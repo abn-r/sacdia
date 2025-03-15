@@ -1,0 +1,1014 @@
+import 'dart:async';
+import 'dart:io';
+import 'package:flutter/material.dart';
+import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
+import 'package:material_segmented_control/material_segmented_control.dart';
+import 'package:progress_hud/progress_hud.dart';
+import 'package:provider/provider.dart';
+import 'package:sacdia/Utils/preferences.dart';
+import 'package:sacdia/Utils/size_config.dart';
+import 'package:sacdia/src/Models/Clases_Lista.dart';
+import 'package:sacdia/src/Pages/pr_club_select_page.dart';
+import 'package:sacdia/src/Providers/class_provider.dart';
+import 'package:sacdia/src/Providers/user_provider.dart';
+import 'package:sacdia/src/Widgets/alert_required_fields.dart';
+import 'package:slide_popup_dialog/slide_popup_dialog.dart' as slideDialog;
+import 'package:sacdia/Utils/constants.dart';
+import 'package:sacdia/src/Widgets/form_field_widget.dart';
+
+import 'package:path_provider/path_provider.dart';
+
+enum GenderMode { GENDER_ALL, GENDER_MALE, GENDER_FEMALE }
+
+class PersonalInfoPage extends StatefulWidget {
+  @override
+  _PersonalInfoPageState createState() => _PersonalInfoPageState();
+}
+
+class _PersonalInfoPageState extends State<PersonalInfoPage> {
+  final CounterStorage storage = CounterStorage();
+
+  final _formKey = GlobalKey<FormState>();
+  final _key = GlobalKey<ScaffoldState>();
+
+  final prefs = Preferences();
+
+  GenderMode _formMode = GenderMode.GENDER_ALL;
+
+  Map<bool, Widget> _children() => {
+        false: Text('No',
+            style: TextStyle(fontSize: SizeConfig.textMultiplier * 2)),
+        true: Text('Sí',
+            style: TextStyle(fontSize: SizeConfig.textMultiplier * 2)),
+      };
+
+  List bloodTypeList = [
+    'A +',
+    'A -',
+    'B +',
+    'B -',
+    'O +',
+    'O -',
+    'AB +',
+    'AB -',
+  ];
+
+  List<DropdownMenuItem<String>> _dropBlood;
+
+  Timer timer;
+
+  TextEditingController allergies;
+  TextEditingController tutorPhone;
+  TextEditingController tutor;
+  TextEditingController disease;
+  TextEditingController medicalTreatment;
+
+  String selectedGender;
+  String selectedBloodType;
+  String errorMessage;
+  String birthday;
+  String message;
+  String uid;
+
+  var day;
+  var month;
+  var year;
+
+  int bloodType;
+  int gender;
+  bool selectionAllergies = false;
+  bool selectionDisease = false;
+  bool selectionBaptism = false;
+
+  bool isLoading;
+
+  @override
+  void initState() {
+    isLoading = false;
+    _dropBlood = getBloodItems(bloodTypeList);
+    selectedBloodType = _dropBlood[0].value;
+
+    message = "";
+    birthday = 'Persiona para seleccionar...';
+    allergies = TextEditingController(text: '');
+    tutor = TextEditingController(text: '');
+    tutorPhone = TextEditingController(text: '');
+    disease = TextEditingController(text: '');
+    medicalTreatment = TextEditingController(text: '');
+    super.initState();
+    prefs.initPrefs();
+    uid = prefs.id;
+  }
+
+  @override
+  void dispose() {
+    allergies.dispose();
+    tutor.dispose();
+    tutorPhone.dispose();
+    disease.dispose();
+    medicalTreatment.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        key: _key,
+        appBar: AppBar(
+          elevation: 0,
+          title: Text('INFORMACIÓN PERSONAL',
+              style: TextStyle(fontWeight: FontWeight.bold)),
+          centerTitle: true,
+          backgroundColor: sac_red,
+        ),
+        body: Stack(
+          children: <Widget>[_content(context), _showProgress()],
+        ));
+  }
+
+  Widget _content(BuildContext context) {
+    return Form(
+      key: _formKey,
+      child: ListView(
+        physics: BouncingScrollPhysics(),
+        children: <Widget>[
+          AlertRequiredFields(),
+          _selectGender(),
+          SizedBox(height: SizeConfig.heightMultiplier * 2),
+          _birthdayInput(),
+          _segmentedBaptism(),
+          SizedBox(height: SizeConfig.heightMultiplier * 3),
+          FormFielInput(
+            controller: tutor,
+            title: '¿A QUIÉN LLAMAMOS EN CASO\nDE EMERGENCIA?',
+            textInput: TextInputType.text,
+            textCapitalization: TextCapitalization.words,
+          ),
+          FormFielInput(
+            controller: tutorPhone,
+            title: '¿CUÁL ES SU NÚMERO DE CONTACTO?',
+            textInput: TextInputType.number,
+            textCapitalization: TextCapitalization.sentences,
+          ),
+          _bloodTypeInput(),
+          SizedBox(height: SizeConfig.heightMultiplier * 3),
+          _segmentedAllergies(),
+          SizedBox(height: SizeConfig.heightMultiplier * 3),
+          selectionAllergies
+              ? FormFielInput(
+                  controller: allergies,
+                  title: '¿CÚAL ES TU ALERGIA?',
+                  textInput: TextInputType.text,
+                  textCapitalization: TextCapitalization.sentences,
+                )
+              : Container(),
+          SizedBox(height: SizeConfig.heightMultiplier * 1.2),
+          _segmentedDisease(),
+          SizedBox(height: SizeConfig.heightMultiplier * 3),
+          selectionDisease
+              ? FormFielInput(
+                  controller: disease,
+                  title: 'MENCIONA LA ENFERMEDAD',
+                  textInput: TextInputType.text,
+                  textCapitalization: TextCapitalization.sentences,
+                )
+              : Container(),
+          selectionDisease
+              ? FormFielInput(
+                  controller: medicalTreatment,
+                  title: 'MENCIONA EL TRATAMIENTO MÉDICO',
+                  textInput: TextInputType.text,
+                  textCapitalization: TextCapitalization.sentences,
+                )
+              : Container(),
+          SizedBox(height: SizeConfig.heightMultiplier * 2),
+          _buttonContinue(),
+          SizedBox(height: SizeConfig.heightMultiplier * 4),
+        ],
+      ),
+    );
+  }
+
+  Widget _selectGender() {
+    String male;
+    String female;
+    switch (_formMode) {
+      case GenderMode.GENDER_ALL:
+        male = 'assets/img/boy.png';
+        female = 'assets/img/girl.png';
+        break;
+      case GenderMode.GENDER_MALE:
+        male = 'assets/img/boy.png';
+        female = 'assets/img/girlGray.png';
+        break;
+      case GenderMode.GENDER_FEMALE:
+        male = 'assets/img/boyGray.png';
+        female = 'assets/img/girl.png';
+        break;
+      default:
+    }
+    return Container(
+        margin:
+            EdgeInsets.symmetric(horizontal: SizeConfig.widthMultiplier * 10),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Container(
+              margin: EdgeInsets.only(top: 18),
+              child: Text(
+                "¿ERES HOMBRE O MUJER?",
+                style: Theme.of(context)
+                    .textTheme
+                    .headline6
+                    .copyWith(color: sac_black, fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            SizedBox(height: SizeConfig.heightMultiplier * 1.2),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: <Widget>[
+                IconButton(
+                  icon: Image.asset(male),
+                  tooltip: 'Hombre',
+                  color: Colors.blue[400],
+                  splashColor: Colors.red[200],
+                  disabledColor: Colors.grey[400],
+                  onPressed: () {
+                    setState(() {
+                      _formMode = GenderMode.GENDER_MALE;
+                      _changeMale();
+                      gender = 0;
+                      build(context);
+                    });
+                  },
+                  iconSize: SizeConfig.imageSizeMultiplier * 16,
+                ),
+                IconButton(
+                  icon: Image.asset(female),
+                  tooltip: 'Mujer',
+                  color: Colors.blue[400],
+                  splashColor: Colors.red[200],
+                  disabledColor: Colors.grey[400],
+                  onPressed: () {
+                    setState(() {
+                      _formMode = GenderMode.GENDER_MALE;
+                      _changeFemale();
+                      gender = 1;
+                      build(context);
+                    });
+                  },
+                  iconSize: SizeConfig.imageSizeMultiplier * 16,
+                ),
+              ],
+            ),
+          ],
+        ));
+  }
+
+  Widget _birthdayInput() {
+    return Container(
+      child: Column(
+        children: <Widget>[
+          Container(
+            margin: EdgeInsets.symmetric(
+                horizontal: SizeConfig.widthMultiplier * 10),
+            child: Text(
+              "¿CUÁNDO ES TU CUMPLEAÑOS?",
+              style: Theme.of(context)
+                  .textTheme
+                  .headline6
+                  .copyWith(color: sac_black, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
+          ),
+          GestureDetector(
+              onTap: _picker,
+              child: Container(
+                constraints: BoxConstraints.expand(
+                    height: SizeConfig.heightMultiplier * 6),
+                alignment: Alignment.center,
+                margin: EdgeInsets.fromLTRB(
+                  SizeConfig.widthMultiplier * 10,
+                  SizeConfig.heightMultiplier * 1.2,
+                  SizeConfig.widthMultiplier * 10,
+                  SizeConfig.heightMultiplier * 3,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Color.fromARGB(18, 0, 0, 0),
+                      offset: Offset(0, 5.04),
+                      blurRadius: 30,
+                    ),
+                  ],
+                  borderRadius: BorderRadius.all(Radius.circular(10)),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(width: SizeConfig.widthMultiplier * 4),
+                    Expanded(
+                      flex: 1,
+                      child: Container(
+                        child: Text(birthday,
+                            style: TextStyle(
+                                fontSize: SizeConfig.textMultiplier * 2,
+                                color: sac_black)),
+                      ),
+                    ),
+                    Icon(Icons.date_range,
+                        size: SizeConfig.imageSizeMultiplier * 7),
+                    SizedBox(width: SizeConfig.widthMultiplier * 4),
+                  ],
+                ),
+              )),
+        ],
+      ),
+    );
+  }
+
+  Widget _segmentedBaptism() {
+    return Container(
+        margin:
+            EdgeInsets.symmetric(horizontal: SizeConfig.widthMultiplier * 10),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Container(
+              child: Text(
+                "¿ERES BAUTIZADO (A)?",
+                style: Theme.of(context)
+                    .textTheme
+                    .headline6
+                    .copyWith(color: sac_black, fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            SizedBox(height: SizeConfig.heightMultiplier * 1.2),
+            Container(
+              width: 600,
+              margin: EdgeInsets.symmetric(
+                  horizontal: SizeConfig.widthMultiplier * 10),
+              child: MaterialSegmentedControl(
+                children: _children(),
+                selectionIndex: selectionBaptism,
+                borderColor: Colors.grey,
+                selectedColor: sac_red,
+                unselectedColor: Colors.white,
+                borderRadius: 32.0,
+                onSegmentChosen: (index) {
+                  setState(() {
+                    if (index) {
+                      selectionBaptism = true;
+                    } else {
+                      selectionBaptism = false;
+                    }
+                  });
+                },
+              ),
+            )
+          ],
+        ));
+  }
+
+  Widget _bloodTypeInput() {
+    return Container(
+      child: Column(
+        children: <Widget>[
+          Container(
+            margin: EdgeInsets.symmetric(
+                horizontal: SizeConfig.widthMultiplier * 10),
+            child: Text(
+              "TIPO DE SANGRE",
+              style: Theme.of(context)
+                  .textTheme
+                  .headline6
+                  .copyWith(color: sac_black, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
+          ),
+          SizedBox(height: SizeConfig.heightMultiplier * 1.2),
+          GestureDetector(
+              onTap: selectedBloodTypeList,
+              child: Container(
+                constraints: BoxConstraints.expand(
+                    height: SizeConfig.heightMultiplier * 6),
+                alignment: Alignment.center,
+                margin: EdgeInsets.symmetric(
+                    horizontal: SizeConfig.widthMultiplier * 10),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Color.fromARGB(18, 0, 0, 0),
+                      offset: Offset(0, 5.04),
+                      blurRadius: 30,
+                    ),
+                  ],
+                  borderRadius: BorderRadius.all(Radius.circular(10)),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(width: SizeConfig.widthMultiplier * 4),
+                    Expanded(
+                      flex: 1,
+                      child: Container(
+                        child: Text(
+                          selectedBloodType,
+                          style: TextStyle(
+                              color: sac_black,
+                              fontSize: SizeConfig.textMultiplier * 2),
+                          textAlign: TextAlign.left,
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: SizeConfig.widthMultiplier * 4),
+                  ],
+                ),
+              )),
+        ],
+      ),
+    );
+  }
+
+  Widget _segmentedAllergies() {
+    return Container(
+        child: Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        Container(
+          margin:
+              EdgeInsets.symmetric(horizontal: SizeConfig.widthMultiplier * 10),
+          alignment: Alignment.center,
+          child: Text(
+            "¿ERES ALÉRGICO A ALGO?",
+            style: Theme.of(context)
+                .textTheme
+                .headline6
+                .copyWith(color: sac_black, fontWeight: FontWeight.bold),
+            textAlign: TextAlign.center,
+          ),
+        ),
+        SizedBox(height: SizeConfig.heightMultiplier * 1.2),
+        Container(
+          width: 600,
+          margin:
+              EdgeInsets.symmetric(horizontal: SizeConfig.widthMultiplier * 10),
+          child: MaterialSegmentedControl(
+            children: _children(),
+            selectionIndex: selectionAllergies,
+            borderColor: Colors.grey,
+            selectedColor: sac_red,
+            unselectedColor: Colors.white,
+            borderRadius: 32.0,
+            onSegmentChosen: (index) {
+              setState(() {
+                if (index) {
+                  selectionAllergies = true;
+                } else {
+                  selectionAllergies = false;
+                }
+              });
+            },
+          ),
+        )
+      ],
+    ));
+  }
+
+  Widget _segmentedDisease() {
+    return Container(
+        child: Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        Container(
+          margin:
+              EdgeInsets.symmetric(horizontal: SizeConfig.widthMultiplier * 10),
+          child: Text(
+            "¿PADECES ALGUNA ENFERMEDAD?",
+            style: Theme.of(context)
+                .textTheme
+                .headline6
+                .copyWith(color: sac_black, fontWeight: FontWeight.bold),
+            textAlign: TextAlign.center,
+          ),
+        ),
+        SizedBox(height: SizeConfig.heightMultiplier * 1.2),
+        Container(
+          width: 600,
+          margin:
+              EdgeInsets.symmetric(horizontal: SizeConfig.widthMultiplier * 10),
+          child: MaterialSegmentedControl(
+            children: _children(),
+            selectionIndex: selectionDisease,
+            borderColor: Colors.grey,
+            selectedColor: sac_red,
+            unselectedColor: Colors.white,
+            borderRadius: 32.0,
+            onSegmentChosen: (index) {
+              setState(() {
+                if (index) {
+                  selectionDisease = true;
+                } else {
+                  selectionDisease = false;
+                }
+              });
+            },
+          ),
+        )
+      ],
+    ));
+  }
+
+  Widget _buttonContinue() {
+    return Container(
+        //padding: EdgeInsets.all(40),
+        margin:
+            EdgeInsets.symmetric(horizontal: SizeConfig.widthMultiplier * 10),
+        child: SizedBox(
+          height: SizeConfig.heightMultiplier * 6,
+          child: RaisedButton(
+            elevation: 0.0,
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+            color: sac_red,
+            child: Text(
+              'CONTINUAR',
+              style: Theme.of(context)
+                  .textTheme
+                  .headline6
+                  .copyWith(color: Colors.white, fontWeight: FontWeight.bold),
+            ),
+            onPressed: _validateAndSubmit,
+          ),
+        ));
+  }
+
+  Widget _showProgress() {
+    if (isLoading) {
+      return ProgressHUD(
+        backgroundColor: Colors.black12,
+        color: Colors.white,
+        containerColor: Color.fromARGB(255, 23, 54, 81),
+        borderRadius: 5.0,
+        text: 'Cargando...',
+      );
+    }
+    return Container();
+  }
+
+  void _picker() {
+    DatePicker.showDatePicker(context,
+        showTitleActions: true,
+        minTime: DateTime(1950, 01, 01),
+        maxTime: DateTime(
+            DateTime.now().year, DateTime.now().month, DateTime.now().day),
+        theme: DatePickerTheme(
+            backgroundColor: Colors.white,
+            itemStyle: TextStyle(color: sac_black, fontWeight: FontWeight.bold),
+            cancelStyle: TextStyle(
+                color: sac_black,
+                fontWeight: FontWeight.bold,
+                fontSize: SizeConfig.textMultiplier * 2),
+            doneStyle: TextStyle(
+                color: sac_black,
+                fontWeight: FontWeight.bold,
+                fontSize: SizeConfig.textMultiplier * 2)), onChanged: (date) {
+      //print('change $date');
+    }, onConfirm: (date) {
+      setState(() {
+        day = date.toString().substring(8, 10);
+        month = date.toString().substring(5, 7);
+        year = date.toString().substring(0, 4);
+        birthday = date.toString().substring(0, 10);
+        build(context);
+      });
+
+      //return _birthday;
+    }, currentTime: DateTime.now(), locale: LocaleType.es);
+  }
+
+  void selectedBloodTypeList() {
+    slideDialog.showSlideDialog(
+      context: context,
+      child: Expanded(
+        //height: 500,
+        child: ListView.builder(
+            itemCount: bloodTypeList.length,
+            itemBuilder: (BuildContext context, int index) {
+              return GestureDetector(
+                  onTap: () => selectBloodType(bloodTypeList[index]),
+                  behavior: HitTestBehavior.opaque,
+                  child: Container(
+                    padding: EdgeInsets.all(15),
+                    child: Center(
+                      child: Text(
+                        bloodTypeList[index],
+                        style: TextStyle(
+                            fontSize: SizeConfig.textMultiplier * 2.2,
+                            color: sac_black),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ));
+            }),
+      ),
+      barrierColor: sac_red.withOpacity(0.6),
+      barrierDismissible: false,
+      pillColor: sac_red,
+      backgroundColor: Colors.white,
+    );
+  }
+
+  void selectBloodType(String selectType) {
+    setState(() {
+      Navigator.of(context).pop();
+      selectedBloodType = selectType;
+      switch (selectedBloodType) {
+        case 'A +':
+          bloodType = 0;
+          break;
+        case 'A ´':
+          bloodType = 1;
+          break;
+        case 'B +':
+          bloodType = 2;
+          break;
+        case 'B -':
+          bloodType = 3;
+          break;
+        case 'O +':
+          bloodType = 4;
+          break;
+        case 'O -':
+          bloodType = 5;
+          break;
+        case 'AB +':
+          bloodType = 6;
+          break;
+        case 'AB -':
+          bloodType = 7;
+          break;
+        default:
+          bloodType = 4;
+      }
+    });
+  }
+
+  List<DropdownMenuItem<String>> getBloodItems(List genders) {
+    List<DropdownMenuItem<String>> items = List();
+    for (String gender in genders) {
+      items.add(DropdownMenuItem(value: gender, child: Text(gender)));
+    }
+    return items;
+  }
+
+  void _changeMale() {
+    setState(() {
+      _formMode = GenderMode.GENDER_MALE;
+    });
+  }
+
+  void _changeFemale() {
+    setState(() {
+      _formMode = GenderMode.GENDER_FEMALE;
+    });
+  }
+
+  void _navigateToFiltersClubs(BuildContext context) async {
+    await Navigator.of(context).pushReplacement(MaterialPageRoute(
+        builder: (BuildContext context) => ClubSelectPage(change: false)));
+  }
+
+  _validateAndSubmit() async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final classProvider = Provider.of<ClassProvider>(context, listen: false);
+
+    setState(() {
+      isLoading = true;
+    });
+
+    if (gender == null) {
+      gender = 1;
+    }
+
+    if (bloodType == null) {
+      bloodType = 1;
+    }
+
+    var birthday = DateTime(int.parse(year), int.parse(month), int.parse(day));
+    var date2 = DateTime.now();
+    var difference = date2.difference(birthday).inDays;
+
+    var streamClass = Stream.fromFuture(classProvider.getClasses());
+    //var streamSections = Stream.fromFuture(classProvider.getClassSection());
+
+    if (difference > age_user) {
+      if (tutorPhone.text.length == 10) {
+        if ((allergies != null || allergies.text.isNotEmpty) ||
+            (disease != null || disease.text.isNotEmpty)) {
+          var personalInfo = {
+            "imagen": '$uid.png',
+            "alergias": selectionAllergies,
+            "alergias_des": allergies.text,
+            "cumpleanos": birthday.toIso8601String(),
+            "tutor": tutor.text,
+            "tutor_numero": tutorPhone.text,
+            "genero": gender,
+            "enfermedades": selectionDisease,
+            "enfermedades_des": disease.text,
+            "tipo_sangre": bloodType,
+            'bautismo': selectionBaptism,
+            "tratamiento_medico": medicalTreatment.text
+          };
+
+          userProvider
+              .setPersonalInfo(personalInfo)
+              .then((value) => {
+                    if (value['status'])
+                      {
+                        timer = Timer(const Duration(seconds: 2), () {
+                          setState(() {
+                            isLoading = false;
+                            _navigateToFiltersClubs(context);
+                          });
+                        })
+                      }
+                  })
+              .catchError((err) => {
+                    print(err),
+                  });
+
+          streamClass.listen((data) {
+            var sc = ListadoClases.fromJson(data);
+
+            for (var i = 0; i < sc.total; i++) {
+              print('El valor de el campo division es: ${sc.clases[i].division}');
+              var userClass = {
+                "clase": sc.clases[i].id,
+                "division": sc.clases[i].division,
+                "comprobante_url": 'comprobante_url',
+                "director": 'director',
+                "director_correo": 'director_correo',
+                "director_telefono": 1234567890,
+                "usuario": prefs.id,
+                "fecha": '0000-00-00'
+              };
+
+              userProvider
+                  .createUserClass(userClass)
+                  .then((value) => {
+                        print(value['message']),
+                        print('Clase ${sc.clases[i].nombre} creada.'),
+                      })
+                  .catchError((err) => {
+                        isLoading = false,
+                        _key.currentState.showSnackBar(SnackBar(
+                          content: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [Text(err.toString()), Icon(Icons.error)],
+                          ),
+                          backgroundColor: sac_red,
+                        )),
+                      });
+            }
+          }, onDone: () {
+            print("Task Done");
+          }, onError: (error) {
+            print("Some Error");
+          });
+
+          /* streamSections.listen((data) {
+            var ss = ListadoSecciones.fromJson(data);
+
+            for (var i = 0; i < ss.total; i++) {
+              userSection = {
+                "completada": false,
+                "usuario": prefs.id,
+                "clase": ss.sections[i].clase.id,
+                "clase_tipo": ss.sections[i].claseTipo,
+                "orden": ss.sections[i].orden,
+                "seccion": ss.sections[i].seccion,
+                "seccion_id": ss.sections[i].seccionId,
+                "actividades": data['sections'][i]
+                    ['actividades'] //ss.sections[i].actividades
+              };
+
+              classProvider
+                  .createUserClassSection(userSection)
+                  .then((value) => {
+                        print(value),
+                      })
+                  .catchError((err) => {
+                        isLoading = false,
+                        _key.currentState.showSnackBar(SnackBar(
+                          content: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [Text(err), Icon(Icons.error)],
+                          ),
+                          backgroundColor: sac_red,
+                        )),
+                      });
+            }
+          }, onDone: () {
+            print("Task Done");
+          }, onError: (error) {
+            print("Some Error");
+          }); */
+        } else {
+          allergies.text = '';
+          disease.text = '';
+
+          var personalInfo = {
+            "imagen": '$uid.png',
+            'alergias': selectionAllergies,
+            'alergias_des': allergies.text,
+            'cumpleanos': birthday.toIso8601String(),
+            'tutor': tutor.text,
+            'tutor_numero': tutorPhone.text,
+            'genero': gender,
+            'enfermedades': selectionDisease,
+            'enfermedades_des': disease.text,
+            'tipo_sangre': bloodType,
+            'bautismo': selectionBaptism,
+            "tratamiento_medico": medicalTreatment.text
+          };
+
+          userProvider
+              .setPersonalInfo(personalInfo)
+              .then((value) => {
+                    if (value['status'])
+                      {
+                        timer = Timer(const Duration(seconds: 2), () {
+                          setState(() {
+                            isLoading = false;
+                            _navigateToFiltersClubs(context);
+                          });
+                        })
+                      }
+                  })
+              .catchError((err) => {
+                    print(err),
+                  });
+
+          streamClass.listen((data) {
+            var sc = ListadoClases.fromJson(data);
+
+            for (var i = 0; i < sc.total; i++) {
+              var userClass = {
+                "clase": sc.clases[i].id,
+                "comprobante_url": 'comprobante_url',
+                "director": 'director',
+                "director_correo": 'director_correo',
+                "director_telefono": 1234567890,
+                "usuario": prefs.id,
+                "fecha": '0000-00-00'
+              };
+
+              userProvider
+                  .createUserClass(userClass)
+                  .then((value) => {
+                        print(value['message']),
+                        print('Clase ${sc.clases[i].nombre} creada.'),
+                      })
+                  .catchError((err) => {
+                        isLoading = false,
+                        _key.currentState.showSnackBar(SnackBar(
+                          content: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [Text(err.toString()), Icon(Icons.error)],
+                          ),
+                          backgroundColor: sac_red,
+                        )),
+                      });
+            }
+          }, onDone: () {
+            print("Task Done");
+          }, onError: (error) {
+            print("Some Error");
+          });
+
+          /* streamSections.listen((data) {
+            var ss = ListadoSecciones.fromJson(data);
+
+            for (var i = 0; i < ss.total; i++) {
+              userSection = {
+                "completada": false,
+                "usuario": prefs.id,
+                "clase": ss.sections[i].clase.id,
+                "clase_tipo": ss.sections[i].claseTipo,
+                "orden": ss.sections[i].orden,
+                "seccion": ss.sections[i].seccion,
+                "seccion_id": ss.sections[i].seccionId,
+                "actividades": data['sections'][i]
+                    ['actividades'] //ss.sections[i].actividades
+              };
+
+              classProvider
+                  .createUserClassSection(userSection)
+                  .then((value) => {
+                        print(value),
+                      })
+                  .catchError((err) => {
+                        isLoading = false,
+                        _key.currentState.showSnackBar(SnackBar(
+                          content: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(child: Text(err)),
+                              Icon(Icons.error)
+                            ],
+                          ),
+                          backgroundColor: sac_red,
+                        )),
+                      });
+            }
+          }, onDone: () {
+            print("Task Done");
+          }, onError: (error) {
+            print("Some Error");
+          }); */
+        }
+      } else {
+        message = 'El número de contacto debe de tener 10 caracteres.';
+        isLoading = false;
+        _key.currentState.showSnackBar(SnackBar(
+          content: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                  child: Text(message,
+                      style: TextStyle(
+                          fontSize: SizeConfig.textMultiplier * 1.8))),
+              SizedBox(width: SizeConfig.widthMultiplier * 4),
+              Icon(Icons.error)
+            ],
+          ),
+          backgroundColor: sac_red,
+        ));
+      }
+    } else {
+      message =
+          'Debes de tener al menos 3 años cumplidos para continuar con el registro.';
+      isLoading = false;
+      _key.currentState.showSnackBar(SnackBar(
+        content: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+                child: Text(message,
+                    style:
+                        TextStyle(fontSize: SizeConfig.textMultiplier * 1.8))),
+            SizedBox(width: SizeConfig.widthMultiplier * 4),
+            Icon(Icons.error)
+          ],
+        ),
+        backgroundColor: sac_red,
+      ));
+    }
+  }
+}
+
+class CounterStorage {
+  Future<String> get _localPath async {
+    final directory = await getApplicationDocumentsDirectory();
+
+    return directory.path;
+  }
+
+  Future<File> get _localFile async {
+    final path = await _localPath;
+    print(File('$path/counter.json'));
+    return File('$path/counter.json');
+  }
+
+  Future<dynamic> readCounter() async {
+    try {
+      final file = await _localFile;
+
+      // Read the file
+      String contents = await file.readAsString();
+
+      return int.parse(contents);
+    } catch (e) {
+      // If encountering an error, return 0
+      return 0;
+    }
+  }
+
+  Future<dynamic> writeCounter(dynamic counter) async {
+    final file = await _localFile;
+
+    // Write the file
+    return file.writeAsString('$counter');
+  }
+}

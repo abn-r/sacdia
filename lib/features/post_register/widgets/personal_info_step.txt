@@ -1,0 +1,145 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sacdia/core/catalogs/bloc/catalogs_event.dart';
+import 'package:sacdia/core/catalogs/bloc/catalogs_state.dart';
+import 'package:sacdia/core/widgets/input_text_widget.dart';
+import 'package:sacdia/features/post_register/bloc/post_register_bloc.dart';
+import 'package:sacdia/features/post_register/bloc/post_register_event.dart';
+import 'package:sacdia/core/catalogs/bloc/catalogs_bloc.dart';
+import 'package:sacdia/core/catalogs/models/country.dart';
+import 'package:sacdia/core/catalogs/models/union.dart';
+import 'package:sacdia/core/catalogs/models/local_field.dart';
+
+class PersonalInfoStep extends StatefulWidget {
+  const PersonalInfoStep({super.key});
+
+  @override
+  State<PersonalInfoStep> createState() => _PersonalInfoStepState();
+}
+
+class _PersonalInfoStepState extends State<PersonalInfoStep> {
+  final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
+  final _lastNameController = TextEditingController();
+
+  Country? selectedCountry;
+  Union? selectedUnion;
+  LocalField? selectedLocalField;
+
+  @override
+  void initState() {
+    super.initState();
+    // Cargar catálogos al iniciar
+    context.read<CatalogsBloc>().add(LoadCatalogs());
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _lastNameController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<CatalogsBloc, CatalogsState>(
+      builder: (context, catalogsState) {
+        return Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              CustomTextField(
+                controller: _nameController,
+                labelText: 'Nombre',
+                keyboardType: TextInputType.text,
+                validator: (value) {
+                  if (value?.isEmpty ?? true) {
+                    return 'El nombre es requerido';
+                  }
+                  return null;
+                },
+                onChanged: (value) => context.read<PostRegisterBloc>().add(
+                      NameChanged(value ?? ''),
+                    ),
+              ),
+              const SizedBox(height: 16),
+              CustomTextField(
+                controller: _lastNameController,
+                labelText: 'Apellido',
+                keyboardType: TextInputType.text,
+                validator: (value) {
+                  if (value?.isEmpty ?? true) {
+                    return 'El apellido es requerido';
+                  }
+                  return null;
+                },
+                onChanged: (value) => context.read<PostRegisterBloc>().add(
+                      LastNameChanged(value ?? ''),
+                    ),
+              ),
+              const SizedBox(height: 16),
+              if (catalogsState is CatalogsLoaded) ...[
+                DropdownButtonFormField<Country>(
+                  value: selectedCountry,
+                  decoration: const InputDecoration(
+                    labelText: 'País',
+                    enabled: false,
+                  ),
+                  items: catalogsState.countries.map((country) {
+                    return DropdownMenuItem(
+                      value: country,
+                      child: Text(country.name),
+                    );
+                  }).toList(),
+                  onChanged: null, // Deshabilitado por ahora
+                ),
+                const SizedBox(height: 16),
+                DropdownButtonFormField<Union>(
+                  value: selectedUnion,
+                  decoration: const InputDecoration(
+                    labelText: 'Unión',
+                    enabled: false,
+                  ),
+                  items: catalogsState.unions.map((union) {
+                    return DropdownMenuItem(
+                      value: union,
+                      child: Text(union.name),
+                    );
+                  }).toList(),
+                  onChanged: null, // Deshabilitado por ahora
+                ),
+                const SizedBox(height: 16),
+                DropdownButtonFormField<LocalField>(
+                  value: selectedLocalField,
+                  decoration: const InputDecoration(
+                    labelText: 'Campo Local',
+                    enabled: false,
+                  ),
+                  items: catalogsState.localFields
+                      .where((field) => selectedUnion != null
+                          ? field.unionId == selectedUnion!.id
+                          : true)
+                      .map((field) {
+                    return DropdownMenuItem(
+                      value: field,
+                      child: Text(field.name),
+                    );
+                  }).toList(),
+                  onChanged: null, // Deshabilitado por ahora
+                ),
+              ] else if (catalogsState is CatalogsLoading) ...[
+                const Center(
+                  child: CircularProgressIndicator(),
+                ),
+              ] else if (catalogsState is CatalogsError) ...[
+                Center(
+                  child: Text('Error: ${catalogsState.message}'),
+                ),
+              ],
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
