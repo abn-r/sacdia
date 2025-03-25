@@ -12,9 +12,6 @@ class EmergencyContact {
   });
 
   factory EmergencyContact.fromJson(Map<String, dynamic> json) {
-    // Imprimir la estructura JSON recibida para depuración
-    print('⚙️ Creando EmergencyContact desde JSON: $json');
-    
     try {
       // Verificar si hay un objeto 'data' anidado y usarlo si existe
       final Map<String, dynamic> data = json.containsKey('data') && json['data'] is Map<String, dynamic> 

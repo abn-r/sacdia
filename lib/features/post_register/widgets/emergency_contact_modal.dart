@@ -5,7 +5,6 @@ import 'package:sacdia/core/widgets/input_text_widget.dart';
 import 'package:sacdia/features/post_register/bloc/post_register_bloc.dart';
 import 'package:sacdia/features/post_register/bloc/post_register_event.dart';
 import 'package:sacdia/features/post_register/bloc/post_register_state.dart';
-import 'package:sacdia/features/theme/theme_data.dart';
 
 class EmergencyContactModal extends StatefulWidget {
   final Function(String name, String phone, int? relationship) onConfirm;

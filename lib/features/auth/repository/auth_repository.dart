@@ -1,23 +1,28 @@
 import 'dart:async';
 import 'package:dio/dio.dart';
+import 'package:sacdia/core/http/api_client.dart';
 import 'package:sacdia/features/auth/models/user_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:sacdia/core/constants.dart';
 
 class AuthRepository {
-  final Dio dio;
-  final SupabaseClient supabaseClient;
+  final Dio _dio;
+  final SupabaseClient _supabaseClient;
 
   Timer? _refreshTimer;
 
   AuthRepository({
-    required this.dio,
-    required this.supabaseClient,
-  });
+    Dio? dio,
+    SupabaseClient? supabaseClient,
+  }) : _dio = dio ?? ApiClient().dio,
+       _supabaseClient = supabaseClient ?? Supabase.instance.client;
+  
+  /// Acceso directo al cliente de Supabase
+  SupabaseClient get supabaseClient => _supabaseClient;
 
   Future<UserModel?> signInWithEmail(String email, String password) async {
     try {
-      final response = await supabaseClient.auth.signInWithPassword(
+      final response = await _supabaseClient.auth.signInWithPassword(
         email: email,
         password: password,
       );
@@ -48,7 +53,7 @@ class AuthRepository {
     required String maternalSurname,
   }) async {
     try {
-      final singUp = await dio.post('$api/auth/signUp', data: {
+      final singUp = await _dio.post('$api/auth/signUp', data: {
         "email": email,
         "password": password,
         "name": name,
@@ -57,8 +62,6 @@ class AuthRepository {
       });
 
       final userId = singUp.data['user_id'] as String;
-      final accessToken = singUp.data['access_token'] as String;
-
       final postRegisterComplete = await checkPostRegisterComplete(userId);
 
       return UserModel(
@@ -70,11 +73,32 @@ class AuthRepository {
       rethrow;
     }
   }
+  
+  /// Obtiene la información del usuario actual desde la sesión de Supabase
+  Future<UserModel?> getCurrentUser() async {
+    try {
+      final session = _supabaseClient.auth.currentSession;
+      if (session == null || session.user == null) {
+        return null;
+      }
+      
+      final userId = session.user.id;
+      final complete = await checkPostRegisterComplete(userId);
+      
+      return UserModel(
+        id: userId,
+        email: session.user.email ?? '',
+        postRegisterComplete: complete,
+      );
+    } catch (e) {
+      return null;
+    }
+  }
 
   /// Verifica si el usuario ya completó el post-registro en la API
   Future<bool> checkPostRegisterComplete(String userId) async {
     try {
-      final response = await dio.post('$api/auth/pr-check', data: {'user_id': userId});
+      final response = await _dio.post('$api/auth/pr-check', data: {'user_id': userId});
       if (response.data != null && response.data['complete'] == true) {
         return true;
       }
@@ -86,7 +110,7 @@ class AuthRepository {
 
   Future<void> completePostRegister(String userId) async {
     try {
-      final response = await dio.post('$api/auth/pr-complete', data: {'user_id': userId});
+      final response = await _dio.post('$api/auth/pr-complete', data: {'user_id': userId});
       print('Respuesta del completePostRegister');
       print(response.statusCode);
       print(response.data);
@@ -100,7 +124,7 @@ class AuthRepository {
   /// Recuperar contraseña (Supabase envía un correo)
   Future<void> resetPassword(String email) async {
     try {
-      await supabaseClient.auth.resetPasswordForEmail(email);
+      await _supabaseClient.auth.resetPasswordForEmail(email);
     } catch (e) {
       rethrow;
     }
@@ -110,14 +134,14 @@ class AuthRepository {
   Future<void> signOut() async {
     try {
       _refreshTimer?.cancel();
-      await supabaseClient.auth.signOut();
+      await _supabaseClient.auth.signOut();
     } catch (e) {
       rethrow;
     }
   }
 
   Future<String> getValidToken() async {
-    final session = supabaseClient.auth.currentSession;
+    final session = _supabaseClient.auth.currentSession;
     
     // Si la sesión está por expirar, renovarla
     if (session != null && 
@@ -125,9 +149,9 @@ class AuthRepository {
         DateTime.fromMillisecondsSinceEpoch(session.expiresAt! * 1000)
             .difference(DateTime.now())
             .inMinutes < 5) {
-      await supabaseClient.auth.refreshSession();
+      await _supabaseClient.auth.refreshSession();
     }
     
-    return supabaseClient.auth.currentSession?.accessToken ?? '';
+    return _supabaseClient.auth.currentSession?.accessToken ?? '';
   }
 }

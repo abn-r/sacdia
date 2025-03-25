@@ -51,11 +51,6 @@ class EmergencyContactsSelectorWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Solo mostrar información de depuración cuando hay contactos para evitar mensajes repetitivos
-    if (selectedContacts.isNotEmpty) {
-      print('💼 ContactsSelector: ${selectedContacts.length} contactos disponibles');
-    }
-    
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(

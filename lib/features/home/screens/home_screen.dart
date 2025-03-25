@@ -35,17 +35,6 @@ class HomeScreen extends StatelessWidget {
                     Text('Email: ${user.email}'),
                     const SizedBox(height: 16),
 
-                    // (Opcional) Mostrar información de la sesión
-                    // ¡Ojo! No es recomendable mostrar tokens en producción.
-                    ...[
-                      // Text(
-                      //   'Refresh Token (debug): ${session.refreshToken}',
-                      //   style: const TextStyle(fontSize: 12),
-                      //   textAlign: TextAlign.center,
-                      // ),
-                      const SizedBox(height: 16),
-                    ],
-
                     // Botón para cerrar sesión
                     ElevatedButton.icon(
                       onPressed: () {

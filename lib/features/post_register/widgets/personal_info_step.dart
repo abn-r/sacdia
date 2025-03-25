@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:sacdia/core/catalogs/bloc/catalogs_bloc.dart';
 import 'package:sacdia/core/catalogs/bloc/catalogs_event.dart';
+import 'package:sacdia/core/catalogs/bloc/catalogs_state.dart';
 import 'package:sacdia/core/catalogs/models/country.dart';
 import 'package:sacdia/core/catalogs/models/local_field.dart';
 import 'package:sacdia/core/constants.dart';
@@ -31,11 +32,13 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
   final _formKey = GlobalKey<FormState>();
   final _birthDateController = TextEditingController();
   final _baptismDateController = TextEditingController();
+  final _bloodTypeController = TextEditingController();
 
   DateTime? _birthDate;
   DateTime? _baptismDate;
   bool _isBaptized = false;
   String? _selectedGender;
+  String? _selectedBloodType;
   double _maleOpacity = 0.5;
   double _femaleOpacity = 0.5;
 
@@ -46,19 +49,37 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
   @override
   void initState() {
     super.initState();
-    context.read<CatalogsBloc>().add(LoadCatalogs());
+
+    // Comprobar si ya están cargados los catálogos antes de solicitarlos nuevamente
+    final catalogsState = context.read<CatalogsBloc>().state;
+    if (catalogsState is! CatalogsLoaded) {
+      // Solo solicitamos catálogos si no están ya cargados
+      context.read<CatalogsBloc>().add(LoadCatalogs());
+    }
+
+    // Cargar contactos de emergencia y tipos de relación
     context
         .read<PostRegisterBloc>()
         .add(const LoadEmergencyContactsRequested());
     context
         .read<PostRegisterBloc>()
         .add(const LoadRelationshipTypesRequested());
+        
+    // Obtener los valores del estado actual si existen
+    final postRegisterState = context.read<PostRegisterBloc>().state;
+    if (postRegisterState.bloodType != null) {
+      setState(() {
+        _selectedBloodType = postRegisterState.bloodType;
+        _bloodTypeController.text = _selectedBloodType!;
+      });
+    }
   }
 
   @override
   void dispose() {
     _birthDateController.dispose();
     _baptismDateController.dispose();
+    _bloodTypeController.dispose();
     super.dispose();
   }
 
@@ -148,10 +169,25 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
   Widget build(BuildContext context) {
     return BlocConsumer<PostRegisterBloc, PostRegisterState>(
       listener: (context, state) {
+        // Actualizar el campo de tipo de sangre si cambia en el estado
+        if (state.bloodType != null && state.bloodType != _selectedBloodType) {
+          setState(() {
+            _selectedBloodType = state.bloodType;
+            _bloodTypeController.text = _selectedBloodType!;
+          });
+        }
+        
         if (state.isSuccess) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-                content: Text('Información actualizada correctamente')),
+            SnackBar(
+              content: Text('Información actualizada correctamente'),
+              backgroundColor: sacGreen,
+              behavior: SnackBarBehavior.floating,
+              margin: EdgeInsets.all(16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
           );
         }
         if (state.errorMessage != null &&
@@ -283,6 +319,17 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
                       ),
                     ),
                   const SizedBox(height: 16),
+                  
+                  // Selector de tipo de sangre
+                  GestureDetector(
+                    onTap: () => _showBloodTypeModal(context),
+                    child: CustomSelectorData(
+                      labelText: '¿CUÁL ES TU TIPO DE SANGRE?',
+                      prefixIcon: Icons.bloodtype,
+                      controller: _bloodTypeController,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
 
                   // Envolvemos el widget en un BlocBuilder para asegurar que se actualice cuando cambie el estado
                   BlocBuilder<PostRegisterBloc, PostRegisterState>(
@@ -294,11 +341,6 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
                             !current.isLoading &&
                             current.emergencyContacts.isNotEmpty),
                     builder: (context, blocState) {
-                      // Mostrar información de depuración solo una vez por construcción
-                      if (blocState.emergencyContacts.isNotEmpty) {
-                        print(
-                            '⚡ Contactos de emergencia cargados: ${blocState.emergencyContacts.length}');
-                      }
                       return EmergencyContactsSelectorWidget(
                         selectedContacts: blocState.emergencyContacts,
                         onTap: () => _showEmergencyContactsModal(context),
@@ -317,7 +359,7 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
                   ),
                   const SizedBox(height: 24),
                   ElevatedButton(
-                    onPressed: state.isLoading
+                    onPressed: state.isLoading || state.isPersonalInfoSaved
                         ? null
                         : () {
                             if (_formKey.currentState?.validate() ?? false) {
@@ -331,13 +373,42 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
                             color: sacRed,
                             strokeWidth: 3,
                             valueColor: AlwaysStoppedAnimation<Color>(sacRed),
-                        )
-                        : const Text('Guardar',
+                          )
+                        : Text(
+                            state.isPersonalInfoSaved
+                                ? 'Datos Guardados ✓'
+                                : 'Guardar Datos',
                             style: TextStyle(
-                                color: Colors.white,
+                                color: state.isPersonalInfoSaved
+                                    ? Colors.grey
+                                    : Colors.white,
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold)),
                   ),
+                  if (state.isPersonalInfoSaved) ...[
+                    const SizedBox(height: 16),
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.green.shade50,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.green.shade200),
+                      ),
+                      child: const Row(
+                        children: [
+                          Icon(Icons.check_circle, color: Colors.green),
+                          SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              'Información guardada correctamente. Ahora puedes continuar al siguiente paso.',
+                              style: TextStyle(color: Colors.green),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 30),
+                  ],
                 ],
               ),
             ),
@@ -574,6 +645,37 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
                   );
             },
           );
+        },
+      ),
+    );
+  }
+
+  void _showBloodTypeModal(BuildContext context) {
+    final List<String> bloodTypes = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
+    
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => ImprovedSelectionModal<String>(
+        title: 'Seleccionar tipo de sangre',
+        subtitle: 'Por favor, selecciona tu tipo de sangre.',
+        items: bloodTypes,
+        selectedItems: _selectedBloodType != null ? [_selectedBloodType!] : [],
+        itemBuilder: (bloodType) => Text(bloodType),
+        searchStringBuilder: (bloodType) => bloodType,
+        onConfirm: (selected) {
+          if (selected.isNotEmpty) {
+            setState(() {
+              _selectedBloodType = selected.first;
+              _bloodTypeController.text = _selectedBloodType!;
+            });
+            
+            // Enviar el evento al bloc para actualizar el estado
+            context.read<PostRegisterBloc>().add(
+              BloodTypeChanged(_selectedBloodType!),
+            );
+          }
         },
       ),
     );

@@ -45,7 +45,13 @@ class _LoginScreenState extends State<LoginScreen> {
       listener: (context, state) {
         if (state.errorMessage != null && state.errorMessage!.isNotEmpty) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.errorMessage!)),
+            SnackBar(content: Text(state.errorMessage!),
+            behavior: SnackBarBehavior.floating,
+            margin: const EdgeInsets.all(15),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            ),
           );
         }
       },

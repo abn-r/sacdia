@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:sacdia/features/auth/bloc/auth_bloc.dart';
 import 'package:sacdia/features/auth/bloc/auth_state.dart';
 import 'package:sacdia/features/auth/screens/forgot_password_screen.dart';
-import 'package:sacdia/features/home/screens/home_screen.dart';
+import 'package:sacdia/features/home/presentation/screens/home_screen.dart';
 import 'package:sacdia/features/auth/screens/login_screen.dart';
 import 'package:sacdia/features/auth/screens/register_screen.dart';
 import 'package:sacdia/features/post_register/screens/post_register_screen.dart';

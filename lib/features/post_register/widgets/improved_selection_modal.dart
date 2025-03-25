@@ -224,7 +224,7 @@ class _ImprovedSelectionModalState<T> extends State<ImprovedSelectionModal<T>> {
 
               // Botones de acción
               Container(
-                padding: const EdgeInsets.all(10),
+                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [

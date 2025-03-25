@@ -8,6 +8,7 @@ class PersonalInfoUser {
   DateTime? baptismDate;
   List<Disease> diseases;
   List<Allergy> allergies;
+  String bloodType;
 
   PersonalInfoUser({
     required this.gender,
@@ -16,6 +17,7 @@ class PersonalInfoUser {
     required this.baptismDate,
     required this.diseases,
     required this.allergies,
+    required this.bloodType,
   });
 
   Map<String, dynamic> toJson() {
@@ -26,6 +28,7 @@ class PersonalInfoUser {
       'baptismDate': baptismDate?.toIso8601String().split('T').first ?? '',
       'diseases': diseases.map((disease) => disease.toJson()).toList(),
       'allergies': allergies.map((allergy) => allergy.toJson()).toList(),
+      'bloodType': bloodType,
     };
   }
 
@@ -55,6 +58,7 @@ class PersonalInfoUser {
           : null,
       diseases: diseasesFromJson,
       allergies: allergiesFromJson,
+      bloodType: json['blood_type'],
     );
   }
 }

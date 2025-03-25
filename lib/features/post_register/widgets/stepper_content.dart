@@ -6,8 +6,10 @@ import 'package:sacdia/features/post_register/bloc/post_register_event.dart';
 import 'package:sacdia/features/post_register/bloc/post_register_state.dart';
 import 'package:sacdia/features/post_register/widgets/photo_upload_step.dart';
 import 'package:sacdia/features/post_register/widgets/personal_info_step.dart';
-import 'package:sacdia/features/post_register/widgets/contact_info_step.dart';
+import 'package:sacdia/features/post_register/widgets/club_info_step.dart';
 import 'package:sacdia/features/theme/theme_data.dart';
+import 'package:sacdia/features/auth/bloc/auth_bloc.dart';
+import 'package:sacdia/features/auth/bloc/auth_event.dart';
 
 class StepperContent extends StatelessWidget {
   const StepperContent({super.key});
@@ -62,9 +64,9 @@ class StepperContent extends StatelessWidget {
       Step(
         title: const SizedBox.shrink(),
         label: const Text('Paso 3'),
-        content: const ContactInfoStep(),
+        content: const ClubInfoStep(),
         isActive: state.currentStep >= 2,
-        state: state.currentStep == 2 ? StepState.indexed : StepState.complete,
+        state: state.currentStep > 2 ? StepState.complete : StepState.indexed,
       ),
     ];
   }
@@ -109,9 +111,14 @@ class _StepperControls extends StatelessWidget {
             Expanded(
               child: ElevatedButton(
                 onPressed: state.canContinue
-                    ? () => context.read<PostRegisterBloc>().add(
+                    ? () {
+                        if (state.currentStep == 2 && state.isClubInfoSaved && state.isPostRegisterCompleted) {
+                          context.read<AuthBloc>().add(CheckPostRegisterComplete());
+                        }
+                        context.read<PostRegisterBloc>().add(
                           const NextStepRequested(),
-                        )
+                        );
+                      }
                     : null,
                 style: (state.canContinue
                     ? AppThemeData.primaryButtonStyle

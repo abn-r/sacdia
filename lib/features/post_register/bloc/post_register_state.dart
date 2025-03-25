@@ -3,6 +3,10 @@ import 'package:equatable/equatable.dart';
 import 'package:sacdia/features/post_register/models/allergy_model.dart';
 import 'package:sacdia/features/post_register/models/disease_model.dart';
 import 'package:sacdia/features/post_register/models/emergency_contact.dart';
+import 'package:sacdia/features/post_register/models/club_models.dart';
+import 'package:sacdia/core/catalogs/models/country.dart';
+import 'package:sacdia/core/catalogs/models/union.dart';
+import 'package:sacdia/core/catalogs/models/local_field.dart';
 
 class PostRegisterState extends Equatable {
   final File? selectedPhoto;
@@ -16,6 +20,7 @@ class PostRegisterState extends Equatable {
   final DateTime? baptismDate;
   final String? gender;
   final String? selectedGender;
+  final String? bloodType;
   final String? emergencyContactName;
   final String? emergencyContactPhone;
   final String? emergencyContactEmail;
@@ -28,6 +33,27 @@ class PostRegisterState extends Equatable {
   final List<EmergencyContact> emergencyContacts;
   final List<RelationshipType> relationshipTypes;
   final bool showEmergencyContactModal;
+  final bool isPersonalInfoSaved;
+  
+  // Club info properties
+  final List<Country> countries;
+  final Country? selectedCountry;
+  final List<Union> unions;
+  final Union? selectedUnion;
+  final List<LocalField> localFields;
+  final LocalField? selectedLocalField;
+  final List<Club> clubs;
+  final Club? selectedClub;
+  final List<ClubType> clubTypes;
+  final ClubType? selectedClubType;
+  final List<Class> classes;
+  final Class? selectedClass;
+  final bool isClubInfoSaved;
+  
+  // Post-registro completo
+  final bool isPostRegisterCompleted;
+  final bool isCompletingPostRegister;
+  final String? completePostRegisterError;
 
   const PostRegisterState({
     this.selectedPhoto,
@@ -41,6 +67,7 @@ class PostRegisterState extends Equatable {
     this.baptismDate,
     this.gender,
     this.selectedGender,
+    this.bloodType,
     this.emergencyContactName,
     this.emergencyContactPhone,
     this.emergencyContactEmail,
@@ -53,6 +80,25 @@ class PostRegisterState extends Equatable {
     this.emergencyContacts = const [],
     this.relationshipTypes = const [],
     this.showEmergencyContactModal = false,
+    this.isPersonalInfoSaved = false,
+    // Club info defaults
+    this.countries = const [],
+    this.selectedCountry,
+    this.unions = const [],
+    this.selectedUnion,
+    this.localFields = const [],
+    this.selectedLocalField,
+    this.clubs = const [],
+    this.selectedClub,
+    this.clubTypes = const [],
+    this.selectedClubType,
+    this.classes = const [],
+    this.selectedClass,
+    this.isClubInfoSaved = false,
+    // Post-registro completo
+    this.isPostRegisterCompleted = false,
+    this.isCompletingPostRegister = false,
+    this.completePostRegisterError,
   });
 
   PostRegisterState copyWith({
@@ -67,6 +113,7 @@ class PostRegisterState extends Equatable {
     DateTime? baptismDate,
     String? gender,
     String? selectedGender,
+    String? bloodType,
     String? emergencyContactName,
     String? emergencyContactPhone,
     String? emergencyContactEmail,
@@ -79,6 +126,25 @@ class PostRegisterState extends Equatable {
     List<EmergencyContact>? emergencyContacts,
     List<RelationshipType>? relationshipTypes,
     bool? showEmergencyContactModal,
+    bool? isPersonalInfoSaved,
+    // Club info parameters
+    List<Country>? countries,
+    Country? selectedCountry,
+    List<Union>? unions,
+    Union? selectedUnion,
+    List<LocalField>? localFields,
+    LocalField? selectedLocalField,
+    List<Club>? clubs,
+    Club? selectedClub,
+    List<ClubType>? clubTypes,
+    ClubType? selectedClubType,
+    List<Class>? classes,
+    Class? selectedClass,
+    bool? isClubInfoSaved,
+    // Post-registro completo
+    bool? isPostRegisterCompleted,
+    bool? isCompletingPostRegister,
+    String? completePostRegisterError,
   }) {
     return PostRegisterState(
       selectedPhoto: selectedPhoto ?? this.selectedPhoto,
@@ -92,6 +158,7 @@ class PostRegisterState extends Equatable {
       baptismDate: baptismDate ?? this.baptismDate,
       gender: gender ?? this.gender,
       selectedGender: selectedGender ?? this.selectedGender,
+      bloodType: bloodType ?? this.bloodType,
       emergencyContactName: emergencyContactName ?? this.emergencyContactName,
       emergencyContactPhone: emergencyContactPhone ?? this.emergencyContactPhone,
       emergencyContactEmail: emergencyContactEmail ?? this.emergencyContactEmail,
@@ -104,6 +171,25 @@ class PostRegisterState extends Equatable {
       emergencyContacts: emergencyContacts ?? this.emergencyContacts,
       relationshipTypes: relationshipTypes ?? this.relationshipTypes,
       showEmergencyContactModal: showEmergencyContactModal ?? this.showEmergencyContactModal,
+      isPersonalInfoSaved: isPersonalInfoSaved ?? this.isPersonalInfoSaved,
+      // Club info
+      countries: countries ?? this.countries,
+      selectedCountry: selectedCountry ?? this.selectedCountry,
+      unions: unions ?? this.unions,
+      selectedUnion: selectedUnion ?? this.selectedUnion,
+      localFields: localFields ?? this.localFields,
+      selectedLocalField: selectedLocalField ?? this.selectedLocalField,
+      clubs: clubs ?? this.clubs,
+      selectedClub: selectedClub ?? this.selectedClub,
+      clubTypes: clubTypes ?? this.clubTypes,
+      selectedClubType: selectedClubType ?? this.selectedClubType,
+      classes: classes ?? this.classes,
+      selectedClass: selectedClass ?? this.selectedClass,
+      isClubInfoSaved: isClubInfoSaved ?? this.isClubInfoSaved,
+      // Post-registro completo
+      isPostRegisterCompleted: isPostRegisterCompleted ?? this.isPostRegisterCompleted,
+      isCompletingPostRegister: isCompletingPostRegister ?? this.isCompletingPostRegister,
+      completePostRegisterError: completePostRegisterError ?? this.completePostRegisterError,
     );
   }
 
@@ -120,6 +206,7 @@ class PostRegisterState extends Equatable {
         baptismDate,
         gender,
         selectedGender,
+        bloodType,
         emergencyContactName,
         emergencyContactPhone,
         emergencyContactEmail,
@@ -132,5 +219,24 @@ class PostRegisterState extends Equatable {
         emergencyContacts,
         relationshipTypes,
         showEmergencyContactModal,
+        isPersonalInfoSaved,
+        // Club info props
+        countries,
+        selectedCountry,
+        unions,
+        selectedUnion,
+        localFields,
+        selectedLocalField,
+        clubs,
+        selectedClub,
+        clubTypes,
+        selectedClubType,
+        classes,
+        selectedClass,
+        isClubInfoSaved,
+        // Post-registro completo
+        isPostRegisterCompleted,
+        isCompletingPostRegister,
+        completePostRegisterError,
       ];
 }

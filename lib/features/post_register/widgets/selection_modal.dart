@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:sacdia/core/constants.dart';
-// *****************************************************
-// Selection Modal
-// *****************************************************  
+ 
 class SelectionModal extends StatefulWidget {
   final String title;
   final String subtitle;
@@ -37,6 +34,13 @@ class _SelectionModalState extends State<SelectionModal> {
   @override
   Widget build(BuildContext context) {
     return Container(
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(16),
+          topRight: Radius.circular(16),
+        ),
+      ),
       padding: const EdgeInsets.all(16),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -89,7 +93,7 @@ class _SelectionModalState extends State<SelectionModal> {
               widget.onConfirm(_selectedItems);
               Navigator.pop(context);
             },
-            child: const Text('Confirmar'),
+            child: const Text('Confirmar', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
           ),
         ],
       ),

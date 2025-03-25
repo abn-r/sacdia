@@ -3,6 +3,10 @@ import 'package:equatable/equatable.dart';
 import 'package:sacdia/features/post_register/models/allergy_model.dart';
 import 'package:sacdia/features/post_register/models/disease_model.dart';
 import 'package:sacdia/features/post_register/models/emergency_contact.dart';
+import 'package:sacdia/features/post_register/models/club_models.dart';
+import 'package:sacdia/core/catalogs/models/country.dart';
+import 'package:sacdia/core/catalogs/models/union.dart';
+import 'package:sacdia/core/catalogs/models/local_field.dart';
 
 abstract class PostRegisterEvent extends Equatable {
   const PostRegisterEvent();
@@ -158,5 +162,123 @@ class AddEmergencyContactSilent extends PostRegisterEvent {
 
 class ClearErrorMessagesRequested extends PostRegisterEvent {
   const ClearErrorMessagesRequested();
+}
+
+// Club Info Events
+class LoadCountriesRequested extends PostRegisterEvent {
+  const LoadCountriesRequested();
+}
+
+class CountrySelected extends PostRegisterEvent {
+  final Country country;
+  
+  const CountrySelected(this.country);
+  
+  @override
+  List<Object> get props => [country];
+}
+
+class LoadUnionsRequested extends PostRegisterEvent {
+  final int countryId;
+  
+  const LoadUnionsRequested(this.countryId);
+  
+  @override
+  List<Object> get props => [countryId];
+}
+
+class UnionSelected extends PostRegisterEvent {
+  final Union union;
+  
+  const UnionSelected(this.union);
+  
+  @override
+  List<Object> get props => [union];
+}
+
+class LoadLocalFieldsRequested extends PostRegisterEvent {
+  final int unionId;
+  
+  const LoadLocalFieldsRequested(this.unionId);
+  
+  @override
+  List<Object> get props => [unionId];
+}
+
+class LocalFieldSelected extends PostRegisterEvent {
+  final LocalField localField;
+  
+  const LocalFieldSelected(this.localField);
+  
+  @override
+  List<Object> get props => [localField];
+}
+
+class LoadClubsRequested extends PostRegisterEvent {
+  final int localFieldId;
+  
+  const LoadClubsRequested(this.localFieldId);
+  
+  @override
+  List<Object> get props => [localFieldId];
+}
+
+class ClubSelected extends PostRegisterEvent {
+  final Club club;
+  
+  const ClubSelected(this.club);
+  
+  @override
+  List<Object> get props => [club];
+}
+
+class LoadClubTypesRequested extends PostRegisterEvent {
+  const LoadClubTypesRequested();
+}
+
+class ClubTypeSelected extends PostRegisterEvent {
+  final ClubType clubType;
+  
+  const ClubTypeSelected(this.clubType);
+  
+  @override
+  List<Object> get props => [clubType];
+}
+
+class LoadClassesRequested extends PostRegisterEvent {
+  final int clubTypeId;
+  
+  const LoadClassesRequested(this.clubTypeId);
+  
+  @override
+  List<Object> get props => [clubTypeId];
+}
+
+class ClassSelected extends PostRegisterEvent {
+  final Class selectedClass;
+  
+  const ClassSelected(this.selectedClass);
+  
+  @override
+  List<Object> get props => [selectedClass];
+}
+
+class SaveClubInfoRequested extends PostRegisterEvent {
+  const SaveClubInfoRequested();
+}
+
+// Evento para completar el post-registro
+class CompletePostRegisterRequested extends PostRegisterEvent {
+  const CompletePostRegisterRequested();
+}
+
+// Evento para cambiar el tipo de sangre
+class BloodTypeChanged extends PostRegisterEvent {
+  final String bloodType;
+  
+  const BloodTypeChanged(this.bloodType);
+  
+  @override
+  List<Object> get props => [bloodType];
 }
 

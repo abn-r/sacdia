@@ -45,6 +45,9 @@ class CustomTextFieldState extends State<CustomTextField> {
 
   @override
   Widget build(BuildContext context) {
+    // Define un radio constante para los bordes
+    const double borderRadius = 12;
+    
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
       child: Column(
@@ -69,8 +72,10 @@ class CustomTextFieldState extends State<CustomTextField> {
                   blurRadius: 38.4,
                 ),
               ],
-              borderRadius: const BorderRadius.all(Radius.circular(12)),
+              borderRadius: const BorderRadius.all(Radius.circular(borderRadius)),
             ),
+            // El clipBehavior es importante para asegurar que el TextFormField respete el recorte del borde
+            clipBehavior: Clip.antiAlias,
             child: TextFormField(
               controller: widget.controller,
               validator: widget.validator,
@@ -83,11 +88,25 @@ class CustomTextFieldState extends State<CustomTextField> {
               onChanged: widget.onChanged,
               decoration: InputDecoration(
                 hintText: 'Escriba aquí...',
-                focusedBorder: InputBorder.none,
-                enabledBorder: InputBorder.none,
+                // Utilizar bordes personalizados y transparentes para mantener el estilo consistente
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(borderRadius),
+                  borderSide: BorderSide.none,
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(borderRadius),
+                  borderSide: BorderSide.none,
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(borderRadius),
+                  borderSide: BorderSide.none,
+                ),
+                // Aumentar el padding para que el texto no quede tan pegado a los bordes
                 contentPadding:
-                    const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                    const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
                 hintStyle: const TextStyle(color: sacGrey),
+                fillColor: Colors.white,
+                filled: true,
                 prefixIcon: widget.prefixIcon != null
                     ? Icon(widget.prefixIcon, color: sacGrey)
                     : null,

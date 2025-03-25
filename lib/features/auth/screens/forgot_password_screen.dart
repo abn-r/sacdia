@@ -39,12 +39,24 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       listener: (context, state) {
         if (state.errorMessage != null && state.errorMessage!.isNotEmpty) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.errorMessage!)),
+            SnackBar(
+              content: Text(state.errorMessage!),
+              behavior: SnackBarBehavior.floating,
+              margin: const EdgeInsets.all(15),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
           );
         } else if (!state.isLoading) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
+            SnackBar(
               content: Text('Se ha enviado un correo de recuperación.'),
+              behavior: SnackBarBehavior.floating,
+              margin: EdgeInsets.all(15),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
           );
         }
@@ -53,8 +65,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         appBar: AppBar(
             title: const Text(
               'RECUPERAR CONTRASEÑA',
-              style:
-                  TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
+              style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18),
             ),
             backgroundColor: sacRed,
             elevation: 0,
