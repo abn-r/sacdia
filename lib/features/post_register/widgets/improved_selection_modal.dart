@@ -263,6 +263,7 @@ class _ImprovedSelectionModalState<T> extends State<ImprovedSelectionModal<T>> {
                   ],
                 ),
               ),
+              const SizedBox(height: 25),
             ],
           ),
         );

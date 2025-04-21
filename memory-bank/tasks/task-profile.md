@@ -1,0 +1,25 @@
+# Profile Module Tasks
+
+- **Implement "Actualizar Perfil"**: 
+    - Define editing capabilities (Name, Photo, basic info?).
+    - Create necessary screens/widgets for editing.
+    - Add required methods to `UserRepository`/`UserService` and `UserBloc` (or a new dedicated EditProfileBloc/Cubit).
+    - Connect the button in `ProfileScreen`.
+- **Implement Specialities Section**: 
+    - Create `UserSpecialitiesCubit` (or similar).
+    - Add method to `UserService` to fetch user specialities from API.
+    - Implement loading logic in `ProfileScreen._loadUserSpecialities`.
+    - Update the speciality carousel UI in `ProfileScreen` to display real data.
+    - Consider navigation to a detailed specialities view.
+- **Complete `UserPersonalInfoScreen`**: 
+    - Ensure it displays all relevant personal info (including fields from `UserProfileModel`).
+    - Integrate sections/navigation for managing Allergies (using `UserAllergiesScreen`), Diseases (`UserDiseasesScreen`), and Emergency Contacts (using the screen to be created in `task-user.md`).
+    - Define and implement editing capabilities for basic personal info (if not covered by "Actualizar Perfil").
+- **Implement `ConfigurationScreen`**: 
+    - Add options like Theme Switching (using `ThemeBloc`).
+    - Add Logout button (using `AuthBloc.SignOutRequested`).
+    - Add other relevant settings (e.g., Account Management link, About page).
+- **Handle Multiple Clubs/Roles/Classes**: If required, refactor UI in `ProfileScreen` to display multiple items instead of just the first one found.
+- **Refine Initial Loading**: Review `initState` in `ProfileScreen` to optimize data loading if needed.
+- **UI/UX**: Improve loading/error states, potentially refactor large `ProfileScreen` widget.
+- **Testing**: Write Widget tests for `ProfileScreen`, `UserPersonalInfoScreen`, `ConfigurationScreen`, etc. 

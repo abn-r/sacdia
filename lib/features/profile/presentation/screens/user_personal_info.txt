@@ -1,0 +1,82 @@
+                    BlocBuilder<UserClubsCubit, UserClubsState>(
+                      builder: (context, state) {
+                        if (state is UserClubsLoading) {
+                          return const Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(16.0),
+                              child: CircularProgressIndicator(color: sacRed),
+                            ),
+                          );
+                        } else if (state is UserClubsError) {
+                          return _buildInfoCard(
+                            icon: Icons.error_outline,
+                            title: 'Error',
+                            value: 'No se pudo cargar la información del club',
+                          );
+                        } else if (state is UserClubsLoaded && state.clubs.isNotEmpty) {
+                          final club = state.clubs.first;
+                          return Column(
+                            children: [
+                              // Club y cargo en la misma línea
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: _buildInfoCard(
+                                      icon: Icons.people,
+                                      title: 'Club',
+                                      value: club.clubName,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: _buildInfoCard(
+                                      icon: Icons.star,
+                                      title: 'Cargo',
+                                      value: 'Director',
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              
+                              // Información detallada del club si está disponible
+                              _buildInfoCard(
+                                icon: Icons.school,
+                                title: 'Clase',
+                                value: 'Guía Mayor Avanzado',
+                              ),
+                              
+                              if (club.clubAdvId != null || club.clubPathfId != null || club.clubMgId != null)
+                                _buildInfoCard(
+                                  icon: Icons.category,
+                                  title: 'Tipos de Club Asignados',
+                                  value: [
+                                    if (club.clubAdvId != null) 'Aventureros',
+                                    if (club.clubPathfId != null) 'Conquistadores',
+                                    if (club.clubMgId != null) 'Guías Mayores',
+                                  ].join(', '),
+                                ),
+                            ],
+                          );
+                        } else {
+                          // No hay clubes asignados
+                          return Row(
+                            children: [
+                              Expanded(
+                                child: _buildInfoCard(
+                                  icon: Icons.people,
+                                  title: 'Club',
+                                  value: 'No asignado',
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: _buildInfoCard(
+                                  icon: Icons.star,
+                                  title: 'Cargo',
+                                  value: 'No asignado',
+                                ),
+                              ),
+                            ],
+                          );
+                        }
+                      },

@@ -11,6 +11,9 @@ class CustomTextField extends StatefulWidget {
   final IconData? prefixIcon;
   final void Function(String?)? onChanged;
   final bool isNumber;
+  final int? maxLength;
+  final MaxLengthEnforcement? maxLengthEnforcement;
+  final List<TextInputFormatter>? inputFormatters;
 
   const CustomTextField({
     super.key,
@@ -22,6 +25,9 @@ class CustomTextField extends StatefulWidget {
     this.prefixIcon,
     this.onChanged,
     this.isNumber = false,
+    this.maxLength,
+    this.maxLengthEnforcement,
+    this.inputFormatters,
   });
 
   @override
@@ -81,9 +87,11 @@ class CustomTextFieldState extends State<CustomTextField> {
               validator: widget.validator,
               obscureText: _obscureText,
               keyboardType: widget.keyboardType,
-              inputFormatters: widget.isNumber
+              inputFormatters: widget.inputFormatters ?? (widget.isNumber
                   ? [FilteringTextInputFormatter.digitsOnly]
-                  : null,
+                  : null),
+              maxLength: widget.maxLength,
+              maxLengthEnforcement: widget.maxLengthEnforcement,
               autofocus: false,
               onChanged: widget.onChanged,
               decoration: InputDecoration(
@@ -101,6 +109,8 @@ class CustomTextFieldState extends State<CustomTextField> {
                   borderRadius: BorderRadius.circular(borderRadius),
                   borderSide: BorderSide.none,
                 ),
+                // Si hay maxLength, ocultar el contador
+                counterText: widget.maxLength != null ? '' : null,
                 // Aumentar el padding para que el texto no quede tan pegado a los bordes
                 contentPadding:
                     const EdgeInsets.symmetric(vertical: 15, horizontal: 15),

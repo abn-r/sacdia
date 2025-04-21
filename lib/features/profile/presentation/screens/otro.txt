@@ -1,0 +1,623 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sacdia/core/constants.dart';
+import 'package:sacdia/features/profile/presentation/screens/configuration_screen.dart';
+import 'package:sacdia/features/profile/presentation/screens/user_personal_info_screen.dart';
+import 'package:sacdia/features/user/bloc/user_bloc.dart';
+import 'package:sacdia/features/user/bloc/user_event.dart';
+import 'package:sacdia/features/user/bloc/user_state.dart';
+import 'package:sacdia/features/user/models/user_profile_model.dart';
+import 'package:sacdia/features/club/cubit/user_clubs_cubit.dart';
+import 'package:sacdia/features/club/models/user_club_model.dart';
+import 'package:sacdia/features/club/extensions/club_extensions.dart';
+import 'package:sacdia/features/club/widgets/club_info_widget.dart';
+
+class ProfileScreen extends StatefulWidget {
+  const ProfileScreen({super.key});
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Cargar los clubes del usuario al iniciar la pantalla
+    _loadUserClubs();
+  }
+  
+  void _loadUserClubs() {
+    // Cargar los clubes del usuario
+    context.read<UserClubsCubit>().getUserClubs();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.9),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.arrow_back, color: sacRed),
+          ),
+          onPressed: () => Navigator.pop(context),
+        ),
+        actions: [
+          Container(
+            margin: const EdgeInsets.only(right: 16),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.9),
+              shape: BoxShape.circle,
+            ),
+            child: IconButton(
+              icon: const Icon(Icons.settings, color: sacRed),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ConfigurationScreen(),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+      body: BlocBuilder<UserBloc, UserState>(
+        buildWhen: (previous, current) =>
+            previous.userProfile != current.userProfile ||
+            previous.status != current.status,
+        builder: (context, state) {
+          // Mostrar loader mientras se carga el perfil
+          if (state.status == UserStatus.loading ||
+              state.userProfile == null) {
+            return const Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CircularProgressIndicator(
+                    color: sacRed,
+                  ),
+                  SizedBox(height: 16),
+                  Text(
+                    'Cargando perfil...',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: sacBlack,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
+      
+          // Si hay error, mostrar mensaje
+          if (state.status == UserStatus.error) {
+            return Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.error_outline,
+                    color: sacRed,
+                    size: 48,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    state.errorMessage ?? 'Error al cargar el perfil',
+                    style: const TextStyle(
+                      fontSize: 16,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      context
+                          .read<UserBloc>()
+                          .add(const LoadUserProfile());
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: sacRed,
+                    ),
+                    child: const Text('Reintentar'),
+                  ),
+                ],
+              ),
+            );
+          }
+      
+          // Mostrar la información del perfil
+          final UserProfileModel user = state.userProfile!;
+          return SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header con degradado y foto
+                _buildProfileHeader(user),
+                
+                // Botones para actualizar perfil
+                _buildActionButtons(context, user),
+                
+                // Sección de especialidades
+                _buildSectionTitle(context, 'Especialidades', Icons.stars),
+                _buildSpecialtiesSection(),
+                
+                // Sección de clases
+                _buildSectionTitle(context, 'Clases', Icons.school),
+                _buildClassesSection(),
+                
+                // Sección de información adicional
+                _buildSectionTitle(context, 'Información Personal', Icons.person),
+                _buildInfoSection(user),
+                
+                const SizedBox(height: 30),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+  
+  Widget _buildProfileHeader(UserProfileModel user) {
+    return Container(
+      height: 280,
+      width: double.infinity,
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [sacRed, Colors.white],
+          stops: [0.6, 1.0],
+        ),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // Foto de perfil
+          Container(
+            width: 120,
+            height: 120,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: Colors.white,
+                width: 4,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.2),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: user.userImage == null || user.userImage!.isEmpty
+                ? const CircleAvatar(
+                    backgroundImage: AssetImage(userPlaceholder),
+                  )
+                : CircleAvatar(
+                    backgroundImage: NetworkImage(
+                      'https://pfjdavhuriyhtqyifwky.supabase.co/storage/v1/object/public/profile-pictures//${user.userImage}',
+                    ),
+                  ),
+          ),
+          const SizedBox(height: 16),
+          // Nombre del usuario
+          Text(
+            user.fullName,
+            style: const TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 8),
+          // Club
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.3),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.groups,
+                  color: Colors.white,
+                  size: 18,
+                ),
+                const SizedBox(width: 4),
+                ClubInfoText(
+                  style: const TextStyle(
+                    fontSize: 16,
+                    color: Colors.white,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
+          // Insignias
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _buildBadge('Director', Icons.star),
+              const SizedBox(width: 8),
+              _buildBadge('Guía Mayor Avanzado', Icons.shield),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+  
+  Widget _buildBadge(String text, IconData icon) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.3),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            icon,
+            color: Colors.white,
+            size: 16,
+          ),
+          const SizedBox(width: 4),
+          Text(
+            text,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionButtons(BuildContext context, UserProfileModel user) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Row(
+        children: [
+          Expanded(
+            child: ElevatedButton.icon(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => UserPersonalInfoScreen(user: user),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.edit, size: 18),
+              label: const Text('Info. personal'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: sacBlack,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: ElevatedButton.icon(
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) => AlertDialog(
+                    title: const Text('En desarrollo'),
+                    content: const Text('La funcionalidad para actualizar el perfil estará disponible próximamente.'),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text('Aceptar'),
+                      ),
+                    ],
+                  ),
+                );
+              },
+              icon: const Icon(Icons.upload, size: 18),
+              label: const Text('Act. perfil'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: sacYellow,
+                foregroundColor: sacBlack,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(BuildContext context, String title, IconData icon) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: sacRed.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(
+              icon,
+              color: sacRed,
+              size: 24,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: sacBlack,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSpecialtiesSection() {
+    return SizedBox(
+      height: 100,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        children: [
+          _buildSpecialityCard('ADRA', sacBlue, Icons.volunteer_activism),
+          _buildSpecialityCard('Naturaleza', sacGreen, Icons.nature),
+          _buildSpecialityCard('Recreativas', sacYellow, Icons.sports_handball),
+        ],
+      ),
+    );
+  }
+  
+  Widget _buildClassesSection() {
+    return SizedBox(
+      height: 100,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        children: [
+          _buildClassCard('Amigo', sacBlue, logoAVT),
+          _buildClassCard('Compañero', sacGreen, logoConqColor),
+          _buildClassCard('Guía', sacRed, logoGM),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoSection(UserProfileModel user) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Column(
+        children: [
+          _buildInfoCard(
+            icon: Icons.cake,
+            title: 'Fecha de Nacimiento',
+            value: user.birthday != null
+                ? '${user.birthday!.day}/${user.birthday!.month}/${user.birthday!.year}'
+                : 'No disponible',
+          ),
+          _buildInfoCard(
+            icon: Icons.bloodtype,
+            title: 'Tipo de Sangre',
+            value: _formatBloodType(user.blood),
+          ),
+          _buildInfoCard(
+            icon: Icons.email,
+            title: 'Correo Electrónico',
+            value: user.email,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSpecialityCard(String title, Color color, IconData icon) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 12),
+      child: Container(
+        width: 180,
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: color.withOpacity(0.3),
+              blurRadius: 8,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Stack(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Positioned(
+              right: 12,
+              bottom: 12,
+              child: Icon(
+                icon,
+                color: Colors.white.withOpacity(0.5),
+                size: 32,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildClassCard(String title, Color color, String logoPath) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 12),
+      child: Container(
+        width: 180,
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: color.withOpacity(0.3),
+              blurRadius: 8,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Stack(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Positioned(
+              right: 12,
+              bottom: 12,
+              child: Image.asset(
+                logoPath,
+                width: 32,
+                height: 32,
+                color: Colors.white.withOpacity(0.5),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoCard({
+    required IconData icon,
+    required String title,
+    required String value,
+  }) {
+    return Card(
+      elevation: 0,
+      margin: const EdgeInsets.only(bottom: 12),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: Colors.grey.withOpacity(0.2)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: sacRed.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(
+                icon,
+                color: sacRed,
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    value,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+  
+  // Función para formatear el tipo de sangre
+  String _formatBloodType(String? bloodType) {
+    if (bloodType == null || bloodType.isEmpty) {
+      return 'No registrado';
+    }
+    
+    final Map<String, String> bloodTypeMap = {
+      'O_POSITIVE': 'O+',
+      'O_NEGATIVE': 'O-',
+      'A_POSITIVE': 'A+',
+      'A_NEGATIVE': 'A-',
+      'B_POSITIVE': 'B+',
+      'B_NEGATIVE': 'B-',
+      'AB_POSITIVE': 'AB+',
+      'AB_NEGATIVE': 'AB-',
+    };
+    
+    return bloodTypeMap[bloodType] ?? bloodType;
+  }
+}

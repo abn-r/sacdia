@@ -11,6 +11,22 @@ const Color sacGrey = Color(0xFFB9B9B9);
 
 const Color sacGreenLight = Color(0xFF43A78A);
 
+const Color colorCorderitos = Color(0xFF70C1DC);
+const Color colorCastores = Color(0xFF3D7734);
+const Color colorAbejas = Color(0xFFF5D631);
+const Color colorRayos = Color(0xFFDB563F);
+const Color colorConstructores = Color(0xFF284376);
+const Color colorManos = Color(0xFF8B2E38);
+const Color colorAmigo = Color(0xFF2EA0DA);
+const Color colorCompanero = Color(0xFFF06151);
+const Color colorExplorador = Color(0xFF4FBF9F);
+const Color colorOrientador = Color(0xFF9FB9B1);
+const Color colorViajero = Color(0xFFAE69BA);
+const Color colorGuia = Color(0xFFFBBD5E); //023682
+const Color colorGuiaMayor = Color(0xFF023682);
+const Color colorGuiaAvanzado = Color(0xFF023682);
+const Color colorGuiaInstructor = Color(0xFF023682);
+
 // Imagenes o Iconos
 const String userPlaceholder = 'assets/img/placeHolder.png';
 const String logoApp = 'assets/img/LogoSACDIA.png';

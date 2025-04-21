@@ -1,0 +1,1105 @@
+Quiero que implementes mediante los principios solid esta pantalla, dentro del feature@home.
+
+Quiero que implementes lo siguiente:
+- [ ] Se muestran las opciones de la pantalla en base al rol, que es obtenido de los servicios.
+- [ ] Se debe de contar con un Heather en la parte de arriba que muestre en la parte superior izquierda, un texto de bienvenida y el nombre del usuario y en la parte superior derecha, la fotografía del usuario en un círculo con un margen blanco.
+- [ ] En la parte inferior derecha, se tiene que mostrar un elemento flotante que permita acceder a los contactos de emergencia del club.
+- [ ] También se tiene que contar con una funcionabilidad que permita cambiar entre clubes, lo cual va a mostrar un modal para que el usuario pueda seleccionar entre aventureros, conquistadores y es mayores, según el tipo de club que se le que se pueda seleccionar y que esté asociado al club.
+Te comparto una imagen del mockup de la pantalla.
+
+También necesito que me ayudes implementar un blog llamado y user blog, el cual pueda consultar siempre la información del usuario de la base de datos, a través de la re SAPI, del cual lo tendremos la información del nombre, la foto de perfil, entre otros datos. Este blog de usuario debe ser accesible para toda la aplicación, pero sólo se usará una vez que el usuario se encuentre autenticado en la aplicación.
+
+Te comparto el viejo código, para que puedas ver lo que antes implementaba, pero no necesariamente necesitas reutilizar el código: 
+
+import 'package:awesome_dialog/awesome_dialog.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:provider/provider.dart';
+import 'package:responsive_widgets/responsive_widgets.dart';
+import 'package:sacdia/src/Pages/splash_page.dart';
+import 'package:slide_popup_dialog/slide_popup_dialog.dart' as slideDialog;
+import 'package:sacdia/Utils/size_config.dart';
+import 'package:sacdia/src/Models/Club_Usuario.dart';
+import 'package:sacdia/src/Models/User.dart';
+import 'package:sacdia/src/Pages/club_admin_info_page.dart';
+import 'package:sacdia/src/Pages/club_gc_progress_page.dart';
+import 'package:sacdia/src/Pages/club_groupClass_page.dart';
+import 'package:sacdia/src/Pages/club_health_insurance.dart';
+import 'package:sacdia/src/Pages/club_members_page.dart';
+import 'package:sacdia/src/Pages/club_unit_detail.dart';
+import 'package:sacdia/src/Pages/club_units_page.dart';
+import 'package:sacdia/src/Pages/emergency_contact_page.dart';
+import 'package:sacdia/src/Pages/finance_report_page.dart';
+import 'package:sacdia/src/Pages/resource_page.dart';
+import 'package:sacdia/src/Pages/secretary_evidence_folder_page.dart';
+import 'package:sacdia/src/Pages/warehouse_page.dart';
+import 'package:sacdia/src/Providers/club_provider.dart';
+import 'package:sacdia/src/Providers/cycles_provider.dart';
+import 'package:sacdia/src/Widgets/home_action_card.dart';
+import 'package:sacdia/src/Widgets/user_club_no_accepted.dart';
+import 'package:sacdia/src/Widgets/user_complete_register.dart';
+import 'package:sacdia/Utils/preferences.dart';
+import 'package:sacdia/Utils/constants.dart';
+
+class HomePage extends StatefulWidget {
+  Usuario user;
+
+  HomePage({Key key, this.user}) : super(key: key);
+
+  @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  final _key = GlobalKey<ScaffoldState>();
+
+  final prefs = new Preferences();
+  var options;
+
+  Widget content;
+
+  Color _colorBar;
+
+  int divisionSelected;
+
+  bool director;
+  bool subdirector;
+  bool secretario;
+  bool tesorero;
+  bool consejero;
+
+  ClubUsuario clubInfo;
+
+  String idCiclo;
+  String ciclo;
+  String rol;
+
+  @override
+  void initState() {
+    super.initState();
+    prefs.initPrefs();
+
+    prefs.division != null
+        ? divisionSelected = prefs.division
+        : divisionSelected = 1;
+
+    print('El valor de división es: ${prefs.division}');
+
+    director = false;
+    subdirector = false;
+
+    if (widget.user.user.pr) {
+      if (widget.user.user.clubAceptacion) {
+        switch (divisionSelected) {
+          case 0:
+            rol = widget.user.user.rolAventureros;
+            break;
+          case 1:
+            rol = widget.user.user.rolConquistadores;
+            break;
+          case 2:
+            rol = widget.user.user.rolGuiasMayores;
+            break;
+          default:
+        }
+
+        switch (rol) {
+          case 'Director':
+            director = true;
+            subdirector = false;
+            content = _menuDirector();
+            break;
+          case 'Sub-Director':
+            director = false;
+            subdirector = true;
+            content = _menuSubDirector();
+            break;
+          case 'Secretario - Tesorero':
+            director = false;
+            subdirector = true;
+            content = _menuSubDirector();
+            break;
+          case 'Consejero':
+            content = _menuConsejero();
+            break;
+          case 'Miembro':
+            content = _menuMiembro();
+            break;
+          default:
+            content = _menuMiembro();
+            break;
+        }
+      } else {
+        setState(() {
+          content = UserNoAccepted(widget.user.user.clubId.nombre);
+          build(context);
+        });
+      }
+    } else {
+      setState(() {
+        content = CompleteRegister(widget.user.user.id);
+        build(context);
+      });
+    }
+
+    if (director || subdirector) {
+      final clubProvider = Provider.of<ClubProvider>(context, listen: false);
+
+      var stream = Stream.fromFuture(clubProvider.getClub());
+
+      stream.listen((data) {
+        clubInfo = ClubUsuario.fromJson(data);
+      }, onDone: () {
+        print("Task Done - info club");
+      }, onError: (error) {
+        print("Some Error - info club");
+      });
+    }
+
+    final cycleProvider = Provider.of<CycleProvider>(context, listen: false);
+
+    var dataCylce = Stream.fromFuture(cycleProvider.getCycle());
+
+    dataCylce.listen((event) {
+      idCiclo = event.cycles[0].id;
+      ciclo = '${event.cycles[0].inicio} -  ${event.cycles[0].fin}';
+    }, onDone: () {
+      print("Task Done - info club");
+    }, onError: (error) {
+      print("Some Error - info club");
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      key: _key,
+      backgroundColor: sac_green,
+      body: content,
+      floatingActionButton: widget.user.user.pr
+          ? widget.user.user.clubAceptacion
+              ? FloatingActionButton.extended(
+                  hoverElevation: 5,
+                  backgroundColor: sac_red,
+                  onPressed: () {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (_) => EmergencyContact()));
+                  },
+                  elevation: 0,
+                  icon: Icon(FontAwesomeIcons.phoneAlt),
+                  label: Text('SOS',
+                      style: TextStyle(
+                          fontSize: SizeConfig.textMultiplier * 2.2,
+                          fontWeight: FontWeight.bold)),
+                  /* child: Container(
+                      height: 500, child: Icon(FontAwesomeIcons.phoneAlt)), */
+                )
+              : Container()
+          : Container(),
+    );
+  }
+
+  Widget _menuDirector() {
+    return Column(
+      children: <Widget>[
+        SizedBoxResponsive(height: SizeConfig.heightMultiplier * 2.5),
+        Expanded(
+          child: StaggeredGridView.count(
+            crossAxisCount: 2,
+            crossAxisSpacing: 20.0,
+            mainAxisSpacing: 20.0,
+            padding: EdgeInsets.symmetric(horizontal: 30.0, vertical: 8.0),
+            children: <Widget>[
+              topInfo(),
+              ContainerResponsive(
+                width: 120,
+                height: 100,
+                child: HomeActionCard(
+                    title: 'Miembros',
+                    image: 'assets/img/Miembros.png',
+                    type: 0,
+                    press: () {
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (_) => MembersClubPage()));
+                    }),
+              ),
+              HomeActionCard(
+                  title: 'Club',
+                  image: 'assets/img/AdminClub.png',
+                  type: 0,
+                  press: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) => AdminInfoClubPage(
+                                  clubName: widget.user.user.clubId.nombre,
+                                  cid: widget.user.user.clubId.id,
+                                  clubInfo: clubInfo,
+                                )));
+                  }),
+              HomeActionCard(
+                  title: 'Carpeta de Evidencias',
+                  image: 'assets/img/CarpetaEvidencias.png',
+                  type: 0,
+                  press: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) => EvidenceFolder(
+                                  idClub: widget.user.user.clubId.id,
+                                  idCiclo: idCiclo,
+                                  ciclo: ciclo,
+                                  idCampo: widget.user.user.campoLocal.id,
+                                )));
+                  }),
+              HomeActionCard(
+                  title: 'Finanzas',
+                  image: 'assets/img/Finanzas.png',
+                  type: 0,
+                  press: () {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (_) => FinanceReportPage()));
+                  }),
+              HomeActionCard(
+                  title: 'Unidades',
+                  image: 'assets/img/Unidades.png',
+                  type: 0,
+                  press: () {
+                    director
+                        ? Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) =>
+                                    UnitsPage(rol: widget.user.user.rol)))
+                        : widget.user.user.unidadAsignada?.nombre != null
+                            ? Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (_) => UnitDetailPage(
+                                        idUnidad: widget
+                                            .user.user.unidadAsignada.id)))
+                            : infoUnitDialog();
+                  }),
+              HomeActionCard(
+                  title: 'Clase Agrupada',
+                  image: 'assets/img/ClaseAgrupada.png',
+                  type: 0,
+                  press: () {
+                    switch (widget.user.user.claseActual.nombre) {
+                      case 'Corderitos':
+                        _colorBar = color_corderitos;
+                        break;
+                      case 'Castores':
+                        _colorBar = color_castores;
+                        break;
+                      case 'Abejas':
+                        _colorBar = color_abejas;
+                        break;
+                      case 'Rayos de Sol':
+                        _colorBar = color_rayos;
+                        break;
+                      case 'Constructor':
+                        _colorBar = color_constructores;
+                        break;
+                      case 'Manos Ayudadoras':
+                        _colorBar = color_manos;
+                        break;
+                      case 'Amigo':
+                        _colorBar = color_amigo;
+                        break;
+                      case 'Compañero':
+                        _colorBar = color_companero;
+                        break;
+                      case 'Explorador':
+                        _colorBar = color_explorador;
+                        break;
+                      case 'Orientador':
+                        _colorBar = color_orientador;
+                        break;
+                      case 'Viajero':
+                        _colorBar = color_viajero;
+                        break;
+                      case 'Guía':
+                        _colorBar = color_guia;
+                        break;
+                      case 'Guía Mayor':
+                        _colorBar = color_guia_mayor;
+                        break;
+                      default:
+                        _colorBar = sac_black;
+                    }
+                    widget.user.user.claseAsignada?.id != null
+                        ? Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) => GroupClassPage(
+                                      assignedClass:
+                                          widget.user.user.claseAsignada.nombre,
+                                      assignedClassId:
+                                          widget.user.user.claseAsignada.id,
+                                    )))
+                        : Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) => GroupClassProgressPage(
+                                      userClass:
+                                          widget.user.user.claseActual.id,
+                                      color: _colorBar,
+                                      clase:
+                                          widget.user.user.claseActual.nombre,
+                                      usuario: widget.user.user.nombre +
+                                          ' ' +
+                                          widget.user.user.apellidos,
+                                      idUsuario: widget.user.user.id,
+                                    )));
+                    //infoDialog();
+                  }),
+              HomeActionCard(
+                  title: 'Seguros del Club',
+                  image: 'assets/img/SeguroClub.png',
+                  type: 0,
+                  press: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) => HealthInsurancePage()));
+                  }),
+              HomeActionCard(
+                  title: 'Inventario',
+                  image: 'assets/img/Inventario.png',
+                  type: 0,
+                  press: () {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (_) => WareHousePage()));
+                  }),
+              HomeActionCard(
+                  title: 'Recursos',
+                  image: 'assets/img/RecursosClub.png',
+                  type: 0,
+                  press: () {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (_) => ResourcePage()));
+                  }),
+              HomeActionCard(
+                  title: 'Contacto de Emergencia',
+                  image: 'assets/img/ContactoEmergencia.png',
+                  type: 0,
+                  press: () {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (_) => EmergencyContact()));
+                  }),
+            ],
+            staggeredTiles: [
+              StaggeredTile.extent(2, 100),
+              StaggeredTile.extent(1, 135),
+              StaggeredTile.extent(1, 135),
+              StaggeredTile.extent(1, 135),
+              StaggeredTile.extent(1, 135),
+              StaggeredTile.extent(1, 135),
+              StaggeredTile.extent(1, 135),
+              StaggeredTile.extent(1, 135),
+              StaggeredTile.extent(1, 135),
+              StaggeredTile.extent(1, 135),
+              StaggeredTile.extent(1, 135),
+              //StaggeredTile.extent(2, 110),
+            ],
+          ),
+        )
+      ],
+    );
+  }
+
+  Widget _menuSubDirector() {
+    return Column(
+      children: <Widget>[
+        SizedBoxResponsive(height: SizeConfig.heightMultiplier * 2.5),
+        Expanded(
+          child: StaggeredGridView.count(
+            crossAxisCount: 2,
+            crossAxisSpacing: 12.0,
+            mainAxisSpacing: 12.0,
+            padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            children: <Widget>[
+              topInfo(),
+              HomeActionCard(
+                  title: 'Club',
+                  image: 'assets/img/AdminClub.png',
+                  type: 0,
+                  press: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) => AdminInfoClubPage(
+                                  clubName: widget.user.user.clubId.nombre,
+                                  cid: widget.user.user.clubId.id,
+                                  clubInfo: clubInfo,
+                                )));
+                  }),
+              HomeActionCard(
+                  title: 'Carpeta de Evidencias',
+                  image: 'assets/img/CarpetaEvidencias.png',
+                  type: 0,
+                  press: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) => EvidenceFolder(
+                                  idClub: widget.user.user.clubId.id,
+                                  idCiclo: idCiclo,
+                                  ciclo: ciclo,
+                                  idCampo: widget.user.user.campoLocal.id,
+                                )));
+                  }),
+              HomeActionCard(
+                  title: 'Finanzas',
+                  image: 'assets/img/Finanzas.png',
+                  type: 0,
+                  press: () {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (_) => FinanceReportPage()));
+                  }),
+              HomeActionCard(
+                  title: 'Unidades',
+                  image: 'assets/img/Unidades.png',
+                  type: 0,
+                  press: () {
+                    director
+                        ? Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) =>
+                                    UnitsPage(rol: widget.user.user.rol)))
+                        : widget.user.user.unidadAsignada?.nombre != null
+                            ? Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (_) => UnitDetailPage(
+                                        idUnidad: widget
+                                            .user.user.unidadAsignada.id)))
+                            : infoUnitDialog();
+                  }),
+              HomeActionCard(
+                  title: 'Clase Agrupada',
+                  image: 'assets/img/ClaseAgrupada.png',
+                  type: 0,
+                  press: () {
+                    switch (widget.user.user.claseActual.nombre) {
+                      case 'Corderitos':
+                        _colorBar = color_corderitos;
+                        break;
+                      case 'Castores':
+                        _colorBar = color_castores;
+                        break;
+                      case 'Abejas':
+                        _colorBar = color_abejas;
+                        break;
+                      case 'Rayos de Sol':
+                        _colorBar = color_rayos;
+                        break;
+                      case 'Constructor':
+                        _colorBar = color_constructores;
+                        break;
+                      case 'Manos Ayudadoras':
+                        _colorBar = color_manos;
+                        break;
+                      case 'Amigo':
+                        _colorBar = color_amigo;
+                        break;
+                      case 'Compañero':
+                        _colorBar = color_companero;
+                        break;
+                      case 'Explorador':
+                        _colorBar = color_explorador;
+                        break;
+                      case 'Orientador':
+                        _colorBar = color_orientador;
+                        break;
+                      case 'Viajero':
+                        _colorBar = color_viajero;
+                        break;
+                      case 'Guía':
+                        _colorBar = color_guia;
+                        break;
+                      case 'Guía Mayor':
+                        _colorBar = color_guia_mayor;
+                        break;
+                      default:
+                        _colorBar = sac_black;
+                    }
+                    widget.user.user.claseAsignada?.id != null
+                        ? Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) => GroupClassPage(
+                                      assignedClass:
+                                          widget.user.user.claseAsignada.nombre,
+                                      assignedClassId:
+                                          widget.user.user.claseAsignada.id,
+                                    )))
+                        : Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) => GroupClassProgressPage(
+                                      userClass:
+                                          widget.user.user.claseActual.id,
+                                      color: _colorBar,
+                                      clase:
+                                          widget.user.user.claseActual.nombre,
+                                      usuario: widget.user.user.nombre +
+                                          ' ' +
+                                          widget.user.user.apellidos,
+                                      idUsuario: widget.user.user.id,
+                                    )));
+                    //infoDialog();
+                  }),
+              HomeActionCard(
+                  title: 'Seguros del Club',
+                  image: 'assets/img/SeguroClub.png',
+                  type: 0,
+                  press: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) => HealthInsurancePage()));
+                  }),
+              HomeActionCard(
+                  title: 'Inventario',
+                  image: 'assets/img/Inventario.png',
+                  type: 0,
+                  press: () {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (_) => WareHousePage()));
+                  }),
+              HomeActionCard(
+                  title: 'Recursos',
+                  image: 'assets/img/RecursosClub.png',
+                  type: 0,
+                  press: () {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (_) => ResourcePage()));
+                  }),
+              HomeActionCard(
+                  title: 'Contacto de Emergencia',
+                  image: 'assets/img/ContactoEmergencia.png',
+                  type: 0,
+                  press: () {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (_) => EmergencyContact()));
+                  }),
+            ],
+            staggeredTiles: [
+              StaggeredTile.extent(2, 100),
+              StaggeredTile.extent(1, 135),
+              StaggeredTile.extent(1, 135),
+              StaggeredTile.extent(1, 135),
+              StaggeredTile.extent(1, 135),
+              StaggeredTile.extent(1, 135),
+              StaggeredTile.extent(1, 135),
+              StaggeredTile.extent(1, 135),
+              StaggeredTile.extent(1, 135),
+              StaggeredTile.extent(2, 135),
+            ],
+          ),
+        )
+      ],
+    );
+  }
+
+  Widget _menuConsejero() {
+    return Column(
+      children: <Widget>[
+        SizedBoxResponsive(height: SizeConfig.heightMultiplier * 2.5),
+        Expanded(
+          child: StaggeredGridView.count(
+            crossAxisCount: 2,
+            crossAxisSpacing: 12.0,
+            mainAxisSpacing: 12.0,
+            padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            children: <Widget>[
+              topInfo(),
+              HomeActionCard(
+                  title: 'Unidad',
+                  image: 'assets/img/Unidades.png',
+                  type: 0,
+                  press: () {
+                    director
+                        ? Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) =>
+                                    UnitsPage(rol: widget.user.user.rol)))
+                        : widget.user.user.unidadAsignada?.id != null
+                            ? Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (_) => UnitDetailPage(
+                                        nombreUnidad: widget
+                                            .user.user.unidadAsignada.nombre,
+                                        idUnidad: widget
+                                            .user.user.unidadAsignada.id)))
+                            : infoUnitDialog();
+                  }),
+              HomeActionCard(
+                  title: 'Clase Agrupada',
+                  image: 'assets/img/ClaseAgrupada.png',
+                  type: 0,
+                  press: () {
+                    switch (widget.user.user.claseActual.nombre) {
+                      case 'Corderitos':
+                        _colorBar = color_corderitos;
+                        break;
+                      case 'Castores':
+                        _colorBar = color_castores;
+                        break;
+                      case 'Abejas':
+                        _colorBar = color_abejas;
+                        break;
+                      case 'Rayos de Sol':
+                        _colorBar = color_rayos;
+                        break;
+                      case 'Constructor':
+                        _colorBar = color_constructores;
+                        break;
+                      case 'Manos Ayudadoras':
+                        _colorBar = color_manos;
+                        break;
+                      case 'Amigo':
+                        _colorBar = color_amigo;
+                        break;
+                      case 'Compañero':
+                        _colorBar = color_companero;
+                        break;
+                      case 'Explorador':
+                        _colorBar = color_explorador;
+                        break;
+                      case 'Orientador':
+                        _colorBar = color_orientador;
+                        break;
+                      case 'Viajero':
+                        _colorBar = color_viajero;
+                        break;
+                      case 'Guía':
+                        _colorBar = color_guia;
+                        break;
+                      case 'Guía Mayor':
+                        _colorBar = color_guia_mayor;
+                        break;
+                      default:
+                        _colorBar = sac_black;
+                    }
+                    widget.user.user.claseAsignada?.id != null
+                        ? Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) => GroupClassPage(
+                                      assignedClass:
+                                          widget.user.user.claseAsignada.nombre,
+                                      assignedClassId:
+                                          widget.user.user.claseAsignada.id,
+                                    )))
+                        : Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) => GroupClassProgressPage(
+                                      userClass:
+                                          widget.user.user.claseActual.id,
+                                      color: _colorBar,
+                                      clase:
+                                          widget.user.user.claseActual.nombre,
+                                      usuario: widget.user.user.nombre +
+                                          ' ' +
+                                          widget.user.user.apellidos,
+                                      idUsuario: widget.user.user.id,
+                                    )));
+                  }),
+              HomeActionCard(
+                  title: 'Recursos',
+                  image: 'assets/img/RecursosClub.png',
+                  type: 0,
+                  press: () {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (_) => ResourcePage()));
+                  }),
+              HomeActionCard(
+                  title: 'Contacto de Emergencia',
+                  image: 'assets/img/ContactoEmergencia.png',
+                  type: 0,
+                  press: () {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (_) => EmergencyContact()));
+                  }),
+            ],
+            staggeredTiles: [
+              StaggeredTile.extent(2, 100),
+              StaggeredTile.extent(1, 135),
+              StaggeredTile.extent(1, 135),
+              StaggeredTile.extent(1, 135),
+              StaggeredTile.extent(1, 135),
+            ],
+          ),
+        )
+      ],
+    );
+  }
+
+  Widget _menuMiembro() {
+    return Column(
+      children: <Widget>[
+        SizedBoxResponsive(height: SizeConfig.heightMultiplier * 2.5),
+        Expanded(
+          child: StaggeredGridView.count(
+            crossAxisCount: 2,
+            crossAxisSpacing: 12.0,
+            mainAxisSpacing: 12.0,
+            padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            children: <Widget>[
+              topInfo(),
+              HomeActionCard(
+                  title: 'Clase Agrupada',
+                  image: 'assets/img/ClaseAgrupada.png',
+                  type: 0,
+                  press: () {
+                    switch (widget.user.user.claseActual.nombre) {
+                      case 'Corderitos':
+                        _colorBar = color_corderitos;
+                        break;
+                      case 'Castores':
+                        _colorBar = color_castores;
+                        break;
+                      case 'Abejas':
+                        _colorBar = color_abejas;
+                        break;
+                      case 'Rayos de Sol':
+                        _colorBar = color_rayos;
+                        break;
+                      case 'Constructor':
+                        _colorBar = color_constructores;
+                        break;
+                      case 'Manos Ayudadoras':
+                        _colorBar = color_manos;
+                        break;
+                      case 'Amigo':
+                        _colorBar = color_amigo;
+                        break;
+                      case 'Compañero':
+                        _colorBar = color_companero;
+                        break;
+                      case 'Explorador':
+                        _colorBar = color_explorador;
+                        break;
+                      case 'Orientador':
+                        _colorBar = color_orientador;
+                        break;
+                      case 'Viajero':
+                        _colorBar = color_viajero;
+                        break;
+                      case 'Guía':
+                        _colorBar = color_guia;
+                        break;
+                      case 'Guía Mayor':
+                        _colorBar = color_guia_mayor;
+                        break;
+                      default:
+                        _colorBar = sac_black;
+                    }
+                    widget.user.user.claseAsignada?.id != null
+                        ? Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) => GroupClassPage(
+                                      assignedClass:
+                                          widget.user.user.claseAsignada.nombre,
+                                      assignedClassId:
+                                          widget.user.user.claseAsignada.id,
+                                    )))
+                        : Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) => GroupClassProgressPage(
+                                      userClass:
+                                          widget.user.user.claseActual.id,
+                                      color: _colorBar,
+                                      clase:
+                                          widget.user.user.claseActual.nombre,
+                                      usuario: widget.user.user.nombre +
+                                          ' ' +
+                                          widget.user.user.apellidos,
+                                      idUsuario: widget.user.user.id,
+                                    )));
+                  }),
+              HomeActionCard(
+                  title: 'Recursos',
+                  image: 'assets/img/RecursosClub.png',
+                  type: 0,
+                  press: () {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (_) => ResourcePage()));
+                  }),
+              HomeActionCard(
+                  title: 'Contacto de Emergencia',
+                  image: 'assets/img/ContactoEmergencia.png',
+                  type: 1,
+                  press: () {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (_) => EmergencyContact()));
+                  }),
+            ],
+            staggeredTiles: [
+              StaggeredTile.extent(2, 100),
+              StaggeredTile.extent(1, 135),
+              StaggeredTile.extent(1, 135),
+              StaggeredTile.extent(2, 110),
+            ],
+          ),
+        )
+      ],
+    );
+  }
+
+  Widget topInfo() {
+    Widget logo;
+
+    switch (divisionSelected) {
+      case 0:
+        logo = Image.asset('assets/img/logo_aventureros_color.png',
+            height: SizeConfig.imageSizeMultiplier * 8.5,
+            width: SizeConfig.imageSizeMultiplier * 8.5);
+        break;
+      case 1:
+        logo = Image.asset('assets/img/logo_conquistadores_color.png',
+            height: SizeConfig.imageSizeMultiplier * 8.5,
+            width: SizeConfig.imageSizeMultiplier * 8.5);
+        break;
+      case 2:
+        logo = Image.asset('assets/img/logo-guias-mayores.png',
+            height: SizeConfig.imageSizeMultiplier * 8.5,
+            width: SizeConfig.imageSizeMultiplier * 8.5);
+        break;
+      default:
+    }
+    return Container(
+      margin: EdgeInsets.symmetric(
+          horizontal: SizeConfig.widthMultiplier * 10,
+          vertical: SizeConfig.heightMultiplier * 1.2),
+      alignment: Alignment.center,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: 2),
+            child: Text('Hola \n${widget.user.user.nombre}',
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: SizeConfig.textMultiplier * 3,
+                    fontWeight: FontWeight.bold)),
+          ),
+          Container(
+            width: SizeConfig.widthMultiplier * 24,
+            child: Stack(
+              alignment: Alignment.center,
+              children: <Widget>[
+                Container(
+                  height: SizeConfig.imageSizeMultiplier * 16.5,
+                  width: SizeConfig.imageSizeMultiplier * 16.5,
+                  decoration: BoxDecoration(
+                      color: Colors.white,
+                      border: Border.all(
+                        color: Colors.white,
+                        width: 10,
+                      ),
+                      borderRadius: BorderRadius.all(Radius.circular(50.0))),
+                ),
+                GestureDetector(
+                  onTap: _selectClub,
+                  child: ClipOval(
+                    child: widget.user.user == null ||
+                            widget.user.user.imagen.isEmpty
+                        ? _placeholerPhoto()
+                        : Container(
+                            constraints: BoxConstraints.expand(
+                                height: SizeConfig.imageSizeMultiplier * 15,
+                                width: SizeConfig.imageSizeMultiplier * 15),
+                            color: Colors.white,
+                            child: FadeInImage.assetNetwork(
+                              placeholder: 'assets/img/placeHolder.png',
+                              image:
+                                  '$api/api/user/${prefs.id}/profile/${widget.user.user.imagen}?token=${prefs.token}',
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                  ),
+                ),
+                Positioned(
+                    right: SizeConfig.widthMultiplier * 0.5,
+                    bottom: SizeConfig.heightMultiplier * 0,
+                    child: logo)
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _placeholerPhoto() {
+    return Container(
+      color: Colors.grey[350],
+      constraints: BoxConstraints.expand(
+          height: SizeConfig.imageSizeMultiplier * 15,
+          width: SizeConfig.imageSizeMultiplier * 15),
+      child: Center(
+        child: Icon(Icons.photo,
+            size: SizeConfig.imageSizeMultiplier * 5, color: sac_black),
+      ),
+    );
+  }
+
+  void _selectClub() {
+    slideDialog.showSlideDialog(
+      context: context,
+      child: Expanded(
+          child: Container(
+        margin:
+            EdgeInsets.symmetric(horizontal: SizeConfig.widthMultiplier * 10),
+        child: ListView(
+          children: [
+            Text(
+              'Seleccione el club con el que desea interactuar',
+              style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: SizeConfig.heightMultiplier * 6),
+            GestureDetector(
+              onTap: () {
+                setState(() {
+                  prefs.division = 0;
+                  print('AVENTUREROS');
+                  build(context);
+                });
+                Navigator.pop(context);
+                Navigator.of(context).pushReplacement(new MaterialPageRoute(
+                    builder: (BuildContext context) => SplashPage()));
+              },
+              child: Container(
+                margin: EdgeInsets.symmetric(
+                    horizontal: SizeConfig.widthMultiplier * 12),
+                child:
+                    Row(mainAxisAlignment: MainAxisAlignment.start, children: [
+                  Image.asset('assets/img/logo_aventureros_color.png',
+                      height: SizeConfig.imageSizeMultiplier * 10,
+                      width: SizeConfig.imageSizeMultiplier * 10),
+                  SizedBox(width: SizeConfig.widthMultiplier * 3),
+                  Text(
+                    'Aventureros',
+                    style: TextStyle(
+                      fontSize: 24,
+                    ),
+                    textAlign: TextAlign.center,
+                  )
+                ]),
+              ),
+            ),
+            SizedBox(height: SizeConfig.heightMultiplier * 3),
+            GestureDetector(
+              onTap: () {
+                setState(() {
+                  prefs.division = 1;
+                  print('CONQUISTADORES');
+                  build(context);
+                });
+                Navigator.pop(context);
+                Navigator.of(context).pushReplacement(new MaterialPageRoute(
+                    builder: (BuildContext context) => SplashPage()));
+              },
+              child: Container(
+                margin: EdgeInsets.symmetric(
+                    horizontal: SizeConfig.widthMultiplier * 12),
+                child:
+                    Row(mainAxisAlignment: MainAxisAlignment.start, children: [
+                  Image.asset('assets/img/logo_conquistadores_color.png',
+                      height: SizeConfig.imageSizeMultiplier * 10,
+                      width: SizeConfig.imageSizeMultiplier * 10),
+                  SizedBox(width: SizeConfig.widthMultiplier * 3),
+                  Text(
+                    'Conquistadores',
+                    style: TextStyle(
+                      fontSize: 24,
+                    ),
+                    textAlign: TextAlign.center,
+                  )
+                ]),
+              ),
+            ),
+            SizedBox(height: SizeConfig.heightMultiplier * 3),
+            GestureDetector(
+              onTap: () {
+                setState(() {
+                  prefs.division = 2;
+                  print('GUÌAS MAYORES');
+                  build(context);
+                });
+                Navigator.pop(context);
+                Navigator.of(context).pushReplacement(new MaterialPageRoute(
+                    builder: (BuildContext context) => SplashPage()));
+              },
+              child: Container(
+                margin: EdgeInsets.symmetric(
+                    horizontal: SizeConfig.widthMultiplier * 12),
+                child:
+                    Row(mainAxisAlignment: MainAxisAlignment.start, children: [
+                  Image.asset('assets/img/logo-guias-mayores.png',
+                      height: SizeConfig.imageSizeMultiplier * 10,
+                      width: SizeConfig.imageSizeMultiplier * 10),
+                  SizedBox(width: SizeConfig.widthMultiplier * 3),
+                  Text(
+                    'Guías Mayores',
+                    style: TextStyle(
+                      fontSize: 24,
+                    ),
+                    textAlign: TextAlign.center,
+                  )
+                ]),
+              ),
+            ),
+          ],
+        ),
+      )),
+      barrierColor: sac_green.withOpacity(0.6),
+      barrierDismissible: false,
+      pillColor: sac_green,
+      backgroundColor: Colors.white,
+    );
+  }
+
+  void infoDialog() async {
+    return AwesomeDialog(
+            context: context,
+            animType: AnimType.BOTTOMSLIDE,
+            dialogType: DialogType.WARNING,
+            title: '¡Alerta!',
+            desc:
+                'No se te ha asignado una clase, ponte en contacto con tu director para saber más detalles.',
+            btnOkOnPress: () {},
+            btnOkText: 'Aceptar',
+            btnOkColor: sac_yellow,
+            dismissOnTouchOutside: false)
+        .show();
+  }
+
+  void infoUnitDialog() async {
+    return AwesomeDialog(
+            context: context,
+            animType: AnimType.BOTTOMSLIDE,
+            dialogType: DialogType.WARNING,
+            title: '¡Alerta!',
+            desc:
+                'No se te ha asignado una unidad, ponte en contacto con tu director para saber más detalles.',
+            btnOkOnPress: () {},
+            btnOkText: 'Aceptar',
+            btnOkColor: sac_yellow,
+            dismissOnTouchOutside: false)
+        .show();
+  }
+}

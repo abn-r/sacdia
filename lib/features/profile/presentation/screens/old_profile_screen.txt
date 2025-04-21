@@ -1,0 +1,437 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sacdia/core/constants.dart';
+import 'package:sacdia/features/user/bloc/user_bloc.dart';
+import 'package:sacdia/features/user/bloc/user_event.dart';
+import 'package:sacdia/features/user/bloc/user_state.dart';
+import 'package:sacdia/features/user/models/user_profile_model.dart';
+
+class ProfileScreen extends StatelessWidget {
+  const ProfileScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: sacGreen,
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Encabezado
+            Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+              child: Row(
+                children: const [
+                  Text(
+                    'Mi Perfil',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Contenido principal
+            Expanded(
+              child: Container(
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(24),
+                    topRight: Radius.circular(24),
+                  ),
+                ),
+                child: BlocBuilder<UserBloc, UserState>(
+                  buildWhen: (previous, current) =>
+                      previous.userProfile != current.userProfile ||
+                      previous.status != current.status,
+                  builder: (context, state) {
+                    // Mostrar loader mientras se carga el perfil
+                    if (state.status == UserStatus.loading ||
+                        state.userProfile == null) {
+                      return const Center(
+                        child: CircularProgressIndicator(
+                          color: sacGreen,
+                        ),
+                      );
+                    }
+
+                    // Si hay error, mostrar mensaje
+                    if (state.status == UserStatus.error) {
+                      return Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.error_outline,
+                              color: sacGreen,
+                              size: 48,
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              state.errorMessage ?? 'Error al cargar el perfil',
+                              style: const TextStyle(
+                                fontSize: 16,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 16),
+                            ElevatedButton(
+                              onPressed: () {
+                                context
+                                    .read<UserBloc>()
+                                    .add(const LoadUserProfile());
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: sacGreen,
+                              ),
+                              child: const Text('Reintentar'),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+
+                    // Mostrar la información del perfil
+                    final UserProfileModel user = state.userProfile!;
+                    return SingleChildScrollView(
+                      child: Padding(
+                        padding: const EdgeInsets.all(24.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Foto de perfil y nombre
+                            Center(
+                              child: Column(
+                                children: [
+                                  // Foto de perfil
+                                  Container(
+                                    width: 120,
+                                    height: 120,
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey[200],
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: sacGreen,
+                                        width: 4,
+                                      ),
+                                    ),
+                                    child: user.userImage == null ||
+                                            user.userImage!.isEmpty
+                                        ? const Icon(
+                                            Icons.person,
+                                            size: 60,
+                                            color: sacGreen,
+                                          )
+                                        : ClipOval(
+                                            child: Image.network(
+                                              'https://pfjdavhuriyhtqyifwky.supabase.co/storage/v1/object/public/profile-pictures//${user.userImage}',
+                                              fit: BoxFit.cover,
+                                              errorBuilder: (context, _, __) =>
+                                                  const Icon(
+                                                Icons.error_outline,
+                                                size: 60,
+                                                color: sacGreen,
+                                              ),
+                                            ),
+                                          ),
+                                  ),
+                                  const SizedBox(height: 16),
+
+                                  // Nombre del usuario
+                                  Text(
+                                    user.fullName,
+                                    style: const TextStyle(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+
+                                  // Correo electrónico
+                                  Text(
+                                    user.email,
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color: Colors.grey[600],
+                                    ),
+                                  ),
+
+                                  const SizedBox(height: 24),
+
+                                  // Botón para editar perfil
+                                  ElevatedButton.icon(
+                                    onPressed: () {
+                                      // Acción para editar perfil
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: sacGreen,
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 24,
+                                        vertical: 12,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(30),
+                                      ),
+                                    ),
+                                    icon: const Icon(Icons.edit),
+                                    label: const Text('Editar Perfil'),
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                            const SizedBox(height: 32),
+                            const Divider(),
+                            const SizedBox(height: 24),
+
+                            // Información personal
+                            const Text(
+                              'Información Personal',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+
+                            // Tarjetas de información personal
+                            _buildInfoCard(
+                              icon: Icons.transgender,
+                              title: 'Género',
+                              value: user.gender ?? 'No registrado',
+                            ),
+                            _buildInfoCard(
+                              icon: Icons.cake,
+                              title: 'Fecha de Nacimiento',
+                              value: user.birthday != null
+                                  ? '${user.birthday!.day}/${user.birthday!.month}/${user.birthday!.year}'
+                                  : 'No registrada',
+                            ),
+                            _buildInfoCard(
+                              icon: Icons.bloodtype,
+                              title: 'Tipo de Sangre',
+                              value: user.blood ?? 'No registrado',
+                            ),
+                            _buildInfoCard(
+                              icon: Icons.church,
+                              title: 'Bautizado',
+                              value: user.baptism == true ? 'Sí' : 'No',
+                            ),
+
+                            const SizedBox(height: 32),
+                            const Divider(),
+                            const SizedBox(height: 24),
+
+                            // Información del club
+                            const Text(
+                              'Información del Club',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+
+                            // Tarjetas de información del club
+                            _buildInfoCard(
+                              icon: Icons.people,
+                              title: 'Club',
+                              value: _getClubName(user),
+                            ),
+                            _buildInfoCard(
+                              icon: Icons.location_city,
+                              title: 'Club ID',
+                              value: user.clubId != null
+                                  ? user.clubId.toString()
+                                  : 'No asignado',
+                            ),
+
+                            const SizedBox(height: 32),
+                            const Divider(),
+                            const SizedBox(height: 24),
+
+                            // Opciones de cuenta
+                            const Text(
+                              'Opciones de Cuenta',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+
+                            // Botones de opciones
+                            _buildActionButton(
+                              icon: Icons.lock,
+                              title: 'Cambiar Contraseña',
+                              onTap: () {
+                                // Acción para cambiar contraseña
+                              },
+                            ),
+                            _buildActionButton(
+                              icon: Icons.notifications,
+                              title: 'Notificaciones',
+                              onTap: () {
+                                // Acción para configurar notificaciones
+                              },
+                            ),
+                            _buildActionButton(
+                              icon: Icons.help,
+                              title: 'Ayuda y Soporte',
+                              onTap: () {
+                                // Acción para ayuda y soporte
+                              },
+                            ),
+                            _buildActionButton(
+                              icon: Icons.logout,
+                              title: 'Cerrar Sesión',
+                              onTap: () {
+                                // Acción para cerrar sesión
+                              },
+                              color: Colors.red,
+                            ),
+
+                            const SizedBox(height: 32),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Método para construir tarjetas de información
+  Widget _buildInfoCard({
+    required IconData icon,
+    required String title,
+    required String value,
+  }) {
+    final Map<String, String> bloodTypeMap = {
+      'O_POSITIVE': 'O+',
+      'O_NEGATIVE': 'O-',
+      'A_POSITIVE': 'A+',
+      'A_NEGATIVE': 'A-',
+      'B_POSITIVE': 'B+',
+      'B_NEGATIVE': 'B-',
+      'AB_POSITIVE': 'AB+',
+      'AB_NEGATIVE': 'AB-',
+    };
+
+    value = bloodTypeMap[value] ?? value;
+    return Card(
+      margin: const EdgeInsets.only(bottom: 16),
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: sacGreen.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                icon,
+                color: sacGreen,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    value,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Método para construir botones de acción
+  Widget _buildActionButton({
+    required IconData icon,
+    required String title,
+    required VoidCallback onTap,
+    Color color = sacGreen,
+  }) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      elevation: 1,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Icon(
+                icon,
+                color: color,
+                size: 24,
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: color == sacGreen ? Colors.black87 : color,
+                  ),
+                ),
+              ),
+              Icon(
+                Icons.arrow_forward_ios,
+                color: Colors.grey[400],
+                size: 16,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Método para obtener el nombre del club
+  String _getClubName(UserProfileModel user) {
+    if (user.clubAdvId != null) return 'Aventureros';
+    if (user.clubPathId != null) return 'Conquistadores';
+    if (user.clubMgId != null) return 'Guías Mayores';
+    return 'No asignado';
+  }
+}

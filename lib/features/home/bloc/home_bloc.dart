@@ -1,86 +1,68 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../domain/repositories/feature_repository.dart';
-import 'home_event.dart';
-import 'home_state.dart';
+import 'package:sacdia/features/user/bloc/user_bloc.dart';
+import 'package:sacdia/features/user/bloc/user_event.dart';
+import 'package:sacdia/features/user/models/user_profile_model.dart';
+
+// Eventos para HomeBloc
+abstract class HomeEvent {}
+
+class LoadHomeData extends HomeEvent {}
+
+// Estados para HomeBloc
+class HomeState {
+  final bool isLoading;
+  final String? errorMessage;
+  final UserProfileModel? userProfile;
+
+  HomeState({
+    this.isLoading = false,
+    this.errorMessage,
+    this.userProfile,
+  });
+
+  HomeState copyWith({
+    bool? isLoading,
+    String? errorMessage,
+    UserProfileModel? userProfile,
+  }) {
+    return HomeState(
+      isLoading: isLoading ?? this.isLoading,
+      errorMessage: errorMessage,
+      userProfile: userProfile ?? this.userProfile,
+    );
+  }
+}
 
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
-  final FeatureRepository _featureRepository;
+  final UserBloc _userBloc;
 
-  HomeBloc({
-    required FeatureRepository featureRepository,
-  })  : _featureRepository = featureRepository,
-        super(const HomeState()) {
-    on<LoadHomeRequested>(_onLoadHomeRequested);
-    on<LoadFavoriteFeaturesRequested>(_onLoadFavoriteFeaturesRequested);
-    on<UpdateFeatureOrderRequested>(_onUpdateFeatureOrderRequested);
-    on<ToggleFeatureFavoriteRequested>(_onToggleFeatureFavoriteRequested);
+  HomeBloc({required UserBloc userBloc})
+      : _userBloc = userBloc,
+        super(HomeState()) {
+    on<LoadHomeData>(_onLoadHomeData);
   }
 
-  Future<void> _onLoadHomeRequested(
-    LoadHomeRequested event,
+  Future<void> _onLoadHomeData(
+    LoadHomeData event,
     Emitter<HomeState> emit,
   ) async {
+    emit(state.copyWith(isLoading: true));
+    
     try {
-      emit(state.copyWith(status: HomeStatus.loading, isLoading: true));
-
-      final userRoles = await _featureRepository.getCurrentUserRoles();
-      final features = await _featureRepository.getAvailableFeatures();
-      final favoriteFeatures = await _featureRepository.getFavoriteFeatures();
-
+      // Delegamos la carga del perfil al UserBloc
+      _userBloc.add(const LoadUserProfile());
+      
+      // Emitimos un estado con el perfil actualizado
       emit(state.copyWith(
-        status: HomeStatus.loaded,
-        features: features,
-        favoriteFeatures: favoriteFeatures,
-        userRoles: userRoles,
         isLoading: false,
+        userProfile: _userBloc.state.userProfile,
       ));
     } catch (e) {
+      debugPrint('Error en HomeBloc: $e');
       emit(state.copyWith(
-        status: HomeStatus.error,
-        errorMessage: e.toString(),
         isLoading: false,
-      ));
-    }
-  }
-
-  Future<void> _onLoadFavoriteFeaturesRequested(
-    LoadFavoriteFeaturesRequested event,
-    Emitter<HomeState> emit,
-  ) async {
-    try {
-      final favoriteFeatures = await _featureRepository.getFavoriteFeatures();
-      emit(state.copyWith(favoriteFeatures: favoriteFeatures));
-    } catch (e) {
-      emit(state.copyWith(
-        errorMessage: 'Error al cargar características favoritas: ${e.toString()}',
-      ));
-    }
-  }
-
-  Future<void> _onUpdateFeatureOrderRequested(
-    UpdateFeatureOrderRequested event,
-    Emitter<HomeState> emit,
-  ) async {
-    try {
-      await _featureRepository.updateFeatureOrder(event.featureIds);
-      add(const LoadHomeRequested());
-    } catch (e) {
-      emit(state.copyWith(
-        errorMessage: 'Error al actualizar orden: ${e.toString()}',
-      ));
-    }
-  }
-
-  Future<void> _onToggleFeatureFavoriteRequested(
-    ToggleFeatureFavoriteRequested event,
-    Emitter<HomeState> emit,
-  ) async {
-    try {
-      await _featureRepository.toggleFeatureFavorite(event.featureId);
-      add(const LoadFavoriteFeaturesRequested());
-    } catch (e) {
-      emit(state.copyWith(
-        errorMessage: 'Error al actualizar favoritos: ${e.toString()}',
+        errorMessage: 'Error al cargar datos: ${e.toString()}',
       ));
     }
   }
