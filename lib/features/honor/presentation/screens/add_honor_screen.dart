@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
@@ -8,9 +9,10 @@ import 'package:sacdia/features/honor/cubit/honor_categories_cubit.dart';
 import 'package:sacdia/features/honor/cubit/user_honors_cubit.dart';
 import 'package:sacdia/features/honor/models/honor_category_model.dart';
 import 'package:sacdia/features/honor/models/honor_model.dart';
+import 'package:sacdia/features/honor/presentation/screens/add_user_honor_screen.dart';
 
 class AddHonorScreen extends StatefulWidget {
-  const AddHonorScreen({Key? key}) : super(key: key);
+  const AddHonorScreen({super.key});
 
   @override
   State<AddHonorScreen> createState() => _AddHonorScreenState();
@@ -20,8 +22,6 @@ class _AddHonorScreenState extends State<AddHonorScreen> {
   final TextEditingController _searchController = TextEditingController();
   List<HonorCategory> _filteredCategories = [];
   Honor? _selectedHonor;
-  File? _certificateFile;
-  List<File> _images = [];
   bool _isLoading = false;
   
   // Caché para las URLs firmadas
@@ -36,7 +36,7 @@ class _AddHonorScreenState extends State<AddHonorScreen> {
     // Cargar las categorías de especialidades al iniciar la pantalla
     _loadCategories();
   }
-  
+
   Future<void> _loadCategories() async {
     final cubit = context.read<HonorCategoriesCubit>();
     
@@ -131,96 +131,99 @@ class _AddHonorScreenState extends State<AddHonorScreen> {
     });
   }
 
-  Future<void> _pickCertificate() async {
-    try {
-      FilePickerResult? result = await FilePicker.platform.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: ['pdf'],
-      );
-
-      if (result != null) {
-        setState(() {
-          _certificateFile = File(result.files.single.path!);
-        });
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error al seleccionar el certificado: $e')),
-      );
+  // Método para obtener el color de una categoría según su id o nombre
+  Color getCategoryColor(HonorCategory category) {
+    switch (category.categoryName) {
+      case adra:
+        return catAdra;
+      case agropecuarias:
+        return catagropecuarias;
+      case cienciaSalud:
+        return catCienciasSalud;
+      case domesticas:
+        return catDomesticas;
+      case habilidadesManuales:
+        return catHabilidadesManuales;
+      case misioneras:
+        return catMisioneras;
+      case naturaleza:
+        return catNaturaleza;
+      case profesionales:
+        return catProfesionales;
+      case recreativas:
+        return catRecreativas;
+      default:
+        // Usar ID como respaldo para asignar un color
+        switch (category.categoryId) {
+          case 1:
+            return catAdra;
+          case 2:
+            return catagropecuarias;
+          case 3:
+            return catCienciasSalud;
+          case 4:
+            return catDomesticas;
+          case 5:
+            return catHabilidadesManuales;
+          case 6:
+            return catMisioneras;
+          case 7:
+            return catNaturaleza;
+          case 8:
+            return catProfesionales;
+          case 9:
+            return catRecreativas;
+          default:
+            return sacBlack; // Color por defecto
+        }
     }
   }
 
-  Future<void> _pickImages() async {
-    try {
-      final ImagePicker picker = ImagePicker();
-      final List<XFile> pickedImages = await picker.pickMultiImage();
-
-      if (pickedImages.isNotEmpty) {
-        setState(() {
-          _images.addAll(pickedImages.map((xFile) => File(xFile.path)));
-        });
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error al seleccionar imágenes: $e')),
-      );
-    }
-  }
-
-  Future<void> _saveHonor() async {
-    if (_selectedHonor == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Por favor, seleccione una especialidad'),
-        ),
-      );
-      return;
-    }
-
-    if (_certificateFile == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Por favor, adjunte el certificado en PDF'),
-        ),
-      );
-      return;
-    }
-
-    if (_images.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Por favor, adjunte al menos una imagen'),
-        ),
-      );
-      return;
-    }
-
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      await context.read<UserHonorsCubit>().createUserHonor(
-            honorId: _selectedHonor!.honorId,
-            certificateFile: _certificateFile,
-            images: _images,
-          );
-
-      if (!mounted) return;
-
-      Navigator.pop(context, true);
-    } catch (e) {
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error al guardar la especialidad: $e'),
-        ),
-      );
-
-      setState(() {
-        _isLoading = false;
-      });
+  // Método para obtener el icono de una categoría
+  IconData getCategoryIcon(HonorCategory category) {
+    switch (category.categoryName) {
+      case adra:
+        return Icons.volunteer_activism;
+      case agropecuarias:
+        return Icons.agriculture;
+      case cienciaSalud:
+        return Icons.medical_services;
+      case domesticas:
+        return Icons.home;
+      case habilidadesManuales:
+        return Icons.handyman;
+      case misioneras:
+        return Icons.public;
+      case naturaleza:
+        return Icons.forest;
+      case profesionales:
+        return Icons.work;
+      case recreativas:
+        return Icons.sports_handball;
+      default:
+        // Usar ID como respaldo
+        switch (category.categoryId) {
+          case 1:
+            return Icons.volunteer_activism;
+          case 2:
+            return Icons.agriculture;
+          case 3:
+            return Icons.medical_services;
+          case 4:
+            return Icons.home;
+          case 5:
+            return Icons.handyman;
+          case 6:
+            return Icons.public;
+          case 7:
+            return Icons.forest;
+          case 8:
+            return Icons.work;
+          case 9:
+            return Icons.sports_handball;
+          default:
+            return Icons.star; // Icono por defecto
+        }
     }
   }
 
@@ -231,7 +234,7 @@ class _AddHonorScreenState extends State<AddHonorScreen> {
         backgroundColor: sacRed,
         elevation: 0,
         title: const Text(
-          'AGREGAR ESPECIALIDAD',
+          'ESPECIALIDADES',
           style: TextStyle(
             color: Colors.white,
             fontSize: 18,
@@ -252,6 +255,7 @@ class _AddHonorScreenState extends State<AddHonorScreen> {
                   prefixIcon: const Icon(Icons.search),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: sacGrey),
                   ),
                   contentPadding: const EdgeInsets.symmetric(
                     vertical: 12,
@@ -262,43 +266,13 @@ class _AddHonorScreenState extends State<AddHonorScreen> {
               ),
             ),
 
-            // Especialidad seleccionada
-            if (_selectedHonor != null)
-              SelectedHonorWidget(
-                honor: _selectedHonor!,
-                onRemove: () {
-                  setState(() {
-                    _selectedHonor = null;
-                  });
-                },
-              ),
-
-            // Archivos adjuntos
-            if (_selectedHonor != null)
-              AttachmentSection(
-                certificateFile: _certificateFile,
-                images: _images,
-                onPickCertificate: _pickCertificate,
-                onPickImages: _pickImages,
-                onRemoveCertificate: () {
-                  setState(() {
-                    _certificateFile = null;
-                  });
-                },
-                onRemoveImage: (int index) {
-                  setState(() {
-                    _images.removeAt(index);
-                  });
-                },
-              ),
-
             // Lista de especialidades
             Expanded(
               child: BlocBuilder<HonorCategoriesCubit, HonorCategoriesState>(
                 builder: (context, state) {
                   if (state is HonorCategoriesLoading && _allCategories.isEmpty) {
                     return const Center(
-                      child: CircularProgressIndicator(color: sacRed),
+                      child: CupertinoActivityIndicator(color: sacBlack),
                     );
                   } else if (state is HonorCategoriesError && _allCategories.isEmpty) {
                     return Center(
@@ -344,15 +318,98 @@ class _AddHonorScreenState extends State<AddHonorScreen> {
                     itemCount: _filteredCategories.length,
                     itemBuilder: (context, index) {
                       final category = _filteredCategories[index];
+                      final categoryColor = getCategoryColor(category);
+                      final categoryIcon = getCategoryIcon(category);
+                      
                       return CategorySection(
                         category: category,
                         signedUrlCache: _signedUrlCache,
                         getSignedImageUrl: _getSignedImageUrl,
                         selectedHonorId: _selectedHonor?.honorId,
-                        onHonorSelected: (honor) {
+                        categoryColor: categoryColor,
+                        categoryIcon: categoryIcon,
+                        onHonorSelected: (honor) async {
                           setState(() {
-                            _selectedHonor = honor;
+                            _isLoading = true;
                           });
+                          
+                          // Mostrar indicador de carga mientras se obtiene la URL
+                          showDialog(
+                            context: context,
+                            barrierDismissible: false,
+                            builder: (context) => Dialog(
+                              backgroundColor: Colors.transparent,
+                              elevation: 0,
+                              child: Center(
+                                child: Container(
+                                  padding: const EdgeInsets.all(20),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const CupertinoActivityIndicator(radius: 16),
+                                      const SizedBox(height: 15),
+                                      const Text("Cargando imagen...", style: TextStyle(fontWeight: FontWeight.bold)),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                          
+                          String imageUrl = '';
+                          
+                          try {
+                            // Primero verificar si ya tenemos la URL en caché
+                            if (honor.honorImage != null && _signedUrlCache.containsKey(honor.honorImage!)) {
+                              imageUrl = _signedUrlCache[honor.honorImage!]!;
+                              print("✅ Usando URL de caché para ${honor.name}: ${imageUrl.substring(0, 50)}...");
+                            } 
+                            // Si no está en caché, solicitarla explícitamente y esperar
+                            else if (honor.honorImage != null && honor.honorImage!.isNotEmpty) {
+                              print("⏳ Obteniendo URL firmada para ${honor.name}...");
+                              imageUrl = await _getSignedImageUrl(honor.honorImage);
+                              print("✅ URL obtenida para ${honor.name}: ${imageUrl.isEmpty ? 'VACÍA' : imageUrl.substring(0, 50) + '...'}");
+                            }
+                          } catch (e) {
+                            print("❌ Error obteniendo URL: $e");
+                          } finally {
+                            setState(() {
+                              _isLoading = false;
+                            });
+                          }
+                          
+                          // Cerrar diálogo de carga
+                          if (context.mounted) {
+                            Navigator.pop(context);
+                          }
+                          
+                          // Solo navegar si el contexto aún está montado
+                          if (context.mounted) {
+                            // Navegar a la pantalla de agregar especialidad detallada
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => BlocProvider.value(
+                                  value: context.read<UserHonorsCubit>(),
+                                  child: AddUserHonorScreen(
+                                    honor: honor,
+                                    honorImageUrl: imageUrl,
+                                    categoryColor: categoryColor,
+                                    categoryName: category.categoryName,
+                                  ),
+                                ),
+                              ),
+                            ).then((result) {
+                              if (result == true) {
+                                // Si se registró exitosamente, regresar a la pantalla anterior
+                                Navigator.pop(context, true);
+                              }
+                            });
+                          }
                         },
                       );
                     },
@@ -363,225 +420,19 @@ class _AddHonorScreenState extends State<AddHonorScreen> {
           ],
         ),
       ),
-      bottomNavigationBar: _selectedHonor != null
-          ? Container(
-              padding: const EdgeInsets.all(16.0),
-              color: Colors.white,
-              child: ElevatedButton(
-                onPressed: _isLoading ? null : _saveHonor,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: sacRed,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: _isLoading
-                    ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text(
-                        'Guardar Especialidad',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-              ),
-            )
-          : null,
     );
   }
 }
 
-// Widget para mostrar la especialidad seleccionada
-class SelectedHonorWidget extends StatelessWidget {
-  final Honor honor;
-  final VoidCallback onRemove;
-
-  const SelectedHonorWidget({
-    Key? key,
-    required this.honor,
-    required this.onRemove,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16.0),
-      margin: const EdgeInsets.symmetric(horizontal: 16.0),
-      decoration: BoxDecoration(
-        color: sacYellow.withOpacity(0.2),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  honor.name,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                if (honor.description != null)
-                  Text(
-                    honor.description!,
-                    style: const TextStyle(
-                      fontSize: 14,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-              ],
-            ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.close),
-            onPressed: onRemove,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// Widget para la sección de archivos adjuntos
-class AttachmentSection extends StatelessWidget {
-  final File? certificateFile;
-  final List<File> images;
-  final VoidCallback onPickCertificate;
-  final VoidCallback onPickImages;
-  final VoidCallback onRemoveCertificate;
-  final Function(int) onRemoveImage;
-
-  const AttachmentSection({
-    Key? key,
-    required this.certificateFile,
-    required this.images,
-    required this.onPickCertificate,
-    required this.onPickImages,
-    required this.onRemoveCertificate,
-    required this.onRemoveImage,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Archivos Adjuntos',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: onPickCertificate,
-                  icon: const Icon(Icons.upload_file),
-                  label: const Text('Certificado PDF'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: sacBlue,
-                    foregroundColor: Colors.white,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: onPickImages,
-                  icon: const Icon(Icons.image),
-                  label: const Text('Imágenes'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: sacGreen,
-                    foregroundColor: Colors.white,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          if (certificateFile != null)
-            ListTile(
-              leading: const Icon(Icons.file_present),
-              title: Text(
-                certificateFile!.path.split('/').last,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              trailing: IconButton(
-                icon: const Icon(Icons.delete),
-                onPressed: onRemoveCertificate,
-              ),
-            ),
-          if (images.isNotEmpty) ...[
-            const Text(
-              'Imágenes seleccionadas:',
-              style: TextStyle(fontSize: 14),
-            ),
-            SizedBox(
-              height: 100,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: images.length,
-                itemBuilder: (context, index) {
-                  return Stack(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(4.0),
-                        child: Image.file(
-                          images[index],
-                          height: 90,
-                          width: 90,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                      Positioned(
-                        top: 0,
-                        right: 0,
-                        child: GestureDetector(
-                          onTap: () => onRemoveImage(index),
-                          child: Container(
-                            padding: const EdgeInsets.all(2),
-                            decoration: const BoxDecoration(
-                              color: Colors.red,
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.close,
-                              size: 16,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  );
-                },
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-// Widget para cada sección de categoría
+// Widget para mostrar la sección de categoría
 class CategorySection extends StatelessWidget {
   final HonorCategory category;
   final Map<String, String> signedUrlCache;
   final Future<String> Function(String?) getSignedImageUrl;
   final int? selectedHonorId;
   final Function(Honor) onHonorSelected;
+  final Color categoryColor;
+  final IconData categoryIcon;
 
   const CategorySection({
     Key? key,
@@ -590,6 +441,8 @@ class CategorySection extends StatelessWidget {
     required this.getSignedImageUrl,
     required this.selectedHonorId,
     required this.onHonorSelected,
+    required this.categoryColor,
+    required this.categoryIcon,
   }) : super(key: key);
 
   @override
@@ -597,38 +450,88 @@ class CategorySection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        ExpansionTile(
-          title: Text(
-            category.categoryName,
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 18,
+        Theme(
+          data: Theme.of(context).copyWith(
+            dividerColor: category.categoryName == "Estudio de la Naturaleza" ? sacBlack : categoryColor,
+            colorScheme: Theme.of(context).colorScheme.copyWith(
+              primary: category.categoryName == "Estudio de la Naturaleza" ? sacBlack : categoryColor,
+            ),
+            unselectedWidgetColor: category.categoryName == "Estudio de la Naturaleza" ? sacBlack : categoryColor,
+          ),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              border: Border(
+                top: BorderSide(
+                  color: category.categoryName == "Estudio de la Naturaleza" 
+                      ? sacBlack.withOpacity(0.5) 
+                      : categoryColor.withOpacity(0.5),
+                  width: 1.5,
+                ),
+                bottom: BorderSide(
+                  color: category.categoryName == "Estudio de la Naturaleza" 
+                      ? sacBlack.withOpacity(0.5) 
+                      : categoryColor.withOpacity(0.5),
+                  width: 1.5,
+                ),
+              ),
+            ),
+            child: ExpansionTile(
+              title: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: categoryColor,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(
+                      categoryIcon,
+                      color: category.categoryName != "Estudio de la Naturaleza" ? Colors.white : sacBlack,
+                      size: 24,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      category.categoryName,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                        color: category.categoryName != "Estudio de la Naturaleza" ? categoryColor : sacBlack,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              collapsedBackgroundColor: categoryColor.withOpacity(0.1),
+              backgroundColor: categoryColor.withOpacity(0.05),
+              children: [
+                GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                    childAspectRatio: 0.8,
+                    crossAxisSpacing: 10,
+                    mainAxisSpacing: 10,
+                  ),
+                  itemCount: category.honors.length,
+                  itemBuilder: (context, index) {
+                    final honor = category.honors[index];
+                    return HonorItem(
+                      honor: honor,
+                      signedUrlCache: signedUrlCache,
+                      getSignedImageUrl: getSignedImageUrl,
+                      isSelected: selectedHonorId == honor.honorId,
+                      onSelected: () => onHonorSelected(honor),
+                      categoryColor: categoryColor,
+                    );
+                  },
+                ),
+              ],
             ),
           ),
-          children: [
-            GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
-                childAspectRatio: 0.8,
-                crossAxisSpacing: 15,
-                mainAxisSpacing: 15,
-              ),
-              itemCount: category.honors.length,
-              itemBuilder: (context, index) {
-                final honor = category.honors[index];
-                return HonorItem(
-                  honor: honor,
-                  signedUrlCache: signedUrlCache,
-                  getSignedImageUrl: getSignedImageUrl,
-                  isSelected: selectedHonorId == honor.honorId,
-                  onSelected: () => onHonorSelected(honor),
-                );
-              },
-            ),
-          ],
         ),
       ],
     );
@@ -642,6 +545,7 @@ class HonorItem extends StatelessWidget {
   final Future<String> Function(String?) getSignedImageUrl;
   final bool isSelected;
   final VoidCallback onSelected;
+  final Color categoryColor;
 
   const HonorItem({
     Key? key,
@@ -650,6 +554,7 @@ class HonorItem extends StatelessWidget {
     required this.getSignedImageUrl,
     required this.isSelected,
     required this.onSelected,
+    required this.categoryColor,
   }) : super(key: key);
 
   @override
@@ -659,38 +564,26 @@ class HonorItem extends StatelessWidget {
         Expanded(
           child: GestureDetector(
             onTap: onSelected,
-            child: Container(
-              decoration: BoxDecoration(
-                color: const Color(0xFFFEF9C3),
-                borderRadius: BorderRadius.circular(50),
-                border: Border.all(
-                  color: isSelected
-                      ? sacRed
-                      : const Color(0xFFFCD34D),
-                  width: isSelected ? 2.5 : 1.5,
-                ),
-              ),
-              child: honor.honorImage != null && honor.honorImage!.isNotEmpty
-                  ? _buildHonorImage()
-                  : const Center(
-                      child: Text(
-                        "Imagen",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+            child: honor.honorImage != null && honor.honorImage!.isNotEmpty
+                ? _buildHonorImage()
+                : const Center(
+                    child: CupertinoActivityIndicator(
+                      color: sacBlack,
+                      radius: 10,
+                      animating: true,
                     ),
-            ),
+                  ),
           ),
         ),
         const SizedBox(height: 5),
+        
         Text(
           honor.name,
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 12,
             fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            color: isSelected ? categoryColor : sacBlack,
           ),
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
@@ -703,12 +596,17 @@ class HonorItem extends StatelessWidget {
     // Si ya tenemos la URL en caché, mostrar la imagen directamente
     if (honor.honorImage != null && signedUrlCache.containsKey(honor.honorImage!)) {
       final imageUrl = signedUrlCache[honor.honorImage!]!;
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(50),
-        child: Image.network(
-          imageUrl,
-          fit: BoxFit.cover,
-          errorBuilder: (context, _, __) => _buildErrorWidget(),
+      return Container(
+        decoration: BoxDecoration(
+          border: isSelected ? Border.all(color: categoryColor, width: 3) : null,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(10),
+          child: Image.network(
+            imageUrl,
+            errorBuilder: (context, _, __) => _buildErrorWidget(),
+          ),
         ),
       );
     }
@@ -722,8 +620,7 @@ class HonorItem extends StatelessWidget {
             child: SizedBox(
               width: 20,
               height: 20,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
+              child: CupertinoActivityIndicator(
                 color: sacRed,
               ),
             ),
@@ -735,12 +632,18 @@ class HonorItem extends StatelessWidget {
           return _buildErrorWidget();
         }
         
-        return ClipRRect(
-          borderRadius: BorderRadius.circular(50),
-          child: Image.network(
-            imageUrl,
-            fit: BoxFit.cover,
-            errorBuilder: (context, _, __) => _buildErrorWidget(),
+        return Container(
+          decoration: BoxDecoration(
+            border: isSelected ? Border.all(color: categoryColor, width: 3) : null,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: Image.network(
+              imageUrl,
+              fit: BoxFit.cover,
+              errorBuilder: (context, _, __) => _buildErrorWidget(),
+            ),
           ),
         );
       },
@@ -749,7 +652,11 @@ class HonorItem extends StatelessWidget {
   
   Widget _buildErrorWidget() {
     return Container(
-      color: Colors.grey[350],
+      decoration: BoxDecoration(
+        border: isSelected ? Border.all(color: categoryColor, width: 3) : null,
+        color: Colors.grey[350],
+        borderRadius: BorderRadius.circular(10),
+      ),
       child: const Center(
         child: Icon(
           Icons.error_outline,

@@ -369,10 +369,8 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
                             }
                           },
                     child: state.isLoading
-                        ? const CircularProgressIndicator(
+                        ? const CupertinoActivityIndicator(
                             color: sacRed,
-                            strokeWidth: 3,
-                            valueColor: AlwaysStoppedAnimation<Color>(sacRed),
                           )
                         : Text(
                             state.isPersonalInfoSaved

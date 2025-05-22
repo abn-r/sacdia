@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sacdia/core/catalogs/bloc/catalogs_bloc.dart';
 import 'package:sacdia/core/catalogs/bloc/catalogs_event.dart' as catalog_events;
@@ -104,7 +105,7 @@ class _ClubInfoStepState extends State<ClubInfoStep> {
       builder: (context) => BlocBuilder<CatalogsBloc, CatalogsState>(
         builder: (context, state) {
           if (state is CatalogsLoading) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(child: CupertinoActivityIndicator());
           }
 
           if (state is CatalogsError) {
@@ -196,7 +197,7 @@ class _ClubInfoStepState extends State<ClubInfoStep> {
         return BlocBuilder<CatalogsBloc, CatalogsState>(
           builder: (context, state) {
             if (state is! CatalogsLoaded) {
-              return const Center(child: CircularProgressIndicator());
+              return const Center(child: CupertinoActivityIndicator());
             }
             
             return SelectionModal(
@@ -274,7 +275,7 @@ class _ClubInfoStepState extends State<ClubInfoStep> {
         return BlocBuilder<CatalogsBloc, CatalogsState>(
           builder: (context, state) {
             if (state is! CatalogsLoaded) {
-              return const Center(child: CircularProgressIndicator());
+              return const Center(child: CupertinoActivityIndicator());
             }
             
             print('🏛️ Mostrando modal de campos locales');
@@ -362,7 +363,7 @@ class _ClubInfoStepState extends State<ClubInfoStep> {
           builder: (context, state) {
             if (state is! CatalogsLoaded) {
               print('⚠️ Estado de catálogos no cargado');
-              return const Center(child: CircularProgressIndicator());
+              return const Center(child: CupertinoActivityIndicator());
             }
             
             final clubs = state.clubs.where(
@@ -438,7 +439,7 @@ class _ClubInfoStepState extends State<ClubInfoStep> {
         return BlocBuilder<CatalogsBloc, CatalogsState>(
           builder: (context, state) {
             if (state is! CatalogsLoaded) {
-              return const Center(child: CircularProgressIndicator());
+              return const Center(child: CupertinoActivityIndicator());
             }
             
             return SelectionModal(
@@ -494,7 +495,7 @@ class _ClubInfoStepState extends State<ClubInfoStep> {
         return BlocBuilder<CatalogsBloc, CatalogsState>(
           builder: (context, state) {
             if (state is! CatalogsLoaded) {
-              return const Center(child: CircularProgressIndicator());
+              return const Center(child: CupertinoActivityIndicator());
             }
             
             // Filtrar clases para el tipo de club seleccionado
@@ -823,10 +824,8 @@ class _ClubInfoStepState extends State<ClubInfoStep> {
                         ? null
                         : _saveClubInfo,
                     child: state.isLoading
-                        ? const CircularProgressIndicator(
+                        ? const CupertinoActivityIndicator(
                             color: sacRed,
-                            strokeWidth: 3,
-                            valueColor: AlwaysStoppedAnimation<Color>(sacRed),
                           )
                         : Text(
                             state.isClubInfoSaved ? 'Datos Guardados ✓' : 'Guardar Datos',

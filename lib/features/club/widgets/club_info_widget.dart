@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sacdia/core/constants.dart';
 import 'package:sacdia/features/club/cubit/user_clubs_cubit.dart';
@@ -69,7 +70,7 @@ class ClubInfoCard extends StatelessWidget {
             child: Padding(
               padding: padding ?? const EdgeInsets.all(16.0),
               child: const Center(
-                child: CircularProgressIndicator(color: sacRed),
+                child: CupertinoActivityIndicator(color: sacRed),
               ),
             ),
           );
@@ -125,11 +126,11 @@ class ClubInfoCard extends StatelessWidget {
                       spacing: 8,
                       children: [
                         if (club.clubAdvId != null)
-                          _buildChip('Aventureros', Colors.blue),
+                          _buildChip('Aventureros', sacBlue),
                         if (club.clubPathfId != null)
-                          _buildChip('Conquistadores', Colors.green),
+                          _buildChip('Conquistadores', sacRed),
                         if (club.clubMgId != null)
-                          _buildChip('Guías Mayores', Colors.red),
+                          _buildChip('Guías Mayores', colorGuiaMayor),
                       ],
                     ),
                 ],

@@ -9,14 +9,15 @@ import 'package:sacdia/features/auth/screens/register_screen.dart';
 import 'package:sacdia/features/main_layout/presentation/main_layout.dart';
 import 'package:sacdia/features/post_register/screens/post_register_screen.dart';
 import 'package:sacdia/features/splash_screen.dart';
+import 'package:get_it/get_it.dart';
 
 class AppRouter {
-  final AuthBloc authBloc;
+  final AuthBloc _authBloc;
+  late final GoRouter router;
 
-  AppRouter(this.authBloc);
-
-  late final GoRouter router = GoRouter(
-    refreshListenable: GoRouterRefreshStream(authBloc.stream),
+  AppRouter(this._authBloc) {
+    router = GoRouter(
+      refreshListenable: GoRouterRefreshStream(_authBloc.stream),
     initialLocation: '/',
     routes: [
       GoRoute(
@@ -51,7 +52,7 @@ class AppRouter {
       ),
     ],
     redirect: (context, state) {
-      final authState = authBloc.state;
+        final authState = _authBloc.state;
 
       /// Manejo básico de rutas según estado
       final loggedIn = authState.status == AuthStatus.authenticated;
@@ -100,6 +101,12 @@ class AppRouter {
       return null;
     },
   );
+    
+    // Registrar el router en GetIt para poder acceder desde cualquier parte
+    if (!GetIt.I.isRegistered<GoRouter>()) {
+      GetIt.I.registerSingleton<GoRouter>(router);
+    }
+  }
 }
 
 class GoRouterRefreshStream extends ChangeNotifier {

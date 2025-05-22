@@ -2,37 +2,29 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:get_it/get_it.dart';
 import 'package:sacdia/core/auth_events/auth_event_service.dart';
 import 'package:sacdia/core/catalogs/bloc/catalogs_bloc.dart';
-import 'package:sacdia/core/catalogs/respository/catalogs_repository.dart';
+import 'package:sacdia/core/di/injection_container.dart';
 import 'package:sacdia/core/widgets/auth_event_listener.dart';
 import 'package:sacdia/features/auth/bloc/auth_bloc.dart';
-import 'package:sacdia/features/auth/bloc/auth_event.dart';
 import 'package:sacdia/features/auth/bloc/auth_state.dart' as app_auth;
-import 'package:sacdia/features/auth/repository/auth_repository.dart';
+import 'package:sacdia/features/club/cubit/user_clubs_cubit.dart';
 import 'package:sacdia/features/home/bloc/home_bloc.dart';
+import 'package:sacdia/features/honor/cubit/honor_categories_cubit.dart';
+import 'package:sacdia/features/honor/cubit/user_honors_cubit.dart';
 import 'package:sacdia/features/post_register/bloc/post_register_bloc.dart';
-import 'package:sacdia/features/post_register/repository/post_register_repository.dart';
 import 'package:sacdia/core/router/app_router.dart';
 import 'package:sacdia/features/theme/bloc/theme_bloc.dart';
-import 'package:sacdia/features/theme/bloc/theme_event.dart';
 import 'package:sacdia/features/theme/bloc/theme_state.dart';
 import 'package:sacdia/features/theme/theme_data.dart';
-import 'package:sacdia/features/theme/theme_repository.dart';
 import 'package:sacdia/features/user/bloc/user_bloc.dart';
 import 'package:sacdia/features/user/cubit/user_allergies_cubit.dart';
 import 'package:sacdia/features/user/cubit/user_classes_cubit.dart';
 import 'package:sacdia/features/user/cubit/user_diseases_cubit.dart';
 import 'package:sacdia/features/user/cubit/user_emergency_contacts_cubit.dart';
 import 'package:sacdia/features/user/cubit/user_roles_cubit.dart';
-import 'package:sacdia/features/user/repository/user_repository.dart';
-import 'package:sacdia/features/user/services/user_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:sacdia/features/club/cubit/user_clubs_cubit.dart';
-import 'package:sacdia/features/honor/services/honor_service.dart';
-import 'package:sacdia/features/honor/cubit/user_honors_cubit.dart';
-import 'package:sacdia/features/honor/cubit/honor_categories_cubit.dart';
-import 'package:get_it/get_it.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -43,137 +35,37 @@ void main() async {
           'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmamRhdmh1cml5aHRxeWlmd2t5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDg2MjY0MDAsImV4cCI6MjAyNDIwMjQwMH0.OlIfWioRlPSdK_h_CAEB0WPzBKyXl6GrfVaShPHB-NM',
       debug: false);
 
-  
-  // Servicios
-  final authEventService = AuthEventService();
-  final userService = UserService();
-  final honorService = HonorService();
-  
-  // Registrar servicios en GetIt para acceso global
-  final getIt = GetIt.instance;
-  if (!getIt.isRegistered<HonorService>()) {
-    getIt.registerSingleton<HonorService>(honorService);
-  }
-  
-  // Repositorios
-  final themeRepository = ThemeRepository();
-  final authRepository = AuthRepository();
-  final postRegisterRepository = PostRegisterRepository();
-  final catalogsRepository = CatalogsRepository();
-  final userRepository = UserRepository();
-
-  // Blocs
-  final themeBloc = ThemeBloc(themeRepository: themeRepository);
-  final authBloc = AuthBloc(
-    authRepository: authRepository,
-    authEventService: authEventService,
-  );
-  final catalogsBloc = CatalogsBloc(repository: catalogsRepository);
-  final userBloc = UserBloc(userRepository: userRepository);
-  final homeBloc = HomeBloc(userBloc: userBloc);
-  final postRegisterBloc = PostRegisterBloc(
-    repository: postRegisterRepository,
-    authRepository: authRepository,
-    authBloc: authBloc,
-    catalogsBloc: catalogsBloc,
-  );
-  
-  // Cubits
-  final userAllergiesCubit = UserAllergiesCubit(userService: userService);
-  final userDiseasesCubit = UserDiseasesCubit(userService: userService);
-  final userEmergencyContactsCubit = UserEmergencyContactsCubit(userService: userService);
-  final userClubsCubit = UserClubsCubit(userService: userService);
-  final userClassesCubit = UserClassesCubit(userService: userService);
-  final userRolesCubit = UserRolesCubit(userService: userService);
-  final userHonorsCubit = UserHonorsCubit(honorService: honorService);
-  final honorCategoriesCubit = HonorCategoriesCubit(honorService: honorService);
-  
-  // Registrar cubits en GetIt para acceso global
-  if (!getIt.isRegistered<UserHonorsCubit>()) {
-    getIt.registerSingleton<UserHonorsCubit>(userHonorsCubit);
-  }
-  
-  if (!getIt.isRegistered<HonorCategoriesCubit>()) {
-    getIt.registerSingleton<HonorCategoriesCubit>(honorCategoriesCubit);
-  }
+  // Inicializar todas las dependencias con get_it
+  await initDependencies();
   
   // Router
-  final appRouter = AppRouter(authBloc).router;
+  final appRouter = AppRouter(GetIt.I<AuthBloc>()).router;
 
-  runApp(MyApp(
-    themeBloc: themeBloc,
-    authBloc: authBloc,
-    postRegisterBloc: postRegisterBloc,
-    catalogsBloc: catalogsBloc,
-    userBloc: userBloc,
-    homeBloc: homeBloc,
-    userAllergiesCubit: userAllergiesCubit,
-    userDiseasesCubit: userDiseasesCubit,
-    userEmergencyContactsCubit: userEmergencyContactsCubit,
-    userClubsCubit: userClubsCubit,
-    userClassesCubit: userClassesCubit,
-    userRolesCubit: userRolesCubit,
-    userHonorsCubit: userHonorsCubit,
-    honorCategoriesCubit: honorCategoriesCubit,
-    router: appRouter,
-  ));
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  final ThemeBloc themeBloc;
-  final AuthBloc authBloc;
-  final PostRegisterBloc postRegisterBloc;
-  final CatalogsBloc catalogsBloc;
-  final UserBloc userBloc;
-  final HomeBloc homeBloc;
-  final UserAllergiesCubit userAllergiesCubit;
-  final UserDiseasesCubit userDiseasesCubit;
-  final UserEmergencyContactsCubit userEmergencyContactsCubit;
-  final UserClubsCubit userClubsCubit;
-  final UserClassesCubit userClassesCubit;
-  final UserRolesCubit userRolesCubit;
-  final UserHonorsCubit userHonorsCubit;
-  final HonorCategoriesCubit honorCategoriesCubit;
-  final GoRouter router;
-
-  const MyApp({
-    super.key,
-    required this.themeBloc,
-    required this.authBloc,
-    required this.postRegisterBloc,
-    required this.catalogsBloc,
-    required this.userBloc,
-    required this.homeBloc,
-    required this.userAllergiesCubit,
-    required this.userDiseasesCubit,
-    required this.userEmergencyContactsCubit,
-    required this.userClubsCubit,
-    required this.userClassesCubit,
-    required this.userRolesCubit,
-    required this.userHonorsCubit,
-    required this.honorCategoriesCubit,
-    required this.router,
-  });
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
         BlocProvider<ThemeBloc>(
-            create: (context) => themeBloc..add(LoadThemeEvent())),
-        BlocProvider<AuthBloc>(create: (context) => authBloc),
-        BlocProvider<PostRegisterBloc>(create: (context) => postRegisterBloc),
-        BlocProvider<CatalogsBloc>(create: (context) => catalogsBloc),
-        BlocProvider<UserBloc>(create: (context) => userBloc),
-        BlocProvider<HomeBloc>(create: (context) => homeBloc),
-        BlocProvider<UserAllergiesCubit>(create: (context) => userAllergiesCubit),
-        BlocProvider<UserDiseasesCubit>(create: (context) => userDiseasesCubit),
-        BlocProvider<UserEmergencyContactsCubit>(create: (context) => userEmergencyContactsCubit),
-        BlocProvider<UserClubsCubit>(create: (context) => userClubsCubit),
-        BlocProvider<UserClassesCubit>(create: (context) => userClassesCubit),
-        BlocProvider<UserRolesCubit>(create: (context) => userRolesCubit),
-        BlocProvider<UserHonorsCubit>(create: (context) => userHonorsCubit),
-        BlocProvider<HonorCategoriesCubit>(create: (context) => honorCategoriesCubit),
+            create: (context) => GetIt.I<ThemeBloc>()),
+        BlocProvider<AuthBloc>(create: (context) => GetIt.I<AuthBloc>()),
+        BlocProvider<PostRegisterBloc>(create: (context) => GetIt.I<PostRegisterBloc>()),
+        BlocProvider<CatalogsBloc>(create: (context) => GetIt.I<CatalogsBloc>()),
+        BlocProvider<UserBloc>(create: (context) => GetIt.I<UserBloc>()),
+        BlocProvider<HomeBloc>(create: (context) => GetIt.I<HomeBloc>()),
+        BlocProvider<UserAllergiesCubit>(create: (context) => GetIt.I<UserAllergiesCubit>()),
+        BlocProvider<UserDiseasesCubit>(create: (context) => GetIt.I<UserDiseasesCubit>()),
+        BlocProvider<UserEmergencyContactsCubit>(create: (context) => GetIt.I<UserEmergencyContactsCubit>()),
+        BlocProvider<UserClubsCubit>(create: (context) => GetIt.I<UserClubsCubit>()),
+        BlocProvider<UserClassesCubit>(create: (context) => GetIt.I<UserClassesCubit>()),
+        BlocProvider<UserRolesCubit>(create: (context) => GetIt.I<UserRolesCubit>()),
+        BlocProvider<UserHonorsCubit>(create: (context) => GetIt.I<UserHonorsCubit>()),
+        BlocProvider<HonorCategoriesCubit>(create: (context) => GetIt.I<HonorCategoriesCubit>()),
       ],
       child: BlocConsumer<AuthBloc, app_auth.AuthState>(
         listener: (context, authState) {
@@ -206,9 +98,9 @@ class MyApp extends StatelessWidget {
                   supportedLocales: const [
                     Locale('es', 'MX'),
                   ],
-                  routerDelegate: router.routerDelegate,
-                  routeInformationParser: router.routeInformationParser,
-                  routeInformationProvider: router.routeInformationProvider,
+                  routerDelegate: GetIt.I<GoRouter>().routerDelegate,
+                  routeInformationParser: GetIt.I<GoRouter>().routeInformationParser,
+                  routeInformationProvider: GetIt.I<GoRouter>().routeInformationProvider,
                 ),
               );
             },
@@ -248,38 +140,26 @@ class MyApp extends StatelessWidget {
               title,
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
-                fontSize: 16,
+                fontSize: 16.0,
               ),
             ),
-            const SizedBox(height: 4),
-            Text(state.errorMessage ?? 'Error de autenticación'),
+            const SizedBox(height: 4.0),
+            Text(
+              state.errorMessage ?? 'Ha ocurrido un error de autenticación',
+              style: const TextStyle(fontSize: 14.0),
+            ),
           ],
         ),
         backgroundColor: backgroundColor,
-        duration: const Duration(seconds: 5),
-        behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.all(15),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-        action: isError || isWarning ? SnackBarAction(
-          label: 'Iniciar sesión',
+        duration: const Duration(seconds: 6),
+        action: SnackBarAction(
+          label: 'Cerrar',
           textColor: Colors.white,
-          onPressed: () => _handleSessionExpired(context),
-        ) : null,
+          onPressed: () {
+            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          },
+        ),
       ),
     );
-    
-    // Limpiar el error después de mostrarlo
-    Future.delayed(const Duration(seconds: 5), () {
-      if (context.mounted) {
-        context.read<AuthBloc>().add(ClearAuthErrorsRequested());
-      }
-    });
-  }
-  
-  void _handleSessionExpired(BuildContext context) async {
-    context.read<AuthBloc>().add(SignOutRequested());
-    router.go('/login');
   }
 }

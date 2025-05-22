@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sacdia/core/constants.dart';
 import 'package:sacdia/features/user/bloc/user_bloc.dart';
@@ -34,7 +35,7 @@ class HomeHeader extends StatelessWidget {
           return const Padding(
             padding: EdgeInsets.symmetric(vertical: 25),
             child: Center(
-              child: CircularProgressIndicator(color: Colors.white),
+              child: CupertinoActivityIndicator(color: Colors.white),
             ),
           );
         }

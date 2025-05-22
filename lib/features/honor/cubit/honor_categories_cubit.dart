@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:sacdia/features/honor/models/honor_category_model.dart';
@@ -42,6 +44,7 @@ class HonorCategoriesCubit extends Cubit<HonorCategoriesState> {
         super(HonorCategoriesInitial());
 
   Future<void> getHonorCategories() async {
+    log('🔍 [HonorCategoriesCubit] getHonorCategories');
     try {
       emit(HonorCategoriesLoading());
       final categories = await _honorService.getHonorsByCategory();

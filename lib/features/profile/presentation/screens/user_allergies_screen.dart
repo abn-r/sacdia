@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sacdia/core/constants.dart';
 import 'package:sacdia/features/user/cubit/user_allergies_cubit.dart';
@@ -70,7 +71,7 @@ class UserAllergiesScreen extends StatelessWidget {
           builder: (context, state) {
             if (state is UserAllergiesLoading) {
               return const Center(
-                child: CircularProgressIndicator(color: sacRed),
+                child: CupertinoActivityIndicator(color: sacRed),
               );
             } else if (state is UserAllergiesLoaded) {
               if (state.allergies.isEmpty) {
@@ -82,7 +83,7 @@ class UserAllergiesScreen extends StatelessWidget {
               return _buildErrorState(context, state.message);
             } else {
               return const Center(
-                child: CircularProgressIndicator(color: sacRed),
+                child: CupertinoActivityIndicator(color: sacRed),
               );
             }
           },
@@ -347,7 +348,7 @@ class _AddAllergyDialogState extends State<_AddAllergyDialog> {
           builder: (context, state) {
             if (state is CatalogAllergiesLoading) {
               return const Center(
-                child: CircularProgressIndicator(color: sacRed),
+                child: CupertinoActivityIndicator(color: sacRed),
               );
             } else if (state is CatalogAllergiesLoaded) {
               // Inicializar la lista filtrada si aún no se ha hecho

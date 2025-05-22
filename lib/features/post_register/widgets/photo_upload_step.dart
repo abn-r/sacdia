@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sacdia/features/post_register/bloc/post_register_bloc.dart';
 import 'package:sacdia/features/post_register/bloc/post_register_event.dart';
@@ -112,9 +113,8 @@ class _PhotoPreview extends StatelessWidget {
               onPressed: isUploaded ? null : onUpload,
               style: AppThemeData.primaryButtonStyle,
               child: isUploading
-                  ? const CircularProgressIndicator(
+                  ? const CupertinoActivityIndicator(
                       color: Colors.white,
-                      strokeWidth: 2.5,
                     )
                   : Text('Guardar',
                       style: AppThemeData.buttonTextStyle

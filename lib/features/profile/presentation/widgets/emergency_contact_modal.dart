@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sacdia/core/constants.dart';
 import 'package:sacdia/core/widgets/input_text_widget.dart';
@@ -117,7 +118,7 @@ class _EmergencyContactModalState extends State<EmergencyContactModal> {
                       const Center(
                         child: Column(
                           children: [
-                            CircularProgressIndicator(color: sacRed),
+                            CupertinoActivityIndicator(color: sacRed),
                             SizedBox(height: 8),
                             Text('Cargando tipos de relación...'),
                           ],
@@ -282,7 +283,7 @@ class _EmergencyContactModalState extends State<EmergencyContactModal> {
                         ),
                       ),
                       child: state is UserEmergencyContactsLoading
-                          ? const CircularProgressIndicator(color: Colors.white)
+                          ? const CupertinoActivityIndicator(color: Colors.white)
                           : Text(
                               widget.contact == null ? 'Guardar' : 'Actualizar',
                               style: const TextStyle(

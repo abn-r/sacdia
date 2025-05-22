@@ -9,6 +9,21 @@
 - **Home Screen**: Basic dashboard structure, role-based menu display.
 - **Core Components**: HTTP Client (`ApiClient`), Constants, Router (`go_router`), Theme management.
 - **Basic UI**: Several screens implemented (`Login`, `Register`, `PostRegister`, `Profile`, `Home`, etc.) with custom styles.
+- **Specialities/Honors**: Complete honor management system implemented, including:
+  - Speciality selection screen with categories and search functionality (`AddHonorScreen`)
+  - Detailed registration screen for specialities (`AddUserHonorScreen`)
+  - Functionality to add/take photos for certificates and evidence
+  - Image management (add, remove, preview)
+  - Validation and confirmation dialog for registration
+  - Integration with `UserHonorsCubit` for state updates
+  - Support for retrieving certificate and evidence images from Supabase storage ("users-honors" bucket)
+  - URL signing and caching for efficient image loading
+  - Updated `UserHonor` model to handle the new API response format with `ImageData` objects
+  - Enhanced image display in the speciality details dialog with signed URLs
+  - Added dedicated `UserHonorDetailScreen` with fullscreen image viewer for certificates and evidence images
+- **Club Data Persistence**: 
+  - Implemented `PreferencesService` to store key club identifiers (`clubId`, `clubAdvId`, `clubPathfId`, `clubGmId`) and default selected club type (`clubTypeSelect` = 2) in `shared_preferences`.
+  - Integrated this saving mechanism into `UserClubsCubit` upon successful club data retrieval.
 
 ## What's Left to Build
 1.  **Dependency Injection**: Refactor entire app to use `get_it`.
@@ -17,7 +32,6 @@
     *   `activities` module functionality.
     *   `profile/ConfigurationScreen` functionality.
     *   Profile Update feature.
-    *   Specialities feature (Data loading, UI in Profile, potentially dedicated screen).
     *   Emergency Contact management (UI/Cubits needed).
     *   Connect Club Type selection in Home to state management.
 3.  **Module Refinements**: 
@@ -42,7 +56,7 @@
 - Manual Dependency Injection is fragile.
 - Inconsistent use/enforcement of Clean Architecture layers in some areas.
 - Error handling can be improved (more specific messages, global auth handling).
-- Several key features are not yet implemented (Activities, Specialities, Main Layout Navigation, Profile Update).
+- Several key features are not yet implemented (Activities, Main Layout Navigation, Profile Update).
 - Testing coverage is minimal/non-existent.
 - Potential logic issues (e.g., `_determineUserRole`, `ProfileScreen` loading, `StepperControls` logic).
 
@@ -50,5 +64,7 @@
 1.  **DI Refactoring**: Implement `get_it` throughout the application.
 2.  **Main Layout Implementation**: Build `ShellRoute` with `MotionTabBar` and connect main screens (Home, Activities, Profile).
 3.  **Activities Module**: Implement core functionality for viewing/managing activities.
-4.  **Profile Completion**: Implement Specialities section, Profile Update, Configuration screen, and integrate Allergy/Disease/Contact management.
-5.  **Testing Foundation**: Set up base test configurations and write initial tests for critical flows (Auth, PostRegister). 
+4.  **Profile Completion**: Implement Profile Update, Configuration screen, and integrate Allergy/Disease/Contact management.
+5.  **Testing Foundation**: Set up base test configurations and write initial tests for critical flows (Auth, PostRegister).
+6.  **API Client Enhancements**: Implement robust JWT injection, token refresh, and global auth error handling (`AuthEventService` integration).
+7.  **Specialities Implementation**: Create complete flow for speciality selection and registration. 

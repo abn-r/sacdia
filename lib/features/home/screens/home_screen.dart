@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sacdia/core/constants.dart';
 import 'package:sacdia/features/auth/bloc/auth_bloc.dart';
@@ -18,6 +19,8 @@ import 'package:sacdia/features/club/cubit/user_clubs_cubit.dart';
 import 'package:sacdia/features/club/models/user_club_model.dart';
 import 'package:sacdia/features/club/extensions/club_extensions.dart';
 import 'package:sacdia/features/club/widgets/club_info_widget.dart';
+import 'package:sacdia/core/services/preferences_service.dart';
+import 'package:get_it/get_it.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -38,8 +41,26 @@ class _HomeScreenState extends State<HomeScreen> {
     
     // Cargar los clubes del usuario
     _loadUserClubs();
+    _logSharedPreferencesValues();
   }
   
+  Future<void> _logSharedPreferencesValues() async {
+    final PreferencesService preferencesService = GetIt.I<PreferencesService>();
+
+    final int clubTypeSelect = await preferencesService.getClubTypeSelect();
+    final int? clubId = await preferencesService.getClubId();
+    final int? clubAdvId = await preferencesService.getClubAdvId();
+    final int? clubPathfId = await preferencesService.getClubPathfId();
+    final int? clubGmId = await preferencesService.getClubGmId();
+
+    print('🔵 Valores en SharedPreferences:');
+    print('🏠 Tipo de Club Seleccionado (clubTypeSelect): $clubTypeSelect');
+    print('🆔 ID Club Principal (clubId): $clubId');
+    print('🅰️ ID Club Aventureros (clubAdvId): $clubAdvId');
+    print('👣 ID Club Conquistadores (clubPathfId): $clubPathfId');
+    print('🧭 ID Club Guías Mayores (clubGmId): $clubGmId');
+  }
+
   void _loadUserClubs() {
     // Cargar los clubes del usuario al iniciar la pantalla
     context.read<UserClubsCubit>().getUserClubs();
@@ -98,9 +119,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         // Mostrar loader mientras se carga el perfil
                         if (state.status == UserStatus.loading) {
                           return const Center(
-                            child: CircularProgressIndicator(
+                            child: CupertinoActivityIndicator(
                               color: Colors.white,
-                              strokeWidth: 4,
                             ),
                           );
                         }

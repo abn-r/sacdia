@@ -15,7 +15,9 @@ The SACDIA app aims for a Clean Architecture approach, although implementation v
 2.  **Navigation**: `go_router` for declarative routing, including auth-based redirection and potentially `ShellRoute` for main layout.
 3.  **Backend Interaction**: Centralized `ApiClient` (using `dio`) in `core/http` handles calls to the NestJS API. It likely needs interceptors for JWT token injection and potentially refresh logic (using `AuthRepository.getValidToken`?) and error handling (triggering `AuthEventService` on 401/403).
 4.  **Authentication**: Supabase Auth handles user creation (via NestJS API for signup), login, password reset, and session management. `AuthRepository` interacts with both Supabase and the NestJS API (`/auth` endpoints).
-5.  **Data Persistence (Local)**: `shared_preferences` used by `ThemeRepository` to store theme preference. No other local persistence observed yet.
+5.  **Data Persistence (Local)**: 
+    *   `shared_preferences` used by `ThemeRepository` to store theme preference.
+    *   `PreferencesService` (`lib/core/services/preferences_service.dart`) introduced to manage storing and retrieving club-related information locally using `shared_preferences`. This includes `clubId`, specific club type IDs (`clubAdvId`, `clubPathfId`, `clubGmId`), and the default `clubTypeSelect`.
 6.  **Dependency Injection**: Currently manual instantiation in `main.dart`. Plan is to migrate to `get_it`.
 7.  **Image Handling**: `image_picker` for selection, `image_cropper` for cropping, `flutter_image_compress` for optimization before upload (likely to Supabase Storage via NestJS API in `PostRegisterRepository`).
 

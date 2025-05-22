@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sacdia/core/constants.dart';
 import 'package:sacdia/features/user/cubit/user_diseases_cubit.dart';
@@ -49,7 +50,7 @@ class _UserDiseasesScreenState extends State<UserDiseasesScreen> {
           builder: (context, state) {
             if (state is UserDiseasesLoading) {
               return const Center(
-                child: CircularProgressIndicator(color: sacRed),
+                child: CupertinoActivityIndicator(color: sacRed),
               );
             } else if (state is UserDiseasesLoaded) {
               if (state.diseases.isEmpty) {
@@ -64,7 +65,7 @@ class _UserDiseasesScreenState extends State<UserDiseasesScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    CircularProgressIndicator(color: sacBlack, strokeWidth: 3),
+                    CupertinoActivityIndicator(color: sacBlack),
                     SizedBox(height: 16),
                     Text('Cargando enfermedades...',
                         style: TextStyle(color: sacBlack, fontSize: 16)),

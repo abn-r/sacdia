@@ -1,7 +1,9 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:sacdia/core/services/preferences_service.dart';
 import 'package:sacdia/features/club/models/user_club_model.dart';
 import 'package:sacdia/features/user/services/user_service.dart';
+import 'package:get_it/get_it.dart';
 
 // Estados
 abstract class UserClubsState extends Equatable {
@@ -34,9 +36,9 @@ class UserClubsError extends UserClubsState {
   List<Object?> get props => [message];
 }
 
-// Cubit
 class UserClubsCubit extends Cubit<UserClubsState> {
   final UserService userService;
+  final PreferencesService _preferencesService;
   List<UserClub> _clubs = [];
   
   // Constantes para caché
@@ -44,7 +46,8 @@ class UserClubsCubit extends Cubit<UserClubsState> {
   DateTime? _lastClubsUpdate;
   
   UserClubsCubit({required this.userService}) 
-      : super(UserClubsInitial());
+      : _preferencesService = GetIt.I<PreferencesService>(),
+        super(UserClubsInitial());
   
   Future<void> getUserClubs({bool forceRefresh = false}) async {
     // Verificar si ya hay clubes cargados y si la caché todavía es válida
@@ -68,6 +71,18 @@ class UserClubsCubit extends Cubit<UserClubsState> {
       _lastClubsUpdate = DateTime.now();
       
       emit(UserClubsLoaded(_clubs, lastUpdated: _lastClubsUpdate!));
+
+      // Save club info to preferences
+      if (_clubs.isNotEmpty) {
+        final primaryClub = _clubs.first;
+        await _preferencesService.saveClubId(primaryClub.clubId);
+        await _preferencesService.saveClubAdvId(primaryClub.clubAdvId);
+        await _preferencesService.saveClubPathfId(primaryClub.clubPathfId);
+        await _preferencesService.saveClubGmId(primaryClub.clubMgId);
+      }
+      // Save default club type select
+      await _preferencesService.saveClubTypeSelect(2);
+
     } catch (e) {
       emit(UserClubsError('Error al cargar los clubes: ${e.toString()}'));
     }

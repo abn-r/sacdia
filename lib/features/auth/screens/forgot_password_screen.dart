@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sacdia/core/widgets/input_text_widget.dart';
@@ -110,10 +111,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       ),
                       const SizedBox(height: 20),
                       if (state.isLoading)
-                        const CircularProgressIndicator(
+                        const CupertinoActivityIndicator(
                           color: sacRed,
-                          strokeWidth: 2.5,
-                          backgroundColor: Colors.white,
                         )
                       else
                         ElevatedButton(

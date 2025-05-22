@@ -1,4 +1,7 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:sacdia/core/constants.dart';
@@ -14,15 +17,15 @@ import 'package:sacdia/features/user/cubit/user_roles_cubit.dart';
 import 'package:sacdia/features/user/models/user_class_model.dart';
 import 'package:sacdia/features/user/models/user_profile_model.dart';
 import 'package:sacdia/features/club/cubit/user_clubs_cubit.dart';
-import 'package:sacdia/features/club/models/user_club_model.dart';
-import 'package:sacdia/features/club/extensions/club_extensions.dart';
 import 'package:sacdia/features/club/widgets/club_info_widget.dart';
 import 'package:sacdia/features/honor/cubit/user_honors_cubit.dart';
 import 'package:sacdia/features/honor/models/user_honor_category_model.dart';
+import 'package:sacdia/features/honor/models/user_honor_model.dart';
 import 'package:sacdia/features/honor/presentation/screens/add_honor_screen.dart';
 import 'package:get_it/get_it.dart';
-import 'package:sacdia/features/honor/services/honor_service.dart';
 import 'package:sacdia/features/honor/cubit/honor_categories_cubit.dart';
+import 'package:intl/intl.dart';
+import 'package:sacdia/features/honor/presentation/screens/user_honor_detail.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -35,50 +38,42 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void initState() {
     super.initState();
-    // Cargar los clubes del usuario al iniciar la pantalla
-    _loadUserClubs();
-    // Cargar las clases del usuario
-    _loadUserClasses();
-    // Cargar los roles del usuario
-    _loadUserRoles();
-    // Método vacío para cargar especialidades (para futura implementación)
-    _loadUserSpecialities();
+    _loadUserClubs(); // Cargar los clubes del usuario al iniciar la pantalla
+    _loadUserClasses(); // Cargar las clases del usuario
+    _loadUserRoles(); // Cargar los roles del usuario
+    _loadUserSpecialities(); // Cargar las especialidades del usuario
   }
 
   void _loadUserClubs() {
-    // Cargar los clubes del usuario
-    context.read<UserClubsCubit>().getUserClubs();
+    context.read<UserClubsCubit>().getUserClubs(); // Cargar los clubes del usuario
   }
 
   void _loadUserClasses() {
-    // Cargar las clases del usuario
-    context.read<UserClassesCubit>().getUserClasses();
+    context.read<UserClassesCubit>().getUserClasses(); // Cargar las clases del usuario
   }
 
   void _loadUserRoles() {
-    // Cargar los roles del usuario
-    context.read<UserRolesCubit>().getUserRoles();
+    context.read<UserRolesCubit>().getUserRoles(); // Cargar los roles del usuario
   }
 
   void _loadUserSpecialities() {
-    // Cargar las especialidades del usuario
-    if (!GetIt.I.isRegistered<HonorService>()) {
-      GetIt.I.registerSingleton<HonorService>(HonorService());
+    // Cargar las especialidades del usuario - get_it ya tiene las dependencias registradas
+    final honorsCubit = context.read<UserHonorsCubit>();
+
+    // Solo cargar desde API si no hay datos en caché
+    if (!honorsCubit.hasCachedData) {
+      honorsCubit.getUserHonors();
     }
-    
-    if (!GetIt.I.isRegistered<UserHonorsCubit>()) {
-      GetIt.I.registerSingleton<UserHonorsCubit>(
-        UserHonorsCubit(honorService: GetIt.I<HonorService>()),
-      );
-    }
-    
-    if (!GetIt.I.isRegistered<HonorCategoriesCubit>()) {
-      GetIt.I.registerSingleton<HonorCategoriesCubit>(
-        HonorCategoriesCubit(honorService: GetIt.I<HonorService>()),
-      );
-    }
-    
-    context.read<UserHonorsCubit>().getUserHonors();
+  }
+
+  // Método para forzar recarga de especialidades
+  void _refreshUserSpecialities() {
+    final honorsCubit = context.read<UserHonorsCubit>();
+    // Primero limpiar la caché para asegurar que se consulte la API
+    honorsCubit.clearCache();
+    // Luego solicitar nueva carga con forceRefresh=true
+    honorsCubit.getUserHonors(forceRefresh: true);
+    log('🔄 Forzando recarga de especialidades desde API (caché limpiada)');
   }
 
   // Método para obtener la clase actual del usuario
@@ -132,7 +127,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               return const Center(
                 child: Column(
                   children: [
-                    CircularProgressIndicator(
+                    CupertinoActivityIndicator(
                       color: sacRed,
                     ),
                     SizedBox(height: 16),
@@ -398,45 +393,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           userClasses = state.classes;
                         }
 
-                        // Creamos primero los círculos de la fila superior
-                        List<StatusCircleData> topRowCircles = [
-                          // Círculo azul fuerte para Guía Mayor
-                          StatusCircleData.imageCircle(
-                            isActive: userClasses
-                                .any((c) => c.className == 'Guía Mayor'),
-                            color: colorGuiaMayor,
-                            imagePath: 'assets/img/logos-clases/G1_NEGRO.png',
-                            onTap: () {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Clase: Guía Mayor'),
-                                ),
-                              );
-                            },
-                          ),
-
-                          // // Círculo negro para bautismo con SVG
-                          // StatusCircleData.svgCircle(
-                          //   isActive: user.baptism ?? false,
-                          //   color: sacBlack,
-                          //   svgPath: 'assets/img/bautismo.svg',
-                          //   onTap: () {
-                          //     ScaffoldMessenger.of(context).showSnackBar(
-                          //       SnackBar(
-                          //         content: Text(user.baptism ?? false
-                          //             ? 'Usuario bautizado'
-                          //             : 'Usuario no bautizado'),
-                          //       ),
-                          //     );
-                          //   },
-                          // ),
-                        ];
-
                         // Ahora los círculos de la fila inferior
                         List<StatusCircleData> bottomRowCircles = [
                           StatusCircleData.imageCircle(
-                            isActive: userClasses
-                                .any((c) => c.className == 'Amigo'),
+                            isActive:
+                                userClasses.any((c) => c.className == 'Amigo' && c.investiture),
                             color: sacRed,
                             imagePath: 'assets/img/logos-clases/C3_NEGRO.png',
                             onTap: () {
@@ -447,7 +408,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                           StatusCircleData.imageCircle(
                             isActive: userClasses
-                                .any((c) => c.className == 'Compañero'),
+                                .any((c) => c.className == 'Compañero' && c.investiture),
                             color: colorCompanero,
                             imagePath: 'assets/img/logos-clases/C3_NEGRO.png',
                             onTap: () {
@@ -459,7 +420,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                           StatusCircleData.imageCircle(
                             isActive: userClasses
-                                .any((c) => c.className == 'Explorador'),
+                                .any((c) => c.className == 'Explorador' && c.investiture),
                             color: colorExplorador,
                             imagePath: 'assets/img/logos-clases/C3_NEGRO.png',
                             onTap: () {
@@ -471,7 +432,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                           StatusCircleData.imageCircle(
                             isActive: userClasses
-                                .any((c) => c.className == 'Orientador'),
+                                .any((c) => c.className == 'Orientador' && c.investiture),
                             color: colorOrientador,
                             imagePath: 'assets/img/logos-clases/C3_NEGRO.png',
                             onTap: () {
@@ -483,7 +444,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                           StatusCircleData.imageCircle(
                             isActive: userClasses
-                                .any((c) => c.className == 'Viajero'),
+                                .any((c) => c.className == 'Viajero' && c.investiture),
                             color: colorViajero,
                             imagePath: 'assets/img/logos-clases/C3_NEGRO.png',
                             onTap: () {
@@ -493,8 +454,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             },
                           ),
                           StatusCircleData.imageCircle(
-                            isActive: userClasses
-                                .any((c) => c.className == 'Guía'),
+                            isActive:
+                                userClasses.any((c) => c.className == 'Guía' && c.investiture),
                             color: colorGuia,
                             imagePath: 'assets/img/logos-clases/C3_NEGRO.png',
                             onTap: () {
@@ -512,20 +473,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                // StatusCirclesSection(
-                                //   circlesData: topRowCircles,
-                                //   circleSize: 60,
-                                //   spacing: 20,
-                                //   padding: const EdgeInsets.symmetric(
-                                //       horizontal: 20.0),
-                                // ),
-                                // ss
                                 GestureDetector(
                                   onTap: () {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
-                                        content: Text(
-                                            userClasses.any((c) => c.className == "Guía Mayor")
+                                        content: Text(userClasses.any((c) =>
+                                                c.className == "Guía Mayor" && c.investiture)
                                             ? 'El usuario está investido de la clase de Guías Mayores'
                                             : 'El usuario no está investido de la clase de Guías Mayores'),
                                       ),
@@ -533,8 +486,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   },
                                   child: SvgPicture.asset(
                                     'assets/svg/logo-gm.svg',
-                                    colorFilter: 
-                                        userClasses.any((c) => c.className == "Guía Mayor")
+                                    colorFilter: userClasses.any(
+                                            (c) => c.className == "Guía Mayor" && c.investiture)
                                         ? null // Usar color original del SVG
                                         : ColorFilter.mode(
                                             Colors.grey.withAlpha(30),
@@ -547,7 +500,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   onTap: () {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
-                                        content: Text(user.baptism ?? false
+                                        content: Text(user.baptism == true
                                             ? 'Usuario bautizado'
                                             : 'Usuario no bautizado'),
                                       ),
@@ -555,7 +508,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   },
                                   child: SvgPicture.asset(
                                     'assets/svg/bautismo.svg',
-                                    colorFilter: (user.baptism ?? false)
+                                    colorFilter: (user.baptism == true)
                                         ? ColorFilter.mode(
                                             Colors.black, BlendMode.srcIn)
                                         : ColorFilter.mode(
@@ -588,85 +541,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                   const SizedBox(height: 20),
 
-                  // Clases
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 20),
-                    child: Text(
-                      'Clases',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: sacBlack,
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  // Carrusel de clases
-                  SizedBox(
-                    height: 120,
-                    child: BlocBuilder<UserClassesCubit, UserClassesState>(
-                      builder: (context, state) {
-                        if (state is UserClassesLoading) {
-                          return const Center(
-                            child: CircularProgressIndicator(color: sacRed),
-                          );
-                        } else if (state is UserClassesError) {
-                          return Center(
-                            child: Text(
-                              'Error: ${state.message}',
-                              style: const TextStyle(color: sacRed),
-                            ),
-                          );
-                        } else if (state is UserClassesLoaded &&
-                            state.classes.isNotEmpty) {
-                          // Mostrar las clases del usuario
-                          return ListView.builder(
-                            scrollDirection: Axis.horizontal,
-                            padding: const EdgeInsets.symmetric(horizontal: 10),
-                            itemCount: state.classes.length,
-                            itemBuilder: (context, index) {
-                              final UserClass userClass = state.classes[index];
-                              // Determinar el color según el tipo de club
-                              Color cardColor = sacBlue;
-                              String logoPath = logoAVT;
-                              
-                              if (userClass.clubTypeName == "Guías Mayores") {
-                                cardColor = colorGuiaMayor;
-                                logoPath = logoGM;
-                              } else if (userClass.clubTypeName == "Conquistadores") {
-                                cardColor = sacRed;
-                                logoPath = logoConqColor;
-                              }
-
-                              return _buildClassCard(
-                                userClass.className,
-                                cardColor,
-                                logoPath,
-                                userClass.advanced,
-                              );
-                            },
-                          );
-                        } else {
-                          // Si no hay clases o el estado es inicial, mostrar ejemplos predeterminados
-                          return ListView(
-                            scrollDirection: Axis.horizontal,
-                            padding: const EdgeInsets.symmetric(horizontal: 10),
-                            children: [
-                              _buildClassCard('Amigo', sacBlue, logoAVT, false),
-                              _buildClassCard(
-                                  'Compañero', sacGreen, logoConqColor, false),
-                              _buildClassCard('Guía', sacRed, logoGM, false),
-                            ],
-                          );
-                        }
-                      },
-                    ),
-                  ),
-
-                  const SizedBox(height: 30),
-
                   // Especialidades
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -681,101 +555,102 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             color: sacBlack,
                           ),
                         ),
-                        IconButton(
-                          icon: const Icon(Icons.add_circle, color: sacRed, size: 30),
-                          onPressed: () {
-                            // Navegar a la pantalla de agregar especialidad
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => MultiBlocProvider(
-                                  providers: [
-                                    BlocProvider.value(
-                                      value: GetIt.I<UserHonorsCubit>(),
+                        Row(
+                          children: [
+                            BlocBuilder<UserHonorsCubit, UserHonorsState>(
+                              builder: (context, state) {
+                                // Mostrar fecha de última actualización
+                                if (state is UserHonorsLoaded) {
+                                  final lastUpdate = context
+                                      .read<UserHonorsCubit>()
+                                      .lastUpdateTime;
+                                  if (lastUpdate != null && state.fromCache) {
+                                    return Padding(
+                                      padding:
+                                          const EdgeInsets.only(right: 8.0),
+                                      child: Text(
+                                        'Actualizado: ${_formatDate(lastUpdate)}',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.grey[600],
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                }
+                                return const SizedBox();
+                              },
+                            ),
+                            // Botón para refrescar especialidades
+                            IconButton(
+                              icon: const Icon(Icons.refresh,
+                                  color: sacBlack, size: 30),
+                              onPressed: _refreshUserSpecialities,
+                              tooltip: 'Actualizar especialidades',
+                            ),
+                            // Botón para agregar especialidad
+                            IconButton(
+                              icon: const Icon(Icons.add_circle_outline,
+                                  color: sacRed, size: 30),
+                              tooltip: 'Agregar especialidad',
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => MultiBlocProvider(
+                                      providers: [
+                                        BlocProvider.value(
+                                          value: GetIt.I<UserHonorsCubit>(),
+                                        ),
+                                        BlocProvider.value(
+                                          value:
+                                              GetIt.I<HonorCategoriesCubit>(),
+                                        ),
+                                      ],
+                                      child: const AddHonorScreen(),
                                     ),
-                                    BlocProvider.value(
-                                      value: GetIt.I<HonorCategoriesCubit>(),
-                                    ),
-                                  ],
-                                  child: const AddHonorScreen(),
-                                ),
-                              ),
-                            ).then((result) {
-                              if (result == true) {
-                                // Recargar especialidades si se agregó una nueva
-                                context.read<UserHonorsCubit>().getUserHonors();
-                              }
-                            });
-                          },
+                                  ),
+                                ).then((result) {
+                                  // Si se agregó una especialidad, recargar las especialidades
+                                  if (result == true) {
+                                    log('✅ Se registró una nueva especialidad, recargando datos...');
+                                    _refreshUserSpecialities();
+                                  }
+                                });
+                              },
+                            ),
+                          ],
                         ),
                       ],
                     ),
                   ),
 
-                  const SizedBox(height: 16),
-
-                  // Carrusel de especialidades
-                  SizedBox(
-                    height: 120,
-                    child: BlocProvider.value(
-                      value: GetIt.I<UserHonorsCubit>(),
-                      child: BlocBuilder<UserHonorsCubit, UserHonorsState>(
-                        builder: (context, state) {
-                          if (state is UserHonorsLoading) {
-                            return const Center(
-                              child: CircularProgressIndicator(color: sacRed),
-                            );
-                          } else if (state is UserHonorsError) {
-                            return Center(
-                              child: Text(
-                                'Error: ${state.message}',
-                                style: const TextStyle(color: sacRed),
-                              ),
-                            );
-                          } else if (state is UserHonorsLoaded && state.categories.isNotEmpty) {
-                            // Mostrar las categorías de especialidades
-                            return ListView.builder(
-                              scrollDirection: Axis.horizontal,
-                              padding: const EdgeInsets.symmetric(horizontal: 10),
-                              itemCount: state.categories.length,
-                              itemBuilder: (context, index) {
-                                final UserHonorCategory category = state.categories[index];
-                                return _buildSpecialityCard(
-                                  category.categoryName,
-                                  _getCategoryColor(category.categoryId),
-                                  _getCategoryIcon(category.categoryId),
-                                  category.honors.length.toString(),
-                                );
-                              },
-                            );
-                          } else {
-                            // Si no hay especialidades o estado inicial, mostrar ejemplos predeterminados
-                            return ListView(
-                              scrollDirection: Axis.horizontal,
-                              padding: const EdgeInsets.symmetric(horizontal: 10),
-                              children: [
-                                _buildSpecialityCard(
-                                    'ADRA', sacBlue, Icons.volunteer_activism, '0'),
-                                _buildSpecialityCard(
-                                    'Naturaleza', sacGreen, Icons.nature, '0'),
-                                _buildSpecialityCard(
-                                    'Recreativas', sacYellow, Icons.sports_handball, '0'),
-                              ],
-                            );
-                          }
-                        },
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 30),
+                  const SizedBox(height: 10),
 
                   // Secciones de especialidades por categoría
                   BlocProvider.value(
                     value: GetIt.I<UserHonorsCubit>(),
                     child: BlocBuilder<UserHonorsCubit, UserHonorsState>(
                       builder: (context, state) {
-                        if (state is UserHonorsLoaded && state.categories.isNotEmpty) {
+                        if (state is UserHonorsLoading) {
+                          return const Center(
+                            child: CupertinoActivityIndicator(color: sacRed),
+                          );
+                        } else if (state is UserHonorsError) {
+                          log('❌ Error cargando honores: ${state.message}');
+                          return Center(
+                            child: Text(
+                              'Error: ${state.message}',
+                              style: const TextStyle(color: sacRed),
+                            ),
+                          );
+                        } else if (state is UserHonorsLoaded) {
+                          if (state.categories.isEmpty) {
+                            return const Center(
+                              child: Text('No hay especialidades disponibles'),
+                            );
+                          }
+                          
                           return Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: state.categories.map((category) {
@@ -783,7 +658,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             }).toList(),
                           );
                         }
-                        return const SizedBox();
+                        return const Center(
+                          child: Text('Cargando especialidades...'),
+                        );
                       },
                     ),
                   ),
@@ -796,98 +673,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
       ),
     );
-  }
-
-  Widget _buildSpecialityCard(String title, Color color, IconData icon, String count) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10),
-      child: Container(
-        width: 200,
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Stack(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                  Text(
-                    '$count especialidades',
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Colors.white,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Positioned(
-              right: 20,
-              bottom: 20,
-              child: Icon(
-                icon,
-                color: Colors.white.withOpacity(0.7),
-                size: 40,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Color _getCategoryColor(int categoryId) {
-    switch (categoryId % 5) {
-      case 0:
-        return sacRed;
-      case 1:
-        return sacBlue;
-      case 2:
-        return sacGreen;
-      case 3:
-        return sacYellow;
-      case 4:
-        return Colors.purple;
-      default:
-        return sacBlack;
-    }
-  }
-
-  IconData _getCategoryIcon(int categoryId) {
-    switch (categoryId) {
-      case 1:
-        return Icons.volunteer_activism; // ADRA
-      case 2:
-        return Icons.agriculture; // Agrícolas
-      case 3:
-        return Icons.medical_services; // Ciencias de la Salud
-      case 4:
-        return Icons.home; // Domésticas
-      case 5:
-        return Icons.handyman; // Habilidades Manuales
-      case 6:
-        return Icons.public; // Misioneras
-      case 7:
-        return Icons.nature; // Naturaleza
-      case 8:
-        return Icons.work; // Profesionales
-      case 9:
-        return Icons.sports_handball; // Recreativas
-      default:
-        return Icons.star; // Icono por defecto
-    }
   }
 
   Widget _buildClassCard(
@@ -934,57 +719,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 logoPath,
                 width: 40,
                 height: 40,
-                color: Colors.white.withOpacity(0.7),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildInfoCard({
-    required IconData icon,
-    required String title,
-    required String value,
-  }) {
-    return Card(
-      elevation: 0,
-      margin: const EdgeInsets.only(bottom: 16),
-      color: Colors.grey[100],
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            Icon(
-              icon,
-              color: sacRed,
-              size: 24,
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey[600],
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    value,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
+                color: Colors.white.withAlpha(70),
               ),
             ),
           ],
@@ -994,143 +729,253 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildCategorySection(UserHonorCategory category) {
+    Color categoryColor = sacBlack;
+    IconData categoryIcon = Icons.star;
+
+    switch (category.categoryName) {
+      case adra:
+        categoryColor = catAdra;
+        categoryIcon = Icons.volunteer_activism;
+        break;
+      case agropecuarias:
+        categoryColor = catagropecuarias;
+        categoryIcon = Icons.agriculture;
+        break;
+      case cienciaSalud:
+        categoryColor = catCienciasSalud;
+        categoryIcon = Icons.medical_services;
+        break;
+      case domesticas:
+        categoryColor = catDomesticas;
+        categoryIcon = Icons.home;
+        break;
+      case habilidadesManuales:
+        categoryColor = catHabilidadesManuales;
+        categoryIcon = Icons.handyman;
+        break;
+      case misioneras:
+        categoryColor = catMisioneras;
+        categoryIcon = Icons.public;
+        break;
+      case naturaleza:
+        categoryColor = catNaturaleza;
+        categoryIcon = Icons.forest;
+        break;
+      case profesionales:
+        categoryColor = catProfesionales;
+        categoryIcon = Icons.work;
+        break;
+      case recreativas:
+        categoryColor = catRecreativas;
+        categoryIcon = Icons.sports_handball;
+        break;
+    }
+
+    bool isNatureCategory = category.categoryName == naturaleza ||
+        category.categoryName == "Estudio de la naturaleza";
+
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      padding: const EdgeInsets.symmetric(vertical: 10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Título de la categoría
-          Text(
-            category.categoryName,
-            style: const TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-              color: sacBlack,
+          // Encabezado de la categoría
+          Container(
+            decoration: BoxDecoration(
+              border: Border(
+                top: BorderSide(
+                  color: isNatureCategory
+                      ? sacBlack.withAlpha(100)
+                      : categoryColor.withAlpha(100),
+                  width: 1.5,
+                ),
+                bottom: BorderSide(
+                  color: isNatureCategory
+                      ? sacBlack.withAlpha(100)
+                      : categoryColor.withAlpha(100),
+                  width: 1.5,
+                ),
+              ),
+              color: categoryColor.withAlpha(10),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: categoryColor,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    categoryIcon,
+                    color: isNatureCategory ? sacBlack : Colors.white,
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    category.categoryName,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                      color: isNatureCategory ? sacBlack : categoryColor,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 15),
-          // Cuadrícula de especialidades en formato oval
+
+          // Grid de especialidades
           GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 3,
               childAspectRatio: 0.8,
               crossAxisSpacing: 10,
-              mainAxisSpacing: 15,
+              mainAxisSpacing: 10,
             ),
             itemCount: category.honors.length,
             itemBuilder: (context, index) {
               final honor = category.honors[index];
-              return Column(
-                children: [
-                  // Contenedor oval para la imagen
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () {
-                        // Mostrar detalles de la especialidad
-                        showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return AlertDialog(
-                              title: Text(honor.honorName),
-                              content: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text('Estado: ${honor.validate ? 'Validado' : 'Pendiente'}'),
-                                  const SizedBox(height: 8),
-                                  if (honor.certificate != null) ...[
-                                    const Text('Certificado:'),
-                                    TextButton.icon(
-                                      icon: const Icon(Icons.description),
-                                      label: const Text('Ver certificado'),
-                                      onPressed: () {
-                                        // Lógica para abrir el PDF
-                                      },
-                                    ),
-                                  ],
-                                  if (honor.images.isNotEmpty) ...[
-                                    const Text('Imágenes:'),
-                                    SizedBox(
-                                      height: 100,
-                                      child: ListView.builder(
-                                        scrollDirection: Axis.horizontal,
-                                        itemCount: honor.images.length,
-                                        itemBuilder: (context, imgIndex) {
-                                          return Padding(
-                                            padding: const EdgeInsets.all(4.0),
-                                            child: Image.network(
-                                              honor.images[imgIndex],
-                                              height: 80,
-                                              width: 80,
-                                              fit: BoxFit.cover,
-                                            ),
-                                          );
-                                        },
-                                      ),
-                                    ),
-                                  ],
-                                ],
-                              ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.pop(context),
-                                  child: const Text('Cerrar'),
-                                ),
-                              ],
-                            );
-                          },
-                        );
-                      },
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFFEF9C3), // Color amarillo claro uniforme
-                          borderRadius: BorderRadius.circular(50), // Forma ovalada
-                          border: Border.all(
-                            color: const Color(0xFFFCD34D), // Borde amarillo más oscuro
-                            width: 1.5,
-                          ),
-                        ),
-                        child: Center(
-                          child: honor.images.isNotEmpty || honor.honorImage != null
-                              ? const Text(
-                                  "Imagen",
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                )
-                              : const Text(
-                                  "Imagen",
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 5),
-                  // Nombre de la especialidad
-                  Text(
-                    honor.honorName,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: sacBlack,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              );
+              return _buildHonorItem(honor, categoryColor);
             },
           ),
         ],
       ),
     );
+  }
+
+  // Widget para cada especialidad individual
+  Widget _buildHonorItem(UserHonor honor, Color categoryColor) {
+    // Calcular las iniciales de la especialidad para mostrar como fallback
+    final String initials = honor.honorName
+        .split(' ')
+        .take(2)
+        .map((word) => word.isNotEmpty ? word[0].toUpperCase() : '')
+        .join('');
+
+    return Column(
+      children: [
+        Expanded(
+          child: GestureDetector(
+            onTap: () {
+              // Navegar a la pantalla de detalle de especialidad
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => UserHonorDetailScreen(
+                    honor: honor,
+                    categoryColor: categoryColor,
+                  ),
+                ),
+              );
+            },
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: honor.honorImage != null && honor.honorImage!.isNotEmpty
+                ? FutureBuilder<String>(
+                    future: context.read<UserHonorsCubit>().getHonorImageSignedUrl(honor.honorImage),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return Container(
+                          decoration: BoxDecoration(
+                            color: Colors.grey[100],
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Center(
+                            child: CupertinoActivityIndicator(
+                              color: sacBlack,
+                              radius: 10,
+                            ),
+                          ),
+                        );
+                      }
+                      
+                      final imageUrl = snapshot.data ?? '';
+                      return imageUrl.isNotEmpty
+                          ? Image.network(
+                              imageUrl,
+                              errorBuilder: (context, error, stackTrace) {
+                                log('❌ Error al cargar imagen de honor ${honor.honorName}: $error');
+                                return _buildInitialsContainer(initials, categoryColor);
+                              },
+                            )
+                          : _buildInitialsContainer(initials, categoryColor);
+                    },
+                  )
+                : _buildInitialsContainer(initials, categoryColor),
+            ),
+          ),
+        ),
+        Text(
+          honor.honorName,
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            color: sacBlack,
+          ),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ],
+    );
+  }
+
+  // Widget para mostrar un contenedor con iniciales
+  Widget _buildInitialsContainer(String initials, Color categoryColor) {
+    return Container(
+      decoration: BoxDecoration(
+        color: categoryColor.withAlpha(20),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: categoryColor.withAlpha(50), width: 1),
+      ),
+      child: Center(
+        child: Text(
+          initials,
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: categoryColor,
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Método para formatear fecha
+  String _formatDate(DateTime date) {
+    final now = DateTime.now();
+    final difference = now.difference(date);
+
+    if (difference.inMinutes < 1) {
+      return 'Ahora';
+    } else if (difference.inHours < 1) {
+      return 'Hace ${difference.inMinutes} min';
+    } else if (difference.inDays < 1) {
+      return 'Hace ${difference.inHours} h';
+    } else if (difference.inDays < 7) {
+      return 'Hace ${difference.inDays} días';
+    } else {
+      return DateFormat('dd/MM/yy').format(date);
+    }
+  }
+
+  // Método auxiliar para convertir honor a JSON para logs
+  String _honorToJson(UserHonor honor) {
+    final Map<String, dynamic> json = {
+      'honorId': honor.honorId,
+      'honorName': honor.honorName,
+      'honorImage': honor.honorImage,
+      'images': honor.images,
+      'certificate': honor.certificate,
+      'validate': honor.validate,
+    };
+    return json.toString();
   }
 }

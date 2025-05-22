@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sacdia/core/widgets/input_text_widget.dart';
@@ -177,10 +178,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       const SizedBox(height: 20),
                       if (state.isLoading)
                         const Center(
-                            child: CircularProgressIndicator(
+                            child: CupertinoActivityIndicator(
                           color: sacRed,
-                          strokeWidth: 2.5,
-                          backgroundColor: Colors.white,
                         ))
                       else
                         ElevatedButton(

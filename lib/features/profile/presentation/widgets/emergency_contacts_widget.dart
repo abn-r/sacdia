@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sacdia/core/constants.dart';
 import 'package:sacdia/features/profile/presentation/widgets/emergency_contact_modal.dart';
@@ -88,9 +89,8 @@ class _EmergencyContactsWidgetState extends State<EmergencyContactsWidget> {
                         SizedBox(
                           width: 20,
                           height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          child: CupertinoActivityIndicator(
+                            color: Colors.white,
                           ),
                         ),
                         SizedBox(width: 10),
@@ -198,7 +198,7 @@ class _EmergencyContactsWidgetState extends State<EmergencyContactsWidget> {
           return const Center(
             child: Padding(
               padding: EdgeInsets.all(16.0),
-              child: CircularProgressIndicator(color: sacRed),
+              child: CupertinoActivityIndicator(color: sacRed),
             ),
           );
         }
@@ -298,7 +298,7 @@ class _EmergencyContactsWidgetState extends State<EmergencyContactsWidget> {
                   child: SizedBox(
                     width: 24,
                     height: 24,
-                    child: CircularProgressIndicator(strokeWidth: 2.0),
+                    child: CupertinoActivityIndicator(),
                   ),
                 ),
               );

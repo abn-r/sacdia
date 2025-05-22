@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:get_it/get_it.dart';
 import 'package:sacdia/core/constants.dart';
 import 'package:sacdia/features/user/models/emergency_contact_model.dart';
 import 'package:sacdia/features/user/models/user_allergy_model.dart';
@@ -18,7 +19,7 @@ class UserService {
   UserService({
     Dio? dio,
     SupabaseClient? supabaseClient,
-  })  : _dio = dio ?? ApiClient().dio,
+  })  : _dio = dio ?? GetIt.I<ApiClient>().dio,
         _supabaseClient = supabaseClient ?? Supabase.instance.client;
 
   /// Obtiene el ID del usuario autenticado o lanza una excepción si no existe

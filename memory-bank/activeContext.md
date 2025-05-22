@@ -15,47 +15,76 @@
 - **Home**: Dashboard screen (`HomeScreen`) shows role-based menu options. Integrates user profile and club data. Club type selection UI exists but logic needs connection.
 - **Other Modules**: `main_layout`, `activities`, `club`, `theme` structures exist but functionality needs detailed review/implementation.
 
+1. **Dependency Injection**: Implemented centralized dependency injection system using `get_it`:
+   - Created central container in `lib/core/di/injection_container.dart`
+   - Registered all services, repositories, blocs and cubits as singleton or lazySingleton
+   - Removed manual instantiations in `main.dart`
+   - Updated BlocProviders to use `get_it` instances
+   - Eliminated duplicate registrations in `profile_screen.dart`
+
+2. **API Client Improvements**: Refactored and enhanced the API client with robust interceptors:
+   - Advanced JWT management with preventive token renewal
+   - Full integration with AuthEventService for global authentication error handling
+   - Implementation of automatic logout mechanism for unrecoverable errors
+   - Enhanced logging and debugging with configurable verbose logs
+   - Better specific error handling (401, 403, 400) with customized messages
+   - Automatic request retries when token is renewed
+   - Registration of the client in the dependency injection container
+
+3. **Honor/Specialities Feature**: Implementación completa para la gestión de especialidades:
+   - Pantallas para selección y registro de especialidades
+   - Soporte para carga y visualización de certificados e imágenes de evidencia
+   - Actualizado modelo `UserHonor` para manejar el nuevo formato de API con objetos `ImageData`
+   - Implementada nueva clase `ImageData` que contiene campos `image` y `path` para cada imagen
+   - Actualizado el manejo de URLs firmadas para certificados e imágenes de evidencia
+   - Las imágenes ahora se obtienen desde el bucket "users-honors" en Supabase
+   - Mejorado el diálogo de detalles de especialidad para mostrar imágenes con URLs firmadas
+   - Implementado caché de URLs firmadas para mejorar el rendimiento
+   - Las constantes para nombres de buckets se centralizaron en `constants.dart` para facilitar cambios futuros
+   - Creada nueva pantalla `UserHonorDetailScreen` para mostrar detalles de especialidad con visor de imágenes a pantalla completa
+
+4. **Club Preferences Storage**: Implemented local storage for essential club identifiers and a default club type selection:
+   - Created `PreferencesService` (`lib/core/services/preferences_service.dart`) to handle `shared_preferences` operations for club data.
+   - Integrated `PreferencesService` into `UserClubsCubit` to save `clubId`, `clubAdvId`, `clubPathfId`, `clubGmId`, and a default `clubTypeSelect` (set to 2 for Pathfinders) upon successful loading of user's clubs.
+   - `PreferencesService` registered in `get_it` for application-wide access.
+
 ## Next Steps (Based on Analysis)
-1.  **Dependency Injection**: Refactor entire application to use `get_it` for managing Repositories, Services, Blocs, and Cubits.
-2.  **Complete Core Features**: 
-    *   Implement `main_layout` (ShellRoute with MotionTabBar).
-    *   Implement `activities` module (Screens, State Management, API calls).
-    *   Implement `profile/ConfigurationScreen`.
-    *   Implement profile update functionality.
-    *   Implement specialities section in `ProfileScreen` (requires Cubit, Service methods, UI).
-    *   Connect `ClubTypeSelector` in `HomeScreen` to `UserBloc`.
-3.  **Refine Existing Modules**: 
-    *   Address identified TODOs/potential issues in `auth`, `post_register`, `user`, `profile`, `home` (e.g., error handling, UI/UX feedback, navigation setup).
-    *   Implement remaining User Cubits (`EmergencyContacts`, `Roles`, `Classes`).
-    *   Complete `profile/user_personal_info_screen` to integrate allergy/disease/contact management.
-4.  **Testing**: Implement Unit, Widget, and Integration tests across modules.
-5.  **API Client**: Ensure `ApiClient` includes robust JWT token injection, refresh logic, and global error handling (connecting `_handleAuthError` in `UserService` to `AuthEventService`).
+1. ~~**Dependency Injection**: Refactor entire application to use `get_it` for managing Repositories, Services, Blocs, and Cubits.~~
+2. **Complete Core Features**: 
+    * Implement `main_layout` (ShellRoute with MotionTabBar).
+    * Implement `activities` module (Screens, State Management, API calls).
+    * Implement `profile/ConfigurationScreen`.
+    * Implement profile update functionality.
+    * ~~Implement specialities section in `ProfileScreen` (requires Cubit, Service methods, UI).~~
+    * Connect `ClubTypeSelector` in `HomeScreen` to `UserBloc`.
+3. **Refine Existing Modules**: 
+    * Address identified TODOs/potential issues in `auth`, `post_register`, `user`, `profile`, `home` (e.g., error handling, UI/UX feedback, navigation setup).
+    * Implement remaining User Cubits (`EmergencyContacts`, `Roles`, `Classes`).
+    * Complete `profile/user_personal_info_screen` to integrate allergy/disease/contact management.
+4. **Testing**: Implement Unit, Widget, and Integration tests across modules.
+5. ~~**API Client**: Ensure `ApiClient` includes robust JWT token injection, refresh logic, and global error handling (connecting `_handleAuthError` in `UserService` to `AuthEventService`).~~
 
 ## Active Decisions
-1.  **State Management**: Continue using BLoC for existing features and Cubit for new ones.
-2.  **Dependency Injection**: Migrate to `get_it`.
-3.  **Architecture**: Maintain the feature-based structure with `core` for shared elements.
-4.  **Backend**: Continue using the NestJS API + Supabase Auth/DB combination.
+1. **State Management**: Continue using BLoC for existing features and Cubit for new ones.
+2. ~~**Dependency Injection**: Migrate to `get_it`.~~
+3. **Architecture**: Maintain the feature-based structure with `core` for shared elements.
+4. **Backend**: Continue using the NestJS API + Supabase Auth/DB combination.
+5. **Specialities**: Use a two-screen flow for selecting and registering specialities, allowing for a more focused user experience at each step.
 
 ## Current Considerations
-1.  **Technical**: Managing the mix of BLoC/Cubit, ensuring robust error handling (especially auth errors from API), implementing comprehensive tests.
-2.  **Product**: Prioritizing the implementation of core missing features (Activities, Specialities, Main Layout) vs. refining existing ones.
-3.  **Development**: Need for clear task breakdown based on the generated `task-*.md` files.
-
-## Current Considerations
-1. Technical
+1. **Technical**:
    - Performance optimization
    - Code organization
    - Testing strategy
    - Security implementation
 
-2. Product
+2. **Product**:
    - Feature prioritization
    - User experience design
    - Platform compatibility
    - Localization strategy
 
-3. Development
+3. **Development**:
    - Team collaboration
    - Code review process
    - Documentation standards

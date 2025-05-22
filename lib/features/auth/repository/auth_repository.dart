@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:dio/dio.dart';
+import 'package:get_it/get_it.dart';
 import 'package:sacdia/core/http/api_client.dart';
 import 'package:sacdia/features/auth/models/user_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -14,7 +15,7 @@ class AuthRepository {
   AuthRepository({
     Dio? dio,
     SupabaseClient? supabaseClient,
-  }) : _dio = dio ?? ApiClient().dio,
+  }) : _dio = dio ?? GetIt.I<ApiClient>().dio,
        _supabaseClient = supabaseClient ?? Supabase.instance.client;
   
   /// Acceso directo al cliente de Supabase

@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sacdia/core/widgets/input_text_widget.dart';
@@ -132,9 +133,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                             const SizedBox(height: 16),
                             if (state.isLoading)
-                              const CircularProgressIndicator(
-                                strokeWidth: 2.5,
-                                backgroundColor: sacRed,
+                              const CupertinoActivityIndicator(
                                 color: Colors.white,
                               )
                             else
