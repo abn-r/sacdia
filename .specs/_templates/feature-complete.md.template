@@ -1,0 +1,459 @@
+# Feature Complete: [Nombre de la Feature]
+
+> Esta plantilla combina Requirements, Design y Tasks en un solo documento  
+> Ideal para features pequeñas o medianas  
+> Para features complejas, usa las plantillas separadas
+
+> **Estado General**: [Draft | In Review | Approved | In Progress |  Complete]  
+> **Fecha de Creación**: [YYYY-MM-DD]  
+> **Última Actualización**: [YYYY-MM-DD]  
+> **Owner**: [Nombre/Equipo]
+
+---
+
+## 📋 PARTE 1: REQUIREMENTS
+
+### Resumen Ejecutivo
+
+[Descripción de 2-3 párrafos: qué problema resuelve, para quién y por qué es importante]
+
+### User Stories
+
+#### US-1: [Nombre]
+
+**Como** [tipo de usuario]  
+**Quiero** [hacer algo]  
+**Para** [obtener algún beneficio]
+
+**Criterios de Aceptación (EARS)**:
+
+1. **WHEN** [condición]  
+   **THE SYSTEM SHALL** [comportamiento esperado]
+
+2. **WHEN** [condición]  
+   **THE SYSTEM SHALL** [comportamiento esperado]
+
+**Escenarios de Prueba**:
+- [ ] Caso feliz: [descripción]
+- [ ] Caso de error: [descripción]
+- [ ] Caso borde: [descripción]
+
+---
+
+#### US-2: [Otra User Story]
+
+[Repetir estructura]
+
+---
+
+### Requisitos No Funcionales
+
+**Performance**:
+- THE SYSTEM SHALL responder en < [X] segundos
+
+**Seguridad**:
+- THE SYSTEM SHALL validar todos los inputs
+- THE SYSTEM SHALL usar autenticación [método]
+
+**Usabilidad**:
+- THE SYSTEM SHALL ser responsive
+- THE SYSTEM SHALL cumplir WCAG 2.1 nivel AA
+
+---
+
+## 🏗️ PARTE 2: DESIGN
+
+### Arquitectura
+
+```mermaid
+graph TB
+    Client[Frontend] -->|HTTP| API[Backend API]
+    API -->|Query| DB[(Database)]
+    API -->|Cache| Redis[(Redis)]
+```
+
+**Componentes**:
+1. **Frontend**: [Tecnología] - [Responsabilidad]
+2. **Backend API**: [Tecnología] - [Responsabilidad]
+3. **Database**: [Tecnología] - [Responsabilidad]
+
+---
+
+### Base de Datos
+
+#### Tabla: `[nombre_tabla]`
+
+```sql
+CREATE TABLE [nombre_tabla] (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    [campo1] VARCHAR(255) NOT NULL,
+    [campo2] INTEGER,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_[tabla]_[campo] ON [tabla]([campo]);
+```
+
+---
+
+### API Endpoints
+
+#### `POST /api/v1/[resource]`
+
+**Request**:
+```json
+{
+  "field1": "value",
+  "field2": 123
+}
+```
+
+**Response 201**:
+```json
+{
+  "success": true,
+  "data": {
+    "id": "uuid",
+    "field1": "value"
+  }
+}
+```
+
+**Response 400**:
+```json
+{
+  "success": false,
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Invalid input"
+  }
+}
+```
+
+---
+
+#### `GET /api/v1/[resource]/{id}`
+
+**Response 200**: Ver arriba  
+**Response 404**: Not found
+
+---
+
+### Flujo de Datos
+
+```mermaid
+sequenceDiagram
+    User->>Frontend: Acción
+    Frontend->>API: POST /api/[resource]
+    API->>Database: INSERT
+    Database-->>API: Success
+    API-->>Frontend: Response
+    Frontend-->>User: Actualizar UI
+```
+
+---
+
+### Componentes Frontend
+
+**Componentes a Crear**:
+1. `[Feature]Container.tsx` - Lógica
+2. `[Feature]View.tsx` - UI
+3. `[Feature]Form.tsx` - Formulario
+
+**Props Interface**:
+```typescript
+interface [Feature]Props {
+  data: DataType;
+  onAction: () => void;
+  loading: boolean;
+}
+```
+
+---
+
+### Seguridad
+
+**Autenticación**: JWT  
+**Autorización**: RBAC con roles: `admin`, `user`  
+**Validación**: Client-side + Server-side  
+**Sanitización**: HTML inputs, SQL injection prevention
+
+---
+
+## ✅ PARTE 3: TASKS
+
+### Progreso
+
+```
+[███████░░░░░░░░░] 35% Completado
+```
+
+**Estimación Total**: [X días]
+
+---
+
+### Fase 1: Backend (Estimación: [Y días])
+
+#### T1: Setup Base de Datos
+
+**Estado**: `[ ]` | **Estimación**: 0.5 días
+
+**Checklist**:
+- [ ] Crear migration para tabla `[nombre]`
+- [ ] Agregar índices
+- [ ] Crear seeds de prueba
+- [ ] Verificar en dev
+
+**Archivos**:
+- `migrations/[timestamp]_create_[table].sql`
+
+---
+
+#### T2: Crear Modelos
+
+**Estado**: `[ ]` | **Estimación**: 1 día
+
+**Checklist**:
+- [ ] Crear interfaces/types
+- [ ] Implementar validaciones
+- [ ] Unit tests (>80% coverage)
+
+**Archivos**:
+- `src/models/[Model].ts`
+- `src/models/__tests__/[Model].test.ts`
+
+---
+
+#### T3: Implementar Servicios
+
+**Estado**: `[ ]` | **Estimación**: 2 días
+
+**Checklist**:
+- [ ] CRUD operations
+- [ ] Lógica de negocio
+- [ ] Error handling
+- [ ] Unit tests
+
+**Métodos**:
+- `create()`, `findById()`, `findAll()`, `update()`, `delete()`
+
+**Archivos**:
+- `src/services/[feature]Service.ts`
+
+---
+
+#### T4: Crear Controllers/Routes
+
+**Estado**: `[ ]` | **Estimación**: 1.5 días
+
+**Checklist**:
+- [ ] Endpoints implementados
+- [ ] Validación de input
+- [ ] Error responses
+- [ ] Integration tests
+
+**Archivos**:
+- `src/controllers/[feature]Controller.ts`
+- `src/routes/[feature]Routes.ts`
+
+---
+
+#### T5: Autenticación/Autorización
+
+**Estado**: `[ ]` | **Estimación**: 1 día
+
+**Checklist**:
+- [ ] Middleware de auth
+- [ ] Guards de autorización
+- [ ] Tests de seguridad
+
+---
+
+### Fase 2: Frontend (Estimación: [Z días])
+
+#### T6: Crear Types
+
+**Estado**: `[ ]` | **Estimación**: 0.5 días
+
+**Archivos**:
+- `src/types/[feature].ts`
+
+---
+
+#### T7: API Client
+
+**Estado**: `[ ]` | **Estimación**: 1 día
+
+**Checklist**:
+- [ ] Funciones para cada endpoint
+- [ ] Error handling
+- [ ] Type-safe
+
+**Archivos**:
+- `src/services/api/[feature]Api.ts`
+
+---
+
+#### T8: State Management
+
+**Estado**: `[ ]` | **Estimación**: 1 día
+
+**Checklist**:
+- [ ] Store/Context configurado
+- [ ] Actions definidas
+- [ ] Integrado con API
+
+**Archivos**:
+- `src/store/[feature]Slice.ts`
+
+---
+
+#### T9: Componentes UI
+
+**Estado**: `[ ]` | **Estimación**: 3 días
+
+**Checklist**:
+- [ ] Container component
+- [ ] View component
+- [ ] Form component
+- [ ] Responsive
+- [ ] Tests
+
+**Archivos**:
+- `src/components/[Feature]/`
+
+---
+
+### Fase 3: Testing y Deploy (Estimación: [W días])
+
+#### T10: Tests Completos
+
+**Estado**: `[ ]` | **Estimación**: 2 días
+
+**Checklist**:
+- [ ] Unit tests backend (>80%)
+- [ ] Unit tests frontend (>70%)
+- [ ] Integration tests
+- [ ] E2E tests críticos
+
+---
+
+#### T11: Documentación
+
+**Estado**: `[ ]` | **Estimación**: 1 día
+
+**Checklist**:
+- [ ] API docs (Swagger)
+- [ ] README actualizado
+- [ ] Guía de uso
+
+---
+
+#### T12: Deploy
+
+**Estado**: `[ ]` | **Estimación**: 1 día
+
+**Checklist**:
+- [ ] Deploy a staging
+- [ ] QA testing
+- [ ] Deploy a producción
+- [ ] Monitoreo activo
+
+---
+
+## 📊 TRACKING Y METADATA
+
+### Dependencias
+
+| Dependencia Externa | Estado | ETA | Contacto |
+|---------------------|--------|-----|----------|
+| [Nombre] | ⏳ Pending | [Fecha] | [Email] |
+
+---
+
+### Riesgos
+
+| Riesgo | Probabilidad | Impacto | Mitigación |
+|--------|--------------|---------|------------|
+| [Descripción] | Alta/Media/Baja | Alto/Medio/Bajo | [Plan] |
+
+---
+
+### Métricas de Éxito
+
+**Cuantitativas**:
+- [Métrica 1]: [Objetivo]
+- [Métrica 2]: [Objetivo]
+
+**Cualitativas**:
+- [Criterio de satisfacción]
+
+---
+
+### Fuera de Alcance
+
+- [ ] [Lo que NO se incluye en esta versión]
+- [ ] [Para versión futura]
+
+---
+
+## 🔗 ANEXOS
+
+### Referencias
+- [Link a diseños]
+- [Link a documentación externa]
+
+### Decisiones Técnicas
+
+**Por qué elegimos [tecnología/approach]**:
+[Explicación de decisiones importantes]
+
+---
+
+## 🤖 NOTAS PARA IA
+
+**Al implementar esta feature**:
+
+1. **Leer primero**: Los steering files en `.specs/_steering/`
+2. **Seguir**: Convenciones de `coding-standards.md`
+3. **Orden de implementación**: Backend → Frontend → Tests
+4. **Testing**: Escribir tests para cada componente
+5. **Commits**: Mensajes descriptivos según convención
+
+**Archivos de Referencia**:
+- `[path/to/similar-feature]`: Implementación similar
+
+**Comandos Útiles**:
+```bash
+npm run dev        # Correr en desarrollo
+npm run test       # Correr tests
+npm run lint       # Verificar código
+npm run migrate    # Aplicar migraciones
+```
+
+**Prioridades**:
+1. [Prioridad más alta]
+2. [Segunda prioridad]
+3. [Tercera prioridad]
+
+---
+
+## 📝 CONTROL DE CAMBIOS
+
+| Fecha | Versión | Cambios | Autor |
+|-------|---------|---------|-------|
+| [YYYY-MM-DD] | 0.1 | Creación inicial | [Nombre] |
+| [YYYY-MM-DD] | 0.2 | [Descripción] | [Nombre] |
+
+---
+
+## ✔️ APROBACIONES
+
+- [ ] **Product Owner**: [Nombre] - [Fecha]
+- [ ] **Tech Lead**: [Nombre] - [Fecha]
+- [ ] **QA**: [Nombre] - [Fecha]
+
+---
+
+**🎯 Estado Final**: [Descripción del estado actual de la feature]

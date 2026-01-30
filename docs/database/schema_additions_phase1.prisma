@@ -1,0 +1,349 @@
+// ============================================================================
+// SACDIA SCHEMA ADDITIONS - PHASE 1 (CRITICAL)
+// Generated: 2026-01-20
+// Apply these changes to docs/database/schema.prisma
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// STEP 1: ADD NEW ENUMS (Add at the end of the file, after existing enums)
+// ----------------------------------------------------------------------------
+
+enum investiture_status_enum {
+  IN_PROGRESS              // En desarrollo
+  SUBMITTED_FOR_VALIDATION // Enviado a validación
+  APPROVED                 // Aprobado por coordinador
+  REJECTED                 // Rechazado por coordinador
+  INVESTIDO                // Investido (ceremonia completada)
+}
+
+enum investiture_action_enum {
+  SUBMITTED
+  APPROVED
+  REJECTED
+  REINVESTITURE_REQUESTED
+}
+
+enum insurance_type_enum {
+  GENERAL_ACTIVITIES  // Actividades generales
+  CAMPOREE            // Camporees específicos
+  HIGH_RISK           // Actividades de alto riesgo
+}
+
+enum evidence_validation_enum {
+  PENDING
+  VALIDATED
+  REJECTED
+}
+
+// ----------------------------------------------------------------------------
+// STEP 2: MODIFY EXISTING MODEL - enrollments
+// IMPORTANT: Replace entire enrollments model with this version
+// ----------------------------------------------------------------------------
+
+model enrollments {
+  enrollment_id              Int                            @id @default(autoincrement())
+  user_id                    String                         @db.Uuid
+  class_id                   Int
+  ecclesiastical_year_id     Int                            // NEW: Vincula inscripción a año eclesiástico
+  enrollment_date            DateTime                       @default(now()) @db.Timestamptz(6)
+  
+  // Estados de investidura - MODIFIED
+  investiture_status         investiture_status_enum        @default(IN_PROGRESS)  // CHANGED from Boolean
+  submitted_for_validation   Boolean                        @default(false)        // NEW
+  submitted_at               DateTime?                      @db.Timestamptz(6)     // NEW
+  validated_by               String?                        @db.Uuid               // NEW (coordinador)
+  validated_at               DateTime?                      @db.Timestamptz(6)     // NEW
+  rejection_reason           String?                                               // NEW
+  investiture_date           DateTime?                      @db.Timestamptz(6)     // NEW
+  
+  // Estado avanzado (si no completa todos los módulos)
+  advanced_status            Boolean?                       @default(false)
+  
+  // Control de edición - NEW
+  locked_for_validation      Boolean                        @default(false)        // NEW
+  
+  // Cursado cruzado - NEW
+  cross_type_enrollment      Boolean                        @default(false)        // NEW
+  
+  active                     Boolean                        @default(true)
+  created_at                 DateTime                       @default(now()) @db.Timestamptz(6)
+  modified_at                DateTime                       @default(now()) @db.Timestamptz(6)
+  
+  // Relations
+  classes                    classes                        @relation(fields: [class_id], references: [class_id], onDelete: NoAction, onUpdate: NoAction)
+  ecclesiastical_year        ecclesiastical_year            @relation(fields: [ecclesiastical_year_id], references: [year_id], onDelete: NoAction, onUpdate: NoAction)
+  users                      users                          @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
+  validator                  users?                         @relation("enrollment_validator", fields: [validated_by], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
+  
+  investiture_history        investiture_validation_history[]
+
+  @@unique([user_id, class_id, ecclesiastical_year_id])
+  @@index([user_id, ecclesiastical_year_id], map: "idx_enrollments_user_year")
+  @@index([investiture_status], map: "idx_enrollments_status")
+  @@index([locked_for_validation], map: "idx_enrollments_locked")
+  @@index([user_id, cross_type_enrollment], map: "idx_enrollments_cross_type")
+}
+
+// ----------------------------------------------------------------------------
+// STEP 3: MODIFY EXISTING MODEL - attending_members_camporees
+// IMPORTANT: Replace entire attending_members_camporees model with this version
+// ----------------------------------------------------------------------------
+
+model attending_members_camporees {
+  attending_members_id Int               @id @default(autoincrement())
+  camporee_id          Int
+  camporee_type        String            @db.VarChar(50)
+  user_id              String            @db.Uuid
+  club_name            String?           @db.VarChar(255)
+  local_field_id       Int?
+  insurance_verified   Boolean           @default(false)  // NEW
+  insurance_id         Int?                               // NEW
+  active               Boolean           @default(true)
+  created_at           DateTime          @default(now()) @db.Timestamptz(6)
+  modified_at          DateTime          @default(now()) @db.Timestamptz(6)
+  
+  local_camporees      local_camporees   @relation(fields: [camporee_id], references: [local_camporee_id], onDelete: Cascade, onUpdate: NoAction)
+  local_fields         local_fields?     @relation(fields: [local_field_id], references: [local_field_id], onDelete: Cascade, onUpdate: NoAction)
+  users                users             @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
+  insurance            member_insurances? @relation(fields: [insurance_id], references: [insurance_id], onDelete: NoAction, onUpdate: NoAction)  // NEW
+}
+
+// ----------------------------------------------------------------------------
+// STEP 4: MODIFY EXISTING MODEL - classes
+// IMPORTANT: Replace entire classes model with this version
+// ----------------------------------------------------------------------------
+
+model classes {
+  class_id               Int                      @id @default(autoincrement())
+  name                   String                   @unique @db.VarChar(255)
+  description            String?
+  active                 Boolean
+  club_type_id           Int
+  minimum_age            Int
+  requires_invested_gm   Boolean                  @default(false)  // NEW
+  created_at             DateTime                 @default(now()) @db.Timestamptz(6)
+  modified_at            DateTime                 @default(now()) @db.Timestamptz(6)
+  material_url           String?                  @db.VarChar
+  
+  class_module_progress  class_module_progress[]
+  class_modules          class_modules[]
+  class_section_progress class_section_progress[]
+  club_types             club_types               @relation(fields: [club_type_id], references: [ct_id], onDelete: NoAction, onUpdate: NoAction)
+  enrollments            enrollments[]
+  users_classes          users_classes[]
+}
+
+// ----------------------------------------------------------------------------
+// STEP 5: ADD NEW MODEL - certifications
+// ----------------------------------------------------------------------------
+
+model certifications {
+  certification_id           Int                            @id @default(autoincrement())
+  name                       String                         @unique @db.VarChar(255)
+  description                String?
+  material_url               String?                        @db.VarChar
+  active                     Boolean                        @default(true)
+  created_at                 DateTime                       @default(now()) @db.Timestamptz(6)
+  modified_at                DateTime                       @default(now()) @updatedAt @db.Timestamptz(6)
+  
+  certification_modules      certification_modules[]
+  users_certifications       users_certifications[]
+  certification_module_progress   certification_module_progress[]
+  certification_section_progress  certification_section_progress[]
+}
+
+// ----------------------------------------------------------------------------
+// STEP 6: ADD NEW MODEL - certification_modules
+// ----------------------------------------------------------------------------
+
+model certification_modules {
+  module_id            Int                        @id @default(autoincrement())
+  name                 String                     @db.VarChar(255)
+  description          String?
+  certification_id     Int
+  active               Boolean                    @default(true)
+  created_at           DateTime                   @default(now()) @db.Timestamptz(6)
+  modified_at          DateTime                   @default(now()) @updatedAt @db.Timestamptz(6)
+  
+  certifications       certifications             @relation(fields: [certification_id], references: [certification_id], onDelete: NoAction, onUpdate: NoAction)
+  certification_sections certification_sections[]
+  
+  @@unique([name, certification_id])
+}
+
+// ----------------------------------------------------------------------------
+// STEP 7: ADD NEW MODEL - certification_sections
+// ----------------------------------------------------------------------------
+
+model certification_sections {
+  section_id           Int                       @id @default(autoincrement())
+  name                 String                    @db.VarChar(255)
+  description          String?
+  module_id            Int
+  active               Boolean                   @default(true)
+  created_at           DateTime                  @default(now()) @db.Timestamptz(6)
+  modified_at          DateTime                  @default(now()) @updatedAt @db.Timestamptz(6)
+  
+  certification_modules certification_modules   @relation(fields: [module_id], references: [module_id], onDelete: NoAction, onUpdate: NoAction)
+  
+  @@unique([name, module_id])
+}
+
+// ----------------------------------------------------------------------------
+// STEP 8: ADD NEW MODEL - users_certifications
+// ----------------------------------------------------------------------------
+
+model users_certifications {
+  enrollment_id       Int            @id @default(autoincrement())
+  user_id             String         @db.Uuid
+  certification_id    Int
+  enrollment_date     DateTime       @default(now()) @db.Timestamptz(6)
+  completion_status   Boolean        @default(false)
+  completion_date     DateTime?      @db.Timestamptz(6)
+  certificate_url     String?        @db.VarChar
+  active              Boolean        @default(true)
+  created_at          DateTime       @default(now()) @db.Timestamptz(6)
+  modified_at         DateTime       @default(now()) @updatedAt @db.Timestamptz(6)
+  
+  certifications      certifications @relation(fields: [certification_id], references: [certification_id], onDelete: NoAction, onUpdate: NoAction)
+  users               users          @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
+  
+  @@index([user_id, completion_status], map: "idx_users_certifications_completion")
+}
+
+// ----------------------------------------------------------------------------
+// STEP 9: ADD NEW MODEL - certification_module_progress
+// ----------------------------------------------------------------------------
+
+model certification_module_progress {
+  progress_id        Int            @id @default(autoincrement())
+  user_id            String         @db.Uuid
+  certification_id   Int
+  module_id          Int
+  score              Float
+  active             Boolean        @default(true)
+  created_at         DateTime       @default(now()) @db.Timestamptz(6)
+  modified_at        DateTime       @default(now()) @updatedAt @db.Timestamptz(6)
+  
+  certifications     certifications @relation(fields: [certification_id], references: [certification_id], onDelete: NoAction, onUpdate: NoAction)
+  users              users          @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
+  
+  @@unique([user_id, certification_id, module_id])
+}
+
+// ----------------------------------------------------------------------------
+// STEP 10: ADD NEW MODEL - certification_section_progress
+// ----------------------------------------------------------------------------
+
+model certification_section_progress {
+  progress_id        Int            @id @default(autoincrement())
+  user_id            String         @db.Uuid
+  certification_id   Int
+  module_id          Int
+  section_id         Int
+  score              Float
+  evidences          Json?
+  active             Boolean        @default(true)
+  created_at         DateTime       @default(now()) @db.Timestamptz(6)
+  modified_at        DateTime       @default(now()) @updatedAt @db.Timestamptz(6)
+  
+  certifications     certifications @relation(fields: [certification_id], references: [certification_id], onDelete: NoAction, onUpdate: NoAction)
+  users              users          @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
+  
+  @@unique([user_id, certification_id, module_id, section_id])
+}
+
+// ----------------------------------------------------------------------------
+// STEP 11: ADD NEW MODEL - member_insurances
+// ----------------------------------------------------------------------------
+
+model member_insurances {
+  insurance_id            Int                           @id @default(autoincrement())
+  user_id                 String                        @db.Uuid
+  insurance_type          insurance_type_enum
+  policy_number           String?                       @db.VarChar(100)
+  provider                String?                       @db.VarChar(255)
+  start_date              DateTime                      @db.Date
+  end_date                DateTime                      @db.Date
+  coverage_amount         Decimal?                      @db.Decimal(10, 2)
+  active                  Boolean                       @default(true)
+  created_at              DateTime                      @default(now()) @db.Timestamptz(6)
+  modified_at             DateTime                      @default(now()) @updatedAt @db.Timestamptz(6)
+  
+  users                   users                         @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction)
+  attending_members       attending_members_camporees[]
+  
+  @@index([user_id, end_date], map: "idx_member_insurances_user_expiry")
+}
+
+// ----------------------------------------------------------------------------
+// STEP 12: ADD NEW MODEL - investiture_validation_history
+// ----------------------------------------------------------------------------
+
+model investiture_validation_history {
+  history_id       Int                        @id @default(autoincrement())
+  enrollment_id    Int
+  action           investiture_action_enum
+  performed_by     String                     @db.Uuid
+  comments         String?
+  created_at       DateTime                   @default(now()) @db.Timestamptz(6)
+  
+  enrollments      enrollments                @relation(fields: [enrollment_id], references: [enrollment_id], onDelete: Cascade, onUpdate: NoAction)
+  users            users                      @relation(fields: [performed_by], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
+  
+  @@index([enrollment_id], map: "idx_investiture_history_enrollment")
+}
+
+// ----------------------------------------------------------------------------
+// STEP 13: ADD NEW MODEL - investiture_config
+// ----------------------------------------------------------------------------
+
+model investiture_config {
+  config_id              Int                 @id @default(autoincrement())
+  local_field_id         Int
+  ecclesiastical_year_id Int
+  submission_deadline    DateTime            @db.Date
+  investiture_date       DateTime            @db.Date
+  active                 Boolean             @default(true)
+  created_at             DateTime            @default(now()) @db.Timestamptz(6)
+  modified_at            DateTime            @default(now()) @updatedAt @db.Timestamptz(6)
+  
+  local_fields           local_fields        @relation(fields: [local_field_id], references: [local_field_id], onDelete: Cascade, onUpdate: NoAction)
+  ecclesiastical_year    ecclesiastical_year @relation(fields: [ecclesiastical_year_id], references: [year_id], onDelete: Cascade, onUpdate: NoAction)
+  
+  @@unique([local_field_id, ecclesiastical_year_id])
+}
+
+// ============================================================================
+// STEP 14: UPDATE users MODEL - Add new relations
+// IMPORTANT: Add these lines to the existing users model
+// ============================================================================
+
+// Add to users model relations section:
+// validator_enrollments             enrollments[]                     @relation("enrollment_validator")
+// users_certifications              users_certifications[]
+// certification_module_progress     certification_module_progress[]
+// certification_section_progress    certification_section_progress[]
+// member_insurances                 member_insurances[]
+// investiture_validation_history    investiture_validation_history[]
+
+// ============================================================================
+// STEP 15: UPDATE local_fields MODEL - Add new relation
+// IMPORTANT: Add this line to the existing local_fields model
+// ============================================================================
+
+// Add to local_fields model relations section:
+// investiture_configs               investiture_config[]
+
+// ============================================================================
+// STEP 16: UPDATE ecclesiastical_year MODEL - Add new relations
+// IMPORTANT: Add these lines to the existing ecclesiastical_year model
+// ============================================================================
+
+// Add to ecclesiastical_year model relations section:
+// enrollments_relation              enrollments[]
+// investiture_configs               investiture_config[]
+
+// ============================================================================
+// END OF SCHEMA ADDITIONS
+// ============================================================================

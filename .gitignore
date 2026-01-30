@@ -1,0 +1,22 @@
+# Ignore macOS files
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Ignore IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Ignore sub-repositories (they have their own Git)
+sacdia-backend/
+sacdia-app/
+sacdia-admin/
+sacdia_app/
+
+# Ignore temporary files
+*.tmp
+*.log
+.cache/

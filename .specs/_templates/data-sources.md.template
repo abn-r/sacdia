@@ -1,0 +1,688 @@
+# Data Sources - [Nombre de la Feature]
+
+> **Fecha de Creación**: [YYYY-MM-DD]  
+> **Última Actualización**: [YYYY-MM-DD]  
+> **Responsable**: [Nombre/Equipo]  
+> **Vinculado a**: [requirements.md](./requirements.md) | [design.md](./design.md)
+
+## Resumen
+
+[Descripción general de las fuentes de datos que esta feature utiliza, por qué son necesarias y cómo se integran en el sistema]
+
+---
+
+## Bases de Datos
+
+### BD-1: [Nombre de la Base de Datos]
+
+**Tipo**: [PostgreSQL | MySQL | MongoDB | SQLite | etc.]  
+**Propósito**: [Para qué se usa esta base de datos]  
+**Ambiente**: [Local | Staging | Production]
+
+#### Configuración de Conexión
+
+**Connection String**:
+```
+postgresql://[usuario]:[password]@[host]:[port]/[database]
+```
+
+**Variables de Entorno**:
+```bash
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=app_database
+DB_USER=app_user
+DB_PASSWORD=****** # Ver secrets manager
+DB_SSL_MODE=require
+DB_POOL_MIN=2
+DB_POOL_MAX=10
+```
+
+**Ubicación de Credenciales**: 
+- Development: `.env.local` (no en git)
+- Staging/Production: [AWS Secrets Manager | GCP Secret Manager | Azure Key Vault]
+
+#### Tablas Utilizadas
+
+##### Tabla: `users`
+
+**Schema**:
+```sql
+CREATE TABLE users (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    email VARCHAR(255) UNIQUE NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+```
+
+**Operaciones**:
+- ✅ `READ`: Consultar información de usuarios
+- ✅ `WRITE`: Crear nuevos usuarios
+- ❌ `UPDATE`: No se modifican usuarios desde esta feature
+- ❌ `DELETE`: No se eliminan usuarios
+
+**Queries Principales**:
+```sql
+-- Query 1: Obtener usuario por email
+SELECT id, email, created_at 
+FROM users 
+WHERE email = $1 AND deleted_at IS NULL;
+
+-- Query 2: Listar usuarios activos
+SELECT id, email 
+FROM users 
+WHERE deleted_at IS NULL 
+ORDER BY created_at DESC 
+LIMIT $1 OFFSET $2;
+```
+
+**Índices Requeridos**:
+- `idx_users_email` en `email`
+- `idx_users_created_at` en `created_at`
+
+**Volumen de Datos Esperado**: ~10,000 registros
+
+---
+
+##### Tabla: `[otra_tabla]`
+
+**Schema**: Ver `design.md`
+
+**Operaciones**: [Descripción]
+
+---
+
+#### Migraciones
+
+**Archivos de Migración**:
+- `migrations/20260109_create_[table].sql`
+- `migrations/20260110_add_indexes.sql`
+
+**Comando para Aplicar**:
+```bash
+npm run migrate:up
+```
+
+**Comando para Rollback**:
+```bash
+npm run migrate:down
+```
+
+---
+
+#### Backup y Recuperación
+
+**Frecuencia de Backup**: [Diario | Semanal | Tiempo real]  
+**Retención**: [7 días | 30 días | 1 año]  
+**Ubicación**: [S3, Cloud Storage, etc.]
+
+**Procedimiento de Recuperación**:
+```bash
+# Restaurar desde backup
+pg_restore -d [database] [backup_file.dump]
+```
+
+---
+
+#### Consideraciones de Performance
+
+**Connection Pooling**:
+- Min connections: 2
+- Max connections: 10
+- Idle timeout: 30s
+
+**Query Optimization**:
+- Usar prepared statements
+- Implementar pagination para queries grandes
+- Cachear queries frecuentes en Redis (ver siguiente sección)
+
+**Monitoreo**:
+- Slow query log habilitado (> 1s)
+- Alertas para conexiones > 80% del pool
+
+---
+
+## APIs Externas
+
+### API-1: [Nombre del Servicio Externo]
+
+**Provider**: [Nombre de la empresa/servicio]  
+**Propósito**: [Para qué se usa esta API]  
+**Documentación**: [URL a docs oficiales]
+
+#### Configuración
+
+**Base URL**: 
+```
+https://api.example.com/v1
+```
+
+**Autenticación**: [API Key | OAuth 2.0 | JWT]
+
+**Credenciales**:
+```bash
+EXTERNAL_API_KEY=******* # Ver secrets manager
+EXTERNAL_API_SECRET=*******
+```
+
+**Rate Limits**:
+- Requests por minuto: 100
+- Requests por día: 10,000
+- Burst: 20 requests
+
+#### Endpoints Utilizados
+
+##### GET /users/{id}
+
+**Descripción**: Obtener información de usuario externo
+
+**Headers**:
+```
+Authorization: Bearer {API_KEY}
+Accept: application/json
+```
+
+**Request Example**:
+```http
+GET https://api.example.com/v1/users/12345
+```
+
+**Response Example**:
+```json
+{
+  "id": "12345",
+  "name": "John Doe",
+  "email": "john@example.com"
+}
+```
+
+**Error Handling**:
+- `404`: Usuario no encontrado → Mostrar mensaje amigable
+- `429`: Rate limit excedido → Retry con exponential backoff
+- `500`: Error del servidor → Log error, retry hasta 3 veces
+
+**Timeout**: 5 segundos
+
+---
+
+##### POST /webhooks/subscribe
+
+**Descripción**: Suscribirse a eventos
+
+**Request Body**:
+```json
+{
+  "url": "https://myapp.com/webhooks/external-service",
+  "events": ["user.created", "user.updated"]
+}
+```
+
+**Response**: `201 Created`
+
+---
+
+#### Manejo de Errores y Reintentos
+
+**Estrategia de Retry**:
+```typescript
+const retryConfig = {
+  maxRetries: 3,
+  backoff: 'exponential', // 1s, 2s, 4s
+  retryableStatusCodes: [408, 429, 500, 502, 503, 504]
+};
+```
+
+**Circuit Breaker**:
+- Abrirse después de 5 fallos consecutivos
+- Half-open después de 30 segundos
+- Cerrarse después de 2 éxitos consecutivos
+
+**Fallback**:
+- Si API no disponible: [Usar datos en cache | Mostrar mensaje | Degradar funcionalidad]
+
+---
+
+#### Caching
+
+**Estrategia**: 
+- Cachear responses por 5 minutos
+- Invalidar cache en webhooks de actualización
+
+**Implementación**:
+```typescript
+const cacheKey = `external-api:users:${userId}`;
+const cached = await redis.get(cacheKey);
+if (cached) return JSON.parse(cached);
+
+const data = await fetchFromExternalAPI(userId);
+await redis.setex(cacheKey, 300, JSON.stringify(data));
+return data;
+```
+
+---
+
+#### Monitoreo y Logs
+
+**Métricas a Trackear**:
+- Request rate
+- Error rate
+- Latencia (p50, p95, p99)
+- Rate limit remaining
+
+**Logs**:
+```json
+{
+  "timestamp": "2026-01-09T13:00:00Z",
+  "service": "external-api",
+  "endpoint": "/users/12345",
+  "method": "GET",
+  "status": 200,
+  "duration_ms": 234,
+  "rate_limit_remaining": 95
+}
+```
+
+---
+
+#### Costos y Billing
+
+**Modelo de Pricing**: [Por request | Por usuario | Suscripción]  
+**Costo Estimado Mensual**: $[cantidad]  
+**Alertas**: Notificar si costo > $[threshold]
+
+---
+
+### API-2: [Otro Servicio]
+
+[Misma estructura que API-1]
+
+---
+
+## Servicios de Terceros
+
+### SVC-1: Servicio de Almacenamiento (S3/Cloud Storage)
+
+**Provider**: [AWS S3 | GCP Cloud Storage | Azure Blob]  
+**Propósito**: [Almacenar archivos subidos por usuarios]
+
+#### Configuración
+
+**Bucket**: `my-app-uploads-production`  
+**Región**: `us-east-1`
+
+**Credenciales**:
+```bash
+AWS_ACCESS_KEY_ID=*******
+AWS_SECRET_ACCESS_KEY=*******
+AWS_REGION=us-east-1
+AWS_BUCKET_NAME=my-app-uploads-production
+```
+
+#### Estructura de Directorios
+
+```
+my-app-uploads-production/
+├── users/
+│   └── {user_id}/
+│       ├── avatars/
+│       │   └── {filename}
+│       └── documents/
+│           └── {filename}
+└── public/
+    └── assets/
+        └── {filename}
+```
+
+#### Políticas de Acceso
+
+**User Uploads**:
+- Private por default
+- Signed URLs con expiración de 1 hora para acceso
+- Encriptación en reposo (AES-256)
+
+**Public Assets**:
+- Público con CloudFront CDN
+- Cache de 30 días
+
+#### Límites
+
+**Tamaño de Archivo**:
+- Máximo por archivo: 10 MB
+- Formatos permitidos: `.jpg, .png, .pdf, .docx`
+
+**Quota**:
+- 100 GB de almacenamiento total
+- Alerta al 80% de uso
+
+---
+
+### SVC-2: Servicio de Email (SendGrid/SES)
+
+**Provider**: [SendGrid | AWS SES | etc.]  
+**Propósito**: Envío de emails transaccionales
+
+#### Configuración
+
+**API Key**: 
+```bash
+SENDGRID_API_KEY=*******
+```
+
+**From Email**: `noreply@myapp.com`  
+**From Name**: `MyApp`
+
+#### Templates
+
+| Template ID | Nombre | Uso |
+|-------------|--------|-----|
+| `d-xxxxx1` | Welcome Email | Nuevo registro de usuario |
+| `d-xxxxx2` | Password Reset | Reset de contraseña |
+| `d-xxxxx3` | Order Confirmation | Confirmación de orden |
+
+#### Rate Limits
+
+- 100 emails por minuto
+- 10,000 emails por día
+
+#### Tracking
+
+- Open tracking: Habilitado
+- Click tracking: Habilitado
+- Unsubscribe tracking: Habilitado
+
+---
+
+### SVC-3: Servicio de Pagos (Stripe/PayPal)
+
+**Provider**: [Stripe | PayPal | etc.]  
+**Propósito**: Procesamiento de pagos
+
+#### Configuración
+
+**Environment**: [Test | Production]
+
+**Keys**:
+```bash
+# Test
+STRIPE_PUBLISHABLE_KEY=pk_test_*******
+STRIPE_SECRET_KEY=sk_test_*******
+
+# Production
+STRIPE_PUBLISHABLE_KEY=pk_live_*******
+STRIPE_SECRET_KEY=sk_live_*******
+```
+
+**Webhook Secret**:
+```bash
+STRIPE_WEBHOOK_SECRET=whsec_*******
+```
+
+#### Webhooks
+
+**Endpoint**: `https://myapp.com/webhooks/stripe`
+
+**Eventos Suscritos**:
+- `payment_intent.succeeded`
+- `payment_intent.payment_failed`
+- `customer.subscription.created`
+- `customer.subscription.deleted`
+
+**Verificación**:
+```typescript
+const sig = request.headers['stripe-signature'];
+const event = stripe.webhooks.constructEvent(
+  request.body,
+  sig,
+  webhookSecret
+);
+```
+
+---
+
+## Cache (Redis/Memcached)
+
+### CACHE-1: Redis
+
+**Propósito**: Cache de datos frecuentes, sesiones, rate limiting
+
+#### Configuración
+
+**Host**: `redis.myapp.com`  
+**Port**: `6379`  
+**Database**: `0`
+
+**Credenciales**:
+```bash
+REDIS_URL=redis://:password@redis.myapp.com:6379/0
+```
+
+#### Patrones de Cache
+
+##### Patrón 1: Cache de Queries
+
+**TTL**: 5 minutos  
+**Keys**: `cache:query:{hash}`
+
+```typescript
+const cacheKey = `cache:query:${queryHash}`;
+const cached = await redis.get(cacheKey);
+if (cached) return JSON.parse(cached);
+
+const data = await database.query(sql);
+await redis.setex(cacheKey, 300, JSON.stringify(data));
+```
+
+##### Patrón 2: Sesiones de Usuario
+
+**TTL**: 24 horas  
+**Keys**: `session:{sessionId}`
+
+##### Patrón 3: Rate Limiting
+
+**Keys**: `rate_limit:{ip}:{endpoint}`
+
+```typescript
+const key = `rate_limit:${ip}:${endpoint}`;
+const current = await redis.incr(key);
+if (current === 1) {
+  await redis.expire(key, 60); // 1 minuto window
+}
+if (current > 100) {
+  throw new RateLimitError();
+}
+```
+
+#### Monitoreo
+
+**Métricas**:
+- Hit rate (objetivo: >80%)
+- Memory usage
+- Evictions
+
+---
+
+## Message Queue (RabbitMQ/SQS)
+
+### QUEUE-1: [Nombre de la Cola]
+
+**Provider**: [RabbitMQ | AWS SQS | etc.]  
+**Propósito**: Procesamiento asíncrono de tareas
+
+#### Configuración
+
+**URL**:
+```bash
+RABBITMQ_URL=amqp://user:pass@rabbitmq.myapp.com:5672
+```
+
+#### Queues
+
+##### Queue: `email-notifications`
+
+**Propósito**: Enviar emails de forma asíncrona
+
+**Message Format**:
+```json
+{
+  "type": "email",
+  "to": "user@example.com",
+  "template": "welcome",
+  "data": {
+    "name": "John Doe"
+  }
+}
+```
+
+**Processing**:
+- Max retries: 3
+- Dead letter queue: `email-notifications-dlq`
+- Visibility timeout: 30s
+
+---
+
+## Dependencias de Datos
+
+### Flujo de Datos
+
+```mermaid
+graph LR
+    A[User Input] --> B[API]
+    B --> C{Cache Hit?}
+    C -->|Yes| D[Return Cached]
+    C -->|No| E[Database]
+    E --> F[Process]
+    F --> G[Update Cache]
+    G --> H[Return Response]
+    B --> I[External API]
+    I --> J[Process]
+    J --> G
+```
+
+---
+
+## Seguridad y Cumplimiento
+
+### Datos Sensibles
+
+| Tipo de Dato | Clasificación | Encriptación | Retención |
+|--------------|---------------|--------------|-----------|
+| Contraseñas | Crítica | bcrypt (10 rounds) | Indefinida |
+| Emails | PII | En tránsito (TLS) | Indefinida |
+| Documentos | Sensible | En reposo (AES-256) | 7 años |
+| Logs | Media | N/A | 90 días |
+
+### Cumplimiento
+
+**GDPR**:
+- [ ] Implementar derecho al olvido
+- [ ] Consentimiento explícito para datos
+- [ ] Portabilidad de datos
+
+**CCPA**:
+- [ ] Opt-out de venta de datos
+- [ ] Divulgación de datos recopilados
+
+---
+
+## Disaster Recovery
+
+### Backup Strategy
+
+**Base de Datos**:
+- Full backup: Diario a las 2 AM UTC
+- Incremental: Cada 6 horas
+- Retención: 30 días
+
+**Archivos S3**:
+- Versionado habilitado
+- Cross-region replication
+- Lifecycle policy: Archivar a Glacier después de 90 días
+
+### Recovery Time Objective (RTO)
+
+| Componente | RTO | RPO |
+|------------|-----|-----|
+| Base de Datos | 1 hora | 15 min |
+| API | 30 min | N/A |
+| Archivos | 2 horas | 24 horas |
+
+---
+
+## Monitoreo de Fuentes de Datos
+
+### Dashboards
+
+**Datadog/Grafana Dashboard**: [URL]
+
+**Métricas Clave**:
+- Database connections in use
+- API response times
+- Cache hit rates
+- Queue depth
+- Error rates por fuente
+
+### Alerts
+
+| Alerta | Condición | Severidad |
+|--------|-----------|-----------|
+| DB Connection Pool Full | >90% usado por 5 min | Critical |
+| External API Down | >50% error rate por 3 min | High |
+| Cache Hit Rate Low | <70% por 10 min | Medium |
+| Queue Backlog | >1000 mensajes por 15 min | Medium |
+
+---
+
+## Costos
+
+### Breakdown Mensual Estimado
+
+| Servicio | Costo | Notas |
+|----------|-------|-------|
+| Database (RDS) | $150 | db.t3.medium |
+| Redis (ElastiCache) | $50 | cache.t3.small |
+| S3 Storage | $20 | ~200 GB |
+| External API | $100 | ~200k requests |
+| SendGrid | $30 | ~10k emails |
+| **Total** | **$350** | |
+
+---
+
+## Migraciones y Sincronización
+
+### Estrategia de Migración de Datos
+
+**Fuente**: [Sistema legacy]  
+**Destino**: Nueva base de datos
+
+**Scripts**:
+- `scripts/migrate-users.js`
+- `scripts/migrate-orders.js`
+
+**Testing**:
+- [ ] Migración en ambiente de test
+- [ ] Validación de integridad de datos
+- [ ] Plan de rollback
+
+---
+
+## Notas para IA
+
+> Información importante para agentes IA que implementen esta feature
+
+**Al conectarse a fuentes de datos**:
+1. Siempre usar variables de entorno para credenciales
+2. Implementar retry logic para APIs externas
+3. Cachear datos cuando sea posible
+4. Loggear todas las operaciones críticas
+5. Validar datos antes de guardar en BD
+
+**Librerías Recomendadas**:
+- Database: `pg` (PostgreSQL), `mongoose` (MongoDB)
+- Redis: `ioredis`
+- HTTP Client: `axios` con `axios-retry`
+- AWS SDK: `@aws-sdk/client-s3`
+
+**Archivos de Referencia**:
+- `.specs/_steering/data-guidelines.md`: Mejores prácticas
+- `src/lib/database.ts`: Database connection utility
+- `src/lib/redis.ts`: Redis client wrapper

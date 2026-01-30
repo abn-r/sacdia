@@ -1,0 +1,1016 @@
+{
+  "_description": "Ejemplos de respuestas JSON de la API SACDIA - Generado automáticamente desde el código base",
+  "_note": "Los valores son ficticios pero realistas, basados en la estructura real de los modelos",
+
+  "auth": {
+    "signup_response": {
+      "status": true,
+      "message": "User registered successfully",
+      "data": {
+        "user_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+        "email": "juan.perez@example.com"
+      }
+    },
+    "signin_response": {
+      "status": true,
+      "data": {
+        "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhMWIyYzNkNC1lNWY2LTc4OTAtYWJjZC1lZjEyMzQ1Njc4OTAiLCJlbWFpbCI6Imp1YW4ucGVyZXpAZXhhbXBsZS5jb20iLCJpYXQiOjE3MDI2NTYwMDAsImV4cCI6MTcwMjc0MjQwMH0.signature",
+        "token_type": "bearer",
+        "expires_in": 86400,
+        "refresh_token": "refresh_token_here",
+        "user": {
+          "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+          "email": "juan.perez@example.com"
+        }
+      }
+    },
+    "profile_response": {
+      "status": true,
+      "data": {
+        "user_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+        "name": "Juan",
+        "paternal_last_name": "Pérez",
+        "mother_last_name": "García",
+        "email": "juan.perez@example.com",
+        "roles": ["director", "user"],
+        "permissions": ["read:users", "update:users", "read:clubs", "create:clubs"]
+      }
+    },
+    "pr_check_response": {
+      "status": true,
+      "data": {
+        "complete": true
+      }
+    }
+  },
+
+  "users": {
+    "get_one": {
+      "status": true,
+      "data": {
+        "user_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+        "name": "Juan",
+        "paternal_last_name": "Pérez",
+        "mother_last_name": "García",
+        "active": true,
+        "email": "juan.perez@example.com",
+        "gender": "Masculino",
+        "birthday": "2005-03-15",
+        "blood": "O+",
+        "baptism": true,
+        "baptism_date": "2018-06-20",
+        "apple_connected": false,
+        "fb_connected": false,
+        "google_connected": true,
+        "user_image": "https://storage.example.com/profiles/a1b2c3d4.jpg",
+        "country_id": 1,
+        "union_id": 1,
+        "local_field_id": 1,
+        "access_app": true,
+        "access_panel": false,
+        "created_at": "2023-01-15T10:30:00.000Z",
+        "modified_at": "2024-01-10T15:45:00.000Z"
+      }
+    },
+    "get_list": {
+      "status": true,
+      "data": [
+        {
+          "user_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+          "name": "Juan",
+          "paternal_last_name": "Pérez",
+          "mother_last_name": "García",
+          "email": "juan.perez@example.com",
+          "active": true,
+          "gender": "Masculino",
+          "birthday": "2005-03-15"
+        },
+        {
+          "user_id": "b2c3d4e5-f6a7-8901-bcde-f23456789012",
+          "name": "María",
+          "paternal_last_name": "López",
+          "mother_last_name": "Martínez",
+          "email": "maria.lopez@example.com",
+          "active": true,
+          "gender": "Femenino",
+          "birthday": "2007-08-22"
+        }
+      ],
+      "total": 150,
+      "nextCursor": "c3d4e5f6-a7b8-9012-cdef-345678901234"
+    },
+    "update_response": {
+      "status": true,
+      "message": "User updated successfully",
+      "data": {
+        "user_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+        "name": "Juan Carlos",
+        "modified_at": "2024-01-15T10:30:00.000Z"
+      }
+    }
+  },
+
+  "emergency_contacts": {
+    "get_one": {
+      "status": true,
+      "data": {
+        "emergency_id": 1,
+        "name": "María García",
+        "relationship_type": 1,
+        "primary": true,
+        "phone": "+52 81 1234 5678",
+        "owner_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+        "contact_user_id": null,
+        "active": true,
+        "created_at": "2023-06-15T10:30:00.000Z",
+        "modified_at": "2023-06-15T10:30:00.000Z"
+      }
+    },
+    "get_list": {
+      "status": true,
+      "data": [
+        {
+          "emergency_id": 1,
+          "name": "María García",
+          "relationship_type": 1,
+          "primary": true,
+          "phone": "+52 81 1234 5678"
+        },
+        {
+          "emergency_id": 2,
+          "name": "Pedro Pérez",
+          "relationship_type": 2,
+          "primary": false,
+          "phone": "+52 81 8765 4321"
+        }
+      ],
+      "total": 2
+    }
+  },
+
+  "users_allergies": {
+    "get_by_user": {
+      "status": true,
+      "data": [
+        {
+          "user_allergies_id": 1,
+          "user_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+          "allergy_id": 3,
+          "active": true,
+          "allergies": {
+            "allergy_id": 3,
+            "name": "Penicilina",
+            "description": "Alergia a antibióticos derivados de penicilina"
+          }
+        }
+      ],
+      "total": 1
+    },
+    "assign_response": {
+      "status": true,
+      "message": "Allergies assigned successfully",
+      "data": {
+        "created": 2,
+        "userId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+      }
+    }
+  },
+
+  "users_diseases": {
+    "get_by_user": {
+      "status": true,
+      "data": [
+        {
+          "user_disease_id": 1,
+          "user_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+          "disease_id": 2,
+          "active": true,
+          "diseases": {
+            "disease_id": 2,
+            "name": "Asma",
+            "description": "Enfermedad respiratoria crónica"
+          }
+        }
+      ],
+      "total": 1
+    }
+  },
+
+  "users_honors": {
+    "get_one": {
+      "status": true,
+      "data": {
+        "user_honor_id": 1,
+        "user_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+        "honor_id": 15,
+        "active": true,
+        "validate": true,
+        "certificate": "https://storage.example.com/certificates/honor_15_user.pdf",
+        "images": [
+          "https://storage.example.com/evidences/img1.jpg",
+          "https://storage.example.com/evidences/img2.jpg"
+        ],
+        "document": null,
+        "date": "2023-08-20",
+        "created_at": "2023-08-20T10:30:00.000Z"
+      }
+    },
+    "get_by_category": {
+      "status": true,
+      "data": [
+        {
+          "category": {
+            "honor_category_id": 1,
+            "name": "Actividades al aire libre",
+            "icon": 1
+          },
+          "honors": [
+            {
+              "user_honor_id": 1,
+              "honor_id": 15,
+              "validate": true,
+              "date": "2023-08-20",
+              "honors": {
+                "name": "Campismo",
+                "honor_image": "https://storage.example.com/honors/campismo.png"
+              }
+            },
+            {
+              "user_honor_id": 5,
+              "honor_id": 18,
+              "validate": true,
+              "date": "2023-10-15",
+              "honors": {
+                "name": "Orientación",
+                "honor_image": "https://storage.example.com/honors/orientacion.png"
+              }
+            }
+          ]
+        },
+        {
+          "category": {
+            "honor_category_id": 3,
+            "name": "Artes y manualidades",
+            "icon": 3
+          },
+          "honors": [
+            {
+              "user_honor_id": 8,
+              "honor_id": 42,
+              "validate": false,
+              "date": "2024-01-05",
+              "honors": {
+                "name": "Cerámica",
+                "honor_image": "https://storage.example.com/honors/ceramica.png"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  },
+
+  "users_classes": {
+    "get_by_user": {
+      "status": true,
+      "data": [
+        {
+          "user_class_id": 1,
+          "user_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+          "class_id": 5,
+          "investiture": true,
+          "date_investiture": "2023-12-15",
+          "advanced": true,
+          "current_class": false,
+          "certificate": "https://storage.example.com/certificates/class_5.pdf",
+          "active": true,
+          "classes": {
+            "class_id": 5,
+            "name": "Explorador",
+            "minimum_age": 12
+          }
+        },
+        {
+          "user_class_id": 2,
+          "user_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+          "class_id": 6,
+          "investiture": false,
+          "date_investiture": null,
+          "advanced": false,
+          "current_class": true,
+          "certificate": null,
+          "active": true,
+          "classes": {
+            "class_id": 6,
+            "name": "Orientador",
+            "minimum_age": 13
+          }
+        }
+      ],
+      "total": 2
+    }
+  },
+
+  "clubs": {
+    "get_one": {
+      "status": true,
+      "data": {
+        "club_id": 1,
+        "name": "Club Alfa",
+        "description": "Club de Conquistadores de la Iglesia Central",
+        "active": true,
+        "local_field_id": 1,
+        "address": "Av. Principal 123, Col. Centro",
+        "district_id": 1,
+        "church_id": 1,
+        "coordinates": {
+          "lat": 25.6866,
+          "lng": -100.3161
+        },
+        "created_at": "2020-01-15T10:30:00.000Z",
+        "modified_at": "2024-01-10T15:45:00.000Z"
+      }
+    },
+    "get_list": {
+      "status": true,
+      "data": [
+        {
+          "club_id": 1,
+          "name": "Club Alfa",
+          "description": "Club de Conquistadores de la Iglesia Central",
+          "active": true,
+          "church_id": 1
+        },
+        {
+          "club_id": 2,
+          "name": "Club Beta",
+          "description": "Club de Aventureros de la Iglesia Norte",
+          "active": true,
+          "church_id": 2
+        }
+      ],
+      "total": 25
+    },
+    "get_types": {
+      "status": true,
+      "data": {
+        "club_id": 1,
+        "name": "Club Alfa",
+        "instances": {
+          "adventurers": {
+            "club_adv_id": 1,
+            "active": true,
+            "club_type_id": 1
+          },
+          "pathfinders": {
+            "club_pathf_id": 1,
+            "active": true,
+            "club_type_id": 2
+          },
+          "master_guild": null
+        }
+      }
+    },
+    "create_container_response": {
+      "status": true,
+      "message": "Club container and specified instances processed.",
+      "mainClub": {
+        "status": true,
+        "data": {
+          "club_id": 10,
+          "name": "Club Nuevo"
+        }
+      },
+      "createdInstances": {
+        "pathfinder": {
+          "club_pathf_id": 15,
+          "club_type_id": 2,
+          "active": true
+        }
+      }
+    }
+  },
+
+  "club_role_assignments": {
+    "get_one": {
+      "status": true,
+      "data": {
+        "assignment_id": "f1e2d3c4-b5a6-7890-1234-567890abcdef",
+        "user_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+        "role_id": "11223344-5566-7788-99aa-bbccddeeff00",
+        "club_adv_id": null,
+        "club_pathf_id": 1,
+        "club_mg_id": null,
+        "ecclesiastical_year_id": 1,
+        "start_date": "2024-01-01",
+        "end_date": "2024-12-31",
+        "active": true,
+        "created_at": "2024-01-05T10:30:00.000Z",
+        "users": {
+          "name": "Juan",
+          "paternal_last_name": "Pérez"
+        },
+        "roles": {
+          "role_name": "director"
+        }
+      }
+    },
+    "get_list": {
+      "status": true,
+      "data": [
+        {
+          "assignment_id": "f1e2d3c4-b5a6-7890-1234-567890abcdef",
+          "user_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+          "role_id": "11223344-5566-7788-99aa-bbccddeeff00",
+          "club_pathf_id": 1,
+          "active": true
+        }
+      ],
+      "total": 15
+    }
+  },
+
+  "classes": {
+    "get_one": {
+      "status": true,
+      "data": {
+        "class_id": 5,
+        "name": "Explorador",
+        "description": "Tercera clase de Conquistadores",
+        "active": true,
+        "club_type_id": 2,
+        "minimum_age": 12,
+        "material_url": "https://storage.example.com/materials/explorador.pdf",
+        "created_at": "2020-01-01T00:00:00.000Z",
+        "modified_at": "2023-06-15T10:30:00.000Z"
+      }
+    },
+    "get_list": {
+      "status": true,
+      "data": [
+        {
+          "class_id": 1,
+          "name": "Amigo",
+          "description": "Primera clase de Conquistadores",
+          "active": true,
+          "club_type_id": 2,
+          "minimum_age": 10
+        },
+        {
+          "class_id": 2,
+          "name": "Compañero",
+          "description": "Segunda clase de Conquistadores",
+          "active": true,
+          "club_type_id": 2,
+          "minimum_age": 11
+        },
+        {
+          "class_id": 3,
+          "name": "Explorador",
+          "description": "Tercera clase de Conquistadores",
+          "active": true,
+          "club_type_id": 2,
+          "minimum_age": 12
+        }
+      ],
+      "total": 12
+    }
+  },
+
+  "countries": {
+    "get_one": {
+      "status": true,
+      "data": {
+        "country_id": 1,
+        "name": "México",
+        "abbreviation": "MX",
+        "active": true,
+        "created_at": "2020-01-01T00:00:00.000Z",
+        "modified_at": "2020-01-01T00:00:00.000Z"
+      }
+    },
+    "get_list": {
+      "status": true,
+      "data": [
+        {
+          "country_id": 1,
+          "name": "México",
+          "abbreviation": "MX",
+          "active": true
+        },
+        {
+          "country_id": 2,
+          "name": "Guatemala",
+          "abbreviation": "GT",
+          "active": true
+        },
+        {
+          "country_id": 3,
+          "name": "El Salvador",
+          "abbreviation": "SV",
+          "active": true
+        }
+      ],
+      "total": 25
+    }
+  },
+
+  "unions": {
+    "get_one": {
+      "status": true,
+      "data": {
+        "union_id": 1,
+        "name": "Unión Mexicana del Norte",
+        "abbreviation": "UMN",
+        "active": true,
+        "country_id": 1,
+        "created_at": "2020-01-01T00:00:00.000Z"
+      }
+    },
+    "get_by_country": {
+      "status": true,
+      "data": [
+        {
+          "union_id": 1,
+          "name": "Unión Mexicana del Norte",
+          "abbreviation": "UMN",
+          "country_id": 1
+        },
+        {
+          "union_id": 2,
+          "name": "Unión Mexicana del Sur",
+          "abbreviation": "UMS",
+          "country_id": 1
+        },
+        {
+          "union_id": 3,
+          "name": "Unión Mexicana Interoceánica",
+          "abbreviation": "UMI",
+          "country_id": 1
+        }
+      ],
+      "total": 3
+    }
+  },
+
+  "local_fields": {
+    "get_one": {
+      "status": true,
+      "data": {
+        "local_field_id": 1,
+        "name": "Asociación del Noreste",
+        "abbreviation": "ANE",
+        "active": true,
+        "union_id": 1,
+        "created_at": "2020-01-01T00:00:00.000Z"
+      }
+    },
+    "get_list": {
+      "status": true,
+      "data": [
+        {
+          "local_field_id": 1,
+          "name": "Asociación del Noreste",
+          "abbreviation": "ANE",
+          "union_id": 1
+        },
+        {
+          "local_field_id": 2,
+          "name": "Misión del Norte",
+          "abbreviation": "MN",
+          "union_id": 1
+        }
+      ],
+      "total": 8
+    }
+  },
+
+  "districts": {
+    "get_one": {
+      "status": true,
+      "data": {
+        "district_id": 1,
+        "name": "Distrito Metropolitano",
+        "active": true,
+        "local_field_id": 1,
+        "created_at": "2020-01-01T00:00:00.000Z"
+      }
+    },
+    "get_by_local_field": {
+      "status": true,
+      "data": [
+        {
+          "district_id": 1,
+          "name": "Distrito Metropolitano",
+          "local_field_id": 1
+        },
+        {
+          "district_id": 2,
+          "name": "Distrito Sur",
+          "local_field_id": 1
+        }
+      ],
+      "total": 2
+    }
+  },
+
+  "churches": {
+    "get_one": {
+      "status": true,
+      "data": {
+        "church_id": 1,
+        "name": "Iglesia Central",
+        "active": true,
+        "district_id": 1,
+        "created_at": "2020-01-01T00:00:00.000Z"
+      }
+    },
+    "get_list": {
+      "status": true,
+      "data": [
+        {
+          "church_id": 1,
+          "name": "Iglesia Central",
+          "district_id": 1,
+          "active": true
+        },
+        {
+          "church_id": 2,
+          "name": "Iglesia Norte",
+          "district_id": 1,
+          "active": true
+        }
+      ],
+      "total": 15
+    }
+  },
+
+  "club_types": {
+    "get_list": {
+      "status": true,
+      "data": [
+        {
+          "ct_id": 1,
+          "name": "Aventureros",
+          "active": true
+        },
+        {
+          "ct_id": 2,
+          "name": "Conquistadores",
+          "active": true
+        },
+        {
+          "ct_id": 3,
+          "name": "Guías Mayores",
+          "active": true
+        }
+      ],
+      "total": 3
+    }
+  },
+
+  "honors": {
+    "get_one": {
+      "status": true,
+      "data": {
+        "honor_id": 15,
+        "name": "Campismo",
+        "description": "Especialidad de actividades al aire libre sobre campismo y supervivencia",
+        "honor_image": "https://storage.example.com/honors/campismo.png",
+        "honors_category_id": 1,
+        "master_honors_id": 3,
+        "material_url": "https://storage.example.com/materials/campismo.pdf",
+        "club_type_id": 2,
+        "active": true,
+        "approval": 1,
+        "skill_level": 2,
+        "year": "1928",
+        "created_at": "2020-01-01T00:00:00.000Z"
+      }
+    },
+    "get_by_category": {
+      "status": true,
+      "data": [
+        {
+          "category": {
+            "honor_category_id": 1,
+            "name": "Actividades al aire libre",
+            "description": "Especialidades relacionadas con la naturaleza",
+            "icon": 1
+          },
+          "honors": [
+            {
+              "honor_id": 15,
+              "name": "Campismo",
+              "honor_image": "https://storage.example.com/honors/campismo.png",
+              "skill_level": 2
+            },
+            {
+              "honor_id": 18,
+              "name": "Orientación",
+              "honor_image": "https://storage.example.com/honors/orientacion.png",
+              "skill_level": 1
+            }
+          ]
+        }
+      ]
+    }
+  },
+
+  "honors_categories": {
+    "get_list": {
+      "status": true,
+      "data": [
+        {
+          "honor_category_id": 1,
+          "name": "Actividades al aire libre",
+          "description": "Especialidades relacionadas con la naturaleza",
+          "icon": 1,
+          "active": true
+        },
+        {
+          "honor_category_id": 2,
+          "name": "Actividades vocacionales",
+          "description": "Especialidades relacionadas con profesiones",
+          "icon": 2,
+          "active": true
+        },
+        {
+          "honor_category_id": 3,
+          "name": "Artes y manualidades",
+          "description": "Especialidades artísticas y manuales",
+          "icon": 3,
+          "active": true
+        }
+      ],
+      "total": 8
+    }
+  },
+
+  "master_honors": {
+    "get_one": {
+      "status": true,
+      "data": {
+        "master_honor_id": 3,
+        "name": "Maestro en Vida Primitiva",
+        "master_image": "https://storage.example.com/masters/vida_primitiva.png",
+        "active": true,
+        "created_at": "2020-01-01T00:00:00.000Z"
+      }
+    }
+  },
+
+  "allergies": {
+    "get_list": {
+      "status": true,
+      "data": [
+        {
+          "allergy_id": 1,
+          "name": "Polen",
+          "description": "Alergia al polen de plantas",
+          "active": true
+        },
+        {
+          "allergy_id": 2,
+          "name": "Mariscos",
+          "description": "Alergia a mariscos y crustáceos",
+          "active": true
+        },
+        {
+          "allergy_id": 3,
+          "name": "Penicilina",
+          "description": "Alergia a antibióticos derivados de penicilina",
+          "active": true
+        }
+      ],
+      "total": 15
+    }
+  },
+
+  "diseases": {
+    "get_list": {
+      "status": true,
+      "data": [
+        {
+          "disease_id": 1,
+          "name": "Diabetes",
+          "description": "Diabetes mellitus tipo 1 o 2",
+          "active": true
+        },
+        {
+          "disease_id": 2,
+          "name": "Asma",
+          "description": "Enfermedad respiratoria crónica",
+          "active": true
+        },
+        {
+          "disease_id": 3,
+          "name": "Epilepsia",
+          "description": "Trastorno neurológico",
+          "active": true
+        }
+      ],
+      "total": 20
+    }
+  },
+
+  "relationship_types": {
+    "get_list": {
+      "status": true,
+      "data": [
+        {
+          "relationship_type_id": 1,
+          "name": "Padre",
+          "active": true
+        },
+        {
+          "relationship_type_id": 2,
+          "name": "Madre",
+          "active": true
+        },
+        {
+          "relationship_type_id": 3,
+          "name": "Hermano/a",
+          "active": true
+        },
+        {
+          "relationship_type_id": 4,
+          "name": "Abuelo/a",
+          "active": true
+        },
+        {
+          "relationship_type_id": 5,
+          "name": "Tío/a",
+          "active": true
+        }
+      ],
+      "total": 10
+    }
+  },
+
+  "roles": {
+    "get_one": {
+      "status": true,
+      "data": {
+        "role_id": "11223344-5566-7788-99aa-bbccddeeff00",
+        "role_name": "director",
+        "role_category": "CLUB",
+        "active": true,
+        "created_at": "2020-01-01T00:00:00.000Z"
+      }
+    },
+    "get_list": {
+      "status": true,
+      "data": [
+        {
+          "role_id": "00112233-4455-6677-8899-aabbccddeeff",
+          "role_name": "super-admin",
+          "role_category": "GLOBAL",
+          "active": true
+        },
+        {
+          "role_id": "11223344-5566-7788-99aa-bbccddeeff00",
+          "role_name": "director",
+          "role_category": "CLUB",
+          "active": true
+        },
+        {
+          "role_id": "22334455-6677-8899-aabb-ccddeeff0011",
+          "role_name": "user",
+          "role_category": "GLOBAL",
+          "active": true
+        }
+      ],
+      "total": 18
+    }
+  },
+
+  "permissions": {
+    "get_one": {
+      "status": true,
+      "data": {
+        "permission_id": "aabbccdd-eeff-0011-2233-445566778899",
+        "permission_name": "read:users",
+        "description": "Permite leer información de usuarios",
+        "active": true,
+        "created_at": "2020-01-01T00:00:00.000Z"
+      }
+    },
+    "get_names": {
+      "status": true,
+      "data": [
+        "read:users",
+        "create:users",
+        "update:users",
+        "delete:users",
+        "read:clubs",
+        "create:clubs"
+      ]
+    }
+  },
+
+  "role_permissions": {
+    "get_by_role": {
+      "status": true,
+      "data": [
+        {
+          "role_permission_id": "11111111-2222-3333-4444-555566667777",
+          "role_id": "11223344-5566-7788-99aa-bbccddeeff00",
+          "permission_id": "aabbccdd-eeff-0011-2233-445566778899",
+          "active": true,
+          "permissions": {
+            "permission_name": "read:users"
+          }
+        },
+        {
+          "role_permission_id": "22222222-3333-4444-5555-666677778888",
+          "role_id": "11223344-5566-7788-99aa-bbccddeeff00",
+          "permission_id": "bbccddee-ff00-1122-3344-556677889900",
+          "active": true,
+          "permissions": {
+            "permission_name": "read:clubs"
+          }
+        }
+      ],
+      "total": 15
+    }
+  },
+
+  "users_roles": {
+    "get_by_user": {
+      "status": true,
+      "data": [
+        {
+          "user_role_id": "aaaabbbb-cccc-dddd-eeee-ffff00001111",
+          "user_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+          "role_id": "11223344-5566-7788-99aa-bbccddeeff00",
+          "active": true,
+          "roles": {
+            "role_name": "director",
+            "role_category": "CLUB"
+          }
+        },
+        {
+          "user_role_id": "bbbbcccc-dddd-eeee-ffff-000011112222",
+          "user_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+          "role_id": "22334455-6677-8899-aabb-ccddeeff0011",
+          "active": true,
+          "roles": {
+            "role_name": "user",
+            "role_category": "GLOBAL"
+          }
+        }
+      ],
+      "total": 2
+    }
+  },
+
+  "file_upload": {
+    "profile_picture_response": {
+      "status": true,
+      "data": {
+        "url": "https://storage.supabase.co/storage/v1/object/public/profiles/a1b2c3d4-e5f6-7890-abcd-ef1234567890.jpg",
+        "path": "profiles/a1b2c3d4-e5f6-7890-abcd-ef1234567890.jpg"
+      }
+    }
+  },
+
+  "error_responses": {
+    "bad_request": {
+      "status": false,
+      "statusCode": 400,
+      "message": "Validation failed",
+      "error": "Bad Request"
+    },
+    "unauthorized": {
+      "status": false,
+      "statusCode": 401,
+      "message": "Invalid or expired token",
+      "error": "Unauthorized"
+    },
+    "forbidden": {
+      "status": false,
+      "statusCode": 403,
+      "message": "You don't have permission to access this resource",
+      "error": "Forbidden"
+    },
+    "not_found": {
+      "status": false,
+      "statusCode": 404,
+      "message": "Resource not found",
+      "error": "Not Found"
+    },
+    "conflict": {
+      "status": false,
+      "statusCode": 409,
+      "message": "Email already exists",
+      "error": "Conflict"
+    },
+    "internal_error": {
+      "status": false,
+      "statusCode": 500,
+      "message": "Internal server error",
+      "error": "Internal Server Error"
+    }
+  }
+}

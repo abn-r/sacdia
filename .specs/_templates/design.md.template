@@ -1,0 +1,819 @@
+# Design - [Nombre de la Feature]
+
+> **Fase**: Design  
+> **Fecha de Creación**: [YYYY-MM-DD]  
+> **Última Actualización**: [YYYY-MM-DD]  
+> **Estado**: [Draft | In Review | Approved | Ready for Implementation]  
+> **Vinculado a**: [requirements.md](./requirements.md)
+
+## Resumen del Diseño
+
+[Descripción de 2-3 párrafos sobre cómo se implementará la solución técnicamente, las decisiones arquitectónicas principales y el enfoque general]
+
+---
+
+## Arquitectura General
+
+### Diagrama de Arquitectura
+
+```mermaid
+graph TB
+    Client[Cliente/Frontend]
+    API[API Gateway]
+    Service[Servicio Principal]
+    DB[(Base de Datos)]
+    Cache[(Cache)]
+    Queue[Cola de Mensajes]
+    
+    Client -->|HTTPS| API
+    API -->|REST/GraphQL| Service
+    Service -->|Read/Write| DB
+    Service -->|Get/Set| Cache
+    Service -->|Publish| Queue
+```
+
+### Componentes Principales
+
+#### 1. [Nombre del Componente]
+- **Responsabilidad**: [Qué hace este componente]
+- **Tecnología**: [Framework/Librería/Lenguaje]
+- **Interacciones**: [Con qué otros componentes interactúa]
+- **Justificación**: [Por qué se eligió este approach]
+
+#### 2. [Nombre del Componente]
+- **Responsabilidad**: [Descripción]
+- **Tecnología**: [Stack]
+- **Interacciones**: [Descripción]
+- **Justificación**: [Razones]
+
+---
+
+## Diseño de Base de Datos
+
+### Modelo Entidad-Relación
+
+```mermaid
+erDiagram
+    USER ||--o{ ORDER : places
+    USER {
+        uuid id PK
+        string email
+        string password_hash
+        timestamp created_at
+    }
+    ORDER ||--|{ ORDER_ITEM : contains
+    ORDER {
+        uuid id PK
+        uuid user_id FK
+        decimal total
+        string status
+        timestamp created_at
+    }
+    ORDER_ITEM {
+        uuid id PK
+        uuid order_id FK
+        uuid product_id FK
+        int quantity
+        decimal price
+    }
+    PRODUCT ||--o{ ORDER_ITEM : "ordered in"
+    PRODUCT {
+        uuid id PK
+        string name
+        string description
+        decimal price
+        int stock
+    }
+```
+
+### Esquemas de Tablas
+
+#### Tabla: `users`
+
+```sql
+CREATE TABLE users (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    full_name VARCHAR(255),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    deleted_at TIMESTAMP WITH TIME ZONE,
+    
+    CONSTRAINT email_format CHECK (email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}$')
+);
+
+CREATE INDEX idx_users_email ON users(email);
+CREATE INDEX idx_users_created_at ON users(created_at);
+```
+
+**Consideraciones**:
+- Soft delete usando `deleted_at`
+- Índice en email para búsquedas rápidas
+- Validación de formato de email a nivel de BD
+
+#### Tabla: `[nombre_tabla]`
+
+```sql
+CREATE TABLE [nombre_tabla] (
+    -- Definición de campos
+);
+```
+
+### Migraciones
+
+**Estrategia de Migración**:
+- [Herramienta a usar: Alembic, Flyway, etc.]
+- [Proceso de rollback]
+- [Consideraciones para datos existentes]
+
+---
+
+## API Design
+
+### Endpoints
+
+#### `POST /api/v1/[recurso]`
+
+**Descripción**: [Qué hace este endpoint]
+
+**Headers**:
+```
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+**Request Body**:
+```json
+{
+  "field1": "string",
+  "field2": 123,
+  "field3": {
+    "nested": "value"
+  }
+}
+```
+
+**Validaciones**:
+- `field1`: Requerido, máximo 255 caracteres
+- `field2`: Requerido, debe ser mayor a 0
+- `field3`: Opcional
+
+**Response 201 - Created**:
+```json
+{
+  "success": true,
+  "data": {
+    "id": "uuid",
+    "field1": "string",
+    "created_at": "2026-01-09T13:00:00Z"
+  }
+}
+```
+
+**Response 400 - Bad Request**:
+```json
+{
+  "success": false,
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Invalid input data",
+    "details": [
+      {
+        "field": "field1",
+        "message": "Field is required"
+      }
+    ]
+  }
+}
+```
+
+**Response 401 - Unauthorized**:
+```json
+{
+  "success": false,
+  "error": {
+    "code": "UNAUTHORIZED",
+    "message": "Invalid or expired token"
+  }
+}
+```
+
+---
+
+#### `GET /api/v1/[recurso]/{id}`
+
+**Descripción**: [Qué hace]
+
+**Path Parameters**:
+- `id`: UUID del recurso
+
+**Query Parameters**:
+- `include`: (opcional) Lista de relaciones a incluir, ej: `comments,author`
+
+**Response 200 - OK**:
+```json
+{
+  "success": true,
+  "data": {
+    // objeto
+  }
+}
+```
+
+**Response 404 - Not Found**:
+```json
+{
+  "success": false,
+  "error": {
+    "code": "NOT_FOUND",
+    "message": "Resource not found"
+  }
+}
+```
+
+---
+
+### Contratos de API
+
+**Versionado**: 
+- URL-based versioning (`/api/v1/`, `/api/v2/`)
+- Deprecated endpoints tendrán warning header
+
+**Rate Limiting**:
+- 1000 requests por hora por usuario autenticado
+- 100 requests por hora por IP para endpoints públicos
+
+**Paginación**:
+```
+GET /api/v1/resources?page=1&limit=20&sort=created_at&order=desc
+```
+
+Response incluye metadata:
+```json
+{
+  "data": [...],
+  "meta": {
+    "page": 1,
+    "limit": 20,
+    "total": 150,
+    "total_pages": 8
+  }
+}
+```
+
+---
+
+## Flujos de Datos
+
+### Diagrama de Secuencia - [Flujo Principal]
+
+```mermaid
+sequenceDiagram
+    participant U as Usuario
+    participant F as Frontend
+    participant A as API Gateway
+    participant S as Service
+    participant D as Database
+    participant C as Cache
+    
+    U->>F: Acción (ej: Click en botón)
+    F->>F: Validación cliente
+    F->>A: POST /api/v1/resource
+    A->>A: Validar JWT
+    A->>S: Request procesado
+    S->>C: Verificar cache
+    alt Cache hit
+        C-->>S: Datos del cache
+    else Cache miss
+        S->>D: Query DB
+        D-->>S: Resultados
+        S->>C: Actualizar cache
+    end
+    S->>S: Procesar lógica de negocio
+    S-->>A: Response
+    A-->>F: Response
+    F->>F: Actualizar UI
+    F-->>U: Mostrar resultado
+```
+
+### Diagrama de Secuencia - [Flujo de Error]
+
+```mermaid
+sequenceDiagram
+    participant U as Usuario
+    participant F as Frontend
+    participant A as API
+    participant S as Service
+    
+    U->>F: Acción inválida
+    F->>A: Request con datos inválidos
+    A->>S: Forward request
+    S->>S: Validación falla
+    S-->>A: Error 400
+    A-->>F: Error response
+    F->>F: Parse error
+    F-->>U: Mostrar mensaje de error amigable
+```
+
+---
+
+## Diseño de Componentes Frontend
+
+### Estructura de Componentes
+
+```
+src/
+├── components/
+│   └── [FeatureName]/
+│       ├── [FeatureName]Container.tsx     # Container component (lógica)
+│       ├── [FeatureName]View.tsx          # Presentational component (UI)
+│       ├── [FeatureName]Item.tsx          # Sub-componente
+│       ├── hooks/
+│       │   └── use[FeatureName].ts        # Custom hooks
+│       ├── types.ts                       # TypeScript types
+│       └── styles.module.css              # Estilos
+```
+
+### Componente Principal: `[ComponentName]`
+
+**Props Interface**:
+```typescript
+interface [ComponentName]Props {
+  id: string;
+  data: DataType;
+  onAction: (payload: ActionPayload) => void;
+  loading?: boolean;
+  error?: Error | null;
+}
+```
+
+**Estado Interno**:
+```typescript
+interface [ComponentName]State {
+  isOpen: boolean;
+  selectedItem: string | null;
+  formData: FormData;
+}
+```
+
+**Hooks Utilizados**:
+- `useState`: Para [descripción]
+- `useEffect`: Para [descripción]
+- `useCustomHook`: Para [descripción]
+
+**Responsabilidades**:
+- [Responsabilidad 1]
+- [Responsabilidad 2]
+
+---
+
+## Gestión de Estado
+
+### State Management
+
+**Enfoque**: [Redux, Zustand, Context API, etc.]
+
+**Store Structure**:
+```typescript
+interface AppState {
+  [feature]: {
+    data: DataType[];
+    loading: boolean;
+    error: Error | null;
+    filters: FilterState;
+  };
+}
+```
+
+**Actions**:
+```typescript
+// Action types
+const FETCH_DATA_REQUEST = '[Feature] Fetch Data Request';
+const FETCH_DATA_SUCCESS = '[Feature] Fetch Data Success';
+const FETCH_DATA_FAILURE = '[Feature] Fetch Data Failure';
+
+// Action creators
+const fetchDataRequest = () => ({ type: FETCH_DATA_REQUEST });
+const fetchDataSuccess = (data: DataType[]) => ({ 
+  type: FETCH_DATA_SUCCESS, 
+  payload: data 
+});
+```
+
+---
+
+## Lógica de Negocio
+
+### Reglas de Negocio
+
+#### RN-1: [Nombre de la Regla]
+
+**Descripción**: [Qué hace esta regla]
+
+**Condiciones**:
+- SI [condición 1]
+- Y [condición 2]
+- ENTONCES [acción]
+
+**Implementación**:
+```python
+def validate_business_rule_1(data: Dict) -> bool:
+    """
+    Valida [regla específica]
+    
+    Args:
+        data: Datos a validar
+        
+    Returns:
+        True si cumple la regla, False en caso contrario
+        
+    Raises:
+        ValidationError: Si los datos son inválidos
+    """
+    # Implementación
+    pass
+```
+
+**Casos de Prueba**:
+- Caso válido: [descripción]
+- Caso inválido: [descripción]
+- Caso borde: [descripción]
+
+---
+
+### Algoritmos Principales
+
+#### Algoritmo: [Nombre del Algoritmo]
+
+**Propósito**: [Para qué sirve]
+
+**Complejidad**: O([complejidad temporal]) tiempo, O([complejidad espacial]) espacio
+
+**Pseudocódigo**:
+```
+FUNCIÓN algoritmo(entrada):
+    1. Inicializar variables
+    2. PARA CADA elemento EN entrada:
+        3. Realizar operación
+        4. SI condición:
+            5. Acción
+    6. RETORNAR resultado
+```
+
+**Consideraciones**:
+- [Consideración de rendimiento]
+- [Consideración de casos borde]
+
+---
+
+## Seguridad
+
+### Autenticación
+
+**Método**: JWT (JSON Web Tokens)
+
+**Flow**:
+1. Usuario envía credenciales a `/auth/login`
+2. Server valida credenciales
+3. Server genera JWT con payload:
+   ```json
+   {
+     "sub": "user_id",
+     "email": "user@example.com",
+     "role": "user",
+     "iat": 1234567890,
+     "exp": 1234571490
+   }
+   ```
+4. Cliente almacena token en localStorage/sessionStorage
+5. Cada request incluye token en header `Authorization: Bearer <token>`
+
+**Token Expiration**: 1 hora
+**Refresh Token**: 7 días
+
+### Autorización
+
+**Modelo**: RBAC (Role-Based Access Control)
+
+**Roles**:
+- `admin`: Acceso total
+- `user`: Acceso estándar
+- `guest`: Acceso limitado
+
+**Permisos por Recurso**:
+
+| Recurso | Admin | User | Guest |
+|---------|-------|------|-------|
+| Read    | ✓     | ✓    | ✓     |
+| Create  | ✓     | ✓    | ✗     |
+| Update  | ✓     | Own  | ✗     |
+| Delete  | ✓     | Own  | ✗     |
+
+### Validación y Sanitización
+
+**Input Validation**:
+- Validación en cliente (UX)
+- Validación en API (Seguridad)
+- Validación en DB (Integridad)
+
+**Sanitización**:
+```python
+from bleach import clean
+
+def sanitize_html(html_input: str) -> str:
+    """Sanitiza HTML para prevenir XSS"""
+    allowed_tags = ['p', 'br', 'strong', 'em']
+    return clean(html_input, tags=allowed_tags, strip=True)
+```
+
+**SQL Injection Prevention**:
+- Usar ORMs/Query builders
+- Parameterized queries
+- Nunca concatenar strings en SQL
+
+---
+
+## Manejo de Errores
+
+### Estrategia de Errores
+
+**Niveles**:
+1. **Validation Errors**: Errores de entrada de usuario (400)
+2. **Business Logic Errors**: Violaciones de reglas de negocio (422)
+3. **Authorization Errors**: Sin permisos (403)
+4. **Not Found Errors**: Recurso no existe (404)
+5. **Server Errors**: Errores internos (500)
+
+**Formato de Error Estándar**:
+```json
+{
+  "success": false,
+  "error": {
+    "code": "ERROR_CODE",
+    "message": "Human-readable message",
+    "details": {},
+    "timestamp": "2026-01-09T13:00:00Z",
+    "request_id": "uuid"
+  }
+}
+```
+
+**Logging**:
+```python
+logger.error(
+    "Error processing request",
+    extra={
+        "request_id": request_id,
+        "user_id": user_id,
+        "error_code": error_code,
+        "stack_trace": traceback.format_exc()
+    }
+)
+```
+
+---
+
+## Performance y Optimización
+
+### Estrategias de Caching
+
+**Niveles de Cache**:
+1. **Browser Cache**: Assets estáticos (24h)
+2. **CDN Cache**: Imágenes, CSS, JS (7 días)
+3. **Application Cache**: Redis para datos frecuentes (5-15 min)
+4. **Database Query Cache**: Queries repetitivas (1-5 min)
+
+**Invalidación de Cache**:
+- Time-based: TTL automático
+- Event-based: Al actualizar datos
+- Manual: Endpoint de administración
+
+### Optimizaciones de DB
+
+**Índices**:
+```sql
+-- Índice para búsquedas frecuentes
+CREATE INDEX idx_[table]_[column] ON [table]([column]);
+
+-- Índice compuesto para queries complejas
+CREATE INDEX idx_[table]_composite ON [table]([col1], [col2]);
+```
+
+**Query Optimization**:
+- Evitar N+1 queries (usar JOINs o eager loading)
+- Limitar SELECTs a columnas necesarias
+- Usar EXPLAIN ANALYZE para optimizar
+
+**Connection Pooling**:
+- Pool size: 10-20 conexiones
+- Max overflow: 5
+- Timeout: 30 segundos
+
+### Optimizaciones Frontend
+
+**Code Splitting**:
+```typescript
+// Lazy loading de componentes
+const HeavyComponent = lazy(() => import('./HeavyComponent'));
+```
+
+**Asset Optimization**:
+- Imágenes: WebP format, lazy loading
+- CSS: Minificación, critical CSS inline
+- JS: Minificación, tree shaking
+
+---
+
+## Monitoreo y Observabilidad
+
+### Métricas Clave
+
+**Application Metrics**:
+- Request rate (requests/sec)
+- Error rate (%)
+- Response time (p50, p95, p99)
+- Throughput (ops/sec)
+
+**Business Metrics**:
+- [Métrica de negocio 1]
+- [Métrica de negocio 2]
+
+### Logging
+
+**Log Levels**:
+- `DEBUG`: Información detallada para debugging
+- `INFO`: Eventos normales del sistema
+- `WARNING`: Situaciones inusuales pero manejables
+- `ERROR`: Errores que requieren atención
+- `CRITICAL`: Fallos severos del sistema
+
+**Log Format** (JSON structured):
+```json
+{
+  "timestamp": "2026-01-09T13:00:00Z",
+  "level": "ERROR",
+  "service": "api-service",
+  "request_id": "uuid",
+  "user_id": "uuid",
+  "message": "Error message",
+  "context": {},
+  "stack_trace": "..."
+}
+```
+
+### Alertas
+
+| Alerta | Condición | Severidad | Acción |
+|--------|-----------|-----------|--------|
+| High Error Rate | Error rate > 5% por 5 min | Critical | Page on-call |
+| Slow Response | p95 > 3s por 10 min | Warning | Notify team |
+| High CPU | CPU > 80% por 15 min | Warning | Auto-scale |
+
+---
+
+## Testing Strategy
+
+### Niveles de Testing
+
+#### Unit Tests
+- **Framework**: [pytest, Jest, etc.]
+- **Coverage objetivo**: 80%+
+- **Foco**: Funciones puras, lógica de negocio
+
+```python
+def test_validate_business_rule():
+    # Arrange
+    valid_data = {"field": "value"}
+    
+    # Act
+    result = validate_business_rule(valid_data)
+    
+    # Assert
+    assert result == True
+```
+
+#### Integration Tests
+- **Framework**: [TestContainers, etc.]
+- **Foco**: Interacciones entre componentes, DB, APIs
+
+#### End-to-End Tests
+- **Framework**: [Cypress, Playwright, etc.]
+- **Foco**: User journeys críticos
+
+---
+
+## Deployment Strategy
+
+### Infraestructura
+
+**Hosting**: [AWS, GCP, Azure, etc.]
+
+**Componentes**:
+- **Compute**: [EC2, Cloud Run, etc.]
+- **Database**: [RDS, Cloud SQL, etc.]
+- **Cache**: [ElastiCache, Memorystore, etc.]
+- **Storage**: [S3, Cloud Storage, etc.]
+
+### CI/CD Pipeline
+
+```mermaid
+graph LR
+    A[Git Push] --> B[Run Tests]
+    B --> C{Tests Pass?}
+    C -->|No| D[Notify Developer]
+    C -->|Yes| E[Build Docker Image]
+    E --> F[Push to Registry]
+    F --> G[Deploy to Staging]
+    G --> H[Run E2E Tests]
+    H --> I{Tests Pass?}
+    I -->|No| D
+    I -->|Yes| J[Manual Approval]
+    J --> K[Deploy to Production]
+```
+
+### Rollback Strategy
+
+- Mantener últimas 3 versiones disponibles
+- Automated health checks post-deployment
+- One-click rollback si health checks fallan
+
+---
+
+## Decisiones Técnicas
+
+### ADR-1: [Título de la Decisión]
+
+**Estado**: [Proposed | Accepted | Deprecated | Superseded]  
+**Fecha**: [YYYY-MM-DD]  
+**Decisores**: [Nombres]
+
+**Contexto**:
+[Descripción del problema o situación que requiere una decisión]
+
+**Opciones Consideradas**:
+1. **Opción A**: [Descripción]
+   - Pros: [Lista]
+   - Contras: [Lista]
+   
+2. **Opción B**: [Descripción]
+   - Pros: [Lista]
+   - Contras: [Lista]
+
+**Decisión**:
+[Qué se decidió y por qué]
+
+**Consecuencias**:
+- Positivas: [Lista]
+- Negativas: [Lista]
+- Trade-offs: [Lista]
+
+---
+
+## Deuda Técnica
+
+| ID | Descripción | Impacto | Esfuerzo | Prioridad |
+|----|-------------|---------|----------|-----------|
+| TD-1 | [Descripción] | Alto/Medio/Bajo | [Story points] | Alta/Media/Baja |
+| TD-2 | [Descripción] | Alto/Medio/Bajo | [Story points] | Alta/Media/Baja |
+
+---
+
+## Referencias
+
+### Documentación Externa
+- [Link a documentación de tecnología usada]
+- [Link a best practices]
+
+### Referencias Internas
+- [requirements.md](./requirements.md)
+- [Código relacionado]
+
+---
+
+## Notas para IA
+
+> Esta sección guía a los agentes IA en la implementación
+
+**Patrones a Seguir**:
+- [Patrón 1: ej. "Repository pattern para acceso a datos"]
+- [Patrón 2]
+
+**Convenciones de Código**:
+- [Convención 1]
+- [Convención 2]
+
+**Archivos Clave a Revisar**:
+- `[path/to/similar-implementation.py]`: Ejemplo de patrón similar
+- `[path/to/base-class.py]`: Clase base a extender
+
+**Prioridades de Implementación**:
+1. [Componente más crítico primero]
+2. [Segundo componente]
+3. [Componente final]
+
+**Validaciones Críticas**:
+- [ ] Todos los endpoints tienen validación de entrada
+- [ ] Todos los queries tienen índices apropiados
+- [ ] Todos los secretos usan variables de entorno
+- [ ] Logging está implementado en puntos críticos

@@ -1,0 +1,753 @@
+# Tasks - [Nombre de la Feature]
+
+> **Fase**: Implementation Planning  
+> **Fecha de Creación**: [YYYY-MM-DD]  
+> **Última Actualización**: [YYYY-MM-DD]  
+> **Estado**: [Not Started | In Progress | Completed]  
+> **Vinculado a**: [requirements.md](./requirements.md) | [design.md](./design.md)
+
+## Resumen del Plan de Implementación
+
+[Breve descripción de la estrategia de implementación, orden de tareas y consideraciones principales]
+
+**Tiempo Estimado Total**: [X días/semanas]  
+**Complejidad**: [Baja | Media | Alta]  
+**Prioridad**: [P0-Critical | P1-High | P2-Medium | P3-Low]
+
+---
+
+## Progreso General
+
+```
+[████████░░░░░░░░░░░░] 40% Completado
+
+Tareas Totales: 15
+✅ Completadas: 6
+🔄 En Progreso: 2
+⏳ Pendientes: 7
+```
+
+---
+
+## Fase 1: Preparación y Setup
+
+### T1.1: Configuración del Entorno de Desarrollo
+
+**Estado**: `[ ]` Not Started | `[/]` In Progress | `[x]` Done
+
+**Descripción**:  
+Configurar el entorno de desarrollo local con todas las dependencias necesarias.
+
+**Criterios de Completitud**:
+- [ ] Variables de entorno configuradas en `.env`
+- [ ] Base de datos local creada y conectada
+- [ ] Dependencias instaladas (`npm install` / `pip install`)
+- [ ] Tests dummy corriendo exitosamente
+- [ ] Pre-commit hooks configurados
+
+**Comandos/Pasos**:
+```bash
+# 1. Copiar archivo de configuración
+cp .env.example .env
+
+# 2. Instalar dependencias
+npm install
+
+# 3. Crear database
+createdb [database_name]
+
+# 4. Correr migraciones
+npm run migrate
+
+# 5. Verificar setup
+npm run test
+```
+
+**Archivos a Crear/Modificar**:
+- `.env`
+- `package.json` (actualizar dependencias)
+
+**Dependencias**: Ninguna
+
+**Estimación**: 0.5 días  
+**Asignado a**: [Nombre/IA]  
+**Notas**: [Notas adicionales]
+
+---
+
+### T1.2: Crear Estructura de Directorios
+
+**Estado**: `[ ]`
+
+**Descripción**:  
+Crear la estructura de directorios siguiendo las convenciones del proyecto.
+
+**Criterios de Completitud**:
+- [ ] Directorios creados según `structure.md`
+- [ ] Archivos `index` o `__init__` creados donde corresponda
+- [ ] Documentación actualizada
+
+**Estructura a Crear**:
+```
+src/
+├── components/
+│   └── [FeatureName]/
+│       ├── index.ts
+│       ├── [FeatureName]Container.tsx
+│       └── [FeatureName]View.tsx
+├── services/
+│   └── [featureName]Service.ts
+├── models/
+│   └── [FeatureName].ts
+└── tests/
+    └── [featureName]/
+```
+
+**Dependencies**: T1.1
+
+**Estimación**: 0.25 días
+
+---
+
+### T1.3: Configurar Migraciones de Base de Datos
+
+**Estado**: `[ ]`
+
+**Descripción**:  
+Crear scripts de migración para las nuevas tablas requeridas.
+
+**Criterios de Completitud**:
+- [ ] Archivos de migración creados
+- [ ] Migraciones corriendo sin errores en dev
+- [ ] Rollback testeado
+- [ ] Seeds de datos de prueba creados
+
+**Migraciones a Crear**:
+1. `YYYYMMDDHHMMSS_create_[table_name]_table.sql`
+2. `YYYYMMDDHHMMSS_add_indexes_to_[table_name].sql`
+
+**SQL Preview**:
+```sql
+-- Ver design.md para esquemas completos
+CREATE TABLE [table_name] (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    -- otros campos
+);
+```
+
+**Dependencias**: T1.1
+
+**Estimación**: 1 día
+
+---
+
+## Fase 2: Backend / API Development
+
+### T2.1: Crear Modelos de Datos
+
+**Estado**: `[ ]`
+
+**Descripción**:  
+Implementar modelos/entidades para interactuar con la base de datos.
+
+**Criterios de Completitud**:
+- [ ] Modelos creados con todos los campos
+- [ ] Validaciones implementadas  
+- [ ] Relaciones definidas correctamente
+- [ ] Unit tests para modelos pasando
+
+**Archivos a Crear**:
+- `src/models/[ModelName].ts` (o `.py`)
+
+**Código Template**:
+```typescript
+// TypeScript example
+export interface [ModelName] {
+  id: string;
+  // campos según design.md
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export class [ModelName]Entity {
+  // ORM implementation
+}
+```
+
+**Tests Requeridos**:
+```typescript
+describe('[ModelName]', () => {
+  it('should create instance with valid data', () => {});
+  it('should validate required fields', () => {});
+  it('should handle relationships', () => {});
+});
+```
+
+**Dependencias**: T1.3
+
+**Estimación**: 1.5 días
+
+---
+
+### T2.2: Implementar Servicios/Repository Layer
+
+**Estado**: `[ ]`
+
+**Descripción**:  
+Crear capa de servicios para lógica de negocio y acceso a datos.
+
+**Criterios de Completitud**:
+- [ ] Service class creado
+- [ ] Métodos CRUD implementados
+- [ ] Lógica de negocio implementada según requirements
+- [ ] Error handling implementado
+- [ ] Unit tests pasando (>80% coverage)
+
+**Métodos a Implementar**:
+- `create(data: CreateDTO): Promise<Entity>`
+- `findById(id: string): Promise<Entity | null>`
+- `findAll(filters: FilterDTO): Promise<Entity[]>`
+- `update(id: string, data: UpdateDTO): Promise<Entity>`
+- `delete(id: string): Promise<void>`
+- `[customBusinessMethod](): Promise<Result>`
+
+**Archivos a Crear**:
+- `src/services/[featureName]Service.ts`
+- `src/services/__tests__/[featureName]Service.test.ts`
+
+**Dependencias**: T2.1
+
+**Estimación**: 2 días
+
+---
+
+### T2.3: Crear Controllers/Handlers
+
+**Estado**: `[ ]`
+
+**Descripción**:  
+Implementar controladores para manejar requests HTTP.
+
+**Criterios de Completitud**:
+- [ ] Controllers creados para cada endpoint
+- [ ] Validación de input implementada
+- [ ] Error handling con códigos HTTP correctos
+- [ ] Integration tests pasando
+
+**Endpoints a Implementar** (ver design.md para specs completas):
+- `POST /api/v1/[resource]`
+- `GET /api/v1/[resource]/:id`
+- `GET /api/v1/[resource]`
+- `PUT /api/v1/[resource]/:id`
+- `DELETE /api/v1/[resource]/:id`
+
+**Archivos a Crear**:
+- `src/controllers/[featureName]Controller.ts`
+- `src/routes/[featureName]Routes.ts`
+
+**Dependencias**: T2.2
+
+**Estimación**: 2 días
+
+---
+
+### T2.4: Implementar Validación y Sanitización
+
+**Estado**: `[ ]`
+
+**Descripción**:  
+Agregar validación robusta para todos los inputs.
+
+**Criterios de Completitud**:
+- [ ] Schemas de validación definidos (Zod, Joi, etc.)
+- [ ] Validación en todos los endpoints
+- [ ] Sanitización de inputs (prevenir XSS, SQL injection)
+- [ ] Mensajes de error descriptivos
+- [ ] Tests de casos inválidos
+
+**Archivos a Crear**:
+- `src/validators/[featureName]Validator.ts`
+
+**Ejemplo**:
+```typescript
+import { z } from 'zod';
+
+export const CreateSchema = z.object({
+  field1: z.string().min(1).max(255),
+  field2: z.number().positive(),
+  email: z.string().email(),
+});
+```
+
+**Dependencias**: T2.3
+
+**Estimación**: 1 día
+
+---
+
+### T2.5: Implementar Autenticación y Autorización
+
+**Estado**: `[ ]`
+
+**Descripción**:  
+Agregar middleware de autenticación y checks de autorización.
+
+**Criterios de Completitud**:
+- [ ] Middleware de autenticación JWT implementado
+- [ ] Guards de autorización por rol implementados
+- [ ] Endpoints protegidos apropiadamente
+- [ ] Tests de seguridad pasando
+
+**Archivos a Crear**:
+- `src/middleware/auth.ts`
+- `src/middleware/authorize.ts`
+
+**Dependencias**: T2.3
+
+**Estimación**: 1.5 días
+
+---
+
+## Fase 3: Frontend Development
+
+### T3.1: Crear Types/Interfaces
+
+**Estado**: `[ ]`
+
+**Descripción**:  
+Definir tipos TypeScript para todas las entidades y DTOs.
+
+**Criterios de Completitud**:
+- [ ] Interfaces creadas para entities
+- [ ] Types para API responses
+- [ ] Types para form data
+- [ ] Sin errores de TypeScript
+
+**Archivos a Crear**:
+- `src/types/[featureName].ts`
+
+**Dependencias**: T2.1
+
+**Estimación**: 0.5 días
+
+---
+
+### T3.2: Crear Service Layer (API Client)
+
+**Estado**: `[ ]`
+
+**Descripción**:  
+Implementar funciones para llamar al API desde el frontend.
+
+**Criterios de Completitud**:
+- [ ] Funciones para cada endpoint
+- [ ] Error handling
+- [ ] Loading states
+- [ ] Type-safe
+
+**Archivos a Crear**:
+- `src/services/api/[featureName]Api.ts`
+
+**Ejemplo**:
+```typescript
+export const [featureName]Api = {
+  getAll: async (filters?: FilterDTO): Promise<Entity[]> => {
+    const response = await fetch('/api/v1/[resource]', {
+      method: 'GET',
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    return response.json();
+  },
+  // más métodos...
+};
+```
+
+**Dependencias**: T3.1, T2.3
+
+**Estimación**: 1 día
+
+---
+
+### T3.3: Implementar State Management
+
+**Estado**: `[ ]`
+
+**Descripción**:  
+Configurar state management para la feature.
+
+**Criterios de Completitud**:
+- [ ] Store/Context creado
+- [ ] Actions/Reducers definidos
+- [ ] Selectors implementados
+- [ ] Estado sincronizado con API
+
+**Archivos a Crear**:
+- `src/store/[featureName]Slice.ts` (si Redux)
+- `src/hooks/use[FeatureName]Store.ts`
+
+**Dependencias**: T3.2
+
+**Estimación**: 1 día
+
+---
+
+### T3.4: Crear Componentes UI
+
+**Estado**: `[ ]`
+
+**Descripción**:  
+Implementar componentes React/Vue siguiendo el diseño.
+
+**Criterios de Completitud**:
+- [ ] Todos los componentes creados según design
+- [ ] Props type-safe
+- [ ] Responsive design
+- [ ] Accesibilidad (a11y) validada
+- [ ] Storybook stories creadas (si aplica)
+
+**Componentes a Crear**:
+1. `[FeatureName]Container.tsx` - Container con lógica
+2. `[FeatureName]View.tsx` - Presentational component
+3. `[FeatureName]Item.tsx` - Sub-componente
+4. `[FeatureName]Form.tsx` - Formulario
+
+**Dependencias**: T3.3
+
+**Estimación**: 3 días
+
+---
+
+### T3.5: Implementar Formularios y Validación
+
+**Estado**: `[ ]`
+
+**Descripción**:  
+Crear formularios con validación del lado del cliente.
+
+**Criterios de Completitud**:
+- [ ] Formularios con react-hook-form u similar
+- [ ] Validación en tiempo real
+- [ ] Mensajes de error claros
+- [ ] Submit handling
+- [ ] Loading y disabled states
+
+**Archivos a Crear**:
+- `src/components/[FeatureName]/[FeatureName]Form.tsx`
+- `src/validators/[featureName]FormSchema.ts`
+
+**Dependencias**: T3.4
+
+**Estimación**: 1.5 días
+
+---
+
+### T3.6: Implementar Manejo de Errores y Loading States
+
+**Estado**: `[ ]`
+
+**Descripción**:  
+Agregar UX para estados de carga, éxito y error.
+
+**Criterios de Completitud**:
+- [ ] Loading spinners/skeletons
+- [ ] Error boundaries
+- [ ] Toast notifications para éxito/error
+- [ ] Retry logic para errores de red
+
+**Dependencias**: T3.4
+
+**Estimación**: 1 día
+
+---
+
+## Fase 4: Testing
+
+### T4.1: Unit Tests Backend
+
+**Estado**: `[ ]`
+
+**Descripción**:  
+Escribir unit tests para toda la lógica backend.
+
+**Criterios de Completitud**:
+- [ ] Tests para models
+- [ ] Tests para services
+- [ ] Tests para validators
+- [ ] Coverage >80%
+
+**Archivos a Crear**:
+- Tests en `src/**/__tests__/`
+
+**Comandos**:
+```bash
+npm run test:unit
+npm run test:coverage
+```
+
+**Dependencias**: T2.1, T2.2, T2.4
+
+**Estimación**: 2 días
+
+---
+
+### T4.2: Integration Tests API
+
+**Estado**: `[ ]`
+
+**Descripción**:  
+Tests de integración para endpoints.
+
+**Criterios de Completitud**:
+- [ ] Tests para cada endpoint
+- [ ] Tests de autenticación
+- [ ] Tests de casos de error
+- [ ] Tests con base de datos de prueba
+
+**Dependencias**: T2.3, T2.5
+
+**Estimación**: 1.5 días
+
+---
+
+### T4.3: Component Tests Frontend
+
+**Estado**: `[ ]`
+
+**Descripción**:  
+Tests para componentes React/Vue.
+
+**Criterios de Completitud**:
+- [ ] Tests con React Testing Library
+- [ ] Tests de interacciones de usuario
+- [ ] Tests de edge cases
+- [ ] Snapshot tests
+
+**Dependencias**: T3.4
+
+**Estimación**: 2 días
+
+---
+
+### T4.4: E2E Tests
+
+**Estado**: `[ ]`
+
+**Descripción**:  
+Tests end-to-end de user journeys críticos.
+
+**Criterios de Completitud**:
+- [ ] Happy path testeado
+- [ ] Casos de error testeados
+- [ ] Tests corriendo en CI
+
+**Herramienta**: [Cypress, Playwright, etc.]
+
+**Tests a Crear**:
+1. User can [acción principal]
+2. User cannot [acción sin permisos]
+3. Form validation works correctly
+
+**Dependencias**: T3.4, T2.3
+
+**Estimación**: 2 días
+
+---
+
+## Fase 5: Documentation y Deployment
+
+### T5.1: Documentar API
+
+**Estado**: `[ ]`
+
+**Descripción**:  
+Crear documentación de API (OpenAPI/Swagger).
+
+**Criterios de Completitud**:
+- [ ] Swagger/OpenAPI spec completo
+- [ ] Ejemplos de requests/responses
+- [ ] Documentación deployada
+
+**Archivos a Crear**:
+- `docs/api/[feature]-api.yaml`
+
+**Dependencias**: T2.3
+
+**Estimación**: 1 día
+
+---
+
+### T5.2: Actualizar README y Docs
+
+**Estado**: `[ ]`
+
+**Descripción**:  
+Actualizar documentación del proyecto.
+
+**Criterios de Completitud**:
+- [ ] README actualizado con nueva feature
+- [ ] Guía de uso creada
+- [ ] Diagramas actualizados
+
+**Dependencias**: Todas las anteriores
+
+**Estimación**: 0.5 días
+
+---
+
+### T5.3: Code Review y Refactoring
+
+**Estado**: `[ ]`
+
+**Descripción**:  
+Revisar código y refactorizar según necesidad.
+
+**Criterios de Completitud**:
+- [ ] Code review completado
+- [ ] Refactorings aplicados
+- [ ] Linter pasando sin warnings
+- [ ] No deuda técnica crítica
+
+**Dependencias**: Todas las tareas de implementación
+
+**Estimación**: 1 día
+
+---
+
+### T5.4: Deployment a Staging
+
+**Estado**: `[ ]`
+
+**Descripción**:  
+Deployar a ambiente de staging para testing.
+
+**Criterios de Completitud**:
+- [ ] Código deployado a staging
+- [ ] Migraciones corridas
+- [ ] Health checks pasando
+- [ ] Smoke tests pasando
+
+**Comandos**:
+```bash
+git push origin main
+# CI/CD se encarga del deploy
+```
+
+**Dependencias**: T5.3
+
+**Estimación**: 0.5 días
+
+---
+
+### T5.5: QA y User Acceptance Testing
+
+**Estado**: `[ ]`
+
+**Descripción**:  
+Testing manual por QA y stakeholders.
+
+**Criterios de Completitud**:
+- [ ] Test plan ejecutado
+- [ ] Bugs críticos resueltos
+- [ ] Sign-off de stakeholders
+
+**Dependencias**: T5.4
+
+**Estimación**: 2 días
+
+---
+
+### T5.6: Deployment a Producción
+
+**Estado**: `[ ]`
+
+**Descripción**:  
+Deploy final a producción.
+
+**Criterios de Completitud**:
+- [ ] Deployment completado
+- [ ] Monitoreo activo
+- [ ] No errores críticos en primeras 24h
+- [ ] Rollback plan listo
+
+**Dependencias**: T5.5
+
+**Estimación**: 0.5 días
+
+---
+
+## Tasks Opcionales
+
+### TO.1: Implementar Analytics
+
+**Estado**: `[ ]`
+
+**Descripción**:  
+Agregar tracking de eventos para esta feature.
+
+**Estimación**: 1 día
+
+---
+
+### TO.2: Optimización de Performance
+
+**Estado**: `[ ]`
+
+**Descripción**:  
+Profiling y optimizaciones si es necesario.
+
+**Estimación**: 1-2 días
+
+---
+
+## Dependencias Externas
+
+| Dependencia | Estado | Bloqueante | Contacto | ETA |
+|-------------|--------|------------|----------|-----|
+| [API de terceros X] | ⏳ Pending | ✅ Sí | [email] | [fecha] |
+| [Aprobación de diseño] | ✅ Done | ❌ No | [persona] | - |
+
+---
+
+## Riesgos y Mitigaciones
+
+| Riesgo | Probabilidad | Impacto | Mitigación |
+|--------|--------------|---------|------------|
+| [Riesgo 1] | Alta | Alto | [Plan de mitigación] |
+| [Riesgo 2] | Media | Medio | [Plan de mitigación] |
+
+---
+
+## Notas para IA
+
+> Instrucciones específicas para agentes IA que implementen estas tareas
+
+**Prioridades**:
+1. Implementar backend primero (T2.x)
+2. Luego frontend (T3.x)
+3. Finalmente tests y docs (T4.x, T5.x)
+
+**Al implementar cada tarea**:
+- [ ] Leer requirements.md y design.md antes de empezar
+- [ ] Seguir convenciones de `coding-standards.md`
+- [ ] Agregar tests para cada funcionalidad
+- [ ] Actualizar esta checklist al completar
+- [ ] Crear commit con mensaje descriptivo
+
+**Comandos útiles**:
+```bash
+# Correr tests
+npm run test
+
+# Verificar linting
+npm run lint
+
+# Correr en dev
+npm run dev
+
+# Build para producción
+npm run build
+```
+
+**Archivos de referencia**:
+- `[path/to/similar-feature]`: Implementación similar
+- `.specs/_steering/`: Guidelines globales
