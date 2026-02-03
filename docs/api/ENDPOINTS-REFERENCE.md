@@ -22,11 +22,13 @@
 ### PROCESO 1: Inicio de Sesión
 
 #### Endpoint Principal
+
 ```http
 POST /api/v1/auth/login
 ```
 
 **Request Body**:
+
 ```typescript
 {
   email: string;
@@ -35,6 +37,7 @@ POST /api/v1/auth/login
 ```
 
 **Response Success (200)**:
+
 ```json
 {
   "status": "success",
@@ -58,22 +61,25 @@ POST /api/v1/auth/login
 ### PROCESO 2: Registro de Usuarios
 
 #### Endpoint
+
 ```http
 POST /api/v1/auth/register
 ```
 
 **Request Body** (✅ Nombres actualizados):
+
 ```typescript
 {
   name: string;
-  paternal_last_name: string;  // ✅ Descriptivo
-  maternal_last_name: string;  // ✅ Descriptivo
+  paternal_last_name: string; // ✅ Descriptivo
+  maternal_last_name: string; // ✅ Descriptivo
   email: string;
   password: string;
 }
 ```
 
 **Implementación Backend** (✅ Con users_pr tracking):
+
 ```typescript
 @Injectable()
 export class AuthService {
@@ -84,7 +90,7 @@ export class AuthService {
         email: dto.email,
         password: dto.password,
       });
-      
+
       if (error) throw new BadRequestException(error.message);
 
       // 2. Crear en tabla users
@@ -93,8 +99,8 @@ export class AuthService {
           id: authUser.user.id,
           email: dto.email,
           name: dto.name,
-          paternal_last_name: dto.paternal_last_name,  // ✅
-          maternal_last_name: dto.maternal_last_name,  // ✅
+          paternal_last_name: dto.paternal_last_name, // ✅
+          maternal_last_name: dto.maternal_last_name, // ✅
         },
       });
 
@@ -111,9 +117,9 @@ export class AuthService {
 
       // 4. ✅ Asignar rol "user" (GLOBAL)
       const userRole = await tx.roles.findFirst({
-        where: { 
-          role_name: 'user',
-          role_category: 'GLOBAL'  // ✅ Filtro por categoría
+        where: {
+          role_name: "user",
+          role_category: "GLOBAL", // ✅ Filtro por categoría
         },
       });
 
@@ -158,11 +164,13 @@ Authorization: Bearer {token}
 ### PROCESO 1: Fotografía de Perfil
 
 #### Verificar Estado
+
 ```http
 GET /api/v1/auth/profile/completion-status
 ```
 
 **Response** (✅ Con tracking granular):
+
 ```json
 {
   "status": "success",
@@ -181,12 +189,14 @@ GET /api/v1/auth/profile/completion-status
 ---
 
 #### Subir Fotografía
+
 ```http
 POST /api/v1/users/:userId/profile-picture
 Content-Type: multipart/form-data
 ```
 
 **Implementación**:
+
 ```typescript
 @Post(':userId/profile-picture')
 async uploadProfilePicture(
@@ -232,11 +242,13 @@ async uploadProfilePicture(
 ### PROCESO 2: Información Personal
 
 #### Actualizar Info Personal
+
 ```http
 PATCH /api/v1/users/:userId
 ```
 
 **Request Body**:
+
 ```typescript
 {
   gender: 'M' | 'F';
@@ -255,6 +267,7 @@ POST /api/v1/users/:userId/emergency-contacts
 ```
 
 **Implementación con validación**:
+
 ```typescript
 @Post(':userId/emergency-contacts')
 async addEmergencyContact(
@@ -299,6 +312,7 @@ async addEmergencyContact(
 ---
 
 #### Alergias y Enfermedades
+
 ```http
 GET    /api/v1/users/:userId/allergies
 POST   /api/v1/users/:userId/allergies
@@ -312,11 +326,13 @@ DELETE /api/v1/users/:userId/diseases/:diseaseId
 ---
 
 #### Completar Paso 2
+
 ```http
 POST /api/v1/users/:userId/post-registration/complete-step-2
 ```
 
 **Implementación**:
+
 ```typescript
 @Post(':userId/post-registration/complete-step-2')
 async completePersonalInfo(@Param('userId') userId: string) {
@@ -355,11 +371,13 @@ async completePersonalInfo(@Param('userId') userId: string) {
 **Trigger**: Si edad < 18 años
 
 #### Verificar Si Requiere
+
 ```http
 GET /api/v1/users/:userId/requires-legal-representative
 ```
 
 **Response**:
+
 ```json
 {
   "required": true,
@@ -371,11 +389,13 @@ GET /api/v1/users/:userId/requires-legal-representative
 ---
 
 #### Crear Representante Legal
+
 ```http
 POST /api/v1/users/:userId/legal-representative
 ```
 
 **Request Body - Opción A** (Usuario registrado):
+
 ```typescript
 {
   representative_user_id: "uuid",
@@ -384,6 +404,7 @@ POST /api/v1/users/:userId/legal-representative
 ```
 
 **Request Body - Opción B** (Solo datos):
+
 ```typescript
 {
   name: "María",
@@ -395,6 +416,7 @@ POST /api/v1/users/:userId/legal-representative
 ```
 
 **Implementación**:
+
 ```typescript
 @Post(':userId/legal-representative')
 async createLegalRepresentative(
@@ -443,6 +465,7 @@ async createLegalRepresentative(
 ### PROCESO 3: Selección de Club
 
 #### Catálogos
+
 ```http
 GET /api/v1/catalogs/countries
 GET /api/v1/catalogs/countries/:countryId/unions
@@ -455,24 +478,27 @@ GET /api/v1/catalogs/classes?clubTypeId={uuid}
 ---
 
 #### Completar Paso 3 (✅ Con ecclesiastical_year_id)
+
 ```http
 POST /api/v1/users/:userId/post-registration/complete-step-3
 ```
 
 **Request Body**:
+
 ```typescript
 {
   countryId: string;
   unionId: string;
   localFieldId: string;
   clubId: string;
-  clubType: 'adventurers' | 'pathfinders' | 'master_guild';
-  clubInstanceId: number;  // ID de la instancia específica
+  clubType: "adventurers" | "pathfinders" | "master_guild";
+  clubInstanceId: number; // ID de la instancia específica
   classId: string;
 }
 ```
 
 **Implementación** (✅ Con año eclesiástico auto-asignado):
+
 ```typescript
 @Post(':userId/post-registration/complete-step-3')
 async completeClubSelection(
@@ -504,7 +530,7 @@ async completeClubSelection(
 
     // 3. Obtener rol "member" (CLUB category)
     const memberRole = await tx.roles.findFirst({
-      where: { 
+      where: {
         role_name: 'member',
         role_category: 'CLUB'  // ✅ Filtro por categoría
       },
@@ -556,6 +582,7 @@ async completeClubSelection(
 ## 📊 Resumen de Endpoints
 
 ### Autenticación (6)
+
 ```
 POST   /api/v1/auth/register
 POST   /api/v1/auth/login
@@ -567,6 +594,7 @@ GET    /api/v1/auth/profile/completion-status
 ```
 
 ### Post-Registro (11)
+
 ```
 # Paso 1: Fotografía
 GET    /api/v1/users/:userId/post-registration/photo-status
@@ -578,22 +606,128 @@ PATCH  /api/v1/users/:userId
 POST   /api/v1/users/:userId/post-registration/complete-step-2
 
 # Paso 2.5: Representante Legal (si edad < 18)
-GET    /api/v1/users/:userId/requires-legal-representative  # ✅ NUEVO
-POST   /api/v1/users/:userId/legal-representative          # ✅ NUEVO
-GET    /api/v1/users/:userId/legal-representative          # ✅ NUEVO
-PATCH  /api/v1/users/:userId/legal-representative          # ✅ NUEVO
-DELETE /api/v1/users/:userId/legal-representative          # ✅ NUEVO
+GET    /api/v1/users/:userId/requires-legal-representative
+POST   /api/v1/users/:userId/legal-representative
+GET    /api/v1/users/:userId/legal-representative
+PATCH  /api/v1/users/:userId/legal-representative
+DELETE /api/v1/users/:userId/legal-representative
 
 # Paso 3: Club
 POST   /api/v1/users/:userId/post-registration/complete-step-3
 ```
 
 ### Contactos (4)
+
 ```
 GET    /api/v1/users/:userId/emergency-contacts
-POST   /api/v1/users/:userId/emergency-contacts    # ✅ Validación máx 5
+POST   /api/v1/users/:userId/emergency-contacts    # Validación máx 5
 PATCH  /api/v1/emergency-contacts/:contactId
 DELETE /api/v1/emergency-contacts/:contactId
+```
+
+### Catálogos (10) ✅ NUEVO
+
+```
+GET    /api/v1/catalogs/club-types
+GET    /api/v1/catalogs/countries
+GET    /api/v1/catalogs/unions                     # Query: ?countryId=
+GET    /api/v1/catalogs/local-fields               # Query: ?unionId=
+GET    /api/v1/catalogs/districts                  # Query: ?localFieldId=
+GET    /api/v1/catalogs/churches                   # Query: ?districtId=
+GET    /api/v1/catalogs/roles                      # Query: ?category=GLOBAL|CLUB
+GET    /api/v1/catalogs/ecclesiastical-years
+GET    /api/v1/catalogs/ecclesiastical-years/current
+GET    /api/v1/catalogs/club-ideals                # Query: ?clubTypeId=
+```
+
+### Clubs (11) ✅ NUEVO
+
+```
+# CRUD de Clubs
+GET    /api/v1/clubs                               # Query: ?localFieldId, ?districtId, ?churchId, ?active
+GET    /api/v1/clubs/:clubId
+POST   /api/v1/clubs
+PATCH  /api/v1/clubs/:clubId
+DELETE /api/v1/clubs/:clubId
+
+# Instancias (Aventureros, Conquistadores, GM)
+GET    /api/v1/clubs/:clubId/instances
+GET    /api/v1/clubs/:clubId/instances/:type       # type = adventurers|pathfinders|master_guilds
+POST   /api/v1/clubs/:clubId/instances
+PATCH  /api/v1/clubs/:clubId/instances/:type/:instanceId
+
+# Miembros y Roles
+GET    /api/v1/clubs/:clubId/instances/:type/:instanceId/members
+POST   /api/v1/clubs/:clubId/instances/:type/:instanceId/roles
+
+# Asignaciones de Rol
+PATCH  /api/v1/club-roles/:assignmentId
+DELETE /api/v1/club-roles/:assignmentId
+```
+
+### Classes (7) ✅ NUEVO
+
+```
+# Catálogo de Clases (público)
+GET    /api/v1/classes                             # Query: ?clubTypeId=
+GET    /api/v1/classes/:classId
+GET    /api/v1/classes/:classId/modules
+
+# Inscripciones y Progreso (autenticado)
+GET    /api/v1/users/:userId/classes               # Query: ?yearId=
+POST   /api/v1/users/:userId/classes/enroll
+GET    /api/v1/users/:userId/classes/:classId/progress
+PATCH  /api/v1/users/:userId/classes/:classId/progress
+```
+
+### Honors (8) ✅ NUEVO
+
+```
+# Catálogo de Honores (público)
+GET    /api/v1/honors                              # Query: ?categoryId, ?clubTypeId, ?skillLevel
+GET    /api/v1/honors/:honorId
+GET    /api/v1/honors/categories
+
+# Honores de Usuario (autenticado)
+GET    /api/v1/users/:userId/honors                # Query: ?validated
+GET    /api/v1/users/:userId/honors/stats
+POST   /api/v1/users/:userId/honors/:honorId       # Iniciar honor
+PATCH  /api/v1/users/:userId/honors/:honorId       # Actualizar progreso
+DELETE /api/v1/users/:userId/honors/:honorId       # Abandonar
+```
+
+### Activities (7) ✅ NUEVO
+
+```
+# Actividades por Club
+GET    /api/v1/clubs/:clubId/activities            # Query: ?clubTypeId, ?active, ?activityType
+POST   /api/v1/clubs/:clubId/activities
+
+# Actividad Individual
+GET    /api/v1/activities/:activityId
+PATCH  /api/v1/activities/:activityId
+DELETE /api/v1/activities/:activityId
+
+# Asistencia
+POST   /api/v1/activities/:activityId/attendance
+GET    /api/v1/activities/:activityId/attendance
+```
+
+### Finances (7) ✅ NUEVO
+
+```
+# Categorías Financieras
+GET    /api/v1/finances/categories                 # Query: ?type (0=Ingreso, 1=Egreso)
+
+# Finanzas por Club
+GET    /api/v1/clubs/:clubId/finances              # Query: ?year, ?month, ?clubTypeId, ?categoryId
+GET    /api/v1/clubs/:clubId/finances/summary
+POST   /api/v1/clubs/:clubId/finances
+
+# Movimiento Individual
+GET    /api/v1/finances/:financeId
+PATCH  /api/v1/finances/:financeId
+DELETE /api/v1/finances/:financeId
 ```
 
 ---
@@ -609,9 +743,16 @@ DELETE /api/v1/emergency-contacts/:contactId
 - [x] Representante legal requerido si edad < 18
 - [x] Máximo 1 representante por usuario
 - [x] Transacciones completas en registro y post-registro
+- [x] Endpoints de catálogos con filtros jerárquicos
+- [x] Gestión de instancias de club por tipo
+- [x] Sistema de progreso por secciones y módulos
+- [x] Honores con validación de instructor
+- [x] Actividades con geolocalización y asistencia
+- [x] Finanzas con categorías y resúmenes
 
 ---
 
 **Generado**: 2026-01-29  
-**Versión**: 2.0.0 (Con todas las decisiones finales)  
-**Siguiente**: Ver [queries-club-role-assignments.md](file:///Users/abner/Documents/dev/sacdia/docs/restapi/queries-club-role-assignments.md) para queries SQL
+**Actualizado**: 2026-01-31  
+**Versión**: 2.2.0 (Con todos los módulos)  
+**Total Endpoints**: 57

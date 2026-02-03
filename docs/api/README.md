@@ -18,36 +18,54 @@ Guía completa de la REST API construida con NestJS.
 ## API Overview
 
 ### Stack Tecnológico
+
 - **Framework**: NestJS 10.x + TypeScript 5.x
 - **ORM**: Prisma 6.x
 - **Auth**: Supabase Auth (JWT)
 - **Validación**: class-validator + class-transformer
 - **Documentación**: Swagger/OpenAPI
-- **Seguridad**: Helmet, Throttler, CORS
+- **Seguridad**: Helmet, Throttler, CORS, 2FA, Token Blacklist, Session Limits
 - **Deploy**: Vercel Serverless
 
 ### Base URL
+
 ```
-Development:  http://localhost:3000/api/v1
-Production:   https://sacdia-api.vercel.app/api/v1
+Development:  http://localhost:3000/v1
+Production:   https://sacdia-api.vercel.app/v1
 ```
 
 ### Versionado
-**Estrategia**: URI-based (`/api/v1/`)
+
+**Estrategia**: URI-based (`/v1/`)
+
 - Visible y cacheable
 - Máximo 2 versiones mayores simultáneas
 - Swagger multi-version
+
+📖 **Documentación completa de versionamiento**: [API-VERSIONING.md](API-VERSIONING.md)
+
+**Importante**: Todos los endpoints DEBEN incluir `/v1/` en la URL:
+
+```bash
+✅ curl http://localhost:3000/v1/auth/me
+❌ curl http://localhost:3000/auth/me     # 404 Not Found
+```
 
 ---
 
 ## Archivos de Referencia
 
-| Documento | Descripción |
-|-----------|-------------|
-| [API-SPECIFICATION.md](API-SPECIFICATION.md) | **Especificación técnica completa** - DTOs, Guards, módulos |
-| [ENDPOINTS-REFERENCE.md](ENDPOINTS-REFERENCE.md) | **Referencia de endpoints** por proceso de negocio |
-| [ARCHITECTURE-DECISIONS.md](ARCHITECTURE-DECISIONS.md) | **ADRs** - Decisiones arquitectónicas documentadas |
-| [walkthrough-backend-init.md](walkthrough-backend-init.md) | Walkthrough de inicialización del backend |
+| Documento                                                            | Descripción                                                          |
+| -------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| [API-SPECIFICATION.md](API-SPECIFICATION.md)                         | **Especificación técnica completa** - DTOs, Guards, módulos          |
+| [API-VERSIONING.md](API-VERSIONING.md)                               | **Versionamiento de API** - Configuración, ejemplos, best practices  |
+| [SECURITY-GUIDE.md](SECURITY-GUIDE.md)                               | **Guía de seguridad** - 2FA, Token Blacklist, Sessions, IP Whitelist |
+| [ENDPOINTS-REFERENCE.md](ENDPOINTS-REFERENCE.md)                     | **Referencia de endpoints** por proceso de negocio                   |
+| [ARCHITECTURE-DECISIONS.md](ARCHITECTURE-DECISIONS.md)               | **ADRs** - Decisiones arquitectónicas documentadas                   |
+| [walkthrough-backend-init.md](walkthrough-backend-init.md)           | Walkthrough de inicialización del backend                            |
+| [walkthrough-users-emergency.md](walkthrough-users-emergency.md)     | Implementación Users + Emergency Contacts                            |
+| [walkthrough-legal-rep-postreg.md](walkthrough-legal-rep-postreg.md) | Implementación Legal Reps + Post-Registration                        |
+| [walkthrough-security.md](walkthrough-security.md)                   | Walkthrough de mejoras de seguridad (Fases 1-4)                      |
 
 ---
 
@@ -60,12 +78,12 @@ sequenceDiagram
     participant Client
     participant API
     participant Supabase
-    
+
     Client->>API: POST /auth/register
     API->>Supabase: signUp(email, password)
     Supabase-->>API: { user, session }
     API-->>Client: { accessToken, refreshToken }
-    
+
     Client->>API: GET /users/me (Authorization: Bearer token)
     API->>Supabase: verifyJWT(token)
     Supabase-->>API: { user_id }
@@ -100,20 +118,24 @@ La API implementa un sistema RBAC de dos niveles:
 
 ```typescript
 enum RoleCategory {
-  GLOBAL = 'GLOBAL',  // Roles de sistema
-  CLUB = 'CLUB'       // Roles de instancia de club
+  GLOBAL = "GLOBAL", // Roles de sistema
+  CLUB = "CLUB", // Roles de instancia de club
 }
 ```
 
 ### Roles Globales (tabla: `users_roles`)
+
 Aplican a nivel sistema, sin restricción de club:
+
 - **super_admin**: Acceso total
 - **admin**: Administrador de campo local
 - **coordinator**: Coordinador de unión
 - **user**: Usuario estándar (asignado en registro)
 
 ### Roles de Club (tabla: `club_role_assignments`)
+
 Aplican solo a instancias específicas de club:
+
 - **director**: Director del club
 - **subdirector**: Subdirector
 - **secretary**: Secretario
@@ -128,7 +150,7 @@ Aplican solo a instancias específicas de club:
 @Controller('clubs/:clubId/activities')
 @UseGuards(SupabaseGuard, RolesGuard)
 export class ActivitiesController {
-  
+
   @Post()
   @Roles('director', 'subdirector')
   @Permissions('CREATE:ACTIVITIES')
@@ -172,6 +194,7 @@ export class ActivitiesController {
 ### Ejemplos de Uso
 
 #### Registro de Usuario
+
 ```bash
 curl -X POST http://localhost:3000/api/v1/auth/register \
   -H "Content-Type: application/json" \
@@ -185,6 +208,7 @@ curl -X POST http://localhost:3000/api/v1/auth/register \
 ```
 
 #### Login
+
 ```bash
 curl -X POST http://localhost:3000/api/v1/auth/login \
   -H "Content-Type: application/json" \
@@ -195,6 +219,7 @@ curl -X POST http://localhost:3000/api/v1/auth/login \
 ```
 
 #### Obtener Perfil
+
 ```bash
 curl -X GET http://localhost:3000/api/v1/auth/me \
   -H "Authorization: Bearer {tu_access_token}"
@@ -203,10 +228,13 @@ curl -X GET http://localhost:3000/api/v1/auth/me \
 ### Respuestas Estándar
 
 **Success**:
+
 ```json
 {
   "status": "success",
-  "data": { /* resource */ },
+  "data": {
+    /* resource */
+  },
   "meta": {
     "timestamp": "2026-01-30T10:00:00Z",
     "version": "1.0.0"
@@ -215,6 +243,7 @@ curl -X GET http://localhost:3000/api/v1/auth/me \
 ```
 
 **Error**:
+
 ```json
 {
   "status": "error",
@@ -227,10 +256,13 @@ curl -X GET http://localhost:3000/api/v1/auth/me \
 ```
 
 **Paginated**:
+
 ```json
 {
   "status": "success",
-  "data": [ /* items */ ],
+  "data": [
+    /* items */
+  ],
   "meta": {
     "pagination": {
       "page": 1,
@@ -282,18 +314,21 @@ npm run test:e2e -- --coverage
 ## Comandos Útiles
 
 ### Desarrollo
+
 ```bash
 npm run start:dev          # Modo watch
 npm run start:debug        # Con debugger
 ```
 
 ### Build
+
 ```bash
 npm run build              # Compilar TypeScript
 npm run start:prod         # Producción
 ```
 
 ### Tests
+
 ```bash
 npm run test               # Unit tests
 npm run test:e2e           # E2E tests
@@ -301,6 +336,7 @@ npm run test:cov           # Con coverage
 ```
 
 ### Prisma
+
 ```bash
 npx prisma studio          # GUI para ver/editar datos
 npx prisma migrate dev     # Crear migración
@@ -340,6 +376,7 @@ src/
 ---
 
 **Ver también**:
+
 - [Database Schema](../database/SCHEMA-REFERENCE.md) - Modelos Prisma
 - [Processes](../02-PROCESSES.md) - Procesos de negocio
 - [Implementation Roadmap](../03-IMPLEMENTATION-ROADMAP.md) - Roadmap de desarrollo

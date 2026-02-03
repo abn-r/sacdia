@@ -41,6 +41,7 @@ docs/
     ├── README.md                          📖 Guía de API
     ├── API-SPECIFICATION.md               📋 Especificación técnica v2.0
     ├── ENDPOINTS-REFERENCE.md             🔗 Referencia de endpoints
+    ├── TESTING.md                         🧪 Guía de Pruebas y Testing
     ├── ARCHITECTURE-DECISIONS.md          🏛️ Decisiones arquitectónicas (ADRs)
     ├── walkthrough-backend-init.md        🚀 Walkthrough del backend
     └── _source_docs/                      📦 Documentos originales
@@ -62,6 +63,7 @@ docs/
 ## 🎯 Guía de Navegación por Rol
 
 ### Backend Developer
+
 ```
 1. README.md → 01-OVERVIEW.md
 2. database/README.md → database/SCHEMA-REFERENCE.md
@@ -70,6 +72,7 @@ docs/
 ```
 
 ### Mobile Developer
+
 ```
 1. README.md → 01-OVERVIEW.md
 2. 02-PROCESSES.md (flujos de usuario)
@@ -78,6 +81,7 @@ docs/
 ```
 
 ### Frontend/Admin Developer
+
 ```
 1. README.md → 01-OVERVIEW.md
 2. api/API-SPECIFICATION.md
@@ -89,14 +93,16 @@ docs/
 ## 📊 Estadísticas
 
 ### Archivos Principales (visibles)
+
 - **Raíz**: 4 archivos (README + 3 docs principales)
 - **Database**: 7 archivos + 12 SQL scripts
 - **API**: 5 archivos
 - **Total**: ~16 archivos principales
 
 ### Archivos Fuente (archivados)
-- **database/_source_docs**: 4 archivos
-- **api/_source_docs**: 11 archivos
+
+- **database/\_source_docs**: 4 archivos
+- **api/\_source_docs**: 11 archivos
 - **Total**: 15 archivos de referencia
 
 ---
@@ -115,14 +121,17 @@ Todos los links cruzados han sido verificados:
 ## 🔄 Cambios Aplicados
 
 ### Renombrados
+
 - `procesos-sacdia.md` → `02-PROCESSES.md`
 - `roadmap-implementacion.md` → `03-IMPLEMENTATION-ROADMAP.md`
 
 ### Reorganizados
+
 - `restapi/` → `api/`
 - `database/backups/` → `database/migrations/`
 
 ### Consolidados
+
 - Database: `relations.md` + `auditoria-naming-bd.md` + `verificacion-schema-prisma.md` → `SCHEMA-REFERENCE.md`
 - API: Múltiples docs → `API-SPECIFICATION.md`, `ENDPOINTS-REFERENCE.md`, `ARCHITECTURE-DECISIONS.md`
 
@@ -130,14 +139,14 @@ Todos los links cruzados han sido verificados:
 
 ## 📌 Documentos Clave
 
-| Categoría | Documento | Propósito |
-|-----------|-----------|-----------|
-| **Inicio** | `README.md` | Punto de entrada único |
-| **Overview** | `01-OVERVIEW.md` | Arquitectura y stack |
-| **Base de Datos** | `database/SCHEMA-REFERENCE.md` | Referencia completa del schema |
-| **API** | `api/API-SPECIFICATION.md` | Especificación técnica de la API |
-| **Procesos** | `02-PROCESSES.md` | Flujos de negocio |
-| **Roadmap** | `03-IMPLEMENTATION-ROADMAP.md` | Plan de implementación |
+| Categoría         | Documento                      | Propósito                        |
+| ----------------- | ------------------------------ | -------------------------------- |
+| **Inicio**        | `README.md`                    | Punto de entrada único           |
+| **Overview**      | `01-OVERVIEW.md`               | Arquitectura y stack             |
+| **Base de Datos** | `database/SCHEMA-REFERENCE.md` | Referencia completa del schema   |
+| **API**           | `api/API-SPECIFICATION.md`     | Especificación técnica de la API |
+| **Procesos**      | `02-PROCESSES.md`              | Flujos de negocio                |
+| **Roadmap**       | `03-IMPLEMENTATION-ROADMAP.md` | Plan de implementación           |
 
 ---
 
@@ -157,11 +166,13 @@ Todos los links cruzados han sido verificados:
 ## 🛠️ Mantenimiento
 
 ### Para actualizar documentación:
+
 1. Edita el archivo principal (no los `_source_docs`)
 2. Actualiza links si renombras archivos
 3. Mantén `README.md` sincronizado
 
 ### Para agregar nueva documentación:
+
 - Docs técnicos → Carpeta apropiada (`database/` o `api/`)
 - Docs generales → Raíz con prefijo numérico si es secuencial
 - Actualiza `README.md` con el nuevo documento

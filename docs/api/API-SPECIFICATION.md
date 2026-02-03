@@ -9,6 +9,7 @@
 ## 📋 Referencias y Decisiones Aplicadas
 
 Este documento integra:
+
 - ✅ **Product vision**: `.specs/_steering/product.md`
 - ✅ **Stack tecnológico**: `.specs/_steering/tech.md`
 - ✅ **Procesos de negocio**: `docs/procesos-sacdia.md`
@@ -29,6 +30,7 @@ Este documento integra:
 ## 🎯 Decisiones Arquitectónicas
 
 ### Stack Final
+
 - **Backend**: NestJS 10.x + TypeScript 5.x
 - **Database**: PostgreSQL 15.x (Supabase)
 - **ORM**: Prisma 6.x
@@ -38,18 +40,36 @@ Este documento integra:
 - **Hosting**: Vercel Serverless
 
 ### Versionado
+
 **Estrategia**: URI-based (`/api/v1/`)
+
 - Visible, cacheable, simple
 - Swagger multi-version
 - Máximo 2 versiones mayores simultáneas
 
+📖 **Documentación completa**: [API-VERSIONING.md](./API-VERSIONING.md)
+
 ### Seguridad (Desde Día 1)
+
+**Fase 1-3 (Básico)**:
+
 - Helmet (security headers)
-- @nestjs/throttler (rate limiting)
-- CORS configurado
+- @nestjs/throttler (rate limiting: 3/seg, 20/10seg, 100/min)
+- CORS configurado con whitelist
 - JWT validation con Supabase
 - Secrets en variables de entorno
 - Validación con class-validator
+- Sanitización XSS (sanitize-html)
+- Compression (gzip)
+
+**Fase 4 (Avanzado)** ✅ NUEVO:
+
+- **2FA con Supabase MFA** (TOTP)
+- **Token Blacklist** (revocación antes de expiración)
+- **Session Limits** (máximo 5 sesiones por usuario)
+- **IP Whitelist** para endpoints admin (soporte CIDR)
+- **Audit Logging** (todas las requests)
+- **Error Handling seguro** (oculta detalles en producción)
 
 ---
 
@@ -89,12 +109,13 @@ src/
 
 ```typescript
 enum RoleCategory {
-  GLOBAL = 'GLOBAL',  // Roles de sistema
-  CLUB = 'CLUB'       // Roles de instancia de club
+  GLOBAL = "GLOBAL", // Roles de sistema
+  CLUB = "CLUB", // Roles de instancia de club
 }
 ```
 
 **Tabla `roles`**:
+
 ```sql
 CREATE TABLE roles (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -113,20 +134,21 @@ CREATE TABLE roles (
 Asignados directamente al usuario, aplican a todo el sistema:
 
 ```typescript
-- super_admin   // Acceso total al sistema
-- admin         // Administrador de campo local
-- coordinator   // Coordinador de asociación/unión
-- user          // Usuario estándar (asignado en registro)
+-super_admin - // Acceso total al sistema
+  admin - // Administrador de campo local
+  coordinator - // Coordinador de asociación/unión
+  user; // Usuario estándar (asignado en registro)
 ```
 
 **Tabla `users_roles`**:
+
 ```sql
 CREATE TABLE users_roles (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   role_id UUID NOT NULL REFERENCES roles(id),
   assigned_at TIMESTAMP DEFAULT NOW(),
-  
+
   CONSTRAINT unique_user_global_role UNIQUE (user_id, role_id)
 );
 ```
@@ -138,45 +160,46 @@ CREATE TABLE users_roles (
 Asignados a instancias específicas de club, vinculados a año eclesiástico:
 
 ```typescript
-- director       // Director del club
-- subdirector    // Subdirector
-- secretary      // Secretario
-- treasurer      // Tesorero
-- counselor      // Consejero
-- member         // Miembro regular (asignado en post-registro)
+-director - // Director del club
+  subdirector - // Subdirector
+  secretary - // Secretario
+  treasurer - // Tesorero
+  counselor - // Consejero
+  member; // Miembro regular (asignado en post-registro)
 ```
 
 **Tabla `club_role_assignments`** (con `ecclesiastical_year_id`):
+
 ```sql
 CREATE TABLE club_role_assignments (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES users(id),
   role_id UUID NOT NULL REFERENCES roles(id),  -- Debe tener role_category = 'CLUB'
-  
+
   -- Instancia de club (solo UNA con valor)
   club_adv_id INT REFERENCES club_adventurers(id),
   club_pathf_id INT REFERENCES club_pathfinders(id),
   club_mg_id INT REFERENCES club_master_guild(id),
-  
+
   -- ✅ Año eclesiástico
   ecclesiastical_year_id INT NOT NULL REFERENCES ecclesiastical_years(id),
-  
+
   -- Metadata
   start_date DATE NOT NULL DEFAULT CURRENT_DATE,
   end_date DATE,
   active BOOLEAN DEFAULT true,
   status VARCHAR(20) DEFAULT 'active' CHECK (status IN ('pending', 'active', 'inactive')),
-  
+
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW(),
-  
+
   -- Constraints
   CONSTRAINT one_club_instance CHECK (
-    (club_adv_id IS NOT NULL)::int + 
-    (club_pathf_id IS NOT NULL)::int + 
+    (club_adv_id IS NOT NULL)::int +
+    (club_pathf_id IS NOT NULL)::int +
     (club_mg_id IS NOT NULL)::int = 1
   ),
-  
+
   CONSTRAINT unique_user_role_instance_year UNIQUE NULLS NOT DISTINCT (
     user_id, role_id, club_adv_id, club_pathf_id, club_mg_id, ecclesiastical_year_id
   )
@@ -190,20 +213,22 @@ CREATE TABLE club_role_assignments (
 ### Guards en NestJS
 
 ```typescript
-@Controller('clubs/:clubId/activities')
+@Controller("clubs/:clubId/activities")
 @UseGuards(SupabaseGuard, RolesGuard)
 export class ActivitiesController {
-  
   @Post()
-  @Roles('director', 'subdirector', 'secretary')
-  @Permissions('CREATE:ACTIVITIES')
-  async create(@Param('clubId') clubId: string, @Body() dto: CreateActivityDto) {
+  @Roles("director", "subdirector", "secretary")
+  @Permissions("CREATE:ACTIVITIES")
+  async create(
+    @Param("clubId") clubId: string,
+    @Body() dto: CreateActivityDto,
+  ) {
     // Solo usuarios con rol de director/subdirector/secretary en este club
   }
-  
-  @Delete(':id')
-  @ClubRole('director')  // ✅ Decorator personalizado
-  async remove(@Param('id') id: string) {
+
+  @Delete(":id")
+  @ClubRole("director") // ✅ Decorator personalizado
+  async remove(@Param("id") id: string) {
     // Solo director del club
   }
 }
@@ -222,21 +247,21 @@ CREATE TABLE users (
   name VARCHAR(100) NOT NULL,
   paternal_last_name VARCHAR(100) NOT NULL,  -- ✅ Descriptivo
   maternal_last_name VARCHAR(100) NOT NULL,  -- ✅ Descriptivo
-  
+
   -- Info personal
   gender CHAR(1) CHECK (gender IN ('M', 'F')),
   birthdate DATE,
   is_baptized BOOLEAN,
   baptism_date DATE,
-  
+
   -- Ubicación
   country_id UUID REFERENCES countries(id),
   union_id UUID REFERENCES unions(id),
   local_field_id UUID REFERENCES local_fields(id),
-  
+
   -- Avatar
   avatar TEXT,  -- URL de Supabase Storage
-  
+
   -- Metadata
   active BOOLEAN DEFAULT true,
   created_at TIMESTAMP DEFAULT NOW(),
@@ -253,19 +278,20 @@ CREATE TABLE users (
 ```sql
 CREATE TABLE users_pr (
   user_id UUID PRIMARY KEY REFERENCES users(id),
-  
+
   -- Tracking por paso
  complete BOOLEAN DEFAULT false,
   profile_picture_complete BOOLEAN DEFAULT false,  -- ✅ Paso 1
   personal_info_complete BOOLEAN DEFAULT false,    -- ✅ Paso 2
   club_selection_complete BOOLEAN DEFAULT false,   -- ✅ Paso 3
-  
+
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW()
 );
 ```
 
 **Flujo**:
+
 1. Foto subida → `profile_picture_complete = true`
 2. Info personal guardada → `personal_info_complete = true`
 3. Club seleccionado → `club_selection_complete = true` AND `complete = true`
@@ -280,26 +306,26 @@ Para usuarios menores de 18 años:
 CREATE TABLE legal_representatives (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  
+
   -- Opción 1: Representante es usuario registrado
   representative_user_id UUID REFERENCES users(id),
-  
+
   -- Opción 2: Solo datos del representante
   name VARCHAR(100),
   paternal_last_name VARCHAR(100),
   maternal_last_name VARCHAR(100),
   phone VARCHAR(20),
-  
+
   -- Tipo de relación (padre, madre, tutor)
   relationship_type_id UUID REFERENCES relationship_types(id),
-  
+
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW(),
-  
+
   -- Constraints
   CONSTRAINT one_representative_per_user UNIQUE(user_id),
   CONSTRAINT representative_data_check CHECK (
-    (representative_user_id IS NOT NULL) OR 
+    (representative_user_id IS NOT NULL) OR
     (name IS NOT NULL AND paternal_last_name IS NOT NULL AND phone IS NOT NULL)
   )
 );
@@ -318,10 +344,10 @@ CREATE TABLE emergency_contacts (
   name VARCHAR(100) NOT NULL,
   phone VARCHAR(20) NOT NULL,
   relationship_type_id UUID REFERENCES relationship_types(id),
-  
+
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW(),
-  
+
   -- Evitar duplicados
   CONSTRAINT unique_user_contact UNIQUE (user_id, name, phone)
 );
@@ -349,7 +375,13 @@ FOR EACH ROW EXECUTE FUNCTION check_max_emergency_contacts();
 ### RegisterDto
 
 ```typescript
-import { IsString, IsNotEmpty, IsEmail, MinLength, Matches } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsEmail,
+  MinLength,
+  Matches,
+} from "class-validator";
 
 export class RegisterDto {
   @IsString()
@@ -358,11 +390,11 @@ export class RegisterDto {
 
   @IsString()
   @IsNotEmpty()
-  paternal_last_name: string;  // ✅ Descriptivo
+  paternal_last_name: string; // ✅ Descriptivo
 
   @IsString()
   @IsNotEmpty()
-  maternal_last_name: string;  // ✅ Descriptivo
+  maternal_last_name: string; // ✅ Descriptivo
 
   @IsEmail()
   email: string;
@@ -370,7 +402,7 @@ export class RegisterDto {
   @IsString()
   @MinLength(8)
   @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, {
-    message: 'Password must contain uppercase, lowercase and number'
+    message: "Password must contain uppercase, lowercase and number",
   })
   password: string;
 }
@@ -382,7 +414,7 @@ export class RegisterDto {
 
 ```typescript
 export class UpdatePersonalInfoDto {
-  @IsEnum(['M', 'F'])
+  @IsEnum(["M", "F"])
   gender: string;
 
   @IsDateString()
@@ -394,12 +426,12 @@ export class UpdatePersonalInfoDto {
 
   @IsOptional()
   @IsDateString()
-  @ValidateIf(o => o.is_baptized === true)
+  @ValidateIf((o) => o.is_baptized === true)
   baptism_date?: string;
 }
 
 // Validador personalizado
-@ValidatorConstraint({ name: 'AgeValidator', async: false })
+@ValidatorConstraint({ name: "AgeValidator", async: false })
 export class AgeValidator implements ValidatorConstraintInterface {
   validate(birthdate: string, args: ValidationArguments) {
     const { min, max } = args.constraints[0];
@@ -422,22 +454,22 @@ export class CreateLegalRepresentativeDto {
 
   // Opción 2: Solo datos
   @IsOptional()
-  @ValidateIf(o => !o.representative_user_id)
+  @ValidateIf((o) => !o.representative_user_id)
   @IsString()
   name?: string;
 
   @IsOptional()
-  @ValidateIf(o => !o.representative_user_id)
+  @ValidateIf((o) => !o.representative_user_id)
   @IsString()
   paternal_last_name?: string;
 
   @IsOptional()
-  @ValidateIf(o => !o.representative_user_id)
+  @ValidateIf((o) => !o.representative_user_id)
   @IsString()
   maternal_last_name?: string;
 
   @IsOptional()
-  @ValidateIf(o => !o.representative_user_id)
+  @ValidateIf((o) => !o.representative_user_id)
   @IsString()
   phone?: string;
 
@@ -458,8 +490,20 @@ POST   /api/v1/auth/login
 POST   /api/v1/auth/logout
 POST   /api/v1/auth/password/reset-request
 POST   /api/v1/auth/password/reset
-GET    /api/v1/auth/me                            // Incluye global_roles + club_role_assignments
-GET    /api/v1/auth/profile/completion-status     // ✅ Con tracking granular
+GET    /api/v1/auth/me                      // Incluye global_roles + club_role_assignments
+GET    /api/v1/auth/profile/completion-status // ✅ Con tracking granular
+
+// ✅ MFA (2FA) - NUEVO
+POST   /api/v1/auth/mfa/enroll              // Genera QR code para configurar
+POST   /api/v1/auth/mfa/verify              // Verifica código y activa 2FA
+GET    /api/v1/auth/mfa/factors             // Lista factores configurados
+GET    /api/v1/auth/mfa/status              // Estado de 2FA del usuario
+DELETE /api/v1/auth/mfa/unenroll            // Deshabilita 2FA
+
+// ✅ Sessions - NUEVO
+GET    /api/v1/auth/sessions                // Lista sesiones activas
+DELETE /api/v1/auth/sessions/:sessionId     // Cierra sesión específica
+DELETE /api/v1/auth/sessions                // Logout de todos los dispositivos
 ```
 
 ### Módulo Users
@@ -542,10 +586,13 @@ POST   /api/v1/classes/:classId/validate-investiture/:userId
 ## 📊 Respuestas Estándar
 
 ### Success
+
 ```json
 {
   "status": "success",
-  "data": { /* resource */ },
+  "data": {
+    /* resource */
+  },
   "meta": {
     "timestamp": "2026-01-29T17:00:00Z",
     "version": "1.0.0",
@@ -555,10 +602,13 @@ POST   /api/v1/classes/:classId/validate-investiture/:userId
 ```
 
 ### Paginated
+
 ```json
 {
   "status": "success",
-  "data": [ /* items */ ],
+  "data": [
+    /* items */
+  ],
   "meta": {
     "pagination": {
       "page": 1,
@@ -571,15 +621,14 @@ POST   /api/v1/classes/:classId/validate-investiture/:userId
 ```
 
 ### Error
+
 ```json
 {
   "status": "error",
   "error": {
     "code": "VALIDATION_ERROR",
     "message": "Validation failed",
-    "details": [
-      { "field": "email", "message": "must be a valid email" }
-    ]
+    "details": [{ "field": "email", "message": "must be a valid email" }]
   }
 }
 ```
@@ -589,6 +638,7 @@ POST   /api/v1/classes/:classId/validate-investiture/:userId
 ## 🚀 Plan de Implementación
 
 ### Fase 1: Fundamentos (Semana 1-2)
+
 - [ ] Setup NestJS con versionado `/api/v1/`
 - [ ] Configurar Prisma + Supabase
 - [ ] Implementar Helmet + Throttler + CORS
@@ -596,6 +646,7 @@ POST   /api/v1/classes/:classId/validate-investiture/:userId
 - [ ] Configurar Swagger
 
 ### Fase 2: Auth + RBAC (Semana 3-4)
+
 - [ ] Módulo Auth completo
 - [ ] Sistema de roles con `role_category`
 - [ ] Tablas `users_roles` y `club_role_assignments`
@@ -603,6 +654,7 @@ POST   /api/v1/classes/:classId/validate-investiture/:userId
 - [ ] Tests E2E de auth
 
 ### Fase 3: Users + Post-Registro (Semana 5-6)
+
 - [ ] Módulo Users básico
 - [ ] Tabla `users_pr` con tracking granular
 - [ ] Upload de fotografía (Supabase Storage)
@@ -610,11 +662,13 @@ POST   /api/v1/classes/:classId/validate-investiture/:userId
 - [ ] Alergias y enfermedades
 
 ### Fase 4: Legal Representatives (Semana 7)
+
 - [ ] Módulo Legal Representatives
 - [ ] Validación de edad < 18
 - [ ] Flujo completo en post-registro
 
 ### Fase 5: Clubs + Classes (Semana 8-10)
+
 - [ ] Módulo Clubs (CRUD + instancias)
 - [ ] `club_role_assignments` con `ecclesiastical_year_id`
 - [ ] Auto-asignación rol "member"
@@ -622,6 +676,7 @@ POST   /api/v1/classes/:classId/validate-investiture/:userId
 - [ ] Validación de investiduras
 
 ### Fase 6: Módulos Adicionales + Testing (Semana 11-12)
+
 - [ ] Activities, Finances, Inventory
 - [ ] Catalogs unificados
 - [ ] Tests unitarios (>70% coverage)

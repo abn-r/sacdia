@@ -82,6 +82,7 @@
 **Versión**: Node 20.x LTS / TypeScript 5.x
 
 **Librerías NestJS**:
+
 - `@nestjs/config` - Configuración
 - `@nestjs/jwt` - JWT tokens
 - `@nestjs/passport` - Autenticación
@@ -98,6 +99,7 @@
 **ORM/ODM**: Prisma (v5.x)
 
 **Prisma Features Usados**:
+
 - Prisma Client - Type-safe queries
 - Prisma Migrate - Migraciones de DB
 - Prisma Studio - GUI para DB (dev)
@@ -114,13 +116,20 @@
 **Estilo de API**: REST
 
 **REST API Details**:
+
 - Versionado: URL-based (`/api/v1/`)
 - Autenticación: JWT (tokens de Supabase Auth)
 - Response format: JSON
 - Status codes: Estándar HTTP
-- Rate limiting: Implementado con `@nestjs/throttler`
+- Rate limiting: Implementado con `@nestjs/throttler` (3 tiers)
+- Security headers: Helmet (CSP, HSTS, X-Frame-Options)
+- 2FA: Supabase MFA (TOTP)
+- Session management: Límite de 5 sesiones por usuario
+- Token blacklist: Revocación de JWT antes de expiración
+- IP whitelist: Para endpoints admin (soporte CIDR)
 
 **Si GraphQL**:
+
 - Server: [Apollo Server | GraphQL Yoga | Otro]
 - Schema approach: [Code-first | Schema-first]
 
@@ -146,6 +155,7 @@
 **Patrón**: **Clean Architecture**
 
 **Capas**:
+
 ```
 lib/
 ├── core/                  # Utilidades, constantes, extensions, errores
@@ -179,6 +189,7 @@ lib/
 ```
 
 **Principios Clean Architecture aplicados**:
+
 - **Dependency Rule**: Dependencias apuntan hacia adentro (Presentation → Domain ← Data)
 - **Domain no depende de nada**: Solo Dart puro
 - **Use Cases**: Una clase por acción de negocio
@@ -189,6 +200,7 @@ lib/
 **Solución**: **Riverpod 2.x** (https://riverpod.dev/)
 
 **Por qué Riverpod**:
+
 - Type-safe con compile-time errors
 - No necesita BuildContext
 - Testeable fácilmente (providers son top-level)
@@ -197,6 +209,7 @@ lib/
 - Code generation support
 
 **Tipos de Providers usados**:
+
 ```dart
 // Estado simple inmutable
 final counterProvider = StateProvider<int>((ref) => 0);
@@ -222,6 +235,7 @@ final notificationsProvider = StreamProvider<Notification>((ref) {
 **HTTP Client**: **Dio 5.x** (https://pub.dev/packages/dio)
 
 **Configuración**:
+
 ```dart
 // DioClient con interceptors
 - BaseURL configurada
@@ -233,6 +247,7 @@ final notificationsProvider = StreamProvider<Notification>((ref) {
 ```
 
 **Librerías complementarias**:
+
 - `dio_cache_interceptor` - Cache de HTTP responses
 - `pretty_dio_logger` - Logs legibles (dev only)
 
@@ -241,11 +256,13 @@ final notificationsProvider = StreamProvider<Notification>((ref) {
 **json_serializable 6.x** + **freezed 2.x**
 
 **Por qué**:
+
 - Code generation = menos boilerplate
 - Type-safe serialization
 - freezed: Immutable models + union types + copyWith
 
 **Ejemplo**:
+
 ```dart
 @freezed
 class User with _$User {
@@ -255,7 +272,7 @@ class User with _$User {
     required String name,
     DateTime? lastLogin,
   }) = _User;
-  
+
   factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
 }
 ```
@@ -263,14 +280,17 @@ class User with _$User {
 ### Local Storage & Persistence
 
 **Secure Storage (Tokens, Secrets)**:
+
 - `flutter_secure_storage` - Keychain (iOS) / KeyStore (Android)
 - Para: JWT tokens, refresh tokens, API keys
 
 **Preferences (Settings simples)**:
+
 - `shared_preferences` - Key-value storage
 - Para: Theme mode, idioma, flags de features
 
 **SQLite Local (Cache opcional)**:
+
 - `drift` (antes Moor) - SQL type-safe
 - Solo si necesitas cache offline complejo
 
@@ -279,9 +299,11 @@ class User with _$User {
 **Provider**: **Supabase Auth**
 
 **Librerías**:
+
 - `supabase_flutter` 2.x - Cliente oficial de Supabase
 
 **Flow de Autenticación**:
+
 ```
 1. User Login/Register → Supabase Auth API
 2. Supabase Auth retorna JWT access token + refresh token
@@ -293,6 +315,7 @@ class User with _$User {
 ```
 
 **Providers Riverpod de Auth**:
+
 ```dart
 // Auth state provider
 final authStateProvider = StateNotifierProvider<AuthNotifier, AuthState>(...);
@@ -309,6 +332,7 @@ final authRepositoryProvider = Provider<AuthRepository>(...);
 **Router**: **go_router 13.x**
 
 **Por qué**:
+
 - Routing declarativo type-safe
 - Deep linking support
 - Redirecciones (guards para auth)
@@ -316,6 +340,7 @@ final authRepositoryProvider = Provider<AuthRepository>(...);
 - Manejo de back button
 
 **Estructura**:
+
 ```dart
 final router = GoRouter(
   redirect: (context, state) {
@@ -340,38 +365,42 @@ final router = GoRouter(
 **Design System**: **Material 3** (Material You)
 
 **Temas**:
+
 - Light theme
 - Dark theme
 - Dynamic color (Material You) opcional
 
 **Responsive**:
+
 - `responsive_framework` o custom MediaQuery breakpoints
 - Adaptive para iOS/Android (CupertinoApp si necesario)
 
 **Librerías UI Esenciales**:
+
 ```yaml
 dependencies:
   # Icons & Images
-  flutter_svg: ^2.0.0              # SVG support
-  cached_network_image: ^3.3.0     # Cache de imágenes de red
-  
+  flutter_svg: ^2.0.0 # SVG support
+  cached_network_image: ^3.3.0 # Cache de imágenes de red
+
   # Loading & Feedback
-  flutter_spinkit: ^5.2.0          # Loading indicators
-  fluttertoast: ^8.2.0             # Toast messages
-  
+  flutter_spinkit: ^5.2.0 # Loading indicators
+  fluttertoast: ^8.2.0 # Toast messages
+
   # Forms
-  flutter_hooks: ^0.20.0            # Hooks para forms (opcional)
-  
+  flutter_hooks: ^0.20.0 # Hooks para forms (opcional)
+
   # Animations
-  lottie: ^3.0.0                   # Animaciones Lottie (opcional)
-  
+  lottie: ^3.0.0 # Animaciones Lottie (opcional)
+
   # Pull to refresh
-  pull_to_refresh: ^2.0.0          # Refresh lists
+  pull_to_refresh: ^2.0.0 # Refresh lists
 ```
 
 ### Internacionalización (i18n)
 
 **Si necesitas múltiples idiomas**:
+
 - `flutter_localizations` (built-in)
 - `intl` package
 - ARB files para traducciones
@@ -379,14 +408,17 @@ dependencies:
 ### Testing
 
 **Unit Tests**:
+
 - Testear Use Cases, Repositories (con mocks)
 - `mockito` + `build_runner` para generate mocks
 
 **Widget Tests**:
+
 - Testear widgets individuales
 - `flutter_test` (built-in)
 
 **Integration Tests**:
+
 - E2E testing (opcional para MVP)
 - `integration_test` package
 
@@ -401,64 +433,71 @@ dependencies:
 ### Features Específicas Móviles
 
 **Modo Offline**:
+
 - `drift` (SQLite) para cache local persistente
 - Sincronización automática cuando hay conexión
 - Queue de operaciones pendientes
 
 **Real-time**:
+
 - Supabase Realtime para subscripciones
 - WebSocket fallback si es necesario
 
 **Geolocalización**:
+
 - `geolocator` package
 - Permisos iOS/Android configurados
 - Background location (si necesario)
 
 **Cámara/Galería**:
+
 - `image_picker` - Seleccionar de galería
 - `camera` - Tomar foto directo
 - `image_cropper` - Recortar imágenes
 - Compression antes de upload
 
 **Biometría**:
+
 - `local_auth` package
 - FaceID (iOS) + Fingerprint (Android)
 - Autenticación local para features sensibles
 
 **Notificaciones Locales**:
+
 - `flutter_local_notifications`
 - Recordatorios programados
 - Background tasks con `workmanager`
 
 **Librerías Adicionales Flutter**:
+
 ```yaml
 dependencies:
   # Offline & Database
   drift: ^2.14.0
-  
+
   # Real-time
-  supabase_flutter: ^2.0.0  # Incluye Realtime
-  
+  supabase_flutter: ^2.0.0 # Incluye Realtime
+
   # Location
   geolocator: ^11.0.0
   geocoding: ^2.1.0
-  
+
   # Camera & Images
   image_picker: ^1.0.0
   camera: ^0.10.0
   image_cropper: ^5.0.0
   flutter_image_compress: ^2.0.0
-  
+
   # Biometrics
   local_auth: ^2.1.0
-  
+
   # Notifications
   flutter_local_notifications: ^16.0.0
   firebase_messaging: ^14.0.0
-  
+
   # Background tasks
   workmanager: ^0.5.0
-  
+
   # Crashlytics
   firebase_crashlytics: ^3.4.0
 ```
@@ -490,6 +529,7 @@ dependencies:
 **Pipelines**:
 
 **Backend NestJS**:
+
 ```yaml
 on: push
 jobs:
@@ -505,6 +545,7 @@ jobs:
 ```
 
 **Admin Panel (Next.js)**:
+
 ```yaml
 on: push to main
 jobs:
@@ -514,6 +555,7 @@ jobs:
 ```
 
 **Flutter App**:
+
 ```yaml
 on: tag creation
 jobs:
@@ -523,29 +565,28 @@ jobs:
   - Upload to Play Console / App Store Connect
 ```
 
-
 ---
 
 ## Servicios de Terceros
 
 ### Esenciales
 
-| Servicio | Propósito | Provider | Alternativa |
-|----------|-----------|----------|-------------|
-| Authentication | Auth de usuarios | **Supabase Auth** | Auth0, Firebase |
-| Email | Emails transaccionales | **Resend** | SendGrid, AWS SES |
-| Payments | Procesamiento | **Stripe + PayPal + MercadoPago** | Otro |
-| Storage | Archivos/imágenes | **Supabase Storage** | AWS S3, Cloudinary |
-| Push Notifications | Notif. móviles | **Firebase Cloud Messaging (FCM)** | OneSignal |
+| Servicio           | Propósito              | Provider                           | Alternativa        |
+| ------------------ | ---------------------- | ---------------------------------- | ------------------ |
+| Authentication     | Auth de usuarios       | **Supabase Auth**                  | Auth0, Firebase    |
+| Email              | Emails transaccionales | **Resend**                         | SendGrid, AWS SES  |
+| Payments           | Procesamiento          | **Stripe + PayPal + MercadoPago**  | Otro               |
+| Storage            | Archivos/imágenes      | **Supabase Storage**               | AWS S3, Cloudinary |
+| Push Notifications | Notif. móviles         | **Firebase Cloud Messaging (FCM)** | OneSignal          |
 
 ### Opcionales / Nice-to-Have
 
-| Servicio | Propósito | Provider |
-|----------|-----------|----------|
-| Analytics | User analytics | **Google Analytics 4** |
-| Monitoring | Error tracking | **Sentry** (NestJS + Next.js + Flutter) |
-| Logs | Log aggregation | Vercel Logs + Better Stack (opcional) |
-| Crash Reports | Flutter crashes | **Firebase Crashlytics** |
+| Servicio      | Propósito       | Provider                                |
+| ------------- | --------------- | --------------------------------------- |
+| Analytics     | User analytics  | **Google Analytics 4**                  |
+| Monitoring    | Error tracking  | **Sentry** (NestJS + Next.js + Flutter) |
+| Logs          | Log aggregation | Vercel Logs + Better Stack (opcional)   |
+| Crash Reports | Flutter crashes | **Firebase Crashlytics**                |
 
 ---
 
@@ -561,36 +602,43 @@ jobs:
 ### Setup
 
 bash
+
 # Clone repository
+
 git clone [repo-url]
 
 # Install dependencies
+
 npm install
 
 # Setup environment
+
 cp .env.example .env
+
 # Editar .env con tus valores
 
 # Run database (con Docker)
+
 docker-compose up -d postgres redis
 
 # Run migrations
+
 npm run migrate
 
 # Start dev server
-npm run dev
 
+npm run dev
 
 ### Puertos Usados
 
-| Servicio | Puerto  |
-|----------|--------|
-| Next.js Admin Panel | 3000 |
-| NestJS Backend API | 3001 |
-| PostgreSQL (Docker) | 5432 |
-| Redis (Docker) | 6379 |
-| Prisma Studio | 5555 |
-| Flutter App | Emulator/Device |
+| Servicio            | Puerto          |
+| ------------------- | --------------- |
+| Next.js Admin Panel | 3000            |
+| NestJS Backend API  | 3001            |
+| PostgreSQL (Docker) | 5432            |
+| Redis (Docker)      | 6379            |
+| Prisma Studio       | 5555            |
+| Flutter App         | Emulator/Device |
 
 ---
 
@@ -630,12 +678,11 @@ npm run dev
 **Config**:
 json
 {
-  "semi": true,
-  "singleQuote": true,
-  "trailingComma": "es5",
-  "printWidth": 80
+"semi": true,
+"singleQuote": true,
+"trailingComma": "es5",
+"printWidth": 80
 }
-
 
 ### Type Checking
 
@@ -643,24 +690,25 @@ json
 
 typescript
 {
-  "compilerOptions": {
-    "strict": true,
-    "noImplicitAny": true,
-    "strictNullChecks": true
-  }
+"compilerOptions": {
+"strict": true,
+"noImplicitAny": true,
+"strictNullChecks": true
 }
-
+}
 
 ### Git Hooks
 
 **Tool**: Husky + lint-staged
 
 **Pre-commit**:
+
 - Lint código modificado
 - Formatear con Prettier
 - Run type check
 
 **Pre-push**:
+
 - Run tests
 
 ---
@@ -692,11 +740,12 @@ typescript
 
 ### Estructura de Repositorios - Recomendación
 
-**Opción Recomendada**: **Backend + Admin juntos, Flutter separado** 
+**Opción Recomendada**: **Backend + Admin juntos, Flutter separado**
 
 **Por qué**:
 
 ✅ **Ventajas**:
+
 1. **Backend + Admin comparten**:
    - Types/Interfaces (DTOs compartidos)
    - Validaciones (Zod schemas reutilizables)
@@ -763,10 +812,11 @@ typescript
 ```
 
 **pnpm-workspace.yaml**:
+
 ```yaml
 packages:
-  - 'apps/*'
-  - 'packages/*'
+  - "apps/*"
+  - "packages/*"
 ```
 
 **Alternativa** (3 repos separados):
@@ -785,7 +835,7 @@ Solo si tienes equipos completamente separados o necesitas control de acceso muy
 
 ---
 
-### Por qué  Clean Architecture (Flutter)
+### Por qué Clean Architecture (Flutter)
 
 - **Separación de responsabilidades** clara (data/domain/presentation)
 - **Testeable**: domain layer es Dart puro (no depende de Flutter)
@@ -799,6 +849,7 @@ Solo si tienes equipos completamente separados o necesitas control de acceso muy
 ### Por qué Supabase
 
 ✅ **Pros**:
+
 - **PostgreSQL real** (no NoSQL limitado como Firebase)
 - **Auth built-in** (menos código custom, mantiene estándares)
 - **Storage incluido** (S3-compatible)
@@ -808,6 +859,7 @@ Solo si tienes equipos completamente separados o necesitas control de acceso muy
 - **Supabase CLI** para development local
 
 ⚠️ **Trade-offs**:
+
 - Vendor lock-in moderado (pero PostgreSQL standard)
 - Menos control que DB self-hosted
 
@@ -816,6 +868,7 @@ Solo si tienes equipos completamente separados o necesitas control de acceso muy
 ### Por qué Vercel Serverless para Backend
 
 ✅ **Pros para tu caso (< $20/mes)**:
+
 - **Hobby tier gratis** (100GB bandwidth, funciones ilimitadas)
 - **Auto-scaling** sin configuración
 - **Deploy automático** con GitHub (push to deploy)
@@ -824,10 +877,12 @@ Solo si tienes equipos completamente separados o necesitas control de acceso muy
 - **Monorepo support** nativo (backend + admin en un proyecto)
 
 ⚠️ **Limitaciones**:
+
 - **Max 10s execution time** (suficiente para APIs REST, pero no para jobs largos)
 - **Cold starts** (~500ms primera request, luego
 
- rápido)
+rápido)
+
 - **No WebSockets persistentes** (usar Supabase Realtime en su lugar)
 - Si creces mucho, evaluar Railway/Render (pay-as-you-go)
 
@@ -910,6 +965,7 @@ Si estamos migrando de stack anterior:
 **Timeline**: [Fecha estimada de completion]
 
 **Pasos**:
+
 1. [Paso 1]
 2. [Paso 2]
 3. [Paso 3]
@@ -923,6 +979,7 @@ Si estamos migrando de stack anterior:
 ### 1. SIEMPRE usa las tecnologías especificadas
 
 **Backend**:
+
 - ✅ NestJS con TypeScript
 - ✅ Prisma para queries (no raw SQL directo)
 - ✅ class-validator + class-transformer para DTOs
@@ -930,6 +987,7 @@ Si estamos migrando de stack anterior:
 - ❌ NO Express directo, NO TypeORM, NO Sequelize
 
 **Admin Panel**:
+
 - ✅ Next.js 14+ App Router (no Pages Router)
 - ✅ shadcn/ui components (no Material-UI, no Chakra)
 - ✅ TailwindCSS (no CSS-in-JS)
@@ -938,6 +996,7 @@ Si estamos migrando de stack anterior:
 - ❌ NO create-react-app, NO Vite standalone
 
 **Flutter**:
+
 - ✅ Clean Architecture (data/domain/presentation)
 - ✅ Riverpod 2.x (no Bloc, no Provider legacy)
 - ✅ Dio para HTTP (no http package)
@@ -948,6 +1007,7 @@ Si estamos migrando de stack anterior:
 ### 2. Autenticación Flow
 
 **SIEMPRE sigue este flujo**:
+
 ```
 1. User login → Supabase Auth API
 2. Get JWT token from Supabase
@@ -958,6 +1018,7 @@ Si estamos migrando de stack anterior:
 ```
 
 ❌ **NO implementes**:
+
 - Custom JWT generation en backend
 - Session-based auth
 - Cookies para auth (usar headers)
@@ -965,14 +1026,16 @@ Si estamos migrando de stack anterior:
 ### 3. Database Queries
 
 **✅ Bien (Prisma)**:
+
 ```typescript
 const users = await this.prisma.user.findMany({
   where: { email: { contains: query } },
-  include: { orders: true }
+  include: { orders: true },
 });
 ```
 
 **❌ Mal (raw SQL)**:
+
 ```typescript
 const users = await this.prisma.$queryRaw`
   SELECT * FROM users WHERE email LIKE '%${query}%'
@@ -982,6 +1045,7 @@ const users = await this.prisma.$queryRaw`
 ### 4. Flutter Clean Architecture
 
 **SIEMPRE estructura features así**:
+
 ```
 lib/features/[feature_name]/
 ├── data/
@@ -1011,6 +1075,7 @@ lib/features/[feature_name]/
 ### 5. API Responses
 
 **✅ Formato estándar**:
+
 ```typescript
 // Success
 {
@@ -1033,6 +1098,7 @@ lib/features/[feature_name]/
 ### 6. Monorepo (Backend + Admin)
 
 **Shared types** entre backend y admin:
+
 ```
 packages/shared/src/
 ├── types/
@@ -1045,45 +1111,48 @@ packages/shared/src/
 ```
 
 **Importar así**:
+
 ```typescript
 // En backend o admin
-import { UserDTO } from '@repo/shared/dtos';
-import { API_ENDPOINTS } from '@repo/shared/constants';
+import { UserDTO } from "@repo/shared/dtos";
+import { API_ENDPOINTS } from "@repo/shared/constants";
 ```
 
 ### 7. Testing
 
 **Backend (NestJS)**:
+
 ```typescript
-describe('UserService', () => {
+describe("UserService", () => {
   let service: UserService;
   let prisma: PrismaService;
-  
+
   beforeEach(async () => {
     const module = await Test.createTestingModule({
       providers: [UserService, PrismaService],
     }).compile();
-    
+
     service = module.get<UserService>(UserService);
   });
-  
-  it('should create user', async () => {
+
+  it("should create user", async () => {
     // Use Jest + mock Prisma
   });
 });
 ```
 
 **Flutter**:
+
 ```dart
 // Test use case
 test('should get user from repository', () async {
   // Arrange
   when(mockRepo.getUser(any))
     .thenAnswer((_) async => Right(tUser));
-  
+
   // Act
   final result = await usecase(Params(id: '1'));
-  
+
   // Assert
   expect(result, Right(tUser));
   verify(mockRepo.getUser('1'));
@@ -1095,17 +1164,19 @@ test('should get user from repository', () async {
 Al sugerir instalación de packages:
 
 **pnpm (Backend/Admin)**:
+
 ```bash
 pnpm add @nestjs/core@^10.0.0
 pnpm add -D @types/node@^20.0.0
 ```
 
 **Flutter**:
+
 ```yaml
 dependencies:
   riverpod: ^2.4.0
   freezed_annotation: ^2.4.0
-  
+
 dev_dependencies:
   build_runner: ^2.4.0
   freezed: ^2.4.0
@@ -1114,17 +1185,19 @@ dev_dependencies:
 ### 9. Errores Comunes a Evitar
 
 ❌ **NO hagas**:
+
 1. No mezclar App Router y Pages Router en Next.js
 2. No usar `any` en TypeScript (usar `unknown` si es necesario)
 3. No poner lógica de negocio en presentation layer (Flutter)
 4. No hardcodear URLs de API (usar env variables)
 5. No commits de `.env` files
-6. No raw SQL en Prisma (usar type-safe queries)  
+6. No raw SQL en Prisma (usar type-safe queries)
 7. No setState en Flutter (usar Riverpod)
 
 ### 10. Si necesitas agregar nueva tecnología
 
 **ANTES de sugerirla**:
+
 1. Verifica si hay algo similar ya en uso
 2. Justifica por qué es necesaria
 3. Verifica compatibilidad con stack actual
@@ -1132,12 +1205,13 @@ dev_dependencies:
 5. **Pregunta al usuario antes de agregar**
 
 **Ejemplo**:
+
 ```
 Veo que necesitas [X]. Podríamos usar [librería Y] que:
 - Es compatible con nuestro stack
 - Bundle size: 15KB gzipped
 - Alternativas consideradas: [A, B]
-  
+
 ¿Procedo con [Y] o prefieres otra opción?
 ```
 
