@@ -1,8 +1,19 @@
-# Especificación Técnica - Nueva REST API SACDIA v2.0
+# Especificación Técnica - Nueva REST API SACDIA v2.2
 
-**Versión**: 2.0.0 (Actualizada)  
-**Fecha**: 29 de enero de 2026  
-**Status**: Listo para implementación
+**Versión**: 2.2.0 (Actualizada)
+**Fecha**: 4 de febrero de 2026
+**Status**: Producción
+
+**Cambios en v2.2**:
+- ✅ Módulo Camporees implementado (+8 endpoints)
+- ✅ Módulo Folders/Portfolios implementado (+7 endpoints)
+- ✅ Módulo Certifications implementado (+7 endpoints)
+- ✅ Módulo Inventory implementado (+5 endpoints)
+- ✅ OAuth con Google y Apple (+5 endpoints)
+- ✅ Push Notifications con FCM (+3 endpoints)
+- ✅ WebSockets para real-time (gateway + eventos)
+- ✅ Reset Password completado (+1 endpoint)
+- ✅ Total: 105+ endpoints REST en producción
 
 ---
 
@@ -34,8 +45,10 @@ Este documento integra:
 - **Backend**: NestJS 10.x + TypeScript 5.x
 - **Database**: PostgreSQL 15.x (Supabase)
 - **ORM**: Prisma 6.x
-- **Auth**: Supabase Auth (JWT)
+- **Auth**: Supabase Auth (JWT + OAuth)
 - **Storage**: Supabase Storage
+- **Push Notifications**: Firebase Cloud Messaging (FCM)
+- **Real-time**: Socket.io (WebSockets)
 - **Cache**: Redis (Upstash)
 - **Hosting**: Vercel Serverless
 
@@ -78,16 +91,19 @@ Este documento integra:
 ```
 src/
 ├── modules/
-│   ├── auth/                    # Autenticación y autorización
+│   ├── auth/                    # Autenticación y autorización (JWT + OAuth)
 │   ├── users/                   # Gestión de usuarios y perfiles
-│   ├── legal-representatives/   # ✅ NUEVO: Representantes legales
+│   ├── legal-representatives/   # Representantes legales
 │   ├── clubs/                   # Gestión de clubes e instancias
 │   ├── classes/                 # Clases progresivas
 │   ├── honors/                  # Especialidades
 │   ├── activities/              # Actividades
 │   ├── finances/                # Finanzas
-│   ├── inventory/               # Inventarios
-│   ├── camporees/               # Campamentos
+│   ├── inventory/               # ✅ Inventarios por instancia de club
+│   ├── camporees/               # ✅ Campamentos con validación de seguros
+│   ├── folders/                 # ✅ Portfolios/Carpetas de evidencias
+│   ├── certifications/          # ✅ Certificaciones para GMs investidos
+│   ├── notifications/           # ✅ Push notifications (FCM)
 │   ├── catalogs/                # Catálogos maestros
 │   └── files/                   # Gestión de archivos
 ├── common/
@@ -581,6 +597,44 @@ POST   /api/v1/users/:userId/classes/:classId/submit-for-validation
 POST   /api/v1/classes/:classId/validate-investiture/:userId
 ```
 
+### Módulo Camporees (✅ NUEVO)
+
+**Endpoints**: 8
+
+Gestión de campamentos (locales y de unión) con validación automática de seguros.
+
+**Características**:
+- CRUD completo de campamentos
+- Registro de miembros con validación de seguros
+- Validación de tipo de seguro (CAMPOREE)
+- Validación de fechas de vencimiento
+- Soft delete de campamentos y registros
+- Listado de asistentes
+
+**Endpoints**:
+
+```typescript
+GET    /api/v1/camporees                               // Listar campamentos (paginado)
+POST   /api/v1/camporees                               // Crear campamento (director, subdirector)
+GET    /api/v1/camporees/:id                           // Obtener campamento
+PATCH  /api/v1/camporees/:id                           // Actualizar (director, subdirector)
+DELETE /api/v1/camporees/:id                           // Eliminar (director)
+POST   /api/v1/camporees/:id/register                  // Registrar miembro
+GET    /api/v1/camporees/:id/members                   // Listar asistentes
+DELETE /api/v1/camporees/:id/members/:userId           // Remover miembro
+```
+
+**Validaciones de Seguro**:
+- Tipo debe ser `CAMPOREE` (enum)
+- Pertenece al usuario registrado
+- Fecha de vencimiento >= fecha fin del campamento
+- Estado activo
+
+**Roles requeridos**:
+- Crear/Actualizar: director, subdirector
+- Eliminar: director
+- Registrar/Listar: autenticado
+
 ---
 
 ## 📊 Respuestas Estándar
@@ -693,6 +747,7 @@ POST   /api/v1/classes/:classId/validate-investiture/:userId
 
 ---
 
-**Generado**: 2026-01-29  
-**Versión**: 2.0.0 (Con todas las decisiones finales)  
-**Status**: ✅ Listo para implementación
+**Generado**: 2026-01-29
+**Actualizado**: 2026-02-04
+**Versión**: 2.2.0 (105+ endpoints, 17 módulos)
+**Status**: ✅ Producción - Fase 1 Completada
