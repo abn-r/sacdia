@@ -14,9 +14,14 @@
 sacdia-backend/
 sacdia-app/
 sacdia-admin/
-sacdia_app/
 
 # Ignore temporary files
 *.tmp
 *.log
 .cache/
+
+# Ignore claude-mem context files (local only)
+CLAUDE.md
+docs/CLAUDE.md
+docs/api/CLAUDE.md
+.claude/
