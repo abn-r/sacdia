@@ -1,8 +1,8 @@
-# Mapeo Procesos → Endpoints - SACDIA API v2.0
+# Mapeo Procesos → Endpoints - SACDIA API v2.2
 
-**Versión**: 2.0.0 (Actualizada)  
-**Fecha**: 29 de enero de 2026  
-**Base**: `docs/procesos-sacdia.md` + `docs/restapi/restructura-roles.md`
+**Versión**: 2.2.0 (Actualizada con Módulos Nuevos)
+**Fecha**: 3 de febrero de 2026
+**Base**: `docs/procesos-sacdia.md` + `docs/restapi/restructura-roles.md` + `IMPLEMENTATION-PLAN.md`
 
 ---
 
@@ -730,6 +730,391 @@ PATCH  /api/v1/finances/:financeId
 DELETE /api/v1/finances/:financeId
 ```
 
+### Campaments/Camporees (8) ✅ NUEVO
+
+```
+# Listar Campamentos
+GET    /api/v1/camporees                               # Query: ?page, ?limit, ?type (local|union)
+
+# Crear Campamento (Director/Subdirector)
+POST   /api/v1/camporees
+
+# Campamento Individual
+GET    /api/v1/camporees/:id
+PATCH  /api/v1/camporees/:id                           # Director/Subdirector
+DELETE /api/v1/camporees/:id                           # Director only
+
+# Registro de Miembros (con validación de seguro)
+POST   /api/v1/camporees/:id/register
+GET    /api/v1/camporees/:id/members
+DELETE /api/v1/camporees/:id/members/:userId
+```
+
+**Request Body - Crear Campamento**:
+
+```typescript
+{
+  name: string;
+  description?: string;
+  start_date: string;           // ISO 8601
+  end_date: string;
+  local_field_id: number;
+  includes_adventurers: boolean;
+  includes_pathfinders: boolean;
+  includes_master_guides: boolean;
+  local_camporee_place: string;
+  registration_cost?: number;
+}
+```
+
+**Request Body - Registrar Miembro**:
+
+```typescript
+{
+  user_id: string;
+  camporee_type: 'local' | 'union';
+  club_name?: string;
+  insurance_id?: number;        // FK a member_insurances (REQUERIDO)
+}
+```
+
+**Validaciones Críticas**:
+- ✅ Validar seguro activo tipo CAMPOREE
+- ✅ Validar fecha de vencimiento del seguro > fecha fin del campamento
+- ✅ Usar transacciones para registro de miembros
+
+---
+
+### Folders/Portfolios (7) ✅ NUEVO
+
+```
+# Templates de Folders (público)
+GET    /api/v1/folders                                 # Query: ?clubTypeId, ?ecclesiasticalYearId
+GET    /api/v1/folders/:id
+POST   /api/v1/folders                                 # Admin only
+
+# Folders de Usuario (autenticado)
+GET    /api/v1/users/:userId/folders
+POST   /api/v1/users/:userId/folders/:folderId/enroll
+GET    /api/v1/users/:userId/folders/:folderId/progress
+PATCH  /api/v1/users/:userId/folders/:folderId/modules/:moduleId/sections/:sectionId
+```
+
+**Request Body - Crear Folder Template**:
+
+```typescript
+{
+  name: string;
+  description?: string;
+  club_type?: number;           // 1=Aventureros, 2=Conquistadores, 3=GM
+  ecclesiastical_year_id?: number;
+  max_points?: number;
+  minimum_points?: number;
+}
+```
+
+**Request Body - Actualizar Progreso de Sección**:
+
+```typescript
+{
+  points: number;
+  evidences?: Record<string, any>; // JSON con archivos/fotos
+}
+```
+
+**Response - Progreso de Folder**:
+
+```json
+{
+  "folder_id": 1,
+  "status": "active",
+  "progress_percentage": 65.5,
+  "total_points": 131,
+  "max_points": 200,
+  "modules": [
+    {
+      "module_id": 1,
+      "name": "Módulo 1",
+      "progress": 80,
+      "sections": [
+        {
+          "section_id": 1,
+          "name": "Sección 1.1",
+          "points": 10,
+          "max_points": 10,
+          "completed": true
+        }
+      ]
+    }
+  ]
+}
+```
+
+---
+
+### Certifications (7) ✅ NUEVO
+
+**Restricción**: Solo Guías Mayores investidos
+
+```
+# Catálogo de Certificaciones (público)
+GET    /api/v1/certifications
+GET    /api/v1/certifications/:id
+
+# Inscripciones (autenticado - solo GM investidos)
+POST   /api/v1/users/:userId/certifications/enroll
+GET    /api/v1/users/:userId/certifications
+GET    /api/v1/users/:userId/certifications/:certificationId/progress
+PATCH  /api/v1/users/:userId/certifications/:certificationId/progress
+DELETE /api/v1/users/:userId/certifications/:certificationId
+```
+
+**Request Body - Inscripción**:
+
+```typescript
+{
+  certification_id: number;
+}
+```
+
+**Validación de Elegibilidad**:
+
+```typescript
+// Backend valida:
+// 1. Usuario tiene clase "Guía Mayor"
+// 2. Campo investiture = true
+// 3. Permite múltiples inscripciones simultáneas (a diferencia de classes)
+```
+
+**Estructura Similar a Classes**:
+- Módulos y secciones
+- Progreso por sección
+- Tracking de completion_status
+- Sin restricción de inscripción única
+
+---
+
+### Inventory (5) ✅ NUEVO
+
+```
+# Inventario por Club Instance
+GET    /api/v1/clubs/:clubId/inventory                 # Query: ?instanceType (adv|pathf|mg)
+POST   /api/v1/clubs/:clubId/inventory                 # Director/Subdirector/Tesorero
+PATCH  /api/v1/inventory/:id
+DELETE /api/v1/inventory/:id                           # Director only
+
+# Catálogo de Categorías
+GET    /api/v1/catalogs/inventory-categories
+```
+
+**Request Body - Crear Item**:
+
+```typescript
+{
+  name: string;
+  description?: string;
+  inventory_category_id?: number;
+  amount: number;
+  // Uno de estos tres (según instanceType):
+  club_adv_id?: number;
+  club_pathf_id?: number;
+  club_mg_id?: number;
+}
+```
+
+**Response - Lista de Inventario**:
+
+```json
+{
+  "data": [
+    {
+      "inventory_id": 1,
+      "name": "Cuerdas 10m",
+      "description": "Para campamentos",
+      "category": {
+        "category_id": 1,
+        "name": "Material de Campismo"
+      },
+      "amount": 15,
+      "active": true,
+      "created_at": "2026-02-01T10:00:00Z"
+    }
+  ]
+}
+```
+
+---
+
+### OAuth (5) ✅ NUEVO
+
+**Providers**: Google, Apple
+
+```
+# Iniciar OAuth Flow
+POST   /api/v1/auth/oauth/google
+POST   /api/v1/auth/oauth/apple
+
+# Callback (maneja Supabase automáticamente)
+GET    /api/v1/auth/oauth/callback
+
+# Gestión de Providers Conectados
+GET    /api/v1/auth/oauth/providers                    # Auth required
+DELETE /api/v1/auth/oauth/:provider                    # Auth required
+```
+
+**Request Body - Iniciar OAuth**:
+
+```typescript
+{
+  redirectUrl?: string;         // Default: https://sacdia.app/auth/callback
+}
+```
+
+**Response - Iniciar OAuth**:
+
+```json
+{
+  "url": "https://accounts.google.com/o/oauth2/v2/auth?..."
+}
+```
+
+**Response - Callback**:
+
+```json
+{
+  "access_token": "jwt_token",
+  "user": {
+    "id": "uuid",
+    "email": "user@gmail.com",
+    "google_connected": true,
+    "apple_connected": false
+  }
+}
+```
+
+**Flags en BD**:
+- `users.google_connected` (boolean)
+- `users.apple_connected` (boolean)
+- `users.fb_connected` (boolean) - reservado
+
+---
+
+### Push Notifications (3) ✅ NUEVO
+
+**Tecnología**: Firebase Cloud Messaging (FCM)
+
+```
+# Gestión de Tokens FCM
+POST   /api/v1/users/:userId/fcm-tokens
+GET    /api/v1/users/:userId/fcm-tokens
+DELETE /api/v1/fcm-tokens/:tokenId
+```
+
+**Request Body - Registrar Token**:
+
+```typescript
+{
+  fcm_token: string;            // Token de FCM del dispositivo
+  device_type: 'ios' | 'android' | 'web';
+  device_name?: string;         // ej: "iPhone 14 de Juan"
+}
+```
+
+**Response - Lista de Tokens**:
+
+```json
+{
+  "data": [
+    {
+      "token_id": "uuid",
+      "fcm_token": "fcm_token_string",
+      "device_type": "ios",
+      "device_name": "iPhone 14 de Juan",
+      "is_active": true,
+      "created_at": "2026-02-01T10:00:00Z"
+    }
+  ]
+}
+```
+
+**Tabla en BD**: `user_fcm_tokens`
+- Máximo recomendado: 5 tokens por usuario
+- Auto-cleanup de tokens expirados
+
+---
+
+### WebSockets (Real-time) ✅ OPCIONAL
+
+**Namespace**: `/api/v1/ws`
+
+**Eventos Cliente → Servidor**:
+
+```typescript
+// Unirse a sala de club
+socket.emit('join-club', { clubId: number });
+
+// Salir de sala de club
+socket.emit('leave-club', { clubId: number });
+```
+
+**Eventos Servidor → Cliente**:
+
+```typescript
+// Progreso de clase actualizado
+'class-updated' → { classId: number, progress: number }
+
+// Progreso individual
+'class-progress-updated' → { classId: number, progress: number }
+
+// Nueva actividad creada
+'activity-created' → { activityId: number, clubId: number }
+
+// Nuevo miembro
+'member-joined' → { userId: string, clubId: number }
+
+// Notificación general
+'notification' → { title: string, body: string, data: any }
+```
+
+**Autenticación**:
+
+```typescript
+const socket = io('http://localhost:3000/api/v1/ws', {
+  auth: {
+    token: 'jwt_token'        // O query: { token: 'jwt_token' }
+  }
+});
+```
+
+**Guards**: `WsJwtGuard` valida token en handshake
+
+---
+
+## 📊 Resumen Actualizado de Endpoints
+
+### Total por Módulo
+
+- Autenticación: 7 endpoints (incluye OAuth)
+- Post-Registro: 11 endpoints
+- Contactos: 4 endpoints
+- Representantes Legales: 4 endpoints
+- Catálogos: 11 endpoints
+- Clubs: 11 endpoints
+- Classes: 7 endpoints
+- Honors: 8 endpoints
+- Activities: 7 endpoints
+- Finances: 7 endpoints
+- **Campaments: 8 endpoints** ✅ NUEVO
+- **Folders: 7 endpoints** ✅ NUEVO
+- **Certifications: 7 endpoints** ✅ NUEVO
+- **Inventory: 5 endpoints** ✅ NUEVO
+- **OAuth: 5 endpoints** ✅ NUEVO
+- **Push Notifications: 3 endpoints** ✅ NUEVO
+- **WebSockets: Gateway + eventos** ✅ OPCIONAL
+
+**Total Endpoints REST**: **105+ endpoints**
+**Total Módulos**: **17 módulos**
+
 ---
 
 ## ✅ Checklist de Validaciones
@@ -749,10 +1134,18 @@ DELETE /api/v1/finances/:financeId
 - [x] Honores con validación de instructor
 - [x] Actividades con geolocalización y asistencia
 - [x] Finanzas con categorías y resúmenes
+- [x] Campamentos con validación de seguros
+- [x] Folders/Portfolios con progreso por módulos
+- [x] Certificaciones exclusivas para GM investidos
+- [x] Sistema de inventario por instancia de club
+- [x] OAuth con Google y Apple
+- [x] Push notifications con FCM
+- [x] WebSockets para actualizaciones en tiempo real
 
 ---
 
-**Generado**: 2026-01-29  
-**Actualizado**: 2026-01-31  
-**Versión**: 2.2.0 (Con todos los módulos)  
-**Total Endpoints**: 57
+**Generado**: 2026-01-29
+**Actualizado**: 2026-02-03
+**Versión**: 2.2.0 (Con 17 módulos completos)
+**Total Endpoints REST**: 105+
+**WebSockets**: Gateway + eventos real-time
