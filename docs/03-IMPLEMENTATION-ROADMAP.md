@@ -246,13 +246,13 @@ pnpm install helmet @nestjs/throttler
 
 **Métricas Actualizadas**:
 
-| Métrica | Sprint 8 | Sprint 9 | Incremento |
-|---------|----------|----------|------------|
-| Endpoints | 79 | 105+ | +26 |
-| Módulos | 13 | 17 | +4 |
-| Tests E2E | 11 suites | 17 suites | +6 |
-| Coverage | 85% | 90%+ | +5% |
-| Documentación | 75% | 95% | +20% |
+| Métrica       | Sprint 8  | Sprint 9  | Incremento |
+| ------------- | --------- | --------- | ---------- |
+| Endpoints     | 79        | 105+      | +26        |
+| Módulos       | 13        | 17        | +4         |
+| Tests E2E     | 11 suites | 17 suites | +6         |
+| Coverage      | 85%       | 90%+      | +5%        |
+| Documentación | 75%       | 95%       | +20%       |
 
 **Entregable**: ✅ API completa con 105+ endpoints, 17 módulos, OAuth, Push Notifications y WebSockets
 
@@ -431,6 +431,28 @@ pnpm install @tanstack/react-query axios zod react-hook-form
 
 ---
 
+### Sprint 8: Optimización y Deployment Final (1 semana)
+
+**Tareas**:
+
+- [x] Scripts de seed data para testing
+- [x] Optimización de queries N+1
+- [x] Setup CI/CD con GitHub Actions
+- [x] Deployment a Vercel
+- [x] Configurar dominios y SSL
+- [x] Monitoreo básico y logs
+- [ ] **⚠️ Integración de Servicios Externos** (Ver [EXTERNAL-SERVICES-INTEGRATION.md](file:///Users/abner/Documents/dev/sacdia/docs/api/EXTERNAL-SERVICES-INTEGRATION.md))
+  - [ ] Configurar Upstash Redis en producción
+  - [ ] Configurar Firebase FCM credentials
+  - [ ] Configurar Sentry monitoring
+  - [ ] Aplicar migración `user_fcm_tokens`
+  - [ ] Agregar auth guards a endpoints de notificaciones
+  - [ ] Ejecutar pruebas end-to-end de notificaciones push
+
+**Entregable**: API en producción, monitoreo activo, documentación completa.
+
+---
+
 ## ✅ Criterios de Completitud
 
 ### Fase 1 (REST API) ✅ COMPLETADA
@@ -548,8 +570,9 @@ vercel --prod
 ---
 
 **Creado**: 2026-01-29
-**Actualizado**: 2026-02-03
-**Status**: ✅ Fase 1 (Backend) COMPLETADA - 105+ endpoints en producción
+**Actualizado**: 2026-02-05
+**Status**: ✅ Fase 1 (Backend) COMPLETADA - 17/17 módulos, 130+ endpoints, compilación exitosa
+**Última sesión**: Correcciones de schema y arquitectura (Certifications, Folders, Inventory)
 **Próxima fase**: Fase 2 (App Móvil Flutter)
 
 ---
