@@ -1,8 +1,10 @@
 # Walkthrough: OAuth Authentication (Google & Apple)
 
-**Módulo**: OAuth
-**Versión API**: 2.2
-**Fecha**: 3 de febrero de 2026
+**Módulo**: OAuth  
+**Versión API**: 2.2  
+**Status**: ✅ IMPLEMENTADO  
+**Fecha Implementación**: 5 de febrero de 2026  
+**Fecha Documentación**: 3 de febrero de 2026
 
 ---
 
@@ -17,6 +19,7 @@ El módulo de **OAuth** permite a los usuarios autenticarse usando sus cuentas d
 - Integración con Supabase Auth
 
 **Providers Soportados**:
+
 - ✅ Google
 - ✅ Apple
 - 🔜 Facebook (reservado para futuro)
@@ -135,6 +138,7 @@ curl -X POST http://localhost:3000/api/v1/auth/oauth/google \
 ```
 
 **Frontend debe**:
+
 1. Recibir la URL
 2. Abrir en navegador (web) o WebView (móvil)
 3. El usuario aprueba permisos en Google
@@ -166,6 +170,7 @@ curl -X POST http://localhost:3000/api/v1/auth/oauth/apple \
 ```
 
 **Flujo similar a Google**:
+
 1. Usuario aprueba en pantalla de Apple
 2. Apple redirige a callback con código
 3. Frontend captura el código
@@ -178,6 +183,7 @@ curl -X POST http://localhost:3000/api/v1/auth/oauth/apple \
 **Autenticación**: No requerida (el access_token se proporciona en query params)
 
 **Query Parameters**:
+
 - `access_token` (string): Token JWT de Supabase
 - `refresh_token` (string, optional): Token de refresh
 - `provider` (string, optional): "google" o "apple"
@@ -359,34 +365,37 @@ curl -X DELETE http://localhost:3000/api/v1/auth/oauth/google \
 1. **Frontend muestra botón "Sign in with Google"**
 
 2. **Usuario hace click**
+
    ```typescript
-   const response = await fetch('/api/v1/auth/oauth/google', {
-     method: 'POST',
-     headers: { 'Content-Type': 'application/json' },
+   const response = await fetch("/api/v1/auth/oauth/google", {
+     method: "POST",
+     headers: { "Content-Type": "application/json" },
      body: JSON.stringify({
-       redirectUrl: 'https://sacdia.app/auth/callback'
-     })
+       redirectUrl: "https://sacdia.app/auth/callback",
+     }),
    });
 
    const { url } = await response.json();
-   window.location.href = url;  // Redirigir a Google
+   window.location.href = url; // Redirigir a Google
    ```
 
 3. **Usuario aprueba en Google**
 
 4. **Google redirige a callback**
+
    ```
    https://sacdia.app/auth/callback?access_token=eyJ...&provider=google
    ```
 
 5. **Frontend captura el token y llama al backend**
+
    ```typescript
    const urlParams = new URLSearchParams(window.location.search);
-   const accessToken = urlParams.get('access_token');
+   const accessToken = urlParams.get("access_token");
 
    const response = await fetch(
      `/api/v1/auth/oauth/callback?access_token=${accessToken}`,
-     { method: 'GET' }
+     { method: "GET" },
    );
 
    const { data } = await response.json();
@@ -406,9 +415,9 @@ curl -X DELETE http://localhost:3000/api/v1/auth/oauth/google \
 7. **Frontend redirige a post-registro**
    ```typescript
    if (data.needsPostRegistration) {
-     router.push('/post-registration');
+     router.push("/post-registration");
    } else {
-     router.push('/dashboard');
+     router.push("/dashboard");
    }
    ```
 
@@ -423,12 +432,14 @@ curl -X DELETE http://localhost:3000/api/v1/auth/oauth/google \
 1. **Usuario va a configuración de perfil**
 
 2. **Ve sección "Providers Conectados"**
+
    ```bash
    GET /api/v1/auth/oauth/providers
    Response: { google_connected: false, apple_connected: false }
    ```
 
 3. **Click en "Conectar Google"**
+
    ```bash
    POST /api/v1/auth/oauth/google
    Response: { url: "https://accounts.google.com/..." }
@@ -437,10 +448,11 @@ curl -X DELETE http://localhost:3000/api/v1/auth/oauth/google \
 4. **Flujo OAuth estándar**
 
 5. **Backend actualiza flag**
+
    ```typescript
    await prisma.users.update({
      where: { id: userId },
-     data: { google_connected: true }
+     data: { google_connected: true },
    });
    ```
 
@@ -459,6 +471,7 @@ curl -X DELETE http://localhost:3000/api/v1/auth/oauth/google \
 1. **App móvil muestra botón de Apple**
 
 2. **Usuario hace click**
+
    ```dart
    // Flutter example
    final response = await dio.post('/api/v1/auth/oauth/apple');
@@ -475,11 +488,13 @@ curl -X DELETE http://localhost:3000/api/v1/auth/oauth/google \
 4. **Callback con token**
 
 5. **App captura deeplink**
+
    ```
    sacdia://auth/callback?access_token=...
    ```
 
 6. **App llama al backend**
+
    ```dart
    final callbackResponse = await dio.get(
      '/api/v1/auth/oauth/callback',
@@ -498,6 +513,7 @@ curl -X DELETE http://localhost:3000/api/v1/auth/oauth/google \
 **Flujo**:
 
 1. **Apple genera email relay**
+
    ```
    abc123xyz@privaterelay.appleid.com
    ```
@@ -505,12 +521,13 @@ curl -X DELETE http://localhost:3000/api/v1/auth/oauth/google \
 2. **Supabase crea usuario con email relay**
 
 3. **Backend recibe en callback**
+
    ```json
    {
      "user": {
        "email": "abc123xyz@privaterelay.appleid.com",
        "user_metadata": {
-         "name": "Juan Pérez",  // Si usuario lo compartió
+         "name": "Juan Pérez", // Si usuario lo compartió
          "email": "abc123xyz@privaterelay.appleid.com"
        }
      }
@@ -566,6 +583,7 @@ curl -X DELETE http://localhost:3000/api/v1/auth/oauth/google \
 **Causa**: Usuario hizo click en "Cancelar" en la pantalla de Google/Apple.
 
 **Comportamiento**:
+
 - Google/Apple redirige a callback con `error=access_denied`
 - Frontend debe capturar este error y mostrar mensaje amigable
 
@@ -573,11 +591,11 @@ curl -X DELETE http://localhost:3000/api/v1/auth/oauth/google \
 
 ```typescript
 const urlParams = new URLSearchParams(window.location.search);
-const error = urlParams.get('error');
+const error = urlParams.get("error");
 
-if (error === 'access_denied') {
-  showMessage('Autenticación cancelada. Intenta nuevamente.');
-  router.push('/login');
+if (error === "access_denied") {
+  showMessage("Autenticación cancelada. Intenta nuevamente.");
+  router.push("/login");
 }
 ```
 
@@ -588,6 +606,7 @@ if (error === 'access_denied') {
 **Causa**: Usuario intenta registrarse con Google usando email ya registrado con email/password.
 
 **Comportamiento**:
+
 - Supabase **vincula automáticamente** las cuentas
 - Usuario puede login con cualquiera de los dos métodos
 - Ambos `google_connected` y email/password funcionan
@@ -601,40 +620,50 @@ if (error === 'access_denied') {
 ### Controller: `oauth.controller.ts`
 
 ```typescript
-import { Controller, Post, Get, Delete, Body, Query, Param, UseGuards, Request } from '@nestjs/common';
-import { OAuthService } from './oauth.service';
-import { JwtAuthGuard } from '../guards/jwt-auth.guard';
+import {
+  Controller,
+  Post,
+  Get,
+  Delete,
+  Body,
+  Query,
+  Param,
+  UseGuards,
+  Request,
+} from "@nestjs/common";
+import { OAuthService } from "./oauth.service";
+import { JwtAuthGuard } from "../guards/jwt-auth.guard";
 
-@Controller('auth/oauth')
+@Controller("auth/oauth")
 export class OAuthController {
   constructor(private readonly oauthService: OAuthService) {}
 
-  @Post('google')
+  @Post("google")
   async googleSignIn(@Body() dto: { redirectUrl?: string }) {
     return await this.oauthService.initiateGoogleSignIn(dto.redirectUrl);
   }
 
-  @Post('apple')
+  @Post("apple")
   async appleSignIn(@Body() dto: { redirectUrl?: string }) {
     return await this.oauthService.initiateAppleSignIn(dto.redirectUrl);
   }
 
-  @Get('callback')
+  @Get("callback")
   async handleCallback(@Query() query: OAuthCallbackDto) {
     return await this.oauthService.handleCallback(query);
   }
 
-  @Get('providers')
+  @Get("providers")
   @UseGuards(JwtAuthGuard)
   async getConnectedProviders(@Request() req) {
     return await this.oauthService.getConnectedProviders(req.user.id);
   }
 
-  @Delete(':provider')
+  @Delete(":provider")
   @UseGuards(JwtAuthGuard)
   async disconnectProvider(
-    @Param('provider') provider: string,
-    @Request() req
+    @Param("provider") provider: string,
+    @Request() req,
   ) {
     return await this.oauthService.disconnectProvider(req.user.id, provider);
   }
@@ -644,23 +673,27 @@ export class OAuthController {
 ### Service: `oauth.service.ts`
 
 ```typescript
-import { Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
-import { SupabaseService } from '../common/services/supabase.service';
-import { PrismaService } from '../common/services/prisma.service';
+import {
+  Injectable,
+  InternalServerErrorException,
+  UnauthorizedException,
+} from "@nestjs/common";
+import { SupabaseService } from "../common/services/supabase.service";
+import { PrismaService } from "../common/services/prisma.service";
 
 @Injectable()
 export class OAuthService {
   constructor(
     private readonly supabase: SupabaseService,
-    private readonly prisma: PrismaService
+    private readonly prisma: PrismaService,
   ) {}
 
   async initiateGoogleSignIn(redirectUrl?: string) {
     const { data, error } = await this.supabase.auth.signInWithOAuth({
-      provider: 'google',
+      provider: "google",
       options: {
-        redirectTo: redirectUrl || 'https://sacdia.app/auth/callback'
-      }
+        redirectTo: redirectUrl || "https://sacdia.app/auth/callback",
+      },
     });
 
     if (error) throw new InternalServerErrorException(error.message);
@@ -670,10 +703,10 @@ export class OAuthService {
 
   async initiateAppleSignIn(redirectUrl?: string) {
     const { data, error } = await this.supabase.auth.signInWithOAuth({
-      provider: 'apple',
+      provider: "apple",
       options: {
-        redirectTo: redirectUrl || 'https://sacdia.app/auth/callback'
-      }
+        redirectTo: redirectUrl || "https://sacdia.app/auth/callback",
+      },
     });
 
     if (error) throw new InternalServerErrorException(error.message);
@@ -685,15 +718,18 @@ export class OAuthService {
     const { access_token } = query;
 
     // Obtener usuario de Supabase
-    const { data: { user }, error } = await this.supabase.auth.getUser(access_token);
+    const {
+      data: { user },
+      error,
+    } = await this.supabase.auth.getUser(access_token);
 
     if (error || !user) {
-      throw new UnauthorizedException('Invalid OAuth callback');
+      throw new UnauthorizedException("Invalid OAuth callback");
     }
 
     // Verificar o crear usuario en BD
     let dbUser = await this.prisma.users.findUnique({
-      where: { id: user.id }
+      where: { id: user.id },
     });
 
     if (!dbUser) {
@@ -703,20 +739,20 @@ export class OAuthService {
 
     // Actualizar flags de providers
     const identities = user.identities || [];
-    const googleConnected = identities.some(i => i.provider === 'google');
-    const appleConnected = identities.some(i => i.provider === 'apple');
+    const googleConnected = identities.some((i) => i.provider === "google");
+    const appleConnected = identities.some((i) => i.provider === "apple");
 
     await this.prisma.users.update({
       where: { id: user.id },
       data: {
         google_connected: googleConnected,
-        apple_connected: appleConnected
-      }
+        apple_connected: appleConnected,
+      },
     });
 
     // Verificar post-registro
     const usersPr = await this.prisma.users_pr.findUnique({
-      where: { user_id: user.id }
+      where: { user_id: user.id },
     });
 
     return {
@@ -724,9 +760,9 @@ export class OAuthService {
       user: {
         ...dbUser,
         google_connected: googleConnected,
-        apple_connected: appleConnected
+        apple_connected: appleConnected,
       },
-      needsPostRegistration: !usersPr?.complete
+      needsPostRegistration: !usersPr?.complete,
     };
   }
 
@@ -737,9 +773,11 @@ export class OAuthService {
         data: {
           id: supabaseUser.id,
           email: supabaseUser.email,
-          name: supabaseUser.user_metadata?.name || supabaseUser.email.split('@')[0],
-          avatar: supabaseUser.user_metadata?.avatar_url
-        }
+          name:
+            supabaseUser.user_metadata?.name ||
+            supabaseUser.email.split("@")[0],
+          avatar: supabaseUser.user_metadata?.avatar_url,
+        },
       });
 
       // Crear users_pr
@@ -749,20 +787,20 @@ export class OAuthService {
           complete: false,
           profile_picture_complete: false,
           personal_info_complete: false,
-          club_selection_complete: false
-        }
+          club_selection_complete: false,
+        },
       });
 
       // Asignar rol "user"
       const userRole = await tx.roles.findFirst({
-        where: { role_name: 'user', role_category: 'GLOBAL' }
+        where: { role_name: "user", role_category: "GLOBAL" },
       });
 
       await tx.users_roles.create({
         data: {
           user_id: user.id,
-          role_id: userRole.id
-        }
+          role_id: userRole.id,
+        },
       });
 
       return user;
@@ -775,8 +813,8 @@ export class OAuthService {
       select: {
         google_connected: true,
         apple_connected: true,
-        fb_connected: true
-      }
+        fb_connected: true,
+      },
     });
 
     return user;
@@ -787,7 +825,7 @@ export class OAuthService {
 
     await this.prisma.users.update({
       where: { id: userId },
-      data: { [field]: false }
+      data: { [field]: false },
     });
 
     return { success: true };
@@ -827,68 +865,68 @@ model users {
 ### Test E2E: `oauth.e2e-spec.ts`
 
 ```typescript
-describe('OAuth API (e2e)', () => {
-  it('POST /auth/oauth/google - should return OAuth URL', async () => {
+describe("OAuth API (e2e)", () => {
+  it("POST /auth/oauth/google - should return OAuth URL", async () => {
     const response = await request(app.getHttpServer())
-      .post('/api/v1/auth/oauth/google')
-      .send({ redirectUrl: 'https://test.com/callback' })
+      .post("/api/v1/auth/oauth/google")
+      .send({ redirectUrl: "https://test.com/callback" })
       .expect(200);
 
-    expect(response.body.url).toContain('accounts.google.com');
+    expect(response.body.url).toContain("accounts.google.com");
   });
 
-  it('POST /auth/oauth/apple - should return OAuth URL', async () => {
+  it("POST /auth/oauth/apple - should return OAuth URL", async () => {
     const response = await request(app.getHttpServer())
-      .post('/api/v1/auth/oauth/apple')
+      .post("/api/v1/auth/oauth/apple")
       .expect(200);
 
-    expect(response.body.url).toContain('appleid.apple.com');
+    expect(response.body.url).toContain("appleid.apple.com");
   });
 
-  it('GET /auth/oauth/callback - should create user and return token', async () => {
+  it("GET /auth/oauth/callback - should create user and return token", async () => {
     // Mock Supabase response
-    jest.spyOn(supabaseService.auth, 'getUser').mockResolvedValue({
+    jest.spyOn(supabaseService.auth, "getUser").mockResolvedValue({
       data: {
         user: {
-          id: 'new-user-id',
-          email: 'test@gmail.com',
+          id: "new-user-id",
+          email: "test@gmail.com",
           user_metadata: {
-            name: 'Test User',
-            avatar_url: 'https://example.com/avatar.jpg'
+            name: "Test User",
+            avatar_url: "https://example.com/avatar.jpg",
           },
-          identities: [{ provider: 'google' }]
-        }
+          identities: [{ provider: "google" }],
+        },
       },
-      error: null
+      error: null,
     });
 
     const response = await request(app.getHttpServer())
-      .get('/api/v1/auth/oauth/callback')
-      .query({ access_token: 'mock-token' })
+      .get("/api/v1/auth/oauth/callback")
+      .query({ access_token: "mock-token" })
       .expect(200);
 
     expect(response.body.user.google_connected).toBe(true);
     expect(response.body.needsPostRegistration).toBe(true);
   });
 
-  it('GET /auth/oauth/providers - should return connected providers', async () => {
+  it("GET /auth/oauth/providers - should return connected providers", async () => {
     const response = await request(app.getHttpServer())
-      .get('/api/v1/auth/oauth/providers')
-      .set('Authorization', `Bearer ${token}`)
+      .get("/api/v1/auth/oauth/providers")
+      .set("Authorization", `Bearer ${token}`)
       .expect(200);
 
-    expect(response.body).toHaveProperty('google_connected');
-    expect(response.body).toHaveProperty('apple_connected');
+    expect(response.body).toHaveProperty("google_connected");
+    expect(response.body).toHaveProperty("apple_connected");
   });
 
-  it('DELETE /auth/oauth/google - should disconnect provider', async () => {
+  it("DELETE /auth/oauth/google - should disconnect provider", async () => {
     await request(app.getHttpServer())
-      .delete('/api/v1/auth/oauth/google')
-      .set('Authorization', `Bearer ${token}`)
+      .delete("/api/v1/auth/oauth/google")
+      .set("Authorization", `Bearer ${token}`)
       .expect(200);
 
     const user = await prisma.users.findUnique({
-      where: { id: userId }
+      where: { id: userId },
     });
 
     expect(user.google_connected).toBe(false);

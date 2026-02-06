@@ -779,6 +779,7 @@ DELETE /api/v1/camporees/:id/members/:userId
 ```
 
 **Validaciones Críticas**:
+
 - ✅ Validar seguro activo tipo CAMPOREE
 - ✅ Validar fecha de vencimiento del seguro > fecha fin del campamento
 - ✅ Usar transacciones para registro de miembros
@@ -887,6 +888,7 @@ DELETE /api/v1/users/:userId/certifications/:certificationId
 ```
 
 **Estructura Similar a Classes**:
+
 - Módulos y secciones
 - Progreso por sección
 - Tracking de completion_status
@@ -945,7 +947,10 @@ GET    /api/v1/catalogs/inventory-categories
 
 ---
 
-### OAuth (5) ✅ NUEVO
+### OAuth (5) ✅ IMPLEMENTADO
+
+**Fecha**: 5 de febrero de 2026
+**Archivos**: `oauth.controller.ts`, `oauth.service.ts`
 
 **Providers**: Google, Apple
 
@@ -954,10 +959,10 @@ GET    /api/v1/catalogs/inventory-categories
 POST   /api/v1/auth/oauth/google
 POST   /api/v1/auth/oauth/apple
 
-# Callback (maneja Supabase automáticamente)
+# Manejar Callback
 GET    /api/v1/auth/oauth/callback
 
-# Gestión de Providers Conectados
+# Gestión de Providers (Auth required)
 GET    /api/v1/auth/oauth/providers                    # Auth required
 DELETE /api/v1/auth/oauth/:provider                    # Auth required
 ```
@@ -993,6 +998,7 @@ DELETE /api/v1/auth/oauth/:provider                    # Auth required
 ```
 
 **Flags en BD**:
+
 - `users.google_connected` (boolean)
 - `users.apple_connected` (boolean)
 - `users.fb_connected` (boolean) - reservado
@@ -1038,6 +1044,7 @@ DELETE /api/v1/fcm-tokens/:tokenId
 ```
 
 **Tabla en BD**: `user_fcm_tokens`
+
 - Máximo recomendado: 5 tokens por usuario
 - Auto-cleanup de tokens expirados
 
@@ -1051,10 +1058,10 @@ DELETE /api/v1/fcm-tokens/:tokenId
 
 ```typescript
 // Unirse a sala de club
-socket.emit('join-club', { clubId: number });
+socket.emit("join-club", { clubId: number });
 
 // Salir de sala de club
-socket.emit('leave-club', { clubId: number });
+socket.emit("leave-club", { clubId: number });
 ```
 
 **Eventos Servidor → Cliente**:
@@ -1079,10 +1086,10 @@ socket.emit('leave-club', { clubId: number });
 **Autenticación**:
 
 ```typescript
-const socket = io('http://localhost:3000/api/v1/ws', {
+const socket = io("http://localhost:3000/api/v1/ws", {
   auth: {
-    token: 'jwt_token'        // O query: { token: 'jwt_token' }
-  }
+    token: "jwt_token", // O query: { token: 'jwt_token' }
+  },
 });
 ```
 
@@ -1145,7 +1152,8 @@ const socket = io('http://localhost:3000/api/v1/ws', {
 ---
 
 **Generado**: 2026-01-29
-**Actualizado**: 2026-02-03
-**Versión**: 2.2.0 (Con 17 módulos completos)
+**Actualizado**: 2026-02-05
+**Versión**: 2.2.0 (Con 17 módulos completos - Backend implementado 100%)
 **Total Endpoints REST**: 105+
 **WebSockets**: Gateway + eventos real-time
+**Implementación**: Certifications, Folders, Inventory implementados en esta sesión
