@@ -7,52 +7,63 @@
 ## 🎯 Por Dónde Empezar
 
 ### Backend Developer
+
 1. Lee [Overview](01-OVERVIEW.md) para entender la arquitectura
-2. Revisa [Database Guide](database/README.md) para el schema
-3. Consulta [API Guide](api/README.md) para endpoints
-4. Sigue [Implementation Roadmap](03-IMPLEMENTATION-ROADMAP.md)
+2. Consulta [Database Reference](03-DATABASE/README.md)
+3. Revisa [API Specification](02-API/API-SPECIFICATION.md)
+4. Explora [Features](01-FEATURES/) para implementación específica
 
 ### Mobile Developer
-1. Lee [Overview](01-OVERVIEW.md) para el contexto
-2. Revisa [Processes](02-PROCESSES.md) para flujos de usuario
-3. Consulta [API Specification](api/API-SPECIFICATION.md) para endpoints
-4. Revisa [Endpoints Reference](api/ENDPOINTS-REFERENCE.md) para integraciones
+
+1. Lee [Overview](01-OVERVIEW.md)
+2. Revisa [Processes](02-PROCESSES.md) para flujos
+3. Consulta [Features](01-FEATURES/) para detalles de cada módulo
+4. Revisa [Endpoints Reference](02-API/ENDPOINTS-REFERENCE.md)
 
 ### Frontend/Admin Developer
+
 1. Lee [Overview](01-OVERVIEW.md)
-2. Revisa [API Specification](api/API-SPECIFICATION.md)
-3. Consulta sistema RBAC en [Architecture Decisions](api/ARCHITECTURE-DECISIONS.md)
+2. Consulta [Features](01-FEATURES/)
+3. Revisa sistema RBAC en [Architecture Decisions](02-API/ARCHITECTURE-DECISIONS.md)
 
 ---
 
-## 📚 Índice de Documentación
+## 📚 Índice de Documentación Consolidada
 
-### Documentos Principales
+### 00-STEERING (Estándares)
 
-| Documento | Descripción |
-|-----------|-------------|
-| [01-OVERVIEW.md](01-OVERVIEW.md) | Visión general del proyecto, stack tecnológico y arquitectura |
-| [02-PROCESSES.md](02-PROCESSES.md) | Procesos de negocio detallados (Auth, Post-registro, etc.) |
-| [03-IMPLEMENTATION-ROADMAP.md](03-IMPLEMENTATION-ROADMAP.md) | Roadmap de implementación por fases |
+Guías rectoras del proyecto.
 
-### Base de Datos
+- [Product Vision](00-STEERING/product.md)
+- [Tech Stack](00-STEERING/tech.md)
+- [Coding Standards](00-STEERING/coding-standards.md)
+- [Project Structure](00-STEERING/structure.md)
 
-| Documento | Descripción |
-|-----------|-------------|
-| [database/README.md](database/README.md) | Guía de base de datos |
-| [database/schema.prisma](database/schema.prisma) | Schema Prisma definitivo |
-| [database/SCHEMA-REFERENCE.md](database/SCHEMA-REFERENCE.md) | Referencia completa del schema (tablas, relaciones, naming) |
-| [database/migrations/](database/migrations/) | Scripts de migración SQL |
+### 01-FEATURES (Módulos)
 
-### REST API
+Documentación funcional y walkthroughs de implementación.
 
-| Documento | Descripción |
-|-----------|-------------|
-| [api/README.md](api/README.md) | Guía de la REST API |
-| [api/API-SPECIFICATION.md](api/API-SPECIFICATION.md) | Especificación técnica completa v2.0 |
-| [api/ENDPOINTS-REFERENCE.md](api/ENDPOINTS-REFERENCE.md) | Referencia de endpoints por proceso |
-| [api/ARCHITECTURE-DECISIONS.md](api/ARCHITECTURE-DECISIONS.md) | Decisiones arquitectónicas (ADRs) |
-| [api/walkthrough-backend-init.md](api/walkthrough-backend-init.md) | Walkthrough de inicialización del backend |
+- **Auth & Users**: [Features/Auth](01-FEATURES/auth/)
+- **Finanzas**: [Features/Finanzas](01-FEATURES/finanzas/)
+- **Actividades**: [Features/Actividades](01-FEATURES/actividades/)
+- **Certificaciones**: [Features/Certificaciones](01-FEATURES/certificaciones-guias-mayores/)
+- **Infraestructura**: [Features/Infrastructure](01-FEATURES/infrastructure/)
+
+### 02-API (Referencia Técnica)
+
+- [API Specification](02-API/API-SPECIFICATION.md)
+- [Endpoints Reference](02-API/ENDPOINTS-REFERENCE.md)
+- [Testing Guide](02-API/TESTING-GUIDE.md)
+
+### 03-DATABASE (Datos)
+
+- [Schema Reference](03-DATABASE/SCHEMA-REFERENCE.md)
+- [Migrations](03-DATABASE/migrations/)
+
+### GUIDES (Guías Generales)
+
+- [Spec-Driven Development](guides/spec-driven-development.md)
+- [Deployment Guide](guides/deployment.md)
 
 ---
 
@@ -64,18 +75,18 @@ graph TB
         MOBILE[App Móvil Flutter]
         ADMIN[Panel Admin Next.js]
     end
-    
+
     subgraph "Backend"
         API[REST API NestJS]
         PRISMA[Prisma ORM]
     end
-    
+
     subgraph "Services"
         SUPABASE[Supabase]
         AUTH[Auth + Storage]
         DB[(PostgreSQL)]
     end
-    
+
     MOBILE --> API
     ADMIN --> API
     API --> PRISMA
@@ -90,6 +101,7 @@ graph TB
 ## 🔗 Links Rápidos
 
 ### Stack Tecnológico
+
 - **Backend**: NestJS 10.x + TypeScript + Prisma
 - **Database**: PostgreSQL 15.x (Supabase)
 - **Auth**: Supabase Auth (JWT)
@@ -98,6 +110,7 @@ graph TB
 - **Deploy**: Vercel Serverless
 
 ### Recursos Externos
+
 - [Supabase Dashboard](https://supabase.com)
 - [Prisma Docs](https://prisma.io/docs)
 - [NestJS Docs](https://docs.nestjs.com)

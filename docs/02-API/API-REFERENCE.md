@@ -2,6 +2,10 @@
 
 Este documento detalla los endpoints disponibles en la API REST, organizados por módulo.
 
+> [!IMPORTANT]
+> **Base URL**: Todos los endpoints usan el prefijo `/api/v1`  
+> Ejemplo: `GET /api/v1/auth/me` (no `/auth/me`)
+
 ## 🔑 Autenticación y Seguridad
 
 Todas las peticiones protegidas requieren el header:
