@@ -20,10 +20,10 @@ sacdia-admin/
 *.log
 .cache/
 
+# Local AI context files (personal, non-versioned)
+*.local.md
+
 # Ignore claude-mem context files (local only)
-CLAUDE.md
-docs/CLAUDE.md
-docs/api/CLAUDE.md
 .claude/
 .agent/
 .agents/

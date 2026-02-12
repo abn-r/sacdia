@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Honors &amp; Specialties Grid Catalog - SACDIA</title>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Icons -->
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Theme Configuration -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#2b2bee",
+                        "primary-hover": "#1e1eb8",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#101022",
+                        "surface-dark": "#1a1a2e",
+                        "surface-hover": "#23233b",
+                        "border-dark": "#2a2a40",
+                        "nature": "#22c55e",
+                        "arts": "#f59e0b",
+                        "spiritual": "#6366f1",
+                        "vocational": "#ef4444",
+                        "health": "#ec4899",
+                        "household": "#8b5cf6",
+                    },
+                    fontFamily: {
+                        "display": ["Lexend", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #101022; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2a2a40; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #2b2bee; 
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-200 font-display min-h-screen flex overflow-hidden">
+<!-- Sidebar -->
+<aside class="w-64 flex-shrink-0 border-r border-slate-200 dark:border-border-dark bg-white dark:bg-surface-dark flex flex-col hidden lg:flex">
+<div class="h-16 flex items-center px-6 border-b border-slate-200 dark:border-border-dark">
+<div class="flex items-center gap-2 text-primary font-bold text-xl">
+<span class="material-icons-round">local_fire_department</span>
+<span>SACDIA</span>
+</div>
+</div>
+<nav class="flex-1 overflow-y-auto py-6 px-3 space-y-1">
+<a class="flex items-center gap-3 px-3 py-2.5 rounded text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors group" href="#">
+<span class="material-icons-round text-[20px] group-hover:text-primary transition-colors">dashboard</span>
+<span class="text-sm font-medium">Dashboard</span>
+</a>
+<div class="pt-4 pb-2 px-3 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+                Management
+            </div>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors group" href="#">
+<span class="material-icons-round text-[20px] group-hover:text-primary transition-colors">groups</span>
+<span class="text-sm font-medium">Clubs</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors group" href="#">
+<span class="material-icons-round text-[20px] group-hover:text-primary transition-colors">person</span>
+<span class="text-sm font-medium">Members</span>
+</a>
+<div class="pt-4 pb-2 px-3 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+                Catalog
+            </div>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded bg-primary/10 text-primary transition-colors" href="#">
+<span class="material-icons-round text-[20px]">military_tech</span>
+<span class="text-sm font-medium">Honors &amp; Specialties</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors group" href="#">
+<span class="material-icons-round text-[20px] group-hover:text-primary transition-colors">school</span>
+<span class="text-sm font-medium">Classes</span>
+</a>
+<div class="pt-4 pb-2 px-3 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+                System
+            </div>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors group" href="#">
+<span class="material-icons-round text-[20px] group-hover:text-primary transition-colors">settings</span>
+<span class="text-sm font-medium">Settings</span>
+</a>
+</nav>
+<div class="p-4 border-t border-slate-200 dark:border-border-dark">
+<div class="flex items-center gap-3 p-2 rounded-lg bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-border-dark">
+<div class="h-8 w-8 rounded bg-primary/20 flex items-center justify-center text-primary font-bold">JD</div>
+<div class="flex-1 min-w-0">
+<p class="text-sm font-medium truncate">John Doe</p>
+<p class="text-xs text-slate-500 dark:text-slate-400 truncate">Admin</p>
+</div>
+<button class="text-slate-400 hover:text-white">
+<span class="material-icons-round text-[18px]">logout</span>
+</button>
+</div>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 flex flex-col min-w-0 overflow-hidden bg-background-light dark:bg-background-dark">
+<!-- Header -->
+<header class="h-16 flex items-center justify-between px-6 bg-white dark:bg-surface-dark border-b border-slate-200 dark:border-border-dark z-10">
+<div class="flex items-center gap-4 lg:hidden">
+<button class="p-2 -ml-2 text-slate-500 hover:text-primary">
+<span class="material-icons-round">menu</span>
+</button>
+<div class="text-primary font-bold text-xl">SACDIA</div>
+</div>
+<!-- Breadcrumbs (Desktop) -->
+<nav class="hidden lg:flex text-sm font-medium text-slate-500 dark:text-slate-400">
+<a class="hover:text-primary transition-colors" href="#">Home</a>
+<span class="mx-2 text-slate-600">/</span>
+<span class="text-slate-900 dark:text-white">Honors Catalog</span>
+</nav>
+<div class="flex items-center gap-4">
+<button class="relative p-2 text-slate-500 dark:text-slate-400 hover:text-primary transition-colors rounded-full hover:bg-slate-100 dark:hover:bg-white/5">
+<span class="material-icons-round">notifications</span>
+<span class="absolute top-2 right-2 h-2 w-2 rounded-full bg-red-500 border border-white dark:border-surface-dark"></span>
+</button>
+<button class="p-2 text-slate-500 dark:text-slate-400 hover:text-primary transition-colors rounded-full hover:bg-slate-100 dark:hover:bg-white/5">
+<span class="material-icons-round">help_outline</span>
+</button>
+</div>
+</header>
+<!-- Content Scroll Area -->
+<div class="flex-1 overflow-y-auto p-4 lg:p-8">
+<div class="max-w-7xl mx-auto space-y-8">
+<!-- Page Title & Actions -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+<div>
+<h1 class="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Honors Catalog</h1>
+<p class="mt-1 text-slate-500 dark:text-slate-400">Browse and manage the complete library of Pathfinder honors and specialties.</p>
+</div>
+<button class="inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded font-medium transition-colors shadow-lg shadow-primary/25">
+<span class="material-icons-round text-lg">add</span>
+                        Add New Honor
+                    </button>
+</div>
+<!-- Filters & Search Toolbar -->
+<div class="bg-white dark:bg-surface-dark rounded-xl p-4 border border-slate-200 dark:border-border-dark shadow-sm">
+<div class="flex flex-col lg:flex-row gap-4 items-center justify-between">
+<!-- Search -->
+<div class="relative w-full lg:w-96 group">
+<span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors">
+<span class="material-icons-round">search</span>
+</span>
+<input class="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all placeholder:text-slate-400" placeholder="Search honors by name..." type="text"/>
+</div>
+<!-- Category Filter Tabs -->
+<div class="w-full lg:w-auto overflow-x-auto pb-2 lg:pb-0 -mx-4 px-4 lg:mx-0 lg:px-0">
+<div class="flex items-center gap-2">
+<button class="px-4 py-2 rounded text-sm font-medium bg-primary text-white shadow-md shadow-primary/20 whitespace-nowrap">
+                                    All Honors
+                                </button>
+<button class="px-4 py-2 rounded text-sm font-medium bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10 transition-colors whitespace-nowrap">
+<span class="inline-block w-2 h-2 rounded-full bg-nature mr-2"></span>Nature
+                                </button>
+<button class="px-4 py-2 rounded text-sm font-medium bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10 transition-colors whitespace-nowrap">
+<span class="inline-block w-2 h-2 rounded-full bg-arts mr-2"></span>Arts &amp; Crafts
+                                </button>
+<button class="px-4 py-2 rounded text-sm font-medium bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10 transition-colors whitespace-nowrap">
+<span class="inline-block w-2 h-2 rounded-full bg-spiritual mr-2"></span>Spiritual
+                                </button>
+<button class="px-4 py-2 rounded text-sm font-medium bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10 transition-colors whitespace-nowrap">
+<span class="inline-block w-2 h-2 rounded-full bg-health mr-2"></span>Health
+                                </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Grid Catalog -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+<!-- Card 1: Nature -->
+<div class="group bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark overflow-hidden hover:border-primary/50 dark:hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-1">
+<div class="h-32 bg-gradient-to-br from-green-900/40 to-emerald-900/10 flex items-center justify-center relative p-4">
+<div class="absolute top-3 right-3">
+<span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-nature/10 text-nature border border-nature/20">
+                                    Nature
+                                </span>
+</div>
+<img class="h-20 w-20 object-cover rounded-full border-4 border-white dark:border-surface-dark shadow-md z-10" data-alt="Forest trees representing nature honor" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDbQA5rpPlpPnk7aVEuZnd6CUPfHQ0_2xbTOusYxT57F_-Yq_Ev4kfYTBBaa_BVEf62QYOfaNFkVBNb1n1CUMuVF07jDlDaW7QjoFtXrrQMlwXTyORDJJwhip-BR_d4WWlbBq9Z7jzwKts5sxL0Jaz-CFUZ2nrssLTrxfHsmPyv8vt5r-bOpmjLu-vpR_6FdJ0O5SlJOaCXdSWnOBc4zHhKrPPULM2a4M6S6IMOwdChea0c0lasZfzA3nQArIP11l3_dsrpqUT7zn8"/>
+</div>
+<div class="p-5">
+<h3 class="font-bold text-lg text-slate-900 dark:text-white group-hover:text-primary transition-colors">Trees</h3>
+<p class="text-xs text-slate-400 mt-1 mb-3 font-mono">AD-001 • Level 1</p>
+<p class="text-sm text-slate-500 dark:text-slate-400 line-clamp-2">Identify and classify common trees. Understand the importance of forests for the ecosystem.</p>
+<div class="mt-5 flex items-center gap-3 pt-4 border-t border-slate-100 dark:border-white/5">
+<button class="flex-1 py-2 px-3 text-sm font-medium text-center text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 rounded transition-colors">
+                                    View Details
+                                </button>
+<button class="p-2 text-slate-400 hover:text-primary hover:bg-primary/10 rounded transition-colors">
+<span class="material-icons-round text-sm">edit</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Card 2: Arts -->
+<div class="group bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark overflow-hidden hover:border-primary/50 dark:hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-1">
+<div class="h-32 bg-gradient-to-br from-amber-900/40 to-orange-900/10 flex items-center justify-center relative p-4">
+<div class="absolute top-3 right-3">
+<span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-arts/10 text-arts border border-arts/20">
+                                    Arts
+                                </span>
+</div>
+<img class="h-20 w-20 object-cover rounded-full border-4 border-white dark:border-surface-dark shadow-md z-10" data-alt="Palette and paint brushes art honor" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBv3eC8UNvTrSlk5wU47R_6zOOFvOpu6d59nrFZyvXIKilAwdbEczTBxKn5hUKEzFaeDlhEnCpYo7ygOoeV0AZlKQtrdQxnvZ2ZMfaIIQcBJGC9F3NO4yoh7QVypxWbsqnpBdVXl-A6h-ltrQZQURrpOe3Pre2Xi_aw-GR0jPO5i8w3lND6QmCHi4KC3iJ7URZES3suD2BGnEhw8cH_grsxvSxFFHaOXalsCXkl86KCNNCnfd4l3_EcmzrAwxdGkyVVOo2K-2GIkhg"/>
+</div>
+<div class="p-5">
+<h3 class="font-bold text-lg text-slate-900 dark:text-white group-hover:text-primary transition-colors">Painting</h3>
+<p class="text-xs text-slate-400 mt-1 mb-3 font-mono">AR-014 • Level 2</p>
+<p class="text-sm text-slate-500 dark:text-slate-400 line-clamp-2">Master basic painting techniques using oil or acrylics. Create a landscape or portrait piece.</p>
+<div class="mt-5 flex items-center gap-3 pt-4 border-t border-slate-100 dark:border-white/5">
+<button class="flex-1 py-2 px-3 text-sm font-medium text-center text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 rounded transition-colors">
+                                    View Details
+                                </button>
+<button class="p-2 text-slate-400 hover:text-primary hover:bg-primary/10 rounded transition-colors">
+<span class="material-icons-round text-sm">edit</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Card 3: Spiritual -->
+<div class="group bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark overflow-hidden hover:border-primary/50 dark:hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-1">
+<div class="h-32 bg-gradient-to-br from-indigo-900/40 to-blue-900/10 flex items-center justify-center relative p-4">
+<div class="absolute top-3 right-3">
+<span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-spiritual/10 text-spiritual border border-spiritual/20">
+                                    Spiritual
+                                </span>
+</div>
+<img class="h-20 w-20 object-cover rounded-full border-4 border-white dark:border-surface-dark shadow-md z-10" data-alt="Open bible with light spiritual honor" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBVIfdutZAVUc9cVUbKBbNa-7FaUTNJzUTbEyvntE1sFl_J7LSb8MXjXIOX0_aOWv9G8UUdcgQAqFJJpgOu4mC63TZpSZ2FxAHK3SWflzjKpoZE6ZK40d6-txMOMS6xH0cOVc2IejIBj_qkltuBVPbDxUNn6m6z7Me3Qrrr8uAsRWjUzkPzfQcwB7j3iwQ_16-WdrhvndpFZATqarQ_lpThmJGxLTHwdtMwV64CMDbADG3fw6e9zTfHSKa0zjoyscTXS3fYGN8bErU"/>
+</div>
+<div class="p-5">
+<h3 class="font-bold text-lg text-slate-900 dark:text-white group-hover:text-primary transition-colors">Bible Marking</h3>
+<p class="text-xs text-slate-400 mt-1 mb-3 font-mono">SP-005 • Level 1</p>
+<p class="text-sm text-slate-500 dark:text-slate-400 line-clamp-2">Learn methods for marking your Bible for effective study and giving Bible studies.</p>
+<div class="mt-5 flex items-center gap-3 pt-4 border-t border-slate-100 dark:border-white/5">
+<button class="flex-1 py-2 px-3 text-sm font-medium text-center text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 rounded transition-colors">
+                                    View Details
+                                </button>
+<button class="p-2 text-slate-400 hover:text-primary hover:bg-primary/10 rounded transition-colors">
+<span class="material-icons-round text-sm">edit</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Card 4: Health -->
+<div class="group bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark overflow-hidden hover:border-primary/50 dark:hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-1">
+<div class="h-32 bg-gradient-to-br from-pink-900/40 to-rose-900/10 flex items-center justify-center relative p-4">
+<div class="absolute top-3 right-3">
+<span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-health/10 text-health border border-health/20">
+                                    Health
+                                </span>
+</div>
+<img class="h-20 w-20 object-cover rounded-full border-4 border-white dark:border-surface-dark shadow-md z-10" data-alt="First aid kit health honor" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBJXtzL_iTTmuaA2zkQukHNhOBUf1D9yLc8GE_s7tze07OH9fpAA9R1maINxZWVegfqaadSjwRQFkkgVG2kBBiGn3Usx2F63aWR7DHcZME2WN432T00HWdWxk0NJsjF0KEHt3wgYNf1ioKMLxYpdQw4K18lzjcg3L_3sfIKaHLD2V-95XKn2MmFw6pqLFai62nN_SLoSq4Gc5p_9ZVTRErXWHUItV662L0zzKjn-GceLB960FNvRN5zFd0zV3TDca01X-R1kQYri9M"/>
+</div>
+<div class="p-5">
+<h3 class="font-bold text-lg text-slate-900 dark:text-white group-hover:text-primary transition-colors">First Aid</h3>
+<p class="text-xs text-slate-400 mt-1 mb-3 font-mono">HM-003 • Level 2</p>
+<p class="text-sm text-slate-500 dark:text-slate-400 line-clamp-2">Basic Red Cross First Aid certification. Learn CPR and how to handle emergencies.</p>
+<div class="mt-5 flex items-center gap-3 pt-4 border-t border-slate-100 dark:border-white/5">
+<button class="flex-1 py-2 px-3 text-sm font-medium text-center text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 rounded transition-colors">
+                                    View Details
+                                </button>
+<button class="p-2 text-slate-400 hover:text-primary hover:bg-primary/10 rounded transition-colors">
+<span class="material-icons-round text-sm">edit</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Card 5: Vocational -->
+<div class="group bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark overflow-hidden hover:border-primary/50 dark:hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-1">
+<div class="h-32 bg-gradient-to-br from-red-900/40 to-orange-900/10 flex items-center justify-center relative p-4">
+<div class="absolute top-3 right-3">
+<span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-vocational/10 text-vocational border border-vocational/20">
+                                    Vocational
+                                </span>
+</div>
+<img class="h-20 w-20 object-cover rounded-full border-4 border-white dark:border-surface-dark shadow-md z-10" data-alt="Mechanic fixing car vocational honor" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD05QX1Z04SQJ0gsZHQGOIzLeek_TSL4TuedBC_vK6wsB-40lXdVv-vY-fN1wKfxBYMaXKJJRIm-Zawy09AkMtabxmfufc59h96zNcDVLMGuREdfcWIfloEgqh2RlFcttsePMpoyqKHxSq7FDSUlR5vIwiKzIK9CHDh9sjlJeEzmiGBO3PXKeEhzJozPMCDj6AEubQe6ZrNdMYaEtX03YzjCmNNCBIBDg_9PMgKfF0LkUu4Yy68Lljxa9k-ZauVrK00-09sv1oh9zU"/>
+</div>
+<div class="p-5">
+<h3 class="font-bold text-lg text-slate-900 dark:text-white group-hover:text-primary transition-colors">Auto Mechanics</h3>
+<p class="text-xs text-slate-400 mt-1 mb-3 font-mono">VO-012 • Level 3</p>
+<p class="text-sm text-slate-500 dark:text-slate-400 line-clamp-2">Understand the basic principles of an internal combustion engine and vehicle maintenance.</p>
+<div class="mt-5 flex items-center gap-3 pt-4 border-t border-slate-100 dark:border-white/5">
+<button class="flex-1 py-2 px-3 text-sm font-medium text-center text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 rounded transition-colors">
+                                    View Details
+                                </button>
+<button class="p-2 text-slate-400 hover:text-primary hover:bg-primary/10 rounded transition-colors">
+<span class="material-icons-round text-sm">edit</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Card 6: Nature -->
+<div class="group bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark overflow-hidden hover:border-primary/50 dark:hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-1">
+<div class="h-32 bg-gradient-to-br from-green-900/40 to-teal-900/10 flex items-center justify-center relative p-4">
+<div class="absolute top-3 right-3">
+<span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-nature/10 text-nature border border-nature/20">
+                                    Nature
+                                </span>
+</div>
+<img class="h-20 w-20 object-cover rounded-full border-4 border-white dark:border-surface-dark shadow-md z-10" data-alt="Insects close up nature honor" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA1j3yTYPDGedicjzTOmbEaUuYZSVBOp1KbIsjX02CAbTdkgMxXQqVps7UqYXl1kZnqXNS6wXFlANtZ2A0AZw4XuqOIvaJ_dCqKMyAa4WqWd8paARzQTIo7eZR-QTN3dXFY_0EL5No3EwynfmzLYNnWskGlnjQKxLC4Lc1xMOQJLof68tC7cVSQWkUns0rYrMsD5EBitE63hYseUrhPzjbURPj3oWPDg91Swa69TRVPqZrV_wIfur7UenLe5R8j0-ejsiZOVG60GlI"/>
+</div>
+<div class="p-5">
+<h3 class="font-bold text-lg text-slate-900 dark:text-white group-hover:text-primary transition-colors">Insects</h3>
+<p class="text-xs text-slate-400 mt-1 mb-3 font-mono">AD-008 • Level 1</p>
+<p class="text-sm text-slate-500 dark:text-slate-400 line-clamp-2">Identify common insects. Collect, mount, and label insects for a collection display.</p>
+<div class="mt-5 flex items-center gap-3 pt-4 border-t border-slate-100 dark:border-white/5">
+<button class="flex-1 py-2 px-3 text-sm font-medium text-center text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 rounded transition-colors">
+                                    View Details
+                                </button>
+<button class="p-2 text-slate-400 hover:text-primary hover:bg-primary/10 rounded transition-colors">
+<span class="material-icons-round text-sm">edit</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Card 7: Household Arts -->
+<div class="group bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark overflow-hidden hover:border-primary/50 dark:hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-1">
+<div class="h-32 bg-gradient-to-br from-violet-900/40 to-purple-900/10 flex items-center justify-center relative p-4">
+<div class="absolute top-3 right-3">
+<span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-household/10 text-household border border-household/20">
+                                    Household
+                                </span>
+</div>
+<img class="h-20 w-20 object-cover rounded-full border-4 border-white dark:border-surface-dark shadow-md z-10" data-alt="Cooking ingredients household honor" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6zq4xTjVmg2VGRd1XeoOElQNW_O__fdeyulDNoUKbPPAkFXhR5iOx0F724yO5oDO8Wn7XN5_ufEUT_W8XstAu2cPYd3CMZJsExQnE8O-fOfuIPpFl4v78ENvHPyB14SZ1tayzQUDefBNjaxxWkIOQBO1l6X4FUoPrd-ixobg-CMs-paroi7p6ksZKD-GWwTDjgRD2-9CX0V-rAEmfSPmo6pyLtsQlNTx6n8QNR0auGXqpYEm6u28kItyYquaXm9s5sNnfBO5Qf9g"/>
+</div>
+<div class="p-5">
+<h3 class="font-bold text-lg text-slate-900 dark:text-white group-hover:text-primary transition-colors">Cooking</h3>
+<p class="text-xs text-slate-400 mt-1 mb-3 font-mono">HA-002 • Level 1</p>
+<p class="text-sm text-slate-500 dark:text-slate-400 line-clamp-2">Prepare a balanced meal, understand nutrition basics, and kitchen safety protocols.</p>
+<div class="mt-5 flex items-center gap-3 pt-4 border-t border-slate-100 dark:border-white/5">
+<button class="flex-1 py-2 px-3 text-sm font-medium text-center text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 rounded transition-colors">
+                                    View Details
+                                </button>
+<button class="p-2 text-slate-400 hover:text-primary hover:bg-primary/10 rounded transition-colors">
+<span class="material-icons-round text-sm">edit</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Card 8: Recreation (Using Nature style as fallback/similar) -->
+<div class="group bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark overflow-hidden hover:border-primary/50 dark:hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-1">
+<div class="h-32 bg-gradient-to-br from-green-900/40 to-lime-900/10 flex items-center justify-center relative p-4">
+<div class="absolute top-3 right-3">
+<span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-nature/10 text-nature border border-nature/20">
+                                    Recreation
+                                </span>
+</div>
+<img class="h-20 w-20 object-cover rounded-full border-4 border-white dark:border-surface-dark shadow-md z-10" data-alt="Camping tent recreation honor" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA-WIZZFO3hdTXc4G0U06ItVtSAjjZMA_miFcknJfDakv76gCdXpE40ugWOP5BKWMmbZMqSTcFJqyInvyqPQo5waXy1RkYSdBmM1VKMv2smhMsRt4cmewzQy1I1Vi-Ci_yEyX0bQHvO6R2L-wXSmvGrdvrMvJPIz8-1fwTYfgjbe1xoxcMUzi9Z_mmkU23igtfalaGuDByoebNuN91hCbckPQ34KtLMhPCRiNtWkvoPxmIegni57kUsR6IMYrqATuktlyqCN69F4bU"/>
+</div>
+<div class="p-5">
+<h3 class="font-bold text-lg text-slate-900 dark:text-white group-hover:text-primary transition-colors">Camping Skills I</h3>
+<p class="text-xs text-slate-400 mt-1 mb-3 font-mono">REC-001 • Level 1</p>
+<p class="text-sm text-slate-500 dark:text-slate-400 line-clamp-2">Be at least in the 5th grade. Understand and practice wilderness safety and etiquette.</p>
+<div class="mt-5 flex items-center gap-3 pt-4 border-t border-slate-100 dark:border-white/5">
+<button class="flex-1 py-2 px-3 text-sm font-medium text-center text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 rounded transition-colors">
+                                    View Details
+                                </button>
+<button class="p-2 text-slate-400 hover:text-primary hover:bg-primary/10 rounded transition-colors">
+<span class="material-icons-round text-sm">edit</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Pagination -->
+<div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-slate-200 dark:border-border-dark">
+<p class="text-sm text-slate-500 dark:text-slate-400">
+                        Showing <span class="font-medium text-slate-900 dark:text-white">1</span> to <span class="font-medium text-slate-900 dark:text-white">8</span> of <span class="font-medium text-slate-900 dark:text-white">450</span> results
+                    </p>
+<div class="flex items-center gap-2">
+<button class="px-3 py-1 rounded border border-slate-200 dark:border-border-dark text-slate-500 disabled:opacity-50 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors">
+<span class="material-icons-round text-sm">chevron_left</span>
+</button>
+<button class="px-3 py-1 rounded bg-primary text-white font-medium text-sm">1</button>
+<button class="px-3 py-1 rounded border border-slate-200 dark:border-border-dark text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors text-sm">2</button>
+<button class="px-3 py-1 rounded border border-slate-200 dark:border-border-dark text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors text-sm">3</button>
+<span class="text-slate-400">...</span>
+<button class="px-3 py-1 rounded border border-slate-200 dark:border-border-dark text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors text-sm">56</button>
+<button class="px-3 py-1 rounded border border-slate-200 dark:border-border-dark text-slate-500 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors">
+<span class="material-icons-round text-sm">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

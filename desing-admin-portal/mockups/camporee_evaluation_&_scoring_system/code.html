@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Camporee Evaluation &amp; Scoring System</title>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Icons -->
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#0d93f2",
+                        "primary-dark": "#0b84da",
+                        "background-light": "#f5f7f8",
+                        "background-dark": "#101b22",
+                        "surface-dark": "#16242e", // Slightly lighter than bg-dark for cards
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom scrollbar for dark mode */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #101b22; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2a3b47; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #0d93f2; 
+        }
+        
+        .glass-panel {
+            background: rgba(22, 36, 46, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        /* Rank Gradients */
+        .rank-gold {
+            background: linear-gradient(135deg, #FFD700 0%, #FDB931 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .rank-silver {
+            background: linear-gradient(135deg, #E0E0E0 0%, #BDBDBD 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .rank-bronze {
+            background: linear-gradient(135deg, #CD7F32 0%, #A0522D 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-200 font-display min-h-screen flex flex-col">
+<!-- Top Navigation -->
+<header class="h-16 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-surface-dark/90 sticky top-0 z-40 backdrop-blur-md">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between">
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded bg-primary flex items-center justify-center text-white font-bold text-sm">
+                        S
+                    </div>
+<span class="font-bold text-lg tracking-tight text-gray-900 dark:text-white">SACDIA</span>
+<span class="px-2 py-0.5 rounded text-xs bg-primary/10 text-primary font-medium border border-primary/20">Admin</span>
+</div>
+<div class="h-6 w-px bg-gray-300 dark:bg-gray-700 mx-2"></div>
+<h1 class="text-sm font-medium text-gray-500 dark:text-gray-400">Camporee 2024 Evaluation</h1>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400 transition-colors">
+<span class="material-icons-outlined text-xl">notifications</span>
+</button>
+<div class="flex items-center gap-3 pl-4 border-l border-gray-200 dark:border-gray-700">
+<div class="text-right hidden sm:block">
+<p class="text-sm font-medium text-gray-900 dark:text-white">Marcus Director</p>
+<p class="text-xs text-gray-500 dark:text-gray-400">Head Judge</p>
+</div>
+<img alt="User Profile" class="w-9 h-9 rounded-full ring-2 ring-primary/20 data-alt='User Avatar'" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCjBgqaHbtyls1wffnJwDPMFkZi7MojZ-kFLu_9NQEGoLBRTTFyJdGHBEODwwdFluTXHA_oxpQJ8ECHFTbLBcIKSaf5tJzV3m8TDow9XlIgtz5uHxaHrov_I9-b8XCNV9VaZmtITArpDkzyBuXWx5pi1Aden3QciN4MRgqDTibW7L3ozAjXYOs-ezNvu3ORStHig6-sEnk2OgglKvsQwk_b5-SA5G2rmOJKCyM2lG0Qucbz9QbLYGW0xzshYqsOGvt2BkelokPakdk"/>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Content -->
+<main class="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+<!-- LEFT COLUMN: Leaderboard (8 cols) -->
+<div class="lg:col-span-8 flex flex-col gap-6">
+<!-- Header Section -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+<div>
+<h2 class="text-2xl font-bold text-gray-900 dark:text-white">Live Scoreboard</h2>
+<p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Real-time standings across all fields.</p>
+</div>
+<div class="flex gap-2">
+<button class="flex items-center gap-2 px-3 py-2 bg-white dark:bg-surface-dark border border-gray-200 dark:border-gray-700 rounded text-sm font-medium hover:border-primary/50 transition-colors">
+<span class="material-icons-outlined text-base">filter_list</span>
+                            Filter by Field
+                        </button>
+<button class="flex items-center gap-2 px-3 py-2 bg-primary hover:bg-primary-dark text-white rounded text-sm font-medium transition-colors shadow-lg shadow-primary/20">
+<span class="material-icons-outlined text-base">refresh</span>
+                            Refresh
+                        </button>
+</div>
+</div>
+<!-- Leaderboard Table -->
+<div class="bg-white dark:bg-surface-dark rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm overflow-hidden">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 text-xs uppercase text-gray-500 dark:text-gray-400 font-semibold tracking-wider">
+<th class="px-6 py-4 w-16 text-center">Rank</th>
+<th class="px-6 py-4">Club Name</th>
+<th class="px-6 py-4">Field / Region</th>
+<th class="px-6 py-4 text-center">Trend</th>
+<th class="px-6 py-4 text-right">Total Points</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-gray-200 dark:divide-gray-800 text-sm">
+<!-- Rank 1 -->
+<tr class="bg-gradient-to-r from-yellow-500/10 to-transparent hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group">
+<td class="px-6 py-4 text-center">
+<div class="mx-auto w-8 h-8 flex items-center justify-center rounded-full bg-yellow-500/20 text-yellow-500 border border-yellow-500/30 font-bold">1</div>
+</td>
+<td class="px-6 py-4 font-medium text-gray-900 dark:text-white flex items-center gap-3">
+<span class="material-icons-outlined text-yellow-500">emoji_events</span>
+                                        Orion Pathfinders
+                                    </td>
+<td class="px-6 py-4 text-gray-500 dark:text-gray-400">North Field</td>
+<td class="px-6 py-4 text-center text-green-500 flex justify-center items-center gap-1">
+<span class="material-icons-outlined text-base">trending_up</span>
+<span class="text-xs font-semibold">+12</span>
+</td>
+<td class="px-6 py-4 text-right font-bold text-lg text-gray-900 dark:text-white tabular-nums">1,245</td>
+</tr>
+<!-- Rank 2 -->
+<tr class="bg-gradient-to-r from-gray-400/10 to-transparent hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
+<td class="px-6 py-4 text-center">
+<div class="mx-auto w-8 h-8 flex items-center justify-center rounded-full bg-gray-300/20 text-gray-300 border border-gray-300/30 font-bold">2</div>
+</td>
+<td class="px-6 py-4 font-medium text-gray-900 dark:text-white flex items-center gap-3">
+<span class="material-icons-outlined text-gray-400">emoji_events</span>
+                                        Galaxy Explorers
+                                    </td>
+<td class="px-6 py-4 text-gray-500 dark:text-gray-400">East Conference</td>
+<td class="px-6 py-4 text-center text-green-500 flex justify-center items-center gap-1">
+<span class="material-icons-outlined text-base">trending_up</span>
+<span class="text-xs font-semibold">+5</span>
+</td>
+<td class="px-6 py-4 text-right font-bold text-lg text-gray-900 dark:text-white tabular-nums">1,198</td>
+</tr>
+<!-- Rank 3 -->
+<tr class="bg-gradient-to-r from-orange-700/10 to-transparent hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
+<td class="px-6 py-4 text-center">
+<div class="mx-auto w-8 h-8 flex items-center justify-center rounded-full bg-orange-700/20 text-orange-600 dark:text-orange-400 border border-orange-700/30 font-bold">3</div>
+</td>
+<td class="px-6 py-4 font-medium text-gray-900 dark:text-white flex items-center gap-3">
+<span class="material-icons-outlined text-orange-700 dark:text-orange-400">emoji_events</span>
+                                        Zion Mountaineers
+                                    </td>
+<td class="px-6 py-4 text-gray-500 dark:text-gray-400">South Mission</td>
+<td class="px-6 py-4 text-center text-red-500 flex justify-center items-center gap-1">
+<span class="material-icons-outlined text-base">trending_down</span>
+<span class="text-xs font-semibold">-2</span>
+</td>
+<td class="px-6 py-4 text-right font-bold text-lg text-gray-900 dark:text-white tabular-nums">1,150</td>
+</tr>
+<!-- Regular Ranks -->
+<tr class="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors border-l-2 border-transparent hover:border-primary">
+<td class="px-6 py-4 text-center text-gray-500 font-medium">4</td>
+<td class="px-6 py-4 font-medium text-gray-900 dark:text-gray-300">Evergreen Guides</td>
+<td class="px-6 py-4 text-gray-500 dark:text-gray-400">West Federation</td>
+<td class="px-6 py-4 text-center text-gray-500 flex justify-center items-center gap-1">
+<span class="material-icons-outlined text-base">remove</span>
+</td>
+<td class="px-6 py-4 text-right font-semibold text-gray-700 dark:text-gray-300 tabular-nums">1,020</td>
+</tr>
+<tr class="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors border-l-2 border-transparent hover:border-primary">
+<td class="px-6 py-4 text-center text-gray-500 font-medium">5</td>
+<td class="px-6 py-4 font-medium text-gray-900 dark:text-gray-300">Morning Star Club</td>
+<td class="px-6 py-4 text-gray-500 dark:text-gray-400">North Field</td>
+<td class="px-6 py-4 text-center text-green-500 flex justify-center items-center gap-1">
+<span class="material-icons-outlined text-base">trending_up</span>
+<span class="text-xs font-semibold">+8</span>
+</td>
+<td class="px-6 py-4 text-right font-semibold text-gray-700 dark:text-gray-300 tabular-nums">985</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="px-6 py-4 border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/30 flex justify-between items-center">
+<span class="text-xs text-gray-500 dark:text-gray-400">Showing top 5 of 42 clubs</span>
+<a class="text-xs font-medium text-primary hover:text-primary-dark hover:underline" href="#">View Full Leaderboard</a>
+</div>
+</div>
+<!-- Field Progress Stats -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="bg-white dark:bg-surface-dark p-6 rounded-xl border border-gray-200 dark:border-gray-800">
+<h3 class="text-sm font-semibold uppercase text-gray-500 dark:text-gray-400 mb-4 tracking-wider">Evaluation Progress by Field</h3>
+<div class="space-y-4">
+<!-- Field 1 -->
+<div>
+<div class="flex justify-between text-sm mb-1">
+<span class="font-medium text-gray-700 dark:text-gray-200">North Field</span>
+<span class="text-primary font-bold">85%</span>
+</div>
+<div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+<div class="bg-primary h-2 rounded-full" style="width: 85%"></div>
+</div>
+</div>
+<!-- Field 2 -->
+<div>
+<div class="flex justify-between text-sm mb-1">
+<span class="font-medium text-gray-700 dark:text-gray-200">East Conference</span>
+<span class="text-primary font-bold">62%</span>
+</div>
+<div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+<div class="bg-primary/80 h-2 rounded-full" style="width: 62%"></div>
+</div>
+</div>
+<!-- Field 3 -->
+<div>
+<div class="flex justify-between text-sm mb-1">
+<span class="font-medium text-gray-700 dark:text-gray-200">South Mission</span>
+<span class="text-primary font-bold">40%</span>
+</div>
+<div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+<div class="bg-primary/60 h-2 rounded-full" style="width: 40%"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-primary/5 dark:bg-primary/10 rounded-xl border border-primary/20 p-6 flex items-center relative overflow-hidden">
+<div class="absolute -right-10 -bottom-10 w-40 h-40 bg-primary/20 rounded-full blur-3xl"></div>
+<div class="relative z-10 w-full">
+<h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Pending Reviews</h3>
+<p class="text-sm text-gray-600 dark:text-gray-300 mb-6">You have 12 clubs scheduled for inspection today.</p>
+<button class="w-full bg-primary hover:bg-primary-dark text-white font-medium py-2 px-4 rounded shadow-lg shadow-primary/20 transition-all flex justify-center items-center gap-2">
+<span class="material-icons-outlined text-sm">play_arrow</span>
+                                Start Queue
+                            </button>
+</div>
+</div>
+</div>
+</div>
+<!-- RIGHT COLUMN: Inspection Actions (4 cols) -->
+<div class="lg:col-span-4 flex flex-col h-full">
+<div class="mb-4">
+<h2 class="text-2xl font-bold text-gray-900 dark:text-white">Daily Inspections</h2>
+<p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Select a category to grade.</p>
+</div>
+<div class="grid grid-cols-1 gap-4 flex-1">
+<!-- Card 1: Uniform -->
+<button class="group text-left relative overflow-hidden bg-white dark:bg-surface-dark rounded-xl border border-gray-200 dark:border-gray-800 p-5 hover:border-primary dark:hover:border-primary transition-all duration-300 shadow-sm hover:shadow-md hover:shadow-primary/5">
+<div class="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 group-hover:scale-110 transition-all">
+<span class="material-icons-outlined text-6xl text-primary">checkroom</span>
+</div>
+<div class="flex items-start gap-4">
+<div class="p-3 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-icons-outlined text-2xl">checkroom</span>
+</div>
+<div class="flex-1">
+<h3 class="font-semibold text-gray-900 dark:text-white text-lg">Uniform</h3>
+<p class="text-xs text-gray-500 dark:text-gray-400 mt-1 mb-3">Class A &amp; Field Uniform checks</p>
+<div class="flex items-center gap-2 text-xs font-medium text-gray-600 dark:text-gray-300">
+<div class="flex-1 bg-gray-200 dark:bg-gray-700 h-1.5 rounded-full overflow-hidden">
+<div class="bg-blue-500 h-full w-3/4"></div>
+</div>
+<span>32/42</span>
+</div>
+</div>
+</div>
+</button>
+<!-- Card 2: Campsite Cleanliness -->
+<button class="group text-left relative overflow-hidden bg-white dark:bg-surface-dark rounded-xl border border-gray-200 dark:border-gray-800 p-5 hover:border-primary dark:hover:border-primary transition-all duration-300 shadow-sm hover:shadow-md hover:shadow-primary/5" onclick="document.getElementById('inspection-modal').showModal()">
+<div class="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 group-hover:scale-110 transition-all">
+<span class="material-icons-outlined text-6xl text-green-500">deck</span>
+</div>
+<div class="flex items-start gap-4">
+<div class="p-3 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-lg group-hover:bg-green-600 group-hover:text-white transition-colors">
+<span class="material-icons-outlined text-2xl">deck</span>
+</div>
+<div class="flex-1">
+<h3 class="font-semibold text-gray-900 dark:text-white text-lg">Campsite</h3>
+<p class="text-xs text-gray-500 dark:text-gray-400 mt-1 mb-3">Hygiene, setup, and safety</p>
+<div class="flex items-center gap-2 text-xs font-medium text-gray-600 dark:text-gray-300">
+<div class="flex-1 bg-gray-200 dark:bg-gray-700 h-1.5 rounded-full overflow-hidden">
+<div class="bg-green-500 h-full w-1/2"></div>
+</div>
+<span>21/42</span>
+</div>
+</div>
+</div>
+</button>
+<!-- Card 3: Spiritual Activities -->
+<button class="group text-left relative overflow-hidden bg-white dark:bg-surface-dark rounded-xl border border-gray-200 dark:border-gray-800 p-5 hover:border-primary dark:hover:border-primary transition-all duration-300 shadow-sm hover:shadow-md hover:shadow-primary/5">
+<div class="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 group-hover:scale-110 transition-all">
+<span class="material-icons-outlined text-6xl text-purple-500">auto_stories</span>
+</div>
+<div class="flex items-start gap-4">
+<div class="p-3 bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-lg group-hover:bg-purple-600 group-hover:text-white transition-colors">
+<span class="material-icons-outlined text-2xl">auto_stories</span>
+</div>
+<div class="flex-1">
+<h3 class="font-semibold text-gray-900 dark:text-white text-lg">Spiritual</h3>
+<p class="text-xs text-gray-500 dark:text-gray-400 mt-1 mb-3">Devotionals &amp; attendance</p>
+<div class="flex items-center gap-2 text-xs font-medium text-gray-600 dark:text-gray-300">
+<div class="flex-1 bg-gray-200 dark:bg-gray-700 h-1.5 rounded-full overflow-hidden">
+<div class="bg-purple-500 h-full w-full"></div>
+</div>
+<span class="text-green-500">Done</span>
+</div>
+</div>
+</div>
+</button>
+<!-- Card 4: Punctuality -->
+<button class="group text-left relative overflow-hidden bg-white dark:bg-surface-dark rounded-xl border border-gray-200 dark:border-gray-800 p-5 hover:border-primary dark:hover:border-primary transition-all duration-300 shadow-sm hover:shadow-md hover:shadow-primary/5">
+<div class="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 group-hover:scale-110 transition-all">
+<span class="material-icons-outlined text-6xl text-orange-500">timer</span>
+</div>
+<div class="flex items-start gap-4">
+<div class="p-3 bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 rounded-lg group-hover:bg-orange-600 group-hover:text-white transition-colors">
+<span class="material-icons-outlined text-2xl">timer</span>
+</div>
+<div class="flex-1">
+<h3 class="font-semibold text-gray-900 dark:text-white text-lg">Punctuality</h3>
+<p class="text-xs text-gray-500 dark:text-gray-400 mt-1 mb-3">Event arrival times</p>
+<div class="flex items-center gap-2 text-xs font-medium text-gray-600 dark:text-gray-300">
+<div class="flex-1 bg-gray-200 dark:bg-gray-700 h-1.5 rounded-full overflow-hidden">
+<div class="bg-orange-500 h-full w-1/4"></div>
+</div>
+<span>10/42</span>
+</div>
+</div>
+</div>
+</button>
+</div>
+</div>
+</div>
+</main>
+<!-- Inspection Dialog (Hidden by default, shown by click on Campsite Card) -->
+<dialog class="bg-transparent p-0 w-full max-w-2xl backdrop:bg-black/50 backdrop:backdrop-blur-sm" id="inspection-modal">
+<div class="bg-white dark:bg-surface-dark rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden max-h-[90vh] flex flex-col">
+<!-- Modal Header -->
+<div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between bg-gray-50 dark:bg-gray-900/50">
+<div class="flex items-center gap-3">
+<div class="p-2 bg-green-100 dark:bg-green-900/30 rounded text-green-600 dark:text-green-400">
+<span class="material-icons-outlined text-xl">deck</span>
+</div>
+<div>
+<h3 class="text-lg font-bold text-gray-900 dark:text-white">Campsite Evaluation</h3>
+<p class="text-xs text-gray-500 dark:text-gray-400">New entry</p>
+</div>
+</div>
+<button class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors" onclick="document.getElementById('inspection-modal').close()">
+<span class="material-icons-outlined">close</span>
+</button>
+</div>
+<!-- Modal Body -->
+<div class="p-6 overflow-y-auto space-y-6">
+<!-- Club Selection -->
+<div>
+<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Select Club</label>
+<div class="relative">
+<span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
+<span class="material-icons-outlined text-lg">search</span>
+</span>
+<input class="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent outline-none" placeholder="Search club name..." type="text"/>
+</div>
+</div>
+<!-- Score Slider -->
+<div>
+<div class="flex justify-between items-center mb-4">
+<label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Score</label>
+<span class="text-2xl font-bold text-primary">8<span class="text-base font-normal text-gray-400">/10</span></span>
+</div>
+<input class="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-primary" max="10" min="0" type="range" value="8"/>
+<div class="flex justify-between text-xs text-gray-400 mt-1">
+<span>0 (Poor)</span>
+<span>5 (Average)</span>
+<span>10 (Excellent)</span>
+</div>
+</div>
+<!-- Sub Criteria (Checkboxes) -->
+<div class="grid grid-cols-2 gap-4">
+<label class="flex items-center space-x-3 p-3 border border-gray-200 dark:border-gray-700 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50">
+<input checked="" class="form-checkbox h-5 w-5 text-primary rounded border-gray-300 focus:ring-primary dark:bg-gray-800 dark:border-gray-600" type="checkbox"/>
+<span class="text-sm text-gray-700 dark:text-gray-300">Tent Alignment</span>
+</label>
+<label class="flex items-center space-x-3 p-3 border border-gray-200 dark:border-gray-700 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50">
+<input checked="" class="form-checkbox h-5 w-5 text-primary rounded border-gray-300 focus:ring-primary dark:bg-gray-800 dark:border-gray-600" type="checkbox"/>
+<span class="text-sm text-gray-700 dark:text-gray-300">Garbage Disposal</span>
+</label>
+<label class="flex items-center space-x-3 p-3 border border-gray-200 dark:border-gray-700 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50">
+<input class="form-checkbox h-5 w-5 text-primary rounded border-gray-300 focus:ring-primary dark:bg-gray-800 dark:border-gray-600" type="checkbox"/>
+<span class="text-sm text-gray-700 dark:text-gray-300">Fire Safety</span>
+</label>
+<label class="flex items-center space-x-3 p-3 border border-gray-200 dark:border-gray-700 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50">
+<input checked="" class="form-checkbox h-5 w-5 text-primary rounded border-gray-300 focus:ring-primary dark:bg-gray-800 dark:border-gray-600" type="checkbox"/>
+<span class="text-sm text-gray-700 dark:text-gray-300">Entrance Gateway</span>
+</label>
+</div>
+<!-- Evidence Upload -->
+<div>
+<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Photo Evidence</label>
+<div class="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg p-6 text-center hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer">
+<span class="material-icons-outlined text-3xl text-gray-400 mb-2">add_a_photo</span>
+<p class="text-sm text-gray-500 dark:text-gray-400">Drag and drop or click to upload</p>
+</div>
+</div>
+<!-- Comments -->
+<div>
+<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Feedback / Comments</label>
+<textarea class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent outline-none resize-none" placeholder="Enter specific feedback for the club director..." rows="3"></textarea>
+</div>
+</div>
+<!-- Modal Footer -->
+<div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 flex justify-end gap-3">
+<button class="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded font-medium hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" onclick="document.getElementById('inspection-modal').close()">
+                    Cancel
+                </button>
+<button class="px-6 py-2 bg-primary hover:bg-primary-dark text-white rounded font-medium shadow-md shadow-primary/20 transition-all flex items-center gap-2" onclick="document.getElementById('inspection-modal').close()">
+<span class="material-icons-outlined text-sm">save</span>
+                    Submit Score
+                </button>
+</div>
+</div>
+</dialog>
+</body></html>

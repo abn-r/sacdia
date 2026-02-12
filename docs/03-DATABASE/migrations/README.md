@@ -13,6 +13,7 @@ Scripts SQL para inicialización y migración de la base de datos.
 | `script_03_especialidades.sql` | Honores y especialidades | script_01, script_02 |
 | `script_04_catalogos_medicos.sql` | Alergias y enfermedades | Ninguna |
 | `script_05_roles_permisos.sql` | Sistema RBAC (roles y permisos) | Ninguna |
+| `script_06_admin_permissions.sql` | Permisos del Admin Panel (resource:action) | script_05 |
 | `verificar_catalogos.sql` | Queries de verificación | Todos los anteriores |
 
 ### Scripts de Datos Semilla (Seed Data)

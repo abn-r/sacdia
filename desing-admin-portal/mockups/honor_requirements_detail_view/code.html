@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Honor Requirements Detail View - SACDIA</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#2b2bee",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#101022",
+                    },
+                    fontFamily: {
+                        "display": ["Lexend", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom scrollbar for dark mode dashboard */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #101022; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2b2bee; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #1e1ea8; 
+        }
+        
+        .glass-panel {
+            background: rgba(30, 30, 48, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-100 font-display min-h-screen flex flex-col antialiased selection:bg-primary/30 selection:text-white">
+<!-- Top Navigation (Mockup) -->
+<nav class="sticky top-0 z-50 w-full glass-panel border-b border-white/5 h-16 flex items-center px-6 justify-between">
+<div class="flex items-center gap-4">
+<div class="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center text-white font-bold text-lg">S</div>
+<div class="hidden md:flex items-center text-sm text-slate-400">
+<span class="hover:text-primary cursor-pointer transition-colors">Dashboard</span>
+<span class="mx-2">/</span>
+<span class="hover:text-primary cursor-pointer transition-colors">Honors</span>
+<span class="mx-2">/</span>
+<span class="hover:text-primary cursor-pointer transition-colors">Health &amp; Science</span>
+<span class="mx-2">/</span>
+<span class="text-white font-medium">First Aid - Basic</span>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 text-slate-400 hover:text-white transition-colors relative">
+<span class="material-icons-round">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full"></span>
+</button>
+<div class="w-9 h-9 rounded-full bg-slate-700 overflow-hidden border border-white/10">
+<img class="w-full h-full object-cover" data-alt="User Avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBg9GyIAmbmPXaT_V3lLygVmq6mgBRY0NNIbFKByZkqSUBVfjoCrnL88nNUOegZrrYMGQsQklItjgtYDVFaGGsMbOLUKx2FheM8RhtFTFVtuFH55M6eD5du6a3ITK-x5LrR2XPEEaFxQSRvtMUtES7oMWmSlowxjqiqPcHZaWPf4zW_soP13LJvst68W4Ij0dkzWjpByVuyCn89qDZXhqAAHTCv9Q-ZMGSUNTqWKhVYedlFAo6YpvKgfIl1owyOCfbQCCyAetJuikM"/>
+</div>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="flex-1 container mx-auto px-4 py-8 max-w-7xl">
+<!-- Header Section -->
+<header class="mb-8 relative group">
+<div class="absolute -inset-1 bg-gradient-to-r from-primary/20 to-purple-600/20 rounded-2xl blur opacity-50 group-hover:opacity-75 transition duration-1000 group-hover:duration-200"></div>
+<div class="relative bg-white dark:bg-[#1a1a2e] rounded-xl p-6 border border-slate-200 dark:border-white/5 shadow-xl flex flex-col md:flex-row gap-6 items-start md:items-center justify-between">
+<div class="flex items-center gap-6">
+<!-- Honor Patch -->
+<div class="relative w-24 h-24 md:w-32 md:h-32 flex-shrink-0">
+<div class="absolute inset-0 bg-primary/20 rounded-full blur-xl transform scale-90"></div>
+<img class="relative w-full h-full object-cover rounded-full border-4 border-white dark:border-[#1a1a2e] shadow-lg z-10" data-alt="Red cross patch or medical icon representing First Aid" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCy-VedZAXXA7FM2gLkpvTpV4sSqtdyyKVJwCIk3n1-EXUWVgGoawQOeAYSXiuOstN6DOpANEdQlqSJA2pHFl7UvPy9y5zsxZiJ6uQ7TT5wrgxny7rO_gSY1C2Wd4lFGF3yG6vfZ6DhcD87qsGtRrOSivzNItzwrxzB_l4dofmDjbac3FUJvohGoySsdDUy-DCqJy1w-08Cd30jkaB2G6l-B4bn_rLbQCaB9F1DJIUDtXIujQZD8XOBfMzkQIjAwg2daa2hC7sLYX4"/>
+<div class="absolute -bottom-2 -right-2 bg-[#101022] rounded-full p-1 z-20">
+<div class="bg-green-500 w-4 h-4 rounded-full border-2 border-[#101022]"></div>
+</div>
+</div>
+<!-- Title & Details -->
+<div>
+<div class="flex flex-wrap items-center gap-3 mb-2">
+<span class="px-2.5 py-0.5 rounded text-xs font-semibold bg-red-500/10 text-red-400 border border-red-500/20 uppercase tracking-wide">Health &amp; Science</span>
+<span class="flex items-center gap-1 text-xs text-slate-400 font-medium bg-slate-800/50 px-2 py-0.5 rounded border border-white/5">
+<span class="material-icons-round text-amber-400 text-sm">star</span>
+                                Difficulty: 2/5
+                            </span>
+</div>
+<h1 class="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-2 tracking-tight">First Aid - Basic</h1>
+<p class="text-slate-500 dark:text-slate-400 max-w-2xl text-sm leading-relaxed">
+                            This honor introduces fundamental life-saving techniques. Participants will learn how to assess emergency situations, perform CPR, and treat common injuries.
+                        </p>
+</div>
+</div>
+<!-- Actions -->
+<div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto mt-4 md:mt-0">
+<button class="flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg border border-slate-300 dark:border-white/10 text-slate-700 dark:text-slate-300 font-medium hover:bg-slate-100 dark:hover:bg-white/5 transition-all text-sm">
+<span class="material-icons-round text-lg">edit</span>
+                        Edit Reqs
+                    </button>
+<button class="flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg bg-primary hover:bg-primary/90 text-white font-medium shadow-lg shadow-primary/25 transition-all text-sm group">
+<span class="material-icons-round text-lg group-hover:animate-pulse">assignment_ind</span>
+                        Assign to Members
+                    </button>
+</div>
+</div>
+</header>
+<!-- Split Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+<!-- Left Column: Requirements List -->
+<div class="lg:col-span-2 space-y-6">
+<div class="flex items-center justify-between mb-2">
+<h2 class="text-xl font-semibold text-white flex items-center gap-2">
+<span class="material-icons-round text-primary">list_alt</span>
+                        Requirements Checklist
+                    </h2>
+<span class="text-xs text-slate-500 bg-slate-800/50 px-2 py-1 rounded border border-white/5">12 Steps Total</span>
+</div>
+<!-- Requirement Group 1 -->
+<div class="bg-white dark:bg-[#1a1a2e] border border-slate-200 dark:border-white/5 rounded-xl overflow-hidden shadow-sm">
+<div class="bg-slate-50 dark:bg-white/5 px-6 py-3 border-b border-slate-200 dark:border-white/5 flex items-center justify-between">
+<h3 class="font-semibold text-slate-800 dark:text-slate-200">Section 1: General Principles</h3>
+<div class="w-6 h-6 rounded-full bg-green-500/20 flex items-center justify-center">
+<span class="material-icons-round text-green-500 text-sm">check</span>
+</div>
+</div>
+<div class="p-6 space-y-6">
+<!-- Item 1 -->
+<div class="flex gap-4 group">
+<div class="pt-1">
+<input class="w-5 h-5 rounded border-slate-600 bg-slate-800 text-primary focus:ring-primary focus:ring-offset-background-dark cursor-pointer" type="checkbox"/>
+</div>
+<div class="flex-1">
+<p class="text-slate-800 dark:text-slate-200 font-medium mb-1">1. Know the basic principles of mouth-to-mouth breathing.</p>
+<p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
+                                    Include the proper head tilt, checking for obstructions, and the rate of compressions vs breaths for adults and infants.
+                                </p>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="flex gap-4 group">
+<div class="pt-1">
+<input checked="" class="w-5 h-5 rounded border-slate-600 bg-slate-800 text-primary focus:ring-primary focus:ring-offset-background-dark cursor-pointer" type="checkbox"/>
+</div>
+<div class="flex-1">
+<p class="text-slate-800 dark:text-slate-200 font-medium mb-1 line-through opacity-50">2. Know how to control bleeding.</p>
+<p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed opacity-50">
+                                    Demonstrate direct pressure, elevation, and pressure points. Understand when to use a tourniquet as a last resort.
+                                </p>
+</div>
+</div>
+</div>
+</div>
+<!-- Requirement Group 2 -->
+<div class="bg-white dark:bg-[#1a1a2e] border border-slate-200 dark:border-white/5 rounded-xl overflow-hidden shadow-sm">
+<div class="bg-slate-50 dark:bg-white/5 px-6 py-3 border-b border-slate-200 dark:border-white/5">
+<h3 class="font-semibold text-slate-800 dark:text-slate-200">Section 2: Emergency Response</h3>
+</div>
+<div class="p-6 space-y-6">
+<!-- Item 3 -->
+<div class="flex gap-4 group">
+<div class="pt-1">
+<input class="w-5 h-5 rounded border-slate-600 bg-slate-800 text-primary focus:ring-primary focus:ring-offset-background-dark cursor-pointer" type="checkbox"/>
+</div>
+<div class="flex-1">
+<p class="text-slate-800 dark:text-slate-200 font-medium mb-1">3. Know the procedure for treating a victim of poisoning.</p>
+<div class="mt-2 bg-slate-100 dark:bg-slate-900/50 p-3 rounded-lg border border-slate-200 dark:border-white/5 text-sm text-slate-500 dark:text-slate-400">
+<strong>Instructor Note:</strong> Emphasize contacting Poison Control immediately. Do not induce vomiting unless instructed.
+                                </div>
+</div>
+</div>
+<!-- Item 4 -->
+<div class="flex gap-4 group">
+<div class="pt-1">
+<input class="w-5 h-5 rounded border-slate-600 bg-slate-800 text-primary focus:ring-primary focus:ring-offset-background-dark cursor-pointer" type="checkbox"/>
+</div>
+<div class="flex-1">
+<p class="text-slate-800 dark:text-slate-200 font-medium mb-1">4. Demonstrate the proper procedure for splinting broken bones.</p>
+<p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
+                                    Perform splinting on:
+                                </p>
+<ul class="list-disc list-inside text-sm text-slate-500 dark:text-slate-400 mt-1 ml-2 space-y-1">
+<li>Lower arm</li>
+<li>Upper arm</li>
+<li>Lower leg</li>
+</ul>
+</div>
+</div>
+<!-- Item 5 -->
+<div class="flex gap-4 group">
+<div class="pt-1">
+<input class="w-5 h-5 rounded border-slate-600 bg-slate-800 text-primary focus:ring-primary focus:ring-offset-background-dark cursor-pointer" type="checkbox"/>
+</div>
+<div class="flex-1">
+<p class="text-slate-800 dark:text-slate-200 font-medium mb-1">5. Know the proper procedure to help a choking victim.</p>
+<p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
+                                    Demonstrate the Heimlich maneuver on a standing and lying victim.
+                                </p>
+</div>
+</div>
+</div>
+</div>
+<!-- Requirement Group 3 -->
+<div class="bg-white dark:bg-[#1a1a2e] border border-slate-200 dark:border-white/5 rounded-xl overflow-hidden shadow-sm">
+<div class="bg-slate-50 dark:bg-white/5 px-6 py-3 border-b border-slate-200 dark:border-white/5">
+<h3 class="font-semibold text-slate-800 dark:text-slate-200">Section 3: Practical Exam</h3>
+</div>
+<div class="p-6 space-y-6">
+<!-- Item 6 -->
+<div class="flex gap-4 group">
+<div class="pt-1">
+<input class="w-5 h-5 rounded border-slate-600 bg-slate-800 text-primary focus:ring-primary focus:ring-offset-background-dark cursor-pointer" type="checkbox"/>
+</div>
+<div class="flex-1">
+<p class="text-slate-800 dark:text-slate-200 font-medium mb-1">6. Complete a mock disaster scenario.</p>
+<p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
+                                    Participate in a triage simulation with at least 3 types of injuries represented.
+                                </p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column: Metadata Sidebar -->
+<aside class="space-y-6">
+<!-- Quick Info Card -->
+<div class="bg-white dark:bg-[#1a1a2e] border border-slate-200 dark:border-white/5 rounded-xl p-5 shadow-sm">
+<h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Honor Details</h3>
+<div class="space-y-4">
+<div class="flex items-start gap-3">
+<div class="p-2 rounded bg-primary/10 text-primary">
+<span class="material-icons-round text-lg">schedule</span>
+</div>
+<div>
+<p class="text-xs text-slate-500 dark:text-slate-400">Estimated Time</p>
+<p class="text-sm font-medium text-slate-800 dark:text-slate-200">4-6 Hours</p>
+</div>
+</div>
+<div class="flex items-start gap-3">
+<div class="p-2 rounded bg-primary/10 text-primary">
+<span class="material-icons-round text-lg">link</span>
+</div>
+<div>
+<p class="text-xs text-slate-500 dark:text-slate-400">Prerequisites</p>
+<a class="text-sm font-medium text-primary hover:underline" href="#">Basic Rescue Honor</a>
+</div>
+</div>
+<div class="flex items-start gap-3">
+<div class="p-2 rounded bg-primary/10 text-primary">
+<span class="material-icons-round text-lg">backpack</span>
+</div>
+<div>
+<p class="text-xs text-slate-500 dark:text-slate-400">Materials Needed</p>
+<p class="text-sm font-medium text-slate-800 dark:text-slate-200">Bandages, Splints, Dummy</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Instructors Card -->
+<div class="bg-white dark:bg-[#1a1a2e] border border-slate-200 dark:border-white/5 rounded-xl p-5 shadow-sm">
+<div class="flex items-center justify-between mb-4">
+<h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Qualified Instructors</h3>
+<button class="text-primary text-xs hover:underline">View All</button>
+</div>
+<div class="space-y-3">
+<!-- Instructor 1 -->
+<div class="flex items-center gap-3 p-2 hover:bg-slate-50 dark:hover:bg-white/5 rounded-lg transition-colors cursor-pointer group">
+<img class="w-10 h-10 rounded-full object-cover border border-slate-200 dark:border-slate-700" data-alt="Instructor Avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuATGe7vaomB-MDZofcNrDOyrWyDpl5fS4YC1tog-x4Gn9hrAG4pwwv94EjznkUWS4wK9OisHHe6U7P4_xUXJuwK0X05WvU9OrSX5vnl1aM1WYEArnkCBz745gCzAuw6TKREE0x-hENZ-wD1JMMl3c9Sg_wRJHuu0-pRiWAc6I6A5uyQBFWnF_f7zWpv5Q8-Ul2wQwTU8xXL9EVnjilCgmfYpvZs8TYG6ZBM6gbGOasbOUSFdfMHxN3IAsXwSaqi9yXeBh4jQSMW59U"/>
+<div class="flex-1">
+<h4 class="text-sm font-medium text-slate-800 dark:text-slate-200 group-hover:text-primary transition-colors">David Chen</h4>
+<p class="text-xs text-slate-500">Master Guide</p>
+</div>
+<span class="material-icons-round text-slate-400 text-lg">chevron_right</span>
+</div>
+<!-- Instructor 2 -->
+<div class="flex items-center gap-3 p-2 hover:bg-slate-50 dark:hover:bg-white/5 rounded-lg transition-colors cursor-pointer group">
+<img class="w-10 h-10 rounded-full object-cover border border-slate-200 dark:border-slate-700" data-alt="Instructor Avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCQPULGouM45tmxZgz6pDjjsdkZY0mwICs6vYNB00DrQVVY-7vbV7knSLVb8jqWe-qua68IZjZ0tgnzBAqi5Lc2mzDhMnS3Q8KRPoEf6awIWxs1KDstCPA16KiSrK5H0bEXHBrwKEimzDIH_7ALyipS5X53ZGpE30J1R2f0ERvii3C8yrwyvWrPKVy-xCOug8jHH3zo4MBnorYe1GqbaRyiQvpF52VcwLPy-F2ZhuFjJRxGAGvNpVMiaEQqJ40CtFOPUuaQxVRPCX4"/>
+<div class="flex-1">
+<h4 class="text-sm font-medium text-slate-800 dark:text-slate-200 group-hover:text-primary transition-colors">Sarah Connor</h4>
+<p class="text-xs text-slate-500">RN, EMT</p>
+</div>
+<span class="material-icons-round text-slate-400 text-lg">chevron_right</span>
+</div>
+</div>
+<button class="mt-4 w-full py-2 border border-dashed border-slate-300 dark:border-slate-700 text-slate-500 dark:text-slate-400 rounded-lg text-xs hover:border-primary hover:text-primary transition-colors flex items-center justify-center gap-1">
+<span class="material-icons-round text-sm">add</span>
+                        Assign Instructor
+                    </button>
+</div>
+<!-- Resources Card -->
+<div class="bg-gradient-to-br from-primary/10 to-transparent border border-primary/20 rounded-xl p-5 shadow-sm">
+<h3 class="text-xs font-bold text-primary uppercase tracking-wider mb-3">Teaching Resources</h3>
+<ul class="space-y-2">
+<li>
+<a class="flex items-center gap-2 text-sm text-slate-300 hover:text-white transition-colors" href="#">
+<span class="material-icons-round text-red-400 text-base">picture_as_pdf</span>
+                                Instructor Manual.pdf
+                            </a>
+</li>
+<li>
+<a class="flex items-center gap-2 text-sm text-slate-300 hover:text-white transition-colors" href="#">
+<span class="material-icons-round text-blue-400 text-base">slideshow</span>
+                                Training Slides (PPTX)
+                            </a>
+</li>
+<li>
+<a class="flex items-center gap-2 text-sm text-slate-300 hover:text-white transition-colors" href="#">
+<span class="material-icons-round text-red-600 text-base">play_circle</span>
+                                CPR Demo Video
+                            </a>
+</li>
+</ul>
+</div>
+</aside>
+</div>
+</main>
+</body></html>
