@@ -1,3 +1,9 @@
+<!-- CANONICAL-API-NOTE -->
+> [!WARNING]
+> Este documento puede incluir rutas históricas/propuestas o ejemplos desactualizados.
+> Para consumo de agentes (App + Panel), usar como contrato canónico:
+> [ENDPOINTS-LIVE-REFERENCE.md](./ENDPOINTS-LIVE-REFERENCE.md)
+
 # 📚 Referencia de API - SACDIA
 
 Este documento detalla los endpoints disponibles en la API REST, organizados por módulo.
@@ -322,3 +328,30 @@ La mayoría de estos endpoints soportan `?page=1&limit=20`.
     "primary": true
   }
   ```
+
+---
+
+## 🧭 Admin Users (Scope por Rol)
+
+### List Admin Users
+
+`GET /admin/users`
+
+- **Auth**: JWT
+- **Roles**: `super_admin`, `admin`, `coordinator`
+- **Query**: `search`, `role`, `active`, `unionId`, `localFieldId`, `page`, `limit`
+- **Alcance de datos**:
+  - `super_admin` → **ALL**
+  - `admin` → **UNION** (si tiene `union_id`); si no, **LOCAL_FIELD** (si tiene `local_field_id`)
+  - `coordinator` → **LOCAL_FIELD** (requiere `local_field_id`)
+- **Errores esperados**: `403` si el rol está mal configurado para su scope
+
+### Get Admin User Detail
+
+`GET /admin/users/:userId`
+
+- **Auth**: JWT
+- **Roles**: `super_admin`, `admin`, `coordinator`
+- **Descripción**: Retorna detalle de usuario sólo si pertenece al alcance del actor
+- **Errores esperados**: `404` si el usuario objetivo está fuera de scope
+

@@ -2,7 +2,7 @@
 
 **Fecha**: 6 de febrero de 2026
 **Duracion estimada**: 6 semanas (ajustable por microfase)
-**Estado**: PLANIFICACION
+**Estado**: EN PROGRESO (UI rediseñada - ver PHASE-2B-UI-REDESIGN-PLAN.md)
 **Prerequisito**: Fase 1 (Backend API) COMPLETADA - 105+ endpoints, 17 modulos
 
 ---
@@ -20,16 +20,19 @@ La Fase 2 se alinea al 100% con la documentacion existente:
 
 ### Estado Actual de la App
 
-La app ya tiene implementado (49 archivos Dart):
+La app tiene implementado (~120+ archivos Dart):
 
 - Clean Architecture con capas domain/data/presentation
 - Riverpod para state management
 - Dio HTTP client con interceptores (auth, error, logger)
 - Supabase Auth (login/register basico)
 - Secure Storage + Shared Preferences
-- Sistema de temas (light/dark)
+- Sistema de temas (light/dark) con design system "Scout Vibrante"
 - GoRouter para navegacion
-- 2 features: Auth (login/register) y Home (dashboard basico)
+- 8 features: Auth, Home, Dashboard, Classes, Honors, Activities, Profile, Post-Registration
+- Biblioteca de componentes Sac*: SacButton, SacCard, SacBadge, SacProgressRing, SacProgressBar, SacTextField
+- Iconografia migrada a HugeIcons (hugeicons v1.1.5)
+- **UI completamente rediseñada** (Phase 2B completada 2026-02-18) — ver `PHASE-2B-UI-REDESIGN-PLAN.md`
 
 ---
 
@@ -548,9 +551,9 @@ lib/core/
 
 | Endpoint | Metodo | Descripcion |
 |----------|--------|-------------|
-| `/users/:userId/fcm-tokens` | POST | Registrar token FCM |
-| `/users/:userId/fcm-tokens` | GET | Listar tokens |
-| `/fcm-tokens/:tokenId` | DELETE | Eliminar token |
+| `/fcm-tokens` | POST | Registrar token FCM (userId desde JWT) |
+| `/fcm-tokens` | GET | Listar tokens propios |
+| `/fcm-tokens/:token` | DELETE | Eliminar token propio |
 
 **Dependencias**:
 

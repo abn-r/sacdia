@@ -1,5 +1,11 @@
 # Verificación de Implementación - SACDIA Backend API
 
+> [!IMPORTANT]
+> Documento histórico (2026-02-05).
+> Úsalo como referencia de avance de esa fecha; no como contrato actual.
+> Para estado vigente de notificaciones/admin ver `IMPLEMENTATION-SESSION-2026-02-13-admin-hardening.md`.
+
+
 **Fecha de Verificación**: 5 de febrero de 2026
 **Estado**: ✅ FASE 1 COMPLETADA
 **Propósito**: Verificar que todos los walkthroughs tienen su implementación correspondiente

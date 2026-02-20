@@ -1,6 +1,10 @@
 # Documentación SACDIA
 
 **Sistema de Administración de Clubes del Ministerio Juvenil Adventista**
+> [!IMPORTANT]
+> Este directorio (`/docs` en el repositorio padre) es la fuente de verdad de documentación del proyecto.
+> Si se actualiza backend, este índice y los documentos afectados deben sincronizarse aquí primero.
+
 
 ---
 
@@ -10,21 +14,22 @@
 
 1. Lee [Overview](01-OVERVIEW.md) para entender la arquitectura
 2. Consulta [Database Reference](03-DATABASE/README.md)
-3. Revisa [API Specification](02-API/API-SPECIFICATION.md)
-4. Explora [Features](01-FEATURES/) para implementación específica
+3. Revisa [Live Endpoints Reference](02-API/ENDPOINTS-LIVE-REFERENCE.md) para contrato runtime
+4. Usa [API Specification](02-API/API-SPECIFICATION.md) para decisiones técnicas/arquitectura
 
 ### Mobile Developer
 
 1. Lee [Overview](01-OVERVIEW.md)
 2. Revisa [Processes](02-PROCESSES.md) para flujos
 3. Consulta [Features](01-FEATURES/) para detalles de cada módulo
-4. Revisa [Endpoints Reference](02-API/ENDPOINTS-REFERENCE.md)
+4. Revisa [Live Endpoints Reference](02-API/ENDPOINTS-LIVE-REFERENCE.md)
 
 ### Frontend/Admin Developer
 
 1. Lee [Overview](01-OVERVIEW.md)
 2. Consulta [Features](01-FEATURES/)
-3. Revisa sistema RBAC en [Architecture Decisions](02-API/ARCHITECTURE-DECISIONS.md)
+3. Revisa [Live Endpoints Reference](02-API/ENDPOINTS-LIVE-REFERENCE.md)
+4. Revisa sistema RBAC en [Architecture Decisions](02-API/ARCHITECTURE-DECISIONS.md)
 
 ---
 
@@ -43,17 +48,30 @@ Guías rectoras del proyecto.
 
 Documentación funcional y walkthroughs de implementación.
 
-- **Auth & Users**: [Features/Auth](01-FEATURES/auth/)
-- **Finanzas**: [Features/Finanzas](01-FEATURES/finanzas/)
-- **Actividades**: [Features/Actividades](01-FEATURES/actividades/)
-- **Certificaciones**: [Features/Certificaciones](01-FEATURES/certificaciones-guias-mayores/)
-- **Infraestructura**: [Features/Infrastructure](01-FEATURES/infrastructure/)
+- [Auth](01-FEATURES/auth/)
+- [Actividades + Camporees](01-FEATURES/actividades/)
+- [Catálogos](01-FEATURES/catalogos/)
+- [Certificaciones / Guías Mayores](01-FEATURES/certificaciones-guias-mayores/)
+- [Clases Progresivas](01-FEATURES/clases-progresivas/)
+- [Comunicaciones (Push/Notificaciones)](01-FEATURES/communications/)
+- [Finanzas](01-FEATURES/finanzas/)
+- [Gestión de Clubs + Post-registro + Legal Reps](01-FEATURES/gestion-clubs/)
+- [Gestión de Seguros](01-FEATURES/gestion-seguros/)
+- [Honores](01-FEATURES/honores/)
+- [Infrastructure](01-FEATURES/infrastructure/)
+- [Inventario](01-FEATURES/inventario/)
+- [Validación de Investiduras](01-FEATURES/validacion-investiduras/)
 
 ### 02-API (Referencia Técnica)
 
-- [API Specification](02-API/API-SPECIFICATION.md)
-- [Endpoints Reference](02-API/ENDPOINTS-REFERENCE.md)
+- [Live Endpoints Reference (Canónico para agentes)](02-API/ENDPOINTS-LIVE-REFERENCE.md)
+- [API Specification (diseño técnico)](02-API/API-SPECIFICATION.md)
+- [Endpoints Reference (legacy/histórico)](02-API/ENDPOINTS-REFERENCE.md)
+- [Complete API Reference (legacy/histórico)](02-API/COMPLETE-API-REFERENCE.md)
 - [Testing Guide](02-API/TESTING-GUIDE.md)
+- [External Services Integration (actualizado)](02-API/EXTERNAL-SERVICES-INTEGRATION.md)
+- [Session: Admin + Notifications Hardening](IMPLEMENTATION-SESSION-2026-02-13-admin-hardening.md)
+- [Session: Admin Panel Delivery + QA/UAT](IMPLEMENTATION-SESSION-2026-02-17-admin-panel-delivery.md)
 
 ### 03-DATABASE (Datos)
 
@@ -63,7 +81,8 @@ Documentación funcional y walkthroughs de implementación.
 ### GUIDES (Guías Generales)
 
 - [Spec-Driven Development](guides/spec-driven-development.md)
-- [Deployment Guide](guides/deployment.md)
+- [Admin Panel Users Scope Integration](guides/ADMIN-PANEL-USERS-SCOPE-INTEGRATION.md)
+- [Deployment Guide](DEPLOYMENT-GUIDE.md)
 
 ---
 
@@ -102,11 +121,11 @@ graph TB
 
 ### Stack Tecnológico
 
-- **Backend**: NestJS 10.x + TypeScript + Prisma
+- **Backend**: NestJS 11.x + TypeScript + Prisma 7
 - **Database**: PostgreSQL 15.x (Supabase)
 - **Auth**: Supabase Auth (JWT)
 - **Mobile**: Flutter + Riverpod + Clean Architecture
-- **Admin**: Next.js 14 + shadcn/ui + TailwindCSS
+- **Admin**: Next.js 16 + shadcn/ui + TailwindCSS
 - **Deploy**: Vercel Serverless
 
 ### Recursos Externos
@@ -131,5 +150,5 @@ graph TB
 
 ---
 
-**Última actualización**: 2026-01-30  
+**Última actualización**: 2026-02-17
 **Mantenido por**: Equipo SACDIA

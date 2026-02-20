@@ -488,6 +488,9 @@ dependencies:
   image_cropper: ^5.0.0
   flutter_image_compress: ^2.0.0
 
+  # Icons
+  hugeicons: ^1.1.5  # Librería de iconos (reemplaza Material Icons)
+
   # Biometrics
   local_auth: ^2.1.0
 

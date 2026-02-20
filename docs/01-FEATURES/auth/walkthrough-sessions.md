@@ -37,7 +37,7 @@ El módulo Sessions implementa gestión de sesiones concurrentes por usuario. Pe
 
 ## 📁 Archivos Implementados
 
-### 1. [src/common/services/session-management.service.ts](file:///Users/abner/Documents/dev/sacdia/sacdia-backend/src/common/services/session-management.service.ts)
+### 1. [src/common/services/session-management.service.ts](file:///Users/abner/Documents/development/sacdia/sacdia-backend/src/common/services/session-management.service.ts)
 
 **Configuración**:
 
@@ -149,7 +149,7 @@ Obtiene estadísticas de sesiones del usuario.
 
 ---
 
-### 2. [src/auth/sessions.controller.ts](file:///Users/abner/Documents/dev/sacdia/sacdia-backend/src/auth/sessions.controller.ts)
+### 2. [src/auth/sessions.controller.ts](file:///Users/abner/Documents/development/sacdia/sacdia-backend/src/auth/sessions.controller.ts)
 
 **Endpoints implementados**:
 

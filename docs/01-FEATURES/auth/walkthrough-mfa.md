@@ -35,7 +35,7 @@ El módulo MFA implementa autenticación de dos factores (2FA) usando el estánd
 
 ## 📁 Archivos Implementados
 
-### 1. [src/common/services/mfa.service.ts](file:///Users/abner/Documents/dev/sacdia/sacdia-backend/src/common/services/mfa.service.ts)
+### 1. [src/common/services/mfa.service.ts](file:///Users/abner/Documents/development/sacdia/sacdia-backend/src/common/services/mfa.service.ts)
 
 **Métodos principales**:
 
@@ -118,7 +118,7 @@ Obtiene el nivel de autenticación actual.
 
 ---
 
-### 2. [src/auth/mfa.controller.ts](file:///Users/abner/Documents/dev/sacdia/sacdia-backend/src/auth/mfa.controller.ts)
+### 2. [src/auth/mfa.controller.ts](file:///Users/abner/Documents/development/sacdia/sacdia-backend/src/auth/mfa.controller.ts)
 
 **Endpoints implementados**:
 
@@ -134,7 +134,7 @@ Obtiene el nivel de autenticación actual.
 
 ---
 
-### 3. [src/auth/dto/mfa.dto.ts](file:///Users/abner/Documents/dev/sacdia/sacdia-backend/src/auth/dto/mfa.dto.ts)
+### 3. [src/auth/dto/mfa.dto.ts](file:///Users/abner/Documents/development/sacdia/sacdia-backend/src/auth/dto/mfa.dto.ts)
 
 **DTOs definidos**:
 

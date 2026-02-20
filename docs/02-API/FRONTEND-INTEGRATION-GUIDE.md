@@ -43,6 +43,24 @@ const API_URLS = {
 
 ---
 
+## Actualizacion 2026-02-17 (Admin Panel)
+
+Se agrego validacion operativa para frontend admin mediante smoke E2E en `sacdia-admin/scripts/e2e-smoke.mjs`.
+
+Comandos de referencia:
+
+```bash
+# Smoke autenticado
+set -a; source .env.e2e.local; set +a; pnpm test:e2e:smoke
+
+# Smoke con create/edit opcional
+set -a; source .env.e2e.local; set +a; E2E_ENABLE_WRITE=1 pnpm test:e2e:smoke
+```
+
+Notas operativas:
+- El runner maneja fallback de conectividad `localhost -> 127.0.0.1` para entornos IPv4/IPv6.
+- Si un endpoint no esta publicado o hay rate-limit (429), reporta degradacion sin bloquear toda la corrida.
+
 ## Setup Inicial
 
 ### Next.js Admin Panel

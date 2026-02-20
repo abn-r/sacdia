@@ -447,11 +447,11 @@ Cuando aprendas mejores prácticas:
 
 ### Guías Detalladas
 
-1. [Getting Started](./guides/01-getting-started.md) - Primeros pasos
-2. [Creating Features](./guides/02-creating-features.md) - Crear una feature paso a paso
-3. [Idea to Spec](./guides/03-idea-to-spec.md) - Transformar ideas vagas en specs
-4. [Working with AI](./guides/04-working-with-ai.md) - Sacar máximo provecho de IA
-5. [Best Practices](./guides/05-best-practices.md) - Consejos avanzados
+1. [Getting Started](./01-getting-started.md) - Primeros pasos
+2. [Creating Features](./02-creating-features.md) - Crear una feature paso a paso
+3. [Idea to Spec](./03-idea-to-spec.md) - Transformar ideas vagas en specs
+4. [Working with AI](./04-working-with-ai.md) - Sacar máximo provecho de IA
+5. [Best Practices](./05-best-practices.md) - Consejos avanzados
 
 ### Referencias Externas
 
@@ -516,8 +516,8 @@ Este sistema es para uso interno del proyecto. Adapta y modifica según necesite
 
 ---
 
-**¿Listo para empezar?** → Lee [Getting Started](./guides/01-getting-started.md)
+**¿Listo para empezar?** → Lee [Getting Started](./01-getting-started.md)
 
-**¿Necesitas ayuda con tus ideas?** → Lee [Idea to Spec](./guides/03-idea-to-spec.md)
+**¿Necesitas ayuda con tus ideas?** → Lee [Idea to Spec](./03-idea-to-spec.md)
 
-**¿Primera feature?** → Lee [Creating Features](./guides/02-creating-features.md)
+**¿Primera feature?** → Lee [Creating Features](./02-creating-features.md)

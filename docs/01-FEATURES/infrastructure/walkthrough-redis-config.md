@@ -74,7 +74,7 @@ redis://default:PASSWORD@HOST:PORT
 
 ### Opción 1: Script de Prueba (Recomendado)
 
-He creado un script de prueba para ti en [`scripts/test-redis.ts`](file:///Users/abner/Documents/dev/sacdia/sacdia-backend/scripts/test-redis.ts).
+He creado un script de prueba para ti en [`scripts/test-redis.ts`](file:///Users/abner/Documents/development/sacdia/sacdia-backend/scripts/test-redis.ts).
 
 **Ejecuta el script**:
 

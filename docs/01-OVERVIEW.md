@@ -22,9 +22,9 @@ SACDIA es una plataforma integral para la administración de clubes del Minister
 ## Stack Tecnológico
 
 ### Backend
-- **Framework**: NestJS 10.x
+- **Framework**: NestJS 11.x
 - **Lenguaje**: TypeScript 5.x
-- **ORM**: Prisma 6.x
+- **ORM**: Prisma 7.x
 - **Database**: PostgreSQL 15.x (Supabase)
 - **Auth**: Supabase Auth (JWT)
 - **Storage**: Supabase Storage
@@ -41,7 +41,7 @@ SACDIA es una plataforma integral para la administración de clubes del Minister
 - **Features**: Offline mode, real-time sync, geolocation, camera
 
 ### Admin Panel
-- **Framework**: Next.js 14 (App Router)
+- **Framework**: Next.js 16 (App Router)
 - **Lenguaje**: TypeScript 5.x
 - **UI**: shadcn/ui + TailwindCSS
 - **Forms**: React Hook Form + Zod
@@ -95,7 +95,7 @@ graph TB
 - Sistema RBAC con roles globales y de club
 - Permisos granulares por módulo
 
-**Ver**: [api/ARCHITECTURE-DECISIONS.md](api/ARCHITECTURE-DECISIONS.md#adr-002-sistema-rbac)
+**Ver**: [api/ARCHITECTURE-DECISIONS.md](02-API/ARCHITECTURE-DECISIONS.md#adr-002-sistema-rbac)
 
 ---
 
@@ -115,7 +115,7 @@ Flujo de 3 pasos tras registro inicial:
 - **Roles de club**: Director, Subdirector, Secretario, Tesorero, Consejero, Miembro
 - **Asignaciones por año eclesiástico**: Tracking anual de membresías
 
-**Ver**: [database/SCHEMA-REFERENCE.md](database/SCHEMA-REFERENCE.md#relaciones-de-clubes)
+**Ver**: [database/SCHEMA-REFERENCE.md](03-DATABASE/SCHEMA-REFERENCE.md#relaciones-de-clubes)
 
 ---
 
@@ -167,7 +167,7 @@ Aplican solo a instancias específicas de club:
 - **counselor**: Consejero
 - **member**: Miembro regular (asignado en post-registro)
 
-**Ver**: [api/ARCHITECTURE-DECISIONS.md](api/ARCHITECTURE-DECISIONS.md#adr-002-sistema-rbac)
+**Ver**: [api/ARCHITECTURE-DECISIONS.md](02-API/ARCHITECTURE-DECISIONS.md#adr-002-sistema-rbac)
 
 ---
 
@@ -197,7 +197,7 @@ sequenceDiagram
     participant API
     participant DB
     
-    App->>API: POST /users/:id/post-registration/complete-step-3
+    App->>API: POST /api/v1/users/:id/post-registration/step-3/complete
     API->>DB: UPDATE users (country, union, local_field)
     API->>DB: GET ecclesiastical_year WHERE active
     API->>DB: INSERT club_role_assignments (member + year)
@@ -227,13 +227,13 @@ Country (País)
 
 ## Próximos Pasos
 
-1. **Backend Developer**: Continúa con [database/README.md](database/README.md)
+1. **Backend Developer**: Continúa con [database/README.md](03-DATABASE/README.md)
 2. **Mobile Developer**: Ve a [02-PROCESSES.md](02-PROCESSES.md)
-3. **Arquitectura detallada**: Consulta [api/API-SPECIFICATION.md](api/API-SPECIFICATION.md)
+3. **Arquitectura detallada**: Consulta [api/API-SPECIFICATION.md](02-API/API-SPECIFICATION.md)
 
 ---
 
 **Ver también**:
 - [Implementation Roadmap](03-IMPLEMENTATION-ROADMAP.md)
-- [Database Schema Reference](database/SCHEMA-REFERENCE.md)
-- [API Specification](api/API-SPECIFICATION.md)
+- [Database Schema Reference](03-DATABASE/SCHEMA-REFERENCE.md)
+- [API Specification](02-API/API-SPECIFICATION.md)

@@ -470,7 +470,7 @@ CREATE INDEX idx_churches_district ON churches(district_id) WHERE active = true;
 - [schema.prisma](schema.prisma) - Schema Prisma definitivo
 - [migrations/](migrations/) - Scripts SQL de migración  
 - [README.md](README.md) - Guía de base de datos
-- [../api/API-SPECIFICATION.md](../api/API-SPECIFICATION.md) - Cómo la API usa estos modelos
+- [../02-API/API-SPECIFICATION.md](../02-API/API-SPECIFICATION.md) - Cómo la API usa estos modelos
 
 ---
 

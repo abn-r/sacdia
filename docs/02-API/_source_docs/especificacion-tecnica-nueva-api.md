@@ -632,9 +632,9 @@ POST   /api/v1/classes/:classId/validate-investiture/:userId
 
 ## 📝 Recursos Adicionales
 
-- **Queries SQL**: [queries-club-role-assignments.md](file:///Users/abner/Documents/dev/sacdia/docs/restapi/queries-club-role-assignments.md)
-- **Análisis de Roles**: [analisis-club-members-vs-roles.md](file:///Users/abner/Documents/dev/sacdia/docs/restapi/analisis-club-members-vs-roles.md)
-- **Decisiones**: [decisiones-estandarizacion.md](file:///Users/abner/Documents/dev/sacdia/docs/restapi/decisiones-estandarizacion.md)
+- **Queries SQL**: [queries-club-role-assignments.md](file:///Users/abner/Documents/development/sacdia/docs/02-API/_source_docs/queries-club-role-assignments.md)
+- **Análisis de Roles**: [analisis-club-members-vs-roles.md](file:///Users/abner/Documents/development/sacdia/docs/02-API/_source_docs/analisis-club-members-vs-roles.md)
+- **Decisiones**: [decisiones-estandarizacion.md](file:///Users/abner/Documents/development/sacdia/docs/02-API/_source_docs/decisiones-estandarizacion.md)
 
 ---
 

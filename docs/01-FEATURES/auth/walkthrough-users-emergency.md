@@ -50,7 +50,7 @@
 
 ### Users Module (4 archivos)
 
-#### 1. [src/users/dto/update-user.dto.ts](file:///Users/abner/Documents/dev/sacdia/sacdia-backend/src/users/dto/update-user.dto.ts)
+#### 1. [src/users/dto/update-user.dto.ts](file:///Users/abner/Documents/development/sacdia/sacdia-backend/src/users/dto/update-user.dto.ts)
 
 ```typescript
 export class UpdateUserDto {
@@ -84,7 +84,7 @@ export class UpdateUserDto {
 - `baptism_date`: Requerido solo si `baptism=true`
 - `blood`: Enum de tipos de sangre de Prisma
 
-#### 2. [src/users/users.service.ts](file:///Users/abner/Documents/dev/sacdia/sacdia-backend/src/users/users.service.ts)
+#### 2. [src/users/users.service.ts](file:///Users/abner/Documents/development/sacdia/sacdia-backend/src/users/users.service.ts)
 
 **Métodos implementados**:
 
@@ -146,7 +146,7 @@ Calcula edad exacta considerando mes y día
 
 Retorna `true` si edad < 18
 
-#### 3. [src/users/users.controller.ts](file:///Users/abner/Documents/dev/sacdia/sacdia-backend/src/users/users.controller.ts)
+#### 3. [src/users/users.controller.ts](file:///Users/abner/Documents/development/sacdia/sacdia-backend/src/users/users.controller.ts)
 
 **Endpoints**:
 
@@ -181,7 +181,7 @@ async uploadProfilePicture(
 }
 ```
 
-#### 4. [src/users/users.module.ts](file:///Users/abner/Documents/dev/sacdia/sacdia-backend/src/users/users.module.ts)
+#### 4. [src/users/users.module.ts](file:///Users/abner/Documents/development/sacdia/sacdia-backend/src/users/users.module.ts)
 
 ```typescript
 @Module({
@@ -196,7 +196,7 @@ export class UsersModule {}
 
 ### Emergency Contacts Module (5 archivos)
 
-#### 5. [src/emergency-contacts/dto/create-emergency-contact.dto.ts](file:///Users/abner/Documents/dev/sacdia/sacdia-backend/src/emergency-contacts/dto/create-emergency-contact.dto.ts)
+#### 5. [src/emergency-contacts/dto/create-emergency-contact.dto.ts](file:///Users/abner/Documents/development/sacdia/sacdia-backend/src/emergency-contacts/dto/create-emergency-contact.dto.ts)
 
 ```typescript
 export class CreateEmergencyContactDto {
@@ -220,7 +220,7 @@ export class CreateEmergencyContactDto {
 > [!WARNING]
 > El campo `relationship_type` es `Int` porque hace referencia a la tabla antigua `relationship_type` que fue eliminada. Actualmente no tiene FK válida. En una migración futura se debe cambiar a UUID para usar `relationship_types`.
 
-#### 6. [src/emergency-contacts/dto/update-emergency-contact.dto.ts](file:///Users/abner/Documents/dev/sacdia/sacdia-backend/src/emergency-contacts/dto/update-emergency-contact.dto.ts)
+#### 6. [src/emergency-contacts/dto/update-emergency-contact.dto.ts](file:///Users/abner/Documents/development/sacdia/sacdia-backend/src/emergency-contacts/dto/update-emergency-contact.dto.ts)
 
 ```typescript
 export class UpdateEmergencyContactDto extends PartialType(
@@ -228,7 +228,7 @@ export class UpdateEmergencyContactDto extends PartialType(
 ) {}
 ```
 
-#### 7. [src/emergency-contacts/emergency-contacts.service.ts](file:///Users/abner/Documents/dev/sacdia/sacdia-backend/src/emergency-contacts/emergency-contacts.service.ts)
+#### 7. [src/emergency-contacts/emergency-contacts.service.ts](file:///Users/abner/Documents/development/sacdia/sacdia-backend/src/emergency-contacts/emergency-contacts.service.ts)
 
 **Constante**:
 
@@ -311,7 +311,7 @@ await this.prisma.emergency_contacts.update({
 });
 ```
 
-#### 8. [src/emergency-contacts/emergency-contacts.controller.ts](file:///Users/abner/Documents/dev/sacdia/sacdia-backend/src/emergency-contacts/emergency-contacts.controller.ts)
+#### 8. [src/emergency-contacts/emergency-contacts.controller.ts](file:///Users/abner/Documents/development/sacdia/sacdia-backend/src/emergency-contacts/emergency-contacts.controller.ts)
 
 **Endpoints**:
 

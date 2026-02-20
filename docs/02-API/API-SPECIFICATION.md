@@ -1,19 +1,18 @@
-# Especificación Técnica - Nueva REST API SACDIA v2.2
+<!-- CANONICAL-API-NOTE -->
+> [!WARNING]
+> Documento de especificación técnica/arquitectura.
+> Para endpoints runtime consumibles por agentes, usar:
+> [ENDPOINTS-LIVE-REFERENCE.md](./ENDPOINTS-LIVE-REFERENCE.md)
 
-**Versión**: 2.2.0 (Actualizada)
-**Fecha**: 4 de febrero de 2026
-**Status**: Producción
+# Especificación Técnica - REST API SACDIA
 
-**Cambios en v2.2**:
-- ✅ Módulo Camporees implementado (+8 endpoints)
-- ✅ Módulo Folders/Portfolios implementado (+7 endpoints)
-- ✅ Módulo Certifications implementado (+7 endpoints)
-- ✅ Módulo Inventory implementado (+5 endpoints)
-- ✅ OAuth con Google y Apple (+5 endpoints)
-- ✅ Push Notifications con FCM (+3 endpoints)
-- ✅ WebSockets para real-time (gateway + eventos)
-- ✅ Reset Password completado (+1 endpoint)
-- ✅ Total: 105+ endpoints REST en producción
+**Versión**: 3.0.0 (contrato runtime unificado)
+**Fecha**: 17 de febrero de 2026
+**Status**: ✅ Producción - Endpoints canónicos en ENDPOINTS-LIVE-REFERENCE.md
+
+**Nota**:
+- Este documento conserva decisiones de arquitectura, seguridad y contratos.
+- El listado y conteo vigente de endpoints se mantiene en [ENDPOINTS-LIVE-REFERENCE.md](ENDPOINTS-LIVE-REFERENCE.md).
 
 ---
 
@@ -25,7 +24,7 @@ Este documento integra:
 - ✅ **Stack tecnológico**: `.specs/_steering/tech.md`
 - ✅ **Procesos de negocio**: `docs/procesos-sacdia.md`
 - ✅ **Sistema de roles**: `docs/restapi/restructura-roles.md`
-- ✅ **Queries SQL**: `docs/restapi/queries-club-role-assignments.md`
+- ✅ **Queries SQL**: `docs/02-API/_source_docs/queries-club-role-assignments.md`
 
 ###Decisiones Finales Aplicadas
 
@@ -42,9 +41,9 @@ Este documento integra:
 
 ### Stack Final
 
-- **Backend**: NestJS 10.x + TypeScript 5.x
+- **Backend**: NestJS 11.x + TypeScript 5.x
 - **Database**: PostgreSQL 15.x (Supabase)
-- **ORM**: Prisma 6.x
+- **ORM**: Prisma 7.x
 - **Auth**: Supabase Auth (JWT + OAuth)
 - **Storage**: Supabase Storage
 - **Push Notifications**: Firebase Cloud Messaging (FCM)
@@ -221,7 +220,7 @@ CREATE TABLE club_role_assignments (
   )
 );
 
--- Ver queries completas en: docs/restapi/queries-club-role-assignments.md
+-- Ver queries completas en: docs/02-API/_source_docs/queries-club-role-assignments.md
 ```
 
 ---
@@ -498,144 +497,29 @@ export class CreateLegalRepresentativeDto {
 
 ## 🔗 Endpoints Principales
 
-### Módulo Auth
+> [!IMPORTANT]
+> El listado completo y vigente de endpoints del backend está en [ENDPOINTS-LIVE-REFERENCE.md](ENDPOINTS-LIVE-REFERENCE.md).
+> Esta especificación se mantiene para arquitectura, seguridad, contratos y decisiones técnicas.
 
-```typescript
-POST   /api/v1/auth/register
-POST   /api/v1/auth/login
-POST   /api/v1/auth/logout
-POST   /api/v1/auth/password/reset-request
-POST   /api/v1/auth/password/reset
-GET    /api/v1/auth/me                      // Incluye global_roles + club_role_assignments
-GET    /api/v1/auth/profile/completion-status // ✅ Con tracking granular
+### Módulos Runtime (Resumen)
 
-// ✅ MFA (2FA) - NUEVO
-POST   /api/v1/auth/mfa/enroll              // Genera QR code para configurar
-POST   /api/v1/auth/mfa/verify              // Verifica código y activa 2FA
-GET    /api/v1/auth/mfa/factors             // Lista factores configurados
-GET    /api/v1/auth/mfa/status              // Estado de 2FA del usuario
-DELETE /api/v1/auth/mfa/unenroll            // Deshabilita 2FA
-
-// ✅ Sessions - NUEVO
-GET    /api/v1/auth/sessions                // Lista sesiones activas
-DELETE /api/v1/auth/sessions/:sessionId     // Cierra sesión específica
-DELETE /api/v1/auth/sessions                // Logout de todos los dispositivos
-```
-
-### Módulo Users
-
-```typescript
-GET    /api/v1/users/:userId
-PATCH  /api/v1/users/:userId
-POST   /api/v1/users/:userId/profile-picture
-DELETE /api/v1/users/:userId/profile-picture
-
-// Emergency Contacts (máx 5)
-GET    /api/v1/users/:userId/emergency-contacts
-POST   /api/v1/users/:userId/emergency-contacts    // ✅ Validación de máx 5
-PATCH  /api/v1/emergency-contacts/:contactId
-DELETE /api/v1/emergency-contacts/:contactId
-
-// Allergies & Diseases
-GET    /api/v1/users/:userId/allergies
-POST   /api/v1/users/:userId/allergies
-DELETE /api/v1/users/:userId/allergies/:allergyId
-
-GET    /api/v1/users/:userId/diseases
-POST   /api/v1/users/:userId/diseases
-DELETE /api/v1/users/:userId/diseases/:diseaseId
-```
-
-### Módulo Legal Representatives (✅ NUEVO)
-
-```typescript
-GET    /api/v1/users/:userId/requires-legal-representative  // Verifica si edad < 18
-POST   /api/v1/users/:userId/legal-representative
-GET    /api/v1/users/:userId/legal-representative
-PATCH  /api/v1/users/:userId/legal-representative
-DELETE /api/v1/users/:userId/legal-representative          // Solo si edad >= 18
-```
-
-### Módulo Clubs
-
-```typescript
-POST   /api/v1/clubs
-GET    /api/v1/clubs
-GET    /api/v1/clubs/:clubId
-PATCH  /api/v1/clubs/:clubId
-
-// Instancias
-POST   /api/v1/clubs/:clubId/instances/adventurers
-POST   /api/v1/clubs/:clubId/instances/pathfinders
-POST   /api/v1/clubs/:clubId/instances/master-guides
-GET    /api/v1/clubs/:clubId/instances
-
-// Miembros (via club_role_assignments)
-GET    /api/v1/clubs/:clubId/members                    // ✅ Ver queries SQL
-POST   /api/v1/clubs/:clubId/members                    // Crea role assignment
-DELETE /api/v1/clubs/:clubId/members/:userId
-
-// Roles de club (club_role_assignments)
-POST   /api/v1/clubs/:clubId/members/:userId/roles      // Asignar rol adicional
-GET    /api/v1/users/:userId/club-roles                 // Obtener todos sus roles de club
-DELETE /api/v1/club-role-assignments/:assignmentId
-```
-
-### Módulo Classes
-
-```typescript
-GET    /api/v1/classes
-GET    /api/v1/classes/:classId
-POST   /api/v1/users/:userId/classes                    // Inscripción
-GET    /api/v1/users/:userId/classes
-DELETE /api/v1/users/:userId/classes/:classId
-
-// Progreso
-GET    /api/v1/users/:userId/classes/:classId/progress
-POST   /api/v1/users/:userId/classes/:classId/modules/:moduleId/sections/:sectionId
-POST   /api/v1/users/:userId/classes/:classId/submit-for-validation
-POST   /api/v1/classes/:classId/validate-investiture/:userId
-```
-
-### Módulo Camporees (✅ NUEVO)
-
-**Endpoints**: 8
-
-Gestión de campamentos (locales y de unión) con validación automática de seguros.
-
-**Características**:
-- CRUD completo de campamentos
-- Registro de miembros con validación de seguros
-- Validación de tipo de seguro (CAMPOREE)
-- Validación de fechas de vencimiento
-- Soft delete de campamentos y registros
-- Listado de asistentes
-
-**Endpoints**:
-
-```typescript
-GET    /api/v1/camporees                               // Listar campamentos (paginado)
-POST   /api/v1/camporees                               // Crear campamento (director, subdirector)
-GET    /api/v1/camporees/:id                           // Obtener campamento
-PATCH  /api/v1/camporees/:id                           // Actualizar (director, subdirector)
-DELETE /api/v1/camporees/:id                           // Eliminar (director)
-POST   /api/v1/camporees/:id/register                  // Registrar miembro
-GET    /api/v1/camporees/:id/members                   // Listar asistentes
-DELETE /api/v1/camporees/:id/members/:userId           // Remover miembro
-```
-
-**Validaciones de Seguro**:
-- Tipo debe ser `CAMPOREE` (enum)
-- Pertenece al usuario registrado
-- Fecha de vencimiento >= fecha fin del campamento
-- Estado activo
-
-**Roles requeridos**:
-- Crear/Actualizar: director, subdirector
-- Eliminar: director
-- Registrar/Listar: autenticado
-
----
+- `/api/v1/auth`
+- `/api/v1/users`
+- `/api/v1/activities`
+- `/api/v1/admin`
+- `/api/v1/camporees`
+- `/api/v1/catalogs`
+- `/api/v1/certifications`
+- `/api/v1/classes`
+- `/api/v1/club-roles`
+- `/api/v1/clubs`
+- `/api/v1/fcm-tokens`
+- `/api/v1/finances`
+- `/api/v1/folders`
+- `/api/v1/health`
+- `/api/v1/honors`
+- `/api/v1/inventory`
+- `/api/v1/notifications`
 
 ## 📊 Respuestas Estándar
 
@@ -689,65 +573,21 @@ DELETE /api/v1/camporees/:id/members/:userId           // Remover miembro
 
 ---
 
-## 🚀 Plan de Implementación
+## 🚀 Estado de Implementación
 
-### Fase 1: Fundamentos (Semana 1-2)
-
-- [ ] Setup NestJS con versionado `/api/v1/`
-- [ ] Configurar Prisma + Supabase
-- [ ] Implementar Helmet + Throttler + CORS
-- [ ] Crear SupabaseGuard
-- [ ] Configurar Swagger
-
-### Fase 2: Auth + RBAC (Semana 3-4)
-
-- [ ] Módulo Auth completo
-- [ ] Sistema de roles con `role_category`
-- [ ] Tablas `users_roles` y `club_role_assignments`
-- [ ] RolesGuard y decorators
-- [ ] Tests E2E de auth
-
-### Fase 3: Users + Post-Registro (Semana 5-6)
-
-- [ ] Módulo Users básico
-- [ ] Tabla `users_pr` con tracking granular
-- [ ] Upload de fotografía (Supabase Storage)
-- [ ] Contactos de emergencia (validación máx 5)
-- [ ] Alergias y enfermedades
-
-### Fase 4: Legal Representatives (Semana 7)
-
-- [ ] Módulo Legal Representatives
-- [ ] Validación de edad < 18
-- [ ] Flujo completo en post-registro
-
-### Fase 5: Clubs + Classes (Semana 8-10)
-
-- [ ] Módulo Clubs (CRUD + instancias)
-- [ ] `club_role_assignments` con `ecclesiastical_year_id`
-- [ ] Auto-asignación rol "member"
-- [ ] Módulo Classes (catálogo + enrollment)
-- [ ] Validación de investiduras
-
-### Fase 6: Módulos Adicionales + Testing (Semana 11-12)
-
-- [ ] Activities, Finances, Inventory
-- [ ] Catalogs unificados
-- [ ] Tests unitarios (>70% coverage)
-- [ ] Tests E2E completos
-- [ ] Performance testing
-
----
+- API backend en producción con contrato runtime centralizado en [ENDPOINTS-LIVE-REFERENCE.md](ENDPOINTS-LIVE-REFERENCE.md).
+- Módulos activos: auth, users, clubs, classes, honors, activities, camporees, finances, inventory, folders, notifications, catalogs, admin geography/reference y rbac.
+- Para consumo por agentes (App + Panel Admin), usar siempre el documento canónico de endpoints en vivo.
 
 ## 📝 Recursos Adicionales
 
-- **Queries SQL**: [queries-club-role-assignments.md](file:///Users/abner/Documents/dev/sacdia/docs/restapi/queries-club-role-assignments.md)
-- **Análisis de Roles**: [analisis-club-members-vs-roles.md](file:///Users/abner/Documents/dev/sacdia/docs/restapi/analisis-club-members-vs-roles.md)
-- **Decisiones**: [decisiones-estandarizacion.md](file:///Users/abner/Documents/dev/sacdia/docs/restapi/decisiones-estandarizacion.md)
+- **Queries SQL**: [queries-club-role-assignments.md](./_source_docs/queries-club-role-assignments.md)
+- **Análisis de Roles**: [analisis-club-members-vs-roles.md](./_source_docs/analisis-club-members-vs-roles.md)
+- **Decisiones**: [decisiones-estandarizacion.md](./_source_docs/decisiones-estandarizacion.md)
 
 ---
 
 **Generado**: 2026-01-29
-**Actualizado**: 2026-02-04
-**Versión**: 2.2.0 (105+ endpoints, 17 módulos)
-**Status**: ✅ Producción - Fase 1 Completada
+**Actualizado**: 2026-02-17
+**Versión**: 3.0.0 (contrato runtime unificado)
+**Status**: ✅ Producción - Endpoints canónicos en ENDPOINTS-LIVE-REFERENCE.md

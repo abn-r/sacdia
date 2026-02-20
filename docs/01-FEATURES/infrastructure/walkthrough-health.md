@@ -32,7 +32,7 @@ El módulo Health implementa un endpoint simple de salud para monitoreo del sist
 
 ## 📁 Archivos Implementados
 
-### [src/health/health.controller.ts](file:///Users/abner/Documents/dev/sacdia/sacdia-backend/src/health/health.controller.ts)
+### [src/health/health.controller.ts](file:///Users/abner/Documents/development/sacdia/sacdia-backend/src/health/health.controller.ts)
 
 **Código completo**:
 

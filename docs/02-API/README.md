@@ -2,6 +2,11 @@
 
 Guía completa de la REST API construida con NestJS.
 
+> [!IMPORTANT]
+> **Contrato runtime para agentes (App + Panel Admin):** [ENDPOINTS-LIVE-REFERENCE.md](ENDPOINTS-LIVE-REFERENCE.md)
+>
+> Los documentos `ENDPOINTS-REFERENCE.md`, `COMPLETE-API-REFERENCE.md`, `API-REFERENCE.md` y partes de `API-SPECIFICATION.md` pueden contener rutas históricas/propuestas.
+
 ---
 
 ## 📋 Índice
@@ -19,8 +24,8 @@ Guía completa de la REST API construida con NestJS.
 
 ### Stack Tecnológico
 
-- **Framework**: NestJS 10.x + TypeScript 5.x
-- **ORM**: Prisma 6.x
+- **Framework**: NestJS 11.x + TypeScript 5.x
+- **ORM**: Prisma 7.x
 - **Auth**: Supabase Auth (JWT)
 - **Validación**: class-validator + class-transformer
 - **Documentación**: Swagger/OpenAPI
@@ -30,13 +35,13 @@ Guía completa de la REST API construida con NestJS.
 ### Base URL
 
 ```
-Development:  http://localhost:3000/v1
-Production:   https://sacdia-api.vercel.app/v1
+Development:  http://localhost:3000/api/v1
+Production:   https://sacdia-api.vercel.app/api/v1
 ```
 
 ### Versionado
 
-**Estrategia**: URI-based (`/v1/`)
+**Estrategia**: URI-based (`/api/v1/`)
 
 - Visible y cacheable
 - Máximo 2 versiones mayores simultáneas
@@ -44,10 +49,10 @@ Production:   https://sacdia-api.vercel.app/v1
 
 📖 **Documentación completa de versionamiento**: [API-VERSIONING.md](API-VERSIONING.md)
 
-**Importante**: Todos los endpoints DEBEN incluir `/v1/` en la URL:
+**Importante**: Todos los endpoints DEBEN incluir `/api/v1/` en la URL:
 
 ```bash
-✅ curl http://localhost:3000/v1/auth/me
+✅ curl http://localhost:3000/api/v1/auth/me
 ❌ curl http://localhost:3000/auth/me     # 404 Not Found
 ```
 
@@ -57,15 +62,16 @@ Production:   https://sacdia-api.vercel.app/v1
 
 | Documento                                                            | Descripción                                                          |
 | -------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| [ENDPOINTS-LIVE-REFERENCE.md](ENDPOINTS-LIVE-REFERENCE.md)           | **Contrato runtime canónico** consumible por agentes                 |
 | [API-SPECIFICATION.md](API-SPECIFICATION.md)                         | **Especificación técnica completa** - DTOs, Guards, módulos          |
 | [API-VERSIONING.md](API-VERSIONING.md)                               | **Versionamiento de API** - Configuración, ejemplos, best practices  |
 | [SECURITY-GUIDE.md](SECURITY-GUIDE.md)                               | **Guía de seguridad** - 2FA, Token Blacklist, Sessions, IP Whitelist |
 | [ENDPOINTS-REFERENCE.md](ENDPOINTS-REFERENCE.md)                     | **Referencia de endpoints** por proceso de negocio                   |
 | [ARCHITECTURE-DECISIONS.md](ARCHITECTURE-DECISIONS.md)               | **ADRs** - Decisiones arquitectónicas documentadas                   |
-| [walkthrough-backend-init.md](walkthrough-backend-init.md)           | Walkthrough de inicialización del backend                            |
-| [walkthrough-users-emergency.md](walkthrough-users-emergency.md)     | Implementación Users + Emergency Contacts                            |
-| [walkthrough-legal-rep-postreg.md](walkthrough-legal-rep-postreg.md) | Implementación Legal Reps + Post-Registration                        |
-| [walkthrough-security.md](walkthrough-security.md)                   | Walkthrough de mejoras de seguridad (Fases 1-4)                      |
+| [walkthrough-backend-init.md](../01-FEATURES/infrastructure/walkthrough-backend-init.md)           | Walkthrough de inicialización del backend                            |
+| [walkthrough-users-emergency.md](../01-FEATURES/auth/walkthrough-users-emergency.md)     | Implementación Users + Emergency Contacts                            |
+| [walkthrough-legal-rep-postreg.md](../01-FEATURES/gestion-clubs/walkthrough-legal-rep-postreg.md) | Implementación Legal Reps + Post-Registration                        |
+| [walkthrough-security.md](../01-FEATURES/auth/walkthrough-security.md)                   | Walkthrough de mejoras de seguridad (Fases 1-4)                      |
 
 ---
 
@@ -98,7 +104,6 @@ POST   /api/v1/auth/login          # Login
 POST   /api/v1/auth/logout         # Logout
 GET    /api/v1/auth/me             # Perfil con roles/permisos
 POST   /api/v1/auth/password/reset-request
-POST   /api/v1/auth/password/reset
 ```
 
 ### Headers Requeridos
@@ -164,32 +169,28 @@ export class ActivitiesController {
 
 ## Endpoints Principales
 
-### Módulos Disponibles
+### Módulos Disponibles (Runtime)
 
-```
-/api/v1/
-├── auth/                   # Autenticación
-├── users/                  # Gestión de usuarios
-│   ├── emergency-contacts/
-│   ├── allergies/
-│   ├── diseases/
-│   ├── users-honors/
-│   └── users-classes/
-├── clubs/                  # Gestión de clubes
-├── classes/                # Clases progresivas
-└── catalogs/               # Catálogos maestros
-    ├── roles/
-    ├── permissions/
-    ├── countries/
-    ├── unions/
-    ├── local-fields/
-    ├── districts/
-    ├── churches/
-    ├── allergies/
-    ├── diseases/
-    ├── honors/
-    └── club-types/
-```
+Fuente canónica: [ENDPOINTS-LIVE-REFERENCE.md](ENDPOINTS-LIVE-REFERENCE.md)
+
+`/api/v1/`
+- auth
+- users
+- activities
+- admin (catálogos administrativos + RBAC)
+- camporees
+- catalogs
+- certifications
+- classes
+- club-roles
+- clubs
+- fcm-tokens
+- finances
+- folders
+- health
+- honors
+- inventory
+- notifications
 
 ### Ejemplos de Uso
 
@@ -349,34 +350,33 @@ npx prisma generate        # Generar cliente
 
 ```
 src/
-├── modules/
-│   ├── auth/              # AuthModule
-│   ├── users/             # UsersModule
-│   ├── clubs/             # ClubsModule
-│   ├── classes/           # ClassesModule
-│   └── catalogs/          # CatalogsModule
-├── common/
-│   ├── guards/            # SupabaseGuard, RolesGuard
-│   ├── decorators/        # @Roles(), @Permissions()
-│   ├── interceptors/      # Response transformation
-│   └── filters/           # Exception handling
-└── prisma/
-    └── prisma.service.ts
+├── auth/
+├── users/
+├── clubs/
+├── classes/
+├── honors/
+├── activities/
+├── camporees/
+├── finances/
+├── inventory/
+├── folders/
+├── notifications/
+├── catalogs/
+├── admin/
+└── rbac/
 ```
-
----
 
 ## Próximos Pasos
 
 1. **Explorar especificación**: Lee [API-SPECIFICATION.md](API-SPECIFICATION.md)
 2. **Ver endpoints por proceso**: Consulta [ENDPOINTS-REFERENCE.md](ENDPOINTS-REFERENCE.md)
 3. **Entender decisiones**: Revisa [ARCHITECTURE-DECISIONS.md](ARCHITECTURE-DECISIONS.md)
-4. **Inicializar backend**: Sigue [walkthrough-backend-init.md](walkthrough-backend-init.md)
+4. **Inicializar backend**: Sigue [walkthrough-backend-init.md](../01-FEATURES/infrastructure/walkthrough-backend-init.md)
 
 ---
 
 **Ver también**:
 
-- [Database Schema](../database/SCHEMA-REFERENCE.md) - Modelos Prisma
+- [Database Schema](../03-DATABASE/SCHEMA-REFERENCE.md) - Modelos Prisma
 - [Processes](../02-PROCESSES.md) - Procesos de negocio
 - [Implementation Roadmap](../03-IMPLEMENTATION-ROADMAP.md) - Roadmap de desarrollo

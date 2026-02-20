@@ -263,5 +263,5 @@ WHERE cra.club_pathf_id = 123
 ---
 
 **Ver también**:
-- [API Specification](../api/API-SPECIFICATION.md) - Cómo la API usa estos modelos
-- [Architecture Decisions](../api/ARCHITECTURE-DECISIONS.md) - Por qué se tomaron ciertas decisiones
+- [API Specification](../02-API/API-SPECIFICATION.md) - Cómo la API usa estos modelos
+- [Architecture Decisions](../02-API/ARCHITECTURE-DECISIONS.md) - Por qué se tomaron ciertas decisiones

@@ -1,5 +1,11 @@
 # Auditoría de Rutas API - SACDIA Backend
 
+> [!IMPORTANT]
+> Documento de auditoría histórica (2026-02-04).
+> Parte de los hallazgos ya fue resuelta (versionado, OAuth, FCM hardening).
+> Estado vigente: `02-API/EXTERNAL-SERVICES-INTEGRATION.md`, `02-API/ENDPOINTS-REFERENCE.md` y `IMPLEMENTATION-SESSION-2026-02-13-admin-hardening.md`.
+
+
 **Fecha**: 2026-02-04  
 **Status**: ⚠️ Inconsistencias Detectadas  
 **Gravedad**: 🟡 Media (no crítico pero requiere atención)
@@ -27,7 +33,7 @@ He verificado el análisis y **ES CORRECTO**. Se encontraron:
 
 | Componente        | Ruta Base | Archivo                                                                                          |
 | ----------------- | --------- | ------------------------------------------------------------------------------------------------ |
-| Backend (main.ts) | `/v1`     | [main.ts:122-125](file:///Users/abner/Documents/dev/sacdia/sacdia-backend/src/main.ts#L122-L125) |
+| Backend (main.ts) | `/v1`     | [main.ts:122-125](file:///Users/abner/Documents/development/sacdia/sacdia-backend/src/main.ts#L122-L125) |
 | Documentación     | `/api/v1` | Todos los `.md` en `docs/api/`                                                                   |
 | Ejemplos curl     | `/api/v1` | Walkthroughs                                                                                     |
 | Frontend guides   | `/api/v1` | FRONTEND-INTEGRATION-GUIDE.md                                                                    |
@@ -62,9 +68,9 @@ app.enableVersioning({
 
 | Controller                                                                                                                                  | Línea | Ruta Resultante (INCORRECTA) |
 | ------------------------------------------------------------------------------------------------------------------------------------------- | ----- | ---------------------------- |
-| [certifications.controller.ts](file:///Users/abner/Documents/dev/sacdia/sacdia-backend/src/certifications/certifications.controller.ts#L30) | 30    | `/v1/api/v1/certifications`  |
-| [folders.controller.ts](file:///Users/abner/Documents/dev/sacdia/sacdia-backend/src/folders/folders.controller.ts#L29)                      | 29    | `/v1/api/v1/folders`         |
-| [inventory.controller.ts](file:///Users/abner/Documents/dev/sacdia/sacdia-backend/src/inventory/inventory.controller.ts#L29)                | 29    | `/v1/api/v1/inventory`       |
+| [certifications.controller.ts](file:///Users/abner/Documents/development/sacdia/sacdia-backend/src/certifications/certifications.controller.ts#L30) | 30    | `/v1/api/v1/certifications`  |
+| [folders.controller.ts](file:///Users/abner/Documents/development/sacdia/sacdia-backend/src/folders/folders.controller.ts#L29)                      | 29    | `/v1/api/v1/folders`         |
+| [inventory.controller.ts](file:///Users/abner/Documents/development/sacdia/sacdia-backend/src/inventory/inventory.controller.ts#L29)                | 29    | `/v1/api/v1/inventory`       |
 
 **Código Actual**:
 
@@ -99,8 +105,8 @@ export class CertificationsController {
 
 **Documentado en**:
 
-- [walkthrough-oauth.md](file:///Users/abner/Documents/dev/sacdia/docs/api/walkthrough-oauth.md)
-- [ENDPOINTS-REFERENCE.md](file:///Users/abner/Documents/dev/sacdia/docs/api/ENDPOINTS-REFERENCE.md#L954-L962)
+- [walkthrough-oauth.md](file:///Users/abner/Documents/development/sacdia/docs/01-FEATURES/auth/walkthrough-oauth.md)
+- [ENDPOINTS-REFERENCE.md](file:///Users/abner/Documents/development/sacdia/docs/02-API/ENDPOINTS-REFERENCE.md#L954-L962)
 
 **Endpoints Faltantes** (5):
 
@@ -140,7 +146,7 @@ POST   /api/v1/users/:userId/fcm-tokens
 GET    /api/v1/users/:userId/fcm-tokens
 ```
 
-**Implementado** ([notifications.controller.ts:100-122](file:///Users/abner/Documents/dev/sacdia/sacdia-backend/src/notifications/notifications.controller.ts#L100-L122)):
+**Implementado** ([notifications.controller.ts:100-122](file:///Users/abner/Documents/development/sacdia/sacdia-backend/src/notifications/notifications.controller.ts#L100-L122)):
 
 ```typescript
 @Controller('fcm-tokens')
@@ -162,7 +168,7 @@ export class FcmTokensController {
 
 ### 5️⃣ Honors - Endpoints de Progreso Faltantes 🟡
 
-**Implementado** ([honors.controller.ts](file:///Users/abner/Documents/dev/sacdia/sacdia-backend/src/honors/honors.controller.ts)):
+**Implementado** ([honors.controller.ts](file:///Users/abner/Documents/development/sacdia/sacdia-backend/src/honors/honors.controller.ts)):
 
 ```typescript
 @Controller('honors')
@@ -190,11 +196,11 @@ export class HonorsController {
 
 **Cambios Aplicados**:
 
-1. ✅ **Agregado `app.setGlobalPrefix('api')`** en [main.ts:123](file:///Users/abner/Documents/dev/sacdia/sacdia-backend/src/main.ts#L123)
+1. ✅ **Agregado `app.setGlobalPrefix('api')`** en [main.ts:123](file:///Users/abner/Documents/development/sacdia/sacdia-backend/src/main.ts#L123)
 2. ✅ **Corregidos 3 controllers**:
-   - [certifications.controller.ts:30](file:///Users/abner/Documents/dev/sacdia/sacdia-backend/src/certifications/certifications.controller.ts#L30) - `@Controller('certifications')`
-   - [folders.controller.ts:29](file:///Users/abner/Documents/dev/sacdia/sacdia-backend/src/folders/folders.controller.ts#L29) - `@Controller('folders')`
-   - [inventory.controller.ts:29](file:///Users/abner/Documents/dev/sacdia/sacdia-backend/src/inventory/inventory.controller.ts#L29) - `@Controller('inventory')`
+   - [certifications.controller.ts:30](file:///Users/abner/Documents/development/sacdia/sacdia-backend/src/certifications/certifications.controller.ts#L30) - `@Controller('certifications')`
+   - [folders.controller.ts:29](file:///Users/abner/Documents/development/sacdia/sacdia-backend/src/folders/folders.controller.ts#L29) - `@Controller('folders')`
+   - [inventory.controller.ts:29](file:///Users/abner/Documents/development/sacdia/sacdia-backend/src/inventory/inventory.controller.ts#L29) - `@Controller('inventory')`
 
 **Resultado**:
 
@@ -284,16 +290,16 @@ Si **NO** (prefieres `/v1`):
 
 ### Archivos Clave
 
-- [main.ts](file:///Users/abner/Documents/dev/sacdia/sacdia-backend/src/main.ts) - Configuración versionado
-- [certifications.controller.ts](file:///Users/abner/Documents/dev/sacdia/sacdia-backend/src/certifications/certifications.controller.ts#L30)
-- [folders.controller.ts](file:///Users/abner/Documents/dev/sacdia/sacdia-backend/src/folders/folders.controller.ts#L29)
-- [inventory.controller.ts](file:///Users/abner/Documents/dev/sacdia/sacdia-backend/src/inventory/inventory.controller.ts#L29)
+- [main.ts](file:///Users/abner/Documents/development/sacdia/sacdia-backend/src/main.ts) - Configuración versionado
+- [certifications.controller.ts](file:///Users/abner/Documents/development/sacdia/sacdia-backend/src/certifications/certifications.controller.ts#L30)
+- [folders.controller.ts](file:///Users/abner/Documents/development/sacdia/sacdia-backend/src/folders/folders.controller.ts#L29)
+- [inventory.controller.ts](file:///Users/abner/Documents/development/sacdia/sacdia-backend/src/inventory/inventory.controller.ts#L29)
 
 ### Documentación
 
-- [walkthrough-oauth.md](file:///Users/abner/Documents/dev/sacdia/docs/api/walkthrough-oauth.md)
-- [ENDPOINTS-REFERENCE.md](file:///Users/abner/Documents/dev/sacdia/docs/api/ENDPOINTS-REFERENCE.md)
-- [walkthrough-push-notifications.md](file:///Users/abner/Documents/dev/sacdia/docs/api/walkthrough-push-notifications.md)
+- [walkthrough-oauth.md](file:///Users/abner/Documents/development/sacdia/docs/01-FEATURES/auth/walkthrough-oauth.md)
+- [ENDPOINTS-REFERENCE.md](file:///Users/abner/Documents/development/sacdia/docs/02-API/ENDPOINTS-REFERENCE.md)
+- [walkthrough-push-notifications.md](file:///Users/abner/Documents/development/sacdia/docs/01-FEATURES/communications/walkthrough-push-notifications.md)
 
 ---
 

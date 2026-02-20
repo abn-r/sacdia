@@ -1,5 +1,10 @@
 # Auditoría de Servicios Externos - SACDIA Backend
 
+> [!IMPORTANT]
+> Documento histórico (2026-02-05).
+> El contrato vigente de servicios externos y FCM está en `02-API/EXTERNAL-SERVICES-INTEGRATION.md` (actualizado 2026-02-13).
+
+
 **Fecha**: 5 de febrero de 2026
 **Alcance**: Redis, Firebase FCM, Sentry, Honors Module Review
 **Estado**: ✅ COMPLETADO

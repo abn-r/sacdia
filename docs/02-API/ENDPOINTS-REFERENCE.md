@@ -1,3 +1,9 @@
+<!-- CANONICAL-API-NOTE -->
+> [!WARNING]
+> Este documento puede incluir rutas históricas/propuestas o ejemplos desactualizados.
+> Para consumo de agentes (App + Panel), usar como contrato canónico:
+> [ENDPOINTS-LIVE-REFERENCE.md](./ENDPOINTS-LIVE-REFERENCE.md)
+
 # Mapeo Procesos → Endpoints - SACDIA API v2.2
 
 **Versión**: 2.2.0 (Actualizada con Módulos Nuevos)
@@ -1005,48 +1011,41 @@ DELETE /api/v1/auth/oauth/:provider                    # Auth required
 
 ---
 
-### Push Notifications (3) ✅ NUEVO
+### Push Notifications (6) ✅ ACTUALIZADO
 
 **Tecnología**: Firebase Cloud Messaging (FCM)
 
 ```
-# Gestión de Tokens FCM
-POST   /api/v1/users/:userId/fcm-tokens
-GET    /api/v1/users/:userId/fcm-tokens
-DELETE /api/v1/fcm-tokens/:tokenId
+# Gestión de Tokens FCM (JWT requerido)
+POST   /api/v1/fcm-tokens
+GET    /api/v1/fcm-tokens
+DELETE /api/v1/fcm-tokens/:token
+GET    /api/v1/fcm-tokens/user/:userId        # owner/admin (compatibilidad)
+
+# Envío de notificaciones
+POST   /api/v1/notifications/send             # JWT requerido
+POST   /api/v1/notifications/broadcast        # solo admin|super_admin
+POST   /api/v1/notifications/club/:type/:id   # solo admin|super_admin
 ```
 
 **Request Body - Registrar Token**:
 
 ```typescript
 {
-  fcm_token: string;            // Token de FCM del dispositivo
-  device_type: 'ios' | 'android' | 'web';
-  device_name?: string;         // ej: "iPhone 14 de Juan"
+  token: string;                // Token FCM del dispositivo
+  device_type?: 'ios' | 'android' | 'web';
+  device_name?: string;
 }
 ```
 
-**Response - Lista de Tokens**:
-
-```json
-{
-  "data": [
-    {
-      "token_id": "uuid",
-      "fcm_token": "fcm_token_string",
-      "device_type": "ios",
-      "device_name": "iPhone 14 de Juan",
-      "is_active": true,
-      "created_at": "2026-02-01T10:00:00Z"
-    }
-  ]
-}
-```
+**Nota de contrato**:
+- `userId` ya no se envía en body al registrar token.
+- El backend toma `userId` desde el JWT autenticado.
 
 **Tabla en BD**: `user_fcm_tokens`
 
-- Máximo recomendado: 5 tokens por usuario
-- Auto-cleanup de tokens expirados
+- Auto-cleanup de tokens inválidos
+- Validación de ownership para baja/listado de tokens
 
 ---
 

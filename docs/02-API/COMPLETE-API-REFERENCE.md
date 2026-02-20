@@ -1,3 +1,9 @@
+<!-- CANONICAL-API-NOTE -->
+> [!WARNING]
+> Este documento puede incluir rutas históricas/propuestas o ejemplos desactualizados.
+> Para consumo de agentes (App + Panel), usar como contrato canónico:
+> [ENDPOINTS-LIVE-REFERENCE.md](./ENDPOINTS-LIVE-REFERENCE.md)
+
 # 📚 Complete SACDIA API Reference
 
 > [!IMPORTANT]
@@ -18,6 +24,7 @@
 - [Emergency Contacts](#emergency-contacts)
 - [Legal Representatives](#legal-representatives)
 - [Post-Registration](#post-registration)
+- [Admin Users (Scope-Based Access)](#admin-users-scope-based-access)
 - [RBAC (Roles & Permissions)](#rbac-roles--permissions)
 
 ---
@@ -1813,7 +1820,7 @@ All catalog endpoints are **public** (no authentication required).
 ### POST `/api/v1/notifications/broadcast`
 
 **Description**: Send notification to all users  
-**Authentication**: JWT Bearer Token  
+**Authentication**: JWT Bearer Token (`admin` | `super_admin`)  
 **Request Body**:
 
 ```json
@@ -1840,7 +1847,7 @@ All catalog endpoints are **public** (no authentication required).
 ### POST `/api/v1/notifications/club/:instanceType/:instanceId`
 
 **Description**: Send notification to club members  
-**Authentication**: JWT Bearer Token  
+**Authentication**: JWT Bearer Token (`admin` | `super_admin`)  
 **URL Parameters**:
 
 - `instanceType` (string): `adventurers`, `pathfinders`, or `master_guilds`
@@ -1877,7 +1884,6 @@ All catalog endpoints are **public** (no authentication required).
 
 ```json
 {
-  "userId": "uuid",
   "token": "fcm_token_here",
   "device_type": "iOS",
   "device_name": "iPhone 13"
@@ -1912,10 +1918,30 @@ All catalog endpoints are **public** (no authentication required).
 
 ---
 
+### GET `/api/v1/fcm-tokens`
+
+**Description**: Get current authenticated user FCM tokens  
+**Authentication**: JWT Bearer Token  
+
+**Response** (200):
+
+```json
+[
+  {
+    "token": "fcm_token_here",
+    "device_type": "iOS",
+    "device_name": "iPhone 13",
+    "last_used": "2024-01-20T10:30:00Z"
+  }
+]
+```
+
+---
+
 ### GET `/api/v1/fcm-tokens/user/:userId`
 
 **Description**: Get user's FCM tokens  
-**Authentication**: JWT Bearer Token  
+**Authentication**: JWT Bearer Token (owner/admin)  
 **URL Parameters**:
 
 - `userId` (string, UUID): User ID
@@ -2444,6 +2470,96 @@ enum blood_type {
 
 ---
 
+
+## 🧭 Admin Users (Scope-Based Access)
+
+> **Prefix**: `/api/v1/admin`  
+> **Authentication**: JWT Bearer Token  
+> **Guard**: `GlobalRolesGuard` — requiere rol global
+
+### GET `/api/v1/admin/users`
+
+**Description**: List administrative users with scope enforcement by actor role  
+**Roles required**: `super_admin`, `admin`, `coordinator`
+
+**Query Params** (optional):
+
+- `search` (string): Full-text search by name/email
+- `role` (string): Filter by global role
+- `active` (boolean): Filter active/inactive users
+- `unionId` (number): Union filter (applies inside actor scope)
+- `localFieldId` (number): Local field filter (applies inside actor scope)
+- `page` (number, default `1`)
+- `limit` (number, default `20`)
+
+**Scope behavior**:
+
+- `super_admin` → **ALL**
+- `admin` → **UNION** when `union_id` exists; otherwise **LOCAL_FIELD** when `local_field_id` exists
+- `coordinator` → **LOCAL_FIELD** (requires `local_field_id`)
+
+**Response** (200):
+
+```json
+{
+  "status": "success",
+  "data": {
+    "items": [],
+    "meta": {
+      "page": 1,
+      "limit": 20,
+      "total": 0,
+      "totalPages": 0,
+      "scope": {
+        "type": "UNION",
+        "unionId": 7,
+        "localFieldId": null
+      }
+    }
+  }
+}
+```
+
+**Error cases**:
+
+- `403 Forbidden` when actor role exists but has no valid scope configuration
+
+---
+
+### GET `/api/v1/admin/users/:userId`
+
+**Description**: Get user detail only if target is inside actor scope  
+**Roles required**: `super_admin`, `admin`, `coordinator`
+
+**Path Params**:
+
+- `userId` (string, UUID): Target user ID
+
+**Response** (200):
+
+```json
+{
+  "status": "success",
+  "data": {
+    "user_id": "uuid",
+    "email": "user@example.com",
+    "name": "Juan",
+    "union_id": 7,
+    "local_field_id": 11,
+    "global_roles": ["member"],
+    "profile": {
+      "complete": true
+    }
+  }
+}
+```
+
+**Error cases**:
+
+- `404 Not Found` when target user is outside actor scope
+
+---
+
 ## � RBAC (Roles & Permissions)
 
 > **Prefix**: `/api/v1/admin/rbac`  
@@ -2661,5 +2777,5 @@ Some endpoints require specific club roles:
 
 ---
 
-**Last Updated**: 2026-02-09  
+**Last Updated**: 2026-02-18  
 **API Version**: v1

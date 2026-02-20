@@ -1,9 +1,29 @@
 # Roadmap de Implementación - SACDIA
 
-**Fecha**: 29 de enero de 2026  
+**Fecha**: 13 de febrero de 2026
 **Estrategia**: Backend-First → Mobile → Admin Panel
+**Estado de sincronización**: Backend estabilizado + bloque mínimo admin habilitado
 
 ---
+
+## Actualizacion 2026-02-18 (estado de implementacion)
+
+- Fase 2B (Rediseño UI App Móvil) **completada al 100%** (Fases A-I + migración HugeIcons).
+  - 57 archivos migrados de Material Icons a HugeIcons (`hugeicons: ^1.1.5`).
+  - Design system "Scout Vibrante" implementado completo: paleta Deep Indigo/Emerald/Amber, 6 componentes Sac*, Progress Ring estilo Apple Health.
+  - Todas las pantallas rediseñadas: Auth, Post-Registro, Dashboard, Clases, Honores, Actividades, Perfil, Settings, Home/Navigation.
+  - 0 errores, 0 warnings en `flutter analyze`.
+  - Pendiente: Fase J (push notifications, offline mode, testing, animaciones).
+- Ver detalle: `docs/PHASE-2B-UI-REDESIGN-PLAN.md`.
+
+## Actualizacion 2026-02-17 (estado de implementacion)
+
+- Fase 3 (Panel Admin) paso de setup a operacion funcional en `sacdia-admin`.
+- Se cerraron pantallas core con API real y manejo de degradacion por entorno (401/403/404/405/429/5xx).
+- Se implemento smoke E2E para rutas admin, chequeos responsive y modo escritura opcional de CRUD criticos.
+- Se habilito baseline i18n inicial y mejoras UX en login (tema, visibilidad de contrasena, guardado navegador).
+
+Ver detalle completo en: `docs/IMPLEMENTATION-SESSION-2026-02-17-admin-panel-delivery.md`.
 
 ## 🎯 Visión General
 
@@ -441,13 +461,13 @@ pnpm install @tanstack/react-query axios zod react-hook-form
 - [x] Deployment a Vercel
 - [x] Configurar dominios y SSL
 - [x] Monitoreo básico y logs
-- [ ] **⚠️ Integración de Servicios Externos** (Ver [EXTERNAL-SERVICES-INTEGRATION.md](file:///Users/abner/Documents/dev/sacdia/docs/api/EXTERNAL-SERVICES-INTEGRATION.md))
-  - [ ] Configurar Upstash Redis en producción
-  - [ ] Configurar Firebase FCM credentials
-  - [ ] Configurar Sentry monitoring
-  - [ ] Aplicar migración `user_fcm_tokens`
-  - [ ] Agregar auth guards a endpoints de notificaciones
-  - [ ] Ejecutar pruebas end-to-end de notificaciones push
+- [~] **⚠️ Integración de Servicios Externos** (Ver [EXTERNAL-SERVICES-INTEGRATION.md](02-API/EXTERNAL-SERVICES-INTEGRATION.md))
+  - [ ] Configurar Redis productivo en entorno deploy
+  - [ ] Configurar credenciales FCM productivas válidas
+  - [ ] Configurar Sentry en entorno deploy
+  - [x] Aplicar migración `user_fcm_tokens`
+  - [x] Agregar auth guards + roles a endpoints de notificaciones
+  - [x] Ejecutar pruebas E2E de notificaciones/admin (local)
 
 **Entregable**: API en producción, monitoreo activo, documentación completa.
 

@@ -2,10 +2,30 @@
 
 **Fecha**: 8 de febrero de 2026
 **Duración estimada**: 4-5 semanas (en paralelo con Fase 2)
-**Estado**: PLANIFICACIÓN
+**Estado**: EN EJECUCIÓN (backend mínimo habilitado)
 **Prerequisito**: Fase 1 (Backend API) COMPLETADA - 105+ endpoints, 17 módulos
 
+> [!IMPORTANT]
+> **Actualización 2026-02-13 (backend):**
+> - Ya existen rutas `/api/v1/admin/*` para geografía y catálogos de referencia.
+> - Notificaciones y `fcm-tokens` ahora requieren JWT.
+> - `broadcast` y `club` restringidos a `admin|super_admin`.
+> - Registro FCM toma `userId` desde JWT (no desde body).
+> - Pendiente por entorno: Redis/FCM/Sentry productivos y validación en staging/prod.
+
+
 ---
+
+## Actualizacion 2026-02-17 (frontend admin)
+
+- `sacdia-admin` ya opera con pantallas funcionales para modulos core (dashboard, usuarios/aprobaciones, clubes, clases, honores, actividades, camporees, finanzas, inventario, certificaciones, notificaciones, settings, credenciales, RBAC).
+- Catalogos CRUD por paginas y submenu consolidado en navegacion.
+- Login actualizado: tema claro/oscuro, mostrar/ocultar contrasena, autocompletado y guardado de credenciales del navegador.
+- Baseline i18n habilitado (locale cookie + diccionario inicial).
+- Smoke E2E implementado y validado (lectura, responsive y modo escritura opcional).
+- Dependencias por entorno para cierre total: disponibilidad de /api/v1/admin/users, datos de clubes para mutaciones y ventanas de rate-limit (429).
+
+**Estado real de fase**: MVP administrativo operativo y listo para UAT funcional en entorno con contrato y datos habilitados.
 
 ## Justificación: ¿Por qué iniciar Fase 3 junto con Fase 2?
 
@@ -18,9 +38,9 @@ La app móvil (Fase 2) depende de catálogos poblados en la base de datos para f
 
 ---
 
-## Estado Actual del Proyecto Admin
+## Estado Inicial del Proyecto Admin (historico 2026-02-08)
 
-El proyecto `sacdia-admin/` ya tiene la base inicializada:
+Este bloque conserva el estado inicial usado para planificacion. Para estado actual, ver la seccion "Actualizacion 2026-02-17 (frontend admin)".
 
 - ✅ Next.js 16 (App Router) configurado
 - ✅ shadcn/ui + Tailwind CSS v4 configurado
@@ -58,99 +78,51 @@ npx shadcn@latest add sonner
 
 ---
 
-## Hallazgo Crítico: Backend necesita endpoints CRUD Admin
+## Estado Backend para Admin (actualizado 2026-02-13)
 
-Los endpoints de catálogos actuales son **SOLO LECTURA** (GET). Para que el panel admin pueda gestionar catálogos, se necesitan **nuevos endpoints** en el backend.
+### ✅ Ya implementado en backend
 
-### Endpoints Backend Faltantes (por módulo)
-
-#### Jerarquía Geográfica (NUEVO: ~20 endpoints)
+#### Jerarquía Geográfica
 
 ```
-# Países
-POST   /api/v1/admin/countries
-PATCH  /api/v1/admin/countries/:id
-DELETE /api/v1/admin/countries/:id
+GET|POST /api/v1/admin/countries
+PATCH|DELETE /api/v1/admin/countries/:countryId
 
-# Uniones
-POST   /api/v1/admin/unions
-PATCH  /api/v1/admin/unions/:id
-DELETE /api/v1/admin/unions/:id
+GET|POST /api/v1/admin/unions
+PATCH|DELETE /api/v1/admin/unions/:unionId
 
-# Campos Locales
-POST   /api/v1/admin/local-fields
-PATCH  /api/v1/admin/local-fields/:id
-DELETE /api/v1/admin/local-fields/:id
+GET|POST /api/v1/admin/local-fields
+PATCH|DELETE /api/v1/admin/local-fields/:localFieldId
 
-# Distritos
-POST   /api/v1/admin/districts
-PATCH  /api/v1/admin/districts/:id
-DELETE /api/v1/admin/districts/:id
+GET|POST /api/v1/admin/districts
+PATCH|DELETE /api/v1/admin/districts/:districtId
 
-# Iglesias
-POST   /api/v1/admin/churches
-PATCH  /api/v1/admin/churches/:id
-DELETE /api/v1/admin/churches/:id
+GET|POST /api/v1/admin/churches
+PATCH|DELETE /api/v1/admin/churches/:churchId
 ```
 
-#### Catálogos de Datos (NUEVO: ~15 endpoints)
+#### Catálogos de Referencia
 
 ```
-# Tipos de Relación
-GET    /api/v1/admin/relationship-types
-POST   /api/v1/admin/relationship-types
-PATCH  /api/v1/admin/relationship-types/:id
-DELETE /api/v1/admin/relationship-types/:id
+GET|POST /api/v1/admin/relationship-types
+PATCH|DELETE /api/v1/admin/relationship-types/:relationshipTypeId
 
-# Alergias
-GET    /api/v1/admin/allergies
-POST   /api/v1/admin/allergies
-PATCH  /api/v1/admin/allergies/:id
-DELETE /api/v1/admin/allergies/:id
+GET|POST /api/v1/admin/allergies
+PATCH|DELETE /api/v1/admin/allergies/:allergyId
 
-# Enfermedades
-GET    /api/v1/admin/diseases
-POST   /api/v1/admin/diseases
-PATCH  /api/v1/admin/diseases/:id
-DELETE /api/v1/admin/diseases/:id
+GET|POST /api/v1/admin/diseases
+PATCH|DELETE /api/v1/admin/diseases/:diseaseId
 
-# Años Eclesiásticos
-POST   /api/v1/admin/ecclesiastical-years
-PATCH  /api/v1/admin/ecclesiastical-years/:id
-DELETE /api/v1/admin/ecclesiastical-years/:id
+GET|POST /api/v1/admin/ecclesiastical-years
+PATCH|DELETE /api/v1/admin/ecclesiastical-years/:yearId
 ```
 
-#### Clases y Honores Admin (NUEVO: ~12 endpoints)
+### ⏳ Pendiente para próximas microfases
 
-```
-# Clases (CRUD)
-POST   /api/v1/admin/classes
-PATCH  /api/v1/admin/classes/:id
-DELETE /api/v1/admin/classes/:id
+- CRUD admin de clases (`/api/v1/admin/classes`, módulos y secciones).
+- CRUD admin de honores/categorías (`/api/v1/admin/honors*`).
 
-# Módulos de Clase
-POST   /api/v1/admin/classes/:classId/modules
-PATCH  /api/v1/admin/class-modules/:id
-DELETE /api/v1/admin/class-modules/:id
-
-# Secciones de Módulo
-POST   /api/v1/admin/class-modules/:moduleId/sections
-PATCH  /api/v1/admin/class-sections/:id
-DELETE /api/v1/admin/class-sections/:id
-
-# Categorías de Honores
-POST   /api/v1/admin/honor-categories
-PATCH  /api/v1/admin/honor-categories/:id
-DELETE /api/v1/admin/honor-categories/:id
-
-# Honores (CRUD)
-POST   /api/v1/admin/honors
-PATCH  /api/v1/admin/honors/:id
-DELETE /api/v1/admin/honors/:id
-```
-
-**Nota**: Todos los endpoints admin requieren rol `super_admin` o `admin`. Se recomienda un guard `@Roles('super_admin', 'admin')` y prefijo `/admin/`.
-
+**Nota de seguridad**: rutas admin protegidas con JWT + `GlobalRolesGuard` (`admin|super_admin`).
 ---
 
 ## MICROFASE 3.0: Setup del Proyecto + Autenticación (3-4 días)

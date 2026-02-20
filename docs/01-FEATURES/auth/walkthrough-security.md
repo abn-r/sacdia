@@ -185,7 +185,7 @@ pnpm run build
 ### Headers de Seguridad
 
 ```bash
-curl -I http://localhost:3000/v1/auth/me
+curl -I http://localhost:3000/api/v1/auth/me
 
 # Headers esperados:
 # X-Content-Type-Options: nosniff

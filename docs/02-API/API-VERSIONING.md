@@ -1,6 +1,6 @@
 # API Versioning - SACDIA Backend
 
-**Última actualización**: 30 de enero de 2026  
+**Última actualización**: 13 de febrero de 2026  
 **Versión actual**: v1  
 **Tipo de versionamiento**: URI-based
 
@@ -45,7 +45,7 @@ Después de evaluar las opciones (Header, Query Param, Media Type), se eligió *
 **Ejemplo**:
 
 ```
-/v1/auth/register
+/api/v1/auth/register
 /v2/users/:userId
 ```
 
@@ -82,57 +82,57 @@ app.enableVersioning({
 #### Auth (6)
 
 ```
-POST   /v1/auth/register
-POST   /v1/auth/login
-POST   /v1/auth/logout
-POST   /v1/auth/password/reset-request
-GET    /v1/auth/me
-GET    /v1/auth/profile/completion-status
+POST   /api/v1/auth/register
+POST   /api/v1/auth/login
+POST   /api/v1/auth/logout
+POST   /api/v1/auth/password/reset-request
+GET    /api/v1/auth/me
+GET    /api/v1/auth/profile/completion-status
 ```
 
 #### Users (6)
 
 ```
-GET    /v1/users/:userId
-PATCH  /v1/users/:userId
-POST   /v1/users/:userId/profile-picture
-DELETE /v1/users/:userId/profile-picture
-GET    /v1/users/:userId/age
-GET    /v1/users/:userId/requires-legal-representative
+GET    /api/v1/users/:userId
+PATCH  /api/v1/users/:userId
+POST   /api/v1/users/:userId/profile-picture
+DELETE /api/v1/users/:userId/profile-picture
+GET    /api/v1/users/:userId/age
+GET    /api/v1/users/:userId/requires-legal-representative
 ```
 
 #### Emergency Contacts (5)
 
 ```
-POST   /v1/users/:userId/emergency-contacts
-GET    /v1/users/:userId/emergency-contacts
-GET    /v1/users/:userId/emergency-contacts/:contactId
-PATCH  /v1/users/:userId/emergency-contacts/:contactId
-DELETE /v1/users/:userId/emergency-contacts/:contactId
+POST   /api/v1/users/:userId/emergency-contacts
+GET    /api/v1/users/:userId/emergency-contacts
+GET    /api/v1/users/:userId/emergency-contacts/:contactId
+PATCH  /api/v1/users/:userId/emergency-contacts/:contactId
+DELETE /api/v1/users/:userId/emergency-contacts/:contactId
 ```
 
 #### Legal Representatives (4)
 
 ```
-POST   /v1/users/:userId/legal-representative
-GET    /v1/users/:userId/legal-representative
-PATCH  /v1/users/:userId/legal-representative
-DELETE /v1/users/:userId/legal-representative
+POST   /api/v1/users/:userId/legal-representative
+GET    /api/v1/users/:userId/legal-representative
+PATCH  /api/v1/users/:userId/legal-representative
+DELETE /api/v1/users/:userId/legal-representative
 ```
 
 #### Post-Registration (4)
 
 ```
-GET    /v1/users/:userId/post-registration/status
-POST   /v1/users/:userId/post-registration/step-1/complete
-POST   /v1/users/:userId/post-registration/step-2/complete
-POST   /v1/users/:userId/post-registration/step-3/complete
+GET    /api/v1/users/:userId/post-registration/status
+POST   /api/v1/users/:userId/post-registration/step-1/complete
+POST   /api/v1/users/:userId/post-registration/step-2/complete
+POST   /api/v1/users/:userId/post-registration/step-3/complete
 ```
 
 #### Root (1)
 
 ```
-GET    /v1/
+GET    /api/v1/
 ```
 
 ---
@@ -143,14 +143,14 @@ GET    /v1/
 
 | URL Solicitada | Resultado        | Status  |
 | -------------- | ---------------- | ------- |
-| `/v1/auth/me`  | ✅ Funciona      | 200/401 |
+| `/api/v1/auth/me`  | ✅ Funciona      | 200/401 |
 | `/auth/me`     | ❌ No existe     | 404     |
 | `/v2/auth/me`  | ❌ No existe aún | 404     |
 
 **Importante**:
 
-- ⚠️ **Solo rutas con `/v1/` funcionan**
-- ⚠️ **No hay auto-redirect** de `/auth/me` a `/v1/auth/me`
+- ⚠️ **Solo rutas con `/api/v1/` funcionan**
+- ⚠️ **No hay auto-redirect** de `/auth/me` a `/api/v1/auth/me`
 - ⚠️ **Versiones inexistentes** retornan 404
 
 ### Testing de Versionamiento
@@ -159,11 +159,11 @@ GET    /v1/
 
 ```bash
 # Con autenticación
-curl http://localhost:3000/v1/auth/me \
+curl http://localhost:3000/api/v1/auth/me \
   -H "Authorization: Bearer {token}"
 
 # Sin autenticación (esperado 401)
-curl http://localhost:3000/v1/auth/me
+curl http://localhost:3000/api/v1/auth/me
 # Response: {"message":"Unauthorized","statusCode":401}
 ```
 
@@ -258,7 +258,7 @@ export class AuthController {
 **Resultado**:
 
 ```
-POST /v1/auth/register → registerV1()
+POST /api/v1/auth/register → registerV1()
 POST /v2/auth/register → registerV2()
 ```
 
@@ -449,7 +449,7 @@ app.useGlobalInterceptors(new ApiVersionInterceptor());
 **Resultado**:
 
 ```bash
-curl -I http://localhost:3000/v1/auth/me
+curl -I http://localhost:3000/api/v1/auth/me
 # Headers:
 # X-API-Version: 1.0.0
 ```
@@ -534,9 +534,9 @@ export class AuthServiceV2 {
 ```typescript
 // e2e/auth.v1.e2e-spec.ts
 describe("Auth V1 (e2e)", () => {
-  it("/v1/auth/login (POST)", () => {
+  it("/api/v1/auth/login (POST)", () => {
     return request(app.getHttpServer())
-      .post("/v1/auth/login")
+      .post("/api/v1/auth/login")
       .send({ email: "test@test.com", password: "pass123" })
       .expect(200)
       .expect((res) => {
@@ -610,7 +610,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 const API_VERSION = "v1"; // Fácil de cambiar a v2
 
 export const apiClient = axios.create({
-  baseURL: `${API_BASE_URL}/${API_VERSION}`,
+  baseURL: `${API_BASE_URL}/api/${API_VERSION}`,
   headers: {
     "Content-Type": "application/json",
   },
@@ -630,7 +630,7 @@ class ApiService {
   static const String baseUrl = 'http://localhost:3000';
   static const String version = 'v1';
 
-  static String get versionedUrl => '$baseUrl/$version';
+  static String get versionedUrl => '$baseUrl/api/$version';
 
   Future<Map<String, dynamic>> login(String email, String password) async {
     final response = await http.post(
@@ -646,7 +646,7 @@ class ApiService {
 
 ```bash
 # Variables
-API_URL="http://localhost:3000"
+API_URL="http://localhost:3000/api"
 VERSION="v1"
 TOKEN="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 
@@ -716,10 +716,10 @@ curl http://localhost:3000/auth/me
 # Error: Cannot GET /auth/me
 ```
 
-**Solución**: Siempre incluir `/v1/`
+**Solución**: Siempre incluir `/api/v1/`
 
 ```bash
-curl http://localhost:3000/v1/auth/me
+curl http://localhost:3000/api/v1/auth/me
 ```
 
 ---

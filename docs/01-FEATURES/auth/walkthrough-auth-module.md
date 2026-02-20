@@ -56,7 +56,7 @@
 
 ### Common Module (3 archivos)
 
-#### 1. [src/common/supabase.service.ts](file:///Users/abner/Documents/dev/sacdia/sacdia-backend/src/common/supabase.service.ts)
+#### 1. [src/common/supabase.service.ts](file:///Users/abner/Documents/development/sacdia/sacdia-backend/src/common/supabase.service.ts)
 
 ```typescript
 @Injectable()
@@ -86,7 +86,7 @@ export class SupabaseService {
 - No persiste sesión (stateless)
 - Inyectable globalmente
 
-#### 2. [src/common/guards/jwt-auth.guard.ts](file:///Users/abner/Documents/dev/sacdia/sacdia-backend/src/common/guards/jwt-auth.guard.ts)
+#### 2. [src/common/guards/jwt-auth.guard.ts](file:///Users/abner/Documents/development/sacdia/sacdia-backend/src/common/guards/jwt-auth.guard.ts)
 
 ```typescript
 @Injectable()
@@ -105,7 +105,7 @@ export class JwtAuthGuard extends AuthGuard("jwt") {
 async getProtected() { ... }
 ```
 
-#### 3. [src/common/decorators/current-user.decorator.ts](file:///Users/abner/Documents/dev/sacdia/sacdia-backend/src/common/decorators/current-user.decorator.ts)
+#### 3. [src/common/decorators/current-user.decorator.ts](file:///Users/abner/Documents/development/sacdia/sacdia-backend/src/common/decorators/current-user.decorator.ts)
 
 ```typescript
 export const CurrentUser = createParamDecorator(
@@ -130,7 +130,7 @@ async getProfile(@CurrentUser() user: { userId: string }) {
 
 #### 4. DTOs (3 archivos)
 
-**[register.dto.ts](file:///Users/abner/Documents/dev/sacdia/sacdia-backend/src/auth/dto/register.dto.ts)**
+**[register.dto.ts](file:///Users/abner/Documents/development/sacdia/sacdia-backend/src/auth/dto/register.dto.ts)**
 
 ```typescript
 export class RegisterDto {
@@ -155,7 +155,7 @@ export class RegisterDto {
 }
 ```
 
-**[login.dto.ts](file:///Users/abner/Documents/dev/sacdia/sacdia-backend/src/auth/dto/login.dto.ts)**
+**[login.dto.ts](file:///Users/abner/Documents/development/sacdia/sacdia-backend/src/auth/dto/login.dto.ts)**
 
 ```typescript
 export class LoginDto {
@@ -167,7 +167,7 @@ export class LoginDto {
 }
 ```
 
-**[reset-password-request.dto.ts](file:///Users/abner/Documents/dev/sacdia/sacdia-backend/src/auth/dto/reset-password-request.dto.ts)**
+**[reset-password-request.dto.ts](file:///Users/abner/Documents/development/sacdia/sacdia-backend/src/auth/dto/reset-password-request.dto.ts)**
 
 ```typescript
 export class ResetPasswordRequestDto {
@@ -176,7 +176,7 @@ export class ResetPasswordRequestDto {
 }
 ```
 
-#### 5. [src/auth/strategies/jwt.strategy.ts](file:///Users/abner/Documents/dev/sacdia/sacdia-backend/src/auth/strategies/jwt.strategy.ts)
+#### 5. [src/auth/strategies/jwt.strategy.ts](file:///Users/abner/Documents/development/sacdia/sacdia-backend/src/auth/strategies/jwt.strategy.ts)
 
 ```typescript
 export interface JwtPayload {
@@ -211,7 +211,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 - Valida firma con secret de Supabase
 - Inyecta user en request
 
-#### 6. [src/auth/auth.service.ts](file:///Users/abner/Documents/dev/sacdia/sacdia-backend/src/auth/auth.service.ts)
+#### 6. [src/auth/auth.service.ts](file:///Users/abner/Documents/development/sacdia/sacdia-backend/src/auth/auth.service.ts)
 
 **Métodos implementados**:
 
@@ -296,7 +296,7 @@ Retorna información del usuario autenticado
 }
 ```
 
-#### 7. [src/auth/auth.controller.ts](file:///Users/abner/Documents/dev/sacdia/sacdia-backend/src/auth/auth.controller.ts)
+#### 7. [src/auth/auth.controller.ts](file:///Users/abner/Documents/development/sacdia/sacdia-backend/src/auth/auth.controller.ts)
 
 **Endpoints**:
 
@@ -320,7 +320,7 @@ async register(@Body() registerDto: RegisterDto) {
 }
 ```
 
-#### 8. [src/auth/auth.module.ts](file:///Users/abner/Documents/dev/sacdia/sacdia-backend/src/auth/auth.module.ts)
+#### 8. [src/auth/auth.module.ts](file:///Users/abner/Documents/development/sacdia/sacdia-backend/src/auth/auth.module.ts)
 
 ```typescript
 @Module({
@@ -345,7 +345,7 @@ export class AuthModule {}
 
 ### Configuración Global
 
-#### 9. [src/app.module.ts](file:///Users/abner/Documents/dev/sacdia/sacdia-backend/src/app.module.ts)
+#### 9. [src/app.module.ts](file:///Users/abner/Documents/development/sacdia/sacdia-backend/src/app.module.ts)
 
 ```typescript
 @Module({
@@ -360,7 +360,7 @@ export class AuthModule {}
 export class AppModule {}
 ```
 
-#### 10. [src/main.ts](file:///Users/abner/Documents/dev/sacdia/sacdia-backend/src/main.ts)
+#### 10. [src/main.ts](file:///Users/abner/Documents/development/sacdia/sacdia-backend/src/main.ts)
 
 **ValidationPipe global**:
 
@@ -380,7 +380,7 @@ app.useGlobalPipes(
 
 ## 🔐 Configuración de Variables de Entorno
 
-### [.env.example](file:///Users/abner/Documents/dev/sacdia/sacdia-backend/.env.example)
+### [.env.example](file:///Users/abner/Documents/development/sacdia/sacdia-backend/.env.example)
 
 ```bash
 # Database

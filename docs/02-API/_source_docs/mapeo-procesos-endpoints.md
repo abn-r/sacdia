@@ -614,4 +614,4 @@ DELETE /api/v1/emergency-contacts/:contactId
 
 **Generado**: 2026-01-29  
 **Versión**: 2.0.0 (Con todas las decisiones finales)  
-**Siguiente**: Ver [queries-club-role-assignments.md](file:///Users/abner/Documents/dev/sacdia/docs/restapi/queries-club-role-assignments.md) para queries SQL
+**Siguiente**: Ver [queries-club-role-assignments.md](file:///Users/abner/Documents/development/sacdia/docs/02-API/_source_docs/queries-club-role-assignments.md) para queries SQL

@@ -34,7 +34,7 @@
 
 ### Legal Representatives Module (5 archivos)
 
-#### 1. [src/legal-representatives/dto/create-legal-representative.dto.ts](file:///Users/abner/Documents/dev/sacdia/sacdia-backend/src/legal-representatives/dto/create-legal-representative.dto.ts)
+#### 1. [src/legal-representatives/dto/create-legal-representative.dto.ts](file:///Users/abner/Documents/development/sacdia/sacdia-backend/src/legal-representatives/dto/create-legal-representative.dto.ts)
 
 ```typescript
 export class CreateLegalRepresentativeDto {
@@ -76,7 +76,7 @@ export class CreateLegalRepresentativeDto {
 - Si `representative_user_id` presente → datos manuales opcionales
 - Si `representative_user_id` ausente → `name`, `paternal_last_name`, `phone` requeridos
 
-#### 2. [src/legal-representatives/legal-representatives.service.ts](file:///Users/abner/Documents/dev/sacdia/sacdia-backend/src/legal-representatives/legal-representatives.service.ts)
+#### 2. [src/legal-representatives/legal-representatives.service.ts](file:///Users/abner/Documents/development/sacdia/sacdia-backend/src/legal-representatives/legal-representatives.service.ts)
 
 **Métodos implementados:**
 
@@ -139,7 +139,7 @@ Permite actualizar datos del representante
 
 Elimina representante (hard delete)
 
-#### 3. [src/legal-representatives/legal-representatives.controller.ts](file:///Users/abner/Documents/dev/sacdia/sacdia-backend/src/legal-representatives/legal-representatives.controller.ts)
+#### 3. [src/legal-representatives/legal-representatives.controller.ts](file:///Users/abner/Documents/development/sacdia/sacdia-backend/src/legal-representatives/legal-representatives.controller.ts)
 
 **Endpoints**:
 
@@ -154,7 +154,7 @@ Elimina representante (hard delete)
 
 ### Post-Registration Module (4 archivos)
 
-#### 4. [src/post-registration/dto/complete-club-selection.dto.ts](file:///Users/abner/Documents/dev/sacdia/sacdia-backend/src/post-registration/dto/complete-club-selection.dto.ts)
+#### 4. [src/post-registration/dto/complete-club-selection.dto.ts](file:///Users/abner/Documents/development/sacdia/sacdia-backend/src/post-registration/dto/complete-club-selection.dto.ts)
 
 ```typescript
 export class CompleteClubSelectionDto {
@@ -178,7 +178,7 @@ export class CompleteClubSelectionDto {
 }
 ```
 
-#### 5. [src/post-registration/post-registration.service.ts](file:///Users/abner/Documents/dev/sacdia/sacdia-backend/src/post-registration/post-registration.service.ts)
+#### 5. [src/post-registration/post-registration.service.ts](file:///Users/abner/Documents/development/sacdia/sacdia-backend/src/post-registration/post-registration.service.ts)
 
 **Métodos implementados:**
 
@@ -372,7 +372,7 @@ return await this.prisma.$transaction(async (tx) => {
 - ✅ Inscribe en clase
 - ✅ Marca post-registro completo
 
-#### 6. [src/post-registration/post-registration.controller.ts](file:///Users/abner/Documents/dev/sacdia/sacdia-backend/src/post-registration/post-registration.controller.ts)
+#### 6. [src/post-registration/post-registration.controller.ts](file:///Users/abner/Documents/development/sacdia/sacdia-backend/src/post-registration/post-registration.controller.ts)
 
 **Endpoints**:
 
