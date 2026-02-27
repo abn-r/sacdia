@@ -7,7 +7,7 @@
 # Especificación Técnica - REST API SACDIA
 
 **Versión**: 3.0.0 (contrato runtime unificado)
-**Fecha**: 17 de febrero de 2026
+**Fecha**: 21 de febrero de 2026
 **Status**: ✅ Producción - Endpoints canónicos en ENDPOINTS-LIVE-REFERENCE.md
 
 **Nota**:
@@ -257,30 +257,31 @@ export class ActivitiesController {
 
 ```sql
 CREATE TABLE users (
-  id UUID PRIMARY KEY,  -- Mismo UUID de Supabase Auth
+  user_id UUID PRIMARY KEY,  -- Mismo UUID de Supabase Auth
   email VARCHAR(255) UNIQUE NOT NULL,
-  name VARCHAR(100) NOT NULL,
-  paternal_last_name VARCHAR(100) NOT NULL,  -- ✅ Descriptivo
-  maternal_last_name VARCHAR(100) NOT NULL,  -- ✅ Descriptivo
+  name VARCHAR(100),
+  paternal_last_name VARCHAR(100),
+  maternal_last_name VARCHAR(100),
 
   -- Info personal
   gender CHAR(1) CHECK (gender IN ('M', 'F')),
-  birthdate DATE,
-  is_baptized BOOLEAN,
+  birthday DATE,
+  baptism BOOLEAN,
   baptism_date DATE,
+  blood TEXT,
 
   -- Ubicación
-  country_id UUID REFERENCES countries(id),
-  union_id UUID REFERENCES unions(id),
-  local_field_id UUID REFERENCES local_fields(id),
+  country_id INTEGER REFERENCES countries(country_id),
+  union_id INTEGER REFERENCES unions(union_id),
+  local_field_id INTEGER REFERENCES local_fields(local_field_id),
 
-  -- Avatar
-  avatar TEXT,  -- URL de Supabase Storage
+  -- Avatar/imagen de perfil
+  user_image TEXT,  -- URL de Supabase Storage
 
   -- Metadata
   active BOOLEAN DEFAULT true,
   created_at TIMESTAMP DEFAULT NOW(),
-  updated_at TIMESTAMP DEFAULT NOW()
+  modified_at TIMESTAMP DEFAULT NOW()
 );
 ```
 
@@ -292,7 +293,7 @@ CREATE TABLE users (
 
 ```sql
 CREATE TABLE users_pr (
-  user_id UUID PRIMARY KEY REFERENCES users(id),
+  user_id UUID PRIMARY KEY REFERENCES users(user_id),
 
   -- Tracking por paso
  complete BOOLEAN DEFAULT false,
@@ -320,10 +321,10 @@ Para usuarios menores de 18 años:
 ```sql
 CREATE TABLE legal_representatives (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
 
   -- Opción 1: Representante es usuario registrado
-  representative_user_id UUID REFERENCES users(id),
+  representative_user_id UUID REFERENCES users(user_id),
 
   -- Opción 2: Solo datos del representante
   name VARCHAR(100),
@@ -332,7 +333,7 @@ CREATE TABLE legal_representatives (
   phone VARCHAR(20),
 
   -- Tipo de relación (padre, madre, tutor)
-  relationship_type_id UUID REFERENCES relationship_types(id),
+  relationship_type_id UUID REFERENCES relationship_types(relationship_type_id),
 
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW(),
@@ -354,24 +355,27 @@ CREATE TABLE legal_representatives (
 
 ```sql
 CREATE TABLE emergency_contacts (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  emergency_id SERIAL PRIMARY KEY,
+  owner_id UUID NOT NULL REFERENCES users(user_id) ON DELETE RESTRICT,
+  contact_user_id UUID REFERENCES users(user_id) ON DELETE SET NULL,
   name VARCHAR(100) NOT NULL,
   phone VARCHAR(20) NOT NULL,
-  relationship_type_id UUID REFERENCES relationship_types(id),
+  relationship_type_id UUID NOT NULL REFERENCES relationship_types(relationship_type_id),
+  primary BOOLEAN DEFAULT false,
+  active BOOLEAN DEFAULT true,
 
   created_at TIMESTAMP DEFAULT NOW(),
-  updated_at TIMESTAMP DEFAULT NOW(),
+  modified_at TIMESTAMP DEFAULT NOW(),
 
   -- Evitar duplicados
-  CONSTRAINT unique_user_contact UNIQUE (user_id, name, phone)
+  CONSTRAINT unique_owner_contact UNIQUE (owner_id, name, phone)
 );
 
 -- Trigger para validar máximo 5
 CREATE OR REPLACE FUNCTION check_max_emergency_contacts()
 RETURNS TRIGGER AS $$
 BEGIN
-  IF (SELECT COUNT(*) FROM emergency_contacts WHERE user_id = NEW.user_id) >= 5 THEN
+  IF (SELECT COUNT(*) FROM emergency_contacts WHERE owner_id = NEW.owner_id AND active = true) >= 5 THEN
     RAISE EXCEPTION 'User cannot have more than 5 emergency contacts';
   END IF;
   RETURN NEW;
@@ -425,34 +429,78 @@ export class RegisterDto {
 
 ---
 
-### UpdatePersonalInfoDto
+### UpdateUserDto
 
 ```typescript
-export class UpdatePersonalInfoDto {
+export class UpdateUserDto {
   @IsEnum(["M", "F"])
-  gender: string;
-
-  @IsDateString()
-  @Validate(AgeValidator, [{ min: 3, max: 99 }])
-  birthdate: string;
-
-  @IsBoolean()
-  is_baptized: boolean;
+  @IsOptional()
+  gender?: "M" | "F";
 
   @IsOptional()
   @IsDateString()
-  @ValidateIf((o) => o.is_baptized === true)
-  baptism_date?: string;
-}
+  birthday?: string;
 
-// Validador personalizado
-@ValidatorConstraint({ name: "AgeValidator", async: false })
-export class AgeValidator implements ValidatorConstraintInterface {
-  validate(birthdate: string, args: ValidationArguments) {
-    const { min, max } = args.constraints[0];
-    const age = calculateAge(birthdate);
-    return age >= min && age <= max;
-  }
+  @IsOptional()
+  @IsBoolean()
+  baptism?: boolean;
+
+  @IsOptional()
+  @IsDateString()
+  @ValidateIf((o) => o.baptism === true)
+  baptism_date?: string;
+
+  @IsOptional()
+  @IsEnum(blood_type)
+  blood?: blood_type;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  country_id?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  union_id?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  local_field_id?: number;
+}
+```
+
+---
+
+### UpdateUserAllergiesDto
+
+```typescript
+export class UpdateUserAllergiesDto {
+  @IsArray()
+  @ArrayUnique()
+  @Type(() => Number)
+  @IsInt({ each: true })
+  @Min(1, { each: true })
+  allergy_ids: number[];
+}
+```
+
+---
+
+### UpdateUserDiseasesDto
+
+```typescript
+export class UpdateUserDiseasesDto {
+  @IsArray()
+  @ArrayUnique()
+  @Type(() => Number)
+  @IsInt({ each: true })
+  @Min(1, { each: true })
+  disease_ids: number[];
 }
 ```
 

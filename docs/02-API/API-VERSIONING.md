@@ -77,7 +77,7 @@ app.enableVersioning({
 
 ## Estructura de Rutas
 
-### Versión 1 (Actual - 26 endpoints)
+### Versión 1 (Actual - 28 endpoints)
 
 #### Auth (6)
 
@@ -90,11 +90,13 @@ GET    /api/v1/auth/me
 GET    /api/v1/auth/profile/completion-status
 ```
 
-#### Users (6)
+#### Users (8)
 
 ```
 GET    /api/v1/users/:userId
 PATCH  /api/v1/users/:userId
+PUT    /api/v1/users/:userId/allergies
+PUT    /api/v1/users/:userId/diseases
 POST   /api/v1/users/:userId/profile-picture
 DELETE /api/v1/users/:userId/profile-picture
 GET    /api/v1/users/:userId/age

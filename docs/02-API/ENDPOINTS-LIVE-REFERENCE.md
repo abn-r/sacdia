@@ -5,8 +5,8 @@
 > Generado desde `src/**/*controller.ts` del backend en runtime.
 > Base URL: `/api/v1`
 
-**Generado**: 2026-02-18T01:13:33Z
-**Total endpoints**: 175
+**Generado**: 2026-02-23T11:05:00.000Z
+**Total endpoints**: 180
 
 ## Lectura Rápida
 
@@ -44,6 +44,8 @@
 |---|---|---|---|---|---|
 | GET | `/api/v1/users/:userId` | JWT | - | Obtener información de un usuario | `src/users/users.controller.ts` |
 | PATCH | `/api/v1/users/:userId` | JWT | - | Actualizar información personal del usuario | `src/users/users.controller.ts` |
+| PUT | `/api/v1/users/:userId/allergies` | JWT | - | Guardar alergias del usuario | `src/users/users.controller.ts` |
+| PUT | `/api/v1/users/:userId/diseases` | JWT | - | Guardar enfermedades del usuario | `src/users/users.controller.ts` |
 | GET | `/api/v1/users/:userId/age` | JWT | - | Calcular edad del usuario | `src/users/users.controller.ts` |
 | GET | `/api/v1/users/:userId/classes` | JWT | - | Obtener inscripciones del usuario | `src/classes/classes.controller.ts` |
 | GET | `/api/v1/users/:userId/classes/:classId/progress` | JWT | - | Obtener progreso del usuario en una clase | `src/classes/classes.controller.ts` |
@@ -151,10 +153,13 @@
 
 | Method | Path | Auth | Roles | Description | Source |
 |---|---|---|---|---|---|
+| GET | `/api/v1/catalogs/allergies` | Public | - | Obtener catálogo de alergias | `src/catalogs/catalogs.controller.ts` |
 | GET | `/api/v1/catalogs/churches` | Public | - | Obtener iglesias | `src/catalogs/catalogs.controller.ts` |
 | GET | `/api/v1/catalogs/club-ideals` | Public | - | Obtener ideales de club | `src/catalogs/catalogs.controller.ts` |
 | GET | `/api/v1/catalogs/club-types` | Public | - | Obtener tipos de club | `src/catalogs/catalogs.controller.ts` |
+| GET | `/api/v1/catalogs/relationship-types` | Public | - | Obtener tipos de relación | `src/catalogs/catalogs.controller.ts` |
 | GET | `/api/v1/catalogs/countries` | Public | - | Obtener países | `src/catalogs/catalogs.controller.ts` |
+| GET | `/api/v1/catalogs/diseases` | Public | - | Obtener catálogo de enfermedades | `src/catalogs/catalogs.controller.ts` |
 | GET | `/api/v1/catalogs/districts` | Public | - | Obtener distritos | `src/catalogs/catalogs.controller.ts` |
 | GET | `/api/v1/catalogs/ecclesiastical-years` | Public | - | Obtener años eclesiásticos | `src/catalogs/catalogs.controller.ts` |
 | GET | `/api/v1/catalogs/ecclesiastical-years/current` | Public | - | Obtener año eclesiástico actual | `src/catalogs/catalogs.controller.ts` |

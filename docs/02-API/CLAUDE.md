@@ -15,10 +15,11 @@ Usar este archivo como contexto rapido para agentes IA antes de implementar camb
 1. `docs/00-STEERING/tech.md`
 2. `docs/00-STEERING/coding-standards.md`
 3. `docs/02-API/API-SPECIFICATION.md`
-4. `docs/02-API/ENDPOINTS-REFERENCE.md`
-5. `docs/02-API/ARCHITECTURE-DECISIONS.md`
-6. `docs/02-API/SECURITY-GUIDE.md`
-7. `sacdia-backend/CLAUDE.md`
+4. `docs/02-API/ENDPOINTS-LIVE-REFERENCE.md`
+5. `docs/02-API/ENDPOINTS-REFERENCE.md`
+6. `docs/02-API/ARCHITECTURE-DECISIONS.md`
+7. `docs/02-API/SECURITY-GUIDE.md`
+8. `sacdia-backend/CLAUDE.md`
 
 Si hay conflicto entre documentos, priorizar:
 1) `docs/00-STEERING/*` 2) `docs/02-API/*` 3) este archivo.
@@ -27,7 +28,9 @@ Si hay conflicto entre documentos, priorizar:
 
 - Requisitos funcionales por modulo: `docs/01-FEATURES/<feature>/requirements.md`
 - Diseno funcional/tecnico de feature: `docs/01-FEATURES/<feature>/design.md`
-- Contratos API/DTO/endpoints: `docs/02-API/API-SPECIFICATION.md` y `docs/02-API/ENDPOINTS-REFERENCE.md`
+- Contratos API runtime/endpoints: `docs/02-API/ENDPOINTS-LIVE-REFERENCE.md`
+- Contratos API/DTO/diseno tecnico: `docs/02-API/API-SPECIFICATION.md`
+- Flujos por proceso: `docs/02-API/ENDPOINTS-REFERENCE.md`
 - Seguridad y reglas transversales: `docs/02-API/SECURITY-GUIDE.md`
 - Versionado API: `docs/02-API/API-VERSIONING.md`
 
@@ -87,7 +90,8 @@ pnpm run load-test
 
 Cuando cambie comportamiento:
 
-- Endpoints/DTO/errores -> actualizar `docs/02-API/ENDPOINTS-REFERENCE.md` y/o `docs/02-API/API-SPECIFICATION.md`.
+- Endpoints runtime -> actualizar `docs/02-API/ENDPOINTS-LIVE-REFERENCE.md`.
+- Endpoints/DTO/errores (diseno/proceso) -> actualizar `docs/02-API/ENDPOINTS-REFERENCE.md` y/o `docs/02-API/API-SPECIFICATION.md`.
 - Cambios de seguridad/autorizacion -> actualizar `docs/02-API/SECURITY-GUIDE.md` y `docs/02-API/ARCHITECTURE-DECISIONS.md`.
 - Cambios de versionado/ruta base -> actualizar `docs/02-API/API-VERSIONING.md`.
 - Cambios de flujo funcional -> actualizar `docs/01-FEATURES/<feature>/`.

@@ -5,7 +5,8 @@ Guía completa de la REST API construida con NestJS.
 > [!IMPORTANT]
 > **Contrato runtime para agentes (App + Panel Admin):** [ENDPOINTS-LIVE-REFERENCE.md](ENDPOINTS-LIVE-REFERENCE.md)
 >
-> Los documentos `ENDPOINTS-REFERENCE.md`, `COMPLETE-API-REFERENCE.md`, `API-REFERENCE.md` y partes de `API-SPECIFICATION.md` pueden contener rutas históricas/propuestas.
+> `API-REFERENCE.md` y `COMPLETE-API-REFERENCE.md` se conservan solo como alias de compatibilidad.
+> Para consumo runtime, usar exclusivamente `ENDPOINTS-LIVE-REFERENCE.md`.
 
 ---
 
@@ -56,6 +57,16 @@ Production:   https://sacdia-api.vercel.app/api/v1
 ❌ curl http://localhost:3000/auth/me     # 404 Not Found
 ```
 
+### Actualización 2026-02-21
+
+- Nuevos endpoints de salud de usuario:
+  - `PUT /api/v1/users/:userId/allergies`
+  - `PUT /api/v1/users/:userId/diseases`
+- `PATCH /api/v1/users/:userId` ahora acepta también:
+  - `country_id`, `union_id`, `local_field_id`
+- `emergency_contacts` quedó alineado con UUID:
+  - `relationship_type_id` → FK a `relationship_types.relationship_type_id`
+
 ---
 
 ## Archivos de Referencia
@@ -66,7 +77,8 @@ Production:   https://sacdia-api.vercel.app/api/v1
 | [API-SPECIFICATION.md](API-SPECIFICATION.md)                         | **Especificación técnica completa** - DTOs, Guards, módulos          |
 | [API-VERSIONING.md](API-VERSIONING.md)                               | **Versionamiento de API** - Configuración, ejemplos, best practices  |
 | [SECURITY-GUIDE.md](SECURITY-GUIDE.md)                               | **Guía de seguridad** - 2FA, Token Blacklist, Sessions, IP Whitelist |
-| [ENDPOINTS-REFERENCE.md](ENDPOINTS-REFERENCE.md)                     | **Referencia de endpoints** por proceso de negocio                   |
+| [ENDPOINTS-REFERENCE.md](ENDPOINTS-REFERENCE.md)                     | **Mapeo funcional** de procesos de negocio                           |
+| [API-REFERENCE.md](API-REFERENCE.md)                                 | Alias de compatibilidad (redirige al canónico)                       |
 | [ARCHITECTURE-DECISIONS.md](ARCHITECTURE-DECISIONS.md)               | **ADRs** - Decisiones arquitectónicas documentadas                   |
 | [walkthrough-backend-init.md](../01-FEATURES/infrastructure/walkthrough-backend-init.md)           | Walkthrough de inicialización del backend                            |
 | [walkthrough-users-emergency.md](../01-FEATURES/auth/walkthrough-users-emergency.md)     | Implementación Users + Emergency Contacts                            |

@@ -7,7 +7,7 @@
 # Mapeo Procesos → Endpoints - SACDIA API v2.2
 
 **Versión**: 2.2.0 (Actualizada con Módulos Nuevos)
-**Fecha**: 3 de febrero de 2026
+**Fecha**: 21 de febrero de 2026
 **Base**: `docs/procesos-sacdia.md` + `docs/restapi/restructura-roles.md` + `IMPLEMENTATION-PLAN.md`
 
 ---
@@ -258,9 +258,13 @@ PATCH /api/v1/users/:userId
 ```typescript
 {
   gender: 'M' | 'F';
-  birthdate: string;      // YYYY-MM-DD
-  is_baptized: boolean;
-  baptism_date?: string;  // Si is_baptized = true
+  birthday: string;        // YYYY-MM-DD
+  baptism: boolean;
+  baptism_date?: string;   // Si baptism = true
+  blood?: blood_type;
+  country_id?: number;
+  union_id?: number;
+  local_field_id?: number;
 }
 ```
 
@@ -320,27 +324,42 @@ async addEmergencyContact(
 #### Alergias y Enfermedades
 
 ```http
-GET    /api/v1/users/:userId/allergies
-POST   /api/v1/users/:userId/allergies
-DELETE /api/v1/users/:userId/allergies/:allergyId
-
-GET    /api/v1/users/:userId/diseases
-POST   /api/v1/users/:userId/diseases
-DELETE /api/v1/users/:userId/diseases/:diseaseId
+PUT /api/v1/users/:userId/allergies
+PUT /api/v1/users/:userId/diseases
 ```
+
+**Body - Allergies**:
+
+```json
+{ "allergy_ids": [1, 2, 3] }
+```
+
+**Body - Diseases**:
+
+```json
+{ "disease_ids": [10, 12] }
+```
+
+Comportamiento:
+
+1. Reemplaza el conjunto activo completo del usuario.
+2. Reactiva registros existentes inactivos.
+3. Crea registros nuevos si no existen.
+4. Desactiva (`active=false`) registros activos no enviados.
+5. Lista vacía (`[]`) limpia el conjunto activo.
 
 ---
 
 #### Completar Paso 2
 
 ```http
-POST /api/v1/users/:userId/post-registration/complete-step-2
+POST /api/v1/users/:userId/post-registration/step-2/complete
 ```
 
 **Implementación**:
 
 ```typescript
-@Post(':userId/post-registration/complete-step-2')
+@Post(':userId/post-registration/step-2/complete')
 async completePersonalInfo(@Param('userId') userId: string) {
   const user = await this.prisma.users.findUnique({
     where: { id: userId },
@@ -486,27 +505,26 @@ GET /api/v1/catalogs/classes?clubTypeId={uuid}
 #### Completar Paso 3 (✅ Con ecclesiastical_year_id)
 
 ```http
-POST /api/v1/users/:userId/post-registration/complete-step-3
+POST /api/v1/users/:userId/post-registration/step-3/complete
 ```
 
 **Request Body**:
 
 ```typescript
 {
-  countryId: string;
-  unionId: string;
-  localFieldId: string;
-  clubId: string;
-  clubType: "adventurers" | "pathfinders" | "master_guild";
-  clubInstanceId: number; // ID de la instancia específica
-  classId: string;
+  country_id: number;
+  union_id: number;
+  local_field_id: number;
+  club_type: "adventurers" | "pathfinders" | "master_guild";
+  club_instance_id: number; // ID de la instancia específica
+  class_id: number;
 }
 ```
 
 **Implementación** (✅ Con año eclesiástico auto-asignado):
 
 ```typescript
-@Post(':userId/post-registration/complete-step-3')
+@Post(':userId/post-registration/step-3/complete')
 async completeClubSelection(
   @Param('userId') userId: string,
   @Body() dto: CompleteClubSelectionDto,
@@ -516,9 +534,9 @@ async completeClubSelection(
     await tx.users.update({
       where: { id: userId },
       data: {
-        country_id: dto.countryId,
-        union_id: dto.unionId,
-        local_field_id: dto.localFieldId,
+        country_id: dto.country_id,
+        union_id: dto.union_id,
+        local_field_id: dto.local_field_id,
       },
     });
 
@@ -543,8 +561,8 @@ async completeClubSelection(
     });
 
     // 4. ✅ Determinar campo de instancia
-    const clubInstanceField = dto.clubType === 'adventurers' ? 'club_adv_id'
-      : dto.clubType === 'pathfinders' ? 'club_pathf_id'
+    const clubInstanceField = dto.club_type === 'adventurers' ? 'club_adv_id'
+      : dto.club_type === 'pathfinders' ? 'club_pathf_id'
       : 'club_mg_id';
 
     // 5. ✅ Asignar rol "member" en club_role_assignments
@@ -552,7 +570,7 @@ async completeClubSelection(
       data: {
         user_id: userId,
         role_id: memberRole.id,
-        [clubInstanceField]: dto.clubInstanceId,
+        [clubInstanceField]: dto.club_instance_id,
         ecclesiastical_year_id: currentYear.id,  // ✅ Auto-asignado
         start_date: new Date(),
         active: true,
@@ -564,7 +582,7 @@ async completeClubSelection(
     await tx.users_classes.create({
       data: {
         user_id: userId,
-        class_id: dto.classId,
+        class_id: dto.class_id,
         current_class: true,
       },
     });
@@ -599,17 +617,19 @@ GET    /api/v1/auth/me
 GET    /api/v1/auth/profile/completion-status
 ```
 
-### Post-Registro (11)
+### Post-Registro y Perfil (Actual)
 
 ```
 # Paso 1: Fotografía
-GET    /api/v1/users/:userId/post-registration/photo-status
+GET    /api/v1/users/:userId/post-registration/status
 POST   /api/v1/users/:userId/profile-picture
 DELETE /api/v1/users/:userId/profile-picture
 
 # Paso 2: Info Personal
 PATCH  /api/v1/users/:userId
-POST   /api/v1/users/:userId/post-registration/complete-step-2
+PUT    /api/v1/users/:userId/allergies
+PUT    /api/v1/users/:userId/diseases
+POST   /api/v1/users/:userId/post-registration/step-2/complete
 
 # Paso 2.5: Representante Legal (si edad < 18)
 GET    /api/v1/users/:userId/requires-legal-representative
@@ -619,16 +639,17 @@ PATCH  /api/v1/users/:userId/legal-representative
 DELETE /api/v1/users/:userId/legal-representative
 
 # Paso 3: Club
-POST   /api/v1/users/:userId/post-registration/complete-step-3
+POST   /api/v1/users/:userId/post-registration/step-3/complete
 ```
 
-### Contactos (4)
+### Contactos (5)
 
 ```
 GET    /api/v1/users/:userId/emergency-contacts
 POST   /api/v1/users/:userId/emergency-contacts    # Validación máx 5
-PATCH  /api/v1/emergency-contacts/:contactId
-DELETE /api/v1/emergency-contacts/:contactId
+GET    /api/v1/users/:userId/emergency-contacts/:contactId
+PATCH  /api/v1/users/:userId/emergency-contacts/:contactId
+DELETE /api/v1/users/:userId/emergency-contacts/:contactId
 ```
 
 ### Catálogos (10) ✅ NUEVO

@@ -21,8 +21,8 @@ Objetivo: asegurar que cualquier implementacion use el contexto correcto antes d
 
 - Codigo: `sacdia-backend/`
 - Contexto local: `sacdia-backend/CLAUDE.md`
-- Referencia API: `docs/02-API/API-REFERENCE.md`
-- Endpoints: `docs/02-API/ENDPOINTS-REFERENCE.md`
+- Referencia API runtime (canónica): `docs/02-API/ENDPOINTS-LIVE-REFERENCE.md`
+- Endpoints por proceso: `docs/02-API/ENDPOINTS-REFERENCE.md`
 - Seguridad: `docs/02-API/SECURITY-GUIDE.md`
 - Testing: `docs/02-API/TESTING-GUIDE.md`
 

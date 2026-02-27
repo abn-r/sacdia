@@ -250,6 +250,6 @@ Color.withValues(alpha: 0.5)
 
 ## 9. Referencias
 
-- **API Reference**: `docs/02-API/COMPLETE-API-REFERENCE.md`
+- **API Reference (canónico runtime)**: `docs/02-API/ENDPOINTS-LIVE-REFERENCE.md`
 - **Phase 2 Plan**: `docs/PHASE-2-FLUTTER-APP-PLAN.md`
 - **Implementation Status**: `documentation/features/phase2-implementation-status.md`

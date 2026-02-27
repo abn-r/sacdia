@@ -66,8 +66,8 @@ Documentación funcional y walkthroughs de implementación.
 
 - [Live Endpoints Reference (Canónico para agentes)](02-API/ENDPOINTS-LIVE-REFERENCE.md)
 - [API Specification (diseño técnico)](02-API/API-SPECIFICATION.md)
-- [Endpoints Reference (legacy/histórico)](02-API/ENDPOINTS-REFERENCE.md)
-- [Complete API Reference (legacy/histórico)](02-API/COMPLETE-API-REFERENCE.md)
+- [Endpoints Reference (mapeo por procesos)](02-API/ENDPOINTS-REFERENCE.md)
+- [API Reference (alias de compatibilidad)](02-API/API-REFERENCE.md)
 - [Testing Guide](02-API/TESTING-GUIDE.md)
 - [External Services Integration (actualizado)](02-API/EXTERNAL-SERVICES-INTEGRATION.md)
 - [Session: Admin + Notifications Hardening](IMPLEMENTATION-SESSION-2026-02-13-admin-hardening.md)

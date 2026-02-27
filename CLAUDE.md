@@ -58,7 +58,7 @@ git clone https://github.com/abn-r/sacdia-app.git sacdia-app
 
 - **Router para agentes IA**: `AGENTS.md`
 - **Steering global**: `docs/00-STEERING/`
-- **API**: `docs/02-API/API-REFERENCE.md`
+- **API (runtime canónica)**: `docs/02-API/ENDPOINTS-LIVE-REFERENCE.md`
 - **Database**: `docs/03-DATABASE/SCHEMA-REFERENCE.md`
 - **Roadmap**: `docs/03-IMPLEMENTATION-ROADMAP.md`
 
