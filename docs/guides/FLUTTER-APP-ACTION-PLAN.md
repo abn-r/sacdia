@@ -48,13 +48,16 @@
 
 ### Task 1.2: Implementar Refresh Token ✅
 
+> Nota de contrato (2026-03-01): `POST /api/v1/auth/refresh` requiere `refreshToken` en request body.
+> Enviar `refresh_token` devuelve `400` + `LEGACY_SNAKE_CASE_REMOVED` (salvo rollback temporal).
+
 **Archivo**: `lib/core/network/interceptors/auth_interceptor.dart`
 
 **Cambios realizados**:
 - Implementado `_tryRefreshToken()` con llamada a `/api/v1/auth/refresh`
 - Auto-refresh en `onError` cuando recibe 401
 - Retry automático de request original tras refresh exitoso
-- Almacenamiento de refresh_token en FlutterSecureStorage
+- Almacenamiento de refreshToken en FlutterSecureStorage
 
 **Checklist**:
 - [x] Crear modelo `AuthTokens` si no existe
@@ -62,7 +65,7 @@
 - [x] Agregar al repository interface y implementation
 - [x] Crear use case `RefreshToken`
 - [x] Implementar auto-refresh en interceptor (401 → refresh → retry)
-- [x] Almacenar refresh_token en FlutterSecureStorage
+- [x] Almacenar refreshToken en FlutterSecureStorage
 
 ### Task 1.3: Corregir Endpoint de Registro ✅
 
@@ -71,7 +74,7 @@
 **Cambios realizados**:
 - Endpoint cambiado a `/api/v1/auth/register`
 - Campos renombrados: `p_lastname` → `paternal_last_name`, `m_lastname` → `maternal_last_name`
-- Guardado de refresh_token junto con access_token
+- Guardado de refreshToken junto con accessToken
 
 **Checklist**:
 - [x] Cambiar endpoint a `/api/v1/auth/register`

@@ -72,6 +72,7 @@ Documentación funcional y walkthroughs de implementación.
 - [External Services Integration (actualizado)](02-API/EXTERNAL-SERVICES-INTEGRATION.md)
 - [Session: Admin + Notifications Hardening](IMPLEMENTATION-SESSION-2026-02-13-admin-hardening.md)
 - [Session: Admin Panel Delivery + QA/UAT](IMPLEMENTATION-SESSION-2026-02-17-admin-panel-delivery.md)
+- [Session: Auth Cutover + Session Hardening](IMPLEMENTATION-SESSION-2026-03-01-auth-cutover-session-hardening.md)
 
 ### 03-DATABASE (Datos)
 
@@ -150,5 +151,5 @@ graph TB
 
 ---
 
-**Última actualización**: 2026-02-17
+**Última actualización**: 2026-03-01
 **Mantenido por**: Equipo SACDIA

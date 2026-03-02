@@ -51,7 +51,7 @@ sequenceDiagram
     Backend->>Supabase: getUser(access_token)
     Supabase-->>Backend: User data + identities
     Backend->>Backend: Update google_connected flag
-    Backend-->>Frontend: { access_token, user }
+    Backend-->>Frontend: { accessToken, refreshToken, user }
     Frontend->>User: Logged in successfully
 ```
 
@@ -188,6 +188,8 @@ curl -X POST http://localhost:3000/api/v1/auth/oauth/apple \
 - `refresh_token` (string, optional): Token de refresh
 - `provider` (string, optional): "google" o "apple"
 
+> Nota: el callback recibe `access_token`/`refresh_token` (formato proveedor), pero la respuesta del backend es camelCase.
+
 **Request**:
 
 ```bash
@@ -198,23 +200,19 @@ curl -X GET "http://localhost:3000/api/v1/auth/oauth/callback?access_token=eyJhb
 
 ```json
 {
-  "status": "success",
-  "data": {
-    "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-    "refresh_token": "v1.abc123...",
-    "user": {
-      "id": "uuid-123",
-      "email": "user@gmail.com",
-      "name": "Juan",
-      "paternal_last_name": "Pérez",
-      "maternal_last_name": "González",
-      "avatar": "https://lh3.googleusercontent.com/...",
-      "google_connected": true,
-      "apple_connected": false,
-      "fb_connected": false
-    },
-    "needsPostRegistration": true
-  }
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "refreshToken": "v1.abc123...",
+  "user": {
+    "id": "uuid-123",
+    "email": "user@gmail.com",
+    "name": "Juan",
+    "paternal_last_name": "Pérez",
+    "maternal_last_name": "González",
+    "avatar": "https://lh3.googleusercontent.com/...",
+    "google_connected": true,
+    "apple_connected": false
+  },
+  "needsPostRegistration": true
 }
 ```
 
@@ -398,8 +396,8 @@ curl -X DELETE http://localhost:3000/api/v1/auth/oauth/google \
      { method: "GET" },
    );
 
-   const { data } = await response.json();
-   // data.access_token → Guardar en storage
+   const data = await response.json();
+   // data.accessToken → Guardar en storage
    // data.user → Guardar en estado
    // data.needsPostRegistration → Redirigir a post-registro
    ```
@@ -756,7 +754,8 @@ export class OAuthService {
     });
 
     return {
-      access_token: access_token,
+      accessToken: access_token,
+      refreshToken: query.refresh_token ?? null,
       user: {
         ...dbUser,
         google_connected: googleConnected,

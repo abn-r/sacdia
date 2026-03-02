@@ -244,7 +244,7 @@ try {
   "status": "success",
   "data": {
     "accessToken": "eyJhbG...",
-    "refreshToken": "refresh_token",
+    "refreshToken": "v1.abc123...",
     "user": {
       "id": "uuid",
       "email": "user@example.com",
@@ -263,6 +263,9 @@ try {
   }
 }
 ```
+
+> Nota de contrato (2026-03-01): `POST /api/v1/auth/refresh` acepta únicamente `refreshToken` en request body.
+> `refresh_token` devuelve `400` con `LEGACY_SNAKE_CASE_REMOVED` (salvo rollback temporal con `AUTH_REJECT_SNAKE_CASE=false`).
 
 ##### `logout(accessToken: string)`
 

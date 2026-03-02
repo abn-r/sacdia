@@ -5,7 +5,7 @@
 > Generado desde `src/**/*controller.ts` del backend en runtime.
 > Base URL: `/api/v1`
 
-**Generado**: 2026-02-23T11:05:00.000Z
+**Generado**: 2026-03-01T21:00:00.000Z
 **Total endpoints**: 180
 
 ## Lectura Rápida
@@ -37,6 +37,14 @@
 | DELETE | `/api/v1/auth/sessions` | JWT | - | Cerrar todas las sesiones | `src/auth/sessions.controller.ts` |
 | GET | `/api/v1/auth/sessions` | JWT | - | Listar sesiones activas | `src/auth/sessions.controller.ts` |
 | DELETE | `/api/v1/auth/sessions/:sessionId` | JWT | - | Cerrar una sesión específica | `src/auth/sessions.controller.ts` |
+
+### Auth Contract Notes (2026-03-01)
+
+- `POST /api/v1/auth/login` y `POST /api/v1/auth/refresh` responden tokens solo en camelCase: `accessToken`, `refreshToken`, `expiresAt`, `tokenType`.
+- `POST /api/v1/auth/refresh` acepta `refreshToken` en request body. `refresh_token` es rechazado con `400` + `code=LEGACY_SNAKE_CASE_REMOVED` (default).
+- Rollback temporal controlado: `AUTH_REJECT_SNAKE_CASE=false` permite `refresh_token` únicamente de forma transitoria.
+- `GET /api/v1/auth/oauth/callback` mantiene `access_token`/`refresh_token` en query por compatibilidad con proveedor, pero la respuesta backend es camelCase.
+- Endpoints MFA soportan header opcional `x-refresh-token` para bind de sesión cuando Supabase lo requiera.
 
 ## users
 
