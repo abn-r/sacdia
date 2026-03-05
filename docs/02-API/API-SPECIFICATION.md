@@ -20,11 +20,11 @@
 
 Este documento integra:
 
-- ✅ **Product vision**: `.specs/_steering/product.md`
-- ✅ **Stack tecnológico**: `.specs/_steering/tech.md`
-- ✅ **Procesos de negocio**: `docs/procesos-sacdia.md`
-- ✅ **Sistema de roles**: `docs/restapi/restructura-roles.md`
-- ✅ **Queries SQL**: `docs/02-API/_source_docs/queries-club-role-assignments.md`
+- ✅ **Product vision**: `docs/00-STEERING/product.md`
+- ✅ **Stack tecnológico**: `docs/00-STEERING/tech.md`
+- ✅ **Procesos de negocio**: `docs/02-PROCESSES.md`
+- ✅ **Sistema de roles**: `docs/history/source/api/restrucura-roles.md` (histórico)
+- ✅ **Queries SQL (histórico)**: `docs/history/source/api/queries-club-role-assignments.md`
 
 ###Decisiones Finales Aplicadas
 
@@ -220,7 +220,7 @@ CREATE TABLE club_role_assignments (
   )
 );
 
--- Ver queries completas en: docs/02-API/_source_docs/queries-club-role-assignments.md
+-- Ver queries completas en: docs/history/source/api/queries-club-role-assignments.md
 ```
 
 ---
@@ -629,9 +629,9 @@ export class CreateLegalRepresentativeDto {
 
 ## 📝 Recursos Adicionales
 
-- **Queries SQL**: [queries-club-role-assignments.md](./_source_docs/queries-club-role-assignments.md)
-- **Análisis de Roles**: [analisis-club-members-vs-roles.md](./_source_docs/analisis-club-members-vs-roles.md)
-- **Decisiones**: [decisiones-estandarizacion.md](./_source_docs/decisiones-estandarizacion.md)
+- **Queries SQL (histórico)**: [queries-club-role-assignments.md](../history/source/api/queries-club-role-assignments.md)
+- **Análisis de Roles (histórico)**: [analisis-club-members-vs-roles.md](../history/source/api/analisis-club-members-vs-roles.md)
+- **Decisiones (histórico)**: [decisiones-estandarizacion.md](../history/source/api/decisiones-estandarizacion.md)
 
 ---
 

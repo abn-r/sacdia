@@ -1128,10 +1128,10 @@ void main() {
 
 ### Documentación Completa
 
-- **API Specification**: `/docs/api/API-SPECIFICATION.md`
-- **Endpoints Reference**: `/docs/api/ENDPOINTS-REFERENCE.md`
-- **Walkthroughs**: `/docs/api/walkthrough-*.md` (15 guías)
-- **Security Guide**: `/docs/api/SECURITY-GUIDE.md`
+- **API Specification**: `/docs/02-API/API-SPECIFICATION.md`
+- **Endpoints Reference**: `/docs/02-API/ENDPOINTS-REFERENCE.md`
+- **Walkthroughs**: `/docs/01-FEATURES/*/walkthrough-*.md`
+- **Security Guide**: `/docs/02-API/SECURITY-GUIDE.md`
 
 ### Collections API
 

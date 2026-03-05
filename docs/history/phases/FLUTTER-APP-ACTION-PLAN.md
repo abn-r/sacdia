@@ -48,8 +48,9 @@
 
 ### Task 1.2: Implementar Refresh Token ✅
 
-> Nota de contrato (2026-03-01): `POST /api/v1/auth/refresh` requiere `refreshToken` en request body.
-> Enviar `refresh_token` devuelve `400` + `LEGACY_SNAKE_CASE_REMOVED` (salvo rollback temporal).
+> Nota de contrato (2026-03-04): `POST /api/v1/auth/refresh` usa `refreshToken` como contrato oficial.
+> Compatibilidad temporal: `refresh_token` solo entre **2026-03-04** y **2026-03-18** con `AUTH_REJECT_SNAKE_CASE=false`.
+> `POST /api/v1/auth/logout` es fail-safe (best effort) y no debe bloquear cierre de sesión en app.
 
 **Archivo**: `lib/core/network/interceptors/auth_interceptor.dart`
 

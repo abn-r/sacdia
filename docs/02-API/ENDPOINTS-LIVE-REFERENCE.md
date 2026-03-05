@@ -5,7 +5,7 @@
 > Generado desde `src/**/*controller.ts` del backend en runtime.
 > Base URL: `/api/v1`
 
-**Generado**: 2026-03-01T21:00:00.000Z
+**Generado**: 2026-03-04T21:00:00.000Z (sincronización manual de Auth)
 **Total endpoints**: 180
 
 ## Lectura Rápida
@@ -19,8 +19,10 @@
 | Method | Path | Auth | Roles | Description | Source |
 |---|---|---|---|---|---|
 | POST | `/api/v1/auth/login` | Public | - | Iniciar sesión | `src/auth/auth.controller.ts` |
-| POST | `/api/v1/auth/logout` | JWT | - | Cerrar sesión | `src/auth/auth.controller.ts` |
+| POST | `/api/v1/auth/refresh` | Public | - | Refrescar sesión con refresh token | `src/auth/auth.controller.ts` |
+| POST | `/api/v1/auth/logout` | Public (Bearer opcional) | - | Cerrar sesión (best effort) | `src/auth/auth.controller.ts` |
 | GET | `/api/v1/auth/me` | JWT | - | Obtener perfil del usuario autenticado | `src/auth/auth.controller.ts` |
+| PATCH | `/api/v1/auth/me/context` | JWT | - | Cambiar contexto activo de club/instancia | `src/auth/auth.controller.ts` |
 | POST | `/api/v1/auth/mfa/enroll` | JWT | - | Iniciar enrolamiento de 2FA | `src/auth/mfa.controller.ts` |
 | GET | `/api/v1/auth/mfa/factors` | JWT | - | Listar factores MFA configurados | `src/auth/mfa.controller.ts` |
 | GET | `/api/v1/auth/mfa/status` | JWT | - | Verificar estado de 2FA | `src/auth/mfa.controller.ts` |
@@ -38,12 +40,14 @@
 | GET | `/api/v1/auth/sessions` | JWT | - | Listar sesiones activas | `src/auth/sessions.controller.ts` |
 | DELETE | `/api/v1/auth/sessions/:sessionId` | JWT | - | Cerrar una sesión específica | `src/auth/sessions.controller.ts` |
 
-### Auth Contract Notes (2026-03-01)
+### Auth Contract Notes (2026-03-04)
 
-- `POST /api/v1/auth/login` y `POST /api/v1/auth/refresh` responden tokens solo en camelCase: `accessToken`, `refreshToken`, `expiresAt`, `tokenType`.
-- `POST /api/v1/auth/refresh` acepta `refreshToken` en request body. `refresh_token` es rechazado con `400` + `code=LEGACY_SNAKE_CASE_REMOVED` (default).
-- Rollback temporal controlado: `AUTH_REJECT_SNAKE_CASE=false` permite `refresh_token` únicamente de forma transitoria.
-- `GET /api/v1/auth/oauth/callback` mantiene `access_token`/`refresh_token` en query por compatibilidad con proveedor, pero la respuesta backend es camelCase.
+- `POST /api/v1/auth/login` y `POST /api/v1/auth/refresh` responden tokens en camelCase: `accessToken`, `refreshToken`, `expiresAt`, `tokenType`.
+- Contrato oficial de refresh: body con `refreshToken`.
+- Ventana temporal legacy: **2026-03-04** a **2026-03-18** con `AUTH_REJECT_SNAKE_CASE=false` para aceptar `refresh_token`.
+- Fecha objetivo de retorno a estricto: **2026-03-18** con `AUTH_REJECT_SNAKE_CASE=true`.
+- `POST /api/v1/auth/logout` es fail-safe (best effort): no requiere JWT válido, acepta bearer opcional y `refreshToken` opcional en body.
+- `GET /api/v1/auth/oauth/callback` mantiene `access_token`/`refresh_token` en query por compatibilidad con proveedor; respuesta backend permanece camelCase.
 - Endpoints MFA soportan header opcional `x-refresh-token` para bind de sesión cuando Supabase lo requiera.
 
 ## users

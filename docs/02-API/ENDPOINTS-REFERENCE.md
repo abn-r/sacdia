@@ -8,7 +8,7 @@
 
 **Versión**: 2.2.0 (Actualizada con Módulos Nuevos)
 **Fecha**: 21 de febrero de 2026
-**Base**: `docs/procesos-sacdia.md` + `docs/restapi/restructura-roles.md` + `IMPLEMENTATION-PLAN.md`
+**Base**: `docs/02-PROCESSES.md` + `docs/history/source/api/restrucura-roles.md` + `docs/03-IMPLEMENTATION-ROADMAP.md`
 
 ---
 

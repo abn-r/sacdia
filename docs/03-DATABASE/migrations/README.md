@@ -4,6 +4,12 @@ Scripts SQL para inicialización y migración de la base de datos.
 
 ---
 
+> [!IMPORTANT]
+> Este README consolida la guía operativa principal y el contexto de backup/restore.
+> La versión histórica anterior está en `docs/history/database/README_BACKUP.md`.
+
+---
+
 ## 📋 Scripts Disponibles
 
 | Script | Descripción | Dependencias |
@@ -75,7 +81,7 @@ npx prisma db execute --file migrations/script_01_organizacion.sql
 
 # O desde el directorio específico
 cd sacdia-backend
-npx prisma db execute --file ../docs/database/migrations/script_01_organizacion.sql
+npx prisma db execute --file ../docs/03-DATABASE/migrations/script_01_organizacion.sql
 ```
 
 ---
@@ -149,6 +155,13 @@ ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name;
 ### Datos de Producción
 ⚠️ **NO ejecutar estos scripts en producción** si ya tienes datos reales.  
 Son solo para desarrollo e inicialización de entornos nuevos.
+
+### Backup y Restore
+
+- Antes de cambios críticos, generar backup lógico completo de la base.
+- En restauraciones parciales por tabla, usar scripts versionados y validar FKs antes de aplicar.
+- Mantener pruebas de restore periódicas en entorno de staging.
+- Ver guía histórica detallada: `docs/history/database/README_BACKUP.md`.
 
 ---
 

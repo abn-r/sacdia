@@ -4,7 +4,7 @@
 > [!IMPORTANT]
 > Este archivo se mantiene por compatibilidad de enlaces históricos.
 > El inventario runtime canónico y vigente de endpoints está en:
-> [ENDPOINTS-LIVE-REFERENCE.md](./ENDPOINTS-LIVE-REFERENCE.md)
+> [ENDPOINTS-LIVE-REFERENCE.md](../../02-API/ENDPOINTS-LIVE-REFERENCE.md)
 
 ## Estado de consolidación
 
@@ -14,6 +14,6 @@
 
 ## Referencias
 
-- Runtime canónico: [ENDPOINTS-LIVE-REFERENCE.md](./ENDPOINTS-LIVE-REFERENCE.md)
-- Especificación técnica: [API-SPECIFICATION.md](./API-SPECIFICATION.md)
-- Mapeo funcional por procesos: [ENDPOINTS-REFERENCE.md](./ENDPOINTS-REFERENCE.md)
+- Runtime canónico: [ENDPOINTS-LIVE-REFERENCE.md](../../02-API/ENDPOINTS-LIVE-REFERENCE.md)
+- Especificación técnica: [API-SPECIFICATION.md](../../02-API/API-SPECIFICATION.md)
+- Mapeo funcional por procesos: [ENDPOINTS-REFERENCE.md](../../02-API/ENDPOINTS-REFERENCE.md)

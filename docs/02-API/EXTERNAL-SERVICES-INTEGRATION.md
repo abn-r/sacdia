@@ -138,7 +138,7 @@ Checklist técnico ejecutado el 2026-02-13:
 
 ## Referencias
 
-- `docs/IMPLEMENTATION-SESSION-2026-02-13-admin-hardening.md`
+- `docs/history/implementation/IMPLEMENTATION-SESSION-2026-02-13-admin-hardening.md`
 - `sacdia-backend/src/common/common.module.ts`
 - `sacdia-backend/src/config/firebase-admin.module.ts`
 - `sacdia-backend/src/notifications/notifications.controller.ts`

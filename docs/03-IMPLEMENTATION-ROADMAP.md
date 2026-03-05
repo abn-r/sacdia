@@ -14,7 +14,7 @@
   - Todas las pantallas rediseñadas: Auth, Post-Registro, Dashboard, Clases, Honores, Actividades, Perfil, Settings, Home/Navigation.
   - 0 errores, 0 warnings en `flutter analyze`.
   - Pendiente: Fase J (push notifications, offline mode, testing, animaciones).
-- Ver detalle: `docs/PHASE-2B-UI-REDESIGN-PLAN.md`.
+- Ver detalle consolidado: `docs/PHASE-2-MOBILE-PROGRAM.md`.
 
 ## Actualizacion 2026-02-17 (estado de implementacion)
 
@@ -23,7 +23,7 @@
 - Se implemento smoke E2E para rutas admin, chequeos responsive y modo escritura opcional de CRUD criticos.
 - Se habilito baseline i18n inicial y mejoras UX en login (tema, visibilidad de contrasena, guardado navegador).
 
-Ver detalle completo en: `docs/IMPLEMENTATION-SESSION-2026-02-17-admin-panel-delivery.md`.
+Ver detalle completo en: `docs/CHANGELOG-IMPLEMENTATION.md` y `docs/history/implementation/IMPLEMENTATION-SESSION-2026-02-17-admin-panel-delivery.md`.
 
 ## 🎯 Visión General
 

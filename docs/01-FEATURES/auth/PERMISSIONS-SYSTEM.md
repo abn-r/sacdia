@@ -342,7 +342,7 @@ Script de migración: `docs/03-DATABASE/migrations/script_06_admin_permissions.s
 
 - [SCHEMA-REFERENCE.md](../../03-DATABASE/SCHEMA-REFERENCE.md) — Tablas `permissions`, `role_permissions`, `roles`
 - [ARCHITECTURE-DECISIONS.md](../../02-API/ARCHITECTURE-DECISIONS.md#5-sistema-de-membresía-y-roles) — ADR de roles
-- [restrucura-roles.md](../../02-API/_source_docs/restrucura-roles.md) — Guía de integración Flutter
+- [restrucura-roles.md](../../history/source/api/restrucura-roles.md) — Guía histórica de integración Flutter
 
 ---
 

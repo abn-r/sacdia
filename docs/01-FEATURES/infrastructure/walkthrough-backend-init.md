@@ -53,7 +53,7 @@ npx prisma init
 ### 4. Copia de Schema Actualizado
 
 ```bash
-cp ../docs/database/schema.prisma prisma/schema.prisma
+cp ../docs/03-DATABASE/schema.prisma prisma/schema.prisma
 ```
 
 **Schema incluye**:

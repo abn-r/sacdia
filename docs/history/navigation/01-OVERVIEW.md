@@ -95,7 +95,7 @@ graph TB
 - Sistema RBAC con roles globales y de club
 - Permisos granulares por módulo
 
-**Ver**: [api/ARCHITECTURE-DECISIONS.md](02-API/ARCHITECTURE-DECISIONS.md#adr-002-sistema-rbac)
+**Ver**: [api/ARCHITECTURE-DECISIONS.md](../../02-API/ARCHITECTURE-DECISIONS.md#adr-002-sistema-rbac)
 
 ---
 
@@ -105,7 +105,7 @@ Flujo de 3 pasos tras registro inicial:
 2. **Información personal** (género, fecha nacimiento, contactos emergencia, alergias/enfermedades)
 3. **Selección de club** (cascading: país → unión → campo → club → tipo → clase)
 
-**Ver**: [02-PROCESSES.md](02-PROCESSES.md#módulo-post-registro)
+**Ver**: [02-PROCESSES.md](../../02-PROCESSES.md#módulo-post-registro)
 
 ---
 
@@ -115,7 +115,7 @@ Flujo de 3 pasos tras registro inicial:
 - **Roles de club**: Director, Subdirector, Secretario, Tesorero, Consejero, Miembro
 - **Asignaciones por año eclesiástico**: Tracking anual de membresías
 
-**Ver**: [database/SCHEMA-REFERENCE.md](03-DATABASE/SCHEMA-REFERENCE.md#relaciones-de-clubes)
+**Ver**: [database/SCHEMA-REFERENCE.md](../../03-DATABASE/SCHEMA-REFERENCE.md#relaciones-de-clubes)
 
 ---
 
@@ -167,7 +167,7 @@ Aplican solo a instancias específicas de club:
 - **counselor**: Consejero
 - **member**: Miembro regular (asignado en post-registro)
 
-**Ver**: [api/ARCHITECTURE-DECISIONS.md](02-API/ARCHITECTURE-DECISIONS.md#adr-002-sistema-rbac)
+**Ver**: [api/ARCHITECTURE-DECISIONS.md](../../02-API/ARCHITECTURE-DECISIONS.md#adr-002-sistema-rbac)
 
 ---
 
@@ -227,13 +227,13 @@ Country (País)
 
 ## Próximos Pasos
 
-1. **Backend Developer**: Continúa con [database/README.md](03-DATABASE/README.md)
-2. **Mobile Developer**: Ve a [02-PROCESSES.md](02-PROCESSES.md)
-3. **Arquitectura detallada**: Consulta [api/API-SPECIFICATION.md](02-API/API-SPECIFICATION.md)
+1. **Backend Developer**: Continúa con [database/README.md](../../03-DATABASE/README.md)
+2. **Mobile Developer**: Ve a [02-PROCESSES.md](../../02-PROCESSES.md)
+3. **Arquitectura detallada**: Consulta [api/API-SPECIFICATION.md](../../02-API/API-SPECIFICATION.md)
 
 ---
 
 **Ver también**:
-- [Implementation Roadmap](03-IMPLEMENTATION-ROADMAP.md)
-- [Database Schema Reference](03-DATABASE/SCHEMA-REFERENCE.md)
-- [API Specification](02-API/API-SPECIFICATION.md)
+- [Implementation Roadmap](../../03-IMPLEMENTATION-ROADMAP.md)
+- [Database Schema Reference](../../03-DATABASE/SCHEMA-REFERENCE.md)
+- [API Specification](../../02-API/API-SPECIFICATION.md)

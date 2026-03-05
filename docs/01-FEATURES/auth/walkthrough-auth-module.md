@@ -245,6 +245,8 @@ try {
   "data": {
     "accessToken": "eyJhbG...",
     "refreshToken": "v1.abc123...",
+    "expiresAt": 1900000000,
+    "tokenType": "bearer",
     "user": {
       "id": "uuid",
       "email": "user@example.com",
@@ -264,12 +266,13 @@ try {
 }
 ```
 
-> Nota de contrato (2026-03-01): `POST /api/v1/auth/refresh` acepta únicamente `refreshToken` en request body.
-> `refresh_token` devuelve `400` con `LEGACY_SNAKE_CASE_REMOVED` (salvo rollback temporal con `AUTH_REJECT_SNAKE_CASE=false`).
+> Nota de contrato (2026-03-04): `POST /api/v1/auth/refresh` mantiene `refreshToken` como contrato oficial.
+> Ventana temporal legacy: `refresh_token` aceptado solo de **2026-03-04** a **2026-03-18** con `AUTH_REJECT_SNAKE_CASE=false`.
+> Fecha objetivo de retorno a estricto: **2026-03-18**.
 
-##### `logout(accessToken: string)`
+##### `logout(input?: { accessToken?: string; refreshToken?: string })`
 
-Invalida token en Supabase
+Logout fail-safe (best effort): intenta revocar por access token; si no está disponible/expiró, intenta con refresh token y responde `200` para no bloquear UX.
 
 ##### `requestPasswordReset(dto: ResetPasswordRequestDto)`
 
@@ -307,10 +310,14 @@ Retorna información del usuario autenticado
 | ------ | --------------------------------- | ---- | ------------------------- |
 | POST   | `/auth/register`                  | No   | Registro de nuevo usuario |
 | POST   | `/auth/login`                     | No   | Iniciar sesión            |
-| POST   | `/auth/logout`                    | Sí   | Cerrar sesión             |
+| POST   | `/auth/refresh`                   | No   | Refrescar sesión          |
+| POST   | `/auth/logout`                    | No*  | Cerrar sesión (best effort) |
 | POST   | `/auth/password/reset-request`    | No   | Solicitar recuperación    |
 | GET    | `/auth/me`                        | Sí   | Perfil del usuario        |
+| PATCH  | `/auth/me/context`                | Sí   | Cambiar contexto activo   |
 | GET    | `/auth/profile/completion-status` | Sí   | Estado post-registro      |
+
+\* Puede recibir `Authorization` bearer opcional y/o `refreshToken` en body.
 
 **Ejemplo uso**:
 

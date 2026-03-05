@@ -8,13 +8,13 @@
 
 [Adapta según tu stack - este es un ejemplo para proyecto full-stack]
 
-``
+```
 project-root/
-├── .specs/                   # Sistema de especificaciones
-│   ├── _templates/          # Plantillas reutilizables
-│   ├── _steering/           # Archivos de configuración global
-│   ├── _guides/             # Guías de uso
-│   └── features/            # Specs de features individuales
+├── docs/                     # Sistema de documentación
+│   ├── templates/           # Plantillas reutilizables
+│   ├── 00-STEERING/         # Archivos de configuración global
+│   ├── guides/              # Guías de uso
+│   └── 01-FEATURES/         # Specs de features individuales
 │
 ├── frontend/ (o src/ si monorepo)
 │   ├── components/          # Componentes React/Vue
@@ -439,8 +439,8 @@ logs/
 npm-debug.log*
 
 # Misc
-.specs/features/*/     # Solo ejemplo en control de versiones
-!.specs/features/example-feature/
+docs/history/**        # Históricos (solo referencia)
+docs/templates/examples/**  # Ejemplos de plantillas
 ```
 
 ---

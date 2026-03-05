@@ -1,7 +1,13 @@
 # Session: Auth Cutover + Session Hardening
 
 Fecha: **2026-03-01**
-Estado: **Aplicado**
+Estado: **Aplicado (Histórico)**
+
+> [!NOTE]
+> Este documento es snapshot del cutover del **2026-03-01**.
+> El estado vigente de sesiones/Auth se documenta en:
+> - [IMPLEMENTATION-SESSION-2026-03-04-session-stabilization.md](IMPLEMENTATION-SESSION-2026-03-04-session-stabilization.md)
+> - [02-API/ENDPOINTS-LIVE-REFERENCE.md](../../02-API/ENDPOINTS-LIVE-REFERENCE.md)
 
 ## Contexto
 
