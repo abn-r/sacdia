@@ -1,7 +1,20 @@
 # Sistema de Permisos - SACDIA Admin Panel
 
 **Fecha**: 9 de febrero de 2026  
-**Status**: Aprobado
+**Status**: ACTIVE
+
+> [!IMPORTANT]
+> Este documento sigue siendo útil como catálogo de permisos y convención de nombres.
+> El contrato oficial de autorización ya no es el arreglo plano `permissions` del cliente.
+> La fuente de verdad actual para autorización es:
+> - `docs/01-FEATURES/auth/AUTHORIZATION-CANONICAL-CONTRACT.md`
+> - `docs/01-FEATURES/auth/RBAC-ENFORCEMENT-MATRIX.md`
+> - `docs/01-FEATURES/auth/CLUB-ROLE-ASSIGNMENT-FIRST-CONTRACT.md`
+
+> [!NOTE]
+> Varias secciones históricas de este documento describen un modelo donde el frontend
+> resolvía más cosas localmente. Desde 2026-03-07 la dirección técnica oficial es:
+> backend enforced permissions + clientes consumidores del bloque `authorization`.
 
 ---
 
