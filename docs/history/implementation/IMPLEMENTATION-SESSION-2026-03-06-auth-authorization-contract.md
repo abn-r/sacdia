@@ -26,12 +26,28 @@ Legacy fields remain present in the auth response for continuity, but the new `a
 - Reused the resolver in `GlobalRolesGuard` and `OwnerOrAdminGuard` to remove duplicated global-role lookups.
 - Added unit tests for the resolver and updated auth service tests to validate the new contract.
 
+## Stage 2 Update
+
+After the initial contract wiring, the club authorization path was moved closer to the new semantics:
+
+- `ClubRolesGuard` now resolves access through the canonical authorization service instead of re-querying raw assignments directly.
+- Club-scoped access now checks the **active assignment** for the target club.
+- Administrative territorial bypass was preserved through a new `canManageClub()` resolver path that recognizes `super_admin`, union-level admin roles, and local-field roles according to the actor scope already resolved by backend.
+- Added focused unit coverage for `ClubRolesGuard`.
+
 ## Verification
 
 Commands executed:
 
 ```bash
 pnpm exec jest common/services/authorization-context.service.spec.ts auth/auth.service.spec.ts auth/auth.controller.spec.ts --runInBand
+pnpm build
+```
+
+Stage 2 verification:
+
+```bash
+pnpm exec jest common/services/authorization-context.service.spec.ts common/guards/club-roles.guard.spec.ts auth/auth.service.spec.ts auth/auth.controller.spec.ts --runInBand
 pnpm build
 ```
 
@@ -46,6 +62,8 @@ Result:
 - `src/common/services/authorization-context.service.spec.ts`
 - `src/auth/auth.service.ts`
 - `src/auth/auth.controller.ts`
+- `src/common/guards/club-roles.guard.ts`
+- `src/common/guards/club-roles.guard.spec.ts`
 - `src/common/guards/global-roles.guard.ts`
 - `src/common/guards/owner-or-admin.guard.ts`
 
