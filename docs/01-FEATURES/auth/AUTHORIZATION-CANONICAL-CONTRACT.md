@@ -1,7 +1,7 @@
 # Contrato Canónico de Autorización
 
 **Status**: ACTIVE  
-**Fecha**: 2026-03-07  
+**Fecha**: 2026-03-08  
 **Ámbito**: `sacdia-backend`, `sacdia-admin`, `sacdia-app`
 
 ## Propósito
@@ -13,6 +13,18 @@ La regla principal es:
 - el backend resuelve autorización;
 - los clientes consumen autorización resuelta;
 - los campos legacy existen solo por compatibilidad temporal.
+
+## Precedencia Documental
+
+Para evitar contratos paralelos, la precedencia oficial es:
+
+1. `AUTHORIZATION-CANONICAL-CONTRACT.md` (shape y semántica del payload `authorization`).
+2. `RBAC-ENFORCEMENT-MATRIX.md` (cómo se enforcea cada permiso en backend).
+3. `CLUB-ROLE-ASSIGNMENT-FIRST-CONTRACT.md` (modelo de escrituras/lecturas de asignaciones de club).
+
+Regla explícita:
+
+- el arreglo plano `permissions` legacy no es fuente oficial de autorización para clientes nuevos.
 
 ## Contrato Oficial
 
@@ -232,4 +244,6 @@ Respuesta esperada:
 
 - `docs/01-FEATURES/auth/RBAC-ENFORCEMENT-MATRIX.md`
 - `docs/01-FEATURES/auth/CLUB-ROLE-ASSIGNMENT-FIRST-CONTRACT.md`
+- `docs/01-FEATURES/auth/PERMISSIONS-SYSTEM.md`
 - `docs/history/implementation/IMPLEMENTATION-SESSION-2026-03-06-auth-authorization-contract.md`
+- `docs/history/implementation/IMPLEMENTATION-SESSION-2026-03-07-rbac-hardening-stage-1.md`

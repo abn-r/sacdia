@@ -65,6 +65,7 @@ Result:
 
 - Club aggregate routes that still operate at main-club level remain a compatibility compromise; the new guard already enforces exact instance matching where the route or entity shape makes that possible.
 - Existing legacy auth fields are still present for client compatibility, but backend authorization is no longer limited to those fields.
+- Stage 1 does not imply full enforcement coverage for every permission in the business catalog; some modules remain staged.
 
 ## Documentation Added
 
@@ -79,6 +80,14 @@ These documents define:
 - the official `authorization` payload contract;
 - how permissions are enforced in backend;
 - the assignment-first write/read model for club roles.
+
+## Consistency Update (2026-03-08)
+
+A documentation consistency pass aligned the canonical RBAC trilogy plus permission catalog:
+
+- `PERMISSIONS-SYSTEM.md` now acts as canonical catalog and no longer positions flat `permissions` as the client source of truth.
+- `RBAC-ENFORCEMENT-MATRIX.md` now reflects current notification permissions (`send`, `broadcast`, `club`) and separates `club_roles:assign` create vs update semantics.
+- `CLUB-ROLE-ASSIGNMENT-FIRST-CONTRACT.md` now mirrors the same create/update/revoke authorization resource model.
 
 ## Next Stage
 

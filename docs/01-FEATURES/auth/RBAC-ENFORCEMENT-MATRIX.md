@@ -1,7 +1,7 @@
 # Matriz de Enforcement RBAC
 
 **Status**: ACTIVE  
-**Fecha**: 2026-03-07  
+**Fecha**: 2026-03-08  
 **Ámbito**: backend enforced permissions
 
 ## Propósito
@@ -21,8 +21,12 @@ La regla principal es:
 | `global` | Recurso administrativo o territorial | Permisos globales + scope territorial |
 | `club` | Recurso de club padre | Permiso efectivo + bypass global o contexto club activo |
 | `club_instance` | Recurso de instancia exacta | Permiso efectivo + asignación activa exacta |
-| `club_assignment` | Recurso de asignación | Permiso efectivo + relación con assignment |
+| `club_assignment` | Recurso de asignación | Permiso efectivo + relación con `assignment_id` |
 | `user` | Recurso del propio usuario | Permiso global o fallback de ownership |
+
+Nota de implementación:
+
+- En código existen recursos derivados (`activity`, `finance`, `inventory_item`, `inventory_instance`) que resuelven finalmente a validación de `club_instance`.
 
 ## Reglas de Evaluación
 
@@ -38,7 +42,6 @@ La regla principal es:
 
 | Permiso | Acción | Recurso | Enforcement backend | Cliente esperado |
 |---------|--------|---------|---------------------|------------------|
-| `dashboard:view` | Abrir dashboard | `global` | `@RequirePermissions('dashboard:view')` | Admin usa `effective.permissions` |
 | `users:read` | Listar usuarios | `global` | permiso global | Admin |
 | `users:read_detail` | Ver detalle de usuario | `global` o `user` | permiso global o ownership según ruta | Admin y self-service |
 | `users:update` | Editar usuario | `global` o `user` | permiso global o guard de ownership | Admin y self-service |
@@ -50,26 +53,35 @@ La regla principal es:
 | `club_instances:create` | Crear instancia | `club` | permiso global territorial o active assignment compatible | Admin |
 | `club_instances:update` | Editar instancia | `club_instance` | permiso efectivo + asignación activa exacta o bypass global | Admin y App |
 | `club_roles:read` | Ver miembros y asignaciones | `club` | permiso global territorial o contexto club | Admin y App |
-| `club_roles:assign` | Crear o editar asignación | `club_assignment` | permiso efectivo + active assignment o bypass global | Admin y App |
-| `club_roles:revoke` | Revocar asignación | `club_assignment` | permiso efectivo + active assignment o bypass global | Admin |
+| `club_roles:assign` | Crear asignación (`POST /clubs/:clubId/instances/:type/:instanceId/roles`) | `club` | permiso + contexto club válido + reglas complementarias (`ClubRolesGuard`) | Admin y App |
+| `club_roles:assign` | Actualizar asignación (`PATCH /club-roles/:assignmentId`) | `club_assignment` | permiso efectivo + active assignment o bypass global | Admin y App |
+| `club_roles:revoke` | Revocar asignación (`DELETE /club-roles/:assignmentId`) | `club_assignment` | permiso efectivo + active assignment o bypass global | Admin |
 | `activities:read` | Ver actividades | `club` | permiso global territorial o contexto club | Admin y App |
 | `activities:create` | Crear actividad | `club` | permiso efectivo + contexto válido | Admin y App |
-| `activities:update` | Editar actividad | `club` | permiso efectivo + contexto válido | Admin y App |
-| `activities:delete` | Eliminar actividad | `club` | permiso efectivo + contexto válido | Admin |
-| `attendance:read` | Ver asistencia | `club` | permiso efectivo + contexto válido | Admin y App |
-| `attendance:manage` | Pasar asistencia | `club` | permiso efectivo + contexto válido | Admin y App |
+| `activities:update` | Editar actividad | `club_instance` | permiso efectivo + instancia exacta o bypass global | Admin y App |
+| `activities:delete` | Eliminar actividad | `club_instance` | permiso efectivo + instancia exacta o bypass global | Admin |
+| `attendance:read` | Ver asistencia | `club_instance` | permiso efectivo + instancia exacta o bypass global | Admin y App |
+| `attendance:manage` | Pasar asistencia | `club_instance` | permiso efectivo + instancia exacta o bypass global | Admin y App |
 | `finances:read` | Ver finanzas | `club` | permiso global territorial o contexto club | Admin y App |
 | `finances:create` | Crear movimiento | `club` | permiso efectivo + contexto válido | Admin y App |
-| `finances:update` | Editar movimiento | `club` | permiso efectivo + contexto válido | Admin y App |
-| `finances:delete` | Eliminar movimiento | `club` | permiso efectivo + contexto válido | Admin |
+| `finances:update` | Editar movimiento | `club_instance` | permiso efectivo + instancia exacta o bypass global | Admin y App |
+| `finances:delete` | Eliminar movimiento | `club_instance` | permiso efectivo + instancia exacta o bypass global | Admin |
 | `inventory:read` | Ver inventario | `club` | permiso global territorial o contexto club | Admin y App |
 | `inventory:create` | Crear ítem | `club_instance` | permiso efectivo + asignación activa exacta o bypass global | Admin y App |
 | `inventory:update` | Editar ítem | `club_instance` | permiso efectivo + asignación activa exacta o bypass global | Admin y App |
 | `inventory:delete` | Eliminar ítem | `club_instance` | permiso efectivo + asignación activa exacta o bypass global | Admin |
-| `notifications:send` | Enviar notificación | `global` o `club` | permiso explícito + scope del recurso | Admin |
+| `notifications:send` | Enviar notificación directa | `global` | permiso global explícito | Admin |
+| `notifications:broadcast` | Enviar notificación masiva | `global` | permiso global explícito | Admin |
+| `notifications:club` | Enviar notificación a club | `global` (Stage 1) | permiso global explícito (sin resource scope adicional en esta etapa) | Admin |
 | `permissions:read` | Ver RBAC | `global` | permiso global | Admin |
 | `permissions:assign` | Cambiar permisos | `global` | permiso global | Admin |
 | `roles:read` | Ver roles | `global` | permiso global | Admin |
+
+## Cobertura y Límites de Stage 1
+
+- Esta matriz refleja enforcement activo de rutas sensibles priorizadas.
+- El catálogo completo de permisos vive en `PERMISSIONS-SYSTEM.md`.
+- No todo permiso del catálogo implica que su módulo ya esté endurecido al 100% con metadata de recurso en esta etapa.
 
 ## Endpoints que no deben quedar en JWT-only
 
@@ -111,4 +123,5 @@ JWT-only o ownership guard dedicado sigue siendo válido solo si:
 
 - `docs/01-FEATURES/auth/AUTHORIZATION-CANONICAL-CONTRACT.md`
 - `docs/01-FEATURES/auth/CLUB-ROLE-ASSIGNMENT-FIRST-CONTRACT.md`
+- `docs/01-FEATURES/auth/PERMISSIONS-SYSTEM.md`
 - `docs/history/implementation/IMPLEMENTATION-SESSION-2026-03-07-rbac-hardening-stage-1.md`

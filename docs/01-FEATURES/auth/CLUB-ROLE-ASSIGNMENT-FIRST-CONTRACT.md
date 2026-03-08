@@ -1,7 +1,7 @@
 # Contrato Assignment-First para Roles de Club
 
 **Status**: ACTIVE  
-**Fecha**: 2026-03-07  
+**Fecha**: 2026-03-08  
 **Ámbito**: backend, admin, app
 
 ## Propósito
@@ -118,6 +118,18 @@ Respuesta relevante:
 - `authorization.active_assignment`
 - `authorization.effective`
 
+## Semántica de Enforcement (Alineada a Matriz)
+
+| Operación | Endpoint | Recurso de autorización | Criterio base |
+|-----------|----------|-------------------------|---------------|
+| Crear asignación | `POST /clubs/:clubId/instances/:type/:instanceId/roles` | `club` | permiso + contexto club válido + reglas complementarias de rol |
+| Actualizar asignación | `PATCH /club-roles/:assignmentId` | `club_assignment` | permiso + relación válida con `assignment_id` o bypass global |
+| Revocar asignación | `DELETE /club-roles/:assignmentId` | `club_assignment` | permiso + relación válida con `assignment_id` o bypass global |
+
+Regla de sesión:
+
+- `PATCH /auth/me/context` es el mecanismo único para cambiar asignación activa en sesión.
+
 ## Reglas de Cliente
 
 ### `sacdia-admin`
@@ -182,4 +194,5 @@ La autorización efectiva de club sale solo de:
 
 - `docs/01-FEATURES/auth/AUTHORIZATION-CANONICAL-CONTRACT.md`
 - `docs/01-FEATURES/auth/RBAC-ENFORCEMENT-MATRIX.md`
+- `docs/01-FEATURES/auth/PERMISSIONS-SYSTEM.md`
 - `docs/01-FEATURES/auth/future-rbac-user-stories.md`

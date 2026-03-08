@@ -4,6 +4,7 @@ Bitácora cronológica consolidada de implementación.
 
 ## 2026-03
 
+- 2026-03-08: RBAC canonical documentation alignment (authorization contract, enforcement matrix, assignment-first contract, permissions catalog, and Stage 1 consistency update).
 - 2026-03-04: Session stabilization auth.
 - 2026-03-01: Auth cutover + session hardening.
 
