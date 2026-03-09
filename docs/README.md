@@ -2,9 +2,12 @@
 
 **Sistema de Administración de Clubes del Ministerio Juvenil Adventista**
 
+**Estado**: ACTIVE
+
 > [!IMPORTANT]
 > Este directorio es la fuente de verdad documental del proyecto.
 > La documentación histórica se encuentra en `docs/history/`.
+> La precedencia global es: `docs/README.md` + `docs/00-STEERING/*` -> documentos de dominio activos -> material histórico o subordinado.
 
 ---
 
@@ -15,6 +18,8 @@
 3. Contratos API: `docs/02-API/`
 4. Datos y schema: `docs/03-DATABASE/`
 5. Historial y bitácoras: `docs/history/`
+
+`README.md` en la raíz cumple solo función de onboarding corto. Documentos como `docs/03-IMPLEMENTATION-ROADMAP.md` y `docs/02-API/FRONTEND-INTEGRATION-GUIDE.md` deben leerse como apoyo subordinado a esta baseline.
 
 ---
 
@@ -90,6 +95,13 @@ Todo contenido de auditorías, planes cerrados, sesiones y fuentes intermedias v
 - `HISTORICAL`: contexto histórico, no contrato vigente.
 - `DEPRECATED`: reemplazado por documento canónico.
 
+## Convención Editorial para Pendientes y Aspiracional
+
+- No crear estados nuevos para "pending", "future" o "planned".
+- Si un documento sigue siendo canónico, mantener `ACTIVE` y etiquetar el texto puntual como `Pendiente`, `Planificado`, `Recomendado` o `Por verificar`.
+- Si el valor principal del documento es una foto de una etapa previa, marcarlo `HISTORICAL` y enlazar el reemplazo activo.
+- Si un documento fue sustituido, marcarlo `DEPRECATED` y apuntar al documento vigente.
+
 ---
 
 ## Ver También
@@ -97,5 +109,4 @@ Todo contenido de auditorías, planes cerrados, sesiones y fuentes intermedias v
 - `docs/CLAUDE.md`
 - `docs/history/README.md`
 
-**Última actualización**: 2026-03-04
-
+**Última actualización**: 2026-03-09

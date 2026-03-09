@@ -3,6 +3,11 @@
 **Versión**: 2.2.0
 **Fecha**: 4 de febrero de 2026
 **Audiencia**: Desarrolladores Frontend (Admin Panel & Mobile App)
+**Estado**: ACTIVE
+
+> [!IMPORTANT]
+> Esta guía es operativa y subordinada a `docs/README.md`, `docs/00-STEERING/*` y `docs/02-API/ENDPOINTS-LIVE-REFERENCE.md`.
+> Los endpoints y contratos runtime se validan contra la referencia live; los ejemplos de esta guía no reemplazan esa fuente de verdad.
 
 ---
 
@@ -25,18 +30,15 @@ Esta guía proporciona ejemplos prácticos de cómo consumir la API REST de SACD
 
 ### URLs Base
 
+Definí la base URL por entorno en variables de entorno del módulo frontend correspondiente. No tomes dominios o puertos hardcodeados de esta guía como contrato global.
+
 ```typescript
-const API_URLS = {
-  development: 'http://localhost:3000/api/v1',
-  staging: 'https://api-staging.sacdia.app/api/v1',
-  production: 'https://api.sacdia.app/api/v1'
-};
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 ```
 
 ### Endpoints Totales
 
-- **105+ endpoints REST**
-- **17 módulos funcionales**
+- Verificar cobertura y disponibilidad actual en `docs/02-API/ENDPOINTS-LIVE-REFERENCE.md`
 - **Versionado**: `/api/v1/` (URI-based)
 - **Formato**: JSON
 - **Autenticación**: JWT (Supabase Auth)
@@ -84,7 +86,7 @@ const supabase = createClient(
 );
 
 const apiClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/v1',
+  baseURL: process.env.NEXT_PUBLIC_API_URL,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -154,7 +156,7 @@ class ApiClient {
     _dio = Dio(BaseOptions(
       baseUrl: const String.fromEnvironment(
         'API_URL',
-        defaultValue: 'http://localhost:3000/api/v1',
+        defaultValue: '',
       ),
       connectTimeout: const Duration(seconds: 30),
       receiveTimeout: const Duration(seconds: 30),
@@ -1174,5 +1176,6 @@ void main() {
 ---
 
 **Generado**: 4 de febrero de 2026
+**Revisión editorial**: 2026-03-09
 **Versión**: 2.2.0
-**Estado**: Producción Ready
+**Estado**: ACTIVE - validar runtime actual contra `docs/02-API/ENDPOINTS-LIVE-REFERENCE.md`
