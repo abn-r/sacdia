@@ -670,6 +670,34 @@ try {
 
 ## Ejemplos por Módulo
 
+### Módulo: Perfil de Salud (reads canónicos)
+
+Los reads de alergias y enfermedades del usuario usan los endpoints canónicos:
+
+```http
+GET /api/v1/users/:userId/allergies
+GET /api/v1/users/:userId/diseases
+```
+
+Contrato de integración:
+
+- Ambos endpoints requieren JWT y `users:read_detail` con ownership sobre `userId`.
+- La respuesta exitosa siempre usa envelope `{ status: 'success', data: [...] }`.
+- `data` llega como lista plana:
+  - alergias: `{ allergy_id, name }`
+  - enfermedades: `{ disease_id, name }`
+- Si el usuario existe pero no tiene selecciones activas, backend responde `200` con `data: []`.
+- Frontend NO debe convertir `404` en lista vacía: `404` significa que el usuario no existe y debe tratarse como error real.
+
+Ejemplo Flutter:
+
+```dart
+final response = await dio.get('/users/$userId/allergies');
+final items = (response.data['data'] as List<dynamic>)
+    .map((json) => AllergyModel.fromJson(json as Map<String, dynamic>))
+    .toList();
+```
+
 ### Módulo: Actividades
 
 **Listar actividades del club**:

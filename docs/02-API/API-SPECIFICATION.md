@@ -619,6 +619,26 @@ export class CreateLegalRepresentativeDto {
 }
 ```
 
+### Contrato Canónico: Health Profile Reads
+
+Los reads de perfil de salud usan sub-recursos canónicos del usuario:
+
+```http
+GET /api/v1/users/:userId/allergies
+GET /api/v1/users/:userId/diseases
+```
+
+Reglas:
+
+- Requieren JWT + permiso `users:read_detail`.
+- Deben usar `@AuthorizationResource({ type: 'user', ownerParam: 'userId' })`.
+- Responden con envelope `{ status: 'success', data: [...] }`.
+- `data` es una lista plana de selecciones activas:
+  - alergias: `{ allergy_id, name }`
+  - enfermedades: `{ disease_id, name }`
+- Si el usuario existe sin selecciones activas, la respuesta es `200` con `data: []`.
+- `404` aplica solo cuando `userId` no existe.
+
 ---
 
 ## 🚀 Estado de Implementación

@@ -324,8 +324,33 @@ async addEmergencyContact(
 #### Alergias y Enfermedades
 
 ```http
+GET /api/v1/users/:userId/allergies
+GET /api/v1/users/:userId/diseases
 PUT /api/v1/users/:userId/allergies
 PUT /api/v1/users/:userId/diseases
+```
+
+**Lectura - Response 200 Allergies**:
+
+```json
+{
+  "status": "success",
+  "data": [
+    { "allergy_id": 1, "name": "Polen" },
+    { "allergy_id": 2, "name": "Lactosa" }
+  ]
+}
+```
+
+**Lectura - Response 200 Diseases**:
+
+```json
+{
+  "status": "success",
+  "data": [
+    { "disease_id": 10, "name": "Asma" }
+  ]
+}
 ```
 
 **Body - Allergies**:
@@ -342,11 +367,15 @@ PUT /api/v1/users/:userId/diseases
 
 Comportamiento:
 
-1. Reemplaza el conjunto activo completo del usuario.
-2. Reactiva registros existentes inactivos.
-3. Crea registros nuevos si no existen.
-4. Desactiva (`active=false`) registros activos no enviados.
-5. Lista vacía (`[]`) limpia el conjunto activo.
+1. `GET` requiere `users:read_detail` con `@AuthorizationResource({ type: 'user', ownerParam: 'userId' })`.
+2. `GET` devuelve una lista plana de selecciones activas (`{ allergy_id, name }` o `{ disease_id, name }`).
+3. `GET` responde `200` con `data: []` si el usuario existe pero no tiene selecciones activas.
+4. `GET` responde `404` solo cuando el usuario no existe.
+5. `PUT` reemplaza el conjunto activo completo del usuario.
+6. `PUT` reactiva registros existentes inactivos.
+7. `PUT` crea registros nuevos si no existen.
+8. `PUT` desactiva (`active=false`) registros activos no enviados.
+9. Lista vacía (`[]`) limpia el conjunto activo.
 
 ---
 
@@ -627,6 +656,8 @@ DELETE /api/v1/users/:userId/profile-picture
 
 # Paso 2: Info Personal
 PATCH  /api/v1/users/:userId
+GET    /api/v1/users/:userId/allergies
+GET    /api/v1/users/:userId/diseases
 PUT    /api/v1/users/:userId/allergies
 PUT    /api/v1/users/:userId/diseases
 POST   /api/v1/users/:userId/post-registration/step-2/complete
