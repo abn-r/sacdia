@@ -85,6 +85,13 @@ Regla:
 | `users:delete` | Desactivar/eliminar usuario |
 | `users:export` | Exportar listado de usuarios |
 
+Notas canónicas del modelo vigente:
+
+- sub-recursos sensibles (`allergies`, `diseases`, `emergency-contacts`, `legal-representative`, `post-registration`, `profile-picture`) NO tienen permisos dedicados hoy;
+- runtime reutiliza `users:read_detail` para lecturas y `users:update` para escrituras junto con ownership sobre `userId`;
+- GAP FORMAL: el catálogo actual no permite tiering fino entre perfil general, salud, datos legales y progreso de post-registro;
+- DECISION PENDING: si post-registro debe seguir siendo administrable por actores con permiso global `users:update`.
+
 ### Roles y Permisos
 | Permiso | Descripción |
 |---------|-------------|

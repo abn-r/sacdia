@@ -1,7 +1,7 @@
 # Contrato Canónico de Autorización
 
 **Status**: ACTIVE  
-**Fecha**: 2026-03-08  
+**Fecha**: 2026-03-09  
 **Ámbito**: `sacdia-backend`, `sacdia-admin`, `sacdia-app`
 
 ## Propósito
@@ -113,6 +113,85 @@ Describe lo que el backend ya resolvió para la sesión actual.
 - `effective.permissions`: permisos listos para gating en clientes.
 - `effective.scope.global`: alcance territorial resuelto.
 - `effective.scope.club`: contexto activo exacto de club e instancia.
+
+## Reglas Canónicas para Recursos `user`
+
+Cuando una ruta usa `@AuthorizationResource({ type: 'user', ownerParam: 'userId' })`, el contrato runtime vigente es:
+
+- ownership real sobre `userId` habilita self-service estricto para el propio usuario;
+- si no hay ownership, el actor necesita permiso global suficiente (`users:read_detail` para lecturas, `users:update` para escrituras);
+- permisos provenientes solo de `active_assignment` no habilitan acceso transversal a recursos `user` de terceros.
+
+Sub-recursos sensibles hoy cubiertos por este modelo:
+
+- perfil base y foto de perfil;
+- alergias y enfermedades;
+- contactos de emergencia;
+- representante legal;
+- estado y pasos de post-registro;
+- endpoints derivados como edad calculada y `requires-legal-representative`.
+
+### GAP FORMAL - tiering de datos sensibles
+
+El modelo RBAC vigente NO distingue con permisos dedicados entre:
+
+- perfil general;
+- salud;
+- contactos de emergencia;
+- representante legal;
+- progreso de post-registro.
+
+Por lo tanto:
+
+- no declarar tiers finos de acceso que el runtime actual no enforcea;
+- documentar estos sub-recursos como heredando `users:read_detail` o `users:update` + ownership/admin access.
+
+### DECISION PENDING - administracion de post-registro sobre terceros
+
+El runtime vigente todavia permite que un actor no owner con permiso global `users:update` ejecute:
+
+- `POST /users/:userId/post-registration/step-1/complete`;
+- `POST /users/:userId/post-registration/step-2/complete`;
+- `POST /users/:userId/post-registration/step-3/complete`.
+
+Esta capacidad existe hoy en backend, pero sigue abierta como decision funcional canónica.
+
+Hasta resolverla:
+
+- no declarar permisos nuevos por suposicion;
+- no asumir que `users:update` habilita lectura o edicion de datos sensibles de terceros;
+- tratar la administracion de `process-state` / `administrative completion` como excepcion minima documentada, no como permiso fino nuevo.
+
+### Politica de cliente - opcion C minima para terceros
+
+Las rutas de post-registro siguen usando el recurso `user`, por lo que runtime todavia permite que un actor con permiso global `users:update` las mutile aunque no sea owner.
+
+La politica canónica para clientes queda asi:
+
+- `process-state` / `administrative completion` de terceros puede reflejarse cuando exista autorizacion global resuelta explicita (`users:read_detail` para lectura, `users:update` para escritura);
+- datos sensibles enviados por el usuario (`health`, `emergency contacts`, `legal representative`, perfil sensible derivado del paso 2) NO deben quedar expuestos ni editables en clientes de terceros solo por `users:update` genérico;
+- `sacdia-admin` y `sacdia-app` deben degradar u ocultar esas superficies cuando no exista una señal explicita compatible con esta politica minima.
+
+## Registro Canonico de Abiertos
+
+Los abiertos vigentes tras Batch 1, Batch 2 y Batch 3 son exactamente estos:
+
+1. `GAP FORMAL`: no existe tier RBAC separado para perfil general vs salud vs contactos de emergencia vs representante legal vs progreso de post-registro.
+2. `DECISION PENDING`: falta definir si la administracion de post-registro de terceros via `users:update` global debe mantenerse como politica estable o cerrarse en una etapa posterior.
+
+Regla de control de scope:
+
+- no agregar permisos nuevos ni reinterpretar permisos legacy para cerrar estos abiertos a nivel cliente;
+- cualquier cambio futuro debe partir de backend + contrato canónico actualizado.
+
+## Validacion Transversal Final
+
+Validacion documental final de Batch 3:
+
+- backend: el contrato `user` verificado se mantiene en ownership o permiso global; `active_assignment` no habilita acceso a terceros;
+- `sacdia-admin`: el consumo canónico sigue siendo `authorization.effective.permissions` y `authorization.grants`;
+- `sacdia-app`: el gating sensible usa ownership o `users:read_detail`, y separa eso de `users:update` para `administrative completion`;
+- docs activas de auth y API quedan alineadas sobre los mismos dos abiertos: `GAP FORMAL` y `DECISION PENDING`.
 
 ## Reglas de Consumo
 

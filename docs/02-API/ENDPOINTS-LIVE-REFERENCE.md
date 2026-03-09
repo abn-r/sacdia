@@ -87,6 +87,15 @@
 | POST | `/api/v1/users/:userId/profile-picture` | JWT | - | Subir foto de perfil | `src/users/users.controller.ts` |
 | GET | `/api/v1/users/:userId/requires-legal-representative` | JWT | - | Verificar si el usuario requiere representante legal | `src/users/users.controller.ts` |
 
+### User Authorization Notes (2026-03-09)
+
+- Las rutas `user` de esta sección no son solo "JWT-only" en semántica de autorización: runtime usa `JwtAuthGuard` + `PermissionsGuard` + `@AuthorizationResource({ type: 'user', ownerParam: 'userId' })` en las superficies sensibles verificadas de Batch 1.
+- Self-service: el owner del `userId` puede operar sobre sus propias rutas sensibles.
+- Admin/global access: un actor no owner necesita permiso global `users:read_detail` para lecturas o `users:update` para escrituras; permisos provenientes solo de `active_assignment` no habilitan acceso transversal a recursos `user`.
+- Superficies sensibles verificadas: alergias, enfermedades, contactos de emergencia, representante legal, foto de perfil, estado/pasos de post-registro, edad calculada y `requires-legal-representative`.
+- GAP FORMAL: el runtime actual no expone permisos separados para salud, contactos de emergencia, representante legal o post-registro.
+- DECISION PENDING: `POST /api/v1/users/:userId/post-registration/step-{1,2,3}/complete` sigue siendo administrable en runtime por actores con permiso global `users:update`; falta decisión canónica específica sobre si esa capacidad debe mantenerse como política estable.
+
 ## activities
 
 | Method | Path | Auth | Roles | Description | Source |

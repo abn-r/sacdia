@@ -639,6 +639,28 @@ Reglas:
 - Si el usuario existe sin selecciones activas, la respuesta es `200` con `data: []`.
 - `404` aplica solo cuando `userId` no existe.
 
+### Contrato Canónico: User ownership y sub-recursos sensibles
+
+Para las rutas sensibles que cuelgan de `/api/v1/users/:userId/...`, el runtime vigente verificable en backend es:
+
+- ownership sobre `userId` habilita self-service;
+- un actor no owner necesita permiso global `users:read_detail` para lecturas o `users:update` para escrituras;
+- permisos de club provenientes solo de `active_assignment` no habilitan acceso a datos `user` de terceros.
+
+Superficies confirmadas en Batch 1:
+
+- `allergies`, `diseases`;
+- `emergency-contacts`;
+- `legal-representative`;
+- `profile-picture`;
+- `post-registration/status` y `step-{1,2,3}/complete`;
+- derivados `age` y `requires-legal-representative`.
+
+Límites documentales:
+
+- GAP FORMAL: no existen permisos dedicados para separar salud, representante legal, contactos de emergencia o post-registro del permiso general `users:*`.
+- DECISION PENDING: el runtime permite mutaciones administrativas de post-registro con `users:update` global, pero esa política todavía no tiene validación funcional canónica separada.
+
 ---
 
 ## 🚀 Estado de Implementación

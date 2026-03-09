@@ -1,7 +1,7 @@
 # Matriz de Enforcement RBAC
 
 **Status**: ACTIVE  
-**Fecha**: 2026-03-08  
+**Fecha**: 2026-03-09  
 **Ámbito**: backend enforced permissions
 
 ## Propósito
@@ -82,6 +82,34 @@ Nota de implementación:
 - Esta matriz refleja enforcement activo de rutas sensibles priorizadas.
 - El catálogo completo de permisos vive en `PERMISSIONS-SYSTEM.md`.
 - No todo permiso del catálogo implica que su módulo ya esté endurecido al 100% con metadata de recurso en esta etapa.
+
+## Recursos `user` sensibles verificados en Batch 1
+
+| Superficie | Rutas verificadas | Permiso runtime | Enforcement backend | Estado |
+|------------|-------------------|-----------------|---------------------|--------|
+| Perfil y derivados | `GET/PATCH /users/:userId`, `GET /age`, `GET /requires-legal-representative`, `POST/DELETE /profile-picture` | `users:read_detail` o `users:update` | ownership o permiso global; permisos de club no alcanzan | Verificado |
+| Salud | `GET/PUT /allergies`, `GET/PUT /diseases` | `users:read_detail` o `users:update` | ownership o permiso global; sin tier fino dedicado | Verificado |
+| Contactos de emergencia | `GET/POST/PATCH/DELETE /emergency-contacts` | `users:read_detail` o `users:update` | ownership o permiso global | Verificado |
+| Representante legal | `GET/POST/PATCH/DELETE /legal-representative` | `users:read_detail` o `users:update` | ownership o permiso global | Verificado |
+| Post-registro | `GET /post-registration/status`, `POST /step-1/complete`, `POST /step-2/complete`, `POST /step-3/complete` | `users:read_detail` o `users:update` | ownership o permiso global | Verificado runtime |
+
+Notas:
+
+- `PermissionsGuard` permite owner fallback antes de resolver permisos explícitos en recursos `user`.
+- Para actores no owner, solo cuentan permisos globales; un `active_assignment` con permisos de club no abre acceso a datos `user` de terceros.
+- GAP FORMAL: no existe permiso separado para salud/legal/contactos/post-registro.
+- DECISION PENDING: `users:update` global todavia puede administrar `post-registration/step-{1,2,3}/complete` sobre terceros en runtime; falta definir si esa capacidad queda estable o se restringe luego.
+- Politica cliente vigente: `process-state` / `administrative completion` de terceros puede reflejar acceso global explicito, pero datos sensibles enviados por usuario no deben habilitarse en clientes solo por `users:update`.
+- Regla de scope: no inventar permisos finos nuevos en admin o mobile para cerrar este gap; el frontend solo puede degradar superficies segun autorizacion ya resuelta por backend.
+
+## Validacion Transversal Final (Batch 3)
+
+| Capa | Evidencia verificada | Resultado |
+|------|----------------------|-----------|
+| Docs auth | `AUTHORIZATION-CANONICAL-CONTRACT.md` y esta matriz usan el mismo `GAP FORMAL` y `DECISION PENDING` | Alineado |
+| Backend | `PermissionsGuard` mantiene ownership o permiso global para recurso `user`; permisos de club no alcanzan terceros | Alineado |
+| Admin | consumo canonico desde `authorization.effective.permissions` y `authorization.grants` | Alineado |
+| Mobile | helpers separan `administrative completion` de acceso a datos sensibles y no tratan `users:update` como permiso sensible | Alineado |
 
 ## Endpoints que no deben quedar en JWT-only
 

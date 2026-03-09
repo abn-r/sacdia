@@ -700,6 +700,33 @@ final items = (response.data['data'] as List<dynamic>)
     .toList();
 ```
 
+### Módulo: Rutas sensibles de usuario
+
+Para `/api/v1/users/:userId/...` en superficies sensibles verificadas (`allergies`, `diseases`, `emergency-contacts`, `legal-representative`, `profile-picture`, `post-registration`, `age`, `requires-legal-representative`):
+
+- frontend no debe interpretar estas rutas como mero "JWT-only";
+- self-service depende de ownership sobre `userId`;
+- acceso sobre terceros requiere permiso global resuelto (`users:read_detail` o `users:update`), no permisos de club derivados del contexto activo;
+- no introducir gating fino por salud/legal/contactos porque el backend todavía no expone permisos separados para esas categorías.
+
+Límites transitorios que deben quedar explícitos:
+
+- GAP FORMAL: no existe tier RBAC separado para datos médicos, legales o de emergencia;
+- DECISION PENDING: `post-registration/step-{1,2,3}/complete` sigue administrable en runtime por actores con `users:update` global, pero esa política aún no se considera cerrada de forma canónica;
+- politica cliente opcion C minima:
+  - admin puede reflejar `process-state` / `administrative completion` de terceros con autorizacion global resuelta explicita;
+  - mobile y admin no deben exponer ni editar datos sensibles enviados por usuario de terceros solo por `users:update` genérico;
+  - clientes deben seguir la autorizacion resuelta del backend y no inventar permisos implicitos desde contexto de club o roles legacy.
+
+### Validacion transversal final (Batch 3)
+
+Checklist final de consistencia para frontend:
+
+- `sacdia-admin` debe seguir usando `authorization.effective.permissions` para gating operativo y `authorization.grants` para contexto y detalle;
+- `sacdia-app` debe separar `administrative completion` de acceso a datos sensibles: `users:update` no alcanza por si solo para salud/contactos/legal de terceros;
+- ni admin ni mobile deben crear permisos frontend nuevos para cerrar el `GAP FORMAL`;
+- mientras la `DECISION PENDING` siga abierta, la UX sobre terceros debe limitarse a la politica minima documentada y degradar el resto.
+
 ### Módulo: Actividades
 
 **Listar actividades del club**:
