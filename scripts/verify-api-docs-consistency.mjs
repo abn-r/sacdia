@@ -5,7 +5,7 @@ import path from 'node:path';
 
 const DOCS_API_DIR = path.join(process.cwd(), 'docs', '02-API');
 const CANONICAL_FILE = 'ENDPOINTS-LIVE-REFERENCE.md';
-const COMPAT_ALIAS_FILES = ['API-REFERENCE.md', 'COMPLETE-API-REFERENCE.md'];
+const COMPAT_ALIAS_FILES = ['API-REFERENCE.md'];
 
 const errors = [];
 
