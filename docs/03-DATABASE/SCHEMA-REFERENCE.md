@@ -108,7 +108,7 @@ graph TB
 **Relaciones**:
 - One-to-One: `users_pr`, `legal_representatives`
 - One-to-Many: `emergency_contacts`, `club_role_assignments`, `users_classes`, `users_honors`
-- Many-to-Many: `roles` (via `users_roles`), `allergies` (via `users_allergies`), `diseases` (via `users_diseases`)
+- Many-to-Many: `roles` (via `users_roles`), `allergies` (via `users_allergies`), `diseases` (via `users_diseases`), `medicines` (via `users_medicines`)
 
 **Naming Convention**: ✅ Cumple - Nombres descriptivos (`paternal_last_name` vs `p_lastname`)
 

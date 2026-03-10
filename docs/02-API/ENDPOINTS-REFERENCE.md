@@ -321,18 +321,21 @@ async addEmergencyContact(
 
 ---
 
-#### Alergias y Enfermedades
+#### Alergias, Enfermedades y Medicamentos
 
-Baseline health activo de este batch: `allergies` + `diseases` como sub-recursos sensibles de `user`.
-`medicines` queda diferido y no forma parte del runtime activo documentado aqui.
+Baseline health activo de este batch: `allergies` + `diseases` + `medicines` como sub-recursos sensibles de `user`.
+En esta fase, `medicines` NO tiene vínculo runtime con `diseases` ni atributos clínicos adicionales.
 
 ```http
 GET /api/v1/users/:userId/allergies
 GET /api/v1/users/:userId/diseases
+GET /api/v1/users/:userId/medicines
 PUT /api/v1/users/:userId/allergies
 PUT /api/v1/users/:userId/diseases
+PUT /api/v1/users/:userId/medicines
 DELETE /api/v1/users/:userId/allergies/:allergyId
 DELETE /api/v1/users/:userId/diseases/:diseaseId
+DELETE /api/v1/users/:userId/medicines/:medicineId
 ```
 
 **Lectura - Response 200 Allergies**:

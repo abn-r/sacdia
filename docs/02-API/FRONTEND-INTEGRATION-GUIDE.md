@@ -674,18 +674,20 @@ try {
 
 ### Módulo: Perfil de Salud (baseline activo)
 
-El baseline health activo para frontend queda limitado a `allergies` + `diseases` como sub-recursos sensibles de `user`.
-`medicines` sigue diferido y no debe tratarse como superficie runtime activa en este batch.
+El baseline health activo para frontend queda limitado a `allergies` + `diseases` + `medicines` como sub-recursos sensibles de `user`.
 
 Rutas canónicas verificadas:
 
 ```http
 GET /api/v1/users/:userId/allergies
 GET /api/v1/users/:userId/diseases
+GET /api/v1/users/:userId/medicines
 PUT /api/v1/users/:userId/allergies
 PUT /api/v1/users/:userId/diseases
+PUT /api/v1/users/:userId/medicines
 DELETE /api/v1/users/:userId/allergies/:allergyId
 DELETE /api/v1/users/:userId/diseases/:diseaseId
+DELETE /api/v1/users/:userId/medicines/:medicineId
 ```
 
 Contrato de integración:

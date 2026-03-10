@@ -125,7 +125,7 @@ Cuando una ruta usa `@AuthorizationResource({ type: 'user', ownerParam: 'userId'
 Sub-recursos sensibles hoy cubiertos por este modelo:
 
 - perfil base y foto de perfil;
-- baseline health activo: alergias y enfermedades (incluyendo escrituras batch por `PUT` y bajas puntuales por `DELETE` item-level);
+- baseline health activo: alergias, enfermedades y medicamentos (incluyendo escrituras batch por `PUT` y bajas puntuales por `DELETE` item-level);
 - contactos de emergencia;
 - representante legal;
 - estado y pasos de post-registro;
@@ -133,7 +133,8 @@ Sub-recursos sensibles hoy cubiertos por este modelo:
 
 Limite explicito del baseline health actual:
 
-- `medicines` no forma parte todavia del runtime canónico activo ni debe inferirse como sub-recurso vigente por analogia.
+- `medicines` forma parte del runtime canónico activo como relación sensible `user -> medicines`.
+- No existe todavía vínculo runtime `medicine <-> disease` ni debe inferirse por analogía.
 
 ### GAP FORMAL - tiering de datos sensibles
 

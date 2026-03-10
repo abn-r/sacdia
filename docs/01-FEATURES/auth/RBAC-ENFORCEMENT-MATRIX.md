@@ -88,7 +88,7 @@ Nota de implementación:
 | Superficie | Rutas verificadas | Permiso runtime | Enforcement backend | Estado |
 |------------|-------------------|-----------------|---------------------|--------|
 | Perfil y derivados | `GET/PATCH /users/:userId`, `GET /age`, `GET /requires-legal-representative`, `POST/DELETE /profile-picture` | `users:read_detail` o `users:update` | ownership o permiso global; permisos de club no alcanzan | Verificado |
-| Salud | `GET/PUT /allergies`, `GET/PUT /diseases`, `DELETE /allergies/:allergyId`, `DELETE /diseases/:diseaseId` | `users:read_detail` o `users:update` | ownership o permiso global; baseline activo limitado a `allergies` + `diseases`, sin tier fino dedicado | Verificado |
+| Salud | `GET/PUT /allergies`, `GET/PUT /diseases`, `GET/PUT /medicines`, `DELETE /allergies/:allergyId`, `DELETE /diseases/:diseaseId`, `DELETE /medicines/:medicineId` | `users:read_detail` o `users:update` | ownership o permiso global; baseline activo limitado a `allergies` + `diseases` + `medicines`, sin tier fino dedicado | Verificado |
 | Contactos de emergencia | `GET/POST/PATCH/DELETE /emergency-contacts` | `users:read_detail` o `users:update` | ownership o permiso global | Verificado |
 | Representante legal | `GET/POST/PATCH/DELETE /legal-representative` | `users:read_detail` o `users:update` | ownership o permiso global | Verificado |
 | Post-registro | `GET /post-registration/status`, `POST /step-1/complete`, `POST /step-2/complete`, `POST /step-3/complete` | `users:read_detail` o `users:update` | ownership o permiso global; terceros quedan en modo administrativo minimo | Verificado runtime |
@@ -97,7 +97,8 @@ Notas:
 
 - `PermissionsGuard` permite owner fallback antes de resolver permisos explícitos en recursos `user`.
 - Para actores no owner, solo cuentan permisos globales; un `active_assignment` con permisos de club no abre acceso a datos `user` de terceros.
-- Baseline health activo verificado: `allergies` + `diseases`; `medicines` sigue diferido y fuera del enforcement/documentación activa de este batch.
+- Baseline health activo verificado: `allergies` + `diseases` + `medicines`.
+- `medicines` se limita a catálogo + relación sensible `user -> medicines`; no existe vínculo runtime `medicine <-> disease` en esta fase.
 - GAP FORMAL: no existe permiso separado para salud/legal/contactos/post-registro.
 - Opcion C cerrada: `users:update` global mantiene `post-registration/step-{1,2,3}/complete` sobre terceros, pero solo con respuestas y errores administrativos minimos.
 - Politica cliente vigente: `process-state` / `administrative completion` de terceros puede reflejar acceso global explicito, pero datos sensibles enviados por usuario no deben habilitarse en clientes solo por `users:update`.

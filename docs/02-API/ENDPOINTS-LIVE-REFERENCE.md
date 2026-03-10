@@ -58,10 +58,13 @@
 | PATCH | `/api/v1/users/:userId` | JWT | - | Actualizar información personal del usuario | `src/users/users.controller.ts` |
 | GET | `/api/v1/users/:userId/allergies` | JWT | - | Obtener alergias activas del usuario | `src/users/users.controller.ts` |
 | GET | `/api/v1/users/:userId/diseases` | JWT | - | Obtener enfermedades activas del usuario | `src/users/users.controller.ts` |
+| GET | `/api/v1/users/:userId/medicines` | JWT | - | Obtener medicamentos activos del usuario | `src/users/users.controller.ts` |
 | PUT | `/api/v1/users/:userId/allergies` | JWT | - | Guardar alergias del usuario | `src/users/users.controller.ts` |
 | PUT | `/api/v1/users/:userId/diseases` | JWT | - | Guardar enfermedades del usuario | `src/users/users.controller.ts` |
+| PUT | `/api/v1/users/:userId/medicines` | JWT | - | Guardar medicamentos del usuario | `src/users/users.controller.ts` |
 | DELETE | `/api/v1/users/:userId/allergies/:allergyId` | JWT | - | Eliminar una alergia activa del usuario (soft delete) | `src/users/users.controller.ts` |
 | DELETE | `/api/v1/users/:userId/diseases/:diseaseId` | JWT | - | Eliminar una enfermedad activa del usuario (soft delete) | `src/users/users.controller.ts` |
+| DELETE | `/api/v1/users/:userId/medicines/:medicineId` | JWT | - | Eliminar un medicamento activo del usuario (soft delete) | `src/users/users.controller.ts` |
 | GET | `/api/v1/users/:userId/age` | JWT | - | Calcular edad del usuario | `src/users/users.controller.ts` |
 | GET | `/api/v1/users/:userId/classes` | JWT | - | Obtener inscripciones del usuario | `src/classes/classes.controller.ts` |
 | GET | `/api/v1/users/:userId/classes/:classId/progress` | JWT | - | Obtener progreso del usuario en una clase | `src/classes/classes.controller.ts` |
@@ -94,8 +97,8 @@
 - Las rutas `user` de esta sección no son solo "JWT-only" en semántica de autorización: runtime usa `JwtAuthGuard` + `PermissionsGuard` + `@AuthorizationResource({ type: 'user', ownerParam: 'userId' })` en las superficies sensibles verificadas de Batch 1.
 - Self-service: el owner del `userId` puede operar sobre sus propias rutas sensibles.
 - Admin/global access: un actor no owner necesita permiso global `users:read_detail` para lecturas o `users:update` para escrituras; permisos provenientes solo de `active_assignment` no habilitan acceso transversal a recursos `user`.
-- Baseline health activo: `allergies` + `diseases` como sub-recursos sensibles de `user`; `DELETE` por item esta verificado en runtime y `medicines` sigue diferido fuera de este baseline.
-- Superficies sensibles verificadas: alergias, enfermedades, contactos de emergencia, representante legal, foto de perfil, estado/pasos de post-registro, edad calculada y `requires-legal-representative`.
+- Baseline health activo: `allergies` + `diseases` + `medicines` como sub-recursos sensibles de `user`; `DELETE` por item esta verificado en runtime.
+- Superficies sensibles verificadas: alergias, enfermedades, medicamentos, contactos de emergencia, representante legal, foto de perfil, estado/pasos de post-registro, edad calculada y `requires-legal-representative`.
 - GAP FORMAL: el runtime actual no expone permisos separados para salud, contactos de emergencia, representante legal o post-registro.
 - Opción C cerrada: `GET /api/v1/users/:userId/post-registration/status` permite lectura administrativa mínima de terceros con `users:read_detail`, y `POST /api/v1/users/:userId/post-registration/step-{1,2,3}/complete` permite completion administrativa mínima con `users:update`.
 - Para terceros no owner, `status` debe mantenerse en estado administrativo mínimo y `step-{1,2,3}/complete` no debe filtrar razones sensibles detalladas del usuario objetivo.

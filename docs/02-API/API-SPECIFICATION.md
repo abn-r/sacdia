@@ -625,20 +625,25 @@ El baseline health activo del runtime queda anclado sobre sub-recursos sensibles
 
 - `allergies`
 - `diseases`
+- `medicines`
 
 Fuera de scope del baseline activo actual:
 
-- `medicines` sigue diferido; no forma parte del contrato runtime activo de este batch.
+- vínculo `medicine <-> disease`;
+- dosis, frecuencia, prescripción o historial clínico.
 
 Rutas verificadas en backend:
 
 ```http
 GET /api/v1/users/:userId/allergies
 GET /api/v1/users/:userId/diseases
+GET /api/v1/users/:userId/medicines
 PUT /api/v1/users/:userId/allergies
 PUT /api/v1/users/:userId/diseases
+PUT /api/v1/users/:userId/medicines
 DELETE /api/v1/users/:userId/allergies/:allergyId
 DELETE /api/v1/users/:userId/diseases/:diseaseId
+DELETE /api/v1/users/:userId/medicines/:medicineId
 ```
 
 Reglas:
