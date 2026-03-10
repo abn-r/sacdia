@@ -307,7 +307,7 @@ Solución: Implementar locks distribuidos con Redlock.
 
 **Nombres de Branches**:
 - `main` / `master`: Producción
-- `develop`: Desarrollo
+- `development`: Desarrollo
 - `feature/[nombre]`: Nueva feature
 - `fix/[nombre]`: Bug fix
 - `hotfix/[nombre]`: Fix crítico en producción
