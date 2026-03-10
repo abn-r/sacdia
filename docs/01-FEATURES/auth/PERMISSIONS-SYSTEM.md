@@ -1,7 +1,7 @@
 # Sistema de Permisos - SACDIA
 
 **Status**: ACTIVE  
-**Fecha**: 2026-03-08
+**Fecha**: 2026-03-10
 
 > [!IMPORTANT]
 > Este documento es el catálogo canónico de nombres de permisos y su convención.
@@ -84,6 +84,21 @@ Regla:
 | `users:update` | Editar datos de usuario |
 | `users:delete` | Desactivar/eliminar usuario |
 | `users:export` | Exportar listado de usuarios |
+| `health:read` | Ver sub-recursos sensibles de salud del usuario |
+| `health:update` | Editar sub-recursos sensibles de salud del usuario |
+| `emergency_contacts:read` | Ver contactos de emergencia del usuario |
+| `emergency_contacts:update` | Editar contactos de emergencia del usuario |
+| `legal_representative:read` | Ver representante legal del usuario |
+| `legal_representative:update` | Editar representante legal del usuario |
+| `post_registration:read` | Ver estado administrativo de post-registro |
+| `post_registration:update` | Completar o editar pasos administrativos de post-registro |
+
+Notas canónicas del modelo vigente:
+
+- las familias sensibles del change son `health`, `emergency_contacts`, `legal_representative` y `post_registration`;
+- OR transicional vigente: para terceros, lectura fina acepta `family:read` o el legado de la familia `users:*` (`users:read_detail`); escritura fina acepta `family:update` o el legado `users:update`;
+- exclusiones fuera de scope: `GET/PATCH /users/:userId`, `POST/DELETE /users/:userId/profile-picture`, `GET /users/:userId/age` y `GET /users/:userId/requires-legal-representative` siguen en metadata legacy `users:*`;
+- excepción mínima vigente: terceros pueden consultar `post_registration/status` y completar `step-{1,2,3}` solo en modo administrativo mínimo, sin feedback sensible adicional.
 
 ### Roles y Permisos
 | Permiso | Descripción |
@@ -242,4 +257,4 @@ Regla:
 - `docs/history/implementation/IMPLEMENTATION-SESSION-2026-03-07-rbac-hardening-stage-1.md`
 - `docs/03-DATABASE/migrations/script_06_admin_permissions.sql`
 
-**Última actualización**: 2026-03-08 (alineación canónica RBAC)
+**Última actualización**: 2026-03-10 (familias sensibles + fallback transicional)

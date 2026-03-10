@@ -69,6 +69,7 @@ La base de datos está diseñada con las siguientes características:
     ├── relationship_types
     ├── allergies
     ├── diseases
+    ├── medicines
     └── ecclesiastical_years
 ```
 

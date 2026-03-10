@@ -619,6 +619,82 @@ export class CreateLegalRepresentativeDto {
 }
 ```
 
+### Contrato Canónico: Health Profile Baseline
+
+El baseline health activo del runtime queda anclado sobre sub-recursos sensibles de `user`:
+
+- `allergies`
+- `diseases`
+- `medicines`
+
+Fuera de scope del baseline activo actual:
+
+- vínculo `medicine <-> disease`;
+- dosis, frecuencia, prescripción o historial clínico.
+
+Rutas verificadas en backend:
+
+```http
+GET /api/v1/users/:userId/allergies
+GET /api/v1/users/:userId/diseases
+GET /api/v1/users/:userId/medicines
+PUT /api/v1/users/:userId/allergies
+PUT /api/v1/users/:userId/diseases
+PUT /api/v1/users/:userId/medicines
+DELETE /api/v1/users/:userId/allergies/:allergyId
+DELETE /api/v1/users/:userId/diseases/:diseaseId
+DELETE /api/v1/users/:userId/medicines/:medicineId
+```
+
+Reglas:
+
+- Son sub-recursos sensibles `user`, no recursos health globales.
+- Deben usar `@AuthorizationResource({ type: 'user', ownerParam: 'userId' })`.
+- Owner-or-global: ownership sobre `userId` habilita self-service; para terceros, lectura acepta `health:read` o fallback legacy `users:read_detail`, y escritura acepta `health:update` o fallback legacy `users:update`.
+- Permisos de club provenientes solo de `active_assignment` no habilitan acceso a health de terceros.
+- Responden con envelope `{ status: 'success', data: [...] }`.
+- `GET` devuelve una lista plana de selecciones activas:
+  - alergias: `{ allergy_id, name }`
+  - enfermedades: `{ disease_id, name }`
+- Si el usuario existe sin selecciones activas, la respuesta es `200` con `data: []`.
+- `PUT` reemplaza el conjunto activo completo.
+- `DELETE` por item existe en runtime y desactiva logicamente una seleccion puntual (`active=false`) sin inventar un recurso nuevo.
+- `DELETE` responde `404` cuando la seleccion puntual no esta activa en ese usuario.
+- `404` aplica en `GET` solo cuando `userId` no existe.
+
+### Contrato Canónico: User ownership y sub-recursos sensibles
+
+Para las rutas sensibles que cuelgan de `/api/v1/users/:userId/...`, el runtime vigente verificable en backend es:
+
+- ownership sobre `userId` habilita self-service;
+- para terceros, solo cuentan permisos globales resueltos explicitamente;
+- lecturas finas aceptan `family:read` o fallback legacy `users:read_detail`;
+- escrituras finas aceptan `family:update` o fallback legacy `users:update`;
+- permisos de club provenientes solo de `active_assignment` no habilitan acceso a datos `user` de terceros.
+
+Familias sensibles confirmadas en runtime:
+
+- `health` (`allergies`, `diseases`, `medicines`);
+- `emergency-contacts`;
+- `legal-representative`;
+- `post-registration/status` y `step-{1,2,3}/complete`;
+
+Exclusiones explicitas fuera del tiering fino actual:
+
+- `GET /users/:userId`;
+- `PATCH /users/:userId`;
+- `POST /users/:userId/profile-picture`;
+- `DELETE /users/:userId/profile-picture`;
+- `GET /users/:userId/age`;
+- `GET /users/:userId/requires-legal-representative`.
+
+Límites documentales:
+
+- Los permisos finos dedicados vigentes son `health:*`, `emergency_contacts:*`, `legal_representative:*` y `post_registration:*`.
+- `GET /users/:userId/post-registration/status` permite lectura administrativa mínima de terceros con `post_registration:read` o fallback legacy `users:read_detail`.
+- `POST /users/:userId/post-registration/step-{1,2,3}/complete` permite completion administrativa mínima de terceros con `post_registration:update` o fallback legacy `users:update`.
+- Para terceros no owner, el backend debe devolver estado administrativo mínimo y respuestas saneadas, sin inferir datos sensibles ni causas detalladas del paso 2.
+
 ---
 
 ## 🚀 Estado de Implementación

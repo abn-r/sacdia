@@ -1,8 +1,14 @@
 # Roadmap de Implementación - SACDIA
 
+**Estado**: HISTORICAL
 **Fecha**: 13 de febrero de 2026
 **Estrategia**: Backend-First → Mobile → Admin Panel
-**Estado de sincronización**: Backend estabilizado + bloque mínimo admin habilitado
+**Lectura correcta**: roadmap y bitácora de fases; no baseline runtime vigente.
+
+> [!IMPORTANT]
+> Este documento mezcla planificación original, cierres de fase y snapshots de implementación.
+> Para baseline global y precedencia documental usar `docs/README.md` y `docs/00-STEERING/*`.
+> Para contratos runtime vigentes de API usar `docs/02-API/ENDPOINTS-LIVE-REFERENCE.md`.
 
 ---
 
@@ -581,7 +587,7 @@ vercel --prod
 
 ---
 
-## 📝 Próximos Pasos Inmediatos
+## 📝 Próximos Pasos Inmediatos (snapshot histórico del plan original)
 
 1. **HOY**: Inicializar proyecto NestJS
 2. **Esta semana**: Completar Sprint 1-2 (Fundamentos)
@@ -590,8 +596,8 @@ vercel --prod
 ---
 
 **Creado**: 2026-01-29
-**Actualizado**: 2026-02-05
-**Status**: ✅ Fase 1 (Backend) COMPLETADA - 17/17 módulos, 130+ endpoints, compilación exitosa
+**Actualizado**: 2026-03-09 (revisión editorial)
+**Status**: HISTORICAL - snapshot de roadmap y cierre de fases; validar métricas y estado actual contra documentos `ACTIVE`
 **Última sesión**: Correcciones de schema y arquitectura (Certifications, Folders, Inventory)
 **Próxima fase**: Fase 2 (App Móvil Flutter)
 

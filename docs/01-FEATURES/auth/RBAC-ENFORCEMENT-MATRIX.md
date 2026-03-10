@@ -1,7 +1,7 @@
 # Matriz de Enforcement RBAC
 
 **Status**: ACTIVE  
-**Fecha**: 2026-03-08  
+**Fecha**: 2026-03-10  
 **Ámbito**: backend enforced permissions
 
 ## Propósito
@@ -82,6 +82,35 @@ Nota de implementación:
 - Esta matriz refleja enforcement activo de rutas sensibles priorizadas.
 - El catálogo completo de permisos vive en `PERMISSIONS-SYSTEM.md`.
 - No todo permiso del catálogo implica que su módulo ya esté endurecido al 100% con metadata de recurso en esta etapa.
+
+## Recursos `user` sensibles verificados
+
+| Superficie | Rutas verificadas | Permiso runtime | Enforcement backend | Estado |
+|------------|-------------------|-----------------|---------------------|--------|
+| Perfil y derivados (fuera de scope) | `GET/PATCH /users/:userId`, `GET /age`, `GET /requires-legal-representative`, `POST/DELETE /profile-picture` | `users:read_detail` o `users:update` | ownership o permiso global; metadata legacy `users:*` | Verificado |
+| Salud | `GET/PUT /allergies`, `GET/PUT /diseases`, `GET/PUT /medicines`, `DELETE /allergies/:allergyId`, `DELETE /diseases/:diseaseId`, `DELETE /medicines/:medicineId` | `health:read` / `health:update` OR fallback `users:read_detail` / `users:update` | ownership o permiso global; baseline activo limitado a `allergies` + `diseases` + `medicines` | Verificado |
+| Contactos de emergencia | `GET/POST/PATCH/DELETE /emergency-contacts` | `emergency_contacts:read` / `emergency_contacts:update` OR fallback `users:read_detail` / `users:update` | ownership o permiso global | Verificado |
+| Representante legal | `GET/POST/PATCH/DELETE /legal-representative` | `legal_representative:read` / `legal_representative:update` OR fallback `users:read_detail` / `users:update` | ownership o permiso global | Verificado |
+| Post-registro | `GET /post-registration/status`, `POST /step-1/complete`, `POST /step-2/complete`, `POST /step-3/complete` | `post_registration:read` / `post_registration:update` OR fallback `users:read_detail` / `users:update` | ownership o permiso global; terceros quedan en modo administrativo mínimo | Verificado runtime |
+
+Notas:
+
+- `PermissionsGuard` permite owner fallback antes de resolver permisos explícitos en recursos `user`.
+- Para actores no owner, solo cuentan permisos globales; un `active_assignment` con permisos de club no abre acceso a datos `user` de terceros.
+- OR transicional vigente en backend: permiso fino de familia o fallback legacy de la familia `users:*` (`users:read_detail` para lectura, `users:update` para escritura).
+- Baseline health activo verificado: `allergies` + `diseases` + `medicines`.
+- `medicines` se limita a catálogo + relación sensible `user -> medicines`; no existe vínculo runtime `medicine <-> disease` en esta fase.
+- Excepción mínima vigente: `post_registration` de terceros mantiene lectura/completion administrativos mínimos, sin feedback sensible detallado.
+- Exclusiones fuera de scope del change: perfil base, foto de perfil y derivados de edad/representante legal siguen en metadata legacy `users:*`.
+
+## Validacion Transversal Final (Batch 3)
+
+| Capa | Evidencia verificada | Resultado |
+|------|----------------------|-----------|
+| Docs auth | `AUTHORIZATION-CANONICAL-CONTRACT.md` y esta matriz usan las mismas familias finas, fallback legacy y exclusiones fuera de scope | Alineado |
+| Backend | `PermissionsGuard` mantiene ownership o permiso global para recurso `user`; permisos de club no alcanzan terceros | Alineado |
+| Admin | consumo canonico desde `authorization.effective.permissions` y `authorization.grants` | Alineado |
+| Mobile | helpers separan `administrative completion` de acceso a datos sensibles y no tratan `users:update` como permiso sensible de lectura | Alineado |
 
 ## Endpoints que no deben quedar en JWT-only
 

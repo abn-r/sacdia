@@ -27,6 +27,14 @@ INSERT INTO permissions (permission_name, description) VALUES
   ('users:update',            'Editar datos de usuario'),
   ('users:delete',            'Desactivar/eliminar usuario'),
   ('users:export',            'Exportar listado de usuarios'),
+  ('health:read',             'Ver sub-recursos sensibles de salud del usuario'),
+  ('health:update',           'Editar sub-recursos sensibles de salud del usuario'),
+  ('emergency_contacts:read', 'Ver contactos de emergencia del usuario'),
+  ('emergency_contacts:update','Editar contactos de emergencia del usuario'),
+  ('legal_representative:read','Ver representante legal del usuario'),
+  ('legal_representative:update','Editar representante legal del usuario'),
+  ('post_registration:read',  'Ver estado sensible de post-registro del usuario'),
+  ('post_registration:update','Completar o editar pasos sensibles de post-registro del usuario'),
 
   -- Roles y Permisos
   ('roles:read',              'Ver roles del sistema'),
@@ -157,6 +165,14 @@ WHERE r.role_name = 'admin'
     'users:read_detail',
     'users:update',
     'users:export',
+    'health:read',
+    'health:update',
+    'emergency_contacts:read',
+    'emergency_contacts:update',
+    'legal_representative:read',
+    'legal_representative:update',
+    'post_registration:read',
+    'post_registration:update',
 
     -- Roles (solo lectura y asignación)
     'roles:read',
@@ -262,6 +278,10 @@ WHERE r.role_name = 'coordinator'
     -- Usuarios (solo lectura)
     'users:read',
     'users:read_detail',
+    'health:read',
+    'emergency_contacts:read',
+    'legal_representative:read',
+    'post_registration:read',
 
     -- Roles (solo lectura)
     'roles:read',

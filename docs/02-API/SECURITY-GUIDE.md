@@ -6,6 +6,53 @@
 
 ---
 
+## RBAC sensible por sub-recurso `user`
+
+El runtime actual endurece sub-recursos sensibles de `user` con `JwtAuthGuard` + `PermissionsGuard` + metadata `@AuthorizationResource({ type: 'user', ownerParam: 'userId' })`.
+
+### Familias incluidas
+
+| Familia | Rutas directas cubiertas | Permisos finos | Fallback transicional |
+| --- | --- | --- | --- |
+| `health` | `GET/PUT /users/:userId/allergies`, `GET/PUT /users/:userId/diseases`, `GET/PUT /users/:userId/medicines`, `DELETE` item-level | `health:read`, `health:update` | `users:read_detail`, `users:update` |
+| `emergency_contacts` | `GET/POST/PATCH/DELETE /users/:userId/emergency-contacts` | `emergency_contacts:read`, `emergency_contacts:update` | `users:read_detail`, `users:update` |
+| `legal_representative` | `GET/POST/PATCH/DELETE /users/:userId/legal-representative` | `legal_representative:read`, `legal_representative:update` | `users:read_detail`, `users:update` |
+| `post_registration` | `GET /users/:userId/post-registration/status`, `POST /users/:userId/post-registration/step-{1,2,3}/complete` | `post_registration:read`, `post_registration:update` | `users:read_detail`, `users:update` |
+
+Reglas de seguridad:
+
+- el owner del `userId` mantiene self-service aunque no tenga permisos globales explícitos;
+- para terceros, solo cuentan permisos globales;
+- permisos provenientes solo de `authorization.active_assignment` no habilitan acceso transversal a recursos `user`.
+
+### Excepción mínima de terceros en `post_registration`
+
+- `GET /users/:userId/post-registration/status` para terceros queda limitado a estado administrativo mínimo;
+- `POST /users/:userId/post-registration/step-{1,2,3}/complete` para terceros queda limitado a completion administrativa mínima;
+- respuestas y errores NO deben filtrar razones sensibles detalladas del usuario objetivo.
+
+### Exclusiones fuera de scope
+
+Estas rutas siguen bajo metadata legacy `users:*` y no forman parte del tiering fino de este change:
+
+- `GET/PATCH /users/:userId`;
+- `POST/DELETE /users/:userId/profile-picture`;
+- `GET /users/:userId/age`;
+- `GET /users/:userId/requires-legal-representative`.
+
+### Pruning administrativo
+
+`GET /api/v1/admin/users/:userId` poda bloques sensibles por familia:
+
+- `health`;
+- `emergency_contacts`;
+- `legal_representative`;
+- `post_registration`.
+
+Cada bloque se expone solo si el actor tiene `family:read` o el fallback legacy `users:read_detail`.
+
+---
+
 ## 📋 Resumen de Características de Seguridad
 
 ### Fase 1-3: Seguridad Básica

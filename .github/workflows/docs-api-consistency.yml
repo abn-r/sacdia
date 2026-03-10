@@ -7,7 +7,7 @@ on:
       - 'scripts/verify-api-docs-consistency.mjs'
       - '.github/workflows/docs-api-consistency.yml'
   push:
-    branches: [main, develop]
+    branches: [main, development]
     paths:
       - 'docs/**'
       - 'scripts/verify-api-docs-consistency.mjs'

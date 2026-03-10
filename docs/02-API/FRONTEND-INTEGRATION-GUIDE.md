@@ -3,6 +3,11 @@
 **Versión**: 2.2.0
 **Fecha**: 4 de febrero de 2026
 **Audiencia**: Desarrolladores Frontend (Admin Panel & Mobile App)
+**Estado**: ACTIVE
+
+> [!IMPORTANT]
+> Esta guía es operativa y subordinada a `docs/README.md`, `docs/00-STEERING/*` y `docs/02-API/ENDPOINTS-LIVE-REFERENCE.md`.
+> Los endpoints y contratos runtime se validan contra la referencia live; los ejemplos de esta guía no reemplazan esa fuente de verdad.
 
 ---
 
@@ -25,18 +30,15 @@ Esta guía proporciona ejemplos prácticos de cómo consumir la API REST de SACD
 
 ### URLs Base
 
+Definí la base URL por entorno en variables de entorno del módulo frontend correspondiente. No tomes dominios o puertos hardcodeados de esta guía como contrato global.
+
 ```typescript
-const API_URLS = {
-  development: 'http://localhost:3000/api/v1',
-  staging: 'https://api-staging.sacdia.app/api/v1',
-  production: 'https://api.sacdia.app/api/v1'
-};
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 ```
 
 ### Endpoints Totales
 
-- **105+ endpoints REST**
-- **17 módulos funcionales**
+- Verificar cobertura y disponibilidad actual en `docs/02-API/ENDPOINTS-LIVE-REFERENCE.md`
 - **Versionado**: `/api/v1/` (URI-based)
 - **Formato**: JSON
 - **Autenticación**: JWT (Supabase Auth)
@@ -84,7 +86,7 @@ const supabase = createClient(
 );
 
 const apiClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/v1',
+  baseURL: process.env.NEXT_PUBLIC_API_URL,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -154,7 +156,7 @@ class ApiClient {
     _dio = Dio(BaseOptions(
       baseUrl: const String.fromEnvironment(
         'API_URL',
-        defaultValue: 'http://localhost:3000/api/v1',
+        defaultValue: '',
       ),
       connectTimeout: const Duration(seconds: 30),
       receiveTimeout: const Duration(seconds: 30),
@@ -670,6 +672,76 @@ try {
 
 ## Ejemplos por Módulo
 
+### Módulo: Perfil de Salud (baseline activo)
+
+El baseline health activo para frontend queda limitado a `allergies` + `diseases` + `medicines` como sub-recursos sensibles de `user`.
+
+Rutas canónicas verificadas:
+
+```http
+GET /api/v1/users/:userId/allergies
+GET /api/v1/users/:userId/diseases
+GET /api/v1/users/:userId/medicines
+PUT /api/v1/users/:userId/allergies
+PUT /api/v1/users/:userId/diseases
+PUT /api/v1/users/:userId/medicines
+DELETE /api/v1/users/:userId/allergies/:allergyId
+DELETE /api/v1/users/:userId/diseases/:diseaseId
+DELETE /api/v1/users/:userId/medicines/:medicineId
+```
+
+Contrato de integración:
+
+- Son rutas `user` sensibles con modelo owner-or-global.
+- `GET` requiere JWT y `users:read_detail`; `PUT` y `DELETE` por item requieren `users:update`.
+- Self-service depende de ownership sobre `userId`; para terceros solo cuenta permiso global suficiente resuelto por backend.
+- Clientes no deben derivar acceso a health de terceros desde contexto de club o `active_assignment`.
+- La respuesta exitosa siempre usa envelope `{ status: 'success', data: [...] }`.
+- En `GET`, `data` llega como lista plana:
+  - alergias: `{ allergy_id, name }`
+  - enfermedades: `{ disease_id, name }`
+- Si el usuario existe pero no tiene selecciones activas, backend responde `200` con `data: []`.
+- Frontend NO debe convertir `404` en lista vacía: `404` significa que el usuario no existe y debe tratarse como error real.
+- `PUT` reemplaza el conjunto activo completo.
+- `DELETE` por item desactiva logicamente una seleccion puntual ya activa.
+
+Ejemplo Flutter:
+
+```dart
+final response = await dio.get('/users/$userId/allergies');
+final items = (response.data['data'] as List<dynamic>)
+    .map((json) => AllergyModel.fromJson(json as Map<String, dynamic>))
+    .toList();
+```
+
+### Módulo: Rutas sensibles de usuario
+
+Para `/api/v1/users/:userId/...` en superficies sensibles verificadas (`allergies`, `diseases`, `emergency-contacts`, `legal-representative`, `profile-picture`, `post-registration`, `age`, `requires-legal-representative`):
+
+- frontend no debe interpretar estas rutas como mero "JWT-only";
+- self-service depende de ownership sobre `userId`;
+- acceso sobre terceros requiere permiso global resuelto (`users:read_detail` o `users:update`), no permisos de club derivados del contexto activo;
+- no introducir gating fino por salud/legal/contactos porque el backend todavía no expone permisos separados para esas categorías.
+
+Límites transitorios que deben quedar explícitos:
+
+- GAP FORMAL: no existe tier RBAC separado para datos médicos, legales o de emergencia;
+- politica cliente opcion C cerrada:
+  - admin puede reflejar `process-state` / `administrative completion` de terceros con autorizacion global resuelta explicita;
+  - `GET /post-registration/status` de terceros debe tratarse como estado administrativo mínimo, sin feedback guiado extra como `nextStep`;
+  - `POST /post-registration/step-{1,2,3}/complete` de terceros debe esperar respuesta administrativa mínima del backend, sin razones sensibles detalladas;
+  - mobile y admin no deben exponer ni editar datos sensibles enviados por usuario de terceros solo por `users:update` genérico;
+  - clientes deben seguir la autorizacion resuelta del backend y no inventar permisos implicitos desde contexto de club o roles legacy.
+
+### Validacion transversal final (Batch 3)
+
+Checklist final de consistencia para frontend:
+
+- `sacdia-admin` debe seguir usando `authorization.effective.permissions` para gating operativo y `authorization.grants` para contexto y detalle;
+- `sacdia-app` debe separar `administrative completion` de acceso a datos sensibles: `users:update` no alcanza por si solo para salud/contactos/legal de terceros;
+- ni admin ni mobile deben crear permisos frontend nuevos para cerrar el `GAP FORMAL`;
+- la UX sobre terceros debe limitarse a la política mínima documentada y degradar el resto, aun cuando el actor tenga `users:update`.
+
 ### Módulo: Actividades
 
 **Listar actividades del club**:
@@ -1146,5 +1218,6 @@ void main() {
 ---
 
 **Generado**: 4 de febrero de 2026
+**Revisión editorial**: 2026-03-09
 **Versión**: 2.2.0
-**Estado**: Producción Ready
+**Estado**: ACTIVE - validar runtime actual contra `docs/02-API/ENDPOINTS-LIVE-REFERENCE.md`

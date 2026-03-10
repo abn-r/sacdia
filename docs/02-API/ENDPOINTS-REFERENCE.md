@@ -321,11 +321,44 @@ async addEmergencyContact(
 
 ---
 
-#### Alergias y Enfermedades
+#### Alergias, Enfermedades y Medicamentos
+
+Baseline health activo de este batch: `allergies` + `diseases` + `medicines` como sub-recursos sensibles de `user`.
+En esta fase, `medicines` NO tiene vínculo runtime con `diseases` ni atributos clínicos adicionales.
 
 ```http
+GET /api/v1/users/:userId/allergies
+GET /api/v1/users/:userId/diseases
+GET /api/v1/users/:userId/medicines
 PUT /api/v1/users/:userId/allergies
 PUT /api/v1/users/:userId/diseases
+PUT /api/v1/users/:userId/medicines
+DELETE /api/v1/users/:userId/allergies/:allergyId
+DELETE /api/v1/users/:userId/diseases/:diseaseId
+DELETE /api/v1/users/:userId/medicines/:medicineId
+```
+
+**Lectura - Response 200 Allergies**:
+
+```json
+{
+  "status": "success",
+  "data": [
+    { "allergy_id": 1, "name": "Polen" },
+    { "allergy_id": 2, "name": "Lactosa" }
+  ]
+}
+```
+
+**Lectura - Response 200 Diseases**:
+
+```json
+{
+  "status": "success",
+  "data": [
+    { "disease_id": 10, "name": "Asma" }
+  ]
+}
 ```
 
 **Body - Allergies**:
@@ -342,11 +375,21 @@ PUT /api/v1/users/:userId/diseases
 
 Comportamiento:
 
-1. Reemplaza el conjunto activo completo del usuario.
-2. Reactiva registros existentes inactivos.
-3. Crea registros nuevos si no existen.
-4. Desactiva (`active=false`) registros activos no enviados.
-5. Lista vacía (`[]`) limpia el conjunto activo.
+1. Estas rutas pertenecen al recurso sensible `user` y siguen owner-or-global, no un recurso health global separado.
+2. `GET` requiere `users:read_detail` con `@AuthorizationResource({ type: 'user', ownerParam: 'userId' })`.
+3. `PUT` y `DELETE` por item requieren `users:update` con `@AuthorizationResource({ type: 'user', ownerParam: 'userId' })`.
+4. Ownership sobre `userId` habilita self-service; para terceros solo cuenta permiso global suficiente.
+5. Permisos de club provenientes solo de `active_assignment` no habilitan acceso a health de terceros.
+6. `GET` devuelve una lista plana de selecciones activas (`{ allergy_id, name }` o `{ disease_id, name }`).
+7. `GET` responde `200` con `data: []` si el usuario existe pero no tiene selecciones activas.
+8. `GET` responde `404` solo cuando el usuario no existe.
+9. `PUT` reemplaza el conjunto activo completo del usuario.
+10. `PUT` reactiva registros existentes inactivos.
+11. `PUT` crea registros nuevos si no existen.
+12. `PUT` desactiva (`active=false`) registros activos no enviados.
+13. Lista vacia (`[]`) limpia el conjunto activo.
+14. `DELETE` por item existe en runtime y desactiva logicamente una seleccion puntual (`active=false`).
+15. `DELETE` responde `404` cuando la seleccion puntual no esta activa para ese usuario.
 
 ---
 
@@ -627,8 +670,15 @@ DELETE /api/v1/users/:userId/profile-picture
 
 # Paso 2: Info Personal
 PATCH  /api/v1/users/:userId
+GET    /api/v1/users/:userId/allergies
+GET    /api/v1/users/:userId/diseases
+GET    /api/v1/users/:userId/medicines
 PUT    /api/v1/users/:userId/allergies
 PUT    /api/v1/users/:userId/diseases
+PUT    /api/v1/users/:userId/medicines
+DELETE /api/v1/users/:userId/allergies/:allergyId
+DELETE /api/v1/users/:userId/diseases/:diseaseId
+DELETE /api/v1/users/:userId/medicines/:medicineId
 POST   /api/v1/users/:userId/post-registration/step-2/complete
 
 # Paso 2.5: Representante Legal (si edad < 18)
@@ -641,6 +691,19 @@ DELETE /api/v1/users/:userId/legal-representative
 # Paso 3: Club
 POST   /api/v1/users/:userId/post-registration/step-3/complete
 ```
+
+Notas canónicas de RBAC sensible y flujo de terceros:
+
+- Familias sensibles directas en runtime:
+  - `health`: alergias, enfermedades y medicamentos.
+  - `emergency_contacts`: contactos de emergencia.
+  - `legal_representative`: representante legal.
+  - `post_registration`: estado y completion de pasos.
+- OR transicional vigente: lectura fina acepta `family:read` o fallback legacy de la familia `users:*` (`users:read_detail`); escritura fina acepta `family:update` o fallback legacy `users:update`.
+- `GET /users/:userId/post-registration/status` para terceros con `post_registration:read` o `users:read_detail` se limita a estado administrativo mínimo del proceso.
+- `POST /users/:userId/post-registration/step-{1,2,3}/complete` para terceros con `post_registration:update` o `users:update` sigue existiendo como completion administrativa mínima.
+- Esas rutas NO deben usar respuestas o errores para revelar datos sensibles faltantes del usuario objetivo.
+- Fuera de scope del change: `GET/PATCH /users/:userId`, `POST/DELETE /users/:userId/profile-picture`, `GET /users/:userId/age` y `GET /users/:userId/requires-legal-representative` siguen en metadata legacy `users:*`.
 
 ### Contactos (5)
 

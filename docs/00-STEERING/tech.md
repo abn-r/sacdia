@@ -3,6 +3,12 @@
 > Define el stack tecnológico del proyecto  
 > La IA usará esta info para suggest implementaciones compatibles
 
+**Estado**: ACTIVE
+
+> [!IMPORTANT]
+> Este documento define la baseline tecnológica global del workspace actual.
+> Si una sección habla de una recomendación futura, una alternativa o una estructura no adoptada, debe leerse como nota subordinada y no como descripción del runtime vigente.
+
 ---
 
 ## Stack Overview
@@ -12,6 +18,13 @@
 **Arquitectura**: Backend REST API + Múltiples Clients (Web Admin + Flutter App)
 
 **Metodología**: Clean Architecture
+
+**Workspace actual**:
+
+- `sacdia-backend/` - backend NestJS + Prisma
+- `sacdia-admin/` - admin web Next.js
+- `sacdia-app/` - app móvil Flutter
+- `docs/` - baseline documental y contratos globales
 
 ---
 
@@ -741,7 +754,11 @@ typescript
 
 ## Decisiones Técnicas
 
-### Estructura de Repositorios - Recomendación
+### Estructura de Repositorios - Recomendación no adoptada
+
+> [!IMPORTANT]
+> Esta sección conserva una alternativa evaluada durante diseño.
+> No describe la estructura activa del workspace actual, que hoy opera con `sacdia-backend/`, `sacdia-admin/`, `sacdia-app/` y `docs/` dentro del mismo workspace.
 
 **Opción Recomendada**: **Backend + Admin juntos, Flutter separado**
 
@@ -1220,5 +1237,5 @@ Veo que necesitas [X]. Podríamos usar [librería Y] que:
 
 ---
 
-**Última actualización**: 2026-01-11  
+**Última actualización**: 2026-03-09  
 **Revisado por**: Usuario - Stack completo definido
