@@ -650,7 +650,7 @@ Reglas:
 
 - Son sub-recursos sensibles `user`, no recursos health globales.
 - Deben usar `@AuthorizationResource({ type: 'user', ownerParam: 'userId' })`.
-- Owner-or-global: ownership sobre `userId` habilita self-service; un actor no owner necesita permiso global `users:read_detail` para lecturas o `users:update` para escrituras.
+- Owner-or-global: ownership sobre `userId` habilita self-service; para terceros, lectura acepta `health:read` o fallback legacy `users:read_detail`, y escritura acepta `health:update` o fallback legacy `users:update`.
 - Permisos de club provenientes solo de `active_assignment` no habilitan acceso a health de terceros.
 - Responden con envelope `{ status: 'success', data: [...] }`.
 - `GET` devuelve una lista plana de selecciones activas:
@@ -667,22 +667,32 @@ Reglas:
 Para las rutas sensibles que cuelgan de `/api/v1/users/:userId/...`, el runtime vigente verificable en backend es:
 
 - ownership sobre `userId` habilita self-service;
-- un actor no owner necesita permiso global `users:read_detail` para lecturas o `users:update` para escrituras;
+- para terceros, solo cuentan permisos globales resueltos explicitamente;
+- lecturas finas aceptan `family:read` o fallback legacy `users:read_detail`;
+- escrituras finas aceptan `family:update` o fallback legacy `users:update`;
 - permisos de club provenientes solo de `active_assignment` no habilitan acceso a datos `user` de terceros.
 
-Superficies confirmadas en Batch 1:
+Familias sensibles confirmadas en runtime:
 
-- `allergies`, `diseases`;
+- `health` (`allergies`, `diseases`, `medicines`);
 - `emergency-contacts`;
 - `legal-representative`;
-- `profile-picture`;
 - `post-registration/status` y `step-{1,2,3}/complete`;
-- derivados `age` y `requires-legal-representative`.
+
+Exclusiones explicitas fuera del tiering fino actual:
+
+- `GET /users/:userId`;
+- `PATCH /users/:userId`;
+- `POST /users/:userId/profile-picture`;
+- `DELETE /users/:userId/profile-picture`;
+- `GET /users/:userId/age`;
+- `GET /users/:userId/requires-legal-representative`.
 
 Límites documentales:
 
-- GAP FORMAL: no existen permisos dedicados para separar salud, representante legal, contactos de emergencia o post-registro del permiso general `users:*`.
-- Opción C cerrada: `GET /users/:userId/post-registration/status` permite lectura administrativa mínima de terceros con `users:read_detail`, y `POST /users/:userId/post-registration/step-{1,2,3}/complete` permite completion administrativa mínima con `users:update`.
+- Los permisos finos dedicados vigentes son `health:*`, `emergency_contacts:*`, `legal_representative:*` y `post_registration:*`.
+- `GET /users/:userId/post-registration/status` permite lectura administrativa mínima de terceros con `post_registration:read` o fallback legacy `users:read_detail`.
+- `POST /users/:userId/post-registration/step-{1,2,3}/complete` permite completion administrativa mínima de terceros con `post_registration:update` o fallback legacy `users:update`.
 - Para terceros no owner, el backend debe devolver estado administrativo mínimo y respuestas saneadas, sin inferir datos sensibles ni causas detalladas del paso 2.
 
 ---
