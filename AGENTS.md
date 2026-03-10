@@ -108,3 +108,20 @@ Si se modifica codigo que cambie comportamiento, actualizar documentacion en el 
 Algunos `CLAUDE.md` incluyen bloques `<claude-mem-context>` autogenerados.
 No usar esos bloques como unica fuente de verdad para requisitos tecnicos.
 La fuente de verdad funcional y tecnica debe ser `docs/00-STEERING/`, `docs/01-FEATURES/`, `docs/02-API/` y `docs/03-DATABASE/`.
+
+## 8) Modo Codex para tareas chicas
+
+Cuando se use Codex sin el wiring completo de OpenCode, aplicar este router minimo:
+
+- `gentleman`: para cambios acotados, de bajo riesgo, sin necesidad de artefacto persistente. Ejemplos: ajuste puntual, fix chico, refactor local, actualizacion menor de docs.
+- `sdd-lite`: para cambios chicos o medianos con 2 o mas archivos, riesgo medio, cambio de comportamiento o necesidad de trazabilidad corta.
+- `sdd completo`: si el cambio ya pide `requirements`, `design` y `tasks`, seguir el flujo normal del proyecto en lugar de inventar atajos.
+
+Reglas operativas:
+
+- `gentleman` no salta la lectura minima obligatoria ni la verificacion final.
+- `sdd-lite` debe crear un micro artefacto con la plantilla `docs/templates/codex-small-task.md.template` antes de tocar codigo.
+- Si el cambio afecta negocio, guardar el micro artefacto en `docs/01-FEATURES/<feature>/changes/YYYY-MM-DD-<slug>.md`.
+- Si el cambio deja de ser chico durante la exploracion, escalar a flujo SDD normal.
+
+Guia de uso: `docs/guides/codex-small-task-workflow.md`.
