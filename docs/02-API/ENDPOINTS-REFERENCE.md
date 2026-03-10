@@ -672,10 +672,13 @@ DELETE /api/v1/users/:userId/profile-picture
 PATCH  /api/v1/users/:userId
 GET    /api/v1/users/:userId/allergies
 GET    /api/v1/users/:userId/diseases
+GET    /api/v1/users/:userId/medicines
 PUT    /api/v1/users/:userId/allergies
 PUT    /api/v1/users/:userId/diseases
+PUT    /api/v1/users/:userId/medicines
 DELETE /api/v1/users/:userId/allergies/:allergyId
 DELETE /api/v1/users/:userId/diseases/:diseaseId
+DELETE /api/v1/users/:userId/medicines/:medicineId
 POST   /api/v1/users/:userId/post-registration/step-2/complete
 
 # Paso 2.5: Representante Legal (si edad < 18)
@@ -689,11 +692,18 @@ DELETE /api/v1/users/:userId/legal-representative
 POST   /api/v1/users/:userId/post-registration/step-3/complete
 ```
 
-Notas canónicas del flujo de terceros:
+Notas canónicas de RBAC sensible y flujo de terceros:
 
-- `GET /users/:userId/post-registration/status` para terceros con `users:read_detail` se limita a estado administrativo mínimo del proceso.
-- `POST /users/:userId/post-registration/step-{1,2,3}/complete` para terceros con `users:update` sigue existiendo como completion administrativa mínima.
+- Familias sensibles directas en runtime:
+  - `health`: alergias, enfermedades y medicamentos.
+  - `emergency_contacts`: contactos de emergencia.
+  - `legal_representative`: representante legal.
+  - `post_registration`: estado y completion de pasos.
+- OR transicional vigente: lectura fina acepta `family:read` o fallback legacy de la familia `users:*` (`users:read_detail`); escritura fina acepta `family:update` o fallback legacy `users:update`.
+- `GET /users/:userId/post-registration/status` para terceros con `post_registration:read` o `users:read_detail` se limita a estado administrativo mínimo del proceso.
+- `POST /users/:userId/post-registration/step-{1,2,3}/complete` para terceros con `post_registration:update` o `users:update` sigue existiendo como completion administrativa mínima.
 - Esas rutas NO deben usar respuestas o errores para revelar datos sensibles faltantes del usuario objetivo.
+- Fuera de scope del change: `GET/PATCH /users/:userId`, `POST/DELETE /users/:userId/profile-picture`, `GET /users/:userId/age` y `GET /users/:userId/requires-legal-representative` siguen en metadata legacy `users:*`.
 
 ### Contactos (5)
 

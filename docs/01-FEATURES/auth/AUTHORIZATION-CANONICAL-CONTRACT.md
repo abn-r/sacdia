@@ -1,7 +1,7 @@
 # Contrato Canónico de Autorización
 
 **Status**: ACTIVE  
-**Fecha**: 2026-03-09  
+**Fecha**: 2026-03-10  
 **Ámbito**: `sacdia-backend`, `sacdia-admin`, `sacdia-app`
 
 ## Propósito
@@ -122,36 +122,58 @@ Cuando una ruta usa `@AuthorizationResource({ type: 'user', ownerParam: 'userId'
 - si no hay ownership, el actor necesita permiso global suficiente (`users:read_detail` para lecturas, `users:update` para escrituras);
 - permisos provenientes solo de `active_assignment` no habilitan acceso transversal a recursos `user` de terceros.
 
-Sub-recursos sensibles hoy cubiertos por este modelo:
+Sub-recursos sensibles hoy cubiertos por familias finas:
 
-- perfil base y foto de perfil;
-- baseline health activo: alergias, enfermedades y medicamentos (incluyendo escrituras batch por `PUT` y bajas puntuales por `DELETE` item-level);
-- contactos de emergencia;
-- representante legal;
-- estado y pasos de post-registro;
-- endpoints derivados como edad calculada y `requires-legal-representative`.
+- `health`: `GET/PUT /users/:userId/allergies`, `GET/PUT /users/:userId/diseases`, `GET/PUT /users/:userId/medicines`, `DELETE` item-level de esas tres colecciones;
+- `emergency_contacts`: `GET/POST/PATCH/DELETE /users/:userId/emergency-contacts`;
+- `legal_representative`: `GET/POST/PATCH/DELETE /users/:userId/legal-representative`;
+- `post_registration`: `GET /users/:userId/post-registration/status` y `POST /users/:userId/post-registration/step-{1,2,3}/complete`.
 
-Limite explicito del baseline health actual:
+Límite explícito del baseline `health` actual:
 
 - `medicines` forma parte del runtime canónico activo como relación sensible `user -> medicines`.
 - No existe todavía vínculo runtime `medicine <-> disease` ni debe inferirse por analogía.
 
-### GAP FORMAL - tiering de datos sensibles
+### Tiering RBAC sensible vigente
 
-El modelo RBAC vigente NO distingue con permisos dedicados entre:
+El runtime vigente SI distingue permisos finos por familia sensible para sub-recursos `user`:
 
-- perfil general;
-- salud;
-- contactos de emergencia;
-- representante legal;
-- progreso de post-registro.
+- `health:read` / `health:update`;
+- `emergency_contacts:read` / `emergency_contacts:update`;
+- `legal_representative:read` / `legal_representative:update`;
+- `post_registration:read` / `post_registration:update`.
 
-Por lo tanto:
+Regla de enforcement:
 
-- no declarar tiers finos de acceso que el runtime actual no enforcea;
-- documentar estos sub-recursos como heredando `users:read_detail` o `users:update` + ownership/admin access.
+- ownership sobre `userId` mantiene self-service estricto del propio usuario;
+- para terceros, solo cuentan permisos globales;
+- permisos de club provenientes de `authorization.active_assignment` NO habilitan acceso a recursos `user` de terceros.
 
-### Politica cerrada - opcion C para post-registro sobre terceros
+OR transicional vigente:
+
+- lecturas finas aceptan `family:read` O el legado de la familia `users:*` para lectura (`users:read_detail`);
+- escrituras finas aceptan `family:update` O el legado de la familia `users:*` para escritura (`users:update`).
+
+Esto existe para compatibilidad transicional y NO redefine el contrato objetivo de largo plazo.
+
+### Exclusiones explícitas fuera de scope del change
+
+Las siguientes rutas directas del recurso `user` permanecen fuera del tiering fino y siguen en metadata legacy `users:*`:
+
+- `GET /users/:userId`;
+- `PATCH /users/:userId`;
+- `POST /users/:userId/profile-picture`;
+- `DELETE /users/:userId/profile-picture`;
+- `GET /users/:userId/age`;
+- `GET /users/:userId/requires-legal-representative`.
+
+Regla documental:
+
+- no inventar familias nuevas para estas rutas;
+- documentarlas como exclusiones deliberadas de `rbac-sensitive-subresources`;
+- cualquier tiering adicional sobre perfil base, foto o derivados requiere change posterior.
+
+### Política cerrada - excepción mínima de terceros en post-registro
 
 El runtime vigente todavia permite que un actor no owner con permiso global `users:update` ejecute:
 
@@ -159,44 +181,47 @@ El runtime vigente todavia permite que un actor no owner con permiso global `use
 - `POST /users/:userId/post-registration/step-2/complete`;
 - `POST /users/:userId/post-registration/step-3/complete`.
 
-La decision funcional canónica queda cerrada asi:
+La decisión funcional canónica queda cerrada así:
 
 - no declarar permisos nuevos por suposicion;
-- `GET /users/:userId/post-registration/status` permite lectura administrativa minima de terceros con `users:read_detail`;
-- `POST /users/:userId/post-registration/step-{1,2,3}/complete` permite completion administrativa minima de terceros con `users:update`;
+- `GET /users/:userId/post-registration/status` permite lectura administrativa mínima de terceros con `post_registration:read` o fallback legacy `users:read_detail`;
+- `POST /users/:userId/post-registration/step-{1,2,3}/complete` permite completion administrativa mínima de terceros con `post_registration:update` o fallback legacy `users:update`;
 - ownership mantiene feedback detallado actual;
 - terceros no reciben en respuestas ni errores detalles sensibles del usuario objetivo.
 
-### Politica de cliente - opcion C minima para terceros
+### Política de cliente - excepción mínima para terceros
 
-La politica canónica para clientes queda asi:
+La política canónica para clientes queda así:
 
-- `process-state` / `administrative completion` de terceros puede reflejarse cuando exista autorizacion global resuelta explicita (`users:read_detail` para lectura, `users:update` para escritura);
+- `process-state` / `administrative completion` de terceros puede reflejarse cuando exista autorización global resuelta explícita (`post_registration:read` o `users:read_detail` para lectura; `post_registration:update` o `users:update` para escritura);
 - `GET /post-registration/status` para terceros debe limitarse al estado administrativo minimo del proceso y no necesita feedback guiado tipo `nextStep`;
 - `POST /step-{1,2,3}/complete` para terceros debe usar respuestas y errores minimos, sin devolver detalles sensibles del paso 2 ni feedback detallado del usuario objetivo;
-- datos sensibles enviados por el usuario (`health` = `allergies` + `diseases`, `emergency contacts`, `legal representative`, perfil sensible derivado del paso 2) NO deben quedar expuestos ni editables en clientes de terceros solo por `users:update` genérico;
+- datos sensibles enviados por el usuario (`health` = `allergies` + `diseases` + `medicines`, `emergency contacts`, `legal representative`, perfil sensible derivado del paso 2) NO deben quedar expuestos ni editables en clientes de terceros solo por `users:update` genérico;
 - `sacdia-admin` y `sacdia-app` deben degradar u ocultar esas superficies cuando no exista una señal explicita compatible con esta politica minima.
 
-## Registro Canonico de Abiertos
+## Registro Canónico de Exclusiones
 
-Los abiertos vigentes tras este cierre son exactamente estos:
+Las exclusiones vigentes tras este cierre son exactamente estas:
 
-1. `GAP FORMAL`: no existe tier RBAC separado para perfil general vs salud vs contactos de emergencia vs representante legal vs progreso de post-registro.
+1. perfil base y mutación general `PATCH /users/:userId`;
+2. foto de perfil (`POST/DELETE /users/:userId/profile-picture`);
+3. derivados `GET /users/:userId/age` y `GET /users/:userId/requires-legal-representative`.
 
 Regla de control de scope:
 
-- no agregar permisos nuevos ni reinterpretar permisos legacy para cerrar estos abiertos a nivel cliente;
-- cualquier cambio futuro debe partir de backend + contrato canónico actualizado.
+- no reetiquetar estas rutas como familias finas sin cambio backend adicional;
+- no usar clientes para simular un tiering que el backend no publica.
 
 ## Validacion Transversal Final
 
-Validacion documental final tras cierre de opcion C:
+Validación documental final tras cierre de la excepción mínima:
 
+- backend: las familias `health`, `emergency_contacts`, `legal_representative` y `post_registration` se enforcean con permisos finos + fallback legacy de la familia `users:*`;
 - backend: el contrato `user` verificado se mantiene en ownership o permiso global; `active_assignment` no habilita acceso a terceros;
-- backend: post-registro sobre terceros queda en modo administrativo minimo; owner conserva feedback detallado y terceros reciben respuestas saneadas;
+- backend: post-registro sobre terceros queda en modo administrativo mínimo; owner conserva feedback detallado y terceros reciben respuestas saneadas;
 - `sacdia-admin`: el consumo canónico sigue siendo `authorization.effective.permissions` y `authorization.grants`;
-- `sacdia-app`: el gating sensible usa ownership o `users:read_detail`, y separa eso de `users:update` para `administrative completion`;
-- docs activas de auth y API quedan alineadas sobre un solo abierto formal: `GAP FORMAL`.
+- `sacdia-app`: el gating sensible distingue familias finas, pero conserva fallback transicional a `users:read_detail` / `users:update`;
+- docs activas de auth y API quedan alineadas sobre familias finas cubiertas y exclusiones fuera de scope.
 
 ## Reglas de Consumo
 

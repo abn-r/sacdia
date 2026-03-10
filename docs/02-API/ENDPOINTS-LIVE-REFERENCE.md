@@ -5,7 +5,7 @@
 > Generado desde `src/**/*controller.ts` del backend en runtime.
 > Base URL: `/api/v1`
 
-**Generado**: 2026-03-04T21:00:00.000Z (sincronización manual de Auth)
+**Generado**: 2026-03-10T00:00:00.000Z (sincronización manual RBAC sensible)
 **Total endpoints**: 180
 
 ## Lectura Rápida
@@ -92,15 +92,20 @@
 | POST | `/api/v1/users/:userId/profile-picture` | JWT | - | Subir foto de perfil | `src/users/users.controller.ts` |
 | GET | `/api/v1/users/:userId/requires-legal-representative` | JWT | - | Verificar si el usuario requiere representante legal | `src/users/users.controller.ts` |
 
-### User Authorization Notes (2026-03-09)
+### User Authorization Notes (2026-03-10)
 
 - Las rutas `user` de esta sección no son solo "JWT-only" en semántica de autorización: runtime usa `JwtAuthGuard` + `PermissionsGuard` + `@AuthorizationResource({ type: 'user', ownerParam: 'userId' })` en las superficies sensibles verificadas de Batch 1.
 - Self-service: el owner del `userId` puede operar sobre sus propias rutas sensibles.
 - Admin/global access: un actor no owner necesita permiso global `users:read_detail` para lecturas o `users:update` para escrituras; permisos provenientes solo de `active_assignment` no habilitan acceso transversal a recursos `user`.
-- Baseline health activo: `allergies` + `diseases` + `medicines` como sub-recursos sensibles de `user`; `DELETE` por item esta verificado en runtime.
-- Superficies sensibles verificadas: alergias, enfermedades, medicamentos, contactos de emergencia, representante legal, foto de perfil, estado/pasos de post-registro, edad calculada y `requires-legal-representative`.
-- GAP FORMAL: el runtime actual no expone permisos separados para salud, contactos de emergencia, representante legal o post-registro.
-- Opción C cerrada: `GET /api/v1/users/:userId/post-registration/status` permite lectura administrativa mínima de terceros con `users:read_detail`, y `POST /api/v1/users/:userId/post-registration/step-{1,2,3}/complete` permite completion administrativa mínima con `users:update`.
+- Familias sensibles directas del change:
+  - `health`: `GET/PUT /allergies`, `GET/PUT /diseases`, `GET/PUT /medicines`, `DELETE` item-level de las tres colecciones.
+  - `emergency_contacts`: `GET/POST/PATCH/DELETE /emergency-contacts`.
+  - `legal_representative`: `GET/POST/PATCH/DELETE /legal-representative`.
+  - `post_registration`: `GET /post-registration/status`, `POST /step-{1,2,3}/complete`.
+- OR transicional vigente: para terceros, cada familia acepta su permiso fino (`family:read`/`family:update`) o el fallback legacy de la familia `users:*` (`users:read_detail` para lectura, `users:update` para escritura).
+- Baseline health activo: `allergies` + `diseases` + `medicines` como sub-recursos sensibles de `user`; `DELETE` por item está verificado en runtime.
+- Excepción mínima de terceros en `post_registration`: `GET /api/v1/users/:userId/post-registration/status` permite lectura administrativa mínima, y `POST /api/v1/users/:userId/post-registration/step-{1,2,3}/complete` permite completion administrativa mínima.
+- Exclusiones fuera de scope del change: `GET/PATCH /api/v1/users/:userId`, `POST/DELETE /api/v1/users/:userId/profile-picture`, `GET /api/v1/users/:userId/age` y `GET /api/v1/users/:userId/requires-legal-representative` siguen en metadata legacy `users:*`.
 - Para terceros no owner, `status` debe mantenerse en estado administrativo mínimo y `step-{1,2,3}/complete` no debe filtrar razones sensibles detalladas del usuario objetivo.
 
 ## activities

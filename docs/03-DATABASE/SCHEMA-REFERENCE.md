@@ -287,7 +287,7 @@ UNIQUE NULLS NOT DISTINCT (
 | `active` | BOOLEAN | Rol activo | DEFAULT true |
 
 **Roles Globales** (`role_category = 'GLOBAL'`):
-- `super_admin`, `admin`, `coordinator`, `user`
+- `super_admin`, `admin`, `assistant_admin`, `coordinator`, `user`
 
 **Roles de Club** (`role_category = 'CLUB'`):
 - `director`, `subdirector`, `secretary`, `treasurer`, `counselor`, `member`
@@ -295,10 +295,21 @@ UNIQUE NULLS NOT DISTINCT (
 ---
 
 #### Tabla: `permissions`
-**Campos**: `id` (UUID), `permission_name` (ej: `CREATE:USERS`), `description`, `active`
+**Campos**: `id` (UUID), `permission_name` (ej: `users:read_detail`, `health:read`), `description`, `active`
+
+**Convención vigente**:
+
+- formato `resource:action` en minúsculas;
+- recursos sensibles agregados por `rbac-sensitive-subresources`: `health`, `emergency_contacts`, `legal_representative`, `post_registration`;
+- coexisten con permisos legacy de la familia `users:*` (`users:read_detail`, `users:update`) para compatibilidad transicional.
 
 #### Tabla: `role_permissions`
 **Descripción**: Tabla pivote Many-to-Many entre `roles` y `permissions`
+
+**Seed relevante**:
+
+- `docs/03-DATABASE/migrations/script_06_admin_permissions.sql` inserta el catálogo `resource:action` y ya incluye los permisos finos `health:*`, `emergency_contacts:*`, `legal_representative:*` y `post_registration:*`.
+- El mismo seed asigna esos permisos a `super_admin`, `admin` y, en lectura, a `coordinator`.
 
 #### Tabla: `users_roles`
 **Descripción**: Asignación de roles GLOBALES a usuarios  
