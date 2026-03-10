@@ -724,9 +724,10 @@ Para `/api/v1/users/:userId/...` en superficies sensibles verificadas (`allergie
 Límites transitorios que deben quedar explícitos:
 
 - GAP FORMAL: no existe tier RBAC separado para datos médicos, legales o de emergencia;
-- DECISION PENDING: `post-registration/step-{1,2,3}/complete` sigue administrable en runtime por actores con `users:update` global, pero esa política aún no se considera cerrada de forma canónica;
-- politica cliente opcion C minima:
+- politica cliente opcion C cerrada:
   - admin puede reflejar `process-state` / `administrative completion` de terceros con autorizacion global resuelta explicita;
+  - `GET /post-registration/status` de terceros debe tratarse como estado administrativo mínimo, sin feedback guiado extra como `nextStep`;
+  - `POST /post-registration/step-{1,2,3}/complete` de terceros debe esperar respuesta administrativa mínima del backend, sin razones sensibles detalladas;
   - mobile y admin no deben exponer ni editar datos sensibles enviados por usuario de terceros solo por `users:update` genérico;
   - clientes deben seguir la autorizacion resuelta del backend y no inventar permisos implicitos desde contexto de club o roles legacy.
 
@@ -737,7 +738,7 @@ Checklist final de consistencia para frontend:
 - `sacdia-admin` debe seguir usando `authorization.effective.permissions` para gating operativo y `authorization.grants` para contexto y detalle;
 - `sacdia-app` debe separar `administrative completion` de acceso a datos sensibles: `users:update` no alcanza por si solo para salud/contactos/legal de terceros;
 - ni admin ni mobile deben crear permisos frontend nuevos para cerrar el `GAP FORMAL`;
-- mientras la `DECISION PENDING` siga abierta, la UX sobre terceros debe limitarse a la politica minima documentada y degradar el resto.
+- la UX sobre terceros debe limitarse a la política mínima documentada y degradar el resto, aun cuando el actor tenga `users:update`.
 
 ### Módulo: Actividades
 

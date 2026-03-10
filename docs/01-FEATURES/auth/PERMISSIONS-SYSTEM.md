@@ -90,7 +90,7 @@ Notas canónicas del modelo vigente:
 - sub-recursos sensibles (`allergies`, `diseases`, `emergency-contacts`, `legal-representative`, `post-registration`, `profile-picture`) NO tienen permisos dedicados hoy;
 - runtime reutiliza `users:read_detail` para lecturas y `users:update` para escrituras junto con ownership sobre `userId`;
 - GAP FORMAL: el catálogo actual no permite tiering fino entre perfil general, salud, datos legales y progreso de post-registro;
-- DECISION PENDING: si post-registro debe seguir siendo administrable por actores con permiso global `users:update`.
+- opción C cerrada: post-registro sigue administrable por actores con permiso global `users:read_detail`/`users:update`, pero terceros quedan limitados a lectura y completion administrativos mínimos sin feedback sensible adicional.
 
 ### Roles y Permisos
 | Permiso | Descripción |

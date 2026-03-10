@@ -91,7 +91,7 @@ Nota de implementación:
 | Salud | `GET/PUT /allergies`, `GET/PUT /diseases`, `DELETE /allergies/:allergyId`, `DELETE /diseases/:diseaseId` | `users:read_detail` o `users:update` | ownership o permiso global; baseline activo limitado a `allergies` + `diseases`, sin tier fino dedicado | Verificado |
 | Contactos de emergencia | `GET/POST/PATCH/DELETE /emergency-contacts` | `users:read_detail` o `users:update` | ownership o permiso global | Verificado |
 | Representante legal | `GET/POST/PATCH/DELETE /legal-representative` | `users:read_detail` o `users:update` | ownership o permiso global | Verificado |
-| Post-registro | `GET /post-registration/status`, `POST /step-1/complete`, `POST /step-2/complete`, `POST /step-3/complete` | `users:read_detail` o `users:update` | ownership o permiso global | Verificado runtime |
+| Post-registro | `GET /post-registration/status`, `POST /step-1/complete`, `POST /step-2/complete`, `POST /step-3/complete` | `users:read_detail` o `users:update` | ownership o permiso global; terceros quedan en modo administrativo minimo | Verificado runtime |
 
 Notas:
 
@@ -99,15 +99,16 @@ Notas:
 - Para actores no owner, solo cuentan permisos globales; un `active_assignment` con permisos de club no abre acceso a datos `user` de terceros.
 - Baseline health activo verificado: `allergies` + `diseases`; `medicines` sigue diferido y fuera del enforcement/documentación activa de este batch.
 - GAP FORMAL: no existe permiso separado para salud/legal/contactos/post-registro.
-- DECISION PENDING: `users:update` global todavia puede administrar `post-registration/step-{1,2,3}/complete` sobre terceros en runtime; falta definir si esa capacidad queda estable o se restringe luego.
+- Opcion C cerrada: `users:update` global mantiene `post-registration/step-{1,2,3}/complete` sobre terceros, pero solo con respuestas y errores administrativos minimos.
 - Politica cliente vigente: `process-state` / `administrative completion` de terceros puede reflejar acceso global explicito, pero datos sensibles enviados por usuario no deben habilitarse en clientes solo por `users:update`.
+- `GET /post-registration/status` de terceros queda limitado a estado administrativo minimo; feedback guiado como `nextStep` queda reservado para ownership.
 - Regla de scope: no inventar permisos finos nuevos en admin o mobile para cerrar este gap; el frontend solo puede degradar superficies segun autorizacion ya resuelta por backend.
 
 ## Validacion Transversal Final (Batch 3)
 
 | Capa | Evidencia verificada | Resultado |
 |------|----------------------|-----------|
-| Docs auth | `AUTHORIZATION-CANONICAL-CONTRACT.md` y esta matriz usan el mismo `GAP FORMAL` y `DECISION PENDING` | Alineado |
+| Docs auth | `AUTHORIZATION-CANONICAL-CONTRACT.md` y esta matriz usan el mismo `GAP FORMAL` y el cierre de opcion C | Alineado |
 | Backend | `PermissionsGuard` mantiene ownership o permiso global para recurso `user`; permisos de club no alcanzan terceros | Alineado |
 | Admin | consumo canonico desde `authorization.effective.permissions` y `authorization.grants` | Alineado |
 | Mobile | helpers separan `administrative completion` de acceso a datos sensibles y no tratan `users:update` como permiso sensible | Alineado |

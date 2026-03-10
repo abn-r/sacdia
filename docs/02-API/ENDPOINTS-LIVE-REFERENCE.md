@@ -97,7 +97,8 @@
 - Baseline health activo: `allergies` + `diseases` como sub-recursos sensibles de `user`; `DELETE` por item esta verificado en runtime y `medicines` sigue diferido fuera de este baseline.
 - Superficies sensibles verificadas: alergias, enfermedades, contactos de emergencia, representante legal, foto de perfil, estado/pasos de post-registro, edad calculada y `requires-legal-representative`.
 - GAP FORMAL: el runtime actual no expone permisos separados para salud, contactos de emergencia, representante legal o post-registro.
-- DECISION PENDING: `POST /api/v1/users/:userId/post-registration/step-{1,2,3}/complete` sigue siendo administrable en runtime por actores con permiso global `users:update`; falta decisión canónica específica sobre si esa capacidad debe mantenerse como política estable.
+- Opción C cerrada: `GET /api/v1/users/:userId/post-registration/status` permite lectura administrativa mínima de terceros con `users:read_detail`, y `POST /api/v1/users/:userId/post-registration/step-{1,2,3}/complete` permite completion administrativa mínima con `users:update`.
+- Para terceros no owner, `status` debe mantenerse en estado administrativo mínimo y `step-{1,2,3}/complete` no debe filtrar razones sensibles detalladas del usuario objetivo.
 
 ## activities
 

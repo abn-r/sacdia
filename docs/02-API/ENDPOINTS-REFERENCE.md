@@ -686,6 +686,12 @@ DELETE /api/v1/users/:userId/legal-representative
 POST   /api/v1/users/:userId/post-registration/step-3/complete
 ```
 
+Notas canónicas del flujo de terceros:
+
+- `GET /users/:userId/post-registration/status` para terceros con `users:read_detail` se limita a estado administrativo mínimo del proceso.
+- `POST /users/:userId/post-registration/step-{1,2,3}/complete` para terceros con `users:update` sigue existiendo como completion administrativa mínima.
+- Esas rutas NO deben usar respuestas o errores para revelar datos sensibles faltantes del usuario objetivo.
+
 ### Contactos (5)
 
 ```

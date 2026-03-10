@@ -677,7 +677,8 @@ Superficies confirmadas en Batch 1:
 Límites documentales:
 
 - GAP FORMAL: no existen permisos dedicados para separar salud, representante legal, contactos de emergencia o post-registro del permiso general `users:*`.
-- DECISION PENDING: el runtime permite mutaciones administrativas de post-registro con `users:update` global, pero esa política todavía no tiene validación funcional canónica separada.
+- Opción C cerrada: `GET /users/:userId/post-registration/status` permite lectura administrativa mínima de terceros con `users:read_detail`, y `POST /users/:userId/post-registration/step-{1,2,3}/complete` permite completion administrativa mínima con `users:update`.
+- Para terceros no owner, el backend debe devolver estado administrativo mínimo y respuestas saneadas, sin inferir datos sensibles ni causas detalladas del paso 2.
 
 ---
 

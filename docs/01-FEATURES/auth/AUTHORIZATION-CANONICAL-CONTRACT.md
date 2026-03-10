@@ -150,7 +150,7 @@ Por lo tanto:
 - no declarar tiers finos de acceso que el runtime actual no enforcea;
 - documentar estos sub-recursos como heredando `users:read_detail` o `users:update` + ownership/admin access.
 
-### DECISION PENDING - administracion de post-registro sobre terceros
+### Politica cerrada - opcion C para post-registro sobre terceros
 
 El runtime vigente todavia permite que un actor no owner con permiso global `users:update` ejecute:
 
@@ -158,30 +158,29 @@ El runtime vigente todavia permite que un actor no owner con permiso global `use
 - `POST /users/:userId/post-registration/step-2/complete`;
 - `POST /users/:userId/post-registration/step-3/complete`.
 
-Esta capacidad existe hoy en backend, pero sigue abierta como decision funcional canónica.
-
-Hasta resolverla:
+La decision funcional canónica queda cerrada asi:
 
 - no declarar permisos nuevos por suposicion;
-- no asumir que `users:update` habilita lectura o edicion de datos sensibles de terceros;
-- tratar la administracion de `process-state` / `administrative completion` como excepcion minima documentada, no como permiso fino nuevo.
+- `GET /users/:userId/post-registration/status` permite lectura administrativa minima de terceros con `users:read_detail`;
+- `POST /users/:userId/post-registration/step-{1,2,3}/complete` permite completion administrativa minima de terceros con `users:update`;
+- ownership mantiene feedback detallado actual;
+- terceros no reciben en respuestas ni errores detalles sensibles del usuario objetivo.
 
 ### Politica de cliente - opcion C minima para terceros
-
-Las rutas de post-registro siguen usando el recurso `user`, por lo que runtime todavia permite que un actor con permiso global `users:update` las mutile aunque no sea owner.
 
 La politica canónica para clientes queda asi:
 
 - `process-state` / `administrative completion` de terceros puede reflejarse cuando exista autorizacion global resuelta explicita (`users:read_detail` para lectura, `users:update` para escritura);
+- `GET /post-registration/status` para terceros debe limitarse al estado administrativo minimo del proceso y no necesita feedback guiado tipo `nextStep`;
+- `POST /step-{1,2,3}/complete` para terceros debe usar respuestas y errores minimos, sin devolver detalles sensibles del paso 2 ni feedback detallado del usuario objetivo;
 - datos sensibles enviados por el usuario (`health` = `allergies` + `diseases`, `emergency contacts`, `legal representative`, perfil sensible derivado del paso 2) NO deben quedar expuestos ni editables en clientes de terceros solo por `users:update` genérico;
 - `sacdia-admin` y `sacdia-app` deben degradar u ocultar esas superficies cuando no exista una señal explicita compatible con esta politica minima.
 
 ## Registro Canonico de Abiertos
 
-Los abiertos vigentes tras Batch 1, Batch 2 y Batch 3 son exactamente estos:
+Los abiertos vigentes tras este cierre son exactamente estos:
 
 1. `GAP FORMAL`: no existe tier RBAC separado para perfil general vs salud vs contactos de emergencia vs representante legal vs progreso de post-registro.
-2. `DECISION PENDING`: falta definir si la administracion de post-registro de terceros via `users:update` global debe mantenerse como politica estable o cerrarse en una etapa posterior.
 
 Regla de control de scope:
 
@@ -190,12 +189,13 @@ Regla de control de scope:
 
 ## Validacion Transversal Final
 
-Validacion documental final de Batch 3:
+Validacion documental final tras cierre de opcion C:
 
 - backend: el contrato `user` verificado se mantiene en ownership o permiso global; `active_assignment` no habilita acceso a terceros;
+- backend: post-registro sobre terceros queda en modo administrativo minimo; owner conserva feedback detallado y terceros reciben respuestas saneadas;
 - `sacdia-admin`: el consumo canónico sigue siendo `authorization.effective.permissions` y `authorization.grants`;
 - `sacdia-app`: el gating sensible usa ownership o `users:read_detail`, y separa eso de `users:update` para `administrative completion`;
-- docs activas de auth y API quedan alineadas sobre los mismos dos abiertos: `GAP FORMAL` y `DECISION PENDING`.
+- docs activas de auth y API quedan alineadas sobre un solo abierto formal: `GAP FORMAL`.
 
 ## Reglas de Consumo
 
