@@ -323,11 +323,16 @@ async addEmergencyContact(
 
 #### Alergias y Enfermedades
 
+Baseline health activo de este batch: `allergies` + `diseases` como sub-recursos sensibles de `user`.
+`medicines` queda diferido y no forma parte del runtime activo documentado aqui.
+
 ```http
 GET /api/v1/users/:userId/allergies
 GET /api/v1/users/:userId/diseases
 PUT /api/v1/users/:userId/allergies
 PUT /api/v1/users/:userId/diseases
+DELETE /api/v1/users/:userId/allergies/:allergyId
+DELETE /api/v1/users/:userId/diseases/:diseaseId
 ```
 
 **Lectura - Response 200 Allergies**:
@@ -367,15 +372,21 @@ PUT /api/v1/users/:userId/diseases
 
 Comportamiento:
 
-1. `GET` requiere `users:read_detail` con `@AuthorizationResource({ type: 'user', ownerParam: 'userId' })`.
-2. `GET` devuelve una lista plana de selecciones activas (`{ allergy_id, name }` o `{ disease_id, name }`).
-3. `GET` responde `200` con `data: []` si el usuario existe pero no tiene selecciones activas.
-4. `GET` responde `404` solo cuando el usuario no existe.
-5. `PUT` reemplaza el conjunto activo completo del usuario.
-6. `PUT` reactiva registros existentes inactivos.
-7. `PUT` crea registros nuevos si no existen.
-8. `PUT` desactiva (`active=false`) registros activos no enviados.
-9. Lista vacía (`[]`) limpia el conjunto activo.
+1. Estas rutas pertenecen al recurso sensible `user` y siguen owner-or-global, no un recurso health global separado.
+2. `GET` requiere `users:read_detail` con `@AuthorizationResource({ type: 'user', ownerParam: 'userId' })`.
+3. `PUT` y `DELETE` por item requieren `users:update` con `@AuthorizationResource({ type: 'user', ownerParam: 'userId' })`.
+4. Ownership sobre `userId` habilita self-service; para terceros solo cuenta permiso global suficiente.
+5. Permisos de club provenientes solo de `active_assignment` no habilitan acceso a health de terceros.
+6. `GET` devuelve una lista plana de selecciones activas (`{ allergy_id, name }` o `{ disease_id, name }`).
+7. `GET` responde `200` con `data: []` si el usuario existe pero no tiene selecciones activas.
+8. `GET` responde `404` solo cuando el usuario no existe.
+9. `PUT` reemplaza el conjunto activo completo del usuario.
+10. `PUT` reactiva registros existentes inactivos.
+11. `PUT` crea registros nuevos si no existen.
+12. `PUT` desactiva (`active=false`) registros activos no enviados.
+13. Lista vacia (`[]`) limpia el conjunto activo.
+14. `DELETE` por item existe en runtime y desactiva logicamente una seleccion puntual (`active=false`).
+15. `DELETE` responde `404` cuando la seleccion puntual no esta activa para ese usuario.
 
 ---
 
@@ -660,6 +671,8 @@ GET    /api/v1/users/:userId/allergies
 GET    /api/v1/users/:userId/diseases
 PUT    /api/v1/users/:userId/allergies
 PUT    /api/v1/users/:userId/diseases
+DELETE /api/v1/users/:userId/allergies/:allergyId
+DELETE /api/v1/users/:userId/diseases/:diseaseId
 POST   /api/v1/users/:userId/post-registration/step-2/complete
 
 # Paso 2.5: Representante Legal (si edad < 18)

@@ -619,25 +619,43 @@ export class CreateLegalRepresentativeDto {
 }
 ```
 
-### Contrato Canónico: Health Profile Reads
+### Contrato Canónico: Health Profile Baseline
 
-Los reads de perfil de salud usan sub-recursos canónicos del usuario:
+El baseline health activo del runtime queda anclado sobre sub-recursos sensibles de `user`:
+
+- `allergies`
+- `diseases`
+
+Fuera de scope del baseline activo actual:
+
+- `medicines` sigue diferido; no forma parte del contrato runtime activo de este batch.
+
+Rutas verificadas en backend:
 
 ```http
 GET /api/v1/users/:userId/allergies
 GET /api/v1/users/:userId/diseases
+PUT /api/v1/users/:userId/allergies
+PUT /api/v1/users/:userId/diseases
+DELETE /api/v1/users/:userId/allergies/:allergyId
+DELETE /api/v1/users/:userId/diseases/:diseaseId
 ```
 
 Reglas:
 
-- Requieren JWT + permiso `users:read_detail`.
+- Son sub-recursos sensibles `user`, no recursos health globales.
 - Deben usar `@AuthorizationResource({ type: 'user', ownerParam: 'userId' })`.
+- Owner-or-global: ownership sobre `userId` habilita self-service; un actor no owner necesita permiso global `users:read_detail` para lecturas o `users:update` para escrituras.
+- Permisos de club provenientes solo de `active_assignment` no habilitan acceso a health de terceros.
 - Responden con envelope `{ status: 'success', data: [...] }`.
-- `data` es una lista plana de selecciones activas:
+- `GET` devuelve una lista plana de selecciones activas:
   - alergias: `{ allergy_id, name }`
   - enfermedades: `{ disease_id, name }`
 - Si el usuario existe sin selecciones activas, la respuesta es `200` con `data: []`.
-- `404` aplica solo cuando `userId` no existe.
+- `PUT` reemplaza el conjunto activo completo.
+- `DELETE` por item existe en runtime y desactiva logicamente una seleccion puntual (`active=false`) sin inventar un recurso nuevo.
+- `DELETE` responde `404` cuando la seleccion puntual no esta activa en ese usuario.
+- `404` aplica en `GET` solo cuando `userId` no existe.
 
 ### Contrato Canónico: User ownership y sub-recursos sensibles
 

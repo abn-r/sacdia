@@ -125,11 +125,15 @@ Cuando una ruta usa `@AuthorizationResource({ type: 'user', ownerParam: 'userId'
 Sub-recursos sensibles hoy cubiertos por este modelo:
 
 - perfil base y foto de perfil;
-- alergias y enfermedades;
+- baseline health activo: alergias y enfermedades (incluyendo escrituras batch por `PUT` y bajas puntuales por `DELETE` item-level);
 - contactos de emergencia;
 - representante legal;
 - estado y pasos de post-registro;
 - endpoints derivados como edad calculada y `requires-legal-representative`.
+
+Limite explicito del baseline health actual:
+
+- `medicines` no forma parte todavia del runtime canónico activo ni debe inferirse como sub-recurso vigente por analogia.
 
 ### GAP FORMAL - tiering de datos sensibles
 
@@ -169,7 +173,7 @@ Las rutas de post-registro siguen usando el recurso `user`, por lo que runtime t
 La politica canónica para clientes queda asi:
 
 - `process-state` / `administrative completion` de terceros puede reflejarse cuando exista autorizacion global resuelta explicita (`users:read_detail` para lectura, `users:update` para escritura);
-- datos sensibles enviados por el usuario (`health`, `emergency contacts`, `legal representative`, perfil sensible derivado del paso 2) NO deben quedar expuestos ni editables en clientes de terceros solo por `users:update` genérico;
+- datos sensibles enviados por el usuario (`health` = `allergies` + `diseases`, `emergency contacts`, `legal representative`, perfil sensible derivado del paso 2) NO deben quedar expuestos ni editables en clientes de terceros solo por `users:update` genérico;
 - `sacdia-admin` y `sacdia-app` deben degradar u ocultar esas superficies cuando no exista una señal explicita compatible con esta politica minima.
 
 ## Registro Canonico de Abiertos

@@ -672,24 +672,36 @@ try {
 
 ## Ejemplos por Módulo
 
-### Módulo: Perfil de Salud (reads canónicos)
+### Módulo: Perfil de Salud (baseline activo)
 
-Los reads de alergias y enfermedades del usuario usan los endpoints canónicos:
+El baseline health activo para frontend queda limitado a `allergies` + `diseases` como sub-recursos sensibles de `user`.
+`medicines` sigue diferido y no debe tratarse como superficie runtime activa en este batch.
+
+Rutas canónicas verificadas:
 
 ```http
 GET /api/v1/users/:userId/allergies
 GET /api/v1/users/:userId/diseases
+PUT /api/v1/users/:userId/allergies
+PUT /api/v1/users/:userId/diseases
+DELETE /api/v1/users/:userId/allergies/:allergyId
+DELETE /api/v1/users/:userId/diseases/:diseaseId
 ```
 
 Contrato de integración:
 
-- Ambos endpoints requieren JWT y `users:read_detail` con ownership sobre `userId`.
+- Son rutas `user` sensibles con modelo owner-or-global.
+- `GET` requiere JWT y `users:read_detail`; `PUT` y `DELETE` por item requieren `users:update`.
+- Self-service depende de ownership sobre `userId`; para terceros solo cuenta permiso global suficiente resuelto por backend.
+- Clientes no deben derivar acceso a health de terceros desde contexto de club o `active_assignment`.
 - La respuesta exitosa siempre usa envelope `{ status: 'success', data: [...] }`.
-- `data` llega como lista plana:
+- En `GET`, `data` llega como lista plana:
   - alergias: `{ allergy_id, name }`
   - enfermedades: `{ disease_id, name }`
 - Si el usuario existe pero no tiene selecciones activas, backend responde `200` con `data: []`.
 - Frontend NO debe convertir `404` en lista vacía: `404` significa que el usuario no existe y debe tratarse como error real.
+- `PUT` reemplaza el conjunto activo completo.
+- `DELETE` por item desactiva logicamente una seleccion puntual ya activa.
 
 Ejemplo Flutter:
 

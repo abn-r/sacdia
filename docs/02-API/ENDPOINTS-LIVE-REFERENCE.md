@@ -60,6 +60,8 @@
 | GET | `/api/v1/users/:userId/diseases` | JWT | - | Obtener enfermedades activas del usuario | `src/users/users.controller.ts` |
 | PUT | `/api/v1/users/:userId/allergies` | JWT | - | Guardar alergias del usuario | `src/users/users.controller.ts` |
 | PUT | `/api/v1/users/:userId/diseases` | JWT | - | Guardar enfermedades del usuario | `src/users/users.controller.ts` |
+| DELETE | `/api/v1/users/:userId/allergies/:allergyId` | JWT | - | Eliminar una alergia activa del usuario (soft delete) | `src/users/users.controller.ts` |
+| DELETE | `/api/v1/users/:userId/diseases/:diseaseId` | JWT | - | Eliminar una enfermedad activa del usuario (soft delete) | `src/users/users.controller.ts` |
 | GET | `/api/v1/users/:userId/age` | JWT | - | Calcular edad del usuario | `src/users/users.controller.ts` |
 | GET | `/api/v1/users/:userId/classes` | JWT | - | Obtener inscripciones del usuario | `src/classes/classes.controller.ts` |
 | GET | `/api/v1/users/:userId/classes/:classId/progress` | JWT | - | Obtener progreso del usuario en una clase | `src/classes/classes.controller.ts` |
@@ -92,6 +94,7 @@
 - Las rutas `user` de esta sección no son solo "JWT-only" en semántica de autorización: runtime usa `JwtAuthGuard` + `PermissionsGuard` + `@AuthorizationResource({ type: 'user', ownerParam: 'userId' })` en las superficies sensibles verificadas de Batch 1.
 - Self-service: el owner del `userId` puede operar sobre sus propias rutas sensibles.
 - Admin/global access: un actor no owner necesita permiso global `users:read_detail` para lecturas o `users:update` para escrituras; permisos provenientes solo de `active_assignment` no habilitan acceso transversal a recursos `user`.
+- Baseline health activo: `allergies` + `diseases` como sub-recursos sensibles de `user`; `DELETE` por item esta verificado en runtime y `medicines` sigue diferido fuera de este baseline.
 - Superficies sensibles verificadas: alergias, enfermedades, contactos de emergencia, representante legal, foto de perfil, estado/pasos de post-registro, edad calculada y `requires-legal-representative`.
 - GAP FORMAL: el runtime actual no expone permisos separados para salud, contactos de emergencia, representante legal o post-registro.
 - DECISION PENDING: `POST /api/v1/users/:userId/post-registration/step-{1,2,3}/complete` sigue siendo administrable en runtime por actores con permiso global `users:update`; falta decisión canónica específica sobre si esa capacidad debe mantenerse como política estable.
