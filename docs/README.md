@@ -7,48 +7,74 @@
 > [!IMPORTANT]
 > Este directorio es la fuente de verdad documental del proyecto.
 > La documentación histórica se encuentra en `docs/history/`.
-> La precedencia global es: `docs/README.md` + `docs/00-STEERING/*` -> documentos de dominio activos -> material histórico o subordinado.
+> La precedencia global es: `docs/canon/*` -> `docs/README.md` -> documentación operativa subordinada -> material histórico.
 
 ---
 
-## Punto de Entrada Único
+## Punto de Entrada Recomendado
 
-1. Reglas globales: `docs/00-STEERING/`
-2. Funcional por módulo: `docs/01-FEATURES/`
-3. Contratos API: `docs/02-API/`
-4. Datos y schema: `docs/03-DATABASE/`
-5. Historial y bitácoras: `docs/history/`
+1. Canon del sistema: `docs/canon/`
+2. Reglas globales y baseline técnica: `docs/00-STEERING/`
+3. Funcional por módulo: `docs/01-FEATURES/`
+4. Contratos API y operación: `docs/02-API/`
+5. Guías subordinadas: `docs/guides/`
+6. Datos y schema: `docs/03-DATABASE/`
+7. Historial y bitácoras: `docs/history/`
 
-`README.md` en la raíz cumple solo función de onboarding corto. Documentos como `docs/03-IMPLEMENTATION-ROADMAP.md` y `docs/02-API/FRONTEND-INTEGRATION-GUIDE.md` deben leerse como apoyo subordinado a esta baseline.
+`README.md` en la raíz cumple solo función de onboarding corto. Documentos como `docs/03-IMPLEMENTATION-ROADMAP.md` y `docs/02-API/FRONTEND-INTEGRATION-GUIDE.md` deben leerse como apoyo subordinado al canon y a esta baseline.
 
 ---
 
 ## Rutas Canónicas por Rol
 
+### Canon base
+
+1. `docs/canon/dominio-sacdia.md`
+2. `docs/canon/identidad-sacdia.md`
+3. `docs/canon/gobernanza-canon.md`
+4. `docs/canon/arquitectura-sacdia.md`
+5. `docs/canon/runtime-sacdia.md`
+6. `docs/canon/decisiones-clave.md`
+
 ### Backend
 
-1. `docs/00-STEERING/tech.md`
-2. `docs/02-API/ENDPOINTS-LIVE-REFERENCE.md`
-3. `docs/02-API/API-SPECIFICATION.md`
-4. `docs/03-DATABASE/schema.prisma`
+1. `docs/canon/dominio-sacdia.md`
+2. `docs/canon/runtime-sacdia.md`
+3. `docs/00-STEERING/tech.md`
+4. `docs/02-API/ENDPOINTS-LIVE-REFERENCE.md`
+5. `docs/02-API/API-SPECIFICATION.md`
+6. `docs/03-DATABASE/schema.prisma`
 
 ### Mobile
 
-1. `docs/00-STEERING/tech.md`
-2. `docs/PHASE-2-MOBILE-PROGRAM.md`
-3. `docs/02-API/ENDPOINTS-LIVE-REFERENCE.md`
-4. `docs/01-FEATURES/`
+1. `docs/canon/dominio-sacdia.md`
+2. `docs/canon/runtime-sacdia.md`
+3. `docs/00-STEERING/tech.md`
+4. `docs/02-API/ENDPOINTS-LIVE-REFERENCE.md`
+5. `docs/01-FEATURES/`
 
 ### Admin Web
 
-1. `docs/00-STEERING/tech.md`
-2. `docs/PHASE-3-ADMIN-PROGRAM.md`
-3. `docs/02-API/ENDPOINTS-LIVE-REFERENCE.md`
-4. `docs/01-FEATURES/`
+1. `docs/canon/dominio-sacdia.md`
+2. `docs/canon/runtime-sacdia.md`
+3. `docs/00-STEERING/tech.md`
+4. `docs/02-API/ENDPOINTS-LIVE-REFERENCE.md`
+5. `docs/01-FEATURES/`
 
 ---
 
 ## Capa Canónica
+
+### canon/
+
+- `dominio-sacdia.md`
+- `identidad-sacdia.md`
+- `gobernanza-canon.md`
+- `arquitectura-sacdia.md`
+- `runtime-sacdia.md`
+- `decisiones-clave.md`
+
+`docs/canon/` es la capa de mayor autoridad documental del proyecto.
 
 ### 00-STEERING
 
@@ -80,6 +106,16 @@ Módulos de negocio activos (sin contenido de ejemplo).
 
 ---
 
+## Capa Operativa Subordinada
+
+La documentación fuera de `docs/canon/` puede seguir siendo activa para operación, integración o referencia técnica, pero no redefine el canon.
+
+- `docs/00-STEERING/`
+- `docs/01-FEATURES/`
+- `docs/02-API/`
+- `docs/guides/`
+- `docs/03-DATABASE/`
+
 ## Capa Histórica
 
 Todo contenido de auditorías, planes cerrados, sesiones y fuentes intermedias vive en:
@@ -91,7 +127,8 @@ Todo contenido de auditorías, planes cerrados, sesiones y fuentes intermedias v
 
 ## Estado de Documento
 
-- `ACTIVE`: canónico y operativo.
+- `ACTIVE`: documento vigente.
+- `DRAFT`: documento en construcción.
 - `HISTORICAL`: contexto histórico, no contrato vigente.
 - `DEPRECATED`: reemplazado por documento canónico.
 
@@ -107,6 +144,7 @@ Todo contenido de auditorías, planes cerrados, sesiones y fuentes intermedias v
 ## Ver También
 
 - `docs/CLAUDE.md`
+- `docs/canon/README.md`
 - `docs/history/README.md`
 
-**Última actualización**: 2026-03-09
+**Última actualización**: 2026-03-12

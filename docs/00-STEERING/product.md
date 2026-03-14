@@ -1,5 +1,9 @@
 # Product Overview
 
+**Estado**: DEPRECATED
+
+Reemplazado por: `docs/canon/dominio-sacdia.md` y `docs/canon/identidad-sacdia.md`
+
 > Define la visión, objetivos y características clave del producto  
 > Este archivo ayuda a la IA a entender el "por qué" detrás de las decisiones técnicas
 

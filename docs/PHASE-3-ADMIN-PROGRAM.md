@@ -1,7 +1,9 @@
 # Phase 3 Admin Program (Consolidado)
 
-**Estado**: ACTIVE  
+**Estado**: HISTORICAL  
 **Última actualización**: 2026-03-04
+
+Revisar primero: `docs/canon/runtime-sacdia.md`, `docs/canon/arquitectura-sacdia.md`, `docs/02-API/ENDPOINTS-LIVE-REFERENCE.md`
 
 Documento consolidado de especificación funcional y guía de integración del panel admin.
 

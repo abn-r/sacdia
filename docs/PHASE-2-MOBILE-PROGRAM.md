@@ -1,7 +1,9 @@
 # Phase 2 Mobile Program (Consolidado)
 
-**Estado**: ACTIVE  
+**Estado**: HISTORICAL  
 **Última actualización**: 2026-03-04
+
+Revisar primero: `docs/canon/runtime-sacdia.md`, `docs/canon/arquitectura-sacdia.md`, `docs/02-API/ENDPOINTS-LIVE-REFERENCE.md`
 
 Documento consolidado de la línea móvil.
 

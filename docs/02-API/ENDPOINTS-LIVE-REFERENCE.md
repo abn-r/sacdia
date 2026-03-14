@@ -171,6 +171,19 @@
 | GET | `/api/v1/admin/users` | JWT | super_admin, admin, coordinator | Listar usuarios administrativos con alcance por rol (ALL/UNION/LOCAL_FIELD) | `src/admin/admin-users.controller.ts` |
 | GET | `/api/v1/admin/users/:userId` | JWT | super_admin, admin, coordinator | Obtener detalle de usuario validando alcance por rol del actor | `src/admin/admin-users.controller.ts` |
 
+### Admin user detail transitional formative contract (FS-01)
+
+- Endpoint: `GET /api/v1/admin/users/:userId`
+- Envelope se mantiene: `{ status, data }`
+- `data.current_operational_enrollment`: fuente anual operativa (SOLO `enrollments` del año eclesiástico activo)
+- `data.trajectory_classes`: trayectoria consolidada/histórica (SOLO `users_classes`)
+- `data.classes`: alias legacy **deprecado**; mantiene semántica de trayectoria y NO representa verdad operativa anual
+- Reglas de nulidad:
+  - si no hay año eclesiástico activo -> `current_operational_enrollment = null`
+  - si no hay enrollment activo del año -> `current_operational_enrollment = null`
+  - si hay más de un enrollment candidato del año -> `current_operational_enrollment = null` (sin inferencia)
+- Consumers actualizados deben leer presente desde `current_operational_enrollment` e histórico desde `trajectory_classes`; no reconstruir presente con `trajectory_classes/classes`
+
 ## camporees
 
 | Method | Path | Auth | Roles | Description | Source |

@@ -695,6 +695,35 @@ Límites documentales:
 - `POST /users/:userId/post-registration/step-{1,2,3}/complete` permite completion administrativa mínima de terceros con `post_registration:update` o fallback legacy `users:update`.
 - Para terceros no owner, el backend debe devolver estado administrativo mínimo y respuestas saneadas, sin inferir datos sensibles ni causas detalladas del paso 2.
 
+### Contrato Transicional Formativo FS-01 (`GET /api/v1/admin/users/:userId`)
+
+Este endpoint mantiene envelope `{ status, data }` y añade semántica explícita para estado formativo:
+
+- `data.current_operational_enrollment`
+  - Nullable.
+  - Fuente de verdad operativa anual: **solo** `enrollments` del año eclesiástico activo.
+  - No usa `users_classes.current_class` para inferir presente.
+- `data.trajectory_classes`
+  - Arreglo (puede ser vacío).
+  - Fuente de verdad de trayectoria consolidada/histórica: **solo** `users_classes`.
+- `data.classes`
+  - Alias legacy **deprecado** de `trajectory_classes` para compatibilidad.
+  - Mantiene semántica de trayectoria (NO semántica operativa anual).
+
+Reglas de nulidad para `current_operational_enrollment`:
+
+- no hay año eclesiástico activo resoluble;
+- no hay enrollment activo del usuario para el año activo;
+- hay más de un enrollment candidato para el año activo.
+
+En esos casos se retorna `null` sin selección silenciosa ni inferencia desde trayectoria.
+
+#### Nota de rollout
+
+- Consumidores actualizados deben usar `current_operational_enrollment` para estado anual presente y `trajectory_classes` para histórico.
+- Consumidores deben tolerar `current_operational_enrollment = null`.
+- Durante FS-01 no se eliminan writes legacy ni se retira `classes`.
+
 ---
 
 ## 🚀 Estado de Implementación

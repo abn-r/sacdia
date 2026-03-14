@@ -1,5 +1,9 @@
 # Project Structure
 
+**Estado**: HISTORICAL
+
+Revisar primero: `docs/canon/arquitectura-sacdia.md` y `docs/README.md`
+
 > Define la organización de archivos y directorios del proyecto
 
 ---

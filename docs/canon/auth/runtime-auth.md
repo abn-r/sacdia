@@ -1,0 +1,316 @@
+# Runtime: Auth
+
+## Estado
+ACTIVE
+
+## Propósito
+Este documento define el comportamiento técnico vigente del dominio de autenticación y autorización.
+
+Acá manda el runtime real del backend, no los walkthroughs viejos ni suposiciones de cliente.
+
+## Precedencia
+Orden de autoridad para auth dentro de la nueva capa canónica:
+
+1. `docs/canon/auth/dominio-auth.md`
+2. `docs/canon/auth/runtime-auth.md`
+3. `docs/canon/auth/procesos-auth.md`
+
+Si un documento legacy contradice este archivo, este archivo manda.
+
+## Resumen operativo
+El estado actual del runtime de auth es este:
+
+- la autenticación base depende de Supabase Auth;
+- el backend expone endpoints propios bajo `/api/v1/auth/*`;
+- `POST /auth/login` y `POST /auth/refresh` entregan tokens en camelCase;
+- `GET /auth/me` es la fuente canónica del bloque `authorization`;
+- el contexto activo de club se cambia con `PATCH /auth/me/context`;
+- existen superficies activas para OAuth, MFA y gestión de sesiones;
+- algunos contratos legacy siguen expuestos por compatibilidad temporal.
+
+## Componentes runtime
+
+### Supabase Auth
+Responsabilidades actuales:
+- autenticar credenciales con email y password;
+- emitir `accessToken` y `refreshToken`;
+- refrescar sesión;
+- soportar OAuth con Google y Apple;
+- soportar MFA con TOTP.
+
+### Backend NestJS
+Responsabilidades actuales:
+- exponer endpoints canónicos de auth para clientes;
+- normalizar respuestas de tokens en camelCase;
+- resolver perfil autenticado;
+- resolver autorización efectiva por sesión;
+- persistir y cambiar asignación activa de club;
+- ofrecer superficies auxiliares de MFA, OAuth y sesiones.
+
+### Prisma / Postgres
+Responsabilidades actuales:
+- persistir usuario local en `users`;
+- persistir tracking de post-registro y `active_club_assignment_id` en `users_pr`;
+- persistir roles, permisos y asignaciones de club;
+- NO persistir una tabla canónica propia de sesiones auth.
+
+### Cache / Redis
+Responsabilidades actuales:
+- blacklist de tokens;
+- gestión operativa de sesiones concurrentes;
+- TTL de sesiones administradas por backend.
+
+## Endpoints canónicos vigentes
+
+### Sesión base
+- `POST /api/v1/auth/login`
+- `POST /api/v1/auth/refresh`
+- `POST /api/v1/auth/logout`
+- `GET /api/v1/auth/me`
+- `PATCH /api/v1/auth/me/context`
+
+### OAuth
+- `POST /api/v1/auth/oauth/google`
+- `POST /api/v1/auth/oauth/apple`
+- `GET /api/v1/auth/oauth/callback`
+- `GET /api/v1/auth/oauth/providers`
+- `DELETE /api/v1/auth/oauth/:provider`
+
+### MFA
+- `POST /api/v1/auth/mfa/enroll`
+- `POST /api/v1/auth/mfa/verify`
+- `GET /api/v1/auth/mfa/factors`
+- `GET /api/v1/auth/mfa/status`
+- `DELETE /api/v1/auth/mfa/unenroll`
+
+### Gestión de sesiones
+- `GET /api/v1/auth/sessions`
+- `DELETE /api/v1/auth/sessions/:sessionId`
+- `DELETE /api/v1/auth/sessions`
+
+## Contratos vigentes de tokens
+
+### Login
+`POST /api/v1/auth/login` responde hoy:
+
+```json
+{
+  "status": "success",
+  "data": {
+    "accessToken": "...",
+    "refreshToken": "...",
+    "expiresAt": 1900000000,
+    "tokenType": "bearer",
+    "user": {
+      "id": "uuid",
+      "email": "user@sacdia.app",
+      "name": "Juan",
+      "paternal_last_name": "Perez",
+      "maternal_last_name": "Lopez",
+      "avatar": null,
+      "roles": ["user"]
+    },
+    "needsPostRegistration": false,
+    "postRegistrationStatus": null
+  }
+}
+```
+
+Reglas vigentes:
+- el login autentica y entrega tokens;
+- el login NO entrega el bloque canónico `authorization`;
+- después del login, el cliente debe llamar `GET /auth/me` para obtener autorización efectiva y contexto activo.
+
+### Refresh
+`POST /api/v1/auth/refresh` recibe como contrato vigente:
+
+```json
+{
+  "refreshToken": "v1.abc..."
+}
+```
+
+Y responde:
+
+```json
+{
+  "status": "success",
+  "data": {
+    "accessToken": "...",
+    "refreshToken": "...",
+    "expiresAt": 1900000000,
+    "tokenType": "bearer"
+  }
+}
+```
+
+Compatibilidad transicional:
+- `refresh_token` existió como input legacy;
+- hoy el contrato canónico es `refreshToken`;
+- el backend ya contempla rechazo estricto del payload snake_case.
+
+### Logout
+`POST /api/v1/auth/logout` es best effort:
+- acepta bearer opcional;
+- acepta `refreshToken` opcional en body;
+- intenta revocar por access token primero;
+- si no hay access token válido, intenta derivarlo desde refresh token;
+- no bloquea UX si la revocación falla.
+
+## Contrato canónico de autorización
+La fuente oficial para autorización resuelta por sesión es `GET /api/v1/auth/me`.
+
+Campos canónicos relevantes:
+- `authorization.grants.global_roles`
+- `authorization.grants.club_assignments`
+- `authorization.active_assignment`
+- `authorization.effective.permissions`
+- `authorization.effective.scope`
+
+Reglas vigentes:
+- backend resuelve autorización;
+- clientes consumen autorización resuelta;
+- `authorization.effective.permissions` es la fuente operativa para gating de UX;
+- permisos de club salen solo de la asignación activa;
+- los campos legacy `roles`, `permissions`, `club` y `club_context` siguen expuestos solo por compatibilidad temporal.
+
+## Contexto activo de club
+El cambio de contexto activo ocurre únicamente por:
+
+`PATCH /api/v1/auth/me/context`
+
+Payload vigente:
+
+```json
+{
+  "assignment_id": "uuid"
+}
+```
+
+Semántica vigente:
+- la asignación debe pertenecer al usuario;
+- la asignación debe estar `active = true` y `status = active`;
+- el backend persiste `active_club_assignment_id` en `users_pr`;
+- la respuesta devuelve `authorization` recalculado;
+- los clientes no deben inventar contexto activo localmente.
+
+## OAuth vigente
+Estado actual soportado:
+- Google;
+- Apple.
+
+Flujo vigente resumido:
+1. cliente llama `POST /auth/oauth/{provider}`;
+2. backend devuelve una URL de Supabase OAuth;
+3. proveedor autentica al usuario;
+4. callback llega a `GET /auth/oauth/callback` con `access_token` y opcionalmente `refresh_token` en query;
+5. backend obtiene usuario desde Supabase;
+6. si es primera vez, crea usuario local y tracking mínimo;
+7. backend responde en camelCase con tokens, usuario y `needsPostRegistration`.
+
+Notas vigentes:
+- el callback conserva query params snake_case por compatibilidad con proveedor;
+- la respuesta del backend sigue camelCase;
+- `google_connected` y `apple_connected` son flags locales de tracking/UI, no la fuente real de autenticación.
+
+## MFA vigente
+Estado actual soportado:
+- MFA con TOTP usando Supabase.
+
+Superficies vigentes:
+- enrolamiento de factor;
+- verificación y activación;
+- listado de factores;
+- consulta de estado;
+- deshabilitación.
+
+Notas vigentes:
+- los endpoints MFA requieren JWT;
+- pueden aceptar `x-refresh-token` opcional para bind de sesión cuando Supabase lo requiere;
+- el runtime expone `aal1` y `aal2` a través de status MFA.
+
+Límite importante del estado actual:
+- el endpoint de login principal no publica hoy un handshake canónico de `requiresMfa` previo a sesión elevada;
+- MFA existe como superficie operativa, pero el flujo exacto de challenge en login todavía necesita definirse de forma canónica en procesos.
+
+## Gestión operativa de sesiones
+Estado actual soportado:
+- listado de sesiones activas;
+- cierre de una sesión específica;
+- cierre de todas las sesiones;
+- blacklist global por usuario;
+- límite de 5 sesiones concurrentes;
+- almacenamiento en cache con TTL de 24 horas.
+
+Reglas vigentes:
+- las sesiones operativas del backend viven en cache, no en Prisma;
+- el servicio de blacklist invalida tokens antes de expiración natural;
+- `DELETE /auth/sessions` blacklistea tokens del usuario y limpia sesiones registradas.
+
+Límite importante del estado actual:
+- existe servicio de session management, pero su integración completa con `POST /auth/login` y `POST /auth/refresh` no está cerrada como contrato canónico en esta capa;
+- por eso, la gestión de sesiones debe tratarse hoy como superficie disponible, pero con integración pendiente de consolidación total en el proceso de sesión.
+
+## Registro y post-registro
+Estado actual:
+- `POST /api/v1/auth/register` crea usuario en Supabase y réplica local en Prisma;
+- también crea tracking granular en `users_pr`;
+- asigna el rol global `user`;
+- `GET /api/v1/auth/profile/completion-status` expone el estado del post-registro.
+
+El login y OAuth devuelven `needsPostRegistration` para que el cliente decida continuidad UX.
+
+## Campos y compatibilidad legacy
+Campos legacy todavía expuestos por compatibilidad:
+- `roles`
+- `permissions`
+- `club`
+- `club_context`
+
+Regla vigente:
+- pueden seguir existiendo durante migración;
+- no son contrato nuevo;
+- cualquier cliente nuevo o refactorizado debe consumir `authorization`.
+
+## Seguridad runtime vigente
+- JWT autentica identidad;
+- `JwtAuthGuard` protege endpoints autenticados;
+- `PermissionsGuard` y metadata de recurso endurecen autorización en rutas sensibles;
+- frontend no actúa como barrera de seguridad;
+- logout y cierre de sesiones deben asumirse como operaciones defensivas, no como única garantía;
+- datos sensibles del usuario siguen reglas específicas de ownership o permiso global en recursos `user`.
+
+## Gaps y pendientes explícitos
+Estos puntos NO deben maquillarse como cerrados:
+
+- el proceso canónico post-login debe explicitar la llamada a `GET /auth/me`;
+- MFA existe, pero el handshake exacto de login con elevación a `aal2` no está consolidado como contrato canónico de proceso;
+- session management existe, pero su wiring contractual completo con login/refresh todavía necesita cerrarse;
+- los campos legacy siguen vivos y deben eliminarse gradualmente cuando admin y app migren por completo al bloque `authorization`.
+
+## Regla para clientes
+
+### `sacdia-admin`
+- usa `authorization.effective.permissions` para gating de páginas, acciones y mutaciones;
+- usa `authorization.grants` para matrices, detalle de roles y selector de contexto;
+- no reconstruye RBAC desde joins locales.
+
+### `sacdia-app`
+- usa `authorization.effective.permissions` para acciones habilitadas;
+- usa `authorization.effective.scope.club` como contexto activo;
+- usa `authorization.grants.club_assignments` para selector de contexto;
+- no usa metadata legacy como fuente de autorización nueva.
+
+## Referencias activas
+- `docs/canon/auth/dominio-auth.md`
+- `docs/01-FEATURES/auth/AUTHORIZATION-CANONICAL-CONTRACT.md`
+- `docs/01-FEATURES/auth/CLUB-ROLE-ASSIGNMENT-FIRST-CONTRACT.md`
+- `docs/01-FEATURES/auth/PERMISSIONS-SYSTEM.md`
+- `docs/01-FEATURES/auth/RBAC-ENFORCEMENT-MATRIX.md`
+- `docs/02-API/ENDPOINTS-LIVE-REFERENCE.md`
+- `sacdia-backend/src/auth/auth.controller.ts`
+- `sacdia-backend/src/auth/auth.service.ts`
+- `sacdia-backend/src/auth/oauth.controller.ts`
+- `sacdia-backend/src/auth/mfa.controller.ts`
+- `sacdia-backend/src/auth/sessions.controller.ts`
+- `sacdia-backend/src/common/services/authorization-context.service.ts`

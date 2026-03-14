@@ -1,5 +1,9 @@
 # SACDIA
 
+**Estado**: HISTORICAL
+
+Revisar primero: `docs/canon/dominio-sacdia.md`, `docs/canon/runtime-sacdia.md`, `docs/02-API/ENDPOINTS-LIVE-REFERENCE.md`
+
 ## MÓDULO: Autenticación
 
 **Descripción:** Este módulo gestiona y verifica que cada usuario esté autenticado en la plataforma, de lo contrario gestiona que se registre o actualice sus datos de acceso.
