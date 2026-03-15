@@ -1,12 +1,14 @@
 # ENDPOINTS LIVE REFERENCE (Runtime Truth)
 
+<!-- Verificado contra código 2026-03-14. No se encontraron endpoints FANTASMA en este documento (los 17 FANTASMA detectados en Reality Matrix son consumidos por admin/app pero no estaban listados aquí). Este documento cubre 180 de 198 endpoints implementados; los 18 faltantes están documentados en docs/audit/REALITY-MATRIX.md como SIN DOCS. -->
+
 > [!IMPORTANT]
 > Documento canónico para agentes (App + Panel Admin).
 > Generado desde `src/**/*controller.ts` del backend en runtime.
 > Base URL: `/api/v1`
 
 **Generado**: 2026-03-10T00:00:00.000Z (sincronización manual RBAC sensible)
-**Total endpoints**: 180
+**Total endpoints**: 180 (de 198 implementados; ver Reality Matrix para gap de 18 endpoints sin documentar)
 
 ## Lectura Rápida
 
@@ -67,8 +69,8 @@
 | DELETE | `/api/v1/users/:userId/medicines/:medicineId` | JWT | - | Eliminar un medicamento activo del usuario (soft delete) | `src/users/users.controller.ts` |
 | GET | `/api/v1/users/:userId/age` | JWT | - | Calcular edad del usuario | `src/users/users.controller.ts` |
 | GET | `/api/v1/users/:userId/classes` | JWT | - | Obtener inscripciones del usuario | `src/classes/classes.controller.ts` |
-| GET | `/api/v1/users/:userId/classes/:classId/progress` | JWT | - | Obtener progreso del usuario en una clase | `src/classes/classes.controller.ts` |
-| PATCH | `/api/v1/users/:userId/classes/:classId/progress` | JWT | - | Actualizar progreso de sección | `src/classes/classes.controller.ts` |
+| GET | `/api/v1/users/:userId/classes/:classId/progress` | JWT | - | Obtener progreso anual del usuario en una clase (`?enrollmentId=` opcional) | `src/classes/classes.controller.ts` |
+| PATCH | `/api/v1/users/:userId/classes/:classId/progress` | JWT | - | Actualizar progreso anual de sección (`enrollment_id` opcional) | `src/classes/classes.controller.ts` |
 | POST | `/api/v1/users/:userId/classes/enroll` | JWT | - | Inscribir usuario en clase | `src/classes/classes.controller.ts` |
 | GET | `/api/v1/users/:userId/emergency-contacts` | JWT | - | Listar contactos de emergencia del usuario | `src/emergency-contacts/emergency-contacts.controller.ts` |
 | POST | `/api/v1/users/:userId/emergency-contacts` | JWT | - | Crear contacto de emergencia (máximo 5) | `src/emergency-contacts/emergency-contacts.controller.ts` |
@@ -87,7 +89,7 @@
 | GET | `/api/v1/users/:userId/post-registration/status` | JWT | - | Obtener estado del post-registro | `src/post-registration/post-registration.controller.ts` |
 | POST | `/api/v1/users/:userId/post-registration/step-1/complete` | JWT | - | Completar Paso 1: Foto de perfil | `src/post-registration/post-registration.controller.ts` |
 | POST | `/api/v1/users/:userId/post-registration/step-2/complete` | JWT | - | Completar Paso 2: Información personal | `src/post-registration/post-registration.controller.ts` |
-| POST | `/api/v1/users/:userId/post-registration/step-3/complete` | JWT | - | Completar Paso 3: Selección de club | `src/post-registration/post-registration.controller.ts` |
+| POST | `/api/v1/users/:userId/post-registration/step-3/complete` | JWT | - | Completar Paso 3: selección de club y alta anual en `enrollments` | `src/post-registration/post-registration.controller.ts` |
 | DELETE | `/api/v1/users/:userId/profile-picture` | JWT | - | Eliminar foto de perfil | `src/users/users.controller.ts` |
 | POST | `/api/v1/users/:userId/profile-picture` | JWT | - | Subir foto de perfil | `src/users/users.controller.ts` |
 | GET | `/api/v1/users/:userId/requires-legal-representative` | JWT | - | Verificar si el usuario requiere representante legal | `src/users/users.controller.ts` |
@@ -107,6 +109,22 @@
 - Excepción mínima de terceros en `post_registration`: `GET /api/v1/users/:userId/post-registration/status` permite lectura administrativa mínima, y `POST /api/v1/users/:userId/post-registration/step-{1,2,3}/complete` permite completion administrativa mínima.
 - Exclusiones fuera de scope del change: `GET/PATCH /api/v1/users/:userId`, `POST/DELETE /api/v1/users/:userId/profile-picture`, `GET /api/v1/users/:userId/age` y `GET /api/v1/users/:userId/requires-legal-representative` siguen en metadata legacy `users:*`.
 - Para terceros no owner, `status` debe mantenerse en estado administrativo mínimo y `step-{1,2,3}/complete` no debe filtrar razones sensibles detalladas del usuario objetivo.
+
+### Post-registration step 3 runtime notes (FS-02)
+
+- `POST /api/v1/users/:userId/post-registration/step-3/complete` ahora completa el alta operativa anual en `enrollments` como condición de éxito del paso.
+- El flujo mantiene idempotencia para reintentos: reusa/reactiva el tuple único `(user_id, class_id, ecclesiastical_year_id)` y evita duplicados por conflicto de unicidad.
+- Si el usuario cambia de clase en el mismo año eclesiástico, el backend desactiva otros `enrollments` activos de ese año antes de resolver el seleccionado.
+- `users_classes` se mantiene solo como proyección temporal de compatibilidad (`current_class`) y no como fuente de verdad operativa anual.
+
+### Class progress runtime notes (FS-03)
+
+- `GET/PATCH /api/v1/users/:userId/classes/:classId/progress` siguen siendo class-scoped en la ruta, pero el owner real del progreso es `enrollments.enrollment_id`.
+- Sin override explícito, el backend resuelve una sola inscripción activa del año eclesiástico actual para `(userId, classId)`.
+- `GET` acepta `?enrollmentId=` y `PATCH` acepta `enrollment_id` como override aditivo para seleccionar una inscripción anual específica.
+- Si no existe inscripción anual resoluble, la API responde `404`.
+- Si la resolución class-scoped es ambigua y no se envía override, la API responde `409` con código `ENROLLMENT_RESOLUTION_AMBIGUOUS`.
+- El payload exitoso de lectura expone `enrollment_id` y `ecclesiastical_year_id` para hacer visible el owner anual resuelto.
 
 ## activities
 

@@ -3,6 +3,7 @@
 ## Estado
 
 ACTIVE
+<!-- VERIFICADO contra código 2026-03-14: las 9 decisiones revisadas contra Reality Matrix. Todas siguen vigentes. -->
 
 ## Propósito
 
@@ -26,7 +27,7 @@ No deben entrar decisiones menores de implementación, notas de sesión, bugs t�
 
 ### 1. La trayectoria institucional es el eje del sistema
 
-**Estado**: Vigente
+**Estado**: Vigente <!-- VERIFICADO: enrollments + users_classes + classes implementados y ALINEADO -->
 
 **Contexto**: La documentación previa tendía a describir SACDIA como un sistema de gestión o catálogo administrativo. Esa lectura debilitaba el valor principal del producto y fragmentaba la semántica del dominio.
 
@@ -40,7 +41,7 @@ No deben entrar decisiones menores de implementación, notas de sesión, bugs t�
 
 ### 2. Club y sección de club se modelan como entidades distintas
 
-**Estado**: Vigente
+**Estado**: Vigente <!-- VERIFICADO: clubs + club_adventurers/club_pathfinders/club_master_guilds implementados -->
 
 **Contexto**: La documentación y el runtime actual distinguían de manera parcial entre club y `instance`, pero sin una formulación canónica estable. Eso generaba ruido entre raíz institucional y unidad operativa.
 
@@ -54,7 +55,7 @@ No deben entrar decisiones menores de implementación, notas de sesión, bugs t�
 
 ### 3. Tipo de club clasifica, pero no opera por sí solo
 
-**Estado**: Vigente
+**Estado**: Vigente <!-- VERIFICADO: club_types es catálogo, operación vía instances -->
 
 **Contexto**: Parte de la documentación heredada trataba el tipo de club como si fuera casi equivalente a la unidad operativa.
 
@@ -68,7 +69,7 @@ No deben entrar decisiones menores de implementación, notas de sesión, bugs t�
 
 ### 4. La pertenencia se interpreta mediante vinculación contextual
 
-**Estado**: Vigente
+**Estado**: Vigente <!-- VERIFICADO: club_role_assignments con año eclesiástico, active_assignment en users_pr -->
 
 **Contexto**: La pertenencia plana al club no soporta bien historial, simultaneidad de roles, cambios de etapa ni lectura contextual del miembro.
 
@@ -82,7 +83,7 @@ No deben entrar decisiones menores de implementación, notas de sesión, bugs t�
 
 ### 5. Sección de club es el término canónico; instancia queda relegado al runtime
 
-**Estado**: Vigente
+**Estado**: Vigente <!-- VERIFICADO: código usa "instance", canon usa "sección de club" -->
 
 **Contexto**: El sistema actual usa `instance` y tablas separadas por tipo. Ese naming es útil técnicamente, pero no es el mejor lenguaje para el dominio.
 
@@ -96,7 +97,7 @@ No deben entrar decisiones menores de implementación, notas de sesión, bugs t�
 
 ### 6. Registrar y validar son actos distintos
 
-**Estado**: Vigente
+**Estado**: Vigente <!-- ASPIRACIONAL: no implementado — investiture_validation_history e investiture_config existen como tablas pero sin módulo/endpoints/screens. El concepto es canon pero la implementación es FANTASMA -->
 
 **Contexto**: El flujo de investidura y otros procesos muestran que existe una diferencia real entre captura operativa y reconocimiento institucional.
 
@@ -138,7 +139,7 @@ No deben entrar decisiones menores de implementación, notas de sesión, bugs t�
 
 ### 9. La verdad formativa se separa entre ciclo anual y trayectoria consolidada
 
-**Estado**: Vigente
+**Estado**: Vigente <!-- VERIFICADO: enrollments = ciclo anual, users_classes = trayectoria consolidada. Backend implementa ambos con FS-02/FS-03 -->
 
 **Contexto**: El sistema actual usa `users_classes` y `enrollments` con semánticas parcialmente superpuestas. La intención original distingue dos planos válidos: trayectoria histórica por clase y cursado anual dentro de un año eclesiástico. El problema actual no es la existencia de ambas estructuras, sino la falta de una frontera de autoridad clara en runtime.
 

@@ -2,6 +2,7 @@
 
 ## Estado
 ACTIVE
+<!-- VERIFICADO contra código 2026-03-14: modelo RBAC contextual confirmado en backend (RbacModule, PermissionsGuard, JwtAuthGuard, authorization-context.service.ts). Roles globales y de club, scope territorial, active_assignment — todo implementado y ALINEADO. -->
 
 ## Proposito
 Definir el modelo canónico de autorización de SACDIA.

@@ -2,6 +2,7 @@
 
 ## Estado
 ACTIVE
+<!-- VERIFICADO contra código 2026-03-14: todos los endpoints auth listados son ALINEADO en Reality Matrix (22 endpoints auth implementados y documentados) -->
 
 ## Propósito
 Este documento define el comportamiento técnico vigente del dominio de autenticación y autorización.
@@ -61,32 +62,33 @@ Responsabilidades actuales:
 - TTL de sesiones administradas por backend.
 
 ## Endpoints canónicos vigentes
+<!-- VERIFICADO contra código 2026-03-14: todos los endpoints listados a continuación existen en backend-audit -->
 
 ### Sesión base
-- `POST /api/v1/auth/login`
-- `POST /api/v1/auth/refresh`
-- `POST /api/v1/auth/logout`
-- `GET /api/v1/auth/me`
-- `PATCH /api/v1/auth/me/context`
+- `POST /api/v1/auth/login` <!-- VERIFICADO -->
+- `POST /api/v1/auth/refresh` <!-- VERIFICADO -->
+- `POST /api/v1/auth/logout` <!-- VERIFICADO -->
+- `GET /api/v1/auth/me` <!-- VERIFICADO -->
+- `PATCH /api/v1/auth/me/context` <!-- VERIFICADO -->
 
 ### OAuth
-- `POST /api/v1/auth/oauth/google`
-- `POST /api/v1/auth/oauth/apple`
-- `GET /api/v1/auth/oauth/callback`
-- `GET /api/v1/auth/oauth/providers`
-- `DELETE /api/v1/auth/oauth/:provider`
+- `POST /api/v1/auth/oauth/google` <!-- VERIFICADO -->
+- `POST /api/v1/auth/oauth/apple` <!-- VERIFICADO -->
+- `GET /api/v1/auth/oauth/callback` <!-- VERIFICADO -->
+- `GET /api/v1/auth/oauth/providers` <!-- VERIFICADO -->
+- `DELETE /api/v1/auth/oauth/:provider` <!-- VERIFICADO -->
 
 ### MFA
-- `POST /api/v1/auth/mfa/enroll`
-- `POST /api/v1/auth/mfa/verify`
-- `GET /api/v1/auth/mfa/factors`
-- `GET /api/v1/auth/mfa/status`
-- `DELETE /api/v1/auth/mfa/unenroll`
+- `POST /api/v1/auth/mfa/enroll` <!-- VERIFICADO -->
+- `POST /api/v1/auth/mfa/verify` <!-- VERIFICADO -->
+- `GET /api/v1/auth/mfa/factors` <!-- VERIFICADO -->
+- `GET /api/v1/auth/mfa/status` <!-- VERIFICADO -->
+- `DELETE /api/v1/auth/mfa/unenroll` <!-- VERIFICADO -->
 
 ### Gestión de sesiones
-- `GET /api/v1/auth/sessions`
-- `DELETE /api/v1/auth/sessions/:sessionId`
-- `DELETE /api/v1/auth/sessions`
+- `GET /api/v1/auth/sessions` <!-- VERIFICADO -->
+- `DELETE /api/v1/auth/sessions/:sessionId` <!-- VERIFICADO -->
+- `DELETE /api/v1/auth/sessions` <!-- VERIFICADO -->
 
 ## Contratos vigentes de tokens
 

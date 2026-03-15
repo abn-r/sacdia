@@ -3,6 +3,7 @@
 ## Estado
 
 ACTIVE
+<!-- VERIFICADO contra código 2026-03-14: las cinco capas descritas (dominio, backend, admin web, app móvil, datos) están materializadas en el código. Las responsabilidades por módulo son consistentes con la implementación. No se detectó drift estructural en claims arquitectónicos. -->
 
 ## Propósito
 
@@ -107,11 +108,11 @@ Estas tensiones no se resuelven negándolas, sino aclarando dónde vive cada res
 
 En el estado actual del workspace, SACDIA se expresa en:
 
-- `sacdia-backend/` como backend principal de reglas y contratos;
-- `sacdia-admin/` como panel administrativo web;
-- `sacdia-app/` como app móvil;
-- `docs/` como capa documental canónica y operativa;
-- base de datos relacional como soporte de persistencia y trazabilidad.
+- `sacdia-backend/` como backend principal de reglas y contratos; <!-- VERIFICADO: 22 módulos NestJS, 198 endpoints -->
+- `sacdia-admin/` como panel administrativo web; <!-- VERIFICADO: 37 pages -->
+- `sacdia-app/` como app móvil; <!-- VERIFICADO: 55 screens -->
+- `docs/` como capa documental canónica y operativa; <!-- VERIFICADO -->
+- base de datos relacional como soporte de persistencia y trazabilidad. <!-- VERIFICADO: 72 modelos en schema.prisma -->
 
 La estructura concreta de carpetas o repositorios debe leerse como implementación de esta arquitectura, no como la arquitectura misma.
 

@@ -1,5 +1,7 @@
 # Schema Reference - SACDIA Database
 
+<!-- Sincronizado contra schema.prisma 2026-03-14. Drift corregido en: users (field names), users_pr (PK + campos faltantes). Este documento cubre ~25 de 72 modelos; schema.prisma es fuente de verdad para los modelos no cubiertos aquí. -->
+
 Referencia completa del schema de base de datos PostgreSQL de SACDIA.
 
 ---
@@ -85,25 +87,30 @@ graph TB
 #### Tabla: `users`
 **Descripción**: Tabla principal de usuarios del sistema
 
-**Campos**:
+**Campos** (sincronizado con schema.prisma 2026-03-14):
 | Campo | Tipo | Descripción | Constraints |
 |-------|------|-------------|-------------|
-| `id` | UUID | ID único (mismo que Supabase Auth) | PK |
-| `email` | VARCHAR(255) | Email del usuario | UNIQUE, NOT NULL |
-| `name` | VARCHAR(100) | Nombre | NOT NULL |
-| `paternal_last_name` | VARCHAR(100) | Apellido paterno | NOT NULL |
-| `maternal_last_name` | VARCHAR(100) | Apellido materno | NOT NULL |
-| `gender` | CHAR(1) | Género (M/F) | CHECK IN ('M','F') |
-| `birthdate` | DATE | Fecha de nacimiento | - |
-| `is_baptized` | BOOLEAN | ¿Está bautizado? | - |
+| `user_id` | UUID | ID único (mismo que Supabase Auth, `auth.uid()`) | PK |
+| `email` | VARCHAR(100) | Email del usuario | UNIQUE, NOT NULL |
+| `name` | VARCHAR(50) | Nombre | NULL |
+| `paternal_last_name` | VARCHAR(50) | Apellido paterno | NULL |
+| `maternal_last_name` | VARCHAR(50) | Apellido materno | NULL |
+| `gender` | VARCHAR | Género | - |
+| `birthday` | DATE | Fecha de nacimiento | - |
+| `baptism` | BOOLEAN | ¿Está bautizado? | DEFAULT false |
 | `baptism_date` | DATE | Fecha de bautismo | - |
-| `country_id` | UUID | País | FK → countries |
-| `union_id` | UUID | Unión | FK → unions |
-| `local_field_id` | UUID | Campo local | FK → local_fields |
-| `avatar` | TEXT | URL de foto de perfil | - |
+| `blood` | ENUM(blood_type) | Tipo de sangre | - |
+| `country_id` | INT | País | FK → countries, NULL |
+| `union_id` | INT | Unión | FK → unions, NULL |
+| `local_field_id` | INT | Campo local | FK → local_fields, NULL |
+| `user_image` | TEXT | URL de foto de perfil | NULL |
+| `apple_connected` | BOOLEAN | OAuth Apple vinculado | DEFAULT false |
+| `google_connected` | BOOLEAN | OAuth Google vinculado | DEFAULT false |
+| `access_app` | BOOLEAN | Acceso a app móvil | DEFAULT true |
+| `access_panel` | BOOLEAN | Acceso a panel admin | DEFAULT false |
 | `active` | BOOLEAN | Usuario activo | DEFAULT true |
-| `created_at` | TIMESTAMP | Fecha de creación | DEFAULT NOW() |
-| `updated_at` | TIMESTAMP | Última actualización | DEFAULT NOW() |
+| `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
+| `modified_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW(), @updatedAt |
 
 **Relaciones**:
 - One-to-One: `users_pr`, `legal_representatives`
@@ -115,24 +122,29 @@ graph TB
 ---
 
 #### Tabla: `users_pr`
-**Descripción**: Tracking de post-registro (onboarding)
+**Descripción**: Tracking de post-registro (onboarding) y contexto activo de club
 
-**Campos**:
+**Campos** (sincronizado con schema.prisma 2026-03-14):
 | Campo | Tipo | Descripción |
 |-------|------|-------------|
-| `user_id` | UUID | Usuario | PK, FK → users |
+| `user_pr_id` | INT | PK técnico (autoincrement) |
+| `user_id` | UUID | Usuario | UNIQUE, FK → users |
 | `complete` | BOOLEAN | Post-registro completo | DEFAULT false |
 | `profile_picture_complete` | BOOLEAN | Paso 1: Foto | DEFAULT false |
 | `personal_info_complete` | BOOLEAN | Paso 2: Info personal | DEFAULT false |
 | `club_selection_complete` | BOOLEAN | Paso 3: Club | DEFAULT false |
-| `created_at` | TIMESTAMP | Fecha creación | DEFAULT NOW() |
-| `updated_at` | TIMESTAMP | Última actualización | DEFAULT NOW() |
+| `active_club_assignment_id` | UUID | Asignación activa de club para contexto de sesión | NULL |
+| `date_completed` | TIMESTAMPTZ | Fecha de completado del post-registro | NULL |
+| `created_at` | TIMESTAMPTZ | Fecha creación | DEFAULT NOW() |
+| `modified_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW(), @updatedAt |
 
 **Flujo**:
 1. Registro → Crea registro con todo en `false`
 2. Paso 1 → `profile_picture_complete = true`
 3. Paso 2 → `personal_info_complete = true`
 4. Paso 3 → `club_selection_complete = true` AND `complete = true`
+
+**Nota**: `active_club_assignment_id` es persistido por `PATCH /auth/me/context` y leído por el backend para resolver autorización efectiva por sesión.
 
 ---
 
@@ -222,8 +234,8 @@ Country → Union → Local Field → District → Church → Club
 
 ---
 
-#### Tablas: `club_adventurers`, `club_pathfinders`, `club_master_guild`
-**Descripción**: Instancias específicas de club por tipo
+#### Tablas: `club_adventurers`, `club_pathfinders`, `club_master_guilds`
+**Descripción**: Instancias específicas de club por tipo (secciones de club en canon)
 
 **Campos comunes**:
 | Campo | Tipo | Descripción |
@@ -234,7 +246,7 @@ Country → Union → Local Field → District → Church → Club
 | `name` | VARCHAR(100) | Nombre de la instancia | - |
 | `active` | BOOLEAN | Instancia activa | DEFAULT true |
 
-**Naming Convention**: ✅ Se recomienda plural (`club_master_guilds`), pendiente de aplicar
+**Naming Convention**: ✅ schema.prisma ya usa `club_master_guilds` (plural)
 
 ---
 
@@ -330,7 +342,7 @@ UNIQUE NULLS NOT DISTINCT (
 **Campos**: `id` (UUID), `name`, `honors_category_id`, `club_type_id`, `difficulty`, `active`
 
 #### Tabla: `users_classes`
-**Descripción**: Inscripción de usuarios a clases
+**Descripción**: Trayectoria consolidada por clase y proyección legacy de compatibilidad (`current_class`), no verdad operativa anual primaria
 
 **Campos**:
 | Campo | Tipo | Descripción |
@@ -342,6 +354,63 @@ UNIQUE NULLS NOT DISTINCT (
 | `investiture` | BOOLEAN | Investido |
 | `date_investiture` | DATE | Fecha de investidura |
 | `certificate` | TEXT | URL del certificado |
+
+**Nota runtime (FS-02)**:
+- La inscripción operativa anual se resuelve en `enrollments`.
+- `users_classes` se sincroniza temporalmente para consumidores legacy mientras se completa la migración de lecturas.
+
+#### Tabla: `enrollments`
+**Descripción**: Intento anual operativo de cursado por usuario, clase y año eclesiástico; owner primario del progreso formativo
+
+**Campos relevantes**:
+| Campo | Tipo | Descripción |
+|-------|------|-------------|
+| `enrollment_id` | INT | Identidad de la inscripción anual |
+| `user_id` | UUID | Usuario dueño del intento |
+| `class_id` | INT | Clase cursada |
+| `ecclesiastical_year_id` | INT | Año eclesiástico del intento |
+| `active` | BOOLEAN | Estado operativo de la inscripción |
+
+**Regla de identidad**:
+- `UNIQUE (user_id, class_id, ecclesiastical_year_id)` evita duplicar el mismo intento anual.
+
+#### Tabla: `class_section_progress`
+**Descripción**: Fuente operativa del avance por sección; desde FS-03 pertenece a una inscripción anual vía `enrollment_id`
+
+**Campos relevantes**:
+| Campo | Tipo | Descripción |
+|-------|------|-------------|
+| `section_progress_id` | INT | ID del registro |
+| `enrollment_id` | INT NULL | Owner anual del progreso |
+| `user_id` | UUID | Huella legacy transicional |
+| `class_id` | INT | Huella legacy transicional |
+| `module_id` | INT | Módulo de la sección |
+| `section_id` | INT | Sección evaluada |
+| `score` | FLOAT | Puntaje registrado |
+| `evidences` | JSON | Evidencias adjuntas |
+
+**Regla de unicidad FS-03**:
+- `UNIQUE (enrollment_id, module_id, section_id)` cuando `enrollment_id` no es nulo.
+
+#### Tabla: `class_module_progress`
+**Descripción**: Proyección sincronizada por módulo; resume el avance de secciones para la misma inscripción anual
+
+**Campos relevantes**:
+| Campo | Tipo | Descripción |
+|-------|------|-------------|
+| `module_progress_id` | INT | ID del registro |
+| `enrollment_id` | INT NULL | Owner anual del progreso |
+| `user_id` | UUID | Huella legacy transicional |
+| `class_id` | INT | Huella legacy transicional |
+| `module_id` | INT | Módulo resumido |
+| `score` | FLOAT | Puntaje agregado del módulo |
+
+**Regla de unicidad FS-03**:
+- `UNIQUE (enrollment_id, module_id)` cuando `enrollment_id` no es nulo.
+
+**Política de backfill acotado**:
+- Solo se backfillean filas legacy cuyo `user_id + class_id` mapee de forma determinística a una sola inscripción en `enrollments`.
+- Filas ambiguas o sin match quedan con `enrollment_id = NULL` para revisión/manual follow-up; FS-03 no inventa historia perfecta.
 
 ---
 
@@ -371,7 +440,7 @@ UNIQUE NULLS NOT DISTINCT (
 | Tabla/Campo | Actual | Debería ser | Prioridad |
 |-------------|--------|-------------|-----------|
 | `ecclesiastical_year` | Singular | `ecclesiastical_years` | ALTA |
-| `club_master_guild` | Singular | `club_master_guilds` | MEDIA |
+| `club_master_guild` | Singular | `club_master_guilds` | RESUELTA (schema.prisma ya usa plural) |
 | `club_types.ct_id` | Abreviado | `club_type_id` | ALTA |
 | `inventory_categories.inventory_categoty_id` | Typo | `inventory_category_id` | ALTA |
 
@@ -485,5 +554,5 @@ CREATE INDEX idx_churches_district ON churches(district_id) WHERE active = true;
 
 ---
 
-**Última actualización**: 2026-01-30  
-**Fuentes**: `relations.md`, `auditoria-naming-bd.md`, `verificacion-schema-prisma.md`
+**Última actualización**: 2026-03-14 (sincronizado contra schema.prisma, drift corregido en users y users_pr)
+**Fuentes**: `schema.prisma` (fuente de verdad), `relations.md`, `auditoria-naming-bd.md`, `verificacion-schema-prisma.md`
