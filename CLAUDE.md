@@ -15,7 +15,7 @@ Monorepo con panel admin web, app móvil y backend API para gestionar clubes de 
 
 - **Autenticación**: Supabase Auth (JWT + OAuth con Google y Apple)
 - **Base de Datos**: PostgreSQL vía Supabase
-- **Storage**: Supabase Storage para archivos
+- **Storage**: Cloudflare R2 para archivos
 - **TypeScript**: Backend y panel admin
 - **Dart**: App móvil (Flutter)
 - **Git**: Conventional Commits para todos los repos
