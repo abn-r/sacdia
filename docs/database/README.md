@@ -1,5 +1,7 @@
 # Database Documentation - SACDIA
 
+**Estado**: ACTIVE
+
 Guía completa de la base de datos PostgreSQL del sistema SACDIA.
 
 ---

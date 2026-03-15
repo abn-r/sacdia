@@ -1,5 +1,7 @@
 # Schema Reference - SACDIA Database
 
+**Estado**: ACTIVE
+
 <!-- Sincronizado contra schema.prisma 2026-03-14. Drift corregido en: users (field names), users_pr (PK + campos faltantes). Este documento cubre ~25 de 72 modelos; schema.prisma es fuente de verdad para los modelos no cubiertos aquí. -->
 
 Referencia completa del schema de base de datos PostgreSQL de SACDIA.

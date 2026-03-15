@@ -1,5 +1,7 @@
 # SACDIA Security Implementation Guide
 
+**Estado**: ACTIVE
+
 **Versión**: 1.0  
 **Fecha**: 31 de enero de 2026  
 **Status**: ✅ Implementado

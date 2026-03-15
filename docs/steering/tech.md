@@ -1,5 +1,7 @@
 # Technology Stack
 
+**Estado**: ACTIVE
+
 > Define el stack tecnológico del proyecto  
 > La IA usará esta info para suggest implementaciones compatibles
 

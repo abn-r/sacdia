@@ -7,6 +7,7 @@
 > Generado desde `src/**/*controller.ts` del backend en runtime.
 > Base URL: `/api/v1`
 
+**Estado**: ACTIVE
 **Generado**: 2026-03-10T00:00:00.000Z (sincronización manual RBAC sensible)
 **Total endpoints**: 180 (de 198 implementados; ver Reality Matrix para gap de 18 endpoints sin documentar)
 

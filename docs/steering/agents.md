@@ -1,5 +1,7 @@
 # Agents Configuration
 
+**Estado**: ACTIVE
+
 > Este archivo configura el comportamiento de los agentes de IA para tu proyecto  
 > Compatible con el estándar AGENTS.md y IDEs con IA como Cursor, Windsurf, Copilot, etc.
 

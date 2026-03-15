@@ -6,6 +6,7 @@
 
 # Especificación Técnica - REST API SACDIA
 
+**Estado**: ACTIVE
 **Versión**: 3.0.0 (contrato runtime unificado)
 **Fecha**: 21 de febrero de 2026
 **Status**: ✅ Producción - Endpoints canónicos en ENDPOINTS-LIVE-REFERENCE.md
@@ -618,6 +619,34 @@ export class CreateLegalRepresentativeDto {
   }
 }
 ```
+
+### Contrato Canónico: Class progress enrollment-aware (FS-03)
+
+Las rutas de progreso de clases mantienen compatibilidad transicional en el path, pero la identidad operativa del progreso ya no es `(user_id, class_id)` sino `enrollments.enrollment_id`.
+
+```http
+GET /api/v1/users/:userId/classes/:classId/progress?enrollmentId=123
+PATCH /api/v1/users/:userId/classes/:classId/progress
+```
+
+```json
+{
+  "module_id": 10,
+  "section_id": 55,
+  "score": 100,
+  "evidences": { "urls": ["https://..."] },
+  "enrollment_id": 123
+}
+```
+
+Reglas:
+
+- Sin override explícito, el backend resuelve una sola inscripción activa del año eclesiástico actual para `(userId, classId)`.
+- `GET` acepta `enrollmentId` por query; `PATCH` acepta `enrollment_id` en body como override aditivo.
+- La respuesta exitosa de lectura incluye `enrollment_id` y `ecclesiastical_year_id` para exponer el owner anual resuelto.
+- `404 NOT_FOUND`: no existe inscripción anual resoluble para ese `userId` + `classId`.
+- `409 CONFLICT`: existe ambigüedad de resolución y la API devuelve `code = ENROLLMENT_RESOLUTION_AMBIGUOUS` para forzar selección explícita.
+- `class_section_progress` es la fuente operativa; `class_module_progress` se mantiene como proyección sincronizada por `enrollment_id`.
 
 ### Contrato Canónico: Health Profile Baseline
 

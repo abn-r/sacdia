@@ -1,5 +1,7 @@
 # Idea to Spec Guide
 
+**Estado**: ACTIVE
+
 Guía compacta para convertir una idea en una especificación ejecutable.
 
 ## Paso 1: Claridad de problema

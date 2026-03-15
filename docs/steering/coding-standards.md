@@ -1,5 +1,7 @@
 # Coding Standards
 
+**Estado**: ACTIVE
+
 > Estándares de código específicos para mantener consistencia y calidad
 
 ---

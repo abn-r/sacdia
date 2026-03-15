@@ -1,5 +1,7 @@
 # Decisiones de Estandarización - SACDIA
 
+**Estado**: ACTIVE
+
 **Fecha**: 29 de enero de 2026  
 **Status**: Aprobado por usuario
 

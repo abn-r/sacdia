@@ -1,5 +1,7 @@
 # API Versioning - SACDIA Backend
 
+**Estado**: ACTIVE
+
 **Última actualización**: 13 de febrero de 2026  
 **Versión actual**: v1  
 **Tipo de versionamiento**: URI-based

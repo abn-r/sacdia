@@ -1,5 +1,7 @@
 # Admin Integration Guide
 
+**Estado**: ACTIVE
+
 Guía operativa resumida para integrar frontend admin con contratos backend vigentes.
 
 ## Contrato fuente de verdad

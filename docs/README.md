@@ -1,27 +1,51 @@
-# Documentación SACDIA
-
-**Sistema de Administración de Clubes del Ministerio Juvenil Adventista**
+# SACDIA — Documentación
 
 **Estado**: ACTIVE
 
 > [!IMPORTANT]
 > Este directorio es la fuente de verdad documental del proyecto.
 > La documentación histórica se encuentra en `docs/history/`.
-> La precedencia global es: `docs/canon/*` -> `docs/README.md` -> documentación operativa subordinada -> material histórico.
+> La precedencia global es: `docs/canon/*` → `docs/README.md` → documentación operativa subordinada → material histórico.
 
 ---
 
-## Punto de Entrada Recomendado
+## Estructura
 
-1. Canon del sistema: `docs/canon/`
-2. Reglas globales y baseline técnica: `docs/00-STEERING/`
-3. Funcional por módulo: `docs/01-FEATURES/`
-4. Contratos API y operación: `docs/02-API/`
-5. Guías subordinadas: `docs/guides/`
-6. Datos y schema: `docs/03-DATABASE/`
-7. Historial y bitácoras: `docs/history/`
+| Carpeta | Contenido | Autoridad |
+|---------|-----------|-----------|
+| `canon/` | Verdad del negocio, verificada contra código | Máxima — rige sobre todo |
+| `audit/` | Auditorías de código + Reality Matrix | Foto del código al 2026-03-14 |
+| `features/` | Estado verificado por dominio funcional | Derivado de audit + canon |
+| `api/` | Contratos API (endpoints, seguridad, testing) | Operacional, subordinado a canon |
+| `database/` | Schema Prisma + referencia + migraciones | Operacional, schema.prisma es fuente |
+| `steering/` | Estándares técnicos y de código | Normativo |
+| `guides/` | Guías operativas y workflows | Práctico |
+| `plans/` | Planes de implementación activos | Temporal |
+| `superpowers/` | Specs y planes de diseño (SDD) | Temporal |
+| `templates/` | Plantillas para nuevos features | Referencia |
+| `history/` | Todo documento inactivo, archivado | Solo contexto histórico |
 
-`README.md` en la raíz cumple solo función de onboarding corto. Documentos como `docs/03-IMPLEMENTATION-ROADMAP.md` y `docs/02-API/FRONTEND-INTEGRATION-GUIDE.md` deben leerse como apoyo subordinado al canon y a esta baseline.
+## Jerarquía de Autoridad
+
+Definida en `canon/source-of-truth.md`:
+
+1. `canon/source-of-truth.md` (gateway operativo)
+2. Este README (navegación estructural)
+3. `canon/*` (según tipo de pregunta)
+4. `api/ENDPOINTS-LIVE-REFERENCE.md` (runtime API)
+5. `database/schema.prisma` (estructura de datos)
+6. `steering/*` (estándares)
+
+## Navegación por Tipo de Pregunta
+
+| Pregunta | Consultar en orden |
+|----------|-------------------|
+| Producto/Alcance | canon/source-of-truth → canon/dominio → canon/identidad → features/ |
+| Arquitectura | canon/source-of-truth → canon/arquitectura → canon/decisiones-clave → steering/ |
+| API/Runtime | canon/source-of-truth → api/ENDPOINTS-LIVE-REFERENCE → api/ARCHITECTURE-DECISIONS |
+| Datos/Schema | canon/source-of-truth → database/schema.prisma → database/SCHEMA-REFERENCE |
+| Estado de features | features/README.md → features/{dominio}.md → audit/REALITY-MATRIX.md |
+| Decisiones pendientes | audit/DECISIONS-PENDING.md |
 
 ---
 
@@ -29,99 +53,37 @@
 
 ### Canon base
 
-1. `docs/canon/dominio-sacdia.md`
-2. `docs/canon/identidad-sacdia.md`
-3. `docs/canon/gobernanza-canon.md`
-4. `docs/canon/arquitectura-sacdia.md`
-5. `docs/canon/runtime-sacdia.md`
-6. `docs/canon/decisiones-clave.md`
+1. `canon/dominio-sacdia.md`
+2. `canon/identidad-sacdia.md`
+3. `canon/gobernanza-canon.md`
+4. `canon/arquitectura-sacdia.md`
+5. `canon/runtime-sacdia.md`
+6. `canon/decisiones-clave.md`
 
 ### Backend
 
-1. `docs/canon/dominio-sacdia.md`
-2. `docs/canon/runtime-sacdia.md`
-3. `docs/00-STEERING/tech.md`
-4. `docs/02-API/ENDPOINTS-LIVE-REFERENCE.md`
-5. `docs/02-API/API-SPECIFICATION.md`
-6. `docs/03-DATABASE/schema.prisma`
+1. `canon/dominio-sacdia.md`
+2. `canon/runtime-sacdia.md`
+3. `steering/tech.md`
+4. `api/ENDPOINTS-LIVE-REFERENCE.md`
+5. `api/API-SPECIFICATION.md`
+6. `database/schema.prisma`
 
 ### Mobile
 
-1. `docs/canon/dominio-sacdia.md`
-2. `docs/canon/runtime-sacdia.md`
-3. `docs/00-STEERING/tech.md`
-4. `docs/02-API/ENDPOINTS-LIVE-REFERENCE.md`
-5. `docs/01-FEATURES/`
+1. `canon/dominio-sacdia.md`
+2. `canon/runtime-sacdia.md`
+3. `steering/tech.md`
+4. `api/ENDPOINTS-LIVE-REFERENCE.md`
+5. `features/`
 
 ### Admin Web
 
-1. `docs/canon/dominio-sacdia.md`
-2. `docs/canon/runtime-sacdia.md`
-3. `docs/00-STEERING/tech.md`
-4. `docs/02-API/ENDPOINTS-LIVE-REFERENCE.md`
-5. `docs/01-FEATURES/`
-
----
-
-## Capa Canónica
-
-### canon/
-
-- `dominio-sacdia.md`
-- `identidad-sacdia.md`
-- `gobernanza-canon.md`
-- `arquitectura-sacdia.md`
-- `runtime-sacdia.md`
-- `decisiones-clave.md`
-
-`docs/canon/` es la capa de mayor autoridad documental del proyecto.
-
-### 00-STEERING
-
-- `product.md`
-- `tech.md`
-- `structure.md`
-- `coding-standards.md`
-- `data-guidelines.md`
-- `agents.md`
-
-### 01-FEATURES
-
-Módulos de negocio activos (sin contenido de ejemplo).
-
-### 02-API
-
-- **Runtime**: `ENDPOINTS-LIVE-REFERENCE.md`
-- **Especificación técnica**: `API-SPECIFICATION.md`
-- **Mapeo funcional**: `ENDPOINTS-REFERENCE.md`
-- **Seguridad**: `SECURITY-GUIDE.md`
-- **Integración frontend**: `FRONTEND-INTEGRATION-GUIDE.md`
-- **Testing**: `TESTING-GUIDE.md`
-
-### 03-DATABASE
-
-- `schema.prisma`
-- `SCHEMA-REFERENCE.md`
-- `migrations/README.md`
-
----
-
-## Capa Operativa Subordinada
-
-La documentación fuera de `docs/canon/` puede seguir siendo activa para operación, integración o referencia técnica, pero no redefine el canon.
-
-- `docs/00-STEERING/`
-- `docs/01-FEATURES/`
-- `docs/02-API/`
-- `docs/guides/`
-- `docs/03-DATABASE/`
-
-## Capa Histórica
-
-Todo contenido de auditorías, planes cerrados, sesiones y fuentes intermedias vive en:
-
-- `docs/history/`
-- `docs/CHANGELOG-IMPLEMENTATION.md`
+1. `canon/dominio-sacdia.md`
+2. `canon/runtime-sacdia.md`
+3. `steering/tech.md`
+4. `api/ENDPOINTS-LIVE-REFERENCE.md`
+5. `features/`
 
 ---
 
@@ -139,12 +101,40 @@ Todo contenido de auditorías, planes cerrados, sesiones y fuentes intermedias v
 - Si el valor principal del documento es una foto de una etapa previa, marcarlo `HISTORICAL` y enlazar el reemplazo activo.
 - Si un documento fue sustituido, marcarlo `DEPRECATED` y apuntar al documento vigente.
 
+## Estado del Proyecto
+
+Ver `audit/REALITY-MATRIX.md` para la foto completa y `features/README.md` para estado por dominio.
+
 ---
 
 ## Ver También
 
-- `docs/CLAUDE.md`
-- `docs/canon/README.md`
-- `docs/history/README.md`
+- `canon/README.md`
+- `history/README.md`
 
-**Última actualización**: 2026-03-12
+## SDD Command Parity Workflow
+
+Use this guardrail whenever SDD command contracts are changed.
+
+Local run:
+
+```bash
+node scripts/check-sdd-command-parity.mjs
+```
+
+Useful options:
+
+- `--json` for machine-readable output.
+- `--command-dir <path>` to validate fixtures or CI mirrors.
+
+Failure triage order:
+
+1. `required-command-presence` — missing `sdd-*.md` contracts.
+2. `placeholder-contract.required` — missing `{argument}`, `{project}`, `{workdir}` tokens.
+3. `persistence-modes.required` — incomplete `engram|openspec|hybrid|none` guidance.
+4. `result-contract.required-fields` — missing `status`, `executive_summary`, `artifacts`, `next_recommended` in phase commands.
+5. `meta-state-guidance.required` — missing `sdd/{argument}/state` references for `sdd-new`, `sdd-continue`, `sdd-ff`.
+
+CI runs this as an enforced gate; failures block the workflow.
+
+**Última actualización**: 2026-03-14

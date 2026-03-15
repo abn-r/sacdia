@@ -1,5 +1,7 @@
 # Data Guidelines
 
+**Estado**: ACTIVE
+
 > Guías para manejo de datos, APIs externas, y fuentes de datos
 
 ---

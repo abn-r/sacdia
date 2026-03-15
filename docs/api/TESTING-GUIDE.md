@@ -1,5 +1,7 @@
 # Guía de Testing - SACDIA Backend API
 
+**Estado**: ACTIVE
+
 **Última actualización**: 4 de marzo de 2026
 **Estado**: Documento canónico de testing API
 

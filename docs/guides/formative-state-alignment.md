@@ -66,7 +66,7 @@ Objetivo:
 
 - alinear onboarding con la fuente de verdad anual;
 - mantener idempotencia del flujo actual;
-- no proyectar todavía a trayectoria en el momento de inscripción inicial.
+- mantener `users_classes` solo como proyección transicional de compatibilidad, sin volverla condición de éxito operativa.
 
 ### Fase 3: hacer el progreso dependiente del enrollment
 

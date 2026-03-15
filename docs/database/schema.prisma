@@ -101,15 +101,17 @@ model class_module_progress {
   module_progress_id Int      @id @default(autoincrement())
   user_id            String   @db.Uuid
   class_id           Int
+  enrollment_id      Int?
   module_id          Int
   score              Float
   active             Boolean  @default(true)
   created_at         DateTime @default(now()) @db.Timestamptz(6)
   modified_at        DateTime @default(now()) @db.Timestamptz(6)
   classes            classes  @relation(fields: [class_id], references: [class_id], onDelete: NoAction, onUpdate: NoAction)
+  enrollments        enrollments? @relation(fields: [enrollment_id], references: [enrollment_id], onDelete: NoAction, onUpdate: NoAction)
   users              users    @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
 
-  @@unique([user_id, class_id, module_id])
+  @@unique([enrollment_id, module_id])
 }
 
 model class_modules {
@@ -130,6 +132,7 @@ model class_section_progress {
   section_progress_id Int      @id @default(autoincrement())
   user_id             String   @db.Uuid
   class_id            Int
+  enrollment_id       Int?
   module_id           Int
   section_id          Int
   score               Float
@@ -138,9 +141,10 @@ model class_section_progress {
   created_at          DateTime @default(now()) @db.Timestamptz(6)
   modified_at         DateTime @default(now()) @db.Timestamptz(6)
   classes             classes  @relation(fields: [class_id], references: [class_id], onDelete: NoAction, onUpdate: NoAction)
+  enrollments         enrollments? @relation(fields: [enrollment_id], references: [enrollment_id], onDelete: NoAction, onUpdate: NoAction)
   users               users    @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
 
-  @@unique([user_id, class_id, module_id, section_id])
+  @@unique([enrollment_id, module_id, section_id])
 }
 
 model class_sections {
@@ -413,6 +417,8 @@ model enrollments {
 
   // Relations
   classes             classes              @relation(fields: [class_id], references: [class_id], onDelete: NoAction, onUpdate: NoAction)
+  class_module_progress  class_module_progress[]
+  class_section_progress class_section_progress[]
   ecclesiastical_year ecclesiastical_years @relation(fields: [ecclesiastical_year_id], references: [year_id], onDelete: NoAction, onUpdate: NoAction)
   users               users                @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
   validator           users?               @relation("enrollment_validator", fields: [validated_by], references: [user_id], onDelete: NoAction, onUpdate: NoAction)

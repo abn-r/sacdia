@@ -545,7 +545,7 @@ GET /api/v1/catalogs/classes?clubTypeId={uuid}
 
 ---
 
-#### Completar Paso 3 (✅ Con ecclesiastical_year_id)
+#### Completar Paso 3 (✅ enrollment-first en año eclesiástico activo)
 
 ```http
 POST /api/v1/users/:userId/post-registration/step-3/complete
@@ -564,7 +564,7 @@ POST /api/v1/users/:userId/post-registration/step-3/complete
 }
 ```
 
-**Implementación** (✅ Con año eclesiástico auto-asignado):
+**Implementación** (✅ verdad operativa anual en `enrollments`):
 
 ```typescript
 @Post(':userId/post-registration/step-3/complete')
@@ -573,76 +573,23 @@ async completeClubSelection(
   @Body() dto: CompleteClubSelectionDto,
 ) {
   return await this.prisma.$transaction(async (tx) => {
-    // 1. Actualizar país, unión, campo local
-    await tx.users.update({
-      where: { id: userId },
-      data: {
-        country_id: dto.country_id,
-        union_id: dto.union_id,
-        local_field_id: dto.local_field_id,
-      },
-    });
-
-    // 2. ✅ Obtener año eclesiástico actual (AUTO-ASIGNADO)
-    const currentYear = await tx.ecclesiastical_years.findFirst({
-      where: {
-        start_date: { lte: new Date() },
-        end_date: { gte: new Date() }
-      }
-    });
-
-    if (!currentYear) {
-      throw new InternalServerErrorException('No active ecclesiastical year');
-    }
-
-    // 3. Obtener rol "member" (CLUB category)
-    const memberRole = await tx.roles.findFirst({
-      where: {
-        role_name: 'member',
-        role_category: 'CLUB'  // ✅ Filtro por categoría
-      },
-    });
-
-    // 4. ✅ Determinar campo de instancia
-    const clubInstanceField = dto.club_type === 'adventurers' ? 'club_adv_id'
-      : dto.club_type === 'pathfinders' ? 'club_pathf_id'
-      : 'club_mg_id';
-
-    // 5. ✅ Asignar rol "member" en club_role_assignments
-    await tx.club_role_assignments.create({
-      data: {
-        user_id: userId,
-        role_id: memberRole.id,
-        [clubInstanceField]: dto.club_instance_id,
-        ecclesiastical_year_id: currentYear.id,  // ✅ Auto-asignado
-        start_date: new Date(),
-        active: true,
-        status: 'pending',  // Pendiente de aprobación
-      },
-    });
-
-    // 6. Inscribir en clase
-    await tx.users_classes.create({
-      data: {
-        user_id: userId,
-        class_id: dto.class_id,
-        current_class: true,
-      },
-    });
-
-    // 7. ✅ Marcar paso 3 y todo post-registro completo
-    await tx.users_pr.update({
-      where: { user_id: userId },
-      data: {
-        club_selection_complete: true,  // ✅ Paso 3
-        complete: true,                  // ✅ Todo completo
-      },
-    });
-
-    return { success: true };
+    // 1. Resolver año eclesiástico activo (obligatorio)
+    // 2. Validar club/class seleccionados
+    // 3. Resolver asignación member del club (idempotente, start_date = start_date del año)
+    // 4. Desactivar otros enrollments activos del mismo user+año
+    // 5. Resolver enrollment seleccionado (reuse/reactivate/create)
+    // 6. Sincronizar users_classes.current_class como compatibilidad temporal
+    // 7. Marcar users_pr.club_selection_complete=true y complete=true
   });
 }
 ```
+
+**Semántica vigente FS-02**:
+
+- La condición de éxito del paso 3 es terminar con una inscripción anual operativa en `enrollments` para `(user_id, class_id, ecclesiastical_year_id)`.
+- `users_classes` sigue existiendo, pero solo como proyección temporal de compatibilidad para consumidores legacy.
+- Reintentos con el mismo payload son idempotentes: no deben duplicar `enrollments` ni asignaciones `member` activas para el mismo año.
+- Si no hay año eclesiástico activo o no se puede resolver el enrollment seleccionado, la transacción falla sin fallback operativo a `users_classes`.
 
 ---
 
@@ -766,9 +713,17 @@ GET    /api/v1/classes/:classId/modules
 # Inscripciones y Progreso (autenticado)
 GET    /api/v1/users/:userId/classes               # Query: ?yearId=
 POST   /api/v1/users/:userId/classes/enroll
-GET    /api/v1/users/:userId/classes/:classId/progress
-PATCH  /api/v1/users/:userId/classes/:classId/progress
+GET    /api/v1/users/:userId/classes/:classId/progress   # Query opcional: ?enrollmentId=
+PATCH  /api/v1/users/:userId/classes/:classId/progress   # Body opcional: enrollment_id
 ```
+
+**Semántica transicional FS-03**:
+
+- La ruta sigue siendo class-scoped por compatibilidad, pero la persistencia de progreso es enrollment-aware.
+- `GET` resuelve una única inscripción activa del año eclesiástico actual o usa `enrollmentId` si el caller lo envía.
+- `PATCH` mantiene el shape actual y agrega `enrollment_id` como override aditivo para seleccionar la inscripción anual correcta.
+- `404`: no existe inscripción anual resoluble para esa clase.
+- `409`: hay más de una inscripción candidata y el caller no envió override explícito.
 
 ### Honors (8) ✅ NUEVO
 

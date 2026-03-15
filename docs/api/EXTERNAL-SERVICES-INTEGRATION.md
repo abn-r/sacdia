@@ -1,5 +1,7 @@
 # Integración de Servicios Externos
 
+**Estado**: ACTIVE
+
 **Versión**: 2.0  
 **Fecha**: 2026-02-13  
 **Status**: 🟡 Implementado en código, pendiente cierre por entorno (staging/prod)

@@ -1,5 +1,7 @@
 # Guía de Integración Frontend - SACDIA API v2.2
 
+**Estado**: ACTIVE
+
 **Versión**: 2.2.0
 **Fecha**: 4 de febrero de 2026
 **Audiencia**: Desarrolladores Frontend (Admin Panel & Mobile App)

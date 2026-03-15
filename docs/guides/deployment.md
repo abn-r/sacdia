@@ -1,5 +1,7 @@
 # Guía de Deployment - SACDIA
 
+**Estado**: ACTIVE
+
 **Versión**: 2.2.0
 **Fecha**: 4 de febrero de 2026
 **Stack**: NestJS Backend + Next.js Admin + Flutter App

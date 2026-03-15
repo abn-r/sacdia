@@ -1,5 +1,7 @@
 # Developer Workflow Guide
 
+**Estado**: ACTIVE
+
 Guía unificada para trabajar con documentación y desarrollo en SACDIA.
 
 ## Flujo recomendado
