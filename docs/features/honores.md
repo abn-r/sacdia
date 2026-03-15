@@ -12,9 +12,9 @@ Estado: IMPLEMENTADO
 - No hay definicion canon detallada del modelo de honores mas alla de su rol en la trayectoria formativa
 
 ## Gap
-- Admin consume CRUD completo de /admin/honor-categories que son endpoints FANTASMA (no existen en backend audit)
+- Admin consume CRUD completo de /admin/honor-categories que son endpoints FANTASMA (no existen en backend audit) — pendiente de implementacion en backend
 - 3 endpoints de user honors sin documentacion API (POST bulk, POST files, POST register)
 - GET /honors/grouped-by-category existe en backend pero sin documentacion API
 
 ## Prioridad
-- A definir por el desarrollador
+- Alta para honor-categories CRUD — admin depende de endpoints que no existen en backend

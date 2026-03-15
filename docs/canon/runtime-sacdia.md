@@ -78,7 +78,7 @@ El runtime actual conserva naming técnico heredado en varios puntos, pero debe 
 
 - `Club` = raíz institucional;
 - `Sección de club` = unidad operativa real;
-- `instance` o tablas separadas por tipo = representación técnica actual de sección;
+- `instance` o tablas separadas por tipo = representación técnica actual de sección (el naming canónico para URLs es `club-sections`, no `club-instances`);
 - `user` = representación técnica del miembro;
 - `role` / `assignment` = representación técnica que no sustituye el concepto canónico de cargo o vinculación institucional.
 
@@ -234,9 +234,11 @@ Notas runtime activas:
 El runtime documenta:
 
 - catálogos públicos de geografía, tipos de club, tipos de relación, años eclesiásticos y roles;
-- endpoints admin para geografía y catálogos de referencia;
+- endpoints admin para geografía y catálogos de referencia (alergias, enfermedades, medicamentos, tipos de relación, años eclesiásticos);
 - endpoints admin RBAC para permisos y roles;
 - listado administrativo de usuarios y detalle administrativo por alcance.
+
+Los catálogos de referencia son catálogos de trayectoria: soportan la operación y trazabilidad de la trayectoria institucional del miembro. No requieren endpoints separados para admin y usuario; el acceso se controla mediante RBAC y alcance territorial.
 
 ### 6.6 Operación de club
 <!-- VERIFICADO contra código 2026-03-14: actividades PARCIAL (admin placeholder), finanzas PARCIAL (admin placeholder), camporees PARCIAL (app sin screens), inventario PARCIAL (admin placeholder), notifications ALINEADO -->
@@ -281,6 +283,7 @@ Roles globales documentados:
 
 - `super_admin`
 - `admin`
+- `assistant_admin`
 - `coordinator`
 - `user`
 
@@ -325,7 +328,18 @@ La persistencia documentada usa:
 - timestamps automáticos;
 - constraints relacionales para integridad.
 
-### 8.3 Módulos de datos confirmados por autoridad usada
+### 8.3 Categorización del universo de modelos
+
+El schema de persistencia contiene 72 modelos. Se categorizan así:
+
+- **Modelos core de trayectoria**: `users`, `enrollments`, `users_classes`, `users_honors`, `member_insurances`, `legal_representatives`, `emergency_contacts`, `users_pr`, `users_roles`, `club_role_assignments`, `unit_members`, `units`, `weekly_records`.
+- **Modelos de catálogo (trayectoria)**: `classes`, `honors`, `honors_categories`, `master_honors`, `club_types`, `club_ideals`, `relationship_types`, `allergies`, `diseases`, `medicines`, `ecclesiastical_years`, `activity_types`, `inventory_categories`, `finances_categories`.
+- **Modelos operativos**: `clubs`, `club_adventurers`, `club_pathfinders`, `club_master_guilds`, `folders`, `folders_modules`, `folders_sections`, `folders_modules_records`, `folders_section_records`, `folder_assignments`, `certifications` y tablas relacionadas, `club_inventory`, `finances` y tablas relacionadas, `activities` y tablas relacionadas, `camporees` y tablas relacionadas, `notifications`.
+- **Modelos de infraestructura**: `error_logs`, `user_fcm_tokens`.
+- **Modelos RBAC**: `roles`, `permissions`, `role_permissions`, `users_permissions`.
+- **Modelos de organización**: `countries`, `unions`, `local_fields`, `districts`, `churches`.
+
+### 8.4 Módulos de datos confirmados por autoridad usada
 
 El runtime documenta al menos estos grupos de persistencia:
 
@@ -336,7 +350,7 @@ El runtime documenta al menos estos grupos de persistencia:
 - **RBAC**: `roles`, `permissions`, `role_permissions`
 - **Catálogos**: `club_types`, `relationship_types`, `inventory_categories`
 
-### 8.4 Lectura canónica de estructuras clave
+### 8.5 Lectura canónica de estructuras clave
 
 #### Miembro y post-registro
 
@@ -379,6 +393,10 @@ Las integraciones documentadas por la autoridad usada son:
 - **Vercel** como hosting documentado para admin web y backend en la baseline técnica.
 
 Este documento no afirma más detalle operativo sobre proveedores externos que el expresamente documentado por las fuentes autorizadas.
+
+### 9.1 Infraestructura operativa
+
+Los componentes de infraestructura (health check, logging, Sentry, rate limiting, seguridad global) no forman parte del canon de dominio de negocio. Son infraestructura operativa del runtime documentada aquí por referencia. Su detalle operativo se encuentra en `docs/features/infrastructure.md`.
 
 ---
 

@@ -12,10 +12,10 @@ Estado: IMPLEMENTADO
 - Las carpetas son un camino estructurado de evidencia institucional
 
 ## Gap
-- App consume endpoints de /club-instances/:id/evidence-folder que son FANTASMA (no existen en backend audit)
-- El backend tiene FoldersModule con rutas /folders/*, pero la app consume rutas /club-instances/* que son diferentes
-- Hay un desacople entre las rutas del backend y las que la app consume
+- App consume endpoints de /club-instances/:id/evidence-folder que son FANTASMA (no existen en backend audit) — pendiente de implementacion
+- El naming canonico para URLs es `/club-sections/` (no `/club-instances/`). Cuando se implementen estos endpoints, deben usar el patron canonico `/club-sections/:id/evidence-folder`
+- El backend tiene FoldersModule con rutas /folders/*, pero la app consume rutas /club-instances/* que son diferentes — desacople a resolver en implementacion
 - Admin es solo lectura
 
 ## Prioridad
-- A definir por el desarrollador
+- Media — evidence-folder endpoints pendientes de implementacion con naming canonico club-sections

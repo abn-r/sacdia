@@ -92,6 +92,14 @@ Camino estructurado de avance institucional del miembro dentro de una sección.
 
 Acto institucional mediante el cual un registro, avance o resultado recibe reconocimiento formal.
 
+### Catálogo de trayectoria
+
+Dato de referencia que soporta la operación y trazabilidad de la trayectoria del miembro. Incluye alergias, enfermedades, medicamentos, tipos de relación, ideales de club, años eclesiásticos, categorías de honores y otros catálogos operativos necesarios para registrar, clasificar y contextualizar la información institucional del miembro.
+
+### Seguro institucional
+
+Registro asociado a la trayectoria del miembro que documenta la cobertura de seguros vinculada a su participación institucional (actividades generales, camporees, actividades de alto riesgo). Forma parte de la dimensión administrativa de la trayectoria.
+
 ### Cargo
 
 Responsabilidad institucional ejercida por una persona en un contexto y periodo determinados.

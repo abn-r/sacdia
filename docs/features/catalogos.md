@@ -14,8 +14,8 @@ Estado: IMPLEMENTADO
 ## Gap
 - 4 endpoints de /admin/medicines sin documentacion API
 - GET /catalogs/activity-types sin documentacion API
-- Canon no define explicitamente los catalogos administrativos (alergias, enfermedades, tipos de relacion, anos eclesiasticos) como capacidad del sistema — son SIN CANON
-- Admin consume /admin/honor-categories y /admin/club-ideals como endpoints FANTASMA
+- Admin consume /admin/club-ideals como endpoint FANTASMA (read-only) — pendiente de implementacion en backend
+- Admin consume /admin/honor-categories como endpoints FANTASMA — pendiente de implementacion en backend (ver `docs/features/honores.md`)
 
 ## Prioridad
-- A definir por el desarrollador
+- Media — catalogos son canon de trayectoria; endpoints FANTASMA pendientes de implementacion

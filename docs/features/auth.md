@@ -14,8 +14,10 @@ Estado: IMPLEMENTADO
 
 ## Gap
 - App declara OAuth Google/Apple pero no esta funcional (lanza excepcion)
-- App consume POST /auth/update-password y POST /auth/pr-check que son FANTASMA (no aparecen en backend audit)
+- App consume POST /auth/update-password que es FANTASMA (no existe en backend) — pendiente de implementacion
+- App consume POST /auth/pr-check que es FANTASMA (no aparece en backend audit)
 - Admin no implementa MFA, OAuth ni gestion de sesiones
+- PATCH /admin/users/:userId/approval para aprobacion de usuarios es FANTASMA — pendiente de implementacion en backend
 
 ## Prioridad
-- A definir por el desarrollador
+- Alta para update-password y user approval — funcionalidad core de auth pendiente de backend
