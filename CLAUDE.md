@@ -9,7 +9,6 @@ Monorepo con panel admin web, app móvil y backend API para gestionar clubes de 
 /sacdia-admin       - Panel Web (Next.js 16 + shadcn/ui)
 /sacdia-app         - App Móvil (Flutter + Clean Architecture)
 /docs               - Documentación técnica
-/.specs             - Especificaciones del sistema
 ```
 
 ## Stack Tecnológico Compartido
@@ -57,10 +56,12 @@ git clone https://github.com/abn-r/sacdia-app.git sacdia-app
 ## Documentación
 
 - **Router para agentes IA**: `AGENTS.md`
-- **Steering global**: `docs/00-STEERING/`
-- **API (runtime canónica)**: `docs/02-API/ENDPOINTS-LIVE-REFERENCE.md`
-- **Database**: `docs/03-DATABASE/SCHEMA-REFERENCE.md`
-- **Roadmap**: `docs/03-IMPLEMENTATION-ROADMAP.md`
+- **Steering global**: `docs/steering/`
+- **API (runtime canónica)**: `docs/api/ENDPOINTS-LIVE-REFERENCE.md`
+- **Database**: `docs/database/SCHEMA-REFERENCE.md`
+- **Reality Matrix**: `docs/audit/REALITY-MATRIX.md`
+- **Feature Registry**: `docs/features/README.md`
+- **Decisiones pendientes**: `docs/audit/DECISIONS-PENDING.md`
 
 ## CLAUDE.md Específicos
 

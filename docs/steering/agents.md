@@ -27,7 +27,7 @@ Este proyecto sigue una filosofía de **spec-driven development** (desarrollo ba
 Cuando trabajas en una nueva feature, **SIEMPRE** sigue este flujo:
 
 ```
-1. Leer specs existentes (docs/00-STEERING/)
+1. Leer specs existentes (docs/steering/)
    ↓
 2. Crear/Actualizar requirements.md
    ↓
@@ -62,10 +62,8 @@ Si contestas "no" a cualquiera, **DETENTE** y crea/revisa las specs primero.
 **ANTES de implementar cualquier código**:
 
 ```markdown
-1. Lee TODOS los steering files en `docs/00-STEERING/`:
-   - product.md (visión del producto)
+1. Lee TODOS los steering files en `docs/steering/`:
    - tech.md (stack tecnológico)
-   - structure.md (organización del proyecto)
    - coding-standards.md (estándares de código)
    - data-guidelines.md (manejo de datos)
 
@@ -506,10 +504,8 @@ Después de implementar, verifica:
 ## Recursos Adicionales
 
 ### Documentación Interna
-- `docs/00-STEERING/product.md`: Visión del producto
-- `docs/00-STEERING/tech.md`: Stack tecnológico
-- `docs/00-STEERING/structure.md`: Estructura del proyecto
-- `docs/00-STEERING/coding-standards.md`: Estándares detallados
+- `docs/steering/tech.md`: Stack tecnológico
+- `docs/steering/coding-standards.md`: Estándares detallados
 - `docs/guides/`: Guías de uso del sistema
 
 ### Cuando Tengas Dudas
