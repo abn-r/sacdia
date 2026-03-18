@@ -101,15 +101,17 @@ model class_module_progress {
   module_progress_id Int      @id @default(autoincrement())
   user_id            String   @db.Uuid
   class_id           Int
+  enrollment_id      Int?
   module_id          Int
   score              Float
   active             Boolean  @default(true)
   created_at         DateTime @default(now()) @db.Timestamptz(6)
   modified_at        DateTime @default(now()) @db.Timestamptz(6)
   classes            classes  @relation(fields: [class_id], references: [class_id], onDelete: NoAction, onUpdate: NoAction)
+  enrollments        enrollments? @relation(fields: [enrollment_id], references: [enrollment_id], onDelete: NoAction, onUpdate: NoAction)
   users              users    @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
 
-  @@unique([user_id, class_id, module_id])
+  @@unique([enrollment_id, module_id])
 }
 
 model class_modules {
@@ -130,6 +132,7 @@ model class_section_progress {
   section_progress_id Int      @id @default(autoincrement())
   user_id             String   @db.Uuid
   class_id            Int
+  enrollment_id       Int?
   module_id           Int
   section_id          Int
   score               Float
@@ -138,9 +141,10 @@ model class_section_progress {
   created_at          DateTime @default(now()) @db.Timestamptz(6)
   modified_at         DateTime @default(now()) @db.Timestamptz(6)
   classes             classes  @relation(fields: [class_id], references: [class_id], onDelete: NoAction, onUpdate: NoAction)
+  enrollments         enrollments? @relation(fields: [enrollment_id], references: [enrollment_id], onDelete: NoAction, onUpdate: NoAction)
   users               users    @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
 
-  @@unique([user_id, class_id, module_id, section_id])
+  @@unique([enrollment_id, module_id, section_id])
 }
 
 model class_sections {
@@ -413,6 +417,8 @@ model enrollments {
 
   // Relations
   classes             classes              @relation(fields: [class_id], references: [class_id], onDelete: NoAction, onUpdate: NoAction)
+  class_module_progress  class_module_progress[]
+  class_section_progress class_section_progress[]
   ecclesiastical_year ecclesiastical_years @relation(fields: [ecclesiastical_year_id], references: [year_id], onDelete: NoAction, onUpdate: NoAction)
   users               users                @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
   validator           users?               @relation("enrollment_validator", fields: [validated_by], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
@@ -823,6 +829,7 @@ model users {
   users_allergies                users_allergies[]
   users_classes                  users_classes[]
   users_diseases                 users_diseases[]
+  users_medicines                users_medicines[]
   users_honors                   users_honors[]
   users_permissions              users_permissions[]
   users_pr                       users_pr[]
@@ -1095,6 +1102,19 @@ model users_diseases {
   @@unique([user_id, disease_id], map: "user_diseases_user_id_disease_id_key")
 }
 
+model users_medicines {
+  user_medicine_id Int       @id(map: "user_medicines_pkey") @default(autoincrement())
+  user_id          String    @db.Uuid
+  medicine_id      Int
+  created_at       DateTime  @default(now()) @db.Timestamptz(6)
+  modified_at      DateTime  @default(now()) @db.Timestamptz(6)
+  active           Boolean   @default(true)
+  medicines        medicines @relation(fields: [medicine_id], references: [medicine_id], onDelete: NoAction, onUpdate: NoAction, map: "user_medicines_medicine_id_fkey")
+  users            users     @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "user_medicines_user_id_fkey")
+
+  @@unique([user_id, medicine_id], map: "user_medicines_user_id_medicine_id_key")
+}
+
 model users_honors {
   user_honor_id Int       @id(map: "user_honors_pkey") @default(autoincrement())
   user_id       String    @db.Uuid
@@ -1139,12 +1159,13 @@ model users_roles {
 }
 
 model medicines {
-  medicine_id Int       @id @default(autoincrement())
-  name        String    @db.VarChar
-  description String?   @db.VarChar
-  active      Boolean?  @default(true)
-  created_at  DateTime  @default(now()) @db.Timestamptz(6)
-  modified_at DateTime? @default(now()) @db.Timestamptz(6)
+  medicine_id     Int               @id @default(autoincrement())
+  name            String            @db.VarChar
+  description     String?           @db.VarChar
+  active          Boolean           @default(true)
+  created_at      DateTime          @default(now()) @db.Timestamptz(6)
+  modified_at     DateTime          @default(now()) @updatedAt @db.Timestamptz(6)
+  users_medicines users_medicines[]
 }
 
 // ========================================

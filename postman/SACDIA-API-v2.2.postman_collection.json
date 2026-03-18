@@ -1,0 +1,793 @@
+{
+  "info": {
+    "name": "SACDIA API v2.2",
+    "description": "Complete API collection for SACDIA - Sistema de Administración de Clubes JA\n\n**Version**: 2.2.0\n**Base URL**: {{base_url}}/api/v1\n**Authentication**: JWT Bearer Token\n\n## Setup\n1. Import this collection\n2. Import environment (SACDIA-Environment.json)\n3. Run 'Auth - Login' to get token\n4. Token will auto-save to environment\n\n## Modules (17)\n- Authentication (7 endpoints)\n- Post-Registration (11 endpoints)\n- Contacts (4 endpoints)\n- Legal Representatives (4 endpoints)\n- Catalogs (11 endpoints)\n- Clubs (11 endpoints)\n- Classes (7 endpoints)\n- Honors (8 endpoints)\n- Activities (7 endpoints)\n- Finances (7 endpoints)\n- Camporees (8 endpoints)\n- Folders (7 endpoints)\n- Certifications (7 endpoints)\n- Inventory (5 endpoints)\n- OAuth (5 endpoints)\n- Push Notifications (3 endpoints)\n- Files (2 endpoints)\n\n**Total**: 105+ endpoints",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "1234567"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{auth_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "01. Authentication",
+      "item": [
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.environment.set('auth_token', jsonData.data.session.access_token);",
+                  "    pm.environment.set('user_id', jsonData.data.user.id);",
+                  "    pm.test('Token saved to environment', () => {",
+                  "        pm.expect(jsonData.data.session.access_token).to.be.a('string');",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{test_email}}\",\n  \"password\": \"{{test_password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "login"]
+            },
+            "description": "Login with email and password. Token is auto-saved to environment."
+          }
+        },
+        {
+          "name": "Register",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"newuser@example.com\",\n  \"password\": \"SecurePass123!\",\n  \"name\": \"Juan\",\n  \"paternal_last_name\": \"Pérez\",\n  \"maternal_last_name\": \"García\",\n  \"birthdate\": \"2005-03-15\",\n  \"gender\": \"M\",\n  \"country_id\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/register",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/logout",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "logout"]
+            }
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refresh_token\": \"{{refresh_token}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/refresh",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "refresh"]
+            }
+          }
+        },
+        {
+          "name": "Request Password Reset",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/password/reset-request",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "password", "reset-request"]
+            }
+          }
+        },
+        {
+          "name": "Reset Password",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"access_token\": \"token-from-email\",\n  \"newPassword\": \"NewSecurePass123!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/password/reset",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "password", "reset"]
+            }
+          }
+        },
+        {
+          "name": "Get Current User",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/me",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "me"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "02. Clubs",
+      "item": [
+        {
+          "name": "List Clubs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/clubs?page=1&limit=20",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "clubs"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Club by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/clubs/:clubId",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "clubs", ":clubId"],
+              "variable": [
+                {
+                  "key": "clubId",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Club",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Club Conquistadores Emanuel\",\n  \"local_field_id\": 1,\n  \"church_id\": 1,\n  \"club_types\": [2]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/clubs",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "clubs"]
+            }
+          }
+        },
+        {
+          "name": "Update Club",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Club Conquistadores Emanuel Updated\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/clubs/:clubId",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "clubs", ":clubId"],
+              "variable": [
+                {
+                  "key": "clubId",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Club",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/clubs/:clubId",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "clubs", ":clubId"],
+              "variable": [
+                {
+                  "key": "clubId",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "03. Activities",
+      "item": [
+        {
+          "name": "List Club Activities",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/clubs/:clubId/activities?clubTypeId=2&active=true",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "clubs", ":clubId", "activities"],
+              "query": [
+                {
+                  "key": "clubTypeId",
+                  "value": "2"
+                },
+                {
+                  "key": "active",
+                  "value": "true"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "clubId",
+                  "value": "5"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Activity",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Reunión Semanal\",\n  \"description\": \"Reunión regular del club\",\n  \"activity_type\": \"meeting\",\n  \"activity_date\": \"2026-02-08T16:00:00.000Z\",\n  \"end_date\": \"2026-02-08T19:00:00.000Z\",\n  \"location\": \"Iglesia Central\",\n  \"latitude\": 19.432608,\n  \"longitude\": -99.133209,\n  \"club_pathf_id\": 5,\n  \"max_participants\": 50\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/clubs/:clubId/activities",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "clubs", ":clubId", "activities"],
+              "variable": [
+                {
+                  "key": "clubId",
+                  "value": "5"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Activity",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/activities/:activityId",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "activities", ":activityId"],
+              "variable": [
+                {
+                  "key": "activityId",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Register Attendance",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"{{user_id}}\",\n  \"check_in_time\": \"2026-02-08T16:05:00.000Z\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/activities/:activityId/attendance",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "activities", ":activityId", "attendance"],
+              "variable": [
+                {
+                  "key": "activityId",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Activity Attendance",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/activities/:activityId/attendance",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "activities", ":activityId", "attendance"],
+              "variable": [
+                {
+                  "key": "activityId",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "04. Finances",
+      "item": [
+        {
+          "name": "Get Finance Categories",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/finances/categories?type=0",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "finances", "categories"],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "0",
+                  "description": "0=Income, 1=Expense"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Club Finances",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/clubs/:clubId/finances?year=2026&month=2",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "clubs", ":clubId", "finances"],
+              "query": [
+                {
+                  "key": "year",
+                  "value": "2026"
+                },
+                {
+                  "key": "month",
+                  "value": "2"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "clubId",
+                  "value": "5"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Financial Summary",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/clubs/:clubId/finances/summary?year=2026&month=2",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "clubs", ":clubId", "finances", "summary"],
+              "query": [
+                {
+                  "key": "year",
+                  "value": "2026"
+                },
+                {
+                  "key": "month",
+                  "value": "2"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "clubId",
+                  "value": "5"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Finance Transaction",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Cuotas de febrero 2026\",\n  \"amount\": 3000.00,\n  \"type\": 0,\n  \"transaction_date\": \"2026-02-01\",\n  \"finance_category_id\": 1,\n  \"club_pathf_id\": 5,\n  \"ecclesiastical_year_id\": 5,\n  \"receipt_number\": \"R-2026-001\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/clubs/:clubId/finances",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "clubs", ":clubId", "finances"],
+              "variable": [
+                {
+                  "key": "clubId",
+                  "value": "5"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "05. Honors",
+      "item": [
+        {
+          "name": "List Honor Categories",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/catalogs/honor-categories",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "catalogs", "honor-categories"]
+            }
+          }
+        },
+        {
+          "name": "List Honors",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/honors?categoryId=1&difficulty=1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "honors"],
+              "query": [
+                {
+                  "key": "categoryId",
+                  "value": "1"
+                },
+                {
+                  "key": "difficulty",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Honor Details",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/honors/:honorId",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "honors", ":honorId"],
+              "variable": [
+                {
+                  "key": "honorId",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Enroll in Honor",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"honor_id\": 1,\n  \"instructor_user_id\": \"instructor-uuid\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/users/:userId/honors/enroll",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "users", ":userId", "honors", "enroll"],
+              "variable": [
+                {
+                  "key": "userId",
+                  "value": "{{user_id}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get User Honors",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/users/:userId/honors",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "users", ":userId", "honors"],
+              "variable": [
+                {
+                  "key": "userId",
+                  "value": "{{user_id}}"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "06. Catalogs",
+      "item": [
+        {
+          "name": "Get Countries",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/catalogs/countries",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "catalogs", "countries"]
+            }
+          }
+        },
+        {
+          "name": "Get Unions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/catalogs/unions?countryId=1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "catalogs", "unions"],
+              "query": [
+                {
+                  "key": "countryId",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Local Fields",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/catalogs/local-fields?unionId=1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "catalogs", "local-fields"],
+              "query": [
+                {
+                  "key": "unionId",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Club Types",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/catalogs/club-types",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "catalogs", "club-types"]
+            }
+          }
+        },
+        {
+          "name": "Get Roles",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/catalogs/roles?category=CLUB",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "catalogs", "roles"],
+              "query": [
+                {
+                  "key": "category",
+                  "value": "CLUB",
+                  "description": "GLOBAL or CLUB"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "07. OAuth",
+      "item": [
+        {
+          "name": "Initiate Google OAuth",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"redirectUrl\": \"https://sacdia.app/auth/callback\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/oauth/google",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "oauth", "google"]
+            }
+          }
+        },
+        {
+          "name": "Initiate Apple OAuth",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"redirectUrl\": \"https://sacdia.app/auth/callback\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/oauth/apple",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "oauth", "apple"]
+            }
+          }
+        },
+        {
+          "name": "Get Connected Providers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/oauth/providers",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "oauth", "providers"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Health Check",
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/v1/health",
+          "host": ["{{base_url}}"],
+          "path": ["api", "v1", "health"]
+        },
+        "description": "Health check endpoint - no auth required"
+      }
+    }
+  ]
+}

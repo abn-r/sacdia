@@ -14,9 +14,17 @@
 sacdia-backend/
 sacdia-app/
 sacdia-admin/
-sacdia_app/
 
 # Ignore temporary files
 *.tmp
 *.log
 .cache/
+
+# Local AI context files (personal, non-versioned)
+*.local.md
+
+# Ignore claude-mem context files (local only)
+.claude/
+.agent/
+.agents/
+.opencode/

@@ -1,8 +1,19 @@
-# Especificación Técnica - Nueva REST API SACDIA v2.0
+<!-- CANONICAL-API-NOTE -->
+> [!WARNING]
+> Documento de especificación técnica/arquitectura.
+> Para endpoints runtime consumibles por agentes, usar:
+> [ENDPOINTS-LIVE-REFERENCE.md](./ENDPOINTS-LIVE-REFERENCE.md)
 
-**Versión**: 2.0.0 (Actualizada)  
-**Fecha**: 29 de enero de 2026  
-**Status**: Listo para implementación
+# Especificación Técnica - REST API SACDIA
+
+**Estado**: ACTIVE
+**Versión**: 3.0.0 (contrato runtime unificado)
+**Fecha**: 21 de febrero de 2026
+**Status**: ✅ Producción - Endpoints canónicos en ENDPOINTS-LIVE-REFERENCE.md
+
+**Nota**:
+- Este documento conserva decisiones de arquitectura, seguridad y contratos.
+- El listado y conteo vigente de endpoints se mantiene en [ENDPOINTS-LIVE-REFERENCE.md](ENDPOINTS-LIVE-REFERENCE.md).
 
 ---
 
@@ -10,11 +21,11 @@
 
 Este documento integra:
 
-- ✅ **Product vision**: `.specs/_steering/product.md`
-- ✅ **Stack tecnológico**: `.specs/_steering/tech.md`
-- ✅ **Procesos de negocio**: `docs/procesos-sacdia.md`
-- ✅ **Sistema de roles**: `docs/restapi/restructura-roles.md`
-- ✅ **Queries SQL**: `docs/restapi/queries-club-role-assignments.md`
+- ✅ **Product vision**: `docs/00-STEERING/product.md`
+- ✅ **Stack tecnológico**: `docs/00-STEERING/tech.md`
+- ✅ **Procesos de negocio**: `docs/02-PROCESSES.md`
+- ✅ **Sistema de roles**: `docs/history/source/api/restrucura-roles.md` (histórico)
+- ✅ **Queries SQL (histórico)**: `docs/history/source/api/queries-club-role-assignments.md`
 
 ###Decisiones Finales Aplicadas
 
@@ -31,11 +42,13 @@ Este documento integra:
 
 ### Stack Final
 
-- **Backend**: NestJS 10.x + TypeScript 5.x
+- **Backend**: NestJS 11.x + TypeScript 5.x
 - **Database**: PostgreSQL 15.x (Supabase)
-- **ORM**: Prisma 6.x
-- **Auth**: Supabase Auth (JWT)
+- **ORM**: Prisma 7.x
+- **Auth**: Supabase Auth (JWT + OAuth)
 - **Storage**: Supabase Storage
+- **Push Notifications**: Firebase Cloud Messaging (FCM)
+- **Real-time**: Socket.io (WebSockets)
 - **Cache**: Redis (Upstash)
 - **Hosting**: Vercel Serverless
 
@@ -78,16 +91,19 @@ Este documento integra:
 ```
 src/
 ├── modules/
-│   ├── auth/                    # Autenticación y autorización
+│   ├── auth/                    # Autenticación y autorización (JWT + OAuth)
 │   ├── users/                   # Gestión de usuarios y perfiles
-│   ├── legal-representatives/   # ✅ NUEVO: Representantes legales
-│   ├── clubs/                   # Gestión de clubes e instancias
+│   ├── legal-representatives/   # Representantes legales
+│   ├── clubs/                   # Gestión de clubes y secciones
 │   ├── classes/                 # Clases progresivas
 │   ├── honors/                  # Especialidades
 │   ├── activities/              # Actividades
 │   ├── finances/                # Finanzas
-│   ├── inventory/               # Inventarios
-│   ├── camporees/               # Campamentos
+│   ├── inventory/               # ✅ Inventarios por sección de club
+│   ├── camporees/               # ✅ Campamentos con validación de seguros
+│   ├── folders/                 # ✅ Portfolios/Carpetas de evidencias
+│   ├── certifications/          # ✅ Certificaciones para GMs investidos
+│   ├── notifications/           # ✅ Push notifications (FCM)
 │   ├── catalogs/                # Catálogos maestros
 │   └── files/                   # Gestión de archivos
 ├── common/
@@ -110,7 +126,7 @@ src/
 ```typescript
 enum RoleCategory {
   GLOBAL = "GLOBAL", // Roles de sistema
-  CLUB = "CLUB", // Roles de instancia de club
+  CLUB = "CLUB", // Roles de sección de club
 }
 ```
 
@@ -176,10 +192,8 @@ CREATE TABLE club_role_assignments (
   user_id UUID NOT NULL REFERENCES users(id),
   role_id UUID NOT NULL REFERENCES roles(id),  -- Debe tener role_category = 'CLUB'
 
-  -- Instancia de club (solo UNA con valor)
-  club_adv_id INT REFERENCES club_adventurers(id),
-  club_pathf_id INT REFERENCES club_pathfinders(id),
-  club_mg_id INT REFERENCES club_master_guild(id),
+  -- Sección de club (FK directa)
+  club_section_id INT NOT NULL REFERENCES club_sections(club_section_id),
 
   -- ✅ Año eclesiástico
   ecclesiastical_year_id INT NOT NULL REFERENCES ecclesiastical_years(id),
@@ -194,18 +208,10 @@ CREATE TABLE club_role_assignments (
   updated_at TIMESTAMP DEFAULT NOW(),
 
   -- Constraints
-  CONSTRAINT one_club_instance CHECK (
-    (club_adv_id IS NOT NULL)::int +
-    (club_pathf_id IS NOT NULL)::int +
-    (club_mg_id IS NOT NULL)::int = 1
-  ),
-
-  CONSTRAINT unique_user_role_instance_year UNIQUE NULLS NOT DISTINCT (
-    user_id, role_id, club_adv_id, club_pathf_id, club_mg_id, ecclesiastical_year_id
+  CONSTRAINT unique_user_role_section_year UNIQUE (
+    user_id, role_id, club_section_id, ecclesiastical_year_id
   )
 );
-
--- Ver queries completas en: docs/restapi/queries-club-role-assignments.md
 ```
 
 ---
@@ -242,30 +248,31 @@ export class ActivitiesController {
 
 ```sql
 CREATE TABLE users (
-  id UUID PRIMARY KEY,  -- Mismo UUID de Supabase Auth
+  user_id UUID PRIMARY KEY,  -- Mismo UUID de Supabase Auth
   email VARCHAR(255) UNIQUE NOT NULL,
-  name VARCHAR(100) NOT NULL,
-  paternal_last_name VARCHAR(100) NOT NULL,  -- ✅ Descriptivo
-  maternal_last_name VARCHAR(100) NOT NULL,  -- ✅ Descriptivo
+  name VARCHAR(100),
+  paternal_last_name VARCHAR(100),
+  maternal_last_name VARCHAR(100),
 
   -- Info personal
   gender CHAR(1) CHECK (gender IN ('M', 'F')),
-  birthdate DATE,
-  is_baptized BOOLEAN,
+  birthday DATE,
+  baptism BOOLEAN,
   baptism_date DATE,
+  blood TEXT,
 
   -- Ubicación
-  country_id UUID REFERENCES countries(id),
-  union_id UUID REFERENCES unions(id),
-  local_field_id UUID REFERENCES local_fields(id),
+  country_id INTEGER REFERENCES countries(country_id),
+  union_id INTEGER REFERENCES unions(union_id),
+  local_field_id INTEGER REFERENCES local_fields(local_field_id),
 
-  -- Avatar
-  avatar TEXT,  -- URL de Supabase Storage
+  -- Avatar/imagen de perfil
+  user_image TEXT,  -- URL de Supabase Storage
 
   -- Metadata
   active BOOLEAN DEFAULT true,
   created_at TIMESTAMP DEFAULT NOW(),
-  updated_at TIMESTAMP DEFAULT NOW()
+  modified_at TIMESTAMP DEFAULT NOW()
 );
 ```
 
@@ -277,7 +284,7 @@ CREATE TABLE users (
 
 ```sql
 CREATE TABLE users_pr (
-  user_id UUID PRIMARY KEY REFERENCES users(id),
+  user_id UUID PRIMARY KEY REFERENCES users(user_id),
 
   -- Tracking por paso
  complete BOOLEAN DEFAULT false,
@@ -305,10 +312,10 @@ Para usuarios menores de 18 años:
 ```sql
 CREATE TABLE legal_representatives (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
 
   -- Opción 1: Representante es usuario registrado
-  representative_user_id UUID REFERENCES users(id),
+  representative_user_id UUID REFERENCES users(user_id),
 
   -- Opción 2: Solo datos del representante
   name VARCHAR(100),
@@ -317,7 +324,7 @@ CREATE TABLE legal_representatives (
   phone VARCHAR(20),
 
   -- Tipo de relación (padre, madre, tutor)
-  relationship_type_id UUID REFERENCES relationship_types(id),
+  relationship_type_id UUID REFERENCES relationship_types(relationship_type_id),
 
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW(),
@@ -339,24 +346,27 @@ CREATE TABLE legal_representatives (
 
 ```sql
 CREATE TABLE emergency_contacts (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  emergency_id SERIAL PRIMARY KEY,
+  owner_id UUID NOT NULL REFERENCES users(user_id) ON DELETE RESTRICT,
+  contact_user_id UUID REFERENCES users(user_id) ON DELETE SET NULL,
   name VARCHAR(100) NOT NULL,
   phone VARCHAR(20) NOT NULL,
-  relationship_type_id UUID REFERENCES relationship_types(id),
+  relationship_type_id UUID NOT NULL REFERENCES relationship_types(relationship_type_id),
+  primary BOOLEAN DEFAULT false,
+  active BOOLEAN DEFAULT true,
 
   created_at TIMESTAMP DEFAULT NOW(),
-  updated_at TIMESTAMP DEFAULT NOW(),
+  modified_at TIMESTAMP DEFAULT NOW(),
 
   -- Evitar duplicados
-  CONSTRAINT unique_user_contact UNIQUE (user_id, name, phone)
+  CONSTRAINT unique_owner_contact UNIQUE (owner_id, name, phone)
 );
 
 -- Trigger para validar máximo 5
 CREATE OR REPLACE FUNCTION check_max_emergency_contacts()
 RETURNS TRIGGER AS $$
 BEGIN
-  IF (SELECT COUNT(*) FROM emergency_contacts WHERE user_id = NEW.user_id) >= 5 THEN
+  IF (SELECT COUNT(*) FROM emergency_contacts WHERE owner_id = NEW.owner_id AND active = true) >= 5 THEN
     RAISE EXCEPTION 'User cannot have more than 5 emergency contacts';
   END IF;
   RETURN NEW;
@@ -410,34 +420,78 @@ export class RegisterDto {
 
 ---
 
-### UpdatePersonalInfoDto
+### UpdateUserDto
 
 ```typescript
-export class UpdatePersonalInfoDto {
+export class UpdateUserDto {
   @IsEnum(["M", "F"])
-  gender: string;
-
-  @IsDateString()
-  @Validate(AgeValidator, [{ min: 3, max: 99 }])
-  birthdate: string;
-
-  @IsBoolean()
-  is_baptized: boolean;
+  @IsOptional()
+  gender?: "M" | "F";
 
   @IsOptional()
   @IsDateString()
-  @ValidateIf((o) => o.is_baptized === true)
-  baptism_date?: string;
-}
+  birthday?: string;
 
-// Validador personalizado
-@ValidatorConstraint({ name: "AgeValidator", async: false })
-export class AgeValidator implements ValidatorConstraintInterface {
-  validate(birthdate: string, args: ValidationArguments) {
-    const { min, max } = args.constraints[0];
-    const age = calculateAge(birthdate);
-    return age >= min && age <= max;
-  }
+  @IsOptional()
+  @IsBoolean()
+  baptism?: boolean;
+
+  @IsOptional()
+  @IsDateString()
+  @ValidateIf((o) => o.baptism === true)
+  baptism_date?: string;
+
+  @IsOptional()
+  @IsEnum(blood_type)
+  blood?: blood_type;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  country_id?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  union_id?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  local_field_id?: number;
+}
+```
+
+---
+
+### UpdateUserAllergiesDto
+
+```typescript
+export class UpdateUserAllergiesDto {
+  @IsArray()
+  @ArrayUnique()
+  @Type(() => Number)
+  @IsInt({ each: true })
+  @Min(1, { each: true })
+  allergy_ids: number[];
+}
+```
+
+---
+
+### UpdateUserDiseasesDto
+
+```typescript
+export class UpdateUserDiseasesDto {
+  @IsArray()
+  @ArrayUnique()
+  @Type(() => Number)
+  @IsInt({ each: true })
+  @Min(1, { each: true })
+  disease_ids: number[];
 }
 ```
 
@@ -482,106 +536,29 @@ export class CreateLegalRepresentativeDto {
 
 ## 🔗 Endpoints Principales
 
-### Módulo Auth
+> [!IMPORTANT]
+> El listado completo y vigente de endpoints del backend está en [ENDPOINTS-LIVE-REFERENCE.md](ENDPOINTS-LIVE-REFERENCE.md).
+> Esta especificación se mantiene para arquitectura, seguridad, contratos y decisiones técnicas.
 
-```typescript
-POST   /api/v1/auth/register
-POST   /api/v1/auth/login
-POST   /api/v1/auth/logout
-POST   /api/v1/auth/password/reset-request
-POST   /api/v1/auth/password/reset
-GET    /api/v1/auth/me                      // Incluye global_roles + club_role_assignments
-GET    /api/v1/auth/profile/completion-status // ✅ Con tracking granular
+### Módulos Runtime (Resumen)
 
-// ✅ MFA (2FA) - NUEVO
-POST   /api/v1/auth/mfa/enroll              // Genera QR code para configurar
-POST   /api/v1/auth/mfa/verify              // Verifica código y activa 2FA
-GET    /api/v1/auth/mfa/factors             // Lista factores configurados
-GET    /api/v1/auth/mfa/status              // Estado de 2FA del usuario
-DELETE /api/v1/auth/mfa/unenroll            // Deshabilita 2FA
-
-// ✅ Sessions - NUEVO
-GET    /api/v1/auth/sessions                // Lista sesiones activas
-DELETE /api/v1/auth/sessions/:sessionId     // Cierra sesión específica
-DELETE /api/v1/auth/sessions                // Logout de todos los dispositivos
-```
-
-### Módulo Users
-
-```typescript
-GET    /api/v1/users/:userId
-PATCH  /api/v1/users/:userId
-POST   /api/v1/users/:userId/profile-picture
-DELETE /api/v1/users/:userId/profile-picture
-
-// Emergency Contacts (máx 5)
-GET    /api/v1/users/:userId/emergency-contacts
-POST   /api/v1/users/:userId/emergency-contacts    // ✅ Validación de máx 5
-PATCH  /api/v1/emergency-contacts/:contactId
-DELETE /api/v1/emergency-contacts/:contactId
-
-// Allergies & Diseases
-GET    /api/v1/users/:userId/allergies
-POST   /api/v1/users/:userId/allergies
-DELETE /api/v1/users/:userId/allergies/:allergyId
-
-GET    /api/v1/users/:userId/diseases
-POST   /api/v1/users/:userId/diseases
-DELETE /api/v1/users/:userId/diseases/:diseaseId
-```
-
-### Módulo Legal Representatives (✅ NUEVO)
-
-```typescript
-GET    /api/v1/users/:userId/requires-legal-representative  // Verifica si edad < 18
-POST   /api/v1/users/:userId/legal-representative
-GET    /api/v1/users/:userId/legal-representative
-PATCH  /api/v1/users/:userId/legal-representative
-DELETE /api/v1/users/:userId/legal-representative          // Solo si edad >= 18
-```
-
-### Módulo Clubs
-
-```typescript
-POST   /api/v1/clubs
-GET    /api/v1/clubs
-GET    /api/v1/clubs/:clubId
-PATCH  /api/v1/clubs/:clubId
-
-// Instancias
-POST   /api/v1/clubs/:clubId/instances/adventurers
-POST   /api/v1/clubs/:clubId/instances/pathfinders
-POST   /api/v1/clubs/:clubId/instances/master-guides
-GET    /api/v1/clubs/:clubId/instances
-
-// Miembros (via club_role_assignments)
-GET    /api/v1/clubs/:clubId/members                    // ✅ Ver queries SQL
-POST   /api/v1/clubs/:clubId/members                    // Crea role assignment
-DELETE /api/v1/clubs/:clubId/members/:userId
-
-// Roles de club (club_role_assignments)
-POST   /api/v1/clubs/:clubId/members/:userId/roles      // Asignar rol adicional
-GET    /api/v1/users/:userId/club-roles                 // Obtener todos sus roles de club
-DELETE /api/v1/club-role-assignments/:assignmentId
-```
-
-### Módulo Classes
-
-```typescript
-GET    /api/v1/classes
-GET    /api/v1/classes/:classId
-POST   /api/v1/users/:userId/classes                    // Inscripción
-GET    /api/v1/users/:userId/classes
-DELETE /api/v1/users/:userId/classes/:classId
-
-// Progreso
-GET    /api/v1/users/:userId/classes/:classId/progress
-POST   /api/v1/users/:userId/classes/:classId/modules/:moduleId/sections/:sectionId
-POST   /api/v1/users/:userId/classes/:classId/submit-for-validation
-POST   /api/v1/classes/:classId/validate-investiture/:userId
-```
-
----
+- `/api/v1/auth`
+- `/api/v1/users`
+- `/api/v1/activities`
+- `/api/v1/admin`
+- `/api/v1/camporees`
+- `/api/v1/catalogs`
+- `/api/v1/certifications`
+- `/api/v1/classes`
+- `/api/v1/club-roles`
+- `/api/v1/clubs`
+- `/api/v1/fcm-tokens`
+- `/api/v1/finances`
+- `/api/v1/folders`
+- `/api/v1/health`
+- `/api/v1/honors`
+- `/api/v1/inventory`
+- `/api/v1/notifications`
 
 ## 📊 Respuestas Estándar
 
@@ -633,66 +610,156 @@ POST   /api/v1/classes/:classId/validate-investiture/:userId
 }
 ```
 
+### Contrato Canónico: Class progress enrollment-aware (FS-03)
+
+Las rutas de progreso de clases mantienen compatibilidad transicional en el path, pero la identidad operativa del progreso ya no es `(user_id, class_id)` sino `enrollments.enrollment_id`.
+
+```http
+GET /api/v1/users/:userId/classes/:classId/progress?enrollmentId=123
+PATCH /api/v1/users/:userId/classes/:classId/progress
+```
+
+```json
+{
+  "module_id": 10,
+  "section_id": 55,
+  "score": 100,
+  "evidences": { "urls": ["https://..."] },
+  "enrollment_id": 123
+}
+```
+
+Reglas:
+
+- Sin override explícito, el backend resuelve una sola inscripción activa del año eclesiástico actual para `(userId, classId)`.
+- `GET` acepta `enrollmentId` por query; `PATCH` acepta `enrollment_id` en body como override aditivo.
+- La respuesta exitosa de lectura incluye `enrollment_id` y `ecclesiastical_year_id` para exponer el owner anual resuelto.
+- `404 NOT_FOUND`: no existe inscripción anual resoluble para ese `userId` + `classId`.
+- `409 CONFLICT`: existe ambigüedad de resolución y la API devuelve `code = ENROLLMENT_RESOLUTION_AMBIGUOUS` para forzar selección explícita.
+- `class_section_progress` es la fuente operativa; `class_module_progress` se mantiene como proyección sincronizada por `enrollment_id`.
+
+### Contrato Canónico: Health Profile Baseline
+
+El baseline health activo del runtime queda anclado sobre sub-recursos sensibles de `user`:
+
+- `allergies`
+- `diseases`
+- `medicines`
+
+Fuera de scope del baseline activo actual:
+
+- vínculo `medicine <-> disease`;
+- dosis, frecuencia, prescripción o historial clínico.
+
+Rutas verificadas en backend:
+
+```http
+GET /api/v1/users/:userId/allergies
+GET /api/v1/users/:userId/diseases
+GET /api/v1/users/:userId/medicines
+PUT /api/v1/users/:userId/allergies
+PUT /api/v1/users/:userId/diseases
+PUT /api/v1/users/:userId/medicines
+DELETE /api/v1/users/:userId/allergies/:allergyId
+DELETE /api/v1/users/:userId/diseases/:diseaseId
+DELETE /api/v1/users/:userId/medicines/:medicineId
+```
+
+Reglas:
+
+- Son sub-recursos sensibles `user`, no recursos health globales.
+- Deben usar `@AuthorizationResource({ type: 'user', ownerParam: 'userId' })`.
+- Owner-or-global: ownership sobre `userId` habilita self-service; para terceros, lectura acepta `health:read` o fallback legacy `users:read_detail`, y escritura acepta `health:update` o fallback legacy `users:update`.
+- Permisos de club provenientes solo de `active_assignment` no habilitan acceso a health de terceros.
+- Responden con envelope `{ status: 'success', data: [...] }`.
+- `GET` devuelve una lista plana de selecciones activas:
+  - alergias: `{ allergy_id, name }`
+  - enfermedades: `{ disease_id, name }`
+- Si el usuario existe sin selecciones activas, la respuesta es `200` con `data: []`.
+- `PUT` reemplaza el conjunto activo completo.
+- `DELETE` por item existe en runtime y desactiva logicamente una seleccion puntual (`active=false`) sin inventar un recurso nuevo.
+- `DELETE` responde `404` cuando la seleccion puntual no esta activa en ese usuario.
+- `404` aplica en `GET` solo cuando `userId` no existe.
+
+### Contrato Canónico: User ownership y sub-recursos sensibles
+
+Para las rutas sensibles que cuelgan de `/api/v1/users/:userId/...`, el runtime vigente verificable en backend es:
+
+- ownership sobre `userId` habilita self-service;
+- para terceros, solo cuentan permisos globales resueltos explicitamente;
+- lecturas finas aceptan `family:read` o fallback legacy `users:read_detail`;
+- escrituras finas aceptan `family:update` o fallback legacy `users:update`;
+- permisos de club provenientes solo de `active_assignment` no habilitan acceso a datos `user` de terceros.
+
+Familias sensibles confirmadas en runtime:
+
+- `health` (`allergies`, `diseases`, `medicines`);
+- `emergency-contacts`;
+- `legal-representative`;
+- `post-registration/status` y `step-{1,2,3}/complete`;
+
+Exclusiones explicitas fuera del tiering fino actual:
+
+- `GET /users/:userId`;
+- `PATCH /users/:userId`;
+- `POST /users/:userId/profile-picture`;
+- `DELETE /users/:userId/profile-picture`;
+- `GET /users/:userId/age`;
+- `GET /users/:userId/requires-legal-representative`.
+
+Límites documentales:
+
+- Los permisos finos dedicados vigentes son `health:*`, `emergency_contacts:*`, `legal_representative:*` y `post_registration:*`.
+- `GET /users/:userId/post-registration/status` permite lectura administrativa mínima de terceros con `post_registration:read` o fallback legacy `users:read_detail`.
+- `POST /users/:userId/post-registration/step-{1,2,3}/complete` permite completion administrativa mínima de terceros con `post_registration:update` o fallback legacy `users:update`.
+- Para terceros no owner, el backend debe devolver estado administrativo mínimo y respuestas saneadas, sin inferir datos sensibles ni causas detalladas del paso 2.
+
+### Contrato Transicional Formativo FS-01 (`GET /api/v1/admin/users/:userId`)
+
+Este endpoint mantiene envelope `{ status, data }` y añade semántica explícita para estado formativo:
+
+- `data.current_operational_enrollment`
+  - Nullable.
+  - Fuente de verdad operativa anual: **solo** `enrollments` del año eclesiástico activo.
+  - No usa `users_classes.current_class` para inferir presente.
+- `data.trajectory_classes`
+  - Arreglo (puede ser vacío).
+  - Fuente de verdad de trayectoria consolidada/histórica: **solo** `users_classes`.
+- `data.classes`
+  - Alias legacy **deprecado** de `trajectory_classes` para compatibilidad.
+  - Mantiene semántica de trayectoria (NO semántica operativa anual).
+
+Reglas de nulidad para `current_operational_enrollment`:
+
+- no hay año eclesiástico activo resoluble;
+- no hay enrollment activo del usuario para el año activo;
+- hay más de un enrollment candidato para el año activo.
+
+En esos casos se retorna `null` sin selección silenciosa ni inferencia desde trayectoria.
+
+#### Nota de rollout
+
+- Consumidores actualizados deben usar `current_operational_enrollment` para estado anual presente y `trajectory_classes` para histórico.
+- Consumidores deben tolerar `current_operational_enrollment = null`.
+- Durante FS-01 no se eliminan writes legacy ni se retira `classes`.
+
 ---
 
-## 🚀 Plan de Implementación
+## 🚀 Estado de Implementación
 
-### Fase 1: Fundamentos (Semana 1-2)
-
-- [ ] Setup NestJS con versionado `/api/v1/`
-- [ ] Configurar Prisma + Supabase
-- [ ] Implementar Helmet + Throttler + CORS
-- [ ] Crear SupabaseGuard
-- [ ] Configurar Swagger
-
-### Fase 2: Auth + RBAC (Semana 3-4)
-
-- [ ] Módulo Auth completo
-- [ ] Sistema de roles con `role_category`
-- [ ] Tablas `users_roles` y `club_role_assignments`
-- [ ] RolesGuard y decorators
-- [ ] Tests E2E de auth
-
-### Fase 3: Users + Post-Registro (Semana 5-6)
-
-- [ ] Módulo Users básico
-- [ ] Tabla `users_pr` con tracking granular
-- [ ] Upload de fotografía (Supabase Storage)
-- [ ] Contactos de emergencia (validación máx 5)
-- [ ] Alergias y enfermedades
-
-### Fase 4: Legal Representatives (Semana 7)
-
-- [ ] Módulo Legal Representatives
-- [ ] Validación de edad < 18
-- [ ] Flujo completo en post-registro
-
-### Fase 5: Clubs + Classes (Semana 8-10)
-
-- [ ] Módulo Clubs (CRUD + instancias)
-- [ ] `club_role_assignments` con `ecclesiastical_year_id`
-- [ ] Auto-asignación rol "member"
-- [ ] Módulo Classes (catálogo + enrollment)
-- [ ] Validación de investiduras
-
-### Fase 6: Módulos Adicionales + Testing (Semana 11-12)
-
-- [ ] Activities, Finances, Inventory
-- [ ] Catalogs unificados
-- [ ] Tests unitarios (>70% coverage)
-- [ ] Tests E2E completos
-- [ ] Performance testing
-
----
+- API backend en producción con contrato runtime centralizado en [ENDPOINTS-LIVE-REFERENCE.md](ENDPOINTS-LIVE-REFERENCE.md).
+- Módulos activos: auth, users, clubs, classes, honors, activities, camporees, finances, inventory, folders, notifications, catalogs, admin geography/reference y rbac.
+- Para consumo por agentes (App + Panel Admin), usar siempre el documento canónico de endpoints en vivo.
 
 ## 📝 Recursos Adicionales
 
-- **Queries SQL**: [queries-club-role-assignments.md](file:///Users/abner/Documents/dev/sacdia/docs/restapi/queries-club-role-assignments.md)
-- **Análisis de Roles**: [analisis-club-members-vs-roles.md](file:///Users/abner/Documents/dev/sacdia/docs/restapi/analisis-club-members-vs-roles.md)
-- **Decisiones**: [decisiones-estandarizacion.md](file:///Users/abner/Documents/dev/sacdia/docs/restapi/decisiones-estandarizacion.md)
+- **Queries SQL (histórico)**: [queries-club-role-assignments.md](../history/source/api/queries-club-role-assignments.md)
+- **Análisis de Roles (histórico)**: [analisis-club-members-vs-roles.md](../history/source/api/analisis-club-members-vs-roles.md)
+- **Decisiones (histórico)**: [decisiones-estandarizacion.md](../history/source/api/decisiones-estandarizacion.md)
 
 ---
 
-**Generado**: 2026-01-29  
-**Versión**: 2.0.0 (Con todas las decisiones finales)  
-**Status**: ✅ Listo para implementación
+**Generado**: 2026-01-29
+**Actualizado**: 2026-03-18
+**Versión**: 3.0.0 (contrato runtime unificado)
+**Status**: ✅ Producción - Endpoints canónicos en ENDPOINTS-LIVE-REFERENCE.md

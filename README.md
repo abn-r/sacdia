@@ -1,168 +1,53 @@
-# SACDIA - Sistema de Administración de Clubes de Conquistadores y JDVA
+# SACDIA
 
-Sistema integral de gestión para clubes de Conquistadores, Aventureros y JDVA, desarrollado con arquitectura moderna y escalable.
+Workspace de SACDIA con documentacion global y modulos runtime del proyecto.
 
-## 📋 Descripción
+## Rol de este archivo
 
-SACDIA es una plataforma completa que permite administrar:
+- `README.md` es onboarding resumido del workspace.
+- La capa canonica del sistema vive en `docs/canon/`.
+- La baseline global y rutas de lectura viven en `docs/README.md`.
+- Si un roadmap, guia de integracion o nota historica contradice el canon, gana `docs/canon/*`.
 
-- Clubes de Conquistadores y Aventureros
-- Inscripciones anuales y períodos de membresía
-- Gestión de miembros, directores y padres
-- Sistema de investidura y certificaciones
-- Seguros y gestión financiera
-- Eventos y actividades
+## Estructura del workspace
 
-## 🏗️ Arquitectura - Multi-Repositorio
-
-Este proyecto utiliza una arquitectura de **multi-repositorio** para mantener cada componente independiente:
-
-### Repositorios del Proyecto
-
-| Componente           | Repositorio                                               | Descripción                   | Tecnología                   |
-| -------------------- | --------------------------------------------------------- | ----------------------------- | ---------------------------- |
-| 📚 **Documentación** | [sacdia](https://github.com/abn-r/sacdia)                 | Specs y documentación central | Markdown                     |
-| 🔧 **Backend**       | [sacdia-backend](https://github.com/abn-r/sacdia-backend) | API REST y lógica de negocio  | NestJS + Prisma + Supabase   |
-| 📱 **App Móvil**     | [sandia-app](https://github.com/abn-r/sandia-app)         | Aplicación móvil iOS/Android  | Flutter + Clean Architecture |
-| 💻 **Panel Admin**   | [sandia-admin](https://github.com/abn-r/sandia-admin)     | Panel de administración web   | Next.js 16 + shadcn/ui       |
-
-## 📁 Contenido de Este Repositorio
-
-Este repositorio contiene **únicamente la documentación y especificaciones** del proyecto:
-
-```
+```text
 sacdia/
-├── .specs/              # Especificaciones técnicas del proyecto
-│   ├── _steering/       # Documentos de dirección (tech stack, roadmap)
-│   ├── architecture/    # Diagramas y arquitectura
-│   └── features/        # Especificaciones de features
-├── docs/                # Documentación técnica y de producto
-│   ├── database/        # Schema, migraciones, relaciones
-│   ├── api/             # Documentación de API
-│   └── guides/          # Guías de desarrollo
-└── README.md           # Este archivo
+|- docs/             # Baseline documental global
+|- sacdia-backend/   # Backend NestJS + Prisma
+|- sacdia-admin/     # Admin web Next.js
+|- sacdia-app/       # App movil Flutter
+|- postman/          # Artefactos de apoyo
+`- scripts/          # Utilidades del workspace
 ```
 
-## 🚀 Quick Start
+## Punto de entrada recomendado
 
-### Para Desarrolladores
+1. `docs/README.md`
+2. `docs/canon/dominio-sacdia.md`
+3. `docs/canon/identidad-sacdia.md`
+4. `docs/canon/gobernanza-canon.md`
+5. `docs/00-STEERING/tech.md`
+6. `docs/00-STEERING/coding-standards.md`
 
-1. **Clona todos los repositorios:**
+## Baseline documental
 
-```bash
-# Crear carpeta del proyecto
-mkdir sacdia && cd sacdia
+- Canon del sistema: `docs/canon/`
+- Reglas globales: `docs/00-STEERING/`
+- Features por dominio: `docs/01-FEATURES/`
+- Contratos API runtime: `docs/02-API/ENDPOINTS-LIVE-REFERENCE.md`
+- Integracion frontend: `docs/02-API/FRONTEND-INTEGRATION-GUIDE.md`
+- Datos y schema: `docs/03-DATABASE/`
+- Planes y cierres historicos: `docs/history/` y documentos marcados como `HISTORICAL`
 
-# Clonar documentación
-git clone https://github.com/abn-r/sacdia.git .
+## Como trabajar en este workspace
 
-# Clonar backend
-git clone https://github.com/abn-r/sacdia-backend.git
+- Lee primero `AGENTS.md` y el `CLAUDE.md` del modulo que vayas a tocar.
+- Hace cambios runtime dentro de `sacdia-backend/`, `sacdia-admin/` o `sacdia-app/` segun corresponda.
+- Si cambias comportamiento, actualiza la documentacion canonica en el mismo trabajo.
+- Trata roadmap, changelogs y notas de sesiones como contexto subordinado, no como contrato vigente.
 
-# Clonar app móvil
-git clone https://github.com/abn-r/sandia-app.git sacdia-app
+## Estado de la documentacion
 
-# Clonar panel admin
-git clone https://github.com/abn-r/sandia-admin.git sacdia-admin
-```
-
-2. **Configurar cada proyecto:**
-
-```bash
-# Backend
-cd sacdia-backend
-cp .env.example .env
-pnpm install
-pnpm prisma migrate dev
-
-# Admin Panel
-cd ../sacdia-admin
-cp .env.local.example .env.local
-pnpm install
-pnpm dev
-
-# App Móvil
-cd ../sacdia-app
-flutter pub get
-flutter run
-```
-
-## 🛠️ Tech Stack
-
-### Backend
-
-- **Framework:** NestJS 10
-- **Database:** PostgreSQL (Supabase)
-- **ORM:** Prisma
-- **Auth:** Supabase Auth
-- **Validation:** Zod
-
-### Frontend Admin
-
-- **Framework:** Next.js 16 (App Router)
-- **Language:** TypeScript
-- **Styling:** Tailwind CSS v4
-- **UI:** shadcn/ui
-- **Forms:** React Hook Form + Zod
-
-### Mobile App
-
-- **Framework:** Flutter 3.x
-- **Architecture:** Clean Architecture
-- **State Management:** Riverpod
-- **HTTP Client:** Dio
-- **Storage:** Hive
-
-### Deployment
-
-- **Backend:** Railway / Vercel Serverless
-- **Admin:** Vercel
-- **Database:** Supabase (Free tier)
-- **Storage:** Supabase Storage
-- **Mobile:** App Store + Google Play
-
-## 📖 Documentación
-
-- **[Tech Stack](.specs/_steering/tech.md)** - Stack tecnológico completo
-- **[Database Schema](docs/database/schema.prisma)** - Schema de base de datos
-- **[API Documentation](docs/api/)** - Documentación de endpoints
-- **[Product Requirements](docs/product.md)** - Requerimientos del producto
-
-## 🤝 Guidelines de Desarrollo
-
-### Workflow de Git
-
-Cada repositorio es independiente. Para hacer cambios:
-
-1. Trabaja en tu repositorio correspondiente
-2. Crea una branch feature: `git checkout -b feature/nombre-feature`
-3. Commit con mensajes descriptivos: `git commit -m "feat: descripción"`
-4. Push y crea un Pull Request
-
-### Convenciones
-
-- **Commits:** Usar [Conventional Commits](https://www.conventionalcommits.org/)
-  - `feat:` - Nueva funcionalidad
-  - `fix:` - Corrección de bugs
-  - `docs:` - Cambios en documentación
-  - `refactor:` - Refactorización de código
-  - `test:` - Agregar/modificar tests
-
-## 👥 Equipo
-
-- **Project Lead:** [Tu nombre]
-- **Backend:** [Tu nombre]
-- **Frontend:** [Tu nombre]
-- **Mobile:** [Tu nombre]
-
-## 📄 Licencia
-
-[Definir licencia]
-
-## 📞 Contacto
-
-Para preguntas o colaboración, contacta a [tu email/contacto]
-
----
-
-**Última actualización:** Enero 2026
+- La taxonomia oficial de documentos es `ACTIVE`, `DRAFT`, `HISTORICAL` y `DEPRECATED`.
+- La explicacion operativa y precedencia completa estan en `docs/README.md`.

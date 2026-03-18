@@ -1,122 +1,140 @@
-# Documentación SACDIA
+# SACDIA — Documentación
 
-**Sistema de Administración de Clubes del Ministerio Juvenil Adventista**
+**Estado**: ACTIVE
 
----
-
-## 🎯 Por Dónde Empezar
-
-### Backend Developer
-1. Lee [Overview](01-OVERVIEW.md) para entender la arquitectura
-2. Revisa [Database Guide](database/README.md) para el schema
-3. Consulta [API Guide](api/README.md) para endpoints
-4. Sigue [Implementation Roadmap](03-IMPLEMENTATION-ROADMAP.md)
-
-### Mobile Developer
-1. Lee [Overview](01-OVERVIEW.md) para el contexto
-2. Revisa [Processes](02-PROCESSES.md) para flujos de usuario
-3. Consulta [API Specification](api/API-SPECIFICATION.md) para endpoints
-4. Revisa [Endpoints Reference](api/ENDPOINTS-REFERENCE.md) para integraciones
-
-### Frontend/Admin Developer
-1. Lee [Overview](01-OVERVIEW.md)
-2. Revisa [API Specification](api/API-SPECIFICATION.md)
-3. Consulta sistema RBAC en [Architecture Decisions](api/ARCHITECTURE-DECISIONS.md)
+> [!IMPORTANT]
+> Este directorio es la fuente de verdad documental del proyecto.
+> La documentación histórica se encuentra en `docs/history/`.
+> La precedencia global es: `docs/canon/*` → `docs/README.md` → documentación operativa subordinada → material histórico.
 
 ---
 
-## 📚 Índice de Documentación
+## Estructura
 
-### Documentos Principales
+| Carpeta | Contenido | Autoridad |
+|---------|-----------|-----------|
+| `canon/` | Verdad del negocio, verificada contra código | Máxima — rige sobre todo |
+| `audit/` | Auditorías de código + Reality Matrix | Foto del código al 2026-03-14 |
+| `features/` | Estado verificado por dominio funcional | Derivado de audit + canon |
+| `api/` | Contratos API (endpoints, seguridad, testing) | Operacional, subordinado a canon |
+| `database/` | Schema Prisma + referencia + migraciones | Operacional, schema.prisma es fuente |
+| `steering/` | Estándares técnicos y de código | Normativo |
+| `guides/` | Guías operativas y workflows | Práctico |
+| `plans/` | Planes de implementación activos | Temporal |
+| `superpowers/` | Specs y planes de diseño (SDD) | Temporal |
+| `templates/` | Plantillas para nuevos features | Referencia |
+| `history/` | Todo documento inactivo, archivado | Solo contexto histórico |
 
-| Documento | Descripción |
-|-----------|-------------|
-| [01-OVERVIEW.md](01-OVERVIEW.md) | Visión general del proyecto, stack tecnológico y arquitectura |
-| [02-PROCESSES.md](02-PROCESSES.md) | Procesos de negocio detallados (Auth, Post-registro, etc.) |
-| [03-IMPLEMENTATION-ROADMAP.md](03-IMPLEMENTATION-ROADMAP.md) | Roadmap de implementación por fases |
+## Jerarquía de Autoridad
 
-### Base de Datos
+Definida en `canon/source-of-truth.md`:
 
-| Documento | Descripción |
-|-----------|-------------|
-| [database/README.md](database/README.md) | Guía de base de datos |
-| [database/schema.prisma](database/schema.prisma) | Schema Prisma definitivo |
-| [database/SCHEMA-REFERENCE.md](database/SCHEMA-REFERENCE.md) | Referencia completa del schema (tablas, relaciones, naming) |
-| [database/migrations/](database/migrations/) | Scripts de migración SQL |
+1. `canon/source-of-truth.md` (gateway operativo)
+2. Este README (navegación estructural)
+3. `canon/*` (según tipo de pregunta)
+4. `api/ENDPOINTS-LIVE-REFERENCE.md` (runtime API)
+5. `database/schema.prisma` (estructura de datos)
+6. `steering/*` (estándares)
 
-### REST API
+## Navegación por Tipo de Pregunta
 
-| Documento | Descripción |
-|-----------|-------------|
-| [api/README.md](api/README.md) | Guía de la REST API |
-| [api/API-SPECIFICATION.md](api/API-SPECIFICATION.md) | Especificación técnica completa v2.0 |
-| [api/ENDPOINTS-REFERENCE.md](api/ENDPOINTS-REFERENCE.md) | Referencia de endpoints por proceso |
-| [api/ARCHITECTURE-DECISIONS.md](api/ARCHITECTURE-DECISIONS.md) | Decisiones arquitectónicas (ADRs) |
-| [api/walkthrough-backend-init.md](api/walkthrough-backend-init.md) | Walkthrough de inicialización del backend |
-
----
-
-## 🏗️ Arquitectura General
-
-```mermaid
-graph TB
-    subgraph "Frontend"
-        MOBILE[App Móvil Flutter]
-        ADMIN[Panel Admin Next.js]
-    end
-    
-    subgraph "Backend"
-        API[REST API NestJS]
-        PRISMA[Prisma ORM]
-    end
-    
-    subgraph "Services"
-        SUPABASE[Supabase]
-        AUTH[Auth + Storage]
-        DB[(PostgreSQL)]
-    end
-    
-    MOBILE --> API
-    ADMIN --> API
-    API --> PRISMA
-    PRISMA --> DB
-    API --> AUTH
-    SUPABASE --> AUTH
-    SUPABASE --> DB
-```
+| Pregunta | Consultar en orden |
+|----------|-------------------|
+| Producto/Alcance | canon/source-of-truth → canon/dominio → canon/identidad → features/ |
+| Arquitectura | canon/source-of-truth → canon/arquitectura → canon/decisiones-clave → steering/ |
+| API/Runtime | canon/source-of-truth → api/ENDPOINTS-LIVE-REFERENCE → api/ARCHITECTURE-DECISIONS |
+| Datos/Schema | canon/source-of-truth → database/schema.prisma → database/SCHEMA-REFERENCE |
+| Estado de features | features/README.md → features/{dominio}.md → audit/REALITY-MATRIX.md |
+| Decisiones pendientes | audit/DECISIONS-PENDING.md |
 
 ---
 
-## 🔗 Links Rápidos
+## Rutas Canónicas por Rol
 
-### Stack Tecnológico
-- **Backend**: NestJS 10.x + TypeScript + Prisma
-- **Database**: PostgreSQL 15.x (Supabase)
-- **Auth**: Supabase Auth (JWT)
-- **Mobile**: Flutter + Riverpod + Clean Architecture
-- **Admin**: Next.js 14 + shadcn/ui + TailwindCSS
-- **Deploy**: Vercel Serverless
+### Canon base
 
-### Recursos Externos
-- [Supabase Dashboard](https://supabase.com)
-- [Prisma Docs](https://prisma.io/docs)
-- [NestJS Docs](https://docs.nestjs.com)
+1. `canon/dominio-sacdia.md`
+2. `canon/identidad-sacdia.md`
+3. `canon/gobernanza-canon.md`
+4. `canon/arquitectura-sacdia.md`
+5. `canon/runtime-sacdia.md`
+6. `canon/decisiones-clave.md`
+
+### Backend
+
+1. `canon/dominio-sacdia.md`
+2. `canon/runtime-sacdia.md`
+3. `steering/tech.md`
+4. `api/ENDPOINTS-LIVE-REFERENCE.md`
+5. `api/API-SPECIFICATION.md`
+6. `database/schema.prisma`
+
+### Mobile
+
+1. `canon/dominio-sacdia.md`
+2. `canon/runtime-sacdia.md`
+3. `steering/tech.md`
+4. `api/ENDPOINTS-LIVE-REFERENCE.md`
+5. `features/`
+
+### Admin Web
+
+1. `canon/dominio-sacdia.md`
+2. `canon/runtime-sacdia.md`
+3. `steering/tech.md`
+4. `api/ENDPOINTS-LIVE-REFERENCE.md`
+5. `features/`
 
 ---
 
-## 📖 Glosario de Términos
+## Estado de Documento
 
-- **SACDIA**: Sistema de Administración de Clubes del Ministerio Juvenil Adventista
-- **RBAC**: Role-Based Access Control (sistema de permisos por roles)
-- **Post-registro**: Proceso de completar perfil tras registro inicial
-- **Club Instance**: Instancia específica de un tipo de club (Aventureros, Conquistadores, Guías Mayores)
-- **Ecclesiastical Year**: Año eclesiástico para rastrear membresías anuales
+- `ACTIVE`: documento vigente.
+- `DRAFT`: documento en construcción.
+- `HISTORICAL`: contexto histórico, no contrato vigente.
+- `DEPRECATED`: reemplazado por documento canónico.
+
+## Convención Editorial para Pendientes y Aspiracional
+
+- No crear estados nuevos para "pending", "future" o "planned".
+- Si un documento sigue siendo canónico, mantener `ACTIVE` y etiquetar el texto puntual como `Pendiente`, `Planificado`, `Recomendado` o `Por verificar`.
+- Si el valor principal del documento es una foto de una etapa previa, marcarlo `HISTORICAL` y enlazar el reemplazo activo.
+- Si un documento fue sustituido, marcarlo `DEPRECATED` y apuntar al documento vigente.
+
+## Estado del Proyecto
+
+Ver `audit/REALITY-MATRIX.md` para la foto completa y `features/README.md` para estado por dominio.
+
+---
 
 ## Ver También
 
-- [Documentation Structure](DOCUMENTATION-STRUCTURE.md) - Estructura completa de la documentación
+- `canon/README.md`
+- `history/README.md`
 
----
+## SDD Command Parity Workflow
 
-**Última actualización**: 2026-01-30  
-**Mantenido por**: Equipo SACDIA
+Use this guardrail whenever SDD command contracts are changed.
+
+Local run:
+
+```bash
+node scripts/check-sdd-command-parity.mjs
+```
+
+Useful options:
+
+- `--json` for machine-readable output.
+- `--command-dir <path>` to validate fixtures or CI mirrors.
+
+Failure triage order:
+
+1. `required-command-presence` — missing `sdd-*.md` contracts.
+2. `placeholder-contract.required` — missing `{argument}`, `{project}`, `{workdir}` tokens.
+3. `persistence-modes.required` — incomplete `engram|openspec|hybrid|none` guidance.
+4. `result-contract.required-fields` — missing `status`, `executive_summary`, `artifacts`, `next_recommended` in phase commands.
+5. `meta-state-guidance.required` — missing `sdd/{argument}/state` references for `sdd-new`, `sdd-continue`, `sdd-ff`.
+
+CI runs this as an enforced gate; failures block the workflow.
+
+**Última actualización**: 2026-03-14

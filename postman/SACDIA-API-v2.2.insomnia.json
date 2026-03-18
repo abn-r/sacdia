@@ -1,0 +1,928 @@
+{
+  "_type": "export",
+  "__export_format": 4,
+  "__export_date": "2026-02-04T19:21:00.000Z",
+  "__export_source": "insomnia.desktop.app:v2023.5.8",
+  "resources": [
+    {
+      "_id": "wrk_sacdia_v22",
+      "_type": "workspace",
+      "name": "SACDIA API v2.2",
+      "description": "REST API para Sistema de Administración de Clubes JA\n\n**Version**: 2.2.0\n**Endpoints**: 105+\n**Modules**: 17\n\nInstrucciones:\n1. Ejecutar Health Check primero\n2. Ejecutar Login para obtener token\n3. El token se guarda automáticamente en el environment\n4. Todos los demás endpoints usan el token automáticamente",
+      "scope": "collection",
+      "parentId": null
+    },
+    {
+      "_id": "env_sacdia_base",
+      "_type": "environment",
+      "name": "Base Environment",
+      "data": {
+        "base_url": "http://localhost:3000",
+        "auth_token": "",
+        "refresh_token": "",
+        "user_id": "",
+        "test_email": "test@sacdia.app",
+        "test_password": "Test123!"
+      },
+      "dataPropertyOrder": {
+        "&": ["base_url", "auth_token", "refresh_token", "user_id", "test_email", "test_password"]
+      },
+      "color": null,
+      "isPrivate": false,
+      "metaSortKey": 1707004800000,
+      "parentId": "wrk_sacdia_v22"
+    },
+    {
+      "_id": "jar_cookies",
+      "_type": "cookie_jar",
+      "name": "Default Jar",
+      "cookies": [],
+      "parentId": "wrk_sacdia_v22"
+    },
+    {
+      "_id": "fld_health",
+      "_type": "request_group",
+      "name": "Health Check",
+      "description": "Endpoint para verificar el estado del backend",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1000,
+      "parentId": "wrk_sacdia_v22"
+    },
+    {
+      "_id": "req_health_check",
+      "_type": "request",
+      "name": "Health Check",
+      "description": "Verifica que el backend está corriendo correctamente",
+      "url": "{{ _.base_url }}/api/v1/health",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": -1000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "parentId": "fld_health"
+    },
+    {
+      "_id": "fld_auth",
+      "_type": "request_group",
+      "name": "01. Authentication",
+      "description": "Endpoints de autenticación con Supabase",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -900,
+      "parentId": "wrk_sacdia_v22"
+    },
+    {
+      "_id": "req_auth_login",
+      "_type": "request",
+      "name": "Login",
+      "description": "Autenticar usuario y obtener JWT token",
+      "url": "{{ _.base_url }}/api/v1/auth/login",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"email\": \"{{ _.test_email }}\",\n  \"password\": \"{{ _.test_password }}\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -900,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "parentId": "fld_auth"
+    },
+    {
+      "_id": "req_auth_register",
+      "_type": "request",
+      "name": "Register",
+      "description": "Crear nueva cuenta de usuario",
+      "url": "{{ _.base_url }}/api/v1/auth/register",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"email\": \"nuevo@sacdia.app\",\n  \"password\": \"Password123!\",\n  \"first_name\": \"Juan\",\n  \"last_name\": \"Pérez\",\n  \"gender\": \"male\",\n  \"birthdate\": \"2000-05-15\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -890,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "parentId": "fld_auth"
+    },
+    {
+      "_id": "req_auth_refresh",
+      "_type": "request",
+      "name": "Refresh Token",
+      "description": "Refrescar token expirado",
+      "url": "{{ _.base_url }}/api/v1/auth/refresh",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"refresh_token\": \"{{ _.refresh_token }}\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -880,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "parentId": "fld_auth"
+    },
+    {
+      "_id": "req_auth_logout",
+      "_type": "request",
+      "name": "Logout",
+      "description": "Cerrar sesión del usuario",
+      "url": "{{ _.base_url }}/api/v1/auth/logout",
+      "method": "POST",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.auth_token }}"
+      },
+      "metaSortKey": -870,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "parentId": "fld_auth"
+    },
+    {
+      "_id": "req_auth_me",
+      "_type": "request",
+      "name": "Get Current User",
+      "description": "Obtener información del usuario autenticado",
+      "url": "{{ _.base_url }}/api/v1/auth/me",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.auth_token }}"
+      },
+      "metaSortKey": -860,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "parentId": "fld_auth"
+    },
+    {
+      "_id": "req_auth_forgot_password",
+      "_type": "request",
+      "name": "Forgot Password",
+      "description": "Solicitar email de recuperación de contraseña",
+      "url": "{{ _.base_url }}/api/v1/auth/forgot-password",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"email\": \"{{ _.test_email }}\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -850,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "parentId": "fld_auth"
+    },
+    {
+      "_id": "req_auth_reset_password",
+      "_type": "request",
+      "name": "Reset Password",
+      "description": "Restablecer contraseña con token de recuperación",
+      "url": "{{ _.base_url }}/api/v1/auth/reset-password",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"token\": \"recovery_token_here\",\n  \"new_password\": \"NewPassword123!\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -840,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "parentId": "fld_auth"
+    },
+    {
+      "_id": "fld_clubs",
+      "_type": "request_group",
+      "name": "02. Clubs",
+      "description": "Gestión de clubs JA",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -800,
+      "parentId": "wrk_sacdia_v22"
+    },
+    {
+      "_id": "req_clubs_list",
+      "_type": "request",
+      "name": "List Clubs",
+      "description": "Listar todos los clubs del usuario autenticado",
+      "url": "{{ _.base_url }}/api/v1/clubs",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.auth_token }}"
+      },
+      "metaSortKey": -800,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "parentId": "fld_clubs"
+    },
+    {
+      "_id": "req_clubs_get",
+      "_type": "request",
+      "name": "Get Club by ID",
+      "description": "Obtener detalles de un club específico",
+      "url": "{{ _.base_url }}/api/v1/clubs/5",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.auth_token }}"
+      },
+      "metaSortKey": -790,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "parentId": "fld_clubs"
+    },
+    {
+      "_id": "req_clubs_create",
+      "_type": "request",
+      "name": "Create Club",
+      "description": "Crear nuevo club",
+      "url": "{{ _.base_url }}/api/v1/clubs",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"Club Conquistadores Emanuel\",\n  \"club_type_id\": 1,\n  \"country_id\": 1,\n  \"union_id\": 1,\n  \"field_id\": 1,\n  \"zone\": \"Norte\",\n  \"district\": \"Distrito 5\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.auth_token }}"
+      },
+      "metaSortKey": -780,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "parentId": "fld_clubs"
+    },
+    {
+      "_id": "req_clubs_update",
+      "_type": "request",
+      "name": "Update Club",
+      "description": "Actualizar información del club",
+      "url": "{{ _.base_url }}/api/v1/clubs/5",
+      "method": "PATCH",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"Club Conquistadores Emanuel Actualizado\",\n  \"zone\": \"Sur\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.auth_token }}"
+      },
+      "metaSortKey": -770,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "parentId": "fld_clubs"
+    },
+    {
+      "_id": "req_clubs_delete",
+      "_type": "request",
+      "name": "Delete Club",
+      "description": "Eliminar club (soft delete)",
+      "url": "{{ _.base_url }}/api/v1/clubs/5",
+      "method": "DELETE",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.auth_token }}"
+      },
+      "metaSortKey": -760,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "parentId": "fld_clubs"
+    },
+    {
+      "_id": "fld_activities",
+      "_type": "request_group",
+      "name": "03. Activities",
+      "description": "Gestión de actividades y asistencia",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -700,
+      "parentId": "wrk_sacdia_v22"
+    },
+    {
+      "_id": "req_activities_list",
+      "_type": "request",
+      "name": "List Activities",
+      "description": "Listar actividades del club con filtros opcionales",
+      "url": "{{ _.base_url }}/api/v1/clubs/5/activities?type=reunion&status=scheduled",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.auth_token }}"
+      },
+      "metaSortKey": -700,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "parentId": "fld_activities"
+    },
+    {
+      "_id": "req_activities_create",
+      "_type": "request",
+      "name": "Create Activity",
+      "description": "Crear nueva actividad con geolocalización",
+      "url": "{{ _.base_url }}/api/v1/clubs/5/activities",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"title\": \"Reunión Semanal\",\n  \"type\": \"reunion\",\n  \"description\": \"Reunión regular del club\",\n  \"start_datetime\": \"2026-02-08T10:00:00Z\",\n  \"end_datetime\": \"2026-02-08T12:00:00Z\",\n  \"location\": \"Iglesia Central\",\n  \"latitude\": 19.432608,\n  \"longitude\": -99.133209,\n  \"max_participants\": 30,\n  \"requires_approval\": false\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.auth_token }}"
+      },
+      "metaSortKey": -690,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "parentId": "fld_activities"
+    },
+    {
+      "_id": "req_activities_get",
+      "_type": "request",
+      "name": "Get Activity Details",
+      "description": "Obtener detalles de una actividad específica",
+      "url": "{{ _.base_url }}/api/v1/clubs/5/activities/10",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.auth_token }}"
+      },
+      "metaSortKey": -680,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "parentId": "fld_activities"
+    },
+    {
+      "_id": "req_activities_register_attendance",
+      "_type": "request",
+      "name": "Register Attendance",
+      "description": "Registrar asistencia con check-in/check-out",
+      "url": "{{ _.base_url }}/api/v1/clubs/5/activities/10/attendance",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"user_id\": \"{{ _.user_id }}\",\n  \"check_in\": \"2026-02-08T10:05:00Z\",\n  \"check_out\": \"2026-02-08T11:55:00Z\",\n  \"attended\": true\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.auth_token }}"
+      },
+      "metaSortKey": -670,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "parentId": "fld_activities"
+    },
+    {
+      "_id": "req_activities_update",
+      "_type": "request",
+      "name": "Update Activity",
+      "description": "Actualizar detalles de la actividad",
+      "url": "{{ _.base_url }}/api/v1/clubs/5/activities/10",
+      "method": "PATCH",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"title\": \"Reunión Semanal - Actualizada\",\n  \"max_participants\": 35\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.auth_token }}"
+      },
+      "metaSortKey": -660,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "parentId": "fld_activities"
+    },
+    {
+      "_id": "fld_finances",
+      "_type": "request_group",
+      "name": "04. Finances",
+      "description": "Gestión financiera del club",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -600,
+      "parentId": "wrk_sacdia_v22"
+    },
+    {
+      "_id": "req_finances_categories",
+      "_type": "request",
+      "name": "Get Finance Categories",
+      "description": "Obtener categorías de ingresos y egresos",
+      "url": "{{ _.base_url }}/api/v1/clubs/5/finances/categories",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.auth_token }}"
+      },
+      "metaSortKey": -600,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "parentId": "fld_finances"
+    },
+    {
+      "_id": "req_finances_create_income",
+      "_type": "request",
+      "name": "Create Income Transaction",
+      "description": "Registrar ingreso con categoría y recibo",
+      "url": "{{ _.base_url }}/api/v1/clubs/5/finances/transactions",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"type\": 0,\n  \"amount\": 500.00,\n  \"concept\": \"Cuotas de febrero 2026\",\n  \"category_id\": 1,\n  \"transaction_date\": \"2026-02-04T12:00:00Z\",\n  \"receipt_number\": \"R-2026-001\",\n  \"ecclesiastical_year_id\": 5\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.auth_token }}"
+      },
+      "metaSortKey": -590,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "parentId": "fld_finances"
+    },
+    {
+      "_id": "req_finances_create_expense",
+      "_type": "request",
+      "name": "Create Expense Transaction",
+      "description": "Registrar egreso con categoría",
+      "url": "{{ _.base_url }}/api/v1/clubs/5/finances/transactions",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"type\": 1,\n  \"amount\": 150.00,\n  \"concept\": \"Material didáctico\",\n  \"category_id\": 10,\n  \"transaction_date\": \"2026-02-04T14:00:00Z\",\n  \"receipt_number\": \"E-2026-001\",\n  \"ecclesiastical_year_id\": 5\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.auth_token }}"
+      },
+      "metaSortKey": -580,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "parentId": "fld_finances"
+    },
+    {
+      "_id": "req_finances_summary",
+      "_type": "request",
+      "name": "Get Financial Summary",
+      "description": "Obtener resumen financiero por mes/año",
+      "url": "{{ _.base_url }}/api/v1/clubs/5/finances/summary?year=2026&month=2",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.auth_token }}"
+      },
+      "metaSortKey": -570,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "parentId": "fld_finances"
+    },
+    {
+      "_id": "fld_honors",
+      "_type": "request_group",
+      "name": "05. Honors",
+      "description": "Gestión de especialidades y progreso",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -500,
+      "parentId": "wrk_sacdia_v22"
+    },
+    {
+      "_id": "req_honors_list",
+      "_type": "request",
+      "name": "List Available Honors",
+      "description": "Listar especialidades disponibles con filtros",
+      "url": "{{ _.base_url }}/api/v1/honors?category=nature&level=basic",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.auth_token }}"
+      },
+      "metaSortKey": -500,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "parentId": "fld_honors"
+    },
+    {
+      "_id": "req_honors_get",
+      "_type": "request",
+      "name": "Get Honor Details",
+      "description": "Obtener detalles de una especialidad con requisitos",
+      "url": "{{ _.base_url }}/api/v1/honors/15",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.auth_token }}"
+      },
+      "metaSortKey": -490,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "parentId": "fld_honors"
+    },
+    {
+      "_id": "req_honors_enroll",
+      "_type": "request",
+      "name": "Enroll in Honor",
+      "description": "Inscribirse en una especialidad con instructor",
+      "url": "{{ _.base_url }}/api/v1/honors/15/enroll",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"user_id\": \"{{ _.user_id }}\",\n  \"club_id\": 5,\n  \"instructor_id\": \"instructor-uuid-here\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.auth_token }}"
+      },
+      "metaSortKey": -480,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "parentId": "fld_honors"
+    },
+    {
+      "_id": "req_honors_update_progress",
+      "_type": "request",
+      "name": "Update Progress",
+      "description": "Actualizar progreso en requisitos de especialidad",
+      "url": "{{ _.base_url }}/api/v1/honors/enrollments/enrollment-id/progress",
+      "method": "PATCH",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"requirement_id\": \"req-123\",\n  \"completed\": true,\n  \"notes\": \"Completado satisfactoriamente\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.auth_token }}"
+      },
+      "metaSortKey": -470,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "parentId": "fld_honors"
+    },
+    {
+      "_id": "req_honors_my_progress",
+      "_type": "request",
+      "name": "Get My Honor Progress",
+      "description": "Ver progreso del usuario en especialidades",
+      "url": "{{ _.base_url }}/api/v1/honors/my-progress",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.auth_token }}"
+      },
+      "metaSortKey": -460,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "parentId": "fld_honors"
+    },
+    {
+      "_id": "fld_catalogs",
+      "_type": "request_group",
+      "name": "06. Catalogs",
+      "description": "Catálogos de datos maestros",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -400,
+      "parentId": "wrk_sacdia_v22"
+    },
+    {
+      "_id": "req_catalogs_countries",
+      "_type": "request",
+      "name": "Get Countries",
+      "description": "Listar países disponibles",
+      "url": "{{ _.base_url }}/api/v1/catalogs/countries",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.auth_token }}"
+      },
+      "metaSortKey": -400,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "parentId": "fld_catalogs"
+    },
+    {
+      "_id": "req_catalogs_unions",
+      "_type": "request",
+      "name": "Get Unions by Country",
+      "description": "Listar uniones de un país",
+      "url": "{{ _.base_url }}/api/v1/catalogs/countries/1/unions",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.auth_token }}"
+      },
+      "metaSortKey": -390,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "parentId": "fld_catalogs"
+    },
+    {
+      "_id": "req_catalogs_fields",
+      "_type": "request",
+      "name": "Get Fields by Union",
+      "description": "Listar campos de una unión",
+      "url": "{{ _.base_url }}/api/v1/catalogs/unions/1/fields",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.auth_token }}"
+      },
+      "metaSortKey": -380,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "parentId": "fld_catalogs"
+    },
+    {
+      "_id": "req_catalogs_club_types",
+      "_type": "request",
+      "name": "Get Club Types",
+      "description": "Listar tipos de club (Conquistadores, Aventureros, etc.)",
+      "url": "{{ _.base_url }}/api/v1/catalogs/club-types",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.auth_token }}"
+      },
+      "metaSortKey": -370,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "parentId": "fld_catalogs"
+    },
+    {
+      "_id": "req_catalogs_roles",
+      "_type": "request",
+      "name": "Get Roles",
+      "description": "Listar roles disponibles del sistema",
+      "url": "{{ _.base_url }}/api/v1/catalogs/roles",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.auth_token }}"
+      },
+      "metaSortKey": -360,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "parentId": "fld_catalogs"
+    },
+    {
+      "_id": "fld_oauth",
+      "_type": "request_group",
+      "name": "07. OAuth",
+      "description": "Autenticación con proveedores externos",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -300,
+      "parentId": "wrk_sacdia_v22"
+    },
+    {
+      "_id": "req_oauth_google",
+      "_type": "request",
+      "name": "Google OAuth Login",
+      "description": "Autenticar con Google OAuth",
+      "url": "{{ _.base_url }}/api/v1/oauth/google",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"id_token\": \"google_id_token_here\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -300,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "parentId": "fld_oauth"
+    },
+    {
+      "_id": "req_oauth_apple",
+      "_type": "request",
+      "name": "Apple OAuth Login",
+      "description": "Autenticar con Apple Sign In",
+      "url": "{{ _.base_url }}/api/v1/oauth/apple",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"id_token\": \"apple_id_token_here\",\n  \"user_identifier\": \"apple_user_id\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -290,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "parentId": "fld_oauth"
+    },
+    {
+      "_id": "req_oauth_providers",
+      "_type": "request",
+      "name": "Get OAuth Providers",
+      "description": "Listar proveedores OAuth disponibles",
+      "url": "{{ _.base_url }}/api/v1/oauth/providers",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": -280,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "parentId": "fld_oauth"
+    }
+  ]
+}

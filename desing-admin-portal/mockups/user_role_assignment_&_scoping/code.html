@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SACDIA - User Role Assignment</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Google Material Icons -->
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#2b2bee",
+              "background-light": "#f6f6f8",
+              "background-dark": "#101022",
+              "card-dark": "#1a1a2e",
+              "surface-dark": "#23233a",
+            },
+            fontFamily: {
+              "display": ["Inter", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom scrollbar for dark mode */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #101022; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2b2bee; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4f4fff; 
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display antialiased min-h-screen flex flex-col">
+<!-- Navbar -->
+<nav class="h-16 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-card-dark flex items-center px-6 justify-between sticky top-0 z-50">
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white font-bold">S</div>
+<span class="font-bold text-lg tracking-tight">SACDIA <span class="text-xs font-normal opacity-70">Admin</span></span>
+</div>
+<div class="h-6 w-px bg-slate-300 dark:bg-slate-700 mx-2"></div>
+<div class="flex items-center text-sm text-slate-500 dark:text-slate-400">
+<span class="hover:text-primary cursor-pointer">User Management</span>
+<span class="material-icons-round text-base mx-1">chevron_right</span>
+<span class="text-slate-900 dark:text-white font-medium">Role Assignment</span>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="relative p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 transition-colors">
+<span class="material-icons-round">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-red-500 border-2 border-white dark:border-card-dark"></span>
+</button>
+<div class="flex items-center gap-3 pl-4 border-l border-slate-200 dark:border-slate-700">
+<div class="text-right hidden sm:block">
+<p class="text-sm font-medium">Admin User</p>
+<p class="text-xs text-slate-500 dark:text-slate-400">System Administrator</p>
+</div>
+<img alt="Admin Profile" class="w-9 h-9 rounded-full border-2 border-slate-200 dark:border-slate-700" data-alt="Admin user avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAejgmq7vIwfZ0tPpXVoW3az2I2QCZ8tBmGpEBfjLgpbz_J2WZnMV4433YrSvVhCgz6wwGxQ9j_co5ZZT6nU-YCTU445YdSLpjZ4b-T1tt9qV4MIUwzsQf0uBpIy3QO0T2IHm7159Xi71bjZzBuINNUdI35kNhJd3-fz7leh6ahgfeWT6XVfEgs3u2TINsCJMMTq9UhTfxrApVYAvxIQpBjJR2rpcFR5sHEz5Z_ijJ_RL8A753OERr-z4m2UYBknhv7tGPLFNVWtsU"/>
+</div>
+</div>
+</nav>
+<!-- Main Content -->
+<main class="flex-1 container mx-auto p-6 max-w-7xl">
+<!-- Header Section -->
+<div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+<div>
+<h1 class="text-2xl font-bold text-slate-900 dark:text-white">Role Assignment &amp; Scoping</h1>
+<p class="text-slate-500 dark:text-slate-400 mt-1">Manage permissions, administrative scope, and temporary access for users.</p>
+</div>
+<div class="flex gap-3">
+<button class="px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 bg-white dark:bg-card-dark border border-slate-300 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors shadow-sm">
+                    View Audit Log
+                </button>
+<button class="px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20 flex items-center gap-2">
+<span class="material-icons-round text-sm">save</span>
+                    Save Changes
+                </button>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+<!-- Left Column: User Profile & Context (4 cols) -->
+<div class="lg:col-span-4 space-y-6">
+<!-- User Profile Card -->
+<div class="bg-white dark:bg-card-dark rounded-xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm relative overflow-hidden">
+<div class="absolute top-0 left-0 w-full h-24 bg-gradient-to-r from-primary/20 to-primary/5" data-alt="Abstract blue gradient header background"></div>
+<div class="relative flex flex-col items-center text-center">
+<div class="w-24 h-24 rounded-full border-4 border-white dark:border-card-dark shadow-md overflow-hidden bg-slate-200 dark:bg-slate-800 mb-4">
+<img alt="User Avatar" class="w-full h-full object-cover" data-alt="Portrait of a young man smiling" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAT19UbTiTcROAgyyI-Fi9ui6kWGLQuntZJ6-yQJl-1B7CNAx3C9d5NtpfUqnfZcozFHGtCZTPlE9c2n6KNONLD46MjqaSLmSYBgKjIx8tjXYg79semxzU1ijO8oZ7x8V63Oo0zUdraocAY-6IW8HgT-DKxve2Y19RRrMTeTtNjaJsSIX6I8-WsDJcWD4yM2xhljLmlsTDOq9NT2rnMJKlRvzGYwjqc2gR8HmV83GDeGo9lsKvONyDfoyCQ75Toz3jCAoXOXrE8bJQ"/>
+</div>
+<h2 class="text-xl font-bold text-slate-900 dark:text-white">Bro. James Wilson</h2>
+<p class="text-slate-500 dark:text-slate-400 text-sm mb-3">james.wilson@sacdia.org</p>
+<div class="flex items-center gap-2 mb-6">
+<span class="px-3 py-1 rounded-full text-xs font-semibold bg-primary/20 text-primary border border-primary/20">
+                                Master Guide
+                            </span>
+<span class="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                                Active
+                            </span>
+</div>
+<div class="w-full grid grid-cols-2 gap-4 border-t border-slate-200 dark:border-slate-700 pt-4">
+<div class="text-left">
+<p class="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold">Home Club</p>
+<p class="text-sm font-medium mt-1 truncate">Orion Pathfinder Club</p>
+</div>
+<div class="text-left">
+<p class="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold">Union</p>
+<p class="text-sm font-medium mt-1 truncate">Atlantic Union</p>
+</div>
+<div class="text-left">
+<p class="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold">Member ID</p>
+<p class="text-sm font-medium mt-1 font-mono text-slate-600 dark:text-slate-300">#SAC-8829-X</p>
+</div>
+<div class="text-left">
+<p class="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold">Joined</p>
+<p class="text-sm font-medium mt-1">Mar 12, 2021</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Quick Stats / Context -->
+<div class="bg-white dark:bg-card-dark rounded-xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm">
+<h3 class="text-sm font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+<span class="material-icons-round text-primary text-lg">security</span>
+                        Security Context
+                    </h3>
+<div class="space-y-4">
+<div class="flex justify-between items-center text-sm">
+<span class="text-slate-500 dark:text-slate-400">Last Login</span>
+<span class="text-slate-900 dark:text-slate-200">Today, 09:42 AM</span>
+</div>
+<div class="flex justify-between items-center text-sm">
+<span class="text-slate-500 dark:text-slate-400">Security Level</span>
+<div class="flex gap-1">
+<div class="w-2 h-2 rounded-full bg-primary"></div>
+<div class="w-2 h-2 rounded-full bg-primary"></div>
+<div class="w-2 h-2 rounded-full bg-primary"></div>
+<div class="w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-700"></div>
+</div>
+</div>
+<div class="flex justify-between items-center text-sm">
+<span class="text-slate-500 dark:text-slate-400">2FA Status</span>
+<span class="text-emerald-500 flex items-center gap-1 text-xs font-bold bg-emerald-500/10 px-2 py-0.5 rounded">
+<span class="material-icons-round text-xs">check_circle</span> ENABLED
+                            </span>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column: Role Management (8 cols) -->
+<div class="lg:col-span-8 space-y-6">
+<!-- Add New Role Section -->
+<div class="bg-white dark:bg-card-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+<div class="p-5 border-b border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-surface-dark/50 flex justify-between items-center">
+<h3 class="font-bold text-slate-900 dark:text-white">Add New Role</h3>
+<span class="text-xs text-slate-500 dark:text-slate-400 bg-slate-200 dark:bg-slate-800 px-2 py-1 rounded">Step 1 of 2</span>
+</div>
+<div class="p-6 grid grid-cols-1 md:grid-cols-12 gap-6">
+<!-- Role Selection -->
+<div class="md:col-span-5 space-y-2">
+<label class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Role Definition</label>
+<div class="relative">
+<select class="w-full bg-white dark:bg-surface-dark border border-slate-300 dark:border-slate-700 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary focus:border-transparent outline-none appearance-none cursor-pointer text-slate-900 dark:text-slate-100">
+<option disabled="" selected="" value="">Select a role...</option>
+<optgroup label="Club Level">
+<option value="club_director">Club Director</option>
+<option value="club_secretary">Club Secretary</option>
+<option value="club_treasurer">Club Treasurer</option>
+<option value="counselor">Counselor</option>
+</optgroup>
+<optgroup label="Conference Level">
+<option value="area_coordinator">Area Coordinator</option>
+<option value="conf_director">Youth Director</option>
+</optgroup>
+</select>
+<span class="material-icons-round absolute right-3 top-2.5 text-slate-400 pointer-events-none">expand_more</span>
+</div>
+<p class="text-xs text-slate-500">Determines permission sets.</p>
+</div>
+<!-- Scope Selection -->
+<div class="md:col-span-5 space-y-2">
+<label class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Administrative Scope</label>
+<div class="relative">
+<input class="w-full bg-white dark:bg-surface-dark border border-slate-300 dark:border-slate-700 rounded-lg pl-10 pr-4 py-2.5 text-sm focus:ring-2 focus:ring-primary focus:border-transparent outline-none text-slate-900 dark:text-slate-100" placeholder="Search entity (e.g. Orion Club)..." type="text"/>
+<span class="material-icons-round absolute left-3 top-2.5 text-slate-400 text-lg">search</span>
+</div>
+<p class="text-xs text-slate-500">Where this role applies.</p>
+</div>
+<!-- Action Button -->
+<div class="md:col-span-2 flex items-end">
+<button class="w-full h-[42px] bg-primary/10 hover:bg-primary/20 text-primary font-medium rounded-lg transition-colors flex items-center justify-center gap-1 border border-primary/20">
+<span class="material-icons-round text-lg">add</span>
+                                Add
+                            </button>
+</div>
+</div>
+<!-- Temporal Options (Collapsed by default logic, but shown here for UI) -->
+<div class="px-6 pb-6 pt-0 border-t border-dashed border-slate-200 dark:border-slate-700/50 mt-2">
+<div class="mt-4 flex flex-col md:flex-row gap-6 items-start md:items-center">
+<!-- Ecclesiastical Year Toggle -->
+<label class="flex items-center cursor-pointer group">
+<input class="sr-only peer" type="checkbox"/>
+<div class="relative w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary/50 dark:peer-focus:ring-primary/80 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
+<span class="ml-3 text-sm font-medium text-slate-900 dark:text-slate-300 group-hover:text-primary transition-colors">Ecclesiastical Year Only</span>
+</label>
+<!-- Date Range -->
+<div class="flex items-center gap-2 flex-1">
+<div class="relative w-full max-w-[160px]">
+<input class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-300 dark:border-slate-700 rounded px-3 py-1.5 text-sm text-slate-600 dark:text-slate-300 focus:outline-none focus:border-primary" type="date"/>
+</div>
+<span class="text-slate-400 text-xs">to</span>
+<div class="relative w-full max-w-[160px]">
+<input class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-300 dark:border-slate-700 rounded px-3 py-1.5 text-sm text-slate-600 dark:text-slate-300 focus:outline-none focus:border-primary" type="date"/>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Currently Assigned Roles Table -->
+<div class="bg-white dark:bg-card-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col">
+<div class="p-5 border-b border-slate-200 dark:border-slate-700 flex justify-between items-end">
+<h3 class="font-bold text-slate-900 dark:text-white">Currently Assigned Roles</h3>
+<div class="flex gap-2 text-xs">
+<span class="flex items-center gap-1 text-slate-500 dark:text-slate-400">
+<span class="w-2 h-2 rounded-full bg-purple-500"></span> Global
+                            </span>
+<span class="flex items-center gap-1 text-slate-500 dark:text-slate-400">
+<span class="w-2 h-2 rounded-full bg-blue-500"></span> Union
+                            </span>
+<span class="flex items-center gap-1 text-slate-500 dark:text-slate-400">
+<span class="w-2 h-2 rounded-full bg-emerald-500"></span> Club
+                            </span>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-surface-dark/30">
+<th class="p-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Role Name</th>
+<th class="p-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Scope / Entity</th>
+<th class="p-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Assigned On</th>
+<th class="p-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+<!-- Row 1 -->
+<tr class="group hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+<td class="p-4">
+<div class="flex items-center gap-3">
+<div class="p-2 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+<span class="material-icons-round text-lg">account_balance_wallet</span>
+</div>
+<div>
+<p class="text-sm font-semibold text-slate-900 dark:text-white">Club Treasurer</p>
+<p class="text-xs text-slate-500 dark:text-slate-400">Finance Module Access</p>
+</div>
+</div>
+</td>
+<td class="p-4">
+<div class="flex flex-col gap-1">
+<span class="text-sm text-slate-800 dark:text-slate-200 font-medium">Orion Pathfinder Club</span>
+<span class="inline-flex items-center gap-1 text-[10px] text-emerald-600 dark:text-emerald-400 bg-emerald-500/5 px-1.5 py-0.5 rounded border border-emerald-500/10 w-fit">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Local Level
+                                            </span>
+</div>
+</td>
+<td class="p-4">
+<div class="text-sm text-slate-600 dark:text-slate-400">Jan 12, 2024</div>
+<div class="text-xs text-slate-400 dark:text-slate-500">by SysAdmin</div>
+</td>
+<td class="p-4 text-right">
+<button class="p-2 text-slate-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all group-hover:visible" title="Unassign Role">
+<span class="material-icons-round text-xl">delete_outline</span>
+</button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="group hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+<td class="p-4">
+<div class="flex items-center gap-3">
+<div class="p-2 rounded bg-blue-500/10 text-blue-600 dark:text-blue-400">
+<span class="material-icons-round text-lg">event</span>
+</div>
+<div>
+<p class="text-sm font-semibold text-slate-900 dark:text-white">Event Coordinator</p>
+<p class="text-xs text-slate-500 dark:text-slate-400">Limited Scope (Temp)</p>
+</div>
+</div>
+</td>
+<td class="p-4">
+<div class="flex flex-col gap-1">
+<span class="text-sm text-slate-800 dark:text-slate-200 font-medium">Atlantic Union</span>
+<span class="inline-flex items-center gap-1 text-[10px] text-blue-600 dark:text-blue-400 bg-blue-500/5 px-1.5 py-0.5 rounded border border-blue-500/10 w-fit">
+<span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span> Union Level
+                                            </span>
+</div>
+</td>
+<td class="p-4">
+<div class="text-sm text-slate-600 dark:text-slate-400">Mar 05, 2024</div>
+<div class="text-xs text-amber-500 dark:text-amber-400 flex items-center gap-1">
+<span class="material-icons-round text-[10px]">timer</span> Expires in 24d
+                                        </div>
+</td>
+<td class="p-4 text-right">
+<button class="p-2 text-slate-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all group-hover:visible" title="Unassign Role">
+<span class="material-icons-round text-xl">delete_outline</span>
+</button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="group hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+<td class="p-4">
+<div class="flex items-center gap-3">
+<div class="p-2 rounded bg-purple-500/10 text-purple-600 dark:text-purple-400">
+<span class="material-icons-round text-lg">verified_user</span>
+</div>
+<div>
+<p class="text-sm font-semibold text-slate-900 dark:text-white">MG Candidate Mentor</p>
+<p class="text-xs text-slate-500 dark:text-slate-400">Mentorship Module</p>
+</div>
+</div>
+</td>
+<td class="p-4">
+<div class="flex flex-col gap-1">
+<span class="text-sm text-slate-800 dark:text-slate-200 font-medium">Northeastern Conference</span>
+<span class="inline-flex items-center gap-1 text-[10px] text-purple-600 dark:text-purple-400 bg-purple-500/5 px-1.5 py-0.5 rounded border border-purple-500/10 w-fit">
+<span class="w-1.5 h-1.5 rounded-full bg-purple-500"></span> Conference Level
+                                            </span>
+</div>
+</td>
+<td class="p-4">
+<div class="text-sm text-slate-600 dark:text-slate-400">Feb 20, 2024</div>
+<div class="text-xs text-slate-400 dark:text-slate-500">by Conf. Youth Dir</div>
+</td>
+<td class="p-4 text-right">
+<button class="p-2 text-slate-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all group-hover:visible" title="Unassign Role">
+<span class="material-icons-round text-xl">delete_outline</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+<!-- Empty State (Hidden) -->
+<!-- <div class="p-12 flex flex-col items-center justify-center text-center">
+                            <div class="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4">
+                                <span class="material-icons-round text-3xl text-slate-400">policy</span>
+                            </div>
+                            <h4 class="text-slate-900 dark:text-white font-medium">No roles assigned</h4>
+                            <p class="text-slate-500 dark:text-slate-400 text-sm mt-1 max-w-xs">Use the form above to assign a new role to this user.</p>
+                        </div> -->
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer Action Bar (Optional Sticky) -->
+<div class="sticky bottom-0 bg-white dark:bg-card-dark border-t border-slate-200 dark:border-slate-800 p-4 z-40 mt-6">
+<div class="container mx-auto max-w-7xl flex justify-between items-center">
+<div class="text-sm text-slate-500 dark:text-slate-400 hidden sm:block">
+<span class="font-semibold text-primary">Note:</span> Changes are logged in the admin audit trail.
+            </div>
+<div class="flex gap-3 w-full sm:w-auto justify-end">
+<button class="px-5 py-2.5 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
+                    Cancel
+                </button>
+<button class="px-5 py-2.5 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary/90 transition-colors shadow-lg shadow-primary/25 flex items-center gap-2">
+                    Save Changes
+                </button>
+</div>
+</div>
+</div>
+</body></html>
