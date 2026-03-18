@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Member Profile &amp; Progress View - SACDIA</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#2b2bee",
+                        "primary-hover": "#1e1ec8",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#101022",
+                        "surface-dark": "#1a1a2e",
+                        "surface-darker": "#151529",
+                        "border-dark": "#2a2a40",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        /* Custom scrollbar for dark mode */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #101022; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2a2a40; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #3a3a55; 
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen flex antialiased font-display">
+<!-- Sidebar -->
+<aside class="hidden lg:flex w-64 flex-col fixed inset-y-0 z-50 bg-white dark:bg-surface-dark border-r border-slate-200 dark:border-border-dark">
+<div class="h-16 flex items-center px-6 border-b border-slate-200 dark:border-border-dark">
+<div class="flex items-center gap-2 text-primary font-bold text-xl tracking-tight">
+<span class="material-icons">diversity_3</span>
+                SACDIA
+            </div>
+</div>
+<nav class="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
+<a class="flex items-center px-4 py-3 text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-lg hover:bg-slate-100 dark:hover:bg-primary/10 transition-colors" href="#">
+<span class="material-icons mr-3 text-[20px]">dashboard</span>
+                Dashboard
+            </a>
+<a class="flex items-center px-4 py-3 text-sm font-medium bg-primary/10 text-primary rounded-lg transition-colors" href="#">
+<span class="material-icons mr-3 text-[20px]">people</span>
+                Members
+            </a>
+<a class="flex items-center px-4 py-3 text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-lg hover:bg-slate-100 dark:hover:bg-primary/10 transition-colors" href="#">
+<span class="material-icons mr-3 text-[20px]">school</span>
+                Classes
+            </a>
+<a class="flex items-center px-4 py-3 text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-lg hover:bg-slate-100 dark:hover:bg-primary/10 transition-colors" href="#">
+<span class="material-icons mr-3 text-[20px]">calendar_month</span>
+                Events
+            </a>
+<a class="flex items-center px-4 py-3 text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-lg hover:bg-slate-100 dark:hover:bg-primary/10 transition-colors" href="#">
+<span class="material-icons mr-3 text-[20px]">payments</span>
+                Finance
+            </a>
+</nav>
+<div class="p-4 border-t border-slate-200 dark:border-border-dark">
+<button class="flex items-center w-full px-4 py-2 text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">
+<span class="material-icons mr-3 text-[20px]">logout</span>
+                Sign Out
+            </button>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 lg:pl-64 flex flex-col min-h-screen">
+<!-- Top Navigation Bar -->
+<header class="h-16 sticky top-0 z-40 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-slate-200 dark:border-border-dark flex items-center justify-between px-6 lg:px-8">
+<div class="flex items-center gap-4">
+<button class="lg:hidden text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white">
+<span class="material-icons">menu</span>
+</button>
+<nav class="flex text-sm font-medium text-slate-500 dark:text-slate-400">
+<a class="hover:text-slate-900 dark:hover:text-white" href="#">Members</a>
+<span class="mx-2 text-slate-300 dark:text-slate-600">/</span>
+<span class="text-slate-900 dark:text-white">Profile</span>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button class="relative text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-surface-dark p-2 rounded-full transition-colors">
+<span class="material-icons">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full"></span>
+</button>
+<div class="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center text-xs text-white font-bold">
+                    A
+                </div>
+</div>
+</header>
+<!-- Content Body -->
+<div class="flex-1 p-6 lg:p-8 max-w-7xl mx-auto w-full space-y-8">
+<!-- Hero Header Section -->
+<div class="relative bg-white dark:bg-surface-dark rounded-xl shadow-sm border border-slate-200 dark:border-border-dark overflow-hidden p-6 sm:p-8">
+<div class="absolute top-0 right-0 p-6 flex gap-3">
+<button class="hidden sm:flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 bg-white dark:bg-surface-darker border border-slate-300 dark:border-border-dark rounded-lg hover:bg-slate-50 dark:hover:bg-border-dark/50 transition-colors">
+<span class="material-icons text-[18px]">edit</span>
+                        Edit Profile
+                    </button>
+<button class="hidden sm:flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-hover rounded-lg transition-colors shadow-lg shadow-primary/20">
+<span class="material-icons text-[18px]">settings</span>
+                        Manage Access
+                    </button>
+</div>
+<div class="flex flex-col sm:flex-row items-start sm:items-center gap-6">
+<div class="relative">
+<img alt="Portrait of Gabriel Silva looking confident in outdoor setting" class="w-24 h-24 sm:w-28 sm:h-28 rounded-full object-cover border-4 border-white dark:border-surface-darker shadow-lg" data-alt="Portrait of a young man" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCt6FhKT93jtUvI3EHPHapGBlp-DsQEvMKFCCegLaJ1a7cWqcsfxdKrkVICW_05v4YeGEGySdj7_XW-U6q8w7dD9FGCaAbB00gcGuDm5j0ctMd5uDyWsFlSHHwFbj7wqNN850f0wSeCa3gcQmiz83UsRk3oU_D24YKU33cDCHpSIyfhoTiQgvckh1shTigPTjeixMaWRx8GM86auo0ZT-IrVrbhkA1hZHVrP-S4wxxSWtXd4W2irVO6vyubk1jJCuXy7TZKth4M0Us"/>
+<div class="absolute bottom-1 right-1 w-6 h-6 bg-green-500 border-4 border-white dark:border-surface-dark rounded-full" title="Active"></div>
+</div>
+<div class="flex-1 space-y-2 pt-2">
+<div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+<h1 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Gabriel Silva</h1>
+<div class="flex flex-wrap gap-2">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-primary/20 text-primary border border-primary/20">
+                                    Master Guide
+                                </span>
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-500/10 text-purple-400 border border-purple-500/20">
+                                    Admin
+                                </span>
+</div>
+</div>
+<div class="flex flex-col sm:flex-row sm:items-center gap-y-1 gap-x-6 text-sm text-slate-500 dark:text-slate-400">
+<div class="flex items-center gap-2">
+<span class="material-icons text-[18px] opacity-70">email</span>
+                                gabriel.silva@sacdia.org
+                            </div>
+<div class="flex items-center gap-2">
+<span class="material-icons text-[18px] opacity-70">badge</span>
+                                ID: #8839201
+                            </div>
+<div class="flex items-center gap-2">
+<span class="material-icons text-[18px] opacity-70">location_on</span>
+                                São Paulo, Brazil
+                            </div>
+</div>
+</div>
+</div>
+<!-- Mobile actions -->
+<div class="mt-6 flex sm:hidden gap-3 w-full">
+<button class="flex-1 flex justify-center items-center gap-2 px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 bg-white dark:bg-surface-darker border border-slate-300 dark:border-border-dark rounded-lg">
+                        Edit
+                    </button>
+<button class="flex-1 flex justify-center items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg">
+                        Manage
+                    </button>
+</div>
+</div>
+<!-- Content Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+<!-- Left Column -->
+<div class="space-y-6 lg:col-span-1">
+<!-- Personal Info Card -->
+<div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark p-6">
+<div class="flex items-center justify-between mb-6">
+<h3 class="font-semibold text-lg text-slate-900 dark:text-white">Personal Info</h3>
+<button class="text-primary hover:text-primary-hover text-sm font-medium">Edit</button>
+</div>
+<div class="space-y-4">
+<div class="grid grid-cols-2 gap-4">
+<div>
+<label class="block text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Date of Birth</label>
+<div class="text-sm font-medium text-slate-900 dark:text-slate-200">Oct 24, 1995</div>
+</div>
+<div>
+<label class="block text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Age</label>
+<div class="text-sm font-medium text-slate-900 dark:text-slate-200">28 yrs</div>
+</div>
+<div>
+<label class="block text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Blood Type</label>
+<div class="text-sm font-medium text-slate-900 dark:text-slate-200 flex items-center gap-2">
+<span class="material-icons text-red-500 text-[16px]">bloodtype</span> O+
+                                    </div>
+</div>
+<div>
+<label class="block text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Gender</label>
+<div class="text-sm font-medium text-slate-900 dark:text-slate-200">Male</div>
+</div>
+</div>
+<div class="pt-4 border-t border-slate-100 dark:border-border-dark">
+<label class="block text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Marital Status</label>
+<div class="text-sm font-medium text-slate-900 dark:text-slate-200">Single</div>
+</div>
+</div>
+</div>
+<!-- Contact Details Card -->
+<div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark p-6">
+<div class="flex items-center justify-between mb-6">
+<h3 class="font-semibold text-lg text-slate-900 dark:text-white">Contact Details</h3>
+<button class="text-primary hover:text-primary-hover text-sm font-medium">Edit</button>
+</div>
+<div class="space-y-5">
+<div class="flex gap-4">
+<div class="w-10 h-10 rounded-lg bg-slate-100 dark:bg-surface-darker flex items-center justify-center shrink-0">
+<span class="material-icons text-slate-500 dark:text-slate-400">phone</span>
+</div>
+<div>
+<label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-0.5">Mobile Phone</label>
+<div class="text-sm font-medium text-slate-900 dark:text-slate-200">+55 (11) 98765-4321</div>
+</div>
+</div>
+<div class="flex gap-4">
+<div class="w-10 h-10 rounded-lg bg-slate-100 dark:bg-surface-darker flex items-center justify-center shrink-0">
+<span class="material-icons text-slate-500 dark:text-slate-400">home</span>
+</div>
+<div>
+<label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-0.5">Address</label>
+<div class="text-sm font-medium text-slate-900 dark:text-slate-200">Rua das Flores, 123<br/>Jardim Paulista, SP</div>
+</div>
+</div>
+<div class="flex gap-4">
+<div class="w-10 h-10 rounded-lg bg-red-500/10 dark:bg-red-500/10 flex items-center justify-center shrink-0">
+<span class="material-icons text-red-500">emergency</span>
+</div>
+<div>
+<label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-0.5">Emergency Contact</label>
+<div class="text-sm font-medium text-slate-900 dark:text-slate-200">Maria Silva (Mother)<br/><span class="text-slate-500 text-xs">+55 (11) 91234-5678</span></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column -->
+<div class="space-y-6 lg:col-span-2">
+<!-- Class Progress -->
+<div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark p-6">
+<div class="flex items-center justify-between mb-6">
+<div class="flex items-center gap-3">
+<div class="p-2 bg-primary/10 rounded-lg">
+<span class="material-icons text-primary">school</span>
+</div>
+<h3 class="font-semibold text-lg text-slate-900 dark:text-white">Current Classes</h3>
+</div>
+<span class="text-xs font-medium px-2 py-1 bg-green-500/10 text-green-500 border border-green-500/20 rounded">Active Year 2024</span>
+</div>
+<div class="space-y-6">
+<!-- Class Item 1 -->
+<div>
+<div class="flex justify-between items-end mb-2">
+<div>
+<h4 class="text-sm font-semibold text-slate-900 dark:text-white">Companion Class</h4>
+<p class="text-xs text-slate-500 dark:text-slate-400">Requirements pending: 3</p>
+</div>
+<span class="text-sm font-bold text-primary">75%</span>
+</div>
+<div class="w-full bg-slate-100 dark:bg-surface-darker rounded-full h-2.5 overflow-hidden">
+<div class="bg-primary h-2.5 rounded-full" style="width: 75%"></div>
+</div>
+</div>
+<!-- Class Item 2 -->
+<div>
+<div class="flex justify-between items-end mb-2">
+<div>
+<h4 class="text-sm font-semibold text-slate-900 dark:text-white">Explorer Class</h4>
+<p class="text-xs text-slate-500 dark:text-slate-400">Advanced specialization</p>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-icons text-green-500 text-[16px]">check_circle</span>
+<span class="text-sm font-bold text-green-500">Completed</span>
+</div>
+</div>
+<div class="w-full bg-slate-100 dark:bg-surface-darker rounded-full h-2.5 overflow-hidden">
+<div class="bg-green-500 h-2.5 rounded-full" style="width: 100%"></div>
+</div>
+</div>
+<!-- Class Item 3 -->
+<div>
+<div class="flex justify-between items-end mb-2">
+<div>
+<h4 class="text-sm font-semibold text-slate-900 dark:text-white">Ranger Class</h4>
+<p class="text-xs text-slate-500 dark:text-slate-400">Not started</p>
+</div>
+<span class="text-sm font-bold text-slate-500">0%</span>
+</div>
+<div class="w-full bg-slate-100 dark:bg-surface-darker rounded-full h-2.5 overflow-hidden">
+<div class="bg-slate-400 h-2.5 rounded-full" style="width: 0%"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Roles History & Certifications Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<!-- Roles History -->
+<div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark p-6">
+<h3 class="font-semibold text-lg text-slate-900 dark:text-white mb-6">Roles History</h3>
+<div class="relative pl-4 border-l-2 border-slate-200 dark:border-border-dark space-y-6">
+<!-- Item 1 -->
+<div class="relative">
+<div class="absolute -left-[21px] top-1 h-3 w-3 rounded-full border-2 border-primary bg-background-light dark:bg-background-dark"></div>
+<p class="text-xs font-medium text-slate-400 mb-0.5">2023 - Present</p>
+<h4 class="text-sm font-semibold text-slate-900 dark:text-white">Club Treasurer</h4>
+<p class="text-xs text-slate-500 mt-1">Responsible for monthly dues and event budgeting.</p>
+</div>
+<!-- Item 2 -->
+<div class="relative">
+<div class="absolute -left-[21px] top-1 h-3 w-3 rounded-full border-2 border-slate-300 dark:border-slate-600 bg-background-light dark:bg-background-dark"></div>
+<p class="text-xs font-medium text-slate-400 mb-0.5">2021 - 2022</p>
+<h4 class="text-sm font-semibold text-slate-900 dark:text-white">Unit Counselor</h4>
+<p class="text-xs text-slate-500 mt-1">Lions Unit leader.</p>
+</div>
+<!-- Item 3 -->
+<div class="relative">
+<div class="absolute -left-[21px] top-1 h-3 w-3 rounded-full border-2 border-slate-300 dark:border-slate-600 bg-background-light dark:bg-background-dark"></div>
+<p class="text-xs font-medium text-slate-400 mb-0.5">2020</p>
+<h4 class="text-sm font-semibold text-slate-900 dark:text-white">Club Secretary</h4>
+</div>
+</div>
+</div>
+<!-- Recent Certifications / Stats -->
+<div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark p-6 flex flex-col">
+<h3 class="font-semibold text-lg text-slate-900 dark:text-white mb-6">Recent Honors</h3>
+<div class="flex-1 space-y-4">
+<div class="flex items-center gap-4 p-3 rounded-lg bg-slate-50 dark:bg-surface-darker/50 border border-slate-100 dark:border-border-dark/50 hover:border-primary/30 transition-colors cursor-pointer group">
+<img alt="Camping tent in a dark forest" class="w-12 h-12 rounded bg-slate-200 object-cover" data-alt="Camping Honor Badge" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBlb6I2jXt78CgYsv0sk9qMLcY08JbMV8JG6eF-faPkWXDp7h0qD-tgnxEhSz2G4SUiLQnkZ17cu6vlmZ_A7KqrFOszz91bJQ1IGSqEHkKzJXs4jNTOFfwUkblC-mQyIGaNR2IPsEQas1K8_EcN1DvEX_yfeiR6v3heSMExuH6f8BqhGt3_0rue3kC6CGDxeanah-BEoh5QsDl8wELR0Akfblz5Jxhpk33ZQGgkdB36BS8selI8Vqw3LjH2g3I24MIdbF_0J4DQOsk"/>
+<div>
+<h4 class="text-sm font-semibold text-slate-900 dark:text-white group-hover:text-primary transition-colors">Camping Skills IV</h4>
+<p class="text-xs text-slate-500">Awarded: Jan 15, 2024</p>
+</div>
+</div>
+<div class="flex items-center gap-4 p-3 rounded-lg bg-slate-50 dark:bg-surface-darker/50 border border-slate-100 dark:border-border-dark/50 hover:border-primary/30 transition-colors cursor-pointer group">
+<img alt="Close up of a knot tied with rope" class="w-12 h-12 rounded bg-slate-200 object-cover" data-alt="Knots Honor Badge" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBDYBGzgxJqs1DZGbvO91MsQ9-TyHvfvNWqdGwMMD5UPY0eFptgDhppyewcYzesVFOVqLLJVDVFtkeUsol9KPRQWDvyH1D5fkojudsn6lUL9Q6BnANS7saPByV4a5VWo3K78iSv_mo4gOuWP4LqE8V9nGuzxubLzWMm9SPJ3XwQnNEqz6uEVJroaimxHyCGl1Xho4sTTjXS-gzt_jITeZsM9FD3ggkTEhwyRDDVjRY-whR3XBzf6Uo2xuojYMSU2TwuxtrjXivlnws"/>
+<div>
+<h4 class="text-sm font-semibold text-slate-900 dark:text-white group-hover:text-primary transition-colors">Knots &amp; Lashing</h4>
+<p class="text-xs text-slate-500">Awarded: Dec 10, 2023</p>
+</div>
+</div>
+<div class="flex items-center gap-4 p-3 rounded-lg bg-slate-50 dark:bg-surface-darker/50 border border-slate-100 dark:border-border-dark/50 hover:border-primary/30 transition-colors cursor-pointer group">
+<img alt="First aid kit contents" class="w-12 h-12 rounded bg-slate-200 object-cover" data-alt="First Aid Honor Badge" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDbVh_kDk3BslI04AO2yxT1_YheqAtK9m17Ggryo_q4NiZMuUuwvNaMwUDFNLO_d-VxNSyujv6fNrF5MFlb01V0dFtPeLInpWjjiJbRopfJgCJsnzBbKNxf9HTBcz_qpO-FeA5ekNiGn7ORKG4IuBA93NUF_N7wnrpIJNpc3XgKt0gU3xGtG5INnQRR9_2GLev23jAEiSd1UHNDSSYtTGCqNhCpy3-qqk0jU8Hxd8l8b8U_ikQebzsyNG9CIdTVC1KCqNhTPzl5DsY"/>
+<div>
+<h4 class="text-sm font-semibold text-slate-900 dark:text-white group-hover:text-primary transition-colors">First Aid - Basic</h4>
+<p class="text-xs text-slate-500">Awarded: Nov 05, 2023</p>
+</div>
+</div>
+</div>
+<button class="w-full mt-4 text-xs font-medium text-slate-500 hover:text-primary uppercase tracking-wider py-2 transition-colors">View All Honors</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer Stepper -->
+<div class="mt-8">
+<div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark p-6 sm:p-8">
+<h3 class="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-8">Registration Status (2024)</h3>
+<div class="relative">
+<!-- Connecting Line -->
+<div class="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-slate-100 dark:bg-surface-darker rounded z-0"></div>
+<div class="absolute left-0 top-1/2 -translate-y-1/2 w-2/3 h-1 bg-gradient-to-r from-primary to-primary/60 rounded z-0"></div>
+<div class="relative z-10 flex justify-between w-full">
+<!-- Step 1 -->
+<div class="flex flex-col items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white shadow-lg shadow-primary/30">
+<span class="material-icons text-[20px]">check</span>
+</div>
+<div class="text-center">
+<p class="text-xs font-bold text-slate-900 dark:text-white">Registration</p>
+<p class="text-[10px] text-slate-500">Completed</p>
+</div>
+</div>
+<!-- Step 2 -->
+<div class="flex flex-col items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white shadow-lg shadow-primary/30">
+<span class="material-icons text-[20px]">check</span>
+</div>
+<div class="text-center">
+<p class="text-xs font-bold text-slate-900 dark:text-white">Medical Check</p>
+<p class="text-[10px] text-slate-500">Verified</p>
+</div>
+</div>
+<!-- Step 3 -->
+<div class="flex flex-col items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-surface-dark border-4 border-primary flex items-center justify-center text-primary shadow-lg shadow-primary/20">
+<span class="material-icons text-[20px]">inventory_2</span>
+</div>
+<div class="text-center">
+<p class="text-xs font-bold text-slate-900 dark:text-white">Uniform</p>
+<p class="text-[10px] text-slate-500">Assigned</p>
+</div>
+</div>
+<!-- Step 4 -->
+<div class="flex flex-col items-center gap-3 opacity-50">
+<div class="w-10 h-10 rounded-full bg-slate-100 dark:bg-surface-darker border-4 border-slate-200 dark:border-border-dark flex items-center justify-center text-slate-400">
+<span class="text-xs font-bold">4</span>
+</div>
+<div class="text-center">
+<p class="text-xs font-bold text-slate-900 dark:text-white">Insurance</p>
+<p class="text-[10px] text-slate-500">Pending</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

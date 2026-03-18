@@ -1,5 +1,7 @@
 # Decisiones de Estandarización - SACDIA
 
+**Estado**: ACTIVE
+
 **Fecha**: 29 de enero de 2026  
 **Status**: Aprobado por usuario
 
@@ -189,7 +191,7 @@ await tx.club_role_assignments.create({
   data: {
     user_id: userId,
     role_id: 'uuid-del-rol-member',  // Rol CLUB: "member"
-    club_adv_id: clubInstanceId,  // O club_pathf_id o club_mg_id
+    club_section_id: clubSectionId,  // FK directa a club_sections
     ecclesiastical_year_id: currentYear.id,
     start_date: new Date(),
     active: true,
@@ -281,6 +283,55 @@ CREATE TABLE roles (
 
 ---
 
+---
+
+## 6. Módulo RBAC y Gestión de Permisos desde Admin Panel
+
+### ✅ DECISIÓN FINAL (2026-02-09)
+
+#### Cambios en `auth.service.ts`
+
+- **`login()`**: Ahora incluye `users_roles` (con `role_name` y `role_category`) en el query de Prisma. Retorna `roles: string[]` en el objeto `user` de la respuesta.
+- **`getProfile()`**: Ahora incluye `users_roles → roles → role_permissions → permissions`. Retorna `roles: string[]` y `permissions: string[]` aplanados en `data`.
+
+#### Módulo `RbacModule` (Backend)
+
+Nuevo módulo NestJS en `src/rbac/` registrado en `app.module.ts`:
+
+| Archivo | Propósito |
+|---------|-----------|
+| `rbac.module.ts` | Módulo con imports de `PrismaModule` |
+| `rbac.controller.ts` | 8 endpoints bajo `/admin/rbac`, protegidos por `GlobalRolesGuard` |
+| `rbac.service.ts` | CRUD permisos + sync de permisos a roles |
+| `dto/create-permission.dto.ts` | Validación regex `resource:action` |
+| `dto/update-permission.dto.ts` | Actualización parcial |
+| `dto/assign-permissions.dto.ts` | Asignación bulk de UUIDs |
+
+**Endpoints**:
+- CRUD de permisos: `GET/POST/PATCH/DELETE /admin/rbac/permissions`
+- Roles con permisos: `GET /admin/rbac/roles`
+- Sync permisos a rol: `PUT /admin/rbac/roles/:id/permissions`
+- Remover permiso: `DELETE /admin/rbac/roles/:id/permissions/:pid`
+
+#### Pantallas Admin Panel (Frontend)
+
+| Ruta | Descripción |
+|------|-------------|
+| `/dashboard/rbac` | Índice con tarjetas |
+| `/dashboard/rbac/permissions` | CRUD de permisos (tabla + formularios) |
+| `/dashboard/rbac/roles` | Matriz de asignación permisos↔roles con checkboxes |
+
+#### Cambios en frontend auth
+
+- `extractRoles()` (`roles.ts`): Ahora desenvuelve `{ status, data }` wrapper y soporta `users_roles` en formato Prisma
+- `getCurrentUser()` (`session.ts`): Desenvuelve respuesta backend `{ status, data }` antes de retornar `AuthUser`
+- Sidebar: Nueva sección "Seguridad" con enlaces a Permisos y Roles
+
+**Documentación completa**: [`docs/01-FEATURES/auth/PERMISSIONS-SYSTEM.md`](../01-FEATURES/auth/PERMISSIONS-SYSTEM.md)
+
+---
+
 **Generado**: 2026-01-29  
 **Actualizado por**: Usuario  
+**Última actualización**: 2026-02-09 (ADR #6 — RBAC Module)  
 **Status**: ✅ Todas las decisiones confirmadas - Listo para implementación

@@ -1,0 +1,86 @@
+# CLAUDE - [scope-name]
+
+Guia operativa del dominio `[scope-name]`.
+Usar este archivo como contexto rapido para agentes IA antes de implementar.
+
+## 1) Alcance
+
+- Dominio: `[backend | admin | app | feature | database | guides]`
+- Ruta principal de codigo: `[path/to/code]`
+- Ruta principal de docs: `[path/to/docs]`
+- Owner: `[team-or-person]`
+
+## 2) Leer primero (orden)
+
+1. `[doc-1.md]`
+2. `[doc-2.md]`
+3. `[doc-3.md]`
+
+Si hay conflicto entre documentos, priorizar:
+1) `docs/00-STEERING/*` 2) docs del dominio 3) este archivo.
+
+## 3) Fuente de verdad del dominio
+
+- Requisitos funcionales: `[requirements.md or equivalent]`
+- Diseno tecnico: `[design.md or equivalent]`
+- Contratos API/DTO: `[api-reference-doc]`
+- Datos y schema: `[schema/migration-doc]`
+
+## 4) Comandos utiles
+
+```bash
+# setup
+[install-command]
+
+# desarrollo
+[dev-command]
+
+# pruebas
+[test-command]
+
+# lint/analisis
+[lint-command]
+```
+
+## 5) Convenciones clave
+
+- Naming: `[camelCase/snake_case/etc]`
+- Validacion de input: `[approach]`
+- Manejo de errores: `[approach]`
+- Auth/RBAC: `[approach]`
+- Logs/auditoria: `[approach]`
+
+## 6) Limites y riesgos
+
+- No tocar: `[sensitive-files-or-flows]`
+- Riesgo alto: `[area-1]`
+- Riesgo medio: `[area-2]`
+- Dependencias externas criticas: `[service-1, service-2]`
+
+## 7) Checklist pre-implementacion
+
+- [ ] Lei docs base y docs del dominio.
+- [ ] Entiendo criterios de aceptacion.
+- [ ] Verifique contratos actuales (API/DB/UI).
+- [ ] Identifique pruebas a actualizar/agregar.
+
+## 8) Checklist post-implementacion
+
+- [ ] Codigo alineado a convenciones del dominio.
+- [ ] Tests relevantes pasando.
+- [ ] Lint/analyze sin errores.
+- [ ] Documentacion actualizada en el mismo cambio.
+
+## 9) Actualizacion de docs obligatoria
+
+Cuando cambie comportamiento:
+
+- API/DTO/errores -> actualizar `docs/02-API/`.
+- Schema/relaciones/migraciones -> actualizar `docs/03-DATABASE/`.
+- Flujo funcional -> actualizar `docs/01-FEATURES/<feature>/`.
+- Criterios globales -> actualizar `docs/00-STEERING/`.
+
+## 10) Contexto local opcional (no versionado)
+
+Notas temporales de sesion deben ir en `CLAUDE.local.md` o `*.local.md`.
+No usar este archivo para memoria efimera.

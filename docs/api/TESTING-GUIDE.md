@@ -1,7 +1,24 @@
 # Guía de Testing - SACDIA Backend API
 
-**Última actualización**: 5 de febrero de 2026
-**Estado**: Backend completado (17/17 módulos)
+**Estado**: ACTIVE
+
+**Última actualización**: 4 de marzo de 2026
+**Estado**: Documento canónico de testing API
+
+> [!IMPORTANT]
+> Este documento consolida la guía rápida de pruebas (`TESTING.md`) y la guía extendida.
+> Para evitar duplicación, `TESTING.md` fue movido a `docs/history/api/TESTING.md`.
+
+---
+
+## 🚀 Comandos Rápidos
+
+```bash
+pnpm run test
+pnpm run test:watch
+pnpm run test:cov
+pnpm run test:e2e
+```
 
 ---
 
@@ -358,13 +375,11 @@ describe('FoldersService', () => {
 
       await service.updateSectionProgress(userId, folderId, moduleId, sectionId, dto);
 
-      // Verificar que query usa club IDs
+      // Verificar que query usa club_section_id
       expect(spy).toHaveBeenCalledWith(
         expect.objectContaining({
           where: expect.objectContaining({
-            OR: expect.arrayContaining([
-              expect.objectContaining({ club_adv_id: expect.any(Number) })
-            ])
+            club_section_id: expect.any(Number)
           })
         })
       );

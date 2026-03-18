@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "skills": {
+    "nextlevelbuilder-ui-ux-pro-max": {
+      "source": "smithery/ai",
+      "sourceType": "well-known",
+      "computedHash": "047974cdd8a0c68e96559f0260dfc76a8b2cf19c3adb2cd4a8997dfe70436d35"
+    }
+  }
+}

@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>System Permissions Management - SACDIA</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#2b2bee",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#101022",
+                        "primary-dark": "#1a1a9f", // Darker shade for contrast if needed
+                        "primary-light": "#5454f2", // Lighter shade for hover
+                    },
+                    fontFamily: {
+                        "display": ["Lexend", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom Scrollbar for Webkit */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #101022; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2b2bee; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #5454f2; 
+        }
+        
+        /* Glass effect for header */
+        .glass-header {
+            background: rgba(16, 16, 34, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(43, 43, 238, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-100 font-display min-h-screen flex flex-col md:flex-row antialiased selection:bg-primary/30 selection:text-white">
+<!-- Sidebar Navigation -->
+<aside class="w-full md:w-64 bg-white dark:bg-[#15152a] border-b md:border-b-0 md:border-r border-primary/10 flex-shrink-0 flex flex-col h-auto md:h-screen fixed z-20 md:sticky top-0 transition-all duration-300">
+<div class="h-16 flex items-center px-6 border-b border-primary/10">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white font-bold text-lg shadow-[0_0_15px_rgba(43,43,238,0.4)]">
+                    S
+                </div>
+<span class="text-xl font-bold tracking-tight text-slate-900 dark:text-white">SACDIA</span>
+</div>
+</div>
+<nav class="flex-1 overflow-y-auto py-4 px-3 space-y-1">
+<div class="px-3 mb-2 text-xs font-semibold text-primary/70 uppercase tracking-wider">Main</div>
+<a class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-slate-600 dark:text-slate-400 rounded-lg hover:bg-primary/10 hover:text-primary transition-colors group" href="#">
+<span class="material-icons text-xl group-hover:text-primary transition-colors">dashboard</span>
+                Dashboard
+            </a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-slate-600 dark:text-slate-400 rounded-lg hover:bg-primary/10 hover:text-primary transition-colors group" href="#">
+<span class="material-icons text-xl group-hover:text-primary transition-colors">groups</span>
+                Clubs
+            </a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-slate-600 dark:text-slate-400 rounded-lg hover:bg-primary/10 hover:text-primary transition-colors group" href="#">
+<span class="material-icons text-xl group-hover:text-primary transition-colors">person</span>
+                Members
+            </a>
+<div class="px-3 mt-6 mb-2 text-xs font-semibold text-primary/70 uppercase tracking-wider">Administration</div>
+<a class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium bg-primary/10 text-primary rounded-lg border border-primary/20 shadow-sm relative overflow-hidden group" href="#">
+<div class="absolute inset-0 bg-primary/5 group-hover:bg-primary/10 transition-colors"></div>
+<span class="material-icons text-xl relative z-10">verified_user</span>
+<span class="relative z-10">Permissions</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-slate-600 dark:text-slate-400 rounded-lg hover:bg-primary/10 hover:text-primary transition-colors group" href="#">
+<span class="material-icons text-xl group-hover:text-primary transition-colors">manage_accounts</span>
+                Roles
+            </a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-slate-600 dark:text-slate-400 rounded-lg hover:bg-primary/10 hover:text-primary transition-colors group" href="#">
+<span class="material-icons text-xl group-hover:text-primary transition-colors">settings</span>
+                System Config
+            </a>
+</nav>
+<div class="p-4 border-t border-primary/10">
+<div class="flex items-center gap-3">
+<img alt="Admin User Avatar" class="h-9 w-9 rounded-full ring-2 ring-primary/30" data-alt="Profile picture of a smiling man" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC4QiXpukFTld0fs-LTKBQURFAichwcRD0fL3Cn97UZrTH67-KzUF420C4NScb4IPFD2fzrVADns0cNmnF_V4HBj6pxNnqExuGQMB0PTvTeLLRfKwF5bfBfx3DibXrF0bzQvZORcI4HoluE-JIdgjAqfRVtwfS2W4rhQ_HXjpfMaO32m7lovNGgPPguBqOdeiiTjLjZI6uufLqLSJvK79G7LwzvHIwkSTHdSpUM5960CTumQgvjhLvbQpPkTSOjAKWL1QbhXEUgj00"/>
+<div class="flex-1 min-w-0">
+<p class="text-sm font-medium text-slate-900 dark:text-white truncate">Admin User</p>
+<p class="text-xs text-slate-500 dark:text-slate-400 truncate">admin@sacdia.org</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 min-w-0 flex flex-col h-full overflow-hidden relative">
+<!-- Top Header -->
+<header class="glass-header z-10 sticky top-0 px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+<div>
+<h1 class="text-2xl font-bold text-slate-900 dark:text-white leading-tight">System Permissions</h1>
+<p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Manage granular access controls and system capabilities.</p>
+</div>
+<div class="flex items-center gap-3">
+<button class="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-primary hover:bg-primary-light active:bg-primary-dark rounded-lg shadow-lg shadow-primary/20 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary focus:ring-offset-[#101022]">
+<span class="material-icons text-[18px]">add_moderator</span>
+                    Create Custom Permission
+                </button>
+</div>
+</header>
+<!-- Main Content Area -->
+<div class="flex-1 overflow-auto p-6 scroll-smooth">
+<!-- Filters & Search Toolbar -->
+<div class="mb-6 flex flex-col md:flex-row gap-4 justify-between items-start md:items-center bg-white dark:bg-[#15152a] p-4 rounded-xl border border-primary/10 shadow-sm">
+<!-- Search Input -->
+<div class="relative w-full md:w-96 group">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<span class="material-icons text-slate-400 group-focus-within:text-primary transition-colors text-[20px]">search</span>
+</div>
+<input class="block w-full pl-10 pr-3 py-2.5 border border-slate-200 dark:border-slate-700 rounded-lg leading-5 bg-slate-50 dark:bg-[#1a1a35] text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition duration-150 ease-in-out sm:text-sm" placeholder="Search permissions (e.g. club.create)..." type="text"/>
+</div>
+<!-- Filters -->
+<div class="flex flex-wrap gap-3 w-full md:w-auto">
+<!-- Category Filter -->
+<div class="relative inline-block text-left w-full sm:w-auto">
+<select class="block w-full pl-3 pr-10 py-2.5 text-base border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary sm:text-sm rounded-lg bg-slate-50 dark:bg-[#1a1a35] text-slate-700 dark:text-slate-200 appearance-none cursor-pointer">
+<option>All Categories</option>
+<option>Clubs Management</option>
+<option>Security &amp; Auth</option>
+<option>Finance</option>
+<option>Reports</option>
+</select>
+<div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-500">
+<span class="material-icons text-[18px]">expand_more</span>
+</div>
+</div>
+<!-- Impact Filter -->
+<div class="relative inline-block text-left w-full sm:w-auto">
+<select class="block w-full pl-3 pr-10 py-2.5 text-base border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary sm:text-sm rounded-lg bg-slate-50 dark:bg-[#1a1a35] text-slate-700 dark:text-slate-200 appearance-none cursor-pointer">
+<option>All Impact Levels</option>
+<option>High Impact</option>
+<option>Medium Impact</option>
+<option>Low Impact</option>
+</select>
+<div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-500">
+<span class="material-icons text-[18px]">expand_more</span>
+</div>
+</div>
+<!-- Reset Button -->
+<button class="inline-flex items-center justify-center p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#1a1a35] text-slate-400 hover:text-primary hover:border-primary/50 transition-colors">
+<span class="material-icons text-[20px]">restart_alt</span>
+</button>
+</div>
+</div>
+<!-- Data Table Card -->
+<div class="bg-white dark:bg-[#15152a] rounded-xl border border-primary/10 shadow-sm overflow-hidden flex flex-col">
+<div class="overflow-x-auto">
+<table class="min-w-full divide-y divide-slate-200 dark:divide-slate-800">
+<thead class="bg-slate-50 dark:bg-[#1a1a35]">
+<tr>
+<th class="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider" scope="col">
+                                    Permission Key
+                                </th>
+<th class="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider" scope="col">
+                                    Name &amp; Description
+                                </th>
+<th class="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider" scope="col">
+                                    Category
+                                </th>
+<th class="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider" scope="col">
+                                    Impact
+                                </th>
+<th class="relative px-6 py-4" scope="col">
+<span class="sr-only">Actions</span>
+</th>
+</tr>
+</thead>
+<tbody class="bg-white dark:bg-[#15152a] divide-y divide-slate-200 dark:divide-slate-800/50">
+<!-- Row 1: High Impact -->
+<tr class="hover:bg-slate-50 dark:hover:bg-primary/5 transition-colors group">
+<td class="px-6 py-4 whitespace-nowrap">
+<div class="flex items-center">
+<div class="flex-shrink-0 h-8 w-8 rounded bg-red-500/10 flex items-center justify-center mr-3 border border-red-500/20">
+<span class="material-icons text-red-500 text-[18px]">gpp_good</span>
+</div>
+<code class="text-sm font-mono text-primary font-medium bg-primary/10 px-2 py-1 rounded">club.create</code>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="text-sm font-medium text-slate-900 dark:text-white">Create New Club</div>
+<div class="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Allows user to register a new club entity in the registry.</div>
+</td>
+<td class="px-6 py-4 whitespace-nowrap">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                                        Clubs
+                                    </span>
+</td>
+<td class="px-6 py-4 whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300 border border-red-200 dark:border-red-900/50">
+<span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span>
+                                        High Impact
+                                    </span>
+</td>
+<td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+<div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="text-slate-400 hover:text-primary transition-colors p-1"><span class="material-icons text-[20px]">edit</span></button>
+<button class="text-slate-400 hover:text-red-500 transition-colors p-1"><span class="material-icons text-[20px]">delete</span></button>
+</div>
+</td>
+</tr>
+<!-- Row 2: Medium Impact -->
+<tr class="hover:bg-slate-50 dark:hover:bg-primary/5 transition-colors group">
+<td class="px-6 py-4 whitespace-nowrap">
+<div class="flex items-center">
+<div class="flex-shrink-0 h-8 w-8 rounded bg-yellow-500/10 flex items-center justify-center mr-3 border border-yellow-500/20">
+<span class="material-icons text-yellow-500 text-[18px]">person_add</span>
+</div>
+<code class="text-sm font-mono text-primary font-medium bg-primary/10 px-2 py-1 rounded">member.approve</code>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="text-sm font-medium text-slate-900 dark:text-white">Approve Membership</div>
+<div class="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Grants ability to finalize and activate member applications.</div>
+</td>
+<td class="px-6 py-4 whitespace-nowrap">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                                        Membership
+                                    </span>
+</td>
+<td class="px-6 py-4 whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300 border border-amber-200 dark:border-amber-900/50">
+<span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                                        Medium Impact
+                                    </span>
+</td>
+<td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+<div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="text-slate-400 hover:text-primary transition-colors p-1"><span class="material-icons text-[20px]">edit</span></button>
+<button class="text-slate-400 hover:text-red-500 transition-colors p-1"><span class="material-icons text-[20px]">delete</span></button>
+</div>
+</td>
+</tr>
+<!-- Row 3: Low Impact -->
+<tr class="hover:bg-slate-50 dark:hover:bg-primary/5 transition-colors group">
+<td class="px-6 py-4 whitespace-nowrap">
+<div class="flex items-center">
+<div class="flex-shrink-0 h-8 w-8 rounded bg-blue-500/10 flex items-center justify-center mr-3 border border-blue-500/20">
+<span class="material-icons text-blue-500 text-[18px]">visibility</span>
+</div>
+<code class="text-sm font-mono text-primary font-medium bg-primary/10 px-2 py-1 rounded">finance.view</code>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="text-sm font-medium text-slate-900 dark:text-white">View Financial Reports</div>
+<div class="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Read-only access to club ledgers and transaction history.</div>
+</td>
+<td class="px-6 py-4 whitespace-nowrap">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                                        Finance
+                                    </span>
+</td>
+<td class="px-6 py-4 whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-900/50">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                        Low Impact
+                                    </span>
+</td>
+<td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+<div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="text-slate-400 hover:text-primary transition-colors p-1"><span class="material-icons text-[20px]">edit</span></button>
+<button class="text-slate-400 hover:text-red-500 transition-colors p-1"><span class="material-icons text-[20px]">delete</span></button>
+</div>
+</td>
+</tr>
+<!-- Row 4: High Impact -->
+<tr class="hover:bg-slate-50 dark:hover:bg-primary/5 transition-colors group">
+<td class="px-6 py-4 whitespace-nowrap">
+<div class="flex items-center">
+<div class="flex-shrink-0 h-8 w-8 rounded bg-red-500/10 flex items-center justify-center mr-3 border border-red-500/20">
+<span class="material-icons text-red-500 text-[18px]">admin_panel_settings</span>
+</div>
+<code class="text-sm font-mono text-primary font-medium bg-primary/10 px-2 py-1 rounded">system.config.write</code>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="text-sm font-medium text-slate-900 dark:text-white">Edit System Configuration</div>
+<div class="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Modify core application settings and global variables.</div>
+</td>
+<td class="px-6 py-4 whitespace-nowrap">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                                        System
+                                    </span>
+</td>
+<td class="px-6 py-4 whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300 border border-red-200 dark:border-red-900/50">
+<span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span>
+                                        High Impact
+                                    </span>
+</td>
+<td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+<div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="text-slate-400 hover:text-primary transition-colors p-1"><span class="material-icons text-[20px]">edit</span></button>
+<button class="text-slate-400 hover:text-red-500 transition-colors p-1"><span class="material-icons text-[20px]">delete</span></button>
+</div>
+</td>
+</tr>
+<!-- Row 5: Medium Impact -->
+<tr class="hover:bg-slate-50 dark:hover:bg-primary/5 transition-colors group">
+<td class="px-6 py-4 whitespace-nowrap">
+<div class="flex items-center">
+<div class="flex-shrink-0 h-8 w-8 rounded bg-yellow-500/10 flex items-center justify-center mr-3 border border-yellow-500/20">
+<span class="material-icons text-yellow-500 text-[18px]">shield</span>
+</div>
+<code class="text-sm font-mono text-primary font-medium bg-primary/10 px-2 py-1 rounded">security.audit</code>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="text-sm font-medium text-slate-900 dark:text-white">Access Audit Logs</div>
+<div class="text-sm text-slate-500 dark:text-slate-400 mt-0.5">View security events and user activity logs.</div>
+</td>
+<td class="px-6 py-4 whitespace-nowrap">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                                        Security
+                                    </span>
+</td>
+<td class="px-6 py-4 whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300 border border-amber-200 dark:border-amber-900/50">
+<span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                                        Medium Impact
+                                    </span>
+</td>
+<td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+<div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="text-slate-400 hover:text-primary transition-colors p-1"><span class="material-icons text-[20px]">edit</span></button>
+<button class="text-slate-400 hover:text-red-500 transition-colors p-1"><span class="material-icons text-[20px]">delete</span></button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination Footer -->
+<div class="bg-slate-50 dark:bg-[#1a1a35] px-4 py-3 flex items-center justify-between border-t border-slate-200 dark:border-slate-800 sm:px-6">
+<div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+<div>
+<p class="text-sm text-slate-500 dark:text-slate-400">
+                                Showing <span class="font-medium text-slate-900 dark:text-white">1</span> to <span class="font-medium text-slate-900 dark:text-white">5</span> of <span class="font-medium text-slate-900 dark:text-white">24</span> results
+                            </p>
+</div>
+<div>
+<nav aria-label="Pagination" class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+<a class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-[#15152a] text-sm font-medium text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-primary/10" href="#">
+<span class="sr-only">Previous</span>
+<span class="material-icons text-[20px]">chevron_left</span>
+</a>
+<a aria-current="page" class="z-10 bg-primary/10 border-primary text-primary relative inline-flex items-center px-4 py-2 border text-sm font-medium" href="#">
+                                    1
+                                </a>
+<a class="bg-white dark:bg-[#15152a] border-slate-300 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-primary/10 relative inline-flex items-center px-4 py-2 border text-sm font-medium" href="#">
+                                    2
+                                </a>
+<a class="bg-white dark:bg-[#15152a] border-slate-300 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-primary/10 relative inline-flex items-center px-4 py-2 border text-sm font-medium" href="#">
+                                    3
+                                </a>
+<span class="relative inline-flex items-center px-4 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-[#15152a] text-sm font-medium text-slate-700 dark:text-slate-500">
+                                    ...
+                                </span>
+<a class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-[#15152a] text-sm font-medium text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-primary/10" href="#">
+<span class="sr-only">Next</span>
+<span class="material-icons text-[20px]">chevron_right</span>
+</a>
+</nav>
+</div>
+</div>
+</div>
+</div>
+<!-- Contextual Help / Info Box -->
+<div class="mt-6 rounded-lg bg-primary/5 border border-primary/20 p-4">
+<div class="flex">
+<div class="flex-shrink-0">
+<span class="material-icons text-primary">info</span>
+</div>
+<div class="ml-3">
+<h3 class="text-sm font-medium text-primary">Understanding Impact Levels</h3>
+<div class="mt-2 text-sm text-slate-600 dark:text-slate-400">
+<p>High impact permissions can significantly alter system behavior or delete critical data. Always ensure these are assigned only to the most trusted roles.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>
