@@ -5,7 +5,7 @@
 **Tipo de documento**: runtime canonizado, documented-as-built
 **Ámbito**: backend, clientes, contratos API, persistencia e integraciones documentadas
 
-<!-- VERIFICADO contra código 2026-03-14. Claims cruzados con Reality Matrix. -->
+<!-- VERIFICADO contra código 2026-03-14. Claims cruzados con Reality Matrix. Actualizado 2026-03-18: club_sections consolidation. -->
 
 > [!IMPORTANT]
 > Este documento describe el runtime permitido por la autoridad congelada de Wave 0.
@@ -78,7 +78,7 @@ El runtime actual conserva naming técnico heredado en varios puntos, pero debe 
 
 - `Club` = raíz institucional;
 - `Sección de club` = unidad operativa real;
-- `instance` o tablas separadas por tipo = representación técnica actual de sección (el naming canónico para URLs es `club-sections`, no `club-instances`);
+- `club_sections` = tabla consolidada que representa secciones de club (desde consolidación 2026-03-17; naming canónico y técnico alineados);
 - `user` = representación técnica del miembro;
 - `role` / `assignment` = representación técnica que no sustituye el concepto canónico de cargo o vinculación institucional.
 
@@ -197,15 +197,15 @@ Notas runtime activas:
 El runtime documenta:
 
 - CRUD operativo de clubes;
-- lectura y creación de `instances` por club;
-- lectura de miembros de una instancia;
+- lectura y creación de secciones por club;
+- lectura de miembros de una sección;
 - asignación y actualización/remoción de roles de club.
 
 Interpretación canónica:
 
 - `clubs` representa la raíz institucional;
-- `instances` representa la realización técnica actual de `Sección de club`;
-- la operación concreta documentada ocurre sobre estas secciones técnicas por tipo.
+- `club_sections` representa la realización técnica de `Sección de club` (consolidado desde 2026-03-17, Decisión 10);
+- la operación concreta documentada ocurre sobre estas secciones, diferenciadas por `club_type_id`.
 
 ### 6.4 Formación, trayectoria y validación
 <!-- VERIFICADO contra código 2026-03-14: classes ALINEADO, honors ALINEADO, certifications PARCIAL (backend+admin read-only, app sin screens), folders ALINEADO -->
@@ -334,7 +334,7 @@ El schema de persistencia contiene 72 modelos. Se categorizan así:
 
 - **Modelos core de trayectoria**: `users`, `enrollments`, `users_classes`, `users_honors`, `member_insurances`, `legal_representatives`, `emergency_contacts`, `users_pr`, `users_roles`, `club_role_assignments`, `unit_members`, `units`, `weekly_records`.
 - **Modelos de catálogo (trayectoria)**: `classes`, `honors`, `honors_categories`, `master_honors`, `club_types`, `club_ideals`, `relationship_types`, `allergies`, `diseases`, `medicines`, `ecclesiastical_years`, `activity_types`, `inventory_categories`, `finances_categories`.
-- **Modelos operativos**: `clubs`, `club_adventurers`, `club_pathfinders`, `club_master_guilds`, `folders`, `folders_modules`, `folders_sections`, `folders_modules_records`, `folders_section_records`, `folder_assignments`, `certifications` y tablas relacionadas, `club_inventory`, `finances` y tablas relacionadas, `activities` y tablas relacionadas, `camporees` y tablas relacionadas, `notifications`.
+- **Modelos operativos**: `clubs`, `club_sections`, `folders`, `folders_modules`, `folders_sections`, `folders_modules_records`, `folders_section_records`, `folder_assignments`, `certifications` y tablas relacionadas, `club_inventory`, `finances` y tablas relacionadas, `activities` y tablas relacionadas, `camporees` y tablas relacionadas, `notifications`.
 - **Modelos de infraestructura**: `error_logs`, `user_fcm_tokens`.
 - **Modelos RBAC**: `roles`, `permissions`, `role_permissions`, `users_permissions`.
 - **Modelos de organización**: `countries`, `unions`, `local_fields`, `districts`, `churches`.
@@ -345,7 +345,7 @@ El runtime documenta al menos estos grupos de persistencia:
 
 - **Users & Auth**: `users`, `users_pr`, `users_roles`, `legal_representatives`, `emergency_contacts`
 - **Organization**: `countries`, `unions`, `local_fields`, `districts`, `churches`, `ecclesiastical_years`
-- **Clubs**: `clubs`, `club_adventurers`, `club_pathfinders`, `club_master_guilds`, `club_role_assignments`
+- **Clubs**: `clubs`, `club_sections`, `club_role_assignments`
 - **Formación**: `classes`, `users_classes`, `enrollments`
 - **RBAC**: `roles`, `permissions`, `role_permissions`
 - **Catálogos**: `club_types`, `relationship_types`, `inventory_categories`
@@ -362,8 +362,8 @@ El runtime documenta al menos estos grupos de persistencia:
 #### Club y sección
 
 - `clubs` representa la raíz institucional;
-- `club_adventurers`, `club_pathfinders` y `club_master_guilds` representan la realización técnica actual por tipo;
-- `club_role_assignments` expresa asignación contextual de cargo con año eclesiástico.
+- `club_sections` representa la realización técnica consolidada de secciones por tipo (reemplaza `club_adventurers`, `club_pathfinders`, `club_master_guilds` desde 2026-03-17);
+- `club_role_assignments` expresa asignación contextual de cargo con año eclesiástico vía `club_section_id`.
 
 #### Formación
 

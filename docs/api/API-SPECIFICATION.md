@@ -94,12 +94,12 @@ src/
 │   ├── auth/                    # Autenticación y autorización (JWT + OAuth)
 │   ├── users/                   # Gestión de usuarios y perfiles
 │   ├── legal-representatives/   # Representantes legales
-│   ├── clubs/                   # Gestión de clubes e instancias
+│   ├── clubs/                   # Gestión de clubes y secciones
 │   ├── classes/                 # Clases progresivas
 │   ├── honors/                  # Especialidades
 │   ├── activities/              # Actividades
 │   ├── finances/                # Finanzas
-│   ├── inventory/               # ✅ Inventarios por instancia de club
+│   ├── inventory/               # ✅ Inventarios por sección de club
 │   ├── camporees/               # ✅ Campamentos con validación de seguros
 │   ├── folders/                 # ✅ Portfolios/Carpetas de evidencias
 │   ├── certifications/          # ✅ Certificaciones para GMs investidos
@@ -126,7 +126,7 @@ src/
 ```typescript
 enum RoleCategory {
   GLOBAL = "GLOBAL", // Roles de sistema
-  CLUB = "CLUB", // Roles de instancia de club
+  CLUB = "CLUB", // Roles de sección de club
 }
 ```
 
@@ -192,10 +192,8 @@ CREATE TABLE club_role_assignments (
   user_id UUID NOT NULL REFERENCES users(id),
   role_id UUID NOT NULL REFERENCES roles(id),  -- Debe tener role_category = 'CLUB'
 
-  -- Instancia de club (solo UNA con valor)
-  club_adv_id INT REFERENCES club_adventurers(id),
-  club_pathf_id INT REFERENCES club_pathfinders(id),
-  club_mg_id INT REFERENCES club_master_guild(id),
+  -- Sección de club (FK directa)
+  club_section_id INT NOT NULL REFERENCES club_sections(club_section_id),
 
   -- ✅ Año eclesiástico
   ecclesiastical_year_id INT NOT NULL REFERENCES ecclesiastical_years(id),
@@ -210,18 +208,10 @@ CREATE TABLE club_role_assignments (
   updated_at TIMESTAMP DEFAULT NOW(),
 
   -- Constraints
-  CONSTRAINT one_club_instance CHECK (
-    (club_adv_id IS NOT NULL)::int +
-    (club_pathf_id IS NOT NULL)::int +
-    (club_mg_id IS NOT NULL)::int = 1
-  ),
-
-  CONSTRAINT unique_user_role_instance_year UNIQUE NULLS NOT DISTINCT (
-    user_id, role_id, club_adv_id, club_pathf_id, club_mg_id, ecclesiastical_year_id
+  CONSTRAINT unique_user_role_section_year UNIQUE (
+    user_id, role_id, club_section_id, ecclesiastical_year_id
   )
 );
-
--- Ver queries completas en: docs/history/source/api/queries-club-role-assignments.md
 ```
 
 ---
@@ -770,6 +760,6 @@ En esos casos se retorna `null` sin selección silenciosa ni inferencia desde tr
 ---
 
 **Generado**: 2026-01-29
-**Actualizado**: 2026-02-17
+**Actualizado**: 2026-03-18
 **Versión**: 3.0.0 (contrato runtime unificado)
 **Status**: ✅ Producción - Endpoints canónicos en ENDPOINTS-LIVE-REFERENCE.md

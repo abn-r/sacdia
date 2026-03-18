@@ -47,9 +47,7 @@ La base de datos está diseñada con las siguientes características:
 │
 ├── 🏕️ Clubs
 │   ├── clubs (contenedor)
-│   ├── club_adventurers
-│   ├── club_pathfinders
-│   ├── club_master_guild
+│   ├── club_sections (secciones por tipo)
 │   └── club_role_assignments
 │
 ├── 📚 Classes & Honors
@@ -195,7 +193,7 @@ Ejecutar en este orden para evitar errores de FK:
 ### Convenciones de ID
 - **Tablas principales**: `{tabla}_id` UUID (ej: `user_id`, `club_id`)
 - **Tablas pivote**: `id` UUID como PK, FKs con nombres descriptivos
-- **Excepciones**: Instancias de club usan INT (`club_adv_id`, `club_pathf_id`, `club_mg_id`)
+- **Excepciones**: Secciones de club usan INT (`club_section_id`)
 
 **Ver detalles**: [SCHEMA-REFERENCE.md](SCHEMA-REFERENCE.md#convenciones-de-naming)
 
@@ -212,11 +210,9 @@ districts (1) ──→ (N) churches
 churches (1) ──→ (N) clubs
 ```
 
-### Club Instances
+### Club Sections
 ```
-clubs (1) ──→ (N) club_adventurers
-clubs (1) ──→ (N) club_pathfinders
-clubs (1) ──→ (N) club_master_guild
+clubs (1) ──→ (N) club_sections (diferenciadas por club_type_id)
 ```
 
 ### RBAC
@@ -242,13 +238,13 @@ JOIN roles r ON r.id = ur.role_id
 WHERE ur.user_id = 'uuid-del-usuario';
 ```
 
-### Ver miembros de un club
+### Ver miembros de una sección de club
 ```sql
 SELECT u.name, u.paternal_last_name, r.role_name
 FROM club_role_assignments cra
 JOIN users u ON u.id = cra.user_id
 JOIN roles r ON r.id = cra.role_id
-WHERE cra.club_pathf_id = 123
+WHERE cra.club_section_id = 123
   AND cra.active = true;
 ```
 

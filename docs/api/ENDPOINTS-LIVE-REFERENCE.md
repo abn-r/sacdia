@@ -275,12 +275,13 @@
 | GET | `/api/v1/clubs/:clubId/finances` | JWT | - | Listar movimientos financieros del club | `src/finances/finances.controller.ts` |
 | POST | `/api/v1/clubs/:clubId/finances` | JWT | director, subdirector, treasurer | Crear movimiento financiero | `src/finances/finances.controller.ts` |
 | GET | `/api/v1/clubs/:clubId/finances/summary` | JWT | - | Resumen financiero del club | `src/finances/finances.controller.ts` |
-| GET | `/api/v1/clubs/:clubId/instances` | JWT | - | Obtener instancias del club | `src/clubs/clubs.controller.ts` |
-| POST | `/api/v1/clubs/:clubId/instances` | JWT | director, subdirector | Crear instancia de club (requiere director o subdirector) | `src/clubs/clubs.controller.ts` |
-| GET | `/api/v1/clubs/:clubId/instances/:type` | JWT | - | Obtener instancia por tipo | `src/clubs/clubs.controller.ts` |
-| PATCH | `/api/v1/clubs/:clubId/instances/:type/:instanceId` | JWT | director, subdirector, secretary | Actualizar instancia (requiere director, subdirector o secretario) | `src/clubs/clubs.controller.ts` |
-| GET | `/api/v1/clubs/:clubId/instances/:type/:instanceId/members` | JWT | - | Listar miembros de la instancia | `src/clubs/clubs.controller.ts` |
-| POST | `/api/v1/clubs/:clubId/instances/:type/:instanceId/roles` | JWT | director, subdirector, secretary | Asignar rol a un miembro (requiere director, subdirector o secretario) | `src/clubs/clubs.controller.ts` |
+| GET | `/api/v1/clubs/:clubId/sections` | JWT | - | Listar secciones del club | `src/clubs/clubs.controller.ts` |
+| GET | `/api/v1/clubs/:clubId/sections/:sectionId` | JWT | - | Obtener sección por ID | `src/clubs/clubs.controller.ts` |
+| POST | `/api/v1/clubs/:clubId/sections` | JWT | director, subdirector | Crear sección de club (requiere director o subdirector) | `src/clubs/clubs.controller.ts` |
+| PATCH | `/api/v1/clubs/:clubId/sections/:sectionId` | JWT | director, subdirector, secretary | Actualizar sección (requiere director, subdirector o secretario) | `src/clubs/clubs.controller.ts` |
+| DELETE | `/api/v1/clubs/:clubId/sections/:sectionId` | JWT | director | Eliminar sección | `src/clubs/clubs.controller.ts` |
+| GET | `/api/v1/clubs/:clubId/sections/:sectionId/members` | JWT | - | Listar miembros de la sección | `src/clubs/clubs.controller.ts` |
+| POST | `/api/v1/clubs/:clubId/sections/:sectionId/roles` | JWT | director, subdirector, secretary | Asignar rol a un miembro (requiere director, subdirector o secretario) | `src/clubs/clubs.controller.ts` |
 
 ## fcm-tokens
 
@@ -342,7 +343,7 @@
 | Method | Path | Auth | Roles | Description | Source |
 |---|---|---|---|---|---|
 | POST | `/api/v1/notifications/broadcast` | JWT | super_admin, admin | Send notification to all users | `src/notifications/notifications.controller.ts` |
-| POST | `/api/v1/notifications/club/:instanceType/:instanceId` | JWT | super_admin, admin | Send notification to club members | `src/notifications/notifications.controller.ts` |
+| POST | `/api/v1/notifications/club/:sectionId` | JWT | super_admin, admin | Send notification to club section members | `src/notifications/notifications.controller.ts` |
 | POST | `/api/v1/notifications/send` | JWT | - | Send notification to specific user | `src/notifications/notifications.controller.ts` |
 
 ## root

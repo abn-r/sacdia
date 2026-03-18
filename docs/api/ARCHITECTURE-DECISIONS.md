@@ -191,7 +191,7 @@ await tx.club_role_assignments.create({
   data: {
     user_id: userId,
     role_id: 'uuid-del-rol-member',  // Rol CLUB: "member"
-    club_adv_id: clubInstanceId,  // O club_pathf_id o club_mg_id
+    club_section_id: clubSectionId,  // FK directa a club_sections
     ecclesiastical_year_id: currentYear.id,
     start_date: new Date(),
     active: true,

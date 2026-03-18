@@ -123,12 +123,13 @@ Convenciones:
 | POST `/clubs` | Si | Si | Si | ALINEADO |
 | PATCH `/clubs/:clubId` | Si | Si | Si | ALINEADO |
 | DELETE `/clubs/:clubId` | Si | Si | Si | ALINEADO |
-| GET `/clubs/:clubId/instances` | Si | Si | Si | ALINEADO |
-| GET `/clubs/:clubId/instances/:type` | Si | Si | Si | ALINEADO |
-| POST `/clubs/:clubId/instances` | Si | Si | Si | ALINEADO |
-| PATCH `/clubs/:clubId/instances/:type/:instanceId` | Si | Si | Si | ALINEADO |
-| GET `/clubs/:clubId/instances/:type/:instanceId/members` | Si | Si | Si | ALINEADO |
-| POST `/clubs/:clubId/instances/:type/:instanceId/roles` | Si | Si | Si | ALINEADO |
+| GET `/clubs/:clubId/sections` | Si | Si | Si | ALINEADO |
+| GET `/clubs/:clubId/sections/:sectionId` | Si | Si | Si | ALINEADO |
+| POST `/clubs/:clubId/sections` | Si | Si | Si | ALINEADO |
+| PATCH `/clubs/:clubId/sections/:sectionId` | Si | Si | Si | ALINEADO |
+| DELETE `/clubs/:clubId/sections/:sectionId` | Si | Si | Si | ALINEADO |
+| GET `/clubs/:clubId/sections/:sectionId/members` | Si | Si | Si | ALINEADO |
+| POST `/clubs/:clubId/sections/:sectionId/roles` | Si | Si | Si | ALINEADO |
 
 ### club-roles
 
@@ -191,7 +192,7 @@ Convenciones:
 |----------|:---:|:---:|:---:|---|
 | POST `/notifications/send` | Si | Si | Si | ALINEADO |
 | POST `/notifications/broadcast` | Si | Si | Si | ALINEADO |
-| POST `/notifications/club/:instanceType/:instanceId` | Si | Si | Si | ALINEADO |
+| POST `/notifications/club/:sectionId` | Si | Si | Si | ALINEADO |
 
 ### fcm-tokens
 
@@ -362,15 +363,15 @@ Estos endpoints son consumidos por el admin o la app pero NO existen en el backe
 | GET `/users/:userId/post-registration/photo-status` | App | Si? | No | No | SIN DOCS | Usado por app post_registration |
 | PATCH `/emergency-contacts/:contactId` | App | Si? | No | No | SIN DOCS | App usa ruta diferente a backend (backend: `/users/:userId/emergency-contacts/:contactId`) |
 | DELETE `/emergency-contacts/:contactId` | App | Si? | No | No | SIN DOCS | Idem |
-| GET `/clubs/:clubId/instances/:instanceType/:instanceId` | App | Si? | No | Si | SIN DOCS | App club datasource; similar a documented route but with explicit instance return |
-| PATCH `/clubs/:clubId/instances/:instanceType/:instanceId` | App | Si? | No | Si | SIN DOCS | Idem |
-| GET `/club-instances/:id/evidence-folder` | App | No | No | No | FANTASMA | Evidence folder endpoints no existen en backend-audit |
-| POST `/club-instances/:id/evidence-folder/sections/:sectionId/submit` | App | No | No | No | FANTASMA? | Idem |
-| POST `/club-instances/:id/evidence-folder/sections/:sectionId/files` | App | No | No | No | FANTASMA? | Idem |
-| DELETE `/club-instances/:id/evidence-folder/sections/:sectionId/files/:fileId` | App | No | No | No | FANTASMA? | Idem |
+| GET `/clubs/:clubId/sections/:sectionId` | App | Si | Si | Si | ALINEADO | Consolidated from instances routes |
+| PATCH `/clubs/:clubId/sections/:sectionId` | App | Si | Si | Si | ALINEADO | Consolidated from instances routes |
+| GET `/clubs/:clubId/sections/:sectionId/evidence-folder` | App | No | No | No | FANTASMA | Evidence folder endpoints no existen en backend-audit |
+| POST `/clubs/:clubId/sections/:sectionId/evidence-folder/sections/:efSectionId/submit` | App | No | No | No | FANTASMA? | Idem |
+| POST `/clubs/:clubId/sections/:sectionId/evidence-folder/sections/:efSectionId/files` | App | No | No | No | FANTASMA? | Idem |
+| DELETE `/clubs/:clubId/sections/:sectionId/evidence-folder/sections/:efSectionId/files/:fileId` | App | No | No | No | FANTASMA? | Idem |
 | POST `/users/:userId/classes/:classId/sections/:requirementId/files` | App | No | No | No | SIN DOCS | App classes datasource, file upload |
 | DELETE `/users/:userId/classes/:classId/sections/:requirementId/files/:fileId` | App | No | No | No | SIN DOCS | App classes datasource, file delete |
-| GET `/clubs/:clubId/instances/:type/:instanceId/members/insurance` | App | No | No | No | FANTASMA? | Insurance listing per instance |
+| GET `/clubs/:clubId/sections/:sectionId/members/insurance` | App | No | No | No | FANTASMA? | Insurance listing per section |
 | GET `/users/:memberId/insurance` | App | No | No | No | FANTASMA? | User insurance detail |
 | POST `/users/:memberId/insurance` | App | No | No | No | FANTASMA? | Create insurance |
 | PATCH `/insurance/:insuranceId` | App | No | No | No | FANTASMA? | Update insurance |
@@ -404,9 +405,7 @@ Convenciones:
 | club_inventory | Si | No | No | SIN CANON |
 | club_types | Si | No | Si | SIN DOCS |
 | clubs | Si | Si | Si | ALINEADO |
-| club_adventurers | Si | Si | Si | ALINEADO |
-| club_pathfinders | Si | Si | Si | ALINEADO |
-| club_master_guilds | Si | Si | Si | ALINEADO |
+| club_sections | Si | Si | Si | ALINEADO |
 | club_role_assignments | Si | Si | Si | ALINEADO |
 | countries | Si | Si | Si | ALINEADO |
 | districts | Si | Si | Si | ALINEADO |
@@ -562,7 +561,7 @@ El admin panel consume 9 endpoints que no existen en el backend-audit:
 - `POST /auth/update-password`
 
 ### 3. Evidence folder y insurance: app sin backend
-La app tiene screens completas para evidence folders y insurance, pero los endpoints que consume (`/club-instances/*`, `/users/:memberId/insurance`, etc.) no aparecen en el backend audit de 198 endpoints.
+La app tiene screens completas para evidence folders y insurance, pero los endpoints que consume (`/clubs/:clubId/sections/:sectionId/evidence-folder`, `/users/:memberId/insurance`, etc.) no aparecen en el backend audit de 198 endpoints.
 
 ### 4. SCHEMA-REFERENCE desactualizado
 SCHEMA-REFERENCE.md solo documenta ~25 de 72 tablas. Falta documentacion para toda la capa de certificaciones, folders, camporees, inventario, seguros, investiduras y muchas tablas auxiliares.

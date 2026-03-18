@@ -6,6 +6,16 @@ Fuente: Reality Matrix + Canon verification
 
 ---
 
+## Consolidación club_sections (2026-03-17)
+
+| Item | Detalle | Resolucion |
+|---|---|---|
+| 3 tablas idénticas → 1 | `club_adventurers`, `club_pathfinders`, `club_master_guilds` → `club_sections` | RESUELTO: consolidado en tabla única con `club_type_id` como discriminador. Decisión 10 en `decisiones-clave.md`. |
+| 3 FK nullables → 1 FK directa | `club_adv_id`/`club_pathf_id`/`club_mg_id` → `club_section_id` en 10 tablas dependientes | RESUELTO: implementado en DB, backend, admin y app. |
+| Naming convergencia | `instance` → `section` en URLs y código | RESUELTO: `/clubs/:id/sections/:sectionId`. Permisos: `club_sections:*`. |
+
+---
+
 ## Canon aspiracional — mantener como objetivo?
 
 | Claim canon | Archivo | Detalle | Resolucion |
@@ -81,11 +91,11 @@ Fuente: Reality Matrix + Canon verification
 | Endpoint | Nota | Resolucion |
 |---|---|---|
 | `POST /auth/update-password` | Llamado por app pero no existe en backend | RESUELTO: pendiente de implementacion en backend. Documentado en features/auth.md |
-| `GET /club-instances/:id/evidence-folder` | Evidence folder feature sin backend | RESUELTO: pendiente de implementacion. Naming canonico: `/club-sections/:id/evidence-folder`. Documentado en features/carpetas-evidencias.md |
-| `POST /club-instances/:id/evidence-folder/sections/:sectionId/submit` | Idem | Idem — usar `/club-sections/` en implementacion |
-| `POST /club-instances/:id/evidence-folder/sections/:sectionId/files` | Idem | Idem |
-| `DELETE /club-instances/:id/evidence-folder/sections/:sectionId/files/:fileId` | Idem | Idem |
-| `GET /clubs/:clubId/instances/:type/:instanceId/members/insurance` | Insurance listing sin backend | RESUELTO: pendiente de implementacion. Seguros es canon de trayectoria. Documentado en features/gestion-seguros.md |
+| `GET /clubs/:clubId/sections/:sectionId/evidence-folder` | Evidence folder feature sin backend | RESUELTO: pendiente de implementacion. Naming canonico consolidado (2026-03-17). Documentado en features/carpetas-evidencias.md |
+| `POST /clubs/:clubId/sections/:sectionId/evidence-folder/sections/:efSectionId/submit` | Idem | Idem |
+| `POST /clubs/:clubId/sections/:sectionId/evidence-folder/sections/:efSectionId/files` | Idem | Idem |
+| `DELETE /clubs/:clubId/sections/:sectionId/evidence-folder/sections/:efSectionId/files/:fileId` | Idem | Idem |
+| `GET /clubs/:clubId/sections/:sectionId/members/insurance` | Insurance listing sin backend | RESUELTO: pendiente de implementacion. Seguros es canon de trayectoria. Documentado en features/gestion-seguros.md |
 | `GET /users/:memberId/insurance` | Insurance detail sin backend | Idem |
 | `POST /users/:memberId/insurance` | Create insurance sin backend | Idem |
 | `PATCH /insurance/:insuranceId` | Update insurance sin backend | Idem |

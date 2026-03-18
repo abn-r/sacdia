@@ -2,7 +2,7 @@
 
 **Estado**: ACTIVE
 
-<!-- Sincronizado contra schema.prisma 2026-03-14. Drift corregido en: users (field names), users_pr (PK + campos faltantes). Este documento cubre ~25 de 72 modelos; schema.prisma es fuente de verdad para los modelos no cubiertos aquí. -->
+<!-- Sincronizado contra schema.prisma 2026-03-18. club_sections consolidation applied (3 tables → 1). Drift corregido en: users (field names), users_pr (PK + campos faltantes). Este documento cubre ~25 de 72 modelos; schema.prisma es fuente de verdad para los modelos no cubiertos aquí. -->
 
 Referencia completa del schema de base de datos PostgreSQL de SACDIA.
 
@@ -27,14 +27,10 @@ graph TB
     
     subgraph "Clubs"
         CLUBS[clubs]
-        ADV[club_adventurers]
-        PATH[club_pathfinders]
-        MG[club_master_guild]
-        
+        SECTIONS[club_sections]
+
         CHURCHES --> CLUBS
-        CLUBS --> ADV
-        CLUBS --> PATH
-        CLUBS --> MG
+        CLUBS --> SECTIONS
     end
     
     subgraph "Users & Auth"
@@ -62,9 +58,7 @@ graph TB
         
         USERS --> CLUB_ROLES
         CLUB_ROLES --> ROLES
-        CLUB_ROLES --> ADV
-        CLUB_ROLES --> PATH
-        CLUB_ROLES --> MG
+        CLUB_ROLES --> SECTIONS
     end
     
     subgraph "Classes & Honors"
@@ -232,28 +226,35 @@ Country → Union → Local Field → District → Church → Club
 | `name` | VARCHAR(100) | Nombre del club | NOT NULL |
 | `active` | BOOLEAN | Club activo | DEFAULT true |
 
-**Relación**: Un club puede tener múltiples instancias por tipo
+**Relación**: Un club puede tener múltiples secciones por tipo
 
 ---
 
-#### Tablas: `club_adventurers`, `club_pathfinders`, `club_master_guilds`
-**Descripción**: Instancias específicas de club por tipo (secciones de club en canon)
+#### Tabla: `club_sections`
+**Descripción**: Secciones de club (unidades operativas por tipo: Aventureros, Conquistadores, Guías Mayores)
 
-**Campos comunes**:
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| `id` | INT | ID único | PK, AUTO_INCREMENT |
-| `main_club_id` | UUID | Club contenedor | FK → clubs |
-| `club_type_id` | UUID | Tipo de club | FK → club_types |
-| `name` | VARCHAR(100) | Nombre de la instancia | - |
-| `active` | BOOLEAN | Instancia activa | DEFAULT true |
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `club_section_id` | SERIAL | ID único | PK |
+| `active` | BOOLEAN | Sección activa | DEFAULT false |
+| `souls_target` | INT | Meta de almas | DEFAULT 1 |
+| `fee` | INT | Cuota | DEFAULT 1 |
+| `meeting_day` | JSON[] | Días de reunión | |
+| `meeting_time` | JSON[] | Horarios de reunión | |
+| `club_type_id` | INT | Tipo de club | NOT NULL, FK → club_types |
+| `main_club_id` | INT | Club contenedor | NULL, FK → clubs ON DELETE CASCADE |
+| `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
+| `modified_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW() |
 
-**Naming Convention**: ✅ schema.prisma ya usa `club_master_guilds` (plural)
+**Unique**: `(main_club_id, club_type_id)`
+
+**Nota**: Consolidación de las anteriores `club_adventurers`, `club_pathfinders`, `club_master_guilds` (2026-03-17, Decisión 10)
 
 ---
 
 #### Tabla: `club_role_assignments`
-**Descripción**: Asignación de roles a usuarios en instancias específicas de club
+**Descripción**: Asignación de roles a usuarios en secciones de club
 
 **Campos**:
 | Campo | Tipo | Descripción | Constraints |
@@ -261,27 +262,16 @@ Country → Union → Local Field → District → Church → Club
 | `id` | UUID | ID único | PK |
 | `user_id` | UUID | Usuario | FK → users |
 | `role_id` | UUID | Rol (debe ser `role_category = 'CLUB'`) | FK → roles |
-| `club_adv_id` | INT | Instancia Aventureros | FK → club_adventurers, NULL |
-| `club_pathf_id` | INT | Instancia Conquistadores | FK → club_pathfinders, NULL |
-| `club_mg_id` | INT | Instancia Guías Mayores | FK → club_master_guild, NULL |
+| `club_section_id` | INT | Sección de club | FK → club_sections, NOT NULL |
 | `ecclesiastical_year_id` | INT | Año eclesiástico | FK → ecclesiastical_years |
 | `start_date` | DATE | Fecha inicio | DEFAULT CURRENT_DATE |
 | `end_date` | DATE | Fecha fin | NULL |
 | `active` | BOOLEAN | Asignación activa | DEFAULT true |
 | `status` | VARCHAR(20) | Estado (pending/active/inactive) | CHECK |
 
-**Constraint CHECK**: Solo UNO de los 3 club IDs puede tener valor:
-```sql
-(club_adv_id IS NOT NULL)::int + 
-(club_pathf_id IS NOT NULL)::int + 
-(club_mg_id IS NOT NULL)::int = 1
-```
-
 **Constraint UNIQUE**:
 ```sql
-UNIQUE NULLS NOT DISTINCT (
-  user_id, role_id, club_adv_id, club_pathf_id, club_mg_id, ecclesiastical_year_id
-)
+UNIQUE (user_id, role_id, club_section_id, ecclesiastical_year_id)
 ```
 
 ---
@@ -433,7 +423,7 @@ UNIQUE NULLS NOT DISTINCT (
 #### IDs
 - **Tablas principales**: `{tabla}_id` UUID
 - **Tablas pivote**: `id` UUID como PK, FKs descriptivos
-- **Instancias de club**: INT (`club_adv_id`, `club_pathf_id`, `club_mg_id`)
+- **Secciones de club**: INT (`club_section_id`)
 
 ---
 
@@ -442,7 +432,7 @@ UNIQUE NULLS NOT DISTINCT (
 | Tabla/Campo | Actual | Debería ser | Prioridad |
 |-------------|--------|-------------|-----------|
 | `ecclesiastical_year` | Singular | `ecclesiastical_years` | ALTA |
-| `club_master_guild` | Singular | `club_master_guilds` | RESUELTA (schema.prisma ya usa plural) |
+| `club_master_guild` | Singular | `club_master_guilds` | RESUELTA (consolidado en `club_sections` — 2026-03-17) |
 | `club_types.ct_id` | Abreviado | `club_type_id` | ALTA |
 | `inventory_categories.inventory_categoty_id` | Typo | `inventory_category_id` | ALTA |
 
@@ -462,25 +452,23 @@ JOIN roles r ON r.id = ur.role_id
 WHERE ur.user_id = 'uuid-del-usuario';
 
 -- Roles de club
-SELECT 
+SELECT
   r.role_name,
-  CASE 
-    WHEN cra.club_adv_id IS NOT NULL THEN 'Aventureros'
-    WHEN cra.club_pathf_id IS NOT NULL THEN 'Conquistadores'
-    WHEN cra.club_mg_id IS NOT NULL THEN 'Guías Mayores'
-  END AS club_type,
+  ct.name AS club_type,
   ey.name AS year
 FROM club_role_assignments cra
 JOIN roles r ON r.id = cra.role_id
+JOIN club_sections cs ON cs.club_section_id = cra.club_section_id
+JOIN club_types ct ON ct.id = cs.club_type_id
 JOIN ecclesiastical_years ey ON ey.id = cra.ecclesiastical_year_id
 WHERE cra.user_id = 'uuid-del-usuario'
   AND cra.active = true;
 ```
 
-### Obtener miembros activos de un club
+### Obtener miembros activos de una sección de club
 
 ```sql
-SELECT 
+SELECT
   u.name,
   u.paternal_last_name,
   u.maternal_last_name,
@@ -489,9 +477,9 @@ SELECT
 FROM club_role_assignments cra
 JOIN users u ON u.id = cra.user_id
 JOIN roles r ON r.id = cra.role_id
-WHERE cra.club_pathf_id = 123  -- ID de instancia
+WHERE cra.club_section_id = 123  -- ID de sección
   AND cra.active = true
-ORDER BY 
+ORDER BY
   CASE r.role_name
     WHEN 'director' THEN 1
     WHEN 'subdirector' THEN 2
@@ -512,16 +500,14 @@ WHERE start_date <= CURRENT_DATE
 ### Contar usuarios por tipo de club
 
 ```sql
-SELECT 
-  CASE 
-    WHEN cra.club_adv_id IS NOT NULL THEN 'Aventureros'
-    WHEN cra.club_pathf_id IS NOT NULL THEN 'Conquistadores'
-    WHEN cra.club_mg_id IS NOT NULL THEN 'Guías Mayores'
-  END AS club_type,
+SELECT
+  ct.name AS club_type,
   COUNT(DISTINCT cra.user_id) AS member_count
 FROM club_role_assignments cra
+JOIN club_sections cs ON cs.club_section_id = cra.club_section_id
+JOIN club_types ct ON ct.id = cs.club_type_id
 WHERE cra.active = true
-GROUP BY club_type;
+GROUP BY ct.name;
 ```
 
 ---
@@ -535,7 +521,7 @@ CREATE INDEX idx_users_location ON users(country_id, union_id, local_field_id);
 
 -- Performance en club_role_assignments
 CREATE INDEX idx_cra_user ON club_role_assignments(user_id) WHERE active = true;
-CREATE INDEX idx_cra_clubs ON club_role_assignments(club_adv_id, club_pathf_id, club_mg_id);
+CREATE INDEX idx_cra_section ON club_role_assignments(club_section_id);
 CREATE INDEX idx_cra_year ON club_role_assignments(ecclesiastical_year_id);
 
 -- Performance en jerarquía organizacional
@@ -556,5 +542,5 @@ CREATE INDEX idx_churches_district ON churches(district_id) WHERE active = true;
 
 ---
 
-**Última actualización**: 2026-03-14 (sincronizado contra schema.prisma, drift corregido en users y users_pr)
+**Última actualización**: 2026-03-18 (club_sections consolidation applied — 3 tables → 1, 3 FK nullables → 1 FK directa)
 **Fuentes**: `schema.prisma` (fuente de verdad), `relations.md`, `auditoria-naming-bd.md`, `verificacion-schema-prisma.md`

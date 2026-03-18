@@ -375,13 +375,11 @@ describe('FoldersService', () => {
 
       await service.updateSectionProgress(userId, folderId, moduleId, sectionId, dto);
 
-      // Verificar que query usa club IDs
+      // Verificar que query usa club_section_id
       expect(spy).toHaveBeenCalledWith(
         expect.objectContaining({
           where: expect.objectContaining({
-            OR: expect.arrayContaining([
-              expect.objectContaining({ club_adv_id: expect.any(Number) })
-            ])
+            club_section_id: expect.any(Number)
           })
         })
       );

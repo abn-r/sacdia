@@ -2,10 +2,10 @@
 Estado: IMPLEMENTADO
 
 ## Que existe (verificado contra codigo)
-- **Backend**: ClubsModule — 13 endpoints (CRUD clubs, instances CRUD, members listing, role assignment). Controllers: ClubsController, ClubRolesController. Guards: JwtAuthGuard, PermissionsGuard, ClubRolesGuard.
-- **Admin**: 3 pages funcionales (clubs list, clubs/new, clubs/[id]). CRUD completo de clubs. Gestion de instancias (crear, actualizar). Listado de miembros por instancia. Asignacion/revocacion de roles de club.
-- **App**: 3 features relacionados — club (1 screen: ClubView), members (3 screens: MembersView, MemberProfileView, RoleAssignmentView), units (2 screens: UnitsListView, UnitDetailView). Consume endpoints de clubs, instances, members y role assignments.
-- **DB**: clubs, club_adventurers, club_pathfinders, club_master_guilds, club_types, club_role_assignments, units, unit_members, enrollments
+- **Backend**: ClubsModule — endpoints (CRUD clubs, sections CRUD, members listing, role assignment). Controllers: ClubsController, ClubRolesController. Guards: JwtAuthGuard, PermissionsGuard, ClubRolesGuard.
+- **Admin**: 3 pages funcionales (clubs list, clubs/new, clubs/[id]). CRUD completo de clubs. Gestion de secciones (crear, actualizar). Listado de miembros por sección. Asignacion/revocacion de roles de club.
+- **App**: 3 features relacionados — club (1 screen: ClubView), members (3 screens: MembersView, MemberProfileView, RoleAssignmentView), units (2 screens: UnitsListView, UnitDetailView). Consume endpoints de clubs, sections, members y role assignments.
+- **DB**: clubs, club_sections, club_types, club_role_assignments, units, unit_members, enrollments
 
 ## Que define el canon
 - Club es la entidad institucional raiz con identidad y continuidad (Decision 2)

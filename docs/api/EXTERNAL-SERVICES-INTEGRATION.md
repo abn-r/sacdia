@@ -66,7 +66,7 @@ REDIS_URL=redis://default:password@host:port
 
 - `POST /api/v1/notifications/send` (JWT requerido)
 - `POST /api/v1/notifications/broadcast` (JWT + rol `admin|super_admin`)
-- `POST /api/v1/notifications/club/:instanceType/:instanceId` (JWT + rol `admin|super_admin`)
+- `POST /api/v1/notifications/club/:sectionId` (JWT + rol `admin|super_admin`)
 
 ### Variables de entorno
 
