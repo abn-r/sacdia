@@ -42,7 +42,7 @@ npx prisma migrate dev --name add_insurance_evidence_fields
 npx prisma generate
 ```
 
-**Status**: 🔲
+**Status**: ✅ DONE
 
 ---
 
@@ -120,7 +120,7 @@ export class CreateInsuranceDto {
 export class UpdateInsuranceDto extends PartialType(CreateInsuranceDto) {}
 ```
 
-**Status**: 🔲
+**Status**: ✅ DONE
 
 ---
 
@@ -172,7 +172,7 @@ export class UpdateInsuranceDto extends PartialType(CreateInsuranceDto) {}
 ]
 ```
 
-**Status**: 🔲
+**Status**: ✅ DONE
 
 ---
 
@@ -182,7 +182,7 @@ export class UpdateInsuranceDto extends PartialType(CreateInsuranceDto) {}
 
 Agregar `InsuranceModule` al array de imports.
 
-**Status**: 🔲
+**Status**: ✅ DONE
 
 ---
 
@@ -192,7 +192,7 @@ Agregar `InsuranceModule` al array de imports.
 2. Test e2e para los 4 endpoints
 3. `pnpm run test` y `pnpm run test:e2e` pasan
 
-**Status**: 🔲
+**Status**: ✅ DONE
 
 ---
 
@@ -205,7 +205,7 @@ git push origin development
 gh pr create --base preproduction --head development --title "feat(insurance): member insurance management endpoints"
 ```
 
-**Status**: 🔲
+**Status**: ✅ DONE — PR #9 merged to main
 
 ---
 

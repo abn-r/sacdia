@@ -83,7 +83,7 @@ graph TB
 #### Tabla: `users`
 **Descripción**: Tabla principal de usuarios del sistema
 
-**Campos** (sincronizado con schema.prisma 2026-03-14):
+**Campos** (sincronizado con schema.prisma 2026-03-18):
 | Campo | Tipo | Descripción | Constraints |
 |-------|------|-------------|-------------|
 | `user_id` | UUID | ID único (mismo que Supabase Auth, `auth.uid()`) | PK |
@@ -91,6 +91,8 @@ graph TB
 | `name` | VARCHAR(50) | Nombre | NULL |
 | `paternal_last_name` | VARCHAR(50) | Apellido paterno | NULL |
 | `maternal_last_name` | VARCHAR(50) | Apellido materno | NULL |
+| `approval_status` | ENUM(user_approval_status) | Estado administrativo de aprobación (`pending`, `approved`, `rejected`) | DEFAULT `pending`, NOT NULL |
+| `rejection_reason` | TEXT | Motivo del rechazo administrativo cuando aplica | NULL |
 | `gender` | VARCHAR | Género | - |
 | `birthday` | DATE | Fecha de nacimiento | - |
 | `baptism` | BOOLEAN | ¿Está bautizado? | DEFAULT false |
@@ -403,6 +405,39 @@ UNIQUE (user_id, role_id, club_section_id, ecclesiastical_year_id)
 **Política de backfill acotado**:
 - Solo se backfillean filas legacy cuyo `user_id + class_id` mapee de forma determinística a una sola inscripción en `enrollments`.
 - Filas ambiguas o sin match quedan con `enrollment_id = NULL` para revisión/manual follow-up; FS-03 no inventa historia perfecta.
+
+---
+
+### 🛡️ Módulo: Insurance
+
+#### Tabla: `member_insurances`
+**Descripción**: Seguro institucional por miembro, usado por la app móvil y por validaciones de camporee.
+
+**Campos relevantes**:
+| Campo | Tipo | Descripción |
+|-------|------|-------------|
+| `insurance_id` | INT | Identidad del seguro |
+| `user_id` | UUID | Usuario asegurado |
+| `insurance_type` | ENUM(`insurance_type_enum`) | Tipo de cobertura |
+| `policy_number` | VARCHAR(100) | Número de póliza |
+| `provider` | VARCHAR(255) | Aseguradora |
+| `start_date` | DATE | Inicio de vigencia |
+| `end_date` | DATE | Fin de vigencia |
+| `coverage_amount` | DECIMAL(10,2) | Monto asegurado |
+| `active` | BOOLEAN | Seguro activo |
+| `evidence_file_url` | VARCHAR(500) | URL de evidencia adjunta |
+| `evidence_file_name` | VARCHAR(255) | Nombre original del archivo |
+| `created_by_id` | UUID | Usuario creador |
+| `modified_by_id` | UUID | Usuario que actualizó por última vez |
+
+**Relaciones**:
+- `users` vía `user_id`
+- `users` vía `created_by_id` y `modified_by_id` para auditoría
+- `camporee_members` vía `insurance_id`
+
+**Notas**:
+- La evidencia se sube al bucket R2 `INSURANCE_EVIDENCE`.
+- El backend expone listado por sección, detalle por miembro y CRUD multipart para el seguro.
 
 ---
 

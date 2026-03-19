@@ -40,7 +40,7 @@
 2. `npx prisma migrate dev --name make_honor_category_icon_nullable`
 3. `npx prisma generate`
 
-**Status**: 🔲
+**Status**: ✅ DONE — icon made nullable, migration applied
 
 ---
 
@@ -160,7 +160,7 @@ export class UpdateHonorCategoryDto extends PartialType(CreateHonorCategoryDto) 
 
 **Verificación**: `pnpm run test` pasa. El admin panel debería poder listar, crear, editar y eliminar categorías.
 
-**Status**: 🔲
+**Status**: ✅ DONE — controller, service y DTOs implementados
 
 ---
 
@@ -180,7 +180,7 @@ ON CONFLICT (permission_name) DO NOTHING;
 
 Ejecutar via psql contra la DB.
 
-**Status**: 🔲
+**Status**: ✅ DONE — 4 rows inserted
 
 ---
 
@@ -196,7 +196,7 @@ git push origin development
 gh pr create --base preproduction --head development --title "feat(admin): honor categories CRUD"
 ```
 
-**Status**: 🔲
+**Status**: ✅ DONE — PRs #10/#11 merged to main
 
 ---
 

@@ -69,7 +69,7 @@ npx prisma migrate dev --name add_evidence_files_and_section_status
 npx prisma generate
 ```
 
-**Status**: 🔲
+**Status**: ✅ DONE
 
 ---
 
@@ -116,7 +116,7 @@ export class EvidenceFolderController {
 }
 ```
 
-**Status**: 🔲
+**Status**: ✅ DONE
 
 ---
 
@@ -136,7 +136,7 @@ export class EvidenceFolderController {
 
 **Nota**: Verificar que `R2FileStorageService` exista en `sacdia-backend/src/` — buscar con `rg "R2FileStorage"`.
 
-**Status**: 🔲
+**Status**: ✅ DONE
 
 ---
 
@@ -146,7 +146,7 @@ export class EvidenceFolderController {
 
 Agregar `EvidenceFolderController` y `EvidenceFolderService` al módulo.
 
-**Status**: 🔲
+**Status**: ✅ DONE
 
 ---
 
@@ -191,7 +191,7 @@ Agregar `EvidenceFolderController` y `EvidenceFolderService` al módulo.
 
 El service debe mapear los datos de Prisma a esta estructura.
 
-**Status**: 🔲
+**Status**: ✅ DONE
 
 ---
 
@@ -201,7 +201,7 @@ El service debe mapear los datos de Prisma a esta estructura.
 2. Test e2e para los 4 endpoints
 3. `pnpm run test` y `pnpm run test:e2e` pasan
 
-**Status**: 🔲
+**Status**: ✅ DONE
 
 ---
 
@@ -214,7 +214,7 @@ git push origin development
 gh pr create --base preproduction --head development --title "feat(folders): evidence folder CRUD endpoints"
 ```
 
-**Status**: 🔲
+**Status**: ✅ DONE — PR #8 merged to main
 
 ---
 

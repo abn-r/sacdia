@@ -26,6 +26,7 @@
 | POST | `/api/v1/auth/logout` | Public (Bearer opcional) | - | Cerrar sesión (best effort) | `src/auth/auth.controller.ts` |
 | GET | `/api/v1/auth/me` | JWT | - | Obtener perfil del usuario autenticado | `src/auth/auth.controller.ts` |
 | PATCH | `/api/v1/auth/me/context` | JWT | - | Cambiar contexto activo de club/instancia | `src/auth/auth.controller.ts` |
+| POST | `/api/v1/auth/update-password` | JWT | - | Actualizar la contraseña del usuario autenticado | `src/auth/auth.controller.ts` |
 | POST | `/api/v1/auth/mfa/enroll` | JWT | - | Iniciar enrolamiento de 2FA | `src/auth/mfa.controller.ts` |
 | GET | `/api/v1/auth/mfa/factors` | JWT | - | Listar factores MFA configurados | `src/auth/mfa.controller.ts` |
 | GET | `/api/v1/auth/mfa/status` | JWT | - | Verificar estado de 2FA | `src/auth/mfa.controller.ts` |
@@ -94,6 +95,15 @@
 | DELETE | `/api/v1/users/:userId/profile-picture` | JWT | - | Eliminar foto de perfil | `src/users/users.controller.ts` |
 | POST | `/api/v1/users/:userId/profile-picture` | JWT | - | Subir foto de perfil | `src/users/users.controller.ts` |
 | GET | `/api/v1/users/:userId/requires-legal-representative` | JWT | - | Verificar si el usuario requiere representante legal | `src/users/users.controller.ts` |
+
+### insurance
+
+| Method | Path | Auth | Roles | Description | Source |
+|---|---|---|---|---|---|
+| GET | `/api/v1/clubs/:clubId/sections/:sectionId/members/insurance` | JWT | - | Listar miembros de una sección con su seguro activo más reciente | `src/insurance/insurance.controller.ts` |
+| GET | `/api/v1/users/:memberId/insurance` | JWT | - | Obtener el detalle del seguro activo del miembro | `src/insurance/insurance.controller.ts` |
+| POST | `/api/v1/users/:memberId/insurance` | JWT | - | Crear un seguro para un miembro con evidencia opcional en multipart (`evidence`) | `src/insurance/insurance.controller.ts` |
+| PATCH | `/api/v1/insurance/:insuranceId` | JWT | - | Actualizar un seguro existente con evidencia opcional en multipart (`evidence`) | `src/insurance/insurance.controller.ts` |
 
 ### User Authorization Notes (2026-03-10)
 
@@ -189,6 +199,8 @@
 | PATCH | `/api/v1/admin/unions/:unionId` | JWT | super_admin, admin | Update union | `src/admin/admin-geography.controller.ts` |
 | GET | `/api/v1/admin/users` | JWT | super_admin, admin, coordinator | Listar usuarios administrativos con alcance por rol (ALL/UNION/LOCAL_FIELD) | `src/admin/admin-users.controller.ts` |
 | GET | `/api/v1/admin/users/:userId` | JWT | super_admin, admin, coordinator | Obtener detalle de usuario validando alcance por rol del actor | `src/admin/admin-users.controller.ts` |
+| PATCH | `/api/v1/admin/users/:userId` | JWT | super_admin, admin, coordinator | Actualizar campos administrativos del usuario | `src/admin/admin-users.controller.ts` |
+| PATCH | `/api/v1/admin/users/:userId/approval` | JWT | super_admin, admin, coordinator | Aprobar o rechazar un usuario administrativo | `src/admin/admin-users.controller.ts` |
 
 ### Admin user detail transitional formative contract (FS-01)
 

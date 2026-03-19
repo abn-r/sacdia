@@ -14,10 +14,9 @@ Estado: IMPLEMENTADO
 
 ## Gap
 - App declara OAuth Google/Apple pero no esta funcional (lanza excepcion)
-- App consume POST /auth/update-password que es FANTASMA (no existe en backend) — pendiente de implementacion
 - App consume POST /auth/pr-check que es FANTASMA (no aparece en backend audit)
 - Admin no implementa MFA, OAuth ni gestion de sesiones
-- PATCH /admin/users/:userId/approval para aprobacion de usuarios es FANTASMA — pendiente de implementacion en backend
+- La migracion Prisma para `users.approval_status` y `users.rejection_reason` esta preparada en código, pero sigue **pendiente de aplicación** en la base configurada por un bloqueo preexistente del shadow DB (`schema "extensions" does not exist`)
 
 ## Prioridad
-- Alta para update-password y user approval — funcionalidad core de auth pendiente de backend
+- Alta para `POST /auth/pr-check` y para destrabar la aplicacion de la migracion de approval en DB

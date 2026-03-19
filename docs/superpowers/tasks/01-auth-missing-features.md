@@ -28,7 +28,7 @@
 
 **Verificación**: `npx prisma migrate status` muestra migración aplicada.
 
-**Status**: 🔲
+**Status**: ✅ DONE — migración aplicada; shadow DB fixed con baselining
 
 ---
 
@@ -83,7 +83,7 @@ async updateUserApproval(userId: string, dto: UpdateUserApprovalDto) {
 
 **Verificación**: `pnpm run test` pasa. Probar con curl o desde el admin panel.
 
-**Status**: 🔲
+**Status**: ✅
 
 ---
 
@@ -133,7 +133,7 @@ async updateUser(userId: string, dto: UpdateAdminUserDto) {
 
 **Verificación**: `pnpm run test` pasa.
 
-**Status**: 🔲
+**Status**: ✅
 
 ---
 
@@ -188,7 +188,7 @@ async updatePassword(userId: string, newPassword: string) {
 
 **Verificación**: `pnpm run test` pasa. Probar desde la app: la llamada ya existe en `auth_remote_data_source.dart` pero retorna mock.
 
-**Status**: 🔲
+**Status**: ✅
 
 ---
 
@@ -207,7 +207,7 @@ async updatePassword(userId: string, newPassword: string) {
 
 **Verificación**: `pnpm run test` — todos pasan.
 
-**Status**: 🔲
+**Status**: ✅
 
 ---
 
@@ -222,7 +222,7 @@ git push origin development
 gh pr create --base preproduction --head development --title "feat(auth): user approval, admin update, password change"
 ```
 
-**Status**: 🔲
+**Status**: ✅ DONE — PR #7 merged to main; 320 tests passing
 
 ---
 

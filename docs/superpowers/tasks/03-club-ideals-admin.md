@@ -46,7 +46,7 @@ Eso es todo. No necesita DTOs, no necesita create/update/delete.
 
 **Verificación**: `pnpm run test` pasa. Admin panel carga la página de club-ideals.
 
-**Status**: 🔲
+**Status**: ✅ DONE — endpoint exists in admin-reference.controller.ts
 
 ---
 
@@ -60,4 +60,4 @@ git push origin development
 
 Se puede agrupar con otro bloque en el mismo PR si se implementan juntos.
 
-**Status**: 🔲
+**Status**: ✅ DONE — included in batch PRs #10/#11 merged to main
