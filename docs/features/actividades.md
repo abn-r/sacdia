@@ -32,7 +32,7 @@ El modelo contempla `activity_instances` como instancias recurrentes de una acti
 - **4 screens**: ActivitiesListView, ActivityDetailView, CreateActivityView, LocationPickerView
 - Consume los 7 endpoints del backend
 - Incluye selector de ubicacion en mapa (LocationPickerView)
-- **Bug conocido**: `/home/activities` tiene `clubId` hardcodeado a 1
+- `ActivitiesListView` resuelve `clubId` desde `clubContextProvider` (bug de hardcodeo a 1 corregido)
 
 ### Base de datos
 - `activities` — Actividades del club
@@ -61,7 +61,7 @@ El modelo contempla `activity_instances` como instancias recurrentes de una acti
 ## Gaps y pendientes
 
 - **Admin es placeholder**: Backend y app estan completos pero el panel admin no tiene UI funcional para actividades
-- **clubId hardcodeado en app**: La pantalla `/home/activities` usa `clubId = 1` en vez del club activo del usuario
+- **clubId hardcodeado en app**: corregido — `ActivitiesListView` ahora resuelve `clubId` desde `clubContextProvider`
 - **`GET /catalogs/activity-types`**: Existe en backend pero sin documentacion API en ENDPOINTS-LIVE-REFERENCE.md
 - **Recurrencia**: El modelo `activity_instances` existe en DB pero la API no expone endpoints para gestionar instancias recurrentes
 - **Reportes de asistencia**: No hay endpoint para obtener estadisticas o reportes de asistencia agregados
@@ -69,4 +69,4 @@ El modelo contempla `activity_instances` como instancias recurrentes de una acti
 ## Prioridad y siguiente accion
 
 - **Prioridad**: Media — backend y app funcionales; admin es el gap principal
-- **Siguiente accion**: Implementar UI de actividades en sacdia-admin consumiendo los 7 endpoints existentes. Corregir el hardcodeo de `clubId` en la app.
+- **Siguiente accion**: Implementar UI de actividades en sacdia-admin consumiendo los 7 endpoints existentes.

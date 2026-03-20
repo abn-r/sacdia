@@ -1,6 +1,6 @@
 # Validacion de Investiduras
 
-**Estado**: FANTASMA
+**Estado**: PARCIAL
 
 ## Descripcion de dominio
 
@@ -10,14 +10,19 @@ El proceso tiene multiples etapas definidas por el canon: (1) el miembro complet
 
 La Decision 6 del canon establece que registrar y validar son actos distintos: la captura operativa (registrar progreso dia a dia) y la validacion institucional (aprobar y reconocer formalmente) tienen actores, momentos y reglas diferentes. Al entrar en validacion, el registro deja de ser editable — esto es un efecto de dominio critico que protege la integridad del proceso.
 
-El schema de base de datos tiene toda la infraestructura preparada (tablas, enums, campos en enrollments), pero **no existe ningun endpoint, servicio, pagina o screen que implemente este flujo**. Es la pieza faltante mas critica del dominio formativo.
+El schema de base de datos tiene toda la infraestructura preparada (tablas, enums, campos en enrollments). El backend ya implementa el flujo con 5 endpoints via InvestitureModule, pero **ningun cliente (admin ni app) tiene UI para validaciones** — el runtime existe pero es inaccesible para usuarios finales.
 
 ## Que existe (verificado contra codigo)
 
-### Backend
-- **No hay modulo dedicado** — no existe InvestitureModule, InvestitureController ni InvestitureService
-- **No hay endpoints** de validacion ni investidura en ningun controlador existente
-- El `enrollments` model en Prisma tiene campos de investidura que NO son expuestos por ningun runtime:
+### Backend (InvestitureModule)
+- **InvestitureModule implementado** — InvestitureController, InvestitureService, 3 DTOs, registrado en AppModule
+- **5 endpoints**:
+  - `POST /enrollments/:enrollmentId/submit-for-validation` — enviar a validacion
+  - `POST /enrollments/:enrollmentId/validate` — aprobar o rechazar (con body: action + comments)
+  - `POST /enrollments/:enrollmentId/investiture` — registrar investidura
+  - `GET /admin/investiture/pending` — listar enrollments pendientes de validacion por scope del actor
+  - `GET /admin/investiture/history` — historial de validaciones
+- El `enrollments` model en Prisma tiene campos de investidura expuestos via los endpoints anteriores:
   - `investiture_status` (investiture_status_enum)
   - `submitted_for_validation` (Boolean, default false)
   - `submitted_at` (DateTime?)
@@ -86,21 +91,15 @@ El schema de base de datos tiene toda la infraestructura preparada (tablas, enum
 
 ## Gaps y pendientes
 
-- **CRITICO**: Cero runtime — las tablas y enums existen en el schema pero no hay ningun endpoint, servicio, pagina o screen que los exponga
-- No hay InvestitureModule/Controller/Service en el backend
-- No hay UI en admin para gestionar validaciones (listar pendientes, aprobar, rechazar)
-- No hay UI en app para que consejeros envien a validacion ni para que miembros vean su estado
+- **No hay UI en admin** para gestionar validaciones (listar pendientes, aprobar, rechazar)
+- **No hay screens en app** para que consejeros envien a validacion ni para que miembros vean su estado
 - No hay UI para configurar investiture_config (deadlines y fechas por campo local)
-- El sistema puede registrar avance formativo completo pero NO puede validarlo ni investir institucionalmente — gap funcional critico
 - No hay notificaciones asociadas a cambios de estado de validacion
 - No hay reportes de investiduras por periodo/campo local/club
 
 ## Prioridad y siguiente accion
 
-- **CRITICA**: Este es el gap funcional mas importante del dominio formativo. Sin validacion de investiduras, todo el registro de progreso carece de cierre institucional.
-- **Siguiente accion concreta**: Disenar e implementar InvestitureModule en backend con al menos estos endpoints:
-  1. `POST /enrollments/:enrollmentId/submit-for-validation` — enviar a validacion
-  2. `POST /enrollments/:enrollmentId/validate` — aprobar o rechazar (con body: action + comments)
-  3. `POST /enrollments/:enrollmentId/investiture` — registrar investidura
-  4. `GET /admin/investiture/pending` — listar enrollments pendientes de validacion por scope del actor
-  5. `GET/POST /admin/investiture/config` — gestionar configuracion de investidura por campo local
+- **Alta**: Backend implementado. El gap ahora es la UI: admin y app son los proximos pasos.
+- **Siguiente accion concreta**:
+  1. Implementar pagina de admin para listar y gestionar validaciones pendientes (aprobar/rechazar)
+  2. Implementar screens en la app para que consejeros envien a validacion y vean el estado de cada enrollment

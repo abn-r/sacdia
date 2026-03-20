@@ -36,7 +36,7 @@ Cada item del inventario pertenece a un club especifico y tiene campos para nomb
 ### Base de datos
 - `club_inventory` — Items del inventario por club
 - `inventory_categories` — Catalogo de categorias de inventario
-- **Nota**: `inventory_categories` tiene un typo en el PK: `inventory_categoty_id` (falta la 'r' en category)
+- **Nota**: `inventory_categories` tenia un typo en el PK (`inventory_categoty_id`). Corregido en schema.prisma; migracion `20260320000000_fix_inventory_category_id_typo` creada (pendiente de deploy).
 
 ## Requisitos funcionales
 
@@ -58,7 +58,7 @@ Cada item del inventario pertenece a un club especifico y tiene campos para nomb
 ## Gaps y pendientes
 
 - **Admin es placeholder**: Backend y app completos pero el panel admin no tiene UI funcional
-- **Typo en PK de categorias**: `inventory_categoty_id` deberia ser `inventory_category_id` — pendiente de migracion
+- **Typo en PK de categorias**: corregido en schema.prisma; migracion `20260320000000_fix_inventory_category_id_typo` creada y pendiente de deploy en produccion
 - **Sin historial de movimientos**: No hay tracking de cuando se agrego, retiro o movio un item (solo estado actual)
 - **Sin fotos**: No hay soporte para adjuntar fotos de los items del inventario
 - **Sin prestamos**: No hay modelo para registrar prestamos de equipamiento entre clubes o a unidades
@@ -67,4 +67,4 @@ Cada item del inventario pertenece a un club especifico y tiene campos para nomb
 ## Prioridad y siguiente accion
 
 - **Prioridad**: Media — backend y app funcionales; admin es el gap principal
-- **Siguiente accion**: Implementar UI de inventario en sacdia-admin consumiendo los 6 endpoints existentes. Corregir el typo en `inventory_categoty_id` mediante migracion Prisma.
+- **Siguiente accion**: Implementar UI de inventario en sacdia-admin consumiendo los 6 endpoints existentes. Deployar la migracion `20260320000000_fix_inventory_category_id_typo` en produccion.

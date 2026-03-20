@@ -644,6 +644,7 @@ UNIQUE (user_id, role_id, club_section_id, ecclesiastical_year_id)
 | `finance_date` | DATE | Fecha del movimiento | NOT NULL |
 | `active` | BOOLEAN | Registro activo | DEFAULT false |
 | `created_by` | UUID | Usuario creador | FK → users, NOT NULL |
+| `modified_by_id` | UUID | Usuario que modificó | FK → users, NULL |
 | `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
 | `modified_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW() |
 | `club_section_id` | INT | Sección de club | FK → club_sections, NULL |
@@ -651,7 +652,7 @@ UNIQUE (user_id, role_id, club_section_id, ecclesiastical_year_id)
 **Índices**: `idx_finances_club_section_id`
 
 **Relaciones**:
-- Many-to-One: `club_sections`, `club_types`, `users`, `finances_categories`
+- Many-to-One: `club_sections`, `club_types`, `users`, `finances_categories`, `users` (via modified_by_id, relation "finances_modified_by")
 
 ---
 

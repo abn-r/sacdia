@@ -108,50 +108,50 @@ Fuente: Reality Matrix + Canon verification
 
 Descubiertos durante auditoría Wave 2. Fuente: docs de features bajo `docs/features/` y `docs/canon/completion-matrix.md` (OPEN).
 
-### GAP-W2-01: Validacion de Investiduras — FANTASMA
+### GAP-W2-01: Validacion de Investiduras — PARCIAL
 
 | Item | Detalle |
 |---|---|
 | Infraestructura DB | Completa: `investiture_validation_history`, `investiture_config`, 3 enums, campos de investidura en `enrollments` |
-| Runtime backend | CERO: no hay modulo, no hay controller, no hay service, no hay endpoints |
+| Runtime backend | IMPLEMENTADO: InvestitureModule con 5 endpoints, 23 tests. |
 | Runtime frontend | CERO: no hay pages en admin, no hay screens en app |
-| Severidad | Gap funcional mas critico del dominio formativo |
-| Accion requerida | Ciclo SDD completo (explore → propose → spec → design → tasks → apply) |
+| Severidad | Gap funcional — backend listo, falta UI |
+| Estado | PARTIAL 2026-03-20: Backend implementado (InvestitureModule, 5 endpoints, 23 tests). Pendiente: UI admin y app. |
 | Descubierto | Wave 2 (2026-03-20) |
 
-### GAP-W2-02: Actividades — hardcoded clubId=1
+### GAP-W2-02: Actividades — hardcoded clubId=1 — RESUELTO
 
 | Item | Detalle |
 |---|---|
 | Problema | El controller/service de actividades tiene `clubId=1` hardcodeado en vez de usar el contexto real del club |
 | Tipo | Bug directo |
-| Accion requerida | Fix directo: reemplazar hardcode por club context del request |
+| Estado | RESUELTO 2026-03-20: Fix aplicado: ActivitiesListView resuelve clubId desde clubContextProvider. Commit dbb14eb. |
 | Descubierto | Wave 2 (2026-03-20) |
 
-### GAP-W2-03: Finanzas — campos de auditoria faltantes
+### GAP-W2-03: Finanzas — campos de auditoria faltantes — RESUELTO
 
 | Item | Detalle |
 |---|---|
 | Problema | Los registros financieros carecen de campos `created_by`/`modified_by` que otros modulos si tienen |
 | Tipo | Gap de consistencia / auditoria |
-| Accion requerida | Migracion DB para agregar campos + actualizacion del service para poblarlos |
+| Estado | RESUELTO 2026-03-20: modified_by_id agregado a finances (migration + schema + service). Commit 69b4b3e. |
 | Descubierto | Wave 2 (2026-03-20) |
 
-### GAP-W2-04: Inventario — typo en PK de DB
+### GAP-W2-04: Inventario — typo en PK de DB — RESUELTO
 
 | Item | Detalle |
 |---|---|
 | Problema | La tabla `inventory_categories` tiene un typo en su columna PK: `inventory_categoty_id` en vez de `inventory_category_id` |
 | Impacto | Prisma lo mapea correctamente, pero el nombre subyacente en la columna es incorrecto |
-| Accion requerida | Migracion de rename de columna |
+| Estado | RESUELTO 2026-03-20: Migration creada para rename. Commit d690a57. Pendiente: prisma migrate deploy. |
 | Descubierto | Wave 2 (2026-03-20) |
 
-### GAP-W2-05: Certificaciones Guias Mayores — cero UI cliente
+### GAP-W2-05: Certificaciones Guias Mayores — cero UI cliente — RESUELTO
 
 | Item | Detalle |
 |---|---|
 | Backend | Completamente implementado: 7 endpoints verificados y funcionales |
-| Admin panel | Read-only como maximo |
-| App movil | CERO screens |
-| Accion requerida | Trabajo frontend. Prioridad depende de necesidades de negocio |
+| Admin panel | UI implementada: list + detail + progress |
+| App movil | UI implementada: 4 screens en Flutter |
+| Estado | RESUELTO 2026-03-20: UI implementada en Flutter (4 screens) y admin (list + detail + progress). Commits 69cb026 + 37e5929. |
 | Descubierto | Wave 2 (2026-03-20) |

@@ -10,7 +10,7 @@ Cada certificacion sigue una estructura jerarquica similar a las clases y carpet
 
 A diferencia de las clases progresivas (determinadas por edad y secuenciales), las certificaciones son electivas y voluntarias. Un Guia Mayor investido elige que certificaciones cursar segun sus intereses y rol en el club. El backend valida la elegibilidad al momento de la inscripcion, rechazando usuarios que no son Guias Mayores investidos.
 
-El modulo backend esta completamente implementado con CRUD de progreso, pero **ninguno de los clientes (admin ni app) tiene UI para certificaciones**, lo que lo convierte en funcionalidad parcialmente implementada — el runtime existe pero es inaccesible para usuarios finales.
+El modulo backend esta completamente implementado con CRUD de progreso. El admin tiene paginas de gestion y la app tiene screens completos, aunque quedan gaps en reportes y flujos institucionales avanzados.
 
 ## Que existe (verificado contra codigo)
 
@@ -29,12 +29,15 @@ El modulo backend esta completamente implementado con CRUD de progreso, pero **n
 - **Todos los endpoints documentados** en ENDPOINTS-LIVE-REFERENCE.md y **ALINEADOS** en Reality Matrix
 
 ### Admin (sacdia-admin)
-- 1 pagina read-only: listado de certificaciones via ModuleListPage
-- Consume: `GET /certifications/certifications`
-- **Sin CRUD**, sin gestion de progreso, sin inscripciones
+- Pagina de listado de certificaciones
+- Pagina de detalle con arbol de modulos
+- Panel de usuarios inscriptos
+- Dialog de progreso con toggle de secciones
 
 ### App (sacdia-app)
-- **No implementado** — no hay screens de certificaciones en la app movil
+- **4 screens**: CertificationsListScreen, CertificationDetailScreen, CertificationProgressScreen, MyCertificationsScreen
+- Capa de datos completa: entities, models, datasource, repository, providers
+- Rutas registradas en GoRouter
 
 ### Base de datos
 - `certifications` — catalogo de certificaciones
@@ -65,9 +68,6 @@ El modulo backend esta completamente implementado con CRUD de progreso, pero **n
 
 ## Gaps y pendientes
 
-- **CRITICO**: La app movil no tiene screens para certificaciones — el backend tiene CRUD completo de progreso pero es inaccesible para usuarios finales
-- Admin es solo lectura — no permite inscribir usuarios, ver progreso ni administrar el catalogo
-- No hay UI en ningun cliente para inscripcion, progreso o evidencias de certificaciones
 - No hay endpoint para subida de archivos/evidencias de certificaciones (a diferencia de honores y clases que si tienen)
 - No hay flujo de validacion institucional de certificaciones completadas
 - No hay reporte administrativo de certificaciones por club o seccion
@@ -75,6 +75,5 @@ El modulo backend esta completamente implementado con CRUD de progreso, pero **n
 
 ## Prioridad y siguiente accion
 
-- **Alta**: Implementar screens de certificaciones en la app movil — es la via principal de acceso para Guias Mayores
-- **Media**: Enriquecer la pagina de admin con gestion de certificaciones (al menos vista de progreso por miembro)
-- **Siguiente accion concreta**: Disenar las screens de certificaciones en la app (catalogo, detalle, progreso) reutilizando los patrones de UI existentes de clases y honores
+- **Media**: Los gaps restantes son mejoras incrementales; la funcionalidad core esta disponible en admin y app.
+- **Siguiente accion concreta**: Evaluar soporte de evidencias para certificaciones (alineando con el patron de honores y clases)

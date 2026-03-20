@@ -31,7 +31,7 @@
 | Canon de producto | `COMPLETE` | Sin cambios |
 | Canon técnico base | `PARTIAL` | Sin cambios respecto a Wave 0 |
 | Estándares operativos | `COMPLETE` | Sin cambios |
-| Runtime API | `COMPLETE` | 215 endpoints documentados (+19 nuevos, +2 corregidos, -1 fantasma removido) |
+| Runtime API | `COMPLETE` | 220 endpoints documentados (+5 investiture nuevos respecto a Wave 2) |
 | Racionales/decisiones API | `PARTIAL` | Sin cambios |
 | Modelo de datos | `COMPLETE` | ~72 modelos + 8 enums documentados en SCHEMA-REFERENCE (era ~25) |
 | Features por dominio | `PARTIAL` | 16 dominios con spec completa; 9 COMPLETE (código IMPLEMENTADO), 5 PARTIAL (código PARCIAL), 1 NO CANON, 1 FANTASMA. Ningún dominio con set requirements+design+tasks |
@@ -47,7 +47,7 @@
 | Arquitectura canónica | `arquitectura-sacdia.md`, `decisiones-clave.md` | Ambos existen y están `ACTIVE` | `COMPLETE` | Cobertura de arquitectura y decisiones duraderas |
 | Baseline técnica global | `tech.md`, `structure.md`, `coding-standards.md`, `data-guidelines.md`, `agents.md` | Todos existen; `structure.md` está `HISTORICAL` | `PARTIAL` | La baseline existe, pero la guía de estructura quedó degradada por estatus/obsolescencia |
 | Estándares de ingeniería | `coding-standards.md`, `data-guidelines.md`, `agents.md` | Los tres existen y cubren normas operativas | `COMPLETE` | Sirven como baseline operativa subordinada |
-| Contrato runtime API | `ENDPOINTS-LIVE-REFERENCE.md` | Existe, base `/api/v1`, 215 endpoints, 22+ módulos | `COMPLETE` | Actualizado Wave 2: +19 endpoints, +2 correcciones, -1 fantasma |
+| Contrato runtime API | `ENDPOINTS-LIVE-REFERENCE.md` | Existe, base `/api/v1`, 220 endpoints, 23+ módulos | `COMPLETE` | Actualizado Wave 2: +19 endpoints, +2 correcciones, -1 fantasma. Post-Wave 2: +5 investiture |
 | Decisiones API estructurales | `ARCHITECTURE-DECISIONS.md` | Existe, pero su alcance es selectivo (naming, `users_pr`, legal reps, año eclesiástico, roles/RBAC) | `PARTIAL` | Complementa, no reemplaza, al Live Reference |
 | Modelo de datos estructural | `schema.prisma`, `docs/03-DATABASE/README.md`, `SCHEMA-REFERENCE.md` | Los tres existen; `SCHEMA-REFERENCE.md` actualizado con ~72 modelos + 8 enums | `COMPLETE` | Actualizado Wave 2: ~48 modelos nuevos documentados. `schema.prisma` sigue mandando |
 
@@ -68,19 +68,19 @@
 | `carpetas-evidencias` | ✅ | — | — | — | — | `COMPLETE` | IMPLEMENTADO | Spec Wave 2: carpetas-evidencias.md (IMPLEMENTADO, 89 líneas). Era MISSING |
 | `rbac` | ✅ | — | — | — | — | `COMPLETE` | IMPLEMENTADO | Spec Wave 2: rbac.md (IMPLEMENTADO). Era MISSING |
 | `gestion-seguros` | ✅ | ✅ | — | — | — | `COMPLETE` | IMPLEMENTADO | Spec Wave 2: gestion-seguros.md (IMPLEMENTADO). Corregido de SIN CANON |
-| `actividades` | ✅ | — | ✅ | — | ✅ | `PARTIAL` | PARCIAL | Spec Wave 2: actividades.md (PARCIAL). Bug: clubId hardcoded |
-| `finanzas` | ✅ | — | ✅ | — | ✅ | `PARTIAL` | PARCIAL | Spec Wave 2: finanzas.md (PARCIAL). Faltan campos de auditoría |
-| `inventario` | ✅ | — | — | — | ✅ | `PARTIAL` | PARCIAL | Spec Wave 2: inventario.md (PARCIAL). Typo en PK |
+| `actividades` | ✅ | — | ✅ | — | ✅ | `COMPLETE` | IMPLEMENTADO | Spec Wave 2: actividades.md. GAP-W2-02 FIXED 2026-03-20: clubId resuelto desde clubContextProvider |
+| `finanzas` | ✅ | — | ✅ | — | ✅ | `COMPLETE` | IMPLEMENTADO | Spec Wave 2: finanzas.md. GAP-W2-03 FIXED 2026-03-20: modified_by_id agregado (migration + schema + service) |
+| `inventario` | ✅ | — | — | — | ✅ | `COMPLETE` | IMPLEMENTADO | Spec Wave 2: inventario.md. GAP-W2-04 FIXED 2026-03-20: migration creada para rename de PK. Pendiente deploy |
 | `camporees` | ✅ | — | — | — | — | `PARTIAL` | PARCIAL | Spec Wave 2: camporees.md (PARCIAL). Sin screens en app |
-| `certificaciones-guias-mayores` | ✅ | ✅ | — | — | ✅ | `PARTIAL` | PARCIAL | Spec Wave 2: certificaciones-guias-mayores.md (PARCIAL). Backend done, zero client UI |
+| `certificaciones-guias-mayores` | ✅ | ✅ | — | — | ✅ | `COMPLETE` | IMPLEMENTADO | Spec Wave 2: certificaciones-guias-mayores.md. GAP-W2-05 FIXED 2026-03-20: UI Flutter (4 screens) + admin (list + detail + progress) |
 | `infrastructure` | ✅ | — | — | — | ✅ | `PARTIAL` | NO CANON | Spec Wave 2: infrastructure.md (NO CANON, cross-cutting) |
-| `validacion-investiduras` | ✅ | ✅ | — | — | — | `PARTIAL` | FANTASMA | Spec Wave 2: validacion-investiduras.md (FANTASMA, 106 líneas). DB existe, zero runtime |
+| `validacion-investiduras` | ✅ | ✅ | — | — | — | `PARTIAL` | PARCIAL | Spec Wave 2: validacion-investiduras.md. GAP-W2-01 PARTIAL 2026-03-20: backend implementado (InvestitureModule, 5 endpoints). UI admin y app pendientes |
 
 **Lectura de la fila**:
 
 - `COMPLETE` en features requiere spec completa y código IMPLEMENTADO sin gaps documentados.
 - `PARTIAL` indica que existe spec pero el código tiene gaps o el dominio no está completamente implementado.
-- Wave 2 cerró 16 specs de dominio. 9 dominios `COMPLETE` (código implementado), 5 `PARTIAL` (código parcial), 1 `PARTIAL` (NO CANON), 1 `PARTIAL` (FANTASMA).
+- Wave 2 cerró 16 specs de dominio. Post-Wave 2 (2026-03-20): 12 dominios `COMPLETE` (código implementado), 2 `PARTIAL` (código parcial), 1 `PARTIAL` (NO CANON), 1 `PARTIAL` (backend parcial, UI pendiente).
 - Set completo `requirements + design + tasks` sigue sin existir para ningún dominio.
 
 ---
@@ -88,7 +88,7 @@
 ## 5. Matriz de cobertura runtime por módulo API
 
 Fuente única de esta sección: `docs/02-API/ENDPOINTS-LIVE-REFERENCE.md`
-**Total**: 215 endpoints documentados (actualizado Wave 2, 2026-03-20)
+**Total**: 220 endpoints documentados (actualizado post-Wave 2, 2026-03-20: +5 investiture)
 
 | Módulo runtime | Evidencia encontrada | Estado | Observación |
 |---|---|---|---|
@@ -109,6 +109,7 @@ Fuente única de esta sección: `docs/02-API/ENDPOINTS-LIVE-REFERENCE.md`
 | `health` | Sección presente | `COMPLETE` | Runtime documentado |
 | `honors` | Sección presente | `COMPLETE` | Wave 2: +endpoints grouped-by-category, user-honors create/bulk/files |
 | `inventory` | Sección presente | `COMPLETE` | Runtime documentado |
+| `investiture` | Sección presente | `COMPLETE` | Post-Wave 2 2026-03-20: 5 endpoints documentados (InvestitureModule) |
 | `notifications` | Sección presente | `COMPLETE` | Wave 2: corrección de route signature |
 | `root` | Sección presente | `COMPLETE` | Runtime documentado |
 
@@ -133,11 +134,11 @@ Fuente única de esta sección: `docs/02-API/ENDPOINTS-LIVE-REFERENCE.md`
 | Canon de catálogos admin | 16+ endpoints CRUD admin sin mención en canon | Implementados y documentados en ENDPOINTS-LIVE-REFERENCE + catalogos.md | `FIXED` | Cerrado 2026-03-20 (Wave 2): spec catalogos.md cubre el dominio |
 | Notifications route signature | Firma de ruta incorrecta en doc | Corregido en ENDPOINTS-LIVE-REFERENCE | `FIXED` | Corregido 2026-03-20 (Wave 2) |
 | FCM tokens param name | Nombre de parámetro incorrecto en doc | Corregido en ENDPOINTS-LIVE-REFERENCE | `FIXED` | Corregido 2026-03-20 (Wave 2) |
-| `validacion-investiduras` FANTASMA | Módulo runtime esperado | DB tables existen, pero zero endpoints/módulos/screens | `OPEN` | Dominio documentado como FANTASMA en spec. Decidir si implementar o deprecar tablas |
-| `actividades` bug clubId | clubId dinámico por contexto | clubId hardcoded en implementación | `OPEN` | Documentado en spec actividades.md. Requiere fix en backend |
-| `finanzas` campos auditoría | Campos de auditoría en modelo | Faltan campos de auditoría | `OPEN` | Documentado en spec finanzas.md. Requiere migración |
-| `inventario` PK typo | PK consistente | Typo en PK detectado | `OPEN` | Documentado en spec inventario.md. Requiere migración |
-| `certificaciones-guias-mayores` sin UI | Client UI para certificaciones | Backend completo, zero client UI (admin y app) | `OPEN` | Documentado en spec. Requiere implementación de pantallas |
+| `validacion-investiduras` FANTASMA | Módulo runtime esperado | DB tables existen; backend implementado (5 endpoints). UI admin y app pendientes | `PARTIAL` | GAP-W2-01 PARTIAL 2026-03-20: InvestitureModule implementado. Pendiente UI admin y app |
+| `actividades` bug clubId | clubId dinámico por contexto | clubId hardcoded en implementación | `FIXED` | GAP-W2-02 FIXED 2026-03-20: ActivitiesListView resuelve clubId desde clubContextProvider. Commit dbb14eb |
+| `finanzas` campos auditoría | Campos de auditoría en modelo | Faltan campos de auditoría | `FIXED` | GAP-W2-03 FIXED 2026-03-20: modified_by_id agregado a finances (migration + schema + service). Commit 69b4b3e |
+| `inventario` PK typo | PK consistente | Typo en PK detectado | `FIXED` | GAP-W2-04 FIXED 2026-03-20: migration creada para rename. Commit d690a57. Pendiente: prisma migrate deploy |
+| `certificaciones-guias-mayores` sin UI | Client UI para certificaciones | Backend completo, zero client UI (admin y app) | `FIXED` | GAP-W2-05 FIXED 2026-03-20: UI implementada en Flutter (4 screens) y admin (list + detail + progress). Commits 69cb026 + 37e5929 |
 
 ---
 
@@ -146,7 +147,7 @@ Fuente única de esta sección: `docs/02-API/ENDPOINTS-LIVE-REFERENCE.md`
 `Runtime` puede tomar como base inmediata:
 
 1. `docs/canon/source-of-truth.md` para precedencia;
-2. `docs/02-API/ENDPOINTS-LIVE-REFERENCE.md` para API vigente (215 endpoints, actualizado Wave 2);
+2. `docs/02-API/ENDPOINTS-LIVE-REFERENCE.md` para API vigente (220 endpoints, actualizado post-Wave 2 2026-03-20);
 3. `docs/03-DATABASE/schema.prisma` para modelo de datos vigente;
 4. `docs/database/SCHEMA-REFERENCE.md` para referencia humana del modelo (~72 modelos + 8 enums, actualizado Wave 2);
 5. `docs/canon/dominio-sacdia.md`, `identidad-sacdia.md`, `arquitectura-sacdia.md` y `decisiones-clave.md` para interpretación canónica;
@@ -163,3 +164,4 @@ Fuente única de esta sección: `docs/02-API/ENDPOINTS-LIVE-REFERENCE.md`
 |---|---|---|
 | 2026-03-14 | Wave 0 | Matriz inicial. 180 endpoints, ~25 modelos, 17 fantasma removidos, storage drift corregido |
 | 2026-03-20 | Wave 2 | +19 endpoints (total 215), +2 correcciones, -1 fantasma. SCHEMA-REFERENCE: +48 modelos (total ~72 + 8 enums). 16 feature specs creadas. 5 gaps OPEN nuevos documentados |
+| 2026-03-20 | Post-Wave 2 | GAP-W2-02/03/04/05 → FIXED. GAP-W2-01 → PARTIAL (backend done). +5 endpoints investiture (total 220). 4 dominios adicionales → COMPLETE |

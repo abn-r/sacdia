@@ -63,10 +63,10 @@ Las categorias financieras son un catalogo compartido que permite clasificar los
 - **Admin es placeholder**: Backend y app completos pero el panel admin no tiene UI funcional
 - **Sin reportes avanzados**: No hay endpoints para reportes por categoria, tendencias temporales o comparativas entre periodos
 - **Sin exportacion**: No hay funcionalidad para exportar movimientos a PDF o Excel
-- **Sin auditoría avanzada**: Los movimientos no registran quien creo o modifico cada registro (no hay `created_by_id` / `modified_by_id`)
+- **Sin auditoría avanzada**: Los movimientos registran `created_by` (UUID, NOT NULL) y `modified_by_id` (UUID, nullable, FK a users); no hay audit trail de acciones en formato log
 - **Sin presupuesto**: No hay modelo para definir presupuestos anuales por categoria y comparar ejecucion vs presupuesto
 
 ## Prioridad y siguiente accion
 
 - **Prioridad**: Media — backend y app funcionales; admin es el gap principal
-- **Siguiente accion**: Implementar UI de finanzas en sacdia-admin consumiendo los 7 endpoints existentes. Considerar agregar campos de auditoria (`created_by_id`, `modified_by_id`) al modelo `finances`.
+- **Siguiente accion**: Implementar UI de finanzas en sacdia-admin consumiendo los 7 endpoints existentes.
