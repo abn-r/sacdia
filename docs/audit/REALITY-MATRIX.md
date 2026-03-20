@@ -492,7 +492,7 @@ Convenciones:
 | users | Si | Si | Si | ALINEADO |
 | user_fcm_tokens | Si | No | No | SIN CANON |
 | users_pr | Si | Si | Si | ALINEADO |
-| users_classes | Si | Si | Si | ALINEADO |
+| users_classes | No | No | No | ARCHIVADA (como users_classes_archive) |
 | certifications | Si | No | Si | SIN DOCS |
 | certification_modules | Si | No | No | SIN CANON |
 | certification_sections | Si | No | No | SIN CANON |

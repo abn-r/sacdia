@@ -286,8 +286,8 @@ No requiere otros servicios inyectados en el MVP.
 5. Abrir transacción Prisma:
    a. Actualizar enrollment: `investiture_status = INVESTIDO`, `investiture_date = investiture_config.investiture_date`.
    b. Crear history entry: `action = APPROVED` (reutilizamos el enum — no existe un valor `INVESTIDO` en `investiture_action_enum`; usar `APPROVED` con un comentario contextual que indique el acto de investidura, hasta que se agregue el valor al enum).
-   c. **Auto-sync users_classes**: buscar registro en `users_classes` donde `user_id = enrollment.user_id` y `class_id = enrollment.class_id`. Si existe → actualizar `investiture = true`, `date_investiture = investiture_config.investiture_date`. Si no existe → crear el registro con esos valores.
-6. Retornar: `{ enrollment_id, investiture_status, investiture_date, users_classes_synced }`.
+   c. **(Archivado)** El sincronismo con `users_classes` ya no aplica — la tabla fue archivada como `users_classes_archive`.
+6. Retornar: `{ enrollment_id, investiture_status, investiture_date }`.
 
 **Nota sobre investiture_action_enum**: el enum solo tiene `SUBMITTED`, `APPROVED`, `REJECTED`, `REINVESTITURE_REQUESTED`. No existe `INVESTIDO`. Para el acto de investidura formal se recomienda agregar `INVESTIDO` al enum en una migración futura. En el MVP, usar `APPROVED` con comments descriptivo o bien crear la migración como parte del MVP.
 
@@ -469,16 +469,12 @@ prisma.$transaction(async (tx) => {
   const config = await resolveInvestitureConfig(tx, enrollmentId)  // lectura dentro de tx
   const updated = await tx.enrollments.update({ ... investiture_date: config.investiture_date })
   await tx.investiture_validation_history.create({ ... })
-  await tx.users_classes.upsert({
-    where: { user_id_class_id: { user_id, class_id } },  // si existe unique constraint
-    update: { investiture: true, date_investiture: config.investiture_date },
-    create: { user_id, class_id, investiture: true, date_investiture: config.investiture_date, active: true }
-  })
+  // users_classes sync ya no aplica — tabla archivada como users_classes_archive
   return updated
 })
 ```
 
-**Nota sobre upsert en users_classes**: verificar si existe unique constraint en `(user_id, class_id)` en el schema. Si no existe, usar `findFirst` + `update`/`create` manual dentro de la transacción.
+**Nota histórica**: El sincronismo con `users_classes` fue removido. La tabla se archivó como `users_classes_archive`. El histórico de investiduras se consulta desde `enrollments` directamente.
 
 ---
 
@@ -513,15 +509,13 @@ El módulo se importa en `AppModule` al igual que `CertificationsModule`, `Class
 
 ---
 
-## Sync con users_classes
+## Sync con users_classes [ARCHIVADO]
 
-**Qué se sincroniza**: cuando un enrollment alcanza el estado `INVESTIDO`, se actualiza (o crea) el registro en `users_classes` con `investiture = true` y `date_investiture = investiture_config.investiture_date`.
+**Estado**: ❌ **REMOVIDO** — La tabla `users_classes` fue archivada como `users_classes_archive`.
 
-**Por qué**: `users_classes` es la tabla de membresía histórica del usuario en una clase. El campo `investiture` en esa tabla es lo que consulta `certifications.service.ts` para verificar elegibilidad de Guías Mayores. Sin este sync, un usuario puede quedar con `investiture_status = INVESTIDO` en `enrollments` pero sin `investiture = true` en `users_classes`, rompiendo la validación de elegibilidad para certificaciones.
+**Cómo se verifica elegibilidad de Guías Mayores ahora**: `certifications.service.ts` debe validar contra `enrollments` directamente, filtrando por `investiture_status = 'INVESTIDO'`. No consultar `users_classes`.
 
-**Cuándo no crear el registro**: si el usuario no tiene ningún registro previo en `users_classes` para esa clase, crearlo con `active = true`. Si ya existe, actualizarlo. El upsert resuelve ambos casos.
-
-**Sincronización inversa (TODO futuro)**: si en el futuro se admite re-invertir el estado de un enrollment (volver de INVESTIDO a APPROVED por error), se debe sincronizar el campo `investiture` de vuelta a `false`. Fuera del alcance del MVP.
+**Histórico de investiduras**: Se obtiene directamente desde `enrollments` con filtros históricos por año eclesiástico y estado de investidura.
 
 ---
 
@@ -550,8 +544,6 @@ Para cada método del service, escribir tests usando el patrón de mocks de Pris
 
 3. `markInvestido`
    - Caso feliz: APPROVED → INVESTIDO con fecha de investiture_config
-   - Caso feliz: sync de users_classes crea registro si no existe
-   - Caso feliz: sync de users_classes actualiza registro si ya existe
    - Error: estado distinto de APPROVED → BadRequestException
    - Error: ya es INVESTIDO → ConflictException
    - Error: investiture_config no encontrado → NotFoundException
@@ -580,6 +572,6 @@ Cubrir el flujo completo: submit → approve → investiture en un solo test de 
 | REJECTED persiste y permite re-submit | El bloqueo perpetuo crea casos sin salida; el club debe poder corregir y reenviar |
 | submission_deadline es advertencia suave | Realidad operacional: los plazos se cumplen parcialmente; bloquear crearía un cuello de botella administrativo |
 | investiture_date siempre viene de investiture_config | Una sola fuente de verdad por campo local/año; evita inconsistencias si cada enrollment tuviera su propia fecha |
-| Auto-sync users_classes en INVESTIDO | La tabla users_classes es la fuente de consulta para elegibilidad de certificaciones; sin sync el sistema queda inconsistente |
+| users_classes archivada | La tabla fue archivada como users_classes_archive. El histórico se consulta directamente desde enrollments. |
 | REINVESTITURE_REQUESTED fuera de MVP | Caso de uso excepcional; el flujo base debe estabilizarse primero |
 | No hay endpoint de configuración en MVP | investiture_config se gestiona directamente en DB por ahora; se puede agregar como módulo separado en iteración siguiente |

@@ -64,11 +64,11 @@ graph TB
     subgraph "Classes & Honors"
         CLASSES[classes]
         HONORS[honors]
-        USERS_CLASSES[users_classes]
+        ENROLLMENTS[enrollments]
         USERS_HONORS[users_honors]
-        
-        USERS --> USERS_CLASSES
-        USERS_CLASSES --> CLASSES
+
+        USERS --> ENROLLMENTS
+        ENROLLMENTS --> CLASSES
         USERS --> USERS_HONORS
         USERS_HONORS --> HONORS
     end
@@ -112,8 +112,10 @@ graph TB
 
 **Relaciones**:
 - One-to-One: `users_pr`, `legal_representatives`
-- One-to-Many: `emergency_contacts`, `club_role_assignments`, `users_classes`, `users_honors`
+- One-to-Many: `emergency_contacts`, `club_role_assignments`, `users_honors`
 - Many-to-Many: `roles` (via `users_roles`), `allergies` (via `users_allergies`), `diseases` (via `users_diseases`), `medicines` (via `users_medicines`)
+
+**Nota histórica**: La relación `users_classes` fue deprecada y la tabla se archivó como `users_classes_archive`. El histórico consolidado se resuelve ahora desde `enrollments`.
 
 **Naming Convention**: ✅ Cumple - Nombres descriptivos (`paternal_last_name` vs `p_lastname`)
 
@@ -432,7 +434,9 @@ UNIQUE (user_id, role_id, club_section_id, ecclesiastical_year_id)
 
 **Relaciones**:
 - Many-to-One: `club_types`
-- One-to-Many: `class_module_progress`, `class_modules`, `class_section_progress`, `enrollments`, `users_classes`
+- One-to-Many: `class_module_progress`, `class_modules`, `class_section_progress`, `enrollments`
+
+**Nota histórica**: La relación `users_classes` fue deprecada. El histórico consolidado se resuelve desde `enrollments`.
 
 ---
 
@@ -461,23 +465,13 @@ UNIQUE (user_id, role_id, club_section_id, ecclesiastical_year_id)
 - Many-to-One: `club_types`, `honors_categories`, `master_honors`
 - One-to-Many: `users_honors`
 
-#### Tabla: `users_classes`
-**Descripción**: Trayectoria consolidada por clase y proyección legacy de compatibilidad (`current_class`), no verdad operativa anual primaria
+#### Tabla: `users_classes` [DEPRECADA]
 
-**Campos**:
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| `id` | UUID | ID único |
-| `user_id` | UUID | Usuario |
-| `class_id` | UUID | Clase |
-| `current_class` | BOOLEAN | ¿Es su clase actual? |
-| `investiture` | BOOLEAN | Investido |
-| `date_investiture` | DATE | Fecha de investidura |
-| `certificate` | TEXT | URL del certificado |
+**Estado**: ❌ **ARCHIVADA Y ELIMINADA**
 
-**Nota runtime (FS-02)**:
-- La inscripción operativa anual se resuelve en `enrollments`.
-- `users_classes` se sincroniza temporalmente para consumidores legacy mientras se completa la migración de lecturas.
+Fue archivada como `users_classes_archive` en la migración del 2026-03-20. El histórico consolidado se resuelve completamente desde `enrollments` y sus proyecciones (`class_module_progress`, `class_section_progress`).
+
+**Motivo**: La separación entre "trayectoria consolidada" (legacy) y "inscripción operativa anual" (authority) se resolvió completamente hacia `enrollments` como única fuente de verdad. Los consumidores que necesitaban el histórico consolidado deben consultar directamente `enrollments` con filtros históricos.
 
 #### Tabla: `enrollments`
 **Descripción**: Intento anual operativo de cursado por usuario, clase y año eclesiástico; owner primario del progreso formativo

@@ -129,7 +129,7 @@
 - `POST /api/v1/users/:userId/post-registration/step-3/complete` ahora completa el alta operativa anual en `enrollments` como condición de éxito del paso.
 - El flujo mantiene idempotencia para reintentos: reusa/reactiva el tuple único `(user_id, class_id, ecclesiastical_year_id)` y evita duplicados por conflicto de unicidad.
 - Si el usuario cambia de clase en el mismo año eclesiástico, el backend desactiva otros `enrollments` activos de ese año antes de resolver el seleccionado.
-- `users_classes` se mantiene solo como proyección temporal de compatibilidad (`current_class`) y no como fuente de verdad operativa anual.
+- `users_classes` fue archivada como `users_classes_archive` en la migración y ya no existe en el modelo operativo. El histórico consolidado ahora se resuelve desde `enrollments`.
 
 ### Class progress runtime notes (FS-03)
 
@@ -220,7 +220,7 @@
 - Endpoint: `GET /api/v1/admin/users/:userId`
 - Envelope se mantiene: `{ status, data }`
 - `data.current_operational_enrollment`: fuente anual operativa (SOLO `enrollments` del año eclesiástico activo)
-- `data.trajectory_classes`: trayectoria consolidada/histórica (SOLO `users_classes`)
+- `data.trajectory_classes`: trayectoria consolidada/histórica (SOLO `enrollments` archivados en `users_classes_archive`)
 - `data.classes`: alias legacy **deprecado**; mantiene semántica de trayectoria y NO representa verdad operativa anual
 - Reglas de nulidad:
   - si no hay año eclesiástico activo -> `current_operational_enrollment = null`

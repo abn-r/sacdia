@@ -8,7 +8,7 @@ Las clases progresivas son el eje central del proceso formativo institucional en
 
 Cada clase se compone de modulos tematicos, y cada modulo contiene secciones evaluables. El progreso se registra por seccion (puntaje + evidencias) y se proyecta a nivel de modulo. La regla fundamental es que la clase se determina por la edad al inicio del ano eclesiastico y NO cambia durante ese ciclo — un miembro que cumple anos a mitad de ano sigue en su clase original.
 
-El sistema mantiene una separacion critica entre dos conceptos: el **ciclo anual operativo** (gestionado por `enrollments`) y la **trayectoria consolidada** (gestionado por `users_classes`). La inscripcion anual en enrollments es la fuente de verdad para el progreso del ano en curso, mientras que users_classes mantiene el historico consolidado y la proyeccion legacy de compatibilidad.
+El sistema adopta una única fuente de verdad: el **ciclo anual operativo** es gestionado enteramente por `enrollments` con sus proyecciones de progreso (`class_module_progress`, `class_section_progress`). La tabla legacy `users_classes` fue archivada como `users_classes_archive` y ya no participa en el modelo operativo. El histórico consolidado se consulta directamente desde `enrollments` con filtros históricos por año eclesiástico.
 
 La culminacion exitosa de una clase lleva a la investidura, que es el acto institucional de reconocimiento formal. Este flujo de validacion e investidura aun no tiene runtime implementado (ver feature `validacion-investiduras`).
 
@@ -45,7 +45,7 @@ La culminacion exitosa de una clase lleva a la investidura, que es el acto insti
 - `enrollments` — inscripcion anual operativa (enrollment_id, user_id, class_id, ecclesiastical_year_id, investiture_status, active). UNIQUE: (user_id, class_id, ecclesiastical_year_id)
 - `class_section_progress` — progreso por seccion con enrollment_id como owner anual. UNIQUE: (enrollment_id, module_id, section_id)
 - `class_module_progress` — proyeccion de progreso por modulo. UNIQUE: (enrollment_id, module_id)
-- `users_classes` — trayectoria consolidada legacy (user_id, class_id, current_class, investiture, date_investiture, certificate)
+- `users_classes` — [ARCHIVADA] trayectoria consolidada legacy (archivada como `users_classes_archive`)
 
 ## Requisitos funcionales
 
@@ -60,7 +60,7 @@ La culminacion exitosa de una clase lleva a la investidura, que es el acto insti
 
 ## Decisiones de diseno
 
-- **Decision 9 (enrollments vs users_classes)**: la verdad operativa anual vive en `enrollments`; `users_classes` es solo proyeccion legacy de compatibilidad
+- **Decision 9 (enrollments vs users_classes)**: la verdad operativa anual vive en `enrollments`; `users_classes` fue archivada como `users_classes_archive` y no participa más en el modelo operativo
 - **Resolucion de enrollment**: el backend resuelve automaticamente una inscripcion activa del ano eclesiastico actual; enrollmentId es override aditivo
 - **Dos controladores separados**: ClassesController (catalogo) y UserClassesController (inscripciones) con guards diferentes
 - **PermissionsGuard con permisos finos**: classes:read y classes:update con AuthorizationResource para owner detection
@@ -68,7 +68,7 @@ La culminacion exitosa de una clase lleva a la investidura, que es el acto insti
 
 ## Gaps y pendientes
 
-- La frontera de autoridad entre enrollments y users_classes no esta implementada de forma consistente (Decision 9 advierte cautela)
+- [RESUELTO] La frontera de autoridad entre enrollments y users_classes ha sido resuelta: `users_classes` fue archivada y `enrollments` es la única autoridad
 - App consume endpoints de archivos por seccion (POST/DELETE files) que **no aparecen en backend audit** — posibles endpoints FANTASMA o no capturados
 - Admin es solo lectura — no permite gestionar inscripciones, progreso ni administrar clases
 - `/home/grouped-class` en app tiene classId hardcodeado a 1

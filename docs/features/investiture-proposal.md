@@ -108,7 +108,7 @@ Body: { investiture_date: string (ISO date) }
 ```
 - **Guard**: `GlobalRolesGuard` — roles `admin`, `coordinator`
 - **Precondición**: `investiture_status = APPROVED`
-- **Efecto**: `investiture_status → INVESTIDO`, `investiture_date = investiture_date`, auto-sync `users_classes.investiture = true`
+- **Efecto**: `investiture_status → INVESTIDO`, `investiture_date = investiture_date` (auto-sync `users_classes` ya no aplica — tabla archivada)
 - **Registra en history**: action `SUBMITTED` (acción de investidura final)
 
 ### 4. Listar pendientes de validación
@@ -147,7 +147,7 @@ Los siguientes endpoints quedan fuera del MVP pero son necesarios para operació
 | **REJECTED no descarta** | `REJECTED` conserva el enrollment con estado + unlock para edición. El re-envío reutiliza el mismo enrollment (no se crea uno nuevo). Historia completa preservada. |
 | **submission_deadline es soft** | La fecha límite de envío emite advertencia ("tardío") pero no bloquea el envío. Las solicitudes tardías se marcan y requieren validación igualmente. |
 | **investiture_date sincronizada** | `enrollment.investiture_date` siempre iguala a `investiture_config.investiture_date` — investidura grupal por ceremonia, no por miembro individual. |
-| **Auto-sync users_classes** | Al alcanzar `INVESTIDO`, se sincroniza `users_classes.investiture = true` para compatibilidad con la app Flutter actual. TODO: migrar a lectura exclusiva de enrollments cuando la app toque el feature de clases. |
+| **users_classes (archivada)** | La tabla fue archivada como `users_classes_archive`. El histórico de investiduras se consulta directamente desde `enrollments` con investiture_status. |
 | **REINVESTITURE_REQUESTED fuera del MVP** | El enum ya existe en DB pero el flujo no se implementa en esta iteración. |
 
 ---
@@ -155,7 +155,6 @@ Los siguientes endpoints quedan fuera del MVP pero son necesarios para operació
 ## Dependencias e integración
 
 - **Módulo `EnrollmentsModule`**: El nuevo módulo depende de él para leer y actualizar `enrollments`.
-- **Módulo `UsersClassesModule`**: Para el auto-sync de `users_classes.investiture` al investir.
 - **`ClubRolesGuard` / `GlobalRolesGuard`**: Guards existentes — no requieren modificación.
 - **Prisma**: Todos los modelos y enums ya están definidos en `schema.prisma`.
 - **`ecclesiastical_years`**: Necesario para consultar `investiture_config` activa del período en curso.
@@ -166,7 +165,6 @@ Los siguientes endpoints quedan fuera del MVP pero son necesarios para operació
 
 | Riesgo | Probabilidad | Impacto | Mitigación |
 |---|---|---|---|
-| Auto-sync `users_classes` puede romper app Flutter si se usa el campo para lógica de clases | Media | Alto | Documentar el TODO y no tocar la lectura de `users_classes` en Flutter hasta migrar |
 | Un coordinator con scope incorrecto puede ver enrollments de otro campo local | Media | Alto | Filtrar siempre por `local_field_id` del actor en el endpoint `pending` |
 | Investidura doble (ejecutar endpoint dos veces sobre el mismo enrollment) | Baja | Medio | Validar precondición estricta: solo `APPROVED` puede transicionar a `INVESTIDO` |
 | `investiture_config` inexistente para un campo local al intentar investir | Alta | Medio | Manejo explícito: 404 descriptivo si no existe config activa para el campo/año |
@@ -179,8 +177,7 @@ Los siguientes endpoints quedan fuera del MVP pero son necesarios para operació
 2. Un admin o coordinador puede aprobar (`APPROVED`) o rechazar (`REJECTED`) un enrollment enviado; el rechazo incluye comentario obligatorio y desbloquea el enrollment.
 3. Un enrollment rechazado puede ser reenviado a validación por el director/consejero, pasando nuevamente a `SUBMITTED_FOR_VALIDATION`.
 4. Un admin o coordinador puede registrar la investidura de un enrollment `APPROVED`, llevándolo a `INVESTIDO` con fecha.
-5. Al investir, `users_classes.investiture` se sincroniza a `true` para el usuario correspondiente.
-6. Cada transición de estado genera un registro en `investiture_validation_history` con actor, acción, comentarios opcionales y timestamp.
+5. Cada transición de estado genera un registro en `investiture_validation_history` con actor, acción, comentarios opcionales y timestamp.
 7. El endpoint `pending` retorna solo enrollments del `local_field_id` del actor autenticado.
 8. Todos los endpoints respetan los guards de roles documentados; requests con roles incorrectos retornan 403.
 9. Una solicitud enviada después del `submission_deadline` se permite pero el enrollment queda marcado como tardío en la respuesta.

@@ -18,7 +18,7 @@ Task 2 (service — submitForValidation)
     │
 Task 3 (service — validateEnrollment)
     │
-Task 4 (service — markInvestido + sync users_classes)
+Task 4 (service — markInvestido)
     │
 Task 5 (service — getPending + getHistory)
     │
@@ -271,7 +271,7 @@ src/investiture/investiture.service.ts    ← agregar método
 
 ---
 
-## Task 4: Service — markInvestido + sync users_classes
+## Task 4: Service — markInvestido
 
 ### Archivos a modificar
 
@@ -319,56 +319,28 @@ src/investiture/investiture.service.ts    ← agregar método
        }
      })
 
-     // 6c. Auto-sync users_classes
-     // Verificar si existe unique constraint en (user_id, class_id) en el schema.
-     // Si existe, usar upsert; si no, usar findFirst + update/create manual.
-     await tx.users_classes.upsert({
-       where: {
-         user_id_class_id: {
-           user_id: enrollment.user_id,
-           class_id: enrollment.class_id,
-         }
-       },
-       update: {
-         investiture: true,
-         date_investiture: investiture_config.investiture_date,
-       },
-       create: {
-         user_id: enrollment.user_id,
-         class_id: enrollment.class_id,
-         investiture: true,
-         date_investiture: investiture_config.investiture_date,
-         active: true,
-       }
-     })
+     // 6c. [ARCHIVADO] Auto-sync users_classes ya no aplica — tabla removida.
+     // El histórico se consulta directamente desde enrollments.
 
      return updated
    })
    ```
 
-   **IMPORTANTE sobre upsert en users_classes**: verificar en `schema.prisma` si existe un unique constraint nombrado `user_id_class_id` en la tabla `users_classes`. Si el constraint tiene otro nombre, usar ese nombre. Si no existe unique constraint, reemplazar el upsert por:
-   ```typescript
-   const existing = await tx.users_classes.findFirst({ where: { user_id, class_id } })
-   if (existing) {
-     await tx.users_classes.update({ where: { id: existing.id }, data: { investiture: true, ... } })
-   } else {
-     await tx.users_classes.create({ data: { user_id, class_id, investiture: true, ... } })
+   **NOTA HISTÓRICA**: El sincronismo con `users_classes` fue removido. La tabla se archivó como `users_classes_archive`. No es necesario hacer upsert ni sync manual.
    }
    ```
 
-7. Retornar: `{ enrollment_id, investiture_status: 'INVESTIDO', investiture_date, users_classes_synced: true }`
+7. Retornar: `{ enrollment_id, investiture_status: 'INVESTIDO', investiture_date }`
 
 ### Criterios de aceptación
 
 - [ ] Caso feliz: enrollment `APPROVED` → status cambia a `INVESTIDO`, `investiture_date` poblado con la fecha de `investiture_config`
 - [ ] `investiture_date` en el enrollment coincide con `investiture_config.investiture_date` (no acepta fecha del body)
-- [ ] Auto-sync `users_classes`: si existe registro → actualiza `investiture = true`
-- [ ] Auto-sync `users_classes`: si NO existe registro → crea registro con `investiture = true`
 - [ ] Error: enrollment ya en `INVESTIDO` → `ConflictException`
 - [ ] Error: enrollment en estado distinto de `APPROVED` → `BadRequestException`
 - [ ] Error: sin `investiture_config` activo → `NotFoundException`
 - [ ] Registro creado en `investiture_validation_history`
-- [ ] La transacción es atómica — si falla el sync de users_classes, el enrollment no cambia de estado
+- [ ] La transacción es atómica
 
 ---
 
@@ -664,13 +636,11 @@ Usar como referencia: `src/admin/admin-users.service.spec.ts` y `src/insurance/i
 4. Error: enrollment en estado `IN_PROGRESS` → `ConflictException`
 5. Error: enrollment en estado `APPROVED` → `ConflictException`
 
-**`markInvestido`** (6 casos):
+**`markInvestido`** (4 casos):
 1. Caso feliz: `APPROVED` → `INVESTIDO`, `investiture_date` igual a `investiture_config.investiture_date`
-2. Caso feliz: auto-sync `users_classes` — si no existe registro, lo crea con `investiture = true`
-3. Caso feliz: auto-sync `users_classes` — si existe registro, lo actualiza con `investiture = true`
-4. Error: ya está en `INVESTIDO` → `ConflictException`
-5. Error: estado `SUBMITTED_FOR_VALIDATION` → `BadRequestException`
-6. Error: `investiture_config` no encontrado → `NotFoundException`
+2. Error: ya está en `INVESTIDO` → `ConflictException`
+3. Error: estado `SUBMITTED_FOR_VALIDATION` → `BadRequestException`
+4. Error: `investiture_config` no encontrado → `NotFoundException`
 
 **`getPending`** (3 casos):
 1. Retorna solo enrollments `SUBMITTED_FOR_VALIDATION` y `active = true`
@@ -688,7 +658,6 @@ Usar como referencia: `src/admin/admin-users.service.spec.ts` y `src/insurance/i
 - [ ] Los mocks de Prisma están correctamente tipados — no se usa `any` para los mocks
 - [ ] Cada test verifica tanto el efecto en el enrollment como el registro en `investiture_validation_history`
 - [ ] Los tests de error verifican el mensaje de la excepción, no solo el tipo
-- [ ] El auto-sync de `users_classes` tiene tests separados para create y update
 
 ---
 
@@ -698,12 +667,9 @@ Usar como referencia: `src/admin/admin-users.service.spec.ts` y `src/insurance/i
 
 Verificar cómo otros controllers del proyecto extraen el ID del usuario autenticado. Buscar en `src/users/users.controller.ts` o `src/clubs/clubs.controller.ts` el patrón `@Request() req` y cómo se accede a `req.user`. El campo exacto puede ser `req.user.sub` o `req.user.id` — no asumir, verificar.
 
-### Modelo users_classes en Prisma
+### Nota histórica: Modelo users_classes en Prisma
 
-Antes de implementar Task 4, verificar en `prisma/schema.prisma`:
-- El nombre exacto del modelo (`users_classes` o `usersClasses`)
-- Si existe un unique index nombrado en `(user_id, class_id)` — necesario para el upsert
-- Los campos `investiture` (Boolean) y `date_investiture` (DateTime?)
+La tabla `users_classes` fue archivada como `users_classes_archive`. Ya no es necesario verificar el schema ni implementar upserts relacionados con esa tabla.
 
 ### investiture_action_enum sin valor INVESTIDO
 
