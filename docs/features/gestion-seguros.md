@@ -1,25 +1,75 @@
 # Gestion de Seguros (Insurance)
-Estado: EN BACKEND
+
+**Estado**: IMPLEMENTADO
+
+## Descripcion de dominio
+
+El seguro institucional es un requisito administrativo para la participacion de miembros en actividades de riesgo dentro de los clubes de Conquistadores, Aventureros y Guias Mayores. Los clubes operan en contextos donde los miembros (muchos de ellos menores de edad) realizan actividades al aire libre que implican riesgo: campamentos, caminatas, escalada, actividades acuaticas, orden cerrado, y especialmente camporees competitivos.
+
+El sistema contempla tres tipos de seguro segun el enum `insurance_type_enum`: GENERAL_ACTIVITIES (cobertura general para reuniones y actividades regulares), CAMPOREE (cobertura especifica para participacion en camporees), y HIGH_RISK (cobertura para actividades de alto riesgo como rapel, escalada, etc.). Cada seguro documenta la poliza, aseguradora, vigencia, monto de cobertura y puede incluir evidencia documental adjunta (archivo de poliza escaneado).
+
+La vinculacion de seguros con camporees es directa: la tabla `camporee_members` referencia `member_insurances`, lo que permite validar que un miembro tiene cobertura vigente al momento de inscribirse en un evento. El modulo forma parte de la dimension administrativa de la trayectoria del miembro dentro de la institucion.
 
 ## Que existe (verificado contra codigo)
-- **Backend**: Ya existe `InsuranceModule` con endpoints runtime para listado por sección, detalle por miembro, creación multipart y actualización multipart. La tabla `member_insurances` existe en `schema.prisma` con enum `insurance_type_enum` (GENERAL_ACTIVITIES, CAMPOREE, HIGH_RISK) y campos de evidencia/auditoría.
-- **Admin**: Placeholder — modulo planificado. No consume endpoints.
-- **App**: 3 screens (InsuranceView, InsuranceDetailView, InsuranceFormSheet). Consume 4 endpoints ahora disponibles en backend:
-  - `GET /api/v1/clubs/:clubId/sections/:sectionId/members/insurance`
-  - `GET /api/v1/users/:memberId/insurance`
-  - `POST /api/v1/users/:memberId/insurance`
-  - `PATCH /api/v1/insurance/:insuranceId`
-- **DB**: `member_insurances` con relación a `users`, `camporee_members` y auditoría (`created_by_id`, `modified_by_id`).
 
-## Que define el canon
-- El seguro institucional es parte de la trayectoria del miembro (`docs/canon/dominio-sacdia.md`): documenta la cobertura de seguros vinculada a la participacion institucional
-- Los seguros forman parte de la dimension administrativa de la trayectoria
+### Backend (InsuranceModule)
+- **Controller**: `src/insurance/insurance.controller.ts`
+- **Service**: `src/insurance/insurance.service.ts`
+- **Module**: `src/insurance/insurance.module.ts`
+- **DTOs**: `src/insurance/dto/`
+- **Guards**: JwtAuthGuard (verificado en ENDPOINTS-LIVE-REFERENCE)
+- **4 endpoints**:
+  - `GET /api/v1/clubs/:clubId/sections/:sectionId/members/insurance` — Listar miembros de una seccion con su seguro activo mas reciente
+  - `GET /api/v1/users/:memberId/insurance` — Obtener detalle del seguro activo del miembro
+  - `POST /api/v1/users/:memberId/insurance` — Crear seguro con evidencia opcional (multipart, campo `evidence`)
+  - `PATCH /api/v1/insurance/:insuranceId` — Actualizar seguro existente con evidencia opcional (multipart)
 
-## Gap
-- App tiene screens completas con datasource pero los endpoints que consume no existen en el backend — pendiente de implementacion
-- El módulo backend vive en `src/insurance/` y usa evidencia multipart opcional en el campo `evidence`.
-- La evidencia se guarda en R2 con el bucket `INSURANCE_EVIDENCE`.
-- El contrato móvil espera `evidence_file_url` y `evidence_file_name`, ya reflejados en backend.
+### Admin
+- **Placeholder** — Modulo planificado. No consume endpoints. Sin funcionalidad real.
 
-## Prioridad
-- Media — canon reconocido, backend pendiente de implementacion
+### App Movil
+- **3 screens**: InsuranceView, InsuranceDetailView, InsuranceFormSheet
+- Consume los 4 endpoints del backend
+- Soporta carga de evidencia documental
+- Espera campos `evidence_file_url` y `evidence_file_name` en las respuestas
+
+### Base de datos
+- `member_insurances` — Seguros por miembro con campos:
+  - `insurance_id` (PK INT), `user_id` (FK UUID), `insurance_type` (ENUM), `policy_number`, `provider`, `start_date`, `end_date`, `coverage_amount` (DECIMAL), `active`, `evidence_file_url`, `evidence_file_name`
+  - Auditoria: `created_by_id` (FK UUID), `modified_by_id` (FK UUID)
+- Relacion con `camporee_members` via `insurance_id`
+
+### Storage
+- Evidencia de seguros se almacena en Cloudflare R2, bucket `INSURANCE_EVIDENCE`
+
+## Requisitos funcionales
+
+1. Debe ser posible crear un seguro para cualquier miembro activo de una seccion de club
+2. El seguro debe registrar: tipo (GENERAL_ACTIVITIES, CAMPOREE, HIGH_RISK), numero de poliza, aseguradora, fechas de vigencia, monto de cobertura
+3. Debe ser posible adjuntar evidencia documental (PDF, imagen) al seguro via upload multipart
+4. El listado de seguros por seccion debe mostrar cada miembro con su seguro activo mas reciente
+5. Los seguros deben poder actualizarse (renovar vigencia, cambiar aseguradora, actualizar evidencia)
+6. La evidencia se almacena en Cloudflare R2 y se expone como URL firmada
+7. El modulo debe registrar quien creo y quien modifico cada seguro (auditoria)
+8. El panel admin debe permitir gestion de seguros por seccion/club (actualmente placeholder)
+
+## Decisiones de diseno
+
+- **Multipart para evidencia**: La creacion y actualizacion de seguros aceptan upload multipart con campo `evidence`, no requiere un endpoint separado para archivos
+- **Seguro activo mas reciente**: El listado por seccion resuelve el seguro activo vigente de cada miembro, no el historico completo
+- **Tres tipos de seguro**: El enum `insurance_type_enum` distingue cobertura por contexto de uso, no por nivel de proteccion
+- **Auditoria integrada**: Los campos `created_by_id` y `modified_by_id` registran el actor que gestiona el seguro, que puede ser diferente del miembro asegurado (directores gestionan seguros de sus miembros)
+- **Almacenamiento R2**: La evidencia se guarda en Cloudflare R2 siguiendo el mismo patron que fotos de perfil y evidencias de honores
+
+## Gaps y pendientes
+
+- **Admin es placeholder**: Backend y app completos pero el panel admin no tiene UI funcional
+- **Sin validacion de vigencia en camporees**: Aunque el modelo vincula seguros con `camporee_members`, no esta verificado que el backend valide vigencia al momento del registro en camporee
+- **Sin notificaciones de vencimiento**: No hay mecanismo para alertar cuando un seguro esta por vencer
+- **Sin historial**: Solo se muestra el seguro activo mas reciente; no hay endpoint para consultar seguros historicos de un miembro
+- **REALITY-MATRIX desactualizada**: La Reality Matrix marcaba seguros como "SIN CANON" y sin backend module, pero el modulo `src/insurance/` existe con 4 endpoints funcionales documentados en ENDPOINTS-LIVE-REFERENCE
+
+## Prioridad y siguiente accion
+
+- **Prioridad**: Media — backend y app funcionales; admin es el gap principal
+- **Siguiente accion**: Implementar UI de seguros en sacdia-admin. Actualizar REALITY-MATRIX.md para reflejar que el InsuranceModule existe. Considerar agregar validacion de seguro vigente al endpoint de registro en camporees.

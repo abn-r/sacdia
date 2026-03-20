@@ -101,3 +101,57 @@ Fuente: Reality Matrix + Canon verification
 | `PATCH /insurance/:insuranceId` | Update insurance sin backend | Idem |
 
 **Nota**: Ninguno de estos endpoints estaba en ENDPOINTS-LIVE-REFERENCE.md, por lo que no se removio nada de ese documento. El gap es entre lo que los clientes consumen y lo que el backend expone. Todos marcados como pendientes de implementacion en sus respectivos archivos de features.
+
+---
+
+## Gaps de implementacion — Wave 2 (2026-03-20)
+
+Descubiertos durante auditoría Wave 2. Fuente: docs de features bajo `docs/features/` y `docs/canon/completion-matrix.md` (OPEN).
+
+### GAP-W2-01: Validacion de Investiduras — FANTASMA
+
+| Item | Detalle |
+|---|---|
+| Infraestructura DB | Completa: `investiture_validation_history`, `investiture_config`, 3 enums, campos de investidura en `enrollments` |
+| Runtime backend | CERO: no hay modulo, no hay controller, no hay service, no hay endpoints |
+| Runtime frontend | CERO: no hay pages en admin, no hay screens en app |
+| Severidad | Gap funcional mas critico del dominio formativo |
+| Accion requerida | Ciclo SDD completo (explore → propose → spec → design → tasks → apply) |
+| Descubierto | Wave 2 (2026-03-20) |
+
+### GAP-W2-02: Actividades — hardcoded clubId=1
+
+| Item | Detalle |
+|---|---|
+| Problema | El controller/service de actividades tiene `clubId=1` hardcodeado en vez de usar el contexto real del club |
+| Tipo | Bug directo |
+| Accion requerida | Fix directo: reemplazar hardcode por club context del request |
+| Descubierto | Wave 2 (2026-03-20) |
+
+### GAP-W2-03: Finanzas — campos de auditoria faltantes
+
+| Item | Detalle |
+|---|---|
+| Problema | Los registros financieros carecen de campos `created_by`/`modified_by` que otros modulos si tienen |
+| Tipo | Gap de consistencia / auditoria |
+| Accion requerida | Migracion DB para agregar campos + actualizacion del service para poblarlos |
+| Descubierto | Wave 2 (2026-03-20) |
+
+### GAP-W2-04: Inventario — typo en PK de DB
+
+| Item | Detalle |
+|---|---|
+| Problema | La tabla `inventory_categories` tiene un typo en su columna PK: `inventory_categoty_id` en vez de `inventory_category_id` |
+| Impacto | Prisma lo mapea correctamente, pero el nombre subyacente en la columna es incorrecto |
+| Accion requerida | Migracion de rename de columna |
+| Descubierto | Wave 2 (2026-03-20) |
+
+### GAP-W2-05: Certificaciones Guias Mayores — cero UI cliente
+
+| Item | Detalle |
+|---|---|
+| Backend | Completamente implementado: 7 endpoints verificados y funcionales |
+| Admin panel | Read-only como maximo |
+| App movil | CERO screens |
+| Accion requerida | Trabajo frontend. Prioridad depende de necesidades de negocio |
+| Descubierto | Wave 2 (2026-03-20) |

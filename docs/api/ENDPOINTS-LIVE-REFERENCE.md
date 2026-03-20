@@ -1,6 +1,6 @@
 # ENDPOINTS LIVE REFERENCE (Runtime Truth)
 
-<!-- Verificado contra código 2026-03-14. No se encontraron endpoints FANTASMA en este documento (los 17 FANTASMA detectados en Reality Matrix son consumidos por admin/app pero no estaban listados aquí). Este documento cubre 180 de 198 endpoints implementados; los 18 faltantes están documentados en docs/audit/REALITY-MATRIX.md como SIN DOCS. -->
+<!-- Verificado contra código 2026-03-20. Documento completo: cubre todos los endpoints implementados en controllers. -->
 
 > [!IMPORTANT]
 > Documento canónico para agentes (App + Panel Admin).
@@ -8,8 +8,8 @@
 > Base URL: `/api/v1`
 
 **Estado**: ACTIVE
-**Generado**: 2026-03-10T00:00:00.000Z (sincronización manual RBAC sensible)
-**Total endpoints**: 180 (de 198 implementados; ver Reality Matrix para gap de 18 endpoints sin documentar)
+**Generado**: 2026-03-20T00:00:00.000Z (sincronización completa contra controllers)
+**Total endpoints**: 215
 
 ## Lectura Rápida
 
@@ -80,10 +80,13 @@
 | GET | `/api/v1/users/:userId/emergency-contacts/:contactId` | JWT | - | Obtener un contacto específico | `src/emergency-contacts/emergency-contacts.controller.ts` |
 | PATCH | `/api/v1/users/:userId/emergency-contacts/:contactId` | JWT | - | Actualizar contacto de emergencia | `src/emergency-contacts/emergency-contacts.controller.ts` |
 | GET | `/api/v1/users/:userId/honors` | JWT | - | Obtener honores del usuario | `src/honors/honors.controller.ts` |
+| POST | `/api/v1/users/:userId/honors` | JWT | - | Registrar honor con datos iniciales (o reactivar) | `src/honors/honors.controller.ts` |
+| POST | `/api/v1/users/:userId/honors/bulk` | JWT | - | Registrar honores de usuario de forma masiva | `src/honors/honors.controller.ts` |
+| GET | `/api/v1/users/:userId/honors/stats` | JWT | - | Obtener estadísticas de honores del usuario | `src/honors/honors.controller.ts` |
 | DELETE | `/api/v1/users/:userId/honors/:honorId` | JWT | - | Abandonar honor | `src/honors/honors.controller.ts` |
 | PATCH | `/api/v1/users/:userId/honors/:honorId` | JWT | - | Actualizar progreso de honor | `src/honors/honors.controller.ts` |
 | POST | `/api/v1/users/:userId/honors/:honorId` | JWT | - | Iniciar un honor | `src/honors/honors.controller.ts` |
-| GET | `/api/v1/users/:userId/honors/stats` | JWT | - | Obtener estadísticas de honores del usuario | `src/honors/honors.controller.ts` |
+| POST | `/api/v1/users/:userId/honors/:honorId/files` | JWT | - | Subir evidencias del honor (multipart: certificate, document, images) | `src/honors/honors.controller.ts` |
 | DELETE | `/api/v1/users/:userId/legal-representative` | JWT | - | Eliminar representante legal | `src/legal-representatives/legal-representatives.controller.ts` |
 | GET | `/api/v1/users/:userId/legal-representative` | JWT | - | Obtener representante legal del usuario | `src/legal-representatives/legal-representatives.controller.ts` |
 | PATCH | `/api/v1/users/:userId/legal-representative` | JWT | - | Actualizar representante legal | `src/legal-representatives/legal-representatives.controller.ts` |
@@ -155,6 +158,7 @@
 | POST | `/api/v1/admin/allergies` | JWT | super_admin, admin | Create allergy | `src/admin/admin-reference.controller.ts` |
 | DELETE | `/api/v1/admin/allergies/:allergyId` | JWT | super_admin, admin | Soft delete allergy | `src/admin/admin-reference.controller.ts` |
 | PATCH | `/api/v1/admin/allergies/:allergyId` | JWT | super_admin, admin | Update allergy | `src/admin/admin-reference.controller.ts` |
+| GET | `/api/v1/admin/club-ideals` | JWT | super_admin, admin | List club ideals for admin | `src/admin/admin-reference.controller.ts` |
 | GET | `/api/v1/admin/churches` | JWT | super_admin, admin | List churches for admin management | `src/admin/admin-geography.controller.ts` |
 | POST | `/api/v1/admin/churches` | JWT | super_admin, admin | Create church | `src/admin/admin-geography.controller.ts` |
 | DELETE | `/api/v1/admin/churches/:churchId` | JWT | super_admin, admin | Soft delete church | `src/admin/admin-geography.controller.ts` |
@@ -175,10 +179,19 @@
 | POST | `/api/v1/admin/ecclesiastical-years` | JWT | super_admin, admin | Create ecclesiastical year | `src/admin/admin-reference.controller.ts` |
 | DELETE | `/api/v1/admin/ecclesiastical-years/:yearId` | JWT | super_admin, admin | Soft delete ecclesiastical year | `src/admin/admin-reference.controller.ts` |
 | PATCH | `/api/v1/admin/ecclesiastical-years/:yearId` | JWT | super_admin, admin | Update ecclesiastical year | `src/admin/admin-reference.controller.ts` |
+| GET | `/api/v1/admin/honor-categories` | JWT | super_admin, admin | List honor categories for admin management | `src/admin/admin-reference.controller.ts` |
+| POST | `/api/v1/admin/honor-categories` | JWT | super_admin, admin | Create honor category | `src/admin/admin-reference.controller.ts` |
+| GET | `/api/v1/admin/honor-categories/:id` | JWT | super_admin, admin | Get honor category by ID | `src/admin/admin-reference.controller.ts` |
+| DELETE | `/api/v1/admin/honor-categories/:id` | JWT | super_admin, admin | Soft delete honor category | `src/admin/admin-reference.controller.ts` |
+| PATCH | `/api/v1/admin/honor-categories/:id` | JWT | super_admin, admin | Update honor category | `src/admin/admin-reference.controller.ts` |
 | GET | `/api/v1/admin/local-fields` | JWT | super_admin, admin | List local fields for admin management | `src/admin/admin-geography.controller.ts` |
 | POST | `/api/v1/admin/local-fields` | JWT | super_admin, admin | Create local field | `src/admin/admin-geography.controller.ts` |
 | DELETE | `/api/v1/admin/local-fields/:localFieldId` | JWT | super_admin, admin | Soft delete local field | `src/admin/admin-geography.controller.ts` |
 | PATCH | `/api/v1/admin/local-fields/:localFieldId` | JWT | super_admin, admin | Update local field | `src/admin/admin-geography.controller.ts` |
+| GET | `/api/v1/admin/medicines` | JWT | super_admin, admin | List medicines for admin management | `src/admin/admin-reference.controller.ts` |
+| POST | `/api/v1/admin/medicines` | JWT | super_admin, admin | Create medicine | `src/admin/admin-reference.controller.ts` |
+| DELETE | `/api/v1/admin/medicines/:medicineId` | JWT | super_admin, admin | Soft delete medicine | `src/admin/admin-reference.controller.ts` |
+| PATCH | `/api/v1/admin/medicines/:medicineId` | JWT | super_admin, admin | Update medicine | `src/admin/admin-reference.controller.ts` |
 | GET | `/api/v1/admin/rbac/permissions` | JWT | super_admin, admin | Listar todos los permisos | `src/rbac/rbac.controller.ts` |
 | POST | `/api/v1/admin/rbac/permissions` | JWT | super_admin | Crear un nuevo permiso | `src/rbac/rbac.controller.ts` |
 | DELETE | `/api/v1/admin/rbac/permissions/:id` | JWT | super_admin | Desactivar un permiso | `src/rbac/rbac.controller.ts` |
@@ -232,6 +245,7 @@
 
 | Method | Path | Auth | Roles | Description | Source |
 |---|---|---|---|---|---|
+| GET | `/api/v1/catalogs/activity-types` | Public | - | Obtener tipos de actividad | `src/catalogs/catalogs.controller.ts` |
 | GET | `/api/v1/catalogs/allergies` | Public | - | Obtener catálogo de alergias | `src/catalogs/catalogs.controller.ts` |
 | GET | `/api/v1/catalogs/churches` | Public | - | Obtener iglesias | `src/catalogs/catalogs.controller.ts` |
 | GET | `/api/v1/catalogs/club-ideals` | Public | - | Obtener ideales de club | `src/catalogs/catalogs.controller.ts` |
@@ -291,7 +305,6 @@
 | GET | `/api/v1/clubs/:clubId/sections/:sectionId` | JWT | - | Obtener sección por ID | `src/clubs/clubs.controller.ts` |
 | POST | `/api/v1/clubs/:clubId/sections` | JWT | director, subdirector | Crear sección de club (requiere director o subdirector) | `src/clubs/clubs.controller.ts` |
 | PATCH | `/api/v1/clubs/:clubId/sections/:sectionId` | JWT | director, subdirector, secretary | Actualizar sección (requiere director, subdirector o secretario) | `src/clubs/clubs.controller.ts` |
-| DELETE | `/api/v1/clubs/:clubId/sections/:sectionId` | JWT | director | Eliminar sección | `src/clubs/clubs.controller.ts` |
 | GET | `/api/v1/clubs/:clubId/sections/:sectionId/members` | JWT | - | Listar miembros de la sección | `src/clubs/clubs.controller.ts` |
 | POST | `/api/v1/clubs/:clubId/sections/:sectionId/roles` | JWT | director, subdirector, secretary | Asignar rol a un miembro (requiere director, subdirector o secretario) | `src/clubs/clubs.controller.ts` |
 
@@ -301,7 +314,7 @@
 |---|---|---|---|---|---|
 | GET | `/api/v1/fcm-tokens` | JWT | - | Get current user FCM tokens | `src/notifications/notifications.controller.ts` |
 | POST | `/api/v1/fcm-tokens` | JWT | - | Register FCM token | `src/notifications/notifications.controller.ts` |
-| DELETE | `/api/v1/fcm-tokens/:token` | JWT | - | Unregister FCM token | `src/notifications/notifications.controller.ts` |
+| DELETE | `/api/v1/fcm-tokens/:id` | JWT | - | Unregister FCM token by record ID | `src/notifications/notifications.controller.ts` |
 | GET | `/api/v1/fcm-tokens/user/:userId` | JWT | - | Get FCM tokens by user ID (owner/admin only) | `src/notifications/notifications.controller.ts` |
 
 ## finances
@@ -325,6 +338,15 @@
 | PATCH | `/api/v1/folders/users/:userId/folders/:folderId/modules/:moduleId/sections/:sectionId` | JWT | - | Actualizar progreso de una sección | `src/folders/folders.controller.ts` |
 | GET | `/api/v1/folders/users/:userId/folders/:folderId/progress` | JWT | - | Ver progreso detallado de una carpeta | `src/folders/folders.controller.ts` |
 
+## evidence-folder
+
+| Method | Path | Auth | Roles | Description | Source |
+|---|---|---|---|---|---|
+| GET | `/api/v1/club-sections/:sectionId/evidence-folder` | JWT | - | Get evidence folder for club section | `src/folders/evidence-folder.controller.ts` |
+| POST | `/api/v1/club-sections/:sectionId/evidence-folder/sections/:efSectionId/submit` | JWT | - | Submit evidence folder section | `src/folders/evidence-folder.controller.ts` |
+| POST | `/api/v1/club-sections/:sectionId/evidence-folder/sections/:efSectionId/files` | JWT | - | Upload evidence file (multipart: file) | `src/folders/evidence-folder.controller.ts` |
+| DELETE | `/api/v1/club-sections/:sectionId/evidence-folder/sections/:efSectionId/files/:fileId` | JWT | - | Delete evidence file | `src/folders/evidence-folder.controller.ts` |
+
 ## health
 
 | Method | Path | Auth | Roles | Description | Source |
@@ -338,6 +360,7 @@
 | GET | `/api/v1/honors` | Public | - | Listar honores | `src/honors/honors.controller.ts` |
 | GET | `/api/v1/honors/:honorId` | Public | - | Obtener honor por ID | `src/honors/honors.controller.ts` |
 | GET | `/api/v1/honors/categories` | Public | - | Listar categorías de honores | `src/honors/honors.controller.ts` |
+| GET | `/api/v1/honors/grouped-by-category` | Public | - | Listar honores agrupados por categoría | `src/honors/honors.controller.ts` |
 
 ## inventory
 
@@ -355,7 +378,7 @@
 | Method | Path | Auth | Roles | Description | Source |
 |---|---|---|---|---|---|
 | POST | `/api/v1/notifications/broadcast` | JWT | super_admin, admin | Send notification to all users | `src/notifications/notifications.controller.ts` |
-| POST | `/api/v1/notifications/club/:sectionId` | JWT | super_admin, admin | Send notification to club section members | `src/notifications/notifications.controller.ts` |
+| POST | `/api/v1/notifications/club/:instanceType/:instanceId` | JWT | super_admin, admin | Send notification to club members | `src/notifications/notifications.controller.ts` |
 | POST | `/api/v1/notifications/send` | JWT | - | Send notification to specific user | `src/notifications/notifications.controller.ts` |
 
 ## root

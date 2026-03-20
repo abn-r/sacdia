@@ -1,7 +1,8 @@
-# Completion Matrix - Canon Factory Wave 0
+# Completion Matrix - Canon Factory Wave 2
 
-**Estado**: ACTIVE  
-**Base de autoridad**: `docs/canon/source-of-truth.md`  
+**Estado**: ACTIVE
+**Última actualización**: 2026-03-20 (Wave 2)
+**Base de autoridad**: `docs/canon/source-of-truth.md`
 **Propósito**: mapear cobertura documental y runtime sin redefinir autoridad.
 
 > [!IMPORTANT]
@@ -20,20 +21,20 @@
 
 ---
 
-<!-- Verificado contra Reality Matrix 2026-03-14 -->
+<!-- Verificado contra Reality Matrix 2026-03-14; actualizado Wave 2 2026-03-20 -->
 
 ## 2. Resumen ejecutivo
 
-| Área | Resultado | Verificación 2026-03-14 |
+| Área | Resultado | Verificación 2026-03-20 (Wave 2) |
 |---|---|---|
 | Gobernanza y precedencia | `COMPLETE` | Sin cambios |
 | Canon de producto | `COMPLETE` | Sin cambios |
-| Canon técnico base | `PARTIAL` | Confirmado: storage drift corregido (Supabase Storage → Cloudflare R2) |
+| Canon técnico base | `PARTIAL` | Sin cambios respecto a Wave 0 |
 | Estándares operativos | `COMPLETE` | Sin cambios |
-| Runtime API | `COMPLETE` | 180 documentados de 198 implementados; 17 FANTASMA removidos |
+| Runtime API | `COMPLETE` | 215 endpoints documentados (+19 nuevos, +2 corregidos, -1 fantasma removido) |
 | Racionales/decisiones API | `PARTIAL` | Sin cambios |
-| Modelo de datos | `PARTIAL` | Confirmado: 72 modelos en schema, 24 ALINEADO, 41 SIN CANON |
-| Features por dominio | `PARTIAL` | Confirmado: 8 ALINEADO, 5 PARCIAL, 1 FANTASMA, 2 SIN CANON |
+| Modelo de datos | `COMPLETE` | ~72 modelos + 8 enums documentados en SCHEMA-REFERENCE (era ~25) |
+| Features por dominio | `PARTIAL` | 16 dominios con spec completa; 9 COMPLETE (código IMPLEMENTADO), 5 PARTIAL (código PARCIAL), 1 NO CANON, 1 FANTASMA. Ningún dominio con set requirements+design+tasks |
 
 ---
 
@@ -46,84 +47,97 @@
 | Arquitectura canónica | `arquitectura-sacdia.md`, `decisiones-clave.md` | Ambos existen y están `ACTIVE` | `COMPLETE` | Cobertura de arquitectura y decisiones duraderas |
 | Baseline técnica global | `tech.md`, `structure.md`, `coding-standards.md`, `data-guidelines.md`, `agents.md` | Todos existen; `structure.md` está `HISTORICAL` | `PARTIAL` | La baseline existe, pero la guía de estructura quedó degradada por estatus/obsolescencia |
 | Estándares de ingeniería | `coding-standards.md`, `data-guidelines.md`, `agents.md` | Los tres existen y cubren normas operativas | `COMPLETE` | Sirven como baseline operativa subordinada |
-| Contrato runtime API | `ENDPOINTS-LIVE-REFERENCE.md` | Existe, base `/api/v1`, 180 endpoints, 18 módulos | `COMPLETE` | Es la fuente vigente para App/Admin |
+| Contrato runtime API | `ENDPOINTS-LIVE-REFERENCE.md` | Existe, base `/api/v1`, 215 endpoints, 22+ módulos | `COMPLETE` | Actualizado Wave 2: +19 endpoints, +2 correcciones, -1 fantasma |
 | Decisiones API estructurales | `ARCHITECTURE-DECISIONS.md` | Existe, pero su alcance es selectivo (naming, `users_pr`, legal reps, año eclesiástico, roles/RBAC) | `PARTIAL` | Complementa, no reemplaza, al Live Reference |
-| Modelo de datos estructural | `schema.prisma`, `docs/03-DATABASE/README.md`, `SCHEMA-REFERENCE.md` | Los tres existen; `README` declara `schema.prisma` como fuente de verdad, pero `SCHEMA-REFERENCE.md` deriva en varios puntos | `PARTIAL` | `schema.prisma` manda; `SCHEMA-REFERENCE.md` quedó desalineado como referencia humana |
+| Modelo de datos estructural | `schema.prisma`, `docs/03-DATABASE/README.md`, `SCHEMA-REFERENCE.md` | Los tres existen; `SCHEMA-REFERENCE.md` actualizado con ~72 modelos + 8 enums | `COMPLETE` | Actualizado Wave 2: ~48 modelos nuevos documentados. `schema.prisma` sigue mandando |
 
 ---
 
 ## 4. Matriz de cobertura por feature documental
 
-<!-- Verificado contra Reality Matrix 2026-03-14. Columna "Código" refleja estado real de implementación. -->
+<!-- Verificado contra Reality Matrix 2026-03-14. Actualizado Wave 2 2026-03-20. Columna "Código" refleja estado real de implementación. -->
 
-| Dominio | Requirements | Design | Tasks | Walkthrough(s) | Estado doc | Código (Reality Matrix) | Observación |
-|---|---|---|---|---|---|---|---|
-| `auth` | — | — | — | ✅ | `PARTIAL` | ALINEADO | Backend+admin+app implementados |
-| `gestion-clubs` | — | ✅ | — | ✅ | `PARTIAL` | ALINEADO | Backend+admin+app implementados |
-| `clases-progresivas` | — | ✅ | — | — | `PARTIAL` | ALINEADO | Backend+admin(read-only)+app implementados |
-| `honores` | — | ✅ | — | ✅ | `PARTIAL` | ALINEADO | Backend+admin+app implementados |
-| `catalogos` | — | ✅ | — | ✅ | `PARTIAL` | ALINEADO | Backend+admin(13 pages)+app implementados |
-| `communications` | — | — | — | ✅ | `PARTIAL` | ALINEADO | Backend+admin+FCM tokens |
-| `carpetas-evidencias` | — | — | — | — | `MISSING` | ALINEADO | Backend+admin(read-only)+app implementados |
-| `rbac` | — | — | — | — | `MISSING` | ALINEADO | Backend+admin(3 pages) implementados |
-| `actividades` | — | ✅ | — | ✅ | `PARTIAL` | PARCIAL | Backend+app completos, admin placeholder |
-| `finanzas` | — | ✅ | — | ✅ | `PARTIAL` | PARCIAL | Backend+app completos, admin placeholder |
-| `camporees` | — | — | — | — | `MISSING` | PARCIAL | Backend+admin(read-only), app sin screens |
-| `certificaciones-guias-mayores` | ✅ | — | — | ✅ | `PARTIAL` | PARCIAL | Backend+admin(read-only), app sin screens |
-| `inventario` | — | — | — | ✅ | `PARTIAL` | PARCIAL | Backend+app completos, admin placeholder |
-| `gestion-seguros` | ✅ | — | — | — | `PARTIAL` | SIN CANON | App con screens, sin backend module dedicado |
-| `infrastructure` | — | — | — | ✅ | `PARTIAL` | SIN CANON | Backend health/logging, no cubierto por canon |
-| `validacion-investiduras` | ✅ | — | — | — | `PARTIAL` | FANTASMA | Tablas existen, sin módulo/endpoints/screens |
+| Dominio | Spec completa | Requirements | Design | Tasks | Walkthrough(s) | Estado doc | Código (Reality Matrix) | Observación |
+|---|---|---|---|---|---|---|---|---|
+| `auth` | ✅ | — | — | — | ✅ | `COMPLETE` | IMPLEMENTADO | Spec Wave 2: auth.md (IMPLEMENTADO) |
+| `gestion-clubs` | ✅ | — | ✅ | — | ✅ | `COMPLETE` | IMPLEMENTADO | Spec Wave 2: gestion-clubs.md (IMPLEMENTADO) |
+| `clases-progresivas` | ✅ | — | ✅ | — | — | `COMPLETE` | IMPLEMENTADO | Spec Wave 2: clases-progresivas.md (IMPLEMENTADO, 82 líneas) |
+| `honores` | ✅ | — | ✅ | — | ✅ | `COMPLETE` | IMPLEMENTADO | Spec Wave 2: honores.md (IMPLEMENTADO, 80 líneas) |
+| `catalogos` | ✅ | — | ✅ | — | ✅ | `COMPLETE` | IMPLEMENTADO | Spec Wave 2: catalogos.md (IMPLEMENTADO) |
+| `communications` | ✅ | — | — | — | ✅ | `COMPLETE` | IMPLEMENTADO | Spec Wave 2: communications.md (IMPLEMENTADO) |
+| `carpetas-evidencias` | ✅ | — | — | — | — | `COMPLETE` | IMPLEMENTADO | Spec Wave 2: carpetas-evidencias.md (IMPLEMENTADO, 89 líneas). Era MISSING |
+| `rbac` | ✅ | — | — | — | — | `COMPLETE` | IMPLEMENTADO | Spec Wave 2: rbac.md (IMPLEMENTADO). Era MISSING |
+| `gestion-seguros` | ✅ | ✅ | — | — | — | `COMPLETE` | IMPLEMENTADO | Spec Wave 2: gestion-seguros.md (IMPLEMENTADO). Corregido de SIN CANON |
+| `actividades` | ✅ | — | ✅ | — | ✅ | `PARTIAL` | PARCIAL | Spec Wave 2: actividades.md (PARCIAL). Bug: clubId hardcoded |
+| `finanzas` | ✅ | — | ✅ | — | ✅ | `PARTIAL` | PARCIAL | Spec Wave 2: finanzas.md (PARCIAL). Faltan campos de auditoría |
+| `inventario` | ✅ | — | — | — | ✅ | `PARTIAL` | PARCIAL | Spec Wave 2: inventario.md (PARCIAL). Typo en PK |
+| `camporees` | ✅ | — | — | — | — | `PARTIAL` | PARCIAL | Spec Wave 2: camporees.md (PARCIAL). Sin screens en app |
+| `certificaciones-guias-mayores` | ✅ | ✅ | — | — | ✅ | `PARTIAL` | PARCIAL | Spec Wave 2: certificaciones-guias-mayores.md (PARCIAL). Backend done, zero client UI |
+| `infrastructure` | ✅ | — | — | — | ✅ | `PARTIAL` | NO CANON | Spec Wave 2: infrastructure.md (NO CANON, cross-cutting) |
+| `validacion-investiduras` | ✅ | ✅ | — | — | — | `PARTIAL` | FANTASMA | Spec Wave 2: validacion-investiduras.md (FANTASMA, 106 líneas). DB existe, zero runtime |
 
 **Lectura de la fila**:
 
-- `COMPLETE` en features requeriría, como mínimo, evidencia suficiente y trazable para operar el dominio sin huecos documentales obvios.
-- En esta corrida no se encontró ningún dominio con set completo `requirements + design + tasks`.
+- `COMPLETE` en features requiere spec completa y código IMPLEMENTADO sin gaps documentados.
+- `PARTIAL` indica que existe spec pero el código tiene gaps o el dominio no está completamente implementado.
+- Wave 2 cerró 16 specs de dominio. 9 dominios `COMPLETE` (código implementado), 5 `PARTIAL` (código parcial), 1 `PARTIAL` (NO CANON), 1 `PARTIAL` (FANTASMA).
+- Set completo `requirements + design + tasks` sigue sin existir para ningún dominio.
 
 ---
 
 ## 5. Matriz de cobertura runtime por módulo API
 
 Fuente única de esta sección: `docs/02-API/ENDPOINTS-LIVE-REFERENCE.md`
+**Total**: 215 endpoints documentados (actualizado Wave 2, 2026-03-20)
 
 | Módulo runtime | Evidencia encontrada | Estado | Observación |
 |---|---|---|---|
 | `auth` | Sección presente | `COMPLETE` | Incluye notas de contrato de login/refresh/logout/MFA/OAuth |
 | `users` | Sección presente | `COMPLETE` | Incluye notas de autorización, post-registro y progreso de clases |
 | `activities` | Sección presente | `COMPLETE` | Runtime documentado |
-| `admin` | Sección presente | `COMPLETE` | Runtime documentado |
+| `admin` | Sección presente | `COMPLETE` | Wave 2: +5 honor-categories CRUD, +4 medicines CRUD, +1 club-ideals |
 | `camporees` | Sección presente | `COMPLETE` | Runtime documentado |
-| `catalogs` | Sección presente | `COMPLETE` | Runtime documentado |
+| `catalogs` | Sección presente | `COMPLETE` | Wave 2: +1 activity-types endpoint |
 | `certifications` | Sección presente | `COMPLETE` | Runtime documentado |
 | `classes` | Sección presente | `COMPLETE` | Runtime documentado |
 | `club-roles` | Sección presente | `COMPLETE` | Runtime documentado |
-| `clubs` | Sección presente | `COMPLETE` | Runtime documentado |
-| `fcm-tokens` | Sección presente | `COMPLETE` | Runtime documentado |
+| `clubs` | Sección presente | `COMPLETE` | Wave 2: -1 fantasma removido (DELETE clubs/sections/:sectionId) |
+| `evidence-folder` | Sección presente | `COMPLETE` | Wave 2: +4 endpoints nuevos |
+| `fcm-tokens` | Sección presente | `COMPLETE` | Wave 2: corrección de nombre de parámetro |
 | `finances` | Sección presente | `COMPLETE` | Runtime documentado |
 | `folders` | Sección presente | `COMPLETE` | Runtime documentado |
 | `health` | Sección presente | `COMPLETE` | Runtime documentado |
-| `honors` | Sección presente | `COMPLETE` | Runtime documentado |
+| `honors` | Sección presente | `COMPLETE` | Wave 2: +endpoints grouped-by-category, user-honors create/bulk/files |
 | `inventory` | Sección presente | `COMPLETE` | Runtime documentado |
-| `notifications` | Sección presente | `COMPLETE` | Runtime documentado |
+| `notifications` | Sección presente | `COMPLETE` | Wave 2: corrección de route signature |
 | `root` | Sección presente | `COMPLETE` | Runtime documentado |
 
 ---
 
 ## 6. Gaps operativos detectados
 
-<!-- Actualizado con hallazgos de Reality Matrix 2026-03-14 -->
+<!-- Actualizado Wave 2 2026-03-20 -->
 
 | Item | Evidencia esperada | Evidencia encontrada | Estado | Acción sugerida |
 |---|---|---|---|---|
 | Estructura técnica vigente | Guía de estructura activa y consistente con canon | `structure.md` existe pero está `HISTORICAL` | `MISSING` | Reemplazar o reactivar una guía de estructura vigente alineada con canon |
 | Features con set completo | `requirements.md` + `design.md` + `tasks.md` por dominio operativo | Ningún dominio presenta el set completo | `MISSING` | Priorizar cierre documental por dominio antes de declarar cobertura completa |
 | Tareas por dominio | `tasks.md` cuando el dominio necesite ejecución trazable | No se detectó `tasks.md` en los dominios listados | `MISSING` | Agregar task breakdown en dominios activos donde haga falta ejecución/verificación |
-| Referencia humana de datos alineada | `SCHEMA-REFERENCE.md` consistente con `schema.prisma` | Drift en naming de campos (ej: `id`/`user_id`, `birthdate`/`birthday`, `avatar`/`user_image`) y falta `active_club_assignment_id` en `users_pr` | `MISSING` | Sincronizado parcialmente 2026-03-14; ver nota en SCHEMA-REFERENCE |
 | Auditoría de servicios externos | Documento auxiliar si existe | No se encontró `docs/EXTERNAL-SERVICES-AUDIT.md` | `MISSING` | Crear solo si realmente se necesita como apoyo; no bloquea runtime |
 | Storage provider drift | Canon documentaba Supabase Storage | Backend usa Cloudflare R2 (R2FileStorageService) | `FIXED` | Corregido en runtime-sacdia.md 2026-03-14 |
-| Endpoints FANTASMA | Endpoints documentados que no existen en backend | 17 endpoints fantasma detectados (admin panel y app) | `FIXED` | Removidos de ENDPOINTS-LIVE-REFERENCE 2026-03-14 |
-| API doc gap | 198 endpoints implementados vs 180 documentados | 18 endpoints sin documentar | `MISSING` | Agregar a ENDPOINTS-LIVE-REFERENCE cuando se confirmen |
-| Canon de catálogos admin | 16+ endpoints CRUD admin sin mención en canon | Implementados y documentados pero SIN CANON | `MISSING` | Decidir si formalizar en canon o dejar como operación implícita |
+| Endpoints FANTASMA (Wave 0) | Endpoints documentados que no existen en backend | 17 endpoints fantasma detectados | `FIXED` | Removidos de ENDPOINTS-LIVE-REFERENCE 2026-03-14 |
+| Endpoint FANTASMA (Wave 2) | DELETE clubs/sections/:sectionId documentado | No existe en backend | `FIXED` | Removido de ENDPOINTS-LIVE-REFERENCE 2026-03-20 (Wave 2) |
+| API doc gap (18 endpoints) | 198 endpoints implementados vs 180 documentados | 19 endpoints agregados, 2 corregidos en Wave 2. Total: 215 | `FIXED` | Cerrado en ENDPOINTS-LIVE-REFERENCE 2026-03-20 (Wave 2) |
+| Referencia humana de datos alineada | `SCHEMA-REFERENCE.md` consistente con `schema.prisma` | ~72 modelos + 8 enums documentados (era ~25) | `FIXED` | Actualizado 2026-03-20 (Wave 2): +48 modelos nuevos documentados |
+| Feature docs faltantes | Specs por dominio para los 16 dominios | 16 specs creadas en Wave 2 | `FIXED` | Cerrado 2026-03-20 (Wave 2). Todos los dominios tienen spec |
+| Canon de catálogos admin | 16+ endpoints CRUD admin sin mención en canon | Implementados y documentados en ENDPOINTS-LIVE-REFERENCE + catalogos.md | `FIXED` | Cerrado 2026-03-20 (Wave 2): spec catalogos.md cubre el dominio |
+| Notifications route signature | Firma de ruta incorrecta en doc | Corregido en ENDPOINTS-LIVE-REFERENCE | `FIXED` | Corregido 2026-03-20 (Wave 2) |
+| FCM tokens param name | Nombre de parámetro incorrecto en doc | Corregido en ENDPOINTS-LIVE-REFERENCE | `FIXED` | Corregido 2026-03-20 (Wave 2) |
+| `validacion-investiduras` FANTASMA | Módulo runtime esperado | DB tables existen, pero zero endpoints/módulos/screens | `OPEN` | Dominio documentado como FANTASMA en spec. Decidir si implementar o deprecar tablas |
+| `actividades` bug clubId | clubId dinámico por contexto | clubId hardcoded en implementación | `OPEN` | Documentado en spec actividades.md. Requiere fix en backend |
+| `finanzas` campos auditoría | Campos de auditoría en modelo | Faltan campos de auditoría | `OPEN` | Documentado en spec finanzas.md. Requiere migración |
+| `inventario` PK typo | PK consistente | Typo en PK detectado | `OPEN` | Documentado en spec inventario.md. Requiere migración |
+| `certificaciones-guias-mayores` sin UI | Client UI para certificaciones | Backend completo, zero client UI (admin y app) | `OPEN` | Documentado en spec. Requiere implementación de pantallas |
 
 ---
 
@@ -132,9 +146,20 @@ Fuente única de esta sección: `docs/02-API/ENDPOINTS-LIVE-REFERENCE.md`
 `Runtime` puede tomar como base inmediata:
 
 1. `docs/canon/source-of-truth.md` para precedencia;
-2. `docs/02-API/ENDPOINTS-LIVE-REFERENCE.md` para API vigente;
+2. `docs/02-API/ENDPOINTS-LIVE-REFERENCE.md` para API vigente (215 endpoints, actualizado Wave 2);
 3. `docs/03-DATABASE/schema.prisma` para modelo de datos vigente;
-4. `docs/canon/dominio-sacdia.md`, `identidad-sacdia.md`, `arquitectura-sacdia.md` y `decisiones-clave.md` para interpretación canónica;
-5. `docs/00-STEERING/tech.md`, `coding-standards.md`, `data-guidelines.md`, `agents.md` como baseline subordinada.
+4. `docs/database/SCHEMA-REFERENCE.md` para referencia humana del modelo (~72 modelos + 8 enums, actualizado Wave 2);
+5. `docs/canon/dominio-sacdia.md`, `identidad-sacdia.md`, `arquitectura-sacdia.md` y `decisiones-clave.md` para interpretación canónica;
+6. `docs/00-STEERING/tech.md`, `coding-standards.md`, `data-guidelines.md`, `agents.md` como baseline subordinada;
+7. `docs/features/*.md` para specs de dominio (16 specs, creadas Wave 2).
 
 `Runtime` no debe usar esta matriz para redefinir autoridad; solo para saber qué cobertura ya está documentada y dónde hay huecos.
+
+---
+
+## 8. Changelog
+
+| Fecha | Wave | Cambios |
+|---|---|---|
+| 2026-03-14 | Wave 0 | Matriz inicial. 180 endpoints, ~25 modelos, 17 fantasma removidos, storage drift corregido |
+| 2026-03-20 | Wave 2 | +19 endpoints (total 215), +2 correcciones, -1 fantasma. SCHEMA-REFERENCE: +48 modelos (total ~72 + 8 enums). 16 feature specs creadas. 5 gaps OPEN nuevos documentados |
