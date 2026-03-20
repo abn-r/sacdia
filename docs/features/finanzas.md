@@ -1,6 +1,6 @@
 # Finanzas
 
-**Estado**: PARCIAL
+**Estado**: IMPLEMENTADO
 
 ## Descripcion de dominio
 
@@ -26,14 +26,16 @@ Las categorias financieras son un catalogo compartido que permite clasificar los
   - `DELETE /api/v1/finances/:financeId` — Desactivar movimiento
 
 ### Admin
-- **Placeholder** — Redirige a seleccionar club. No consume endpoints. Sin funcionalidad real.
+- **Dashboard completo**: Tarjetas resumen (ingresos/egresos/balance), tabla de transacciones con filtros por ano/mes, dialog de creacion/edicion, confirmacion de eliminacion
+- Cliente API en `src/lib/api/finances.ts`
+- Consume los 7 endpoints del backend
 
 ### App Movil
 - **3 screens**: FinancesView, AddTransactionSheet, TransactionDetailView
 - Consume los 7 endpoints del backend
 - Soporta filtros por ano/mes en el listado
 - Muestra resumen financiero (balance, total ingresos, total egresos)
-- CRUD completo de transacciones desde la app
+- CRUD completo de transacciones desde la app, incluyendo eliminacion con confirmacion via AlertDialog en la vista de detalle
 
 ### Base de datos
 - `finances` — Movimientos financieros (ingresos/egresos por club)
@@ -47,7 +49,7 @@ Las categorias financieras son un catalogo compartido que permite clasificar los
 4. Los movimientos deben ser filtrables por ano y mes
 5. Los movimientos deben poder desactivarse (soft delete) sin perder datos historicos
 6. Las categorias financieras deben ser un catalogo compartido entre clubes
-7. El panel admin debe permitir gestion y supervision financiera de los clubes (actualmente placeholder)
+7. El panel admin debe permitir gestion y supervision financiera de los clubes
 8. El resumen financiero debe actualizarse en tiempo real conforme se registran movimientos
 
 ## Decisiones de diseno
@@ -60,13 +62,11 @@ Las categorias financieras son un catalogo compartido que permite clasificar los
 
 ## Gaps y pendientes
 
-- **Admin es placeholder**: Backend y app completos pero el panel admin no tiene UI funcional
 - **Sin reportes avanzados**: No hay endpoints para reportes por categoria, tendencias temporales o comparativas entre periodos
 - **Sin exportacion**: No hay funcionalidad para exportar movimientos a PDF o Excel
 - **Sin auditoría avanzada**: Los movimientos registran `created_by` (UUID, NOT NULL) y `modified_by_id` (UUID, nullable, FK a users); no hay audit trail de acciones en formato log
 - **Sin presupuesto**: No hay modelo para definir presupuestos anuales por categoria y comparar ejecucion vs presupuesto
 
-## Prioridad y siguiente accion
+## Estado de implementacion
 
-- **Prioridad**: Media — backend y app funcionales; admin es el gap principal
-- **Siguiente accion**: Implementar UI de finanzas en sacdia-admin consumiendo los 7 endpoints existentes.
+- **Prioridad**: Completo — backend, admin y app implementados sin gaps funcionales pendientes

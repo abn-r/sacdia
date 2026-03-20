@@ -1,6 +1,6 @@
 # Actividades
 
-**Estado**: PARCIAL
+**Estado**: IMPLEMENTADO
 
 ## Descripcion de dominio
 
@@ -26,13 +26,16 @@ El modelo contempla `activity_instances` como instancias recurrentes de una acti
   - `GET /api/v1/activities/:activityId/attendance` — Obtener asistencia
 
 ### Admin
-- **Placeholder** — Redirige a seleccionar club. No consume endpoints. Sin funcionalidad real.
+- **UI completa**: Pagina de lista con selector de club, pagina de detalle con panel de asistencia, dialog de creacion/edicion, confirmacion de eliminacion
+- Cliente API en `src/lib/api/activities.ts`
+- Consume los 7 endpoints del backend
 
 ### App Movil
 - **4 screens**: ActivitiesListView, ActivityDetailView, CreateActivityView, LocationPickerView
 - Consume los 7 endpoints del backend
 - Incluye selector de ubicacion en mapa (LocationPickerView)
 - `ActivitiesListView` resuelve `clubId` desde `clubContextProvider` (bug de hardcodeo a 1 corregido)
+- Edicion y eliminacion de actividades disponibles en la vista de detalle (`EditActivityView` + confirmacion de borrado)
 
 ### Base de datos
 - `activities` — Actividades del club
@@ -48,7 +51,7 @@ El modelo contempla `activity_instances` como instancias recurrentes de una acti
 5. Las actividades deben poder desactivarse (soft delete) sin perder datos historicos
 6. El catalogo de tipos de actividad (`GET /catalogs/activity-types`) debe estar disponible para clasificar actividades
 7. La app debe permitir seleccionar ubicacion geografica en un mapa al crear una actividad
-8. El panel admin debe ofrecer gestion completa de actividades por club (actualmente placeholder)
+8. El panel admin debe ofrecer gestion completa de actividades por club
 
 ## Decisiones de diseno
 
@@ -60,13 +63,10 @@ El modelo contempla `activity_instances` como instancias recurrentes de una acti
 
 ## Gaps y pendientes
 
-- **Admin es placeholder**: Backend y app estan completos pero el panel admin no tiene UI funcional para actividades
-- **clubId hardcodeado en app**: corregido — `ActivitiesListView` ahora resuelve `clubId` desde `clubContextProvider`
 - **`GET /catalogs/activity-types`**: Existe en backend pero sin documentacion API en ENDPOINTS-LIVE-REFERENCE.md
 - **Recurrencia**: El modelo `activity_instances` existe en DB pero la API no expone endpoints para gestionar instancias recurrentes
 - **Reportes de asistencia**: No hay endpoint para obtener estadisticas o reportes de asistencia agregados
 
-## Prioridad y siguiente accion
+## Estado de implementacion
 
-- **Prioridad**: Media — backend y app funcionales; admin es el gap principal
-- **Siguiente accion**: Implementar UI de actividades en sacdia-admin consumiendo los 7 endpoints existentes.
+- **Prioridad**: Completo — backend, admin y app implementados sin gaps funcionales pendientes

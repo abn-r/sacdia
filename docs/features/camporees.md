@@ -1,6 +1,6 @@
 # Camporees
 
-**Estado**: PARCIAL
+**Estado**: IMPLEMENTADO
 
 ## Descripcion de dominio
 
@@ -27,11 +27,13 @@ La inscripcion de miembros en camporees tiene implicaciones directas con el modu
   - `DELETE /api/v1/camporees/:camporeeId/members/:userId` — Remover miembro del camporee (roles: director, subdirector)
 
 ### Admin
-- **1 pagina read-only**: Lista de camporees via `ModuleListPage` consumiendo `GET /camporees`
-- El codigo en `lib/camporees/actions.ts` y `lib/api/camporees.ts` tiene funciones de CRUD y gestion de miembros implementadas pero la UI solo muestra el listado
+- **CRUD completo**: Lista con creacion/eliminacion, pagina de detalle con tarjeta de info y tab de miembros, dialog de creacion/edicion, registro de miembros con validacion de seguro, remocion de miembros
+- Reutiliza el cliente API existente (`lib/api/camporees.ts`) y las server actions (`lib/camporees/actions.ts`)
 
 ### App Movil
-- **No implementado** — No hay screens de camporees en la app movil
+- **4 screens**: lista de camporees, detalle con preview de miembros, registro de miembro con validacion de seguro, lista de miembros con opcion de remocion
+- Capa de datos completa: entidades, modelos, datasource, repositorio, providers
+- Rutas configuradas en GoRouter
 
 ### Base de datos
 - `local_camporees` — Camporees a nivel de campo local
@@ -49,7 +51,7 @@ La inscripcion de miembros en camporees tiene implicaciones directas con el modu
 5. El registro de miembros debe validar requisitos (seguro activo, membresia vigente)
 6. Los camporees deben poder desactivarse (soft delete) sin perder datos historicos
 7. El panel admin debe permitir CRUD completo de camporees con gestion de miembros
-8. La app movil debe permitir a los miembros ver camporees disponibles e inscribirse
+8. La app movil permite ver camporees disponibles, inscribirse y gestionar miembros inscritos
 
 ## Decisiones de diseno
 
@@ -60,14 +62,10 @@ La inscripcion de miembros en camporees tiene implicaciones directas con el modu
 
 ## Gaps y pendientes
 
-- **App no tiene screens**: El modulo de camporees no esta implementado en la app movil
-- **Admin read-only**: La UI del admin solo muestra listado; las funciones de CRUD y gestion de miembros estan codificadas pero no expuestas en la interfaz
 - **Sin evaluaciones**: No hay modelo para registrar evaluaciones o puntajes de los clubes/miembros durante el camporee
 - **Sin documentacion de modelo**: Las 5 tablas de camporees no estan documentadas en SCHEMA-REFERENCE.md
-- **Sin validacion de seguro**: Aunque el modelo vincula miembros con seguros, no esta claro si el endpoint de registro valida efectivamente que el miembro tenga seguro vigente
 - **Sin logistica**: No hay modelo para gestionar logistica del camporee (comida, transporte, alojamiento)
 
-## Prioridad y siguiente accion
+## Estado de implementacion
 
-- **Prioridad**: Media-alta — canon reconoce camporees como capacidad operativa; falta app y admin funcional
-- **Siguiente accion**: Implementar CRUD completo en admin aprovechando las funciones ya codificadas en `actions.ts`/`api/camporees.ts`. Luego agregar screens en la app movil.
+- **Prioridad**: Completo — backend, admin y app implementados con CRUD completo y validacion de seguro en el registro de miembros
