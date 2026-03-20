@@ -1,6 +1,6 @@
 # Validacion de Investiduras
 
-**Estado**: PARCIAL
+**Estado**: IMPLEMENTADO
 
 ## Descripcion de dominio
 
@@ -33,10 +33,22 @@ El schema de base de datos tiene toda la infraestructura preparada (tablas, enum
   - `locked_for_validation` (Boolean, default false)
 
 ### Admin (sacdia-admin)
-- **No implementado** — no hay paginas de validacion de investiduras
+- **Implementado** — Pagina de validaciones con:
+  - Tabla de enrollments pendientes de validacion con filtros (estado, año)
+  - Botones de accion: Aprobar, Rechazar, Marcar Investido
+  - Dialogs de confirmacion con campos de comentarios
+  - Timeline de historial de validaciones
+  - Badges de estado (SUBMITTED_FOR_VALIDATION, APPROVED, REJECTED, INVESTIDO)
+  - Entry en sidebar nav bajo "Administración"
 
 ### App (sacdia-app)
-- **No implementado** — no hay screens de validacion ni investidura
+- **Implementado** — 3 screens principales:
+  - **PendingInvestituresScreen**: lista de enrollments pendientes para coordinadores (filtro por rol)
+  - **SubmitInvestitureView**: vista para que directores/consejeros envien a validacion (con confirmation)
+  - **InvestitureHistoryScreen**: timeline del historial de validaciones por miembro
+  - Data layer con entities, models, datasource, repository, providers
+  - Status badge widget reutilizable
+  - Routes integradas en GoRouter con transiciones animadas
 
 ### Base de datos (schema completo, cero runtime)
 
@@ -91,15 +103,12 @@ El schema de base de datos tiene toda la infraestructura preparada (tablas, enum
 
 ## Gaps y pendientes
 
-- **No hay UI en admin** para gestionar validaciones (listar pendientes, aprobar, rechazar)
-- **No hay screens en app** para que consejeros envien a validacion ni para que miembros vean su estado
-- No hay UI para configurar investiture_config (deadlines y fechas por campo local)
-- No hay notificaciones asociadas a cambios de estado de validacion
-- No hay reportes de investiduras por periodo/campo local/club
+- No hay UI para configurar investiture_config (deadlines y fechas por campo local) — Iteracion 2
+- No hay notificaciones asociadas a cambios de estado de validacion — Iteracion 2
+- No hay reportes de investiduras por periodo/campo local/club — Iteracion 2
 
-## Prioridad y siguiente accion
+## Implementacion completada
 
-- **Alta**: Backend implementado. El gap ahora es la UI: admin y app son los proximos pasos.
-- **Siguiente accion concreta**:
-  1. Implementar pagina de admin para listar y gestionar validaciones pendientes (aprobar/rechazar)
-  2. Implementar screens en la app para que consejeros envien a validacion y vean el estado de cada enrollment
+- ✅ Backend: InvestitureModule con 5 endpoints, 23 tests
+- ✅ Admin: Tabla de validaciones, dialogs de accion, historial, filtros
+- ✅ App: 3 screens (pending list, submit view, history timeline), data layer completa, GoRouter integration

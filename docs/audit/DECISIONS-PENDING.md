@@ -108,15 +108,16 @@ Fuente: Reality Matrix + Canon verification
 
 Descubiertos durante auditoría Wave 2. Fuente: docs de features bajo `docs/features/` y `docs/canon/completion-matrix.md` (OPEN).
 
-### GAP-W2-01: Validacion de Investiduras — PARCIAL
+### GAP-W2-01: Validacion de Investiduras — RESUELTO
 
 | Item | Detalle |
 |---|---|
 | Infraestructura DB | Completa: `investiture_validation_history`, `investiture_config`, 3 enums, campos de investidura en `enrollments` |
 | Runtime backend | IMPLEMENTADO: InvestitureModule con 5 endpoints, 23 tests. |
-| Runtime frontend | CERO: no hay pages en admin, no hay screens en app |
-| Severidad | Gap funcional — backend listo, falta UI |
-| Estado | PARTIAL 2026-03-20: Backend implementado (InvestitureModule, 5 endpoints, 23 tests). Pendiente: UI admin y app. |
+| Runtime frontend - Admin | IMPLEMENTADO: Tabla de validaciones, dialogs de accion (aprobar/rechazar/investido), historial timeline, filtros por estado/año, entry en sidebar nav. 9 archivos. |
+| Runtime frontend - App | IMPLEMENTADO: 3 screens principales (pending list, submit view, history timeline), data layer completa (entities, models, datasource, repository, providers), status badge widget, GoRouter integration. 16 archivos. |
+| Severidad | Gap funcional completamente resuelto |
+| Estado | RESUELTO 2026-03-20: UI implementada en Flutter (16 archivos, 3 screens) y admin (9 archivos, pending table + history + dialogs). Commits 2f4ac49 + 7199ab0. |
 | Descubierto | Wave 2 (2026-03-20) |
 
 ### GAP-W2-02: Actividades — hardcoded clubId=1 — RESUELTO

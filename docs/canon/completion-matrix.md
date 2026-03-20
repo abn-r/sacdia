@@ -74,13 +74,13 @@
 | `camporees` | ✅ | — | — | — | — | `PARTIAL` | PARCIAL | Spec Wave 2: camporees.md (PARCIAL). Sin screens en app |
 | `certificaciones-guias-mayores` | ✅ | ✅ | — | — | ✅ | `COMPLETE` | IMPLEMENTADO | Spec Wave 2: certificaciones-guias-mayores.md. GAP-W2-05 FIXED 2026-03-20: UI Flutter (4 screens) + admin (list + detail + progress) |
 | `infrastructure` | ✅ | — | — | — | ✅ | `PARTIAL` | NO CANON | Spec Wave 2: infrastructure.md (NO CANON, cross-cutting) |
-| `validacion-investiduras` | ✅ | ✅ | — | — | — | `PARTIAL` | PARCIAL | Spec Wave 2: validacion-investiduras.md. GAP-W2-01 PARTIAL 2026-03-20: backend implementado (InvestitureModule, 5 endpoints). UI admin y app pendientes |
+| `validacion-investiduras` | ✅ | ✅ | — | — | — | `COMPLETE` | IMPLEMENTADO | Spec Wave 2: validacion-investiduras.md. GAP-W2-01 FIXED 2026-03-20: InvestitureModule + UI admin (table + dialogs + history) + UI app (3 screens). Commits 2f4ac49 + 7199ab0 |
 
 **Lectura de la fila**:
 
 - `COMPLETE` en features requiere spec completa y código IMPLEMENTADO sin gaps documentados.
 - `PARTIAL` indica que existe spec pero el código tiene gaps o el dominio no está completamente implementado.
-- Wave 2 cerró 16 specs de dominio. Post-Wave 2 (2026-03-20): 12 dominios `COMPLETE` (código implementado), 2 `PARTIAL` (código parcial), 1 `PARTIAL` (NO CANON), 1 `PARTIAL` (backend parcial, UI pendiente).
+- Wave 2 cerró 16 specs de dominio. Post-Wave 2 (2026-03-20): 13 dominios `COMPLETE` (código implementado), 1 `PARTIAL` (código parcial), 1 `PARTIAL` (NO CANON).
 - Set completo `requirements + design + tasks` sigue sin existir para ningún dominio.
 
 ---
@@ -134,7 +134,7 @@ Fuente única de esta sección: `docs/02-API/ENDPOINTS-LIVE-REFERENCE.md`
 | Canon de catálogos admin | 16+ endpoints CRUD admin sin mención en canon | Implementados y documentados en ENDPOINTS-LIVE-REFERENCE + catalogos.md | `FIXED` | Cerrado 2026-03-20 (Wave 2): spec catalogos.md cubre el dominio |
 | Notifications route signature | Firma de ruta incorrecta en doc | Corregido en ENDPOINTS-LIVE-REFERENCE | `FIXED` | Corregido 2026-03-20 (Wave 2) |
 | FCM tokens param name | Nombre de parámetro incorrecto en doc | Corregido en ENDPOINTS-LIVE-REFERENCE | `FIXED` | Corregido 2026-03-20 (Wave 2) |
-| `validacion-investiduras` FANTASMA | Módulo runtime esperado | DB tables existen; backend implementado (5 endpoints). UI admin y app pendientes | `PARTIAL` | GAP-W2-01 PARTIAL 2026-03-20: InvestitureModule implementado. Pendiente UI admin y app |
+| `validacion-investiduras` IMPLEMENTADA | Módulo runtime esperado | DB tables existen; backend implementado (5 endpoints); UI admin (table + dialogs + history); UI app (3 screens) | `FIXED` | GAP-W2-01 FIXED 2026-03-20: InvestitureModule + admin + app completamente implementados |
 | `actividades` bug clubId | clubId dinámico por contexto | clubId hardcoded en implementación | `FIXED` | GAP-W2-02 FIXED 2026-03-20: ActivitiesListView resuelve clubId desde clubContextProvider. Commit dbb14eb |
 | `finanzas` campos auditoría | Campos de auditoría en modelo | Faltan campos de auditoría | `FIXED` | GAP-W2-03 FIXED 2026-03-20: modified_by_id agregado a finances (migration + schema + service). Commit 69b4b3e |
 | `inventario` PK typo | PK consistente | Typo en PK detectado | `FIXED` | GAP-W2-04 FIXED 2026-03-20: migration creada para rename. Commit d690a57. Pendiente: prisma migrate deploy |
@@ -164,4 +164,4 @@ Fuente única de esta sección: `docs/02-API/ENDPOINTS-LIVE-REFERENCE.md`
 |---|---|---|
 | 2026-03-14 | Wave 0 | Matriz inicial. 180 endpoints, ~25 modelos, 17 fantasma removidos, storage drift corregido |
 | 2026-03-20 | Wave 2 | +19 endpoints (total 215), +2 correcciones, -1 fantasma. SCHEMA-REFERENCE: +48 modelos (total ~72 + 8 enums). 16 feature specs creadas. 5 gaps OPEN nuevos documentados |
-| 2026-03-20 | Post-Wave 2 | GAP-W2-02/03/04/05 → FIXED. GAP-W2-01 → PARTIAL (backend done). +5 endpoints investiture (total 220). 4 dominios adicionales → COMPLETE |
+| 2026-03-20 | Post-Wave 2 | GAP-W2-01/02/03/04/05 → FIXED. +5 endpoints investiture (total 220). 5 dominios adicionales → COMPLETE (total 13 COMPLETE) |
