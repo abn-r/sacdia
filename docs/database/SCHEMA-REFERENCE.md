@@ -2,7 +2,7 @@
 
 **Estado**: ACTIVE
 
-<!-- Sincronizado contra schema.prisma 2026-03-20 (Wave 2). club_sections consolidation applied (3 tables → 1). Drift corregido en: users (field names), users_pr (PK + campos faltantes). Cobertura completa: ~72 modelos + 8 enums documentados. -->
+<!-- Sincronizado contra schema.prisma 2026-03-20 (Wave 3). club_sections consolidation applied (3 tables → 1). Drift corregido en: users (field names), users_pr (PK + campos faltantes), countries/unions/local_fields/districts/churches (PKs + campos reales), clubs (campos completos), classes (campos completos), honors (campos completos). Cobertura completa: 71 modelos + 8 enums documentados con campos verbatim de schema.prisma. -->
 
 Referencia completa del schema de base de datos PostgreSQL de SACDIA.
 
@@ -195,40 +195,128 @@ Country → Union → Local Field → District → Church → Club
 ```
 
 #### Tabla: `countries`
-**Campos**: `id` (UUID), `name`, `abbreviation`, `active`, timestamps
+**Descripción**: Países disponibles en el sistema (catálogo geográfico de nivel superior)
+
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `country_id` | INT | ID único | PK, autoincrement |
+| `name` | VARCHAR(50) | Nombre del país | UNIQUE, NOT NULL |
+| `abbreviation` | VARCHAR(8) | Abreviatura del país | UNIQUE, NOT NULL |
+| `active` | BOOLEAN | País activo | DEFAULT false |
+| `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
+| `modified_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW() |
+
+**Índices**: `idx_countries_active` sobre `(active)`
+
+**Relaciones**:
+- One-to-Many: `unions`, `users`
+
+---
 
 #### Tabla: `unions`
-**Campos**: `id` (UUID), `country_id` (FK), `name`, `abbreviation`, `active`, timestamps  
-**Relación**: Many-to-One con `countries`
+**Descripción**: Uniones eclesiásticas (nivel regional, agrupan campos locales)
+
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `union_id` | INT | ID único | PK, autoincrement |
+| `name` | VARCHAR(50) | Nombre de la unión | UNIQUE, NOT NULL |
+| `abbreviation` | VARCHAR(8) | Abreviatura de la unión | UNIQUE, NOT NULL |
+| `active` | BOOLEAN | Unión activa | DEFAULT false |
+| `country_id` | INT | País al que pertenece | FK → countries, NOT NULL |
+| `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
+| `modified_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW() |
+
+**Relaciones**:
+- Many-to-One: `countries`
+- One-to-Many: `local_fields`, `union_camporees`, `users`
+
+---
 
 #### Tabla: `local_fields`
-**Campos**: `id` (UUID), `union_id` (FK), `name`, `abbreviation`, `active`, timestamps  
-**Relación**: Many-to-One con `unions`
+**Descripción**: Campos locales (nivel de asociación local, agrupa distritos y clubes)
+
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `local_field_id` | INT | ID único | PK, autoincrement |
+| `name` | VARCHAR(50) | Nombre del campo local | UNIQUE, NOT NULL |
+| `abbreviation` | VARCHAR(8) | Abreviatura del campo local | UNIQUE, NOT NULL |
+| `active` | BOOLEAN | Campo local activo | DEFAULT false |
+| `union_id` | INT | Unión a la que pertenece | FK → unions, NOT NULL |
+| `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
+| `modified_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW() |
+
+**Relaciones**:
+- Many-to-One: `unions`
+- One-to-Many: `camporee_clubs`, `camporee_members`, `clubs`, `districts`, `investiture_configs`, `local_camporees`, `union_camporee_local_fields`, `users`
+
+---
 
 #### Tabla: `districts`
-**Campos**: `id` (UUID), `local_field_id` (FK), `name`, `active`, timestamps  
-**Relación**: Many-to-One con `local_fields`
+**Descripción**: Distritos eclesiásticos dentro de un campo local (agrupan iglesias)
+
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `districlub_type_id` | INT | ID único | PK, autoincrement |
+| `name` | VARCHAR(50) | Nombre del distrito | NOT NULL |
+| `active` | BOOLEAN | Distrito activo | DEFAULT false |
+| `local_field_id` | INT | Campo local al que pertenece | FK → local_fields, NOT NULL |
+| `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
+| `modified_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW() |
+
+**Nota**: El PK se llama `districlub_type_id` por razones históricas (fue renombrado pero el nombre quedó así en la BD).
+
+**Relaciones**:
+- Many-to-One: `local_fields`
+- One-to-Many: `churches`, `clubs`
+
+---
 
 #### Tabla: `churches`
-**Campos**: `id` (UUID), `district_id` (FK), `name`, `address`, `active`, timestamps  
-**Relación**: Many-to-One con `districts`
+**Descripción**: Iglesias locales dentro de un distrito (cada iglesia puede tener un club)
+
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `church_id` | INT | ID único | PK, autoincrement |
+| `name` | VARCHAR(50) | Nombre de la iglesia | NOT NULL |
+| `active` | BOOLEAN | Iglesia activa | DEFAULT false |
+| `districlub_type_id` | INT | Distrito al que pertenece | FK → districts, NOT NULL |
+| `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
+| `modified_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW() |
+
+**Relaciones**:
+- Many-to-One: `districts`
+- One-to-Many: `clubs`
 
 ---
 
 ### 🏕️ Módulo: Clubs
 
 #### Tabla: `clubs`
-**Descripción**: Club contenedor (una iglesia tiene 1 club principal)
+**Descripción**: Club contenedor (una iglesia tiene 1 club principal por tipo)
 
 **Campos**:
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| `id` | UUID | ID único | PK |
-| `church_id` | UUID | Iglesia | FK → churches |
-| `name` | VARCHAR(100) | Nombre del club | NOT NULL |
-| `active` | BOOLEAN | Club activo | DEFAULT true |
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `club_id` | INT | ID único | PK, autoincrement |
+| `name` | VARCHAR(50) | Nombre del club | NOT NULL |
+| `description` | STRING | Descripción del club | NULL |
+| `active` | BOOLEAN | Club activo | DEFAULT false |
+| `local_field_id` | INT | Campo local al que pertenece | FK → local_fields, NOT NULL |
+| `address` | STRING | Dirección del club | NULL |
+| `church_id` | INT | Iglesia a la que pertenece | FK → churches, NOT NULL |
+| `coordinates` | JSON | Coordenadas geográficas | NOT NULL |
+| `districlub_type_id` | INT | Distrito al que pertenece | FK → districts, NOT NULL |
+| `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
+| `modified_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW() |
 
-**Relación**: Un club puede tener múltiples secciones por tipo
+**Relaciones**:
+- Many-to-One: `churches`, `districts`, `local_fields`
+- One-to-Many: `club_sections`
 
 ---
 
@@ -326,14 +414,52 @@ UNIQUE (user_id, role_id, club_section_id, ecclesiastical_year_id)
 ### 📚 Módulo: Classes & Honors
 
 #### Tabla: `classes`
-**Descripción**: Clases progresivas (Amigo, Compañero, Explorador, etc.)
+**Descripción**: Clases progresivas por tipo de club (Amigo, Compañero, Explorador, etc.)
 
-**Campos**: `id` (UUID), `name`, `club_type_id`, `order`, `active`
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `class_id` | INT | ID único | PK, autoincrement |
+| `name` | VARCHAR(255) | Nombre de la clase | UNIQUE, NOT NULL |
+| `description` | STRING | Descripción de la clase | NULL |
+| `active` | BOOLEAN | Clase activa | NOT NULL |
+| `club_type_id` | INT | Tipo de club al que pertenece | FK → club_types, NOT NULL |
+| `minimum_age` | INT | Edad mínima requerida | NOT NULL |
+| `requires_invested_gm` | BOOLEAN | Requiere Guía Mayor investido | DEFAULT false |
+| `material_url` | VARCHAR | URL del material de estudio | NULL |
+| `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
+| `modified_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW() |
+
+**Relaciones**:
+- Many-to-One: `club_types`
+- One-to-Many: `class_module_progress`, `class_modules`, `class_section_progress`, `enrollments`, `users_classes`
+
+---
 
 #### Tabla: `honors`
-**Descripción**: Especialidades
+**Descripción**: Especialidades (logros y habilidades que los miembros pueden obtener)
 
-**Campos**: `id` (UUID), `name`, `honors_category_id`, `club_type_id`, `difficulty`, `active`
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `honor_id` | INT | ID único | PK, autoincrement |
+| `name` | VARCHAR(100) | Nombre de la especialidad | UNIQUE, NOT NULL |
+| `description` | STRING | Descripción | NULL |
+| `honor_image` | STRING | URL de imagen de la especialidad | NOT NULL |
+| `honors_category_id` | INT | Categoría de la especialidad | FK → honors_categories, NOT NULL |
+| `master_honors_id` | INT | Especialidad maestra asociada | FK → master_honors, NULL |
+| `material_url` | VARCHAR | URL del material de estudio | NOT NULL |
+| `club_type_id` | INT | Tipo de club al que pertenece | FK → club_types, NOT NULL |
+| `active` | BOOLEAN | Especialidad activa | DEFAULT true |
+| `approval` | INT | Nivel de aprobación | DEFAULT 1 |
+| `skill_level` | INT | Nivel de habilidad | DEFAULT 1 |
+| `year` | VARCHAR | Año de la especialidad | NULL |
+| `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
+| `modified_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW() |
+
+**Relaciones**:
+- Many-to-One: `club_types`, `honors_categories`, `master_honors`
+- One-to-Many: `users_honors`
 
 #### Tabla: `users_classes`
 **Descripción**: Trayectoria consolidada por clase y proyección legacy de compatibilidad (`current_class`), no verdad operativa anual primaria
@@ -1697,5 +1823,5 @@ CREATE INDEX idx_churches_district ON churches(district_id) WHERE active = true;
 
 ---
 
-**Última actualización**: 2026-03-20 (Wave 2 — cobertura completa: ~72 modelos + 8 enums documentados)
+**Última actualización**: 2026-03-20 (Wave 3 — cobertura completa: 71 modelos + 8 enums documentados, campos verbatim de schema.prisma)
 **Fuentes**: `schema.prisma` (fuente de verdad), `relations.md`, `auditoria-naming-bd.md`, `verificacion-schema-prisma.md`
