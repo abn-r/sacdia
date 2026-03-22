@@ -2,9 +2,10 @@
 
 **Date**: 2026-03-22
 **Status**: Approved — ready for implementation
-**Version**: 3 (hard cutover)
+**Version**: 4 (hard cutover + Option C: custom HS256 JWT)
 **Driver**: Cost reduction from ~$55-75/mo to ~$19/mo (65-75% savings)
 **Constraint**: All existing users are test users — hard cutover, no bridge period
+**Spike Finding**: Better Auth emits opaque session tokens, NOT JWTs. SACDIA signs its own HS256 JWT.
 
 ---
 
@@ -127,9 +128,13 @@ export const auth = betterAuth({
 
 **Key benefit**: 25+ tables with FK to `users.user_id` remain COMPLETELY UNTOUCHED.
 
-### Decision 3: JwtStrategy — Single Source, HS256 Only
+### Decision 3: JwtStrategy — Option C (Custom HS256 JWT)
 
-No dual-JWKS. No bridge. Only Better Auth HS256 tokens:
+Better Auth emits **opaque session tokens** (32-byte random strings), NOT JWTs. SACDIA signs its own HS256 JWT after BA authentication. The JwtStrategy validates these SACDIA-signed JWTs:
+
+**Flow**: BA login → opaque session → SACDIA signs HS256 JWT → client receives JWT
+**Refresh**: Client sends BA opaque token → BA validates session → SACDIA signs new JWT
+**Logout**: Revoke BA session FIRST → then blacklist JWT via TokenBlacklistService
 
 ```typescript
 @Injectable()
@@ -239,22 +244,25 @@ model verification {
 
 ## Behavioral Specification
 
-### JWT Token Format
+### Token Architecture (Option C — Custom HS256 JWT)
 
-- Algorithm: **HS256** signed with `BETTER_AUTH_SECRET` (min 32 chars)
-- Access token expiry: **1 hour**
-- Refresh token expiry: **7 days**
-- Required claims: `sub` (user UUID), `iat`, `exp`, `email`
+Better Auth emits **opaque session tokens** (32-byte random strings stored in `session` table). SACDIA signs its own HS256 JWT for API consumers.
+
+- **access_token**: HS256 JWT signed by SACDIA with `BETTER_AUTH_SECRET` (min 32 chars)
+  - Claims: `sub` (user UUID), `iat`, `exp`, `email`
+  - Expiry: **1 hour**
+- **refresh_token**: BA opaque session token (used to get new JWT)
+  - Expiry: **7 days** (BA session expiry)
 - Old Supabase ES256 tokens: **rejected with 401** (no fallback)
 
 ### Endpoint Specs (22 endpoints)
 
 | Endpoint | Method | Success | Key Behavior |
 |----------|--------|---------|--------------|
-| `/auth/register` | POST | 201 | BA creates user in `users` table directly. Returns JWT. |
-| `/auth/login` | POST | 200 | BA validates credentials. Creates `session` row. Returns JWT. |
-| `/auth/refresh` | POST | 200 | Validates refresh token + session exists in DB. |
-| `/auth/logout` | POST | 200 | Deletes `session` row. Blacklists access token. |
+| `/auth/register` | POST | 201 | BA creates user → SACDIA signs HS256 JWT → returns `{access_token: JWT, refresh_token: BA_opaque}`. |
+| `/auth/login` | POST | 200 | BA validates credentials → creates `session` row → SACDIA signs JWT. |
+| `/auth/refresh` | POST | 200 | Client sends BA opaque token → BA validates session → SACDIA signs new JWT. |
+| `/auth/logout` | POST | 200 | Revokes BA session FIRST → then blacklists JWT via TokenBlacklistService. |
 | `/auth/logout-all` | POST | 200 | Deletes ALL user sessions. Blacklists all tokens. |
 | `/auth/password-reset` | POST | 200 | Enumeration-safe (same response for unknown email). |
 | `/auth/password-reset/confirm` | POST | 200 | Validates token, updates password, invalidates all sessions. |
@@ -285,7 +293,7 @@ Better Auth's `account` table replaces the old boolean flags:
 
 ## Data Flow Diagrams
 
-### Login Flow
+### Login Flow (Option C)
 
 ```
 Client ──POST /auth/login──► AuthController
@@ -297,10 +305,15 @@ Client ──POST /auth/login──► AuthController
                     ▼                         ▼
             BetterAuthService           PrismaService
            .signInWithPassword()       .users.findUnique()
-                    │                         │
+              │ returns:                      │
+              │ { user, session }              │
+              │ (session.token = opaque)       │
                     └──────────┬──────────────┘
                                ▼
-                    buildAuthTokenResponse()
+                    BetterAuthService.signJwt(user)
+                       signs HS256 JWT: { sub: user.id, email }
+                               ▼
+                    return { access_token: JWT, refresh_token: session.token }
 ```
 
 ### OAuth Flow
@@ -316,9 +329,11 @@ Flutter opens URL via flutter_appauth
          │
 Google callback → /auth/oauth/callback?code=xxx
          │
-   Better Auth: exchange code → find/create user → write account row → create session → issue JWT
+   Better Auth: exchange code → find/create user → write account row → create session (opaque)
          │
-   Redirect → sacdia-app://auth/callback?access_token=...
+   SACDIA signs HS256 JWT with user data
+         │
+   Redirect → sacdia-app://auth/callback?access_token=JWT&refresh_token=BA_opaque
          │
 Flutter stores token in FlutterSecureStorage
 ```
@@ -465,10 +480,12 @@ APPLE_PRIVATE_KEY
 
 | Risk | Severity | Mitigation |
 |------|----------|------------|
-| `usePlural: true` edge cases | MEDIUM | Spike (W3-000) verifies before any code |
-| NOT NULL columns without defaults | LOW | Schema already has defaults; verified in spike |
+| `usePlural: true` pluralizes ALL 4 tables | MEDIUM | Use explicit `modelName` per table or plural Prisma names with `@@map` (confirmed in spike) |
+| NOT NULL columns without defaults | LOW | Schema already has defaults; BA ignores unknown columns (confirmed in spike) |
 | Neon connection pool sizing | LOW | 1000 via pooler vs 300 peak concurrent |
 | Better Auth TOTP plugin maturity | MEDIUM | Fallback to `otplib` if insufficient |
+| JWT+BA session sync on logout | LOW | Enforce order: revoke BA session FIRST → then blacklist JWT. If blacklist fails, JWT expires in 1h naturally |
+| `npm install` fails on node v24 | LOW | Use `pnpm add better-auth` instead (confirmed in spike) |
 
 ---
 

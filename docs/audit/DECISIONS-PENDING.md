@@ -156,3 +156,103 @@ Descubiertos durante auditoría Wave 2. Fuente: docs de features bajo `docs/feat
 | App movil | UI implementada: 4 screens en Flutter |
 | Estado | RESUELTO 2026-03-20: UI implementada en Flutter (4 screens) y admin (list + detail + progress). Commits 69cb026 + 37e5929. |
 | Descubierto | Wave 2 (2026-03-20) |
+
+---
+
+## Wave 3 — Spike Findings (W3-000) — 2026-03-22
+
+### W3-000: Better Auth Token Format Spike — COMPLETADO
+
+Spike ejecutado el 2026-03-22. Script en `sacdia-backend/scripts/spike-better-auth.ts`.
+Fuente: análisis del código fuente de better-auth@1.5.6.
+
+#### Q1 — Tipo de token: OPAQUE SESSION TOKEN (no JWT)
+
+| Item | Detalle |
+|---|---|
+| Tipo | Token opaco — string random de 32 bytes (`generateId(32)`) |
+| Fuente | `better-auth/dist/db/internal-adapter.mjs:156` |
+| Respuesta signInEmail | `{ token: session.token, user: {...} }` |
+| Conclusion | El token devuelto por `signInEmail` NO es un JWT. Es un identificador opaco almacenado en la tabla `session`. No tiene estructura header.payload.signature. |
+
+#### Q2 — Algoritmo: N/A para token primario
+
+| Item | Detalle |
+|---|---|
+| Token primario | No aplica — es un string opaco, no JWT |
+| JWT plugin (opt-in) | EdDSA (Ed25519) por defecto. Tambien soporta ES256, ES512, RSA256, PS256, ECDH-ES |
+| HS256 | NO soportado por el JWT plugin de better-auth |
+| Fuente | `better-auth/dist/plugins/jwt/sign.mjs` |
+
+#### Q3 — Claims JWT (solo si se usa el JWT plugin)
+
+| Claim | Valor |
+|---|---|
+| `sub` | `user.id` = `users.user_id` (UUID, despues del field mapping) |
+| `iat` | Timestamp actual |
+| `exp` | `iat + expirationTime` (default: 15 minutos) |
+| `iss` | `baseURL` |
+| `aud` | `baseURL` |
+| Payload adicional | Objeto usuario completo (name, email, emailVerified, image) |
+| Fuente | `better-auth/dist/plugins/jwt/sign.mjs` (funcion `getJwtToken`) |
+
+#### Q4 — Alcance de `usePlural: true`
+
+| Item | Detalle |
+|---|---|
+| Tablas afectadas | TODAS las cuatro tablas core: user→users, session→sessions, account→accounts, verification→verifications |
+| Fuente | `@better-auth/core/dist/db/adapter/get-model-name.mjs` |
+| Recomendacion | Usar `modelName` por tabla en vez de `usePlural: true` para control preciso |
+| Config recomendada | `user: { modelName: "users" }` — las otras tres quedan como `session`, `account`, `verification` |
+
+#### Q5 — Columnas SACDIA extras (additionalFields)
+
+| Item | Detalle |
+|---|---|
+| Comportamiento | BA ignora completamente columnas desconocidas |
+| Mecanismo | `transformInput()` itera solo `schema[model].fields` — construye `transformedData` exclusivamente de campos BA conocidos |
+| Fuente | `@better-auth/core/dist/db/adapter/factory.mjs:102-144` |
+| Conclusion | NO se necesita declarar `additionalFields` para columnas SACDIA (paternal_last_name, gender, blood, birthday, approval_status, etc.). BA nunca las lee ni las escribe. |
+
+#### Q6 — Server API sin HTTP handler
+
+| Item | Detalle |
+|---|---|
+| auth.api disponible | Si — BA endpoints son funciones, no solo HTTP routes |
+| Llamadas server-side | `auth.api.signInEmail({ body: { email, password } })` funciona directo |
+| HTTP handler requerido | Solo para callbacks OAuth (redirect flow a `/auth/callback/*`) |
+| Fuente | Documentacion BA + verificado en spike (auth.api disponible post-init) |
+
+---
+
+### IMPLICACION CRITICA: Redesign de W3-009 requerido
+
+**El diseño actual de W3-009 (JwtStrategy HS256 con BETTER_AUTH_SECRET) es INVALIDO.**
+
+Better Auth NO emite HS256 JWTs. El token primario es opaco. El JWT plugin usa EdDSA/JWKS.
+
+El `JwtStrategy` actual de NestJS (`passport-jwt` + `secretOrKey: BETTER_AUTH_SECRET`) NO funcionará con Better Auth sin cambios fundamentales.
+
+#### Opciones de validación (para decidir antes de W3-009):
+
+| Opción | Descripción | Pros | Contras |
+|---|---|---|---|
+| **A — Session validation (recomendada)** | Guard NestJS que llama `auth.api.getSession({ headers })` en cada request | Idiomático BA, revocación nativa, sin key management | DB lookup por request (cacheable con Redis) |
+| **B — JWT plugin + JWKS** | Usar plugin `jwt()`, cliente llama `GET /auth/token` para obtener JWT EdDSA, JwtStrategy valida contra JWKS | Stateless, similar al patrón actual Supabase ES256 | Requiere tabla `jwk`, JWT expira en 15 min por defecto, más complejidad |
+| **C — Custom HS256 signing** | BetterAuthService firma manualmente un JWT HS256 con `@nestjs/jwt` después del login, sin usar el JWT plugin de BA | Mantiene JwtStrategy actual prácticamente sin cambios | No idiomático BA, manual de manejar refresh/revocación |
+
+**Recomendación**: Opción A. Reemplazar PassportStrategy con un NestJS Guard que valide via `auth.api.getSession()`. Cachear el resultado en Redis con TTL = min(session.expiresAt, 5min).
+
+**Impacto en el plan de tareas**:
+- W3-009 debe ser rediseñado antes de implementarse
+- W3-007 y W3-008 permanecen válidos (BetterAuthService interface es correcta)
+- El token que se devuelve al cliente es el opaque session token, no un JWT
+- `buildAuthTokenResponse()` debe actualizarse — ya no hay `access_token` JWT
+
+| Estado | Detalle |
+|---|---|
+| Spike completado | 2026-03-22 |
+| Script | `sacdia-backend/scripts/spike-better-auth.ts` |
+| better-auth instalado | `package.json` + `pnpm-lock.yaml` actualizados |
+| Preguntas 1-6 | Todas respondidas con evidencia de código fuente |
+| Accion requerida | Equipo debe decidir Opcion A/B/C antes de iniciar W3-009 |
