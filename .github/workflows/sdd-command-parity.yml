@@ -1,0 +1,39 @@
+name: SDD Command Parity
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/check-sdd-command-parity.mjs'
+      - 'scripts/lib/sdd-parity-*.mjs'
+      - 'scripts/lib/__tests__/sdd-parity-*.test.mjs'
+      - 'scripts/__fixtures__/sdd-parity/**'
+      - 'docs/README.md'
+      - '.atl/skill-registry.md'
+      - '.github/workflows/sdd-command-parity.yml'
+  push:
+    branches: [main, development]
+    paths:
+      - 'scripts/check-sdd-command-parity.mjs'
+      - 'scripts/lib/sdd-parity-*.mjs'
+      - 'scripts/lib/__tests__/sdd-parity-*.test.mjs'
+      - 'scripts/__fixtures__/sdd-parity/**'
+      - '.github/workflows/sdd-command-parity.yml'
+
+jobs:
+  parity-check:
+    name: Run parity checker (enforced)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run parity checker against fixtures baseline
+        run: node scripts/check-sdd-command-parity.mjs --command-dir scripts/__fixtures__/sdd-parity/valid
+
+      - name: Run parity unit and integration tests
+        run: node --test scripts/lib/__tests__/sdd-parity-rules.test.mjs scripts/lib/__tests__/sdd-parity-runner.test.mjs

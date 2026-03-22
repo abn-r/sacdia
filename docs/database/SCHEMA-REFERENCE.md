@@ -2,7 +2,7 @@
 
 **Estado**: ACTIVE
 
-<!-- Sincronizado contra schema.prisma 2026-03-18. club_sections consolidation applied (3 tables → 1). Drift corregido en: users (field names), users_pr (PK + campos faltantes). Este documento cubre ~25 de 72 modelos; schema.prisma es fuente de verdad para los modelos no cubiertos aquí. -->
+<!-- Sincronizado contra schema.prisma 2026-03-20 (Wave 3). club_sections consolidation applied (3 tables → 1). Drift corregido en: users (field names), users_pr (PK + campos faltantes), countries/unions/local_fields/districts/churches (PKs + campos reales), clubs (campos completos), classes (campos completos), honors (campos completos). Cobertura completa: 71 modelos + 8 enums documentados con campos verbatim de schema.prisma. -->
 
 Referencia completa del schema de base de datos PostgreSQL de SACDIA.
 
@@ -64,11 +64,11 @@ graph TB
     subgraph "Classes & Honors"
         CLASSES[classes]
         HONORS[honors]
-        USERS_CLASSES[users_classes]
+        ENROLLMENTS[enrollments]
         USERS_HONORS[users_honors]
-        
-        USERS --> USERS_CLASSES
-        USERS_CLASSES --> CLASSES
+
+        USERS --> ENROLLMENTS
+        ENROLLMENTS --> CLASSES
         USERS --> USERS_HONORS
         USERS_HONORS --> HONORS
     end
@@ -83,7 +83,7 @@ graph TB
 #### Tabla: `users`
 **Descripción**: Tabla principal de usuarios del sistema
 
-**Campos** (sincronizado con schema.prisma 2026-03-14):
+**Campos** (sincronizado con schema.prisma 2026-03-18):
 | Campo | Tipo | Descripción | Constraints |
 |-------|------|-------------|-------------|
 | `user_id` | UUID | ID único (mismo que Supabase Auth, `auth.uid()`) | PK |
@@ -91,6 +91,8 @@ graph TB
 | `name` | VARCHAR(50) | Nombre | NULL |
 | `paternal_last_name` | VARCHAR(50) | Apellido paterno | NULL |
 | `maternal_last_name` | VARCHAR(50) | Apellido materno | NULL |
+| `approval_status` | ENUM(user_approval_status) | Estado administrativo de aprobación (`pending`, `approved`, `rejected`) | DEFAULT `pending`, NOT NULL |
+| `rejection_reason` | TEXT | Motivo del rechazo administrativo cuando aplica | NULL |
 | `gender` | VARCHAR | Género | - |
 | `birthday` | DATE | Fecha de nacimiento | - |
 | `baptism` | BOOLEAN | ¿Está bautizado? | DEFAULT false |
@@ -110,8 +112,10 @@ graph TB
 
 **Relaciones**:
 - One-to-One: `users_pr`, `legal_representatives`
-- One-to-Many: `emergency_contacts`, `club_role_assignments`, `users_classes`, `users_honors`
+- One-to-Many: `emergency_contacts`, `club_role_assignments`, `users_honors`
 - Many-to-Many: `roles` (via `users_roles`), `allergies` (via `users_allergies`), `diseases` (via `users_diseases`), `medicines` (via `users_medicines`)
+
+**Nota histórica**: La relación `users_classes` fue deprecada y la tabla se archivó como `users_classes_archive`. El histórico consolidado se resuelve ahora desde `enrollments`.
 
 **Naming Convention**: ✅ Cumple - Nombres descriptivos (`paternal_last_name` vs `p_lastname`)
 
@@ -193,40 +197,128 @@ Country → Union → Local Field → District → Church → Club
 ```
 
 #### Tabla: `countries`
-**Campos**: `id` (UUID), `name`, `abbreviation`, `active`, timestamps
+**Descripción**: Países disponibles en el sistema (catálogo geográfico de nivel superior)
+
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `country_id` | INT | ID único | PK, autoincrement |
+| `name` | VARCHAR(50) | Nombre del país | UNIQUE, NOT NULL |
+| `abbreviation` | VARCHAR(8) | Abreviatura del país | UNIQUE, NOT NULL |
+| `active` | BOOLEAN | País activo | DEFAULT false |
+| `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
+| `modified_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW() |
+
+**Índices**: `idx_countries_active` sobre `(active)`
+
+**Relaciones**:
+- One-to-Many: `unions`, `users`
+
+---
 
 #### Tabla: `unions`
-**Campos**: `id` (UUID), `country_id` (FK), `name`, `abbreviation`, `active`, timestamps  
-**Relación**: Many-to-One con `countries`
+**Descripción**: Uniones eclesiásticas (nivel regional, agrupan campos locales)
+
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `union_id` | INT | ID único | PK, autoincrement |
+| `name` | VARCHAR(50) | Nombre de la unión | UNIQUE, NOT NULL |
+| `abbreviation` | VARCHAR(8) | Abreviatura de la unión | UNIQUE, NOT NULL |
+| `active` | BOOLEAN | Unión activa | DEFAULT false |
+| `country_id` | INT | País al que pertenece | FK → countries, NOT NULL |
+| `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
+| `modified_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW() |
+
+**Relaciones**:
+- Many-to-One: `countries`
+- One-to-Many: `local_fields`, `union_camporees`, `users`
+
+---
 
 #### Tabla: `local_fields`
-**Campos**: `id` (UUID), `union_id` (FK), `name`, `abbreviation`, `active`, timestamps  
-**Relación**: Many-to-One con `unions`
+**Descripción**: Campos locales (nivel de asociación local, agrupa distritos y clubes)
+
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `local_field_id` | INT | ID único | PK, autoincrement |
+| `name` | VARCHAR(50) | Nombre del campo local | UNIQUE, NOT NULL |
+| `abbreviation` | VARCHAR(8) | Abreviatura del campo local | UNIQUE, NOT NULL |
+| `active` | BOOLEAN | Campo local activo | DEFAULT false |
+| `union_id` | INT | Unión a la que pertenece | FK → unions, NOT NULL |
+| `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
+| `modified_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW() |
+
+**Relaciones**:
+- Many-to-One: `unions`
+- One-to-Many: `camporee_clubs`, `camporee_members`, `clubs`, `districts`, `investiture_configs`, `local_camporees`, `union_camporee_local_fields`, `users`
+
+---
 
 #### Tabla: `districts`
-**Campos**: `id` (UUID), `local_field_id` (FK), `name`, `active`, timestamps  
-**Relación**: Many-to-One con `local_fields`
+**Descripción**: Distritos eclesiásticos dentro de un campo local (agrupan iglesias)
+
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `districlub_type_id` | INT | ID único | PK, autoincrement |
+| `name` | VARCHAR(50) | Nombre del distrito | NOT NULL |
+| `active` | BOOLEAN | Distrito activo | DEFAULT false |
+| `local_field_id` | INT | Campo local al que pertenece | FK → local_fields, NOT NULL |
+| `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
+| `modified_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW() |
+
+**Nota**: El PK se llama `districlub_type_id` por razones históricas (fue renombrado pero el nombre quedó así en la BD).
+
+**Relaciones**:
+- Many-to-One: `local_fields`
+- One-to-Many: `churches`, `clubs`
+
+---
 
 #### Tabla: `churches`
-**Campos**: `id` (UUID), `district_id` (FK), `name`, `address`, `active`, timestamps  
-**Relación**: Many-to-One con `districts`
+**Descripción**: Iglesias locales dentro de un distrito (cada iglesia puede tener un club)
+
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `church_id` | INT | ID único | PK, autoincrement |
+| `name` | VARCHAR(50) | Nombre de la iglesia | NOT NULL |
+| `active` | BOOLEAN | Iglesia activa | DEFAULT false |
+| `districlub_type_id` | INT | Distrito al que pertenece | FK → districts, NOT NULL |
+| `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
+| `modified_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW() |
+
+**Relaciones**:
+- Many-to-One: `districts`
+- One-to-Many: `clubs`
 
 ---
 
 ### 🏕️ Módulo: Clubs
 
 #### Tabla: `clubs`
-**Descripción**: Club contenedor (una iglesia tiene 1 club principal)
+**Descripción**: Club contenedor (una iglesia tiene 1 club principal por tipo)
 
 **Campos**:
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| `id` | UUID | ID único | PK |
-| `church_id` | UUID | Iglesia | FK → churches |
-| `name` | VARCHAR(100) | Nombre del club | NOT NULL |
-| `active` | BOOLEAN | Club activo | DEFAULT true |
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `club_id` | INT | ID único | PK, autoincrement |
+| `name` | VARCHAR(50) | Nombre del club | NOT NULL |
+| `description` | STRING | Descripción del club | NULL |
+| `active` | BOOLEAN | Club activo | DEFAULT false |
+| `local_field_id` | INT | Campo local al que pertenece | FK → local_fields, NOT NULL |
+| `address` | STRING | Dirección del club | NULL |
+| `church_id` | INT | Iglesia a la que pertenece | FK → churches, NOT NULL |
+| `coordinates` | JSON | Coordenadas geográficas | NOT NULL |
+| `districlub_type_id` | INT | Distrito al que pertenece | FK → districts, NOT NULL |
+| `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
+| `modified_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW() |
 
-**Relación**: Un club puede tener múltiples secciones por tipo
+**Relaciones**:
+- Many-to-One: `churches`, `districts`, `local_fields`
+- One-to-Many: `club_sections`
 
 ---
 
@@ -324,32 +416,62 @@ UNIQUE (user_id, role_id, club_section_id, ecclesiastical_year_id)
 ### 📚 Módulo: Classes & Honors
 
 #### Tabla: `classes`
-**Descripción**: Clases progresivas (Amigo, Compañero, Explorador, etc.)
-
-**Campos**: `id` (UUID), `name`, `club_type_id`, `order`, `active`
-
-#### Tabla: `honors`
-**Descripción**: Especialidades
-
-**Campos**: `id` (UUID), `name`, `honors_category_id`, `club_type_id`, `difficulty`, `active`
-
-#### Tabla: `users_classes`
-**Descripción**: Trayectoria consolidada por clase y proyección legacy de compatibilidad (`current_class`), no verdad operativa anual primaria
+**Descripción**: Clases progresivas por tipo de club (Amigo, Compañero, Explorador, etc.)
 
 **Campos**:
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| `id` | UUID | ID único |
-| `user_id` | UUID | Usuario |
-| `class_id` | UUID | Clase |
-| `current_class` | BOOLEAN | ¿Es su clase actual? |
-| `investiture` | BOOLEAN | Investido |
-| `date_investiture` | DATE | Fecha de investidura |
-| `certificate` | TEXT | URL del certificado |
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `class_id` | INT | ID único | PK, autoincrement |
+| `name` | VARCHAR(255) | Nombre de la clase | UNIQUE, NOT NULL |
+| `description` | STRING | Descripción de la clase | NULL |
+| `active` | BOOLEAN | Clase activa | NOT NULL |
+| `club_type_id` | INT | Tipo de club al que pertenece | FK → club_types, NOT NULL |
+| `minimum_age` | INT | Edad mínima requerida | NOT NULL |
+| `requires_invested_gm` | BOOLEAN | Requiere Guía Mayor investido | DEFAULT false |
+| `material_url` | VARCHAR | URL del material de estudio | NULL |
+| `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
+| `modified_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW() |
 
-**Nota runtime (FS-02)**:
-- La inscripción operativa anual se resuelve en `enrollments`.
-- `users_classes` se sincroniza temporalmente para consumidores legacy mientras se completa la migración de lecturas.
+**Relaciones**:
+- Many-to-One: `club_types`
+- One-to-Many: `class_module_progress`, `class_modules`, `class_section_progress`, `enrollments`
+
+**Nota histórica**: La relación `users_classes` fue deprecada. El histórico consolidado se resuelve desde `enrollments`.
+
+---
+
+#### Tabla: `honors`
+**Descripción**: Especialidades (logros y habilidades que los miembros pueden obtener)
+
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `honor_id` | INT | ID único | PK, autoincrement |
+| `name` | VARCHAR(100) | Nombre de la especialidad | UNIQUE, NOT NULL |
+| `description` | STRING | Descripción | NULL |
+| `honor_image` | STRING | URL de imagen de la especialidad | NOT NULL |
+| `honors_category_id` | INT | Categoría de la especialidad | FK → honors_categories, NOT NULL |
+| `master_honors_id` | INT | Especialidad maestra asociada | FK → master_honors, NULL |
+| `material_url` | VARCHAR | URL del material de estudio | NOT NULL |
+| `club_type_id` | INT | Tipo de club al que pertenece | FK → club_types, NOT NULL |
+| `active` | BOOLEAN | Especialidad activa | DEFAULT true |
+| `approval` | INT | Nivel de aprobación | DEFAULT 1 |
+| `skill_level` | INT | Nivel de habilidad | DEFAULT 1 |
+| `year` | VARCHAR | Año de la especialidad | NULL |
+| `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
+| `modified_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW() |
+
+**Relaciones**:
+- Many-to-One: `club_types`, `honors_categories`, `master_honors`
+- One-to-Many: `users_honors`
+
+#### Tabla: `users_classes` [DEPRECADA]
+
+**Estado**: ❌ **ARCHIVADA Y ELIMINADA**
+
+Fue archivada como `users_classes_archive` en la migración del 2026-03-20. El histórico consolidado se resuelve completamente desde `enrollments` y sus proyecciones (`class_module_progress`, `class_section_progress`).
+
+**Motivo**: La separación entre "trayectoria consolidada" (legacy) y "inscripción operativa anual" (authority) se resolvió completamente hacia `enrollments` como única fuente de verdad. Los consumidores que necesitaban el histórico consolidado deben consultar directamente `enrollments` con filtros históricos.
 
 #### Tabla: `enrollments`
 **Descripción**: Intento anual operativo de cursado por usuario, clase y año eclesiástico; owner primario del progreso formativo
@@ -403,6 +525,1159 @@ UNIQUE (user_id, role_id, club_section_id, ecclesiastical_year_id)
 **Política de backfill acotado**:
 - Solo se backfillean filas legacy cuyo `user_id + class_id` mapee de forma determinística a una sola inscripción en `enrollments`.
 - Filas ambiguas o sin match quedan con `enrollment_id = NULL` para revisión/manual follow-up; FS-03 no inventa historia perfecta.
+
+---
+
+### 🛡️ Módulo: Insurance
+
+#### Tabla: `member_insurances`
+**Descripción**: Seguro institucional por miembro, usado por la app móvil y por validaciones de camporee.
+
+**Campos relevantes**:
+| Campo | Tipo | Descripción |
+|-------|------|-------------|
+| `insurance_id` | INT | Identidad del seguro |
+| `user_id` | UUID | Usuario asegurado |
+| `insurance_type` | ENUM(`insurance_type_enum`) | Tipo de cobertura |
+| `policy_number` | VARCHAR(100) | Número de póliza |
+| `provider` | VARCHAR(255) | Aseguradora |
+| `start_date` | DATE | Inicio de vigencia |
+| `end_date` | DATE | Fin de vigencia |
+| `coverage_amount` | DECIMAL(10,2) | Monto asegurado |
+| `active` | BOOLEAN | Seguro activo |
+| `evidence_file_url` | VARCHAR(500) | URL de evidencia adjunta |
+| `evidence_file_name` | VARCHAR(255) | Nombre original del archivo |
+| `created_by_id` | UUID | Usuario creador |
+| `modified_by_id` | UUID | Usuario que actualizó por última vez |
+
+**Relaciones**:
+- `users` vía `user_id`
+- `users` vía `created_by_id` y `modified_by_id` para auditoría
+- `camporee_members` vía `insurance_id`
+
+**Notas**:
+- La evidencia se sube al bucket R2 `INSURANCE_EVIDENCE`.
+- El backend expone listado por sección, detalle por miembro y CRUD multipart para el seguro.
+
+---
+
+### 💊 Módulo: Health / Catálogos Médicos
+
+#### Tabla: `diseases`
+**Descripción**: Catálogo de enfermedades/padecimientos que pueden asociarse a usuarios
+
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `disease_id` | INT | ID único | PK, autoincrement |
+| `name` | STRING | Nombre de la enfermedad | UNIQUE, NOT NULL |
+| `description` | STRING | Descripción detallada | NULL |
+| `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
+| `modified_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW(), @updatedAt |
+| `active` | BOOLEAN | Registro activo | DEFAULT true |
+
+**Relaciones**:
+- One-to-Many: `users_diseases`
+
+---
+
+#### Tabla: `allergies`
+**Descripción**: Catálogo de alergias que pueden asociarse a usuarios
+
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `allergy_id` | INT | ID único | PK, autoincrement |
+| `name` | STRING | Nombre de la alergia | UNIQUE, NOT NULL |
+| `description` | STRING | Descripción detallada | NULL |
+| `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
+| `modified_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW(), @updatedAt |
+| `active` | BOOLEAN | Registro activo | DEFAULT true |
+
+**Relaciones**:
+- One-to-Many: `users_allergies`
+
+---
+
+#### Tabla: `medicines`
+**Descripción**: Catálogo de medicamentos que pueden asociarse a usuarios
+
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `medicine_id` | INT | ID único | PK, autoincrement |
+| `name` | VARCHAR | Nombre del medicamento | NOT NULL |
+| `description` | VARCHAR | Descripción detallada | NULL |
+| `active` | BOOLEAN | Registro activo | DEFAULT true |
+| `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
+| `modified_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW(), @updatedAt |
+
+**Relaciones**:
+- One-to-Many: `users_medicines`
+
+---
+
+#### Tabla: `users_allergies`
+**Descripción**: Tabla pivote Many-to-Many entre `users` y `allergies`
+
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `user_allergies_id` | INT | ID único | PK, autoincrement |
+| `user_id` | UUID | Usuario | FK → users, NOT NULL |
+| `allergy_id` | INT | Alergia | FK → allergies, NULL |
+| `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
+| `modified_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW() |
+| `active` | BOOLEAN | Registro activo | DEFAULT true |
+
+**Constraint UNIQUE**: `(user_id, allergy_id)`
+
+**Relaciones**:
+- Many-to-One: `users`, `allergies`
+
+---
+
+#### Tabla: `users_diseases`
+**Descripción**: Tabla pivote Many-to-Many entre `users` y `diseases`
+
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `user_disease_id` | INT | ID único | PK, autoincrement |
+| `user_id` | UUID | Usuario | FK → users, NOT NULL |
+| `disease_id` | INT | Enfermedad | FK → diseases, NOT NULL |
+| `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
+| `modified_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW() |
+| `active` | BOOLEAN | Registro activo | DEFAULT true |
+
+**Constraint UNIQUE**: `(user_id, disease_id)`
+
+**Relaciones**:
+- Many-to-One: `users`, `diseases`
+
+---
+
+#### Tabla: `users_medicines`
+**Descripción**: Tabla pivote Many-to-Many entre `users` y `medicines`
+
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `user_medicine_id` | INT | ID único | PK, autoincrement |
+| `user_id` | UUID | Usuario | FK → users, NOT NULL |
+| `medicine_id` | INT | Medicamento | FK → medicines, NOT NULL |
+| `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
+| `modified_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW() |
+| `active` | BOOLEAN | Registro activo | DEFAULT true |
+
+**Constraint UNIQUE**: `(user_id, medicine_id)`
+
+**Índices**: `idx_users_medicines_medicine_id`, `idx_users_medicines_user_id`
+
+**Relaciones**:
+- Many-to-One: `users`, `medicines`
+
+---
+
+### 📦 Módulo: Inventory
+
+#### Tabla: `inventory_categories`
+**Descripción**: Catálogo de categorías para clasificar ítems del inventario de club
+
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `inventory_category_id` | INT | ID único | PK, autoincrement |
+| `name` | VARCHAR(100) | Nombre de la categoría | NOT NULL |
+| `icon` | INT | Índice de ícono | NULL, DEFAULT 0 |
+| `active` | BOOLEAN | Categoría activa | DEFAULT false |
+| `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
+| `modified_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW() |
+
+**Relaciones**:
+- One-to-Many: `club_inventory`
+
+**Nota de inconsistencia**: El PK en la base real tiene un typo (`inventory_categoty_id`); en schema.prisma se mapea como `inventory_category_id`.
+
+---
+
+#### Tabla: `club_inventory`
+**Descripción**: Ítems del inventario de una sección de club
+
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `club_inventory_id` | INT | ID único | PK, autoincrement |
+| `name` | VARCHAR(100) | Nombre del ítem | NOT NULL |
+| `description` | STRING | Descripción del ítem | NULL |
+| `inventory_category_id` | INT | Categoría | FK → inventory_categories, NULL |
+| `amount` | INT | Cantidad en inventario | NULL, DEFAULT 0 |
+| `active` | BOOLEAN | Ítem activo | DEFAULT false |
+| `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
+| `modified_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW() |
+| `club_section_id` | INT | Sección de club dueña | FK → club_sections, NULL |
+
+**Índices**: `idx_club_inventory_club_section_id`
+
+**Relaciones**:
+- Many-to-One: `club_sections`, `inventory_categories`
+
+---
+
+### 💰 Módulo: Finances
+
+#### Tabla: `finances_categories`
+**Descripción**: Catálogo de categorías financieras (ingresos/egresos)
+
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `finance_category_id` | INT | ID único | PK, autoincrement |
+| `name` | VARCHAR(100) | Nombre de la categoría | NOT NULL |
+| `description` | STRING | Descripción | NULL |
+| `icon` | INT | Índice de ícono | NULL, DEFAULT 0 |
+| `type` | INT | Tipo (ingreso/egreso) | NOT NULL |
+| `active` | BOOLEAN | Categoría activa | DEFAULT false |
+| `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
+| `modified_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW() |
+
+**Constraint UNIQUE**: `(name, type)` (map: `unique_name_type`)
+
+**Relaciones**:
+- One-to-Many: `finances`
+
+---
+
+#### Tabla: `finances`
+**Descripción**: Registros financieros (ingresos y egresos) de un club
+
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `finance_id` | INT | ID único | PK, autoincrement |
+| `year` | INT | Año del registro | NOT NULL |
+| `month` | INT | Mes del registro | NOT NULL |
+| `amount` | INT | Monto | NOT NULL |
+| `description` | STRING | Descripción del movimiento | NULL |
+| `club_type_id` | INT | Tipo de club | FK → club_types, NOT NULL |
+| `finance_category_id` | INT | Categoría financiera | FK → finances_categories, NOT NULL |
+| `finance_date` | DATE | Fecha del movimiento | NOT NULL |
+| `active` | BOOLEAN | Registro activo | DEFAULT false |
+| `created_by` | UUID | Usuario creador | FK → users, NOT NULL |
+| `modified_by_id` | UUID | Usuario que modificó | FK → users, NULL |
+| `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
+| `modified_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW() |
+| `club_section_id` | INT | Sección de club | FK → club_sections, NULL |
+
+**Índices**: `idx_finances_club_section_id`
+
+**Relaciones**:
+- Many-to-One: `club_sections`, `club_types`, `users`, `finances_categories`, `users` (via modified_by_id, relation "finances_modified_by")
+
+---
+
+### 🔐 Módulo: Auth Pivots (Adicionales)
+
+#### Tabla: `users_permissions`
+**Descripción**: Asignación directa de permisos a usuarios (bypass de roles)
+
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `user_permission_id` | UUID | ID único | PK, DEFAULT uuid_generate_v4() |
+| `user_id` | UUID | Usuario | FK → users, NOT NULL |
+| `permission_id` | UUID | Permiso | FK → permissions, NOT NULL |
+| `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
+| `modified_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW() |
+| `active` | BOOLEAN | Asignación activa | DEFAULT true |
+
+**Constraint UNIQUE**: `(user_id, permission_id)`
+
+**Relaciones**:
+- Many-to-One: `users` (ON DELETE CASCADE), `permissions` (ON DELETE CASCADE)
+
+---
+
+#### Tabla: `relationship_types`
+**Descripción**: Catálogo de tipos de relación (padre, madre, tutor, etc.) para contactos de emergencia y representantes legales
+
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `relationship_type_id` | UUID | ID único | PK, DEFAULT uuid_generate_v4() |
+| `name` | VARCHAR(50) | Nombre del tipo de relación | UNIQUE, NOT NULL |
+| `description` | STRING | Descripción | NULL |
+| `active` | BOOLEAN | Tipo activo | DEFAULT true |
+| `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
+| `modified_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW(), @updatedAt |
+
+**Índices**: `idx_relationship_types_name`
+
+**Relaciones**:
+- One-to-Many: `emergency_contacts`, `legal_representatives`
+
+---
+
+### 🏕️ Módulo: Clubs (Auxiliares)
+
+#### Tabla: `club_types`
+**Descripción**: Catálogo de tipos de club (Aventureros, Conquistadores, Guías Mayores)
+
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `club_type_id` | INT | ID único | PK, autoincrement |
+| `name` | VARCHAR(50) | Nombre del tipo | UNIQUE, NOT NULL |
+| `active` | BOOLEAN | Tipo activo | DEFAULT false |
+| `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
+| `modified_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW() |
+
+**Relaciones**:
+- One-to-Many: `activities`, `classes`, `club_ideals`, `club_sections`, `finances`, `folders`, `honors`, `units`
+
+---
+
+#### Tabla: `ecclesiastical_years`
+**Descripción**: Años eclesiásticos (períodos administrativos anuales de la iglesia)
+
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `year_id` | INT | ID único | PK, autoincrement |
+| `start_date` | DATE | Fecha de inicio del año eclesiástico | NOT NULL |
+| `end_date` | DATE | Fecha de fin del año eclesiástico | NOT NULL |
+| `active` | BOOLEAN | Año activo | DEFAULT false |
+| `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
+| `modified_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW() |
+
+**Relaciones**:
+- One-to-Many: `club_role_assignments`, `enrollments`, `folders`, `investiture_configs`, `local_camporees`, `union_camporees`
+
+---
+
+#### Tabla: `units`
+**Descripción**: Unidades dentro de una sección de club (agrupaciones de miembros con capitán, secretario y consejero)
+
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `unit_id` | INT | ID único | PK, autoincrement |
+| `name` | VARCHAR(255) | Nombre de la unidad | NOT NULL |
+| `captain_id` | UUID | Capitán de la unidad | FK → users, NOT NULL |
+| `secretary_id` | UUID | Secretario de la unidad | FK → users, NOT NULL |
+| `advisor_id` | UUID | Consejero de la unidad | FK → users, NOT NULL |
+| `substitute_advisor_id` | UUID | Consejero suplente | FK → users, NULL |
+| `club_type_id` | INT | Tipo de club | FK → club_types, NOT NULL |
+| `active` | BOOLEAN | Unidad activa | NOT NULL |
+| `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
+| `modified_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW() |
+| `club_section_id` | INT | Sección de club | FK → club_sections, NULL |
+
+**Índices**: `idx_units_club_section_id`
+
+**Relaciones**:
+- Many-to-One: `users` (advisor_id), `users` (captain_id), `club_sections`, `club_types`, `users` (secretary_id), `users` (substitute_advisor_id)
+- One-to-Many: `unit_members`
+
+---
+
+#### Tabla: `unit_members`
+**Descripción**: Membresía de usuarios en unidades de club
+
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `unit_member_id` | INT | ID único | PK, autoincrement |
+| `unit_id` | INT | Unidad | FK → units, NOT NULL |
+| `user_id` | UUID | Usuario miembro | UNIQUE, FK → users, NOT NULL |
+| `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
+| `modified_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW() |
+| `active` | BOOLEAN | Membresía activa | DEFAULT true |
+
+**Relaciones**:
+- Many-to-One: `units`, `users`
+
+**Nota**: `user_id` es UNIQUE — un usuario solo puede pertenecer a una unidad.
+
+---
+
+#### Tabla: `club_ideals`
+**Descripción**: Ideales del club por tipo (himno, lema, voto, ley, etc.)
+
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `club_ideal_id` | INT | ID único | PK, autoincrement |
+| `name` | VARCHAR(50) | Nombre del ideal (ej: "Himno", "Lema") | NOT NULL |
+| `ideal_order` | INT | Orden de presentación | NOT NULL |
+| `club_type_id` | INT | Tipo de club | FK → club_types, NOT NULL |
+| `active` | BOOLEAN | Ideal activo | DEFAULT false |
+| `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
+| `modified_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW() |
+| `ideal` | STRING | Contenido/texto del ideal | NULL |
+
+**Relaciones**:
+- Many-to-One: `club_types`
+
+---
+
+### 📅 Módulo: Activities
+
+#### Tabla: `activity_types`
+**Descripción**: Catálogo de tipos de actividad (campamento, excursión, reunión, etc.)
+
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `activity_type_id` | INT | ID único | PK, autoincrement |
+| `code` | VARCHAR(50) | Código único de tipo | UNIQUE, NOT NULL |
+| `name` | VARCHAR(100) | Nombre del tipo | UNIQUE, NOT NULL |
+| `description` | STRING | Descripción | NULL |
+| `active` | BOOLEAN | Tipo activo | DEFAULT true |
+| `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
+| `modified_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW() |
+
+**Relaciones**:
+- One-to-Many: `activities`
+
+---
+
+#### Tabla: `activities`
+**Descripción**: Actividades programadas de un club (campamentos, excursiones, reuniones)
+
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `activity_id` | INT | ID único | PK, autoincrement |
+| `name` | VARCHAR(80) | Nombre de la actividad | NOT NULL |
+| `description` | STRING | Descripción | NULL |
+| `club_type_id` | INT | Tipo de club | FK → club_types, NOT NULL |
+| `active` | BOOLEAN | Actividad activa | DEFAULT false |
+| `lat` | FLOAT | Latitud de ubicación | NOT NULL |
+| `long` | FLOAT | Longitud de ubicación | NOT NULL |
+| `activity_time` | VARCHAR(10) | Hora de la actividad | DEFAULT "09:00" |
+| `activity_place` | STRING | Lugar de la actividad | DEFAULT "place" |
+| `image` | STRING | URL de imagen | NOT NULL |
+| `platform` | INT | Plataforma (0=presencial) | DEFAULT 0 |
+| `link_meet` | STRING | Link de videollamada | NULL |
+| `additional_data` | STRING | Datos adicionales | NULL |
+| `attendees` | JSON | Lista de asistentes | NULL |
+| `classes` | JSON | Clases asociadas | NULL |
+| `created_by` | UUID | Usuario creador | FK → users, NOT NULL |
+| `created_at` | TIMESTAMPTZ | Fecha de creación | NULL |
+| `modified_at` | TIMESTAMPTZ | Última actualización | NULL |
+| `activity_type_id` | INT | Tipo de actividad | FK → activity_types, NOT NULL |
+| `club_section_id` | INT | Sección de club | FK → club_sections, NULL |
+
+**Índices**: `idx_activities_activity_type_id`, `idx_activities_club_section_id`
+
+**Relaciones**:
+- Many-to-One: `activity_types`, `club_sections`, `club_types`, `users`
+- One-to-Many: `activity_instances`
+
+---
+
+#### Tabla: `activity_instances`
+**Descripción**: Instancias de una actividad por sección de club (permite reutilizar una actividad en múltiples secciones)
+
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `activity_instance_id` | INT | ID único | PK, autoincrement |
+| `activity_id` | INT | Actividad base | FK → activities (ON DELETE CASCADE), NOT NULL |
+| `active` | BOOLEAN | Instancia activa | DEFAULT true |
+| `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
+| `modified_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW(), @updatedAt |
+| `club_section_id` | INT | Sección de club | FK → club_sections, NULL |
+
+**Constraint UNIQUE**: `(activity_id, club_section_id)` (map: `activity_instances_unique_instance_per_activity`)
+
+**Índices**: `idx_activity_instances_activity`, `idx_activity_instances_club_section_id`
+
+**Relaciones**:
+- Many-to-One: `activities`, `club_sections`
+
+---
+
+### 🏅 Módulo: Honors (Auxiliares)
+
+#### Tabla: `honors_categories`
+**Descripción**: Catálogo de categorías de especialidades (Naturaleza, Manualidades, etc.)
+
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `honor_category_id` | INT | ID único | PK, autoincrement |
+| `name` | VARCHAR(100) | Nombre de la categoría | UNIQUE, NOT NULL |
+| `description` | STRING | Descripción | NULL |
+| `icon` | INT | Índice de ícono | NULL |
+| `active` | BOOLEAN | Categoría activa | DEFAULT false |
+| `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
+| `modified_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW() |
+
+**Relaciones**:
+- One-to-Many: `honors`
+
+---
+
+#### Tabla: `master_honors`
+**Descripción**: Especialidades maestras (agrupan especialidades regulares para el programa de Guía Mayor)
+
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `master_honor_id` | INT | ID único | PK, autoincrement |
+| `name` | VARCHAR(100) | Nombre de la especialidad maestra | UNIQUE, NOT NULL |
+| `master_image` | STRING | URL de imagen | NULL |
+| `active` | BOOLEAN | Registro activo | DEFAULT false |
+| `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
+| `modified_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW() |
+
+**Relaciones**:
+- One-to-Many: `honors`
+
+---
+
+#### Tabla: `users_honors`
+**Descripción**: Especialidades obtenidas por usuarios
+
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `user_honor_id` | INT | ID único | PK, autoincrement |
+| `user_id` | UUID | Usuario | FK → users, NOT NULL |
+| `honor_id` | INT | Especialidad | FK → honors, NOT NULL |
+| `active` | BOOLEAN | Registro activo | DEFAULT true |
+| `validate` | BOOLEAN | Validada por instructor | DEFAULT false |
+| `certificate` | VARCHAR | URL del certificado | NOT NULL |
+| `images` | JSON | Imágenes de evidencia | DEFAULT "[]" |
+| `document` | VARCHAR | URL de documento adjunto | NULL |
+| `date` | DATE | Fecha de obtención | NOT NULL |
+| `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
+| `modified_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW() |
+
+**Constraint UNIQUE**: `(user_id, honor_id)`
+
+**Índices**: `idx_users_honors_user_id`
+
+**Relaciones**:
+- Many-to-One: `users`, `honors`
+
+---
+
+### 📚 Módulo: Classes (Auxiliares)
+
+#### Tabla: `class_modules`
+**Descripción**: Módulos que componen una clase progresiva
+
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `module_id` | INT | ID único | PK, autoincrement |
+| `name` | VARCHAR(255) | Nombre del módulo | NOT NULL |
+| `description` | STRING | Descripción | NULL |
+| `class_id` | INT | Clase a la que pertenece | FK → classes, NOT NULL |
+| `active` | BOOLEAN | Módulo activo | NOT NULL |
+| `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
+| `modified_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW() |
+
+**Constraint UNIQUE**: `(name, class_id)`
+
+**Relaciones**:
+- Many-to-One: `classes`
+- One-to-Many: `class_sections`
+
+---
+
+#### Tabla: `class_sections`
+**Descripción**: Secciones dentro de un módulo de clase (unidades evaluables)
+
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `section_id` | INT | ID único | PK, autoincrement |
+| `name` | VARCHAR(255) | Nombre de la sección | NOT NULL |
+| `description` | STRING | Descripción | NULL |
+| `module_id` | INT | Módulo al que pertenece | FK → class_modules, NOT NULL |
+| `active` | BOOLEAN | Sección activa | NOT NULL |
+| `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
+| `modified_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW() |
+
+**Constraint UNIQUE**: `(name, module_id)`
+
+**Relaciones**:
+- Many-to-One: `class_modules`
+
+---
+
+### 🎓 Módulo: Certifications
+
+#### Tabla: `certifications`
+**Descripción**: Catálogo de certificaciones (programas formativos adicionales más allá de clases progresivas)
+
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `certification_id` | INT | ID único | PK, autoincrement |
+| `name` | VARCHAR(255) | Nombre de la certificación | UNIQUE, NOT NULL |
+| `description` | STRING | Descripción | NULL |
+| `material_url` | VARCHAR | URL del material de estudio | NULL |
+| `active` | BOOLEAN | Certificación activa | DEFAULT true |
+| `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
+| `modified_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW(), @updatedAt |
+| `duration_hours` | INT | Duración estimada en horas | NULL |
+
+**Relaciones**:
+- One-to-Many: `certification_module_progress`, `certification_modules`, `certification_section_progress`, `users_certifications`
+
+---
+
+#### Tabla: `certification_modules`
+**Descripción**: Módulos que componen una certificación
+
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `module_id` | INT | ID único | PK, autoincrement |
+| `name` | VARCHAR(255) | Nombre del módulo | NOT NULL |
+| `description` | STRING | Descripción | NULL |
+| `certification_id` | INT | Certificación a la que pertenece | FK → certifications, NOT NULL |
+| `active` | BOOLEAN | Módulo activo | DEFAULT true |
+| `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
+| `modified_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW(), @updatedAt |
+
+**Constraint UNIQUE**: `(name, certification_id)`
+
+**Relaciones**:
+- Many-to-One: `certifications`
+- One-to-Many: `certification_sections`
+
+---
+
+#### Tabla: `certification_sections`
+**Descripción**: Secciones dentro de un módulo de certificación (unidades evaluables)
+
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `section_id` | INT | ID único | PK, autoincrement |
+| `name` | VARCHAR(255) | Nombre de la sección | NOT NULL |
+| `description` | STRING | Descripción | NULL |
+| `module_id` | INT | Módulo al que pertenece | FK → certification_modules, NOT NULL |
+| `active` | BOOLEAN | Sección activa | DEFAULT true |
+| `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
+| `modified_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW(), @updatedAt |
+
+**Constraint UNIQUE**: `(name, module_id)`
+
+**Relaciones**:
+- Many-to-One: `certification_modules`
+
+---
+
+#### Tabla: `users_certifications`
+**Descripción**: Inscripciones de usuarios a certificaciones y su estado de completado
+
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `enrollment_id` | INT | ID único | PK, autoincrement |
+| `user_id` | UUID | Usuario inscrito | FK → users, NOT NULL |
+| `certification_id` | INT | Certificación | FK → certifications, NOT NULL |
+| `enrollment_date` | TIMESTAMPTZ | Fecha de inscripción | DEFAULT NOW() |
+| `completion_status` | BOOLEAN | ¿Certificación completada? | DEFAULT false |
+| `completion_date` | TIMESTAMPTZ | Fecha de completado | NULL |
+| `certificate_url` | VARCHAR | URL del certificado emitido | NULL |
+| `active` | BOOLEAN | Inscripción activa | DEFAULT true |
+| `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
+| `modified_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW(), @updatedAt |
+
+**Índices**: `idx_users_certifications_completion` sobre `(user_id, completion_status)`
+
+**Relaciones**:
+- Many-to-One: `certifications`, `users`
+
+---
+
+#### Tabla: `certification_module_progress`
+**Descripción**: Progreso de un usuario por módulo de certificación
+
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `progress_id` | INT | ID único | PK, autoincrement |
+| `user_id` | UUID | Usuario | FK → users, NOT NULL |
+| `certification_id` | INT | Certificación | FK → certifications, NOT NULL |
+| `module_id` | INT | Módulo | NOT NULL |
+| `score` | FLOAT | Puntaje obtenido | NOT NULL |
+| `active` | BOOLEAN | Registro activo | DEFAULT true |
+| `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
+| `modified_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW(), @updatedAt |
+| `completed` | BOOLEAN | ¿Módulo completado? | DEFAULT false |
+| `completion_date` | TIMESTAMPTZ | Fecha de completado | NULL |
+
+**Constraint UNIQUE**: `(user_id, certification_id, module_id)`
+
+**Relaciones**:
+- Many-to-One: `certifications`, `users`
+
+---
+
+#### Tabla: `certification_section_progress`
+**Descripción**: Progreso de un usuario por sección de certificación
+
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `progress_id` | INT | ID único | PK, autoincrement |
+| `user_id` | UUID | Usuario | FK → users, NOT NULL |
+| `certification_id` | INT | Certificación | FK → certifications, NOT NULL |
+| `module_id` | INT | Módulo | NOT NULL |
+| `section_id` | INT | Sección | NOT NULL |
+| `score` | FLOAT | Puntaje obtenido | NOT NULL |
+| `evidences` | JSON | Evidencias adjuntas | NULL |
+| `active` | BOOLEAN | Registro activo | DEFAULT true |
+| `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
+| `modified_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW(), @updatedAt |
+| `completed` | BOOLEAN | ¿Sección completada? | DEFAULT false |
+| `completion_date` | TIMESTAMPTZ | Fecha de completado | NULL |
+
+**Constraint UNIQUE**: `(user_id, certification_id, module_id, section_id)`
+
+**Relaciones**:
+- Many-to-One: `certifications`, `users`
+
+---
+
+### 🏕️ Módulo: Camporees
+
+#### Tabla: `local_camporees`
+**Descripción**: Camporees a nivel de campo local (eventos presenciales de competencia entre clubes)
+
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `local_camporee_id` | INT | ID único | PK, autoincrement |
+| `name` | VARCHAR(255) | Nombre del camporee | NOT NULL |
+| `description` | STRING | Descripción | NULL |
+| `start_date` | DATE | Fecha de inicio | NOT NULL |
+| `end_date` | DATE | Fecha de fin | NOT NULL |
+| `local_field_id` | INT | Campo local organizador | FK → local_fields, NOT NULL |
+| `includes_adventurers` | BOOLEAN | Incluye Aventureros | DEFAULT false, NULL |
+| `includes_pathfinders` | BOOLEAN | Incluye Conquistadores | DEFAULT false, NULL |
+| `includes_master_guides` | BOOLEAN | Incluye Guías Mayores | DEFAULT false, NULL |
+| `local_camporee_place` | STRING | Lugar del camporee | DEFAULT "Lugar" |
+| `registration_cost` | DECIMAL(10,2) | Costo de inscripción | NULL |
+| `ecclesiastical_year` | INT | Año eclesiástico | FK → ecclesiastical_years, NOT NULL |
+| `active` | BOOLEAN | Camporee activo | DEFAULT true |
+| `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
+| `modified_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW() |
+
+**Relaciones**:
+- Many-to-One: `ecclesiastical_years`, `local_fields`
+- One-to-Many: `camporee_clubs`, `camporee_members`
+
+---
+
+#### Tabla: `union_camporees`
+**Descripción**: Camporees a nivel de unión (eventos regionales de mayor escala)
+
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `union_camporee_id` | INT | ID único | PK, autoincrement |
+| `name` | VARCHAR(255) | Nombre del camporee | NOT NULL |
+| `description` | STRING | Descripción | NULL |
+| `start_date` | DATE | Fecha de inicio | NOT NULL |
+| `end_date` | DATE | Fecha de fin | NOT NULL |
+| `union_id` | INT | Unión organizadora | FK → unions, NOT NULL |
+| `includes_adventurers` | BOOLEAN | Incluye Aventureros | DEFAULT false, NULL |
+| `includes_pathfinders` | BOOLEAN | Incluye Conquistadores | DEFAULT false, NULL |
+| `includes_master_guides` | BOOLEAN | Incluye Guías Mayores | DEFAULT false, NULL |
+| `union_camporee_place` | STRING | Lugar del camporee | DEFAULT "Lugar" |
+| `registration_cost` | DECIMAL(10,2) | Costo de inscripción | NULL |
+| `ecclesiastical_year` | INT | Año eclesiástico | FK → ecclesiastical_years, NOT NULL |
+| `active` | BOOLEAN | Camporee activo | DEFAULT true |
+| `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
+| `modified_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW() |
+
+**Relaciones**:
+- Many-to-One: `ecclesiastical_years`, `unions`
+- One-to-Many: `union_camporee_local_fields`
+
+---
+
+#### Tabla: `union_camporee_local_fields`
+**Descripción**: Tabla pivote entre camporees de unión y campos locales participantes
+
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `union_camporee_lf_id` | INT | ID del camporee de unión | PK (compuesto), FK → union_camporees (ON DELETE CASCADE) |
+| `local_field_id` | INT | Campo local participante | PK (compuesto), FK → local_fields (ON DELETE CASCADE) |
+| `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
+| `modified_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW() |
+| `active` | BOOLEAN | Relación activa | DEFAULT true |
+
+**PK compuesta**: `(union_camporee_lf_id, local_field_id)`
+
+**Relaciones**:
+- Many-to-One: `local_fields`, `union_camporees`
+
+---
+
+#### Tabla: `camporee_clubs`
+**Descripción**: Clubes inscritos en un camporee local
+
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `camporee_club_id` | INT | ID único | PK, autoincrement |
+| `camporee_id` | INT | Camporee | FK → local_camporees (ON DELETE CASCADE), NOT NULL |
+| `camporee_type` | VARCHAR(50) | Tipo de camporee | NOT NULL |
+| `club_id` | INT | Club (legacy) | NULL |
+| `local_field_id` | INT | Campo local | FK → local_fields (ON DELETE CASCADE), NULL |
+| `active` | BOOLEAN | Inscripción activa | DEFAULT true |
+| `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
+| `modified_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW() |
+| `club_section_id` | INT | Sección de club | FK → club_sections, NULL |
+
+**Índices**: `idx_camporee_clubs_club_section_id`
+
+**Relaciones**:
+- Many-to-One: `local_camporees`, `club_sections`, `local_fields`
+
+---
+
+#### Tabla: `camporee_members`
+**Descripción**: Miembros individuales inscritos en un camporee local
+
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `camporee_member_id` | INT | ID único | PK, autoincrement |
+| `camporee_id` | INT | Camporee | FK → local_camporees (ON DELETE CASCADE), NOT NULL |
+| `camporee_type` | VARCHAR(50) | Tipo de camporee | NOT NULL |
+| `user_id` | UUID | Usuario miembro | FK → users, NOT NULL |
+| `club_name` | VARCHAR(255) | Nombre del club (desnormalizado) | NULL |
+| `local_field_id` | INT | Campo local | FK → local_fields (ON DELETE CASCADE), NULL |
+| `insurance_verified` | BOOLEAN | Seguro verificado | DEFAULT false |
+| `insurance_id` | INT | Seguro del miembro | FK → member_insurances, NULL |
+| `active` | BOOLEAN | Inscripción activa | DEFAULT true |
+| `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
+| `modified_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW() |
+
+**Relaciones**:
+- Many-to-One: `local_camporees`, `member_insurances`, `local_fields`, `users`
+
+---
+
+### 🎖️ Módulo: Investiture
+
+#### Tabla: `investiture_validation_history`
+**Descripción**: Historial de acciones de validación del proceso de investidura
+
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `history_id` | INT | ID único | PK, autoincrement |
+| `enrollment_id` | INT | Inscripción | FK → enrollments (ON DELETE CASCADE), NOT NULL |
+| `action` | ENUM(investiture_action_enum) | Acción realizada (`SUBMITTED`, `APPROVED`, `REJECTED`, `REINVESTITURE_REQUESTED`) | NOT NULL |
+| `performed_by` | UUID | Usuario que realizó la acción | FK → users, NOT NULL |
+| `comments` | STRING | Comentarios opcionales | NULL |
+| `created_at` | TIMESTAMPTZ | Fecha de la acción | DEFAULT NOW() |
+
+**Índices**: `idx_investiture_history_enrollment`
+
+**Relaciones**:
+- Many-to-One: `enrollments`, `users`
+
+---
+
+#### Tabla: `investiture_config`
+**Descripción**: Configuración de investidura por campo local y año eclesiástico (fechas límite)
+
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `config_id` | INT | ID único | PK, autoincrement |
+| `local_field_id` | INT | Campo local | FK → local_fields (ON DELETE CASCADE), NOT NULL |
+| `ecclesiastical_year_id` | INT | Año eclesiástico | FK → ecclesiastical_years (ON DELETE CASCADE), NOT NULL |
+| `submission_deadline` | DATE | Fecha límite de envío | NOT NULL |
+| `investiture_date` | DATE | Fecha de investidura programada | NOT NULL |
+| `active` | BOOLEAN | Configuración activa | DEFAULT true |
+| `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
+| `modified_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW(), @updatedAt |
+
+**Constraint UNIQUE**: `(local_field_id, ecclesiastical_year_id)`
+
+**Relaciones**:
+- Many-to-One: `ecclesiastical_years`, `local_fields`
+
+---
+
+### 📁 Módulo: Folders (Carpetas de Evaluación)
+
+#### Tabla: `folders`
+**Descripción**: Carpetas de evaluación del club por año eclesiástico (contienen módulos y secciones calificables)
+
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `folder_id` | INT | ID único | PK, autoincrement |
+| `name` | VARCHAR(255) | Nombre de la carpeta | UNIQUE, NOT NULL |
+| `description` | STRING | Descripción | NULL |
+| `active` | BOOLEAN | Carpeta activa | DEFAULT false |
+| `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
+| `modified_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW() |
+| `club_type` | INT | Tipo de club | FK → club_types, NULL |
+| `ecclesiastical_year_id` | INT | Año eclesiástico | FK → ecclesiastical_years, NULL |
+| `status` | VARCHAR(50) | Estado de la carpeta | DEFAULT "incompleto" |
+| `total_points` | INT | Puntos acumulados | DEFAULT 0 |
+| `max_points` | INT | Puntaje máximo posible | DEFAULT 0 |
+| `minimum_points` | INT | Puntaje mínimo requerido | DEFAULT 0 |
+
+**Relaciones**:
+- Many-to-One: `club_types`, `ecclesiastical_years`
+- One-to-Many: `folder_assignments`, `folders_modules`, `folders_modules_records`, `folders_section_records`
+
+---
+
+#### Tabla: `folders_modules`
+**Descripción**: Módulos dentro de una carpeta de evaluación
+
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `folder_module_id` | INT | ID único | PK, autoincrement |
+| `name` | VARCHAR(255) | Nombre del módulo | NOT NULL |
+| `description` | STRING | Descripción | NULL |
+| `folder_id` | INT | Carpeta a la que pertenece | FK → folders, NULL |
+| `total_points` | INT | Puntos acumulados | DEFAULT 0 |
+| `max_points` | INT | Puntaje máximo posible | DEFAULT 0 |
+| `minimum_points` | INT | Puntaje mínimo requerido | DEFAULT 0 |
+| `active` | BOOLEAN | Módulo activo | DEFAULT true |
+| `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
+| `modified_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW() |
+
+**Relaciones**:
+- Many-to-One: `folders`
+- One-to-Many: `folders_modules_records`, `folders_section_records`, `folders_sections`
+
+---
+
+#### Tabla: `folders_sections`
+**Descripción**: Secciones dentro de un módulo de carpeta (unidades evaluables individuales)
+
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `folder_section_id` | INT | ID único | PK, autoincrement |
+| `name` | VARCHAR(255) | Nombre de la sección | NOT NULL |
+| `description` | STRING | Descripción | NULL |
+| `module_id` | INT | Módulo al que pertenece | FK → folders_modules, NULL |
+| `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
+| `modified_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW() |
+| `total_points` | INT | Puntos acumulados | DEFAULT 0 |
+| `max_points` | INT | Puntaje máximo posible | DEFAULT 0 |
+| `minimum_points` | INT | Puntaje mínimo requerido | DEFAULT 0 |
+| `active` | BOOLEAN | Sección activa | DEFAULT true |
+
+**Relaciones**:
+- Many-to-One: `folders_modules`
+- One-to-Many: `folders_section_records`
+
+---
+
+#### Tabla: `folder_assignments`
+**Descripción**: Asignación de carpetas a usuarios miembros para seguimiento individual
+
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `folder_assignment_id` | INT | ID único | PK, autoincrement |
+| `folder_id` | INT | Carpeta asignada | FK → folders, NULL |
+| `active` | BOOLEAN | Asignación activa | DEFAULT true |
+| `assignment_date` | TIMESTAMPTZ | Fecha de asignación | DEFAULT NOW() |
+| `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
+| `modified_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW() |
+| `user_id` | UUID | Usuario asignado | FK → users, NULL |
+| `completion_date` | TIMESTAMPTZ | Fecha de completado | NULL |
+| `progress_percentage` | FLOAT | Porcentaje de avance | DEFAULT 0 |
+| `status` | STRING | Estado de la asignación | DEFAULT "IN_PROGRESS" |
+| `total_points` | INT | Puntos acumulados | DEFAULT 0 |
+| `club_section_id` | INT | Sección de club | FK → club_sections, NULL |
+
+**Índices**: `idx_folder_assignments_club_section_id`
+
+**Relaciones**:
+- Many-to-One: `users`, `club_sections`, `folders`
+
+---
+
+#### Tabla: `folders_modules_records`
+**Descripción**: Registros de puntaje por módulo de carpeta por sección de club
+
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `folder_module_record_id` | INT | ID único | PK, autoincrement |
+| `folder_id` | INT | Carpeta | FK → folders, NULL |
+| `module_id` | INT | Módulo de carpeta | FK → folders_modules, NULL |
+| `points` | INT | Puntos obtenidos | DEFAULT 0 |
+| `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
+| `modified_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW() |
+| `active` | BOOLEAN | Registro activo | DEFAULT true |
+| `club_section_id` | INT | Sección de club | FK → club_sections, NULL |
+
+**Índices**: `idx_folders_modules_records_club_section_id`
+
+**Relaciones**:
+- Many-to-One: `club_sections`, `folders`, `folders_modules`
+
+---
+
+#### Tabla: `folders_section_records`
+**Descripción**: Registros de puntaje por sección de carpeta, con evidencias y flujo de validación
+
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `folder_section_record_id` | INT | ID único | PK, autoincrement |
+| `folder_id` | INT | Carpeta | FK → folders, NULL |
+| `module_id` | INT | Módulo de carpeta | FK → folders_modules, NULL |
+| `section_id` | INT | Sección de carpeta | FK → folders_sections, NULL |
+| `points` | INT | Puntos obtenidos | DEFAULT 0 |
+| `pdf_file` | VARCHAR(255) | URL del archivo PDF adjunto | NULL |
+| `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
+| `modified_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW() |
+| `evidences` | JSON | Evidencias adjuntas (legacy) | NULL |
+| `active` | BOOLEAN | Registro activo | DEFAULT true |
+| `club_section_id` | INT | Sección de club | FK → club_sections, NULL |
+| `status` | VARCHAR(20) | Estado de validación | DEFAULT "pendiente" |
+| `submitted_by_id` | UUID | Usuario que envió | FK → users, NULL |
+| `submitted_at` | TIMESTAMPTZ | Fecha de envío | NULL |
+| `validated_by_id` | UUID | Usuario que validó | FK → users, NULL |
+| `validated_at` | TIMESTAMPTZ | Fecha de validación | NULL |
+| `earned_points` | INT | Puntos efectivamente ganados | DEFAULT 0 |
+
+**Índices**: `idx_folders_section_records_club_section_id`
+
+**Relaciones**:
+- Many-to-One: `club_sections`, `folders`, `folders_modules`, `folders_sections`, `users` (submitted_by), `users` (validated_by)
+- One-to-Many: `evidence_files`
+
+---
+
+#### Tabla: `evidence_files`
+**Descripción**: Archivos de evidencia asociados a registros de sección de carpeta
+
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `evidence_file_id` | INT | ID único | PK, autoincrement |
+| `section_record_id` | INT | Registro de sección | FK → folders_section_records (ON DELETE CASCADE), NOT NULL |
+| `file_url` | VARCHAR(500) | URL del archivo en R2/storage | NOT NULL |
+| `file_name` | VARCHAR(255) | Nombre original del archivo | NOT NULL |
+| `file_type` | VARCHAR(50) | Tipo MIME del archivo | NOT NULL |
+| `uploaded_by_id` | UUID | Usuario que subió el archivo | FK → users, NOT NULL |
+| `uploaded_at` | TIMESTAMPTZ | Fecha de subida | DEFAULT NOW() |
+| `active` | BOOLEAN | Archivo activo | DEFAULT true |
+
+**Índices**: `idx_evidence_files_section_record`, `idx_evidence_files_uploaded_by`
+
+**Relaciones**:
+- Many-to-One: `folders_section_records`, `users`
+
+---
+
+### ⚙️ Módulo: System / Notifications
+
+#### Tabla: `error_logs`
+**Descripción**: Logs de errores de procedimientos almacenados y procesos del sistema
+
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `log_id` | INT | ID único | PK, autoincrement |
+| `procedure_name` | VARCHAR(100) | Nombre del procedimiento que falló | NOT NULL |
+| `error_message` | STRING | Mensaje de error | NOT NULL |
+| `additional_details` | STRING | Detalles adicionales de contexto | NOT NULL |
+| `created_at` | TIMESTAMPTZ | Fecha del error | DEFAULT NOW() |
+
+---
+
+#### Tabla: `user_fcm_tokens`
+**Descripción**: Tokens Firebase Cloud Messaging para push notifications por dispositivo
+
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `fcm_token_id` | UUID | ID único | PK, DEFAULT uuid_generate_v4() |
+| `user_id` | UUID | Usuario dueño del token | FK → users (ON DELETE CASCADE), NOT NULL |
+| `token` | VARCHAR(255) | Token FCM del dispositivo | UNIQUE, NOT NULL |
+| `device_type` | VARCHAR(50) | Tipo de dispositivo (ios/android) | NULL |
+| `device_name` | VARCHAR(100) | Nombre del dispositivo | NULL |
+| `active` | BOOLEAN | Token activo | DEFAULT true |
+| `last_used` | TIMESTAMPTZ | Última vez que se usó | DEFAULT NOW() |
+| `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
+| `modified_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW(), @updatedAt |
+
+**Índices**: `idx_user_fcm_tokens_active`, `idx_user_fcm_tokens_user_id`
+
+**Relaciones**:
+- Many-to-One: `users`
+
+---
+
+#### Tabla: `weekly_records`
+**Descripción**: Registros semanales de asistencia, puntualidad y puntos por miembro
+
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `record_id` | INT | ID único | PK, autoincrement |
+| `user_id` | UUID | Usuario miembro | FK → users, NOT NULL |
+| `week` | INT | Número de semana | NOT NULL |
+| `attendance` | INT | Puntos de asistencia | NOT NULL |
+| `punctuality` | INT | Puntos de puntualidad | NOT NULL |
+| `points` | INT | Puntos totales de la semana | NOT NULL |
+| `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
+| `modified_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW() |
+| `active` | BOOLEAN | Registro activo | DEFAULT true |
+
+**Constraint UNIQUE**: `(user_id, week)`
+
+**Relaciones**:
+- Many-to-One: `users`
+
+---
+
+### 🔖 Módulo: Enums
+
+#### Enum: `blood_type`
+**Valores**: `A+`, `A-`, `B+`, `B-`, `AB+`, `AB-`, `O+`, `O-`
+
+#### Enum: `gender`
+**Valores**: `Masculino`, `Femenino`
+
+#### Enum: `role_category`
+**Valores**: `GLOBAL`, `CLUB`
+
+#### Enum: `user_approval_status`
+**Valores**: `pending`, `approved`, `rejected`
+
+#### Enum: `investiture_status_enum`
+**Valores**: `IN_PROGRESS`, `SUBMITTED_FOR_VALIDATION`, `APPROVED`, `REJECTED`, `INVESTIDO`
+
+#### Enum: `investiture_action_enum`
+**Valores**: `SUBMITTED`, `APPROVED`, `REJECTED`, `REINVESTITURE_REQUESTED`
+
+#### Enum: `insurance_type_enum`
+**Valores**: `GENERAL_ACTIVITIES`, `CAMPOREE`, `HIGH_RISK`
+
+#### Enum: `evidence_validation_enum`
+**Valores**: `PENDING`, `VALIDATED`, `REJECTED`
 
 ---
 
@@ -542,5 +1817,5 @@ CREATE INDEX idx_churches_district ON churches(district_id) WHERE active = true;
 
 ---
 
-**Última actualización**: 2026-03-18 (club_sections consolidation applied — 3 tables → 1, 3 FK nullables → 1 FK directa)
+**Última actualización**: 2026-03-20 (Wave 3 — cobertura completa: 71 modelos + 8 enums documentados, campos verbatim de schema.prisma)
 **Fuentes**: `schema.prisma` (fuente de verdad), `relations.md`, `auditoria-naming-bd.md`, `verificacion-schema-prisma.md`

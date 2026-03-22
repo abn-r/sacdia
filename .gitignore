@@ -19,6 +19,7 @@ sacdia-admin/
 *.tmp
 *.log
 .cache/
+.pnpm-store/
 
 # Local AI context files (personal, non-versioned)
 *.local.md
@@ -28,3 +29,4 @@ sacdia-admin/
 .agent/
 .agents/
 .opencode/
+.worktrees/

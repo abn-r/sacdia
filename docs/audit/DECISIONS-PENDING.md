@@ -101,3 +101,58 @@ Fuente: Reality Matrix + Canon verification
 | `PATCH /insurance/:insuranceId` | Update insurance sin backend | Idem |
 
 **Nota**: Ninguno de estos endpoints estaba en ENDPOINTS-LIVE-REFERENCE.md, por lo que no se removio nada de ese documento. El gap es entre lo que los clientes consumen y lo que el backend expone. Todos marcados como pendientes de implementacion en sus respectivos archivos de features.
+
+---
+
+## Gaps de implementacion — Wave 2 (2026-03-20)
+
+Descubiertos durante auditoría Wave 2. Fuente: docs de features bajo `docs/features/` y `docs/canon/completion-matrix.md` (OPEN).
+
+### GAP-W2-01: Validacion de Investiduras — RESUELTO
+
+| Item | Detalle |
+|---|---|
+| Infraestructura DB | Completa: `investiture_validation_history`, `investiture_config`, 3 enums, campos de investidura en `enrollments` |
+| Runtime backend | IMPLEMENTADO: InvestitureModule con 5 endpoints, 23 tests. |
+| Runtime frontend - Admin | IMPLEMENTADO: Tabla de validaciones, dialogs de accion (aprobar/rechazar/investido), historial timeline, filtros por estado/año, entry en sidebar nav. 9 archivos. |
+| Runtime frontend - App | IMPLEMENTADO: 3 screens principales (pending list, submit view, history timeline), data layer completa (entities, models, datasource, repository, providers), status badge widget, GoRouter integration. 16 archivos. |
+| Severidad | Gap funcional completamente resuelto |
+| Estado | RESUELTO 2026-03-20: UI implementada en Flutter (16 archivos, 3 screens) y admin (9 archivos, pending table + history + dialogs). Commits 2f4ac49 + 7199ab0. |
+| Descubierto | Wave 2 (2026-03-20) |
+
+### GAP-W2-02: Actividades — hardcoded clubId=1 — RESUELTO
+
+| Item | Detalle |
+|---|---|
+| Problema | El controller/service de actividades tiene `clubId=1` hardcodeado en vez de usar el contexto real del club |
+| Tipo | Bug directo |
+| Estado | RESUELTO 2026-03-20: Fix aplicado: ActivitiesListView resuelve clubId desde clubContextProvider. Commit dbb14eb. |
+| Descubierto | Wave 2 (2026-03-20) |
+
+### GAP-W2-03: Finanzas — campos de auditoria faltantes — RESUELTO
+
+| Item | Detalle |
+|---|---|
+| Problema | Los registros financieros carecen de campos `created_by`/`modified_by` que otros modulos si tienen |
+| Tipo | Gap de consistencia / auditoria |
+| Estado | RESUELTO 2026-03-20: modified_by_id agregado a finances (migration + schema + service). Commit 69b4b3e. |
+| Descubierto | Wave 2 (2026-03-20) |
+
+### GAP-W2-04: Inventario — typo en PK de DB — RESUELTO
+
+| Item | Detalle |
+|---|---|
+| Problema | La tabla `inventory_categories` tiene un typo en su columna PK: `inventory_categoty_id` en vez de `inventory_category_id` |
+| Impacto | Prisma lo mapea correctamente, pero el nombre subyacente en la columna es incorrecto |
+| Estado | RESUELTO 2026-03-20: Migration creada para rename. Commit d690a57. Pendiente: prisma migrate deploy. |
+| Descubierto | Wave 2 (2026-03-20) |
+
+### GAP-W2-05: Certificaciones Guias Mayores — cero UI cliente — RESUELTO
+
+| Item | Detalle |
+|---|---|
+| Backend | Completamente implementado: 7 endpoints verificados y funcionales |
+| Admin panel | UI implementada: list + detail + progress |
+| App movil | UI implementada: 4 screens en Flutter |
+| Estado | RESUELTO 2026-03-20: UI implementada en Flutter (4 screens) y admin (list + detail + progress). Commits 69cb026 + 37e5929. |
+| Descubierto | Wave 2 (2026-03-20) |

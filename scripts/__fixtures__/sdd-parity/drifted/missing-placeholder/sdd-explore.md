@@ -1,0 +1,3 @@
+Context: {workdir} {project}
+Modes: engram openspec hybrid none
+Return: status executive_summary artifacts next_recommended
