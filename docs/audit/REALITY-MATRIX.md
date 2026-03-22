@@ -1,11 +1,11 @@
 # Reality Matrix — SACDIA
-Fecha: 2026-03-20
+Fecha: 2026-03-22
 
 ## Resumen
 
 | Categoria | Total | ALINEADO | SIN CANON | SIN DOCS | FANTASMA | PARCIAL | DRIFT |
 |-----------|-------|----------|-----------|----------|----------|---------|-------|
-| Endpoints | 220 | 195 | 12 | 6 | 0 | — | 0 |
+| Endpoints | 225 | 195 | 12 | 11 | 0 | — | 0 |
 | Modelos | 72 | 24 | 41 | 7 | 0 | — | 0 |
 | Features | 16 | 14 | 1 | 0 | 0 | 1 | 0 |
 | Integraciones | 7 | 5 | 1 | 1 | 0 | — | 0 |
@@ -194,6 +194,9 @@ Convenciones:
 | POST `/admin/rbac/roles/:id/permissions` | Si | Si | Si | ALINEADO |
 | PUT `/admin/rbac/roles/:id/permissions` | Si | Si | Si | ALINEADO |
 | DELETE `/admin/rbac/roles/:id/permissions/:permissionId` | Si | Si | Si | ALINEADO |
+| GET `/admin/rbac/users/:userId/permissions` | Si | No | Si | SIN DOCS |
+| POST `/admin/rbac/users/:userId/permissions` | Si | No | Si | SIN DOCS |
+| DELETE `/admin/rbac/users/:userId/permissions/:permissionId` | Si | No | Si | SIN DOCS |
 
 ### notifications
 
@@ -202,6 +205,7 @@ Convenciones:
 | POST `/notifications/send` | Si | Si | Si | ALINEADO |
 | POST `/notifications/broadcast` | Si | Si | Si | ALINEADO |
 | POST `/notifications/club/:sectionId` | Si | Si | Si | ALINEADO |
+| GET `/notifications/history` | Si | No | Si | SIN DOCS |
 
 ### fcm-tokens
 
@@ -300,6 +304,7 @@ Convenciones:
 | GET `/users/:memberId/insurance` | Si | Si | Si | ALINEADO |
 | POST `/users/:memberId/insurance` | Si | Si | Si | ALINEADO |
 | PATCH `/insurance/:insuranceId` | Si | Si | Si | ALINEADO |
+| GET `/insurance/expiring` | Si | No | Si | SIN DOCS |
 
 > Nota: InsurancesModule implementado en commit 7eed6c8 (2026-03-18). Era SIN CANON (sin modulo backend) en Wave 0.
 
@@ -623,8 +628,8 @@ Los dominios que eran PARCIAL o FANTASMA en Wave 0 fueron completados:
 - **gestion-seguros**: InsurancesModule + admin + app (antes SIN CANON)
 - **validacion-investiduras**: InvestitureModule + admin + app (antes FANTASMA)
 
-### 3. Endpoints: 220 documentados (era 180 en Wave 0)
-Wave 2 agrego 40 endpoints a la documentacion. Total 220 en ENDPOINTS-LIVE-REFERENCE.md.
+### 3. Endpoints: 225 en matriz (220 en ENDPOINTS-LIVE-REFERENCE.md, era 180 en Wave 0)
+Wave 2 agrego 40 endpoints a la documentacion. Total 220 en ENDPOINTS-LIVE-REFERENCE.md. Sprint final agrego 5 endpoints implementados (commit 7b9f29b) aun sin documentar en API reference (SIN DOCS).
 
 ### 4. SCHEMA-REFERENCE actualizado: ~72 modelos + 8 enums
 Wave 2 documento ~48 modelos adicionales en SCHEMA-REFERENCE.md (era ~25 tablas).
