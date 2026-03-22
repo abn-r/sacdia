@@ -84,6 +84,51 @@ El sistema incluye un mecanismo de permisos sensibles para sub-recursos de usuar
 - **OR transicional**: Para terceros, el sistema acepta el permiso fino O el fallback legacy `users:*` durante el periodo de transicion
 - **Sync vs Assign**: `PUT` reemplaza todos los permisos (sync), `POST` agrega sin eliminar existentes (assign)
 
+## Permisos sensibles por sub-recurso de usuario
+
+El sistema RBAC implementa permisos finos (fine-grained) para 4 familias de sub-recursos sensibles de `user`. Cada familia tiene un par de permisos `read`/`update` que coexisten con los permisos legacy `users:*` mediante un OR transicional.
+
+### Tabla completa de permisos sensibles
+
+| Familia | Permiso fino | Fallback legacy | Endpoints afectados |
+| --- | --- | --- | --- |
+| `health` | `health:read` | `users:read_detail` | `GET /users/:userId/allergies`, `GET /users/:userId/diseases`, `GET /users/:userId/medicines` |
+| `health` | `health:update` | `users:update` | `PUT /users/:userId/allergies`, `PUT /users/:userId/diseases`, `PUT /users/:userId/medicines`, `DELETE` item-level |
+| `emergency_contacts` | `emergency_contacts:read` | `users:read_detail` | `GET /users/:userId/emergency-contacts` |
+| `emergency_contacts` | `emergency_contacts:update` | `users:update` | `POST/PATCH/DELETE /users/:userId/emergency-contacts` |
+| `legal_representative` | `legal_representative:read` | `users:read_detail` | `GET /users/:userId/legal-representative` |
+| `legal_representative` | `legal_representative:update` | `users:update` | `POST/PATCH/DELETE /users/:userId/legal-representative` |
+| `post_registration` | `post_registration:read` | `users:read_detail` | `GET /users/:userId/post-registration/status` |
+| `post_registration` | `post_registration:update` | `users:update` | `POST /users/:userId/post-registration/step-{1,2,3}/complete` |
+
+### Reglas de autorizacion
+
+1. **Owner bypass (self-service)**: El propietario del `userId` tiene acceso completo a sus propios sub-recursos sin necesidad de permisos globales explícitos
+2. **Terceros**: Solo se evaluan permisos globales. Se acepta el permiso fino **O** el fallback legacy (OR transicional)
+3. **Permisos de club no aplican**: Los permisos provenientes unicamente de `authorization.active_assignment` no habilitan acceso transversal a recursos `user`
+
+### Pruning administrativo
+
+El endpoint `GET /api/v1/admin/users/:userId` poda automaticamente los bloques sensibles de la respuesta segun los permisos del actor que realiza la consulta. Cada bloque (`health`, `emergency_contacts`, `legal_representative`, `post_registration`) se incluye en la respuesta **solo si** el actor tiene el permiso fino `family:read` o el fallback legacy `users:read_detail`.
+
+> Referencia completa: [`docs/api/SECURITY-GUIDE.md`](../api/SECURITY-GUIDE.md) — seccion "Pruning administrativo"
+
+### Exclusiones (fuera de scope del tiering fino)
+
+Las siguientes rutas de `user` permanecen bajo permisos legacy `users:*` y no forman parte del sistema de permisos finos:
+
+- `GET/PATCH /users/:userId`
+- `POST/DELETE /users/:userId/profile-picture`
+- `GET /users/:userId/age`
+- `GET /users/:userId/requires-legal-representative`
+
+### Referencias cruzadas
+
+- **Implementacion de seguridad completa**: [`docs/api/SECURITY-GUIDE.md`](../api/SECURITY-GUIDE.md)
+- **Endpoints live reference**: [`docs/api/ENDPOINTS-LIVE-REFERENCE.md`](../api/ENDPOINTS-LIVE-REFERENCE.md)
+- **Guard de policy**: `src/common/guards/sensitive-user-subresource-policy.ts`
+- **Decorator de metadata**: `src/common/decorators/sensitive-user-subresource.decorator.ts`
+
 ## Gaps y pendientes
 
 - **Sin UI en app**: Correcto por diseno — la app no necesita interfaz de administracion de RBAC

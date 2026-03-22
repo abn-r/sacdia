@@ -66,16 +66,16 @@
 | PUT | `/api/v1/users/:userId/allergies` | JWT | - | Guardar alergias del usuario | `src/users/users.controller.ts` |
 | PUT | `/api/v1/users/:userId/diseases` | JWT | - | Guardar enfermedades del usuario | `src/users/users.controller.ts` |
 | PUT | `/api/v1/users/:userId/medicines` | JWT | - | Guardar medicamentos del usuario | `src/users/users.controller.ts` |
-| DELETE | `/api/v1/users/:userId/allergies/:allergyId` | JWT | - | Eliminar una alergia activa del usuario (soft delete) | `src/users/users.controller.ts` |
-| DELETE | `/api/v1/users/:userId/diseases/:diseaseId` | JWT | - | Eliminar una enfermedad activa del usuario (soft delete) | `src/users/users.controller.ts` |
-| DELETE | `/api/v1/users/:userId/medicines/:medicineId` | JWT | - | Eliminar un medicamento activo del usuario (soft delete) | `src/users/users.controller.ts` |
+| DELETE | `/api/v1/users/:userId/allergies/:allergyId` | JWT | `health:update` OR `users:update` (owner bypass) | Eliminar una alergia activa del usuario (soft delete) | `src/users/users.controller.ts` |
+| DELETE | `/api/v1/users/:userId/diseases/:diseaseId` | JWT | `health:update` OR `users:update` (owner bypass) | Eliminar una enfermedad activa del usuario (soft delete) | `src/users/users.controller.ts` |
+| DELETE | `/api/v1/users/:userId/medicines/:medicineId` | JWT | `health:update` OR `users:update` (owner bypass) | Eliminar un medicamento activo del usuario (soft delete) | `src/users/users.controller.ts` |
 | GET | `/api/v1/users/:userId/age` | JWT | - | Calcular edad del usuario | `src/users/users.controller.ts` |
 | GET | `/api/v1/users/:userId/classes` | JWT | - | Obtener inscripciones del usuario | `src/classes/classes.controller.ts` |
 | GET | `/api/v1/users/:userId/classes/:classId/progress` | JWT | - | Obtener progreso anual del usuario en una clase (`?enrollmentId=` opcional) | `src/classes/classes.controller.ts` |
 | PATCH | `/api/v1/users/:userId/classes/:classId/progress` | JWT | - | Actualizar progreso anual de sección (`enrollment_id` opcional) | `src/classes/classes.controller.ts` |
 | POST | `/api/v1/users/:userId/classes/enroll` | JWT | - | Inscribir usuario en clase | `src/classes/classes.controller.ts` |
 | GET | `/api/v1/users/:userId/emergency-contacts` | JWT | - | Listar contactos de emergencia del usuario | `src/emergency-contacts/emergency-contacts.controller.ts` |
-| POST | `/api/v1/users/:userId/emergency-contacts` | JWT | - | Crear contacto de emergencia (máximo 5) | `src/emergency-contacts/emergency-contacts.controller.ts` |
+| POST | `/api/v1/users/:userId/emergency-contacts` | JWT | `emergency_contacts:update` OR `users:update` (owner bypass) | Crear contacto de emergencia (máximo 5) | `src/emergency-contacts/emergency-contacts.controller.ts` |
 | DELETE | `/api/v1/users/:userId/emergency-contacts/:contactId` | JWT | - | Eliminar contacto de emergencia (soft delete) | `src/emergency-contacts/emergency-contacts.controller.ts` |
 | GET | `/api/v1/users/:userId/emergency-contacts/:contactId` | JWT | - | Obtener un contacto específico | `src/emergency-contacts/emergency-contacts.controller.ts` |
 | PATCH | `/api/v1/users/:userId/emergency-contacts/:contactId` | JWT | - | Actualizar contacto de emergencia | `src/emergency-contacts/emergency-contacts.controller.ts` |
@@ -90,7 +90,7 @@
 | DELETE | `/api/v1/users/:userId/legal-representative` | JWT | - | Eliminar representante legal | `src/legal-representatives/legal-representatives.controller.ts` |
 | GET | `/api/v1/users/:userId/legal-representative` | JWT | - | Obtener representante legal del usuario | `src/legal-representatives/legal-representatives.controller.ts` |
 | PATCH | `/api/v1/users/:userId/legal-representative` | JWT | - | Actualizar representante legal | `src/legal-representatives/legal-representatives.controller.ts` |
-| POST | `/api/v1/users/:userId/legal-representative` | JWT | - | Registrar representante legal (solo para menores de 18) | `src/legal-representatives/legal-representatives.controller.ts` |
+| POST | `/api/v1/users/:userId/legal-representative` | JWT | `legal_representative:update` OR `users:update` (owner bypass) | Registrar representante legal (solo para menores de 18) | `src/legal-representatives/legal-representatives.controller.ts` |
 | GET | `/api/v1/users/:userId/post-registration/status` | JWT | - | Obtener estado del post-registro | `src/post-registration/post-registration.controller.ts` |
 | POST | `/api/v1/users/:userId/post-registration/step-1/complete` | JWT | - | Completar Paso 1: Foto de perfil | `src/post-registration/post-registration.controller.ts` |
 | POST | `/api/v1/users/:userId/post-registration/step-2/complete` | JWT | - | Completar Paso 2: Información personal | `src/post-registration/post-registration.controller.ts` |
@@ -210,10 +210,10 @@
 | POST | `/api/v1/admin/unions` | JWT | super_admin, admin | Create union | `src/admin/admin-geography.controller.ts` |
 | DELETE | `/api/v1/admin/unions/:unionId` | JWT | super_admin, admin | Soft delete union | `src/admin/admin-geography.controller.ts` |
 | PATCH | `/api/v1/admin/unions/:unionId` | JWT | super_admin, admin | Update union | `src/admin/admin-geography.controller.ts` |
-| GET | `/api/v1/admin/users` | JWT | super_admin, admin, coordinator | Listar usuarios administrativos con alcance por rol (ALL/UNION/LOCAL_FIELD) | `src/admin/admin-users.controller.ts` |
-| GET | `/api/v1/admin/users/:userId` | JWT | super_admin, admin, coordinator | Obtener detalle de usuario validando alcance por rol del actor | `src/admin/admin-users.controller.ts` |
-| PATCH | `/api/v1/admin/users/:userId` | JWT | super_admin, admin, coordinator | Actualizar campos administrativos del usuario | `src/admin/admin-users.controller.ts` |
-| PATCH | `/api/v1/admin/users/:userId/approval` | JWT | super_admin, admin, coordinator | Aprobar o rechazar un usuario administrativo | `src/admin/admin-users.controller.ts` |
+| GET | `/api/v1/admin/users` | JWT | `users:read` | Listar usuarios administrativos con alcance por rol (ALL/UNION/LOCAL_FIELD) | `src/admin/admin-users.controller.ts` |
+| GET | `/api/v1/admin/users/:userId` | JWT | `users:read_detail` | Obtener detalle de usuario validando alcance por rol del actor | `src/admin/admin-users.controller.ts` |
+| PATCH | `/api/v1/admin/users/:userId` | JWT | `users:update` | Actualizar campos administrativos del usuario | `src/admin/admin-users.controller.ts` |
+| PATCH | `/api/v1/admin/users/:userId/approval` | JWT | `users:update` | Aprobar o rechazar un usuario administrativo | `src/admin/admin-users.controller.ts` |
 
 ### Admin user detail transitional formative contract (FS-01)
 
@@ -227,6 +227,18 @@
   - si no hay enrollment activo del año -> `current_operational_enrollment = null`
   - si hay más de un enrollment candidato del año -> `current_operational_enrollment = null` (sin inferencia)
 - Consumers actualizados deben leer presente desde `current_operational_enrollment` e histórico desde `trajectory_classes`; no reconstruir presente con `trajectory_classes/classes`
+
+### Pruning administrativo de bloques sensibles
+
+- Endpoint: `GET /api/v1/admin/users/:userId`
+- El response poda bloques sensibles según los permisos del actor, agrupados por familia:
+  - `health`
+  - `emergency_contacts`
+  - `legal_representative`
+  - `post_registration`
+- Cada bloque se incluye en el response **solo** si el actor posee el permiso `{family}:read` o el fallback legacy `users:read_detail`
+- Si el actor no tiene el permiso correspondiente, el bloque se omite del objeto `data` sin error
+- Reglas detalladas: ver [`SECURITY-GUIDE.md` § Pruning administrativo](SECURITY-GUIDE.md)
 
 ## camporees
 
