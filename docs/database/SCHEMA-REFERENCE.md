@@ -2,7 +2,7 @@
 
 **Estado**: ACTIVE
 
-<!-- Sincronizado contra schema.prisma 2026-03-22. Cobertura completa: 73 modelos + 8 enums documentados. Añadidos en 2026-03-22: inventory_history, notification_logs. -->
+<!-- Sincronizado contra schema.prisma 2026-03-22. Cobertura completa: 73 modelos + 8 enums documentados. Añadidos en 2026-03-22: inventory_history, notification_logs. Wave 3 (2026-03-22): email_verified añadido a users, apple_connected/google_connected removidos, tablas BA (sessions, accounts, verifications) añadidas. -->
 
 Referencia completa del schema de base de datos PostgreSQL de SACDIA.
 
@@ -86,7 +86,7 @@ graph TB
 **Campos** (sincronizado con schema.prisma 2026-03-18):
 | Campo | Tipo | Descripción | Constraints |
 |-------|------|-------------|-------------|
-| `user_id` | UUID | ID único (mismo que Supabase Auth, `auth.uid()`) | PK |
+| `user_id` | UUID | ID único (PK, referenciado por Better Auth `accounts.userId`) | PK |
 | `email` | VARCHAR(100) | Email del usuario | UNIQUE, NOT NULL |
 | `name` | VARCHAR(50) | Nombre | NULL |
 | `paternal_last_name` | VARCHAR(50) | Apellido paterno | NULL |
@@ -102,8 +102,7 @@ graph TB
 | `union_id` | INT | Unión | FK → unions, NULL |
 | `local_field_id` | INT | Campo local | FK → local_fields, NULL |
 | `user_image` | TEXT | URL de foto de perfil | NULL |
-| `apple_connected` | BOOLEAN | OAuth Apple vinculado | DEFAULT false |
-| `google_connected` | BOOLEAN | OAuth Google vinculado | DEFAULT false |
+| `email_verified` | BOOLEAN | Email verificado (gestionado por Better Auth) | DEFAULT false |
 | `access_app` | BOOLEAN | Acceso a app móvil | DEFAULT true |
 | `access_panel` | BOOLEAN | Acceso a panel admin | DEFAULT false |
 | `active` | BOOLEAN | Usuario activo | DEFAULT true |
@@ -116,8 +115,63 @@ graph TB
 - Many-to-Many: `roles` (via `users_roles`), `allergies` (via `users_allergies`), `diseases` (via `users_diseases`), `medicines` (via `users_medicines`)
 
 **Nota histórica**: La relación `users_classes` fue deprecada y la tabla se archivó como `users_classes_archive`. El histórico consolidado se resuelve ahora desde `enrollments`.
+Los campos `apple_connected` y `google_connected` fueron removidos en Wave 3 — el estado de OAuth ahora se resuelve desde la tabla `accounts` de Better Auth.
 
 **Naming Convention**: ✅ Cumple - Nombres descriptivos (`paternal_last_name` vs `p_lastname`)
+
+---
+
+#### Tabla: `sessions` (Better Auth)
+**Descripción**: Sesiones activas gestionadas por Better Auth
+
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `id` | TEXT | ID único de sesión | PK |
+| `expiresAt` | TIMESTAMPTZ | Expiración de la sesión | NOT NULL |
+| `token` | TEXT | Token opaco de sesión | UNIQUE, NOT NULL |
+| `createdAt` | TIMESTAMPTZ | Fecha de creación | NOT NULL |
+| `updatedAt` | TIMESTAMPTZ | Última actualización | NOT NULL |
+| `ipAddress` | TEXT | IP de origen | NULL |
+| `userAgent` | TEXT | User-Agent del cliente | NULL |
+| `userId` | TEXT | Usuario propietario | FK → users.user_id, NOT NULL |
+
+---
+
+#### Tabla: `accounts` (Better Auth)
+**Descripción**: Cuentas de proveedor (email/password, Google, Apple) vinculadas a un usuario
+
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `id` | TEXT | ID único | PK |
+| `accountId` | TEXT | ID en el proveedor externo | NOT NULL |
+| `providerId` | TEXT | Identificador del proveedor (ej: "google", "credential") | NOT NULL |
+| `userId` | TEXT | Usuario SACDIA vinculado | FK → users.user_id, NOT NULL |
+| `accessToken` | TEXT | Access token del proveedor | NULL |
+| `refreshToken` | TEXT | Refresh token del proveedor | NULL |
+| `idToken` | TEXT | ID token del proveedor | NULL |
+| `accessTokenExpiresAt` | TIMESTAMPTZ | Expiración del access token | NULL |
+| `refreshTokenExpiresAt` | TIMESTAMPTZ | Expiración del refresh token | NULL |
+| `scope` | TEXT | Scopes otorgados | NULL |
+| `password` | TEXT | Hash de contraseña (solo credential provider) | NULL |
+| `createdAt` | TIMESTAMPTZ | Fecha de creación | NOT NULL |
+| `updatedAt` | TIMESTAMPTZ | Última actualización | NOT NULL |
+
+---
+
+#### Tabla: `verifications` (Better Auth)
+**Descripción**: Tokens temporales para verificación de email y flujos similares
+
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `id` | TEXT | ID único | PK |
+| `identifier` | TEXT | Identificador (ej: email) | NOT NULL |
+| `value` | TEXT | Valor/token de verificación | NOT NULL |
+| `expiresAt` | TIMESTAMPTZ | Expiración | NOT NULL |
+| `createdAt` | TIMESTAMPTZ | Fecha de creación | NULL |
+| `updatedAt` | TIMESTAMPTZ | Última actualización | NULL |
 
 ---
 
