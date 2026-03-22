@@ -2,7 +2,7 @@
 
 **Estado**: ACTIVE
 
-<!-- Sincronizado contra schema.prisma 2026-03-20 (Wave 3). club_sections consolidation applied (3 tables → 1). Drift corregido en: users (field names), users_pr (PK + campos faltantes), countries/unions/local_fields/districts/churches (PKs + campos reales), clubs (campos completos), classes (campos completos), honors (campos completos). Cobertura completa: 71 modelos + 8 enums documentados con campos verbatim de schema.prisma. -->
+<!-- Sincronizado contra schema.prisma 2026-03-22. Cobertura completa: 73 modelos + 8 enums documentados. Añadidos en 2026-03-22: inventory_history, notification_logs. -->
 
 Referencia completa del schema de base de datos PostgreSQL de SACDIA.
 
@@ -721,6 +721,29 @@ Fue archivada como `users_classes_archive` en la migración del 2026-03-20. El h
 
 **Relaciones**:
 - Many-to-One: `club_sections`, `inventory_categories`
+- One-to-Many: `inventory_history`
+
+---
+
+#### Tabla: `inventory_history`
+**Descripción**: Log de auditoría de cambios en ítems de inventario de club
+
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `history_id` | INT | ID único | PK, autoincrement |
+| `inventory_id` | INT | Ítem de inventario afectado | FK → club_inventory (ON DELETE CASCADE), NOT NULL |
+| `action` | VARCHAR(20) | Acción realizada (ej: `UPDATE`, `DELETE`) | NOT NULL |
+| `field_changed` | VARCHAR(100) | Campo que fue modificado | NULL |
+| `old_value` | STRING | Valor anterior del campo | NULL |
+| `new_value` | STRING | Valor nuevo del campo | NULL |
+| `performed_by` | UUID | Usuario que realizó la acción | FK → users, NOT NULL |
+| `created_at` | TIMESTAMPTZ | Fecha del cambio | DEFAULT NOW() |
+
+**Índices**: `idx_inventory_history_inventory`, `idx_inventory_history_performer`
+
+**Relaciones**:
+- Many-to-One: `club_inventory` (ON DELETE CASCADE), `users` (relation "inventory_history_performer")
 
 ---
 
@@ -1627,6 +1650,30 @@ Fue archivada como `users_classes_archive` en la migración del 2026-03-20. El h
 
 **Relaciones**:
 - Many-to-One: `users`
+
+---
+
+#### Tabla: `notification_logs`
+**Descripción**: Log de notificaciones push enviadas (historial de broadcasts y envíos directos)
+
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `log_id` | INT | ID único | PK, autoincrement |
+| `title` | VARCHAR(255) | Título de la notificación enviada | NOT NULL |
+| `body` | STRING | Cuerpo del mensaje | NOT NULL |
+| `type` | VARCHAR(50) | Tipo de notificación (ej: `broadcast`, `club`) | NOT NULL |
+| `target_type` | VARCHAR(50) | Tipo de destino (ej: `section`, `user`) | NOT NULL |
+| `target_id` | VARCHAR(255) | ID del destino (sección, usuario, etc.) | NULL |
+| `sent_by` | UUID | Usuario que disparó el envío | FK → users, NOT NULL |
+| `tokens_sent` | INT | Cantidad de tokens a los que se envió | DEFAULT 0 |
+| `tokens_failed` | INT | Cantidad de tokens con error de entrega | DEFAULT 0 |
+| `created_at` | TIMESTAMPTZ | Fecha del envío | DEFAULT NOW() |
+
+**Índices**: `idx_notification_logs_sender`, `idx_notification_logs_created`
+
+**Relaciones**:
+- Many-to-One: `users` (relation "notification_logs_sender")
 
 ---
 
