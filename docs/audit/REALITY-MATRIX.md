@@ -5,15 +5,15 @@ Fecha: 2026-03-22
 
 | Categoria | Total | ALINEADO | SIN CANON | SIN DOCS | FANTASMA | PARCIAL | DRIFT |
 |-----------|-------|----------|-----------|----------|----------|---------|-------|
-| Endpoints | 225 | 195 | 12 | 11 | 0 | — | 0 |
-| Modelos | 72 | 24 | 41 | 7 | 0 | — | 0 |
+| Endpoints | 230 | 197 | 14 | 11 | 0 | — | 0 |
+| Modelos | 74 | 34 | 40 | 0 | 0 | — | 0 |
 | Features | 16 | 14 | 1 | 0 | 0 | 1 | 0 |
 | Integraciones | 7 | 5 | 1 | 1 | 0 | — | 0 |
 
 **Fuentes de verdad cruzadas**:
 - Codigo: `backend-audit.md` (backends con InvestitureModule, InsurancesModule, EvidenceFolderController — ~220+ endpoints), `admin-audit.md` (37+ pages), `app-audit.md` (55+ screens)
 - Documentacion API: `ENDPOINTS-LIVE-REFERENCE.md` (220 endpoints documentados, post-Wave 2)
-- Schema: `schema.prisma` (72 modelos + 8 enums), `SCHEMA-REFERENCE.md` (actualizado Wave 2: ~72 modelos documentados)
+- Schema: `schema.prisma` (74 modelos + 8 enums), `SCHEMA-REFERENCE.md` (actualizado 2026-03-22: 74 modelos documentados)
 - Canon: `dominio-sacdia.md`, `runtime-sacdia.md`, `arquitectura-sacdia.md`, `decisiones-clave.md`, `auth/modelo-autorizacion.md`, `auth/runtime-auth.md`
 
 ---
@@ -320,6 +320,18 @@ Convenciones:
 
 > Nota: InvestitureModule implementado en commits 6d33460 + 5eac904 (2026-03-20). Era FANTASMA en Wave 0 (solo tablas en schema.prisma).
 
+### admin — investiture config
+
+| Endpoint | Implementado | Doc API | Canon | Estado |
+|----------|:---:|:---:|:---:|---|
+| GET `/api/v1/admin/investiture/config` | Si | No | No | SIN CANON |
+| GET `/api/v1/admin/investiture/config/:configId` | Si | No | No | SIN CANON |
+| POST `/api/v1/admin/investiture/config` | Si | No | No | SIN CANON |
+| PATCH `/api/v1/admin/investiture/config/:configId` | Si | No | No | SIN CANON |
+| DELETE `/api/v1/admin/investiture/config/:configId` | Si | No | No | SIN CANON |
+
+> Nota: CRUD de `investiture_config` (configuración de fechas límite e investidura por campo local y año). Guards: GET requiere `admin|coordinator`, POST/PATCH/DELETE requieren `admin`. DELETE es soft-delete (`active = false`). Verificado en `investiture.controller.ts` (2026-03-22).
+
 ### admin — reference (catalogos admin)
 
 | Endpoint | Implementado | Doc API | Canon | Estado |
@@ -445,91 +457,93 @@ Todos los endpoints que eran FANTASMA en Wave 0 han sido resueltos:
 
 Convenciones:
 - **schema.prisma**: existe como `model` en el archivo prisma en docs/
-- **SCHEMA-REFERENCE**: documentado en SCHEMA-REFERENCE.md (actualizado Wave 2: ~72 modelos + 8 enums)
+- **SCHEMA-REFERENCE**: documentado en SCHEMA-REFERENCE.md (actualizado 2026-03-22: 74 modelos + 8 enums)
 - **Canon**: mencionado o su concepto de dominio referenciado en documentos canon
 
 | Model | schema.prisma | SCHEMA-REFERENCE | Canon | Estado |
 |-------|:---:|:---:|:---:|---|
-| activities | Si | No | Si | SIN DOCS |
-| activity_types | Si | No | No | SIN DOCS |
-| activity_instances | Si | No | No | SIN DOCS |
-| folder_assignments | Si | No | No | SIN CANON |
-| camporee_clubs | Si | No | No | SIN CANON |
-| camporee_members | Si | No | No | SIN CANON |
+| activities | Si | Si | Si | ALINEADO |
+| activity_types | Si | Si | No | SIN CANON |
+| activity_instances | Si | Si | No | SIN CANON |
+| folder_assignments | Si | Si | No | SIN CANON |
+| camporee_clubs | Si | Si | No | SIN CANON |
+| camporee_members | Si | Si | No | SIN CANON |
 | churches | Si | Si | Si | ALINEADO |
 | class_module_progress | Si | Si | Si | ALINEADO |
-| class_modules | Si | No | No | SIN CANON |
+| class_modules | Si | Si | No | SIN CANON |
 | class_section_progress | Si | Si | Si | ALINEADO |
-| class_sections | Si | No | No | SIN CANON |
+| class_sections | Si | Si | No | SIN CANON |
 | classes | Si | Si | Si | ALINEADO |
-| club_ideals | Si | No | No | SIN CANON |
-| club_inventory | Si | No | No | SIN CANON |
-| club_types | Si | No | Si | SIN DOCS |
+| club_ideals | Si | Si | No | SIN CANON |
+| club_inventory | Si | Si | No | SIN CANON |
+| club_types | Si | Si | Si | ALINEADO |
 | clubs | Si | Si | Si | ALINEADO |
 | club_sections | Si | Si | Si | ALINEADO |
 | club_role_assignments | Si | Si | Si | ALINEADO |
 | countries | Si | Si | Si | ALINEADO |
 | districts | Si | Si | Si | ALINEADO |
-| ecclesiastical_years | Si | No | Si | SIN DOCS |
+| ecclesiastical_years | Si | Si | Si | ALINEADO |
 | enrollments | Si | Si | Si | ALINEADO |
-| error_logs | Si | No | No | SIN CANON |
-| finances | Si | No | Si | SIN DOCS |
-| finances_categories | Si | No | No | SIN CANON |
-| folders | Si | No | Si | SIN CANON |
-| folders_modules | Si | No | No | SIN CANON |
-| folders_modules_records | Si | No | No | SIN CANON |
-| folders_section_records | Si | No | No | SIN CANON |
-| folders_sections | Si | No | No | SIN CANON |
+| error_logs | Si | Si | No | SIN CANON |
+| finances | Si | Si | Si | ALINEADO |
+| finances_categories | Si | Si | No | SIN CANON |
+| folders | Si | Si | Si | ALINEADO |
+| folders_modules | Si | Si | No | SIN CANON |
+| folders_modules_records | Si | Si | No | SIN CANON |
+| folders_section_records | Si | Si | No | SIN CANON |
+| folders_sections | Si | Si | No | SIN CANON |
 | honors | Si | Si | Si | ALINEADO |
-| honors_categories | Si | No | No | SIN CANON |
-| inventory_categories | Si | No | No | SIN CANON |
-| local_camporees | Si | No | No | SIN CANON |
+| honors_categories | Si | Si | No | SIN CANON |
+| inventory_categories | Si | Si | No | SIN CANON |
+| inventory_history | Si | Si | No | SIN CANON |
+| local_camporees | Si | Si | No | SIN CANON |
 | local_fields | Si | Si | Si | ALINEADO |
-| master_honors | Si | No | No | SIN CANON |
+| master_honors | Si | Si | No | SIN CANON |
+| notification_logs | Si | Si | No | SIN CANON |
 | permissions | Si | Si | Si | ALINEADO |
 | role_permissions | Si | Si | Si | ALINEADO |
 | roles | Si | Si | Si | ALINEADO |
-| union_camporee_local_fields | Si | No | No | SIN CANON |
-| union_camporees | Si | No | No | SIN CANON |
+| union_camporee_local_fields | Si | Si | No | SIN CANON |
+| union_camporees | Si | Si | No | SIN CANON |
 | unions | Si | Si | Si | ALINEADO |
-| unit_members | Si | No | No | SIN CANON |
-| units | Si | No | No | SIN CANON |
+| unit_members | Si | Si | No | SIN CANON |
+| units | Si | Si | No | SIN CANON |
 | users | Si | Si | Si | ALINEADO |
-| user_fcm_tokens | Si | No | No | SIN CANON |
+| user_fcm_tokens | Si | Si | No | SIN CANON |
 | users_pr | Si | Si | Si | ALINEADO |
 | users_classes | No | No | No | ARCHIVADA (como users_classes_archive) |
-| certifications | Si | No | Si | SIN DOCS |
-| certification_modules | Si | No | No | SIN CANON |
-| certification_sections | Si | No | No | SIN CANON |
-| users_certifications | Si | No | No | SIN CANON |
-| certification_module_progress | Si | No | No | SIN CANON |
-| certification_section_progress | Si | No | No | SIN CANON |
-| member_insurances | Si | No | No | SIN CANON |
-| investiture_validation_history | Si | No | No | SIN CANON |
-| investiture_config | Si | No | No | SIN CANON |
-| diseases | Si | No | No | SIN CANON |
-| allergies | Si | No | No | SIN CANON |
+| certifications | Si | Si | Si | ALINEADO |
+| certification_modules | Si | Si | No | SIN CANON |
+| certification_sections | Si | Si | No | SIN CANON |
+| users_certifications | Si | Si | No | SIN CANON |
+| certification_module_progress | Si | Si | No | SIN CANON |
+| certification_section_progress | Si | Si | No | SIN CANON |
+| member_insurances | Si | Si | No | SIN CANON |
+| investiture_validation_history | Si | Si | No | SIN CANON |
+| investiture_config | Si | Si | No | SIN CANON |
+| diseases | Si | Si | No | SIN CANON |
+| allergies | Si | Si | No | SIN CANON |
 | emergency_contacts | Si | Si | Si | ALINEADO |
-| weekly_records | Si | No | No | SIN CANON |
-| users_allergies | Si | No | No | SIN CANON |
-| users_diseases | Si | No | No | SIN CANON |
-| users_medicines | Si | No | No | SIN CANON |
-| users_honors | Si | No | No | SIN CANON |
-| users_permissions | Si | No | No | SIN CANON |
+| weekly_records | Si | Si | No | SIN CANON |
+| users_allergies | Si | Si | No | SIN CANON |
+| users_diseases | Si | Si | No | SIN CANON |
+| users_medicines | Si | Si | No | SIN CANON |
+| users_honors | Si | Si | No | SIN CANON |
+| users_permissions | Si | Si | No | SIN CANON |
 | users_roles | Si | Si | Si | ALINEADO |
-| medicines | Si | No | No | SIN CANON |
-| relationship_types | Si | No | No | SIN CANON |
+| medicines | Si | Si | No | SIN CANON |
+| relationship_types | Si | Si | No | SIN CANON |
 | legal_representatives | Si | Si | Si | ALINEADO |
 
 ### Conteos modelos
 
-- **ALINEADO**: 24 (schema.prisma + SCHEMA-REFERENCE + Canon)
-- **SIN CANON**: 41 (en schema.prisma pero sin mencion canon ni SCHEMA-REFERENCE significativa)
-- **SIN DOCS**: 7 (en schema.prisma y con concepto en canon pero sin SCHEMA-REFERENCE)
+- **ALINEADO**: 34 (schema.prisma + SCHEMA-REFERENCE + Canon)
+- **SIN CANON**: 40 (en schema.prisma + SCHEMA-REFERENCE pero sin mencion en documentos canon)
+- **SIN DOCS**: 0 (resuelto — Wave 2 + Wave 3 + 2026-03-22 documentaron todos los modelos en SCHEMA-REFERENCE)
 - **FANTASMA**: 0
 - **DRIFT**: 0
 
-> **Nota**: SCHEMA-REFERENCE.md fue actualizado en Wave 2 documentando ~72 modelos + 8 enums. Los conteos ALINEADO/SIN CANON/SIN DOCS no cambiaron porque la columna SCHEMA-REFERENCE solo se actualiza cuando los modelos individuales se documentan en profundidad en SCHEMA-REFERENCE.md. La actualizacion de Wave 2 agrego modelos pero los estados por fila requieren validacion individual para cambiar.
+> **Nota**: SCHEMA-REFERENCE.md fue actualizado en Wave 2 documentando ~72 modelos + 8 enums. Wave 3 completo con activities/activity_types/activity_instances. 2026-03-22: inventory_history y notification_logs agregados (estaban en schema.prisma sin documentar). Los estados SIN CANON persisten porque los conceptos existen en schema.prisma y SCHEMA-REFERENCE pero no estan referenciados explicitamente en los documentos canon de dominio. Para resolverlos, agregar menciones en dominio-sacdia.md o runtime-sacdia.md segun corresponda.
 
 ---
 
@@ -631,8 +645,8 @@ Los dominios que eran PARCIAL o FANTASMA en Wave 0 fueron completados:
 ### 3. Endpoints: 225 en matriz (220 en ENDPOINTS-LIVE-REFERENCE.md, era 180 en Wave 0)
 Wave 2 agrego 40 endpoints a la documentacion. Total 220 en ENDPOINTS-LIVE-REFERENCE.md. Sprint final agrego 5 endpoints implementados (commit 7b9f29b) aun sin documentar en API reference (SIN DOCS).
 
-### 4. SCHEMA-REFERENCE actualizado: ~72 modelos + 8 enums
-Wave 2 documento ~48 modelos adicionales en SCHEMA-REFERENCE.md (era ~25 tablas).
+### 4. SCHEMA-REFERENCE actualizado: 74 modelos + 8 enums
+Wave 2 documento ~48 modelos adicionales en SCHEMA-REFERENCE.md (era ~25 tablas). 2026-03-22: inventory_history y notification_logs agregados.
 
 ### 5. 3 migraciones de base de datos aplicadas
 - `d690a57`: rename PK inventory_categories (typo corregido)
