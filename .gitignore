@@ -28,5 +28,7 @@ sacdia-admin/
 .claude/
 .agent/
 .agents/
+.atl/
 .opencode/
+.superpowers/
 .worktrees/
