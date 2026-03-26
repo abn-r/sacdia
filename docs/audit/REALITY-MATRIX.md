@@ -1,18 +1,18 @@
 # Reality Matrix — SACDIA
-Fecha: 2026-03-22
+Fecha: 2026-03-26
 
 ## Resumen
 
 | Categoria | Total | ALINEADO | SIN CANON | SIN DOCS | FANTASMA | PARCIAL | DRIFT |
 |-----------|-------|----------|-----------|----------|----------|---------|-------|
-| Endpoints | 230 | 197 | 14 | 11 | 0 | — | 0 |
-| Modelos | 74 | 34 | 40 | 0 | 0 | — | 0 |
-| Features | 16 | 14 | 1 | 0 | 0 | 1 | 0 |
+| Endpoints | 244 | 211 | 14 | 11 | 0 | — | 0 |
+| Modelos | 76 | 36 | 40 | 0 | 0 | — | 0 |
+| Features | 17 | 15 | 1 | 0 | 0 | 1 | 0 |
 | Integraciones | 7 | 5 | 1 | 1 | 0 | — | 0 |
 
 **Fuentes de verdad cruzadas**:
-- Codigo: `backend-audit.md` (backends con InvestitureModule, InsurancesModule, EvidenceFolderController — ~220+ endpoints), `admin-audit.md` (37+ pages), `app-audit.md` (55+ screens)
-- Documentacion API: `ENDPOINTS-LIVE-REFERENCE.md` (220 endpoints documentados, post-Wave 2)
+- Codigo: `backend-audit.md` (backends con InvestitureModule, InsurancesModule, EvidenceFolderController, ResourcesModule — ~269+ endpoints), `admin-audit.md` (37+ pages), `app-audit.md` (55+ screens)
+- Documentacion API: `ENDPOINTS-LIVE-REFERENCE.md` (269 endpoints documentados, post-ResourcesModule 2026-03-26)
 - Schema: `schema.prisma` (74 modelos + 8 enums), `SCHEMA-REFERENCE.md` (actualizado 2026-03-22: 74 modelos documentados)
 - Canon: `dominio-sacdia.md`, `runtime-sacdia.md`, `arquitectura-sacdia.md`, `decisiones-clave.md`, `auth/modelo-autorizacion.md`, `auth/runtime-auth.md`
 
@@ -413,6 +413,32 @@ Convenciones:
 | GET `/users/:userId/classes/:classId/progress` | Si | Si | Si | ALINEADO |
 | PATCH `/users/:userId/classes/:classId/progress` | Si | Si | Si | ALINEADO |
 
+### resources
+
+| Endpoint | Implementado | Doc API | Canon | Estado |
+|----------|:---:|:---:|:---:|---|
+| POST `/resources` | Si | Si | Si | ALINEADO |
+| GET `/resources` | Si | Si | Si | ALINEADO |
+| GET `/resources/:id` | Si | Si | Si | ALINEADO |
+| GET `/resources/:id/signed-url` | Si | Si | Si | ALINEADO |
+| PATCH `/resources/:id` | Si | Si | Si | ALINEADO |
+| DELETE `/resources/:id` | Si | Si | Si | ALINEADO |
+| GET `/resources/me` | Si | Si | Si | ALINEADO |
+| GET `/resources/me/:id` | Si | Si | Si | ALINEADO |
+| GET `/resources/me/:id/signed-url` | Si | Si | Si | ALINEADO |
+
+### resource-categories
+
+| Endpoint | Implementado | Doc API | Canon | Estado |
+|----------|:---:|:---:|:---:|---|
+| POST `/resource-categories` | Si | Si | Si | ALINEADO |
+| GET `/resource-categories` | Si | Si | Si | ALINEADO |
+| GET `/resource-categories/:id` | Si | Si | Si | ALINEADO |
+| PATCH `/resource-categories/:id` | Si | Si | Si | ALINEADO |
+| DELETE `/resource-categories/:id` | Si | Si | Si | ALINEADO |
+
+> Nota: ResourcesModule (14 endpoints) implementado 2026-03-26. Storage en R2 bucket RESOURCES_FILES, URLs firmadas TTL 1 hora, visibilidad por scope (system/union/local_field).
+
 ### Endpoints FANTASMA (resueltos al 2026-03-20)
 
 Todos los endpoints que eran FANTASMA en Wave 0 han sido resueltos:
@@ -534,16 +560,18 @@ Convenciones:
 | medicines | Si | Si | No | SIN CANON |
 | relationship_types | Si | Si | No | SIN CANON |
 | legal_representatives | Si | Si | Si | ALINEADO |
+| resource_categories | Si | Si | Si | ALINEADO |
+| resources | Si | Si | Si | ALINEADO |
 
 ### Conteos modelos
 
-- **ALINEADO**: 34 (schema.prisma + SCHEMA-REFERENCE + Canon)
+- **ALINEADO**: 36 (schema.prisma + SCHEMA-REFERENCE + Canon)
 - **SIN CANON**: 40 (en schema.prisma + SCHEMA-REFERENCE pero sin mencion en documentos canon)
 - **SIN DOCS**: 0 (resuelto — Wave 2 + Wave 3 + 2026-03-22 documentaron todos los modelos en SCHEMA-REFERENCE)
 - **FANTASMA**: 0
 - **DRIFT**: 0
 
-> **Nota**: SCHEMA-REFERENCE.md fue actualizado en Wave 2 documentando ~72 modelos + 8 enums. Wave 3 completo con activities/activity_types/activity_instances. 2026-03-22: inventory_history y notification_logs agregados (estaban en schema.prisma sin documentar). Los estados SIN CANON persisten porque los conceptos existen en schema.prisma y SCHEMA-REFERENCE pero no estan referenciados explicitamente en los documentos canon de dominio. Para resolverlos, agregar menciones en dominio-sacdia.md o runtime-sacdia.md segun corresponda.
+> **Nota**: SCHEMA-REFERENCE.md fue actualizado en Wave 2 documentando ~72 modelos + 8 enums. Wave 3 completo con activities/activity_types/activity_instances. 2026-03-22: inventory_history y notification_logs agregados (estaban en schema.prisma sin documentar). 2026-03-26: resource_categories y resources agregados (ResourcesModule). Los estados SIN CANON persisten porque los conceptos existen en schema.prisma y SCHEMA-REFERENCE pero no estan referenciados explicitamente en los documentos canon de dominio. Para resolverlos, agregar menciones en dominio-sacdia.md o runtime-sacdia.md segun corresponda.
 
 ---
 
@@ -572,12 +600,13 @@ Convenciones:
 | gestion-seguros (insurance) | Si (InsurancesModule) | Si (CRUD funcional) | Si (insurance, 3 screens) | Si (gestion-seguros.md) | ALINEADO |
 | carpetas-evidencias (folders) | Si (FoldersModule + EvidenceFolderController) | Si (read-only) | Si (evidence_folder, 2 screens) | Si (formacion) | ALINEADO |
 | rbac (permisos/roles) | Si (RbacModule) | Si (rbac, 3 pages) | No | Si (auth/) | ALINEADO |
+| recursos | Si (ResourcesModule, 14 endpoints) | Si (categorias CRUD + recursos CRUD) | Si (Clean Architecture completa) | Si (recursos.md) | ALINEADO |
 | infrastructure (health, logging) | Si (CommonModule, AppModule) | No | No | Si (runtime 6.7) | PARCIAL |
 | validacion-investiduras | Si (InvestitureModule, 5 endpoints) | Si (table + dialogs + history) | Si (3 screens) | Si (dominio: validacion) | ALINEADO |
 
 ### Conteos features
 
-- **ALINEADO**: 15
+- **ALINEADO**: 16
 - **PARCIAL**: 1 (infrastructure — cross-cutting, sin client UI dedicada)
 - **SIN CANON**: 0
 - **FANTASMA**: 0
@@ -642,11 +671,11 @@ Los dominios que eran PARCIAL o FANTASMA en Wave 0 fueron completados:
 - **gestion-seguros**: InsurancesModule + admin + app (antes SIN CANON)
 - **validacion-investiduras**: InvestitureModule + admin + app (antes FANTASMA)
 
-### 3. Endpoints: 225 en matriz (220 en ENDPOINTS-LIVE-REFERENCE.md, era 180 en Wave 0)
-Wave 2 agrego 40 endpoints a la documentacion. Total 220 en ENDPOINTS-LIVE-REFERENCE.md. Sprint final agrego 5 endpoints implementados (commit 7b9f29b) aun sin documentar en API reference (SIN DOCS).
+### 3. Endpoints: 244 en matriz (269 en ENDPOINTS-LIVE-REFERENCE.md)
+ResourcesModule agrego 14 endpoints nuevos (2026-03-26). Total 269 en ENDPOINTS-LIVE-REFERENCE.md.
 
-### 4. SCHEMA-REFERENCE actualizado: 74 modelos + 8 enums
-Wave 2 documento ~48 modelos adicionales en SCHEMA-REFERENCE.md (era ~25 tablas). 2026-03-22: inventory_history y notification_logs agregados.
+### 4. SCHEMA-REFERENCE actualizado: 76 modelos + 8 enums
+Wave 2 documento ~48 modelos adicionales en SCHEMA-REFERENCE.md (era ~25 tablas). 2026-03-22: inventory_history y notification_logs agregados. 2026-03-26: resource_categories y resources agregados.
 
 ### 5. 3 migraciones de base de datos aplicadas
 - `d690a57`: rename PK inventory_categories (typo corregido)

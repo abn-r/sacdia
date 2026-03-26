@@ -66,6 +66,7 @@ Para cambios de negocio, ubicar primero el dominio en `docs/features/`:
 - `honores`
 - `infrastructure`
 - `inventario`
+- `recursos`
 - `validacion-investiduras`
 
 Orden recomendado dentro de cada feature:
