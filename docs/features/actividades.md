@@ -36,6 +36,7 @@ El modelo contempla `activity_instances` como instancias recurrentes de una acti
 - Incluye selector de ubicacion en mapa (LocationPickerView)
 - `ActivitiesListView` resuelve `clubId` desde `clubContextProvider` (bug de hardcodeo a 1 corregido)
 - Edicion y eliminacion de actividades disponibles en la vista de detalle (`EditActivityView` + confirmacion de borrado)
+- El boton "Agregar" en `ActivitiesListView` solo se muestra a usuarios con permiso `activities:create` o con roles legacy `director`, `deputy_director`, `secretary`, `counselor` — evaluado via `canByPermissionOrLegacyRole`
 
 ### Base de datos
 - `activities` — Actividades del club
@@ -44,7 +45,7 @@ El modelo contempla `activity_instances` como instancias recurrentes de una acti
 
 ## Requisitos funcionales
 
-1. Un miembro con rol director, subdirector, secretario o consejero debe poder crear actividades para su club
+1. Un miembro con rol director, subdirector, secretario o consejero debe poder crear actividades para su club; el boton de creacion debe ocultarse para usuarios sin ese permiso/rol
 2. Las actividades deben tener nombre, descripcion, fecha/hora, tipo y ubicacion opcional
 3. El sistema debe permitir registrar asistencia de miembros a cada actividad
 4. El listado de actividades debe filtrarse por club y mostrarse en orden cronologico
@@ -56,7 +57,8 @@ El modelo contempla `activity_instances` como instancias recurrentes de una acti
 ## Decisiones de diseno
 
 - **Soft delete**: Las actividades se desactivan, no se eliminan fisicamente
-- **Autorizacion por rol de club**: Solo roles operativos (director, subdirector, secretary, counselor) pueden crear actividades; la lectura es abierta a miembros con JWT
+- **Autorizacion por rol de club**: Solo roles operativos (director, subdirector, secretary, counselor) pueden crear actividades; la lectura es abierta a miembros con JWT. La app oculta el boton de creacion si el usuario no tiene el permiso `activities:create` ni alguno de esos roles legacy
+- **Campo `image` opcional en `CreateActivityDto`**: El campo `image` es opcional (`@IsOptional()`) — solo aplica para actividades virtuales. En el DTO de actualizacion (`UpdateActivityDto`) tambien es opcional
 - **Geolocalizacion**: La app implementa seleccion de ubicacion en mapa, pero el backend almacena coordenadas como campos del modelo
 - **Tipos de actividad**: Separados en tabla catalogo `activity_types` para permitir administracion independiente
 - **Instancias**: El modelo `activity_instances` sugiere un diseno para actividades recurrentes, aunque la API actual no lo expone explicitamente
