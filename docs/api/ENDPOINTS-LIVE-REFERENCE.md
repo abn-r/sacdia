@@ -1,6 +1,6 @@
 # ENDPOINTS LIVE REFERENCE (Runtime Truth)
 
-<!-- Verificado contra código 2026-03-20. Documento completo: cubre todos los endpoints implementados en controllers. -->
+<!-- Verificado contra código 2026-03-25. Documento completo: cubre todos los endpoints implementados en controllers. Camporees expandido: deadlines, aprobaciones tardías, inscripción de unión (41 endpoints). -->
 
 > [!IMPORTANT]
 > Documento canónico para agentes (App + Panel Admin).
@@ -8,8 +8,8 @@
 > Base URL: `/api/v1`
 
 **Estado**: ACTIVE
-**Generado**: 2026-03-20T00:00:00.000Z (sincronización completa contra controllers)
-**Total endpoints**: 220
+**Generado**: 2026-03-25T00:00:00.000Z (sincronización completa contra controllers)
+**Total endpoints**: 263
 
 ## Lectura Rápida
 
@@ -242,16 +242,98 @@
 
 ## camporees
 
-| Method | Path | Auth | Roles | Description | Source |
+> 41 endpoints. Todos requieren JWT. Permisos basados en `activities:*` (CRUD) y `attendance:*` (inscripciones/pagos/aprobaciones). Inscripciones tardías (después del deadline configurado en el camporee) generan estado `pending_approval` y requieren aprobación explícita.
+
+### Local Camporees — CRUD
+
+| Method | Path | Auth | Permission | Description | Source |
 |---|---|---|---|---|---|
-| GET | `/api/v1/camporees` | JWT | - | Listar camporees | `src/camporees/camporees.controller.ts` |
-| POST | `/api/v1/camporees` | JWT | director, subdirector | Crear camporee | `src/camporees/camporees.controller.ts` |
-| DELETE | `/api/v1/camporees/:camporeeId` | JWT | director | Desactivar camporee | `src/camporees/camporees.controller.ts` |
-| GET | `/api/v1/camporees/:camporeeId` | JWT | - | Obtener camporee por ID | `src/camporees/camporees.controller.ts` |
-| PATCH | `/api/v1/camporees/:camporeeId` | JWT | director, subdirector | Actualizar camporee | `src/camporees/camporees.controller.ts` |
-| GET | `/api/v1/camporees/:camporeeId/members` | JWT | - | Listar miembros del camporee | `src/camporees/camporees.controller.ts` |
-| DELETE | `/api/v1/camporees/:camporeeId/members/:userId` | JWT | director, subdirector | Remover miembro del camporee | `src/camporees/camporees.controller.ts` |
-| POST | `/api/v1/camporees/:camporeeId/register` | JWT | - | Registrar miembro en camporee | `src/camporees/camporees.controller.ts` |
+| GET | `/api/v1/camporees` | JWT | `activities:read` | Listar camporees (`?active=true\|false`, `?page=`, `?limit=`) | `src/camporees/camporees.controller.ts` |
+| GET | `/api/v1/camporees/:camporeeId` | JWT | `activities:read` | Obtener camporee local por ID | `src/camporees/camporees.controller.ts` |
+| POST | `/api/v1/camporees` | JWT | `activities:create` | Crear camporee local | `src/camporees/camporees.controller.ts` |
+| PATCH | `/api/v1/camporees/:camporeeId` | JWT | `activities:update` | Actualizar camporee local | `src/camporees/camporees.controller.ts` |
+| DELETE | `/api/v1/camporees/:camporeeId` | JWT | `activities:delete` | Desactivar camporee local (soft delete) | `src/camporees/camporees.controller.ts` |
+
+### Local Camporees — Club Enrollment
+
+| Method | Path | Auth | Permission | Description | Source |
+|---|---|---|---|---|---|
+| POST | `/api/v1/camporees/:camporeeId/clubs` | JWT | `attendance:manage` | Inscribir sección de club en camporee (tardía → `pending_approval`) | `src/camporees/camporees.controller.ts` |
+| GET | `/api/v1/camporees/:camporeeId/clubs` | JWT | `attendance:read` | Listar clubes inscritos (`?status=registered\|pending_approval\|approved\|rejected`) | `src/camporees/camporees.controller.ts` |
+| DELETE | `/api/v1/camporees/:camporeeId/clubs/:camporeeClubId` | JWT | `attendance:manage` | Cancelar inscripción de club | `src/camporees/camporees.controller.ts` |
+
+### Local Camporees — Member Registration
+
+| Method | Path | Auth | Permission | Description | Source |
+|---|---|---|---|---|---|
+| POST | `/api/v1/camporees/:camporeeId/register` | JWT | `attendance:manage` | Registrar miembro en camporee con validación de seguro (tardía → `pending_approval`) | `src/camporees/camporees.controller.ts` |
+| GET | `/api/v1/camporees/:camporeeId/members` | JWT | `attendance:read` | Listar miembros registrados (`?status=registered\|pending_approval\|approved\|rejected`) | `src/camporees/camporees.controller.ts` |
+| DELETE | `/api/v1/camporees/:camporeeId/members/:userId` | JWT | `attendance:manage` | Remover miembro del camporee (soft delete) | `src/camporees/camporees.controller.ts` |
+
+### Local Camporees — Payments
+
+| Method | Path | Auth | Permission | Description | Source |
+|---|---|---|---|---|---|
+| POST | `/api/v1/camporees/:camporeeId/members/:memberId/payments` | JWT | `attendance:manage` | Registrar pago de un miembro (tardío → `pending_approval`) | `src/camporees/camporees.controller.ts` |
+| GET | `/api/v1/camporees/:camporeeId/members/:memberId/payments` | JWT | `attendance:read` | Listar pagos de un miembro (`?status=registered\|pending_approval\|approved\|rejected\|cancelled`) | `src/camporees/camporees.controller.ts` |
+| GET | `/api/v1/camporees/:camporeeId/payments` | JWT | `attendance:read` | Listar todos los pagos del camporee (`?status=registered\|pending_approval\|approved\|rejected\|cancelled`) | `src/camporees/camporees.controller.ts` |
+| PATCH | `/api/v1/camporees/payments/:paymentId` | JWT | `attendance:manage` | Actualizar datos de un pago registrado | `src/camporees/camporees.controller.ts` |
+| PATCH | `/api/v1/camporees/payments/:camporeePaymentId/approve` | JWT | `attendance:approve_late` | Aprobar pago tardío | `src/camporees/camporees.controller.ts` |
+| PATCH | `/api/v1/camporees/payments/:camporeePaymentId/reject` | JWT | `attendance:approve_late` | Rechazar pago tardío | `src/camporees/camporees.controller.ts` |
+
+### Local Camporees — Late Enrollment Approvals
+
+| Method | Path | Auth | Permission | Description | Source |
+|---|---|---|---|---|---|
+| GET | `/api/v1/camporees/:camporeeId/pending` | JWT | `attendance:approve_late` | Listar todos los clubes, miembros y pagos con estado `pending_approval` | `src/camporees/camporees.controller.ts` |
+| PATCH | `/api/v1/camporees/:camporeeId/clubs/:camporeeClubId/approve` | JWT | `attendance:approve_late` | Aprobar inscripción tardía de club | `src/camporees/camporees.controller.ts` |
+| PATCH | `/api/v1/camporees/:camporeeId/clubs/:camporeeClubId/reject` | JWT | `attendance:approve_late` | Rechazar inscripción tardía de club | `src/camporees/camporees.controller.ts` |
+| PATCH | `/api/v1/camporees/:camporeeId/members/:camporeeMemberId/approve` | JWT | `attendance:approve_late` | Aprobar inscripción tardía de miembro | `src/camporees/camporees.controller.ts` |
+| PATCH | `/api/v1/camporees/:camporeeId/members/:camporeeMemberId/reject` | JWT | `attendance:approve_late` | Rechazar inscripción tardía de miembro | `src/camporees/camporees.controller.ts` |
+
+### Union Camporees — CRUD
+
+| Method | Path | Auth | Permission | Description | Source |
+|---|---|---|---|---|---|
+| GET | `/api/v1/camporees/union` | JWT | `activities:read` | Listar camporees de unión (`?union_id=`, `?active=true\|false`, `?year=`, `?page=`, `?limit=`) | `src/camporees/camporees.controller.ts` |
+| GET | `/api/v1/camporees/union/:camporeeId` | JWT | `activities:read` | Obtener camporee de unión por ID | `src/camporees/camporees.controller.ts` |
+| POST | `/api/v1/camporees/union` | JWT | `activities:create` | Crear camporee de unión | `src/camporees/camporees.controller.ts` |
+| PATCH | `/api/v1/camporees/union/:camporeeId` | JWT | `activities:update` | Actualizar camporee de unión | `src/camporees/camporees.controller.ts` |
+| DELETE | `/api/v1/camporees/union/:camporeeId` | JWT | `activities:delete` | Desactivar camporee de unión (soft delete) | `src/camporees/camporees.controller.ts` |
+
+### Union Camporees — Club Enrollment
+
+| Method | Path | Auth | Permission | Description | Source |
+|---|---|---|---|---|---|
+| POST | `/api/v1/camporees/union/:camporeeId/clubs` | JWT | `attendance:manage` | Inscribir sección de club en camporee de unión (tardía → `pending_approval`) | `src/camporees/camporees.controller.ts` |
+| GET | `/api/v1/camporees/union/:camporeeId/clubs` | JWT | `attendance:read` | Listar clubes inscritos en camporee de unión (`?status=registered\|pending_approval\|approved\|rejected\|cancelled`) | `src/camporees/camporees.controller.ts` |
+| DELETE | `/api/v1/camporees/union/:camporeeId/clubs/:camporeeClubId` | JWT | `attendance:manage` | Cancelar inscripción de club en camporee de unión | `src/camporees/camporees.controller.ts` |
+
+### Union Camporees — Member Registration
+
+| Method | Path | Auth | Permission | Description | Source |
+|---|---|---|---|---|---|
+| POST | `/api/v1/camporees/union/:camporeeId/register` | JWT | `attendance:manage` | Registrar miembro en camporee de unión con validación de seguro (tardía → `pending_approval`) | `src/camporees/camporees.controller.ts` |
+| GET | `/api/v1/camporees/union/:camporeeId/members` | JWT | `attendance:read` | Listar miembros del camporee de unión (`?status=registered\|pending_approval\|approved\|rejected\|cancelled`) | `src/camporees/camporees.controller.ts` |
+| DELETE | `/api/v1/camporees/union/:camporeeId/members/:userId` | JWT | `attendance:manage` | Remover miembro del camporee de unión (soft delete) | `src/camporees/camporees.controller.ts` |
+
+### Union Camporees — Payments
+
+| Method | Path | Auth | Permission | Description | Source |
+|---|---|---|---|---|---|
+| POST | `/api/v1/camporees/union/:camporeeId/members/:memberId/payments` | JWT | `attendance:manage` | Registrar pago de miembro en camporee de unión | `src/camporees/camporees.controller.ts` |
+| GET | `/api/v1/camporees/union/:camporeeId/members/:memberId/payments` | JWT | `attendance:read` | Listar pagos de un miembro en camporee de unión (`?status=registered\|pending_approval\|approved\|rejected\|cancelled`) | `src/camporees/camporees.controller.ts` |
+| GET | `/api/v1/camporees/union/:camporeeId/payments` | JWT | `attendance:read` | Listar todos los pagos del camporee de unión (`?status=registered\|pending_approval\|approved\|rejected\|cancelled`) | `src/camporees/camporees.controller.ts` |
+
+### Union Camporees — Late Enrollment Approvals
+
+| Method | Path | Auth | Permission | Description | Source |
+|---|---|---|---|---|---|
+| GET | `/api/v1/camporees/union/:camporeeId/pending` | JWT | `attendance:approve_late` | Listar todos los clubes, miembros y pagos con estado `pending_approval` en camporee de unión | `src/camporees/camporees.controller.ts` |
+| PATCH | `/api/v1/camporees/union/:camporeeId/clubs/:camporeeClubId/approve` | JWT | `attendance:approve_late` | Aprobar inscripción tardía de club en camporee de unión | `src/camporees/camporees.controller.ts` |
+| PATCH | `/api/v1/camporees/union/:camporeeId/clubs/:camporeeClubId/reject` | JWT | `attendance:approve_late` | Rechazar inscripción tardía de club en camporee de unión | `src/camporees/camporees.controller.ts` |
+| PATCH | `/api/v1/camporees/union/:camporeeId/members/:camporeeMemberId/approve` | JWT | `attendance:approve_late` | Aprobar inscripción tardía de miembro en camporee de unión | `src/camporees/camporees.controller.ts` |
+| PATCH | `/api/v1/camporees/union/:camporeeId/members/:camporeeMemberId/reject` | JWT | `attendance:approve_late` | Rechazar inscripción tardía de miembro en camporee de unión | `src/camporees/camporees.controller.ts` |
 
 ## catalogs
 

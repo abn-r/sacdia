@@ -1,5 +1,5 @@
 # Feature Registry — SACDIA
-Generado: 2026-03-14 | Actualizado: 2026-03-20
+Generado: 2026-03-14 | Actualizado: 2026-03-25
 Fuente: Reality Matrix + Code Audits
 
 ## Resumen
@@ -13,7 +13,7 @@ Fuente: Reality Matrix + Code Audits
 | [actividades](actividades.md) | IMPLEMENTADO | ActivitiesModule (7 endpoints) | UI completa (list + detail + create/edit + delete) | 4 screens + edit/delete en detalle |
 | [finanzas](finanzas.md) | IMPLEMENTADO | FinancesModule (7 endpoints) | Dashboard completo (resumen + tabla + filtros + CRUD) | 3 screens + eliminacion con AlertDialog |
 | [catalogos](catalogos.md) | IMPLEMENTADO | CatalogsModule + AdminModule (54 endpoints) | 13 pages funcionales | Shared catalogs |
-| [camporees](camporees.md) | IMPLEMENTADO | CamporeesModule (8 endpoints) | CRUD completo + gestion de miembros | 4 screens + capa de datos completa |
+| [camporees](camporees.md) | IMPLEMENTADO | CamporeesModule (41 endpoints: CRUD local + union, deadlines, inscripcion clubes/miembros, pagos, flujo aprobacion tardía) | CRUD completo + gestion de miembros | 4 screens + capa de datos completa |
 | [communications](communications.md) | IMPLEMENTADO | NotificationsModule (7 endpoints) | 1 page funcional | FCM tokens |
 | [certificaciones-guias-mayores](certificaciones-guias-mayores.md) | IMPLEMENTADO | CertificationsModule (7 endpoints) | list + detail + progress | 4 screens |
 | [inventario](inventario.md) | IMPLEMENTADO | InventoryModule (6 endpoints) | CRUD funcional | 4 screens |

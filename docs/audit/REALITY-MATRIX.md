@@ -1,19 +1,19 @@
 # Reality Matrix — SACDIA
-Fecha: 2026-03-22
+Fecha: 2026-03-25
 
 ## Resumen
 
 | Categoria | Total | ALINEADO | SIN CANON | SIN DOCS | FANTASMA | PARCIAL | DRIFT |
 |-----------|-------|----------|-----------|----------|----------|---------|-------|
-| Endpoints | 230 | 197 | 14 | 11 | 0 | — | 0 |
-| Modelos | 74 | 34 | 40 | 0 | 0 | — | 0 |
+| Endpoints | 263 | 230 | 14 | 11 | 0 | — | 0 |
+| Modelos | 74 | 39 | 35 | 0 | 0 | — | 0 |
 | Features | 16 | 14 | 1 | 0 | 0 | 1 | 0 |
 | Integraciones | 7 | 5 | 1 | 1 | 0 | — | 0 |
 
 **Fuentes de verdad cruzadas**:
-- Codigo: `backend-audit.md` (backends con InvestitureModule, InsurancesModule, EvidenceFolderController — ~220+ endpoints), `admin-audit.md` (37+ pages), `app-audit.md` (55+ screens)
-- Documentacion API: `ENDPOINTS-LIVE-REFERENCE.md` (220 endpoints documentados, post-Wave 2)
-- Schema: `schema.prisma` (74 modelos + 8 enums), `SCHEMA-REFERENCE.md` (actualizado 2026-03-22: 74 modelos documentados)
+- Codigo: `backend-audit.md` (backends con InvestitureModule, InsurancesModule, EvidenceFolderController, CamporeesModule — ~263 endpoints), `admin-audit.md` (37+ pages), `app-audit.md` (55+ screens)
+- Documentacion API: `ENDPOINTS-LIVE-REFERENCE.md` (263 endpoints documentados, actualizado 2026-03-25: camporees deadlines + union enrollment)
+- Schema: `schema.prisma` (74 modelos + 8 enums), `SCHEMA-REFERENCE.md` (actualizado 2026-03-25: deadline fields y FK polimorfica en tablas camporee, 74 modelos documentados)
 - Canon: `dominio-sacdia.md`, `runtime-sacdia.md`, `arquitectura-sacdia.md`, `decisiones-clave.md`, `auth/modelo-autorizacion.md`, `auth/runtime-auth.md`
 
 ---
@@ -218,6 +218,8 @@ Convenciones:
 
 ### camporees
 
+#### camporees — local
+
 | Endpoint | Implementado | Doc API | Canon | Estado |
 |----------|:---:|:---:|:---:|---|
 | GET `/camporees` | Si | Si | Si | ALINEADO |
@@ -228,6 +230,46 @@ Convenciones:
 | POST `/camporees/:camporeeId/register` | Si | Si | Si | ALINEADO |
 | GET `/camporees/:camporeeId/members` | Si | Si | Si | ALINEADO |
 | DELETE `/camporees/:camporeeId/members/:userId` | Si | Si | Si | ALINEADO |
+| POST `/camporees/:camporeeId/clubs` | Si | Si | Si | ALINEADO |
+| GET `/camporees/:camporeeId/clubs` | Si | Si | Si | ALINEADO |
+| DELETE `/camporees/:camporeeId/clubs/:camporeeClubId` | Si | Si | Si | ALINEADO |
+| POST `/camporees/:camporeeId/members/:memberId/payments` | Si | Si | Si | ALINEADO |
+| GET `/camporees/:camporeeId/members/:memberId/payments` | Si | Si | Si | ALINEADO |
+| GET `/camporees/:camporeeId/payments` | Si | Si | Si | ALINEADO |
+| PATCH `/camporees/payments/:paymentId` | Si | Si | Si | ALINEADO |
+| PATCH `/camporees/payments/:paymentId/approve` | Si | Si | Si | ALINEADO |
+| PATCH `/camporees/payments/:paymentId/reject` | Si | Si | Si | ALINEADO |
+| GET `/camporees/:camporeeId/pending` | Si | Si | Si | ALINEADO |
+| PATCH `/camporees/:camporeeId/clubs/:camporeeClubId/approve` | Si | Si | Si | ALINEADO |
+| PATCH `/camporees/:camporeeId/clubs/:camporeeClubId/reject` | Si | Si | Si | ALINEADO |
+| PATCH `/camporees/:camporeeId/members/:camporeeMemberId/approve` | Si | Si | Si | ALINEADO |
+| PATCH `/camporees/:camporeeId/members/:camporeeMemberId/reject` | Si | Si | Si | ALINEADO |
+
+#### camporees — union
+
+| Endpoint | Implementado | Doc API | Canon | Estado |
+|----------|:---:|:---:|:---:|---|
+| GET `/camporees/union` | Si | Si | Si | ALINEADO |
+| GET `/camporees/union/:camporeeId` | Si | Si | Si | ALINEADO |
+| POST `/camporees/union` | Si | Si | Si | ALINEADO |
+| PATCH `/camporees/union/:camporeeId` | Si | Si | Si | ALINEADO |
+| DELETE `/camporees/union/:camporeeId` | Si | Si | Si | ALINEADO |
+| POST `/camporees/union/:camporeeId/clubs` | Si | Si | Si | ALINEADO |
+| GET `/camporees/union/:camporeeId/clubs` | Si | Si | Si | ALINEADO |
+| DELETE `/camporees/union/:camporeeId/clubs/:camporeeClubId` | Si | Si | Si | ALINEADO |
+| POST `/camporees/union/:camporeeId/register` | Si | Si | Si | ALINEADO |
+| GET `/camporees/union/:camporeeId/members` | Si | Si | Si | ALINEADO |
+| DELETE `/camporees/union/:camporeeId/members/:userId` | Si | Si | Si | ALINEADO |
+| POST `/camporees/union/:camporeeId/members/:memberId/payments` | Si | Si | Si | ALINEADO |
+| GET `/camporees/union/:camporeeId/members/:memberId/payments` | Si | Si | Si | ALINEADO |
+| GET `/camporees/union/:camporeeId/payments` | Si | Si | Si | ALINEADO |
+| GET `/camporees/union/:camporeeId/pending` | Si | Si | Si | ALINEADO |
+| PATCH `/camporees/union/:camporeeId/clubs/:camporeeClubId/approve` | Si | Si | Si | ALINEADO |
+| PATCH `/camporees/union/:camporeeId/clubs/:camporeeClubId/reject` | Si | Si | Si | ALINEADO |
+| PATCH `/camporees/union/:camporeeId/members/:camporeeMemberId/approve` | Si | Si | Si | ALINEADO |
+| PATCH `/camporees/union/:camporeeId/members/:camporeeMemberId/reject` | Si | Si | Si | ALINEADO |
+
+> Nota: endpoints expandidos en 2026-03-25 para reflejar el modulo completo: inscripcion de clubes y miembros, pagos, flujo de aprobacion tardio, y soporte de union.
 
 ### catalogs
 
@@ -466,8 +508,8 @@ Convenciones:
 | activity_types | Si | Si | No | SIN CANON |
 | activity_instances | Si | Si | No | SIN CANON |
 | folder_assignments | Si | Si | No | SIN CANON |
-| camporee_clubs | Si | Si | No | SIN CANON |
-| camporee_members | Si | Si | No | SIN CANON |
+| camporee_clubs | Si | Si | Si | ALINEADO |
+| camporee_members | Si | Si | Si | ALINEADO |
 | churches | Si | Si | Si | ALINEADO |
 | class_module_progress | Si | Si | Si | ALINEADO |
 | class_modules | Si | Si | No | SIN CANON |
@@ -496,15 +538,15 @@ Convenciones:
 | honors_categories | Si | Si | No | SIN CANON |
 | inventory_categories | Si | Si | No | SIN CANON |
 | inventory_history | Si | Si | No | SIN CANON |
-| local_camporees | Si | Si | No | SIN CANON |
+| local_camporees | Si | Si | Si | ALINEADO |
 | local_fields | Si | Si | Si | ALINEADO |
 | master_honors | Si | Si | No | SIN CANON |
 | notification_logs | Si | Si | No | SIN CANON |
 | permissions | Si | Si | Si | ALINEADO |
 | role_permissions | Si | Si | Si | ALINEADO |
 | roles | Si | Si | Si | ALINEADO |
-| union_camporee_local_fields | Si | Si | No | SIN CANON |
-| union_camporees | Si | Si | No | SIN CANON |
+| union_camporee_local_fields | Si | Si | Si | ALINEADO |
+| union_camporees | Si | Si | Si | ALINEADO |
 | unions | Si | Si | Si | ALINEADO |
 | unit_members | Si | Si | No | SIN CANON |
 | units | Si | Si | No | SIN CANON |
@@ -565,7 +607,7 @@ Convenciones:
 | actividades | Si (ActivitiesModule) | Si (list + detail + create/edit + delete) | Si (activities, 4 screens + edit/delete) | Si (runtime 6.6) | ALINEADO |
 | finanzas | Si (FinancesModule) | Si (dashboard + resumen + tabla + filtros + CRUD) | Si (finances, 3 screens + delete AlertDialog) | Si (runtime 6.6) | ALINEADO |
 | catalogos | Si (CatalogsModule, AdminModule) | Si (catalogs, 13 pages) | Si (shared catalogs) | Si (runtime 6.5) | ALINEADO |
-| camporees | Si (CamporeesModule) | Si (CRUD completo + gestion de miembros) | Si (4 screens + capa de datos completa) | Si (runtime 6.6) | ALINEADO |
+| camporees | Si (CamporeesModule: CRUD local + union, inscripcion de clubes y miembros, pagos, flujo de aprobacion tardia, deadlines) | Si (CRUD completo + gestion de miembros) | Si (4 screens + capa de datos completa) | Si (runtime 6.6) | ALINEADO |
 | communications (notificaciones) | Si (NotificationsModule) | Si (notifications, 1 page) | No (consume FCM tokens) | Si (runtime 6.6) | ALINEADO |
 | certificaciones-guias-mayores | Si (CertificationsModule) | Si (list + detail + progress) | Si (4 screens) | Si (formacion) | ALINEADO |
 | inventario | Si (InventoryModule) | Si (CRUD funcional) | Si (inventory, 4 screens) | Si (runtime 6.6) | ALINEADO |
@@ -586,7 +628,7 @@ Convenciones:
 > **Notas**:
 > - **actividades**: Admin UI completa implementada en commit 1179598 (2026-03-20). Era PARCIAL (placeholder).
 > - **finanzas**: Admin dashboard completo implementado en commit 1179598 (2026-03-20). Era PARCIAL (placeholder).
-> - **camporees**: Admin CRUD + gestion de miembros en commit c18cc07 (2026-03-20). App 4 screens en commit bfa3231 (2026-03-20). Era PARCIAL.
+> - **camporees**: Admin CRUD + gestion de miembros en commit c18cc07 (2026-03-20). App 4 screens en commit bfa3231 (2026-03-20). Era PARCIAL. Actualizado 2026-03-25: modulo expandido con 41 endpoints (22 local + 19 union); deadlines (club_registration_deadline, member_registration_deadline, payment_deadline) en local_camporees y union_camporees; FK polimorfica en camporee_clubs/camporee_members (union_camporee_id + CHECK constraint); flujo de aprobacion tardía con CamporeeLateApprovalsService; autorizacion escopada por tipo (camporee vs union_camporee). 5 modelos pasaron de SIN CANON a ALINEADO.
 > - **certificaciones-guias-mayores**: UI Flutter (4 screens) en commit 69cb026. Admin (list + detail + progress) en commit 37e5929 (2026-03-20). Era PARCIAL.
 > - **inventario**: Admin CRUD funcional segun feature registry. Era PARCIAL (placeholder).
 > - **gestion-seguros**: InsurancesModule implementado en commit 7eed6c8 (2026-03-18). Era SIN CANON.

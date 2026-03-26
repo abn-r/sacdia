@@ -2,7 +2,7 @@
 
 **Estado**: ACTIVE
 
-<!-- Sincronizado contra schema.prisma 2026-03-22. Cobertura completa: 73 modelos + 8 enums documentados. Añadidos en 2026-03-22: inventory_history, notification_logs. Wave 3 (2026-03-22): email_verified añadido a users, apple_connected/google_connected removidos, tablas BA (sessions, accounts, verifications) añadidas. -->
+<!-- Sincronizado contra schema.prisma 2026-03-25. Cobertura completa: 74 modelos + 8 enums documentados. Añadidos en 2026-03-22: inventory_history, notification_logs. Wave 3 (2026-03-22): email_verified añadido a users, apple_connected/google_connected removidos, tablas BA (sessions, accounts, verifications) añadidas. 2026-03-25: camporees module — deadline fields en local_camporees y union_camporees (club_registration_deadline, member_registration_deadline, payment_deadline), FK polimórfica en camporee_clubs y camporee_members (union_camporee_id + CHECK constraint), campos de aprobación (rejection_reason, approved_by, rejected_by) en camporee_clubs, camporee_members, camporee_payments. -->
 
 Referencia completa del schema de base de datos PostgreSQL de SACDIA.
 
@@ -1345,6 +1345,9 @@ Fue archivada como `users_classes_archive` en la migración del 2026-03-20. El h
 | `includes_master_guides` | BOOLEAN | Incluye Guías Mayores | DEFAULT false, NULL |
 | `local_camporee_place` | STRING | Lugar del camporee | DEFAULT "Lugar" |
 | `registration_cost` | DECIMAL(10,2) | Costo de inscripción | NULL |
+| `club_registration_deadline` | TIMESTAMPTZ(6) | Fecha límite de inscripción de clubes | NULL |
+| `member_registration_deadline` | TIMESTAMPTZ(6) | Fecha límite de inscripción de miembros | NULL |
+| `payment_deadline` | TIMESTAMPTZ(6) | Fecha límite de registro de pago | NULL |
 | `ecclesiastical_year` | INT | Año eclesiástico | FK → ecclesiastical_years, NOT NULL |
 | `active` | BOOLEAN | Camporee activo | DEFAULT true |
 | `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
@@ -1373,6 +1376,9 @@ Fue archivada como `users_classes_archive` en la migración del 2026-03-20. El h
 | `includes_master_guides` | BOOLEAN | Incluye Guías Mayores | DEFAULT false, NULL |
 | `union_camporee_place` | STRING | Lugar del camporee | DEFAULT "Lugar" |
 | `registration_cost` | DECIMAL(10,2) | Costo de inscripción | NULL |
+| `club_registration_deadline` | TIMESTAMPTZ(6) | Fecha límite de inscripción de clubes | NULL |
+| `member_registration_deadline` | TIMESTAMPTZ(6) | Fecha límite de inscripción de miembros | NULL |
+| `payment_deadline` | TIMESTAMPTZ(6) | Fecha límite de registro de pago | NULL |
 | `ecclesiastical_year` | INT | Año eclesiástico | FK → ecclesiastical_years, NOT NULL |
 | `active` | BOOLEAN | Camporee activo | DEFAULT true |
 | `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
@@ -1380,7 +1386,7 @@ Fue archivada como `users_classes_archive` en la migración del 2026-03-20. El h
 
 **Relaciones**:
 - Many-to-One: `ecclesiastical_years`, `unions`
-- One-to-Many: `union_camporee_local_fields`
+- One-to-Many: `union_camporee_local_fields`, `camporee_clubs`, `camporee_members`
 
 ---
 
@@ -1404,36 +1410,48 @@ Fue archivada como `users_classes_archive` en la migración del 2026-03-20. El h
 ---
 
 #### Tabla: `camporee_clubs`
-**Descripción**: Clubes inscritos en un camporee local
+**Descripción**: Clubes inscritos en un camporee local o de unión. Soporta FK polimórfica: exactamente uno de `camporee_id` o `union_camporee_id` debe estar presente (CHECK constraint en DB).
 
 **Campos**:
 | Campo | Tipo | Descripción | Constraints |
 |-------|------|-------------|-------------|
 | `camporee_club_id` | INT | ID único | PK, autoincrement |
-| `camporee_id` | INT | Camporee | FK → local_camporees (ON DELETE CASCADE), NOT NULL |
+| `camporee_id` | INT | Camporee local | FK → local_camporees (ON DELETE CASCADE), NULL |
+| `union_camporee_id` | INT | Camporee de unión | FK → union_camporees (ON DELETE CASCADE), NULL |
 | `camporee_type` | VARCHAR(50) | Tipo de camporee | NOT NULL |
 | `club_id` | INT | Club (legacy) | NULL |
 | `local_field_id` | INT | Campo local | FK → local_fields (ON DELETE CASCADE), NULL |
+| `status` | VARCHAR(20) | Estado de la inscripción | DEFAULT 'registered' |
+| `registered_by` | UUID | Usuario que registró | FK → users, NULL |
 | `active` | BOOLEAN | Inscripción activa | DEFAULT true |
 | `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
 | `modified_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW() |
 | `club_section_id` | INT | Sección de club | FK → club_sections, NULL |
+| `rejection_reason` | TEXT | Motivo de rechazo | NULL |
+| `approved_by` | UUID | Usuario que aprobó | FK → users, NULL |
+| `rejected_by` | UUID | Usuario que rechazó | FK → users, NULL |
 
-**Índices**: `idx_camporee_clubs_club_section_id`
+**Índices**: `idx_camporee_clubs_club_section_id`, `idx_camporee_clubs_union_camporee_id`
+
+**Notas**:
+- `camporee_id` pasó de NOT NULL a nullable al agregar soporte para camporees de unión
+- CHECK constraint en DB garantiza que exactamente uno de `camporee_id` o `union_camporee_id` esté presente
+- `status` values: `registered` | `pending_approval` | `approved` | `rejected`
 
 **Relaciones**:
-- Many-to-One: `local_camporees`, `club_sections`, `local_fields`
+- Many-to-One: `local_camporees`, `union_camporees`, `club_sections`, `local_fields`, `users`
 
 ---
 
 #### Tabla: `camporee_members`
-**Descripción**: Miembros individuales inscritos en un camporee local
+**Descripción**: Miembros individuales inscritos en un camporee local o de unión. Soporta FK polimórfica: exactamente uno de `camporee_id` o `union_camporee_id` debe estar presente (CHECK constraint en DB).
 
 **Campos**:
 | Campo | Tipo | Descripción | Constraints |
 |-------|------|-------------|-------------|
 | `camporee_member_id` | INT | ID único | PK, autoincrement |
-| `camporee_id` | INT | Camporee | FK → local_camporees (ON DELETE CASCADE), NOT NULL |
+| `camporee_id` | INT | Camporee local | FK → local_camporees (ON DELETE CASCADE), NULL |
+| `union_camporee_id` | INT | Camporee de unión | FK → union_camporees (ON DELETE CASCADE), NULL |
 | `camporee_type` | VARCHAR(50) | Tipo de camporee | NOT NULL |
 | `user_id` | UUID | Usuario miembro | FK → users, NOT NULL |
 | `club_name` | VARCHAR(255) | Nombre del club (desnormalizado) | NULL |
@@ -1443,9 +1461,52 @@ Fue archivada como `users_classes_archive` en la migración del 2026-03-20. El h
 | `active` | BOOLEAN | Inscripción activa | DEFAULT true |
 | `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
 | `modified_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW() |
+| `status` | VARCHAR(20) | Estado de la inscripción | DEFAULT 'registered' |
+| `rejection_reason` | TEXT | Motivo de rechazo | NULL |
+| `approved_by` | UUID | Usuario que aprobó | FK → users, NULL |
+| `rejected_by` | UUID | Usuario que rechazó | FK → users, NULL |
+
+**Índices**: `idx_camporee_members_union_camporee_id`
+
+**Notas**:
+- `camporee_id` pasó de NOT NULL a nullable al agregar soporte para camporees de unión
+- CHECK constraint en DB garantiza que exactamente uno de `camporee_id` o `union_camporee_id` esté presente
+- `status` values: `registered` | `pending_approval` | `approved` | `rejected`
 
 **Relaciones**:
-- Many-to-One: `local_camporees`, `member_insurances`, `local_fields`, `users`
+- Many-to-One: `local_camporees`, `union_camporees`, `member_insurances`, `local_fields`, `users`
+- One-to-Many: `camporee_payments`
+
+---
+
+#### Tabla: `camporee_payments`
+**Descripción**: Pagos registrados por un miembro de camporee. Soporta flujo de aprobación con estado y auditoría.
+
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `camporee_payment_id` | UUID | ID único | PK, default uuid_generate_v4() |
+| `camporee_member_id` | INT | Miembro del camporee | FK → camporee_members (ON DELETE CASCADE), NOT NULL |
+| `amount` | DECIMAL(10,2) | Monto pagado | NOT NULL |
+| `payment_type` | VARCHAR(50) | Tipo de pago | NOT NULL |
+| `reference` | VARCHAR(100) | Referencia del pago | NULL |
+| `notes` | TEXT | Notas adicionales | NULL |
+| `registered_by` | UUID | Usuario que registró el pago | FK → users, NOT NULL |
+| `paid_at` | DATE | Fecha del pago | NOT NULL |
+| `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
+| `modified_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW() (updatedAt) |
+| `status` | VARCHAR(20) | Estado del pago | DEFAULT 'registered' |
+| `rejection_reason` | TEXT | Motivo de rechazo | NULL |
+| `approved_by` | UUID | Usuario que aprobó | FK → users, NULL |
+| `rejected_by` | UUID | Usuario que rechazó | FK → users, NULL |
+
+**Índices**: `idx_camporee_payments_member_id`
+
+**Notas**:
+- `status` values: `registered` | `pending_approval` | `approved` | `rejected`
+
+**Relaciones**:
+- Many-to-One: `camporee_members`, `users`
 
 ---
 
