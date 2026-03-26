@@ -1,5 +1,5 @@
 # Feature Registry — SACDIA
-Generado: 2026-03-14 | Actualizado: 2026-03-20
+Generado: 2026-03-14 | Actualizado: 2026-03-26
 Fuente: Reality Matrix + Code Audits
 
 ## Resumen
@@ -19,7 +19,13 @@ Fuente: Reality Matrix + Code Audits
 | [inventario](inventario.md) | IMPLEMENTADO | InventoryModule (6 endpoints) | CRUD funcional | 4 screens |
 | [gestion-seguros](gestion-seguros.md) | IMPLEMENTADO | InsurancesModule | CRUD funcional | 3 screens |
 | [carpetas-evidencias](carpetas-evidencias.md) | IMPLEMENTADO | FoldersModule (7 endpoints) | Read-only | 2 screens |
+| [annual-folders-scoring](annual-folders-scoring.md) | IMPLEMENTADO | EvaluationModule + AwardCategoriesModule + RankingsModule (11 endpoints) | Evaluacion + Rankings + CRUD categorias | Solo lectura |
 | [rbac](rbac.md) | IMPLEMENTADO | RbacModule (10 endpoints) | 3 pages funcionales | No aplica |
+| [aprobaciones-camporees](aprobaciones-camporees.md) | IMPLEMENTADO | CamporeesModule (approval endpoints) | Approval UI (pending badges, union routing, member status) | No aplica |
+| [aprobaciones-masivas](aprobaciones-masivas.md) | IMPLEMENTADO | InvestitureModule (+2 bulk endpoints) | Bulk action bar + checkboxes (hasta 200) | No aplica |
+| [validacion-evidencias](validacion-evidencias.md) | IMPLEMENTADO | EvidenceReviewModule (7 endpoints) | Dedicated review page + gallery + bulk ops | No aplica |
+| [sla-dashboard](sla-dashboard.md) | IMPLEMENTADO | AnalyticsModule (1 endpoint) | Dashboard con metricas operacionales | No aplica |
+| [recursos](recursos.md) | IMPLEMENTADO | ResourcesModule (14 endpoints) | Categorias CRUD + Recursos CRUD | Clean Architecture completa |
 | [infrastructure](infrastructure.md) | SIN CANON | CommonModule + AppModule | No implementado | No implementado |
 | [validacion-investiduras](validacion-investiduras.md) | IMPLEMENTADO | InvestitureModule (5 endpoints) | table + dialogs + history | 3 screens |
 
@@ -27,7 +33,7 @@ Fuente: Reality Matrix + Code Audits
 
 | Estado | Cantidad | Dominios |
 |--------|----------|----------|
-| IMPLEMENTADO | 15 | auth, gestion-clubs, clases-progresivas, honores, catalogos, communications, carpetas-evidencias, rbac, gestion-seguros, actividades, finanzas, camporees, certificaciones-guias-mayores, inventario, validacion-investiduras |
+| IMPLEMENTADO | 21 | auth, gestion-clubs, clases-progresivas, honores, catalogos, communications, carpetas-evidencias, annual-folders-scoring, rbac, gestion-seguros, actividades, finanzas, camporees, certificaciones-guias-mayores, inventario, validacion-investiduras, aprobaciones-camporees, aprobaciones-masivas, validacion-evidencias, sla-dashboard, recursos |
 | PARCIAL | 0 | — |
 | SIN CANON | 1 | infrastructure |
 | FANTASMA | 0 | — |

@@ -69,3 +69,4 @@ La inscripcion de miembros en camporees tiene implicaciones directas con el modu
 ## Estado de implementacion
 
 - **Prioridad**: Completo — backend, admin y app implementados con CRUD completo y validacion de seguro en el registro de miembros
+- ✅ Approval UI: Aprobacion/rechazo de inscripciones de clubes, miembros y pagos desde el admin panel (ver [aprobaciones-camporees](aprobaciones-camporees.md))

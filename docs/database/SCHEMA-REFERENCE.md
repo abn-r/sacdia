@@ -2,7 +2,7 @@
 
 **Estado**: ACTIVE
 
-<!-- Sincronizado contra schema.prisma 2026-03-22. Cobertura completa: 73 modelos + 8 enums documentados. Añadidos en 2026-03-22: inventory_history, notification_logs. Wave 3 (2026-03-22): email_verified añadido a users, apple_connected/google_connected removidos, tablas BA (sessions, accounts, verifications) añadidas. -->
+<!-- Sincronizado contra schema.prisma 2026-03-25. Cobertura completa: 78 modelos + 8 enums documentados. Añadidos en 2026-03-25: annual_folder_section_evaluations, award_categories, club_annual_rankings (Annual Folders Scoring) + campos de scoring en folder_template_sections, folder_templates, annual_folders. Añadidos en 2026-03-26: resource_categories, resources (ResourcesModule). Wave 3 (2026-03-22): email_verified añadido a users, apple_connected/google_connected removidos, tablas BA (sessions, accounts, verifications) añadidas. -->
 
 Referencia completa del schema de base de datos PostgreSQL de SACDIA.
 
@@ -71,6 +71,28 @@ graph TB
         ENROLLMENTS --> CLASSES
         USERS --> USERS_HONORS
         USERS_HONORS --> HONORS
+    end
+
+    subgraph "Annual Folders & Scoring"
+        CLUB_ENROLL[club_enrollments]
+        FTEMPLATES[folder_templates]
+        FTSECTIONS[folder_template_sections]
+        ANNUAL_F[annual_folders]
+        AF_EVIDENCES[annual_folder_evidences]
+        AF_EVALS[annual_folder_section_evaluations]
+        AWARD_CAT[award_categories]
+        CLUB_RANK[club_annual_rankings]
+
+        SECTIONS --> CLUB_ENROLL
+        CLUB_ENROLL --> ANNUAL_F
+        FTEMPLATES --> FTSECTIONS
+        FTEMPLATES --> ANNUAL_F
+        ANNUAL_F --> AF_EVIDENCES
+        ANNUAL_F --> AF_EVALS
+        AF_EVIDENCES --> FTSECTIONS
+        AF_EVALS --> FTSECTIONS
+        CLUB_ENROLL --> CLUB_RANK
+        AWARD_CAT --> CLUB_RANK
     end
 ```
 
@@ -1637,6 +1659,7 @@ Fue archivada como `users_classes_archive` en la migración del 2026-03-20. El h
 | `validated_by_id` | UUID | Usuario que validó | FK → users, NULL |
 | `validated_at` | TIMESTAMPTZ | Fecha de validación | NULL |
 | `earned_points` | INT | Puntos efectivamente ganados | DEFAULT 0 |
+| `rejection_reason` | VARCHAR | Motivo de rechazo de la validación | NULL |
 
 **Índices**: `idx_folders_section_records_club_section_id`
 
@@ -1647,13 +1670,14 @@ Fue archivada como `users_classes_archive` en la migración del 2026-03-20. El h
 ---
 
 #### Tabla: `evidence_files`
-**Descripción**: Archivos de evidencia asociados a registros de sección de carpeta
+**Descripción**: Archivos de evidencia asociados a registros de sección de carpeta o honores de usuario
 
 **Campos**:
 | Campo | Tipo | Descripción | Constraints |
 |-------|------|-------------|-------------|
 | `evidence_file_id` | INT | ID único | PK, autoincrement |
-| `section_record_id` | INT | Registro de sección | FK → folders_section_records (ON DELETE CASCADE), NOT NULL |
+| `section_record_id` | INT | Registro de sección | FK → folders_section_records (ON DELETE CASCADE), NULL |
+| `user_honor_id` | INT | Honor de usuario | FK → users_honors(user_honor_id), NULL |
 | `file_url` | VARCHAR(500) | URL del archivo en R2/storage | NOT NULL |
 | `file_name` | VARCHAR(255) | Nombre original del archivo | NOT NULL |
 | `file_type` | VARCHAR(50) | Tipo MIME del archivo | NOT NULL |
@@ -1661,10 +1685,113 @@ Fue archivada como `users_classes_archive` en la migración del 2026-03-20. El h
 | `uploaded_at` | TIMESTAMPTZ | Fecha de subida | DEFAULT NOW() |
 | `active` | BOOLEAN | Archivo activo | DEFAULT true |
 
-**Índices**: `idx_evidence_files_section_record`, `idx_evidence_files_uploaded_by`
+**Índices**: `idx_evidence_files_section_record`, `idx_evidence_files_uploaded_by`, `idx_evidence_files_user_honor`
 
 **Relaciones**:
-- Many-to-One: `folders_section_records`, `users`
+- Many-to-One: `folders_section_records`, `users`, `users_honors`
+
+---
+
+### 🏆 Módulo: Annual Folders Scoring (Calificación de Carpetas Anuales)
+
+#### Tabla: `annual_folder_section_evaluations`
+**Descripción**: Evaluaciones de secciones de carpetas anuales realizadas por el campo local
+
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `id` | UUID | ID único | PK, DEFAULT gen_random_uuid() |
+| `folder_id` | UUID | Carpeta anual evaluada | FK → annual_folders (ON DELETE CASCADE), NOT NULL |
+| `section_id` | UUID | Sección del template evaluada | FK → folder_template_sections, NOT NULL |
+| `earned_points` | INT | Puntos otorgados por el evaluador | NOT NULL |
+| `max_points` | INT | Puntaje máximo posible de la sección | NOT NULL |
+| `notes` | TEXT | Notas/comentarios del evaluador | NULL |
+| `evaluated_by_id` | UUID | Usuario evaluador | FK → users, NOT NULL |
+| `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
+| `updated_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW() |
+
+**Índices**: UNIQUE(`folder_id`, `section_id`)
+
+**Relaciones**:
+- Many-to-One: `annual_folders` (cascade delete), `folder_template_sections`, `users` (evaluated_by)
+
+---
+
+#### Tabla: `award_categories`
+**Descripción**: Catálogo de categorías de premios para la premiación de fin de año (reutilizable entre años)
+
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `id` | UUID | ID único | PK, DEFAULT gen_random_uuid() |
+| `name` | VARCHAR(255) | Nombre de la categoría | NOT NULL |
+| `description` | TEXT | Descripción de la categoría | NULL |
+| `club_type_id` | INT | Tipo de club (nullable = aplica a todos) | FK → club_types, NULL |
+| `min_points` | INT | Puntaje mínimo para calificar | NOT NULL |
+| `max_points` | INT | Puntaje máximo del rango | NOT NULL |
+| `icon` | VARCHAR(100) | Icono representativo | NULL |
+| `order` | INT | Orden de visualización | DEFAULT 0 |
+| `active` | BOOLEAN | Activa (soft-delete) | DEFAULT true |
+| `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
+| `updated_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW() |
+
+**Relaciones**:
+- Many-to-One: `club_types` (opcional)
+- One-to-Many: `club_annual_rankings`
+
+---
+
+#### Tabla: `club_annual_rankings`
+**Descripción**: Rankings pre-calculados de clubes por año eclesiástico y categoría de premio
+
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `id` | UUID | ID único | PK, DEFAULT gen_random_uuid() |
+| `club_enrollment_id` | UUID | Inscripción del club | FK → club_enrollments, NOT NULL |
+| `club_type_id` | INT | Tipo de club | FK → club_types, NOT NULL |
+| `ecclesiastical_year_id` | INT | Año eclesiástico | FK → ecclesiastical_years, NOT NULL |
+| `award_category_id` | UUID | Categoría de premio (sentinel UUID `00000000-...` para ranking general) | FK → award_categories, NOT NULL |
+| `total_earned_points` | INT | Puntos totales obtenidos | DEFAULT 0 |
+| `total_max_points` | INT | Puntaje máximo posible | DEFAULT 0 |
+| `progress_percentage` | FLOAT | Porcentaje de avance | DEFAULT 0 |
+| `rank_position` | INT | Posición en el ranking (dense ranking) | NOT NULL |
+| `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
+| `updated_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW() |
+
+**Índices**: UNIQUE(`club_enrollment_id`, `ecclesiastical_year_id`, `award_category_id`)
+
+**Relaciones**:
+- Many-to-One: `club_enrollments`, `club_types`, `ecclesiastical_years`, `award_categories`
+
+**Notas**:
+- Se usa sentinel UUID (`00000000-0000-0000-0000-000000000000`) para el ranking general (sin categoría específica) evitando nullable en unique constraint
+- Rankings calculados con dense ranking: empates obtienen el mismo número (1,1,2,3)
+- Cron nocturno a las 2 AM recalcula idempotentemente
+
+---
+
+#### Campos añadidos a tablas existentes
+
+**`folder_template_sections`** (campos nuevos):
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `max_points` | INT | Puntaje máximo asignable a la sección | DEFAULT 0 |
+| `minimum_points` | INT | Puntaje mínimo requerido | DEFAULT 0 |
+
+**`folder_templates`** (campos nuevos):
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `minimum_points` | INT | Puntaje mínimo requerido para el template | DEFAULT 0 |
+| `closing_date` | TIMESTAMPTZ | Fecha límite para submissions (no bloquea evaluación) | NULL |
+
+**`annual_folders`** (campos nuevos):
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `total_earned_points` | INT | Puntos totales obtenidos | DEFAULT 0 |
+| `total_max_points` | INT | Puntaje máximo posible | DEFAULT 0 |
+| `progress_percentage` | FLOAT | Porcentaje de avance | DEFAULT 0 |
+| `evaluated_at` | TIMESTAMPTZ | Fecha de última evaluación | NULL |
 
 ---
 
@@ -1779,6 +1906,67 @@ Fue archivada como `users_classes_archive` en la migración del 2026-03-20. El h
 
 #### Enum: `evidence_validation_enum`
 **Valores**: `PENDING`, `VALIDATED`, `REJECTED`
+
+---
+
+### 📁 Módulo: Resources
+
+#### Tabla: `resource_categories`
+**Descripción**: Catálogo de categorías para clasificar recursos (Devocionales, Materiales de Estudio, etc.)
+
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `resource_category_id` | INT | ID único | PK, autoincrement |
+| `name` | VARCHAR(100) | Nombre de la categoría | UNIQUE, NOT NULL |
+| `description` | STRING | Descripción | NULL |
+| `active` | BOOLEAN | Categoría activa | DEFAULT true |
+| `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
+| `modified_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW(), @updatedAt |
+
+**Índices**: `idx_resource_categories_active`
+
+**Relaciones**:
+- One-to-Many: `resources`
+
+---
+
+#### Tabla: `resources`
+**Descripción**: Recursos digitales compartidos en el sistema (documentos, audios, imágenes, videos, textos) con visibilidad escalonada por scope
+
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `resource_id` | UUID | ID único | PK, gen_random_uuid() |
+| `title` | VARCHAR(255) | Título del recurso | NOT NULL |
+| `description` | STRING | Descripción del recurso | NULL |
+| `resource_type` | VARCHAR(20) | Tipo: `document`, `audio`, `image`, `video_link`, `text` | NOT NULL |
+| `resource_category_id` | INT | Categoría del recurso | FK → resource_categories (SET NULL), NULL |
+| `club_type_id` | INT | Tipo de club al que aplica | FK → club_types (SET NULL), NULL |
+| `scope_level` | VARCHAR(20) | Visibilidad: `system`, `union`, `local_field` | NOT NULL |
+| `scope_id` | INT | ID de la entidad del scope (union_id o local_field_id según scope_level) | NULL |
+| `file_key` | VARCHAR(500) | Clave del archivo en R2 (bucket RESOURCES_FILES) | NULL |
+| `file_name` | VARCHAR(255) | Nombre original del archivo | NULL |
+| `file_size` | INT | Tamaño del archivo en bytes | NULL |
+| `file_mime_type` | VARCHAR(100) | MIME type del archivo | NULL |
+| `content` | STRING | Contenido de texto para tipo `text` | NULL |
+| `external_url` | VARCHAR(1000) | URL externa para tipo `video_link` | NULL |
+| `uploaded_by` | UUID | Usuario que subió el recurso | FK → users (CASCADE), NOT NULL |
+| `active` | BOOLEAN | Recurso activo (soft delete) | DEFAULT true |
+| `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
+| `modified_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW(), @updatedAt |
+
+**Índices**: `idx_resources_active`, `idx_resources_scope (scope_level, scope_id)`, `idx_resources_club_type`, `idx_resources_category`, `idx_resources_type`
+
+**Relaciones**:
+- Many-to-One: `resource_categories`, `club_types`, `users`
+
+**Notas de diseño**:
+- Scope `system` (DIA) es visible para todos los usuarios.
+- Scope `union` es visible para usuarios de esa unión y niveles inferiores.
+- Scope `local_field` es visible solo para usuarios del campo local específico.
+- Archivos almacenados en el bucket `RESOURCES_FILES` de Cloudflare R2; URLs firmadas con TTL de 1 hora.
+- Para tipos `video_link` y `text`, el campo `file_key` es opcional.
 
 ---
 
@@ -1918,5 +2106,5 @@ CREATE INDEX idx_churches_district ON churches(district_id) WHERE active = true;
 
 ---
 
-**Última actualización**: 2026-03-20 (Wave 3 — cobertura completa: 71 modelos + 8 enums documentados, campos verbatim de schema.prisma)
+**Última actualización**: 2026-03-25 (Evidence Review — rejection_reason en folders_section_records, user_honor_id FK en evidence_files; 78 modelos + 8 enums documentados)
 **Fuentes**: `schema.prisma` (fuente de verdad), `relations.md`, `auditoria-naming-bd.md`, `verificacion-schema-prisma.md`

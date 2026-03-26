@@ -109,6 +109,7 @@ El schema de base de datos tiene toda la infraestructura preparada (tablas, enum
 
 ## Implementacion completada
 
-- ✅ Backend: InvestitureModule con 5 endpoints, 23 tests
-- ✅ Admin: Tabla de validaciones, dialogs de accion, historial, filtros
+- ✅ Backend: InvestitureModule con 7 endpoints (5 individuales + 2 bulk), 23 tests
+- ✅ Admin: Tabla de validaciones, dialogs de accion, historial, filtros, bulk operations con checkboxes y floating action bar
 - ✅ App: 3 screens (pending list, submit view, history timeline), data layer completa, GoRouter integration
+- ✅ Bulk operations: Hasta 200 enrollments por operacion, partial success handling, race condition protection (ver [aprobaciones-masivas](aprobaciones-masivas.md))

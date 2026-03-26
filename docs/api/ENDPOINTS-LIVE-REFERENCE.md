@@ -1,6 +1,6 @@
 # ENDPOINTS LIVE REFERENCE (Runtime Truth)
 
-<!-- Verificado contra código 2026-03-20. Documento completo: cubre todos los endpoints implementados en controllers. -->
+<!-- Verificado contra código 2026-03-25. Documento completo: cubre todos los endpoints implementados en controllers. -->
 
 > [!IMPORTANT]
 > Documento canónico para agentes (App + Panel Admin).
@@ -8,8 +8,8 @@
 > Base URL: `/api/v1`
 
 **Estado**: ACTIVE
-**Generado**: 2026-03-20T00:00:00.000Z (sincronización completa contra controllers)
-**Total endpoints**: 220
+**Generado**: 2026-03-25T00:00:00.000Z (sincronización completa contra controllers)
+**Total endpoints**: 269
 
 ## Lectura Rápida
 
@@ -408,6 +408,81 @@
 | POST | `/api/v1/enrollments/:enrollmentId/investiture` | JWT | admin, coordinator (GlobalRoles) | Marcar enrollment como investido. Body: `{ comments?: string }` | `src/investiture/investiture.controller.ts` |
 | GET | `/api/v1/investiture/pending` | JWT | admin, coordinator (GlobalRoles) | Listar enrollments pendientes de validación. Query: `local_field_id?`, `ecclesiastical_year_id?`, `page?`, `limit?` | `src/investiture/investiture.controller.ts` |
 | GET | `/api/v1/enrollments/:enrollmentId/investiture-history` | JWT | - | Historial de validación de investidura. Dual-role auth in service. | `src/investiture/investiture.controller.ts` |
+
+## resources
+
+| Method | Path | Auth | Roles | Description | Source |
+|---|---|---|---|---|---|
+| POST | `/api/v1/resources` | JWT | `resources:create` | Crear recurso (multipart/form-data, archivo max 50 MB; opcional para video_link/text) | `src/resources/resources.controller.ts` |
+| GET | `/api/v1/resources` | JWT | `resources:read` | Listar recursos con paginación y filtros (tipo, categoría, tipo de club, scope, texto) | `src/resources/resources.controller.ts` |
+| GET | `/api/v1/resources/:id` | JWT | `resources:read` | Obtener recurso por UUID con URL firmada si tiene archivo | `src/resources/resources.controller.ts` |
+| GET | `/api/v1/resources/:id/signed-url` | JWT | `resources:read` | Generar URL firmada fresca para archivo del recurso (TTL 1 hora) | `src/resources/resources.controller.ts` |
+| PATCH | `/api/v1/resources/:id` | JWT | `resources:update` | Actualizar metadatos del recurso (sin reemplazar archivo) | `src/resources/resources.controller.ts` |
+| DELETE | `/api/v1/resources/:id` | JWT | `resources:delete` | Soft delete del recurso (archivo en R2 no se elimina) | `src/resources/resources.controller.ts` |
+| GET | `/api/v1/resources/me` | JWT | - | Recursos visibles para el usuario autenticado según scope y tipo de club (no requiere RBAC) | `src/resources/resources-app.controller.ts` |
+| GET | `/api/v1/resources/me/:id` | JWT | - | Obtener recurso individual visible para el usuario autenticado con URL firmada | `src/resources/resources-app.controller.ts` |
+| GET | `/api/v1/resources/me/:id/signed-url` | JWT | - | Generar URL firmada fresca para archivo del recurso (app, TTL 1 hora) | `src/resources/resources-app.controller.ts` |
+
+## resource-categories
+
+| Method | Path | Auth | Roles | Description | Source |
+|---|---|---|---|---|---|
+| POST | `/api/v1/resource-categories` | JWT | `resource_categories:create` | Crear categoría de recurso | `src/resources/resource-categories.controller.ts` |
+| GET | `/api/v1/resource-categories` | JWT | `resource_categories:read` | Listar categorías de recursos activas | `src/resources/resource-categories.controller.ts` |
+| GET | `/api/v1/resource-categories/:id` | JWT | `resource_categories:read` | Obtener categoría de recurso por ID | `src/resources/resource-categories.controller.ts` |
+| PATCH | `/api/v1/resource-categories/:id` | JWT | `resource_categories:update` | Actualizar categoría de recurso | `src/resources/resource-categories.controller.ts` |
+| DELETE | `/api/v1/resource-categories/:id` | JWT | `resource_categories:delete` | Soft delete de categoría (falla si tiene recursos activos) | `src/resources/resource-categories.controller.ts` |
+
+## annual-folders-evaluation
+
+| Method | Path | Auth | Roles | Description | Source |
+|---|---|---|---|---|---|
+| POST | `/api/v1/annual-folders/:folderId/sections/:sectionId/evaluate` | JWT | `annual_folders:evaluate` | Evaluar una sección de carpeta anual (puntos + notas) | `src/annual-folders/evaluation.controller.ts` |
+| POST | `/api/v1/annual-folders/:folderId/sections/:sectionId/reopen` | JWT | `annual_folders:evaluate` | Reabrir sección evaluada para re-evaluación | `src/annual-folders/evaluation.controller.ts` |
+| GET | `/api/v1/annual-folders/:folderId/evaluations` | JWT | `annual_folders:evaluate` | Listar evaluaciones de una carpeta anual | `src/annual-folders/evaluation.controller.ts` |
+
+## award-categories
+
+| Method | Path | Auth | Roles | Description | Source |
+|---|---|---|---|---|---|
+| POST | `/api/v1/award-categories` | JWT | `award_categories:create` | Crear categoría de premio | `src/annual-folders/award-categories.controller.ts` |
+| GET | `/api/v1/award-categories` | JWT | `award_categories:read` | Listar categorías de premios | `src/annual-folders/award-categories.controller.ts` |
+| GET | `/api/v1/award-categories/:categoryId` | JWT | `award_categories:read` | Obtener categoría de premio por ID | `src/annual-folders/award-categories.controller.ts` |
+| PATCH | `/api/v1/award-categories/:categoryId` | JWT | `award_categories:update` | Actualizar categoría de premio | `src/annual-folders/award-categories.controller.ts` |
+| DELETE | `/api/v1/award-categories/:categoryId` | JWT | `award_categories:delete` | Soft delete de categoría de premio | `src/annual-folders/award-categories.controller.ts` |
+
+## rankings
+
+| Method | Path | Auth | Roles | Description | Source |
+|---|---|---|---|---|---|
+| GET | `/api/v1/annual-folders/rankings` | JWT | `rankings:read` | Obtener rankings de clubes con filtros (club_type, year, category) | `src/annual-folders/rankings.controller.ts` |
+| GET | `/api/v1/annual-folders/rankings/club/:enrollmentId` | JWT | `rankings:read` | Obtener rankings de un club específico | `src/annual-folders/rankings.controller.ts` |
+| POST | `/api/v1/annual-folders/rankings/recalculate` | JWT | `rankings:recalculate` | Disparar recálculo manual de rankings | `src/annual-folders/rankings.controller.ts` |
+
+## evidence-review
+
+| Method | Path | Auth | Roles | Description | Source |
+|---|---|---|---|---|---|
+| GET | `/api/v1/evidence-review/pending` | JWT | admin, coordinator (GlobalRoles) | Listar evidencias pendientes de validación. Query: `type?` (folder\|class\|honor), `page?`, `limit?` | `src/evidence-review/evidence-review.controller.ts` |
+| GET | `/api/v1/evidence-review/:type/:id` | JWT | admin, coordinator (GlobalRoles) | Detalle de evidencia con archivos adjuntos | `src/evidence-review/evidence-review.controller.ts` |
+| POST | `/api/v1/evidence-review/:type/:id/approve` | JWT | admin, coordinator (GlobalRoles) | Aprobar evidencia | `src/evidence-review/evidence-review.controller.ts` |
+| POST | `/api/v1/evidence-review/:type/:id/reject` | JWT | admin, coordinator (GlobalRoles) | Rechazar evidencia. Body: `{ reason: string }` (required) | `src/evidence-review/evidence-review.controller.ts` |
+| POST | `/api/v1/evidence-review/bulk-approve` | JWT | admin, coordinator (GlobalRoles) | Aprobación masiva (mismo tipo). Body: `{ type: string, ids: int[] }` | `src/evidence-review/evidence-review.controller.ts` |
+| POST | `/api/v1/evidence-review/bulk-reject` | JWT | admin, coordinator (GlobalRoles) | Rechazo masivo (mismo tipo). Body: `{ type: string, ids: int[], reason: string }` | `src/evidence-review/evidence-review.controller.ts` |
+| GET | `/api/v1/evidence-review/:type/:id/history` | JWT | admin, coordinator (GlobalRoles) | Historial de validación de evidencia | `src/evidence-review/evidence-review.controller.ts` |
+
+## analytics
+
+| Method | Path | Auth | Roles | Description | Source |
+|---|---|---|---|---|---|
+| GET | `/api/v1/admin/analytics/sla-dashboard` | JWT | admin, coordinator (GlobalRoles) | Métricas SLA: pendientes, overdue, tiempos promedio, tasas de aprobación, throughput 12 semanas. Cache 60s. Scoped por campo local. | `src/analytics/analytics.controller.ts` |
+
+## investiture-bulk
+
+| Method | Path | Auth | Roles | Description | Source |
+|---|---|---|---|---|---|
+| POST | `/api/v1/investiture/enrollments/bulk-approve` | JWT | admin, coordinator (GlobalRoles) | Aprobación masiva de investiduras (coordinator-approve, field-approve, invest). Body: `{ enrollment_ids: int[], action: string }`. Máx 200. | `src/investiture/investiture.controller.ts` |
+| POST | `/api/v1/investiture/enrollments/bulk-reject` | JWT | admin, coordinator (GlobalRoles) | Rechazo masivo de investiduras. Body: `{ enrollment_ids: int[], comments: string }` (comments required). Máx 200. | `src/investiture/investiture.controller.ts` |
 
 ## Nota de mantenimiento
 
