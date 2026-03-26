@@ -5,14 +5,14 @@ Fecha: 2026-03-25
 
 | Categoria | Total | ALINEADO | SIN CANON | SIN DOCS | FANTASMA | PARCIAL | DRIFT |
 |-----------|-------|----------|-----------|----------|----------|---------|-------|
-| Endpoints | 263 | 230 | 14 | 11 | 0 | — | 0 |
+| Endpoints | 263 | 219 | 39 | 5 | 0 | — | 0 |
 | Modelos | 74 | 39 | 35 | 0 | 0 | — | 0 |
-| Features | 16 | 14 | 1 | 0 | 0 | 1 | 0 |
+| Features | 16 | 15 | 1 | 0 | 0 | 1 | 0 |
 | Integraciones | 7 | 5 | 1 | 1 | 0 | — | 0 |
 
 **Fuentes de verdad cruzadas**:
 - Codigo: `backend-audit.md` (backends con InvestitureModule, InsurancesModule, EvidenceFolderController, CamporeesModule — ~263 endpoints), `admin-audit.md` (37+ pages), `app-audit.md` (55+ screens)
-- Documentacion API: `ENDPOINTS-LIVE-REFERENCE.md` (263 endpoints documentados, actualizado 2026-03-25: camporees deadlines + union enrollment)
+- Documentacion API: `ENDPOINTS-LIVE-REFERENCE.md` (253 endpoints documentados, actualizado 2026-03-25: camporees deadlines + union enrollment)
 - Schema: `schema.prisma` (74 modelos + 8 enums), `SCHEMA-REFERENCE.md` (actualizado 2026-03-25: deadline fields y FK polimorfica en tablas camporee, 74 modelos documentados)
 - Canon: `dominio-sacdia.md`, `runtime-sacdia.md`, `arquitectura-sacdia.md`, `decisiones-clave.md`, `auth/modelo-autorizacion.md`, `auth/runtime-auth.md`
 

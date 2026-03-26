@@ -9,7 +9,7 @@
 
 **Estado**: ACTIVE
 **Generado**: 2026-03-25T00:00:00.000Z (sincronización completa contra controllers)
-**Total endpoints**: 263
+**Total endpoints**: 253
 
 ## Lectura Rápida
 

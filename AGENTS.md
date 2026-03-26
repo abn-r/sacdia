@@ -56,6 +56,8 @@ Para cambios de negocio, ubicar primero el dominio en `docs/features/`:
 
 - `actividades`
 - `auth`
+- `camporees`
+- `carpetas-evidencias`
 - `catalogos`
 - `certificaciones-guias-mayores`
 - `clases-progresivas`

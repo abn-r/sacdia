@@ -50,8 +50,8 @@ La inscripcion de miembros en camporees tiene implicaciones directas con el modu
 
 **Pagos (compartido local/union)**
   - `PATCH /api/v1/camporees/payments/:paymentId` — Actualizar pago
-  - `PATCH /api/v1/camporees/payments/:paymentId/approve` — Aprobar pago tardío
-  - `PATCH /api/v1/camporees/payments/:paymentId/reject` — Rechazar pago tardío
+  - `PATCH /api/v1/camporees/payments/:camporeePaymentId/approve` — Aprobar pago tardío
+  - `PATCH /api/v1/camporees/payments/:camporeePaymentId/reject` — Rechazar pago tardío
 
 **Camporees de union — CRUD**
   - `GET /api/v1/camporees/union` — Listar camporees de union
