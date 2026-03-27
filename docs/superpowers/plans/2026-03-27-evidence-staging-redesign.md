@@ -20,8 +20,18 @@
 | Create | `lib/core/widgets/evidence_staging/image_source_dialog.dart` | Shared camera/gallery picker bottom sheet |
 | Create | `lib/core/widgets/evidence_staging/staged_file_grid.dart` | Unified grid showing remote + local files |
 | Create | `lib/core/widgets/evidence_staging/upload_progress_sheet.dart` | Persistent bottom sheet with per-file upload progress |
-| Create | `lib/core/widgets/evidence_staging/evidence_staging_manager.dart` | Main orchestrator widget with bottom action bar |
-| Modify | `lib/core/widgets/sac_button.dart` | Fix disabled state to use `context.sac` theme tokens |
+| Modify | `lib/features/classes/data/datasources/classes_remote_data_source.dart` | Wire `onProgress` callback to Dio `onSendProgress` |
+| Modify | `lib/features/classes/data/repositories/classes_repository_impl.dart` | Pass through `onProgress` callback |
+| Modify | `lib/features/classes/domain/repositories/classes_repository.dart` | Add `onProgress` to abstract interface |
+| Modify | `lib/features/classes/domain/usecases/upload_requirement_file.dart` | Add `onProgress` to params |
+| Modify | `lib/features/classes/presentation/providers/classes_providers.dart` | Add `onProgress` + `skipInvalidation` to `RequirementNotifier.uploadFile()` |
+| Modify | `lib/features/evidence_folder/data/datasources/evidence_folder_remote_data_source.dart` | Wire `onProgress` callback to Dio `onSendProgress` |
+| Modify | `lib/features/evidence_folder/data/repositories/evidence_folder_repository_impl.dart` | Pass through `onProgress` callback |
+| Modify | `lib/features/evidence_folder/domain/repositories/evidence_folder_repository.dart` | Add `onProgress` to abstract interface |
+| Modify | `lib/features/evidence_folder/domain/usecases/upload_evidence_file.dart` | Add `onProgress` to params |
+| Modify | `lib/features/evidence_folder/presentation/providers/evidence_folder_providers.dart` | Add `onProgress` + `skipInvalidation` to `EvidenceSectionNotifier.uploadFile()` |
+| Create | `lib/core/widgets/evidence_staging/evidence_staging_manager.dart` | Main orchestrator widget with built-in action bar |
+| Modify | `lib/core/widgets/sac_button.dart` | Fix disabled state to use `context.sac` theme tokens, remove AnimatedOpacity no-op |
 | Modify | `lib/features/classes/presentation/views/requirement_detail_view.dart` | Replace picker/grid/bar with `EvidenceStagingManager` |
 | Modify | `lib/features/evidence_folder/presentation/views/evidence_section_detail_view.dart` | Replace picker/grid/bar with `EvidenceStagingManager` |
 | Delete | `lib/features/classes/presentation/widgets/requirement_evidence_grid.dart` | Replaced by `StagedFileGrid` |
@@ -123,31 +133,56 @@ class StagedFile extends Equatable {
 
   // ── copyWith ──────────────────────────────────────────────────────────────
 
+  /// Sentinel object used to distinguish "not provided" from "set to null"
+  /// for nullable fields in [copyWith].
+  static const _sentinel = Object();
+
+  /// Creates a copy with the given fields replaced.
+  ///
+  /// Nullable fields ([errorMessage], [localPath], [remoteUrl], [mimeType],
+  /// [uploadedBy], [uploadedAt]) use a sentinel pattern so they can be
+  /// explicitly cleared by passing `null`:
+  /// ```dart
+  /// file.copyWith(errorMessage: null) // clears errorMessage
+  /// file.copyWith()                   // keeps existing errorMessage
+  /// ```
   StagedFile copyWith({
     String? id,
     String? name,
     String? type,
     StagedFileStatus? status,
-    String? localPath,
-    String? remoteUrl,
-    String? mimeType,
+    Object? localPath = _sentinel,
+    Object? remoteUrl = _sentinel,
+    Object? mimeType = _sentinel,
     double? uploadProgress,
-    String? errorMessage,
-    String? uploadedBy,
-    DateTime? uploadedAt,
+    Object? errorMessage = _sentinel,
+    Object? uploadedBy = _sentinel,
+    Object? uploadedAt = _sentinel,
   }) {
     return StagedFile(
       id: id ?? this.id,
       name: name ?? this.name,
       type: type ?? this.type,
       status: status ?? this.status,
-      localPath: localPath ?? this.localPath,
-      remoteUrl: remoteUrl ?? this.remoteUrl,
-      mimeType: mimeType ?? this.mimeType,
+      localPath: identical(localPath, _sentinel)
+          ? this.localPath
+          : localPath as String?,
+      remoteUrl: identical(remoteUrl, _sentinel)
+          ? this.remoteUrl
+          : remoteUrl as String?,
+      mimeType: identical(mimeType, _sentinel)
+          ? this.mimeType
+          : mimeType as String?,
       uploadProgress: uploadProgress ?? this.uploadProgress,
-      errorMessage: errorMessage ?? this.errorMessage,
-      uploadedBy: uploadedBy ?? this.uploadedBy,
-      uploadedAt: uploadedAt ?? this.uploadedAt,
+      errorMessage: identical(errorMessage, _sentinel)
+          ? this.errorMessage
+          : errorMessage as String?,
+      uploadedBy: identical(uploadedBy, _sentinel)
+          ? this.uploadedBy
+          : uploadedBy as String?,
+      uploadedAt: identical(uploadedAt, _sentinel)
+          ? this.uploadedAt
+          : uploadedAt as DateTime?,
     );
   }
 
@@ -203,6 +238,9 @@ class StagedFile extends Equatable {
     );
   }
 
+  /// [uploadProgress] is intentionally excluded from [props].
+  /// Progress updates are high-frequency and should NOT trigger Equatable
+  /// equality checks — the upload sheet reacts to stream events instead.
   @override
   List<Object?> get props => [
         id,
@@ -212,7 +250,7 @@ class StagedFile extends Equatable {
         localPath,
         remoteUrl,
         mimeType,
-        uploadProgress,
+        // uploadProgress excluded — high-frequency, not identity-relevant
         errorMessage,
         uploadedBy,
         uploadedAt,
@@ -794,8 +832,31 @@ class _StagedFileCell extends StatelessWidget {
       } else if (file.isPdf && file.remoteUrl != null) {
         SacPdfViewer.show(context, pdfUrl: file.remoteUrl!, title: file.name);
       }
+    } else if (file.isLocal && file.localPath != null) {
+      // Local images: open full-screen preview
+      if (file.isImage) {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => Scaffold(
+              backgroundColor: Colors.black,
+              appBar: AppBar(
+                backgroundColor: Colors.transparent,
+                iconTheme: const IconThemeData(color: Colors.white),
+              ),
+              body: Center(
+                child: InteractiveViewer(
+                  child: Image.file(
+                    File(file.localPath!),
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      }
+      // Local PDFs: no preview (would need a local PDF viewer dependency)
     }
-    // Local files: no viewer action (already previewed in-grid)
   }
 }
 
@@ -913,6 +974,9 @@ enum UploadSheetResult {
 
   /// User chose to continue with only the successfully uploaded files.
   continuePartial,
+
+  /// User chose to retry only the failed files.
+  retry,
 
   /// User cancelled — return to staging (already-uploaded files persist).
   cancelled,
@@ -1142,12 +1206,13 @@ class _UploadProgressSheetContentState
     // Partial failure or all failed: 3 buttons
     return Column(
       children: [
-        // Retry failed
+        // Retry failed — returns UploadSheetResult.retry so the manager
+        // can re-run uploads for only the failed files.
         SizedBox(
           width: double.infinity,
           child: FilledButton(
             onPressed: () =>
-                Navigator.pop(context, UploadSheetResult.cancelled),
+                Navigator.pop(context, UploadSheetResult.retry),
             style: FilledButton.styleFrom(
               backgroundColor: AppColors.primary,
               padding: const EdgeInsets.symmetric(vertical: 14),
@@ -1373,7 +1438,304 @@ git commit -m "feat: add UploadProgressSheet with per-file progress tracking"
 
 ---
 
-## Task 5: EvidenceStagingManager
+## Task 5: Wire onProgress Callback Through Data Layer
+
+**Files:**
+- Modify: `lib/features/classes/data/datasources/classes_remote_data_source.dart`
+- Modify: `lib/features/classes/data/repositories/classes_repository_impl.dart`
+- Modify: `lib/features/classes/domain/repositories/classes_repository.dart`
+- Modify: `lib/features/classes/domain/usecases/upload_requirement_file.dart`
+- Modify: `lib/features/classes/presentation/providers/classes_providers.dart`
+- Modify: `lib/features/evidence_folder/data/datasources/evidence_folder_remote_data_source.dart`
+- Modify: `lib/features/evidence_folder/data/repositories/evidence_folder_repository_impl.dart`
+- Modify: `lib/features/evidence_folder/domain/repositories/evidence_folder_repository.dart`
+- Modify: `lib/features/evidence_folder/domain/usecases/upload_evidence_file.dart`
+- Modify: `lib/features/evidence_folder/presentation/providers/evidence_folder_providers.dart`
+
+Both features already have `onSendProgress` in their Dio `.post()` calls, but it is only used for logging — never wired to an external callback. This task threads an `onProgress` callback from the notifier all the way down to Dio.
+
+**C-2 fix (skipInvalidation)** is also applied here: both notifiers get a `skipInvalidation` parameter that, when `true`, skips the `ref.invalidate()` call after upload. The staging manager passes `skipInvalidation: true` during batch uploads, then triggers a single invalidation after the entire batch via the `onSubmit` callback.
+
+- [ ] **Step 1: Classes feature — data source**
+
+Add an optional `onProgress` callback to `ClassesRemoteDataSourceImpl.uploadRequirementFile()` and its abstract interface:
+
+```dart
+// Abstract (classes_remote_data_source.dart):
+Future<RequirementEvidenceModel> uploadRequirementFile({
+  required String userId,
+  required int classId,
+  required int requirementId,
+  required String filePath,
+  required String fileName,
+  required String mimeType,
+  void Function(double)? onProgress,  // NEW
+});
+
+// Impl — wire onSendProgress in the Dio .post() call:
+onSendProgress: (sent, total) {
+  if (total > 0) {
+    final fraction = sent / total;
+    onProgress?.call(fraction);
+    AppLogger.d(
+      'Upload progress: ${(fraction * 100).toStringAsFixed(1)}%',
+      tag: _tag,
+    );
+  }
+},
+```
+
+- [ ] **Step 2: Classes feature — repository**
+
+Pass through `onProgress` in `ClassesRepositoryImpl.uploadRequirementFile()` and its abstract interface:
+
+```dart
+// Abstract (classes_repository.dart):
+Future<Either<Failure, RequirementEvidence>> uploadRequirementFile({
+  required String userId,
+  required int classId,
+  required int requirementId,
+  required String filePath,
+  required String fileName,
+  required String mimeType,
+  void Function(double)? onProgress,  // NEW
+});
+
+// Impl — pass through to data source:
+final model = await remoteDataSource.uploadRequirementFile(
+  userId: userId,
+  classId: classId,
+  requirementId: requirementId,
+  filePath: filePath,
+  fileName: fileName,
+  mimeType: mimeType,
+  onProgress: onProgress,  // NEW
+);
+```
+
+- [ ] **Step 3: Classes feature — use case**
+
+Add `onProgress` to `UploadRequirementFileParams` and pass through:
+
+```dart
+class UploadRequirementFileParams {
+  // ... existing fields ...
+  final void Function(double)? onProgress;  // NEW
+
+  const UploadRequirementFileParams({
+    // ... existing params ...
+    this.onProgress,  // NEW
+  });
+}
+
+// In call():
+return _repository.uploadRequirementFile(
+  userId: params.userId,
+  classId: params.classId,
+  requirementId: params.requirementId,
+  filePath: params.filePath,
+  fileName: params.fileName,
+  mimeType: params.mimeType,
+  onProgress: params.onProgress,  // NEW
+);
+```
+
+- [ ] **Step 4: Classes feature — notifier (RequirementNotifier)**
+
+Add `onProgress` and `skipInvalidation` to `uploadFile()`:
+
+```dart
+Future<bool> uploadFile({
+  required int requirementId,
+  required XFile pickedFile,
+  required String mimeType,
+  void Function(double)? onProgress,   // NEW (C-1)
+  bool skipInvalidation = false,        // NEW (C-2)
+}) async {
+  state = state.copyWith(isLoading: true, errorMessage: null, success: false);
+
+  final result = await ref.read(uploadRequirementFileUseCaseProvider)(
+    UploadRequirementFileParams(
+      userId: _userId,
+      classId: _classId,
+      requirementId: requirementId,
+      filePath: pickedFile.path,
+      fileName: pickedFile.name,
+      mimeType: mimeType,
+      onProgress: onProgress,  // NEW
+    ),
+  );
+
+  return result.fold(
+    (failure) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: failure.message,
+      );
+      return false;
+    },
+    (_) {
+      state = state.copyWith(isLoading: false, success: true);
+      if (!skipInvalidation) {                          // NEW (C-2)
+        ref.invalidate(classWithProgressProvider(_classId));
+      }
+      return true;
+    },
+  );
+}
+```
+
+- [ ] **Step 5: Evidence folder feature — data source**
+
+Same pattern as Step 1. Add `onProgress` to `EvidenceFolderRemoteDataSourceImpl.uploadFile()` and its abstract interface:
+
+```dart
+// Abstract:
+Future<EvidenceFileModel> uploadFile({
+  required String clubSectionId,
+  required String sectionId,
+  required String filePath,
+  required String fileName,
+  required String mimeType,
+  void Function(double)? onProgress,  // NEW
+});
+
+// Impl — wire onSendProgress:
+onSendProgress: (sent, total) {
+  if (total > 0) {
+    final fraction = sent / total;
+    onProgress?.call(fraction);
+    AppLogger.d(
+      'Upload progress: ${(fraction * 100).toStringAsFixed(1)}%',
+      tag: _tag,
+    );
+  }
+},
+```
+
+- [ ] **Step 6: Evidence folder feature — repository**
+
+Pass through `onProgress`:
+
+```dart
+// Abstract:
+Future<Either<Failure, EvidenceFile>> uploadFile({
+  required String clubSectionId,
+  required String sectionId,
+  required String filePath,
+  required String fileName,
+  required String mimeType,
+  void Function(double)? onProgress,  // NEW
+});
+
+// Impl:
+final model = await remoteDataSource.uploadFile(
+  clubSectionId: clubSectionId,
+  sectionId: sectionId,
+  filePath: filePath,
+  fileName: fileName,
+  mimeType: mimeType,
+  onProgress: onProgress,  // NEW
+);
+```
+
+- [ ] **Step 7: Evidence folder feature — use case**
+
+Add `onProgress` to `UploadEvidenceFileParams` and pass through:
+
+```dart
+class UploadEvidenceFileParams {
+  // ... existing fields ...
+  final void Function(double)? onProgress;  // NEW
+
+  const UploadEvidenceFileParams({
+    // ... existing params ...
+    this.onProgress,  // NEW
+  });
+}
+
+// In call():
+return _repository.uploadFile(
+  clubSectionId: params.clubSectionId,
+  sectionId: params.sectionId,
+  filePath: params.filePath,
+  fileName: params.fileName,
+  mimeType: params.mimeType,
+  onProgress: params.onProgress,  // NEW
+);
+```
+
+- [ ] **Step 8: Evidence folder feature — notifier (EvidenceSectionNotifier)**
+
+Add `onProgress` and `skipInvalidation` to `uploadFile()`:
+
+```dart
+Future<bool> uploadFile({
+  required String sectionId,
+  required XFile pickedFile,
+  required String mimeType,
+  void Function(double)? onProgress,   // NEW (C-1)
+  bool skipInvalidation = false,        // NEW (C-2)
+}) async {
+  state = state.copyWith(isLoading: true, errorMessage: null, success: false);
+
+  final result = await ref.read(uploadEvidenceFileUseCaseProvider)(
+    UploadEvidenceFileParams(
+      clubSectionId: _clubSectionId,
+      sectionId: sectionId,
+      filePath: pickedFile.path,
+      fileName: pickedFile.name,
+      mimeType: mimeType,
+      onProgress: onProgress,  // NEW
+    ),
+  );
+
+  return result.fold(
+    (failure) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: failure.message,
+      );
+      return false;
+    },
+    (_) {
+      state = state.copyWith(isLoading: false, success: true);
+      if (!skipInvalidation) {                                  // NEW (C-2)
+        ref.invalidate(evidenceFolderProvider(_clubSectionId));
+      }
+      return true;
+    },
+  );
+}
+```
+
+- [ ] **Step 9: Run `flutter analyze` to verify both features**
+
+```bash
+cd /Users/abner/Documents/development/sacdia/sacdia-app && flutter analyze lib/features/classes/ lib/features/evidence_folder/
+```
+
+- [ ] **Step 10: Commit**
+
+```bash
+git add lib/features/classes/data/datasources/classes_remote_data_source.dart \
+  lib/features/classes/data/repositories/classes_repository_impl.dart \
+  lib/features/classes/domain/repositories/classes_repository.dart \
+  lib/features/classes/domain/usecases/upload_requirement_file.dart \
+  lib/features/classes/presentation/providers/classes_providers.dart \
+  lib/features/evidence_folder/data/datasources/evidence_folder_remote_data_source.dart \
+  lib/features/evidence_folder/data/repositories/evidence_folder_repository_impl.dart \
+  lib/features/evidence_folder/domain/repositories/evidence_folder_repository.dart \
+  lib/features/evidence_folder/domain/usecases/upload_evidence_file.dart \
+  lib/features/evidence_folder/presentation/providers/evidence_folder_providers.dart
+git commit -m "feat: wire onProgress callback and skipInvalidation through upload chain"
+```
+
+---
+
+## Task 6: EvidenceStagingManager
+
+> **Depends on:** Task 5 (onProgress + skipInvalidation must exist before integration)
 
 **Files:**
 - Create: `lib/core/widgets/evidence_staging/evidence_staging_manager.dart`
@@ -1449,6 +1811,14 @@ class EvidenceStagingManager extends StatefulWidget {
   /// Disables all modification controls.
   final bool canModify;
 
+  /// Whether the notifier is currently loading (submit, delete, etc.).
+  /// Used to disable the action bar while operations are in progress.
+  final bool isLoading;
+
+  /// Called whenever the count of local (unsaved) files changes.
+  /// The parent can use this to update `PopScope.canPop` without a GlobalKey.
+  final void Function(bool hasLocalFiles)? onLocalFilesChanged;
+
   const EvidenceStagingManager({
     super.key,
     required this.existingFiles,
@@ -1458,6 +1828,8 @@ class EvidenceStagingManager extends StatefulWidget {
     required this.onSubmit,
     required this.fileNameBuilder,
     required this.canModify,
+    this.isLoading = false,
+    this.onLocalFilesChanged,
   });
 
   @override
@@ -1508,8 +1880,11 @@ class EvidenceStagingManagerState extends State<EvidenceStagingManager> {
       _hasAnyFiles &&
       !_isOverLimit;
 
-  /// Public getter for parent screens to check if there are unsaved local files.
-  bool get hasUnsavedLocalFiles => _hasLocalFiles;
+  /// Notifies the parent whenever the local file count changes.
+  /// Used for PopScope without GlobalKey (I-2 fix).
+  void _notifyLocalFilesChanged() {
+    widget.onLocalFilesChanged?.call(_hasLocalFiles);
+  }
 
   // ── File picking ──────────────────────────────────────────────────────────
 
@@ -1537,18 +1912,21 @@ class EvidenceStagingManagerState extends State<EvidenceStagingManager> {
 
       if (pickedFiles.isEmpty || !mounted) return;
 
+      // I-3: Never mutate _allFiles in place — always create a new list.
       setState(() {
-        for (final picked in pickedFiles) {
+        final newFiles = pickedFiles.map((picked) {
           final mimeType = picked.name.toLowerCase().endsWith('.png')
               ? 'image/png'
               : 'image/jpeg';
-          _allFiles.add(StagedFile.local(
+          return StagedFile.local(
             localPath: picked.path,
             name: picked.name,
             mimeType: mimeType,
-          ));
-        }
+          );
+        }).toList();
+        _allFiles = [..._allFiles, ...newFiles];
       });
+      _notifyLocalFilesChanged();
     } catch (e) {
       AppLogger.e('Error al seleccionar imagen', error: e);
       if (mounted) {
@@ -1566,16 +1944,19 @@ class EvidenceStagingManagerState extends State<EvidenceStagingManager> {
       );
       if (result == null || result.files.isEmpty || !mounted) return;
 
+      // I-3: Never mutate _allFiles in place — always create a new list.
       setState(() {
-        for (final platformFile in result.files) {
-          if (platformFile.path == null) continue;
-          _allFiles.add(StagedFile.local(
-            localPath: platformFile.path!,
-            name: platformFile.name,
-            mimeType: 'application/pdf',
-          ));
-        }
+        final newFiles = result.files
+            .where((pf) => pf.path != null)
+            .map((pf) => StagedFile.local(
+                  localPath: pf.path!,
+                  name: pf.name,
+                  mimeType: 'application/pdf',
+                ))
+            .toList();
+        _allFiles = [..._allFiles, ...newFiles];
       });
+      _notifyLocalFilesChanged();
     } catch (e) {
       AppLogger.e('Error al seleccionar PDF', error: e);
       if (mounted) {
@@ -1586,20 +1967,23 @@ class EvidenceStagingManagerState extends State<EvidenceStagingManager> {
 
   // ── Local file removal ──────────────────────────────────────────────────────
 
+  // I-3: Never mutate _allFiles in place — always create a new list.
   void _removeLocalFile(StagedFile file) {
     setState(() {
-      _allFiles.removeWhere((f) => f.id == file.id);
+      _allFiles = _allFiles.where((f) => f.id != file.id).toList();
     });
+    _notifyLocalFilesChanged();
   }
 
   // ── Remote file deletion ──────────────────────────────────────────────────
 
+  // I-3: Never mutate _allFiles in place — always create a new list.
   Future<void> _deleteRemoteFile(StagedFile file) async {
     try {
       await widget.onDeleteRemote(file.id);
       if (mounted) {
         setState(() {
-          _allFiles.removeWhere((f) => f.id == file.id);
+          _allFiles = _allFiles.where((f) => f.id != file.id).toList();
         });
       }
     } catch (e) {
@@ -1711,24 +2095,46 @@ class EvidenceStagingManagerState extends State<EvidenceStagingManager> {
 
     setState(() => _isUploading = false);
 
+    // I-3: Never mutate _allFiles in place — always create a new list.
     switch (sheetResult) {
       case UploadSheetResult.continueSubmit:
       case UploadSheetResult.continuePartial:
         // Remove local files that were completed (they're now on server)
         setState(() {
-          _allFiles.removeWhere(
-            (f) =>
-                f.status == StagedFileStatus.completed ||
-                (sheetResult == UploadSheetResult.continuePartial &&
-                    f.status == StagedFileStatus.error),
-          );
+          _allFiles = _allFiles.where((f) {
+            if (f.status == StagedFileStatus.completed) return false;
+            if (sheetResult == UploadSheetResult.continuePartial &&
+                f.status == StagedFileStatus.error) return false;
+            return true;
+          }).toList();
         });
         // Proceed to submit
         await widget.onSubmit();
         break;
 
+      // C-3: Retry actually re-runs the upload loop for failed files.
+      case UploadSheetResult.retry:
+        // Reset failed files back to uploading and re-run the loop
+        setState(() {
+          _allFiles = _allFiles.map((f) {
+            if (f.status == StagedFileStatus.error) {
+              return f.copyWith(
+                status: StagedFileStatus.local,
+                uploadProgress: 0.0,
+                errorMessage: null,
+              );
+            }
+            return f;
+          }).toList();
+        });
+        // Recursively re-run the upload queue for the remaining local files
+        if (_hasLocalFiles && mounted) {
+          await _executeUploadQueue(context);
+        }
+        break;
+
       case UploadSheetResult.cancelled:
-        // Return failed files to local status for retry
+        // Return failed files to local status for manual re-staging
         setState(() {
           _allFiles = _allFiles.map((f) {
             if (f.status == StagedFileStatus.error) {
@@ -1752,6 +2158,14 @@ class EvidenceStagingManagerState extends State<EvidenceStagingManager> {
     }
   }
 
+  /// Updates a file's status in the list. Creates a new list (I-3).
+  ///
+  /// With the sentinel copyWith pattern (I-1), passing `null` for
+  /// [errorMessage] explicitly clears it, while omitting it preserves
+  /// the existing value. Here we always pass it through since every
+  /// status transition has clear intent:
+  /// - `uploading` / `completed`: errorMessage is null -> clears previous error
+  /// - `error`: errorMessage is set -> stores the error
   void _updateFileStatus(
     String fileId,
     StagedFileStatus status, {
@@ -1770,6 +2184,7 @@ class EvidenceStagingManagerState extends State<EvidenceStagingManager> {
         return f;
       }).toList();
     });
+    _notifyLocalFilesChanged();
   }
 
   // ── Dialogs ─────────────────────────────────────────────────────────────────
@@ -1845,24 +2260,43 @@ class EvidenceStagingManagerState extends State<EvidenceStagingManager> {
 
   // ── Build ──────────────────────────────────────────────────────────────────
 
+  // I-2: The action bar is built directly inside this widget's build method,
+  // eliminating the need for a GlobalKey<EvidenceStagingManagerState> in the
+  // parent. The parent Scaffold should NOT use bottomNavigationBar — instead,
+  // this widget outputs both the grid and the action bar in a single Column.
+  // I-5: No mid-batch invalidation issue since C-2 (skipInvalidation) ensures
+  // providers are not invalidated during batch uploads. A single invalidation
+  // happens after the full batch via the onSubmit callback.
+
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Grid
-        if (_allFiles.isEmpty)
-          _EmptyFiles(canModify: widget.canModify)
-        else
-          StagedFileGrid(
-            files: _allFiles,
-            maxFiles: widget.maxFiles,
-            canModify: widget.canModify,
-            onRemoveLocal: _removeLocalFile,
-            onDeleteRemote: _deleteRemoteFile,
+        // Scrollable content area
+        Expanded(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: _allFiles.isEmpty
+                ? _EmptyFiles(canModify: widget.canModify)
+                : StagedFileGrid(
+                    files: _allFiles,
+                    maxFiles: widget.maxFiles,
+                    canModify: widget.canModify,
+                    onRemoveLocal: _removeLocalFile,
+                    onDeleteRemote: _deleteRemoteFile,
+                  ),
           ),
+        ),
 
-        // Spacing before bottom bar is handled by the parent view
+        // Action bar — always at the bottom, no GlobalKey needed
+        if (widget.canModify)
+          _EvidenceStagingActionBar(
+            onPickImages: () => _pickImages(context),
+            onPickPdfs: () => _pickPdfs(context),
+            onSubmit: () => _submitForValidation(context),
+            canSubmit: _canSubmit,
+            isLoading: widget.isLoading || _isUploading,
+          ),
       ],
     );
   }
@@ -1905,19 +2339,21 @@ class _EmptyFiles extends StatelessWidget {
   }
 }
 
-/// Bottom action bar for evidence staging.
-///
-/// Extracted as a separate widget so that integration screens can place it
-/// in `bottomNavigationBar` of their Scaffold.
-class EvidenceStagingActionBar extends StatelessWidget {
-  final EvidenceStagingManagerState managerState;
-  final bool canModify;
+/// I-2: Bottom action bar is now a private widget inside the manager file.
+/// It takes simple callbacks instead of requiring access to the manager's state
+/// via a GlobalKey. The parent screen never needs to reference the manager state.
+class _EvidenceStagingActionBar extends StatelessWidget {
+  final VoidCallback onPickImages;
+  final VoidCallback onPickPdfs;
+  final VoidCallback onSubmit;
+  final bool canSubmit;
   final bool isLoading;
 
-  const EvidenceStagingActionBar({
-    super.key,
-    required this.managerState,
-    required this.canModify,
+  const _EvidenceStagingActionBar({
+    required this.onPickImages,
+    required this.onPickPdfs,
+    required this.onSubmit,
+    required this.canSubmit,
     required this.isLoading,
   });
 
@@ -1953,10 +2389,8 @@ class EvidenceStagingActionBar extends StatelessWidget {
                 child: SacButton.outline(
                   text: 'Imagen',
                   icon: HugeIcons.strokeRoundedCamera01,
-                  isEnabled: canModify && !isLoading,
-                  onPressed: canModify && !isLoading
-                      ? () => managerState._pickImages(context)
-                      : null,
+                  isEnabled: !isLoading,
+                  onPressed: !isLoading ? onPickImages : null,
                 ),
               ),
               const SizedBox(width: 10),
@@ -1964,10 +2398,8 @@ class EvidenceStagingActionBar extends StatelessWidget {
                 child: SacButton.outline(
                   text: 'PDF',
                   icon: HugeIcons.strokeRoundedPdf01,
-                  isEnabled: canModify && !isLoading,
-                  onPressed: canModify && !isLoading
-                      ? () => managerState._pickPdfs(context)
-                      : null,
+                  isEnabled: !isLoading,
+                  onPressed: !isLoading ? onPickPdfs : null,
                 ),
               ),
             ],
@@ -1978,11 +2410,9 @@ class EvidenceStagingActionBar extends StatelessWidget {
           SacButton.primary(
             text: 'Enviar a validación',
             icon: HugeIcons.strokeRoundedSent,
-            isEnabled: managerState._canSubmit && !isLoading,
+            isEnabled: canSubmit && !isLoading,
             isLoading: isLoading,
-            onPressed: managerState._canSubmit && !isLoading
-                ? () => managerState._submitForValidation(context)
-                : null,
+            onPressed: canSubmit && !isLoading ? onSubmit : null,
           ),
         ],
       ),
@@ -1991,7 +2421,7 @@ class EvidenceStagingActionBar extends StatelessWidget {
 }
 ```
 
-**Important design note about `EvidenceStagingActionBar`**: It accesses the manager's private methods via the state directly. This is intentional — the action bar is tightly coupled to the manager's state and should not be used independently. The parent screen creates a `GlobalKey<EvidenceStagingManagerState>` to pass the state into the action bar. This avoids lifting all the picker/upload logic up to the parent, keeping it encapsulated in the staging widget tree.
+**Important design note about `_EvidenceStagingActionBar`**: The action bar is now a private widget built directly inside `EvidenceStagingManagerState.build()`. This eliminates the need for a `GlobalKey<EvidenceStagingManagerState>` in the parent (I-2 fix). The parent screen uses `EvidenceStagingManager` as a single widget that outputs both the grid and the action bar — the Scaffold should NOT use `bottomNavigationBar` for the action bar. Instead, the `EvidenceStagingManager` goes inside the Scaffold `body` and fills the available space with `Expanded`.
 
 - [ ] **Step 2: Run `flutter analyze` to verify**
 
@@ -1999,19 +2429,9 @@ class EvidenceStagingActionBar extends StatelessWidget {
 cd /Users/abner/Documents/development/sacdia/sacdia-app && flutter analyze lib/core/widgets/evidence_staging/evidence_staging_manager.dart
 ```
 
-- [ ] **Step 3: Fix any analyzer issues (likely: private member access across classes)**
+- [ ] **Step 3: Fix any analyzer issues**
 
-The `EvidenceStagingActionBar` references private methods `_pickImages`, `_pickPdfs`, `_submitForValidation`, and `_canSubmit` on `EvidenceStagingManagerState`. Since they're in the same file, private members are accessible. However, if the analyzer complains, rename them to public or use a pattern like:
-
-```dart
-// In EvidenceStagingManagerState, add public methods:
-void pickImages(BuildContext context) => _pickImages(context);
-void pickPdfs(BuildContext context) => _pickPdfs(context);
-void submitForValidation(BuildContext context) => _submitForValidation(context);
-bool get canSubmit => _canSubmit;
-```
-
-**Note:** Private members in Dart are library-private, not class-private. Since both classes are in the same file (same library), `_pickImages` etc. are accessible. No renaming should be needed.
+The `_EvidenceStagingActionBar` is now a private widget that takes simple `VoidCallback`s — no access to manager state needed. The action bar is built inside `EvidenceStagingManagerState.build()` which passes its own methods as callbacks. No private member access issues.
 
 - [ ] **Step 4: Commit**
 
@@ -2022,7 +2442,7 @@ git commit -m "feat: add EvidenceStagingManager orchestrator widget"
 
 ---
 
-## Task 6: SacButton Disabled Style Fix
+## Task 7: SacButton Disabled Style Fix
 
 **Files:**
 - Modify: `lib/core/widgets/sac_button.dart`
@@ -2041,7 +2461,7 @@ The structural change:
    - `backgroundColor` -> `context.sac.surface` (very light, neutral)
    - `foregroundColor` (text/icon) -> `context.sac.textTertiary` (muted)
    - `border` -> `context.sac.border` (neutral)
-3. Add a 200ms animated transition via `AnimatedContainer` or by adjusting the existing animation.
+3. Remove the `AnimatedOpacity` wrapper (I-4 fix) — it wraps with `opacity: 1.0` which is a no-op. Disabled transition is handled via instant color changes on `setState`.
 
 Replace the `build` method in `_SacButtonState`:
 
@@ -2127,12 +2547,9 @@ Widget build(BuildContext context) {
     );
   }
 
-  // Wrap in AnimatedContainer for smooth disabled transition
-  button = AnimatedOpacity(
-    opacity: 1.0, // We handle colors directly, not opacity
-    duration: const Duration(milliseconds: 200),
-    child: button,
-  );
+  // I-4: No AnimatedOpacity wrapper — opacity is always 1.0 so it's a no-op.
+  // Disabled state is handled via color changes which are instant on setState.
+  // The ScaleTransition below provides the only intentional animation.
 
   // Scale animation on press with haptic feedback
   return GestureDetector(
@@ -2153,6 +2570,7 @@ Widget build(BuildContext context) {
 - `_borderSide` still returns the variant's normal border; only overridden to neutral when disabled.
 - Loading spinner color uses `effectiveFg` so it's muted when disabled.
 - Icon colors use `effectiveFg` instead of raw `_foregroundColor`.
+- `AnimatedOpacity` wrapper removed (I-4) — it was a no-op with `opacity: 1.0`.
 
 - [ ] **Step 3: Add the `sac_colors.dart` import if not already present**
 
@@ -2177,7 +2595,7 @@ git commit -m "fix: refactor SacButton disabled state to use theme tokens"
 
 ---
 
-## Task 7: Integration — Classes (RequirementDetailView)
+## Task 8: Integration — Classes (RequirementDetailView)
 
 **Files:**
 - Modify: `lib/features/classes/presentation/views/requirement_detail_view.dart`
@@ -2222,15 +2640,9 @@ Keep:
 - `_submit()` — simplified to just call the notifier
 - `_showErrorSnackbar()` — still used
 
-- [ ] **Step 4: Add GlobalKey for the staging manager state**
+- [ ] **Step 4: Replace the grid and bottom bar in `build()`**
 
-In `_RequirementDetailViewState`:
-
-```dart
-final _stagingKey = GlobalKey<EvidenceStagingManagerState>();
-```
-
-- [ ] **Step 5: Replace the grid and bottom bar in `build()`**
+No `GlobalKey` needed (I-2 fix). The `EvidenceStagingManager` outputs both grid and action bar internally. Place it inside the Scaffold `body`, NOT `bottomNavigationBar`. Remove the `bottomNavigationBar` property entirely from the Scaffold.
 
 In the `build()` method, replace the entire "Archivos de evidencia" section (the header, the empty state, the grid, and the spacing) with:
 
@@ -2250,22 +2662,30 @@ Padding(
   ),
 ),
 
-Padding(
-  padding: const EdgeInsets.symmetric(horizontal: 16),
+// I-2: EvidenceStagingManager goes inside the body, NOT bottomNavigationBar.
+// It manages its own action bar internally — no GlobalKey needed.
+// Wrap it in Expanded if it's inside a Column, so it fills available space.
+Expanded(
   child: EvidenceStagingManager(
-    key: _stagingKey,
     existingFiles: requirement.files
         .map(StagedFile.fromRequirementEvidence)
         .toList(),
     maxFiles: requirement.maxFiles,
+    isLoading: notifierState.isLoading,
+    // C-1: Pass onProgress through to the notifier so Dio reports progress.
+    // C-2: skipInvalidation prevents per-file provider refresh mid-batch.
+    // I-6: Throw on false so the staging manager catches the error.
     onUpload: (xFile, mimeType, onProgress) async {
-      await ref
+      final success = await ref
           .read(requirementNotifierProvider(widget.classId).notifier)
           .uploadFile(
             requirementId: requirement.id,
             pickedFile: xFile,
             mimeType: mimeType,
+            onProgress: onProgress,
+            skipInvalidation: true,
           );
+      if (!success) throw Exception('Upload failed');
     },
     onDeleteRemote: (fileId) async {
       await ref
@@ -2308,37 +2728,9 @@ Padding(
 ),
 ```
 
-Remove the old `_BottomActionBar` widget class entirely and replace the `bottomNavigationBar` in the Scaffold with:
+Remove the old `_BottomActionBar` widget class entirely. Remove the `bottomNavigationBar` property from the Scaffold — the action bar is now built inside `EvidenceStagingManager` (I-2 fix).
 
-```dart
-bottomNavigationBar: canModify
-    ? EvidenceStagingActionBar(
-        managerState: _stagingKey.currentState!,
-        canModify: canModify,
-        isLoading: notifierState.isLoading,
-      )
-    : null,
-```
-
-**Important**: The `_stagingKey.currentState` may be null on the first build frame. Wrap it with a null check or use a `Builder` to ensure the key is resolved. A safer approach:
-
-```dart
-bottomNavigationBar: canModify
-    ? Builder(
-        builder: (context) {
-          final state = _stagingKey.currentState;
-          if (state == null) return const SizedBox.shrink();
-          return EvidenceStagingActionBar(
-            managerState: state,
-            canModify: canModify,
-            isLoading: notifierState.isLoading,
-          );
-        },
-      )
-    : null,
-```
-
-- [ ] **Step 6: Remove the loading overlay logic that uses `_isUploading`**
+- [ ] **Step 5: Remove the loading overlay logic that uses `_isUploading`**
 
 Replace:
 ```dart
@@ -2352,15 +2744,15 @@ final isLoading = notifierState.isLoading;
 
 The staging manager handles its own upload state internally.
 
-- [ ] **Step 7: Remove the old `_submit()` method**
+- [ ] **Step 6: Remove the old `_submit()` method**
 
 It is now replaced by the inline `onSubmit` callback.
 
-- [ ] **Step 8: Remove the old `_confirmDelete()` method**
+- [ ] **Step 7: Remove the old `_confirmDelete()` method**
 
 Remote file deletion is now handled inside `EvidenceStagingManager._deleteRemoteFile` → calls `onDeleteRemote` callback.
 
-- [ ] **Step 9: Remove the file counter from the header Row**
+- [ ] **Step 8: Remove the file counter from the header Row**
 
 The staging grid now shows its own counter below the grid. Remove:
 ```dart
@@ -2372,13 +2764,15 @@ if (canModify)
   ),
 ```
 
-- [ ] **Step 10: Add `PopScope` for navigate-away warning**
+- [ ] **Step 9: Add `PopScope` for navigate-away warning**
 
-Wrap the Scaffold's body (or the entire Scaffold) with `PopScope`:
+Add a `_hasUnsavedFiles` boolean field to `_RequirementDetailViewState` that the `EvidenceStagingManager` updates via a callback. Add `onLocalFilesChanged: (hasLocal) => setState(() => _hasUnsavedFiles = hasLocal)` to the manager constructor (this requires adding the callback to `EvidenceStagingManager` — see note below). Alternatively, since the manager is inside the same widget tree, the simpler approach is to track local files at the parent level by counting them from the `existingFiles` vs total:
+
+Wrap the Scaffold (or its body) with `PopScope`:
 
 ```dart
 return PopScope(
-  canPop: !(_stagingKey.currentState?.hasUnsavedLocalFiles ?? false),
+  canPop: !_hasUnsavedFiles,
   onPopInvokedWithResult: (didPop, result) async {
     if (didPop) return;
     final confirm = await showDialog<bool>(
@@ -2411,17 +2805,17 @@ return PopScope(
 );
 ```
 
-- [ ] **Step 11: Delete the old `_BottomActionBar` private widget class from the file**
+- [ ] **Step 10: Delete the old `_BottomActionBar` private widget class from the file**
 
 Remove the entire `class _BottomActionBar extends StatelessWidget { ... }` block.
 
-- [ ] **Step 12: Run `flutter analyze`**
+- [ ] **Step 11: Run `flutter analyze`**
 
 ```bash
 cd /Users/abner/Documents/development/sacdia/sacdia-app && flutter analyze lib/features/classes/presentation/views/requirement_detail_view.dart
 ```
 
-- [ ] **Step 13: Commit**
+- [ ] **Step 12: Commit**
 
 ```bash
 git add lib/features/classes/presentation/views/requirement_detail_view.dart
@@ -2430,7 +2824,7 @@ git commit -m "feat: integrate EvidenceStagingManager into RequirementDetailView
 
 ---
 
-## Task 8: Integration — Evidence Folders (EvidenceSectionDetailView)
+## Task 9: Integration — Evidence Folders (EvidenceSectionDetailView)
 
 **Files:**
 - Modify: `lib/features/evidence_folder/presentation/views/evidence_section_detail_view.dart`
@@ -2470,15 +2864,11 @@ Delete:
 Keep:
 - `_showErrorSnackbar()`
 
-- [ ] **Step 4: Add GlobalKey for the staging manager state**
+- [ ] **Step 4: Replace the grid and bottom bar in `build()`, add `PopScope`**
 
-```dart
-final _stagingKey = GlobalKey<EvidenceStagingManagerState>();
-```
+No `GlobalKey` needed (I-2 fix). Same approach as Task 8 — `EvidenceStagingManager` goes inside the Scaffold `body`, not `bottomNavigationBar`. Remove `bottomNavigationBar` entirely.
 
-- [ ] **Step 5: Replace the grid and bottom bar in `build()`, add `PopScope`**
-
-Follow the same pattern as Task 7 but with evidence folder entities and notifier:
+Follow the same pattern as Task 8 but with evidence folder entities and notifier:
 
 ```dart
 // Map files
@@ -2486,14 +2876,20 @@ existingFiles: widget.section.files
     .map(StagedFile.fromEvidenceFile)
     .toList(),
 maxFiles: widget.section.maxFiles,
+// C-1: Pass onProgress through to the notifier so Dio reports progress.
+// C-2: skipInvalidation prevents per-file provider refresh mid-batch.
+// I-6: Throw on false so the staging manager catches the error.
 onUpload: (xFile, mimeType, onProgress) async {
-  await ref
+  final success = await ref
       .read(evidenceSectionNotifierProvider(widget.clubSectionId).notifier)
       .uploadFile(
         sectionId: widget.section.id,
         pickedFile: xFile,
         mimeType: mimeType,
+        onProgress: onProgress,
+        skipInvalidation: true,
       );
+  if (!success) throw Exception('Upload failed');
 },
 onDeleteRemote: (fileId) async {
   await ref
@@ -2547,9 +2943,9 @@ fileNameBuilder: (originalName, index) {
 },
 ```
 
-- [ ] **Step 6: Replace `_canModify` getter with local variable in build, wrap with `PopScope`**
+- [ ] **Step 5: Replace `_canModify` getter with local variable in build, wrap with `PopScope`**
 
-Same `PopScope` pattern as Task 7.
+Same `PopScope` pattern as Task 8.
 
 ```dart
 final canModify =
@@ -2557,21 +2953,21 @@ final canModify =
     widget.folderIsOpen;
 ```
 
-- [ ] **Step 7: Remove the file counter from the header Row**
+- [ ] **Step 6: Remove the file counter from the header Row**
 
-Same as Task 7 — the staging grid shows its own counter.
+Same as Task 8 — the staging grid shows its own counter.
 
-- [ ] **Step 8: Remove old `_BottomActionBar`, `_EmptyFiles` private widget classes**
+- [ ] **Step 7: Remove old `_BottomActionBar`, `_EmptyFiles` private widget classes**
 
-- [ ] **Step 9: Remove old `_submit()` method**
+- [ ] **Step 8: Remove old `_submit()` method**
 
-- [ ] **Step 10: Run `flutter analyze`**
+- [ ] **Step 9: Run `flutter analyze`**
 
 ```bash
 cd /Users/abner/Documents/development/sacdia/sacdia-app && flutter analyze lib/features/evidence_folder/presentation/views/evidence_section_detail_view.dart
 ```
 
-- [ ] **Step 11: Commit**
+- [ ] **Step 10: Commit**
 
 ```bash
 git add lib/features/evidence_folder/presentation/views/evidence_section_detail_view.dart
@@ -2580,7 +2976,7 @@ git commit -m "feat: integrate EvidenceStagingManager into EvidenceSectionDetail
 
 ---
 
-## Task 9: Cleanup — Delete Deprecated Grid Widgets
+## Task 10: Cleanup — Delete Deprecated Grid Widgets
 
 **Files:**
 - Delete: `lib/features/classes/presentation/widgets/requirement_evidence_grid.dart`
@@ -2604,7 +3000,7 @@ rm lib/features/evidence_folder/presentation/widgets/evidence_file_grid.dart
 
 - [ ] **Step 3: Remove any dead imports from the detail views**
 
-Check both detail views for any remaining imports of the old grids. They should already be removed in Tasks 7 and 8, but verify:
+Check both detail views for any remaining imports of the old grids. They should already be removed in Tasks 8 and 9, but verify:
 
 ```bash
 cd /Users/abner/Documents/development/sacdia/sacdia-app && rg "requirement_evidence_grid\|evidence_file_grid" lib/ --files-with-matches
