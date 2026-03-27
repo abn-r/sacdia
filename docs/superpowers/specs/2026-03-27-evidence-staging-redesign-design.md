@@ -53,17 +53,23 @@ The main widget consumed by both integration points.
 
 ```dart
 EvidenceStagingManager({
-  required List<ExistingFile> existingFiles,  // already uploaded
+  required List<StagedFile> existingFiles,  // already uploaded — caller maps domain entities to StagedFile(status: uploaded)
   required int maxFiles,
-  required Future<void> Function(XFile file, String mimeType) onUpload,  // single file upload callback
+  required Future<void> Function(XFile file, String mimeType, void Function(double progress) onProgress) onUpload,  // single file upload callback with progress
   required Future<void> Function(String fileId) onDeleteRemote,  // delete already-uploaded file
   required Future<void> Function() onSubmit,  // mark as submitted for validation
-  required String Function(String originalName, int index) fileNameBuilder,  // naming convention
+  required String Function(String originalName, int index) fileNameBuilder,  // naming convention — index is the absolute position in the full file list (existing remote count + position in local batch), starting from 1
   required bool canModify,  // false when status != pendiente
 })
 ```
 
-**Internal state**: `List<StagedFile>` combining existing remote files + locally staged files.
+> **I-1 — Decoupling note**: `ExistingFile` is not a shared type. Each feature maps its own domain entities to `StagedFile` before passing them in. `RequirementDetailView` maps `RequirementEvidence` → `StagedFile(status: uploaded)`, and `EvidenceSectionDetailView` maps `EvidenceFile` → `StagedFile(status: uploaded)`. `EvidenceStagingManager` only knows about `StagedFile`.
+
+> **I-2 — Upload progress note**: The `onUpload` callback receives an `onProgress` callback that maps directly to Dio's `onSendProgress`. The `EvidenceStagingManager` passes a closure that calls `setState` to update the corresponding `StagedFile.uploadProgress` in the internal staging list as bytes are transferred.
+
+**Internal state**: `List<StagedFile>` combining existing remote files + locally staged files. Managed with `StatefulWidget` + `setState` — no Riverpod notifier needed since this state is local to the widget tree and does not need to be shared across the app.
+
+> **S-3 — State management note**: `EvidenceStagingManager` is a `StatefulWidget`. All staging list mutations (add, remove, status transitions, progress updates) go through `setState`. Riverpod is used only for the notifiers in the parent screens (`RequirementNotifier`, `EvidenceSectionNotifier`), not inside the staging widget itself.
 
 **Manages**:
 - Multi-select image picker (gallery) and single camera capture
@@ -84,6 +90,8 @@ EvidenceStagingManager({
 | `uploaded` | Thumbnail or PDF icon + green check badge (top-right) + uploader name + date (bottom) |
 | `local` | Thumbnail or PDF icon + dashed green border + "Nuevo" badge (top-right, green) + red X button (top-left) to remove from staging |
 | Excess over limit | Same as `local` but with red border instead of green |
+
+> **S-1 — Delete behavior**: Local files (`status: local`) are removed immediately from the staging list when the red X is tapped — no confirmation needed since nothing has been sent to the server. Remote files (`status: uploaded`) show a confirmation dialog before calling `onDeleteRemote`, because deletion is a destructive API call that cannot be undone.
 
 Below the grid: file counter `"X de Y archivos"`. If total exceeds maxFiles: red text `"Tenés Z archivos de más, eliminá algunos para continuar"`.
 
@@ -121,9 +129,12 @@ Persistent bottom sheet (`isDismissible: false`, `enableDrag: false`). Appears w
 
 **On all complete (no errors)**: Header changes to "Todos los archivos subidos" (green). Shows "Continuar" button that closes the sheet and triggers the submit-for-validation call.
 
-**On complete with errors**: Header shows "X de Y subidos, Z fallaron" (orange). Two buttons:
-- **"Reintentar fallidos"** — re-queues failed files
-- **"Continuar con los subidos"** — proceeds with what succeeded, marks as submitted
+**On complete with errors**: Header shows "X de Y subidos, Z fallaron" (orange). Three buttons:
+- **"Reintentar fallidos"** — re-queues failed files and restarts the upload queue for them
+- **"Continuar con los subidos"** — proceeds with uploaded files only and marks as submitted; shows a warning before confirming: "Los Z archivos que fallaron no se incluirán en la validación."
+- **"Cancelar"** — closes the sheet and keeps all staging intact; already-uploaded files remain on the server, failed files return to `local` status in the staging list so the user can review, modify, or retry later
+
+> **I-3 — Partial failure note**: The three-option design avoids forcing the user to either retry everything or lose control. "Cancelar" is a safe exit — it does not discard what was already uploaded, nor does it submit incomplete data.
 
 ### `ImageSourceDialog`
 
@@ -142,6 +153,8 @@ Applied globally in `SacButton` (affects all buttons across the app):
 
 No theme color remnant when disabled. The disabled state must look intentionally inactive, not visually broken.
 
+> **I-4 — SacButton structural change**: The current `SacButton` implementation resolves disabled colors using static `AppColors` constants and `WidgetStateProperty` (resolved outside the `build` method). Fixing the disabled style is not just a color swap — it requires refactoring the disabled state resolution to read from `context.sac` (the `SacColors` extension) inside the `build` method, where `BuildContext` is available. This is a structural change to how `SacButton` resolves its color scheme.
+
 ## Integration Points
 
 ### Classes — `RequirementDetailView`
@@ -155,6 +168,14 @@ With:
 ### Evidence Folders — `EvidenceSectionDetailView`
 
 Same replacement pattern using `EvidenceSectionNotifier.uploadFile()` and `EvidenceSectionNotifier.submit()`.
+
+### `PopScope` — Back Navigation Guard
+
+Both `RequirementDetailView` and `EvidenceSectionDetailView` must wrap their content in a `PopScope` widget with `canPop: false` when there are staged local files (i.e., `StagedFile` entries with `status: local` in the staging list). On back attempt, show a confirmation dialog: "Tenés archivos sin enviar. ¿Seguro que querés salir?" and only call `Navigator.pop` if the user confirms.
+
+### Provider Invalidation Timing
+
+Provider invalidation (to refresh the grid with newly confirmed remote files) must happen **after the entire batch completes**, not after each individual file upload. Invalidating mid-batch would trigger unnecessary rebuilds and could cause state inconsistencies while the upload queue is still running.
 
 ## Edge Cases
 
@@ -174,7 +195,16 @@ Same replacement pattern using `EvidenceSectionNotifier.uploadFile()` and `Evide
 
 No new dependencies required. `ImagePicker` and `FilePicker` already support multi-select in the current project setup.
 
+## Deprecations
+
+Once integration is complete, the following files must be deleted:
+
+- `evidence_file_grid.dart` — replaced by `StagedFileGrid`
+- `requirement_evidence_grid.dart` — replaced by `StagedFileGrid`
+
+Both grids served a single-feature purpose. `StagedFileGrid` is the unified replacement for both.
+
 ## Scope Summary
 
-- **In scope**: `EvidenceStagingManager` widget tree, `SacButton` disabled style fix, integration in RequirementDetailView and EvidenceSectionDetailView
+- **In scope**: `EvidenceStagingManager` widget tree, `SacButton` disabled style fix, integration in RequirementDetailView and EvidenceSectionDetailView, deletion of deprecated grid widgets
 - **Out of scope**: Backend changes, new API endpoints, new package dependencies
