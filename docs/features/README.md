@@ -1,5 +1,5 @@
 # Feature Registry — SACDIA
-Generado: 2026-03-14 | Actualizado: 2026-03-25
+Generado: 2026-03-14 | Actualizado: 2026-03-27
 Fuente: Reality Matrix + Code Audits
 
 ## Resumen
@@ -12,7 +12,7 @@ Fuente: Reality Matrix + Code Audits
 | [honores](honores.md) | IMPLEMENTADO | HonorsModule (16 endpoints, incluye requirements + progress) | CRUD funcional | 4 screens + checklist de requisitos por honor |
 | [actividades](actividades.md) | IMPLEMENTADO | ActivitiesModule (7 endpoints) | UI completa (list + detail + create/edit + delete) | 4 screens + edit/delete en detalle |
 | [finanzas](finanzas.md) | IMPLEMENTADO | FinancesModule (7 endpoints) | Dashboard completo (resumen + tabla + filtros + CRUD) | 3 screens + eliminacion con AlertDialog |
-| [catalogos](catalogos.md) | IMPLEMENTADO | CatalogsModule + AdminModule (54 endpoints) | 13 pages funcionales | Shared catalogs |
+| [catalogos](catalogos.md) | IMPLEMENTADO | CatalogsModule + AdminModule (55 endpoints). Redis cache-aside: 14 catálogos TTL 1h, año eclesiástico 24h. Auto-invalidación en mutaciones. Manual: `POST /admin/catalogs/cache/invalidate`. | 13 pages funcionales | Shared catalogs |
 | [camporees](camporees.md) | IMPLEMENTADO | CamporeesModule (8 endpoints) | CRUD completo + gestion de miembros | 4 screens + capa de datos completa |
 | [communications](communications.md) | IMPLEMENTADO | NotificationsModule (7 endpoints) | 1 page funcional | FCM tokens |
 | [certificaciones-guias-mayores](certificaciones-guias-mayores.md) | IMPLEMENTADO | CertificationsModule (7 endpoints) | list + detail + progress | 4 screens |
