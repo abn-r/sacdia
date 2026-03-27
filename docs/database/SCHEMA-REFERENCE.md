@@ -578,6 +578,12 @@ Fue archivada como `users_classes_archive` en la migración del 2026-03-20. El h
 | `section_id` | INT | Sección evaluada |
 | `score` | FLOAT | Puntaje registrado |
 | `evidences` | JSON | Evidencias adjuntas |
+| `status` | evidence_validation_enum | Estado de validación (migrado de VARCHAR a enum) |
+| `submitted_by_id` | UUID NULL | Usuario que envió |
+| `submitted_at` | TIMESTAMPTZ NULL | Fecha de envío |
+| `validated_by_id` | UUID NULL | Usuario que validó |
+| `validated_at` | TIMESTAMPTZ NULL | Fecha de validación |
+| `rejection_reason` | VARCHAR NULL | Motivo de rechazo |
 
 **Regla de unicidad FS-03**:
 - `UNIQUE (enrollment_id, module_id, section_id)` cuando `enrollment_id` no es nulo.
@@ -1067,6 +1073,7 @@ Fue archivada como `users_classes_archive` en la migración del 2026-03-20. El h
 | `modified_at` | TIMESTAMPTZ | Última actualización | NULL |
 | `activity_type_id` | INT | Tipo de actividad | FK → activity_types, NOT NULL |
 | `club_section_id` | INT | Sección de club | FK → club_sections, NULL |
+| `is_joint` | BOOLEAN | Actividad conjunta (abarca múltiples secciones) | DEFAULT false |
 
 **Índices**: `idx_activities_activity_type_id`, `idx_activities_club_section_id`
 
@@ -1693,7 +1700,7 @@ Fue archivada como `users_classes_archive` en la migración del 2026-03-20. El h
 | `evidences` | JSON | Evidencias adjuntas (legacy) | NULL |
 | `active` | BOOLEAN | Registro activo | DEFAULT true |
 | `club_section_id` | INT | Sección de club | FK → club_sections, NULL |
-| `status` | VARCHAR(20) | Estado de validación | DEFAULT "pendiente" |
+| `status` | evidence_validation_enum | Estado de validación (migrado de VARCHAR a enum) | DEFAULT PENDING |
 | `submitted_by_id` | UUID | Usuario que envió | FK → users, NULL |
 | `submitted_at` | TIMESTAMPTZ | Fecha de envío | NULL |
 | `validated_by_id` | UUID | Usuario que validó | FK → users, NULL |
@@ -1710,7 +1717,7 @@ Fue archivada como `users_classes_archive` en la migración del 2026-03-20. El h
 ---
 
 #### Tabla: `evidence_files`
-**Descripción**: Archivos de evidencia asociados a registros de sección de carpeta o honores de usuario
+**Descripción**: Archivos de evidencia asociados a registros de sección de carpeta, progreso de clases, o honores de usuario. La FK `user_honor_id` fue populada vía migración SQL (`jsonb_array_elements`) que extrajo URLs del campo JSON legacy `users_honors.images` hacia filas individuales en esta tabla.
 
 **Campos**:
 | Campo | Tipo | Descripción | Constraints |
@@ -2076,6 +2083,7 @@ club_sections → club_enrollments → annual_folders → annual_folder_evidence
 
 #### Enum: `evidence_validation_enum`
 **Valores**: `PENDING`, `VALIDATED`, `REJECTED`
+**Uso**: `folders_section_records.status`, `class_section_progress.status` (migrados de VARCHAR con valores en español a este enum). Previamente definido pero no utilizado; ahora es el tipo canónico para estados de validación de evidencias.
 
 ---
 

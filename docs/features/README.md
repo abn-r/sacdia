@@ -1,5 +1,5 @@
 # Feature Registry — SACDIA
-Generado: 2026-03-14 | Actualizado: 2026-03-27
+Generado: 2026-03-14 | Actualizado: 2026-03-25
 Fuente: Reality Matrix + Code Audits
 
 ## Resumen
@@ -26,6 +26,7 @@ Fuente: Reality Matrix + Code Audits
 | [validacion-evidencias](validacion-evidencias.md) | IMPLEMENTADO | EvidenceReviewModule (7 endpoints) | Dedicated review page + gallery + bulk ops | No aplica |
 | [sla-dashboard](sla-dashboard.md) | IMPLEMENTADO | AnalyticsModule (1 endpoint) | Dashboard con metricas operacionales | No aplica |
 | [recursos](recursos.md) | IMPLEMENTADO | ResourcesModule (14 endpoints) | Categorias CRUD + Recursos CRUD | Clean Architecture completa |
+| [actividades-conjuntas](actividades-conjuntas.md) | IMPLEMENTADO | ActivitiesModule (`is_joint` + multi-instance) | No aplica | Joint toggle + section picker |
 | [infrastructure](infrastructure.md) | SIN CANON | CommonModule + AppModule | No implementado | No implementado |
 | [validacion-investiduras](validacion-investiduras.md) | IMPLEMENTADO | InvestitureModule (5 endpoints) | table + dialogs + history | 3 screens |
 
@@ -33,7 +34,7 @@ Fuente: Reality Matrix + Code Audits
 
 | Estado | Cantidad | Dominios |
 |--------|----------|----------|
-| IMPLEMENTADO | 21 | auth, gestion-clubs, clases-progresivas, honores, catalogos, communications, carpetas-evidencias, annual-folders-scoring, rbac, gestion-seguros, actividades, finanzas, camporees, certificaciones-guias-mayores, inventario, validacion-investiduras, aprobaciones-camporees, aprobaciones-masivas, validacion-evidencias, sla-dashboard, recursos |
+| IMPLEMENTADO | 22 | auth, gestion-clubs, clases-progresivas, honores, catalogos, communications, carpetas-evidencias, annual-folders-scoring, rbac, gestion-seguros, actividades, actividades-conjuntas, finanzas, camporees, certificaciones-guias-mayores, inventario, validacion-investiduras, aprobaciones-camporees, aprobaciones-masivas, validacion-evidencias, sla-dashboard, recursos |
 | PARCIAL | 0 | — |
 | SIN CANON | 1 | infrastructure |
 | FANTASMA | 0 | — |
