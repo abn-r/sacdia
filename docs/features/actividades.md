@@ -38,6 +38,34 @@ El modelo contempla `activity_instances` como instancias recurrentes de una acti
 - Edicion y eliminacion de actividades disponibles en la vista de detalle (`EditActivityView` + confirmacion de borrado)
 - El boton "Agregar" en `ActivitiesListView` solo se muestra a usuarios con permiso `activities:create` o con roles legacy `director`, `deputy_director`, `secretary`, `counselor` — evaluado via `canByPermissionOrLegacyRole`
 
+**Entidad Activity — campos adicionales (post-rediseno):**
+- `lat`, `longitude` — coordenadas de la ubicacion
+- `activityDate`, `activityEndDate` — fecha/hora de inicio y fin
+- `attendees` — lista de participantes con nombre e imagen
+- `classes` — secciones/clases asociadas a la actividad
+- `additionalData` — datos extra sin esquema fijo
+- `creatorName`, `creatorImage` — datos del organizador
+- Getters computados: `isPast` (actividad ya ocurrio), `hasVirtualLink` (tiene link de videoconferencia), `hasLocation` (tiene coordenadas validas)
+
+**ActivityDetailView — rediseno completo:**
+- Hero edge-to-edge: mapa interactivo (`flutter_map`) para actividades presenciales, imagen para virtuales; se extiende detras del AppBar
+- Grid 2×3 de metadata con tarjetas tintadas por color (fecha, hora, lugar, tipo, seccion, modalidad)
+- Badge de modalidad (Presencial / Virtual / Hibrido) en la fila del titulo, no sobre el hero
+- Seccion de participantes con avatares apilados en paleta calida
+- Footer card de organizador con nombre e imagen del creador
+- Estado de carga con shimmer skeleton (`activity_detail_skeleton.dart`)
+- Boton "Confirmar asistencia" eliminado — la asistencia es gestionada por administradores, no es opt-in del usuario
+
+**Nuevos widgets extraidos:**
+- `activity_hero_section.dart` — hero condicional: flutter_map (presencial) o imagen (virtual/hibrido)
+- `activity_metadata_grid.dart` — grid 2×3 con acento de color por tarjeta
+- `activity_attendees_section.dart` — avatares apilados con paleta calida
+- `activity_detail_skeleton.dart` — skeleton shimmer de carga
+
+**CreateActivityView — cambios de formulario:**
+- Agregados date pickers para fecha de inicio y fecha de fin
+- `SacDropdownField` reemplazado por `BottomSheetPicker` para seleccion de tipo y seccion
+
 ### Base de datos
 - `activities` — Actividades del club
 - `activity_types` — Catalogo de tipos de actividad
@@ -59,7 +87,9 @@ El modelo contempla `activity_instances` como instancias recurrentes de una acti
 - **Soft delete**: Las actividades se desactivan, no se eliminan fisicamente
 - **Autorizacion por rol de club**: Solo roles operativos (director, subdirector, secretary, counselor) pueden crear actividades; la lectura es abierta a miembros con JWT. La app oculta el boton de creacion si el usuario no tiene el permiso `activities:create` ni alguno de esos roles legacy
 - **Campo `image` opcional en `CreateActivityDto`**: El campo `image` es opcional (`@IsOptional()`) — solo aplica para actividades virtuales. En el DTO de actualizacion (`UpdateActivityDto`) tambien es opcional
-- **Geolocalizacion**: La app implementa seleccion de ubicacion en mapa, pero el backend almacena coordenadas como campos del modelo
+- **Asistencia no es self-service**: El boton "Confirmar asistencia" fue eliminado de la app. La asistencia la registran los administradores via el panel admin (`POST /activities/:id/attendance`), no los propios miembros
+- **BottomSheetPicker en formularios**: El formulario de creacion de actividad adopta `BottomSheetPicker` en lugar de `SacDropdownField` para la seleccion de tipo y seccion, alineandose con el patron de pickers del resto de la app
+- **Geolocalizacion**: La app implementa seleccion de ubicacion en mapa (LocationPickerView). El backend almacena coordenadas en campos `lat`/`longitude` del modelo. En el detalle, actividades presenciales muestran un hero edge-to-edge con `flutter_map`; virtuales muestran una imagen de portada
 - **Tipos de actividad**: Separados en tabla catalogo `activity_types` para permitir administracion independiente
 - **Instancias**: El modelo `activity_instances` sugiere un diseno para actividades recurrentes, aunque la API actual no lo expone explicitamente
 
