@@ -13,7 +13,7 @@ El modelo de honores soporta el ciclo completo: catalogo publico de consulta, in
 ## Que existe (verificado contra codigo)
 
 ### Backend (HonorsModule)
-- **Controladores**: `HonorsController` (catalogo publico, 4 endpoints) + `UserHonorsController` (honores de usuario, 8 endpoints) = **12 endpoints totales**
+- **Controladores**: `HonorsController` (catalogo publico, 5 endpoints incluyendo requirements) + `UserHonorsController` (honores de usuario, 11 endpoints incluyendo progress) = **16 endpoints totales**
 - **Catalogo publico** (OptionalJwtAuthGuard):
   - `GET /honors` — listar honores con paginacion y filtros (categoryId, clubTypeId, skillLevel)
   - `GET /honors/categories` — listar categorias de honores
@@ -64,6 +64,71 @@ El modelo de honores soporta el ciclo completo: catalogo publico de consulta, in
 - **OwnerOrAdminGuard en user honors**: patron self-service con escalacion admin
 - **Reactivacion en lugar de duplicacion**: startHonor y createUserHonor reactivan registros inactivos existentes en vez de crear duplicados
 - **Upload separado de registro**: las evidencias se suben en un endpoint dedicado (POST files) independiente del registro inicial
+
+## Requisitos por Especialidad
+
+### Descripcion
+
+Cada honor tiene una lista estructurada de requisitos que el usuario debe completar. El sistema permite rastrear el progreso individual por requisito, con una UI de checklist en la app y una barra de progreso visible en el catalogo y en la vista de detalle.
+
+### Datos seeded
+
+- **5,410 requisitos** cargados desde **605 archivos markdown** extraidos del sistema institucional
+- Tasa de match: **100%** — todos los markdowns mapearon a un honor existente en la base de datos
+- Fuente: extraccion automatizada con numeracion de items y deteccion de sub-items
+
+### Base de datos
+
+#### Tabla: `honor_requirements`
+Catalogo de requisitos por honor.
+
+| Campo | Tipo | Descripcion | Constraints |
+|-------|------|-------------|-------------|
+| `requirement_id` | INT | ID unico | PK, autoincrement |
+| `honor_id` | INT | Honor al que pertenece | FK → honors, NOT NULL |
+| `requirement_number` | VARCHAR | Numeracion del requisito (ej. "1", "1.a") | NOT NULL |
+| `requirement_text` | TEXT | Texto del requisito | NOT NULL |
+| `has_sub_items` | BOOLEAN | Tiene sub-items | DEFAULT false |
+| `needs_review` | BOOLEAN | Marcado para revision manual | DEFAULT false |
+| `active` | BOOLEAN | Registro activo | DEFAULT true |
+
+#### Tabla: `user_honor_requirement_progress`
+Progreso por usuario por requisito.
+
+| Campo | Tipo | Descripcion | Constraints |
+|-------|------|-------------|-------------|
+| `progress_id` | INT | ID unico | PK, autoincrement |
+| `user_honor_id` | INT | Relacion usuario-honor | FK → users_honors, NOT NULL |
+| `requirement_id` | INT | Requisito | FK → honor_requirements, NOT NULL |
+| `completed` | BOOLEAN | Completado por el usuario | DEFAULT false |
+| `notes` | TEXT | Notas opcionales | NULL |
+| `completed_at` | TIMESTAMPTZ | Fecha de completado | NULL |
+| `active` | BOOLEAN | Registro activo | DEFAULT true |
+
+### Backend (nuevos endpoints)
+
+4 endpoints agregados al modulo de honores:
+
+- `GET /honors/:honorId/requirements` — catalogo de requisitos de un honor (publico / opcional JWT)
+- `GET /users/:userId/honors/:honorId/requirements/progress` — progreso del usuario por requisito
+- `PATCH /users/:userId/honors/:honorId/requirements/:requirementId/progress` — actualizar un requisito individual
+- `PATCH /users/:userId/honors/:honorId/requirements/progress/batch` — actualizar multiples requisitos en una sola operacion
+
+### App (sacdia-app)
+
+- Checklist interactivo en la vista de detalle de honor
+- Estado local con dirty detection — el usuario puede marcar/desmarcar sin guardar inmediatamente
+- Bulk save al presionar "Guardar" — usa el endpoint batch para minimizar requests
+- Barra de progreso visible en las tarjetas del catalogo y en la vista de detalle
+- El progreso es informativo: **no es una puerta de validacion** — el usuario igual debe enviar evidencias explicitamente para solicitar validacion institucional
+
+### Coexistencia con flujo existente
+
+- El flujo de subida de evidencias (PDF, imagenes, certificado) via `POST /users/:userId/honors/:honorId/files` continua igual
+- Los requisitos son un checklist de auto-reporte, no reemplazan la validacion institucional
+- El instructor valida mediante el campo `validate` en `users_honors`, independientemente del progreso de requisitos
+
+---
 
 ## Gaps y pendientes
 

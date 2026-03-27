@@ -88,8 +88,11 @@ Convenciones:
 | POST `/users/:userId/honors/:honorId` | Si | Si | Si | ALINEADO |
 | PATCH `/users/:userId/honors/:honorId` | Si | Si | Si | ALINEADO |
 | DELETE `/users/:userId/honors/:honorId` | Si | Si | Si | ALINEADO |
+| GET `/users/:userId/honors/:honorId/requirements/progress` | Si | Si | No | SIN CANON |
+| PATCH `/users/:userId/honors/:honorId/requirements/:requirementId/progress` | Si | Si | No | SIN CANON |
+| PATCH `/users/:userId/honors/:honorId/requirements/progress/batch` | Si | Si | No | SIN CANON |
 
-> Nota: endpoints de honors documentados en Wave 2 (ya no SIN DOCS).
+> Nota: endpoints de honors documentados en Wave 2 (ya no SIN DOCS). 2026-03-27: 3 endpoints de requirement progress agregados.
 
 ### emergency-contacts
 
@@ -153,8 +156,9 @@ Convenciones:
 | GET `/honors/categories` | Si | Si | Si | ALINEADO |
 | GET `/honors/grouped-by-category` | Si | Si | Si | ALINEADO |
 | GET `/honors/:honorId` | Si | Si | Si | ALINEADO |
+| GET `/honors/:honorId/requirements` | Si | Si | No | SIN CANON |
 
-> Nota: `GET /honors/grouped-by-category` documentado en Wave 2 (ya no SIN DOCS).
+> Nota: `GET /honors/grouped-by-category` documentado en Wave 2 (ya no SIN DOCS). 2026-03-27: requirements endpoint agregado.
 
 ### activities
 
@@ -518,6 +522,7 @@ Convenciones:
 | folders_modules_records | Si | Si | No | SIN CANON |
 | folders_section_records | Si | Si | No | SIN CANON |
 | folders_sections | Si | Si | No | SIN CANON |
+| honor_requirements | Si | Si | No | SIN CANON |
 | honors | Si | Si | Si | ALINEADO |
 | honors_categories | Si | Si | No | SIN CANON |
 | inventory_categories | Si | Si | No | SIN CANON |
@@ -554,6 +559,7 @@ Convenciones:
 | users_allergies | Si | Si | No | SIN CANON |
 | users_diseases | Si | Si | No | SIN CANON |
 | users_medicines | Si | Si | No | SIN CANON |
+| user_honor_requirement_progress | Si | Si | No | SIN CANON |
 | users_honors | Si | Si | No | SIN CANON |
 | users_permissions | Si | Si | No | SIN CANON |
 | users_roles | Si | Si | Si | ALINEADO |
@@ -566,12 +572,12 @@ Convenciones:
 ### Conteos modelos
 
 - **ALINEADO**: 36 (schema.prisma + SCHEMA-REFERENCE + Canon)
-- **SIN CANON**: 40 (en schema.prisma + SCHEMA-REFERENCE pero sin mencion en documentos canon)
+- **SIN CANON**: 42 (en schema.prisma + SCHEMA-REFERENCE pero sin mencion en documentos canon)
 - **SIN DOCS**: 0 (resuelto — Wave 2 + Wave 3 + 2026-03-22 documentaron todos los modelos en SCHEMA-REFERENCE)
 - **FANTASMA**: 0
 - **DRIFT**: 0
 
-> **Nota**: SCHEMA-REFERENCE.md fue actualizado en Wave 2 documentando ~72 modelos + 8 enums. Wave 3 completo con activities/activity_types/activity_instances. 2026-03-22: inventory_history y notification_logs agregados (estaban en schema.prisma sin documentar). 2026-03-26: resource_categories y resources agregados (ResourcesModule). Los estados SIN CANON persisten porque los conceptos existen en schema.prisma y SCHEMA-REFERENCE pero no estan referenciados explicitamente en los documentos canon de dominio. Para resolverlos, agregar menciones en dominio-sacdia.md o runtime-sacdia.md segun corresponda.
+> **Nota**: SCHEMA-REFERENCE.md fue actualizado en Wave 2 documentando ~72 modelos + 8 enums. Wave 3 completo con activities/activity_types/activity_instances. 2026-03-22: inventory_history y notification_logs agregados (estaban en schema.prisma sin documentar). 2026-03-26: resource_categories y resources agregados (ResourcesModule). 2026-03-27: honor_requirements y user_honor_requirement_progress agregados (per-requirement tracking feature). Los estados SIN CANON persisten porque los conceptos existen en schema.prisma y SCHEMA-REFERENCE pero no estan referenciados explicitamente en los documentos canon de dominio. Para resolverlos, agregar menciones en dominio-sacdia.md o runtime-sacdia.md segun corresponda.
 
 ---
 
@@ -589,7 +595,7 @@ Convenciones:
 | auth | Si (AuthModule) | Si (login) | Si (auth, 5 screens) | Si (auth/) | ALINEADO |
 | gestion-clubs (clubes, secciones, cargos) | Si (ClubsModule) | Si (clubs, 3 pages) | Si (club, members, units) | Si (dominio, runtime) | ALINEADO |
 | clases-progresivas | Si (ClassesModule) | Si (read-only) | Si (classes, 6 screens) | Si (formacion/trayectoria) | ALINEADO |
-| honores | Si (HonorsModule) | Si (honors, CRUD) | Si (honors, 4 screens) | Si (formacion) | ALINEADO |
+| honores | Si (HonorsModule, 16 endpoints) | Si (honors, CRUD) | Si (honors, 4 screens + checklist requisitos + progress bar) | Si (formacion) | ALINEADO |
 | actividades | Si (ActivitiesModule) | Si (list + detail + create/edit + delete) | Si (activities, 4 screens + edit/delete) | Si (runtime 6.6) | ALINEADO |
 | finanzas | Si (FinancesModule) | Si (dashboard + resumen + tabla + filtros + CRUD) | Si (finances, 3 screens + delete AlertDialog) | Si (runtime 6.6) | ALINEADO |
 | catalogos | Si (CatalogsModule, AdminModule) | Si (catalogs, 13 pages) | Si (shared catalogs) | Si (runtime 6.5) | ALINEADO |
@@ -671,11 +677,11 @@ Los dominios que eran PARCIAL o FANTASMA en Wave 0 fueron completados:
 - **gestion-seguros**: InsurancesModule + admin + app (antes SIN CANON)
 - **validacion-investiduras**: InvestitureModule + admin + app (antes FANTASMA)
 
-### 3. Endpoints: 244 en matriz (269 en ENDPOINTS-LIVE-REFERENCE.md)
-ResourcesModule agrego 14 endpoints nuevos (2026-03-26). Total 269 en ENDPOINTS-LIVE-REFERENCE.md.
+### 3. Endpoints: 248 en matriz (273 en ENDPOINTS-LIVE-REFERENCE.md)
+ResourcesModule agrego 14 endpoints nuevos (2026-03-26). 2026-03-27: 4 endpoints de honor requirements/progress agregados. Total 273 en ENDPOINTS-LIVE-REFERENCE.md.
 
-### 4. SCHEMA-REFERENCE actualizado: 76 modelos + 8 enums
-Wave 2 documento ~48 modelos adicionales en SCHEMA-REFERENCE.md (era ~25 tablas). 2026-03-22: inventory_history y notification_logs agregados. 2026-03-26: resource_categories y resources agregados.
+### 4. SCHEMA-REFERENCE actualizado: 78 modelos + 8 enums
+Wave 2 documento ~48 modelos adicionales en SCHEMA-REFERENCE.md (era ~25 tablas). 2026-03-22: inventory_history y notification_logs agregados. 2026-03-26: resource_categories y resources agregados. 2026-03-27: honor_requirements y user_honor_requirement_progress agregados.
 
 ### 5. 3 migraciones de base de datos aplicadas
 - `d690a57`: rename PK inventory_categories (typo corregido)

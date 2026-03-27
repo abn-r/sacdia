@@ -1161,6 +1161,46 @@ Fue archivada como `users_classes_archive` en la migración del 2026-03-20. El h
 
 **Relaciones**:
 - Many-to-One: `users`, `honors`
+- One-to-Many: `user_honor_requirement_progress`
+
+---
+
+#### Tabla: `honor_requirements`
+**Descripción**: Catálogo de requisitos estructurados por honor (5,410 registros seeded de 605 markdowns)
+
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `requirement_id` | INT | ID único | PK, autoincrement |
+| `honor_id` | INT | Honor al que pertenece | FK → honors, NOT NULL |
+| `requirement_number` | VARCHAR | Numeración del requisito (ej. "1", "1.a") | NOT NULL |
+| `requirement_text` | TEXT | Texto del requisito | NOT NULL |
+| `has_sub_items` | BOOLEAN | Indica si tiene sub-items | DEFAULT false |
+| `needs_review` | BOOLEAN | Marcado para revisión manual post-seed | DEFAULT false |
+| `active` | BOOLEAN | Registro activo | DEFAULT true |
+
+**Relaciones**:
+- Many-to-One: `honors`
+- One-to-Many: `user_honor_requirement_progress`
+
+---
+
+#### Tabla: `user_honor_requirement_progress`
+**Descripción**: Progreso por usuario por requisito de un honor (checklist de auto-reporte)
+
+**Campos**:
+| Campo | Tipo | Descripción | Constraints |
+|-------|------|-------------|-------------|
+| `progress_id` | INT | ID único | PK, autoincrement |
+| `user_honor_id` | INT | Relación usuario-honor | FK → users_honors, NOT NULL |
+| `requirement_id` | INT | Requisito | FK → honor_requirements, NOT NULL |
+| `completed` | BOOLEAN | Completado por el usuario | DEFAULT false |
+| `notes` | TEXT | Notas opcionales del usuario | NULL |
+| `completed_at` | TIMESTAMPTZ | Fecha en que fue marcado completado | NULL |
+| `active` | BOOLEAN | Registro activo | DEFAULT true |
+
+**Relaciones**:
+- Many-to-One: `users_honors`, `honor_requirements`
 
 ---
 

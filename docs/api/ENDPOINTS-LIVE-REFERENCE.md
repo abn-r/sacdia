@@ -87,6 +87,9 @@
 | PATCH | `/api/v1/users/:userId/honors/:honorId` | JWT | - | Actualizar progreso de honor | `src/honors/honors.controller.ts` |
 | POST | `/api/v1/users/:userId/honors/:honorId` | JWT | - | Iniciar un honor | `src/honors/honors.controller.ts` |
 | POST | `/api/v1/users/:userId/honors/:honorId/files` | JWT | - | Subir evidencias del honor (multipart: certificate, document, images) | `src/honors/honors.controller.ts` |
+| GET | `/api/v1/users/:userId/honors/:honorId/requirements/progress` | JWT | - | Obtener progreso del usuario por requisito de un honor | `src/honors/honors.controller.ts` |
+| PATCH | `/api/v1/users/:userId/honors/:honorId/requirements/:requirementId/progress` | JWT | - | Actualizar progreso de un requisito individual | `src/honors/honors.controller.ts` |
+| PATCH | `/api/v1/users/:userId/honors/:honorId/requirements/progress/batch` | JWT | - | Actualizar progreso de múltiples requisitos en lote | `src/honors/honors.controller.ts` |
 | DELETE | `/api/v1/users/:userId/legal-representative` | JWT | - | Eliminar representante legal | `src/legal-representatives/legal-representatives.controller.ts` |
 | GET | `/api/v1/users/:userId/legal-representative` | JWT | - | Obtener representante legal del usuario | `src/legal-representatives/legal-representatives.controller.ts` |
 | PATCH | `/api/v1/users/:userId/legal-representative` | JWT | - | Actualizar representante legal | `src/legal-representatives/legal-representatives.controller.ts` |
@@ -373,6 +376,15 @@
 | GET | `/api/v1/honors/:honorId` | Public | - | Obtener honor por ID | `src/honors/honors.controller.ts` |
 | GET | `/api/v1/honors/categories` | Public | - | Listar categorías de honores | `src/honors/honors.controller.ts` |
 | GET | `/api/v1/honors/grouped-by-category` | Public | - | Listar honores agrupados por categoría | `src/honors/honors.controller.ts` |
+| GET | `/api/v1/honors/:honorId/requirements` | Public | - | Listar requisitos de un honor | `src/honors/honors.controller.ts` |
+
+## honor-requirements (user progress)
+
+| Method | Path | Auth | Roles | Description | Source |
+|---|---|---|---|---|---|
+| GET | `/api/v1/users/:userId/honors/:honorId/requirements/progress` | JWT | - | Obtener progreso del usuario por requisito | `src/honors/honors.controller.ts` |
+| PATCH | `/api/v1/users/:userId/honors/:honorId/requirements/:requirementId/progress` | JWT | - | Actualizar progreso de un requisito individual | `src/honors/honors.controller.ts` |
+| PATCH | `/api/v1/users/:userId/honors/:honorId/requirements/progress/batch` | JWT | - | Actualizar progreso de múltiples requisitos en lote | `src/honors/honors.controller.ts` |
 
 ## inventory
 

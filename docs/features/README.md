@@ -1,5 +1,5 @@
 # Feature Registry — SACDIA
-Generado: 2026-03-14 | Actualizado: 2026-03-26
+Generado: 2026-03-14 | Actualizado: 2026-03-27
 Fuente: Reality Matrix + Code Audits
 
 ## Resumen
@@ -9,7 +9,7 @@ Fuente: Reality Matrix + Code Audits
 | [auth](auth.md) | IMPLEMENTADO | AuthModule (22 endpoints) | Login funcional | 5 screens |
 | [gestion-clubs](gestion-clubs.md) | IMPLEMENTADO | ClubsModule (13 endpoints) | 3 pages funcionales | club + members + units |
 | [clases-progresivas](clases-progresivas.md) | IMPLEMENTADO | ClassesModule (7 endpoints) | Read-only | 6 screens |
-| [honores](honores.md) | IMPLEMENTADO | HonorsModule (12 endpoints) | CRUD funcional | 4 screens |
+| [honores](honores.md) | IMPLEMENTADO | HonorsModule (16 endpoints, incluye requirements + progress) | CRUD funcional | 4 screens + checklist de requisitos por honor |
 | [actividades](actividades.md) | IMPLEMENTADO | ActivitiesModule (7 endpoints) | UI completa (list + detail + create/edit + delete) | 4 screens + edit/delete en detalle |
 | [finanzas](finanzas.md) | IMPLEMENTADO | FinancesModule (7 endpoints) | Dashboard completo (resumen + tabla + filtros + CRUD) | 3 screens + eliminacion con AlertDialog |
 | [catalogos](catalogos.md) | IMPLEMENTADO | CatalogsModule + AdminModule (54 endpoints) | 13 pages funcionales | Shared catalogs |
