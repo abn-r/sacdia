@@ -1,0 +1,25 @@
+# Especialidad — critica de medios visuales
+
+**Fuente**: `/Users/abner/Downloads/S3/honors_pdf/critica_de_medios_visuales.pdf`
+**Texto extraído**: `/Users/abner/Documents/development/sacdia/docs/working/honors-especialidades/raw/critica-de-medios-visuales.txt`
+**Nivel detectado**: 2
+**Cantidad de requisitos detectados**: 10
+
+> Nota: extracción automática preliminar desde la capa de texto del PDF. Requiere revisión humana antes de cualquier carga a base de datos.
+
+## Requisitos detectados
+
+1. Como grupo, crear una lista de los diversos tipos de medios visuales. Luego, participar en una profunda discusión acerca de cómo diferentes tipos de medios pueden ser usados para esparcir el evangelio de Cristo. Presentar un resumen de su discusión a un grupo diferente o compartir sus conclusiones por internet. Diversos tipos de medios visuales Resumen
+2. Leer Historia de los Patriarcas y Profetas, capítulo 41, La apostasía a orillas del Jordán, los dos párrafos que comienzan con «Sobre toda cosa guardada, guarda tu corazón ...». Discutir cómo esto se relaciona con el consumo de medios visuales y cómo sus sentidos y su conciencia de sus alrededores son impactados.
+3. Comparar y contrastar los diferentes sistemas de clasificación para videojuegos, películas y programas de televisión con la guía proporcionada en Filipenses 4:8.
+4. Discutir la importancia de la participación de los padres en la selección de los medios de comunicación.
+5. Discutir el impacto que la violencia en los medios visuales desempeña en la formación de la sociedad y sus expectativas.
+6. Seguir las noticias actuales durante tres días y evaluar las fuentes y la exactitud de lo que se ha informado. Evaluar dónde cae cada informe en una escala de uno a cinco, uno representando entretenimiento puro y cinco representando noticias estrictamente informativas. Preparar y presentar sus hallazgos a su grupo. Día 1 1 2 3 4 5 Entretenimiento Informativa Día 2 1 2 3 4 5 Entretenimiento Informativa Día 3 1 2 3 4 5 Entretenimiento Informativa
+7. Buscar en los escritos de Elena de White el consejo acerca del uso prudente del tiempo. Seleccionar y leer un pasaje descubierto durante su búsqueda. Pasaje
+8. Mantener un registro detallado de la cantidad de tiempo y tipos de todos los medios visuales que consume durante un período de cuatro días. Incluir los siguientes datos en sus registros: a. Tiempo dedicado en mirar los medios b. Clasificación de medios y organización de clasificación (si está disponible) c. La trama o el tema d. Pureza de contenido vs. temas sexuales y/o violentos e. El mensaje que fue presentado por los medios de comunicación Preparar un gráfico o tabla que ilustre sus hallazgos. ¿Qué cambios, si los hay, necesita hacer a sus hábitos de mirar los medios? Evaluar cómo ser cristiano debe afectar su uso de los medios de comunicación. Ser detallado y sincero, teniendo en cuenta lo que ha experimentado en esta especialidad. Compartir su evaluación en una carta, informe o diario con un amigo o líder confiado.
+9. Mirar una presentación de medios con su familia. Después de mirarla, entrevistar a los miembros de su familia con las siguientes preguntas: a. ¿Encontró la presentación entretenida? b. ¿Aprendió algo valioso? c. ¿Vería la presentación de nuevo? ¿Por qué sí o por qué no? d. ¿Siente que su tiempo estuvo bien gastado en mirar los medios?
+10. Crear un discurso, presentación o un juego que muestra lo que ha aprendido acerca de los medios visuales al desarrollar esta especialidad. Compartir esta presentación con un grupo.
+
+## Observaciones
+
+- Este archivo fue preparado para análisis posterior, no para carga directa a BD.

@@ -1,0 +1,25 @@
+# Especialidad — numismatica
+
+**Fuente**: `/Users/abner/Downloads/S3/honors_pdf/numismatica.pdf`
+**Texto extraído**: `/Users/abner/Documents/development/sacdia/docs/working/honors-especialidades/raw/numismatica.txt`
+**Nivel detectado**: 2
+**Cantidad de requisitos detectados**: 10
+
+> Nota: extracción automática preliminar desde la capa de texto del PDF. Requiere revisión humana antes de cualquier carga a base de datos.
+
+## Requisitos detectados
+
+1. Relatar brevemente la historia del trueque, mostrando 3 razones de cómo el dinero llegó a utilizarse. Nombrar 10 formas extrañas del dinero usado en lugar de monedas o divisas. 1.
+2. 
+3. 
+4. 
+5. 
+6. 
+7. 
+8. 
+9. 
+10. 2. Relatar brevemente la historia de la acuñación de monedas y el papel moneda en su país. Asegurarse de mencionar las fechas del establecimiento de cualquier casa de la moneda (cecas) o plantas de grabado. También descubrir algún cambio en la composición metálica de una moneda, mencionando algún punto interesante en relación con este cambio. 3. Explicar cómo se distribuye el dinero en su país. 4. Definir los siguientes términos: Aleación Fecha alterada Monedas fundidas Revestimiento de la moneda Conmemorativa Troquel (cortante) Campo Inscripción (leyenda) Letras en el borde Marca de la Casa de la moneda Anverso Moneda sin impresión (plana) Pruebas Reverso Serie Tipo Monedas Borde acanalado 5. Describir el anverso y reverso de papel moneda de las 6 denominaciones más bajas actualmente en uso en su país. Denominación Anverso Reverso 1. 2. 3. 4. 5. 6. 6. Conocer cómo se clasifican las monedas en calidad por los coleccionistas. 7. Compilar y montar un cuadro de monedas de su país de cualquier fecha de acuñación o de actual circulación. Monedas de prueba, conmemorativas, raras, de plata, o monedas costosas no son necesarias. En su colección debe: a. Poseer al menos una moneda de cada acuñación del tipo fijado. b. Localizar e identificar la marca de acuñación (si hay alguna) en cada moneda. c. Localizar e identificar a las iníciales (si hay alguna) de cada diseñador de la moneda. 8. Hacer 2 de los siguientes: a. Hacer dibujos ampliados de ambos lados de 10 distintas denominaciones o las formas de monedas de su país que ya no estén in circulación. b. Coleccionar, identificar y montar 25 diferentes monedas extranjeras. No colocar monedas iguales. c. Coleccionar y montar un conjunto de monedas acuñadas en su país durante el siglo XX. d. Coleccionar y montar una serie de monedas de su país a partir de su año de nacimiento (monedas conmemorativas, de oro, de prueba, costosas y raras no necesariamente deben incluirse). Nota: los datos acerca de la moneda de su país pueden obtenerse a partir del Departamento de Tesorería del gobierno.
+
+## Observaciones
+
+- Este archivo fue preparado para análisis posterior, no para carga directa a BD.

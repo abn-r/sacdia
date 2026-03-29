@@ -1,0 +1,77 @@
+Nombre
+
+• Nivel de destreza 3
+
+Actividades vocacionales
+
+División Sudamericana
+
+Desarrollo de software
+
+1. Tener la especialidad Computación V - Especializado.
+
+2. Decir qué es software y cuáles son sus funciones en el control y manipulación de la 
+
+información.
+
+3. Definir qué es lenguaje de programación.
+
+Describir la diferencia entre programación de alto y bajo nivel.
+
+Nivel alto
+
+Nivel bajo
+
+4. Definir las siguientes clases de estudios de programación:
+
+Programación estructurada
+
+Programación funcional
+
+Programación orientada a objetivos
+
+Programación orientada a eventos
+
+Nombre
+
+• Nivel de destreza 3
+
+Actividades vocacionales
+
+División Sudamericana
+
+5. Definir los siguientes términos:
+
+Código binario
+
+Alcance
+
+Diagrama de flujo
+
+Programación
+
+Base de datos
+
+Compilación
+
+6. Saber cuáles son los pasos principales para crear un software.
+
+7. Describir el uso del UML para las fases de desarrollo de un software.
+
+8. ¿Qué técnicas se aplican mejor en el desarrollo de Ágiles (software liviano y rápido)?
+
+Presentar un estudio sobre esta técnica.
+
+Fecha de presentación
+
+Nombre
+
+• Nivel de destreza 3
+
+Actividades vocacionales
+
+División Sudamericana
+
+9. ¿En cuáles proyectos de desarrollo es posible aplicar el RUP y cuáles son sus fases?
+
+Fecha completada: Instructor/asesor:

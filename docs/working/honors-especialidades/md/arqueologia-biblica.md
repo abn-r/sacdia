@@ -1,0 +1,26 @@
+# Especialidad — arqueologia biblica
+
+**Fuente**: `/Users/abner/Downloads/S3/honors_pdf/arqueologia_biblica.pdf`
+**Texto extraído**: `/Users/abner/Documents/development/sacdia/docs/working/honors-especialidades/raw/arqueologia-biblica.txt`
+**Nivel detectado**: 2
+**Cantidad de requisitos detectados**: 11
+
+> Nota: extracción automática preliminar desde la capa de texto del PDF. Requiere revisión humana antes de cualquier carga a base de datos.
+
+## Requisitos detectados
+
+1. Definir «arqueología», diferenciándola de «paleontología». Arqueología Paleontología
+2. Definir los siguientes términos: Papirólogo Egiptólogo Asiriólogo Orientalista Escritura cuneiforme Jeroglífico Paleografía Anticuario Sitio arqueológico Estratigrafía Crecimiento espiritual, actividades misioneras y herencia Tell (también tall o tel) Quiryat Réplica
+3. Definir el maximalismo y el minimalismo. Maximalismo Minimalismo
+4. Describir o ilustrar 10 herramientas utilizadas en una excavación arqueológica. Si es posible, demostrar cómo se usan varios de las herramientas. 1. 6. 2. 7. 3. 8. 4. 9.
+5. 10. 5. Describir las técnicas principales de datación de un artefacto arqueológico. Crecimiento espiritual, actividades misioneras y herencia
+6. Dar 3 beneficios que la arqueología bíblica puede proveer al estudiante de la Biblia. 1. 2. 3.
+7. Informar acerca de la historia de la arqueología (mínimo de 20 eventos de importancia) a través de: a. Escribir un reporte de investigación de dos páginas b. Ilustrar una cronología detallada c. Crear una presentación electrónica d. Otro método de presentación aprobado por su instructor
+8. Compartir con un grupo o un instructor el significado de cada uno de los siguientes arqueólogos famosos (u otros arqueólogos relevantes a su región, país o división). Ser detallado y específico: a. Jean-François Champollion b. Eduardo Robinson c. Guillermo Foxwell Albright
+9. Montar una carpeta con 10 descubrimientos arqueológicos que colaboran con la historia bíblica tanto del Antiguo Testamento como el Nuevo Testamento. La carpeta deberá tener las siguientes características: a. En orden cronológico por sus fechas o geografía b. Organizado por Antiguo y Nuevo Testamento c. Fotografías o imágenes d. Textos e. Fuentes bibliográficas f. Comentario personal acerca de cada artefacto o descubrimiento Crecimiento espiritual, actividades misioneras y herencia
+10. Descubrir información de recursos disponibles (videos, libros, revistas, diarios, etc.) de cinco excavaciones todavía en marcha hoy alrededor del mundo que sean relevantes para la comprensión del texto bíblico. Explicar por qué cada excavación es relevante para la comprensión del texto bíblico. 1. Por qué relevante 2. Por qué relevante 3. Por qué relevante 4. Por qué relevante 5. Por qué relevante
+11. Hacer una de las siguientes: a. Montar una maqueta simple de Jerusalén observando lo siguiente: i. Relieve ii. Los perímetros diferentes de la ciudad en las épocas del primer templo (David y Salomón), segundo templo (Herodes y Jesucristo) y la Jerusalén actual iii. Los sitios principales arqueológicos iv. Los puntos principales de visitación religiosa b. Simular una excavación arqueológica. Preparar la excavación O participar de manera significativa en todas las etapas del proceso de excavación, incluyendo: i. Herramientas de recolección ii. Colocación de la rejilla/zona de excavación iii. Excavación iv. Identificación de artefactos v. Identificar el contexto del artefacto vi. Registro de datos vii. Evaluación de la importancia del proceso de excavación
+
+## Observaciones
+
+- Este archivo fue preparado para análisis posterior, no para carga directa a BD.

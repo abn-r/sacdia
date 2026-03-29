@@ -1,0 +1,24 @@
+# Especialidad — mercadotecnia avanzado
+
+**Fuente**: `/Users/abner/Downloads/S3/honors_pdf/mercadotecnia_avanzado.pdf`
+**Texto extraído**: `/Users/abner/Documents/development/sacdia/docs/working/honors-especialidades/raw/mercadotecnia-avanzado.txt`
+**Nivel detectado**: 3
+**Cantidad de requisitos detectados**: 9
+
+> Nota: extracción automática preliminar desde la capa de texto del PDF. Requiere revisión humana antes de cualquier carga a base de datos.
+
+## Requisitos detectados
+
+1. Tener la especialidad de Mercadotecnia.
+2. Explicar las siguientes fases del proceso creativo: Percepción del problema Teorización del problema Producir la solución
+3. ¿Qué es «Brainstorming» o lluvia de ideas? ¿Cómo se puede usar en el Club de Conquistadores?
+4. Investigar y hacer un informe sobre las cuatro «P» que componen las técnicas de la mercadotecnia y explicar cómo se puede adaptar su uso en el Club de Conquistadores. P P P P
+5. Conocer algunas técnicas de posicionamiento y estrategia de la mercadotecnia como: SWOT Fuerzas de Porter Matriz BCG Otras que considere interesante
+6. Utilizar la creatividad para producir una presentación del Club para su barrio o escuela. En esta presentación utilizar al menos 2 de los siguientes recursos: a. Video b. Página web c. Música o poema d. Carteles, panfletos, afiches, etc.
+7. Hacer una planificación para divulgar el Club en al menos 3 redes sociales.
+8. Realizar una asesoría de la mercadotecnia completa en al menos 2 de los siguientes departamentos y descubrir cómo aplicar los recursos de la mercadotecnia para predicar el evangelio en el barrio. a. Ministerio Joven b. Conquistadores c. Aventureros d. Música e. Evangelismo f. Publicaciones g. Mayordomía Cristiana h. Temperancia i. Ministerio de la Mujer j. Ministerio del Menor k. Ministerio del Adolescente l. Escuela Sabática m. Ministerio Personal n. Ministerio de la Familia o. Asociación Solidaria Adventista - ASA p. Ministerio de Salud q. Misión Global r. Educación
+9. ¿Cómo el texto de Filipenses 4:8, puede influenciar y dirigir las prácticas, estrategias y ética de la mercadotecnia?
+
+## Observaciones
+
+- Este archivo fue preparado para análisis posterior, no para carga directa a BD.

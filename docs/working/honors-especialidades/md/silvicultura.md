@@ -1,0 +1,25 @@
+# Especialidad — silvicultura
+
+**Fuente**: `/Users/abner/Downloads/S3/honors_pdf/silvicultura.pdf`
+**Texto extraído**: `/Users/abner/Documents/development/sacdia/docs/working/honors-especialidades/raw/silvicultura.txt`
+**Nivel detectado**: 2
+**Cantidad de requisitos detectados**: 10
+
+> Nota: extracción automática preliminar desde la capa de texto del PDF. Requiere revisión humana antes de cualquier carga a base de datos.
+
+## Requisitos detectados
+
+1. Tener la especialidad de Árboles.
+2. Aprender el uso apropiado de las siguientes herramientas comunes de silvicultura y practicar usándolas en los árboles de un bosque. Grabar la información para cada árbol y también dar el nombre común de cada árbol: (Completar el Cartel #1) a. Cinta diamétrica – medir el diámetro de los árboles (o medir la circunferencia de los árboles y calcular el diámetro) b. Clinómetro o aparato de tangentes – medir la altura de los árboles c. Taladro de incremento – contar los anillos de los árboles d. Prisma – estimar el área basal por acre o hectárea
+3. Usar la información acumulado del #2 para determinar el volumen de metros por tabla de los árboles medidos en el bosque. (Completar el Cartel #1)
+4. Calcular el área basal de un árbol desde la medida del diámetro o la circunferencia. ¿Cuál es el área basal por acre o hectárea? Área basal por acre/hectárea
+5. Estudiar 5 especies de árboles que son importantes para la silvicultura en su área y dar la información siguiente para cada uno: a. Nombre científico y común b. Gama del árbol c. Altura y diámetro del árbol al llegar a su madurez d. Hábitat del árbol, zona del bosque y elevación científico común Gama Altura Diámetro Hábitat Zona Elevación 1. 2. 3. 4. 5.
+6. Hacer una lista de los beneficios del bosque al entorno, la calidad del agua, la calidad del aire, la vida silvestre y la recreación.
+7. Hacer una lista del uso de la madera producida en los bosques de su área, y cuáles especies de árbol son importantes para cada uso.
+8. Descubrir y discutir lo siguiente: ¿Cómo se manejan los bosques para reducir el daño causado por insectos y enfermedades? ¿Qué factores influencian el comportamiento de fuego? Cuando se considera que los incendios forestales producen beneficios igual que destrucción, ¿cuáles tratamientos pueden reducir la severidad de incendios forestales?
+9. Hacer uno de las siguientes actividades: a. Visitar un vivero de plantas de semillero de bosque Fecha de visita b. Sembrar plantas de semillero de bosque o semillas de bosque
+10. Explorar las historias bíblicas en Génesis 1 al 3 y Apocalipsis 22 que hablan del árbol de la vida. En la discusión, descubrir el papel de los árboles en el entorno perfecto de Dios y la responsabilidad de cuidar al entorno. Silvicultura — Cartel #1 Nombre común del árbol Diámetro Altura N o. de anillos Área basal Volumen de metros por tabla
+
+## Observaciones
+
+- Este archivo fue preparado para análisis posterior, no para carga directa a BD.

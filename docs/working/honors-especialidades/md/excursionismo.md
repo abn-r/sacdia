@@ -1,0 +1,28 @@
+# Especialidad — excursionismo
+
+**Fuente**: `/Users/abner/Downloads/S3/honors_pdf/excursionismo.pdf`
+**Texto extraído**: `/Users/abner/Documents/development/sacdia/docs/working/honors-especialidades/raw/excursionismo.txt`
+**Nivel detectado**: 2
+**Cantidad de requisitos detectados**: 13
+
+> Nota: extracción automática preliminar desde la capa de texto del PDF. Requiere revisión humana antes de cualquier carga a base de datos.
+
+## Requisitos detectados
+
+1. Discutir con su instructor el significado del lema: «sólo tomar fotos y sólo dejar huellas».
+2. Conocer los puntos esenciales de vestimenta adecuada, calzado, ropa impermeable (para lluvia) para usar en la excursión. Vestimenta Calzado Ropa impermeable
+3. Conocer los principios en la selección de una mochila de buena calidad. ¿Qué podría ser utilizado en lugar de una mochila en una emergencia?
+4. Conocer los elementos esenciales que deben llevarse en un viaje con mochila.
+5. ¿Qué clase de saco de dormir y almohadilla son los mejores para su zona de acampar? Conocer al menos 3 de cada clase que están disponibles. Saco de Dormir Almohadilla 1. 2. 3.
+6. Conocer la forma correcta para empaquetar un paquete.
+7. ¿Qué clase de alimentos son los mejores para el excursionismo? Visitar una tienda de comestibles y hacer una lista de alimentos que se encuentran allí que son apropiados para excursionistas. Con su instructor: a. Preparar un menú para un viaje con mochila de un fin de semana utilizando los alimentos obtenidos a partir de una tienda de comestibles (Completar el Cartel #1) b. Aprender las técnicas de medición, el empaquetado y el etiquetado de los alimentos para su viaje con mochila c. Hacer una merienda para el camino/sendero
+8. Conocer la prevención, los síntomas y los primeros auxilios para: (Completar el Cartel #2) a. Las quemaduras de sol b. Las ampollas c. La congelación d. La hipotermia e. El golpe de calor f. La insolación g. La mordedura de serpientes h. Los calambres i. La deshidratación
+9. Tener un botiquín de primeros auxilios en su mochila y saber cómo usarlo.
+10. De acuerdo a su peso, ¿cuál es el número máximo de kilos que usted está permitido llevar?
+11. Conocer 3 formas de encontrar el sentido de dirección sin una brújula. Demostrar al menos 2. 1. 2. 3.
+12. Mostrar la forma correcta de poner y quitar una mochila solo y con un compañero.
+13. Participar en un viaje con mochila de fin de semana de al menos 8 kilómetros a un lugar no accesible por un vehículo y cocinar sus propios alimentos. Fecha del viaje Número de kilómetros Excursionismo — Cartel #1 Desayuno Almuerzo Cena Viernes Sábado Sábado Sábado Domingo Domingo Excursionismo — Cartel #2 Prevención Síntomas Primeros Auxilios Quemaduras del sol Ampollas Congelación Hipotermia Insolación Golpe de calor Mordedura de serpientes Calambres Deshidratación
+
+## Observaciones
+
+- Este archivo fue preparado para análisis posterior, no para carga directa a BD.

@@ -1,0 +1,24 @@
+# Especialidad — ciencia de agua avanzado
+
+**Fuente**: `/Users/abner/Downloads/S3/honors_pdf/ciencia_de_agua_avanzado.pdf`
+**Texto extraído**: `/Users/abner/Documents/development/sacdia/docs/working/honors-especialidades/raw/ciencia-de-agua-avanzado.txt`
+**Nivel detectado**: 2
+**Cantidad de requisitos detectados**: 9
+
+> Nota: extracción automática preliminar desde la capa de texto del PDF. Requiere revisión humana antes de cualquier carga a base de datos.
+
+## Requisitos detectados
+
+1. Tener la especialidad de Ciencia de Agua.
+2. Ilustrar y describir brevemente cómo cada estado físico de agua contribuye al clima de la tierra. Gas Líquido Sólido
+3. Discutir con un grupo los efectos de agua por las inundaciones y la erosión.
+4. Explicar los siguientes términos con referencia a los cambios en el estado de agua: Condensación Evaporación Congelación Derretir Deposición (desublimación) Sublimación
+5. Ser capaz de explicar e ilustrar con fotografías, diagramas o dibujos las siguientes clases de agua: Agua filtrada Agua blanda Agua destilada Agua de lluvia Agua de nieve Agua desionizada Agua bruta Agua dura
+6. ¿Qué es una cuenca hidrográfica? Discutir con un grupo la importancia de las cuencas hidrográficas.
+7. ¿Cómo es que filtrar el agua la hace potable?
+8. Individualmente o con un grupo, realizar el siguiente experimento y explicar en los resultados qué se puede hacer para mantener las fuentes de agua potables. Investigar la Contaminación Hay muchas maneras de que el agua pueda llegar a ser contaminada. Aparte de la contaminación natural, como el suelo, las hojas y los organismos vivos, las personas causan la contaminación más grave. Desde los fertilizantes agrícolas y pesticidas hasta la escorrentía urbana y residuos industriales, los contaminantes pueden filtrarse en el agua subterránea que se usa usualmente como una fuente de agua potable. Seguir las instrucciones de este experimento para hacer agua contaminada y observar lo que los contaminantes pueden hacer a los suministros de agua. Materiales:  8 frascos de una pinta (cuatro con tapas herméticas)  Cinta de enmascarar  Embudo  Algodón  Aceite de motor  Vinagre  Detergente de lavandería  Tierra  Vasos plásticos Procedimiento:  Etiquetar dos conjuntos de frascos. Enumerar cuatro de los frascos (1, 2, 3 y 4) con cinta de enmascarar. Asegurarse de que estos cuatro frascos tengan tapas que se ajusten bien. Llenar este conjunto de frascos a la mitad con agua. Enumerar los otros cuatro frascos (5, 6, 7 y 8) con cinta de enmascarar y ponerlos a un lado.  Observar el agua en el frasco #1. Anotar sus observaciones.  Poner una cucharada de aceite de motor en el frasco #2. Apretar la tapa y agitar el frasco con cuidado. Anotar sus observaciones.  Poner una cucharada de vinagre en el frasco #3. Apretar la tapa y agitar el frasco con cuidado. Anotar sus observaciones.  Poner una cucharada de detergente en el frasco #4. Apretar la tapa y agitar el frasco con cuidado. Anotar sus observaciones.  Colocar un pedazo de algodón en el embudo y luego añadir un poco de tierra. Colocar el embudo en frasco vacío #5.  Verter el contenido del frasco #1 (sólo agua) en el embudo y dejar que se escurra a través del embudo al frasco #5.  Mover el embudo con el algodón y la tierra al frasco vacío #6. Verter el contenido del frasco #2 (aceite y agua) en el embudo y dejar que se escurra a través del embudo al frasco #6. Observar y anotar sus observaciones.  Mover el embudo con el algodón y la tierra al frasco vacío #7. Verter el contenido del frasco #3 (vinagre) en el embudo y dejar que se escurra a través del embudo al frasco #7. Observar y anotar sus observaciones.  Mover el embudo con el algodón y la tierra al frasco vacío #8. Verter el contenido del frasco #4 (detergente) en el embudo y dejar que se escurra a través del embudo al frasco #8. Observar y anotar sus observaciones. Hacer Descubrimientos:  Si se añaden estas sustancias a una fuente de agua de verdad, ¿cómo podrían afectar el agua?  ¿Cómo afectarían a los animales y las personas?  ¿Puede pensar en algunos casos en que materiales como estos (aceite, detergente químico, etc.) podrían haber sido derramados o botados y posiblemente puesto en peligro un suministro de agua?  ¿Qué medidas puede tomar una comunidad para prevenir tales accidentes?
+9. Desarrollar una aplicación espiritual del agua y compartirla con su grupo.
+
+## Observaciones
+
+- Este archivo fue preparado para análisis posterior, no para carga directa a BD.

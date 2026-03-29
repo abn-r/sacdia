@@ -1,0 +1,20 @@
+# Especialidad — insectos
+
+**Fuente**: `/Users/abner/Downloads/S3/honors_pdf/insectos.pdf`
+**Texto extraído**: `/Users/abner/Documents/development/sacdia/docs/working/honors-especialidades/raw/insectos.txt`
+**Nivel detectado**: 1
+**Cantidad de requisitos detectados**: 5
+
+> Nota: extracción automática preliminar desde la capa de texto del PDF. Requiere revisión humana antes de cualquier carga a base de datos.
+
+## Requisitos detectados
+
+1. Realizar una de las siguientes actividades: a. Montar una colección de 20 especies de insectos que representen al menos 6 diferentes órdenes excluyendo las polillas o mariposas (especímenes montados con descuido no serán aceptables). i. Colocar bajo cada ejemplar una etiqueta que muestre la localidad donde fue capturado, la fecha cuando fue capturado y el nombre del coleccionista. Las etiquetas no deben ser mayor que 6 mm x 20 mm. ii. Identificar los insectos con nombres comunes y género o el nivel de especie en las etiquetas segundas a ser montadas por debajo de la primera. iii. Organizar todos los especímenes perfectamente en una caja de insectos de acuerdo a las órdenes y familias. Las etiquetas deben ser puestas en la caja y no adjuntadas a los pines de insectos. b. Hacer dibujos a color o pinturas de 20 especies de insectos, en la cual se representen por lo menos 6 diferentes órdenes. Dibujos o pinturas deben ser del tamaño real o más grande, para mostrar los detalles de los pequeños insectos y en los colores naturales. Etiquetar los dibujos con nombres comunes y cada género o nombres de la especie en niveles. c. Tomar fotos a color de 20 especies de insectos que representen por lo menos 6 diferentes órdenes. Todas las imágenes deben estar enfocadas, en primer plano y debidamente etiquetadas, indicando dónde fue fotografiado, fecha de la fotografía, nombres comunes y cada género o nombre del nivel de la especie.
+2. ¿Cuáles son las características distintivas de un insecto?
+3. Nombrar 5 especies de insectos perjudiciales y dar detalles sobre cómo controlarlas. 1. 4. 2. 5. 3. Control:
+4. Nombrar 2 clases de insectos sociales. ¿En qué se diferencian de los insectos no sociales? 1. 4. 2. 5. 3. Control:
+5. Mencionar 2 historias de la Biblia en la cual los insectos de desempeñaron un papel importante. 1. 2.
+
+## Observaciones
+
+- Este archivo fue preparado para análisis posterior, no para carga directa a BD.

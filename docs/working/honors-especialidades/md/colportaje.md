@@ -1,0 +1,22 @@
+# Especialidad — colportaje
+
+**Fuente**: `/Users/abner/Downloads/S3/honors_pdf/colportaje.pdf`
+**Texto extraído**: `/Users/abner/Documents/development/sacdia/docs/working/honors-especialidades/raw/colportaje.txt`
+**Nivel detectado**: 1
+**Cantidad de requisitos detectados**: 7
+
+> Nota: extracción automática preliminar desde la capa de texto del PDF. Requiere revisión humana antes de cualquier carga a base de datos.
+
+## Requisitos detectados
+
+1. A través de la Biblia y los escritos de Elena G. de White, escribir un resumen, por lo menos de 250 palabras de extensión, sobre la importancia de la utilización de la literatura en la conducción de personas a Cristo.
+2. Nombrar 5 cualidades esenciales de un colportor. 1. 2.
+3. 
+4. 
+5. 3. ¿Cómo se sostiene el colportor? 4. ¿Qué 4 pasos se toman en la venta de un libro o una revista? 1. 2. 3. 4. 5. Dar un breve bosquejo de la forma de cómo despertar el interés en la compra de un libro o una revista. Crecimiento espiritual, actividades misioneras y herencia
+6. Conocer la manera de satisfacer las objeciones a la compra de un libro o una revista.
+7. Realizar una de las siguientes actividades: a. Mantener un estante donde se muestre literatura durante 4 meses, manteniendo un registro de cuáles libros son los más populares y menos populares. b. Realizar un proyecto de distribución de literatura en su comunidad casa por casa o por correo durante 10 horas. Incluir en la literatura una tarjeta de respuesta adicional para la literatura, estudios bíblicos, y/o un curso bíblico por correspondencia. c. Participar en la venta de libros adventistas y/o revistas durante un período de un mínimo de 5 semanas, o por lo menos 20 horas cada semana. d. Realizar un proyecto de distribución de libros religiosos a los funcionarios del gobierno local. Pasar al menos 10 horas en su proyecto. e. Realizar un proyecto de suministro de literatura religiosa a los pacientes en un hospital o asilo de ancianos. Pasar al menos 10 horas en su proyecto. f. Hacer un proyecto de suministrar una suscripción anual de la revista Liberty [Libertad] a los magistrados y/o abogados en su comunidad. Reunir el dinero o recibir contribuciones para la suscripción de regalo. g. Hacer un proyecto de envío de literatura y/o Biblias al campo misionero. Parte de este proyecto es recoger la literatura y/o Biblias, la determinación de dónde enviar el material y empacar y enviar el material. Proyecto seleccionado
+
+## Observaciones
+
+- Este archivo fue preparado para análisis posterior, no para carga directa a BD.

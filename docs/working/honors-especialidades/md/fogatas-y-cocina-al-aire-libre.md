@@ -1,0 +1,29 @@
+# Especialidad — fogatas y cocina al aire libre
+
+**Fuente**: `/Users/abner/Downloads/S3/honors_pdf/fogatas_y_cocina_al_aire_libre.pdf`
+**Texto extraído**: `/Users/abner/Documents/development/sacdia/docs/working/honors-especialidades/raw/fogatas-y-cocina-al-aire-libre.txt`
+**Nivel detectado**: 2
+**Cantidad de requisitos detectados**: 14
+
+> Nota: extracción automática preliminar desde la capa de texto del PDF. Requiere revisión humana antes de cualquier carga a base de datos.
+
+## Requisitos detectados
+
+1. Hacer 5 diferentes clases de fogatas y conocer sus usos. Dos de estas fogatas deben ser fogatas para cocinar. Fogatas Usos 1) 2) 3) 4) 5)
+2. De manera segura hacer virutas de madera o palos con virutas.
+3. Mostrar las técnicas correctas para iniciar una fogata.
+4. Empezar una fogata con un fósforo y mantenerla encendida durante al menos 10 minutos.
+5. Conocer y practicar las normas de seguridad ante el fuego.
+6. Mostrar la manera correcta y segura de cortar y dividir la madera para el fuego.
+7. Empezar una fogata en un día lluvioso.
+8. Demostrar las siguientes técnicas de cocina: a. Ebullición b. Freír c. Hornear pan en un palo d. Hornear con papel de aluminio e. Hornear con un horno reflector f. Cocinar a fuego lento
+9. Conocer un método de mantener los alimentos frescos mientras acampa, diferente al hielo.
+10. Conocer la manera de mantener los alimentos y utensilios seguros de los animales e insectos.
+11. ¿Por qué es importante mantener limpios sus utensilios de cocina y de comer?
+12. Demostrar conocimiento de la nutrición adecuada y los grupos de alimentos, hacer un menú equilibrado y completo para 6 comidas de campamento. Incluir lo siguiente: (Completar el Cartel #1) a. Un buen desayuno, almuerzo, cena para una caminata donde el poco peso es importante. La comida no debe ser cocinada, pero debe ser nutritiva. b. Las 5 comidas restantes podrán estar compuestas por cualquier clase de comida: enlatados, frescos, congelados o deshidratados. Una de las 5 comidas debe ser hecha en una olla.
+13. Hacer una lista de los artículos que serán necesarias para preparar las 6 comidas anteriormente mencionadas. (Completar el Cartel #2)
+14. Saber cómo: Manejar adecuadamente y con seguridad los alimentos Disponer de la basura y los trastos Lavar sus utensilios Fogatas y cocina al aire libre — Cartel #1 Desayuno Almuerzo Cena Viernes Sábado Sábado Sábado Domingo Domingo Arte de acampar — Cartel #2 Cena – viernes Desayuno – sábado Almuerzo – sábado Cena – sábado Desayuno – domingo Almuerzo – domingo
+
+## Observaciones
+
+- Este archivo fue preparado para análisis posterior, no para carga directa a BD.

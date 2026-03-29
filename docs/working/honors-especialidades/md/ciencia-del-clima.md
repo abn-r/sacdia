@@ -1,0 +1,28 @@
+# Especialidad — ciencia del clima
+
+**Fuente**: `/Users/abner/Downloads/S3/honors_pdf/ciencia_del_clima.pdf`
+**Texto extraído**: `/Users/abner/Documents/development/sacdia/docs/working/honors-especialidades/raw/ciencia-del-clima.txt`
+**Nivel detectado**: 2
+**Cantidad de requisitos detectados**: 13
+
+> Nota: extracción automática preliminar desde la capa de texto del PDF. Requiere revisión humana antes de cualquier carga a base de datos.
+
+## Requisitos detectados
+
+1. ¿Qué es la climatología?
+2. Investigar y crear un gráfico que muestre las tendencias en los cambios de temperatura durante los últimos 1000 años por siglo.
+3. Describir brevemente los siguientes términos en relación con la ciencia del clima y su impacto en el medio ambiente: a. Cambio climático b. Gases de efecto invernadero c. Combustibles fósiles d. Hábitat e. Dióxido de carbono (CO2) f. Emisiones Estudio de la naturaleza g. Subida del nivel del mar h. Geoingeniería i. Deforestación
+4. Discutir qué tipo de educación se requiere para una carrera relacionada con la ciencia del clima.
+5. Identificar y definir por lo menos 10 disciplinas de carrera de ciencias del clima. 1. 6. 2. 7. 3. 8. 4. 9. 5. 10.
+6. Con otra persona o en un grupo, discutir el contexto bíblico de los siguientes textos en relación con nuestra responsabilidad de cuidar el medio ambiente: a. Génesis 2:15 b. Números 35:33 y 34 Estudio de la naturaleza c. Ezequiel 34:18 d. Jeremías 2:7
+7. Investigar y discutir algunas inquietudes acerca de los cambios en los patrones climáticos que han destacado los climatólogos en relación con el aumento de las temperaturas globales.
+8. Con referencia a la gráfica creada en la pregunta 2, mostrar que ha habido cambios en el clima en el pasado en base a los siguientes factores: a. Factores naturales que cambian el clima. b. Factores humanos que cambian el clima.
+9. En base a su investigación de los eventos actuales relacionados con la ciencia del clima, discutir su impacto y efectos en la vida silvestre y la vida marina. La vida silvestre La vida marina
+10. Individualmente o en grupo, crear una de las siguientes ilustraciones: a. Crear un cartel ambiental que muestre cómo los cambios en el clima de la Tierra pueden afectar a los ecosistemas a nivel local y global. b. Crear un cartel que ilustre El Niño contra La Niña y sus impactos en el clima de la Tierra. c. Crear un cartel que ilustre el impacto humano en el cambio climático y describir métodos para revertir esos efectos. Estudio de la naturaleza
+11. Individualmente o en grupo, completar uno de los siguientes: a. Crear un plan detallado y relevante para un jardín infiltrante en su iglesia, hogar o dentro de su comunidad. Enviar sus planes y un presupuesto a las personas apropiadas para su revisión. Preparar y hacer una presentación oral a un grupo acerca de su plan. b. Visitar una región de impacto ambiental local y evaluar cómo podría afectar positivamente el clima.
+12. Con otra persona o en grupo, discutir cada una de las siguientes preguntas abiertas desde una perspectiva cristiana. El objetivo es dar una justificación para su respuesta en lo que respecta a nuestros papeles como habitantes cristianos conscientes del medio ambiente a. ¿Cómo deben los cristianos ver el cambio climático? b. Como cristianos, ¿tenemos una mayor responsabilidad de mantener un ambiente global saludable? Basado en sus respuestas, desarrollar un plan diseñado para incorporar sus ideas en un proyecto efectivo para su iglesia o comunidad. Prepárese para dar una presentación oral acerca de sus hallazgos y las acciones que se han tomado.
+13. Hay una discusión apasionada acerca del concepto de calentamiento global que es un evento de cambio climático. ¿Cuál es su punto de vista acerca del tema? Por favor, dar tres razones que le ayuden a formar su punto de vista. 1. 2. 3.
+
+## Observaciones
+
+- Este archivo fue preparado para análisis posterior, no para carga directa a BD.

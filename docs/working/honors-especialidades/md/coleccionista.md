@@ -1,0 +1,23 @@
+# Especialidad — coleccionista
+
+**Fuente**: `/Users/abner/Downloads/S3/honors_pdf/coleccionista.pdf`
+**Texto extraído**: `/Users/abner/Documents/development/sacdia/docs/working/honors-especialidades/raw/coleccionista.txt`
+**Nivel detectado**: 1
+**Cantidad de requisitos detectados**: 8
+
+> Nota: extracción automática preliminar desde la capa de texto del PDF. Requiere revisión humana antes de cualquier carga a base de datos.
+
+## Requisitos detectados
+
+1. Explicar lo que hace un coleccionista y por qué esta actividad es cada vez más recomendada para las personas que viven en las grandes ciudades.
+2. Visitar una exposición de artes o una feria artesanal y hacer una lista de los diversos artículos de colección que allí se encuentran. Lugar visitado Artículos de colección
+3. Hacer una lista de al menos 10 elementos que la gente colecciona en la actualidad. 1. 6. 2. 7. 3. 8.
+4. 9.
+5. 10. 4. Junto con su instructor, completar uno de los siguientes requisitos: a. Iniciar una colección para su club. Ayudar a escoger un tipo de recolección y desarrollar un exposición creativa, escribir un párrafo sobre el por qué fue elegido, hacer una lista de lo que debería contar en la descripción de los elementos y contribuir con por lo menos 5 puntos diferentes. Tipo de colección Por qué elegido Qué debe contar en la descripción b. En una colección de un club ya existente, ayudar en la organización y conservación. Además, contribuir con por lo menos 5 elementos. Escribir un párrafo sobre la colección ya existente, hacer una evaluación del estado actual de la colección y sugerir qué se podría mejorar. Descripción, evaluación y sugerencias de la colección 5. En su club o en alguna institución especializada, asistir a una conferencia dada por un coleccionista experimentado sobre las peculiaridades sobre la actividad. Hacer un informe de no menos de 500 palabras sobre el cuidado de las colecciones, la forma de conseguir nuevos objetos y otras cosas interesantes aprendidas. Conferencia asistida Informe
+6. ¿Qué sucede cuando un elemento de la colección (o una colección entera) tiene un precio muy elevado? ¿Ese valor es siempre más importante para el coleccionista?
+7. Empezar 3 colecciones diferentes (de preferencia una de ellas debe ser similar al discurso del punto 5), con un mínimo de 15 elementos cada una. Demostrar la capacidad para ordenar, clasificar e identificar los elementos y especificar (en caso sea posible): fecha, hora lugar de origen, el valor estimado, lugar dónde se encontró y otros detalles específicos relacionados con las colecciones escogidas.
+8. Participar en una exhibición de colecciones en su club, escuela o iglesia, con al menos 2 colecciones personales, hacer la organización de los objetos debidamente identificados con las aclaraciones necesarias para las visitas.
+
+## Observaciones
+
+- Este archivo fue preparado para análisis posterior, no para carga directa a BD.

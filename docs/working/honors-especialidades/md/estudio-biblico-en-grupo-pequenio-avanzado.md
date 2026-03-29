@@ -1,0 +1,22 @@
+# Especialidad — estudio biblico en grupo pequenio avanzado
+
+**Fuente**: `/Users/abner/Downloads/S3/honors_pdf/estudio_biblico_en_grupo_pequenio_avanzado.pdf`
+**Texto extraído**: `/Users/abner/Documents/development/sacdia/docs/working/honors-especialidades/raw/estudio-biblico-en-grupo-pequenio-avanzado.txt`
+**Nivel detectado**: 3
+**Cantidad de requisitos detectados**: 7
+
+> Nota: extracción automática preliminar desde la capa de texto del PDF. Requiere revisión humana antes de cualquier carga a base de datos.
+
+## Requisitos detectados
+
+1. Tener la especialidad de Estudio bíblico en grupo pequeño.
+2. ¿En qué punto debería un líder de un grupo pequeño multiplicar el grupo en grupos más pequeños?
+3. ¿Qué es un buen mínimo de tamaño de grupo? ¿Por qué deberían reunirse grupos muy pequeños en lugares públicos y qué constituye un lugar público?
+4. ¿Cómo debe un líder tratar con la situación cuando sólo un miembro aparezca para el estudio?
+5. Seleccionar una plantilla de estudio bíblico que puede usarse para dirigir una serie de estudios bíblicos en grupo pequeño en uno de los siguientes temas: a. Héroes de la Biblia b. Temas relevantes para el crecimiento espiritual de los adolescentes c. Temas que dan guía espiritual d. Cómo compartir a Jesús en la escuela, en el trabajo o con amigos e. Algunas de las 28 creencias fundamentales
+6. Desarrollar la serie de estudios basada en su plantilla seleccionada.
+7. Dirigir un estudio bíblico de grupo pequeño por lo menos ocho sesiones usando el esquema creado en el requisito anterior.
+
+## Observaciones
+
+- Este archivo fue preparado para análisis posterior, no para carga directa a BD.

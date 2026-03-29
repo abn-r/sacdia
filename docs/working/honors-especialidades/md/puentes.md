@@ -1,0 +1,24 @@
+# Especialidad — puentes
+
+**Fuente**: `/Users/abner/Downloads/S3/honors_pdf/puentes.pdf`
+**Texto extraído**: `/Users/abner/Documents/development/sacdia/docs/working/honors-especialidades/raw/puentes.txt`
+**Nivel detectado**: 1
+**Cantidad de requisitos detectados**: 9
+
+> Nota: extracción automática preliminar desde la capa de texto del PDF. Requiere revisión humana antes de cualquier carga a base de datos.
+
+## Requisitos detectados
+
+1. Definir los siguientes términos: Puente Acueducto Cimbra Fuerza de compresión Fuerza de tensión Puente basculante Puente cubierto
+2. Describir las 6 clases principales de diseño de puentes y dar 2 ejemplos de cada uno: Puente en arco Puente viga Puente atirantado Puente en ménsula Puente colgante Puente de braguero
+3. Descubrir la distancia que cada uno de los siguientes diseños de puentes pueden alcanzar: Puente en arco Puente viga Puente atirantado Puente en ménsula Puente colgante Puente de braguero
+4. Nombrar el diseño de puentes que pueden alcanzar la distancia más larga.
+5. Dibujar o ilustrar el diseño básico de cada una de las siguientes clases de puentes: a. Puente viga b. Puente en arco c. Puente colgante d. Puente cubierto e. Puente de braguero f. Puente atirantado (diseño en abanico) g. Puente en ménsula h. Puente basculante i. Puente atirantado (diseño en arpa)
+6. Hacer las siguientes actividades: a. Ver un video de puentes. b. Hacer una lista de por lo menos 8 puentes notables, o nombrar 2 puentes que haya cruzado y decir qué diseño tenían. Puentes notables 1. 2. 3. 4. 5. 6.
+7. 
+8. Puentes cruzados 1. 2. 7. Hacer un video/presentación multimedia o una presentación de un álbum de recortes de puentes que haya visto. 8. Construir un puente utilizando materiales como palillos, ovillo, hilo y pegamento.
+9. Recitar Juan 3:16 y decir cómo este versículo describe el papel de Cristo como puente entre los cielos y la tierra.
+
+## Observaciones
+
+- Este archivo fue preparado para análisis posterior, no para carga directa a BD.
