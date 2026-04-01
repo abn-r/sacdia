@@ -105,3 +105,9 @@ Si se modifica codigo que cambie comportamiento, actualizar documentacion en el 
 Algunos `CLAUDE.md` incluyen bloques `<claude-mem-context>` autogenerados.
 No usar esos bloques como unica fuente de verdad para requisitos tecnicos.
 La fuente de verdad funcional y tecnica debe ser `docs/steering/`, `docs/features/`, `docs/api/` y `docs/database/`.
+
+## 8) Skills de workspace
+
+| Skill | Descripcion | Archivo |
+|------|-------------|---------|
+| `sacdia-code-review` | Playbook reusable para revisar PRs y cambios cross-repo en `sacdia-backend`, `sacdia-admin` y `sacdia-app`, con checklist y templates. | [SKILL.md](.agents/skills/sacdia-code-review/SKILL.md) |
