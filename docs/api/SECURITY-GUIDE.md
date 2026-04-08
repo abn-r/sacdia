@@ -19,7 +19,8 @@ El runtime actual endurece sub-recursos sensibles de `user` con `JwtAuthGuard` +
 | `health` | `GET/PUT /users/:userId/allergies`, `GET/PUT /users/:userId/diseases`, `GET/PUT /users/:userId/medicines`, `DELETE` item-level | `health:read`, `health:update` | `users:read_detail`, `users:update` |
 | `emergency_contacts` | `GET/POST/PATCH/DELETE /users/:userId/emergency-contacts` | `emergency_contacts:read`, `emergency_contacts:update` | `users:read_detail`, `users:update` |
 | `legal_representative` | `GET/POST/PATCH/DELETE /users/:userId/legal-representative` | `legal_representative:read`, `legal_representative:update` | `users:read_detail`, `users:update` |
-| `post_registration` | `GET /users/:userId/post-registration/status`, `POST /users/:userId/post-registration/step-{1,2,3}/complete` | `post_registration:read`, `post_registration:update` | `users:read_detail`, `users:update` |
+| `post_registration` | `GET /users/:userId/post-registration/status` | `post_registration:read` | `users:read_detail` |
+| `post_registration` | `POST /users/:userId/post-registration/step-{1,2,3}/complete` | `registration:complete` | _(sin fallback)_ |
 
 Reglas de seguridad:
 

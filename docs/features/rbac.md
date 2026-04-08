@@ -99,12 +99,14 @@ El sistema RBAC implementa permisos finos (fine-grained) para 4 familias de sub-
 | `legal_representative` | `legal_representative:read` | `users:read_detail` | `GET /users/:userId/legal-representative` |
 | `legal_representative` | `legal_representative:update` | `users:update` | `POST/PATCH/DELETE /users/:userId/legal-representative` |
 | `post_registration` | `post_registration:read` | `users:read_detail` | `GET /users/:userId/post-registration/status` |
-| `post_registration` | `post_registration:update` | `users:update` | `POST /users/:userId/post-registration/step-{1,2,3}/complete` |
+| `post_registration` | `registration:complete` | _(sin fallback)_ | `POST /users/:userId/post-registration/step-{1,2,3}/complete` |
+
+> **Nota**: `registration:complete` es un permiso global dedicado asignado a roles de campo (super_admin, admin, assistant-lf, director-lf y equivalentes union/dia por herencia). No usa fallback a `users:update`. El owner siempre puede completar su propio registro sin este permiso.
 
 ### Reglas de autorizacion
 
 1. **Owner bypass (self-service)**: El propietario del `userId` tiene acceso completo a sus propios sub-recursos sin necesidad de permisos globales explícitos
-2. **Terceros**: Solo se evaluan permisos globales. Se acepta el permiso fino **O** el fallback legacy (OR transicional)
+2. **Terceros**: Solo se evaluan permisos globales. Se acepta el permiso fino **O** el fallback legacy (OR transicional). Excepcion: `registration:complete` no tiene fallback legacy
 3. **Permisos de club no aplican**: Los permisos provenientes unicamente de `authorization.active_assignment` no habilitan acceso transversal a recursos `user`
 
 ### Pruning administrativo

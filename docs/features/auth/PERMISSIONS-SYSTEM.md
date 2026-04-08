@@ -90,14 +90,15 @@ Regla:
 | `legal_representative:read` | Ver representante legal del usuario |
 | `legal_representative:update` | Editar representante legal del usuario |
 | `post_registration:read` | Ver estado administrativo de post-registro |
-| `post_registration:update` | Completar o editar pasos administrativos de post-registro |
+| `registration:complete` | Completar pasos administrativos de post-registro (permiso global dedicado, sin fallback a `users:update`) |
 
 Notas canonicas del modelo vigente:
 
 - las familias sensibles del change son `health`, `emergency_contacts`, `legal_representative` y `post_registration`;
 - OR transicional vigente: para terceros, lectura fina acepta `family:read` o el legado de la familia `users:*` (`users:read_detail`); escritura fina acepta `family:update` o el legado `users:update`;
+- excepcion: los endpoints `POST /step-{1,2,3}/complete` ahora usan `registration:complete` (permiso global dedicado) en lugar de `post_registration:update` con fallback a `users:update`. Roles asignados: super_admin, admin, assistant-lf, director-lf (y equivalentes union/dia por herencia). El owner siempre puede completar su propio registro;
 - exclusiones fuera de scope: `GET/PATCH /users/:userId`, `POST/DELETE /users/:userId/profile-picture`, `GET /users/:userId/age` y `GET /users/:userId/requires-legal-representative` siguen en metadata legacy `users:*`;
-- excepcion minima vigente: terceros pueden consultar `post_registration/status` y completar `step-{1,2,3}` solo en modo administrativo minimo, sin feedback sensible adicional.
+- excepcion minima vigente: terceros pueden consultar `post_registration/status` solo en modo administrativo minimo, sin feedback sensible adicional.
 
 ### Roles y Permisos
 | Permiso | Descripcion |
