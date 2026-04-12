@@ -256,3 +256,55 @@ El `JwtStrategy` actual de NestJS (`passport-jwt` + `secretOrKey: BETTER_AUTH_SE
 | better-auth instalado | `package.json` + `pnpm-lock.yaml` actualizados |
 | Preguntas 1-6 | Todas respondidas con evidencia de código fuente |
 | Accion requerida | Equipo debe decidir Opcion A/B/C antes de iniciar W3-009 |
+
+---
+
+## DEUDA TÉCNICA — Legacy Column Naming: `districts.districlub_type_id` (2026-04-12)
+
+### Contexto
+
+La tabla `districts` en `sacdia-backend/prisma/schema.prisma` tiene una PK con nombre heredado confuso: `districlub_type_id` en vez de `district_id`. El nombre mezcla "district" y "club_type", aparentemente un typo histórico o naming accidental que quedó consolidado.
+
+La tabla `churches` propaga este error: usa `districlub_type_id` como FK hacia `districts`, multiplicando el impacto del nombre legacy por toda la relación.
+
+### Impacto
+
+**En la BD y Prisma:**
+- Columna subyacente: `districlub_type_id` (incorrecto, confuso)
+- Propagación: FK en `churches`, y por referencia indirecta en cualquier service que cargue relaciones (ej: `admin-geography.service.ts`, `clubs.service.ts`)
+- Riesgo: future developers confunden el nombre con club_type
+
+**Antes de la mitigación (commits 2026-04-12):**
+- API público exponía nombre legacy: `{ "districlub_type_id": 123 }`
+- Clientes (admin, app) consumían directamente el nombre confuso
+
+### Mitigación Actual
+
+**Commits 2026-04-12:**
+- `d082d9e` (sacdia-backend): mappers en `catalogs.service.ts` (`mapDistrict`, `mapChurch`) aliasean la columna como `district_id` en responses
+- `62786ee` (sacdia-admin): UI consume el alias público `district_id`
+- `036ee2d` (sacdia-app): Flutter datasources mapean hacia `district_id`
+
+**Resultado:**
+- Contrato API público ya expone el nombre correcto: `{ "district_id": 123 }`
+- Clientes aislados del nombre legacy
+- Costo: cero migraciones complejas, mitigación pura en mappers
+
+### Por qué NO migramos la BD
+
+1. **Rename de columna complicado**: requiere `ALTER TABLE districts RENAME COLUMN` seguido de actualizar todas las FKs (`churches.districlub_type_id`, y cualquier otra tabla que lo use como FK)
+2. **Locking en vivo**: en una BD con datos de producción, el rename genera locks que pueden afectar operaciones
+3. **Propagación de cambios**: Prisma schema, migrations, y todas las queries directas que leen `districlub_type_id` necesitarían actualización (riesgo de inconsistencias transitorias)
+4. **Bajo ROI**: el alias en la API ya expone el nombre correcto externamente. El beneficio cosmético no justifica el riesgo operativo
+
+### Cuándo revisitar
+
+- **Major schema refactor**: cuando se planee reestructuración más amplia (ej: consolidación de tablas de geografía, índices, particionamiento)
+- **Window de mantenimiento**: si se abre una ventana de downtime programado para cambios grandes
+- **Contexto adicional**: si emergen FKs nuevas o cambios en `club_type` que hagan el nombre aún más confuso
+
+### Referencia de commits
+
+- **Backend mitigación**: `d082d9e` — mappers con alias `district_id` en CatalogsService
+- **Admin mitigación**: `62786ee` — UI actualizada a consumir alias
+- **App mitigación**: `036ee2d` — Flutter datasources mapean alias
