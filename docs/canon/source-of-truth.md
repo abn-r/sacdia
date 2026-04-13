@@ -101,16 +101,18 @@ Reglas:
 
 Fuentes canónicas de datos:
 
-1. `docs/database/schema.prisma`
+1. `sacdia-backend/prisma/schema.prisma`
 2. `docs/database/README.md`
-3. `docs/database/SCHEMA-REFERENCE.md`
+3. `docs/database/schema.prisma`
+4. `docs/database/SCHEMA-REFERENCE.md`
 
 Reglas:
 
-- `schema.prisma` es la fuente de verdad estructural del modelo de datos.
-- `README.md` de database define la guía operativa del módulo y además declara a `schema.prisma` como fuente de verdad.
-- `SCHEMA-REFERENCE.md` es una referencia humana útil, pero queda subordinada a `schema.prisma` cuando haya drift o diferencias de naming, tipos o claves.
-- Cuando `SCHEMA-REFERENCE.md` o ejemplos de otros documentos difieran en forma estructural exacta, gana `schema.prisma`.
+- Mientras exista drift entre ambos schemas, `sacdia-backend/prisma/schema.prisma` es la fuente de verdad estructural efectiva del runtime.
+- `docs/database/schema.prisma` queda tratado como espejo documental pendiente de resincronización, no como autoridad primaria mientras siga desalineado.
+- `docs/database/README.md` debe declarar explícitamente este arbitraje para evitar síntesis por intuición.
+- `docs/database/SCHEMA-REFERENCE.md` es referencia humana subordinada y no puede contradecir al schema efectivo del backend.
+- Cuando un documento de datos difiera en naming, tipos, claves o relaciones, gana `sacdia-backend/prisma/schema.prisma` hasta que la capa documental sea resincronizada.
 
 ### 3.5 Gobernanza documental
 
@@ -159,9 +161,10 @@ Reglas:
 ### 4.4 Si la pregunta es de datos o schema
 
 1. `docs/canon/source-of-truth.md`
-2. `docs/database/schema.prisma`
+2. `sacdia-backend/prisma/schema.prisma`
 3. `docs/database/README.md`
-4. `docs/database/SCHEMA-REFERENCE.md`
+4. `docs/database/schema.prisma`
+5. `docs/database/SCHEMA-REFERENCE.md`
 
 ### 4.5 Si la pregunta es de precedencia documental
 
@@ -236,7 +239,7 @@ Si el conflicto bloquea el uso seguro de la documentación, debe marcarse `BLOCK
 
 1. iniciar cualquier decisión de precedencia en este archivo;
 2. usar `ENDPOINTS-LIVE-REFERENCE.md` para afirmar comportamiento API vigente;
-3. usar `schema.prisma` para afirmar estructura de datos vigente;
+3. usar `sacdia-backend/prisma/schema.prisma` para afirmar estructura de datos vigente mientras persista el drift documental;
 4. tratar `ENDPOINTS-REFERENCE.md` y roadmap como apoyo narrativo, no como contrato actual;
 5. escalar contradicciones reales en vez de resolverlas por intuición.
 
@@ -250,7 +253,7 @@ La congelación de Wave 0 queda así:
 - runtime API: `docs/api/ENDPOINTS-LIVE-REFERENCE.md`
 - decisiones aprobadas: `docs/api/ARCHITECTURE-DECISIONS.md`
 - baseline técnica global: `docs/steering/*` activos
-- datos: `docs/database/schema.prisma`
+- datos: `sacdia-backend/prisma/schema.prisma` como autoridad efectiva; `docs/database/schema.prisma` como espejo a resincronizar
 - histórico y roadmap: prohibidos como estado actual
 
 Mientras este archivo no sea reemplazado explícitamente por otro documento canónico, esta jerarquía permanece vigente.

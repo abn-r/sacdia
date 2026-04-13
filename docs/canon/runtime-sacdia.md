@@ -22,10 +22,10 @@ La precedencia para interpretar este documento es:
 3. `docs/canon/identidad-sacdia.md`
 4. `docs/canon/arquitectura-sacdia.md`
 5. `docs/canon/decisiones-clave.md`
-6. `docs/02-API/ENDPOINTS-LIVE-REFERENCE.md`
-7. `docs/02-API/ARCHITECTURE-DECISIONS.md`
-8. `docs/03-DATABASE/schema.prisma`
-9. `docs/03-DATABASE/README.md`
+6. `docs/api/ENDPOINTS-LIVE-REFERENCE.md`
+7. `docs/api/ARCHITECTURE-DECISIONS.md`
+8. `docs/database/schema.prisma`
+9. `docs/database/README.md`
 10. `docs/canon/completion-matrix.md`
 
 Si una fuente autorizada de menor jerarquía contradice otra superior, este documento no fuerza síntesis y debe escalar el punto.
@@ -99,7 +99,7 @@ Esta frontera está respaldada por `docs/canon/decisiones-clave.md` y por las no
 
 ### 5.1 Fuente runtime
 
-La fuente runtime API vigente es `docs/02-API/ENDPOINTS-LIVE-REFERENCE.md`.
+La fuente runtime API vigente es `docs/api/ENDPOINTS-LIVE-REFERENCE.md`.
 
 Características documentadas:
 
@@ -314,9 +314,9 @@ Y mantiene compatibilidad transicional con permisos legacy `users:*` en ciertas 
 
 ### 8.1 Fuente estructural
 
-La fuente de verdad estructural de datos es `docs/03-DATABASE/schema.prisma`.
+La fuente de verdad estructural de datos es `docs/database/schema.prisma`.
 
-La guía operativa subordinada es `docs/03-DATABASE/README.md`.
+La guía operativa subordinada es `docs/database/README.md`.
 
 ### 8.2 Rasgos documentados de persistencia
 
@@ -430,7 +430,7 @@ Este runtime canonizado:
 
 Cuando cambie el contrato runtime documentado:
 
-1. se actualiza primero `docs/02-API/ENDPOINTS-LIVE-REFERENCE.md`;
+1. se actualiza primero `docs/api/ENDPOINTS-LIVE-REFERENCE.md`;
 2. se revalida contra `docs/canon/source-of-truth.md`;
 3. se ajusta `docs/canon/completion-matrix.md` si cambia cobertura o aparece drift nuevo;
 4. recién entonces se actualiza este `runtime-sacdia.md`.

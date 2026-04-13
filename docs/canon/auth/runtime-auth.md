@@ -10,13 +10,14 @@ Este documento define el comportamiento técnico vigente del dominio de autentic
 Acá manda el runtime real del backend, no los walkthroughs viejos ni suposiciones de cliente.
 
 ## Precedencia
-Orden de autoridad para auth dentro de la nueva capa canónica:
+Orden de autoridad para auth dentro de la capa canónica activa:
 
-1. `docs/canon/auth/dominio-auth.md`
-2. `docs/canon/auth/runtime-auth.md`
-3. `docs/canon/auth/procesos-auth.md`
+1. `docs/canon/source-of-truth.md`
+2. `docs/canon/runtime-sacdia.md`
+3. `docs/canon/auth/modelo-autorizacion.md`
+4. `docs/canon/auth/runtime-auth.md`
 
-Si un documento legacy contradice este archivo, este archivo manda.
+Si una fuente subordinada contradice una superior, gana la superior y el conflicto debe escalarse.
 
 ## Resumen operativo
 El estado actual del runtime de auth es este:
@@ -304,12 +305,13 @@ Estos puntos NO deben maquillarse como cerrados:
 - no usa metadata legacy como fuente de autorización nueva.
 
 ## Referencias activas
-- `docs/canon/auth/dominio-auth.md`
-- `docs/01-FEATURES/auth/AUTHORIZATION-CANONICAL-CONTRACT.md`
-- `docs/01-FEATURES/auth/CLUB-ROLE-ASSIGNMENT-FIRST-CONTRACT.md`
-- `docs/01-FEATURES/auth/PERMISSIONS-SYSTEM.md`
-- `docs/01-FEATURES/auth/RBAC-ENFORCEMENT-MATRIX.md`
-- `docs/02-API/ENDPOINTS-LIVE-REFERENCE.md`
+- `docs/canon/source-of-truth.md`
+- `docs/canon/runtime-sacdia.md`
+- `docs/canon/auth/modelo-autorizacion.md`
+- `docs/features/auth/AUTHORIZATION-CANONICAL-CONTRACT.md`
+- `docs/features/auth/PERMISSIONS-SYSTEM.md`
+- `docs/features/auth/RBAC-ENFORCEMENT-MATRIX.md`
+- `docs/api/ENDPOINTS-LIVE-REFERENCE.md`
 - `sacdia-backend/src/auth/auth.controller.ts`
 - `sacdia-backend/src/auth/auth.service.ts`
 - `sacdia-backend/src/auth/oauth.controller.ts`
