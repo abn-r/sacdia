@@ -5,7 +5,7 @@
 > [!IMPORTANT]
 > Este directorio es la fuente de verdad documental del proyecto.
 > La documentación histórica se encuentra en `docs/history/`.
-> La precedencia global es: `docs/canon/*` → `docs/README.md` → documentación operativa subordinada → material histórico.
+> La precedencia global es: `docs/canon/source-of-truth.md` → `docs/canon/*` aplicable → `docs/README.md` → documentación operativa subordinada → material histórico.
 
 ---
 
@@ -17,7 +17,7 @@
 | `audit/` | Auditorías de código + Reality Matrix | Foto del código al 2026-03-14 |
 | `features/` | Estado verificado por dominio funcional | Derivado de audit + canon |
 | `api/` | Contratos API (endpoints, seguridad, testing) | Operacional, subordinado a canon |
-| `database/` | Schema Prisma + referencia + migraciones | Operacional, schema.prisma es fuente |
+| `database/` | Schema documental + referencia + migraciones | Operacional; si hay drift manda `sacdia-backend/prisma/schema.prisma` |
 | `steering/` | Estándares técnicos y de código | Normativo |
 | `guides/` | Guías operativas y workflows | Práctico |
 | `plans/` | Planes de implementación activos | Temporal |
@@ -30,10 +30,10 @@
 Definida en `canon/source-of-truth.md`:
 
 1. `canon/source-of-truth.md` (gateway operativo)
-2. Este README (navegación estructural)
-3. `canon/*` (según tipo de pregunta)
+2. `canon/*` (según tipo de pregunta)
+3. Este README (navegación estructural)
 4. `api/ENDPOINTS-LIVE-REFERENCE.md` (runtime API)
-5. `database/schema.prisma` (estructura de datos)
+5. `sacdia-backend/prisma/schema.prisma` (estructura de datos efectiva)
 6. `steering/*` (estándares)
 
 ## Navegación por Tipo de Pregunta
@@ -43,9 +43,16 @@ Definida en `canon/source-of-truth.md`:
 | Producto/Alcance | canon/source-of-truth → canon/dominio → canon/identidad → features/ |
 | Arquitectura | canon/source-of-truth → canon/arquitectura → canon/decisiones-clave → steering/ |
 | API/Runtime | canon/source-of-truth → api/ENDPOINTS-LIVE-REFERENCE → api/ARCHITECTURE-DECISIONS |
-| Datos/Schema | canon/source-of-truth → database/schema.prisma → database/SCHEMA-REFERENCE |
+| Datos/Schema | canon/source-of-truth → sacdia-backend/prisma/schema.prisma → database/README.md → database/schema.prisma → database/SCHEMA-REFERENCE |
 | Estado de features | features/README.md → features/{dominio}.md → audit/REALITY-MATRIX.md |
 | Decisiones pendientes | audit/DECISIONS-PENDING.md |
+
+## Regla Operativa de Autoridad DB
+
+- La autoridad estructural efectiva del modelo de datos vive en `sacdia-backend/prisma/schema.prisma`.
+- `docs/database/schema.prisma` es un espejo documental y puede quedar rezagado hasta su resincronización explícita.
+- `docs/database/SCHEMA-REFERENCE.md` ayuda a lectura humana, pero no arbitra drift contra el schema efectivo del backend.
+- Si aparece contradicción entre docs de datos, se escala el arbitraje; no se mezclan fuentes.
 
 ---
 

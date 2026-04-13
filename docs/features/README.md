@@ -1,40 +1,70 @@
-# Feature Registry — SACDIA
-Generado: 2026-03-14 | Actualizado: 2026-03-27
-Fuente: Reality Matrix + Code Audits
+# Feature Registry - SACDIA
 
-## Resumen
+**Estado**: ACTIVE
+**Actualizado**: 2026-04-12
+**Propósito**: registrar qué dominios tienen documento en `docs/features/` y separar cobertura editorial de estado funcional declarado.
 
-| Dominio | Estado | Backend | Admin | App |
-|---------|--------|---------|-------|-----|
-| [auth](auth.md) | IMPLEMENTADO | AuthModule (22 endpoints) | Login funcional | 5 screens |
-| [gestion-clubs](gestion-clubs.md) | IMPLEMENTADO | ClubsModule (13 endpoints) | 3 pages funcionales | club + members + units |
-| [clases-progresivas](clases-progresivas.md) | IMPLEMENTADO | ClassesModule (7 endpoints) | Read-only | 6 screens |
-| [honores](honores.md) | IMPLEMENTADO | HonorsModule (16 endpoints, incluye requirements + progress) | CRUD funcional | 4 screens + checklist de requisitos por honor |
-| [actividades](actividades.md) | IMPLEMENTADO | ActivitiesModule (7 endpoints) | UI completa (list + detail + create/edit + delete) | 4 screens + edit/delete en detalle |
-| [finanzas](finanzas.md) | IMPLEMENTADO | FinancesModule (7 endpoints) | Dashboard completo (resumen + tabla + filtros + CRUD) | 3 screens + eliminacion con AlertDialog |
-| [catalogos](catalogos.md) | IMPLEMENTADO | CatalogsModule + AdminModule (55 endpoints). Redis cache-aside: 14 catálogos TTL 1h, año eclesiástico 24h. Auto-invalidación en mutaciones. Manual: `POST /admin/catalogs/cache/invalidate`. | 13 pages funcionales | Shared catalogs |
-| [camporees](camporees.md) | IMPLEMENTADO | CamporeesModule (8 endpoints) | CRUD completo + gestion de miembros | 4 screens + capa de datos completa |
-| [communications](communications.md) | IMPLEMENTADO | NotificationsModule (7 endpoints) | 1 page funcional | FCM tokens |
-| [certificaciones-guias-mayores](certificaciones-guias-mayores.md) | IMPLEMENTADO | CertificationsModule (7 endpoints) | list + detail + progress | 4 screens |
-| [inventario](inventario.md) | IMPLEMENTADO | InventoryModule (6 endpoints) | CRUD funcional | 4 screens |
-| [gestion-seguros](gestion-seguros.md) | IMPLEMENTADO | InsurancesModule | CRUD funcional | 3 screens |
-| [carpetas-evidencias](carpetas-evidencias.md) | IMPLEMENTADO | FoldersModule (7 endpoints) | Read-only | 2 screens |
-| [annual-folders-scoring](annual-folders-scoring.md) | IMPLEMENTADO | EvaluationModule + AwardCategoriesModule + RankingsModule (11 endpoints) | Evaluacion + Rankings + CRUD categorias | Solo lectura |
-| [rbac](rbac.md) | IMPLEMENTADO | RbacModule (10 endpoints) | 3 pages funcionales | No aplica |
-| [aprobaciones-camporees](aprobaciones-camporees.md) | IMPLEMENTADO | CamporeesModule (approval endpoints) | Approval UI (pending badges, union routing, member status) | No aplica |
-| [aprobaciones-masivas](aprobaciones-masivas.md) | IMPLEMENTADO | InvestitureModule (+2 bulk endpoints) | Bulk action bar + checkboxes (hasta 200) | No aplica |
-| [validacion-evidencias](validacion-evidencias.md) | IMPLEMENTADO | EvidenceReviewModule (7 endpoints) | Dedicated review page + gallery + bulk ops | No aplica |
-| [sla-dashboard](sla-dashboard.md) | IMPLEMENTADO | AnalyticsModule (1 endpoint) | Dashboard con metricas operacionales | No aplica |
-| [recursos](recursos.md) | IMPLEMENTADO | ResourcesModule (14 endpoints) | Categorias CRUD + Recursos CRUD | Clean Architecture completa |
-| [actividades-conjuntas](actividades-conjuntas.md) | IMPLEMENTADO | ActivitiesModule (`is_joint` + multi-instance) | No aplica | Joint toggle + section picker |
-| [infrastructure](infrastructure.md) | SIN CANON | CommonModule + AppModule | No implementado | No implementado |
-| [validacion-investiduras](validacion-investiduras.md) | IMPLEMENTADO | InvestitureModule (5 endpoints) | table + dialogs + history | 3 screens |
+> [!IMPORTANT]
+> Este archivo es un registro de cobertura documental mínima.
+> No redefine autoridad canónica ni contratos runtime.
+>
+> Separación usada en este registro:
+> - **Estado editorial**: taxonomía documental (`ACTIVE`, `DRAFT`, `HISTORICAL`, `DEPRECATED`).
+> - **Estado funcional**: etiqueta declarada dentro de cada documento de dominio (`IMPLEMENTADO`, `PARCIAL`, `NO CANON`).
+>
+> Si hay conflicto, usar en este orden:
+> 1. `docs/canon/source-of-truth.md`
+> 2. `docs/api/ENDPOINTS-LIVE-REFERENCE.md`
+> 3. `docs/database/schema.prisma` y `docs/database/SCHEMA-REFERENCE.md`
+> 4. este registro para saber si un dominio tiene documentacion minima y que estado funcional declara hoy
 
-## Conteo por estado
+## Como leer este registro
 
-| Estado | Cantidad | Dominios |
-|--------|----------|----------|
-| IMPLEMENTADO | 22 | auth, gestion-clubs, clases-progresivas, honores, catalogos, communications, carpetas-evidencias, annual-folders-scoring, rbac, gestion-seguros, actividades, actividades-conjuntas, finanzas, camporees, certificaciones-guias-mayores, inventario, validacion-investiduras, aprobaciones-camporees, aprobaciones-masivas, validacion-evidencias, sla-dashboard, recursos |
-| PARCIAL | 0 | — |
-| SIN CANON | 1 | infrastructure |
-| FANTASMA | 0 | — |
+| Campo | Significado |
+|---|---|
+| Estado editorial del registro | Estado documental de este `README.md` |
+| Cobertura editorial minima | Si existe un documento de dominio dentro de `docs/features/` |
+| Estado funcional declarado | Estado escrito en el documento del dominio; no equivale a taxonomia editorial |
+
+## Cobertura actual del registro
+
+| Señal | Cantidad | Evidencia |
+|---|---:|---|
+| Documentos de dominio presentes | 23 | archivos `docs/features/*.md`, excluyendo este `README.md` |
+| Estado funcional `IMPLEMENTADO` | 20 | declarado en los documentos de dominio |
+| Estado funcional `PARCIAL` | 2 | `certificaciones-guias-mayores`, `inventario` |
+| Estado funcional `NO CANON` | 1 | `infrastructure` |
+
+## Dominios registrados
+
+| Dominio | Documento | Cobertura editorial minima | Estado funcional declarado |
+|---|---|---|---|
+| `actividades` | [actividades.md](actividades.md) | Documento presente | `IMPLEMENTADO` |
+| `actividades-conjuntas` | [actividades-conjuntas.md](actividades-conjuntas.md) | Documento presente | `IMPLEMENTADO` |
+| `annual-folders-scoring` | [annual-folders-scoring.md](annual-folders-scoring.md) | Documento presente | `IMPLEMENTADO` |
+| `aprobaciones-camporees` | [aprobaciones-camporees.md](aprobaciones-camporees.md) | Documento presente | `IMPLEMENTADO` |
+| `aprobaciones-masivas` | [aprobaciones-masivas.md](aprobaciones-masivas.md) | Documento presente | `IMPLEMENTADO` |
+| `auth` | [auth.md](auth.md) | Documento presente | `IMPLEMENTADO` |
+| `camporees` | [camporees.md](camporees.md) | Documento presente | `IMPLEMENTADO` |
+| `carpetas-evidencias` | [carpetas-evidencias.md](carpetas-evidencias.md) | Documento presente | `IMPLEMENTADO` |
+| `catalogos` | [catalogos.md](catalogos.md) | Documento presente | `IMPLEMENTADO` |
+| `certificaciones-guias-mayores` | [certificaciones-guias-mayores.md](certificaciones-guias-mayores.md) | Documento presente | `PARCIAL` |
+| `clases-progresivas` | [clases-progresivas.md](clases-progresivas.md) | Documento presente | `IMPLEMENTADO` |
+| `communications` | [communications.md](communications.md) | Documento presente | `IMPLEMENTADO` |
+| `finanzas` | [finanzas.md](finanzas.md) | Documento presente | `IMPLEMENTADO` |
+| `gestion-clubs` | [gestion-clubs.md](gestion-clubs.md) | Documento presente | `IMPLEMENTADO` |
+| `gestion-seguros` | [gestion-seguros.md](gestion-seguros.md) | Documento presente | `IMPLEMENTADO` |
+| `honores` | [honores.md](honores.md) | Documento presente | `IMPLEMENTADO` |
+| `infrastructure` | [infrastructure.md](infrastructure.md) | Documento presente | `NO CANON` |
+| `inventario` | [inventario.md](inventario.md) | Documento presente | `PARCIAL` |
+| `rbac` | [rbac.md](rbac.md) | Documento presente | `IMPLEMENTADO` |
+| `recursos` | [recursos.md](recursos.md) | Documento presente | `IMPLEMENTADO` |
+| `sla-dashboard` | [sla-dashboard.md](sla-dashboard.md) | Documento presente | `IMPLEMENTADO` |
+| `validacion-evidencias` | [validacion-evidencias.md](validacion-evidencias.md) | Documento presente | `IMPLEMENTADO` |
+| `validacion-investiduras` | [validacion-investiduras.md](validacion-investiduras.md) | Documento presente | `IMPLEMENTADO` |
+
+## Notas de uso
+
+- Este registro sirve para onboarding y routing minimo por dominio.
+- No usar este archivo para afirmar cantidad de endpoints, tablas o cobertura UI exacta.
+- Si un documento de dominio cambia su estado funcional, actualizar este registro en el mismo trabajo.
