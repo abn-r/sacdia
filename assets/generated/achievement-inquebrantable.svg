@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Inquebrantable">
+  <title>Inquebrantable</title>
+  <desc>Flat matte engraved achievement badge. Transparent canvas, dark circle #1C1C1E, accent #D4A843.</desc>
+  <circle cx="256" cy="256" r="220" fill="#1C1C1E"/>
+  <circle cx="256" cy="256" r="204" fill="none" stroke="#D4A843" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="256" cy="256" r="170" fill="none" stroke="#D4A843" stroke-width="3" stroke-linecap="round" opacity="0.38"/>
+  <polyline points="232,384 256,404 280,384" fill="none" stroke="#D4A843" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>
+  <polygon points="256,202.0 298.0,258.0 280.0,322.0 256,344.0 226.0,310.0 232.0,256.0" fill="none" stroke="#D4A843" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="256,244.0 272.0,294.0 256,318.0 244.0,288.0" fill="none" stroke="#D4A843" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>
+  <polygon points="228.0,172.0 234.0,178.0 228.0,184.0 222.0,178.0" fill="#D4A843" opacity="0.90"/>
+  <polygon points="256.0,158.0 262.0,164.0 256.0,170.0 250.0,164.0" fill="#D4A843" opacity="0.90"/>
+  <polygon points="284.0,172.0 290.0,178.0 284.0,184.0 278.0,178.0" fill="#D4A843" opacity="0.90"/>
+</svg>

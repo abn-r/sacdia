@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Miembro del Mes">
+  <title>Miembro del Mes</title>
+  <desc>Flat matte engraved achievement badge. Transparent canvas, dark circle #1C1C1E, accent #D4A843.</desc>
+  <circle cx="256" cy="256" r="220" fill="#1C1C1E"/>
+  <circle cx="256" cy="256" r="204" fill="none" stroke="#D4A843" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="256" cy="256" r="170" fill="none" stroke="#D4A843" stroke-width="3" stroke-linecap="round" opacity="0.38"/>
+  <polyline points="232,384 256,404 280,384" fill="none" stroke="#D4A843" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>
+  <polygon points="206,218 306,218 292,304 220,304" fill="none" stroke="#D4A843" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="206,236 166,232 176,286 214,282" fill="none" stroke="#D4A843" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="306,236 346,232 336,286 298,282" fill="none" stroke="#D4A843" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <line x1="256" y1="304" x2="256" y2="350" stroke="#D4A843" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <line x1="216" y1="350" x2="296" y2="350" stroke="#D4A843" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <polygon points="256.0,239.0 262.08357736122707,253.6266741082193 277.8742998747885,254.8926091293762 265.8434349436548,265.1983258917807 269.51906080272687,280.6073908706238 256.0,272.35 242.48093919727313,280.6073908706238 246.15656505634516,265.1983258917807 234.12570012521147,254.8926091293762 249.9164226387729,253.6266741082193" fill="none" stroke="#D4A843" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="218,184 238,210 256,174 274,210 296,184" fill="none" stroke="#D4A843" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
