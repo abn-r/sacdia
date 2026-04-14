@@ -230,6 +230,14 @@ Notas runtime activas:
 - si hay ambigüedad devuelve `409 ENROLLMENT_RESOLUTION_AMBIGUOUS`;
 - `GET /api/v1/admin/users/:userId` expone `current_operational_enrollment` como presente anual y `trajectory_classes` como histórico consolidado.
 
+Notas runtime activas de carpetas anuales:
+
+- El estado de cada sección de una carpeta anual vive en la columna `annual_folder_section_evaluations.status` del enum `annual_folder_section_status_enum` (`PENDING`, `SUBMITTED`, `PREAPPROVED_LF`, `VALIDATED`, `REJECTED`).
+- Esa columna persistida es la **fuente única de verdad** del estado de la sección. Ningún consumidor — backend, admin o app — debe derivar el estado a partir de la presencia de filas de evaluación, timestamps LF/unión, o columnas de aprobación. La columna es el contrato.
+- El flujo de revisión puede ser de **dos niveles** cuando la carpeta tiene `requires_union_confirmation = true`: LF pre-aprueba (`PREAPPROVED_LF`) y la unión confirma o hace override (`VALIDATED` | `REJECTED`). Cuando el flag es `false`, la aprobación LF transiciona directamente a `VALIDATED` y el servicio espeja columnas de unión con el actor LF para simetría de auditoría.
+- El flag `requires_union_confirmation` se calcula en la creación del folder a partir de la vinculación con la carpeta de camporee y es históricamente inmutable.
+- Los módulos consumidores del estado de la carpeta anual (scoring/rankings y la vinculación con camporees via `local_camporee_id` / `union_camporee_id`) leen el estado desde la columna `status`. Sólo las filas en estado terminal (`VALIDATED` o `REJECTED`) contribuyen al cálculo de totales y al avance del folder a `evaluated`.
+
 ### 6.5 Operación administrativa y catálogos
 <!-- VERIFICADO contra código 2026-03-14: catalogs ALINEADO, admin geography ALINEADO, admin RBAC ALINEADO, admin reference (allergies/diseases/relationship-types/ecclesiastical-years) implementado pero SIN CANON explícito -->
 
@@ -308,6 +316,15 @@ El runtime documenta explícitamente autorización sensible sobre:
 - `post_registration`
 
 Y mantiene compatibilidad transicional con permisos legacy `users:*` en ciertas superficies.
+
+### 7.4 Política read-wider-than-write en `annual_folders:evaluate`
+
+El módulo de evaluación de carpetas anuales aplica una política deliberada de lectura más amplia que escritura sobre el permiso `annual_folders:evaluate`:
+
+- **Operaciones de escritura** (`POST .../evaluate`, `POST .../confirm-union`, `POST .../reopen`, `PATCH evidences/:evidenceId/reviewer-note`) requieren el permiso con `type: 'global'`. Solo actores LF y de unión con alcance global pueden mutar el estado de evaluación.
+- **Operación de lectura** (`GET /annual-folders/:folderId/evaluations`) requiere el mismo permiso con `type: 'active_assignment'`. Cualquier usuario con asignación activa al club puede consultar el estado de sus propias carpetas sin tener permisos globales de escritura.
+
+Esta asimetría es intencional: los usuarios club-scoped ven el estado de sus propias carpetas, mientras que la mutación queda restringida a actores LF y de unión. La justificación canónica vive como ADR-6 del SDD `annual-folders-ownership-rework` y el contrato está documentado en el JSDoc de `EvaluationController`.
 
 ---
 
