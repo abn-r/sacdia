@@ -17,19 +17,22 @@ La vinculacion de seguros con camporees es directa: la tabla `camporee_members` 
 - **Service**: `src/insurance/insurance.service.ts`
 - **Module**: `src/insurance/insurance.module.ts`
 - **DTOs**: `src/insurance/dto/`
-- **Guards**: JwtAuthGuard (verificado en ENDPOINTS-LIVE-REFERENCE)
-- **4 endpoints**:
-  - `GET /api/v1/clubs/:clubId/sections/:sectionId/members/insurance` — Listar miembros de una seccion con su seguro activo mas reciente
-  - `GET /api/v1/users/:memberId/insurance` — Obtener detalle del seguro activo del miembro
-  - `POST /api/v1/users/:memberId/insurance` — Crear seguro con evidencia opcional (multipart, campo `evidence`)
-  - `PATCH /api/v1/insurance/:insuranceId` — Actualizar seguro existente con evidencia opcional (multipart)
+- **Guards**: `JwtAuthGuard` + `PermissionsGuard` en toda la superficie; `GET /api/v1/insurance/expiring` agrega `GlobalRolesGuard`
+- **5 endpoints**:
+  - `GET /api/v1/clubs/:clubId/sections/:sectionId/members/insurance` — Requiere `insurance:read` y `AuthorizationResource({ type: 'club' })`
+  - `GET /api/v1/insurance/expiring` — Seguros proximos a vencer; requiere rol global `admin` o `coordinator` y acepta `days_ahead` / `local_field_id`
+  - `GET /api/v1/users/:memberId/insurance` — Requiere `insurance:read` y `AuthorizationResource({ type: 'active_assignment' })`
+  - `POST /api/v1/users/:memberId/insurance` — Requiere `insurance:create`; crea seguro con evidencia opcional (multipart, campo `evidence`)
+  - `PATCH /api/v1/insurance/:insuranceId` — Requiere `insurance:update`; actualiza seguro existente con evidencia opcional (multipart)
 
 ### Admin
-- **Placeholder** — Modulo planificado. No consume endpoints. Sin funcionalidad real.
+- **UI funcional**: `/dashboard/insurance` y `/dashboard/insurance/expiring`
+- **Capacidades verificadas**: seleccion de club/seccion, tabla de miembros con estado del seguro, alta/edicion/desactivacion de seguros, alerta de vencimientos y vista dedicada de proximos vencimientos
+- **Consumo verificado**: `GET /clubs/:clubId/sections/:sectionId/members/insurance`, `POST /users/:memberId/insurance`, `PATCH /insurance/:insuranceId`, `GET /insurance/expiring`
 
 ### App Movil
-- **3 screens**: InsuranceView, InsuranceDetailView, InsuranceFormSheet
-- Consume los 4 endpoints del backend
+- **3 screens principales**: InsuranceView, InsuranceDetailView, InsuranceFormSheet
+- Consume listado/detalle/alta/actualizacion; el datasource remoto conserva `GET /insurance/expiring`, pero la alerta actual de vencimientos se deriva localmente desde la lista ya cargada
 - Soporta carga de evidencia documental
 - Espera campos `evidence_file_url` y `evidence_file_name` en las respuestas
 
@@ -51,7 +54,7 @@ La vinculacion de seguros con camporees es directa: la tabla `camporee_members` 
 5. Los seguros deben poder actualizarse (renovar vigencia, cambiar aseguradora, actualizar evidencia)
 6. La evidencia se almacena en Cloudflare R2 y se expone como URL firmada
 7. El modulo debe registrar quien creo y quien modifico cada seguro (auditoria)
-8. El panel admin debe permitir gestion de seguros por seccion/club (actualmente placeholder)
+8. El panel admin debe permitir gestion de seguros por seccion/club y monitoreo de vencimientos proximos
 
 ## Decisiones de diseno
 
@@ -63,13 +66,12 @@ La vinculacion de seguros con camporees es directa: la tabla `camporee_members` 
 
 ## Gaps y pendientes
 
-- **Admin es placeholder**: Backend y app completos pero el panel admin no tiene UI funcional
-- **Sin validacion de vigencia en camporees**: Aunque el modelo vincula seguros con `camporee_members`, no esta verificado que el backend valide vigencia al momento del registro en camporee
 - **Sin notificaciones de vencimiento**: No hay mecanismo para alertar cuando un seguro esta por vencer
 - **Sin historial**: Solo se muestra el seguro activo mas reciente; no hay endpoint para consultar seguros historicos de un miembro
-- **REALITY-MATRIX desactualizada**: La Reality Matrix marcaba seguros como "SIN CANON" y sin backend module, pero el modulo `src/insurance/` existe con 4 endpoints funcionales documentados en ENDPOINTS-LIVE-REFERENCE
+- **Validacion de camporee acotada al flujo de registro**: `camporees.service.ts` valida tipo `CAMPOREE`, titularidad, vigencia y estado activo cuando se envia `insurance_id`, pero no existe una superficie general de historial o auditoria de coberturas
+- **REALITY-MATRIX desactualizada**: La Reality Matrix marcaba seguros como "SIN CANON" y sin backend module, pero el modulo `src/insurance/` existe con 5 endpoints funcionales documentados en ENDPOINTS-LIVE-REFERENCE
 
 ## Prioridad y siguiente accion
 
-- **Prioridad**: Media — backend y app funcionales; admin es el gap principal
-- **Siguiente accion**: Implementar UI de seguros en sacdia-admin. Actualizar REALITY-MATRIX.md para reflejar que el InsuranceModule existe. Considerar agregar validacion de seguro vigente al endpoint de registro en camporees.
+- **Prioridad**: Media — backend, admin y app cubren la operacion base; faltan alertas/notificaciones e historial
+- **Siguiente accion**: Actualizar REALITY-MATRIX.md para reflejar que el InsuranceModule y la UI admin existen. Considerar notificaciones de vencimiento e historial de seguros por miembro.

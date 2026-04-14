@@ -10,18 +10,29 @@ El proceso tiene multiples etapas definidas por el canon: (1) el miembro complet
 
 La Decision 6 del canon establece que registrar y validar son actos distintos: la captura operativa (registrar progreso dia a dia) y la validacion institucional (aprobar y reconocer formalmente) tienen actores, momentos y reglas diferentes. Al entrar en validacion, el registro deja de ser editable — esto es un efecto de dominio critico que protege la integridad del proceso.
 
-El schema de base de datos tiene toda la infraestructura preparada (tablas, enums, campos en enrollments). El backend ya implementa el flujo con 5 endpoints via InvestitureModule, pero **ningun cliente (admin ni app) tiene UI para validaciones** — el runtime existe pero es inaccesible para usuarios finales.
+El schema de base de datos y el runtime ya sostienen investiduras como superficie activa. El backend expone flujo multietapa, compatibilidad legacy, operaciones bulk y CRUD de configuracion; el admin tiene pantallas ruteadas para pendientes, pipeline y configuracion; la app tiene pantallas ruteadas para pendientes e historial, pero la vista de envio a validacion existe en codigo y hoy NO esta ruteada.
 
 ## Que existe (verificado contra codigo)
 
 ### Backend (InvestitureModule)
-- **InvestitureModule implementado** — InvestitureController, InvestitureService, 3 DTOs, registrado en AppModule
-- **5 endpoints**:
-  - `POST /enrollments/:enrollmentId/submit-for-validation` — enviar a validacion
-  - `POST /enrollments/:enrollmentId/validate` — aprobar o rechazar (con body: action + comments)
-  - `POST /enrollments/:enrollmentId/investiture` — registrar investidura
-  - `GET /admin/investiture/pending` — listar enrollments pendientes de validacion por scope del actor
-  - `GET /admin/investiture/history` — historial de validaciones
+- **InvestitureModule implementado** — `InvestitureController`, `InvestitureService`, DTOs de pipeline/config/bulk, registrado en `AppModule`
+- **Superficie canonica activa**:
+  - `POST /investiture/enrollments/:enrollmentId/submit`
+  - `POST /investiture/enrollments/:enrollmentId/club-approve`
+  - `POST /investiture/enrollments/:enrollmentId/coordinator-approve`
+  - `POST /investiture/enrollments/:enrollmentId/field-approve`
+  - `POST /investiture/enrollments/:enrollmentId/invest`
+  - `POST /investiture/enrollments/:enrollmentId/reject`
+  - `GET /investiture/pending`
+  - `GET /investiture/enrollments/:enrollmentId/history`
+  - `POST /investiture/enrollments/bulk-approve`
+  - `POST /investiture/enrollments/bulk-reject`
+  - `GET|POST|PATCH|DELETE /admin/investiture/config`
+- **Compatibilidad legacy aun activa**:
+  - `POST /enrollments/:enrollmentId/submit-for-validation`
+  - `POST /enrollments/:enrollmentId/validate`
+  - `POST /enrollments/:enrollmentId/investiture`
+  - `GET /enrollments/:enrollmentId/investiture-history`
 - El `enrollments` model en Prisma tiene campos de investidura expuestos via los endpoints anteriores:
   - `investiture_status` (investiture_status_enum)
   - `submitted_for_validation` (Boolean, default false)
@@ -33,24 +44,20 @@ El schema de base de datos tiene toda la infraestructura preparada (tablas, enum
   - `locked_for_validation` (Boolean, default false)
 
 ### Admin (sacdia-admin)
-- **Implementado** — Pagina de validaciones con:
-  - Tabla de enrollments pendientes de validacion con filtros (estado, año)
-  - Botones de accion: Aprobar, Rechazar, Marcar Investido
-  - Dialogs de confirmacion con campos de comentarios
-  - Timeline de historial de validaciones
-  - Badges de estado (SUBMITTED_FOR_VALIDATION, APPROVED, REJECTED, INVESTIDO)
-  - Entry en sidebar nav bajo "Administración"
+- **Implementado y ruteado** — paginas y navegacion activas en:
+  - `/dashboard/investiture` — pendientes con acciones legacy de validar/marcar investido
+  - `/dashboard/investiture/pipeline` — pipeline multietapa (`club-approve`, `coordinator-approve`, `field-approve`, `reject`, `invest`)
+  - `/dashboard/investiture/config` — CRUD de `investiture_config`
+  - Entry en sidebar bajo "Investiduras"
 
 ### App (sacdia-app)
-- **Implementado** — 3 screens principales:
-  - **PendingInvestituresScreen**: lista de enrollments pendientes para coordinadores (filtro por rol)
-  - **SubmitInvestitureView**: vista para que directores/consejeros envien a validacion (con confirmation)
-  - **InvestitureHistoryScreen**: timeline del historial de validaciones por miembro
-  - Data layer con entities, models, datasource, repository, providers
-  - Status badge widget reutilizable
-  - Routes integradas en GoRouter con transiciones animadas
+- **Implementado parcialmente y con ruteo mixto**:
+  - `InvestiturePendingListView` esta ruteada en GoRouter (`/investiture/pending`) y permite aprobar/rechazar/marcar investido segun rol
+  - `InvestitureHistoryView` esta ruteada en GoRouter (`/investiture/enrollment/:enrollmentId/history`)
+  - `InvestitureSubmitView` existe en codigo y ejecuta `submit-for-validation`, pero hoy NO tiene ruta registrada en GoRouter
+  - Data layer, providers y widgets de estado existen para submit, pending e history
 
-### Base de datos (schema completo, cero runtime)
+### Base de datos (schema y runtime alineados)
 
 **Tabla `investiture_validation_history`**:
 - `history_id` (INT, PK)
@@ -71,10 +78,10 @@ El schema de base de datos tiene toda la infraestructura preparada (tablas, enum
 - UNIQUE: (local_field_id, ecclesiastical_year_id)
 
 **Enum `investiture_status_enum`**:
-- IN_PROGRESS, SUBMITTED_FOR_VALIDATION, APPROVED, REJECTED, INVESTIDO
+- IN_PROGRESS, SUBMITTED_FOR_VALIDATION, CLUB_APPROVED, COORDINATOR_APPROVED, FIELD_APPROVED, APPROVED, REJECTED, INVESTIDO
 
 **Enum `investiture_action_enum`**:
-- SUBMITTED, APPROVED, REJECTED, REINVESTITURE_REQUESTED
+- SUBMITTED, CLUB_APPROVED, COORDINATOR_APPROVED, FIELD_APPROVED, APPROVED, REJECTED, REINVESTITURE_REQUESTED, INVESTIDO
 
 **Enum `evidence_validation_enum`**:
 - PENDING, VALIDATED, REJECTED
@@ -83,19 +90,19 @@ El schema de base de datos tiene toda la infraestructura preparada (tablas, enum
 
 1. Un consejero o director debe poder enviar un enrollment a validacion (cambiar status a SUBMITTED_FOR_VALIDATION)
 2. Al enviar a validacion, el enrollment debe bloquearse (locked_for_validation = true) y dejar de ser editable
-3. La autoridad validadora (coordinador, admin) debe poder aprobar o rechazar con comentarios
+3. Las autoridades del flujo (director de seccion, coordinacion, admin/campo local) deben poder aprobar o rechazar segun la etapa correspondiente
 4. Si se rechaza, se debe registrar la razon y el enrollment debe volver a estado editable
 5. Si se aprueba, se debe poder programar la fecha de investidura
 6. El acto de investidura debe marcar el status como INVESTIDO y registrar la fecha
 7. Cada transicion de estado debe quedar registrada en investiture_validation_history con actor, accion, comentarios y timestamp
 8. La configuracion de investidura (deadline de envio, fecha de ceremonia) debe ser configurable por campo local y ano eclesiastico
 9. Debe existir una vista de administracion que muestre todos los enrollments pendientes de validacion para un campo local
-10. El flujo debe respetar la jerarquia de autorizacion: consejero envia, coordinador/admin valida
+10. El flujo debe respetar la jerarquia de autorizacion: consejero/director envia, director aprueba a nivel club, coordinacion aprueba su etapa y admin/campo local completa la autorizacion final
 11. Debe soportarse reinvestidura (REINVESTITURE_REQUESTED) para casos de miembros que necesitan re-evaluacion
 
 ## Decisiones de diseno
 
-- **Maquina de estados en enrollments**: El campo `investiture_status` con enum define las transiciones validas: IN_PROGRESS -> SUBMITTED_FOR_VALIDATION -> APPROVED/REJECTED -> INVESTIDO
+- **Maquina de estados en enrollments**: El campo `investiture_status` define el pipeline vigente: IN_PROGRESS -> SUBMITTED_FOR_VALIDATION -> CLUB_APPROVED -> COORDINATOR_APPROVED -> FIELD_APPROVED -> INVESTIDO, con `REJECTED` como salida de correccion
 - **Bloqueo en validacion**: `locked_for_validation` impide edicion de progreso mientras esta en revision — proteccion de integridad de dominio
 - **Historia de validacion**: Tabla dedicada `investiture_validation_history` con audit trail completo de cada accion
 - **Configuracion por campo local**: `investiture_config` permite que cada campo local defina sus propias fechas de deadline y ceremonia por ano eclesiastico
@@ -103,13 +110,13 @@ El schema de base de datos tiene toda la infraestructura preparada (tablas, enum
 
 ## Gaps y pendientes
 
-- No hay UI para configurar investiture_config (deadlines y fechas por campo local) — Iteracion 2
+- `InvestitureSubmitView` existe en app pero no esta expuesta por una ruta registrada
 - No hay notificaciones asociadas a cambios de estado de validacion — Iteracion 2
 - No hay reportes de investiduras por periodo/campo local/club — Iteracion 2
 
 ## Implementacion completada
 
-- ✅ Backend: InvestitureModule con 7 endpoints (5 individuales + 2 bulk), 23 tests
-- ✅ Admin: Tabla de validaciones, dialogs de accion, historial, filtros, bulk operations con checkboxes y floating action bar
-- ✅ App: 3 screens (pending list, submit view, history timeline), data layer completa, GoRouter integration
-- ✅ Bulk operations: Hasta 200 enrollments por operacion, partial success handling, race condition protection (ver [aprobaciones-masivas](aprobaciones-masivas.md))
+- ✅ Backend: modulo activo con pipeline multietapa, compat legacy, bulk ops y CRUD de configuracion
+- ✅ Admin: pendientes, pipeline y configuracion accesibles desde rutas del dashboard y sidebar
+- ✅ App: pending/history ruteados; submit view implementada pero no ruteada
+- ✅ Bulk operations: hasta 200 enrollments por operacion; `club-approve` sigue siendo individual

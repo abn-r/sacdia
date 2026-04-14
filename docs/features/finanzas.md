@@ -16,11 +16,12 @@ Las categorias financieras son un catalogo compartido que permite clasificar los
 - **Controller**: `src/finances/finances.controller.ts`
 - **Service**: `src/finances/finances.service.ts`
 - **Guards**: JwtAuthGuard, PermissionsGuard, ClubRolesGuard
-- **7 endpoints**:
+- **8 endpoints**:
   - `GET /api/v1/finances/categories` — Listar categorias financieras
+  - `GET /api/v1/clubs/:clubId/finances/transactions` — Listado paginado de transacciones con `page`, `limit`, `type`, `search`, `startDate`, `endDate`, `sortBy`, `sortOrder`
   - `GET /api/v1/clubs/:clubId/finances` — Listar movimientos financieros del club
   - `GET /api/v1/clubs/:clubId/finances/summary` — Resumen financiero del club
-  - `POST /api/v1/clubs/:clubId/finances` — Crear movimiento financiero (roles: director, subdirector, treasurer)
+  - `POST /api/v1/clubs/:clubId/finances` — Crear movimiento financiero (roles: director, deputy_director, treasurer)
   - `GET /api/v1/finances/:financeId` — Obtener movimiento por ID
   - `PATCH /api/v1/finances/:financeId` — Actualizar movimiento
   - `DELETE /api/v1/finances/:financeId` — Desactivar movimiento
@@ -28,12 +29,14 @@ Las categorias financieras son un catalogo compartido que permite clasificar los
 ### Admin
 - **Dashboard completo**: Tarjetas resumen (ingresos/egresos/balance), tabla de transacciones con filtros por ano/mes, dialog de creacion/edicion, confirmacion de eliminacion
 - Cliente API en `src/lib/api/finances.ts`
-- Consume los 7 endpoints del backend
+- **Consumo verificado**: usa `GET /api/v1/clubs/:clubId/finances`, `GET /summary`, `GET /finances/categories`, `POST /clubs/:clubId/finances`, `GET /finances/:financeId`, `PATCH /finances/:financeId`, `DELETE /finances/:financeId`
+- **Filtro actual admin**: el dashboard trabaja sobre la superficie mensual/anual de `GET /api/v1/clubs/:clubId/finances`; no usa hoy el endpoint paginado `/transactions`
 
 ### App Movil
-- **3 screens**: FinancesView, AddTransactionSheet, TransactionDetailView
-- Consume los 7 endpoints del backend
-- Soporta filtros por ano/mes en el listado
+- **Superficies principales**: `FinancesView`, `AddTransactionSheet`, `TransactionDetailView`, `AllTransactionsView`
+- Consume el listado mensual (`GET /clubs/:clubId/finances`), resumen (`GET /summary`), CRUD, categorias y el listado paginado `GET /clubs/:clubId/finances/transactions`
+- Soporta filtros por ano/mes en la vista principal
+- Soporta busqueda, filtro por tipo, rango de fechas, orden y paginacion infinita en la vista completa de transacciones
 - Muestra resumen financiero (balance, total ingresos, total egresos)
 - CRUD completo de transacciones desde la app, incluyendo eliminacion con confirmacion via AlertDialog en la vista de detalle
 
@@ -43,7 +46,7 @@ Las categorias financieras son un catalogo compartido que permite clasificar los
 
 ## Requisitos funcionales
 
-1. Solo roles de tesorero, director o subdirector deben poder crear movimientos financieros
+1. Solo roles de tesorero, director o `deputy_director` deben poder crear movimientos financieros
 2. Cada movimiento debe registrar: monto, tipo (ingreso/egreso), categoria, descripcion, fecha
 3. El sistema debe calcular y exponer un resumen financiero por club (balance, total ingresos, total egresos)
 4. Los movimientos deben ser filtrables por ano y mes
@@ -54,10 +57,11 @@ Las categorias financieras son un catalogo compartido que permite clasificar los
 
 ## Decisiones de diseno
 
-- **Autorizacion por rol de club**: La creacion de movimientos esta restringida a director, subdirector y tesorero mediante `ClubRolesGuard`
+- **Autorizacion por rol de club**: La creacion de movimientos esta restringida a `director`, `deputy_director` y `treasurer` mediante `ClubRolesGuard`
 - **Soft delete**: Los movimientos se desactivan; esto implica que el resumen financiero debe considerar solo registros activos
 - **Categorias compartidas**: Las categorias financieras son globales, no por club, permitiendo estandarizacion
 - **Resumen calculado**: El endpoint `summary` calcula el balance en tiempo real desde los movimientos activos, no desde un campo pre-calculado
+- **Doble superficie de lectura**: `GET /clubs/:clubId/finances` resuelve la vista mensual/anual del dashboard y `GET /clubs/:clubId/finances/transactions` cubre busqueda, filtros avanzados y paginacion server-side
 - **Filtrado temporal**: Los filtros por ano/mes se aplican a nivel de query, no como entidades separadas
 
 ## Gaps y pendientes

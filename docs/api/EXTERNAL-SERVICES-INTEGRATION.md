@@ -3,7 +3,7 @@
 **Estado**: ACTIVE
 
 **Versión**: 2.0  
-**Fecha**: 2026-02-13  
+**Fecha**: 2026-04-13  
 **Status**: 🟡 Implementado en código, pendiente cierre por entorno (staging/prod)
 
 ---
@@ -49,7 +49,7 @@ REDIS_URL=redis://default:password@host:port
 - ✅ Validación de ownership en operación de tokens.
 - ⚠️ Pendiente: credenciales FCM válidas por entorno para inicialización real.
 
-### Contrato API vigente (2026-02-13)
+### Contrato API vigente (2026-04-13)
 
 #### Gestión de Tokens
 
@@ -57,8 +57,10 @@ REDIS_URL=redis://default:password@host:port
   - `userId` se obtiene del JWT autenticado.
 - `GET /api/v1/fcm-tokens` (JWT requerido)
   - Lista tokens del usuario autenticado.
-- `DELETE /api/v1/fcm-tokens/:token` (JWT requerido)
-  - Solo permite desactivar tokens propios.
+- `DELETE /api/v1/fcm-tokens/by-token` (JWT requerido)
+  - Desactiva el token propio enviando el valor en el body.
+- `DELETE /api/v1/fcm-tokens/:id` (JWT requerido)
+  - Desactiva un token propio por ID de registro.
 - `GET /api/v1/fcm-tokens/user/:userId` (JWT requerido, owner/admin)
   - Endpoint de compatibilidad para owner o admin.
 
@@ -66,7 +68,22 @@ REDIS_URL=redis://default:password@host:port
 
 - `POST /api/v1/notifications/send` (JWT requerido)
 - `POST /api/v1/notifications/broadcast` (JWT + rol `admin|super_admin`)
-- `POST /api/v1/notifications/club/:sectionId` (JWT + rol `admin|super_admin`)
+- `POST /api/v1/notifications/club/:instanceType/:instanceId` (JWT + enforcement RBAC por `active_assignment`)
+
+#### Bandeja y Preferencias
+
+- `GET /api/v1/notifications/history` (JWT requerido)
+  - Admin ve auditoria global; usuario regular ve su propia bandeja.
+- `GET /api/v1/notifications/unread-count` (JWT requerido)
+  - Conteo de entregas no leidas del usuario autenticado.
+- `PATCH /api/v1/notifications/read-all` (JWT requerido)
+  - Marca todas las entregas no leidas del usuario como leidas.
+- `PATCH /api/v1/notifications/:deliveryId/read` (JWT requerido)
+  - Marca como leida una entrega puntual del usuario autenticado.
+- `GET /api/v1/notifications/preferences` (JWT requerido)
+  - Devuelve preferencias por categoria del usuario autenticado.
+- `PUT /api/v1/notifications/preferences/:category` (JWT requerido)
+  - Upsert de preferencia por categoria; el modelo es opt-out.
 
 ### Variables de entorno
 

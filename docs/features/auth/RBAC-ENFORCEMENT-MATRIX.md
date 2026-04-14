@@ -21,6 +21,7 @@ La regla principal es:
 | `global` | Recurso administrativo o territorial | Permisos globales + scope territorial |
 | `club` | Recurso de club padre | Permiso efectivo + bypass global o contexto club activo |
 | `club_instance` | Recurso de instancia exacta | Permiso efectivo + asignacion activa exacta |
+| `active_assignment` | Recurso ligado al contexto operativo activo del actor | Permiso efectivo + asignacion activa exacta |
 | `club_assignment` | Recurso de asignacion | Permiso efectivo + relacion con `assignment_id` |
 | `user` | Recurso del propio usuario | Permiso global o fallback de ownership |
 
@@ -72,7 +73,7 @@ Nota de implementacion:
 | `inventory:delete` | Eliminar item | `club_instance` | permiso efectivo + asignacion activa exacta o bypass global | Admin |
 | `notifications:send` | Enviar notificacion directa | `global` | permiso global explicito | Admin |
 | `notifications:broadcast` | Enviar notificacion masiva | `global` | permiso global explicito | Admin |
-| `notifications:club` | Enviar notificacion a club | `global` (Stage 1) | permiso global explicito (sin resource scope adicional en esta etapa) | Admin |
+| `notifications:club` | Enviar notificacion a club | `active_assignment` | permiso efectivo + asignacion activa exacta | Admin |
 | `permissions:read` | Ver RBAC | `global` | permiso global | Admin |
 | `permissions:assign` | Cambiar permisos | `global` | permiso global | Admin |
 | `roles:read` | Ver roles | `global` | permiso global | Admin |

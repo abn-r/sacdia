@@ -1,7 +1,7 @@
 # Feature Registry - SACDIA
 
 **Estado**: ACTIVE
-**Actualizado**: 2026-04-12
+**Actualizado**: 2026-04-14
 **Propósito**: registrar qué dominios tienen documento en `docs/features/` y separar cobertura editorial de estado funcional declarado.
 
 > [!IMPORTANT]
@@ -30,9 +30,9 @@
 
 | Señal | Cantidad | Evidencia |
 |---|---:|---|
-| Documentos de dominio presentes | 23 | archivos `docs/features/*.md`, excluyendo este `README.md` |
-| Estado funcional `IMPLEMENTADO` | 20 | declarado en los documentos de dominio |
-| Estado funcional `PARCIAL` | 2 | `certificaciones-guias-mayores`, `inventario` |
+| Documentos de dominio presentes | 27 | archivos `docs/features/*.md`, excluyendo este `README.md` |
+| Estado funcional `IMPLEMENTADO` | 25 | declarado en los documentos de dominio |
+| Estado funcional `PARCIAL` | 1 | `certificaciones-guias-mayores` |
 | Estado funcional `NO CANON` | 1 | `infrastructure` |
 
 ## Dominios registrados
@@ -56,12 +56,16 @@
 | `gestion-seguros` | [gestion-seguros.md](gestion-seguros.md) | Documento presente | `IMPLEMENTADO` |
 | `honores` | [honores.md](honores.md) | Documento presente | `IMPLEMENTADO` |
 | `infrastructure` | [infrastructure.md](infrastructure.md) | Documento presente | `NO CANON` |
-| `inventario` | [inventario.md](inventario.md) | Documento presente | `PARCIAL` |
+| `inventario` | [inventario.md](inventario.md) | Documento presente | `IMPLEMENTADO` |
+| `member-of-month` | [member-of-month.md](member-of-month.md) | Documento presente | `IMPLEMENTADO` |
+| `membership-requests` | [membership-requests.md](membership-requests.md) | Documento presente | `IMPLEMENTADO` |
+| `monthly-reports` | [monthly-reports.md](monthly-reports.md) | Documento presente | `IMPLEMENTADO` |
 | `rbac` | [rbac.md](rbac.md) | Documento presente | `IMPLEMENTADO` |
 | `recursos` | [recursos.md](recursos.md) | Documento presente | `IMPLEMENTADO` |
 | `sla-dashboard` | [sla-dashboard.md](sla-dashboard.md) | Documento presente | `IMPLEMENTADO` |
 | `validacion-evidencias` | [validacion-evidencias.md](validacion-evidencias.md) | Documento presente | `IMPLEMENTADO` |
 | `validacion-investiduras` | [validacion-investiduras.md](validacion-investiduras.md) | Documento presente | `IMPLEMENTADO` |
+| `weekly-records` | [weekly-records.md](weekly-records.md) | Documento presente | `IMPLEMENTADO` |
 
 ## Notas de uso
 
