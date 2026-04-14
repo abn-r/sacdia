@@ -6,7 +6,7 @@ Guía operativa de la base de datos PostgreSQL del sistema SACDIA.
 
 > [!IMPORTANT]
 > La fuente de verdad estructural efectiva del runtime es `sacdia-backend/prisma/schema.prisma`.
-> `docs/database/schema.prisma` queda como espejo documental pendiente de resincronización mientras exista drift entre ambos archivos.
+> `docs/database/schema.prisma` es el espejo documental sincronizado del schema efectivo y debe mantenerse alineado con el backend.
 > `docs/database/SCHEMA-REFERENCE.md` es referencia humana subordinada y no debe usarse para arbitrar diferencias estructurales.
 
 ---
@@ -84,8 +84,8 @@ La base de datos está diseñada con las siguientes características verificadas
 
 | Archivo | Descripción |
 |---------|-------------|
-| `sacdia-backend/prisma/schema.prisma` | **Schema efectivo del runtime** - fuente de verdad estructural mientras exista drift documental |
-| [schema.prisma](schema.prisma) | Espejo documental del schema Prisma; requiere resincronización si difiere del backend |
+| `sacdia-backend/prisma/schema.prisma` | **Schema efectivo del runtime** - fuente de verdad estructural |
+| [schema.prisma](schema.prisma) | Espejo documental sincronizado del schema Prisma del backend |
 | [SCHEMA-REFERENCE.md](SCHEMA-REFERENCE.md) | Referencia humana subordinada: tablas, relaciones y naming conventions |
 | [migrations/](migrations/) | Scripts SQL de migración e inicialización |
 | [examples/](examples/) | Ejemplos de respuestas JSON de la API |

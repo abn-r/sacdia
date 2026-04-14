@@ -23,7 +23,7 @@
 |---|---|---|---|
 | Gobernanza y rutas de lectura | `USABLE` | `docs/canon/source-of-truth.md`, `docs/README.md` | La autoridad documental se arbitra fuera de esta matriz |
 | Runtime API | `OUTDATED` | `docs/api/ENDPOINTS-LIVE-REFERENCE.md` | La fuente viva hoy declara 269 endpoints; las cifras historicas de esta matriz ya no son seguras |
-| Modelo de datos | `ARBITRATED_PENDING_RESYNC` | `sacdia-backend/prisma/schema.prisma`, `docs/database/README.md` | El arbitraje de autoridad ya quedó resuelto, pero la resincronizacion completa de `docs/database/` sigue pendiente |
+| Modelo de datos | `ARBITRATED_SYNCED` | `sacdia-backend/prisma/schema.prisma`, `docs/database/schema.prisma`, `docs/database/SCHEMA-REFERENCE.md` | La fuente de verdad efectiva sigue en el backend y la capa documental P1 quedó resincronizada contra ese schema |
 | Baseline técnica global | `ARBITRATED` | `docs/steering/tech.md` | Batch P1.1 corrigió baseline mínima comprobable y removió afirmaciones runtime obsoletas |
 | Registro de features | `USE_REGISTRY` | `docs/features/README.md` | El registro fue normalizado para separar cobertura editorial de estado funcional |
 | Cierre ejecutivo de completitud | `PENDING_RESYNC` | N/A | Requiere resincronizacion posterior a P1/P4 |
@@ -38,11 +38,11 @@
 
 | Bloque | Dependencia | Resultado esperado |
 |---|---|---|
-| P1 - baseline tecnica y datos | Resincronizar `docs/database/schema.prisma` y `docs/database/SCHEMA-REFERENCE.md` contra `sacdia-backend/prisma/schema.prisma` | poder reemitir estado real del modelo de datos sin contradicciones |
+| P1 - baseline tecnica y datos | Mantener sincronizados `docs/database/schema.prisma` y `docs/database/SCHEMA-REFERENCE.md` contra `sacdia-backend/prisma/schema.prisma` | sostener el modelo de datos documental sin reintroducir drift |
 | P4 - cierre y sostenimiento | consolidacion final de olas previas | volver a una matriz ejecutiva con cifras verificadas y reglas de mantenimiento |
 
 ## Nota editorial
 
 - La version detallada anterior se retiro porque mezclaba fotografia historica con exactitud operativa ya superada por fuentes vivas.
-- Este batch resuelve arbitraje de autoridad DB y baseline técnica mínima comprobable, pero NO cierra la resincronizacion integral del modelo de datos.
+- El batch P1 de datos ya dejó resincronizados `docs/database/schema.prisma` y `docs/database/SCHEMA-REFERENCE.md` contra el schema efectivo del backend.
 - Hasta la resincronizacion, este archivo debe leerse como advertencia de alcance, no como inventario exacto.
