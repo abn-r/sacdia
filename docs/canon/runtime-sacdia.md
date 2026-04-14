@@ -105,11 +105,11 @@ Características documentadas:
 
 - **Base URL**: `/api/v1` <!-- VERIFICADO contra código 2026-03-14 -->
 - **Fecha de generación documentada**: `2026-03-10`
-- **Total documentado**: `180 endpoints` (de 198 implementados; 18 sin documentar en ENDPOINTS-LIVE-REFERENCE) <!-- VERIFICADO contra código 2026-03-14 -->
+- **Total documentado**: `290 endpoints` <!-- sincronizado con ENDPOINTS-LIVE-REFERENCE 2026-04-13 -->
 
 ### 5.2 Módulos API documentados
 
-El runtime documenta actualmente estos módulos: <!-- VERIFICADO contra código 2026-03-14: 22 módulos en backend, 18 documentados -->
+El runtime documenta actualmente estos módulos: <!-- sincronizado con ENDPOINTS-LIVE-REFERENCE 2026-04-13: investiture documentado como módulo activo -->
 
 - `auth` <!-- VERIFICADO -->
 - `users` <!-- VERIFICADO -->
@@ -127,6 +127,7 @@ El runtime documenta actualmente estos módulos: <!-- VERIFICADO contra código 
 - `health` <!-- VERIFICADO -->
 - `honors` <!-- VERIFICADO -->
 - `inventory` <!-- VERIFICADO -->
+- `investiture` <!-- VERIFICADO -->
 - `notifications` <!-- VERIFICADO -->
 - `root` <!-- VERIFICADO -->
 
@@ -215,6 +216,7 @@ El runtime documenta:
 - catálogo público de clases;
 - inscripción de usuarios a clases;
 - progreso de clase por usuario y clase;
+- validación de investiduras con pipeline multietapa, historial, bulk ops y configuración por campo local;
 - honores del usuario y catálogo de honores;
 - certificaciones y su progreso;
 - folders y progreso por carpetas;
@@ -406,11 +408,11 @@ El runtime canonizado de Wave 0 queda resumido así:
 
 - SACDIA opera como backend REST + admin web + app móvil + persistencia relacional;
 - la API vigente es la publicada en `ENDPOINTS-LIVE-REFERENCE.md`;
-- la semántica del sistema se interpreta desde trayectoria, club, sección, vinculación, periodo y validación; <!-- ASPIRACIONAL: no implementado — validación de investiduras existe como tablas (investiture_config, investiture_validation_history) pero sin módulo backend, endpoints ni screens -->
+- la semántica del sistema se interpreta desde trayectoria, club, sección, vinculación, periodo y validación;
 - la operación anual formativa se lee desde `enrollments`;
 - la trayectoria consolidada histórica se lee desde `users_classes`;
 - la autorización runtime combina JWT, permisos globales y asignaciones contextuales;
-- las superficies documentadas cubren autenticación, perfil, post-registro, clases, honores, certificaciones, folders, clubes, roles, finanzas, actividades, camporees, inventario y notificaciones.
+- las superficies documentadas cubren autenticación, perfil, post-registro, clases, investiduras, honores, certificaciones, folders, clubes, roles, finanzas, actividades, camporees, inventario y notificaciones.
 
 ---
 

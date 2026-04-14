@@ -97,7 +97,7 @@ No deben entrar decisiones menores de implementación, notas de sesión, bugs t�
 
 ### 6. Registrar y validar son actos distintos
 
-**Estado**: Vigente <!-- ASPIRACIONAL: no implementado — investiture_validation_history e investiture_config existen como tablas pero sin módulo/endpoints/screens. El concepto es canon pero la implementación es FANTASMA -->
+**Estado**: Vigente <!-- VERIFICADO: runtime de investiduras activo con pipeline, historial, config CRUD y compat legacy -->
 
 **Contexto**: El flujo de investidura y otros procesos muestran que existe una diferencia real entre captura operativa y reconocimiento institucional.
 
@@ -107,7 +107,7 @@ No deben entrar decisiones menores de implementación, notas de sesión, bugs t�
 
 - el sistema puede representar estados intermedios sin mentir;
 - no se trata como verdad institucional final algo que solo fue capturado;
-- runtime, reportes y UI deben respetar esta separación.
+- runtime, reportes y UI deben respetar esta separación; la superficie activa de investiduras ya aplica esta distinción.
 
 ### 7. El canon se reconstruye desde conceptos, no desde plantillas ni parches
 
