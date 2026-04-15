@@ -8,8 +8,8 @@
 > Base URL: `/api/v1`
 
 **Estado**: ACTIVE
-**Actualizado**: 2026-04-14 (resincronizacion puntual: P3 docs batch 1 - membership requests, weekly records, member of month, monthly reports)
-**Total endpoints**: 308
+**Actualizado**: 2026-04-15 (resincronizacion achievements: 16 endpoints agregados — 4 user surface + 12 admin surface)
+**Total endpoints**: 324
 
 ## Lectura Rápida
 
@@ -155,6 +155,46 @@
 | PATCH | `/api/v1/activities/:activityId` | JWT | - | Actualizar actividad. Acepta `club_section_ids` e `is_joint` para reasociar secciones (upsert) | `src/activities/activities.controller.ts` |
 | GET | `/api/v1/activities/:activityId/attendance` | JWT | - | Obtener asistencia | `src/activities/activities.controller.ts` |
 | POST | `/api/v1/activities/:activityId/attendance` | JWT | - | Registrar asistencia | `src/activities/activities.controller.ts` |
+
+## achievements
+
+> **NO CANON** — Feature operativa documentada sin promocion al canon. Autoridad: `src/achievements/*.ts` y `prisma/schema.prisma`.
+
+### achievements — user surface
+
+| Method | Path | Auth | Roles | Description | Source |
+|---|---|---|---|---|---|
+| GET | `/api/v1/achievements` | JWT | - | Catalogo de logros agrupado por categoria, paginado. Logros secretos no completados aparecen con `name = "???"` y `description = "???"`. Query: `categoryId?`, `page?`, `limit?` | `src/achievements/achievements.controller.ts` |
+| GET | `/api/v1/achievements/me` | JWT | - | Resumen del usuario autenticado: `summary` con `total_completed`, `total_points`, `completion_percentage` y logros agrupados con progreso | `src/achievements/achievements.controller.ts` |
+| GET | `/api/v1/achievements/categories` | JWT | - | Categorias activas ordenadas por `display_order` | `src/achievements/achievements.controller.ts` |
+| GET | `/api/v1/achievements/:achievementId` | JWT | - | Detalle del logro con progreso del usuario. Responde `{ achievement, userProgress }`. Logros secretos no completados se enmascaran. | `src/achievements/achievements.controller.ts` |
+
+### achievements — admin surface
+
+| Method | Path | Auth | Roles | Description | Source |
+|---|---|---|---|---|---|
+| GET | `/api/v1/admin/achievements/stats` | JWT | admin, super_admin + `achievements:manage` | Estadisticas del dashboard: totales, tasas de completado, logros mas y menos desbloqueados | `src/achievements/admin/admin-achievements.controller.ts` |
+| GET | `/api/v1/admin/achievements/categories` | JWT | admin, super_admin + `achievements:manage` | Listar categorias (vista admin) | `src/achievements/admin/admin-achievements.controller.ts` |
+| POST | `/api/v1/admin/achievements/categories` | JWT | admin, super_admin + `achievements:manage` | Crear categoria | `src/achievements/admin/admin-achievements.controller.ts` |
+| PATCH | `/api/v1/admin/achievements/categories/:categoryId` | JWT | admin, super_admin + `achievements:manage` | Actualizar categoria | `src/achievements/admin/admin-achievements.controller.ts` |
+| DELETE | `/api/v1/admin/achievements/categories/:categoryId` | JWT | admin, super_admin + `achievements:manage` | Soft-delete de categoria. Responde 409 si tiene logros activos. | `src/achievements/admin/admin-achievements.controller.ts` |
+| GET | `/api/v1/admin/achievements` | JWT | admin, super_admin + `achievements:manage` | Listar logros (vista admin, paginado). Query: `type?`, `categoryId?`, `active?`, `page?`, `limit?` | `src/achievements/admin/admin-achievements.controller.ts` |
+| POST | `/api/v1/admin/achievements` | JWT | admin, super_admin + `achievements:manage` | Crear logro. Valida criterios segun tipo antes de persistir. | `src/achievements/admin/admin-achievements.controller.ts` |
+| GET | `/api/v1/admin/achievements/:achievementId` | JWT | admin, super_admin + `achievements:manage` | Obtener logro por ID (vista admin, sin masking) | `src/achievements/admin/admin-achievements.controller.ts` |
+| PATCH | `/api/v1/admin/achievements/:achievementId` | JWT | admin, super_admin + `achievements:manage` | Actualizar logro | `src/achievements/admin/admin-achievements.controller.ts` |
+| DELETE | `/api/v1/admin/achievements/:achievementId` | JWT | admin, super_admin + `achievements:manage` | Soft-delete de logro (`active = false`) | `src/achievements/admin/admin-achievements.controller.ts` |
+| POST | `/api/v1/admin/achievements/:achievementId/image` | JWT | admin, super_admin + `achievements:manage` | Subir badge (multipart, campo `file`, max 2 MB, PNG/SVG/WebP). Guarda en R2 y actualiza `badge_image_key`. | `src/achievements/admin/admin-achievements.controller.ts` |
+| POST | `/api/v1/admin/achievements/retroactive/:achievementId` | JWT | admin, super_admin + `achievements:manage` | Disparar evaluacion retroactiva para todos los usuarios que no completaron el logro | `src/achievements/admin/admin-achievements.controller.ts` |
+
+### Achievements Contract Notes (2026-04-15)
+
+- La superficie de usuario exige `JwtAuthGuard`. La superficie admin exige `JwtAuthGuard` + `GlobalRolesGuard` (`admin|super_admin`) + `PermissionsGuard` (`achievements:manage`).
+- `GET /api/v1/achievements` devuelve `{ categories: [...], meta: { total, page, limit, totalPages } }`.
+- `GET /api/v1/achievements/me` devuelve `{ summary: { total_completed, total_points, completion_percentage }, ... }` con logros agrupados.
+- `GET /api/v1/achievements/:achievementId` devuelve wrapper `{ achievement, userProgress }`, no un objeto plano; el cliente movil tiene drift puntual en este contrato (Por verificar en cliente).
+- El masking de logros secretos aplica solo en la superficie de usuario; la superficie admin no enmascara.
+- La evaluacion de eventos persiste primero en `achievement_event_log` y luego intenta encolar en BullMQ; si la cola no esta disponible, el evento queda persistido sin encolarse.
+- Drift de cliente admin verificado (no corregido en este trabajo): usa `PUT` donde el controller expone `PATCH`; usa `scope` con valores `GLOBAL|CLUB|UNIT` donde Prisma define `GLOBAL|CLUB_TYPE|ECCLESIASTICAL_YEAR`; envia campo multipart `image` donde el controller exige `file`.
 
 ## admin
 

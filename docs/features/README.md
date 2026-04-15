@@ -30,10 +30,10 @@
 
 | Señal | Cantidad | Evidencia |
 |---|---:|---|
-| Documentos de dominio presentes | 27 | archivos `docs/features/*.md`, excluyendo este `README.md` |
+| Documentos de dominio presentes | 28 | archivos `docs/features/*.md`, excluyendo este `README.md` |
 | Estado funcional `IMPLEMENTADO` | 25 | declarado en los documentos de dominio |
 | Estado funcional `PARCIAL` | 1 | `certificaciones-guias-mayores` |
-| Estado funcional `NO CANON` | 1 | `infrastructure` |
+| Estado funcional `NO CANON` | 2 | `achievements`; `infrastructure` declara la variante `NO CANON (infraestructura operativa)` |
 
 ## Dominios registrados
 
@@ -42,6 +42,7 @@
 | `actividades` | [actividades.md](actividades.md) | Documento presente | `IMPLEMENTADO` |
 | `actividades-conjuntas` | [actividades-conjuntas.md](actividades-conjuntas.md) | Documento presente | `IMPLEMENTADO` |
 | `annual-folders-scoring` | [annual-folders-scoring.md](annual-folders-scoring.md) | Documento presente | `IMPLEMENTADO` |
+| `achievements` | [achievements.md](achievements.md) | Documento presente | `NO CANON` |
 | `aprobaciones-camporees` | [aprobaciones-camporees.md](aprobaciones-camporees.md) | Documento presente | `IMPLEMENTADO` |
 | `aprobaciones-masivas` | [aprobaciones-masivas.md](aprobaciones-masivas.md) | Documento presente | `IMPLEMENTADO` |
 | `auth` | [auth.md](auth.md) | Documento presente | `IMPLEMENTADO` |
