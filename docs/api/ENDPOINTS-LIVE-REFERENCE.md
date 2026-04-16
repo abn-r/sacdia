@@ -8,8 +8,8 @@
 > Base URL: `/api/v1`
 
 **Estado**: ACTIVE
-**Generado**: 2026-03-25T00:00:00.000Z (sincronización completa contra controllers)
-**Total endpoints**: 269
+**Actualizado**: 2026-04-16 (gap fixes: club-types CRUD +4, club-ideals CRUD +3, admin/users approval fix, activity-types code uppercase removed)
+**Total endpoints**: 334
 
 ## Lectura Rápida
 
@@ -27,14 +27,15 @@
 | GET | `/api/v1/auth/me` | JWT | - | Obtener perfil del usuario autenticado | `src/auth/auth.controller.ts` |
 | PATCH | `/api/v1/auth/me/context` | JWT | - | Cambiar contexto activo de club/instancia | `src/auth/auth.controller.ts` |
 | POST | `/api/v1/auth/update-password` | JWT | - | Actualizar la contraseña del usuario autenticado | `src/auth/auth.controller.ts` |
+| POST | `/api/v1/auth/verify-email/send` | JWT | - | Enviar email de verificación al usuario autenticado | `src/auth/auth.controller.ts` |
+| POST | `/api/v1/auth/verify-email/confirm` | Public | - | Confirmar verificación de email con token | `src/auth/auth.controller.ts` |
 | POST | `/api/v1/auth/mfa/enroll` | JWT | - | Iniciar enrolamiento de 2FA | `src/auth/mfa.controller.ts` |
-| GET | `/api/v1/auth/mfa/factors` | JWT | - | Listar factores MFA configurados | `src/auth/mfa.controller.ts` |
 | GET | `/api/v1/auth/mfa/status` | JWT | - | Verificar estado de 2FA | `src/auth/mfa.controller.ts` |
-| DELETE | `/api/v1/auth/mfa/unenroll` | JWT | - | Deshabilitar 2FA | `src/auth/mfa.controller.ts` |
+| DELETE | `/api/v1/auth/mfa/disable` | JWT | - | Deshabilitar 2FA | `src/auth/mfa.controller.ts` |
 | POST | `/api/v1/auth/mfa/verify` | JWT | - | Verificar y activar 2FA | `src/auth/mfa.controller.ts` |
 | DELETE | `/api/v1/auth/oauth/:provider` | JWT | - | Desconectar un provider | `src/auth/oauth.controller.ts` |
 | POST | `/api/v1/auth/oauth/apple` | Public | - | Iniciar autenticación con Apple | `src/auth/oauth.controller.ts` |
-| GET | `/api/v1/auth/oauth/callback` | Public | - | Manejar callback de OAuth | `src/auth/oauth.controller.ts` |
+| POST | `/api/v1/auth/oauth/callback` | Public | - | Finalizar callback de OAuth con sesión Better Auth | `src/auth/oauth.controller.ts` |
 | POST | `/api/v1/auth/oauth/google` | Public | - | Iniciar autenticación con Google | `src/auth/oauth.controller.ts` |
 | GET | `/api/v1/auth/oauth/providers` | JWT | - | Obtener providers conectados | `src/auth/oauth.controller.ts` |
 | POST | `/api/v1/auth/password/reset-request` | Public | - | Solicitar recuperación de contraseña | `src/auth/auth.controller.ts` |
@@ -51,8 +52,9 @@
 - Ventana temporal legacy: **2026-03-04** a **2026-03-18** con `AUTH_REJECT_SNAKE_CASE=false` para aceptar `refresh_token`.
 - Fecha objetivo de retorno a estricto: **2026-03-18** con `AUTH_REJECT_SNAKE_CASE=true`.
 - `POST /api/v1/auth/logout` es fail-safe (best effort): no requiere JWT válido, acepta bearer opcional y `refreshToken` opcional en body.
-- `GET /api/v1/auth/oauth/callback` mantiene `access_token`/`refresh_token` en query por compatibilidad con proveedor; respuesta backend permanece camelCase.
-- Endpoints MFA soportan header opcional `x-refresh-token` para bind de sesión cuando Supabase lo requiera.
+- `POST /api/v1/auth/oauth/callback` finaliza el flujo OAuth del lado SACDIA después de que Better Auth resolvió su callback interno `GET /api/auth/callback/{provider}`.
+- El body de `POST /api/v1/auth/oauth/callback` usa `session_token`, `provider` y `redirect_uri?`.
+- `POST /api/v1/auth/mfa/verify` canjea un JWT `aal1` (`mfa_pending: true`) por un nuevo `accessToken` `aal2`.
 
 ## users
 
@@ -106,10 +108,11 @@
 
 | Method | Path | Auth | Roles | Description | Source |
 |---|---|---|---|---|---|
-| GET | `/api/v1/clubs/:clubId/sections/:sectionId/members/insurance` | JWT | - | Listar miembros de una sección con su seguro activo más reciente | `src/insurance/insurance.controller.ts` |
-| GET | `/api/v1/users/:memberId/insurance` | JWT | - | Obtener el detalle del seguro activo del miembro | `src/insurance/insurance.controller.ts` |
-| POST | `/api/v1/users/:memberId/insurance` | JWT | - | Crear un seguro para un miembro con evidencia opcional en multipart (`evidence`) | `src/insurance/insurance.controller.ts` |
-| PATCH | `/api/v1/insurance/:insuranceId` | JWT | - | Actualizar un seguro existente con evidencia opcional en multipart (`evidence`) | `src/insurance/insurance.controller.ts` |
+| GET | `/api/v1/clubs/:clubId/sections/:sectionId/members/insurance` | JWT | `insurance:read` | Listar miembros de una sección con su seguro activo más reciente | `src/insurance/insurance.controller.ts` |
+| GET | `/api/v1/insurance/expiring` | JWT | admin, coordinator (GlobalRoles) | Listar seguros próximos a vencer para monitoreo administrativo global; query: `days_ahead?`, `local_field_id?` | `src/insurance/insurance.controller.ts` |
+| GET | `/api/v1/users/:memberId/insurance` | JWT | `insurance:read` | Obtener el detalle del seguro activo del miembro | `src/insurance/insurance.controller.ts` |
+| POST | `/api/v1/users/:memberId/insurance` | JWT | `insurance:create` | Crear un seguro para un miembro con evidencia opcional en multipart (`evidence`) | `src/insurance/insurance.controller.ts` |
+| PATCH | `/api/v1/insurance/:insuranceId` | JWT | `insurance:update` | Actualizar un seguro existente con evidencia opcional en multipart (`evidence`) | `src/insurance/insurance.controller.ts` |
 
 ### User Authorization Notes (2026-03-10)
 
@@ -153,6 +156,46 @@
 | GET | `/api/v1/activities/:activityId/attendance` | JWT | - | Obtener asistencia | `src/activities/activities.controller.ts` |
 | POST | `/api/v1/activities/:activityId/attendance` | JWT | - | Registrar asistencia | `src/activities/activities.controller.ts` |
 
+## achievements
+
+> **NO CANON** — Feature operativa documentada sin promocion al canon. Autoridad: `src/achievements/*.ts` y `prisma/schema.prisma`.
+
+### achievements — user surface
+
+| Method | Path | Auth | Roles | Description | Source |
+|---|---|---|---|---|---|
+| GET | `/api/v1/achievements` | JWT | - | Catalogo de logros agrupado por categoria, paginado. Logros secretos no completados aparecen con `name = "???"` y `description = "???"`. Query: `categoryId?`, `page?`, `limit?` | `src/achievements/achievements.controller.ts` |
+| GET | `/api/v1/achievements/me` | JWT | - | Resumen del usuario autenticado: `summary` con `total_completed`, `total_points`, `completion_percentage` y logros agrupados con progreso | `src/achievements/achievements.controller.ts` |
+| GET | `/api/v1/achievements/categories` | JWT | - | Categorias activas ordenadas por `display_order` | `src/achievements/achievements.controller.ts` |
+| GET | `/api/v1/achievements/:achievementId` | JWT | - | Detalle del logro con progreso del usuario. Responde `{ achievement, userProgress }`. Logros secretos no completados se enmascaran. | `src/achievements/achievements.controller.ts` |
+
+### achievements — admin surface
+
+| Method | Path | Auth | Roles | Description | Source |
+|---|---|---|---|---|---|
+| GET | `/api/v1/admin/achievements/stats` | JWT | admin, super_admin + `achievements:manage` | Estadisticas del dashboard: totales, tasas de completado, logros mas y menos desbloqueados | `src/achievements/admin/admin-achievements.controller.ts` |
+| GET | `/api/v1/admin/achievements/categories` | JWT | admin, super_admin + `achievements:manage` | Listar categorias (vista admin) | `src/achievements/admin/admin-achievements.controller.ts` |
+| POST | `/api/v1/admin/achievements/categories` | JWT | admin, super_admin + `achievements:manage` | Crear categoria | `src/achievements/admin/admin-achievements.controller.ts` |
+| PATCH | `/api/v1/admin/achievements/categories/:categoryId` | JWT | admin, super_admin + `achievements:manage` | Actualizar categoria | `src/achievements/admin/admin-achievements.controller.ts` |
+| DELETE | `/api/v1/admin/achievements/categories/:categoryId` | JWT | admin, super_admin + `achievements:manage` | Soft-delete de categoria. Responde 409 si tiene logros activos. | `src/achievements/admin/admin-achievements.controller.ts` |
+| GET | `/api/v1/admin/achievements` | JWT | admin, super_admin + `achievements:manage` | Listar logros (vista admin, paginado). Query: `type?`, `categoryId?`, `active?`, `page?`, `limit?` | `src/achievements/admin/admin-achievements.controller.ts` |
+| POST | `/api/v1/admin/achievements` | JWT | admin, super_admin + `achievements:manage` | Crear logro. Valida criterios segun tipo antes de persistir. | `src/achievements/admin/admin-achievements.controller.ts` |
+| GET | `/api/v1/admin/achievements/:achievementId` | JWT | admin, super_admin + `achievements:manage` | Obtener logro por ID (vista admin, sin masking) | `src/achievements/admin/admin-achievements.controller.ts` |
+| PATCH | `/api/v1/admin/achievements/:achievementId` | JWT | admin, super_admin + `achievements:manage` | Actualizar logro | `src/achievements/admin/admin-achievements.controller.ts` |
+| DELETE | `/api/v1/admin/achievements/:achievementId` | JWT | admin, super_admin + `achievements:manage` | Soft-delete de logro (`active = false`) | `src/achievements/admin/admin-achievements.controller.ts` |
+| POST | `/api/v1/admin/achievements/:achievementId/image` | JWT | admin, super_admin + `achievements:manage` | Subir badge (multipart, campo `file`, max 2 MB, PNG/SVG/WebP). Guarda en R2 y actualiza `badge_image_key`. | `src/achievements/admin/admin-achievements.controller.ts` |
+| POST | `/api/v1/admin/achievements/retroactive/:achievementId` | JWT | admin, super_admin + `achievements:manage` | Disparar evaluacion retroactiva para todos los usuarios que no completaron el logro | `src/achievements/admin/admin-achievements.controller.ts` |
+
+### Achievements Contract Notes (2026-04-15)
+
+- La superficie de usuario exige `JwtAuthGuard`. La superficie admin exige `JwtAuthGuard` + `GlobalRolesGuard` (`admin|super_admin`) + `PermissionsGuard` (`achievements:manage`).
+- `GET /api/v1/achievements` devuelve `{ categories: [...], meta: { total, page, limit, totalPages } }`.
+- `GET /api/v1/achievements/me` devuelve `{ summary: { total_completed, total_points, completion_percentage }, ... }` con logros agrupados.
+- `GET /api/v1/achievements/:achievementId` devuelve wrapper `{ achievement, userProgress }`, no un objeto plano; el cliente movil tiene drift puntual en este contrato (Por verificar en cliente).
+- El masking de logros secretos aplica solo en la superficie de usuario; la superficie admin no enmascara.
+- La evaluacion de eventos persiste primero en `achievement_event_log` y luego intenta encolar en BullMQ; si la cola no esta disponible, el evento queda persistido sin encolarse.
+- Drift de cliente admin verificado (no corregido en este trabajo): usa `PUT` donde el controller expone `PATCH`; usa `scope` con valores `GLOBAL|CLUB|UNIT` donde Prisma define `GLOBAL|CLUB_TYPE|ECCLESIASTICAL_YEAR`; envia campo multipart `image` donde el controller exige `file`.
+
 ## admin
 
 | Method | Path | Auth | Roles | Description | Source |
@@ -162,6 +205,13 @@
 | DELETE | `/api/v1/admin/allergies/:allergyId` | JWT | super_admin, admin | Soft delete allergy | `src/admin/admin-reference.controller.ts` |
 | PATCH | `/api/v1/admin/allergies/:allergyId` | JWT | super_admin, admin | Update allergy | `src/admin/admin-reference.controller.ts` |
 | GET | `/api/v1/admin/club-ideals` | JWT | super_admin, admin | List club ideals for admin | `src/admin/admin-reference.controller.ts` |
+| POST | `/api/v1/admin/club-ideals` | JWT | super_admin only | Create club ideal | `src/admin/admin-reference.controller.ts` |
+| PATCH | `/api/v1/admin/club-ideals/:clubIdealId` | JWT | super_admin, admin | Update club ideal | `src/admin/admin-reference.controller.ts` |
+| DELETE | `/api/v1/admin/club-ideals/:clubIdealId` | JWT | super_admin only | Soft delete club ideal | `src/admin/admin-reference.controller.ts` |
+| GET | `/api/v1/admin/club-types` | JWT | super_admin, admin | List all club types for admin management | `src/admin/admin-reference.controller.ts` |
+| POST | `/api/v1/admin/club-types` | JWT | super_admin only | Create club type | `src/admin/admin-reference.controller.ts` |
+| PATCH | `/api/v1/admin/club-types/:clubTypeId` | JWT | super_admin, admin | Update club type | `src/admin/admin-reference.controller.ts` |
+| DELETE | `/api/v1/admin/club-types/:clubTypeId` | JWT | super_admin only | Soft delete club type | `src/admin/admin-reference.controller.ts` |
 | GET | `/api/v1/admin/churches` | JWT | super_admin, admin | List churches for admin management | `src/admin/admin-geography.controller.ts` |
 | POST | `/api/v1/admin/churches` | JWT | super_admin, admin | Create church | `src/admin/admin-geography.controller.ts` |
 | DELETE | `/api/v1/admin/churches/:churchId` | JWT | super_admin, admin | Soft delete church | `src/admin/admin-geography.controller.ts` |
@@ -200,8 +250,11 @@
 | DELETE | `/api/v1/admin/rbac/permissions/:id` | JWT | super_admin | Desactivar un permiso | `src/rbac/rbac.controller.ts` |
 | GET | `/api/v1/admin/rbac/permissions/:id` | JWT | super_admin, admin | Obtener un permiso por ID | `src/rbac/rbac.controller.ts` |
 | PATCH | `/api/v1/admin/rbac/permissions/:id` | JWT | super_admin | Actualizar un permiso | `src/rbac/rbac.controller.ts` |
-| GET | `/api/v1/admin/rbac/roles` | JWT | super_admin, admin | Listar roles con sus permisos | `src/rbac/rbac.controller.ts` |
+| GET | `/api/v1/admin/rbac/roles` | JWT | super_admin, admin | Listar roles con sus permisos. Query: `?active=true\|false\|all` (default true) | `src/rbac/rbac.controller.ts` |
+| POST | `/api/v1/admin/rbac/roles` | JWT | super_admin | Crear rol. Body: `{ role_name, description, role_category, permission_ids? }`. 400 si role_name=super_admin o pattern inválido. 409 si duplicado. | `src/rbac/rbac.controller.ts` |
 | GET | `/api/v1/admin/rbac/roles/:id` | JWT | super_admin, admin | Obtener rol con sus permisos | `src/rbac/rbac.controller.ts` |
+| PATCH | `/api/v1/admin/rbac/roles/:id` | JWT | super_admin | Actualizar rol. Body: `{ description?, permission_ids? }`. role_name es inmutable (400 si presente). 403 en super_admin. | `src/rbac/rbac.controller.ts` |
+| DELETE | `/api/v1/admin/rbac/roles/:id` | JWT | super_admin | Soft-delete rol. 403 en super_admin. 409 si hay usuarios asignados. Response: `{ success, role_id }` | `src/rbac/rbac.controller.ts` |
 | POST | `/api/v1/admin/rbac/roles/:id/permissions` | JWT | super_admin | Asignar permisos a un rol | `src/rbac/rbac.controller.ts` |
 | PUT | `/api/v1/admin/rbac/roles/:id/permissions` | JWT | super_admin | Sincronizar permisos de un rol (reemplaza todos) | `src/rbac/rbac.controller.ts` |
 | DELETE | `/api/v1/admin/rbac/roles/:id/permissions/:permissionId` | JWT | super_admin | Remover un permiso de un rol | `src/rbac/rbac.controller.ts` |
@@ -216,8 +269,8 @@
 | POST | `/api/v1/admin/catalogs/cache/invalidate` | JWT | `catalogs:update` | Invalida manualmente todo el cache Redis de catálogos (14 keys). Graceful fallback si Redis no está disponible. | `src/admin/admin-cache.controller.ts` |
 | GET | `/api/v1/admin/users` | JWT | `users:read` | Listar usuarios administrativos con alcance por rol (ALL/UNION/LOCAL_FIELD) | `src/admin/admin-users.controller.ts` |
 | GET | `/api/v1/admin/users/:userId` | JWT | `users:read_detail` | Obtener detalle de usuario validando alcance por rol del actor | `src/admin/admin-users.controller.ts` |
-| PATCH | `/api/v1/admin/users/:userId` | JWT | `users:update` | Actualizar campos administrativos del usuario | `src/admin/admin-users.controller.ts` |
-| PATCH | `/api/v1/admin/users/:userId/approval` | JWT | `users:update` | Aprobar o rechazar un usuario administrativo | `src/admin/admin-users.controller.ts` |
+| PATCH | `/api/v1/admin/users/:userId` | JWT | `users:update_admin` | Actualizar campos administrativos del usuario (`active`, `access_app`, `access_panel`, `approval_status`, `rejection_reason`). Campos legacy `approval`/`approved` ignorados. | `src/admin/admin-users.controller.ts` |
+| PATCH | `/api/v1/admin/users/:userId/approval` | JWT | `users:update_admin` | Aprobar o rechazar un usuario. Body: `{ approved: bool, rejection_reason? }`. Actualiza atómicamente `approval_status` + `active` + `rejection_reason`. | `src/admin/admin-users.controller.ts` |
 
 ### Admin user detail transitional formative contract (FS-01)
 
@@ -315,7 +368,7 @@
 | GET | `/api/v1/clubs/:clubId/activities` | JWT | - | Listar actividades del club | `src/activities/activities.controller.ts` |
 | POST | `/api/v1/clubs/:clubId/activities` | JWT | director, subdirector, secretary, counselor | Crear actividad. Acepta `club_section_ids` e `is_joint` para actividades conjuntas (multi-seccion) | `src/activities/activities.controller.ts` |
 | GET | `/api/v1/clubs/:clubId/finances` | JWT | - | Listar movimientos financieros del club | `src/finances/finances.controller.ts` |
-| POST | `/api/v1/clubs/:clubId/finances` | JWT | director, subdirector, treasurer | Crear movimiento financiero | `src/finances/finances.controller.ts` |
+| POST | `/api/v1/clubs/:clubId/finances` | JWT | director, deputy_director, treasurer | Crear movimiento financiero | `src/finances/finances.controller.ts` |
 | GET | `/api/v1/clubs/:clubId/finances/summary` | JWT | - | Resumen financiero del club | `src/finances/finances.controller.ts` |
 | GET | `/api/v1/clubs/:clubId/sections` | JWT | - | Listar secciones del club | `src/clubs/clubs.controller.ts` |
 | GET | `/api/v1/clubs/:clubId/sections/:sectionId` | JWT | - | Obtener sección por ID | `src/clubs/clubs.controller.ts` |
@@ -330,6 +383,7 @@
 |---|---|---|---|---|---|
 | GET | `/api/v1/fcm-tokens` | JWT | - | Get current user FCM tokens | `src/notifications/notifications.controller.ts` |
 | POST | `/api/v1/fcm-tokens` | JWT | - | Register FCM token | `src/notifications/notifications.controller.ts` |
+| DELETE | `/api/v1/fcm-tokens/by-token` | JWT | - | Unregister FCM token by token string in request body | `src/notifications/notifications.controller.ts` |
 | DELETE | `/api/v1/fcm-tokens/:id` | JWT | - | Unregister FCM token by record ID | `src/notifications/notifications.controller.ts` |
 | GET | `/api/v1/fcm-tokens/user/:userId` | JWT | - | Get FCM tokens by user ID (owner/admin only) | `src/notifications/notifications.controller.ts` |
 
@@ -337,10 +391,11 @@
 
 | Method | Path | Auth | Roles | Description | Source |
 |---|---|---|---|---|---|
-| DELETE | `/api/v1/finances/:financeId` | JWT | - | Desactivar movimiento | `src/finances/finances.controller.ts` |
-| GET | `/api/v1/finances/:financeId` | JWT | - | Obtener movimiento por ID | `src/finances/finances.controller.ts` |
-| PATCH | `/api/v1/finances/:financeId` | JWT | - | Actualizar movimiento | `src/finances/finances.controller.ts` |
-| GET | `/api/v1/finances/categories` | JWT | - | Listar categorías financieras | `src/finances/finances.controller.ts` |
+| DELETE | `/api/v1/finances/:financeId` | JWT | `finances:delete` | Desactivar movimiento | `src/finances/finances.controller.ts` |
+| GET | `/api/v1/finances/:financeId` | JWT | `finances:read` | Obtener movimiento por ID | `src/finances/finances.controller.ts` |
+| PATCH | `/api/v1/finances/:financeId` | JWT | `finances:update` | Actualizar movimiento | `src/finances/finances.controller.ts` |
+| GET | `/api/v1/finances/categories` | JWT | `finances:read` | Listar categorías financieras | `src/finances/finances.controller.ts` |
+| GET | `/api/v1/clubs/:clubId/finances/transactions` | JWT | `finances:read` | Listado paginado para vistas avanzadas; soporta `page`, `limit`, `type`, `search`, `startDate`, `endDate`, `sortBy`, `sortOrder` | `src/finances/finances.controller.ts` |
 
 ## folders
 
@@ -394,8 +449,9 @@
 | GET | `/api/v1/inventory/catalogs/inventory-categories` | JWT | - | Listar categorías de inventario | `src/inventory/inventory.controller.ts` |
 | GET | `/api/v1/inventory/clubs/:clubId/inventory` | JWT | - | Listar items del inventario de un club | `src/inventory/inventory.controller.ts` |
 | POST | `/api/v1/inventory/clubs/:clubId/inventory` | JWT | - | Agregar nuevo item al inventario | `src/inventory/inventory.controller.ts` |
-| DELETE | `/api/v1/inventory/inventory/:id` | JWT | - | Eliminar un item del inventario | `src/inventory/inventory.controller.ts` |
+| DELETE | `/api/v1/inventory/inventory/:id` | JWT | - | Eliminar logicamente un item del inventario (`active=false`) | `src/inventory/inventory.controller.ts` |
 | GET | `/api/v1/inventory/inventory/:id` | JWT | - | Obtener detalles de un item del inventario | `src/inventory/inventory.controller.ts` |
+| GET | `/api/v1/inventory/inventory/:inventoryId/history` | JWT | - | Obtener historial de cambios de un item del inventario | `src/inventory/inventory.controller.ts` |
 | PATCH | `/api/v1/inventory/inventory/:id` | JWT | - | Actualizar un item del inventario | `src/inventory/inventory.controller.ts` |
 
 ## notifications
@@ -403,8 +459,14 @@
 | Method | Path | Auth | Roles | Description | Source |
 |---|---|---|---|---|---|
 | POST | `/api/v1/notifications/broadcast` | JWT | super_admin, admin | Send notification to all users | `src/notifications/notifications.controller.ts` |
-| POST | `/api/v1/notifications/club/:instanceType/:instanceId` | JWT | super_admin, admin | Send notification to club members | `src/notifications/notifications.controller.ts` |
-| POST | `/api/v1/notifications/send` | JWT | - | Send notification to specific user | `src/notifications/notifications.controller.ts` |
+| POST | `/api/v1/notifications/club/:instanceType/:instanceId` | JWT | `notifications:club` | Send notification to club members with exact active assignment enforcement | `src/notifications/notifications.controller.ts` |
+| GET | `/api/v1/notifications/history` | JWT | - | Get paginated notification history (admin audit log scoped by caller territory, or user inbox) | `src/notifications/notifications.controller.ts` |
+| GET | `/api/v1/notifications/preferences` | JWT | - | Get current user notification preferences | `src/notifications/notifications.controller.ts` |
+| PATCH | `/api/v1/notifications/read-all` | JWT | - | Mark all unread notifications as read | `src/notifications/notifications.controller.ts` |
+| POST | `/api/v1/notifications/send` | JWT | `notifications:send` | Send notification to specific user | `src/notifications/notifications.controller.ts` |
+| GET | `/api/v1/notifications/unread-count` | JWT | - | Get unread notification count for the current user | `src/notifications/notifications.controller.ts` |
+| PATCH | `/api/v1/notifications/:deliveryId/read` | JWT | - | Mark a single notification delivery as read | `src/notifications/notifications.controller.ts` |
+| PUT | `/api/v1/notifications/preferences/:category` | JWT | - | Update notification preference for a category | `src/notifications/notifications.controller.ts` |
 
 ## root
 
@@ -416,11 +478,33 @@
 
 | Method | Path | Auth | Roles | Description | Source |
 |---|---|---|---|---|---|
-| POST | `/api/v1/enrollments/:enrollmentId/submit-for-validation` | JWT | director, counselor (ClubRoles) | Enviar enrollment a validación de investidura. Body: `{ club_id: int, comments?: string }` | `src/investiture/investiture.controller.ts` |
-| POST | `/api/v1/enrollments/:enrollmentId/validate` | JWT | admin, coordinator (GlobalRoles) | Aprobar o rechazar enrollment. Body: `{ action: 'APPROVED'\|'REJECTED', comments?: string }` | `src/investiture/investiture.controller.ts` |
-| POST | `/api/v1/enrollments/:enrollmentId/investiture` | JWT | admin, coordinator (GlobalRoles) | Marcar enrollment como investido. Body: `{ comments?: string }` | `src/investiture/investiture.controller.ts` |
+| POST | `/api/v1/investiture/enrollments/:enrollmentId/submit` | JWT | director, counselor (ClubRoles) | Enviar enrollment al pipeline de validación. Body: `{ club_id: int, comments?: string }` | `src/investiture/investiture.controller.ts` |
+| POST | `/api/v1/investiture/enrollments/:enrollmentId/club-approve` | JWT | director (ClubRoles) | Aprobar en nivel club/sección. Body: `{ comments?: string }` | `src/investiture/investiture.controller.ts` |
+| POST | `/api/v1/investiture/enrollments/:enrollmentId/coordinator-approve` | JWT | admin, coordinator (GlobalRoles) | Aprobar en nivel coordinación. Body: `{ comments?: string }` | `src/investiture/investiture.controller.ts` |
+| POST | `/api/v1/investiture/enrollments/:enrollmentId/field-approve` | JWT | admin (GlobalRoles) | Aprobar en nivel campo local. Body: `{ comments?: string }` | `src/investiture/investiture.controller.ts` |
+| POST | `/api/v1/investiture/enrollments/:enrollmentId/invest` | JWT | admin, coordinator (GlobalRoles) | Registrar investidura formal después de `FIELD_APPROVED`. Body: `{ comments?: string }` | `src/investiture/investiture.controller.ts` |
+| POST | `/api/v1/investiture/enrollments/:enrollmentId/reject` | JWT | admin, coordinator (GlobalRoles) | Rechazar enrollment en cualquier nivel del pipeline. Body: `{ reason: string }` | `src/investiture/investiture.controller.ts` |
 | GET | `/api/v1/investiture/pending` | JWT | admin, coordinator (GlobalRoles) | Listar enrollments pendientes de validación. Query: `local_field_id?`, `ecclesiastical_year_id?`, `page?`, `limit?` | `src/investiture/investiture.controller.ts` |
-| GET | `/api/v1/enrollments/:enrollmentId/investiture-history` | JWT | - | Historial de validación de investidura. Dual-role auth in service. | `src/investiture/investiture.controller.ts` |
+| GET | `/api/v1/investiture/enrollments/:enrollmentId/history` | JWT | - | Historial canónico del pipeline de investidura. La autorización fina se resuelve en el service. | `src/investiture/investiture.controller.ts` |
+| POST | `/api/v1/investiture/enrollments/bulk-approve` | JWT | admin, coordinator (GlobalRoles) | Aprobación masiva. Body: `{ enrollment_ids: int[], action: 'coordinator-approve'|'field-approve'|'invest', comments?: string }`. Máx 200. | `src/investiture/investiture.controller.ts` |
+| POST | `/api/v1/investiture/enrollments/bulk-reject` | JWT | admin, coordinator (GlobalRoles) | Rechazo masivo. Body: `{ enrollment_ids: int[], comments: string }`. Máx 200. | `src/investiture/investiture.controller.ts` |
+| POST | `/api/v1/enrollments/:enrollmentId/submit-for-validation` | JWT | director, counselor (ClubRoles) | [LEGACY] Enviar enrollment a validación de investidura. Body: `{ club_id: int, comments?: string }` | `src/investiture/investiture.controller.ts` |
+| POST | `/api/v1/enrollments/:enrollmentId/validate` | JWT | admin, coordinator (GlobalRoles) | [LEGACY] Aprobar o rechazar desde la superficie simple. Body: `{ action: 'APPROVED'|'REJECTED', comments?: string }` | `src/investiture/investiture.controller.ts` |
+| POST | `/api/v1/enrollments/:enrollmentId/investiture` | JWT | admin, coordinator (GlobalRoles) | [LEGACY] Registrar investidura formal. Body: `{ comments?: string }` | `src/investiture/investiture.controller.ts` |
+| GET | `/api/v1/enrollments/:enrollmentId/investiture-history` | JWT | - | [LEGACY] Historial de validación de investidura. Dual-role auth in service. | `src/investiture/investiture.controller.ts` |
+| GET | `/api/v1/admin/investiture/config` | JWT | admin, coordinator (GlobalRoles) | Listar configuraciones de investidura. Query: `local_field_id?` | `src/investiture/investiture.controller.ts` |
+| GET | `/api/v1/admin/investiture/config/:configId` | JWT | admin, coordinator (GlobalRoles) | Obtener configuración de investidura por ID | `src/investiture/investiture.controller.ts` |
+| POST | `/api/v1/admin/investiture/config` | JWT | admin (GlobalRoles) | Crear configuración de investidura | `src/investiture/investiture.controller.ts` |
+| PATCH | `/api/v1/admin/investiture/config/:configId` | JWT | admin (GlobalRoles) | Actualizar configuración de investidura | `src/investiture/investiture.controller.ts` |
+| DELETE | `/api/v1/admin/investiture/config/:configId` | JWT | admin (GlobalRoles) | Soft delete de configuración (`active=false`) | `src/investiture/investiture.controller.ts` |
+
+### Investiture Contract Notes (2026-04-13)
+
+- La superficie canónica actual es la prefijada con `/api/v1/investiture/...`; los endpoints bajo `/api/v1/enrollments/...` permanecen por compatibilidad.
+- `POST /api/v1/enrollments/:enrollmentId/validate` es legacy: acepta `APPROVED|REJECTED`, pero en runtime real `APPROVED` mueve el enrollment a `CLUB_APPROVED`.
+- El pipeline multietapa usa `SUBMITTED_FOR_VALIDATION -> CLUB_APPROVED -> COORDINATOR_APPROVED -> FIELD_APPROVED -> INVESTIDO`.
+- `POST /api/v1/investiture/enrollments/bulk-approve` NO soporta `club-approve`; esa transición sigue siendo individual.
+- `GET|POST|PATCH|DELETE /api/v1/admin/investiture/config` son endpoints activos del mismo controller y sostienen la pantalla de configuración del admin.
 
 ## resources
 
@@ -490,12 +574,55 @@
 |---|---|---|---|---|---|
 | GET | `/api/v1/admin/analytics/sla-dashboard` | JWT | admin, coordinator (GlobalRoles) | Métricas SLA: pendientes, overdue, tiempos promedio, tasas de aprobación, throughput 12 semanas. Cache 60s. Scoped por campo local. | `src/analytics/analytics.controller.ts` |
 
-## investiture-bulk
+## membership-requests
 
 | Method | Path | Auth | Roles | Description | Source |
 |---|---|---|---|---|---|
-| POST | `/api/v1/investiture/enrollments/bulk-approve` | JWT | admin, coordinator (GlobalRoles) | Aprobación masiva de investiduras (coordinator-approve, field-approve, invest). Body: `{ enrollment_ids: int[], action: string }`. Máx 200. | `src/investiture/investiture.controller.ts` |
-| POST | `/api/v1/investiture/enrollments/bulk-reject` | JWT | admin, coordinator (GlobalRoles) | Rechazo masivo de investiduras. Body: `{ enrollment_ids: int[], comments: string }` (comments required). Máx 200. | `src/investiture/investiture.controller.ts` |
+| GET | `/api/v1/club-sections/:clubSectionId/membership-requests` | JWT | `club_members:approve` | Listar solicitudes pendientes activas de membresia para una seccion | `src/membership-requests/membership-requests.controller.ts` |
+| POST | `/api/v1/club-sections/:clubSectionId/membership-requests/:assignmentId/approve` | JWT | `club_members:approve` | Aprobar solicitud pendiente y activar la asignacion | `src/membership-requests/membership-requests.controller.ts` |
+| POST | `/api/v1/club-sections/:clubSectionId/membership-requests/:assignmentId/reject` | JWT | `club_members:approve` | Rechazar solicitud pendiente con motivo opcional | `src/membership-requests/membership-requests.controller.ts` |
+
+## monthly-reports
+
+| Method | Path | Auth | Roles | Description | Source |
+|---|---|---|---|---|---|
+| GET | `/api/v1/monthly-reports/preview/:enrollmentId` | JWT | `reports:read` | Vista previa en vivo por matricula UUID + `month` + `year`; no congela datos | `src/monthly-reports/monthly-reports.controller.ts` |
+| POST | `/api/v1/monthly-reports/:enrollmentId` | JWT | `reports:read` | Obtener o crear borrador unico por `(club_enrollment_id, month, year)` | `src/monthly-reports/monthly-reports.controller.ts` |
+| PATCH | `/api/v1/monthly-reports/:reportId/manual-data` | JWT | `reports:read` | Actualizar datos manuales solo si el informe esta en `draft` | `src/monthly-reports/monthly-reports.controller.ts` |
+| POST | `/api/v1/monthly-reports/:reportId/generate` | JWT | `reports:read` | Congelar `snapshot_data` y pasar a `generated` | `src/monthly-reports/monthly-reports.controller.ts` |
+| POST | `/api/v1/monthly-reports/:reportId/submit` | JWT | `reports:read` | Pasar de `generated` a `submitted` | `src/monthly-reports/monthly-reports.controller.ts` |
+| GET | `/api/v1/monthly-reports/enrollment/:enrollmentId` | JWT | `reports:read` | Listar informes por matricula UUID; acepta `status?` | `src/monthly-reports/monthly-reports.controller.ts` |
+| GET | `/api/v1/monthly-reports/:reportId/pdf` | JWT | `reports:download` | Descargar PDF generado server-side; solo disponible para `generated|submitted` | `src/monthly-reports/monthly-reports.controller.ts` |
+| GET | `/api/v1/monthly-reports/:reportId` | JWT | `reports:read` | Obtener informe completo con `manual_data`, `snapshot_data`, matricula y submitter | `src/monthly-reports/monthly-reports.controller.ts` |
+
+### Monthly Reports Contract Notes (2026-04-14)
+
+- `enrollmentId` y `reportId` son UUID en runtime; no IDs numericos.
+- Los estados vigentes verificados son `draft`, `generated` y `submitted`.
+- `PATCH /manual-data` acepta el shape de `UpdateManualDataDto`; no el payload legacy que algunos clientes todavia modelan.
+- `GET /pdf` genera el archivo en el backend con `pdfkit`; no devuelve una URL prefirmada ni referencia a storage.
+
+## units
+
+| Method | Path | Auth | Roles | Description | Source |
+|---|---|---|---|---|---|
+| GET | `/api/v1/clubs/:clubId/units/:unitId/weekly-records` | JWT | `units:read` | Listar registros semanales activos de miembros activos de la unidad | `src/units/units.controller.ts` |
+| POST | `/api/v1/clubs/:clubId/units/:unitId/weekly-records` | JWT | `units:update` | Crear registro semanal; valida pertenencia activa, unicidad `(user_id, week, year)` y scores por categoria | `src/units/units.controller.ts` |
+| PATCH | `/api/v1/clubs/:clubId/units/:unitId/weekly-records/:recordId` | JWT | `units:update` | Actualizar asistencia, puntualidad, estado activo o scores por categoria del registro semanal | `src/units/units.controller.ts` |
+
+## scoring-categories
+
+| Method | Path | Auth | Roles | Description | Source |
+|---|---|---|---|---|---|
+| GET | `/api/v1/local-fields/:fieldId/scoring-categories` | JWT | `units:read` | Listar categorias de puntuacion para un campo local (division + union + propias) | `src/scoring-categories/scoring-categories.controller.ts` |
+
+## member-of-month
+
+| Method | Path | Auth | Roles | Description | Source |
+|---|---|---|---|---|---|
+| GET | `/api/v1/clubs/:clubId/sections/:sectionId/member-of-month` | JWT | `units:read` | Obtener ganador(es) del mes actual para una seccion | `src/member-of-month/member-of-month.controller.ts` |
+| GET | `/api/v1/clubs/:clubId/sections/:sectionId/member-of-month/history` | JWT | `units:read` | Obtener historial paginado de miembro del mes por seccion | `src/member-of-month/member-of-month.controller.ts` |
+| POST | `/api/v1/clubs/:clubId/sections/:sectionId/member-of-month/evaluate` | JWT | `units:update` + director/sub-director/directora de la seccion | Disparar evaluacion manual del periodo solicitado; rate limit 5/min | `src/member-of-month/member-of-month.controller.ts` |
 
 ## Nota de mantenimiento
 
