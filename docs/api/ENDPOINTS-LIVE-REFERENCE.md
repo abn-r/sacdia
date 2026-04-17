@@ -8,8 +8,8 @@
 > Base URL: `/api/v1`
 
 **Estado**: ACTIVE
-**Actualizado**: 2026-04-17 (settings screen mobile: DELETE /auth/me + notification preferences + FCM token management — 6 nuevos endpoints)
-**Total endpoints**: 330
+**Actualizado**: 2026-04-17 (GDPR data export — 3 nuevos endpoints: POST /users/me/data-export, GET /users/me/data-exports, GET /users/me/data-exports/:exportId/download)
+**Total endpoints**: 333
 
 ## Lectura Rápida
 
@@ -59,6 +59,14 @@
 - **Sessions (2026-04)**: JWTs ahora incluyen claim `sid` (BA session row UUID). `GET /auth/sessions` usa `sid` para marcar `is_current`. Tokens anteriores a este cambio no tienen `sid` — `is_current` será false para todas las sesiones. La tabla usada es `sessions` (Prisma model `session`, BA schema). `DELETE /auth/sessions/:id` devuelve 204. `DELETE /auth/sessions` devuelve 200 con `{ revoked_count }`. El endpoint `POST /auth/mfa/verify` preserva el claim `sid` del token aal1 en el token aal2 resultante.
 
 ## users
+
+### GDPR Data Export (mobile Settings screen)
+
+| Method | Path | Auth | Roles | Description | Source |
+|---|---|---|---|---|---|
+| POST | `/api/v1/users/me/data-export` | JWT | - | Solicitar exportación de datos GDPR. Body opcional: `{ format?: "json" }`. 201 nuevo job, 200 si ya existe uno pendiente/procesando, 429 si hay export `ready` en las últimas 24h (body: `{ retry_after_seconds, export_id }`). Rate limit Throttle: 1/min short, 2/h medium. | `src/data-export/data-export.controller.ts` |
+| GET | `/api/v1/users/me/data-exports` | JWT | - | Listar todos los exports del usuario. Responde `{ exports: [{ export_id, status, format, file_size_bytes, created_at, completed_at, expires_at, failure_reason }] }`. Status posibles: `pending\|processing\|ready\|failed\|expired` | `src/data-export/data-export.controller.ts` |
+| GET | `/api/v1/users/me/data-exports/:exportId/download` | JWT | - | Obtener URL presignada de R2 (TTL 15 min) para un export `ready`. 200 `{ url, expires_at }`, 404 no existe o cross-user, 409 pending/processing, 410 expired, 422 failed. Audit log en cada download. | `src/data-export/data-export.controller.ts` |
 
 ### User notification preferences (mobile Settings screen)
 
