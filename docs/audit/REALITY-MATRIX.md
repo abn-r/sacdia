@@ -1,5 +1,5 @@
 # Reality Matrix — SACDIA
-Fecha: 2026-03-26
+Fecha: 2026-03-26 | Última actualización: 2026-04-17
 
 ## Resumen
 
@@ -700,3 +700,57 @@ Los 16+ endpoints CRUD admin de catalogos (`/admin/relationship-types`, `/admin/
 
 ### 8. infrastructure sigue siendo PARCIAL
 CommonModule y AppModule estan implementados pero no hay client UI dedicada (admin ni app). Es cross-cutting por naturaleza — no es un gap critico.
+
+---
+
+## Audit de Seguridad — 2026-04-17
+
+Auditoría de seguridad del backend (`sacdia-backend`). Todos los hallazgos de sesión 2026-04-17.
+
+### Leyenda de severidad
+
+| Nivel | Descripción |
+|-------|-------------|
+| CRITICAL | Vulnerabilidad explotable directamente, afecta integridad de datos o autenticación |
+| HIGH | Falla lógica grave con impacto en autorización, ownership, o consistencia |
+| MEDIUM | Gap de validación, race condition de bajo riesgo, o deuda de seguridad |
+| LOW | Código defensivo faltante, CVEs en deps, o mejoras de bajo impacto |
+| INFRA | Configuración de infraestructura/entorno pendiente |
+
+### Tabla de hallazgos
+
+| ID | Severidad | Área | Descripción | Estado | Commit(s) | Notas |
+|----|-----------|------|-------------|--------|-----------|-------|
+| C-01 | CRITICAL | annual-folders | TOCTOU en `annual_folders` — doble check sin lock transaccional permitía acceso concurrente a recursos de otro club | RESOLVED | `9ef269d` | Lock via `$transaction` + select-for-update |
+| C-02 | CRITICAL | evidence-folder | Validación de evidencia sin verificación de ownership del archivo — un usuario podía adjuntar archivos de otro usuario | RESOLVED | `9ef269d` | Ownership check agregado en upload + validate |
+| H-01 | HIGH | notifications | Sin cap en `limit` de listado — `GET /notifications/history` permitía traer N ilimitado de registros | RESOLVED | `56f906f` | Cap a 100, default 20 |
+| H-02 | HIGH | scoring-categories | `super_admin` podía ser asignado a scoring-categories sin restricción de roles | RESOLVED | `5cf32ba` | Guard de roles reforzado |
+| H-03 | HIGH | annual-folders | `submitFolder` sin verificación de ownership del folder antes de submit | RESOLVED | `9ef269d` | Ownership check previo a transición de estado |
+| H-04 | HIGH | config | `EMAIL_ENABLED` no validado en schema Joi — podía arrancar sin la variable y silenciar errores de email | RESOLVED | `077c7d7` | Agregado a Joi schema de config |
+| H-05 | HIGH | annual-folders | `setReviewerNote` permitía escribir notas en folders de cualquier territory sin validar scope del reviewer | RESOLVED | `9ef269d` | Territory scope check agregado |
+| M-01 | MEDIUM | evidence-folder | `submitSection` sin ownership check a nivel de assignment — cualquier miembro autenticado podía hacer submit de una sección ajena | RESOLVED | `1fdf337` | PermissionsGuard + assignment scope |
+| M-02 | MEDIUM | honors | Uploads de honors sin validación de tipo MIME + sin soporte HEIC para iOS | RESOLVED | `bad5ea9` | MIME whitelist + HEIC→JPEG conversion |
+| M-03 | MEDIUM | scoring-categories | TODOs de validación sin resolver en scoring-categories service | RESOLVED (verify-only) | `ca072f9` | TODOs documentados y cerrados; lógica verificada como correcta |
+| M-04 | MEDIUM | camporees | Paginación faltante en listado de camporees + URLs de archivos sin presign | RESOLVED | SDD change `camporees-pagination-presign` (10 commits, ver archive) | Ref: `sdd/camporees-pagination-presign/archive-report` en engram |
+| M-05 | MEDIUM | rankings | Throttle + lock faltante en endpoint de rankings bajo carga concurrente | RESOLVED | `8999cc5` | Throttle + Redis lock aplicados |
+| M-06 | MEDIUM | users | `update-user.dto` con validaciones insuficientes — campos sensibles sin whitelist | RESOLVED | `8b23911` | DTO reforzado con class-validator |
+| M-07 | MEDIUM | membership-requests | TOCTOU en aprobación de membership-requests — doble aprobación concurrente posible | RESOLVED | `251fcd7` | Transacción + check de estado previo |
+
+### Hallazgos pendientes (OPEN)
+
+| ID | Severidad | Área | Descripción | Estado | Notas |
+|----|-----------|------|-------------|--------|-------|
+| INFRA-01 | INFRA | storage | `R2_PUBLIC_URL_USER_PROFILES` sin configurar en staging/prod + bucket de Cloudflare sin acceso público habilitado | OPEN | Requiere configuración de infra — no es código |
+| INFRA-02 | INFRA | app | `CachedNetworkImage` no conectado a `userImageUrl` en perfil de usuario | OPEN | UI low priority — app |
+| ARCH-01 | MEDIUM | admin | `DataTablePagination` sin patrón unificado para tab-context (cada tab tiene su propio estado de paginación) | OPEN | Arquitectural — admin panel |
+| VERIFY-01 | MEDIUM | evidence-folder | `submitSection` PermissionsGuard — scope `active_assignment` necesita verificación de que el guard rechaza correctamente asignaciones inactivas | OPEN | Verify-flagged — requiere test unitario |
+| DB-01 | MEDIUM | database | `club_role_assignments` sin columnas de audit trail (`created_at`, `created_by_id`) — inconsistente con otros modelos | OPEN | Requiere migration |
+| DEP-01 | LOW | deps | CVE: `path-to-regexp` (ReDoS alto) + `protobufjs` (ACE crítico) — deps transitivas sin fix upstream | OPEN | Monitorear — sin fix disponible al 2026-04-17 |
+| LOW-01 | LOW | auth | Email verification delivery — pre-existing, no parte del sistema de auth SACDIA nativo | OPEN | Pre-existing, auth layer (Better Auth) |
+
+### Contexto de la sesión 2026-04-17
+
+- **Scope**: sacdia-backend únicamente
+- **Commits en backend**: `9ef269d`, `56f906f`, `5cf32ba`, `077c7d7`, `1fdf337`, `bad5ea9`, `ca072f9`, `8999cc5`, `8b23911`, `251fcd7` + 10 commits del change `camporees-pagination-presign`
+- **SDD change cerrado**: `camporees-pagination-presign` — archive en engram `sdd/camporees-pagination-presign/archive-report`
+- **Sesión previa (2026-04-01)**: audit Flutter (3 CRITICAL + 5 HIGH + 6 MEDIUM, commit `622424e`) + audit Backend (2 CRITICAL + 6 HIGH + 8 MEDIUM, commit `2e8c36b`) — ver memory engram `audit_flutter_2026_04` y `audit_backend_2026_04`
