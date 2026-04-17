@@ -8,8 +8,8 @@
 > Base URL: `/api/v1`
 
 **Estado**: ACTIVE
-**Actualizado**: 2026-04-15 (resincronizacion achievements: 16 endpoints agregados — 4 user surface + 12 admin surface)
-**Total endpoints**: 324
+**Actualizado**: 2026-04-17 (settings screen mobile: DELETE /auth/me + notification preferences + FCM token management — 6 nuevos endpoints)
+**Total endpoints**: 330
 
 ## Lectura Rápida
 
@@ -25,6 +25,7 @@
 | POST | `/api/v1/auth/refresh` | Public | - | Refrescar sesión con refresh token | `src/auth/auth.controller.ts` |
 | POST | `/api/v1/auth/logout` | Public (Bearer opcional) | - | Cerrar sesión (best effort) | `src/auth/auth.controller.ts` |
 | GET | `/api/v1/auth/me` | JWT | - | Obtener perfil del usuario autenticado | `src/auth/auth.controller.ts` |
+| DELETE | `/api/v1/auth/me` | JWT | - | Eliminar cuenta (Apple 5.1.1v). Body: `{ password }`. Rate limit 1/h. Soft-delete + PII anonimizado + sesiones revocadas + FCM desactivado | `src/auth/auth.controller.ts` |
 | PATCH | `/api/v1/auth/me/context` | JWT | - | Cambiar contexto activo de club/instancia | `src/auth/auth.controller.ts` |
 | POST | `/api/v1/auth/update-password` | JWT | - | Actualizar la contraseña del usuario autenticado | `src/auth/auth.controller.ts` |
 | POST | `/api/v1/auth/verify-email/send` | JWT | - | Enviar email de verificación al usuario autenticado | `src/auth/auth.controller.ts` |
@@ -41,9 +42,9 @@
 | POST | `/api/v1/auth/password/reset-request` | Public | - | Solicitar recuperación de contraseña | `src/auth/auth.controller.ts` |
 | GET | `/api/v1/auth/profile/completion-status` | JWT | - | Obtener estado del post-registro | `src/auth/auth.controller.ts` |
 | POST | `/api/v1/auth/register` | Public | - | Registrar nuevo usuario | `src/auth/auth.controller.ts` |
-| DELETE | `/api/v1/auth/sessions` | JWT | - | Cerrar todas las sesiones | `src/auth/sessions.controller.ts` |
-| GET | `/api/v1/auth/sessions` | JWT | - | Listar sesiones activas | `src/auth/sessions.controller.ts` |
-| DELETE | `/api/v1/auth/sessions/:sessionId` | JWT | - | Cerrar una sesión específica | `src/auth/sessions.controller.ts` |
+| DELETE | `/api/v1/auth/sessions` | JWT | - | Revocar todas las sesiones excepto la actual (200 `{ revoked_count: N }`). Rate: 10/min/user | `src/auth/sessions.controller.ts` |
+| GET | `/api/v1/auth/sessions` | JWT | - | Listar sesiones activas del usuario. Responde `{ sessions[], current_session_id }`. `is_current` requiere JWT con claim `sid`. Rate: 30/min/user | `src/auth/sessions.controller.ts` |
+| DELETE | `/api/v1/auth/sessions/:sessionId` | JWT | - | Revocar sesión específica (204). 400 si es la sesión actual, 403 si pertenece a otro usuario, 404 si no existe. Rate: 10/min/user | `src/auth/sessions.controller.ts` |
 
 ### Auth Contract Notes (2026-03-04)
 
@@ -55,8 +56,20 @@
 - `POST /api/v1/auth/oauth/callback` finaliza el flujo OAuth del lado SACDIA después de que Better Auth resolvió su callback interno `GET /api/auth/callback/{provider}`.
 - El body de `POST /api/v1/auth/oauth/callback` usa `session_token`, `provider` y `redirect_uri?`.
 - `POST /api/v1/auth/mfa/verify` canjea un JWT `aal1` (`mfa_pending: true`) por un nuevo `accessToken` `aal2`.
+- **Sessions (2026-04)**: JWTs ahora incluyen claim `sid` (BA session row UUID). `GET /auth/sessions` usa `sid` para marcar `is_current`. Tokens anteriores a este cambio no tienen `sid` — `is_current` será false para todas las sesiones. La tabla usada es `sessions` (Prisma model `session`, BA schema). `DELETE /auth/sessions/:id` devuelve 204. `DELETE /auth/sessions` devuelve 200 con `{ revoked_count }`. El endpoint `POST /auth/mfa/verify` preserva el claim `sid` del token aal1 en el token aal2 resultante.
 
 ## users
+
+### User notification preferences (mobile Settings screen)
+
+| Method | Path | Auth | Roles | Description | Source |
+|---|---|---|---|---|---|
+| GET | `/api/v1/users/me/notification-preferences` | JWT | - | Obtener preferencias de notificación del usuario. Retorna `{ master, activities, achievements, approvals, invitations, reminders }`. Categorías sin fila en DB default a `true` (modelo opt-out) | `src/notifications/user-notification-preferences.controller.ts` |
+| PATCH | `/api/v1/users/me/notification-preferences` | JWT | - | Actualizar preferencias parcialmente. `master=false` desactiva todas las categorías. `master=true` activa todas. Categorías individuales se pueden togglear independientemente | `src/notifications/user-notification-preferences.controller.ts` |
+| POST | `/api/v1/users/me/fcm-tokens` | JWT | - | Registrar token FCM del dispositivo. Upsert — si existe se re-activa y re-asocia al usuario actual | `src/notifications/user-notification-preferences.controller.ts` |
+| DELETE | `/api/v1/users/me/fcm-tokens/:tokenId` | JWT | - | Desregistrar token FCM por UUID de registro (no por valor del token). Retorna 403 si el token pertenece a otro usuario | `src/notifications/user-notification-preferences.controller.ts` |
+
+### User CRUD endpoints
 
 | Method | Path | Auth | Roles | Description | Source |
 |---|---|---|---|---|---|
