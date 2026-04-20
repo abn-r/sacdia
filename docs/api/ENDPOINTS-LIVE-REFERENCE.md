@@ -8,8 +8,8 @@
 > Base URL: `/api/v1`
 
 **Estado**: ACTIVE
-**Actualizado**: 2026-04-17 (GDPR data export — 3 nuevos endpoints: POST /users/me/data-export, GET /users/me/data-exports, GET /users/me/data-exports/:exportId/download)
-**Total endpoints**: 333
+**Actualizado**: 2026-04-20 (merge documental: notifications deliveries runtime + GDPR data export + settings self-service)
+**Total endpoints**: 328
 
 ## Lectura Rápida
 
@@ -470,8 +470,8 @@
 | Method | Path | Auth | Roles | Description | Source |
 |---|---|---|---|---|---|
 | POST | `/api/v1/notifications/broadcast` | JWT | super_admin, admin | Send notification to all users | `src/notifications/notifications.controller.ts` |
-| POST | `/api/v1/notifications/club/:instanceType/:instanceId` | JWT | `notifications:club` | Send notification to club members with `active_assignment` enforcement | `src/notifications/notifications.controller.ts` |
-| GET | `/api/v1/notifications/history` | JWT | - | Get paginated notification history (admin audit log or user inbox) | `src/notifications/notifications.controller.ts` |
+| POST | `/api/v1/notifications/club/:instanceType/:instanceId` | JWT | `notifications:club` | Send notification to club members with exact active assignment enforcement | `src/notifications/notifications.controller.ts` |
+| GET | `/api/v1/notifications/history` | JWT | - | Get paginated notification history (admin audit log scoped by caller territory, or user inbox) | `src/notifications/notifications.controller.ts` |
 | GET | `/api/v1/notifications/preferences` | JWT | - | Get current user notification preferences | `src/notifications/notifications.controller.ts` |
 | PATCH | `/api/v1/notifications/read-all` | JWT | - | Mark all unread notifications as read | `src/notifications/notifications.controller.ts` |
 | POST | `/api/v1/notifications/send` | JWT | `notifications:send` | Send notification to specific user | `src/notifications/notifications.controller.ts` |

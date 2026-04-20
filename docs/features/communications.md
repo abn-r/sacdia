@@ -80,12 +80,12 @@ El envio soporta tres niveles: directo a un usuario, broadcast global y envio a 
 
 ## Gaps y pendientes
 
-- **Scope admin pendiente en historial**: `GET /notifications/history` todavia no filtra auditoria administrativa por territorio/campo local
+- **Scope admin resuelto en historial**: `GET /notifications/history` filtra auditoria administrativa por territorio/scope del caller; `super_admin` conserva la vista completa
 - **Sin programacion**: No hay scheduling de notificaciones futuras
 - **Sin UI expuesta para preferencias/unread en admin**: esas superficies hoy se consumen principalmente desde la app/self-service
 - **Sin targeting administrable por rol desde la UI**: el runtime tiene helpers internos por rol, pero no una superficie de producto dedicada
 
 ## Prioridad y siguiente accion
 
-- **Prioridad**: Media — dominio funcional y con bandeja operativa, pero con deuda puntual de scope administrativo
-- **Siguiente accion**: Restringir `GET /api/v1/notifications/history` por territorio administrativo y alinear la UI administrativa de envio por club con la ruta canonica vigente.
+- **Prioridad**: Media — dominio funcional y con bandeja operativa, con mayor endurecimiento en historial administrativo ya aplicado
+- **Siguiente accion**: Alinear la UI administrativa de envio por club con la ruta canonica vigente.
