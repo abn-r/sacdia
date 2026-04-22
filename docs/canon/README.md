@@ -114,6 +114,54 @@ Describe la verdad operativa actual del sistema. Mientras no termine su verifica
 
 Conserva la memoria estructural de las decisiones que fijan interpretación, organización y evolución del sistema.
 
+### `runtime-achievements.md`
+
+Canoniza el sistema de logros y tiers (Bronze→Diamond) del miembro, evaluación por eventos y journal persistente. Decisión registrada: `decisiones-clave.md` §11.
+
+### `runtime-rankings.md`
+
+Canoniza la clasificación anual de clubes por puntaje de carpetas, categorías de premio configurables y dense ranking. Conceptualmente distinto de `runtime-achievements.md`. Decisión registrada: `decisiones-clave.md` §12.
+
+### `runtime-resiliencia-red.md`
+
+Canoniza la capacidad vigente de cache local + TTL + invalidación por FCM silent messages, y la separa explícitamente de un modelo offline-first (no implementado hoy). Decisión registrada: `decisiones-clave.md` §13.
+
+### `runtime-communications.md`
+
+Canoniza las comunicaciones visibles (notificaciones push + bandeja), persistencia dual `notification_logs` + `notification_deliveries`, opt-out por categoría, ciclo de vida de tokens FCM y convención del tag `source` para trazabilidad. Distinto del path silent (ver `runtime-resiliencia-red.md`). Decisión registrada: `decisiones-clave.md` §14.
+
+### `runtime-sla-dashboard.md`
+
+Canoniza el SLA dashboard como lector puro de datos operacionales (investiture, validation, camporee), con cache in-memory TTL 60s, scope por `local_field_id` del coordinador derivado del JWT, y ventanas temporales fijas (30d overdue, 90d approval rate, 12w throughput). Sin tablas dedicadas. Decisión registrada: `decisiones-clave.md` §15.
+
+### `runtime-member-of-month.md`
+
+Canoniza el reconocimiento mensual del miembro con mayor puntaje por sección, evaluación automática por cron + manual por director con idempotencia, empates permitidos con ganadores múltiples, notificación a ganador + liderazgo, superficie admin multi-sección, y permisos propios `mom:*`. Decisión registrada: `decisiones-clave.md` §16.
+
+### `runtime-scoring-categories.md`
+
+Canoniza el catálogo jerárquico de categorías de puntuación (division/union/local-field) con herencia automática entre niveles, consumido por weekly-records, MoM y annual-folders-scoring. Permisos propios `scoring_categories:read/manage` tras migración desde `units:*`. Decisión registrada: `decisiones-clave.md` §17.
+
+### `runtime-requests.md`
+
+Canoniza el workflow de solicitudes de transferencia de miembros entre clubes y solicitudes de asignación de rol. Permisos propios `requests:read/review` tras migración desde `clubs:*`/`club_roles:*`. `membership-requests` queda explícitamente fuera (dominio separado con `club_members:approve`). Decisión registrada: `decisiones-clave.md` §18.
+
+### `runtime-user-certifications.md`
+
+Canoniza las operaciones admin-level sobre progresión de certificaciones de usuario (enrollUser, getUserCertifications, updateProgress, etc.). Permisos propios `user_certifications:read/manage` con prefix `user_` para evitar colisión con el browse catalog público `certifications:read`. Decisión registrada: `decisiones-clave.md` §19.
+
+### `runtime-user-folders.md`
+
+Canoniza las operaciones admin-level sobre inscripción y progreso de carpetas de usuario. Permisos propios `user_folders:read/manage`. Distinto del browse catalog (`folders:read`) y del subsistema hermano de carpetas de evidencia anual (`evidence_folders:*`). Decisión registrada: `decisiones-clave.md` §19.
+
+### `runtime-camporees.md`
+
+Canoniza operaciones CRUD sobre la entidad camporee con permisos propios `camporees:read/create/update/delete`. Separa explícitamente de `attendance:*` cross-cutting (preservado deliberadamente entre activities y camporees). Permiso `camporees:register` reservado sin uso actual. Decisión registrada: `decisiones-clave.md` §20.
+
+### `runtime-validation.md`
+
+Canoniza el workflow submit → review con permisos propios `validation:submit/review/read`. Coexistencia: los permisos originales `classes:*` y `users:read_detail` PERMANECEN activos para sus dominios propios. Drift histórico corregido: nav `/dashboard/validation` migrado de `investiture:read` a `validation:read`. Decisión registrada: `decisiones-clave.md` §21.
+
 ## Convenciones de nombres
 - `<area>.md` o `<tema>.md` — documento canónico cuando el nombre exacto comunica mejor su rol sistémico;
 - `dominio-<area>.md` — definición funcional y semántica de un dominio específico;
