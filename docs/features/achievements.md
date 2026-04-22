@@ -1,9 +1,10 @@
 # Achievements / Gamification
 
-**Estado**: NO CANON
+**Estado**: ACTIVE
+**Autoridad canónica**: `docs/canon/runtime-achievements.md`
 
 > Feature operativa documentada con enfoque feature-first.
-> No redefine canon de negocio. La autoridad operativa para esta superficie vive en runtime backend y Prisma.
+> El canon rector del sistema de tiers, eventos y evaluación vive en `docs/canon/runtime-achievements.md`. Este documento lista superficie operativa y contratos runtime.
 
 ## Descripcion de dominio
 

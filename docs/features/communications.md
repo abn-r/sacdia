@@ -22,7 +22,7 @@ El envio soporta tres niveles: directo a un usuario, broadcast global y envio a 
     - `POST /api/v1/notifications/send` — Enviar notificacion directa (`notifications:send`)
     - `POST /api/v1/notifications/broadcast` — Enviar broadcast global (`notifications:broadcast`)
     - `POST /api/v1/notifications/club/:instanceType/:instanceId` — Enviar a miembros de club con enforcement por `active_assignment` (`notifications:club`)
-    - `GET /api/v1/notifications/history` — Historial paginado; admin ve auditoria, usuario regular ve su bandeja
+    - `GET /api/v1/notifications/history` — Historial paginado; admin ve auditoria, usuario regular ve su bandeja (requiere `notifications:send` desde 2026-04-22)
     - `GET /api/v1/notifications/unread-count` — Conteo de no leidas del usuario autenticado
     - `PATCH /api/v1/notifications/read-all` — Marcar todas como leidas
     - `PATCH /api/v1/notifications/:deliveryId/read` — Marcar una entrega como leida
@@ -42,7 +42,7 @@ El envio soporta tres niveles: directo a un usuario, broadcast global y envio a 
 - **Cobertura verificada**:
   - envio directo y broadcast consumen rutas vigentes
   - historial administrativo consume `GET /api/v1/notifications/history`
-  - el formulario de envio por club del admin sigue cableado a una ruta legacy de seccion, por lo que esa parte de la UI no esta alineada todavia con `POST /api/v1/notifications/club/:instanceType/:instanceId`
+  - el formulario de envio por club del admin ya consume la ruta canonica `POST /api/v1/notifications/club/:instanceType/:instanceId` (alineado 2026-04-22; la ruta legacy `POST /notifications/section/:sectionId` nunca existio en backend y producia 404 silencioso hasta el fix)
 
 ### App Movil
 - **Tiene bandeja funcional**: `NotificationsInboxView` con paginacion, pull-to-refresh y carga incremental

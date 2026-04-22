@@ -15,13 +15,14 @@ La feature esta implementada en backend con IDs UUID y estados `draft -> generat
 - **Service**: `src/monthly-reports/monthly-reports.service.ts`
 - **PDF**: `src/monthly-reports/monthly-reports-pdf.service.ts`
 - **Cron**: `src/monthly-reports/monthly-reports-cron.service.ts`
-- **8 endpoints directos**:
+- **9 endpoints directos**:
   - `GET /api/v1/monthly-reports/preview/:enrollmentId` - preview en vivo para una matricula y periodo
   - `POST /api/v1/monthly-reports/:enrollmentId` - obtener o crear borrador unico por `(club_enrollment_id, month, year)`
   - `PATCH /api/v1/monthly-reports/:reportId/manual-data` - guardar datos manuales solo si el informe esta en `draft`
   - `POST /api/v1/monthly-reports/:reportId/generate` - congelar `snapshot_data` y pasar a `generated`
   - `POST /api/v1/monthly-reports/:reportId/submit` - pasar de `generated` a `submitted`
   - `GET /api/v1/monthly-reports/enrollment/:enrollmentId` - listar informes por matricula, con filtro opcional `status`
+  - `GET /api/v1/monthly-reports/admin/list` - **supervision multi-club para admin/coordinator** (agregado 2026-04-22). Query params: `club_type_id`, `local_field_id`, `year`, `month`, `status`, `page`, `limit`. Scope: admin/super_admin ve todo; coordinator es forzado a su `local_field_id` derivado via `AuthorizationContextService` (JWT no trae claim directo, se resuelve en server con cache Redis 5min). Response paginada con club_name, club_type, local_field, submitter_name y member_count por item.
   - `GET /api/v1/monthly-reports/:reportId/pdf` - descargar PDF solo para `generated|submitted`
   - `GET /api/v1/monthly-reports/:reportId` - obtener detalle completo con `manual_data`, `snapshot_data`, matricula y submitter
 - **Permisos verificados**:

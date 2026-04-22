@@ -14,13 +14,15 @@ La feature combina consulta del ganador vigente, historial paginado, evaluacion 
 - **Controller**: `src/member-of-month/member-of-month.controller.ts`
 - **Service**: `src/member-of-month/member-of-month.service.ts`
 - **Cron**: `src/member-of-month/member-of-month-cron.service.ts`
-- **3 endpoints**:
+- **4 endpoints**:
   - `GET /api/v1/clubs/:clubId/sections/:sectionId/member-of-month` - obtener ganador(es) del mes actual
   - `GET /api/v1/clubs/:clubId/sections/:sectionId/member-of-month/history` - historial paginado por periodo
   - `POST /api/v1/clubs/:clubId/sections/:sectionId/member-of-month/evaluate` - disparar evaluacion manual de un mes/anio
-- **Permisos y reglas**:
-  - lectura requiere `units:read`
-  - evaluacion manual requiere `units:update`, throttle de `5` requests por minuto y validacion adicional de rol director/sub-director/directora activo en la seccion
+  - `GET /api/v1/member-of-month/admin/list` - **supervision multi-seccion para admin/coordinator** (agregado 2026-04-22). Query params: `club_type_id`, `local_field_id`, `club_id`, `section_id`, `year`, `month`, `notified`, `page`, `limit`. Scope: admin/super_admin ve todo; coordinator es forzado a su `local_field_id` resuelto via `AuthorizationContextService`. Response paginada con user_name, section_name, club_type, club_name, local_field, total_points, notified.
+- **Permisos y reglas** (migrados a dominio propio 2026-04-22):
+  - lectura por seccion requiere `mom:read`
+  - supervision multi-seccion (endpoint admin/list) requiere `mom:supervise`
+  - evaluacion manual requiere `mom:evaluate`, throttle de `5` requests por minuto y validacion adicional de rol director/sub-director/directora activo en la seccion
   - la evaluacion es idempotente: borra e inserta de nuevo el periodo antes de persistir ganadores
   - el historial pagina por periodos distintos `(year, month)` y limita `limit` a `100`
 - **Cron operativo**:
