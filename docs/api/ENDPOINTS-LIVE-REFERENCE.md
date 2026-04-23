@@ -8,8 +8,8 @@
 > Base URL: `/api/v1`
 
 **Estado**: ACTIVE
-**Actualizado**: 2026-04-20 (merge documental: notifications deliveries runtime + GDPR data export + settings self-service)
-**Total endpoints**: 328
+**Actualizado**: 2026-04-23 (support reports endpoint + admin notification stats)
+**Total endpoints**: 330
 
 ## Lectura Rápida
 
@@ -259,6 +259,7 @@
 | POST | `/api/v1/admin/medicines` | JWT | super_admin, admin | Create medicine | `src/admin/admin-reference.controller.ts` |
 | DELETE | `/api/v1/admin/medicines/:medicineId` | JWT | super_admin, admin | Soft delete medicine | `src/admin/admin-reference.controller.ts` |
 | PATCH | `/api/v1/admin/medicines/:medicineId` | JWT | super_admin, admin | Update medicine | `src/admin/admin-reference.controller.ts` |
+| GET | `/api/v1/admin/notifications/stats` | JWT | super_admin, admin | Metricas de delivery FCM. Query `?days=30` (int 1-365, default 30). Responde `{ activeTokens, inactiveTokens30d, dailyDeliveryRate[] }`; cada fila trae `date`, `tokens_sent`, `tokens_failed`, `success_rate` (server-side; `null` cuando ambos contadores son 0 para distinguir "sin datos" de "100% fallo") | `src/admin/admin-notifications.controller.ts` |
 | GET | `/api/v1/admin/rbac/permissions` | JWT | super_admin, admin | Listar todos los permisos | `src/rbac/rbac.controller.ts` |
 | POST | `/api/v1/admin/rbac/permissions` | JWT | super_admin | Crear un nuevo permiso | `src/rbac/rbac.controller.ts` |
 | DELETE | `/api/v1/admin/rbac/permissions/:id` | JWT | super_admin | Desactivar un permiso | `src/rbac/rbac.controller.ts` |
@@ -634,6 +635,12 @@
 | GET | `/api/v1/clubs/:clubId/sections/:sectionId/member-of-month` | JWT | `units:read` | Obtener ganador(es) del mes actual para una seccion | `src/member-of-month/member-of-month.controller.ts` |
 | GET | `/api/v1/clubs/:clubId/sections/:sectionId/member-of-month/history` | JWT | `units:read` | Obtener historial paginado de miembro del mes por seccion | `src/member-of-month/member-of-month.controller.ts` |
 | POST | `/api/v1/clubs/:clubId/sections/:sectionId/member-of-month/evaluate` | JWT | `units:update` + director/sub-director/directora de la seccion | Disparar evaluacion manual del periodo solicitado; rate limit 5/min | `src/member-of-month/member-of-month.controller.ts` |
+
+## support
+
+| Method | Path | Auth | Roles | Description | Source |
+|---|---|---|---|---|---|
+| POST | `/api/v1/support/reports` | JWT | - | Enviar reporte de soporte (bug, feature_request, account, data_issue, performance, other). Body: `{ category, title<=120, description<=2000, deviceInfo{platform,osVersion,model,appVersion,buildNumber}, userContext?{route?,clubId?,sectionId?} }`. Rate limit 5/hora por usuario. Responde 201 `{ reportId, createdAt }` | `src/support/support.controller.ts` |
 
 ## Nota de mantenimiento
 
