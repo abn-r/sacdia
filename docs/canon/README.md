@@ -162,6 +162,10 @@ Canoniza operaciones CRUD sobre la entidad camporee con permisos propios `campor
 
 Canoniza el workflow submit → review con permisos propios `validation:submit/review/read`. Coexistencia: los permisos originales `classes:*` y `users:read_detail` PERMANECEN activos para sus dominios propios. Drift histórico corregido: nav `/dashboard/validation` migrado de `investiture:read` a `validation:read`. Decisión registrada: `decisiones-clave.md` §21.
 
+### `runtime-alerting.md`
+
+Canoniza la capa de alerting Sentry sobre los 3 runtimes (backend/admin/app). Separa código (captura + tags + fingerprints) de configuración (reglas Sentry UI, reconfigurables sin redeploy). Documenta convención de tags (`cron`, `job_name`, `source`, `queue`), 5 reglas de alerta recomendadas, runbook operacional y release tracking via `VERCEL_GIT_COMMIT_SHA` / `RENDER_GIT_COMMIT`.
+
 ## Convenciones de nombres
 - `<area>.md` o `<tema>.md` — documento canónico cuando el nombre exacto comunica mejor su rol sistémico;
 - `dominio-<area>.md` — definición funcional y semántica de un dominio específico;
