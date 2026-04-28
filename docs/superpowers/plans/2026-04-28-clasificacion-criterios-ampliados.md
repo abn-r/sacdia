@@ -16,6 +16,47 @@
 
 ---
 
+## SCHEMA AUDIT NOTES (verified against dev branch 2026-04-28 — apply to ALL tasks)
+
+The plan as originally drafted assumed several wrong column types and table names. Tasks were rewritten in-place against the actual schema. When in doubt, run `\d <table>` against dev via psql before writing $queryRaw.
+
+| Concept | Real schema |
+|---|---|
+| `clubs.club_id` | **integer** (NOT uuid) |
+| `clubs.local_field_id` | integer (FK to local_fields) |
+| `club_sections.club_section_id` | **integer**, FK `main_club_id integer` to clubs |
+| `club_enrollments.club_enrollment_id` | uuid |
+| `annual_folders.annual_folder_id` | uuid |
+| `annual_folders` columns | NO `ecclesiastical_year_id` directly — derive via `folder_template.ecclesiastical_year_id` (existing pattern in `rankings.service.ts`). `annual_folders.local_camporee_id` and `union_camporee_id` exist (XOR check constraint). |
+| `annual_folders.status` (varchar) | values `open | submitted | evaluated | closed` |
+| `annual_folder_section_evaluations.status` enum (`annual_folder_section_status_enum`) | `PENDING | SUBMITTED | PREAPPROVED_LF | VALIDATED | REJECTED`. NO `'closed'` value (that's a folder-level status, not a section status). |
+| Finance closing table name | **`finance_period_closings`** (plural — NOT singular) |
+| `finance_period_closings.club_id` | **integer** |
+| `finance_period_closings.closed_at` | `timestamp(3) without time zone` (NO timezone). Comparing against `make_timestamptz(...)` requires casting either side: `closed_at <= (make_timestamptz(year, month + 1, deadline_day, 23, 59, 59, 'UTC') AT TIME ZONE 'UTC')` returns `timestamp without time zone` — comparable directly. |
+| `folders` (legacy folders for evidence records) | `folder_id integer`, `ecclesiastical_year_id integer` (FK), NO `year` column |
+| `folders_section_records.folder_id` | integer (FK → `folders.folder_id`) |
+| `folders_section_records.club_section_id` | integer (FK → `club_sections.club_section_id`) |
+| `folders_section_records.status` enum `evidence_validation_enum` | `PENDING | VALIDATED | REJECTED` |
+| `camporee_clubs` | split FK columns `camporee_id` (FK local_camporees) AND `union_camporee_id` (FK union_camporees), with CHECK enforcing exactly one non-null. `club_id integer`. `status varchar(20)` ('registered' | 'approved' | 'rejected'). |
+| `local_camporees` | `local_camporee_id integer`, `local_field_id integer` (NO `union_id`). Scope by local_field. |
+| `union_camporees` | `union_camporee_id integer`, `union_id integer NOT NULL`. |
+| Ecclesiastical year ID across tables | `ecclesiastical_years.year_id` is integer (referenced everywhere as `ecclesiastical_year_id`). |
+
+**Calculator signature ground truth** (use these in Task 8 wiring):
+
+| Calculator | Signature |
+|---|---|
+| `FolderScoreService.calc(enrollmentId: string /* uuid */, yearId: number)` | year passed via folder_template join |
+| `FinanceScoreService.calc(clubId: number, year: number)` | calendar year, NOT ecclesiastical_year_id |
+| `CamporeeScoreService.calc(clubId: number, localFieldId: number, unionId: number | null, year: number)` | year is `ecclesiastical_year` integer |
+| `EvidenceScoreService.calc(clubId: number, ecclesiasticalYearId: number)` | year is `ecclesiastical_year_id` |
+| `WeightsResolverService.resolve(clubTypeId: number)` | int |
+| `CompositeScoreService.compose(scores, weights)` | pure |
+
+Wiring (Task 8) must source the right inputs per club from `clubs` + `club_enrollments` + `ecclesiastical_years`.
+
+---
+
 ## Phase 0: Database Schema Migrations
 
 ### Task 1: Write 3 hand-rolled migration SQL files
@@ -340,6 +381,8 @@ All calculators live in a new file `score-calculators.ts` co-located with `ranki
 
 ### Task 4: calcFinanceScore — TDD
 
+> **SCHEMA NOTE**: real table is `finance_period_closings` (plural). `club_id` is `integer`. `closed_at` is `timestamp(3) WITHOUT time zone` — must convert `make_timestamptz(...)` result via `AT TIME ZONE 'UTC'` to compare. Signature is `calc(clubId: number, year: number)` — NOT string/uuid.
+
 **Files:**
 - Create: `sacdia-backend/src/annual-folders/score-calculators/finance-score.ts`
 - Create: `sacdia-backend/src/annual-folders/score-calculators/finance-score.spec.ts`
@@ -650,6 +693,8 @@ git commit -m "feat(rankings): add CamporeeScoreService scoped by union_id"
 
 ### Task 6: calcEvidenceScore — TDD
 
+> **SCHEMA NOTE**: signature is `calc(clubId: number, ecclesiasticalYearId: number)`. `folders.year` does NOT exist — use `folders.ecclesiastical_year_id`. `folders.folder_id` and `folders_section_records.folder_id` are `integer`. `club_sections.main_club_id` is `integer`. The query uses `folders` (legacy folders system that holds `folders_section_records` with `evidence_validation_enum` status), NOT `annual_folders` (different table). The implementer must NOT confuse the two — the evidence validation flow lives in `folders_section_records`, not in `annual_folder_section_evaluations`.
+
 **Files:**
 - Create: `sacdia-backend/src/annual-folders/score-calculators/evidence-score.ts`
 - Create: `sacdia-backend/src/annual-folders/score-calculators/evidence-score.spec.ts`
@@ -760,6 +805,10 @@ git commit -m "feat(rankings): add EvidenceScoreService computing approval rate"
 ---
 
 ### Task 7: refactor calcFolderScore + add resolveWeights + composite — TDD
+
+> **SCHEMA NOTE for FolderScoreService**: signature is `calc(enrollmentId: string /* uuid */, yearId: number)`. `annual_folders` has NO `ecclesiastical_year_id` column — derive year via `folder_template.ecclesiastical_year_id` join (existing pattern, see `rankings.service.ts:166-180`). `annual_folder_section_evaluations.status` enum values are `PENDING | SUBMITTED | PREAPPROVED_LF | VALIDATED | REJECTED` — use only `'VALIDATED'` (no `'closed'`; that's a folder-level status). Cast enum literal in raw SQL: `e.status = 'VALIDATED'::annual_folder_section_status_enum`. `annual_folders.club_enrollment_id` and `annual_folder_section_evaluations.annual_folder_id` are uuid.
+
+> **SCHEMA NOTE for WeightsResolverService**: `ranking_weight_configs.club_type_id` is `int?` (nullable). Prisma `findUnique({ where: { club_type_id: null } })` may not work because Prisma rejects `null` for unique fields. Use `findFirst({ where: { club_type_id: null } })` for the default-global lookup.
 
 **Files:**
 - Create: `sacdia-backend/src/annual-folders/score-calculators/folder-score.ts`
