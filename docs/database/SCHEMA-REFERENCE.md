@@ -2,7 +2,7 @@
 
 **Estado**: ACTIVE
 **Sincronizado contra**: `sacdia-backend/prisma/schema.prisma`
-**Fecha de resincronizacion**: 2026-04-15 (achievements: notas operativas agregadas)
+**Fecha de resincronizacion**: 2026-04-28 (8.4-C: club_annual_rankings extendido, award_categories extendido, ranking_weight_configs nuevo, system_config keys nuevas)
 
 Referencia humana concisa del schema Prisma vigente.
 
@@ -71,6 +71,9 @@ Referencia humana concisa del schema Prisma vigente.
 
 - Incluye configuracion operativa general.
 - Membership requests usa la key `membership.pending_timeout_days` para expirar solicitudes pendientes.
+- Nuevas keys desde 8.4-C (2026-04-28):
+  - `ranking.finance_closing_deadline_day` (default `5`) — día del mes límite para cierre financiero en el cálculo de `finance_score_pct`.
+  - `ranking.recalculation_enabled` (default `true`) — kill-switch que inhibe el cron y el endpoint manual de recálculo de rankings cuando es `false`.
 
 ### `activities` y `activity_instances`
 
@@ -130,6 +133,44 @@ Referencia humana concisa del schema Prisma vigente.
 - CHECK `annual_folder_section_evaluations_preapproved_requires_lf_check`: `status <> 'PREAPPROVED_LF' OR lf_approved_at IS NOT NULL`; impide marcar `PREAPPROVED_LF` sin un timestamp de aprobacion local.
 - Indice `idx_annual_folder_section_evaluations_status` para soportar filtrado analitico por estado.
 
+### `club_annual_rankings` — columnas extendidas (8.4-C)
+
+Columnas nuevas desde migración `20260428*_extended_rankings_schema`:
+
+- `folder_score_pct FLOAT NOT NULL DEFAULT 0` — porcentaje de puntaje de carpeta (0-100).
+- `finance_score_pct FLOAT NOT NULL DEFAULT 0` — porcentaje de cierre financiero mensual (0-100).
+- `camporee_score_pct FLOAT NOT NULL DEFAULT 0` — porcentaje de asistencia a camporees (0-100).
+- `evidence_score_pct FLOAT NOT NULL DEFAULT 0` — porcentaje de evidencias validadas (0-100).
+- `composite_score_pct FLOAT NOT NULL DEFAULT 0` — promedio ponderado de los 4 componentes (0-100).
+- `composite_calculated_at TIMESTAMPTZ?` — timestamp de la última actualización del composite.
+
+Índice nuevo: `idx_rankings_composite` sobre `(ecclesiastical_year_id, club_type_id, composite_score_pct DESC)` para soportar el dense ranking y listados ordenados por composite.
+
+### `award_categories` — columnas extendidas (8.4-C)
+
+Columnas nuevas:
+
+- `min_composite_pct FLOAT?` — umbral inferior de `composite_score_pct` para calificar en la categoría (0-100).
+- `max_composite_pct FLOAT?` — umbral superior de `composite_score_pct` (0-100). `null` = sin tope.
+- `is_legacy BOOLEAN NOT NULL DEFAULT false` — marcador de filas creadas antes de 2026-04-28. Las categorías legacy se excluyen del composite ranking. El GET filtra `is_legacy = false` por defecto.
+
+### `ranking_weight_configs` (nueva — 8.4-C)
+
+Tabla que almacena configuraciones de pesos para el composite ranking:
+
+- `id UUID PK` — identificador de la configuración.
+- `club_type_id INT?` — FK a `club_types`; `NULL` = configuración global default.
+- `folder_weight INT NOT NULL` — peso del componente carpeta (0-100).
+- `finance_weight INT NOT NULL` — peso del componente finanzas (0-100).
+- `camporee_weight INT NOT NULL` — peso del componente camporee (0-100).
+- `evidence_weight INT NOT NULL` — peso del componente evidencias (0-100).
+- `created_at TIMESTAMPTZ NOT NULL DEFAULT now()`.
+- `updated_at TIMESTAMPTZ NOT NULL DEFAULT now()`.
+
+Constraints:
+- CHECK `ranking_weight_configs_sum_check`: `folder_weight + finance_weight + camporee_weight + evidence_weight = 100`.
+- Índice único parcial: `ranking_weight_configs_club_type_unique` sobre `(club_type_id) WHERE club_type_id IS NOT NULL` — permite único global null + un override por club_type.
+
 ---
 
 ## Inventario resumido por dominio
@@ -175,7 +216,7 @@ Referencia humana concisa del schema Prisma vigente.
 
 - `club_enrollments`, `folder_templates`, `folder_template_sections`
 - `annual_folders`, `annual_folder_evidences`, `annual_folder_section_evaluations`, `annual_folder_section_submissions`
-- `award_categories`, `club_annual_rankings`, `monthly_reports`, `monthly_report_manual_data`, `member_of_month`, `weekly_records`, `scoring_categories`, `weekly_record_scores`
+- `award_categories`, `club_annual_rankings`, `ranking_weight_configs`, `monthly_reports`, `monthly_report_manual_data`, `member_of_month`, `weekly_records`, `scoring_categories`, `weekly_record_scores`
 
 ### Recursos y logros
 
@@ -216,6 +257,7 @@ Referencia humana concisa del schema Prisma vigente.
 - `20260415100200_section_evaluations_dual_level` - renombra `evaluated_by_id`/`evaluated_at` a `lf_approved_by`/`lf_approved_at` (ambas nullable), añade `union_approved_by`/`union_approved_at`/`union_decision`, crea `union_evaluation_decision_enum` y el CHECK de orden LF→Union.
 - `20260415100300_section_evaluations_stored_status` - crea `annual_folder_section_status_enum`, añade la columna `status` materializada con default `PENDING`, el CHECK de `PREAPPROVED_LF` y el indice analitico por estado.
 - `20260415100400_annual_folders_eager_evaluation_backfill` - migracion data-only; no-op sobre dev por ausencia de datos legacy.
+- `20260428000000_extended_rankings_schema` (8.4-C) - añade 5 columnas de score + `composite_calculated_at` a `club_annual_rankings`; crea `ranking_weight_configs` con CHECK sum=100 + índice único parcial; extiende `award_categories` con `min_composite_pct`, `max_composite_pct`, `is_legacy`; crea `idx_rankings_composite`; inserta configuración global default (60/15/15/10); agrega keys `ranking.finance_closing_deadline_day` y `ranking.recalculation_enabled` en `system_config`. Aplicada en los 3 branches Neon (development, staging, production).
 
 ## Nota operativa
 

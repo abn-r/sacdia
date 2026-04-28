@@ -1,8 +1,8 @@
 # SACDIA — Bases del Proyecto
 ## Versión normalizada para análisis contra canon e implementación
 
-**Última resincronización**: 2026-04-28 contra canon + engram (sesiones #1808 + #1842).
-**Cambios clave**: 8.1 Multilenguaje, 8.3 Reportes y 8.5 QR/tarjetas pasaron de [ROADMAP] a [VIGENTE]. 8.6 IA queda aislada como [ROADMAP]. Pendientes reales: 8.2 Offline + 8.4 Clasificación ampliada + 8.6 IA.
+**Última resincronización**: 2026-04-28 contra canon + engram (sesiones #1808 + #1842 + 8.4-C shipped).
+**Cambios clave**: 8.1 Multilenguaje, 8.3 Reportes y 8.5 QR/tarjetas pasaron de [ROADMAP] a [VIGENTE]. 8.4-C Clasificación ampliada pasa a [VIGENTE]. 8.6 IA queda aislada como [ROADMAP]. Pendientes reales: 8.2 Offline + 8.4 A/B/D/E + 8.6 IA.
 
 ### Propósito del documento
 Este documento presenta la visión base de SACDIA, su posicionamiento frente a soluciones existentes del ecosistema y una síntesis de capacidades actuales, capacidades parciales y líneas de evolución futura.
@@ -103,7 +103,7 @@ Cobertura actual acotada a un recurso (activities); ampliar cobertura por featur
 
 ### 5.7 Clasificación institucional de clubes
 **[VIGENTE]**  
-Existe un subsistema de **ranking anual de clubes** con categorías de premio configurables, pipeline automático de recálculo (cron diario 02:00 UTC con lock distribuido) y superficie admin dedicada. Canon rector: `docs/canon/runtime-rankings.md`.
+Existe un subsistema de **ranking anual de clubes** con composite ponderado de 4 criterios institucionales (carpeta/finanzas/camporee/evidencias), categorías de premio configurables, pipeline automático de recálculo (cron diario 02:00 UTC con lock distribuido y kill-switch) y superficie admin dedicada con drill-down por club. Canon rector: `docs/canon/runtime-rankings.md`.
 
 ### 5.8 Sistema de logros y tiers del miembro
 **[VIGENTE]**  
@@ -143,14 +143,14 @@ La cobertura de invalidación por feature no está auditada transversalmente y n
 Una experiencia **offline-first** real (queue persistida de mutaciones, sincronización diferida con reconciliación de conflictos) **no existe hoy** y debe tratarse como línea futura. No describir la capacidad actual como "offline" sin matizar — es cache + invalidación, no offline-first.
 
 ### 6.2 Clasificación y ranking
-**[PARCIAL]**  
-SACDIA ya muestra bases para lógica de clasificación/ranking mediante categorías configurables y estructuras relacionadas con puntajes o niveles en algunos dominios.
+**[VIGENTE]**  
+SACDIA implementa un sistema de **clasificación institucional compuesta** de clubes por año eclesiástico. El composite ranking pondera cuatro criterios: puntaje de carpeta anual evaluada (60%), cumplimiento de cierre financiero mensual (15%), asistencia a camporees (15%) y cobertura de evidencias validadas (10%). Los pesos son configurables por tipo de club. Canon rector: `docs/canon/runtime-rankings.md`.
 
-**[PARCIAL]**  
-También existen niveles tipo Bronce/Plata/Oro/Platino/Diamante en ciertos contextos específicos.
+**[VIGENTE]**  
+Las categorías de premio son configurables con umbrales de composite percentage (0-100). Las categorías previas a 2026-04-28 están marcadas `is_legacy = true` y no participan en el composite ranking.
 
-**[PARCIAL]**  
-Sin embargo, no debe afirmarse todavía como una **clasificación institucional única y cerrada** aplicable a todo el sistema sin mayor verificación.
+**[VIGENTE]**  
+También existen niveles tipo Bronce/Plata/Oro/Platino/Diamante como parte del sistema de achievements de miembros (`docs/canon/runtime-achievements.md`), conceptualmente distinto del sistema de clasificación de clubes.
 
 ---
 
@@ -193,8 +193,22 @@ Pipeline de reportes expandido: además de los 8 jobs base, existen reportes tri
 Dashboards accionables adicionales y expansión a nuevos dominios siguen como línea futura.
 
 ### 8.4 Clasificación institucional ampliada
+
+#### 8.4-C Criterios ampliados [VIGENTE]
+**[VIGENTE]**  
+Composite ranking implementado (2026-04-28): promedio ponderado de 4 criterios (carpeta/finanzas/camporee/evidencias), pesos configurables por `club_type` en `ranking_weight_configs`, endpoint de drill-down por club (`/breakdown`) y CRUD de configuración de pesos (`/ranking-weights`). Canon rector: `docs/canon/runtime-rankings.md` §13. Decisión estructural: `docs/canon/decisiones-clave.md` §22.
+
+Referencias:
+- Spec: `docs/superpowers/specs/2026-04-28-clasificacion-criterios-ampliados-design.md`
+- Plan: `docs/superpowers/plans/2026-04-28-clasificacion-criterios-ampliados.md`
+
+#### 8.4 A/B/D/E — Pendientes [ROADMAP]
 **[ROADMAP]**  
-La evolución hacia un modelo más visible y uniforme de clasificación institucional puede evaluarse como línea futura, siempre que se defina su alcance funcional y su valor real para clubes, secciones y liderazgo.
+Las siguientes sub-líneas de 8.4 permanecen como evolución futura:
+- **8.4-A**: Clasificación a nivel sección y miembro (hoy el ranking es solo por club).
+- **8.4-B**: Visibilidad para el usuario final (app móvil) del ranking de su club y posición.
+- **8.4-D**: Periodicidades menores (ranking mensual, trimestral) adicionales al ciclo anual.
+- **8.4-E**: Agrupación y comparación regional (por campo local, unión o división).
 
 ### 8.5 QR y tarjetas virtuales
 **[VIGENTE]**

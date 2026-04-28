@@ -404,6 +404,36 @@ Hallazgo paralelo: la ruta admin `/dashboard/validation` usaba `investiture:read
 
 **Cierre del audit C2 de permisos reutilizados**: Sprint E es el último del plan de 5 sprints (MoM §16, scoring-categories §17, requests §18, user_certifications+user_folders §19, camporees §20, validation §21). 6 dominios canonizados con permisos propios. Audit cerrado.
 
+### 22. Criterios institucionales ampliados (8.4-C)
+
+**Estado**: Vigente <!-- VERIFICADO: schema club_annual_rankings con 5 columnas nuevas + composite_calculated_at, ranking_weight_configs, award_categories extendido con min/max_composite_pct + is_legacy, score-calculators/*, WeightsResolver, endpoint /breakdown, CRUD /ranking-weights. Vigente desde 2026-04-28. -->
+
+**Contexto**: El sistema de rankings institucionales (§12, `docs/canon/runtime-rankings.md`) ordenaba los clubes únicamente por `total_earned_points` de carpeta evaluada. Eso dejaba fuera criterios institucionales relevantes (cumplimiento financiero mensual, asistencia a camporees, cobertura de evidencias) y no permitía configurar pesos por tipo de club.
+
+**Decisión**: El canon adopta un composite ponderado de 4 componentes como índice de clasificación institucional. Se fija que:
+
+- el composite es el promedio ponderado de `folder_score_pct` (0-100) + `finance_score_pct` + `camporee_score_pct` + `evidence_score_pct`, cada uno calculado independientemente por su propio score-calculator;
+- los pesos globales por defecto son `60 / 15 / 15 / 10` (folder / finance / camporee / evidence); se pueden sobreescribir por `club_type_id` en `ranking_weight_configs`; la suma debe ser exactamente 100 (DB CHECK + API validation);
+- el dense ranking (`rank_position`) se asigna sobre `composite_score_pct DESC` (antes sobre `total_earned_points DESC`);
+- semántica current-year-forward: los rankings históricos retienen `0` en los campos nuevos vía `DEFAULT 0` sin recomputación retroactiva;
+- `award_categories.{min,max}_composite_pct` interpretan umbrales en escala 0-100; las filas pre-2026-04-28 están marcadas `is_legacy = true` y excluidas del composite ranking;
+- el kill-switch `system_config[ranking.recalculation_enabled]` (default `true`) inhibe tanto el cron como el recálculo manual; ambas rutas lo consultan antes de ejecutar;
+- el `system_config[ranking.finance_closing_deadline_day]` (default `5`) parametriza qué día del mes se considera como fecha límite de cierre financiero para el cálculo de `finance_score_pct`.
+
+**Consecuencias**:
+
+- `GET /annual-folders/rankings*` ahora incluye los 6 campos nuevos por fila;
+- el nuevo endpoint `GET /annual-folders/rankings/:enrollmentId/breakdown?year_id` expone el composite + pesos + detalle por componente (permiso `rankings:read`);
+- el CRUD `/ranking-weights` (5 endpoints, permisos `ranking_weights:read/write`) gestiona las configuraciones de pesos; el default global no puede eliminarse;
+- cualquier nuevo criterio de clasificación debe agregarse como componente en `score-calculators/*` y requerir actualización de este canon;
+- la integración de camporee score requiere que los camporees del año estén registrados en la DB antes del recálculo; ausencia de camporees produce `score_pct = 0`, no error.
+
+**Referencias**:
+
+- Spec: `docs/superpowers/specs/2026-04-28-clasificacion-criterios-ampliados-design.md`
+- Plan: `docs/superpowers/plans/2026-04-28-clasificacion-criterios-ampliados.md`
+- Canon rector: `docs/canon/runtime-rankings.md` §13.
+
 ## Estados posibles de una decisión
 
 Las decisiones de este documento deben estar en uno de estos estados:

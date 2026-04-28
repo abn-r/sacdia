@@ -8,8 +8,8 @@
 > Base URL: `/api/v1`
 
 **Estado**: ACTIVE
-**Actualizado**: 2026-04-27 (QR canonical contract + virtual card endpoints)
-**Total endpoints**: 334
+**Actualizado**: 2026-04-28 (8.4-C extended institutional rankings)
+**Total endpoints**: 340
 
 ## Lectura Rápida
 
@@ -576,11 +576,70 @@
 
 ## rankings
 
+Desde 8.4-C (2026-04-28), los endpoints `GET` de rankings incluyen 6 campos nuevos por fila: `folder_score_pct`, `finance_score_pct`, `camporee_score_pct`, `evidence_score_pct`, `composite_score_pct`, `composite_calculated_at`.
+
 | Method | Path | Auth | Roles | Description | Source |
 |---|---|---|---|---|---|
-| GET | `/api/v1/annual-folders/rankings` | JWT | `rankings:read` | Obtener rankings de clubes con filtros (club_type, year, category) | `src/annual-folders/rankings.controller.ts` |
-| GET | `/api/v1/annual-folders/rankings/club/:enrollmentId` | JWT | `rankings:read` | Obtener rankings de un club específico | `src/annual-folders/rankings.controller.ts` |
-| POST | `/api/v1/annual-folders/rankings/recalculate` | JWT | `rankings:recalculate` | Disparar recálculo manual de rankings | `src/annual-folders/rankings.controller.ts` |
+| GET | `/api/v1/annual-folders/rankings` | JWT | `rankings:read` | Obtener rankings de clubes con filtros (club_type, year, category). Cada fila incluye los 6 campos de composite. | `src/annual-folders/rankings.controller.ts` |
+| GET | `/api/v1/annual-folders/rankings/club/:enrollmentId` | JWT | `rankings:read` | Obtener rankings de un club específico. Incluye los 6 campos de composite. | `src/annual-folders/rankings.controller.ts` |
+| GET | `/api/v1/annual-folders/rankings/:enrollmentId/breakdown` | JWT | `rankings:read` | Drill-down de clasificación por enrollment. Query: `?year_id=`. Devuelve composite + pesos aplicados + detalle por componente. Ver esquema de respuesta abajo. | `src/annual-folders/rankings.controller.ts` |
+| POST | `/api/v1/annual-folders/rankings/recalculate` | JWT | `rankings:recalculate` | Disparar recálculo manual de rankings. Respeta kill-switch `ranking.recalculation_enabled`. | `src/annual-folders/rankings.controller.ts` |
+
+#### Esquema de respuesta — `/breakdown`
+
+```json
+{
+  "enrollment_id": "uuid",
+  "year_id": 5,
+  "composite_score_pct": 76.85,
+  "weights_applied": {
+    "folder": 60, "finance": 15, "camporee": 15, "evidence": 10,
+    "source": "default | club_type_override"
+  },
+  "components": {
+    "folder": {
+      "score_pct": 78.50,
+      "earned_points": 1240,
+      "max_points": 1580,
+      "sections_evaluated": 12
+    },
+    "finance": {
+      "score_pct": 91.66,
+      "months_closed_on_time": 11,
+      "months_total": 12,
+      "deadline_day": 5,
+      "missed_months": [3]
+    },
+    "camporee": {
+      "score_pct": 50.00,
+      "attended": 1,
+      "available_in_scope": 2,
+      "events": [
+        { "id": "uuid", "name": "Camporee Unión 2026", "status": "approved" },
+        { "id": "uuid", "name": "Camporee Local Q2", "status": null }
+      ]
+    },
+    "evidence": {
+      "score_pct": 88.00,
+      "validated": 22,
+      "rejected": 3,
+      "pending_excluded": 8
+    }
+  }
+}
+```
+
+## ranking-weights
+
+Permisos: `ranking_weights:read` (lectura) | `ranking_weights:write` (creación, modificación, eliminación).
+
+| Method | Path | Auth | Roles | Description | Source |
+|---|---|---|---|---|---|
+| GET | `/api/v1/ranking-weights` | JWT | `ranking_weights:read` | Listar todas las configuraciones de pesos (default global + overrides por club_type) | `src/annual-folders/ranking-weights.controller.ts` |
+| GET | `/api/v1/ranking-weights/:id` | JWT | `ranking_weights:read` | Obtener detalle de una configuración de pesos por ID | `src/annual-folders/ranking-weights.controller.ts` |
+| POST | `/api/v1/ranking-weights` | JWT | `ranking_weights:write` | Crear override de pesos por `club_type_id`. Body: `{ club_type_id, folder_weight, finance_weight, camporee_weight, evidence_weight }` (todos requeridos). HTTP 400 si suma ≠ 100. HTTP 409 si `club_type_id` ya tiene override. | `src/annual-folders/ranking-weights.controller.ts` |
+| PATCH | `/api/v1/ranking-weights/:id` | JWT | `ranking_weights:write` | Actualización parcial de pesos. Re-valida suma = 100 (HTTP 400 si no cumple). | `src/annual-folders/ranking-weights.controller.ts` |
+| DELETE | `/api/v1/ranking-weights/:id` | JWT | `ranking_weights:write` | Eliminar override. HTTP 400 si se intenta eliminar la fila con `club_type_id = NULL` (default global no eliminable). | `src/annual-folders/ranking-weights.controller.ts` |
 
 ## evidence-review
 

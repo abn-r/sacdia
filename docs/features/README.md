@@ -1,7 +1,7 @@
 # Feature Registry - SACDIA
 
 **Estado**: ACTIVE
-**Actualizado**: 2026-04-14
+**Actualizado**: 2026-04-28
 **Propósito**: registrar qué dominios tienen documento en `docs/features/` y separar cobertura editorial de estado funcional declarado.
 
 > [!IMPORTANT]
@@ -30,8 +30,8 @@
 
 | Señal | Cantidad | Evidencia |
 |---|---:|---|
-| Documentos de dominio presentes | 28 | archivos `docs/features/*.md`, excluyendo este `README.md` |
-| Estado funcional `IMPLEMENTADO` | 25 | declarado en los documentos de dominio |
+| Documentos de dominio presentes | 29 | archivos `docs/features/*.md`, excluyendo este `README.md` |
+| Estado funcional `IMPLEMENTADO` | 26 | declarado en los documentos de dominio |
 | Estado funcional `PARCIAL` | 1 | `certificaciones-guias-mayores` |
 | Estado funcional `NO CANON` | 2 | `achievements`; `infrastructure` declara la variante `NO CANON (infraestructura operativa)` |
 
@@ -61,6 +61,7 @@
 | `member-of-month` | [member-of-month.md](member-of-month.md) | Documento presente | `IMPLEMENTADO` |
 | `membership-requests` | [membership-requests.md](membership-requests.md) | Documento presente | `IMPLEMENTADO` |
 | `monthly-reports` | [monthly-reports.md](monthly-reports.md) | Documento presente | `IMPLEMENTADO` |
+| `clasificacion-institucional-ampliada` | — (ver spec + plan) | Documento de dominio en spec/plan | `IMPLEMENTADO` |
 | `rbac` | [rbac.md](rbac.md) | Documento presente | `IMPLEMENTADO` |
 | `recursos` | [recursos.md](recursos.md) | Documento presente | `IMPLEMENTADO` |
 | `sla-dashboard` | [sla-dashboard.md](sla-dashboard.md) | Documento presente | `IMPLEMENTADO` |
@@ -73,3 +74,9 @@
 - Este registro sirve para onboarding y routing minimo por dominio.
 - No usar este archivo para afirmar cantidad de endpoints, tablas o cobertura UI exacta.
 - Si un documento de dominio cambia su estado funcional, actualizar este registro en el mismo trabajo.
+
+## Entradas sin documento propio en `docs/features/`
+
+| Feature | Estado | Spec | Plan | Descripción |
+|---|---|---|---|---|
+| Clasificación institucional ampliada (8.4-C) | Vigente desde 2026-04-28 | [`docs/superpowers/specs/2026-04-28-clasificacion-criterios-ampliados-design.md`](../superpowers/specs/2026-04-28-clasificacion-criterios-ampliados-design.md) | [`docs/superpowers/plans/2026-04-28-clasificacion-criterios-ampliados.md`](../superpowers/plans/2026-04-28-clasificacion-criterios-ampliados.md) | Composite ranking ponderado (folder/finanzas/camporee/evidencias) por club por año eclesiástico, con pesos configurables por `club_type` y drill-down por componente vía `/breakdown`. |
