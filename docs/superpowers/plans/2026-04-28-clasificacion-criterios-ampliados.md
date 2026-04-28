@@ -89,12 +89,13 @@ VALUES (NULL, 60, 15, 15, 10);
 Content:
 ```sql
 -- 20260428000200_ranking_system_config
-INSERT INTO system_config (key, value, description) VALUES
+-- NOTE: system_config uses config_key/config_value/config_type (verified against schema).
+INSERT INTO system_config (config_key, config_value, description, config_type) VALUES
   ('ranking.finance_closing_deadline_day', '5',
-   'Day of the following month considered on-time for monthly financial closing'),
+   'Day of the following month considered on-time for monthly financial closing', 'integer'),
   ('ranking.recalculation_enabled', 'true',
-   'Kill-switch for extended rankings recalculation')
-ON CONFLICT (key) DO NOTHING;
+   'Kill-switch for extended rankings recalculation', 'boolean')
+ON CONFLICT (config_key) DO NOTHING;
 ```
 
 - [ ] **Step 4: Update Prisma schema in `sacdia-backend/prisma/schema.prisma`**
@@ -170,8 +171,8 @@ SELECT column_name FROM information_schema.columns
   WHERE table_name = 'club_annual_rankings'
     AND column_name LIKE '%_score_pct';
 SELECT to_regclass('public.ranking_weight_configs');
-SELECT key FROM system_config
-  WHERE key IN ('ranking.finance_closing_deadline_day', 'ranking.recalculation_enabled');
+SELECT config_key FROM system_config
+  WHERE config_key IN ('ranking.finance_closing_deadline_day', 'ranking.recalculation_enabled');
 SQL
 ```
 
@@ -370,28 +371,28 @@ describe('FinanceScoreService.calc', () => {
   });
 
   it('returns 100 when 12 months closed on time with default deadline', async () => {
-    prisma.system_config.findUnique.mockResolvedValueOnce({ key: 'ranking.finance_closing_deadline_day', value: '5' });
+    prisma.system_config.findUnique.mockResolvedValueOnce({ config_key: 'ranking.finance_closing_deadline_day', config_value: '5' });
     prisma.finance_period_closing.count.mockResolvedValueOnce(12);
     const result = await svc.calc('club-uuid', 2026);
     expect(Number(result)).toBe(100);
   });
 
   it('returns 0 when no months closed', async () => {
-    prisma.system_config.findUnique.mockResolvedValueOnce({ key: 'ranking.finance_closing_deadline_day', value: '5' });
+    prisma.system_config.findUnique.mockResolvedValueOnce({ config_key: 'ranking.finance_closing_deadline_day', config_value: '5' });
     prisma.finance_period_closing.count.mockResolvedValueOnce(0);
     const result = await svc.calc('club-uuid', 2026);
     expect(Number(result)).toBe(0);
   });
 
   it('returns 50 when 6 months closed on time', async () => {
-    prisma.system_config.findUnique.mockResolvedValueOnce({ key: 'ranking.finance_closing_deadline_day', value: '5' });
+    prisma.system_config.findUnique.mockResolvedValueOnce({ config_key: 'ranking.finance_closing_deadline_day', config_value: '5' });
     prisma.finance_period_closing.count.mockResolvedValueOnce(6);
     const result = await svc.calc('club-uuid', 2026);
     expect(Number(result)).toBe(50);
   });
 
   it('caps at 100 if count exceeds 12 (defensive)', async () => {
-    prisma.system_config.findUnique.mockResolvedValueOnce({ key: 'ranking.finance_closing_deadline_day', value: '5' });
+    prisma.system_config.findUnique.mockResolvedValueOnce({ config_key: 'ranking.finance_closing_deadline_day', config_value: '5' });
     prisma.finance_period_closing.count.mockResolvedValueOnce(15);
     const result = await svc.calc('club-uuid', 2026);
     expect(Number(result)).toBe(100);
@@ -459,13 +460,13 @@ export class FinanceScoreService {
 
   private async resolveDeadlineDay(): Promise<number> {
     const row = await this.prisma.system_config.findUnique({
-      where: { key: 'ranking.finance_closing_deadline_day' },
+      where: { config_key: 'ranking.finance_closing_deadline_day' },
     });
     if (!row) {
       this.logger.warn('system_config[ranking.finance_closing_deadline_day] missing, using default 5');
       return DEFAULT_DEADLINE_DAY;
     }
-    const parsed = parseInt(row.value, 10);
+    const parsed = parseInt(row.config_value, 10);
     return Number.isNaN(parsed) ? DEFAULT_DEADLINE_DAY : parsed;
   }
 }
@@ -1158,9 +1159,9 @@ Dense ranking logic on composite_score_pct stays identical.
 At top of `handleRankingsRecalculation()`, before lock acquisition:
 ```typescript
 const killSwitch = await this.prisma.system_config.findUnique({
-  where: { key: 'ranking.recalculation_enabled' },
+  where: { config_key: 'ranking.recalculation_enabled' },
 });
-if (killSwitch && killSwitch.value === 'false') {
+if (killSwitch && killSwitch.config_value === 'false') {
   this.logger.warn('Rankings recalculation skipped: kill-switch enabled');
   return { skipped: true, reason: 'kill_switch' };
 }
@@ -1369,9 +1370,9 @@ async getBreakdown(enrollmentId: string, yearId: number): Promise<RankingBreakdo
   `;
 
   const financeDeadline = await this.prisma.system_config.findUnique({
-    where: { key: 'ranking.finance_closing_deadline_day' },
+    where: { config_key: 'ranking.finance_closing_deadline_day' },
   });
-  const deadlineDay = parseInt(financeDeadline?.value ?? '5', 10);
+  const deadlineDay = parseInt(financeDeadline?.config_value ?? '5', 10);
 
   const monthsClosedRows = await this.prisma.$queryRaw<{ month: number }[]>`
     SELECT month FROM finance_period_closing
