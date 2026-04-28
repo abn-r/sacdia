@@ -8,8 +8,8 @@
 > Base URL: `/api/v1`
 
 **Estado**: ACTIVE
-**Actualizado**: 2026-04-23 (support reports endpoint + admin notification stats)
-**Total endpoints**: 330
+**Actualizado**: 2026-04-27 (QR canonical contract + virtual card endpoints)
+**Total endpoints**: 334
 
 ## Lectura Rápida
 
@@ -45,6 +45,20 @@
 | DELETE | `/api/v1/auth/sessions` | JWT | - | Revocar todas las sesiones excepto la actual (200 `{ revoked_count: N }`). Rate: 10/min/user | `src/auth/sessions.controller.ts` |
 | GET | `/api/v1/auth/sessions` | JWT | - | Listar sesiones activas del usuario. Responde `{ sessions[], current_session_id }`. `is_current` requiere JWT con claim `sid`. Rate: 30/min/user | `src/auth/sessions.controller.ts` |
 | DELETE | `/api/v1/auth/sessions/:sessionId` | JWT | - | Revocar sesión específica (204). 400 si es la sesión actual, 403 si pertenece a otro usuario, 404 si no existe. Rate: 10/min/user | `src/auth/sessions.controller.ts` |
+
+## qr
+
+| Method | Path | Auth | Roles | Description | Source |
+|---|---|---|---|---|---|
+| GET | `/api/v1/qr/member/token` | JWT | - | Emitir un JWT HS256 de 24 h para la credencial QR legacy. Compatible con clientes actuales. | `src/qr/qr.controller.ts` |
+| GET | `/api/v1/qr/me` | JWT | `qr:issue_self` | Obtener metadata y estado de la credencial QR del usuario autenticado. Retorna token, expiración, member view y `authorization` canónica. | `src/qr/qr.controller.ts` |
+| GET | `/api/v1/qr/me/card` | JWT | `qr:issue_self` | Obtener payload visual de la tarjeta virtual. Incluye token, member view y campos visuales. Fallback: `section_name` usa `club_type` si no existe la sección activa. | `src/qr/qr.controller.ts` |
+| GET | `/api/v1/qr/me/card.pdf` | JWT | `qr:issue_self` | Descargar la tarjeta virtual en PDF. El backend expone el token como texto porque no renderiza bitmap QR. | `src/qr/qr.controller.ts` |
+| POST | `/api/v1/qr/validate` | JWT | `qr:validate` | Validar QR canónico y opcionalmente registrar asistencia si se envía `activity_id`. | `src/qr/qr.controller.ts` |
+| POST | `/api/v1/qr/scan` | JWT | `attendance:manage` | Alias legado de `/qr/validate` para compatibilidad temporal con clientes actuales. | `src/qr/qr.controller.ts` |
+
+> [!NOTE]
+> No existe hoy un endpoint admin-scoped para descargar la credencial PDF de terceros. En el panel web, la única superficie clara es `/dashboard/users/[userId]`, pero esa pantalla no debe mostrar una acción de descarga para otro miembro hasta que backend publique un contrato equivalente (por ejemplo, uno bajo `/api/v1/admin/users/:userId/...`).
 
 ### Auth Contract Notes (2026-03-04)
 

@@ -31,6 +31,7 @@ Referencia humana concisa del schema Prisma vigente.
 ### `users_pr`
 
 - Incluye `active_club_assignment_id` ademas del tracking de post-registro.
+- No existe tabla dedicada para credenciales QR: el contrato canónico nuevo usa JWT stateless y, por ahora, solo `users_pr`/`club_role_assignments` para resolver contexto visual y autorizacion.
 
 ### `club_sections`
 
