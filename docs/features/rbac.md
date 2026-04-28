@@ -99,12 +99,14 @@ El sistema RBAC implementa permisos finos (fine-grained) para 4 familias de sub-
 | `legal_representative` | `legal_representative:read` | `users:read_detail` | `GET /users/:userId/legal-representative` |
 | `legal_representative` | `legal_representative:update` | `users:update` | `POST/PATCH/DELETE /users/:userId/legal-representative` |
 | `post_registration` | `post_registration:read` | `users:read_detail` | `GET /users/:userId/post-registration/status` |
-| `post_registration` | `post_registration:update` | `users:update` | `POST /users/:userId/post-registration/step-{1,2,3}/complete` |
+| `post_registration` | `registration:complete` | _(sin fallback)_ | `POST /users/:userId/post-registration/step-{1,2,3}/complete` |
+
+> **Nota**: `registration:complete` es un permiso global dedicado asignado a roles de campo (super_admin, admin, assistant-lf, director-lf y equivalentes union/dia por herencia). No usa fallback a `users:update`. El owner siempre puede completar su propio registro sin este permiso.
 
 ### Reglas de autorizacion
 
 1. **Owner bypass (self-service)**: El propietario del `userId` tiene acceso completo a sus propios sub-recursos sin necesidad de permisos globales explícitos
-2. **Terceros**: Solo se evaluan permisos globales. Se acepta el permiso fino **O** el fallback legacy (OR transicional)
+2. **Terceros**: Solo se evaluan permisos globales. Se acepta el permiso fino **O** el fallback legacy (OR transicional). Excepcion: `registration:complete` no tiene fallback legacy
 3. **Permisos de club no aplican**: Los permisos provenientes unicamente de `authorization.active_assignment` no habilitan acceso transversal a recursos `user`
 
 ### Pruning administrativo
@@ -129,14 +131,72 @@ Las siguientes rutas de `user` permanecen bajo permisos legacy `users:*` y no fo
 - **Guard de policy**: `src/common/guards/sensitive-user-subresource-policy.ts`
 - **Decorator de metadata**: `src/common/decorators/sensitive-user-subresource.decorator.ts`
 
+## Context Switching y permisos por seccion activa
+
+El sistema soporta usuarios con multiples asignaciones de club (ej: Director en Conquistadores + Miembro en Guias Mayores). El contexto activo se controla mediante `PATCH /auth/me/context` y afecta los permisos visibles en toda la app.
+
+### Fuente de verdad
+
+- **Campo canonico**: `users_pr.active_club_assignment_id` en la DB
+- **Seteo**: `PATCH /auth/me/context` con `{ assignment_id }` — escribe en DB, invalida cache Redis, re-resuelve autorizacion
+- **Lectura**: Tanto `GET /auth/me` como `GET /dashboard/summary` leen del mismo campo canonico
+- **Cache**: Redis con TTL 5 min. Se invalida explicitamente en cada context switch
+
+### Calculo de effectivePermissions
+
+`AuthorizationContextService.resolveUserAuthorization` calcula `effective.permissions` como la **union de**:
+1. Permisos de **global grants** (roles globales del usuario)
+2. Permisos del **active club assignment** unicamente
+
+Los permisos de asignaciones de club inactivas **NO** se incluyen en `effectivePermissions`. Esto garantiza que un Director en Conquistadores pierde permisos de director al cambiar a Guias Mayores donde es Miembro.
+
+### Frontend: gating de UI
+
+La app Flutter usa dos mecanismos para gating de UI, ambos scoped al contexto activo:
+
+| Mecanismo | Fuente | Uso |
+| --- | --- | --- |
+| `effectivePermissions` (RBAC canonico) | `authorization.effective.permissions` de `/auth/me` | Check primario en `canByPermissionOrLegacyRole` |
+| `resolvedRoleNames` (legacy fallback) | Solo global grants + active grant role | Fallback cuando el permiso RBAC no existe |
+
+`resolvedRoleNames` en `AuthorizationSnapshot` solo incluye roles de grants globales y del active grant — **no** de asignaciones inactivas. Esto previene escalacion de privilegios donde un rol de una seccion inactiva otorga acceso en la seccion activa.
+
+### Quick Access Grid — permisos por rol
+
+| Tarjeta | Permiso RBAC | Roles legacy (fallback) |
+| --- | --- | --- |
+| Coordinacion | — | `coordinator`, `admin`, `super_admin`, `assistant_admin` |
+| Miembros | `users:read_detail` | `director`, `deputy_director`, `secretary`, `secretary_treasurer`, `counselor` |
+| Club | `clubs:update` | `director`, `deputy_director`, `secretary`, `secretary_treasurer` |
+| Carpeta de Evidencias | `users:read_detail` | `director`, `deputy_director`, `secretary`, `secretary_treasurer` |
+| Finanzas | `finances:read` | `director`, `treasurer`, `secretary_treasurer` |
+| Unidades | `units:update` | `director`, `deputy_director`, `counselor`, `secretary`, `secretary_treasurer` |
+| Clase Agrupada | `classes:update` | `director`, `deputy_director`, `counselor`, `instructor`, `secretary`, `secretary_treasurer` |
+| Seguros del Club | `insurance:read` | `director`, `deputy_director`, `secretary`, `secretary_treasurer` |
+| Inventario | `inventory:read` | `director`, `deputy_director`, `secretary`, `secretary_treasurer` |
+| Recursos | `folders:read` | — (todos los miembros) |
+
+### Seed de permisos
+
+El archivo `prisma/seeds/role-permissions.seed.sql` es **idempotente**: cada bloque de rol hace `DELETE` + `INSERT`. Correr el seed siempre produce el set exacto de permisos definido en el archivo. Despues de ejecutar el seed, reiniciar el backend para invalidar el cache de Redis.
+
+## Bugs corregidos (2026-04-10)
+
+1. **Redis cache no se invalidaba en context switch**: `setActiveClubContext` escribia en DB pero `resolveUserAuthorization` leia del cache stale. Fix: invalidar cache antes de re-resolver.
+2. **Dashboard summary ignoraba active context**: `dashboard.service.getSummary()` usaba `findFirst(orderBy: created_at)` en vez de leer `active_club_assignment_id`. Fix: misma logica que auth service.
+3. **`resolvedRoleNames` incluia roles de TODAS las secciones**: Un Member veia UI de Director porque `resolvedRoleNames` iteraba todos los `clubAssignments`. Fix: solo global grants + active grant.
+4. **Seed no-idempotente**: `ON CONFLICT DO NOTHING` solo agregaba permisos, nunca removia stale. El member tenia `users:read_detail` de un seed anterior. Fix: DELETE + INSERT por rol.
+5. **Legacy role names en espanol**: El grid usaba `secretario`, `tesorero` pero el backend usa `secretary`, `treasurer`. Nunca matcheaban. Fix: corregidos a ingles.
+6. **`secretary_treasurer` no contemplado**: Este rol no aparecia en ninguna tarjeta del grid. Fix: agregado donde corresponde `secretary` o `treasurer`.
+
 ## Gaps y pendientes
 
 - **Sin UI en app**: Correcto por diseno — la app no necesita interfaz de administracion de RBAC
 - **Permisos directos a usuarios poco documentados**: La tabla `users_permissions` existe pero el workflow para asignar permisos directos no esta expuesto en admin
-- **Sin auditoría de cambios**: No hay log de quien modifico la matriz de permisos y cuando
+- **Sin auditoria de cambios**: No hay log de quien modifico la matriz de permisos y cuando
 - **Transicion de permisos legacy**: El OR transicional entre permisos finos y `users:*` deberia tener fecha de sunset definida
 
 ## Prioridad y siguiente accion
 
-- **Prioridad**: Baja — feature completamente funcional en backend y admin
-- **Siguiente accion**: Definir fecha de sunset para el OR transicional de permisos legacy. Considerar agregar auditoría de cambios en la matriz de permisos.
+- **Prioridad**: Baja — feature completamente funcional en backend, admin y app movil
+- **Siguiente accion**: Definir fecha de sunset para el OR transicional de permisos legacy. Considerar agregar auditoria de cambios en la matriz de permisos.

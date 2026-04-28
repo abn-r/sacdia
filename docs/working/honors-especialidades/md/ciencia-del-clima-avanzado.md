@@ -1,0 +1,23 @@
+# Especialidad — ciencia del clima avanzado
+
+**Fuente**: `/Users/abner/Downloads/S3/honors_pdf/ciencia_del_clima_avanzado.pdf`
+**Texto extraído**: `/Users/abner/Documents/development/sacdia/docs/working/honors-especialidades/raw/ciencia-del-clima-avanzado.txt`
+**Nivel detectado**: 3
+**Cantidad de requisitos detectados**: 8
+
+> Nota: extracción automática preliminar desde la capa de texto del PDF. Requiere revisión humana antes de cualquier carga a base de datos.
+
+## Requisitos detectados
+
+1. Tener la especialidad de Ciencia del clima y por lo menos una de las siguientes especialidades: • Combustibles alternativos • Ecología • Conservación medioambiental • Reciclaje • Energía renovable • Ríos y arroyos • Climatología
+2. ¿Qué es la agricultura industrializada? ¿Cuáles son algunos de los impactos positivos y negativos que la agricultura industrializada ha tenido en el clima de la tierra? Positivos Negativos ¿Cómo han cambiado los métodos de la agricultura industrializada en los últimos 200 años?
+3. Nombrar por lo menos dos agencias gubernamentales en su país y tres organizaciones no gubernamentales (por ejemplo, ONU, IPCC) que brindan investigación asociada con el cambio climático con el fin de influir en las políticas gubernamentales. Gubernamentales 1. 2. No gubernamentales 1. 2. 3. Estudio de la naturaleza Leer un informe publicado por cada una de estas cinco entidades y discutir las similitudes y diferencias de sus evidencias y conclusiones. Informe leído Similitudes Diferencias Informe leído Similitudes Diferencias Informe leído Similitudes Diferencias Estudio de la naturaleza Informe leído Similitudes Diferencias Informe leído Similitudes Diferencias
+4. Investigar un tema del cambio climático que pueda ser controvertido. a. Identificar una fuente de cada lado de la controversia que utiliza evidencia científica para respaldar las conclusiones de los autores. b. Resumir cada argumento proporcionando la hipótesis, evidencia y conclusión para cada lado. c. Examinar cada resumen para determinar si sus propios sesgos personales las afectaron. d. Responder la siguiente pregunta: ¿Puede una persona examinar la evidencia científica sin permitir que sus sesgos personales afecten su análisis?
+5. ¿Qué es el permafrost? Estudio de la naturaleza ¿Cómo afecta el clima de la Tierra al permafrost? ¿Por qué es importante para los científicos monitorear el permafrost?
+6. Investigar los esfuerzos de su gobierno estatal/provincial para abordar los efectos de los gases de efecto invernadero. Estar preparado para discutir sus hallazgos con un grupo.
+7. La energía renovable se ha postulado como una solución para reducir los gases de efecto invernadero. Hacer tres de los siguientes: a. Ilustrar a través de medios creativos el proceso de cómo se teoriza que los gases de efecto invernadero afectan el cambio en nuestro clima. b. Investigar qué esfuerzos está realizando su gobierno local/estatal para promover la adopción de fuentes de energía renovables. c. Hacer una lista de las formas en que usted y su familia pueden adoptar energías renovables o reducir su huella energética. d. Si es posible, invitar a un experto local para que hable con su grupo acerca del cambio climático y las energías renovables. e. Encontrar y revisar recursos por internet, videos, informes de noticias y medios similares y compartirlos con su grupo.
+8. Individualmente o en grupo, completar uno de los siguientes: a. Crear un modelo de un sistema de captación de agua de lluvia. Preparar y hacer una presentación oral a un grupo, presentando su modelo, su eficacia y las leyes locales relacionadas con la recolección de agua de lluvia. Estudio de la naturaleza b. Visitar un parque, museo, centro de ciencias u otras instalaciones que empleen prácticas conscientes del medioambiente. Hacer un recorrido, hablar con un empleado o de alguna otra manera conocer y evaluar las cosas que ve.
+
+## Observaciones
+
+- Este archivo fue preparado para análisis posterior, no para carga directa a BD.

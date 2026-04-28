@@ -1,0 +1,24 @@
+# Especialidad — ornamentacion floral
+
+**Fuente**: `/Users/abner/Downloads/S3/honors_pdf/ornamentacion_floral.pdf`
+**Texto extraído**: `/Users/abner/Documents/development/sacdia/docs/working/honors-especialidades/raw/ornamentacion-floral.txt`
+**Nivel detectado**: 2
+**Cantidad de requisitos detectados**: 9
+
+> Nota: extracción automática preliminar desde la capa de texto del PDF. Requiere revisión humana antes de cualquier carga a base de datos.
+
+## Requisitos detectados
+
+1. Nombrar 6 florales de interiores adecuados perennes y 6 anuales. Perennes Anuales 1.
+2. 
+3. 
+4. 
+5. 
+6. 2. Nombrar al menos 3 flores que florecen en la primavera o a principios de verano adecuados para el arreglo floral interiores. 1. 3. 2. 3. Nombrar al menos 3 flores que no se mantienen frescas cuando se cortan y 3 que sí lo hacen. No se mantienen Se mantienen 1. 2. 3. 4. Dar 6 sugerencias en relación con el corte de flores y su atención posterior, tal como cuándo se debe cortar, cómo cortar y cómo conservarlas. 1. 2. 3. 4. 5. 6. 5. ¿En qué fase de desarrollo deberían cortarse las rosas, gladiolas y dalias? Rosas Gladiolas Dalias 6. Dar 3 sugerencias sobre la relación de los contenedores y las flores utilizadas y 3 en relación a la habitación y el mobiliario. Contenedores y las flores 1. 2. 3. Arreglo de la habitación 1. 2. 3.
+7. En el arreglo floral, ¿cuál debería ser la relación de tonos claros y oscuros? flores grandes y pequeñas? abiertas y parcialmente abiertas?
+8. Hacer 2 arreglos florales artísticos en cada una de las siguientes áreas (se pueden utilizar flores frescas o de seda): a. Decoración de mesa b. Uso general de la casa c. Servicio público
+9. ¿Cuáles son algunas de las flores silvestres que podrían ser utilizadas en los arreglos para el hogar? ¿Qué combinaciones de estas flores se pueden utilizar?
+
+## Observaciones
+
+- Este archivo fue preparado para análisis posterior, no para carga directa a BD.

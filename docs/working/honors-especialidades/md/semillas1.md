@@ -1,0 +1,24 @@
+# Especialidad — semillas1
+
+**Fuente**: `/Users/abner/Downloads/S3/honors_pdf/semillas1.pdf`
+**Texto extraído**: `/Users/abner/Documents/development/sacdia/docs/working/honors-especialidades/raw/semillas1.txt`
+**Nivel detectado**: 1
+**Cantidad de requisitos detectados**: 9
+
+> Nota: extracción automática preliminar desde la capa de texto del PDF. Requiere revisión humana antes de cualquier carga a base de datos.
+
+## Requisitos detectados
+
+1. ¿Cuál es el objetivo principal de la semilla?
+2. ¿Cuáles alimentos fueron dados por primera vez al hombre en el Jardín del Edén?
+3. Identificar una semilla o el dibujo y conocer la finalidad de cada una de estas partes de una semilla: tegumento cotiledón embrión
+4. Decir de memoria 4 diferentes métodos con los cuales se esparcen las semillas. 1. 2. 3. 4. Nombrar 3 clases de plantas cuyas semillas son esparcidas por cada método. 1. 2. 3.
+5. Mencionar de memoria 10 clases de semillas que se utilizan para la alimentación. 1. 6. 2. 7. 3. 8. 4. 9. 5. 10.
+6. Mencionar de memoria 5 clases de semillas que se utilizan como fuentes de aceite. 1. 4. 2. 5. 3.
+7. Mencionar de memoria 5 clases de semillas que se utilizan para las especias. 1. 4. 2. 5. 3.
+8. ¿Qué condiciones son necesarias para que una semilla brote?
+9. Hacer una colección de 30 diferentes clases de semillas, de los cuales sólo 10 se pueden obtener de los paquetes de semillas comerciales, los otros 20 se deben de recolectar por sí mismo. Etiquetar cada clase de la siguiente manera: nombre de la semilla, fecha recolectada, la ubicación donde se recogieron y el nombre del coleccionista.
+
+## Observaciones
+
+- Este archivo fue preparado para análisis posterior, no para carga directa a BD.

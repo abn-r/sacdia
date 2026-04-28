@@ -1,0 +1,25 @@
+# Especialidad — espeleologia
+
+**Fuente**: `/Users/abner/Downloads/S3/honors_pdf/espeleologia.pdf`
+**Texto extraído**: `/Users/abner/Documents/development/sacdia/docs/working/honors-especialidades/raw/espeleologia.txt`
+**Nivel detectado**: 2
+**Cantidad de requisitos detectados**: 10
+
+> Nota: extracción automática preliminar desde la capa de texto del PDF. Requiere revisión humana antes de cualquier carga a base de datos.
+
+## Requisitos detectados
+
+1. Conocer al menos 3 fuentes de luz para la espeleología. 1.
+2. 
+3. Conocer la importancia de contar con suministros extras de luz y las luces de reserva. Pedir a una persona con experiencia en espeleología que le muestre cómo una luz de carburo funciona. 2. Hacer una lista de todos los equipos necesarios para el éxito de una salida de espeleología excluyendo los equipos de descenso vertical y comenzar a elaborar juego de equipos. 3. Localizar un espeleólogo experimentado y unirse a esa persona en la exploración de por lo menos 3 cuevas relativamente fáciles. Cuevas Horas completadas 1. 2. 3. Espeleólogo experimentado
+4. Mantener un registro de estas exploraciones, señalando la fecha, ubicación de las cuevas, condiciones, características, horas dedicadas a cada una, los nombres de los otros miembros de su equipo y el nombre del líder del viaje. (Completar el Cartel #1)
+5. Aprender, conocer bien y practicar las normas de seguridad de espeleología.
+6. Practicar «caminar» en una empinada cuesta tirando de sí mismo a lo largo de una cuerda.
+7. Describir varias maneras en que las cuevas fueron utilizadas en los tiempos bíblicos.
+8. Participar en el proceso de mapeo de una pequeña cueva que ha explorado.
+9. Conocer los nombres de al menos 5 diferentes términos de espeleología y 3 animales que habitan en las cuevas. Incluir en el informe los que ha observado mientras realizaba la espeleología. Términos de espeleología 1. 2. 3. 4. 5. Tres animales 1. 2. 3.
+10. Escribir un informe de su experiencia de al menos 500 palabras de las 10 o más horas de espeleología e incluir todo lo que ha aprendido mientras llevó a cabo los 9 requisitos anteriores.
+
+## Observaciones
+
+- Este archivo fue preparado para análisis posterior, no para carga directa a BD.

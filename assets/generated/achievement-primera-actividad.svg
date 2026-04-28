@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Primera Actividad">
+  <title>Primera Actividad</title>
+  <desc>Flat matte engraved achievement badge. Transparent canvas, dark circle #1C1C1E, accent #27AE60.</desc>
+  <circle cx="256" cy="256" r="220" fill="#1C1C1E"/>
+  <circle cx="256" cy="256" r="204" fill="none" stroke="#27AE60" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="256" cy="256" r="170" fill="none" stroke="#27AE60" stroke-width="3" stroke-linecap="round" opacity="0.38"/>
+  <polyline points="232,384 256,404 280,384" fill="none" stroke="#27AE60" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>
+  <polyline points="203.5,357.0 201.0,277.0 221.0,274.5 226.0,202.0 246.0,199.5 248.5,272.0 266.0,192.0 286.0,197.0 278.5,274.5 301.0,212.0 318.5,222.0 291.0,297.0 328.5,267.0 341.0,282.0 301.0,334.5 281.0,362.0" fill="none" stroke="#27AE60" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <line x1="203.5" y1="357.0" x2="281.0" y2="362.0" stroke="#27AE60" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

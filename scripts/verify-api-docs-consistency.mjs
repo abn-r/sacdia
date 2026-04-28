@@ -3,16 +3,18 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-const DOCS_API_DIR = path.join(process.cwd(), 'docs', '02-API');
+const DOCS_API_DIR = path.join(process.cwd(), 'docs', 'api');
 const CANONICAL_FILE = 'ENDPOINTS-LIVE-REFERENCE.md';
-const COMPAT_ALIAS_FILES = ['API-REFERENCE.md'];
+// Legacy aliases were moved out of the active API docs surface.
+// If historical redirect files still exist somewhere else, CI does not require them.
+const COMPAT_ALIAS_FILES = [];
 
 const errors = [];
 
 function readDoc(fileName) {
   const fullPath = path.join(DOCS_API_DIR, fileName);
   if (!fs.existsSync(fullPath)) {
-    errors.push(`Missing file: docs/02-API/${fileName}`);
+    errors.push(`Missing file: docs/api/${fileName}`);
     return '';
   }
 
@@ -33,7 +35,7 @@ const canonicalCount = countEndpointEntries(canonicalContent);
 
 if (canonicalContent && canonicalCount < 100) {
   errors.push(
-    `Canonical file docs/02-API/${CANONICAL_FILE} looks incomplete: detected ${canonicalCount} endpoint entries.`,
+    `Canonical file docs/api/${CANONICAL_FILE} looks incomplete: detected ${canonicalCount} endpoint entries.`,
   );
 }
 
@@ -45,23 +47,23 @@ for (const aliasFile of COMPAT_ALIAS_FILES) {
 
   if (!aliasContent.includes('<!-- CANONICAL-REDIRECT -->')) {
     errors.push(
-      `docs/02-API/${aliasFile} must include <!-- CANONICAL-REDIRECT --> marker.`,
+      `docs/api/${aliasFile} must include <!-- CANONICAL-REDIRECT --> marker.`,
     );
   }
 
   if (!aliasContent.includes('ENDPOINTS-LIVE-REFERENCE.md')) {
-    errors.push(`docs/02-API/${aliasFile} must link to ENDPOINTS-LIVE-REFERENCE.md.`);
+    errors.push(`docs/api/${aliasFile} must link to ENDPOINTS-LIVE-REFERENCE.md.`);
   }
 
   const aliasEndpointCount = countEndpointEntries(aliasContent);
   if (aliasEndpointCount > 0) {
     errors.push(
-      `docs/02-API/${aliasFile} reintroduces duplicated runtime inventory (${aliasEndpointCount} endpoint entries found).`,
+      `docs/api/${aliasFile} reintroduces duplicated runtime inventory (${aliasEndpointCount} endpoint entries found).`,
     );
   }
 }
 
-for (const indexPath of ['docs/README.md', 'docs/02-API/README.md']) {
+for (const indexPath of ['docs/README.md']) {
   const absolute = path.join(process.cwd(), indexPath);
   if (!fs.existsSync(absolute)) {
     errors.push(`Missing index file: ${indexPath}`);

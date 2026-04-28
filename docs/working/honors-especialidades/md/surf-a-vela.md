@@ -1,0 +1,26 @@
+# Especialidad — surf a vela
+
+**Fuente**: `/Users/abner/Downloads/S3/honors_pdf/surf_a_vela.pdf`
+**Texto extraído**: `/Users/abner/Documents/development/sacdia/docs/working/honors-especialidades/raw/surf-a-vela.txt`
+**Nivel detectado**: 2
+**Cantidad de requisitos detectados**: 11
+
+> Nota: extracción automática preliminar desde la capa de texto del PDF. Requiere revisión humana antes de cualquier carga a base de datos.
+
+## Requisitos detectados
+
+1. Tener la especialidad de Natación II.
+2. Conocer el significado de los siguientes términos: A favor del viento Revés Posición básica de inicio Lista de chequeo del principiante Control de la tabla Centro de la tabla Línea central Planto central Puño de escota Adelante Mano adelante Adentro Giro Posición del mástil Fuera Puntos del reloj Orientar la vela Auto-rescate Técnica de la tijera Bordada Levantar la vela Punto visual de referencia
+3. Conocer los nombres de las partes de la tabla y demostrar cómo instalar su propia vela.
+4. Explicar los fundamentos de la teoría de vela.
+5. Definir y demostrar las posiciones de inicio.
+6. Definir y demostrar los 4 pasos para virar. 1. 2. 3. 4.
+7. Definir y demostrar los 4 pasos para girar por el foque. 1. 2. 3. 4.
+8. Hacer una lista de los 7 pasos para comenzar a hacer los movimientos de vela en el agua. 1. 2. 3. 4. 5. 6. 7.
+9. Responder a las siguientes preguntas acerca de la seguridad: ¿Qué equipo de seguridad debería llevarse puesto mientras se hace surf a vela? ¿Por qué es importante saber el pronóstico del tiempo local, antes de salir al agua? Cuando se está aprendiendo surf a vela, ¿por qué es importante estar en un lugar cerrado o área protegida? ¿Cuáles son las señales de la mano de «todo está bien» y «necesito ayuda»?
+10. ¿Cómo debe cuidar la vela y la tabla a fin de mantenerlos en buen estado de funcionamiento?
+11. Con éxito, navegar a vela en una tabla hacia un punto de referencia visual y volver a la posición inicial.
+
+## Observaciones
+
+- Este archivo fue preparado para análisis posterior, no para carga directa a BD.

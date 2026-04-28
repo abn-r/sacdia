@@ -21,6 +21,7 @@ La regla principal es:
 | `global` | Recurso administrativo o territorial | Permisos globales + scope territorial |
 | `club` | Recurso de club padre | Permiso efectivo + bypass global o contexto club activo |
 | `club_instance` | Recurso de instancia exacta | Permiso efectivo + asignacion activa exacta |
+| `active_assignment` | Recurso ligado al contexto operativo activo del actor | Permiso efectivo + asignacion activa exacta |
 | `club_assignment` | Recurso de asignacion | Permiso efectivo + relacion con `assignment_id` |
 | `user` | Recurso del propio usuario | Permiso global o fallback de ownership |
 
@@ -62,6 +63,8 @@ Nota de implementacion:
 | `activities:delete` | Eliminar actividad | `club_instance` | permiso efectivo + instancia exacta o bypass global | Admin |
 | `attendance:read` | Ver asistencia | `club_instance` | permiso efectivo + instancia exacta o bypass global | Admin y App |
 | `attendance:manage` | Pasar asistencia | `club_instance` | permiso efectivo + instancia exacta o bypass global | Admin y App |
+| `qr:issue_self` | Ver credencial QR propia | `global` | permiso global dedicado de self-service | Admin y App |
+| `qr:validate` | Validar QR de un miembro | `active_assignment` | permiso efectivo + asignacion activa exacta o bypass global | Admin y App |
 | `finances:read` | Ver finanzas | `club` | permiso global territorial o contexto club | Admin y App |
 | `finances:create` | Crear movimiento | `club` | permiso efectivo + contexto valido | Admin y App |
 | `finances:update` | Editar movimiento | `club_instance` | permiso efectivo + instancia exacta o bypass global | Admin y App |
@@ -72,7 +75,7 @@ Nota de implementacion:
 | `inventory:delete` | Eliminar item | `club_instance` | permiso efectivo + asignacion activa exacta o bypass global | Admin |
 | `notifications:send` | Enviar notificacion directa | `global` | permiso global explicito | Admin |
 | `notifications:broadcast` | Enviar notificacion masiva | `global` | permiso global explicito | Admin |
-| `notifications:club` | Enviar notificacion a club | `global` (Stage 1) | permiso global explicito (sin resource scope adicional en esta etapa) | Admin |
+| `notifications:club` | Enviar notificacion a club | `active_assignment` | permiso efectivo + asignacion activa exacta | Admin |
 | `permissions:read` | Ver RBAC | `global` | permiso global | Admin |
 | `permissions:assign` | Cambiar permisos | `global` | permiso global | Admin |
 | `roles:read` | Ver roles | `global` | permiso global | Admin |
@@ -91,16 +94,18 @@ Nota de implementacion:
 | Salud | `GET/PUT /allergies`, `GET/PUT /diseases`, `GET/PUT /medicines`, `DELETE /allergies/:allergyId`, `DELETE /diseases/:diseaseId`, `DELETE /medicines/:medicineId` | `health:read` / `health:update` OR fallback `users:read_detail` / `users:update` | ownership o permiso global; baseline activo limitado a `allergies` + `diseases` + `medicines` | Verificado |
 | Contactos de emergencia | `GET/POST/PATCH/DELETE /emergency-contacts` | `emergency_contacts:read` / `emergency_contacts:update` OR fallback `users:read_detail` / `users:update` | ownership o permiso global | Verificado |
 | Representante legal | `GET/POST/PATCH/DELETE /legal-representative` | `legal_representative:read` / `legal_representative:update` OR fallback `users:read_detail` / `users:update` | ownership o permiso global | Verificado |
-| Post-registro | `GET /post-registration/status`, `POST /step-1/complete`, `POST /step-2/complete`, `POST /step-3/complete` | `post_registration:read` / `post_registration:update` OR fallback `users:read_detail` / `users:update` | ownership o permiso global; terceros quedan en modo administrativo minimo | Verificado runtime |
+| Post-registro (lectura) | `GET /post-registration/status` | `post_registration:read` OR fallback `users:read_detail` | ownership o permiso global | Verificado runtime |
+| Post-registro (completar) | `POST /step-1/complete`, `POST /step-2/complete`, `POST /step-3/complete` | `registration:complete` _(sin fallback)_ | ownership o permiso global dedicado; terceros quedan en modo administrativo minimo | Verificado runtime |
 
 Notas:
 
 - `PermissionsGuard` permite owner fallback antes de resolver permisos explicitos en recursos `user`.
 - Para actores no owner, solo cuentan permisos globales; un `active_assignment` con permisos de club no abre acceso a datos `user` de terceros.
-- OR transicional vigente en backend: permiso fino de familia o fallback legacy de la familia `users:*` (`users:read_detail` para lectura, `users:update` para escritura).
+- OR transicional vigente en backend: permiso fino de familia o fallback legacy de la familia `users:*` (`users:read_detail` para lectura, `users:update` para escritura). Excepcion: `registration:complete` no tiene fallback legacy.
+- `registration:complete` es un permiso global dedicado asignado a roles de campo (super_admin, admin, assistant-lf, director-lf y equivalentes union/dia por herencia). El owner siempre puede completar su propio registro sin este permiso.
 - Baseline health activo verificado: `allergies` + `diseases` + `medicines`.
 - `medicines` se limita a catalogo + relacion sensible `user -> medicines`; no existe vinculo runtime `medicine <-> disease` en esta fase.
-- Excepcion minima vigente: `post_registration` de terceros mantiene lectura/completion administrativos minimos, sin feedback sensible detallado.
+- Excepcion minima vigente: `post_registration` de terceros mantiene lectura administrativa minima y completion con `registration:complete`, sin feedback sensible detallado.
 - Exclusiones fuera de scope del change: perfil base, foto de perfil y derivados de edad/representante legal siguen en metadata legacy `users:*`.
 
 ## Validacion Transversal Final (Batch 3)

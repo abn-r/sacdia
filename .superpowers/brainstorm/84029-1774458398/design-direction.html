@@ -1,0 +1,214 @@
+<h2>Dirección de Diseño — Honors Flow Completo</h2>
+<p class="subtitle">Duolingo gamification + Scout badge essence. Elegí la dirección que más te guste.</p>
+
+<div class="cards">
+
+  <!-- Option A: Badge Collection -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="background: linear-gradient(135deg, #183651 0%, #2EA0DA 100%); padding: 24px; min-height: 320px;">
+      <!-- Scout Badge Grid Mockup -->
+      <div style="text-align: center; margin-bottom: 16px;">
+        <span style="color: #FBBD5E; font-size: 14px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;">Mis Especialidades</span>
+      </div>
+      <!-- Progress bar -->
+      <div style="background: rgba(255,255,255,0.15); border-radius: 12px; height: 8px; margin-bottom: 20px;">
+        <div style="background: linear-gradient(90deg, #4FBF9F, #43A78A); width: 35%; height: 100%; border-radius: 12px;"></div>
+      </div>
+      <!-- Badge Grid -->
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
+        <div style="background: rgba(255,255,255,0.1); border-radius: 16px; padding: 16px; text-align: center; border: 2px solid #4FBF9F;">
+          <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #4FBF9F, #43A78A); border-radius: 50%; margin: 0 auto 8px; display: flex; align-items: center; justify-content: center; font-size: 24px;">✓</div>
+          <span style="color: white; font-size: 10px;">Primeros Auxilios</span>
+        </div>
+        <div style="background: rgba(255,255,255,0.1); border-radius: 16px; padding: 16px; text-align: center; border: 2px solid #FBBD5E;">
+          <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #FBBD5E, #F06151); border-radius: 50%; margin: 0 auto 8px; display: flex; align-items: center; justify-content: center;">
+            <div style="width: 28px; height: 28px; border: 3px solid white; border-radius: 50%; border-top-color: transparent; transform: rotate(45deg);"></div>
+          </div>
+          <span style="color: white; font-size: 10px;">Nudos</span>
+        </div>
+        <div style="background: rgba(255,255,255,0.08); border-radius: 16px; padding: 16px; text-align: center; border: 2px dashed rgba(255,255,255,0.2);">
+          <div style="width: 48px; height: 48px; background: rgba(255,255,255,0.1); border-radius: 50%; margin: 0 auto 8px; display: flex; align-items: center; justify-content: center; font-size: 20px; color: rgba(255,255,255,0.3);">+</div>
+          <span style="color: rgba(255,255,255,0.4); font-size: 10px;">Explorar</span>
+        </div>
+      </div>
+      <!-- Stats -->
+      <div style="display: flex; justify-content: space-around; margin-top: 20px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.1);">
+        <div style="text-align: center;">
+          <div style="color: #4FBF9F; font-size: 24px; font-weight: 800;">3</div>
+          <div style="color: rgba(255,255,255,0.5); font-size: 10px;">Completadas</div>
+        </div>
+        <div style="text-align: center;">
+          <div style="color: #FBBD5E; font-size: 24px; font-weight: 800;">2</div>
+          <div style="color: rgba(255,255,255,0.5); font-size: 10px;">En progreso</div>
+        </div>
+        <div style="text-align: center;">
+          <div style="color: #2EA0DA; font-size: 24px; font-weight: 800;">12</div>
+          <div style="color: rgba(255,255,255,0.5); font-size: 10px;">Disponibles</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Badge Collection (Dark Scout)</h3>
+      <p>Fondo oscuro tipo "noche de campamento". Las especialidades son <strong>insignias circulares</strong> en un grid. Completadas brillan en verde, en progreso con animación de carga, y las nuevas tienen borde punteado invitando a explorar. Barra de progreso global arriba.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Pros</h4><ul>
+          <li>Muy scout — se siente como un chaleco con insignias</li>
+          <li>Progreso visual inmediato (verde vs amarillo vs gris)</li>
+          <li>Grid compacto, muchas insignias visibles a la vez</li>
+        </ul></div>
+        <div class="cons"><h4>Cons</h4><ul>
+          <li>Fondo oscuro puede cansar en uso prolongado</li>
+          <li>Menos espacio para descripción de cada honor</li>
+        </ul></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Option B: Duolingo Path -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="background: linear-gradient(180deg, #F0F7FF 0%, #E8F4FD 100%); padding: 24px; min-height: 320px;">
+      <!-- Category Header -->
+      <div style="text-align: center; margin-bottom: 16px;">
+        <span style="color: #183651; font-size: 14px; font-weight: 700; letter-spacing: 1px;">NATURALEZA</span>
+        <div style="color: #2EA0DA; font-size: 11px; margin-top: 2px;">4 de 8 completadas</div>
+      </div>
+      <!-- Duolingo-style path -->
+      <div style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
+        <!-- Node 1 - Completed -->
+        <div style="display: flex; align-items: center; gap: 16px;">
+          <div style="width: 64px; height: 64px; background: linear-gradient(135deg, #4FBF9F, #43A78A); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 0 #2d8a6e;">
+            <span style="font-size: 28px; color: white;">★</span>
+          </div>
+          <div>
+            <div style="color: #183651; font-weight: 700; font-size: 14px;">Botánica</div>
+            <div style="color: #4FBF9F; font-size: 11px; font-weight: 600;">Completada ✓</div>
+          </div>
+        </div>
+        <!-- Connector -->
+        <div style="width: 3px; height: 16px; background: #4FBF9F; border-radius: 2px;"></div>
+        <!-- Node 2 - In Progress -->
+        <div style="display: flex; align-items: center; gap: 16px;">
+          <div style="position: relative; width: 64px; height: 64px;">
+            <div style="width: 64px; height: 64px; background: linear-gradient(135deg, #FBBD5E, #F06151); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 0 #c4944a; animation: pulse 2s infinite;">
+              <span style="font-size: 22px;">🌿</span>
+            </div>
+            <!-- Progress ring simulation -->
+            <div style="position: absolute; top: -3px; left: -3px; width: 70px; height: 70px; border: 3px solid rgba(251,189,94,0.3); border-top-color: #FBBD5E; border-radius: 50; transform: rotate(120deg);"></div>
+          </div>
+          <div>
+            <div style="color: #183651; font-weight: 700; font-size: 14px;">Zoología</div>
+            <div style="color: #FBBD5E; font-size: 11px; font-weight: 600;">60% completada</div>
+          </div>
+        </div>
+        <!-- Connector -->
+        <div style="width: 3px; height: 16px; background: rgba(24,54,81,0.15); border-radius: 2px;"></div>
+        <!-- Node 3 - Locked -->
+        <div style="display: flex; align-items: center; gap: 16px; opacity: 0.5;">
+          <div style="width: 64px; height: 64px; background: #E1E6E7; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 0 #B9B9B9;">
+            <span style="font-size: 22px;">🔒</span>
+          </div>
+          <div>
+            <div style="color: #183651; font-weight: 700; font-size: 14px;">Ecología</div>
+            <div style="color: #B9B9B9; font-size: 11px;">Disponible</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Duolingo Path (Light & Playful)</h3>
+      <p>Fondo claro y alegre. Las especialidades se muestran en un <strong>camino vertical</strong> tipo Duolingo dentro de cada categoría. Nodos circulares grandes con sombra 3D, conectados por líneas. Completados en verde, en progreso en amarillo con animación, disponibles en gris.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Pros</h4><ul>
+          <li>Gamificación clara — se siente como un juego</li>
+          <li>Progreso lineal muy intuitivo</li>
+          <li>Accesible para niños de 5 años y adultos</li>
+        </ul></div>
+        <div class="cons"><h4>Cons</h4><ul>
+          <li>Implica orden secuencial (¿las honors tienen orden?)</li>
+          <li>Menos honors visibles a la vez en pantalla</li>
+        </ul></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Option C: Hybrid -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="background: linear-gradient(180deg, #FFFFFF 0%, #F0F7FF 100%); padding: 24px; min-height: 320px;">
+      <!-- Header with progress -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <span style="color: #183651; font-size: 16px; font-weight: 800;">Especialidades</span>
+        <div style="background: linear-gradient(135deg, #4FBF9F, #43A78A); color: white; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 700;">5/17</div>
+      </div>
+      <!-- Category chips -->
+      <div style="display: flex; gap: 8px; margin-bottom: 16px; overflow-x: auto;">
+        <div style="background: #2EA0DA; color: white; padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 600; white-space: nowrap;">Naturaleza</div>
+        <div style="background: rgba(46,160,218,0.1); color: #2EA0DA; padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 600; white-space: nowrap;">Artes</div>
+        <div style="background: rgba(46,160,218,0.1); color: #2EA0DA; padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 600; white-space: nowrap;">Habilidades</div>
+      </div>
+      <!-- Honor Cards -->
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <!-- Card 1 - Completed -->
+        <div style="background: white; border-radius: 16px; padding: 14px; display: flex; align-items: center; gap: 14px; box-shadow: 0 2px 8px rgba(24,54,81,0.08); border-left: 4px solid #4FBF9F;">
+          <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #4FBF9F, #43A78A); border-radius: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            <span style="color: white; font-size: 20px; font-weight: 800;">✓</span>
+          </div>
+          <div style="flex: 1; min-width: 0;">
+            <div style="color: #183651; font-weight: 700; font-size: 13px;">Primeros Auxilios</div>
+            <div style="color: #4FBF9F; font-size: 10px; font-weight: 600;">Completada</div>
+          </div>
+          <div style="width: 32px; height: 32px; background: linear-gradient(135deg, #FBBD5E, #F06151); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px;">⭐</div>
+        </div>
+        <!-- Card 2 - In Progress -->
+        <div style="background: white; border-radius: 16px; padding: 14px; display: flex; align-items: center; gap: 14px; box-shadow: 0 2px 8px rgba(24,54,81,0.08); border-left: 4px solid #FBBD5E;">
+          <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #FBBD5E, #F06151); border-radius: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            <span style="color: white; font-size: 18px;">🌿</span>
+          </div>
+          <div style="flex: 1; min-width: 0;">
+            <div style="color: #183651; font-weight: 700; font-size: 13px;">Zoología</div>
+            <div style="display: flex; align-items: center; gap: 6px; margin-top: 4px;">
+              <div style="flex: 1; background: rgba(251,189,94,0.2); border-radius: 4px; height: 6px;">
+                <div style="background: #FBBD5E; width: 60%; height: 100%; border-radius: 4px;"></div>
+              </div>
+              <span style="color: #FBBD5E; font-size: 10px; font-weight: 700;">60%</span>
+            </div>
+          </div>
+        </div>
+        <!-- Card 3 - Available -->
+        <div style="background: white; border-radius: 16px; padding: 14px; display: flex; align-items: center; gap: 14px; box-shadow: 0 2px 8px rgba(24,54,81,0.08); border-left: 4px solid #E1E6E7;">
+          <div style="width: 48px; height: 48px; background: #E1E6E7; border-radius: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            <span style="font-size: 18px;">🏕️</span>
+          </div>
+          <div style="flex: 1; min-width: 0;">
+            <div style="color: #183651; font-weight: 700; font-size: 13px;">Campismo</div>
+            <div style="color: #B9B9B9; font-size: 10px;">Disponible • Nivel básico</div>
+          </div>
+          <div style="color: #2EA0DA; font-size: 20px; font-weight: 300;">›</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Hybrid Cards (Clean & Progressive)</h3>
+      <p>Fondo claro, <strong>chips de categoría</strong> horizontales arriba (reemplazan el dropdown), y debajo <strong>cards con barra de progreso</strong> individual. Border-left indica estado con color. Combina lo mejor: grid explorable + progreso visible + badges de logro.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Pros</h4><ul>
+          <li>Categorías como chips — NO dropdown, visual e inmediato</li>
+          <li>Progreso individual por honor (barra + porcentaje)</li>
+          <li>Funciona igual para 5 años que para 99</li>
+          <li>No implica orden secuencial</li>
+        </ul></div>
+        <div class="cons"><h4>Cons</h4><ul>
+          <li>Menos "wow" que las otras dos opciones</li>
+          <li>Cards pueden ser monótonas si hay muchas</li>
+        </ul></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<style>
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+</style>

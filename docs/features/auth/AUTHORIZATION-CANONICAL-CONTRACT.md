@@ -141,7 +141,7 @@ El runtime vigente SI distingue permisos finos por familia sensible para sub-rec
 - `health:read` / `health:update`;
 - `emergency_contacts:read` / `emergency_contacts:update`;
 - `legal_representative:read` / `legal_representative:update`;
-- `post_registration:read` / `post_registration:update`.
+- `post_registration:read` / `registration:complete`.
 
 Regla de enforcement:
 
@@ -152,7 +152,8 @@ Regla de enforcement:
 OR transicional vigente:
 
 - lecturas finas aceptan `family:read` O el legado de la familia `users:*` para lectura (`users:read_detail`);
-- escrituras finas aceptan `family:update` O el legado de la familia `users:*` para escritura (`users:update`).
+- escrituras finas aceptan `family:update` O el legado de la familia `users:*` para escritura (`users:update`);
+- excepcion: `registration:complete` es un permiso global dedicado sin fallback legacy. Asignado a roles de campo (super_admin, admin, assistant-lf, director-lf y equivalentes union/dia por herencia). El owner siempre puede completar su propio registro sin este permiso.
 
 Esto existe para compatibilidad transicional y NO redefine el contrato objetivo de largo plazo.
 
@@ -175,7 +176,7 @@ Regla documental:
 
 ### Politica cerrada - excepcion minima de terceros en post-registro
 
-El runtime vigente todavia permite que un actor no owner con permiso global `users:update` ejecute:
+El runtime vigente permite que un actor no owner con permiso global `registration:complete` ejecute:
 
 - `POST /users/:userId/post-registration/step-1/complete`;
 - `POST /users/:userId/post-registration/step-2/complete`;
@@ -183,17 +184,16 @@ El runtime vigente todavia permite que un actor no owner con permiso global `use
 
 La decision funcional canonica queda cerrada asi:
 
-- no declarar permisos nuevos por suposicion;
 - `GET /users/:userId/post-registration/status` permite lectura administrativa minima de terceros con `post_registration:read` o fallback legacy `users:read_detail`;
-- `POST /users/:userId/post-registration/step-{1,2,3}/complete` permite completion administrativa minima de terceros con `post_registration:update` o fallback legacy `users:update`;
-- ownership mantiene feedback detallado actual;
+- `POST /users/:userId/post-registration/step-{1,2,3}/complete` requiere `registration:complete` (permiso global dedicado, sin fallback a `users:update`). Roles asignados: super_admin, admin, assistant-lf, director-lf y equivalentes union/dia por herencia;
+- ownership mantiene feedback detallado actual y permite completar sin necesidad de `registration:complete`;
 - terceros no reciben en respuestas ni errores detalles sensibles del usuario objetivo.
 
 ### Politica de cliente - excepcion minima para terceros
 
 La politica canonica para clientes queda asi:
 
-- `process-state` / `administrative completion` de terceros puede reflejarse cuando exista autorizacion global resuelta explicita (`post_registration:read` o `users:read_detail` para lectura; `post_registration:update` o `users:update` para escritura);
+- `process-state` / `administrative completion` de terceros puede reflejarse cuando exista autorizacion global resuelta explicita (`post_registration:read` o `users:read_detail` para lectura; `registration:complete` para escritura);
 - `GET /post-registration/status` para terceros debe limitarse al estado administrativo minimo del proceso y no necesita feedback guiado tipo `nextStep`;
 - `POST /step-{1,2,3}/complete` para terceros debe usar respuestas y errores minimos, sin devolver detalles sensibles del paso 2 ni feedback detallado del usuario objetivo;
 - datos sensibles enviados por el usuario (`health` = `allergies` + `diseases` + `medicines`, `emergency contacts`, `legal representative`, perfil sensible derivado del paso 2) NO deben quedar expuestos ni editables en clientes de terceros solo por `users:update` generico;
@@ -348,6 +348,14 @@ Respuesta esperada:
 - `authorization.active_assignment`
 - `authorization.effective`
 - compatibilidad temporal con `club` y `active`
+
+### QR canonico
+
+Las credenciales QR nuevas consumen este mismo contrato de autorizacion:
+
+- `qr:issue_self` habilita `/qr/me`, `/qr/me/card` y `/qr/me/card.pdf`;
+- `qr:validate` habilita `/qr/validate`;
+- `/qr/scan` permanece como alias legacy y sigue gobernado por `attendance:manage`.
 
 ## Referencias Relacionadas
 

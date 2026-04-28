@@ -1,0 +1,26 @@
+# Especialidad — campamento en invierno
+
+**Fuente**: `/Users/abner/Downloads/S3/honors_pdf/campamento_en_invierno.pdf`
+**Texto extraído**: `/Users/abner/Documents/development/sacdia/docs/working/honors-especialidades/raw/campamento-en-invierno.txt`
+**Nivel detectado**: 2
+**Cantidad de requisitos detectados**: 11
+
+> Nota: extracción automática preliminar desde la capa de texto del PDF. Requiere revisión humana antes de cualquier carga a base de datos.
+
+## Requisitos detectados
+
+1. Obtener la especialidad de Arte de acampar.
+2. Hacer una lista completa del equipo necesario para acampar en invierno, tales como posiblemente temperaturas bajo cero, tormentas y nieve. (Completar el Cartel #1)
+3. Explicar los principios de mantener el calor corporal y la sequedad a través de la correcta utilización de prendas de vestir y de dormir en todas las temperaturas bajo cero mientras viaja, descansa y duerme. Viaja Descansa Duerme
+4. Enumerar y explicar las características de la selección del campamento de invierno.
+5. Describir, o mostrar si es posible, la preparación del lugar para una tienda de campaña a nivel en un sitio en la nieve y armar y fijar una tienda de campaña en condiciones de invierno.
+6. Preparar un menú balanceado de 3 días para ser utilizado en su experiencia de campamento de invierno. (Completar el Cartel #2)
+7. Saber cómo obtener agua de la nieve.
+8. Conocer 5 normas de seguridad de campamento durante invierno. 1. 2. 3. 4. 5.
+9. Explicar las medidas adecuadas a tomar en caso de perderse sin equipo, en condiciones de invierno.
+10. Mostrar el conocimiento y la capacidad para prevenir, reconocer y cuidar de la congelación leve, la hipotermia, la ceguera leve por la nieve y la deshidratación. (Completar el Cartel #3)
+11. Pasar un total de 6 días y 6 noches en un campamento en el clima frío. a. Todas las noches la temperatura debería bajar cerca de los 5° C. b. Dos noches debería haber temperaturas inferiores al punto de congelación (0° C). c. Todas las noches deben ser pasadas en las tiendas de campaña, lonas o al aire libre. Fecha Temperaturas Noche pasada en Campamento en invierno — Cartel #1 Temperaturas bajo cero Tormentas Nieve Campamento en invierno — Cartel #2 Día 1 Desayuno Almuerzo Cena Día 2 Día 3 Campamento en invierno — Cartel #3 Prevención Reconocimiento Cuidado Congelación leve Hipotermia Ceguera leve por la nieve Deshidratación
+
+## Observaciones
+
+- Este archivo fue preparado para análisis posterior, no para carga directa a BD.

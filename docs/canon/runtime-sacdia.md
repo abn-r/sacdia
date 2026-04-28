@@ -22,10 +22,10 @@ La precedencia para interpretar este documento es:
 3. `docs/canon/identidad-sacdia.md`
 4. `docs/canon/arquitectura-sacdia.md`
 5. `docs/canon/decisiones-clave.md`
-6. `docs/02-API/ENDPOINTS-LIVE-REFERENCE.md`
-7. `docs/02-API/ARCHITECTURE-DECISIONS.md`
-8. `docs/03-DATABASE/schema.prisma`
-9. `docs/03-DATABASE/README.md`
+6. `docs/api/ENDPOINTS-LIVE-REFERENCE.md`
+7. `docs/api/ARCHITECTURE-DECISIONS.md`
+8. `docs/database/schema.prisma`
+9. `docs/database/README.md`
 10. `docs/canon/completion-matrix.md`
 
 Si una fuente autorizada de menor jerarquía contradice otra superior, este documento no fuerza síntesis y debe escalar el punto.
@@ -99,17 +99,17 @@ Esta frontera está respaldada por `docs/canon/decisiones-clave.md` y por las no
 
 ### 5.1 Fuente runtime
 
-La fuente runtime API vigente es `docs/02-API/ENDPOINTS-LIVE-REFERENCE.md`.
+La fuente runtime API vigente es `docs/api/ENDPOINTS-LIVE-REFERENCE.md`.
 
 Características documentadas:
 
 - **Base URL**: `/api/v1` <!-- VERIFICADO contra código 2026-03-14 -->
 - **Fecha de generación documentada**: `2026-03-10`
-- **Total documentado**: `180 endpoints` (de 198 implementados; 18 sin documentar en ENDPOINTS-LIVE-REFERENCE) <!-- VERIFICADO contra código 2026-03-14 -->
+- **Total documentado**: `290 endpoints` <!-- sincronizado con ENDPOINTS-LIVE-REFERENCE 2026-04-13 -->
 
 ### 5.2 Módulos API documentados
 
-El runtime documenta actualmente estos módulos: <!-- VERIFICADO contra código 2026-03-14: 22 módulos en backend, 18 documentados -->
+El runtime documenta actualmente estos módulos: <!-- sincronizado con ENDPOINTS-LIVE-REFERENCE 2026-04-13: investiture documentado como módulo activo -->
 
 - `auth` <!-- VERIFICADO -->
 - `users` <!-- VERIFICADO -->
@@ -127,6 +127,7 @@ El runtime documenta actualmente estos módulos: <!-- VERIFICADO contra código 
 - `health` <!-- VERIFICADO -->
 - `honors` <!-- VERIFICADO -->
 - `inventory` <!-- VERIFICADO -->
+- `investiture` <!-- VERIFICADO -->
 - `notifications` <!-- VERIFICADO -->
 - `root` <!-- VERIFICADO -->
 
@@ -215,6 +216,7 @@ El runtime documenta:
 - catálogo público de clases;
 - inscripción de usuarios a clases;
 - progreso de clase por usuario y clase;
+- validación de investiduras con pipeline multietapa, historial, bulk ops y configuración por campo local;
 - honores del usuario y catálogo de honores;
 - certificaciones y su progreso;
 - folders y progreso por carpetas;
@@ -227,6 +229,14 @@ Notas runtime activas:
 - si no existe inscripción resoluble devuelve `404`;
 - si hay ambigüedad devuelve `409 ENROLLMENT_RESOLUTION_AMBIGUOUS`;
 - `GET /api/v1/admin/users/:userId` expone `current_operational_enrollment` como presente anual y `trajectory_classes` como histórico consolidado.
+
+Notas runtime activas de carpetas anuales:
+
+- El estado de cada sección de una carpeta anual vive en la columna `annual_folder_section_evaluations.status` del enum `annual_folder_section_status_enum` (`PENDING`, `SUBMITTED`, `PREAPPROVED_LF`, `VALIDATED`, `REJECTED`).
+- Esa columna persistida es la **fuente única de verdad** del estado de la sección. Ningún consumidor — backend, admin o app — debe derivar el estado a partir de la presencia de filas de evaluación, timestamps LF/unión, o columnas de aprobación. La columna es el contrato.
+- El flujo de revisión puede ser de **dos niveles** cuando la carpeta tiene `requires_union_confirmation = true`: LF pre-aprueba (`PREAPPROVED_LF`) y la unión confirma o hace override (`VALIDATED` | `REJECTED`). Cuando el flag es `false`, la aprobación LF transiciona directamente a `VALIDATED` y el servicio espeja columnas de unión con el actor LF para simetría de auditoría.
+- El flag `requires_union_confirmation` se calcula en la creación del folder a partir de la vinculación con la carpeta de camporee y es históricamente inmutable.
+- Los módulos consumidores del estado de la carpeta anual (scoring/rankings y la vinculación con camporees via `local_camporee_id` / `union_camporee_id`) leen el estado desde la columna `status`. Sólo las filas en estado terminal (`VALIDATED` o `REJECTED`) contribuyen al cálculo de totales y al avance del folder a `evaluated`.
 
 ### 6.5 Operación administrativa y catálogos
 <!-- VERIFICADO contra código 2026-03-14: catalogs ALINEADO, admin geography ALINEADO, admin RBAC ALINEADO, admin reference (allergies/diseases/relationship-types/ecclesiastical-years) implementado pero SIN CANON explícito -->
@@ -307,6 +317,15 @@ El runtime documenta explícitamente autorización sensible sobre:
 
 Y mantiene compatibilidad transicional con permisos legacy `users:*` en ciertas superficies.
 
+### 7.4 Política read-wider-than-write en `annual_folders:evaluate`
+
+El módulo de evaluación de carpetas anuales aplica una política deliberada de lectura más amplia que escritura sobre el permiso `annual_folders:evaluate`:
+
+- **Operaciones de escritura** (`POST .../evaluate`, `POST .../confirm-union`, `POST .../reopen`, `PATCH evidences/:evidenceId/reviewer-note`) requieren el permiso con `type: 'global'`. Solo actores LF y de unión con alcance global pueden mutar el estado de evaluación.
+- **Operación de lectura** (`GET /annual-folders/:folderId/evaluations`) requiere el mismo permiso con `type: 'active_assignment'`. Cualquier usuario con asignación activa al club puede consultar el estado de sus propias carpetas sin tener permisos globales de escritura.
+
+Esta asimetría es intencional: los usuarios club-scoped ven el estado de sus propias carpetas, mientras que la mutación queda restringida a actores LF y de unión. La justificación canónica vive como ADR-6 del SDD `annual-folders-ownership-rework` y el contrato está documentado en el JSDoc de `EvaluationController`.
+
 ---
 
 ## 8. Persistencia runtime documentada
@@ -314,9 +333,9 @@ Y mantiene compatibilidad transicional con permisos legacy `users:*` en ciertas 
 
 ### 8.1 Fuente estructural
 
-La fuente de verdad estructural de datos es `docs/03-DATABASE/schema.prisma`.
+La fuente de verdad estructural de datos es `docs/database/schema.prisma`.
 
-La guía operativa subordinada es `docs/03-DATABASE/README.md`.
+La guía operativa subordinada es `docs/database/README.md`.
 
 ### 8.2 Rasgos documentados de persistencia
 
@@ -406,11 +425,11 @@ El runtime canonizado de Wave 0 queda resumido así:
 
 - SACDIA opera como backend REST + admin web + app móvil + persistencia relacional;
 - la API vigente es la publicada en `ENDPOINTS-LIVE-REFERENCE.md`;
-- la semántica del sistema se interpreta desde trayectoria, club, sección, vinculación, periodo y validación; <!-- ASPIRACIONAL: no implementado — validación de investiduras existe como tablas (investiture_config, investiture_validation_history) pero sin módulo backend, endpoints ni screens -->
+- la semántica del sistema se interpreta desde trayectoria, club, sección, vinculación, periodo y validación;
 - la operación anual formativa se lee desde `enrollments`;
 - la trayectoria consolidada histórica se lee desde `users_classes`;
 - la autorización runtime combina JWT, permisos globales y asignaciones contextuales;
-- las superficies documentadas cubren autenticación, perfil, post-registro, clases, honores, certificaciones, folders, clubes, roles, finanzas, actividades, camporees, inventario y notificaciones.
+- las superficies documentadas cubren autenticación, perfil, post-registro, clases, investiduras, honores, certificaciones, folders, clubes, roles, finanzas, actividades, camporees, inventario y notificaciones.
 
 ---
 
@@ -430,7 +449,7 @@ Este runtime canonizado:
 
 Cuando cambie el contrato runtime documentado:
 
-1. se actualiza primero `docs/02-API/ENDPOINTS-LIVE-REFERENCE.md`;
+1. se actualiza primero `docs/api/ENDPOINTS-LIVE-REFERENCE.md`;
 2. se revalida contra `docs/canon/source-of-truth.md`;
 3. se ajusta `docs/canon/completion-matrix.md` si cambia cobertura o aparece drift nuevo;
 4. recién entonces se actualiza este `runtime-sacdia.md`.

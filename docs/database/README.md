@@ -2,7 +2,12 @@
 
 **Estado**: ACTIVE
 
-Guía completa de la base de datos PostgreSQL del sistema SACDIA.
+Guía operativa de la base de datos PostgreSQL del sistema SACDIA.
+
+> [!IMPORTANT]
+> La fuente de verdad estructural efectiva del runtime es `sacdia-backend/prisma/schema.prisma`.
+> `docs/database/schema.prisma` es el espejo documental sincronizado del schema efectivo y debe mantenerse alineado con el backend.
+> `docs/database/SCHEMA-REFERENCE.md` es referencia humana subordinada y no debe usarse para arbitrar diferencias estructurales.
 
 ---
 
@@ -18,9 +23,9 @@ Guía completa de la base de datos PostgreSQL del sistema SACDIA.
 
 ## Schema Overview
 
-La base de datos está diseñada con las siguientes características:
+La base de datos está diseñada con las siguientes características verificadas para este baseline:
 
-- **PostgreSQL 15.x** en Supabase
+- **PostgreSQL** como motor relacional operativo
 - **Prisma ORM** como abstracción
 - **UUIDs** para todas las tablas principales
 - **Soft deletes** mediante campo `active`
@@ -79,8 +84,9 @@ La base de datos está diseñada con las siguientes características:
 
 | Archivo | Descripción |
 |---------|-------------|
-| [schema.prisma](schema.prisma) | **Schema definitivo de Prisma** - Fuente de verdad |
-| [SCHEMA-REFERENCE.md](SCHEMA-REFERENCE.md) | Referencia completa: tablas, relaciones, naming conventions |
+| `sacdia-backend/prisma/schema.prisma` | **Schema efectivo del runtime** - fuente de verdad estructural |
+| [schema.prisma](schema.prisma) | Espejo documental sincronizado del schema Prisma del backend |
+| [SCHEMA-REFERENCE.md](SCHEMA-REFERENCE.md) | Referencia humana subordinada: tablas, relaciones y naming conventions |
 | [migrations/](migrations/) | Scripts SQL de migración e inicialización |
 | [examples/](examples/) | Ejemplos de respuestas JSON de la API |
 
@@ -254,7 +260,7 @@ WHERE cra.club_section_id = 123
 
 ## Próximos Pasos
 
-1. **Explorar schema**: Abre [schema.prisma](schema.prisma)
+1. **Explorar schema vigente**: Abre `sacdia-backend/prisma/schema.prisma`
 2. **Ver relaciones**: Lee [SCHEMA-REFERENCE.md](SCHEMA-REFERENCE.md)
 3. **Ejecutar migraciones**: Sigue [migrations/README.md](migrations/README.md)
 4. **Usar Prisma**: `npx prisma studio`

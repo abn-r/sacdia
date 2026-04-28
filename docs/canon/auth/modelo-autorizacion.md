@@ -261,13 +261,14 @@ Toda implementación futura de auth y authorization debe respetar estas reglas:
 - cualquier cambio al modelo debe actualizar este documento, `runtime-auth.md` y el proceso afectado.
 
 ## Relacion con otros documentos
-- `docs/canon/auth/dominio-auth.md` — define el dominio y sus invariantes;
-- `docs/canon/auth/runtime-auth.md` — define el comportamiento técnico vigente;
-- `docs/canon/auth/procesos-auth.md` — define cómo se ve esto en flujos concretos como login, refresh o cambio de contexto.
+- `docs/canon/source-of-truth.md` — fija precedencia y rutas autorizadas;
+- `docs/canon/runtime-sacdia.md` — ubica auth dentro del runtime general de SACDIA;
+- `docs/canon/auth/runtime-auth.md` — define el comportamiento técnico vigente.
 
 ## Referencias activas
 - `docs/canon/auth/runtime-auth.md`
-- `docs/01-FEATURES/auth/AUTHORIZATION-CANONICAL-CONTRACT.md`
-- `docs/01-FEATURES/auth/CLUB-ROLE-ASSIGNMENT-FIRST-CONTRACT.md`
-- `docs/01-FEATURES/auth/RBAC-ENFORCEMENT-MATRIX.md`
+- `docs/canon/source-of-truth.md`
+- `docs/canon/runtime-sacdia.md`
+- `docs/features/auth/AUTHORIZATION-CANONICAL-CONTRACT.md`
+- `docs/features/auth/RBAC-ENFORCEMENT-MATRIX.md`
 - `sacdia-backend/src/common/services/authorization-context.service.ts`

@@ -1,0 +1,25 @@
+# Especialidad — metodologia de estudio
+
+**Fuente**: `/Users/abner/Downloads/S3/honors_pdf/metodologia_de_estudio.pdf`
+**Texto extraído**: `/Users/abner/Documents/development/sacdia/docs/working/honors-especialidades/raw/metodologia-de-estudio.txt`
+**Nivel detectado**: 2
+**Cantidad de requisitos detectados**: 10
+
+> Nota: extracción automática preliminar desde la capa de texto del PDF. Requiere revisión humana antes de cualquier carga a base de datos.
+
+## Requisitos detectados
+
+1. Describir de manera escrita u oral cómo contribuyen los siguientes puntos con el estudio: Elección del lugar y ambiente ideal Uso de diccionarios y enciclopedias Dominio del tiempo de estudio Investigación bibliográfica como complemento del estudio Técnicas de asimilación y memorización
+2. Hacer una ficha con su cronograma de estudios y seguirla durante un mes. El cronograma debe contener las fechas del mes y estar dividido por semanas. Llene la ficha con el tiempo que invertirá en las siguientes actividades: a. Sueño b. Escuela c. Transporte d. Alimentación
+3. Describir por escrito u oralmente maneras que ayudan al alumno a concentrarse durante los estudios: En casa En la biblioteca En la escuela
+4. Demostrar cuál es la mejor postura para estudiar y enumerar qué posiciones debe evitar el alumno al estudiar.
+5. Presentar cinco ideas para el alumno que quiere sacarse la nota máxima en evaluaciones y trabajos. 1. 2. 3. 4. 5.
+6. Presentar cinco ideas que el alumno puede hacer para disminuir el tiempo de lectura y asimilar mejor el contenido estudiado. 1. 2. 3. 4. 5.
+7. ¿Qué actividades ayudan al alumno a mejorar su capacidad de aprendizaje?
+8. Escribir 25 a 30 líneas con uno de los siguientes temas: a. ¿Dónde voy a estar y qué haré de aquí a 7 años? b. ¿Cómo haré para seguir la profesión que escogí? c. ¿Qué quiero aprender aún y cómo puedo alcanzar este objetivo?
+9. Saber la diferencia entre resumen y reseña, presentando ambos en forma de bosquejo.
+10. Leer algún libro de su elección que trate sobre técnicas y metodologías de estudio y presentar un bosquejo de 50 líneas como mínimo. Libro leído
+
+## Observaciones
+
+- Este archivo fue preparado para análisis posterior, no para carga directa a BD.

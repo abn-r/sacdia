@@ -1,0 +1,30 @@
+# Especialidad — reyes de israel
+
+**Fuente**: `/Users/abner/Downloads/S3/honors_pdf/reyes_de_israel.pdf`
+**Texto extraído**: `/Users/abner/Documents/development/sacdia/docs/working/honors-especialidades/raw/reyes-de-israel.txt`
+**Nivel detectado**: 1
+**Cantidad de requisitos detectados**: 15
+
+> Nota: extracción automática preliminar desde la capa de texto del PDF. Requiere revisión humana antes de cualquier carga a base de datos.
+
+## Requisitos detectados
+
+1. Discutir las cualidades que el Señor buscó de un rey en Deuteronomio 17:14-20. Explicar por qué el Señor esbozó tales criterios siglos antes de que los hijos de Israel clamaran por un rey.
+2. Leer 1 Samuel 8-10. Descubrir el curso significativo de los acontecimientos que conducen a la selección del primer rey del antiguo Israel.
+3. ¿Cuál fue el papel divino de un rey durante la época del antiguo Israel?
+4. ¿Quiénes fueron los primeros cuatro reyes de Israel y cómo se relacionan entre sí? 1. 2. 3. 4.
+5. En Daniel 2:21, dice que Dios pone reyes y quita reyes. Citar tres ejemplos bíblicos de cómo este texto es pertinente con respecto a la voluntad de Dios y a usted en su vida diaria. 1. 2. 3. Crecimiento espiritual, actividades misioneras y herencia
+6. Describir brevemente los acontecimientos en la vida del rey Saúl que llevó al Señor a elegir otro rey de Israel.
+7. Leer 2 Samuel 11-12. Aunque el rey David fue considerado como un buen rey, ¿qué serie de acontecimientos lo llevaron al pecado que justificaba que Dios lo castigara?
+8. A la luz de los muchos pecados de David, ¿cómo se le consideraba todavía un hombre conforme al corazón de Dios?
+9. La Biblia declara al rey Salomón como el hombre más sabio que haya vivido jamás. Describir lo que fue tan profundo acerca del reinado del rey Salomón. Considerar el pasaje 1 Reyes 3:16-28.
+10. Repasar Deuteronomio 17:14-20. Considerar y analizar cómo el rey Salomón viró en contra de las cualidades que Dios buscaba en un rey.
+11. Leer Eclesiastés 12. ¿Qué consejo profundo da el Rey Salomón acerca de la vida y el servicio al Señor? Crecimiento espiritual, actividades misioneras y herencia
+12. Estudiar la vida del rey Roboam en 1 Reyes 12. Describir brevemente la serie cronológica de acontecimientos que llevaron a la rebelión, resultando en la división a los reinos de Israel y Judá.
+13. Individualmente o con un compañero, investigar dos de los siguientes reyes. Preste especial interés a sus esfuerzos para apoyar la causa de Dios. Compartir su investigación con un grupo en algún formato multimedia. a. Azarías – 2 Crónicas 26:1-15 b. David – 1 Crónicas 28:11-12 c. Ezequías – 2 Crónicas 29 d. Josafat – 2 Crónicas 17-19 e. Josías – 2 Reyes 23 f. O un rey de su elección
+14. Dibujar un diagrama que delinea la cronología de los reyes de Israel y Judá, incluir cuándo llegaron al poder y cuánto tiempo reinaron. Hacer que Israel y Judá sigan un cronograma paralelo.
+15. Crear una presentación, un discurso o un juego que muestra lo que ha aprendido acerca de los reyes de Israel al desarrollar esta especialidad. Compartir esta presentación con un grupo.
+
+## Observaciones
+
+- Este archivo fue preparado para análisis posterior, no para carga directa a BD.

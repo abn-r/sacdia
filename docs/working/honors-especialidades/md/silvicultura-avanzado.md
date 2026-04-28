@@ -1,0 +1,24 @@
+# Especialidad — silvicultura avanzado
+
+**Fuente**: `/Users/abner/Downloads/S3/honors_pdf/silvicultura_avanzado.pdf`
+**Texto extraído**: `/Users/abner/Documents/development/sacdia/docs/working/honors-especialidades/raw/silvicultura-avanzado.txt`
+**Nivel detectado**: 3
+**Cantidad de requisitos detectados**: 9
+
+> Nota: extracción automática preliminar desde la capa de texto del PDF. Requiere revisión humana antes de cualquier carga a base de datos.
+
+## Requisitos detectados
+
+1. Tener la especialidad de Silvicultura.
+2. Definir los siguientes términos: Área basal Tronco Diámetro Corte de árboles de semilla Cortar selectivamente Corte de aclareo Silvicultura Follaje Corona Madera para celulosa Sucesión Despejamiento Rotación Aserrío Bosque clímax Hábitat
+3. Estudiar 5 especies de árboles que son importantes para la silvicultura en su área y dar la información siguiente para cada uno: (Completar el Cartel #1) a. Nombre científico y común b. Gama del árbol c. Altura y diámetro del árbol al llegar a su madurez d. Plagas importantes (insectos, enfermedades, etc.) del árbol e. Hábitat del árbol, zona del bosque y elevación f. Edad común de rotación (cosecha) para usos varios
+4. ¿Cuáles métodos se usan para asegurar la reforestación de un área de cosecha?
+5. En un mapa de su país, dibujar las áreas de bosque e indicar las clases de bosques en su área.
+6. Escribir un informe breve (250 palabras o más) sobre la importancia de los bosques en su país. Incluir temas como la importancia de la madera para papel (celulosa) y leña; hábitat de la vida silvestre; pasto para ganado; buena calidad de agua; y recreación para las personas.
+7. Visitar uno de los siguientes o escribir un informe con diagramas de las operaciones: a. Aserradero b. Planta de celulosa c. Fábrica de mobiliario
+8. Hacer una encuesta forestal en un bosque típico para su área. Usar un prisma y marcar todos los árboles suficientemente grandes para que cuenten, grabar los datos siguientes para cada uno, y grabar el área basal por especie para la parcela entera. a. Nombre científico y común b. Diámetro c. Altura d. Edad (determinado por un taladro de incremento) Nombre científico Nombre común Diámetro Altura Edad Área Basal
+9. Participar en un proyecto de reforestación. Silvicultura, avanzado — Cartel #1 científico común Gama Altura Diámetro Plagas Hábitat Zona Elevación Edad de rotación
+
+## Observaciones
+
+- Este archivo fue preparado para análisis posterior, no para carga directa a BD.

@@ -1,0 +1,26 @@
+# Especialidad — negocios
+
+**Fuente**: `/Users/abner/Downloads/S3/honors_pdf/negocios.pdf`
+**Texto extraído**: `/Users/abner/Documents/development/sacdia/docs/working/honors-especialidades/raw/negocios.txt`
+**Nivel detectado**: 2
+**Cantidad de requisitos detectados**: 11
+
+> Nota: extracción automática preliminar desde la capa de texto del PDF. Requiere revisión humana antes de cualquier carga a base de datos.
+
+## Requisitos detectados
+
+1. Definir los siguientes términos: Salir sin ganar ni perder Negocio Plan de negocio Capital Distribución Interés Microempresa Precio Producto Producción Beneficio Promoción Servicio Mercado objetivo
+2. Describir 3 maneras en que un negocio puede ser concebido. 1. 2.
+3. 3. Explicar los beneficios de tener un equipo directivo en un negocio (tenga en cuenta que una persona puede adoptar todos estos papeles en un pequeño negocio).
+4. Hacer una lista de las maneras en que se puede promover el producto/servicio de un negocio.
+5. Mostrar cómo se determina: a. Precio del producto b. Punto muerto (umbral de rentabilidad) c. Beneficio/pérdida
+6. Discutir las maneras en que los beneficios de un negocio pueden ser usados.
+7. Aportar por lo menos 4 ideas para pequeños negocios que pueden ser conducidos por los Conquistadores en su club. Evaluar las fortalezas, debilidades, oportunidades y amenazas asociadas con cada una de ellas. 1. 2. 3. 4.
+8. Desarrollar un plan de negocios para por lo menos una de sus ideas de #7 anteriormente. Incluir lo siguiente en el plan: a. Descripción del negocio b. Capital necesario y la fuente del capital c. Precio del producto/servicio d. Mercado objetivo e. Método de promoción f. Ubicación de ventas g. Beneficios esperados h. Difusión de los beneficios
+9. Ejecutar el plan: a. Edificar el equipo directivo b. Crear el producto c. Anunciar el producto/servicio d. Vender el producto o realizar el servicio e. Informar acerca de los beneficios/pérdidas f. Informar acerca del uso de los beneficios g. Sugerencias para mejoramiento
+10. Discutir temas éticos y valores cristianos involucrados en la conducción de un negocio a. A Dios b. Al gobierno c. Al cliente d. Al empleado
+11. Recontar la historia de José como un astuto gerente y hombre de negocios (Génesis 41:39- 57), la parábola de los talentos (Lucas 19:11-26) u otro pasaje bíblico similar. Identificar 3 lecciones de la historia que se pueden aplicar a su negocio.
+
+## Observaciones
+
+- Este archivo fue preparado para análisis posterior, no para carga directa a BD.

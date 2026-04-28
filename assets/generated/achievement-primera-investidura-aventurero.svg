@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Primera Investidura Aventurero">
+  <title>Primera Investidura Aventurero</title>
+  <desc>Flat matte engraved achievement badge. Transparent canvas, dark circle #1C1C1E, accent #5B9BD5.</desc>
+  <circle cx="256" cy="256" r="220" fill="#1C1C1E"/>
+  <circle cx="256" cy="256" r="204" fill="none" stroke="#5B9BD5" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="256" cy="256" r="170" fill="none" stroke="#5B9BD5" stroke-width="3" stroke-linecap="round" opacity="0.38"/>
+  <polyline points="232,384 256,404 280,384" fill="none" stroke="#5B9BD5" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>
+  <polygon points="178.0,230.0 256.0,342.0 334.0,230.0" fill="none" stroke="#5B9BD5" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <line x1="178.0" y1="230.0" x2="256.0" y2="290.0" stroke="#5B9BD5" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <line x1="334.0" y1="230.0" x2="256.0" y2="290.0" stroke="#5B9BD5" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <ellipse cx="256" cy="298.0" rx="20.0" ry="16.0" fill="none" stroke="#5B9BD5" stroke-width="6" stroke-linecap="round"/>
+  <polygon points="256.0,142.0 262.3480807247587,157.26261646075056 278.8253563910837,158.58359213500125 266.27141037598767,169.33738353924943 270.10684605501933,185.41640786499875 256.0,176.8 241.89315394498064,185.41640786499875 245.72858962401233,169.33738353924943 233.1746436089163,158.58359213500125 249.65191927524128,157.26261646075056" fill="none" stroke="#5B9BD5" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

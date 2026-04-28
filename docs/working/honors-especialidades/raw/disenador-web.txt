@@ -1,0 +1,97 @@
+Nombre
+
+• Nivel de destreza 1
+
+Actividades vocacionales
+
+División Sudamericana
+
+Diseñador web
+
+1. Tener las especialidades de Computación I-IV.
+
+2. Definir los siguientes términos:
+
+Layout
+
+HTML
+
+DHTML
+
+CSS
+
+Java script
+
+Tags
+
+Cuerpo
+
+PHP
+
+SQL
+
+Página estática
+
+Página dinámica
+
+Enlaces
+
+Nombre
+
+• Nivel de destreza 1
+
+Actividades vocacionales
+
+División Sudamericana
+
+www
+
+3. Presentar en forma escrita un código simple de lenguaje HTML, usando los siguientes 
+
+elementos:
+
+a. Título
+
+b. Encabezado
+
+c. Cuerpo
+
+d. Menú
+
+e. Tablas
+
+f. Pie de página
+
+4. Presentar en una ilustración, o usando medios audiovisuales, la función de las principales 
+
+herramientas del mercado para la producción de un sitio web, como:
+
+a. Dreamweaver
+
+b. CorelDraw
+
+c. Fireworks
+
+d. Flash
+
+e. PhotoShop
+
+Punto Práctico 
+
+5. Crear una página estática simple, usando solo el bloc de notas, y con el código ponerla 
+
+en el browser con los siguientes elementos:
+
+a. Título
+
+b. Encabezado
+
+c. Cuerpo
+
+d. Menú izquierdo con enlaces
+
+e. Pie de página
+
+f. Banner animado, por lo menos dos
+
+Fecha completada: Instructor/asesor:

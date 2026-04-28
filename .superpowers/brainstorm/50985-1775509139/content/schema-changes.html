@@ -1,0 +1,94 @@
+<h2>Cambios de schema propuestos para honor_requirements</h2>
+<p class="subtitle">Campos nuevos necesarios para soportar sub-items, evidencia, y choice groups</p>
+
+<div class="section">
+  <h3>Schema actual</h3>
+  <div style="background: #1a1a2e; border-radius: 8px; padding: 16px; font-family: monospace; font-size: 0.85em; line-height: 1.6;">
+    <div style="color: #666;">// honor_requirements (actual)</div>
+    <div><span style="color: #f39c12;">requirement_id</span>      <span style="color: #888;">Int</span>     <span style="color: #555;">PK autoincrement</span></div>
+    <div><span style="color: #f39c12;">honor_id</span>             <span style="color: #888;">Int</span>     <span style="color: #555;">FK → honors</span></div>
+    <div><span style="color: #f39c12;">requirement_number</span>   <span style="color: #888;">Int</span>     <span style="color: #555;">ordenamiento</span></div>
+    <div><span style="color: #f39c12;">requirement_text</span>     <span style="color: #888;">String</span>  <span style="color: #555;">texto completo (con sub-items embebidos)</span></div>
+    <div><span style="color: #f39c12;">has_sub_items</span>        <span style="color: #888;">Bool</span>    <span style="color: #555;">flag simple</span></div>
+    <div><span style="color: #f39c12;">needs_review</span>         <span style="color: #888;">Bool</span>    <span style="color: #555;">pendiente de revisión</span></div>
+    <div><span style="color: #f39c12;">active</span>               <span style="color: #888;">Bool</span></div>
+    <div><span style="color: #f39c12;">created_at/modified_at</span> <span style="color: #888;">DateTime</span></div>
+    <div style="margin-top: 8px; color: #555;">@@unique([honor_id, requirement_number])</div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Schema propuesto</h3>
+  <div style="background: #1a1a2e; border-radius: 8px; padding: 16px; font-family: monospace; font-size: 0.85em; line-height: 1.6;">
+    <div style="color: #666;">// honor_requirements (propuesto)</div>
+    <div><span style="color: #f39c12;">requirement_id</span>      <span style="color: #888;">Int</span>     <span style="color: #555;">PK autoincrement (sin cambios)</span></div>
+    <div><span style="color: #f39c12;">honor_id</span>             <span style="color: #888;">Int</span>     <span style="color: #555;">FK → honors (sin cambios)</span></div>
+    <div><span style="color: #2ecc71;">parent_id</span>            <span style="color: #888;">Int?</span>    <span style="color: #2ecc71;">NUEVO — FK → honor_requirements (null = top-level)</span></div>
+    <div><span style="color: #f39c12;">requirement_number</span>   <span style="color: #888;">Int</span>     <span style="color: #555;">ordenamiento (sin cambios)</span></div>
+    <div><span style="color: #2ecc71;">display_label</span>        <span style="color: #888;">String?</span> <span style="color: #2ecc71;">NUEVO — "1", "a", "ii", "3.b" (para mostrar al usuario)</span></div>
+    <div><span style="color: #f39c12;">requirement_text</span>     <span style="color: #888;">String</span>  <span style="color: #555;">solo texto instruccional (sin sub-items embebidos)</span></div>
+    <div><span style="color: #2ecc71;">reference_text</span>       <span style="color: #888;">String?</span> <span style="color: #2ecc71;">NUEVO — tablas/material de referencia separado</span></div>
+    <div><span style="color: #f39c12;">has_sub_items</span>        <span style="color: #888;">Bool</span>    <span style="color: #555;">(sin cambios, derivado de children.count > 0)</span></div>
+    <div><span style="color: #2ecc71;">is_choice_group</span>      <span style="color: #888;">Bool</span>    <span style="color: #2ecc71;">NUEVO — true para "elegí N de los siguientes"</span></div>
+    <div><span style="color: #2ecc71;">choice_min</span>           <span style="color: #888;">Int?</span>    <span style="color: #2ecc71;">NUEVO — mínimo a completar (N en "elegí N de M")</span></div>
+    <div><span style="color: #2ecc71;">requires_evidence</span>    <span style="color: #888;">Bool</span>    <span style="color: #2ecc71;">NUEVO — true si es práctico (fogata, construir, etc.)</span></div>
+    <div><span style="color: #f39c12;">needs_review</span>         <span style="color: #888;">Bool</span>    <span style="color: #555;">(sin cambios)</span></div>
+    <div><span style="color: #f39c12;">active</span>               <span style="color: #888;">Bool</span></div>
+    <div><span style="color: #f39c12;">created_at/modified_at</span> <span style="color: #888;">DateTime</span></div>
+    <div style="margin-top: 8px; color: #555;">@@unique([honor_id, requirement_number, parent_id])</div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Tabla nueva: requirement_evidence</h3>
+  <div style="background: #1a1a2e; border-radius: 8px; padding: 16px; font-family: monospace; font-size: 0.85em; line-height: 1.6;">
+    <div style="color: #666;">// requirement_evidence (NUEVA)</div>
+    <div><span style="color: #2ecc71;">evidence_id</span>         <span style="color: #888;">Int</span>     <span style="color: #555;">PK autoincrement</span></div>
+    <div><span style="color: #2ecc71;">progress_id</span>         <span style="color: #888;">Int</span>     <span style="color: #555;">FK → user_honor_requirement_progress</span></div>
+    <div><span style="color: #2ecc71;">evidence_type</span>       <span style="color: #888;">Enum</span>    <span style="color: #555;">IMAGE | FILE | LINK</span></div>
+    <div><span style="color: #2ecc71;">url</span>                 <span style="color: #888;">String</span>  <span style="color: #555;">URL del archivo (R2) o enlace externo</span></div>
+    <div><span style="color: #2ecc71;">filename</span>            <span style="color: #888;">String?</span> <span style="color: #555;">nombre original del archivo</span></div>
+    <div><span style="color: #2ecc71;">mime_type</span>           <span style="color: #888;">String?</span> <span style="color: #555;">tipo MIME para archivos</span></div>
+    <div><span style="color: #2ecc71;">file_size</span>           <span style="color: #888;">Int?</span>    <span style="color: #555;">tamaño en bytes</span></div>
+    <div><span style="color: #2ecc71;">active</span>              <span style="color: #888;">Bool</span></div>
+    <div><span style="color: #2ecc71;">created_at/modified_at</span> <span style="color: #888;">DateTime</span></div>
+    <div style="margin-top: 8px; color: #555;">@@index([progress_id])</div>
+    <div style="color: #555;">// Límite: 3 por tipo por progress_id (enforced en app layer)</div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Cambios a user_honor_requirement_progress</h3>
+  <div style="background: #1a1a2e; border-radius: 8px; padding: 16px; font-family: monospace; font-size: 0.85em; line-height: 1.6;">
+    <div style="color: #666;">// user_honor_requirement_progress (modificado)</div>
+    <div><span style="color: #f39c12;">progress_id</span>         <span style="color: #888;">Int</span>     <span style="color: #555;">PK (sin cambios)</span></div>
+    <div><span style="color: #f39c12;">user_honor_id</span>       <span style="color: #888;">Int</span>     <span style="color: #555;">FK (sin cambios)</span></div>
+    <div><span style="color: #f39c12;">requirement_id</span>      <span style="color: #888;">Int</span>     <span style="color: #555;">FK (sin cambios)</span></div>
+    <div><span style="color: #f39c12;">completed</span>           <span style="color: #888;">Bool</span>    <span style="color: #555;">(sin cambios)</span></div>
+    <div><span style="color: #2ecc71;">text_response</span>       <span style="color: #888;">String?</span> <span style="color: #2ecc71;">NUEVO — respuesta de texto (hasta 800 chars)</span></div>
+    <div><span style="color: #f39c12;">notes</span>               <span style="color: #888;">String?</span> <span style="color: #555;">notas personales (2000 chars, ya existe)</span></div>
+    <div><span style="color: #f39c12;">completed_at</span>        <span style="color: #888;">DateTime?</span></div>
+    <div><span style="color: #f39c12;">active/created_at/modified_at</span></div>
+    <div style="margin-top: 8px; color: #666;">// evidences → relation a requirement_evidence[]</div>
+  </div>
+</div>
+
+<h3>¿Este schema cubre lo que necesitás?</h3>
+<p class="subtitle">Revisá los cambios y decime si falta algo o sobra algo</p>
+
+<div class="options">
+  <div class="option" data-choice="approve" onclick="toggleSelect(this)">
+    <div class="letter">✓</div>
+    <div class="content">
+      <h3>Se ve bien, dale</h3>
+      <p>El schema cubre sub-items, choice groups, evidencia por tipo, y texto de respuesta.</p>
+    </div>
+  </div>
+  <div class="option" data-choice="changes" onclick="toggleSelect(this)">
+    <div class="letter">✎</div>
+    <div class="content">
+      <h3>Necesita cambios</h3>
+      <p>Decime en la terminal qué falta o qué sobra.</p>
+    </div>
+  </div>
+</div>

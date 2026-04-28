@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Primer Camporee">
+  <title>Primer Camporee</title>
+  <desc>Flat matte engraved achievement badge. Transparent canvas, dark circle #1C1C1E, accent #A0522D.</desc>
+  <circle cx="256" cy="256" r="220" fill="#1C1C1E"/>
+  <circle cx="256" cy="256" r="204" fill="none" stroke="#A0522D" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="256" cy="256" r="170" fill="none" stroke="#A0522D" stroke-width="3" stroke-linecap="round" opacity="0.38"/>
+  <polyline points="232,384 256,404 280,384" fill="none" stroke="#A0522D" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>
+  <polygon points="156,344 256,208 356,344" fill="none" stroke="#A0522D" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <line x1="256" y1="208" x2="256" y2="344" stroke="#A0522D" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="256,182 256,208 302,196 256,182" fill="none" stroke="#A0522D" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <line x1="138" y1="344" x2="374" y2="344" stroke="#A0522D" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

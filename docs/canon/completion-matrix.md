@@ -1,168 +1,48 @@
-# Completion Matrix - Canon Factory Wave 2
+# Completion Matrix - SACDIA
 
 **Estado**: ACTIVE
-**Última actualización**: 2026-03-20 (Wave 2)
+**Actualizado**: 2026-04-12
 **Base de autoridad**: `docs/canon/source-of-truth.md`
-**Propósito**: mapear cobertura documental y runtime sin redefinir autoridad.
+**Propósito**: tablero diagnostico de cobertura documental, sin vender precision falsa ni redefinir autoridad.
 
 > [!IMPORTANT]
-> Esta matriz no crea jerarquía nueva.
-> Solo registra qué evidencia autorizada existe, qué falta y qué puntos quedan degradados o disputados.
+> Esta matriz queda temporalmente degradada como tablero de control.
+> Los numeros detallados de versiones anteriores ya no son confiables frente a las fuentes vivas actuales.
+>
+> Hasta una resincronizacion completa, usar como autoridad operativa:
+> - `docs/api/ENDPOINTS-LIVE-REFERENCE.md` para runtime API
+> - `sacdia-backend/prisma/schema.prisma` para estructura de datos efectiva
+> - `docs/database/schema.prisma` y `docs/database/SCHEMA-REFERENCE.md` solo como capa documental subordinada
+> - `docs/features/README.md` para registro minimo de dominios documentados
 
 ---
 
-## 1. Escala de estado
+## Estado de confiabilidad por area
 
-- `COMPLETE`: la evidencia autorizada esperada existe y no se detectó conflicto para esa fila.
-- `PARTIAL`: existe evidencia autorizada, pero la cobertura es incompleta o el set de artefactos es insuficiente.
-- `MISSING`: no se encontró la evidencia autorizada esperada.
-- `DISPUTED`: existen fuentes autorizadas, pero chocan entre sí para la fila.
-- `BLOCKED`: la fila no puede cerrarse de forma segura sin arbitraje.
-
----
-
-<!-- Verificado contra Reality Matrix 2026-03-14; actualizado Wave 2 2026-03-20 -->
-
-## 2. Resumen ejecutivo
-
-| Área | Resultado | Verificación 2026-03-20 (Wave 2) |
-|---|---|---|
-| Gobernanza y precedencia | `COMPLETE` | Sin cambios |
-| Canon de producto | `COMPLETE` | Sin cambios |
-| Canon técnico base | `PARTIAL` | Sin cambios respecto a Wave 0 |
-| Estándares operativos | `COMPLETE` | Sin cambios |
-| Runtime API | `COMPLETE` | 220 endpoints documentados (+5 investiture nuevos respecto a Wave 2) |
-| Racionales/decisiones API | `PARTIAL` | Sin cambios |
-| Modelo de datos | `COMPLETE` | ~72 modelos + 8 enums documentados en SCHEMA-REFERENCE (era ~25) |
-| Features por dominio | `COMPLETE` | 16 dominios con spec completa; 12 COMPLETE (código IMPLEMENTADO), 2 PARTIAL (código PARCIAL), 1 NO CANON, 1 FANTASMA → actualizado 2026-03-20: 14 COMPLETE tras implementar actividades, finanzas y camporees. Ningún dominio con set requirements+design+tasks |
-
----
-
-## 3. Matriz base de cobertura autorizada
-
-| Área | Evidencia esperada según `source-of-truth` | Evidencia encontrada | Estado | Observaciones |
-|---|---|---|---|---|
-| Gobernanza documental | `source-of-truth.md`, `docs/README.md`, `gobernanza-canon.md` | Los tres documentos existen y están en uso | `COMPLETE` | La precedencia quedó explícita y operable |
-| Canon de producto | `dominio-sacdia.md`, `identidad-sacdia.md`, `gobernanza-canon.md` | Los tres existen y están `ACTIVE` | `COMPLETE` | Cobertura base de identidad, lenguaje y reglas de interpretación |
-| Arquitectura canónica | `arquitectura-sacdia.md`, `decisiones-clave.md` | Ambos existen y están `ACTIVE` | `COMPLETE` | Cobertura de arquitectura y decisiones duraderas |
-| Baseline técnica global | `tech.md`, `structure.md`, `coding-standards.md`, `data-guidelines.md`, `agents.md` | Todos existen; `structure.md` está `HISTORICAL` | `PARTIAL` | La baseline existe, pero la guía de estructura quedó degradada por estatus/obsolescencia |
-| Estándares de ingeniería | `coding-standards.md`, `data-guidelines.md`, `agents.md` | Los tres existen y cubren normas operativas | `COMPLETE` | Sirven como baseline operativa subordinada |
-| Contrato runtime API | `ENDPOINTS-LIVE-REFERENCE.md` | Existe, base `/api/v1`, 220 endpoints, 23+ módulos | `COMPLETE` | Actualizado Wave 2: +19 endpoints, +2 correcciones, -1 fantasma. Post-Wave 2: +5 investiture |
-| Decisiones API estructurales | `ARCHITECTURE-DECISIONS.md` | Existe, pero su alcance es selectivo (naming, `users_pr`, legal reps, año eclesiástico, roles/RBAC) | `PARTIAL` | Complementa, no reemplaza, al Live Reference |
-| Modelo de datos estructural | `schema.prisma`, `docs/03-DATABASE/README.md`, `SCHEMA-REFERENCE.md` | Los tres existen; `SCHEMA-REFERENCE.md` actualizado con ~72 modelos + 8 enums | `COMPLETE` | Actualizado Wave 2: ~48 modelos nuevos documentados. `schema.prisma` sigue mandando |
-
----
-
-## 4. Matriz de cobertura por feature documental
-
-<!-- Verificado contra Reality Matrix 2026-03-14. Actualizado Wave 2 2026-03-20. Columna "Código" refleja estado real de implementación. -->
-
-| Dominio | Spec completa | Requirements | Design | Tasks | Walkthrough(s) | Estado doc | Código (Reality Matrix) | Observación |
-|---|---|---|---|---|---|---|---|---|
-| `auth` | ✅ | — | — | — | ✅ | `COMPLETE` | IMPLEMENTADO | Spec Wave 2: auth.md (IMPLEMENTADO) |
-| `gestion-clubs` | ✅ | — | ✅ | — | ✅ | `COMPLETE` | IMPLEMENTADO | Spec Wave 2: gestion-clubs.md (IMPLEMENTADO) |
-| `clases-progresivas` | ✅ | — | ✅ | — | — | `COMPLETE` | IMPLEMENTADO | Spec Wave 2: clases-progresivas.md (IMPLEMENTADO, 82 líneas) |
-| `honores` | ✅ | — | ✅ | — | ✅ | `COMPLETE` | IMPLEMENTADO | Spec Wave 2: honores.md (IMPLEMENTADO, 80 líneas) |
-| `catalogos` | ✅ | — | ✅ | — | ✅ | `COMPLETE` | IMPLEMENTADO | Spec Wave 2: catalogos.md (IMPLEMENTADO) |
-| `communications` | ✅ | — | — | — | ✅ | `COMPLETE` | IMPLEMENTADO | Spec Wave 2: communications.md (IMPLEMENTADO) |
-| `carpetas-evidencias` | ✅ | — | — | — | — | `COMPLETE` | IMPLEMENTADO | Spec Wave 2: carpetas-evidencias.md (IMPLEMENTADO, 89 líneas). Era MISSING |
-| `rbac` | ✅ | — | — | — | — | `COMPLETE` | IMPLEMENTADO | Spec Wave 2: rbac.md (IMPLEMENTADO). Era MISSING |
-| `gestion-seguros` | ✅ | ✅ | — | — | — | `COMPLETE` | IMPLEMENTADO | Spec Wave 2: gestion-seguros.md (IMPLEMENTADO). Corregido de SIN CANON |
-| `actividades` | ✅ | — | ✅ | — | ✅ | `COMPLETE` | IMPLEMENTADO | FIXED 2026-03-20: admin UI completa (list + detail + attendance + create/edit dialog + delete). App: edit/delete en detalle (EditActivityView). Cliente API: src/lib/api/activities.ts |
-| `finanzas` | ✅ | — | ✅ | — | ✅ | `COMPLETE` | IMPLEMENTADO | FIXED 2026-03-20: admin dashboard completo (resumen cards + tabla + filtros + create/edit dialog + delete). App: eliminacion con AlertDialog en detalle. Cliente API: src/lib/api/finances.ts |
-| `inventario` | ✅ | — | — | — | ✅ | `COMPLETE` | IMPLEMENTADO | Spec Wave 2: inventario.md. GAP-W2-04 FIXED 2026-03-20: migration creada para rename de PK. Pendiente deploy |
-| `camporees` | ✅ | — | — | — | — | `COMPLETE` | IMPLEMENTADO | FIXED 2026-03-20: admin CRUD completo (list + detail + create/edit dialog + member registration + member removal). App: 4 screens + capa de datos completa + GoRouter. Validacion de seguro en registro |
-| `certificaciones-guias-mayores` | ✅ | ✅ | — | — | ✅ | `COMPLETE` | IMPLEMENTADO | Spec Wave 2: certificaciones-guias-mayores.md. GAP-W2-05 FIXED 2026-03-20: UI Flutter (4 screens) + admin (list + detail + progress) |
-| `infrastructure` | ✅ | — | — | — | ✅ | `PARTIAL` | NO CANON | Spec Wave 2: infrastructure.md (NO CANON, cross-cutting) |
-| `validacion-investiduras` | ✅ | ✅ | — | — | — | `COMPLETE` | IMPLEMENTADO | Spec Wave 2: validacion-investiduras.md. GAP-W2-01 FIXED 2026-03-20: InvestitureModule + UI admin (table + dialogs + history) + UI app (3 screens). Commits 2f4ac49 + 7199ab0 |
-
-**Lectura de la fila**:
-
-- `COMPLETE` en features requiere spec completa y código IMPLEMENTADO sin gaps documentados.
-- `PARTIAL` indica que existe spec pero el código tiene gaps o el dominio no está completamente implementado.
-- Wave 2 cerró 16 specs de dominio. Post-Wave 2 (2026-03-20): 13 dominios `COMPLETE` (código implementado), 1 `PARTIAL` (código parcial), 1 `PARTIAL` (NO CANON). 2026-03-20 (actividades/finanzas/camporees): 14 dominios con código `COMPLETE`, 2 `PARTIAL` (inventario, infrastructure/NO CANON).
-- Set completo `requirements + design + tasks` sigue sin existir para ningún dominio.
-
----
-
-## 5. Matriz de cobertura runtime por módulo API
-
-Fuente única de esta sección: `docs/02-API/ENDPOINTS-LIVE-REFERENCE.md`
-**Total**: 220 endpoints documentados (actualizado post-Wave 2, 2026-03-20: +5 investiture)
-
-| Módulo runtime | Evidencia encontrada | Estado | Observación |
+| Area | Estado de esta matriz | Fuente viva a usar | Motivo |
 |---|---|---|---|
-| `auth` | Sección presente | `COMPLETE` | Incluye notas de contrato de login/refresh/logout/MFA/OAuth |
-| `users` | Sección presente | `COMPLETE` | Incluye notas de autorización, post-registro y progreso de clases |
-| `activities` | Sección presente | `COMPLETE` | Runtime documentado |
-| `admin` | Sección presente | `COMPLETE` | Wave 2: +5 honor-categories CRUD, +4 medicines CRUD, +1 club-ideals |
-| `camporees` | Sección presente | `COMPLETE` | Runtime documentado |
-| `catalogs` | Sección presente | `COMPLETE` | Wave 2: +1 activity-types endpoint |
-| `certifications` | Sección presente | `COMPLETE` | Runtime documentado |
-| `classes` | Sección presente | `COMPLETE` | Runtime documentado |
-| `club-roles` | Sección presente | `COMPLETE` | Runtime documentado |
-| `clubs` | Sección presente | `COMPLETE` | Wave 2: -1 fantasma removido (DELETE clubs/sections/:sectionId) |
-| `evidence-folder` | Sección presente | `COMPLETE` | Wave 2: +4 endpoints nuevos |
-| `fcm-tokens` | Sección presente | `COMPLETE` | Wave 2: corrección de nombre de parámetro |
-| `finances` | Sección presente | `COMPLETE` | Runtime documentado |
-| `folders` | Sección presente | `COMPLETE` | Runtime documentado |
-| `health` | Sección presente | `COMPLETE` | Runtime documentado |
-| `honors` | Sección presente | `COMPLETE` | Wave 2: +endpoints grouped-by-category, user-honors create/bulk/files |
-| `inventory` | Sección presente | `COMPLETE` | Runtime documentado |
-| `investiture` | Sección presente | `COMPLETE` | Post-Wave 2 2026-03-20: 5 endpoints documentados (InvestitureModule) |
-| `notifications` | Sección presente | `COMPLETE` | Wave 2: corrección de route signature |
-| `root` | Sección presente | `COMPLETE` | Runtime documentado |
+| Gobernanza y rutas de lectura | `USABLE` | `docs/canon/source-of-truth.md`, `docs/README.md` | La autoridad documental se arbitra fuera de esta matriz |
+| Runtime API | `OUTDATED` | `docs/api/ENDPOINTS-LIVE-REFERENCE.md` | La fuente viva hoy declara 269 endpoints; las cifras historicas de esta matriz ya no son seguras |
+| Modelo de datos | `ARBITRATED_SYNCED` | `sacdia-backend/prisma/schema.prisma`, `docs/database/schema.prisma`, `docs/database/SCHEMA-REFERENCE.md` | La fuente de verdad efectiva sigue en el backend y la capa documental P1 quedó resincronizada contra ese schema |
+| Baseline técnica global | `ARBITRATED` | `docs/steering/tech.md` | Batch P1.1 corrigió baseline mínima comprobable y removió afirmaciones runtime obsoletas |
+| Registro de features | `USE_REGISTRY` | `docs/features/README.md` | El registro fue normalizado para separar cobertura editorial de estado funcional |
+| Cierre ejecutivo de completitud | `PENDING_RESYNC` | N/A | Requiere resincronizacion posterior a P1/P4 |
 
----
+## Uso permitido
 
-## 6. Gaps operativos detectados
+- Sirve para detectar que areas necesitan resincronizacion documental.
+- No sirve para afirmar totales exactos de endpoints, modelos, enums o porcentaje de cierre por dominio.
+- No debe usarse para contradecir fuentes vivas ni para declarar una baseline cerrada.
 
-<!-- Actualizado Wave 2 2026-03-20 -->
+## Trabajo pendiente para volver a precisión alta
 
-| Item | Evidencia esperada | Evidencia encontrada | Estado | Acción sugerida |
-|---|---|---|---|---|
-| Estructura técnica vigente | Guía de estructura activa y consistente con canon | `structure.md` existe pero está `HISTORICAL` | `MISSING` | Reemplazar o reactivar una guía de estructura vigente alineada con canon |
-| Features con set completo | `requirements.md` + `design.md` + `tasks.md` por dominio operativo | Ningún dominio presenta el set completo | `MISSING` | Priorizar cierre documental por dominio antes de declarar cobertura completa |
-| Tareas por dominio | `tasks.md` cuando el dominio necesite ejecución trazable | No se detectó `tasks.md` en los dominios listados | `MISSING` | Agregar task breakdown en dominios activos donde haga falta ejecución/verificación |
-| Auditoría de servicios externos | Documento auxiliar si existe | No se encontró `docs/EXTERNAL-SERVICES-AUDIT.md` | `MISSING` | Crear solo si realmente se necesita como apoyo; no bloquea runtime |
-| Storage provider drift | Canon documentaba Supabase Storage | Backend usa Cloudflare R2 (R2FileStorageService) | `FIXED` | Corregido en runtime-sacdia.md 2026-03-14 |
-| Endpoints FANTASMA (Wave 0) | Endpoints documentados que no existen en backend | 17 endpoints fantasma detectados | `FIXED` | Removidos de ENDPOINTS-LIVE-REFERENCE 2026-03-14 |
-| Endpoint FANTASMA (Wave 2) | DELETE clubs/sections/:sectionId documentado | No existe en backend | `FIXED` | Removido de ENDPOINTS-LIVE-REFERENCE 2026-03-20 (Wave 2) |
-| API doc gap (18 endpoints) | 198 endpoints implementados vs 180 documentados | 19 endpoints agregados, 2 corregidos en Wave 2. Total: 215 | `FIXED` | Cerrado en ENDPOINTS-LIVE-REFERENCE 2026-03-20 (Wave 2) |
-| Referencia humana de datos alineada | `SCHEMA-REFERENCE.md` consistente con `schema.prisma` | ~72 modelos + 8 enums documentados (era ~25) | `FIXED` | Actualizado 2026-03-20 (Wave 2): +48 modelos nuevos documentados |
-| Feature docs faltantes | Specs por dominio para los 16 dominios | 16 specs creadas en Wave 2 | `FIXED` | Cerrado 2026-03-20 (Wave 2). Todos los dominios tienen spec |
-| Canon de catálogos admin | 16+ endpoints CRUD admin sin mención en canon | Implementados y documentados en ENDPOINTS-LIVE-REFERENCE + catalogos.md | `FIXED` | Cerrado 2026-03-20 (Wave 2): spec catalogos.md cubre el dominio |
-| Notifications route signature | Firma de ruta incorrecta en doc | Corregido en ENDPOINTS-LIVE-REFERENCE | `FIXED` | Corregido 2026-03-20 (Wave 2) |
-| FCM tokens param name | Nombre de parámetro incorrecto en doc | Corregido en ENDPOINTS-LIVE-REFERENCE | `FIXED` | Corregido 2026-03-20 (Wave 2) |
-| `validacion-investiduras` IMPLEMENTADA | Módulo runtime esperado | DB tables existen; backend implementado (5 endpoints); UI admin (table + dialogs + history); UI app (3 screens) | `FIXED` | GAP-W2-01 FIXED 2026-03-20: InvestitureModule + admin + app completamente implementados |
-| `actividades` bug clubId | clubId dinámico por contexto | clubId hardcoded en implementación | `FIXED` | GAP-W2-02 FIXED 2026-03-20: ActivitiesListView resuelve clubId desde clubContextProvider. Commit dbb14eb |
-| `finanzas` campos auditoría | Campos de auditoría en modelo | Faltan campos de auditoría | `FIXED` | GAP-W2-03 FIXED 2026-03-20: modified_by_id agregado a finances (migration + schema + service). Commit 69b4b3e |
-| `inventario` PK typo | PK consistente | Typo en PK detectado | `FIXED` | GAP-W2-04 FIXED 2026-03-20: migration creada para rename. Commit d690a57. Pendiente: prisma migrate deploy |
-| `certificaciones-guias-mayores` sin UI | Client UI para certificaciones | Backend completo, zero client UI (admin y app) | `FIXED` | GAP-W2-05 FIXED 2026-03-20: UI implementada en Flutter (4 screens) y admin (list + detail + progress). Commits 69cb026 + 37e5929 |
-
----
-
-## 7. Uso permitido para Runtime
-
-`Runtime` puede tomar como base inmediata:
-
-1. `docs/canon/source-of-truth.md` para precedencia;
-2. `docs/02-API/ENDPOINTS-LIVE-REFERENCE.md` para API vigente (220 endpoints, actualizado post-Wave 2 2026-03-20);
-3. `docs/03-DATABASE/schema.prisma` para modelo de datos vigente;
-4. `docs/database/SCHEMA-REFERENCE.md` para referencia humana del modelo (~72 modelos + 8 enums, actualizado Wave 2);
-5. `docs/canon/dominio-sacdia.md`, `identidad-sacdia.md`, `arquitectura-sacdia.md` y `decisiones-clave.md` para interpretación canónica;
-6. `docs/00-STEERING/tech.md`, `coding-standards.md`, `data-guidelines.md`, `agents.md` como baseline subordinada;
-7. `docs/features/*.md` para specs de dominio (16 specs, creadas Wave 2).
-
-`Runtime` no debe usar esta matriz para redefinir autoridad; solo para saber qué cobertura ya está documentada y dónde hay huecos.
-
----
-
-## 8. Changelog
-
-| Fecha | Wave | Cambios |
+| Bloque | Dependencia | Resultado esperado |
 |---|---|---|
-| 2026-03-14 | Wave 0 | Matriz inicial. 180 endpoints, ~25 modelos, 17 fantasma removidos, storage drift corregido |
-| 2026-03-20 | Wave 2 | +19 endpoints (total 215), +2 correcciones, -1 fantasma. SCHEMA-REFERENCE: +48 modelos (total ~72 + 8 enums). 16 feature specs creadas. 5 gaps OPEN nuevos documentados |
-| 2026-03-20 | Post-Wave 2 | GAP-W2-01/02/03/04/05 → FIXED. +5 endpoints investiture (total 220). 5 dominios adicionales → COMPLETE (total 13 COMPLETE) |
-| 2026-03-20 | Impl. completa | actividades, finanzas, camporees → IMPLEMENTADO en los 3 repos. Admin UI completa para los 3 dominios. App: edit/delete en actividades, eliminacion con AlertDialog en finanzas, 4 screens + capa de datos en camporees. Total COMPLETE: 16/16 dominios operativos |
+| P1 - baseline tecnica y datos | Mantener sincronizados `docs/database/schema.prisma` y `docs/database/SCHEMA-REFERENCE.md` contra `sacdia-backend/prisma/schema.prisma` | sostener el modelo de datos documental sin reintroducir drift |
+| P4 - cierre y sostenimiento | consolidacion final de olas previas | volver a una matriz ejecutiva con cifras verificadas y reglas de mantenimiento |
+
+## Nota editorial
+
+- La version detallada anterior se retiro porque mezclaba fotografia historica con exactitud operativa ya superada por fuentes vivas.
+- El batch P1 de datos ya dejó resincronizados `docs/database/schema.prisma` y `docs/database/SCHEMA-REFERENCE.md` contra el schema efectivo del backend.
+- Hasta la resincronizacion, este archivo debe leerse como advertencia de alcance, no como inventario exacto.

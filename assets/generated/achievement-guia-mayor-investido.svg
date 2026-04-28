@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Guía Mayor Investido">
+  <title>Guía Mayor Investido</title>
+  <desc>Flat matte engraved achievement badge. Transparent canvas, dark circle #1C1C1E, accent #8E44AD.</desc>
+  <circle cx="256" cy="256" r="220" fill="#1C1C1E"/>
+  <circle cx="256" cy="256" r="204" fill="none" stroke="#8E44AD" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="256" cy="256" r="170" fill="none" stroke="#8E44AD" stroke-width="3" stroke-linecap="round" opacity="0.38"/>
+  <polyline points="232,384 256,404 280,384" fill="none" stroke="#8E44AD" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>
+  <polyline points="158,270 238,253 256,283 256,373 176,350 158,307" fill="none" stroke="#8E44AD" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="354,270 274,253 256,283 256,373 336,350 354,307" fill="none" stroke="#8E44AD" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <line x1="256" y1="283" x2="256" y2="373" stroke="#8E44AD" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <polygon points="256,162.0 283.3,198.4 271.6,240.0 256,254.3 236.5,232.2 240.4,197.1" fill="none" stroke="#8E44AD" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="256,189.3 266.4,221.8 256,237.4 248.2,217.9" fill="none" stroke="#8E44AD" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>
+  <line x1="256" y1="250" x2="256" y2="296" stroke="#8E44AD" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

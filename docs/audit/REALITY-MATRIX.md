@@ -1,18 +1,18 @@
 # Reality Matrix — SACDIA
-Fecha: 2026-03-22
+Fecha: 2026-03-26 | Última actualización: 2026-04-17
 
 ## Resumen
 
 | Categoria | Total | ALINEADO | SIN CANON | SIN DOCS | FANTASMA | PARCIAL | DRIFT |
 |-----------|-------|----------|-----------|----------|----------|---------|-------|
-| Endpoints | 230 | 197 | 14 | 11 | 0 | — | 0 |
-| Modelos | 74 | 34 | 40 | 0 | 0 | — | 0 |
-| Features | 16 | 14 | 1 | 0 | 0 | 1 | 0 |
+| Endpoints | 244 | 211 | 14 | 11 | 0 | — | 0 |
+| Modelos | 76 | 36 | 40 | 0 | 0 | — | 0 |
+| Features | 17 | 15 | 1 | 0 | 0 | 1 | 0 |
 | Integraciones | 7 | 5 | 1 | 1 | 0 | — | 0 |
 
 **Fuentes de verdad cruzadas**:
-- Codigo: `backend-audit.md` (backends con InvestitureModule, InsurancesModule, EvidenceFolderController — ~220+ endpoints), `admin-audit.md` (37+ pages), `app-audit.md` (55+ screens)
-- Documentacion API: `ENDPOINTS-LIVE-REFERENCE.md` (220 endpoints documentados, post-Wave 2)
+- Codigo: `backend-audit.md` (backends con InvestitureModule, InsurancesModule, EvidenceFolderController, ResourcesModule — ~269+ endpoints), `admin-audit.md` (37+ pages), `app-audit.md` (55+ screens)
+- Documentacion API: `ENDPOINTS-LIVE-REFERENCE.md` (269 endpoints documentados, post-ResourcesModule 2026-03-26)
 - Schema: `schema.prisma` (74 modelos + 8 enums), `SCHEMA-REFERENCE.md` (actualizado 2026-03-22: 74 modelos documentados)
 - Canon: `dominio-sacdia.md`, `runtime-sacdia.md`, `arquitectura-sacdia.md`, `decisiones-clave.md`, `auth/modelo-autorizacion.md`, `auth/runtime-auth.md`
 
@@ -88,8 +88,11 @@ Convenciones:
 | POST `/users/:userId/honors/:honorId` | Si | Si | Si | ALINEADO |
 | PATCH `/users/:userId/honors/:honorId` | Si | Si | Si | ALINEADO |
 | DELETE `/users/:userId/honors/:honorId` | Si | Si | Si | ALINEADO |
+| GET `/users/:userId/honors/:honorId/requirements/progress` | Si | Si | No | SIN CANON |
+| PATCH `/users/:userId/honors/:honorId/requirements/:requirementId/progress` | Si | Si | No | SIN CANON |
+| PATCH `/users/:userId/honors/:honorId/requirements/progress/batch` | Si | Si | No | SIN CANON |
 
-> Nota: endpoints de honors documentados en Wave 2 (ya no SIN DOCS).
+> Nota: endpoints de honors documentados en Wave 2 (ya no SIN DOCS). 2026-03-27: 3 endpoints de requirement progress agregados.
 
 ### emergency-contacts
 
@@ -153,8 +156,9 @@ Convenciones:
 | GET `/honors/categories` | Si | Si | Si | ALINEADO |
 | GET `/honors/grouped-by-category` | Si | Si | Si | ALINEADO |
 | GET `/honors/:honorId` | Si | Si | Si | ALINEADO |
+| GET `/honors/:honorId/requirements` | Si | Si | No | SIN CANON |
 
-> Nota: `GET /honors/grouped-by-category` documentado en Wave 2 (ya no SIN DOCS).
+> Nota: `GET /honors/grouped-by-category` documentado en Wave 2 (ya no SIN DOCS). 2026-03-27: requirements endpoint agregado.
 
 ### activities
 
@@ -413,6 +417,32 @@ Convenciones:
 | GET `/users/:userId/classes/:classId/progress` | Si | Si | Si | ALINEADO |
 | PATCH `/users/:userId/classes/:classId/progress` | Si | Si | Si | ALINEADO |
 
+### resources
+
+| Endpoint | Implementado | Doc API | Canon | Estado |
+|----------|:---:|:---:|:---:|---|
+| POST `/resources` | Si | Si | Si | ALINEADO |
+| GET `/resources` | Si | Si | Si | ALINEADO |
+| GET `/resources/:id` | Si | Si | Si | ALINEADO |
+| GET `/resources/:id/signed-url` | Si | Si | Si | ALINEADO |
+| PATCH `/resources/:id` | Si | Si | Si | ALINEADO |
+| DELETE `/resources/:id` | Si | Si | Si | ALINEADO |
+| GET `/resources/me` | Si | Si | Si | ALINEADO |
+| GET `/resources/me/:id` | Si | Si | Si | ALINEADO |
+| GET `/resources/me/:id/signed-url` | Si | Si | Si | ALINEADO |
+
+### resource-categories
+
+| Endpoint | Implementado | Doc API | Canon | Estado |
+|----------|:---:|:---:|:---:|---|
+| POST `/resource-categories` | Si | Si | Si | ALINEADO |
+| GET `/resource-categories` | Si | Si | Si | ALINEADO |
+| GET `/resource-categories/:id` | Si | Si | Si | ALINEADO |
+| PATCH `/resource-categories/:id` | Si | Si | Si | ALINEADO |
+| DELETE `/resource-categories/:id` | Si | Si | Si | ALINEADO |
+
+> Nota: ResourcesModule (14 endpoints) implementado 2026-03-26. Storage en R2 bucket RESOURCES_FILES, URLs firmadas TTL 1 hora, visibilidad por scope (system/union/local_field).
+
 ### Endpoints FANTASMA (resueltos al 2026-03-20)
 
 Todos los endpoints que eran FANTASMA en Wave 0 han sido resueltos:
@@ -492,6 +522,7 @@ Convenciones:
 | folders_modules_records | Si | Si | No | SIN CANON |
 | folders_section_records | Si | Si | No | SIN CANON |
 | folders_sections | Si | Si | No | SIN CANON |
+| honor_requirements | Si | Si | No | SIN CANON |
 | honors | Si | Si | Si | ALINEADO |
 | honors_categories | Si | Si | No | SIN CANON |
 | inventory_categories | Si | Si | No | SIN CANON |
@@ -528,22 +559,25 @@ Convenciones:
 | users_allergies | Si | Si | No | SIN CANON |
 | users_diseases | Si | Si | No | SIN CANON |
 | users_medicines | Si | Si | No | SIN CANON |
+| user_honor_requirement_progress | Si | Si | No | SIN CANON |
 | users_honors | Si | Si | No | SIN CANON |
 | users_permissions | Si | Si | No | SIN CANON |
 | users_roles | Si | Si | Si | ALINEADO |
 | medicines | Si | Si | No | SIN CANON |
 | relationship_types | Si | Si | No | SIN CANON |
 | legal_representatives | Si | Si | Si | ALINEADO |
+| resource_categories | Si | Si | Si | ALINEADO |
+| resources | Si | Si | Si | ALINEADO |
 
 ### Conteos modelos
 
-- **ALINEADO**: 34 (schema.prisma + SCHEMA-REFERENCE + Canon)
-- **SIN CANON**: 40 (en schema.prisma + SCHEMA-REFERENCE pero sin mencion en documentos canon)
+- **ALINEADO**: 36 (schema.prisma + SCHEMA-REFERENCE + Canon)
+- **SIN CANON**: 42 (en schema.prisma + SCHEMA-REFERENCE pero sin mencion en documentos canon)
 - **SIN DOCS**: 0 (resuelto — Wave 2 + Wave 3 + 2026-03-22 documentaron todos los modelos en SCHEMA-REFERENCE)
 - **FANTASMA**: 0
 - **DRIFT**: 0
 
-> **Nota**: SCHEMA-REFERENCE.md fue actualizado en Wave 2 documentando ~72 modelos + 8 enums. Wave 3 completo con activities/activity_types/activity_instances. 2026-03-22: inventory_history y notification_logs agregados (estaban en schema.prisma sin documentar). Los estados SIN CANON persisten porque los conceptos existen en schema.prisma y SCHEMA-REFERENCE pero no estan referenciados explicitamente en los documentos canon de dominio. Para resolverlos, agregar menciones en dominio-sacdia.md o runtime-sacdia.md segun corresponda.
+> **Nota**: SCHEMA-REFERENCE.md fue actualizado en Wave 2 documentando ~72 modelos + 8 enums. Wave 3 completo con activities/activity_types/activity_instances. 2026-03-22: inventory_history y notification_logs agregados (estaban en schema.prisma sin documentar). 2026-03-26: resource_categories y resources agregados (ResourcesModule). 2026-03-27: honor_requirements y user_honor_requirement_progress agregados (per-requirement tracking feature). Los estados SIN CANON persisten porque los conceptos existen en schema.prisma y SCHEMA-REFERENCE pero no estan referenciados explicitamente en los documentos canon de dominio. Para resolverlos, agregar menciones en dominio-sacdia.md o runtime-sacdia.md segun corresponda.
 
 ---
 
@@ -561,7 +595,7 @@ Convenciones:
 | auth | Si (AuthModule) | Si (login) | Si (auth, 5 screens) | Si (auth/) | ALINEADO |
 | gestion-clubs (clubes, secciones, cargos) | Si (ClubsModule) | Si (clubs, 3 pages) | Si (club, members, units) | Si (dominio, runtime) | ALINEADO |
 | clases-progresivas | Si (ClassesModule) | Si (read-only) | Si (classes, 6 screens) | Si (formacion/trayectoria) | ALINEADO |
-| honores | Si (HonorsModule) | Si (honors, CRUD) | Si (honors, 4 screens) | Si (formacion) | ALINEADO |
+| honores | Si (HonorsModule, 16 endpoints) | Si (honors, CRUD) | Si (honors, 4 screens + checklist requisitos + progress bar) | Si (formacion) | ALINEADO |
 | actividades | Si (ActivitiesModule) | Si (list + detail + create/edit + delete) | Si (activities, 4 screens + edit/delete) | Si (runtime 6.6) | ALINEADO |
 | finanzas | Si (FinancesModule) | Si (dashboard + resumen + tabla + filtros + CRUD) | Si (finances, 3 screens + delete AlertDialog) | Si (runtime 6.6) | ALINEADO |
 | catalogos | Si (CatalogsModule, AdminModule) | Si (catalogs, 13 pages) | Si (shared catalogs) | Si (runtime 6.5) | ALINEADO |
@@ -572,12 +606,13 @@ Convenciones:
 | gestion-seguros (insurance) | Si (InsurancesModule) | Si (CRUD funcional) | Si (insurance, 3 screens) | Si (gestion-seguros.md) | ALINEADO |
 | carpetas-evidencias (folders) | Si (FoldersModule + EvidenceFolderController) | Si (read-only) | Si (evidence_folder, 2 screens) | Si (formacion) | ALINEADO |
 | rbac (permisos/roles) | Si (RbacModule) | Si (rbac, 3 pages) | No | Si (auth/) | ALINEADO |
+| recursos | Si (ResourcesModule, 14 endpoints) | Si (categorias CRUD + recursos CRUD) | Si (Clean Architecture completa) | Si (recursos.md) | ALINEADO |
 | infrastructure (health, logging) | Si (CommonModule, AppModule) | No | No | Si (runtime 6.7) | PARCIAL |
 | validacion-investiduras | Si (InvestitureModule, 5 endpoints) | Si (table + dialogs + history) | Si (3 screens) | Si (dominio: validacion) | ALINEADO |
 
 ### Conteos features
 
-- **ALINEADO**: 15
+- **ALINEADO**: 16
 - **PARCIAL**: 1 (infrastructure — cross-cutting, sin client UI dedicada)
 - **SIN CANON**: 0
 - **FANTASMA**: 0
@@ -642,11 +677,11 @@ Los dominios que eran PARCIAL o FANTASMA en Wave 0 fueron completados:
 - **gestion-seguros**: InsurancesModule + admin + app (antes SIN CANON)
 - **validacion-investiduras**: InvestitureModule + admin + app (antes FANTASMA)
 
-### 3. Endpoints: 225 en matriz (220 en ENDPOINTS-LIVE-REFERENCE.md, era 180 en Wave 0)
-Wave 2 agrego 40 endpoints a la documentacion. Total 220 en ENDPOINTS-LIVE-REFERENCE.md. Sprint final agrego 5 endpoints implementados (commit 7b9f29b) aun sin documentar en API reference (SIN DOCS).
+### 3. Endpoints: 248 en matriz (273 en ENDPOINTS-LIVE-REFERENCE.md)
+ResourcesModule agrego 14 endpoints nuevos (2026-03-26). 2026-03-27: 4 endpoints de honor requirements/progress agregados. Total 273 en ENDPOINTS-LIVE-REFERENCE.md.
 
-### 4. SCHEMA-REFERENCE actualizado: 74 modelos + 8 enums
-Wave 2 documento ~48 modelos adicionales en SCHEMA-REFERENCE.md (era ~25 tablas). 2026-03-22: inventory_history y notification_logs agregados.
+### 4. SCHEMA-REFERENCE actualizado: 78 modelos + 8 enums
+Wave 2 documento ~48 modelos adicionales en SCHEMA-REFERENCE.md (era ~25 tablas). 2026-03-22: inventory_history y notification_logs agregados. 2026-03-26: resource_categories y resources agregados. 2026-03-27: honor_requirements y user_honor_requirement_progress agregados.
 
 ### 5. 3 migraciones de base de datos aplicadas
 - `d690a57`: rename PK inventory_categories (typo corregido)
@@ -665,3 +700,57 @@ Los 16+ endpoints CRUD admin de catalogos (`/admin/relationship-types`, `/admin/
 
 ### 8. infrastructure sigue siendo PARCIAL
 CommonModule y AppModule estan implementados pero no hay client UI dedicada (admin ni app). Es cross-cutting por naturaleza — no es un gap critico.
+
+---
+
+## Audit de Seguridad — 2026-04-17
+
+Auditoría de seguridad del backend (`sacdia-backend`). Todos los hallazgos de sesión 2026-04-17.
+
+### Leyenda de severidad
+
+| Nivel | Descripción |
+|-------|-------------|
+| CRITICAL | Vulnerabilidad explotable directamente, afecta integridad de datos o autenticación |
+| HIGH | Falla lógica grave con impacto en autorización, ownership, o consistencia |
+| MEDIUM | Gap de validación, race condition de bajo riesgo, o deuda de seguridad |
+| LOW | Código defensivo faltante, CVEs en deps, o mejoras de bajo impacto |
+| INFRA | Configuración de infraestructura/entorno pendiente |
+
+### Tabla de hallazgos
+
+| ID | Severidad | Área | Descripción | Estado | Commit(s) | Notas |
+|----|-----------|------|-------------|--------|-----------|-------|
+| C-01 | CRITICAL | annual-folders | TOCTOU en `annual_folders` — doble check sin lock transaccional permitía acceso concurrente a recursos de otro club | RESOLVED | `9ef269d` | Lock via `$transaction` + select-for-update |
+| C-02 | CRITICAL | evidence-folder | Validación de evidencia sin verificación de ownership del archivo — un usuario podía adjuntar archivos de otro usuario | RESOLVED | `9ef269d` | Ownership check agregado en upload + validate |
+| H-01 | HIGH | notifications | Sin cap en `limit` de listado — `GET /notifications/history` permitía traer N ilimitado de registros | RESOLVED | `56f906f` | Cap a 100, default 20 |
+| H-02 | HIGH | scoring-categories | `super_admin` podía ser asignado a scoring-categories sin restricción de roles | RESOLVED | `5cf32ba` | Guard de roles reforzado |
+| H-03 | HIGH | annual-folders | `submitFolder` sin verificación de ownership del folder antes de submit | RESOLVED | `9ef269d` | Ownership check previo a transición de estado |
+| H-04 | HIGH | config | `EMAIL_ENABLED` no validado en schema Joi — podía arrancar sin la variable y silenciar errores de email | RESOLVED | `077c7d7` | Agregado a Joi schema de config |
+| H-05 | HIGH | annual-folders | `setReviewerNote` permitía escribir notas en folders de cualquier territory sin validar scope del reviewer | RESOLVED | `9ef269d` | Territory scope check agregado |
+| M-01 | MEDIUM | evidence-folder | `submitSection` sin ownership check a nivel de assignment — cualquier miembro autenticado podía hacer submit de una sección ajena | RESOLVED | `1fdf337` | PermissionsGuard + assignment scope |
+| M-02 | MEDIUM | honors | Uploads de honors sin validación de tipo MIME + sin soporte HEIC para iOS | RESOLVED | `bad5ea9` | MIME whitelist + HEIC→JPEG conversion |
+| M-03 | MEDIUM | scoring-categories | TODOs de validación sin resolver en scoring-categories service | RESOLVED (verify-only) | `ca072f9` | TODOs documentados y cerrados; lógica verificada como correcta |
+| M-04 | MEDIUM | camporees | Paginación faltante en listado de camporees + URLs de archivos sin presign | RESOLVED | SDD change `camporees-pagination-presign` (10 commits, ver archive) | Ref: `sdd/camporees-pagination-presign/archive-report` en engram |
+| M-05 | MEDIUM | rankings | Throttle + lock faltante en endpoint de rankings bajo carga concurrente | RESOLVED | `8999cc5` | Throttle + Redis lock aplicados |
+| M-06 | MEDIUM | users | `update-user.dto` con validaciones insuficientes — campos sensibles sin whitelist | RESOLVED | `8b23911` | DTO reforzado con class-validator |
+| M-07 | MEDIUM | membership-requests | TOCTOU en aprobación de membership-requests — doble aprobación concurrente posible | RESOLVED | `251fcd7` | Transacción + check de estado previo |
+
+### Hallazgos pendientes (OPEN)
+
+| ID | Severidad | Área | Descripción | Estado | Notas |
+|----|-----------|------|-------------|--------|-------|
+| INFRA-01 | INFRA | storage | `R2_PUBLIC_URL_USER_PROFILES` sin configurar en staging/prod + bucket de Cloudflare sin acceso público habilitado | OPEN | Requiere configuración de infra — no es código |
+| INFRA-02 | INFRA | app | `CachedNetworkImage` no conectado a `userImageUrl` en perfil de usuario | OPEN | UI low priority — app |
+| ARCH-01 | MEDIUM | admin | `DataTablePagination` sin patrón unificado para tab-context (cada tab tiene su propio estado de paginación) | OPEN | Arquitectural — admin panel |
+| VERIFY-01 | MEDIUM | evidence-folder | `submitSection` PermissionsGuard — scope `active_assignment` necesita verificación de que el guard rechaza correctamente asignaciones inactivas | OPEN | Verify-flagged — requiere test unitario |
+| DB-01 | MEDIUM | database | `club_role_assignments` sin columnas de audit trail (`created_at`, `created_by_id`) — inconsistente con otros modelos | OPEN | Requiere migration |
+| DEP-01 | LOW | deps | CVE: `path-to-regexp` (ReDoS alto) + `protobufjs` (ACE crítico) — deps transitivas sin fix upstream | OPEN | Monitorear — sin fix disponible al 2026-04-17 |
+| LOW-01 | LOW | auth | Email verification delivery — pre-existing, no parte del sistema de auth SACDIA nativo | OPEN | Pre-existing, auth layer (Better Auth) |
+
+### Contexto de la sesión 2026-04-17
+
+- **Scope**: sacdia-backend únicamente
+- **Commits en backend**: `9ef269d`, `56f906f`, `5cf32ba`, `077c7d7`, `1fdf337`, `bad5ea9`, `ca072f9`, `8999cc5`, `8b23911`, `251fcd7` + 10 commits del change `camporees-pagination-presign`
+- **SDD change cerrado**: `camporees-pagination-presign` — archive en engram `sdd/camporees-pagination-presign/archive-report`
+- **Sesión previa (2026-04-01)**: audit Flutter (3 CRITICAL + 5 HIGH + 6 MEDIUM, commit `622424e`) + audit Backend (2 CRITICAL + 6 HIGH + 8 MEDIUM, commit `2e8c36b`) — ver memory engram `audit_flutter_2026_04` y `audit_backend_2026_04`

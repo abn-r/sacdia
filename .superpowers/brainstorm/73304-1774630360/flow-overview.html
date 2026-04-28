@@ -1,0 +1,91 @@
+<h2>Flujo de Evidencias con Staging Local</h2>
+<p class="subtitle">Validemos que el flujo completo tiene sentido antes de definir la arquitectura</p>
+
+<div class="section">
+  <h3>Flujo Propuesto</h3>
+  <div style="display: flex; flex-direction: column; gap: 16px; max-width: 700px; margin: 0 auto;">
+
+    <div style="background: #1a1a2e; border: 1px solid #333; border-radius: 12px; padding: 16px;">
+      <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+        <span style="background: #6c5ce7; color: white; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px;">1</span>
+        <strong style="color: #e0e0e0;">Usuario abre el requerimiento / seccion</strong>
+      </div>
+      <p style="color: #999; margin: 0; padding-left: 38px;">Ve la grilla con archivos ya subidos (check verde) y espacio disponible.</p>
+    </div>
+
+    <div style="text-align: center; color: #555;">&#9660;</div>
+
+    <div style="background: #1a1a2e; border: 1px solid #333; border-radius: 12px; padding: 16px;">
+      <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+        <span style="background: #6c5ce7; color: white; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px;">2</span>
+        <strong style="color: #e0e0e0;">Agrega archivos (Imagen / PDF)</strong>
+      </div>
+      <p style="color: #999; margin: 0; padding-left: 38px;">Multi-select desde galeria o file picker. Los archivos se agregan a la grilla con badge <span style="background: #00b894; color: white; padding: 1px 6px; border-radius: 4px; font-size: 11px;">Nuevo</span> pero NO se suben todavia. Solo viven en memoria local.</p>
+    </div>
+
+    <div style="text-align: center; color: #555;">&#9660;</div>
+
+    <div style="background: #1a1a2e; border: 1px solid #333; border-radius: 12px; padding: 16px;">
+      <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+        <span style="background: #6c5ce7; color: white; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px;">3</span>
+        <strong style="color: #e0e0e0;">Revisa y ajusta</strong>
+      </div>
+      <p style="color: #999; margin: 0; padding-left: 38px;">Puede eliminar archivos nuevos (desaparecen al instante, son locales) o archivos ya subidos (se marcan para eliminar del servidor). Si excede el limite, ve aviso rojo y el boton "Enviar" se deshabilita.</p>
+    </div>
+
+    <div style="text-align: center; color: #555;">&#9660;</div>
+
+    <div style="background: #1a1a2e; border: 1px solid #333; border-radius: 12px; padding: 16px;">
+      <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+        <span style="background: #6c5ce7; color: white; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px;">4</span>
+        <strong style="color: #e0e0e0;">Toca "Enviar a validacion"</strong>
+      </div>
+      <p style="color: #999; margin: 0; padding-left: 38px;">Se abre un dialog de confirmacion: "Se subiran X archivos nuevos. ¿Confirmas?"</p>
+    </div>
+
+    <div style="text-align: center; color: #555;">&#9660;</div>
+
+    <div style="background: #1a1a2e; border: 1px solid #6c5ce7; border-radius: 12px; padding: 16px;">
+      <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+        <span style="background: #e17055; color: white; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px;">5</span>
+        <strong style="color: #e0e0e0;">Bottom sheet de progreso</strong>
+      </div>
+      <p style="color: #999; margin: 0; padding-left: 38px;">Aparece en la parte inferior. Muestra cada archivo con su estado: <span style="color: #fdcb6e;">&#9679; pendiente</span> <span style="color: #74b9ff;">&#9679; subiendo (con %)</span> <span style="color: #00b894;">&#9679; completado</span> <span style="color: #d63031;">&#9679; error (con boton reintentar)</span>. Resumen arriba: "Subiendo 3 de 7..."</p>
+    </div>
+
+    <div style="text-align: center; color: #555;">&#9660;</div>
+
+    <div style="background: #1a1a2e; border: 1px solid #00b894; border-radius: 12px; padding: 16px;">
+      <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+        <span style="background: #00b894; color: white; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px;">6</span>
+        <strong style="color: #e0e0e0;">Resultado</strong>
+      </div>
+      <p style="color: #999; margin: 0; padding-left: 38px;">Si todo salio bien: se marca como "Enviado a validacion" y se bloquea la edicion. Si hubo errores: muestra resumen "5 de 7 subidos, 2 fallaron" con opcion de reintentar los fallidos.</p>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top: 32px;">
+  <h3>Detalle: Grilla Unificada</h3>
+  <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; max-width: 500px; margin: 0 auto;">
+    <div style="background: #2d2d44; border-radius: 10px; aspect-ratio: 0.82; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; border: 1px solid #444;">
+      <span style="font-size: 28px;">&#128247;</span>
+      <span style="color: #aaa; font-size: 11px; margin-top: 4px;">foto_1.jpg</span>
+      <span style="position: absolute; top: 6px; right: 6px; background: #00b894; color: white; border-radius: 50%; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; font-size: 10px;">&#10003;</span>
+      <span style="position: absolute; bottom: 4px; left: 6px; color: #888; font-size: 9px;">Ana T. - 15 Mar</span>
+    </div>
+    <div style="background: #2d2d44; border-radius: 10px; aspect-ratio: 0.82; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; border: 1px solid #444;">
+      <span style="font-size: 28px;">&#128196;</span>
+      <span style="color: #aaa; font-size: 11px; margin-top: 4px;">doc.pdf</span>
+      <span style="position: absolute; top: 6px; right: 6px; background: #00b894; color: white; border-radius: 50%; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; font-size: 10px;">&#10003;</span>
+      <span style="position: absolute; bottom: 4px; left: 6px; color: #888; font-size: 9px;">Carlos M. - 20 Mar</span>
+    </div>
+    <div style="background: #1a2e1a; border: 2px dashed #00b894; border-radius: 10px; aspect-ratio: 0.82; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative;">
+      <span style="font-size: 28px;">&#128247;</span>
+      <span style="color: #aaa; font-size: 11px; margin-top: 4px;">nueva_foto.jpg</span>
+      <span style="position: absolute; top: 6px; right: 6px; background: #00b894; color: white; padding: 1px 5px; border-radius: 4px; font-size: 9px; font-weight: 600;">Nuevo</span>
+      <span style="position: absolute; top: 6px; left: 6px; background: #d63031; color: white; border-radius: 50%; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; font-size: 12px; cursor: pointer;">&#215;</span>
+    </div>
+  </div>
+  <p style="text-align: center; color: #888; font-size: 12px; margin-top: 12px;">Archivos ya subidos (check verde) junto a archivos locales nuevos (borde punteado verde + badge "Nuevo")</p>
+</div>

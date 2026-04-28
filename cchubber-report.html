@@ -1,0 +1,1320 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CC Hubber</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+<script>
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "background": "#121315",
+          "surface": "#121315",
+          "surface-dim": "#121315",
+          "surface-container-lowest": "#0d0e0f",
+          "surface-container-low": "#1b1c1d",
+          "surface-container": "#1f2021",
+          "surface-container-high": "#292a2b",
+          "surface-container-highest": "#343536",
+          "surface-bright": "#38393a",
+          "on-surface": "#e3e2e3",
+          "on-surface-variant": "#c7c4d7",
+          "on-background": "#e3e2e3",
+          "outline": "#908fa0",
+          "outline-variant": "#464554",
+          "primary": "#c0c1ff",
+          "primary-container": "#8083ff",
+          "on-primary": "#1000a9",
+          "secondary": "#ffb690",
+          "secondary-container": "#ec6a06",
+          "on-secondary": "#552100",
+          "tertiary": "#d4bbff",
+          "tertiary-container": "#a775ff",
+          "error": "#ffb4ab",
+          "error-container": "#93000a",
+          "on-error": "#690005",
+          "inverse-surface": "#e3e2e3",
+          "inverse-on-surface": "#303032",
+          "inverse-primary": "#494bd6",
+          "surface-tint": "#c0c1ff",
+        },
+        fontFamily: {
+          "headline": ["Inter", "system-ui", "sans-serif"],
+          "body": ["Inter", "system-ui", "sans-serif"],
+          "label": ["Inter", "system-ui", "sans-serif"],
+          "mono": ["JetBrains Mono", "monospace"],
+        },
+        borderRadius: {
+          "DEFAULT": "0.125rem",
+          "lg": "0.25rem",
+          "xl": "0.5rem",
+          "full": "0.75rem",
+        },
+      },
+    },
+  }
+</script>
+<style>
+  body {
+    background-color: #121315;
+    color: #e3e2e3;
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  .font-mono { font-family: 'JetBrains Mono', monospace !important; }
+
+  /* Info tooltips */
+  .has-tip{position:relative;cursor:help;}
+  .has-tip .tip{
+    position:absolute;top:calc(100% + 8px);left:0;transform:none;
+    background:#292a2b;border:1px solid rgba(70,69,84,0.3);border-radius:8px;
+    padding:10px 14px;font-size:11px;line-height:1.5;color:#c7c4d7;
+    width:280px;pointer-events:none;opacity:0;transition:opacity 0.15s;
+    z-index:50;text-transform:none;letter-spacing:0;font-weight:400;
+    box-shadow:0 8px 24px rgba(0,0,0,0.4);
+  }
+  .has-tip:hover .tip{opacity:1;pointer-events:auto;}
+
+  /* Tooltip */
+  .tt {
+    position: fixed;
+    background: rgba(31, 32, 33, 0.95);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(70, 69, 84, 0.3);
+    border-radius: 0.5rem;
+    padding: 10px 14px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.12s;
+    z-index: 100;
+    white-space: nowrap;
+  }
+  .tt.on { opacity: 1; }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(60px);
+    background: #292a2b;
+    border: 1px solid rgba(70, 69, 84, 0.3);
+    border-radius: 0.5rem;
+    padding: 10px 20px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #e3e2e3;
+    opacity: 0;
+    transition: all 0.25s;
+    z-index: 200;
+    pointer-events: none;
+  }
+  .toast.on { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* SVG chart */
+  #cost-chart-svg { width: 100%; overflow: visible; display: block; }
+
+  /* Table hover */
+  .tbl-row:hover { background: #292a2b; }
+  .tbl-row { transition: background 0.15s; }
+</style>
+</head>
+<body class="selection:bg-primary selection:text-on-primary">
+
+<div class="tt" id="tt">
+  <div class="font-mono text-[11px] text-[#908fa0] mb-1" id="tt-d"></div>
+  <div class="font-mono text-[15px] font-bold text-[#e3e2e3]" id="tt-c"></div>
+  <div class="text-[10px] text-[#ffb4ab] mt-1" id="tt-a"></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<!-- 1. HEADER -->
+<header class="w-full px-6 py-5 max-w-[1200px] mx-auto flex justify-between items-baseline">
+  <div class="flex items-baseline gap-4">
+    <a href="https://github.com/azkhh/cchubber" target="_blank" class="text-lg font-bold tracking-tight text-[#e3e2e3]" style="text-decoration:none;">CC Hubber</a>
+    <span class="text-[10px] uppercase tracking-[0.05em] text-[#908fa0]">shipped fast with <a href="https://moveros.dev" target="_blank" style="text-decoration:none;color:inherit;">Mover OS</a></span>
+  </div>
+  <span class="font-mono text-[11px] text-[#908fa0]" id="range-lbl">All time</span>
+</header>
+
+<main class="pb-20 px-6 max-w-[1200px] mx-auto space-y-12">
+
+<!-- 2. SHARE CARD — HTML for display, Canvas for video export -->
+<section class="flex flex-col items-center">
+  <style>
+    @keyframes cardFloat{
+      0%,100%{transform:perspective(800px) rotateY(-2deg) rotateX(1deg)}
+      50%{transform:perspective(800px) rotateY(2deg) rotateX(-1deg)}
+    }
+    @keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+    .cc-card{
+      position:relative;width:100%;max-width:740px;
+      border-radius:22px;overflow:hidden;
+      background:linear-gradient(145deg,#1a1b2e 0%,#151622 20%,#0f1018 40%,#131428 55%,#191a2d 70%,#141520 85%,#12131f 100%);
+      box-shadow:0 2px 4px rgba(0,0,0,0.1),0 8px 16px rgba(0,0,0,0.1),0 16px 32px rgba(0,0,0,0.15);
+      animation:cardFloat 6s ease-in-out infinite;
+    }
+    .cc-card::before{
+      content:'';position:absolute;inset:0;
+      background:linear-gradient(105deg,transparent 30%,rgba(192,193,255,0.04) 45%,rgba(212,187,255,0.06) 50%,rgba(192,193,255,0.04) 55%,transparent 70%);
+      background-size:200% 100%;animation:shimmer 4s ease-in-out infinite;
+      pointer-events:none;z-index:2;
+    }
+    .cc-card::after{
+      content:'';position:absolute;inset:0;z-index:1;pointer-events:none;opacity:0.035;
+      background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size:128px 128px;
+    }
+    .cc-inner{position:relative;z-index:3;display:flex;flex-direction:column;justify-content:space-between;padding:36px 40px;min-height:280px;}
+    .cc-card.no-shimmer::before{display:none!important;}
+  </style>
+  <div class="cc-card" id="share-card-html">
+    <div class="cc-inner">
+      <div class="flex items-start justify-between">
+        <div class="flex items-center gap-4">
+          <div class="w-14 h-14 flex items-center justify-center rounded-[12px]" style="background:#c0c1ff">
+            <span class="text-[30px]" style="color:#0f1018;font-weight:900;">A</span>
+          </div>
+          <div>
+            <span class="text-[10px] font-mono uppercase tracking-[0.08em] font-bold block" style="color:#c0c1ff">Excellent</span>
+            <span class="text-xl font-bold text-[#e3e2e3]">Excellent Performance</span>
+          </div>
+        </div>
+        <div class="text-right">
+          <span class="text-[11px] font-mono uppercase tracking-[0.1em] text-[#908fa0] font-bold block">Claude Code</span>
+          <span class="text-[11px] font-mono uppercase tracking-[0.06em] text-[#596678] block" id="card-range">All time</span>
+        </div>
+      </div>
+      <div class="flex justify-between items-end">
+        <div>
+          <p class="text-[10px] uppercase tracking-[0.06em] text-[#908fa0] mb-1">Total Spend</p>
+          <p class="font-mono text-[40px] font-bold text-[#e3e2e3] leading-none" id="h-cost">$1,332</p>
+        </div>
+        <div class="text-center">
+          <p class="text-[10px] uppercase tracking-[0.06em] text-[#908fa0] mb-1">Active Days</p>
+          <p class="font-mono text-[40px] font-bold text-[#e3e2e3] leading-none" id="h-days">41</p>
+        </div>
+        <div class="text-right">
+          <p class="text-[10px] uppercase tracking-[0.06em] text-[#908fa0] mb-1">Cache Ratio</p>
+          <p class="font-mono text-[40px] font-bold text-[#e3e2e3] leading-none">491:1</p>
+        </div>
+      </div>
+      <div class="flex justify-between items-end">
+        <p class="text-[12px] text-[#908fa0]">3 anomalies detected</p>
+        <div class="flex items-center gap-2 text-[12px] font-mono tracking-[0.03em] shrink-0">
+          <a href="https://github.com/azkhh/cchubber" target="_blank" class="text-[#c0c1ff] hover:text-[#e1e0ff]" style="text-decoration:none;font-weight:600;">CC Hubber</a>
+          <span class="text-[#464554]">&middot;</span>
+          <span class="text-[#908fa0]">shipped fast with</span>
+          <a href="https://moveros.dev" target="_blank" class="text-[#c0c1ff] hover:text-[#e1e0ff]" style="text-decoration:none;font-weight:600;">Mover OS</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Hidden canvas for video recording -->
+  <canvas id="share-card" style="display:none;"></canvas>
+  <div class="flex justify-center mt-5">
+    <button id="btn-gif" class="px-5 py-2 border border-[rgba(70,69,84,0.3)] rounded-lg text-xs font-semibold text-[#908fa0] hover:bg-[#292a2b] hover:text-[#e3e2e3] transition-colors flex items-center gap-2 cursor-pointer">
+      <span class="material-symbols-outlined text-sm">share</span>
+      Share
+    </button>
+  </div>
+</section>
+
+
+<!-- Inflection callouts -->
+<section class="space-y-3">
+  <div class="p-6 bg-[#0d0e0f] border-l-4 rounded-r-xl" style="border-left-color:#c0c1ff">
+    <p class="text-xs font-bold uppercase tracking-[0.05em] mb-1" style="color:#c0c1ff">Inflection Point</p>
+    <p class="text-sm text-[#c7c4d7]">Your cache efficiency improved 21.7x starting Feb 20. Before: 9,481:1. After: 437:1.</p>
+  </div>
+  
+</section>
+
+
+<!-- 3. METRIC GRID -->
+<section class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 rounded-xl border border-[rgba(70,69,84,0.15)]" style="gap:1px; background:rgba(70,69,84,0.15);">
+  <div class="p-6 bg-[#0d0e0f]">
+    <span class="text-[10px] uppercase tracking-[0.05em] text-[#908fa0] block mb-3">Total Cost</span>
+    <span class="font-mono text-2xl font-bold block text-[#e3e2e3]" id="ov-total">$1,332</span>
+    <span class="text-[10px] text-[#908fa0] mt-1 block font-mono" id="ov-avg">$32.49 avg/day</span>
+  </div>
+  <div class="p-6 bg-[#0d0e0f]">
+    <span class="text-[10px] uppercase tracking-[0.05em] text-[#908fa0] block mb-3">Peak Day</span>
+    <span class="font-mono text-2xl font-bold block text-[#e3e2e3]">$177</span>
+    <span class="text-[10px] text-[#908fa0] mt-1 block font-mono">2026-03-27</span>
+  </div>
+  <div class="p-6 bg-[#0d0e0f]">
+    <span class="text-[10px] uppercase tracking-[0.05em] text-[#908fa0] block mb-3 has-tip">Cache Health <span class="text-[8px] text-[#464554]">&#9432;</span>
+      <span class="tip">Overall grade based on your cache efficiency ratio, weighted towards recent 7 days. A-B = healthy (300-800:1 ratio). C = elevated, investigate. D-F = critical, likely affected by cache bugs. The grade drops when recent efficiency is worse than historical.</span>
+    </span>
+    <span class="font-mono text-2xl font-bold block" style="color:#c0c1ff">A</span>
+    <span class="text-[10px] text-[#908fa0] mt-1 block font-mono">491:1</span>
+  </div>
+  <div class="p-6 bg-[#0d0e0f]">
+    <span class="text-[10px] uppercase tracking-[0.05em] text-[#908fa0] block mb-3 has-tip">Cache Breaks <span class="text-[8px] text-[#464554]">&#9432;</span>
+      <span class="tip">When your prompt cache is invalidated, Claude Code re-reads your entire context at 12.5x the cached price. Causes: editing CLAUDE.md mid-session, connecting/disconnecting MCP tools, model switches, 5-min inactivity timeout. Estimated from cache write tokens since no diff files exist on your CC version.</span>
+    </span>
+    <span class="font-mono text-2xl font-bold block text-[#e3e2e3]">~311</span>
+    <span class="text-[10px] text-[#908fa0] mt-1 block">estimated from writes</span>
+  </div>
+  <div class="p-6 bg-[#0d0e0f]">
+    <span class="text-[10px] uppercase tracking-[0.05em] text-[#908fa0] block mb-3">CLAUDE.md</span>
+    <span class="font-mono text-2xl font-bold block text-[#e3e2e3]">~5K</span>
+    <span class="text-[10px] text-[#908fa0] mt-1 block font-mono">17.9 KB</span>
+  </div>
+  
+  <div class="p-6 bg-[#0d0e0f]">
+    <span class="text-[10px] uppercase tracking-[0.05em] text-[#908fa0] block mb-3">Sessions</span>
+    <span class="font-mono text-2xl font-bold block text-[#e3e2e3]">38</span>
+    <span class="text-[10px] text-[#908fa0] mt-1 block font-mono">235 min avg</span>
+  </div>
+</section>
+
+<!-- 4. COST TREND CHART -->
+<section class="bg-[#1b1c1d] p-8 rounded-xl border border-[rgba(70,69,84,0.15)]">
+  <div class="flex justify-between items-end mb-10">
+    <div>
+      <h3 class="text-xl font-bold text-[#e3e2e3] mb-1">Cost Trend</h3>
+      <p class="text-sm text-[#908fa0]" id="chart-info"></p>
+    </div>
+    <div class="flex gap-1 p-1 bg-[#0d0e0f] rounded-xl border border-[rgba(70,69,84,0.15)]" id="filters">
+      <button class="cfilt px-3 py-1.5 text-[10px] font-bold uppercase rounded-lg text-[#908fa0] hover:text-[#e3e2e3] transition-colors" data-r="7">7d</button>
+      <button class="cfilt px-3 py-1.5 text-[10px] font-bold uppercase rounded-lg text-[#908fa0] hover:text-[#e3e2e3] transition-colors" data-r="30">30d</button>
+      <button class="cfilt px-3 py-1.5 text-[10px] font-bold uppercase rounded-lg text-[#908fa0] hover:text-[#e3e2e3] transition-colors" data-r="90">90d</button>
+      <button class="cfilt px-3 py-1.5 text-[10px] font-bold uppercase rounded-lg bg-[#c0c1ff] text-[#1000a9] transition-colors" data-r="all">All</button>
+    </div>
+  </div>
+  <svg id="cost-chart-svg" viewBox="0 0 900 200" preserveAspectRatio="xMidYMid meet"></svg>
+</section>
+
+<!-- 5. SESSION INTELLIGENCE + MODEL DISTRIBUTION -->
+<section class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+  <!-- Session Intelligence -->
+  <div class="space-y-8">
+    
+    <div class="bg-[#1b1c1d] p-8 rounded-xl border border-[rgba(70,69,84,0.15)]">
+      <h3 class="text-xl font-bold text-[#e3e2e3] mb-6">Session Intelligence</h3>
+      <div class="grid grid-cols-3 gap-6 mb-8">
+        <div>
+          <span class="text-[10px] uppercase tracking-[0.05em] text-[#908fa0] block mb-1">Median</span>
+          <span class="font-mono text-xl font-bold text-[#e3e2e3]">13m</span>
+        </div>
+        <div>
+          <span class="text-[10px] uppercase tracking-[0.05em] text-[#908fa0] block mb-1">P90</span>
+          <span class="font-mono text-xl font-bold text-[#e3e2e3]">18h</span>
+        </div>
+        <div>
+          <span class="text-[10px] uppercase tracking-[0.05em] text-[#908fa0] block mb-1">Longest</span>
+          <span class="font-mono text-xl font-bold text-[#e3e2e3]">31h</span>
+        </div>
+      </div>
+      <div class="grid grid-cols-3 gap-6 mb-8">
+        <div>
+          <span class="text-[10px] uppercase tracking-[0.05em] text-[#908fa0] block mb-1">Long Sessions</span>
+          <span class="font-mono text-xl font-bold text-[#e3e2e3]">14</span>
+          <span class="text-[10px] text-[#908fa0] block font-mono">37% over 60m</span>
+        </div>
+        <div>
+          <span class="text-[10px] uppercase tracking-[0.05em] text-[#908fa0] block mb-1">Tools/Session</span>
+          <span class="font-mono text-xl font-bold text-[#e3e2e3]">24</span>
+        </div>
+        <div>
+          <span class="text-[10px] uppercase tracking-[0.05em] text-[#908fa0] block mb-1">Lines/Hour</span>
+          <span class="font-mono text-xl font-bold text-[#e3e2e3]">28</span>
+        </div>
+      </div>
+
+      
+      <div>
+        <span class="text-[10px] uppercase tracking-[0.05em] text-[#908fa0] block mb-4">Top Tools Usage</span>
+        <div class="space-y-3">
+          
+          <div class="space-y-1">
+            <div class="flex justify-between text-[11px] font-mono">
+              <span class="text-[#c7c4d7]">Bash</span>
+              <span class="text-[#908fa0]">346</span>
+            </div>
+            <div class="h-1.5 bg-[#343536] rounded-full overflow-hidden">
+              <div class="h-full rounded-full" style="width:100%;background:#c0c1ff"></div>
+            </div>
+          </div>
+          <div class="space-y-1">
+            <div class="flex justify-between text-[11px] font-mono">
+              <span class="text-[#c7c4d7]">Read</span>
+              <span class="text-[#908fa0]">136</span>
+            </div>
+            <div class="h-1.5 bg-[#343536] rounded-full overflow-hidden">
+              <div class="h-full rounded-full" style="width:39.30635838150289%;background:#d4bbff"></div>
+            </div>
+          </div>
+          <div class="space-y-1">
+            <div class="flex justify-between text-[11px] font-mono">
+              <span class="text-[#c7c4d7]">Agent</span>
+              <span class="text-[#908fa0]">125</span>
+            </div>
+            <div class="h-1.5 bg-[#343536] rounded-full overflow-hidden">
+              <div class="h-full rounded-full" style="width:36.127167630057805%;background:#d4bbff"></div>
+            </div>
+          </div>
+          <div class="space-y-1">
+            <div class="flex justify-between text-[11px] font-mono">
+              <span class="text-[#c7c4d7]">Edit</span>
+              <span class="text-[#908fa0]">58</span>
+            </div>
+            <div class="h-1.5 bg-[#343536] rounded-full overflow-hidden">
+              <div class="h-full rounded-full" style="width:16.76300578034682%;background:#d4bbff"></div>
+            </div>
+          </div>
+          <div class="space-y-1">
+            <div class="flex justify-between text-[11px] font-mono">
+              <span class="text-[#c7c4d7]">Glob</span>
+              <span class="text-[#908fa0]">34</span>
+            </div>
+            <div class="h-1.5 bg-[#343536] rounded-full overflow-hidden">
+              <div class="h-full rounded-full" style="width:9.826589595375722%;background:#d4bbff"></div>
+            </div>
+          </div>
+          <div class="space-y-1">
+            <div class="flex justify-between text-[11px] font-mono">
+              <span class="text-[#c7c4d7]">Grep</span>
+              <span class="text-[#908fa0]">33</span>
+            </div>
+            <div class="h-1.5 bg-[#343536] rounded-full overflow-hidden">
+              <div class="h-full rounded-full" style="width:9.53757225433526%;background:#d4bbff"></div>
+            </div>
+          </div>
+          <div class="space-y-1">
+            <div class="flex justify-between text-[11px] font-mono">
+              <span class="text-[#c7c4d7]">TaskUpdate</span>
+              <span class="text-[#908fa0]">27</span>
+            </div>
+            <div class="h-1.5 bg-[#343536] rounded-full overflow-hidden">
+              <div class="h-full rounded-full" style="width:7.803468208092486%;background:#d4bbff"></div>
+            </div>
+          </div>
+          <div class="space-y-1">
+            <div class="flex justify-between text-[11px] font-mono">
+              <span class="text-[#c7c4d7]">mcp__plugin_engram_engram__mem_search</span>
+              <span class="text-[#908fa0]">20</span>
+            </div>
+            <div class="h-1.5 bg-[#343536] rounded-full overflow-hidden">
+              <div class="h-full rounded-full" style="width:5.780346820809249%;background:#d4bbff"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6. ACTIVITY HEATMAP -->
+    
+    <div class="bg-[#1b1c1d] p-8 rounded-xl border border-[rgba(70,69,84,0.15)]">
+      <h3 class="text-lg font-bold text-[#e3e2e3] mb-4">Activity by Hour</h3>
+      <div class="" id="hour-grid" style="display:flex;justify-content:space-between;align-items:flex-end;padding:0 4px;"></div>
+      <!-- labels rendered by JS -->
+    </div>
+  </div>
+
+  <!-- Model Distribution -->
+  <div class="space-y-8">
+    <div class="bg-[#1b1c1d] p-8 rounded-xl border border-[rgba(70,69,84,0.15)]">
+      <h3 class="text-xl font-bold text-[#e3e2e3] mb-6">Model Distribution</h3>
+      <div class="w-full h-4 flex rounded-full overflow-hidden mb-6" style="gap:2px">
+        <div class="h-full" style="width:64.73735544666486%;background:#c0c1ff;border-radius:9999px 0 0 9999px"></div><div class="h-full" style="width:33.23750286273231%;background:#d4bbff;border-radius:0"></div><div class="h-full" style="width:1.5665591078491095%;background:#ffb690;border-radius:0"></div><div class="h-full" style="width:0.4585825827537418%;background:#8083ff;border-radius:0 9999px 9999px 0"></div>
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <div class="flex items-center gap-2">
+            <div class="w-2 h-2 rounded-full" style="background:#c0c1ff"></div>
+            <span class="text-xs font-mono text-[#c7c4d7]">Opus 4.6</span>
+            <span class="text-xs font-mono text-[#908fa0]">$862</span>
+            <span class="text-[10px] text-[#464554] font-mono">64.7%</span>
+          </div><div class="flex items-center gap-2">
+            <div class="w-2 h-2 rounded-full" style="background:#d4bbff"></div>
+            <span class="text-xs font-mono text-[#c7c4d7]">Sonnet 4.6</span>
+            <span class="text-xs font-mono text-[#908fa0]">$443</span>
+            <span class="text-[10px] text-[#464554] font-mono">33.2%</span>
+          </div><div class="flex items-center gap-2">
+            <div class="w-2 h-2 rounded-full" style="background:#ffb690"></div>
+            <span class="text-xs font-mono text-[#c7c4d7]">Haiku 4.5</span>
+            <span class="text-xs font-mono text-[#908fa0]">$20.87</span>
+            <span class="text-[10px] text-[#464554] font-mono">1.6%</span>
+          </div><div class="flex items-center gap-2">
+            <div class="w-2 h-2 rounded-full" style="background:#8083ff"></div>
+            <span class="text-xs font-mono text-[#c7c4d7]">Sonnet 4.5</span>
+            <span class="text-xs font-mono text-[#908fa0]">$6.11</span>
+            <span class="text-[10px] text-[#464554] font-mono">0.5%</span>
+          </div>
+      </div>
+      
+      <div class="mt-6 pt-6 border-t border-[rgba(70,69,84,0.15)] text-sm text-[#c7c4d7]">
+        <span class="font-mono">65%</span> Opus &middot;
+        <span class="font-mono">34%</span> Sonnet &middot;
+        <span class="font-mono">2%</span> Haiku
+        <span class="text-[#c0c1ff] ml-3 font-mono">~$138 potential savings</span>
+      </div>
+    </div>
+
+    <!-- 9. RECOMMENDATIONS (placed alongside model distribution) -->
+    
+    <div class="bg-[#1b1c1d] p-8 rounded-xl border border-[rgba(70,69,84,0.15)]">
+      <h3 class="text-xl font-bold text-[#e3e2e3] mb-6">Recommendations</h3>
+      <div class="space-y-3">
+        <div class="p-4 bg-[#0d0e0f] rounded-r-lg flex items-start gap-4" style="border-left:3px solid #c0c1ff">
+            <div class="flex-1 min-w-0">
+              <div class="flex items-start justify-between gap-4">
+                <p class="text-[13px] font-semibold text-[#e3e2e3]">Efficiency improved 21.7x on 2026-02-20</p>
+                <div class="flex items-center gap-2 shrink-0">
+                  <span class="text-[10px] font-mono px-2 py-0.5 rounded" style="background:#c0c1ff18;color:#c0c1ff">Already saving</span>
+                  
+                </div>
+              </div>
+              <p class="text-[11px] text-[#908fa0] mt-1 leading-relaxed">Your cache efficiency improved. Likely a version update or workflow change.</p>
+            </div>
+          </div><div class="p-4 bg-[#0d0e0f] rounded-r-lg flex items-start gap-4" style="border-left:3px solid #ffb690">
+            <div class="flex-1 min-w-0">
+              <div class="flex items-start justify-between gap-4">
+                <p class="text-[13px] font-semibold text-[#e3e2e3]">CLAUDE.md is 5K tokens — trim to &lt;4K</p>
+                <div class="flex items-center gap-2 shrink-0">
+                  <span class="text-[10px] font-mono px-2 py-0.5 rounded" style="background:#ffb69018;color:#ffb690">saves ~3K tokens/msg</span>
+                  <button data-clip="Q0MgSHViYmVyIGZsYWdnZWQgdGhpcyBhYm91dCBteSBzZXR1cDoKCkNMQVVERS5tZCBpcyA1SyB0b2tlbnMg4oCUIHRyaW0gdG8gPDRLCgpSZS1yZWFkIG9uIGV2ZXJ5IHR1cm4uIE1vdmUgcmFyZWx5LXVzZWQgcnVsZXMgdG8gcHJvamVjdCBmaWxlcy4gVXNlIHNraWxscy9ob29rcyBpbnN0ZWFkIG9mIGlubGluZSBpbnN0cnVjdGlvbnMuIENvbW11bml0eSB0YXJnZXQ6IHVuZGVyIDIwMCBsaW5lcy4gWW91ciBjb25maWcgaXMgMi40eCB0aGUgY29tbXVuaXR5IGF2ZXJhZ2Ugb2YgMksgdG9rZW5zLgoKQmVmb3JlIG1ha2luZyBjaGFuZ2VzOgoxLiBSZWFkIHRoZSByZWxldmFudCBmaWxlcyBmaXJzdCB0byB1bmRlcnN0YW5kIHRoZSBjdXJyZW50IHNldHVwCjIuIERvIE5PVCByZW1vdmUgb3IgbW9kaWZ5IGFueXRoaW5nIHdpdGhvdXQgYXNraW5nIG1lIOKAlCBzb21lIHRoaW5ncyBhcmUgdGhlcmUgaW50ZW50aW9uYWxseQozLiBTaG93IG1lIHdoYXQgZWFjaCBzZWN0aW9uL3NldHRpbmcgY29zdHMgaW4gdG9rZW5zIGFuZCBsZXQgbWUgZGVjaWRlIHdoYXQgdG8ga2VlcAo0LiBTdWdnZXN0IG9wdGltaXphdGlvbnMgKG1vdmUgdG8gc2tpbGxzLCB1c2UgaG9va3MsIHJlc3RydWN0dXJlKSByYXRoZXIgdGhhbiBkZWxldGlvbgo1LiBEbyBub3QgYnJlYWsgZXhpc3Rpbmcgd29ya2luZyBmdW5jdGlvbmFsaXR5" onclick="var t=atob(this.dataset.clip);navigator.clipboard.writeText(t);this.textContent='Copied!';var b=this;setTimeout(function(){b.textContent='Fix with Claude'},1500)" class="text-[10px] font-mono px-2 py-0.5 rounded border border-[rgba(70,69,84,0.3)] text-[#908fa0] cursor-pointer hover:text-[#e3e2e3] hover:border-[rgba(70,69,84,0.6)] transition-colors">Fix with Claude</button>
+                </div>
+              </div>
+              <p class="text-[11px] text-[#908fa0] mt-1 leading-relaxed">Re-read on every turn. Move rarely-used rules to project files. Use skills/hooks instead of inline instructions. Community target: under 200 lines. Your config is 2.4x the community average of 2K tokens.</p>
+            </div>
+          </div><div class="p-4 bg-[#0d0e0f] rounded-r-lg flex items-start gap-4" style="border-left:3px solid #c0c1ff">
+            <div class="flex-1 min-w-0">
+              <div class="flex items-start justify-between gap-4">
+                <p class="text-[13px] font-semibold text-[#e3e2e3]">&quot;Documents development sacdia&quot; uses 99% of output tokens (3 projects total)</p>
+                <div class="flex items-center gap-2 shrink-0">
+                  <span class="text-[10px] font-mono px-2 py-0.5 rounded" style="background:#c0c1ff18;color:#c0c1ff">Focus optimization here first</span>
+                  <button data-clip="Q0MgSHViYmVyIGZsYWdnZWQgdGhpcyBhYm91dCBteSBzZXR1cDoKCiJEb2N1bWVudHMgZGV2ZWxvcG1lbnQgc2FjZGlhIiB1c2VzIDk5JSBvZiBvdXRwdXQgdG9rZW5zICgzIHByb2plY3RzIHRvdGFsKQoKWW91ciBtb3N0IGFjdGl2ZSBwcm9qZWN0IGJ5IG91dHB1dC4gMjk2NTggbWVzc2FnZXMgYWNyb3NzIDEzMTMgc2Vzc2lvbnMuIENvbnNpZGVyIHdoZXRoZXIgdGhpcyBwcm9qZWN0IG5lZWRzIE9wdXMgb3IgaWYgU29ubmV0IHdvdWxkIHdvcmsuIFNwbGl0dGluZyBsYXJnZSB0YXNrcyBpbnRvIHNtYWxsZXIgc2Vzc2lvbnMgcmVkdWNlcyBjb250ZXh0IGJsb2F0LgoKQmVmb3JlIG1ha2luZyBjaGFuZ2VzOgoxLiBSZWFkIHRoZSByZWxldmFudCBmaWxlcyBmaXJzdCB0byB1bmRlcnN0YW5kIHRoZSBjdXJyZW50IHNldHVwCjIuIERvIE5PVCByZW1vdmUgb3IgbW9kaWZ5IGFueXRoaW5nIHdpdGhvdXQgYXNraW5nIG1lIOKAlCBzb21lIHRoaW5ncyBhcmUgdGhlcmUgaW50ZW50aW9uYWxseQozLiBTaG93IG1lIHdoYXQgZWFjaCBzZWN0aW9uL3NldHRpbmcgY29zdHMgaW4gdG9rZW5zIGFuZCBsZXQgbWUgZGVjaWRlIHdoYXQgdG8ga2VlcAo0LiBTdWdnZXN0IG9wdGltaXphdGlvbnMgKG1vdmUgdG8gc2tpbGxzLCB1c2UgaG9va3MsIHJlc3RydWN0dXJlKSByYXRoZXIgdGhhbiBkZWxldGlvbgo1LiBEbyBub3QgYnJlYWsgZXhpc3Rpbmcgd29ya2luZyBmdW5jdGlvbmFsaXR5" onclick="var t=atob(this.dataset.clip);navigator.clipboard.writeText(t);this.textContent='Copied!';var b=this;setTimeout(function(){b.textContent='Fix with Claude'},1500)" class="text-[10px] font-mono px-2 py-0.5 rounded border border-[rgba(70,69,84,0.3)] text-[#908fa0] cursor-pointer hover:text-[#e3e2e3] hover:border-[rgba(70,69,84,0.6)] transition-colors">Fix with Claude</button>
+                </div>
+              </div>
+              <p class="text-[11px] text-[#908fa0] mt-1 leading-relaxed">Your most active project by output. 29658 messages across 1313 sessions. Consider whether this project needs Opus or if Sonnet would work. Splitting large tasks into smaller sessions reduces context bloat.</p>
+            </div>
+          </div><div class="p-4 bg-[#0d0e0f] rounded-r-lg flex items-start gap-4" style="border-left:3px solid #ffb690">
+            <div class="flex-1 min-w-0">
+              <div class="flex items-start justify-between gap-4">
+                <p class="text-[13px] font-semibold text-[#e3e2e3]">Avg session 235 min — 6.5x community average</p>
+                <div class="flex items-center gap-2 shrink-0">
+                  <span class="text-[10px] font-mono px-2 py-0.5 rounded" style="background:#ffb69018;color:#ffb690">~15-25% usage reduction</span>
+                  <button data-clip="Q0MgSHViYmVyIGZsYWdnZWQgdGhpcyBhYm91dCBteSBzZXR1cDoKCkF2ZyBzZXNzaW9uIDIzNSBtaW4g4oCUIDYuNXggY29tbXVuaXR5IGF2ZXJhZ2UKCkNvbW11bml0eSBhdmVyYWdlIGlzIDM2IG1pbi4gTG9uZ2VyIHNlc3Npb25zIGFjY3VtdWxhdGUgY29udGV4dCBibG9hdC4gVXNlIC9jb21wYWN0IGV2ZXJ5IDMwLTQwIHRvb2wgY2FsbHMuIFN0YXJ0IGZyZXNoIHNlc3Npb25zIGZvciBuZXcgdGFza3MuIFlvdXIgcDkwIGlzIDEwOTcgbWluLgoKQmVmb3JlIG1ha2luZyBjaGFuZ2VzOgoxLiBSZWFkIHRoZSByZWxldmFudCBmaWxlcyBmaXJzdCB0byB1bmRlcnN0YW5kIHRoZSBjdXJyZW50IHNldHVwCjIuIERvIE5PVCByZW1vdmUgb3IgbW9kaWZ5IGFueXRoaW5nIHdpdGhvdXQgYXNraW5nIG1lIOKAlCBzb21lIHRoaW5ncyBhcmUgdGhlcmUgaW50ZW50aW9uYWxseQozLiBTaG93IG1lIHdoYXQgZWFjaCBzZWN0aW9uL3NldHRpbmcgY29zdHMgaW4gdG9rZW5zIGFuZCBsZXQgbWUgZGVjaWRlIHdoYXQgdG8ga2VlcAo0LiBTdWdnZXN0IG9wdGltaXphdGlvbnMgKG1vdmUgdG8gc2tpbGxzLCB1c2UgaG9va3MsIHJlc3RydWN0dXJlKSByYXRoZXIgdGhhbiBkZWxldGlvbgo1LiBEbyBub3QgYnJlYWsgZXhpc3Rpbmcgd29ya2luZyBmdW5jdGlvbmFsaXR5" onclick="var t=atob(this.dataset.clip);navigator.clipboard.writeText(t);this.textContent='Copied!';var b=this;setTimeout(function(){b.textContent='Fix with Claude'},1500)" class="text-[10px] font-mono px-2 py-0.5 rounded border border-[rgba(70,69,84,0.3)] text-[#908fa0] cursor-pointer hover:text-[#e3e2e3] hover:border-[rgba(70,69,84,0.6)] transition-colors">Fix with Claude</button>
+                </div>
+              </div>
+              <p class="text-[11px] text-[#908fa0] mt-1 leading-relaxed">Community average is 36 min. Longer sessions accumulate context bloat. Use /compact every 30-40 tool calls. Start fresh sessions for new tasks. Your p90 is 1097 min.</p>
+            </div>
+          </div><div class="p-4 bg-[#0d0e0f] rounded-r-lg flex items-start gap-4" style="border-left:3px solid #ffb4ab">
+            <div class="flex-1 min-w-0">
+              <div class="flex items-start justify-between gap-4">
+                <p class="text-[13px] font-semibold text-[#e3e2e3]">3 cost spikes — worst $177 on 2026-03-27</p>
+                <div class="flex items-center gap-2 shrink-0">
+                  <span class="text-[10px] font-mono px-2 py-0.5 rounded" style="background:#ffb4ab18;color:#ffb4ab">Preventable with monitoring</span>
+                  <button data-clip="Q0MgSHViYmVyIGZsYWdnZWQgdGhpcyBhYm91dCBteSBzZXR1cDoKCjMgY29zdCBzcGlrZXMg4oCUIHdvcnN0ICQxNzcgb24gMjAyNi0wMy0yNwoKV2F0Y2ggdGhlIGZpcnN0IDEtMiBtZXNzYWdlcyBvZiBlYWNoIHNlc3Npb24uIElmIGEgc2luZ2xlIG1lc3NhZ2UgYnVybnMgMy01JSBvZiBxdW90YSwgcmVzdGFydCBpbW1lZGlhdGVseS4gR2l0SHViICMzODAyOSBkb2N1bWVudHMgcGhhbnRvbSA2NTJLIG91dHB1dCB0b2tlbiBidWdzLgoKQmVmb3JlIG1ha2luZyBjaGFuZ2VzOgoxLiBSZWFkIHRoZSByZWxldmFudCBmaWxlcyBmaXJzdCB0byB1bmRlcnN0YW5kIHRoZSBjdXJyZW50IHNldHVwCjIuIERvIE5PVCByZW1vdmUgb3IgbW9kaWZ5IGFueXRoaW5nIHdpdGhvdXQgYXNraW5nIG1lIOKAlCBzb21lIHRoaW5ncyBhcmUgdGhlcmUgaW50ZW50aW9uYWxseQozLiBTaG93IG1lIHdoYXQgZWFjaCBzZWN0aW9uL3NldHRpbmcgY29zdHMgaW4gdG9rZW5zIGFuZCBsZXQgbWUgZGVjaWRlIHdoYXQgdG8ga2VlcAo0LiBTdWdnZXN0IG9wdGltaXphdGlvbnMgKG1vdmUgdG8gc2tpbGxzLCB1c2UgaG9va3MsIHJlc3RydWN0dXJlKSByYXRoZXIgdGhhbiBkZWxldGlvbgo1LiBEbyBub3QgYnJlYWsgZXhpc3Rpbmcgd29ya2luZyBmdW5jdGlvbmFsaXR5" onclick="var t=atob(this.dataset.clip);navigator.clipboard.writeText(t);this.textContent='Copied!';var b=this;setTimeout(function(){b.textContent='Fix with Claude'},1500)" class="text-[10px] font-mono px-2 py-0.5 rounded border border-[rgba(70,69,84,0.3)] text-[#908fa0] cursor-pointer hover:text-[#e3e2e3] hover:border-[rgba(70,69,84,0.6)] transition-colors">Fix with Claude</button>
+                </div>
+              </div>
+              <p class="text-[11px] text-[#908fa0] mt-1 leading-relaxed">Watch the first 1-2 messages of each session. If a single message burns 3-5% of quota, restart immediately. GitHub #38029 documents phantom 652K output token bugs.</p>
+            </div>
+          </div><div class="p-4 bg-[#0d0e0f] rounded-r-lg flex items-start gap-4" style="border-left:3px solid #c0c1ff">
+            <div class="flex-1 min-w-0">
+              <div class="flex items-start justify-between gap-4">
+                <p class="text-[13px] font-semibold text-[#e3e2e3]">Create .claudeignore to exclude build artifacts</p>
+                <div class="flex items-center gap-2 shrink-0">
+                  <span class="text-[10px] font-mono px-2 py-0.5 rounded" style="background:#c0c1ff18;color:#c0c1ff">~5-10% per context load</span>
+                  <button data-clip="Q0MgSHViYmVyIGZsYWdnZWQgdGhpcyBhYm91dCBteSBzZXR1cDoKCkNyZWF0ZSAuY2xhdWRlaWdub3JlIHRvIGV4Y2x1ZGUgYnVpbGQgYXJ0aWZhY3RzCgpQcmV2ZW50cyBDQyBmcm9tIHJlYWRpbmcgbm9kZV9tb2R1bGVzLywgZGlzdC8sICoubG9jaywgX19weWNhY2hlX18vLiBFYWNoIGNvbnRleHQgbG9hZCBzY2FucyB5b3VyIHByb2plY3QgdHJlZSDigJQgZXhjbHVkaW5nIGp1bmsgc2F2ZXMgdG9rZW5zIGV2ZXJ5IHR1cm4uCgpCZWZvcmUgbWFraW5nIGNoYW5nZXM6CjEuIFJlYWQgdGhlIHJlbGV2YW50IGZpbGVzIGZpcnN0IHRvIHVuZGVyc3RhbmQgdGhlIGN1cnJlbnQgc2V0dXAKMi4gRG8gTk9UIHJlbW92ZSBvciBtb2RpZnkgYW55dGhpbmcgd2l0aG91dCBhc2tpbmcgbWUg4oCUIHNvbWUgdGhpbmdzIGFyZSB0aGVyZSBpbnRlbnRpb25hbGx5CjMuIFNob3cgbWUgd2hhdCBlYWNoIHNlY3Rpb24vc2V0dGluZyBjb3N0cyBpbiB0b2tlbnMgYW5kIGxldCBtZSBkZWNpZGUgd2hhdCB0byBrZWVwCjQuIFN1Z2dlc3Qgb3B0aW1pemF0aW9ucyAobW92ZSB0byBza2lsbHMsIHVzZSBob29rcywgcmVzdHJ1Y3R1cmUpIHJhdGhlciB0aGFuIGRlbGV0aW9uCjUuIERvIG5vdCBicmVhayBleGlzdGluZyB3b3JraW5nIGZ1bmN0aW9uYWxpdHk=" onclick="var t=atob(this.dataset.clip);navigator.clipboard.writeText(t);this.textContent='Copied!';var b=this;setTimeout(function(){b.textContent='Fix with Claude'},1500)" class="text-[10px] font-mono px-2 py-0.5 rounded border border-[rgba(70,69,84,0.3)] text-[#908fa0] cursor-pointer hover:text-[#e3e2e3] hover:border-[rgba(70,69,84,0.6)] transition-colors">Fix with Claude</button>
+                </div>
+              </div>
+              <p class="text-[11px] text-[#908fa0] mt-1 leading-relaxed">Prevents CC from reading node_modules/, dist/, *.lock, __pycache__/. Each context load scans your project tree — excluding junk saves tokens every turn.</p>
+            </div>
+          </div><div class="p-4 bg-[#0d0e0f] rounded-r-lg flex items-start gap-4" style="border-left:3px solid #c0c1ff">
+            <div class="flex-1 min-w-0">
+              <div class="flex items-start justify-between gap-4">
+                <p class="text-[13px] font-semibold text-[#e3e2e3]">Enable tool search to reduce context by ~25K tokens</p>
+                <div class="flex items-center gap-2 shrink-0">
+                  <span class="text-[10px] font-mono px-2 py-0.5 rounded" style="background:#c0c1ff18;color:#c0c1ff">~45% context reduction</span>
+                  <button data-clip="Q0MgSHViYmVyIGZsYWdnZWQgdGhpcyBhYm91dCBteSBzZXR1cDoKCkVuYWJsZSB0b29sIHNlYXJjaCB0byByZWR1Y2UgY29udGV4dCBieSB+MjVLIHRva2VucwoKQWRkICJFTkFCTEVfVE9PTF9TRUFSQ0giOiAidHJ1ZSIgdG8gc2V0dGluZ3MuanNvbi4gQ2xhdWRlIENvZGUgbG9hZHMgZnVsbCBKU09OIHNjaGVtYXMgZm9yIGV2ZXJ5IHRvb2wgYXQgc2Vzc2lvbiBzdGFydCAoMTQtMjBLIHRva2VucykuIFRvb2wgc2VhcmNoIGxvYWRzIHRoZW0gb24tZGVtYW5kIGluc3RlYWQuIE9uZSBzZXR0aW5nLCBpbnN0YW50IHNhdmluZ3MuCgpCZWZvcmUgbWFraW5nIGNoYW5nZXM6CjEuIFJlYWQgdGhlIHJlbGV2YW50IGZpbGVzIGZpcnN0IHRvIHVuZGVyc3RhbmQgdGhlIGN1cnJlbnQgc2V0dXAKMi4gRG8gTk9UIHJlbW92ZSBvciBtb2RpZnkgYW55dGhpbmcgd2l0aG91dCBhc2tpbmcgbWUg4oCUIHNvbWUgdGhpbmdzIGFyZSB0aGVyZSBpbnRlbnRpb25hbGx5CjMuIFNob3cgbWUgd2hhdCBlYWNoIHNlY3Rpb24vc2V0dGluZyBjb3N0cyBpbiB0b2tlbnMgYW5kIGxldCBtZSBkZWNpZGUgd2hhdCB0byBrZWVwCjQuIFN1Z2dlc3Qgb3B0aW1pemF0aW9ucyAobW92ZSB0byBza2lsbHMsIHVzZSBob29rcywgcmVzdHJ1Y3R1cmUpIHJhdGhlciB0aGFuIGRlbGV0aW9uCjUuIERvIG5vdCBicmVhayBleGlzdGluZyB3b3JraW5nIGZ1bmN0aW9uYWxpdHk=" onclick="var t=atob(this.dataset.clip);navigator.clipboard.writeText(t);this.textContent='Copied!';var b=this;setTimeout(function(){b.textContent='Fix with Claude'},1500)" class="text-[10px] font-mono px-2 py-0.5 rounded border border-[rgba(70,69,84,0.3)] text-[#908fa0] cursor-pointer hover:text-[#e3e2e3] hover:border-[rgba(70,69,84,0.6)] transition-colors">Fix with Claude</button>
+                </div>
+              </div>
+              <p class="text-[11px] text-[#908fa0] mt-1 leading-relaxed">Add &quot;ENABLE_TOOL_SEARCH&quot;: &quot;true&quot; to settings.json. Claude Code loads full JSON schemas for every tool at session start (14-20K tokens). Tool search loads them on-demand instead. One setting, instant savings.</p>
+            </div>
+          </div><div class="p-4 bg-[#0d0e0f] rounded-r-lg flex items-start gap-4" style="border-left:3px solid #c0c1ff">
+            <div class="flex-1 min-w-0">
+              <div class="flex items-start justify-between gap-4">
+                <p class="text-[13px] font-semibold text-[#e3e2e3]">Be specific in prompts — reduces tokens up to 10x</p>
+                <div class="flex items-center gap-2 shrink-0">
+                  <span class="text-[10px] font-mono px-2 py-0.5 rounded" style="background:#c0c1ff18;color:#c0c1ff">~20-40% usage reduction</span>
+                  <button data-clip="Q0MgSHViYmVyIGZsYWdnZWQgdGhpcyBhYm91dCBteSBzZXR1cDoKCkJlIHNwZWNpZmljIGluIHByb21wdHMg4oCUIHJlZHVjZXMgdG9rZW5zIHVwIHRvIDEweAoKSW5zdGVhZCBvZiAiZml4IHRoZSBhdXRoIGJ1ZyIsIHNheSAiZml4IEpXVCB2YWxpZGF0aW9uIGluIHNyYy9hdXRoL3ZhbGlkYXRlLnRzIGxpbmUgNDIiLiBTcGVjaWZpYyBwcm9tcHRzIGF2b2lkIGNvZGViYXNlLXdpZGUgc2NhbnMuIENvbW11bml0eS12ZXJpZmllZDogMTB4IHJlZHVjdGlvbiBwZXIgcHJvbXB0LgoKQmVmb3JlIG1ha2luZyBjaGFuZ2VzOgoxLiBSZWFkIHRoZSByZWxldmFudCBmaWxlcyBmaXJzdCB0byB1bmRlcnN0YW5kIHRoZSBjdXJyZW50IHNldHVwCjIuIERvIE5PVCByZW1vdmUgb3IgbW9kaWZ5IGFueXRoaW5nIHdpdGhvdXQgYXNraW5nIG1lIOKAlCBzb21lIHRoaW5ncyBhcmUgdGhlcmUgaW50ZW50aW9uYWxseQozLiBTaG93IG1lIHdoYXQgZWFjaCBzZWN0aW9uL3NldHRpbmcgY29zdHMgaW4gdG9rZW5zIGFuZCBsZXQgbWUgZGVjaWRlIHdoYXQgdG8ga2VlcAo0LiBTdWdnZXN0IG9wdGltaXphdGlvbnMgKG1vdmUgdG8gc2tpbGxzLCB1c2UgaG9va3MsIHJlc3RydWN0dXJlKSByYXRoZXIgdGhhbiBkZWxldGlvbgo1LiBEbyBub3QgYnJlYWsgZXhpc3Rpbmcgd29ya2luZyBmdW5jdGlvbmFsaXR5" onclick="var t=atob(this.dataset.clip);navigator.clipboard.writeText(t);this.textContent='Copied!';var b=this;setTimeout(function(){b.textContent='Fix with Claude'},1500)" class="text-[10px] font-mono px-2 py-0.5 rounded border border-[rgba(70,69,84,0.3)] text-[#908fa0] cursor-pointer hover:text-[#e3e2e3] hover:border-[rgba(70,69,84,0.6)] transition-colors">Fix with Claude</button>
+                </div>
+              </div>
+              <p class="text-[11px] text-[#908fa0] mt-1 leading-relaxed">Instead of &quot;fix the auth bug&quot;, say &quot;fix JWT validation in src/auth/validate.ts line 42&quot;. Specific prompts avoid codebase-wide scans. Community-verified: 10x reduction per prompt.</p>
+            </div>
+          </div><div class="p-4 bg-[#0d0e0f] rounded-r-lg flex items-start gap-4" style="border-left:3px solid #c0c1ff">
+            <div class="flex-1 min-w-0">
+              <div class="flex items-start justify-between gap-4">
+                <p class="text-[13px] font-semibold text-[#e3e2e3]">59% of work during throttled hours</p>
+                <div class="flex items-center gap-2 shrink-0">
+                  <span class="text-[10px] font-mono px-2 py-0.5 rounded" style="background:#c0c1ff18;color:#c0c1ff">~30% longer session limits</span>
+                  <button data-clip="Q0MgSHViYmVyIGZsYWdnZWQgdGhpcyBhYm91dCBteSBzZXR1cDoKCjU5JSBvZiB3b3JrIGR1cmluZyB0aHJvdHRsZWQgaG91cnMKCkFudGhyb3BpYyB0aHJvdHRsZXMgNS1ob3VyIGxpbWl0cyBkdXJpbmcgNWFtLTExYW0gUFQgd2Vla2RheXMuIFNoaWZ0IGhlYXZ5IHdvcmsgKHJlZmFjdG9ycywgdGVzdCBnZW4pIHRvIG9mZi1wZWFrIGZvciAzMCUrIGxvbmdlciBsaW1pdHMuCgpCZWZvcmUgbWFraW5nIGNoYW5nZXM6CjEuIFJlYWQgdGhlIHJlbGV2YW50IGZpbGVzIGZpcnN0IHRvIHVuZGVyc3RhbmQgdGhlIGN1cnJlbnQgc2V0dXAKMi4gRG8gTk9UIHJlbW92ZSBvciBtb2RpZnkgYW55dGhpbmcgd2l0aG91dCBhc2tpbmcgbWUg4oCUIHNvbWUgdGhpbmdzIGFyZSB0aGVyZSBpbnRlbnRpb25hbGx5CjMuIFNob3cgbWUgd2hhdCBlYWNoIHNlY3Rpb24vc2V0dGluZyBjb3N0cyBpbiB0b2tlbnMgYW5kIGxldCBtZSBkZWNpZGUgd2hhdCB0byBrZWVwCjQuIFN1Z2dlc3Qgb3B0aW1pemF0aW9ucyAobW92ZSB0byBza2lsbHMsIHVzZSBob29rcywgcmVzdHJ1Y3R1cmUpIHJhdGhlciB0aGFuIGRlbGV0aW9uCjUuIERvIG5vdCBicmVhayBleGlzdGluZyB3b3JraW5nIGZ1bmN0aW9uYWxpdHk=" onclick="var t=atob(this.dataset.clip);navigator.clipboard.writeText(t);this.textContent='Copied!';var b=this;setTimeout(function(){b.textContent='Fix with Claude'},1500)" class="text-[10px] font-mono px-2 py-0.5 rounded border border-[rgba(70,69,84,0.3)] text-[#908fa0] cursor-pointer hover:text-[#e3e2e3] hover:border-[rgba(70,69,84,0.6)] transition-colors">Fix with Claude</button>
+                </div>
+              </div>
+              <p class="text-[11px] text-[#908fa0] mt-1 leading-relaxed">Anthropic throttles 5-hour limits during 5am-11am PT weekdays. Shift heavy work (refactors, test gen) to off-peak for 30%+ longer limits.</p>
+            </div>
+          </div><div class="p-4 bg-[#0d0e0f] rounded-r-lg flex items-start gap-4" style="border-left:3px solid #c0c1ff">
+            <div class="flex-1 min-w-0">
+              <div class="flex items-start justify-between gap-4">
+                <p class="text-[13px] font-semibold text-[#e3e2e3]">Disconnect unused MCP servers</p>
+                <div class="flex items-center gap-2 shrink-0">
+                  <span class="text-[10px] font-mono px-2 py-0.5 rounded" style="background:#c0c1ff18;color:#c0c1ff">~5-15% per cache break avoided</span>
+                  <button data-clip="Q0MgSHViYmVyIGZsYWdnZWQgdGhpcyBhYm91dCBteSBzZXR1cDoKCkRpc2Nvbm5lY3QgdW51c2VkIE1DUCBzZXJ2ZXJzCgpFYWNoIE1DUCB0b29sIHNjaGVtYSBjaGFuZ2UgaW52YWxpZGF0ZXMgdGhlIHByb21wdCBjYWNoZS4gT25seSBjb25uZWN0IHNlcnZlcnMgeW91IGFjdGl2ZWx5IG5lZWQuIERpc2Nvbm5lY3QgdGhlIHJlc3QgYmV0d2VlbiBzZXNzaW9ucy4KCkJlZm9yZSBtYWtpbmcgY2hhbmdlczoKMS4gUmVhZCB0aGUgcmVsZXZhbnQgZmlsZXMgZmlyc3QgdG8gdW5kZXJzdGFuZCB0aGUgY3VycmVudCBzZXR1cAoyLiBEbyBOT1QgcmVtb3ZlIG9yIG1vZGlmeSBhbnl0aGluZyB3aXRob3V0IGFza2luZyBtZSDigJQgc29tZSB0aGluZ3MgYXJlIHRoZXJlIGludGVudGlvbmFsbHkKMy4gU2hvdyBtZSB3aGF0IGVhY2ggc2VjdGlvbi9zZXR0aW5nIGNvc3RzIGluIHRva2VucyBhbmQgbGV0IG1lIGRlY2lkZSB3aGF0IHRvIGtlZXAKNC4gU3VnZ2VzdCBvcHRpbWl6YXRpb25zIChtb3ZlIHRvIHNraWxscywgdXNlIGhvb2tzLCByZXN0cnVjdHVyZSkgcmF0aGVyIHRoYW4gZGVsZXRpb24KNS4gRG8gbm90IGJyZWFrIGV4aXN0aW5nIHdvcmtpbmcgZnVuY3Rpb25hbGl0eQ==" onclick="var t=atob(this.dataset.clip);navigator.clipboard.writeText(t);this.textContent='Copied!';var b=this;setTimeout(function(){b.textContent='Fix with Claude'},1500)" class="text-[10px] font-mono px-2 py-0.5 rounded border border-[rgba(70,69,84,0.3)] text-[#908fa0] cursor-pointer hover:text-[#e3e2e3] hover:border-[rgba(70,69,84,0.6)] transition-colors">Fix with Claude</button>
+                </div>
+              </div>
+              <p class="text-[11px] text-[#908fa0] mt-1 leading-relaxed">Each MCP tool schema change invalidates the prompt cache. Only connect servers you actively need. Disconnect the rest between sessions.</p>
+            </div>
+          </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 7. COMMUNITY LEADERBOARD -->
+<section id="community-section" class="bg-[#1b1c1d] rounded-xl border border-[rgba(70,69,84,0.15)] overflow-hidden" style="display:none">
+  <div class="px-8 py-6 border-b border-[rgba(70,69,84,0.15)]">
+    <div class="flex items-center justify-between">
+      <h3 class="text-xl font-bold text-[#e3e2e3]">Community</h3>
+      <span id="community-count" class="text-[10px] font-mono text-[#908fa0]"></span>
+    </div>
+    <p id="community-percentile" class="text-sm text-[#908fa0] mt-1"></p>
+  </div>
+
+  <!-- Grade distribution bar -->
+  <div class="px-8 py-4 border-b border-[rgba(70,69,84,0.15)]">
+    <div class="flex items-center gap-3 mb-2">
+      <span class="text-[10px] font-mono text-[#908fa0] uppercase tracking-wider">Grade Distribution</span>
+    </div>
+    <div id="grade-dist-bar" class="flex h-6 rounded overflow-hidden"></div>
+    <div id="grade-dist-labels" class="flex mt-1"></div>
+  </div>
+
+  <!-- Leaderboard table -->
+  <div class="overflow-x-auto">
+    <table class="w-full">
+      <thead>
+        <tr class="border-b border-[rgba(70,69,84,0.15)]">
+          <th class="px-8 py-3 text-[10px] uppercase font-bold tracking-[0.05em] text-[#908fa0] text-left">#</th>
+          <th class="px-4 py-3 text-[10px] uppercase font-bold tracking-[0.05em] text-[#908fa0]">Grade</th>
+          <th class="px-4 py-3 text-[10px] uppercase font-bold tracking-[0.05em] text-[#908fa0] text-right">Ratio</th>
+          <th class="px-4 py-3 text-[10px] uppercase font-bold tracking-[0.05em] text-[#908fa0]">Cost</th>
+          <th class="px-4 py-3 text-[10px] uppercase font-bold tracking-[0.05em] text-[#908fa0] text-right">Opus %</th>
+          <th class="px-8 py-3 text-[10px] uppercase font-bold tracking-[0.05em] text-[#908fa0]">Country</th>
+        </tr>
+      </thead>
+      <tbody id="leaderboard-body"></tbody>
+    </table>
+  </div>
+</section>
+
+<!-- 8. PROJECTS TABLE -->
+
+<section class="bg-[#1b1c1d] rounded-xl border border-[rgba(70,69,84,0.15)] overflow-hidden">
+  <div class="px-8 py-6 border-b border-[rgba(70,69,84,0.15)] flex justify-between items-center">
+    <h3 class="text-xl font-bold text-[#e3e2e3]">Projects</h3>
+    <button id="toggle-paths" onclick="document.querySelectorAll('.proj-name,.proj-path').forEach(e=>e.style.filter=e.style.filter?'':'blur(8px)');this.textContent=this.textContent==='Hide names'?'Show names':'Hide names'" class="text-[10px] font-mono text-[#908fa0] px-3 py-1 border border-[rgba(70,69,84,0.3)] rounded cursor-pointer hover:text-[#e3e2e3]">Hide names</button>
+  </div>
+  <div class="overflow-x-auto">
+    <table class="w-full text-left" id="proj-tbl">
+      <thead class="bg-[#0d0e0f] border-b border-[rgba(70,69,84,0.15)]">
+        <tr>
+          <th class="px-8 py-4 text-[10px] uppercase font-bold tracking-[0.05em] text-[#908fa0]">Project</th>
+          <th class="px-8 py-4 text-[10px] uppercase font-bold tracking-[0.05em] text-[#908fa0]">Messages</th>
+          <th class="px-8 py-4 text-[10px] uppercase font-bold tracking-[0.05em] text-[#908fa0]">Sessions</th>
+          <th class="px-8 py-4 text-[10px] uppercase font-bold tracking-[0.05em] text-[#908fa0] text-right">Est. Cost</th>
+          <th class="px-8 py-4 text-[10px] uppercase font-bold tracking-[0.05em] text-[#908fa0] text-right">Output</th>
+          <th class="px-8 py-4 text-[10px] uppercase font-bold tracking-[0.05em] text-[#908fa0] text-right">Cache Read</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-[rgba(70,69,84,0.15)]"></tbody>
+    </table>
+  </div>
+</section>
+
+
+<!-- 8. ANOMALIES TABLE -->
+
+<section class="bg-[#1b1c1d] rounded-xl border border-[rgba(70,69,84,0.15)] overflow-hidden">
+  <div class="px-8 py-6 border-b border-[rgba(70,69,84,0.15)] flex justify-between items-center">
+    <h3 class="text-xl font-bold text-[#e3e2e3]">Detected Anomalies</h3>
+    <span class="material-symbols-outlined text-[#ffb4ab] animate-pulse">warning</span>
+  </div>
+  <div class="overflow-x-auto">
+    <table class="w-full text-left">
+      <thead class="bg-[#0d0e0f] border-b border-[rgba(70,69,84,0.15)]">
+        <tr>
+          <th class="px-8 py-4 text-[10px] uppercase font-bold tracking-[0.05em] text-[#908fa0]">Date</th>
+          <th class="px-8 py-4 text-[10px] uppercase font-bold tracking-[0.05em] text-[#908fa0]">Cost</th>
+          <th class="px-8 py-4 text-[10px] uppercase font-bold tracking-[0.05em] text-[#908fa0]">Deviation</th>
+          <th class="px-8 py-4 text-[10px] uppercase font-bold tracking-[0.05em] text-[#908fa0]">Cache Ratio</th>
+          <th class="px-8 py-4 text-[10px] uppercase font-bold tracking-[0.05em] text-[#908fa0] text-right">Severity</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-[rgba(70,69,84,0.15)]">
+        <tr class="tbl-row">
+            <td class="px-8 py-4 font-mono text-sm text-[#e3e2e3]">2026-03-27</td>
+            <td class="px-8 py-4 font-mono text-sm text-[#e3e2e3] font-bold">$177</td>
+            <td class="px-8 py-4 font-mono text-sm font-bold" style="color:#ffb4ab">+$144.16</td>
+            <td class="px-8 py-4 font-mono text-sm text-[#c7c4d7]">1,017:1</td>
+            <td class="px-8 py-4 text-right"><span class="px-2 py-0.5 rounded text-[10px] font-bold font-mono uppercase" style="background:rgba(255, 180, 171, 0.10);color:#ffb4ab">critical</span></td>
+          </tr><tr class="tbl-row">
+            <td class="px-8 py-4 font-mono text-sm text-[#e3e2e3]">2026-03-24</td>
+            <td class="px-8 py-4 font-mono text-sm text-[#e3e2e3] font-bold">$133</td>
+            <td class="px-8 py-4 font-mono text-sm font-bold" style="color:#ffb4ab">+$100.91</td>
+            <td class="px-8 py-4 font-mono text-sm text-[#c7c4d7]">446:1</td>
+            <td class="px-8 py-4 text-right"><span class="px-2 py-0.5 rounded text-[10px] font-bold font-mono uppercase" style="background:rgba(255, 182, 144, 0.10);color:#ffb690">warning</span></td>
+          </tr><tr class="tbl-row">
+            <td class="px-8 py-4 font-mono text-sm text-[#e3e2e3]">2026-03-25</td>
+            <td class="px-8 py-4 font-mono text-sm text-[#e3e2e3] font-bold">$132</td>
+            <td class="px-8 py-4 font-mono text-sm font-bold" style="color:#ffb4ab">+$99.29</td>
+            <td class="px-8 py-4 font-mono text-sm text-[#c7c4d7]">634:1</td>
+            <td class="px-8 py-4 text-right"><span class="px-2 py-0.5 rounded text-[10px] font-bold font-mono uppercase" style="background:rgba(255, 182, 144, 0.10);color:#ffb690">warning</span></td>
+          </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+
+<!-- 10. CLAUDE.md ANALYSIS — Global only, section breakdown -->
+<section class="bg-[#1b1c1d] rounded-xl border border-[rgba(70,69,84,0.15)] overflow-hidden">
+  <div class="px-8 py-6 border-b border-[rgba(70,69,84,0.15)] flex justify-between items-center">
+    <h3 class="text-xl font-bold text-[#e3e2e3]">CLAUDE.md Analysis</h3>
+    <div class="text-right">
+      <span class="font-mono text-sm text-[#e3e2e3]">332 lines</span>
+      <span class="text-[#908fa0] mx-2">&middot;</span>
+      <span class="font-mono text-sm text-[#e3e2e3]">~4,593 tokens</span>
+      <span class="text-[#908fa0] mx-2">&middot;</span>
+      <span class="font-mono text-sm text-[#e3e2e3]">17.9 KB</span>
+    </div>
+  </div>
+  <div class="px-8 py-4 bg-[#0d0e0f] border-b border-[rgba(70,69,84,0.15)] flex justify-between text-xs">
+    <span class="text-[#908fa0]">Per-message cost impact</span>
+    <span class="font-mono">
+      <span class="text-[#c0c1ff]">$0.0023</span> cached &middot;
+      <span class="text-[#ffb690]">$0.0230</span> uncached &middot;
+      <span class="text-[#ffb4ab]">$0.46</span>/day at 200 msgs
+    </span>
+  </div>
+  
+  <div class="overflow-x-auto">
+    <table class="w-full text-left">
+      <thead class="bg-[#0d0e0f] border-b border-[rgba(70,69,84,0.15)]">
+        <tr>
+          <th class="px-8 py-3 text-[10px] uppercase font-bold tracking-[0.05em] text-[#908fa0]">Section</th>
+          <th class="px-8 py-3 text-[10px] uppercase font-bold tracking-[0.05em] text-[#908fa0] text-right">Lines</th>
+          <th class="px-8 py-3 text-[10px] uppercase font-bold tracking-[0.05em] text-[#908fa0] text-right">Tokens</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-[rgba(70,69,84,0.15)]">
+        <tr class="tbl-row">
+          <td class="px-8 py-3 text-sm text-[#e3e2e3]">Header</td>
+          <td class="px-8 py-3 font-mono text-sm text-[#c7c4d7] text-right">1</td>
+          <td class="px-8 py-3 font-mono text-sm text-[#c7c4d7] text-right">9</td>
+        </tr><tr class="tbl-row">
+          <td class="px-8 py-3 text-sm text-[#e3e2e3]">Engram Persistent Memory — Protocol</td>
+          <td class="px-8 py-3 font-mono text-sm text-[#c7c4d7] text-right">66</td>
+          <td class="px-8 py-3 font-mono text-sm text-[#c7c4d7] text-right">806</td>
+        </tr><tr class="tbl-row">
+          <td class="px-8 py-3 text-sm text-[#e3e2e3]">Goal</td>
+          <td class="px-8 py-3 font-mono text-sm text-[#c7c4d7] text-right">3</td>
+          <td class="px-8 py-3 font-mono text-sm text-[#c7c4d7] text-right">12</td>
+        </tr><tr class="tbl-row">
+          <td class="px-8 py-3 text-sm text-[#e3e2e3]">Instructions</td>
+          <td class="px-8 py-3 font-mono text-sm text-[#c7c4d7] text-right">3</td>
+          <td class="px-8 py-3 font-mono text-sm text-[#c7c4d7] text-right">20</td>
+        </tr><tr class="tbl-row">
+          <td class="px-8 py-3 text-sm text-[#e3e2e3]">Discoveries</td>
+          <td class="px-8 py-3 font-mono text-sm text-[#c7c4d7] text-right">3</td>
+          <td class="px-8 py-3 font-mono text-sm text-[#c7c4d7] text-right">18</td>
+        </tr><tr class="tbl-row">
+          <td class="px-8 py-3 text-sm text-[#e3e2e3]">Accomplished</td>
+          <td class="px-8 py-3 font-mono text-sm text-[#c7c4d7] text-right">3</td>
+          <td class="px-8 py-3 font-mono text-sm text-[#c7c4d7] text-right">14</td>
+        </tr><tr class="tbl-row">
+          <td class="px-8 py-3 text-sm text-[#e3e2e3]">Next Steps</td>
+          <td class="px-8 py-3 font-mono text-sm text-[#c7c4d7] text-right">3</td>
+          <td class="px-8 py-3 font-mono text-sm text-[#c7c4d7] text-right">17</td>
+        </tr><tr class="tbl-row">
+          <td class="px-8 py-3 text-sm text-[#e3e2e3]">Relevant Files</td>
+          <td class="px-8 py-3 font-mono text-sm text-[#c7c4d7] text-right">16</td>
+          <td class="px-8 py-3 font-mono text-sm text-[#c7c4d7] text-right">167</td>
+        </tr><tr class="tbl-row">
+          <td class="px-8 py-3 text-sm text-[#e3e2e3]">Rules</td>
+          <td class="px-8 py-3 font-mono text-sm text-[#c7c4d7] text-right">11</td>
+          <td class="px-8 py-3 font-mono text-sm text-[#c7c4d7] text-right">164</td>
+        </tr><tr class="tbl-row">
+          <td class="px-8 py-3 text-sm text-[#e3e2e3]">Personality</td>
+          <td class="px-8 py-3 font-mono text-sm text-[#c7c4d7] text-right">4</td>
+          <td class="px-8 py-3 font-mono text-sm text-[#c7c4d7] text-right">62</td>
+        </tr><tr class="tbl-row">
+          <td class="px-8 py-3 text-sm text-[#e3e2e3]">Language</td>
+          <td class="px-8 py-3 font-mono text-sm text-[#c7c4d7] text-right">5</td>
+          <td class="px-8 py-3 font-mono text-sm text-[#c7c4d7] text-right">96</td>
+        </tr><tr class="tbl-row">
+          <td class="px-8 py-3 text-sm text-[#e3e2e3]">Tone</td>
+          <td class="px-8 py-3 font-mono text-sm text-[#c7c4d7] text-right">4</td>
+          <td class="px-8 py-3 font-mono text-sm text-[#c7c4d7] text-right">85</td>
+        </tr><tr class="tbl-row">
+          <td class="px-8 py-3 text-sm text-[#e3e2e3]">Philosophy</td>
+          <td class="px-8 py-3 font-mono text-sm text-[#c7c4d7] text-right">7</td>
+          <td class="px-8 py-3 font-mono text-sm text-[#c7c4d7] text-right">78</td>
+        </tr><tr class="tbl-row">
+          <td class="px-8 py-3 text-sm text-[#e3e2e3]">Expertise</td>
+          <td class="px-8 py-3 font-mono text-sm text-[#c7c4d7] text-right">4</td>
+          <td class="px-8 py-3 font-mono text-sm text-[#c7c4d7] text-right">55</td>
+        </tr><tr class="tbl-row">
+          <td class="px-8 py-3 text-sm text-[#e3e2e3]">Behavior</td>
+          <td class="px-8 py-3 font-mono text-sm text-[#c7c4d7] text-right">7</td>
+          <td class="px-8 py-3 font-mono text-sm text-[#c7c4d7] text-right">76</td>
+        </tr><tr class="tbl-row">
+          <td class="px-8 py-3 text-sm text-[#e3e2e3]">Skills (Auto-load based on context)</td>
+          <td class="px-8 py-3 font-mono text-sm text-[#c7c4d7] text-right">26</td>
+          <td class="px-8 py-3 font-mono text-sm text-[#c7c4d7] text-right">254</td>
+        </tr><tr class="tbl-row">
+          <td class="px-8 py-3 text-sm text-[#e3e2e3]">Agent Teams Orchestrator</td>
+          <td class="px-8 py-3 font-mono text-sm text-[#c7c4d7] text-right">53</td>
+          <td class="px-8 py-3 font-mono text-sm text-[#c7c4d7] text-right">620</td>
+        </tr><tr class="tbl-row">
+          <td class="px-8 py-3 text-sm text-[#e3e2e3]">SDD Workflow (Spec-Driven Development)</td>
+          <td class="px-8 py-3 font-mono text-sm text-[#c7c4d7] text-right">113</td>
+          <td class="px-8 py-3 font-mono text-sm text-[#c7c4d7] text-right">1,409</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  
+</section>
+
+<!-- 11. CACHE SAVINGS -->
+
+<section class="grid grid-cols-1 md:grid-cols-2 rounded-xl overflow-hidden border border-[rgba(70,69,84,0.15)]" style="gap:1px; background:rgba(70,69,84,0.15);">
+  <div class="p-8 bg-[#0d0e0f]">
+    <span class="text-[10px] uppercase tracking-[0.05em] text-[#908fa0] block mb-3">Saved by Cache</span>
+    <span class="font-mono text-3xl font-bold block text-[#c0c1ff]">~$9,210</span>
+    <span class="text-[10px] text-[#908fa0] mt-2 block">vs standard input pricing</span>
+  </div>
+  <div class="p-8 bg-[#0d0e0f]">
+    <span class="text-[10px] uppercase tracking-[0.05em] text-[#908fa0] block mb-3">Wasted on Breaks</span>
+    <span class="font-mono text-3xl font-bold block text-[#ffb690]">~$537</span>
+    <span class="text-[10px] text-[#908fa0] mt-2 block">from cache invalidation</span>
+  </div>
+</section>
+
+
+
+
+</main>
+
+<!-- 12. FOOTER -->
+<footer class="w-full py-12 border-t border-[rgba(70,69,84,0.05)]">
+  <div class="max-w-[1200px] mx-auto px-6 text-center">
+    <span class="text-[10px] tracking-widest uppercase text-[#908fa0]"><a href="https://github.com/azkhh/cchubber" target="_blank" style="text-decoration:none;color:inherit;">CC Hubber</a> &middot; shipped fast with <a href="https://moveros.dev" target="_blank" style="text-decoration:none;color:inherit;">Mover OS</a></span>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js"></script>
+<script>
+(function(){
+  var D=[{"date":"2026-02-12","cost":0.55541505,"cacheOutputRatio":29954,"isAnomaly":false},{"date":"2026-02-16","cost":0.5930772,"cacheOutputRatio":13307,"isAnomaly":false},{"date":"2026-02-17","cost":1.11566805,"cacheOutputRatio":8614,"isAnomaly":false},{"date":"2026-02-18","cost":5.41388935,"cacheOutputRatio":12419,"isAnomaly":false},{"date":"2026-02-19","cost":7.966550249999998,"cacheOutputRatio":8344,"isAnomaly":false},{"date":"2026-02-20","cost":0.8896951499999999,"cacheOutputRatio":1734,"isAnomaly":false},{"date":"2026-02-23","cost":2.2917234,"cacheOutputRatio":2122,"isAnomaly":false},{"date":"2026-02-24","cost":0.11386154999999999,"cacheOutputRatio":2344,"isAnomaly":false},{"date":"2026-02-26","cost":2.8799085,"cacheOutputRatio":4515,"isAnomaly":false},{"date":"2026-02-27","cost":1.0214933000000002,"cacheOutputRatio":125,"isAnomaly":false},{"date":"2026-03-02","cost":1.23601035,"cacheOutputRatio":164,"isAnomaly":false},{"date":"2026-03-03","cost":5.77144145,"cacheOutputRatio":334,"isAnomaly":false},{"date":"2026-03-04","cost":6.37662735,"cacheOutputRatio":634,"isAnomaly":false},{"date":"2026-03-05","cost":7.9567152,"cacheOutputRatio":235,"isAnomaly":false},{"date":"2026-03-06","cost":11.780565450000001,"cacheOutputRatio":323,"isAnomaly":false},{"date":"2026-03-07","cost":1.3441386,"cacheOutputRatio":176,"isAnomaly":false},{"date":"2026-03-09","cost":2.9688656499999997,"cacheOutputRatio":308,"isAnomaly":false},{"date":"2026-03-10","cost":0.09173774999999999,"cacheOutputRatio":0,"isAnomaly":false},{"date":"2026-03-11","cost":6.8348713,"cacheOutputRatio":440,"isAnomaly":false},{"date":"2026-03-12","cost":8.959873000000002,"cacheOutputRatio":555,"isAnomaly":false},{"date":"2026-03-13","cost":19.11174465,"cacheOutputRatio":384,"isAnomaly":false},{"date":"2026-03-14","cost":13.3522852,"cacheOutputRatio":187,"isAnomaly":false},{"date":"2026-03-15","cost":11.6425095,"cacheOutputRatio":467,"isAnomaly":false},{"date":"2026-03-17","cost":25.8051621,"cacheOutputRatio":326,"isAnomaly":false},{"date":"2026-03-18","cost":32.329911349999996,"cacheOutputRatio":549,"isAnomaly":false},{"date":"2026-03-19","cost":29.43898015,"cacheOutputRatio":689,"isAnomaly":false},{"date":"2026-03-20","cost":64.84107225,"cacheOutputRatio":396,"isAnomaly":false},{"date":"2026-03-21","cost":20.5977759,"cacheOutputRatio":715,"isAnomaly":false},{"date":"2026-03-22","cost":44.65094855,"cacheOutputRatio":506,"isAnomaly":false},{"date":"2026-03-23","cost":103.98855400000001,"cacheOutputRatio":522,"isAnomaly":false},{"date":"2026-03-24","cost":133.40271639999997,"cacheOutputRatio":446,"isAnomaly":true},{"date":"2026-03-25","cost":131.7804069,"cacheOutputRatio":634,"isAnomaly":true},{"date":"2026-03-26","cost":119.42313920000001,"cacheOutputRatio":467,"isAnomaly":false},{"date":"2026-03-27","cost":176.6517411,"cacheOutputRatio":1017,"isAnomaly":true},{"date":"2026-03-28","cost":115.91076444999999,"cacheOutputRatio":411,"isAnomaly":false},{"date":"2026-03-29","cost":41.949820349999996,"cacheOutputRatio":533,"isAnomaly":false},{"date":"2026-03-30","cost":33.976139849999996,"cacheOutputRatio":481,"isAnomaly":false},{"date":"2026-03-31","cost":52.00676705,"cacheOutputRatio":242,"isAnomaly":false},{"date":"2026-04-01","cost":62.10831859999999,"cacheOutputRatio":510,"isAnomaly":false},{"date":"2026-04-02","cost":9.5311427,"cacheOutputRatio":316,"isAnomaly":false},{"date":"2026-04-06","cost":13.399519699999999,"cacheOutputRatio":421,"isAnomaly":false}], P=[{"name":"Documents development sacdia","path":"/Users/abner/Documents/development/sacdia","messages":29658,"sessions":1313,"input":589341,"output":4114273,"cacheRead":2033052416,"cacheWrite":92371547},{"name":"strategy seguimiento documentacion","path":"/Users/abner/Documents/development/it/strategy/seguimiento/documentacion","messages":302,"sessions":25,"input":18570,"output":58338,"cacheRead":13648483,"cacheWrite":1072532},{"name":" ","path":"/","messages":3,"sessions":3,"input":9,"output":3,"cacheRead":45216,"cacheWrite":2118}];
+  var CARD={
+    grade:'A',gradeLabel:'Excellent',gradePerf:'Excellent Performance',
+    gradeColor:'#c0c1ff',
+    cost:'$1,332',days:'41',
+    ratio:'491:1',
+    diagnosis:'3 anomalies detected',
+    range:'All time'
+  };
+  var HR=[1,0,0,0,0,269,1290,468,277,302,1482,1159,1684,2593,3182,2574,2152,3010,2370,1243,1002,2975,1897,33];
+  var CACHE_R=0.50,OUT=25,INP=5,CW=6.25;
+
+  function fc(n){return n>=100?'$'+Math.round(n).toLocaleString():'$'+n.toFixed(2)}
+  function ft(n){return n>=1e9?(n/1e9).toFixed(1)+'B':n>=1e6?(n/1e6).toFixed(1)+'M':n>=1e3?(n/1e3).toFixed(1)+'K':n.toString()}
+
+  // Hour activity — vertical bar chart
+  if(HR){
+    var hg=document.getElementById('hour-grid');
+    if(hg){
+      var mx=Math.max.apply(null,HR);
+      var html='';
+      for(var i=0;i<24;i++){
+        var pct=mx>0?Math.max(HR[i]/mx*100,2):2;
+        var opac=pct>70?'0.85':pct>40?'0.6':pct>15?'0.35':'0.12';
+        html+='<div style="display:flex;flex-direction:column;align-items:center;gap:4px;" title="'+i+':00 — '+HR[i]+' messages">';
+        html+='<div style="width:3px;height:80px;background:rgba(70,69,84,0.2);border-radius:2px;position:relative;overflow:hidden;">';
+        html+='<div style="position:absolute;bottom:0;width:100%;height:'+pct+'%;background:rgba(192,193,255,'+opac+');border-radius:2px;"></div>';
+        html+='</div>';
+        html+='<span style="font-size:8px;font-family:JetBrains Mono,monospace;color:'+(i%6===0?'#908fa0':'#464554')+';">'+i+'</span>';
+        html+='</div>';
+      }
+      hg.innerHTML=html;
+    }
+  }
+
+  // Project table
+  var ptb=document.querySelector('#proj-tbl tbody');
+  if(ptb&&P.length>0){
+    P.sort(function(a,b){return(b.output/1e6*OUT+b.cacheRead/1e6*CACHE_R)-(a.output/1e6*OUT+a.cacheRead/1e6*CACHE_R)});
+    var h='';
+    for(var i=0;i<P.length;i++){
+      var p=P[i];
+      h+='<tr class="tbl-row">';
+      h+='<td class="px-8 py-4 text-sm font-semibold text-[#e3e2e3]"><span class="proj-name">'+p.name+'</span>';
+      if(p.path)h+='<br><span class="proj-path text-[10px] text-[#908fa0] font-mono">'+p.path+'</span>';
+      h+='</td>';
+      var projCost=p.output/1e6*OUT+p.cacheRead/1e6*CACHE_R+p.input/1e6*INP+p.cacheWrite/1e6*CW;
+      h+='<td class="px-8 py-4 font-mono text-sm text-[#c7c4d7]">'+p.messages.toLocaleString()+'</td>';
+      h+='<td class="px-8 py-4 font-mono text-sm text-[#c7c4d7]">'+p.sessions+'</td>';
+      h+='<td class="px-8 py-4 font-mono text-sm text-[#c7c4d7] text-right">'+fc(projCost)+'</td>';
+      h+='<td class="px-8 py-4 font-mono text-sm text-[#c7c4d7] text-right">'+ft(p.output)+'</td>';
+      h+='<td class="px-8 py-4 font-mono text-sm text-[#c7c4d7] text-right">'+ft(p.cacheRead)+'</td>';
+      h+='</tr>';
+    }
+    ptb.innerHTML=h;
+  }
+
+  // Chart
+  var W=900,H=200,PD={t:24,r:16,b:40,l:56};
+  var cW=W-PD.l-PD.r,cH=H-PD.t-PD.b;
+  var svg=document.getElementById('cost-chart-svg');
+  var tt=document.getElementById('tt'),ttd=document.getElementById('tt-d'),ttc=document.getElementById('tt-c'),tta=document.getElementById('tt-a');
+
+  function filt(r){return r==='all'?D:D.slice(-parseInt(r,10))}
+
+  function chart(d){
+    if(!svg)return;
+    if(!d.length){svg.innerHTML='<text x="450" y="100" text-anchor="middle" fill="#908fa0" font-size="13" font-family="Inter,sans-serif">No data</text>';return}
+    var mx=Math.max.apply(null,d.map(function(x){return x.cost}))*1.1;if(mx<0.01)mx=1;
+    var s='';
+    // grid lines
+    for(var i=0;i<=3;i++){
+      var y=PD.t+(cH/3)*i,v=mx-(mx/3)*i;
+      s+='<line x1="'+PD.l+'" y1="'+y+'" x2="'+(W-PD.r)+'" y2="'+y+'" stroke="rgba(70,69,84,0.15)" stroke-width="1"/>';
+      s+='<text x="'+(PD.l-10)+'" y="'+(y+4)+'" text-anchor="end" fill="#908fa0" font-size="9" font-family="JetBrains Mono,monospace">$'+(v<1?v.toFixed(2):Math.round(v))+'</text>';
+    }
+    // area + line
+    var step=d.length>1?cW/(d.length-1):0;
+    var pts=d.map(function(x,j){return{x:PD.l+(d.length===1?cW/2:j*step),y:PD.t+cH-(x.cost/mx)*cH}});
+    var lp='M '+pts[0].x+' '+pts[0].y;
+    var ap='M '+pts[0].x+' '+(PD.t+cH)+' L '+pts[0].x+' '+pts[0].y;
+    for(var j=1;j<pts.length;j++){var cx=(pts[j-1].x+pts[j].x)/2;lp+=' C '+cx+' '+pts[j-1].y+' '+cx+' '+pts[j].y+' '+pts[j].x+' '+pts[j].y;ap+=' C '+cx+' '+pts[j-1].y+' '+cx+' '+pts[j].y+' '+pts[j].x+' '+pts[j].y}
+    ap+=' L '+pts[pts.length-1].x+' '+(PD.t+cH)+' Z';
+    // Stitch gradient: primary at 30% to transparent
+    s+='<defs><linearGradient id="ag" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#c0c1ff" stop-opacity="0.3"/><stop offset="100%" stop-color="#c0c1ff" stop-opacity="0"/></linearGradient></defs>';
+    s+='<path d="'+ap+'" fill="url(#ag)"/>';
+    s+='<path d="'+lp+'" fill="none" stroke="#c0c1ff" stroke-width="2" stroke-linecap="round"/>';
+    // x labels
+    var every=Math.max(1,Math.floor(d.length/8));
+    d.forEach(function(x,j){
+      var px=PD.l+(d.length===1?cW/2:j*step);
+      if(j%every===0||j===d.length-1)s+='<text x="'+px+'" y="'+(H-6)+'" text-anchor="middle" fill="#908fa0" font-size="9" font-family="JetBrains Mono,monospace">'+x.date.slice(5)+'</text>';
+    });
+    // anomaly dots
+    d.forEach(function(x,j){
+      var px=PD.l+(d.length===1?cW/2:j*step),py=PD.t+cH-(x.cost/mx)*cH;
+      if(x.isAnomaly)s+='<circle cx="'+px+'" cy="'+py+'" r="4" fill="#ffb4ab" stroke="#121315" stroke-width="2"/>';
+    });
+    // hover targets
+    d.forEach(function(x,j){
+      var px=PD.l+(d.length===1?cW/2:j*step),py=PD.t+cH-(x.cost/mx)*cH;
+      s+='<circle cx="'+px+'" cy="'+py+'" r="14" fill="transparent" data-d="'+x.date+'" data-c="'+x.cost+'" data-a="'+(x.isAnomaly?1:0)+'" class="hov" style="cursor:crosshair"/>';
+    });
+    svg.innerHTML=s;
+    svg.querySelectorAll('.hov').forEach(function(el){
+      el.addEventListener('mouseenter',function(e){
+        ttd.textContent=e.target.dataset.d;
+        ttc.textContent=fc(parseFloat(e.target.dataset.c));
+        tta.textContent=e.target.dataset.a==='1'?'ANOMALY':'';
+        tta.style.display=e.target.dataset.a==='1'?'block':'none';
+        tt.classList.add('on');
+      });
+      el.addEventListener('mousemove',function(e){tt.style.left=(e.clientX+14)+'px';tt.style.top=(e.clientY-40)+'px'});
+      el.addEventListener('mouseleave',function(){tt.classList.remove('on')});
+    });
+  }
+
+  var RL={7:'Last 7 days',30:'Last 30 days',90:'Last 90 days',all:'All time'};
+
+  function setR(r){
+    var f=filt(r);chart(f);
+    var ci=document.getElementById('chart-info');
+    if(ci&&f.length){var t=f.reduce(function(s,x){return s+x.cost},0),a=f.filter(function(x){return x.cost>0}).length;ci.textContent=a+' days · '+fc(t)}
+    var rl=document.getElementById('range-lbl');if(rl)rl.textContent=RL[r]||'All time';
+    CARD.range=RL[r]||'All time';
+    var cr=document.getElementById('card-range');if(cr)cr.textContent=CARD.range;
+    if(f.length){
+      var t=f.reduce(function(s,x){return s+x.cost},0),a=f.filter(function(x){return x.cost>0}).length;
+      CARD.cost=fc(t);CARD.days=a.toString();
+      // Update HTML card
+      var hc=document.getElementById('h-cost');if(hc)hc.textContent=fc(t);
+      var hd=document.getElementById('h-days');if(hd)hd.textContent=a;
+      // Update overview
+      var ot=document.getElementById('ov-total'),oa=document.getElementById('ov-avg');
+      if(ot)ot.textContent=fc(t);if(oa&&a>0)oa.textContent=fc(t/a)+' avg/day';
+    }
+    // Update filter button states - Stitch style
+    document.querySelectorAll('.cfilt').forEach(function(b){
+      if(b.dataset.r===r){
+        b.style.background='#c0c1ff';b.style.color='#1000a9';
+      } else {
+        b.style.background='transparent';b.style.color='#908fa0';
+      }
+    });
+  }
+
+  document.querySelectorAll('.cfilt').forEach(function(b){b.addEventListener('click',function(){setR(b.dataset.r)})});
+
+  // Export helpers
+  var toast=document.getElementById('toast');
+  function showToast(m){if(!toast)return;toast.textContent=m;toast.classList.add('on');setTimeout(function(){toast.classList.remove('on')},2000)}
+
+  // ─── CANVAS SHARE CARD ─────────────────────────────
+  // Renders entirely on canvas — same output for display AND video export
+  var cardCanvas=document.getElementById('share-card');
+  var cardW=1480,cardH=580,cardR=44; // 2x resolution for retina
+  cardCanvas.width=cardW;cardCanvas.height=cardH;
+  var cardCtx=cardCanvas.getContext('2d');
+
+  function roundRect(ctx,x,y,w,h,r){
+    ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+    ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);
+    ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();
+  }
+
+  function drawCard(ctx,w,h,shimmerT){
+    // Background gradient
+    var bg=ctx.createLinearGradient(0,0,w,h);
+    bg.addColorStop(0,'#1a1b2e');bg.addColorStop(0.4,'#0f1018');bg.addColorStop(0.7,'#191a2d');bg.addColorStop(1,'#12131f');
+    roundRect(ctx,0,0,w,h,cardR);ctx.save();ctx.clip();
+    ctx.fillStyle=bg;ctx.fillRect(0,0,w,h);
+
+    var pad=80,padT=72;
+
+    // Grade badge
+    var bx=pad,by=padT,bs=112;
+    roundRect(ctx,bx,by,bs,bs,24);
+    ctx.fillStyle=CARD.gradeColor;ctx.fill();
+    ctx.font='800 56px "JetBrains Mono",monospace';ctx.fillStyle='#0f1018';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(CARD.grade,bx+bs/2,by+bs/2);
+
+    // Grade label + performance text
+    ctx.textAlign='left';ctx.textBaseline='top';
+    ctx.font='700 18px "JetBrains Mono",monospace';ctx.fillStyle=CARD.gradeColor;
+    ctx.fillText(CARD.gradeLabel.toUpperCase(),bx+bs+32,by+12);
+    ctx.font='700 36px "Inter",sans-serif';ctx.fillStyle='#e3e2e3';
+    ctx.fillText(CARD.gradePerf,bx+bs+32,by+40);
+
+    // Top right: Claude Code + range
+    ctx.textAlign='right';
+    ctx.font='700 20px "JetBrains Mono",monospace';ctx.fillStyle='#908fa0';
+    ctx.fillText('CLAUDE CODE',w-pad,padT+16);
+    ctx.font='400 16px "JetBrains Mono",monospace';ctx.fillStyle='#464554';
+    ctx.fillText(CARD.range,w-pad,padT+44);
+
+    // Stats row
+    var statsY=h*0.45;
+    var labels=['TOTAL SPEND','ACTIVE DAYS','CACHE RATIO'];
+    var values=[CARD.cost,CARD.days,CARD.ratio];
+    var positions=[pad,w*0.38,w*0.7];
+    var aligns=['left','center','right'];
+    var xEnds=[null,null,w-pad];
+
+    for(var i=0;i<3;i++){
+      ctx.textAlign=i===2?'right':i===1?'center':'left';
+      var sx=i===2?w-pad:i===1?w/2:pad;
+      ctx.font='400 16px "Inter",sans-serif';ctx.fillStyle='#908fa0';
+      ctx.fillText(labels[i],sx,statsY);
+      ctx.font='700 64px "JetBrains Mono",monospace';ctx.fillStyle='#e3e2e3';
+      ctx.fillText(values[i],sx,statsY+28);
+    }
+
+    // Bottom: diagnosis + branding
+    var botY=h-padT;
+    ctx.textAlign='left';
+    ctx.font='400 20px "Inter",sans-serif';ctx.fillStyle='#908fa0';
+    ctx.fillText(CARD.diagnosis,pad,botY);
+
+    // Branding — measure text to space properly
+    ctx.textAlign='right';
+    ctx.font='500 18px "JetBrains Mono",monospace';
+    var moverW=ctx.measureText('Mover OS').width;
+    ctx.font='400 18px "Inter",sans-serif';
+    var shippedW=ctx.measureText(' shipped fast with ').width;
+    ctx.font='500 18px "JetBrains Mono",monospace';
+    var hubberW=ctx.measureText('CC Hubber').width;
+
+    var bx=w-pad;
+    ctx.font='500 18px "JetBrains Mono",monospace';ctx.fillStyle='#c0c1ff';
+    ctx.fillText('Mover OS',bx,botY);
+    bx-=moverW;
+    ctx.font='400 18px "Inter",sans-serif';ctx.fillStyle='#908fa0';
+    ctx.fillText(' shipped fast with ',bx,botY);
+    bx-=shippedW;
+    ctx.font='500 18px "JetBrains Mono",monospace';ctx.fillStyle='#c0c1ff';
+    ctx.fillText('CC Hubber',bx,botY);
+
+    // Subtle shimmer sweep
+    if(shimmerT!==undefined){
+      var sx=-w*0.4+(shimmerT%1)*w*1.8;
+      var sg=ctx.createLinearGradient(sx,0,sx+w*0.3,h);
+      sg.addColorStop(0,'rgba(255,255,255,0)');
+      sg.addColorStop(0.45,'rgba(192,193,255,0.02)');
+      sg.addColorStop(0.5,'rgba(255,255,255,0.045)');
+      sg.addColorStop(0.55,'rgba(212,187,255,0.02)');
+      sg.addColorStop(1,'rgba(255,255,255,0)');
+      ctx.fillStyle=sg;ctx.fillRect(0,0,w,h);
+    }
+
+    ctx.restore();
+  }
+
+  // Animate the card on the page
+  var cardAnimStart=null;
+  function animateCard(ts){
+    if(!cardAnimStart)cardAnimStart=ts;
+    var t=((ts-cardAnimStart)%6000)/6000;
+    drawCard(cardCtx,cardW,cardH,t);
+    requestAnimationFrame(animateCard);
+  }
+  document.fonts.ready.then(function(){requestAnimationFrame(animateCard)});
+
+  // ─── VIDEO EXPORT (records the same canvas) ──────
+  // Video export — captures HTML card with html-to-image, animates on canvas at 1440p
+  var gb=document.getElementById('btn-gif');
+  if(gb)gb.addEventListener('click',function(){
+    gb.textContent='Capturing...';gb.disabled=true;
+    var htmlCard=document.getElementById('share-card-html');
+    if(!htmlCard||typeof htmlToImage==='undefined'){gb.textContent='Share';gb.disabled=false;showToast('Library not loaded');return}
+
+    // Pause animation + hide CSS shimmer/noise for clean capture
+    htmlCard.style.animation='none';htmlCard.style.transform='none';
+    htmlCard.classList.add('no-shimmer');
+
+    document.fonts.ready.then(function(){
+      return htmlToImage.toPng(htmlCard,{quality:1,pixelRatio:3}).then(function(dataUrl){
+        htmlCard.style.animation='';htmlCard.style.transform='';
+        htmlCard.classList.remove('no-shimmer');
+        gb.textContent='Recording...';
+
+        var img=new Image();
+        img.onload=function(){
+          // 2560x1440 canvas
+          var VW=2560,VH=1440;
+          var vidCanvas=document.createElement('canvas');vidCanvas.width=VW;vidCanvas.height=VH;
+          var vctx=vidCanvas.getContext('2d');
+          vctx.imageSmoothingEnabled=true;vctx.imageSmoothingQuality='high';
+
+          // Scale card to fill ~90% of frame width for maximum impact
+          var scale=Math.min((VW*0.88)/img.width,(VH*0.82)/img.height);
+          var cw=Math.round(img.width*scale),ch=Math.round(img.height*scale);
+          var r=22*3*scale; // border radius
+
+          var stream=vidCanvas.captureStream(30);
+          var chunks=[];
+          // Prefer MP4 (Chrome 124+, works on X/Twitter), fallback WebM
+          var mime=MediaRecorder.isTypeSupported('video/mp4;codecs=avc1')?'video/mp4;codecs=avc1'
+            :MediaRecorder.isTypeSupported('video/mp4')?'video/mp4':'video/webm';
+          var ext=mime.startsWith('video/mp4')?'mp4':'webm';
+          var recorder=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:30000000});
+          recorder.ondataavailable=function(e){if(e.data.size>0)chunks.push(e.data)};
+          recorder.onstop=function(){
+            var blob=new Blob(chunks,{type:mime.split(';')[0]});
+            var a=document.createElement('a');a.download='cchubber-card.'+ext;
+            a.href=URL.createObjectURL(blob);a.click();
+            gb.innerHTML='<span class="material-symbols-outlined text-sm">share</span> Share';
+            gb.disabled=false;showToast('Video saved ('+ext.toUpperCase()+')');
+          };
+
+          // Pre-generate noise texture to fight gradient banding
+          var noiseC=document.createElement('canvas');noiseC.width=256;noiseC.height=256;
+          var nctx=noiseC.getContext('2d');
+          var ndata=nctx.createImageData(256,256);
+          for(var ni=0;ni<ndata.data.length;ni+=4){var v=Math.random()*255;ndata.data[ni]=v;ndata.data[ni+1]=v;ndata.data[ni+2]=v;ndata.data[ni+3]=8;}
+          nctx.putImageData(ndata,0,0);
+
+          var duration=6000,startTime=null;
+          recorder.start(100);
+
+          function frame(ts){
+            if(!startTime)startTime=ts;
+            var elapsed=ts-startTime;
+            if(elapsed>=duration){setTimeout(function(){recorder.stop()},300);return}
+
+            var t=elapsed/duration;
+            // Gentle breathe + float — matches the natural feel of the CSS animation
+            // ease-in-out via cosine (same curve as CSS ease-in-out)
+            // Gentle lateral drift — subtle, no shake
+            var drift=Math.sin(t*Math.PI*2)*5;
+
+            vctx.fillStyle='#000';vctx.fillRect(0,0,VW,VH);
+            vctx.save();
+            vctx.translate((VW-cw)/2+drift,(VH-ch)/2);
+
+            // Draw the HTML-captured card image (browser-quality)
+            vctx.drawImage(img,0,0,cw,ch);
+
+            // Clip shimmer + noise to rounded card shape (prevents corner bleed)
+            var cr=22*3*scale; // 22px radius * 3 pixelRatio * video scale
+            vctx.beginPath();
+            vctx.moveTo(cr,0);vctx.lineTo(cw-cr,0);vctx.quadraticCurveTo(cw,0,cw,cr);
+            vctx.lineTo(cw,ch-cr);vctx.quadraticCurveTo(cw,ch,cw-cr,ch);vctx.lineTo(cr,ch);
+            vctx.quadraticCurveTo(0,ch,0,ch-cr);vctx.lineTo(0,cr);vctx.quadraticCurveTo(0,0,cr,0);
+            vctx.closePath();vctx.clip();
+
+            // Shimmer sweep
+            var shimProgress=(t*2)%1;
+            var sx=-cw*0.5+shimProgress*cw*2;
+            var g=vctx.createLinearGradient(sx,0,sx+cw*0.4,ch);
+            g.addColorStop(0,'rgba(255,255,255,0)');
+            g.addColorStop(0.3,'rgba(192,193,255,0.04)');
+            g.addColorStop(0.45,'rgba(212,187,255,0.06)');
+            g.addColorStop(0.55,'rgba(192,193,255,0.06)');
+            g.addColorStop(0.7,'rgba(212,187,255,0.04)');
+            g.addColorStop(1,'rgba(255,255,255,0)');
+            vctx.fillStyle=g;vctx.fillRect(0,0,cw,ch);
+
+            // Noise dither
+            var pat=vctx.createPattern(noiseC,'repeat');
+            vctx.fillStyle=pat;vctx.globalAlpha=0.4;vctx.fillRect(0,0,cw,ch);vctx.globalAlpha=1;
+
+            vctx.restore();
+            requestAnimationFrame(frame);
+          }
+
+          requestAnimationFrame(frame);
+        };
+        img.src=dataUrl;
+      });
+    }).catch(function(e){
+      htmlCard.style.animation='';htmlCard.style.transform='';htmlCard.classList.remove('no-shimmer');
+      gb.innerHTML='<span class="material-symbols-outlined text-sm">share</span> Share';
+      gb.disabled=false;showToast('Failed: '+e.message);
+    });
+  });
+
+  setR('all');
+
+  // Community leaderboard — stats fetched at generation time, embedded as JSON
+  var MY_RATIO = 491;
+  var MY_GRADE = 'A';
+  var gradeColors = {A:'#10b981',B:'#22d3ee',C:'#f59e0b',D:'#f97316',F:'#ef4444'};
+  var stats = null;
+
+  (function(stats){
+    if(!stats || !stats.totalReports) return;
+      var sec = document.getElementById('community-section');
+      if(!sec || !stats.totalReports) return;
+      sec.style.display = '';
+
+      // Re-grade function — applies current grading logic to stored ratios
+      // so old telemetry entries get accurate grades, not the inflated v0.4 grades
+      function regrade(ratio){
+        // Simplified: ratio signal dominates (40%), assume stable trend (70), good hit rate (85), no breaks (100)
+        var rs;
+        if(ratio<=200)rs=100;else if(ratio<=350)rs=85;else if(ratio<=500)rs=70;
+        else if(ratio<=650)rs=55;else if(ratio<=800)rs=42;else if(ratio<=1000)rs=30;
+        else if(ratio<=1500)rs=18;else if(ratio<=2000)rs=10;else rs=3;
+        var composite=Math.round(85*0.15+rs*0.40+70*0.30+100*0.15);
+        if(rs<=5)composite=Math.min(composite,38);
+        if(composite>=75)return'A';if(composite>=60)return'B';if(composite>=45)return'C';if(composite>=30)return'D';return'F';
+      }
+
+      // Count + geographic spread (don't show raw user count — looks small early on)
+      var countries = stats.countries ? Object.keys(stats.countries) : [];
+      document.getElementById('community-count').textContent = countries.length + ' countries';
+
+      // Calculate percentile from recent entries
+      var recent = stats.recent || [];
+      var ratios = recent.map(function(r){return r.ratio||9999}).sort(function(a,b){return a-b});
+      var betterThan = ratios.filter(function(r){return r > MY_RATIO}).length;
+      var pctile = ratios.length > 0 ? Math.round(betterThan / ratios.length * 100) : 0;
+      document.getElementById('community-percentile').innerHTML =
+        'Your cache ratio of <strong style="color:#e3e2e3">' + MY_RATIO + ':1</strong> is better than <strong style="color:#c0c1ff">' + pctile + '%</strong> of CC Hubber users';
+
+      // Grade distribution — use stored grade for v0.5+ entries, regrade older ones
+      function getGrade(entry){
+        var v = entry.v || entry.version || '0.3.3';
+        var parts = v.split('.'); var isNew = (parseInt(parts[0]||0)>0) || (parseInt(parts[1]||0)>=5);
+        return (isNew && entry.grade) ? entry.grade : (entry.ratio ? regrade(entry.ratio) : (entry.grade || 'C'));
+      }
+      var regraded = {A:0,B:0,C:0,D:0,F:0};
+      recent.forEach(function(r){regraded[getGrade(r)]++});
+      var gTotal = Object.values(regraded).reduce(function(s,v){return s+v},0);
+      var bar = document.getElementById('grade-dist-bar');
+      var labels = document.getElementById('grade-dist-labels');
+      ['A','B','C','D','F'].forEach(function(g){
+        var count = regraded[g] || 0;
+        var pct = gTotal > 0 ? (count/gTotal*100) : 0;
+        if(pct > 0){
+          var seg = document.createElement('div');
+          seg.style.cssText = 'width:'+pct+'%;background:'+gradeColors[g]+';display:flex;align-items:center;justify-content:center;';
+          seg.innerHTML = '<span style="font-size:10px;font-weight:700;color:#0d0e0f">' + (pct>8?g:'') + '</span>';
+          bar.appendChild(seg);
+          var lbl = document.createElement('span');
+          lbl.style.cssText = 'width:'+pct+'%;text-align:center;font-size:10px;color:#908fa0;font-family:monospace;';
+          lbl.textContent = count;
+          labels.appendChild(lbl);
+        }
+      });
+
+      // Leaderboard table — re-graded, with user's position injected
+      var tbody = document.getElementById('leaderboard-body');
+      var sorted = recent.filter(function(r){return r.ratio}).sort(function(a,b){return (a.ratio||9999)-(b.ratio||9999)});
+
+      // Find where the user would rank
+      var myRank = sorted.findIndex(function(e){return (e.ratio||0) >= MY_RATIO});
+      if(myRank < 0) myRank = sorted.length;
+
+      // Show top 10 + user's position (if not in top 10)
+      var showIndices = [];
+      for(var si=0;si<Math.min(10,sorted.length);si++) showIndices.push(si);
+      var userInTop = myRank < 10;
+      if(!userInTop && myRank < sorted.length){
+        showIndices.push(-1); // separator
+        if(myRank > 0) showIndices.push(myRank-1);
+        showIndices.push(myRank);
+        if(myRank+1 < sorted.length) showIndices.push(myRank+1);
+      }
+
+      var html = '';
+      for(var si2=0;si2<showIndices.length;si2++){
+        var idx = showIndices[si2];
+        if(idx === -1){
+          html += '<tr><td colspan="6" class="px-8 py-1 text-center text-[10px] text-[#908fa0]">···</td></tr>';
+          continue;
+        }
+        var entry = sorted[idx];
+        if(!entry) continue;
+        var g = getGrade(entry);
+        var isMe = idx === myRank;
+        var rowStyle = isMe ? 'background:rgba(192,193,255,0.08);border-left:3px solid #c0c1ff;' : '';
+        html += '<tr style="border-bottom:1px solid rgba(70,69,84,0.1);'+rowStyle+'">';
+        html += '<td class="px-8 py-3 text-sm font-mono '+(isMe?'text-[#c0c1ff] font-bold':'text-[#908fa0]')+'">#'+(idx+1)+(isMe?' ← you':'')+'</td>';
+        html += '<td class="px-4 py-3 text-sm font-bold text-center" style="color:'+gradeColors[g]+'">'+g+'</td>';
+        html += '<td class="px-4 py-3 text-sm font-mono text-[#c7c4d7] text-right">'+(entry.ratio||'?')+':1</td>';
+        html += '<td class="px-4 py-3 text-sm font-mono text-[#908fa0]">'+(entry.cost||'?')+'</td>';
+        html += '<td class="px-4 py-3 text-sm font-mono text-[#c7c4d7] text-right">'+(entry.opus||'?')+'%</td>';
+        html += '<td class="px-8 py-3 text-sm text-[#908fa0]">'+(entry.country||'?')+'</td>';
+        html += '</tr>';
+      }
+      tbody.innerHTML = html;
+
+      // Update percentile text with rank
+      document.getElementById('community-percentile').innerHTML =
+        'You're <strong style="color:#c0c1ff">#'+(myRank+1)+' of '+sorted.length+'</strong> users by cache efficiency. Better than <strong style="color:#c0c1ff">'+pctile+'%</strong>';
+  })(stats);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,32 @@
+# Especialidad — prevencion del acoso i
+
+**Fuente**: `/Users/abner/Downloads/S3/honors_pdf/prevencion_del_acoso_i.pdf`
+**Texto extraído**: `/Users/abner/Documents/development/sacdia/docs/working/honors-especialidades/raw/prevencion-del-acoso-i.txt`
+**Nivel detectado**: 1
+**Cantidad de requisitos detectados**: 17
+
+> Nota: extracción automática preliminar desde la capa de texto del PDF. Requiere revisión humana antes de cualquier carga a base de datos.
+
+## Requisitos detectados
+
+1. Dar una definición básica del acoso. Diferenciar claramente entre el acoso y el conflicto. Acoso Conflicto
+2. Describir brevemente los siguientes tipos de acoso: a. El acoso verbal b. El acoso físico c. El acoso prejudicial Crecimiento espiritual, actividades misioneras y herencia
+3. Describir brevemente las diferencias entre la autoaceptación, la autoestima y la identidad personal. Autoaceptación Autoestima Identidad personal Compartir cómo cree que una cantidad saludable de estas cualidades podría proteger a alguien de experimentar una situación de acoso.
+4. Memorizar y explicar cuatro reglas básicas de la prevención del acoso. a. No intimidaremos ni acosaremos a otros b. Trataremos de ayudar a los estudiantes que son acosados c. Trataremos de incluir a los estudiantes que son excluidos d. Si sabemos que alguien está siendo acosado, se lo diremos a un adulto en la escuela/iglesia y a un adulto en casa Crecimiento espiritual, actividades misioneras y herencia
+5. ¿Cuáles son algunas de las señales que se deben buscar y que podrían determinar si una persona sufre alguna forma de acoso?
+6. ¿Cuáles son los diferentes papeles que hacen las personas cuando son parte de una situación de acoso (conocido como el Círculo del Acoso)? a. b. c. d. e. f. g. ¿Qué papeles ha presenciado en situaciones en las que ha visto o sido involucrado?
+7. ¿Cuáles son las posibles consecuencias a largo plazo para aquellos que siguen siendo acosadores?
+8. Describir brevemente cómo los siguientes ejemplos bíblicos demuestran el acoso y cómo se relaciona con nuestras responsabilidades como seguidores de Cristo: a. David y sus hermanos – 1 Samuel 17:28 y 29 Crecimiento espiritual, actividades misioneras y herencia b. José y sus hermanos – Génesis 37 c. María y Judas – Juan 12:1-7
+9. Invitar a un orador o un profesional capacitado para que haga una presentación acerca de los siguientes impactos del acoso:  Cómo una persona puede convertirse en una víctima del acoso  Los efectos a corto y largo plazo del acoso  Derribar a alguien nunca le ayudará a llegar a la cima  Cómo identificar algunos de los rasgos comunes de un acosador  Dónde obtener ayuda si está siendo acosado
+10. Discutir un momento en el que cada uno de los siguientes puede haber ocurrido. ¿Qué es una cosa que podría haber cambiado la situación o haber evitado la situación de acoso? a. Una persona fue acosada porque no siguió los estilos o las modas de otros b. Una persona estuvo de acuerdo con el acoso para sentirse aceptada por otros c. Las palabras de una persona fueron interpretadas por otra como acoso Crecimiento espiritual, actividades misioneras y herencia
+11. Discutir desde la perspectiva de un cristiano qué opciones están disponibles si usted se convierte en una víctima de acoso verbal, físico o perjudicial. Describir brevemente algunas acciones que puede tomar para mantenerse a salvo. (Recuerde las reglas de la Prevención del Acoso)
+12. Crear una lista de 3-5 cualidades que caracterizan a un buen amigo. Discutir con un grupo cuáles creen que son los mejores aspectos. Evaluar personalmente cuáles aspectos de la amistad usted hace mejor.
+13. Describir brevemente cómo la práctica de un estilo de vida cristiano puede afectar su enfoque al acoso.
+14. Crear un cartel pequeño que ilustre la importancia de la prevención del acoso e incluir una acción que comience con «Yo puedo» o «Yo haré». Publicar esto en un área de alto tráfico. Crecimiento espiritual, actividades misioneras y herencia
+15. Hacer el papel o discutir situaciones en las que podría usar por lo menos 2 de las siguientes estrategias para confrontar el acoso:  Buscar y rodearse de amigos verdaderos  Mantener el autocontrol  Ignorar al acosador  Evitar al acosador  No mostrar ninguna reacción al acoso  Sentirse seguro de sí mismo  Buscar a un adulto que le ayude a cambiar la situación de acoso Crecimiento espiritual, actividades misioneras y herencia
+16. Como grupo, crear estrategias de cómo seguir con éxito las reglas de la prevención del acoso en cada una de las siguientes situaciones:  Si alguien es la víctima y se siente acosado, sin embargo, tiene miedo de decirle a los adultos porque no le escucharán.  Si alguien es el espectador que ve que su amigo está siendo acosado, pero el amigo no puede o no está dispuesto de solo informar a un adulto.  Si alguien es el espectador que ve alguien más siendo acosado, pero el acosado y la víctima son sus buenos amigos.
+17. Realizar una de las siguientes actividades de prevención del acoso individualmente o como grupo: a. Crear una estrategia que describa cuatro formas en que puede ayudar a ser parte de la solución al acoso verbal, físico o perjudicial. Resumir brevemente su enfoque y estar listo para compartir con el grupo. b. Con adultos, desarrollar una política para su grupo diseñado para tratar con el acoso. Proponer ideas acerca de las pautas que deben incluirse. Comprometerse a apoyar esta política dentro de su esfera de influencia (hogar, iglesia, club, grupo de escuela sabática, etc.).
+
+## Observaciones
+
+- Este archivo fue preparado para análisis posterior, no para carga directa a BD.

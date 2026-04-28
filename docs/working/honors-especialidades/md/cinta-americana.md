@@ -1,0 +1,25 @@
+# Especialidad — cinta americana
+
+**Fuente**: `/Users/abner/Downloads/S3/honors_pdf/cinta_americana.pdf`
+**Texto extraído**: `/Users/abner/Documents/development/sacdia/docs/working/honors-especialidades/raw/cinta-americana.txt`
+**Nivel detectado**: 1
+**Cantidad de requisitos detectados**: 10
+
+> Nota: extracción automática preliminar desde la capa de texto del PDF. Requiere revisión humana antes de cualquier carga a base de datos.
+
+## Requisitos detectados
+
+1. Hacer una lista o explicar los componentes de la cinta americana.
+2. Dar un informe de 3-5 minutos o crear una cronología acerca de la historia y el desarrollo de la cinta americana.
+3. Nombrar tres usos de la cinta americana. 1. 2. 3.
+4. Hacer una lista de por lo menos tres maneras en que la cinta americana se usa en un ambiente profesional. 1. 2. 3.
+5. Resumir las reglas de seguridad de la cinta americana de manera que se relacionan con su uso general, el uso recreativo entre los jóvenes y dentro de un ambiente artesanal.
+6. Demostrar la capacidad de romper pedazos de cinta americana, a mano, en las siguientes medidas sin la ayuda de un cuchillo, tijeras o cualquier otro instrumento de cortar. La cinta no debe enredarse ni arrugarse. a. 15 cm (6 pulgadas) b. 60 cm (2 pies) c. 150 cm (5 pies)
+7. Crear un juego de herramientas con los elementos básicos necesarios para las manualidades de cinta americana, incluyendo por lo menos tres colores/diseños de cinta americana, estera de cortar, tijeras, cuchillo cartonero y herramientas para la eliminación de residuos. Demostrar la capacidad de usar cada herramienta.
+8. Crear cinco objetos de cinta americana, tales como: a. Monedero o cartera b. Cesta o bolsa de mano c. Una prenda de vestir d. Decoraciones para días festivos e. Envolturas o moñas navideñas f. Arreglo floral simple g. Juguete h. Objetos de su elección
+9. Construir un barco que flotará un saco de harina de 2 kg (5 libras) durante cinco minutos, evitando que la harina se moje. Puede usar otros materiales para crear un marco, pero la mayoría del casco debe hacerse de cinta americana.
+10. Completar las siguientes lecciones espirituales sobre la «pegajosidad» de la cinta americana. a. Leer Daniel capítulo 3 y analizar cómo la cinta americana puede aplicarse a Dios y a los hebreos en la historia. b. Memorizar y recitar Proverbios 18:24 y explicar cómo la cinta americana se aplica a este versículo. c. Discutir en un grupo cómo el «pecado» puede pegarse a nosotros. d. Memorizar y recitar Santiago 4:7 y compartir sus ideas acerca de cómo el pecado puede despegarse en nuestras vidas.
+
+## Observaciones
+
+- Este archivo fue preparado para análisis posterior, no para carga directa a BD.
