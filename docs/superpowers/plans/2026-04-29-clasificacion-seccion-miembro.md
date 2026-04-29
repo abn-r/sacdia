@@ -609,7 +609,7 @@ Cada calculator TDD: spec test PRIMERO, then impl, run, commit. NUNCA lanzan exc
 - Create: `sacdia-backend/src/rankings/member-rankings/services/class-score.service.ts`
 - Test: `sacdia-backend/src/rankings/member-rankings/services/class-score.service.spec.ts`
 
-**OQ5 resolution (in-task)**: default = `class_module_progress.active = true AND score IS NOT NULL` cuenta como completado. Si equipo backend define otra regla, ajustar test cases primero.
+**OQ5 resolution (in-task)**: default = `class_module_progress.active = true` cuenta como completado. (NULL guard removed — column is `Float NOT NULL` per schema, no null possible). Si equipo backend define otra regla, ajustar test cases primero.
 
 - [ ] **Step 1: Write failing test**
 
@@ -715,7 +715,6 @@ export class ClassScoreService {
       where: {
         enrollment_id: enrollmentId,
         active: true,
-        score: { not: null },
       },
     });
 
