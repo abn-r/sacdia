@@ -1,18 +1,20 @@
-# 8.4-A Section + Member Rankings Implementation Plan
+# 8.4-A Section + Member Rankings Implementation Plan (post-audit)
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Implementar rankings nivel sección + miembro extendiendo el pipeline composite ranking de 8.4-C, con dark-launch independiente, RBAC granular, y UI en 2 fases (admin web → Flutter móvil).
+**Goal:** Implementar rankings nivel sección + enrollment ("miembro" user-facing) extendiendo el pipeline composite ranking de 8.4-C, con dark-launch independiente, RBAC granular, y UI en 2 fases (admin web → Flutter móvil).
 
-**Architecture:** Sección como agregado puro de miembros (sin calculadores propios). Miembro con 4 calculators TDD (clases, evidencias, investiduras, camporees) más composite con NULL redistribution. Cron secuencial mismo job (club → member → section), kill-switch independiente para dark launch, polimorfismo `award_categories.scope`. Tablas nuevas: `member_rankings`, `section_rankings`, `member_ranking_weights`. Reuso de `WeightsResolverService` y `CompositeScoreService` parametrizados por scope.
+**Architecture:** Naming híbrido — schema usa `enrollment_*` (real DB entity), URLs/DTOs/UI strings usan `member_*` (user-facing). Sección como agregado puro de enrollments (sin calculadores propios). 3 calculators TDD (clases, investidura binario, camporees). Composite con NULL redistribution. Cron secuencial mismo job (club → enrollment → section), kill-switch independiente. Polimorfismo `award_categories.scope`. Tablas nuevas: `enrollment_rankings`, `section_rankings`, `enrollment_ranking_weights`. Reuso de `WeightsResolverService` y `CompositeScoreService` parametrizados por scope.
 
 **Tech Stack:** NestJS + Prisma + PostgreSQL Neon (3 branches dev/staging/prod) + BullMQ + Redis (cron infra), Jest TDD backend, Next.js 16 + shadcn/ui + Tailwind v4 admin, Flutter Clean Architecture mobile (Fase 2).
 
-**Spec reference:** `docs/superpowers/specs/2026-04-29-clasificacion-seccion-miembro-design.md`
+**Spec reference:** `docs/superpowers/specs/2026-04-29-clasificacion-seccion-miembro-design.md` (post-audit rewrite, commit 546a26c)
 
-**Engram references:** `sacdia/strategy/8-4-a-seccion-miembro-spec` (spec key), patrones #1204 / #1296 / #1839 (Neon migrations TXN atómicas), #1850 (clubs sin `union_id` directo — derivar via `local_fields`), #1883 / #1888 (controller order bugs con ParseUUIDPipe — orden en `module.controllers` array crítico, requiere e2e HTTP test real para detectar).
+**Audit reference:** `docs/superpowers/audits/2026-04-29-section-member-schema-audit.md` (commit 643b694) — schema reality locked, do NOT re-audit.
 
-**Race-safe rule:** Same-repo (sacdia-backend) → serialize subagents. schema.prisma sólo lo edita Task 5. Cross-repo (backend ↔ admin) paralelizable únicamente después de mergear backend.
+**Engram patterns:** #1204/#1296/#1839 (Neon manual psql), #1850 (camporee_clubs split FKs + clubs sin union_id directo — derivar via local_fields), #1883/#1888 (controller order bug + missing e2e gap from 8.4-C — apply learnings).
+
+**Race-safe rule:** Same-repo (sacdia-backend) → serialize subagents. schema.prisma sólo lo edita una task. Cross-repo (backend ↔ admin) paralelizable únicamente después de mergear backend.
 
 **Branch convention:** `feat/section-member-rankings-8-4-a` en los 3 repos cuando arranquen sub-features. Empezar en `sacdia-backend`.
 
@@ -20,197 +22,65 @@
 
 ---
 
-## SCHEMA AUDIT NOTES (a verificar en Phase 0 antes de migrations)
+## Schema reality (audit-locked)
 
-El spec §5 lista 11 ítems de audit (A1–A11) que deben validarse contra Neon dev branch antes de escribir las migrations definitivas. Sin esto, las migrations pueden romper en runtime y los calculadores apuntar a tablas/columnas inexistentes. Phase 0 cubre esto explícitamente. Cuando un calculador (Tasks 6–9) referencia una tabla cuyo nombre o columna no fue confirmada, el subagente DEBE consultar primero los resultados del audit committed por Phase 0 antes de escribir SQL.
+| Locked fact | Value |
+|-------------|-------|
+| "Member" entity | `enrollments` (PK `enrollment_id INTEGER`, FK `user_id UUID`) |
+| "Section" entity | `club_sections.club_section_id INTEGER` |
+| Year FK | `ecclesiastical_years.year_id INTEGER` (referenciado como `ecclesiastical_year_id`) |
+| Investiture model | Binary via `enrollments.investiture_status` enum (`IN_PROGRESS|INVESTIDO`) |
+| Camporee per-member | `camporee_members.user_id UUID + status='approved'` |
+| Class progress | `class_module_progress` (cols `enrollment_id INTEGER`, `user_id UUID`, `class_id INTEGER`, `module_id INTEGER`, `score DOUBLE PRECISION`, `active BOOLEAN`) — sin columna `year_id` directa, año vía `enrollments.ecclesiastical_year_id` |
+| Roles | UUID PK, identifier `role_name`, member role UUID `9567fef6-8091-494a-ac1c-fb3716ed2091` |
+| Permissions | identifier `permission_name` (NO `name`) |
+| system_config | columns `config_key/config_value/config_type/description/updated_at` |
+| Camporee year FK | `local_camporees.ecclesiastical_year INTEGER` y `union_camporees.ecclesiastical_year INTEGER` (sin FK formal — referencia informal) |
+| Clubs union resolution | `clubs` NO tiene `union_id` directo. Derivar vía `clubs.local_field_id → local_fields.union_id` (engram #1850) |
 
----
-
-## Phase 0 — Migration audit + schema validation contra Neon dev
-
-### Task 1: Schema audit subagent contra Neon dev (A1–A11)
-
-**Files:**
-- Create: `docs/superpowers/audits/2026-04-29-section-member-schema-audit.md`
-- Modify: `docs/superpowers/specs/2026-04-29-clasificacion-seccion-miembro-design.md` (sección §5 con resultados)
-
-- [ ] **Step 1: Lanzar subagent read-only que conecte a Neon dev y ejecute las 11 queries del spec §5**
-
-Lanzar repo-researcher (haiku) con instrucciones: ejecutar las queries A1–A11 del spec §5 contra Neon dev usando:
-
-```bash
-PSQL=/opt/homebrew/opt/libpq/bin/psql
-URL=$(neonctl connection-string development --project-id wispy-hall-32797215)
-$PSQL "$URL" -v ON_ERROR_STOP=1 <<'SQL'
--- A1: members.member_id type
-SELECT data_type FROM information_schema.columns
-  WHERE table_name='members' AND column_name='member_id';
-
--- A2: members.member_status presence + enum values
-SELECT column_name, data_type, udt_name FROM information_schema.columns
-  WHERE table_name='members' AND column_name='member_status';
-SELECT DISTINCT member_status FROM members LIMIT 20;
-
--- A3: club_sections.club_section_id type
-SELECT data_type FROM information_schema.columns
-  WHERE table_name='club_sections' AND column_name='club_section_id';
-
--- A4: member_class_progress existence + columns
-SELECT to_regclass('public.member_class_progress');
-SELECT column_name, data_type FROM information_schema.columns
-  WHERE table_name='member_class_progress' ORDER BY ordinal_position;
-
--- A5: evidence_attendance per-member
-SELECT to_regclass('public.evidence_attendance');
-SELECT column_name FROM information_schema.columns
-  WHERE table_name='evidence_attendance' ORDER BY ordinal_position;
-
--- A6: investitures per-member
-SELECT to_regclass('public.investitures'), to_regclass('public.member_investitures');
-SELECT table_name, column_name FROM information_schema.columns
-  WHERE table_name IN ('investitures','member_investitures') ORDER BY table_name, ordinal_position;
-
--- A7: camporee_attendees / camporee_participants per-member
-SELECT to_regclass('public.camporee_attendees'), to_regclass('public.camporee_participants');
-
--- A8: rol member en roles
-SELECT role_id, code, name FROM roles WHERE code = 'member' OR name ILIKE '%member%';
-
--- A9: system_config column names
-SELECT column_name FROM information_schema.columns
-  WHERE table_name='system_config' ORDER BY ordinal_position;
-
--- A10: years vs ecclesiastical_years
-SELECT to_regclass('public.years'), to_regclass('public.ecclesiastical_years');
-SELECT column_name FROM information_schema.columns
-  WHERE table_name='ecclesiastical_years' ORDER BY ordinal_position;
-
--- A11: investiture_requirements
-SELECT to_regclass('public.investiture_requirements');
-SELECT column_name FROM information_schema.columns
-  WHERE table_name='investiture_requirements' ORDER BY ordinal_position;
-SQL
-```
-
-El subagent debe devolver un report estructurado por ítem con: query ejecutada, output crudo, conclusión (CONFIRMED / DEVIATION / MISSING) y recomendación de acción. Patrón engram #1204/#1296/#1839 para uso de neonctl.
-
-- [ ] **Step 2: Escribir audit report en `docs/superpowers/audits/2026-04-29-section-member-schema-audit.md`**
-
-Estructura obligatoria:
-
-```markdown
-# Audit 8.4-A — Schema validation Neon dev (2026-04-29)
-
-| ID  | Ítem                                  | Estado    | Tabla/columna real                | Acción                         |
-|-----|---------------------------------------|-----------|-----------------------------------|--------------------------------|
-| A1  | members.member_id INTEGER             | CONFIRMED | integer                           | usar Int en Prisma             |
-| A2  | members.member_status existe          | TBD       | ...                               | si no existe → skip filtro F1  |
-| A3  | club_sections.club_section_id INTEGER | CONFIRMED | integer                           | usar Int en Prisma             |
-...
-```
-
-Una sección por ítem con la query, output, decisión.
-
-- [ ] **Step 3: Update spec §5 con resultados confirmados**
-
-Reemplazar la tabla "TODO" del spec §5 por la tabla real con estado CONFIRMED/DEVIATION/MISSING + acción tomada. Linkear al audit report.
-
-- [ ] **Step 4: Commit**
-
-```bash
-cd /Users/abner/Documents/development/sacdia
-git add docs/superpowers/audits/2026-04-29-section-member-schema-audit.md \
-        docs/superpowers/specs/2026-04-29-clasificacion-seccion-miembro-design.md
-git commit -m "$(cat <<'EOF'
-docs(audit): validate 8.4-A schema dependencies against Neon dev
-
-Run queries A1-A11 against development branch of wispy-hall-32797215.
-Lock real table/column names before writing migrations.
-EOF
-)"
-```
+Subagents executing migrations or services MUST use these audit-locked values. Do NOT re-audit during implementation.
 
 ---
 
-### Task 2: Lock decisiones de fallback para A2 y A11 (gating)
+## Open questions (defer or resolve in-task)
 
-**Files:**
-- Modify: `docs/superpowers/plans/2026-04-29-clasificacion-seccion-miembro.md` (este archivo, sección "Decisions log")
-- Modify: `docs/superpowers/specs/2026-04-29-clasificacion-seccion-miembro-design.md` (§5 + §15.2 OQs)
-
-- [ ] **Step 1: Decisión A2 (member_status)**
-
-Si audit Task 1 reporta:
-- **A2 CONFIRMED**: `SectionAggregationService` filtra por `m.member_status = 'active'`. No hay cambios.
-- **A2 MISSING**: Fase 1 omite el filtro (se agregan TODAS las filas con `composite IS NOT NULL` en el AVG). Documentar TODO en plan + spec. Migration separada `ADD COLUMN member_status varchar(20) NOT NULL DEFAULT 'active'` se planifica para Fase 2 (no en este plan).
-
-Append a este plan, en sección "Decisions log" al final:
-
-```markdown
-## Decisions log
-
-- **A2 — `members.member_status`**: <CONFIRMED | MISSING>. <Acción>.
-- **A11 — `investiture_requirements`**: <CONFIRMED | MISSING>. <Acción>.
-- **A4 — `member_class_progress`**: <nombre real de tabla>. <Columnas confirmadas>.
-- **A5 — `evidence_attendance`**: <nombre real | MISSING>. <Acción>.
-- **A6 — investiduras per-member**: <tabla real>. <Columnas año + status>.
-- **A7 — camporees per-member**: <tabla real | MISSING>. <Acción>.
-- **A10 — años**: <`years` | `ecclesiastical_years`>. <FK column real>.
-```
-
-- [ ] **Step 2: Decisión A11 (investiture_requirements)**
-
-- **A11 CONFIRMED**: `InvestitureScoreService` calcula `eligible_count` desde `investiture_requirements` per `(club_type_id, seniority_year)`.
-- **A11 MISSING**: Workaround documentado. Opciones:
-  1. **Bloquear señal**: `InvestitureScoreService.calculate()` retorna NULL siempre. Composite redistribuye su peso. Categorización afectada documentada.
-  2. **Derivar elegibilidad**: si existe `class_modules` con regla por `club_type_id + age_min` o equivalente, derivar `eligible_count` de ahí. Documentar fórmula.
-
-Lock una de las dos opciones aquí antes de Phase 2.
-
-- [ ] **Step 3: Decisión A10 (years vs ecclesiastical_years)**
-
-Lockear: a partir de Phase 1, todas las migrations y modelos Prisma usan el nombre de tabla y columna que devuelve el audit (probablemente `ecclesiastical_year_id` consistente con 8.4-C). Reemplazar `year_id` placeholder del spec en todas las referencias.
-
-- [ ] **Step 4: Commit decisiones**
-
-```bash
-git add docs/superpowers/plans/2026-04-29-clasificacion-seccion-miembro.md \
-        docs/superpowers/specs/2026-04-29-clasificacion-seccion-miembro-design.md
-git commit -m "$(cat <<'EOF'
-docs(plan): lock 8.4-A audit fallback decisions for A2/A10/A11
-
-Fix migration ambiguity before Phase 1. Decisions sealed prior to writing SQL.
-EOF
-)"
-```
+| # | Pregunta | Resolución |
+|---|----------|------------|
+| OQ1 | Privacidad `top_n` — `member_name` real, anonimizado, o solo score+rank | Decidir antes de Task 11 (controller `/me`). Default plan: anonimizado `"Miembro #N"` salvo decisión explícita de producto |
+| OQ2 | Section aggregation active filter | Phase 2 enhancement — no bloquea Fase 1 |
+| OQ3 | Evidence signal reintroducción | Phase 2 — migration dedicada cuando se modele tabla per-member |
+| OQ4 | `camporee_members.status` lifecycle ownership | Doc gap — confirmar en staging con datos reales |
+| OQ5 | Definición de "completado" en `class_module_progress` | Resolver en Task 4 (consultar equipo backend, default `active=true AND score IS NOT NULL`) |
 
 ---
 
 ## Phase 1 — Database migrations + RBAC seeds (sacdia-backend)
 
-### Task 3: Crear 4 archivos de migration SQL
+### Task 1: Crear 4 migration files SQL
 
 **Files:**
-- Create: `sacdia-backend/prisma/migrations/20260429000000_member_rankings_schema/migration.sql`
-- Create: `sacdia-backend/prisma/migrations/20260429000100_award_categories_scope/migration.sql`
-- Create: `sacdia-backend/prisma/migrations/20260429000200_member_rankings_seeds/migration.sql`
-- Create: `sacdia-backend/prisma/migrations/20260429000300_member_rankings_award_seeds/migration.sql`
+- Create: `sacdia-backend/prisma/migrations/20260429000000_enrollment_rankings_schema/migration.sql`
+- Create: `sacdia-backend/prisma/migrations/20260429000001_award_categories_scope/migration.sql`
+- Create: `sacdia-backend/prisma/migrations/20260429000002_enrollment_rankings_seeds/migration.sql`
+- Create: `sacdia-backend/prisma/migrations/20260429000003_enrollment_rankings_default_award_seeds/migration.sql`
 
-> **NOTA**: tipos de FK (`Int` vs `String/Uuid`) deben matchear lo confirmado por audit Task 1. El template a continuación asume `member_id INTEGER`, `club_id INTEGER`, `club_section_id INTEGER`, `ecclesiastical_year_id INTEGER` consistente con 8.4-C. Si audit difiere, ajustar antes de commit.
+- [ ] **Step 1: Crear archivo 1 — `20260429000000_enrollment_rankings_schema/migration.sql`**
 
-- [ ] **Step 1: `20260429000000_member_rankings_schema/migration.sql`**
+Contenido completo:
 
 ```sql
--- 20260429000000_member_rankings_schema
+-- 20260429000000_enrollment_rankings_schema
+-- Audit reference: docs/superpowers/audits/2026-04-29-section-member-schema-audit.md (A1, A3, A10)
+-- 3 tablas nuevas + indexes + CHECK constraints
 
-CREATE TABLE member_rankings (
+CREATE TABLE enrollment_rankings (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  member_id INTEGER NOT NULL REFERENCES members(member_id) ON DELETE CASCADE,
+  enrollment_id INTEGER NOT NULL REFERENCES enrollments(enrollment_id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES users(user_id),
   club_id INTEGER NOT NULL REFERENCES clubs(club_id),
   club_section_id INTEGER REFERENCES club_sections(club_section_id),
   ecclesiastical_year_id INTEGER NOT NULL REFERENCES ecclesiastical_years(year_id),
   class_score_pct NUMERIC(5,2),
-  evidence_score_pct NUMERIC(5,2),
   investiture_score_pct NUMERIC(5,2),
   camporee_score_pct NUMERIC(5,2),
   composite_score_pct NUMERIC(5,2),
@@ -219,17 +89,29 @@ CREATE TABLE member_rankings (
   composite_calculated_at TIMESTAMPTZ(6),
   created_at TIMESTAMPTZ(6) NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ(6) NOT NULL DEFAULT now(),
-  CONSTRAINT uq_member_rankings_member_year UNIQUE(member_id, ecclesiastical_year_id)
+  CONSTRAINT uq_enrollment_rankings_enrollment_year
+    UNIQUE (enrollment_id, ecclesiastical_year_id),
+  CONSTRAINT chk_enrollment_rankings_class_score
+    CHECK (class_score_pct IS NULL OR (class_score_pct BETWEEN 0 AND 100)),
+  CONSTRAINT chk_enrollment_rankings_invest_score
+    CHECK (investiture_score_pct IS NULL OR (investiture_score_pct BETWEEN 0 AND 100)),
+  CONSTRAINT chk_enrollment_rankings_camporee_score
+    CHECK (camporee_score_pct IS NULL OR (camporee_score_pct BETWEEN 0 AND 100)),
+  CONSTRAINT chk_enrollment_rankings_composite
+    CHECK (composite_score_pct IS NULL OR (composite_score_pct BETWEEN 0 AND 100))
 );
 
-CREATE INDEX idx_member_rankings_club_year
-  ON member_rankings(club_id, ecclesiastical_year_id);
+CREATE INDEX idx_enrollment_rankings_club_year
+  ON enrollment_rankings(club_id, ecclesiastical_year_id);
 
-CREATE INDEX idx_member_rankings_section_year
-  ON member_rankings(club_section_id, ecclesiastical_year_id);
+CREATE INDEX idx_enrollment_rankings_section_year
+  ON enrollment_rankings(club_section_id, ecclesiastical_year_id);
 
-CREATE INDEX idx_member_rankings_composite
-  ON member_rankings(club_id, ecclesiastical_year_id, composite_score_pct DESC NULLS LAST);
+CREATE INDEX idx_enrollment_rankings_composite
+  ON enrollment_rankings(club_id, ecclesiastical_year_id, composite_score_pct DESC NULLS LAST);
+
+CREATE INDEX idx_enrollment_rankings_user
+  ON enrollment_rankings(user_id);
 
 CREATE TABLE section_rankings (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -237,13 +119,18 @@ CREATE TABLE section_rankings (
   club_id INTEGER NOT NULL REFERENCES clubs(club_id),
   ecclesiastical_year_id INTEGER NOT NULL REFERENCES ecclesiastical_years(year_id),
   composite_score_pct NUMERIC(5,2),
-  active_member_count INTEGER NOT NULL DEFAULT 0,
+  active_enrollment_count INTEGER NOT NULL DEFAULT 0,
   rank_position INTEGER,
   awarded_category_id UUID REFERENCES award_categories(award_category_id),
   composite_calculated_at TIMESTAMPTZ(6),
   created_at TIMESTAMPTZ(6) NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ(6) NOT NULL DEFAULT now(),
-  CONSTRAINT uq_section_rankings_section_year UNIQUE(club_section_id, ecclesiastical_year_id)
+  CONSTRAINT uq_section_rankings_section_year
+    UNIQUE (club_section_id, ecclesiastical_year_id),
+  CONSTRAINT chk_section_rankings_composite
+    CHECK (composite_score_pct IS NULL OR (composite_score_pct BETWEEN 0 AND 100)),
+  CONSTRAINT chk_section_rankings_count_nonneg
+    CHECK (active_enrollment_count >= 0)
 );
 
 CREATE INDEX idx_section_rankings_club_year
@@ -252,39 +139,40 @@ CREATE INDEX idx_section_rankings_club_year
 CREATE INDEX idx_section_rankings_composite
   ON section_rankings(club_id, ecclesiastical_year_id, composite_score_pct DESC NULLS LAST);
 
-CREATE TABLE member_ranking_weights (
+CREATE TABLE enrollment_ranking_weights (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   club_type_id INTEGER REFERENCES club_types(club_type_id),
   ecclesiastical_year_id INTEGER REFERENCES ecclesiastical_years(year_id),
   class_pct NUMERIC(5,2) NOT NULL,
-  evidence_pct NUMERIC(5,2) NOT NULL,
   investiture_pct NUMERIC(5,2) NOT NULL,
   camporee_pct NUMERIC(5,2) NOT NULL,
   is_default BOOLEAN NOT NULL DEFAULT false,
   created_at TIMESTAMPTZ(6) NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ(6) NOT NULL DEFAULT now(),
-  CONSTRAINT chk_member_weights_sum_100
-    CHECK (class_pct + evidence_pct + investiture_pct + camporee_pct = 100),
-  CONSTRAINT chk_member_weights_ranges
-    CHECK (
-      class_pct       BETWEEN 0 AND 100
-      AND evidence_pct    BETWEEN 0 AND 100
-      AND investiture_pct BETWEEN 0 AND 100
-      AND camporee_pct    BETWEEN 0 AND 100
-    ),
-  CONSTRAINT uq_member_weights_type_year UNIQUE(club_type_id, ecclesiastical_year_id)
+  CONSTRAINT chk_enrollment_weights_sum_100
+    CHECK (class_pct + investiture_pct + camporee_pct = 100),
+  CONSTRAINT chk_enrollment_weights_class_range
+    CHECK (class_pct BETWEEN 0 AND 100),
+  CONSTRAINT chk_enrollment_weights_invest_range
+    CHECK (investiture_pct BETWEEN 0 AND 100),
+  CONSTRAINT chk_enrollment_weights_camporee_range
+    CHECK (camporee_pct BETWEEN 0 AND 100),
+  CONSTRAINT uq_enrollment_weights_type_year
+    UNIQUE (club_type_id, ecclesiastical_year_id)
 );
 
--- partial unique index for default global (club_type_id IS NULL AND year IS NULL)
-CREATE UNIQUE INDEX idx_member_ranking_weights_default
-  ON member_ranking_weights ((1))
+CREATE UNIQUE INDEX idx_enrollment_weights_default_global
+  ON enrollment_ranking_weights ((club_type_id IS NULL), (ecclesiastical_year_id IS NULL))
   WHERE club_type_id IS NULL AND ecclesiastical_year_id IS NULL;
 ```
 
-- [ ] **Step 2: `20260429000100_award_categories_scope/migration.sql`**
+- [ ] **Step 2: Crear archivo 2 — `20260429000001_award_categories_scope/migration.sql`**
+
+Contenido completo:
 
 ```sql
--- 20260429000100_award_categories_scope
+-- 20260429000001_award_categories_scope
+-- Spec §4.4 — extiende award_categories con polimorfismo de scope
 
 ALTER TABLE award_categories
   ADD COLUMN scope VARCHAR(20) NOT NULL DEFAULT 'club';
@@ -293,357 +181,397 @@ ALTER TABLE award_categories
   ADD CONSTRAINT chk_award_scope
   CHECK (scope IN ('club', 'section', 'member'));
 
--- Backfill defensivo (todas las filas existentes ya tienen 'club' por DEFAULT)
 UPDATE award_categories SET scope = 'club' WHERE scope IS NULL;
 
 CREATE INDEX idx_award_categories_scope
   ON award_categories(scope, is_legacy);
 ```
 
-- [ ] **Step 3: `20260429000200_member_rankings_seeds/migration.sql`**
+- [ ] **Step 3: Crear archivo 3 — `20260429000002_enrollment_rankings_seeds/migration.sql`**
+
+Contenido completo:
 
 ```sql
--- 20260429000200_member_rankings_seeds
+-- 20260429000002_enrollment_rankings_seeds
+-- Audit A8 (permission_name + role_id UUID), A9 (system_config columns)
 
--- Seed default global weights (40/25/20/15 según spec §4.3)
-INSERT INTO member_ranking_weights
-  (club_type_id, ecclesiastical_year_id, class_pct, evidence_pct, investiture_pct, camporee_pct, is_default)
+INSERT INTO enrollment_ranking_weights
+  (club_type_id, ecclesiastical_year_id, class_pct, investiture_pct, camporee_pct, is_default)
 VALUES
-  (NULL, NULL, 40, 25, 20, 15, true)
+  (NULL, NULL, 50, 30, 20, true)
 ON CONFLICT DO NOTHING;
 
--- system_config keys nuevas
-INSERT INTO system_config (config_key, config_value, description, config_type) VALUES
-  ('member_ranking.recalculation_enabled', 'true',
-   'Kill-switch para el recálculo de member + section rankings (8.4-A)', 'boolean'),
-  ('member_ranking.member_visibility', 'self_only',
-   'Visibilidad del ranking para el miembro: self_only | self_and_top_n | hidden', 'string'),
-  ('member_ranking.top_n', '5',
-   'Cantidad de miembros en top N cuando member_visibility = self_and_top_n', 'integer')
+INSERT INTO system_config (config_key, config_value, config_type, description) VALUES
+  ('member_ranking.recalculation_enabled', 'true',      'boolean',
+   'Kill-switch enrollment+section ranking recalc'),
+  ('member_ranking.member_visibility',     'self_only', 'string',
+   'self_only | self_and_top_n | hidden'),
+  ('member_ranking.top_n',                 '5',         'integer',
+   'How many top to show if visibility=self_and_top_n')
 ON CONFLICT (config_key) DO NOTHING;
 
--- 10 permisos nuevos
-INSERT INTO permissions (permission_id, code, description, created_at)
-VALUES
-  (gen_random_uuid(), 'member_rankings:read_self',     'Read own member ranking',                NOW()),
-  (gen_random_uuid(), 'member_rankings:read_section',  'Read member rankings within own section', NOW()),
-  (gen_random_uuid(), 'member_rankings:read_club',     'Read member rankings within own club',    NOW()),
-  (gen_random_uuid(), 'member_rankings:read_lf',       'Read member rankings within own local field', NOW()),
-  (gen_random_uuid(), 'member_rankings:read_global',   'Read all member rankings',                NOW()),
-  (gen_random_uuid(), 'member_ranking_weights:read',   'Read member ranking weight configurations', NOW()),
-  (gen_random_uuid(), 'member_ranking_weights:write',  'Create/update/delete member ranking weights', NOW()),
-  (gen_random_uuid(), 'section_rankings:read_club',    'Read section rankings within own club',   NOW()),
-  (gen_random_uuid(), 'section_rankings:read_lf',      'Read section rankings within own local field', NOW()),
-  (gen_random_uuid(), 'section_rankings:read_global',  'Read all section rankings',               NOW())
-ON CONFLICT (code) DO NOTHING;
+INSERT INTO permissions (permission_id, permission_name, description) VALUES
+  (gen_random_uuid(), 'member_rankings:read_self',       'Read own member ranking'),
+  (gen_random_uuid(), 'member_rankings:read_section',    'Read section member rankings'),
+  (gen_random_uuid(), 'member_rankings:read_club',       'Read club member rankings'),
+  (gen_random_uuid(), 'member_rankings:read_lf',         'Read local field member rankings'),
+  (gen_random_uuid(), 'member_rankings:read_global',     'Read all member rankings'),
+  (gen_random_uuid(), 'member_ranking_weights:read',     'Read member ranking weights'),
+  (gen_random_uuid(), 'member_ranking_weights:write',    'Write/CRUD member ranking weights'),
+  (gen_random_uuid(), 'section_rankings:read_club',      'Read club section rankings'),
+  (gen_random_uuid(), 'section_rankings:read_lf',        'Read local field section rankings'),
+  (gen_random_uuid(), 'section_rankings:read_global',    'Read all section rankings')
+ON CONFLICT (permission_name) DO NOTHING;
 
--- Grants en role_permissions según matriz §4.6 del spec
--- super_admin + admin: TODO (10 permisos)
+-- Grants matriz §4.7
 INSERT INTO role_permissions (role_id, permission_id)
-SELECT r.role_id, p.permission_id
-FROM roles r CROSS JOIN permissions p
-WHERE r.code IN ('super_admin', 'admin')
-  AND p.code LIKE 'member_rankings:%' OR p.code LIKE 'section_rankings:%' OR p.code LIKE 'member_ranking_weights:%'
+SELECT r.role_id, p.permission_id FROM roles r, permissions p
+  WHERE r.role_name = 'member' AND p.permission_name = 'member_rankings:read_self'
 ON CONFLICT DO NOTHING;
 
--- member: read_self
 INSERT INTO role_permissions (role_id, permission_id)
-SELECT r.role_id, p.permission_id
-FROM roles r CROSS JOIN permissions p
-WHERE r.code = 'member' AND p.code = 'member_rankings:read_self'
+SELECT r.role_id, p.permission_id FROM roles r, permissions p
+  WHERE r.role_name = 'assistant-club'
+    AND p.permission_name IN ('member_rankings:read_section','member_rankings:read_club','section_rankings:read_club')
 ON CONFLICT DO NOTHING;
 
--- assistant-club, director-club: read_section + read_club + section_rankings:read_club
 INSERT INTO role_permissions (role_id, permission_id)
-SELECT r.role_id, p.permission_id
-FROM roles r CROSS JOIN permissions p
-WHERE r.code IN ('assistant-club', 'director-club')
-  AND p.code IN ('member_rankings:read_section', 'member_rankings:read_club', 'section_rankings:read_club')
+SELECT r.role_id, p.permission_id FROM roles r, permissions p
+  WHERE r.role_name = 'director-club'
+    AND p.permission_name IN ('member_rankings:read_section','member_rankings:read_club','section_rankings:read_club')
 ON CONFLICT DO NOTHING;
 
--- director-dia, assistant-dia: read_club + section_rankings:read_club
 INSERT INTO role_permissions (role_id, permission_id)
-SELECT r.role_id, p.permission_id
-FROM roles r CROSS JOIN permissions p
-WHERE r.code IN ('director-dia', 'assistant-dia')
-  AND p.code IN ('member_rankings:read_club', 'section_rankings:read_club')
+SELECT r.role_id, p.permission_id FROM roles r, permissions p
+  WHERE r.role_name IN ('director-dia','assistant-dia')
+    AND p.permission_name IN ('member_rankings:read_club','section_rankings:read_club')
 ON CONFLICT DO NOTHING;
 
--- director-lf, assistant-lf: read_lf + section_rankings:read_lf
 INSERT INTO role_permissions (role_id, permission_id)
-SELECT r.role_id, p.permission_id
-FROM roles r CROSS JOIN permissions p
-WHERE r.code IN ('director-lf', 'assistant-lf')
-  AND p.code IN ('member_rankings:read_lf', 'section_rankings:read_lf')
+SELECT r.role_id, p.permission_id FROM roles r, permissions p
+  WHERE r.role_name IN ('director-lf','assistant-lf')
+    AND p.permission_name IN ('member_rankings:read_lf','section_rankings:read_lf')
 ON CONFLICT DO NOTHING;
 
--- director-lf adicional: member_ranking_weights:read
 INSERT INTO role_permissions (role_id, permission_id)
-SELECT r.role_id, p.permission_id
-FROM roles r CROSS JOIN permissions p
-WHERE r.code = 'director-lf'
-  AND p.code = 'member_ranking_weights:read'
+SELECT r.role_id, p.permission_id FROM roles r, permissions p
+  WHERE r.role_name = 'director-lf'
+    AND p.permission_name = 'member_ranking_weights:read'
 ON CONFLICT DO NOTHING;
 
--- director-union, assistant-union: read_global + section_rankings:read_global + weights:read
 INSERT INTO role_permissions (role_id, permission_id)
-SELECT r.role_id, p.permission_id
-FROM roles r CROSS JOIN permissions p
-WHERE r.code IN ('director-union', 'assistant-union')
-  AND p.code IN ('member_rankings:read_global', 'section_rankings:read_global', 'member_ranking_weights:read')
+SELECT r.role_id, p.permission_id FROM roles r, permissions p
+  WHERE r.role_name IN ('director-union','assistant-union')
+    AND p.permission_name IN ('member_rankings:read_global','section_rankings:read_global','member_ranking_weights:read')
+ON CONFLICT DO NOTHING;
+
+INSERT INTO role_permissions (role_id, permission_id)
+SELECT r.role_id, p.permission_id FROM roles r, permissions p
+  WHERE r.role_name IN ('admin','super_admin')
+    AND p.permission_name IN (
+      'member_rankings:read_self','member_rankings:read_section','member_rankings:read_club',
+      'member_rankings:read_lf','member_rankings:read_global',
+      'member_ranking_weights:read','member_ranking_weights:write',
+      'section_rankings:read_club','section_rankings:read_lf','section_rankings:read_global'
+    )
 ON CONFLICT DO NOTHING;
 ```
 
-> **NOTA**: si audit Task 1 reporta nombres de roles distintos a los del spec (ej. `member` no existe en tabla `roles`), revisar en sub-paso de Phase 0 antes de aplicar este archivo.
-
-- [ ] **Step 4: `20260429000300_member_rankings_award_seeds/migration.sql`**
+- [ ] **Step 4: Crear archivo 4 — `20260429000003_enrollment_rankings_default_award_seeds/migration.sql`**
 
 ```sql
--- 20260429000300_member_rankings_award_seeds
+-- 20260429000003_enrollment_rankings_default_award_seeds
+-- Cutoffs §11.5 spec — laxos vs club (AAA ≥85 en lugar de ≥80)
 
--- Seed default categorías scope='member' y scope='section'
 INSERT INTO award_categories
-  (award_category_id, name, scope, min_composite_pct, max_composite_pct, color, is_legacy, created_at, updated_at)
+  (award_category_id, name, color, scope, min_composite_pct, max_composite_pct, is_legacy, created_at, updated_at)
 VALUES
-  (gen_random_uuid(), 'AAA', 'member', 85, 100,    '#4ade80', false, NOW(), NOW()),
-  (gen_random_uuid(), 'AA',  'member', 75, 84.99,  '#86efac', false, NOW(), NOW()),
-  (gen_random_uuid(), 'A',   'member', 65, 74.99,  '#fde047', false, NOW(), NOW()),
-  (gen_random_uuid(), 'B',   'member', 50, 64.99,  '#fb923c', false, NOW(), NOW()),
-  (gen_random_uuid(), 'C',   'member',  0, 49.99,  '#f87171', false, NOW(), NOW()),
-  (gen_random_uuid(), 'AAA', 'section', 85, 100,   '#4ade80', false, NOW(), NOW()),
-  (gen_random_uuid(), 'AA',  'section', 75, 84.99, '#86efac', false, NOW(), NOW()),
-  (gen_random_uuid(), 'A',   'section', 65, 74.99, '#fde047', false, NOW(), NOW()),
-  (gen_random_uuid(), 'B',   'section', 50, 64.99, '#fb923c', false, NOW(), NOW()),
-  (gen_random_uuid(), 'C',   'section',  0, 49.99, '#f87171', false, NOW(), NOW())
+  (gen_random_uuid(), 'AAA', '#10b981', 'member',  85, 100,   false, NOW(), NOW()),
+  (gen_random_uuid(), 'AA',  '#22c55e', 'member',  75, 84.99, false, NOW(), NOW()),
+  (gen_random_uuid(), 'A',   '#eab308', 'member',  65, 74.99, false, NOW(), NOW()),
+  (gen_random_uuid(), 'B',   '#f59e0b', 'member',  50, 64.99, false, NOW(), NOW()),
+  (gen_random_uuid(), 'C',   '#ef4444', 'member',  0,  49.99, false, NOW(), NOW()),
+  (gen_random_uuid(), 'AAA', '#10b981', 'section', 85, 100,   false, NOW(), NOW()),
+  (gen_random_uuid(), 'AA',  '#22c55e', 'section', 75, 84.99, false, NOW(), NOW()),
+  (gen_random_uuid(), 'A',   '#eab308', 'section', 65, 74.99, false, NOW(), NOW()),
+  (gen_random_uuid(), 'B',   '#f59e0b', 'section', 50, 64.99, false, NOW(), NOW()),
+  (gen_random_uuid(), 'C',   '#ef4444', 'section', 0,  49.99, false, NOW(), NOW())
 ON CONFLICT DO NOTHING;
 ```
 
-- [ ] **Step 5: Commit los 4 archivos**
+> Nota: si `award_categories` no tiene columna `color`, eliminar de la lista. Verificar con `\d award_categories` en Step 5.
+
+- [ ] **Step 5: Schema reality check pre-aplicación**
 
 ```bash
-cd /Users/abner/Documents/development/sacdia/sacdia-backend
-git add prisma/migrations/20260429000000_member_rankings_schema \
-        prisma/migrations/20260429000100_award_categories_scope \
-        prisma/migrations/20260429000200_member_rankings_seeds \
-        prisma/migrations/20260429000300_member_rankings_award_seeds
-git commit -m "$(cat <<'EOF'
-feat(schema): add member + section rankings migrations (8.4-A)
+PSQL=/opt/homebrew/opt/libpq/bin/psql
+URL=$(neonctl connection-string development --project-id wispy-hall-32797215)
+$PSQL "$URL" -v ON_ERROR_STOP=1 <<'SQL'
+\d award_categories
+\d permissions
+\d roles
+\d system_config
+SQL
+```
 
-3 new tables (member_rankings, section_rankings, member_ranking_weights),
-award_categories.scope polymorphic column, 10 RBAC permissions, 3 system_config keys,
-default global weights 40/25/20/15, 10 default award categories (member + section).
+Verificar columnas reales antes de Task 2.
+
+- [ ] **Step 6: Code review checkpoint** — invocar spec-reviewer subagent contra los 4 archivos SQL.
+
+- [ ] **Step 7: Commit**
+
+```bash
+cd sacdia-backend
+git add prisma/migrations/20260429000000_enrollment_rankings_schema \
+        prisma/migrations/20260429000001_award_categories_scope \
+        prisma/migrations/20260429000002_enrollment_rankings_seeds \
+        prisma/migrations/20260429000003_enrollment_rankings_default_award_seeds
+git commit -m "$(cat <<'EOF'
+feat(enrollment-rankings): add 4 migration files for 8.4-A schema
+
+Adds enrollment_rankings, section_rankings, enrollment_ranking_weights
+tables; extends award_categories with polymorphic scope column; seeds
+default global weights (50/30/20), 3 system_config keys, 10 permissions
+with RBAC grants per matrix §4.7, and default award categories for
+scope='member' and scope='section'.
+
+Schema audit reference: docs/superpowers/audits/2026-04-29-section-member-schema-audit.md
 EOF
 )"
 ```
 
 ---
 
-### Task 4: Aplicar 4 migrations a Neon dev → staging → prod
+### Task 2: Apply 4 migrations a Neon dev → staging → prod
 
 **Files:**
-- Read-only: 4 migration files de Task 3
+- Read-only: 4 archivos creados en Task 1
 - Execution: psql + neonctl
 
-> **Patrón engram #1204 / #1296 / #1839**: TXN atómica per-archivo, registrar en `_prisma_migrations` manualmente, verify queries post-apply.
-
-- [ ] **Step 1: Pre-check sobre cada branch**
+- [ ] **Step 1: Pre-check estado en cada branch**
 
 ```bash
 PSQL=/opt/homebrew/opt/libpq/bin/psql
-
-for BRANCH in development staging production; do
-  URL=$(neonctl connection-string $BRANCH --project-id wispy-hall-32797215)
-  echo "=== Pre-check $BRANCH ==="
-  $PSQL "$URL" -v ON_ERROR_STOP=1 <<'SQL'
-SELECT to_regclass('public.member_rankings'),
-       to_regclass('public.section_rankings'),
-       to_regclass('public.member_ranking_weights');
+URL=$(neonctl connection-string development --project-id wispy-hall-32797215)
+$PSQL "$URL" -v ON_ERROR_STOP=1 <<'SQL'
+SELECT to_regclass('public.enrollment_rankings');
+SELECT to_regclass('public.section_rankings');
+SELECT to_regclass('public.enrollment_ranking_weights');
 SELECT column_name FROM information_schema.columns
   WHERE table_name='award_categories' AND column_name='scope';
 SELECT config_key FROM system_config
-  WHERE config_key LIKE 'member_ranking.%';
-SELECT code FROM permissions WHERE code LIKE 'member_rankings:%' OR code LIKE 'section_rankings:%' OR code LIKE 'member_ranking_weights:%';
+  WHERE config_key IN (
+    'member_ranking.recalculation_enabled',
+    'member_ranking.member_visibility',
+    'member_ranking.top_n'
+  );
+SELECT permission_name FROM permissions
+  WHERE permission_name LIKE 'member_rankings:%'
+     OR permission_name LIKE 'member_ranking_weights:%'
+     OR permission_name LIKE 'section_rankings:%';
 SQL
-done
 ```
 
-Expected en los 3 branches PRE-apply: `to_regclass` NULL para las 3 tablas, 0 rows para `scope` column, 0 system_config rows, 0 permissions rows.
+Esperado pre-apply: 3 NULL regclass, 0 columna scope, 0 system_config rows, 0 permissions rows.
 
-- [ ] **Step 2: Aplicar atómicamente per branch (dev primero)**
+- [ ] **Step 2: Apply atómico TXN BEGIN/COMMIT por branch**
+
+Para cada branch (orden: development → staging → production):
 
 ```bash
-for BRANCH in development staging production; do
-  URL=$(neonctl connection-string $BRANCH --project-id wispy-hall-32797215)
-  echo "=== Apply $BRANCH ==="
-  $PSQL "$URL" -v ON_ERROR_STOP=1 <<SQL
+URL=$(neonctl connection-string development --project-id wispy-hall-32797215)
+$PSQL "$URL" -v ON_ERROR_STOP=1 <<SQL
 BEGIN;
 
-\i sacdia-backend/prisma/migrations/20260429000000_member_rankings_schema/migration.sql
-INSERT INTO _prisma_migrations (id, checksum, finished_at, migration_name, logs, rolled_back_at, started_at, applied_steps_count)
-VALUES (gen_random_uuid()::text, 'manual', NOW(), '20260429000000_member_rankings_schema', NULL, NULL, NOW(), 1);
+\i sacdia-backend/prisma/migrations/20260429000000_enrollment_rankings_schema/migration.sql
+INSERT INTO _prisma_migrations
+  (id, checksum, finished_at, migration_name, logs, rolled_back_at, started_at, applied_steps_count)
+VALUES
+  (gen_random_uuid()::text, 'manual', NOW(),
+   '20260429000000_enrollment_rankings_schema', NULL, NULL, NOW(), 1);
 
-\i sacdia-backend/prisma/migrations/20260429000100_award_categories_scope/migration.sql
-INSERT INTO _prisma_migrations (id, checksum, finished_at, migration_name, logs, rolled_back_at, started_at, applied_steps_count)
-VALUES (gen_random_uuid()::text, 'manual', NOW(), '20260429000100_award_categories_scope', NULL, NULL, NOW(), 1);
+\i sacdia-backend/prisma/migrations/20260429000001_award_categories_scope/migration.sql
+INSERT INTO _prisma_migrations
+  (id, checksum, finished_at, migration_name, logs, rolled_back_at, started_at, applied_steps_count)
+VALUES
+  (gen_random_uuid()::text, 'manual', NOW(),
+   '20260429000001_award_categories_scope', NULL, NULL, NOW(), 1);
 
-\i sacdia-backend/prisma/migrations/20260429000200_member_rankings_seeds/migration.sql
-INSERT INTO _prisma_migrations (id, checksum, finished_at, migration_name, logs, rolled_back_at, started_at, applied_steps_count)
-VALUES (gen_random_uuid()::text, 'manual', NOW(), '20260429000200_member_rankings_seeds', NULL, NULL, NOW(), 1);
+\i sacdia-backend/prisma/migrations/20260429000002_enrollment_rankings_seeds/migration.sql
+INSERT INTO _prisma_migrations
+  (id, checksum, finished_at, migration_name, logs, rolled_back_at, started_at, applied_steps_count)
+VALUES
+  (gen_random_uuid()::text, 'manual', NOW(),
+   '20260429000002_enrollment_rankings_seeds', NULL, NULL, NOW(), 1);
 
-\i sacdia-backend/prisma/migrations/20260429000300_member_rankings_award_seeds/migration.sql
-INSERT INTO _prisma_migrations (id, checksum, finished_at, migration_name, logs, rolled_back_at, started_at, applied_steps_count)
-VALUES (gen_random_uuid()::text, 'manual', NOW(), '20260429000300_member_rankings_award_seeds', NULL, NULL, NOW(), 1);
+\i sacdia-backend/prisma/migrations/20260429000003_enrollment_rankings_default_award_seeds/migration.sql
+INSERT INTO _prisma_migrations
+  (id, checksum, finished_at, migration_name, logs, rolled_back_at, started_at, applied_steps_count)
+VALUES
+  (gen_random_uuid()::text, 'manual', NOW(),
+   '20260429000003_enrollment_rankings_default_award_seeds', NULL, NULL, NOW(), 1);
 
 COMMIT;
 SQL
-done
 ```
 
-Si CUALQUIER branch falla, abortar el loop y NO continuar. Investigar root cause antes de retry. Si falla post-apply (verify), correr rollback DDL del spec §11.8 sobre el branch afectado.
+Repetir con staging y production. Pattern engram #1204/#1296/#1839.
 
-- [ ] **Step 3: Verify post-apply per branch**
+- [ ] **Step 3: Verify post-apply por branch**
 
 ```bash
-for BRANCH in development staging production; do
-  URL=$(neonctl connection-string $BRANCH --project-id wispy-hall-32797215)
-  echo "=== Verify $BRANCH ==="
-  $PSQL "$URL" -v ON_ERROR_STOP=1 <<'SQL'
-SELECT to_regclass('public.member_rankings') IS NOT NULL AS member_rankings_ok,
-       to_regclass('public.section_rankings') IS NOT NULL AS section_rankings_ok,
-       to_regclass('public.member_ranking_weights') IS NOT NULL AS weights_ok;
--- expect: t,t,t
+$PSQL "$URL" -v ON_ERROR_STOP=1 <<'SQL'
+SELECT to_regclass('public.enrollment_rankings');
+SELECT to_regclass('public.section_rankings');
+SELECT to_regclass('public.enrollment_ranking_weights');
 
-SELECT class_pct, evidence_pct, investiture_pct, camporee_pct
-  FROM member_ranking_weights
+SELECT scope FROM award_categories LIMIT 1;
+-- expect: 'club'
+
+SELECT class_pct, investiture_pct, camporee_pct
+  FROM enrollment_ranking_weights
   WHERE club_type_id IS NULL AND ecclesiastical_year_id IS NULL;
--- expect: (40, 25, 20, 15)
+-- expect: (50, 30, 20)
 
-SELECT COUNT(*) FROM system_config WHERE config_key LIKE 'member_ranking.%';
+SELECT count(*) FROM permissions WHERE permission_name LIKE 'member_rankings:%';
+-- expect: 5
+SELECT count(*) FROM permissions WHERE permission_name LIKE 'member_ranking_weights:%';
+-- expect: 2
+SELECT count(*) FROM permissions WHERE permission_name LIKE 'section_rankings:%';
 -- expect: 3
 
-SELECT COUNT(*) FROM permissions
-  WHERE code LIKE 'member_rankings:%' OR code LIKE 'section_rankings:%' OR code LIKE 'member_ranking_weights:%';
--- expect: 10
+SELECT count(*) FROM award_categories WHERE scope = 'member';
+-- expect: 5
+SELECT count(*) FROM award_categories WHERE scope = 'section';
+-- expect: 5
 
-SELECT COUNT(*) FROM award_categories WHERE scope = 'member';
--- expect: >= 5
-
-SELECT COUNT(*) FROM award_categories WHERE scope = 'section';
--- expect: >= 5
-
-SELECT migration_name FROM _prisma_migrations WHERE migration_name LIKE '20260429%' ORDER BY migration_name;
+SELECT migration_name FROM _prisma_migrations WHERE migration_name LIKE '20260429%';
 -- expect: 4 rows
 SQL
-done
 ```
 
-- [ ] **Step 4: Engram save**
+Si CUALQUIER check falla: STOP. Ejecutar rollback §11.8 spec ANTES de retry.
 
-Save `mem_save` con topic_key `sacdia/migration/8-4-a-applied`, type=config, content: branches afectados, timestamps, verify outputs. NO commit code aún (no hay código TS aún).
+- [ ] **Step 4: Code review checkpoint** — quality-reviewer subagent contra outputs de los 3 branches.
+
+- [ ] **Step 5: Commit log de aplicación**
+
+```bash
+cd sacdia-backend
+git status --short
+# Si clean, no hay commit. Esta task es operacional.
+```
 
 ---
 
-### Task 5: Extender `schema.prisma` con 3 modelos nuevos + extension AwardCategory.scope
+### Task 3: Extend `schema.prisma` con 3 modelos nuevos + extension `award_categories.scope`
 
 **Files:**
 - Modify: `sacdia-backend/prisma/schema.prisma`
+- Generate: `sacdia-backend/node_modules/.prisma/client/`
 
-> **Race-safety**: ESTE es el único task que toca `schema.prisma`. Otros tasks NO modifican el archivo.
-
-- [ ] **Step 1: Localizar `model award_categories` y agregar campo scope**
+- [ ] **Step 1: Localizar `model award_categories` y agregar campo `scope`**
 
 ```prisma
 model award_categories {
-  // ...existing fields...
-  scope             String   @default("club") @db.VarChar(20)
-  // ...
+  // ... campos existentes ...
+  scope String @default("club") @db.VarChar(20)
+
   @@index([scope, is_legacy], map: "idx_award_categories_scope")
 }
 ```
 
-- [ ] **Step 2: Agregar 3 modelos nuevos al final del schema (después de los modelos de 8.4-C)**
+- [ ] **Step 2: Agregar `model EnrollmentRanking`** (Pascal case, mapea a `enrollment_rankings`)
 
 ```prisma
-model member_rankings {
-  id                       String       @id @default(uuid()) @db.Uuid
-  member_id                Int
+model EnrollmentRanking {
+  id                       String    @id @default(uuid()) @db.Uuid
+  enrollment_id            Int
+  user_id                  String    @db.Uuid
   club_id                  Int
   club_section_id          Int?
   ecclesiastical_year_id   Int
-  class_score_pct          Decimal?     @db.Decimal(5, 2)
-  evidence_score_pct       Decimal?     @db.Decimal(5, 2)
-  investiture_score_pct    Decimal?     @db.Decimal(5, 2)
-  camporee_score_pct       Decimal?     @db.Decimal(5, 2)
-  composite_score_pct      Decimal?     @db.Decimal(5, 2)
+  class_score_pct          Decimal?  @db.Decimal(5, 2)
+  investiture_score_pct    Decimal?  @db.Decimal(5, 2)
+  camporee_score_pct       Decimal?  @db.Decimal(5, 2)
+  composite_score_pct      Decimal?  @db.Decimal(5, 2)
   rank_position            Int?
-  awarded_category_id      String?      @db.Uuid
-  composite_calculated_at  DateTime?    @db.Timestamptz(6)
-  created_at               DateTime     @default(now()) @db.Timestamptz(6)
-  updated_at               DateTime     @default(now()) @db.Timestamptz(6)
+  awarded_category_id      String?   @db.Uuid
+  composite_calculated_at  DateTime? @db.Timestamptz(6)
+  created_at               DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at               DateTime  @default(now()) @db.Timestamptz(6)
 
-  members                  members              @relation(fields: [member_id], references: [member_id], onDelete: Cascade)
-  clubs                    clubs                @relation(fields: [club_id], references: [club_id])
-  club_sections            club_sections?       @relation(fields: [club_section_id], references: [club_section_id])
-  ecclesiastical_years     ecclesiastical_years @relation(fields: [ecclesiastical_year_id], references: [year_id])
-  award_categories         award_categories?    @relation(fields: [awarded_category_id], references: [award_category_id])
+  enrollment               enrollments          @relation(fields: [enrollment_id], references: [enrollment_id], onDelete: Cascade)
+  user                     users                @relation(fields: [user_id], references: [user_id])
+  club                     clubs                @relation(fields: [club_id], references: [club_id])
+  club_section             club_sections?       @relation(fields: [club_section_id], references: [club_section_id])
+  ecclesiastical_year      ecclesiastical_years @relation(fields: [ecclesiastical_year_id], references: [year_id])
+  awarded_category         award_categories?    @relation(fields: [awarded_category_id], references: [award_category_id])
 
-  @@unique([member_id, ecclesiastical_year_id], map: "uq_member_rankings_member_year")
-  @@index([club_id, ecclesiastical_year_id], map: "idx_member_rankings_club_year")
-  @@index([club_section_id, ecclesiastical_year_id], map: "idx_member_rankings_section_year")
-  @@index([club_id, ecclesiastical_year_id, composite_score_pct(sort: Desc)], map: "idx_member_rankings_composite")
-}
-
-model section_rankings {
-  id                       String      @id @default(uuid()) @db.Uuid
-  club_section_id          Int
-  club_id                  Int
-  ecclesiastical_year_id   Int
-  composite_score_pct      Decimal?    @db.Decimal(5, 2)
-  active_member_count      Int         @default(0)
-  rank_position            Int?
-  awarded_category_id      String?     @db.Uuid
-  composite_calculated_at  DateTime?   @db.Timestamptz(6)
-  created_at               DateTime    @default(now()) @db.Timestamptz(6)
-  updated_at               DateTime    @default(now()) @db.Timestamptz(6)
-
-  club_sections            club_sections        @relation(fields: [club_section_id], references: [club_section_id], onDelete: Cascade)
-  clubs                    clubs                @relation(fields: [club_id], references: [club_id])
-  ecclesiastical_years     ecclesiastical_years @relation(fields: [ecclesiastical_year_id], references: [year_id])
-  award_categories         award_categories?    @relation(fields: [awarded_category_id], references: [award_category_id])
-
-  @@unique([club_section_id, ecclesiastical_year_id], map: "uq_section_rankings_section_year")
-  @@index([club_id, ecclesiastical_year_id], map: "idx_section_rankings_club_year")
-}
-
-model member_ranking_weights {
-  id                       String     @id @default(uuid()) @db.Uuid
-  club_type_id             Int?
-  ecclesiastical_year_id   Int?
-  class_pct                Decimal    @db.Decimal(5, 2)
-  evidence_pct             Decimal    @db.Decimal(5, 2)
-  investiture_pct          Decimal    @db.Decimal(5, 2)
-  camporee_pct             Decimal    @db.Decimal(5, 2)
-  is_default               Boolean    @default(false)
-  created_at               DateTime   @default(now()) @db.Timestamptz(6)
-  updated_at               DateTime   @default(now()) @db.Timestamptz(6)
-
-  club_types               club_types?           @relation(fields: [club_type_id], references: [club_type_id])
-  ecclesiastical_years     ecclesiastical_years? @relation(fields: [ecclesiastical_year_id], references: [year_id])
-
-  @@unique([club_type_id, ecclesiastical_year_id], map: "uq_member_weights_type_year")
+  @@unique([enrollment_id, ecclesiastical_year_id], map: "uq_enrollment_rankings_enrollment_year")
+  @@index([club_id, ecclesiastical_year_id], map: "idx_enrollment_rankings_club_year")
+  @@index([club_section_id, ecclesiastical_year_id], map: "idx_enrollment_rankings_section_year")
+  @@index([club_id, ecclesiastical_year_id, composite_score_pct(sort: Desc)], map: "idx_enrollment_rankings_composite")
+  @@index([user_id], map: "idx_enrollment_rankings_user")
+  @@map("enrollment_rankings")
 }
 ```
 
-- [ ] **Step 3: Agregar reverse relations a modelos existentes**
+- [ ] **Step 3: Agregar `model SectionRanking`**
 
-En `model members`: `member_rankings member_rankings[]`
-En `model clubs`: `member_rankings member_rankings[]` y `section_rankings section_rankings[]`
-En `model club_sections`: `member_rankings member_rankings[]` y `section_rankings section_rankings[]`
-En `model ecclesiastical_years`: `member_rankings member_rankings[]`, `section_rankings section_rankings[]`, `member_ranking_weights member_ranking_weights[]`
-En `model club_types`: `member_ranking_weights member_ranking_weights[]`
-En `model award_categories`: `member_rankings member_rankings[]` y `section_rankings section_rankings[]`
+```prisma
+model SectionRanking {
+  id                       String    @id @default(uuid()) @db.Uuid
+  club_section_id          Int
+  club_id                  Int
+  ecclesiastical_year_id   Int
+  composite_score_pct      Decimal?  @db.Decimal(5, 2)
+  active_enrollment_count  Int       @default(0)
+  rank_position            Int?
+  awarded_category_id      String?   @db.Uuid
+  composite_calculated_at  DateTime? @db.Timestamptz(6)
+  created_at               DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at               DateTime  @default(now()) @db.Timestamptz(6)
 
-- [ ] **Step 4: Run prisma generate**
+  club_section             club_sections        @relation(fields: [club_section_id], references: [club_section_id], onDelete: Cascade)
+  club                     clubs                @relation(fields: [club_id], references: [club_id])
+  ecclesiastical_year      ecclesiastical_years @relation(fields: [ecclesiastical_year_id], references: [year_id])
+  awarded_category         award_categories?    @relation(fields: [awarded_category_id], references: [award_category_id])
+
+  @@unique([club_section_id, ecclesiastical_year_id], map: "uq_section_rankings_section_year")
+  @@index([club_id, ecclesiastical_year_id], map: "idx_section_rankings_club_year")
+  @@index([club_id, ecclesiastical_year_id, composite_score_pct(sort: Desc)], map: "idx_section_rankings_composite")
+  @@map("section_rankings")
+}
+```
+
+- [ ] **Step 4: Agregar `model EnrollmentRankingWeight`**
+
+```prisma
+model EnrollmentRankingWeight {
+  id                       String    @id @default(uuid()) @db.Uuid
+  club_type_id             Int?
+  ecclesiastical_year_id   Int?
+  class_pct                Decimal   @db.Decimal(5, 2)
+  investiture_pct          Decimal   @db.Decimal(5, 2)
+  camporee_pct             Decimal   @db.Decimal(5, 2)
+  is_default               Boolean   @default(false)
+  created_at               DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at               DateTime  @default(now()) @db.Timestamptz(6)
+
+  club_type                club_types?           @relation(fields: [club_type_id], references: [club_type_id])
+  ecclesiastical_year      ecclesiastical_years? @relation(fields: [ecclesiastical_year_id], references: [year_id])
+
+  @@unique([club_type_id, ecclesiastical_year_id], map: "uq_enrollment_weights_type_year")
+  @@map("enrollment_ranking_weights")
+}
+```
+
+- [ ] **Step 5: Reverse relations en modelos existentes**
+
+En `enrollments`, `users`, `clubs`, `club_sections`, `club_types`, `ecclesiastical_years`, `award_categories` agregar campos del tipo `EnrollmentRanking[]`, `SectionRanking[]`, `EnrollmentRankingWeight[]` según corresponda.
+
+- [ ] **Step 6: `prisma generate` + `tsc --noEmit`**
 
 ```bash
 cd sacdia-backend
@@ -651,17 +579,20 @@ pnpm prisma generate
 pnpm tsc --noEmit
 ```
 
-Expected: ambos exit 0. Si `tsc` reporta errores, generalmente es relación faltante en algún modelo existente — revisar paso 3.
+- [ ] **Step 7: Code review checkpoint** — quality-reviewer subagent: ¿`@@map` correcto? ¿FKs correctas? ¿NULLs alineados con DDL?
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 8: Commit**
 
 ```bash
+cd sacdia-backend
 git add prisma/schema.prisma
 git commit -m "$(cat <<'EOF'
-feat(schema): add member + section rankings Prisma models (8.4-A)
+feat(schema): add EnrollmentRanking, SectionRanking, EnrollmentRankingWeight models
 
-3 new models (member_rankings, section_rankings, member_ranking_weights),
-extend award_categories with scope field, regenerate Prisma client.
+Pascal case Prisma models map to snake_case tables (@@map).
+Adds reverse relations on enrollments, users, clubs, club_sections,
+club_types, ecclesiastical_years, award_categories. Adds polymorphic
+scope field to award_categories.
 EOF
 )"
 ```
@@ -670,1608 +601,1913 @@ EOF
 
 ## Phase 2 — Backend score calculators TDD (sacdia-backend)
 
-> **Reglas TDD**: cada calculator se implementa en orden estricto: spec test PRIMERO con código completo de los assertions, run `pnpm jest <file>` esperando FAIL, then minimal implementation, run again esperando PASS, then commit. NO se permite saltarse el "run failing first" step. Si audit Task 1 reportó que la tabla fuente no existe, aplicar el workaround documentado en Phase 0 ANTES de escribir el calculator.
+Cada calculator TDD: spec test PRIMERO, then impl, run, commit. NUNCA lanzan excepciones por dato faltante (retornan `null`).
 
-> **Carpeta destino para los 6 servicios**: `sacdia-backend/src/member-rankings/score-calculators/`. Module wiring se hace en Task 12.
-
-### Task 6: `ClassScoreService` TDD
+### Task 4: `ClassScoreService` TDD
 
 **Files:**
-- Create: `sacdia-backend/src/member-rankings/score-calculators/class-score.ts`
-- Create: `sacdia-backend/src/member-rankings/score-calculators/class-score.spec.ts`
+- Create: `sacdia-backend/src/rankings/member-rankings/services/class-score.service.ts`
+- Test: `sacdia-backend/src/rankings/member-rankings/services/class-score.service.spec.ts`
+
+**OQ5 resolution (in-task)**: default = `class_module_progress.active = true AND score IS NOT NULL` cuenta como completado. Si equipo backend define otra regla, ajustar test cases primero.
 
 - [ ] **Step 1: Write failing test**
 
 ```typescript
+// class-score.service.spec.ts
 import { Test } from '@nestjs/testing';
-import { PrismaService } from '../../prisma/prisma.service';
-import { ClassScoreService } from './class-score';
+import { ClassScoreService } from './class-score.service';
+import { PrismaService } from '../../../prisma/prisma.service';
 
-describe('ClassScoreService.calculate', () => {
-  let svc: ClassScoreService;
-  let prisma: { $queryRaw: jest.Mock };
+describe('ClassScoreService', () => {
+  let service: ClassScoreService;
+  let prisma: jest.Mocked<PrismaService>;
 
   beforeEach(async () => {
-    prisma = { $queryRaw: jest.fn() };
-    const m = await Test.createTestingModule({
-      providers: [ClassScoreService, { provide: PrismaService, useValue: prisma }],
+    const module = await Test.createTestingModule({
+      providers: [
+        ClassScoreService,
+        {
+          provide: PrismaService,
+          useValue: {
+            enrollments: { findUnique: jest.fn() },
+            class_module_progress: { count: jest.fn() },
+            class_modules: { count: jest.fn() },
+          },
+        },
+      ],
     }).compile();
-    svc = m.get(ClassScoreService);
+    service = module.get(ClassScoreService);
+    prisma = module.get(PrismaService);
   });
 
-  it('returns 60 when 3/5 classes completed', async () => {
-    prisma.$queryRaw
-      .mockResolvedValueOnce([{ completed: 3n, required: 5n }]);
-    const result = await svc.calculate(101, 7);
-    expect(Number(result)).toBe(60);
+  it('happy path: 3/5 modules completed → 60.00', async () => {
+    (prisma.enrollments.findUnique as jest.Mock).mockResolvedValue({
+      enrollment_id: 1, class_id: 10, ecclesiastical_year_id: 2,
+    });
+    (prisma.class_module_progress.count as jest.Mock).mockResolvedValue(3);
+    (prisma.class_modules.count as jest.Mock).mockResolvedValue(5);
+    expect(await service.calculate(1, 2)).toBe(60);
   });
 
-  it('returns NULL when required_count = 0', async () => {
-    prisma.$queryRaw
-      .mockResolvedValueOnce([{ completed: 0n, required: 0n }]);
-    const result = await svc.calculate(101, 7);
-    expect(result).toBeNull();
+  it('required_count = 0 → null', async () => {
+    (prisma.enrollments.findUnique as jest.Mock).mockResolvedValue({
+      enrollment_id: 1, class_id: 10, ecclesiastical_year_id: 2,
+    });
+    (prisma.class_module_progress.count as jest.Mock).mockResolvedValue(0);
+    (prisma.class_modules.count as jest.Mock).mockResolvedValue(0);
+    expect(await service.calculate(1, 2)).toBeNull();
   });
 
-  it('returns 100 when completed > required (defensive clamp)', async () => {
-    prisma.$queryRaw
-      .mockResolvedValueOnce([{ completed: 12n, required: 8n }]);
-    const result = await svc.calculate(101, 7);
-    expect(Number(result)).toBe(100);
+  it('completed > required → clamp 100', async () => {
+    (prisma.enrollments.findUnique as jest.Mock).mockResolvedValue({
+      enrollment_id: 1, class_id: 10, ecclesiastical_year_id: 2,
+    });
+    (prisma.class_module_progress.count as jest.Mock).mockResolvedValue(7);
+    (prisma.class_modules.count as jest.Mock).mockResolvedValue(5);
+    expect(await service.calculate(1, 2)).toBe(100);
   });
 
-  it('returns 100 when fully completed', async () => {
-    prisma.$queryRaw
-      .mockResolvedValueOnce([{ completed: 5n, required: 5n }]);
-    const result = await svc.calculate(101, 7);
-    expect(Number(result)).toBe(100);
+  it('no enrollment → null', async () => {
+    (prisma.enrollments.findUnique as jest.Mock).mockResolvedValue(null);
+    expect(await service.calculate(999, 2)).toBeNull();
   });
 
-  it('returns 0 when none completed', async () => {
-    prisma.$queryRaw
-      .mockResolvedValueOnce([{ completed: 0n, required: 5n }]);
-    const result = await svc.calculate(101, 7);
-    expect(Number(result)).toBe(0);
+  it('exact 0 completed of 5 required → 0', async () => {
+    (prisma.enrollments.findUnique as jest.Mock).mockResolvedValue({
+      enrollment_id: 1, class_id: 10, ecclesiastical_year_id: 2,
+    });
+    (prisma.class_module_progress.count as jest.Mock).mockResolvedValue(0);
+    (prisma.class_modules.count as jest.Mock).mockResolvedValue(5);
+    expect(await service.calculate(1, 2)).toBe(0);
   });
 });
 ```
 
-- [ ] **Step 2: Run, expect FAIL**
+- [ ] **Step 2: Run test, expect FAIL**
 
 ```bash
 cd sacdia-backend
-pnpm jest src/member-rankings/score-calculators/class-score.spec.ts
+pnpm test class-score.service.spec.ts
+# expected: ALL fail (service not implemented)
 ```
 
-Expected: `Cannot find module './class-score'`.
-
-- [ ] **Step 3: Implement minimal `class-score.ts`**
+- [ ] **Step 3: Implement `class-score.service.ts`**
 
 ```typescript
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
+import { PrismaService } from '../../../prisma/prisma.service';
 
 @Injectable()
 export class ClassScoreService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async calculate(memberId: number, ecclesiasticalYearId: number): Promise<number | null> {
-    // NOTA: nombres de tabla/columna confirmados por audit A4. Si difieren, ajustar aquí.
-    const rows = await this.prisma.$queryRaw<{ completed: bigint; required: bigint }[]>`
-      SELECT
-        (SELECT COUNT(*)::bigint
-           FROM member_class_progress mcp
-           WHERE mcp.member_id = ${memberId}
-             AND mcp.ecclesiastical_year_id = ${ecclesiasticalYearId}
-             AND mcp.status = 'completed') AS completed,
-        (SELECT COUNT(*)::bigint
-           FROM class_modules cm
-           JOIN members m ON m.member_id = ${memberId}
-           WHERE cm.club_type_id = m.club_type_id
-             AND cm.is_required = true) AS required
-    `;
-    const completed = Number(rows[0]?.completed ?? 0n);
-    const required = Number(rows[0]?.required ?? 0n);
-    if (required === 0) return null;
-    const pct = Math.min((completed / required) * 100, 100);
-    return Number(pct.toFixed(2));
+  async calculate(
+    enrollmentId: number,
+    ecclesiasticalYearId: number,
+  ): Promise<number | null> {
+    const enrollment = await this.prisma.enrollments.findUnique({
+      where: { enrollment_id: enrollmentId },
+    });
+    if (!enrollment) return null;
+
+    const completedCount = await this.prisma.class_module_progress.count({
+      where: {
+        enrollment_id: enrollmentId,
+        active: true,
+        score: { not: null },
+      },
+    });
+
+    const requiredCount = await this.prisma.class_modules.count({
+      where: { class_id: enrollment.class_id },
+    });
+
+    if (requiredCount === 0) return null;
+    return Math.min((completedCount / requiredCount) * 100, 100);
   }
 }
 ```
 
-- [ ] **Step 4: Run, expect PASS**
+- [ ] **Step 4: Run test, expect PASS**
 
 ```bash
-pnpm jest src/member-rankings/score-calculators/class-score.spec.ts
+pnpm test class-score.service.spec.ts
+# expected: all 5 specs pass
 ```
 
-Expected: 5 tests pass.
+- [ ] **Step 5: Code review checkpoint** — quality-reviewer subagent: ¿OQ5 default está documentado? ¿Math.min clamp correcto? ¿no lanza por null?
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 6: Commit**
 
 ```bash
-git add src/member-rankings/score-calculators/class-score.ts \
-        src/member-rankings/score-calculators/class-score.spec.ts
-git commit -m "feat(member-rankings): add ClassScoreService with NULL-on-zero-required"
+git add sacdia-backend/src/rankings/member-rankings/services/class-score.service.{ts,spec.ts}
+git commit -m "$(cat <<'EOF'
+feat(enrollment-rankings): add ClassScoreService TDD
+
+Returns NULL when required_count=0 (data insufficient).
+Clamps to [0,100]. Uses class_module_progress (audit A4 real table)
+joined to enrollments via enrollment_id for year filtering.
+EOF
+)"
 ```
 
 ---
 
-### Task 7: `EvidenceScoreService` TDD
+### Task 5: `InvestitureScoreService` TDD (BINARIO)
 
 **Files:**
-- Create: `sacdia-backend/src/member-rankings/score-calculators/evidence-score.ts`
-- Create: `sacdia-backend/src/member-rankings/score-calculators/evidence-score.spec.ts`
-
-> Si audit A5 reportó MISSING para `evidence_attendance`, aplicar workaround locked en Phase 0 (probable: derivar de `annual_folder_section_evaluations` per-member o block calculator retornando NULL).
+- Create: `sacdia-backend/src/rankings/member-rankings/services/investiture-score.service.ts`
+- Test: `sacdia-backend/src/rankings/member-rankings/services/investiture-score.service.spec.ts`
 
 - [ ] **Step 1: Write failing test**
 
 ```typescript
 import { Test } from '@nestjs/testing';
-import { PrismaService } from '../../prisma/prisma.service';
-import { EvidenceScoreService } from './evidence-score';
+import { InvestitureScoreService } from './investiture-score.service';
+import { PrismaService } from '../../../prisma/prisma.service';
 
-describe('EvidenceScoreService.calculate', () => {
-  let svc: EvidenceScoreService;
-  let prisma: { $queryRaw: jest.Mock };
+describe('InvestitureScoreService', () => {
+  let service: InvestitureScoreService;
+  let prisma: jest.Mocked<PrismaService>;
 
   beforeEach(async () => {
-    prisma = { $queryRaw: jest.fn() };
-    const m = await Test.createTestingModule({
-      providers: [EvidenceScoreService, { provide: PrismaService, useValue: prisma }],
+    const module = await Test.createTestingModule({
+      providers: [
+        InvestitureScoreService,
+        { provide: PrismaService, useValue: { enrollments: { findFirst: jest.fn() } } },
+      ],
     }).compile();
-    svc = m.get(EvidenceScoreService);
+    service = module.get(InvestitureScoreService);
+    prisma = module.get(PrismaService);
   });
 
-  it('returns 80 when attended 8/10 evidences', async () => {
-    prisma.$queryRaw.mockResolvedValueOnce([{ attended: 8n, total: 10n }]);
-    expect(Number(await svc.calculate(101, 7))).toBe(80);
+  it('INVESTIDO → 100', async () => {
+    (prisma.enrollments.findFirst as jest.Mock).mockResolvedValue({
+      enrollment_id: 1, investiture_status: 'INVESTIDO',
+    });
+    expect(await service.calculate(1, 2)).toBe(100);
   });
 
-  it('returns NULL when total_evidences = 0', async () => {
-    prisma.$queryRaw.mockResolvedValueOnce([{ attended: 0n, total: 0n }]);
-    expect(await svc.calculate(101, 7)).toBeNull();
+  it('IN_PROGRESS → 0', async () => {
+    (prisma.enrollments.findFirst as jest.Mock).mockResolvedValue({
+      enrollment_id: 1, investiture_status: 'IN_PROGRESS',
+    });
+    expect(await service.calculate(1, 2)).toBe(0);
   });
 
-  it('returns 100 when 100% attended', async () => {
-    prisma.$queryRaw.mockResolvedValueOnce([{ attended: 10n, total: 10n }]);
-    expect(Number(await svc.calculate(101, 7))).toBe(100);
+  it('no enrollment for year → null', async () => {
+    (prisma.enrollments.findFirst as jest.Mock).mockResolvedValue(null);
+    expect(await service.calculate(1, 999)).toBeNull();
   });
 
-  it('returns 0 when 0 attended', async () => {
-    prisma.$queryRaw.mockResolvedValueOnce([{ attended: 0n, total: 10n }]);
-    expect(Number(await svc.calculate(101, 7))).toBe(0);
+  it('multiple enrollments same year → uses first (findFirst)', async () => {
+    (prisma.enrollments.findFirst as jest.Mock).mockResolvedValue({
+      enrollment_id: 1, investiture_status: 'INVESTIDO',
+    });
+    expect(await service.calculate(1, 2)).toBe(100);
+    expect(prisma.enrollments.findFirst).toHaveBeenCalledWith({
+      where: { enrollment_id: 1, ecclesiastical_year_id: 2 },
+    });
   });
 });
 ```
 
-- [ ] **Step 2: Run, expect FAIL**
+- [ ] **Step 2: Run test, expect FAIL**
 
 ```bash
-pnpm jest src/member-rankings/score-calculators/evidence-score.spec.ts
+pnpm test investiture-score.service.spec.ts
 ```
 
 - [ ] **Step 3: Implement**
 
 ```typescript
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
-
-@Injectable()
-export class EvidenceScoreService {
-  constructor(private readonly prisma: PrismaService) {}
-
-  async calculate(memberId: number, ecclesiasticalYearId: number): Promise<number | null> {
-    // NOTA: si A5 reporta MISSING, swap esta query por workaround locked en Phase 0.
-    const rows = await this.prisma.$queryRaw<{ attended: bigint; total: bigint }[]>`
-      SELECT
-        (SELECT COUNT(DISTINCT ea.evidence_id)::bigint
-           FROM evidence_attendance ea
-           WHERE ea.member_id = ${memberId}
-             AND ea.ecclesiastical_year_id = ${ecclesiasticalYearId}) AS attended,
-        (SELECT COUNT(DISTINCT e.evidence_id)::bigint
-           FROM evidences e
-           JOIN members m ON m.member_id = ${memberId}
-           WHERE e.club_id = m.club_id
-             AND e.ecclesiastical_year_id = ${ecclesiasticalYearId}
-             AND e.active = true) AS total
-    `;
-    const attended = Number(rows[0]?.attended ?? 0n);
-    const total = Number(rows[0]?.total ?? 0n);
-    if (total === 0) return null;
-    const pct = Math.min((attended / total) * 100, 100);
-    return Number(pct.toFixed(2));
-  }
-}
-```
-
-- [ ] **Step 4: Run, expect PASS**
-
-```bash
-pnpm jest src/member-rankings/score-calculators/evidence-score.spec.ts
-```
-
-- [ ] **Step 5: Commit**
-
-```bash
-git add src/member-rankings/score-calculators/evidence-score.ts \
-        src/member-rankings/score-calculators/evidence-score.spec.ts
-git commit -m "feat(member-rankings): add EvidenceScoreService with NULL-on-zero-total"
-```
-
----
-
-### Task 8: `InvestitureScoreService` TDD
-
-**Files:**
-- Create: `sacdia-backend/src/member-rankings/score-calculators/investiture-score.ts`
-- Create: `sacdia-backend/src/member-rankings/score-calculators/investiture-score.spec.ts`
-
-> Si audit A11 reportó MISSING, aplicar workaround locked en Phase 0 (block o derivar). Decisión crítica: `eligible_count = 0` → NULL (NO 100). Tests blindan esto.
-
-- [ ] **Step 1: Write failing test**
-
-```typescript
-import { Test } from '@nestjs/testing';
-import { PrismaService } from '../../prisma/prisma.service';
-import { InvestitureScoreService } from './investiture-score';
-
-describe('InvestitureScoreService.calculate', () => {
-  let svc: InvestitureScoreService;
-  let prisma: { $queryRaw: jest.Mock };
-
-  beforeEach(async () => {
-    prisma = { $queryRaw: jest.fn() };
-    const m = await Test.createTestingModule({
-      providers: [InvestitureScoreService, { provide: PrismaService, useValue: prisma }],
-    }).compile();
-    svc = m.get(InvestitureScoreService);
-  });
-
-  it('returns ~66.67 for 2/3 investitures achieved', async () => {
-    prisma.$queryRaw.mockResolvedValueOnce([{ achieved: 2n, eligible: 3n }]);
-    expect(Number(await svc.calculate(101, 7))).toBeCloseTo(66.67, 2);
-  });
-
-  it('returns NULL when eligible_count = 0 (decisión crítica)', async () => {
-    prisma.$queryRaw.mockResolvedValueOnce([{ achieved: 0n, eligible: 0n }]);
-    expect(await svc.calculate(101, 7)).toBeNull();
-  });
-
-  it('returns 100 when achieved = eligible', async () => {
-    prisma.$queryRaw.mockResolvedValueOnce([{ achieved: 3n, eligible: 3n }]);
-    expect(Number(await svc.calculate(101, 7))).toBe(100);
-  });
-
-  it('returns 100 (clamped) when achieved > eligible (data corruption)', async () => {
-    prisma.$queryRaw.mockResolvedValueOnce([{ achieved: 5n, eligible: 3n }]);
-    expect(Number(await svc.calculate(101, 7))).toBe(100);
-  });
-
-  it('returns 0 when achieved = 0 with eligible > 0', async () => {
-    prisma.$queryRaw.mockResolvedValueOnce([{ achieved: 0n, eligible: 3n }]);
-    expect(Number(await svc.calculate(101, 7))).toBe(0);
-  });
-});
-```
-
-- [ ] **Step 2: Run, expect FAIL**
-
-```bash
-pnpm jest src/member-rankings/score-calculators/investiture-score.spec.ts
-```
-
-- [ ] **Step 3: Implement**
-
-```typescript
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
+import { PrismaService } from '../../../prisma/prisma.service';
 
 @Injectable()
 export class InvestitureScoreService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async calculate(memberId: number, ecclesiasticalYearId: number): Promise<number | null> {
-    // NOTA: nombres de tabla por audit A6/A11. Si A11 MISSING, retornar null incondicional.
-    const rows = await this.prisma.$queryRaw<{ achieved: bigint; eligible: bigint }[]>`
-      SELECT
-        (SELECT COUNT(*)::bigint
-           FROM investitures i
-           WHERE i.member_id = ${memberId}
-             AND i.achieved_year_id = ${ecclesiasticalYearId}
-             AND i.status = 'approved') AS achieved,
-        (SELECT COUNT(*)::bigint
-           FROM investiture_requirements ir
-           JOIN members m ON m.member_id = ${memberId}
-           WHERE ir.club_type_id = m.club_type_id
-             AND ir.seniority_year <= COALESCE(m.seniority_years, 0)) AS eligible
-    `;
-    const achieved = Number(rows[0]?.achieved ?? 0n);
-    const eligible = Number(rows[0]?.eligible ?? 0n);
-    if (eligible === 0) return null;
-    const pct = Math.min((achieved / eligible) * 100, 100);
-    return Number(pct.toFixed(2));
+  async calculate(
+    enrollmentId: number,
+    ecclesiasticalYearId: number,
+  ): Promise<number | null> {
+    const enrollment = await this.prisma.enrollments.findFirst({
+      where: {
+        enrollment_id: enrollmentId,
+        ecclesiastical_year_id: ecclesiasticalYearId,
+      },
+    });
+    if (!enrollment) return null;
+    return enrollment.investiture_status === 'INVESTIDO' ? 100 : 0;
   }
 }
 ```
 
-- [ ] **Step 4: Run, expect PASS**
+- [ ] **Step 4: Run test, expect PASS**
 
 ```bash
-pnpm jest src/member-rankings/score-calculators/investiture-score.spec.ts
+pnpm test investiture-score.service.spec.ts
 ```
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 5: Code review checkpoint** — verifica modelo binario de spec §7.2.
+
+- [ ] **Step 6: Commit**
 
 ```bash
-git add src/member-rankings/score-calculators/investiture-score.ts \
-        src/member-rankings/score-calculators/investiture-score.spec.ts
-git commit -m "feat(member-rankings): add InvestitureScoreService (NULL on zero eligible)"
+git add sacdia-backend/src/rankings/member-rankings/services/investiture-score.service.{ts,spec.ts}
+git commit -m "$(cat <<'EOF'
+feat(enrollment-rankings): add InvestitureScoreService TDD (binary model)
+
+INVESTIDO → 100, IN_PROGRESS → 0, no enrollment → null.
+Audit A6/A11: investiture_requirements table doesn't exist;
+binary signal via enrollments.investiture_status enum.
+EOF
+)"
 ```
 
 ---
 
-### Task 9: `CamporeeScoreService` per-member TDD
+### Task 6: `CamporeeScoreService` per-enrollment TDD
 
 **Files:**
-- Create: `sacdia-backend/src/member-rankings/score-calculators/camporee-score.ts`
-- Create: `sacdia-backend/src/member-rankings/score-calculators/camporee-score.spec.ts`
+- Create: `sacdia-backend/src/rankings/member-rankings/services/camporee-score.service.ts`
+- Test: `sacdia-backend/src/rankings/member-rankings/services/camporee-score.service.spec.ts`
 
-> Diferencia con 8.4-C: numerador = camporees a los que el MIEMBRO asistió (no el club). Denominador igual al club: camporees del scope union. **Engram #1850**: clubs sin `union_id` directo, derivar via `local_fields`.
+Adaptación del `CamporeeScoreService` club-level de 8.4-C, ahora per-enrollment con `user_id UUID`.
 
 - [ ] **Step 1: Write failing test**
 
 ```typescript
 import { Test } from '@nestjs/testing';
-import { PrismaService } from '../../prisma/prisma.service';
-import { CamporeeScoreService } from './camporee-score';
+import { CamporeeScoreService } from './camporee-score.service';
+import { PrismaService } from '../../../prisma/prisma.service';
 
-describe('CamporeeScoreService.calculate (per-member)', () => {
-  let svc: CamporeeScoreService;
-  let prisma: { $queryRaw: jest.Mock };
+describe('CamporeeScoreService (per-enrollment)', () => {
+  let service: CamporeeScoreService;
+  let prisma: any;
 
   beforeEach(async () => {
-    prisma = { $queryRaw: jest.fn() };
-    const m = await Test.createTestingModule({
-      providers: [CamporeeScoreService, { provide: PrismaService, useValue: prisma }],
+    prisma = {
+      enrollments: { findFirst: jest.fn() },
+      camporee_members: { count: jest.fn() },
+      clubs: { findUnique: jest.fn() },
+      local_camporees: { findMany: jest.fn() },
+      union_camporees: { findMany: jest.fn() },
+    };
+    const module = await Test.createTestingModule({
+      providers: [
+        CamporeeScoreService,
+        { provide: PrismaService, useValue: prisma },
+      ],
     }).compile();
-    svc = m.get(CamporeeScoreService);
+    service = module.get(CamporeeScoreService);
   });
 
-  it('returns 50 when attended 1/2', async () => {
-    prisma.$queryRaw
-      .mockResolvedValueOnce([{ resolved_union_id: 3 }])  // resolve union via local_field
-      .mockResolvedValueOnce([{ total: 2n }])             // denom
-      .mockResolvedValueOnce([{ participated: 1n }]);     // numer
-    expect(Number(await svc.calculate(101, 7))).toBe(50);
+  it('happy path: 1/2 approved → 50', async () => {
+    prisma.enrollments.findFirst.mockResolvedValue({
+      enrollment_id: 1, user_id: 'u1', club_id: 10, ecclesiastical_year_id: 2,
+    });
+    prisma.camporee_members.count.mockResolvedValue(1);
+    prisma.clubs.findUnique.mockResolvedValue({ club_id: 10, local_fields: { union_id: 5 } });
+    prisma.local_camporees.findMany.mockResolvedValue([{ local_camporee_id: 1 }]);
+    prisma.union_camporees.findMany.mockResolvedValue([{ union_camporee_id: 1 }]);
+    expect(await service.calculate(1, 2)).toBe(50);
   });
 
-  it('returns NULL when total_camporees = 0', async () => {
-    prisma.$queryRaw
-      .mockResolvedValueOnce([{ resolved_union_id: 3 }])
-      .mockResolvedValueOnce([{ total: 0n }]);
-    expect(await svc.calculate(101, 7)).toBeNull();
+  it('total_camporees = 0 → null', async () => {
+    prisma.enrollments.findFirst.mockResolvedValue({
+      enrollment_id: 1, user_id: 'u1', club_id: 10, ecclesiastical_year_id: 2,
+    });
+    prisma.camporee_members.count.mockResolvedValue(0);
+    prisma.clubs.findUnique.mockResolvedValue({ club_id: 10, local_fields: { union_id: 5 } });
+    prisma.local_camporees.findMany.mockResolvedValue([]);
+    prisma.union_camporees.findMany.mockResolvedValue([]);
+    expect(await service.calculate(1, 2)).toBeNull();
   });
 
-  it('handles member whose club has no resolvable union (fallback nationals only)', async () => {
-    prisma.$queryRaw
-      .mockResolvedValueOnce([{ resolved_union_id: null }])
-      .mockResolvedValueOnce([{ total: 1n }])
-      .mockResolvedValueOnce([{ participated: 1n }]);
-    expect(Number(await svc.calculate(101, 7))).toBe(100);
+  it('club without union_id → only nationals (union_id NULL) in denom', async () => {
+    prisma.enrollments.findFirst.mockResolvedValue({
+      enrollment_id: 1, user_id: 'u1', club_id: 10, ecclesiastical_year_id: 2,
+    });
+    prisma.camporee_members.count.mockResolvedValue(1);
+    prisma.clubs.findUnique.mockResolvedValue({ club_id: 10, local_fields: null });
+    prisma.local_camporees.findMany.mockResolvedValue([{ local_camporee_id: 1 }]);
+    prisma.union_camporees.findMany.mockResolvedValue([]);
+    expect(await service.calculate(1, 2)).toBe(100);
   });
 
-  it('returns 100 when participated = total', async () => {
-    prisma.$queryRaw
-      .mockResolvedValueOnce([{ resolved_union_id: 3 }])
-      .mockResolvedValueOnce([{ total: 2n }])
-      .mockResolvedValueOnce([{ participated: 2n }]);
-    expect(Number(await svc.calculate(101, 7))).toBe(100);
+  it('all approved (3/3) → 100', async () => {
+    prisma.enrollments.findFirst.mockResolvedValue({
+      enrollment_id: 1, user_id: 'u1', club_id: 10, ecclesiastical_year_id: 2,
+    });
+    prisma.camporee_members.count.mockResolvedValue(3);
+    prisma.clubs.findUnique.mockResolvedValue({ club_id: 10, local_fields: { union_id: 5 } });
+    prisma.local_camporees.findMany.mockResolvedValue([{ local_camporee_id: 1 }, { local_camporee_id: 2 }]);
+    prisma.union_camporees.findMany.mockResolvedValue([{ union_camporee_id: 1 }]);
+    expect(await service.calculate(1, 2)).toBe(100);
+  });
+
+  it('no enrollment → null', async () => {
+    prisma.enrollments.findFirst.mockResolvedValue(null);
+    expect(await service.calculate(999, 2)).toBeNull();
   });
 });
 ```
 
-- [ ] **Step 2: Run, expect FAIL**
+- [ ] **Step 2: Run test, expect FAIL**
 
 ```bash
-pnpm jest src/member-rankings/score-calculators/camporee-score.spec.ts
+pnpm test camporee-score.service.spec.ts
 ```
 
 - [ ] **Step 3: Implement**
 
 ```typescript
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
+import { PrismaService } from '../../../prisma/prisma.service';
 
 @Injectable()
 export class CamporeeScoreService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async calculate(memberId: number, ecclesiasticalYearId: number): Promise<number | null> {
-    // 1. Resolver union_id del miembro vía local_fields (engram #1850: clubs no tiene union_id directo)
-    const unionRows = await this.prisma.$queryRaw<{ resolved_union_id: number | null }[]>`
-      SELECT lf.union_id AS resolved_union_id
-      FROM members m
-      JOIN clubs c ON c.club_id = m.club_id
-      JOIN local_fields lf ON lf.local_field_id = c.local_field_id
-      WHERE m.member_id = ${memberId}
-    `;
-    const unionId = unionRows[0]?.resolved_union_id ?? null;
+  async calculate(
+    enrollmentId: number,
+    ecclesiasticalYearId: number,
+  ): Promise<number | null> {
+    const enrollment = await this.prisma.enrollments.findFirst({
+      where: {
+        enrollment_id: enrollmentId,
+        ecclesiastical_year_id: ecclesiasticalYearId,
+      },
+    });
+    if (!enrollment) return null;
 
-    // 2. Denom: total camporees del scope (local del LF + nationals = union_id IS NULL)
-    const denomRows = await this.prisma.$queryRaw<{ total: bigint }[]>`
-      SELECT COUNT(*)::bigint AS total FROM (
-        SELECT local_camporee_id AS camporee_id FROM local_camporees
-          WHERE ecclesiastical_year_id = ${ecclesiasticalYearId} AND active = true
-            AND (local_field_id IN (SELECT local_field_id FROM local_fields WHERE union_id = ${unionId}) OR ${unionId}::int IS NULL)
-        UNION ALL
-        SELECT union_camporee_id AS camporee_id FROM union_camporees
-          WHERE ecclesiastical_year_id = ${ecclesiasticalYearId} AND active = true
-            AND (union_id = ${unionId} OR union_id IS NULL)
-      ) t
-    `;
-    const total = Number(denomRows[0]?.total ?? 0n);
-    if (total === 0) return null;
+    // engram #1850: clubs has no union_id; resolve via local_fields
+    const club = await this.prisma.clubs.findUnique({
+      where: { club_id: enrollment.club_id },
+      include: { local_fields: { select: { union_id: true } } },
+    });
+    const resolvedUnionId = club?.local_fields?.union_id ?? null;
 
-    // 3. Numer: camporees asistidos por este miembro
-    const numerRows = await this.prisma.$queryRaw<{ participated: bigint }[]>`
-      SELECT COUNT(DISTINCT ca.camporee_id)::bigint AS participated
-      FROM camporee_attendees ca
-      WHERE ca.member_id = ${memberId}
-        AND ca.ecclesiastical_year_id = ${ecclesiasticalYearId}
-        AND ca.status = 'attended'
-    `;
-    const participated = Number(numerRows[0]?.participated ?? 0n);
+    const [participatedCount, localCamporees, unionCamporees] = await Promise.all([
+      this.prisma.camporee_members.count({
+        where: { user_id: enrollment.user_id, status: 'approved' },
+      }),
+      this.prisma.local_camporees.findMany({
+        where: {
+          ecclesiastical_year: ecclesiasticalYearId,
+          active: true,
+          OR: [{ union_id: resolvedUnionId }, { union_id: null }],
+        },
+        select: { local_camporee_id: true },
+      }),
+      this.prisma.union_camporees.findMany({
+        where: {
+          ecclesiastical_year: ecclesiasticalYearId,
+          active: true,
+          OR: [{ union_id: resolvedUnionId }, { union_id: null }],
+        },
+        select: { union_camporee_id: true },
+      }),
+    ]);
 
-    const pct = Math.min((participated / total) * 100, 100);
-    return Number(pct.toFixed(2));
+    const totalCamporees = localCamporees.length + unionCamporees.length;
+    if (totalCamporees === 0) return null;
+    return Math.min((participatedCount / totalCamporees) * 100, 100);
   }
 }
 ```
 
-- [ ] **Step 4: Run, expect PASS**
+- [ ] **Step 4: Run test, expect PASS**
 
 ```bash
-pnpm jest src/member-rankings/score-calculators/camporee-score.spec.ts
+pnpm test camporee-score.service.spec.ts
 ```
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 5: Code review checkpoint** — engram #1850 split FK pattern aplicado (`union_id` resuelto vía `local_fields`).
+
+- [ ] **Step 6: Commit**
 
 ```bash
-git add src/member-rankings/score-calculators/camporee-score.ts \
-        src/member-rankings/score-calculators/camporee-score.spec.ts
-git commit -m "feat(member-rankings): add per-member CamporeeScoreService scoped via local_fields"
+git add sacdia-backend/src/rankings/member-rankings/services/camporee-score.service.{ts,spec.ts}
+git commit -m "$(cat <<'EOF'
+feat(enrollment-rankings): add per-enrollment CamporeeScoreService TDD
+
+Per-enrollment camporee score using camporee_members.user_id UUID.
+Resolves union_id via clubs.local_field_id → local_fields.union_id
+(engram #1850 — clubs has no direct union_id). Status='approved' locked
+as attendance signal (Q-RB4).
+EOF
+)"
 ```
 
 ---
 
-### Task 10: `MemberCompositeScoreService` TDD (NULL redistribution)
+### Task 7: `MemberCompositeScoreService` TDD (NULL redistribution)
 
 **Files:**
-- Create: `sacdia-backend/src/member-rankings/score-calculators/member-composite-score.ts`
-- Create: `sacdia-backend/src/member-rankings/score-calculators/member-composite-score.spec.ts`
-- Create: `sacdia-backend/src/member-rankings/score-calculators/member-weights-resolver.ts`
-- Create: `sacdia-backend/src/member-rankings/score-calculators/member-weights-resolver.spec.ts`
+- Create: `sacdia-backend/src/rankings/member-rankings/services/member-composite-score.service.ts`
+- Create: `sacdia-backend/src/rankings/member-rankings/services/enrollment-weights-resolver.service.ts`
+- Test: `sacdia-backend/src/rankings/member-rankings/services/member-composite-score.service.spec.ts`
+- Test: `sacdia-backend/src/rankings/member-rankings/services/enrollment-weights-resolver.service.spec.ts`
 
-> 2 servicios en este task (resolver + composite). El composite reusa conceptualmente el `WeightsResolverService` de 8.4-C pero contra `member_ranking_weights`.
-
-- [ ] **Step 1: Write `member-weights-resolver.spec.ts` (failing)**
+- [ ] **Step 1: Write failing test (`enrollment-weights-resolver.service.spec.ts`)**
 
 ```typescript
 import { Test } from '@nestjs/testing';
-import { PrismaService } from '../../prisma/prisma.service';
-import { MemberWeightsResolverService } from './member-weights-resolver';
+import { EnrollmentWeightsResolverService } from './enrollment-weights-resolver.service';
+import { PrismaService } from '../../../prisma/prisma.service';
 
-describe('MemberWeightsResolverService.resolve', () => {
-  let svc: MemberWeightsResolverService;
-  let prisma: { member_ranking_weights: { findFirst: jest.Mock } };
+describe('EnrollmentWeightsResolverService', () => {
+  let service: EnrollmentWeightsResolverService;
+  let prisma: any;
 
   beforeEach(async () => {
-    prisma = { member_ranking_weights: { findFirst: jest.fn() } };
+    prisma = { enrollment_ranking_weights: { findFirst: jest.fn() } };
     const m = await Test.createTestingModule({
-      providers: [MemberWeightsResolverService, { provide: PrismaService, useValue: prisma }],
+      providers: [EnrollmentWeightsResolverService, { provide: PrismaService, useValue: prisma }],
     }).compile();
-    svc = m.get(MemberWeightsResolverService);
+    service = m.get(EnrollmentWeightsResolverService);
   });
 
-  it('returns club_type+year override when present', async () => {
-    prisma.member_ranking_weights.findFirst.mockResolvedValueOnce({
-      class_pct: 50, evidence_pct: 20, investiture_pct: 20, camporee_pct: 10,
-    });
-    expect(await svc.resolve(1, 7)).toEqual({
-      class: 50, evidence: 20, investiture: 20, camporee: 10,
-      source: 'override:club_type_1+year_7',
-    });
+  it('override (clubType+year) wins', async () => {
+    prisma.enrollment_ranking_weights.findFirst
+      .mockResolvedValueOnce({ class_pct: 40, investiture_pct: 40, camporee_pct: 20 });
+    const r = await service.resolve({ clubTypeId: 1, ecclesiasticalYearId: 2 });
+    expect(r).toEqual({ class_pct: 40, investiture_pct: 40, camporee_pct: 20, source: 'override:club_type_1+year_2' });
   });
 
   it('falls back to default global', async () => {
-    prisma.member_ranking_weights.findFirst
+    prisma.enrollment_ranking_weights.findFirst
       .mockResolvedValueOnce(null)
-      .mockResolvedValueOnce({ class_pct: 40, evidence_pct: 25, investiture_pct: 20, camporee_pct: 15 });
-    expect(await svc.resolve(1, 7)).toEqual({
-      class: 40, evidence: 25, investiture: 20, camporee: 15, source: 'default',
-    });
-  });
-
-  it('throws when default is missing (config invariant)', async () => {
-    prisma.member_ranking_weights.findFirst.mockResolvedValue(null);
-    await expect(svc.resolve(1, 7)).rejects.toThrow('Default member ranking weights missing');
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce({ class_pct: 50, investiture_pct: 30, camporee_pct: 20, is_default: true });
+    const r = await service.resolve({ clubTypeId: 1, ecclesiasticalYearId: 2 });
+    expect(r.class_pct).toBe(50);
+    expect(r.source).toBe('default');
   });
 });
 ```
 
-- [ ] **Step 2: Implement `member-weights-resolver.ts`**
+- [ ] **Step 2: Write failing test (`member-composite-score.service.spec.ts`)**
+
+```typescript
+describe('MemberCompositeScoreService', () => {
+  // happy path: all scores
+  it('all available: weighted avg with default 50/30/20', async () => {
+    // class=80, investiture=100, camporee=50
+    // composite = 0.5*80 + 0.3*100 + 0.2*50 = 40 + 30 + 10 = 80
+    // ... see implementation
+    expect(80).toBe(80); // placeholder; full mock setup in actual file
+  });
+
+  it('investiture NULL → redistribute to class+camporee', async () => {
+    // class=80, investiture=NULL, camporee=50; weights 50/30/20
+    // weight_used = 50 + 20 = 70
+    // weighted_sum = 0.5*80 + 0.2*50 = 40 + 10 = 50
+    // composite = 50 / 0.7 = 71.43
+    expect(true).toBe(true);
+  });
+
+  it('all NULL → composite NULL', async () => {
+    expect(true).toBe(true);
+  });
+
+  it('override weights applied via resolver', async () => {
+    expect(true).toBe(true);
+  });
+});
+```
+
+(Tests con mocks completos; los stubs arriba son guía. El subagent ejecutor expande cada `it` con full mock setup siguiendo patrón Task 4.)
+
+- [ ] **Step 3: Run tests, expect FAIL**
+
+- [ ] **Step 4: Implement `enrollment-weights-resolver.service.ts`**
 
 ```typescript
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
+import { PrismaService } from '../../../prisma/prisma.service';
 
-export interface ResolvedMemberWeights {
-  class: number;
-  evidence: number;
-  investiture: number;
-  camporee: number;
-  source: string;
+export interface ResolvedWeights {
+  class_pct: number;
+  investiture_pct: number;
+  camporee_pct: number;
+  source: 'default' | string;
 }
 
 @Injectable()
-export class MemberWeightsResolverService {
+export class EnrollmentWeightsResolverService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async resolve(clubTypeId: number, ecclesiasticalYearId: number): Promise<ResolvedMemberWeights> {
-    const override = await this.prisma.member_ranking_weights.findFirst({
-      where: { club_type_id: clubTypeId, ecclesiastical_year_id: ecclesiasticalYearId },
-    });
-    if (override) {
-      return {
-        class: Number(override.class_pct),
-        evidence: Number(override.evidence_pct),
-        investiture: Number(override.investiture_pct),
-        camporee: Number(override.camporee_pct),
-        source: `override:club_type_${clubTypeId}+year_${ecclesiasticalYearId}`,
-      };
+  async resolve(params: {
+    clubTypeId: number | null;
+    ecclesiasticalYearId: number | null;
+  }): Promise<ResolvedWeights> {
+    const { clubTypeId, ecclesiasticalYearId } = params;
+
+    // 1. Try override (club_type_id + ecclesiastical_year_id)
+    if (clubTypeId !== null && ecclesiasticalYearId !== null) {
+      const ovrYear = await this.prisma.enrollment_ranking_weights.findFirst({
+        where: { club_type_id: clubTypeId, ecclesiastical_year_id: ecclesiasticalYearId },
+      });
+      if (ovrYear) {
+        return {
+          class_pct: Number(ovrYear.class_pct),
+          investiture_pct: Number(ovrYear.investiture_pct),
+          camporee_pct: Number(ovrYear.camporee_pct),
+          source: `override:club_type_${clubTypeId}+year_${ecclesiasticalYearId}`,
+        };
+      }
     }
-    const def = await this.prisma.member_ranking_weights.findFirst({
-      where: { club_type_id: null, ecclesiastical_year_id: null },
+
+    // 2. Try override (club_type_id only)
+    if (clubTypeId !== null) {
+      const ovrType = await this.prisma.enrollment_ranking_weights.findFirst({
+        where: { club_type_id: clubTypeId, ecclesiastical_year_id: null },
+      });
+      if (ovrType) {
+        return {
+          class_pct: Number(ovrType.class_pct),
+          investiture_pct: Number(ovrType.investiture_pct),
+          camporee_pct: Number(ovrType.camporee_pct),
+          source: `override:club_type_${clubTypeId}`,
+        };
+      }
+    }
+
+    // 3. Default global
+    const def = await this.prisma.enrollment_ranking_weights.findFirst({
+      where: { club_type_id: null, ecclesiastical_year_id: null, is_default: true },
     });
-    if (!def) throw new Error('Default member ranking weights missing');
+    if (!def) {
+      throw new Error('No default enrollment_ranking_weights row found');
+    }
     return {
-      class: Number(def.class_pct),
-      evidence: Number(def.evidence_pct),
-      investiture: Number(def.investiture_pct),
-      camporee: Number(def.camporee_pct),
+      class_pct: Number(def.class_pct),
+      investiture_pct: Number(def.investiture_pct),
+      camporee_pct: Number(def.camporee_pct),
       source: 'default',
     };
   }
 }
 ```
 
-Run `pnpm jest member-weights-resolver.spec.ts` → PASS.
-
-- [ ] **Step 3: Write `member-composite-score.spec.ts` (failing)**
-
-```typescript
-import { MemberCompositeScoreService, ComponentScoresNullable } from './member-composite-score';
-import type { ResolvedMemberWeights } from './member-weights-resolver';
-
-const W: ResolvedMemberWeights = {
-  class: 40, evidence: 25, investiture: 20, camporee: 15, source: 'default',
-};
-
-describe('MemberCompositeScoreService.compose (with NULL redistribution)', () => {
-  const svc = new MemberCompositeScoreService();
-
-  it('weighted average when all 4 scores present', () => {
-    const scores: ComponentScoresNullable = { class: 80, evidence: 70, investiture: 60, camporee: 50 };
-    // 80*0.4 + 70*0.25 + 60*0.2 + 50*0.15 = 32 + 17.5 + 12 + 7.5 = 69
-    expect(svc.compose(scores, W)).toBe(69);
-  });
-
-  it('redistributes NULL weight proportionally to valid scores', () => {
-    // class NULL, weight 40 → redistribute over evidence(25), investiture(20), camporee(15) sum=60
-    // redistributed weights: evidence = 25 + 25/60*40 = 41.6667; investiture = 20 + 20/60*40 = 33.3333; camporee = 15 + 15/60*40 = 25
-    // sum = 100. Composite = (70*41.6667 + 60*33.3333 + 50*25)/100
-    const scores: ComponentScoresNullable = { class: null, evidence: 70, investiture: 60, camporee: 50 };
-    const result = svc.compose(scores, W);
-    const expected = (70 * 41.6667 + 60 * 33.3333 + 50 * 25) / 100;
-    expect(result).toBeCloseTo(expected, 1);
-  });
-
-  it('returns NULL when all scores are NULL', () => {
-    const scores: ComponentScoresNullable = { class: null, evidence: null, investiture: null, camporee: null };
-    expect(svc.compose(scores, W)).toBeNull();
-  });
-
-  it('uses single valid score as composite when 3 are NULL', () => {
-    const scores: ComponentScoresNullable = { class: 80, evidence: null, investiture: null, camporee: null };
-    expect(svc.compose(scores, W)).toBe(80);
-  });
-
-  it('clamps composite to [0,100]', () => {
-    const scores: ComponentScoresNullable = { class: 100, evidence: 100, investiture: 100, camporee: 100 };
-    expect(svc.compose(scores, W)).toBe(100);
-  });
-});
-```
-
-- [ ] **Step 4: Implement `member-composite-score.ts`**
+- [ ] **Step 5: Implement `member-composite-score.service.ts`**
 
 ```typescript
 import { Injectable } from '@nestjs/common';
-import type { ResolvedMemberWeights } from './member-weights-resolver';
+import { PrismaService } from '../../../prisma/prisma.service';
+import { ClassScoreService } from './class-score.service';
+import { InvestitureScoreService } from './investiture-score.service';
+import { CamporeeScoreService } from './camporee-score.service';
+import { EnrollmentWeightsResolverService, ResolvedWeights } from './enrollment-weights-resolver.service';
 
-export interface ComponentScoresNullable {
-  class: number | null;
-  evidence: number | null;
-  investiture: number | null;
-  camporee: number | null;
+export interface CompositeResult {
+  class_score_pct: number | null;
+  investiture_score_pct: number | null;
+  camporee_score_pct: number | null;
+  composite_score_pct: number | null;
+  weights: ResolvedWeights;
 }
 
 @Injectable()
 export class MemberCompositeScoreService {
-  compose(scores: ComponentScoresNullable, weights: ResolvedMemberWeights): number | null {
-    const pairs: Array<{ score: number; weight: number }> = [];
-    if (scores.class !== null)       pairs.push({ score: scores.class,       weight: weights.class });
-    if (scores.evidence !== null)    pairs.push({ score: scores.evidence,    weight: weights.evidence });
-    if (scores.investiture !== null) pairs.push({ score: scores.investiture, weight: weights.investiture });
-    if (scores.camporee !== null)    pairs.push({ score: scores.camporee,    weight: weights.camporee });
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly classScore: ClassScoreService,
+    private readonly investitureScore: InvestitureScoreService,
+    private readonly camporeeScore: CamporeeScoreService,
+    private readonly weightsResolver: EnrollmentWeightsResolverService,
+  ) {}
 
-    if (pairs.length === 0) return null;
+  async calculate(
+    enrollmentId: number,
+    ecclesiasticalYearId: number,
+  ): Promise<CompositeResult | null> {
+    const enrollment = await this.prisma.enrollments.findUnique({
+      where: { enrollment_id: enrollmentId },
+      include: { class: { select: { club_type_id: true } } },
+    });
+    if (!enrollment) return null;
 
-    const sumValid = pairs.reduce((s, p) => s + p.weight, 0);
-    if (sumValid === 0) return null;
+    const weights = await this.weightsResolver.resolve({
+      clubTypeId: (enrollment as any).class?.club_type_id ?? null,
+      ecclesiasticalYearId,
+    });
 
-    // Redistribute NULL weights proportionally to remaining valid weights
-    const sumNull = 100 - sumValid;
-    const redistributed = pairs.map((p) => ({
-      score: p.score,
-      weight: p.weight + (p.weight / sumValid) * sumNull,
-    }));
+    const [classScore, investitureScore, camporeeScore] = await Promise.all([
+      this.classScore.calculate(enrollmentId, ecclesiasticalYearId),
+      this.investitureScore.calculate(enrollmentId, ecclesiasticalYearId),
+      this.camporeeScore.calculate(enrollmentId, ecclesiasticalYearId),
+    ]);
 
-    const composite = redistributed.reduce((s, p) => s + p.score * p.weight, 0) / 100;
-    const clamped = Math.max(0, Math.min(100, composite));
-    return Number(clamped.toFixed(2));
+    const scores = [classScore, investitureScore, camporeeScore];
+    const weightValues = [weights.class_pct, weights.investiture_pct, weights.camporee_pct];
+
+    let totalWeightUsed = 0;
+    let weightedSum = 0;
+    for (let i = 0; i < scores.length; i++) {
+      if (scores[i] !== null) {
+        weightedSum += (scores[i] as number) * weightValues[i];
+        totalWeightUsed += weightValues[i];
+      }
+    }
+
+    if (totalWeightUsed === 0) {
+      return {
+        class_score_pct: classScore,
+        investiture_score_pct: investitureScore,
+        camporee_score_pct: camporeeScore,
+        composite_score_pct: null,
+        weights,
+      };
+    }
+
+    const composite = weightedSum / totalWeightUsed;
+    return {
+      class_score_pct: classScore,
+      investiture_score_pct: investitureScore,
+      camporee_score_pct: camporeeScore,
+      composite_score_pct: Math.min(Math.max(composite, 0), 100),
+      weights,
+    };
   }
 }
 ```
 
-Run `pnpm jest member-composite-score.spec.ts` → PASS.
-
-- [ ] **Step 5: Commit**
+- [ ] **Step 6: Run tests, expect PASS**
 
 ```bash
-git add src/member-rankings/score-calculators/member-weights-resolver.ts \
-        src/member-rankings/score-calculators/member-weights-resolver.spec.ts \
-        src/member-rankings/score-calculators/member-composite-score.ts \
-        src/member-rankings/score-calculators/member-composite-score.spec.ts
-git commit -m "feat(member-rankings): add MemberCompositeScoreService with NULL redistribution"
+pnpm test member-composite-score.service.spec.ts enrollment-weights-resolver.service.spec.ts
+```
+
+- [ ] **Step 7: Code review checkpoint** — algoritmo NULL redistribution alineado con spec §7.4 (no dividir por 100, todos los scores ya son pct).
+
+- [ ] **Step 8: Commit**
+
+```bash
+git add sacdia-backend/src/rankings/member-rankings/services/{member-composite-score,enrollment-weights-resolver}.service.{ts,spec.ts}
+git commit -m "$(cat <<'EOF'
+feat(enrollment-rankings): add MemberCompositeScoreService + WeightsResolver TDD
+
+Composite weighted avg with NULL redistribution: if a signal is NULL,
+its weight redistributes proportionally to remaining scores.
+WeightsResolver: override(clubType+year) → override(clubType) → default.
+EOF
+)"
 ```
 
 ---
 
-### Task 11: `SectionAggregationService` TDD
+### Task 8: `SectionAggregationService` TDD
 
 **Files:**
-- Create: `sacdia-backend/src/member-rankings/score-calculators/section-aggregation.ts`
-- Create: `sacdia-backend/src/member-rankings/score-calculators/section-aggregation.spec.ts`
-
-> Si A2 (`member_status`) MISSING per audit, omitir filtro `WHERE m.member_status = 'active'` en la query (ver decisión locked en Phase 0).
+- Create: `sacdia-backend/src/rankings/section-rankings/services/section-aggregation.service.ts`
+- Test: `sacdia-backend/src/rankings/section-rankings/services/section-aggregation.service.spec.ts`
 
 - [ ] **Step 1: Write failing test**
 
 ```typescript
 import { Test } from '@nestjs/testing';
-import { PrismaService } from '../../prisma/prisma.service';
-import { SectionAggregationService } from './section-aggregation';
+import { SectionAggregationService } from './section-aggregation.service';
+import { PrismaService } from '../../../prisma/prisma.service';
 
-describe('SectionAggregationService.aggregate', () => {
-  let svc: SectionAggregationService;
-  let prisma: { $queryRaw: jest.Mock };
+describe('SectionAggregationService', () => {
+  let service: SectionAggregationService;
+  let prisma: any;
 
   beforeEach(async () => {
-    prisma = { $queryRaw: jest.fn() };
+    prisma = { enrollment_rankings: { findMany: jest.fn() } };
     const m = await Test.createTestingModule({
       providers: [SectionAggregationService, { provide: PrismaService, useValue: prisma }],
     }).compile();
-    svc = m.get(SectionAggregationService);
+    service = m.get(SectionAggregationService);
   });
 
-  it('returns AVG and active_count for section with 3 active members', async () => {
-    prisma.$queryRaw.mockResolvedValueOnce([{ avg_pct: '70.50', active_count: 3n }]);
-    const result = await svc.aggregate(42, 7);
-    expect(result).toEqual({ composite_score_pct: 70.5, active_member_count: 3 });
+  it('3 enrollments with composite → AVG correct', async () => {
+    prisma.enrollment_rankings.findMany.mockResolvedValue([
+      { composite_score_pct: 80 },
+      { composite_score_pct: 60 },
+      { composite_score_pct: 40 },
+    ]);
+    expect(await service.aggregate(1, 2)).toEqual({
+      composite_score_pct: 60,
+      active_enrollment_count: 3,
+    });
   });
 
-  it('returns NULL composite + 0 count for empty section', async () => {
-    prisma.$queryRaw.mockResolvedValueOnce([{ avg_pct: null, active_count: 0n }]);
-    const result = await svc.aggregate(42, 7);
-    expect(result).toEqual({ composite_score_pct: null, active_member_count: 0 });
+  it('0 enrollments → composite NULL, count 0', async () => {
+    prisma.enrollment_rankings.findMany.mockResolvedValue([]);
+    expect(await service.aggregate(1, 2)).toEqual({
+      composite_score_pct: null,
+      active_enrollment_count: 0,
+    });
   });
 
-  it('AVG ignores NULL composite scores (PostgreSQL default)', async () => {
-    // member 1=80, 2=NULL, 3=60 → AVG = 70 over 2 valid (PostgreSQL ignores NULL)
-    prisma.$queryRaw.mockResolvedValueOnce([{ avg_pct: '70.00', active_count: 3n }]);
-    const result = await svc.aggregate(42, 7);
-    expect(result.composite_score_pct).toBe(70);
-    expect(result.active_member_count).toBe(3);
+  it('mixed (NULLs filtered upstream by where) — only non-null in result', async () => {
+    prisma.enrollment_rankings.findMany.mockResolvedValue([
+      { composite_score_pct: 100 },
+      { composite_score_pct: 50 },
+    ]);
+    expect(await service.aggregate(1, 2)).toEqual({
+      composite_score_pct: 75,
+      active_enrollment_count: 2,
+    });
   });
 });
 ```
 
-- [ ] **Step 2: Run, expect FAIL**
-
-```bash
-pnpm jest src/member-rankings/score-calculators/section-aggregation.spec.ts
-```
+- [ ] **Step 2: Run test, expect FAIL**
 
 - [ ] **Step 3: Implement**
 
 ```typescript
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
+import { PrismaService } from '../../../prisma/prisma.service';
 
 export interface SectionAggregateResult {
   composite_score_pct: number | null;
-  active_member_count: number;
+  active_enrollment_count: number;
 }
 
 @Injectable()
 export class SectionAggregationService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async aggregate(clubSectionId: number, ecclesiasticalYearId: number): Promise<SectionAggregateResult> {
-    // NOTA: si A2 MISSING (decisión Phase 0), eliminar JOIN m + filtro member_status.
-    const rows = await this.prisma.$queryRaw<{ avg_pct: string | null; active_count: bigint }[]>`
-      SELECT
-        AVG(mr.composite_score_pct)::numeric(5,2) AS avg_pct,
-        COUNT(*)::bigint AS active_count
-      FROM member_rankings mr
-      JOIN members m ON m.member_id = mr.member_id
-      WHERE mr.club_section_id = ${clubSectionId}
-        AND mr.ecclesiastical_year_id = ${ecclesiasticalYearId}
-        AND m.member_status = 'active'
-    `;
-    const avgRaw = rows[0]?.avg_pct;
-    const activeCount = Number(rows[0]?.active_count ?? 0n);
+  async aggregate(
+    sectionId: number,
+    ecclesiasticalYearId: number,
+  ): Promise<SectionAggregateResult> {
+    const rows = await this.prisma.enrollment_rankings.findMany({
+      where: {
+        club_section_id: sectionId,
+        ecclesiastical_year_id: ecclesiasticalYearId,
+        composite_score_pct: { not: null },
+      },
+      select: { composite_score_pct: true },
+    });
 
+    if (rows.length === 0) {
+      return { composite_score_pct: null, active_enrollment_count: 0 };
+    }
+
+    const sum = rows.reduce(
+      (acc, r) => acc + Number(r.composite_score_pct),
+      0,
+    );
+    const avg = sum / rows.length;
     return {
-      composite_score_pct: avgRaw === null ? null : Number(avgRaw),
-      active_member_count: activeCount,
+      composite_score_pct: Math.min(Math.max(avg, 0), 100),
+      active_enrollment_count: rows.length,
     };
   }
 }
 ```
 
-- [ ] **Step 4: Run, expect PASS**
+- [ ] **Step 4: Run test, expect PASS**
+
+- [ ] **Step 5: Code review checkpoint** — confirma que NO filtra por `member_status` (columna no existe — audit A2). Sólo `IS NOT NULL` en composite.
+
+- [ ] **Step 6: Commit**
 
 ```bash
-pnpm jest src/member-rankings/score-calculators/section-aggregation.spec.ts
-```
+git add sacdia-backend/src/rankings/section-rankings/services/section-aggregation.service.{ts,spec.ts}
+git commit -m "$(cat <<'EOF'
+feat(section-rankings): add SectionAggregationService TDD
 
-- [ ] **Step 5: Commit**
-
-```bash
-git add src/member-rankings/score-calculators/section-aggregation.ts \
-        src/member-rankings/score-calculators/section-aggregation.spec.ts
-git commit -m "feat(member-rankings): add SectionAggregationService AVG-of-actives"
+AVG of enrollment_rankings.composite_score_pct WHERE NOT NULL.
+No member_status filter (column doesn't exist — audit A2).
+Returns NULL composite + count=0 for empty sections.
+EOF
+)"
 ```
 
 ---
 
 ## Phase 3 — Backend cron integration + ranking-position update (sacdia-backend)
 
-### Task 12: Extender `rankings.service.ts` con `recalculateMemberRankings` + `recalculateSectionAggregates`
+### Task 9: Extender `rankings.service.ts` con dos métodos nuevos + cron wiring
 
 **Files:**
-- Modify: `sacdia-backend/src/annual-folders/rankings.service.ts`
-- Modify: `sacdia-backend/src/annual-folders/annual-folders.module.ts` (registrar 6 providers nuevos)
-- Create: `sacdia-backend/src/annual-folders/__tests__/rankings.service.member.spec.ts`
+- Modify: `sacdia-backend/src/rankings/rankings.service.ts`
+- Modify: `sacdia-backend/src/rankings/rankings.module.ts`
+- Test: `sacdia-backend/src/rankings/rankings.service.spec.ts`
 
-- [ ] **Step 1: Registrar providers en `annual-folders.module.ts`**
-
-```typescript
-import { ClassScoreService } from '../member-rankings/score-calculators/class-score';
-import { EvidenceScoreService } from '../member-rankings/score-calculators/evidence-score';
-import { InvestitureScoreService } from '../member-rankings/score-calculators/investiture-score';
-import { CamporeeScoreService as MemberCamporeeScoreService } from '../member-rankings/score-calculators/camporee-score';
-import { MemberWeightsResolverService } from '../member-rankings/score-calculators/member-weights-resolver';
-import { MemberCompositeScoreService } from '../member-rankings/score-calculators/member-composite-score';
-import { SectionAggregationService } from '../member-rankings/score-calculators/section-aggregation';
-
-@Module({
-  // ...
-  providers: [
-    // ...existing 8.4-C providers...
-    ClassScoreService,
-    EvidenceScoreService,
-    InvestitureScoreService,
-    MemberCamporeeScoreService,
-    MemberWeightsResolverService,
-    MemberCompositeScoreService,
-    SectionAggregationService,
-  ],
-})
-```
-
-- [ ] **Step 2: Inyectar en RankingsService constructor**
+- [ ] **Step 1: Write failing test (extiende suite existente)**
 
 ```typescript
-constructor(
-  private readonly prisma: PrismaService,
-  // existing 8.4-C services...
-  private readonly classScore: ClassScoreService,
-  private readonly evidenceScore: EvidenceScoreService,
-  private readonly investitureScore: InvestitureScoreService,
-  private readonly memberCamporeeScore: MemberCamporeeScoreService,
-  private readonly memberWeights: MemberWeightsResolverService,
-  private readonly memberComposite: MemberCompositeScoreService,
-  private readonly sectionAggregation: SectionAggregationService,
-) {}
-```
-
-- [ ] **Step 3: Implementar `recalculateMemberRankings(yearId?)`**
-
-```typescript
-async recalculateMemberRankings(yearId?: number): Promise<{ processed: number; skipped: number }> {
-  const year = yearId ?? await this.resolveActiveYearId();
-  const logger = new Logger('member-rankings');
-
-  const clubs = await this.prisma.clubs.findMany({
-    where: { active: true },
-    select: { club_id: true, club_type_id: true },
+// rankings.service.spec.ts (extension)
+describe('rankings.service — 8.4-A integration', () => {
+  it('cron skips enrollments+sections if global kill-switch off', async () => {
+    // mock systemConfig.get('ranking.recalculation_enabled') → 'false'
+    // expect: recalculateClubRankings NOT called, recalculateMemberRankings NOT called
   });
 
-  let processed = 0;
-  let skipped = 0;
+  it('cron skips ONLY steps 2 and 3 if member kill-switch off', async () => {
+    // mock 'ranking.recalculation_enabled' → 'true'
+    // mock 'member_ranking.recalculation_enabled' → 'false'
+    // expect: recalculateClubRankings called, recalculateMemberRankings NOT called
+  });
 
-  for (const club of clubs) {
-    const members = await this.prisma.members.findMany({
-      where: { club_id: club.club_id },
-      select: { member_id: true, club_section_id: true },
+  it('cron continues to step 3 if step 2 throws', async () => {
+    // recalculateMemberRankings throws → recalculateSectionAggregates still called
+  });
+
+  it('recalculateMemberRankings: per-enrollment error skips, does not throw', async () => {
+    // 1 enrollment composite throws → other enrollments still upsert
+  });
+
+  it('recalculateSectionAggregates: per-section error skips', async () => {
+    // 1 section throws → other sections still upsert
+  });
+});
+```
+
+- [ ] **Step 2: Run test, expect FAIL**
+
+```bash
+pnpm test rankings.service.spec.ts
+```
+
+- [ ] **Step 3: Implement extension**
+
+```typescript
+// rankings.service.ts (additions)
+@Injectable()
+export class RankingsService {
+  // ... 8.4-C existing methods ...
+
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly memberCompositeScore: MemberCompositeScoreService,
+    private readonly sectionAggregation: SectionAggregationService,
+    private readonly systemConfig: SystemConfigService,
+    // ... existing 8.4-C deps ...
+  ) {}
+
+  @Cron('0 2 * * *', { name: 'rankings-recalculation', timeZone: 'UTC' })
+  async handleRankingsRecalculation(): Promise<void> {
+    const globalEnabled = await this.systemConfig.get('ranking.recalculation_enabled');
+    if (globalEnabled === 'false') {
+      this.logger.warn('[rankings] Global kill-switch off — skipping all recalculation');
+      return;
+    }
+
+    // Step 1: clubs (8.4-C existing)
+    await this.recalculateClubRankings();
+
+    // 8.4-A kill-switch
+    const memberEnabled = await this.systemConfig.get('member_ranking.recalculation_enabled');
+    if (memberEnabled === 'false') {
+      this.logger.warn('[rankings] member_ranking kill-switch off — skipping steps 2 and 3');
+      return;
+    }
+
+    // Step 2: enrollments
+    try {
+      await this.recalculateEnrollmentRankings();
+    } catch (err) {
+      this.logger.error('[member-rankings] recalculateEnrollmentRankings failed, continuing to section aggregates', err);
+    }
+
+    // Step 3: sections (still runs even if step 2 failed partially)
+    try {
+      await this.recalculateSectionAggregates();
+    } catch (err) {
+      this.logger.error('[section-rankings] recalculateSectionAggregates failed', err);
+    }
+  }
+
+  async recalculateEnrollmentRankings(ecclesiasticalYearId?: number): Promise<void> {
+    const yearId = ecclesiasticalYearId ?? await this.resolveActiveYear();
+    this.logger.log(`[member-rankings] Recalc started ecclesiastical_year_id=${yearId}`);
+
+    const clubs = await this.prisma.clubs.findMany({
+      where: { active: true },
+      select: { club_id: true },
     });
 
-    for (const member of members) {
+    let totalEnrollments = 0;
+    let totalSkipped = 0;
+
+    // Batch by chunks of 50 clubs
+    const chunkSize = 50;
+    for (let i = 0; i < clubs.length; i += chunkSize) {
+      const chunk = clubs.slice(i, i + chunkSize);
+      for (const c of chunk) {
+        const enrollments = await this.prisma.enrollments.findMany({
+          where: {
+            ecclesiastical_year_id: yearId,
+            active: true,
+            class: { club_id: c.club_id },
+          },
+          select: {
+            enrollment_id: true,
+            user_id: true,
+            class: { select: { club_id: true, club_sections: { select: { club_section_id: true } } } },
+          },
+        });
+
+        for (const e of enrollments) {
+          try {
+            const result = await this.memberCompositeScore.calculate(e.enrollment_id, yearId);
+            if (!result) { totalSkipped++; continue; }
+
+            await this.prisma.enrollmentRanking.upsert({
+              where: {
+                enrollment_id_ecclesiastical_year_id: {
+                  enrollment_id: e.enrollment_id,
+                  ecclesiastical_year_id: yearId,
+                },
+              },
+              create: {
+                enrollment_id: e.enrollment_id,
+                user_id: e.user_id,
+                club_id: c.club_id,
+                club_section_id: (e as any).class?.club_sections?.club_section_id ?? null,
+                ecclesiastical_year_id: yearId,
+                class_score_pct: result.class_score_pct,
+                investiture_score_pct: result.investiture_score_pct,
+                camporee_score_pct: result.camporee_score_pct,
+                composite_score_pct: result.composite_score_pct,
+                composite_calculated_at: new Date(),
+              },
+              update: {
+                class_score_pct: result.class_score_pct,
+                investiture_score_pct: result.investiture_score_pct,
+                camporee_score_pct: result.camporee_score_pct,
+                composite_score_pct: result.composite_score_pct,
+                composite_calculated_at: new Date(),
+                updated_at: new Date(),
+              },
+            });
+            totalEnrollments++;
+          } catch (err) {
+            this.logger.error({
+              msg: '[member-rankings] enrollment skip',
+              enrollment_id: e.enrollment_id,
+              ecclesiastical_year_id: yearId,
+              error: (err as Error).message,
+            });
+            totalSkipped++;
+          }
+        }
+      }
+    }
+
+    // Update rank_position via DENSE_RANK SQL (Task 10)
+    await this.updateEnrollmentRankPositions(yearId);
+
+    this.logger.log(`[member-rankings] Recalc done enrollments=${totalEnrollments} skipped=${totalSkipped}`);
+  }
+
+  async recalculateSectionAggregates(ecclesiasticalYearId?: number): Promise<void> {
+    const yearId = ecclesiasticalYearId ?? await this.resolveActiveYear();
+    this.logger.log(`[section-rankings] Recalc started ecclesiastical_year_id=${yearId}`);
+
+    const sections = await this.prisma.club_sections.findMany({
+      where: { active: true },
+      select: { club_section_id: true, main_club_id: true },
+    });
+
+    let totalSections = 0;
+    let totalEmpty = 0;
+    let totalErrors = 0;
+
+    for (const s of sections) {
       try {
-        const [classS, evS, invS, camS] = await Promise.all([
-          this.classScore.calculate(member.member_id, year),
-          this.evidenceScore.calculate(member.member_id, year),
-          this.investitureScore.calculate(member.member_id, year),
-          this.memberCamporeeScore.calculate(member.member_id, year),
-        ]);
+        const agg = await this.sectionAggregation.aggregate(s.club_section_id, yearId);
+        if (agg.composite_score_pct === null) totalEmpty++;
 
-        const weights = await this.memberWeights.resolve(club.club_type_id, year);
-        const composite = this.memberComposite.compose(
-          { class: classS, evidence: evS, investiture: invS, camporee: camS },
-          weights,
-        );
-
-        await this.prisma.member_rankings.upsert({
-          where: { uq_member_rankings_member_year: { member_id: member.member_id, ecclesiastical_year_id: year } },
+        await this.prisma.sectionRanking.upsert({
+          where: {
+            club_section_id_ecclesiastical_year_id: {
+              club_section_id: s.club_section_id,
+              ecclesiastical_year_id: yearId,
+            },
+          },
           create: {
-            member_id: member.member_id,
-            club_id: club.club_id,
-            club_section_id: member.club_section_id,
-            ecclesiastical_year_id: year,
-            class_score_pct: classS as any,
-            evidence_score_pct: evS as any,
-            investiture_score_pct: invS as any,
-            camporee_score_pct: camS as any,
-            composite_score_pct: composite as any,
+            club_section_id: s.club_section_id,
+            club_id: s.main_club_id,
+            ecclesiastical_year_id: yearId,
+            composite_score_pct: agg.composite_score_pct,
+            active_enrollment_count: agg.active_enrollment_count,
             composite_calculated_at: new Date(),
           },
           update: {
-            club_id: club.club_id,
-            club_section_id: member.club_section_id,
-            class_score_pct: classS as any,
-            evidence_score_pct: evS as any,
-            investiture_score_pct: invS as any,
-            camporee_score_pct: camS as any,
-            composite_score_pct: composite as any,
+            composite_score_pct: agg.composite_score_pct,
+            active_enrollment_count: agg.active_enrollment_count,
             composite_calculated_at: new Date(),
             updated_at: new Date(),
           },
         });
-        processed++;
+        totalSections++;
       } catch (err) {
-        logger.error(`Member recalc failed member_id=${member.member_id} year=${year}`, err);
-        skipped++;
+        this.logger.error({
+          msg: '[section-rankings] section skip',
+          club_section_id: s.club_section_id,
+          ecclesiastical_year_id: yearId,
+          error: (err as Error).message,
+        });
+        totalErrors++;
       }
     }
+
+    await this.updateSectionRankPositions(yearId);
+
+    this.logger.log(`[section-rankings] Recalc done sections=${totalSections} empty=${totalEmpty} errors=${totalErrors}`);
   }
 
-  logger.log(`Member recalc done year=${year} processed=${processed} skipped=${skipped}`);
-  return { processed, skipped };
+  // updateEnrollmentRankPositions / updateSectionRankPositions: Task 10
+  // resolveActiveYear: existente en 8.4-C
 }
 ```
 
-- [ ] **Step 4: Implementar `recalculateSectionAggregates(yearId?)`**
+- [ ] **Step 4: Wire módulo — modify `rankings.module.ts`**
 
 ```typescript
-async recalculateSectionAggregates(yearId?: number): Promise<{ processed: number; skipped: number }> {
-  const year = yearId ?? await this.resolveActiveYearId();
-  const logger = new Logger('section-rankings');
-
-  const sections = await this.prisma.club_sections.findMany({
-    select: { club_section_id: true, main_club_id: true },
-  });
-
-  let processed = 0;
-  let skipped = 0;
-
-  for (const section of sections) {
-    try {
-      const result = await this.sectionAggregation.aggregate(section.club_section_id, year);
-      await this.prisma.section_rankings.upsert({
-        where: { uq_section_rankings_section_year: { club_section_id: section.club_section_id, ecclesiastical_year_id: year } },
-        create: {
-          club_section_id: section.club_section_id,
-          club_id: section.main_club_id,
-          ecclesiastical_year_id: year,
-          composite_score_pct: result.composite_score_pct as any,
-          active_member_count: result.active_member_count,
-          composite_calculated_at: new Date(),
-        },
-        update: {
-          composite_score_pct: result.composite_score_pct as any,
-          active_member_count: result.active_member_count,
-          composite_calculated_at: new Date(),
-          updated_at: new Date(),
-        },
-      });
-      processed++;
-    } catch (err) {
-      logger.error(`Section aggregate failed section_id=${section.club_section_id} year=${year}`, err);
-      skipped++;
-    }
-  }
-
-  logger.log(`Section aggregate done year=${year} processed=${processed} skipped=${skipped}`);
-  return { processed, skipped };
-}
+@Module({
+  imports: [PrismaModule, SystemConfigModule],
+  providers: [
+    RankingsService,
+    // 8.4-C
+    FolderScoreService, FinanceScoreService, EvidenceScoreService,
+    CamporeeScoreService /* club-level existente */, CompositeScoreService, WeightsResolverService,
+    // 8.4-A
+    ClassScoreService, InvestitureScoreService,
+    /* per-enrollment camporee */ CamporeeScoreService as PerEnrollmentCamporeeScoreService,
+    MemberCompositeScoreService, EnrollmentWeightsResolverService,
+    SectionAggregationService,
+  ],
+  controllers: [RankingsController],
+})
+export class RankingsModule {}
 ```
 
-- [ ] **Step 5: Wire en cron handler existente**
+> Nota: si hay colisión de nombre `CamporeeScoreService` (club-level vs per-enrollment), renombrar el per-enrollment a `EnrollmentCamporeeScoreService` y el club-level mantener nombre original.
 
-Localizar `@Cron('0 2 * * *', { name: 'rankings-recalculation', timeZone: 'UTC' })` (8.4-C) y extender:
+- [ ] **Step 5: Run test, expect PASS**
 
-```typescript
-@Cron('0 2 * * *', { name: 'rankings-recalculation', timeZone: 'UTC' })
-async handleRankingsRecalculation(): Promise<void> {
-  const logger = new Logger('rankings-cron');
-  // Kill-switch global 8.4-C
-  const globalEnabled = await this.systemConfig.get('ranking.recalculation_enabled');
-  if (globalEnabled === 'false') {
-    logger.warn('Recalculation disabled by global kill-switch');
-    return;
-  }
-
-  // Step 1: clubs (8.4-C)
-  await this.recalculateClubRankings();
-
-  // Step 2 + 3: member + section (8.4-A)
-  const memberEnabled = await this.systemConfig.get('member_ranking.recalculation_enabled');
-  if (memberEnabled !== 'false') {
-    try {
-      await this.recalculateMemberRankings();
-    } catch (err) {
-      logger.error('recalculateMemberRankings failed, continuing to section aggregates', err);
-    }
-    try {
-      await this.recalculateSectionAggregates();
-    } catch (err) {
-      logger.error('recalculateSectionAggregates failed', err);
-    }
-  } else {
-    logger.warn('Member ranking recalculation disabled by kill-switch');
-  }
-}
+```bash
+pnpm test rankings.service.spec.ts
 ```
 
-- [ ] **Step 6: Integration test rankings.service.member.spec.ts**
-
-```typescript
-import { Test } from '@nestjs/testing';
-import { RankingsService } from '../rankings.service';
-import { PrismaService } from '../../prisma/prisma.service';
-// Import all 7 score services + mocks
-
-describe('RankingsService.recalculateMemberRankings', () => {
-  // Mock prisma + services, verify:
-  // - kill-switch off → NO calls to score services
-  // - per-member error logged + counted as skipped, loop continues
-  // - upsert called with correct shape
-});
-
-describe('RankingsService.recalculateSectionAggregates', () => {
-  // - empty section → composite NULL + count 0
-  // - error per section logged + skipped, continues
-});
-```
-
-Run: `pnpm jest rankings.service.member.spec.ts` → PASS (≥4 tests).
+- [ ] **Step 6: Code review checkpoint** — quality-reviewer subagent: ¿logs estructurados spec §13.1? ¿try/catch per fase? ¿idempotencia upsert garantizada?
 
 - [ ] **Step 7: Commit**
 
 ```bash
-git add src/annual-folders/rankings.service.ts \
-        src/annual-folders/annual-folders.module.ts \
-        src/annual-folders/__tests__/rankings.service.member.spec.ts
+git add sacdia-backend/src/rankings/{rankings.service.ts,rankings.module.ts,rankings.service.spec.ts}
 git commit -m "$(cat <<'EOF'
-feat(rankings): wire member + section recalculation into cron pipeline
+feat(rankings): extend cron with enrollment + section recalc steps
 
-Sequential club -> member -> section. Kill-switch member_ranking.recalculation_enabled
-gates steps 2+3 independently. Per-member/section errors logged + skipped.
+Adds recalculateEnrollmentRankings and recalculateSectionAggregates as
+sequential steps 2 and 3 of the daily 02:00 UTC cron. Independent
+kill-switch member_ranking.recalculation_enabled allows dark launch.
+Per-enrollment and per-section errors log+skip without bubbling.
 EOF
 )"
 ```
 
 ---
 
-### Task 13: SQL UPDATE DENSE_RANK() per club + año (NULLS LAST)
+### Task 10: SQL UPDATE DENSE_RANK() per club + year (NULLS LAST)
 
 **Files:**
-- Modify: `sacdia-backend/src/annual-folders/rankings.service.ts` (agregar método `updateRankPositions`)
-- Modify: `sacdia-backend/src/annual-folders/__tests__/rankings.service.member.spec.ts`
+- Modify: `sacdia-backend/src/rankings/rankings.service.ts` (agrega métodos `updateEnrollmentRankPositions` + `updateSectionRankPositions`)
+- Test: `sacdia-backend/src/rankings/rankings.service.dense-rank.spec.ts` (integration test contra DB real de test)
 
-- [ ] **Step 1: Implementar `updateMemberRankPositions(yearId)`**
+- [ ] **Step 1: Write failing integration test**
 
 ```typescript
-private async updateMemberRankPositions(yearId: number): Promise<void> {
+import { Test } from '@nestjs/testing';
+import { RankingsService } from './rankings.service';
+import { PrismaService } from '../prisma/prisma.service';
+
+describe('Rank position UPDATE (DENSE_RANK NULLS LAST)', () => {
+  let service: RankingsService;
+  let prisma: PrismaService;
+
+  beforeAll(async () => {
+    const m = await Test.createTestingModule({
+      // ... full module setup with REAL prisma against test DB
+    }).compile();
+    service = m.get(RankingsService);
+    prisma = m.get(PrismaService);
+  });
+
+  beforeEach(async () => {
+    await prisma.$executeRawUnsafe('DELETE FROM enrollment_rankings WHERE ecclesiastical_year_id = 9999');
+  });
+
+  it('assigns dense_rank by composite DESC, NULLs last', async () => {
+    // seed: club 1 with 4 enrollments composite [80, 80, 50, NULL]
+    // expected ranks: 1, 1, 2, 3 (dense — ties share rank, NULL last)
+    // ... insert seed rows ...
+    await service.updateEnrollmentRankPositions(9999);
+    const rows = await prisma.enrollment_rankings.findMany({
+      where: { ecclesiastical_year_id: 9999, club_id: 1 },
+      orderBy: { rank_position: 'asc' },
+    });
+    expect(rows.map(r => [Number(r.composite_score_pct), r.rank_position])).toEqual([
+      [80, 1], [80, 1], [50, 2], [null, 3],
+    ]);
+  });
+});
+```
+
+- [ ] **Step 2: Run test, expect FAIL**
+
+- [ ] **Step 3: Implement los 2 métodos**
+
+```typescript
+// rankings.service.ts (additions)
+private async updateEnrollmentRankPositions(yearId: number): Promise<void> {
   await this.prisma.$executeRaw`
-    UPDATE member_rankings mr
-    SET rank_position = ranked.rk
+    UPDATE enrollment_rankings er
+    SET rank_position = sub.rnk
     FROM (
-      SELECT id, DENSE_RANK() OVER (
-        PARTITION BY club_id, ecclesiastical_year_id
-        ORDER BY composite_score_pct DESC NULLS LAST
-      ) AS rk
-      FROM member_rankings
+      SELECT id,
+        DENSE_RANK() OVER (
+          PARTITION BY club_id, ecclesiastical_year_id
+          ORDER BY composite_score_pct DESC NULLS LAST
+        ) AS rnk
+      FROM enrollment_rankings
       WHERE ecclesiastical_year_id = ${yearId}
-    ) ranked
-    WHERE mr.id = ranked.id
-  `;
-  // Set NULL rank for rows where composite is NULL (no positional rank)
-  await this.prisma.$executeRaw`
-    UPDATE member_rankings
-    SET rank_position = NULL
-    WHERE ecclesiastical_year_id = ${yearId}
-      AND composite_score_pct IS NULL
+    ) sub
+    WHERE er.id = sub.id
   `;
 }
 
 private async updateSectionRankPositions(yearId: number): Promise<void> {
   await this.prisma.$executeRaw`
     UPDATE section_rankings sr
-    SET rank_position = ranked.rk
+    SET rank_position = sub.rnk
     FROM (
-      SELECT id, DENSE_RANK() OVER (
-        PARTITION BY club_id, ecclesiastical_year_id
-        ORDER BY composite_score_pct DESC NULLS LAST
-      ) AS rk
+      SELECT id,
+        DENSE_RANK() OVER (
+          PARTITION BY club_id, ecclesiastical_year_id
+          ORDER BY composite_score_pct DESC NULLS LAST
+        ) AS rnk
       FROM section_rankings
       WHERE ecclesiastical_year_id = ${yearId}
-    ) ranked
-    WHERE sr.id = ranked.id
-  `;
-  await this.prisma.$executeRaw`
-    UPDATE section_rankings
-    SET rank_position = NULL
-    WHERE ecclesiastical_year_id = ${yearId}
-      AND composite_score_pct IS NULL
+    ) sub
+    WHERE sr.id = sub.id
   `;
 }
 ```
 
-- [ ] **Step 2: Llamar después de cada recalculate**
-
-En `recalculateMemberRankings` antes del return: `await this.updateMemberRankPositions(year);`
-En `recalculateSectionAggregates` antes del return: `await this.updateSectionRankPositions(year);`
-
-- [ ] **Step 3: Integration test (real Prisma against test DB seed)**
-
-Agregar test en spec del Task 12:
-
-```typescript
-it('assigns DENSE_RANK with NULLS LAST and ties share rank', async () => {
-  // Seed 4 member_rankings: composite 90, 90, 80, NULL (same club + year)
-  // After updateMemberRankPositions: ranks = [1, 1, 2, NULL]
-});
-```
-
-- [ ] **Step 4: Run + Commit**
+- [ ] **Step 4: Run test, expect PASS**
 
 ```bash
-pnpm jest rankings.service.member.spec.ts
-git add src/annual-folders/rankings.service.ts \
-        src/annual-folders/__tests__/rankings.service.member.spec.ts
-git commit -m "feat(rankings): add DENSE_RANK NULLS LAST for member + section positions"
+pnpm test rankings.service.dense-rank.spec.ts
 ```
 
----
-
-## Phase 4 — Backend REST endpoints (sacdia-backend)
-
-> **CRÍTICO — engram #1883 / PR #28**: el orden de controllers en el array `controllers` del `@Module` IMPORTA. Rutas específicas deben declararse ANTES que rutas con `:param` dinámico. Si añadís rutas con `:param` a un módulo existente, reordená Y agregá un e2e test HTTP real (Task 18) para detectar bugs de ParseUUIDPipe order. Recordá que `member_id`, `club_section_id`, `club_id` son INTEGER — NO usar `ParseUUIDPipe` en esos params, solo `ParseIntPipe`. Usar `ParseUUIDPipe` SOLO en `awarded_category_id` y `member_ranking_weights.id`.
-
-### Task 14: Crear módulo `member-rankings/` (controller + service + DTOs)
-
-**Files:**
-- Create: `sacdia-backend/src/member-rankings/member-rankings.module.ts`
-- Create: `sacdia-backend/src/member-rankings/member-rankings.controller.ts`
-- Create: `sacdia-backend/src/member-rankings/member-rankings.service.ts`
-- Create: `sacdia-backend/src/member-rankings/dto/member-ranking-response.dto.ts`
-- Create: `sacdia-backend/src/member-rankings/dto/member-breakdown.dto.ts`
-- Create: `sacdia-backend/src/member-rankings/dto/recalculate-member-rankings.dto.ts`
-- Create: `sacdia-backend/src/member-rankings/__tests__/member-rankings.controller.spec.ts`
-
-- [ ] **Step 1: Crear DTOs**
-
-`member-ranking-response.dto.ts` (campos según spec §6.5):
-
-```typescript
-export class MemberRankingResponseDto {
-  member_id!: number;
-  member_name!: string;
-  club_section_id!: number | null;
-  section_name!: string | null;
-  class_score_pct!: number | null;
-  evidence_score_pct!: number | null;
-  investiture_score_pct!: number | null;
-  camporee_score_pct!: number | null;
-  composite_score_pct!: number | null;
-  rank_position!: number | null;
-  awarded_category!: { id: string; name: string; color: string; min_pct: number; max_pct: number } | null;
-  composite_calculated_at!: string | null;
-}
-```
-
-`member-breakdown.dto.ts` extiende lo anterior agregando `weights_applied` + 4 `*_breakdown` (ver spec §6.5).
-
-`recalculate-member-rankings.dto.ts`:
-
-```typescript
-import { IsInt, IsOptional } from 'class-validator';
-
-export class RecalculateMemberRankingsDto {
-  @IsOptional() @IsInt() year_id?: number;
-  @IsOptional() @IsInt() club_id?: number;
-}
-```
-
-- [ ] **Step 2: Crear `member-rankings.service.ts`**
-
-Métodos:
-- `list(filter, scope)` — query paginada con scope-filter del caller
-- `breakdown(memberId, callerScope)` — drill-down 4 breakdowns + weights
-- `me(memberId)` — respeta `member_visibility` flag
-- `triggerRecalc(dto)` — kill-switch check + delega en `RankingsService.recalculateMemberRankings(year_id)`
-
-Pseudocódigo:
-
-```typescript
-async me(memberId: number) {
-  const visibility = await this.systemConfig.get('member_ranking.member_visibility');
-  if (visibility === 'hidden') throw new ForbiddenException('MEMBER_RANKING_HIDDEN');
-
-  const yearId = await this.resolveActiveYear();
-  const member = await this.prisma.member_rankings.findUnique({
-    where: { uq_member_rankings_member_year: { member_id: memberId, ecclesiastical_year_id: yearId } },
-    include: { /* relations for DTO */ },
-  });
-  if (!member) throw new NotFoundException('MEMBER_RANKING_NOT_FOUND');
-
-  const result: MemberMyRankingDto = { member: this.toDto(member), visibility_mode: visibility as any };
-  if (visibility === 'self_and_top_n') {
-    const topN = parseInt(await this.systemConfig.get('member_ranking.top_n') || '5', 10);
-    result.top_n = await this.fetchTopN(member.club_id, yearId, topN);
-  }
-  return result;
-}
-```
-
-- [ ] **Step 3: Crear `member-rankings.controller.ts`**
-
-```typescript
-import { Body, Controller, Get, Param, ParseIntPipe, Post, Query, UseGuards, Req } from '@nestjs/common';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { PermissionsGuard } from '../auth/permissions.guard';
-import { RequirePermissions } from '../auth/permissions.decorator';
-import { MemberRankingsService } from './member-rankings.service';
-import { RecalculateMemberRankingsDto } from './dto/recalculate-member-rankings.dto';
-
-@Controller('member-rankings')
-@UseGuards(JwtAuthGuard, PermissionsGuard)
-export class MemberRankingsController {
-  constructor(private readonly svc: MemberRankingsService) {}
-
-  // ORDER MATTERS — specific routes BEFORE :param routes (engram #1883)
-  @Get('me')
-  @RequirePermissions('member_rankings:read_self')
-  me(@Req() req: any) {
-    return this.svc.me(req.user.member_id);
-  }
-
-  @Post('recalculate')
-  @RequirePermissions('member_ranking_weights:write')
-  recalculate(@Body() dto: RecalculateMemberRankingsDto) {
-    return this.svc.triggerRecalc(dto);
-  }
-
-  @Get()
-  @RequirePermissions(
-    'member_rankings:read_self', 'member_rankings:read_section', 'member_rankings:read_club',
-    'member_rankings:read_lf', 'member_rankings:read_global'
-  )
-  list(@Query() filter: any, @Req() req: any) {
-    return this.svc.list(filter, req.user);
-  }
-
-  @Get(':memberId/breakdown')
-  @RequirePermissions(
-    'member_rankings:read_self', 'member_rankings:read_section', 'member_rankings:read_club',
-    'member_rankings:read_lf', 'member_rankings:read_global'
-  )
-  breakdown(@Param('memberId', ParseIntPipe) memberId: number, @Req() req: any) {
-    return this.svc.breakdown(memberId, req.user);
-  }
-}
-```
-
-- [ ] **Step 4: Module + register**
-
-```typescript
-@Module({
-  controllers: [MemberRankingsController],
-  providers: [MemberRankingsService /*, plus services from Phase 2/3 imports */],
-  exports: [MemberRankingsService],
-})
-export class MemberRankingsModule {}
-```
-
-Importar en `app.module.ts`.
-
-- [ ] **Step 5: Integration tests (controller spec)**
-
-```typescript
-describe('MemberRankingsController', () => {
-  // Mock JwtAuthGuard + PermissionsGuard + service
-  it('GET /member-rankings/me with visibility=hidden → 403', async () => { ... });
-  it('GET /member-rankings/me with visibility=self_only → 200 returns own only', async () => { ... });
-  it('GET /member-rankings/me with visibility=self_and_top_n → 200 includes top_n', async () => { ... });
-  it('GET /member-rankings as member → only own row', async () => { ... });
-  it('GET /member-rankings as director-club → filters by club_id', async () => { ... });
-  it('GET /member-rankings/:memberId/breakdown wrong scope → 403', async () => { ... });
-  it('POST /member-rankings/recalculate as super_admin → 200', async () => { ... });
-});
-```
-
-Run: `pnpm jest member-rankings.controller.spec.ts` → PASS.
+- [ ] **Step 5: Code review checkpoint** — verify NULLS LAST y DENSE_RANK (no ROW_NUMBER): empates comparten rank.
 
 - [ ] **Step 6: Commit**
 
 ```bash
-git add src/member-rankings/
+git add sacdia-backend/src/rankings/{rankings.service.ts,rankings.service.dense-rank.spec.ts}
 git commit -m "$(cat <<'EOF'
-feat(member-rankings): add REST endpoints (list, me, breakdown, recalculate)
+feat(rankings): add DENSE_RANK rank_position updates for enrollments+sections
 
-Specific routes ordered before :param routes (engram #1883). Visibility flag enforced
-in /me. RBAC scope-filtered list. Integer params via ParseIntPipe.
+PARTITION BY (club_id, ecclesiastical_year_id) ORDER BY composite DESC
+NULLS LAST. Ties share rank (dense semantics, same as 8.4-C). Runs
+after upserts complete, idempotent across re-execution.
 EOF
 )"
 ```
 
 ---
 
-### Task 15: Crear módulo `section-rankings/`
+## Phase 4 — Backend REST endpoints (sacdia-backend)
+
+> **CRÍTICO — engram #1883/PR #28**: orden controllers en module.controllers array MATTERS. Rutas estáticas (`/me`, `/recalculate`) ANTES de rutas dinámicas (`/:enrollmentId`). Si un PR rompe orden, ParseUUIDPipe/ParseIntPipe se aplica primero a la ruta dinámica y devuelve 400 BadRequest sobre URLs estáticas. Tests modulares NO detectan esto: SOLO e2e con HTTP real (engram #1888) — Phase 4 incluye tarea e2e dedicada.
+
+### Task 11: Crear módulo `member-rankings/`
 
 **Files:**
-- Create: `sacdia-backend/src/section-rankings/section-rankings.module.ts`
-- Create: `sacdia-backend/src/section-rankings/section-rankings.controller.ts`
-- Create: `sacdia-backend/src/section-rankings/section-rankings.service.ts`
-- Create: `sacdia-backend/src/section-rankings/dto/section-ranking-response.dto.ts`
-- Create: `sacdia-backend/src/section-rankings/__tests__/section-rankings.controller.spec.ts`
+- Create: `sacdia-backend/src/rankings/member-rankings/member-rankings.controller.ts`
+- Create: `sacdia-backend/src/rankings/member-rankings/member-rankings.service.ts`
+- Create: `sacdia-backend/src/rankings/member-rankings/dto/member-ranking-response.dto.ts`
+- Create: `sacdia-backend/src/rankings/member-rankings/dto/member-breakdown.dto.ts`
+- Create: `sacdia-backend/src/rankings/member-rankings/dto/member-my-ranking.dto.ts`
+- Create: `sacdia-backend/src/rankings/member-rankings/member-rankings.module.ts`
+- Test: `sacdia-backend/src/rankings/member-rankings/member-rankings.controller.spec.ts`
 
-- [ ] **Step 1: DTO + service**
-
-`section-ranking-response.dto.ts` según spec §6.5 (`SectionRankingResponseDto`).
-
-Service: `list(filter, scope)` + `members(sectionId, scope)`.
-
-- [ ] **Step 2: Controller (orden de rutas crítico)**
+- [ ] **Step 1: Write failing test (RBAC matrix scenarios)**
 
 ```typescript
-@Controller('section-rankings')
-@UseGuards(JwtAuthGuard, PermissionsGuard)
-export class SectionRankingsController {
-  constructor(private readonly svc: SectionRankingsService) {}
+describe('MemberRankingsController', () => {
+  it('GET / member self → 200 (own only)', async () => { /* ... */ });
+  it('GET / member other enrollment_id → 403', async () => { /* ... */ });
+  it('GET / director-club mismo club → 200 filtered', async () => { /* ... */ });
+  it('GET / director-club otro club → 403', async () => { /* ... */ });
+  it('GET /me visibility=hidden → 403 MEMBER_RANKING_HIDDEN', async () => { /* ... */ });
+  it('GET /me visibility=self_and_top_n → includes top_n', async () => { /* ... */ });
+  it('GET /:enrollmentId/breakdown ParseIntPipe — string "abc" → 400', async () => { /* ... */ });
+  it('POST /recalculate kill-switch off → 400 RECALCULATION_DISABLED', async () => { /* ... */ });
+});
+```
 
-  @Get()
-  @RequirePermissions('section_rankings:read_club', 'section_rankings:read_lf', 'section_rankings:read_global')
-  list(@Query() filter: any, @Req() req: any) { return this.svc.list(filter, req.user); }
+- [ ] **Step 2: Run test, expect FAIL**
 
-  @Get(':sectionId/members')
-  @RequirePermissions('section_rankings:read_club', 'section_rankings:read_lf', 'section_rankings:read_global')
-  members(@Param('sectionId', ParseIntPipe) sectionId: number, @Req() req: any) {
-    return this.svc.members(sectionId, req.user);
+- [ ] **Step 3: Implement DTOs**
+
+```typescript
+// member-ranking-response.dto.ts
+export class MemberRankingResponseDto {
+  enrollment_id!: number;
+  user_id!: string;
+  member_name!: string;
+  club_section_id!: number | null;
+  section_name!: string | null;
+  class_score_pct!: number | null;
+  investiture_score_pct!: number | null;
+  camporee_score_pct!: number | null;
+  composite_score_pct!: number | null;
+  rank_position!: number | null;
+  awarded_category!: {
+    id: string; name: string; color: string;
+    min_pct: number; max_pct: number;
+  } | null;
+  composite_calculated_at!: string | null;
+
+  static fromEnrollmentRanking(row: any): MemberRankingResponseDto {
+    return {
+      enrollment_id: row.enrollment_id,
+      user_id: row.user_id,
+      member_name: row.user?.name ?? '',
+      club_section_id: row.club_section_id,
+      section_name: row.club_section?.name ?? null,
+      class_score_pct: row.class_score_pct !== null ? Number(row.class_score_pct) : null,
+      investiture_score_pct: row.investiture_score_pct !== null ? Number(row.investiture_score_pct) : null,
+      camporee_score_pct: row.camporee_score_pct !== null ? Number(row.camporee_score_pct) : null,
+      composite_score_pct: row.composite_score_pct !== null ? Number(row.composite_score_pct) : null,
+      rank_position: row.rank_position,
+      awarded_category: row.awarded_category ? {
+        id: row.awarded_category.award_category_id,
+        name: row.awarded_category.name,
+        color: row.awarded_category.color,
+        min_pct: Number(row.awarded_category.min_composite_pct),
+        max_pct: Number(row.awarded_category.max_composite_pct),
+      } : null,
+      composite_calculated_at: row.composite_calculated_at?.toISOString() ?? null,
+    };
+  }
+}
+
+// member-breakdown.dto.ts (extends Response + adds breakdowns)
+// member-my-ranking.dto.ts: { member, visibility_mode, top_n? }
+```
+
+- [ ] **Step 4: Implement service `member-rankings.service.ts`**
+
+```typescript
+@Injectable()
+export class MemberRankingsService {
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly systemConfig: SystemConfigService,
+    private readonly rankingsService: RankingsService,
+  ) {}
+
+  async list(params: {
+    callerScope: ScopeContext; // resuelto por guard
+    clubId?: number;
+    sectionId?: number;
+    yearId?: number;
+    page: number;
+    limit: number;
+  }) {
+    const where = this.buildScopeWhere(params);
+    const [data, total] = await Promise.all([
+      this.prisma.enrollmentRanking.findMany({
+        where,
+        skip: (params.page - 1) * params.limit,
+        take: params.limit,
+        orderBy: { rank_position: 'asc' },
+        include: { user: true, club_section: true, awarded_category: true },
+      }),
+      this.prisma.enrollmentRanking.count({ where }),
+    ]);
+    return { data: data.map(MemberRankingResponseDto.fromEnrollmentRanking), total, page: params.page, limit: params.limit };
+  }
+
+  async getMyRanking(userId: string, yearId: number): Promise<MemberMyRankingDto> {
+    const visibility = await this.systemConfig.get('member_ranking.member_visibility') ?? 'self_only';
+    if (visibility === 'hidden') {
+      throw new ForbiddenException({ code: 'MEMBER_RANKING_HIDDEN', message: 'Member ranking visibility is hidden' });
+    }
+
+    const own = await this.prisma.enrollmentRanking.findFirst({
+      where: { user_id: userId, ecclesiastical_year_id: yearId },
+      include: { user: true, club_section: true, awarded_category: true },
+    });
+    const memberDto = own ? MemberRankingResponseDto.fromEnrollmentRanking(own) : null;
+
+    let topN: any[] | undefined;
+    if (visibility === 'self_and_top_n' && own) {
+      const n = Number(await this.systemConfig.get('member_ranking.top_n') ?? '5');
+      const top = await this.prisma.enrollmentRanking.findMany({
+        where: { club_id: own.club_id, ecclesiastical_year_id: yearId, composite_score_pct: { not: null } },
+        orderBy: { rank_position: 'asc' },
+        take: n,
+        include: { user: true },
+      });
+      // OQ1 default: anonimizado
+      topN = top.map((r, idx) => ({
+        member_name: `Miembro #${idx + 1}`,
+        composite_score_pct: r.composite_score_pct !== null ? Number(r.composite_score_pct) : null,
+        rank_position: r.rank_position,
+      }));
+    }
+
+    return { member: memberDto!, visibility_mode: visibility as any, top_n: topN };
+  }
+
+  async getBreakdown(enrollmentId: number, yearId: number, callerScope: ScopeContext): Promise<MemberBreakdownDto> {
+    // 1. Validar scope
+    // 2. Cargar EnrollmentRanking row + cargar weights aplicadas
+    // 3. Computar 3 breakdowns numéricos (completedCount/requiredCount, status, participated/total)
+    // 4. Devolver DTO
+  }
+
+  async triggerRecalculate(yearId: number, clubId?: number) {
+    const enabled = await this.systemConfig.get('member_ranking.recalculation_enabled');
+    if (enabled === 'false') {
+      throw new BadRequestException({ code: 'RECALCULATION_DISABLED' });
+    }
+    await this.rankingsService.recalculateEnrollmentRankings(yearId);
+    await this.rankingsService.recalculateSectionAggregates(yearId);
+    return { triggered: true, ecclesiastical_year_id: yearId, club_id: clubId };
+  }
+
+  private buildScopeWhere(params: any): Prisma.EnrollmentRankingWhereInput {
+    // Resolver según permisos: read_self → user_id=caller; read_club → club_id IN (caller_clubs); etc.
+    return {};
   }
 }
 ```
 
-- [ ] **Step 3: Integration test**
+- [ ] **Step 5: Implement controller con orden de rutas correcto**
 
 ```typescript
-describe('SectionRankingsController', () => {
-  it('GET /section-rankings as director-club → 200 filtered by club', async () => {});
-  it('GET /section-rankings as member → 403', async () => {});
-  it('GET /section-rankings/:sectionId/members other club → 403', async () => {});
-});
+import { Controller, Get, Post, Param, Query, Body, UseGuards, ParseIntPipe, Req } from '@nestjs/common';
+import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
+import { PermissionsGuard } from '../../auth/permissions.guard';
+import { RequirePermissions } from '../../auth/decorators/require-permissions.decorator';
+
+@Controller('member-rankings')
+@UseGuards(JwtAuthGuard, PermissionsGuard)
+export class MemberRankingsController {
+  constructor(private readonly service: MemberRankingsService) {}
+
+  // STATIC ROUTES FIRST (engram #1883)
+  @Get('/me')
+  @RequirePermissions('member_rankings:read_self')
+  async getMyRanking(@Req() req: any) {
+    return this.service.getMyRanking(req.user.user_id, await this.resolveActiveYear());
+  }
+
+  @Post('/recalculate')
+  @RequirePermissions('member_ranking_weights:write')
+  async triggerRecalculate(@Body() body: { ecclesiastical_year_id?: number; club_id?: number }) {
+    return this.service.triggerRecalculate(body.ecclesiastical_year_id ?? await this.resolveActiveYear(), body.club_id);
+  }
+
+  // DYNAMIC ROUTES AFTER
+  @Get('/:enrollmentId/breakdown')
+  @RequirePermissions('member_rankings:read_self','member_rankings:read_section','member_rankings:read_club','member_rankings:read_lf','member_rankings:read_global')
+  async getBreakdown(
+    @Param('enrollmentId', ParseIntPipe) enrollmentId: number,
+    @Query('ecclesiastical_year_id', ParseIntPipe) yearId: number,
+    @Req() req: any,
+  ) {
+    return this.service.getBreakdown(enrollmentId, yearId, req.user.scope);
+  }
+
+  // LIST (root)
+  @Get()
+  @RequirePermissions('member_rankings:read_self','member_rankings:read_section','member_rankings:read_club','member_rankings:read_lf','member_rankings:read_global')
+  async list(
+    @Query('club_id') clubId?: string,
+    @Query('section_id') sectionId?: string,
+    @Query('ecclesiastical_year_id') yearId?: string,
+    @Query('page') page = '1',
+    @Query('limit') limit = '50',
+    @Req() req: any,
+  ) {
+    return this.service.list({
+      callerScope: req.user.scope,
+      clubId: clubId ? parseInt(clubId, 10) : undefined,
+      sectionId: sectionId ? parseInt(sectionId, 10) : undefined,
+      yearId: yearId ? parseInt(yearId, 10) : undefined,
+      page: parseInt(page, 10),
+      limit: parseInt(limit, 10),
+    });
+  }
+
+  private async resolveActiveYear(): Promise<number> {
+    // shared helper (en service o utility)
+    return 0;
+  }
+}
 ```
 
-- [ ] **Step 4: Commit**
+- [ ] **Step 6: Run tests, expect PASS** (8 controller specs)
 
 ```bash
-git add src/section-rankings/
-git commit -m "feat(section-rankings): add REST endpoints (list, members) with RBAC scope filter"
+pnpm test member-rankings.controller.spec.ts
+```
+
+- [ ] **Step 7: Code review checkpoint** — quality-reviewer subagent: ¿order rutas correcto? ¿`ParseIntPipe` en `:enrollmentId`? ¿RBAC permissions correctos?
+
+- [ ] **Step 8: Commit**
+
+```bash
+git add sacdia-backend/src/rankings/member-rankings
+git commit -m "$(cat <<'EOF'
+feat(member-rankings): add controller + service + DTOs (REST endpoints)
+
+GET / list (paginated, RBAC scope-filtered)
+GET /me (visibility-gated: hidden→403, self_only, self_and_top_n)
+GET /:enrollmentId/breakdown (ParseIntPipe — INTEGER, NOT UUID)
+POST /recalculate (kill-switch validated)
+
+Static routes registered BEFORE dynamic to avoid ParseIntPipe order
+bug (engram #1883/#1888).
+EOF
+)"
 ```
 
 ---
 
-### Task 16: Crear módulo `member-ranking-weights/` CRUD
+### Task 12: Crear módulo `section-rankings/`
 
 **Files:**
-- Create: `sacdia-backend/src/member-ranking-weights/member-ranking-weights.module.ts`
-- Create: `sacdia-backend/src/member-ranking-weights/member-ranking-weights.controller.ts`
-- Create: `sacdia-backend/src/member-ranking-weights/member-ranking-weights.service.ts`
-- Create: `sacdia-backend/src/member-ranking-weights/dto/create-member-ranking-weights.dto.ts`
-- Create: `sacdia-backend/src/member-ranking-weights/dto/update-member-ranking-weights.dto.ts`
-- Create: `sacdia-backend/src/member-ranking-weights/__tests__/member-ranking-weights.controller.spec.ts`
+- Create: `sacdia-backend/src/rankings/section-rankings/section-rankings.controller.ts`
+- Create: `sacdia-backend/src/rankings/section-rankings/section-rankings.service.ts`
+- Create: `sacdia-backend/src/rankings/section-rankings/dto/section-ranking-response.dto.ts`
+- Create: `sacdia-backend/src/rankings/section-rankings/section-rankings.module.ts`
+- Test: `sacdia-backend/src/rankings/section-rankings/section-rankings.controller.spec.ts`
 
-- [ ] **Step 1: DTOs con `class-validator`**
+- [ ] **Step 1: Write failing test**
 
 ```typescript
-// create-member-ranking-weights.dto.ts
-import { IsInt, IsNumber, IsOptional, Min, Max, ValidateIf } from 'class-validator';
+describe('SectionRankingsController', () => {
+  it('GET / director-club → 200 filtered by club', async () => { /* ... */ });
+  it('GET / member → 403', async () => { /* ... */ });
+  it('GET /:sectionId/members ParseIntPipe — "abc" → 400', async () => { /* ... */ });
+  it('GET /:sectionId/members → enrollments ordered by rank_position ASC NULLS LAST', async () => { /* ... */ });
+});
+```
 
+- [ ] **Step 2: Run test, expect FAIL**
+
+- [ ] **Step 3: Implement DTO + service + controller**
+
+```typescript
+// section-ranking-response.dto.ts
+export class SectionRankingResponseDto {
+  club_section_id!: number;
+  section_name!: string;
+  composite_score_pct!: number | null;
+  rank_position!: number | null;
+  active_enrollment_count!: number;
+  awarded_category!: { /* ... */ } | null;
+  composite_calculated_at!: string | null;
+
+  static fromSectionRanking(row: any): SectionRankingResponseDto { /* ... */ return {} as any; }
+}
+
+// section-rankings.controller.ts
+@Controller('section-rankings')
+@UseGuards(JwtAuthGuard, PermissionsGuard)
+export class SectionRankingsController {
+  constructor(private readonly service: SectionRankingsService) {}
+
+  // DYNAMIC con sub-route /members ANTES que root para no colisionar
+  @Get('/:sectionId/members')
+  @RequirePermissions('section_rankings:read_club','section_rankings:read_lf','section_rankings:read_global')
+  async getMembers(
+    @Param('sectionId', ParseIntPipe) sectionId: number,
+    @Query('ecclesiastical_year_id', ParseIntPipe) yearId: number,
+    @Req() req: any,
+  ) {
+    return this.service.getMembers(sectionId, yearId, req.user.scope);
+  }
+
+  @Get()
+  @RequirePermissions('section_rankings:read_club','section_rankings:read_lf','section_rankings:read_global')
+  async list(
+    @Query('club_id') clubId?: string,
+    @Query('ecclesiastical_year_id') yearId?: string,
+    @Query('page') page = '1',
+    @Query('limit') limit = '50',
+    @Req() req: any,
+  ) {
+    return this.service.list({
+      callerScope: req.user.scope,
+      clubId: clubId ? parseInt(clubId, 10) : undefined,
+      yearId: yearId ? parseInt(yearId, 10) : undefined,
+      page: parseInt(page, 10),
+      limit: parseInt(limit, 10),
+    });
+  }
+}
+```
+
+- [ ] **Step 4: Run tests, expect PASS**
+
+- [ ] **Step 5: Code review checkpoint** — orden de rutas: `/:sectionId/members` ANTES de `GET /` (en NestJS el orden de declaración no importa para rutas con prefijo distinto, pero declarativo es claro).
+
+- [ ] **Step 6: Commit**
+
+```bash
+git add sacdia-backend/src/rankings/section-rankings
+git commit -m "feat(section-rankings): add controller + service + DTO
+
+GET / list (paginated, RBAC scope-filtered)
+GET /:sectionId/members drill-down (ParseIntPipe INTEGER)
+"
+```
+
+---
+
+### Task 13: Crear módulo `member-ranking-weights/` CRUD
+
+**Files:**
+- Create: `sacdia-backend/src/rankings/member-ranking-weights/member-ranking-weights.controller.ts`
+- Create: `sacdia-backend/src/rankings/member-ranking-weights/member-ranking-weights.service.ts`
+- Create: `sacdia-backend/src/rankings/member-ranking-weights/dto/{create,update,response}-weights.dto.ts`
+- Test: `sacdia-backend/src/rankings/member-ranking-weights/member-ranking-weights.controller.spec.ts`
+
+Mismo patrón que `ranking-weights` 8.4-C, pero con 3 columnas (no 4) y `ParseUUIDPipe` en `:id`.
+
+- [ ] **Step 1: Write failing test**
+
+```typescript
+describe('MemberRankingWeightsController', () => {
+  it('POST sum=100 → 201 created', async () => { /* class=40, invest=40, camporee=20 */ });
+  it('POST sum≠100 → 400 WEIGHTS_SUM_INVALID', async () => { /* 50+30+30=110 */ });
+  it('POST negative weight → 400', async () => { /* -10 */ });
+  it('POST duplicate (clubType+year) → 409 WEIGHTS_CONFLICT', async () => { });
+  it('DELETE default global → 400 DEFAULT_WEIGHTS_NOT_DELETABLE', async () => { });
+  it('GET /:id ParseUUIDPipe non-uuid → 400', async () => { });
+  it('PATCH validates SUM=100', async () => { });
+  it('GET / list returns default + overrides', async () => { });
+});
+```
+
+- [ ] **Step 2: Run test, expect FAIL**
+
+- [ ] **Step 3: Implement DTOs (zod o class-validator)**
+
+```typescript
+// create-weights.dto.ts
 export class CreateMemberRankingWeightsDto {
-  @IsOptional() @IsInt() club_type_id?: number;
-  @IsOptional() @IsInt() ecclesiastical_year_id?: number;
+  @IsOptional() @IsInt() club_type_id?: number | null;
+  @IsOptional() @IsInt() ecclesiastical_year_id?: number | null;
   @IsNumber() @Min(0) @Max(100) class_pct!: number;
-  @IsNumber() @Min(0) @Max(100) evidence_pct!: number;
   @IsNumber() @Min(0) @Max(100) investiture_pct!: number;
   @IsNumber() @Min(0) @Max(100) camporee_pct!: number;
 }
 ```
 
-- [ ] **Step 2: Service con valid SUM=100 + DELETE-default-blocked**
+- [ ] **Step 4: Implement service**
 
 ```typescript
-async create(dto: CreateMemberRankingWeightsDto) {
-  const sum = dto.class_pct + dto.evidence_pct + dto.investiture_pct + dto.camporee_pct;
-  if (sum !== 100) throw new BadRequestException('WEIGHTS_SUM_INVALID');
-  try {
-    return await this.prisma.member_ranking_weights.create({ data: dto });
-  } catch (err: any) {
-    if (err.code === 'P2002') throw new ConflictException('WEIGHTS_CONFLICT');
-    throw err;
-  }
-}
+@Injectable()
+export class MemberRankingWeightsService {
+  constructor(private readonly prisma: PrismaService) {}
 
-async remove(id: string) {
-  const row = await this.prisma.member_ranking_weights.findUnique({ where: { id } });
-  if (!row) throw new NotFoundException();
-  if (row.is_default) throw new BadRequestException('DEFAULT_WEIGHTS_NOT_DELETABLE');
-  return this.prisma.member_ranking_weights.delete({ where: { id } });
+  async create(dto: CreateMemberRankingWeightsDto) {
+    const sum = dto.class_pct + dto.investiture_pct + dto.camporee_pct;
+    if (sum !== 100) throw new BadRequestException({ code: 'WEIGHTS_SUM_INVALID', sum });
+
+    try {
+      return await this.prisma.enrollmentRankingWeight.create({
+        data: { ...dto, is_default: false },
+      });
+    } catch (e: any) {
+      if (e.code === 'P2002') throw new ConflictException({ code: 'WEIGHTS_CONFLICT' });
+      throw e;
+    }
+  }
+
+  async update(id: string, dto: UpdateMemberRankingWeightsDto) {
+    const sum = dto.class_pct + dto.investiture_pct + dto.camporee_pct;
+    if (sum !== 100) throw new BadRequestException({ code: 'WEIGHTS_SUM_INVALID', sum });
+    return this.prisma.enrollmentRankingWeight.update({ where: { id }, data: dto });
+  }
+
+  async remove(id: string) {
+    const row = await this.prisma.enrollmentRankingWeight.findUnique({ where: { id } });
+    if (!row) throw new NotFoundException();
+    if (row.is_default) throw new BadRequestException({ code: 'DEFAULT_WEIGHTS_NOT_DELETABLE' });
+    await this.prisma.enrollmentRankingWeight.delete({ where: { id } });
+  }
+
+  list() { return this.prisma.enrollmentRankingWeight.findMany({ orderBy: { is_default: 'desc' } }); }
+  findOne(id: string) { return this.prisma.enrollmentRankingWeight.findUnique({ where: { id } }); }
 }
 ```
 
-- [ ] **Step 3: Controller (params UUID → ParseUUIDPipe)**
+- [ ] **Step 5: Implement controller**
 
 ```typescript
 @Controller('member-ranking-weights')
 @UseGuards(JwtAuthGuard, PermissionsGuard)
 export class MemberRankingWeightsController {
-  constructor(private readonly svc: MemberRankingWeightsService) {}
+  constructor(private readonly service: MemberRankingWeightsService) {}
 
   @Get()
   @RequirePermissions('member_ranking_weights:read')
-  list() { return this.svc.list(); }
+  list() { return this.service.list(); }
 
-  @Get(':id')
+  @Get('/:id')
   @RequirePermissions('member_ranking_weights:read')
-  findOne(@Param('id', ParseUUIDPipe) id: string) { return this.svc.findOne(id); }
+  findOne(@Param('id', ParseUUIDPipe) id: string) { return this.service.findOne(id); }
 
   @Post()
   @RequirePermissions('member_ranking_weights:write')
-  create(@Body() dto: CreateMemberRankingWeightsDto) { return this.svc.create(dto); }
+  create(@Body() dto: CreateMemberRankingWeightsDto) { return this.service.create(dto); }
 
-  @Patch(':id')
+  @Patch('/:id')
   @RequirePermissions('member_ranking_weights:write')
   update(@Param('id', ParseUUIDPipe) id: string, @Body() dto: UpdateMemberRankingWeightsDto) {
-    return this.svc.update(id, dto);
+    return this.service.update(id, dto);
   }
 
-  @Delete(':id')
+  @Delete('/:id')
   @RequirePermissions('member_ranking_weights:write')
-  remove(@Param('id', ParseUUIDPipe) id: string) { return this.svc.remove(id); }
+  remove(@Param('id', ParseUUIDPipe) id: string) { return this.service.remove(id); }
 }
 ```
 
-- [ ] **Step 4: Tests**
+- [ ] **Step 6: Run tests, expect PASS**
 
-5 test cases mínimos:
-- POST con sum != 100 → 400
-- POST duplicate (club_type+year) → 409
-- DELETE on default → 400
-- POST as field_admin → 403
-- GET as super_admin → 200
+- [ ] **Step 7: Code review checkpoint** — `ParseUUIDPipe` en `:id` (PK es UUID). 3 columnas (NO `evidence_pct`).
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 8: Commit**
 
 ```bash
-git add src/member-ranking-weights/
-git commit -m "feat(member-ranking-weights): add CRUD with sum=100 + default-protect"
+git add sacdia-backend/src/rankings/member-ranking-weights
+git commit -m "$(cat <<'EOF'
+feat(member-ranking-weights): add CRUD endpoints with SUM=100 validation
+
+3 weight columns (class, investiture, camporee — NO evidence in Phase 1).
+ParseUUIDPipe on :id (UUID PK). Default global row not deletable.
+EOF
+)"
 ```
 
 ---
 
-### Task 17: Extender `award-categories` controller con filter `?scope=` + scope validation en POST/PATCH
+### Task 14: Extend `award-categories` controller con filter `?scope=`
 
 **Files:**
 - Modify: `sacdia-backend/src/award-categories/award-categories.controller.ts`
 - Modify: `sacdia-backend/src/award-categories/award-categories.service.ts`
-- Modify: `sacdia-backend/src/award-categories/dto/create-award-category.dto.ts`
-- Modify: `sacdia-backend/src/award-categories/dto/update-award-category.dto.ts`
-- Modify: `sacdia-backend/src/award-categories/__tests__/award-categories.controller.spec.ts`
+- Modify: `sacdia-backend/src/award-categories/dto/{create,update}-award-category.dto.ts`
+- Test: `sacdia-backend/src/award-categories/award-categories.controller.spec.ts`
 
-- [ ] **Step 1: Agregar scope a DTOs**
+- [ ] **Step 1: Write failing test**
 
 ```typescript
-// create-award-category.dto.ts
-import { IsEnum, IsOptional } from 'class-validator';
+describe('AwardCategoriesController — scope extension', () => {
+  it('GET /?scope=club returns only club rows', async () => { /* ... */ });
+  it('GET /?scope=member returns only member rows', async () => { /* ... */ });
+  it('GET /?scope=invalid → 400', async () => { /* ... */ });
+  it('POST scope=member required', async () => { /* ... */ });
+  it('PATCH scope=club only by admin role', async () => { /* ... */ });
+});
+```
 
-export enum AwardCategoryScope { CLUB = 'club', SECTION = 'section', MEMBER = 'member' }
+- [ ] **Step 2: Run test, expect FAIL**
 
+- [ ] **Step 3: Implement extension**
+
+```typescript
+// dto extension
 export class CreateAwardCategoryDto {
-  // ...existing...
-  @IsOptional() @IsEnum(AwardCategoryScope) scope?: AwardCategoryScope = AwardCategoryScope.CLUB;
+  // existing fields ...
+  @IsIn(['club', 'section', 'member']) scope!: 'club' | 'section' | 'member';
 }
-```
 
-- [ ] **Step 2: Filter `?scope=` en GET**
-
-```typescript
-@Get()
-list(@Query('scope') scope?: AwardCategoryScope, @Query('is_legacy') legacy?: string) {
-  return this.svc.list({ scope, is_legacy: legacy === 'true' });
-}
-```
-
-Service:
-```typescript
-async list(filter: { scope?: AwardCategoryScope; is_legacy?: boolean }) {
+// service.list update
+list(filter?: { scope?: 'club' | 'section' | 'member'; is_legacy?: boolean }) {
   return this.prisma.award_categories.findMany({
-    where: {
-      ...(filter.scope && { scope: filter.scope }),
-      ...(filter.is_legacy !== undefined && { is_legacy: filter.is_legacy }),
-    },
+    where: { ...(filter?.scope && { scope: filter.scope }), ...(filter?.is_legacy !== undefined && { is_legacy: filter.is_legacy }) },
+    orderBy: { min_composite_pct: 'desc' },
   });
 }
-```
 
-- [ ] **Step 3: PATCH scope sólo por admin**
-
-```typescript
-@Patch(':id')
-update(@Param('id', ParseUUIDPipe) id: string, @Body() dto: UpdateAwardCategoryDto, @Req() req: any) {
-  if (dto.scope && !req.user.roles.includes('admin') && !req.user.roles.includes('super_admin')) {
-    throw new ForbiddenException('SCOPE_UPDATE_REQUIRES_ADMIN');
+// controller
+@Get()
+list(
+  @Query('scope') scope?: 'club' | 'section' | 'member',
+  @Query('is_legacy') isLegacy?: string,
+) {
+  if (scope && !['club','section','member'].includes(scope)) {
+    throw new BadRequestException({ code: 'INVALID_SCOPE' });
   }
-  return this.svc.update(id, dto);
+  return this.service.list({ scope, is_legacy: isLegacy === 'true' });
 }
 ```
 
-- [ ] **Step 4: Test**
+- [ ] **Step 4: Run tests, expect PASS**
 
-3 tests nuevos:
-- GET ?scope=member → only scope=member rows
-- POST scope=invalid → 400
-- PATCH scope=member as field_admin → 403
+- [ ] **Step 5: Code review checkpoint** — scope enum coherente entre DB CHECK constraint, DTO `IsIn`, y query validation.
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 6: Commit**
 
 ```bash
-git add src/award-categories/
-git commit -m "feat(award-categories): add scope filter + admin-gated scope updates"
+git add sacdia-backend/src/award-categories
+git commit -m "feat(award-categories): extend with polymorphic scope filter
+
+GET /?scope=club|section|member filter.
+POST/PATCH require valid scope enum.
+"
 ```
 
 ---
 
-### Task 18: E2E integration test real Express HTTP a `/member-rankings/` y `/section-rankings/`
+### Task 15: E2E integration test — HTTP real contra `/member-rankings/` y `/section-rankings/`
 
 **Files:**
 - Create: `sacdia-backend/test/member-rankings.e2e-spec.ts`
 - Create: `sacdia-backend/test/section-rankings.e2e-spec.ts`
 
-> **Por qué este test**: engram #1888 — tests modulares con `Test.createTestingModule` NO ven bugs de orden de controllers (`ParseUUIDPipe` interceptando `/me` antes que el handler específico). Solo HTTP real a través de Express los detecta.
+> **CONTEXTO** (engram #1888): tests modulares (`Test.createTestingModule`) NO cargan ParseUUIDPipe/ParseIntPipe en orden real de rutas — saltean middleware order. SOLO `INestApplication` con HTTP real (supertest contra `request(app.getHttpServer())`) detecta bugs tipo 8.4-C donde `GET /` retornaba 400 BadRequest porque el pipe de `:id` se ejecutaba primero.
 
-- [ ] **Step 1: `member-rankings.e2e-spec.ts`**
+- [ ] **Step 1: Write failing e2e test (`member-rankings.e2e-spec.ts`)**
 
 ```typescript
 import { Test } from '@nestjs/testing';
-import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
 
-describe('MemberRankings E2E', () => {
+describe('MemberRankings (e2e — HTTP real)', () => {
   let app: INestApplication;
-  let adminToken: string;
   let memberToken: string;
+  let directorToken: string;
 
   beforeAll(async () => {
-    const moduleRef = await Test.createTestingModule({ imports: [AppModule] }).compile();
-    app = moduleRef.createNestApplication();
-    app.useGlobalPipes(new ValidationPipe({ transform: true }));
+    const m = await Test.createTestingModule({ imports: [AppModule] }).compile();
+    app = m.createNestApplication();
     await app.init();
-    // Login flow to get tokens
-    adminToken = await loginAs('admin@sacdia.com', 'Sacdia2026!');
-    memberToken = await loginAs('member@sacdia.com', 'Sacdia2026!');
+    // Login fixtures: obtener tokens via /auth/sign-in
+    memberToken = await loginAs('member-test@sacdia.com', 'Sacdia2026!');
+    directorToken = await loginAs('director@sacdia.com', 'Sacdia2026!');
   });
 
-  afterAll(async () => { await app.close(); });
+  afterAll(() => app.close());
 
-  it('GET /member-rankings → 200 (no ParseUUIDPipe order bug)', async () => {
-    const res = await request(app.getHttpServer())
-      .get('/member-rankings')
-      .set('Authorization', `Bearer ${adminToken}`);
-    expect(res.status).toBe(200);
-  });
+  it('GET /api/v1/member-rankings — list returns 200 (not 400 BadRequest)', () =>
+    request(app.getHttpServer())
+      .get('/api/v1/member-rankings')
+      .set('Authorization', `Bearer ${directorToken}`)
+      .expect(200));
 
-  it('GET /member-rankings/me as member → 200 with own data', async () => {
-    const res = await request(app.getHttpServer())
-      .get('/member-rankings/me')
-      .set('Authorization', `Bearer ${memberToken}`);
-    expect([200, 404]).toContain(res.status); // 404 si aún no recalculado
-  });
-
-  it('POST /member-rankings/recalculate as admin → 200/201', async () => {
-    const res = await request(app.getHttpServer())
-      .post('/member-rankings/recalculate')
-      .set('Authorization', `Bearer ${adminToken}`)
-      .send({});
-    expect([200, 201]).toContain(res.status);
-  });
-
-  it('POST /member-rankings/recalculate as member → 403', async () => {
-    const res = await request(app.getHttpServer())
-      .post('/member-rankings/recalculate')
+  it('GET /api/v1/member-rankings/me — visibility=hidden returns 403', async () => {
+    // setSystemConfig('member_ranking.member_visibility', 'hidden');
+    return request(app.getHttpServer())
+      .get('/api/v1/member-rankings/me')
       .set('Authorization', `Bearer ${memberToken}`)
-      .send({});
-    expect(res.status).toBe(403);
+      .expect(403)
+      .expect(res => expect(res.body.code).toBe('MEMBER_RANKING_HIDDEN'));
+  });
+
+  it('GET /api/v1/member-rankings/me — visibility=self_only returns 200', async () => {
+    // setSystemConfig('member_ranking.member_visibility', 'self_only');
+    return request(app.getHttpServer())
+      .get('/api/v1/member-rankings/me')
+      .set('Authorization', `Bearer ${memberToken}`)
+      .expect(200);
+  });
+
+  it('GET /api/v1/member-rankings/123/breakdown — ParseIntPipe accepts integer', () =>
+    request(app.getHttpServer())
+      .get('/api/v1/member-rankings/123/breakdown?ecclesiastical_year_id=1')
+      .set('Authorization', `Bearer ${directorToken}`)
+      .expect((res) => expect([200, 404]).toContain(res.status))); // 404 si no existe; 200 si existe
+
+  it('GET /api/v1/member-rankings/abc/breakdown — non-int → 400', () =>
+    request(app.getHttpServer())
+      .get('/api/v1/member-rankings/abc/breakdown')
+      .set('Authorization', `Bearer ${directorToken}`)
+      .expect(400));
+
+  it('POST /api/v1/member-rankings/recalculate kill-switch off → 400', async () => {
+    // setSystemConfig('member_ranking.recalculation_enabled', 'false');
+    return request(app.getHttpServer())
+      .post('/api/v1/member-rankings/recalculate')
+      .set('Authorization', `Bearer ${directorToken}`)
+      .send({ ecclesiastical_year_id: 1 })
+      .expect(400)
+      .expect(res => expect(res.body.code).toBe('RECALCULATION_DISABLED'));
   });
 });
 ```
 
-- [ ] **Step 2: `section-rankings.e2e-spec.ts`**
+- [ ] **Step 2: Write failing e2e test (`section-rankings.e2e-spec.ts`)**
 
 ```typescript
-describe('SectionRankings E2E', () => {
-  // similar setup
-  it('GET /section-rankings → 200 (no controller order bug)', async () => {});
-  it('GET /section-rankings/:sectionId/members → 200 valid integer ID', async () => {});
+describe('SectionRankings (e2e — HTTP real)', () => {
+  let app: INestApplication;
+
+  beforeAll(/* ... */);
+
+  it('GET /api/v1/section-rankings — list 200', () =>
+    request(app.getHttpServer())
+      .get('/api/v1/section-rankings')
+      .set('Authorization', `Bearer ${directorToken}`)
+      .expect(200));
+
+  it('GET /api/v1/section-rankings/1/members — ParseIntPipe', () =>
+    request(app.getHttpServer())
+      .get('/api/v1/section-rankings/1/members?ecclesiastical_year_id=1')
+      .set('Authorization', `Bearer ${directorToken}`)
+      .expect((res) => expect([200, 404]).toContain(res.status)));
+
+  it('GET /api/v1/section-rankings/abc/members — 400', () =>
+    request(app.getHttpServer())
+      .get('/api/v1/section-rankings/abc/members')
+      .set('Authorization', `Bearer ${directorToken}`)
+      .expect(400));
 });
 ```
 
-- [ ] **Step 3: Run + Commit**
+- [ ] **Step 3: Run e2e tests, expect FAIL si hay route order bug**
 
 ```bash
-pnpm jest --config test/jest-e2e.json
-git add test/member-rankings.e2e-spec.ts test/section-rankings.e2e-spec.ts
-git commit -m "$(cat <<'EOF'
-test(rankings): add E2E HTTP tests to detect controller ordering bugs
+cd sacdia-backend
+pnpm test:e2e member-rankings.e2e-spec.ts section-rankings.e2e-spec.ts
+```
 
-Modular tests miss ParseUUIDPipe order issues (engram #1888). Real Express
-HTTP roundtrip required.
+- [ ] **Step 4: Si fallan, AJUSTAR orden de rutas en controllers** (Tasks 11–12 ya aplican el patrón correcto, pero verificar).
+
+- [ ] **Step 5: Run e2e tests, expect PASS**
+
+- [ ] **Step 6: Code review checkpoint** — engram #1888 gap closed. NingunA ruta estática colisionando con dinámica.
+
+- [ ] **Step 7: Commit**
+
+```bash
+git add sacdia-backend/test/{member-rankings,section-rankings}.e2e-spec.ts
+git commit -m "$(cat <<'EOF'
+test(rankings): add e2e specs for member-rankings and section-rankings
+
+Closes the gap from 8.4-C (engram #1888) where modular tests didn't
+detect ParseIntPipe order bugs on dynamic routes. Tests run real
+HTTP requests via supertest against INestApplication.
 EOF
 )"
 ```
@@ -2280,25 +2516,29 @@ EOF
 
 ## Phase 5 — Admin web UI Fase 1 (sacdia-admin)
 
-> **Cross-repo gate**: NO ejecutar Phase 5 hasta que Phase 4 esté mergeada en sacdia-backend. Cada page sigue `sacdia-admin/DESIGN-SYSTEM.md`: shadcn/ui new-york, dark mode con semantic tokens (`bg-primary/10`, `text-muted-foreground` — nunca `bg-blue-50`), lucide-react icons. CRUD CREATE/EDIT = `Dialog`, DELETE = `AlertDialog`. Reusar componentes 8.4-C cuando aplique.
+> Cada page: shadcn/ui new-york, Tailwind v4 con tokens semánticos (bg-primary/10, text-muted-foreground, NO bg-blue-50 hardcoded), lucide-react icons. Reference: `sacdia-admin/DESIGN-SYSTEM.md`. CRUD create/edit = Dialog modal; delete = AlertDialog confirmation.
 
-### Task 19: `/dashboard/member-rankings` — table list + filters + breakdown link
+### Task 16: `/dashboard/member-rankings` page (table + filters)
 
 **Files:**
-- Create: `sacdia-admin/src/app/(dashboard)/dashboard/member-rankings/page.tsx`
+- Create: `sacdia-admin/src/app/dashboard/member-rankings/page.tsx`
+- Create: `sacdia-admin/src/app/dashboard/member-rankings/_components/member-rankings-table.tsx`
+- Create: `sacdia-admin/src/app/dashboard/member-rankings/_components/member-ranking-score-badge.tsx`
+- Create: `sacdia-admin/src/app/dashboard/member-rankings/_components/member-rankings-filters.tsx`
 - Create: `sacdia-admin/src/lib/api/member-rankings.ts`
-- Create: `sacdia-admin/src/components/member-rankings/MemberRankingScoreBadge.tsx`
 
-- [ ] **Step 1: API client `lib/api/member-rankings.ts`**
+- [ ] **Step 1: Implement API client `member-rankings.ts`**
 
 ```typescript
-export interface MemberRanking {
-  member_id: number;
+import { api } from './client';
+
+export interface MemberRankingResponse {
+  enrollment_id: number;
+  user_id: string;
   member_name: string;
   club_section_id: number | null;
   section_name: string | null;
   class_score_pct: number | null;
-  evidence_score_pct: number | null;
   investiture_score_pct: number | null;
   camporee_score_pct: number | null;
   composite_score_pct: number | null;
@@ -2307,245 +2547,295 @@ export interface MemberRanking {
   composite_calculated_at: string | null;
 }
 
-export interface MemberRankingPage { data: MemberRanking[]; total: number; page: number; limit: number; }
+export async function listMemberRankings(params: {
+  club_id?: number; section_id?: number; ecclesiastical_year_id?: number;
+  page?: number; limit?: number;
+}): Promise<{ data: MemberRankingResponse[]; total: number; page: number; limit: number }> {
+  return api.get('/api/v1/member-rankings', { params });
+}
 
-export async function listMemberRankings(filter: { club_id?: number; year_id?: number; section_id?: number; page?: number; limit?: number }): Promise<MemberRankingPage> {
-  const qs = new URLSearchParams(Object.entries(filter).filter(([, v]) => v != null).map(([k, v]) => [k, String(v)]));
-  const res = await fetch(`/api/proxy/member-rankings?${qs}`, { credentials: 'include' });
-  if (!res.ok) throw new Error('Failed to list member rankings');
-  return res.json();
+export async function getMemberBreakdown(enrollmentId: number, yearId: number) {
+  return api.get(`/api/v1/member-rankings/${enrollmentId}/breakdown`, {
+    params: { ecclesiastical_year_id: yearId },
+  });
 }
 ```
 
-- [ ] **Step 2: `MemberRankingScoreBadge.tsx`**
+- [ ] **Step 2: Implement `MemberRankingScoreBadge`** (reusable, similar a `RankingScoreBadge` 8.4-C)
 
 ```tsx
 import { Badge } from '@/components/ui/badge';
 
+const cutoff = (pct: number | null): 'success' | 'warning' | 'destructive' | 'outline' => {
+  if (pct === null) return 'outline';
+  if (pct >= 85) return 'success';
+  if (pct >= 65) return 'warning';
+  return 'destructive';
+};
+
 export function MemberRankingScoreBadge({ value }: { value: number | null }) {
-  if (value === null) return <Badge variant="outline">N/D</Badge>;
-  const variant = value >= 85 ? 'success' : value >= 65 ? 'warning' : 'destructive';
-  return <Badge variant={variant}>{value.toFixed(2)}%</Badge>;
+  return (
+    <Badge variant={cutoff(value)}>
+      {value === null ? '—' : `${value.toFixed(2)}%`}
+    </Badge>
+  );
 }
 ```
 
-- [ ] **Step 3: Page**
+- [ ] **Step 3: Implement table component (shadcn DataTable + TanStack Query)**
 
 ```tsx
 'use client';
-import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
-import { listMemberRankings, MemberRanking } from '@/lib/api/member-rankings';
-import { MemberRankingScoreBadge } from '@/components/member-rankings/MemberRankingScoreBadge';
-import { Button } from '@/components/ui/button';
-// + filter selects (year/club/section)
+import { listMemberRankings, MemberRankingResponse } from '@/lib/api/member-rankings';
+import { MemberRankingScoreBadge } from './member-ranking-score-badge';
+
+export function MemberRankingsTable({ filters }: { filters: any }) {
+  const { data, isLoading } = useQuery({
+    queryKey: ['member-rankings', filters],
+    queryFn: () => listMemberRankings(filters),
+  });
+
+  if (isLoading) return <Skeleton />;
+  if (!data || data.data.length === 0) return <EmptyState />;
+
+  return (
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>#</TableHead>
+          <TableHead>Miembro</TableHead>
+          <TableHead>Sección</TableHead>
+          <TableHead>Composite</TableHead>
+          <TableHead>Clase</TableHead>
+          <TableHead>Investidura</TableHead>
+          <TableHead>Camporees</TableHead>
+          <TableHead>Categoría</TableHead>
+          <TableHead></TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {data.data.map((row: MemberRankingResponse) => (
+          <TableRow key={row.enrollment_id}>
+            <TableCell>{row.rank_position ?? '—'}</TableCell>
+            <TableCell>{row.member_name}</TableCell>
+            <TableCell>{row.section_name ?? '—'}</TableCell>
+            <TableCell><MemberRankingScoreBadge value={row.composite_score_pct} /></TableCell>
+            <TableCell>{row.class_score_pct?.toFixed(2) ?? '—'}</TableCell>
+            <TableCell>{row.investiture_score_pct === 100 ? 'Investido' : row.investiture_score_pct === 0 ? 'En progreso' : '—'}</TableCell>
+            <TableCell>{row.camporee_score_pct?.toFixed(2) ?? '—'}</TableCell>
+            <TableCell>{row.awarded_category ? <Badge style={{ backgroundColor: row.awarded_category.color }}>{row.awarded_category.name}</Badge> : '—'}</TableCell>
+            <TableCell>
+              <Link href={`/dashboard/member-rankings/${row.enrollment_id}/breakdown`}>
+                <Button variant="ghost" size="sm">Ver detalle</Button>
+              </Link>
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  );
+}
+```
+
+- [ ] **Step 4: Implement page `/dashboard/member-rankings/page.tsx`** (SSR + client filters)
+
+```tsx
+import { MemberRankingsTable } from './_components/member-rankings-table';
+import { MemberRankingsFilters } from './_components/member-rankings-filters';
 
 export default function MemberRankingsPage() {
-  const [rows, setRows] = useState<MemberRanking[]>([]);
-  // load with filters, paginate, render table similar to 8.4-C rankings page
-  // table: # | Miembro | Sección | Composite badge | Class% | Evidence% | Investiture% | Camporee% | Categoría | Acciones
   return (
-    <div className="container mx-auto py-8 space-y-4">
-      <h1 className="text-2xl font-semibold">Ranking de miembros</h1>
-      {/* filters */}
-      <table className="w-full text-sm">
-        <thead><tr>{['#','Miembro','Sección','Composite','Clase %','Evidencias %','Investiduras %','Camporees %','Categoría','Acciones'].map(h => <th key={h}>{h}</th>)}</tr></thead>
-        <tbody>
-          {rows.map((r) => (
-            <tr key={r.member_id}>
-              <td>{r.rank_position ?? '—'}</td>
-              <td>{r.member_name}</td>
-              <td>{r.section_name ?? '—'}</td>
-              <td><MemberRankingScoreBadge value={r.composite_score_pct} /></td>
-              <td>{r.class_score_pct ?? '—'}</td>
-              <td>{r.evidence_score_pct ?? '—'}</td>
-              <td>{r.investiture_score_pct ?? '—'}</td>
-              <td>{r.camporee_score_pct ?? '—'}</td>
-              <td>{r.awarded_category?.name ?? '—'}</td>
-              <td>
-                <Link href={`/dashboard/member-rankings/${r.member_id}/breakdown`}>
-                  <Button variant="link">Ver detalle</Button>
-                </Link>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div className="space-y-6 p-6">
+      <header className="flex items-center justify-between">
+        <h1 className="text-2xl font-semibold">Ranking de miembros</h1>
+        <Button onClick={triggerRecalculate}>Recalcular</Button>
+      </header>
+      <MemberRankingsFilters />
+      <MemberRankingsTable filters={/* read from URL search params */ {}} />
     </div>
   );
 }
 ```
 
-- [ ] **Step 4: Smoke + Commit**
+- [ ] **Step 5: Code review checkpoint** — design system check (shadcn variants, no hardcoded Tailwind colors).
+
+- [ ] **Step 6: Commit**
 
 ```bash
 cd sacdia-admin
-pnpm dev   # navegar a /dashboard/member-rankings
-git add src/app/\(dashboard\)/dashboard/member-rankings src/lib/api/member-rankings.ts src/components/member-rankings
-git commit -m "feat(admin): add member rankings list page with score badges"
+git add src/app/dashboard/member-rankings src/lib/api/member-rankings.ts
+git commit -m "feat(member-rankings): add admin dashboard page with table + filters
+
+Uses MemberRankingScoreBadge (cutoffs ≥85 success, ≥65 warning, <65 destructive).
+3 score columns + composite + awarded category. Client-side filters via search params.
+"
 ```
 
 ---
 
-### Task 20: `/dashboard/member-rankings/[memberId]/breakdown`
+### Task 17: `/dashboard/member-rankings/[enrollmentId]/breakdown` drill-down
 
 **Files:**
-- Create: `sacdia-admin/src/app/(dashboard)/dashboard/member-rankings/[memberId]/breakdown/page.tsx`
-- Create: `sacdia-admin/src/components/member-rankings/MemberBreakdownCard.tsx`
+- Create: `sacdia-admin/src/app/dashboard/member-rankings/[enrollmentId]/breakdown/page.tsx`
+- Create: `sacdia-admin/src/app/dashboard/member-rankings/[enrollmentId]/breakdown/_components/member-breakdown-card.tsx`
 
-- [ ] **Step 1: API call `getMemberBreakdown(memberId)` en `lib/api/member-rankings.ts`**
-
-```typescript
-export interface MemberBreakdown extends MemberRanking {
-  weights_applied: { class_pct: number; evidence_pct: number; investiture_pct: number; camporee_pct: number; source: string };
-  class_breakdown: { completed_count: number; required_count: number; percentage: number | null };
-  evidence_breakdown: { attended_count: number; total_evidences: number; percentage: number | null };
-  investiture_breakdown: { achieved_count: number; eligible_count: number; percentage: number | null };
-  camporee_breakdown: { participated_count: number; total_camporees: number; percentage: number | null };
-}
-
-export async function getMemberBreakdown(memberId: number): Promise<MemberBreakdown> {
-  const res = await fetch(`/api/proxy/member-rankings/${memberId}/breakdown`, { credentials: 'include' });
-  if (!res.ok) throw new Error('Failed to fetch breakdown');
-  return res.json();
-}
-```
-
-- [ ] **Step 2: `MemberBreakdownCard.tsx` (4 cards reutilizables)**
+- [ ] **Step 1: Implement reusable `MemberBreakdownCard`**
 
 ```tsx
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Trophy, BookOpen, Tent, Award } from 'lucide-react';
+type Signal = 'class' | 'investiture' | 'camporee';
 
-type Signal = 'class' | 'evidence' | 'investiture' | 'camporee';
+interface BreakdownData {
+  class?: { completed_count: number; required_count: number; percentage: number | null };
+  investiture?: { investiture_status: 'INVESTIDO' | 'IN_PROGRESS' | null; score: 100 | 0 | null };
+  camporee?: { participated_count: number; total_camporees: number; percentage: number | null };
+}
 
-const ICONS: Record<Signal, any> = { class: BookOpen, evidence: Trophy, investiture: Award, camporee: Tent };
-const TITLES: Record<Signal, string> = { class: 'Clases', evidence: 'Evidencias', investiture: 'Investiduras', camporee: 'Camporees' };
-
-export function MemberBreakdownCard({ signal, percentage, numerator, denominator, weight }:
-  { signal: Signal; percentage: number | null; numerator: number; denominator: number; weight: number }) {
-  const Icon = ICONS[signal];
+export function MemberBreakdownCard({ signal, data, weight }: {
+  signal: Signal; data: BreakdownData[Signal]; weight: number;
+}) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2"><Icon className="h-5 w-5" />{TITLES[signal]}</CardTitle>
+        <CardTitle>{labels[signal]}</CardTitle>
+        <CardDescription>Peso aplicado: {weight}%</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="text-3xl font-semibold">{percentage === null ? 'N/D' : `${percentage.toFixed(2)}%`}</div>
-        <div className="text-sm text-muted-foreground">{numerator}/{denominator} · peso {weight}%</div>
+        {signal === 'class' && /* render class breakdown */}
+        {signal === 'investiture' && /* render INVESTIDO/IN_PROGRESS badge */}
+        {signal === 'camporee' && /* render camporee breakdown */}
       </CardContent>
     </Card>
   );
 }
 ```
 
-- [ ] **Step 3: Page**
+- [ ] **Step 2: Implement page con header + 3 cards + weights aplicados + recalc button**
 
 ```tsx
 'use client';
-import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useParams } from 'next/navigation';
-import { getMemberBreakdown, MemberBreakdown } from '@/lib/api/member-rankings';
-import { MemberBreakdownCard } from '@/components/member-rankings/MemberBreakdownCard';
-import { MemberRankingScoreBadge } from '@/components/member-rankings/MemberRankingScoreBadge';
+import { getMemberBreakdown } from '@/lib/api/member-rankings';
 
-export default function BreakdownPage() {
-  const { memberId } = useParams<{ memberId: string }>();
-  const [data, setData] = useState<MemberBreakdown | null>(null);
-  useEffect(() => { getMemberBreakdown(parseInt(memberId, 10)).then(setData); }, [memberId]);
-  if (!data) return <div>Cargando…</div>;
+export default function MemberBreakdownPage() {
+  const { enrollmentId } = useParams();
+  const { data } = useQuery({
+    queryKey: ['member-breakdown', enrollmentId],
+    queryFn: () => getMemberBreakdown(Number(enrollmentId), getActiveYear()),
+  });
+  if (!data) return <Skeleton />;
 
   return (
-    <div className="container mx-auto py-8 space-y-6">
-      <header>
-        <h1 className="text-2xl font-semibold">{data.member_name}</h1>
-        <div className="text-muted-foreground">{data.section_name ?? '—'}</div>
-        <MemberRankingScoreBadge value={data.composite_score_pct} />
-      </header>
-      <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <MemberBreakdownCard signal="class"       percentage={data.class_breakdown.percentage}       numerator={data.class_breakdown.completed_count}      denominator={data.class_breakdown.required_count}    weight={data.weights_applied.class_pct} />
-        <MemberBreakdownCard signal="evidence"    percentage={data.evidence_breakdown.percentage}    numerator={data.evidence_breakdown.attended_count}    denominator={data.evidence_breakdown.total_evidences} weight={data.weights_applied.evidence_pct} />
-        <MemberBreakdownCard signal="investiture" percentage={data.investiture_breakdown.percentage} numerator={data.investiture_breakdown.achieved_count} denominator={data.investiture_breakdown.eligible_count} weight={data.weights_applied.investiture_pct} />
-        <MemberBreakdownCard signal="camporee"    percentage={data.camporee_breakdown.percentage}    numerator={data.camporee_breakdown.participated_count}denominator={data.camporee_breakdown.total_camporees}weight={data.weights_applied.camporee_pct} />
-      </section>
-      <section>
-        <h2 className="text-lg font-medium">Pesos aplicados</h2>
-        <div className="text-sm text-muted-foreground">Fuente: {data.weights_applied.source}</div>
-      </section>
+    <div className="space-y-6 p-6">
+      <BreakdownHeader data={data} />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <MemberBreakdownCard signal="class" data={data.class_breakdown} weight={data.weights_applied.class_pct} />
+        <MemberBreakdownCard signal="investiture" data={data.investiture_breakdown} weight={data.weights_applied.investiture_pct} />
+        <MemberBreakdownCard signal="camporee" data={data.camporee_breakdown} weight={data.weights_applied.camporee_pct} />
+      </div>
+      <WeightsAppliedSection weights={data.weights_applied} />
+      <LastUpdatedSection composite_calculated_at={data.composite_calculated_at} />
     </div>
   );
 }
 ```
 
+- [ ] **Step 3: Code review checkpoint** — verifica investiture muestra status badge + score binario claro.
+
 - [ ] **Step 4: Commit**
 
 ```bash
-git add src/app/\(dashboard\)/dashboard/member-rankings/\[memberId\] src/components/member-rankings/MemberBreakdownCard.tsx
-git commit -m "feat(admin): add member rankings breakdown drill-down page"
+git add sacdia-admin/src/app/dashboard/member-rankings/[enrollmentId]
+git commit -m "feat(member-rankings): add breakdown drill-down page with 3 score cards"
 ```
 
 ---
 
-### Task 21: `/dashboard/section-rankings` — table list + drill-down link
+### Task 18: `/dashboard/section-rankings` page
 
 **Files:**
-- Create: `sacdia-admin/src/app/(dashboard)/dashboard/section-rankings/page.tsx`
-- Create: `sacdia-admin/src/app/(dashboard)/dashboard/section-rankings/[sectionId]/members/page.tsx`
+- Create: `sacdia-admin/src/app/dashboard/section-rankings/page.tsx`
+- Create: `sacdia-admin/src/app/dashboard/section-rankings/_components/section-rankings-table.tsx`
+- Create: `sacdia-admin/src/app/dashboard/section-rankings/[sectionId]/members/page.tsx`
 - Create: `sacdia-admin/src/lib/api/section-rankings.ts`
 
-- [ ] **Step 1: API client**
+- [ ] **Step 1: Implement API client + table** (similar pattern Task 16)
 
 ```typescript
-export interface SectionRanking {
+export interface SectionRankingResponse {
   club_section_id: number;
   section_name: string;
   composite_score_pct: number | null;
   rank_position: number | null;
-  active_member_count: number;
-  awarded_category: { id: string; name: string; color: string; min_pct: number; max_pct: number } | null;
+  active_enrollment_count: number;
+  awarded_category: any | null;
   composite_calculated_at: string | null;
 }
 
-export async function listSectionRankings(filter: { club_id?: number; year_id?: number }): Promise<{ data: SectionRanking[]; total: number }> {
-  const qs = new URLSearchParams(Object.entries(filter).filter(([, v]) => v != null).map(([k, v]) => [k, String(v)]));
-  const res = await fetch(`/api/proxy/section-rankings?${qs}`, { credentials: 'include' });
-  if (!res.ok) throw new Error('Failed to list section rankings');
-  return res.json();
+export async function listSectionRankings(params: {
+  club_id?: number; ecclesiastical_year_id?: number; page?: number; limit?: number;
+}) {
+  return api.get('/api/v1/section-rankings', { params });
 }
 
-export async function listSectionMembers(sectionId: number): Promise<{ section: SectionRanking; members: any[] }> {
-  const res = await fetch(`/api/proxy/section-rankings/${sectionId}/members`, { credentials: 'include' });
-  if (!res.ok) throw new Error('Failed');
-  return res.json();
+export async function getSectionMembers(sectionId: number, yearId: number) {
+  return api.get(`/api/v1/section-rankings/${sectionId}/members`, {
+    params: { ecclesiastical_year_id: yearId },
+  });
 }
 ```
 
-- [ ] **Step 2: List page (table + Ver miembros link)**
+- [ ] **Step 2: Implement table page**
 
-Tabla con columns: `#`, Sección, Composite badge, Miembros activos, Categoría, Acciones.
+```tsx
+export default function SectionRankingsPage() {
+  return (
+    <div className="space-y-6 p-6">
+      <h1 className="text-2xl font-semibold">Ranking de secciones</h1>
+      <SectionRankingsTable />
+    </div>
+  );
+}
+```
 
-- [ ] **Step 3: `/[sectionId]/members` page**
+- [ ] **Step 3: Implement drill-down `/section-rankings/[sectionId]/members/page.tsx`**
 
-Header con datos de la sección + tabla reutilizando `MemberRankingScoreBadge` para cada miembro.
+```tsx
+export default function SectionMembersPage() {
+  const { sectionId } = useParams();
+  const { data } = useQuery({
+    queryKey: ['section-members', sectionId],
+    queryFn: () => getSectionMembers(Number(sectionId), getActiveYear()),
+  });
+  return (
+    <div className="space-y-6 p-6">
+      <SectionHeader section={data?.section} />
+      <MembersTable members={data?.members ?? []} />
+    </div>
+  );
+}
+```
 
-- [ ] **Step 4: Commit**
+- [ ] **Step 4: Code review checkpoint**
+
+- [ ] **Step 5: Commit**
 
 ```bash
-git add src/app/\(dashboard\)/dashboard/section-rankings src/lib/api/section-rankings.ts
-git commit -m "feat(admin): add section rankings list + members drill-down pages"
+git add sacdia-admin/src/app/dashboard/section-rankings src/lib/api/section-rankings.ts
+git commit -m "feat(section-rankings): add admin pages list + drill-down to members"
 ```
 
 ---
 
-### Task 22: `/dashboard/member-ranking-weights` — CRUD page
+### Task 19: `/dashboard/member-ranking-weights` CRUD page
 
 **Files:**
-- Create: `sacdia-admin/src/app/(dashboard)/dashboard/member-ranking-weights/page.tsx`
+- Create: `sacdia-admin/src/app/dashboard/member-ranking-weights/page.tsx`
+- Create: `sacdia-admin/src/app/dashboard/member-ranking-weights/_components/weights-form-dialog.tsx`
+- Create: `sacdia-admin/src/app/dashboard/member-ranking-weights/_components/weights-table.tsx`
 - Create: `sacdia-admin/src/lib/api/member-ranking-weights.ts`
-- Create: `sacdia-admin/src/components/member-ranking-weights/MemberWeightsForm.tsx`
-- Create: `sacdia-admin/src/components/member-ranking-weights/NewMemberOverrideForm.tsx`
-
-> Reusar `WeightSumIndicator` y `WeightInput` de 8.4-C (`sacdia-admin/src/components/rankings/`). No duplicar.
 
 - [ ] **Step 1: API client**
 
@@ -2555,75 +2845,190 @@ export interface MemberRankingWeights {
   club_type_id: number | null;
   ecclesiastical_year_id: number | null;
   class_pct: number;
-  evidence_pct: number;
   investiture_pct: number;
   camporee_pct: number;
   is_default: boolean;
-  updated_at: string;
 }
 
-export async function listMemberRankingWeights(): Promise<MemberRankingWeights[]> {
-  const res = await fetch('/api/proxy/member-ranking-weights', { credentials: 'include' });
-  if (!res.ok) throw new Error('Failed');
-  return res.json();
-}
-// + create / update / remove (idéntico al patrón ranking-weights 8.4-C)
+export const listWeights = () => api.get('/api/v1/member-ranking-weights');
+export const createWeights = (dto: any) => api.post('/api/v1/member-ranking-weights', dto);
+export const updateWeights = (id: string, dto: any) => api.patch(`/api/v1/member-ranking-weights/${id}`, dto);
+export const deleteWeights = (id: string) => api.delete(`/api/v1/member-ranking-weights/${id}`);
 ```
 
-- [ ] **Step 2: `MemberWeightsForm.tsx`**
+- [ ] **Step 2: Implement reusable `<WeightSumIndicator>` (o reuse de 8.4-C si disponible)**
 
-Idéntico a `WeightsForm` de 8.4-C pero con 4 inputs distintos (`class_pct`, `evidence_pct`, `investiture_pct`, `camporee_pct`).
+```tsx
+export function WeightSumIndicator({ values }: { values: number[] }) {
+  const sum = values.reduce((a, b) => a + b, 0);
+  const isValid = sum === 100;
+  return (
+    <Badge variant={isValid ? 'success' : 'destructive'}>
+      Suma: {sum}% {isValid ? '✓' : '✗ debe ser 100'}
+    </Badge>
+  );
+}
+```
 
-- [ ] **Step 3: Page composition (default global card + overrides table + Add override Dialog)**
+- [ ] **Step 3: Implement form dialog (shadcn Dialog + react-hook-form + zod)**
 
-Estructura similar a `/dashboard/ranking-weights` page de 8.4-C: Card con default global + Card con tabla de overrides + Dialog "Agregar override" usando shadcn `Dialog` + `AlertDialog` para delete.
+```tsx
+const schema = z.object({
+  club_type_id: z.number().int().nullable(),
+  ecclesiastical_year_id: z.number().int().nullable(),
+  class_pct: z.number().min(0).max(100),
+  investiture_pct: z.number().min(0).max(100),
+  camporee_pct: z.number().min(0).max(100),
+}).refine(d => d.class_pct + d.investiture_pct + d.camporee_pct === 100, {
+  message: 'La suma debe ser 100',
+});
 
-- [ ] **Step 4: Commit**
+export function WeightsFormDialog({ open, onOpenChange, initial, onSubmit }: any) {
+  const form = useForm({ resolver: zodResolver(schema), defaultValues: initial });
+  const watched = form.watch(['class_pct', 'investiture_pct', 'camporee_pct']);
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader><DialogTitle>{initial ? 'Editar' : 'Crear'} override</DialogTitle></DialogHeader>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            {/* Inputs class/investiture/camporee + selects clubType+year */}
+            <WeightSumIndicator values={watched.map(Number)} />
+            <Button type="submit" disabled={watched.reduce((a, b) => Number(a) + Number(b), 0) !== 100}>
+              Guardar
+            </Button>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+```
+
+- [ ] **Step 4: Implement table page con dialogs CREATE/EDIT y AlertDialog DELETE**
+
+```tsx
+export default function WeightsPage() {
+  const [openDialog, setOpenDialog] = useState(false);
+  const [editing, setEditing] = useState(null);
+  const { data } = useQuery({ queryKey: ['weights'], queryFn: listWeights });
+
+  const defaultRow = data?.find((r: any) => r.is_default);
+  const overrides = data?.filter((r: any) => !r.is_default) ?? [];
+
+  return (
+    <div className="space-y-6 p-6">
+      <h1 className="text-2xl font-semibold">Pesos de ranking de miembros</h1>
+
+      <Card>
+        <CardHeader><CardTitle>Default global</CardTitle></CardHeader>
+        <CardContent>
+          {defaultRow && (
+            <>
+              <div className="grid grid-cols-3 gap-4">
+                <div>Clase: {defaultRow.class_pct}%</div>
+                <div>Investidura: {defaultRow.investiture_pct}%</div>
+                <div>Camporees: {defaultRow.camporee_pct}%</div>
+              </div>
+              <Button onClick={() => { setEditing(defaultRow); setOpenDialog(true); }}>Editar</Button>
+            </>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Overrides por tipo + año</CardTitle>
+          <Button onClick={() => { setEditing(null); setOpenDialog(true); }}>Agregar override</Button>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            {/* render overrides rows con DELETE AlertDialog */}
+          </Table>
+        </CardContent>
+      </Card>
+
+      <WeightsFormDialog open={openDialog} onOpenChange={setOpenDialog} initial={editing} onSubmit={/* ... */ () => {}} />
+    </div>
+  );
+}
+```
+
+- [ ] **Step 5: Code review checkpoint** — 3 weights only (NO `evidence_pct`). DELETE de default → AlertDialog warning.
+
+- [ ] **Step 6: Commit**
 
 ```bash
-git add src/app/\(dashboard\)/dashboard/member-ranking-weights src/lib/api/member-ranking-weights.ts src/components/member-ranking-weights
-git commit -m "feat(admin): add member ranking weights CRUD page (default + overrides)"
+git add sacdia-admin/src/app/dashboard/member-ranking-weights src/lib/api/member-ranking-weights.ts
+git commit -m "$(cat <<'EOF'
+feat(member-ranking-weights): add admin CRUD page with WeightSumIndicator
+
+Default global readonly card + overrides table.
+Form validates sum=100 client-side via WeightSumIndicator.
+3 weights only (class, investiture, camporee — NO evidence in Phase 1).
+Dialog for create/edit, AlertDialog for delete.
+EOF
+)"
 ```
 
 ---
 
-### Task 23: Extender `/dashboard/award-categories` con tabs scope (Club | Section | Member) + Active/Legacy nested
+### Task 20: Extend `/dashboard/award-categories` con tabs scope (Club | Section | Member)
 
 **Files:**
-- Modify: `sacdia-admin/src/app/(dashboard)/dashboard/annual-folders/categories/page.tsx`
-- Modify: existing form component for award categories (locate first via `rg 'min_composite_pct' sacdia-admin/src`)
+- Modify: `sacdia-admin/src/app/dashboard/award-categories/page.tsx`
+- Modify: `sacdia-admin/src/app/dashboard/award-categories/_components/categories-table.tsx`
+- Modify: `sacdia-admin/src/app/dashboard/award-categories/_components/category-form-dialog.tsx`
+- Modify: `sacdia-admin/src/lib/api/award-categories.ts`
 
-- [ ] **Step 1: Tabs primarios scope**
+- [ ] **Step 1: Update API client**
 
-```tsx
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-
-const [scopeTab, setScopeTab] = useState<'club' | 'section' | 'member'>('club');
-const [legacyTab, setLegacyTab] = useState<'active' | 'legacy'>('active');
-
-<Tabs value={scopeTab} onValueChange={(v) => setScopeTab(v as any)}>
-  <TabsList>
-    <TabsTrigger value="club">Club</TabsTrigger>
-    <TabsTrigger value="section">Sección</TabsTrigger>
-    <TabsTrigger value="member">Miembro</TabsTrigger>
-  </TabsList>
-</Tabs>
-
-<Tabs value={legacyTab} onValueChange={(v) => setLegacyTab(v as any)}>
-  <TabsList>
-    <TabsTrigger value="active">Activas</TabsTrigger>
-    <TabsTrigger value="legacy">Legacy</TabsTrigger>
-  </TabsList>
-</Tabs>
+```typescript
+export const listCategories = (params: { scope?: 'club'|'section'|'member'; is_legacy?: boolean }) =>
+  api.get('/api/v1/award-categories', { params });
 ```
 
-- [ ] **Step 2: Fetch con `?scope=${scopeTab}&is_legacy=${legacyTab === 'legacy'}`**
-
-- [ ] **Step 3: Form (CREATE/EDIT) agregar select scope**
+- [ ] **Step 2: Add scope tabs (Tabs primitive de shadcn)**
 
 ```tsx
-<Select value={form.scope} onValueChange={(v) => setForm({ ...form, scope: v })}>
-  <SelectTrigger><SelectValue /></SelectTrigger>
+'use client';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+
+export default function AwardCategoriesPage() {
+  const [scope, setScope] = useState<'club'|'section'|'member'>('club');
+  const [showLegacy, setShowLegacy] = useState(false);
+
+  return (
+    <div className="space-y-6 p-6">
+      <header><h1 className="text-2xl">Categorías de premios</h1></header>
+      <Tabs value={scope} onValueChange={(v: any) => setScope(v)}>
+        <TabsList>
+          <TabsTrigger value="club">Club</TabsTrigger>
+          <TabsTrigger value="section">Sección</TabsTrigger>
+          <TabsTrigger value="member">Miembro</TabsTrigger>
+        </TabsList>
+        <TabsContent value={scope}>
+          <Tabs defaultValue="active">
+            <TabsList>
+              <TabsTrigger value="active">Active</TabsTrigger>
+              <TabsTrigger value="legacy">Legacy</TabsTrigger>
+            </TabsList>
+            <TabsContent value="active"><CategoriesTable scope={scope} legacy={false} /></TabsContent>
+            <TabsContent value="legacy"><CategoriesTable scope={scope} legacy={true} /></TabsContent>
+          </Tabs>
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+}
+```
+
+- [ ] **Step 3: Update form dialog con field `scope`**
+
+```tsx
+<Select name="scope" required>
+  <SelectTrigger><SelectValue placeholder="Scope" /></SelectTrigger>
   <SelectContent>
     <SelectItem value="club">Club</SelectItem>
     <SelectItem value="section">Sección</SelectItem>
@@ -2632,394 +3037,690 @@ const [legacyTab, setLegacyTab] = useState<'active' | 'legacy'>('active');
 </Select>
 ```
 
-- [ ] **Step 4: Commit**
+- [ ] **Step 4: Code review checkpoint** — todas las categorías existentes mantienen `scope='club'` (backfill de migration).
+
+- [ ] **Step 5: Commit**
 
 ```bash
-git add src/app/\(dashboard\)/dashboard/annual-folders/categories
-git commit -m "feat(admin): add scope tabs + active/legacy filter to award categories"
+git add sacdia-admin/src/app/dashboard/award-categories src/lib/api/award-categories.ts
+git commit -m "feat(award-categories): extend admin page with scope tabs (Club|Section|Member)"
 ```
 
 ---
 
 ## Phase 6 — Documentation update (root sacdia)
 
-### Task 24: Update canon docs y registries
+### Task 21: Update canon docs + API live reference + schema reference + features registry
 
 **Files:**
-- Modify: `docs/canon/runtime-rankings.md`
-- Modify: `docs/canon/decisiones-clave.md`
-- Modify: `docs/api/ENDPOINTS-LIVE-REFERENCE.md`
-- Modify: `docs/database/SCHEMA-REFERENCE.md`
-- Modify: `docs/features/README.md`
+- Modify: `docs/canon/runtime-rankings.md` (agregar §14)
+- Modify: `docs/canon/decisiones-clave.md` (agregar §23)
+- Modify: `docs/api/ENDPOINTS-LIVE-REFERENCE.md` (340 → ~350 endpoints)
+- Modify: `docs/database/SCHEMA-REFERENCE.md` (agregar 3 tablas + extensión `award_categories`)
+- Modify: `docs/features/README.md` (status 8.4-A: shipped)
 
-- [ ] **Step 1: `docs/canon/runtime-rankings.md` agregar §14**
+- [ ] **Step 1: `runtime-rankings.md` §14 — Enrollment + Section Rankings**
 
-Nueva sección §14 "Rankings nivel sección + miembro (8.4-A)":
-- Pipeline secuencial: club → member → section
-- Kill-switch independiente `member_ranking.recalculation_enabled`
-- Tablas: `member_rankings`, `section_rankings`, `member_ranking_weights`
-- Composite con NULL redistribution
-- Política DENSE_RANK NULLS LAST
-- Visibility flag `member_visibility`
-- Linkear al spec `docs/superpowers/specs/2026-04-29-clasificacion-seccion-miembro-design.md`
+Agregar al final de §13:
 
-- [ ] **Step 2: `docs/canon/decisiones-clave.md` agregar §23**
+```markdown
+## §14. 8.4-A Enrollment + Section Rankings (post-audit shipped)
 
-§23 "Clasificación sección + miembro (8.4-A)" resumiendo Q1–Q9 del spec, weights default 40/25/20/15, polimorfismo `award_categories.scope`, RBAC matrix.
+**Estado**: shipped 2026-04-29
+**Spec**: `docs/superpowers/specs/2026-04-29-clasificacion-seccion-miembro-design.md`
+**Audit**: `docs/superpowers/audits/2026-04-29-section-member-schema-audit.md`
 
-- [ ] **Step 3: `docs/api/ENDPOINTS-LIVE-REFERENCE.md`**
+### Tablas
+- `enrollment_rankings` (UUID PK, `enrollment_id INTEGER`, `user_id UUID`, `club_section_id INTEGER`, `composite_score_pct NUMERIC(5,2)`)
+- `section_rankings` (UUID PK, `club_section_id INTEGER`)
+- `enrollment_ranking_weights` (UUID PK, 3 columnas: class_pct + investiture_pct + camporee_pct = 100)
 
-Agregar 4 grupos nuevos (≈10 endpoints):
-- `/member-rankings` (GET, GET/me, GET/:memberId/breakdown, POST/recalculate)
-- `/section-rankings` (GET, GET/:sectionId/members)
-- `/member-ranking-weights` (GET, GET/:id, POST, PATCH/:id, DELETE/:id)
-- Extension `?scope=` en `/award-categories`
+### Hybrid naming convention (MEMORIZAR)
+- Schema interno: `enrollment_rankings`, `enrollment_id`, `enrollment_ranking_weights`
+- API/UI/permissions/system_config keys externos: `member-rankings`, `member_rankings:*`, `member_ranking.*`
 
-Total bump 340 → ~350 endpoints.
+### Cron
+Job `0 2 * * *` UTC ejecuta: club → enrollment → section. Kill-switches independientes:
+- `ranking.recalculation_enabled` (global)
+- `member_ranking.recalculation_enabled` (8.4-A only)
 
-- [ ] **Step 4: `docs/database/SCHEMA-REFERENCE.md`**
+### Calculadores Fase 1 (3 señales)
+- `ClassScoreService` → `class_module_progress`
+- `InvestitureScoreService` → `enrollments.investiture_status` (binario)
+- `CamporeeScoreService` → `camporee_members` (per-user)
 
-Agregar 3 tablas nuevas (`member_rankings`, `section_rankings`, `member_ranking_weights`) con sus columnas + indexes + constraints. Documentar extension `award_categories.scope`.
+### Composite (NULL redistribution)
+Si una señal es NULL, su peso se redistribuye proporcionalmente. Si todas NULL → composite NULL.
 
-- [ ] **Step 5: `docs/features/README.md`**
+### Sección como agregado puro
+`section_rankings.composite = AVG(enrollment_rankings.composite WHERE NOT NULL)`. NO calculadores propios.
+```
 
-Entry: "Clasificación sección y miembro — 8.4-A — vigente desde 2026-04-29 — spec en `docs/superpowers/specs/2026-04-29-clasificacion-seccion-miembro-design.md`. Status: backend + admin Fase 1 mergeado, Flutter Fase 2 pendiente.".
+- [ ] **Step 2: `decisiones-clave.md` §23**
 
-- [ ] **Step 6: Commit**
+```markdown
+## §23. 8.4-A: naming híbrido + 3 señales + audit-locked schema (2026-04-29)
+
+**Decisión**: Schema interno usa la entidad real (`enrollments`, `enrollment_rankings`, `enrollment_id`). API/UI/permissions/system_config externos usan `member-*` (orientado al usuario final). Capa de mapeo en DTOs (`MemberRankingResponseDto.fromEnrollmentRanking`).
+
+**Decisión**: Fase 1 = 3 señales (clases, investidura binaria, camporees). Evidencias bloqueadas (audit A5: tabla per-member no existe).
+
+**Decisión**: Investidura es señal binaria (INVESTIDO=100, IN_PROGRESS=0, sin enrollment=NULL). No requisitos discretos en Fase 1 (audit A11: tabla no existe).
+
+**Audit reference**: commit `643b694`. 11 ítems verificados; 8 desviaciones del spec original.
+```
+
+- [ ] **Step 3: `ENDPOINTS-LIVE-REFERENCE.md` agregar 4 grupos**
+
+```markdown
+## /api/v1/member-rankings (Phase 8.4-A)
+- GET /                        — list paginated, RBAC scope-filtered
+- GET /me                      — own ranking (visibility-gated)
+- GET /:enrollmentId/breakdown — drill-down (ParseIntPipe — INTEGER)
+- POST /recalculate            — trigger manual recalc (kill-switch validated)
+
+## /api/v1/section-rankings (Phase 8.4-A)
+- GET /                       — list paginated
+- GET /:sectionId/members     — drill-down (ParseIntPipe)
+
+## /api/v1/member-ranking-weights (Phase 8.4-A)
+- GET /                       — list default + overrides
+- GET /:id                    — detail (ParseUUIDPipe)
+- POST /                      — create override (validates sum=100)
+- PATCH /:id                  — update (validates sum=100)
+- DELETE /:id                 — delete (default not deletable)
+
+## /api/v1/award-categories (extension Phase 8.4-A)
+- GET /?scope=club|section|member — filter by polymorphic scope
+- POST/PATCH require valid scope enum
+```
+
+Total: 340 (8.4-C) + 11 nuevos = 351 endpoints.
+
+- [ ] **Step 4: `SCHEMA-REFERENCE.md` agregar 3 tablas + extensión**
+
+Documentar columnas, FKs, indexes, CHECK constraints, naming híbrido (schema en español como en resto del documento si aplica).
+
+- [ ] **Step 5: `features/README.md` — actualizar 8.4-A status**
+
+Cambiar de `planning` → `shipped 2026-04-29`. Linkear spec, audit, plan, runtime canon §14.
+
+- [ ] **Step 6: Code review checkpoint** — quality-reviewer subagent: ¿hybrid naming explícitamente documentado? ¿endpoints count correcto?
+
+- [ ] **Step 7: Commit (root sacdia repo)**
 
 ```bash
 cd /Users/abner/Documents/development/sacdia
-git add docs/canon/runtime-rankings.md \
-        docs/canon/decisiones-clave.md \
-        docs/api/ENDPOINTS-LIVE-REFERENCE.md \
-        docs/database/SCHEMA-REFERENCE.md \
+git add docs/canon/runtime-rankings.md docs/canon/decisiones-clave.md \
+        docs/api/ENDPOINTS-LIVE-REFERENCE.md docs/database/SCHEMA-REFERENCE.md \
         docs/features/README.md
-git commit -m "docs(canon): document 8.4-A section + member rankings runtime"
+git commit -m "$(cat <<'EOF'
+docs(canon): document 8.4-A enrollment+section rankings as shipped
+
+Updates runtime-rankings.md §14 with cron pipeline, calculators, and
+NULL redistribution composite. Adds decision §23 to decisiones-clave.md
+documenting the hybrid naming convention (schema enrollment_*, API
+member_*) and the audit-locked schema reality. Endpoints live reference
+extended with 4 new endpoint groups (340 → 351). Schema reference
+documents 3 new tables and award_categories.scope polymorphism.
+EOF
+)"
 ```
 
 ---
 
 ## Phase 7 — Smoke E2E + manual validation (post-merge)
 
-### Task 25: Smoke manual contra Neon dev
+### Task 22: Smoke E2E manual contra dev environment
 
-**Files:** ninguno (validation only)
+**Setup**: backend + admin desplegados en dev (Neon dev branch). Tests creds: `admin@sacdia.com / Sacdia2026!` (super_admin) y `director@sacdia.com / Sacdia2026!` (director-club ACV/GM).
 
-- [ ] **Step 1: Kill-switch ON validation**
+- [ ] **Step 1: Pre-condiciones**
 
-```bash
-URL=$(neonctl connection-string development --project-id wispy-hall-32797215)
-PSQL=/opt/homebrew/opt/libpq/bin/psql
-$PSQL "$URL" -c "UPDATE system_config SET config_value = 'true' WHERE config_key = 'member_ranking.recalculation_enabled';"
+```sql
+-- Verificar kill-switch ON
+SELECT config_value FROM system_config WHERE config_key = 'member_ranking.recalculation_enabled';
+-- expected: 'true'
+
+-- Verificar default weights
+SELECT class_pct, investiture_pct, camporee_pct FROM enrollment_ranking_weights WHERE is_default = true;
+-- expected: (50, 30, 20)
 ```
-
-Login como super_admin: `admin@sacdia.com / Sacdia2026!`
 
 - [ ] **Step 2: Trigger manual recalc**
 
 ```bash
-TOKEN=<jwt obtenido del login>
-curl -X POST http://localhost:3000/api/v1/member-rankings/recalculate \
-  -H "Authorization: Bearer $TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{}'
+curl -X POST 'https://api-dev.sacdia.com/api/v1/member-rankings/recalculate' \
+  -H "Authorization: Bearer $ADMIN_TOKEN" \
+  -H 'Content-Type: application/json' \
+  -d '{"ecclesiastical_year_id": <activeYearId>}'
+# expected: 200/201 { "triggered": true, ... }
 ```
 
-Esperado: 200 / 201 con `{ triggered: true, year_id: <active> }`.
+- [ ] **Step 3: Verificar `enrollment_rankings` populated**
 
-- [ ] **Step 3: Verificar populate en DB**
+```sql
+SELECT count(*) FROM enrollment_rankings WHERE ecclesiastical_year_id = <activeYearId>;
+-- expected: > 0 (= número de enrollments con scores calculables)
 
-```bash
-$PSQL "$URL" -c "SELECT COUNT(*) FROM member_rankings WHERE composite_calculated_at >= NOW() - interval '5 min';"
-$PSQL "$URL" -c "SELECT COUNT(*) FROM section_rankings WHERE composite_calculated_at >= NOW() - interval '5 min';"
+SELECT enrollment_id, composite_score_pct, rank_position
+  FROM enrollment_rankings
+  WHERE ecclesiastical_year_id = <activeYearId>
+  ORDER BY rank_position
+  LIMIT 10;
+-- expected: ranks empezando en 1 (DENSE_RANK), composite NUMERIC entre 0 y 100, NULLs al final
 ```
 
-- [ ] **Step 4: Validar que AVG sección coincide cálculo manual**
+- [ ] **Step 4: Verificar `section_rankings` populated**
 
-```bash
-$PSQL "$URL" -c "
-SELECT sr.club_section_id, sr.composite_score_pct AS section_pct,
-       AVG(mr.composite_score_pct)::numeric(5,2) AS manual_avg,
-       COUNT(*) FILTER (WHERE mr.composite_score_pct IS NOT NULL) AS member_count
+```sql
+SELECT count(*) FROM section_rankings WHERE ecclesiastical_year_id = <activeYearId>;
+
+-- AVG validation manual: pick a section con ≥2 enrollments
+SELECT
+  sr.composite_score_pct AS section_avg,
+  AVG(er.composite_score_pct) AS manual_avg,
+  count(er.id) AS member_count
 FROM section_rankings sr
-LEFT JOIN member_rankings mr ON mr.club_section_id = sr.club_section_id
-  AND mr.ecclesiastical_year_id = sr.ecclesiastical_year_id
-JOIN members m ON m.member_id = mr.member_id AND m.member_status = 'active'
-WHERE sr.ecclesiastical_year_id = (SELECT year_id FROM ecclesiastical_years WHERE active = true LIMIT 1)
-GROUP BY sr.club_section_id, sr.composite_score_pct
-LIMIT 10;
-"
+LEFT JOIN enrollment_rankings er ON
+  er.club_section_id = sr.club_section_id AND
+  er.ecclesiastical_year_id = sr.ecclesiastical_year_id AND
+  er.composite_score_pct IS NOT NULL
+WHERE sr.ecclesiastical_year_id = <activeYearId>
+GROUP BY sr.id, sr.composite_score_pct
+LIMIT 5;
+-- expected: section_avg ≈ manual_avg (idénticos al 0.01)
 ```
-
-`section_pct` debe ser igual a `manual_avg` ±0.01.
 
 - [ ] **Step 5: RBAC negative tests**
 
 ```bash
-# member token de otro miembro al breakdown ajeno → 403
-curl -i -X GET http://localhost:3000/api/v1/member-rankings/<otro-member-id>/breakdown -H "Authorization: Bearer $MEMBER_TOKEN"
-# expect: 403
+# member viendo otro enrollment → 403
+curl -X GET 'https://api-dev.sacdia.com/api/v1/member-rankings/<otherEnrollmentId>/breakdown?ecclesiastical_year_id=<y>' \
+  -H "Authorization: Bearer $MEMBER_TOKEN"
+# expected: 403
 
-# director-club a club ajeno → 403
-curl -i -X GET "http://localhost:3000/api/v1/member-rankings?club_id=<otro-club>" -H "Authorization: Bearer $DIR_CLUB_TOKEN"
-# expect: 403 o filtrado vacío
+# director-club viendo otro club → 403
+# (requiere member que pertenezca a club distinto al del director)
 
-# director-lf scope OK
-curl -i -X GET http://localhost:3000/api/v1/section-rankings -H "Authorization: Bearer $DIR_LF_TOKEN"
-# expect: 200 con secciones del LF
+# director-lf en su scope → 200
 ```
 
-- [ ] **Step 6: Visibility=hidden negative test**
+- [ ] **Step 6: Visibility flag tests**
+
+```sql
+UPDATE system_config SET config_value = 'hidden' WHERE config_key = 'member_ranking.member_visibility';
+```
 
 ```bash
-$PSQL "$URL" -c "UPDATE system_config SET config_value = 'hidden' WHERE config_key = 'member_ranking.member_visibility';"
-
-curl -i -X GET http://localhost:3000/api/v1/member-rankings/me -H "Authorization: Bearer $MEMBER_TOKEN"
-# expect: 403 con MEMBER_RANKING_HIDDEN
-
-# Restore
-$PSQL "$URL" -c "UPDATE system_config SET config_value = 'self_only' WHERE config_key = 'member_ranking.member_visibility';"
+curl -X GET 'https://api-dev.sacdia.com/api/v1/member-rankings/me' \
+  -H "Authorization: Bearer $MEMBER_TOKEN"
+# expected: 403 MEMBER_RANKING_HIDDEN
 ```
 
-- [ ] **Step 7: Save engram session summary**
+```sql
+UPDATE system_config SET config_value = 'self_and_top_n' WHERE config_key = 'member_ranking.member_visibility';
+```
 
-`mem_save` con topic_key `sacdia/feature/8-4-a-shipped`, type=architecture, content: lista de tasks completados, branches mergeadas, smoke results, endpoints HTTP probados, follow-ups pendientes (Fase 2 Flutter, optimización delta-only).
+```bash
+curl -X GET 'https://api-dev.sacdia.com/api/v1/member-rankings/me' \
+  -H "Authorization: Bearer $MEMBER_TOKEN"
+# expected: 200 + body.top_n: array de N elementos
+```
+
+```sql
+-- Restore default
+UPDATE system_config SET config_value = 'self_only' WHERE config_key = 'member_ranking.member_visibility';
+```
+
+- [ ] **Step 7: Code review checkpoint** — todos los smoke pasan. Documentar resultados en engram con `mem_save` (topic `sdd/8-4-a/smoke-results`).
+
+- [ ] **Step 8: No commit (smoke ops, no source change)**
 
 ---
 
-## Phase 8 — Mobile Flutter UI Fase 2 (sacdia-app, optional separate wave)
+## Phase 8 — Mobile Flutter UI Fase 2 (sacdia-app, OPTIONAL separate wave)
 
-> **NOTA**: Phase 8 es opcional para este plan. Si el usuario quiere ship rápido la Fase 1, comentar tasks 26–28 e indicar que se generará un plan separado cuando arranque Fase 2. Mantener Phase 8 documentada aquí como referencia. Branch sugerida: `feat/section-member-rankings-8-4-a-mobile`.
+> **NOTA**: Phase 8 es opcional y puede liberarse como wave separada después de validar Fase 1 admin web. Backend ya soporta endpoints `/me` con visibility-gating; aquí se construye la superficie móvil.
 
-### Task 26: Flutter repository + provider para member + section rankings
+### Task 23: Flutter repository + provider para member_rankings + section_rankings
 
 **Files:**
-- Create: `sacdia-app/lib/features/rankings/domain/entities/member_ranking.dart`
-- Create: `sacdia-app/lib/features/rankings/domain/repositories/member_rankings_repository.dart`
+- Create: `sacdia-app/lib/features/rankings/data/models/member_ranking_dto.dart`
+- Create: `sacdia-app/lib/features/rankings/data/models/section_ranking_dto.dart`
+- Create: `sacdia-app/lib/features/rankings/data/repositories/member_rankings_repository.dart`
 - Create: `sacdia-app/lib/features/rankings/data/repositories/member_rankings_remote_repository.dart`
 - Create: `sacdia-app/lib/features/rankings/presentation/providers/my_ranking_provider.dart`
 - Create: `sacdia-app/lib/features/rankings/presentation/providers/section_ranking_provider.dart`
+- Test: `sacdia-app/test/features/rankings/data/repositories/member_rankings_remote_repository_test.dart`
 
-- [ ] **Step 1: Domain entity**
-
-`MemberRanking` y `SectionRanking` Dart classes con campos del DTO REST. Implementar `fromJson` / `toJson`.
-
-- [ ] **Step 2: Abstract repository**
+- [ ] **Step 1: Implement DTOs (using freezed o simple classes con fromJson)**
 
 ```dart
-abstract class MemberRankingsRepository {
-  Future<MemberMyRankingDto> getMyRanking();
-  Future<List<MemberRanking>> getSectionRankings(int sectionId, int yearId);
+class MemberRankingDto {
+  final int enrollmentId;
+  final String userId;
+  final String memberName;
+  final int? clubSectionId;
+  final String? sectionName;
+  final double? classScorePct;
+  final double? investitureScorePct;
+  final double? camporeeScorePct;
+  final double? compositeScorePct;
+  final int? rankPosition;
+  final AwardCategoryDto? awardedCategory;
+  final DateTime? compositeCalculatedAt;
+
+  MemberRankingDto({/* ... */});
+
+  factory MemberRankingDto.fromJson(Map<String, dynamic> json) => MemberRankingDto(
+    enrollmentId: json['enrollment_id'],
+    userId: json['user_id'],
+    memberName: json['member_name'],
+    clubSectionId: json['club_section_id'],
+    sectionName: json['section_name'],
+    classScorePct: (json['class_score_pct'] as num?)?.toDouble(),
+    investitureScorePct: (json['investiture_score_pct'] as num?)?.toDouble(),
+    camporeeScorePct: (json['camporee_score_pct'] as num?)?.toDouble(),
+    compositeScorePct: (json['composite_score_pct'] as num?)?.toDouble(),
+    rankPosition: json['rank_position'],
+    awardedCategory: json['awarded_category'] != null
+      ? AwardCategoryDto.fromJson(json['awarded_category'])
+      : null,
+    compositeCalculatedAt: json['composite_calculated_at'] != null
+      ? DateTime.parse(json['composite_calculated_at'])
+      : null,
+  );
+}
+
+class MemberMyRankingDto {
+  final MemberRankingDto member;
+  final String visibilityMode; // 'self_only' | 'self_and_top_n' | 'hidden'
+  final List<TopNEntryDto>? topN;
+  // factory fromJson ...
 }
 ```
 
-- [ ] **Step 3: Implementación remote repository**
-
-HTTP calls a `/api/v1/member-rankings/me` y `/api/v1/section-rankings/:sectionId/members`. Manejar 403 sin throw (retornar empty state cuando `visibility = hidden`).
-
-- [ ] **Step 4: Providers Riverpod**
+- [ ] **Step 2: Implement repository abstract + remote impl**
 
 ```dart
+abstract class MemberRankingsRepository {
+  Future<MemberMyRankingDto?> getMyRanking();
+  Future<List<MemberRankingDto>> getSectionMembers(int sectionId, int yearId);
+}
+
+class MemberRankingsRemoteRepository implements MemberRankingsRepository {
+  final ApiClient client;
+  MemberRankingsRemoteRepository(this.client);
+
+  @override
+  Future<MemberMyRankingDto?> getMyRanking() async {
+    try {
+      final res = await client.get('/api/v1/member-rankings/me');
+      return MemberMyRankingDto.fromJson(res);
+    } on ForbiddenException {
+      return null; // visibility=hidden → UI muestra empty state
+    }
+  }
+
+  @override
+  Future<List<MemberRankingDto>> getSectionMembers(int sectionId, int yearId) async {
+    final res = await client.get(
+      '/api/v1/section-rankings/$sectionId/members',
+      queryParameters: {'ecclesiastical_year_id': yearId},
+    );
+    return (res['members'] as List).map((m) => MemberRankingDto.fromJson(m)).toList();
+  }
+}
+```
+
+- [ ] **Step 3: Implement Riverpod providers**
+
+```dart
+final memberRankingsRepositoryProvider = Provider<MemberRankingsRepository>(
+  (ref) => MemberRankingsRemoteRepository(ref.read(apiClientProvider)),
+);
+
 final myRankingProvider = FutureProvider.autoDispose<MemberMyRankingDto?>((ref) async {
   final repo = ref.watch(memberRankingsRepositoryProvider);
-  try {
-    return await repo.getMyRanking();
-  } on ForbiddenException {
-    return null;
-  }
+  return repo.getMyRanking();
 });
 
 final sectionRankingProvider = FutureProvider.autoDispose
-  .family<List<MemberRanking>, ({int sectionId, int yearId})>((ref, p) async {
+  .family<List<MemberRankingDto>, ({int sectionId, int yearId})>((ref, params) async {
     final repo = ref.watch(memberRankingsRepositoryProvider);
-    return repo.getSectionRankings(p.sectionId, p.yearId);
+    return repo.getSectionMembers(params.sectionId, params.yearId);
   });
 ```
 
-- [ ] **Step 5: Tests + Commit**
+- [ ] **Step 4: Write repository tests (mocktail)**
+
+```dart
+void main() {
+  group('MemberRankingsRemoteRepository', () {
+    test('getMyRanking returns DTO on 200', () async { /* ... */ });
+    test('getMyRanking returns null on 403 (visibility=hidden)', () async { /* ... */ });
+    test('getSectionMembers returns list', () async { /* ... */ });
+  });
+}
+```
+
+- [ ] **Step 5: Run tests, expect PASS**
 
 ```bash
 cd sacdia-app
-flutter test test/features/rankings
+flutter test test/features/rankings/
+```
+
+- [ ] **Step 6: Code review checkpoint** — null on 403 (no throw), DTOs alineados con DTOs backend.
+
+- [ ] **Step 7: Commit**
+
+```bash
+cd sacdia-app
 git add lib/features/rankings test/features/rankings
-git commit -m "feat(rankings): add Flutter repository + Riverpod providers for member + section rankings"
+git commit -m "feat(rankings): add member + section rankings repository and providers
+
+DTOs aligned with backend MemberRankingResponseDto.
+Repository returns null on 403 (visibility=hidden) for graceful UI handling.
+"
 ```
 
 ---
 
-### Task 27: `MyRankingScreen` con 4 score cards + composite + awarded category
+### Task 24: `MyRankingScreen` Flutter
 
 **Files:**
 - Create: `sacdia-app/lib/features/rankings/presentation/screens/my_ranking_screen.dart`
-- Create: `sacdia-app/lib/features/rankings/presentation/widgets/score_card.dart`
+- Create: `sacdia-app/lib/features/rankings/presentation/widgets/my_ranking_header_card.dart`
+- Create: `sacdia-app/lib/features/rankings/presentation/widgets/score_mini_card.dart`
+- Create: `sacdia-app/lib/features/rankings/presentation/widgets/top_n_section.dart`
 
-- [ ] **Step 1: ScoreCard widget**
+- [ ] **Step 1: Implement header card (composite + rank + awarded category)**
 
-ScoreCard con HugeIconData (per memory rule), value display, label.
+```dart
+class MyRankingHeaderCard extends StatelessWidget {
+  final MemberRankingDto member;
+  // build composite badge + rank + awarded category color badge
+}
+```
 
-- [ ] **Step 2: MyRankingScreen**
+- [ ] **Step 2: Implement 3 mini-cards (Clase / Investidura / Camporees)**
 
-Pantalla con composite badge grande + 4 ScoreCards. Si `provider.value == null` (visibility=hidden), mostrar empty state. Si `composite_calculated_at == null`, mostrar "Tu puntaje aún no fue calculado". Si `visibility = self_and_top_n`, mostrar sección Top N con lista compacta.
+```dart
+class ScoreMiniCard extends StatelessWidget {
+  final String label;
+  final double? value;
+  final HugeIconData icon; // pattern HugeIconData typedef obligatorio (memory)
+  // empty state si value == null: "Sin datos"
+}
+```
 
-Pull-to-refresh + auto-dispose providers.
+- [ ] **Step 3: Implement screen con visibility gating**
 
-- [ ] **Step 3: Routing**
+```dart
+class MyRankingScreen extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final asyncRanking = ref.watch(myRankingProvider);
 
-Agregar ruta `/my-ranking` al GoRouter. Gateada por permiso `member_rankings:read_self`.
+    return Scaffold(
+      appBar: AppBar(title: Text('Mi Ranking')),
+      body: RefreshIndicator(
+        onRefresh: () async => ref.invalidate(myRankingProvider),
+        child: asyncRanking.when(
+          data: (data) {
+            if (data == null) return EmptyState(message: 'Tu ranking no está disponible.');
+            if (data.member.compositeCalculatedAt == null) {
+              return EmptyState(message: 'Tu puntaje aún no fue calculado');
+            }
+            return SingleChildScrollView(
+              child: Column(children: [
+                MyRankingHeaderCard(member: data.member),
+                Row(children: [
+                  Expanded(child: ScoreMiniCard(label: 'Clases', value: data.member.classScorePct, icon: HugeIcons.book01)),
+                  Expanded(child: ScoreMiniCard(label: 'Investidura', value: data.member.investitureScorePct, icon: HugeIcons.medal01)),
+                  Expanded(child: ScoreMiniCard(label: 'Camporees', value: data.member.camporeeScorePct, icon: HugeIcons.tent01)),
+                ]),
+                if (data.visibilityMode == 'self_and_top_n' && data.topN != null)
+                  TopNSection(entries: data.topN!),
+              ]),
+            );
+          },
+          loading: () => Center(child: CircularProgressIndicator()),
+          error: (e, _) => ErrorState(error: e.toString()),
+        ),
+      ),
+    );
+  }
+}
+```
 
-- [ ] **Step 4: Tests + Commit**
+- [ ] **Step 4: Wire en navigation (gateado por `visibility != 'hidden'` server-side; cliente intenta y maneja null)**
+
+- [ ] **Step 5: Code review checkpoint** — usa `HugeIconData` (NO `dynamic` ni `IconData`). Empty states correctos.
+
+- [ ] **Step 6: Commit**
 
 ```bash
-flutter test test/features/rankings/my_ranking_screen_test.dart
-git add lib/features/rankings/presentation/screens/my_ranking_screen.dart \
-        lib/features/rankings/presentation/widgets/score_card.dart
-git commit -m "feat(rankings): add MyRankingScreen with composite + 4 score cards"
+git add sacdia-app/lib/features/rankings/presentation/screens/my_ranking_screen.dart \
+        sacdia-app/lib/features/rankings/presentation/widgets/{my_ranking_header_card,score_mini_card,top_n_section}.dart
+git commit -m "feat(rankings): add MyRankingScreen with 3 score cards + composite + top_n"
 ```
 
 ---
 
-### Task 28: `SectionRankingScreen` con lista miembros sección
+### Task 25: `SectionRankingScreen` Flutter
 
 **Files:**
 - Create: `sacdia-app/lib/features/rankings/presentation/screens/section_ranking_screen.dart`
+- Create: `sacdia-app/lib/features/rankings/presentation/widgets/member_list_tile.dart`
 
-- [ ] **Step 1: Screen**
+- [ ] **Step 1: Implement screen**
 
-Header con sección + composite + miembros activos. ListView de members con rank, nombre, composite badge, awarded_category badge.
+```dart
+class SectionRankingScreen extends ConsumerWidget {
+  final int sectionId;
+  final int yearId;
+  const SectionRankingScreen({required this.sectionId, required this.yearId});
 
-- [ ] **Step 2: RBAC client-side gating**
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final asyncMembers = ref.watch(sectionRankingProvider((sectionId: sectionId, yearId: yearId)));
+    return Scaffold(
+      appBar: AppBar(title: Text('Sección')),
+      body: asyncMembers.when(
+        data: (members) {
+          if (members.isEmpty) return EmptyState();
+          return ListView.builder(
+            itemCount: members.length,
+            itemBuilder: (_, i) => MemberListTile(member: members[i]),
+          );
+        },
+        loading: () => Center(child: CircularProgressIndicator()),
+        error: (e, _) => ErrorState(),
+      ),
+    );
+  }
+}
+```
 
-Verificar permiso `section_rankings:read_club` (o superior) antes de mostrar la pantalla en el menú. Si no, hide nav item.
+- [ ] **Step 2: Implement `MemberListTile` (rank + name + composite badge)**
 
-- [ ] **Step 3: Tests + Commit**
+- [ ] **Step 3: RBAC client-side gating** — pantalla solo visible para directores y asistentes de club. Resolver via providers de auth.
+
+- [ ] **Step 4: Code review checkpoint**
+
+- [ ] **Step 5: Commit**
 
 ```bash
-git add lib/features/rankings/presentation/screens/section_ranking_screen.dart
-git commit -m "feat(rankings): add SectionRankingScreen with member list"
+git add sacdia-app/lib/features/rankings/presentation/screens/section_ranking_screen.dart \
+        sacdia-app/lib/features/rankings/presentation/widgets/member_list_tile.dart
+git commit -m "feat(rankings): add SectionRankingScreen with members list (rank ordered)"
 ```
 
 ---
 
 ## Phase 9 — Fase 2 optimization (delta-only) — OPTIONAL
 
-### Task 29: Optimization delta-only — recalc solo miembros con cambios desde último recálculo
+### Task 26: Delta-only recalc — solo enrollments con `last_progress_change > previous_recalc_at`
 
 **Files:**
-- Modify: `sacdia-backend/src/annual-folders/rankings.service.ts`
-- Create: `sacdia-backend/prisma/migrations/20260601000000_member_progress_tracking/migration.sql` (si hace falta agregar `last_progress_change`)
-- Modify: `sacdia-backend/src/annual-folders/__tests__/rankings.service.member.spec.ts`
+- Modify: `sacdia-backend/prisma/schema.prisma` (agregar columna `last_progress_change` a `enrollments` o crear `enrollment_progress_audit`)
+- Create: `sacdia-backend/prisma/migrations/<timestamp>_enrollment_delta_tracking/migration.sql`
+- Modify: `sacdia-backend/src/rankings/rankings.service.ts` (`recalculateEnrollmentRankings` con filtro delta)
+- Test: `sacdia-backend/src/rankings/rankings.service.delta.spec.ts`
 
-- [ ] **Step 1: Migration `ADD COLUMN last_progress_change` en `members`** (si no existe)
+- [ ] **Step 1: Decidir tracking strategy**
+
+Opción A: agregar columna `last_progress_change TIMESTAMPTZ` a `enrollments`, actualizada por trigger en `class_module_progress`/`camporee_members`/`investiture_validation_history`.
+
+Opción B: tabla `enrollment_progress_audit` con timestamp por evento.
+
+Recomendado: Opción A (menos overhead).
+
+- [ ] **Step 2: Crear migration**
 
 ```sql
-ALTER TABLE members ADD COLUMN last_progress_change TIMESTAMPTZ(6);
-CREATE INDEX idx_members_last_progress_change ON members(last_progress_change);
+ALTER TABLE enrollments ADD COLUMN last_progress_change TIMESTAMPTZ(6);
+
+CREATE INDEX idx_enrollments_last_progress
+  ON enrollments(last_progress_change);
+
+-- Trigger en class_module_progress
+CREATE OR REPLACE FUNCTION update_enrollment_last_progress()
+RETURNS TRIGGER AS $$
+BEGIN
+  UPDATE enrollments
+    SET last_progress_change = NOW()
+    WHERE enrollment_id = NEW.enrollment_id;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_class_module_progress_touch
+  AFTER INSERT OR UPDATE ON class_module_progress
+  FOR EACH ROW EXECUTE FUNCTION update_enrollment_last_progress();
+
+-- Trigger análogo en camporee_members (via user_id → buscar enrollments del año)
+-- y en investiture_validation_history
 ```
 
-Aplicar a 3 branches con TXN atómico (patrón Task 4).
+- [ ] **Step 3: Apply migration via psql + neonctl** (mismo patrón Task 2)
 
-- [ ] **Step 2: Trigger / app-level update de `last_progress_change`**
-
-En cada mutation que afecte señales (member_class_progress, evidence_attendance, investitures, camporee_attendees), set `members.last_progress_change = NOW()` para el `member_id` afectado.
-
-- [ ] **Step 3: Modify `recalculateMemberRankings` para filter delta-only**
+- [ ] **Step 4: Write failing test**
 
 ```typescript
-// Filtrar members donde last_progress_change > last member_rankings.composite_calculated_at
-const members = await this.prisma.$queryRaw<...>`
-  SELECT m.member_id, m.club_section_id, m.club_id, c.club_type_id
-  FROM members m
-  JOIN clubs c ON c.club_id = m.club_id
-  LEFT JOIN member_rankings mr
-    ON mr.member_id = m.member_id AND mr.ecclesiastical_year_id = ${year}
-  WHERE c.active = true
-    AND (mr.composite_calculated_at IS NULL
-         OR m.last_progress_change > mr.composite_calculated_at)
-`;
+describe('recalculateEnrollmentRankings (delta-only)', () => {
+  it('skips enrollments with last_progress_change <= previous_recalc_at', async () => { /* ... */ });
+  it('processes enrollments with last_progress_change > previous_recalc_at', async () => { /* ... */ });
+});
 ```
 
-- [ ] **Step 4: Test + Commit**
+- [ ] **Step 5: Implement filter en `recalculateEnrollmentRankings`**
+
+```typescript
+async recalculateEnrollmentRankings(yearId: number, mode: 'full' | 'delta' = 'full') {
+  // ... existing setup ...
+  const previousRecalc = await this.getPreviousRecalcAt(yearId);
+
+  const enrollments = await this.prisma.enrollments.findMany({
+    where: {
+      ecclesiastical_year_id: yearId,
+      active: true,
+      class: { club_id: c.club_id },
+      ...(mode === 'delta' && previousRecalc ? {
+        last_progress_change: { gt: previousRecalc },
+      } : {}),
+    },
+    // ... rest unchanged
+  });
+}
+```
+
+- [ ] **Step 6: Run test, expect PASS**
+
+- [ ] **Step 7: Code review checkpoint** — verificar triggers no causan recursión, ON CONFLICT idempotente.
+
+- [ ] **Step 8: Commit**
 
 ```bash
-pnpm jest rankings.service.member.spec.ts
-git add prisma/migrations/20260601000000_member_progress_tracking \
-        src/annual-folders/rankings.service.ts \
-        src/annual-folders/__tests__/rankings.service.member.spec.ts
-git commit -m "perf(rankings): delta-only member recalc using last_progress_change"
+git add sacdia-backend/prisma/migrations/<timestamp>_enrollment_delta_tracking \
+        sacdia-backend/prisma/schema.prisma \
+        sacdia-backend/src/rankings/rankings.service.ts \
+        sacdia-backend/src/rankings/rankings.service.delta.spec.ts
+git commit -m "$(cat <<'EOF'
+feat(rankings): add delta-only recalc mode for enrollment rankings
+
+Adds enrollments.last_progress_change tracked via trigger on
+class_module_progress, camporee_members, investiture_validation_history.
+Mode 'delta' filters by last_progress_change > previous_recalc_at,
+reducing daily cron cost for large clubs without progress changes.
+Default cron mode unchanged ('full'); delta mode opt-in via param.
+EOF
+)"
 ```
 
 ---
 
-## Verification gate (antes de declarar 8.4-A done)
+## Self-review checklist
 
-- [ ] **Backend tests**
+Antes de declarar el plan completo, el orquestador valida:
 
-  ```bash
-  cd sacdia-backend
-  pnpm jest
-  pnpm tsc --noEmit
-  pnpm jest --config test/jest-e2e.json
-  ```
+1. **Spec coverage**:
+   - [x] Q1 Sección agregado puro → Task 8 (SectionAggregationService)
+   - [x] Q2 3 señales Fase 1 → Tasks 4, 5, 6
+   - [x] Q3 Tabla `enrollment_ranking_weights` separada → Task 1 (DDL) + Task 13 (CRUD)
+   - [x] Q4 RBAC modelo C + flag visibility → Task 1 (seeds) + Task 11 (controller)
+   - [x] Q5 UI 2 fases → Phase 5 (admin) + Phase 8 (Flutter)
+   - [x] Q6 Cron secuencial → Task 9
+   - [x] Q7 `award_categories.scope` polimórfica → Task 1 archivo 2 + Task 14
+   - [x] Q8 AVG enrollments con composite calculado → Task 8
+   - [x] Q9 Kill-switch separado → Task 1 archivo 3 + Task 9
+   - [x] Q-RB1 Naming híbrido → documentado en header + Task 21 explicit
+   - [x] Q-RB2 Evidencias descartadas + redistribución → Tasks 4-7
+   - [x] Q-RB3 Investidura binaria → Task 5
+   - [x] Q-RB4 `'approved'` locked camporees → Task 6
+   - [x] §4 Schema → Task 1 + Task 3
+   - [x] §5 Audit notes → Schema reality table al inicio
+   - [x] §6 Endpoints + DTOs + RBAC → Tasks 11-14
+   - [x] §7 Calculadores → Tasks 4-8
+   - [x] §8 Cron + dark launch → Task 9
+   - [x] §9 UI admin → Tasks 16-20
+   - [x] §10 UI Flutter → Tasks 23-25
+   - [x] §11 Migrations → Tasks 1-2
+   - [x] §12 Error handling → distribuido en Tasks 9, 11, 13
+   - [x] §13 Logs estructurados → Task 9
+   - [x] §14 Testing strategy → Tasks 4-15
+   - [x] §15 Open questions → tabla al inicio + OQ5 resuelto en Task 4
+   - [x] §16 DoR/DoD → Task 22 smoke + Task 21 canon
 
-- [ ] **Admin tests**
+2. **Placeholder scan**: NO TBD/TODO en task content. OQs centralizadas en sección dedicada.
 
-  ```bash
-  cd sacdia-admin
-  pnpm test
-  pnpm tsc --noEmit
-  ```
+3. **Type consistency**:
+   - `enrollment_id` siempre INTEGER ✓
+   - `user_id` siempre UUID ✓
+   - `ecclesiastical_year_id` siempre INTEGER ✓
+   - `club_section_id` siempre INTEGER ✓
+   - Service signatures consistent: `calculate(enrollmentId: number, ecclesiasticalYearId: number): Promise<number | null>` ✓
 
-- [ ] **Drift check (Neon vs Prisma) en 3 branches**
+4. **Naming consistency**:
+   - Schema/internal: `enrollment_*` (tablas, columnas, modelos Prisma `EnrollmentRanking`/`SectionRanking`/`EnrollmentRankingWeight`) ✓
+   - External (URLs/DTOs/perms/keys): `member_*` (`/api/v1/member-rankings`, `member_rankings:read_*`, `member_ranking.*`, `MemberRankingResponseDto`) ✓
+   - NO mix detectado en el plan ✓
 
-  ```bash
-  cd sacdia-backend
-  for BRANCH in development staging production; do
-    URL=$(neonctl connection-string $BRANCH --project-id wispy-hall-32797215)
-    DATABASE_URL="$URL" pnpm prisma migrate status
-  done
-  ```
+5. **Pipe consistency**:
+   - `enrollment_id`/`section_id`/`club_id` → `ParseIntPipe` ✓
+   - `id` UUIDs (weights, awarded_category) → `ParseUUIDPipe` ✓
 
-  Expected: las 3 reportan "Database schema is up to date".
+6. **Race-safe rule**: Phase 1-4 same repo (sacdia-backend) → serialize subagents. Phase 5 (sacdia-admin) puede paralelizar SOLO después de mergear backend (Tasks 11-15 PR aprobado). Phase 6 (root sacdia) post-merge. Phase 8 (sacdia-app) wave separada.
 
-- [ ] **Smoke E2E manual** (Task 25 completado)
-
-- [ ] **Engram session summary** con `mem_save` topic_key `sacdia/feature/8-4-a-shipped`.
-
----
-
-## Decisions log
-
-> Llenar este log al cerrar Phase 0 / Task 2. Sirve como source of truth para todos los tasks subsiguientes.
-
-- **A1** — `members.member_id`: <CONFIRMED INTEGER | DEVIATION>. Acción: <usar Int en Prisma>.
-- **A2** — `members.member_status`: <CONFIRMED | MISSING>. Acción: <filtrar 'active' | omitir filtro Fase 1, ADD COLUMN en Fase 2>.
-- **A3** — `club_sections.club_section_id`: <CONFIRMED INTEGER>.
-- **A4** — `member_class_progress`: <nombre real de tabla>. Columnas: <list>.
-- **A5** — `evidence_attendance`: <existe | derivar de annual_folder_section_evaluations | block calculator NULL>.
-- **A6** — investiduras per-member: <tabla real>. Columna año: <achieved_year_id | year_id>. Status values: <list>.
-- **A7** — camporees per-member: <camporee_attendees | camporee_participants | MISSING>.
-- **A8** — rol `member`: <existe en roles | implicado por members table>.
-- **A9** — system_config columnas: <`config_key/config_value/config_type` confirmados>.
-- **A10** — años: <`ecclesiastical_years.year_id` | `years.year_id`>. Reemplazar referencias en plan.
-- **A11** — `investiture_requirements`: <existe | MISSING → workaround>.
-
----
-
-## Out-of-scope reminder (NO implementar aquí)
-
-- Visibilidad usuario final detallada con permission-aware filtering en endpoint search list (nivel 8.4-B sub-feature dedicada)
-- Periodicidad mensual/trimestral del ranking (8.4-D)
-- Agrupación regional / multi-club (8.4-E)
-- Notificaciones FCM por cambio de ranking del miembro
-- Ranking histórico retroactivo
-- Export CSV / PDF
-- Gráficos evolutivos del score del miembro
+7. **Engram references**: #1204/#1296/#1839 (Neon manual psql) en Task 2; #1850 (split FK + clubs sin union_id) en Task 6; #1883/#1888 (controller order + e2e gap) en Task 11 + 12 + 15.
 
 ---
 
-## Engram patterns referenciados
+## Total
 
-- **#1204 / #1296 / #1839** — Neon migrations TXN atómico per-archivo, registro manual en `_prisma_migrations`, verify queries pre/post-apply.
-- **#1850** — Schema discoveries 8.4-C: `clubs` no tiene `union_id` directo, derivar via `local_fields`.
-- **#1883 / PR #28 / #1888** — Controller order bugs: rutas específicas antes que `:param` dinámicos. Tests modulares NO ven `ParseUUIDPipe` order bugs; requiere e2e HTTP real (Task 18).
-- **#1839** (cron) — Patrón secuencial en mismo job + kill-switch + try/catch per fase.
+- **26 tasks** (Phases 1-7 = 22 core, Phases 8-9 = 4 opcionales).
+- Reducción vs plan anterior: 29 → 26 (Evidence calculator dropped por audit A5; Phase 0 audit ya completado en commit `643b694`).
+- Execution recomendada: **subagent-driven-development** (always for SACDIA per stack engram #1850 race-safe rule).
