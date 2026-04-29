@@ -890,7 +890,7 @@ describe('CamporeeScoreService (per-enrollment)', () => {
 
   beforeEach(async () => {
     prisma = {
-      enrollments: { findFirst: jest.fn() },
+      enrollments: { findUnique: jest.fn() },
       camporee_members: { count: jest.fn() },
       clubs: { findUnique: jest.fn() },
       local_camporees: { findMany: jest.fn() },
@@ -906,51 +906,51 @@ describe('CamporeeScoreService (per-enrollment)', () => {
   });
 
   it('happy path: 1/2 approved → 50', async () => {
-    prisma.enrollments.findFirst.mockResolvedValue({
+    prisma.enrollments.findUnique.mockResolvedValue({
       enrollment_id: 1, user_id: 'u1', club_id: 10, ecclesiastical_year_id: 2,
     });
     prisma.camporee_members.count.mockResolvedValue(1);
-    prisma.clubs.findUnique.mockResolvedValue({ club_id: 10, local_fields: { union_id: 5 } });
+    prisma.clubs.findUnique.mockResolvedValue({ local_field_id: 100, local_fields: { union_id: 5 } });
     prisma.local_camporees.findMany.mockResolvedValue([{ local_camporee_id: 1 }]);
     prisma.union_camporees.findMany.mockResolvedValue([{ union_camporee_id: 1 }]);
     expect(await service.calculate(1, 2)).toBe(50);
   });
 
   it('total_camporees = 0 → null', async () => {
-    prisma.enrollments.findFirst.mockResolvedValue({
+    prisma.enrollments.findUnique.mockResolvedValue({
       enrollment_id: 1, user_id: 'u1', club_id: 10, ecclesiastical_year_id: 2,
     });
     prisma.camporee_members.count.mockResolvedValue(0);
-    prisma.clubs.findUnique.mockResolvedValue({ club_id: 10, local_fields: { union_id: 5 } });
+    prisma.clubs.findUnique.mockResolvedValue({ local_field_id: 100, local_fields: { union_id: 5 } });
     prisma.local_camporees.findMany.mockResolvedValue([]);
     prisma.union_camporees.findMany.mockResolvedValue([]);
     expect(await service.calculate(1, 2)).toBeNull();
   });
 
   it('club without union_id → only nationals (union_id NULL) in denom', async () => {
-    prisma.enrollments.findFirst.mockResolvedValue({
+    prisma.enrollments.findUnique.mockResolvedValue({
       enrollment_id: 1, user_id: 'u1', club_id: 10, ecclesiastical_year_id: 2,
     });
     prisma.camporee_members.count.mockResolvedValue(1);
-    prisma.clubs.findUnique.mockResolvedValue({ club_id: 10, local_fields: null });
+    prisma.clubs.findUnique.mockResolvedValue({ local_field_id: 100, local_fields: null });
     prisma.local_camporees.findMany.mockResolvedValue([{ local_camporee_id: 1 }]);
-    prisma.union_camporees.findMany.mockResolvedValue([]);
+    // union_camporees.findMany NOT called when resolvedUnionId === null
     expect(await service.calculate(1, 2)).toBe(100);
   });
 
   it('all approved (3/3) → 100', async () => {
-    prisma.enrollments.findFirst.mockResolvedValue({
+    prisma.enrollments.findUnique.mockResolvedValue({
       enrollment_id: 1, user_id: 'u1', club_id: 10, ecclesiastical_year_id: 2,
     });
     prisma.camporee_members.count.mockResolvedValue(3);
-    prisma.clubs.findUnique.mockResolvedValue({ club_id: 10, local_fields: { union_id: 5 } });
+    prisma.clubs.findUnique.mockResolvedValue({ local_field_id: 100, local_fields: { union_id: 5 } });
     prisma.local_camporees.findMany.mockResolvedValue([{ local_camporee_id: 1 }, { local_camporee_id: 2 }]);
     prisma.union_camporees.findMany.mockResolvedValue([{ union_camporee_id: 1 }]);
     expect(await service.calculate(1, 2)).toBe(100);
   });
 
   it('no enrollment → null', async () => {
-    prisma.enrollments.findFirst.mockResolvedValue(null);
+    prisma.enrollments.findUnique.mockResolvedValue(null);
     expect(await service.calculate(999, 2)).toBeNull();
   });
 });
@@ -976,20 +976,23 @@ export class CamporeeScoreService {
     enrollmentId: number,
     ecclesiasticalYearId: number,
   ): Promise<number | null> {
-    const enrollment = await this.prisma.enrollments.findFirst({
-      where: {
-        enrollment_id: enrollmentId,
-        ecclesiastical_year_id: ecclesiasticalYearId,
-      },
+    const enrollment = await this.prisma.enrollments.findUnique({
+      where: { enrollment_id: enrollmentId },
     });
     if (!enrollment) return null;
 
     // engram #1850: clubs has no union_id; resolve via local_fields
     const club = await this.prisma.clubs.findUnique({
       where: { club_id: enrollment.club_id },
-      include: { local_fields: { select: { union_id: true } } },
+      select: {
+        local_field_id: true,
+        local_fields: { select: { union_id: true } },
+      },
     });
     const resolvedUnionId = club?.local_fields?.union_id ?? null;
+
+    const localFieldId = club?.local_field_id;
+    if (!localFieldId) return null;
 
     const [participatedCount, localCamporees, unionCamporees] = await Promise.all([
       this.prisma.camporee_members.count({
@@ -999,18 +1002,20 @@ export class CamporeeScoreService {
         where: {
           ecclesiastical_year: ecclesiasticalYearId,
           active: true,
-          OR: [{ union_id: resolvedUnionId }, { union_id: null }],
+          local_field_id: localFieldId,
         },
         select: { local_camporee_id: true },
       }),
-      this.prisma.union_camporees.findMany({
-        where: {
-          ecclesiastical_year: ecclesiasticalYearId,
-          active: true,
-          OR: [{ union_id: resolvedUnionId }, { union_id: null }],
-        },
-        select: { union_camporee_id: true },
-      }),
+      resolvedUnionId === null
+        ? Promise.resolve([])
+        : this.prisma.union_camporees.findMany({
+            where: {
+              ecclesiastical_year: ecclesiasticalYearId,
+              active: true,
+              union_id: resolvedUnionId,
+            },
+            select: { union_camporee_id: true },
+          }),
     ]);
 
     const totalCamporees = localCamporees.length + unionCamporees.length;
@@ -1039,6 +1044,11 @@ Per-enrollment camporee score using camporee_members.user_id UUID.
 Resolves union_id via clubs.local_field_id → local_fields.union_id
 (engram #1850 — clubs has no direct union_id). Status='approved' locked
 as attendance signal (Q-RB4).
+
+Schema deviations from initial plan, applied per audit (cross-ref 8.4-C
+commit e654f99): local_camporees scoped by local_field_id (no union_id
+column); union_camporees scoped by union_id with conditional skip when
+club has no union (no IS NULL fallback — column is NOT NULL).
 EOF
 )"
 ```
@@ -1065,7 +1075,7 @@ describe('EnrollmentWeightsResolverService', () => {
   let prisma: any;
 
   beforeEach(async () => {
-    prisma = { enrollment_ranking_weights: { findFirst: jest.fn() } };
+    prisma = { enrollmentRankingWeight: { findFirst: jest.fn() } };
     const m = await Test.createTestingModule({
       providers: [EnrollmentWeightsResolverService, { provide: PrismaService, useValue: prisma }],
     }).compile();
@@ -1073,14 +1083,14 @@ describe('EnrollmentWeightsResolverService', () => {
   });
 
   it('override (clubType+year) wins', async () => {
-    prisma.enrollment_ranking_weights.findFirst
+    prisma.enrollmentRankingWeight.findFirst
       .mockResolvedValueOnce({ class_pct: 40, investiture_pct: 40, camporee_pct: 20 });
     const r = await service.resolve({ clubTypeId: 1, ecclesiasticalYearId: 2 });
     expect(r).toEqual({ class_pct: 40, investiture_pct: 40, camporee_pct: 20, source: 'override:club_type_1+year_2' });
   });
 
   it('falls back to default global', async () => {
-    prisma.enrollment_ranking_weights.findFirst
+    prisma.enrollmentRankingWeight.findFirst
       .mockResolvedValueOnce(null)
       .mockResolvedValueOnce(null)
       .mockResolvedValueOnce({ class_pct: 50, investiture_pct: 30, camporee_pct: 20, is_default: true });
@@ -1150,7 +1160,7 @@ export class EnrollmentWeightsResolverService {
 
     // 1. Try override (club_type_id + ecclesiastical_year_id)
     if (clubTypeId !== null && ecclesiasticalYearId !== null) {
-      const ovrYear = await this.prisma.enrollment_ranking_weights.findFirst({
+      const ovrYear = await this.prisma.enrollmentRankingWeight.findFirst({
         where: { club_type_id: clubTypeId, ecclesiastical_year_id: ecclesiasticalYearId },
       });
       if (ovrYear) {
@@ -1165,7 +1175,7 @@ export class EnrollmentWeightsResolverService {
 
     // 2. Try override (club_type_id only)
     if (clubTypeId !== null) {
-      const ovrType = await this.prisma.enrollment_ranking_weights.findFirst({
+      const ovrType = await this.prisma.enrollmentRankingWeight.findFirst({
         where: { club_type_id: clubTypeId, ecclesiastical_year_id: null },
       });
       if (ovrType) {
@@ -1179,7 +1189,7 @@ export class EnrollmentWeightsResolverService {
     }
 
     // 3. Default global
-    const def = await this.prisma.enrollment_ranking_weights.findFirst({
+    const def = await this.prisma.enrollmentRankingWeight.findFirst({
       where: { club_type_id: null, ecclesiastical_year_id: null, is_default: true },
     });
     if (!def) {
@@ -1229,12 +1239,12 @@ export class MemberCompositeScoreService {
   ): Promise<CompositeResult | null> {
     const enrollment = await this.prisma.enrollments.findUnique({
       where: { enrollment_id: enrollmentId },
-      include: { class: { select: { club_type_id: true } } },
+      include: { classes: { select: { club_type_id: true } } },
     });
     if (!enrollment) return null;
 
     const weights = await this.weightsResolver.resolve({
-      clubTypeId: (enrollment as any).class?.club_type_id ?? null,
+      clubTypeId: (enrollment as any).classes?.club_type_id ?? null,
       ecclesiasticalYearId,
     });
 
@@ -1320,7 +1330,7 @@ describe('SectionAggregationService', () => {
   let prisma: any;
 
   beforeEach(async () => {
-    prisma = { enrollment_rankings: { findMany: jest.fn() } };
+    prisma = { enrollmentRanking: { findMany: jest.fn() } };
     const m = await Test.createTestingModule({
       providers: [SectionAggregationService, { provide: PrismaService, useValue: prisma }],
     }).compile();
@@ -1328,7 +1338,7 @@ describe('SectionAggregationService', () => {
   });
 
   it('3 enrollments with composite → AVG correct', async () => {
-    prisma.enrollment_rankings.findMany.mockResolvedValue([
+    prisma.enrollmentRanking.findMany.mockResolvedValue([
       { composite_score_pct: 80 },
       { composite_score_pct: 60 },
       { composite_score_pct: 40 },
@@ -1340,7 +1350,7 @@ describe('SectionAggregationService', () => {
   });
 
   it('0 enrollments → composite NULL, count 0', async () => {
-    prisma.enrollment_rankings.findMany.mockResolvedValue([]);
+    prisma.enrollmentRanking.findMany.mockResolvedValue([]);
     expect(await service.aggregate(1, 2)).toEqual({
       composite_score_pct: null,
       active_enrollment_count: 0,
@@ -1348,7 +1358,7 @@ describe('SectionAggregationService', () => {
   });
 
   it('mixed (NULLs filtered upstream by where) — only non-null in result', async () => {
-    prisma.enrollment_rankings.findMany.mockResolvedValue([
+    prisma.enrollmentRanking.findMany.mockResolvedValue([
       { composite_score_pct: 100 },
       { composite_score_pct: 50 },
     ]);
@@ -1381,7 +1391,7 @@ export class SectionAggregationService {
     sectionId: number,
     ecclesiasticalYearId: number,
   ): Promise<SectionAggregateResult> {
-    const rows = await this.prisma.enrollment_rankings.findMany({
+    const rows = await this.prisma.enrollmentRanking.findMany({
       where: {
         club_section_id: sectionId,
         ecclesiastical_year_id: ecclesiasticalYearId,
@@ -1538,23 +1548,49 @@ export class RankingsService {
     for (let i = 0; i < clubs.length; i += chunkSize) {
       const chunk = clubs.slice(i, i + chunkSize);
       for (const c of chunk) {
+        // D9-α: resolve class_id set via club_sections → club_type_id → classes
+        const sections = await this.prisma.club_sections.findMany({
+          where: { main_club_id: c.club_id, active: true },
+          select: { club_section_id: true, club_type_id: true },
+        });
+        if (sections.length === 0) continue;
+
+        const clubTypeIds = [...new Set(sections.map((s) => s.club_type_id))];
+        const classes = await this.prisma.classes.findMany({
+          where: { club_type_id: { in: clubTypeIds } },
+          select: { class_id: true, club_type_id: true },
+        });
+        const classIdSet = classes.map((cls) => cls.class_id);
+        if (classIdSet.length === 0) continue;
+
+        // Map club_type_id → club_section_id (first section per type) for ranking row
+        const sectionByClubType = new Map<number, number>();
+        for (const s of sections) {
+          if (!sectionByClubType.has(s.club_type_id)) {
+            sectionByClubType.set(s.club_type_id, s.club_section_id);
+          }
+        }
+        const classToClubType = new Map<number, number>();
+        for (const cls of classes) {
+          classToClubType.set(cls.class_id, cls.club_type_id);
+        }
+
         const enrollments = await this.prisma.enrollments.findMany({
           where: {
             ecclesiastical_year_id: yearId,
             active: true,
-            class: { club_id: c.club_id },
+            class_id: { in: classIdSet },
           },
-          select: {
-            enrollment_id: true,
-            user_id: true,
-            class: { select: { club_id: true, club_sections: { select: { club_section_id: true } } } },
-          },
+          select: { enrollment_id: true, user_id: true, class_id: true },
         });
 
         for (const e of enrollments) {
           try {
             const result = await this.memberCompositeScore.calculate(e.enrollment_id, yearId);
             if (!result) { totalSkipped++; continue; }
+
+            const clubTypeId = classToClubType.get(e.class_id);
+            const clubSectionId = clubTypeId ? sectionByClubType.get(clubTypeId) ?? null : null;
 
             await this.prisma.enrollmentRanking.upsert({
               where: {
@@ -1567,7 +1603,7 @@ export class RankingsService {
                 enrollment_id: e.enrollment_id,
                 user_id: e.user_id,
                 club_id: c.club_id,
-                club_section_id: (e as any).class?.club_sections?.club_section_id ?? null,
+                club_section_id: clubSectionId,
                 ecclesiastical_year_id: yearId,
                 class_score_pct: result.class_score_pct,
                 investiture_score_pct: result.investiture_score_pct,
@@ -1581,7 +1617,7 @@ export class RankingsService {
                 camporee_score_pct: result.camporee_score_pct,
                 composite_score_pct: result.composite_score_pct,
                 composite_calculated_at: new Date(),
-                updated_at: new Date(),
+                modified_at: new Date(),
               },
             });
             totalEnrollments++;
@@ -1641,7 +1677,7 @@ export class RankingsService {
             composite_score_pct: agg.composite_score_pct,
             active_enrollment_count: agg.active_enrollment_count,
             composite_calculated_at: new Date(),
-            updated_at: new Date(),
+            modified_at: new Date(),
           },
         });
         totalSections++;
@@ -1748,7 +1784,7 @@ describe('Rank position UPDATE (DENSE_RANK NULLS LAST)', () => {
     // expected ranks: 1, 1, 2, 3 (dense — ties share rank, NULL last)
     // ... insert seed rows ...
     await service.updateEnrollmentRankPositions(9999);
-    const rows = await prisma.enrollment_rankings.findMany({
+    const rows = await prisma.enrollmentRanking.findMany({
       where: { ecclesiastical_year_id: 9999, club_id: 1 },
       orderBy: { rank_position: 'asc' },
     });
@@ -1872,7 +1908,7 @@ export class MemberRankingResponseDto {
   composite_score_pct!: number | null;
   rank_position!: number | null;
   awarded_category!: {
-    id: string; name: string; color: string;
+    id: string; name: string; icon: string | null;
     min_pct: number; max_pct: number;
   } | null;
   composite_calculated_at!: string | null;
@@ -1892,7 +1928,7 @@ export class MemberRankingResponseDto {
       awarded_category: row.awarded_category ? {
         id: row.awarded_category.award_category_id,
         name: row.awarded_category.name,
-        color: row.awarded_category.color,
+        icon: row.awarded_category.icon ?? null,
         min_pct: Number(row.awarded_category.min_composite_pct),
         max_pct: Number(row.awarded_category.max_composite_pct),
       } : null,
@@ -1946,6 +1982,7 @@ export class MemberRankingsService {
 
     const own = await this.prisma.enrollmentRanking.findFirst({
       where: { user_id: userId, ecclesiastical_year_id: yearId },
+      orderBy: { rank_position: 'asc' },
       include: { user: true, club_section: true, awarded_category: true },
     });
     const memberDto = own ? MemberRankingResponseDto.fromEnrollmentRanking(own) : null;
@@ -3628,12 +3665,12 @@ async recalculateEnrollmentRankings(yearId: number, mode: 'full' | 'delta' = 'fu
     where: {
       ecclesiastical_year_id: yearId,
       active: true,
-      class: { club_id: c.club_id },
+      class_id: { in: classIdSet },
       ...(mode === 'delta' && previousRecalc ? {
         last_progress_change: { gt: previousRecalc },
       } : {}),
     },
-    // ... rest unchanged
+    // ... rest unchanged (classIdSet resolved via D9-α club_sections → club_type_id → classes)
   });
 }
 ```
