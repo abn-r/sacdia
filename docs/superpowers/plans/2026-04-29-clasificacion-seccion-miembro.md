@@ -46,7 +46,7 @@ Subagents executing migrations or services MUST use these audit-locked values. D
 
 | # | Pregunta | Resolución |
 |---|----------|------------|
-| OQ1 | Privacidad `top_n` — `member_name` real, anonimizado, o solo score+rank | Decidir antes de Task 11 (controller `/me`). Default plan: anonimizado `"Miembro #N"` salvo decisión explícita de producto |
+| OQ1 | Privacidad `top_n` — `member_name` real, anonimizado, o solo score+rank | Decidir antes de Task 12 (controller `/me`). Default plan: anonimizado `"Miembro #N"` salvo decisión explícita de producto |
 | OQ2 | Section aggregation active filter | Phase 2 enhancement — no bloquea Fase 1 |
 | OQ3 | Evidence signal reintroducción | Phase 2 — migration dedicada cuando se modele tabla per-member |
 | OQ4 | `camporee_members.status` lifecycle ownership | Doc gap — confirmar en staging con datos reales |
@@ -869,89 +869,318 @@ EOF
 
 ---
 
-### Task 6: `CamporeeScoreService` per-enrollment TDD
+### Task 6: `EnrollmentClubResolverService` TDD
+
+**Files:**
+- Create: `sacdia-backend/src/rankings/member-rankings/services/enrollment-club-resolver.service.ts`
+- Test: `sacdia-backend/src/rankings/member-rankings/services/enrollment-club-resolver.service.spec.ts`
+
+**Why this task exists**: `enrollments` has no direct `club_id` FK. Per-enrollment ranking calculators need to resolve which club + section a member is in for a given year. This service centralizes that traversal:
+
+`enrollment.user_id` → `club_role_assignments(year, active=true, club_section_id IS NOT NULL)` → `club_sections.main_club_id` → `clubs.club_id`
+
+Returns `null` when the user has no active club assignment for the year — those enrollments are NOT ranked.
+
+**v1 heuristic** (document as future refinement): when a user has multiple active assignments in the same year (e.g. helper in one section, member in another), pick the first by `created_at ASC`. Future Q-RB7 may add role-based prioritization.
+
+- [ ] **Step 1: Write failing test**
+
+```typescript
+import { Test } from '@nestjs/testing';
+import { EnrollmentClubResolverService } from './enrollment-club-resolver.service';
+import { PrismaService } from '../../../prisma/prisma.service';
+
+describe('EnrollmentClubResolverService', () => {
+  let service: EnrollmentClubResolverService;
+  let prisma: any;
+
+  beforeEach(async () => {
+    prisma = {
+      enrollments: { findUnique: jest.fn() },
+      club_role_assignments: { findFirst: jest.fn() },
+    };
+    const module = await Test.createTestingModule({
+      providers: [
+        EnrollmentClubResolverService,
+        { provide: PrismaService, useValue: prisma },
+      ],
+    }).compile();
+    service = module.get(EnrollmentClubResolverService);
+  });
+
+  it('happy path: resolves club + section', async () => {
+    prisma.enrollments.findUnique.mockResolvedValue({ user_id: 'u1' });
+    prisma.club_role_assignments.findFirst.mockResolvedValue({
+      club_sections: { club_section_id: 50, main_club_id: 10 },
+    });
+    expect(await service.resolve(1, 2)).toEqual({ clubId: 10, clubSectionId: 50 });
+  });
+
+  it('no enrollment → null', async () => {
+    prisma.enrollments.findUnique.mockResolvedValue(null);
+    expect(await service.resolve(999, 2)).toBeNull();
+    expect(prisma.club_role_assignments.findFirst).not.toHaveBeenCalled();
+  });
+
+  it('user has no active assignment for year → null', async () => {
+    prisma.enrollments.findUnique.mockResolvedValue({ user_id: 'u1' });
+    prisma.club_role_assignments.findFirst.mockResolvedValue(null);
+    expect(await service.resolve(1, 2)).toBeNull();
+  });
+
+  it('assignment found but main_club_id is null (orphaned section) → null', async () => {
+    prisma.enrollments.findUnique.mockResolvedValue({ user_id: 'u1' });
+    prisma.club_role_assignments.findFirst.mockResolvedValue({
+      club_sections: { club_section_id: 50, main_club_id: null },
+    });
+    expect(await service.resolve(1, 2)).toBeNull();
+  });
+
+  it('passes correct where clause to club_role_assignments.findFirst', async () => {
+    prisma.enrollments.findUnique.mockResolvedValue({ user_id: 'u1' });
+    prisma.club_role_assignments.findFirst.mockResolvedValue({
+      club_sections: { club_section_id: 50, main_club_id: 10 },
+    });
+    await service.resolve(1, 2);
+    expect(prisma.club_role_assignments.findFirst).toHaveBeenCalledWith({
+      where: {
+        user_id: 'u1',
+        ecclesiastical_year_id: 2,
+        active: true,
+        club_section_id: { not: null },
+      },
+      orderBy: { created_at: 'asc' },
+      select: {
+        club_sections: {
+          select: { club_section_id: true, main_club_id: true },
+        },
+      },
+    });
+  });
+});
+```
+
+- [ ] **Step 2: Run test, expect FAIL**
+
+```bash
+cd sacdia-backend
+pnpm test enrollment-club-resolver.service.spec.ts
+```
+
+- [ ] **Step 3: Implement**
+
+```typescript
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../../../prisma/prisma.service';
+
+export interface EnrollmentClubContext {
+  clubId: number;
+  clubSectionId: number;
+}
+
+@Injectable()
+export class EnrollmentClubResolverService {
+  constructor(private readonly prisma: PrismaService) {}
+
+  /**
+   * Resolves the (clubId, clubSectionId) for an enrollment by traversing:
+   *   enrollment.user_id -> club_role_assignments(year, active) -> club_sections -> clubs
+   * Returns null when:
+   *   - enrollment doesn't exist
+   *   - user has no active assignment for the year
+   *   - assignment's section has no main_club_id (orphaned section)
+   * v1 heuristic: when user has multiple active assignments same year, pick
+   * first by created_at ASC. Future Q-RB7 may add role-based selection.
+   */
+  async resolve(
+    enrollmentId: number,
+    ecclesiasticalYearId: number,
+  ): Promise<EnrollmentClubContext | null> {
+    const enrollment = await this.prisma.enrollments.findUnique({
+      where: { enrollment_id: enrollmentId },
+      select: { user_id: true },
+    });
+    if (!enrollment) return null;
+
+    const assignment = await this.prisma.club_role_assignments.findFirst({
+      where: {
+        user_id: enrollment.user_id,
+        ecclesiastical_year_id: ecclesiasticalYearId,
+        active: true,
+        club_section_id: { not: null },
+      },
+      orderBy: { created_at: 'asc' },
+      select: {
+        club_sections: {
+          select: { club_section_id: true, main_club_id: true },
+        },
+      },
+    });
+    if (!assignment?.club_sections?.main_club_id) return null;
+
+    return {
+      clubId: assignment.club_sections.main_club_id,
+      clubSectionId: assignment.club_sections.club_section_id,
+    };
+  }
+}
+```
+
+- [ ] **Step 4: Run test, expect PASS** (5 specs green)
+
+- [ ] **Step 5: Code review checkpoint** — verify findFirst orderBy is deterministic; ensure null cases short-circuit (no extra DB calls).
+
+- [ ] **Step 6: Commit**
+
+```bash
+cd sacdia-backend
+git add src/rankings/member-rankings/services/enrollment-club-resolver.service.ts src/rankings/member-rankings/services/enrollment-club-resolver.service.spec.ts
+git commit -m "$(cat <<'EOF'
+feat(enrollment-rankings): add EnrollmentClubResolverService TDD
+
+Centralizes the indirect path from enrollment to club, since
+enrollments has no direct club_id FK. Traverses:
+  enrollment.user_id -> club_role_assignments(year, active) ->
+  club_sections.main_club_id -> clubs.club_id
+
+Returns null when user has no active assignment for the year
+(unranked). When multiple active assignments exist, picks first by
+created_at ASC (v1 heuristic; future Q-RB7 may add role priority).
+Used by Camporee/Class/Investiture/Composite calculators in this
+phase.
+EOF
+)"
+```
+
+---
+
+### Task 7: `CamporeeScoreService` per-enrollment TDD
 
 **Files:**
 - Create: `sacdia-backend/src/rankings/member-rankings/services/camporee-score.service.ts`
 - Test: `sacdia-backend/src/rankings/member-rankings/services/camporee-score.service.spec.ts`
 
-Adaptación del `CamporeeScoreService` club-level de 8.4-C, ahora per-enrollment con `user_id UUID`.
+Adaptación del `CamporeeScoreService` club-level de 8.4-C (commit `e654f99`), per-enrollment con `user_id UUID`. Uses `EnrollmentClubResolverService` (Task 6) to resolve the user's club for the year.
+
+**Critical pattern**: numerator must be SCOPE-FILTERED by the same camporee IDs as the denominator. Counting all approved `camporee_members` for a user globally produces inflated scores. 8.4-C reference enforces this scoping; v1 of this plan forgot it and was caught in Stage 2 review.
 
 - [ ] **Step 1: Write failing test**
 
 ```typescript
 import { Test } from '@nestjs/testing';
 import { CamporeeScoreService } from './camporee-score.service';
+import { EnrollmentClubResolverService } from './enrollment-club-resolver.service';
 import { PrismaService } from '../../../prisma/prisma.service';
 
 describe('CamporeeScoreService (per-enrollment)', () => {
   let service: CamporeeScoreService;
   let prisma: any;
+  let resolver: jest.Mocked<EnrollmentClubResolverService>;
 
   beforeEach(async () => {
     prisma = {
       enrollments: { findUnique: jest.fn() },
-      camporee_members: { count: jest.fn() },
       clubs: { findUnique: jest.fn() },
+      camporee_members: { count: jest.fn() },
       local_camporees: { findMany: jest.fn() },
       union_camporees: { findMany: jest.fn() },
     };
+    resolver = { resolve: jest.fn() } as any;
     const module = await Test.createTestingModule({
       providers: [
         CamporeeScoreService,
         { provide: PrismaService, useValue: prisma },
+        { provide: EnrollmentClubResolverService, useValue: resolver },
       ],
     }).compile();
     service = module.get(CamporeeScoreService);
   });
 
-  it('happy path: 1/2 approved → 50', async () => {
-    prisma.enrollments.findUnique.mockResolvedValue({
-      enrollment_id: 1, user_id: 'u1', club_id: 10, ecclesiastical_year_id: 2,
+  it('happy path: 1 of 2 in-scope approved → 50', async () => {
+    prisma.enrollments.findUnique.mockResolvedValue({ user_id: 'u1' });
+    resolver.resolve.mockResolvedValue({ clubId: 10, clubSectionId: 50 });
+    prisma.clubs.findUnique.mockResolvedValue({
+      local_field_id: 100,
+      local_fields: { union_id: 5 },
     });
+    prisma.local_camporees.findMany.mockResolvedValue([{ local_camporee_id: 11 }]);
+    prisma.union_camporees.findMany.mockResolvedValue([{ union_camporee_id: 22 }]);
     prisma.camporee_members.count.mockResolvedValue(1);
-    prisma.clubs.findUnique.mockResolvedValue({ local_field_id: 100, local_fields: { union_id: 5 } });
-    prisma.local_camporees.findMany.mockResolvedValue([{ local_camporee_id: 1 }]);
-    prisma.union_camporees.findMany.mockResolvedValue([{ union_camporee_id: 1 }]);
     expect(await service.calculate(1, 2)).toBe(50);
+    // verify count was scoped to in-range IDs
+    expect(prisma.camporee_members.count).toHaveBeenCalledWith({
+      where: {
+        user_id: 'u1',
+        status: 'approved',
+        OR: [
+          { camporee_id: { in: [11] } },
+          { union_camporee_id: { in: [22] } },
+        ],
+      },
+    });
   });
 
-  it('total_camporees = 0 → null', async () => {
-    prisma.enrollments.findUnique.mockResolvedValue({
-      enrollment_id: 1, user_id: 'u1', club_id: 10, ecclesiastical_year_id: 2,
+  it('total scope camporees = 0 → null', async () => {
+    prisma.enrollments.findUnique.mockResolvedValue({ user_id: 'u1' });
+    resolver.resolve.mockResolvedValue({ clubId: 10, clubSectionId: 50 });
+    prisma.clubs.findUnique.mockResolvedValue({
+      local_field_id: 100,
+      local_fields: { union_id: 5 },
     });
-    prisma.camporee_members.count.mockResolvedValue(0);
-    prisma.clubs.findUnique.mockResolvedValue({ local_field_id: 100, local_fields: { union_id: 5 } });
     prisma.local_camporees.findMany.mockResolvedValue([]);
     prisma.union_camporees.findMany.mockResolvedValue([]);
     expect(await service.calculate(1, 2)).toBeNull();
+    // count not called when no scope IDs to filter against
+    expect(prisma.camporee_members.count).not.toHaveBeenCalled();
   });
 
-  it('club without union_id → only nationals (union_id NULL) in denom', async () => {
-    prisma.enrollments.findUnique.mockResolvedValue({
-      enrollment_id: 1, user_id: 'u1', club_id: 10, ecclesiastical_year_id: 2,
+  it('club without union_id → only locals in scope, union skipped', async () => {
+    prisma.enrollments.findUnique.mockResolvedValue({ user_id: 'u1' });
+    resolver.resolve.mockResolvedValue({ clubId: 10, clubSectionId: 50 });
+    prisma.clubs.findUnique.mockResolvedValue({
+      local_field_id: 100,
+      local_fields: null,
     });
+    prisma.local_camporees.findMany.mockResolvedValue([{ local_camporee_id: 11 }]);
     prisma.camporee_members.count.mockResolvedValue(1);
-    prisma.clubs.findUnique.mockResolvedValue({ local_field_id: 100, local_fields: null });
-    prisma.local_camporees.findMany.mockResolvedValue([{ local_camporee_id: 1 }]);
-    // union_camporees.findMany NOT called when resolvedUnionId === null
     expect(await service.calculate(1, 2)).toBe(100);
+    expect(prisma.union_camporees.findMany).not.toHaveBeenCalled();
+    expect(prisma.camporee_members.count).toHaveBeenCalledWith({
+      where: {
+        user_id: 'u1',
+        status: 'approved',
+        OR: [{ camporee_id: { in: [11] } }],
+      },
+    });
   });
 
   it('all approved (3/3) → 100', async () => {
-    prisma.enrollments.findUnique.mockResolvedValue({
-      enrollment_id: 1, user_id: 'u1', club_id: 10, ecclesiastical_year_id: 2,
+    prisma.enrollments.findUnique.mockResolvedValue({ user_id: 'u1' });
+    resolver.resolve.mockResolvedValue({ clubId: 10, clubSectionId: 50 });
+    prisma.clubs.findUnique.mockResolvedValue({
+      local_field_id: 100,
+      local_fields: { union_id: 5 },
     });
+    prisma.local_camporees.findMany.mockResolvedValue([
+      { local_camporee_id: 11 },
+      { local_camporee_id: 12 },
+    ]);
+    prisma.union_camporees.findMany.mockResolvedValue([{ union_camporee_id: 22 }]);
     prisma.camporee_members.count.mockResolvedValue(3);
-    prisma.clubs.findUnique.mockResolvedValue({ local_field_id: 100, local_fields: { union_id: 5 } });
-    prisma.local_camporees.findMany.mockResolvedValue([{ local_camporee_id: 1 }, { local_camporee_id: 2 }]);
-    prisma.union_camporees.findMany.mockResolvedValue([{ union_camporee_id: 1 }]);
     expect(await service.calculate(1, 2)).toBe(100);
   });
 
   it('no enrollment → null', async () => {
     prisma.enrollments.findUnique.mockResolvedValue(null);
     expect(await service.calculate(999, 2)).toBeNull();
+    expect(resolver.resolve).not.toHaveBeenCalled();
+  });
+
+  it('resolver returns null (no active assignment) → null', async () => {
+    prisma.enrollments.findUnique.mockResolvedValue({ user_id: 'u1' });
+    resolver.resolve.mockResolvedValue(null);
+    expect(await service.calculate(1, 2)).toBeNull();
+    expect(prisma.clubs.findUnique).not.toHaveBeenCalled();
   });
 });
 ```
@@ -967,10 +1196,14 @@ pnpm test camporee-score.service.spec.ts
 ```typescript
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service';
+import { EnrollmentClubResolverService } from './enrollment-club-resolver.service';
 
 @Injectable()
 export class CamporeeScoreService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly clubResolver: EnrollmentClubResolverService,
+  ) {}
 
   async calculate(
     enrollmentId: number,
@@ -978,26 +1211,27 @@ export class CamporeeScoreService {
   ): Promise<number | null> {
     const enrollment = await this.prisma.enrollments.findUnique({
       where: { enrollment_id: enrollmentId },
+      select: { user_id: true },
     });
     if (!enrollment) return null;
 
-    // engram #1850: clubs has no union_id; resolve via local_fields
-    const club = await this.prisma.clubs.findUnique({
-      where: { club_id: enrollment.club_id },
+    const club = await this.clubResolver.resolve(enrollmentId, ecclesiasticalYearId);
+    if (!club) return null;
+
+    // engram #1850: clubs has no direct union_id; resolve via local_fields
+    const clubData = await this.prisma.clubs.findUnique({
+      where: { club_id: club.clubId },
       select: {
         local_field_id: true,
         local_fields: { select: { union_id: true } },
       },
     });
-    const resolvedUnionId = club?.local_fields?.union_id ?? null;
+    if (!clubData) return null;
 
-    const localFieldId = club?.local_field_id;
-    if (!localFieldId) return null;
+    const localFieldId = clubData.local_field_id;
+    const resolvedUnionId = clubData.local_fields?.union_id ?? null;
 
-    const [participatedCount, localCamporees, unionCamporees] = await Promise.all([
-      this.prisma.camporee_members.count({
-        where: { user_id: enrollment.user_id, status: 'approved' },
-      }),
+    const [localCamporees, unionCamporees] = await Promise.all([
       this.prisma.local_camporees.findMany({
         where: {
           ecclesiastical_year: ecclesiasticalYearId,
@@ -1018,20 +1252,34 @@ export class CamporeeScoreService {
           }),
     ]);
 
-    const totalCamporees = localCamporees.length + unionCamporees.length;
+    const localIds = localCamporees.map((c) => c.local_camporee_id);
+    const unionIds = unionCamporees.map((c) => c.union_camporee_id);
+    const totalCamporees = localIds.length + unionIds.length;
     if (totalCamporees === 0) return null;
+
+    // CRITICAL: scope numerator to in-range camporee IDs only.
+    // Without this filter the count includes lifetime global attendance,
+    // inflating scores (caught in stage 2 review of v1 plan).
+    const orClauses: Array<Record<string, unknown>> = [];
+    if (localIds.length > 0) orClauses.push({ camporee_id: { in: localIds } });
+    if (unionIds.length > 0) orClauses.push({ union_camporee_id: { in: unionIds } });
+
+    const participatedCount = await this.prisma.camporee_members.count({
+      where: {
+        user_id: enrollment.user_id,
+        status: 'approved',
+        OR: orClauses,
+      },
+    });
+
     return Math.min((participatedCount / totalCamporees) * 100, 100);
   }
 }
 ```
 
-- [ ] **Step 4: Run test, expect PASS**
+- [ ] **Step 4: Run test, expect PASS** (6 specs green)
 
-```bash
-pnpm test camporee-score.service.spec.ts
-```
-
-- [ ] **Step 5: Code review checkpoint** — engram #1850 split FK pattern aplicado (`union_id` resuelto vía `local_fields`).
+- [ ] **Step 5: Code review checkpoint** — verify numerator scoped to denom IDs (no lifetime inflation); resolver short-circuits when user unranked; engram #1850 split FK applied.
 
 - [ ] **Step 6: Commit**
 
@@ -1041,21 +1289,25 @@ git commit -m "$(cat <<'EOF'
 feat(enrollment-rankings): add per-enrollment CamporeeScoreService TDD
 
 Per-enrollment camporee score using camporee_members.user_id UUID.
-Resolves union_id via clubs.local_field_id → local_fields.union_id
-(engram #1850 — clubs has no direct union_id). Status='approved' locked
-as attendance signal (Q-RB4).
+Resolves the user's club for the year via EnrollmentClubResolverService
+(Task 6); enrollments has no direct club_id FK.
 
-Schema deviations from initial plan, applied per audit (cross-ref 8.4-C
-commit e654f99): local_camporees scoped by local_field_id (no union_id
-column); union_camporees scoped by union_id with conditional skip when
-club has no union (no IS NULL fallback — column is NOT NULL).
+Numerator scope: count is filtered by camporee IDs in the same scope as
+the denominator (localFieldId + union_id), preventing global lifetime
+attendance from inflating scores. v1 plan missed this — caught in
+stage 2 review and applied here as the canonical pattern.
+
+Schema deviations from initial plan (cross-ref 8.4-C commit e654f99):
+local_camporees scoped by local_field_id (no union_id column);
+union_camporees scoped by union_id with conditional skip when club
+has no union (column is NOT NULL — no IS NULL fallback).
 EOF
 )"
 ```
 
 ---
 
-### Task 7: `MemberCompositeScoreService` TDD (NULL redistribution)
+### Task 8: `MemberCompositeScoreService` TDD (NULL redistribution)
 
 **Files:**
 - Create: `sacdia-backend/src/rankings/member-rankings/services/member-composite-score.service.ts`
@@ -1312,7 +1564,7 @@ EOF
 
 ---
 
-### Task 8: `SectionAggregationService` TDD
+### Task 9: `SectionAggregationService` TDD
 
 **Files:**
 - Create: `sacdia-backend/src/rankings/section-rankings/services/section-aggregation.service.ts`
@@ -1439,7 +1691,7 @@ EOF
 
 ## Phase 3 — Backend cron integration + ranking-position update (sacdia-backend)
 
-### Task 9: Extender `rankings.service.ts` con dos métodos nuevos + cron wiring
+### Task 10: Extender `rankings.service.ts` con dos métodos nuevos + cron wiring
 
 **Files:**
 - Modify: `sacdia-backend/src/rankings/rankings.service.ts`
@@ -1634,7 +1886,7 @@ export class RankingsService {
       }
     }
 
-    // Update rank_position via DENSE_RANK SQL (Task 10)
+    // Update rank_position via DENSE_RANK SQL (Task 11)
     await this.updateEnrollmentRankPositions(yearId);
 
     this.logger.log(`[member-rankings] Recalc done enrollments=${totalEnrollments} skipped=${totalSkipped}`);
@@ -1697,7 +1949,7 @@ export class RankingsService {
     this.logger.log(`[section-rankings] Recalc done sections=${totalSections} empty=${totalEmpty} errors=${totalErrors}`);
   }
 
-  // updateEnrollmentRankPositions / updateSectionRankPositions: Task 10
+  // updateEnrollmentRankPositions / updateSectionRankPositions: Task 11
   // resolveActiveYear: existente en 8.4-C
 }
 ```
@@ -1750,7 +2002,7 @@ EOF
 
 ---
 
-### Task 10: SQL UPDATE DENSE_RANK() per club + year (NULLS LAST)
+### Task 11: SQL UPDATE DENSE_RANK() per club + year (NULLS LAST)
 
 **Files:**
 - Modify: `sacdia-backend/src/rankings/rankings.service.ts` (agrega métodos `updateEnrollmentRankPositions` + `updateSectionRankPositions`)
@@ -1864,7 +2116,7 @@ EOF
 
 > **CRÍTICO — engram #1883/PR #28**: orden controllers en module.controllers array MATTERS. Rutas estáticas (`/me`, `/recalculate`) ANTES de rutas dinámicas (`/:enrollmentId`). Si un PR rompe orden, ParseUUIDPipe/ParseIntPipe se aplica primero a la ruta dinámica y devuelve 400 BadRequest sobre URLs estáticas. Tests modulares NO detectan esto: SOLO e2e con HTTP real (engram #1888) — Phase 4 incluye tarea e2e dedicada.
 
-### Task 11: Crear módulo `member-rankings/`
+### Task 12: Crear módulo `member-rankings/`
 
 **Files:**
 - Create: `sacdia-backend/src/rankings/member-rankings/member-rankings.controller.ts`
@@ -2124,7 +2376,7 @@ EOF
 
 ---
 
-### Task 12: Crear módulo `section-rankings/`
+### Task 13: Crear módulo `section-rankings/`
 
 **Files:**
 - Create: `sacdia-backend/src/rankings/section-rankings/section-rankings.controller.ts`
@@ -2216,7 +2468,7 @@ GET /:sectionId/members drill-down (ParseIntPipe INTEGER)
 
 ---
 
-### Task 13: Crear módulo `member-ranking-weights/` CRUD
+### Task 14: Crear módulo `member-ranking-weights/` CRUD
 
 **Files:**
 - Create: `sacdia-backend/src/rankings/member-ranking-weights/member-ranking-weights.controller.ts`
@@ -2346,7 +2598,7 @@ EOF
 
 ---
 
-### Task 14: Extend `award-categories` controller con filter `?scope=`
+### Task 15: Extend `award-categories` controller con filter `?scope=`
 
 **Files:**
 - Modify: `sacdia-backend/src/award-categories/award-categories.controller.ts`
@@ -2415,7 +2667,7 @@ POST/PATCH require valid scope enum.
 
 ---
 
-### Task 15: E2E integration test — HTTP real contra `/member-rankings/` y `/section-rankings/`
+### Task 16: E2E integration test — HTTP real contra `/member-rankings/` y `/section-rankings/`
 
 **Files:**
 - Create: `sacdia-backend/test/member-rankings.e2e-spec.ts`
@@ -2555,7 +2807,7 @@ EOF
 
 > Cada page: shadcn/ui new-york, Tailwind v4 con tokens semánticos (bg-primary/10, text-muted-foreground, NO bg-blue-50 hardcoded), lucide-react icons. Reference: `sacdia-admin/DESIGN-SYSTEM.md`. CRUD create/edit = Dialog modal; delete = AlertDialog confirmation.
 
-### Task 16: `/dashboard/member-rankings` page (table + filters)
+### Task 17: `/dashboard/member-rankings` page (table + filters)
 
 **Files:**
 - Create: `sacdia-admin/src/app/dashboard/member-rankings/page.tsx`
@@ -2712,7 +2964,7 @@ Uses MemberRankingScoreBadge (cutoffs ≥85 success, ≥65 warning, <65 destruct
 
 ---
 
-### Task 17: `/dashboard/member-rankings/[enrollmentId]/breakdown` drill-down
+### Task 18: `/dashboard/member-rankings/[enrollmentId]/breakdown` drill-down
 
 **Files:**
 - Create: `sacdia-admin/src/app/dashboard/member-rankings/[enrollmentId]/breakdown/page.tsx`
@@ -2790,7 +3042,7 @@ git commit -m "feat(member-rankings): add breakdown drill-down page with 3 score
 
 ---
 
-### Task 18: `/dashboard/section-rankings` page
+### Task 19: `/dashboard/section-rankings` page
 
 **Files:**
 - Create: `sacdia-admin/src/app/dashboard/section-rankings/page.tsx`
@@ -2798,7 +3050,7 @@ git commit -m "feat(member-rankings): add breakdown drill-down page with 3 score
 - Create: `sacdia-admin/src/app/dashboard/section-rankings/[sectionId]/members/page.tsx`
 - Create: `sacdia-admin/src/lib/api/section-rankings.ts`
 
-- [ ] **Step 1: Implement API client + table** (similar pattern Task 16)
+- [ ] **Step 1: Implement API client + table** (similar pattern Task 17)
 
 ```typescript
 export interface SectionRankingResponse {
@@ -2866,7 +3118,7 @@ git commit -m "feat(section-rankings): add admin pages list + drill-down to memb
 
 ---
 
-### Task 19: `/dashboard/member-ranking-weights` CRUD page
+### Task 20: `/dashboard/member-ranking-weights` CRUD page
 
 **Files:**
 - Create: `sacdia-admin/src/app/dashboard/member-ranking-weights/page.tsx`
@@ -3011,7 +3263,7 @@ EOF
 
 ---
 
-### Task 20: Extend `/dashboard/award-categories` con tabs scope (Club | Section | Member)
+### Task 21: Extend `/dashboard/award-categories` con tabs scope (Club | Section | Member)
 
 **Files:**
 - Modify: `sacdia-admin/src/app/dashboard/award-categories/page.tsx`
@@ -3087,7 +3339,7 @@ git commit -m "feat(award-categories): extend admin page with scope tabs (Club|S
 
 ## Phase 6 — Documentation update (root sacdia)
 
-### Task 21: Update canon docs + API live reference + schema reference + features registry
+### Task 22: Update canon docs + API live reference + schema reference + features registry
 
 **Files:**
 - Modify: `docs/canon/runtime-rankings.md` (agregar §14)
@@ -3208,7 +3460,7 @@ EOF
 
 ## Phase 7 — Smoke E2E + manual validation (post-merge)
 
-### Task 22: Smoke E2E manual contra dev environment
+### Task 23: Smoke E2E manual contra dev environment
 
 **Setup**: backend + admin desplegados en dev (Neon dev branch). Tests creds: `admin@sacdia.com / Sacdia2026!` (super_admin) y `director@sacdia.com / Sacdia2026!` (director-club ACV/GM).
 
@@ -3320,7 +3572,7 @@ UPDATE system_config SET config_value = 'self_only' WHERE config_key = 'member_r
 
 > **NOTA**: Phase 8 es opcional y puede liberarse como wave separada después de validar Fase 1 admin web. Backend ya soporta endpoints `/me` con visibility-gating; aquí se construye la superficie móvil.
 
-### Task 23: Flutter repository + provider para member_rankings + section_rankings
+### Task 24: Flutter repository + provider para member_rankings + section_rankings
 
 **Files:**
 - Create: `sacdia-app/lib/features/rankings/data/models/member_ranking_dto.dart`
@@ -3465,7 +3717,7 @@ Repository returns null on 403 (visibility=hidden) for graceful UI handling.
 
 ---
 
-### Task 24: `MyRankingScreen` Flutter
+### Task 25: `MyRankingScreen` Flutter
 
 **Files:**
 - Create: `sacdia-app/lib/features/rankings/presentation/screens/my_ranking_screen.dart`
@@ -3547,7 +3799,7 @@ git commit -m "feat(rankings): add MyRankingScreen with 3 score cards + composit
 
 ---
 
-### Task 25: `SectionRankingScreen` Flutter
+### Task 26: `SectionRankingScreen` Flutter
 
 **Files:**
 - Create: `sacdia-app/lib/features/rankings/presentation/screens/section_ranking_screen.dart`
@@ -3600,7 +3852,7 @@ git commit -m "feat(rankings): add SectionRankingScreen with members list (rank 
 
 ## Phase 9 — Fase 2 optimization (delta-only) — OPTIONAL
 
-### Task 26: Delta-only recalc — solo enrollments con `last_progress_change > previous_recalc_at`
+### Task 27: Delta-only recalc — solo enrollments con `last_progress_change > previous_recalc_at`
 
 **Files:**
 - Modify: `sacdia-backend/prisma/schema.prisma` (agregar columna `last_progress_change` a `enrollments` o crear `enrollment_progress_audit`)
@@ -3705,32 +3957,32 @@ EOF
 Antes de declarar el plan completo, el orquestador valida:
 
 1. **Spec coverage**:
-   - [x] Q1 Sección agregado puro → Task 8 (SectionAggregationService)
-   - [x] Q2 3 señales Fase 1 → Tasks 4, 5, 6
-   - [x] Q3 Tabla `enrollment_ranking_weights` separada → Task 1 (DDL) + Task 13 (CRUD)
-   - [x] Q4 RBAC modelo C + flag visibility → Task 1 (seeds) + Task 11 (controller)
+   - [x] Q1 Sección agregado puro → Task 9 (SectionAggregationService)
+   - [x] Q2 3 señales Fase 1 → Tasks 4, 5, 7
+   - [x] Q3 Tabla `enrollment_ranking_weights` separada → Task 1 (DDL) + Task 14 (CRUD)
+   - [x] Q4 RBAC modelo C + flag visibility → Task 1 (seeds) + Task 12 (controller)
    - [x] Q5 UI 2 fases → Phase 5 (admin) + Phase 8 (Flutter)
-   - [x] Q6 Cron secuencial → Task 9
-   - [x] Q7 `award_categories.scope` polimórfica → Task 1 archivo 2 + Task 14
-   - [x] Q8 AVG enrollments con composite calculado → Task 8
-   - [x] Q9 Kill-switch separado → Task 1 archivo 3 + Task 9
-   - [x] Q-RB1 Naming híbrido → documentado en header + Task 21 explicit
-   - [x] Q-RB2 Evidencias descartadas + redistribución → Tasks 4-7
+   - [x] Q6 Cron secuencial → Task 10
+   - [x] Q7 `award_categories.scope` polimórfica → Task 1 archivo 2 + Task 15
+   - [x] Q8 AVG enrollments con composite calculado → Task 9
+   - [x] Q9 Kill-switch separado → Task 1 archivo 3 + Task 10
+   - [x] Q-RB1 Naming híbrido → documentado en header + Task 22 explicit
+   - [x] Q-RB2 Evidencias descartadas + redistribución → Tasks 4-8
    - [x] Q-RB3 Investidura binaria → Task 5
-   - [x] Q-RB4 `'approved'` locked camporees → Task 6
+   - [x] Q-RB4 `'approved'` locked camporees → Task 7
    - [x] §4 Schema → Task 1 + Task 3
    - [x] §5 Audit notes → Schema reality table al inicio
-   - [x] §6 Endpoints + DTOs + RBAC → Tasks 11-14
-   - [x] §7 Calculadores → Tasks 4-8
-   - [x] §8 Cron + dark launch → Task 9
-   - [x] §9 UI admin → Tasks 16-20
-   - [x] §10 UI Flutter → Tasks 23-25
+   - [x] §6 Endpoints + DTOs + RBAC → Tasks 12-15
+   - [x] §7 Calculadores → Tasks 4-9
+   - [x] §8 Cron + dark launch → Task 10
+   - [x] §9 UI admin → Tasks 17-21
+   - [x] §10 UI Flutter → Tasks 24-26
    - [x] §11 Migrations → Tasks 1-2
-   - [x] §12 Error handling → distribuido en Tasks 9, 11, 13
-   - [x] §13 Logs estructurados → Task 9
-   - [x] §14 Testing strategy → Tasks 4-15
+   - [x] §12 Error handling → distribuido en Tasks 10, 12, 14
+   - [x] §13 Logs estructurados → Task 10
+   - [x] §14 Testing strategy → Tasks 4-16
    - [x] §15 Open questions → tabla al inicio + OQ5 resuelto en Task 4
-   - [x] §16 DoR/DoD → Task 22 smoke + Task 21 canon
+   - [x] §16 DoR/DoD → Task 23 smoke + Task 22 canon
 
 2. **Placeholder scan**: NO TBD/TODO en task content. OQs centralizadas en sección dedicada.
 
@@ -3750,14 +4002,14 @@ Antes de declarar el plan completo, el orquestador valida:
    - `enrollment_id`/`section_id`/`club_id` → `ParseIntPipe` ✓
    - `id` UUIDs (weights, awarded_category) → `ParseUUIDPipe` ✓
 
-6. **Race-safe rule**: Phase 1-4 same repo (sacdia-backend) → serialize subagents. Phase 5 (sacdia-admin) puede paralelizar SOLO después de mergear backend (Tasks 11-15 PR aprobado). Phase 6 (root sacdia) post-merge. Phase 8 (sacdia-app) wave separada.
+6. **Race-safe rule**: Phase 1-4 same repo (sacdia-backend) → serialize subagents. Phase 5 (sacdia-admin) puede paralelizar SOLO después de mergear backend (Tasks 12-16 PR aprobado). Phase 6 (root sacdia) post-merge. Phase 8 (sacdia-app) wave separada.
 
-7. **Engram references**: #1204/#1296/#1839 (Neon manual psql) en Task 2; #1850 (split FK + clubs sin union_id) en Task 6; #1883/#1888 (controller order + e2e gap) en Task 11 + 12 + 15.
+7. **Engram references**: #1204/#1296/#1839 (Neon manual psql) en Task 2; #1850 (split FK + clubs sin union_id) en Task 7; #1883/#1888 (controller order + e2e gap) en Task 12 + 13 + 16.
 
 ---
 
 ## Total
 
-- **26 tasks** (Phases 1-7 = 22 core, Phases 8-9 = 4 opcionales).
-- Reducción vs plan anterior: 29 → 26 (Evidence calculator dropped por audit A5; Phase 0 audit ya completado en commit `643b694`).
+- **27 tasks** (Phases 1-7 = 23 core, Phases 8-9 = 4 opcionales).
+- Reducción vs plan anterior: 29 → 26 (Evidence calculator dropped por audit A5; Phase 0 audit ya completado en commit `643b694`). Task 6 added post stage-2 review: EnrollmentClubResolverService centralizes enrollment→club traversal (enrollments has no direct club_id FK).
 - Execution recomendada: **subagent-driven-development** (always for SACDIA per stack engram #1850 race-safe rule).
