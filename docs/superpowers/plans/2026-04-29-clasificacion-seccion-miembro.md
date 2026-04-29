@@ -1062,7 +1062,7 @@ EOF
 
 Adaptación del `CamporeeScoreService` club-level de 8.4-C (commit `e654f99`), per-enrollment con `user_id UUID`. Uses `EnrollmentClubResolverService` (Task 6) to resolve the user's club for the year.
 
-**Critical pattern**: numerator must be SCOPE-FILTERED by the same camporee IDs as the denominator. Counting all approved `camporee_members` for a user globally produces inflated scores. 8.4-C reference enforces this scoping; v1 of this plan forgot it and was caught in Stage 2 review.
+**Critical pattern**: numerator must be SCOPE-FILTERED by the same camporee IDs as the denominator. Counting all approved `camporee_members` for a user globally produces inflated scores. 8.4-C reference enforces this scoping; v1 of this plan forgot it and was caught in Stage 2 review. Additionally, union_camporees denominator is filtered through the `union_camporee_local_fields` junction so members are only scored against camporees that invited their local_field — added per Stage 2 review of Task 7.
 
 - [ ] **Step 1: Write failing test**
 
@@ -1247,6 +1247,9 @@ export class CamporeeScoreService {
               ecclesiastical_year: ecclesiasticalYearId,
               active: true,
               union_id: resolvedUnionId,
+              union_camporee_local_fields: {
+                some: { local_field_id: localFieldId },
+              },
             },
             select: { union_camporee_id: true },
           }),
