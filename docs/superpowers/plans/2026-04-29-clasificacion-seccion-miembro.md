@@ -88,7 +88,7 @@ CREATE TABLE enrollment_rankings (
   awarded_category_id UUID REFERENCES award_categories(award_category_id),
   composite_calculated_at TIMESTAMPTZ(6),
   created_at TIMESTAMPTZ(6) NOT NULL DEFAULT now(),
-  updated_at TIMESTAMPTZ(6) NOT NULL DEFAULT now(),
+  modified_at TIMESTAMPTZ(6) NOT NULL DEFAULT now(),
   CONSTRAINT uq_enrollment_rankings_enrollment_year
     UNIQUE (enrollment_id, ecclesiastical_year_id),
   CONSTRAINT chk_enrollment_rankings_class_score
@@ -124,7 +124,7 @@ CREATE TABLE section_rankings (
   awarded_category_id UUID REFERENCES award_categories(award_category_id),
   composite_calculated_at TIMESTAMPTZ(6),
   created_at TIMESTAMPTZ(6) NOT NULL DEFAULT now(),
-  updated_at TIMESTAMPTZ(6) NOT NULL DEFAULT now(),
+  modified_at TIMESTAMPTZ(6) NOT NULL DEFAULT now(),
   CONSTRAINT uq_section_rankings_section_year
     UNIQUE (club_section_id, ecclesiastical_year_id),
   CONSTRAINT chk_section_rankings_composite
@@ -148,7 +148,7 @@ CREATE TABLE enrollment_ranking_weights (
   camporee_pct NUMERIC(5,2) NOT NULL,
   is_default BOOLEAN NOT NULL DEFAULT false,
   created_at TIMESTAMPTZ(6) NOT NULL DEFAULT now(),
-  updated_at TIMESTAMPTZ(6) NOT NULL DEFAULT now(),
+  modified_at TIMESTAMPTZ(6) NOT NULL DEFAULT now(),
   CONSTRAINT chk_enrollment_weights_sum_100
     CHECK (class_pct + investiture_pct + camporee_pct = 100),
   CONSTRAINT chk_enrollment_weights_class_range
@@ -284,7 +284,7 @@ ON CONFLICT DO NOTHING;
 -- Cutoffs §11.5 spec — laxos vs club (AAA ≥85 en lugar de ≥80)
 
 INSERT INTO award_categories
-  (award_category_id, name, color, scope, min_composite_pct, max_composite_pct, is_legacy, created_at, updated_at)
+  (award_category_id, name, color, scope, min_composite_pct, max_composite_pct, is_legacy, created_at, modified_at)
 VALUES
   (gen_random_uuid(), 'AAA', '#10b981', 'member',  85, 100,   false, NOW(), NOW()),
   (gen_random_uuid(), 'AA',  '#22c55e', 'member',  75, 84.99, false, NOW(), NOW()),
@@ -499,7 +499,7 @@ model EnrollmentRanking {
   awarded_category_id      String?   @db.Uuid
   composite_calculated_at  DateTime? @db.Timestamptz(6)
   created_at               DateTime  @default(now()) @db.Timestamptz(6)
-  updated_at               DateTime  @default(now()) @db.Timestamptz(6)
+  modified_at              DateTime  @default(now()) @db.Timestamptz(6)
 
   enrollment               enrollments          @relation(fields: [enrollment_id], references: [enrollment_id], onDelete: Cascade)
   user                     users                @relation(fields: [user_id], references: [user_id])
@@ -531,7 +531,7 @@ model SectionRanking {
   awarded_category_id      String?   @db.Uuid
   composite_calculated_at  DateTime? @db.Timestamptz(6)
   created_at               DateTime  @default(now()) @db.Timestamptz(6)
-  updated_at               DateTime  @default(now()) @db.Timestamptz(6)
+  modified_at              DateTime  @default(now()) @db.Timestamptz(6)
 
   club_section             club_sections        @relation(fields: [club_section_id], references: [club_section_id], onDelete: Cascade)
   club                     clubs                @relation(fields: [club_id], references: [club_id])
@@ -557,7 +557,7 @@ model EnrollmentRankingWeight {
   camporee_pct             Decimal   @db.Decimal(5, 2)
   is_default               Boolean   @default(false)
   created_at               DateTime  @default(now()) @db.Timestamptz(6)
-  updated_at               DateTime  @default(now()) @db.Timestamptz(6)
+  modified_at              DateTime  @default(now()) @db.Timestamptz(6)
 
   club_type                club_types?           @relation(fields: [club_type_id], references: [club_type_id])
   ecclesiastical_year      ecclesiastical_years? @relation(fields: [ecclesiastical_year_id], references: [year_id])
