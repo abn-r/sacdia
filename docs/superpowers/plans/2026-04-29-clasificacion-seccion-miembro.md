@@ -1699,32 +1699,54 @@ EOF
 
 ### Task 10: Extender `rankings.service.ts` con dos métodos nuevos + cron wiring
 
+> **Bundled with Task 11** for implementation — same target file, single commit. See also Task 11.
+
 **Files:**
-- Modify: `sacdia-backend/src/rankings/rankings.service.ts`
-- Modify: `sacdia-backend/src/rankings/rankings.module.ts`
-- Test: `sacdia-backend/src/rankings/rankings.service.spec.ts`
+- Modify: `sacdia-backend/src/annual-folders/rankings.service.ts`
+- Modify: `sacdia-backend/src/annual-folders/annual-folders.module.ts`
+- Modify: `sacdia-backend/src/system-config/system-config.service.ts` (add `get()` helper — D2.a)
+- Test: `sacdia-backend/src/annual-folders/__tests__/rankings.service.spec.ts` (extend existing suite)
+
+**Sub-step 0 (prerequisite): Add `get()` helper to `SystemConfigService`**
+
+Modify `sacdia-backend/src/system-config/system-config.service.ts` to add a non-throwing `get()` method. Existing `findByKey` throws `AppNotFoundException` and stays for callers that want that behaviour. The new `get()` returns `null` when the row is not found:
+
+```typescript
+async get(key: string): Promise<string | null> {
+  const config = await this.prisma.system_config.findUnique({
+    where: { config_key: key },
+  });
+  return config?.config_value ?? null;
+}
+```
+
+**Sub-step 0b: Update `RankingsProcessor`**
+
+`sacdia-backend/src/annual-folders/rankings.processor.ts` currently calls `rankingsService.recalculateRankings()`. Update it to call `this.rankingsService.recalculateAll()` instead (new public orchestrator method added in Step 3 below). Existing `recalculateRankings()` stays untouched — it continues to do clubs-only and is called internally by `recalculateAll()`.
 
 - [ ] **Step 1: Write failing test (extiende suite existente)**
 
+Extend the existing `Test.createTestingModule()` mock setup in `sacdia-backend/src/annual-folders/__tests__/rankings.service.spec.ts` with three new mocks: `MemberCompositeScoreService`, `SectionAggregationService`, and `SystemConfigService` (the latter must mock `get`). Add a new `describe` block inside the existing file:
+
 ```typescript
-// rankings.service.spec.ts (extension)
+// sacdia-backend/src/annual-folders/__tests__/rankings.service.spec.ts (extension)
 describe('rankings.service — 8.4-A integration', () => {
-  it('cron skips enrollments+sections if global kill-switch off', async () => {
+  it('recalculateAll: skips enrollments+sections if global kill-switch off', async () => {
     // mock systemConfig.get('ranking.recalculation_enabled') → 'false'
-    // expect: recalculateClubRankings NOT called, recalculateMemberRankings NOT called
+    // expect: recalculateRankings NOT called, recalculateEnrollmentRankings NOT called
   });
 
-  it('cron skips ONLY steps 2 and 3 if member kill-switch off', async () => {
+  it('recalculateAll: skips ONLY steps 2 and 3 if member kill-switch off', async () => {
     // mock 'ranking.recalculation_enabled' → 'true'
     // mock 'member_ranking.recalculation_enabled' → 'false'
-    // expect: recalculateClubRankings called, recalculateMemberRankings NOT called
+    // expect: recalculateRankings called, recalculateEnrollmentRankings NOT called
   });
 
-  it('cron continues to step 3 if step 2 throws', async () => {
-    // recalculateMemberRankings throws → recalculateSectionAggregates still called
+  it('recalculateAll: continues to step 3 if step 2 throws', async () => {
+    // recalculateEnrollmentRankings throws → recalculateSectionAggregates still called
   });
 
-  it('recalculateMemberRankings: per-enrollment error skips, does not throw', async () => {
+  it('recalculateEnrollmentRankings: per-enrollment error skips, does not throw', async () => {
     // 1 enrollment composite throws → other enrollments still upsert
   });
 
@@ -1743,245 +1765,279 @@ pnpm test rankings.service.spec.ts
 - [ ] **Step 3: Implement extension**
 
 ```typescript
-// rankings.service.ts (additions)
-@Injectable()
-export class RankingsService {
-  // ... 8.4-C existing methods ...
+// sacdia-backend/src/annual-folders/rankings.service.ts (additions)
+// Existing constructor — add 8.4-A deps alongside existing ones:
+constructor(
+  private readonly prisma: PrismaService,
+  private readonly lockService: DistributedLockService,
+  private readonly cronLogger: CronRunLogger,
+  @Optional()
+  @InjectQueue(RANKINGS_QUEUE)
+  private readonly rankingsQueue: Queue | null,
+  // 8.4-A new
+  private readonly memberCompositeScore: MemberCompositeScoreService,
+  private readonly sectionAggregation: SectionAggregationService,
+  private readonly systemConfig: SystemConfigService,
+) {}
 
-  constructor(
-    private readonly prisma: PrismaService,
-    private readonly memberCompositeScore: MemberCompositeScoreService,
-    private readonly sectionAggregation: SectionAggregationService,
-    private readonly systemConfig: SystemConfigService,
-    // ... existing 8.4-C deps ...
-  ) {}
-
-  @Cron('0 2 * * *', { name: 'rankings-recalculation', timeZone: 'UTC' })
-  async handleRankingsRecalculation(): Promise<void> {
-    const globalEnabled = await this.systemConfig.get('ranking.recalculation_enabled');
-    if (globalEnabled === 'false') {
-      this.logger.warn('[rankings] Global kill-switch off — skipping all recalculation');
-      return;
-    }
-
-    // Step 1: clubs (8.4-C existing)
-    await this.recalculateClubRankings();
-
-    // 8.4-A kill-switch
-    const memberEnabled = await this.systemConfig.get('member_ranking.recalculation_enabled');
-    if (memberEnabled === 'false') {
-      this.logger.warn('[rankings] member_ranking kill-switch off — skipping steps 2 and 3');
-      return;
-    }
-
-    // Step 2: enrollments
-    try {
-      await this.recalculateEnrollmentRankings();
-    } catch (err) {
-      this.logger.error('[member-rankings] recalculateEnrollmentRankings failed, continuing to section aggregates', err);
-    }
-
-    // Step 3: sections (still runs even if step 2 failed partially)
-    try {
-      await this.recalculateSectionAggregates();
-    } catch (err) {
-      this.logger.error('[section-rankings] recalculateSectionAggregates failed', err);
-    }
-  }
-
-  async recalculateEnrollmentRankings(ecclesiasticalYearId?: number): Promise<void> {
-    const yearId = ecclesiasticalYearId ?? await this.resolveActiveYear();
-    this.logger.log(`[member-rankings] Recalc started ecclesiastical_year_id=${yearId}`);
-
-    const clubs = await this.prisma.clubs.findMany({
-      where: { active: true },
-      select: { club_id: true },
-    });
-
-    let totalEnrollments = 0;
-    let totalSkipped = 0;
-
-    // Batch by chunks of 50 clubs
-    const chunkSize = 50;
-    for (let i = 0; i < clubs.length; i += chunkSize) {
-      const chunk = clubs.slice(i, i + chunkSize);
-      for (const c of chunk) {
-        // D9-α: resolve class_id set via club_sections → club_type_id → classes
-        const sections = await this.prisma.club_sections.findMany({
-          where: { main_club_id: c.club_id, active: true },
-          select: { club_section_id: true, club_type_id: true },
-        });
-        if (sections.length === 0) continue;
-
-        const clubTypeIds = [...new Set(sections.map((s) => s.club_type_id))];
-        const classes = await this.prisma.classes.findMany({
-          where: { club_type_id: { in: clubTypeIds } },
-          select: { class_id: true, club_type_id: true },
-        });
-        const classIdSet = classes.map((cls) => cls.class_id);
-        if (classIdSet.length === 0) continue;
-
-        // Map club_type_id → club_section_id (first section per type) for ranking row
-        const sectionByClubType = new Map<number, number>();
-        for (const s of sections) {
-          if (!sectionByClubType.has(s.club_type_id)) {
-            sectionByClubType.set(s.club_type_id, s.club_section_id);
-          }
-        }
-        const classToClubType = new Map<number, number>();
-        for (const cls of classes) {
-          classToClubType.set(cls.class_id, cls.club_type_id);
-        }
-
-        const enrollments = await this.prisma.enrollments.findMany({
-          where: {
-            ecclesiastical_year_id: yearId,
-            active: true,
-            class_id: { in: classIdSet },
-          },
-          select: { enrollment_id: true, user_id: true, class_id: true },
-        });
-
-        for (const e of enrollments) {
-          try {
-            const result = await this.memberCompositeScore.calculate(e.enrollment_id, yearId);
-            if (!result) { totalSkipped++; continue; }
-
-            const clubTypeId = classToClubType.get(e.class_id);
-            const clubSectionId = clubTypeId ? sectionByClubType.get(clubTypeId) ?? null : null;
-
-            await this.prisma.enrollmentRanking.upsert({
-              where: {
-                enrollment_id_ecclesiastical_year_id: {
-                  enrollment_id: e.enrollment_id,
-                  ecclesiastical_year_id: yearId,
-                },
-              },
-              create: {
-                enrollment_id: e.enrollment_id,
-                user_id: e.user_id,
-                club_id: c.club_id,
-                club_section_id: clubSectionId,
-                ecclesiastical_year_id: yearId,
-                class_score_pct: result.class_score_pct,
-                investiture_score_pct: result.investiture_score_pct,
-                camporee_score_pct: result.camporee_score_pct,
-                composite_score_pct: result.composite_score_pct,
-                composite_calculated_at: new Date(),
-              },
-              update: {
-                class_score_pct: result.class_score_pct,
-                investiture_score_pct: result.investiture_score_pct,
-                camporee_score_pct: result.camporee_score_pct,
-                composite_score_pct: result.composite_score_pct,
-                composite_calculated_at: new Date(),
-                modified_at: new Date(),
-              },
-            });
-            totalEnrollments++;
-          } catch (err) {
-            this.logger.error({
-              msg: '[member-rankings] enrollment skip',
-              enrollment_id: e.enrollment_id,
-              ecclesiastical_year_id: yearId,
-              error: (err as Error).message,
-            });
-            totalSkipped++;
-          }
-        }
-      }
-    }
-
-    // Update rank_position via DENSE_RANK SQL (Task 11)
-    await this.updateEnrollmentRankPositions(yearId);
-
-    this.logger.log(`[member-rankings] Recalc done enrollments=${totalEnrollments} skipped=${totalSkipped}`);
-  }
-
-  async recalculateSectionAggregates(ecclesiasticalYearId?: number): Promise<void> {
-    const yearId = ecclesiasticalYearId ?? await this.resolveActiveYear();
-    this.logger.log(`[section-rankings] Recalc started ecclesiastical_year_id=${yearId}`);
-
-    const sections = await this.prisma.club_sections.findMany({
-      where: { active: true },
-      select: { club_section_id: true, main_club_id: true },
-    });
-
-    let totalSections = 0;
-    let totalEmpty = 0;
-    let totalErrors = 0;
-
-    for (const s of sections) {
-      try {
-        const agg = await this.sectionAggregation.aggregate(s.club_section_id, yearId);
-        if (agg.composite_score_pct === null) totalEmpty++;
-
-        await this.prisma.sectionRanking.upsert({
-          where: {
-            club_section_id_ecclesiastical_year_id: {
-              club_section_id: s.club_section_id,
-              ecclesiastical_year_id: yearId,
-            },
-          },
-          create: {
-            club_section_id: s.club_section_id,
-            club_id: s.main_club_id,
-            ecclesiastical_year_id: yearId,
-            composite_score_pct: agg.composite_score_pct,
-            active_enrollment_count: agg.active_enrollment_count,
-            composite_calculated_at: new Date(),
-          },
-          update: {
-            composite_score_pct: agg.composite_score_pct,
-            active_enrollment_count: agg.active_enrollment_count,
-            composite_calculated_at: new Date(),
-            modified_at: new Date(),
-          },
-        });
-        totalSections++;
-      } catch (err) {
-        this.logger.error({
-          msg: '[section-rankings] section skip',
-          club_section_id: s.club_section_id,
-          ecclesiastical_year_id: yearId,
-          error: (err as Error).message,
-        });
-        totalErrors++;
-      }
-    }
-
-    await this.updateSectionRankPositions(yearId);
-
-    this.logger.log(`[section-rankings] Recalc done sections=${totalSections} empty=${totalEmpty} errors=${totalErrors}`);
-  }
-
-  // updateEnrollmentRankPositions / updateSectionRankPositions: Task 11
-  // resolveActiveYear: existente en 8.4-C
+// Existing cron — UNCHANGED (still enqueues BullMQ job or direct-call fallback):
+@Cron('0 2 * * *', { name: 'annual-folders-rankings-recalc', timeZone: 'UTC' })
+async handleRankingsRecalculation() {
+  // Existing implementation preserved as-is
 }
+
+// Public orchestrator — called by RankingsProcessor (via recalculateAll) + HTTP trigger:
+async recalculateAll(yearId?: number): Promise<void> {
+  const globalEnabled = await this.systemConfig.get('ranking.recalculation_enabled');
+  if (globalEnabled === 'false') {
+    this.logger.warn('[rankings] global kill-switch off — skipping all recalculation');
+    return;
+  }
+
+  // Step 1: clubs (8.4-C existing — untouched)
+  await this.recalculateRankings(yearId);
+
+  // 8.4-A kill-switch
+  const memberEnabled = await this.systemConfig.get('member_ranking.recalculation_enabled');
+  if (memberEnabled === 'false') {
+    this.logger.warn('[rankings] member_ranking kill-switch off — skipping steps 2 and 3');
+    return;
+  }
+
+  // Step 2: enrollments (continues to step 3 even if step 2 throws)
+  try {
+    await this.recalculateEnrollmentRankings(yearId);
+  } catch (err) {
+    this.logger.error('[member-rankings] recalculateEnrollmentRankings failed, continuing to section aggregates', err);
+  }
+
+  // Step 3: sections
+  try {
+    await this.recalculateSectionAggregates(yearId);
+  } catch (err) {
+    this.logger.error('[section-rankings] recalculateSectionAggregates failed', err);
+  }
+}
+
+// Existing HTTP entry point — UNCHANGED (clubs only, acquires lock, calls _runRecalculation):
+// async recalculateRankings(yearId?: number): Promise<void> { ... }
+
+async recalculateEnrollmentRankings(ecclesiasticalYearId?: number): Promise<void> {
+  const yearId = ecclesiasticalYearId ?? await this.resolveYear();
+  this.logger.log(`[member-rankings] Recalc started ecclesiastical_year_id=${yearId}`);
+
+  const clubs = await this.prisma.clubs.findMany({
+    where: { active: true },
+    select: { club_id: true },
+  });
+
+  let totalEnrollments = 0;
+  let totalSkipped = 0;
+
+  // Batch by chunks of 50 clubs
+  const chunkSize = 50;
+  for (let i = 0; i < clubs.length; i += chunkSize) {
+    const chunk = clubs.slice(i, i + chunkSize);
+    for (const c of chunk) {
+      // D9-α: resolve class_id set via club_sections → club_type_id → classes
+      const sections = await this.prisma.club_sections.findMany({
+        where: { main_club_id: c.club_id, active: true },
+        select: { club_section_id: true, club_type_id: true },
+      });
+      if (sections.length === 0) continue;
+
+      const clubTypeIds = [...new Set(sections.map((s) => s.club_type_id))];
+      const classes = await this.prisma.classes.findMany({
+        where: { club_type_id: { in: clubTypeIds } },
+        select: { class_id: true, club_type_id: true },
+      });
+      const classIdSet = classes.map((cls) => cls.class_id);
+      if (classIdSet.length === 0) continue;
+
+      // Map club_type_id → club_section_id (first section per type) for ranking row
+      const sectionByClubType = new Map<number, number>();
+      for (const s of sections) {
+        if (!sectionByClubType.has(s.club_type_id)) {
+          sectionByClubType.set(s.club_type_id, s.club_section_id);
+        }
+      }
+      const classToClubType = new Map<number, number>();
+      for (const cls of classes) {
+        classToClubType.set(cls.class_id, cls.club_type_id);
+      }
+
+      const enrollments = await this.prisma.enrollments.findMany({
+        where: {
+          ecclesiastical_year_id: yearId,
+          active: true,
+          class_id: { in: classIdSet },
+        },
+        select: { enrollment_id: true, user_id: true, class_id: true },
+      });
+
+      for (const e of enrollments) {
+        try {
+          const result = await this.memberCompositeScore.calculate(e.enrollment_id, yearId);
+          if (!result) { totalSkipped++; continue; }
+
+          const clubTypeId = classToClubType.get(e.class_id);
+          const clubSectionId = clubTypeId ? sectionByClubType.get(clubTypeId) ?? null : null;
+
+          await this.prisma.enrollmentRanking.upsert({
+            where: {
+              enrollment_id_ecclesiastical_year_id: {
+                enrollment_id: e.enrollment_id,
+                ecclesiastical_year_id: yearId,
+              },
+            },
+            create: {
+              enrollment_id: e.enrollment_id,
+              user_id: e.user_id,
+              club_id: c.club_id,
+              club_section_id: clubSectionId,
+              ecclesiastical_year_id: yearId,
+              class_score_pct: result.class_score_pct,
+              investiture_score_pct: result.investiture_score_pct,
+              camporee_score_pct: result.camporee_score_pct,
+              composite_score_pct: result.composite_score_pct,
+              composite_calculated_at: new Date(),
+            },
+            update: {
+              class_score_pct: result.class_score_pct,
+              investiture_score_pct: result.investiture_score_pct,
+              camporee_score_pct: result.camporee_score_pct,
+              composite_score_pct: result.composite_score_pct,
+              composite_calculated_at: new Date(),
+              modified_at: new Date(),
+            },
+          });
+          totalEnrollments++;
+        } catch (err) {
+          this.logger.error({
+            msg: '[member-rankings] enrollment skip',
+            enrollment_id: e.enrollment_id,
+            ecclesiastical_year_id: yearId,
+            error: (err as Error).message,
+          });
+          totalSkipped++;
+        }
+      }
+    }
+  }
+
+  // Update rank_position via DENSE_RANK SQL (Task 11)
+  await this.updateEnrollmentRankPositions(yearId);
+
+  this.logger.log(`[member-rankings] Recalc done enrollments=${totalEnrollments} skipped=${totalSkipped}`);
+}
+
+async recalculateSectionAggregates(ecclesiasticalYearId?: number): Promise<void> {
+  const yearId = ecclesiasticalYearId ?? await this.resolveYear();
+  this.logger.log(`[section-rankings] Recalc started ecclesiastical_year_id=${yearId}`);
+
+  const sections = await this.prisma.club_sections.findMany({
+    where: { active: true },
+    select: { club_section_id: true, main_club_id: true },
+  });
+
+  let totalSections = 0;
+  let totalEmpty = 0;
+  let totalErrors = 0;
+
+  for (const s of sections) {
+    try {
+      const agg = await this.sectionAggregation.aggregate(s.club_section_id, yearId);
+      if (agg.composite_score_pct === null) totalEmpty++;
+
+      await this.prisma.sectionRanking.upsert({
+        where: {
+          club_section_id_ecclesiastical_year_id: {
+            club_section_id: s.club_section_id,
+            ecclesiastical_year_id: yearId,
+          },
+        },
+        create: {
+          club_section_id: s.club_section_id,
+          club_id: s.main_club_id,
+          ecclesiastical_year_id: yearId,
+          composite_score_pct: agg.composite_score_pct,
+          active_enrollment_count: agg.active_enrollment_count,
+          composite_calculated_at: new Date(),
+        },
+        update: {
+          composite_score_pct: agg.composite_score_pct,
+          active_enrollment_count: agg.active_enrollment_count,
+          composite_calculated_at: new Date(),
+          modified_at: new Date(),
+        },
+      });
+      totalSections++;
+    } catch (err) {
+      this.logger.error({
+        msg: '[section-rankings] section skip',
+        club_section_id: s.club_section_id,
+        ecclesiastical_year_id: yearId,
+        error: (err as Error).message,
+      });
+      totalErrors++;
+    }
+  }
+
+  await this.updateSectionRankPositions(yearId);
+
+  this.logger.log(`[section-rankings] Recalc done sections=${totalSections} empty=${totalEmpty} errors=${totalErrors}`);
+}
+
+// updateEnrollmentRankPositions / updateSectionRankPositions: Task 11
+// resolveYear: existing private method in 8.4-C (NOT resolveActiveYear)
 ```
 
-- [ ] **Step 4: Wire módulo — modify `rankings.module.ts`**
+- [ ] **Step 4: Wire módulo — modify `sacdia-backend/src/annual-folders/annual-folders.module.ts`**
 
 ```typescript
+// annual-folders.module.ts
 @Module({
-  imports: [PrismaModule, SystemConfigModule],
-  providers: [
-    RankingsService,
-    // 8.4-C
-    FolderScoreService, FinanceScoreService, EvidenceScoreService,
-    CamporeeScoreService /* club-level existente */, CompositeScoreService, WeightsResolverService,
-    // 8.4-A
-    ClassScoreService, InvestitureScoreService,
-    /* per-enrollment camporee */ CamporeeScoreService as PerEnrollmentCamporeeScoreService,
-    MemberCompositeScoreService, EnrollmentWeightsResolverService,
-    SectionAggregationService,
+  imports: [
+    PrismaModule,
+    ClubEnrollmentsModule,
+    CatalogsModule,
+    SystemConfigModule, // NEW for 8.4-A kill-switches
+    ...(redisAvailable ? [BullModule.registerQueue({ name: RANKINGS_QUEUE })] : []),
   ],
-  controllers: [RankingsController],
+  controllers: [
+    AnnualFolderTemplatesController,
+    AnnualFoldersController,
+    AnnualFolderBySectionController,
+    AwardCategoriesController,
+    EvaluationController,
+    RankingsController,
+  ],
+  providers: [
+    AnnualFoldersService,
+    AwardCategoriesService,
+    EvaluationService,
+    RankingsService,
+    // 8.4-A new — calculation pipeline
+    ClassScoreService,
+    InvestitureScoreService,
+    CamporeeScoreService, // NOTE: per-enrollment one from src/rankings/member-rankings
+    EnrollmentClubResolverService,
+    EnrollmentWeightsResolverService,
+    MemberCompositeScoreService,
+    SectionAggregationService,
+    ...(redisAvailable ? [RankingsProcessor] : []),
+  ],
+  exports: [
+    AnnualFoldersService,
+    AwardCategoriesService,
+    EvaluationService,
+    RankingsService,
+  ],
 })
-export class RankingsModule {}
+export class AnnualFoldersModule {}
 ```
 
-> Nota: si hay colisión de nombre `CamporeeScoreService` (club-level vs per-enrollment), renombrar el per-enrollment a `EnrollmentCamporeeScoreService` y el club-level mantener nombre original.
+> **DI collision note**: Task 4 (`ClassScoreService`) and Task 7 (`CamporeeScoreService` at `src/rankings/member-rankings/services/`) share the class name `CamporeeScoreService` with the existing club-level one (8.4-C at a different path). Verify no DI collision at implementation time; if collision arises, rename the per-enrollment one to `EnrollmentCamporeeScoreService`.
 
 - [ ] **Step 5: Run test, expect PASS**
 
@@ -1991,17 +2047,21 @@ pnpm test rankings.service.spec.ts
 
 - [ ] **Step 6: Code review checkpoint** — quality-reviewer subagent: ¿logs estructurados spec §13.1? ¿try/catch per fase? ¿idempotencia upsert garantizada?
 
-- [ ] **Step 7: Commit**
+- [ ] **Step 7: Commit** (bundles Task 10 + Task 11 — see Task 11 for DENSE_RANK methods included in this commit)
 
 ```bash
-git add sacdia-backend/src/rankings/{rankings.service.ts,rankings.module.ts,rankings.service.spec.ts}
+git add sacdia-backend/src/annual-folders/rankings.service.ts
+git add sacdia-backend/src/annual-folders/annual-folders.module.ts
+git add sacdia-backend/src/annual-folders/__tests__/rankings.service.spec.ts
+git add sacdia-backend/src/system-config/system-config.service.ts
 git commit -m "$(cat <<'EOF'
 feat(rankings): extend cron with enrollment + section recalc steps
 
-Adds recalculateEnrollmentRankings and recalculateSectionAggregates as
-sequential steps 2 and 3 of the daily 02:00 UTC cron. Independent
-kill-switch member_ranking.recalculation_enabled allows dark launch.
-Per-enrollment and per-section errors log+skip without bubbling.
+Adds recalculateAll orchestrator, recalculateEnrollmentRankings, and
+recalculateSectionAggregates as sequential steps 2 and 3 of the daily
+02:00 UTC cron. Independent kill-switch member_ranking.recalculation_enabled
+allows dark launch. Per-enrollment and per-section errors log+skip without
+bubbling. DENSE_RANK rank_position updates run after each upsert pass.
 EOF
 )"
 ```
@@ -2010,18 +2070,19 @@ EOF
 
 ### Task 11: SQL UPDATE DENSE_RANK() per club + year (NULLS LAST)
 
-**Files:**
-- Modify: `sacdia-backend/src/rankings/rankings.service.ts` (agrega métodos `updateEnrollmentRankPositions` + `updateSectionRankPositions`)
-- Test: `sacdia-backend/src/rankings/rankings.service.dense-rank.spec.ts` (integration test contra DB real de test)
+> **Bundled with Task 10** implementation. Same target file (`sacdia-backend/src/annual-folders/rankings.service.ts`). Same commit.
 
-- [ ] **Step 1: Write failing integration test**
+**Files:**
+- Modify: `sacdia-backend/src/annual-folders/rankings.service.ts` (agrega métodos privados `updateEnrollmentRankPositions` + `updateSectionRankPositions`)
+- Test: `sacdia-backend/src/annual-folders/__tests__/rankings.service.spec.ts` (extend existing suite — add `describe('rankings.service — DENSE_RANK')` block; do NOT create a separate file)
+
+> **Migration column verification**: PK column for both `enrollment_rankings` and `section_rankings` is `id` (UUID). Confirmed in `sacdia-backend/prisma/migrations/20260429000000_enrollment_rankings_schema/migration.sql`. The SQL below is correct.
+
+- [ ] **Step 1: Write failing integration test** (inside existing spec file, new describe block)
 
 ```typescript
-import { Test } from '@nestjs/testing';
-import { RankingsService } from './rankings.service';
-import { PrismaService } from '../prisma/prisma.service';
-
-describe('Rank position UPDATE (DENSE_RANK NULLS LAST)', () => {
+// sacdia-backend/src/annual-folders/__tests__/rankings.service.spec.ts (extension)
+describe('rankings.service — DENSE_RANK', () => {
   let service: RankingsService;
   let prisma: PrismaService;
 
@@ -2041,7 +2102,7 @@ describe('Rank position UPDATE (DENSE_RANK NULLS LAST)', () => {
     // seed: club 1 with 4 enrollments composite [80, 80, 50, NULL]
     // expected ranks: 1, 1, 2, 3 (dense — ties share rank, NULL last)
     // ... insert seed rows ...
-    await service.updateEnrollmentRankPositions(9999);
+    await service['updateEnrollmentRankPositions'](9999);
     const rows = await prisma.enrollmentRanking.findMany({
       where: { ecclesiastical_year_id: 9999, club_id: 1 },
       orderBy: { rank_position: 'asc' },
@@ -2055,10 +2116,11 @@ describe('Rank position UPDATE (DENSE_RANK NULLS LAST)', () => {
 
 - [ ] **Step 2: Run test, expect FAIL**
 
-- [ ] **Step 3: Implement los 2 métodos**
+- [ ] **Step 3: Implement los 2 métodos privados**
 
 ```typescript
-// rankings.service.ts (additions)
+// sacdia-backend/src/annual-folders/rankings.service.ts (additions)
+// PK col is `id` (UUID) — confirmed in migration 20260429000000_enrollment_rankings_schema
 private async updateEnrollmentRankPositions(yearId: number): Promise<void> {
   await this.prisma.$executeRaw`
     UPDATE enrollment_rankings er
@@ -2097,24 +2159,12 @@ private async updateSectionRankPositions(yearId: number): Promise<void> {
 - [ ] **Step 4: Run test, expect PASS**
 
 ```bash
-pnpm test rankings.service.dense-rank.spec.ts
+pnpm test rankings.service.spec.ts
 ```
 
 - [ ] **Step 5: Code review checkpoint** — verify NULLS LAST y DENSE_RANK (no ROW_NUMBER): empates comparten rank.
 
-- [ ] **Step 6: Commit**
-
-```bash
-git add sacdia-backend/src/rankings/{rankings.service.ts,rankings.service.dense-rank.spec.ts}
-git commit -m "$(cat <<'EOF'
-feat(rankings): add DENSE_RANK rank_position updates for enrollments+sections
-
-PARTITION BY (club_id, ecclesiastical_year_id) ORDER BY composite DESC
-NULLS LAST. Ties share rank (dense semantics, same as 8.4-C). Runs
-after upserts complete, idempotent across re-execution.
-EOF
-)"
-```
+- [ ] **Step 6: Commit** — handled by Task 10 Step 7 (single bundled commit covering both tasks)
 
 ---
 
