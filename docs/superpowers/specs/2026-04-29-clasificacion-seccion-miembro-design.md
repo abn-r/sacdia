@@ -358,25 +358,29 @@ ON CONFLICT (name) DO NOTHING;
 
 ---
 
-## 5. Schema audit notes (TODO — validar contra Neon dev)
+## 5. Schema audit notes
 
-Los siguientes ítems deben verificarse en la rama `development` del proyecto Neon `wispy-hall-32797215` **antes de escribir las migrations**. Si algún item falla, la migration correspondiente debe ajustarse según se indica.
+> **Audit completado 2026-04-29**: ver `docs/superpowers/audits/2026-04-29-section-member-schema-audit.md` para output completo de queries y razonamiento detallado. Decisiones bloqueadas abajo.
 
-| # | Ítem a verificar | Query de validación | Si NO existe → acción |
-|---|-----------------|---------------------|-----------------------|
-| A1 | `members.member_id` es INTEGER | `SELECT data_type FROM information_schema.columns WHERE table_name='members' AND column_name='member_id'` | Ajustar FK en `member_rankings` al tipo real |
-| A2 | `members.member_status` existe con valores incluyendo `'active'` | `SELECT column_name FROM information_schema.columns WHERE table_name='members' AND column_name='member_status'` | Fase 1 sin filtro `member_status`; agregar `ADD COLUMN member_status` en migration separada para Fase 2 |
-| A3 | `club_sections.club_section_id` es INTEGER | `SELECT data_type FROM information_schema.columns WHERE table_name='club_sections' AND column_name='club_section_id'` | Ajustar FK en `member_rankings` y `section_rankings` |
-| A4 | Tabla `member_class_progress` existe (nombre exacto) | `SELECT to_regclass('public.member_class_progress')` | Buscar tabla alternativa: `users_classes`, `class_progress`, `enrollment_progress` |
-| A5 | Tabla o vista `evidence_attendance` existe per-member | `SELECT to_regclass('public.evidence_attendance')` | Investigar si se puede derivar de `annual_folder_section_evaluations` agregado; documentar workaround |
-| A6 | Tabla de investiduras per-member existe (`investitures` o `member_investitures`) con columnas `achieved_year_id` y `status` | `SELECT column_name FROM information_schema.columns WHERE table_name IN ('investitures','member_investitures')` | Usar tabla real encontrada; ajustar `InvestitureScoreService` |
-| A7 | Tabla de asistencia a camporees per-member (`camporee_attendees` o `camporee_participants`) | `SELECT to_regclass('public.camporee_attendees')` | Si no existe, bloquear `CamporeeScoreService` hasta que se confirme fuente; marcar score como NULL |
-| A8 | Rol `member` existe en tabla `roles` | `SELECT name FROM roles WHERE name='member'` | Si el rol es implícito por `members` table, ajustar grant de `member_rankings:read_self` |
-| A9 | Columna `config_key` (no `key`) en `system_config` | `SELECT column_name FROM information_schema.columns WHERE table_name='system_config'` | Usar nombre de columna real (el spec 8.4-C usaba `key`; audit 8.4-A detectó `config_key/config_value/config_type`) |
-| A10 | `years` vs `ecclesiastical_years` — confirmar nombre de tabla y FK name (`year_id` vs `ecclesiastical_year_id`) | `SELECT to_regclass('public.years'), to_regclass('public.ecclesiastical_years')` | Ajustar FKs en las 3 tablas nuevas al nombre real |
-| A11 | Tabla `investiture_requirements` (referenciada en §7.3 InvestitureScoreService) existe con columna que vincule eligibilidad a `club_type_id` + `year_id` (o equivalente para definir `eligible_count`) | `SELECT column_name FROM information_schema.columns WHERE table_name='investiture_requirements'` | Si no existe, `InvestitureScoreService` no puede calcular `eligible_count` → bloquea calculator. Workaround: derivar elegibilidad de `class_modules` o `member_age` si hay regla de negocio. |
+| # | Ítem                                  | Estado    | Resultado real                                                                  | Decisión bloqueada                                                                                       |
+|---|---------------------------------------|-----------|---------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------|
+| A1 | `members.member_id` INTEGER          | DEVIATION | No existe tabla `members`. Entidad = `enrollments.enrollment_id` (INTEGER) + `users.user_id` (UUID) | FK en `member_rankings` → `enrollment_id INTEGER REFERENCES enrollments(enrollment_id)`. Renombrar campo. |
+| A2 | `members.member_status` existe        | MISSING   | No existe `member_status`. Equivalente: `enrollments.active BOOLEAN`           | Filtro de "miembro activo" = `WHERE enrollments.active = true`. Sin migration de ADD COLUMN necesaria.    |
+| A3 | `club_sections.club_section_id` INTEGER | CONFIRMED | `club_section_id INTEGER` — confirmado                                        | Sin cambio. FK `INTEGER REFERENCES club_sections(club_section_id)`.                                      |
+| A4 | `member_class_progress` existe        | DEVIATION | Tabla real: `class_module_progress` (`user_id UUID`, `enrollment_id INTEGER`, sin `year_id` directo; año vía `enrollment_id → enrollments.ecclesiastical_year_id`) | `ClassScoreService` usa `class_module_progress JOIN enrollments USING (enrollment_id)` para filtrar año. |
+| A5 | `evidence_attendance` per-member      | MISSING   | No existe tabla per-member de asistencia a evidencias                           | `EvidenceScoreService` retorna NULL en Fase 1. Peso redistribuido al composite. Requiere decisión de negocio para Fase 2. |
+| A6 | `investitures` / `member_investitures` per-member | DEVIATION | No existen. Datos de investidura en `enrollments.investiture_status` enum (`IN_PROGRESS` / `INVESTIDO`) + `investiture_validation_history` | `InvestitureScoreService` usa señal binaria: `INVESTIDO` = 100, `IN_PROGRESS` = 0, sin enrollment = NULL. |
+| A7 | `camporee_attendees` / `camporee_participants` | DEVIATION | No existen. Tabla real: `camporee_members` (`user_id UUID`, `status VARCHAR`, `camporee_id INTEGER`) | `CamporeeScoreService` usa `camporee_members WHERE user_id = $userUuid AND status = 'approved'` (valor a confirmar con datos en staging). |
+| A8 | rol `member` en `roles`               | CONFIRMED | Existe: `role_id UUID 9567fef6-8091-494a-ac1c-fb3716ed2091`, `role_name='member'`, `role_category=CLUB`. Sin columna `code`. Permisos usan `permission_name`. | Seed grants usan UUID literal del rol `member`. `INSERT INTO permissions (permission_name, ...)`.         |
+| A9 | `system_config` columns               | CONFIRMED | `config_key`, `config_value`, `description`, `config_type`, `updated_at` — confirmado | INSERT usa `(config_key, config_value, config_type)` con `ON CONFLICT (config_key)`. Correcto.           |
+| A10 | `years` vs `ecclesiastical_years`    | CONFIRMED | `years` no existe. `ecclesiastical_years` con PK `year_id INTEGER` — confirmado | FK en 3 tablas nuevas: `year_id INTEGER REFERENCES ecclesiastical_years(year_id)`.                        |
+| A11 | `investiture_requirements`            | MISSING   | No existe. Solo `investiture_config` e `investiture_validation_history`        | `InvestitureScoreService` adopta modelo binario (ver A6). `eligible_count` no calculable en Fase 1. Documentar para Fase 2 si se define tabla de requisitos. |
 
-**Nota sobre A10**: 8.4-C usa `ecclesiastical_year_id`. Este spec usa `year_id` como simplificación. La migration debe usar el nombre real de la tabla/columna según lo que revele el audit.
+**Nota A1 (crítica)**: el cambio de `member_id` a `enrollment_id` es el desvío más importante. Afecta el nombre del campo en `member_rankings`, todos los calculadores (reciben `enrollmentId`), los DTOs, y los endpoints REST (`:enrollmentId` en lugar de `:memberId`). Las tablas nuevas deben usar `enrollment_id` como FK.
+
+**Nota A5**: `EvidenceScoreService` bloqueado en Fase 1. Peso de evidencia (25% por default) se redistribuye proporcionalmente entre las otras 3 señales disponibles vía la política de redistribución de NULLs del composite (§7.5).
+
+**Nota A11**: `InvestitureScoreService` usa señal binaria — no el modelo `achieved_count / eligible_count` del diseño original en §7.3. El §7.3 debe actualizarse en la implementación para reflejar la fuente real de datos.
 
 ---
 
