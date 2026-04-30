@@ -2731,7 +2731,7 @@ POST/PATCH require valid scope enum.
 
 > **CONTEXTO** (engram #1888): tests modulares (`Test.createTestingModule`) NO cargan ParseUUIDPipe/ParseIntPipe en orden real de rutas — saltean middleware order. SOLO `INestApplication` con HTTP real (supertest contra `request(app.getHttpServer())`) detecta bugs tipo 8.4-C donde `GET /` retornaba 400 BadRequest porque el pipe de `:id` se ejecutaba primero.
 
-- [ ] **Step 1: Write failing e2e test (`member-rankings.e2e-spec.ts`)**
+- [x] **Step 1: Write failing e2e test (`member-rankings.e2e-spec.ts`)**
 
 ```typescript
 import { Test } from '@nestjs/testing';
@@ -2802,7 +2802,7 @@ describe('MemberRankings (e2e — HTTP real)', () => {
 });
 ```
 
-- [ ] **Step 2: Write failing e2e test (`section-rankings.e2e-spec.ts`)**
+- [x] **Step 2: Write failing e2e test (`section-rankings.e2e-spec.ts`)**
 
 ```typescript
 describe('SectionRankings (e2e — HTTP real)', () => {
@@ -2830,20 +2830,20 @@ describe('SectionRankings (e2e — HTTP real)', () => {
 });
 ```
 
-- [ ] **Step 3: Run e2e tests, expect FAIL si hay route order bug**
+- [x] **Step 3: Run e2e tests, expect FAIL si hay route order bug**
 
 ```bash
 cd sacdia-backend
 pnpm test:e2e member-rankings.e2e-spec.ts section-rankings.e2e-spec.ts
 ```
 
-- [ ] **Step 4: Si fallan, AJUSTAR orden de rutas en controllers** (Tasks 11–12 ya aplican el patrón correcto, pero verificar).
+- [x] **Step 4: Si fallan, AJUSTAR orden de rutas en controllers** (Tasks 11–12 ya aplican el patrón correcto, pero verificar).
 
-- [ ] **Step 5: Run e2e tests, expect PASS**
+- [x] **Step 5: Run e2e tests, expect PASS**
 
-- [ ] **Step 6: Code review checkpoint** — engram #1888 gap closed. NingunA ruta estática colisionando con dinámica.
+- [x] **Step 6: Code review checkpoint** — engram #1888 gap closed. NingunA ruta estática colisionando con dinámica.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add sacdia-backend/test/{member-rankings,section-rankings}.e2e-spec.ts
