@@ -63,6 +63,8 @@ Nota de implementacion:
 | `activities:delete` | Eliminar actividad | `club_instance` | permiso efectivo + instancia exacta o bypass global | Admin |
 | `attendance:read` | Ver asistencia | `club_instance` | permiso efectivo + instancia exacta o bypass global | Admin y App |
 | `attendance:manage` | Pasar asistencia | `club_instance` | permiso efectivo + instancia exacta o bypass global | Admin y App |
+| `qr:issue_self` | Ver credencial QR propia | `global` | permiso global dedicado de self-service | Admin y App |
+| `qr:validate` | Validar QR de un miembro | `active_assignment` | permiso efectivo + asignacion activa exacta o bypass global | Admin y App |
 | `finances:read` | Ver finanzas | `club` | permiso global territorial o contexto club | Admin y App |
 | `finances:create` | Crear movimiento | `club` | permiso efectivo + contexto valido | Admin y App |
 | `finances:update` | Editar movimiento | `club_instance` | permiso efectivo + instancia exacta o bypass global | Admin y App |

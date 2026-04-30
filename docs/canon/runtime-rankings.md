@@ -6,6 +6,7 @@
 **Ámbito**: clasificación anual de clubes por puntaje de carpetas, categorías de premio configurables y pipeline automático de cálculo
 
 <!-- VERIFICADO contra código 2026-04-22: schema Prisma, rankings.service.ts, controllers de rankings/award-categories y admin UI cruzados con implementación real. -->
+<!-- VERIFICADO 8.4-C 2026-04-28: schema Prisma con columnas de componentes + composite, rankings.service.ts extendido con score-calculators, controllers de rankings/award-categories/ranking-weights y admin UI. 8.4-C shipped. -->
 <!-- VERIFICADO 8.4-A 2026-04-29: modelos enrollment_rankings, section_rankings, enrollment_ranking_weights — field names, indexes y awarded_category_id confirmados contra schema.prisma y migrations 20260429000000–20260429000003. -->
 
 ---
@@ -54,8 +55,16 @@ Fuente agregada: `club_annual_rankings` (`schema.prisma:2026-2051`).
 | `total_earned_points` | `int` | suma sobre secciones |
 | `total_max_points` | `int` | |
 | `progress_percentage` | `float` | |
-| `rank_position` | `int?` | asignado en dense ranking |
+| `rank_position` | `int?` | asignado en dense ranking sobre `composite_score_pct DESC` (ver §6) |
 | `calculated_at` | `timestamptz` | |
+| `folder_score_pct` | `float` | DEFAULT 0; porcentaje de puntaje de carpeta (0-100) |
+| `finance_score_pct` | `float` | DEFAULT 0; porcentaje de cierre financiero mensual (0-100) |
+| `camporee_score_pct` | `float` | DEFAULT 0; porcentaje de asistencia a camporees (0-100) |
+| `evidence_score_pct` | `float` | DEFAULT 0; porcentaje de evidencias validadas (0-100) |
+| `composite_score_pct` | `float` | DEFAULT 0; promedio ponderado de los 4 componentes (0-100) |
+| `composite_calculated_at` | `timestamptz?` | timestamp de la última actualización del composite |
+
+Índice de soporte: `idx_rankings_composite` sobre `(ecclesiastical_year_id, club_type_id, composite_score_pct DESC)`.
 
 Uniqueness: `(club_enrollment_id, ecclesiastical_year_id, award_category_id)`.
 
@@ -88,15 +97,21 @@ Servicio: `sacdia-backend/src/annual-folders/rankings.service.ts`.
 - Cron `@Cron('0 2 * * *')` (línea 66) ejecuta `handleRankingsRecalculation()` diariamente a las 02:00 UTC;
 - recálculo manual vía endpoint `POST /annual-folders/rankings/recalculate?year_id=...` (controller línea 125). Rate limit: 1 vez cada 5 minutos;
 - lock distribuido de 10 minutos por año eclesiástico (evita concurrencia entre cron y manual).
+- Kill-switch: `system_config[ranking.recalculation_enabled]` (default `true`) cortocircuita tanto el cron como el punto de entrada manual; cuando está en `false`, el pipeline retorna sin ejecutar ningún cálculo.
+- El cron ahora calcula los puntajes de componente (folder / finance / camporee / evidence) y el composite mediante los servicios `score-calculators/*` antes del upsert.
+- El recálculo por enrollment ejecuta los cuatro calculadores + `WeightsResolver` en `Promise.all` fuera de la transacción, para minimizar el tiempo de lock.
+- Cada recálculo por enrollment emite una línea `logger.debug` estructurada con `{enrollment_id, year_id, scores, composite, weights_source}` para trazabilidad operativa.
 
 Pasos del cálculo (`recalculateRankings`, líneas 123-264):
 
-1. resolver año eclesiástico (default: año activo);
-2. adquirir lock distribuido por `year_id`;
-3. listar carpetas con `status ∈ {'evaluated', 'closed'}` (línea 126);
-4. para cada carpeta, upsert del ranking general (sentinel, ver §7);
-5. para cada categoría aplicable al `club_type_id` de la carpeta, upsert del ranking por categoría cuando `earned_points ∈ [min_points, max_points]`;
-6. asignar `rank_position` con dense ranking (ver §6).
+1. verificar `system_config[ranking.recalculation_enabled]`; si es `false`, salir sin error;
+2. resolver año eclesiástico (default: año activo);
+3. adquirir lock distribuido por `year_id`;
+4. listar carpetas con `status ∈ {'evaluated', 'closed'}` (línea 126);
+5. para cada carpeta, calcular los 4 component scores + composite (via calculadores + WeightsResolver) en paralelo;
+6. upsert del ranking general (sentinel, ver §7) con todos los campos de score;
+7. para cada categoría aplicable al `club_type_id` de la carpeta, upsert del ranking por categoría cuando `earned_points ∈ [min_points, max_points]` y `composite_score_pct ∈ [min_composite_pct, max_composite_pct]` según aplique;
+8. asignar `rank_position` con dense ranking sobre `composite_score_pct DESC` (ver §6).
 
 ---
 
@@ -105,12 +120,12 @@ Pasos del cálculo (`recalculateRankings`, líneas 123-264):
 Algoritmo en `rankings.service.ts:456-475`:
 
 - agrupar por `(club_type_id, ecclesiastical_year_id, award_category_id)`;
-- ordenar descendente por `total_earned_points`;
+- ordenar descendente por `composite_score_pct` (desde 8.4-C; antes se ordenaba por `total_earned_points`);
 - asignar rank con semántica densa: empates comparten rank; el siguiente grupo obtiene `prevRank + 1`.
 
-Ejemplo: `[90, 90, 70, 70, 50] → [1, 1, 2, 2, 3]`.
+Ejemplo: `[90.0, 90.0, 70.5, 70.5, 50.0] → [1, 1, 2, 2, 3]`.
 
-No existe campo de tiebreaker adicional. Empates perfectos en puntos mantienen rank compartido por diseño.
+No existe campo de tiebreaker adicional. Empates perfectos en `composite_score_pct` mantienen rank compartido por diseño.
 
 ---
 
@@ -121,6 +136,8 @@ Constante: `GENERAL_CATEGORY_ID = '00000000-0000-0000-0000-000000000000'` (`rank
 Justificación: PostgreSQL trata `NULL <> NULL` para constraints únicos. Usar `null` en `award_category_id` rompería la unicidad `(club_enrollment_id, ecclesiastical_year_id, award_category_id)`. El sentinel permite representar "ranking general sin categoría específica" preservando la constraint y habilitando `upsert` de Prisma.
 
 Política: el sentinel no puede aparecer en `award_categories` como categoría real; es un token de ausencia.
+
+Desde 8.4-C, las filas sentinel también llevan los cuatro component scores (`folder_score_pct`, `finance_score_pct`, `camporee_score_pct`, `evidence_score_pct`) y el `composite_score_pct`, habilitando el mismo drill-down que las filas por categoría.
 
 ---
 
@@ -148,17 +165,26 @@ No hay lista de clubes excluidos. El criterio de inclusión es operativo (tener 
 
 Rankings (permiso `rankings:read` | `rankings:recalculate`):
 
-- `GET /annual-folders/rankings?club_type_id&year_id[&category_id]`;
-- `GET /annual-folders/rankings/club/:enrollmentId?year_id`;
+- `GET /annual-folders/rankings?club_type_id&year_id[&category_id]` — cada fila ahora incluye los 6 campos nuevos: `folder_score_pct`, `finance_score_pct`, `camporee_score_pct`, `evidence_score_pct`, `composite_score_pct`, `composite_calculated_at`;
+- `GET /annual-folders/rankings/club/:enrollmentId?year_id` — ídem;
+- `GET /annual-folders/rankings/:enrollmentId/breakdown?year_id` — drill-down por enrollment: devuelve composite + pesos aplicados + detalle de cada componente. Permiso `rankings:read`;
 - `POST /annual-folders/rankings/recalculate?year_id`.
 
 Award categories (permisos `award_categories:*`):
 
 - `POST /award-categories`;
-- `GET /award-categories?club_type_id&active`;
+- `GET /award-categories?club_type_id&active` — filtra `is_legacy = false` por defecto; `?include_legacy=true` para histórico;
 - `GET /award-categories/:categoryId`;
 - `PATCH /award-categories/:categoryId`;
 - `DELETE /award-categories/:categoryId` (soft delete).
+
+### Ranking weights (permisos `ranking_weights:read` | `ranking_weights:write`)
+
+- `GET /ranking-weights` — lista configuraciones (default global + overrides por club_type);
+- `GET /ranking-weights/:id` — detalle de una configuración;
+- `POST /ranking-weights` — crear override por `club_type_id`; body requiere los 4 pesos; valida que sumen 100 (HTTP 400) y que no haya duplicado de `club_type_id` (HTTP 409);
+- `PATCH /ranking-weights/:id` — actualización parcial; re-valida suma = 100;
+- `DELETE /ranking-weights/:id` — eliminar override; la fila con `club_type_id = NULL` (global default) no puede eliminarse (HTTP 400).
 
 Evaluations:
 
@@ -185,11 +211,45 @@ Contrato exacto en `docs/features/annual-folders-scoring.md` y `docs/api/ENDPOIN
 - ningún ranking puede existir sin carpeta evaluada o cerrada que lo respalde;
 - el sentinel UUID nunca puede usarse como `award_category_id` real en `award_categories`;
 - dense ranking es la única semántica de ranking permitida;
-- recálculo manual y cron no pueden ejecutarse concurrentemente para el mismo año (lock distribuido).
+- recálculo manual y cron no pueden ejecutarse concurrentemente para el mismo año (lock distribuido);
+- los 4 pesos de una configuración `ranking_weight_configs` deben sumar exactamente 100 (enforced por DB CHECK + API);
+- `ranking.recalculation_enabled = false` inhibe todo recálculo; no debe bypass en ninguna ruta.
 
 ---
 
-## 13. Clasificación de miembros y secciones (8.4-A)
+## 13. Criterios institucionales ampliados (8.4-C)
+
+**Vigente desde**: 2026-04-28
+
+El composite ranking combina cuatro criterios institucionales en un único índice por club por año eclesiástico:
+
+| Criterio | Campo | Descripción |
+|----------|-------|-------------|
+| **Carpeta** | `folder_score_pct` | Porcentaje de puntos obtenidos sobre el total de la carpeta anual evaluada |
+| **Finanzas** | `finance_score_pct` | Proporción de meses con cierre financiero entregado antes del `ranking.finance_closing_deadline_day` (default: día 5) |
+| **Camporee** | `camporee_score_pct` | Proporción de camporees disponibles en el año (local + unión) a los que el club asistió con estado aprobado |
+| **Evidencias** | `evidence_score_pct` | Proporción de evidencias de carpeta en estado `VALIDATED` sobre el total de evaluadas (pending excluidos) |
+
+### Pesos
+
+Los pesos globales por defecto son `60 / 15 / 15 / 10` (folder / finance / camporee / evidence). Pueden sobreescribirse por `club_type_id` en `ranking_weight_configs`. La suma siempre debe ser exactamente 100 (CHECK constraint + API validation).
+
+### Semántica temporal
+
+Los rankings históricos (antes de 2026-04-28) retienen `0` en los 5 campos nuevos vía `DEFAULT 0`; no se ejecuta recomputación retroactiva. El composite solo es significativo desde el año eclesiástico en que se ejecute el primer recálculo post-8.4-C.
+
+### Categorías legacy
+
+Las filas de `award_categories` creadas antes de 2026-04-28 están marcadas con `is_legacy = true` y no participan en el composite ranking. Solo las categorías con `is_legacy = false` y `min_composite_pct`/`max_composite_pct` configurados evalúan el composite. El GET de `award_categories` excluye legacy por defecto (`?include_legacy=true` para histórico).
+
+### Referencias
+
+- Spec: `docs/superpowers/specs/2026-04-28-clasificacion-criterios-ampliados-design.md`
+- Plan: `docs/superpowers/plans/2026-04-28-clasificacion-criterios-ampliados.md`
+
+---
+
+## 14. Clasificación de miembros y secciones (8.4-A)
 
 **Estado**: shipped 2026-04-29
 **Spec**: `docs/superpowers/specs/2026-04-29-clasificacion-seccion-miembro-design.md`
@@ -200,7 +260,7 @@ Este subsistema extiende el pipeline existente de clasificación institucional d
 
 ---
 
-### 13.1 Modelos de persistencia
+### 14.1 Modelos de persistencia
 
 Tres tablas nuevas creadas por la migración `20260429000000_enrollment_rankings_schema`:
 
@@ -261,7 +321,7 @@ Seeded en migración `20260429000002_enrollment_rankings_seeds`: fila global `is
 
 ---
 
-### 13.2 Pipeline de cálculo
+### 14.2 Pipeline de cálculo
 
 Orquestador: `MemberRankingsRecalculateService.recalculateAll(yearId?)` en `sacdia-backend/src/rankings/member-rankings/services/`.
 
@@ -284,7 +344,7 @@ Rutas de archivo:
 
 ---
 
-### 13.3 Pesos (weights)
+### 14.3 Pesos (weights)
 
 Resolución:
 1. Buscar fila en `enrollment_ranking_weights` WHERE `club_type_id = X AND ecclesiastical_year_id = Y`.
@@ -298,7 +358,7 @@ Errores canónicos:
 
 ---
 
-### 13.4 Cron y recálculo
+### 14.4 Cron y recálculo
 
 - Cron: mismo job `0 2 * * *` UTC extendido. Secuencia: club → enrollment → section.
 - Orquestador de recálculo: `recalculateAll(yearId?)` — sin `yearId` usa año eclesiástico activo.
@@ -310,7 +370,7 @@ Errores canónicos:
 
 ---
 
-### 13.5 Asignación de posición de ranking
+### 14.5 Asignación de posición de ranking
 
 **Enrollment rankings** (`enrollment_rankings.rank_position`):
 - `DENSE_RANK() OVER (PARTITION BY (club_id, ecclesiastical_year_id) ORDER BY composite_score_pct DESC NULLS LAST)`.
@@ -325,7 +385,7 @@ Invariante: `rank_position ∈ ℕ⁺` cuando NOT NULL; NULL es semánticamente 
 
 ---
 
-### 13.6 Redistribución NULL en composite
+### 14.6 Redistribución NULL en composite
 
 Cuando una o más señales son NULL (ej. primer mes sin clases abiertas → `class_score_pct = NULL`), `MemberCompositeScoreService` redistribuye el peso de las señales ausentes de forma proporcional entre las señales presentes:
 
@@ -341,7 +401,7 @@ Para el algoritmo exacto, ver `MemberCompositeScoreService` en `sacdia-backend/s
 
 ---
 
-### 13.7 Visibilidad / RBAC
+### 14.7 Visibilidad / RBAC
 
 **Perfiles de autorización**: `ResolvedAuthorizationProfile` (patrón existente del sistema RBAC).
 
@@ -365,9 +425,9 @@ Sin ninguno de estos permisos → acceso denegado (403).
 
 ---
 
-### 13.8 MEMENTO — Naming híbrido (Audit A11, lock permanente)
+### 14.8 MEMENTO — Naming híbrido (Audit A11, lock permanente)
 
-Este sistema usa una convención de naming híbrido que NO debe revertirse post-implementación (decisión §23).
+Este sistema usa una convención de naming híbrido que NO debe revertirse post-implementación (decisión §22).
 
 | Capa | Nombre usado | Ejemplo |
 |------|-------------|---------|
@@ -386,7 +446,7 @@ Este sistema usa una convención de naming híbrido que NO debe revertirse post-
 
 ---
 
-### 13.9 Invariantes 8.4-A
+### 14.9 Invariantes 8.4-A
 
 - `composite_score_pct ∈ [0, 100]` cuando NOT NULL (CHECK constraint en DB + validación de servicio).
 - `rank_position ∈ ℕ⁺` cuando NOT NULL; NULL es semánticamente "sin posición asignada".
