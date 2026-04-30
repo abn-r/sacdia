@@ -3327,14 +3327,14 @@ EOF
 - Modify: `sacdia-admin/src/app/dashboard/award-categories/_components/category-form-dialog.tsx`
 - Modify: `sacdia-admin/src/lib/api/award-categories.ts`
 
-- [ ] **Step 1: Update API client**
+- [x] **Step 1: Update API client**
 
 ```typescript
 export const listCategories = (params: { scope?: 'club'|'section'|'member'; is_legacy?: boolean }) =>
   api.get('/api/v1/award-categories', { params });
 ```
 
-- [ ] **Step 2: Add scope tabs (Tabs primitive de shadcn)**
+- [x] **Step 2: Add scope tabs (Tabs primitive de shadcn)**
 
 ```tsx
 'use client';
@@ -3369,7 +3369,7 @@ export default function AwardCategoriesPage() {
 }
 ```
 
-- [ ] **Step 3: Update form dialog con field `scope`**
+- [x] **Step 3: Update form dialog con field `scope`**
 
 ```tsx
 <Select name="scope" required>
@@ -3382,9 +3382,9 @@ export default function AwardCategoriesPage() {
 </Select>
 ```
 
-- [ ] **Step 4: Code review checkpoint** — todas las categorías existentes mantienen `scope='club'` (backfill de migration).
+- [x] **Step 4: Code review checkpoint** — todas las categorías existentes mantienen `scope='club'` (backfill de migration).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add sacdia-admin/src/app/dashboard/award-categories src/lib/api/award-categories.ts
