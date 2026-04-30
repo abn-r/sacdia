@@ -2198,9 +2198,9 @@ describe('MemberRankingsController', () => {
 });
 ```
 
-- [ ] **Step 2: Run test, expect FAIL**
+- [x] **Step 2: Run test, expect FAIL**
 
-- [ ] **Step 3: Implement DTOs**
+- [x] **Step 3: Implement DTOs**
 
 ```typescript
 // member-ranking-response.dto.ts
@@ -2249,7 +2249,7 @@ export class MemberRankingResponseDto {
 // member-my-ranking.dto.ts: { member, visibility_mode, top_n? }
 ```
 
-- [ ] **Step 4: Implement service `member-rankings.service.ts`**
+- [x] **Step 4: Implement service `member-rankings.service.ts`**
 
 ```typescript
 @Injectable()
@@ -2339,7 +2339,7 @@ export class MemberRankingsService {
 }
 ```
 
-- [ ] **Step 5: Implement controller con orden de rutas correcto**
+- [x] **Step 5: Implement controller con orden de rutas correcto**
 
 ```typescript
 import { Controller, Get, Post, Param, Query, Body, UseGuards, ParseIntPipe, Req } from '@nestjs/common';
@@ -2404,15 +2404,15 @@ export class MemberRankingsController {
 }
 ```
 
-- [ ] **Step 6: Run tests, expect PASS** (8 controller specs)
+- [x] **Step 6: Run tests, expect PASS** (8 controller specs)
 
 ```bash
 pnpm test member-rankings.controller.spec.ts
 ```
 
-- [ ] **Step 7: Code review checkpoint** — quality-reviewer subagent: ¿order rutas correcto? ¿`ParseIntPipe` en `:enrollmentId`? ¿RBAC permissions correctos?
+- [x] **Step 7: Code review checkpoint** — quality-reviewer subagent: ¿order rutas correcto? ¿`ParseIntPipe` en `:enrollmentId`? ¿RBAC permissions correctos?
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add sacdia-backend/src/rankings/member-rankings
