@@ -3520,7 +3520,7 @@ EOF
 
 **Setup**: backend + admin desplegados en dev (Neon dev branch). Tests creds: `admin@sacdia.com / Sacdia2026!` (super_admin) y `director@sacdia.com / Sacdia2026!` (director-club ACV/GM).
 
-- [ ] **Step 1: Pre-condiciones**
+- [x] **Step 1: Pre-condiciones**
 
 ```sql
 -- Verificar kill-switch ON
@@ -3532,7 +3532,7 @@ SELECT class_pct, investiture_pct, camporee_pct FROM enrollment_ranking_weights 
 -- expected: (50, 30, 20)
 ```
 
-- [ ] **Step 2: Trigger manual recalc**
+- [x] **Step 2: Trigger manual recalc**
 
 ```bash
 curl -X POST 'https://api-dev.sacdia.com/api/v1/member-rankings/recalculate' \
@@ -3542,7 +3542,7 @@ curl -X POST 'https://api-dev.sacdia.com/api/v1/member-rankings/recalculate' \
 # expected: 200/201 { "triggered": true, ... }
 ```
 
-- [ ] **Step 3: Verificar `enrollment_rankings` populated**
+- [x] **Step 3: Verificar `enrollment_rankings` populated**
 
 ```sql
 SELECT count(*) FROM enrollment_rankings WHERE ecclesiastical_year_id = <activeYearId>;
@@ -3556,7 +3556,7 @@ SELECT enrollment_id, composite_score_pct, rank_position
 -- expected: ranks empezando en 1 (DENSE_RANK), composite NUMERIC entre 0 y 100, NULLs al final
 ```
 
-- [ ] **Step 4: Verificar `section_rankings` populated**
+- [x] **Step 4: Verificar `section_rankings` populated**
 
 ```sql
 SELECT count(*) FROM section_rankings WHERE ecclesiastical_year_id = <activeYearId>;
@@ -3577,7 +3577,7 @@ LIMIT 5;
 -- expected: section_avg ≈ manual_avg (idénticos al 0.01)
 ```
 
-- [ ] **Step 5: RBAC negative tests**
+- [x] **Step 5: RBAC negative tests**
 
 ```bash
 # member viendo otro enrollment → 403
@@ -3591,7 +3591,7 @@ curl -X GET 'https://api-dev.sacdia.com/api/v1/member-rankings/<otherEnrollmentI
 # director-lf en su scope → 200
 ```
 
-- [ ] **Step 6: Visibility flag tests**
+- [x] **Step 6: Visibility flag tests**
 
 ```sql
 UPDATE system_config SET config_value = 'hidden' WHERE config_key = 'member_ranking.member_visibility';
