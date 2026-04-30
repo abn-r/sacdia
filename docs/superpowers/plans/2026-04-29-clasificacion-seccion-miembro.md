@@ -3916,7 +3916,7 @@ git commit -m "feat(rankings): add SectionRankingScreen with members list (rank 
 - Modify: `sacdia-backend/src/rankings/rankings.service.ts` (`recalculateEnrollmentRankings` con filtro delta)
 - Test: `sacdia-backend/src/rankings/rankings.service.delta.spec.ts`
 
-- [ ] **Step 1: Decidir tracking strategy**
+- [x] **Step 1: Decidir tracking strategy**
 
 Opción A: agregar columna `last_progress_change TIMESTAMPTZ` a `enrollments`, actualizada por trigger en `class_module_progress`/`camporee_members`/`investiture_validation_history`.
 
@@ -3924,7 +3924,7 @@ Opción B: tabla `enrollment_progress_audit` con timestamp por evento.
 
 Recomendado: Opción A (menos overhead).
 
-- [ ] **Step 2: Crear migration**
+- [x] **Step 2: Crear migration**
 
 ```sql
 ALTER TABLE enrollments ADD COLUMN last_progress_change TIMESTAMPTZ(6);
@@ -3951,9 +3951,9 @@ CREATE TRIGGER trg_class_module_progress_touch
 -- y en investiture_validation_history
 ```
 
-- [ ] **Step 3: Apply migration via psql + neonctl** (mismo patrón Task 2)
+- [x] **Step 3: Apply migration via psql + neonctl** (mismo patrón Task 2)
 
-- [ ] **Step 4: Write failing test**
+- [x] **Step 4: Write failing test**
 
 ```typescript
 describe('recalculateEnrollmentRankings (delta-only)', () => {
@@ -3962,7 +3962,7 @@ describe('recalculateEnrollmentRankings (delta-only)', () => {
 });
 ```
 
-- [ ] **Step 5: Implement filter en `recalculateEnrollmentRankings`**
+- [x] **Step 5: Implement filter en `recalculateEnrollmentRankings`**
 
 ```typescript
 async recalculateEnrollmentRankings(yearId: number, mode: 'full' | 'delta' = 'full') {
@@ -3983,11 +3983,11 @@ async recalculateEnrollmentRankings(yearId: number, mode: 'full' | 'delta' = 'fu
 }
 ```
 
-- [ ] **Step 6: Run test, expect PASS**
+- [x] **Step 6: Run test, expect PASS**
 
-- [ ] **Step 7: Code review checkpoint** — verificar triggers no causan recursión, ON CONFLICT idempotente.
+- [x] **Step 7: Code review checkpoint** — verificar triggers no causan recursión, ON CONFLICT idempotente.
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add sacdia-backend/prisma/migrations/<timestamp>_enrollment_delta_tracking \
