@@ -100,6 +100,42 @@ Referencia humana concisa del schema Prisma vigente.
   - `achievement_tier`: `BRONZE`, `SILVER`, `GOLD`, `PLATINUM`, `DIAMOND`
 - **Drift de cliente verificado** (no corregido en este trabajo): el cliente admin usa valores de `scope` `GLOBAL|CLUB|UNIT` que no coinciden con los valores Prisma `GLOBAL|CLUB_TYPE|ECCLESIASTICAL_YEAR`.
 
+### `enrollment_rankings`, `section_rankings`, `enrollment_ranking_weights` (8.4-A)
+
+> Naming híbrido canónico: schema usa `enrollment_*`; API/permisos/DTOs usan `member-*`. Ver `docs/canon/decisiones-clave.md` §22 y `docs/canon/runtime-rankings.md` §13.8. Lock permanente Audit A11.
+
+**`enrollment_rankings`** — clasificación por enrollment y año eclesiástico:
+- PK: `id UUID`, Unique: `(enrollment_id INTEGER, ecclesiastical_year_id INTEGER)`.
+- Señales: `class_score_pct`, `investiture_score_pct`, `camporee_score_pct` — cada una `NUMERIC(5,2)`, nullable, CHECK ∈ [0,100].
+- Composite: `composite_score_pct NUMERIC(5,2)`, nullable, CHECK ∈ [0,100].
+- Posición: `rank_position INTEGER` nullable (NULLS LAST, DENSE_RANK).
+- FK: `enrollment_id → enrollments`, `user_id → users`, `club_id → clubs`, `club_section_id → club_sections` (nullable), `ecclesiastical_year_id → ecclesiastical_years`, `awarded_category_id → award_categories` (nullable).
+- Índices: `(club_id, ecclesiastical_year_id)`, `(club_section_id, ecclesiastical_year_id)`, `(club_id, ecclesiastical_year_id, composite_score_pct DESC)`, `(user_id)`, `(awarded_category_id)`.
+
+**`section_rankings`** — agregado puro por sección y año:
+- PK: `id UUID`, Unique: `(club_section_id INTEGER, ecclesiastical_year_id INTEGER)`.
+- `composite_score_pct NUMERIC(5,2)` nullable — AVG de enrollments con composite NOT NULL.
+- `active_enrollment_count INTEGER` — conteo de enrollments activos (default 0).
+- `rank_position INTEGER` nullable.
+- `awarded_category_id UUID` nullable — FK → `award_categories`.
+- FK: `club_section_id → club_sections`, `ecclesiastical_year_id → ecclesiastical_years`, `club_id → clubs`, `awarded_category_id → award_categories` (nullable).
+- Índices: `(club_id, ecclesiastical_year_id)`, `(club_id, ecclesiastical_year_id, composite_score_pct DESC)`, `(awarded_category_id)`.
+
+**`enrollment_ranking_weights`** — pesos de señales por (club_type_id, ecclesiastical_year_id):
+- PK: `id UUID`, Unique: `(club_type_id INTEGER?, ecclesiastical_year_id INTEGER?)`.
+- `class_pct`, `investiture_pct`, `camporee_pct` — `DECIMAL(5,2)`.
+- `is_default BOOLEAN` — true solo para la fila global (ambas FK nullable).
+- Sum=100 enforced al nivel de servicio con tolerancia IEEE `Math.abs(sum-100) ≤ 0.01`; no existe CHECK DB.
+- Seeded: fila global `is_default=true` con pesos 50/30/20 (class/investiture/camporee).
+
+### `award_categories` — extensión scope (8.4-A)
+
+- Nueva columna: `scope VARCHAR(20) NOT NULL DEFAULT 'club'` — valores válidos: `club | section | member`.
+- Índice: `idx_award_categories_scope` sobre `(scope, is_legacy)`.
+- Backfill: todas las filas existentes antes de la migración → `scope='club'`.
+- El query param `?scope=` en `GET /api/v1/award-categories` filtra por este campo. Error canónico: `AWARD_CATEGORY_SCOPE_INVALID`.
+- POST y PATCH aceptan `scope` como campo opcional (`@IsOptional @IsIn(['club','section','member'])`).
+
 ### Better Auth
 
 - Los modelos Prisma vigentes son `session`, `account` y `verification`.
@@ -175,6 +211,7 @@ Referencia humana concisa del schema Prisma vigente.
 - `club_enrollments`, `folder_templates`, `folder_template_sections`
 - `annual_folders`, `annual_folder_evidences`, `annual_folder_section_evaluations`, `annual_folder_section_submissions`
 - `award_categories`, `club_annual_rankings`, `monthly_reports`, `monthly_report_manual_data`, `member_of_month`, `weekly_records`, `scoring_categories`, `weekly_record_scores`
+- `enrollment_rankings`, `section_rankings`, `enrollment_ranking_weights` — (8.4-A) clasificación por enrollment/sección
 
 ### Recursos y logros
 
@@ -215,6 +252,10 @@ Referencia humana concisa del schema Prisma vigente.
 - `20260415100200_section_evaluations_dual_level` - renombra `evaluated_by_id`/`evaluated_at` a `lf_approved_by`/`lf_approved_at` (ambas nullable), añade `union_approved_by`/`union_approved_at`/`union_decision`, crea `union_evaluation_decision_enum` y el CHECK de orden LF→Union.
 - `20260415100300_section_evaluations_stored_status` - crea `annual_folder_section_status_enum`, añade la columna `status` materializada con default `PENDING`, el CHECK de `PREAPPROVED_LF` y el indice analitico por estado.
 - `20260415100400_annual_folders_eager_evaluation_backfill` - migracion data-only; no-op sobre dev por ausencia de datos legacy.
+- `20260429000000_enrollment_rankings_schema` - (8.4-A) crea `enrollment_rankings`, `section_rankings`, `enrollment_ranking_weights` con indexes, UNIQUE constraints y CHECK constraints de rango [0,100]. Ver §13.1 de `docs/canon/runtime-rankings.md`.
+- `20260429000001_award_categories_scope` - (8.4-A) añade `scope VARCHAR(20) DEFAULT 'club'` a `award_categories` + índice `idx_award_categories_scope` on `(scope, is_legacy)`. Backfill: filas existentes → `scope='club'`.
+- `20260429000002_enrollment_rankings_seeds` - (8.4-A) seed de fila global `is_default=true` en `enrollment_ranking_weights` con pesos 50/30/20 (class/investiture/camporee).
+- `20260429000003_enrollment_rankings_default_award_seeds` - (8.4-A) seed de categorías de premio con `scope='member'` para clasificación de miembros.
 
 ## Nota operativa
 

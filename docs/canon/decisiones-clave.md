@@ -404,6 +404,35 @@ Hallazgo paralelo: la ruta admin `/dashboard/validation` usaba `investiture:read
 
 **Cierre del audit C2 de permisos reutilizados**: Sprint E es el último del plan de 5 sprints (MoM §16, scoring-categories §17, requests §18, user_certifications+user_folders §19, camporees §20, validation §21). 6 dominios canonizados con permisos propios. Audit cerrado.
 
+### 22. Naming híbrido + 3 señales Fase 1 + schema audit-locked (8.4-A, 2026-04-29)
+
+**Estado**: Vigente <!-- Audit-locked: commit 643b694 (schema audit) + commit 546a26c (spec rewrite). Implementación completa en branch feat/section-member-rankings-8-4-a. -->
+
+**Contexto**: El audit Neon dev del branch `feat/section-member-rankings-8-4-a` (commit `643b694`) reveló 11 ítems de desviación entre el spec original y la realidad del schema. Entre las desviaciones más relevantes: la entidad real para rankings de miembro es `enrollments` (no un modelo "Member" independiente), la investidura es binaria (`INVESTIDO|IN_PROGRESS`), y la tabla de evidencia per-member no existe en Fase 1 (bloquea señal de evidencias). El equipo optó por re-brainstorm + reescritura completa del plan (commit `546a26c`), resultado: naming híbrido formalizado, scope de Fase 1 reducido a 3 señales, y lock permanente del schema.
+
+**Decisión**:
+
+1. **Naming híbrido (capas separadas)**: El schema DB usa `enrollment_*` (refleja la entidad real). La API REST, permisos RBAC, DTOs y strings user-facing usan `member-*` / `member_rankings:*`. El mapeo ocurre en la capa DTO (`MemberRankingResponseDto.fromEnrollmentRanking`). Ver §13.8 de `docs/canon/runtime-rankings.md` para tabla completa de correspondencias.
+
+2. **Fase 1 = 3 señales solamente**: clases (`class_module_progress`), investidura binaria (`enrollments.investiture_status`), camporees (`camporee_members`). Las señales de evidencias y honores quedan bloqueadas para Fase 2 (requieren tabla per-member que no existe en el schema actual).
+
+3. **Investidura binaria**: `INVESTIDO` → 100 puntos, `IN_PROGRESS` → 0 puntos, sin enrollment → NULL (redistribuido). No se modelan requisitos discretos en Fase 1.
+
+4. **Composite NULL redistribution**: Si una señal es NULL, su peso se redistribuye proporcionalmente entre las señales presentes. Si todas NULL → composite NULL. Algoritmo implementado en `MemberCompositeScoreService`.
+
+5. **Audit lock A11** (permanente, no negociable post-implementación): Las tablas físicas `enrollment_rankings` y `enrollment_ranking_weights` **NO se renombran**. Las rutas `/api/v1/member-rankings` y `/api/v1/member-ranking-weights` **NO se modifican**. Cualquier unificación de naming requiere nueva decisión de arquitectura + migración explícita + actualización de este canon.
+
+**Contexto brainstorm Q-RB**: Cuatro preguntas de re-brainstorm resueltas durante el replan (Q-RB1 a Q-RB4) quedaron documentadas en el spec rewrite (`commit 546a26c`): naming híbrido (Q-RB1), NULL redistribution (Q-RB2), kill-switch granular (Q-RB3), y scope de section rankings como agregado puro (Q-RB4).
+
+**Consecuencias**:
+
+- Los DTOs del panel admin y la app móvil siguen API naming (`MemberRanking*`); nunca deben exponer `enrollment_id` al usuario final.
+- Migraciones futuras que toquen rankings NO renombran tablas existentes; agregan columnas o nuevas tablas con prefijo `enrollment_*` o `section_*` según corresponda.
+- El scope de Fase 2 (evidencias, honores, requirimientos discretos de investidura) requiere una nueva decision documentada antes de implementar.
+- Los 4 Q-RB resueltos se consideran decisiones derivadas de este §22; no requieren secciones separadas mientras permanezcan consistentes con la implementación.
+
+**Referencias**: commit `643b694` (schema audit), commit `546a26c` (spec rewrite), `docs/canon/runtime-rankings.md` §13 y §13.8.
+
 ## Estados posibles de una decisión
 
 Las decisiones de este documento deben estar en uno de estos estados:

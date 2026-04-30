@@ -3404,7 +3404,7 @@ git commit -m "feat(award-categories): extend admin page with scope tabs (Club|S
 - Modify: `docs/database/SCHEMA-REFERENCE.md` (agregar 3 tablas + extensión `award_categories`)
 - Modify: `docs/features/README.md` (status 8.4-A: shipped)
 
-- [ ] **Step 1: `runtime-rankings.md` §14 — Enrollment + Section Rankings**
+- [x] **Step 1: `runtime-rankings.md` §14 — Enrollment + Section Rankings**
 
 Agregar al final de §13:
 
@@ -3441,7 +3441,7 @@ Si una señal es NULL, su peso se redistribuye proporcionalmente. Si todas NULL 
 `section_rankings.composite = AVG(enrollment_rankings.composite WHERE NOT NULL)`. NO calculadores propios.
 ```
 
-- [ ] **Step 2: `decisiones-clave.md` §23**
+- [x] **Step 2: `decisiones-clave.md` §23**
 
 ```markdown
 ## §23. 8.4-A: naming híbrido + 3 señales + audit-locked schema (2026-04-29)
@@ -3455,7 +3455,7 @@ Si una señal es NULL, su peso se redistribuye proporcionalmente. Si todas NULL 
 **Audit reference**: commit `643b694`. 11 ítems verificados; 8 desviaciones del spec original.
 ```
 
-- [ ] **Step 3: `ENDPOINTS-LIVE-REFERENCE.md` agregar 4 grupos**
+- [x] **Step 3: `ENDPOINTS-LIVE-REFERENCE.md` agregar 4 grupos**
 
 ```markdown
 ## /api/v1/member-rankings (Phase 8.4-A)
@@ -3482,17 +3482,17 @@ Si una señal es NULL, su peso se redistribuye proporcionalmente. Si todas NULL 
 
 Total: 340 (8.4-C) + 11 nuevos = 351 endpoints.
 
-- [ ] **Step 4: `SCHEMA-REFERENCE.md` agregar 3 tablas + extensión**
+- [x] **Step 4: `SCHEMA-REFERENCE.md` agregar 3 tablas + extensión**
 
 Documentar columnas, FKs, indexes, CHECK constraints, naming híbrido (schema en español como en resto del documento si aplica).
 
-- [ ] **Step 5: `features/README.md` — actualizar 8.4-A status**
+- [x] **Step 5: `features/README.md` — actualizar 8.4-A status**
 
 Cambiar de `planning` → `shipped 2026-04-29`. Linkear spec, audit, plan, runtime canon §14.
 
-- [ ] **Step 6: Code review checkpoint** — quality-reviewer subagent: ¿hybrid naming explícitamente documentado? ¿endpoints count correcto?
+- [x] **Step 6: Code review checkpoint** — quality-reviewer subagent: ¿hybrid naming explícitamente documentado? ¿endpoints count correcto?
 
-- [ ] **Step 7: Commit (root sacdia repo)**
+- [x] **Step 7: Commit (root sacdia repo)**
 
 ```bash
 cd /Users/abner/Documents/development/sacdia

@@ -8,8 +8,8 @@
 > Base URL: `/api/v1`
 
 **Estado**: ACTIVE
-**Actualizado**: 2026-04-23 (support reports endpoint + admin notification stats)
-**Total endpoints**: 330
+**Actualizado**: 2026-04-29 (8.4-A: member-rankings, section-rankings, member-ranking-weights, award-categories scope extension)
+**Total endpoints**: 341
 
 ## Lectura Rápida
 
@@ -554,10 +554,10 @@
 
 | Method | Path | Auth | Roles | Description | Source |
 |---|---|---|---|---|---|
-| POST | `/api/v1/award-categories` | JWT | `award_categories:create` | Crear categoría de premio | `src/annual-folders/award-categories.controller.ts` |
-| GET | `/api/v1/award-categories` | JWT | `award_categories:read` | Listar categorías de premios | `src/annual-folders/award-categories.controller.ts` |
+| POST | `/api/v1/award-categories` | JWT | `award_categories:create` | Crear categoría de premio. Body acepta `scope` (`@IsOptional @IsIn(['club','section','member'])`); default `club` | `src/annual-folders/award-categories.controller.ts` |
+| GET | `/api/v1/award-categories` | JWT | `award_categories:read` | Listar categorías de premios. Query `?scope=club\|section\|member` (8.4-A); error `AWARD_CATEGORY_SCOPE_INVALID` si scope inválido; ausente = sin filtro de scope (devuelve todos) — el default `'club'` es DB column-level, no query-level | `src/annual-folders/award-categories.controller.ts` |
 | GET | `/api/v1/award-categories/:categoryId` | JWT | `award_categories:read` | Obtener categoría de premio por ID | `src/annual-folders/award-categories.controller.ts` |
-| PATCH | `/api/v1/award-categories/:categoryId` | JWT | `award_categories:update` | Actualizar categoría de premio | `src/annual-folders/award-categories.controller.ts` |
+| PATCH | `/api/v1/award-categories/:categoryId` | JWT | `award_categories:update` | Actualizar categoría de premio. Body acepta `scope` (`@IsOptional @IsIn(...)`) | `src/annual-folders/award-categories.controller.ts` |
 | DELETE | `/api/v1/award-categories/:categoryId` | JWT | `award_categories:delete` | Soft delete de categoría de premio | `src/annual-folders/award-categories.controller.ts` |
 
 ## rankings
@@ -641,6 +641,40 @@
 | Method | Path | Auth | Roles | Description | Source |
 |---|---|---|---|---|---|
 | POST | `/api/v1/support/reports` | JWT | - | Enviar reporte de soporte (bug, feature_request, account, data_issue, performance, other). Body: `{ category, title<=120, description<=2000, deviceInfo{platform,osVersion,model,appVersion,buildNumber}, userContext?{route?,clubId?,sectionId?} }`. Rate limit 5/hora por usuario. Responde 201 `{ reportId, createdAt }` | `src/support/support.controller.ts` |
+
+## member-rankings (8.4-A)
+
+> Hybrid naming: rutas y permisos usan `member-rankings`; tabla física es `enrollment_rankings`. Ver `docs/canon/decisiones-clave.md` §22 y `docs/canon/runtime-rankings.md` §13.8.
+
+| Method | Path | Auth | Roles | Description | Source |
+|---|---|---|---|---|---|
+| GET | `/api/v1/member-rankings` | JWT | `member_rankings:read_global\|read_lf\|read_club\|read_section\|read_self` | Lista paginada con filtrado RBAC por scope. 5-tier waterfall: admin/super_admin > read_lf > read_club > read_section > read_self | `src/rankings/member-rankings/member-rankings.controller.ts` |
+| GET | `/api/v1/member-rankings/me` | JWT | `member_rankings:read_self` | Ranking propio del llamante; visibility-gated (kill-switch + scope check). Ruta estática declarada antes de `:enrollmentId` (engram #1883) | `src/rankings/member-rankings/member-rankings.controller.ts` |
+| GET | `/api/v1/member-rankings/:enrollmentId/breakdown` | JWT | `member_rankings:read_self\|read_section\|read_club\|read_lf\|read_global` | Drill-down señales individuales (class/investiture/camporee) para un enrollment. `ParseIntPipe` — `enrollment_id` es INTEGER | `src/rankings/member-rankings/member-rankings.controller.ts` |
+| POST | `/api/v1/member-rankings/recalculate?year_id=N&club_id=M` | JWT | `member_ranking_weights:write` (seeded to admin/super_admin only) | Disparar recálculo manual. Rate limit 5 min. Dual kill-switch validado (`ranking.recalculation_enabled` + `member_ranking.recalculation_enabled`). Error `400 RECALCULATION_DISABLED` si deshabilitado | `src/rankings/member-rankings/member-rankings.controller.ts` |
+
+## section-rankings (8.4-A)
+
+| Method | Path | Auth | Roles | Description | Source |
+|---|---|---|---|---|---|
+| GET | `/api/v1/section-rankings` | JWT | `section_rankings:read_global\|read_lf\|read_club` | Lista paginada de secciones con composite score. 3-tier RBAC waterfall | `src/rankings/section-rankings/section-rankings.controller.ts` |
+| GET | `/api/v1/section-rankings/:sectionId/members` | JWT | `section_rankings:read_global\|read_lf\|read_club` | Drill-down: miembros de la sección ordenados por rank_position. `ParseIntPipe` — `sectionId` es INTEGER | `src/rankings/section-rankings/section-rankings.controller.ts` |
+
+## member-ranking-weights (8.4-A)
+
+> Pesos de señales para composite score. Tabla física: `enrollment_ranking_weights`. Admin/super_admin only (GlobalRolesGuard + PermissionsGuard).
+
+| Method | Path | Auth | Roles | Description | Source |
+|---|---|---|---|---|---|
+| GET | `/api/v1/member-ranking-weights` | JWT | admin/super_admin + `member_ranking_weights:read` | Lista paginada; `is_default DESC` primero (fila global) | `src/rankings/member-ranking-weights/member-ranking-weights.controller.ts` |
+| POST | `/api/v1/member-ranking-weights` | JWT | admin/super_admin + `member_ranking_weights:write` | Crear override por (club_type_id, ecclesiastical_year_id). Valida sum=100 ±0.01. Errores: `WEIGHTS_SUM_INVALID`, `WEIGHTS_CONFLICT` | `src/rankings/member-ranking-weights/member-ranking-weights.controller.ts` |
+| GET | `/api/v1/member-ranking-weights/:id` | JWT | admin/super_admin + `member_ranking_weights:read` | Detalle por UUID. `ParseUUIDPipe` | `src/rankings/member-ranking-weights/member-ranking-weights.controller.ts` |
+| PATCH | `/api/v1/member-ranking-weights/:id` | JWT | admin/super_admin + `member_ranking_weights:write` | Actualizar pesos parcialmente; re-valida sum=100 ±0.01 post-merge | `src/rankings/member-ranking-weights/member-ranking-weights.controller.ts` |
+| DELETE | `/api/v1/member-ranking-weights/:id` | JWT | admin/super_admin + `member_ranking_weights:write` | Eliminar override. Guards `is_default=true`: error `DEFAULT_WEIGHTS_NOT_DELETABLE` | `src/rankings/member-ranking-weights/member-ranking-weights.controller.ts` |
+
+### Nota de actualización endpoint count (2026-04-29)
+
+El spec original proyectaba 340→351 endpoints. El conteo real al 2026-04-29 es **552 decoradores HTTP** en `sacdia-backend/src/` (medido vía `rg -c "@(Get|Post|Patch|Put|Delete)" --type ts`). La discrepancia se debe a que el doc estaba desactualizado antes de 8.4-A. El campo `Total endpoints` de este doc se mantiene como conteo editorial (endpoints canónicos documentados), no como conteo exhaustivo de decoradores (incluye helpers, overloads y handlers internos). Delta 8.4-A documentado: +11 endpoints nuevos (4 member-rankings + 2 section-rankings + 5 member-ranking-weights) + extensión scope en award-categories existentes.
 
 ## Nota de mantenimiento
 

@@ -30,8 +30,8 @@
 
 | Señal | Cantidad | Evidencia |
 |---|---:|---|
-| Documentos de dominio presentes | 28 | archivos `docs/features/*.md`, excluyendo este `README.md` |
-| Estado funcional `IMPLEMENTADO` | 25 | declarado en los documentos de dominio |
+| Documentos de dominio presentes | 29 | archivos `docs/features/*.md` + entradas en canon, excluyendo este `README.md` |
+| Estado funcional `IMPLEMENTADO` | 26 | declarado en los documentos de dominio |
 | Estado funcional `PARCIAL` | 1 | `certificaciones-guias-mayores` |
 | Estado funcional `NO CANON` | 2 | `achievements`; `infrastructure` declara la variante `NO CANON (infraestructura operativa)` |
 
@@ -59,6 +59,7 @@
 | `infrastructure` | [infrastructure.md](infrastructure.md) | Documento presente | `NO CANON` |
 | `inventario` | [inventario.md](inventario.md) | Documento presente | `IMPLEMENTADO` |
 | `member-of-month` | [member-of-month.md](member-of-month.md) | Documento presente | `IMPLEMENTADO` |
+| `member-rankings` | [docs/canon/runtime-rankings.md](../canon/runtime-rankings.md) §13 | Documento presente | `IMPLEMENTADO` |
 | `membership-requests` | [membership-requests.md](membership-requests.md) | Documento presente | `IMPLEMENTADO` |
 | `monthly-reports` | [monthly-reports.md](monthly-reports.md) | Documento presente | `IMPLEMENTADO` |
 | `rbac` | [rbac.md](rbac.md) | Documento presente | `IMPLEMENTADO` |
