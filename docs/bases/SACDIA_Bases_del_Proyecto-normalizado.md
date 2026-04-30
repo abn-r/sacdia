@@ -1,5 +1,8 @@
-# SACDIA — Bases del Proyecto  
+# SACDIA — Bases del Proyecto
 ## Versión normalizada para análisis contra canon e implementación
+
+**Última resincronización**: 2026-04-28 contra canon + engram (sesiones #1808 + #1842 + 8.4-C shipped).
+**Cambios clave**: 8.1 Multilenguaje, 8.3 Reportes y 8.5 QR/tarjetas pasaron de [ROADMAP] a [VIGENTE]. 8.4-C Clasificación ampliada pasa a [VIGENTE]. 8.6 IA queda aislada como [ROADMAP]. Pendientes reales: 8.2 Offline + 8.4 A/B/D/E + 8.6 IA.
 
 ### Propósito del documento
 Este documento presenta la visión base de SACDIA, su posicionamiento frente a soluciones existentes del ecosistema y una síntesis de capacidades actuales, capacidades parciales y líneas de evolución futura.
@@ -100,7 +103,7 @@ Cobertura actual acotada a un recurso (activities); ampliar cobertura por featur
 
 ### 5.7 Clasificación institucional de clubes
 **[VIGENTE]**  
-Existe un subsistema de **ranking anual de clubes** con categorías de premio configurables, pipeline automático de recálculo (cron diario 02:00 UTC con lock distribuido) y superficie admin dedicada. Canon rector: `docs/canon/runtime-rankings.md`.
+Existe un subsistema de **ranking anual de clubes** con composite ponderado de 4 criterios institucionales (carpeta/finanzas/camporee/evidencias), categorías de premio configurables, pipeline automático de recálculo (cron diario 02:00 UTC con lock distribuido y kill-switch) y superficie admin dedicada con drill-down por club. Canon rector: `docs/canon/runtime-rankings.md`.
 
 ### 5.8 Sistema de logros y tiers del miembro
 **[VIGENTE]**  
@@ -140,14 +143,14 @@ La cobertura de invalidación por feature no está auditada transversalmente y n
 Una experiencia **offline-first** real (queue persistida de mutaciones, sincronización diferida con reconciliación de conflictos) **no existe hoy** y debe tratarse como línea futura. No describir la capacidad actual como "offline" sin matizar — es cache + invalidación, no offline-first.
 
 ### 6.2 Clasificación y ranking
-**[PARCIAL]**  
-SACDIA ya muestra bases para lógica de clasificación/ranking mediante categorías configurables y estructuras relacionadas con puntajes o niveles en algunos dominios.
+**[VIGENTE]**  
+SACDIA implementa un sistema de **clasificación institucional compuesta** de clubes por año eclesiástico. El composite ranking pondera cuatro criterios: puntaje de carpeta anual evaluada (60%), cumplimiento de cierre financiero mensual (15%), asistencia a camporees (15%) y cobertura de evidencias validadas (10%). Los pesos son configurables por tipo de club. Canon rector: `docs/canon/runtime-rankings.md`.
 
-**[PARCIAL]**  
-También existen niveles tipo Bronce/Plata/Oro/Platino/Diamante en ciertos contextos específicos.
+**[VIGENTE]**  
+Las categorías de premio son configurables con umbrales de composite percentage (0-100). Las categorías previas a 2026-04-28 están marcadas `is_legacy = true` y no participan en el composite ranking.
 
-**[PARCIAL]**  
-Sin embargo, no debe afirmarse todavía como una **clasificación institucional única y cerrada** aplicable a todo el sistema sin mayor verificación.
+**[VIGENTE]**  
+También existen niveles tipo Bronce/Plata/Oro/Platino/Diamante como parte del sistema de achievements de miembros (`docs/canon/runtime-achievements.md`), conceptualmente distinto del sistema de clasificación de clubes.
 
 ---
 
@@ -171,26 +174,49 @@ Como hipótesis de valor, SACDIA puede comunicar ventajas en:
 
 ## 8. Capacidades futuras y evolución
 
-### 8.1 Trilingüe
-**[ROADMAP]**  
-La expansión multilenguaje debe tratarse como línea futura de evolución.  
-No corresponde describirla como capacidad vigente consolidada del sistema actual.
+### 8.1 Multilenguaje
+**[VIGENTE]**
+SACDIA opera con cobertura i18n cerrada: 4 locales (`es-MX`, `es-ES`, `en-US`, `pt-BR`), paridad de 539 keys en panel admin y 2472 keys × 4 locales en app móvil. 10 catálogos administrables con CRUD multilenguaje (Phase E). Ver `docs/plans/i18n-multilenguaje-roadmap.md` (cerrado).
+
+**[ROADMAP]**
+Ampliación a locales adicionales o features de traducción asistida quedan como evolución futura.
 
 ### 8.2 Offline transversal
 **[ROADMAP]**  
 La consolidación de una experiencia offline más amplia, consistente y documentada puede formar parte de una evolución futura del producto.
 
 ### 8.3 Expansión de reportes
-**[ROADMAP]**  
-La automatización de reportes podría ampliarse a nuevos dominios, con mayor cobertura y dashboards más accionables.
+**[VIGENTE]**
+Pipeline de reportes expandido: además de los 8 jobs base, existen reportes trimestrales y anuales con cron + PDF + feature flags dark-launch (`quarterly_auto_generate_enabled`, `annual_auto_generate_enabled`), alerting automático de jobs (`CronAlertService` cada 15 min, email + in-app, tabla `cron_alerts_log`) y migración de jobs críticos a colas BullMQ con retry exponencial (5 attempts). Ver `docs/plans/reportes-expansion.md` (6/6 sub-líneas cerradas) y `docs/features/cron-automation.md`.
+
+**[ROADMAP]**
+Dashboards accionables adicionales y expansión a nuevos dominios siguen como línea futura.
 
 ### 8.4 Clasificación institucional ampliada
-**[ROADMAP]**  
-La evolución hacia un modelo más visible y uniforme de clasificación institucional puede evaluarse como línea futura, siempre que se defina su alcance funcional y su valor real para clubes, secciones y liderazgo.
 
-### 8.5 IA, QR y otras capacidades diferenciales
+#### 8.4-C Criterios ampliados [VIGENTE]
+**[VIGENTE]**  
+Composite ranking implementado (2026-04-28): promedio ponderado de 4 criterios (carpeta/finanzas/camporee/evidencias), pesos configurables por `club_type` en `ranking_weight_configs`, endpoint de drill-down por club (`/breakdown`) y CRUD de configuración de pesos (`/ranking-weights`). Canon rector: `docs/canon/runtime-rankings.md` §13. Decisión estructural: `docs/canon/decisiones-clave.md` §22.
+
+Referencias:
+- Spec: `docs/superpowers/specs/2026-04-28-clasificacion-criterios-ampliados-design.md`
+- Plan: `docs/superpowers/plans/2026-04-28-clasificacion-criterios-ampliados.md`
+
+#### 8.4 A/B/D/E — Pendientes [ROADMAP]
 **[ROADMAP]**  
-Capacidades como asistentes inteligentes, tarjetas virtuales con QR, automatizaciones avanzadas o inteligencia aplicada deben tratarse como líneas de evolución estratégica y no como funcionalidades actuales verificadas.
+Las siguientes sub-líneas de 8.4 permanecen como evolución futura:
+- **8.4-A**: Clasificación a nivel sección y miembro (hoy el ranking es solo por club).
+- **8.4-B**: Visibilidad para el usuario final (app móvil) del ranking de su club y posición.
+- **8.4-D**: Periodicidades menores (ranking mensual, trimestral) adicionales al ciclo anual.
+- **8.4-E**: Agrupación y comparación regional (por campo local, unión o división).
+
+### 8.5 QR y tarjetas virtuales
+**[VIGENTE]**
+Credencial digital del miembro implementada en app móvil (`sacdia-app/lib/features/virtual_card/`) con tarjeta visual estilo boarding-pass (5 tiers, light + dark, accesibilidad). Backend QR canónico stateless con HMAC-SHA256 firmado con `BETTER_AUTH_SECRET` (Option C), endpoint `/qr/validate`, escáner móvil alineado al contrato runtime. Ver `docs/plans/qr-tarjetas-virtuales-implementacion.md` y `docs/plans/tarjeta-virtual-design-spec.md`.
+
+### 8.6 IA aplicada y capacidades diferenciales
+**[ROADMAP]**
+Asistentes inteligentes, automatizaciones avanzadas e inteligencia aplicada quedan como líneas de evolución estratégica sin scope cerrado ni implementación verificada. Ver `docs/plans/ia-qr-tarjetas-virtuales.md` (línea IA pendiente).
 
 ---
 

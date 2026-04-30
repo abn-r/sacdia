@@ -349,6 +349,14 @@ Respuesta esperada:
 - `authorization.effective`
 - compatibilidad temporal con `club` y `active`
 
+### QR canonico
+
+Las credenciales QR nuevas consumen este mismo contrato de autorizacion:
+
+- `qr:issue_self` habilita `/qr/me`, `/qr/me/card` y `/qr/me/card.pdf`;
+- `qr:validate` habilita `/qr/validate`;
+- `/qr/scan` permanece como alias legacy y sigue gobernado por `attendance:manage`.
+
 ## Referencias Relacionadas
 
 - `docs/features/auth/RBAC-ENFORCEMENT-MATRIX.md`
