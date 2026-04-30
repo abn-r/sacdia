@@ -3106,7 +3106,7 @@ git commit -m "feat(member-rankings): add breakdown drill-down page with 3 score
 - Create: `sacdia-admin/src/app/dashboard/section-rankings/[sectionId]/members/page.tsx`
 - Create: `sacdia-admin/src/lib/api/section-rankings.ts`
 
-- [ ] **Step 1: Implement API client + table** (similar pattern Task 17)
+- [x] **Step 1: Implement API client + table** (similar pattern Task 17)
 
 ```typescript
 export interface SectionRankingResponse {
@@ -3132,7 +3132,7 @@ export async function getSectionMembers(sectionId: number, yearId: number) {
 }
 ```
 
-- [ ] **Step 2: Implement table page**
+- [x] **Step 2: Implement table page**
 
 ```tsx
 export default function SectionRankingsPage() {
@@ -3145,7 +3145,7 @@ export default function SectionRankingsPage() {
 }
 ```
 
-- [ ] **Step 3: Implement drill-down `/section-rankings/[sectionId]/members/page.tsx`**
+- [x] **Step 3: Implement drill-down `/section-rankings/[sectionId]/members/page.tsx`**
 
 ```tsx
 export default function SectionMembersPage() {
@@ -3163,9 +3163,9 @@ export default function SectionMembersPage() {
 }
 ```
 
-- [ ] **Step 4: Code review checkpoint**
+- [x] **Step 4: Code review checkpoint**
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add sacdia-admin/src/app/dashboard/section-rankings src/lib/api/section-rankings.ts
