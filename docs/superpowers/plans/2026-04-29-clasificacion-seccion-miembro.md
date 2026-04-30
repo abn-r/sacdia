@@ -3639,7 +3639,7 @@ UPDATE system_config SET config_value = 'self_only' WHERE config_key = 'member_r
 - Create: `sacdia-app/lib/features/rankings/presentation/providers/section_ranking_provider.dart`
 - Test: `sacdia-app/test/features/rankings/data/repositories/member_rankings_remote_repository_test.dart`
 
-- [ ] **Step 1: Implement DTOs (using freezed o simple classes con fromJson)**
+- [x] **Step 1: Implement DTOs (using freezed o simple classes con fromJson)**
 
 ```dart
 class MemberRankingDto {
@@ -3686,7 +3686,7 @@ class MemberMyRankingDto {
 }
 ```
 
-- [ ] **Step 2: Implement repository abstract + remote impl**
+- [x] **Step 2: Implement repository abstract + remote impl**
 
 ```dart
 abstract class MemberRankingsRepository {
@@ -3719,7 +3719,7 @@ class MemberRankingsRemoteRepository implements MemberRankingsRepository {
 }
 ```
 
-- [ ] **Step 3: Implement Riverpod providers**
+- [x] **Step 3: Implement Riverpod providers**
 
 ```dart
 final memberRankingsRepositoryProvider = Provider<MemberRankingsRepository>(
@@ -3738,7 +3738,7 @@ final sectionRankingProvider = FutureProvider.autoDispose
   });
 ```
 
-- [ ] **Step 4: Write repository tests (mocktail)**
+- [x] **Step 4: Write repository tests (mocktail)**
 
 ```dart
 void main() {
@@ -3750,16 +3750,16 @@ void main() {
 }
 ```
 
-- [ ] **Step 5: Run tests, expect PASS**
+- [x] **Step 5: Run tests, expect PASS**
 
 ```bash
 cd sacdia-app
 flutter test test/features/rankings/
 ```
 
-- [ ] **Step 6: Code review checkpoint** — null on 403 (no throw), DTOs alineados con DTOs backend.
+- [x] **Step 6: Code review checkpoint** — null on 403 (no throw), DTOs alineados con DTOs backend.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 cd sacdia-app
