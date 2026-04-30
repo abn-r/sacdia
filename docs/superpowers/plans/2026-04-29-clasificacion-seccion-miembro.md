@@ -3861,7 +3861,7 @@ git commit -m "feat(rankings): add MyRankingScreen with 3 score cards + composit
 - Create: `sacdia-app/lib/features/rankings/presentation/screens/section_ranking_screen.dart`
 - Create: `sacdia-app/lib/features/rankings/presentation/widgets/member_list_tile.dart`
 
-- [ ] **Step 1: Implement screen**
+- [x] **Step 1: Implement screen**
 
 ```dart
 class SectionRankingScreen extends ConsumerWidget {
@@ -3890,13 +3890,13 @@ class SectionRankingScreen extends ConsumerWidget {
 }
 ```
 
-- [ ] **Step 2: Implement `MemberListTile` (rank + name + composite badge)**
+- [x] **Step 2: Implement `MemberListTile` (rank + name + composite badge)**
 
-- [ ] **Step 3: RBAC client-side gating** — pantalla solo visible para directores y asistentes de club. Resolver via providers de auth.
+- [x] **Step 3: RBAC client-side gating** — pantalla solo visible para directores y asistentes de club. Resolver via providers de auth.
 
-- [ ] **Step 4: Code review checkpoint**
+- [x] **Step 4: Code review checkpoint**
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add sacdia-app/lib/features/rankings/presentation/screens/section_ranking_screen.dart \
