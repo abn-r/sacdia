@@ -1724,7 +1724,7 @@ async get(key: string): Promise<string | null> {
 
 `sacdia-backend/src/annual-folders/rankings.processor.ts` currently calls `rankingsService.recalculateRankings()`. Update it to call `this.rankingsService.recalculateAll()` instead (new public orchestrator method added in Step 3 below). Existing `recalculateRankings()` stays untouched — it continues to do clubs-only and is called internally by `recalculateAll()`.
 
-- [ ] **Step 1: Write failing test (extiende suite existente)**
+- [x] **Step 1: Write failing test (extiende suite existente)**
 
 Extend the existing `Test.createTestingModule()` mock setup in `sacdia-backend/src/annual-folders/__tests__/rankings.service.spec.ts` with three new mocks: `MemberCompositeScoreService`, `SectionAggregationService`, and `SystemConfigService` (the latter must mock `get`). Add a new `describe` block inside the existing file:
 
@@ -1756,13 +1756,13 @@ describe('rankings.service — 8.4-A integration', () => {
 });
 ```
 
-- [ ] **Step 2: Run test, expect FAIL**
+- [x] **Step 2: Run test, expect FAIL**
 
 ```bash
 pnpm test rankings.service.spec.ts
 ```
 
-- [ ] **Step 3: Implement extension**
+- [x] **Step 3: Implement extension**
 
 ```typescript
 // sacdia-backend/src/annual-folders/rankings.service.ts (additions)
@@ -1992,7 +1992,7 @@ async recalculateSectionAggregates(ecclesiasticalYearId?: number): Promise<void>
 // resolveYear: existing private method in 8.4-C (NOT resolveActiveYear)
 ```
 
-- [ ] **Step 4: Wire módulo — modify `sacdia-backend/src/annual-folders/annual-folders.module.ts`**
+- [x] **Step 4: Wire módulo — modify `sacdia-backend/src/annual-folders/annual-folders.module.ts`**
 
 ```typescript
 // annual-folders.module.ts
@@ -2039,15 +2039,15 @@ export class AnnualFoldersModule {}
 
 > **DI collision note**: Task 4 (`ClassScoreService`) and Task 7 (`CamporeeScoreService` at `src/rankings/member-rankings/services/`) share the class name `CamporeeScoreService` with the existing club-level one (8.4-C at a different path). Verify no DI collision at implementation time; if collision arises, rename the per-enrollment one to `EnrollmentCamporeeScoreService`.
 
-- [ ] **Step 5: Run test, expect PASS**
+- [x] **Step 5: Run test, expect PASS**
 
 ```bash
 pnpm test rankings.service.spec.ts
 ```
 
-- [ ] **Step 6: Code review checkpoint** — quality-reviewer subagent: ¿logs estructurados spec §13.1? ¿try/catch per fase? ¿idempotencia upsert garantizada?
+- [x] **Step 6: Code review checkpoint** — quality-reviewer subagent: ¿logs estructurados spec §13.1? ¿try/catch per fase? ¿idempotencia upsert garantizada?
 
-- [ ] **Step 7: Commit** (bundles Task 10 + Task 11 — see Task 11 for DENSE_RANK methods included in this commit)
+- [x] **Step 7: Commit** (bundles Task 10 + Task 11 — see Task 11 for DENSE_RANK methods included in this commit)
 
 ```bash
 git add sacdia-backend/src/annual-folders/rankings.service.ts
@@ -2078,7 +2078,7 @@ EOF
 
 > **Migration column verification**: PK column for both `enrollment_rankings` and `section_rankings` is `id` (UUID). Confirmed in `sacdia-backend/prisma/migrations/20260429000000_enrollment_rankings_schema/migration.sql`. The SQL below is correct.
 
-- [ ] **Step 1: Write failing integration test** (inside existing spec file, new describe block)
+- [x] **Step 1: Write failing integration test** (inside existing spec file, new describe block)
 
 ```typescript
 // sacdia-backend/src/annual-folders/__tests__/rankings.service.spec.ts (extension)
@@ -2114,9 +2114,9 @@ describe('rankings.service — DENSE_RANK', () => {
 });
 ```
 
-- [ ] **Step 2: Run test, expect FAIL**
+- [x] **Step 2: Run test, expect FAIL**
 
-- [ ] **Step 3: Implement los 2 métodos privados**
+- [x] **Step 3: Implement los 2 métodos privados**
 
 ```typescript
 // sacdia-backend/src/annual-folders/rankings.service.ts (additions)
@@ -2156,15 +2156,15 @@ private async updateSectionRankPositions(yearId: number): Promise<void> {
 }
 ```
 
-- [ ] **Step 4: Run test, expect PASS**
+- [x] **Step 4: Run test, expect PASS**
 
 ```bash
 pnpm test rankings.service.spec.ts
 ```
 
-- [ ] **Step 5: Code review checkpoint** — verify NULLS LAST y DENSE_RANK (no ROW_NUMBER): empates comparten rank.
+- [x] **Step 5: Code review checkpoint** — verify NULLS LAST y DENSE_RANK (no ROW_NUMBER): empates comparten rank.
 
-- [ ] **Step 6: Commit** — handled by Task 10 Step 7 (single bundled commit covering both tasks)
+- [x] **Step 6: Commit** — handled by Task 10 Step 7 (single bundled commit covering both tasks)
 
 ---
 
