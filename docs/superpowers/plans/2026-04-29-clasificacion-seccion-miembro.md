@@ -3781,7 +3781,7 @@ Repository returns null on 403 (visibility=hidden) for graceful UI handling.
 - Create: `sacdia-app/lib/features/rankings/presentation/widgets/score_mini_card.dart`
 - Create: `sacdia-app/lib/features/rankings/presentation/widgets/top_n_section.dart`
 
-- [ ] **Step 1: Implement header card (composite + rank + awarded category)**
+- [x] **Step 1: Implement header card (composite + rank + awarded category)**
 
 ```dart
 class MyRankingHeaderCard extends StatelessWidget {
@@ -3790,7 +3790,7 @@ class MyRankingHeaderCard extends StatelessWidget {
 }
 ```
 
-- [ ] **Step 2: Implement 3 mini-cards (Clase / Investidura / Camporees)**
+- [x] **Step 2: Implement 3 mini-cards (Clase / Investidura / Camporees)**
 
 ```dart
 class ScoreMiniCard extends StatelessWidget {
@@ -3801,7 +3801,7 @@ class ScoreMiniCard extends StatelessWidget {
 }
 ```
 
-- [ ] **Step 3: Implement screen con visibility gating**
+- [x] **Step 3: Implement screen con visibility gating**
 
 ```dart
 class MyRankingScreen extends ConsumerWidget {
@@ -3841,11 +3841,11 @@ class MyRankingScreen extends ConsumerWidget {
 }
 ```
 
-- [ ] **Step 4: Wire en navigation (gateado por `visibility != 'hidden'` server-side; cliente intenta y maneja null)**
+- [x] **Step 4: Wire en navigation (gateado por `visibility != 'hidden'` server-side; cliente intenta y maneja null)**
 
-- [ ] **Step 5: Code review checkpoint** — usa `HugeIconData` (NO `dynamic` ni `IconData`). Empty states correctos.
+- [x] **Step 5: Code review checkpoint** — usa `HugeIconData` (NO `dynamic` ni `IconData`). Empty states correctos.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add sacdia-app/lib/features/rankings/presentation/screens/my_ranking_screen.dart \
