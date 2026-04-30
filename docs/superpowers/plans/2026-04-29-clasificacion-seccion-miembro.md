@@ -3026,7 +3026,7 @@ Uses MemberRankingScoreBadge (cutoffs ≥85 success, ≥65 warning, <65 destruct
 - Create: `sacdia-admin/src/app/dashboard/member-rankings/[enrollmentId]/breakdown/page.tsx`
 - Create: `sacdia-admin/src/app/dashboard/member-rankings/[enrollmentId]/breakdown/_components/member-breakdown-card.tsx`
 
-- [ ] **Step 1: Implement reusable `MemberBreakdownCard`**
+- [x] **Step 1: Implement reusable `MemberBreakdownCard`**
 
 ```tsx
 type Signal = 'class' | 'investiture' | 'camporee';
@@ -3056,7 +3056,7 @@ export function MemberBreakdownCard({ signal, data, weight }: {
 }
 ```
 
-- [ ] **Step 2: Implement page con header + 3 cards + weights aplicados + recalc button**
+- [x] **Step 2: Implement page con header + 3 cards + weights aplicados + recalc button**
 
 ```tsx
 'use client';
@@ -3087,9 +3087,9 @@ export default function MemberBreakdownPage() {
 }
 ```
 
-- [ ] **Step 3: Code review checkpoint** — verifica investiture muestra status badge + score binario claro.
+- [x] **Step 3: Code review checkpoint** — verifica investiture muestra status badge + score binario claro.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add sacdia-admin/src/app/dashboard/member-rankings/[enrollmentId]
