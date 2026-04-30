@@ -3182,7 +3182,7 @@ git commit -m "feat(section-rankings): add admin pages list + drill-down to memb
 - Create: `sacdia-admin/src/app/dashboard/member-ranking-weights/_components/weights-table.tsx`
 - Create: `sacdia-admin/src/lib/api/member-ranking-weights.ts`
 
-- [ ] **Step 1: API client**
+- [x] **Step 1: API client**
 
 ```typescript
 export interface MemberRankingWeights {
@@ -3201,7 +3201,7 @@ export const updateWeights = (id: string, dto: any) => api.patch(`/api/v1/member
 export const deleteWeights = (id: string) => api.delete(`/api/v1/member-ranking-weights/${id}`);
 ```
 
-- [ ] **Step 2: Implement reusable `<WeightSumIndicator>` (o reuse de 8.4-C si disponible)**
+- [x] **Step 2: Implement reusable `<WeightSumIndicator>` (o reuse de 8.4-C si disponible)**
 
 ```tsx
 export function WeightSumIndicator({ values }: { values: number[] }) {
@@ -3215,7 +3215,7 @@ export function WeightSumIndicator({ values }: { values: number[] }) {
 }
 ```
 
-- [ ] **Step 3: Implement form dialog (shadcn Dialog + react-hook-form + zod)**
+- [x] **Step 3: Implement form dialog (shadcn Dialog + react-hook-form + zod)**
 
 ```tsx
 const schema = z.object({
@@ -3251,7 +3251,7 @@ export function WeightsFormDialog({ open, onOpenChange, initial, onSubmit }: any
 }
 ```
 
-- [ ] **Step 4: Implement table page con dialogs CREATE/EDIT y AlertDialog DELETE**
+- [x] **Step 4: Implement table page con dialogs CREATE/EDIT y AlertDialog DELETE**
 
 ```tsx
 export default function WeightsPage() {
@@ -3300,9 +3300,9 @@ export default function WeightsPage() {
 }
 ```
 
-- [ ] **Step 5: Code review checkpoint** — 3 weights only (NO `evidence_pct`). DELETE de default → AlertDialog warning.
+- [x] **Step 5: Code review checkpoint** — 3 weights only (NO `evidence_pct`). DELETE de default → AlertDialog warning.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add sacdia-admin/src/app/dashboard/member-ranking-weights src/lib/api/member-ranking-weights.ts
