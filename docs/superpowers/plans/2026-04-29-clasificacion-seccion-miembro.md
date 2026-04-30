@@ -2441,7 +2441,7 @@ EOF
 - Create: `sacdia-backend/src/rankings/section-rankings/section-rankings.module.ts`
 - Test: `sacdia-backend/src/rankings/section-rankings/section-rankings.controller.spec.ts`
 
-- [ ] **Step 1: Write failing test**
+- [x] **Step 1: Write failing test**
 
 ```typescript
 describe('SectionRankingsController', () => {
@@ -2452,9 +2452,9 @@ describe('SectionRankingsController', () => {
 });
 ```
 
-- [ ] **Step 2: Run test, expect FAIL**
+- [x] **Step 2: Run test, expect FAIL**
 
-- [ ] **Step 3: Implement DTO + service + controller**
+- [x] **Step 3: Implement DTO + service + controller**
 
 ```typescript
 // section-ranking-response.dto.ts
@@ -2507,11 +2507,11 @@ export class SectionRankingsController {
 }
 ```
 
-- [ ] **Step 4: Run tests, expect PASS**
+- [x] **Step 4: Run tests, expect PASS**
 
-- [ ] **Step 5: Code review checkpoint** — orden de rutas: `/:sectionId/members` ANTES de `GET /` (en NestJS el orden de declaración no importa para rutas con prefijo distinto, pero declarativo es claro).
+- [x] **Step 5: Code review checkpoint** — orden de rutas: `/:sectionId/members` ANTES de `GET /` (en NestJS el orden de declaración no importa para rutas con prefijo distinto, pero declarativo es claro).
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add sacdia-backend/src/rankings/section-rankings
