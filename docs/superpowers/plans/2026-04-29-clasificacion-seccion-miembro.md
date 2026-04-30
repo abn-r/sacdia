@@ -2662,7 +2662,7 @@ EOF
 - Modify: `sacdia-backend/src/award-categories/dto/{create,update}-award-category.dto.ts`
 - Test: `sacdia-backend/src/award-categories/award-categories.controller.spec.ts`
 
-- [ ] **Step 1: Write failing test**
+- [x] **Step 1: Write failing test**
 
 ```typescript
 describe('AwardCategoriesController — scope extension', () => {
@@ -2674,9 +2674,9 @@ describe('AwardCategoriesController — scope extension', () => {
 });
 ```
 
-- [ ] **Step 2: Run test, expect FAIL**
+- [x] **Step 2: Run test, expect FAIL**
 
-- [ ] **Step 3: Implement extension**
+- [x] **Step 3: Implement extension**
 
 ```typescript
 // dto extension
@@ -2706,11 +2706,11 @@ list(
 }
 ```
 
-- [ ] **Step 4: Run tests, expect PASS**
+- [x] **Step 4: Run tests, expect PASS**
 
-- [ ] **Step 5: Code review checkpoint** — scope enum coherente entre DB CHECK constraint, DTO `IsIn`, y query validation.
+- [x] **Step 5: Code review checkpoint** — scope enum coherente entre DB CHECK constraint, DTO `IsIn`, y query validation.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add sacdia-backend/src/award-categories
