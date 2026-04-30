@@ -2534,7 +2534,7 @@ GET /:sectionId/members drill-down (ParseIntPipe INTEGER)
 
 Mismo patrón que `ranking-weights` 8.4-C, pero con 3 columnas (no 4) y `ParseUUIDPipe` en `:id`.
 
-- [ ] **Step 1: Write failing test**
+- [x] **Step 1: Write failing test**
 
 ```typescript
 describe('MemberRankingWeightsController', () => {
@@ -2549,9 +2549,9 @@ describe('MemberRankingWeightsController', () => {
 });
 ```
 
-- [ ] **Step 2: Run test, expect FAIL**
+- [x] **Step 2: Run test, expect FAIL**
 
-- [ ] **Step 3: Implement DTOs (zod o class-validator)**
+- [x] **Step 3: Implement DTOs (zod o class-validator)**
 
 ```typescript
 // create-weights.dto.ts
@@ -2564,7 +2564,7 @@ export class CreateMemberRankingWeightsDto {
 }
 ```
 
-- [ ] **Step 4: Implement service**
+- [x] **Step 4: Implement service**
 
 ```typescript
 @Injectable()
@@ -2603,7 +2603,7 @@ export class MemberRankingWeightsService {
 }
 ```
 
-- [ ] **Step 5: Implement controller**
+- [x] **Step 5: Implement controller**
 
 ```typescript
 @Controller('member-ranking-weights')
@@ -2635,11 +2635,11 @@ export class MemberRankingWeightsController {
 }
 ```
 
-- [ ] **Step 6: Run tests, expect PASS**
+- [x] **Step 6: Run tests, expect PASS**
 
-- [ ] **Step 7: Code review checkpoint** — `ParseUUIDPipe` en `:id` (PK es UUID). 3 columnas (NO `evidence_pct`).
+- [x] **Step 7: Code review checkpoint** — `ParseUUIDPipe` en `:id` (PK es UUID). 3 columnas (NO `evidence_pct`).
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add sacdia-backend/src/rankings/member-ranking-weights
