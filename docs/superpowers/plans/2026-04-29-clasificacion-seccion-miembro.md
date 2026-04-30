@@ -2872,7 +2872,7 @@ EOF
 - Create: `sacdia-admin/src/app/dashboard/member-rankings/_components/member-rankings-filters.tsx`
 - Create: `sacdia-admin/src/lib/api/member-rankings.ts`
 
-- [ ] **Step 1: Implement API client `member-rankings.ts`**
+- [x] **Step 1: Implement API client `member-rankings.ts`**
 
 ```typescript
 import { api } from './client';
@@ -2906,7 +2906,7 @@ export async function getMemberBreakdown(enrollmentId: number, yearId: number) {
 }
 ```
 
-- [ ] **Step 2: Implement `MemberRankingScoreBadge`** (reusable, similar a `RankingScoreBadge` 8.4-C)
+- [x] **Step 2: Implement `MemberRankingScoreBadge`** (reusable, similar a `RankingScoreBadge` 8.4-C)
 
 ```tsx
 import { Badge } from '@/components/ui/badge';
@@ -2927,7 +2927,7 @@ export function MemberRankingScoreBadge({ value }: { value: number | null }) {
 }
 ```
 
-- [ ] **Step 3: Implement table component (shadcn DataTable + TanStack Query)**
+- [x] **Step 3: Implement table component (shadcn DataTable + TanStack Query)**
 
 ```tsx
 'use client';
@@ -2984,7 +2984,7 @@ export function MemberRankingsTable({ filters }: { filters: any }) {
 }
 ```
 
-- [ ] **Step 4: Implement page `/dashboard/member-rankings/page.tsx`** (SSR + client filters)
+- [x] **Step 4: Implement page `/dashboard/member-rankings/page.tsx`** (SSR + client filters)
 
 ```tsx
 import { MemberRankingsTable } from './_components/member-rankings-table';
@@ -3004,9 +3004,9 @@ export default function MemberRankingsPage() {
 }
 ```
 
-- [ ] **Step 5: Code review checkpoint** — design system check (shadcn variants, no hardcoded Tailwind colors).
+- [x] **Step 5: Code review checkpoint** — design system check (shadcn variants, no hardcoded Tailwind colors).
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 cd sacdia-admin
