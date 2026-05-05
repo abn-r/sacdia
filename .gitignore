@@ -23,6 +23,7 @@ sacdia-admin/
 
 # Local AI context files (personal, non-versioned)
 *.local.md
+EXECUTIVE-BRIEF.md
 
 # Ignore claude-mem context files (local only)
 .claude/
