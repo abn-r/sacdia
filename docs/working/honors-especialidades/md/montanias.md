@@ -1,0 +1,23 @@
+# Especialidad — montanias
+
+**Fuente**: `/Users/abner/Downloads/S3/honors_pdf/montanias.pdf`
+**Texto extraído**: `/Users/abner/Documents/development/sacdia/docs/working/honors-especialidades/raw/montanias.txt`
+**Nivel detectado**: 1
+**Cantidad de requisitos detectados**: 8
+
+> Nota: extracción automática preliminar desde la capa de texto del PDF. Requiere revisión humana antes de cualquier carga a base de datos.
+
+## Requisitos detectados
+
+1. Definir los siguientes términos: Orología Montaña Cordillera Magma Volcán
+2. Decir tres formas en que las montañas han sido formadas. 1. 2.
+3. 3. Elegir 10 montañas, incluyendo 2 cerca de donde vive, y decir cómo se llama cada uno, cuál es su altura, dónde se encuentra y de qué cordillera (si corresponde) forma parte. Intentar elegir montañas de tantos países diferentes como sea posible.
+4. Combinar cada descripción con su respuesta correcta: Cordillera submarina que da la vuelta al mundo Aconcagua Las montañas más altas de cada continente Monte Everest La montaña más alta de Sudamérica Himalaya La montaña más alta de la tierra Monte Mayón La cordillera más larga del mundo Dorsal medioceánica La montaña más alta de Japón Damavand El volcán más alto de Asia Monte McKinley Los indios lo llaman Denali, «El más grande» Siete Cumbres La montaña conocida por su «cono perfecto» Cordillera de los Andes La cordillera con las montañas más altas de la tierra Monte Fuji
+5. Hacer una lista de por lo menos 4 montañas mencionadas en la Biblia y decir qué eventos importantes se realizaron allí: Ararat Monte Carmelo Monte Sinaí Monte Nebo
+6. Hacer la siguiente actividad: a. Visitar una montaña y decir acerca de su experiencia en una de las siguientes maneras: i. Contarle a alguien una historia acerca de su visita ii. Escribir una historia narrativa acerca de su visita iii. Hacer un video o presentación de PowerPoint acerca de su visita iv. Hacer un álbum de recortes con fotografías acerca de su visita (esto puede ser un proyecto en grupo) b. Si NO hay una montaña en su estado/provincia, puede ver un video acerca de las montañas. i. Resumir el video ii. Crear una presentación multimedia acerca del video iii. Crear un modelo tridimensional de una montaña/volcán y demostrar su erupción
+7. Escoger uno de los siguientes versículos acerca de las montañas y recitarlo: a. Salmos 90:2 b. Isaías 52:7 c. Isaías 55:12
+8. Crear un juego o actividad basado en la terminología y las montañas que aprendió en esta especialidad.
+
+## Observaciones
+
+- Este archivo fue preparado para análisis posterior, no para carga directa a BD.

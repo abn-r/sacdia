@@ -1,0 +1,23 @@
+# Especialidad — internet
+
+**Fuente**: `/Users/abner/Downloads/S3/honors_pdf/internet.pdf`
+**Texto extraído**: `/Users/abner/Documents/development/sacdia/docs/working/honors-especialidades/raw/internet.txt`
+**Nivel detectado**: 2
+**Cantidad de requisitos detectados**: 8
+
+> Nota: extracción automática preliminar desde la capa de texto del PDF. Requiere revisión humana antes de cualquier carga a base de datos.
+
+## Requisitos detectados
+
+1. Definir los siguientes términos: Internet World Wide Web (WWW) Sala de chat (mensaje instantáneo) Descargar Subir Sitio web Virus* *A lo largo de esta especialidad, el término «virus» representa los virus tradicionales, así como troyanos, gusanos y otros códigos maliciosos.
+2. Definir los siguientes términos y dar ejemplos de cada uno: Correo electrónico Navegador web IRC/cliente IM (mensajería instantánea) Contenido multimedia Motor de búsqueda y directorios de búsqueda Programa software antivirus Cortafuegos (informática es firewall)
+3. Completar uno de los siguientes: a. Escribir una breve historia del Internet de 250-300 palabras. b. Presentar una charla de 2 a 3 minutos acerca de la historia del Internet. Independientemente de la opción elegida, incluir la fecha y los acontecimientos que rodean su origen, los grandes acontecimientos, el nacimiento y el crecimiento de los navegadores web (como Mosaic, Netscape, Internet Explorer) y lo que están haciendo hoy. Recordar, no se trata de una historia de los ordenadores, sino una breve historia del Internet. Se debe hacer una lista de al menos 2 de los recursos en línea donde se encontró la información relevante para este reporte.
+4. ¿Por qué es importante el programa software del antivirus? Incluir en la respuesta: ¿cuáles son algunas maneras que se puede recibir un virus a través del Internet? ¿por qué es importante tener actualizado el programa antivirus para mantener los archivos del equipo seguros? ¿de qué manera no estar protegido puede dar lugar a compartir un virus con otros miembros de la familia y amigos? ¿qué daño puede hacer un virus a la computadora o a las computadoras de otras personas?
+5. ¿De qué manera filterware/control parental (programas como Net NannyTM o AOL control paterno) protegen a la familia? Desarrollar con su familia y firmar un pacto familiar del uso de Internet que incluya los siguientes elementos: a. Nunca relevar información personal. b. Recordar que las personas no siempre son quienes dicen que son. c. Nunca encontrarse con un amigo de Internet en persona, por primera vez, sin un padre presente. d. Nunca responder a los ataques o a las provocaciones. e. Parar inmediatamente si ves o lees algo que te molesta. f. Colocar cuanto tiempo cada miembro de la familia puede pasar en Internet por semana. Establecer límites para que fomenten tiempo con la familia, en casa y otras g. Tipos de sitios web que sean aceptables/inaceptables para ver. ¿Cuáles son los principios que su familia va a utilizar para determinar cuáles son aceptables? Base estos principios en la Biblia. *Un contrato se ha preparado y está listo para ser firmado al final de este documento.
+6. Mostrar la capacidad para navegar por Internet, demostrando los siguientes: a. Visitar al menos 3 sitios diferentes (distintos nombres de dominio). Imprimir o mostrar la primera página de cada sitio a su instructor. b. Demostrar la capacidad para utilizar un motor de búsqueda para encontrar una página de la Biblia en línea. Ir a la página web, buscar por lo menos 3 diferentes textos de la Biblia de memoria en 3 diferentes versiones e imprimir o mostrar los resultados al instructor. c. Encontrar 3 sitios web creados por la Iglesia Adventista del Séptimo Día. Imprimir o mostrar la primera página de cada sitio al instructor. d. Descargar un archivo comprimido del Internet (.tar, .zip, etc.) a la unidad de disco duro y descomprimirlo, y utilizar el programa o archivo.
+7. Demostrar la capacidad para utilizar el correo electrónico mediante la demostración de lo siguiente al instructor (si es necesario, crear una cuenta de correo electrónico, con un nombre de usuario y contraseña): a. Crear y enviar mensajes de correo electrónico b. Recibir y descargar correo electrónico c. Descargar/ver un archivo adjunto d. Conocer 5 principios de usar el correo electrónico prudentemente y sin peligro.
+8. Memorizar Filipenses 4:8. ¿Cómo funciona este texto de la Biblia como guía para el cristiano en el uso del Internet?
+
+## Observaciones
+
+- Este archivo fue preparado para análisis posterior, no para carga directa a BD.

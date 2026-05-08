@@ -1,0 +1,25 @@
+# Especialidad — aves
+
+**Fuente**: `/Users/abner/Downloads/S3/honors_pdf/aves.pdf`
+**Texto extraído**: `/Users/abner/Documents/development/sacdia/docs/working/honors-especialidades/raw/aves.txt`
+**Nivel detectado**: 1
+**Cantidad de requisitos detectados**: 10
+
+> Nota: extracción automática preliminar desde la capa de texto del PDF. Requiere revisión humana antes de cualquier carga a base de datos.
+
+## Requisitos detectados
+
+1. Dar 2 características que establecen a las aves aparte de todas las demás criaturas. 1.
+2. 2. Nombrar 3 aves no voladoras, decir lo que compone su dieta y el nombre del país o continente en el que cada una vive. Ave Dieta País/Continente 1. 2.
+3. 3. Mencionar el día de la semana cuando las aves fueron creadas. Buscar en la Biblia los nombres de 5 aves y poder nombrarlas de memoria. 1. 4. 2. 5. 3.
+4. Escribir o dar verbalmente 3 maneras en que el amor y el propósito de Dios se muestra en la creación de las aves. 1. 2. 3. Ascociación General
+5. Hacer una lista de 30 especies de aves silvestres, incluyendo las aves de al menos 5 diferentes órdenes, que personalmente ha observado y positivamente identificado por vista al aire libre. 1. 11. 21. 2. 12. 22. 3. 13. 23. 4. 14. 24. 5. 15. 25.
+6. 16. 26.
+7. 17. 27.
+8. 18. 28.
+9. 19. 29.
+10. 20. 30. 6. Hacer una lista de 5 especies de aves silvestres que personalmente ha identificado positivamente escuchando el sonido al aire libre. 1. 4. 2. 5. 3. 7. Realizar una de las siguientes actividades: a. Configurar una estación de alimentación e informar sobre las aves visitantes observadas durante un período de 7 días. b. Encontrar un nido de aves durante la temporada de anidación, identificar la especie de ave que lo construyó, describir el nido en detalle, observar el nido durante 5 días e informar lo que sucedió en el nido en cada uno de los días. Ascociación General c. En el hemisferio occidental: mantener un alimentador de colibríes por 2 meses. i. ¿En qué consiste el néctar hecho por el hombre? ii. ¿Por qué no debe utilizar colorante de alimentos o miel? iii. ¿Cuándo se debe cambiar el líquido en el alimentador? iv. ¿Cómo debería el alimentador ser atendido? d. En otras zonas del mundo: seleccionar al menos 3 diferentes hábitats en su área y hacer listas comparativas de aves de esos hábitats, indicando las diferencias que espera encontrar en las aves y las realmente encontradas.
+
+## Observaciones
+
+- Este archivo fue preparado para análisis posterior, no para carga directa a BD.

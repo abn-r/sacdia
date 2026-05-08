@@ -1,0 +1,41 @@
+# Especialidad — natacion 1
+
+**Fuente**: `/Users/abner/Downloads/S3/honors_pdf/natacion_1.pdf`
+**Texto extraído**: `/Users/abner/Documents/development/sacdia/docs/working/honors-especialidades/raw/natacion-1.txt`
+**Nivel detectado**: 1
+**Cantidad de requisitos detectados**: 26
+
+> Nota: extracción automática preliminar desde la capa de texto del PDF. Requiere revisión humana antes de cualquier carga a base de datos.
+
+## Requisitos detectados
+
+1. Mantener la respiración: tomar una respiración para mantener la respiración con el rostro totalmente sumergido, por lo menos 10 segundos.
+2. Respiración rítmica: alternativamente inhalar por la boca por encima de la superficie y exhalar por la boca y la nariz, con la cabeza completamente sumergida, 10 veces de manera rítmica y continua.
+3. Flotación en la posición prona: en aguas cuya profundidad llegue a la cintura, ponerse boca abajo en el agua y regresar a pie sin ayuda o apoyo.
+4. Desplazarse en posición prona: empujarse boca abajo en aguas cuya profundidad llegue a la cintura en la posición prona, desplazarse a una distancia de al menos 2 longitudes de su cuerpo y volver a la posición de pie.
+5. Flotar en posición supina: asumir una posición supina, flotando boca arriba, en aguas cuya profundidad llegue a la cintura, mantener la posición con la cara por encima del agua durante al menos 10 segundos y volver a una posición de pie sin ayuda.
+6. Desplazarse en posición supina: en aguas cuya profundidad llegue a la cintura, con los brazos a los lados, sentarse, empujarse, desplazarse a una distancia de al menos una longitud del cuerpo y volver a la posición de pie con confianza y de manera fácil.
+7. Deslizarse de frente con patada: en aguas cuya profundidad llegue a la cintura, desplazarse en posición prona, hacer la patada de principiantes de manera suave y sin prisa, y patear por una distancia de 3 veces el tamaño del cuerpo antes de colocarse en la posición de pie.
+8. Deslizarse de espalda con patada: en aguas cuya profundidad llegue a la cintura, desplazarse de espalda usando la patada de principiantes a una distancia de 3 veces el tamaño del cuerpo y recuperar la posición de pie con facilidad.
+9. Brazada (brazada humana o nada estilo perro): en aguas cuya profundidad llegue a la cintura, asumir una posición prona con la cara sumergida y con las piernas patear suavemente, hacer la brazada en serie, jalar y recuperar los brazos y avanzar de ese modo.
+10. Brazada en posición supina: en aguas cuya profundidad llegue a la cintura, empezar a desplazarse de espalda y propulsarse a sí mismo, utilizando el método de las aletas. Recreación
+11. Combinar brazadas de frente: en aguas cuya profundidad sea del alto de la persona, nadar de manera coordinada utilizando la brazada de principiante continuamente por una distancia de 18 a 23 metros.
+12. Combinar brazadas de espalda: en aguas cuya profundidad sea del alto de la persona, nadar una distancia mínima de 9 metros cómodamente y usar el aleteo en combinación con la patada de principiante.
+13. Cambio de dirección: en aguas cuya profundidad sea del alto de la persona, comenzar a nadar con la brazada de principiante en posición prona y en la brazada, hacer un giro brusco en ángulo recto hacia la derecha. Repetir la prueba haciendo un giro a la izquierda. Por último, demostrar capacidad para hacer un giro completo.
+14. Dar vuelta: iniciar la natación en aguas cuya profundidad llegue al pecho. A partir de la posición de frente en la natación, dar vuelta en la espalda y permanecer allí flotando inmóvil o descansar flotando, luego reanudar la posición de la natación y continuar nadando.
+15. Fuera de nivel: caminar dentro del agua hasta que ésta le llegue al cuello, luego girar y mirar hacia el agua de poca profundidad, nadar has que la profundidad de agua le llegue a la cintura antes de ponerse de pie.
+16. Flotación de supervivencia: en aguas cuya profundidad llegue a la cabeza, asumir la posición de descanso con el cuerpo vertical en el agua y la cara también. por el movimiento de los brazos y las piernas, levantar la cabeza fuera del agua, inhalar y exhalar, y reanudar la posición de descanso.
+17. Saltar de pie en aguas de profundidad a la cintura: esta prueba debe terminar con un desplazamiento, patada de desplazamiento, o la brazada combinada de principiante.
+18. Saltar en aguas profundas, nivelar y nadar.
+19. Clavado de cabeza: esta prueba debe de hacerse desde una sólida plataforma de baja elevación sobre agua cuya profundidad llegue al cuello. Debe finalizar emergiendo y nadando un poco a lo largo de la superficie.
+20. Saltar en aguas profundas, nivelarse y nadar 14 metros. Sin detenerse o tocar el fondo, dar la vuelta y nadar de regreso al punto de partida.
+21. Hacer un clavado de cabeza sencillo de un muelle o cubierta, nivelar y nadar 14 metros, dar la vuelta y empezar a nadar hacia atrás. A mitad del camino, colocarse en posición supina y descansar, ya sea inmóvil o con suaves movimientos de remo durante 15 segundos. Girar de nuevo a la posición de natación de rente y nadar al punto de partida.
+22. En tierra, demostrar la forma correcta de poner un dispositivo personal de flotación. Recreación
+23. Mostrar cómo calmar un calambre desde una posición de flotación de supervivencia con la profundidad del agua al nivel del cuello y progresar a aguas profundas.
+24. Desde una cubierta o un muelle, hacer un rescate de extensión de brazo y pierna. Hacer un rescate de extensión utilizando un palo/poste, toalla o camiseta.
+25. Demostrar la respiración artificial.
+26. Conocer las causas y los métodos para la prevención de accidentes que pueden ocurrir en el agua o cerca del agua. Causas Prevención
+
+## Observaciones
+
+- Este archivo fue preparado para análisis posterior, no para carga directa a BD.

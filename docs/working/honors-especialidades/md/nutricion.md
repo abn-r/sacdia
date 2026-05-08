@@ -1,0 +1,25 @@
+# Especialidad — nutricion
+
+**Fuente**: `/Users/abner/Downloads/S3/honors_pdf/nutricion.pdf`
+**Texto extraído**: `/Users/abner/Documents/development/sacdia/docs/working/honors-especialidades/raw/nutricion.txt`
+**Nivel detectado**: 2
+**Cantidad de requisitos detectados**: 10
+
+> Nota: extracción automática preliminar desde la capa de texto del PDF. Requiere revisión humana antes de cualquier carga a base de datos.
+
+## Requisitos detectados
+
+1. Dibujar la pirámide alimenticia en sus varias formas. Decir el número de porciones necesarias de cada grupo por día. Pirámide Alimenticia Número de Porciones 1.
+2. 
+3. 
+4. ¿Por qué es importante comer una dieta balanceada? 2. Explicar la diferencia entre las siguientes clases de dieta: Ovolactovegetarianismo Ovovegetarianismo Veganismo 3. Planear un menú de 2 días de una dieta ovolactovegetariana balanceada utilizando el guía de la pirámide alimentaria. (Completar el Cartel #1) 4. ¿Cuál es otro nombre para las siguientes vitaminas? Vitamina B1 Vitamina B2
+5. Hacer una lista de al menos 3 importantes fuentes alimenticias de los siguientes nutrientes: Fuente #1 Fuente #2 Fuente#3 Vitamina C Vitamina A Vitamina B1 Vitamina B2 Hierro Calcio
+6. ¿Por qué es importante beber mucha agua cada día? ¿Cuánta agua se debería beber todos los días?
+7. Nombrar 3 enfermedades comunes que pueden ser controladas por la dieta. 1. 3. 2.
+8. ¿Cuál es la diferencia entre la harina integral y la harina blanca refinada? Harina integral Harina blanca refinada ¿Cuál tiene el mayor valor nutritivo?
+9. ¿Qué significan las siglas CDR y cuál es su significado?
+10. ¿Por qué es importante no tomar cantidades excesivas de algunas vitaminas y minerales? Nutrición — Cartel #1 DESAYUNO ALMUERZO CENA Día #1 Día #2
+
+## Observaciones
+
+- Este archivo fue preparado para análisis posterior, no para carga directa a BD.

@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SACDIA — Honors Flow Redesign</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0f0f1a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: white; padding: 32px; }
+  h1 { text-align: center; font-size: 28px; font-weight: 800; margin-bottom: 8px; }
+  .subtitle { text-align: center; color: rgba(255,255,255,0.5); font-size: 14px; margin-bottom: 40px; }
+  .screens { display: grid; grid-template-columns: repeat(2, 1fr); gap: 32px; max-width: 960px; margin: 0 auto; }
+  @media (max-width: 800px) { .screens { grid-template-columns: 1fr; max-width: 400px; } }
+  .phone { background: #1a1a2e; border-radius: 28px; padding: 14px; box-shadow: 0 12px 40px rgba(0,0,0,0.5); }
+  .phone-screen { background: #FFFFFF; border-radius: 18px; overflow: hidden; min-height: 540px; }
+  .phone-label { text-align: center; padding: 12px; color: rgba(255,255,255,0.6); font-size: 13px; font-weight: 700; letter-spacing: 1px; }
+  .status-bar { background: #183651; padding: 8px 16px; display: flex; justify-content: space-between; align-items: center; }
+  .status-bar span { color: white; font-size: 10px; font-weight: 600; }
+  .battery { width: 14px; height: 10px; border: 1px solid white; border-radius: 2px; position: relative; }
+  .battery::after { content: ''; position: absolute; left: 1px; top: 1px; width: 70%; height: calc(100% - 2px); background: white; border-radius: 1px; }
+</style>
+</head>
+<body>
+
+<h1>Honors Flow — Opción C Refinada</h1>
+<p class="subtitle">Duolingo gamification + Scout badge essence • 4 pantallas</p>
+
+<div class="screens">
+
+  <!-- SCREEN 1: Catalog -->
+  <div class="phone">
+    <div class="phone-screen">
+      <div class="status-bar"><span>9:41</span><div class="battery"></div></div>
+      <!-- Header -->
+      <div style="background: linear-gradient(135deg, #183651, #2EA0DA); padding: 20px 16px 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <span style="color: white; font-size: 18px; font-weight: 800;">Especialidades</span>
+          <div style="background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px;">
+            <span style="color: white; font-size: 11px; font-weight: 600;">5/17 🏆</span>
+          </div>
+        </div>
+        <div style="background: rgba(255,255,255,0.15); border-radius: 12px; padding: 10px 14px; display: flex; align-items: center; gap: 8px;">
+          <span style="color: rgba(255,255,255,0.6); font-size: 14px;">🔍</span>
+          <span style="color: rgba(255,255,255,0.5); font-size: 12px;">Buscar especialidad...</span>
+        </div>
+      </div>
+      <!-- Category chips -->
+      <div style="padding: 12px 16px 8px; display: flex; gap: 8px; overflow-x: auto;">
+        <div style="background: #2EA0DA; color: white; padding: 8px 16px; border-radius: 24px; font-size: 11px; font-weight: 700; white-space: nowrap; box-shadow: 0 2px 8px rgba(46,160,218,0.3);">🌿 Naturaleza</div>
+        <div style="background: rgba(24,54,81,0.06); color: #183651; padding: 8px 16px; border-radius: 24px; font-size: 11px; font-weight: 600; white-space: nowrap;">🎨 Artes</div>
+        <div style="background: rgba(24,54,81,0.06); color: #183651; padding: 8px 16px; border-radius: 24px; font-size: 11px; font-weight: 600; white-space: nowrap;">🔧 Habilidades</div>
+        <div style="background: rgba(24,54,81,0.06); color: #183651; padding: 8px 16px; border-radius: 24px; font-size: 11px; font-weight: 600; white-space: nowrap;">📖 Académicas</div>
+      </div>
+      <!-- Honor Cards -->
+      <div style="padding: 8px 16px 16px; display: flex; flex-direction: column; gap: 10px;">
+        <!-- Completed -->
+        <div style="background: white; border-radius: 14px; padding: 14px; display: flex; align-items: center; gap: 12px; box-shadow: 0 2px 8px rgba(24,54,81,0.06); border-left: 4px solid #4FBF9F;">
+          <div style="width: 44px; height: 44px; background: linear-gradient(135deg, #4FBF9F, #43A78A); border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            <span style="color: white; font-size: 18px; font-weight: 800;">✓</span>
+          </div>
+          <div style="flex: 1;">
+            <div style="color: #183651; font-weight: 700; font-size: 13px;">Primeros Auxilios</div>
+            <div style="color: #4FBF9F; font-size: 10px; font-weight: 600;">Completada ⭐</div>
+          </div>
+        </div>
+        <!-- In Progress -->
+        <div style="background: white; border-radius: 14px; padding: 14px; display: flex; align-items: center; gap: 12px; box-shadow: 0 2px 8px rgba(24,54,81,0.06); border-left: 4px solid #FBBD5E;">
+          <div style="width: 44px; height: 44px; background: linear-gradient(135deg, #FBBD5E, #e8a84a); border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            <span style="font-size: 18px;">🌿</span>
+          </div>
+          <div style="flex: 1;">
+            <div style="color: #183651; font-weight: 700; font-size: 13px;">Zoología</div>
+            <div style="display: flex; align-items: center; gap: 6px; margin-top: 4px;">
+              <div style="flex: 1; background: rgba(251,189,94,0.2); border-radius: 4px; height: 5px;">
+                <div style="background: #FBBD5E; width: 60%; height: 100%; border-radius: 4px;"></div>
+              </div>
+              <span style="color: #FBBD5E; font-size: 10px; font-weight: 700;">60%</span>
+            </div>
+          </div>
+        </div>
+        <!-- Available 1 -->
+        <div style="background: white; border-radius: 14px; padding: 14px; display: flex; align-items: center; gap: 12px; box-shadow: 0 2px 8px rgba(24,54,81,0.06); border-left: 4px solid #E1E6E7;">
+          <div style="width: 44px; height: 44px; background: #F0F4F5; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            <span style="font-size: 18px;">🏕️</span>
+          </div>
+          <div style="flex: 1;">
+            <div style="color: #183651; font-weight: 700; font-size: 13px;">Campismo</div>
+            <div style="color: #B9B9B9; font-size: 10px;">Disponible • Nivel básico</div>
+          </div>
+          <span style="color: #2EA0DA; font-size: 18px;">›</span>
+        </div>
+        <!-- Available 2 -->
+        <div style="background: white; border-radius: 14px; padding: 14px; display: flex; align-items: center; gap: 12px; box-shadow: 0 2px 8px rgba(24,54,81,0.06); border-left: 4px solid #E1E6E7;">
+          <div style="width: 44px; height: 44px; background: #F0F4F5; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            <span style="font-size: 18px;">🌲</span>
+          </div>
+          <div style="flex: 1;">
+            <div style="color: #183651; font-weight: 700; font-size: 13px;">Botánica</div>
+            <div style="color: #B9B9B9; font-size: 10px;">Disponible • Nivel intermedio</div>
+          </div>
+          <span style="color: #2EA0DA; font-size: 18px;">›</span>
+        </div>
+      </div>
+    </div>
+    <div class="phone-label">① CATÁLOGO</div>
+  </div>
+
+  <!-- SCREEN 2: Detail -->
+  <div class="phone">
+    <div class="phone-screen">
+      <div class="status-bar"><span>9:41</span><div class="battery"></div></div>
+      <div style="background: linear-gradient(135deg, #2EA0DA, #183651); padding: 20px 16px;">
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px;">
+          <span style="color: white; font-size: 18px;">←</span>
+          <span style="color: rgba(255,255,255,0.7); font-size: 12px;">Naturaleza</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 16px;">
+          <div style="width: 72px; height: 72px; background: rgba(255,255,255,0.15); border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 36px; flex-shrink: 0;">🏕️</div>
+          <div>
+            <div style="color: white; font-size: 20px; font-weight: 800;">Campismo</div>
+            <div style="display: flex; gap: 8px; margin-top: 6px;">
+              <span style="background: rgba(255,255,255,0.2); color: white; padding: 3px 10px; border-radius: 12px; font-size: 10px; font-weight: 600;">Nivel Básico</span>
+              <span style="background: rgba(79,191,159,0.3); color: #90EE90; padding: 3px 10px; border-radius: 12px; font-size: 10px; font-weight: 600;">Naturaleza</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="padding: 16px;">
+        <p style="color: #475569; font-size: 12px; line-height: 1.6; margin-bottom: 16px;">Aprendé técnicas de supervivencia, armado de carpas, orientación con brújula, y preparación de fogatas seguras en entornos naturales.</p>
+        <div style="margin-bottom: 16px;">
+          <div style="color: #183651; font-weight: 700; font-size: 13px; margin-bottom: 10px;">Requisitos</div>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <div style="display: flex; align-items: center; gap: 10px; padding: 10px; background: #F8FAFB; border-radius: 10px;">
+              <div style="width: 24px; height: 24px; border: 2px solid #E1E6E7; border-radius: 50%; flex-shrink: 0;"></div>
+              <span style="color: #475569; font-size: 12px;">Armar una carpa sin ayuda</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px; padding: 10px; background: #F8FAFB; border-radius: 10px;">
+              <div style="width: 24px; height: 24px; border: 2px solid #E1E6E7; border-radius: 50%; flex-shrink: 0;"></div>
+              <span style="color: #475569; font-size: 12px;">Encender fogata con 2 métodos</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px; padding: 10px; background: #F8FAFB; border-radius: 10px;">
+              <div style="width: 24px; height: 24px; border: 2px solid #E1E6E7; border-radius: 50%; flex-shrink: 0;"></div>
+              <span style="color: #475569; font-size: 12px;">Cocinar una comida al aire libre</span>
+            </div>
+          </div>
+        </div>
+        <div style="background: rgba(46,160,218,0.08); border-radius: 12px; padding: 12px; display: flex; align-items: center; gap: 10px; margin-bottom: 16px;">
+          <span style="font-size: 16px;">📄</span>
+          <div style="flex: 1;">
+            <div style="color: #2EA0DA; font-size: 12px; font-weight: 600;">Material de estudio</div>
+            <div style="color: #94A3B8; font-size: 10px;">PDF • 2.4 MB</div>
+          </div>
+          <span style="color: #2EA0DA; font-size: 14px;">↓</span>
+        </div>
+        <button style="width: 100%; background: linear-gradient(135deg, #4FBF9F, #43A78A); color: white; border: none; border-radius: 14px; padding: 16px; font-size: 15px; font-weight: 700; box-shadow: 0 4px 0 #2d8a6e; cursor: pointer;">
+          Inscribirme 🚀
+        </button>
+      </div>
+    </div>
+    <div class="phone-label">② DETALLE</div>
+  </div>
+
+  <!-- SCREEN 3: In Progress -->
+  <div class="phone">
+    <div class="phone-screen">
+      <div class="status-bar"><span>9:41</span><div class="battery"></div></div>
+      <div style="background: linear-gradient(135deg, #FBBD5E, #F06151); padding: 20px 16px;">
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+          <span style="color: white; font-size: 18px;">←</span>
+          <span style="color: rgba(255,255,255,0.8); font-size: 12px;">Mi progreso</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 16px;">
+          <div style="width: 64px; height: 64px; background: rgba(255,255,255,0.2); border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 32px; flex-shrink: 0;">🏕️</div>
+          <div style="flex: 1;">
+            <div style="color: white; font-size: 18px; font-weight: 800;">Campismo</div>
+            <div style="background: rgba(255,255,255,0.25); border-radius: 6px; height: 8px; margin-top: 8px;">
+              <div style="background: white; width: 33%; height: 100%; border-radius: 6px;"></div>
+            </div>
+            <div style="color: rgba(255,255,255,0.9); font-size: 11px; margin-top: 4px; font-weight: 600;">1 de 3 requisitos</div>
+          </div>
+        </div>
+      </div>
+      <div style="padding: 16px; display: flex; flex-direction: column; gap: 10px;">
+        <!-- Completed req -->
+        <div style="background: #F0FDF8; border-radius: 12px; padding: 14px; display: flex; align-items: center; gap: 12px; border: 1px solid rgba(79,191,159,0.2);">
+          <div style="width: 28px; height: 28px; background: #4FBF9F; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            <span style="color: white; font-size: 14px; font-weight: 800;">✓</span>
+          </div>
+          <div style="flex: 1;">
+            <div style="color: #183651; font-weight: 600; font-size: 12px; text-decoration: line-through; opacity: 0.6;">Armar una carpa sin ayuda</div>
+            <div style="color: #4FBF9F; font-size: 10px; font-weight: 600;">Validado ✓</div>
+          </div>
+          <span style="color: #4FBF9F; font-size: 10px;">📷 2</span>
+        </div>
+        <!-- Pending - submitted -->
+        <div style="background: white; border-radius: 12px; padding: 14px; display: flex; align-items: center; gap: 12px; border: 1px solid rgba(24,54,81,0.1); box-shadow: 0 2px 8px rgba(24,54,81,0.04);">
+          <div style="width: 28px; height: 28px; border: 2px solid #FBBD5E; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            <div style="width: 10px; height: 10px; background: #FBBD5E; border-radius: 50%;"></div>
+          </div>
+          <div style="flex: 1;">
+            <div style="color: #183651; font-weight: 600; font-size: 12px;">Encender fogata con 2 métodos</div>
+            <div style="color: #FBBD5E; font-size: 10px; font-weight: 600;">Enviada — esperando validación</div>
+          </div>
+        </div>
+        <!-- Not started -->
+        <div style="background: white; border-radius: 12px; padding: 14px; display: flex; align-items: center; gap: 12px; border: 1px solid rgba(24,54,81,0.08);">
+          <div style="width: 28px; height: 28px; border: 2px solid #E1E6E7; border-radius: 50%; flex-shrink: 0;"></div>
+          <div style="flex: 1;">
+            <div style="color: #183651; font-weight: 600; font-size: 12px;">Cocinar una comida al aire libre</div>
+            <div style="color: #B9B9B9; font-size: 10px;">Sin evidencia</div>
+          </div>
+          <button style="background: #2EA0DA; color: white; border: none; border-radius: 10px; padding: 8px 14px; font-size: 10px; font-weight: 700; cursor: pointer;">Subir</button>
+        </div>
+        <div style="height: 1px; background: #F0F4F5; margin: 4px 0;"></div>
+        <div style="color: #183651; font-weight: 700; font-size: 13px; margin-bottom: 4px;">Evidencia subida</div>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
+          <div style="background: #F0F4F5; border-radius: 10px; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 24px;">🖼️</div>
+          <div style="background: #F0F4F5; border-radius: 10px; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 24px;">🖼️</div>
+          <div style="background: rgba(46,160,218,0.08); border-radius: 10px; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; border: 2px dashed rgba(46,160,218,0.3);">
+            <span style="color: #2EA0DA; font-size: 24px;">+</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="phone-label">③ EN PROGRESO</div>
+  </div>
+
+  <!-- SCREEN 4: Completed -->
+  <div class="phone">
+    <div class="phone-screen">
+      <div class="status-bar"><span>9:41</span><div class="battery"></div></div>
+      <div style="background: linear-gradient(135deg, #4FBF9F, #43A78A); padding: 30px 16px; text-align: center;">
+        <div style="font-size: 48px; margin-bottom: 8px;">🎉</div>
+        <div style="color: white; font-size: 22px; font-weight: 800; margin-bottom: 4px;">¡Especialidad Completa!</div>
+        <div style="color: rgba(255,255,255,0.8); font-size: 12px;">Campismo • Completada el 15 Mar 2026</div>
+      </div>
+      <div style="padding: 20px 16px; text-align: center;">
+        <div style="width: 100px; height: 100px; background: linear-gradient(135deg, #FBBD5E, #F06151); border-radius: 50%; margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; font-size: 48px; box-shadow: 0 6px 20px rgba(240,97,81,0.3);">🏕️</div>
+        <div style="color: #183651; font-size: 18px; font-weight: 800; margin-bottom: 4px;">Campismo</div>
+        <div style="display: flex; justify-content: center; gap: 6px; margin-bottom: 20px; flex-wrap: wrap;">
+          <span style="background: rgba(79,191,159,0.1); color: #4FBF9F; padding: 4px 12px; border-radius: 12px; font-size: 10px; font-weight: 700;">Nivel Básico</span>
+          <span style="background: rgba(251,189,94,0.1); color: #FBBD5E; padding: 4px 12px; border-radius: 12px; font-size: 10px; font-weight: 700;">⭐ Insignia obtenida</span>
+        </div>
+        <div style="display: flex; justify-content: space-around; padding: 16px; background: #F8FAFB; border-radius: 14px; margin-bottom: 20px;">
+          <div style="text-align: center;">
+            <div style="color: #4FBF9F; font-size: 22px; font-weight: 800;">3/3</div>
+            <div style="color: #94A3B8; font-size: 10px;">Requisitos</div>
+          </div>
+          <div style="width: 1px; background: #E1E6E7;"></div>
+          <div style="text-align: center;">
+            <div style="color: #2EA0DA; font-size: 22px; font-weight: 800;">5</div>
+            <div style="color: #94A3B8; font-size: 10px;">Evidencias</div>
+          </div>
+          <div style="width: 1px; background: #E1E6E7;"></div>
+          <div style="text-align: center;">
+            <div style="color: #FBBD5E; font-size: 22px; font-weight: 800;">12d</div>
+            <div style="color: #94A3B8; font-size: 10px;">Duración</div>
+          </div>
+        </div>
+        <button style="width: 100%; background: linear-gradient(135deg, #2EA0DA, #1a8ac0); color: white; border: none; border-radius: 14px; padding: 14px; font-size: 14px; font-weight: 700; margin-bottom: 10px; box-shadow: 0 4px 0 #1678a8; cursor: pointer;">
+          Compartir logro 🎯
+        </button>
+        <button style="width: 100%; background: transparent; color: #2EA0DA; border: 2px solid rgba(46,160,218,0.2); border-radius: 14px; padding: 14px; font-size: 14px; font-weight: 700; cursor: pointer;">
+          Ver más especialidades
+        </button>
+      </div>
+    </div>
+    <div class="phone-label">④ COMPLETADA</div>
+  </div>
+
+</div>
+</body>
+</html>

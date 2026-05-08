@@ -1,0 +1,96 @@
+<h2>Problemas de calidad en los datos de requisitos</h2>
+<p class="subtitle">5,410 requisitos cargados — estos son los problemas encontrados</p>
+
+<div class="section">
+  <h3>Resumen de problemas</h3>
+  <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 16px 0;">
+    <div style="background: #1a1a2e; border: 1px solid #e74c3c; border-radius: 8px; padding: 16px; text-align: center;">
+      <div style="font-size: 2em; font-weight: bold; color: #e74c3c;">305</div>
+      <div style="font-size: 0.85em; color: #aaa;">Solo un número<br><small>(ej: "5.", "7.", "9.")</small></div>
+    </div>
+    <div style="background: #1a1a2e; border: 1px solid #e67e22; border-radius: 8px; padding: 16px; text-align: center;">
+      <div style="font-size: 2em; font-weight: bold; color: #e67e22;">437</div>
+      <div style="font-size: 0.85em; color: #aaa;">Sub-items ocultos<br><small>(tiene a. b. c. pero has_sub_items=false)</small></div>
+    </div>
+    <div style="background: #1a1a2e; border: 1px solid #f39c12; border-radius: 8px; padding: 16px; text-align: center;">
+      <div style="font-size: 2em; font-weight: bold; color: #f39c12;">875</div>
+      <div style="font-size: 0.85em; color: #aaa;">Con sub-items<br><small>(has_sub_items=true, texto plano)</small></div>
+    </div>
+    <div style="background: #1a1a2e; border: 1px solid #2ecc71; border-radius: 8px; padding: 16px; text-align: center;">
+      <div style="font-size: 2em; font-weight: bold; color: #2ecc71;">3,793</div>
+      <div style="font-size: 0.85em; color: #aaa;">Limpios<br><small>(sin problemas detectados)</small></div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3 style="color: #e74c3c;">🔴 Problema 1: Requisitos vacíos (305)</h3>
+  <p>El OCR interpretó sub-items internos como requisitos independientes. El texto real se perdió o se fusionó con otro requisito.</p>
+  <div style="background: #1a1a2e; border-radius: 8px; padding: 16px; font-family: monospace; font-size: 0.85em; margin: 8px 0;">
+    <div style="color: #e74c3c;">honor_id=367, req#4 → texto: <strong>"5."</strong></div>
+    <div style="color: #e74c3c;">honor_id=1, req#6 → texto: <strong>"7."</strong></div>
+    <div style="color: #e74c3c;">honor_id=1, req#8 → texto: <strong>"9."</strong></div>
+    <div style="color: #e74c3c;">honor_id=143, req#2 → texto: <strong>"3."</strong></div>
+    <div style="color: #e74c3c;">honor_id=143, req#4 → texto: <strong>"5."</strong></div>
+  </div>
+  <p style="color: #aaa; font-size: 0.85em;">Estos son basura — hay que eliminarlos o reconstruirlos del PDF original.</p>
+</div>
+
+<div class="section">
+  <h3 style="color: #e67e22;">🟠 Problema 2: Sub-items no detectados (437)</h3>
+  <p>Tienen patrones <code>a. b. c.</code> en el texto pero <code>has_sub_items=false</code>. El parser no los detectó.</p>
+  <div style="background: #1a1a2e; border-radius: 8px; padding: 16px; font-size: 0.85em; margin: 8px 0;">
+    <div style="margin-bottom: 12px;">
+      <div style="color: #e67e22; font-weight: bold;">honor_id=142, req#8:</div>
+      <div style="color: #ccc;">"Elaborar una planificación anual de las actividades del club, incluyendo la programación de las clases regulares y avanzadas, que contenga las <strong>metas, estrategias, planes de acción</strong> y las formas de controlar cada etapa..."</div>
+    </div>
+  </div>
+  <p style="color: #aaa; font-size: 0.85em;">Necesitan reclasificación — actualizar has_sub_items y parsear los sub-items.</p>
+</div>
+
+<div class="section">
+  <h3 style="color: #f39c12;">🟡 Problema 3: Sub-items como texto plano (875)</h3>
+  <p>Correctamente marcados como <code>has_sub_items=true</code>, pero los sub-items están incrustados en el texto. No están en filas separadas de la DB.</p>
+  <div style="background: #1a1a2e; border-radius: 8px; padding: 16px; font-size: 0.85em; margin: 8px 0;">
+    <div style="color: #f39c12; font-weight: bold;">honor_id=442, req#12 (Acuarios):</div>
+    <div style="color: #ccc;">"Realizar las siguientes actividades: <strong>a.</strong> Montar un acuario de por lo menos 20 litros... <strong>b.</strong> Durante el montaje, observar lo siguiente: <strong>i.</strong> Demostrar habilidad... <strong>ii.</strong> Explicar... <strong>c.</strong> Durante el período de 3 meses..."</div>
+  </div>
+  <p style="color: #aaa; font-size: 0.85em;">Estos necesitan parsearse en filas hijo en la DB para tracking individual.</p>
+</div>
+
+<div class="section">
+  <h3 style="color: #9b59b6;">🟣 Problema 4: Textos gigantes con tablas embebidas</h3>
+  <p>Algunos requisitos tienen tablas de referencia incrustadas (hasta 5,294 caracteres).</p>
+  <div style="background: #1a1a2e; border-radius: 8px; padding: 16px; font-size: 0.85em; margin: 8px 0;">
+    <div style="color: #9b59b6; font-weight: bold;">honor_id=230, req#10 (Adinkra) — 5,294 chars:</div>
+    <div style="color: #ccc;">"Sellar por lo menos tres tipos diferentes de símbolos de Adinkra... <strong>[seguido de una tabla de 20 símbolos con definiciones completas]</strong>"</div>
+  </div>
+  <p style="color: #aaa; font-size: 0.85em;">El requisito real es corto, pero trae una tabla de referencia pegada. Separar el texto instruccional de la referencia.</p>
+</div>
+
+<h3>¿Cómo querés abordar la limpieza?</h3>
+<p class="subtitle">Seleccioná tu estrategia preferida</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Limpieza automatizada total</h3>
+      <p>Script que parsea, reclasifica, extrae sub-items, elimina basura, y separa tablas embebidas. Sin intervención humana. Rápido pero puede romper algunos requisitos edge-case.</p>
+    </div>
+  </div>
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Automatizado + revisión en admin</h3>
+      <p>Script hace la limpieza pesada (eliminar basura, parsear sub-items, reclasificar). Los cambios quedan con needs_review=true y el admin los valida desde el panel. Mejor calidad, más trabajo.</p>
+    </div>
+  </div>
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Por fases</h3>
+      <p>Fase 1: Eliminar los 305 requisitos basura (automático). Fase 2: Reclasificar los 437 mal marcados (automático). Fase 3: Parsear sub-items de los 875+437 (automático + review). Fase 4: Separar tablas embebidas (manual desde admin).</p>
+    </div>
+  </div>
+</div>

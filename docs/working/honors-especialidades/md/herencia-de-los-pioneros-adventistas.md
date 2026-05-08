@@ -1,0 +1,25 @@
+# Especialidad — herencia de los pioneros adventistas
+
+**Fuente**: `/Users/abner/Downloads/S3/honors_pdf/herencia_de_los_pioneros_adventistas.pdf`
+**Texto extraído**: `/Users/abner/Documents/development/sacdia/docs/working/honors-especialidades/raw/herencia-de-los-pioneros-adventistas.txt`
+**Nivel detectado**: 2
+**Cantidad de requisitos detectados**: 10
+
+> Nota: extracción automática preliminar desde la capa de texto del PDF. Requiere revisión humana antes de cualquier carga a base de datos.
+
+## Requisitos detectados
+
+1. Orígenes: a. Leer, ver o investigar sobre el origen y el desarrollo del movimiento millerita y su papel durante el comienzo de la Iglesia Adventista del Séptimo Día. b. Explicar el Gran Chasco basado en la profecía de Daniel 8. c. Compartir sus descubrimientos con un grupo.
+2. Pioneros: Identificar y explicar la importancia de por lo menos 15 de los siguientes individuos: Marta D. Byington de Amadon Guillermo H. Anderson Juan Nevins Andrews José Bates Juan Byington Miguel Belina Czechowski Arturo Grosvenor Daniells Hiram Edson Enrique Fenner Crecimiento espiritual, actividades misioneras y herencia Eduardo Francisco Forga Carlos M. Kinney Alonzo T. Jones / Ellet José Waggoner Jorge Alberto King Ana Knight Abram LaRue Caterina Lindsay Guillermo Miller Raquel Oakes de Preston Ana Rebeca Smith Urías Smith Lutero Warren Francisco Enrique Westphal Federico Wheeler Jaime White Crecimiento espiritual, actividades misioneras y herencia Cualquier otro pionero de su preferencia de su propia unión/división
+3. Fechas: Explorar y resumir la importancia de cada uno de las siguientes fechas de eventos en la historia adventista: El Gran Chasco (22 de octubre de 1844) La Iglesia Adventista constituida (21 de mayo de 1863) El comienzo de la Reforma de la Salud (1863) Juan N. Andrews: Primer misionero (1874) Congreso de la Asociación General de 1888 (la justificación por la fe) La Reorganización de 1901 / incendios en Battle Creek 1902 Gland, Suiza (1907) Documento de 27 Creencias Fundamentales adoptado en 1980 Otra fecha significativa en la historia del adventismo de su división, asociación o región Universidad de Solusi Periódico La Verdad Presente Sociedad de Tratados Crecimiento espiritual, actividades misioneras y herencia Barco Misionero Pitcairn Universidad de Montemorelos Compañía del Sanatorio de Salud y Bienestar Prensa Manual Washington Conferencias aabáticas Benevolencia sistemática El Instructor de los Jóvenes Norsk Bokforla Les Signes des Temps La Voz de la Esperanza Tabernáculo de los diez centavos
+4. Conocer y explicar lo siguiente: «No tenemos nada que temer del futuro, a menos que olvidemos la manera en que el Señor nos ha conducido, y lo que nos ha enseñado en nuestra historia pasada.» (Notas Biográficas de Elena G. de White, página 216) Crecimiento espiritual, actividades misioneras y herencia
+5. Explicar brevemente la importancia del Congreso de la Asociación General de 1901 y describir la estructura organizacional que resultó. Indicar cómo su asociación o misión cabe en la estructura general de la iglesia. Saber dónde están colocadas las sedes desde su asociación local hasta la Asociación General. Sede de:
+6. Identificar y explicar la importancia de por lo menos 15 de los siguientes individuos:
+7. Hacer una lista de por lo menos 6 jóvenes que estaban involucrados en los principios de la Iglesia Adventista del Séptimo Día y sus edades. Nombre Edad 1. 2. 3. 4. 5. 6. Crecimiento espiritual, actividades misioneras y herencia
+8. Identificar y dar la importancia de lo siguiente que pertenecen a la vida y el ministerio de Elena G. de White. Primera visión (06 de junio de 1863) «Elmshaven» Visiones Gorham, Maine Mensajera del Señor Serie Conflicto de los Siglos Patrimonio de Elena G. de White, Inc. Lovett’s Grove, Ohio «Sunnyside» Testimonios para la Iglesia
+9. Conocer y decir para la escuela, la escuela sabática o un devocional de Conquistadores, 3 historias de la historia adventista. Por lo menos una historia debe ser de los jóvenes adventistas. 1. Fecha de historia 2. Fecha de historia 3. Fecha de historia Crecimiento espiritual, actividades misioneras y herencia
+10. Individualmente o en un grupo, completar uno de lo siguiente: a. Crear y presentar un cartel detallado o exhibición de multimedia (video/presentación) cubriendo una porción de la herencia adventista que haya prendido. Fecha de presentación/exhibición b. Escribir y presentar un drama que cuenta parte de la historia de la herencia adventista. Presentarlo a Conquistadores más jóvenes, Aventureros u otro grupo de individuos menores. Fecha de presentación de drama c. Crear un juego sobre la herencia adventista. Demostrar cómo se juega a su instructor o a un grupo. d. Visitar un sitio oficial de Herencia Adventista entre su asociación, unión o división. Informarle a un grupo de su experiencia. Si es viable, crear un informe de multimedia de su experiencia. Fecha de visita
+
+## Observaciones
+
+- Este archivo fue preparado para análisis posterior, no para carga directa a BD.

@@ -1,140 +1,48 @@
-# Completion Matrix - Canon Factory Wave 0
+# Completion Matrix - SACDIA
 
-**Estado**: ACTIVE  
-**Base de autoridad**: `docs/canon/source-of-truth.md`  
-**Propósito**: mapear cobertura documental y runtime sin redefinir autoridad.
+**Estado**: ACTIVE
+**Actualizado**: 2026-04-12
+**Base de autoridad**: `docs/canon/source-of-truth.md`
+**Propósito**: tablero diagnostico de cobertura documental, sin vender precision falsa ni redefinir autoridad.
 
 > [!IMPORTANT]
-> Esta matriz no crea jerarquía nueva.
-> Solo registra qué evidencia autorizada existe, qué falta y qué puntos quedan degradados o disputados.
+> Esta matriz queda temporalmente degradada como tablero de control.
+> Los numeros detallados de versiones anteriores ya no son confiables frente a las fuentes vivas actuales.
+>
+> Hasta una resincronizacion completa, usar como autoridad operativa:
+> - `docs/api/ENDPOINTS-LIVE-REFERENCE.md` para runtime API
+> - `sacdia-backend/prisma/schema.prisma` para estructura de datos efectiva
+> - `docs/database/schema.prisma` y `docs/database/SCHEMA-REFERENCE.md` solo como capa documental subordinada
+> - `docs/features/README.md` para registro minimo de dominios documentados
 
 ---
 
-## 1. Escala de estado
+## Estado de confiabilidad por area
 
-- `COMPLETE`: la evidencia autorizada esperada existe y no se detectó conflicto para esa fila.
-- `PARTIAL`: existe evidencia autorizada, pero la cobertura es incompleta o el set de artefactos es insuficiente.
-- `MISSING`: no se encontró la evidencia autorizada esperada.
-- `DISPUTED`: existen fuentes autorizadas, pero chocan entre sí para la fila.
-- `BLOCKED`: la fila no puede cerrarse de forma segura sin arbitraje.
-
----
-
-<!-- Verificado contra Reality Matrix 2026-03-14 -->
-
-## 2. Resumen ejecutivo
-
-| Área | Resultado | Verificación 2026-03-14 |
-|---|---|---|
-| Gobernanza y precedencia | `COMPLETE` | Sin cambios |
-| Canon de producto | `COMPLETE` | Sin cambios |
-| Canon técnico base | `PARTIAL` | Confirmado: storage drift corregido (Supabase Storage → Cloudflare R2) |
-| Estándares operativos | `COMPLETE` | Sin cambios |
-| Runtime API | `COMPLETE` | 180 documentados de 198 implementados; 17 FANTASMA removidos |
-| Racionales/decisiones API | `PARTIAL` | Sin cambios |
-| Modelo de datos | `PARTIAL` | Confirmado: 72 modelos en schema, 24 ALINEADO, 41 SIN CANON |
-| Features por dominio | `PARTIAL` | Confirmado: 8 ALINEADO, 5 PARCIAL, 1 FANTASMA, 2 SIN CANON |
-
----
-
-## 3. Matriz base de cobertura autorizada
-
-| Área | Evidencia esperada según `source-of-truth` | Evidencia encontrada | Estado | Observaciones |
-|---|---|---|---|---|
-| Gobernanza documental | `source-of-truth.md`, `docs/README.md`, `gobernanza-canon.md` | Los tres documentos existen y están en uso | `COMPLETE` | La precedencia quedó explícita y operable |
-| Canon de producto | `dominio-sacdia.md`, `identidad-sacdia.md`, `gobernanza-canon.md` | Los tres existen y están `ACTIVE` | `COMPLETE` | Cobertura base de identidad, lenguaje y reglas de interpretación |
-| Arquitectura canónica | `arquitectura-sacdia.md`, `decisiones-clave.md` | Ambos existen y están `ACTIVE` | `COMPLETE` | Cobertura de arquitectura y decisiones duraderas |
-| Baseline técnica global | `tech.md`, `structure.md`, `coding-standards.md`, `data-guidelines.md`, `agents.md` | Todos existen; `structure.md` está `HISTORICAL` | `PARTIAL` | La baseline existe, pero la guía de estructura quedó degradada por estatus/obsolescencia |
-| Estándares de ingeniería | `coding-standards.md`, `data-guidelines.md`, `agents.md` | Los tres existen y cubren normas operativas | `COMPLETE` | Sirven como baseline operativa subordinada |
-| Contrato runtime API | `ENDPOINTS-LIVE-REFERENCE.md` | Existe, base `/api/v1`, 180 endpoints, 18 módulos | `COMPLETE` | Es la fuente vigente para App/Admin |
-| Decisiones API estructurales | `ARCHITECTURE-DECISIONS.md` | Existe, pero su alcance es selectivo (naming, `users_pr`, legal reps, año eclesiástico, roles/RBAC) | `PARTIAL` | Complementa, no reemplaza, al Live Reference |
-| Modelo de datos estructural | `schema.prisma`, `docs/03-DATABASE/README.md`, `SCHEMA-REFERENCE.md` | Los tres existen; `README` declara `schema.prisma` como fuente de verdad, pero `SCHEMA-REFERENCE.md` deriva en varios puntos | `PARTIAL` | `schema.prisma` manda; `SCHEMA-REFERENCE.md` quedó desalineado como referencia humana |
-
----
-
-## 4. Matriz de cobertura por feature documental
-
-<!-- Verificado contra Reality Matrix 2026-03-14. Columna "Código" refleja estado real de implementación. -->
-
-| Dominio | Requirements | Design | Tasks | Walkthrough(s) | Estado doc | Código (Reality Matrix) | Observación |
-|---|---|---|---|---|---|---|---|
-| `auth` | — | — | — | ✅ | `PARTIAL` | ALINEADO | Backend+admin+app implementados |
-| `gestion-clubs` | — | ✅ | — | ✅ | `PARTIAL` | ALINEADO | Backend+admin+app implementados |
-| `clases-progresivas` | — | ✅ | — | — | `PARTIAL` | ALINEADO | Backend+admin(read-only)+app implementados |
-| `honores` | — | ✅ | — | ✅ | `PARTIAL` | ALINEADO | Backend+admin+app implementados |
-| `catalogos` | — | ✅ | — | ✅ | `PARTIAL` | ALINEADO | Backend+admin(13 pages)+app implementados |
-| `communications` | — | — | — | ✅ | `PARTIAL` | ALINEADO | Backend+admin+FCM tokens |
-| `carpetas-evidencias` | — | — | — | — | `MISSING` | ALINEADO | Backend+admin(read-only)+app implementados |
-| `rbac` | — | — | — | — | `MISSING` | ALINEADO | Backend+admin(3 pages) implementados |
-| `actividades` | — | ✅ | — | ✅ | `PARTIAL` | PARCIAL | Backend+app completos, admin placeholder |
-| `finanzas` | — | ✅ | — | ✅ | `PARTIAL` | PARCIAL | Backend+app completos, admin placeholder |
-| `camporees` | — | — | — | — | `MISSING` | PARCIAL | Backend+admin(read-only), app sin screens |
-| `certificaciones-guias-mayores` | ✅ | — | — | ✅ | `PARTIAL` | PARCIAL | Backend+admin(read-only), app sin screens |
-| `inventario` | — | — | — | ✅ | `PARTIAL` | PARCIAL | Backend+app completos, admin placeholder |
-| `gestion-seguros` | ✅ | — | — | — | `PARTIAL` | SIN CANON | App con screens, sin backend module dedicado |
-| `infrastructure` | — | — | — | ✅ | `PARTIAL` | SIN CANON | Backend health/logging, no cubierto por canon |
-| `validacion-investiduras` | ✅ | — | — | — | `PARTIAL` | FANTASMA | Tablas existen, sin módulo/endpoints/screens |
-
-**Lectura de la fila**:
-
-- `COMPLETE` en features requeriría, como mínimo, evidencia suficiente y trazable para operar el dominio sin huecos documentales obvios.
-- En esta corrida no se encontró ningún dominio con set completo `requirements + design + tasks`.
-
----
-
-## 5. Matriz de cobertura runtime por módulo API
-
-Fuente única de esta sección: `docs/02-API/ENDPOINTS-LIVE-REFERENCE.md`
-
-| Módulo runtime | Evidencia encontrada | Estado | Observación |
+| Area | Estado de esta matriz | Fuente viva a usar | Motivo |
 |---|---|---|---|
-| `auth` | Sección presente | `COMPLETE` | Incluye notas de contrato de login/refresh/logout/MFA/OAuth |
-| `users` | Sección presente | `COMPLETE` | Incluye notas de autorización, post-registro y progreso de clases |
-| `activities` | Sección presente | `COMPLETE` | Runtime documentado |
-| `admin` | Sección presente | `COMPLETE` | Runtime documentado |
-| `camporees` | Sección presente | `COMPLETE` | Runtime documentado |
-| `catalogs` | Sección presente | `COMPLETE` | Runtime documentado |
-| `certifications` | Sección presente | `COMPLETE` | Runtime documentado |
-| `classes` | Sección presente | `COMPLETE` | Runtime documentado |
-| `club-roles` | Sección presente | `COMPLETE` | Runtime documentado |
-| `clubs` | Sección presente | `COMPLETE` | Runtime documentado |
-| `fcm-tokens` | Sección presente | `COMPLETE` | Runtime documentado |
-| `finances` | Sección presente | `COMPLETE` | Runtime documentado |
-| `folders` | Sección presente | `COMPLETE` | Runtime documentado |
-| `health` | Sección presente | `COMPLETE` | Runtime documentado |
-| `honors` | Sección presente | `COMPLETE` | Runtime documentado |
-| `inventory` | Sección presente | `COMPLETE` | Runtime documentado |
-| `notifications` | Sección presente | `COMPLETE` | Runtime documentado |
-| `root` | Sección presente | `COMPLETE` | Runtime documentado |
+| Gobernanza y rutas de lectura | `USABLE` | `docs/canon/source-of-truth.md`, `docs/README.md` | La autoridad documental se arbitra fuera de esta matriz |
+| Runtime API | `OUTDATED` | `docs/api/ENDPOINTS-LIVE-REFERENCE.md` | La fuente viva hoy declara 269 endpoints; las cifras historicas de esta matriz ya no son seguras |
+| Modelo de datos | `ARBITRATED_SYNCED` | `sacdia-backend/prisma/schema.prisma`, `docs/database/schema.prisma`, `docs/database/SCHEMA-REFERENCE.md` | La fuente de verdad efectiva sigue en el backend y la capa documental P1 quedó resincronizada contra ese schema |
+| Baseline técnica global | `ARBITRATED` | `docs/steering/tech.md` | Batch P1.1 corrigió baseline mínima comprobable y removió afirmaciones runtime obsoletas |
+| Registro de features | `USE_REGISTRY` | `docs/features/README.md` | El registro fue normalizado para separar cobertura editorial de estado funcional |
+| Cierre ejecutivo de completitud | `PENDING_RESYNC` | N/A | Requiere resincronizacion posterior a P1/P4 |
 
----
+## Uso permitido
 
-## 6. Gaps operativos detectados
+- Sirve para detectar que areas necesitan resincronizacion documental.
+- No sirve para afirmar totales exactos de endpoints, modelos, enums o porcentaje de cierre por dominio.
+- No debe usarse para contradecir fuentes vivas ni para declarar una baseline cerrada.
 
-<!-- Actualizado con hallazgos de Reality Matrix 2026-03-14 -->
+## Trabajo pendiente para volver a precisión alta
 
-| Item | Evidencia esperada | Evidencia encontrada | Estado | Acción sugerida |
-|---|---|---|---|---|
-| Estructura técnica vigente | Guía de estructura activa y consistente con canon | `structure.md` existe pero está `HISTORICAL` | `MISSING` | Reemplazar o reactivar una guía de estructura vigente alineada con canon |
-| Features con set completo | `requirements.md` + `design.md` + `tasks.md` por dominio operativo | Ningún dominio presenta el set completo | `MISSING` | Priorizar cierre documental por dominio antes de declarar cobertura completa |
-| Tareas por dominio | `tasks.md` cuando el dominio necesite ejecución trazable | No se detectó `tasks.md` en los dominios listados | `MISSING` | Agregar task breakdown en dominios activos donde haga falta ejecución/verificación |
-| Referencia humana de datos alineada | `SCHEMA-REFERENCE.md` consistente con `schema.prisma` | Drift en naming de campos (ej: `id`/`user_id`, `birthdate`/`birthday`, `avatar`/`user_image`) y falta `active_club_assignment_id` en `users_pr` | `MISSING` | Sincronizado parcialmente 2026-03-14; ver nota en SCHEMA-REFERENCE |
-| Auditoría de servicios externos | Documento auxiliar si existe | No se encontró `docs/EXTERNAL-SERVICES-AUDIT.md` | `MISSING` | Crear solo si realmente se necesita como apoyo; no bloquea runtime |
-| Storage provider drift | Canon documentaba Supabase Storage | Backend usa Cloudflare R2 (R2FileStorageService) | `FIXED` | Corregido en runtime-sacdia.md 2026-03-14 |
-| Endpoints FANTASMA | Endpoints documentados que no existen en backend | 17 endpoints fantasma detectados (admin panel y app) | `FIXED` | Removidos de ENDPOINTS-LIVE-REFERENCE 2026-03-14 |
-| API doc gap | 198 endpoints implementados vs 180 documentados | 18 endpoints sin documentar | `MISSING` | Agregar a ENDPOINTS-LIVE-REFERENCE cuando se confirmen |
-| Canon de catálogos admin | 16+ endpoints CRUD admin sin mención en canon | Implementados y documentados pero SIN CANON | `MISSING` | Decidir si formalizar en canon o dejar como operación implícita |
+| Bloque | Dependencia | Resultado esperado |
+|---|---|---|
+| P1 - baseline tecnica y datos | Mantener sincronizados `docs/database/schema.prisma` y `docs/database/SCHEMA-REFERENCE.md` contra `sacdia-backend/prisma/schema.prisma` | sostener el modelo de datos documental sin reintroducir drift |
+| P4 - cierre y sostenimiento | consolidacion final de olas previas | volver a una matriz ejecutiva con cifras verificadas y reglas de mantenimiento |
 
----
+## Nota editorial
 
-## 7. Uso permitido para Runtime
-
-`Runtime` puede tomar como base inmediata:
-
-1. `docs/canon/source-of-truth.md` para precedencia;
-2. `docs/02-API/ENDPOINTS-LIVE-REFERENCE.md` para API vigente;
-3. `docs/03-DATABASE/schema.prisma` para modelo de datos vigente;
-4. `docs/canon/dominio-sacdia.md`, `identidad-sacdia.md`, `arquitectura-sacdia.md` y `decisiones-clave.md` para interpretación canónica;
-5. `docs/00-STEERING/tech.md`, `coding-standards.md`, `data-guidelines.md`, `agents.md` como baseline subordinada.
-
-`Runtime` no debe usar esta matriz para redefinir autoridad; solo para saber qué cobertura ya está documentada y dónde hay huecos.
+- La version detallada anterior se retiro porque mezclaba fotografia historica con exactitud operativa ya superada por fuentes vivas.
+- El batch P1 de datos ya dejó resincronizados `docs/database/schema.prisma` y `docs/database/SCHEMA-REFERENCE.md` contra el schema efectivo del backend.
+- Hasta la resincronizacion, este archivo debe leerse como advertencia de alcance, no como inventario exacto.

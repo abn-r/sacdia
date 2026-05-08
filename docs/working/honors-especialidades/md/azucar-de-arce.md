@@ -1,0 +1,28 @@
+# Especialidad — azucar de arce
+
+**Fuente**: `/Users/abner/Downloads/S3/honors_pdf/azucar_de_arce.pdf`
+**Texto extraído**: `/Users/abner/Documents/development/sacdia/docs/working/honors-especialidades/raw/azucar-de-arce.txt`
+**Nivel detectado**: 1
+**Cantidad de requisitos detectados**: 13
+
+> Nota: extracción automática preliminar desde la capa de texto del PDF. Requiere revisión humana antes de cualquier carga a base de datos.
+
+## Requisitos detectados
+
+1. ¿En cuál parte del mundo y en qué época del año funciona la industria del azúcar de arce y por qué? Parte del mundo Época del año ¿Por qué?
+2. Explicar cómo es la savia dulce hecha por el árbol de arce y la forma en que se almacena en el invierno. Hecha Almacenada
+3. Identificar el árbol de azúcar de arce, su corteza y hojas.
+4. ¿Cuán profundo se tiene que taladrar en un árbol de arce para obtener los mejores resultados?
+5. ¿Cuánto tiempo se necesita para que el agujero realizado en un árbol sano de arce sane?
+6. ¿Cuán cerca de un viejo agujero del grifo se puede hacer un nuevo agujero?
+7. ¿Cuántos grifos se podrán realizar en un árbol sano de arce sin dañarlo? 25 cm de diámetro del árbol 30.5 cm de diámetro del árbol 60 cm de diámetro del árbol 90 cm de diámetro del árbol
+8. Decir la forma cómo el azúcar de arce se fabrica a partir del jarabe de arce.
+9. ¿Cuál es el tiempo ideal para el flujo de savia?
+10. ¿La corona de un árbol de arce (las ramas y el área foliar) afecta el flujo y dulzura de la savia?
+11. En un promedio, ¿cuánto de la savia es necesaria para producir un galón de jarabe?
+12. Probar el sabor puro de jarabe de arce o de azúcar de arce.
+13. Observar y explicar cómo se utilizan los siguientes equipos para el azúcar de arce: Taladro Brocas (mechas) Llaves de paso (grifo) Cubo (cazo) Cobertor del cubo Evaporador
+
+## Observaciones
+
+- Este archivo fue preparado para análisis posterior, no para carga directa a BD.

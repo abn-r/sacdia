@@ -1,0 +1,28 @@
+# Especialidad — moluscos avanzado
+
+**Fuente**: `/Users/abner/Downloads/S3/honors_pdf/moluscos_avanzado.pdf`
+**Texto extraído**: `/Users/abner/Documents/development/sacdia/docs/working/honors-especialidades/raw/moluscos-avanzado.txt`
+**Nivel detectado**: 3
+**Cantidad de requisitos detectados**: 13
+
+> Nota: extracción automática preliminar desde la capa de texto del PDF. Requiere revisión humana antes de cualquier carga a base de datos.
+
+## Requisitos detectados
+
+1. Tener la especialidad de Moluscos.
+2. Definir el término «moluscos». Moluscos
+3. Conocer los términos de la clasificación de los moluscos, conocer las características distintivas de cada uno y familiarizarse con varias especies de cada clase. Clasificaciones Características Especie 1. 2. 3.
+4. 
+5. 4. Distinguir entre moluscos univalvos y bivalvos teniendo en cuenta las siguientes partes: a. Concha d. Movimientos b. Cuerpo del molusco e. Asegurando la alimentación c. Reproducción f. Auto-preservación Univalvos Bivalvos 5. Identificar a partir de conchas o dibujos y saber el significado de los siguientes términos lógicos de caracoles: Valva Ápice Apertura, orificio Biso Pie Mantel (manto) Opérculo Nácar Epidermis Costillas Los dientes Líneas concéntricas Canal Espinas Espira Labios
+6. Explicar el desarrollo de una concha. ¿Cuánto tiempo viven los moluscos?
+7. Dar algunos datos sobre la vida de un caracol Strombus pugilis (concha luchadora) y explicar la razón por la que éste molusco es llamado así.
+8. Explicar las actividades del molusco broma.
+9. ¿Cómo se explica la distribución de los moluscos?
+10. Nombrar 2 moluscos que no tienen conchas. 1. 2.
+11. Encontrar respuestas a las siguientes preguntas interesantes: a. ¿Cómo están unidos los bivalvos y univalvos a sus conchas? Bivalvo Univalvo b. ¿Cómo es controlado el color del molusco? c. ¿Qué molusco tiene 4 branquias? d. ¿De qué animal del mar fue hecha la tinta india? e. ¿Qué molusco hace girar un hilo de seda? f. ¿Qué conchas se utilizaban para el dinero de tribus antiguas? g. ¿Qué concha se considera sagrado por los tibetanos? h. ¿De qué molusco se obtenía la tinta púrpura en los tiempos antiguos? i. ¿Cuál es la fuente de las perlas? ¿Cómo se forman?
+12. Nombrar 6 usos comerciales de las conchas (moluscos). 1. 4. 2. 5. 3. 6.
+13. Realizar una de las siguientes actividades: a. Personalmente encontrar y recolectar 40 especies de conchas que representan a las 5 clasificaciones. Enlistar cada molusco con el lugar y la fecha en que fue encontrado, nombre común, nombre científico y la clase. b. Hacer una colección de 50 especies de conchas que ha encontrado, recibido o comprado que representen las 5 clasificaciones. hacer una lista de cada concha recogida de la siguiente manera: si la encontró personalmente, dar la información solicitada en el punto «a»; si la recibió o compró, dar el nombre de la persona de quien recibió la concha, el hábitat de la concha, la fecha de su adquisición, su nombre común, nombre científico y la clase.
+
+## Observaciones
+
+- Este archivo fue preparado para análisis posterior, no para carga directa a BD.

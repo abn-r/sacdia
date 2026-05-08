@@ -1,0 +1,20 @@
+# Especialidad — arte de envolver regalos
+
+**Fuente**: `/Users/abner/Downloads/S3/honors_pdf/arte_de_envolver_regalos.pdf`
+**Texto extraído**: `/Users/abner/Documents/development/sacdia/docs/working/honors-especialidades/raw/arte-de-envolver-regalos.txt`
+**Nivel detectado**: 1
+**Cantidad de requisitos detectados**: 5
+
+> Nota: extracción automática preliminar desde la capa de texto del PDF. Requiere revisión humana antes de cualquier carga a base de datos.
+
+## Requisitos detectados
+
+1. Hacer una lista de 5 normas de cortesía para dar y recibir regalos. 1.
+2. 
+3. 
+4. 
+5. 2. Hacer lo siguiente: a. Coleccionar diferentes clases de papel de regalo, por lo menos 10 grados, 5x7 centímetros en tamaño. b. Escoger un patrón adecuado de papel de regalo para envolver un regalo para un niño, un adulto, una hermana, un hermano, etc. c. Demostrar cómo envolver cuidadosamente una caja rectangular simple en papel. 3. Envolver las siguientes clases de regalos con suplemento ornamental: a. En la forma de un cubo b. En la forma de un cilindro c. Multifacético d. Extraordinario (en su opinión) 4. Saber cómo hacer un moño de regalo (3 clases). 5. Empaquetar un regalo correctamente y con cuidado. Dar el regalo envuelto a alguien en su familia, iglesia o comunidad.
+
+## Observaciones
+
+- Este archivo fue preparado para análisis posterior, no para carga directa a BD.

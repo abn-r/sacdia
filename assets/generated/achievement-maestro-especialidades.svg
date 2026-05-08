@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Maestro de Especialidades">
+  <title>Maestro de Especialidades</title>
+  <desc>Flat matte engraved achievement badge. Transparent canvas, dark circle #1C1C1E, accent #D4A843.</desc>
+  <circle cx="256" cy="256" r="220" fill="#1C1C1E"/>
+  <circle cx="256" cy="256" r="204" fill="none" stroke="#D4A843" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="256" cy="256" r="170" fill="none" stroke="#D4A843" stroke-width="3" stroke-linecap="round" opacity="0.38"/>
+  <polyline points="232,384 256,404 280,384" fill="none" stroke="#D4A843" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>
+  <polyline points="209.7123102859538,189.7913375944708 195.02790846411358,200.63350089909275 182.8006214802108,214.81948332239097 173.61986694240295,231.66544814406004 167.92820405355155,250.35933392272176 166.0,270.0 167.92820405355155,289.64066607727824 173.61986694240292,308.33455185593994 182.8006214802108,325.18051667760903" fill="none" stroke="#D4A843" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" opacity="0.90"/>
+  <line x1="195.02790846411358" y1="200.63350089909275" x2="177.02790846411358" y2="186.63350089909275" stroke="#D4A843" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>
+  <line x1="195.02790846411358" y1="200.63350089909275" x2="181.02790846411358" y2="212.63350089909275" stroke="#D4A843" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0.65"/>
+  <line x1="182.8006214802108" y1="214.81948332239097" x2="164.8006214802108" y2="200.81948332239097" stroke="#D4A843" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>
+  <line x1="182.8006214802108" y1="214.81948332239097" x2="168.8006214802108" y2="226.81948332239097" stroke="#D4A843" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0.65"/>
+  <line x1="173.61986694240295" y1="231.66544814406004" x2="155.61986694240295" y2="217.66544814406004" stroke="#D4A843" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>
+  <line x1="173.61986694240295" y1="231.66544814406004" x2="159.61986694240295" y2="243.66544814406004" stroke="#D4A843" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0.65"/>
+  <line x1="167.92820405355155" y1="250.35933392272176" x2="149.92820405355155" y2="236.35933392272176" stroke="#D4A843" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>
+  <line x1="167.92820405355155" y1="250.35933392272176" x2="153.92820405355155" y2="262.35933392272176" stroke="#D4A843" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0.65"/>
+  <line x1="166.0" y1="270.0" x2="148.0" y2="256.0" stroke="#D4A843" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>
+  <line x1="166.0" y1="270.0" x2="152.0" y2="282.0" stroke="#D4A843" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0.65"/>
+  <line x1="167.92820405355155" y1="289.64066607727824" x2="149.92820405355155" y2="275.64066607727824" stroke="#D4A843" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>
+  <line x1="167.92820405355155" y1="289.64066607727824" x2="153.92820405355155" y2="301.64066607727824" stroke="#D4A843" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0.65"/>
+  <line x1="173.61986694240292" y1="308.33455185593994" x2="155.61986694240292" y2="294.33455185593994" stroke="#D4A843" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>
+  <line x1="173.61986694240292" y1="308.33455185593994" x2="159.61986694240292" y2="320.33455185593994" stroke="#D4A843" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0.65"/>
+  <polyline points="302.28768971404617,189.7913375944708 316.9720915358864,200.63350089909275 329.1993785197892,214.81948332239097 338.38013305759705,231.66544814406004 344.07179594644845,250.35933392272176 346.0,270.0 344.07179594644845,289.64066607727824 338.38013305759705,308.33455185593994 329.1993785197892,325.18051667760903" fill="none" stroke="#D4A843" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" opacity="0.90"/>
+  <line x1="316.9720915358864" y1="200.63350089909275" x2="334.9720915358864" y2="186.63350089909275" stroke="#D4A843" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>
+  <line x1="316.9720915358864" y1="200.63350089909275" x2="330.9720915358864" y2="212.63350089909275" stroke="#D4A843" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0.65"/>
+  <line x1="329.1993785197892" y1="214.81948332239097" x2="347.1993785197892" y2="200.81948332239097" stroke="#D4A843" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>
+  <line x1="329.1993785197892" y1="214.81948332239097" x2="343.1993785197892" y2="226.81948332239097" stroke="#D4A843" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0.65"/>
+  <line x1="338.38013305759705" y1="231.66544814406004" x2="356.38013305759705" y2="217.66544814406004" stroke="#D4A843" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>
+  <line x1="338.38013305759705" y1="231.66544814406004" x2="352.38013305759705" y2="243.66544814406004" stroke="#D4A843" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0.65"/>
+  <line x1="344.07179594644845" y1="250.35933392272176" x2="362.07179594644845" y2="236.35933392272176" stroke="#D4A843" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>
+  <line x1="344.07179594644845" y1="250.35933392272176" x2="358.07179594644845" y2="262.35933392272176" stroke="#D4A843" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0.65"/>
+  <line x1="346.0" y1="270.0" x2="364.0" y2="256.0" stroke="#D4A843" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>
+  <line x1="346.0" y1="270.0" x2="360.0" y2="282.0" stroke="#D4A843" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0.65"/>
+  <line x1="344.07179594644845" y1="289.64066607727824" x2="362.07179594644845" y2="275.64066607727824" stroke="#D4A843" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>
+  <line x1="344.07179594644845" y1="289.64066607727824" x2="358.07179594644845" y2="301.64066607727824" stroke="#D4A843" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0.65"/>
+  <line x1="338.38013305759705" y1="308.33455185593994" x2="356.38013305759705" y2="294.33455185593994" stroke="#D4A843" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>
+  <line x1="338.38013305759705" y1="308.33455185593994" x2="352.38013305759705" y2="320.33455185593994" stroke="#D4A843" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0.65"/>
+  <polygon points="256.0,218.0 269.7541749036439,251.06900233162622 305.454938847348,253.93111629250274 278.2547224813066,277.2309976683738 286.56483311920863,312.06888370749726 256.0,293.4 225.4351668807914,312.06888370749726 233.7452775186934,277.2309976683738 206.545061152652,253.93111629250274 242.24582509635613,251.06900233162622" fill="none" stroke="#D4A843" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

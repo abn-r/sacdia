@@ -13,8 +13,8 @@ Monorepo con panel admin web, app móvil y backend API para gestionar clubes de 
 
 ## Stack Tecnológico Compartido
 
-- **Autenticación**: Supabase Auth (JWT + OAuth con Google y Apple)
-- **Base de Datos**: PostgreSQL vía Supabase
+- **Autenticación**: Better Auth (self-hosted en NestJS, HS256 JWT + OAuth con Google y Apple)
+- **Base de Datos**: PostgreSQL vía Neon
 - **Storage**: Cloudflare R2 para archivos
 - **TypeScript**: Backend y panel admin
 - **Dart**: App móvil (Flutter)
@@ -41,9 +41,9 @@ git clone https://github.com/abn-r/sacdia-app.git sacdia-app
 
 ## Autenticación
 
-- **Provider**: Supabase Auth
-- **Tokens**: JWT con refresh automático
-- **OAuth**: Google y Apple configurados
+- **Provider**: Better Auth (self-hosted, `src/better-auth/` en sacdia-backend)
+- **Tokens**: HS256 JWT firmado con BETTER_AUTH_SECRET (Option C: BA autentica, SACDIA firma JWT)
+- **OAuth**: Google y Apple configurados vía Better Auth
 - **Roles**: Sistema RBAC con roles globales + roles de club
 
 ## URLs de Desarrollo
@@ -51,7 +51,7 @@ git clone https://github.com/abn-r/sacdia-app.git sacdia-app
 - Backend: `http://localhost:3000`
 - Admin: `http://localhost:3001`
 - API Docs: `http://localhost:3000/api`
-- Supabase: Configurar en `.env` de cada proyecto
+- DB (Neon): Configurar DATABASE_URL en `.env` de sacdia-backend
 
 ## Documentación
 

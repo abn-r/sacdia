@@ -1,0 +1,19 @@
+# Especialidad — cataratas
+
+**Fuente**: `/Users/abner/Downloads/S3/honors_pdf/cataratas.pdf`
+**Texto extraído**: `/Users/abner/Documents/development/sacdia/docs/working/honors-especialidades/raw/cataratas.txt`
+**Nivel detectado**: 3
+**Cantidad de requisitos detectados**: 4
+
+> Nota: extracción automática preliminar desde la capa de texto del PDF. Requiere revisión humana antes de cualquier carga a base de datos.
+
+## Requisitos detectados
+
+1. Definir las siguientes clases de cataratas: Bloque o clásica Cascada Cola de caballo Zambullida o en picado Segmentada Escalonada o por niveles
+2. Escoger 10 cataratas, incluyendo 2 que están cerca de su área o estado, y hacer una lista sobre ellas con la siguiente información: nombre, altura, clase de catarata, curso del agua y ubicación. (Completar el Cartel #1)
+3. Completar 2 de las siguientes actividades: a. Visitar una catarata y escribir un párrafo describiendo la experiencia. b. Escoger una catarata (además de los del #2) de interés y encontrar hechos e información interesante de ella. c. Ver un video de una catarata. d. Hacer un álbum de recortes de cataratas. Incluir fotografías o imágenes de cataratas e información importante de cada una. Esto puede ser un proyecto en grupo. e. Con la información proveída, crear un crucigrama o sopa de letras: Ángel/Catarata más alta del mundo con 979 metros. Browne/Catarata más alta en Nueva Zelanda. Dettifoss/Catarata que fluye de un glaciar desde Islandia. Havasu/Catarata en una reservación de nativos norteamericanos en el estado de Arizona. Huangguoshu/Catarata más grande de China. Iguazú/275 saltos en la frontera de Argentina y Brasil. Langfossen/Cascada gigante en Noruega, cayendo 612 metros. Mardalsfossen/Catarata escalonada bien conocida en Noruega. Multnomah/Catarata escalonada por el cañón de Columbia en el estado de Oregon. Niágara/Catarata más poderosa en todo Norteamérica. Shomyo/Catarata más alta por todo el año en Japón. Takakkaw/nombre de los nativos norteamericanos Cree para una catarata en Columbia Británica, Canadá. Tugela/Segunda catarata más alta en el mundo en Sudáfrica. Victoria/Catarata más grande en el mundo. Yosemite/Atracción turística popular en un parque nacional en el estado de California. Yumbilla/Quinta catarata más alta en el mundo, segunda más alta en Perú.
+4. Agua se menciona en cada uno de los siguientes versículos. Describir lo que está pasando en cada versículo y decir qué simboliza el agua. Juan 9:11 Juan 13:5 Mateo 3:16 Cataratas — Cartel #1 Nombre Altura Clase de Catarata Curso del Agua Ubicación
+
+## Observaciones
+
+- Este archivo fue preparado para análisis posterior, no para carga directa a BD.

@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="De Aventurero a Conquistador">
+  <title>De Aventurero a Conquistador</title>
+  <desc>Flat matte engraved achievement badge. Transparent canvas, dark circle #1C1C1E, accent #D4A843.</desc>
+  <circle cx="256" cy="256" r="220" fill="#1C1C1E"/>
+  <circle cx="256" cy="256" r="204" fill="none" stroke="#D4A843" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="256" cy="256" r="170" fill="none" stroke="#D4A843" stroke-width="3" stroke-linecap="round" opacity="0.38"/>
+  <polyline points="232,384 256,404 280,384" fill="none" stroke="#D4A843" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>
+  <polygon points="185.24,309.84 218.0,356.88 250.76,309.84" fill="none" stroke="#D4A843" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <line x1="185.24" y1="309.84" x2="218.0" y2="335.04" stroke="#D4A843" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <line x1="250.76" y1="309.84" x2="218.0" y2="335.04" stroke="#D4A843" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <ellipse cx="218" cy="338.4" rx="8.4" ry="6.72" fill="none" stroke="#D4A843" stroke-width="6" stroke-linecap="round"/>
+  <circle cx="292" cy="196" r="29.4" fill="none" stroke="#D4A843" stroke-width="6" stroke-linecap="round"/>
+  <line x1="292" y1="157.35999999999999" x2="292" y2="234.64000000000001" stroke="#D4A843" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <line x1="253.36" y1="196" x2="330.64" y2="196" stroke="#D4A843" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <line x1="267.64" y1="171.64" x2="316.36" y2="220.36" stroke="#D4A843" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" opacity="0.70"/>
+  <line x1="316.36" y1="171.64" x2="267.64" y2="220.36" stroke="#D4A843" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" opacity="0.70"/>
+  <polygon points="292,157.36 301.24,196 292,234.64 282.76,196" fill="none" stroke="#D4A843" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <line x1="210" y1="316" x2="304" y2="216" stroke="#D4A843" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="304,216 285,218 300,236" fill="none" stroke="#D4A843" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <polygon points="315.0,187.0 318.43854372591096,195.26725058290657 327.36373471183697,195.9827790731257 320.56368062032664,201.80774941709345 322.64120827980213,210.5172209268743 315.0,205.85 307.35879172019787,210.5172209268743 309.43631937967336,201.80774941709345 302.63626528816303,195.9827790731257 311.56145627408904,195.26725058290657" fill="none" stroke="#D4A843" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

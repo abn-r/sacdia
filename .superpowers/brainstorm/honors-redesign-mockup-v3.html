@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SACDIA — Honors Flow v3 (Evidence-based)</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0f0f1a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: white; padding: 32px; }
+  h1 { text-align: center; font-size: 28px; font-weight: 800; margin-bottom: 8px; }
+  .subtitle { text-align: center; color: rgba(255,255,255,0.5); font-size: 14px; margin-bottom: 40px; }
+  .screens { display: grid; grid-template-columns: repeat(2, 1fr); gap: 32px; max-width: 960px; margin: 0 auto; }
+  @media (max-width: 800px) { .screens { grid-template-columns: 1fr; max-width: 400px; } }
+  .phone { background: #1a1a2e; border-radius: 28px; padding: 14px; box-shadow: 0 12px 40px rgba(0,0,0,0.5); }
+  .phone-screen { background: #FFFFFF; border-radius: 18px; overflow: hidden; min-height: 560px; }
+  .phone-label { text-align: center; padding: 12px; color: rgba(255,255,255,0.6); font-size: 13px; font-weight: 700; letter-spacing: 1px; }
+  .status-bar { background: #183651; padding: 8px 16px; display: flex; justify-content: space-between; align-items: center; }
+  .status-bar span { color: white; font-size: 10px; font-weight: 600; }
+  .battery { width: 14px; height: 10px; border: 1px solid white; border-radius: 2px; position: relative; }
+  .battery::after { content: ''; position: absolute; left: 1px; top: 1px; width: 70%; height: calc(100% - 2px); background: white; border-radius: 1px; }
+</style>
+</head>
+<body>
+
+<h1>Honors Flow v3 — Evidence-based</h1>
+<p class="subtitle">Flujo real: inscripción → material offline → subir evidencia → validación</p>
+
+<div class="screens">
+
+  <!-- SCREEN 1: Catalog -->
+  <div class="phone">
+    <div class="phone-screen">
+      <div class="status-bar"><span>9:41</span><div class="battery"></div></div>
+      <div style="background: #183651; padding: 20px 16px 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+          <span style="color: white; font-size: 20px; font-weight: 800; letter-spacing: -0.3px;">Especialidades</span>
+          <div style="background: rgba(255,255,255,0.12); padding: 5px 14px; border-radius: 20px;">
+            <span style="color: #4FBF9F; font-size: 12px; font-weight: 700;">5</span>
+            <span style="color: rgba(255,255,255,0.4); font-size: 12px;">/17</span>
+          </div>
+        </div>
+        <div style="background: rgba(255,255,255,0.08); border-radius: 10px; padding: 11px 14px; display: flex; align-items: center; gap: 10px;">
+          <svg width="16" height="16" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <span style="color: rgba(255,255,255,0.35); font-size: 13px;">Buscar especialidad...</span>
+        </div>
+      </div>
+      <div style="padding: 14px 16px 10px; display: flex; gap: 8px; overflow-x: auto;">
+        <div style="background: #2EA0DA; color: white; padding: 8px 18px; border-radius: 10px; font-size: 12px; font-weight: 700; white-space: nowrap;">Todas</div>
+        <div style="background: #F4F6F7; color: #64748B; padding: 8px 18px; border-radius: 10px; font-size: 12px; font-weight: 600; white-space: nowrap;">Naturaleza</div>
+        <div style="background: #F4F6F7; color: #64748B; padding: 8px 18px; border-radius: 10px; font-size: 12px; font-weight: 600; white-space: nowrap;">Artes</div>
+        <div style="background: #F4F6F7; color: #64748B; padding: 8px 18px; border-radius: 10px; font-size: 12px; font-weight: 600; white-space: nowrap;">Habilidades</div>
+      </div>
+      <div style="padding: 6px 16px 16px; display: flex; flex-direction: column; gap: 8px;">
+        <!-- Validado -->
+        <div style="background: #FAFBFB; border-radius: 12px; padding: 14px; display: flex; align-items: center; gap: 12px; border-left: 3px solid #4FBF9F;">
+          <div style="width: 44px; height: 44px; background: #4FBF9F; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            <svg width="20" height="20" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
+          </div>
+          <div style="flex: 1;">
+            <div style="color: #183651; font-weight: 700; font-size: 14px;">Primeros Auxilios</div>
+            <div style="color: #4FBF9F; font-size: 11px; font-weight: 600; margin-top: 2px;">Validada</div>
+          </div>
+          <div style="width: 28px; height: 28px; background: #FBBD5E; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+            <svg width="14" height="14" fill="white" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          </div>
+        </div>
+        <!-- Enviado -->
+        <div style="background: #FAFBFB; border-radius: 12px; padding: 14px; display: flex; align-items: center; gap: 12px; border-left: 3px solid #FBBD5E;">
+          <div style="width: 44px; height: 44px; background: #FEF3E2; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            <svg width="20" height="20" fill="none" stroke="#FBBD5E" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          </div>
+          <div style="flex: 1;">
+            <div style="color: #183651; font-weight: 700; font-size: 14px;">Zoología</div>
+            <div style="color: #FBBD5E; font-size: 11px; font-weight: 600; margin-top: 2px;">Enviada — en revisión</div>
+          </div>
+        </div>
+        <!-- Inscripto -->
+        <div style="background: #FAFBFB; border-radius: 12px; padding: 14px; display: flex; align-items: center; gap: 12px; border-left: 3px solid #2EA0DA;">
+          <div style="width: 44px; height: 44px; background: #EBF5FB; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            <span style="font-size: 20px;">🏕️</span>
+          </div>
+          <div style="flex: 1;">
+            <div style="color: #183651; font-weight: 700; font-size: 14px;">Campismo</div>
+            <div style="color: #2EA0DA; font-size: 11px; font-weight: 600; margin-top: 2px;">Inscripta — sin evidencia</div>
+          </div>
+        </div>
+        <!-- Disponible -->
+        <div style="background: #FAFBFB; border-radius: 12px; padding: 14px; display: flex; align-items: center; gap: 12px;">
+          <div style="width: 44px; height: 44px; background: #F0F4F5; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            <span style="font-size: 20px;">🌲</span>
+          </div>
+          <div style="flex: 1;">
+            <div style="color: #183651; font-weight: 700; font-size: 14px;">Botánica</div>
+            <div style="color: #94A3B8; font-size: 11px; margin-top: 2px;">Nivel intermedio</div>
+          </div>
+          <svg width="18" height="18" fill="none" stroke="#CBD5E1" stroke-width="2" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
+        </div>
+        <!-- Disponible 2 -->
+        <div style="background: #FAFBFB; border-radius: 12px; padding: 14px; display: flex; align-items: center; gap: 12px;">
+          <div style="width: 44px; height: 44px; background: #F0F4F5; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            <span style="font-size: 20px;">🧭</span>
+          </div>
+          <div style="flex: 1;">
+            <div style="color: #183651; font-weight: 700; font-size: 14px;">Orientación</div>
+            <div style="color: #94A3B8; font-size: 11px; margin-top: 2px;">Nivel avanzado</div>
+          </div>
+          <svg width="18" height="18" fill="none" stroke="#CBD5E1" stroke-width="2" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
+        </div>
+      </div>
+    </div>
+    <div class="phone-label">① CATÁLOGO</div>
+  </div>
+
+  <!-- SCREEN 2: Detail (not enrolled) -->
+  <div class="phone">
+    <div class="phone-screen">
+      <div class="status-bar"><span>9:41</span><div class="battery"></div></div>
+      <div style="background: #183651; padding: 16px;">
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
+          <svg width="20" height="20" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
+          <span style="color: rgba(255,255,255,0.6); font-size: 13px;">Naturaleza</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 16px;">
+          <div style="width: 68px; height: 68px; background: rgba(255,255,255,0.1); border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 34px; flex-shrink: 0;">🏕️</div>
+          <div>
+            <div style="color: white; font-size: 22px; font-weight: 800; letter-spacing: -0.3px;">Campismo</div>
+            <div style="display: flex; gap: 8px; margin-top: 8px;">
+              <span style="background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.7); padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: 600;">Básico</span>
+              <span style="background: rgba(79,191,159,0.15); color: #4FBF9F; padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: 600;">Naturaleza</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="padding: 20px 16px;">
+        <p style="color: #64748B; font-size: 13px; line-height: 1.7; margin-bottom: 24px;">Aprendé técnicas de supervivencia, armado de carpas, orientación con brújula, y preparación de fogatas seguras.</p>
+        <!-- Material download -->
+        <div style="background: #F0F8FF; border-radius: 10px; padding: 14px; display: flex; align-items: center; gap: 12px; margin-bottom: 24px;">
+          <div style="width: 36px; height: 36px; background: #2EA0DA; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            <svg width="18" height="18" fill="white" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>
+          </div>
+          <div style="flex: 1;">
+            <div style="color: #183651; font-size: 13px; font-weight: 600;">Material de estudio</div>
+            <div style="color: #94A3B8; font-size: 11px;">PDF — descargá para completar offline</div>
+          </div>
+          <svg width="18" height="18" fill="none" stroke="#2EA0DA" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        </div>
+        <!-- How it works -->
+        <div style="margin-bottom: 24px;">
+          <div style="color: #183651; font-weight: 700; font-size: 14px; margin-bottom: 12px;">¿Cómo funciona?</div>
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            <div style="display: flex; align-items: flex-start; gap: 12px;">
+              <div style="width: 24px; height: 24px; background: #2EA0DA; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: white; font-size: 11px; font-weight: 800;">1</div>
+              <span style="color: #475569; font-size: 12px; line-height: 1.5;">Descargá el material y completalo con tu instructor</span>
+            </div>
+            <div style="display: flex; align-items: flex-start; gap: 12px;">
+              <div style="width: 24px; height: 24px; background: #2EA0DA; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: white; font-size: 11px; font-weight: 800;">2</div>
+              <span style="color: #475569; font-size: 12px; line-height: 1.5;">Escaneá o fotografiá las hojas firmadas</span>
+            </div>
+            <div style="display: flex; align-items: flex-start; gap: 12px;">
+              <div style="width: 24px; height: 24px; background: #2EA0DA; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: white; font-size: 11px; font-weight: 800;">3</div>
+              <span style="color: #475569; font-size: 12px; line-height: 1.5;">Subí la evidencia y enviala a revisión</span>
+            </div>
+          </div>
+        </div>
+        <!-- CTA -->
+        <button style="width: 100%; background: #4FBF9F; color: white; border: none; border-radius: 12px; padding: 16px; font-size: 15px; font-weight: 700; cursor: pointer;">
+          Inscribirme
+        </button>
+      </div>
+    </div>
+    <div class="phone-label">② DETALLE</div>
+  </div>
+
+  <!-- SCREEN 3: Evidence View (en_progreso) -->
+  <div class="phone">
+    <div class="phone-screen">
+      <div class="status-bar"><span>9:41</span><div class="battery"></div></div>
+      <div style="background: #F06151; padding: 16px 16px 20px;">
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+          <svg width="20" height="20" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
+          <span style="color: rgba(255,255,255,0.7); font-size: 13px;">Mi especialidad</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 16px;">
+          <div style="width: 56px; height: 56px; background: rgba(255,255,255,0.15); border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 28px; flex-shrink: 0;">🏕️</div>
+          <div>
+            <div style="color: white; font-size: 18px; font-weight: 800;">Campismo</div>
+            <span style="background: rgba(255,255,255,0.2); color: white; padding: 3px 10px; border-radius: 8px; font-size: 10px; font-weight: 600; margin-top: 6px; display: inline-block;">En progreso</span>
+          </div>
+        </div>
+      </div>
+      <!-- Status message -->
+      <div style="padding: 16px;">
+        <div style="background: #FEF3E2; border-radius: 10px; padding: 14px; margin-bottom: 16px; display: flex; align-items: flex-start; gap: 10px;">
+          <svg width="18" height="18" fill="none" stroke="#E8A84A" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink: 0; margin-top: 1px;"><circle cx="12" cy="12" r="10"/><path d="M12 16h.01M12 8v4"/></svg>
+          <span style="color: #92600A; font-size: 12px; line-height: 1.5;">Tenés evidencia cargada. Cuando estés listo, enviala a revisión.</span>
+        </div>
+
+        <!-- Material -->
+        <div style="background: #F0F8FF; border-radius: 10px; padding: 12px; display: flex; align-items: center; gap: 10px; margin-bottom: 16px;">
+          <div style="width: 32px; height: 32px; background: #2EA0DA; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            <svg width="16" height="16" fill="white" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>
+          </div>
+          <div style="flex: 1;">
+            <div style="color: #183651; font-size: 12px; font-weight: 600;">Material de estudio</div>
+          </div>
+          <svg width="16" height="16" fill="none" stroke="#2EA0DA" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
+        </div>
+
+        <!-- Evidence section -->
+        <div style="color: #183651; font-weight: 700; font-size: 14px; margin-bottom: 4px;">Evidencia</div>
+        <div style="color: #94A3B8; font-size: 11px; margin-bottom: 12px;">3 archivos • Máx. 10</div>
+
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 20px;">
+          <!-- Uploaded image -->
+          <div style="background: #F4F6F7; border-radius: 10px; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; position: relative;">
+            <svg width="28" height="28" fill="none" stroke="#94A3B8" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+            <div style="position: absolute; top: 4px; right: 4px; width: 16px; height: 16px; background: #4FBF9F; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+              <svg width="10" height="10" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
+            </div>
+          </div>
+          <!-- Uploaded image -->
+          <div style="background: #F4F6F7; border-radius: 10px; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; position: relative;">
+            <svg width="28" height="28" fill="none" stroke="#94A3B8" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+            <div style="position: absolute; top: 4px; right: 4px; width: 16px; height: 16px; background: #4FBF9F; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+              <svg width="10" height="10" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
+            </div>
+          </div>
+          <!-- Uploaded PDF -->
+          <div style="background: #FEF2F2; border-radius: 10px; aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;">
+            <svg width="24" height="24" fill="none" stroke="#F06151" stroke-width="1.5" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+            <span style="color: #F06151; font-size: 8px; font-weight: 700;">PDF</span>
+          </div>
+          <!-- Add more -->
+          <div style="background: #FAFBFB; border-radius: 10px; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; border: 2px dashed #E1E6E7; cursor: pointer;">
+            <svg width="24" height="24" fill="none" stroke="#CBD5E1" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <button style="width: 100%; background: #4FBF9F; color: white; border: none; border-radius: 12px; padding: 15px; font-size: 14px; font-weight: 700; cursor: pointer; margin-bottom: 8px;">
+          Enviar a revisión
+        </button>
+        <button style="width: 100%; background: transparent; color: #64748B; border: 1.5px solid #E1E6E7; border-radius: 12px; padding: 15px; font-size: 14px; font-weight: 600; cursor: pointer;">
+          Subir más evidencia
+        </button>
+      </div>
+    </div>
+    <div class="phone-label">③ EVIDENCIA (en progreso)</div>
+  </div>
+
+  <!-- SCREEN 4: Completed -->
+  <div class="phone">
+    <div class="phone-screen">
+      <div class="status-bar"><span>9:41</span><div class="battery"></div></div>
+      <div style="background: #4FBF9F; padding: 32px 16px; text-align: center;">
+        <div style="width: 72px; height: 72px; background: rgba(255,255,255,0.2); border-radius: 50%; margin: 0 auto 12px; display: flex; align-items: center; justify-content: center;">
+          <svg width="36" height="36" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
+        </div>
+        <div style="color: white; font-size: 22px; font-weight: 800; margin-bottom: 4px; letter-spacing: -0.3px;">Especialidad Completa</div>
+        <div style="color: rgba(255,255,255,0.7); font-size: 12px;">Campismo • 15 Mar 2026</div>
+      </div>
+      <div style="padding: 24px 16px; text-align: center;">
+        <div style="width: 88px; height: 88px; background: #FBBD5E; border-radius: 50%; margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; font-size: 42px;">🏕️</div>
+        <div style="color: #183651; font-size: 18px; font-weight: 800; margin-bottom: 4px;">Campismo</div>
+        <div style="display: flex; justify-content: center; gap: 8px; margin-bottom: 24px;">
+          <span style="background: #F0FDF8; color: #4FBF9F; padding: 4px 12px; border-radius: 8px; font-size: 11px; font-weight: 700;">Básico</span>
+          <span style="background: #FEF3E2; color: #E8A84A; padding: 4px 12px; border-radius: 8px; font-size: 11px; font-weight: 700;">Insignia obtenida</span>
+        </div>
+        <div style="display: flex; justify-content: space-around; padding: 18px 12px; background: #FAFBFB; border-radius: 12px; margin-bottom: 24px;">
+          <div style="text-align: center;">
+            <div style="color: #2EA0DA; font-size: 24px; font-weight: 800;">3</div>
+            <div style="color: #94A3B8; font-size: 10px; margin-top: 2px;">Evidencias</div>
+          </div>
+          <div style="width: 1px; background: #E1E6E7;"></div>
+          <div style="text-align: center;">
+            <div style="color: #F06151; font-size: 16px; font-weight: 800;">10 Feb</div>
+            <div style="color: #94A3B8; font-size: 10px; margin-top: 2px;">Inscripción</div>
+          </div>
+          <div style="width: 1px; background: #E1E6E7;"></div>
+          <div style="text-align: center;">
+            <div style="color: #4FBF9F; font-size: 24px; font-weight: 800;">33d</div>
+            <div style="color: #94A3B8; font-size: 10px; margin-top: 2px;">Duración</div>
+          </div>
+        </div>
+        <button style="width: 100%; background: #2EA0DA; color: white; border: none; border-radius: 12px; padding: 15px; font-size: 14px; font-weight: 700; margin-bottom: 10px; cursor: pointer;">
+          Ver más especialidades
+        </button>
+        <button style="width: 100%; background: transparent; color: #64748B; border: 1.5px solid #E1E6E7; border-radius: 12px; padding: 15px; font-size: 14px; font-weight: 600; cursor: pointer;">
+          Volver
+        </button>
+      </div>
+    </div>
+    <div class="phone-label">④ COMPLETADA</div>
+  </div>
+
+</div>
+</body>
+</html>

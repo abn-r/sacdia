@@ -1,0 +1,189 @@
+<h2>Gráfica de Línea — ¿Juntas o separadas?</h2>
+<p class="subtitle">Estilo área con fill degradado, como la referencia de Wells Fargo</p>
+
+<div class="cards">
+
+  <!-- Option A: Combined -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#000;padding:20px;border-radius:12px 12px 0 0;">
+      <div style="font-family:system-ui;color:#fff;max-width:340px;margin:0 auto;">
+
+        <!-- Chart title -->
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+          <span style="color:#fff;font-size:14px;font-weight:700;">Resumen del Mes</span>
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div style="display:flex;align-items:center;gap:4px;">
+              <div style="width:8px;height:8px;border-radius:50%;background:#4FBF9F;"></div>
+              <span style="color:#666;font-size:10px;">Ingresos</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:4px;">
+              <div style="width:8px;height:8px;border-radius:50%;background:#DC2626;"></div>
+              <span style="color:#666;font-size:10px;">Egresos</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Y axis + Chart area -->
+        <div style="display:flex;gap:6px;">
+          <!-- Y axis labels -->
+          <div style="display:flex;flex-direction:column;justify-content:space-between;height:140px;padding:0 0 2px;">
+            <span style="color:#444;font-size:9px;">$1.5K</span>
+            <span style="color:#444;font-size:9px;">$1.0K</span>
+            <span style="color:#444;font-size:9px;">$500</span>
+            <span style="color:#444;font-size:9px;">$0</span>
+          </div>
+
+          <!-- Chart -->
+          <div style="flex:1;position:relative;height:140px;background:#0a0a0a;border-radius:12px;overflow:hidden;border:1px solid #1a1a1a;">
+            <!-- Grid lines -->
+            <div style="position:absolute;top:0;left:0;right:0;height:1px;background:#151515;"></div>
+            <div style="position:absolute;top:33%;left:0;right:0;height:1px;background:#151515;"></div>
+            <div style="position:absolute;top:66%;left:0;right:0;height:1px;background:#151515;"></div>
+            <div style="position:absolute;bottom:0;left:0;right:0;height:1px;background:#151515;"></div>
+
+            <!-- Income area (green) -->
+            <svg style="position:absolute;top:0;left:0;width:100%;height:100%;" viewBox="0 0 300 140" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="greenFill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#4FBF9F" stop-opacity="0.3"/>
+                  <stop offset="100%" stop-color="#4FBF9F" stop-opacity="0.02"/>
+                </linearGradient>
+              </defs>
+              <path d="M0,100 C30,95 50,80 75,70 C100,60 120,45 150,40 C180,35 200,50 225,30 C250,10 275,15 300,8 L300,140 L0,140 Z" fill="url(#greenFill)"/>
+              <path d="M0,100 C30,95 50,80 75,70 C100,60 120,45 150,40 C180,35 200,50 225,30 C250,10 275,15 300,8" fill="none" stroke="#4FBF9F" stroke-width="2.5"/>
+              <!-- Dot on current -->
+              <circle cx="270" cy="10" r="4" fill="#4FBF9F" stroke="#000" stroke-width="2"/>
+            </svg>
+
+            <!-- Expense area (red) -->
+            <svg style="position:absolute;top:0;left:0;width:100%;height:100%;" viewBox="0 0 300 140" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="redFill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#DC2626" stop-opacity="0.25"/>
+                  <stop offset="100%" stop-color="#DC2626" stop-opacity="0.02"/>
+                </linearGradient>
+              </defs>
+              <path d="M0,80 C30,85 50,90 75,95 C100,100 120,88 150,92 C180,96 200,85 225,90 C250,95 275,88 300,82 L300,140 L0,140 Z" fill="url(#redFill)"/>
+              <path d="M0,80 C30,85 50,90 75,95 C100,100 120,88 150,92 C180,96 200,85 225,90 C250,95 275,88 300,82" fill="none" stroke="#DC2626" stroke-width="2.5"/>
+              <circle cx="270" cy="84" r="4" fill="#DC2626" stroke="#000" stroke-width="2"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- X axis labels -->
+        <div style="display:flex;justify-content:space-between;padding:8px 32px 0;">
+          <span style="color:#444;font-size:9px;">1</span>
+          <span style="color:#444;font-size:9px;">7</span>
+          <span style="color:#444;font-size:9px;">14</span>
+          <span style="color:#444;font-size:9px;">21</span>
+          <span style="color:#aaa;font-size:9px;font-weight:600;">28</span>
+        </div>
+
+        <!-- Period selector -->
+        <div style="display:flex;justify-content:center;gap:4px;margin-top:14px;">
+          <div style="background:#333;border-radius:8px;padding:5px 12px;"><span style="color:#fff;font-size:10px;font-weight:600;">1M</span></div>
+          <div style="background:#111;border-radius:8px;padding:5px 12px;"><span style="color:#555;font-size:10px;">3M</span></div>
+          <div style="background:#111;border-radius:8px;padding:5px 12px;"><span style="color:#555;font-size:10px;">6M</span></div>
+          <div style="background:#111;border-radius:8px;padding:5px 12px;"><span style="color:#555;font-size:10px;">1A</span></div>
+          <div style="background:#111;border-radius:8px;padding:5px 12px;"><span style="color:#555;font-size:10px;">Todo</span></div>
+        </div>
+
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Ambas líneas juntas</h3>
+      <p>Ingresos (verde) y egresos (rojo) en el mismo chart. Cada línea con su área fill degradada. Se ve la relación entre ambas de un vistazo. Selector de período abajo (1M, 3M, 6M, 1A, Todo). Eje X = días del mes.</p>
+      <div class="pros-cons" style="margin-top:12px;">
+        <div class="pros"><h4>Pros</h4><ul><li>Comparación directa e inmediata</li><li>Un solo espacio, más compacto</li><li>Se ven los cruces (cuando gastos superan ingresos)</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Puede verse confuso si los valores son muy cercanos</li><li>Las áreas se superponen</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Option B: Tabs -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#000;padding:20px;border-radius:12px 12px 0 0;">
+      <div style="font-family:system-ui;color:#fff;max-width:340px;margin:0 auto;">
+
+        <!-- Tabs -->
+        <div style="display:flex;background:#111;border-radius:12px;padding:3px;margin-bottom:16px;">
+          <div style="flex:1;background:#1a1a1a;border-radius:10px;padding:8px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,0.3);">
+            <span style="color:#4FBF9F;font-size:12px;font-weight:600;">Ingresos</span>
+          </div>
+          <div style="flex:1;padding:8px;text-align:center;">
+            <span style="color:#555;font-size:12px;font-weight:500;">Egresos</span>
+          </div>
+        </div>
+
+        <!-- Active tab: Income -->
+        <div style="text-align:center;margin-bottom:12px;">
+          <span style="color:#4FBF9F;font-size:28px;font-weight:800;">$1,200.00</span>
+          <div style="color:#444;font-size:11px;margin-top:2px;">Total ingresos · Marzo 2026</div>
+        </div>
+
+        <!-- Y axis + Chart area -->
+        <div style="display:flex;gap:6px;">
+          <div style="display:flex;flex-direction:column;justify-content:space-between;height:130px;padding:0 0 2px;">
+            <span style="color:#444;font-size:9px;">$400</span>
+            <span style="color:#444;font-size:9px;">$200</span>
+            <span style="color:#444;font-size:9px;">$0</span>
+          </div>
+
+          <div style="flex:1;position:relative;height:130px;background:#0a0a0a;border-radius:12px;overflow:hidden;border:1px solid #1a1a1a;">
+            <div style="position:absolute;top:0;left:0;right:0;height:1px;background:#151515;"></div>
+            <div style="position:absolute;top:50%;left:0;right:0;height:1px;background:#151515;"></div>
+            <div style="position:absolute;bottom:0;left:0;right:0;height:1px;background:#151515;"></div>
+
+            <svg style="position:absolute;top:0;left:0;width:100%;height:100%;" viewBox="0 0 300 130" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="greenFill2" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#4FBF9F" stop-opacity="0.35"/>
+                  <stop offset="100%" stop-color="#4FBF9F" stop-opacity="0.02"/>
+                </linearGradient>
+              </defs>
+              <path d="M0,110 C20,105 40,95 60,85 C80,75 100,60 130,50 C160,40 180,55 210,35 C240,15 260,20 280,12 C290,8 300,10 300,10 L300,130 L0,130 Z" fill="url(#greenFill2)"/>
+              <path d="M0,110 C20,105 40,95 60,85 C80,75 100,60 130,50 C160,40 180,55 210,35 C240,15 260,20 280,12 C290,8 300,10 300,10" fill="none" stroke="#4FBF9F" stroke-width="2.5"/>
+              <circle cx="280" cy="12" r="5" fill="#4FBF9F" stroke="#000" stroke-width="2"/>
+              <!-- Tooltip -->
+              <rect x="248" y="0" width="48" height="18" rx="4" fill="#1a1a1a" stroke="#333" stroke-width="0.5"/>
+              <text x="272" y="13" text-anchor="middle" fill="#4FBF9F" font-size="9" font-weight="600">$350</text>
+            </svg>
+          </div>
+        </div>
+
+        <!-- X axis -->
+        <div style="display:flex;justify-content:space-between;padding:8px 32px 0;">
+          <span style="color:#444;font-size:9px;">1</span>
+          <span style="color:#444;font-size:9px;">7</span>
+          <span style="color:#444;font-size:9px;">14</span>
+          <span style="color:#444;font-size:9px;">21</span>
+          <span style="color:#aaa;font-size:9px;font-weight:600;">28</span>
+        </div>
+
+        <!-- Period selector -->
+        <div style="display:flex;justify-content:center;gap:4px;margin-top:14px;">
+          <div style="background:#333;border-radius:8px;padding:5px 12px;"><span style="color:#fff;font-size:10px;font-weight:600;">1M</span></div>
+          <div style="background:#111;border-radius:8px;padding:5px 12px;"><span style="color:#555;font-size:10px;">3M</span></div>
+          <div style="background:#111;border-radius:8px;padding:5px 12px;"><span style="color:#555;font-size:10px;">6M</span></div>
+          <div style="background:#111;border-radius:8px;padding:5px 12px;"><span style="color:#555;font-size:10px;">1A</span></div>
+          <div style="background:#111;border-radius:8px;padding:5px 12px;"><span style="color:#555;font-size:10px;">Todo</span></div>
+        </div>
+
+        <!-- Inactive tab preview -->
+        <div style="margin-top:16px;background:#111;border-radius:12px;padding:12px;border:1px dashed #252525;text-align:center;">
+          <span style="color:#444;font-size:11px;">Tab "Egresos" → misma gráfica en <span style="color:#DC2626;">rojo</span></span>
+        </div>
+
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Separadas por tabs</h3>
+      <p>Un tab switcher (Ingresos / Egresos) arriba de la gráfica. Cada tab muestra su línea con su color y total. Más limpio, sin superposición. El total del tab activo se muestra prominente arriba del chart.</p>
+      <div class="pros-cons" style="margin-top:12px;">
+        <div class="pros"><h4>Pros</h4><ul><li>Más limpio y enfocado</li><li>Total visible por categoría</li><li>Sin confusión de áreas superpuestas</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>No se comparan directamente</li><li>Requiere interacción para ver ambos</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+</div>

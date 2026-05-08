@@ -2,7 +2,7 @@
 
 ## Estado
 ACTIVE
-<!-- VERIFICADO contra código 2026-03-14: todos los endpoints auth listados son ALINEADO en Reality Matrix (22 endpoints auth implementados y documentados) -->
+<!-- VERIFICADO contra código 2026-04-13: runtime auth alineado con Better Auth, verify-email, OAuth callback POST y MFA aal1/aal2 -->
 
 ## Propósito
 Este documento define el comportamiento técnico vigente del dominio de autenticación y autorización.
@@ -10,50 +10,52 @@ Este documento define el comportamiento técnico vigente del dominio de autentic
 Acá manda el runtime real del backend, no los walkthroughs viejos ni suposiciones de cliente.
 
 ## Precedencia
-Orden de autoridad para auth dentro de la nueva capa canónica:
+Orden de autoridad para auth dentro de la capa canónica activa:
 
-1. `docs/canon/auth/dominio-auth.md`
-2. `docs/canon/auth/runtime-auth.md`
-3. `docs/canon/auth/procesos-auth.md`
+1. `docs/canon/source-of-truth.md`
+2. `docs/canon/runtime-sacdia.md`
+3. `docs/canon/auth/modelo-autorizacion.md`
+4. `docs/canon/auth/runtime-auth.md`
 
-Si un documento legacy contradice este archivo, este archivo manda.
+Si una fuente subordinada contradice una superior, gana la superior y el conflicto debe escalarse.
 
 ## Resumen operativo
 El estado actual del runtime de auth es este:
 
-- la autenticación base depende de Supabase Auth;
+- la autenticación base depende de Better Auth self-hosted;
 - el backend expone endpoints propios bajo `/api/v1/auth/*`;
 - `POST /auth/login` y `POST /auth/refresh` entregan tokens en camelCase;
 - `GET /auth/me` es la fuente canónica del bloque `authorization`;
 - el contexto activo de club se cambia con `PATCH /auth/me/context`;
 - existen superficies activas para OAuth, MFA y gestión de sesiones;
-- algunos contratos legacy siguen expuestos por compatibilidad temporal.
+- `refreshToken` representa el session token opaco de Better Auth y el backend firma el `accessToken` HS256.
 
 ## Componentes runtime
 
-### Supabase Auth
+### Better Auth
 Responsabilidades actuales:
 - autenticar credenciales con email y password;
-- emitir `accessToken` y `refreshToken`;
-- refrescar sesión;
-- soportar OAuth con Google y Apple;
-- soportar MFA con TOTP.
+- crear y refrescar sesiones opacas;
+- soportar OAuth con Google y Apple a través de su callback interno;
+- servir de base para el flujo MFA/TOTP integrado por backend.
 
 ### Backend NestJS
 Responsabilidades actuales:
 - exponer endpoints canónicos de auth para clientes;
-- normalizar respuestas de tokens en camelCase;
+- emitir y validar el JWT HS256 de SACDIA para API;
 - resolver perfil autenticado;
 - resolver autorización efectiva por sesión;
 - persistir y cambiar asignación activa de club;
-- ofrecer superficies auxiliares de MFA, OAuth y sesiones.
+- ofrecer superficies auxiliares de verify-email, MFA, OAuth y sesiones.
 
 ### Prisma / Postgres
 Responsabilidades actuales:
 - persistir usuario local en `users`;
 - persistir tracking de post-registro y `active_club_assignment_id` en `users_pr`;
+- persistir verificaciones y secretos TOTP en `verification`;
+- persistir sesiones opacas de Better Auth en `session`/`sessions` según runtime efectivo;
 - persistir roles, permisos y asignaciones de club;
-- NO persistir una tabla canónica propia de sesiones auth.
+- persistir cuentas conectadas OAuth en `account`.
 
 ### Cache / Redis
 Responsabilidades actuales:
@@ -62,28 +64,33 @@ Responsabilidades actuales:
 - TTL de sesiones administradas por backend.
 
 ## Endpoints canónicos vigentes
-<!-- VERIFICADO contra código 2026-03-14: todos los endpoints listados a continuación existen en backend-audit -->
+<!-- VERIFICADO contra código 2026-04-13: auth.controller.ts, oauth.controller.ts, mfa.controller.ts, auth.service.ts y better-auth.service.ts -->
 
 ### Sesión base
+- `POST /api/v1/auth/register` <!-- VERIFICADO -->
 - `POST /api/v1/auth/login` <!-- VERIFICADO -->
 - `POST /api/v1/auth/refresh` <!-- VERIFICADO -->
 - `POST /api/v1/auth/logout` <!-- VERIFICADO -->
+- `POST /api/v1/auth/password/reset-request` <!-- VERIFICADO -->
+- `POST /api/v1/auth/verify-email/send` <!-- VERIFICADO -->
+- `POST /api/v1/auth/verify-email/confirm` <!-- VERIFICADO -->
+- `POST /api/v1/auth/update-password` <!-- VERIFICADO -->
 - `GET /api/v1/auth/me` <!-- VERIFICADO -->
 - `PATCH /api/v1/auth/me/context` <!-- VERIFICADO -->
+- `GET /api/v1/auth/profile/completion-status` <!-- VERIFICADO -->
 
 ### OAuth
 - `POST /api/v1/auth/oauth/google` <!-- VERIFICADO -->
 - `POST /api/v1/auth/oauth/apple` <!-- VERIFICADO -->
-- `GET /api/v1/auth/oauth/callback` <!-- VERIFICADO -->
+- `POST /api/v1/auth/oauth/callback` <!-- VERIFICADO -->
 - `GET /api/v1/auth/oauth/providers` <!-- VERIFICADO -->
 - `DELETE /api/v1/auth/oauth/:provider` <!-- VERIFICADO -->
 
 ### MFA
 - `POST /api/v1/auth/mfa/enroll` <!-- VERIFICADO -->
 - `POST /api/v1/auth/mfa/verify` <!-- VERIFICADO -->
-- `GET /api/v1/auth/mfa/factors` <!-- VERIFICADO -->
 - `GET /api/v1/auth/mfa/status` <!-- VERIFICADO -->
-- `DELETE /api/v1/auth/mfa/unenroll` <!-- VERIFICADO -->
+- `DELETE /api/v1/auth/mfa/disable` <!-- VERIFICADO -->
 
 ### Gestión de sesiones
 - `GET /api/v1/auth/sessions` <!-- VERIFICADO -->
@@ -149,14 +156,15 @@ Y responde:
 Compatibilidad transicional:
 - `refresh_token` existió como input legacy;
 - hoy el contrato canónico es `refreshToken`;
-- el backend ya contempla rechazo estricto del payload snake_case.
+- el backend ya contempla rechazo estricto del payload snake_case;
+- el valor transportado es el session token opaco de Better Auth, no un refresh JWT separado.
 
 ### Logout
 `POST /api/v1/auth/logout` es best effort:
 - acepta bearer opcional;
 - acepta `refreshToken` opcional en body;
-- intenta revocar por access token primero;
-- si no hay access token válido, intenta derivarlo desde refresh token;
+- si recibe `refreshToken`, intenta revocar la sesión opaca en Better Auth;
+- si solo recibe `accessToken`, invalida el JWT en blacklist y deja expirar la sesión opaca por su ciclo natural;
 - no bloquea UX si la revocación falla.
 
 ## Contrato canónico de autorización
@@ -203,33 +211,33 @@ Estado actual soportado:
 
 Flujo vigente resumido:
 1. cliente llama `POST /auth/oauth/{provider}`;
-2. backend devuelve una URL de Supabase OAuth;
+2. backend devuelve una URL de Better Auth para redirigir el browser;
 3. proveedor autentica al usuario;
-4. callback llega a `GET /auth/oauth/callback` con `access_token` y opcionalmente `refresh_token` en query;
-5. backend obtiene usuario desde Supabase;
-6. si es primera vez, crea usuario local y tracking mínimo;
-7. backend responde en camelCase con tokens, usuario y `needsPostRegistration`.
+4. Better Auth resuelve internamente `GET /api/auth/callback/{provider}` y crea/actualiza sesión;
+5. cliente llama `POST /auth/oauth/callback` con `session_token`, `provider` y opcionalmente `redirect_uri`;
+6. backend valida esa sesión opaca, provisiona filas SACDIA faltantes si aplica y firma el JWT HS256;
+7. backend responde con `accessToken`, `sessionToken`, `user` y `needsPostRegistration`.
 
 Notas vigentes:
-- el callback conserva query params snake_case por compatibilidad con proveedor;
-- la respuesta del backend sigue camelCase;
-- `google_connected` y `apple_connected` son flags locales de tracking/UI, no la fuente real de autenticación.
+- el callback público de SACDIA es `POST`, no `GET`;
+- la fuente de verdad de providers conectados es la tabla `account` de Better Auth;
+- `GET /auth/oauth/providers` retorna `string[]` y `DELETE /auth/oauth/:provider` desvincula la cuenta realmente.
 
 ## MFA vigente
 Estado actual soportado:
-- MFA con TOTP usando Supabase.
+- MFA con TOTP sobre JWT propio de SACDIA.
 
 Superficies vigentes:
 - enrolamiento de factor;
-- verificación y activación;
-- listado de factores;
+- verificación con elevación de sesión;
 - consulta de estado;
 - deshabilitación.
 
 Notas vigentes:
 - los endpoints MFA requieren JWT;
-- pueden aceptar `x-refresh-token` opcional para bind de sesión cuando Supabase lo requiere;
-- el runtime expone `aal1` y `aal2` a través de status MFA.
+- `POST /auth/mfa/verify` admite token `aal1` (`mfa_pending: true`) y devuelve un nuevo `accessToken` `aal2` cuando verifica el código;
+- `GET /auth/mfa/status` puede consultarse con token `aal1`;
+- la superficie MFA pública vigente se limita a enrolar, verificar, consultar estado y deshabilitar.
 
 Límite importante del estado actual:
 - el endpoint de login principal no publica hoy un handshake canónico de `requiresMfa` previo a sesión elevada;
@@ -255,9 +263,10 @@ Límite importante del estado actual:
 
 ## Registro y post-registro
 Estado actual:
-- `POST /api/v1/auth/register` crea usuario en Supabase y réplica local en Prisma;
+- `POST /api/v1/auth/register` crea usuario vía Better Auth y completa filas SACDIA en Prisma;
 - también crea tracking granular en `users_pr`;
 - asigna el rol global `user`;
+- dispara el flujo de verify-email para cuentas nuevas;
 - `GET /api/v1/auth/profile/completion-status` expone el estado del post-registro.
 
 El login y OAuth devuelven `needsPostRegistration` para que el cliente decida continuidad UX.
@@ -304,12 +313,13 @@ Estos puntos NO deben maquillarse como cerrados:
 - no usa metadata legacy como fuente de autorización nueva.
 
 ## Referencias activas
-- `docs/canon/auth/dominio-auth.md`
-- `docs/01-FEATURES/auth/AUTHORIZATION-CANONICAL-CONTRACT.md`
-- `docs/01-FEATURES/auth/CLUB-ROLE-ASSIGNMENT-FIRST-CONTRACT.md`
-- `docs/01-FEATURES/auth/PERMISSIONS-SYSTEM.md`
-- `docs/01-FEATURES/auth/RBAC-ENFORCEMENT-MATRIX.md`
-- `docs/02-API/ENDPOINTS-LIVE-REFERENCE.md`
+- `docs/canon/source-of-truth.md`
+- `docs/canon/runtime-sacdia.md`
+- `docs/canon/auth/modelo-autorizacion.md`
+- `docs/features/auth/AUTHORIZATION-CANONICAL-CONTRACT.md`
+- `docs/features/auth/PERMISSIONS-SYSTEM.md`
+- `docs/features/auth/RBAC-ENFORCEMENT-MATRIX.md`
+- `docs/api/ENDPOINTS-LIVE-REFERENCE.md`
 - `sacdia-backend/src/auth/auth.controller.ts`
 - `sacdia-backend/src/auth/auth.service.ts`
 - `sacdia-backend/src/auth/oauth.controller.ts`

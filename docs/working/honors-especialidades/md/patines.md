@@ -1,0 +1,23 @@
+# Especialidad — patines
+
+**Fuente**: `/Users/abner/Downloads/S3/honors_pdf/patines.pdf`
+**Texto extraído**: `/Users/abner/Documents/development/sacdia/docs/working/honors-especialidades/raw/patines.txt`
+**Nivel detectado**: 1
+**Cantidad de requisitos detectados**: 8
+
+> Nota: extracción automática preliminar desde la capa de texto del PDF. Requiere revisión humana antes de cualquier carga a base de datos.
+
+## Requisitos detectados
+
+1. Hacer un resumen de la historia de la creación y los cambios de los patines.
+2. Describir los equipos de seguridad que se usan en el patinaje.
+3. Citar por lo menos 3 deportes en los que se usen patines.
+4. Describir la diferencia entre las siguientes clases de patines: Rollers Tradicional Hielo
+5. Para cada una de las clases de patines mencionada en el requisito 4, citar: a. Lugar apropiado para uso b. Por lo menos 3 modalidades en el que cada clase es usada c. Ventajas que el modelo proporciona d. Desventajas
+6. Saber cómo debe hacerse la manutención de los patines y explicarla (escoge una clase que pueda usarse en su región). Recreación
+7. Realizar lo siguiente mientras patina: a. Saber aumentar velocidad b. Saber frenar rápidamente c. Patinar de espaldas d. Aumentar la velocidad y deslizarse, por lo menos 5 metros agachado e. Cambiar de dirección (derecha e izquierda) f. Tomar velocidad y saltar un objeto g. Hacer un giro de 360° en un pie
+8. Hacer una investigación sobre una de las modalidades deportivas del requisito 3, y mencionar el reglamento, el nivel de las competencias, y las categorías e informaciones interesantes sobre el deporte. Reglamento Nivel de competencias Información interesante
+
+## Observaciones
+
+- Este archivo fue preparado para análisis posterior, no para carga directa a BD.

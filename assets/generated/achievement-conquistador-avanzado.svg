@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Conquistador Avanzado">
+  <title>Conquistador Avanzado</title>
+  <desc>Flat matte engraved achievement badge. Transparent canvas, dark circle #1C1C1E, accent #B8C5D0.</desc>
+  <circle cx="256" cy="256" r="220" fill="#1C1C1E"/>
+  <circle cx="256" cy="256" r="204" fill="none" stroke="#B8C5D0" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="256" cy="256" r="170" fill="none" stroke="#B8C5D0" stroke-width="3" stroke-linecap="round" opacity="0.38"/>
+  <polyline points="232,384 256,404 280,384" fill="none" stroke="#B8C5D0" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>
+  <circle cx="256" cy="276" r="70" fill="none" stroke="#B8C5D0" stroke-width="6" stroke-linecap="round"/>
+  <line x1="256" y1="184" x2="256" y2="368" stroke="#B8C5D0" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <line x1="164" y1="276" x2="348" y2="276" stroke="#B8C5D0" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <line x1="198" y1="218" x2="314" y2="334" stroke="#B8C5D0" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" opacity="0.70"/>
+  <line x1="314" y1="218" x2="198" y2="334" stroke="#B8C5D0" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" opacity="0.70"/>
+  <polygon points="256,184 278,276 256,368 234,276" fill="none" stroke="#B8C5D0" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <polygon points="256.0,216.0 259.43854372591096,224.26725058290657 268.36373471183697,224.9827790731257 261.56368062032664,230.80774941709345 263.64120827980213,239.5172209268743 256.0,234.85 248.35879172019784,239.5172209268743 250.43631937967336,230.80774941709345 243.636265288163,224.9827790731257 252.56145627408904,224.26725058290657" fill="none" stroke="#B8C5D0" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <polygon points="296.70319397786864,286.5 300.1417377037796,294.76725058290657 309.0669286897056,295.4827790731257 302.2668745981953,301.3077494170934 304.34440225767077,310.0172209268743 296.70319397786864,305.35 289.0619856980665,310.0172209268743 291.139513357542,301.3077494170934 284.33945926603167,295.4827790731257 293.2646502519577,294.76725058290657" fill="none" stroke="#B8C5D0" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <polygon points="215.29680602213136,286.5 218.73534974804232,294.76725058290657 227.66054073396836,295.4827790731257 220.860486642458,301.3077494170934 222.93801430193352,310.0172209268743 215.29680602213136,305.35 207.6555977423292,310.0172209268743 209.73312540180473,301.3077494170934 202.93307131029437,295.4827790731257 211.8582622962204,294.76725058290657" fill="none" stroke="#B8C5D0" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

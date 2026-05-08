@@ -1,0 +1,26 @@
+# Especialidad — mamiferos pequenos como mascotas
+
+**Fuente**: `/Users/abner/Downloads/S3/honors_pdf/mamiferos_pequenos_como_mascotas.pdf`
+**Texto extraído**: `/Users/abner/Documents/development/sacdia/docs/working/honors-especialidades/raw/mamiferos-pequenos-como-mascotas.txt`
+**Nivel detectado**: No detectado
+**Cantidad de requisitos detectados**: 11
+
+> Nota: extracción automática preliminar desde la capa de texto del PDF. Requiere revisión humana antes de cualquier carga a base de datos.
+
+## Requisitos detectados
+
+1. Tener la especialidad de Mamíferos.
+2. Mantener un mamífero pequeño como mascota durante al menos 6 meses (perros y gatos no se incluyen entre los mamíferos pequeños como mascota). Para una lista de propuesta de mascotas para elegir, ver el requisito 5.
+3. Completar una de las siguientes actividades: a. Si actualmente dispone de un mamífero pequeño como mascota, mantener un registro de la atención de su mamífero pequeño durante un mes. Incluir en el expediente cuando le da agua, alimento y cuando limpia su jaula. (Completar el Cartel #1) b. Si actualmente no dispone de un mamífero pequeño como mascota, pero ha mantenido una durante al menos 6 meses, cuidar para alguien uno durante al menos una semana. Registrar la atención que fue requerida. (Completar el Cartel #2)
+4. Dar un informe oral (por lo menos 3 minutos) de lo que ha observado acerca del mamífero pequeño como mascota. Incluir alimentos favoritos, algunos de sus hábitos, cuando es más activo y su historia favorita sobre mascotas, etc.
+5. Completar lo siguiente: a. Ser capaz de distinguir entre los siguientes grupo de mamíferos pequeños como mascota (Nota: si la lista de pequeños mamíferos domésticos mencionados no se encuentran en su área, puede sustituir pequeños mamíferos domésticos locales): i. Hámster ii. Jerbo (gerbilino) iii. Rata iv. Ratón v. Cuy (conejillo de Indias o cobayo) vi. Chinchilla vii. Conejo viii. Hurón b. Describir la atención básica de uno en la lista anterior y describir como difiere la atención de otro de la lista. c. ¿Cuáles de estos animales no son roedores? 1. 2.
+6. Escribir un ensayo de 200 palabras sobre la historia y el calor de alguno de los anteriores y las características que tienen que las hacen buenas mascotas. • Nivel de Habilidad 2 General
+7. Ser capaz de identificar 5 variedades de hámster y 5 variedades de conejos. Hámsteres Conejos 1. 2. 3. 4. 5.
+8. ¿Por qué no es bueno hacer mascotas de los pequeños mamíferos capturados en el medio silvestre?
+9. Rabia: ¿Qué es? ¿Cómo se propaga? ¿Puede obtener la rabia de pequeños mamíferos? ¿Se puede curar? ¿Cómo se puede evitar? ¿Cuáles mamíferos pequeños como mascotas pueden llevarlo?
+10. ¿Por qué no se debe manejar los mamíferos pequeños cuando uno tiene gripe? • Nivel de Habilidad 2 General
+11. Buscar en la Biblia 3 referencias a los animales que ahora se consideran como pequeño mamíferos como mascotas. Según la Biblia, ¿se consideran carne limpia o inmunda? Referencias Bíblicas Limpia/Inmunda 1. 2. 3. Mamíferos Pequeños Como Mascotas — Cartel #1 Día 1 Día 8 Día 15 Día 22 Día 29 Día 2 Día 9 Día 16 Día 23 Día 30 Día 3 Día 10 Día 17 Día 24 Día 31 Día 4 Día 11 Día 18 Día 25 Notas adicionales: Día 5 Día 12 Día 19 Día 26 Día 6 Día 13 Día 20 Día 27 Día 7 Día 14 Día 21 Día 28 Mamíferos Pequeños Como Mascotas — Cartel #2 Día 1 Día 1 Día 3 Día 4 Día 5 Día 6 Día 7 Notas Adicionales:
+
+## Observaciones
+
+- Este archivo fue preparado para análisis posterior, no para carga directa a BD.

@@ -1,0 +1,26 @@
+# Especialidad — oracion avanzado
+
+**Fuente**: `/Users/abner/Downloads/S3/honors_pdf/oracion_avanzado.pdf`
+**Texto extraído**: `/Users/abner/Documents/development/sacdia/docs/working/honors-especialidades/raw/oracion-avanzado.txt`
+**Nivel detectado**: 2
+**Cantidad de requisitos detectados**: 11
+
+> Nota: extracción automática preliminar desde la capa de texto del PDF. Requiere revisión humana antes de cualquier carga a base de datos.
+
+## Requisitos detectados
+
+1. Tener la especialidad de Oración.
+2. Leer y discutir en un grupo el propósito de la oración, como está escrito en Santiago 1:2- 9.
+3. Examinar oraciones contestadas en la Biblia por una variedad de personajes bíblicos, y entonces presentar una dramatización sobre 2 de las historias bíblicas de oración y respuestas a sus oraciones (Sansón, David, Ezequías, Moisés, Eliseo, Daniel, etc.). Primera Historia bíblica Fecha de dramatización Segunda Historia bíblica Fecha de dramatización
+4. En 1 Tesalonicenses 5:17 dice que se debe «orar sin cesar». Discutir qué significa esto y cómo se puede hacer.
+5. Leer o escuchar al capítulo de Camino a Cristo por Elena G. de White titulado «¿Puede el Hombre Comunicarse con la Divinidad?» y discutir con un grupo qué se aprendió. Crecimiento espiritual, actividades misioneras y herencia
+6. Elena de White escribe en El Conflicto de los Siglos que «Forma parte del plan de Dios concedernos, en respuesta a la oración hecha con fe, lo que no nos daría si no se lo pidiésemos así.» a. Discutir el significado de este pasaje al creyente cristiano. b. En su discusión, preguntar «¿Por qué crees que Dios hace algo en respuesta a una oración que él no haría normalmente?»
+7. Memorizar 6 diferentes versículos sobre la oración. Para cada pasaje memorizado, poder decir (si es posible): a. Para qué esa persona oró b. El lugar donde la persona oró c. La hora durante cual la persona oró d. La posición de la persona durante la oración 1. Versículo bíblico Para qué oró Dónde oró Hora que oró Posición de oración 2. Versículo bíblico Para qué oró Dónde oró Hora que oró Posición de oración Crecimiento espiritual, actividades misioneras y herencia 3. Versículo bíblico Para qué oró Dónde oró Hora que oró Posición de oración 4. Versículo bíblico Para qué oró Dónde oró Hora que oró Posición de oración 5. Versículo bíblico Para qué oró Dónde oró Hora que oró Posición de oración 6. Versículo bíblico Para qué oró Dónde oró Hora que oró Posición de oración
+8. Entrevistar al menos 3 personas sobre sus oraciones contestadas y compartir las historias con su club, unidad, iglesia o familia. Personas entrevistadas Crecimiento espiritual, actividades misioneras y herencia
+9. Hacer un plan para orar en público. a. Practicar su oración antes de orar con otros. b. Cuando ore a Dios, hable con él como si con un amigo.
+10. Orar en voz alta en 2 de las siguientes ocasiones: a. Reunión de Conquistadores/JA b. Reunión escolar c. Almuerzo con la iglesia d. Escuela sabática e. Servicio de iglesia f. Reunión de oración/grupo pequeño Fechas de oraciones
+11. Mantener un diario de oraciones por 6 semanas, registrando sus oraciones y cualquiera oración contestada.
+
+## Observaciones
+
+- Este archivo fue preparado para análisis posterior, no para carga directa a BD.

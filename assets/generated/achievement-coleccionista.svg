@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Coleccionista">
+  <title>Coleccionista</title>
+  <desc>Flat matte engraved achievement badge. Transparent canvas, dark circle #1C1C1E, accent #B8C5D0.</desc>
+  <circle cx="256" cy="256" r="220" fill="#1C1C1E"/>
+  <circle cx="256" cy="256" r="204" fill="none" stroke="#B8C5D0" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="256" cy="256" r="170" fill="none" stroke="#B8C5D0" stroke-width="3" stroke-linecap="round" opacity="0.38"/>
+  <polyline points="232,384 256,404 280,384" fill="none" stroke="#B8C5D0" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>
+  <polygon points="194.08,211.76 214.24,250.64 196.96,250.64 176.8,211.76" fill="none" stroke="#B8C5D0" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <polygon points="245.92,211.76 225.76,250.64 243.04,250.64 263.2,211.76" fill="none" stroke="#B8C5D0" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <line x1="173.2" y1="209.60000000000002" x2="266.8" y2="209.60000000000002" stroke="#B8C5D0" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="220" cy="290.96" r="38.879999999999995" fill="none" stroke="#B8C5D0" stroke-width="7" stroke-linecap="round"/>
+  <polygon points="220.0,275.12 224.18973327834075,285.19332686409535 235.06473521811523,286.06517080910083 226.77913084815185,293.1626731359046 229.31051839631277,303.77482919089914 220.0,298.08799999999997 210.68948160368723,303.77482919089914 213.22086915184815,293.1626731359046 204.93526478188477,286.06517080910083 215.81026672165925,285.19332686409535" fill="none" stroke="#B8C5D0" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <polygon points="226.48,180.56 249.44,224.84 229.76,224.84 206.8,180.56" fill="none" stroke="#B8C5D0" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <polygon points="285.52,180.56 262.56,224.84 282.24,224.84 305.2,180.56" fill="none" stroke="#B8C5D0" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <line x1="202.7" y1="178.10000000000002" x2="309.3" y2="178.10000000000002" stroke="#B8C5D0" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="256" cy="270.76" r="44.279999999999994" fill="none" stroke="#B8C5D0" stroke-width="7" stroke-linecap="round"/>
+  <polygon points="256.0,252.72 260.7716406781103,264.19240003966416 273.1570595539646,265.18533342147595 263.72067679928404,273.2685999603358 266.6036459513562,285.354666578524 256.0,278.878 245.3963540486438,285.354666578524 248.27932320071594,273.2685999603358 238.8429404460354,265.18533342147595 251.2283593218897,264.19240003966416" fill="none" stroke="#B8C5D0" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <polygon points="266.08,211.76 286.24,250.64 268.96,250.64 248.8,211.76" fill="none" stroke="#B8C5D0" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <polygon points="317.92,211.76 297.76,250.64 315.04,250.64 335.2,211.76" fill="none" stroke="#B8C5D0" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <line x1="245.2" y1="209.60000000000002" x2="338.8" y2="209.60000000000002" stroke="#B8C5D0" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="292" cy="290.96" r="38.879999999999995" fill="none" stroke="#B8C5D0" stroke-width="7" stroke-linecap="round"/>
+  <polygon points="292.0,275.12 296.1897332783407,285.19332686409535 307.06473521811523,286.06517080910083 298.77913084815185,293.1626731359046 301.3105183963128,303.77482919089914 292.0,298.08799999999997 282.6894816036872,303.77482919089914 285.22086915184815,293.1626731359046 276.93526478188477,286.06517080910083 287.8102667216593,285.19332686409535" fill="none" stroke="#B8C5D0" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

@@ -1,0 +1,20 @@
+# Especialidad — salud y curacion
+
+**Fuente**: `/Users/abner/Downloads/S3/honors_pdf/salud_y_curacion.pdf`
+**Texto extraído**: `/Users/abner/Documents/development/sacdia/docs/working/honors-especialidades/raw/salud-y-curacion.txt`
+**Nivel detectado**: 2
+**Cantidad de requisitos detectados**: 5
+
+> Nota: extracción automática preliminar desde la capa de texto del PDF. Requiere revisión humana antes de cualquier carga a base de datos.
+
+## Requisitos detectados
+
+1. Estar por lo menos en el octavo grado.
+2. A través de la Biblia y/o el Espíritu de Profecía, aprender cómo Jesús sanó a los enfermos y el procedimiento para los ancianos de la iglesia de ungir a los enfermos y pedir a Dios por la curación. Escribir un informe de 250 palabras o dar un informe de 2 minutos sobre lo que ha aprendido.
+3. ¿Cómo está relacionada la educación continua con las carreras de salud?
+4. Entrevistar al menos 2 personas que trabajan en una carrera de salud médica. Uno de ellos debe ser alguien que no sea un médico o enfermera, por ejemplo alguien que trabaja en odontología, terapia física, terapia respiratoria, radiología, nutrición, etc. Personas entrevistadas 1. 2. En su entrevista, hacer las siguientes preguntas: a. ¿Por qué eligió su profesión? b. ¿Qué educación es necesaria para entrar en su profesión? c. Después de la educación, ¿qué cantidad de tiempo se tarda en ser certificado o competente en su campo? d. ¿Qué parte de su trabajo le gusta más? ¿Cuál menos? e. ¿Qué días de la semana y cuántas horas por día trabaja usted en su trabajo? f. ¿Qué adelanto está disponible en su campo de trabajo? g. ¿Qué curso de estudio en la universidad complementaría su profesión? h. ¿Cuáles son algunas escuelas locales que ofrecen la formación en su profesión?
+5. Realizar una de las siguientes actividades: a. Ser un voluntario en un hospital o centro médico. b. Visitar un médico o dentista y hacer lo siguiente: i. Observar las zonas de operaciones, como las oficinas de la empresa, el laboratorio, salas de exámenes, sala de rayos-X, etc. ii. Obtener una charla introductoria de los equipos utilizados en dichos lugares. iii. Conocer los pasos que da el paciente cuando visita uno de estos lugares desde la sala de espera hasta el momento en que se retira. iv. Aprender la forma en que el médico hace un examen y toma la historia del paciente para el diagnóstico. c. Ir a una visita de una enfermera que va a un hogar y hacer lo siguiente: i. Aprender los pasos de una visita a una casa con una enfermera desde cuando se encuentra con el paciente hasta cuando informa al médico. ii. Observar la enfermera tomando los signos vitales. iii. Observar la enfermera dando instrucciones y medicamentos. d. Visitar el departamento de pacientes externos de un hospital, como terapia física, rayos-X, laboratorio, etc. Hacer lo siguiente: i. Observar las zonas de trabajo en el departamento ii. Obtener una charla introductoria de los equipos utilizados en el departamento y cómo funciona iii. Conocer los pasos que toma un paciente cuando visita al departamento. iv. ¿Cuántas personas se necesitan en el departamento? v. ¿Funciona el departamento por la noche?
+
+## Observaciones
+
+- Este archivo fue preparado para análisis posterior, no para carga directa a BD.

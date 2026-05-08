@@ -709,9 +709,9 @@ Exclusiones explicitas fuera del tiering fino actual:
 
 Límites documentales:
 
-- Los permisos finos dedicados vigentes son `health:*`, `emergency_contacts:*`, `legal_representative:*` y `post_registration:*`.
+- Los permisos finos dedicados vigentes son `health:*`, `emergency_contacts:*`, `legal_representative:*`, `post_registration:read` y `registration:complete`.
 - `GET /users/:userId/post-registration/status` permite lectura administrativa mínima de terceros con `post_registration:read` o fallback legacy `users:read_detail`.
-- `POST /users/:userId/post-registration/step-{1,2,3}/complete` permite completion administrativa mínima de terceros con `post_registration:update` o fallback legacy `users:update`.
+- `POST /users/:userId/post-registration/step-{1,2,3}/complete` requiere `registration:complete` (permiso global dedicado, sin fallback a `users:update`). Roles asignados: super_admin, admin, assistant-lf, director-lf y equivalentes union/dia por herencia. El owner siempre puede completar su propio registro.
 - Para terceros no owner, el backend debe devolver estado administrativo mínimo y respuestas saneadas, sin inferir datos sensibles ni causas detalladas del paso 2.
 
 ### Contrato Transicional Formativo FS-01 (`GET /api/v1/admin/users/:userId`)

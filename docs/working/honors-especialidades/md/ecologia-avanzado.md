@@ -1,0 +1,26 @@
+# Especialidad — ecologia avanzado
+
+**Fuente**: `/Users/abner/Downloads/S3/honors_pdf/ecologia_avanzado.pdf`
+**Texto extraído**: `/Users/abner/Documents/development/sacdia/docs/working/honors-especialidades/raw/ecologia-avanzado.txt`
+**Nivel detectado**: 3
+**Cantidad de requisitos detectados**: 11
+
+> Nota: extracción automática preliminar desde la capa de texto del PDF. Requiere revisión humana antes de cualquier carga a base de datos.
+
+## Requisitos detectados
+
+1. Tener la especialidad de Ecología.
+2. Decir la primera y segunda ley de la termodinámica y explicar la forma en que son importantes para la ecología. Primera ley Segunda ley Explicación
+3. Explicar los 3 niveles tróficos básicos (de alimentación) y dar un buen ejemplo de una planta o un animal para cada una de ellos. Niveles Ejemplo 1. 2. 3.
+4. Explicar o diagramar las 3 clases de pirámides ecológicas en la cadena alimenticia. Dar un ejemplo de cada una de los niveles de la pirámide. 1. 2. 3.
+5. Definir el ciclo bio-geoquímico y explicar o diagramar todos los componentes básicos por los cuales pasa el ciclo.
+6. Diagramar o explicar los pasos básicos en el flujo de energía a través del entorno biótico (elemento) de un ecosistema. Comenzar con el sol.
+7. Explicar la Ley de Liebig de la capacidad mínima y la Ley de la tolerancia de Shelford, e indicar cómo estas leyes nos dicen cómo y por qué ciertas plantas y animales están en peligro de extinción o son eliminados cuando su hábitat o comunidad son interrumpidos o quedan fuera de su balance. Ley de Liebig Ley de Shelford
+8. Escoger una comunidad biológica en su área, como un bosque o selva; un pantano, lago o estanque; pastos o praderas de pastizales; un cañón o un bosque maderero, etc., que está perturbado o ecológicamente fuera de equilibrio de alguna manera. Hacer una descripción del mismo, incluyendo cómo y en qué medida es perturbado. A continuación, hacer recomendaciones en cuanto a la forma en que la comunidad puede mejorar y cuando sea posible, dar seguimiento y contribuir a mejorar a la comunidad biológica de alguna forma.
+9. Dedicar un mínimo de 20 horas haciendo trabajo activo y productivo en un proyecto de ecología en su área. Esto puede hacerse individualmente o como grupo. Describir el proyecto en general, pero informar específicamente su parte en él.
+10. Definir los siguientes términos: Comunidad Las materias primas La fotosíntesis Quimio-síntesis Autótrofos Heterótrofos Equilibrio ecológico Saprofito Descompositor Productor Consumidor Factor limitante
+11. Encontrar una cita del Espíritu de Profecía y un texto bíblico referente a la ecología y explicar su relevancia y aplicación en nuestros días. Espíritu de Profecía Texto Bíblico Explicación NOTA: Estos requisitos pueden ser expresados verbalmente o por escrito a un líder juvenil. Se recomienda un instructor pero no es requerido para esta especialidad. Consultar con su líder juvenil o instructor antes de comenzar los requisitos 7, 8 y 9.
+
+## Observaciones
+
+- Este archivo fue preparado para análisis posterior, no para carga directa a BD.

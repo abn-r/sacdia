@@ -1,0 +1,24 @@
+# Especialidad — malabarismo
+
+**Fuente**: `/Users/abner/Downloads/S3/honors_pdf/malabarismo.pdf`
+**Texto extraído**: `/Users/abner/Documents/development/sacdia/docs/working/honors-especialidades/raw/malabarismo.txt`
+**Nivel detectado**: 1
+**Cantidad de requisitos detectados**: 9
+
+> Nota: extracción automática preliminar desde la capa de texto del PDF. Requiere revisión humana antes de cualquier carga a base de datos.
+
+## Requisitos detectados
+
+1. Explicar lo siguiente: a. La diferencia entre un flash y hacer malabares b. La diferencia entre una cascada y una fuente
+2. Seguridad: a. ¿Cuáles son las cosas apropiadas para hacer malabares? b. ¿Cuáles son las cosas no apropiadas para hacer malabares?
+3. Conocer qué es la notación transposicional (siteswap) y ser capaz de explicar los siguientes patrones: a. 3 (cascada con 3 bolas) b. 4 (cascada con 4 bolas) c. 441 (media caja con 3 bolas) d. 53 (media ducha con 4 bolas)
+4. Conocer esta notación transposicional adicional: a. 55500 b. 52512 c. 531 d. 0123456 e. 51 (ducha de 3 bolas)
+5. Explicar lo siguiente: a. ¿Cómo se puede saber cuántas bolas hay en una notación transposicional? b. ¿Por qué 352 es una notación inválida? c. ¿Por qué 351 es una notación inválida?
+6. Mirar un video de tres malabaristas profesionales practicando su arte.
+7. Teoría y práctica de pasar: a. ¿Qué es una cascada con tres bolas? ¿Por qué es un patrón común para los principiantes? b. ¿Qué es un auto pase? c. ¿Qué es un pase al compañero?
+8. Completar dos de las cuatro actividades siguientes: a. Hacer malabares con 3 bolas para por lo menos 15 capturas b. Hacer malabares con 2 bolas en una mano c. Hacer flash con 4 bolas d. Pasar con otra persona por lo menos 12 capturas
+9. ¿Cómo se puede usar el malabarismo para el evangelismo o el ministerio?
+
+## Observaciones
+
+- Este archivo fue preparado para análisis posterior, no para carga directa a BD.

@@ -1,0 +1,21 @@
+# Especialidad — auxilio de las catastrofes avanzado adra
+
+**Fuente**: `/Users/abner/Downloads/S3/honors_pdf/auxilio_de_las_catastrofes_avanzado_adra.pdf`
+**Texto extraído**: `/Users/abner/Documents/development/sacdia/docs/working/honors-especialidades/raw/auxilio-de-las-catastrofes-avanzado-adra.txt`
+**Nivel detectado**: 2
+**Cantidad de requisitos detectados**: 6
+
+> Nota: extracción automática preliminar desde la capa de texto del PDF. Requiere revisión humana antes de cualquier carga a base de datos.
+
+## Requisitos detectados
+
+1. Describir las causas subyacentes de cada uno de estos escenarios de catástrofes y dar un ejemplo reciente de por lo menos 6 y de su impacto en la comunidad o país. Destacar por lo menos uno el cual ADRA haya respondido. Huracanes/tifones/ciclones Tornados Inundaciones Terremotos Tsunamis Incendios Erupciones volcánicas Guerras/conflictos civiles ADRA
+2. Las cuatro fases en la gestión de emergencias y catástrofes son: 1) Prevención/mitigación, 2) Preparación, 3) Respuesta y 4) Recuperación. En sus propias palabras, describirle a su instructor lo que significa cada uno de estos términos y por qué son importantes. Prevención/mitigación Preparación Respuesta Recuperación
+3. La preparación es clave durante una emergencia o catástrofe. Si tuviera que armar un kit para tales circunstancias, describirle a su instructor qué artículos incluiría. Discutir las ventajas de elegir artículos a batería y que no requieren electricidad, y alimentos no perecederos en vez de perecederos.
+4. Dibujar el plano del lugar donde vive. Pensar en lo que haría en 3 de las catástrofes informados en el requisito 1. Trazar un camino de fuga de su casa y discutirlo con el instructor y su familia.
+5. Encontrar 3 historias en la Biblia en las que se hayan presentado catástrofes naturales o emergencias políticas. Ponerse en el lugar de las personas de la historia y describir cómo le afectarían esos eventos. Además, discutir brevemente cómo sobrevivieron las personas en esas situaciones. 1. ADRA 2. 3.
+6. Presentar un breve informe a su club de Conquistadores con respecto a lo que aprendió del tema de emergencias y catástrofes, y de estar preparado para actuar en esas circunstancias. Puede hacer una presentación, un drama, mostrar un video corto o utilizar otro método que transmita lo que aprendió.
+
+## Observaciones
+
+- Este archivo fue preparado para análisis posterior, no para carga directa a BD.

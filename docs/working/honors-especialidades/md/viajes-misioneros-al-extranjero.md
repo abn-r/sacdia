@@ -1,0 +1,27 @@
+# Especialidad — viajes misioneros al extranjero
+
+**Fuente**: `/Users/abner/Downloads/S3/honors_pdf/viajes_misioneros_al_extranjero.pdf`
+**Texto extraído**: `/Users/abner/Documents/development/sacdia/docs/working/honors-especialidades/raw/viajes-misioneros-al-extranjero.txt`
+**Nivel detectado**: 2
+**Cantidad de requisitos detectados**: 12
+
+> Nota: extracción automática preliminar desde la capa de texto del PDF. Requiere revisión humana antes de cualquier carga a base de datos.
+
+## Requisitos detectados
+
+1. Leer Mateo 28:19 y 20. En un grupo, crear una lista de razones para hacer un viaje misionero.
+2. ¿Cuáles son algunas de las preparaciones necesarias para realizar un viaje misionero, como diferentes aprobaciones, documentación necesaria y dónde ir?
+3. Identificar y explicar lo que necesita empacar para un viaje misionero que sería apropiado para el destino seleccionado.
+4. Comprender y ser capaz de identificar los problemas de seguridad que son específicos para el país a donde viajará. Estos incluirán lo siguiente: Asuntos de salud Agua potable Asuntos del baño Crecimiento espiritual, actividades misioneras y herencia Alimentos – evitar la contaminación Medidas preventivas de salud como la inmunización requerida y los medicamentos profilácticos Asuntos políticos Asuntos culturales
+5. Dedicar tiempo aprendiendo acerca de la cultura específica con la que estará involucrado y discutir sus hallazgos en una reunión de orientación.
+6. Si el idioma predominante del país que visitará es diferente al suyo, memorizar por lo menos cinco frases comunes en ese idioma, tales como: Hola, por favor, gracias, baño, etc.
+7. Cantar una canción o contar una historia como obra misionera a por lo menos una persona local mientras esté en el país.
+8. Identificar recursos y obtener fondos para hacer un viaje misionero. Esto se puede hacer a través de sus propias ganancias, recaudaciones de fondos, patrocinadores, etc.
+9. Realizar un viaje misionero a un país extranjero. Esto puede ser como una familia, Conquistador, escuela, grupo de la iglesia o a través de un grupo misionero organizado. País
+10. Participar en las actividades asignadas por su líder, que pueden incluir: a. Edificio de la iglesia b. Evangelismo puerta a puerta c. Evangelismo de literatura d. Evangelismo infantil - por ejemplo: Actividades de la escuela bíblica de vacaciones Crecimiento espiritual, actividades misioneras y herencia e. Reuniones evangelísticas f. Evangelismo de salud g. Limpiar o cocinar para el grupo misionero con el que viaja h. Trabajar en orfanatos o centros de huérfanos
+11. Al regresar a casa, hacer una presentación pública acerca de su viaje misionero, que puede incluir lo siguiente: a. ¿Vio un milagro o evidencia de que Dios estaba obrando? b. ¿Ha crecido espiritualmente más cerca a Dios a causa de este viaje, y si es así, cómo? c. ¿Hará cambios en su vida por lo que experimentó en el viaje? Si es así, describir lo que serán. d. ¿Vio a Dios usarle y a su grupo para impactar a otros para él?
+12. Al regresar a casa, vuelva a leer Mateo 28:19 y 20, y discutir si el significado de este versículo ha cambiado para usted.
+
+## Observaciones
+
+- Este archivo fue preparado para análisis posterior, no para carga directa a BD.

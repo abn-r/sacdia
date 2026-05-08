@@ -1,0 +1,334 @@
+<h2>Rediseño Finanzas — 3 Enfoques</h2>
+<p class="subtitle">Todos mantienen: balance, navegación de meses, bar chart, transaction list, tema claro/oscuro</p>
+
+<div class="cards">
+
+  <!-- Approach A -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="background: #000; padding: 16px; border-radius: 12px 12px 0 0;">
+      <div style="font-family: system-ui; color: #fff; max-width: 320px; margin: 0 auto;">
+
+        <!-- Status bar mock -->
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+          <div style="width:28px;height:28px;border-radius:50%;border:1.5px solid #444;display:flex;align-items:center;justify-content:center;">
+            <span style="color:#888;font-size:12px;">🔍</span>
+          </div>
+          <div style="background:#1a1a1a;border-radius:20px;padding:6px 14px;display:flex;gap:8px;">
+            <span style="color:#888;font-size:11px;">💰</span>
+            <span style="color:#888;font-size:11px;">⚙</span>
+          </div>
+        </div>
+
+        <!-- Balance -->
+        <div style="text-align:center; margin-bottom:4px;">
+          <span style="color:#888;font-size:12px;letter-spacing:1px;">SALDO TOTAL</span>
+        </div>
+        <div style="text-align:center; margin-bottom:8px;">
+          <span style="font-size:36px;font-weight:800;color:#fff;">$2,876.00</span>
+        </div>
+
+        <!-- Month nav -->
+        <div style="display:flex;justify-content:center;align-items:center;gap:12px;margin-bottom:12px;">
+          <span style="color:#555;font-size:16px;">◀</span>
+          <span style="color:#aaa;font-size:13px;">Marzo 2026</span>
+          <span style="color:#555;font-size:16px;">▶</span>
+        </div>
+
+        <!-- Activity text -->
+        <div style="text-align:center;color:#777;font-size:12px;margin-bottom:16px;line-height:1.5;">
+          Este mes: <span style="color:#4FBF9F;">$1,200</span> ingresos, <span style="color:#DC2626;">$450</span> egresos
+        </div>
+
+        <!-- Separator -->
+        <div style="border-bottom:1px dashed #333;margin-bottom:16px;"></div>
+
+        <!-- Summary card -->
+        <div style="background:linear-gradient(135deg, #F06151 0%, #D94A3B 100%);border-radius:16px;padding:16px;margin-bottom:16px;position:relative;overflow:hidden;">
+          <div style="position:absolute;right:-10px;top:-10px;width:60px;height:60px;border-radius:50%;background:rgba(255,255,255,0.1);"></div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.8);font-weight:600;letter-spacing:1px;">CLUB CONQUISTADORES</div>
+          <div style="font-size:22px;font-weight:800;color:#fff;margin-top:4px;">$750.00</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.7);margin-top:2px;">Saldo neto del mes · USD</div>
+        </div>
+
+        <!-- Mini bar chart -->
+        <div style="display:flex;align-items:flex-end;gap:8px;height:50px;margin-bottom:16px;padding:0 8px;">
+          <div style="flex:1;display:flex;gap:3px;align-items:flex-end;justify-content:center;">
+            <div style="width:8px;height:20px;background:#4FBF9F;border-radius:3px;"></div>
+            <div style="width:8px;height:30px;background:#DC2626;border-radius:3px;"></div>
+          </div>
+          <div style="flex:1;display:flex;gap:3px;align-items:flex-end;justify-content:center;">
+            <div style="width:8px;height:35px;background:#4FBF9F;border-radius:3px;"></div>
+            <div style="width:8px;height:15px;background:#DC2626;border-radius:3px;"></div>
+          </div>
+          <div style="flex:1;display:flex;gap:3px;align-items:flex-end;justify-content:center;">
+            <div style="width:8px;height:25px;background:#4FBF9F;border-radius:3px;"></div>
+            <div style="width:8px;height:40px;background:#DC2626;border-radius:3px;"></div>
+          </div>
+          <div style="flex:1;display:flex;gap:3px;align-items:flex-end;justify-content:center;">
+            <div style="width:8px;height:45px;background:#4FBF9F;border-radius:3px;"></div>
+            <div style="width:8px;height:20px;background:#DC2626;border-radius:3px;"></div>
+          </div>
+          <div style="flex:1;display:flex;gap:3px;align-items:flex-end;justify-content:center;">
+            <div style="width:8px;height:30px;background:#4FBF9F;border-radius:3px;opacity:0.6;"></div>
+            <div style="width:8px;height:35px;background:#DC2626;border-radius:3px;opacity:0.6;"></div>
+          </div>
+          <div style="flex:1;display:flex;gap:3px;align-items:flex-end;justify-content:center;position:relative;">
+            <div style="width:8px;height:40px;background:#4FBF9F;border-radius:3px;"></div>
+            <div style="width:8px;height:18px;background:#DC2626;border-radius:3px;"></div>
+            <div style="position:absolute;bottom:-14px;font-size:8px;color:#666;">Mar</div>
+          </div>
+        </div>
+
+        <!-- Section title -->
+        <div style="display:flex;justify-content:space-between;align-items:center;margin:20px 0 10px;">
+          <span style="color:#fff;font-size:14px;font-weight:700;">Transacciones Recientes</span>
+          <span style="color:#888;font-size:11px;">Ver todo →</span>
+        </div>
+
+        <!-- Transaction -->
+        <div style="background:#1a1a1a;border-radius:14px;padding:12px;margin-bottom:8px;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="background:#3a2a00;border-radius:10px;padding:6px 10px;display:flex;align-items:center;gap:4px;">
+              <span style="font-size:12px;">🍔</span>
+              <span style="color:#FBBD5E;font-size:11px;font-weight:600;">Food</span>
+            </div>
+            <div style="flex:1;">
+              <div style="color:#888;font-size:11px;">Comida</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="color:#DC2626;font-size:14px;font-weight:700;">-$124.00</div>
+              <div style="color:#555;font-size:10px;">08:21 AM</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Clon Fiel de la Referencia</h3>
+      <p>Copia el estilo casi 1:1. Balance grande centrado, card gradiente para resumen del club, bar chart compacto, transacciones con chips emoji. Separador dashed. Mismo ritmo visual.</p>
+      <div class="pros-cons" style="margin-top:12px;">
+        <div class="pros"><h4>Pros</h4><ul><li>Diseño probado y coherente</li><li>Menor riesgo visual</li><li>Rápido de implementar</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Puede sentirse "copiado"</li><li>Menos identidad propia SACDIA</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Approach B -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="background: #000; padding: 16px; border-radius: 12px 12px 0 0;">
+      <div style="font-family: system-ui; color: #fff; max-width: 320px; margin: 0 auto;">
+
+        <!-- Header with glassmorphism -->
+        <div style="background:linear-gradient(135deg, rgba(240,97,81,0.15) 0%, rgba(79,191,159,0.1) 100%);border-radius:20px;padding:20px;margin-bottom:16px;border:1px solid rgba(255,255,255,0.06);backdrop-filter:blur(10px);">
+
+          <!-- Month nav integrated -->
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+            <span style="color:#555;font-size:14px;">◀</span>
+            <span style="color:#aaa;font-size:13px;font-weight:600;">Marzo 2026</span>
+            <span style="color:#555;font-size:14px;">▶</span>
+          </div>
+
+          <div style="text-align:center;margin-bottom:16px;">
+            <span style="color:#888;font-size:11px;letter-spacing:1px;">SALDO TOTAL</span>
+            <div style="font-size:38px;font-weight:800;color:#fff;margin-top:2px;">$2,876<span style="font-size:22px;color:#888;">.00</span></div>
+          </div>
+
+          <!-- Income/Expense pills -->
+          <div style="display:flex;gap:8px;justify-content:center;">
+            <div style="background:rgba(79,191,159,0.15);border-radius:12px;padding:8px 16px;display:flex;align-items:center;gap:6px;">
+              <div style="width:6px;height:6px;border-radius:50%;background:#4FBF9F;"></div>
+              <span style="color:#4FBF9F;font-size:13px;font-weight:600;">$1,200</span>
+            </div>
+            <div style="background:rgba(220,38,38,0.15);border-radius:12px;padding:8px 16px;display:flex;align-items:center;gap:6px;">
+              <div style="width:6px;height:6px;border-radius:50%;background:#DC2626;"></div>
+              <span style="color:#DC2626;font-size:13px;font-weight:600;">$450</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Club summary card -->
+        <div style="background:linear-gradient(135deg, #F06151 0%, #e8453a 50%, #D94A3B 100%);border-radius:16px;padding:16px;margin-bottom:16px;position:relative;overflow:hidden;">
+          <div style="position:absolute;right:10px;top:10px;width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;">
+            <span style="font-size:16px;">⛺</span>
+          </div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.7);font-weight:500;">Conquistadores</div>
+          <div style="font-size:20px;font-weight:800;color:#fff;margin-top:2px;">$750.00</div>
+          <div style="font-size:10px;color:rgba(255,255,255,0.6);margin-top:4px;">Neto del período</div>
+        </div>
+
+        <!-- Bar chart in card -->
+        <div style="background:#1a1a1a;border-radius:16px;padding:14px;margin-bottom:16px;border:1px solid #252525;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+            <span style="color:#fff;font-size:13px;font-weight:600;">Resumen 6 meses</span>
+            <span style="color:#555;font-size:10px;">Oct — Mar</span>
+          </div>
+          <div style="display:flex;align-items:flex-end;gap:10px;height:55px;padding:0 4px;">
+            <div style="flex:1;display:flex;gap:3px;align-items:flex-end;justify-content:center;">
+              <div style="width:10px;height:22px;background:linear-gradient(to top, #4FBF9F, #6DD5B5);border-radius:4px;"></div>
+              <div style="width:10px;height:32px;background:linear-gradient(to top, #DC2626, #EF4444);border-radius:4px;"></div>
+            </div>
+            <div style="flex:1;display:flex;gap:3px;align-items:flex-end;justify-content:center;">
+              <div style="width:10px;height:38px;background:linear-gradient(to top, #4FBF9F, #6DD5B5);border-radius:4px;"></div>
+              <div style="width:10px;height:18px;background:linear-gradient(to top, #DC2626, #EF4444);border-radius:4px;"></div>
+            </div>
+            <div style="flex:1;display:flex;gap:3px;align-items:flex-end;justify-content:center;">
+              <div style="width:10px;height:28px;background:linear-gradient(to top, #4FBF9F, #6DD5B5);border-radius:4px;"></div>
+              <div style="width:10px;height:42px;background:linear-gradient(to top, #DC2626, #EF4444);border-radius:4px;"></div>
+            </div>
+            <div style="flex:1;display:flex;gap:3px;align-items:flex-end;justify-content:center;">
+              <div style="width:10px;height:48px;background:linear-gradient(to top, #4FBF9F, #6DD5B5);border-radius:4px;"></div>
+              <div style="width:10px;height:22px;background:linear-gradient(to top, #DC2626, #EF4444);border-radius:4px;"></div>
+            </div>
+            <div style="flex:1;display:flex;gap:3px;align-items:flex-end;justify-content:center;">
+              <div style="width:10px;height:32px;background:linear-gradient(to top, #4FBF9F, #6DD5B5);border-radius:4px;"></div>
+              <div style="width:10px;height:38px;background:linear-gradient(to top, #DC2626, #EF4444);border-radius:4px;"></div>
+            </div>
+            <div style="flex:1;display:flex;gap:3px;align-items:flex-end;justify-content:center;">
+              <div style="width:10px;height:44px;background:linear-gradient(to top, #4FBF9F, #6DD5B5);border-radius:4px;"></div>
+              <div style="width:10px;height:20px;background:linear-gradient(to top, #DC2626, #EF4444);border-radius:4px;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Transactions -->
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+          <span style="color:#fff;font-size:14px;font-weight:700;">Transacciones</span>
+          <div style="display:flex;gap:6px;">
+            <div style="background:#333;border-radius:8px;padding:4px 10px;"><span style="color:#fff;font-size:10px;font-weight:600;">Todo</span></div>
+            <div style="background:#1a1a1a;border-radius:8px;padding:4px 10px;"><span style="color:#666;font-size:10px;">Ingreso</span></div>
+            <div style="background:#1a1a1a;border-radius:8px;padding:4px 10px;"><span style="color:#666;font-size:10px;">Egreso</span></div>
+          </div>
+        </div>
+
+        <div style="color:#666;font-size:10px;margin-bottom:6px;">23 Ene, 2026</div>
+        <div style="background:#1a1a1a;border-radius:14px;padding:12px;border:1px solid #252525;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="background:#3a2a00;border-radius:10px;padding:6px 10px;display:flex;align-items:center;gap:4px;">
+              <span style="font-size:12px;">🍔</span>
+              <span style="color:#FBBD5E;font-size:11px;font-weight:600;">Food</span>
+            </div>
+            <div style="flex:1;">
+              <div style="color:#aaa;font-size:12px;font-weight:500;">Comida</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="color:#DC2626;font-size:14px;font-weight:700;">-$124.00</div>
+              <div style="color:#555;font-size:10px;">08:21 AM</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Híbrido Moderno (Recomendado)</h3>
+      <p>Toma el estilo de la referencia pero reorganiza con más estructura. Header glassmorphism con balance + pills ingreso/egreso. Card club con gradiente. Chart en su propia card. Filtros inline en transacciones. Más respiración visual.</p>
+      <div class="pros-cons" style="margin-top:12px;">
+        <div class="pros"><h4>Pros</h4><ul><li>Lo mejor de ambos mundos</li><li>Más organizado y modular</li><li>Identidad SACDIA preservada</li><li>Escalable si agregás features</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Más trabajo de implementación</li><li>Más componentes nuevos</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Approach C -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="background: #000; padding: 16px; border-radius: 12px 12px 0 0;">
+      <div style="font-family: system-ui; color: #fff; max-width: 320px; margin: 0 auto;">
+
+        <!-- Compact top metrics -->
+        <div style="margin-bottom:16px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+            <span style="color:#aaa;font-size:13px;font-weight:600;">Marzo 2026</span>
+            <div style="display:flex;gap:8px;">
+              <span style="color:#555;font-size:12px;">◀</span>
+              <span style="color:#555;font-size:12px;">▶</span>
+            </div>
+          </div>
+
+          <!-- 3 metric cards in row -->
+          <div style="display:flex;gap:8px;margin-bottom:12px;">
+            <div style="flex:1;background:#1a1a1a;border-radius:14px;padding:12px;border:1px solid #252525;">
+              <div style="color:#666;font-size:9px;letter-spacing:0.5px;margin-bottom:4px;">SALDO</div>
+              <div style="color:#fff;font-size:18px;font-weight:800;">$2,876</div>
+            </div>
+            <div style="flex:1;background:rgba(79,191,159,0.08);border-radius:14px;padding:12px;border:1px solid rgba(79,191,159,0.15);">
+              <div style="color:#4FBF9F;font-size:9px;letter-spacing:0.5px;margin-bottom:4px;">INGRESOS</div>
+              <div style="color:#4FBF9F;font-size:18px;font-weight:800;">$1,200</div>
+            </div>
+            <div style="flex:1;background:rgba(220,38,38,0.08);border-radius:14px;padding:12px;border:1px solid rgba(220,38,38,0.15);">
+              <div style="color:#DC2626;font-size:9px;letter-spacing:0.5px;margin-bottom:4px;">EGRESOS</div>
+              <div style="color:#DC2626;font-size:18px;font-weight:800;">$450</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chart prominent -->
+        <div style="background:#1a1a1a;border-radius:16px;padding:14px;margin-bottom:14px;border:1px solid #252525;">
+          <div style="display:flex;align-items:flex-end;gap:8px;height:70px;padding:0 4px;">
+            <div style="flex:1;display:flex;gap:2px;align-items:flex-end;justify-content:center;">
+              <div style="width:12px;height:25px;background:#4FBF9F;border-radius:4px;opacity:0.7;"></div>
+              <div style="width:12px;height:38px;background:#DC2626;border-radius:4px;opacity:0.7;"></div>
+            </div>
+            <div style="flex:1;display:flex;gap:2px;align-items:flex-end;justify-content:center;">
+              <div style="width:12px;height:42px;background:#4FBF9F;border-radius:4px;opacity:0.7;"></div>
+              <div style="width:12px;height:20px;background:#DC2626;border-radius:4px;opacity:0.7;"></div>
+            </div>
+            <div style="flex:1;display:flex;gap:2px;align-items:flex-end;justify-content:center;">
+              <div style="width:12px;height:30px;background:#4FBF9F;border-radius:4px;opacity:0.7;"></div>
+              <div style="width:12px;height:50px;background:#DC2626;border-radius:4px;opacity:0.7;"></div>
+            </div>
+            <div style="flex:1;display:flex;gap:2px;align-items:flex-end;justify-content:center;">
+              <div style="width:12px;height:55px;background:#4FBF9F;border-radius:4px;opacity:0.7;"></div>
+              <div style="width:12px;height:25px;background:#DC2626;border-radius:4px;opacity:0.7;"></div>
+            </div>
+            <div style="flex:1;display:flex;gap:2px;align-items:flex-end;justify-content:center;">
+              <div style="width:12px;height:35px;background:#4FBF9F;border-radius:4px;"></div>
+              <div style="width:12px;height:42px;background:#DC2626;border-radius:4px;"></div>
+            </div>
+            <div style="flex:1;display:flex;gap:2px;align-items:flex-end;justify-content:center;">
+              <div style="width:12px;height:50px;background:#4FBF9F;border-radius:4px;"></div>
+              <div style="width:12px;height:22px;background:#DC2626;border-radius:4px;"></div>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:6px 4px 0;margin-top:4px;">
+            <span style="color:#555;font-size:8px;">Oct</span>
+            <span style="color:#555;font-size:8px;">Nov</span>
+            <span style="color:#555;font-size:8px;">Dic</span>
+            <span style="color:#555;font-size:8px;">Ene</span>
+            <span style="color:#555;font-size:8px;">Feb</span>
+            <span style="color:#888;font-size:8px;font-weight:600;">Mar</span>
+          </div>
+        </div>
+
+        <!-- Transaction list compact -->
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <span style="color:#fff;font-size:13px;font-weight:700;">Movimientos</span>
+          <span style="color:#F06151;font-size:11px;">Ver todo</span>
+        </div>
+
+        <div style="background:#1a1a1a;border-radius:14px;padding:12px;border:1px solid #252525;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:36px;height:36px;border-radius:10px;background:rgba(220,38,38,0.12);display:flex;align-items:center;justify-content:center;">
+              <span style="font-size:16px;">🍔</span>
+            </div>
+            <div style="flex:1;">
+              <div style="color:#fff;font-size:12px;font-weight:600;">Comida</div>
+              <div style="color:#555;font-size:10px;">23 Ene · Food</div>
+            </div>
+            <div style="color:#DC2626;font-size:14px;font-weight:700;">-$124</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Dashboard Compacto</h3>
+      <p>Layout tipo dashboard. 3 métricas en fila (saldo, ingresos, egresos), chart prominente, transacciones compactas con ícono + texto. Más orientado a datos, menos decorativo. Sin card de club.</p>
+      <div class="pros-cons" style="margin-top:12px;">
+        <div class="pros"><h4>Pros</h4><ul><li>Más información visible</li><li>Eficiente en espacio</li><li>Fácil de scanear</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Menos "wow factor"</li><li>Se aleja más de la referencia</li><li>Puede sentirse apretado en pantallas chicas</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+</div>

@@ -1,546 +1,306 @@
 # Schema Reference - SACDIA Database
 
 **Estado**: ACTIVE
+**Sincronizado contra**: `sacdia-backend/prisma/schema.prisma`
+**Fecha de resincronizacion**: 2026-04-28 (8.4-C: club_annual_rankings extendido, award_categories extendido, ranking_weight_configs nuevo, system_config keys nuevas)
 
-<!-- Sincronizado contra schema.prisma 2026-03-18. club_sections consolidation applied (3 tables → 1). Drift corregido en: users (field names), users_pr (PK + campos faltantes). Este documento cubre ~25 de 72 modelos; schema.prisma es fuente de verdad para los modelos no cubiertos aquí. -->
+Referencia humana concisa del schema Prisma vigente.
 
-Referencia completa del schema de base de datos PostgreSQL de SACDIA.
-
----
-
-## Diagrama ER Principal
-
-```mermaid
-graph TB
-    subgraph "Jerarquía Organizacional"
-        COUNTRIES[countries]
-        UNIONS[unions]
-        LF[local_fields]
-        DISTRICTS[districts]
-        CHURCHES[churches]
-        
-        COUNTRIES --> UNIONS
-        UNIONS --> LF
-        LF --> DISTRICTS
-        DISTRICTS --> CHURCHES
-    end
-    
-    subgraph "Clubs"
-        CLUBS[clubs]
-        SECTIONS[club_sections]
-
-        CHURCHES --> CLUBS
-        CLUBS --> SECTIONS
-    end
-    
-    subgraph "Users & Auth"
-        USERS[users]
-        USERS_PR[users_pr]
-        LEGAL_REP[legal_representatives]
-        EMERG[emergency_contacts]
-        
-        USERS --> USERS_PR
-        USERS --> LEGAL_REP
-        USERS --> EMERG
-    end
-    
-    subgraph "RBAC"
-        ROLES[roles]
-        PERMS[permissions]
-        USERS_ROLES[users_roles]
-        ROLE_PERMS[role_permissions]
-        CLUB_ROLES[club_role_assignments]
-        
-        USERS --> USERS_ROLES
-        USERS_ROLES --> ROLES
-        ROLES --> ROLE_PERMS
-        ROLE_PERMS --> PERMS
-        
-        USERS --> CLUB_ROLES
-        CLUB_ROLES --> ROLES
-        CLUB_ROLES --> SECTIONS
-    end
-    
-    subgraph "Classes & Honors"
-        CLASSES[classes]
-        HONORS[honors]
-        USERS_CLASSES[users_classes]
-        USERS_HONORS[users_honors]
-        
-        USERS --> USERS_CLASSES
-        USERS_CLASSES --> CLASSES
-        USERS --> USERS_HONORS
-        USERS_HONORS --> HONORS
-    end
-```
+> [!IMPORTANT]
+> La autoridad estructural efectiva sigue siendo `sacdia-backend/prisma/schema.prisma`.
+> `docs/database/schema.prisma` debe permanecer como espejo documental fiel del mismo archivo.
 
 ---
 
-## Tablas Principales
+## Cifras vigentes
 
-### 📦 Módulo: Users & Authentication
-
-#### Tabla: `users`
-**Descripción**: Tabla principal de usuarios del sistema
-
-**Campos** (sincronizado con schema.prisma 2026-03-14):
-| Campo | Tipo | Descripción | Constraints |
-|-------|------|-------------|-------------|
-| `user_id` | UUID | ID único (mismo que Supabase Auth, `auth.uid()`) | PK |
-| `email` | VARCHAR(100) | Email del usuario | UNIQUE, NOT NULL |
-| `name` | VARCHAR(50) | Nombre | NULL |
-| `paternal_last_name` | VARCHAR(50) | Apellido paterno | NULL |
-| `maternal_last_name` | VARCHAR(50) | Apellido materno | NULL |
-| `gender` | VARCHAR | Género | - |
-| `birthday` | DATE | Fecha de nacimiento | - |
-| `baptism` | BOOLEAN | ¿Está bautizado? | DEFAULT false |
-| `baptism_date` | DATE | Fecha de bautismo | - |
-| `blood` | ENUM(blood_type) | Tipo de sangre | - |
-| `country_id` | INT | País | FK → countries, NULL |
-| `union_id` | INT | Unión | FK → unions, NULL |
-| `local_field_id` | INT | Campo local | FK → local_fields, NULL |
-| `user_image` | TEXT | URL de foto de perfil | NULL |
-| `apple_connected` | BOOLEAN | OAuth Apple vinculado | DEFAULT false |
-| `google_connected` | BOOLEAN | OAuth Google vinculado | DEFAULT false |
-| `access_app` | BOOLEAN | Acceso a app móvil | DEFAULT true |
-| `access_panel` | BOOLEAN | Acceso a panel admin | DEFAULT false |
-| `active` | BOOLEAN | Usuario activo | DEFAULT true |
-| `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
-| `modified_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW(), @updatedAt |
-
-**Relaciones**:
-- One-to-One: `users_pr`, `legal_representatives`
-- One-to-Many: `emergency_contacts`, `club_role_assignments`, `users_classes`, `users_honors`
-- Many-to-Many: `roles` (via `users_roles`), `allergies` (via `users_allergies`), `diseases` (via `users_diseases`), `medicines` (via `users_medicines`)
-
-**Naming Convention**: ✅ Cumple - Nombres descriptivos (`paternal_last_name` vs `p_lastname`)
+- **Modelos Prisma**: 106
+- **Enums Prisma**: 14
+- **Tablas Better Auth mapeadas**: `session -> sessions`, `account -> accounts`, `verification -> verifications`
 
 ---
 
-#### Tabla: `users_pr`
-**Descripción**: Tracking de post-registro (onboarding) y contexto activo de club
+## Correcciones de drift relevantes
 
-**Campos** (sincronizado con schema.prisma 2026-03-14):
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| `user_pr_id` | INT | PK técnico (autoincrement) |
-| `user_id` | UUID | Usuario | UNIQUE, FK → users |
-| `complete` | BOOLEAN | Post-registro completo | DEFAULT false |
-| `profile_picture_complete` | BOOLEAN | Paso 1: Foto | DEFAULT false |
-| `personal_info_complete` | BOOLEAN | Paso 2: Info personal | DEFAULT false |
-| `club_selection_complete` | BOOLEAN | Paso 3: Club | DEFAULT false |
-| `active_club_assignment_id` | UUID | Asignación activa de club para contexto de sesión | NULL |
-| `date_completed` | TIMESTAMPTZ | Fecha de completado del post-registro | NULL |
-| `created_at` | TIMESTAMPTZ | Fecha creación | DEFAULT NOW() |
-| `modified_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW(), @updatedAt |
+### `users`
 
-**Flujo**:
-1. Registro → Crea registro con todo en `false`
-2. Paso 1 → `profile_picture_complete = true`
-3. Paso 2 → `personal_info_complete = true`
-4. Paso 3 → `club_selection_complete = true` AND `complete = true`
+- Incluye `email_verified`, `approval_status` y `rejection_reason`.
+- Mantiene `access_app`, `access_panel`, `country_id`, `union_id`, `local_field_id`.
+- Ya no usa los flags legacy `apple_connected`, `fb_connected` ni `google_connected`.
 
-**Nota**: `active_club_assignment_id` es persistido por `PATCH /auth/me/context` y leído por el backend para resolver autorización efectiva por sesión.
+### `users_pr`
 
----
+- Incluye `active_club_assignment_id` ademas del tracking de post-registro.
+- No existe tabla dedicada para credenciales QR: el contrato canónico nuevo usa JWT stateless y, por ahora, solo `users_pr`/`club_role_assignments` para resolver contexto visual y autorizacion.
 
-#### Tabla: `legal_representatives`
-**Descripción**: Representantes legales para menores de 18 años
+### `club_sections`
 
-**Campos**:
-| Campo | Tipo | Descripción | Constraints |
-|-------|------|-------------|-------------|
-| `id` | UUID | ID único | PK |
-| `user_id` | UUID | Usuario menor | FK → users, UNIQUE |
-| `representative_user_id` | UUID | Usuario representante (si está registrado) | FK → users, NULL |
-| `name` | VARCHAR(100) | Nombre (si no es usuario) | NULL |
-| `paternal_last_name` | VARCHAR(100) | Apellido paterno | NULL |
-| `maternal_last_name` | VARCHAR(100) | Apellido materno | NULL |
-| `phone` | VARCHAR(20) | Teléfono | NULL |
-| `relationship_type_id` | UUID | Tipo de relación | FK → relationship_types |
+- Es la estructura vigente para secciones de club.
+- Incluye datos operativos propios (`name`, `phone`, `email`, `website`, `logo_url`, `address`, `lat`, `long`).
+- La unicidad vigente es `@@unique([main_club_id, club_type_id])`.
 
-**Constraint CHECK**:
-```sql
--- Debe tener O un usuario registrado O datos manuales
-(representative_user_id IS NOT NULL) OR 
-(name IS NOT NULL AND paternal_last_name IS NOT NULL AND phone IS NOT NULL)
-```
+### `club_role_assignments`
 
----
+- La relacion operativa es contra `club_section_id`.
+- Incluye `expires_at` y `rejection_reason`.
+- La unicidad vigente es `@@unique([user_id, role_id, club_section_id, ecclesiastical_year_id, start_date])`.
+- Tambien soporta el flujo de membership requests via `status` (`pending`, `active`, `rejected`, `expired`) sobre la misma asignacion anual.
 
-#### Tabla: `emergency_contacts`
-**Descripción**: Contactos de emergencia (máximo 5 por usuario)
+### `weekly_records`, `weekly_record_scores` y `scoring_categories`
 
-**Campos**:
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| `id` | UUID | ID único | PK |
-| `user_id` | UUID | Usuario | FK → users |
-| `name` | VARCHAR(100) | Nombre del contacto | NOT NULL |
-| `phone` | VARCHAR(20) | Teléfono | NOT NULL |
-| `relationship_type_id` | UUID | Relación (padre, madre, etc.) | FK → relationship_types |
+- `weekly_records` materializa asistencia, puntualidad, total de puntos, `created_by` y `active` por `user_id + week + year`.
+- `weekly_record_scores` guarda el desglose por categoria con unicidad `(record_id, category_id)`.
+- `scoring_categories` define categorias heredadas o propias por `origin_level` + `origin_id`.
 
-**Validación**: Trigger limita a máximo 5 contactos por usuario
+### `member_of_month`
 
----
+- Persiste ganadores por `club_section_id`, `month` y `year`; admite empates porque la unicidad incluye `user_id`.
+- Incluye `total_points` y `notified` para el tracking de notificaciones.
 
-### 🌍 Módulo: Jerarquía Organizacional
+### `monthly_reports` y `monthly_report_manual_data`
 
-La jerarquía geográfica sigue este patrón:
+- `monthly_reports` usa `monthly_report_id` UUID y relacion obligatoria a `club_enrollments.club_enrollment_id` (tambien UUID).
+- La unicidad vigente es `@@unique([club_enrollment_id, month, year])`.
+- El estado es `String` con default `draft`; el runtime backend verificado usa `draft`, `generated` y `submitted`.
+- `snapshot_data` es `Json?` y guarda el snapshot congelado del preview auto-calculado.
+- `submitted_by` referencia `users.user_id` y permite identificar al submitter cuando el informe pasa a `submitted`.
+- `monthly_report_manual_data` es one-to-one por `monthly_report_id` (`@unique`) y se elimina en cascada si se elimina el informe padre.
+- Los campos manuales vigentes son administrativos, misioneros y de seguimiento; no coinciden con algunos payloads legacy de clientes.
 
-```
-Country → Union → Local Field → District → Church → Club
-```
+### `system_config`
 
-#### Tabla: `countries`
-**Campos**: `id` (UUID), `name`, `abbreviation`, `active`, timestamps
+- Incluye configuracion operativa general.
+- Membership requests usa la key `membership.pending_timeout_days` para expirar solicitudes pendientes.
+- Nuevas keys desde 8.4-C (2026-04-28):
+  - `ranking.finance_closing_deadline_day` (default `5`) — día del mes límite para cierre financiero en el cálculo de `finance_score_pct`.
+  - `ranking.recalculation_enabled` (default `true`) — kill-switch que inhibe el cron y el endpoint manual de recálculo de rankings cuando es `false`.
 
-#### Tabla: `unions`
-**Campos**: `id` (UUID), `country_id` (FK), `name`, `abbreviation`, `active`, timestamps  
-**Relación**: Many-to-One con `countries`
+### `activities` y `activity_instances`
 
-#### Tabla: `local_fields`
-**Campos**: `id` (UUID), `union_id` (FK), `name`, `abbreviation`, `active`, timestamps  
-**Relación**: Many-to-One con `unions`
+- `activities` incluye `activity_date`, `activity_end_date`, `reminder_sent`, `activity_type_id`, `club_section_id` e `is_joint`.
+- `activity_instances` sigue vigente para materializar una actividad por seccion.
 
-#### Tabla: `districts`
-**Campos**: `id` (UUID), `local_field_id` (FK), `name`, `active`, timestamps  
-**Relación**: Many-to-One con `local_fields`
+### `finances`
 
-#### Tabla: `churches`
-**Campos**: `id` (UUID), `district_id` (FK), `name`, `address`, `active`, timestamps  
-**Relación**: Many-to-One con `districts`
+- Incluye `modified_by_id`, `club_section_id` y `post_closing_note`.
+- La relacion principal es con `club_sections`, no con tablas legacy separadas por tipo.
 
----
+### `member_insurances`
 
-### 🏕️ Módulo: Clubs
+- Incluye `created_by_id`, `modified_by_id`, `evidence_file_url` y `evidence_file_name`.
+- Sigue relacionada con `camporee_members`.
 
-#### Tabla: `clubs`
-**Descripción**: Club contenedor (una iglesia tiene 1 club principal)
+### `achievement_categories`, `achievements`, `user_achievements`, `achievement_event_log`
 
-**Campos**:
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| `id` | UUID | ID único | PK |
-| `church_id` | UUID | Iglesia | FK → churches |
-| `name` | VARCHAR(100) | Nombre del club | NOT NULL |
-| `active` | BOOLEAN | Club activo | DEFAULT true |
+> **NO CANON** — Dominio achievements documentado como feature operativa sin promocion al canon. Autoridad estructural: `sacdia-backend/prisma/schema.prisma`.
 
-**Relación**: Un club puede tener múltiples secciones por tipo
+- `achievement_categories` — categorias editables con `display_order`, `icon`, `active`; unicidad por `name`.
+- `achievements` — definicion del logro con `criteria` JSON tipado por `achievement_type`, `scope` (`achievement_scope`), `tier` (`achievement_tier`), flags `secret`, `repeatable`, `max_repeats`, FK opcional a `club_types.club_type_id`, y auto-relacion opcional para prerequisito.
+- `user_achievements` — progreso del usuario por tuple `(user_id, achievement_id, ecclesiastical_year_id)`. Campos clave: `progress_value`, `progress_target`, `completed` (bool), `times_completed`, `notified`, `progress_metadata` (JSON). La unicidad asegura un registro de progreso por usuario/logro/año.
+- `achievement_event_log` — journal de eventos procesados por el evaluador. Guarda `event_type`, `user_id`, `payload` JSON, flag `processed` e indices por `(user_id, event_type, created_at)` y por eventos pendientes `(processed, created_at)` para el worker de BullMQ. Sin BullMQ disponible, el evento queda persistido pero no encolado.
+- **Enums activos** (verificados en Prisma):
+  - `achievement_type`: `THRESHOLD`, `STREAK`, `COMPOUND`, `MILESTONE`, `COLLECTION`
+  - `achievement_scope`: `GLOBAL`, `CLUB_TYPE`, `ECCLESIASTICAL_YEAR`
+  - `achievement_tier`: `BRONZE`, `SILVER`, `GOLD`, `PLATINUM`, `DIAMOND`
+- **Drift de cliente verificado** (no corregido en este trabajo): el cliente admin usa valores de `scope` `GLOBAL|CLUB|UNIT` que no coinciden con los valores Prisma `GLOBAL|CLUB_TYPE|ECCLESIASTICAL_YEAR`.
 
----
+### `enrollment_rankings`, `section_rankings`, `enrollment_ranking_weights` (8.4-A)
 
-#### Tabla: `club_sections`
-**Descripción**: Secciones de club (unidades operativas por tipo: Aventureros, Conquistadores, Guías Mayores)
+> Naming híbrido canónico: schema usa `enrollment_*`; API/permisos/DTOs usan `member-*`. Ver `docs/canon/decisiones-clave.md` §22 y `docs/canon/runtime-rankings.md` §13.8. Lock permanente Audit A11.
 
-**Campos**:
-| Campo | Tipo | Descripción | Constraints |
-|-------|------|-------------|-------------|
-| `club_section_id` | SERIAL | ID único | PK |
-| `active` | BOOLEAN | Sección activa | DEFAULT false |
-| `souls_target` | INT | Meta de almas | DEFAULT 1 |
-| `fee` | INT | Cuota | DEFAULT 1 |
-| `meeting_day` | JSON[] | Días de reunión | |
-| `meeting_time` | JSON[] | Horarios de reunión | |
-| `club_type_id` | INT | Tipo de club | NOT NULL, FK → club_types |
-| `main_club_id` | INT | Club contenedor | NULL, FK → clubs ON DELETE CASCADE |
-| `created_at` | TIMESTAMPTZ | Fecha de creación | DEFAULT NOW() |
-| `modified_at` | TIMESTAMPTZ | Última actualización | DEFAULT NOW() |
+**`enrollment_rankings`** — clasificación por enrollment y año eclesiástico:
+- PK: `id UUID`, Unique: `(enrollment_id INTEGER, ecclesiastical_year_id INTEGER)`.
+- Señales: `class_score_pct`, `investiture_score_pct`, `camporee_score_pct` — cada una `NUMERIC(5,2)`, nullable, CHECK ∈ [0,100].
+- Composite: `composite_score_pct NUMERIC(5,2)`, nullable, CHECK ∈ [0,100].
+- Posición: `rank_position INTEGER` nullable (NULLS LAST, DENSE_RANK).
+- FK: `enrollment_id → enrollments`, `user_id → users`, `club_id → clubs`, `club_section_id → club_sections` (nullable), `ecclesiastical_year_id → ecclesiastical_years`, `awarded_category_id → award_categories` (nullable).
+- Índices: `(club_id, ecclesiastical_year_id)`, `(club_section_id, ecclesiastical_year_id)`, `(club_id, ecclesiastical_year_id, composite_score_pct DESC)`, `(user_id)`, `(awarded_category_id)`.
 
-**Unique**: `(main_club_id, club_type_id)`
+**`section_rankings`** — agregado puro por sección y año:
+- PK: `id UUID`, Unique: `(club_section_id INTEGER, ecclesiastical_year_id INTEGER)`.
+- `composite_score_pct NUMERIC(5,2)` nullable — AVG de enrollments con composite NOT NULL.
+- `active_enrollment_count INTEGER` — conteo de enrollments activos (default 0).
+- `rank_position INTEGER` nullable.
+- `awarded_category_id UUID` nullable — FK → `award_categories`.
+- FK: `club_section_id → club_sections`, `ecclesiastical_year_id → ecclesiastical_years`, `club_id → clubs`, `awarded_category_id → award_categories` (nullable).
+- Índices: `(club_id, ecclesiastical_year_id)`, `(club_id, ecclesiastical_year_id, composite_score_pct DESC)`, `(awarded_category_id)`.
 
-**Nota**: Consolidación de las anteriores `club_adventurers`, `club_pathfinders`, `club_master_guilds` (2026-03-17, Decisión 10)
+**`enrollment_ranking_weights`** — pesos de señales por (club_type_id, ecclesiastical_year_id):
+- PK: `id UUID`, Unique: `(club_type_id INTEGER?, ecclesiastical_year_id INTEGER?)`.
+- `class_pct`, `investiture_pct`, `camporee_pct` — `DECIMAL(5,2)`.
+- `is_default BOOLEAN` — true solo para la fila global (ambas FK nullable).
+- Sum=100 enforced al nivel de servicio con tolerancia IEEE `Math.abs(sum-100) ≤ 0.01`; no existe CHECK DB.
+- Seeded: fila global `is_default=true` con pesos 50/30/20 (class/investiture/camporee).
 
----
+### `award_categories` — extensión scope (8.4-A)
 
-#### Tabla: `club_role_assignments`
-**Descripción**: Asignación de roles a usuarios en secciones de club
+- Nueva columna: `scope VARCHAR(20) NOT NULL DEFAULT 'club'` — valores válidos: `club | section | member`.
+- Índice: `idx_award_categories_scope` sobre `(scope, is_legacy)`.
+- Backfill: todas las filas existentes antes de la migración → `scope='club'`.
+- El query param `?scope=` en `GET /api/v1/award-categories` filtra por este campo. Error canónico: `AWARD_CATEGORY_SCOPE_INVALID`.
+- POST y PATCH aceptan `scope` como campo opcional (`@IsOptional @IsIn(['club','section','member'])`).
 
-**Campos**:
-| Campo | Tipo | Descripción | Constraints |
-|-------|------|-------------|-------------|
-| `id` | UUID | ID único | PK |
-| `user_id` | UUID | Usuario | FK → users |
-| `role_id` | UUID | Rol (debe ser `role_category = 'CLUB'`) | FK → roles |
-| `club_section_id` | INT | Sección de club | FK → club_sections, NOT NULL |
-| `ecclesiastical_year_id` | INT | Año eclesiástico | FK → ecclesiastical_years |
-| `start_date` | DATE | Fecha inicio | DEFAULT CURRENT_DATE |
-| `end_date` | DATE | Fecha fin | NULL |
-| `active` | BOOLEAN | Asignación activa | DEFAULT true |
-| `status` | VARCHAR(20) | Estado (pending/active/inactive) | CHECK |
+### Better Auth
 
-**Constraint UNIQUE**:
-```sql
-UNIQUE (user_id, role_id, club_section_id, ecclesiastical_year_id)
-```
+- Los modelos Prisma vigentes son `session`, `account` y `verification`.
+- En base fisica se mapean a `sessions`, `accounts` y `verifications` via `@@map`.
 
----
+### `folder_templates`
 
-### 🔐 Módulo: RBAC (Roles y Permisos)
+- Ownership polimorfico: incluye `owner_union_id` y `owner_local_field_id`, ambos nullable con FK a `unions(union_id)` y `local_fields(local_field_id)` respectivamente (`ON DELETE RESTRICT`).
+- Ya no existe el unique compuesto `(club_type_id, ecclesiastical_year_id)`; cada tipo-anio puede convivir con una plantilla por union y una por campo local.
+- El CHECK `folder_templates_exactly_one_owner_check` obliga a que exactamente uno de los owners este presente.
+- La unicidad efectiva se enforce via dos indices unicos parciales: `folder_templates_union_owner_unique` sobre `(club_type_id, ecclesiastical_year_id, owner_union_id) WHERE owner_union_id IS NOT NULL` y `folder_templates_local_field_owner_unique` sobre `(club_type_id, ecclesiastical_year_id, owner_local_field_id) WHERE owner_local_field_id IS NOT NULL`.
+- Indices btree de apoyo: `idx_folder_templates_owner_union`, `idx_folder_templates_owner_local_field`.
 
-#### Tabla: `roles`
-**Descripción**: Roles del sistema (globales y de club)
+### `annual_folders`
 
-**Campos**:
-| Campo | Tipo | Descripción | Valores |
-|-------|------|-------------|----------|
-| `id` | UUID | ID único | PK |
-| `role_name` | VARCHAR(50) | Nombre del rol | UNIQUE |
-| `role_category` | VARCHAR(10) | Categoría | 'GLOBAL' o 'CLUB' |
-| `description` | TEXT | Descripción | - |
-| `active` | BOOLEAN | Rol activo | DEFAULT true |
+- Incluye `local_camporee_id` y `union_camporee_id` (ambos nullable) con FK a `local_camporees` y `union_camporees` respectivamente (`ON DELETE NO ACTION`).
+- El CHECK `annual_folders_at_most_one_camporee_check` impide que una carpeta referencie simultaneamente a un camporee local y a uno de union; ambos nulos es valido para carpetas de solo-investidura.
+- Incluye el flag `requires_union_confirmation BOOLEAN NOT NULL DEFAULT false`, materializado en la tabla para que el runtime no tenga que recalcularlo en cada lectura.
+- Indices de apoyo: `idx_annual_folders_local_camporee`, `idx_annual_folders_union_camporee`.
 
-**Roles Globales** (`role_category = 'GLOBAL'`):
-- `super_admin`, `admin`, `assistant_admin`, `coordinator`, `user`
+### `annual_folder_section_evaluations`
 
-**Roles de Club** (`role_category = 'CLUB'`):
-- `director`, `subdirector`, `secretary`, `treasurer`, `counselor`, `member`
+- Columnas renombradas: `evaluated_by_id -> lf_approved_by` y `evaluated_at -> lf_approved_at`. Ambas son ahora NULLABLE y `lf_approved_at` ya no lleva `DEFAULT now()`.
+- Nuevas columnas para la capa de union: `union_approved_by UUID?` (FK a `users.user_id`), `union_approved_at TIMESTAMPTZ?` y `union_decision union_evaluation_decision_enum?`.
+- Nueva columna `status annual_folder_section_status_enum NOT NULL DEFAULT 'PENDING'`, que materializa el estado de la evaluacion en vez de derivarlo. Los valores siguen el flujo `PENDING -> SUBMITTED -> PREAPPROVED_LF -> VALIDATED | REJECTED`.
+- CHECK `annual_folder_section_evaluations_union_after_lf_check`: `union_approved_at IS NULL OR lf_approved_at IS NOT NULL`; una accion de union requiere que exista accion previa del campo local.
+- CHECK `annual_folder_section_evaluations_preapproved_requires_lf_check`: `status <> 'PREAPPROVED_LF' OR lf_approved_at IS NOT NULL`; impide marcar `PREAPPROVED_LF` sin un timestamp de aprobacion local.
+- Indice `idx_annual_folder_section_evaluations_status` para soportar filtrado analitico por estado.
 
----
+### `club_annual_rankings` — columnas extendidas (8.4-C)
 
-#### Tabla: `permissions`
-**Campos**: `id` (UUID), `permission_name` (ej: `users:read_detail`, `health:read`), `description`, `active`
+Columnas nuevas desde migración `20260428*_extended_rankings_schema`:
 
-**Convención vigente**:
+- `folder_score_pct FLOAT NOT NULL DEFAULT 0` — porcentaje de puntaje de carpeta (0-100).
+- `finance_score_pct FLOAT NOT NULL DEFAULT 0` — porcentaje de cierre financiero mensual (0-100).
+- `camporee_score_pct FLOAT NOT NULL DEFAULT 0` — porcentaje de asistencia a camporees (0-100).
+- `evidence_score_pct FLOAT NOT NULL DEFAULT 0` — porcentaje de evidencias validadas (0-100).
+- `composite_score_pct FLOAT NOT NULL DEFAULT 0` — promedio ponderado de los 4 componentes (0-100).
+- `composite_calculated_at TIMESTAMPTZ?` — timestamp de la última actualización del composite.
 
-- formato `resource:action` en minúsculas;
-- recursos sensibles agregados por `rbac-sensitive-subresources`: `health`, `emergency_contacts`, `legal_representative`, `post_registration`;
-- coexisten con permisos legacy de la familia `users:*` (`users:read_detail`, `users:update`) para compatibilidad transicional.
+Índice nuevo: `idx_rankings_composite` sobre `(ecclesiastical_year_id, club_type_id, composite_score_pct DESC)` para soportar el dense ranking y listados ordenados por composite.
 
-#### Tabla: `role_permissions`
-**Descripción**: Tabla pivote Many-to-Many entre `roles` y `permissions`
+### `award_categories` — columnas extendidas (8.4-C)
 
-**Seed relevante**:
+Columnas nuevas:
 
-- `docs/03-DATABASE/migrations/script_06_admin_permissions.sql` inserta el catálogo `resource:action` y ya incluye los permisos finos `health:*`, `emergency_contacts:*`, `legal_representative:*` y `post_registration:*`.
-- El mismo seed asigna esos permisos a `super_admin`, `admin` y, en lectura, a `coordinator`.
+- `min_composite_pct FLOAT?` — umbral inferior de `composite_score_pct` para calificar en la categoría (0-100).
+- `max_composite_pct FLOAT?` — umbral superior de `composite_score_pct` (0-100). `null` = sin tope.
+- `is_legacy BOOLEAN NOT NULL DEFAULT false` — marcador de filas creadas antes de 2026-04-28. Las categorías legacy se excluyen del composite ranking. El GET filtra `is_legacy = false` por defecto.
 
-#### Tabla: `users_roles`
-**Descripción**: Asignación de roles GLOBALES a usuarios  
-**Campos**: `id`, `user_id`, `role_id`, `assigned_at`
+### `ranking_weight_configs` (nueva — 8.4-C)
+
+Tabla que almacena configuraciones de pesos para el composite ranking:
+
+- `id UUID PK` — identificador de la configuración.
+- `club_type_id INT?` — FK a `club_types`; `NULL` = configuración global default.
+- `folder_weight INT NOT NULL` — peso del componente carpeta (0-100).
+- `finance_weight INT NOT NULL` — peso del componente finanzas (0-100).
+- `camporee_weight INT NOT NULL` — peso del componente camporee (0-100).
+- `evidence_weight INT NOT NULL` — peso del componente evidencias (0-100).
+- `created_at TIMESTAMPTZ NOT NULL DEFAULT now()`.
+- `updated_at TIMESTAMPTZ NOT NULL DEFAULT now()`.
+
+Constraints:
+- CHECK `ranking_weight_configs_sum_check`: `folder_weight + finance_weight + camporee_weight + evidence_weight = 100`.
+- Índice único parcial: `ranking_weight_configs_club_type_unique` sobre `(club_type_id) WHERE club_type_id IS NOT NULL` — permite único global null + un override por club_type.
 
 ---
 
-### 📚 Módulo: Classes & Honors
+## Inventario resumido por dominio
 
-#### Tabla: `classes`
-**Descripción**: Clases progresivas (Amigo, Compañero, Explorador, etc.)
+### Organizacion y clubes
 
-**Campos**: `id` (UUID), `name`, `club_type_id`, `order`, `active`
+- `countries`, `unions`, `local_fields`, `districts`, `churches`, `clubs`, `club_sections`, `club_types`, `club_ideals`, `units`, `unit_members`
 
-#### Tabla: `honors`
-**Descripción**: Especialidades
+### RBAC y auth
 
-**Campos**: `id` (UUID), `name`, `honors_category_id`, `club_type_id`, `difficulty`, `active`
+- `roles`, `permissions`, `role_permissions`, `users_roles`, `users_permissions`, `club_role_assignments`, `role_slot_limits`, `role_assignment_requests`
+- `session`, `account`, `verification`, `users_pr`, `notification_preferences`, `notification_logs`, `user_fcm_tokens`
 
-#### Tabla: `users_classes`
-**Descripción**: Trayectoria consolidada por clase y proyección legacy de compatibilidad (`current_class`), no verdad operativa anual primaria
+### Usuarios y salud
 
-**Campos**:
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| `id` | UUID | ID único |
-| `user_id` | UUID | Usuario |
-| `class_id` | UUID | Clase |
-| `current_class` | BOOLEAN | ¿Es su clase actual? |
-| `investiture` | BOOLEAN | Investido |
-| `date_investiture` | DATE | Fecha de investidura |
-| `certificate` | TEXT | URL del certificado |
+- `users`, `legal_representatives`, `emergency_contacts`, `relationship_types`
+- `allergies`, `diseases`, `medicines`, `users_allergies`, `users_diseases`, `users_medicines`
+- `member_insurances`
 
-**Nota runtime (FS-02)**:
-- La inscripción operativa anual se resuelve en `enrollments`.
-- `users_classes` se sincroniza temporalmente para consumidores legacy mientras se completa la migración de lecturas.
+### Formacion
 
-#### Tabla: `enrollments`
-**Descripción**: Intento anual operativo de cursado por usuario, clase y año eclesiástico; owner primario del progreso formativo
+- `classes`, `class_modules`, `class_sections`, `enrollments`, `class_module_progress`, `class_section_progress`
+- `certifications`, `certification_modules`, `certification_sections`, `users_certifications`, `certification_module_progress`, `certification_section_progress`
+- `investiture_config`, `investiture_validation_history`, `validation_logs`
 
-**Campos relevantes**:
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| `enrollment_id` | INT | Identidad de la inscripción anual |
-| `user_id` | UUID | Usuario dueño del intento |
-| `class_id` | INT | Clase cursada |
-| `ecclesiastical_year_id` | INT | Año eclesiástico del intento |
-| `active` | BOOLEAN | Estado operativo de la inscripción |
+### Honores y evidencias
 
-**Regla de identidad**:
-- `UNIQUE (user_id, class_id, ecclesiastical_year_id)` evita duplicar el mismo intento anual.
+- `honors`, `honors_categories`, `master_honors`, `users_honors`
+- `honor_requirements`, `user_honor_requirement_progress`, `requirement_evidence`, `evidence_files`
 
-#### Tabla: `class_section_progress`
-**Descripción**: Fuente operativa del avance por sección; desde FS-03 pertenece a una inscripción anual vía `enrollment_id`
+### Actividades, camporees e inventario
 
-**Campos relevantes**:
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| `section_progress_id` | INT | ID del registro |
-| `enrollment_id` | INT NULL | Owner anual del progreso |
-| `user_id` | UUID | Huella legacy transicional |
-| `class_id` | INT | Huella legacy transicional |
-| `module_id` | INT | Módulo de la sección |
-| `section_id` | INT | Sección evaluada |
-| `score` | FLOAT | Puntaje registrado |
-| `evidences` | JSON | Evidencias adjuntas |
+- `activity_types`, `activities`, `activity_instances`
+- `local_camporees`, `union_camporees`, `union_camporee_local_fields`, `camporee_clubs`, `camporee_members`, `camporee_payments`
+- `inventory_categories`, `club_inventory`, `inventory_history`
 
-**Regla de unicidad FS-03**:
-- `UNIQUE (enrollment_id, module_id, section_id)` cuando `enrollment_id` no es nulo.
+### Finanzas y carpetas
 
-#### Tabla: `class_module_progress`
-**Descripción**: Proyección sincronizada por módulo; resume el avance de secciones para la misma inscripción anual
+- `finances`, `finances_categories`, `FinancePeriodClosing`
+- `folders`, `folders_modules`, `folders_sections`, `folder_assignments`, `folders_modules_records`, `folders_section_records`
 
-**Campos relevantes**:
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| `module_progress_id` | INT | ID del registro |
-| `enrollment_id` | INT NULL | Owner anual del progreso |
-| `user_id` | UUID | Huella legacy transicional |
-| `class_id` | INT | Huella legacy transicional |
-| `module_id` | INT | Módulo resumido |
-| `score` | FLOAT | Puntaje agregado del módulo |
+### Enrollment anual, ranking y reportes
 
-**Regla de unicidad FS-03**:
-- `UNIQUE (enrollment_id, module_id)` cuando `enrollment_id` no es nulo.
+- `club_enrollments`, `folder_templates`, `folder_template_sections`
+- `annual_folders`, `annual_folder_evidences`, `annual_folder_section_evaluations`, `annual_folder_section_submissions`
+- `award_categories`, `club_annual_rankings`, `ranking_weight_configs`, `monthly_reports`, `monthly_report_manual_data`, `member_of_month`, `weekly_records`, `scoring_categories`, `weekly_record_scores`
+- `enrollment_rankings`, `section_rankings`, `enrollment_ranking_weights` — (8.4-A) clasificación por enrollment/sección
 
-**Política de backfill acotado**:
-- Solo se backfillean filas legacy cuyo `user_id + class_id` mapee de forma determinística a una sola inscripción en `enrollments`.
-- Filas ambiguas o sin match quedan con `enrollment_id = NULL` para revisión/manual follow-up; FS-03 no inventa historia perfecta.
+### Recursos y logros
+
+- `resource_categories`, `resources`
+- `achievement_categories`, `achievements`, `user_achievements`, `achievement_event_log`
+
+### Soporte operativo
+
+- `error_logs`, `system_config`, `club_transfer_requests`
 
 ---
 
-## Convenciones de Naming
+## Enums vigentes
 
-### ✅ Estándares Aplicados
-
-#### Tablas
-- **Plural**: `users`, `clubs`, `classes`, `permissions`
-- **Snake case**: `emergency_contacts`, `club_role_assignments`
-- **Descriptivo**: `legal_representatives` (no `legal_reps`)
-
-#### Campos
-- **Snake case**: `paternal_last_name`, `created_at`
-- **Descriptivo**: `paternal_last_name` (no `p_lastname`)
-- **IDs explícitos**: `user_id`, `club_type_id` (no `uid`, `ct_id`)
-
-#### IDs
-- **Tablas principales**: `{tabla}_id` UUID
-- **Tablas pivote**: `id` UUID como PK, FKs descriptivos
-- **Secciones de club**: INT (`club_section_id`)
-
----
-
-### ⚠️ Inconsistencias Detectadas (Pendientes)
-
-| Tabla/Campo | Actual | Debería ser | Prioridad |
-|-------------|--------|-------------|-----------|
-| `ecclesiastical_year` | Singular | `ecclesiastical_years` | ALTA |
-| `club_master_guild` | Singular | `club_master_guilds` | RESUELTA (consolidado en `club_sections` — 2026-03-17) |
-| `club_types.ct_id` | Abreviado | `club_type_id` | ALTA |
-| `inventory_categories.inventory_categoty_id` | Typo | `inventory_category_id` | ALTA |
-
-**Ver detalles completos**: Ver documentos originales en carpeta raíz de database/
+- `achievement_scope`
+- `achievement_tier`
+- `achievement_type`
+- `annual_folder_section_status_enum` (`PENDING`, `SUBMITTED`, `PREAPPROVED_LF`, `VALIDATED`, `REJECTED`)
+- `blood_type`
+- `evidence_type_enum`
+- `evidence_validation_enum`
+- `gender`
+- `honor_validation_status_enum`
+- `insurance_type_enum`
+- `investiture_action_enum`
+- `investiture_status_enum`
+- `origin_level_enum`
+- `role_category`
+- `union_evaluation_decision_enum` (`APPROVED`, `REJECTED_OVERRIDE`)
+- `user_approval_status`
 
 ---
 
-## Queries Útiles
+## Migraciones recientes
 
-### Obtener roles de un usuario (globales y de club)
+- `20260415100000_folder_templates_polymorphic_owner` - añade owners polimorficos (`owner_union_id`, `owner_local_field_id`), dropea el unique compuesto legacy y establece el CHECK/indices parciales de exactamente-un-owner.
+- `20260415100100_annual_folders_camporee_link` - añade `local_camporee_id`, `union_camporee_id`, `requires_union_confirmation`, el CHECK de a-lo-mas-un-camporee y los indices asociados.
+- `20260415100200_section_evaluations_dual_level` - renombra `evaluated_by_id`/`evaluated_at` a `lf_approved_by`/`lf_approved_at` (ambas nullable), añade `union_approved_by`/`union_approved_at`/`union_decision`, crea `union_evaluation_decision_enum` y el CHECK de orden LF→Union.
+- `20260415100300_section_evaluations_stored_status` - crea `annual_folder_section_status_enum`, añade la columna `status` materializada con default `PENDING`, el CHECK de `PREAPPROVED_LF` y el indice analitico por estado.
+- `20260415100400_annual_folders_eager_evaluation_backfill` - migracion data-only; no-op sobre dev por ausencia de datos legacy.
+- `20260428000000_extended_rankings_schema` (8.4-C) - añade 5 columnas de score + `composite_calculated_at` a `club_annual_rankings`; crea `ranking_weight_configs` con CHECK sum=100 + índice único parcial; extiende `award_categories` con `min_composite_pct`, `max_composite_pct`, `is_legacy`; crea `idx_rankings_composite`; inserta configuración global default (60/15/15/10); agrega keys `ranking.finance_closing_deadline_day` y `ranking.recalculation_enabled` en `system_config`. Aplicada en los 3 branches Neon (development, staging, production).
+- `20260429000000_enrollment_rankings_schema` - (8.4-A) crea `enrollment_rankings`, `section_rankings`, `enrollment_ranking_weights` con indexes, UNIQUE constraints y CHECK constraints de rango [0,100]. Ver §14.1 de `docs/canon/runtime-rankings.md`.
+- `20260429000001_award_categories_scope` - (8.4-A) añade `scope VARCHAR(20) DEFAULT 'club'` a `award_categories` + índice `idx_award_categories_scope` on `(scope, is_legacy)`. Backfill: filas existentes → `scope='club'`.
+- `20260429000002_enrollment_rankings_seeds` - (8.4-A) seed de fila global `is_default=true` en `enrollment_ranking_weights` con pesos 50/30/20 (class/investiture/camporee).
+- `20260429000003_enrollment_rankings_default_award_seeds` - (8.4-A) seed de categorías de premio con `scope='member'` para clasificación de miembros.
 
-```sql
--- Roles globales
-SELECT r.role_name, r.role_category
-FROM users_roles ur
-JOIN roles r ON r.id = ur.role_id
-WHERE ur.user_id = 'uuid-del-usuario';
+## Nota operativa
 
--- Roles de club
-SELECT
-  r.role_name,
-  ct.name AS club_type,
-  ey.name AS year
-FROM club_role_assignments cra
-JOIN roles r ON r.id = cra.role_id
-JOIN club_sections cs ON cs.club_section_id = cra.club_section_id
-JOIN club_types ct ON ct.id = cs.club_type_id
-JOIN ecclesiastical_years ey ON ey.id = cra.ecclesiastical_year_id
-WHERE cra.user_id = 'uuid-del-usuario'
-  AND cra.active = true;
-```
-
-### Obtener miembros activos de una sección de club
-
-```sql
-SELECT
-  u.name,
-  u.paternal_last_name,
-  u.maternal_last_name,
-  r.role_name,
-  cra.start_date
-FROM club_role_assignments cra
-JOIN users u ON u.id = cra.user_id
-JOIN roles r ON r.id = cra.role_id
-WHERE cra.club_section_id = 123  -- ID de sección
-  AND cra.active = true
-ORDER BY
-  CASE r.role_name
-    WHEN 'director' THEN 1
-    WHEN 'subdirector' THEN 2
-    WHEN 'secretary' THEN 3
-    ELSE 4
-  END;
-```
-
-### Verificar año eclesiástico actual
-
-```sql
-SELECT id, name, start_date, end_date
-FROM ecclesiastical_years
-WHERE start_date <= CURRENT_DATE
-  AND end_date >= CURRENT_DATE;
-```
-
-### Contar usuarios por tipo de club
-
-```sql
-SELECT
-  ct.name AS club_type,
-  COUNT(DISTINCT cra.user_id) AS member_count
-FROM club_role_assignments cra
-JOIN club_sections cs ON cs.club_section_id = cra.club_section_id
-JOIN club_types ct ON ct.id = cs.club_type_id
-WHERE cra.active = true
-GROUP BY ct.name;
-```
-
----
-
-## Índices Recomendados
-
-```sql
--- Performance en búsquedas de usuarios
-CREATE INDEX idx_users_email ON users(email) WHERE active = true;
-CREATE INDEX idx_users_location ON users(country_id, union_id, local_field_id);
-
--- Performance en club_role_assignments
-CREATE INDEX idx_cra_user ON club_role_assignments(user_id) WHERE active = true;
-CREATE INDEX idx_cra_section ON club_role_assignments(club_section_id);
-CREATE INDEX idx_cra_year ON club_role_assignments(ecclesiastical_year_id);
-
--- Performance en jerarquía organizacional
-CREATE INDEX idx_unions_country ON unions(country_id) WHERE active = true;
-CREATE INDEX idx_lf_union ON local_fields(union_id) WHERE active = true;
-CREATE INDEX idx_districts_lf ON districts(local_field_id) WHERE active = true;
-CREATE INDEX idx_churches_district ON churches(district_id) WHERE active = true;
-```
-
----
-
-## Ver También
-
-- [schema.prisma](schema.prisma) - Schema Prisma definitivo
-- [migrations/](migrations/) - Scripts SQL de migración  
-- [README.md](README.md) - Guía de base de datos
-- [../02-API/API-SPECIFICATION.md](../02-API/API-SPECIFICATION.md) - Cómo la API usa estos modelos
-
----
-
-**Última actualización**: 2026-03-18 (club_sections consolidation applied — 3 tables → 1, 3 FK nullables → 1 FK directa)
-**Fuentes**: `schema.prisma` (fuente de verdad), `relations.md`, `auditoria-naming-bd.md`, `verificacion-schema-prisma.md`
+- Para detalle estructural exacto, usar `docs/database/schema.prisma` o `sacdia-backend/prisma/schema.prisma`.
+- Si esta referencia contradice el schema Prisma real, el schema real gana y esta pagina debe resincronizarse.

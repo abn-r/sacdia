@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Leyenda Viviente">
+  <title>Leyenda Viviente</title>
+  <desc>Flat matte engraved achievement badge. Transparent canvas, dark circle #1C1C1E, accent #B9F2FF.</desc>
+  <circle cx="256" cy="256" r="220" fill="#1C1C1E"/>
+  <circle cx="256" cy="256" r="204" fill="none" stroke="#B9F2FF" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="256" cy="256" r="170" fill="none" stroke="#B9F2FF" stroke-width="3" stroke-linecap="round" opacity="0.38"/>
+  <polyline points="232,384 256,404 280,384" fill="none" stroke="#B9F2FF" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>
+  <polyline points="256,200 240,282 256,342 272,282 256,200" fill="none" stroke="#B9F2FF" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="248,232 194,198 146,218 198,258 154,282 220,292" fill="none" stroke="#B9F2FF" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="264,232 318,198 366,218 314,258 358,282 292,292" fill="none" stroke="#B9F2FF" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="232,338 256,382 280,338" fill="none" stroke="#B9F2FF" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="210,350 238,374" fill="none" stroke="#B9F2FF" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" opacity="0.80"/>
+  <polyline points="302,350 274,374" fill="none" stroke="#B9F2FF" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" opacity="0.80"/>
+  <polygon points="184,164 192,172 184,180 176,172" fill="#B9F2FF" opacity="0.90"/>
+  <polygon points="328,164 336,172 328,180 320,172" fill="#B9F2FF" opacity="0.90"/>
+  <polygon points="156,310 164,318 156,326 148,318" fill="#B9F2FF" opacity="0.90"/>
+  <polygon points="356,310 364,318 356,326 348,318" fill="#B9F2FF" opacity="0.90"/>
+</svg>

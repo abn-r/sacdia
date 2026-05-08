@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Veterano de Camporees">
+  <title>Veterano de Camporees</title>
+  <desc>Flat matte engraved achievement badge. Transparent canvas, dark circle #1C1C1E, accent #B8C5D0.</desc>
+  <circle cx="256" cy="256" r="220" fill="#1C1C1E"/>
+  <circle cx="256" cy="256" r="204" fill="none" stroke="#B8C5D0" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="256" cy="256" r="170" fill="none" stroke="#B8C5D0" stroke-width="3" stroke-linecap="round" opacity="0.38"/>
+  <polyline points="232,384 256,404 280,384" fill="none" stroke="#B8C5D0" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>
+  <polyline points="152,336 222,224 276,316 328,250 382,336" fill="none" stroke="#B8C5D0" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <line x1="328" y1="250" x2="328" y2="190" stroke="#B8C5D0" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <polygon points="328,190 372,202 328,216" fill="#B8C5D0" opacity="0.90"/>
+  <line x1="236" y1="318" x2="252" y2="286" stroke="#B8C5D0" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" opacity="0.70"/>
+  <polygon points="236,311.6 251.96,332.88 245.12,357.2 236,365.56 224.6,352.64 226.88,332.12" fill="none" stroke="#B8C5D0" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="236,327.56 242.08,346.56 236,355.68 231.44,344.28" fill="none" stroke="#B8C5D0" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>
+</svg>

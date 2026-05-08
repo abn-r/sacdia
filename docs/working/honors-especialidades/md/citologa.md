@@ -1,0 +1,27 @@
+# Especialidad — citologa
+
+**Fuente**: `/Users/abner/Downloads/S3/honors_pdf/citologa.pdf`
+**Texto extraído**: `/Users/abner/Documents/development/sacdia/docs/working/honors-especialidades/raw/citologa.txt`
+**Nivel detectado**: 2
+**Cantidad de requisitos detectados**: 12
+
+> Nota: extracción automática preliminar desde la capa de texto del PDF. Requiere revisión humana antes de cualquier carga a base de datos.
+
+## Requisitos detectados
+
+1. ¿Cuáles son las 3 partes principales de una célula eucarionte? Mencionar algunas funciones de la misma. 1.
+2. 
+3. 2. ¿Qué es una célula procarionte? 3. Nombrar 3 diferencias entre una célula animal y una vegetal. Célula animal 1. 2. 3. Célula vegetal 1. 2. 3.
+4. ¿Qué son las células madre? ¿Por qué son importantes?
+5. Nombrar 3 funciones de la membrana plasmática. 1. 2. 3.
+6. Explicar las siguientes formas de permeabilidad selectiva: osmosis y difusión. Osmosis Difusión
+7. Explicar las siguientes formas de permeabilidad no selectiva: fagocitosis y pinocitosis. Fagocitosis Pinocitosis
+8. ¿Qué es el transporte activo y el transporte pasivo? Activo Pasivo
+9. ¿Cuáles son las partes del núcleo celular? ¿Por qué es importante cada una de ellas?
+10. Nombrar las funciones de los siguientes orgánulos citoplasmáticos: Mitocondria Centriolo Complejo de Golgi Retículo Endoplasmático Rugoso Retículo Endoplasmático Liso Lisosoma Ribosoma Peroxisoma
+11. ¿Cuál es la importancia de los cilios y flagelos?
+12. Identificar a través de imágenes o dibujos 5 diferentes clases de células (muscular, ósea, cartilaginosa, adiposa, leucocito, hemática, neurona, etc.)
+
+## Observaciones
+
+- Este archivo fue preparado para análisis posterior, no para carga directa a BD.

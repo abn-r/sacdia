@@ -1,0 +1,22 @@
+# Especialidad — construccion con lego
+
+**Fuente**: `/Users/abner/Downloads/S3/honors_pdf/construccion_con_lego.pdf`
+**Texto extraído**: `/Users/abner/Documents/development/sacdia/docs/working/honors-especialidades/raw/construccion-con-lego.txt`
+**Nivel detectado**: 2
+**Cantidad de requisitos detectados**: 7
+
+> Nota: extracción automática preliminar desde la capa de texto del PDF. Requiere revisión humana antes de cualquier carga a base de datos.
+
+## Requisitos detectados
+
+1. Conocer los siguientes términos: Elemento Perno Ladrillo Placa Placa base Baldosa Pendiente Pendiente ascendiente Bisagra Ladrillo técnico Funciones de electricidad Figura mini Pernos no hacia la parte superior (SNOT) Mi propia creación (MOC) Ejes y prendedores
+2. Construir y/o encontrar ejemplos de las siguientes clases de modelos a escala: a. Microescala (1 bloque de ciudad es igual a 32 pernos) b. Escala de figura mini (6 pies o 2 metros es igual a aproximadamente) c. Escala de Coleccionista Ultimate (más grande que la escala de figura mini y más pequeña que una escala de 1 a 1) d. Escala 1 a 1 (tamaño real)
+3. Escoger uno de los siguientes: a. Construir un modelo a escala de 1 a 1 de algo de la naturaleza, su hogar, iglesia o escuela. Después, compartir su modelo con su grupo o club. b. Construir un modelo a escala de su cuarto, casa, apartamento u otro edificio en su comunidad. Asegurarse de incluir grandes artículos de muebles como la cama, la estufa, la refrigeradora, el sofá y la cómoda, etc. Compartir su modelo con su grupo o club.
+4. Escoger uno de los siguientes: a. Utilizar los LEGO como ayuda visual en una historia infantil para los niños entre las edades de 2 a 9 en la iglesia o escuela sabática. b. Utilizar los LEGO como parte de un proyecto escolar.
+5. Construir una escena o un artículo de la Biblia usando los LEGO en uno de los tamaños de escala del requisito #2.
+6. Usando su imaginación, crear su propio diseño en 2 de las 5 categorías a continuación y compartir ambos diseños con su grupo o club. a. Carro, camión u otro vehículo terrestre. b. Avión, helicóptero u otra aeronave. c. Nave, submarino u otra moto acuática. d. Animal o planta construido de ladrillos basado en especies reales usando por lo menos 10 piezas. e. Máquina, aparato o robot (sin funciones de electricidad)
+7. Escribir un párrafo de 250 palabras, o en una presentación de 3-5 minutos a su grupo o club, decir cómo puede utilizar los LEGO para testificar a los que no conocen a Dios.
+
+## Observaciones
+
+- Este archivo fue preparado para análisis posterior, no para carga directa a BD.

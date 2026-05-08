@@ -1,0 +1,24 @@
+# Especialidad — nudos
+
+**Fuente**: `/Users/abner/Downloads/S3/honors_pdf/nudos.pdf`
+**Texto extraído**: `/Users/abner/Documents/development/sacdia/docs/working/honors-especialidades/raw/nudos.txt`
+**Nivel detectado**: 2
+**Cantidad de requisitos detectados**: 9
+
+> Nota: extracción automática preliminar desde la capa de texto del PDF. Requiere revisión humana antes de cualquier carga a base de datos.
+
+## Requisitos detectados
+
+1. Definir los siguientes términos: Seno Chicote Parte fija (firme) Vuelta por encima Vuelta por debajo Giro Doblez Atadura Empalme Remate refuerzo de cabo
+2. Saber cómo cuidar la cuerda.
+3. Describir la diferencia entre cuerda de 3 fibras y cuerda lisa (con alma), y hacer una lista de 3 de los usos de cada una. Diferencia Uso Tres fibras Cuerda lisa
+4. Identificar las siguientes clases de cuerda: a. Manila b. Sisal c. Nylon d. Polipropileno
+5. ¿Cuáles son algunas de las ventajas y desventajas de la cuerda sintética? Ventajas Desventajas
+6. Hacer lo siguiente con la cuerda: a. Empalme b. Empalme ojo de águila c. Empalme pata de conejo d. Rematar el final de una cuerda con una doble corona (piña acollador), remate refuerzo de cabo, o un nudo piña acollador.
+7. Hacer una cuerda de 3 cordones de 1.80 metros de materiales nativos o mecate. Materiales usados
+8. De memoria, hacer por lo menos 20 de los siguientes nudos y conocer sus usos comunes y sus limitaciones. Demostrar cómo son utilizados. Nudo de ancla o tirón de ancla Nudo arnés de hombre As de guía Nudo molinero As de guía por seno Nudo Parker Mariposa o mariposa alpina Nudo vuelta y dos medio cotes Calabrote Nudo Prusik Boca de lobo Nudo margarita Ballestrinque Nudo vuelta de escota Constrictor Nudo corredizo Nudo corona (piña acollador) Nudo cote escurridizo As de guía por seno (doble) Nudo cote escurridizo en una cuerda Vuelta de escota doble Nudo llano o cuadrado Figura de ocho Nudo estibador Pescador Nudo estrangulado Pescador por seno Nudo cirujano Corona con lazos sencillos Nudo de línea de tensión Nudo cazador Nudo vuelta de braza Nudo lazo o corredizo con cote Nudo dos medio cotes Nudo vaquero o mulero
+9. Hacer una tabla de nudos mostrando 25 nudos o más.
+
+## Observaciones
+
+- Este archivo fue preparado para análisis posterior, no para carga directa a BD.

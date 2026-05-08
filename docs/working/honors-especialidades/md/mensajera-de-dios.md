@@ -1,0 +1,18 @@
+# Especialidad — mensajera de dios
+
+**Fuente**: `/Users/abner/Downloads/S3/honors_pdf/mensajera_de_dios.pdf`
+**Texto extraído**: `/Users/abner/Documents/development/sacdia/docs/working/honors-especialidades/raw/mensajera-de-dios.txt`
+**Nivel detectado**: 1
+**Cantidad de requisitos detectados**: 3
+
+> Nota: extracción automática preliminar desde la capa de texto del PDF. Requiere revisión humana antes de cualquier carga a base de datos.
+
+## Requisitos detectados
+
+1. Demostrar conocimiento de lo siguiente. Esto se hace mejor como grupo y lo más probable involucrará estudio y trabajo en grupo. Adicionalmente, proyectos creativos como carteles, exhibiciones, presentaciones y juegos de mesa pueden ser maneras de presentar su conocimiento. a. Los hechos básicos de la vida de Elena G. de White incluyendo eventos como: i. Nacimiento ii. «La piedra» / su enfermedad iii. Años de millerismo / el Gran Chasco iv. Llamado / primera visión v. Casamiento / maternidad vi. Años en Battle Creek vii. Papel en la formación de la Iglesia Adventista viii. Distintas visiones doctrinales (salud, misiones, justificación por fe) ix. Años en Australia / Europa x. Años en California / muerte b. Contexto histórico incluyendo eventos como: i. Ambiente espiritual: segundo gran despertar / millerismo / Gran Chasco ii. Ambiente social iii. Ambiente político c. Una idea de la variedad y clase de libros que ella escribió. i. Libros escritos directamente por Elena de White ii. Libros escritos/compilados por Elena de White de artículos, panfletos o cartas iii. Artículos de publicaciones. iv. Cartas y otros manuscritos v. Compilaciones por el Patrimonio White (de los escritos de Elena de White) 1. Libros
+2. Devocionales vi. Adaptaciones modernas d. La idea bíblica de inspiración - discutir lo siguiente: i. ¿Cómo se determina lo que es considerado como escritos inspirados? Textos: 2 Timoteo 3:16 y 17; 2 Pedro 1: 20 y 21 Crecimiento espiritual, actividades misioneras y herencia ii. ¿Cómo Dios usó los profetas y otros autores bíblicos para grabar sus mensajes a su pueblo? ¿Parece que Dios era el Escritor (inspiración verbal) o guio al escritor a grabar su mensaje sin error (inspiración por pensamiento)? ¿Cuál perspectiva creen los cristianos protestantes que es verdad? ¿Por qué? iii. ¿Promete Dios a guiar o dar mensajes a su pueblo en todos momentos y lugares? Textos: Amós 3:7; Joel 2:28-32 e. Las pruebas bíblicas de un profeta – definir o discutir cómo cada uno de los siguientes textos bíblicos muestran las pruebas bíblicas de un profeta: i. Isaías 8:20 (Deuteronomio 13:1-4; 2 Crónicas 24:19 y 20; 1 Juan 4:2 y 3) ii. Jeremías 28:9 / Deuteronomio 18:22 iii. Juan 4:22 Crecimiento espiritual, actividades misioneras y herencia iv. Mateo 7:20 f. Discutir lo siguiente: i. ¿Cuáles son algunas de las maneras que Elena de White cumple las pruebas bíblicas de un profeta? ii. ¿Qué cree la Iglesia Adventista de la relación entre los escritos de Elena de White y la Biblia? 2. Ganar 200 puntos o más en el tiempo designado del juego Pitcairn de la página web http://honor.ellenwhite.org/index.php.
+3. Ganar 200 puntos o más en el juego Pitcairn usando las aplicaciones gratis disponibles para dispositivos Mac en la tienda de aplicaciones o para dispositivos de Android en Google Play.
+
+## Observaciones
+
+- Este archivo fue preparado para análisis posterior, no para carga directa a BD.

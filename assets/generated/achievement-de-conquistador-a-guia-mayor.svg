@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="De Conquistador a Guía Mayor">
+  <title>De Conquistador a Guía Mayor</title>
+  <desc>Flat matte engraved achievement badge. Transparent canvas, dark circle #1C1C1E, accent #E5E4E2.</desc>
+  <circle cx="256" cy="256" r="220" fill="#1C1C1E"/>
+  <circle cx="256" cy="256" r="204" fill="none" stroke="#E5E4E2" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="256" cy="256" r="170" fill="none" stroke="#E5E4E2" stroke-width="3" stroke-linecap="round" opacity="0.38"/>
+  <polyline points="232,384 256,404 280,384" fill="none" stroke="#E5E4E2" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>
+  <line x1="180" y1="338" x2="220" y2="338" stroke="#E5E4E2" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <line x1="206" y1="310" x2="246" y2="310" stroke="#E5E4E2" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <line x1="232" y1="282" x2="272" y2="282" stroke="#E5E4E2" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <line x1="258" y1="254" x2="298" y2="254" stroke="#E5E4E2" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <line x1="284" y1="226" x2="324" y2="226" stroke="#E5E4E2" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="174,340 206,312 238,284 270,256 302,228 336,198" fill="none" stroke="#E5E4E2" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <polygon points="338,142.4 355.64,165.92 348.08,192.8 338,202.04 325.4,187.76 327.92,165.08" fill="none" stroke="#E5E4E2" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="338,160.04 344.72,181.04 338,191.12 332.96,178.52" fill="none" stroke="#E5E4E2" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>
+</svg>

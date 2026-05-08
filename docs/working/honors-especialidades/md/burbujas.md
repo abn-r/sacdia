@@ -1,0 +1,23 @@
+# Especialidad — burbujas
+
+**Fuente**: `/Users/abner/Downloads/S3/honors_pdf/burbujas.pdf`
+**Texto extraído**: `/Users/abner/Documents/development/sacdia/docs/working/honors-especialidades/raw/burbujas.txt`
+**Nivel detectado**: 2
+**Cantidad de requisitos detectados**: 8
+
+> Nota: extracción automática preliminar desde la capa de texto del PDF. Requiere revisión humana antes de cualquier carga a base de datos.
+
+## Requisitos detectados
+
+1. Definir los siguientes términos: Burbuja de jabón Hidrofílico Hidrofóbico Tensión superficial Energía mínima Superficie mínima
+2. ¿Cómo los siguientes factores climáticos afectan la vida de una burbuja? Humedad Temperatura Viento Precipitación
+3. Hacer un modelo o dibujo de una molécula de jabón. Mostrar por qué la molécula es hidrófilo o hidrófobo.
+4. Hacer una lista de las normas de seguridad sobre soplar burbujas.
+5. Tensión superficial a. Explicar qué causa la tensión superficial. b. Hacer un experimento para determinar si el agua jabonosa tiene tensión superficial alta o baja.
+6. Sopladores a. Explicar qué clases de materiales sirven mejor para el diámetro de sopladores grandes para burbujas. b. Construir un soplador para hacer burbujas grandes.
+7. Componentes a. ¿Qué calidad de agua sirve mejor para las burbujas? ¿Cuáles impurezas afectan negativamente a la calidad de la burbuja? b. ¿Cuáles jabones son mejores para una solución de burbujas? c. ¿Cuál es el propósito de la glicerina o el jarabe de maíz en una solución? d. Aprender una fórmula para una solución para burbujas y hacer una mezcla de esa solución. e. Evaluar su solución para burbujas y hacer una receta mejor, si es necesario.
+8. Experimentos a. Mostrar lo que pasa cuando una burbuja se encuentra con otra burbuja. ¿Cómo esto ilustra la energía mínima y la superficie mínima? b. ¿Qué causa los colores en una burbuja? Demostrar interferencia constructiva y destructiva. c. ¿Qué forma tienen las burbujas y por qué? Hacer un experimento para ilustrar la respuesta.
+
+## Observaciones
+
+- Este archivo fue preparado para análisis posterior, no para carga directa a BD.

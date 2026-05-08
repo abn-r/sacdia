@@ -486,8 +486,8 @@ FUNCIÓN algoritmo(entrada):
      "exp": 1234571490
    }
    ```
-4. Cliente almacena token en localStorage/sessionStorage
-5. Cada request incluye token en header `Authorization: Bearer <token>`
+4. Cliente almacena token en httpOnly cookie (servidor) o en memoria (SPA) — NO usar localStorage/sessionStorage (vulnerable a XSS)
+5. Cada request incluye token en header `Authorization: Bearer <token>` o se envía automáticamente vía cookie httpOnly
 
 **Token Expiration**: 1 hora
 **Refresh Token**: 7 días

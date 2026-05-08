@@ -1,0 +1,28 @@
+# Especialidad — softbol
+
+**Fuente**: `/Users/abner/Downloads/S3/honors_pdf/softbol.pdf`
+**Texto extraído**: `/Users/abner/Documents/development/sacdia/docs/working/honors-especialidades/raw/softbol.txt`
+**Nivel detectado**: 1
+**Cantidad de requisitos detectados**: 13
+
+> Nota: extracción automática preliminar desde la capa de texto del PDF. Requiere revisión humana antes de cualquier carga a base de datos.
+
+## Requisitos detectados
+
+1. Conocer las normas básicas de softbol.
+2. ¿Cuál es el significado de «un buen espíritu deportivo»?
+3. Nombrar y demostrar su comprensión de las competencias requeridas para las 10 posiciones de juego de softbol. 1. 2. 3.
+4. 
+5. 
+6. 
+7. 
+8. 
+9. 
+10. 4. Identificar los siguientes: Bate Caja de bateo Banquillo de entrenador Bolsas de tipo diamantes Guante Base meta Campo interno Círculo de espera Campo externo Montículo del lanzador Goma de picheo Campo derecho Campo izquierdo Softbol 5. Definir o explicar los siguientes términos del juego: Bases llenas Batazo Elección del campo Bola al aire (fly ball) Juego forzado Faul tip Grand slam Rolling Home run Inicio equipo/equipo local Innings Alineación Bola alta sobre el plato Carrera Puntuación Zona de strike La cuenta Caminar 6. Explicar las siguientes llamadas oficiales o reglas: Doble paga Error Pelota limpia Pelota faul Regla del doble terreno Bola al aire dentro del campo Fuera Seguro 7. Demostrar la habilidad de leer una sencilla tabla de puntuación que se anotó en un juego en que participó. 8. Hacer una lista y describir 5 responsabilidades de un árbitro. 1. 2. 3. 4. 5. 9. Nombrar 5 atributos físicos y mentales que se pueden obtener del softbol. Mentales 1. 2. 3. 4. 5. Físicos 1. 2. 3. 4. 5. 10. Como un equipo o individualmente, elaborar un plan para practicar el evangelismo mientras completa los requisitos de esta especialidad. Las posibles opciones podrían incluir lo siguiente: a. Invitar a 3 amigos que no sea de su iglesia a jugar un juego. b. Tener una oración antes de cada juego. c. Exhibir buena disposición deportiva y juego limpio.
+11. Jugar 3 partidos de softbol oficiales con un árbitro y demostrar razonables habilidades.
+12. Escribir un informe de una página sobre un famoso atleta. Discutir por qué es o no un bueno modelo cristiano.
+13. Hablar con su líder de Conquistadores, pastor o maestro de los problemas que enfrenta un joven adventista teniendo en cuenta que participa en deportes en la secundaria, preparatoria o la universidad. ¿Qué alternativas existen para permitir la continuación de la actividad en los deportes?
+
+## Observaciones
+
+- Este archivo fue preparado para análisis posterior, no para carga directa a BD.

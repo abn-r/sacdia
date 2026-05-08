@@ -1,0 +1,30 @@
+# Especialidad — reciclaje
+
+**Fuente**: `/Users/abner/Downloads/S3/honors_pdf/reciclaje.pdf`
+**Texto extraído**: `/Users/abner/Documents/development/sacdia/docs/working/honors-especialidades/raw/reciclaje.txt`
+**Nivel detectado**: 1
+**Cantidad de requisitos detectados**: 15
+
+> Nota: extracción automática preliminar desde la capa de texto del PDF. Requiere revisión humana antes de cualquier carga a base de datos.
+
+## Requisitos detectados
+
+1. Definir la palabra reciclaje.
+2. ¿Cuál es el significado de las 3R? ¿Cómo se puede hacer cada «R» en la escuela/club, el hogar y en la comunidad?
+3. ¿Cuáles son los colores que se usan para separar la basura para el reciclaje?
+4. ¿Quién desarrolló el primer logotipo o símbolo del reciclaje?
+5. Como grupo, discutir al menos 2 referencias bíblicas donde Dios manda a cuidar de su tierra. 1. 2.
+6. ¿Cuáles son las razones que se debe reciclar?
+7. Definir las siguientes categorías del reciclaje. Identificar productos de uso cotidiano que pertenecen a cada categoría. Aluminio Productos Plástico PET Productos PEAD Productos PVC Productos PEBD Productos PP Productos PS Productos Otro #7 Productos Bimetálico Productos Vidrio Productos Acero Productos ¿Qué métodos de reciclaje están disponibles en su comunidad para manejar cada clase?
+8. ¿Cuáles son los plásticos no codificados? ¿Pueden ser reciclados?
+9. Nombrar 7 estados y 7 países extranjeros que actualmente ejecutan programas de reciclaje de recompra. Estado País 1. 2. 3. 4. 5. 6. 7.
+10. Encontrar 3 artículos de actualidad en revistas o periódicos o por Internet que hablan de algún aspecto del reciclaje. Nombre del artículo 1. 2. 3.
+11. Dibujar, fotografiar o descargar el símbolo de reciclaje oficial de su estado/país.
+12. Si aplicable: Nombrar 8 CONTENEDORES que son reciclables para dinero en efectivo en el programa de reciclaje de contenedores de bebidas de su estado o país. 1. 5. 2. 6. 3. 7. 4. 8.
+13. Individualmente o en grupo, diseñar y crear un cartel de reciclaje para su club, iglesia o escuela.
+14. Individualmente o en grupo, hacer una de las siguientes manualidades de materiales reciclados: a. Estación de alimentación para las aves b. Estación de alimentación para los colibríes c. Faro en una botella d. Océano en una botella
+15. Hacer lo siguiente: a. Pasar 8 horas recogiendo y procesando artículos reciclables en su área. b. Mostrar su capacidad para ordenar correctamente los artículos reciclables. c. Trabajar con su club para mantener un programa de reciclaje por un mínimo de 3 meses, usando las ganancias como un evento para recaudar fondos para su club. d. Al final de los 3 meses evaluar el programa. Dar un informe (oral o escrito) sobre lo que ha aprendido, cuánto se ganó y cómo se gastó.
+
+## Observaciones
+
+- Este archivo fue preparado para análisis posterior, no para carga directa a BD.

@@ -1,0 +1,32 @@
+# Especialidad — sangre y defensas y del cuerpo
+
+**Fuente**: `/Users/abner/Downloads/S3/honors_pdf/sangre_y_defensas_y_del_cuerpo.pdf`
+**Texto extraído**: `/Users/abner/Documents/development/sacdia/docs/working/honors-especialidades/raw/sangre-y-defensas-y-del-cuerpo.txt`
+**Nivel detectado**: 2
+**Cantidad de requisitos detectados**: 17
+
+> Nota: extracción automática preliminar desde la capa de texto del PDF. Requiere revisión humana antes de cualquier carga a base de datos.
+
+## Requisitos detectados
+
+1. Tener la especialidad de Vida microscópica.
+2. Nombrar los 2 componentes principales de la sangre. ¿Cuál es el porcentaje normal de cada uno en la sangre? Componentes Porcentaje 1. 2.
+3. Ser capaz de dibujar y nombrar las 7 clases de células sanguíneas e indicar qué hacen cada uno de ellos. 1. 5. 2. 6. 3. 7.
+4. 4. Observar alguna sangre humana bajo el microscopio. Contar 100 glóbulos blancos de la sangre y dibujar un gráfico que muestra el número de cada uno de las 5 clases de glóbulos blancos que ha encontrado. Células sanguíneas 1. 2. 3. 4.
+5. Gráfico ¿Cuál es la clase más común? ¿Cuál es menos común? 5. Hacer al menos una de las siguientes actividades e informar sobre lo que observó: a. Observar como un profesional toma sangre del brazo de una persona. b. Con la ayuda de una persona con experiencia, observar la sangre que fluye a través de algunos capilares (ya sea en cinta de video o en un organismo, como la mejilla de un hámster, la piel de una rana o la cola de un pez de colores). c. Visitar un laboratorio médico, donde se realizan análisis de sangre. d. Visitar un banco de sangre.
+6. ¿Qué 2 gases son transportados por los glóbulos rojos? 1. 2. Explicar por qué la sangre aparece de color azul/verde en sus venas, pero si se corta, la sangre que sale es de color rojo. Explicar por qué la falta de hierro en su dieta puede hacer que tenga sangre de color amarillento.
+7. Explicar cómo la sangre se coagula cuando se lesiona. ¿Cómo los típicos «primeros auxilios» ayudan en este proceso?
+8. ¿Qué significa ser un donante de sangre? Si es posible, conocer su propio tipo de sangre. ¿Qué tipos de sangre puede recibir usted? ¿Qué tipos de sangre no puede recibir usted? ¿Por qué?
+9. Mencionar 2 historias de la Biblia en la que se involucra la sangre. Historias 1. 2. A partir de lo que sabe sobre la sangre, ¿por qué cree que la Biblia utiliza la sangre como un símbolo del poder salvador de Dios?
+10. Hacer una lista de 10 hábitos de salud específicos que pueden ayudar al cuerpo a mantenerse sano y luchar contra la infección. Encontrar una referencia del Espíritu de Profecía que apoya cada uno de estos principios. Mantener un registro durante 3 semanas de la frecuencia con la que repite estos 10 hábitos. Hábitos Referencias 1. 2. 3. 4. 5. 6. 7. 8. 9. 10.
+11. Definir los siguientes términos relativos a las defensas del organismo: La inmunología La inflamación patógena Anticuerpos Células de memoria Inmunidad Vacuna Alergia La histamina El antihistamínico
+12. La hiedra y veneno de roble son plantas comúnmente encontradas por los Conquistadores. Ser capaz de identificarlas. Saber cómo evitar tener reacciones alérgicas a ellas. Explicar qué hacer si tiene una reacción alérgica con alguna de ellas.
+13. Hacer una lista del mayor número posible de las enfermedades infecciosas que usted ha tenido. Enfermedades ¿A cuáles está usted inmune? Explicar por qué o por qué no.
+14. A partir de su registro personal médico, hacer una lista de todas las vacunas que usted ha tenido y determinar junto con su médico cuando debe ser su próxima vacunación.
+15. Escribir o contar acerca de una enfermedad infecciosa (por lo menos 250 palabras).
+16. ¿Qué es el SIDA? ¿Cómo se propaga? ¿Existe una cura? ¿Por qué es tan devastador?
+17. Encontrar 3 referencias bíblicas que tienen que ver con la limpieza y el control o la propagación de enfermedad. 1. 2. 3.
+
+## Observaciones
+
+- Este archivo fue preparado para análisis posterior, no para carga directa a BD.

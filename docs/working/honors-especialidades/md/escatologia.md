@@ -1,0 +1,25 @@
+# Especialidad — escatologia
+
+**Fuente**: `/Users/abner/Downloads/S3/honors_pdf/escatologia.pdf`
+**Texto extraído**: `/Users/abner/Documents/development/sacdia/docs/working/honors-especialidades/raw/escatologia.txt`
+**Nivel detectado**: 2
+**Cantidad de requisitos detectados**: 10
+
+> Nota: extracción automática preliminar desde la capa de texto del PDF. Requiere revisión humana antes de cualquier carga a base de datos.
+
+## Requisitos detectados
+
+1. Leer Mateo 24:3–14 y hacer una investigación encontrando al menos 20 señales que indican la cercanía de la segunda venida de Cristo acontecidos en los últimos 5 años. 1. 11.
+2. 12.
+3. 13.
+4. 14.
+5. 15.
+6. 16.
+7. 17.
+8. 18.
+9. 19.
+10. 20. 2. Saber encontrar de memoria en la Biblia al menos 5 pasajes diferentes de las encontradas en esta especialidad que presentan promesas referentes a la segunda venida de Jesús. 1. 2. 3. 4. 5. 3. Representar una de las parábolas bíblicas que se tratan sobre la segunda venida de Jesús por medio de uno de los siguientes: música, diseño, poesía o dramatización. 4. Organizar un cronograma de un mínimo de una página relacionando los principales eventos finales que se culminarán con la segunda venida de Jesús. Incluir también lo que acontecerá en los 1.000 años siguientes. Crecimiento espiritual, actividades misioneras y herencia 5. Estudiar el relato bíblico de la ascensión de Jesús al Cielo, después de su resurrección. Hacer una lista de las similitudes y diferencias entre este evento y de su segunda venida. Similitudes Diferencias 6. Explicar la relación de los versículos «vengo como un ladrón» de Apocalipsis 16:15 con «y todo ojo le verá» de Apocalipsis 1:7. Apocalipsis 16:15 Apocalipsis 1:17 7. Leer los siguientes pasajes de la Biblia y del Espíritu de Profecía: a. 2 Timoteo 4:8 b. Apocalipsis 2:10 c. Mateo 24:36 d. Eventos de los Últimos Días, pág. 207 e. Primeros Escritos, pág. 15 y 16 f. El Conflicto de los Siglos, pág. 623–629 A partir del conocimiento adquirido en el este estudio y de los otros pasajes discutidos en esta especialidad, responder lo siguiente: a. ¿Por qué es posible afirmar que la segunda venida de Jesús está tan cerca? b. ¿Cómo se puede abreviar el regreso de Jesús? Crecimiento espiritual, actividades misioneras y herencia c. ¿Cuál debe ser el enfoque en relación a la corona celestial? ¿a la cantidad de estrellas? d. ¿Quién sabe el día y la hora del regreso de Jesús? e. ¿Cuáles serán las primeras señales que se verán en los cielos, momentos antes de la venida de Jesús?
+
+## Observaciones
+
+- Este archivo fue preparado para análisis posterior, no para carga directa a BD.

@@ -21,6 +21,14 @@
 
 **Metodología**: Clean Architecture
 
+### Baseline técnica comprobable (Batch P1.1)
+
+- **Backend**: `sacdia-backend/` con NestJS 11.x (`@nestjs/common` `^11.0.1`), Prisma 7.x (`@prisma/client` `^7.3.0`) y TypeScript 5.7.x.
+- **Admin web**: `sacdia-admin/` con Next.js 16.1.6, React 19.2.3, TypeScript 5.x, Tailwind CSS 4 y TanStack Query 5.x.
+- **Auth vigente**: Better Auth self-hosted en backend + JWT emitido/validado por backend; el admin trabaja con cookies HTTP-only hacia la API.
+- **Datos**: PostgreSQL como motor relacional; la autoridad estructural efectiva vive en `sacdia-backend/prisma/schema.prisma` hasta resincronizar la capa documental de `docs/database/`.
+- **Storage/archivos**: Cloudflare R2 como baseline global vigente; no usar Supabase Storage como supuesto por defecto.
+
 **Workspace actual**:
 
 - `sacdia-backend/` - backend NestJS + Prisma
@@ -35,7 +43,7 @@
 ### Framework Principal (Admin Panel)
 
 **Framework**: Next.js  
-**Versión**: 14+ (App Router)  
+**Versión**: 16.1.6 (App Router)  
 **Por qué lo elegimos**: SSR/SSG capabilities, mejor SEO, routing integrado, ideal para panel admin
 
 ### Lenguaje
@@ -62,7 +70,7 @@
 #### Routing (Admin Panel)
 
 - **Router**: Next.js App Router (built-in)
-- **Versión**: Next.js 14+
+- **Versión**: Next.js 16.1.6
 
 #### Data Fetching (Admin Panel)
 
@@ -88,13 +96,13 @@
 ### Framework Principal
 
 **Framework**: NestJS  
-**Versión**: 10.x  
+**Versión**: 11.x  
 **Por qué lo elegimos**: Arquitectura modular, TypeScript nativo, decorators, excelente para APIs enterprise, integración con Prisma
 
 ### Lenguaje
 
 **Lenguaje**: Node.js con TypeScript  
-**Versión**: Node 20.x LTS / TypeScript 5.x
+**Versión**: TypeScript 5.7.x (runtime Node no fijado en este documento)
 
 **Librerías NestJS**:
 
@@ -109,9 +117,9 @@
 #### Database Principal
 
 **Tipo**: Relacional  
-**Motor**: PostgreSQL (hosted en Supabase)  
+**Motor**: PostgreSQL  
 **Versión**: 15.x  
-**ORM/ODM**: Prisma (v5.x)
+**ORM/ODM**: Prisma (v7.x)
 
 **Prisma Features Usados**:
 
@@ -124,7 +132,7 @@
 - **Cache**: Redis (para sessions, rate limiting)
 - **Search**: Ninguno (usar PostgreSQL full-text search inicialmente)
 - **Queue**: Redis + Bull (para jobs asíncronos)
-- **Storage**: Supabase Storage (archivos/imágenes)
+- **Storage**: Cloudflare R2 (archivos/imágenes)
 
 ### APIs
 
@@ -133,12 +141,12 @@
 **REST API Details**:
 
 - Versionado: URL-based (`/api/v1/`)
-- Autenticación: JWT (tokens de Supabase Auth)
+- Autenticación: Better Auth self-hosted + JWT firmado/validado por backend
 - Response format: JSON
 - Status codes: Estándar HTTP
 - Rate limiting: Implementado con `@nestjs/throttler` (3 tiers)
 - Security headers: Helmet (CSP, HSTS, X-Frame-Options)
-- 2FA: Supabase MFA (TOTP)
+- 2FA: TOTP vía Better Auth / backend cuando aplique
 - Session management: Límite de 5 sesiones por usuario
 - Token blacklist: Revocación de JWT antes de expiración
 - IP whitelist: Para endpoints admin (soporte CIDR)
@@ -311,22 +319,16 @@ class User with _$User {
 
 ### Autenticación Flow
 
-**Provider**: **Supabase Auth**
-
-**Librerías**:
-
-- `supabase_flutter` 2.x - Cliente oficial de Supabase
+**Provider**: Backend SACDIA + Better Auth
 
 **Flow de Autenticación**:
 
 ```
-1. User Login/Register → Supabase Auth API
-2. Supabase Auth retorna JWT access token + refresh token
-3. Guardar tokens en flutter_secure_storage
-4. Dio Interceptor inyecta token en headers para llamadas a Backend NestJS:
-   Authorization: Bearer {jwt_token}
-5. Backend NestJS valida JWT (verifica signature con Supabase public key)
-6. Refresh automático cuando token expira (Dio interceptor detecta 401)
+1. Cliente autentica contra el backend SACDIA
+2. Better Auth resuelve la sesión/autenticación primaria
+3. El backend emite o valida JWT para consumo de API
+4. Los clientes almacenan credenciales según su plataforma y envían Authorization o cookies según corresponda
+5. El backend aplica guards y validación de permisos sobre cada request protegida
 ```
 
 **Providers Riverpod de Auth**:
@@ -455,8 +457,8 @@ dependencies:
 
 **Real-time**:
 
-- Supabase Realtime para subscripciones
-- WebSocket fallback si es necesario
+- Definir por feature según contrato runtime vigente
+- No asumir Supabase Realtime como baseline global
 
 **Geolocalización**:
 
@@ -526,10 +528,10 @@ dependencies:
 
 ### Hosting
 
-**Backend NestJS**: **Vercel Serverless Functions** (budget-friendly <$20/mes)
-**Admin Panel (Next.js)**: Vercel (mismo proyecto que backend)
-**Database**: Supabase (PostgreSQL hosted) - Free tier para hobby
-**Storage**: Supabase Storage - Free tier
+**Backend NestJS**: Render
+**Admin Panel (Next.js)**: Vercel
+**Database**: Neon PostgreSQL
+**Storage**: Cloudflare R2
 **Redis**: Upstash (Serverless Redis) - Free tier
 **Mobile App**: App Store + Google Play Store
 
@@ -591,10 +593,10 @@ jobs:
 
 | Servicio           | Propósito              | Provider                           | Alternativa        |
 | ------------------ | ---------------------- | ---------------------------------- | ------------------ |
-| Authentication     | Auth de usuarios       | **Supabase Auth**                  | Auth0, Firebase    |
+| Authentication     | Auth de usuarios       | **Better Auth**                    | Auth0, Firebase    |
 | Email              | Emails transaccionales | **Resend**                         | SendGrid, AWS SES  |
 | Payments           | Procesamiento          | **Stripe + PayPal + MercadoPago**  | Otro               |
-| Storage            | Archivos/imágenes      | **Supabase Storage**               | AWS S3, Cloudinary |
+| Storage            | Archivos/imágenes      | **Cloudflare R2**                  | AWS S3, Cloudinary |
 | Push Notifications | Notif. móviles         | **Firebase Cloud Messaging (FCM)** | OneSignal          |
 
 ### Opcionales / Nice-to-Have
@@ -612,10 +614,10 @@ jobs:
 
 ### Requisitos del Sistema
 
-**Node.js**: Versión 20.x LTS  
+**Node.js**: revisar runtime operativo del módulo antes de fijar versión exacta  
 **Flutter**: Versión 3.19+ (Stable)  
 **Docker**: Requerido para PostgreSQL y Redis locales  
-**Supabase CLI**: Para desarrollo local (opcional)
+**Prisma CLI**: Requerido para validar/generar cliente del backend
 
 ### Setup
 
@@ -868,47 +870,27 @@ Solo si tienes equipos completamente separados o necesitas control de acceso muy
 
 ---
 
-### Por qué Supabase
+### Por qué PostgreSQL + Better Auth + R2
 
 ✅ **Pros**:
 
-- **PostgreSQL real** (no NoSQL limitado como Firebase)
-- **Auth built-in** (menos código custom, mantiene estándares)
-- **Storage incluido** (S3-compatible)
-- **Real-time subscriptions** (WebSocket management handled)
-- **Free tier generosa** para hobby (~500MB DB, 1GB storage, 2GB bandwidth)
-- **BaaS pero con SQL completo** (queries complejas, joins, triggers)
-- **Supabase CLI** para development local
+- **PostgreSQL real** con Prisma como capa de acceso
+- **Better Auth** centraliza autenticación sin acoplar el runtime a Supabase Auth
+- **Cloudflare R2** desacopla storage del proveedor de base de datos
+- **Separación explícita** entre auth, datos y archivos reduce drift conceptual en la documentación
 
 ⚠️ **Trade-offs**:
 
-- Vendor lock-in moderado (pero PostgreSQL standard)
-- Menos control que DB self-hosted
+- Más piezas operativas que un BaaS todo-en-uno
+- La documentación debe evitar volver a fusionar auth, DB y storage como si fueran una sola plataforma
 
 ---
 
-### Por qué Vercel Serverless para Backend
+### Hosting actual verificado
 
-✅ **Pros para tu caso (< $20/mes)**:
-
-- **Hobby tier gratis** (100GB bandwidth, funciones ilimitadas)
-- **Auto-scaling** sin configuración
-- **Deploy automático** con GitHub (push to deploy)
-- **Edge functions** para mejor performance global
-- **Mismo provider** que Admin (simplifica billing y config)
-- **Monorepo support** nativo (backend + admin en un proyecto)
-
-⚠️ **Limitaciones**:
-
-- **Max 10s execution time** (suficiente para APIs REST, pero no para jobs largos)
-- **Cold starts** (~500ms primera request, luego
-
-rápido)
-
-- **No WebSockets persistentes** (usar Supabase Realtime en su lugar)
-- Si creces mucho, evaluar Railway/Render (pay-as-you-go)
-
-**Para tu MVP**: Perfecto. Si creces, migrar es sencillo (NestJS es portable).
+- **Backend**: Render
+- **Admin**: Vercel
+- **Observación**: este documento fija baseline de plataforma, no una evaluación aspiracional de hosts alternativos.
 
 ---
 
@@ -1010,7 +992,7 @@ Si estamos migrando de stack anterior:
 
 **Admin Panel**:
 
-- ✅ Next.js 14+ App Router (no Pages Router)
+- ✅ Next.js 16 App Router (no Pages Router)
 - ✅ shadcn/ui components (no Material-UI, no Chakra)
 - ✅ TailwindCSS (no CSS-in-JS)
 - ✅ React Hook Form + Zod (no Formik, no Yup)
@@ -1031,12 +1013,12 @@ Si estamos migrando de stack anterior:
 **SIEMPRE sigue este flujo**:
 
 ```
-1. User login → Supabase Auth API
-2. Get JWT token from Supabase
-3. Flutter: Store en flutter_secure_storage
+1. User login → backend SACDIA / Better Auth
+2. El backend resuelve la sesión y entrega credenciales válidas para la API
+3. Flutter: store en `flutter_secure_storage` cuando aplique
 4. Flutter: Dio interceptor inyecta token en headers
-5. Backend NestJS: Valida JWT (Supabase public key)
-6. Backend: No crear custom auth, usar Supabase tokens
+5. Backend NestJS: valida JWT/claims propios del runtime vigente
+6. No asumir Supabase Auth ni claves públicas de Supabase como contrato base
 ```
 
 ❌ **NO implementes**:

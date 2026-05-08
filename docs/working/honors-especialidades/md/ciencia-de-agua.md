@@ -1,0 +1,29 @@
+# Especialidad — ciencia de agua
+
+**Fuente**: `/Users/abner/Downloads/S3/honors_pdf/ciencia_de_agua.pdf`
+**Texto extraído**: `/Users/abner/Documents/development/sacdia/docs/working/honors-especialidades/raw/ciencia-de-agua.txt`
+**Nivel detectado**: 1
+**Cantidad de requisitos detectados**: 14
+
+> Nota: extracción automática preliminar desde la capa de texto del PDF. Requiere revisión humana antes de cualquier carga a base de datos.
+
+## Requisitos detectados
+
+1. Usando productos domésticos, construir un modelo tridimensional del átomo de agua. Explicar su composición química.
+2. Hacer una lista y describir (verbalmente u oralmente) algunas características del agua que lo distingue de casi todos los otros elementos.
+3. Por medio de fotografías, diagramas o cualquier otra forma de ayuda visual, ilustrar los 3 estados del agua.
+4. Describir, ilustrar o representar la diferencia entre las nubes, la nieve y la lluvia. Nubes Nieve Lluvia
+5. Por medio de fotografías o diagramas, identificar y hacer una lista de las 5 clases principales de precipitación. 1. 2. 3. 4. 5.
+6. ¿Cuál es el punto de ebullición y el punto de congelación del agua? Ebullición Congelación
+7. Trivia de agua: Las siguientes preguntas pueden ser utilizadas en diferentes formas para promover el aprendizaje y la comprensión sobre el agua. Las preguntas pueden ser adaptadas para juegos de concurso como Jeopardy, Bingo y Wheel of Fortune, entre muchos otros. La creatividad es altamente recomendada. a. ¿Cuál es el peso estimado de un galón (4 litros) de agua? b. ¿El cuerpo humano se compone cuánta cantidad de agua? c. ¿Cuál es el océano más grande en la tierra? d. ¿Cuál es el lago más grande del mundo? e. ¿Cuál es el lago más grande de Norteamérica? f. ¿Puede el sonido viajar más rápido por el agua o el aire? g. ¿Cuál es el punto más profundo en los océanos del mundo? h. ¿Cuál es el río más largo en la tierra? i. ¿Por cuánto tiempo puede una persona sobrevivir sin agua? j. ¿Qué hace que el agua endurezca? k. ¿Qué usa la mayor cantidad de agua en los hogares? l. ¿Cuál es la palabra que se usa para describir la cantidad de vapor de agua en el aire? m. ¿Cuál es el nombre del canal que une el Océano Pacífico con el Océano Atlántico? n. ¿Cuál conduce el calor más eficientemente, el agua o el aire? o. ¿Cuánta agua se necesita beber cada día? p. ¿Qué químico se añade al agua para matar los gérmenes dañinos? q. ¿Cuántos galones / litros de agua se usan en una ducha de cinco minutos? r. ¿Cuál es el río navegable más largo en su país? s. V o F: El agua es a menudo llamado el solvente universal porque muchas cosas se pueden disolver en ella.
+8. ¿Cuánto de la tierra está cubierta por agua?
+9. ¿Qué cantidad de agua de la tierra es agua dulce?
+10. ¿Dónde se encuentra el agua en la tierra?
+11. Seleccionar 3 de los siguientes y discutir al menos una manera que se usa el agua. Agricultura Lavar Beber Extinción de incendios Transporte
+12. ¿Qué es un cuerpo de agua? Por medio de fotografías, diagramas o dibujos, ser capaz de ilustrar los siguientes cuerpos de agua, nombrando a uno que se puede encontrar en su ciudad, condado o estado, si es posible. a. Río b. Lago c. Mar d. Océano e. Aguas rápidas f. Canal g. Arroyo h. Cuenca i. Glaciar j. Golfo k. Puerto l. Laguna m. Embalse
+13. Discutir con un grupo el contexto bíblico de por lo menos 3 de los siguientes textos como cada una se refiere a la importancia de agua en la Biblia. Génesis 1:20 Éxodo 14:21 Mateo 28:19 Juan 3:5 Juan 4:14 Apocalipsis 22:1
+14. Demostrar una técnica que se puede usar para convertir el agua salada en agua potable.
+
+## Observaciones
+
+- Este archivo fue preparado para análisis posterior, no para carga directa a BD.

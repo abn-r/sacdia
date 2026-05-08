@@ -1,0 +1,26 @@
+# Especialidad — optica
+
+**Fuente**: `/Users/abner/Downloads/S3/honors_pdf/optica.pdf`
+**Texto extraído**: `/Users/abner/Documents/development/sacdia/docs/working/honors-especialidades/raw/optica.txt`
+**Nivel detectado**: 2
+**Cantidad de requisitos detectados**: 11
+
+> Nota: extracción automática preliminar desde la capa de texto del PDF. Requiere revisión humana antes de cualquier carga a base de datos.
+
+## Requisitos detectados
+
+1. Definir y/o dibujar un diagrama de lo siguiente: Longitud focal Lente positivo Lente negativo Dos clases de distorsión Color longitudinal Color lateral Aberración esférica Lente acromática Refracción de la luz
+2. Explicar cómo se comporta la luz cuando choca o atraviesa agua, aceite, feldespato y un espejo. Agua Aceite Feldespato Un espejo
+3. Nombrar y dibujar diagramas de 3 clases de lentes positivas y 3 de lentes negativos. Positivas 1. 2. 3. Negativos 1. 2. 3.
+4. ¿Cuál debe ser la mínima distancia de la fuente de luz de un lente cuando se prueba la longitud focal?
+5. Encontrar la longitud focal de al menos 4 lentes, uno debe ser una lente negativa. 1. 3. 2. 4.
+6. Explicar por medio de un diagrama por qué una imagen positiva de un lente hace que una imagen se vea invertida.
+7. Mostrar con diagrama cómo funciona un prisma. Mencionar los ángulos que los colores aparecen y desaparecen.
+8. Demostrar lo que ocurre cuando la luz golpea en un vidrio de un solo sentido (opaco o semitransparente).
+9. Construir un instrumento óptico usando espejos o lentes, como un periscopio, una diapositiva o proyector de opacos o un simple telescopio.
+10. Explicar qué entiende por el término 6x35 y 7x50 tal como se aplica a los prismáticos/binoculares.
+11. Definir el término «f/parada», tal como se utiliza en relación con las cámaras. ¿Qué significa que un lente es rápido o lento? ¿Un f/8.5 es un lente más rápido o más lento que un lente f/8?
+
+## Observaciones
+
+- Este archivo fue preparado para análisis posterior, no para carga directa a BD.

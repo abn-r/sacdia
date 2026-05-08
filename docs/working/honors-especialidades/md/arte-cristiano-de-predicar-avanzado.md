@@ -1,0 +1,23 @@
+# Especialidad — arte cristiano de predicar avanzado
+
+**Fuente**: `/Users/abner/Downloads/S3/honors_pdf/arte_cristiano_de_predicar_avanzado.pdf`
+**Texto extraído**: `/Users/abner/Documents/development/sacdia/docs/working/honors-especialidades/raw/arte-cristiano-de-predicar-avanzado.txt`
+**Nivel detectado**: 3
+**Cantidad de requisitos detectados**: 8
+
+> Nota: extracción automática preliminar desde la capa de texto del PDF. Requiere revisión humana antes de cualquier carga a base de datos.
+
+## Requisitos detectados
+
+1. Tener la especialidad de Arte cristiano de predicar.
+2. Examinar dos o más versiones populares en su idioma o área. Incluir: a. Determinar si son traducciones/versiones formales, dinámicas o paráfrasis. b. Descubrir si estas Biblias fueron traducidas por un comité o por un individuo. c. Evaluar su exactitud, confiabilidad y legibilidad. Responder: d. Descubrir cuáles son los idiomas bíblicos originales. ¿Cuál es la versión que cree que es más fiel al original bíblico? ¿Por qué? e. Citar por lo menos tres versículos que difieren grandemente en sentido en las versiones investigadas. Procurar saber cuál es la traducción más fiel al texto original bíblico. 1. 2.
+3. Traducción más fiel 3. Crear una pequeña colección de 25 sermones cristianos, organizados en formato de un folleto: a. 10 de ellos deben ser de su autoría. b. Los demás (15) pueden ser por otros autores. c. Los sermones deben estar agrupados en las siguientes categorías: i. Salvación ii. Vida cristiana / santificación iii. El regreso de Cristo iv. Ley de Dios / Mandamientos Crecimiento espiritual, actividades misioneras y herencia
+4. Predicar al menos cinco de los sermones (compilados en el requisito anterior), usando recursos audiovisuales o su creatividad. Fechas de predicación
+5. Tener una colección de por lo menos 15 devocionales cortas (5-10 minutos) y usar por lo menos cinco de ellos en lugares públicos (iglesia, grupo pequeño, Escuela Sabática, reunión del club, etc.).
+6. Hacer una de las siguientes actividades: a. Presentar una serie de estudios bíblicos (por lo menos 10 presentaciones) a un grupo de personas reunidas en la iglesia, en una clase bíblica o serie de evangelismo bíblico. b. Estar en la lista de predicaciones de su iglesia durante un año, y predicar por lo menos diez veces en todos los cultos de la iglesia: viernes, sábado y durante la semana. Fechas de predicación c. Ser responsable por un período de por lo menos seis meses de la parte de predicación bíblica en un pequeño grupo. Fechas de predicación
+7. Seleccionar dos de los siguientes y leer un libro en cada área escogida. Citar la bibliografía para el instructor: a. Arte de predicación bíblica b. Uso de ilustraciones en sermones cristianos c. Biografía de un gran evangelista o predicador d. Uso de concordancia y referencias bíblicas Crecimiento espiritual, actividades misioneras y herencia
+8. Tener una Biblia con referencias y concordancia (preferiblemente anotada). Demostrar al instructor o asesor que puede manejarlo de la manera correcta.
+
+## Observaciones
+
+- Este archivo fue preparado para análisis posterior, no para carga directa a BD.

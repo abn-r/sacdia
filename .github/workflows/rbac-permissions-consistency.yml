@@ -1,0 +1,56 @@
+name: RBAC Permissions Consistency
+
+on:
+  push:
+    branches: [main, development]
+    paths:
+      - 'scripts/verify-permissions-consistency.mjs'
+      - '.github/workflows/rbac-permissions-consistency.yml'
+  pull_request:
+    paths:
+      - 'scripts/verify-permissions-consistency.mjs'
+      - '.github/workflows/rbac-permissions-consistency.yml'
+  schedule:
+    - cron: '0 10 * * 1'
+  workflow_dispatch:
+
+jobs:
+  verify-permissions:
+    name: Verify admin ↔ backend seed consistency
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout monorepo
+        uses: actions/checkout@v4
+        with:
+          path: sacdia
+
+      - name: Checkout sacdia-backend
+        uses: actions/checkout@v4
+        with:
+          repository: abn-r/sacdia-backend
+          ref: development
+          path: sacdia/sacdia-backend
+          token: ${{ secrets.CROSS_REPO_TOKEN }}
+          sparse-checkout: prisma/seeds/permissions.seed.sql
+          sparse-checkout-cone-mode: false
+
+      - name: Checkout sacdia-admin
+        uses: actions/checkout@v4
+        with:
+          repository: abn-r/sacdia-admin
+          ref: development
+          path: sacdia/sacdia-admin
+          token: ${{ secrets.CROSS_REPO_TOKEN }}
+          sparse-checkout: |
+            src/components/layout/nav-config.ts
+            src/lib/auth/permissions.ts
+          sparse-checkout-cone-mode: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run permissions consistency check (strict)
+        working-directory: sacdia
+        run: node scripts/verify-permissions-consistency.mjs --strict

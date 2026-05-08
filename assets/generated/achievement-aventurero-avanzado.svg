@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Aventurero Avanzado">
+  <title>Aventurero Avanzado</title>
+  <desc>Flat matte engraved achievement badge. Transparent canvas, dark circle #1C1C1E, accent #B8C5D0.</desc>
+  <circle cx="256" cy="256" r="220" fill="#1C1C1E"/>
+  <circle cx="256" cy="256" r="204" fill="none" stroke="#B8C5D0" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="256" cy="256" r="170" fill="none" stroke="#B8C5D0" stroke-width="3" stroke-linecap="round" opacity="0.38"/>
+  <polyline points="232,384 256,404 280,384" fill="none" stroke="#B8C5D0" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>
+  <polygon points="178.0,230.0 256.0,342.0 334.0,230.0" fill="none" stroke="#B8C5D0" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <line x1="178.0" y1="230.0" x2="256.0" y2="290.0" stroke="#B8C5D0" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <line x1="334.0" y1="230.0" x2="256.0" y2="290.0" stroke="#B8C5D0" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <ellipse cx="256" cy="298.0" rx="20.0" ry="16.0" fill="none" stroke="#B8C5D0" stroke-width="6" stroke-linecap="round"/>
+  <polygon points="256.0,124.0 260.76106054356904,135.44696234556292 273.11901729331277,136.43769410125094 263.70355778199075,144.50303765443707 266.5801345412645,156.56230589874906 256.0,150.1 245.41986545873547,156.56230589874906 248.29644221800925,144.50303765443707 238.88098270668723,136.43769410125094 251.23893945643096,135.44696234556292" fill="none" stroke="#B8C5D0" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <polygon points="216.0,170.0 220.76106054356904,181.44696234556292 233.11901729331277,182.43769410125094 223.70355778199075,190.50303765443707 226.58013454126453,202.56230589874906 216.0,196.1 205.41986545873547,202.56230589874906 208.29644221800925,190.50303765443707 198.88098270668723,182.43769410125094 211.23893945643096,181.44696234556292" fill="none" stroke="#B8C5D0" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <polygon points="296.0,170.0 300.76106054356904,181.44696234556292 313.11901729331277,182.43769410125094 303.70355778199075,190.50303765443707 306.5801345412645,202.56230589874906 296.0,196.1 285.4198654587355,202.56230589874906 288.29644221800925,190.50303765443707 278.88098270668723,182.43769410125094 291.23893945643096,181.44696234556292" fill="none" stroke="#B8C5D0" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

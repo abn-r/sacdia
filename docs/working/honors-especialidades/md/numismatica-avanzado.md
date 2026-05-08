@@ -1,0 +1,21 @@
+# Especialidad — numismatica avanzado
+
+**Fuente**: `/Users/abner/Downloads/S3/honors_pdf/numismatica_avanzado.pdf`
+**Texto extraído**: `/Users/abner/Documents/development/sacdia/docs/working/honors-especialidades/raw/numismatica-avanzado.txt`
+**Nivel detectado**: 3
+**Cantidad de requisitos detectados**: 6
+
+> Nota: extracción automática preliminar desde la capa de texto del PDF. Requiere revisión humana antes de cualquier carga a base de datos.
+
+## Requisitos detectados
+
+1. Tener la especialidad de Numismática.
+2. Seleccionar una moneda o una nota de su colección y presentar una exposición oral o por escrito sobre el informe histórico o de otra índole de importancia, de las personas, sitios, temas o símbolos que se encuentran en ambos lados.
+3. ¿Cuáles son las leyes relativas a la falsificación de su país y qué dispositivos se utilizan en la moneda de su nación para prevenirlo?
+4. Asistir a una reunión de un club local de monedas e informar sobre su experiencia. Posibles temas a considerar: a. Nivel de especialización de los miembros como se han demostrado de presentaciones y diálogos. b. Promedio general de edad de los asistentes. c. Las ideas que podrían ayudar al club a ampliar su interés de coleccionar para un público más amplio. d. Cómo es amigable la organización con los recién llegados. e. Sugerencias sobre cómo estas personas podrían ser alcanzados con el evangelio a través de una manera que les resultaría atractivo.
+5. Seleccionar una de las 3 categorías de su colección conforme a lo dispuesto en los requisitos de la especialidad de Numismática números 7 y 8, y aumentar su colección para incluir 2 veces el número total de muestras.
+6. Añadir a su colección al menos uno de los inusuales (extraño o curioso) casos acerca de las formas aprendidas en el requisito 1 de la especialidad de Numismática que tiene en archivo de la especialidad, por lo menos un párrafo que resuma cómo, cuándo y dónde éste objeto fue utilizado como moneda.
+
+## Observaciones
+
+- Este archivo fue preparado para análisis posterior, no para carga directa a BD.
