@@ -8,7 +8,7 @@
 > Base URL: `/api/v1`
 
 **Estado**: ACTIVE
-**Actualizado**: 2026-04-29 (8.4-A: member-rankings, section-rankings, member-ranking-weights, award-categories scope extension)
+**Actualizado**: 2026-05-06 (auth security hardening: MFA perimeter, RBAC protected roles, password reauth)
 **Total endpoints**: 341
 
 ## Lectura Rápida
@@ -27,7 +27,7 @@
 | GET | `/api/v1/auth/me` | JWT | - | Obtener perfil del usuario autenticado | `src/auth/auth.controller.ts` |
 | DELETE | `/api/v1/auth/me` | JWT | - | Eliminar cuenta (Apple 5.1.1v). Body: `{ password }`. Rate limit 1/h. Soft-delete + PII anonimizado + sesiones revocadas + FCM desactivado | `src/auth/auth.controller.ts` |
 | PATCH | `/api/v1/auth/me/context` | JWT | - | Cambiar contexto activo de club/instancia | `src/auth/auth.controller.ts` |
-| POST | `/api/v1/auth/update-password` | JWT | - | Actualizar la contraseña del usuario autenticado | `src/auth/auth.controller.ts` |
+| POST | `/api/v1/auth/update-password` | JWT | - | Actualizar la contraseña del usuario autenticado. Body: `{ currentPassword, password }`. Requiere JWT `aal2` si el usuario tiene MFA activo. Tras éxito revoca sesiones BA y blacklistea JWTs del usuario | `src/auth/auth.controller.ts` |
 | POST | `/api/v1/auth/verify-email/send` | JWT | - | Enviar email de verificación al usuario autenticado | `src/auth/auth.controller.ts` |
 | POST | `/api/v1/auth/verify-email/confirm` | Public | - | Confirmar verificación de email con token | `src/auth/auth.controller.ts` |
 | POST | `/api/v1/auth/mfa/enroll` | JWT | - | Iniciar enrolamiento de 2FA | `src/auth/mfa.controller.ts` |
@@ -70,7 +70,10 @@
 - `POST /api/v1/auth/oauth/callback` finaliza el flujo OAuth del lado SACDIA después de que Better Auth resolvió su callback interno `GET /api/auth/callback/{provider}`.
 - El body de `POST /api/v1/auth/oauth/callback` usa `session_token`, `provider` y `redirect_uri?`.
 - `POST /api/v1/auth/mfa/verify` canjea un JWT `aal1` (`mfa_pending: true`) por un nuevo `accessToken` `aal2`.
+- `POST /api/v1/auth/update-password` requiere `currentPassword` y `password`. Es self-service: valida la contraseña actual antes de cambiar el hash, y no comparte el flujo admin de reset. Si el usuario tiene TOTP activo, `JwtAuthGuard` rechaza tokens `mfa_pending: true`, por lo que el cambio exige JWT `aal2`.
+- MFA se aplica en `JwtAuthGuard`: cualquier endpoint protegido con JWT rechaza `mfa_pending: true` salvo rutas/clases marcadas con `@SkipMfaCheck()`. `POST /auth/mfa/verify` está exceptuado para permitir el canje `aal1` → `aal2`.
 - **Sessions (2026-04)**: JWTs ahora incluyen claim `sid` (BA session row UUID). `GET /auth/sessions` usa `sid` para marcar `is_current`. Tokens anteriores a este cambio no tienen `sid` — `is_current` será false para todas las sesiones. La tabla usada es `sessions` (Prisma model `session`, BA schema). `DELETE /auth/sessions/:id` devuelve 204. `DELETE /auth/sessions` devuelve 200 con `{ revoked_count }`. El endpoint `POST /auth/mfa/verify` preserva el claim `sid` del token aal1 en el token aal2 resultante.
+- **MFA session assurance (2026-05)**: al verificar TOTP con un JWT que tiene claim `sid`, el backend guarda una garantía server-side en `verifications` con `identifier = mfa-session:{sessionId}`, `value = userId` y `expiresAt = sessions.expires_at`. `POST /auth/refresh` emite `aal2` solo si esa garantía existe y no expiró; si no, emite `aal1` con `mfa_pending: true`. Tokens legacy sin `sid` pueden verificar TOTP, pero no preservan assurance en refresh.
 
 ## users
 
