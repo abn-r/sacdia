@@ -8,8 +8,8 @@
 > Base URL: `/api/v1`
 
 **Estado**: ACTIVE
-**Actualizado**: 2026-04-28 (8.4-C extended institutional rankings)
-**Total endpoints**: 340
+**Actualizado**: 2026-05-06 (auth security hardening: MFA perimeter, RBAC protected roles, password reauth)
+**Total endpoints**: 341
 
 ## Lectura Rápida
 
@@ -27,7 +27,7 @@
 | GET | `/api/v1/auth/me` | JWT | - | Obtener perfil del usuario autenticado | `src/auth/auth.controller.ts` |
 | DELETE | `/api/v1/auth/me` | JWT | - | Eliminar cuenta (Apple 5.1.1v). Body: `{ password }`. Rate limit 1/h. Soft-delete + PII anonimizado + sesiones revocadas + FCM desactivado | `src/auth/auth.controller.ts` |
 | PATCH | `/api/v1/auth/me/context` | JWT | - | Cambiar contexto activo de club/instancia | `src/auth/auth.controller.ts` |
-| POST | `/api/v1/auth/update-password` | JWT | - | Actualizar la contraseña del usuario autenticado | `src/auth/auth.controller.ts` |
+| POST | `/api/v1/auth/update-password` | JWT | - | Actualizar la contraseña del usuario autenticado. Body: `{ currentPassword, password }`. Requiere JWT `aal2` si el usuario tiene MFA activo. Tras éxito revoca sesiones BA y blacklistea JWTs del usuario | `src/auth/auth.controller.ts` |
 | POST | `/api/v1/auth/verify-email/send` | JWT | - | Enviar email de verificación al usuario autenticado | `src/auth/auth.controller.ts` |
 | POST | `/api/v1/auth/verify-email/confirm` | Public | - | Confirmar verificación de email con token | `src/auth/auth.controller.ts` |
 | POST | `/api/v1/auth/mfa/enroll` | JWT | - | Iniciar enrolamiento de 2FA | `src/auth/mfa.controller.ts` |
@@ -70,7 +70,10 @@
 - `POST /api/v1/auth/oauth/callback` finaliza el flujo OAuth del lado SACDIA después de que Better Auth resolvió su callback interno `GET /api/auth/callback/{provider}`.
 - El body de `POST /api/v1/auth/oauth/callback` usa `session_token`, `provider` y `redirect_uri?`.
 - `POST /api/v1/auth/mfa/verify` canjea un JWT `aal1` (`mfa_pending: true`) por un nuevo `accessToken` `aal2`.
+- `POST /api/v1/auth/update-password` requiere `currentPassword` y `password`. Es self-service: valida la contraseña actual antes de cambiar el hash, y no comparte el flujo admin de reset. Si el usuario tiene TOTP activo, `JwtAuthGuard` rechaza tokens `mfa_pending: true`, por lo que el cambio exige JWT `aal2`.
+- MFA se aplica en `JwtAuthGuard`: cualquier endpoint protegido con JWT rechaza `mfa_pending: true` salvo rutas/clases marcadas con `@SkipMfaCheck()`. `POST /auth/mfa/verify` está exceptuado para permitir el canje `aal1` → `aal2`.
 - **Sessions (2026-04)**: JWTs ahora incluyen claim `sid` (BA session row UUID). `GET /auth/sessions` usa `sid` para marcar `is_current`. Tokens anteriores a este cambio no tienen `sid` — `is_current` será false para todas las sesiones. La tabla usada es `sessions` (Prisma model `session`, BA schema). `DELETE /auth/sessions/:id` devuelve 204. `DELETE /auth/sessions` devuelve 200 con `{ revoked_count }`. El endpoint `POST /auth/mfa/verify` preserva el claim `sid` del token aal1 en el token aal2 resultante.
+- **MFA session assurance (2026-05)**: al verificar TOTP con un JWT que tiene claim `sid`, el backend guarda una garantía server-side en `verifications` con `identifier = mfa-session:{sessionId}`, `value = userId` y `expiresAt = sessions.expires_at`. `POST /auth/refresh` emite `aal2` solo si esa garantía existe y no expiró; si no, emite `aal1` con `mfa_pending: true`. Tokens legacy sin `sid` pueden verificar TOTP, pero no preservan assurance en refresh.
 
 ## users
 
@@ -568,10 +571,10 @@
 
 | Method | Path | Auth | Roles | Description | Source |
 |---|---|---|---|---|---|
-| POST | `/api/v1/award-categories` | JWT | `award_categories:create` | Crear categoría de premio | `src/annual-folders/award-categories.controller.ts` |
-| GET | `/api/v1/award-categories` | JWT | `award_categories:read` | Listar categorías de premios | `src/annual-folders/award-categories.controller.ts` |
+| POST | `/api/v1/award-categories` | JWT | `award_categories:create` | Crear categoría de premio. Body acepta `scope` (`@IsOptional @IsIn(['club','section','member'])`); default `club` | `src/annual-folders/award-categories.controller.ts` |
+| GET | `/api/v1/award-categories` | JWT | `award_categories:read` | Listar categorías de premios. Query `?scope=club\|section\|member` (8.4-A); error `AWARD_CATEGORY_SCOPE_INVALID` si scope inválido; ausente = sin filtro de scope (devuelve todos) — el default `'club'` es DB column-level, no query-level | `src/annual-folders/award-categories.controller.ts` |
 | GET | `/api/v1/award-categories/:categoryId` | JWT | `award_categories:read` | Obtener categoría de premio por ID | `src/annual-folders/award-categories.controller.ts` |
-| PATCH | `/api/v1/award-categories/:categoryId` | JWT | `award_categories:update` | Actualizar categoría de premio | `src/annual-folders/award-categories.controller.ts` |
+| PATCH | `/api/v1/award-categories/:categoryId` | JWT | `award_categories:update` | Actualizar categoría de premio. Body acepta `scope` (`@IsOptional @IsIn(...)`) | `src/annual-folders/award-categories.controller.ts` |
 | DELETE | `/api/v1/award-categories/:categoryId` | JWT | `award_categories:delete` | Soft delete de categoría de premio | `src/annual-folders/award-categories.controller.ts` |
 
 ## rankings
@@ -714,6 +717,40 @@ Permisos: `ranking_weights:read` (lectura) | `ranking_weights:write` (creación,
 | Method | Path | Auth | Roles | Description | Source |
 |---|---|---|---|---|---|
 | POST | `/api/v1/support/reports` | JWT | - | Enviar reporte de soporte (bug, feature_request, account, data_issue, performance, other). Body: `{ category, title<=120, description<=2000, deviceInfo{platform,osVersion,model,appVersion,buildNumber}, userContext?{route?,clubId?,sectionId?} }`. Rate limit 5/hora por usuario. Responde 201 `{ reportId, createdAt }` | `src/support/support.controller.ts` |
+
+## member-rankings (8.4-A)
+
+> Hybrid naming: rutas y permisos usan `member-rankings`; tabla física es `enrollment_rankings`. Ver `docs/canon/decisiones-clave.md` §22 y `docs/canon/runtime-rankings.md` §13.8.
+
+| Method | Path | Auth | Roles | Description | Source |
+|---|---|---|---|---|---|
+| GET | `/api/v1/member-rankings` | JWT | `member_rankings:read_global\|read_lf\|read_club\|read_section\|read_self` | Lista paginada con filtrado RBAC por scope. 5-tier waterfall: admin/super_admin > read_lf > read_club > read_section > read_self | `src/rankings/member-rankings/member-rankings.controller.ts` |
+| GET | `/api/v1/member-rankings/me` | JWT | `member_rankings:read_self` | Ranking propio del llamante; visibility-gated (kill-switch + scope check). Ruta estática declarada antes de `:enrollmentId` (engram #1883) | `src/rankings/member-rankings/member-rankings.controller.ts` |
+| GET | `/api/v1/member-rankings/:enrollmentId/breakdown` | JWT | `member_rankings:read_self\|read_section\|read_club\|read_lf\|read_global` | Drill-down señales individuales (class/investiture/camporee) para un enrollment. `ParseIntPipe` — `enrollment_id` es INTEGER | `src/rankings/member-rankings/member-rankings.controller.ts` |
+| POST | `/api/v1/member-rankings/recalculate?year_id=N&club_id=M` | JWT | `member_ranking_weights:write` (seeded to admin/super_admin only) | Disparar recálculo manual. Rate limit 5 min. Dual kill-switch validado (`ranking.recalculation_enabled` + `member_ranking.recalculation_enabled`). Error `400 RECALCULATION_DISABLED` si deshabilitado | `src/rankings/member-rankings/member-rankings.controller.ts` |
+
+## section-rankings (8.4-A)
+
+| Method | Path | Auth | Roles | Description | Source |
+|---|---|---|---|---|---|
+| GET | `/api/v1/section-rankings` | JWT | `section_rankings:read_global\|read_lf\|read_club` | Lista paginada de secciones con composite score. 3-tier RBAC waterfall | `src/rankings/section-rankings/section-rankings.controller.ts` |
+| GET | `/api/v1/section-rankings/:sectionId/members` | JWT | `section_rankings:read_global\|read_lf\|read_club` | Drill-down: miembros de la sección ordenados por rank_position. `ParseIntPipe` — `sectionId` es INTEGER | `src/rankings/section-rankings/section-rankings.controller.ts` |
+
+## member-ranking-weights (8.4-A)
+
+> Pesos de señales para composite score. Tabla física: `enrollment_ranking_weights`. Admin/super_admin only (GlobalRolesGuard + PermissionsGuard).
+
+| Method | Path | Auth | Roles | Description | Source |
+|---|---|---|---|---|---|
+| GET | `/api/v1/member-ranking-weights` | JWT | admin/super_admin + `member_ranking_weights:read` | Lista paginada; `is_default DESC` primero (fila global) | `src/rankings/member-ranking-weights/member-ranking-weights.controller.ts` |
+| POST | `/api/v1/member-ranking-weights` | JWT | admin/super_admin + `member_ranking_weights:write` | Crear override por (club_type_id, ecclesiastical_year_id). Valida sum=100 ±0.01. Errores: `WEIGHTS_SUM_INVALID`, `WEIGHTS_CONFLICT` | `src/rankings/member-ranking-weights/member-ranking-weights.controller.ts` |
+| GET | `/api/v1/member-ranking-weights/:id` | JWT | admin/super_admin + `member_ranking_weights:read` | Detalle por UUID. `ParseUUIDPipe` | `src/rankings/member-ranking-weights/member-ranking-weights.controller.ts` |
+| PATCH | `/api/v1/member-ranking-weights/:id` | JWT | admin/super_admin + `member_ranking_weights:write` | Actualizar pesos parcialmente; re-valida sum=100 ±0.01 post-merge | `src/rankings/member-ranking-weights/member-ranking-weights.controller.ts` |
+| DELETE | `/api/v1/member-ranking-weights/:id` | JWT | admin/super_admin + `member_ranking_weights:write` | Eliminar override. Guards `is_default=true`: error `DEFAULT_WEIGHTS_NOT_DELETABLE` | `src/rankings/member-ranking-weights/member-ranking-weights.controller.ts` |
+
+### Nota de actualización endpoint count (2026-04-29)
+
+El spec original proyectaba 340→351 endpoints. El conteo real al 2026-04-29 es **552 decoradores HTTP** en `sacdia-backend/src/` (medido vía `rg -c "@(Get|Post|Patch|Put|Delete)" --type ts`). La discrepancia se debe a que el doc estaba desactualizado antes de 8.4-A. El campo `Total endpoints` de este doc se mantiene como conteo editorial (endpoints canónicos documentados), no como conteo exhaustivo de decoradores (incluye helpers, overloads y handlers internos). Delta 8.4-A documentado: +11 endpoints nuevos (4 member-rankings + 2 section-rankings + 5 member-ranking-weights) + extensión scope en award-categories existentes.
 
 ## Nota de mantenimiento
 

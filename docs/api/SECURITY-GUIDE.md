@@ -75,9 +75,9 @@ Cada bloque se expone solo si el actor tiene `family:read` o el fallback legacy 
 
 | Característica  | Archivo                         | Descripción                                |
 | --------------- | ------------------------------- | ------------------------------------------ |
-| 2FA (TOTP)      | `mfa.service.ts`                | Autenticación de dos factores con Supabase |
-| Token Blacklist | `token-blacklist.service.ts`    | Revocación de tokens JWT                   |
-| Session Limits  | `session-management.service.ts` | Máximo 5 sesiones por usuario              |
+| 2FA (TOTP)      | `mfa.service.ts`                | TOTP propio sobre Better Auth + tabla `verifications` |
+| Token Blacklist | `token-blacklist.service.ts`    | Revocación de JWT SACDIA                   |
+| Session Limits  | Better Auth `sessions`          | Máximo de sesiones gestionado por BA/runtime |
 | IP Whitelist    | `ip-whitelist.guard.ts`         | Restricción de acceso admin por IP         |
 
 ---
@@ -87,26 +87,34 @@ Cada bloque se expone solo si el actor tiene `family:read` o el fallback legacy 
 ### 2FA (MFA) Endpoints
 
 ```typescript
-// Iniciar enrolamiento - genera QR code
-POST / v1 / auth / mfa / enroll;
-// Response: { factorId, qrCode, secret, uri }
+// Iniciar enrolamiento - genera URI TOTP + backup codes
+POST /v1/auth/mfa/enroll
+// Body: { password: string }
+// Response: { totpURI, backupCodes }
 
-// Verificar código y activar 2FA
-POST / v1 / auth / mfa / verify;
-// Body: { factorId: string, code: string }
-
-// Listar factores configurados
-GET / v1 / auth / mfa / factors;
-// Response: [{ id, friendlyName, factorType, status, createdAt }]
+// Verificar código TOTP durante login MFA
+POST /v1/auth/mfa/verify
+// Auth: JWT aal1 permitido por @SkipMfaCheck()
+// Body: { code: string }
+// Response: { verified: boolean, accessToken?: string }
 
 // Verificar estado de 2FA
-GET / v1 / auth / mfa / status;
-// Response: { mfaEnabled, currentLevel, nextLevel, factors }
+GET /v1/auth/mfa/status
+// Response: { enabled: boolean }
 
 // Deshabilitar 2FA
-DELETE / v1 / auth / mfa / unenroll;
-// Body: { factorId: string }
+DELETE /v1/auth/mfa/disable
+// Body: { password: string }
 ```
+
+### Modelo vigente: Better Auth + JWT SACDIA + TOTP assurance
+
+- Better Auth mantiene sesiones opacas en `sessions`; SACDIA firma JWT HS256 propios con `BETTER_AUTH_SECRET`.
+- Login con usuario que tiene TOTP activo emite JWT `aal1` con `mfa_pending: true`.
+- `JwtAuthGuard` es el perímetro real: rechaza `mfa_pending: true` en rutas protegidas salvo `@SkipMfaCheck()`.
+- `POST /auth/mfa/verify` puede ejecutarse con `aal1`; si el código es válido, emite JWT `aal2` y, cuando el JWT tiene `sid`, guarda assurance en `verifications` como `mfa-session:{sessionId}` hasta `sessions.expires_at`.
+- `POST /auth/refresh` revisa esa assurance para usuarios con TOTP: si existe y no expiró, emite `aal2`; si falta, vuelve a emitir `aal1` con `mfa_pending: true`.
+- `POST /auth/update-password` requiere `{ currentPassword, password }`, JWT `aal2` para usuarios MFA, revoca todas las sesiones BA del usuario y blacklistea JWTs por 8h.
 
 ### Sessions Endpoints
 
@@ -187,31 +195,20 @@ const stats = await sessionService.getSessionStats(userId);
 import { MfaService } from "./common/services/mfa.service";
 
 // Iniciar enrolamiento de 2FA
-const enrollment = await mfaService.enrollMfa(accessToken);
-// { factorId, qrCode, secret, uri }
+const enrollment = await mfaService.enrollMfa(userId, currentPassword);
+// { totpURI, backupCodes }
 
-// Verificar código y activar 2FA
-const verified = await mfaService.verifyAndActivateMfa(
-  accessToken,
-  factorId,
-  code,
-);
-
-// Verificar código durante login
-const isValid = await mfaService.verifyMfaCode(accessToken, factorId, code);
-
-// Listar factores configurados
-const factors = await mfaService.listFactors(accessToken);
+// Verificar código durante login MFA.
+// Si sessionId existe, se persiste assurance server-side para refresh.
+const verified = await mfaService.verifyMfa(userId, email, code, sessionId);
+// { verified: true, accessToken } | { verified: false }
 
 // Verificar si usuario tiene MFA habilitado
-const hasMfa = await mfaService.hasMfaEnabled(accessToken);
-
-// Obtener nivel de autenticación actual
-const level = await mfaService.getAuthenticatorAssuranceLevel(accessToken);
-// { currentLevel: 'aal1' | 'aal2', nextLevel }
+const status = await mfaService.getMfaStatus(userId);
+// { enabled: boolean }
 
 // Deshabilitar 2FA
-await mfaService.unenrollFactor(accessToken, factorId);
+await mfaService.disableMfa(userId, currentPassword);
 ```
 
 ### IP Whitelist Guard
@@ -290,8 +287,8 @@ src/
 │   │   └── sanitize.pipe.ts            # XSS sanitization
 │   └── services/
 │       ├── token-blacklist.service.ts  # Revocación de tokens
-│       ├── session-management.service.ts # Límites de sesiones
-│       └── mfa.service.ts              # 2FA con Supabase
+│       ├── token-blacklist.service.ts  # Revocación user-wide de JWTs
+│       └── mfa.service.ts              # TOTP + assurance por sesión BA
 ├── auth/
 │   ├── mfa.controller.ts               # Endpoints de 2FA
 │   ├── sessions.controller.ts          # Endpoints de sesiones

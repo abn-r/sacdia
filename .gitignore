@@ -23,6 +23,10 @@ sacdia-admin/
 
 # Local AI context files (personal, non-versioned)
 *.local.md
+EXECUTIVE-BRIEF.md
+
+# Local design assets (personal, non-versioned)
+docs/rive-base/
 
 # Ignore claude-mem context files (local only)
 .claude/
