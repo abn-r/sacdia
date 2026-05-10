@@ -6,6 +6,8 @@
 
 Sistema de calificacion para carpetas anuales de evidencias. Permite al campo local evaluar las secciones de evidencia de cada club, asignar puntos, y generar rankings por tipo de club con categorias de premios configurables para la premiacion de fin de ano.
 
+Las carpetas anuales conservan su propio flujo de carga de archivos e imagenes. No forman parte de la cola generica `EvidenceReview` (reservada para clases y honores); se cargan, envian, evalúan y confirman dentro de Annual Folders.
+
 ## Que existe (verificado contra codigo)
 
 ### Backend (NestJS)
@@ -136,6 +138,7 @@ Reopen (LF o union): VALIDATED | REJECTED | PREAPPROVED_LF ──> SUBMITTED
 - **Categorias sin FK de ano**: catalogo maestro que persiste entre anos eclesiasticos
 - **closing_date bloquea submissions pero NO evaluacion**: el campo puede evaluar despues del cierre
 - **Flutter backward-compatible**: campos nullable con fallbacks para backends sin actualizar
+- **Separacion de colas**: `EvidenceReview` no revisa carpetas anuales; Annual Folders usa endpoints propios por folder/seccion (`POST /annual-folders/:folderId/sections/:sectionId/evidences`, `submit`, `evaluate`, `confirm-union`)
 
 ## Gaps y pendientes
 

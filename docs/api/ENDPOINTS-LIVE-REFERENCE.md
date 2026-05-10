@@ -377,6 +377,9 @@
 | GET | `/api/v1/classes` | Public | - | Listar clases | `src/classes/classes.controller.ts` |
 | GET | `/api/v1/classes/:classId` | Public | - | Obtener clase por ID | `src/classes/classes.controller.ts` |
 | GET | `/api/v1/classes/:classId/modules` | Public | - | Obtener módulos de una clase | `src/classes/classes.controller.ts` |
+| POST | `/api/v1/users/:userId/classes/:classId/sections/:sectionId/submit` | JWT | `classes:submit_progress` | Enviar evidencia de sección de clase a validación. Query opcional `?enrollmentId=` para resolver el owner anual explícito. | `src/classes/classes.controller.ts` |
+| POST | `/api/v1/users/:userId/classes/:classId/sections/:sectionId/files` | JWT | `classes:submit_progress` | Subir archivo/imagen de evidencia de clase. Query opcional `?enrollmentId=` para resolver el owner anual explícito. | `src/classes/classes.controller.ts` |
+| DELETE | `/api/v1/users/:userId/classes/:classId/sections/:sectionId/files/:fileId` | JWT | `classes:submit_progress` | Borrar evidencia de clase. Query opcional `?enrollmentId=` para resolver el owner anual explícito. | `src/classes/classes.controller.ts` |
 
 ## club-roles
 
@@ -559,6 +562,17 @@
 | PATCH | `/api/v1/resource-categories/:id` | JWT | `resource_categories:update` | Actualizar categoría de recurso | `src/resources/resource-categories.controller.ts` |
 | DELETE | `/api/v1/resource-categories/:id` | JWT | `resource_categories:delete` | Soft delete de categoría (falla si tiene recursos activos) | `src/resources/resource-categories.controller.ts` |
 
+## annual-folders-core
+
+| Method | Path | Auth | Roles | Description | Source |
+|---|---|---|---|---|---|
+| POST | `/api/v1/annual-folders/enrollments/:enrollmentId` | JWT | `evidence_folders:manage` | Crear carpeta anual para una matrícula de sección. El template se resuelve por tipo de club + año + owner (Unión primero, Campo Local fallback). | `src/annual-folders/annual-folders.controller.ts` |
+| GET | `/api/v1/annual-folders/:folderId` | JWT | `evidence_folders:read` | Obtener carpeta anual con secciones, evidencias y estados canónicos. | `src/annual-folders/annual-folders.controller.ts` |
+| GET | `/api/v1/annual-folders/by-enrollment/:enrollmentId` | JWT | `evidence_folders:read` | Obtener carpeta anual por matrícula de sección. | `src/annual-folders/annual-folders.controller.ts` |
+| POST | `/api/v1/annual-folders/:folderId/sections/:sectionId/evidences` | JWT | `evidence_folders:submit` | Subir archivo/imagen de evidencia a una sección de carpeta anual. | `src/annual-folders/annual-folders.controller.ts` |
+| POST | `/api/v1/annual-folders/:folderId/sections/:sectionId/submit` | JWT | `evidence_folders:submit` | Enviar una sección de carpeta anual a revisión. Requiere al menos una evidencia. | `src/annual-folders/annual-folders.controller.ts` |
+| POST | `/api/v1/annual-folders/:folderId/submit` | JWT | `evidence_folders:submit` | Enviar carpeta anual completa a revisión. | `src/annual-folders/annual-folders.controller.ts` |
+
 ## annual-folders-evaluation
 
 | Method | Path | Auth | Roles | Description | Source |
@@ -648,12 +662,12 @@ Permisos: `ranking_weights:read` (lectura) | `ranking_weights:write` (creación,
 
 | Method | Path | Auth | Roles | Description | Source |
 |---|---|---|---|---|---|
-| GET | `/api/v1/evidence-review/pending` | JWT | admin, coordinator (GlobalRoles) | Listar evidencias pendientes de validación. Query: `type?` (folder\|class\|honor), `page?`, `limit?` | `src/evidence-review/evidence-review.controller.ts` |
+| GET | `/api/v1/evidence-review/pending` | JWT | admin, coordinator (GlobalRoles) | Listar evidencias pendientes de validación. Query: `type?` (class\|honor), `page?`, `limit?`. Carpetas anuales se revisan en Annual Folders. | `src/evidence-review/evidence-review.controller.ts` |
 | GET | `/api/v1/evidence-review/:type/:id` | JWT | admin, coordinator (GlobalRoles) | Detalle de evidencia con archivos adjuntos | `src/evidence-review/evidence-review.controller.ts` |
 | POST | `/api/v1/evidence-review/:type/:id/approve` | JWT | admin, coordinator (GlobalRoles) | Aprobar evidencia | `src/evidence-review/evidence-review.controller.ts` |
 | POST | `/api/v1/evidence-review/:type/:id/reject` | JWT | admin, coordinator (GlobalRoles) | Rechazar evidencia. Body: `{ reason: string }` (required) | `src/evidence-review/evidence-review.controller.ts` |
-| POST | `/api/v1/evidence-review/bulk-approve` | JWT | admin, coordinator (GlobalRoles) | Aprobación masiva (mismo tipo). Body: `{ type: string, ids: int[] }` | `src/evidence-review/evidence-review.controller.ts` |
-| POST | `/api/v1/evidence-review/bulk-reject` | JWT | admin, coordinator (GlobalRoles) | Rechazo masivo (mismo tipo). Body: `{ type: string, ids: int[], reason: string }` | `src/evidence-review/evidence-review.controller.ts` |
+| POST | `/api/v1/evidence-review/bulk-approve` | JWT | admin, coordinator (GlobalRoles) | Aprobación masiva (mismo tipo: `class` u `honor`). Body: `{ type: string, ids: int[] }` | `src/evidence-review/evidence-review.controller.ts` |
+| POST | `/api/v1/evidence-review/bulk-reject` | JWT | admin, coordinator (GlobalRoles) | Rechazo masivo (mismo tipo: `class` u `honor`). Body: `{ type: string, ids: int[], reason: string }` | `src/evidence-review/evidence-review.controller.ts` |
 | GET | `/api/v1/evidence-review/:type/:id/history` | JWT | admin, coordinator (GlobalRoles) | Historial de validación de evidencia | `src/evidence-review/evidence-review.controller.ts` |
 
 ## analytics
