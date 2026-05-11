@@ -1,35 +1,38 @@
 # Auditoría de Servicios Externos — SACDIA
 
-**Última actualización**: 2026-03-20
+**Última actualización**: 2026-05-11
 **Versión API**: v2.2.0
 
 ## Servicios Integrados
 
-### 1. Supabase Auth (Autenticación)
+### 1. Better Auth (Autenticación, self-hosted)
 
-**Propósito**: Identity provider para autenticación de usuarios vía JWT (ES256) y OAuth (Google, Apple).
+**Propósito**: Identity provider self-hosted dentro del backend NestJS. Autentica usuarios con email/password y OAuth (Google, Apple). SACDIA firma JWTs HS256 sobre la sesion validada por Better Auth (Option C).
 
 **Configuración**:
-- `SUPABASE_URL`: Base URL del proyecto Supabase
-- `SUPABASE_ANON_KEY`: Clave pública para operaciones de usuario (refresh, sign-up)
-- `SUPABASE_SERVICE_ROLE_KEY`: Clave privada para operaciones administrativas
-- `SUPABASE_JWT_SECRET`: Solo como fallback legacy HS256 (opcional)
+- `BETTER_AUTH_SECRET`: Secreto compartido para firmar HS256 JWTs emitidos por SACDIA
+- `BETTER_AUTH_BASE_URL`: Base URL del runtime de Better Auth (montado en NestJS)
+- OAuth providers (Google, Apple) configurados via Better Auth — credenciales por provider
 
 **Módulos que lo usan**:
-- `src/auth/*` — Validación JWT y OAuth
-- `src/common/guards/jwt-auth.guard.ts` — Guard de autenticación
+- `src/better-auth/*` — Runtime self-hosted (config, service, controller)
+- `src/auth/*` — AuthController, AuthService, OAuthService, JwtStrategy (HS256)
+- `src/auth/strategies/jwt.strategy.ts:41` — `secretOrKey: BETTER_AUTH_SECRET` (HS256)
+- `src/common/guards/jwt-auth.guard.ts` — Guard de autenticación basado en Passport JWT
 
 **Criticidad**: CRÍTICA
 **Fallback**: Sin autenticación, API inutilizable. No hay fallback.
 
+**Historico**: Migrado desde Supabase Auth en Wave 3 (2026-03 a 2026-04). Supabase ya no es identity provider — las variables `SUPABASE_*` no se usan en runtime auth actual.
+
 ---
 
-### 2. PostgreSQL (Supabase Database)
+### 2. PostgreSQL (Neon)
 
-**Propósito**: Base de datos relacional para todo el dominio de negocio (usuarios, clubs, honores, etc.).
+**Propósito**: Base de datos relacional para todo el dominio de negocio (usuarios, clubs, honores, etc.). Hosteado en Neon (3 branches: development / staging / production).
 
 **Configuración**:
-- `DATABASE_URL`: Cadena de conexión PostgreSQL nativa
+- `DATABASE_URL`: Cadena de conexión PostgreSQL nativa (Neon)
 - Gestión via Prisma ORM
 
 **Módulos que lo usan**:
@@ -122,8 +125,8 @@
 
 | Servicio | Estado | Tipo | Fallback |
 |----------|--------|------|----------|
-| Supabase Auth | Requerido | Crítico | Ninguno |
-| PostgreSQL | Requerido | Crítico | Ninguno |
+| Better Auth (self-hosted) | Requerido | Crítico | Ninguno |
+| PostgreSQL (Neon) | Requerido | Crítico | Ninguno |
 | Cloudflare R2 | Requerido | Importante | Error 500 |
 | Firebase FCM | Opcional | Opcional | Respuesta `{success: false}` |
 | Redis/Upstash | Recomendado | Importante | In-memory cache |
