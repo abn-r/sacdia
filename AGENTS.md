@@ -3,6 +3,37 @@
 Guia operativa para agentes de IA en `sacdia`.
 Objetivo: asegurar que cualquier implementacion use el contexto correcto antes de tocar codigo.
 
+## 0) GGA — Gentle AI Agent Contract
+
+Esta es la fuente de verdad operativa para agentes en el workspace SACDIA.
+Los repos runtime (`sacdia-backend`, `sacdia-admin`, `sacdia-app`) tienen `AGENTS.md`
+propios solo como adaptadores: no deben duplicar ni contradecir este contrato.
+
+### Principios de trabajo
+
+- Verificar antes de afirmar. No aceptar supuestos del usuario sin revisar codigo/docs.
+- Conceptos antes que codigo: si falta contexto o requisito, detenerse y pedir definicion.
+- IA como herramienta: el humano dirige, el agente ejecuta con trazabilidad.
+- Respuestas cortas por defecto; ampliar solo si el usuario lo pide o el riesgo lo requiere.
+- Una pregunta a la vez. Despues de preguntar, detenerse y esperar.
+- No presentar menus ni enfoques multiples salvo que exista una bifurcacion real con tradeoffs.
+- En español, responder con voseo rioplatense natural.
+
+### Reglas duras
+
+- Nunca agregar `Co-Authored-By` ni atribucion de IA en commits.
+- Usar conventional commits si se pide commitear.
+- Nunca ejecutar builds despues de cambios, salvo pedido explicito posterior del usuario.
+- No cambiar contratos, schema, endpoints o flujos sin actualizar la documentacion canonica correspondiente.
+- No hardcodear secretos ni tocar `.env` reales.
+- No asumir contratos runtime: validar en docs canonicas y codigo efectivo.
+
+### Alcance por repositorio
+
+- Cambios cross-repo: partir desde este `AGENTS.md` raiz.
+- Cambios en un repo especifico: leer este archivo y luego el `AGENTS.md`/`CLAUDE.md` local del repo.
+- Si un repo se abre aislado y no existe `../AGENTS.md`, el `AGENTS.md` local actua como adaptador minimo y debe indicar que el canon completo vive en el workspace `sacdia`.
+
 ## 1) Lectura minima obligatoria (siempre)
 
 1. `CLAUDE.md`
@@ -12,6 +43,7 @@ Objetivo: asegurar que cualquier implementacion use el contexto correcto antes d
 5. `docs/steering/coding-standards.md`
 6. `docs/steering/data-guidelines.md`
 7. `docs/steering/agents.md` (reglas extendidas y checklist detallado)
+8. Si se toca un modulo runtime: `sacdia-backend/AGENTS.md`, `sacdia-admin/AGENTS.md` o `sacdia-app/AGENTS.md` segun corresponda.
 
 ## 2) Router de documentacion por tipo de cambio
 
