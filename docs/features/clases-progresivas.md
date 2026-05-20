@@ -80,3 +80,9 @@ La culminacion exitosa de una clase lleva a la investidura, que es el acto insti
 - **Alta**: Resolver los endpoints de archivos por seccion que la app consume (POST/DELETE files) — verificar si existen o implementar
 - **Media**: Implementar gestion de clases en admin (al menos lectura enriquecida con progreso de miembros)
 - **Siguiente accion concreta**: Auditar si los endpoints POST/DELETE files por seccion de la app existen en el backend o son FANTASMA, y alinear
+
+## Carga masiva por certificados OCR
+
+Las clases aprobadas desde la carga masiva por certificado se aplican sobre `enrollments` y registran evento en `investiture_validation_history`. No se usa `users_classes` ni se crea una tabla paralela para clases importadas.
+
+La aprobacion de Campo Local puede marcar el enrollment como `FIELD_APPROVED` usando la fecha de completado/certificacion detectada o corregida por el miembro. La UI de registros importados debe mostrar una vista simplificada del comprobante, separada del flujo normal de checklist/progreso.
