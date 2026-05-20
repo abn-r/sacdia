@@ -1,8 +1,8 @@
 # Carga Masiva OCR de Comprobantes — Diseño
 
-**Fecha**: 2026-05-20  
-**Estado**: Diseño aprobado conversacionalmente  
-**Ámbito**: `sacdia-app`, `sacdia-admin`, `sacdia-backend`  
+**Fecha**: 2026-05-20
+**Estado**: Diseño aprobado conversacionalmente
+**Ámbito**: `sacdia-app`, `sacdia-admin`, `sacdia-backend`
 **Feature**: carga masiva iniciada por miembro para clases y especialidades/honores a partir de comprobantes o certificados.
 
 ---
