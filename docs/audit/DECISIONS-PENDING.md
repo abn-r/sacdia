@@ -73,34 +73,36 @@ Fuente: Reality Matrix + Canon verification
 
 ---
 
-## Endpoints FANTASMA detectados
+## Endpoints FANTASMA detectados — todos IMPLEMENTADOS (resincronizado 2026-05-11)
+
+> Nota historica: en Wave 0 estos endpoints eran consumidos por admin/app pero no existian en backend. Wave 1-2 (2026-03-18 a 2026-03-20) los implemento. La resincronizacion 2026-05-11 verifico cada uno contra `sacdia-backend/src` y confirmo que TODOS estan implementados. Ver tambien `REALITY-MATRIX.md` seccion "Endpoints FANTASMA (resueltos al 2026-03-20)".
 
 ### Consumidos por admin panel
 | Endpoint | Nota | Resolucion |
 |---|---|---|
-| `PATCH /admin/users/:userId/approval` | Usado en admin para aprobar usuarios | RESUELTO: pendiente de implementacion en backend. Documentado en features/auth.md |
-| `PATCH /admin/users/:userId` | Fallback de approval en admin | RESUELTO: pendiente de implementacion en backend |
-| `GET /admin/honor-categories` | CRUD completo en admin (5 endpoints) | RESUELTO: pendiente de implementacion en backend. Documentado en features/honores.md |
-| `POST /admin/honor-categories` | Idem | Idem |
-| `PATCH /admin/honor-categories/:id` | Idem | Idem |
-| `DELETE /admin/honor-categories/:id` | Idem | Idem |
-| `GET /admin/honor-categories/:id` | Idem | Idem |
-| `GET /admin/club-ideals` | Read-only en admin | RESUELTO: pendiente de implementacion en backend. Documentado en features/catalogos.md |
+| `PATCH /admin/users/:userId/approval` | Usado en admin para aprobar usuarios | RESUELTO: implementado en `sacdia-backend/src/admin/admin-users.controller.ts:136` (controller prefix `admin`) — verified 2026-05-11 |
+| `PATCH /admin/users/:userId` | Fallback de approval en admin | RESUELTO: implementado en `sacdia-backend/src/admin/admin-users.controller.ts:147` — verified 2026-05-11 |
+| `GET /admin/honor-categories` | CRUD completo en admin (5 endpoints) | RESUELTO: implementado en `sacdia-backend/src/admin/admin-reference.controller.ts:414` — verified 2026-05-11 |
+| `POST /admin/honor-categories` | Idem | RESUELTO: implementado en `sacdia-backend/src/admin/admin-reference.controller.ts:422` — verified 2026-05-11 |
+| `GET /admin/honor-categories/:id` | Idem | RESUELTO: implementado en `sacdia-backend/src/admin/admin-reference.controller.ts:436` — verified 2026-05-11 |
+| `PATCH /admin/honor-categories/:id` | Idem | RESUELTO: implementado en `sacdia-backend/src/admin/admin-reference.controller.ts:444` — verified 2026-05-11 |
+| `DELETE /admin/honor-categories/:id` | Idem | RESUELTO: implementado en `sacdia-backend/src/admin/admin-reference.controller.ts:460` — verified 2026-05-11 |
+| `GET /admin/club-ideals` | Read-only en admin | RESUELTO: implementado en `sacdia-backend/src/admin/admin-reference.controller.ts:298` (ademas POST:306, PATCH:321, DELETE:339) — verified 2026-05-11 |
 
 ### Consumidos por app movil
 | Endpoint | Nota | Resolucion |
 |---|---|---|
-| `POST /auth/update-password` | Llamado por app pero no existe en backend | RESUELTO: pendiente de implementacion en backend. Documentado en features/auth.md |
-| `GET /clubs/:clubId/sections/:sectionId/evidence-folder` | Evidence folder feature sin backend | RESUELTO: pendiente de implementacion. Naming canonico consolidado (2026-03-17). Documentado en features/carpetas-evidencias.md |
-| `POST /clubs/:clubId/sections/:sectionId/evidence-folder/sections/:efSectionId/submit` | Idem | Idem |
-| `POST /clubs/:clubId/sections/:sectionId/evidence-folder/sections/:efSectionId/files` | Idem | Idem |
-| `DELETE /clubs/:clubId/sections/:sectionId/evidence-folder/sections/:efSectionId/files/:fileId` | Idem | Idem |
-| `GET /clubs/:clubId/sections/:sectionId/members/insurance` | Insurance listing sin backend | RESUELTO: pendiente de implementacion. Seguros es canon de trayectoria. Documentado en features/gestion-seguros.md |
-| `GET /users/:memberId/insurance` | Insurance detail sin backend | Idem |
-| `POST /users/:memberId/insurance` | Create insurance sin backend | Idem |
-| `PATCH /insurance/:insuranceId` | Update insurance sin backend | Idem |
+| `POST /auth/update-password` | Llamado por app pero no existe en backend | RESUELTO: implementado en `sacdia-backend/src/auth/auth.controller.ts:236` (controller prefix `auth`) — verified 2026-05-11 |
+| `GET /club-sections/:sectionId/evidence-folder` | Evidence folder feature sin backend | RESUELTO: implementado en `sacdia-backend/src/folders/evidence-folder.controller.ts:46` (controller prefix `club-sections/:sectionId/evidence-folder`) — verified 2026-05-11. Nota: el path canonico en backend es `/club-sections/:sectionId/evidence-folder`, no `/clubs/:clubId/sections/:sectionId/evidence-folder` como la app usa historicamente; revisar contrato. |
+| `POST /club-sections/:sectionId/evidence-folder/sections/:efSectionId/submit` | Idem | RESUELTO: `sacdia-backend/src/folders/evidence-folder.controller.ts:65` — verified 2026-05-11 |
+| `POST /club-sections/:sectionId/evidence-folder/sections/:efSectionId/files` | Idem | RESUELTO: `sacdia-backend/src/folders/evidence-folder.controller.ts:91` — verified 2026-05-11 |
+| `DELETE /club-sections/:sectionId/evidence-folder/sections/:efSectionId/files/:fileId` | Idem | RESUELTO: `sacdia-backend/src/folders/evidence-folder.controller.ts:137` — verified 2026-05-11 |
+| `GET /clubs/:clubId/sections/:sectionId/members/insurance` | Insurance listing sin backend | RESUELTO: implementado en `sacdia-backend/src/insurance/insurance.controller.ts:58` (controller sin prefix, ruta absoluta) — verified 2026-05-11 |
+| `GET /users/:memberId/insurance` | Insurance detail sin backend | RESUELTO: `sacdia-backend/src/insurance/insurance.controller.ts:123` — verified 2026-05-11 |
+| `POST /users/:memberId/insurance` | Create insurance sin backend | RESUELTO: `sacdia-backend/src/insurance/insurance.controller.ts:134` — verified 2026-05-11 |
+| `PATCH /insurance/:insuranceId` | Update insurance sin backend | RESUELTO: `sacdia-backend/src/insurance/insurance.controller.ts:177` — verified 2026-05-11 |
 
-**Nota**: Ninguno de estos endpoints estaba en ENDPOINTS-LIVE-REFERENCE.md, por lo que no se removio nada de ese documento. El gap es entre lo que los clientes consumen y lo que el backend expone. Todos marcados como pendientes de implementacion en sus respectivos archivos de features.
+**Nota historica**: Estos endpoints fueron implementados durante Wave 1-2 (2026-03-18 a 2026-03-20) en commits 68af077, 8ceaf74, a90e910, f651b3f, 7eed6c8. REALITY-MATRIX.md ya los muestra como ALINEADO desde Wave 2; este documento estaba desactualizado hasta la resincronizacion del 2026-05-11.
 
 ---
 
@@ -308,3 +310,39 @@ La tabla `churches` propaga este error: usa `districlub_type_id` como FK hacia `
 - **Backend mitigación**: `d082d9e` — mappers con alias `district_id` en CatalogsService
 - **Admin mitigación**: `62786ee` — UI actualizada a consumir alias
 - **App mitigación**: `036ee2d` — Flutter datasources mapean alias
+
+---
+
+## Sync de realidad 2026-05-11
+
+Resincronizacion ejecutada por agente `docs/audit-sync-reality-2026-05-11`. Cada claim "FANTASMA" o "pendiente" fue reverificado contra `sacdia-backend/src` con `rg`. Resultado: TODOS los endpoints listados como pendientes en este documento estan implementados en backend desde Wave 1-2 (2026-03-18 a 2026-03-20). Este documento estaba desincronizado por ~2 meses.
+
+### Tabla resumen — verificaciones 2026-05-11
+
+| Claim original | Estado real 2026-05-11 | Evidencia (archivo:linea) |
+|---|---|---|
+| Supabase Auth como identity provider | OBSOLETO — Better Auth self-hosted | `sacdia-backend/src/auth/auth.module.ts:22-27`, `src/better-auth/`, `src/auth/strategies/jwt.strategy.ts:41` (HS256 con `BETTER_AUTH_SECRET`) |
+| `POST /auth/update-password` FANTASMA | IMPLEMENTADO | `src/auth/auth.controller.ts:236` |
+| `PATCH /admin/users/:userId/approval` FANTASMA | IMPLEMENTADO | `src/admin/admin-users.controller.ts:136` |
+| `PATCH /admin/users/:userId` FANTASMA | IMPLEMENTADO | `src/admin/admin-users.controller.ts:147` |
+| `GET /admin/honor-categories` FANTASMA | IMPLEMENTADO | `src/admin/admin-reference.controller.ts:414` |
+| `POST /admin/honor-categories` FANTASMA | IMPLEMENTADO | `src/admin/admin-reference.controller.ts:422` |
+| `GET /admin/honor-categories/:id` FANTASMA | IMPLEMENTADO | `src/admin/admin-reference.controller.ts:436` |
+| `PATCH /admin/honor-categories/:id` FANTASMA | IMPLEMENTADO | `src/admin/admin-reference.controller.ts:444` |
+| `DELETE /admin/honor-categories/:id` FANTASMA | IMPLEMENTADO | `src/admin/admin-reference.controller.ts:460` |
+| `GET /admin/club-ideals` FANTASMA | IMPLEMENTADO (+ POST/PATCH/DELETE) | `src/admin/admin-reference.controller.ts:298,306,321,339` |
+| `GET /clubs/:clubId/sections/:sectionId/evidence-folder` FANTASMA | IMPLEMENTADO bajo prefix `club-sections/:sectionId/evidence-folder` | `src/folders/evidence-folder.controller.ts:42,46` |
+| `POST .../evidence-folder/sections/:efSectionId/submit` FANTASMA | IMPLEMENTADO | `src/folders/evidence-folder.controller.ts:65` |
+| `POST .../evidence-folder/sections/:efSectionId/files` FANTASMA | IMPLEMENTADO | `src/folders/evidence-folder.controller.ts:91` |
+| `DELETE .../evidence-folder/sections/:efSectionId/files/:fileId` FANTASMA | IMPLEMENTADO | `src/folders/evidence-folder.controller.ts:137` |
+| `GET /clubs/:clubId/sections/:sectionId/members/insurance` FANTASMA | IMPLEMENTADO | `src/insurance/insurance.controller.ts:58` |
+| `GET /users/:memberId/insurance` FANTASMA | IMPLEMENTADO | `src/insurance/insurance.controller.ts:123` |
+| `POST /users/:memberId/insurance` FANTASMA | IMPLEMENTADO | `src/insurance/insurance.controller.ts:134` |
+| `PATCH /insurance/:insuranceId` FANTASMA | IMPLEMENTADO | `src/insurance/insurance.controller.ts:177` |
+
+### Observaciones
+
+- 17 endpoints listados como "pendientes de implementacion" estaban ya implementados. Movidos a "RESUELTO: implementado" con file:line.
+- Auth stack completo migrado de Supabase a Better Auth — `EXTERNAL-SERVICES-AUDIT.md` actualizado.
+- Hay un mismatch de path entre app (que llama `/clubs/:clubId/sections/:sectionId/evidence-folder`) y backend (que expone `/club-sections/:sectionId/evidence-folder`). Documentado en la fila correspondiente — requiere revision de contrato.
+- `REALITY-MATRIX.md` ya estaba sincronizado desde Wave 2 (mostraba estos endpoints como ALINEADO). Solo `DECISIONS-PENDING.md` y `EXTERNAL-SERVICES-AUDIT.md` estaban desincronizados.

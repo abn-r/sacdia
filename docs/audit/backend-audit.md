@@ -3,6 +3,17 @@ Fecha: 2026-03-14
 Fuente: sacdia-backend/ (NestJS + Prisma)
 Metodo: Scan automatico de codigo fuente
 
+> **AVISO DE SNAPSHOT HISTORICO (resincronizacion 2026-05-11)**
+>
+> Este documento es un snapshot Wave 0 (2026-03-14). Algunas integraciones aqui listadas YA NO REFLEJAN la realidad actual:
+> - **AuthModule** ya no contiene `SupabaseService` — fue reemplazado por `BetterAuthService` (`src/better-auth/`) en Wave 3. El archivo `src/common/supabase.service.ts` NO existe en el backend actual.
+> - **Integraciones Externas #1 "Supabase Auth"** es OBSOLETA — el identity provider actual es Better Auth self-hosted (HS256 JWT firmado con `BETTER_AUTH_SECRET`). Ver `docs/audit/EXTERNAL-SERVICES-AUDIT.md` (actualizado 2026-05-11).
+>
+> No se reescribe este snapshot — sirve como referencia historica. Para el estado actual canonico ver:
+> - `docs/api/ENDPOINTS-LIVE-REFERENCE.md` (runtime canonico)
+> - `docs/audit/REALITY-MATRIX.md` (matriz actualizada)
+> - `docs/audit/EXTERNAL-SERVICES-AUDIT.md` (integraciones actualizadas)
+
 ## Resumen
 - Endpoints: 198
 - Modelos: 72
