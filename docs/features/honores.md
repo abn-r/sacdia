@@ -143,3 +143,9 @@ Progreso por usuario por requisito.
 - **Alta**: Implementar endpoints `/admin/honor-categories` CRUD en backend — el admin ya los consume y falla silenciosamente
 - **Media**: Documentar los 4 endpoints SIN DOCS en ENDPOINTS-LIVE-REFERENCE.md
 - **Siguiente accion concreta**: Crear `AdminHonorCategoriesController` en backend con CRUD para honor_categories con GlobalRolesGuard (super_admin, admin)
+
+## Carga masiva por certificados OCR
+
+Los honores aprobados desde la carga masiva por certificado se aplican en la tabla existente `users_honors` y adjuntan el comprobante en `evidence_files.user_honor_id`. El flujo no crea una fuente paralela de especialidades: `certificate_bulk_import_*` conserva staging/auditoria y la verdad final sigue en `users_honors`.
+
+La validacion final la realiza Campo Local desde `sacdia-admin`; OCR solo precarga datos y el miembro confirma/corrige antes de enviar.

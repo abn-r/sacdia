@@ -670,6 +670,28 @@ Permisos: `ranking_weights:read` (lectura) | `ranking_weights:write` (creación,
 | POST | `/api/v1/evidence-review/bulk-reject` | JWT | admin, coordinator (GlobalRoles) | Rechazo masivo (mismo tipo: `class` u `honor`). Body: `{ type: string, ids: int[], reason: string }` | `src/evidence-review/evidence-review.controller.ts` |
 | GET | `/api/v1/evidence-review/:type/:id/history` | JWT | admin, coordinator (GlobalRoles) | Historial de validación de evidencia | `src/evidence-review/evidence-review.controller.ts` |
 
+## certificate-bulk-imports
+
+| Method | Path | Auth | Roles | Description | Source |
+|---|---|---|---|---|---|
+| POST | `/api/v1/certificate-bulk-imports` | JWT | member owner | Crear borrador de carga por certificado con archivos ya cargados/metadata. | `src/certificate-bulk-imports/certificate-bulk-imports.controller.ts` |
+| POST | `/api/v1/certificate-bulk-imports/:batchId/process-ocr` | JWT | member owner | Procesar OCR y crear filas editables. | `src/certificate-bulk-imports/certificate-bulk-imports.controller.ts` |
+| GET | `/api/v1/certificate-bulk-imports/:batchId` | JWT | member owner | Obtener detalle del lote propio. | `src/certificate-bulk-imports/certificate-bulk-imports.controller.ts` |
+| PATCH | `/api/v1/certificate-bulk-imports/:batchId/items/:itemId` | JWT | member owner | Corregir fila OCR. Body: `item_type`, `honor_id?`, `class_id?`, `completed_at?`, `mark_as_ready?`. | `src/certificate-bulk-imports/certificate-bulk-imports.controller.ts` |
+| POST | `/api/v1/certificate-bulk-imports/:batchId/submit` | JWT | member owner | Enviar lote a revision de Campo Local. Requiere filas completas. | `src/certificate-bulk-imports/certificate-bulk-imports.controller.ts` |
+| POST | `/api/v1/certificate-bulk-imports/:batchId/items/:itemId/resubmit` | JWT | member owner | Corregir y reenviar fila rechazada. | `src/certificate-bulk-imports/certificate-bulk-imports.controller.ts` |
+
+## admin-certificate-bulk-imports
+
+| Method | Path | Auth | Roles | Description | Source |
+|---|---|---|---|---|---|
+| GET | `/api/v1/admin/certificate-bulk-imports/pending` | JWT | super-admin, admin, assistant-admin, director-lf, assistant-lf | Listar lotes pendientes. Query: `page?`, `limit?`. Scope por `local_field_id` para LF. | `src/certificate-bulk-imports/admin-certificate-bulk-imports.controller.ts` |
+| GET | `/api/v1/admin/certificate-bulk-imports/:batchId` | JWT | super-admin, admin, assistant-admin, director-lf, assistant-lf | Detalle de lote para revision. | `src/certificate-bulk-imports/admin-certificate-bulk-imports.controller.ts` |
+| POST | `/api/v1/admin/certificate-bulk-imports/:batchId/approve` | JWT | super-admin, admin, assistant-admin, director-lf, assistant-lf | Aprobar filas reviewables del lote. Body opcional: `{ comment }`. | `src/certificate-bulk-imports/admin-certificate-bulk-imports.controller.ts` |
+| POST | `/api/v1/admin/certificate-bulk-imports/:batchId/reject` | JWT | super-admin, admin, assistant-admin, director-lf, assistant-lf | Rechazar lote y solicitar correccion. Body: `{ reason }`. | `src/certificate-bulk-imports/admin-certificate-bulk-imports.controller.ts` |
+| POST | `/api/v1/admin/certificate-bulk-imports/:batchId/items/:itemId/approve` | JWT | super-admin, admin, assistant-admin, director-lf, assistant-lf | Aprobar una fila y aplicar a `users_honors` o `enrollments`. Body opcional: `{ comment }`. | `src/certificate-bulk-imports/admin-certificate-bulk-imports.controller.ts` |
+| POST | `/api/v1/admin/certificate-bulk-imports/:batchId/items/:itemId/reject` | JWT | super-admin, admin, assistant-admin, director-lf, assistant-lf | Rechazar una fila. Body: `{ reason }`. | `src/certificate-bulk-imports/admin-certificate-bulk-imports.controller.ts` |
+
 ## analytics
 
 | Method | Path | Auth | Roles | Description | Source |
