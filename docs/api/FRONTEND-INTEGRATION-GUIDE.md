@@ -47,6 +47,15 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 ---
 
+## Actualizacion 2026-05-21 (Clases legacy y duración)
+
+El contrato frontend para clases progresivas incorpora clases legacy y duración configurable:
+
+- Admin debe enviar y leer en `/api/v1/admin/classes`: `available_from_year_id`, `available_until_year_id`, `min_duration_years`, `max_duration_years`.
+- `available_until_year_id = null` significa sin expiración para nuevas inscripciones. No usar años sentinel.
+- Mobile/Admin deben tratar `investiture_status = EXPIRED` como trayectoria histórica: mostrar progreso/registros, pero bloquear edición, subida de evidencias y envío a investidura.
+- El proceso manual usa `POST /api/v1/admin/classes/enrollments/expire-overdue`; ejecutar primero con `{ dry_run: true }` y pedir confirmación antes de `{ dry_run: false }`.
+
 ## Actualizacion 2026-02-17 (Admin Panel)
 
 Se agrego validacion operativa para frontend admin mediante smoke E2E en `sacdia-admin/scripts/e2e-smoke.mjs`.
