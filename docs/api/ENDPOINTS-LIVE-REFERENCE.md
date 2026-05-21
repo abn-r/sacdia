@@ -113,7 +113,7 @@
 | GET | `/api/v1/users/:userId/classes` | JWT | - | Obtener inscripciones del usuario | `src/classes/classes.controller.ts` |
 | GET | `/api/v1/users/:userId/classes/:classId/progress` | JWT | - | Obtener progreso anual del usuario en una clase (`?enrollmentId=` opcional) | `src/classes/classes.controller.ts` |
 | PATCH | `/api/v1/users/:userId/classes/:classId/progress` | JWT | - | Actualizar progreso anual de sección (`enrollment_id` opcional) | `src/classes/classes.controller.ts` |
-| POST | `/api/v1/users/:userId/classes/enroll` | JWT | - | Inscribir usuario en clase | `src/classes/classes.controller.ts` |
+| POST | `/api/v1/users/:userId/classes/enroll` | JWT | - | Inscribir usuario en clase; bloquea clases inactivas o fuera de ventana de disponibilidad por año eclesiástico. | `src/classes/classes.controller.ts` |
 | GET | `/api/v1/users/:userId/emergency-contacts` | JWT | - | Listar contactos de emergencia del usuario | `src/emergency-contacts/emergency-contacts.controller.ts` |
 | POST | `/api/v1/users/:userId/emergency-contacts` | JWT | `emergency_contacts:update` OR `users:update` (owner bypass) | Crear contacto de emergencia (máximo 5) | `src/emergency-contacts/emergency-contacts.controller.ts` |
 | DELETE | `/api/v1/users/:userId/emergency-contacts/:contactId` | JWT | - | Eliminar contacto de emergencia (soft delete) | `src/emergency-contacts/emergency-contacts.controller.ts` |
@@ -296,6 +296,10 @@
 | DELETE | `/api/v1/admin/unions/:unionId` | JWT | super_admin, admin | Soft delete union | `src/admin/admin-geography.controller.ts` |
 | PATCH | `/api/v1/admin/unions/:unionId` | JWT | super_admin, admin | Update union | `src/admin/admin-geography.controller.ts` |
 | POST | `/api/v1/admin/catalogs/cache/invalidate` | JWT | `catalogs:update` | Invalida manualmente todo el cache Redis de catálogos (14 keys). Graceful fallback si Redis no está disponible. | `src/admin/admin-cache.controller.ts` |
+| GET | `/api/v1/admin/classes` | JWT | `catalogs:read` | Listar clases para editor admin, incluyendo traducciones, disponibilidad y duración. | `src/admin/admin-phase-e-catalogs.controller.ts` |
+| POST | `/api/v1/admin/classes` | JWT | `catalogs:create` | Crear clase. Body admite `available_from_year_id?`, `available_until_year_id?`, `min_duration_years?`, `max_duration_years?` y `translations?`. | `src/admin/admin-phase-e-catalogs.controller.ts` |
+| PATCH | `/api/v1/admin/classes/:id` | JWT | `catalogs:update` | Actualizar clase. `available_*_year_id: null` limpia la disponibilidad; `undefined` no modifica. | `src/admin/admin-phase-e-catalogs.controller.ts` |
+| DELETE | `/api/v1/admin/classes/:id` | JWT | `catalogs:delete` | Soft-delete de clase (`active=false`). | `src/admin/admin-phase-e-catalogs.controller.ts` |
 | GET | `/api/v1/admin/users` | JWT | `users:read` | Listar usuarios administrativos con alcance por rol (ALL/UNION/LOCAL_FIELD) | `src/admin/admin-users.controller.ts` |
 | GET | `/api/v1/admin/users/:userId` | JWT | `users:read_detail` | Obtener detalle de usuario validando alcance por rol del actor | `src/admin/admin-users.controller.ts` |
 | PATCH | `/api/v1/admin/users/:userId` | JWT | `users:update` | Actualizar campos administrativos del usuario | `src/admin/admin-users.controller.ts` |
@@ -374,7 +378,7 @@
 
 | Method | Path | Auth | Roles | Description | Source |
 |---|---|---|---|---|---|
-| GET | `/api/v1/classes` | Public | - | Listar clases | `src/classes/classes.controller.ts` |
+| GET | `/api/v1/classes` | Public | - | Listar clases disponibles para inscripción en el año eclesiástico vigente por defecto. Query: `clubTypeId?`, `page?`, `limit?`. | `src/classes/classes.controller.ts` |
 | GET | `/api/v1/classes/:classId` | Public | - | Obtener clase por ID | `src/classes/classes.controller.ts` |
 | GET | `/api/v1/classes/:classId/modules` | Public | - | Obtener módulos de una clase | `src/classes/classes.controller.ts` |
 | POST | `/api/v1/users/:userId/classes/:classId/sections/:sectionId/submit` | JWT | `classes:submit_progress` | Enviar evidencia de sección de clase a validación. Query opcional `?enrollmentId=` para resolver el owner anual explícito. | `src/classes/classes.controller.ts` |
@@ -529,12 +533,15 @@
 | POST | `/api/v1/admin/investiture/config` | JWT | admin (GlobalRoles) | Crear configuración de investidura | `src/investiture/investiture.controller.ts` |
 | PATCH | `/api/v1/admin/investiture/config/:configId` | JWT | admin (GlobalRoles) | Actualizar configuración de investidura | `src/investiture/investiture.controller.ts` |
 | DELETE | `/api/v1/admin/investiture/config/:configId` | JWT | admin (GlobalRoles) | Soft delete de configuración (`active=false`) | `src/investiture/investiture.controller.ts` |
+| POST | `/api/v1/admin/classes/enrollments/expire-overdue` | JWT | admin (GlobalRoles), `catalogs:update` | Vencer manualmente enrollments atrasados por `classes.max_duration_years`. Body: `{ ecclesiastical_year_id?: int, dry_run?: boolean }`. Responde `{ ecclesiastical_year_id, dry_run, scanned_count, expired_count, enrollment_ids }`. | `src/investiture/investiture.controller.ts` |
 
 ### Investiture Contract Notes (2026-04-13)
 
 - La superficie canónica actual es la prefijada con `/api/v1/investiture/...`; los endpoints bajo `/api/v1/enrollments/...` permanecen por compatibilidad.
 - `POST /api/v1/enrollments/:enrollmentId/validate` es legacy: acepta `APPROVED|REJECTED`, pero en runtime real `APPROVED` mueve el enrollment a `CLUB_APPROVED`.
 - El pipeline multietapa usa `SUBMITTED_FOR_VALIDATION -> CLUB_APPROVED -> COORDINATOR_APPROVED -> FIELD_APPROVED -> INVESTIDO`.
+- `EXPIRED` es salida terminal por exceder `classes.max_duration_years`; preserva progreso histórico y bloquea nuevas acciones de investidura.
+- `POST /api/v1/admin/classes/enrollments/expire-overdue` soporta `dry_run` para previsualizar antes de aplicar vencimientos.
 - `POST /api/v1/investiture/enrollments/bulk-approve` NO soporta `club-approve`; esa transición sigue siendo individual.
 - `GET|POST|PATCH|DELETE /api/v1/admin/investiture/config` son endpoints activos del mismo controller y sostienen la pantalla de configuración del admin.
 

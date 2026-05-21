@@ -10,19 +10,19 @@ Cada clase se compone de modulos tematicos, y cada modulo contiene secciones eva
 
 El sistema adopta una única fuente de verdad: el **ciclo anual operativo** es gestionado enteramente por `enrollments` con sus proyecciones de progreso (`class_module_progress`, `class_section_progress`). La tabla legacy `users_classes` fue archivada como `users_classes_archive` y ya no participa en el modelo operativo. El histórico consolidado se consulta directamente desde `enrollments` con filtros históricos por año eclesiástico.
 
-La culminacion exitosa de una clase lleva a la investidura, que es el acto institucional de reconocimiento formal. Este flujo de validacion e investidura aun no tiene runtime implementado (ver feature `validacion-investiduras`).
+La culminacion exitosa de una clase lleva a la investidura, que es el acto institucional de reconocimiento formal. El flujo de validacion e investidura ya existe y ahora valida tambien la ventana de disponibilidad de la clase y su duracion minima/maxima por ano eclesiastico (ver feature `validacion-investiduras`).
 
 ## Que existe (verificado contra codigo)
 
 ### Backend (ClassesModule)
-- **Controladores**: `ClassesController` (catalogo publico, 3 endpoints) + `UserClassesController` (inscripciones de usuario, 4 endpoints) = **7 endpoints totales**
+- **Controladores**: `ClassesController` (catalogo publico, progreso/evidencias e inscripciones) + `AdminPhaseECatalogsController` (CRUD admin de clases) + `InvestitureController` (vencimiento manual de enrollments atrasados)
 - **Catalogo publico** (OptionalJwtAuthGuard):
-  - `GET /classes` — listar clases con paginacion y filtro por clubTypeId
+  - `GET /classes` — listar clases con paginacion y filtro por clubTypeId; por defecto solo devuelve clases disponibles para inscripcion en el ano eclesiastico vigente
   - `GET /classes/:classId` — detalle de clase con modulos y secciones
   - `GET /classes/:classId/modules` — modulos de una clase con sus secciones
 - **Inscripciones de usuario** (JwtAuthGuard + PermissionsGuard):
   - `GET /users/:userId/classes` — listar inscripciones del usuario (filtro por yearId)
-  - `POST /users/:userId/classes/enroll` — inscribir usuario en clase (class_id + ecclesiastical_year_id)
+  - `POST /users/:userId/classes/enroll` — inscribir usuario en clase (class_id + ecclesiastical_year_id); bloquea clases inactivas o fuera de ventana de disponibilidad
   - `GET /users/:userId/classes/:classId/progress` — progreso anual (acepta ?enrollmentId= como override)
   - `PATCH /users/:userId/classes/:classId/progress` — actualizar progreso de seccion (module_id, section_id, score, evidences, enrollment_id opcional)
 - **Servicio**: `ClassesService` con spec de tests
@@ -30,19 +30,20 @@ La culminacion exitosa de una clase lleva a la investidura, que es el acto insti
 - **Decoradores**: @RequirePermissions('classes:read'/'classes:update'), @AuthorizationResource({ type: 'user', ownerParam: 'userId' })
 
 ### Admin (sacdia-admin)
-- 1 pagina read-only: listado de clases via ModuleListPage
-- Consume: `GET /classes`, `GET /catalogs/club-types`
-- Sin CRUD de clases ni gestion de progreso ni inscripciones
+- CRUD de clases activo desde catalogos/admin, incluyendo traducciones, disponibilidad por ano eclesiastico y duracion minima/maxima.
+- Consume `GET|POST|PATCH|DELETE /admin/classes` para administrar el catalogo.
+- Incluye proceso manual auditable para vencer enrollments atrasados: primero `dry_run`, luego confirmacion explicita antes de aplicar `POST /admin/classes/enrollments/expire-overdue`.
+- No gestiona progreso operativo de miembros desde el CRUD de catalogos.
 
 ### App (sacdia-app)
 - 6 screens: ClassesListView, ClassDetailView, ClassDetailWithProgressView, ClassModulesView, SectionDetailView, RequirementDetailView
 - Consume 8 endpoints incluyendo listado, detalle, modulos, inscripcion, progreso y subida/borrado de archivos de evidencia
 
 ### Base de datos
-- `classes` — catalogo de clases (class_id, name, club_type_id, order)
+- `classes` — catalogo de clases (class_id, name, club_type_id, order) con `available_from_year_id`, `available_until_year_id`, `min_duration_years`, `max_duration_years`
 - `class_modules` — modulos por clase
 - `class_sections` — secciones evaluables por modulo
-- `enrollments` — inscripcion anual operativa (enrollment_id, user_id, class_id, ecclesiastical_year_id, investiture_status, active). UNIQUE: (user_id, class_id, ecclesiastical_year_id)
+- `enrollments` — inscripcion anual operativa (enrollment_id, user_id, class_id, ecclesiastical_year_id, investiture_status, active). UNIQUE: (user_id, class_id, ecclesiastical_year_id). El estado `EXPIRED` preserva progreso historico cuando la duracion maxima ya vencio.
 - `class_section_progress` — progreso por seccion con enrollment_id como owner anual. UNIQUE: (enrollment_id, module_id, section_id)
 - `class_module_progress` — proyeccion de progreso por modulo. UNIQUE: (enrollment_id, module_id)
 - `users_classes` — [ARCHIVADA] trayectoria consolidada legacy (archivada como `users_classes_archive`)
@@ -57,6 +58,10 @@ La culminacion exitosa de una clase lleva a la investidura, que es el acto insti
 6. El progreso de seccion registra puntaje y evidencias (JSON)
 7. El progreso de modulo se calcula como proyeccion sincronizada de sus secciones
 8. Si el usuario cambia de clase en el mismo ano, el backend desactiva otros enrollments activos de ese ano
+9. Una clase con `available_until_year_id = null` no expira para nuevas inscripciones; si tiene valor, deja de aparecer para inscripcion despues de ese ano eclesiastico
+10. La duracion de cursado se cuenta por anos eclesiasticos desde `enrollments.ecclesiastical_year_id`
+11. Antes de solicitar investidura, el backend exige respetar `min_duration_years` y `max_duration_years`
+12. Si un enrollment supera la duracion maxima sin investidura, pasa formalmente a `EXPIRED` y conserva su progreso como trayectoria historica
 
 ## Decisiones de diseno
 
@@ -65,21 +70,22 @@ La culminacion exitosa de una clase lleva a la investidura, que es el acto insti
 - **Dos controladores separados**: ClassesController (catalogo) y UserClassesController (inscripciones) con guards diferentes
 - **PermissionsGuard con permisos finos**: classes:read y classes:update con AuthorizationResource para owner detection
 - **Backfill acotado**: filas legacy de progress sin enrollment_id solo se backfillean si mapean deterministicamente a una unica inscripcion
+- **Clases legacy por disponibilidad**: `available_until_year_id = null` significa sin vencimiento; no se usa ano sentinel tipo 2100
+- **Duracion configurable por clase**: defaults `min_duration_years = 1` y `max_duration_years = 1`; Guia Mayor Avanzado/Instructor pueden extenderse por configuracion
+- **Trayectoria inmutable**: `EXPIRED` impide continuar o solicitar investidura, pero no borra progreso ni historial
 
 ## Gaps y pendientes
 
 - [RESUELTO] La frontera de autoridad entre enrollments y users_classes ha sido resuelta: `users_classes` fue archivada y `enrollments` es la única autoridad
-- App consume endpoints de archivos por seccion (POST/DELETE files) que **no aparecen en backend audit** — posibles endpoints FANTASMA o no capturados
-- Admin es solo lectura — no permite gestionar inscripciones, progreso ni administrar clases
 - `/home/grouped-class` en app tiene classId hardcodeado a 1
-- No hay endpoint de administracion de clases (CRUD admin) — el catalogo se gestiona solo por base de datos directa
-- No existe runtime de investidura ni validacion de completitud de clase
+- No hay proceso cron automatico para vencer enrollments; la primera iteracion usa proceso admin/manual auditable
+- Reporteria historica de clases vencidas queda para iteracion posterior
 
 ## Prioridad y siguiente accion
 
-- **Alta**: Resolver los endpoints de archivos por seccion que la app consume (POST/DELETE files) — verificar si existen o implementar
-- **Media**: Implementar gestion de clases en admin (al menos lectura enriquecida con progreso de miembros)
-- **Siguiente accion concreta**: Auditar si los endpoints POST/DELETE files por seccion de la app existen en el backend o son FANTASMA, y alinear
+- **Media**: Definir automatizacion futura (cron/job) para vencimiento de enrollments si el proceso manual demuestra estabilidad
+- **Media**: Agregar reportes historicos de clases legacy/vencidas por campo local/club
+- **Siguiente accion concreta**: Ejecutar el proceso manual de vencimiento con `dry_run` al cierre de cada ano eclesiastico antes de aplicar cambios
 
 ## Carga masiva por certificados OCR
 

@@ -6,7 +6,7 @@
 
 La validacion de investiduras es el proceso institucional mediante el cual el avance formativo de un miembro recibe reconocimiento formal. Es el cierre del ciclo formativo: un miembro completa su clase progresiva durante el ano eclesiastico, su progreso es validado por las autoridades del club y del campo local, y finalmente es investido en una ceremonia oficial.
 
-El proceso tiene multiples etapas definidas por el canon: (1) el miembro completa los requisitos de su clase, (2) el consejero o director envia el registro a validacion, (3) el registro queda bloqueado y pasa a revision institucional, (4) la autoridad competente aprueba o rechaza, (5) si es aprobado, se programa la investidura, (6) el miembro es investido formalmente. Este flujo es central para la identidad del sistema — sin validacion de investiduras, SACDIA puede registrar avance pero no puede reconocerlo institucionalmente.
+El proceso tiene multiples etapas definidas por el canon: (1) el miembro completa los requisitos de su clase dentro de la duracion configurada, (2) el consejero o director envia el registro a validacion, (3) el registro queda bloqueado y pasa a revision institucional, (4) la autoridad competente aprueba o rechaza, (5) si es aprobado, se programa la investidura, (6) el miembro es investido formalmente. Este flujo es central para la identidad del sistema — sin validacion de investiduras, SACDIA puede registrar avance pero no puede reconocerlo institucionalmente.
 
 La Decision 6 del canon establece que registrar y validar son actos distintos: la captura operativa (registrar progreso dia a dia) y la validacion institucional (aprobar y reconocer formalmente) tienen actores, momentos y reglas diferentes. Al entrar en validacion, el registro deja de ser editable — esto es un efecto de dominio critico que protege la integridad del proceso.
 
@@ -28,6 +28,7 @@ El schema de base de datos y el runtime ya sostienen investiduras como superfici
   - `POST /investiture/enrollments/bulk-approve`
   - `POST /investiture/enrollments/bulk-reject`
   - `GET|POST|PATCH|DELETE /admin/investiture/config`
+  - `POST /admin/classes/enrollments/expire-overdue` — proceso admin/manual para vencer enrollments atrasados por duracion maxima de clase
 - **Compatibilidad legacy aun activa**:
   - `POST /enrollments/:enrollmentId/submit-for-validation`
   - `POST /enrollments/:enrollmentId/validate`
@@ -78,10 +79,10 @@ El schema de base de datos y el runtime ya sostienen investiduras como superfici
 - UNIQUE: (local_field_id, ecclesiastical_year_id)
 
 **Enum `investiture_status_enum`**:
-- IN_PROGRESS, SUBMITTED_FOR_VALIDATION, CLUB_APPROVED, COORDINATOR_APPROVED, FIELD_APPROVED, APPROVED, REJECTED, INVESTIDO
+- IN_PROGRESS, SUBMITTED_FOR_VALIDATION, CLUB_APPROVED, COORDINATOR_APPROVED, FIELD_APPROVED, APPROVED, REJECTED, INVESTIDO, EXPIRED
 
 **Enum `investiture_action_enum`**:
-- SUBMITTED, CLUB_APPROVED, COORDINATOR_APPROVED, FIELD_APPROVED, APPROVED, REJECTED, REINVESTITURE_REQUESTED, INVESTIDO
+- SUBMITTED, CLUB_APPROVED, COORDINATOR_APPROVED, FIELD_APPROVED, APPROVED, REJECTED, REINVESTITURE_REQUESTED, INVESTIDO, EXPIRED
 
 **Enum `evidence_validation_enum`**:
 - PENDING, VALIDATED, REJECTED
@@ -99,20 +100,26 @@ El schema de base de datos y el runtime ya sostienen investiduras como superfici
 9. Debe existir una vista de administracion que muestre todos los enrollments pendientes de validacion para un campo local
 10. El flujo debe respetar la jerarquia de autorizacion: consejero/director envia, director aprueba a nivel club, coordinacion aprueba su etapa y admin/campo local completa la autorizacion final
 11. Debe soportarse reinvestidura (REINVESTITURE_REQUESTED) para casos de miembros que necesitan re-evaluacion
+12. Antes de enviar a validacion, el enrollment debe cumplir la duracion minima de su clase y no haber superado la duracion maxima
+13. Si el enrollment supera `classes.max_duration_years`, el backend debe moverlo a `EXPIRED`, registrar auditoria y preservar el progreso como trayectoria historica
+14. El vencimiento masivo debe iniciarse como `dry_run` y solo aplicar cambios con confirmacion admin/manual
 
 ## Decisiones de diseno
 
-- **Maquina de estados en enrollments**: El campo `investiture_status` define el pipeline vigente: IN_PROGRESS -> SUBMITTED_FOR_VALIDATION -> CLUB_APPROVED -> COORDINATOR_APPROVED -> FIELD_APPROVED -> INVESTIDO, con `REJECTED` como salida de correccion
+- **Maquina de estados en enrollments**: El campo `investiture_status` define el pipeline vigente: IN_PROGRESS -> SUBMITTED_FOR_VALIDATION -> CLUB_APPROVED -> COORDINATOR_APPROVED -> FIELD_APPROVED -> INVESTIDO, con `REJECTED` como salida de correccion y `EXPIRED` como salida terminal por vencimiento de duracion maxima
 - **Bloqueo en validacion**: `locked_for_validation` impide edicion de progreso mientras esta en revision — proteccion de integridad de dominio
 - **Historia de validacion**: Tabla dedicada `investiture_validation_history` con audit trail completo de cada accion
 - **Configuracion por campo local**: `investiture_config` permite que cada campo local defina sus propias fechas de deadline y ceremonia por ano eclesiastico
 - **Separacion de registrar y validar** (Decision 6): Actores diferentes (consejero vs coordinador), momentos diferentes, reglas diferentes
+- **Duracion por ano eclesiastico**: la elegibilidad se calcula desde `enrollments.ecclesiastical_year_id`; no desde fechas sueltas de progreso
+- **Vencimiento auditable**: el proceso manual usa `investiture_validation_history.action = EXPIRED` para dejar rastro del cambio
 
 ## Gaps y pendientes
 
 - `InvestitureSubmitView` existe en app pero no esta expuesta por una ruta registrada
 - No hay notificaciones asociadas a cambios de estado de validacion — Iteracion 2
 - No hay reportes de investiduras por periodo/campo local/club — Iteracion 2
+- No hay cron automatico de vencimiento; el proceso inicial es admin/manual
 
 ## Implementacion completada
 
@@ -120,3 +127,4 @@ El schema de base de datos y el runtime ya sostienen investiduras como superfici
 - ✅ Admin: pendientes, pipeline y configuracion accesibles desde rutas del dashboard y sidebar
 - ✅ App: pending/history ruteados; submit view implementada pero no ruteada
 - ✅ Bulk operations: hasta 200 enrollments por operacion; `club-approve` sigue siendo individual
+- ✅ Vencimiento manual de enrollments atrasados por duracion maxima con modo `dry_run` y auditoria `EXPIRED`

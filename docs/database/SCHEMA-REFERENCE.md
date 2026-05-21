@@ -2,7 +2,7 @@
 
 **Estado**: ACTIVE
 **Sincronizado contra**: `sacdia-backend/prisma/schema.prisma`
-**Fecha de resincronizacion**: 2026-04-28 (8.4-C: club_annual_rankings extendido, award_categories extendido, ranking_weight_configs nuevo, system_config keys nuevas)
+**Fecha de resincronizacion**: 2026-05-21 (clases legacy, duración configurable y estado EXPIRED)
 
 Referencia humana concisa del schema Prisma vigente.
 
@@ -103,6 +103,16 @@ Referencia humana concisa del schema Prisma vigente.
   - `achievement_scope`: `GLOBAL`, `CLUB_TYPE`, `ECCLESIASTICAL_YEAR`
   - `achievement_tier`: `BRONZE`, `SILVER`, `GOLD`, `PLATINUM`, `DIAMOND`
 - **Drift de cliente verificado** (no corregido en este trabajo): el cliente admin usa valores de `scope` `GLOBAL|CLUB|UNIT` que no coinciden con los valores Prisma `GLOBAL|CLUB_TYPE|ECCLESIASTICAL_YEAR`.
+
+### `classes` y duración de trayectoria
+
+- `classes.available_from_year_id INT?` y `classes.available_until_year_id INT?` referencian `ecclesiastical_years.year_id`.
+- `available_until_year_id = NULL` significa sin vencimiento para nuevas inscripciones; no se usa año sentinel.
+- `classes.min_duration_years INT NOT NULL DEFAULT 1` y `classes.max_duration_years INT NOT NULL DEFAULT 1` gobiernan elegibilidad antes de solicitar investidura.
+- CHECKs vigentes: `min_duration_years >= 1`, `max_duration_years >= 1`, `max_duration_years >= min_duration_years`.
+- Índices: `idx_classes_available_from_year`, `idx_classes_available_until_year`.
+- `enrollments.investiture_status` incluye `EXPIRED` para preservar progreso histórico cuando se supera la duración máxima sin investidura.
+- `investiture_validation_history.action` incluye `EXPIRED` para auditar vencimientos manuales o por guard de investidura.
 
 ### `enrollment_rankings`, `section_rankings`, `enrollment_ranking_weights` (8.4-A)
 
@@ -298,6 +308,7 @@ Constraints:
 - `20260429000000_enrollment_rankings_schema` - (8.4-A) crea `enrollment_rankings`, `section_rankings`, `enrollment_ranking_weights` con indexes, UNIQUE constraints y CHECK constraints de rango [0,100]. Ver §14.1 de `docs/canon/runtime-rankings.md`.
 - `20260429000001_award_categories_scope` - (8.4-A) añade `scope VARCHAR(20) DEFAULT 'club'` a `award_categories` + índice `idx_award_categories_scope` on `(scope, is_legacy)`. Backfill: filas existentes → `scope='club'`.
 - `20260429000002_enrollment_rankings_seeds` - (8.4-A) seed de fila global `is_default=true` en `enrollment_ranking_weights` con pesos 50/30/20 (class/investiture/camporee).
+- `20260521120000_class_duration_availability` - añade disponibilidad por año eclesiástico y duración min/max a `classes`; agrega `EXPIRED` a enums de investidura.
 - `20260429000003_enrollment_rankings_default_award_seeds` - (8.4-A) seed de categorías de premio con `scope='member'` para clasificación de miembros.
 
 ## Nota operativa
