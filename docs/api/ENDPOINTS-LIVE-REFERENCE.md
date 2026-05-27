@@ -733,6 +733,7 @@ Permisos: `ranking_weights:read` (lectura) | `ranking_weights:write` (creación,
 | POST | `/api/v1/monthly-reports/:reportId/generate` | JWT | `reports:read` | Congelar `snapshot_data` y pasar a `generated` | `src/monthly-reports/monthly-reports.controller.ts` |
 | POST | `/api/v1/monthly-reports/:reportId/submit` | JWT | `reports:read` | Pasar de `generated` a `submitted` | `src/monthly-reports/monthly-reports.controller.ts` |
 | GET | `/api/v1/monthly-reports/enrollment/:enrollmentId` | JWT | `reports:read` | Listar informes por matricula UUID; acepta `status?` | `src/monthly-reports/monthly-reports.controller.ts` |
+| GET | `/api/v1/monthly-reports/admin/list` | JWT | `reports:read` | Supervisión paginada multi-club; filtros `division_id?`, `union_id?`, `local_field_id?`, `club_type_id?`, `year?`, `month?`, `status?`; el backend fuerza el scope jerárquico del actor | `src/monthly-reports/monthly-reports.controller.ts` |
 | GET | `/api/v1/monthly-reports/:reportId/pdf` | JWT | `reports:download` | Descargar PDF generado server-side; solo disponible para `generated|submitted` | `src/monthly-reports/monthly-reports.controller.ts` |
 | GET | `/api/v1/monthly-reports/:reportId` | JWT | `reports:read` | Obtener informe completo con `manual_data`, `snapshot_data`, matricula y submitter | `src/monthly-reports/monthly-reports.controller.ts` |
 
@@ -742,6 +743,7 @@ Permisos: `ranking_weights:read` (lectura) | `ranking_weights:write` (creación,
 - Los estados vigentes verificados son `draft`, `generated` y `submitted`.
 - `PATCH /manual-data` acepta el shape de `UpdateManualDataDto`; no el payload legacy que algunos clientes todavia modelan.
 - `GET /pdf` genera el archivo en el backend con `pdfkit`; no devuelve una URL prefirmada ni referencia a storage.
+- El listado admin aplica scope jerárquico server-side: super/admin y división ven todo con filtros; unión queda forzada a su unión; campo/coordinación queda forzado a su campo; roles de club quedan limitados a su sección activa.
 
 ## units
 

@@ -72,6 +72,21 @@ El envío por club falla cerrado: además del scope exacto, el backend valida qu
 
 ---
 
+## RBAC de reportes institucionales
+
+Los listados administrativos de reportes resuelven el contexto con `AuthorizationContextService` y aplican scope jerárquico en el servidor; los filtros del cliente nunca amplían el alcance real del actor.
+
+| Actor | Alcance efectivo |
+| --- | --- |
+| `super-admin`, `admin`, `director-dia`, `assistant-dia` | Todos los reportes; pueden filtrar por `division_id`, `union_id`, `local_field_id` |
+| `director-union`, `assistant-union` | Solo clubes/campos de su unión; pueden reducir por `local_field_id` |
+| `director-lf`, `assistant-lf`, `coordinator`, `assistant-admin` | Solo clubes de su campo local |
+| Director/secretario con asignación activa de club | Solo reportes de su sección activa |
+
+La regla se centraliza en `src/reports/report-visibility-scope.ts` y se aplica a listados mensuales, trimestrales y anuales.
+
+---
+
 ## 📋 Resumen de Características de Seguridad
 
 ### Fase 1-3: Seguridad Básica

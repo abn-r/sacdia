@@ -22,7 +22,7 @@ La feature esta implementada en backend con IDs UUID y estados `draft -> generat
   - `POST /api/v1/monthly-reports/:reportId/generate` - congelar `snapshot_data` y pasar a `generated`
   - `POST /api/v1/monthly-reports/:reportId/submit` - pasar de `generated` a `submitted`
   - `GET /api/v1/monthly-reports/enrollment/:enrollmentId` - listar informes por matricula, con filtro opcional `status`
-  - `GET /api/v1/monthly-reports/admin/list` - **supervision multi-club para admin/coordinator** (agregado 2026-04-22). Query params: `club_type_id`, `local_field_id`, `year`, `month`, `status`, `page`, `limit`. Scope: admin/super_admin ve todo; coordinator es forzado a su `local_field_id` derivado via `AuthorizationContextService` (JWT no trae claim directo, se resuelve en server con cache Redis 5min). Response paginada con club_name, club_type, local_field, submitter_name y member_count por item.
+  - `GET /api/v1/monthly-reports/admin/list` - **supervision multi-club jerárquica**. Query params: `division_id`, `union_id`, `local_field_id`, `club_type_id`, `year`, `month`, `status`, `page`, `limit`. Scope: `super-admin`/`admin`/`director-dia`/`assistant-dia` ven todo y pueden filtrar; `director-union`/`assistant-union` quedan forzados a su unión; `director-lf`/`assistant-lf`/`coordinator`/`assistant-admin` quedan forzados a su campo; director/secretario de club queda limitado a su sección activa. Response paginada con club_name, club_type, local_field, submitter_name y member_count por item.
   - `GET /api/v1/monthly-reports/:reportId/pdf` - descargar PDF solo para `generated|submitted`
   - `GET /api/v1/monthly-reports/:reportId` - obtener detalle completo con `manual_data`, `snapshot_data`, matricula y submitter
 - **Permisos verificados**:
