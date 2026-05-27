@@ -56,6 +56,22 @@ Cada bloque se expone solo si el actor tiene `family:read` o el fallback legacy 
 
 ---
 
+## RBAC de notificaciones
+
+El módulo `notifications` usa permisos finos y scopes explícitos:
+
+| Superficie | Permiso | Scope efectivo | Roles seed |
+| --- | --- | --- | --- |
+| `POST /notifications/send` | `notifications:send` | global | `admin`, `super-admin` por wildcard |
+| `POST /notifications/broadcast` | `notifications:broadcast` | global | `admin`, `super-admin` por wildcard |
+| `POST /notifications/club/:instanceType/:instanceId` | `notifications:club` | `active_assignment` exacto | `secretary`, `secretary-treasurer`, `deputy-director`, `director`; `admin`/`super-admin` por wildcard pero sin bypass del target activo |
+| `GET /notifications/targets/club` | `notifications:club` | `active_assignment` exacto | mismos roles de envío por club |
+| `GET /notifications/history` | JWT | inbox propia o auditoría admin filtrada por servicio | sin permiso de envío requerido |
+
+El envío por club falla cerrado: además del scope exacto, el backend valida que el `instanceType` de la URL coincida con el tipo real de la sección (`NOTIF_TARGET_TYPE_MISMATCH` en mismatch).
+
+---
+
 ## 📋 Resumen de Características de Seguridad
 
 ### Fase 1-3: Seguridad Básica

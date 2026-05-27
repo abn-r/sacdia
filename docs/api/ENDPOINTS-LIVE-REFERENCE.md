@@ -417,9 +417,9 @@
 
 | Method | Path | Auth | Roles | Description | Source |
 |---|---|---|---|---|---|
-| GET | `/api/v1/fcm-tokens` | JWT | - | Get current user FCM tokens | `src/notifications/notifications.controller.ts` |
-| POST | `/api/v1/fcm-tokens` | JWT | - | Register FCM token | `src/notifications/notifications.controller.ts` |
-| DELETE | `/api/v1/fcm-tokens/by-token` | JWT | - | Unregister FCM token by token string in request body | `src/notifications/notifications.controller.ts` |
+| GET | `/api/v1/fcm-tokens` | JWT | - | Get current user FCM tokens (legacy namespace) | `src/notifications/notifications.controller.ts` |
+| POST | `/api/v1/fcm-tokens` | JWT | - | Register FCM token (legacy-compatible; app canonical path is `/api/v1/users/me/fcm-tokens`) | `src/notifications/notifications.controller.ts` |
+| DELETE | `/api/v1/fcm-tokens/by-token` | JWT | - | Unregister FCM token by token string in request body (legacy fallback when token UUID is unavailable) | `src/notifications/notifications.controller.ts` |
 | DELETE | `/api/v1/fcm-tokens/:id` | JWT | - | Unregister FCM token by record ID | `src/notifications/notifications.controller.ts` |
 | GET | `/api/v1/fcm-tokens/user/:userId` | JWT | - | Get FCM tokens by user ID (owner/admin only) | `src/notifications/notifications.controller.ts` |
 
@@ -494,15 +494,25 @@
 
 | Method | Path | Auth | Roles | Description | Source |
 |---|---|---|---|---|---|
-| POST | `/api/v1/notifications/broadcast` | JWT | super_admin, admin | Send notification to all users | `src/notifications/notifications.controller.ts` |
-| POST | `/api/v1/notifications/club/:instanceType/:instanceId` | JWT | `notifications:club` | Send notification to club members with exact active assignment enforcement | `src/notifications/notifications.controller.ts` |
-| GET | `/api/v1/notifications/history` | JWT | - | Get paginated notification history (admin audit log scoped by caller territory, or user inbox) | `src/notifications/notifications.controller.ts` |
+| POST | `/api/v1/notifications/broadcast` | JWT | `notifications:broadcast` | Send notification to all users | `src/notifications/notifications.controller.ts` |
+| POST | `/api/v1/notifications/club/:instanceType/:instanceId` | JWT | `notifications:club` | Send notification to club members with exact active assignment enforcement. `instanceType` must match the real club section type; mismatch returns HTTP 400 `NOTIF_TARGET_TYPE_MISMATCH`. | `src/notifications/notifications.controller.ts` |
+| GET | `/api/v1/notifications/targets/club` | JWT | `notifications:club` | Return only authorized club targets for the caller active assignment scope. Response shape: `{ data: [{ clubId, clubName, sectionId, sectionName, instanceType, instanceId, label }] }` ordered by `label`. | `src/notifications/notifications.controller.ts` |
+| GET | `/api/v1/notifications/history` | JWT | - | Get paginated notification history (authenticated inbox for regular users; admin audit log scoped in service). No `notifications:send` permission required for inbox usage. | `src/notifications/notifications.controller.ts` |
 | GET | `/api/v1/notifications/preferences` | JWT | - | Get current user notification preferences | `src/notifications/notifications.controller.ts` |
 | PATCH | `/api/v1/notifications/read-all` | JWT | - | Mark all unread notifications as read | `src/notifications/notifications.controller.ts` |
-| POST | `/api/v1/notifications/send` | JWT | `notifications:send` | Send notification to specific user | `src/notifications/notifications.controller.ts` |
+| POST | `/api/v1/notifications/send` | JWT | `notifications:send` | Send notification to a specific user. Body: `{ userId, title, body, data? }` | `src/notifications/notifications.controller.ts` |
 | GET | `/api/v1/notifications/unread-count` | JWT | - | Get unread notification count for the current user | `src/notifications/notifications.controller.ts` |
 | PATCH | `/api/v1/notifications/:deliveryId/read` | JWT | - | Mark a single notification delivery as read | `src/notifications/notifications.controller.ts` |
 | PUT | `/api/v1/notifications/preferences/:category` | JWT | - | Update notification preference for a category | `src/notifications/notifications.controller.ts` |
+
+### Notifications Runtime Notes (2026-05-27)
+
+- Inbox-first delivery: if FCM is not configured or a recipient has no active tokens, runtime still creates `notification_logs` + `notification_deliveries`; only push dispatch is skipped.
+- `notification_logs.tokens_sent` and `notification_logs.tokens_failed` are updated after FCM attempt results are processed.
+- Dynamic notification sources currently include:
+  - `validation:class_approved`, `validation:class_rejected`, `validation:honor_approved`, `validation:honor_rejected`
+  - `requests:transfer_approved`, `requests:transfer_rejected`, `requests:assignment_approved`, `requests:assignment_rejected`
+  - `system_alert:cron_failure`
 
 ## root
 

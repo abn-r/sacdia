@@ -17,21 +17,24 @@ El envio soporta tres niveles: directo a un usuario, broadcast global y envio a 
 - **Services**: `src/notifications/notifications.service.ts`, `src/notifications/fcm-tokens.service.ts`, `src/notifications/notification-preferences.service.ts`
 - **Module**: `src/notifications/notifications.module.ts`
 - **Integracion**: FirebaseAdminModule (FCM) + persistencia en `notification_logs`, `notification_deliveries` y `notification_preferences`
-- **14 endpoints totales**:
+- **17 endpoints totales**:
   - Notificaciones y bandeja:
-    - `POST /api/v1/notifications/send` — Enviar notificacion directa (`notifications:send`)
+    - `POST /api/v1/notifications/send` — Enviar notificacion directa (`notifications:send`, body `{ userId, title, body, data? }`)
     - `POST /api/v1/notifications/broadcast` — Enviar broadcast global (`notifications:broadcast`)
-    - `POST /api/v1/notifications/club/:instanceType/:instanceId` — Enviar a miembros de club con enforcement por `active_assignment` (`notifications:club`)
-    - `GET /api/v1/notifications/history` — Historial paginado; admin ve auditoria, usuario regular ve su bandeja (requiere `notifications:send` desde 2026-04-22)
+    - `POST /api/v1/notifications/club/:instanceType/:instanceId` — Enviar a miembros de club con enforcement por `active_assignment` y validación de tipo de sección (`notifications:club`; mismatch responde `NOTIF_TARGET_TYPE_MISMATCH`)
+    - `GET /api/v1/notifications/targets/club` — Listar targets autorizados del actor para envio a club (`notifications:club`, scope por `active_assignment`)
+    - `GET /api/v1/notifications/history` — Historial paginado; admin ve auditoria, usuario regular ve su bandeja autenticada
     - `GET /api/v1/notifications/unread-count` — Conteo de no leidas del usuario autenticado
     - `PATCH /api/v1/notifications/read-all` — Marcar todas como leidas
     - `PATCH /api/v1/notifications/:deliveryId/read` — Marcar una entrega como leida
     - `GET /api/v1/notifications/preferences` — Obtener preferencias por categoria
     - `PUT /api/v1/notifications/preferences/:category` — Actualizar preferencia por categoria
   - FCM tokens:
-    - `POST /api/v1/fcm-tokens` — Registrar token FCM
+    - `POST /api/v1/fcm-tokens` — Registrar token FCM legacy
+    - `POST /api/v1/users/me/fcm-tokens` — Registrar token FCM propio desde la app
     - `DELETE /api/v1/fcm-tokens/by-token` — Desregistrar token por valor (body)
     - `DELETE /api/v1/fcm-tokens/:id` — Desregistrar token por ID de registro
+    - `DELETE /api/v1/users/me/fcm-tokens/:tokenId` — Desregistrar token propio por ID desde la app
     - `GET /api/v1/fcm-tokens` — Obtener tokens propios activos
     - `GET /api/v1/fcm-tokens/user/:userId` — Obtener tokens por `userId` (owner/admin)
 
@@ -47,7 +50,7 @@ El envio soporta tres niveles: directo a un usuario, broadcast global y envio a 
 ### App Movil
 - **Tiene bandeja funcional**: `NotificationsInboxView` con paginacion, pull-to-refresh y carga incremental
 - Firebase Messaging integrado para recepcion de push notifications
-- Registro automatico de token con `POST /api/v1/fcm-tokens` y desregistro con `DELETE /api/v1/fcm-tokens/by-token`
+- Registro automatico de token con `POST /api/v1/users/me/fcm-tokens` y desregistro con `DELETE /api/v1/users/me/fcm-tokens/:tokenId`; fallback legacy por valor en `DELETE /api/v1/fcm-tokens/by-token`
 - Navegacion desde taps de notificaciones y snackbar en foreground via `PushNotificationService`
 
 ### Base de datos
@@ -60,7 +63,7 @@ El envio soporta tres niveles: directo a un usuario, broadcast global y envio a 
 
 1. El envio directo requiere `notifications:send`
 2. El broadcast global requiere `notifications:broadcast`
-3. El envio a club requiere `notifications:club` y enforcement por `active_assignment`
+3. El envio a club requiere `notifications:club`, enforcement por `active_assignment` y coherencia entre `instanceType` y el tipo real de la sección
 4. Los tokens FCM deben registrarse automaticamente al autenticarse en la app
 5. Los tokens deben poder desregistrarse al cerrar sesion
 6. Un usuario puede tener multiples tokens activos (multiples dispositivos)
@@ -76,7 +79,22 @@ El envio soporta tres niveles: directo a un usuario, broadcast global y envio a 
 - **Persistencia dual**: `notification_logs` guarda auditoria de envios y `notification_deliveries` alimenta la bandeja por usuario
 - **Preferencias opt-out por categoria**: Si falta fila en `notification_preferences`, el backend asume `enabled=true`
 - **Modo mixto de envio**: con Redis/BullMQ usa cola; sin Redis cae a envio sincrono
+- **Inbox-first**: si FCM no esta configurado o el usuario no tiene tokens, igual se crean `notification_logs` y `notification_deliveries`; solo se omite el push.
 - **Segmentacion por club**: la superficie publica de envio por club hoy se resuelve sobre la instancia activa autorizada del actor (`active_assignment`)
+- **Descubrimiento de targets seguro**: `GET /api/v1/notifications/targets/club` expone solo la instancia activa autorizada y evita listar clubes/secciones fuera de scope.
+- **RBAC efectivo**: `notifications:send` y `notifications:broadcast` quedan en roles globales admin/super-admin por wildcard del seed; `notifications:club` se otorga a liderazgo de sección (`secretary`, `secretary-treasurer`, `deputy-director`, `director`) y se vuelve exacto por `active_assignment`.
+- **Historial sin permiso de envío**: `GET /notifications/history` solo requiere JWT; usuario regular ve su bandeja y admin ve auditoría según scope.
+
+## Matriz envio -> destinatarios
+
+| Escenario | Destinatarios | Gate |
+|-----------|---------------|------|
+| Directo admin | `userId` explícito | `notifications:send` global |
+| Broadcast admin | usuarios activos | `notifications:broadcast` global |
+| Club admin | miembros activos de la sección seleccionada | `notifications:club` + `active_assignment` exacto + tipo de sección consistente |
+| Actividades | miembros de la sección de la actividad | emisor interno `activities:*` |
+| Requests/validación/camporees/investiduras | roles/ámbitos calculados por servicio | helpers internos por sección o rol global |
+| Achievements/member of month/alertas cron | usuario específico | `notifySafe` |
 
 ## Gaps y pendientes
 
@@ -87,5 +105,5 @@ El envio soporta tres niveles: directo a un usuario, broadcast global y envio a 
 
 ## Prioridad y siguiente accion
 
-- **Prioridad**: Media — dominio funcional y con bandeja operativa, con mayor endurecimiento en historial administrativo ya aplicado
-- **Siguiente accion**: Alinear la UI administrativa de envio por club con la ruta canonica vigente.
+- **Prioridad**: Media — dominio funcional y con bandeja operativa; quedan mejoras de UX para targeting por club/rol.
+- **Siguiente accion**: Smoke real con FCM/dispositivo cuando haya entorno disponible; luego evaluar targeting por rol si producto lo necesita.
