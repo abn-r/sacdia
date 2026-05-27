@@ -37,7 +37,9 @@ Las unidades (`units`) son subdivisiones informales dentro de una seccion (tipic
 ### Admin
 - **3 paginas funcionales**: clubs list, clubs/new, clubs/[id]
 - CRUD completo de clubs
+- Creacion de club con seleccion encadenada Campo Local > Distrito > Iglesia y secciones iniciales por tipo de club
 - Gestion de secciones (crear, actualizar, eliminar)
+- Gestion de unidades por club/seccion, enviando `club_section_id` al backend
 - Listado de miembros por seccion
 - Asignacion y revocacion de roles de club
 
@@ -45,8 +47,8 @@ Las unidades (`units`) son subdivisiones informales dentro de una seccion (tipic
 - **3 features relacionados**:
   - Club: 1 screen (ClubView) — informacion general del club
   - Members: 3 screens (MembersView, MemberProfileView, RoleAssignmentView) — listado y gestion de miembros
-  - Units: 2 screens (UnitsListView, UnitDetailView) — gestion de unidades (solo presentacion, sin data layer propio)
-- Consume endpoints de clubs, sections, members y role assignments
+  - Units: 2 screens (UnitsListView, UnitDetailView) — gestion de unidades con data layer propio, miembros, registros semanales y categorias de scoring
+- Consume endpoints de clubs, sections, members, role assignments, units y scoring-categories
 
 ### Base de datos
 - `clubs` — Clubs contenedores (uno por iglesia)
@@ -68,6 +70,7 @@ Las unidades (`units`) son subdivisiones informales dentro de una seccion (tipic
 7. Las secciones deben registrar dias y horarios de reunion, cuota y meta de almas
 8. El director del club es el unico que puede eliminar secciones y desactivar el club
 9. Las asignaciones de rol deben estar vinculadas a un ano eclesiastico para mantener historico
+10. Las unidades deben pertenecer a una seccion activa; sus miembros deben pertenecer a esa misma seccion
 
 ## Decisiones de diseno
 
@@ -81,11 +84,11 @@ Las unidades (`units`) son subdivisiones informales dentro de una seccion (tipic
 
 - **Vinculacion institucional incompleta**: Canon define estados de vinculacion (activo, cerrado, suspendido, pendiente) y tipos (formativa, liderazgo, apoyo) — el runtime solo tiene `club_role_assignments` sin esa granularidad
 - **Sin trayectoria historica**: Canon define preservar transiciones entre secciones — no hay estructura dedicada para historico de secciones
-- **Units sin data layer en app**: El feature de unidades en la app es solo presentacion, sin endpoints propios ni logica de datos
+- **Trazabilidad historica de unidades**: No hay auditoria dedicada para cambios de unidad o movimientos entre unidades
 - **Sin invitaciones**: No hay flujo para invitar miembros a un club/seccion; la vinculacion es manual
 - **Sin transferencias**: No hay proceso para transferir un miembro entre clubes o secciones de forma trazable
 
 ## Prioridad y siguiente accion
 
-- **Prioridad**: Baja — feature completamente funcional en las tres capas
-- **Siguiente accion**: Implementar data layer para units en la app. Considerar agregar estados de vinculacion al modelo de `club_role_assignments` para alinearse con el canon.
+- **Prioridad**: Baja — feature funcional en las tres capas; quedan mejoras de trazabilidad y vinculacion institucional
+- **Siguiente accion**: Considerar agregar estados de vinculacion al modelo de `club_role_assignments` y auditoria de movimientos de unidades para alinearse con el canon.

@@ -138,6 +138,7 @@
 | POST | `/api/v1/users/:userId/post-registration/step-1/complete` | JWT | - | Completar Paso 1: Foto de perfil | `src/post-registration/post-registration.controller.ts` |
 | POST | `/api/v1/users/:userId/post-registration/step-2/complete` | JWT | - | Completar Paso 2: Información personal | `src/post-registration/post-registration.controller.ts` |
 | POST | `/api/v1/users/:userId/post-registration/step-3/complete` | JWT | - | Completar Paso 3: selección de club y alta anual en `enrollments` | `src/post-registration/post-registration.controller.ts` |
+| POST | `/api/v1/users/:userId/post-registration/membership-request/cancel` | JWT | `registration:complete` (owner bypass) | Cancelar la solicitud pendiente propia y reabrir selección de club/sección | `src/post-registration/post-registration.controller.ts` |
 | DELETE | `/api/v1/users/:userId/profile-picture` | JWT | - | Eliminar foto de perfil | `src/users/users.controller.ts` |
 | POST | `/api/v1/users/:userId/profile-picture` | JWT | - | Subir foto de perfil | `src/users/users.controller.ts` |
 | GET | `/api/v1/users/:userId/requires-legal-representative` | JWT | - | Verificar si el usuario requiere representante legal | `src/users/users.controller.ts` |
@@ -161,10 +162,10 @@
   - `health`: `GET/PUT /allergies`, `GET/PUT /diseases`, `GET/PUT /medicines`, `DELETE` item-level de las tres colecciones.
   - `emergency_contacts`: `GET/POST/PATCH/DELETE /emergency-contacts`.
   - `legal_representative`: `GET/POST/PATCH/DELETE /legal-representative`.
-  - `post_registration`: `GET /post-registration/status`, `POST /step-{1,2,3}/complete`.
+  - `post_registration`: `GET /post-registration/status`, `POST /step-{1,2,3}/complete`, `POST /membership-request/cancel`.
 - OR transicional vigente: para terceros, cada familia acepta su permiso fino (`family:read`/`family:update`) o el fallback legacy de la familia `users:*` (`users:read_detail` para lectura, `users:update` para escritura).
 - Baseline health activo: `allergies` + `diseases` + `medicines` como sub-recursos sensibles de `user`; `DELETE` por item está verificado en runtime.
-- Excepción mínima de terceros en `post_registration`: `GET /api/v1/users/:userId/post-registration/status` permite lectura administrativa mínima, y `POST /api/v1/users/:userId/post-registration/step-{1,2,3}/complete` permite completion administrativa mínima.
+- Excepción mínima de terceros en `post_registration`: `GET /api/v1/users/:userId/post-registration/status` permite lectura administrativa mínima, y `POST /api/v1/users/:userId/post-registration/step-{1,2,3}/complete` + `POST /api/v1/users/:userId/post-registration/membership-request/cancel` permiten completion/cancelación administrativa mínima.
 - Exclusiones fuera de scope del change: `GET/PATCH /api/v1/users/:userId`, `POST/DELETE /api/v1/users/:userId/profile-picture`, `GET /api/v1/users/:userId/age` y `GET /api/v1/users/:userId/requires-legal-representative` siguen en metadata legacy `users:*`.
 - Para terceros no owner, `status` debe mantenerse en estado administrativo mínimo y `step-{1,2,3}/complete` no debe filtrar razones sensibles detalladas del usuario objetivo.
 
@@ -172,6 +173,8 @@
 
 - `POST /api/v1/users/:userId/post-registration/step-3/complete` ahora completa el alta operativa anual en `enrollments` como condición de éxito del paso.
 - El flujo mantiene idempotencia para reintentos: reusa/reactiva el tuple único `(user_id, class_id, ecclesiastical_year_id)` y evita duplicados por conflicto de unicidad.
+- El flujo bloquea una segunda solicitud `pending` activa del mismo usuario en otra sección; la única excepción es reintentar el mismo tuple anual.
+- `POST /api/v1/users/:userId/post-registration/membership-request/cancel` cancela la solicitud `pending`, marca la asignación como `cancelled`, desactiva la fila y reabre `users_pr.club_selection_complete`.
 - Si el usuario cambia de clase en el mismo año eclesiástico, el backend desactiva otros `enrollments` activos de ese año antes de resolver el seleccionado.
 - `users_classes` fue archivada como `users_classes_archive` en la migración y ya no existe en el modelo operativo. El histórico consolidado ahora se resuelve desde `enrollments`.
 
@@ -749,6 +752,13 @@ Permisos: `ranking_weights:read` (lectura) | `ranking_weights:write` (creación,
 
 | Method | Path | Auth | Roles | Description | Source |
 |---|---|---|---|---|---|
+| GET | `/api/v1/clubs/:clubId/units` | JWT | `units:read` | Listar unidades activas del club, limitadas a sus secciones activas | `src/units/units.controller.ts` |
+| POST | `/api/v1/clubs/:clubId/units` | JWT | `units:create` | Crear unidad en una seccion activa del club; `club_section_id` es requerido y debe pertenecer al club y al `club_type_id` enviado | `src/units/units.controller.ts` |
+| GET | `/api/v1/clubs/:clubId/units/:unitId` | JWT | `units:read` | Obtener detalle de unidad con miembros, validando que la unidad pertenezca al club | `src/units/units.controller.ts` |
+| PATCH | `/api/v1/clubs/:clubId/units/:unitId` | JWT | `units:update` | Actualizar unidad; si se envia `club_section_id` o `club_type_id`, deben ser consistentes con una seccion activa del club | `src/units/units.controller.ts` |
+| DELETE | `/api/v1/clubs/:clubId/units/:unitId` | JWT | `units:delete` | Desactivar unidad (soft delete), validando pertenencia al club | `src/units/units.controller.ts` |
+| POST | `/api/v1/clubs/:clubId/units/:unitId/members` | JWT | `units:update` | Agregar miembro a la unidad, validando pertenencia de la unidad al club y del usuario a la seccion | `src/units/units.controller.ts` |
+| DELETE | `/api/v1/clubs/:clubId/units/:unitId/members/:memberId` | JWT | `units:update` | Remover miembro de la unidad (soft delete), validando pertenencia de la unidad al club | `src/units/units.controller.ts` |
 | GET | `/api/v1/clubs/:clubId/units/:unitId/weekly-records` | JWT | `units:read` | Listar registros semanales activos de miembros activos de la unidad | `src/units/units.controller.ts` |
 | POST | `/api/v1/clubs/:clubId/units/:unitId/weekly-records` | JWT | `units:update` | Crear registro semanal; valida pertenencia activa, unicidad `(user_id, week, year)` y scores por categoria | `src/units/units.controller.ts` |
 | PATCH | `/api/v1/clubs/:clubId/units/:unitId/weekly-records/:recordId` | JWT | `units:update` | Actualizar asistencia, puntualidad, estado activo o scores por categoria del registro semanal | `src/units/units.controller.ts` |

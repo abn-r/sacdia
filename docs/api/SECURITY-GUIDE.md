@@ -21,6 +21,7 @@ El runtime actual endurece sub-recursos sensibles de `user` con `JwtAuthGuard` +
 | `legal_representative` | `GET/POST/PATCH/DELETE /users/:userId/legal-representative` | `legal_representative:read`, `legal_representative:update` | `users:read_detail`, `users:update` |
 | `post_registration` | `GET /users/:userId/post-registration/status` | `post_registration:read` | `users:read_detail` |
 | `post_registration` | `POST /users/:userId/post-registration/step-{1,2,3}/complete` | `registration:complete` | _(sin fallback)_ |
+| `post_registration` | `POST /users/:userId/post-registration/membership-request/cancel` | `registration:complete` | _(sin fallback)_ |
 
 Reglas de seguridad:
 
@@ -32,6 +33,7 @@ Reglas de seguridad:
 
 - `GET /users/:userId/post-registration/status` para terceros queda limitado a estado administrativo mínimo;
 - `POST /users/:userId/post-registration/step-{1,2,3}/complete` para terceros queda limitado a completion administrativa mínima;
+- `POST /users/:userId/post-registration/membership-request/cancel` para terceros queda limitado a cancelación administrativa mínima;
 - respuestas y errores NO deben filtrar razones sensibles detalladas del usuario objetivo.
 
 ### Exclusiones fuera de scope

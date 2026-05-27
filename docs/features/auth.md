@@ -8,7 +8,7 @@ El modulo de autenticacion es el punto de entrada al sistema SACDIA. Gestiona el
 
 El registro de usuarios incluye un flujo de post-registro en tres pasos: (1) foto de perfil, (2) informacion personal completa, y (3) seleccion de club con alta anual en `enrollments`. Este flujo asegura que cada miembro tenga un perfil completo antes de acceder a las funcionalidades del club. El post-registro se trackea en la tabla `users_pr`.
 
-El sistema soporta un flujo de aprobacion administrativa donde nuevos usuarios quedan en estado `pending` hasta que un administrador los aprueba o rechaza. Los campos `approval_status` y `rejection_reason` en la tabla `users` controlan este flujo. Ademas, cada usuario tiene flags de acceso diferenciados: `access_app` (app movil) y `access_panel` (panel admin).
+El sistema no debe depender de una aprobacion global manual para que cada usuario exista o acceda a SACDIA. La regla vigente de producto separa identidad, acceso por superficie y membresia operativa: `access_app` controla acceso a app movil, `access_panel` controla acceso al panel admin, y la pertenencia real a club/seccion se resuelve por asignaciones activas. Los campos `approval_status` y `rejection_reason` quedan orientados a **revision administrativa por excepcion**, no a una cola masiva de aprobacion de todos los usuarios.
 
 La gestion de sesiones permite listar sesiones activas y cerrar sesiones individuales o todas. El OAuth con Google y Apple esta integrado con flujos server-side que manejan callbacks de los proveedores.
 
@@ -40,6 +40,7 @@ La gestion de sesiones permite listar sesiones activas y cerrar sesiones individ
 - **Logout**: `POST /auth/logout`
 - **Proteccion per-page**: via `requireAdminUser()` que verifica `access_panel`
 - **Gestion de usuarios**: `GET /admin/users`, `GET /admin/users/:userId`, `PATCH /admin/users/:userId`, `PATCH /admin/users/:userId/approval`
+- **Revision administrativa**: `PATCH /admin/users/:userId/approval` existe como superficie de revision/compatibilidad, pero no debe entenderse como aprobacion de membresia a club/seccion ni como gate global masivo.
 - No implementa: registro, MFA, OAuth, gestion de sesiones
 
 ### App Movil
@@ -77,8 +78,9 @@ La gestion de sesiones permite listar sesiones activas y cerrar sesiones individ
 10. MFA con enrolamiento TOTP, verificacion, consulta de estado y deshabilitacion
 11. Gestion de sesiones (listar activas, cerrar individual, cerrar todas)
 12. Contexto de club activo persistido y switcheable via `PATCH /auth/me/context`
-13. Flujo de aprobacion administrativa para nuevos usuarios
+13. Revision administrativa por excepcion para usuarios con banderas de riesgo
 14. Flags de acceso diferenciados: `access_app` y `access_panel`
+15. La membresia activa a club/seccion debe ser el gate operativo para funcionalidades de club
 
 ## Decisiones de diseno
 
@@ -86,6 +88,8 @@ La gestion de sesiones permite listar sesiones activas y cerrar sesiones individ
 - **JWT en camelCase**: Ruptura deliberada con snake_case de SQL; los tokens usan camelCase para consistencia con el frontend
 - **Contexto activo persistido**: `active_club_assignment_id` en `users_pr` permite que el backend resuelva autorizacion de club sin requerir que el cliente envie el contexto en cada request
 - **Post-registro con enrollment**: El paso 3 no solo selecciona club sino que crea la inscripcion anual operativa
+- **Revision por excepcion**: no se aprueban manualmente todos los usuarios; solo se escalan casos con riesgo o inconsistencia
+- **Membresia como gate operativo**: un usuario autenticado puede existir sin membresia activa, pero las funcionalidades de club/seccion requieren una asignacion activa
 - **Logout best-effort**: El logout acepta bearer opcional y no falla si el token ya expiro
 - **Token blacklist**: `TokenBlacklistService` invalida tokens revocados usando Redis/Upstash como cache
 
@@ -94,10 +98,11 @@ La gestion de sesiones permite listar sesiones activas y cerrar sesiones individ
 - **OAuth en app no funcional**: Google y Apple estan declarados pero lanzan excepcion "no disponible aun"
 - **`POST /auth/pr-check` fantasma**: La app consume este endpoint pero no aparece en el backend
 - **Admin sin MFA/OAuth/sesiones**: El panel admin solo implementa login/logout basico
-- **Migracion de approval pendiente**: La migracion Prisma para `users.approval_status` y `users.rejection_reason` existe en codigo pero tiene un bloqueo por shadow DB (`schema "extensions" does not exist`)
+- **Semantica legacy de approval**: `PATCH /admin/users/:userId/approval` queda como superficie de revision por excepcion/compatibilidad, no como gate de membresia; la UI principal de detalle de usuario ya no debe presentarlo como accion hero global.
 - **Admin approval endpoints**: `PATCH /admin/users/:userId/approval` y `PATCH /admin/users/:userId` aparecen en el admin audit pero estaban marcados como FANTASMA en la Reality Matrix (ahora verificados en ENDPOINTS-LIVE-REFERENCE como existentes en `src/admin/admin-users.controller.ts`)
+- **Banderas de revision pendientes de formalizar**: menor sin tutor legal, nombre + fecha de nacimiento identicos a otro usuario, y nombres ofensivos.
 
 ## Prioridad y siguiente accion
 
-- **Prioridad**: Alta para destrabar la migracion de approval en DB y habilitar OAuth en la app
-- **Siguiente accion**: Resolver el bloqueo del shadow DB para aplicar la migracion de approval. Implementar OAuth funcional en la app movil. Investigar y resolver `POST /auth/pr-check` (endpoint fantasma consumido por la app).
+- **Prioridad**: Alta para alinear UI/docs/backend con el modelo de revision por excepcion y membresia activa como gate operativo
+- **Siguiente accion**: formalizar banderas de revision por excepcion y verificar end-to-end el flujo de membresia pendiente con backend + app.
