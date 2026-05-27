@@ -563,7 +563,7 @@
 | GET | `/api/v1/resources` | JWT | `resources:read` | Listar recursos con paginación y filtros (tipo, categoría, tipo de club, scope, texto) | `src/resources/resources.controller.ts` |
 | GET | `/api/v1/resources/:id` | JWT | `resources:read` | Obtener recurso por UUID con URL firmada si tiene archivo | `src/resources/resources.controller.ts` |
 | GET | `/api/v1/resources/:id/signed-url` | JWT | `resources:read` | Generar URL firmada fresca para archivo del recurso (TTL 1 hora) | `src/resources/resources.controller.ts` |
-| PATCH | `/api/v1/resources/:id` | JWT | `resources:update` | Actualizar metadatos del recurso (sin reemplazar archivo) | `src/resources/resources.controller.ts` |
+| PATCH | `/api/v1/resources/:id` | JWT | `resources:update` | Actualizar metadatos del recurso; en `multipart/form-data`, `file` reemplaza el archivo asociado | `src/resources/resources.controller.ts` |
 | DELETE | `/api/v1/resources/:id` | JWT | `resources:delete` | Soft delete del recurso (archivo en R2 no se elimina) | `src/resources/resources.controller.ts` |
 | GET | `/api/v1/resources/me` | JWT | - | Recursos visibles para el usuario autenticado según scope y tipo de club (no requiere RBAC) | `src/resources/resources-app.controller.ts` |
 | GET | `/api/v1/resources/me/:id` | JWT | - | Obtener recurso individual visible para el usuario autenticado con URL firmada | `src/resources/resources-app.controller.ts` |

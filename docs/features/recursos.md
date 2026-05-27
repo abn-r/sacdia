@@ -79,6 +79,10 @@ El campo `scope_level` controla quién puede ver el recurso:
 
 La visibilidad es **cascading**: un recurso de scope `union` lo ven todos los campos locales de esa unión.
 
+En el admin, los usuarios globales sin alcance territorial explícito y los usuarios con alcance país pueden crear recursos para `system`, `union` y `local_field`. Los usuarios con alcance unión quedan restringidos a su propia unión; los usuarios con alcance campo local quedan restringidos a su propio campo local.
+
+El campo `club_type_id` restringe el recurso a un tipo de club específico. Cuando es `NULL`, el recurso aplica a todos los tipos de club.
+
 ---
 
 ## Permisos RBAC
@@ -101,6 +105,7 @@ La visibilidad es **cascading**: un recurso de scope `union` lo ven todos los ca
 ## Storage
 
 - **Bucket**: `RESOURCES_FILES` en Cloudflare R2.
+- **Subida admin**: el admin envía archivos como `multipart/form-data` a `POST /api/v1/resources`; el backend valida permisos/scope y sube el objeto a R2. El navegador no debe hacer PUT directo a R2 para crear recursos.
 - **URLs firmadas**: TTL de 1 hora. Se generan on-demand en `GET /resources/:id` y en el endpoint `/signed-url`.
 - **Soft delete**: el archivo en R2 **no se elimina** al desactivar un recurso. Se mantiene para auditoría y posible reactivación.
 - **Limite de archivo**: 50 MB por upload.
@@ -117,6 +122,8 @@ En lugar de una tabla de permisos por recurso, se usa un campo `scope_level` + `
 
 ### 3. URLs firmadas con TTL corto
 Los archivos en R2 no son públicos. Se generan URLs pre-firmadas con 1 hora de vigencia para cada acceso. Esto evita distribución no autorizada de materiales.
+
+La creación de recursos con archivo es API-first: el cliente admin no solicita URLs prefirmadas de subida ni hace PUT directo a R2. Esto centraliza autorización, validación de alcance, límites de archivo y persistencia en el backend.
 
 ### 4. video_link como tipo nativo
 En lugar de obligar a subir un archivo, el tipo `video_link` acepta una URL externa (`external_url`). Esto permite referenciar contenido en YouTube, Vimeo u otras plataformas sin duplicar el archivo.
