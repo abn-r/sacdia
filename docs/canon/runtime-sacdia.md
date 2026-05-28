@@ -306,6 +306,14 @@ Roles de club documentados:
 - `counselor`
 - `member`
 
+El perfil de autorización resuelto (`AuthorizationContextService`) puede
+cachearse por usuario con key versionada (`auth:context:vN:{userId}`) para
+evitar snapshots obsoletos entre cambios de semántica. Toda mutación de
+relación rol-permiso debe invalidar el cache de los usuarios que poseen ese rol,
+tanto por `users_roles` como por `club_role_assignments`, para que
+`PermissionsGuard` evalúe permisos recién asignados sin esperar expiración por
+TTL.
+
 ### 7.3 Alcance documentado de autorización sensible
 
 El runtime documenta explícitamente autorización sensible sobre:
