@@ -52,9 +52,10 @@ Las carpetas anuales conservan su propio flujo de carga de archivos e imagenes. 
 3. Los totales del folder se recalculan automaticamente al evaluar/reabrir secciones
 4. Las categorias de premios son configurables y reutilizables entre anos
 5. Los rankings se pre-calculan con un cron nocturno (dense ranking)
-6. Los rankings se filtran por tipo de club, ano eclesiastico y categoria
-7. La app muestra puntos y estado de evaluacion en modo solo lectura
-8. El folder transiciona: open → submitted → under_evaluation → evaluated → closed
+6. Los rankings se filtran por tipo de club, ano eclesiastico, categoria y campo local (`local_field_id`) cuando se necesita comparar clubes dentro de una asociación/campo. El backend valida el alcance jerárquico del usuario y puede inferir el campo local desde la asignación activa de club o el perfil efectivo cuando el filtro no viene explícito.
+7. La app muestra un scorecard de progreso anual de su propia sección (`/club-sections/:sectionId/annual-ranking-progress`): puntos actuales, máximo anual, reconocimiento, componentes y pendientes; no muestra el leaderboard de otros clubes
+8. El panel administrativo puede consultar el leaderboard por campo local/año/tipo de club vía `/annual-rankings`, con puntos derivados de `annual_ranking_configs` y rangos de `ranking_tiers`
+9. El folder transiciona: open → submitted → under_evaluation → evaluated → closed
 
 ## Flujo de revision en dos niveles
 

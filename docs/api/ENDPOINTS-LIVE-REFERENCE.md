@@ -614,10 +614,14 @@
 ## rankings
 
 Desde 8.4-C (2026-04-28), los endpoints `GET` de rankings incluyen 6 campos nuevos por fila: `folder_score_pct`, `finance_score_pct`, `camporee_score_pct`, `evidence_score_pct`, `composite_score_pct`, `composite_calculated_at`.
+Desde 2026-05-28, `GET /annual-folders/rankings` también acepta `local_field_id` para rankear clubes dentro de un campo local y devuelve `club_enrollment_id`, `ecclesiastical_year_id` y `local_field_id` por fila para navegación/drill-down. Si se omite `local_field_id`, el backend prefiere el campo local de la asignación activa de club y luego el campo local efectivo/perfil del usuario autenticado; un `local_field_id` explícito fuera del alcance jerárquico del usuario responde 403.
+Desde 2026-05-28, la app móvil debe consumir `GET /club-sections/:sectionId/annual-ranking-progress` para mostrar solo el progreso anual de su propia sección, no un leaderboard competitivo de otros clubes.
 
 | Method | Path | Auth | Roles | Description | Source |
 |---|---|---|---|---|---|
-| GET | `/api/v1/annual-folders/rankings` | JWT | `rankings:read` | Obtener rankings de clubes con filtros (club_type, year, category). Cada fila incluye los 6 campos de composite. | `src/annual-folders/rankings.controller.ts` |
+| GET | `/api/v1/club-sections/:sectionId/annual-ranking-progress?year_id=` | JWT | `rankings:read` / `rankings:read_lf` / `rankings:read_global` o `section_rankings:read_*` equivalente | Scorecard anual de una sección: `current_points`, `max_points`, `current_tier`, `next_tier`, `components`, `pending_items`. Scope: mismo club/sección, campo local explícito o global. | `src/rankings/annual-ranking-progress/annual-ranking-progress.controller.ts` |
+| GET | `/api/v1/annual-rankings?local_field_id=&club_type_id=&year_id=` | JWT | `rankings:read` con scope al campo local solicitado | Leaderboard administrativo por campo local, año y tipo de club. Devuelve posición densa, puntos derivados, máximo anual, tier actual/siguiente y componentes. | `src/rankings/annual-ranking-progress/annual-rankings.controller.ts` |
+| GET | `/api/v1/annual-folders/rankings` | JWT | `rankings:read` global o de asignación activa de club | Obtener rankings de clubes con filtros (`club_type_id`, `year_id`, `category_id`, `local_field_id`). Cada fila incluye IDs de navegación y los 6 campos de composite. | `src/annual-folders/rankings.controller.ts` |
 | GET | `/api/v1/annual-folders/rankings/club/:enrollmentId` | JWT | `rankings:read` | Obtener rankings de un club específico. Incluye los 6 campos de composite. | `src/annual-folders/rankings.controller.ts` |
 | GET | `/api/v1/annual-folders/rankings/:enrollmentId/breakdown` | JWT | `rankings:read` | Drill-down de clasificación por enrollment. Query: `?year_id=`. Devuelve composite + pesos aplicados + detalle por componente. Ver esquema de respuesta abajo. | `src/annual-folders/rankings.controller.ts` |
 | POST | `/api/v1/annual-folders/rankings/recalculate` | JWT | `rankings:recalculate` | Disparar recálculo manual de rankings. Respeta kill-switch `ranking.recalculation_enabled`. | `src/annual-folders/rankings.controller.ts` |
