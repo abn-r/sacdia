@@ -217,6 +217,62 @@ Constraints:
 - CHECK `ranking_weight_configs_sum_check`: `folder_weight + finance_weight + camporee_weight + evidence_weight = 100`.
 - Índice único parcial: `ranking_weight_configs_club_type_unique` sobre `(club_type_id) WHERE club_type_id IS NOT NULL` — permite único global null + un override por club_type.
 
+### `ranking_tiers` (nueva — ranking scorecard)
+
+Tabla global de rangos de reconocimiento calculados por bandas porcentuales desde el máximo anual hacia abajo:
+
+- `ranking_tier_id UUID PK`.
+- `name VARCHAR(100)` — nombre visible, por ejemplo `Diamante`.
+- `slug VARCHAR(80)` — identificador único estable.
+- `band_percentage DECIMAL(5,2)` — amplitud del rango; debe estar en `(0,100]`.
+- `color VARCHAR(20)?` e `icon VARCHAR(100)?` — metadatos visuales para admin/app.
+- `sort_order INTEGER` — orden descendente desde el mayor reconocimiento.
+- `active BOOLEAN DEFAULT true`.
+
+Índices/constraints:
+
+- `ranking_tiers_slug_key` único por `slug`.
+- CHECK `ranking_tiers_band_percentage_check`.
+- Índice único parcial `ranking_tiers_active_sort_order_unique` para evitar dos rangos activos con el mismo orden.
+- Índice `idx_ranking_tiers_active_order` para listar rangos activos ordenados.
+
+### `annual_ranking_configs` (nueva — ranking scorecard)
+
+Configura el máximo anual por campo local, año eclesiástico y tipo de club:
+
+- `annual_ranking_config_id UUID PK`.
+- `local_field_id INT` — FK → `local_fields`.
+- `ecclesiastical_year_id INT` — FK → `ecclesiastical_years`.
+- `club_type_id INT` — FK → `club_types`.
+- `max_points INT` — máximo anual decidido por el campo local; debe ser positivo.
+- `active BOOLEAN DEFAULT true`.
+- `created_by UUID?`, `updated_by UUID?` — auditoría ligera del usuario que creó/actualizó.
+
+Índices/constraints:
+
+- Unique `(local_field_id, ecclesiastical_year_id, club_type_id)`.
+- CHECK `annual_ranking_configs_max_points_check`.
+- Índices `idx_annual_ranking_configs_year_type` y `idx_annual_ranking_configs_active`.
+
+### `annual_ranking_component_configs` (nueva — ranking scorecard)
+
+Define el presupuesto de puntos por componente dentro de una configuración anual:
+
+- `annual_ranking_component_config_id UUID PK`.
+- `annual_ranking_config_id UUID` — FK → `annual_ranking_configs` con `ON DELETE CASCADE`.
+- `component_key VARCHAR(50)` — clave estable (`annual_folder`, `finance`, `camporee`, `evidence`).
+- `label VARCHAR(120)` — etiqueta visible.
+- `max_points INT` — puntos máximos del componente; debe ser positivo.
+- `sort_order INTEGER DEFAULT 0`.
+- `active BOOLEAN DEFAULT true`.
+
+Índices/constraints:
+
+- Unique `(annual_ranking_config_id, component_key)`.
+- CHECK `annual_ranking_component_configs_max_points_check`.
+- Índice `idx_annual_ranking_component_configs_active_order`.
+- La suma de componentes activos debe igualar `annual_ranking_configs.max_points`; se valida en servicio/API porque depende de múltiples filas.
+
 ---
 
 ## Inventario resumido por dominio
@@ -262,7 +318,7 @@ Constraints:
 
 - `club_enrollments`, `folder_templates`, `folder_template_sections`
 - `annual_folders`, `annual_folder_evidences`, `annual_folder_section_evaluations`, `annual_folder_section_submissions`
-- `award_categories`, `club_annual_rankings`, `ranking_weight_configs`, `monthly_reports`, `monthly_report_manual_data`, `member_of_month`, `weekly_records`, `scoring_categories`, `weekly_record_scores`
+- `award_categories`, `club_annual_rankings`, `ranking_weight_configs`, `ranking_tiers`, `annual_ranking_configs`, `annual_ranking_component_configs`, `monthly_reports`, `monthly_report_manual_data`, `member_of_month`, `weekly_records`, `scoring_categories`, `weekly_record_scores`
 - `enrollment_rankings`, `section_rankings`, `enrollment_ranking_weights` — (8.4-A) clasificación por enrollment/sección
 
 ### Recursos y logros
@@ -305,6 +361,7 @@ Constraints:
 - `20260415100300_section_evaluations_stored_status` - crea `annual_folder_section_status_enum`, añade la columna `status` materializada con default `PENDING`, el CHECK de `PREAPPROVED_LF` y el indice analitico por estado.
 - `20260415100400_annual_folders_eager_evaluation_backfill` - migracion data-only; no-op sobre dev por ausencia de datos legacy.
 - `20260428000000_extended_rankings_schema` (8.4-C) - añade 5 columnas de score + `composite_calculated_at` a `club_annual_rankings`; crea `ranking_weight_configs` con CHECK sum=100 + índice único parcial; extiende `award_categories` con `min_composite_pct`, `max_composite_pct`, `is_legacy`; crea `idx_rankings_composite`; inserta configuración global default (60/15/15/10); agrega keys `ranking.finance_closing_deadline_day` y `ranking.recalculation_enabled` en `system_config`. Aplicada en los 3 branches Neon (development, staging, production).
+- `20260528180000_annual_ranking_scorecard` - crea `ranking_tiers`, `annual_ranking_configs` y `annual_ranking_component_configs` para soportar rangos porcentuales globales y máximos anuales por campo local/año/tipo de club.
 - `20260429000000_enrollment_rankings_schema` - (8.4-A) crea `enrollment_rankings`, `section_rankings`, `enrollment_ranking_weights` con indexes, UNIQUE constraints y CHECK constraints de rango [0,100]. Ver §14.1 de `docs/canon/runtime-rankings.md`.
 - `20260429000001_award_categories_scope` - (8.4-A) añade `scope VARCHAR(20) DEFAULT 'club'` a `award_categories` + índice `idx_award_categories_scope` on `(scope, is_legacy)`. Backfill: filas existentes → `scope='club'`.
 - `20260429000002_enrollment_rankings_seeds` - (8.4-A) seed de fila global `is_default=true` en `enrollment_ranking_weights` con pesos 50/30/20 (class/investiture/camporee).
