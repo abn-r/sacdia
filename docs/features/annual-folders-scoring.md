@@ -55,7 +55,8 @@ Las carpetas anuales conservan su propio flujo de carga de archivos e imagenes. 
 6. Los rankings se filtran por tipo de club, ano eclesiastico, categoria y campo local (`local_field_id`) cuando se necesita comparar clubes dentro de una asociación/campo. El backend valida el alcance jerárquico del usuario y puede inferir el campo local desde la asignación activa de club o el perfil efectivo cuando el filtro no viene explícito.
 7. La app muestra un scorecard de progreso anual de su propia sección (`/club-sections/:sectionId/annual-ranking-progress`): puntos actuales, máximo anual, reconocimiento, componentes y pendientes; no muestra el leaderboard de otros clubes
 8. El panel administrativo puede consultar el leaderboard por campo local/año/tipo de club vía `/annual-rankings`, con puntos derivados de `annual_ranking_configs` y rangos de `ranking_tiers`
-9. El folder transiciona: open → submitted → under_evaluation → evaluated → closed
+9. El panel administrativo configura los rangos globales vía `/ranking-tiers` y los presupuestos anuales por campo local/año/tipo de club vía `/annual-ranking-configs`. Los rangos son globales del sistema; los puntos máximos y budgets de componentes son decididos por cada campo local para cada año y tipo de club
+10. El folder transiciona: open → submitted → under_evaluation → evaluated → closed
 
 ## Flujo de revision en dos niveles
 

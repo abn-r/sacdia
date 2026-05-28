@@ -167,6 +167,11 @@ Rankings (permiso `rankings:read` | `rankings:recalculate`):
 
 - `GET /club-sections/:sectionId/annual-ranking-progress?year_id` — scorecard móvil de una sola sección/club. Devuelve progreso anual propio (`current_points`, `max_points`, tier actual/siguiente, componentes y pendientes). No expone lista competitiva de otros clubes; esa visibilidad queda para administración;
 - `GET /annual-rankings?local_field_id&club_type_id&year_id` — leaderboard administrativo por campo local, tipo de club y año. Calcula puntos con la configuración anual (`annual_ranking_configs`), asigna posición densa por puntos y deriva el tier actual/siguiente con `ranking_tiers`;
+- `GET /annual-ranking-configs?local_field_id&club_type_id&year_id` — lista configuraciones anuales de puntaje y budgets por componente. Permiso `ranking_weights:read`;
+- `POST /annual-ranking-configs` — crea la configuración anual por campo local/año/tipo de club. Permiso `ranking_weights:write`; valida suma de componentes = `max_points`;
+- `PATCH /annual-ranking-configs/:id` — actualiza máximo anual y reemplaza budgets de componentes. Permiso `ranking_weights:write`;
+- `GET /ranking-tiers` — lista rangos globales activos (`ranking_tiers`) usados para derivar Diamante/Oro/etc. Permiso `ranking_weights:read`;
+- `PATCH /ranking-tiers/:id` — actualiza un rango global; `band_percentage` debe ser positivo. Permiso `ranking_weights:write`;
 - `GET /annual-folders/rankings?club_type_id&year_id[&category_id][&local_field_id]` — cada fila incluye IDs de navegación (`club_enrollment_id`, `ecclesiastical_year_id`, `local_field_id`) y los 6 campos nuevos: `folder_score_pct`, `finance_score_pct`, `camporee_score_pct`, `evidence_score_pct`, `composite_score_pct`, `composite_calculated_at`. Acepta `rankings:read` desde rol global o desde la asignación activa de club. Si `local_field_id` se omite, el backend usa primero el campo local de la asignación activa y luego el campo local efectivo/perfil del usuario; si se envía explícito, valida acceso jerárquico histórico o coincidencia con la asignación activa antes de consultar;
 - `GET /annual-folders/rankings/club/:enrollmentId?year_id` — ídem;
 - `GET /annual-folders/rankings/:enrollmentId/breakdown?year_id` — drill-down por enrollment: devuelve composite + pesos aplicados + detalle de cada componente. Permiso `rankings:read`;
