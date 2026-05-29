@@ -82,6 +82,7 @@ La visibilidad es **cascading**: un recurso de scope `union` lo ven todos los ca
 En el admin, los usuarios globales sin alcance territorial explícito y los usuarios con alcance país pueden crear recursos para `system`, `union` y `local_field`. Los usuarios con alcance unión quedan restringidos a su propia unión; los usuarios con alcance campo local quedan restringidos a su propio campo local.
 
 El campo `club_type_id` restringe el recurso a un tipo de club específico. Cuando es `NULL`, el recurso aplica a todos los tipos de club.
+En la app, ese filtro se compara contra el tipo de club de la asignación activa del usuario (`authorization.effective.scope.club.section.club_type_id`); si el usuario no tiene asignación activa, solo ve recursos sin restricción de tipo de club.
 
 ---
 
@@ -107,6 +108,7 @@ El campo `club_type_id` restringe el recurso a un tipo de club específico. Cuan
 - **Bucket**: `RESOURCES_FILES` en Cloudflare R2.
 - **Subida admin**: el admin envía archivos como `multipart/form-data` a `POST /api/v1/resources`; el backend valida permisos/scope y sube el objeto a R2. El navegador no debe hacer PUT directo a R2 para crear recursos.
 - **URLs firmadas**: TTL de 1 hora. Se generan on-demand en `GET /resources/:id` y en el endpoint `/signed-url`.
+- **App móvil**: documentos, audios e imágenes conservan acción de descarga. Además, audio ofrece reproducción embebida desde la URL firmada, los PDF se abren en visor interno y las imágenes se abren en visor fullscreen con zoom.
 - **Soft delete**: el archivo en R2 **no se elimina** al desactivar un recurso. Se mantiene para auditoría y posible reactivación.
 - **Limite de archivo**: 50 MB por upload.
 

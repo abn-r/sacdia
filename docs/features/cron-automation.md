@@ -2,13 +2,13 @@
 
 **Estado**: IMPLEMENTADO
 
-<!-- VERIFICADO contra código 2026-04-22: 8 @Cron jobs identificados en sacdia-backend/src/, ScheduleModule registrado en app.module.ts:75, timezone UTC (uno explícito, siete por default NestJS). -->
+<!-- VERIFICADO contra código 2026-05-28: jobs @Cron identificados en sacdia-backend/src/, ScheduleModule registrado en app.module.ts. La mayoría opera en UTC; monthly report reminders opera en America/Mexico_City por ser comunicación de calendario local. -->
 
 ## Descripción de dominio
 
-El backend SACDIA ejecuta 8 jobs programados que automatizan flujos institucionales recurrentes: generación de reportes mensuales, cierre financiero, cálculo de rankings anuales, evaluación de miembro del mes, recordatorios de actividades, expiración de solicitudes, cleanup de tokens/sesiones y limpieza de exportes vencidos.
+El backend SACDIA ejecuta jobs programados que automatizan flujos institucionales recurrentes: generación de reportes mensuales, recordatorios de reportes mensuales, cierre financiero, cálculo de rankings anuales, evaluación de miembro del mes, recordatorios de actividades, expiración de solicitudes, cleanup de tokens/sesiones y limpieza de exportes vencidos.
 
-Todos los jobs operan en **UTC** (ver §3), son **idempotentes por diseño** (usan locks distribuidos o verificaciones de estado previo) y siguen un patrón **fire-and-forget** desde el scheduler — fallos dentro de un job no detienen el resto del pipeline ni propagan excepciones al caller original del endpoint que disparó el flujo.
+La mayoría de los jobs operan en **UTC** (ver §3); los recordatorios de reportes mensuales operan en `America/Mexico_City` porque son mensajes de calendario local para usuarios. Son **idempotentes por diseño** (usan locks distribuidos o verificaciones de estado previo) y siguen un patrón **fire-and-forget** desde el scheduler — fallos dentro de un job no detienen el resto del pipeline ni propagan excepciones al caller original del endpoint que disparó el flujo.
 
 Varios jobs están gobernados por `system_config` o feature flags (ver §6) para habilitar/deshabilitar por ambiente sin redeploy.
 
@@ -17,7 +17,7 @@ Varios jobs están gobernados por `system_config` o feature flags (ver §6) para
 ### Infraestructura
 
 - **Módulo NestJS**: `ScheduleModule.forRoot()` registrado en `sacdia-backend/src/app.module.ts:75`.
-- **Timezone**: UTC explícito en los 8 jobs desde 2026-04-22 (opción `{ timeZone: 'UTC' }` en cada decorador `@Cron`).
+- **Timezone**: UTC explícito en los jobs operativos; excepción documentada: `monthly-reports-reminders` usa `{ timeZone: 'America/Mexico_City' }`.
 - **Locks distribuidos**: varios jobs usan lock en Redis para evitar ejecución concurrente entre múltiples instancias (ver cada job para TTL).
 - **Logging**: estructurado vía `Logger` de NestJS; fallos por entidad se loguean y continúan con el siguiente elemento del batch.
 
@@ -26,14 +26,15 @@ Varios jobs están gobernados por `system_config` o feature flags (ver §6) para
 | # | Job | Cron | Frecuencia efectiva | Módulo |
 |---|-----|------|---------------------|--------|
 | 1 | Monthly reports auto-generate | `0 23 * * *` | diario 23:00 UTC | `monthly-reports` |
-| 2 | Nightly rankings recalculation | `0 2 * * *` | diario 02:00 UTC | `annual-folders` |
-| 3 | Data export cleanup | `0 4 * * *` | diario 04:00 UTC | `data-export` |
-| 4 | Member of the month auto-evaluate | `5 0 1 * *` | día 1 del mes, 00:05 UTC | `member-of-month` |
-| 5 | Finance period closing | `0 0 1 * *` | día 1 del mes, 00:00 UTC | `finances` |
-| 6 | Activity reminders | `*/5 * * * *` | cada 5 minutos | `activities` |
-| 7 | Membership requests expiry | `0 * * * *` | cada hora en :00 | `membership-requests` |
-| 8 | Cleanup expired sessions/tokens | `EVERY_6_HOURS` (`0 */6 * * *`) | cada 6 horas | `common` |
-| 9 | Cleanup inactive FCM tokens (>90d) | `EVERY_DAY_AT_3AM` (`0 3 * * *`) | diario 03:00 UTC | `common` |
+| 2 | Monthly reports reminders | `0 9 * * *` | diario 09:00 America/Mexico_City, emite solo dias 27/1/4/5/6 | `monthly-reports` |
+| 3 | Nightly rankings recalculation | `0 2 * * *` | diario 02:00 UTC | `annual-folders` |
+| 4 | Data export cleanup | `0 4 * * *` | diario 04:00 UTC | `data-export` |
+| 5 | Member of the month auto-evaluate | `5 0 1 * *` | día 1 del mes, 00:05 UTC | `member-of-month` |
+| 6 | Finance period closing | `0 0 1 * *` | día 1 del mes, 00:00 UTC | `finances` |
+| 7 | Activity reminders | `*/5 * * * *` | cada 5 minutos | `activities` |
+| 8 | Membership requests expiry | `0 * * * *` | cada hora en :00 | `membership-requests` |
+| 9 | Cleanup expired sessions/tokens | `EVERY_6_HOURS` (`0 */6 * * *`) | cada 6 horas | `common` |
+| 10 | Cleanup inactive FCM tokens (>90d) | `EVERY_DAY_AT_3AM` (`0 3 * * *`) | diario 03:00 UTC | `common` |
 
 ## Detalle por job
 
@@ -50,6 +51,26 @@ Varios jobs están gobernados por `system_config` o feature flags (ver §6) para
   - `reports.auto_generate_enabled` ≠ `true`;
   - fecha actual ≠ `reports.auto_generate_day`;
   - reporte del enrollment ya en status distinto de `draft`.
+
+### 1.1 Monthly reports reminders
+
+- **Archivo**: `sacdia-backend/src/monthly-reports/monthly-reports-reminder-cron.service.ts`
+- **Método**: `handleReminderNotifications()`
+- **Clase**: `MonthlyReportsReminderCronService`
+- **Propósito**: Notificar a director y secretario de cada sección activa sobre la captura/cierre/disponibilidad del informe mensual.
+- **Calendario funcional**:
+  - día 27: registrar avances del mes actual;
+  - día 1: quedan 5 días para cerrar el informe del mes anterior;
+  - día 4: último recordatorio;
+  - día 5: registro cerrado;
+  - día 6: informe generado/disponible, solo si el informe existe en estado `generated` o `submitted`.
+- **Destinatarios**: roles de club `director`, `secretary` y `secretary-treasurer`; no incluye subdirector.
+- **Side-effects**: `NotificationsService.sendToSectionRole()` con source `monthly_reports:reminder` y categoría móvil `reminders`.
+- **Condiciones skip**:
+  - lock distribuido no adquirido;
+  - `reports.reminders_enabled` = `false`;
+  - día fuera del calendario programado;
+  - sección sin director/secretario activo o usuarios con opt-out de `reminders`.
 
 ### 2. Nightly rankings recalculation
 
