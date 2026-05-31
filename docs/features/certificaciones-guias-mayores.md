@@ -71,7 +71,7 @@ El modulo backend esta completamente implementado con CRUD de progreso. El admin
 - No hay endpoint para subida de archivos/evidencias de certificaciones (a diferencia de honores y clases que si tienen)
 - No hay flujo de validacion institucional de certificaciones completadas
 - No hay reporte administrativo de certificaciones por club o seccion
-- La validacion de "Guia Mayor investido" debe validar contra `enrollments` con investiture_status = 'invested' (users_classes fue archivada)
+- La validacion de "Guia Mayor investido" debe validar contra `enrollments` con investiture_status = 'invested' (`users_classes` fue retirada)
 
 ## Prioridad y siguiente accion
 

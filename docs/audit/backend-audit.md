@@ -251,7 +251,7 @@ Schema: `prisma/schema.prisma`
 | 9 | class_modules | 7 | classes, class_sections[] | - |
 | 10 | class_section_progress | 10 | classes, enrollments, users | - |
 | 11 | class_sections | 6 | class_modules | - |
-| 12 | classes | 10 | club_types, enrollments[], users_classes[], class_modules[], class_module_progress[], class_section_progress[] | - |
+| 12 | classes | 9 | club_types, enrollments[], class_modules[], class_module_progress[], class_section_progress[] | - |
 | 13 | club_ideals | 7 | club_types | - |
 | 14 | club_inventory | 10 | club_adventurers, club_master_guilds, club_pathfinders, inventory_categories | - |
 | 15 | club_types | 5 | activities[], classes[], club_adventurers[], club_ideals[], club_master_guilds[], club_pathfinders[], finances[], folders[], honors[], units[] | - |
@@ -286,10 +286,10 @@ Schema: `prisma/schema.prisma`
 | 44 | unions | 6 | countries, local_fields[], union_camporees[], users[] | - |
 | 45 | unit_members | 5 | units, users | - |
 | 46 | units | 10 | club_adventurers, club_master_guilds, club_pathfinders, club_types, users (x4), unit_members[] | - |
-| 47 | users | 26 | countries, local_fields, unions, activities[], enrollments[], club_role_assignments[], users_classes[], users_honors[], users_allergies[], users_diseases[], users_medicines[], users_roles[], users_permissions[] | blood_type |
+| 47 | users | 25 | countries, local_fields, unions, activities[], enrollments[], club_role_assignments[], users_honors[], users_allergies[], users_diseases[], users_medicines[], users_roles[], users_permissions[] | blood_type |
 | 48 | user_fcm_tokens | 7 | users | - |
 | 49 | users_pr | 8 | users | - |
-| 50 | users_classes | 9 | classes, users | - |
+| 50 | users_classes | 0 | RETIRADA del schema runtime actual | - |
 | 51 | certifications | 7 | certification_modules[], users_certifications[] | - |
 | 52 | certification_modules | 6 | certifications, certification_sections[] | - |
 | 53 | certification_sections | 6 | certification_modules | - |

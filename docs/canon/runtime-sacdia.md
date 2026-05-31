@@ -83,13 +83,13 @@ El runtime actual conserva naming técnico heredado en varios puntos, pero debe 
 - `role` / `assignment` = representación técnica que no sustituye el concepto canónico de cargo o vinculación institucional.
 
 ### 4.2 Verdad anual vs trayectoria consolidada
-<!-- VERIFICADO contra código 2026-03-14: enrollments y users_classes existen en schema.prisma y son ALINEADO -->
+<!-- VERIFICADO contra código 2026-05-29: enrollments existe en schema.prisma; users_classes/users_classes_archive fueron retiradas -->
 
 La frontera runtime vigente queda documentada así:
 
 - `enrollments` = verdad operativa anual del cursado, progreso, validación e investidura del periodo; <!-- VERIFICADO -->
-- `users_classes` = trayectoria consolidada por clase a lo largo del tiempo; <!-- VERIFICADO -->
-- `users_classes.current_class` = compatibilidad legacy, no verdad operativa anual. <!-- VERIFICADO -->
+- la trayectoria histórica de clases se consulta desde `enrollments` con filtros por año eclesiástico y estado;
+- `users_classes` y `users_classes_archive` no existen en el schema runtime actual.
 
 Esta frontera está respaldada por `docs/canon/decisiones-clave.md` y por las notas runtime activas en `ENDPOINTS-LIVE-REFERENCE.md`.
 
@@ -190,7 +190,9 @@ Notas runtime activas:
 - el owner puede operar sus propias rutas sensibles;
 - terceros requieren permisos globales o permisos finos transicionales según familia;
 - `post-registration step 3` crea o reactiva alta anual en `enrollments`;
-- si el usuario cambia de clase en el mismo año, se desactivan otros enrollments activos del año antes de resolver el seleccionado.
+- `post-registration step 3` deriva la clase desde fecha de nacimiento, inicio del año eclesiástico y tipo de club seleccionado; si el cliente envía un `class_id` que no coincide, se rechaza;
+- si el usuario re-ejecuta post-registro por corrección/cambio de club, se desactivan otros enrollments activos del año antes de resolver la clase derivada;
+- si una transferencia de club/sección es aprobada, se aplica la misma regla de clase derivada para el `club_type_id` destino y se resuelve el enrollment anual activo.
 
 ### 6.3 Clubes, secciones y cargos
 <!-- VERIFICADO contra código 2026-03-14: clubs module ALINEADO en todas las capas -->
@@ -359,7 +361,7 @@ La persistencia documentada usa:
 
 El schema de persistencia contiene 72 modelos. Se categorizan así:
 
-- **Modelos core de trayectoria**: `users`, `enrollments`, `users_classes`, `users_honors`, `member_insurances`, `legal_representatives`, `emergency_contacts`, `users_pr`, `users_roles`, `club_role_assignments`, `unit_members`, `units`, `weekly_records`.
+- **Modelos core de trayectoria**: `users`, `enrollments`, `users_honors`, `member_insurances`, `legal_representatives`, `emergency_contacts`, `users_pr`, `users_roles`, `club_role_assignments`, `unit_members`, `units`, `weekly_records`.
 - **Modelos de catálogo (trayectoria)**: `classes`, `honors`, `honors_categories`, `master_honors`, `club_types`, `club_ideals`, `relationship_types`, `allergies`, `diseases`, `medicines`, `ecclesiastical_years`, `activity_types`, `inventory_categories`, `finances_categories`.
 - **Modelos operativos**: `clubs`, `club_sections`, `folders`, `folders_modules`, `folders_sections`, `folders_modules_records`, `folders_section_records`, `folder_assignments`, `certifications` y tablas relacionadas, `club_inventory`, `finances` y tablas relacionadas, `activities` y tablas relacionadas, `camporees` y tablas relacionadas, `notifications`.
 - **Modelos de infraestructura**: `error_logs`, `user_fcm_tokens`.
@@ -373,7 +375,7 @@ El runtime documenta al menos estos grupos de persistencia:
 - **Users & Auth**: `users`, `users_pr`, `users_roles`, `legal_representatives`, `emergency_contacts`
 - **Organization**: `countries`, `unions`, `local_fields`, `districts`, `churches`, `ecclesiastical_years`
 - **Clubs**: `clubs`, `club_sections`, `club_role_assignments`
-- **Formación**: `classes`, `users_classes`, `enrollments`
+- **Formación**: `classes`, `enrollments`
 - **RBAC**: `roles`, `permissions`, `role_permissions`
 - **Catálogos**: `club_types`, `relationship_types`, `inventory_categories`
 
@@ -395,8 +397,7 @@ El runtime documenta al menos estos grupos de persistencia:
 #### Formación
 
 - `classes` define catálogo de clases;
-- `enrollments` define ciclo anual operativo;
-- `users_classes` define trayectoria consolidada por clase.
+- `enrollments` define ciclo anual operativo y trayectoria histórica consultable por año eclesiástico/estado.
 
 #### Autoridad y jerarquía
 
@@ -435,7 +436,7 @@ El runtime canonizado de Wave 0 queda resumido así:
 - la API vigente es la publicada en `ENDPOINTS-LIVE-REFERENCE.md`;
 - la semántica del sistema se interpreta desde trayectoria, club, sección, vinculación, periodo y validación;
 - la operación anual formativa se lee desde `enrollments`;
-- la trayectoria consolidada histórica se lee desde `users_classes`;
+- la trayectoria consolidada histórica se lee desde `enrollments`;
 - la autorización runtime combina JWT, permisos globales y asignaciones contextuales;
 - las superficies documentadas cubren autenticación, perfil, post-registro, clases, investiduras, honores, certificaciones, folders, clubes, roles, finanzas, actividades, camporees, inventario y notificaciones.
 

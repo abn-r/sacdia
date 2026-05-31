@@ -27,7 +27,7 @@ No deben entrar decisiones menores de implementación, notas de sesión, bugs t�
 
 ### 1. La trayectoria institucional es el eje del sistema
 
-**Estado**: Vigente <!-- VERIFICADO: enrollments + users_classes + classes implementados y ALINEADO -->
+**Estado**: Vigente <!-- VERIFICADO 2026-05-29: trayectoria formativa de clases se modela con enrollments; users_classes/users_classes_archive no existen en el schema runtime actual -->
 
 **Contexto**: La documentación previa tendía a describir SACDIA como un sistema de gestión o catálogo administrativo. Esa lectura debilitaba el valor principal del producto y fragmentaba la semántica del dominio.
 
@@ -139,21 +139,20 @@ No deben entrar decisiones menores de implementación, notas de sesión, bugs t�
 
 ### 9. La verdad formativa se separa entre ciclo anual y trayectoria consolidada
 
-**Estado**: Vigente <!-- VERIFICADO: enrollments = ciclo anual, users_classes = trayectoria consolidada. Backend implementa ambos con FS-02/FS-03 -->
+**Estado**: Vigente <!-- VERIFICADO 2026-05-29: enrollments = ciclo anual + trayectoria histórica consultable; users_classes/users_classes_archive no existen en el schema runtime actual -->
 
-**Contexto**: El sistema actual usa `users_classes` y `enrollments` con semánticas parcialmente superpuestas. La intención original distingue dos planos válidos: trayectoria histórica por clase y cursado anual dentro de un año eclesiástico. El problema actual no es la existencia de ambas estructuras, sino la falta de una frontera de autoridad clara en runtime.
+**Contexto**: El sistema histórico usó `users_classes` y `enrollments` con semánticas parcialmente superpuestas. El runtime actual retiró `users_classes`; la distinción vigente se expresa dentro de `enrollments`: cursado anual operativo y lectura histórica por año eclesiástico/estado.
 
-**Decisión**: El canon adopta un modelo de responsabilidad dividida:
+**Decisión**: El canon adopta `enrollments` como fuente única del estado formativo de clases:
 
-- `enrollments` es la fuente de verdad del ciclo anual operativo de una clase, incluyendo inscripción, progreso, validación e investidura del periodo;
-- `users_classes` es la fuente de verdad de la trayectoria consolidada por clase del miembro a lo largo del tiempo.
+- ciclo anual operativo: inscripción, progreso, validación e investidura del periodo;
+- trayectoria histórica: consulta consolidada desde enrollments por usuario, clase, año eclesiástico y estado.
 
 **Consecuencias**:
 
-- `users_classes` no debe seguir tratándose como fuente operativa primaria del ciclo actual;
-- post-registro, clases, admin y certificaciones deben alinearse con esta frontera;
-- cuando un ciclo anual llegue a un estado consolidado, su resultado debe proyectarse o sincronizarse hacia `users_classes`;
-- mientras esta frontera no esté implementada de forma consistente, el runtime canónico debe seguir tratándose con cautela.
+- `users_classes` no debe usarse como fuente operativa ni histórica en nuevas implementaciones;
+- post-registro, clases, admin, certificaciones y reportes deben consultar `enrollments`;
+- cualquier documento que eleve `users_classes` por encima de `enrollments` está obsoleto frente al schema runtime actual.
 
 ### 10. Consolidación de secciones de club en tabla única (2026-03-17)
 

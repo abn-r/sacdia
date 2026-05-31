@@ -42,6 +42,7 @@ Las unidades (`units`) son subdivisiones informales dentro de una seccion (tipic
 - Gestion de unidades por club/seccion, enviando `club_section_id` al backend
 - Listado de miembros por seccion
 - Asignacion y revocacion de roles de club
+- Sucesion anual de director por seccion desde el detalle del club, visible solo para `director-lf` y `assistant-lf`
 
 ### App Movil
 - **3 features relacionados**:
@@ -55,6 +56,7 @@ Las unidades (`units`) son subdivisiones informales dentro de una seccion (tipic
 - `club_sections` — Secciones de club (unidad operativa por tipo), consolidado de las antiguas tablas `club_adventurers`, `club_pathfinders`, `club_master_guilds` (Decision 10, 2026-03-17)
 - `club_types` — Catalogo de tipos de club (Aventureros, Conquistadores, Guias Mayores)
 - `club_role_assignments` — Asignaciones de roles a usuarios en secciones (anual)
+- `role_slot_limits` — Limites maximos de asignaciones activas por rol y seccion
 - `units` — Unidades dentro de secciones
 - `unit_members` — Miembros asignados a unidades
 - `enrollments` — Inscripciones anuales operativas
@@ -71,12 +73,16 @@ Las unidades (`units`) son subdivisiones informales dentro de una seccion (tipic
 8. El director del club es el unico que puede eliminar secciones y desactivar el club
 9. Las asignaciones de rol deben estar vinculadas a un ano eclesiastico para mantener historico
 10. Las unidades deben pertenecer a una seccion activa; sus miembros deben pertenecer a esa misma seccion
+11. Una seccion no puede tener mas cargos activos que los definidos para la directiva: `director` 1, `deputy-director` 2, `secretary` 1, `treasurer` 1 y `secretary-treasurer` 1
+12. `secretary-treasurer` es excluyente con `secretary` y `treasurer` separados dentro de la misma seccion
 
 ## Decisiones de diseno
 
 - **Club como identidad, seccion como operacion**: El club es la entidad permanente; las secciones son las que ejecutan el programa (Decision 2 y 3 del canon)
 - **Consolidacion de secciones**: Las tres tablas originales (`club_adventurers`, `club_pathfinders`, `club_master_guilds`) se consolidaron en `club_sections` con un `club_type_id` discriminador (Decision 10)
 - **Roles anuales**: Las asignaciones de rol tienen `ecclesiastical_year_id`, permitiendo que un miembro cambie de rol entre anos sin perder historico
+- **Sucesion anual de director**: para cambiar el director en el siguiente ano eclesiastico, el Admin usa `POST /clubs/:clubId/sections/:sectionId/director-succession`, que cierra la asignacion activa anterior (`active=false`, `status=ended`, `end_date`) y crea una nueva asignacion `director` para el ano indicado. Solo `director-lf` y `assistant-lf` pueden ejecutar este flujo. No deben convivir dos directores activos en la misma seccion.
+- **Limites de directiva**: `role_slot_limits` define los cupos por seccion y el backend tambien conserva fallback canonico para cargos criticos aunque falte el seed. La regla se aplica al crear asignaciones directas, al actualizar un rol y al revisar solicitudes de asignacion.
 - **Contexto activo**: `users_pr.active_club_assignment_id` persiste el contexto de club activo del usuario, usado por `ClubRolesGuard` para resolver autorizacion
 - **Autorizacion por jerarquia de roles**: Director tiene todos los permisos; subdirector la mayoria; secretary puede gestionar roles y secciones
 
@@ -86,7 +92,7 @@ Las unidades (`units`) son subdivisiones informales dentro de una seccion (tipic
 - **Sin trayectoria historica**: Canon define preservar transiciones entre secciones — no hay estructura dedicada para historico de secciones
 - **Trazabilidad historica de unidades**: No hay auditoria dedicada para cambios de unidad o movimientos entre unidades
 - **Sin invitaciones**: No hay flujo para invitar miembros a un club/seccion; la vinculacion es manual
-- **Sin transferencias**: No hay proceso para transferir un miembro entre clubes o secciones de forma trazable
+- **Transferencias parciales**: existe flujo de solicitudes de transferencia entre secciones; al aprobar, mueve asignaciones y recalcula la clase anual por edad/tipo de club destino. Aun falta auditoria dedicada de trayectoria historica de secciones.
 
 ## Prioridad y siguiente accion
 

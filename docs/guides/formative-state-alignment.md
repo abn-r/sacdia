@@ -8,143 +8,74 @@ Lectura previa obligatoria:
 - `docs/canon/runtime-sacdia.md`
 - `docs/canon/decisiones-clave.md`
 
-## Propósito
+## Proposito
 
-Este documento define el plan técnico de transición para alinear el estado formativo del sistema con el canon vigente.
+Este documento alinea el estado formativo de clases con el canon vigente y con el schema runtime actual.
 
-Es un documento subordinado al canon. No redefine el dominio ni el runtime; traduce una decisión canónica a una secuencia de implementación segura.
+Es un documento subordinado al canon. No redefine el dominio ni el runtime; traduce la decision canonica a reglas operativas para nuevas implementaciones.
 
-## Problema
+## Estado runtime vigente
 
-El runtime actual usa dos estructuras con semántica parcialmente superpuesta:
+El runtime actual usa una unica fuente de verdad formativa:
 
 - `enrollments`
-- `users_classes`
 
-La intención de negocio distingue dos niveles válidos:
+La tabla legacy `users_classes` y su archivo historico `users_classes_archive` fueron retirados del schema runtime actual. No deben usarse como fuente operativa, historica ni transicional en nuevas implementaciones.
 
-- `enrollments` para el ciclo anual operativo de una clase dentro de un año eclesiástico;
-- `users_classes` para la trayectoria consolidada por clase a lo largo de la vida institucional del miembro.
+## Modelo objetivo actual
 
-El desalineamiento actual aparece porque distintas partes del sistema siguen tratando ambas estructuras como si fueran fuente primaria del mismo problema.
+- `enrollments` representa el cursado anual operativo de una clase dentro de un año eclesiastico.
+- La trayectoria historica consolidada se consulta desde `enrollments` usando año eclesiastico, clase, estado de investidura/progreso y filtros historicos.
+- `class_module_progress` y `class_section_progress` proyectan avance sobre el `enrollment` correspondiente.
+- Post-registro, cambios de club y transferencias deben resolver la clase operacional desde `enrollments`, no desde tablas legacy.
 
-## Modelo objetivo
+## Reglas de post-registro y transferencia
 
-- `enrollments` es la fuente de verdad del ciclo anual operativo;
-- `users_classes` es la fuente de verdad de la trayectoria consolidada por clase;
-- la proyección va desde resultados consolidados de `enrollments` hacia `users_classes`;
-- `users_classes` no debe seguir funcionando como punto de entrada operativo para onboarding, progreso o validación del ciclo actual.
+La clase no es una decision libre del cliente.
 
-## Puntos actuales de desalineación
+El backend debe derivar la clase esperada usando:
 
-- post-registro escribe verdad formativa en `users_classes`;
-- el módulo de clases usa `enrollments` como verdad operativa;
-- admin sigue leyendo `users_classes` como si fuera estado actual;
-- certificaciones ya usa `enrollments` en parte de su lógica;
-- las tablas de progreso todavía no están claramente acopladas al ciclo anual de `enrollments`.
+1. `users.birthday`;
+2. fecha de inicio del año eclesiastico activo;
+3. `club_type_id` de la seccion seleccionada o destino;
+4. `classes.minimum_age`;
+5. ventana de disponibilidad de la clase, si existe.
 
-## Estrategia por fases
+Si el cliente envia `class_id`, solo funciona como confirmacion. Si no coincide con la clase derivada, el backend debe rechazar la operacion con `POST_REG_CLASS_NOT_ELIGIBLE`.
 
-### Fase 1: separar lecturas sin romper clientes
+## Puntos de desalineacion cerrados
 
-Crear un read model explícito con dos salidas:
+- Post-registro ya no debe escribir ni leer `users_classes`.
+- La seleccion manual de clase en cliente no debe permitir saltarse la regla de edad.
+- La transferencia aprobada debe recalcular/reactivar el `enrollment` del año activo para el tipo de club destino.
+- Documentos que digan que `users_classes` es trayectoria consolidada vigente estan obsoletos frente al canon y deben actualizarse o moverse a `docs/history/`.
 
-- `current_operational_enrollment`
-- `trajectory_classes`
+## Cambios backend requeridos para nuevas features
 
-Objetivo:
+- Leer clase actual desde `enrollments` activos del año eclesiastico correspondiente.
+- Leer historial desde `enrollments`, no desde `users_classes`.
+- Mantener idempotencia al crear/reactivar enrollments por la llave `user_id + class_id + ecclesiastical_year_id`.
+- Desactivar otros enrollments activos del mismo usuario/año cuando se resuelve una nueva clase operacional.
+- Rechazar clases que no correspondan por edad, tipo de club o ventana de disponibilidad.
 
-- dejar de devolver un genérico ambiguo como `classes`;
-- hacer visible el modelo correcto antes de cambiar escrituras;
-- permitir compatibilidad transicional en admin y mobile.
+## Cambios admin requeridos para nuevas features
 
-### Fase 2: mover la escritura operativa al ciclo anual
+- Distinguir explicitamente entre clase operacional actual e historial de enrollments.
+- No mostrar ni consultar `users_classes`.
+- No permitir acciones administrativas que creen una clase operacional incompatible con la edad/año/tipo de club.
 
-Cambiar post-registro para que cree o actualice el `enrollment` del año eclesiástico activo y deje de escribir verdad operativa primaria en `users_classes`.
+## Cambios mobile requeridos para nuevas features
 
-Objetivo:
-
-- alinear onboarding con la fuente de verdad anual;
-- mantener idempotencia del flujo actual;
-- mantener `users_classes` solo como proyección transicional de compatibilidad, sin volverla condición de éxito operativa.
-
-### Fase 3: hacer el progreso dependiente del enrollment
-
-Acoplar progreso de módulos y secciones al `enrollment` correspondiente.
-
-Objetivo:
-
-- evitar que intentos de años distintos compartan accidentalmente el mismo progreso;
-- asegurar que el ciclo anual tenga una semántica cerrada de principio a fin.
-
-### Fase 4: mover lecturas históricas a trayectoria consolidada
-
-Refactorizar consumidores históricos para que lean `users_classes` como proyección consolidada y no como reflejo directo del ciclo actual.
-
-Objetivo:
-
-- que admin y certificaciones distingan con claridad entre estado actual y trayectoria histórica;
-- reducir ambigüedad en UI y contratos.
-
-### Fase 5: retirar semántica legacy
-
-Eliminar el uso de `users_classes.current_class` como verdad operativa y retirar cualquier lectura que siga tratando trayectoria consolidada como si fuera inscripción anual vigente.
-
-Objetivo:
-
-- cerrar la frontera entre ciclo operativo y trayectoria;
-- dejar un runtime consistente con el canon.
-
-## Cambios backend requeridos
-
-- separar respuestas entre estado operativo actual y trayectoria consolidada;
-- cambiar post-registro para escribir `enrollments` en lugar de `users_classes` como verdad primaria del ciclo actual;
-- volver enrollment-aware las lecturas y escrituras de progreso;
-- proyectar resultados consolidados desde `enrollments` hacia `users_classes`;
-- dejar compatibilidad temporal solo donde sea estrictamente necesario.
-
-## Cambios admin requeridos
-
-- dejar de interpretar `classes` como campo único ambiguo;
-- mostrar por separado la clase actual del ciclo y la trayectoria histórica;
-- dejar de asumir que `users_classes` representa la verdad operativa presente.
-
-## Cambios mobile requeridos
-
-- tratar la selección de clase del post-registro como creación de ciclo anual y no como escritura directa de historial;
-- distinguir modelos de catálogo de clase y modelos de enrollment;
-- consumir estado actual desde enrollment y no desde trayectoria consolidada.
-
-## Estrategia de migración y sincronización
-
-- crear enrollments faltantes para usuarios cuyo estado operativo solo exista hoy en `users_classes`;
-- reconstruir o proyectar `users_classes` desde outcomes consolidados de `enrollments` cuando haya datos suficientes;
-- reportar casos ambiguos para revisión manual en vez de inventar equivalencias silenciosas;
-- usar proyección explícita desde eventos de consolidación, no escrituras ad hoc desde múltiples módulos.
-
-## Riesgos y tradeoffs
-
-- cambiar escrituras antes de separar lecturas puede romper clientes;
-- mantener compatibilidad demasiado tiempo prolonga ambigüedad;
-- parte del historial viejo puede requerir reconstrucción manual por falta de contexto anual;
-- si certificaciones migra demasiado temprano, puede bloquear casos legítimos si la trayectoria consolidada no quedó bien proyectada.
-
-## Primer slice recomendado
-
-El primer slice recomendado es separar el read path antes de tocar escrituras.
-
-Concretamente:
-
-1. backend expone `current_operational_enrollment` y `trajectory_classes`;
-2. admin y mobile dejan de leer una sola bolsa ambigua de `classes`;
-3. documentación API deja explícita esta frontera;
-4. recién después se mueve post-registro a `enrollments`.
+- Tratar la clase del post-registro como asignacion automatica del backend.
+- Enviar `class_id` solo si el flujo necesita confirmacion explicita; debe ser opcional.
+- No bloquear el avance por falta de seleccion manual de clase.
+- Mostrar copy de ayuda si se necesita explicar que la clase se asigna por edad.
 
 ## Criterio de cierre
 
-Esta transición puede considerarse cerrada cuando:
+Este alineamiento se considera vigente mientras:
 
-- el ciclo anual operativo viva de forma consistente en `enrollments`;
-- la trayectoria consolidada viva de forma consistente en `users_classes`;
-- admin, mobile y backend lean el mismo modelo semántico;
-- `docs/canon/runtime-sacdia.md` pueda dejar de tratar este punto como una brecha abierta.
+- el ciclo anual operativo viva en `enrollments`;
+- el historial se consulte desde `enrollments`;
+- post-registro y transferencias deriven la clase por edad/tipo de club;
+- no queden docs activas que presenten `users_classes` como tabla runtime.

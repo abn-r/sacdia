@@ -6,9 +6,9 @@
 
 Las clases progresivas son el eje central del proceso formativo institucional en los clubes de Aventureros, Conquistadores y Guias Mayores. Representan un camino secuencial de avance donde cada miembro cursa una clase determinada por su edad al inicio del ano eclesiastico. Las clases de Conquistadores, por ejemplo, siguen la secuencia: Amigo, Companero, Explorador, Orientador, Viajero, Guia.
 
-Cada clase se compone de modulos tematicos, y cada modulo contiene secciones evaluables. El progreso se registra por seccion (puntaje + evidencias) y se proyecta a nivel de modulo. La regla fundamental es que la clase se determina por la edad al inicio del ano eclesiastico y NO cambia durante ese ciclo — un miembro que cumple anos a mitad de ano sigue en su clase original.
+Cada clase se compone de modulos tematicos, y cada modulo contiene secciones evaluables. El progreso se registra por seccion (puntaje + evidencias) y se proyecta a nivel de modulo. La regla fundamental es que la clase se determina por la edad al inicio del ano eclesiastico y NO cambia durante ese ciclo — un miembro que cumple anos a mitad de ano sigue en su clase original. En post-registro, el backend deriva la clase esperada desde `users.birthday`, el inicio del ano eclesiastico activo, el `club_type_id` de la seccion seleccionada y `classes.minimum_age`; si el cliente envia un `class_id` que no coincide, la API lo rechaza.
 
-El sistema adopta una única fuente de verdad: el **ciclo anual operativo** es gestionado enteramente por `enrollments` con sus proyecciones de progreso (`class_module_progress`, `class_section_progress`). La tabla legacy `users_classes` fue archivada como `users_classes_archive` y ya no participa en el modelo operativo. El histórico consolidado se consulta directamente desde `enrollments` con filtros históricos por año eclesiástico.
+El sistema adopta una única fuente de verdad: el **ciclo anual operativo** es gestionado enteramente por `enrollments` con sus proyecciones de progreso (`class_module_progress`, `class_section_progress`). La tabla legacy `users_classes` fue retirada del schema actual y ya no participa en el modelo operativo. El histórico consolidado se consulta directamente desde `enrollments` con filtros históricos por año eclesiástico.
 
 La culminacion exitosa de una clase lleva a la investidura, que es el acto institucional de reconocimiento formal. El flujo de validacion e investidura ya existe y ahora valida tambien la ventana de disponibilidad de la clase y su duracion minima/maxima por ano eclesiastico (ver feature `validacion-investiduras`).
 
@@ -46,7 +46,7 @@ La culminacion exitosa de una clase lleva a la investidura, que es el acto insti
 - `enrollments` — inscripcion anual operativa (enrollment_id, user_id, class_id, ecclesiastical_year_id, investiture_status, active). UNIQUE: (user_id, class_id, ecclesiastical_year_id). El estado `EXPIRED` preserva progreso historico cuando la duracion maxima ya vencio.
 - `class_section_progress` — progreso por seccion con enrollment_id como owner anual. UNIQUE: (enrollment_id, module_id, section_id)
 - `class_module_progress` — proyeccion de progreso por modulo. UNIQUE: (enrollment_id, module_id)
-- `users_classes` — [ARCHIVADA] trayectoria consolidada legacy (archivada como `users_classes_archive`)
+- `users_classes` — [RETIRADA] trayectoria consolidada legacy; no existe en el schema runtime actual
 
 ## Requisitos funcionales
 
@@ -57,15 +57,17 @@ La culminacion exitosa de una clase lleva a la investidura, que es el acto insti
 5. Si la resolucion class-scoped es ambigua (multiples enrollments), la API responde 409 con ENROLLMENT_RESOLUTION_AMBIGUOUS
 6. El progreso de seccion registra puntaje y evidencias (JSON)
 7. El progreso de modulo se calcula como proyeccion sincronizada de sus secciones
-8. Si el usuario cambia de clase en el mismo ano, el backend desactiva otros enrollments activos de ese ano
-9. Una clase con `available_until_year_id = null` no expira para nuevas inscripciones; si tiene valor, deja de aparecer para inscripcion despues de ese ano eclesiastico
-10. La duracion de cursado se cuenta por anos eclesiasticos desde `enrollments.ecclesiastical_year_id`
-11. Antes de solicitar investidura, el backend exige respetar `min_duration_years` y `max_duration_years`
-12. Si un enrollment supera la duracion maxima sin investidura, pasa formalmente a `EXPIRED` y conserva su progreso como trayectoria historica
+8. Si el usuario re-ejecuta post-registro por correccion/cambio de club, el backend deriva la clase por edad/tipo de club y desactiva otros enrollments activos del mismo ano antes de resolver el seleccionado
+9. Si una transferencia de club/seccion es aprobada, el backend aplica la misma regla: deriva la clase para el `club_type_id` destino y resuelve el enrollment anual activo
+10. Una clase con `available_until_year_id = null` no expira para nuevas inscripciones; si tiene valor, deja de aparecer para inscripcion despues de ese ano eclesiastico
+11. La duracion de cursado se cuenta por anos eclesiasticos desde `enrollments.ecclesiastical_year_id`
+12. Antes de solicitar investidura, el backend exige respetar `min_duration_years` y `max_duration_years`
+13. Si un enrollment supera la duracion maxima sin investidura, pasa formalmente a `EXPIRED` y conserva su progreso como trayectoria historica
 
 ## Decisiones de diseno
 
-- **Decision 9 (enrollments vs users_classes)**: la verdad operativa anual vive en `enrollments`; `users_classes` fue archivada como `users_classes_archive` y no participa más en el modelo operativo
+- **Decision 9 (enrollments vs users_classes)**: la verdad operativa anual vive en `enrollments`; `users_classes` fue retirada y no participa más en el modelo operativo
+- **Clase derivada en post-registro**: el cliente no decide libremente la clase; puede omitir `class_id` y el backend la asigna, o enviarlo solo como confirmacion. Si no coincide con la clase calculada por edad/tipo de club, se devuelve `POST_REG_CLASS_NOT_ELIGIBLE`.
 - **Resolucion de enrollment**: el backend resuelve automaticamente una inscripcion activa del ano eclesiastico actual; enrollmentId es override aditivo
 - **Dos controladores separados**: ClassesController (catalogo) y UserClassesController (inscripciones) con guards diferentes
 - **PermissionsGuard con permisos finos**: classes:read y classes:update con AuthorizationResource para owner detection
@@ -76,7 +78,7 @@ La culminacion exitosa de una clase lleva a la investidura, que es el acto insti
 
 ## Gaps y pendientes
 
-- [RESUELTO] La frontera de autoridad entre enrollments y users_classes ha sido resuelta: `users_classes` fue archivada y `enrollments` es la única autoridad
+- [RESUELTO] La frontera de autoridad entre enrollments y users_classes ha sido resuelta: `users_classes` fue retirada y `enrollments` es la única autoridad
 - `/home/grouped-class` en app tiene classId hardcodeado a 1
 - No hay proceso cron automatico para vencer enrollments; la primera iteracion usa proceso admin/manual auditable
 - Reporteria historica de clases vencidas queda para iteracion posterior

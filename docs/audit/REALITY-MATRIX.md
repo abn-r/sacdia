@@ -542,7 +542,7 @@ Convenciones:
 | users | Si | Si | Si | ALINEADO |
 | user_fcm_tokens | Si | Si | No | SIN CANON |
 | users_pr | Si | Si | Si | ALINEADO |
-| users_classes | No | No | No | ARCHIVADA (como users_classes_archive) |
+| users_classes | No | No | No | RETIRADA del schema runtime actual |
 | certifications | Si | Si | Si | ALINEADO |
 | certification_modules | Si | Si | No | SIN CANON |
 | certification_sections | Si | Si | No | SIN CANON |

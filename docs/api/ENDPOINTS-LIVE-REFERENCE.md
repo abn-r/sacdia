@@ -172,11 +172,12 @@
 ### Post-registration step 3 runtime notes (FS-02)
 
 - `POST /api/v1/users/:userId/post-registration/step-3/complete` ahora completa el alta operativa anual en `enrollments` como condición de éxito del paso.
+- La clase del post-registro se deriva en backend desde `users.birthday`, el inicio del año eclesiástico activo, el `club_type_id` de la sección seleccionada y `classes.minimum_age`. `class_id` es opcional; si se envía y no coincide con la clase derivada, responde `POST_REG_CLASS_NOT_ELIGIBLE`.
 - El flujo mantiene idempotencia para reintentos: reusa/reactiva el tuple único `(user_id, class_id, ecclesiastical_year_id)` y evita duplicados por conflicto de unicidad.
 - El flujo bloquea una segunda solicitud `pending` activa del mismo usuario en otra sección; la única excepción es reintentar el mismo tuple anual.
 - `POST /api/v1/users/:userId/post-registration/membership-request/cancel` cancela la solicitud `pending`, marca la asignación como `cancelled`, desactiva la fila y reabre `users_pr.club_selection_complete`.
 - Si el usuario cambia de clase en el mismo año eclesiástico, el backend desactiva otros `enrollments` activos de ese año antes de resolver el seleccionado.
-- `users_classes` fue archivada como `users_classes_archive` en la migración y ya no existe en el modelo operativo. El histórico consolidado ahora se resuelve desde `enrollments`.
+- `users_classes`/`users_classes_archive` ya no existen en el schema runtime actual. El histórico consolidado ahora se resuelve desde `enrollments`.
 
 ### Class progress runtime notes (FS-03)
 
@@ -313,7 +314,7 @@
 - Endpoint: `GET /api/v1/admin/users/:userId`
 - Envelope se mantiene: `{ status, data }`
 - `data.current_operational_enrollment`: fuente anual operativa (SOLO `enrollments` del año eclesiástico activo)
-- `data.trajectory_classes`: trayectoria consolidada/histórica (SOLO `enrollments` archivados en `users_classes_archive`)
+- `data.trajectory_classes`: trayectoria consolidada/histórica resuelta desde `enrollments`
 - `data.classes`: alias legacy **deprecado**; mantiene semántica de trayectoria y NO representa verdad operativa anual
 - Reglas de nulidad:
   - si no hay año eclesiástico activo -> `current_operational_enrollment = null`
@@ -415,6 +416,7 @@
 | PATCH | `/api/v1/clubs/:clubId/sections/:sectionId` | JWT | director, subdirector, secretary | Actualizar sección (requiere director, subdirector o secretario) | `src/clubs/clubs.controller.ts` |
 | GET | `/api/v1/clubs/:clubId/sections/:sectionId/members` | JWT | - | Listar miembros de la sección | `src/clubs/clubs.controller.ts` |
 | POST | `/api/v1/clubs/:clubId/sections/:sectionId/roles` | JWT | director, subdirector, secretary | Asignar rol a un miembro (requiere director, subdirector o secretario) | `src/clubs/clubs.controller.ts` |
+| POST | `/api/v1/clubs/:clubId/sections/:sectionId/director-succession` | JWT | director-lf, assistant-lf | Sucesión anual: cierra el director activo actual y crea el nuevo director de la sección para el año eclesiástico indicado. Body: `{ current_assignment_id, successor_user_id, ecclesiastical_year_id, start_date? }`. | `src/clubs/clubs.controller.ts` |
 
 ## fcm-tokens
 
@@ -587,6 +589,7 @@
 | Method | Path | Auth | Roles | Description | Source |
 |---|---|---|---|---|---|
 | POST | `/api/v1/annual-folders/enrollments/:enrollmentId` | JWT | `evidence_folders:manage` | Crear carpeta anual para una matrícula de sección. El template se resuelve por tipo de club + año + owner (Unión primero, Campo Local fallback). | `src/annual-folders/annual-folders.controller.ts` |
+| GET | `/api/v1/club-sections/:sectionId/annual-folder` | JWT | `evidence_folders:read` | Obtener carpeta anual vigente por sección. Devuelve `200 { data: null }` cuando no hay año activo, inscripción vigente o carpeta creada todavía. | `src/annual-folders/annual-folder-by-section.controller.ts` |
 | GET | `/api/v1/annual-folders/:folderId` | JWT | `evidence_folders:read` | Obtener carpeta anual con secciones, evidencias y estados canónicos. | `src/annual-folders/annual-folders.controller.ts` |
 | GET | `/api/v1/annual-folders/by-enrollment/:enrollmentId` | JWT | `evidence_folders:read` | Obtener carpeta anual por matrícula de sección. | `src/annual-folders/annual-folders.controller.ts` |
 | POST | `/api/v1/annual-folders/:folderId/sections/:sectionId/evidences` | JWT | `evidence_folders:submit` | Subir archivo/imagen de evidencia a una sección de carpeta anual. | `src/annual-folders/annual-folders.controller.ts` |

@@ -724,7 +724,7 @@ Este endpoint mantiene envelope `{ status, data }` y añade semántica explícit
   - No usa `users_classes.current_class` para inferir presente.
 - `data.trajectory_classes`
   - Arreglo (puede ser vacío).
-  - Fuente de verdad de trayectoria consolidada/histórica: **solo** `users_classes`.
+  - Fuente de verdad de trayectoria consolidada/histórica: **solo** `enrollments` con filtros por año eclesiástico/estado.
 - `data.classes`
   - Alias legacy **deprecado** de `trajectory_classes` para compatibilidad.
   - Mantiene semántica de trayectoria (NO semántica operativa anual).
@@ -742,6 +742,7 @@ En esos casos se retorna `null` sin selección silenciosa ni inferencia desde tr
 - Consumidores actualizados deben usar `current_operational_enrollment` para estado anual presente y `trajectory_classes` para histórico.
 - Consumidores deben tolerar `current_operational_enrollment = null`.
 - Durante FS-01 no se eliminan writes legacy ni se retira `classes`.
+- Nota runtime 2026-05-29: `users_classes` y `users_classes_archive` ya no existen en el schema efectivo; cualquier consumidor nuevo debe leer trayectoria desde `enrollments`.
 
 ---
 
