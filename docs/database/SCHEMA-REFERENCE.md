@@ -254,13 +254,39 @@ Configura el máximo anual por campo local, año eclesiástico y tipo de club:
 - CHECK `annual_ranking_configs_max_points_check`.
 - Índices `idx_annual_ranking_configs_year_type` y `idx_annual_ranking_configs_active`.
 
+### `annual_ranking_axis_configs` (nueva — ejes del ranking anual)
+
+Divide una configuración anual en ejes configurables. El uso inicial recomendado es:
+
+- `administrative` — `Cumplimiento Administrativo`.
+- `operational` — `Vida Operativa del Club`.
+
+Columnas:
+
+- `annual_ranking_axis_config_id UUID PK`.
+- `annual_ranking_config_id UUID` — FK → `annual_ranking_configs` con `ON DELETE CASCADE`.
+- `axis_key VARCHAR(50)` — clave estable del eje.
+- `label VARCHAR(120)` — etiqueta visible.
+- `max_points INT` — presupuesto máximo del eje; debe ser positivo.
+- `sort_order INTEGER DEFAULT 0`.
+- `active BOOLEAN DEFAULT true`.
+
+Índices/constraints:
+
+- Unique `(annual_ranking_config_id, axis_key)`.
+- CHECK `annual_ranking_axis_configs_max_points_check`.
+- Índice `idx_annual_ranking_axis_configs_active_order`.
+- Índice `idx_annual_ranking_axis_configs_config_active_order`.
+- La suma de ejes activos debe igualar `annual_ranking_configs.max_points`; se valida en servicio/API porque depende de múltiples filas.
+
 ### `annual_ranking_component_configs` (nueva — ranking scorecard)
 
-Define el presupuesto de puntos por componente dentro de una configuración anual:
+Define el presupuesto de puntos por componente dentro de un eje anual:
 
 - `annual_ranking_component_config_id UUID PK`.
 - `annual_ranking_config_id UUID` — FK → `annual_ranking_configs` con `ON DELETE CASCADE`.
-- `component_key VARCHAR(50)` — clave estable (`annual_folder`, `finance`, `camporee`, `evidence`).
+- `annual_ranking_axis_config_id UUID?` — FK → `annual_ranking_axis_configs` con `ON DELETE CASCADE`. Es nullable para permitir remediación manual de componentes legacy desconocidos; las escrituras nuevas deben persistir componentes asociados a un eje.
+- `component_key VARCHAR(50)` — clave estable canónica (`annual_evidence_folder`, `monthly_reports_timeliness`, `finance_compliance`, `institutional_data_completeness`, `activities_registered`, `attendance_participation`, `camporee_events`, `class_investiture_progress`, `sacdia_operational_usage`). Alias legacy aceptados por API: `annual_folder`, `finance`, `camporee`.
 - `label VARCHAR(120)` — etiqueta visible.
 - `max_points INT` — puntos máximos del componente; debe ser positivo.
 - `sort_order INTEGER DEFAULT 0`.
@@ -271,7 +297,8 @@ Define el presupuesto de puntos por componente dentro de una configuración anua
 - Unique `(annual_ranking_config_id, component_key)`.
 - CHECK `annual_ranking_component_configs_max_points_check`.
 - Índice `idx_annual_ranking_component_configs_active_order`.
-- La suma de componentes activos debe igualar `annual_ranking_configs.max_points`; se valida en servicio/API porque depende de múltiples filas.
+- Índice `idx_annual_ranking_component_configs_axis_id`.
+- La suma de componentes activos por eje debe igualar `annual_ranking_axis_configs.max_points`; se valida en servicio/API porque depende de múltiples filas.
 
 ---
 
@@ -318,7 +345,7 @@ Define el presupuesto de puntos por componente dentro de una configuración anua
 
 - `club_enrollments`, `folder_templates`, `folder_template_sections`
 - `annual_folders`, `annual_folder_evidences`, `annual_folder_section_evaluations`, `annual_folder_section_submissions`
-- `award_categories`, `club_annual_rankings`, `ranking_weight_configs`, `ranking_tiers`, `annual_ranking_configs`, `annual_ranking_component_configs`, `monthly_reports`, `monthly_report_manual_data`, `member_of_month`, `weekly_records`, `scoring_categories`, `weekly_record_scores`
+- `award_categories`, `club_annual_rankings`, `ranking_weight_configs`, `ranking_tiers`, `annual_ranking_configs`, `annual_ranking_axis_configs`, `annual_ranking_component_configs`, `monthly_reports`, `monthly_report_manual_data`, `member_of_month`, `weekly_records`, `scoring_categories`, `weekly_record_scores`
 - `enrollment_rankings`, `section_rankings`, `enrollment_ranking_weights` — (8.4-A) clasificación por enrollment/sección
 
 ### Recursos y logros
@@ -362,6 +389,7 @@ Define el presupuesto de puntos por componente dentro de una configuración anua
 - `20260415100400_annual_folders_eager_evaluation_backfill` - migracion data-only; no-op sobre dev por ausencia de datos legacy.
 - `20260428000000_extended_rankings_schema` (8.4-C) - añade 5 columnas de score + `composite_calculated_at` a `club_annual_rankings`; crea `ranking_weight_configs` con CHECK sum=100 + índice único parcial; extiende `award_categories` con `min_composite_pct`, `max_composite_pct`, `is_legacy`; crea `idx_rankings_composite`; inserta configuración global default (60/15/15/10); agrega keys `ranking.finance_closing_deadline_day` y `ranking.recalculation_enabled` en `system_config`. Aplicada en los 3 branches Neon (development, staging, production).
 - `20260528180000_annual_ranking_scorecard` - crea `ranking_tiers`, `annual_ranking_configs` y `annual_ranking_component_configs` para soportar rangos porcentuales globales y máximos anuales por campo local/año/tipo de club.
+- `20260531203000_annual_ranking_axes` - crea `annual_ranking_axis_configs`, asocia componentes a ejes administrativo/operativo, y conserva componentes legacy desconocidos como inactivos para remediación manual sin asignarlos silenciosamente a un eje.
 - `20260429000000_enrollment_rankings_schema` - (8.4-A) crea `enrollment_rankings`, `section_rankings`, `enrollment_ranking_weights` con indexes, UNIQUE constraints y CHECK constraints de rango [0,100]. Ver §14.1 de `docs/canon/runtime-rankings.md`.
 - `20260429000001_award_categories_scope` - (8.4-A) añade `scope VARCHAR(20) DEFAULT 'club'` a `award_categories` + índice `idx_award_categories_scope` on `(scope, is_legacy)`. Backfill: filas existentes → `scope='club'`.
 - `20260429000002_enrollment_rankings_seeds` - (8.4-A) seed de fila global `is_default=true` en `enrollment_ranking_weights` con pesos 50/30/20 (class/investiture/camporee).

@@ -1,12 +1,12 @@
-# Calificacion de Carpetas Anuales (Annual Folders Scoring)
+# Calificacion de Carpeta Anual de Evidencias (Annual Folders Scoring)
 
 **Estado**: IMPLEMENTADO
 
 ## Descripcion de dominio
 
-Sistema de calificacion para carpetas anuales de evidencias. Permite al campo local evaluar las secciones de evidencia de cada club, asignar puntos, y generar rankings por tipo de club con categorias de premios configurables para la premiacion de fin de ano.
+Sistema de calificacion para la Carpeta Anual de Evidencias. Permite al campo local evaluar las secciones de evidencia de cada club, asignar puntos, y generar rankings por tipo de club con categorias de premios configurables para la premiacion de fin de ano.
 
-Las carpetas anuales conservan su propio flujo de carga de archivos e imagenes. No forman parte de la cola generica `EvidenceReview` (reservada para clases y honores); se cargan, envian, evalúan y confirman dentro de Annual Folders.
+La Carpeta Anual de Evidencias conserva su propio flujo de carga de archivos e imagenes. No forma parte de la cola generica `EvidenceReview` (reservada para clases y honores); se carga, envia, evalúa y confirma dentro del módulo `annual-folders`.
 
 ## Que existe (verificado contra codigo)
 
@@ -26,7 +26,7 @@ Las carpetas anuales conservan su propio flujo de carga de archivos e imagenes. 
 - Pagina de rankings: leaderboard con filtros, medallas top 3, recalculo manual
 - Pagina de categorias de premios: CRUD completo
 - `FolderStatusBadge` con 5 estados: open, submitted, under_evaluation, evaluated, closed
-- Navegacion en sidebar bajo "Carpeta Anual"
+- Navegacion en sidebar bajo "Carpeta Anual de Evidencias"
 
 ### App (Flutter)
 
@@ -53,9 +53,9 @@ Las carpetas anuales conservan su propio flujo de carga de archivos e imagenes. 
 4. Las categorias de premios son configurables y reutilizables entre anos
 5. Los rankings se pre-calculan con un cron nocturno (dense ranking)
 6. Los rankings se filtran por tipo de club, ano eclesiastico, categoria y campo local (`local_field_id`) cuando se necesita comparar clubes dentro de una asociación/campo. El backend valida el alcance jerárquico del usuario y puede inferir el campo local desde la asignación activa de club o el perfil efectivo cuando el filtro no viene explícito.
-7. La app muestra un scorecard de progreso anual de su propia sección (`/club-sections/:sectionId/annual-ranking-progress`): puntos actuales, máximo anual, reconocimiento, componentes y pendientes; no muestra el leaderboard de otros clubes
-8. El panel administrativo puede consultar el leaderboard por campo local/año/tipo de club vía `/annual-rankings`, con puntos derivados de `annual_ranking_configs` y rangos de `ranking_tiers`
-9. El panel administrativo configura los rangos globales vía `/ranking-tiers` y los presupuestos anuales por campo local/año/tipo de club vía `/annual-ranking-configs`. Los rangos son globales del sistema; los puntos máximos y budgets de componentes son decididos por cada campo local para cada año y tipo de club
+7. La app muestra un scorecard de progreso anual de su propia sección (`/club-sections/:sectionId/annual-ranking-progress`): puntos actuales, máximo anual, reconocimiento, ejes (`axes`), componentes y pendientes; no muestra el leaderboard de otros clubes
+8. El panel administrativo puede consultar el leaderboard por campo local/año/tipo de club vía `/annual-rankings`, con puntos derivados por eje desde `annual_ranking_configs` y rangos de `ranking_tiers`
+9. El panel administrativo configura los rangos globales vía `/ranking-tiers` y los presupuestos anuales por campo local/año/tipo de club vía `/annual-ranking-configs`. Los rangos son globales del sistema; los puntos máximos se dividen en ejes configurables `administrative` y `operational` (50/50 recomendado inicialmente), y cada eje contiene componentes canónicos: `annual_evidence_folder`, `monthly_reports_timeliness`, `finance_compliance`, `institutional_data_completeness`, `activities_registered`, `attendance_participation`, `camporee_events`, `class_investiture_progress` y `sacdia_operational_usage`
 10. El folder transiciona: open → submitted → under_evaluation → evaluated → closed
 
 ## Flujo de revision en dos niveles
@@ -140,7 +140,23 @@ Reopen (LF o union): VALIDATED | REJECTED | PREAPPROVED_LF ──> SUBMITTED
 - **Categorias sin FK de ano**: catalogo maestro que persiste entre anos eclesiasticos
 - **closing_date bloquea submissions pero NO evaluacion**: el campo puede evaluar despues del cierre
 - **Flutter backward-compatible**: campos nullable con fallbacks para backends sin actualizar
-- **Separacion de colas**: `EvidenceReview` no revisa carpetas anuales; Annual Folders usa endpoints propios por folder/seccion (`POST /annual-folders/:folderId/sections/:sectionId/evidences`, `submit`, `evaluate`, `confirm-union`)
+- **Separacion de colas**: `EvidenceReview` no revisa la Carpeta Anual de Evidencias; el módulo `annual-folders` usa endpoints propios por folder/seccion (`POST /annual-folders/:folderId/sections/:sectionId/evidences`, `submit`, `evaluate`, `confirm-union`)
+- **Ranking anual no es solo carpeta**: la app y el panel calculan componentes configurables mediante el registry de score. La Carpeta Anual de Evidencias es un componente, no el ranking completo.
+- **Uso operativo sin vanity metrics**: `sacdia_operational_usage` mide acciones útiles registradas en SACDIA (asistencia semanal, clases/progreso, informes, actividades), no sesiones ni logins.
+
+## Formulas actuales del ranking anual por ejes
+
+| Componente | Formula |
+|---|---|
+| `annual_evidence_folder` | porcentaje persistido de la Carpeta Anual de Evidencias; fallback a puntos ganados / puntos máximos |
+| `monthly_reports_timeliness` | informes mensuales `submitted` a tiempo / meses del año eclesiástico; deadline configurable en `ranking.monthly_report_deadline_day` (default 5) |
+| `finance_compliance` | cierres financieros mensuales a tiempo / 12; deadline configurable en `ranking.finance_closing_deadline_day` (default 5) |
+| `institutional_data_completeness` | 10 campos institucionales completos: dirección, horario, director, secretaría, tesorería, nombre, teléfono, email, coordenadas y meta de almas |
+| `activities_registered` | actividades activas de la sección durante el año / `ranking.activities_registered_target` (default 12) |
+| `attendance_participation` | promedio de `weekly_records.attendance` para miembros activos de la sección |
+| `camporee_events` | camporees en alcance con asistencia aprobada / camporees disponibles |
+| `class_investiture_progress` | clases activas investidas/aprobadas / clases activas de miembros de la sección |
+| `sacdia_operational_usage` | usuarios activos de la sección con acciones operativas útiles / usuarios activos de la sección |
 
 ## Gaps y pendientes
 

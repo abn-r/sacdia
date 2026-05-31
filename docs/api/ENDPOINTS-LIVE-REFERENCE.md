@@ -588,21 +588,21 @@
 
 | Method | Path | Auth | Roles | Description | Source |
 |---|---|---|---|---|---|
-| POST | `/api/v1/annual-folders/enrollments/:enrollmentId` | JWT | `evidence_folders:manage` | Crear carpeta anual para una matrícula de sección. El template se resuelve por tipo de club + año + owner (Unión primero, Campo Local fallback). | `src/annual-folders/annual-folders.controller.ts` |
-| GET | `/api/v1/club-sections/:sectionId/annual-folder` | JWT | `evidence_folders:read` | Obtener carpeta anual vigente por sección. Devuelve `200 { data: null }` cuando no hay año activo, inscripción vigente o carpeta creada todavía. | `src/annual-folders/annual-folder-by-section.controller.ts` |
-| GET | `/api/v1/annual-folders/:folderId` | JWT | `evidence_folders:read` | Obtener carpeta anual con secciones, evidencias y estados canónicos. | `src/annual-folders/annual-folders.controller.ts` |
-| GET | `/api/v1/annual-folders/by-enrollment/:enrollmentId` | JWT | `evidence_folders:read` | Obtener carpeta anual por matrícula de sección. | `src/annual-folders/annual-folders.controller.ts` |
-| POST | `/api/v1/annual-folders/:folderId/sections/:sectionId/evidences` | JWT | `evidence_folders:submit` | Subir archivo/imagen de evidencia a una sección de carpeta anual. | `src/annual-folders/annual-folders.controller.ts` |
-| POST | `/api/v1/annual-folders/:folderId/sections/:sectionId/submit` | JWT | `evidence_folders:submit` | Enviar una sección de carpeta anual a revisión. Requiere al menos una evidencia. | `src/annual-folders/annual-folders.controller.ts` |
-| POST | `/api/v1/annual-folders/:folderId/submit` | JWT | `evidence_folders:submit` | Enviar carpeta anual completa a revisión. | `src/annual-folders/annual-folders.controller.ts` |
+| POST | `/api/v1/annual-folders/enrollments/:enrollmentId` | JWT | `evidence_folders:manage` | Crear Carpeta Anual de Evidencias para una matrícula de sección. El template se resuelve por tipo de club + año + owner (Unión primero, Campo Local fallback). | `src/annual-folders/annual-folders.controller.ts` |
+| GET | `/api/v1/club-sections/:sectionId/annual-folder` | JWT | `evidence_folders:read` | Obtener Carpeta Anual de Evidencias vigente por sección. Devuelve `200 { data: null }` cuando no hay año activo, inscripción vigente o carpeta creada todavía. | `src/annual-folders/annual-folder-by-section.controller.ts` |
+| GET | `/api/v1/annual-folders/:folderId` | JWT | `evidence_folders:read` | Obtener Carpeta Anual de Evidencias con secciones, evidencias y estados canónicos. | `src/annual-folders/annual-folders.controller.ts` |
+| GET | `/api/v1/annual-folders/by-enrollment/:enrollmentId` | JWT | `evidence_folders:read` | Obtener Carpeta Anual de Evidencias por matrícula de sección. | `src/annual-folders/annual-folders.controller.ts` |
+| POST | `/api/v1/annual-folders/:folderId/sections/:sectionId/evidences` | JWT | `evidence_folders:submit` | Subir archivo/imagen de evidencia a una sección de Carpeta Anual de Evidencias. | `src/annual-folders/annual-folders.controller.ts` |
+| POST | `/api/v1/annual-folders/:folderId/sections/:sectionId/submit` | JWT | `evidence_folders:submit` | Enviar una sección de Carpeta Anual de Evidencias a revisión. Requiere al menos una evidencia. | `src/annual-folders/annual-folders.controller.ts` |
+| POST | `/api/v1/annual-folders/:folderId/submit` | JWT | `evidence_folders:submit` | Enviar Carpeta Anual de Evidencias completa a revisión. | `src/annual-folders/annual-folders.controller.ts` |
 
 ## annual-folders-evaluation
 
 | Method | Path | Auth | Roles | Description | Source |
 |---|---|---|---|---|---|
-| POST | `/api/v1/annual-folders/:folderId/sections/:sectionId/evaluate` | JWT | `annual_folders:evaluate` | Evaluar una sección de carpeta anual (puntos + notas) | `src/annual-folders/evaluation.controller.ts` |
+| POST | `/api/v1/annual-folders/:folderId/sections/:sectionId/evaluate` | JWT | `annual_folders:evaluate` | Evaluar una sección de Carpeta Anual de Evidencias (puntos + notas) | `src/annual-folders/evaluation.controller.ts` |
 | POST | `/api/v1/annual-folders/:folderId/sections/:sectionId/reopen` | JWT | `annual_folders:evaluate` | Reabrir sección evaluada para re-evaluación | `src/annual-folders/evaluation.controller.ts` |
-| GET | `/api/v1/annual-folders/:folderId/evaluations` | JWT | `annual_folders:evaluate` | Listar evaluaciones de una carpeta anual | `src/annual-folders/evaluation.controller.ts` |
+| GET | `/api/v1/annual-folders/:folderId/evaluations` | JWT | `annual_folders:evaluate` | Listar evaluaciones de una Carpeta Anual de Evidencias | `src/annual-folders/evaluation.controller.ts` |
 
 ## award-categories
 
@@ -622,11 +622,11 @@ Desde 2026-05-28, la app móvil debe consumir `GET /club-sections/:sectionId/ann
 
 | Method | Path | Auth | Roles | Description | Source |
 |---|---|---|---|---|---|
-| GET | `/api/v1/club-sections/:sectionId/annual-ranking-progress?year_id=` | JWT | `rankings:read` / `rankings:read_lf` / `rankings:read_global` o `section_rankings:read_*` equivalente | Scorecard anual de una sección: `current_points`, `max_points`, `current_tier`, `next_tier`, `components`, `pending_items`. Scope: mismo club/sección, campo local explícito o global. | `src/rankings/annual-ranking-progress/annual-ranking-progress.controller.ts` |
-| GET | `/api/v1/annual-rankings?local_field_id=&club_type_id=&year_id=` | JWT | `rankings:read` con scope al campo local solicitado | Leaderboard administrativo por campo local, año y tipo de club. Devuelve posición densa, puntos derivados, máximo anual, tier actual/siguiente y componentes. | `src/rankings/annual-ranking-progress/annual-rankings.controller.ts` |
-| GET | `/api/v1/annual-ranking-configs?local_field_id=&club_type_id=&year_id=` | JWT | `ranking_weights:read` | Listar configuraciones anuales de puntaje por campo local, año y tipo de club. Incluye budgets de componentes activos. | `src/rankings/annual-ranking-progress/annual-ranking-config.controller.ts` |
-| POST | `/api/v1/annual-ranking-configs` | JWT | `ranking_weights:write` | Crear configuración anual de puntaje. Body: `{ local_field_id, ecclesiastical_year_id, club_type_id, max_points, components[] }`. Valida que la suma de componentes sea igual a `max_points`; 409 si ya existe el scope. | `src/rankings/annual-ranking-progress/annual-ranking-config.controller.ts` |
-| PATCH | `/api/v1/annual-ranking-configs/:id` | JWT | `ranking_weights:write` | Actualizar máximo anual y reemplazar budgets de componentes de una configuración existente. Revalida suma de componentes = `max_points`. | `src/rankings/annual-ranking-progress/annual-ranking-config.controller.ts` |
+| GET | `/api/v1/club-sections/:sectionId/annual-ranking-progress?year_id=` | JWT | `rankings:read` / `rankings:read_lf` / `rankings:read_global` o `section_rankings:read_*` equivalente | Scorecard anual de una sección: `current_points`, `max_points`, `current_tier`, `next_tier`, `axes`, `components`, `pending_items`. Scope: mismo club/sección, campo local explícito o global. | `src/rankings/annual-ranking-progress/annual-ranking-progress.controller.ts` |
+| GET | `/api/v1/annual-rankings?local_field_id=&club_type_id=&year_id=` | JWT | `rankings:read` con scope al campo local solicitado | Leaderboard administrativo por campo local, año y tipo de club. Devuelve posición densa, puntos derivados, máximo anual, tier actual/siguiente, ejes y componentes. | `src/rankings/annual-ranking-progress/annual-rankings.controller.ts` |
+| GET | `/api/v1/annual-ranking-configs?local_field_id=&club_type_id=&year_id=` | JWT | `ranking_weights:read` | Listar configuraciones anuales de puntaje por campo local, año y tipo de club. Incluye ejes activos (`axes[]`) y componentes activos (`components[]`) para compatibilidad. | `src/rankings/annual-ranking-progress/annual-ranking-config.controller.ts` |
+| POST | `/api/v1/annual-ranking-configs` | JWT | `ranking_weights:write` | Crear configuración anual de puntaje. Body preferido: `{ local_field_id, ecclesiastical_year_id, club_type_id, max_points, axes[] }`, con ejes `administrative` y `operational`; el body legacy `components[]` sigue aceptado y se normaliza a claves canónicas. Valida suma de ejes = `max_points` y suma de componentes = máximo del eje; 409 si ya existe el scope. | `src/rankings/annual-ranking-progress/annual-ranking-config.controller.ts` |
+| PATCH | `/api/v1/annual-ranking-configs/:id` | JWT | `ranking_weights:write` | Actualizar máximo anual y reemplazar ejes/componentes de una configuración existente. Revalida suma de ejes = `max_points`, suma de componentes por eje, componentes soportados y duplicados. | `src/rankings/annual-ranking-progress/annual-ranking-config.controller.ts` |
 | GET | `/api/v1/ranking-tiers` | JWT | `ranking_weights:read` | Listar rangos globales activos de reconocimiento (`ranking_tiers`) ordenados por `sort_order`. | `src/rankings/annual-ranking-progress/ranking-tiers.controller.ts` |
 | PATCH | `/api/v1/ranking-tiers/:id` | JWT | `ranking_weights:write` | Actualizar un rango global de reconocimiento. `band_percentage` debe ser positivo. | `src/rankings/annual-ranking-progress/ranking-tiers.controller.ts` |
 | GET | `/api/v1/annual-folders/rankings` | JWT | `rankings:read` global o de asignación activa de club | Obtener rankings de clubes con filtros (`club_type_id`, `year_id`, `category_id`, `local_field_id`). Cada fila incluye IDs de navegación y los 6 campos de composite. | `src/annual-folders/rankings.controller.ts` |
@@ -694,7 +694,7 @@ Permisos: `ranking_weights:read` (lectura) | `ranking_weights:write` (creación,
 
 | Method | Path | Auth | Roles | Description | Source |
 |---|---|---|---|---|---|
-| GET | `/api/v1/evidence-review/pending` | JWT | admin, coordinator (GlobalRoles) | Listar evidencias pendientes de validación. Query: `type?` (class\|honor), `page?`, `limit?`. Carpetas anuales se revisan en Annual Folders. | `src/evidence-review/evidence-review.controller.ts` |
+| GET | `/api/v1/evidence-review/pending` | JWT | admin, coordinator (GlobalRoles) | Listar evidencias pendientes de validación. Query: `type?` (class\|honor), `page?`, `limit?`. La Carpeta Anual de Evidencias se revisa en el módulo `annual-folders`. | `src/evidence-review/evidence-review.controller.ts` |
 | GET | `/api/v1/evidence-review/:type/:id` | JWT | admin, coordinator (GlobalRoles) | Detalle de evidencia con archivos adjuntos | `src/evidence-review/evidence-review.controller.ts` |
 | POST | `/api/v1/evidence-review/:type/:id/approve` | JWT | admin, coordinator (GlobalRoles) | Aprobar evidencia | `src/evidence-review/evidence-review.controller.ts` |
 | POST | `/api/v1/evidence-review/:type/:id/reject` | JWT | admin, coordinator (GlobalRoles) | Rechazar evidencia. Body: `{ reason: string }` (required) | `src/evidence-review/evidence-review.controller.ts` |

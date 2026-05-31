@@ -3,7 +3,7 @@
 **Estado**: ACTIVE
 **Autoridad rectora**: `docs/canon/source-of-truth.md`
 **Tipo de documento**: runtime canonizado, documented-as-built
-**Ámbito**: clasificación anual de clubes por puntaje de carpetas, categorías de premio configurables y pipeline automático de cálculo
+**Ámbito**: clasificación anual de clubes por ejes institucionales configurables, Carpeta Anual de Evidencias, categorías de premio y pipeline automático de cálculo
 
 <!-- VERIFICADO contra código 2026-04-22: schema Prisma, rankings.service.ts, controllers de rankings/award-categories y admin UI cruzados con implementación real. -->
 <!-- VERIFICADO 8.4-C 2026-04-28: schema Prisma con columnas de componentes + composite, rankings.service.ts extendido con score-calculators, controllers de rankings/award-categories/ranking-weights y admin UI. 8.4-C shipped. -->
@@ -13,7 +13,7 @@
 
 ## 1. Propósito
 
-Canoniza el subsistema de **clasificación institucional de clubes** basado en puntaje de carpetas anuales evaluadas y categorías de premio configurables.
+Canoniza el subsistema de **clasificación institucional de clubes** basado en ejes configurables. La Carpeta Anual de Evidencias es un componente central del ranking, pero no agota el ranking anual.
 
 Este sistema es distinto del sistema de tiers de achievements (`docs/canon/runtime-achievements.md`). Los rankings operan a nivel club y año eclesiástico, no a nivel miembro.
 
@@ -206,7 +206,7 @@ Contrato exacto en `docs/features/annual-folders-scoring.md` y `docs/api/ENDPOIN
 
 ## 11. Relación con otros canones
 
-- `docs/canon/runtime-sacdia.md` — carpeta anual como fuente de verdad operativa de evaluaciones.
+- `docs/canon/runtime-sacdia.md` — Carpeta Anual de Evidencias como fuente de verdad operativa de evaluaciones.
 - `docs/canon/runtime-achievements.md` — sistema de tiers de miembro (no confundir).
 - `docs/canon/dominio-sacdia.md` — club raíz, sección operativa.
 - `docs/canon/decisiones-clave.md` — decisión 12 (canonización de rankings y award categories).
@@ -224,7 +224,49 @@ Contrato exacto en `docs/features/annual-folders-scoring.md` y `docs/api/ENDPOIN
 
 ---
 
-## 13. Criterios institucionales ampliados (8.4-C)
+## 13. Ranking anual por ejes configurables
+
+**Vigente desde**: 2026-05-31
+
+La superficie nueva de ranking anual (`/club-sections/:sectionId/annual-ranking-progress`, `/annual-rankings`, `/annual-ranking-configs`) calcula puntos desde `annual_ranking_configs` y `annual_ranking_axis_configs`.
+
+### Ejes canónicos
+
+| Eje | Componentes |
+|-----|-------------|
+| `administrative` — Cumplimiento Administrativo | `annual_evidence_folder`, `monthly_reports_timeliness`, `finance_compliance`, `institutional_data_completeness` |
+| `operational` — Vida Operativa del Club | `activities_registered`, `attendance_participation`, `camporee_events`, `class_investiture_progress`, `sacdia_operational_usage` |
+
+Los presupuestos de puntos son configurables por campo local/año/tipo de club. El default recomendado sigue siendo 50/50 entre ejes, pero el sistema valida solamente que:
+
+```text
+SUM(active axes.max_points) = annual_ranking_configs.max_points
+SUM(active components.max_points by axis) = axis.max_points
+```
+
+### Fórmulas runtime
+
+Cada componente devuelve `score_pct` en rango `0–100`, y los puntos se calculan como:
+
+```text
+component_points = ROUND(score_pct / 100 * component.max_points)
+```
+
+| Component key | Fuente runtime | Fórmula inicial |
+|---|---|---|
+| `annual_evidence_folder` | `annual_folders` | `progress_percentage` persistido de la Carpeta Anual de Evidencias; fallback a `total_earned_points / total_max_points` |
+| `monthly_reports_timeliness` | `monthly_reports` + `ecclesiastical_years` | informes `submitted` entregados antes del día `ranking.monthly_report_deadline_day` (default 5) / meses esperados del año eclesiástico |
+| `finance_compliance` | `finance_period_closings` | cierres financieros en tiempo según `ranking.finance_closing_deadline_day` (default 5) |
+| `institutional_data_completeness` | `club_enrollments` + `club_sections` | campos institucionales completos / 10 campos esperados: dirección, horario, director, secretaría, tesorería, nombre, teléfono, email, coordenadas y meta de almas |
+| `activities_registered` | `activity_instances` + `activities` | actividades activas de la sección en el año / `ranking.activities_registered_target` (default 12), con tope 100 |
+| `attendance_participation` | `weekly_records` + `unit_members` | promedio de `weekly_records.attendance` de miembros activos de la sección en los años calendario cubiertos por el año eclesiástico |
+| `camporee_events` | `camporee_clubs` + camporees locales/unión | camporees en alcance con asistencia aprobada / camporees disponibles |
+| `class_investiture_progress` | `enrollments` | clases activas con `investiture_status IN ('APPROVED', 'INVESTIDO')` / clases activas de miembros de la sección |
+| `sacdia_operational_usage` | registros operativos útiles | usuarios activos de la sección con actividad operativa útil / usuarios activos de la sección; no usa logins/sesiones como métrica de vanidad |
+
+`sacdia_operational_usage` considera acciones útiles como registros semanales, matrículas de clases, progreso de clase, informes mensuales enviados y actividades creadas dentro del año eclesiástico.
+
+## 14. Criterios institucionales ampliados legacy (8.4-C)
 
 **Vigente desde**: 2026-04-28
 
@@ -232,7 +274,7 @@ El composite ranking combina cuatro criterios institucionales en un único índi
 
 | Criterio | Campo | Descripción |
 |----------|-------|-------------|
-| **Carpeta** | `folder_score_pct` | Porcentaje de puntos obtenidos sobre el total de la carpeta anual evaluada |
+| **Carpeta Anual de Evidencias** | `folder_score_pct` | Porcentaje de puntos obtenidos sobre el total de la Carpeta Anual de Evidencias evaluada |
 | **Finanzas** | `finance_score_pct` | Proporción de meses con cierre financiero entregado antes del `ranking.finance_closing_deadline_day` (default: día 5) |
 | **Camporee** | `camporee_score_pct` | Proporción de camporees disponibles en el año (local + unión) a los que el club asistió con estado aprobado |
 | **Evidencias** | `evidence_score_pct` | Proporción de evidencias de carpeta en estado `VALIDATED` sobre el total de evaluadas (pending excluidos) |
@@ -240,6 +282,17 @@ El composite ranking combina cuatro criterios institucionales en un único índi
 ### Pesos
 
 Los pesos globales por defecto son `60 / 15 / 15 / 10` (folder / finance / camporee / evidence). Pueden sobreescribirse por `club_type_id` en `ranking_weight_configs`. La suma siempre debe ser exactamente 100 (CHECK constraint + API validation).
+
+### Auditoría de alineación anual
+
+Para verificar que la configuración anual sigue alineada con ejes, componentes canónicos y la Carpeta Anual de Evidencias:
+
+```bash
+cd /Users/abner/Documents/development/sacdia/sacdia-backend
+pnpm exec tsx scripts/audit-annual-ranking-alignment.ts --dry-run
+```
+
+El modo `--dry-run` imprime los checks sin conectarse a base de datos. Sin `--dry-run`, el script usa `ANNUAL_RANKING_AUDIT_DATABASE_URL` o `DATABASE_URL` y ejecuta solo consultas `SELECT` dentro de una transacción `READ ONLY`.
 
 ### Semántica temporal
 
@@ -256,7 +309,7 @@ Las filas de `award_categories` creadas antes de 2026-04-28 están marcadas con 
 
 ---
 
-## 14. Clasificación de miembros y secciones (8.4-A)
+## 15. Clasificación de miembros y secciones (8.4-A)
 
 **Estado**: shipped 2026-04-29
 **Spec**: `docs/superpowers/specs/2026-04-29-clasificacion-seccion-miembro-design.md`
