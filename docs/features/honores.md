@@ -1,151 +1,161 @@
 # Honores (Especialidades)
 
-**Estado**: IMPLEMENTADO
+**Estado**: IMPLEMENTADO — workflow de validacion backend normalizado y paquete de revision admin en PR2.
 
 ## Descripcion de dominio
 
-Los honores (especialidades) son unidades formativas independientes que los miembros de clubes de Aventureros, Conquistadores y Guias Mayores pueden cursar para profundizar en areas de conocimiento especificas. Cada honor pertenece a una categoria tematica (naturaleza, artes domesticas, actividades misioneras, etc.) y tiene un nivel de dificultad (basico, avanzado, master).
+Los honores (especialidades) son unidades formativas independientes que los miembros de clubes de Aventureros, Conquistadores y Guias Mayores pueden cursar para profundizar en areas de conocimiento especificas. Cada honor pertenece a una categoria tematica y puede estar asociado a un tipo de club.
 
-El sistema de honores es uno de los pilares del proceso formativo institucional. A diferencia de las clases progresivas que siguen un camino secuencial, los honores pueden cursarse en cualquier orden y representan especializacion tematica. Un miembro puede tener multiples honores activos simultaneamente, y su progreso se registra individualmente con evidencias (certificados, documentos, imagenes).
+El ciclo funcional es:
 
-El modelo de honores soporta el ciclo completo: catalogo publico de consulta, inscripcion del usuario, registro de progreso con evidencias, validacion, y abandono. El catalogo esta segmentado por tipo de club, lo que permite filtrar honores relevantes para cada seccion (Aventureros solo ve honores de Aventureros).
+1. Catalogo publico de consulta.
+2. Inscripcion del usuario en un honor.
+3. Avance por requisitos/checklist.
+4. Carga de evidencias generales o por requisito.
+5. Envio a revision institucional.
+6. Aprobacion o rechazo por revisor autorizado.
+7. Correccion y reenvio cuando corresponde.
 
-## Que existe (verificado contra codigo)
+## Fuente de verdad de estado
 
-### Backend (HonorsModule)
-- **Controladores**: `HonorsController` (catalogo publico, 5 endpoints incluyendo requirements) + `UserHonorsController` (honores de usuario, 11 endpoints incluyendo progress) = **16 endpoints totales**
-- **Catalogo publico** (OptionalJwtAuthGuard):
-  - `GET /honors` — listar honores con paginacion y filtros (categoryId, clubTypeId, skillLevel)
-  - `GET /honors/categories` — listar categorias de honores
-  - `GET /honors/grouped-by-category` — honores agrupados por categoria con filtros
-  - `GET /honors/:honorId` — detalle de un honor
-- **Honores de usuario** (JwtAuthGuard + OwnerOrAdminGuard):
-  - `GET /users/:userId/honors` — listar honores del usuario (filtro por validated)
-  - `GET /users/:userId/honors/stats` — estadisticas de honores
-  - `POST /users/:userId/honors` — registrar honor con datos iniciales (CreateUserHonorDto)
-  - `POST /users/:userId/honors/bulk` — registro masivo de honores (BulkCreateUserHonorsDto)
-  - `POST /users/:userId/honors/:honorId/files` — subir evidencias (certificate, document, images via multipart)
-  - `POST /users/:userId/honors/:honorId` — iniciar un honor (StartHonorDto)
-  - `PATCH /users/:userId/honors/:honorId` — actualizar progreso (UpdateUserHonorDto)
-  - `DELETE /users/:userId/honors/:honorId` — abandonar honor (soft delete)
-- **Servicio**: `HonorsService` con spec de tests (`honors.service.spec.ts`)
-- **DTOs**: StartHonorDto, UpdateUserHonorDto, CreateUserHonorDto, BulkCreateUserHonorsDto
+La fuente de verdad runtime para honores de usuario es `users_honors.validation_status`:
 
-### Admin (sacdia-admin)
-- 2 paginas funcionales: listado de honores con CRUD y detalle por honor
-- Consume: `GET /honors`, `GET /honors/categories`, `GET /catalogs/club-types`, `POST /honors`, `PATCH /honors/:id`
-- CRUD de categorias en `/admin/honor-categories` — **5 endpoints FANTASMA** (no existen en backend)
+| Estado | Significado |
+|---|---|
+| `IN_PROGRESS` | Honor inscrito/en avance. Editable por el usuario. |
+| `PENDING_REVIEW` | Enviado a revision institucional. No debe tratarse como editable libremente. |
+| `APPROVED` | Honor aprobado institucionalmente. |
+| `REJECTED` | Honor rechazado; el usuario puede corregir y reenviar si hay cambios nuevos. |
 
-### App (sacdia-app)
-- 4 screens: HonorsCatalogView, HonorDetailView, MyHonorsView, AddHonorView
-- Consume 10 endpoints incluyendo catalogo, categorias, grouped-by-category, user honors CRUD con progreso y evidencias
+`users_honors.validate` se mantiene solo por compatibilidad con codigo legado. No debe usarse como fuente primaria de decision.
 
-### Base de datos
-- `honors` — catalogo de especialidades (id, name, honors_category_id, club_type_id, difficulty, honor_image, material_url, master_honors_id)
-- `honors_categories` — categorias tematicas (honor_category_id, name)
-- `master_honors` — honores master (master_honor_id, name)
-- `users_honors` — relacion usuario-honor con progreso (user_honor_id, user_id, honor_id, validated, evidences, etc.). Unique: (user_id, honor_id)
+## Backend
 
-## Requisitos funcionales
+### Catalogo publico
 
-1. El catalogo de honores debe ser consultable sin autenticacion (OptionalJwtAuthGuard)
-2. Los honores deben poder filtrarse por categoria, tipo de club y nivel de dificultad
-3. Un usuario solo puede tener un registro activo por honor (unique constraint user_id + honor_id)
-4. El registro masivo (bulk) debe permitir carga inicial rapida sin duplicados
-5. Las evidencias se suben a Cloudflare R2 en multipart (certificate, document, hasta 10 imagenes)
-6. El abandono de un honor es soft delete (desactivacion, no eliminacion)
-7. El progreso debe ser actualizable parcialmente (evidencias, validacion, certificado)
-8. Solo el owner del recurso o un admin pueden operar sobre honores de usuario
+Controlador: `HonorsController`.
 
-## Decisiones de diseno
+- `GET /honors` — listar honores con paginacion y filtros (`categoryId`, `clubTypeId`, `skillLevel`).
+- `GET /honors/categories` — listar categorias.
+- `GET /honors/grouped-by-category` — agrupar honores por categoria.
+- `GET /honors/:honorId` — detalle.
+- `GET /honors/:honorId/requirements` — requisitos del honor.
 
-- **Dos controladores separados**: HonorsController (catalogo publico) y UserHonorsController (operaciones de usuario) con guards diferentes
-- **OptionalJwtAuthGuard en catalogo**: permite consulta anonima pero enriquece respuesta si hay JWT
-- **OwnerOrAdminGuard en user honors**: patron self-service con escalacion admin
-- **Reactivacion en lugar de duplicacion**: startHonor y createUserHonor reactivan registros inactivos existentes en vez de crear duplicados
-- **Upload separado de registro**: las evidencias se suben en un endpoint dedicado (POST files) independiente del registro inicial
+### Honores de usuario
 
-## Requisitos por Especialidad
+Controladores: `UserHonorsController` y `UserHonorRequirementsController`.
 
-### Descripcion
+- `GET /users/:userId/honors`
+- `GET /users/:userId/honors/stats`
+- `POST /users/:userId/honors`
+- `POST /users/:userId/honors/bulk`
+- `POST /users/:userId/honors/:honorId`
+- `POST /users/:userId/honors/:honorId/files`
+- `PATCH /users/:userId/honors/:honorId`
+- `DELETE /users/:userId/honors/:honorId`
+- `GET /users/:userId/honors/:honorId/requirements/progress`
+- `PATCH /users/:userId/honors/:honorId/requirements/:requirementId/progress`
+- `PATCH /users/:userId/honors/:honorId/requirements/progress/batch`
+- Endpoints de evidencia por requisito: upload/link/list/delete.
 
-Cada honor tiene una lista estructurada de requisitos que el usuario debe completar. El sistema permite rastrear el progreso individual por requisito, con una UI de checklist en la app y una barra de progreso visible en el catalogo y en la vista de detalle.
+### Workflow de validacion
 
-### Datos seeded
+Servicio canonico: `HonorValidationWorkflowService`.
 
-- **5,410 requisitos** cargados desde **605 archivos markdown** extraidos del sistema institucional
-- Tasa de match: **100%** — todos los markdowns mapearon a un honor existente en la base de datos
-- Fuente: extraccion automatizada con numeracion de items y deteccion de sub-items
+Responsabilidades:
 
-### Base de datos
+- Enviar honor a revision.
+- Validar elegibilidad antes del submit.
+- Aprobar honor.
+- Rechazar honor.
+- Sincronizar `validate` solo por compatibilidad.
+- Registrar `validation_logs`.
+- Emitir evento `honor.validated` al aprobar.
 
-#### Tabla: `honor_requirements`
-Catalogo de requisitos por honor.
+El submit se realiza con:
 
-| Campo | Tipo | Descripcion | Constraints |
-|-------|------|-------------|-------------|
-| `requirement_id` | INT | ID unico | PK, autoincrement |
-| `honor_id` | INT | Honor al que pertenece | FK → honors, NOT NULL |
-| `requirement_number` | VARCHAR | Numeracion del requisito (ej. "1", "1.a") | NOT NULL |
-| `requirement_text` | TEXT | Texto del requisito | NOT NULL |
-| `has_sub_items` | BOOLEAN | Tiene sub-items | DEFAULT false |
-| `needs_review` | BOOLEAN | Marcado para revision manual | DEFAULT false |
-| `active` | BOOLEAN | Registro activo | DEFAULT true |
+```http
+POST /api/v1/validation/submit
+```
 
-#### Tabla: `user_honor_requirement_progress`
-Progreso por usuario por requisito.
+Body:
 
-| Campo | Tipo | Descripcion | Constraints |
-|-------|------|-------------|-------------|
-| `progress_id` | INT | ID unico | PK, autoincrement |
-| `user_honor_id` | INT | Relacion usuario-honor | FK → users_honors, NOT NULL |
-| `requirement_id` | INT | Requisito | FK → honor_requirements, NOT NULL |
-| `completed` | BOOLEAN | Completado por el usuario | DEFAULT false |
-| `notes` | TEXT | Notas opcionales | NULL |
-| `completed_at` | TIMESTAMPTZ | Fecha de completado | NULL |
-| `active` | BOOLEAN | Registro activo | DEFAULT true |
+```json
+{ "entity_type": "honor", "entity_id": 123 }
+```
 
-### Backend (nuevos endpoints)
+`entity_id` es `users_honors.user_honor_id`, no `honors.honor_id`.
 
-4 endpoints agregados al modulo de honores:
+Desde PR1, el backend bloquea el submit si:
 
-- `GET /honors/:honorId/requirements` — catalogo de requisitos de un honor (publico / opcional JWT)
-- `GET /users/:userId/honors/:honorId/requirements/progress` — progreso del usuario por requisito
-- `PATCH /users/:userId/honors/:honorId/requirements/:requirementId/progress` — actualizar un requisito individual
-- `PATCH /users/:userId/honors/:honorId/requirements/progress/batch` — actualizar multiples requisitos en una sola operacion
+- el honor no pertenece al usuario;
+- el honor esta inactivo;
+- ya esta aprobado;
+- ya esta pendiente;
+- el estado no permite submit;
+- falta evidencia minima;
+- faltan requisitos obligatorios completos;
+- fue rechazado y no hubo cambios posteriores al rechazo.
 
-### App (sacdia-app)
+## Requisitos por especialidad
 
-- Checklist interactivo en la vista de detalle de honor
-- Estado local con dirty detection — el usuario puede marcar/desmarcar sin guardar inmediatamente
-- Bulk save al presionar "Guardar" — usa el endpoint batch para minimizar requests
-- Barra de progreso visible en las tarjetas del catalogo y en la vista de detalle
-- El progreso es informativo: **no es una puerta de validacion** — el usuario igual debe enviar evidencias explicitamente para solicitar validacion institucional
+Cada honor puede tener requisitos en `honor_requirements`. El avance del usuario vive en `user_honor_requirement_progress`.
 
-### Coexistencia con flujo existente
+La app muestra estos requisitos como checklist, pero la regla importante es esta: **la UI puede anticipar bloqueos, pero el backend decide si el honor puede enviarse a revision**.
 
-- El flujo de subida de evidencias (PDF, imagenes, certificado) via `POST /users/:userId/honors/:honorId/files` continua igual
-- Los requisitos son un checklist de auto-reporte, no reemplazan la validacion institucional
-- El instructor valida mediante el campo `validate` en `users_honors`, independientemente del progreso de requisitos
+Cuando el usuario cambia progreso o evidencia por requisito, el backend actualiza `users_honors.modified_at`. Esto permite bloquear reenvios de honores rechazados si el usuario no corrigio nada.
 
----
+## Evidencias
 
-## Gaps y pendientes
+Hay tres superficies historicas de evidencia:
 
-- **CRITICO**: Admin consume CRUD completo de `/admin/honor-categories` (5 endpoints) que son **FANTASMA** — no existen en backend. Pendiente de implementacion
-- 3 endpoints de user honors sin documentacion API: POST bulk, POST files, POST register (marcados SIN DOCS en Reality Matrix)
-- `GET /honors/grouped-by-category` existe en backend pero sin documentacion API
-- No hay validacion cruzada entre honor y tipo de club del usuario al momento de inscripcion
-- No existe flujo de aprobacion/validacion institucional de honores completados
+- `users_honors.images`, `certificate`, `document` — evidencia general legacy/actual de la app.
+- `evidence_files.user_honor_id` — evidencia normalizada, usada por carga masiva y revision.
+- `requirement_evidence` — evidencia asociada a requisitos concretos.
 
-## Prioridad y siguiente accion
+PR2 no migra todo a una sola tabla. En su lugar, `GET /evidence-review/honor/:id` agrega un `honor_review_packet` que unifica para revision:
 
-- **Alta**: Implementar endpoints `/admin/honor-categories` CRUD en backend — el admin ya los consume y falla silenciosamente
-- **Media**: Documentar los 4 endpoints SIN DOCS en ENDPOINTS-LIVE-REFERENCE.md
-- **Siguiente accion concreta**: Crear `AdminHonorCategoriesController` en backend con CRUD para honor_categories con GlobalRolesGuard (super_admin, admin)
+- progreso total del honor;
+- requisitos completados/pendientes;
+- evidencia general legacy/normalizada;
+- evidencia por requisito.
+
+`files` en el detalle de revision tambien incluye la evidencia reviewable agregada para que el panel pueda mostrar todos los adjuntos sin conocer las tablas historicas.
+
+## App movil
+
+La app Flutter consume:
+
+- catalogo publico;
+- inscripcion/inicio del honor;
+- progreso por requisitos;
+- carga de evidencia;
+- `POST /validation/submit` para enviar a revision.
+
+La app debe tratar `validation_status` como estado canonico. Puede deshabilitar botones por UX, pero no debe asumir que un honor es enviable sin respuesta backend.
+
+## Panel administrativo
+
+La revision institucional actual entra por:
+
+```http
+GET /api/v1/evidence-review/pending?type=honor
+POST /api/v1/evidence-review/honor/:id/approve
+POST /api/v1/evidence-review/honor/:id/reject
+```
+
+`EvidenceReviewService` delega las acciones de honor al `HonorValidationWorkflowService`, para evitar reglas duplicadas.
+
+El detalle de un honor pendiente expone `honor_review_packet` y el panel muestra el avance del honor, el conteo de requisitos, el porcentaje completado y las evidencias asociadas a requisitos. Esto evita que el revisor apruebe/rechace mirando solo archivos generales.
+
+Para catalogo, la superficie correcta es la que consume endpoints admin (`/admin/honors-catalog`, `/admin/master-honors`, `/admin/honor-categories`). La pantalla historica que muta `/honors` debe considerarse stale si intenta crear/editar contra endpoints publicos no implementados.
 
 ## Carga masiva por certificados OCR
 
-Los honores aprobados desde la carga masiva por certificado se aplican en la tabla existente `users_honors` y adjuntan el comprobante en `evidence_files.user_honor_id`. El flujo no crea una fuente paralela de especialidades: `certificate_bulk_import_*` conserva staging/auditoria y la verdad final sigue en `users_honors`.
+Los honores aprobados desde carga masiva por certificado se aplican en `users_honors` y adjuntan comprobante en `evidence_files.user_honor_id`. El flujo no crea una fuente paralela de especialidades: `certificate_bulk_import_*` conserva staging/auditoria y la verdad final sigue en `users_honors`.
 
-La validacion final la realiza Campo Local desde `sacdia-admin`; OCR solo precarga datos y el miembro confirma/corrige antes de enviar.
+## Gaps y pendientes
+
+- Revisar/migrar pantallas admin stale que intentan mutar `/honors` en vez de endpoints `/admin/*`.
+- Evaluar validacion cruzada entre tipo de club del usuario y `honors.club_type_id` al inscribirse.
+- En una fase posterior, deprecar formalmente `users_honors.validate` como fuente de lectura.
