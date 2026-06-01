@@ -690,14 +690,32 @@ Permisos: `ranking_weights:read` (lectura) | `ranking_weights:write` (creación,
 | PATCH | `/api/v1/ranking-weights/:id` | JWT | `ranking_weights:write` | Actualización parcial de pesos. Re-valida suma = 100 (HTTP 400 si no cumple). | `src/annual-folders/ranking-weights.controller.ts` |
 | DELETE | `/api/v1/ranking-weights/:id` | JWT | `ranking_weights:write` | Eliminar override. HTTP 400 si se intenta eliminar la fila con `club_type_id = NULL` (default global no eliminable). | `src/annual-folders/ranking-weights.controller.ts` |
 
+## validation
+
+| Method | Path | Auth | Roles | Description | Source |
+|---|---|---|---|---|---|
+| POST | `/api/v1/validation/submit` | JWT | `validation:submit` | Enviar clase u honor a revisión. Para honores, `entity_id` es `users_honors.user_honor_id`; el backend valida estado, ownership, evidencia mínima, requisitos completos y cambios posteriores si venía de rechazo. | `src/validation/validation.controller.ts` |
+| POST | `/api/v1/validation/:entityType/:entityId/review` | JWT | `validation:review` | Aprobar o rechazar clase/honor. Para honores, delega en el workflow canónico de honores y solo debe operar estados pendientes. Body: `{ action: "approved" \| "rejected", comment?: string }`; rechazo requiere comentario. | `src/validation/validation.controller.ts` |
+| GET | `/api/v1/validation/pending` | JWT | `validation:read` | Listar items pendientes de revisión. Query: `section_id?`, `entity_type?` (`class` \| `honor`). | `src/validation/validation.controller.ts` |
+| GET | `/api/v1/validation/:entityType/:entityId/history` | JWT | `validation:read` | Historial de validación de una clase u honor. | `src/validation/validation.controller.ts` |
+| GET | `/api/v1/validation/eligibility/:userId` | JWT | `validation:read` | Verificar elegibilidad de investidura del usuario. | `src/validation/validation.controller.ts` |
+
+Errores específicos del submit de honores:
+
+- `VALIDATION_HONOR_MISSING_EVIDENCE`
+- `VALIDATION_HONOR_REQUIREMENTS_INCOMPLETE`
+- `VALIDATION_HONOR_NO_CHANGES_AFTER_REJECTION`
+- `VALIDATION_HONOR_NOT_PENDING`
+- `VALIDATION_HONOR_INACTIVE`
+
 ## evidence-review
 
 | Method | Path | Auth | Roles | Description | Source |
 |---|---|---|---|---|---|
 | GET | `/api/v1/evidence-review/pending` | JWT | admin, coordinator (GlobalRoles) | Listar evidencias pendientes de validación. Query: `type?` (class\|honor), `page?`, `limit?`. La Carpeta Anual de Evidencias se revisa en el módulo `annual-folders`. | `src/evidence-review/evidence-review.controller.ts` |
-| GET | `/api/v1/evidence-review/:type/:id` | JWT | admin, coordinator (GlobalRoles) | Detalle de evidencia con archivos adjuntos | `src/evidence-review/evidence-review.controller.ts` |
-| POST | `/api/v1/evidence-review/:type/:id/approve` | JWT | admin, coordinator (GlobalRoles) | Aprobar evidencia | `src/evidence-review/evidence-review.controller.ts` |
-| POST | `/api/v1/evidence-review/:type/:id/reject` | JWT | admin, coordinator (GlobalRoles) | Rechazar evidencia. Body: `{ reason: string }` (required) | `src/evidence-review/evidence-review.controller.ts` |
+| GET | `/api/v1/evidence-review/:type/:id` | JWT | admin, coordinator (GlobalRoles) | Detalle de evidencia con archivos adjuntos. Para `type=honor`, `files` agrega evidencia general + evidencia por requisito y la respuesta incluye `honor_review_packet` con progreso, requisitos y adjuntos por requisito. | `src/evidence-review/evidence-review.controller.ts` |
+| POST | `/api/v1/evidence-review/:type/:id/approve` | JWT | admin, coordinator (GlobalRoles) | Aprobar evidencia. Para `type=honor`, usa el workflow canónico de honores y sincroniza `validation_status=APPROVED` + `validate=true`. | `src/evidence-review/evidence-review.controller.ts` |
+| POST | `/api/v1/evidence-review/:type/:id/reject` | JWT | admin, coordinator (GlobalRoles) | Rechazar evidencia. Body: `{ reason: string }` (required). Para `type=honor`, usa el workflow canónico y sincroniza `validation_status=REJECTED` + `validate=false`. | `src/evidence-review/evidence-review.controller.ts` |
 | POST | `/api/v1/evidence-review/bulk-approve` | JWT | admin, coordinator (GlobalRoles) | Aprobación masiva (mismo tipo: `class` u `honor`). Body: `{ type: string, ids: int[] }` | `src/evidence-review/evidence-review.controller.ts` |
 | POST | `/api/v1/evidence-review/bulk-reject` | JWT | admin, coordinator (GlobalRoles) | Rechazo masivo (mismo tipo: `class` u `honor`). Body: `{ type: string, ids: int[], reason: string }` | `src/evidence-review/evidence-review.controller.ts` |
 | GET | `/api/v1/evidence-review/:type/:id/history` | JWT | admin, coordinator (GlobalRoles) | Historial de validación de evidencia | `src/evidence-review/evidence-review.controller.ts` |
