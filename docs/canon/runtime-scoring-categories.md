@@ -27,8 +27,7 @@ Dentro del canon:
 
 Fuera del canon:
 - fórmulas de agregación (viven en features consumidores);
-- UI de configuración (admin flow);
-- política de cap `max_points` (configuración, no canon estructural).
+- UI de configuración (admin flow).
 
 ---
 
@@ -108,3 +107,12 @@ Ninguno muta categorías — solo las leen. La autoridad de configuración vive 
 - categorías de nivel superior se heredan sin duplicación en datos;
 - el permiso `scoring_categories:*` es el único canónico para estos endpoints; reutilizar `units:*` en nuevos endpoints rompe la frontera de concerns;
 - los 4 endpoints de division-level deben preservar `@GlobalRolesGuard` además del permiso — son configuración global reservada.
+- el `max_points` de cada categoría no puede exceder el cap global `system_config['scoring.category_max_points_cap']` (default runtime: `20`).
+
+## 9. Política runtime de cap global (`max_points`)
+
+- Configuración global: `system_config['scoring.category_max_points_cap']` (tipo `number`, default `20`).
+- Alcance: aplica a categorías `division`, `union` y `local-field`.
+- Validación de escritura: `POST/PATCH` de scoring categories rechazan valores por encima del cap con error `SCORING_CATEGORY_MAX_POINTS_EXCEEDS_CAP`.
+- Normalización de datos existentes: la migración de rollout normaliza cualquier `scoring_categories.max_points > 20` a `20`.
+- Autonomía por nivel: uniones y campos locales pueden administrar categorías propias, pero siempre dentro del cap global.

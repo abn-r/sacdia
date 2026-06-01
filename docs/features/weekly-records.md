@@ -29,6 +29,7 @@ El modelo vigente es por usuario + semana ISO + ano. Cada registro puede tener p
   - la tupla `(user_id, week, year)` es unica
   - las categorias de puntaje se validan contra el campo local del club de la unidad
   - cada score no puede superar `max_points` de su categoria
+  - `max_points` de cada categoria esta limitado por el cap global `system_config['scoring.category_max_points_cap']` (default `20`)
   - `PATCH` hace upsert por categoria y recalcula el total de puntos
   - no hay endpoint DELETE; la baja operativa se resuelve con `PATCH` sobre `active`
 
@@ -54,7 +55,7 @@ El modelo vigente es por usuario + semana ISO + ano. Cada registro puede tener p
 1. Debe ser posible registrar puntaje semanal para miembros activos de una unidad
 2. No debe permitirse duplicar un registro para el mismo usuario/semana/anio
 3. Los puntajes por categoria deben validarse contra categorias activas del campo local correspondiente
-4. Ninguna categoria puede exceder su `max_points`
+4. Ninguna categoria puede exceder su `max_points` y ese `max_points` no puede superar el cap global de scoring categories
 5. Debe ser posible ajustar puntajes existentes sin recrear el registro completo
 6. El total de puntos debe quedar consistente con el detalle por categoria
 
