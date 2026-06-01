@@ -797,7 +797,25 @@ Errores específicos del submit de honores:
 
 | Method | Path | Auth | Roles | Description | Source |
 |---|---|---|---|---|---|
-| GET | `/api/v1/local-fields/:fieldId/scoring-categories` | JWT | `units:read` | Listar categorias de puntuacion para un campo local (division + union + propias) | `src/scoring-categories/scoring-categories.controller.ts` |
+| GET | `/api/v1/divisions/scoring-categories` | JWT | `scoring_categories:read` + `admin/super_admin` | Listar categorias globales (division). `max_points` sujeto al cap global `scoring.category_max_points_cap`. | `src/scoring-categories/scoring-categories.controller.ts` |
+| POST | `/api/v1/divisions/scoring-categories` | JWT | `scoring_categories:manage` + `admin/super_admin` | Crear categoria global. Rechaza `max_points` por encima del cap con `SCORING_CATEGORY_MAX_POINTS_EXCEEDS_CAP`. | `src/scoring-categories/scoring-categories.controller.ts` |
+| PATCH | `/api/v1/divisions/scoring-categories/:id` | JWT | `scoring_categories:manage` + `admin/super_admin` | Actualizar categoria global. Rechaza `max_points` por encima del cap con `SCORING_CATEGORY_MAX_POINTS_EXCEEDS_CAP`. | `src/scoring-categories/scoring-categories.controller.ts` |
+| DELETE | `/api/v1/divisions/scoring-categories/:id` | JWT | `scoring_categories:manage` + `admin/super_admin` | Eliminar categoria global (soft delete). | `src/scoring-categories/scoring-categories.controller.ts` |
+| GET | `/api/v1/unions/:unionId/scoring-categories` | JWT | `scoring_categories:read` | Listar categorias para una union (division + propias). | `src/scoring-categories/scoring-categories.controller.ts` |
+| POST | `/api/v1/unions/:unionId/scoring-categories` | JWT | `scoring_categories:manage` | Crear categoria propia de union. Rechaza `max_points` por encima del cap con `SCORING_CATEGORY_MAX_POINTS_EXCEEDS_CAP`. | `src/scoring-categories/scoring-categories.controller.ts` |
+| PATCH | `/api/v1/unions/:unionId/scoring-categories/:id` | JWT | `scoring_categories:manage` | Actualizar categoria de union. Rechaza `max_points` por encima del cap con `SCORING_CATEGORY_MAX_POINTS_EXCEEDS_CAP`. | `src/scoring-categories/scoring-categories.controller.ts` |
+| DELETE | `/api/v1/unions/:unionId/scoring-categories/:id` | JWT | `scoring_categories:manage` | Eliminar categoria de union (soft delete). | `src/scoring-categories/scoring-categories.controller.ts` |
+| GET | `/api/v1/local-fields/:fieldId/scoring-categories` | JWT | `scoring_categories:read` | Listar categorias de puntuacion para un campo local (division + union + propias) | `src/scoring-categories/scoring-categories.controller.ts` |
+| POST | `/api/v1/local-fields/:fieldId/scoring-categories` | JWT | `scoring_categories:manage` | Crear categoria propia de campo local. Rechaza `max_points` por encima del cap con `SCORING_CATEGORY_MAX_POINTS_EXCEEDS_CAP`. | `src/scoring-categories/scoring-categories.controller.ts` |
+| PATCH | `/api/v1/local-fields/:fieldId/scoring-categories/:id` | JWT | `scoring_categories:manage` | Actualizar categoria de campo local. Rechaza `max_points` por encima del cap con `SCORING_CATEGORY_MAX_POINTS_EXCEEDS_CAP`. | `src/scoring-categories/scoring-categories.controller.ts` |
+| DELETE | `/api/v1/local-fields/:fieldId/scoring-categories/:id` | JWT | `scoring_categories:manage` | Eliminar categoria de campo local (soft delete). | `src/scoring-categories/scoring-categories.controller.ts` |
+
+### Scoring categories contract notes (2026-06-01)
+
+- Cap global runtime: `system_config['scoring.category_max_points_cap']` (default `20`, tipo `number`).
+- Escrituras (`POST/PATCH`) en `division`, `union` y `local-field` validan contra ese cap y responden `SCORING_CATEGORY_MAX_POINTS_EXCEEDS_CAP` si se excede.
+- Rollout de cap: una migracion normaliza categorias existentes con `max_points > 20` a `20`.
+- Weekly records mantiene validacion por `category.max_points`; en la practica ese maximo ya queda acotado por el cap global.
 
 ## member-of-month
 
