@@ -39,6 +39,7 @@ La gestion de sesiones permite listar sesiones activas y cerrar sesiones individ
 - **Login funcional**: `POST /auth/login`, `GET /auth/me`
 - **Logout**: `POST /auth/logout`
 - **Proteccion per-page**: via `requireAdminUser()` que verifica `access_panel`
+- **Dashboard birthday celebration**: el layout protegido lee `birthday` desde `GET /auth/me`; si coincide con el dia calendario local del usuario, muestra un modal celebratorio solo durante ese dia. La opcion "no volver a mostrar hoy" se persiste en `localStorage` por `user_id + anio + MM-DD`.
 - **Gestion de usuarios**: `GET /admin/users`, `GET /admin/users/:userId`, `PATCH /admin/users/:userId`, `PATCH /admin/users/:userId/approval`
 - **Revision administrativa**: `PATCH /admin/users/:userId/approval` existe como superficie de revision/compatibilidad, pero no debe entenderse como aprobacion de membresia a club/seccion ni como gate global masivo.
 - No implementa: registro, MFA, OAuth, gestion de sesiones
@@ -46,6 +47,8 @@ La gestion de sesiones permite listar sesiones activas y cerrar sesiones individ
 ### App Movil
 - **5 screens de auth**: SplashView, LoginView, RegisterView, ForgotPasswordView, AuthGate
 - Consume 9+ endpoints incluyendo login, register, logout, password reset, completion-status, context switch
+- **Dashboard birthday celebration**: `DashboardView` lee `UserEntity.birthday` desde `/auth/me`; si coincide con el dia calendario local, muestra un modal celebratorio y un banner festivo arriba de `ClubInfoCard`. El banner reabre el modal hasta que el usuario pulse "no volver a mostrar hoy"; esa decision se persiste en `SharedPreferences` por `user_id + anio + MM-DD`.
+- **Profile update payload**: la pantalla de edicion de perfil no envia `phone` ni `address` cuando estan vacios. `PATCH /users/:userId` valida `phone` si la propiedad existe; por eso `phone: ""` debe omitirse para representar "sin telefono".
 - OAuth Google/Apple declarado pero lanza excepcion "no disponible aun"
 
 ### Base de datos
