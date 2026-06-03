@@ -219,6 +219,7 @@ Servicio: `sacdia-app/lib/core/notifications/push_notification_service.dart`.
 - distinción foreground/background;
 - routing de taps contra whitelist de `RouteNames`;
 - handling tipado para `member_of_month` y `achievement_unlocked`;
+- en foreground, `achievement_unlocked` muestra un banner flotante dedicado, refresca el estado local de logros y usa payload `{ type, achievement_id, achievement_name, tier, points }` cuando está disponible;
 - inbox con paginación vía `notificationsInboxProvider` (Riverpod).
 
 ### 11.2 Admin web (Next.js)
