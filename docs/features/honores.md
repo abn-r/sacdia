@@ -1,6 +1,6 @@
 # Honores (Especialidades)
 
-**Estado**: IMPLEMENTADO — workflow de validacion backend normalizado y paquete de revision admin en PR2.
+**Estado**: IMPLEMENTADO — workflow de validacion backend normalizado, paquete de revision admin y maestrías configurables en rollout cross-repo.
 
 ## Descripcion de dominio
 
@@ -28,6 +28,96 @@ La fuente de verdad runtime para honores de usuario es `users_honors.validation_
 | `REJECTED` | Honor rechazado; el usuario puede corregir y reenviar si hay cambios nuevos. |
 
 `users_honors.validate` se mantiene solo por compatibilidad con codigo legado. No debe usarse como fuente primaria de decision.
+
+## Maestrías de especialidades
+
+Las maestrías (`master_honors`) son parches/logros de banda derivados de especialidades aprobadas. No son un segundo flujo de revisión: se otorgan automáticamente porque solo cuentan especialidades previamente validadas.
+
+### Fuente de verdad
+
+La fuente de elegibilidad para una maestría es:
+
+```text
+users_honors.validation_status = APPROVED
+users_honors.active = true
+```
+
+La fuente de estado de usuario es `users_master_honors.status`:
+
+| Estado | Etiqueta app | Significado |
+|---|---|---|
+| `AWARDED` | `Vigente` | El usuario cumple los criterios actuales. |
+| `REVOKED` | `No vigente` | El usuario obtuvo la maestría, pero ya no cumple los criterios vigentes. |
+| `RETIRED` | `No vigente` | La maestría fue desactivada/retirada, pero se conserva el histórico. |
+
+`REVOKED` y `RETIRED` no eliminan el registro del usuario. La banda digital y el perfil deben seguir mostrando la maestría con la leyenda **No vigente**.
+
+### Reglas configurables
+
+Las reglas viven en el subdominio de honores, no en `achievements`. Una maestría puede combinar:
+
+- mínimos desde una lista explícita de especialidades;
+- mínimos desde una categoría;
+- grupos compuestos, donde todos los grupos activos deben cumplirse;
+- opciones equivalentes configurables, donde varias especialidades pueden contar como una sola opción.
+
+Las reglas son globales. La aplicabilidad puede ser para todas las divisiones o para divisiones específicas. En el primer otorgamiento se usa la división del club activo y se guarda `awarded_division_id` como contexto histórico; las reevaluaciones usan esa división histórica.
+
+`honors.master_honors_id` no es fuente de verdad para requisitos. Puede servir como relación de catálogo legacy, pero la evaluación usa `master_honor_requirement_groups`, `master_honor_requirement_options` y `master_honor_requirement_option_honors`.
+
+### Evaluación y recálculo
+
+El backend reevalúa maestrías cuando:
+
+- una especialidad del usuario se aprueba, deja de estar aprobada o se desactiva;
+- se cambian reglas, divisiones aplicables o estado activo de una maestría;
+- un admin ejecuta recálculo manual.
+
+Cada cambio se registra en `master_honor_evaluation_history` con `evaluation_snapshot` para explicar por qué se otorgó, recuperó o marcó como **No vigente**.
+
+### Admin
+
+La configuración vive en el catálogo admin de maestrías:
+
+```http
+GET /api/v1/admin/master-honors
+POST /api/v1/admin/master-honors
+PATCH /api/v1/admin/master-honors/:id
+DELETE /api/v1/admin/master-honors/:id
+POST /api/v1/admin/master-honors/:id/recalculate
+```
+
+Solo admin y super-admin deben editar reglas en esta fase. Al guardar cambios, el backend persiste reglas y encola recálculo para usuarios afectados cuando la cola está disponible.
+
+### App móvil
+
+La app consume:
+
+```http
+GET /api/v1/users/:userId/master-honors
+GET /api/v1/users/:userId/master-honors/:masterHonorId
+```
+
+La tarjeta virtual muestra maestrías vigentes y **No vigente** en la banda. El perfil muestra historial con estado y fechas relevantes. La app debe invalidar estos datos cuando recibe una notificación de cambio de maestría.
+
+### Notificaciones y modal global
+
+El backend emite notificaciones de cambio de maestría con `type = master_honor_changed`. La app agrupa varias maestrías en un solo modal global para evitar apilar diálogos.
+
+Casos que notifican:
+
+- maestría obtenida;
+- maestría recuperada;
+- maestría marcada como **No vigente**.
+
+El copy de producto debe usar español neutral, sin modismos regionales.
+
+Ejemplo de copy para **No vigente**:
+
+```text
+Las validaciones requeridas para la maestría {nombre} cambiaron.
+Actualmente no cumples con los requisitos, por lo que quedó marcada como No vigente.
+```
 
 ## Backend
 

@@ -1,6 +1,6 @@
 # ENDPOINTS LIVE REFERENCE (Runtime Truth)
 
-<!-- Verificado contra código 2026-03-25. Documento completo: cubre todos los endpoints implementados en controllers. -->
+<!-- Verificado contra código 2026-03-25. Documento completo: cubre todos los endpoints implementados en controllers. Actualización manual de maestrías 2026-06-04. -->
 
 > [!IMPORTANT]
 > Documento canónico para agentes (App + Panel Admin).
@@ -8,8 +8,8 @@
 > Base URL: `/api/v1`
 
 **Estado**: ACTIVE
-**Actualizado**: 2026-05-06 (auth security hardening: MFA perimeter, RBAC protected roles, password reauth)
-**Total endpoints**: 341
+**Actualizado**: 2026-06-04 (maestrías configurables: endpoints de usuario, recálculo admin y estados Vigente/No vigente)
+**Total endpoints**: 341 (última generación completa; no recalculado en la actualización manual de maestrías)
 
 ## Lectura Rápida
 
@@ -190,6 +190,13 @@
 - Si la resolución class-scoped es ambigua y no se envía override, la API responde `409` con código `ENROLLMENT_RESOLUTION_AMBIGUOUS`.
 - El payload exitoso de lectura expone `enrollment_id` y `ecclesiastical_year_id` para hacer visible el owner anual resuelto.
 
+### Master honors runtime notes (2026-06-04)
+
+- `GET /api/v1/users/:userId/master-honors` es la fuente para banda e historial compacto de maestrías en app. Incluye `AWARDED`, `REVOKED` y `RETIRED`, además de `is_current` y `display_status_label`.
+- `AWARDED` se muestra como `Vigente`; `REVOKED` y `RETIRED` se muestran como `No vigente`.
+- `GET /api/v1/users/:userId/master-honors/:masterHonorId` agrega `evaluation_snapshot` para explicar qué reglas, opciones y especialidades contaron en la evaluación.
+- La app no debe inferir elegibilidad desde `honors.master_honors_id`; esa columna no representa reglas configurables.
+
 ## activities
 
 | Method | Path | Auth | Roles | Description | Source |
@@ -315,6 +322,13 @@
 | GET | `/api/v1/admin/users/:userId` | JWT | `users:read_detail` | Obtener detalle de usuario validando alcance por rol del actor | `src/admin/admin-users.controller.ts` |
 | PATCH | `/api/v1/admin/users/:userId` | JWT | `users:update` | Actualizar campos administrativos del usuario | `src/admin/admin-users.controller.ts` |
 | PATCH | `/api/v1/admin/users/:userId/approval` | JWT | `users:update` | Aprobar o rechazar un usuario administrativo | `src/admin/admin-users.controller.ts` |
+
+### Admin master honors runtime notes (2026-06-04)
+
+- `POST` y `PATCH /api/v1/admin/master-honors` reemplazan la configuración enviada de divisiones y grupos de requisitos.
+- Cada grupo activo debe cumplir sus validaciones: `EXPLICIT_OPTIONS` usa opciones con `honor_ids`; `CATEGORY_COUNT` usa `honors_category_id` y `minimum_required`.
+- Guardar reglas debe disparar recálculo. `POST /api/v1/admin/master-honors/:id/recalculate` permite forzar o reintentar la evaluación.
+- Solo administradores con permisos de escritura de honores deben configurar reglas en esta fase.
 
 ### Admin user detail transitional formative contract (FS-01)
 

@@ -179,7 +179,7 @@ Autoridad: `docs/canon/runtime-resiliencia-red.md` §2.3 y §5. No duplicar pol�
 
 ## 10. Emisores canónicos del runtime
 
-Features del backend que emiten notificaciones visibles (verificado 2026-05-27):
+Features del backend que emiten notificaciones visibles (verificado 2026-06-04):
 
 | Feature | Archivo | Método(s) | Tag `source` típico |
 |---------|---------|-----------|---------------------|
@@ -190,6 +190,7 @@ Features del backend que emiten notificaciones visibles (verificado 2026-05-27):
 | Requests | `sacdia-backend/src/requests/requests.service.ts` | `sendToSectionRole`, `sendToGlobalRole` | `requests:*` |
 | Validation | `sacdia-backend/src/validation/validation.service.ts` | `sendToSectionRole` | `validation:*` |
 | Achievements | `sacdia-backend/src/achievements/achievements.processor.ts` | `notifySafe` | `achievements:*` |
+| Master honors | `sacdia-backend/src/honors/master-honors-evaluator.service.ts` | `notifySafe` | `master_honors:awarded`, `master_honors:recovered`, `master_honors:not_current` |
 | Member of month | `sacdia-backend/src/member-of-month/member-of-month.service.ts` | `notifySafe` | `units:member_of_month*` |
 | Cron alerts | `sacdia-backend/src/common/services/cron-alert.service.ts` | `notifySafe` | `system_alert:cron_failure` |
 
@@ -202,12 +203,33 @@ Matriz de audiencia:
 | Envío por club admin | miembros activos de la sección seleccionada | `notifications:club` + `active_assignment` exacto; seed lo otorga a `secretary`, `secretary-treasurer`, `deputy-director`, `director` |
 | Actividad creada/recordatorio | miembros de sección | emisión interna del backend; no depende de UI admin |
 | Validación/requests/camporees/investiduras | roles o ámbitos globales/club según servicio emisor | helpers internos `sendToSectionRole`/`sendToGlobalRole` |
-| Achievements/member of month/cron alerts | usuario específico | `notifySafe`, sin throw al flujo principal |
+| Achievements/master honors/member of month/cron alerts | usuario específico | `notifySafe`, sin throw al flujo principal |
 
 Cualquier feature nuevo que emita notificaciones debe:
 1. declarar un `source` único y trazable;
 2. usar el método de `NotificationsService` que mejor describa su alcance;
 3. no propagar excepciones del envío al flujo principal (fire-and-forget).
+
+### 10.1 Payload `master_honor_changed`
+
+El evaluador de maestrías emite una notificación visible agrupable con:
+
+```json
+{
+  "type": "master_honor_changed",
+  "transition": "awarded | recovered | not_current",
+  "master_honor_ids": "1,2",
+  "master_honor_names": "Maestría en Acuática|Maestría en Artesanía"
+}
+```
+
+Los tags `source` son:
+
+- `master_honors:awarded`;
+- `master_honors:recovered`;
+- `master_honors:not_current`.
+
+Estas fuentes se categorizan como `achievements` para preferencias de notificación porque la experiencia de usuario es de logro/banda, aunque la elegibilidad de maestrías no depende del dominio `achievements`.
 
 ---
 
@@ -218,8 +240,9 @@ Servicio: `sacdia-app/lib/core/notifications/push_notification_service.dart`.
 - registro de token al `initialize()`;
 - distinción foreground/background;
 - routing de taps contra whitelist de `RouteNames`;
-- handling tipado para `member_of_month` y `achievement_unlocked`;
+- handling tipado para `member_of_month`, `achievement_unlocked` y `master_honor_changed`;
 - en foreground, `achievement_unlocked` muestra un banner flotante dedicado, refresca el estado local de logros y usa payload `{ type, achievement_id, achievement_name, tier, points }` cuando está disponible;
+- en foreground, `master_honor_changed` refresca conteo/bandeja, invalida maestrías de usuario y muestra un modal global agrupado con los nombres recibidos en `master_honor_names`;
 - inbox con paginación vía `notificationsInboxProvider` (Riverpod).
 
 ### 11.2 Admin web (Next.js)
