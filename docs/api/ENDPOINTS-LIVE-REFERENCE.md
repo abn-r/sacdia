@@ -123,6 +123,8 @@
 | POST | `/api/v1/users/:userId/honors` | JWT | - | Registrar honor con datos iniciales (o reactivar) | `src/honors/honors.controller.ts` |
 | POST | `/api/v1/users/:userId/honors/bulk` | JWT | - | Registrar honores de usuario de forma masiva | `src/honors/honors.controller.ts` |
 | GET | `/api/v1/users/:userId/honors/stats` | JWT | - | Obtener estadísticas de honores del usuario | `src/honors/honors.controller.ts` |
+| GET | `/api/v1/users/:userId/master-honors` | JWT | `user_honors:read` (owner bypass) | Listar maestrías del usuario con estados `AWARDED`, `REVOKED` y `RETIRED`; incluye `is_current` y etiqueta `Vigente`/`No vigente`, sin `evaluation_snapshot` para mantener respuesta compacta. | `src/honors/master-honors.controller.ts` |
+| GET | `/api/v1/users/:userId/master-honors/:masterHonorId` | JWT | `user_honors:read` (owner bypass) | Obtener detalle de una maestría del usuario; incluye `evaluation_snapshot` para explicar la evaluación vigente. | `src/honors/master-honors.controller.ts` |
 | DELETE | `/api/v1/users/:userId/honors/:honorId` | JWT | - | Abandonar honor | `src/honors/honors.controller.ts` |
 | PATCH | `/api/v1/users/:userId/honors/:honorId` | JWT | - | Actualizar progreso de honor | `src/honors/honors.controller.ts` |
 | POST | `/api/v1/users/:userId/honors/:honorId` | JWT | - | Iniciar un honor | `src/honors/honors.controller.ts` |
