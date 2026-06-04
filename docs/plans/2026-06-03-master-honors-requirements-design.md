@@ -1,7 +1,7 @@
 # Diseño: requisitos configurables para maestrías de especialidades
 
-**Estado**: DRAFT  
-**Fecha**: 2026-06-03  
+**Estado**: IMPLEMENTADO — infraestructura runtime, admin y app; importación oficial de reglas pendiente
+**Fecha**: 2026-06-04
 **Dominio**: Honores / Maestrías (`master_honors`)  
 
 ## Resumen
@@ -18,6 +18,16 @@ La decisión de diseño es crear un motor propio de reglas de maestrías:
 - con otorgamiento automático;
 - con revocación automática cuando los criterios vigentes dejan de cumplirse;
 - con historial visible aunque una maestría quede **No vigente**.
+
+## Estado de implementación
+
+Este diseño ya fue llevado al runtime en los tres frentes principales:
+
+- Backend: schema, evaluador, recálculo, historial, endpoints de usuario/admin y notificaciones `master_honor_changed`.
+- Admin: editor de reglas, divisiones aplicables, grupos/opciones y acción de recálculo.
+- App móvil: consumo de maestrías de usuario, banda con `Vigente`/`No vigente`, historial de perfil y modal global de cambios.
+
+Pendiente: carga inicial/importación de reglas oficiales. Mientras no exista una fuente curada, `honors.master_honors_id` no debe usarse como verdad de requisitos.
 
 ## Contexto verificado
 

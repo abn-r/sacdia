@@ -76,6 +76,13 @@ Referencia humana concisa del schema Prisma vigente.
 - `divisions` ahora también expone `awarded_users_master_honors[]` para relacionar maestrías otorgadas por división.
 - `honors`, `honors_categories`, `master_honors` y `divisions` incorporan relaciones necesarias para configurar y evaluar maestrías por reglas y por división.
 - El espejo documental declara `divisions` para resolver las nuevas relaciones de maestrías; la tabla ya existía en el schema efectivo del backend.
+- Semántica vigente:
+  - Solo cuentan especialidades de usuario con `users_honors.validation_status = APPROVED` y `users_honors.active = true`.
+  - `users_master_honors.status = AWARDED` se presenta como `Vigente`.
+  - `users_master_honors.status IN (REVOKED, RETIRED)` se presenta como `No vigente` y conserva historial visible.
+  - `users_master_honors.awarded_division_id` guarda la división histórica usada para el primer otorgamiento; la reevaluación usa esa división histórica cuando el registro ya existe.
+  - `master_honor_evaluation_history.evaluation_snapshot` documenta qué grupos, opciones y especialidades contaron en cada cambio.
+  - `honors.master_honors_id` no es fuente de verdad para requisitos configurables; se conserva como relación legacy/catálogo mientras el evaluador usa las tablas de reglas.
 
 ### `monthly_reports` y `monthly_report_manual_data`
 
