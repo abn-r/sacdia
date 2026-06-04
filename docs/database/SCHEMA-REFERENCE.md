@@ -2,7 +2,7 @@
 
 **Estado**: ACTIVE
 **Sincronizado contra**: `sacdia-backend/prisma/schema.prisma`
-**Fecha de resincronizacion**: 2026-05-21 (clases legacy, duración configurable y estado EXPIRED)
+**Fecha de resincronizacion**: 2026-06-04 (task 1 maestrías, relaciones explícitas de auditoría)
 
 Referencia humana concisa del schema Prisma vigente.
 
@@ -14,8 +14,8 @@ Referencia humana concisa del schema Prisma vigente.
 
 ## Cifras vigentes
 
-- **Modelos Prisma**: 106
-- **Enums Prisma**: 14
+- **Modelos Prisma**: 113
+- **Enums Prisma**: 19
 - **Tablas Better Auth mapeadas**: `session -> sessions`, `account -> accounts`, `verification -> verifications`
 
 ---
@@ -56,6 +56,26 @@ Referencia humana concisa del schema Prisma vigente.
 
 - Persiste ganadores por `club_section_id`, `month` y `year`; admite empates porque la unicidad incluye `user_id`.
 - Incluye `total_points` y `notified` para el tracking de notificaciones.
+
+### `master_honors` y requisitos configurables
+
+- `master_honors` ahora incluye:
+  - `applicability_scope` (`ALL` o `SELECTED_DIVISIONS`).
+  - `philosophy` y `notes` para contexto explicativo.
+  - Relación inversa explícita a `master_honor_evaluation_history[]` para trazabilidad.
+- Nuevos modelos asociados a reglas, estado y trazabilidad:
+  - `master_honor_divisions`
+  - `master_honor_requirement_groups`
+  - `master_honor_requirement_options`
+  - `master_honor_requirement_option_honors`
+  - `users_master_honors`
+  - `master_honor_evaluation_history`
+- `users` ahora expone:
+  - `users_master_honors[]` (estado de maestrías).
+  - `master_honor_evaluation_history[]` (evento de cambios de estado).
+- `divisions` ahora también expone `awarded_users_master_honors[]` para relacionar maestrías otorgadas por división.
+- `honors`, `honors_categories`, `master_honors` y `divisions` incorporan relaciones necesarias para configurar y evaluar maestrías por reglas y por división.
+- El espejo documental declara `divisions` para resolver las nuevas relaciones de maestrías; la tabla ya existía en el schema efectivo del backend.
 
 ### `monthly_reports` y `monthly_report_manual_data`
 
@@ -329,6 +349,8 @@ Define el presupuesto de puntos por componente dentro de un eje anual:
 
 - `honors`, `honors_categories`, `master_honors`, `users_honors`
 - `honor_requirements`, `user_honor_requirement_progress`, `requirement_evidence`, `evidence_files`
+- `master_honor_divisions`, `master_honor_requirement_groups`, `master_honor_requirement_options`, `master_honor_requirement_option_honors`
+- `users_master_honors`, `master_honor_evaluation_history`
 
 ### Actividades, camporees e inventario
 
@@ -369,11 +391,16 @@ Define el presupuesto de puntos por componente dentro de un eje anual:
 - `evidence_type_enum`
 - `evidence_validation_enum`
 - `gender`
+- `master_honor_applicability_scope_enum`
+- `master_honor_requirement_group_type_enum`
 - `honor_validation_status_enum`
 - `insurance_type_enum`
 - `investiture_action_enum`
 - `investiture_status_enum`
 - `origin_level_enum`
+- `user_master_honor_status_enum`
+- `user_master_honor_source_enum`
+- `user_master_honor_status_reason_enum`
 - `role_category`
 - `union_evaluation_decision_enum` (`APPROVED`, `REJECTED_OVERRIDE`)
 - `user_approval_status`
@@ -394,6 +421,7 @@ Define el presupuesto de puntos por componente dentro de un eje anual:
 - `20260429000001_award_categories_scope` - (8.4-A) añade `scope VARCHAR(20) DEFAULT 'club'` a `award_categories` + índice `idx_award_categories_scope` on `(scope, is_legacy)`. Backfill: filas existentes → `scope='club'`.
 - `20260429000002_enrollment_rankings_seeds` - (8.4-A) seed de fila global `is_default=true` en `enrollment_ranking_weights` con pesos 50/30/20 (class/investiture/camporee).
 - `20260521120000_class_duration_availability` - añade disponibilidad por año eclesiástico y duración min/max a `classes`; agrega `EXPIRED` a enums de investidura.
+- `20260604000000_master_honor_requirements` - agrega reglas configurables de maestrías (`applicability_scope`, `philosophy`, `notes`) y tablas `master_honor_divisions`, `master_honor_requirement_groups`, `master_honor_requirement_options`, `master_honor_requirement_option_honors`, `users_master_honors`, `master_honor_evaluation_history`.
 - `20260429000003_enrollment_rankings_default_award_seeds` - (8.4-A) seed de categorías de premio con `scope='member'` para clasificación de miembros.
 
 ## Nota operativa

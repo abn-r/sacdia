@@ -123,6 +123,8 @@
 | POST | `/api/v1/users/:userId/honors` | JWT | - | Registrar honor con datos iniciales (o reactivar) | `src/honors/honors.controller.ts` |
 | POST | `/api/v1/users/:userId/honors/bulk` | JWT | - | Registrar honores de usuario de forma masiva | `src/honors/honors.controller.ts` |
 | GET | `/api/v1/users/:userId/honors/stats` | JWT | - | Obtener estadísticas de honores del usuario | `src/honors/honors.controller.ts` |
+| GET | `/api/v1/users/:userId/master-honors` | JWT | `user_honors:read` (owner bypass) | Listar maestrías del usuario con estados `AWARDED`, `REVOKED` y `RETIRED`; incluye `is_current` y etiqueta `Vigente`/`No vigente`, sin `evaluation_snapshot` para mantener respuesta compacta. | `src/honors/master-honors.controller.ts` |
+| GET | `/api/v1/users/:userId/master-honors/:masterHonorId` | JWT | `user_honors:read` (owner bypass) | Obtener detalle de una maestría del usuario; incluye `evaluation_snapshot` para explicar la evaluación vigente. | `src/honors/master-honors.controller.ts` |
 | DELETE | `/api/v1/users/:userId/honors/:honorId` | JWT | - | Abandonar honor | `src/honors/honors.controller.ts` |
 | PATCH | `/api/v1/users/:userId/honors/:honorId` | JWT | - | Actualizar progreso de honor | `src/honors/honors.controller.ts` |
 | POST | `/api/v1/users/:userId/honors/:honorId` | JWT | - | Iniciar un honor | `src/honors/honors.controller.ts` |
@@ -304,6 +306,11 @@
 | POST | `/api/v1/admin/classes` | JWT | `catalogs:create` | Crear clase. Body admite `available_from_year_id?`, `available_until_year_id?`, `min_duration_years?`, `max_duration_years?` y `translations?`. | `src/admin/admin-phase-e-catalogs.controller.ts` |
 | PATCH | `/api/v1/admin/classes/:id` | JWT | `catalogs:update` | Actualizar clase. `available_*_year_id: null` limpia la disponibilidad; `undefined` no modifica. | `src/admin/admin-phase-e-catalogs.controller.ts` |
 | DELETE | `/api/v1/admin/classes/:id` | JWT | `catalogs:delete` | Soft-delete de clase (`active=false`). | `src/admin/admin-phase-e-catalogs.controller.ts` |
+| GET | `/api/v1/admin/master-honors` | JWT | `honors:read` | Listar maestrías con traducciones y configuración de reglas. Incluye `applicability_scope`, `philosophy`, `notes`, divisiones seleccionadas y `requirement_groups` (incluye `group_type`, `minimum_required`, `honors_category_id`, `options[]`). | `src/admin/admin-phase-e-catalogs.controller.ts` |
+| POST | `/api/v1/admin/master-honors` | JWT | `honors:create` | Crear maestría con configuración de aplicabilidad/reglas. Campos nuevos: `applicability_scope` (`ALL`/`SELECTED_DIVISIONS`), `philosophy`, `notes`, `division_ids`, `requirement_groups[]`. Valida `minimum_required >= 1`; para `EXPLICIT_OPTIONS` exige al menos una opción con `honor_ids[] >= 1`; para `CATEGORY_COUNT` exige `honors_category_id` y sin opciones. | `src/admin/admin-phase-e-catalogs.controller.ts` |
+| PATCH | `/api/v1/admin/master-honors/:id` | JWT | `honors:update` | Actualizar maestría y reglas análogas a creación. | `src/admin/admin-phase-e-catalogs.controller.ts` |
+| DELETE | `/api/v1/admin/master-honors/:id` | JWT | `honors:delete` | Soft-delete de maestría (`active=false`). | `src/admin/admin-phase-e-catalogs.controller.ts` |
+| POST | `/api/v1/admin/master-honors/:id/recalculate` | JWT | `honors:update` | Encola recálculo de maestría para usuarios afectados y responde `{ status: 'success', data: { queued: boolean } }`; `queued=false` cuando Redis/cola no está disponible en el runtime. | `src/admin/admin-phase-e-catalogs.controller.ts` |
 | GET | `/api/v1/admin/users` | JWT | `users:read` | Listar usuarios administrativos con alcance por rol (ALL/UNION/LOCAL_FIELD) | `src/admin/admin-users.controller.ts` |
 | GET | `/api/v1/admin/users/:userId` | JWT | `users:read_detail` | Obtener detalle de usuario validando alcance por rol del actor | `src/admin/admin-users.controller.ts` |
 | PATCH | `/api/v1/admin/users/:userId` | JWT | `users:update` | Actualizar campos administrativos del usuario | `src/admin/admin-users.controller.ts` |
