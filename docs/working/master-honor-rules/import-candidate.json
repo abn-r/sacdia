@@ -1,0 +1,2147 @@
+{
+  "version": "2026.official-master-honor-rules.import-candidate.2026-06-06",
+  "master_honors": [
+    {
+      "master_honor_id": 2,
+      "name": "Maestría en Acuática",
+      "master_image": "2",
+      "active": true,
+      "philosophy": "Las especialidades de la Maestría en Acuática enfatizan las especialidades que involucran la recreación acuática.",
+      "notes": "Seguridad Básica en el Agua, Natación I y su nivel avanzado son cursos de natación introductorios y por eso no se incluyen en esta lista.",
+      "applicability_scope": "ALL",
+      "division_ids": [],
+      "groups": [
+        {
+          "group_type": "EXPLICIT_OPTIONS",
+          "title": "Desarrollar por lo menos 7 de las siguientes especialidades:",
+          "description": null,
+          "minimum_required": 7,
+          "display_order": 1,
+          "active": true,
+          "options": [
+            {
+              "label": "Buceo",
+              "display_order": 1,
+              "active": true,
+              "honor_ids": [
+                22
+              ]
+            },
+            {
+              "label": "Buceo con escafandra, y/o avanzado",
+              "display_order": 2,
+              "active": true,
+              "honor_ids": [
+                23,
+                24
+              ]
+            },
+            {
+              "label": "Canotaje",
+              "display_order": 3,
+              "active": true,
+              "honor_ids": [
+                30
+              ]
+            },
+            {
+              "label": "Clavado de trampolín",
+              "display_order": 4,
+              "active": true,
+              "honor_ids": [
+                36
+              ]
+            },
+            {
+              "label": "Esquí acuático",
+              "display_order": 5,
+              "active": true,
+              "honor_ids": [
+                55
+              ]
+            },
+            {
+              "label": "Kayaks",
+              "display_order": 6,
+              "active": true,
+              "honor_ids": [
+                76
+              ]
+            },
+            {
+              "label": "Lancha a motor",
+              "display_order": 7,
+              "active": true,
+              "honor_ids": [
+                77
+              ]
+            },
+            {
+              "label": "Natacion II",
+              "display_order": 8,
+              "active": true,
+              "honor_ids": [
+                88
+              ]
+            },
+            {
+              "label": "Natacion III, y/o avanzado",
+              "display_order": 9,
+              "active": true,
+              "honor_ids": [
+                89,
+                90
+              ]
+            },
+            {
+              "label": "Navegación",
+              "display_order": 10,
+              "active": true,
+              "honor_ids": [
+                91
+              ]
+            },
+            {
+              "label": "Navegación a vela",
+              "display_order": 11,
+              "active": true,
+              "honor_ids": [
+                92
+              ]
+            },
+            {
+              "label": "Remo",
+              "display_order": 12,
+              "active": true,
+              "honor_ids": [
+                108
+              ]
+            },
+            {
+              "label": "Socorrismo",
+              "display_order": 13,
+              "active": true,
+              "honor_ids": [
+                116
+              ]
+            },
+            {
+              "label": "Surf a vela",
+              "display_order": 14,
+              "active": true,
+              "honor_ids": [
+                120
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "master_honor_id": 3,
+      "name": "Maestría en ADRA",
+      "master_image": "3",
+      "active": true,
+      "philosophy": null,
+      "notes": null,
+      "applicability_scope": "ALL",
+      "division_ids": [],
+      "groups": [
+        {
+          "group_type": "CATEGORY_COUNT",
+          "title": "ADRA",
+          "description": "Desarrollar por lo menos 6 especialidades de la categoría de ADRA y por lo menos 1 de las siguientes especialidades:",
+          "minimum_required": 6,
+          "honors_category_id": 1,
+          "display_order": 1,
+          "active": true,
+          "options": []
+        },
+        {
+          "group_type": "EXPLICIT_OPTIONS",
+          "title": "Desarrollar por lo menos 6 especialidades de la categoría de ADRA y por lo menos 1 de las siguientes especialidades:",
+          "description": null,
+          "minimum_required": 1,
+          "display_order": 2,
+          "active": true,
+          "options": [
+            {
+              "label": "Herencia cultural",
+              "display_order": 1,
+              "active": true,
+              "honor_ids": [
+                284
+              ]
+            },
+            {
+              "label": "Idiomas",
+              "display_order": 2,
+              "active": true,
+              "honor_ids": [
+                403
+              ]
+            },
+            {
+              "label": "Multiculturalidad",
+              "display_order": 3,
+              "active": true,
+              "honor_ids": [
+                416
+              ]
+            },
+            {
+              "label": "Temperancia",
+              "display_order": 4,
+              "active": true,
+              "honor_ids": [
+                434
+              ]
+            },
+            {
+              "label": "Testificación de menores",
+              "display_order": 5,
+              "active": true,
+              "honor_ids": [
+                435
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "master_honor_id": 1,
+      "name": "Maestría en Actividades Agrícolas",
+      "master_image": "1",
+      "active": true,
+      "philosophy": null,
+      "notes": null,
+      "applicability_scope": "ALL",
+      "division_ids": [],
+      "groups": [
+        {
+          "group_type": "CATEGORY_COUNT",
+          "title": "Actividades agropecuarias",
+          "description": "Desarrollar por lo menos 7 especialidades de la categoría de Actividades agropecuarias.",
+          "minimum_required": 7,
+          "honors_category_id": 2,
+          "display_order": 1,
+          "active": true,
+          "options": []
+        }
+      ]
+    },
+    {
+      "master_honor_id": 4,
+      "name": "Maestría en Artesanía",
+      "master_image": "4",
+      "active": true,
+      "philosophy": null,
+      "notes": null,
+      "applicability_scope": "ALL",
+      "division_ids": [],
+      "groups": [
+        {
+          "group_type": "CATEGORY_COUNT",
+          "title": "Artes y actividades manuales",
+          "description": "Desarrollar por lo menos 7 especialidades de la categoría de Artes y actividades manuales.",
+          "minimum_required": 7,
+          "honors_category_id": 5,
+          "display_order": 1,
+          "active": true,
+          "options": []
+        }
+      ]
+    },
+    {
+      "master_honor_id": 5,
+      "name": "Maestría en Ciencias Naturales",
+      "master_image": "5",
+      "active": true,
+      "philosophy": "La Maestría en Ciencias Naturales consiste de especialidades del segundo libro de Dios, la naturaleza. Anima a los Conquistadores a explorar una gran variedad de flora y fauna.",
+      "notes": "Algunas especialidades de flora se encuentran en la lista de la Maestría en Conservación en vez de aquí por su enfoque fuerte en la conservación.",
+      "applicability_scope": "ALL",
+      "division_ids": [],
+      "groups": [
+        {
+          "group_type": "EXPLICIT_OPTIONS",
+          "title": "flora",
+          "description": null,
+          "minimum_required": 4,
+          "display_order": 1,
+          "active": true,
+          "options": [
+            {
+              "label": "Árboles",
+              "display_order": 1,
+              "active": true,
+              "honor_ids": [
+                453
+              ]
+            },
+            {
+              "label": "Arbustos",
+              "display_order": 2,
+              "active": true,
+              "honor_ids": [
+                455
+              ]
+            },
+            {
+              "label": "Cactus, y/o avanzado",
+              "display_order": 3,
+              "active": true,
+              "honor_ids": [
+                473,
+                474
+              ]
+            },
+            {
+              "label": "Cataratas",
+              "display_order": 4,
+              "active": true,
+              "honor_ids": [
+                478
+              ]
+            },
+            {
+              "label": "Climatología",
+              "display_order": 5,
+              "active": true,
+              "honor_ids": [
+                485
+              ]
+            },
+            {
+              "label": "Cosmografía",
+              "display_order": 6,
+              "active": true,
+              "honor_ids": [
+                492
+              ]
+            },
+            {
+              "label": "Helechos",
+              "display_order": 7,
+              "active": true,
+              "honor_ids": [
+                515
+              ]
+            },
+            {
+              "label": "Hongos",
+              "display_order": 8,
+              "active": true,
+              "honor_ids": [
+                518
+              ]
+            },
+            {
+              "label": "Meteoritos",
+              "display_order": 9,
+              "active": true,
+              "honor_ids": [
+                535
+              ]
+            },
+            {
+              "label": "Moluscos",
+              "display_order": 10,
+              "active": true,
+              "honor_ids": [
+                538
+              ]
+            },
+            {
+              "label": "Orquídeas",
+              "display_order": 11,
+              "active": true,
+              "honor_ids": [
+                546
+              ]
+            },
+            {
+              "label": "Plantas caseras",
+              "display_order": 12,
+              "active": true,
+              "honor_ids": [
+                556
+              ]
+            },
+            {
+              "label": "Palmeras",
+              "display_order": 13,
+              "active": true,
+              "honor_ids": [
+                548
+              ]
+            },
+            {
+              "label": "Semillas, y/o avanzado",
+              "display_order": 14,
+              "active": true,
+              "honor_ids": [
+                567,
+                568
+              ]
+            },
+            {
+              "label": "Sol de medianoche",
+              "display_order": 15,
+              "active": true,
+              "honor_ids": [
+                570
+              ]
+            },
+            {
+              "label": "Zarzos",
+              "display_order": 16,
+              "active": true,
+              "honor_ids": [
+                575
+              ]
+            }
+          ]
+        },
+        {
+          "group_type": "EXPLICIT_OPTIONS",
+          "title": "fauna",
+          "description": null,
+          "minimum_required": 2,
+          "display_order": 2,
+          "active": true,
+          "options": [
+            {
+              "label": "Antílopes",
+              "display_order": 1,
+              "active": true,
+              "honor_ids": [
+                450
+              ]
+            },
+            {
+              "label": "Anfibios",
+              "display_order": 2,
+              "active": true,
+              "honor_ids": [
+                444
+              ]
+            },
+            {
+              "label": "Arácnidos",
+              "display_order": 3,
+              "active": true,
+              "honor_ids": [
+                452
+              ]
+            },
+            {
+              "label": "Aves, y/o avanzado",
+              "display_order": 4,
+              "active": true,
+              "honor_ids": [
+                460,
+                461
+              ]
+            },
+            {
+              "label": "Dinosaurios",
+              "display_order": 5,
+              "active": true,
+              "honor_ids": [
+                496
+              ]
+            },
+            {
+              "label": "Insectos, y/o avanzado",
+              "display_order": 6,
+              "active": true,
+              "honor_ids": [
+                521,
+                522
+              ]
+            },
+            {
+              "label": "Lombrices",
+              "display_order": 7,
+              "active": true,
+              "honor_ids": [
+                526
+              ]
+            },
+            {
+              "label": "Mariposas",
+              "display_order": 8,
+              "active": true,
+              "honor_ids": [
+                533
+              ]
+            },
+            {
+              "label": "Marsupiales",
+              "display_order": 9,
+              "active": true,
+              "honor_ids": [
+                534
+              ]
+            },
+            {
+              "label": "Murciélagos, y/o avanzado",
+              "display_order": 10,
+              "active": true,
+              "honor_ids": [
+                542,
+                543
+              ]
+            },
+            {
+              "label": "Odonatos, y/o avanzado",
+              "display_order": 11,
+              "active": true,
+              "honor_ids": [
+                544,
+                545
+              ]
+            },
+            {
+              "label": "Tiburones",
+              "display_order": 12,
+              "active": true,
+              "honor_ids": [
+                573
+              ]
+            },
+            {
+              "label": "Vida microscópica",
+              "display_order": 13,
+              "active": true,
+              "honor_ids": [
+                574
+              ]
+            }
+          ]
+        },
+        {
+          "group_type": "EXPLICIT_OPTIONS",
+          "title": "fauna doméstica",
+          "description": null,
+          "minimum_required": 1,
+          "display_order": 3,
+          "active": true,
+          "options": [
+            {
+              "label": "Aves de jaula",
+              "display_order": 1,
+              "active": true,
+              "honor_ids": [
+                464
+              ]
+            },
+            {
+              "label": "Aves domésticas",
+              "display_order": 2,
+              "active": true,
+              "honor_ids": [
+                463
+              ]
+            },
+            {
+              "label": "Gatos",
+              "display_order": 3,
+              "active": true,
+              "honor_ids": [
+                510
+              ]
+            },
+            {
+              "label": "Mamíferos pequeños como mascotas",
+              "display_order": 4,
+              "active": true,
+              "honor_ids": [
+                532
+              ]
+            },
+            {
+              "label": "Peces",
+              "display_order": 5,
+              "active": true,
+              "honor_ids": [
+                552
+              ]
+            },
+            {
+              "label": "Perros",
+              "display_order": 6,
+              "active": true,
+              "honor_ids": [
+                554
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "master_honor_id": 6,
+      "name": "Maestría en Conservación",
+      "master_image": "6",
+      "active": true,
+      "philosophy": "Las especialidades de la Maestría en Conservación enfatizan flora, bioma y temas que se enfocan en el entorno.",
+      "notes": null,
+      "applicability_scope": "ALL",
+      "division_ids": [],
+      "groups": [
+        {
+          "group_type": "EXPLICIT_OPTIONS",
+          "title": "Desarrollar por lo menos 7 de las siguientes especialidades:",
+          "description": null,
+          "minimum_required": 7,
+          "display_order": 1,
+          "active": true,
+          "options": [
+            {
+              "label": "Arena",
+              "display_order": 1,
+              "active": true,
+              "honor_ids": [
+                457
+              ]
+            },
+            {
+              "label": "Combustibles alternativos, avanzado",
+              "display_order": 2,
+              "active": true,
+              "honor_ids": [
+                487,
+                488
+              ]
+            },
+            {
+              "label": "Conservación ambiental",
+              "display_order": 3,
+              "active": true,
+              "honor_ids": [
+                489
+              ]
+            },
+            {
+              "label": "Dunas, y/o avanzado",
+              "display_order": 4,
+              "active": true,
+              "honor_ids": [
+                497,
+                498
+              ]
+            },
+            {
+              "label": "Ecología, y/o avanzado",
+              "display_order": 5,
+              "active": true,
+              "honor_ids": [
+                499,
+                500
+              ]
+            },
+            {
+              "label": "Energía renovable",
+              "display_order": 6,
+              "active": true,
+              "honor_ids": [
+                501
+              ]
+            },
+            {
+              "label": "Especies en peligro de extinción",
+              "display_order": 7,
+              "active": true,
+              "honor_ids": [
+                502
+              ]
+            },
+            {
+              "label": "Fósiles",
+              "display_order": 8,
+              "active": true,
+              "honor_ids": [
+                664
+              ]
+            },
+            {
+              "label": "Geología, y/o avanzado",
+              "display_order": 9,
+              "active": true,
+              "honor_ids": [
+                512,
+                513
+              ]
+            },
+            {
+              "label": "Mineralogía, y/o avanzado",
+              "display_order": 10,
+              "active": true,
+              "honor_ids": [
+                536,
+                537
+              ]
+            },
+            {
+              "label": "Montañas",
+              "display_order": 11,
+              "active": true,
+              "honor_ids": [
+                541
+              ]
+            },
+            {
+              "label": "Pantanos y ciénagas, y/o avanzado",
+              "display_order": 12,
+              "active": true,
+              "honor_ids": [
+                550,
+                551
+              ]
+            },
+            {
+              "label": "Reciclaje",
+              "display_order": 13,
+              "active": true,
+              "honor_ids": [
+                561
+              ]
+            },
+            {
+              "label": "Ríos y arroyos, y/o avanzado",
+              "display_order": 14,
+              "active": true,
+              "honor_ids": [
+                565,
+                566
+              ]
+            },
+            {
+              "label": "Silvicultura, y/o avanzado",
+              "display_order": 15,
+              "active": true,
+              "honor_ids": [
+                213,
+                705
+              ]
+            },
+            {
+              "label": "Taiga, y/o avanzado",
+              "display_order": 16,
+              "active": true,
+              "honor_ids": [
+                571,
+                572
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "master_honor_id": 7,
+      "name": "Maestría en Crecimiento Espiritual y Ministerios",
+      "master_image": "7",
+      "active": true,
+      "philosophy": null,
+      "notes": null,
+      "applicability_scope": "ALL",
+      "division_ids": [],
+      "groups": [
+        {
+          "group_type": "EXPLICIT_OPTIONS",
+          "title": "Crecimiento espiritual",
+          "description": null,
+          "minimum_required": 3,
+          "display_order": 1,
+          "active": true,
+          "options": [
+            {
+              "label": "Aventura para Cristo , y/o avanzado",
+              "display_order": 1,
+              "active": true,
+              "honor_ids": [
+                646,
+                647
+              ]
+            },
+            {
+              "label": "Marcado de la Biblia, y/o avanzado",
+              "display_order": 2,
+              "active": true,
+              "honor_ids": [
+                409,
+                410
+              ]
+            },
+            {
+              "label": "Mayordomía",
+              "display_order": 3,
+              "active": true,
+              "honor_ids": [
+                411
+              ]
+            },
+            {
+              "label": "Oración",
+              "display_order": 4,
+              "active": true,
+              "honor_ids": [
+                418
+              ]
+            },
+            {
+              "label": "Pacificadores, y/o avanzado",
+              "display_order": 5,
+              "active": true,
+              "honor_ids": [
+                420,
+                421
+              ]
+            },
+            {
+              "label": "Santuario",
+              "display_order": 6,
+              "active": true,
+              "honor_ids": [
+                432
+              ]
+            }
+          ]
+        },
+        {
+          "group_type": "EXPLICIT_OPTIONS",
+          "title": "Ministerios",
+          "description": null,
+          "minimum_required": 4,
+          "display_order": 2,
+          "active": true,
+          "options": [
+            {
+              "label": "Arte cristiano de predicar, y/o avanzado",
+              "display_order": 1,
+              "active": true,
+              "honor_ids": [
+                369,
+                370
+              ]
+            },
+            {
+              "label": "Arte cristiano de vender",
+              "display_order": 2,
+              "active": true,
+              "honor_ids": [
+                144
+              ]
+            },
+            {
+              "label": "Colportaje",
+              "display_order": 3,
+              "active": true,
+              "honor_ids": [
+                383
+              ]
+            },
+            {
+              "label": "Drama cristiano",
+              "display_order": 4,
+              "active": true,
+              "honor_ids": [
+                389
+              ]
+            },
+            {
+              "label": "Enfermería casera",
+              "display_order": 5,
+              "active": true,
+              "honor_ids": [
+                582
+              ]
+            },
+            {
+              "label": "Enseñanza",
+              "display_order": 6,
+              "active": true,
+              "honor_ids": [
+                173
+              ]
+            },
+            {
+              "label": "Evangelismo bíblico",
+              "display_order": 7,
+              "active": true,
+              "honor_ids": [
+                174
+              ]
+            },
+            {
+              "label": "Evangelismo personal",
+              "display_order": 8,
+              "active": true,
+              "honor_ids": [
+                394
+              ]
+            },
+            {
+              "label": "Lenguaje gestual, y/o avanzado",
+              "display_order": 9,
+              "active": true,
+              "honor_ids": [
+                407,
+                408
+              ]
+            },
+            {
+              "label": "Narración de historias cristianas",
+              "display_order": 10,
+              "active": true,
+              "honor_ids": [
+                417
+              ]
+            },
+            {
+              "label": "Predícalo, y/o avanzado",
+              "display_order": 11,
+              "active": true,
+              "honor_ids": [
+                425,
+                426
+              ]
+            },
+            {
+              "label": "Testificación de menores",
+              "display_order": 12,
+              "active": true,
+              "honor_ids": [
+                435
+              ]
+            },
+            {
+              "label": "Títeres",
+              "display_order": 13,
+              "active": true,
+              "honor_ids": [
+                436
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "master_honor_id": 8,
+      "name": "Maestría en Deportes",
+      "master_image": "8",
+      "active": true,
+      "philosophy": "La Maestría en Deportes consiste de especialidades que involucran un premio o una situación de ganar vs. perder.",
+      "notes": null,
+      "applicability_scope": "ALL",
+      "division_ids": [],
+      "groups": [
+        {
+          "group_type": "EXPLICIT_OPTIONS",
+          "title": "Desarrollar por lo menos 7 de las siguientes especialidades:",
+          "description": null,
+          "minimum_required": 7,
+          "display_order": 1,
+          "active": true,
+          "options": [
+            {
+              "label": "Baloncesto",
+              "display_order": 1,
+              "active": true,
+              "honor_ids": [
+                19
+              ]
+            },
+            {
+              "label": "Ciclismo, y/o avanzado",
+              "display_order": 2,
+              "active": true,
+              "honor_ids": [
+                33,
+                34
+              ]
+            },
+            {
+              "label": "Equitación, avanzado",
+              "display_order": 3,
+              "active": true,
+              "honor_ids": [
+                49,
+                50
+              ]
+            },
+            {
+              "label": "Esquí alpino",
+              "display_order": 4,
+              "active": true,
+              "honor_ids": [
+                57
+              ]
+            },
+            {
+              "label": "Fútbol",
+              "display_order": 5,
+              "active": true,
+              "honor_ids": [
+                63
+              ]
+            },
+            {
+              "label": "Fútbol bandera",
+              "display_order": 6,
+              "active": true,
+              "honor_ids": [
+                64
+              ]
+            },
+            {
+              "label": "Gimnasia",
+              "display_order": 7,
+              "active": true,
+              "honor_ids": [
+                71
+              ]
+            },
+            {
+              "label": "Golf",
+              "display_order": 8,
+              "active": true,
+              "honor_ids": [
+                73
+              ]
+            },
+            {
+              "label": "Pista y campo",
+              "display_order": 9,
+              "active": true,
+              "honor_ids": [
+                102
+              ]
+            },
+            {
+              "label": "Softbol",
+              "display_order": 10,
+              "active": true,
+              "honor_ids": [
+                118
+              ]
+            },
+            {
+              "label": "Tenis",
+              "display_order": 11,
+              "active": true,
+              "honor_ids": [
+                126
+              ]
+            },
+            {
+              "label": "Tiro con arco",
+              "display_order": 12,
+              "active": true,
+              "honor_ids": [
+                129
+              ]
+            },
+            {
+              "label": "Triatlón",
+              "display_order": 13,
+              "active": true,
+              "honor_ids": [
+                132
+              ]
+            },
+            {
+              "label": "Ultimate disc",
+              "display_order": 14,
+              "active": true,
+              "honor_ids": [
+                135
+              ]
+            },
+            {
+              "label": "Voleibol",
+              "display_order": 15,
+              "active": true,
+              "honor_ids": [
+                140
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "master_honor_id": 9,
+      "name": "Maestría en Familia, Orígenes y Herencia",
+      "master_image": "9",
+      "active": true,
+      "philosophy": null,
+      "notes": "Cada división puede sustituir una especialidad específica que se dirige a la herencia específica dentro de su división (por ejemplo, Folclore Maorí para la División del Pacífico Sur o Herencia Adventista Afroamericana dentro para la División Norteamericana)",
+      "applicability_scope": "ALL",
+      "division_ids": [],
+      "groups": [
+        {
+          "group_type": "EXPLICIT_OPTIONS",
+          "title": "Desarrollar las 2 siguientes especialidades:",
+          "description": null,
+          "minimum_required": 2,
+          "display_order": 1,
+          "active": true,
+          "options": [
+            {
+              "label": "Herencia de los pioneros adventistas",
+              "display_order": 1,
+              "active": true,
+              "honor_ids": [
+                400
+              ]
+            },
+            {
+              "label": "Mensajera de Dios",
+              "display_order": 2,
+              "active": true,
+              "honor_ids": [
+                413
+              ]
+            }
+          ]
+        },
+        {
+          "group_type": "EXPLICIT_OPTIONS",
+          "title": "Desarrollar por lo menos 5 de las siguientes especialidades:",
+          "description": null,
+          "minimum_required": 5,
+          "display_order": 2,
+          "active": true,
+          "options": [
+            {
+              "label": "Arqueología bíblica",
+              "display_order": 1,
+              "active": true,
+              "honor_ids": [
+                368
+              ]
+            },
+            {
+              "label": "Banderas, y/o avanzado",
+              "display_order": 2,
+              "active": true,
+              "honor_ids": [
+                375,
+                376
+              ]
+            },
+            {
+              "label": "Civismo cristiano",
+              "display_order": 3,
+              "active": true,
+              "honor_ids": [
+                382
+              ]
+            },
+            {
+              "label": "Creacionismo, y/o avanzado",
+              "display_order": 4,
+              "active": true,
+              "honor_ids": [
+                384,
+                385
+              ]
+            },
+            {
+              "label": "Escatología",
+              "display_order": 5,
+              "active": true,
+              "honor_ids": [
+                390
+              ]
+            },
+            {
+              "label": "Genealogía",
+              "display_order": 6,
+              "active": true,
+              "honor_ids": [
+                278
+              ]
+            },
+            {
+              "label": "Idiomas",
+              "display_order": 7,
+              "active": true,
+              "honor_ids": [
+                403
+              ]
+            },
+            {
+              "label": "Mejoramiento comunitario",
+              "display_order": 8,
+              "active": true,
+              "honor_ids": [
+                680
+              ]
+            },
+            {
+              "label": "Multiculturalidad",
+              "display_order": 9,
+              "active": true,
+              "honor_ids": [
+                416
+              ]
+            },
+            {
+              "label": "Patriotismo",
+              "display_order": 10,
+              "active": true,
+              "honor_ids": [
+                423
+              ]
+            },
+            {
+              "label": "Vida familiar",
+              "display_order": 11,
+              "active": true,
+              "honor_ids": [
+                439
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "master_honor_id": 10,
+      "name": "Maestría en Habilidades Domésticas",
+      "master_image": "10",
+      "active": true,
+      "philosophy": null,
+      "notes": null,
+      "applicability_scope": "ALL",
+      "division_ids": [],
+      "groups": [
+        {
+          "group_type": "CATEGORY_COUNT",
+          "title": "Artes domésticas",
+          "description": "Desarrollar por lo menos 7 especialidades de la categoría de Artes domésticas.",
+          "minimum_required": 7,
+          "honors_category_id": 4,
+          "display_order": 1,
+          "active": true,
+          "options": []
+        }
+      ]
+    },
+    {
+      "master_honor_id": 11,
+      "name": "Maestría en Habilidades Vocacionales",
+      "master_image": "11",
+      "active": true,
+      "philosophy": null,
+      "notes": null,
+      "applicability_scope": "ALL",
+      "division_ids": [],
+      "groups": [
+        {
+          "group_type": "CATEGORY_COUNT",
+          "title": "Actividades vocacionales",
+          "description": "Desarrollar por lo menos 7 especialidades de la categoría de Actividades vocacionales.",
+          "minimum_required": 7,
+          "honors_category_id": 8,
+          "display_order": 1,
+          "active": true,
+          "options": []
+        }
+      ]
+    },
+    {
+      "master_honor_id": 13,
+      "name": "Maestría en Recreación",
+      "master_image": "13",
+      "active": true,
+      "philosophy": "La Maestría en Recreación consiste de especialidades de actividades al aire libre ue no involucran premios o situaciones de ganar vs. perder. Como hay una Maestría en Vida Primitiva, no se incluye aquí el arte de acampar. Como hay una Maestría Acuática, esta maestría sólo incluye deportes y recreación terrestres.",
+      "notes": null,
+      "applicability_scope": "ALL",
+      "division_ids": [],
+      "groups": [
+        {
+          "group_type": "EXPLICIT_OPTIONS",
+          "title": "Desarrollar por lo menos 7 de las siguientes especialidades:",
+          "description": null,
+          "minimum_required": 7,
+          "display_order": 1,
+          "active": true,
+          "options": [
+            {
+              "label": "Baloncesto",
+              "display_order": 1,
+              "active": true,
+              "honor_ids": [
+                19
+              ]
+            },
+            {
+              "label": "Cometas",
+              "display_order": 2,
+              "active": true,
+              "honor_ids": [
+                39
+              ]
+            },
+            {
+              "label": "Educación física",
+              "display_order": 3,
+              "active": true,
+              "honor_ids": [
+                46
+              ]
+            },
+            {
+              "label": "Ejercicios y marchas",
+              "display_order": 4,
+              "active": true,
+              "honor_ids": [
+                47
+              ]
+            },
+            {
+              "label": "Equitación",
+              "display_order": 5,
+              "active": true,
+              "honor_ids": [
+                49
+              ]
+            },
+            {
+              "label": "Escalada en roca",
+              "display_order": 6,
+              "active": true,
+              "honor_ids": [
+                51
+              ]
+            },
+            {
+              "label": "Esquí de fondo",
+              "display_order": 7,
+              "active": true,
+              "honor_ids": [
+                58
+              ]
+            },
+            {
+              "label": "Excursionismo",
+              "display_order": 8,
+              "active": true,
+              "honor_ids": [
+                60
+              ]
+            },
+            {
+              "label": "Excursionismo sobre la nieve",
+              "display_order": 9,
+              "active": true,
+              "honor_ids": [
+                114
+              ]
+            },
+            {
+              "label": "Exploración de cuevas",
+              "display_order": 10,
+              "active": true,
+              "honor_ids": [
+                660
+              ]
+            },
+            {
+              "label": "Geocaching",
+              "display_order": 11,
+              "active": true,
+              "honor_ids": [
+                67
+              ]
+            },
+            {
+              "label": "Geocaching geológica",
+              "display_order": 12,
+              "active": true,
+              "honor_ids": [
+                665
+              ]
+            },
+            {
+              "label": "Letterboxing",
+              "display_order": 13,
+              "active": true,
+              "honor_ids": [
+                78
+              ]
+            },
+            {
+              "label": "Monociclismo",
+              "display_order": 14,
+              "active": true,
+              "honor_ids": [
+                85
+              ]
+            },
+            {
+              "label": "Orientación",
+              "display_order": 15,
+              "active": true,
+              "honor_ids": [
+                95
+              ]
+            },
+            {
+              "label": "Prospección de oro",
+              "display_order": 16,
+              "active": true,
+              "honor_ids": [
+                103
+              ]
+            },
+            {
+              "label": "Senderismo",
+              "display_order": 17,
+              "active": true,
+              "honor_ids": [
+                112
+              ]
+            },
+            {
+              "label": "Tambores y percusión",
+              "display_order": 18,
+              "active": true,
+              "honor_ids": [
+                709
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "master_honor_id": 14,
+      "name": "Maestría en Salud y Ciencia",
+      "master_image": "14",
+      "active": true,
+      "philosophy": null,
+      "notes": null,
+      "applicability_scope": "ALL",
+      "division_ids": [],
+      "groups": [
+        {
+          "group_type": "EXPLICIT_OPTIONS",
+          "title": "Desarrollar por lo menos 3 de las siguientes especialidades",
+          "description": null,
+          "minimum_required": 3,
+          "display_order": 1,
+          "active": true,
+          "options": [
+            {
+              "label": "Cerebro y conducta",
+              "display_order": 1,
+              "active": true,
+              "honor_ids": [
+                579
+              ]
+            },
+            {
+              "label": "Cuidado de niños",
+              "display_order": 2,
+              "active": true,
+              "honor_ids": [
+                386
+              ]
+            },
+            {
+              "label": "Climatología",
+              "display_order": 3,
+              "active": true,
+              "honor_ids": [
+                485
+              ]
+            },
+            {
+              "label": "Defensas de la sangre y del cuerpo",
+              "display_order": 4,
+              "active": true,
+              "honor_ids": [
+                605
+              ]
+            },
+            {
+              "label": "Digestión",
+              "display_order": 5,
+              "active": true,
+              "honor_ids": [
+                581
+              ]
+            },
+            {
+              "label": "Enfermería casera",
+              "display_order": 6,
+              "active": true,
+              "honor_ids": [
+                582
+              ]
+            },
+            {
+              "label": "Huesos, músculos y movimientos",
+              "display_order": 7,
+              "active": true,
+              "honor_ids": [
+                591
+              ]
+            },
+            {
+              "label": "Salud y curación",
+              "display_order": 8,
+              "active": true,
+              "honor_ids": [
+                603
+              ]
+            }
+          ]
+        },
+        {
+          "group_type": "EXPLICIT_OPTIONS",
+          "title": "y por lo menos 2 de las siguientes especialidades",
+          "description": null,
+          "minimum_required": 2,
+          "display_order": 2,
+          "active": true,
+          "options": [
+            {
+              "label": "Alerta roja",
+              "display_order": 1,
+              "active": true,
+              "honor_ids": [
+                576
+              ]
+            },
+            {
+              "label": "Primeros auxilios I",
+              "display_order": 2,
+              "active": true,
+              "honor_ids": [
+                596
+              ]
+            },
+            {
+              "label": "Primeros auxilios II",
+              "display_order": 3,
+              "active": true,
+              "honor_ids": [
+                597
+              ]
+            },
+            {
+              "label": "Primeros auxilios II, avanzado",
+              "display_order": 4,
+              "active": true,
+              "honor_ids": [
+                597,
+                598
+              ]
+            },
+            {
+              "label": "Reanimación cardiopulmonar (RCP)",
+              "display_order": 5,
+              "active": true,
+              "honor_ids": [
+                601
+              ]
+            },
+            {
+              "label": "Rescate básico",
+              "display_order": 6,
+              "active": true,
+              "honor_ids": [
+                602
+              ]
+            }
+          ]
+        },
+        {
+          "group_type": "EXPLICIT_OPTIONS",
+          "title": "y por lo menos 2 de las siguientes especialidades",
+          "description": null,
+          "minimum_required": 2,
+          "display_order": 3,
+          "active": true,
+          "options": [
+            {
+              "label": "Física",
+              "display_order": 1,
+              "active": true,
+              "honor_ids": [
+                583
+              ]
+            },
+            {
+              "label": "Óptica",
+              "display_order": 2,
+              "active": true,
+              "honor_ids": [
+                593
+              ]
+            },
+            {
+              "label": "Química",
+              "display_order": 3,
+              "active": true,
+              "honor_ids": [
+                600
+              ]
+            },
+            {
+              "label": "Vida microscópica",
+              "display_order": 4,
+              "active": true,
+              "honor_ids": [
+                574
+              ]
+            },
+            {
+              "label": "Virus",
+              "display_order": 5,
+              "active": true,
+              "honor_ids": [
+                608
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "master_honor_id": 15,
+      "name": "Maestría en Tecnología Moderna",
+      "master_image": "15",
+      "active": true,
+      "philosophy": null,
+      "notes": null,
+      "applicability_scope": "ALL",
+      "division_ids": [],
+      "groups": [
+        {
+          "group_type": "EXPLICIT_OPTIONS",
+          "title": "Desarrollar por lo menos 7 de las siguientes especialidades:",
+          "description": null,
+          "minimum_required": 7,
+          "display_order": 1,
+          "active": true,
+          "options": [
+            {
+              "label": "Computadoras, y/o avanzado",
+              "display_order": 1,
+              "active": true,
+              "honor_ids": [
+                157,
+                158
+              ]
+            },
+            {
+              "label": "Ingeniería",
+              "display_order": 2,
+              "active": true,
+              "honor_ids": [
+                181
+              ]
+            },
+            {
+              "label": "Inteligencia artificial",
+              "display_order": 3,
+              "active": true,
+              "honor_ids": [
+                182
+              ]
+            },
+            {
+              "label": "Internet, y/o avanzado",
+              "display_order": 4,
+              "active": true,
+              "honor_ids": [
+                183,
+                184
+              ]
+            },
+            {
+              "label": "Procesar texto",
+              "display_order": 5,
+              "active": true,
+              "honor_ids": [
+                201
+              ]
+            },
+            {
+              "label": "Redes sociales",
+              "display_order": 6,
+              "active": true,
+              "honor_ids": [
+                206
+              ]
+            },
+            {
+              "label": "Video",
+              "display_order": 7,
+              "active": true,
+              "honor_ids": [
+                220
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "master_honor_id": 16,
+      "name": "Maestría en Testificación",
+      "master_image": "16",
+      "active": true,
+      "philosophy": null,
+      "notes": null,
+      "applicability_scope": "ALL",
+      "division_ids": [],
+      "groups": [
+        {
+          "group_type": "CATEGORY_COUNT",
+          "title": "Crecimiento espiritual, actividades misioneras y herencia",
+          "description": "Desarrollar por lo menos 7 especialidades de la categoría de Crecimiento espiritual, actividades misioneras y herencia.",
+          "minimum_required": 7,
+          "honors_category_id": 6,
+          "display_order": 1,
+          "active": true,
+          "options": []
+        }
+      ]
+    },
+    {
+      "master_honor_id": 17,
+      "name": "Maestría en Vida Primitiva",
+      "master_image": "17",
+      "active": true,
+      "philosophy": null,
+      "notes": null,
+      "applicability_scope": "ALL",
+      "division_ids": [],
+      "groups": [
+        {
+          "group_type": "EXPLICIT_OPTIONS",
+          "title": "Desarrollar por lo menos 7 de las siguientes especialidades:",
+          "description": null,
+          "minimum_required": 7,
+          "display_order": 1,
+          "active": true,
+          "options": [
+            {
+              "label": "Arte de acampar",
+              "display_order": 1,
+              "active": true,
+              "honor_ids": [
+                18
+              ]
+            },
+            {
+              "label": "Campamento IV",
+              "display_order": 2,
+              "active": true,
+              "honor_ids": [
+                28
+              ]
+            },
+            {
+              "label": "Campamento en invierno",
+              "display_order": 3,
+              "active": true,
+              "honor_ids": [
+                29
+              ]
+            },
+            {
+              "label": "Cocinando en olla holandesa",
+              "display_order": 4,
+              "active": true,
+              "honor_ids": [
+                37
+              ]
+            },
+            {
+              "label": "Excursionismo",
+              "display_order": 5,
+              "active": true,
+              "honor_ids": [
+                60
+              ]
+            },
+            {
+              "label": "Fogatas y cocina al aire libre",
+              "display_order": 6,
+              "active": true,
+              "honor_ids": [
+                62
+              ]
+            },
+            {
+              "label": "Liderazgo al aire libre",
+              "display_order": 7,
+              "active": true,
+              "honor_ids": [
+                80
+              ]
+            },
+            {
+              "label": "Liderazgo en la naturaleza",
+              "display_order": 8,
+              "active": true,
+              "honor_ids": [
+                82
+              ]
+            },
+            {
+              "label": "Nudos",
+              "display_order": 9,
+              "active": true,
+              "honor_ids": [
+                93
+              ]
+            },
+            {
+              "label": "Orientación",
+              "display_order": 10,
+              "active": true,
+              "honor_ids": [
+                95
+              ]
+            },
+            {
+              "label": "Pionerismo",
+              "display_order": 11,
+              "active": true,
+              "honor_ids": [
+                101
+              ]
+            },
+            {
+              "label": "Plantas silvestres comestibles",
+              "display_order": 12,
+              "active": true,
+              "honor_ids": [
+                557
+              ]
+            },
+            {
+              "label": "Senderismo",
+              "display_order": 13,
+              "active": true,
+              "honor_ids": [
+                112
+              ]
+            },
+            {
+              "label": "Seguridad en campamentos",
+              "display_order": 14,
+              "active": true,
+              "honor_ids": [
+                110
+              ]
+            },
+            {
+              "label": "Supervivencia en clima frío",
+              "display_order": 15,
+              "active": true,
+              "honor_ids": [
+                119
+              ]
+            },
+            {
+              "label": "Tiendas de campaña",
+              "display_order": 16,
+              "active": true,
+              "honor_ids": [
+                128
+              ]
+            },
+            {
+              "label": "Vida primitiva",
+              "display_order": 17,
+              "active": true,
+              "honor_ids": [
+                139
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "master_honor_id": 18,
+      "name": "Maestría en Zoología",
+      "master_image": "18",
+      "active": true,
+      "philosophy": null,
+      "notes": null,
+      "applicability_scope": "ALL",
+      "division_ids": [],
+      "groups": [
+        {
+          "group_type": "EXPLICIT_OPTIONS",
+          "title": "Desarrollar por lo menos 1 de las siguientes especialidades:",
+          "description": null,
+          "minimum_required": 1,
+          "display_order": 1,
+          "active": true,
+          "options": [
+            {
+              "label": "Cetáceaos O Mamíferos marinos",
+              "display_order": 1,
+              "active": true,
+              "honor_ids": [
+                479,
+                531
+              ]
+            },
+            {
+              "label": "Especies en peligro de extinción",
+              "display_order": 2,
+              "active": true,
+              "honor_ids": [
+                502
+              ]
+            },
+            {
+              "label": "Mamíferos",
+              "display_order": 3,
+              "active": true,
+              "honor_ids": [
+                529
+              ]
+            }
+          ]
+        },
+        {
+          "group_type": "EXPLICIT_OPTIONS",
+          "title": "fauna silvestre",
+          "description": null,
+          "minimum_required": 4,
+          "display_order": 2,
+          "active": true,
+          "options": [
+            {
+              "label": "Algas marinas",
+              "display_order": 1,
+              "active": true,
+              "honor_ids": [
+                443
+              ]
+            },
+            {
+              "label": "Anfibios",
+              "display_order": 2,
+              "active": true,
+              "honor_ids": [
+                444
+              ]
+            },
+            {
+              "label": "Antílopes",
+              "display_order": 3,
+              "active": true,
+              "honor_ids": [
+                450
+              ]
+            },
+            {
+              "label": "Arácnidos",
+              "display_order": 4,
+              "active": true,
+              "honor_ids": [
+                452
+              ]
+            },
+            {
+              "label": "Aves, y/o avanzado",
+              "display_order": 5,
+              "active": true,
+              "honor_ids": [
+                460,
+                461
+              ]
+            },
+            {
+              "label": "Dinosaurios O Fósiles",
+              "display_order": 6,
+              "active": true,
+              "honor_ids": [
+                496,
+                664
+              ]
+            },
+            {
+              "label": "Insectos, y/o avanzado",
+              "display_order": 7,
+              "active": true,
+              "honor_ids": [
+                521,
+                522
+              ]
+            },
+            {
+              "label": "Invertebrados marinos",
+              "display_order": 8,
+              "active": true,
+              "honor_ids": [
+                523
+              ]
+            },
+            {
+              "label": "Lombrices",
+              "display_order": 9,
+              "active": true,
+              "honor_ids": [
+                526
+              ]
+            },
+            {
+              "label": "Mariposas",
+              "display_order": 10,
+              "active": true,
+              "honor_ids": [
+                533
+              ]
+            },
+            {
+              "label": "Marsupiales",
+              "display_order": 11,
+              "active": true,
+              "honor_ids": [
+                534
+              ]
+            },
+            {
+              "label": "Murciélagos, y/o avanzado",
+              "display_order": 12,
+              "active": true,
+              "honor_ids": [
+                542,
+                543
+              ]
+            },
+            {
+              "label": "Odonatos, y/o avanzado",
+              "display_order": 13,
+              "active": true,
+              "honor_ids": [
+                544,
+                545
+              ]
+            },
+            {
+              "label": "Tiburones",
+              "display_order": 14,
+              "active": true,
+              "honor_ids": [
+                573
+              ]
+            },
+            {
+              "label": "Vida microscópica",
+              "display_order": 15,
+              "active": true,
+              "honor_ids": [
+                574
+              ]
+            }
+          ]
+        },
+        {
+          "group_type": "EXPLICIT_OPTIONS",
+          "title": "animales que son mascotas o de granja",
+          "description": null,
+          "minimum_required": 2,
+          "display_order": 3,
+          "active": true,
+          "options": [
+            {
+              "label": "Animales Domésticos",
+              "display_order": 1,
+              "active": true,
+              "honor_ids": [
+                446
+              ]
+            },
+            {
+              "label": "Aves domésticas",
+              "display_order": 2,
+              "active": true,
+              "honor_ids": [
+                463
+              ]
+            },
+            {
+              "label": "Aves de jaula O Loros y cacatúas",
+              "display_order": 3,
+              "active": true,
+              "honor_ids": [
+                464,
+                528
+              ]
+            },
+            {
+              "label": "Cuidado y entrenamiento de perros",
+              "display_order": 4,
+              "active": true,
+              "honor_ids": [
+                495
+              ]
+            },
+            {
+              "label": "Gatos",
+              "display_order": 5,
+              "active": true,
+              "honor_ids": [
+                510
+              ]
+            },
+            {
+              "label": "Mamíferos pequeños como mascotas",
+              "display_order": 6,
+              "active": true,
+              "honor_ids": [
+                532
+              ]
+            },
+            {
+              "label": "Perros",
+              "display_order": 7,
+              "active": true,
+              "honor_ids": [
+                554
+              ]
+            },
+            {
+              "label": "Peces",
+              "display_order": 8,
+              "active": true,
+              "honor_ids": [
+                552
+              ]
+            },
+            {
+              "label": "Reptiles, y/o avanzado",
+              "display_order": 9,
+              "active": true,
+              "honor_ids": [
+                563,
+                564
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
