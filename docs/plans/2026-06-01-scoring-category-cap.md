@@ -510,4 +510,3 @@ cd /Users/abner/Documents/development/sacdia/sacdia-app
 dart format --set-exit-if-changed lib/features/units/presentation/views/unit_detail_view.dart
 flutter analyze
 ```
-
