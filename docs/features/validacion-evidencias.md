@@ -52,6 +52,7 @@ Las evidencias pueden ser archivos (fotos, PDFs, documentos) que demuestran la r
 - **Vista unificada limitada**: Un solo punto de entrada para clases y honores evita mezclar la cola generica con el scoring anual de carpetas
 - **Bulk por tipo**: Las operaciones masivas solo permiten evidencias del mismo tipo para evitar inconsistencias de flujo
 - **File gallery**: Preview inline evita la necesidad de descargar archivos para validar
+- **Nombre visible normalizado**: Las evidencias subidas por usuarios se muestran como `Evidencia 01`, `Evidencia 02`, etc. El contexto (usuario, fecha, sección/requisito) queda como metadata; las claves técnicas de storage siguen siendo únicas y no se usan como nombre visible.
 
 ## Gaps y pendientes
 

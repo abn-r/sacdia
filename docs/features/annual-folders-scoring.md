@@ -141,6 +141,7 @@ Reopen (LF o union): VALIDATED | REJECTED | PREAPPROVED_LF ──> SUBMITTED
 - **closing_date bloquea submissions pero NO evaluacion**: el campo puede evaluar despues del cierre
 - **Flutter backward-compatible**: campos nullable con fallbacks para backends sin actualizar
 - **Separacion de colas**: `EvidenceReview` no revisa la Carpeta Anual de Evidencias; el módulo `annual-folders` usa endpoints propios por folder/seccion (`POST /annual-folders/:folderId/sections/:sectionId/evidences`, `submit`, `evaluate`, `confirm-union`)
+- **Nombre visible de evidencias**: Los adjuntos del módulo `annual-folders` se etiquetan como `Evidencia 01`, `Evidencia 02`, etc. El nombre original del archivo y la clave técnica de R2 no deben presentarse como título visible; uploader, fecha y sección quedan como metadata.
 - **Ranking anual no es solo carpeta**: la app y el panel calculan componentes configurables mediante el registry de score. La Carpeta Anual de Evidencias es un componente, no el ranking completo.
 - **Uso operativo sin vanity metrics**: `sacdia_operational_usage` mide acciones útiles registradas en SACDIA (asistencia semanal, clases/progreso, informes, actividades), no sesiones ni logins.
 

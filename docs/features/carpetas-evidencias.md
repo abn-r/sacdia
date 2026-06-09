@@ -72,6 +72,7 @@ Las carpetas son diferentes de las clases progresivas: mientras las clases tiene
 - **JwtAuthGuard simple en EvidenceFolderController**: usa @CurrentUser() para resolver el usuario del token sin PermissionsGuard adicional
 - **Auto-completado jerarquico**: al actualizar una seccion, el servicio verifica y auto-completa modulo y carpeta si corresponde
 - **Soft delete en abandono**: la asignacion se desactiva pero no se elimina fisicamente
+- **Nombre visible normalizado**: Los archivos adjuntos se numeran como `Evidencia 01`, `Evidencia 02`, etc. El nombre original del picker/browser no se conserva como etiqueta visible para evitar confusiones; usuario, fecha y sección se consultan como metadata.
 
 ## Gaps y pendientes
 
