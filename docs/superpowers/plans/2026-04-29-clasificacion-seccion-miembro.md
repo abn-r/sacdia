@@ -18,7 +18,7 @@
 
 **Branch convention:** `feat/section-member-rankings-8-4-a` en los 3 repos cuando arranquen sub-features. Empezar en `sacdia-backend`.
 
-**Test creds dev:** `admin@sacdia.com / Sacdia2026!` (super_admin), `director@sacdia.com / Sacdia2026!` (director-club ACV/GM).
+**Test creds dev:** usuarios de prueba disponibles por canal privado; la contraseña debe leerse desde el secret manager o variable local, no desde docs versionadas.
 
 ---
 
@@ -2749,8 +2749,9 @@ describe('MemberRankings (e2e — HTTP real)', () => {
     app = m.createNestApplication();
     await app.init();
     // Login fixtures: obtener tokens via /auth/sign-in
-    memberToken = await loginAs('member-test@sacdia.com', 'Sacdia2026!');
-    directorToken = await loginAs('director@sacdia.com', 'Sacdia2026!');
+    const testPassword = process.env.E2E_TEST_PASSWORD!;
+    memberToken = await loginAs('member-test@sacdia.com', testPassword);
+    directorToken = await loginAs('director@sacdia.com', testPassword);
   });
 
   afterAll(() => app.close());
@@ -3518,7 +3519,7 @@ EOF
 
 ### Task 23: Smoke E2E manual contra dev environment
 
-**Setup**: backend + admin desplegados en dev (Neon dev branch). Tests creds: `admin@sacdia.com / Sacdia2026!` (super_admin) y `director@sacdia.com / Sacdia2026!` (director-club ACV/GM).
+**Setup**: backend + admin desplegados en dev (Neon dev branch). Usuarios de prueba disponibles por canal privado; password desde secret manager o `E2E_TEST_PASSWORD` local.
 
 - [x] **Step 1: Pre-condiciones**
 

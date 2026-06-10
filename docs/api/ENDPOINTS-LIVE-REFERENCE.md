@@ -99,7 +99,7 @@
 | Method | Path | Auth | Roles | Description | Source |
 |---|---|---|---|---|---|
 | GET | `/api/v1/users/:userId` | JWT | - | Obtener información de un usuario | `src/users/users.controller.ts` |
-| PATCH | `/api/v1/users/:userId` | JWT | - | Actualizar información personal del usuario | `src/users/users.controller.ts` |
+| PATCH | `/api/v1/users/:userId` | JWT | - | Actualizar información personal del usuario. `country_id`, `union_id` y `local_field_id` son de solo lectura en self-service y el backend los rechaza si vienen en el body; los cambios territoriales deben hacerse por flujo administrativo autorizado. | `src/users/users.controller.ts` |
 | GET | `/api/v1/users/:userId/allergies` | JWT | - | Obtener alergias activas del usuario | `src/users/users.controller.ts` |
 | GET | `/api/v1/users/:userId/diseases` | JWT | - | Obtener enfermedades activas del usuario | `src/users/users.controller.ts` |
 | GET | `/api/v1/users/:userId/medicines` | JWT | - | Obtener medicamentos activos del usuario | `src/users/users.controller.ts` |
@@ -124,6 +124,7 @@
 | POST | `/api/v1/users/:userId/honors/bulk` | JWT | - | Registrar honores de usuario de forma masiva | `src/honors/honors.controller.ts` |
 | GET | `/api/v1/users/:userId/honors/stats` | JWT | - | Obtener estadísticas de honores del usuario | `src/honors/honors.controller.ts` |
 | GET | `/api/v1/users/:userId/master-honors` | JWT | `user_honors:read` (owner bypass) | Listar maestrías del usuario con estados `AWARDED`, `REVOKED` y `RETIRED`; incluye `is_current` y etiqueta `Vigente`/`No vigente`, sin `evaluation_snapshot` para mantener respuesta compacta. | `src/honors/master-honors.controller.ts` |
+| GET | `/api/v1/users/:userId/master-honors/roadmap` | JWT | `user_honors:read` (owner bypass) | Listar maestrías activas aplicables al usuario con avance y requisitos, incluyendo maestrías aún no obtenidas. Es lectura sin side effects; no otorga maestrías. | `src/honors/master-honors.controller.ts` |
 | GET | `/api/v1/users/:userId/master-honors/:masterHonorId` | JWT | `user_honors:read` (owner bypass) | Obtener detalle de una maestría del usuario; incluye `evaluation_snapshot` para explicar la evaluación vigente. | `src/honors/master-honors.controller.ts` |
 | DELETE | `/api/v1/users/:userId/honors/:honorId` | JWT | - | Abandonar honor | `src/honors/honors.controller.ts` |
 | PATCH | `/api/v1/users/:userId/honors/:honorId` | JWT | - | Actualizar progreso de honor | `src/honors/honors.controller.ts` |
@@ -194,6 +195,7 @@
 
 - `GET /api/v1/users/:userId/master-honors` es la fuente para banda e historial compacto de maestrías en app. Incluye `AWARDED`, `REVOKED` y `RETIRED`, además de `is_current` y `display_status_label`.
 - `AWARDED` se muestra como `Vigente`; `REVOKED` y `RETIRED` se muestran como `No vigente`.
+- `GET /api/v1/users/:userId/master-honors/roadmap` es la fuente para la pantalla dedicada de maestrías (`/home/master-honors`), donde se muestran oportunidades, avance y requisitos pendientes aunque el usuario aún no tenga maestrías. El perfil usa esta misma respuesta solo para el resumen compacto de conteo/logos. La respuesta incluye `progress_percent`, grupos de requisitos, conteos actuales y opciones completadas, pero no persiste evaluaciones ni crea `users_master_honors`.
 - `GET /api/v1/users/:userId/master-honors/:masterHonorId` agrega `evaluation_snapshot` para explicar qué reglas, opciones y especialidades contaron en la evaluación.
 - La app no debe inferir elegibilidad desde `honors.master_honors_id`; esa columna no representa reglas configurables.
 
