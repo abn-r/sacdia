@@ -95,10 +95,11 @@ La app consume:
 
 ```http
 GET /api/v1/users/:userId/master-honors
+GET /api/v1/users/:userId/master-honors/roadmap
 GET /api/v1/users/:userId/master-honors/:masterHonorId
 ```
 
-La tarjeta virtual muestra maestrías vigentes y **No vigente** en la banda. El perfil muestra historial con estado y fechas relevantes. La app debe invalidar estos datos cuando recibe una notificación de cambio de maestría.
+La tarjeta virtual muestra maestrías vigentes y **No vigente** en la banda. El perfil muestra solo un resumen compacto, similar al resumen de logros: conteo, logos circulares de maestrías obtenidas y un acceso a la pantalla dedicada de maestrías. La pantalla dedicada (`/home/master-honors`) lista el roadmap completo y permite abrir el detalle con avance y requisitos pendientes. Para esto usa `roadmap` y no infiere reglas desde `honors.master_honors_id`. La app debe invalidar estos datos cuando recibe una notificación de cambio de maestría.
 
 ### Notificaciones y modal global
 

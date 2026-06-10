@@ -1,0 +1,1071 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SACDIA Codex Security Scan</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #fff;
+      --bg-elev: #fafafa;
+      --bg-muted: #f5f5f7;
+      --fg: #111827;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --accent: #2563eb;
+      --code: #f3f4f6;
+      --shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0b0f14;
+        --bg-elev: #0f141b;
+        --bg-muted: #121923;
+        --fg: #e5e7eb;
+        --muted: #9ca3af;
+        --border: #243040;
+        --accent: #60a5fa;
+        --code: #111827;
+        --shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+      }
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--fg);
+      font: 15px/1.55 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 280px minmax(0, 1fr);
+      min-height: 100vh;
+    }
+
+    body.sidebar-collapsed .layout { grid-template-columns: 44px minmax(0, 1fr); }
+
+    .sidebar {
+      min-height: 100vh;
+      border-right: 1px solid var(--border);
+      background: var(--bg-muted);
+    }
+
+    .toc-inner {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow: auto;
+      padding: 10px 8px;
+    }
+
+    .nav-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      margin: 0 0 8px;
+      text-transform: uppercase;
+    }
+
+    .nav-toggle {
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--fg);
+      border-radius: 8px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 5px;
+    }
+
+    .nav-toggle:hover { box-shadow: var(--shadow); }
+    .nav-meta { color: var(--muted); font-size: 12px; margin: 0 0 12px; padding: 0 4px; }
+
+    body.sidebar-collapsed .toc-inner {
+      display: flex;
+      align-items: center;
+      padding: 8px 6px;
+    }
+
+    body.sidebar-collapsed .nav-title span,
+    body.sidebar-collapsed .nav-meta,
+    body.sidebar-collapsed .toc { display: none; }
+
+    main { max-width: 1040px; padding: 32px 44px 80px; }
+    h1, h2, h3 { line-height: 1.2; margin-top: 1.7em; }
+    h1:first-child { margin-top: 0; }
+    h2 { border-top: 1px solid var(--border); padding-top: 1em; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code { background: var(--code); border-radius: 4px; padding: 0.1em 0.3em; }
+    pre { background: var(--code); border: 1px solid var(--border); border-radius: 8px; overflow: auto; padding: 16px; }
+    pre code { background: transparent; padding: 0; }
+    table { border-collapse: collapse; width: 100%; margin: 18px 0; }
+    th, td { border: 1px solid var(--border); padding: 8px 10px; vertical-align: top; }
+    th { text-align: left; background: var(--code); }
+
+    main h3[id^="0-"] + table,
+    main h3[id^="1-"] + table,
+    main h3[id^="2-"] + table,
+    main h3[id^="3-"] + table,
+    main h3[id^="4-"] + table,
+    main h3[id^="5-"] + table,
+    main h3[id^="6-"] + table,
+    main h3[id^="7-"] + table,
+    main h3[id^="8-"] + table,
+    main h3[id^="9-"] + table {
+      margin: 10px 0 24px;
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--accent);
+      background: var(--bg-elev);
+      box-shadow: var(--shadow);
+    }
+
+    main h3[id^="0-"] + table th,
+    main h3[id^="1-"] + table th,
+    main h3[id^="2-"] + table th,
+    main h3[id^="3-"] + table th,
+    main h3[id^="4-"] + table th,
+    main h3[id^="5-"] + table th,
+    main h3[id^="6-"] + table th,
+    main h3[id^="7-"] + table th,
+    main h3[id^="8-"] + table th,
+    main h3[id^="9-"] + table th { display: none; }
+
+    main h3[id^="0-"] + table td:first-child,
+    main h3[id^="1-"] + table td:first-child,
+    main h3[id^="2-"] + table td:first-child,
+    main h3[id^="3-"] + table td:first-child,
+    main h3[id^="4-"] + table td:first-child,
+    main h3[id^="5-"] + table td:first-child,
+    main h3[id^="6-"] + table td:first-child,
+    main h3[id^="7-"] + table td:first-child,
+    main h3[id^="8-"] + table td:first-child,
+    main h3[id^="9-"] + table td:first-child {
+      width: 170px;
+      color: var(--muted);
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    main h3[id^="0-"] + table td,
+    main h3[id^="1-"] + table td,
+    main h3[id^="2-"] + table td,
+    main h3[id^="3-"] + table td,
+    main h3[id^="4-"] + table td,
+    main h3[id^="5-"] + table td,
+    main h3[id^="6-"] + table td,
+    main h3[id^="7-"] + table td,
+    main h3[id^="8-"] + table td,
+    main h3[id^="9-"] + table td { border-left: 0; border-right: 0; }
+
+    .toc { list-style: none; padding: 0; margin: 0; }
+    .toc a {
+      display: block;
+      border-radius: 6px;
+      color: var(--fg);
+      font-size: 13px;
+      line-height: 1.3;
+      padding: 4px 6px;
+      position: relative;
+      transition: background 160ms ease, color 160ms ease, padding-left 160ms ease;
+    }
+
+    .toc a:hover { background: var(--bg-elev); text-decoration: none; }
+    .toc-item { list-style: none; margin: 1px 0; }
+    .toc-item.depth-1 > a { font-weight: 700; }
+    .toc-item.depth-2 { padding-left: 14px; }
+    .toc-item.depth-3 { padding-left: 28px; }
+
+    .toc-item.active > a {
+      color: var(--accent);
+      background: color-mix(in srgb, var(--accent) 12%, transparent);
+      font-weight: 700;
+      padding-left: 10px;
+    }
+
+    .toc-item.active > a::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 4px;
+      bottom: 4px;
+      width: 3px;
+      border-radius: 2px;
+      background: var(--accent);
+    }
+
+    @media (max-width: 900px) {
+      .layout { display: block; }
+      .sidebar { min-height: 0; border-right: 0; border-bottom: 1px solid var(--border); }
+      .toc-inner { position: static; height: auto; max-height: 45vh; }
+      main { padding: 24px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar" aria-label="Table of contents">
+      <div class="toc-inner">
+        <div class="nav-title">
+          <span>Outline</span>
+          <button id="navToggle" class="nav-toggle" aria-pressed="false" aria-label="Collapse sidebar" title="Collapse sidebar">
+            <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path id="navToggleIcon" d="M15 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+        <div class="nav-meta">SACDIA Codex Security Scan</div>
+        <ul class="toc">
+          <li class="toc-item depth-1"><a href="#security-review-sacdia-workspace">Security Review: SACDIA workspace</a></li>
+<li class="toc-item depth-2"><a href="#scope">Scope</a></li>
+<li class="toc-item depth-3"><a href="#scan-summary">Scan Summary</a></li>
+<li class="toc-item depth-2"><a href="#threat-model">Threat Model</a></li>
+<li class="toc-item depth-1"><a href="#sacdia-repository-threat-model">SACDIA Repository Threat Model</a></li>
+<li class="toc-item depth-2"><a href="#scope">Scope</a></li>
+<li class="toc-item depth-2"><a href="#assets-and-privileges-that-matter">Assets and privileges that matter</a></li>
+<li class="toc-item depth-2"><a href="#trust-boundaries">Trust boundaries</a></li>
+<li class="toc-item depth-2"><a href="#attacker-controlled-inputs">Attacker-controlled inputs</a></li>
+<li class="toc-item depth-2"><a href="#security-invariants">Security invariants</a></li>
+<li class="toc-item depth-2"><a href="#high-impact-failure-modes-to-prioritize">High-impact failure modes to prioritize</a></li>
+<li class="toc-item depth-2"><a href="#assumptions-to-verify-during-discovery">Assumptions to verify during discovery</a></li>
+<li class="toc-item depth-2"><a href="#findings">Findings</a></li>
+<li class="toc-item depth-3"><a href="#confidence-scale">Confidence Scale</a></li>
+<li class="toc-item depth-3"><a href="#1-self-service-profile-updates-can-retarget-the-territory-used-by-global-rbac">[1] Self-service profile updates can retarget the territory used by global RBAC</a></li>
+<li class="toc-item depth-3"><a href="#2-admin-resource-read-endpoints-ignore-resource-scope-and-issue-cross-scope-signed-urls">[2] Admin resource read endpoints ignore resource scope and issue cross-scope signed URLs</a></li>
+<li class="toc-item depth-3"><a href="#3-admin-resource-update-and-delete-endpoints-mutate-resources-outside-the-actor-scope">[3] Admin resource update and delete endpoints mutate resources outside the actor scope</a></li>
+<li class="toc-item depth-3"><a href="#4-annual-folder-read-routes-expose-private-evidence-across-clubs">[4] Annual folder read routes expose private evidence across clubs</a></li>
+<li class="toc-item depth-3"><a href="#5-annual-folder-upload-accepts-evidence-for-folders-owned-by-another-club">[5] Annual folder upload accepts evidence for folders owned by another club</a></li>
+<li class="toc-item depth-3"><a href="#6-annual-folder-evaluation-actions-are-not-bound-to-the-reviewer-territory">[6] Annual folder evaluation actions are not bound to the reviewer territory</a></li>
+<li class="toc-item depth-3"><a href="#7-membership-request-approval-checks-the-wrong-resource-and-updates-by-assignment-id-only">[7] Membership request approval checks the wrong resource and updates by assignment ID only</a></li>
+<li class="toc-item depth-3"><a href="#8-development-docs-publish-shared-test-credentials-and-fail-open-when-basic-auth-envs-are-missing">[8] Development docs publish shared test credentials and fail open when Basic Auth envs are missing</a></li>
+<li class="toc-item depth-3"><a href="#9-docs-sync-workflow-persists-cross-repo-tokens-while-running-installs-and-generators">[9] Docs sync workflow persists cross-repo tokens while running installs and generators</a></li>
+<li class="toc-item depth-2"><a href="#reviewed-surfaces">Reviewed Surfaces</a></li>
+<li class="toc-item depth-2"><a href="#open-questions-and-follow-up">Open Questions And Follow Up</a></li>
+        </ul>
+      </div>
+    </aside>
+    <main>
+      <h1 id="security-review-sacdia-workspace">Security Review: SACDIA workspace</h1>
+
+<h2 id="scope">Scope</h2>
+
+<ul><li>In-scope code: <code>/Users/abner/Documents/development/sacdia</code>, including <code>sacdia-backend</code>, <code>sacdia-admin</code>, <code>sacdia-app</code>, <code>sacdia-docs</code>, root <code>docs</code>, root scripts, and GitHub workflows.</li><li>Scan mode: Codex Security repository/scoped-path scan across every project repo.</li><li>Generated context: the threat model below was generated during Phase 1 of this scan and copied to <code>/tmp/codex-security-scans/sacdia/7a15ebd9a216_20260610T213223Z/artifacts/01_context/threat_model.md</code>.</li><li>Artifacts reviewed: worker discovery reports under <code>/tmp/codex-security-scans/sacdia/7a15ebd9a216_20260610T213223Z/artifacts/02_discovery/workers</code>, local source traces, scoped rank inputs, and the coverage ledger.</li><li>Runtime/test status: no builds were executed, per project instruction. Validation used static source tracing and existing tests/docs as evidence.</li><li>Explicit exclusions and limitations: live deployment env values, real CI token scopes, live databases, and external OAuth/mobile device runtime behavior were not exercised.</li></ul>
+
+<h3 id="scan-summary">Scan Summary</h3>
+
+<table>
+<thead><tr>
+<th>Field</th>
+<th>Value</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Reportable findings</td>
+<td>9</td>
+</tr>
+<tr>
+<td>Severity mix</td>
+<td>high: 7; medium: 2</td>
+</tr>
+<tr>
+<td>Confidence mix</td>
+<td>high: 7; medium: 2</td>
+</tr>
+<tr>
+<td>Coverage</td>
+<td>backend, admin, app, docs/root with scoped rank inputs and worker discovery reports</td>
+</tr>
+<tr>
+<td>Validation mode</td>
+<td>static trace / code understanding; no builds executed</td>
+</tr>
+<tr>
+<td>Scan directory</td>
+<td><code>/tmp/codex-security-scans/sacdia/7a15ebd9a216_20260610T213223Z</code></td>
+</tr>
+</tbody></table>
+
+
+<h2 id="threat-model">Threat Model</h2>
+
+<h1 id="sacdia-repository-threat-model">SACDIA Repository Threat Model</h1>
+
+<h2 id="scope">Scope</h2>
+
+<p>Workspace: <code>/Users/abner/Documents/development/sacdia</code>.</p>
+<p>Runtime repositories in scope:</p>
+
+<ul><li><code>sacdia-backend</code>: NestJS REST API, Prisma/PostgreSQL, Better Auth/JWT, Redis/BullMQ, FCM, R2, Sentry.</li><li><code>sacdia-admin</code>: Next.js admin panel consuming the backend API with HTTP-only cookie auth patterns.</li><li><code>sacdia-app</code>: Flutter mobile app using Dio/Riverpod, local token/cache storage, FCM, signed URL file flows.</li><li><code>sacdia-docs</code> and root <code>docs/scripts</code>: documentation/static site and workspace automation; lower runtime privilege unless deployment or generated content can affect production behavior.</li></ul>
+
+<h2 id="assets-and-privileges-that-matter">Assets and privileges that matter</h2>
+
+<ul><li>User identities, JWTs, refresh/session state, MFA assurance state, OAuth flows, and password/reset flows.</li><li>Institutional RBAC: global roles, active club/section assignments, contextual permissions, owner-only user sub-resources.</li><li>Sensitive personal and health data: allergies, diseases, medicines, emergency contacts, legal representative data, minors&#x27; data.</li><li>Evidence and storage objects in Cloudflare R2: profile photos, honors/classes/folders evidence, signed upload/download URLs, migrated legacy URLs.</li><li>PostgreSQL integrity: annual enrollments, club sections, roles, progress/validation state, finances, reports, rankings, audit/event journals.</li><li>Notification and realtime invalidation channels: FCM tokens, silent invalidation payloads, queues/processors.</li><li>Admin operational capabilities: catalogs, users, reports, evidence review, investiture, rankings, resources, bulk operations.</li><li>Deployment/runtime secrets: DATABASE_URL, BETTER_AUTH_SECRET, R2 keys, Firebase credentials, Redis URL, Sentry DSN, Google Maps keys.</li></ul>
+
+<h2 id="trust-boundaries">Trust boundaries</h2>
+
+<ul><li>Public internet/client boundary into <code>sacdia-backend</code> REST API.</li><li>Admin browser boundary into backend API through Next.js routes/server actions and cookies.</li><li>Mobile device boundary, including local token/cache storage and foreground/background FCM handling.</li><li>Backend-to-database boundary through Prisma and occasional raw SQL/scripts/migrations.</li><li>Backend-to-R2 boundary for object keys, public URLs, signed URLs and legacy URL migration.</li><li>Backend-to-FCM boundary for visible notifications and silent cache invalidation.</li><li>Worker/queue boundary between request handlers and BullMQ processors.</li><li>CI/deployment boundary reading repository scripts, generated specs, env examples and workflow files.</li><li>Documentation/static-site boundary where markdown/content might become rendered HTML or operational guidance.</li></ul>
+
+<h2 id="attacker-controlled-inputs">Attacker-controlled inputs</h2>
+
+<ul><li>HTTP request paths, params, query strings, bodies, multipart/file metadata, headers including Origin/Authorization/Accept-Language.</li><li>JWTs, refresh tokens, OAuth callback parameters and device/session identifiers.</li><li>Admin form data, filters, search strings, bulk-action payloads and server-action inputs.</li><li>Mobile API responses interpreted by UI, deep-link/intent data if present, local cached state and FCM payload data.</li><li>Uploaded evidence/profile files, filenames, MIME types, object keys and URLs.</li><li>Catalog translations and rich/plain text fields later rendered by admin/mobile/docs.</li><li>Environment variables and deployment configuration.</li><li>Markdown/content inputs in docs/static site if rendered without sanitization.</li></ul>
+
+<h2 id="security-invariants">Security invariants</h2>
+
+<ul><li>Backend is the only authority for authorization and business rules; clients must not broaden scope by sending IDs or filters.</li><li>Authentication must fail closed: invalid/revoked JWTs, MFA-pending JWTs and expired/sessionless states must not reach protected handlers unless an explicit skip is documented.</li><li>Contextual RBAC must bind actor privileges to the target club/section/user/resource; global wildcard behavior must not bypass target-specific constraints where docs say exact active assignment is required.</li><li>Owner/self-service access must be limited to the owner&#x27;s own sensitive sub-resources and must not leak administrative detail to third parties.</li><li>File flows must constrain key prefixes, MIME/content type, object ownership, signed URL lifetime and public URL migration behavior.</li><li>Database access must use parameterized Prisma/prepared APIs; raw SQL and dynamic filters must not permit injection or broad tenant/section bypass.</li><li>Queues, cache and FCM failures must not corrupt transactional truth or silently grant privileges.</li><li>Logs, errors, health checks and Sentry context must not expose secrets, tokens or sensitive personal/health data.</li><li>Secrets must live in environment/secret stores only; examples may name variables but must not include real values.</li><li>Mobile local storage must not make token theft or stale authorization worse than the backend&#x27;s server-side checks allow.</li></ul>
+
+<h2 id="high-impact-failure-modes-to-prioritize">High-impact failure modes to prioritize</h2>
+
+<ol><li>Broken object-level authorization across users, club sections, annual folders, evidence, finances, reports, notifications or admin detail endpoints.</li><li>JWT/session/MFA/refresh mistakes that allow privilege use with stale, revoked or MFA-pending tokens.</li><li>IDOR through admin/mobile clients passing <code>userId</code>, <code>clubId</code>, <code>sectionId</code>, <code>folderId</code>, <code>activityId</code>, <code>honorId</code> or report filters.</li><li>Insecure file upload/download/key handling in R2 evidence and profile-photo paths.</li><li>SQL/query injection or unsafe raw Prisma usage in search, reports, migrations, scripts or dynamic sorting/filtering.</li><li>Stored/reflected XSS in admin-rendered names/descriptions/translations/resources/docs content.</li><li>CSRF/cookie-origin/CORS weaknesses in browser-based admin auth flows.</li><li>FCM token/invalidation misuse that leaks membership/section data or causes unauthorized cache state changes.</li><li>Sensitive data exposure via logs, errors, health checks, generated API docs or repo-committed config.</li><li>Dependency/config supply-chain issues in JS/Flutter tooling, CI workflows and generated artifacts.</li></ol>
+
+<h2 id="assumptions-to-verify-during-discovery">Assumptions to verify during discovery</h2>
+
+<ul><li>Effective Prisma schema is <code>sacdia-backend/prisma/schema.prisma</code>.</li><li>API route truth is code plus <code>docs/api/ENDPOINTS-LIVE-REFERENCE.md</code>; docs can lag and must be checked against implementation.</li><li>The admin does not use Supabase clients and should use backend API/cookies only.</li><li>Mobile is documented as cache + invalidation rather than true offline-first in current canon, even if some local docs still say Hive/offline-first.</li><li>No builds should be executed as part of this scan.</li></ul>
+
+
+<h2 id="findings">Findings</h2>
+
+<table>
+<thead><tr>
+<th>Finding</th>
+<th>Severity</th>
+<th>Confidence</th>
+<th>Category</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><a href="#1-self-service-profile-updates-can-retarget-the-territory-used-by-global-rbac">Self-service profile updates can retarget the territory used by global RBAC</a></td>
+<td>High</td>
+<td>High</td>
+<td>Authorization bypass / privilege escalation</td>
+</tr>
+<tr>
+<td><a href="#2-admin-resource-read-endpoints-ignore-resource-scope-and-issue-cross-scope-signed-urls">Admin resource read endpoints ignore resource scope and issue cross-scope signed URLs</a></td>
+<td>High</td>
+<td>High</td>
+<td>Authorization bypass / IDOR</td>
+</tr>
+<tr>
+<td><a href="#3-admin-resource-update-and-delete-endpoints-mutate-resources-outside-the-actor-scope">Admin resource update and delete endpoints mutate resources outside the actor scope</a></td>
+<td>High</td>
+<td>High</td>
+<td>Authorization bypass / IDOR</td>
+</tr>
+<tr>
+<td><a href="#4-annual-folder-read-routes-expose-private-evidence-across-clubs">Annual folder read routes expose private evidence across clubs</a></td>
+<td>High</td>
+<td>High</td>
+<td>Authorization bypass / IDOR</td>
+</tr>
+<tr>
+<td><a href="#5-annual-folder-upload-accepts-evidence-for-folders-owned-by-another-club">Annual folder upload accepts evidence for folders owned by another club</a></td>
+<td>High</td>
+<td>High</td>
+<td>Authorization bypass / cross-tenant write</td>
+</tr>
+<tr>
+<td><a href="#6-annual-folder-evaluation-actions-are-not-bound-to-the-reviewer-territory">Annual folder evaluation actions are not bound to the reviewer territory</a></td>
+<td>High</td>
+<td>High</td>
+<td>Authorization bypass / cross-territory integrity</td>
+</tr>
+<tr>
+<td><a href="#7-membership-request-approval-checks-the-wrong-resource-and-updates-by-assignment-id-only">Membership request approval checks the wrong resource and updates by assignment ID only</a></td>
+<td>High</td>
+<td>High</td>
+<td>Authorization bypass / IDOR</td>
+</tr>
+<tr>
+<td><a href="#8-development-docs-publish-shared-test-credentials-and-fail-open-when-basic-auth-envs-are-missing">Development docs publish shared test credentials and fail open when Basic Auth envs are missing</a></td>
+<td>Medium</td>
+<td>Medium</td>
+<td>Credential exposure / fail-open access control</td>
+</tr>
+<tr>
+<td><a href="#9-docs-sync-workflow-persists-cross-repo-tokens-while-running-installs-and-generators">Docs sync workflow persists cross-repo tokens while running installs and generators</a></td>
+<td>Medium</td>
+<td>Medium</td>
+<td>CI credential exposure / supply-chain hardening</td>
+</tr>
+</tbody></table>
+
+<h3 id="confidence-scale">Confidence Scale</h3>
+
+<table>
+<thead><tr>
+<th>Label</th>
+<th>Meaning</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>high</td>
+<td>direct source, configuration, or runtime evidence supports the finding, with no material unresolved reachability or exploitability blocker.</td>
+</tr>
+<tr>
+<td>medium</td>
+<td>source evidence supports a plausible issue, but runtime behavior, deployment configuration, role reachability, type constraints, or exploit reliability still need proof.</td>
+</tr>
+<tr>
+<td>low</td>
+<td>weak or incomplete evidence; include only when the user explicitly wants follow-up candidates in the final report.</td>
+</tr>
+</tbody></table>
+
+<h3 id="1-self-service-profile-updates-can-retarget-the-territory-used-by-global-rbac">[1] Self-service profile updates can retarget the territory used by global RBAC</h3>
+
+<table>
+<thead><tr>
+<th>Field</th>
+<th>Value</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Severity</td>
+<td>High</td>
+</tr>
+<tr>
+<td>Confidence</td>
+<td>High</td>
+</tr>
+<tr>
+<td>Confidence rationale</td>
+<td>Static trace shows the owner bypass, the whitelisted geography fields, the direct update sink, and RBAC later deriving global scope from those same fields.</td>
+</tr>
+<tr>
+<td>Category</td>
+<td>Authorization bypass / privilege escalation</td>
+</tr>
+<tr>
+<td>CWE</td>
+<td>CWE-269 Improper Privilege Management; CWE-863 Incorrect Authorization</td>
+</tr>
+<tr>
+<td>Affected lines</td>
+<td>/Users/abner/Documents/development/sacdia/sacdia-backend/src/users/users.controller.ts:124-134; /Users/abner/Documents/development/sacdia/sacdia-backend/src/users/dto/update-user.dto.ts:88-116; /Users/abner/Documents/development/sacdia/sacdia-backend/src/users/users.service.ts:237-250; /Users/abner/Documents/development/sacdia/sacdia-backend/src/common/services/authorization-context.service.ts:387-391,537-615,636-671</td>
+</tr>
+</tbody></table>
+
+<h4 id="summary">Summary</h4>
+<p>A user updating their own profile passes <code>@AuthorizationResource({ type: user, ownerParam: userId })</code>, and <code>UpdateUserDto</code> explicitly accepts <code>country_id</code>, <code>union_id</code>, and <code>local_field_id</code>. <code>UsersService.update()</code> only validates that the geography is real and coherent, then persists the whole DTO. For users with scoped global roles, <code>AuthorizationContextService</code> later uses those same geography columns as the effective global RBAC scope.</p>
+
+<h4 id="validation">Validation</h4>
+<p>Used repository static trace. Checklist: [x] attacker input is owner profile PATCH body; [x] broken control is owner bypass plus profile DTO including RBAC scope fields; [x] sink persists the fields; [x] downstream RBAC consumes those fields; [x] no service-level admin-only guard was found. Runtime proof was not attempted because the scan was read-only and no environment was provided.</p>
+
+<h4 id="dataflow">Dataflow</h4>
+<p><code>PATCH /api/v1/users/:userId</code> body with <code>local_field_id</code> or <code>union_id</code> -&gt; <code>UsersController.update()</code> -&gt; <code>UsersService.validateGeographyReferences()</code> validates existence/coherence only -&gt; <code>prisma.users.update({ data: updateUserDto })</code> -&gt; later <code>resolveUserAuthorization()</code> -&gt; <code>buildUserScope()</code> -&gt; <code>canAccessHierarchyScope()</code> grants LF/union/division access based on the modified user row.</p>
+
+<h4 id="reachability">Reachability</h4>
+<p>Any authenticated user can update their own user row when they have <code>users:update_profile</code>. The serious path is a scoped global actor such as <code>assistant-lf</code>, <code>director-lf</code>, <code>assistant-union</code>, or <code>director-union</code>: after changing their own territory fields and refreshing auth context, they can act in the new territory.</p>
+
+<h4 id="severity">Severity</h4>
+<p>High: this is a direct privilege-boundary break for scoped administrative roles. It is not unauthenticated, so it does not reach critical, but it can move a real admin capability across territories. Evidence that global role assignment is immutable elsewhere would lower severity; runtime proof with two local fields would raise confidence further.</p>
+
+<h4 id="remediation">Remediation</h4>
+<p>Split personal profile DTO from administrative geography changes. For self-service updates, reject <code>country_id</code>, <code>union_id</code>, and <code>local_field_id</code> or make them read-only after onboarding. Move territory reassignment to an admin-only endpoint with explicit target-scope checks and add tests proving scoped global actors cannot retarget themselves.</p>
+
+<h3 id="2-admin-resource-read-endpoints-ignore-resource-scope-and-issue-cross-scope-signed-urls">[2] Admin resource read endpoints ignore resource scope and issue cross-scope signed URLs</h3>
+
+<table>
+<thead><tr>
+<th>Field</th>
+<th>Value</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Severity</td>
+<td>High</td>
+</tr>
+<tr>
+<td>Confidence</td>
+<td>High</td>
+</tr>
+<tr>
+<td>Confidence rationale</td>
+<td>The admin controller requires only global <code>resources:read</code>; service read and signed-url paths query by ID/filter without <code>buildVisibleResourceConditions</code>, while app-safe alternatives show the missing control.</td>
+</tr>
+<tr>
+<td>Category</td>
+<td>Authorization bypass / IDOR</td>
+</tr>
+<tr>
+<td>CWE</td>
+<td>CWE-639 Authorization Bypass Through User-Controlled Key; CWE-862 Missing Authorization</td>
+</tr>
+<tr>
+<td>Affected lines</td>
+<td>/Users/abner/Documents/development/sacdia/sacdia-backend/src/resources/resources.controller.ts:176-227; /Users/abner/Documents/development/sacdia/sacdia-backend/src/resources/resources.service.ts:379-449,665-685; /Users/abner/Documents/development/sacdia/sacdia-backend/src/resources/resources-app.controller.ts:43-119; /Users/abner/Documents/development/sacdia/sacdia-backend/src/resources/resources.service.ts:456-545</td>
+</tr>
+</tbody></table>
+
+<h4 id="summary">Summary</h4>
+<p>The admin resource routes are protected by <code>@AuthorizationResource({ type: global })</code>, which verifies permission presence but not whether the target resource belongs to the actor territory. <code>findAll()</code>, <code>findOne()</code>, and <code>getSignedUrl()</code> then return arbitrary active resources or sign private R2 object keys by <code>resource_id</code>.</p>
+
+<h4 id="validation">Validation</h4>
+<p>Used static source/control/sink comparison. Checklist: [x] attacker controls query or <code>resource_id</code>; [x] admin path lacks contextual scope; [x] sink returns metadata or signed download URL; [x] sibling <code>/resources/me*</code> path demonstrates the intended scope filter; [x] no later service check closes the gap.</p>
+
+<h4 id="dataflow">Dataflow</h4>
+<p>Bearer token with <code>resources:read</code> -&gt; <code>GET /resources</code>, <code>GET /resources/:id</code>, or <code>GET /resources/:id/signed-url</code> -&gt; <code>PermissionsGuard</code> validates global permission only -&gt; <code>ResourcesService.findAll/findOne/getSignedUrl()</code> -&gt; unscoped Prisma query -&gt; optional R2 signed download URL.</p>
+
+<h4 id="reachability">Reachability</h4>
+<p>Scoped global roles and the <code>coordinator</code> role receive resource read capabilities in seeds. <code>findAll()</code> itself can enumerate unscoped resources, making the <code>resource_id</code> precondition much weaker than a random UUID guess.</p>
+
+<h4 id="severity">Severity</h4>
+<p>High: the path exposes private institutional resources and R2 signed URLs across territory boundaries to actors that should only see their own scope. It is authenticated and role-limited, so it is not critical. Evidence that all resources are public would lower severity.</p>
+
+<h4 id="remediation">Remediation</h4>
+<p>Pass <code>req.authorization</code> to admin read methods and use the same <code>buildVisibleResourceConditions()</code> logic as <code>/resources/me*</code>. Add integration tests for LF-A actor reading/signing LF-B resources and expect 403/404.</p>
+
+<h3 id="3-admin-resource-update-and-delete-endpoints-mutate-resources-outside-the-actor-scope">[3] Admin resource update and delete endpoints mutate resources outside the actor scope</h3>
+
+<table>
+<thead><tr>
+<th>Field</th>
+<th>Value</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Severity</td>
+<td>High</td>
+</tr>
+<tr>
+<td>Confidence</td>
+<td>High</td>
+</tr>
+<tr>
+<td>Confidence rationale</td>
+<td>The controller omits authorization context for update/delete, and the service mutates by UUID without checking either the existing resource scope or a requested new scope.</td>
+</tr>
+<tr>
+<td>Category</td>
+<td>Authorization bypass / IDOR</td>
+</tr>
+<tr>
+<td>CWE</td>
+<td>CWE-639 Authorization Bypass Through User-Controlled Key; CWE-863 Incorrect Authorization</td>
+</tr>
+<tr>
+<td>Affected lines</td>
+<td>/Users/abner/Documents/development/sacdia/sacdia-backend/src/resources/resources.controller.ts:234-273; /Users/abner/Documents/development/sacdia/sacdia-backend/src/resources/resources.service.ts:552-658; /Users/abner/Documents/development/sacdia/sacdia-backend/src/resources/resources.service.ts:696-777</td>
+</tr>
+</tbody></table>
+
+<h4 id="summary">Summary</h4>
+<p><code>PATCH /resources/:id</code> and <code>DELETE /resources/:id</code> require the global permission name but do not bind the target resource to the actor. The update method also accepts <code>scope_level</code> and <code>scope_id</code>, so an actor can modify metadata, replace a file, move a resource, or soft-delete resources outside their territory.</p>
+
+<h4 id="validation">Validation</h4>
+<p>Static trace. Checklist: [x] attacker controls <code>id</code> and update body; [x] guard only checks global permission; [x] service loads target by UUID; [x] service writes update/soft-delete; [x] existing helper <code>validateScopeAuthorization()</code> is not used in these methods.</p>
+
+<h4 id="dataflow">Dataflow</h4>
+<p><code>PATCH/DELETE /api/v1/resources/:id</code> -&gt; global <code>resources:update</code> or <code>resources:delete</code> check -&gt; <code>ResourcesService.update/remove(id, ...)</code> -&gt; <code>findUnique({ resource_id: id })</code> -&gt; <code>prisma.resources.update()</code> with no contextual authorization.</p>
+
+<h4 id="reachability">Reachability</h4>
+<p>Any scoped actor with <code>resources:update</code> or <code>resources:delete</code> can reach the route. Resource IDs are enumerable via the unscoped read path described in the previous finding.</p>
+
+<h4 id="severity">Severity</h4>
+<p>High: this enables cross-territory integrity attacks against institutional resources and can remove or relocate content. It is role-limited and not direct code execution, so high is appropriate rather than critical.</p>
+
+<h4 id="remediation">Remediation</h4>
+<p>Authorize both the existing resource and any requested target scope before mutation. Pass <code>req.authorization</code> to the service, require existing-scope access, and rerun <code>validateScopeAuthorization()</code> for changed <code>scope_level/scope_id</code>. Add negative tests for cross-scope update/delete.</p>
+
+<h3 id="4-annual-folder-read-routes-expose-private-evidence-across-clubs">[4] Annual folder read routes expose private evidence across clubs</h3>
+
+<table>
+<thead><tr>
+<th>Field</th>
+<th>Value</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Severity</td>
+<td>High</td>
+</tr>
+<tr>
+<td>Confidence</td>
+<td>High</td>
+</tr>
+<tr>
+<td>Confidence rationale</td>
+<td>The read controllers use <code>active_assignment</code>, which does not bind folder/section IDs to the active club, and the service presigns evidence without receiving actor context.</td>
+</tr>
+<tr>
+<td>Category</td>
+<td>Authorization bypass / IDOR</td>
+</tr>
+<tr>
+<td>CWE</td>
+<td>CWE-639 Authorization Bypass Through User-Controlled Key; CWE-862 Missing Authorization</td>
+</tr>
+<tr>
+<td>Affected lines</td>
+<td>/Users/abner/Documents/development/sacdia/sacdia-backend/src/annual-folders/annual-folders.controller.ts:160-220,223-260; /Users/abner/Documents/development/sacdia/sacdia-backend/src/annual-folders/annual-folder-by-section.controller.ts:27-86; /Users/abner/Documents/development/sacdia/sacdia-backend/src/annual-folders/annual-folders.service.ts:338-427,433-522,1534-1545; /Users/abner/Documents/development/sacdia/sacdia-backend/src/common/guards/permissions.guard.ts:121-125</td>
+</tr>
+</tbody></table>
+
+<h4 id="summary">Summary</h4>
+<p>Annual folder reads require <code>evidence_folders:read</code> on the caller active assignment but never compare the target <code>folderId</code>, enrollment, or path <code>sectionId</code> to that assignment. The service loads the folder and then presigns every evidence file.</p>
+
+<h4 id="validation">Validation</h4>
+<p>Static trace. Checklist: [x] attacker controls <code>folderId</code>, <code>enrollmentId</code>, or integer <code>sectionId</code>; [x] guard returns true for <code>active_assignment</code> after permission check; [x] service has no actor parameter; [x] service calls <code>presignFolderEvidences</code>; [x] other methods contain <code>assertFolderClubAccess</code>, proving a known missing control.</p>
+
+<h4 id="dataflow">Dataflow</h4>
+<p>Authenticated club member -&gt; <code>GET /annual-folders/:folderId</code>, <code>GET /annual-folders/by-enrollment/:enrollmentId</code>, or <code>GET /club-sections/:sectionId/annual-folder</code> -&gt; <code>PermissionsGuard</code> checks only active-assignment permission -&gt; service <code>findUnique()</code> by target ID -&gt; <code>presignFolderEvidences()</code> -&gt; response with evidence metadata and signed URLs.</p>
+
+<h4 id="reachability">Reachability</h4>
+<p>Club members have evidence folder permissions. The section-based route uses sequential integer section IDs, reducing the difficulty of finding another club annual folder compared with random UUID-only access.</p>
+
+<h4 id="severity">Severity</h4>
+<p>High: this exposes private evidence and evaluation data across clubs. It is authenticated and object-ID dependent, so it is high rather than critical. A runtime proof with two clubs would mainly strengthen exploitability confidence.</p>
+
+<h4 id="remediation">Remediation</h4>
+<p>Bind folder/enrollment/section reads to the actor. Use <code>club_section</code> or <code>club_assignment</code> resource resolution, or call <code>assertFolderClubAccess()</code> before returning data. Prefer 404 for cross-club IDs and add tests for member of Club A reading Club B folder.</p>
+
+<h3 id="5-annual-folder-upload-accepts-evidence-for-folders-owned-by-another-club">[5] Annual folder upload accepts evidence for folders owned by another club</h3>
+
+<table>
+<thead><tr>
+<th>Field</th>
+<th>Value</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Severity</td>
+<td>High</td>
+</tr>
+<tr>
+<td>Confidence</td>
+<td>High</td>
+</tr>
+<tr>
+<td>Confidence rationale</td>
+<td>The upload route checks only active-assignment permission; the service verifies folder state and template section but never calls the existing folder ownership guard before writing evidence.</td>
+</tr>
+<tr>
+<td>Category</td>
+<td>Authorization bypass / cross-tenant write</td>
+</tr>
+<tr>
+<td>CWE</td>
+<td>CWE-639 Authorization Bypass Through User-Controlled Key; CWE-863 Incorrect Authorization</td>
+</tr>
+<tr>
+<td>Affected lines</td>
+<td>/Users/abner/Documents/development/sacdia/sacdia-backend/src/annual-folders/annual-folders.controller.ts:263-314; /Users/abner/Documents/development/sacdia/sacdia-backend/src/annual-folders/annual-folders.service.ts:533-619,733-806</td>
+</tr>
+</tbody></table>
+
+<h4 id="summary">Summary</h4>
+<p><code>uploadEvidence()</code> receives the caller user ID but uses it only as <code>uploaded_by</code>. It validates that the folder exists, is open, and the section belongs to the template, then uploads to R2 and creates an evidence row without checking that the caller belongs to the club that owns the folder.</p>
+
+<h4 id="validation">Validation</h4>
+<p>Static trace. Checklist: [x] attacker controls <code>folderId</code> and <code>sectionId</code>; [x] guard only validates active-assignment permission; [x] service writes R2 object and DB row; [x] <code>assertFolderClubAccess()</code> exists nearby but is not called; [x] file MIME validation does not address ownership.</p>
+
+<h4 id="dataflow">Dataflow</h4>
+<p><code>POST /annual-folders/:folderId/sections/:sectionId/evidences</code> multipart file -&gt; active assignment permission -&gt; <code>AnnualFoldersService.uploadEvidence()</code> -&gt; folder/template checks -&gt; R2 upload -&gt; <code>annual_folder_evidences.create({ annual_folder_id: folderId, uploaded_by: userId })</code>.</p>
+
+<h4 id="reachability">Reachability</h4>
+<p>A user with <code>evidence_folders:update</code> in any active club assignment can reach the route. The read vulnerability can reveal the needed folder and section identifiers, so this write path chains naturally from the previous finding.</p>
+
+<h4 id="severity">Severity</h4>
+<p>High: unauthorized evidence upload can corrupt another club evidence folder and influence later review/ranking flows. It is authenticated and needs an open folder, so it remains high rather than critical.</p>
+
+<h4 id="remediation">Remediation</h4>
+<p>Call <code>assertFolderClubAccess(folderId, userId)</code> at the start of <code>uploadEvidence()</code>, before file upload. Add a regression test where Club A member tries to upload into Club B folder and assert no R2 upload or DB row occurs.</p>
+
+<h3 id="6-annual-folder-evaluation-actions-are-not-bound-to-the-reviewer-territory">[6] Annual folder evaluation actions are not bound to the reviewer territory</h3>
+
+<table>
+<thead><tr>
+<th>Field</th>
+<th>Value</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Severity</td>
+<td>High</td>
+</tr>
+<tr>
+<td>Confidence</td>
+<td>High</td>
+</tr>
+<tr>
+<td>Confidence rationale</td>
+<td>Evaluation, reopen, and union confirmation require only a global permission; the service mutates evaluation rows by folder/section without checking the folder territory against the actor.</td>
+</tr>
+<tr>
+<td>Category</td>
+<td>Authorization bypass / cross-territory integrity</td>
+</tr>
+<tr>
+<td>CWE</td>
+<td>CWE-639 Authorization Bypass Through User-Controlled Key; CWE-863 Incorrect Authorization</td>
+</tr>
+<tr>
+<td>Affected lines</td>
+<td>/Users/abner/Documents/development/sacdia/sacdia-backend/src/annual-folders/evaluation.controller.ts:63-189; /Users/abner/Documents/development/sacdia/sacdia-backend/src/annual-folders/evaluation.service.ts:40-46,186-204,420-439,514-595; /Users/abner/Documents/development/sacdia/sacdia-backend/src/annual-folders/annual-folders.service.ts:1066-1074,829-850</td>
+</tr>
+</tbody></table>
+
+<h4 id="summary">Summary</h4>
+<p>Annual folder evaluation routes use <code>@AuthorizationResource({ type: global })</code>, so the guard checks the permission name but not the folder territory. <code>EvaluationService</code> then updates section evaluations, reopens sections, and records union decisions by folder and section IDs without comparing against the actor local field or union.</p>
+
+<h4 id="validation">Validation</h4>
+<p>Static trace. Checklist: [x] attacker controls folder/section IDs; [x] controller uses global resource; [x] service updates evaluation rows; [x] no territory check appears in the service methods; [x] <code>assertEvidenceTerritoryAccess()</code> demonstrates a local pattern for the missing check.</p>
+
+<h4 id="dataflow">Dataflow</h4>
+<p>LF/union actor with <code>annual_folders:evaluate</code> -&gt; <code>POST /annual-folders/:folderId/sections/:sectionId/evaluate</code>, <code>/reopen</code>, or <code>/confirm-union</code> -&gt; global permission check -&gt; <code>EvaluationService</code> transaction -&gt; <code>annual_folder_section_evaluations.update()</code> and folder total recalculation.</p>
+
+<h4 id="reachability">Reachability</h4>
+<p>This requires a reviewer-tier global role, but the intended boundary is territorial. A reviewer from LF-A or Union-A can affect folders in LF-B or Union-B if they know or discover the folder and section IDs.</p>
+
+<h4 id="severity">Severity</h4>
+<p>High: cross-territory approval, rejection, reopening, and union confirmation can alter institutional scoring and final validation. It is privileged but crosses a meaningful authorization boundary. Runtime tests with two territories would further confirm exploitability.</p>
+
+<h4 id="remediation">Remediation</h4>
+<p>Resolve the folder hierarchy before every evaluation mutation and enforce <code>authorizationContext.canAccessHierarchyScope()</code> or a folder-specific territory assertion. For union confirmation, require the folder union to match the actor union unless super-admin. Add cross-territory negative tests.</p>
+
+<h3 id="7-membership-request-approval-checks-the-wrong-resource-and-updates-by-assignment-id-only">[7] Membership request approval checks the wrong resource and updates by assignment ID only</h3>
+
+<table>
+<thead><tr>
+<th>Field</th>
+<th>Value</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Severity</td>
+<td>High</td>
+</tr>
+<tr>
+<td>Confidence</td>
+<td>High</td>
+</tr>
+<tr>
+<td>Confidence rationale</td>
+<td>The controller labels <code>clubSectionId</code> as a club ID for authorization, while approve/reject ignore that path value and update any pending assignment by UUID.</td>
+</tr>
+<tr>
+<td>Category</td>
+<td>Authorization bypass / IDOR</td>
+</tr>
+<tr>
+<td>CWE</td>
+<td>CWE-639 Authorization Bypass Through User-Controlled Key; CWE-863 Incorrect Authorization</td>
+</tr>
+<tr>
+<td>Affected lines</td>
+<td>/Users/abner/Documents/development/sacdia/sacdia-backend/src/membership-requests/membership-requests.controller.ts:70-98,100-129; /Users/abner/Documents/development/sacdia/sacdia-backend/src/membership-requests/membership-requests.service.ts:78-87,122-136; /Users/abner/Documents/development/sacdia/sacdia-backend/src/common/guards/permissions.guard.ts:322-343,1042-1077</td>
+</tr>
+</tbody></table>
+
+<h4 id="summary">Summary</h4>
+<p>The membership controller path is <code>/club-sections/:clubSectionId/...</code>, but the authorization metadata uses <code>{ type: club, clubIdParam: clubSectionId }</code>. <code>validateClubScope()</code> therefore interprets a section ID slot as a main club ID. The approve/reject handlers then drop <code>clubSectionId</code> and call service methods that update by <code>assignment_id</code> only.</p>
+
+<h4 id="validation">Validation</h4>
+<p>Static trace. Checklist: [x] attacker controls path <code>clubSectionId</code> and <code>assignmentId</code>; [x] guard validates the path number as a main club ID; [x] service omits section binding; [x] updateMany mutates by assignment UUID/status/active only; [x] an existing <code>club_assignment</code> resolver could bind the target assignment but is not used.</p>
+
+<h4 id="dataflow">Dataflow</h4>
+<p>Approver in Club A -&gt; <code>POST /club-sections/{clubAId}/membership-requests/{victimAssignmentId}/approve</code> or <code>/reject</code> -&gt; guard validates Club A permission because it treats the path value as <code>clubId</code> -&gt; <code>MembershipRequestsService.approve/reject(assignmentId, actorId)</code> -&gt; <code>club_role_assignments.updateMany({ assignment_id, status: pending, active: true })</code>.</p>
+
+<h4 id="reachability">Reachability</h4>
+<p>The attacker needs <code>club_members:approve</code> in their own club and a pending assignment UUID from another section/club. UUID knowledge is a precondition, but the write is a real cross-club membership decision once the ID is known.</p>
+
+<h4 id="severity">Severity</h4>
+<p>High: unauthorized approval or rejection of role assignments changes membership and authorization state in another club. UUID knowledge limits likelihood, but the impact is a meaningful cross-boundary integrity break.</p>
+
+<h4 id="remediation">Remediation</h4>
+<p>Use <code>@AuthorizationResource({ type: club_assignment, idParam: assignmentId })</code> or explicitly resolve <code>assignmentId</code> to its <code>club_section_id</code> and compare it with the path section. Pass <code>clubSectionId</code> into service <code>approve/reject</code> and include it in the <code>updateMany</code> where clause. Add tests proving Club A approver cannot approve Club B assignment.</p>
+
+<h3 id="8-development-docs-publish-shared-test-credentials-and-fail-open-when-basic-auth-envs-are-missing">[8] Development docs publish shared test credentials and fail open when Basic Auth envs are missing</h3>
+
+<table>
+<thead><tr>
+<th>Field</th>
+<th>Value</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Severity</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>Confidence</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>Confidence rationale</td>
+<td>The credentials and fail-open middleware are directly present in the repo; deployment exposure and data sensitivity were not proven locally.</td>
+</tr>
+<tr>
+<td>Category</td>
+<td>Credential exposure / fail-open access control</td>
+</tr>
+<tr>
+<td>CWE</td>
+<td>CWE-798 Use of Hard-coded Credentials; CWE-306 Missing Authentication for Critical Function</td>
+</tr>
+<tr>
+<td>Affected lines</td>
+<td>/Users/abner/Documents/development/sacdia/sacdia-docs/src/middleware.ts:3-10,35-36; /Users/abner/Documents/development/sacdia/sacdia-docs/content/dev/testing/usuarios-prueba.mdx:12-35; /Users/abner/Documents/development/sacdia/docs/testing/TEST-USERS.md:7-30; /Users/abner/Documents/development/sacdia/sacdia-docs/.source/server.ts:135</td>
+</tr>
+</tbody></table>
+
+<h4 id="summary">Summary</h4>
+<p>The docs repo contains a <code>/dev/testing/usuarios-prueba</code> page and root test-user document listing a shared password and role-specific test emails. The docs middleware protects <code>/dev</code>, but explicitly allows access when either <code>DEV_DOCS_USER</code> or <code>DEV_DOCS_PASSWORD</code> is not configured.</p>
+
+<h4 id="validation">Validation</h4>
+<p>Static validation. Checklist: [x] credential values are committed; [x] generated docs source includes the testing page; [x] middleware fails open without envs; [ ] production env exposure was not verified; [ ] whether the Neon development branch contains sensitive data was not verified.</p>
+
+<h4 id="dataflow">Dataflow</h4>
+<p>Visitor requests <code>/dev/testing/usuarios-prueba</code> -&gt; <code>middleware.ts</code> reads Basic Auth envs -&gt; if one is missing returns <code>NextResponse.next()</code> -&gt; Fumadocs renders committed MDX with shared password and test account emails.</p>
+
+<h4 id="reachability">Reachability</h4>
+<p>Reachability depends on deployment configuration. If <code>sacdia-docs</code> is publicly deployed without both Basic Auth env vars, anonymous users can read the credentials. Even with auth enabled, the credentials remain versioned in repo/docs artifacts.</p>
+
+<h4 id="severity">Severity</h4>
+<p>Medium: exposed shared QA credentials can compromise development accounts and role workflows, but production-data impact is not proven. If development contains copied real data or is internet-accessible with weak isolation, severity should be raised.</p>
+
+<h4 id="remediation">Remediation</h4>
+<p>Rotate the test password, remove concrete passwords from versioned docs, and store test credentials in a private runbook or secret manager. Make production middleware fail closed unless an explicit <code>DEV_DOCS_PUBLIC=true</code> override is set.</p>
+
+<h3 id="9-docs-sync-workflow-persists-cross-repo-tokens-while-running-installs-and-generators">[9] Docs sync workflow persists cross-repo tokens while running installs and generators</h3>
+
+<table>
+<thead><tr>
+<th>Field</th>
+<th>Value</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Severity</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>Confidence</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>Confidence rationale</td>
+<td>Workflow evidence shows cross-repo token checkouts before <code>pnpm install</code> and generation steps; exact PAT scopes and runtime git config were not observed.</td>
+</tr>
+<tr>
+<td>Category</td>
+<td>CI credential exposure / supply-chain hardening</td>
+</tr>
+<tr>
+<td>CWE</td>
+<td>CWE-522 Insufficiently Protected Credentials; CWE-829 Inclusion of Functionality from Untrusted Control Sphere</td>
+</tr>
+<tr>
+<td>Affected lines</td>
+<td>/Users/abner/Documents/development/sacdia/sacdia-docs/.github/workflows/sync-docs.yml:29-48,58-74; /Users/abner/Documents/development/sacdia/sacdia-docs/package.json:13</td>
+</tr>
+</tbody></table>
+
+<h4 id="summary">Summary</h4>
+<p><code>sync-docs.yml</code> checks out backend/admin/app using <code>secrets.SACDIA_REPO_TOKEN</code> and does not set <code>persist-credentials: false</code>. It then runs dependency installation and code generation in the workspace. By default, checkout credentials can remain in Git config for later steps.</p>
+
+<h4 id="validation">Validation</h4>
+<p>Static workflow validation. Checklist: [x] cross-repo token is used; [x] no <code>persist-credentials: false</code> appears; [x] install/generator steps run after token checkout; [ ] token scopes were not verified; [ ] no malicious dependency or script was executed in this scan.</p>
+
+<h4 id="dataflow">Dataflow</h4>
+<p>Scheduled/manual/repository-dispatch workflow -&gt; <code>actions/checkout</code> with PAT for sibling repos -&gt; credentials persist in checkout config by default -&gt; <code>pnpm install</code>, <code>prisma generate</code>, <code>tsx</code>, and docs sync scripts run in the same job workspace.</p>
+
+<h4 id="reachability">Reachability</h4>
+<p>A compromised dependency/lifecycle script, malicious merged generator, or compromised source repo code running in this scheduled job could read or use the persisted token. The workflow does not run on arbitrary fork PRs, reducing likelihood.</p>
+
+<h4 id="severity">Severity</h4>
+<p>Medium: this is a credible CI secret-handling weakness with cross-repo impact if the token is broad. Lack of token-scope evidence and absence of PR-triggered untrusted code keep it below high.</p>
+
+<h4 id="remediation">Remediation</h4>
+<p>Set <code>persist-credentials: false</code> on all checkouts that use PATs, prefer a GitHub App or read-only token per repo, run installs with <code>--ignore-scripts</code> where possible, and separate trusted generation from token-bearing checkout steps.</p>
+
+
+
+<h2 id="reviewed-surfaces">Reviewed Surfaces</h2>
+
+<table>
+<thead><tr>
+<th>Surface</th>
+<th>Risk Area</th>
+<th>Outcome</th>
+<th>Notes</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>sacdia-backend users profile</td>
+<td>RBAC territory / self-service profile</td>
+<td>Reported</td>
+<td>BACKEND-CAND-01</td>
+</tr>
+<tr>
+<td>sacdia-backend resources admin reads</td>
+<td>Private resources / signed URLs</td>
+<td>Reported</td>
+<td>BACKEND-CAND-02</td>
+</tr>
+<tr>
+<td>sacdia-backend resources admin mutations</td>
+<td>Resource integrity</td>
+<td>Reported</td>
+<td>BACKEND-CAND-03</td>
+</tr>
+<tr>
+<td>sacdia-backend annual folder reads</td>
+<td>Evidence confidentiality</td>
+<td>Reported</td>
+<td>BACKEND-CAND-04</td>
+</tr>
+<tr>
+<td>sacdia-backend annual folder uploads</td>
+<td>Evidence integrity</td>
+<td>Reported</td>
+<td>BACKEND-CAND-05</td>
+</tr>
+<tr>
+<td>sacdia-backend annual folder evaluations</td>
+<td>Territorial review integrity</td>
+<td>Reported</td>
+<td>BACKEND-CAND-06</td>
+</tr>
+<tr>
+<td>sacdia-backend membership requests</td>
+<td>Club assignment approval integrity</td>
+<td>Reported</td>
+<td>BACKEND-CAND-07</td>
+</tr>
+<tr>
+<td>sacdia-backend auth/session/MFA/JWT</td>
+<td>Authn hardening</td>
+<td>No issue found</td>
+<td>JWT strategy, MFA guard, CORS, Helmet and Sentry redaction reviewed; no reportable issue promoted.</td>
+</tr>
+<tr>
+<td>sacdia-backend raw SQL/SSRF/upload keys</td>
+<td>Injection/file handling</td>
+<td>No issue found</td>
+<td>Reviewed Prisma raw usages, R2 key generation, file magic-byte validation, and outbound fetch callsites.</td>
+</tr>
+<tr>
+<td>sacdia-admin token bridge</td>
+<td>Browser token containment</td>
+<td>Rejected</td>
+<td>Same-origin <code>/api/auth/token</code> weakens httpOnly against XSS, but no standalone attacker path was proven.</td>
+</tr>
+<tr>
+<td>sacdia-admin honors material URL</td>
+<td>XSS/navigation/iframe</td>
+<td>Rejected</td>
+<td>Stored URL needs allowlist hardening, but author is privileged and CSP/default frame policy limits iframe impact; no proven token theft path.</td>
+</tr>
+<tr>
+<td>sacdia-admin CSRF/redirects/secrets</td>
+<td>Browser security</td>
+<td>No issue found</td>
+<td>SameSite strict cookies, safe relative redirects, Sentry redaction, and empty env example reviewed.</td>
+</tr>
+<tr>
+<td>sacdia-app iOS OAuth custom scheme</td>
+<td>OAuth callback interception</td>
+<td>Needs follow-up</td>
+<td>Code registers <code>io.sacdia.app</code>, but OAuth buttons are currently commented out, app calls GET while backend exposes POST, and backend default redirect is HTTPS. Re-check before re-enabling OAuth.</td>
+</tr>
+<tr>
+<td>sacdia-app certificate import file_url</td>
+<td>Client-supplied file references</td>
+<td>Rejected</td>
+<td>Current backend OCR provider does not dereference <code>file_url</code>; risk is provenance/hardening rather than proven SSRF.</td>
+</tr>
+<tr>
+<td>sacdia-app annual folder legacy upload</td>
+<td>Client/backend contract drift</td>
+<td>Rejected</td>
+<td>Mobile legacy JSON <code>file_url</code> endpoint no longer matches backend multipart route.</td>
+</tr>
+<tr>
+<td>sacdia-app token storage/TLS/FCM</td>
+<td>Mobile client security</td>
+<td>No issue found</td>
+<td>Secure storage, release HTTPS guard, debug-only logging, and FCM handling reviewed.</td>
+</tr>
+<tr>
+<td>sacdia-docs dev credentials</td>
+<td>Credential exposure</td>
+<td>Reported</td>
+<td>DOCS-CAND-01</td>
+</tr>
+<tr>
+<td>sacdia-docs generated MDX</td>
+<td>Stored XSS in docs</td>
+<td>Needs follow-up</td>
+<td>Escaping is incomplete for MDX expression contexts, but source requires contributor/generator control and no runtime PoC was executed.</td>
+</tr>
+<tr>
+<td>sacdia-docs sync workflow</td>
+<td>CI token exposure</td>
+<td>Reported</td>
+<td>DOCS-CAND-03</td>
+</tr>
+<tr>
+<td>root RBAC workflow</td>
+<td>CI secret handling</td>
+<td>Needs follow-up</td>
+<td>PR same-repo risk exists, but fork PRs do not receive secrets by default and token scopes were not verified.</td>
+</tr>
+</tbody></table>
+
+
+<h2 id="open-questions-and-follow-up">Open Questions And Follow Up</h2>
+
+<ul><li>Re-run a focused OAuth mobile review before enabling the commented Google/Apple buttons in <code>/Users/abner/Documents/development/sacdia/sacdia-app/lib/features/auth/presentation/views/login_view.dart</code>; verify iOS Universal Links and backend redirect allowlist together.</li><li>Run a CI secrets hardening pass over <code>/Users/abner/Documents/development/sacdia/sacdia-docs/.github/workflows/sync-docs.yml</code> and <code>/Users/abner/Documents/development/sacdia/.github/workflows/rbac-permissions-consistency.yml</code> with the actual GitHub token scopes.</li><li>Add dynamic two-tenant regression tests for every backend authorization finding before remediation is considered complete.</li></ul>
+
+<p>Report artifacts:</p>
+
+<ul><li>Markdown: <code>/tmp/codex-security-scans/sacdia/7a15ebd9a216_20260610T213223Z/report.md</code></li><li>HTML: <code>/tmp/codex-security-scans/sacdia/7a15ebd9a216_20260610T213223Z/report.html</code></li><li>Coverage ledger: <code>/tmp/codex-security-scans/sacdia/7a15ebd9a216_20260610T213223Z/artifacts/03_coverage/repository_coverage_ledger.md</code></li><li>Validation summary: <code>/tmp/codex-security-scans/sacdia/7a15ebd9a216_20260610T213223Z/artifacts/05_findings/validation_summary.md</code></li><li>Attack-path summary: <code>/tmp/codex-security-scans/sacdia/7a15ebd9a216_20260610T213223Z/artifacts/05_findings/attack_path_analysis_report.md</code></li></ul>
+    </main>
+  </div>
+  <script>
+    const toggle = document.getElementById('navToggle');
+    const icon = document.getElementById('navToggleIcon');
+    const collapsedKey = 'codex-security-report:sidebar-collapsed';
+
+    function setCollapsed(collapsed) {
+      document.body.classList.toggle('sidebar-collapsed', collapsed);
+      if (toggle) {
+        toggle.setAttribute('aria-pressed', collapsed ? 'true' : 'false');
+        toggle.setAttribute('aria-label', collapsed ? 'Expand sidebar' : 'Collapse sidebar');
+        toggle.setAttribute('title', collapsed ? 'Expand sidebar' : 'Collapse sidebar');
+      }
+      if (icon) icon.setAttribute('d', collapsed ? 'M9 6l6 6-6 6' : 'M15 6l-6 6 6 6');
+      try { localStorage.setItem(collapsedKey, collapsed ? '1' : '0'); } catch {}
+    }
+
+    try { setCollapsed(localStorage.getItem(collapsedKey) === '1'); } catch {}
+    if (toggle) toggle.addEventListener('click', () => setCollapsed(!document.body.classList.contains('sidebar-collapsed')));
+
+    const tocLinks = Array.from(document.querySelectorAll('.toc a'));
+    const sections = tocLinks.map((link) => {
+      const id = decodeURIComponent(link.getAttribute('href').slice(1));
+      return [link, document.getElementById(id)];
+    }).filter((pair) => pair[1]);
+
+    const observer = new IntersectionObserver((entries) => {
+      const visible = entries
+        .filter((entry) => entry.isIntersecting)
+        .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0];
+      if (!visible) return;
+      tocLinks.forEach((link) => link.parentElement.classList.remove('active'));
+      const active = tocLinks.find((link) => link.getAttribute('href') === '#' + visible.target.id);
+      if (active) active.parentElement.classList.add('active');
+    }, { rootMargin: '-10% 0px -75% 0px', threshold: [0, 1] });
+
+    sections.forEach(([, section]) => observer.observe(section));
+  </script>
+</body>
+</html>
