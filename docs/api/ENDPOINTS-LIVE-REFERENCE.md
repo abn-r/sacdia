@@ -853,6 +853,9 @@ Errores específicos del submit de honores:
 | Method | Path | Auth | Roles | Description | Source |
 |---|---|---|---|---|---|
 | POST | `/api/v1/support/reports` | JWT | - | Enviar reporte de soporte (bug, feature_request, account, data_issue, performance, other). Body: `{ category, title<=120, description<=2000, deviceInfo{platform,osVersion,model,appVersion,buildNumber}, userContext?{route?,clubId?,sectionId?} }`. Rate limit 5/hora por usuario. Responde 201 `{ reportId, createdAt }` | `src/support/support.controller.ts` |
+| GET | `/api/v1/admin/support/reports` | JWT | admin, coordinator (GlobalRoles) | Lista paginada de reportes de soporte para panel admin. Filtros: `status?` (`open`, `in_progress`, `resolved`, `closed`), `category?`, `userId?`, `search?`, `page?`, `limit?`. Responde `{ status, data: { total, page, limit, items[] } }` | `src/support/support-admin.controller.ts` |
+| GET | `/api/v1/admin/support/reports/:reportId` | JWT | admin, coordinator (GlobalRoles) | Detalle de un reporte con usuario, estado, contexto técnico y timestamps. | `src/support/support-admin.controller.ts` |
+| PATCH | `/api/v1/admin/support/reports/:reportId/status` | JWT | admin, coordinator (GlobalRoles) | Actualiza el estado de atención del reporte. Body: `{ status: "open" \| "in_progress" \| "resolved" \| "closed" }`. | `src/support/support-admin.controller.ts` |
 
 ## member-rankings (8.4-A)
 

@@ -17,7 +17,7 @@ propios solo como adaptadores: no deben duplicar ni contradecir este contrato.
 - Respuestas cortas por defecto; ampliar solo si el usuario lo pide o el riesgo lo requiere.
 - Una pregunta a la vez. Despues de preguntar, detenerse y esperar.
 - No presentar menus ni enfoques multiples salvo que exista una bifurcacion real con tradeoffs.
-- En español, responder con voseo rioplatense natural.
+- En español, responder con español neutro; no usar voseo rioplatense ni modismos argentinos.
 
 ### Reglas duras
 
