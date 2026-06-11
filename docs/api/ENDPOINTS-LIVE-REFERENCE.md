@@ -127,9 +127,9 @@
 | GET | `/api/v1/users/:userId/master-honors/roadmap` | JWT | `user_honors:read` (owner bypass) | Listar maestrías activas aplicables al usuario con avance y requisitos, incluyendo maestrías aún no obtenidas. Es lectura sin side effects; no otorga maestrías. | `src/honors/master-honors.controller.ts` |
 | GET | `/api/v1/users/:userId/master-honors/:masterHonorId` | JWT | `user_honors:read` (owner bypass) | Obtener detalle de una maestría del usuario; incluye `evaluation_snapshot` para explicar la evaluación vigente. | `src/honors/master-honors.controller.ts` |
 | DELETE | `/api/v1/users/:userId/honors/:honorId` | JWT | - | Abandonar honor | `src/honors/honors.controller.ts` |
-| PATCH | `/api/v1/users/:userId/honors/:honorId` | JWT | - | Actualizar progreso de honor | `src/honors/honors.controller.ts` |
+| PATCH | `/api/v1/users/:userId/honors/:honorId` | JWT | - | Actualizar honor del usuario; acepta `completionMode` (`UNDECIDED`, `IN_APP`, `EXTERNAL`) mientras el honor sea mutable | `src/honors/honors.controller.ts` |
 | POST | `/api/v1/users/:userId/honors/:honorId` | JWT | - | Iniciar un honor | `src/honors/honors.controller.ts` |
-| POST | `/api/v1/users/:userId/honors/:honorId/files` | JWT | - | Subir evidencias del honor (multipart: certificate, document, images) | `src/honors/honors.controller.ts` |
+| POST | `/api/v1/users/:userId/honors/:honorId/files` | JWT | - | Subir archivos del honor (multipart: `document` = formato completado externo; `images` = evidencia general, máximo 10 totales; `certificate` legacy) | `src/honors/honors.controller.ts` |
 | GET | `/api/v1/users/:userId/honors/:honorId/requirements/progress` | JWT | - | Obtener progreso del usuario por requisito de un honor | `src/honors/honors.controller.ts` |
 | PATCH | `/api/v1/users/:userId/honors/:honorId/requirements/:requirementId/progress` | JWT | - | Actualizar progreso de un requisito individual | `src/honors/honors.controller.ts` |
 | PATCH | `/api/v1/users/:userId/honors/:honorId/requirements/progress/batch` | JWT | - | Actualizar progreso de múltiples requisitos en lote | `src/honors/honors.controller.ts` |
@@ -506,6 +506,13 @@
 | PATCH | `/api/v1/users/:userId/honors/:honorId/requirements/:requirementId/progress` | JWT | - | Actualizar progreso de un requisito individual | `src/honors/honors.controller.ts` |
 | PATCH | `/api/v1/users/:userId/honors/:honorId/requirements/progress/batch` | JWT | - | Actualizar progreso de múltiples requisitos en lote | `src/honors/honors.controller.ts` |
 
+Notas contractuales de honores de usuario:
+
+- Nuevas inscripciones y reactivaciones exponen `completion_mode = "UNDECIDED"`.
+- La seleccion de modo se envia como `completionMode` en `PATCH /api/v1/users/:userId/honors/:honorId`; las respuestas siguen exponiendo `completion_mode`.
+- `PENDING_REVIEW` y `APPROVED` bloquean cambios libres de modo y archivos.
+- En modo `IN_APP`, el progreso batch acepta y persiste `textResponse` en `user_honor_requirement_progress.text_response`.
+
 ## inventory
 
 | Method | Path | Auth | Roles | Description | Source |
@@ -717,7 +724,7 @@ Permisos: `ranking_weights:read` (lectura) | `ranking_weights:write` (creación,
 
 | Method | Path | Auth | Roles | Description | Source |
 |---|---|---|---|---|---|
-| POST | `/api/v1/validation/submit` | JWT | `validation:submit` | Enviar clase u honor a revisión. Para honores, `entity_id` es `users_honors.user_honor_id`; el backend valida estado, ownership, evidencia mínima, requisitos completos y cambios posteriores si venía de rechazo. | `src/validation/validation.controller.ts` |
+| POST | `/api/v1/validation/submit` | JWT | `validation:submit` | Enviar clase u honor a revisión. Para honores, `entity_id` es `users_honors.user_honor_id`; el backend valida estado, ownership, modo de finalizacion, reglas `IN_APP`/`EXTERNAL` y cambios posteriores si venía de rechazo. | `src/validation/validation.controller.ts` |
 | POST | `/api/v1/validation/:entityType/:entityId/review` | JWT | `validation:review` | Aprobar o rechazar clase/honor. Para honores, delega en el workflow canónico de honores y solo debe operar estados pendientes. Body: `{ action: "approved" \| "rejected", comment?: string }`; rechazo requiere comentario. | `src/validation/validation.controller.ts` |
 | GET | `/api/v1/validation/pending` | JWT | `validation:read` | Listar items pendientes de revisión. Query: `section_id?`, `entity_type?` (`class` \| `honor`). | `src/validation/validation.controller.ts` |
 | GET | `/api/v1/validation/:entityType/:entityId/history` | JWT | `validation:read` | Historial de validación de una clase u honor. | `src/validation/validation.controller.ts` |
@@ -725,6 +732,7 @@ Permisos: `ranking_weights:read` (lectura) | `ranking_weights:write` (creación,
 
 Errores específicos del submit de honores:
 
+- `VALIDATION_HONOR_COMPLETION_MODE_REQUIRED`
 - `VALIDATION_HONOR_MISSING_EVIDENCE`
 - `VALIDATION_HONOR_REQUIREMENTS_INCOMPLETE`
 - `VALIDATION_HONOR_NO_CHANGES_AFTER_REJECTION`
@@ -736,7 +744,7 @@ Errores específicos del submit de honores:
 | Method | Path | Auth | Roles | Description | Source |
 |---|---|---|---|---|---|
 | GET | `/api/v1/evidence-review/pending` | JWT | admin, coordinator (GlobalRoles) | Listar evidencias pendientes de validación. Query: `type?` (class\|honor), `page?`, `limit?`. La Carpeta Anual de Evidencias se revisa en el módulo `annual-folders`. | `src/evidence-review/evidence-review.controller.ts` |
-| GET | `/api/v1/evidence-review/:type/:id` | JWT | admin, coordinator (GlobalRoles) | Detalle de evidencia con archivos adjuntos. Para `type=honor`, `files` agrega evidencia general + evidencia por requisito y la respuesta incluye `honor_review_packet` con progreso, requisitos y adjuntos por requisito. | `src/evidence-review/evidence-review.controller.ts` |
+| GET | `/api/v1/evidence-review/:type/:id` | JWT | admin, coordinator (GlobalRoles) | Detalle de evidencia con archivos adjuntos. Para `type=honor`, `files` agrega formato completado, evidencia general y evidencia por requisito; `honor_review_packet` incluye `completion_mode`, `completed_format_file`, progreso, respuestas textuales, requisitos y adjuntos por requisito. | `src/evidence-review/evidence-review.controller.ts` |
 | POST | `/api/v1/evidence-review/:type/:id/approve` | JWT | admin, coordinator (GlobalRoles) | Aprobar evidencia. Para `type=honor`, usa el workflow canónico de honores y sincroniza `validation_status=APPROVED` + `validate=true`. | `src/evidence-review/evidence-review.controller.ts` |
 | POST | `/api/v1/evidence-review/:type/:id/reject` | JWT | admin, coordinator (GlobalRoles) | Rechazar evidencia. Body: `{ reason: string }` (required). Para `type=honor`, usa el workflow canónico y sincroniza `validation_status=REJECTED` + `validate=false`. | `src/evidence-review/evidence-review.controller.ts` |
 | POST | `/api/v1/evidence-review/bulk-approve` | JWT | admin, coordinator (GlobalRoles) | Aprobación masiva (mismo tipo: `class` u `honor`). Body: `{ type: string, ids: int[] }` | `src/evidence-review/evidence-review.controller.ts` |

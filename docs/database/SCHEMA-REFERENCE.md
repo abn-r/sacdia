@@ -2,7 +2,7 @@
 
 **Estado**: ACTIVE
 **Sincronizado contra**: `sacdia-backend/prisma/schema.prisma`
-**Fecha de resincronizacion**: 2026-06-04 (task 1 maestrías, relaciones explícitas de auditoría)
+**Fecha de resincronizacion**: 2026-06-11 (honores: modo de finalizacion)
 
 Referencia humana concisa del schema Prisma vigente.
 
@@ -15,7 +15,7 @@ Referencia humana concisa del schema Prisma vigente.
 ## Cifras vigentes
 
 - **Modelos Prisma**: 113
-- **Enums Prisma**: 19
+- **Enums Prisma**: 20
 - **Tablas Better Auth mapeadas**: `session -> sessions`, `account -> accounts`, `verification -> verifications`
 
 ---
@@ -83,6 +83,17 @@ Referencia humana concisa del schema Prisma vigente.
   - `users_master_honors.awarded_division_id` guarda la división histórica usada para el primer otorgamiento; la reevaluación usa esa división histórica cuando el registro ya existe.
   - `master_honor_evaluation_history.evaluation_snapshot` documenta qué grupos, opciones y especialidades contaron en cada cambio.
   - `honors.master_honors_id` no es fuente de verdad para requisitos configurables; se conserva como relación legacy/catálogo mientras el evaluador usa las tablas de reglas.
+
+### `users_honors` y modo de finalizacion
+
+- `users_honors.validation_status` sigue siendo la fuente canonica del estado de revision (`IN_PROGRESS`, `PENDING_REVIEW`, `APPROVED`, `REJECTED`).
+- `users_honors.completion_mode` define el camino de trabajo de la especialidad inscrita con default `UNDECIDED`.
+- Valores vigentes de `honor_completion_mode_enum`:
+  - `UNDECIDED` — honor inscrito sin camino elegido; bloquea submit de honores editables.
+  - `IN_APP` — requisitos, respuestas y evidencia puntual dentro de la app.
+  - `EXTERNAL` — formato completado en `document` + evidencias generales; no depende del checklist para submit.
+- `users_honors.document` representa el formato completado en modo externo. `users_honors.images` conserva evidencias generales legacy/actuales con limite runtime de 10 imagenes totales.
+- `requirement_evidence` conserva evidencias puntuales por requisito para el modo `IN_APP`.
 
 ### `monthly_reports` y `monthly_report_manual_data`
 
@@ -400,6 +411,7 @@ Define el presupuesto de puntos por componente dentro de un eje anual:
 - `gender`
 - `master_honor_applicability_scope_enum`
 - `master_honor_requirement_group_type_enum`
+- `honor_completion_mode_enum` (`UNDECIDED`, `IN_APP`, `EXTERNAL`)
 - `honor_validation_status_enum`
 - `insurance_type_enum`
 - `investiture_action_enum`

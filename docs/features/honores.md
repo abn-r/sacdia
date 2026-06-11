@@ -1,6 +1,6 @@
 # Honores (Especialidades)
 
-**Estado**: IMPLEMENTADO — workflow de validacion backend normalizado, paquete de revision admin y maestrías configurables en rollout cross-repo.
+**Estado**: IMPLEMENTADO — workflow de validacion backend por modo, paquete de revision admin y maestrías configurables en rollout cross-repo.
 
 ## Descripcion de dominio
 
@@ -9,12 +9,13 @@ Los honores (especialidades) son unidades formativas independientes que los miem
 El ciclo funcional es:
 
 1. Catalogo publico de consulta.
-2. Inscripcion del usuario en un honor.
-3. Avance por requisitos/checklist.
-4. Carga de evidencias generales o por requisito.
-5. Envio a revision institucional.
-6. Aprobacion o rechazo por revisor autorizado.
-7. Correccion y reenvio cuando corresponde.
+2. Inscripcion del usuario en un honor con modo inicial `UNDECIDED`.
+3. Eleccion de modo de finalizacion: dentro de la app (`IN_APP`) o fuera de la app (`EXTERNAL`).
+4. Si el modo es `IN_APP`, avance por requisitos, respuestas y evidencia puntual por requisito cuando aplique.
+5. Si el modo es `EXTERNAL`, descarga del formato/material, carga del formato completado como `document` y carga de evidencias generales.
+6. Envio a revision institucional segun reglas del modo elegido.
+7. Aprobacion o rechazo por revisor autorizado.
+8. Correccion y reenvio cuando corresponde.
 
 ## Fuente de verdad de estado
 
@@ -28,6 +29,20 @@ La fuente de verdad runtime para honores de usuario es `users_honors.validation_
 | `REJECTED` | Honor rechazado; el usuario puede corregir y reenviar si hay cambios nuevos. |
 
 `users_honors.validate` se mantiene solo por compatibilidad con codigo legado. No debe usarse como fuente primaria de decision.
+
+## Modo de finalizacion
+
+La fuente de verdad runtime para el camino de trabajo de una especialidad inscrita es `users_honors.completion_mode`:
+
+| Modo | Significado |
+|---|---|
+| `UNDECIDED` | Honor inscrito sin camino elegido. No puede enviarse a revision. |
+| `IN_APP` | El miembro completa requisitos, respuestas y evidencias puntuales dentro de la app. |
+| `EXTERNAL` | El miembro completa el formato fuera de la app, lo sube como documento y adjunta evidencias generales. |
+
+Nuevas inscripciones y reactivaciones arrancan en `UNDECIDED`. El modo puede seleccionarse desde `PATCH /api/v1/users/:userId/honors/:honorId` con `completionMode` mientras el honor sea mutable. El backend es la fuente canonica: la app guia la UX, pero la elegibilidad final se decide en backend.
+
+Los estados `PENDING_REVIEW` y `APPROVED` bloquean cambios libres de modo y de archivos. Un honor rechazado puede corregirse y reenviarse si hay cambios posteriores al rechazo.
 
 ## Maestrías de especialidades
 
@@ -177,22 +192,27 @@ Body:
 
 `entity_id` es `users_honors.user_honor_id`, no `honors.honor_id`.
 
-Desde PR1, el backend bloquea el submit si:
+El backend bloquea el submit si:
 
 - el honor no pertenece al usuario;
 - el honor esta inactivo;
 - ya esta aprobado;
 - ya esta pendiente;
 - el estado no permite submit;
-- falta evidencia minima;
-- faltan requisitos obligatorios completos;
+- `completion_mode` esta en `UNDECIDED` o ausente para un honor editable;
+- en modo `IN_APP`, faltan requisitos hoja obligatorios, no se cumple `choice_min` en grupos de opcion, o falta evidencia activa en requisitos marcados `requires_evidence`;
+- en modo `EXTERNAL`, falta el formato completado en `document` o no existe al menos una evidencia general;
 - fue rechazado y no hubo cambios posteriores al rechazo.
 
 ## Requisitos por especialidad
 
 Cada honor puede tener requisitos en `honor_requirements`. El avance del usuario vive en `user_honor_requirement_progress`.
 
-La app muestra estos requisitos como checklist, pero la regla importante es esta: **la UI puede anticipar bloqueos, pero el backend decide si el honor puede enviarse a revision**.
+En modo `IN_APP`, la app muestra estos requisitos como checklist/arbol de trabajo. Las respuestas textuales viven en `user_honor_requirement_progress.text_response` y las evidencias puntuales viven en `requirement_evidence`.
+
+En modo `EXTERNAL`, el checklist no es requisito de elegibilidad para submit. Puede existir progreso legacy, pero el backend no lo usa como bloqueo del flujo externo.
+
+La regla importante es esta: **la UI puede anticipar bloqueos, pero el backend decide si el honor puede enviarse a revision**.
 
 Cuando el usuario cambia progreso o evidencia por requisito, el backend actualiza `users_honors.modified_at`. Esto permite bloquear reenvios de honores rechazados si el usuario no corrigio nada.
 
@@ -200,14 +220,19 @@ Cuando el usuario cambia progreso o evidencia por requisito, el backend actualiz
 
 Hay tres superficies historicas de evidencia:
 
-- `users_honors.images`, `certificate`, `document` — evidencia general legacy/actual de la app.
+- `users_honors.document` — formato completado en modo `EXTERNAL`.
+- `users_honors.images` y `certificate` — evidencia general legacy/actual de la app.
 - `evidence_files.user_honor_id` — evidencia normalizada, usada por carga masiva y revision.
 - `requirement_evidence` — evidencia asociada a requisitos concretos.
 
-PR2 no migra todo a una sola tabla. En su lugar, `GET /evidence-review/honor/:id` agrega un `honor_review_packet` que unifica para revision:
+El limite vigente para evidencia general es de 10 imagenes totales en `users_honors.images`; `document` no consume ese cupo. El backend valida el total existente + nuevo, no solo el tamaño del request.
 
+El flujo vigente no migra todo a una sola tabla. En su lugar, `GET /evidence-review/honor/:id` agrega un `honor_review_packet` que unifica para revision:
+
+- modo de finalizacion (`completion_mode`);
+- formato completado (`completed_format_file`) cuando exista;
 - progreso total del honor;
-- requisitos completados/pendientes;
+- requisitos completados/pendientes, incluyendo `text_response`;
 - evidencia general legacy/normalizada;
 - evidencia por requisito.
 
@@ -223,7 +248,13 @@ La app Flutter consume:
 - carga de evidencia;
 - `POST /validation/submit` para enviar a revision.
 
-La app debe tratar `validation_status` como estado canonico. Puede deshabilitar botones por UX, pero no debe asumir que un honor es enviable sin respuesta backend.
+La app debe tratar `validation_status` como estado canonico de revision y `completion_mode` como estado canonico del camino de trabajo:
+
+- `UNDECIDED`: mostrar selector de modo y no mezclar CTAs de checklist/formato.
+- `IN_APP`: mostrar requisitos, respuestas y evidencia por requisito; no pedir formato completado como accion primaria.
+- `EXTERNAL`: mostrar descarga de formato/material, carga de `document`, evidencias generales y submit; no exigir checklist como accion primaria.
+
+Puede deshabilitar botones por UX, pero no debe asumir que un honor es enviable sin respuesta backend.
 
 ## Panel administrativo
 
@@ -237,7 +268,7 @@ POST /api/v1/evidence-review/honor/:id/reject
 
 `EvidenceReviewService` delega las acciones de honor al `HonorValidationWorkflowService`, para evitar reglas duplicadas.
 
-El detalle de un honor pendiente expone `honor_review_packet` y el panel muestra el avance del honor, el conteo de requisitos, el porcentaje completado y las evidencias asociadas a requisitos. Esto evita que el revisor apruebe/rechace mirando solo archivos generales.
+El detalle de un honor pendiente expone `honor_review_packet` y el panel muestra el modo de finalizacion, formato completado si aplica, avance del honor, conteo de requisitos, porcentaje completado, respuestas textuales y evidencias asociadas a requisitos. Esto evita que el revisor apruebe/rechace mirando solo archivos generales.
 
 Para catalogo, la superficie correcta es la que consume endpoints admin (`/admin/honors-catalog`, `/admin/master-honors`, `/admin/honor-categories`). La pantalla historica que muta `/honors` debe considerarse stale si intenta crear/editar contra endpoints publicos no implementados.
 
