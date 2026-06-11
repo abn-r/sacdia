@@ -40,7 +40,7 @@ La fuente de verdad runtime para el camino de trabajo de una especialidad inscri
 | `IN_APP` | El miembro completa requisitos, respuestas y evidencias puntuales dentro de la app. |
 | `EXTERNAL` | El miembro completa el formato fuera de la app, lo sube como documento y adjunta evidencias generales. |
 
-Nuevas inscripciones y reactivaciones arrancan en `UNDECIDED`. El modo puede seleccionarse desde `PATCH /api/v1/users/:userId/honors/:honorId` con `completionMode` mientras el honor sea mutable. El backend es la fuente canonica: la app guia la UX, pero la elegibilidad final se decide en backend.
+Nuevas inscripciones y reactivaciones arrancan en `UNDECIDED`. El modo puede seleccionarse desde `PATCH /api/v1/users/:userId/honors/:honorId` con `completionMode` mientras el honor sea mutable. La app debe pedir confirmacion antes de persistir la seleccion y actualizar la vista con el modo confirmado. El backend es la fuente canonica: la app guia la UX, pero la elegibilidad final se decide en backend.
 
 Los estados `PENDING_REVIEW` y `APPROVED` bloquean cambios libres de modo y de archivos. Un honor rechazado puede corregirse y reenviarse si hay cambios posteriores al rechazo.
 
