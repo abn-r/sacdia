@@ -40,7 +40,7 @@ La fuente de verdad runtime para el camino de trabajo de una especialidad inscri
 | `IN_APP` | El miembro completa requisitos, respuestas y evidencias puntuales dentro de la app. |
 | `EXTERNAL` | El miembro completa el formato fuera de la app, lo sube como documento y adjunta evidencias generales. |
 
-Nuevas inscripciones y reactivaciones arrancan en `UNDECIDED`. El modo puede seleccionarse desde `PATCH /api/v1/users/:userId/honors/:honorId` con `completionMode` mientras el honor sea mutable. La app debe pedir confirmacion antes de persistir la seleccion y actualizar la vista con el modo confirmado. El backend es la fuente canonica: la app guia la UX, pero la elegibilidad final se decide en backend.
+Nuevas inscripciones y reactivaciones arrancan en `UNDECIDED`. El modo puede seleccionarse desde `PATCH /api/v1/users/:userId/honors/:honorId` con `completionMode` mientras el honor sea mutable. La app debe pedir confirmacion antes de persistir la seleccion, actualizar todas las vistas del flujo con el modo confirmado y no volver a pedir camino al navegar entre detalle, requisitos o evidencias. Si el miembro cambia de camino despues, debe hacerlo mediante una accion explicita de cambio de modo. El backend es la fuente canonica: la app guia la UX, pero la elegibilidad final se decide en backend.
 
 Los estados `PENDING_REVIEW` y `APPROVED` bloquean cambios libres de modo y de archivos. Un honor rechazado puede corregirse y reenviarse si hay cambios posteriores al rechazo.
 
@@ -253,6 +253,8 @@ La app debe tratar `validation_status` como estado canonico de revision y `compl
 - `UNDECIDED`: mostrar selector de modo y no mezclar CTAs de checklist/formato.
 - `IN_APP`: mostrar requisitos, respuestas y evidencia por requisito; no pedir formato completado como accion primaria.
 - `EXTERNAL`: mostrar descarga de formato/material, carga de `document`, evidencias generales y submit; no exigir checklist como accion primaria.
+
+Despues de una seleccion exitosa, detalle, requisitos y evidencias deben resolver el mismo `completion_mode` efectivo. Si una respuesta o refetch llega desfasado temporalmente, la app puede conservar el modo confirmado por el usuario en el estado de sesion hasta que backend devuelva el mismo estado canonico.
 
 Puede deshabilitar botones por UX, pero no debe asumir que un honor es enviable sin respuesta backend.
 
