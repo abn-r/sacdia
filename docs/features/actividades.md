@@ -48,10 +48,12 @@ El modelo contempla `activity_instances` como instancias de una actividad por se
 - Getters computados: `isPast` (actividad ya ocurrio), `hasVirtualLink` (tiene link de videoconferencia), `hasLocation` (tiene coordenadas validas)
 
 **ActivityDetailView — rediseno completo:**
-- Hero edge-to-edge: mapa interactivo (`flutter_map`) para actividades presenciales, imagen para virtuales; se extiende detras del AppBar
+- Hero edge-to-edge de tamaño fijo: mapa Google (`google_maps_flutter`) para actividades presenciales, imagen para virtuales/hibridas, con controles superiores superpuestos. No usa `SliverAppBar` colapsable para evitar relayout costoso del mapa nativo durante el scroll
 - Grid 2×3 de metadata con tarjetas tintadas por color (fecha, hora, lugar, tipo, seccion, modalidad)
 - Badge de modalidad (Presencial / Virtual / Hibrido) en la fila del titulo, no sobre el hero
+- La fila de ubicacion muestra la direccion completa y deja la accion de navegacion en una linea inferior
 - Seccion de participantes con avatares apilados en paleta calida
+- Accion interna de asistencia ubicada antes de participantes; usuarios con `attendance:manage` o rol operacional (`director`, `deputy-director`, `secretary`, `treasurer`, `secretary-treasurer`, `counselor`) escanean QR, y el resto ve "Mostrar mi QR"
 - Footer card de organizador con nombre e imagen del creador
 - Estado de carga con shimmer skeleton (`activity_detail_skeleton.dart`)
 - Boton "Confirmar asistencia" eliminado — la asistencia es gestionada por administradores, no es opt-in del usuario
@@ -87,9 +89,10 @@ El modelo contempla `activity_instances` como instancias de una actividad por se
 - **Soft delete**: Las actividades se desactivan, no se eliminan fisicamente
 - **Autorizacion por rol de club**: Solo roles operativos (director, subdirector, secretary, counselor) pueden crear actividades; la lectura es abierta a miembros con JWT. La app oculta el boton de creacion si el usuario no tiene el permiso `activities:create` ni alguno de esos roles legacy
 - **Campo `image` opcional en `CreateActivityDto`**: El campo `image` es opcional (`@IsOptional()`) — solo aplica para actividades virtuales. En el DTO de actualizacion (`UpdateActivityDto`) tambien es opcional
-- **Asistencia no es self-service**: El boton "Confirmar asistencia" fue eliminado de la app. La asistencia la registran los administradores via el panel admin (`POST /activities/:id/attendance`), no los propios miembros
+- **Asistencia no es self-service**: El boton "Confirmar asistencia" fue eliminado de la app. La asistencia la registran usuarios autorizados via QR en la app movil (`attendance:manage` o roles operacionales de club: director, subdirector, secretario, tesorero, secretario-tesorero o consejero) o administradores via panel admin (`POST /activities/:id/attendance`), no los propios miembros como opt-in
 - **BottomSheetPicker en formularios**: El formulario de creacion de actividad adopta `BottomSheetPicker` en lugar de `SacDropdownField` para la seleccion de tipo y seccion, alineandose con el patron de pickers del resto de la app
 - **Geolocalizacion**: La app implementa seleccion de ubicacion en mapa (LocationPickerView) usando `google_maps_flutter` + `geolocator`. El backend almacena coordenadas en campos `lat`/`longitude` del modelo. En el detalle, actividades presenciales muestran un hero edge-to-edge con Google Maps; virtuales muestran una imagen de portada. La migracion de `flutter_map` a `google_maps_flutter` requiere API keys configuradas en `ios/Runner/AppDelegate.swift` y `android/app/src/main/AndroidManifest.xml`
+- **URLs privadas no bloqueantes**: Las imagenes privadas de actividades y perfiles se firman con R2 cuando la configuracion esta disponible. Si R2 no puede firmar una URL en lectura, el backend registra un warning y devuelve el valor almacenado para no romper listados, dashboard ni detalle por un asset no critico.
 - **Tipos de actividad**: Separados en tabla catalogo `activity_types` para permitir administracion independiente
 - **Instancias**: El modelo `activity_instances` se usa para actividades conjuntas (multiples secciones). Ver [actividades-conjuntas](actividades-conjuntas.md)
 
