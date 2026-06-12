@@ -1,0 +1,25 @@
+# Especialidad de Aventureros — Excursionismo sobre la nieve
+
+**Fuente**: `/Users/abner/Documents/development/sacdia/docs/working/aventureros-especialidades/pdf/constructor-excursionismo-sobre-la-nieve.pdf`
+**Texto extraído**: `/Users/abner/Documents/development/sacdia/docs/working/aventureros-especialidades/raw/constructor-excursionismo-sobre-la-nieve.txt`
+**Nivel / clase detectada**: Constructor
+**Sección fuente**: Grado 3 - Constructor
+**Cantidad de requisitos detectados**: 9
+
+> Nota: extracción automática preliminar desde la fuente enlazada por guiasmayores.com. Requiere revisión humana antes de cualquier carga a base de datos.
+
+## Requisitos detectados
+
+1. Escuchar brevemente la historia del excursionismo sobre la nieve. ¿Dónde se usaban las raquetas para la nieve? ¿Por qué eran necesarias las raquetas para la nieve? ¿Cuáles animales inspiraron el diseño de la raqueta para la nieve? ¿Qué clase de raqueta para la nieve se usa en su área?
+2. ¿Qué clase de materiales fueron usadas para hacer las primeras raquetas para la nieve? ¿Cómo fueron hechas? Libros de historia bíblicas Una lista de actividades sabáticas Barro o plastilina para ilustrar historias bíblicas Libros con actividades cristianas Sus ideas
+3. Describir los lugares seguros para ir en una excursión sobre la nieve.
+4. Describir los lugares peligrosos para ir en una excursión sobre la nieve.
+5. Describir cómo se debe vestir para ir en una excursión sobre la nieve.
+6. Demostrar cómo hacer lo siguiente: Cargar seguramente sus raquetas para la nieve Ponerse las raquetas para la nieve Sujetar sus raquetas para la nieve
+7. Discutir cómo 1 Corintios 6:19 y 20, e Isaías 40:29-31 se relacionan con la aptitud física.
+8. Jugar un juego sobre las raquetas para la nieve, como: búsqueda de tesoros, deletrear con raquetas para la nieve, rastreo de animales, boliche en la nieve, etc.
+9. Ir en una excursión sobre la nieve de por lo menos 1 km y medio con su familia o club.
+
+## Observaciones
+
+- Este archivo fue preparado para análisis posterior, no para carga directa a BD.

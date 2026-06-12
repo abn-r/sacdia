@@ -6,6 +6,8 @@
 
 Los honores (especialidades) son unidades formativas independientes que los miembros de clubes de Aventureros, Conquistadores y Guias Mayores pueden cursar para profundizar en areas de conocimiento especificas. Cada honor pertenece a una categoria tematica y puede estar asociado a un tipo de club.
 
+El catalogo de especialidades sigue siendo unico: Aventureros, Conquistadores y Guias Mayores no tienen tablas separadas de honores. La disponibilidad por tipo de club se modela con `honor_club_types`, mientras que la relacion curricular con una clase especifica se modela con `class_honors`.
+
 El ciclo funcional es:
 
 1. Catalogo publico de consulta.
@@ -29,6 +31,28 @@ La fuente de verdad runtime para honores de usuario es `users_honors.validation_
 | `REJECTED` | Honor rechazado; el usuario puede corregir y reenviar si hay cambios nuevos. |
 
 `users_honors.validate` se mantiene solo por compatibilidad con codigo legado. No debe usarse como fuente primaria de decision.
+
+## Catalogo unificado y aplicabilidad
+
+La fuente de verdad del catalogo es `honors`. El campo `honors.code` es el identificador estable para imports y sincronizaciones; el nombre visible ya no debe usarse como identidad global porque puede repetirse entre programas o niveles.
+
+La elegibilidad/visibilidad por tipo de club vive en `honor_club_types`:
+
+```text
+honor_id + club_type_id + active
+```
+
+Por eso `clubTypeId` en el catalogo publico filtra por aplicabilidad activa, no por el campo legacy `honors.club_type_id`.
+
+`honors.club_type_id` se conserva temporalmente por compatibilidad con pantallas y procesos legacy durante el rollout. No debe usarse como fuente nueva de elegibilidad.
+
+La relacion entre una especialidad y una clase vive en `class_honors`:
+
+```text
+class_id + honor_id + relation_type + active
+```
+
+Esto permite que una especialidad de Aventureros sea especifica de una clase sin mezclar niveles de clase con categorias tematicas. Las especialidades multinivel pueden existir sin enlace a una clase concreta.
 
 ## Modo de finalizacion
 

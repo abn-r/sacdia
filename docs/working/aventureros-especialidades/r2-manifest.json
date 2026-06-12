@@ -1,0 +1,702 @@
+{
+  "ADV-CORDERITOS-ALIMENTOS-SANOS": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-CORDERITOS-ALIMENTOS-SANOS.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-CORDERITOS-ALIMENTOS-SANOS.pdf"
+  },
+  "ADV-CORDERITOS-AMIGOS-DE-LA-BIBLIA": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-CORDERITOS-AMIGOS-DE-LA-BIBLIA.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-CORDERITOS-AMIGOS-DE-LA-BIBLIA.pdf"
+  },
+  "ADV-CORDERITOS-ANIMALES-DEL-ZOOLOGICO": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-CORDERITOS-ANIMALES-DEL-ZOOLOGICO.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-CORDERITOS-ANIMALES-DEL-ZOOLOGICO.pdf"
+  },
+  "ADV-CORDERITOS-AYUDANTES-EN-LA-COMUNIDAD": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-CORDERITOS-AYUDANTES-EN-LA-COMUNIDAD.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-CORDERITOS-AYUDANTES-EN-LA-COMUNIDAD.pdf"
+  },
+  "ADV-CORDERITOS-AYUDANTE-ESPECIAL": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-CORDERITOS-AYUDANTE-ESPECIAL.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-CORDERITOS-AYUDANTE-ESPECIAL.pdf"
+  },
+  "ADV-CORDERITOS-CORDERITO-DE-LANA": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-CORDERITOS-CORDERITO-DE-LANA.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-CORDERITOS-CORDERITO-DE-LANA.pdf"
+  },
+  "ADV-CORDERITOS-ESTRELLAS": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-CORDERITOS-ESTRELLAS.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-CORDERITOS-ESTRELLAS.pdf"
+  },
+  "ADV-CORDERITOS-INSECTOS": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-CORDERITOS-INSECTOS.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-CORDERITOS-INSECTOS.pdf"
+  },
+  "ADV-CORDERITOS-MUSICA": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-CORDERITOS-MUSICA.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-CORDERITOS-MUSICA.pdf"
+  },
+  "ADV-CORDERITOS-SANO-Y-FUERTE": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-CORDERITOS-SANO-Y-FUERTE.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-CORDERITOS-SANO-Y-FUERTE.pdf"
+  },
+  "ADV-CORDERITOS-TIEMPO": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-CORDERITOS-TIEMPO.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-CORDERITOS-TIEMPO.pdf"
+  },
+  "ADV-CORDERITOS-TRENES-Y-CAMIONES": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-CORDERITOS-TRENES-Y-CAMIONES.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-CORDERITOS-TRENES-Y-CAMIONES.pdf"
+  },
+  "ADV-CORDERITOS-USAR-LOS-DEDOS": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-CORDERITOS-USAR-LOS-DEDOS.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-CORDERITOS-USAR-LOS-DEDOS.pdf"
+  },
+  "ADV-CORDERITOS-PARCHE-DE-ROMPECABEZAS": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-CORDERITOS-PARCHE-DE-ROMPECABEZAS.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-CORDERITOS-PARCHE-DE-ROMPECABEZAS.pdf"
+  },
+  "ADV-CORDERITOS-LA-CREACION": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-CORDERITOS-LA-CREACION.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-CORDERITOS-LA-CREACION.pdf"
+  },
+  "ADV-CASTORCITOS-AMIGOS-DE-LA-BIBLIA": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-CASTORCITOS-AMIGOS-DE-LA-BIBLIA.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-CASTORCITOS-AMIGOS-DE-LA-BIBLIA.pdf"
+  },
+  "ADV-CASTORCITOS-ANIMALES": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-CASTORCITOS-ANIMALES.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-CASTORCITOS-ANIMALES.pdf"
+  },
+  "ADV-CASTORCITOS-ARTE-EN-ESPONJA": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-CASTORCITOS-ARTE-EN-ESPONJA.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-CASTORCITOS-ARTE-EN-ESPONJA.pdf"
+  },
+  "ADV-CASTORCITOS-AVES": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-CASTORCITOS-AVES.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-CASTORCITOS-AVES.pdf"
+  },
+  "ADV-CASTORCITOS-AYUDANDO-EN-EL-HOGAR": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-CASTORCITOS-AYUDANDO-EN-EL-HOGAR.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-CASTORCITOS-AYUDANDO-EN-EL-HOGAR.pdf"
+  },
+  "ADV-CASTORCITOS-CONOZCA-SU-CUERPO": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-CASTORCITOS-CONOZCA-SU-CUERPO.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-CASTORCITOS-CONOZCA-SU-CUERPO.pdf"
+  },
+  "ADV-CASTORCITOS-CRAYONES-Y-MARCADORES": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-CASTORCITOS-CRAYONES-Y-MARCADORES.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-CASTORCITOS-CRAYONES-Y-MARCADORES.pdf"
+  },
+  "ADV-CASTORCITOS-DIVERSION-CON-EL-ALFABETO": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-CASTORCITOS-DIVERSION-CON-EL-ALFABETO.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-CASTORCITOS-DIVERSION-CON-EL-ALFABETO.pdf"
+  },
+  "ADV-CASTORCITOS-DIVERSION-CON-MODALES": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-CASTORCITOS-DIVERSION-CON-MODALES.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-CASTORCITOS-DIVERSION-CON-MODALES.pdf"
+  },
+  "ADV-CASTORCITOS-ESTRELLA-DE-JESUS": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-CASTORCITOS-ESTRELLA-DE-JESUS.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-CASTORCITOS-ESTRELLA-DE-JESUS.pdf"
+  },
+  "ADV-CASTORCITOS-FIGURAS-Y-TAMANOS": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-CASTORCITOS-FIGURAS-Y-TAMANOS.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-CASTORCITOS-FIGURAS-Y-TAMANOS.pdf"
+  },
+  "ADV-CASTORCITOS-HOGARES-DE-ANIMALES": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-CASTORCITOS-HOGARES-DE-ANIMALES.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-CASTORCITOS-HOGARES-DE-ANIMALES.pdf"
+  },
+  "ADV-CASTORCITOS-IZQUIERDA-Y-DERECHA": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-CASTORCITOS-IZQUIERDA-Y-DERECHA.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-CASTORCITOS-IZQUIERDA-Y-DERECHA.pdf"
+  },
+  "ADV-CASTORCITOS-JUGUETES": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-CASTORCITOS-JUGUETES.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-CASTORCITOS-JUGUETES.pdf"
+  },
+  "ADV-CASTORCITOS-MASCOTAS": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-CASTORCITOS-MASCOTAS.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-CASTORCITOS-MASCOTAS.pdf"
+  },
+  "ADV-CASTORCITOS-MEDIDAS-Y-ARENA": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-CASTORCITOS-MEDIDAS-Y-ARENA.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-CASTORCITOS-MEDIDAS-Y-ARENA.pdf"
+  },
+  "ADV-CASTORCITOS-MIS-AMIGOS-DE-LA-COMUNIDAD": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-CASTORCITOS-MIS-AMIGOS-DE-LA-COMUNIDAD.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-CASTORCITOS-MIS-AMIGOS-DE-LA-COMUNIDAD.pdf"
+  },
+  "ADV-CASTORCITOS-EL-MUNDO-DE-DIOS": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-CASTORCITOS-EL-MUNDO-DE-DIOS.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-CASTORCITOS-EL-MUNDO-DE-DIOS.pdf"
+  },
+  "ADV-CASTORCITOS-PRINCIPIANTE-DE-CICLISMO": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-CASTORCITOS-PRINCIPIANTE-DE-CICLISMO.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-CASTORCITOS-PRINCIPIANTE-DE-CICLISMO.pdf"
+  },
+  "ADV-CASTORCITOS-PRINCIPIANTE-DE-NATACION": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-CASTORCITOS-PRINCIPIANTE-DE-NATACION.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-CASTORCITOS-PRINCIPIANTE-DE-NATACION.pdf"
+  },
+  "ADV-CASTORCITOS-ROMPECABEZAS": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-CASTORCITOS-ROMPECABEZAS.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-CASTORCITOS-ROMPECABEZAS.pdf"
+  },
+  "ADV-CASTORCITOS-SEGURIDAD-ANTE-INCENDIOS": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-CASTORCITOS-SEGURIDAD-ANTE-INCENDIOS.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-CASTORCITOS-SEGURIDAD-ANTE-INCENDIOS.pdf"
+  },
+  "ADV-CASTORCITOS-TESORO-ESCONDIDO": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-CASTORCITOS-TESORO-ESCONDIDO.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-CASTORCITOS-TESORO-ESCONDIDO.pdf"
+  },
+  "ADV-ABEJITA-INDUSTRIOSA-AMIGO-DE-LOS-ANIMALES": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-ABEJITA-INDUSTRIOSA-AMIGO-DE-LOS-ANIMALES.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-ABEJITA-INDUSTRIOSA-AMIGO-DE-LOS-ANIMALES.pdf"
+  },
+  "ADV-ABEJITA-INDUSTRIOSA-ARENA": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-ABEJITA-INDUSTRIOSA-ARENA.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-ABEJITA-INDUSTRIOSA-ARENA.pdf"
+  },
+  "ADV-ABEJITA-INDUSTRIOSA-ARTISTA": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-ABEJITA-INDUSTRIOSA-ARTISTA.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-ABEJITA-INDUSTRIOSA-ARTISTA.pdf"
+  },
+  "ADV-ABEJITA-INDUSTRIOSA-AYUDANTE-EN-EL-HOGAR": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-ABEJITA-INDUSTRIOSA-AYUDANTE-EN-EL-HOGAR.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-ABEJITA-INDUSTRIOSA-AYUDANTE-EN-EL-HOGAR.pdf"
+  },
+  "ADV-ABEJITA-INDUSTRIOSA-BOTONES": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-ABEJITA-INDUSTRIOSA-BOTONES.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-ABEJITA-INDUSTRIOSA-BOTONES.pdf"
+  },
+  "ADV-ABEJITA-INDUSTRIOSA-ESPECIALISTA-DE-SEGURIDAD": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-ABEJITA-INDUSTRIOSA-ESPECIALISTA-DE-SEGURIDAD.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-ABEJITA-INDUSTRIOSA-ESPECIALISTA-DE-SEGURIDAD.pdf"
+  },
+  "ADV-ABEJITA-INDUSTRIOSA-ESPECIALISTA-EN-SALUD": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-ABEJITA-INDUSTRIOSA-ESPECIALISTA-EN-SALUD.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-ABEJITA-INDUSTRIOSA-ESPECIALISTA-EN-SALUD.pdf"
+  },
+  "ADV-ABEJITA-INDUSTRIOSA-ESTUDIANTE-DE-BIBLIA-I": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-ABEJITA-INDUSTRIOSA-ESTUDIANTE-DE-BIBLIA-I.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-ABEJITA-INDUSTRIOSA-ESTUDIANTE-DE-BIBLIA-I.pdf"
+  },
+  "ADV-ABEJITA-INDUSTRIOSA-FLORES": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-ABEJITA-INDUSTRIOSA-FLORES.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-ABEJITA-INDUSTRIOSA-FLORES.pdf"
+  },
+  "ADV-ABEJITA-INDUSTRIOSA-GUIA": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-ABEJITA-INDUSTRIOSA-GUIA.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-ABEJITA-INDUSTRIOSA-GUIA.pdf"
+  },
+  "ADV-ABEJITA-INDUSTRIOSA-LECTURA-I": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-ABEJITA-INDUSTRIOSA-LECTURA-I.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-ABEJITA-INDUSTRIOSA-LECTURA-I.pdf"
+  },
+  "ADV-ABEJITA-INDUSTRIOSA-MARIPOSAS": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-ABEJITA-INDUSTRIOSA-MARIPOSAS.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-ABEJITA-INDUSTRIOSA-MARIPOSAS.pdf"
+  },
+  "ADV-ABEJITA-INDUSTRIOSA-MUSICO": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-ABEJITA-INDUSTRIOSA-MUSICO.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-ABEJITA-INDUSTRIOSA-MUSICO.pdf"
+  },
+  "ADV-ABEJITA-INDUSTRIOSA-NADADOR-I": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-ABEJITA-INDUSTRIOSA-NADADOR-I.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-ABEJITA-INDUSTRIOSA-NADADOR-I.pdf"
+  },
+  "ADV-ABEJITA-INDUSTRIOSA-OBSERVADOR": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-ABEJITA-INDUSTRIOSA-OBSERVADOR.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-ABEJITA-INDUSTRIOSA-OBSERVADOR.pdf"
+  },
+  "ADV-ABEJITA-INDUSTRIOSA-PAPAS": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-ABEJITA-INDUSTRIOSA-PAPAS.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-ABEJITA-INDUSTRIOSA-PAPAS.pdf"
+  },
+  "ADV-ABEJITA-INDUSTRIOSA-PECES": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-ABEJITA-INDUSTRIOSA-PECES.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-ABEJITA-INDUSTRIOSA-PECES.pdf"
+  },
+  "ADV-RAYITO-DE-SOL-ACAMPANTE": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-RAYITO-DE-SOL-ACAMPANTE.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-RAYITO-DE-SOL-ACAMPANTE.pdf"
+  },
+  "ADV-RAYITO-DE-SOL-ACTOS-DE-BONDAD": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-RAYITO-DE-SOL-ACTOS-DE-BONDAD.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-RAYITO-DE-SOL-ACTOS-DE-BONDAD.pdf"
+  },
+  "ADV-RAYITO-DE-SOL-AMIGO-DE-JESUS": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-RAYITO-DE-SOL-AMIGO-DE-JESUS.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-RAYITO-DE-SOL-AMIGO-DE-JESUS.pdf"
+  },
+  "ADV-RAYITO-DE-SOL-AMIGO-DE-LA-NATURALEZA": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-RAYITO-DE-SOL-AMIGO-DE-LA-NATURALEZA.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-RAYITO-DE-SOL-AMIGO-DE-LA-NATURALEZA.pdf"
+  },
+  "ADV-RAYITO-DE-SOL-ARBOLES": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-RAYITO-DE-SOL-ARBOLES.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-RAYITO-DE-SOL-ARBOLES.pdf"
+  },
+  "ADV-RAYITO-DE-SOL-ARTESANIA": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-RAYITO-DE-SOL-ARTESANIA.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-RAYITO-DE-SOL-ARTESANIA.pdf"
+  },
+  "ADV-RAYITO-DE-SOL-BALLENAS": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-RAYITO-DE-SOL-BALLENAS.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-RAYITO-DE-SOL-BALLENAS.pdf"
+  },
+  "ADV-RAYITO-DE-SOL-COCINERO": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-RAYITO-DE-SOL-COCINERO.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-RAYITO-DE-SOL-COCINERO.pdf"
+  },
+  "ADV-RAYITO-DE-SOL-COLECCIONISTA": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-RAYITO-DE-SOL-COLECCIONISTA.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-RAYITO-DE-SOL-COLECCIONISTA.pdf"
+  },
+  "ADV-RAYITO-DE-SOL-CORTESIA": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-RAYITO-DE-SOL-CORTESIA.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-RAYITO-DE-SOL-CORTESIA.pdf"
+  },
+  "ADV-RAYITO-DE-SOL-CULTURA-FISICA": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-RAYITO-DE-SOL-CULTURA-FISICA.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-RAYITO-DE-SOL-CULTURA-FISICA.pdf"
+  },
+  "ADV-RAYITO-DE-SOL-ENCOLAR": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-RAYITO-DE-SOL-ENCOLAR.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-RAYITO-DE-SOL-ENCOLAR.pdf"
+  },
+  "ADV-RAYITO-DE-SOL-ESQUIADOR": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-RAYITO-DE-SOL-ESQUIADOR.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-RAYITO-DE-SOL-ESQUIADOR.pdf"
+  },
+  "ADV-RAYITO-DE-SOL-ESTACIONES": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-RAYITO-DE-SOL-ESTACIONES.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-RAYITO-DE-SOL-ESTACIONES.pdf"
+  },
+  "ADV-RAYITO-DE-SOL-HORNEAR": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-RAYITO-DE-SOL-HORNEAR.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-RAYITO-DE-SOL-HORNEAR.pdf"
+  },
+  "ADV-RAYITO-DE-SOL-HUELLAS-DE-ANIMALES": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-RAYITO-DE-SOL-HUELLAS-DE-ANIMALES.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-RAYITO-DE-SOL-HUELLAS-DE-ANIMALES.pdf"
+  },
+  "ADV-RAYITO-DE-SOL-JARDINERO": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-RAYITO-DE-SOL-JARDINERO.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-RAYITO-DE-SOL-JARDINERO.pdf"
+  },
+  "ADV-RAYITO-DE-SOL-LECTURA-II": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-RAYITO-DE-SOL-LECTURA-II.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-RAYITO-DE-SOL-LECTURA-II.pdf"
+  },
+  "ADV-RAYITO-DE-SOL-MARIQUITAS": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-RAYITO-DE-SOL-MARIQUITAS.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-RAYITO-DE-SOL-MARIQUITAS.pdf"
+  },
+  "ADV-RAYITO-DE-SOL-MISIONEROS": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-RAYITO-DE-SOL-MISIONEROS.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-RAYITO-DE-SOL-MISIONEROS.pdf"
+  },
+  "ADV-RAYITO-DE-SOL-PAJARITOS": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-RAYITO-DE-SOL-PAJARITOS.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-RAYITO-DE-SOL-PAJARITOS.pdf"
+  },
+  "ADV-RAYITO-DE-SOL-SEGURIDAD-EN-LA-CARRETERA": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-RAYITO-DE-SOL-SEGURIDAD-EN-LA-CARRETERA.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-RAYITO-DE-SOL-SEGURIDAD-EN-LA-CARRETERA.pdf"
+  },
+  "ADV-RAYITO-DE-SOL-SEMILLAS": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-RAYITO-DE-SOL-SEMILLAS.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-RAYITO-DE-SOL-SEMILLAS.pdf"
+  },
+  "ADV-CONSTRUCTOR-AGUA-POTABLE": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-CONSTRUCTOR-AGUA-POTABLE.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-CONSTRUCTOR-AGUA-POTABLE.pdf"
+  },
+  "ADV-CONSTRUCTOR-ANALISTA-DE-COMUNICACION": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-CONSTRUCTOR-ANALISTA-DE-COMUNICACION.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-CONSTRUCTOR-ANALISTA-DE-COMUNICACION.pdf"
+  },
+  "ADV-CONSTRUCTOR-ARMAR-Y-VOLAR": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-CONSTRUCTOR-ARMAR-Y-VOLAR.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-CONSTRUCTOR-ARMAR-Y-VOLAR.pdf"
+  },
+  "ADV-CONSTRUCTOR-ARTESANIA-CASERA": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-CONSTRUCTOR-ARTESANIA-CASERA.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-CONSTRUCTOR-ARTESANIA-CASERA.pdf"
+  },
+  "ADV-CONSTRUCTOR-ASTRONOMO": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-CONSTRUCTOR-ASTRONOMO.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-CONSTRUCTOR-ASTRONOMO.pdf"
+  },
+  "ADV-CONSTRUCTOR-AYUDANTE-DE-LA-FAMILIA": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-CONSTRUCTOR-AYUDANTE-DE-LA-FAMILIA.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-CONSTRUCTOR-AYUDANTE-DE-LA-FAMILIA.pdf"
+  },
+  "ADV-CONSTRUCTOR-AYUDANTE-DE-PRIMEROS-AUXILIOS": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-CONSTRUCTOR-AYUDANTE-DE-PRIMEROS-AUXILIOS.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-CONSTRUCTOR-AYUDANTE-DE-PRIMEROS-AUXILIOS.pdf"
+  },
+  "ADV-CONSTRUCTOR-BLOQUES": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-CONSTRUCTOR-BLOQUES.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-CONSTRUCTOR-BLOQUES.pdf"
+  },
+  "ADV-CONSTRUCTOR-CICLISTA": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-CONSTRUCTOR-CICLISTA.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-CONSTRUCTOR-CICLISTA.pdf"
+  },
+  "ADV-CONSTRUCTOR-COSTURA": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-CONSTRUCTOR-COSTURA.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-CONSTRUCTOR-COSTURA.pdf"
+  },
+  "ADV-CONSTRUCTOR-LOS-DIEZ-MANDAMIENTOS": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-CONSTRUCTOR-LOS-DIEZ-MANDAMIENTOS.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-CONSTRUCTOR-LOS-DIEZ-MANDAMIENTOS.pdf"
+  },
+  "ADV-CONSTRUCTOR-DISCIPULOS": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-CONSTRUCTOR-DISCIPULOS.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-CONSTRUCTOR-DISCIPULOS.pdf"
+  },
+  "ADV-CONSTRUCTOR-DIVERSION-CON-COHETES": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-CONSTRUCTOR-DIVERSION-CON-COHETES.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-CONSTRUCTOR-DIVERSION-CON-COHETES.pdf"
+  },
+  "ADV-CONSTRUCTOR-DIVERSION-CON-TARROS": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-CONSTRUCTOR-DIVERSION-CON-TARROS.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-CONSTRUCTOR-DIVERSION-CON-TARROS.pdf"
+  },
+  "ADV-CONSTRUCTOR-EXCURSIONISMO-SOBRE-LA-NIEVE": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-CONSTRUCTOR-EXCURSIONISMO-SOBRE-LA-NIEVE.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-CONSTRUCTOR-EXCURSIONISMO-SOBRE-LA-NIEVE.pdf"
+  },
+  "ADV-CONSTRUCTOR-GIMNASTA": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-CONSTRUCTOR-GIMNASTA.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-CONSTRUCTOR-GIMNASTA.pdf"
+  },
+  "ADV-CONSTRUCTOR-IMANES-I": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-CONSTRUCTOR-IMANES-I.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-CONSTRUCTOR-IMANES-I.pdf"
+  },
+  "ADV-CONSTRUCTOR-IMANES-II": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-CONSTRUCTOR-IMANES-II.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-CONSTRUCTOR-IMANES-II.pdf"
+  },
+  "ADV-CONSTRUCTOR-LAGARTOS": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-CONSTRUCTOR-LAGARTOS.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-CONSTRUCTOR-LAGARTOS.pdf"
+  },
+  "ADV-CONSTRUCTOR-LECTURA-III": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-CONSTRUCTOR-LECTURA-III.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-CONSTRUCTOR-LECTURA-III.pdf"
+  },
+  "ADV-CONSTRUCTOR-MAYORDOMO-SABIO": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-CONSTRUCTOR-MAYORDOMO-SABIO.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-CONSTRUCTOR-MAYORDOMO-SABIO.pdf"
+  },
+  "ADV-CONSTRUCTOR-MIEL": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-CONSTRUCTOR-MIEL.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-CONSTRUCTOR-MIEL.pdf"
+  },
+  "ADV-CONSTRUCTOR-NADADOR-II": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-CONSTRUCTOR-NADADOR-II.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-CONSTRUCTOR-NADADOR-II.pdf"
+  },
+  "ADV-CONSTRUCTOR-OLIMPIADAS": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-CONSTRUCTOR-OLIMPIADAS.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-CONSTRUCTOR-OLIMPIADAS.pdf"
+  },
+  "ADV-CONSTRUCTOR-ORACION": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-CONSTRUCTOR-ORACION.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-CONSTRUCTOR-ORACION.pdf"
+  },
+  "ADV-CONSTRUCTOR-PERLAS-CUENTAS": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-CONSTRUCTOR-PERLAS-CUENTAS.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-CONSTRUCTOR-PERLAS-CUENTAS.pdf"
+  },
+  "ADV-CONSTRUCTOR-PIONEROS-ADVENTISTAS": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-CONSTRUCTOR-PIONEROS-ADVENTISTAS.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-CONSTRUCTOR-PIONEROS-ADVENTISTAS.pdf"
+  },
+  "ADV-CONSTRUCTOR-SALVAR-LOS-ANIMALES": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-CONSTRUCTOR-SALVAR-LOS-ANIMALES.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-CONSTRUCTOR-SALVAR-LOS-ANIMALES.pdf"
+  },
+  "ADV-CONSTRUCTOR-SOMBRAS-CHINESCAS": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-CONSTRUCTOR-SOMBRAS-CHINESCAS.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-CONSTRUCTOR-SOMBRAS-CHINESCAS.pdf"
+  },
+  "ADV-CONSTRUCTOR-TARJETAS-POSTALES": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-CONSTRUCTOR-TARJETAS-POSTALES.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-CONSTRUCTOR-TARJETAS-POSTALES.pdf"
+  },
+  "ADV-CONSTRUCTOR-TEMPERANCIA": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-CONSTRUCTOR-TEMPERANCIA.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-CONSTRUCTOR-TEMPERANCIA.pdf"
+  },
+  "ADV-CONSTRUCTOR-TROVADOR": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-CONSTRUCTOR-TROVADOR.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-CONSTRUCTOR-TROVADOR.pdf"
+  },
+  "ADV-MANITAS-AYUDADORAS-ABEJAS": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-MANITAS-AYUDADORAS-ABEJAS.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-MANITAS-AYUDADORAS-ABEJAS.pdf"
+  },
+  "ADV-MANITAS-AYUDADORAS-ALBUM-DE-FOTOS": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-MANITAS-AYUDADORAS-ALBUM-DE-FOTOS.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-MANITAS-AYUDADORAS-ALBUM-DE-FOTOS.pdf"
+  },
+  "ADV-MANITAS-AYUDADORAS-AMIGO-CARINOSO": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-MANITAS-AYUDADORAS-AMIGO-CARINOSO.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-MANITAS-AYUDADORAS-AMIGO-CARINOSO.pdf"
+  },
+  "ADV-MANITAS-AYUDADORAS-CANASTERO": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-MANITAS-AYUDADORAS-CANASTERO.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-MANITAS-AYUDADORAS-CANASTERO.pdf"
+  },
+  "ADV-MANITAS-AYUDADORAS-CANOTAJE": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-MANITAS-AYUDADORAS-CANOTAJE.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-MANITAS-AYUDADORAS-CANOTAJE.pdf"
+  },
+  "ADV-MANITAS-AYUDADORAS-CARPINTERO": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-MANITAS-AYUDADORAS-CARPINTERO.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-MANITAS-AYUDADORAS-CARPINTERO.pdf"
+  },
+  "ADV-MANITAS-AYUDADORAS-CLIMATOLOGIA": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-MANITAS-AYUDADORAS-CLIMATOLOGIA.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-MANITAS-AYUDADORAS-CLIMATOLOGIA.pdf"
+  },
+  "ADV-MANITAS-AYUDADORAS-DIVERSION-CON-NACIONES": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-MANITAS-AYUDADORAS-DIVERSION-CON-NACIONES.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-MANITAS-AYUDADORAS-DIVERSION-CON-NACIONES.pdf"
+  },
+  "ADV-MANITAS-AYUDADORAS-ECOLOGO": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-MANITAS-AYUDADORAS-ECOLOGO.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-MANITAS-AYUDADORAS-ECOLOGO.pdf"
+  },
+  "ADV-MANITAS-AYUDADORAS-EQUITACION": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-MANITAS-AYUDADORAS-EQUITACION.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-MANITAS-AYUDADORAS-EQUITACION.pdf"
+  },
+  "ADV-MANITAS-AYUDADORAS-ESPIRITU-SANTO": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-MANITAS-AYUDADORAS-ESPIRITU-SANTO.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-MANITAS-AYUDADORAS-ESPIRITU-SANTO.pdf"
+  },
+  "ADV-MANITAS-AYUDADORAS-ESTUDIANTE-DE-BIBLIA-II": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-MANITAS-AYUDADORAS-ESTUDIANTE-DE-BIBLIA-II.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-MANITAS-AYUDADORAS-ESTUDIANTE-DE-BIBLIA-II.pdf"
+  },
+  "ADV-MANITAS-AYUDADORAS-EXPLORADOR": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-MANITAS-AYUDADORAS-EXPLORADOR.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-MANITAS-AYUDADORAS-EXPLORADOR.pdf"
+  },
+  "ADV-MANITAS-AYUDADORAS-FRUTO-DEL-ESPIRITU": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-MANITAS-AYUDADORAS-FRUTO-DEL-ESPIRITU.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-MANITAS-AYUDADORAS-FRUTO-DEL-ESPIRITU.pdf"
+  },
+  "ADV-MANITAS-AYUDADORAS-GEOLOGO": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-MANITAS-AYUDADORAS-GEOLOGO.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-MANITAS-AYUDADORAS-GEOLOGO.pdf"
+  },
+  "ADV-MANITAS-AYUDADORAS-LECTURA-IV": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-MANITAS-AYUDADORAS-LECTURA-IV.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-MANITAS-AYUDADORAS-LECTURA-IV.pdf"
+  },
+  "ADV-MANITAS-AYUDADORAS-LENGUAJE-DE-SIGNOS": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-MANITAS-AYUDADORAS-LENGUAJE-DE-SIGNOS.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-MANITAS-AYUDADORAS-LENGUAJE-DE-SIGNOS.pdf"
+  },
+  "ADV-MANITAS-AYUDADORAS-HABITAT": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-MANITAS-AYUDADORAS-HABITAT.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-MANITAS-AYUDADORAS-HABITAT.pdf"
+  },
+  "ADV-MANITAS-AYUDADORAS-HIGIENE": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-MANITAS-AYUDADORAS-HIGIENE.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-MANITAS-AYUDADORAS-HIGIENE.pdf"
+  },
+  "ADV-MANITAS-AYUDADORAS-MI-IGLESIA": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-MANITAS-AYUDADORAS-MI-IGLESIA.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-MANITAS-AYUDADORAS-MI-IGLESIA.pdf"
+  },
+  "ADV-MANITAS-AYUDADORAS-NUDOS": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-MANITAS-AYUDADORAS-NUDOS.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-MANITAS-AYUDADORAS-NUDOS.pdf"
+  },
+  "ADV-MANITAS-AYUDADORAS-ORIGAMI": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-MANITAS-AYUDADORAS-ORIGAMI.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-MANITAS-AYUDADORAS-ORIGAMI.pdf"
+  },
+  "ADV-MANITAS-AYUDADORAS-PALADIN-DE-ORACION": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-MANITAS-AYUDADORAS-PALADIN-DE-ORACION.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-MANITAS-AYUDADORAS-PALADIN-DE-ORACION.pdf"
+  },
+  "ADV-MANITAS-AYUDADORAS-PASOS-A-JESUS": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-MANITAS-AYUDADORAS-PASOS-A-JESUS.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-MANITAS-AYUDADORAS-PASOS-A-JESUS.pdf"
+  },
+  "ADV-MANITAS-AYUDADORAS-PATINADOR": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-MANITAS-AYUDADORAS-PATINADOR.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-MANITAS-AYUDADORAS-PATINADOR.pdf"
+  },
+  "ADV-MANITAS-AYUDADORAS-PROMESA-DEL-ARCO-IRIS": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-MANITAS-AYUDADORAS-PROMESA-DEL-ARCO-IRIS.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-MANITAS-AYUDADORAS-PROMESA-DEL-ARCO-IRIS.pdf"
+  },
+  "ADV-MANITAS-AYUDADORAS-PUERTAS-DE-PERLA": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-MANITAS-AYUDADORAS-PUERTAS-DE-PERLA.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-MANITAS-AYUDADORAS-PUERTAS-DE-PERLA.pdf"
+  },
+  "ADV-MANITAS-AYUDADORAS-PUREZA": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-MANITAS-AYUDADORAS-PUREZA.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-MANITAS-AYUDADORAS-PUREZA.pdf"
+  },
+  "ADV-MANITAS-AYUDADORAS-REALEZA-BIBLICA": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-MANITAS-AYUDADORAS-REALEZA-BIBLICA.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-MANITAS-AYUDADORAS-REALEZA-BIBLICA.pdf"
+  },
+  "ADV-MANITAS-AYUDADORAS-REPORTERO": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-MANITAS-AYUDADORAS-REPORTERO.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-MANITAS-AYUDADORAS-REPORTERO.pdf"
+  },
+  "ADV-MANITAS-AYUDADORAS-SANTA-CENA": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-MANITAS-AYUDADORAS-SANTA-CENA.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-MANITAS-AYUDADORAS-SANTA-CENA.pdf"
+  },
+  "ADV-MANITAS-AYUDADORAS-SELLADO": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-MANITAS-AYUDADORAS-SELLADO.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-MANITAS-AYUDADORAS-SELLADO.pdf"
+  },
+  "ADV-MANITAS-AYUDADORAS-TABERNACULO": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-MANITAS-AYUDADORAS-TABERNACULO.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-MANITAS-AYUDADORAS-TABERNACULO.pdf"
+  },
+  "ADV-MANITAS-AYUDADORAS-TECNOLOGIA": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-MANITAS-AYUDADORAS-TECNOLOGIA.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-MANITAS-AYUDADORAS-TECNOLOGIA.pdf"
+  },
+  "ADV-MANITAS-AYUDADORAS-TIRO-CON-ARCO": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-MANITAS-AYUDADORAS-TIRO-CON-ARCO.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-MANITAS-AYUDADORAS-TIRO-CON-ARCO.pdf"
+  },
+  "ADV-MULTINIVEL-ARTE-CON-COMIDA": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-MULTINIVEL-ARTE-CON-COMIDA.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-MULTINIVEL-ARTE-CON-COMIDA.pdf"
+  },
+  "ADV-MULTINIVEL-BUEN-SAMARITANO": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-MULTINIVEL-BUEN-SAMARITANO.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-MULTINIVEL-BUEN-SAMARITANO.pdf"
+  },
+  "ADV-MULTINIVEL-CONTAR-HISTORIAS-BIBLICAS": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-MULTINIVEL-CONTAR-HISTORIAS-BIBLICAS.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-MULTINIVEL-CONTAR-HISTORIAS-BIBLICAS.pdf"
+  },
+  "ADV-MULTINIVEL-COOPERACION": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-MULTINIVEL-COOPERACION.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-MULTINIVEL-COOPERACION.pdf"
+  },
+  "ADV-MULTINIVEL-CREACION": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-MULTINIVEL-CREACION.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-MULTINIVEL-CREACION.pdf"
+  },
+  "ADV-MULTINIVEL-CREADO-POR-DIOS": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-MULTINIVEL-CREADO-POR-DIOS.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-MULTINIVEL-CREADO-POR-DIOS.pdf"
+  },
+  "ADV-MULTINIVEL-DINOSAURIOS": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-MULTINIVEL-DINOSAURIOS.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-MULTINIVEL-DINOSAURIOS.pdf"
+  },
+  "ADV-MULTINIVEL-DIVERSION-CON-FOTOS": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-MULTINIVEL-DIVERSION-CON-FOTOS.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-MULTINIVEL-DIVERSION-CON-FOTOS.pdf"
+  },
+  "ADV-MULTINIVEL-ENFERMEDADES-CONTAGIOSAS": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-MULTINIVEL-ENFERMEDADES-CONTAGIOSAS.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-MULTINIVEL-ENFERMEDADES-CONTAGIOSAS.pdf"
+  },
+  "ADV-MULTINIVEL-ESCUCHAR": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-MULTINIVEL-ESCUCHAR.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-MULTINIVEL-ESCUCHAR.pdf"
+  },
+  "ADV-MULTINIVEL-GALLINAS": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-MULTINIVEL-GALLINAS.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-MULTINIVEL-GALLINAS.pdf"
+  },
+  "ADV-MULTINIVEL-GERMENES": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-MULTINIVEL-GERMENES.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-MULTINIVEL-GERMENES.pdf"
+  },
+  "ADV-MULTINIVEL-GLOBO-AEROSTATICO": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-MULTINIVEL-GLOBO-AEROSTATICO.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-MULTINIVEL-GLOBO-AEROSTATICO.pdf"
+  },
+  "ADV-MULTINIVEL-HOMBRES-DE-LA-BIBLIA": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-MULTINIVEL-HOMBRES-DE-LA-BIBLIA.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-MULTINIVEL-HOMBRES-DE-LA-BIBLIA.pdf"
+  },
+  "ADV-MULTINIVEL-MAGDALENAS-Y-MAS": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-MULTINIVEL-MAGDALENAS-Y-MAS.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-MULTINIVEL-MAGDALENAS-Y-MAS.pdf"
+  },
+  "ADV-MULTINIVEL-MANTENERSE-A-SALVO": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-MULTINIVEL-MANTENERSE-A-SALVO.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-MULTINIVEL-MANTENERSE-A-SALVO.pdf"
+  },
+  "ADV-MULTINIVEL-MIS-SENTIDOS": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-MULTINIVEL-MIS-SENTIDOS.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-MULTINIVEL-MIS-SENTIDOS.pdf"
+  },
+  "ADV-MULTINIVEL-MUJERES-DE-LA-BIBLIA": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-MULTINIVEL-MUJERES-DE-LA-BIBLIA.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-MULTINIVEL-MUJERES-DE-LA-BIBLIA.pdf"
+  },
+  "ADV-MULTINIVEL-PAN-DE-VIDA": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-MULTINIVEL-PAN-DE-VIDA.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-MULTINIVEL-PAN-DE-VIDA.pdf"
+  },
+  "ADV-MULTINIVEL-PARABOLAS-DE-JESUS": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-MULTINIVEL-PARABOLAS-DE-JESUS.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-MULTINIVEL-PARABOLAS-DE-JESUS.pdf"
+  },
+  "ADV-MULTINIVEL-PERROS": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-MULTINIVEL-PERROS.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-MULTINIVEL-PERROS.pdf"
+  },
+  "ADV-MULTINIVEL-PINATA": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-MULTINIVEL-PINATA.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-MULTINIVEL-PINATA.pdf"
+  },
+  "ADV-MULTINIVEL-PIONEROS-ADVENTISTAS-II": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-MULTINIVEL-PIONEROS-ADVENTISTAS-II.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-MULTINIVEL-PIONEROS-ADVENTISTAS-II.pdf"
+  },
+  "ADV-MULTINIVEL-PROTECTORES-DEL-OCEANO": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-MULTINIVEL-PROTECTORES-DEL-OCEANO.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-MULTINIVEL-PROTECTORES-DEL-OCEANO.pdf"
+  },
+  "ADV-MULTINIVEL-QUEDARSE-EN-CASA": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-MULTINIVEL-QUEDARSE-EN-CASA.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-MULTINIVEL-QUEDARSE-EN-CASA.pdf"
+  },
+  "ADV-MULTINIVEL-SABADO-DE-DELICIA": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-MULTINIVEL-SABADO-DE-DELICIA.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-MULTINIVEL-SABADO-DE-DELICIA.pdf"
+  },
+  "ADV-MULTINIVEL-TALENTOS": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-MULTINIVEL-TALENTOS.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-MULTINIVEL-TALENTOS.pdf"
+  },
+  "ADV-MULTINIVEL-TRES-ANGELES": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-MULTINIVEL-TRES-ANGELES.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-MULTINIVEL-TRES-ANGELES.pdf"
+  },
+  "ADV-MULTINIVEL-UNIVERSO-DE-DIOS": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-MULTINIVEL-UNIVERSO-DE-DIOS.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-MULTINIVEL-UNIVERSO-DE-DIOS.pdf"
+  },
+  "ADV-MULTINIVEL-VELAS": {
+    "imageUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors/adventurers/images/ADV-MULTINIVEL-VELAS.png",
+    "materialUrl": "https://pub-c8aa231ae66c46ff96fc5e811994d9d2.r2.dev/honors_pdf/adventurers/materials/ADV-MULTINIVEL-VELAS.pdf"
+  }
+}

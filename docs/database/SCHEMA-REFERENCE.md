@@ -2,7 +2,7 @@
 
 **Estado**: ACTIVE
 **Sincronizado contra**: `sacdia-backend/prisma/schema.prisma`
-**Fecha de resincronizacion**: 2026-06-17 (coordinación por zonas/asignaciones)
+**Fecha de resincronizacion**: 2026-06-18 (coordinación por zonas/asignaciones + honores: aplicabilidad por club y enlaces a clases)
 
 Referencia humana concisa del schema Prisma vigente.
 
@@ -105,6 +105,15 @@ Referencia humana concisa del schema Prisma vigente.
   - `EXTERNAL` — formato completado en `document` + evidencias generales; no depende del checklist para submit.
 - `users_honors.document` representa el formato completado en modo externo. `users_honors.images` conserva evidencias generales legacy/actuales con limite runtime de 10 imagenes totales.
 - `requirement_evidence` conserva evidencias puntuales por requisito para el modo `IN_APP`.
+
+### `honors`, aplicabilidad y clases
+
+- `honors.code` es el identificador estable del catalogo para imports y sincronizaciones. Es nullable durante el rollout, pero cuenta con unicidad para los registros que lo usan.
+- `honor_club_types` modela la disponibilidad/eligibilidad activa de una especialidad por tipo de club (`honor_id`, `club_type_id`, `active`), con unicidad `@@unique([honor_id, club_type_id])`.
+- `class_honors` modela la relacion curricular entre una clase y una especialidad (`class_id`, `honor_id`, `relation_type`, `active`), con unicidad `@@unique([class_id, honor_id, relation_type])`.
+- `class_honor_relation_type_enum` permite clasificar el vínculo como `REQUIRED`, `RECOMMENDED` o `ELECTIVE`.
+- `honors.club_type_id` se conserva como compatibilidad legacy durante el rollout. Los filtros nuevos de catalogo deben usar `honor_club_types`.
+- Las especialidades de Aventureros importadas usan `honors_categories.name = 'Aventureros'` solo como categoria tecnica de compatibilidad cuando el campo de categoria es requerido; la relacion con clases vive en `class_honors`.
 
 ### `monthly_reports` y `monthly_report_manual_data`
 
@@ -378,6 +387,7 @@ Define el presupuesto de puntos por componente dentro de un eje anual:
 ### Honores y evidencias
 
 - `honors`, `honors_categories`, `master_honors`, `users_honors`
+- `honor_club_types`, `class_honors`
 - `honor_requirements`, `user_honor_requirement_progress`, `requirement_evidence`, `evidence_files`
 - `master_honor_divisions`, `master_honor_requirement_groups`, `master_honor_requirement_options`, `master_honor_requirement_option_honors`
 - `users_master_honors`, `master_honor_evaluation_history`
@@ -421,6 +431,7 @@ Define el presupuesto de puntos por componente dentro de un eje anual:
 - `evidence_type_enum`
 - `evidence_validation_enum`
 - `gender`
+- `class_honor_relation_type_enum` (`REQUIRED`, `RECOMMENDED`, `ELECTIVE`)
 - `master_honor_applicability_scope_enum`
 - `master_honor_requirement_group_type_enum`
 - `honor_completion_mode_enum` (`UNDECIDED`, `IN_APP`, `EXTERNAL`)
@@ -453,6 +464,7 @@ Define el presupuesto de puntos por componente dentro de un eje anual:
 - `20260429000002_enrollment_rankings_seeds` - (8.4-A) seed de fila global `is_default=true` en `enrollment_ranking_weights` con pesos 50/30/20 (class/investiture/camporee).
 - `20260521120000_class_duration_availability` - añade disponibilidad por año eclesiástico y duración min/max a `classes`; agrega `EXPIRED` a enums de investidura.
 - `20260604000000_master_honor_requirements` - agrega reglas configurables de maestrías (`applicability_scope`, `philosophy`, `notes`) y tablas `master_honor_divisions`, `master_honor_requirement_groups`, `master_honor_requirement_options`, `master_honor_requirement_option_honors`, `users_master_honors`, `master_honor_evaluation_history`.
+- `20260612000000_honor_applicability_and_class_links` - agrega `honors.code`, `honor_club_types`, `class_honors` y `class_honor_relation_type_enum`; backfill de aplicabilidad desde `honors.club_type_id` y códigos legacy para honores existentes.
 - `20260429000003_enrollment_rankings_default_award_seeds` - (8.4-A) seed de categorías de premio con `scope='member'` para clasificación de miembros.
 
 ## Nota operativa

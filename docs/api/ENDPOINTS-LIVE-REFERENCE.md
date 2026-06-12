@@ -501,11 +501,18 @@
 
 | Method | Path | Auth | Roles | Description | Source |
 |---|---|---|---|---|---|
-| GET | `/api/v1/honors` | Public | - | Listar honores | `src/honors/honors.controller.ts` |
+| GET | `/api/v1/honors` | Public | - | Listar honores; `clubTypeId` filtra por aplicabilidad activa en `honor_club_types` | `src/honors/honors.controller.ts` |
 | GET | `/api/v1/honors/:honorId` | Public | - | Obtener honor por ID | `src/honors/honors.controller.ts` |
 | GET | `/api/v1/honors/categories` | Public | - | Listar categorías de honores | `src/honors/honors.controller.ts` |
-| GET | `/api/v1/honors/grouped-by-category` | Public | - | Listar honores agrupados por categoría | `src/honors/honors.controller.ts` |
+| GET | `/api/v1/honors/grouped-by-category` | Public | - | Listar honores agrupados por categoría; `clubTypeId` filtra por aplicabilidad activa en `honor_club_types` | `src/honors/honors.controller.ts` |
 | GET | `/api/v1/honors/:honorId/requirements` | Public | - | Listar requisitos de un honor | `src/honors/honors.controller.ts` |
+
+Notas contractuales del catalogo publico:
+
+- `honors` sigue siendo el catalogo unico de especialidades para Aventureros, Conquistadores y Guias Mayores.
+- `clubTypeId` en `GET /api/v1/honors` y `GET /api/v1/honors/grouped-by-category` se resuelve por filas activas de `honor_club_types`, no por `honors.club_type_id`.
+- Las respuestas de catalogo pueden incluir aplicabilidad (`honor_club_types` o `applicable_club_types`) junto al campo legacy `club_type_id`.
+- `class_honors` es la relacion curricular para especialidades asociadas a clases de Aventureros; no reemplaza categorias tematicas.
 
 ## honor-requirements (user progress)
 
