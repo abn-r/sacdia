@@ -435,7 +435,7 @@
 | GET | `/api/v1/clubs/:clubId/finances/summary` | JWT | - | Resumen financiero del club | `src/finances/finances.controller.ts` |
 | GET | `/api/v1/clubs/:clubId/sections` | JWT | - | Listar secciones del club | `src/clubs/clubs.controller.ts` |
 | GET | `/api/v1/clubs/:clubId/sections/:sectionId` | JWT | - | Obtener sección por ID | `src/clubs/clubs.controller.ts` |
-| POST | `/api/v1/clubs/:clubId/sections` | JWT | director, subdirector | Crear sección de club (requiere director o subdirector) | `src/clubs/clubs.controller.ts` |
+| POST | `/api/v1/clubs/:clubId/sections` | JWT | director, subdirector | Crear sección de club (requiere director o subdirector). Body acepta `club_type_id`, `name?`, `souls_target?`, `fee?`, `meeting_day?`, `meeting_time?`. | `src/clubs/clubs.controller.ts` |
 | PATCH | `/api/v1/clubs/:clubId/sections/:sectionId` | JWT | director, subdirector, secretary | Actualizar sección (requiere director, subdirector o secretario) | `src/clubs/clubs.controller.ts` |
 | GET | `/api/v1/clubs/:clubId/sections/:sectionId/members` | JWT | - | Listar miembros de la sección | `src/clubs/clubs.controller.ts` |
 | POST | `/api/v1/clubs/:clubId/sections/:sectionId/roles` | JWT | director, subdirector, secretary | Asignar rol a un miembro (requiere director, subdirector o secretario) | `src/clubs/clubs.controller.ts` |
@@ -510,6 +510,7 @@ Notas contractuales de honores de usuario:
 
 - Nuevas inscripciones y reactivaciones exponen `completion_mode = "UNDECIDED"`.
 - La seleccion de modo se envia como `completionMode` en `PATCH /api/v1/users/:userId/honors/:honorId`; las respuestas siguen exponiendo `completion_mode`.
+- `GET /api/v1/users/:userId/honors` incluye `honors.club_type_id` para que la app pueda mostrar avance segun la seccion activa. Las altas (`POST /users/:userId/honors`, `/bulk` y `/users/:userId/honors/:honorId`) validan contra la seccion activa del usuario: Aventureros solo acepta `club_type_id=1`; Conquistadores/Guias Mayores aceptan `club_type_id=2|3`.
 - `PENDING_REVIEW` y `APPROVED` bloquean cambios libres de modo y archivos.
 - En modo `IN_APP`, el progreso batch acepta y persiste `textResponse` en `user_honor_requirement_progress.text_response`.
 
