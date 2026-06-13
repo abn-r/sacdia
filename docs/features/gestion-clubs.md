@@ -26,7 +26,7 @@ Las unidades (`units`) son subdivisiones informales dentro de una seccion (tipic
   - `DELETE /api/v1/clubs/:clubId` — Desactivar club (roles: director)
   - `GET /api/v1/clubs/:clubId/sections` — Listar secciones del club
   - `GET /api/v1/clubs/:clubId/sections/:sectionId` — Obtener seccion por ID
-  - `POST /api/v1/clubs/:clubId/sections` — Crear seccion (roles: director, subdirector)
+  - `POST /api/v1/clubs/:clubId/sections` — Crear seccion con nombre opcional y datos operativos (roles: director, subdirector)
   - `PATCH /api/v1/clubs/:clubId/sections/:sectionId` — Actualizar seccion (roles: director, subdirector, secretary)
   - `DELETE /api/v1/clubs/:clubId/sections/:sectionId` — Eliminar seccion (roles: director)
   - `GET /api/v1/clubs/:clubId/sections/:sectionId/members` — Listar miembros de la seccion
@@ -38,7 +38,7 @@ Las unidades (`units`) son subdivisiones informales dentro de una seccion (tipic
 - **3 paginas funcionales**: clubs list, clubs/new, clubs/[id]
 - CRUD completo de clubs
 - Creacion de club con seleccion encadenada Campo Local > Distrito > Iglesia y secciones iniciales por tipo de club
-- Gestion de secciones (crear, actualizar, eliminar)
+- Gestion de secciones desde el detalle del club (crear, actualizar, activar/desactivar)
 - Gestion de unidades por club/seccion, enviando `club_section_id` al backend
 - Listado de miembros por seccion
 - Asignacion y revocacion de roles de club
