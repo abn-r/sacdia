@@ -42,6 +42,7 @@ La gestion de sesiones permite listar sesiones activas y cerrar sesiones individ
 - **Dashboard birthday celebration**: el layout protegido lee `birthday` desde `GET /auth/me`; si coincide con el dia calendario local del usuario, muestra un modal celebratorio solo durante ese dia. La opcion "no volver a mostrar hoy" se persiste en `localStorage` por `user_id + anio + MM-DD`.
 - **Gestion de usuarios**: `GET /admin/users`, `GET /admin/users/:userId`, `PATCH /admin/users/:userId`, `PATCH /admin/users/:userId/approval`
 - **Revision administrativa**: `PATCH /admin/users/:userId/approval` existe como superficie de revision/compatibilidad, pero no debe entenderse como aprobacion de membresia a club/seccion ni como gate global masivo.
+- **Cuentas eliminadas/anónimas**: el panel usa `is_deleted` para mostrar una etiqueta traducida (`Cuenta eliminada`, `Deleted account`, etc.) sin usar el email técnico `deleted-{user_id}@sacdia.deleted` ni guardar textos de UI en campos de identidad.
 - No implementa: registro, MFA, OAuth, gestion de sesiones
 
 ### App Movil
@@ -49,6 +50,7 @@ La gestion de sesiones permite listar sesiones activas y cerrar sesiones individ
 - Consume 9+ endpoints incluyendo login, register, logout, password reset, completion-status, context switch
 - **Dashboard birthday celebration**: `DashboardView` lee `UserEntity.birthday` desde `/auth/me`; si coincide con el dia calendario local, muestra un modal celebratorio y un banner festivo arriba de `ClubInfoCard`. El banner reabre el modal hasta que el usuario pulse "no volver a mostrar hoy"; esa decision se persiste en `SharedPreferences` por `user_id + anio + MM-DD`.
 - **Profile update payload**: la pantalla de edicion de perfil no envia `phone` ni `address` cuando estan vacios. `PATCH /users/:userId` valida `phone` si la propiedad existe; por eso `phone: ""` debe omitirse para representar "sin telefono".
+- **Eliminar cuenta**: la app pide confirmación localizada, llama `DELETE /auth/me`, limpia sesión/caché local y describe el efecto real como desactivación + anonimización de datos personales; no promete borrar historial/progreso inmediatamente.
 - OAuth Google/Apple declarado pero lanza excepcion "no disponible aun"
 
 ### Base de datos
@@ -95,6 +97,7 @@ La gestion de sesiones permite listar sesiones activas y cerrar sesiones individ
 - **Membresia como gate operativo**: un usuario autenticado puede existir sin membresia activa, pero las funcionalidades de club/seccion requieren una asignacion activa
 - **Logout best-effort**: El logout acepta bearer opcional y no falla si el token ya expiro
 - **Token blacklist**: `TokenBlacklistService` invalida tokens revocados usando Redis/Upstash como cache
+- **Eliminacion de cuenta por autoservicio**: `DELETE /auth/me` revoca sesiones, desactiva FCM, marca `users.active=false`, anonimiza PII en `users`, borra credenciales/vínculos en `accounts` y registra `account_deletion_log`. Los clientes deben derivar el texto visible desde `is_deleted`/`member_is_deleted`; no se guardan etiquetas como `Cuenta eliminada` en columnas de identidad.
 
 ## Gaps y pendientes
 

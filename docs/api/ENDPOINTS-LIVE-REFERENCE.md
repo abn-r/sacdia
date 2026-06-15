@@ -25,7 +25,7 @@
 | POST | `/api/v1/auth/refresh` | Public | - | Refrescar sesión con refresh token | `src/auth/auth.controller.ts` |
 | POST | `/api/v1/auth/logout` | Public (Bearer opcional) | - | Cerrar sesión (best effort) | `src/auth/auth.controller.ts` |
 | GET | `/api/v1/auth/me` | JWT | - | Obtener perfil del usuario autenticado | `src/auth/auth.controller.ts` |
-| DELETE | `/api/v1/auth/me` | JWT | - | Eliminar cuenta (Apple 5.1.1v). Body: `{ password }`. Rate limit 1/h. Soft-delete + PII anonimizado + sesiones revocadas + FCM desactivado | `src/auth/auth.controller.ts` |
+| DELETE | `/api/v1/auth/me` | JWT | - | Eliminar cuenta (Apple 5.1.1v). Body: `{ password }`. Rate limit 1/h. Soft-delete + PII anonimizado + sesiones revocadas + FCM desactivado. No borra historial/progreso de forma inmediata; clientes deben mostrar una etiqueta localizada para cuentas anonimizadas. | `src/auth/auth.controller.ts` |
 | PATCH | `/api/v1/auth/me/context` | JWT | - | Cambiar contexto activo de club/instancia | `src/auth/auth.controller.ts` |
 | POST | `/api/v1/auth/update-password` | JWT | - | Actualizar la contraseña del usuario autenticado. Body: `{ currentPassword, password }`. Requiere JWT `aal2` si el usuario tiene MFA activo. Tras éxito revoca sesiones BA y blacklistea JWTs del usuario | `src/auth/auth.controller.ts` |
 | POST | `/api/v1/auth/verify-email/send` | JWT | - | Enviar email de verificación al usuario autenticado | `src/auth/auth.controller.ts` |
@@ -320,8 +320,8 @@
 | PATCH | `/api/v1/admin/master-honors/:id` | JWT | `honors:update` | Actualizar maestría y reglas análogas a creación. | `src/admin/admin-phase-e-catalogs.controller.ts` |
 | DELETE | `/api/v1/admin/master-honors/:id` | JWT | `honors:delete` | Soft-delete de maestría (`active=false`). | `src/admin/admin-phase-e-catalogs.controller.ts` |
 | POST | `/api/v1/admin/master-honors/:id/recalculate` | JWT | `honors:update` | Encola recálculo de maestría para usuarios afectados y responde `{ status: 'success', data: { queued: boolean } }`; `queued=false` cuando Redis/cola no está disponible en el runtime. | `src/admin/admin-phase-e-catalogs.controller.ts` |
-| GET | `/api/v1/admin/users` | JWT | `users:read` | Listar usuarios administrativos con alcance por rol (ALL/UNION/LOCAL_FIELD) | `src/admin/admin-users.controller.ts` |
-| GET | `/api/v1/admin/users/:userId` | JWT | `users:read_detail` | Obtener detalle de usuario validando alcance por rol del actor | `src/admin/admin-users.controller.ts` |
+| GET | `/api/v1/admin/users` | JWT | `users:read` | Listar usuarios administrativos con alcance por rol (ALL/UNION/LOCAL_FIELD). Incluye `is_deleted` para cuentas anonimizadas por eliminación. | `src/admin/admin-users.controller.ts` |
+| GET | `/api/v1/admin/users/:userId` | JWT | `users:read_detail` | Obtener detalle de usuario validando alcance por rol del actor. Incluye `is_deleted` para que el cliente muestre una etiqueta localizada sin usar el email anonimizado como nombre. | `src/admin/admin-users.controller.ts` |
 | PATCH | `/api/v1/admin/users/:userId` | JWT | `users:update` | Actualizar campos administrativos del usuario | `src/admin/admin-users.controller.ts` |
 | PATCH | `/api/v1/admin/users/:userId/approval` | JWT | `users:update` | Aprobar o rechazar un usuario administrativo | `src/admin/admin-users.controller.ts` |
 
@@ -344,6 +344,13 @@
   - si no hay enrollment activo del año -> `current_operational_enrollment = null`
   - si hay más de un enrollment candidato del año -> `current_operational_enrollment = null` (sin inferencia)
 - Consumers actualizados deben leer presente desde `current_operational_enrollment` e histórico desde `trajectory_classes`; no reconstruir presente con `trajectory_classes/classes`
+
+### Representación de cuentas eliminadas/anónimas
+
+- `GET /api/v1/admin/users` y `GET /api/v1/admin/users/:userId` exponen `is_deleted: true` cuando el usuario fue eliminado por autoservicio y su email fue anonimizado con el patrón `deleted-{user_id}@sacdia.deleted`.
+- El backend mantiene `name`, `paternal_last_name`, `maternal_last_name` y demás PII en `null` para conservar la semántica de anonimización.
+- App y panel deben traducir `is_deleted` como etiqueta de presentación, por ejemplo `Cuenta eliminada` / `Deleted account`, sin persistir esa etiqueta en columnas de identidad.
+- `GET /api/v1/evidence-review/pending` y `GET /api/v1/evidence-review/:type/:id` incluyen `member_is_deleted` para el mismo fallback localizado.
 
 ### Pruning administrativo de bloques sensibles
 
