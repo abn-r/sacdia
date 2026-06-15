@@ -243,7 +243,7 @@ Servicio: `sacdia-app/lib/core/notifications/push_notification_service.dart`.
 - handling tipado para `member_of_month`, `achievement_unlocked` y `master_honor_changed`;
 - en foreground, `achievement_unlocked` muestra un banner flotante dedicado, refresca el estado local de logros y usa payload `{ type, achievement_id, achievement_name, tier, points }` cuando está disponible;
 - en foreground, `master_honor_changed` refresca conteo/bandeja, invalida maestrías de usuario y muestra un modal global agrupado con los nombres recibidos en `master_honor_names`;
-- inbox con paginación vía `notificationsInboxProvider` (Riverpod).
+- inbox con paginación vía `notificationsInboxProvider` (Riverpod), supresión de errores por requests cancelados durante recarga/navegación, modal de detalle al tocar una notificación y badge de no leídas en el dashboard móvil.
 
 ### 11.2 Admin web (Next.js)
 Página: `sacdia-admin/src/app/(dashboard)/dashboard/notifications/page.tsx`.

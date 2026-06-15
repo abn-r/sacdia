@@ -49,6 +49,8 @@ El envio soporta tres niveles: directo a un usuario, broadcast global y envio a 
 
 ### App Movil
 - **Tiene bandeja funcional**: `NotificationsInboxView` con paginacion, pull-to-refresh y carga incremental
+- La bandeja ignora requests de historial cancelados por recargas/navegacion para no mostrar errores falsos, y tocar una notificacion abre un modal de detalle con accion `Aceptar` mientras conserva el marcado como leida.
+- El dashboard movil muestra badge con conteo de notificaciones no leidas sobre la campana.
 - Firebase Messaging integrado para recepcion de push notifications
 - Registro automatico de token con `POST /api/v1/users/me/fcm-tokens` y desregistro con `DELETE /api/v1/users/me/fcm-tokens/:tokenId`; fallback legacy por valor en `DELETE /api/v1/fcm-tokens/by-token`
 - Navegacion desde taps de notificaciones y snackbar en foreground via `PushNotificationService`
