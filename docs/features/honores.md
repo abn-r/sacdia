@@ -44,6 +44,8 @@ Nuevas inscripciones y reactivaciones arrancan en `UNDECIDED`. El modo puede sel
 
 Los estados `PENDING_REVIEW` y `APPROVED` bloquean cambios libres de modo y de archivos. Un honor rechazado puede corregirse y reenviarse si hay cambios posteriores al rechazo.
 
+Los honores aprobados legacy anteriores a `completion_mode` no deben seguir en `UNDECIDED` si tienen artefactos externos (`document`, `certificate`, `images` o `evidence_files`). Esos registros se backfillean como `EXTERNAL` para no mostrar un estado imposible en el historico.
+
 ## Maestrías de especialidades
 
 Las maestrías (`master_honors`) son parches/logros de banda derivados de especialidades aprobadas. No son un segundo flujo de revisión: se otorgan automáticamente porque solo cuentan especialidades previamente validadas.
@@ -119,6 +121,8 @@ La tarjeta virtual muestra maestrías vigentes y **No vigente** en la banda. El 
 ### Notificaciones y modal global
 
 El backend emite notificaciones de cambio de maestría con `type = master_honor_changed`. La app agrupa varias maestrías en un solo modal global para evitar apilar diálogos.
+
+Para validación de especialidades, el contrato técnico conserva `entity_type = "honor"` y fuentes `validation:honor_*`, pero el copy visible al usuario debe decir **especialidad**: "Nueva especialidad enviada a revisión", "Especialidad aprobada" y "Especialidad rechazada".
 
 Casos que notifican:
 
@@ -248,15 +252,21 @@ La app Flutter consume:
 - carga de evidencia;
 - `POST /validation/submit` para enviar a revision.
 
+El catalogo movil se filtra por la seccion activa y no debe exponer un selector manual "Todas / Aventureros / Conquistadores-Guías" cuando ya existe contexto de seccion. La regla vigente es asimetrica: Aventureros ve `club_type_id = 1`; Conquistadores ve solo `club_type_id = 2`; Guias Mayores ve `club_type_id = 2` y `club_type_id = 3`, porque puede reutilizar especialidades de Conquistadores y ademas tener especialidades exclusivas de Guias Mayores. Si no existe contexto de seccion activa, la app puede mostrar el catalogo cargado completo como fallback defensivo.
+
 La app debe tratar `validation_status` como estado canonico de revision y `completion_mode` como estado canonico del camino de trabajo:
 
 - `UNDECIDED`: mostrar selector de modo y no mezclar CTAs de checklist/formato.
 - `IN_APP`: mostrar requisitos, respuestas y evidencia por requisito; no pedir formato completado como accion primaria.
 - `EXTERNAL`: mostrar descarga de formato/material, carga de `document`, evidencias generales y submit; no exigir checklist como accion primaria.
 
+El perfil funciona como superficie de continuidad del trabajo del miembro. Al tocar una especialidad ya inscrita desde Perfil, la app debe abrir directamente el flujo activo segun `completion_mode`: requisitos para `IN_APP`, evidencias/formato para `EXTERNAL`, y detalle con selector solo si sigue en `UNDECIDED`. Las especialidades `APPROVED` abren el detalle historico para mostrar validacion y evidencia registrada.
+
 Despues de una seleccion exitosa, detalle, requisitos y evidencias deben resolver el mismo `completion_mode` efectivo. Si una respuesta o refetch llega desfasado temporalmente, la app puede conservar el modo confirmado por el usuario en el estado de sesion hasta que backend devuelva el mismo estado canonico.
 
 Puede deshabilitar botones por UX, pero no debe asumir que un honor es enviable sin respuesta backend.
+
+Cuando `validation_status = APPROVED`, la pantalla de detalle debe dejar de mostrar el bloqueo de cambio de modo como mensaje principal. En su lugar debe mostrar un historico de lectura: modo registrado, fechas de inscripcion/envio/validacion, nombre y rol del revisor (`validated_by_name`, `validated_by_role_name`, `validated_by_role_label`), formato/evidencias generales para flujo externo y respuestas/evidencias por requisito para flujo dentro de la app. La UI no debe mostrar UUIDs de validador como texto principal de usuario.
 
 ## Panel administrativo
 
