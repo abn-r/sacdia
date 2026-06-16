@@ -189,7 +189,8 @@
 - `GET` acepta `?enrollmentId=` y `PATCH` acepta `enrollment_id` como override aditivo para seleccionar una inscripción anual específica.
 - Si no existe inscripción anual resoluble, la API responde `404`.
 - Si la resolución class-scoped es ambigua y no se envía override, la API responde `409` con código `ENROLLMENT_RESOLUTION_AMBIGUOUS`.
-- El payload exitoso de lectura expone `enrollment_id` y `ecclesiastical_year_id` para hacer visible el owner anual resuelto.
+- El payload exitoso de lectura expone `enrollment_id`, `ecclesiastical_year_id`, `investiture_status`, módulos, secciones, `evidence_files`, `submitted_by_name` y `validated_by_name` para hacer visible el owner anual resuelto, el estado de investidura y el detalle revisable de evidencias.
+- Una sección cuenta como completada si `status = VALIDATED` o si conserva el criterio legacy `score >= 70`.
 
 ### Master honors runtime notes (2026-06-04)
 
@@ -517,7 +518,7 @@ Notas contractuales de honores de usuario:
 
 - Nuevas inscripciones y reactivaciones exponen `completion_mode = "UNDECIDED"`.
 - La seleccion de modo se envia como `completionMode` en `PATCH /api/v1/users/:userId/honors/:honorId`; las respuestas siguen exponiendo `completion_mode`.
-- `GET /api/v1/users/:userId/honors` incluye `honors.club_type_id` para que la app pueda mostrar avance segun la seccion activa. Las altas (`POST /users/:userId/honors`, `/bulk` y `/users/:userId/honors/:honorId`) validan contra la seccion activa del usuario: Aventureros solo acepta `club_type_id=1`; Conquistadores/Guias Mayores aceptan `club_type_id=2|3`.
+- `GET /api/v1/users/:userId/honors` incluye `honors.club_type_id` para que la app pueda mostrar avance segun la seccion activa. Para honores validados tambien expone `validated_by_name`, `validated_by_role_name` y `validated_by_role_label` cuando existe validador asociado. Las altas (`POST /users/:userId/honors`, `/bulk` y `/users/:userId/honors/:honorId`) validan contra la seccion activa del usuario: Aventureros solo acepta `club_type_id=1`; Conquistadores/Guias Mayores aceptan `club_type_id=2|3`.
 - `PENDING_REVIEW` y `APPROVED` bloquean cambios libres de modo y archivos.
 - En modo `IN_APP`, el progreso batch acepta y persiste `textResponse` en `user_honor_requirement_progress.text_response`.
 
@@ -597,6 +598,8 @@ Notas contractuales de honores de usuario:
 - `POST /api/v1/admin/classes/enrollments/expire-overdue` soporta `dry_run` para previsualizar antes de aplicar vencimientos.
 - `POST /api/v1/investiture/enrollments/bulk-approve` NO soporta `club-approve`; esa transición sigue siendo individual.
 - `GET|POST|PATCH|DELETE /api/v1/admin/investiture/config` son endpoints activos del mismo controller y sostienen la pantalla de configuración del admin.
+- `GET /api/v1/investiture/pending` devuelve filas enriquecidas para operación humana: alias `user`, `class`, `club`, `section`, `ecclesiastical_year`, `submitted_by` con `role_name/role_label`, y `submitted_comment`, además de los campos legacy/Prisma originales. Si `club_sections.name` está vacío, `section.name` cae al nombre del `club_type` asociado para evitar mostrar una sección sin nombre.
+- El detalle admin de una investidura reutiliza `GET /api/v1/users/:userId/classes/:classId/progress?enrollmentId=` para mostrar módulos, secciones, evidencias enviadas y quién validó cada sección.
 
 ## resources
 

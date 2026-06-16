@@ -10,7 +10,7 @@ El proceso tiene multiples etapas definidas por el canon: (1) el miembro complet
 
 La Decision 6 del canon establece que registrar y validar son actos distintos: la captura operativa (registrar progreso dia a dia) y la validacion institucional (aprobar y reconocer formalmente) tienen actores, momentos y reglas diferentes. Al entrar en validacion, el registro deja de ser editable — esto es un efecto de dominio critico que protege la integridad del proceso.
 
-El schema de base de datos y el runtime ya sostienen investiduras como superficie activa. El backend expone flujo multietapa, compatibilidad legacy, operaciones bulk y CRUD de configuracion; el admin tiene pantallas ruteadas para pendientes, pipeline y configuracion; la app tiene pantallas ruteadas para pendientes e historial, pero la vista de envio a validacion existe en codigo y hoy NO esta ruteada.
+El schema de base de datos y el runtime ya sostienen investiduras como superficie activa. El backend expone flujo multietapa, compatibilidad legacy, operaciones bulk y CRUD de configuracion; el admin tiene pantallas ruteadas para pendientes, pipeline y configuracion; la app tiene pantallas ruteadas para pendientes e historial, y expone el envio a validacion desde el detalle de clase cuando el enrollment esta 100% completado.
 
 ## Que existe (verificado contra codigo)
 
@@ -46,16 +46,21 @@ El schema de base de datos y el runtime ya sostienen investiduras como superfici
 
 ### Admin (sacdia-admin)
 - **Implementado y ruteado** — paginas y navegacion activas en:
-  - `/dashboard/investiture` — pendientes con acciones legacy de validar/marcar investido
+  - `/dashboard/investiture` — pendientes con datos operables por defecto: miembro, clase, ano eclesiastico, club, seccion, remitente, cargo/rol del remitente, fecha de envio, estado y detalle con historial, modulos/secciones completadas, evidencias enviadas y validador por seccion
+    - Si la seccion del club no tiene nombre propio (`club_sections.name` nulo), el backend expone como nombre visible el tipo de club asociado para que el operador no vea “seccion no disponible” cuando la asignacion existe.
   - `/dashboard/investiture/pipeline` — pipeline multietapa (`club-approve`, `coordinator-approve`, `field-approve`, `reject`, `invest`)
   - `/dashboard/investiture/config` — CRUD de `investiture_config`
   - Entry en sidebar bajo "Investiduras"
 
 ### App (sacdia-app)
-- **Implementado parcialmente y con ruteo mixto**:
+- **Implementado y expuesto en flujos principales**:
   - `InvestiturePendingListView` esta ruteada en GoRouter (`/investiture/pending`) y permite aprobar/rechazar/marcar investido segun rol
   - `InvestitureHistoryView` esta ruteada en GoRouter (`/investiture/enrollment/:enrollmentId/history`)
-  - `InvestitureSubmitView` existe en codigo y ejecuta `submit-for-validation`, pero hoy NO tiene ruta registrada en GoRouter
+  - `ClassDetailWithProgressView` muestra una tarjeta de investidura cuando la clase tiene 100% de requisitos validados:
+    - si el usuario activo es `director` o `counselor`, permite enviar el enrollment a validacion
+    - si el usuario no tiene ese rol, muestra la indicacion de que un consejero/director debe enviarlo
+    - si ya fue enviado/aprobado/investido, muestra el estado y acceso al historial
+  - `InvestitureSubmitView` existe en codigo para un listado de miembros, pero no tiene entrada de navegacion dedicada
   - Data layer, providers y widgets de estado existen para submit, pending e history
 
 ### Base de datos (schema y runtime alineados)
@@ -116,7 +121,7 @@ El schema de base de datos y el runtime ya sostienen investiduras como superfici
 
 ## Gaps y pendientes
 
-- `InvestitureSubmitView` existe en app pero no esta expuesta por una ruta registrada
+- `InvestitureSubmitView` de listado existe en app pero no esta expuesta por una ruta dedicada; el envio visible principal se realiza desde el detalle de clase completada
 - No hay notificaciones asociadas a cambios de estado de validacion — Iteracion 2
 - No hay reportes de investiduras por periodo/campo local/club — Iteracion 2
 - No hay cron automatico de vencimiento; el proceso inicial es admin/manual
@@ -125,6 +130,6 @@ El schema de base de datos y el runtime ya sostienen investiduras como superfici
 
 - ✅ Backend: modulo activo con pipeline multietapa, compat legacy, bulk ops y CRUD de configuracion
 - ✅ Admin: pendientes, pipeline y configuracion accesibles desde rutas del dashboard y sidebar
-- ✅ App: pending/history ruteados; submit view implementada pero no ruteada
+- ✅ App: pending/history ruteados; envio visible desde detalle de clase completada para `director`/`counselor`
 - ✅ Bulk operations: hasta 200 enrollments por operacion; `club-approve` sigue siendo individual
 - ✅ Vencimiento manual de enrollments atrasados por duracion maxima con modo `dry_run` y auditoria `EXPIRED`
