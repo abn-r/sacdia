@@ -190,7 +190,7 @@
 - Si no existe inscripción anual resoluble, la API responde `404`.
 - Si la resolución class-scoped es ambigua y no se envía override, la API responde `409` con código `ENROLLMENT_RESOLUTION_AMBIGUOUS`.
 - El payload exitoso de lectura expone `enrollment_id`, `ecclesiastical_year_id`, `investiture_status`, módulos, secciones, `evidence_files`, `submitted_by_name` y `validated_by_name` para hacer visible el owner anual resuelto, el estado de investidura y el detalle revisable de evidencias.
-- Una sección cuenta como completada si `status = VALIDATED` o si conserva el criterio legacy `score >= 70`.
+- Una sección cuenta como completada si `status = VALIDATED` o si conserva el criterio legacy `score >= 70`; esta regla aplica tanto al detalle `GET /api/v1/users/:userId/classes/:classId/progress` como al resumen `overall_progress` de `GET /api/v1/users/:userId/classes`.
 
 ### Master honors runtime notes (2026-06-04)
 
