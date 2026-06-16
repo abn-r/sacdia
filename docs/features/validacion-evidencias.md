@@ -28,6 +28,10 @@ Las evidencias pueden ser archivos (fotos, PDFs, documentos) que demuestran la r
 - **Vista unificada**: Evidencias de clases y honores en una sola interfaz
 - **Filtros por tipo**: Selector para filtrar por tipo de evidencia
 - **File gallery preview**: Visualizacion de archivos con preview de imagenes y PDFs
+- **URLs firmadas**: El detalle de revision devuelve URLs firmadas de corta duracion para archivos privados de clases y honores; el admin no debe consumir rutas R2 privadas crudas.
+- **Visor PDF local**: Los PDFs se abren mediante `/api/evidence-review/pdf`, una ruta del admin que valida la sesion, recupera el detalle en backend, selecciona el archivo por `fileId` y transmite el PDF como `inline` para evitar iframes rotos con URLs privadas/cross-origin.
+- **Zoom de imagenes**: El visor de imagenes agranda el tamano real del elemento, no usa `transform: scale`, para que el contenedor scrollable permita recorrer toda la imagen ampliada.
+- **Modo de trabajo de honores**: En evidencias de honores, el panel muestra si la especialidad fue trabajada dentro de la app (`IN_APP`) o fuera de la app (`EXTERNAL`) antes de revisar archivos/requisitos.
 - **Bulk operations**: Seleccion multiple para aprobar/rechazar en lote (mismo tipo)
 - **Audit trail**: Timeline de acciones de validacion por evidencia
 
@@ -53,6 +57,8 @@ Las evidencias pueden ser archivos (fotos, PDFs, documentos) que demuestran la r
 - **Bulk por tipo**: Las operaciones masivas solo permiten evidencias del mismo tipo para evitar inconsistencias de flujo
 - **File gallery**: Preview inline evita la necesidad de descargar archivos para validar
 - **Nombre visible normalizado**: Las evidencias subidas por usuarios se muestran como `Evidencia 01`, `Evidencia 02`, etc. El contexto (usuario, fecha, sección/requisito) queda como metadata; las claves técnicas de storage siguen siendo únicas y no se usan como nombre visible.
+- **No exponer storage privado**: La cola de revision debe resolver archivos mediante URLs firmadas generadas por backend. Mostrar `file_url` crudo de R2 en `<img>`, `<iframe>` o links rompe previews y expone errores XML de autorización.
+- **Proxy PDF autenticado**: El iframe del admin no carga directamente URLs R2; usa una ruta server-side del admin para transmitir el PDF con `Content-Disposition: inline` luego de validar token y pertenencia del archivo al detalle solicitado.
 
 ## Gaps y pendientes
 
