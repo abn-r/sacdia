@@ -54,6 +54,7 @@ Las evidencias pueden ser archivos (fotos, PDFs, documentos) que demuestran la r
 
 - **Modulo independiente**: EvidenceReviewModule separado de Annual Folders y HonorsModule para mantener responsabilidad unica
 - **Vista unificada limitada**: Un solo punto de entrada para clases y honores evita mezclar la cola generica con el scoring anual de carpetas
+- **Carpetas anuales con cola propia**: La Carpeta Anual de Evidencias no se busca por UUID en el panel. `/dashboard/annual-folders/evaluate` consume `GET /annual-folders/evaluation/queue` para listar carpetas por club, sección, campo, unión, plantilla y año.
 - **Bulk por tipo**: Las operaciones masivas solo permiten evidencias del mismo tipo para evitar inconsistencias de flujo
 - **File gallery**: Preview inline evita la necesidad de descargar archivos para validar
 - **Nombre visible normalizado**: Las evidencias subidas por usuarios se muestran como `Evidencia 01`, `Evidencia 02`, etc. El contexto (usuario, fecha, sección/requisito) queda como metadata; las claves técnicas de storage siguen siendo únicas y no se usan como nombre visible.

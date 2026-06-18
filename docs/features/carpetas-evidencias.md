@@ -37,9 +37,10 @@ Las carpetas son diferentes de las clases progresivas: mientras las clases tiene
 - **Nota**: Este controlador usa rutas diferentes a FoldersController y no aparece en ENDPOINTS-LIVE-REFERENCE.md
 
 ### Admin (sacdia-admin)
-- 1 pagina read-only: listado de carpetas via ModuleListPage
-- Consume: `GET /folders/folders`
-- Sin gestion de progreso, inscripciones ni administracion de templates
+- Carpetas legacy: listado de templates via ModuleListPage consumiendo `GET /folders/folders`.
+- Carpeta Anual de Evidencias: flujo dedicado en `/dashboard/annual-folders`.
+- Evaluacion: `/dashboard/annual-folders/evaluate` usa una cola legible por humanos (`GET /annual-folders/evaluation/queue`) para buscar por club, seccion, campo, union, plantilla o año. El usuario no necesita conocer UUIDs internos.
+- La vista de evaluacion carga la carpeta seleccionada y permite calificar/reabrir secciones con los endpoints de `annual-folders`.
 
 ### App (sacdia-app)
 - 2 screens: EvidenceFolderView, EvidenceSectionDetailView
@@ -64,6 +65,7 @@ Las carpetas son diferentes de las clases progresivas: mientras las clases tiene
 7. Al completar todos los modulos, la carpeta se auto-completa
 8. Las evidencias deben poder subirse como archivos multipart y eliminarse individualmente
 9. El submit de secciones debe marcar la seccion como enviada para revision
+10. La revision administrativa debe permitir ubicar carpetas por nombres de negocio, no por UUID/ID tecnico.
 
 ## Decisiones de diseno
 
@@ -73,14 +75,13 @@ Las carpetas son diferentes de las clases progresivas: mientras las clases tiene
 - **Auto-completado jerarquico**: al actualizar una seccion, el servicio verifica y auto-completa modulo y carpeta si corresponde
 - **Soft delete en abandono**: la asignacion se desactiva pero no se elimina fisicamente
 - **Nombre visible normalizado**: Los archivos adjuntos se numeran como `Evidencia 01`, `Evidencia 02`, etc. El nombre original del picker/browser no se conserva como etiqueta visible para evitar confusiones; usuario, fecha y sección se consultan como metadata.
+- **IDs como detalle tecnico**: Las vistas administrativas deben mostrar club, seccion, campo, union, plantilla y año como identificadores humanos. Los UUIDs quedan reservados para llamadas API internas y diagnostico tecnico.
 
 ## Gaps y pendientes
 
 - **Desacople de rutas**: La app consume `/clubs/:clubId/sections/:sectionId/evidence-folder` pero el backend tiene `/club-sections/:sectionId/evidence-folder` (sin clubId en la ruta). Las rutas no coinciden exactamente
 - **EvidenceFolderController no documentado**: Los 4 endpoints del EvidenceFolderController no aparecen en ENDPOINTS-LIVE-REFERENCE.md ni en el backend audit original
 - Las rutas canonicas post-consolidacion deberian usar `/clubs/:clubId/sections/:sectionId/evidence-folder` — el backend usa `/club-sections/:sectionId` que es un patron diferente
-- Admin es solo lectura — no permite administrar templates, asignar carpetas ni revisar progreso de miembros
-- No hay flujo de validacion/aprobacion institucional de carpetas completadas
 - No hay endpoint para listar el progreso de todos los miembros de una seccion (vista de consejero/director)
 
 ## Prioridad y siguiente accion
