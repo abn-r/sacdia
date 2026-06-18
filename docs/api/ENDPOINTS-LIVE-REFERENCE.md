@@ -321,7 +321,7 @@
 | PATCH | `/api/v1/admin/master-honors/:id` | JWT | `honors:update` | Actualizar maestría y reglas análogas a creación. | `src/admin/admin-phase-e-catalogs.controller.ts` |
 | DELETE | `/api/v1/admin/master-honors/:id` | JWT | `honors:delete` | Soft-delete de maestría (`active=false`). | `src/admin/admin-phase-e-catalogs.controller.ts` |
 | POST | `/api/v1/admin/master-honors/:id/recalculate` | JWT | `honors:update` | Encola recálculo de maestría para usuarios afectados y responde `{ status: 'success', data: { queued: boolean } }`; `queued=false` cuando Redis/cola no está disponible en el runtime. | `src/admin/admin-phase-e-catalogs.controller.ts` |
-| GET | `/api/v1/admin/users` | JWT | `users:read` | Listar usuarios administrativos con alcance por rol (ALL/UNION/LOCAL_FIELD). Incluye `is_deleted` para cuentas anonimizadas por eliminación. | `src/admin/admin-users.controller.ts` |
+| GET | `/api/v1/admin/users` | JWT | `users:read` | Listar usuarios administrativos con alcance por rol (ALL/UNION/LOCAL_FIELD). Incluye `is_deleted` para cuentas anonimizadas por eliminación y `roles` con roles globales activos + roles de club activos para badges de la tabla. | `src/admin/admin-users.controller.ts` |
 | GET | `/api/v1/admin/users/:userId` | JWT | `users:read_detail` | Obtener detalle de usuario validando alcance por rol del actor. Incluye `is_deleted` para que el cliente muestre una etiqueta localizada sin usar el email anonimizado como nombre. | `src/admin/admin-users.controller.ts` |
 | PATCH | `/api/v1/admin/users/:userId` | JWT | `users:update` | Actualizar campos administrativos del usuario | `src/admin/admin-users.controller.ts` |
 | PATCH | `/api/v1/admin/users/:userId/approval` | JWT | `users:update` | Aprobar o rechazar un usuario administrativo | `src/admin/admin-users.controller.ts` |
@@ -345,6 +345,7 @@
   - si no hay enrollment activo del año -> `current_operational_enrollment = null`
   - si hay más de un enrollment candidato del año -> `current_operational_enrollment = null` (sin inferencia)
 - Consumers actualizados deben leer presente desde `current_operational_enrollment` e histórico desde `trajectory_classes`; no reconstruir presente con `trajectory_classes/classes`
+- El detalle administrativo expone `club_assignments[]` con `club_name`, `section_name`, `district_name` y `church_name` derivados del club asignado para presentación, y `emergency_contacts[].relationship_types.name` para mostrar el parentesco sin recurrir a IDs internos.
 
 ### Representación de cuentas eliminadas/anónimas
 
