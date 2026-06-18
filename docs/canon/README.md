@@ -162,6 +162,10 @@ Canoniza operaciones CRUD sobre la entidad camporee con permisos propios `campor
 
 Canoniza el workflow submit → review con permisos propios `validation:submit/review/read`. Coexistencia: los permisos originales `classes:*` y `users:read_detail` PERMANECEN activos para sus dominios propios. Drift histórico corregido: nav `/dashboard/validation` migrado de `investiture:read` a `validation:read`. Decisión registrada: `decisiones-clave.md` §21.
 
+### `runtime-coordination.md`
+
+Canoniza el modelo institucional de coordinación: zonas por campo local que agrupan distritos, un coordinador general activo por campo local, coordinadores por zona + sección, asignaciones directas por `club_section` y resolución común `coordinator_scope(user_id) -> club_section_ids[]`. Decisión registrada: `decisiones-clave.md` §24.
+
 ### `runtime-alerting.md`
 
 Canoniza la capa de alerting Sentry sobre los 3 runtimes (backend/admin/app). Separa código (captura + tags + fingerprints) de configuración (reglas Sentry UI, reconfigurables sin redeploy). Documenta convención de tags (`cron`, `job_name`, `source`, `queue`), 5 reglas de alerta recomendadas, runbook operacional y release tracking via `VERCEL_GIT_COMMIT_SHA` / `RENDER_GIT_COMMIT`.

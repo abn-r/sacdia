@@ -2,7 +2,7 @@
 
 **Estado**: ACTIVE
 **Sincronizado contra**: `sacdia-backend/prisma/schema.prisma`
-**Fecha de resincronizacion**: 2026-06-11 (honores: modo de finalizacion)
+**Fecha de resincronizacion**: 2026-06-17 (coordinación por zonas/asignaciones)
 
 Referencia humana concisa del schema Prisma vigente.
 
@@ -14,8 +14,8 @@ Referencia humana concisa del schema Prisma vigente.
 
 ## Cifras vigentes
 
-- **Modelos Prisma**: 113
-- **Enums Prisma**: 20
+- **Modelos Prisma**: 184
+- **Enums Prisma**: 36
 - **Tablas Better Auth mapeadas**: `session -> sessions`, `account -> accounts`, `verification -> verifications`
 
 ---
@@ -45,6 +45,17 @@ Referencia humana concisa del schema Prisma vigente.
 - Incluye `expires_at` y `rejection_reason`.
 - La unicidad vigente es `@@unique([user_id, role_id, club_section_id, ecclesiastical_year_id, start_date])`.
 - Tambien soporta el flujo de membership requests via `status` (`pending`, `active`, `rejected`, `expired`) sobre la misma asignacion anual.
+
+### Coordinación institucional
+
+- `coordination_zones` modela zonas creadas por campo local para agrupar distritos.
+- `coordination_zone_districts` asocia distritos a zonas y mantiene una unicidad activa por distrito para evitar doble cobertura operativa.
+- `coordinator_assignments` define autoridad real con `assignment_type` (`GENERAL`, `ZONE`, `SECTION`):
+  - `GENERAL`: un coordinador general activo por campo local.
+  - `ZONE`: un coordinador por zona + `club_type_id`.
+  - `SECTION`: un coordinador directo por `club_section_id`.
+- La unidad final de autorización sigue siendo `club_sections`; el backend debe resolver el alcance efectivo como `club_section_ids`.
+- La incompatibilidad director/coordinador sobre la misma `club_section` se valida en servicio, porque depende de roles activos en `club_role_assignments`.
 
 ### `weekly_records`, `weekly_record_scores` y `scoring_categories`
 
@@ -345,6 +356,7 @@ Define el presupuesto de puntos por componente dentro de un eje anual:
 ### Organizacion y clubes
 
 - `countries`, `unions`, `local_fields`, `districts`, `churches`, `clubs`, `club_sections`, `club_types`, `club_ideals`, `units`, `unit_members`
+- `coordination_zones`, `coordination_zone_districts`, `coordinator_assignments`
 
 ### RBAC y auth
 

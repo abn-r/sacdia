@@ -462,6 +462,43 @@ Hallazgo paralelo: la ruta admin `/dashboard/validation` usaba `investiture:read
 - Plan: `docs/superpowers/plans/2026-04-28-clasificacion-criterios-ampliados.md`
 - Canon rector: `docs/canon/runtime-rankings.md` §13.
 
+### 24. Coordinación se modela por zonas y asignaciones a `club_section` (2026-06-17)
+
+**Estado**: Vigente <!-- Decisión de dominio aprobada por producto antes de salida a producción. Implementación pendiente. Canon rector: docs/canon/runtime-coordination.md. -->
+
+**Contexto**: El rol `coordinator` estaba tratado de forma demasiado genérica:
+un rol global con alcance derivado principalmente de `local_field_id`. Ese
+modelo no representa la operación real de los campos locales, donde existen
+zonas, coordinadores por sección y excepciones por club/sección. Además SACDIA
+es multirol: un usuario puede ser director y coordinador, pero no debe coordinar
+la misma sección donde ya es director.
+
+**Decisión**: El canon adopta `docs/canon/runtime-coordination.md` como fuente
+rectora del dominio coordinación. Se fija que:
+
+- las zonas de coordinación pertenecen a un campo local y agrupan distritos;
+- la cadena operacional es `local_field -> districts -> churches -> clubs -> club_sections`;
+- puede existir máximo un coordinador general activo por campo local;
+- los coordinadores de zona se asignan por `zone_id + club_type_id`;
+- el sistema debe soportar asignaciones directas por `club_section_id`;
+- la unidad final de autoridad es siempre `club_section`;
+- el backend debe resolver `coordinator_scope(user_id) -> club_section_ids[]`;
+- un usuario director activo de una `club_section` no puede ser coordinador de
+  esa misma `club_section`;
+- el rol global habilita entrada, pero no define autoridad operativa por sí solo.
+
+**Consecuencias**:
+
+- los módulos de SLA, evidencias, investiduras y clubes deben migrar a scope por
+  `club_section_ids` efectivos;
+- el admin necesita una superficie propia para zonas y asignaciones de
+  coordinadores;
+- la app móvil debe mostrar funcionalidades multirol y quitar camporees del
+  alcance coordinador;
+- no se debe usar `union_id` como scope de coordinador;
+- cualquier endpoint nuevo de coordinación debe validar scope en backend, no en
+  query params manipulables.
+
 ## Estados posibles de una decisión
 
 Las decisiones de este documento deben estar en uno de estos estados:
