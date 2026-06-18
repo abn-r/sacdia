@@ -1,6 +1,6 @@
 # ENDPOINTS LIVE REFERENCE (Runtime Truth)
 
-<!-- Verificado contra código 2026-03-25. Documento completo: cubre todos los endpoints implementados en controllers. Actualización manual de maestrías 2026-06-04. -->
+<!-- Verificado contra código 2026-03-25. Documento completo: cubre todos los endpoints implementados en controllers. Actualizaciones manuales: maestrías 2026-06-04; coordinación 2026-06-17. -->
 
 > [!IMPORTANT]
 > Documento canónico para agentes (App + Panel Admin).
@@ -8,8 +8,8 @@
 > Base URL: `/api/v1`
 
 **Estado**: ACTIVE
-**Actualizado**: 2026-06-04 (maestrías configurables: endpoints de usuario, recálculo admin y estados Vigente/No vigente)
-**Total endpoints**: 341 (última generación completa; no recalculado en la actualización manual de maestrías)
+**Actualizado**: 2026-06-17 (coordinación: zonas, asignaciones y scope efectivo)
+**Total endpoints**: 341 (última generación completa; no recalculado en actualizaciones manuales posteriores)
 
 ## Lectura Rápida
 
@@ -151,7 +151,7 @@
 | Method | Path | Auth | Roles | Description | Source |
 |---|---|---|---|---|---|
 | GET | `/api/v1/clubs/:clubId/sections/:sectionId/members/insurance` | JWT | `insurance:read` | Listar miembros de una sección con su seguro activo más reciente | `src/insurance/insurance.controller.ts` |
-| GET | `/api/v1/insurance/expiring` | JWT | admin, coordinator (GlobalRoles) | Listar seguros próximos a vencer para monitoreo administrativo global; query: `days_ahead?`, `local_field_id?` | `src/insurance/insurance.controller.ts` |
+| GET | `/api/v1/insurance/expiring` | JWT | admin, coordinator/zone-coordinator/general-coordinator (GlobalRoles) | Listar seguros próximos a vencer para monitoreo administrativo global; query: `days_ahead?`, `local_field_id?` | `src/insurance/insurance.controller.ts` |
 | GET | `/api/v1/users/:memberId/insurance` | JWT | `insurance:read` | Obtener el detalle del seguro activo del miembro | `src/insurance/insurance.controller.ts` |
 | POST | `/api/v1/users/:memberId/insurance` | JWT | `insurance:create` | Crear un seguro para un miembro con evidencia opcional en multipart (`evidence`) | `src/insurance/insurance.controller.ts` |
 | PATCH | `/api/v1/insurance/:insuranceId` | JWT | `insurance:update` | Actualizar un seguro existente con evidencia opcional en multipart (`evidence`) | `src/insurance/insurance.controller.ts` |
@@ -570,20 +570,20 @@ Notas contractuales de honores de usuario:
 |---|---|---|---|---|---|
 | POST | `/api/v1/investiture/enrollments/:enrollmentId/submit` | JWT | director, counselor (ClubRoles) | Enviar enrollment al pipeline de validación. Body: `{ club_id: int, comments?: string }` | `src/investiture/investiture.controller.ts` |
 | POST | `/api/v1/investiture/enrollments/:enrollmentId/club-approve` | JWT | director (ClubRoles) | Aprobar en nivel club/sección. Body: `{ comments?: string }` | `src/investiture/investiture.controller.ts` |
-| POST | `/api/v1/investiture/enrollments/:enrollmentId/coordinator-approve` | JWT | admin, coordinator (GlobalRoles) | Aprobar en nivel coordinación. Body: `{ comments?: string }` | `src/investiture/investiture.controller.ts` |
+| POST | `/api/v1/investiture/enrollments/:enrollmentId/coordinator-approve` | JWT | admin, coordinator/zone-coordinator/general-coordinator (GlobalRoles) | Aprobar en nivel coordinación. Body: `{ comments?: string }` | `src/investiture/investiture.controller.ts` |
 | POST | `/api/v1/investiture/enrollments/:enrollmentId/field-approve` | JWT | admin (GlobalRoles) | Aprobar en nivel campo local. Body: `{ comments?: string }` | `src/investiture/investiture.controller.ts` |
-| POST | `/api/v1/investiture/enrollments/:enrollmentId/invest` | JWT | admin, coordinator (GlobalRoles) | Registrar investidura formal después de `FIELD_APPROVED`. Body: `{ comments?: string }` | `src/investiture/investiture.controller.ts` |
-| POST | `/api/v1/investiture/enrollments/:enrollmentId/reject` | JWT | admin, coordinator (GlobalRoles) | Rechazar enrollment en cualquier nivel del pipeline. Body: `{ reason: string }` | `src/investiture/investiture.controller.ts` |
-| GET | `/api/v1/investiture/pending` | JWT | admin, coordinator (GlobalRoles) | Listar enrollments pendientes de validación. Query: `local_field_id?`, `ecclesiastical_year_id?`, `page?`, `limit?` | `src/investiture/investiture.controller.ts` |
+| POST | `/api/v1/investiture/enrollments/:enrollmentId/invest` | JWT | admin, coordinator/zone-coordinator/general-coordinator (GlobalRoles) | Registrar investidura formal después de `FIELD_APPROVED`. Body: `{ comments?: string }` | `src/investiture/investiture.controller.ts` |
+| POST | `/api/v1/investiture/enrollments/:enrollmentId/reject` | JWT | admin, coordinator/zone-coordinator/general-coordinator (GlobalRoles) | Rechazar enrollment en cualquier nivel del pipeline. Body: `{ reason: string }` | `src/investiture/investiture.controller.ts` |
+| GET | `/api/v1/investiture/pending` | JWT | admin, coordinator/zone-coordinator/general-coordinator (GlobalRoles) | Listar enrollments pendientes de validación. Query: `local_field_id?`, `ecclesiastical_year_id?`, `page?`, `limit?`. Coordinadores no administrativos quedan filtrados por `club_section_ids` efectivos. | `src/investiture/investiture.controller.ts` |
 | GET | `/api/v1/investiture/enrollments/:enrollmentId/history` | JWT | - | Historial canónico del pipeline de investidura. La autorización fina se resuelve en el service. | `src/investiture/investiture.controller.ts` |
-| POST | `/api/v1/investiture/enrollments/bulk-approve` | JWT | admin, coordinator (GlobalRoles) | Aprobación masiva. Body: `{ enrollment_ids: int[], action: 'coordinator-approve'|'field-approve'|'invest', comments?: string }`. Máx 200. | `src/investiture/investiture.controller.ts` |
-| POST | `/api/v1/investiture/enrollments/bulk-reject` | JWT | admin, coordinator (GlobalRoles) | Rechazo masivo. Body: `{ enrollment_ids: int[], comments: string }`. Máx 200. | `src/investiture/investiture.controller.ts` |
+| POST | `/api/v1/investiture/enrollments/bulk-approve` | JWT | admin, coordinator/zone-coordinator/general-coordinator (GlobalRoles) | Aprobación masiva. Body: `{ enrollment_ids: int[], action: 'coordinator-approve'|'field-approve'|'invest', comments?: string }`. Máx 200. | `src/investiture/investiture.controller.ts` |
+| POST | `/api/v1/investiture/enrollments/bulk-reject` | JWT | admin, coordinator/zone-coordinator/general-coordinator (GlobalRoles) | Rechazo masivo. Body: `{ enrollment_ids: int[], comments: string }`. Máx 200. | `src/investiture/investiture.controller.ts` |
 | POST | `/api/v1/enrollments/:enrollmentId/submit-for-validation` | JWT | director, counselor (ClubRoles) | [LEGACY] Enviar enrollment a validación de investidura. Body: `{ club_id: int, comments?: string }` | `src/investiture/investiture.controller.ts` |
-| POST | `/api/v1/enrollments/:enrollmentId/validate` | JWT | admin, coordinator (GlobalRoles) | [LEGACY] Aprobar o rechazar desde la superficie simple. Body: `{ action: 'APPROVED'|'REJECTED', comments?: string }` | `src/investiture/investiture.controller.ts` |
-| POST | `/api/v1/enrollments/:enrollmentId/investiture` | JWT | admin, coordinator (GlobalRoles) | [LEGACY] Registrar investidura formal. Body: `{ comments?: string }` | `src/investiture/investiture.controller.ts` |
+| POST | `/api/v1/enrollments/:enrollmentId/validate` | JWT | admin, coordinator/zone-coordinator/general-coordinator (GlobalRoles) | [LEGACY] Aprobar o rechazar desde la superficie simple. Body: `{ action: 'APPROVED'|'REJECTED', comments?: string }` | `src/investiture/investiture.controller.ts` |
+| POST | `/api/v1/enrollments/:enrollmentId/investiture` | JWT | admin, coordinator/zone-coordinator/general-coordinator (GlobalRoles) | [LEGACY] Registrar investidura formal. Body: `{ comments?: string }` | `src/investiture/investiture.controller.ts` |
 | GET | `/api/v1/enrollments/:enrollmentId/investiture-history` | JWT | - | [LEGACY] Historial de validación de investidura. Dual-role auth in service. | `src/investiture/investiture.controller.ts` |
-| GET | `/api/v1/admin/investiture/config` | JWT | admin, coordinator (GlobalRoles) | Listar configuraciones de investidura. Query: `local_field_id?` | `src/investiture/investiture.controller.ts` |
-| GET | `/api/v1/admin/investiture/config/:configId` | JWT | admin, coordinator (GlobalRoles) | Obtener configuración de investidura por ID | `src/investiture/investiture.controller.ts` |
+| GET | `/api/v1/admin/investiture/config` | JWT | admin, coordinator/zone-coordinator/general-coordinator (GlobalRoles) | Listar configuraciones de investidura. Query: `local_field_id?` | `src/investiture/investiture.controller.ts` |
+| GET | `/api/v1/admin/investiture/config/:configId` | JWT | admin, coordinator/zone-coordinator/general-coordinator (GlobalRoles) | Obtener configuración de investidura por ID | `src/investiture/investiture.controller.ts` |
 | POST | `/api/v1/admin/investiture/config` | JWT | admin (GlobalRoles) | Crear configuración de investidura | `src/investiture/investiture.controller.ts` |
 | PATCH | `/api/v1/admin/investiture/config/:configId` | JWT | admin (GlobalRoles) | Actualizar configuración de investidura | `src/investiture/investiture.controller.ts` |
 | DELETE | `/api/v1/admin/investiture/config/:configId` | JWT | admin (GlobalRoles) | Soft delete de configuración (`active=false`) | `src/investiture/investiture.controller.ts` |
@@ -750,17 +750,39 @@ Errores específicos del submit de honores:
 - `VALIDATION_HONOR_NOT_PENDING`
 - `VALIDATION_HONOR_INACTIVE`
 
+## coordination
+
+| Method | Path | Auth | Roles | Description | Source |
+|---|---|---|---|---|---|
+| GET | `/api/v1/coordination/me/scope` | JWT | - | Resolver el alcance efectivo de coordinación del usuario autenticado. Retorna `is_coordinator`, `club_section_ids`, asignaciones activas y secciones normalizadas para que clientes multirol muestren la superficie coordinador sin adivinar scope. | `src/coordination/coordination.controller.ts` |
+| GET | `/api/v1/admin/coordination/local-fields/:localFieldId/zones` | JWT | admin, super-admin, director-lf, assistant-lf, director-union, assistant-union, director-dia, assistant-dia | Listar zonas de coordinación de un campo local. El servicio valida alcance jerárquico del actor. | `src/coordination/coordination.controller.ts` |
+| POST | `/api/v1/admin/coordination/local-fields/:localFieldId/zones` | JWT | admin, super-admin, director-lf, assistant-lf, director-union, assistant-union, director-dia, assistant-dia | Crear zona de coordinación. Body: `{ name, description?, active? }`. | `src/coordination/coordination.controller.ts` |
+| PATCH | `/api/v1/admin/coordination/zones/:zoneId` | JWT | admin, super-admin, director-lf, assistant-lf, director-union, assistant-union, director-dia, assistant-dia | Actualizar zona de coordinación (`name`, `description`, `active`). | `src/coordination/coordination.controller.ts` |
+| POST | `/api/v1/admin/coordination/zones/:zoneId/districts/:districtId` | JWT | admin, super-admin, director-lf, assistant-lf, director-union, assistant-union, director-dia, assistant-dia | Asignar distrito a zona. Valida que zona y distrito pertenezcan al mismo campo local y que el distrito no esté activo en otra zona. | `src/coordination/coordination.controller.ts` |
+| DELETE | `/api/v1/admin/coordination/zones/:zoneId/districts/:districtId` | JWT | admin, super-admin, director-lf, assistant-lf, director-union, assistant-union, director-dia, assistant-dia | Quitar distrito de zona mediante soft deactivate de la membresía. | `src/coordination/coordination.controller.ts` |
+| GET | `/api/v1/admin/coordination/local-fields/:localFieldId/assignments` | JWT | admin, super-admin, director-lf, assistant-lf, director-union, assistant-union, director-dia, assistant-dia | Listar asignaciones de coordinadores del campo local. Query opcional: `active=true\|false`. | `src/coordination/coordination.controller.ts` |
+| POST | `/api/v1/admin/coordination/local-fields/:localFieldId/assignments` | JWT | admin, super-admin, director-lf, assistant-lf, director-union, assistant-union, director-dia, assistant-dia | Crear asignación `GENERAL`, `ZONE` o `SECTION`. Valida rol coordinador activo, shape, scope por campo local y conflicto director/coordinador en la misma `club_section`. | `src/coordination/coordination.controller.ts` |
+| PATCH | `/api/v1/admin/coordination/assignments/:assignmentId` | JWT | admin, super-admin, director-lf, assistant-lf, director-union, assistant-union, director-dia, assistant-dia | Actualizar asignación de coordinador. Revalida shape, scope y conflicto director/coordinador si queda activa. | `src/coordination/coordination.controller.ts` |
+
+### Coordination contract notes (2026-06-17)
+
+- El scope efectivo del coordinador se calcula server-side como `club_section_ids`; los clientes no deben reconstruirlo.
+- Los endpoints `/api/v1/admin/coordination/*` requieren rol institucional administrativo listado en la tabla y permiso efectivo `coordination:manage`.
+- Usuarios multirol deben usar `coordination/me/scope` junto con `/auth/me`: si además son directores, la app muestra ambas superficies.
+- Una asignación activa se rechaza si el usuario ya es director activo de cualquiera de las `club_sections` resultantes de esa asignación.
+- `coordinator`, `zone-coordinator` y `general-coordinator` son roles globales compatibles con el rol requerido de coordinación; la asignación define el alcance operativo real.
+
 ## evidence-review
 
 | Method | Path | Auth | Roles | Description | Source |
 |---|---|---|---|---|---|
-| GET | `/api/v1/evidence-review/pending` | JWT | admin, coordinator (GlobalRoles) | Listar evidencias pendientes de validación. Query: `type?` (class\|honor), `page?`, `limit?`. La Carpeta Anual de Evidencias se revisa en el módulo `annual-folders`. | `src/evidence-review/evidence-review.controller.ts` |
-| GET | `/api/v1/evidence-review/:type/:id` | JWT | admin, coordinator (GlobalRoles) | Detalle de evidencia con archivos adjuntos. Para `type=honor`, `files` agrega formato completado, evidencia general y evidencia por requisito; `honor_review_packet` incluye `completion_mode`, `completed_format_file`, progreso, respuestas textuales, requisitos y adjuntos por requisito. | `src/evidence-review/evidence-review.controller.ts` |
-| POST | `/api/v1/evidence-review/:type/:id/approve` | JWT | admin, coordinator (GlobalRoles) | Aprobar evidencia. Para `type=honor`, usa el workflow canónico de honores y sincroniza `validation_status=APPROVED` + `validate=true`. | `src/evidence-review/evidence-review.controller.ts` |
-| POST | `/api/v1/evidence-review/:type/:id/reject` | JWT | admin, coordinator (GlobalRoles) | Rechazar evidencia. Body: `{ reason: string }` (required). Para `type=honor`, usa el workflow canónico y sincroniza `validation_status=REJECTED` + `validate=false`. | `src/evidence-review/evidence-review.controller.ts` |
-| POST | `/api/v1/evidence-review/bulk-approve` | JWT | admin, coordinator (GlobalRoles) | Aprobación masiva (mismo tipo: `class` u `honor`). Body: `{ type: string, ids: int[] }` | `src/evidence-review/evidence-review.controller.ts` |
-| POST | `/api/v1/evidence-review/bulk-reject` | JWT | admin, coordinator (GlobalRoles) | Rechazo masivo (mismo tipo: `class` u `honor`). Body: `{ type: string, ids: int[], reason: string }` | `src/evidence-review/evidence-review.controller.ts` |
-| GET | `/api/v1/evidence-review/:type/:id/history` | JWT | admin, coordinator (GlobalRoles) | Historial de validación de evidencia | `src/evidence-review/evidence-review.controller.ts` |
+| GET | `/api/v1/evidence-review/pending` | JWT | admin, coordinator/zone-coordinator/general-coordinator (GlobalRoles) | Listar evidencias pendientes de validación. Query: `type?` (class\|honor), `page?`, `limit?`. Coordinadores no administrativos quedan filtrados por `club_section_ids` efectivos. La Carpeta Anual de Evidencias se revisa en el módulo `annual-folders`. | `src/evidence-review/evidence-review.controller.ts` |
+| GET | `/api/v1/evidence-review/:type/:id` | JWT | admin, coordinator/zone-coordinator/general-coordinator (GlobalRoles) | Detalle de evidencia con archivos adjuntos; para coordinadores se valida pertenencia al scope efectivo. Para `type=honor`, `files` agrega formato completado, evidencia general y evidencia por requisito; `honor_review_packet` incluye `completion_mode`, `completed_format_file`, progreso, respuestas textuales, requisitos y adjuntos por requisito. | `src/evidence-review/evidence-review.controller.ts` |
+| POST | `/api/v1/evidence-review/:type/:id/approve` | JWT | admin, coordinator/zone-coordinator/general-coordinator (GlobalRoles) | Aprobar evidencia. Para `type=honor`, usa el workflow canónico de honores y sincroniza `validation_status=APPROVED` + `validate=true`. | `src/evidence-review/evidence-review.controller.ts` |
+| POST | `/api/v1/evidence-review/:type/:id/reject` | JWT | admin, coordinator/zone-coordinator/general-coordinator (GlobalRoles) | Rechazar evidencia. Body: `{ reason: string }` (required). Para `type=honor`, usa el workflow canónico y sincroniza `validation_status=REJECTED` + `validate=false`. | `src/evidence-review/evidence-review.controller.ts` |
+| POST | `/api/v1/evidence-review/bulk-approve` | JWT | admin, coordinator/zone-coordinator/general-coordinator (GlobalRoles) | Aprobación masiva (mismo tipo: `class` u `honor`). Body: `{ type: string, ids: int[] }` | `src/evidence-review/evidence-review.controller.ts` |
+| POST | `/api/v1/evidence-review/bulk-reject` | JWT | admin, coordinator/zone-coordinator/general-coordinator (GlobalRoles) | Rechazo masivo (mismo tipo: `class` u `honor`). Body: `{ type: string, ids: int[], reason: string }` | `src/evidence-review/evidence-review.controller.ts` |
+| GET | `/api/v1/evidence-review/:type/:id/history` | JWT | admin, coordinator/zone-coordinator/general-coordinator (GlobalRoles) | Historial de validación de evidencia; para coordinadores se valida pertenencia al scope efectivo. | `src/evidence-review/evidence-review.controller.ts` |
 
 ## certificate-bulk-imports
 
@@ -788,7 +810,7 @@ Errores específicos del submit de honores:
 
 | Method | Path | Auth | Roles | Description | Source |
 |---|---|---|---|---|---|
-| GET | `/api/v1/admin/analytics/sla-dashboard` | JWT | admin, coordinator (GlobalRoles) | Métricas SLA: pendientes, overdue, tiempos promedio, tasas de aprobación, throughput 12 semanas. Cache 60s. Scoped por campo local. | `src/analytics/analytics.controller.ts` |
+| GET | `/api/v1/admin/analytics/sla-dashboard` | JWT | admin, coordinator/zone-coordinator/general-coordinator (GlobalRoles) | Métricas SLA: pendientes, overdue, tiempos promedio, tasas de aprobación, throughput 12 semanas. Cache 60s. Scoped por `coordination/me/scope` a `club_section_ids` para coordinadores; global para roles administrativos. | `src/analytics/analytics.controller.ts` |
 
 ## membership-requests
 
@@ -872,9 +894,9 @@ Errores específicos del submit de honores:
 | Method | Path | Auth | Roles | Description | Source |
 |---|---|---|---|---|---|
 | POST | `/api/v1/support/reports` | JWT | - | Enviar reporte de soporte (bug, feature_request, account, data_issue, performance, other). Body: `{ category, title<=120, description<=2000, deviceInfo{platform,osVersion,model,appVersion,buildNumber}, userContext?{route?,clubId?,sectionId?} }`. Rate limit 5/hora por usuario. Responde 201 `{ reportId, createdAt }` | `src/support/support.controller.ts` |
-| GET | `/api/v1/admin/support/reports` | JWT | admin, coordinator (GlobalRoles) | Lista paginada de reportes de soporte para panel admin. Filtros: `status?` (`open`, `in_progress`, `resolved`, `closed`), `category?`, `userId?`, `search?`, `page?`, `limit?`. Responde `{ status, data: { total, page, limit, items[] } }` | `src/support/support-admin.controller.ts` |
-| GET | `/api/v1/admin/support/reports/:reportId` | JWT | admin, coordinator (GlobalRoles) | Detalle de un reporte con usuario, estado, contexto técnico y timestamps. | `src/support/support-admin.controller.ts` |
-| PATCH | `/api/v1/admin/support/reports/:reportId/status` | JWT | admin, coordinator (GlobalRoles) | Actualiza el estado de atención del reporte. Body: `{ status: "open" \| "in_progress" \| "resolved" \| "closed" }`. | `src/support/support-admin.controller.ts` |
+| GET | `/api/v1/admin/support/reports` | JWT | admin, coordinator/zone-coordinator/general-coordinator (GlobalRoles) | Lista paginada de reportes de soporte para panel admin. Filtros: `status?` (`open`, `in_progress`, `resolved`, `closed`), `category?`, `userId?`, `search?`, `page?`, `limit?`. Responde `{ status, data: { total, page, limit, items[] } }` | `src/support/support-admin.controller.ts` |
+| GET | `/api/v1/admin/support/reports/:reportId` | JWT | admin, coordinator/zone-coordinator/general-coordinator (GlobalRoles) | Detalle de un reporte con usuario, estado, contexto técnico y timestamps. | `src/support/support-admin.controller.ts` |
+| PATCH | `/api/v1/admin/support/reports/:reportId/status` | JWT | admin, coordinator/zone-coordinator/general-coordinator (GlobalRoles) | Actualiza el estado de atención del reporte. Body: `{ status: "open" \| "in_progress" \| "resolved" \| "closed" }`. | `src/support/support-admin.controller.ts` |
 
 ## member-rankings (8.4-A)
 
