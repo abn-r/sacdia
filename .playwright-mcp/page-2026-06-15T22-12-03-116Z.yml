@@ -1,0 +1,42 @@
+- generic [ref=e1]:
+  - main [ref=e2]:
+    - complementary [ref=e3]:
+      - img
+      - img
+      - generic [ref=e4]:
+        - img "SACDIA" [ref=e6]
+        - generic [ref=e7]:
+          - generic [ref=e8]: SACDIA
+          - generic [ref=e9]: Sistema Administrativo
+      - generic [ref=e10]:
+        - generic [ref=e11]: Filipenses 4:13
+        - paragraph [ref=e12]: «Todo lo puedo en Cristo que me fortalece.»
+        - paragraph [ref=e13]: Plataforma para clubes de Aventureros, Conquistadores y Guías Mayores. Inscripciones, clases, especialidades y finanzas en un solo lugar.
+      - generic [ref=e14]:
+        - generic [ref=e15]: v1.0 · 2026
+        - generic [ref=e16]: Asociación Norte · Pacífico
+    - generic [ref=e18]:
+      - generic [ref=e19]: Acceso · Administrador
+      - heading "Bienvenido de nuevo" [level=1] [ref=e20]
+      - paragraph [ref=e21]: Ingresa tus credenciales para continuar al panel de tu club.
+      - generic [ref=e22]:
+        - generic [ref=e23]:
+          - generic [ref=e24]: Correo electrónico
+          - textbox "Correo electrónico" [active] [ref=e25]:
+            - /placeholder: admin@sacdia.org
+            - text: admin@sacdia.com
+        - generic [ref=e26]:
+          - generic [ref=e27]: Contraseña
+          - generic [ref=e28]:
+            - textbox "Contraseña" [ref=e29]:
+              - /placeholder: ••••••••
+              - text: Sacdia2026!
+            - button "Mostrar contraseña" [ref=e30]:
+              - img [ref=e31]
+        - button "Iniciar sesión" [ref=e35]:
+          - text: Iniciar sesión
+          - img
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e41] [cursor=pointer]:
+    - img [ref=e42]
+  - alert [ref=e45]

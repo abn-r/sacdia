@@ -1,0 +1,978 @@
+- generic:
+  - generic:
+    - link:
+      - /url: "#main"
+      - text: Ir al contenido principal
+    - generic:
+      - generic:
+        - generic:
+          - generic:
+            - list:
+              - listitem:
+                - link:
+                  - /url: /dashboard
+                  - generic:
+                    - img
+                  - generic:
+                    - generic: SACDIA
+                    - generic: Panel Administrativo
+          - generic:
+            - generic:
+              - list:
+                - listitem:
+                  - link:
+                    - /url: /dashboard
+                    - img
+                    - generic: Dashboard
+                - listitem:
+                  - link:
+                    - /url: /dashboard/users
+                    - img
+                    - generic: Usuarios
+            - generic:
+              - generic: Catálogos
+              - list:
+                - listitem:
+                  - button:
+                    - img
+                    - generic: Catálogos
+                    - img
+                - listitem:
+                  - button:
+                    - img
+                    - generic: Recursos
+                    - img
+            - generic:
+              - generic: Gestión de clubes
+              - list:
+                - listitem:
+                  - link:
+                    - /url: /dashboard/clubs
+                    - img
+                    - generic: Clubes
+                - listitem:
+                  - button:
+                    - img
+                    - generic: Camporees
+                    - img
+                - listitem:
+                  - link:
+                    - /url: /dashboard/classes
+                    - img
+                    - generic: Clases
+                - listitem:
+                  - link:
+                    - /url: /dashboard/enrollments
+                    - img
+                    - generic: Inscripciones
+                - listitem:
+                  - link:
+                    - /url: /dashboard/honors
+                    - img
+                    - generic: Especialidades
+                - listitem:
+                  - link:
+                    - /url: /dashboard/achievements
+                    - img
+                    - generic: Logros
+                - listitem:
+                  - link:
+                    - /url: /dashboard/activities
+                    - img
+                    - generic: Actividades
+                - listitem:
+                  - link:
+                    - /url: /dashboard/finances
+                    - img
+                    - generic: Finanzas
+                - listitem:
+                  - link:
+                    - /url: /dashboard/inventory
+                    - img
+                    - generic: Inventario
+                - listitem:
+                  - link:
+                    - /url: /dashboard/certifications
+                    - img
+                    - generic: Certificaciones
+                - listitem:
+                  - button:
+                    - img
+                    - generic: Seguros
+                    - img
+            - generic:
+              - generic: Materiales
+              - list:
+                - listitem:
+                  - link:
+                    - /url: /dashboard/materials/inbox
+                    - img
+                    - generic: Bandeja
+                - listitem:
+                  - link:
+                    - /url: /dashboard/materials/receipts
+                    - img
+                    - generic: Comprobantes
+                - listitem:
+                  - link:
+                    - /url: /dashboard/materials/inventory
+                    - img
+                    - generic: Inventario
+                - listitem:
+                  - link:
+                    - /url: /dashboard/materials/categories
+                    - img
+                    - generic: Categorías
+                - listitem:
+                  - link:
+                    - /url: /dashboard/materials/config
+                    - img
+                    - generic: Configuración
+            - generic:
+              - generic: Operaciones
+              - list:
+                - listitem:
+                  - link:
+                    - /url: /dashboard/validation
+                    - img
+                    - generic: Validación
+                - listitem:
+                  - link:
+                    - /url: /dashboard/evidence-review
+                    - img
+                    - generic: Revisión de evidencias de usuarios
+                - listitem:
+                  - link:
+                    - /url: /dashboard/certificate-bulk-imports
+                    - img
+                    - generic: Cargas por certificado
+                - listitem:
+                  - button [expanded]:
+                    - img
+                    - generic: Investidura
+                    - img
+                  - generic:
+                    - list:
+                      - listitem:
+                        - link:
+                          - /url: /dashboard/investiture
+                          - generic: Pendientes
+                      - listitem:
+                        - link:
+                          - /url: /dashboard/investiture/pipeline
+                          - generic: Pipeline
+                      - listitem:
+                        - link:
+                          - /url: /dashboard/investiture/config
+                          - generic: Configuración
+                - listitem:
+                  - link:
+                    - /url: /dashboard/folders
+                    - img
+                    - generic: Carpetas Anuales de Evidencias
+                - listitem:
+                  - button:
+                    - img
+                    - generic: Carpeta Anual de Evidencias
+                    - img
+                - listitem:
+                  - link:
+                    - /url: /dashboard/year-end
+                    - img
+                    - generic: Cierre de año
+            - generic:
+              - generic: Rankings y análisis
+              - list:
+                - listitem:
+                  - link:
+                    - /url: /dashboard/sla
+                    - img
+                    - generic: SLA
+                - listitem:
+                  - button:
+                    - img
+                    - generic: Configuración de pesos
+                    - img
+            - generic:
+              - generic: Comunicaciones
+              - list:
+                - listitem:
+                  - button:
+                    - img
+                    - generic: Notificaciones
+                    - img
+            - generic:
+              - generic: Solicitudes y reportes
+              - list:
+                - listitem:
+                  - button:
+                    - img
+                    - generic: Solicitudes
+                    - img
+                - listitem:
+                  - button:
+                    - img
+                    - generic: Reportes
+                    - img
+                - listitem:
+                  - link:
+                    - /url: /dashboard/support
+                    - img
+                    - generic: Reportes de soporte
+                - listitem:
+                  - link:
+                    - /url: /dashboard/member-of-month
+                    - img
+                    - generic: Miembro del mes
+            - generic:
+              - generic: Administración
+              - list:
+                - listitem:
+                  - button:
+                    - img
+                    - generic: Roles y permisos
+                    - img
+                - listitem:
+                  - button:
+                    - img
+                    - generic: Configuración
+                    - img
+                - listitem:
+                  - link:
+                    - /url: /dashboard/system/jobs
+                    - img
+                    - generic: Jobs y colas
+          - generic:
+            - list:
+              - listitem:
+                - button:
+                  - generic:
+                    - generic: A
+                  - generic:
+                    - generic: Admin
+                    - generic: admin@sacdia.com
+    - main:
+      - generic:
+        - heading [level=2]: Paleta de comandos
+        - paragraph: Buscá y navegá a cualquier sección del admin
+      - generic:
+        - button:
+          - img
+          - generic: Alternar barra lateral
+        - generic:
+          - navigation:
+            - list:
+              - listitem:
+                - link:
+                  - /url: /dashboard
+                  - text: Dashboard
+              - listitem:
+                - img
+              - listitem:
+                - link [disabled]: investiture
+        - generic:
+          - button:
+            - img
+            - generic: ACV
+            - img
+            - generic: 2025-2026
+            - img
+          - button:
+            - img
+            - generic: ⌘K
+          - button:
+            - img
+      - generic:
+        - heading [level=2]: Búsqueda global
+        - paragraph: Buscá páginas, catálogos y secciones del panel
+      - main:
+        - generic:
+          - generic:
+            - generic:
+              - generic:
+                - generic:
+                  - generic:
+                    - heading [level=1]: Investiduras
+                    - paragraph: Validación y registro de investiduras de miembros de los clubes.
+              - generic:
+                - generic:
+                  - generic:
+                    - combobox:
+                      - generic:
+                        - text: 2025-2026
+                        - generic: (activo)
+                      - img
+                  - generic:
+                    - paragraph: 1 pendiente
+                    - button:
+                      - img
+                      - text: Actualizar
+                - generic:
+                  - generic:
+                    - table:
+                      - rowgroup:
+                        - row:
+                          - columnheader: Miembro
+                          - columnheader: Clase / Año
+                          - columnheader: Club / Sección
+                          - columnheader: Enviado por
+                          - columnheader: Enviado
+                          - columnheader: Estado
+                          - columnheader: Acciones
+                      - rowgroup:
+                        - row:
+                          - cell:
+                            - generic:
+                              - paragraph: Abner Reyes Ramírez
+                              - paragraph: abner.reyes03@gmail.com
+                          - cell:
+                            - generic:
+                              - paragraph: Guía
+                              - paragraph: "2026"
+                          - cell:
+                            - generic:
+                              - paragraph: ACV
+                              - paragraph: Sección no disponible
+                          - cell:
+                            - generic:
+                              - paragraph: Abner Reyes Ramírez
+                              - paragraph: Director
+                          - cell: 15 jun 2026
+                          - cell:
+                            - generic:
+                              - img
+                              - text: Enviado
+                          - cell:
+                            - generic:
+                              - button:
+                                - img
+                                - text: Ver detalle
+                              - button:
+                                - img
+                              - button:
+                                - img
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e404] [cursor=pointer]:
+    - img [ref=e405]
+  - alert
+  - dialog "Detalle de investidura" [ref=e410]:
+    - generic [ref=e411]:
+      - heading "Detalle de investidura" [level=2] [ref=e412]
+      - paragraph [ref=e413]:
+        - text: Abner Reyes Ramírez ·
+        - generic [ref=e414]:
+          - img
+          - text: Enviado
+    - generic [ref=e417]:
+      - generic [ref=e418]:
+        - generic [ref=e419]:
+          - paragraph [ref=e420]: Miembro
+          - paragraph [ref=e421]: Abner Reyes Ramírez
+          - paragraph [ref=e422]: abner.reyes03@gmail.com
+        - generic [ref=e423]:
+          - paragraph [ref=e424]: Clase
+          - paragraph [ref=e425]: Guía
+          - paragraph [ref=e426]: "2026"
+        - generic [ref=e427]:
+          - paragraph [ref=e428]: Club y sección
+          - paragraph [ref=e429]: ACV
+          - paragraph [ref=e430]: Sección no disponible
+        - generic [ref=e431]:
+          - paragraph [ref=e432]: Enviado por
+          - paragraph [ref=e433]: Abner Reyes Ramírez
+          - paragraph [ref=e434]: Director
+      - generic [ref=e435]:
+        - generic [ref=e436]:
+          - generic [ref=e437]:
+            - heading "Módulos, secciones y evidencias" [level=3] [ref=e438]
+            - paragraph [ref=e439]: 0 de 30 secciones completadas
+          - generic [ref=e440]: 0%
+        - generic [ref=e441]:
+          - generic [ref=e442]:
+            - generic [ref=e443]:
+              - generic [ref=e444]:
+                - paragraph [ref=e445]: Requisitos generales
+                - paragraph [ref=e446]: 0/4 secciones completadas
+              - generic [ref=e447]: 0%
+            - generic [ref=e448]:
+              - generic [ref=e449]:
+                - generic [ref=e450]:
+                  - generic [ref=e451]:
+                    - generic [ref=e452]:
+                      - img [ref=e453]
+                      - paragraph [ref=e456]: Tener 15 años y/o estar en primer grado de bachillerato
+                    - paragraph [ref=e457]: Validado · Validado por Admin SACDIA
+                  - generic [ref=e458]: 0%
+                - link "image_picker_1A00B1A7-589D-4B4E-8A75-D3208EA42CD5-95296-0000023F8A11CFEA.png · Abner Reyes Ramírez" [ref=e460] [cursor=pointer]:
+                  - /url: https://5da196c051c48c7a4ebeea275a2b23d1.r2.cloudflarestorage.com/secure-documents/class-evidence/5-1778702235063.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=e1e7f77dddec5e425c309eba9ddbccb9%2F20260615%2Fauto%2Fs3%2Faws4_request&X-Amz-Date=20260615T211348Z&X-Amz-Expires=300&X-Amz-Signature=1282e93510c0a595232fba8aace103754d4b0a660329832286b32bf248469399&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject
+                  - generic [ref=e461]:
+                    - img [ref=e462]
+                    - generic [ref=e465]: image_picker_1A00B1A7-589D-4B4E-8A75-D3208EA42CD5-95296-0000023F8A11CFEA.png
+                    - generic [ref=e466]: · Abner Reyes Ramírez
+                  - img [ref=e467]
+              - generic [ref=e471]:
+                - generic [ref=e472]:
+                  - generic [ref=e473]:
+                    - generic [ref=e474]:
+                      - img [ref=e475]
+                      - paragraph [ref=e478]: Ser un miembro activo del Club de Conquistadores
+                    - paragraph [ref=e479]: Validado · Validado por Admin SACDIA
+                  - generic [ref=e480]: 0%
+                - link "Evidencia 01.png · Abner Reyes Ramírez" [ref=e482] [cursor=pointer]:
+                  - /url: https://5da196c051c48c7a4ebeea275a2b23d1.r2.cloudflarestorage.com/secure-documents/class-evidence/6-1781295444072.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=e1e7f77dddec5e425c309eba9ddbccb9%2F20260615%2Fauto%2Fs3%2Faws4_request&X-Amz-Date=20260615T211348Z&X-Amz-Expires=300&X-Amz-Signature=81326ae737c15695325e870aa629f6b17c27f4cc9251fd9e754c1c4a6217ba23&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject
+                  - generic [ref=e483]:
+                    - img [ref=e484]
+                    - generic [ref=e487]: Evidencia 01.png
+                    - generic [ref=e488]: · Abner Reyes Ramírez
+                  - img [ref=e489]
+              - generic [ref=e493]:
+                - generic [ref=e494]:
+                  - generic [ref=e495]:
+                    - generic [ref=e496]:
+                      - img [ref=e497]
+                      - paragraph [ref=e500]: Saber y entender la Legión de Honor de los Jóvenes Adventistas
+                    - paragraph [ref=e501]: Validado · Validado por Admin SACDIA
+                  - generic [ref=e502]: 0%
+                - generic [ref=e503]:
+                  - link "Evidencia 01.png · Abner Reyes Ramírez" [ref=e504] [cursor=pointer]:
+                    - /url: https://5da196c051c48c7a4ebeea275a2b23d1.r2.cloudflarestorage.com/secure-documents/class-evidence/7-1781312147253.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=e1e7f77dddec5e425c309eba9ddbccb9%2F20260615%2Fauto%2Fs3%2Faws4_request&X-Amz-Date=20260615T211348Z&X-Amz-Expires=300&X-Amz-Signature=f7c1bb9dffd03772ad1c0d7a1fe44cd29cc93bb6c657e0998cd1165b19aec122&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject
+                    - generic [ref=e505]:
+                      - img [ref=e506]
+                      - generic [ref=e509]: Evidencia 01.png
+                      - generic [ref=e510]: · Abner Reyes Ramírez
+                    - img [ref=e511]
+                  - link "Evidencia 02.png · Abner Reyes Ramírez" [ref=e515] [cursor=pointer]:
+                    - /url: https://5da196c051c48c7a4ebeea275a2b23d1.r2.cloudflarestorage.com/secure-documents/class-evidence/7-1781312148730.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=e1e7f77dddec5e425c309eba9ddbccb9%2F20260615%2Fauto%2Fs3%2Faws4_request&X-Amz-Date=20260615T211348Z&X-Amz-Expires=300&X-Amz-Signature=6cb8e3c0802d97953172b189d7e5f13739b2bfbd1a12b8c911f615f44600b7b7&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject
+                    - generic [ref=e516]:
+                      - img [ref=e517]
+                      - generic [ref=e520]: Evidencia 02.png
+                      - generic [ref=e521]: · Abner Reyes Ramírez
+                    - img [ref=e522]
+                  - link "Evidencia 03.png · Abner Reyes Ramírez" [ref=e526] [cursor=pointer]:
+                    - /url: https://5da196c051c48c7a4ebeea275a2b23d1.r2.cloudflarestorage.com/secure-documents/class-evidence/7-1781312150148.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=e1e7f77dddec5e425c309eba9ddbccb9%2F20260615%2Fauto%2Fs3%2Faws4_request&X-Amz-Date=20260615T211348Z&X-Amz-Expires=300&X-Amz-Signature=b2d16631b29f942cff7fec66f9c582ec3c989991c0bf4493d3a1c799b8b9331a&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject
+                    - generic [ref=e527]:
+                      - img [ref=e528]
+                      - generic [ref=e531]: Evidencia 03.png
+                      - generic [ref=e532]: · Abner Reyes Ramírez
+                    - img [ref=e533]
+                  - link "Evidencia 04.jpg · Abner Reyes Ramírez" [ref=e537] [cursor=pointer]:
+                    - /url: https://5da196c051c48c7a4ebeea275a2b23d1.r2.cloudflarestorage.com/secure-documents/class-evidence/7-1781312151747.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=e1e7f77dddec5e425c309eba9ddbccb9%2F20260615%2Fauto%2Fs3%2Faws4_request&X-Amz-Date=20260615T211348Z&X-Amz-Expires=300&X-Amz-Signature=135e133da5fc25cc56f350c56415f3b6b3661398a7ad3bd4a8f741340dea26b1&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject
+                    - generic [ref=e538]:
+                      - img [ref=e539]
+                      - generic [ref=e542]: Evidencia 04.jpg
+                      - generic [ref=e543]: · Abner Reyes Ramírez
+                    - img [ref=e544]
+                  - link "Evidencia 05.png · Abner Reyes Ramírez" [ref=e548] [cursor=pointer]:
+                    - /url: https://5da196c051c48c7a4ebeea275a2b23d1.r2.cloudflarestorage.com/secure-documents/class-evidence/7-1781312153392.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=e1e7f77dddec5e425c309eba9ddbccb9%2F20260615%2Fauto%2Fs3%2Faws4_request&X-Amz-Date=20260615T211348Z&X-Amz-Expires=300&X-Amz-Signature=501bc76d929bed58f955fcf7786d21f0c5b85a608a2d0a453a2f2170a1eba84e&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject
+                    - generic [ref=e549]:
+                      - img [ref=e550]
+                      - generic [ref=e553]: Evidencia 05.png
+                      - generic [ref=e554]: · Abner Reyes Ramírez
+                    - img [ref=e555]
+                  - link "Evidencia 06.png · Abner Reyes Ramírez" [ref=e559] [cursor=pointer]:
+                    - /url: https://5da196c051c48c7a4ebeea275a2b23d1.r2.cloudflarestorage.com/secure-documents/class-evidence/7-1781312154788.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=e1e7f77dddec5e425c309eba9ddbccb9%2F20260615%2Fauto%2Fs3%2Faws4_request&X-Amz-Date=20260615T211348Z&X-Amz-Expires=300&X-Amz-Signature=9f89db0094af1015bc83a07eb10439be2d4e96d5add638da588cc92eaa841b07&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject
+                    - generic [ref=e560]:
+                      - img [ref=e561]
+                      - generic [ref=e564]: Evidencia 06.png
+                      - generic [ref=e565]: · Abner Reyes Ramírez
+                    - img [ref=e566]
+              - generic [ref=e570]:
+                - generic [ref=e571]:
+                  - generic [ref=e572]:
+                    - generic [ref=e573]:
+                      - img [ref=e574]
+                      - paragraph [ref=e577]: Seleccionar y leer un libro de la lista del Club de Libros
+                    - paragraph [ref=e578]: Validado · Validado por Admin SACDIA
+                  - generic [ref=e579]: 0%
+                - link "Evidencia 01.pdf · Abner Reyes Ramírez" [ref=e581] [cursor=pointer]:
+                  - /url: https://5da196c051c48c7a4ebeea275a2b23d1.r2.cloudflarestorage.com/secure-documents/class-evidence/8-1781312248627.pdf?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=e1e7f77dddec5e425c309eba9ddbccb9%2F20260615%2Fauto%2Fs3%2Faws4_request&X-Amz-Date=20260615T211348Z&X-Amz-Expires=300&X-Amz-Signature=073a0993f8f813abd05171dd1196f5a0d56249fc95ef2b701490bbebe67e0098&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject
+                  - generic [ref=e582]:
+                    - img [ref=e583]
+                    - generic [ref=e586]: Evidencia 01.pdf
+                    - generic [ref=e587]: · Abner Reyes Ramírez
+                  - img [ref=e588]
+          - generic [ref=e592]:
+            - generic [ref=e593]:
+              - generic [ref=e594]:
+                - paragraph [ref=e595]: Descubrimiento espiritual
+                - paragraph [ref=e596]: 0/4 secciones completadas
+              - generic [ref=e597]: 0%
+            - generic [ref=e598]:
+              - generic [ref=e599]:
+                - generic [ref=e600]:
+                  - generic [ref=e601]:
+                    - generic [ref=e602]:
+                      - img [ref=e603]
+                      - paragraph [ref=e606]: Discutir cómo el cristiano puede poseer el fruto del Espíritu según Pablo
+                    - paragraph [ref=e607]: Validado · Validado por Admin SACDIA
+                  - generic [ref=e608]: 0%
+                - link "Evidencia 01.png · Abner Reyes Ramírez" [ref=e610] [cursor=pointer]:
+                  - /url: https://5da196c051c48c7a4ebeea275a2b23d1.r2.cloudflarestorage.com/secure-documents/class-evidence/9-1781548528036.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=e1e7f77dddec5e425c309eba9ddbccb9%2F20260615%2Fauto%2Fs3%2Faws4_request&X-Amz-Date=20260615T211348Z&X-Amz-Expires=300&X-Amz-Signature=5d02728a7a7af456c1e81ace969a45dec808e4ca62bba988ca07d675939eb6a9&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject
+                  - generic [ref=e611]:
+                    - img [ref=e612]
+                    - generic [ref=e615]: Evidencia 01.png
+                    - generic [ref=e616]: · Abner Reyes Ramírez
+                  - img [ref=e617]
+              - generic [ref=e621]:
+                - generic [ref=e622]:
+                  - generic [ref=e623]:
+                    - generic [ref=e624]:
+                      - img [ref=e625]
+                      - paragraph [ref=e628]: Contestar preguntas basadas en el audiovisual sobre el servicio del santuario
+                    - paragraph [ref=e629]: Validado · Validado por Admin SACDIA
+                  - generic [ref=e630]: 0%
+                - link "Evidencia 01.pdf · Abner Reyes Ramírez" [ref=e632] [cursor=pointer]:
+                  - /url: https://5da196c051c48c7a4ebeea275a2b23d1.r2.cloudflarestorage.com/secure-documents/class-evidence/10-1781548540888.pdf?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=e1e7f77dddec5e425c309eba9ddbccb9%2F20260615%2Fauto%2Fs3%2Faws4_request&X-Amz-Date=20260615T211348Z&X-Amz-Expires=300&X-Amz-Signature=d9f035c407ef3b9af5847bb91ddbfaeeee29df227a5ea1b7356067559ade64b1&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject
+                  - generic [ref=e633]:
+                    - img [ref=e634]
+                    - generic [ref=e637]: Evidencia 01.pdf
+                    - generic [ref=e638]: · Abner Reyes Ramírez
+                  - img [ref=e639]
+              - generic [ref=e643]:
+                - generic [ref=e644]:
+                  - generic [ref=e645]:
+                    - generic [ref=e646]:
+                      - img [ref=e647]
+                      - paragraph [ref=e650]: Familiarizarse con el énfasis doctrinal y espiritual de la iglesia
+                    - paragraph [ref=e651]: Validado · Validado por Admin SACDIA
+                  - generic [ref=e652]: 0%
+                - link "Evidencia 01.pdf · Abner Reyes Ramírez" [ref=e654] [cursor=pointer]:
+                  - /url: https://5da196c051c48c7a4ebeea275a2b23d1.r2.cloudflarestorage.com/secure-documents/class-evidence/11-1781548785662.pdf?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=e1e7f77dddec5e425c309eba9ddbccb9%2F20260615%2Fauto%2Fs3%2Faws4_request&X-Amz-Date=20260615T211348Z&X-Amz-Expires=300&X-Amz-Signature=311e513503af039a10da0871e95c600abebe8863f2ecd9c2484d068076eca01e&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject
+                  - generic [ref=e655]:
+                    - img [ref=e656]
+                    - generic [ref=e659]: Evidencia 01.pdf
+                    - generic [ref=e660]: · Abner Reyes Ramírez
+                  - img [ref=e661]
+              - generic [ref=e665]:
+                - generic [ref=e666]:
+                  - generic [ref=e667]:
+                    - generic [ref=e668]:
+                      - img [ref=e669]
+                      - paragraph [ref=e672]: Tener certificado vigente de Gemas Bíblicas
+                    - paragraph [ref=e673]: Validado · Validado por Admin SACDIA
+                  - generic [ref=e674]: 0%
+                - link "Evidencia 01.jpg · Abner Reyes Ramírez" [ref=e676] [cursor=pointer]:
+                  - /url: https://5da196c051c48c7a4ebeea275a2b23d1.r2.cloudflarestorage.com/secure-documents/class-evidence/12-1781548798915.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=e1e7f77dddec5e425c309eba9ddbccb9%2F20260615%2Fauto%2Fs3%2Faws4_request&X-Amz-Date=20260615T211348Z&X-Amz-Expires=300&X-Amz-Signature=ddbf9feaa3d8e6cfcd17fa9ba87687324a38b92a6dceb7e0f3c42d24ee6c6a90&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject
+                  - generic [ref=e677]:
+                    - img [ref=e678]
+                    - generic [ref=e681]: Evidencia 01.jpg
+                    - generic [ref=e682]: · Abner Reyes Ramírez
+                  - img [ref=e683]
+          - generic [ref=e687]:
+            - generic [ref=e688]:
+              - generic [ref=e689]:
+                - paragraph [ref=e690]: Sirviendo a otros
+                - paragraph [ref=e691]: 0/3 secciones completadas
+              - generic [ref=e692]: 0%
+            - generic [ref=e693]:
+              - generic [ref=e694]:
+                - generic [ref=e695]:
+                  - generic [ref=e696]:
+                    - generic [ref=e697]:
+                      - img [ref=e698]
+                      - paragraph [ref=e701]: Ayudar a organizar y participar en grupo o individualmente en actividades de servicio y testificación
+                    - paragraph [ref=e702]: Validado · Validado por Admin SACDIA
+                  - generic [ref=e703]: 0%
+                - link "Evidencia 01.jpg · Abner Reyes Ramírez" [ref=e705] [cursor=pointer]:
+                  - /url: https://5da196c051c48c7a4ebeea275a2b23d1.r2.cloudflarestorage.com/secure-documents/class-evidence/13-1781549146616.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=e1e7f77dddec5e425c309eba9ddbccb9%2F20260615%2Fauto%2Fs3%2Faws4_request&X-Amz-Date=20260615T211348Z&X-Amz-Expires=300&X-Amz-Signature=44656d78aa7885eb1b61652b5050d067629a24454bbe69e9df98891fbca846dd&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject
+                  - generic [ref=e706]:
+                    - img [ref=e707]
+                    - generic [ref=e710]: Evidencia 01.jpg
+                    - generic [ref=e711]: · Abner Reyes Ramírez
+                  - img [ref=e712]
+              - generic [ref=e716]:
+                - generic [ref=e717]:
+                  - generic [ref=e718]:
+                    - generic [ref=e719]:
+                      - img [ref=e720]
+                      - paragraph [ref=e723]: Participar en un intercambio de ideas sobre cómo testificar a otros muchachos
+                    - paragraph [ref=e724]: Validado · Validado por Admin SACDIA
+                  - generic [ref=e725]: 0%
+                - link "Evidencia 01.jpg · Abner Reyes Ramírez" [ref=e727] [cursor=pointer]:
+                  - /url: https://5da196c051c48c7a4ebeea275a2b23d1.r2.cloudflarestorage.com/secure-documents/class-evidence/14-1781549163880.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=e1e7f77dddec5e425c309eba9ddbccb9%2F20260615%2Fauto%2Fs3%2Faws4_request&X-Amz-Date=20260615T211348Z&X-Amz-Expires=300&X-Amz-Signature=96e67f579194196150142c40c2c23da8ba849df188492516c46242acf562c5df&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject
+                  - generic [ref=e728]:
+                    - img [ref=e729]
+                    - generic [ref=e732]: Evidencia 01.jpg
+                    - generic [ref=e733]: · Abner Reyes Ramírez
+                  - img [ref=e734]
+              - generic [ref=e738]:
+                - generic [ref=e739]:
+                  - generic [ref=e740]:
+                    - generic [ref=e741]:
+                      - img [ref=e742]
+                      - paragraph [ref=e745]: Reflexionar sobre el comunicador misionero
+                    - paragraph [ref=e746]: Validado · Validado por Admin SACDIA
+                  - generic [ref=e747]: 0%
+                - link "Evidencia 01.pdf · Abner Reyes Ramírez" [ref=e749] [cursor=pointer]:
+                  - /url: https://5da196c051c48c7a4ebeea275a2b23d1.r2.cloudflarestorage.com/secure-documents/class-evidence/15-1781549174596.pdf?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=e1e7f77dddec5e425c309eba9ddbccb9%2F20260615%2Fauto%2Fs3%2Faws4_request&X-Amz-Date=20260615T211348Z&X-Amz-Expires=300&X-Amz-Signature=3fbecd10c04176eb33f2ebda791c239d5fa1311ddd270e1c798203f80569f780&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject
+                  - generic [ref=e750]:
+                    - img [ref=e751]
+                    - generic [ref=e754]: Evidencia 01.pdf
+                    - generic [ref=e755]: · Abner Reyes Ramírez
+                  - img [ref=e756]
+          - generic [ref=e760]:
+            - generic [ref=e761]:
+              - generic [ref=e762]:
+                - paragraph [ref=e763]: La vida en la iglesia
+                - paragraph [ref=e764]: 0/4 secciones completadas
+              - generic [ref=e765]: 0%
+            - generic [ref=e766]:
+              - generic [ref=e767]:
+                - generic [ref=e768]:
+                  - generic [ref=e769]:
+                    - generic [ref=e770]:
+                      - img [ref=e771]
+                      - paragraph [ref=e774]: Considerar el diagrama denominacional de la organización y sus detalles
+                    - paragraph [ref=e775]: Validado · Validado por Admin SACDIA
+                  - generic [ref=e776]: 0%
+                - link "Evidencia 01.png · Abner Reyes Ramírez" [ref=e778] [cursor=pointer]:
+                  - /url: https://5da196c051c48c7a4ebeea275a2b23d1.r2.cloudflarestorage.com/secure-documents/class-evidence/18-1781549224211.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=e1e7f77dddec5e425c309eba9ddbccb9%2F20260615%2Fauto%2Fs3%2Faws4_request&X-Amz-Date=20260615T211348Z&X-Amz-Expires=300&X-Amz-Signature=05d691a3b306330dc1bd53ce55c1451787697e1c3515979f7b5de5285ab6ede7&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject
+                  - generic [ref=e779]:
+                    - img [ref=e780]
+                    - generic [ref=e783]: Evidencia 01.png
+                    - generic [ref=e784]: · Abner Reyes Ramírez
+                  - img [ref=e785]
+              - generic [ref=e789]:
+                - generic [ref=e790]:
+                  - generic [ref=e791]:
+                    - generic [ref=e792]:
+                      - img [ref=e793]
+                      - paragraph [ref=e796]: Planear una actividad social para el grupo una vez por trimestre
+                    - paragraph [ref=e797]: Validado · Validado por Admin SACDIA
+                  - generic [ref=e798]: 0%
+                - generic [ref=e799]:
+                  - link "Evidencia 01.png · Abner Reyes Ramírez" [ref=e800] [cursor=pointer]:
+                    - /url: https://5da196c051c48c7a4ebeea275a2b23d1.r2.cloudflarestorage.com/secure-documents/class-evidence/19-1781549241563.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=e1e7f77dddec5e425c309eba9ddbccb9%2F20260615%2Fauto%2Fs3%2Faws4_request&X-Amz-Date=20260615T211348Z&X-Amz-Expires=300&X-Amz-Signature=9bf219b60c77db1e2799ddb21262d1cda2902252aaf6ced2bcb2840989e37865&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject
+                    - generic [ref=e801]:
+                      - img [ref=e802]
+                      - generic [ref=e805]: Evidencia 01.png
+                      - generic [ref=e806]: · Abner Reyes Ramírez
+                    - img [ref=e807]
+                  - link "Evidencia 02.pdf · Abner Reyes Ramírez" [ref=e811] [cursor=pointer]:
+                    - /url: https://5da196c051c48c7a4ebeea275a2b23d1.r2.cloudflarestorage.com/secure-documents/class-evidence/19-1781549242965.pdf?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=e1e7f77dddec5e425c309eba9ddbccb9%2F20260615%2Fauto%2Fs3%2Faws4_request&X-Amz-Date=20260615T211348Z&X-Amz-Expires=300&X-Amz-Signature=d2cab7caafbb68a1037b2980d3e69e662d255bf1bed13e90a30b3cc21558bd4e&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject
+                    - generic [ref=e812]:
+                      - img [ref=e813]
+                      - generic [ref=e816]: Evidencia 02.pdf
+                      - generic [ref=e817]: · Abner Reyes Ramírez
+                    - img [ref=e818]
+              - generic [ref=e822]:
+                - generic [ref=e823]:
+                  - generic [ref=e824]:
+                    - generic [ref=e825]:
+                      - img [ref=e826]
+                      - paragraph [ref=e829]: Hacer una breve reseña histórica de la iglesia local
+                    - paragraph [ref=e830]: Validado · Validado por Admin SACDIA
+                  - generic [ref=e831]: 0%
+                - link "Evidencia 01.pdf · Abner Reyes Ramírez" [ref=e833] [cursor=pointer]:
+                  - /url: https://5da196c051c48c7a4ebeea275a2b23d1.r2.cloudflarestorage.com/secure-documents/class-evidence/20-1781549252567.pdf?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=e1e7f77dddec5e425c309eba9ddbccb9%2F20260615%2Fauto%2Fs3%2Faws4_request&X-Amz-Date=20260615T211348Z&X-Amz-Expires=300&X-Amz-Signature=b9d34084553e2518d66d04285afd364d6ec08660e4b5cf40eca0bab6b71dcf66&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject
+                  - generic [ref=e834]:
+                    - img [ref=e835]
+                    - generic [ref=e838]: Evidencia 01.pdf
+                    - generic [ref=e839]: · Abner Reyes Ramírez
+                  - img [ref=e840]
+              - generic [ref=e844]:
+                - generic [ref=e845]:
+                  - generic [ref=e846]:
+                    - generic [ref=e847]:
+                      - img [ref=e848]
+                      - paragraph [ref=e851]: Trazar el desarrollo de la Iglesia Adventista en la División Interamericana
+                    - paragraph [ref=e852]: Validado · Validado por Admin SACDIA
+                  - generic [ref=e853]: 0%
+                - link "Evidencia 01.jpg · Abner Reyes Ramírez" [ref=e855] [cursor=pointer]:
+                  - /url: https://5da196c051c48c7a4ebeea275a2b23d1.r2.cloudflarestorage.com/secure-documents/class-evidence/21-1781549265244.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=e1e7f77dddec5e425c309eba9ddbccb9%2F20260615%2Fauto%2Fs3%2Faws4_request&X-Amz-Date=20260615T211348Z&X-Amz-Expires=300&X-Amz-Signature=56e449ae957f38e50d8c16dac70fa1da9bd2239947cf43f88d18eebab295e357&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject
+                  - generic [ref=e856]:
+                    - img [ref=e857]
+                    - generic [ref=e860]: Evidencia 01.jpg
+                    - generic [ref=e861]: · Abner Reyes Ramírez
+                  - img [ref=e862]
+          - generic [ref=e866]:
+            - generic [ref=e867]:
+              - generic [ref=e868]:
+                - paragraph [ref=e869]: Historia denominacional
+                - paragraph [ref=e870]: 0/1 secciones completadas
+              - generic [ref=e871]: 0%
+            - generic [ref=e873]:
+              - generic [ref=e874]:
+                - generic [ref=e875]:
+                  - generic [ref=e876]:
+                    - img [ref=e877]
+                    - paragraph [ref=e880]: Estudiar expansión misionera, divisiones mundiales y desarrollo histórico adventista
+                  - paragraph [ref=e881]: Validado · Validado por Admin SACDIA
+                - generic [ref=e882]: 0%
+              - link "Evidencia 01.jpg · Abner Reyes Ramírez" [ref=e884] [cursor=pointer]:
+                - /url: https://5da196c051c48c7a4ebeea275a2b23d1.r2.cloudflarestorage.com/secure-documents/class-evidence/16-1781549194290.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=e1e7f77dddec5e425c309eba9ddbccb9%2F20260615%2Fauto%2Fs3%2Faws4_request&X-Amz-Date=20260615T211348Z&X-Amz-Expires=300&X-Amz-Signature=a0e7def3363ec364b1da4b5b213eb5058aa28135400bf9288dbef421d2c28fd3&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject
+                - generic [ref=e885]:
+                  - img [ref=e886]
+                  - generic [ref=e889]: Evidencia 01.jpg
+                  - generic [ref=e890]: · Abner Reyes Ramírez
+                - img [ref=e891]
+          - generic [ref=e895]:
+            - generic [ref=e896]:
+              - generic [ref=e897]:
+                - paragraph [ref=e898]: Desarrollo personal
+                - paragraph [ref=e899]: 0/1 secciones completadas
+              - generic [ref=e900]: 0%
+            - generic [ref=e902]:
+              - generic [ref=e903]:
+                - generic [ref=e904]:
+                  - generic [ref=e905]:
+                    - img [ref=e906]
+                    - paragraph [ref=e909]: Examinar actitudes frente a distintos tópicos por medio de la discusión en grupo
+                  - paragraph [ref=e910]: Validado · Validado por Admin SACDIA
+                - generic [ref=e911]: 0%
+              - link "Evidencia 01.pdf · Abner Reyes Ramírez" [ref=e913] [cursor=pointer]:
+                - /url: https://5da196c051c48c7a4ebeea275a2b23d1.r2.cloudflarestorage.com/secure-documents/class-evidence/17-1781549205505.pdf?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=e1e7f77dddec5e425c309eba9ddbccb9%2F20260615%2Fauto%2Fs3%2Faws4_request&X-Amz-Date=20260615T211348Z&X-Amz-Expires=300&X-Amz-Signature=120f89eb6682ecac9a3bf2c7c92a6f8d666e07c2a143e54b80d66233450f1e79&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject
+                - generic [ref=e914]:
+                  - img [ref=e915]
+                  - generic [ref=e918]: Evidencia 01.pdf
+                  - generic [ref=e919]: · Abner Reyes Ramírez
+                - img [ref=e920]
+          - generic [ref=e924]:
+            - generic [ref=e925]:
+              - generic [ref=e926]:
+                - paragraph [ref=e927]: Salud y bienestar físico
+                - paragraph [ref=e928]: 0/2 secciones completadas
+              - generic [ref=e929]: 0%
+            - generic [ref=e930]:
+              - generic [ref=e931]:
+                - generic [ref=e932]:
+                  - generic [ref=e933]:
+                    - generic [ref=e934]:
+                      - img [ref=e935]
+                      - paragraph [ref=e938]: Presentar motivos personales que demuestren la ventaja de una vida saludable
+                    - paragraph [ref=e939]: Validado · Validado por Admin SACDIA
+                  - generic [ref=e940]: 0%
+                - generic [ref=e941]:
+                  - link "Evidencia 01.png · Abner Reyes Ramírez" [ref=e942] [cursor=pointer]:
+                    - /url: https://5da196c051c48c7a4ebeea275a2b23d1.r2.cloudflarestorage.com/secure-documents/class-evidence/22-1781549417976.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=e1e7f77dddec5e425c309eba9ddbccb9%2F20260615%2Fauto%2Fs3%2Faws4_request&X-Amz-Date=20260615T211348Z&X-Amz-Expires=300&X-Amz-Signature=a4b0aee509d6332280b537911961587132f16d5e6d06c3b84dccf451e4882aaf&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject
+                    - generic [ref=e943]:
+                      - img [ref=e944]
+                      - generic [ref=e947]: Evidencia 01.png
+                      - generic [ref=e948]: · Abner Reyes Ramírez
+                    - img [ref=e949]
+                  - link "Evidencia 02.jpg · Abner Reyes Ramírez" [ref=e953] [cursor=pointer]:
+                    - /url: https://5da196c051c48c7a4ebeea275a2b23d1.r2.cloudflarestorage.com/secure-documents/class-evidence/22-1781549419365.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=e1e7f77dddec5e425c309eba9ddbccb9%2F20260615%2Fauto%2Fs3%2Faws4_request&X-Amz-Date=20260615T211348Z&X-Amz-Expires=300&X-Amz-Signature=83e97181fca78a1e8d10462b5610e5a73cdd53d209f81b0d0b89b3cd6909aeb1&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject
+                    - generic [ref=e954]:
+                      - img [ref=e955]
+                      - generic [ref=e958]: Evidencia 02.jpg
+                      - generic [ref=e959]: · Abner Reyes Ramírez
+                    - img [ref=e960]
+              - generic [ref=e964]:
+                - generic [ref=e965]:
+                  - generic [ref=e966]:
+                    - generic [ref=e967]:
+                      - img [ref=e968]
+                      - paragraph [ref=e971]: Completar actividades relacionadas con temperancia
+                    - paragraph [ref=e972]: Validado · Validado por Admin SACDIA
+                  - generic [ref=e973]: 0%
+                - link "Evidencia 01.pdf · Abner Reyes Ramírez" [ref=e975] [cursor=pointer]:
+                  - /url: https://5da196c051c48c7a4ebeea275a2b23d1.r2.cloudflarestorage.com/secure-documents/class-evidence/23-1781549527963.pdf?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=e1e7f77dddec5e425c309eba9ddbccb9%2F20260615%2Fauto%2Fs3%2Faws4_request&X-Amz-Date=20260615T211348Z&X-Amz-Expires=300&X-Amz-Signature=b0d406f3e8c9f97957115b1f7bfe2023d14ed24bbaac5f950e868656b3432eac&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject
+                  - generic [ref=e976]:
+                    - img [ref=e977]
+                    - generic [ref=e980]: Evidencia 01.pdf
+                    - generic [ref=e981]: · Abner Reyes Ramírez
+                  - img [ref=e982]
+          - generic [ref=e986]:
+            - generic [ref=e987]:
+              - generic [ref=e988]:
+                - paragraph [ref=e989]: Actividades al aire libre
+                - paragraph [ref=e990]: 0/4 secciones completadas
+              - generic [ref=e991]: 0%
+            - generic [ref=e992]:
+              - generic [ref=e993]:
+                - generic [ref=e994]:
+                  - generic [ref=e995]:
+                    - generic [ref=e996]:
+                      - img [ref=e997]
+                      - paragraph [ref=e1000]: Pernoctar dos noches en campamento y discutir equipo necesario
+                    - paragraph [ref=e1001]: Validado · Validado por Admin SACDIA
+                  - generic [ref=e1002]: 0%
+                - generic [ref=e1003]:
+                  - link "Evidencia 01.png · Abner Reyes Ramírez" [ref=e1004] [cursor=pointer]:
+                    - /url: https://5da196c051c48c7a4ebeea275a2b23d1.r2.cloudflarestorage.com/secure-documents/class-evidence/24-1781549544077.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=e1e7f77dddec5e425c309eba9ddbccb9%2F20260615%2Fauto%2Fs3%2Faws4_request&X-Amz-Date=20260615T211348Z&X-Amz-Expires=300&X-Amz-Signature=40784d320db13b2bd1de349b3b7c3d352367c1a2afc2b1e1624b19d747d38b13&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject
+                    - generic [ref=e1005]:
+                      - img [ref=e1006]
+                      - generic [ref=e1009]: Evidencia 01.png
+                      - generic [ref=e1010]: · Abner Reyes Ramírez
+                    - img [ref=e1011]
+                  - link "Evidencia 02.png · Abner Reyes Ramírez" [ref=e1015] [cursor=pointer]:
+                    - /url: https://5da196c051c48c7a4ebeea275a2b23d1.r2.cloudflarestorage.com/secure-documents/class-evidence/24-1781549545651.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=e1e7f77dddec5e425c309eba9ddbccb9%2F20260615%2Fauto%2Fs3%2Faws4_request&X-Amz-Date=20260615T211348Z&X-Amz-Expires=300&X-Amz-Signature=dd1ead09559a631554c30fb3cd08ffb3d0df10b7af5ad9ee7cb49562176c8b31&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject
+                    - generic [ref=e1016]:
+                      - img [ref=e1017]
+                      - generic [ref=e1020]: Evidencia 02.png
+                      - generic [ref=e1021]: · Abner Reyes Ramírez
+                    - img [ref=e1022]
+              - generic [ref=e1026]:
+                - generic [ref=e1027]:
+                  - generic [ref=e1028]:
+                    - generic [ref=e1029]:
+                      - img [ref=e1030]
+                      - paragraph [ref=e1033]: Planear y cocinar al aire libre tres platillos diferentes
+                    - paragraph [ref=e1034]: Validado · Validado por Admin SACDIA
+                  - generic [ref=e1035]: 0%
+                - link "Evidencia 01.pdf · Abner Reyes Ramírez" [ref=e1037] [cursor=pointer]:
+                  - /url: https://5da196c051c48c7a4ebeea275a2b23d1.r2.cloudflarestorage.com/secure-documents/class-evidence/25-1781549555125.pdf?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=e1e7f77dddec5e425c309eba9ddbccb9%2F20260615%2Fauto%2Fs3%2Faws4_request&X-Amz-Date=20260615T211348Z&X-Amz-Expires=300&X-Amz-Signature=fc58c081a2b5e4b9b426ffd32adcb32af4efe12b6158689016ac529d7aeb8c11&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject
+                  - generic [ref=e1038]:
+                    - img [ref=e1039]
+                    - generic [ref=e1042]: Evidencia 01.pdf
+                    - generic [ref=e1043]: · Abner Reyes Ramírez
+                  - img [ref=e1044]
+              - generic [ref=e1048]:
+                - generic [ref=e1049]:
+                  - generic [ref=e1050]:
+                    - generic [ref=e1051]:
+                      - img [ref=e1052]
+                      - paragraph [ref=e1055]: Construir un objeto con cuerdas y amarras (puente, torre, etc.)
+                    - paragraph [ref=e1056]: Validado · Validado por Admin SACDIA
+                  - generic [ref=e1057]: 0%
+                - link "Evidencia 01.png · Abner Reyes Ramírez" [ref=e1059] [cursor=pointer]:
+                  - /url: https://5da196c051c48c7a4ebeea275a2b23d1.r2.cloudflarestorage.com/secure-documents/class-evidence/26-1781549570321.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=e1e7f77dddec5e425c309eba9ddbccb9%2F20260615%2Fauto%2Fs3%2Faws4_request&X-Amz-Date=20260615T211348Z&X-Amz-Expires=300&X-Amz-Signature=aaa29809e9261f63a9607b03634b90b6f823dfd1db4609c0beedda08c7302237&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject
+                  - generic [ref=e1060]:
+                    - img [ref=e1061]
+                    - generic [ref=e1064]: Evidencia 01.png
+                    - generic [ref=e1065]: · Abner Reyes Ramírez
+                  - img [ref=e1066]
+              - generic [ref=e1070]:
+                - generic [ref=e1071]:
+                  - generic [ref=e1072]:
+                    - generic [ref=e1073]:
+                      - img [ref=e1074]
+                      - paragraph [ref=e1077]: Completar una especialidad no realizada anteriormente y que cuente para la clase
+                    - paragraph [ref=e1078]: Validado · Validado por Admin SACDIA
+                  - generic [ref=e1079]: 0%
+                - link "Evidencia 01.pdf · Abner Reyes Ramírez" [ref=e1081] [cursor=pointer]:
+                  - /url: https://5da196c051c48c7a4ebeea275a2b23d1.r2.cloudflarestorage.com/secure-documents/class-evidence/27-1781549578699.pdf?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=e1e7f77dddec5e425c309eba9ddbccb9%2F20260615%2Fauto%2Fs3%2Faws4_request&X-Amz-Date=20260615T211348Z&X-Amz-Expires=300&X-Amz-Signature=b7cf92995029d4e3b771777e368c6fea0d7f4488ebceb52922d8d7b858e394c1&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject
+                  - generic [ref=e1082]:
+                    - img [ref=e1083]
+                    - generic [ref=e1086]: Evidencia 01.pdf
+                    - generic [ref=e1087]: · Abner Reyes Ramírez
+                  - img [ref=e1088]
+          - generic [ref=e1092]:
+            - generic [ref=e1093]:
+              - generic [ref=e1094]:
+                - paragraph [ref=e1095]: Primeros auxilios
+                - paragraph [ref=e1096]: 0/5 secciones completadas
+              - generic [ref=e1097]: 0%
+            - generic [ref=e1098]:
+              - generic [ref=e1099]:
+                - generic [ref=e1100]:
+                  - generic [ref=e1101]:
+                    - generic [ref=e1102]:
+                      - img [ref=e1103]
+                      - paragraph [ref=e1106]: Pasar el examen de primeros auxilios para Guía
+                    - paragraph [ref=e1107]: Validado · Validado por Admin SACDIA
+                  - generic [ref=e1108]: 0%
+                - link "Evidencia 01.jpg · Abner Reyes Ramírez" [ref=e1110] [cursor=pointer]:
+                  - /url: https://5da196c051c48c7a4ebeea275a2b23d1.r2.cloudflarestorage.com/secure-documents/class-evidence/32-1781549642181.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=e1e7f77dddec5e425c309eba9ddbccb9%2F20260615%2Fauto%2Fs3%2Faws4_request&X-Amz-Date=20260615T211348Z&X-Amz-Expires=300&X-Amz-Signature=3982dc4667c585283b56c8bc584a3d4ac33908f24f4a93d02b57a89c100e7dcf&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject
+                  - generic [ref=e1111]:
+                    - img [ref=e1112]
+                    - generic [ref=e1115]: Evidencia 01.jpg
+                    - generic [ref=e1116]: · Abner Reyes Ramírez
+                  - img [ref=e1117]
+              - generic [ref=e1121]:
+                - generic [ref=e1122]:
+                  - generic [ref=e1123]:
+                    - generic [ref=e1124]:
+                      - img [ref=e1125]
+                      - paragraph [ref=e1128]: Técnica de RCP y RCCP
+                    - paragraph [ref=e1129]: Validado · Validado por Admin SACDIA
+                  - generic [ref=e1130]: 0%
+                - link "Evidencia 01.jpg · Abner Reyes Ramírez" [ref=e1132] [cursor=pointer]:
+                  - /url: https://5da196c051c48c7a4ebeea275a2b23d1.r2.cloudflarestorage.com/secure-documents/class-evidence/31-1781549629371.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=e1e7f77dddec5e425c309eba9ddbccb9%2F20260615%2Fauto%2Fs3%2Faws4_request&X-Amz-Date=20260615T211348Z&X-Amz-Expires=300&X-Amz-Signature=70d1f3111be13cc7b3aebb606d28651893e5740f0e32f7a5c0981031594babd4&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject
+                  - generic [ref=e1133]:
+                    - img [ref=e1134]
+                    - generic [ref=e1137]: Evidencia 01.jpg
+                    - generic [ref=e1138]: · Abner Reyes Ramírez
+                  - img [ref=e1139]
+              - generic [ref=e1143]:
+                - generic [ref=e1144]:
+                  - generic [ref=e1145]:
+                    - generic [ref=e1146]:
+                      - img [ref=e1147]
+                      - paragraph [ref=e1150]: Qué hacer en emergencias
+                    - paragraph [ref=e1151]: Validado · Validado por Admin SACDIA
+                  - generic [ref=e1152]: 0%
+                - link "Evidencia 01.png · Abner Reyes Ramírez" [ref=e1154] [cursor=pointer]:
+                  - /url: https://5da196c051c48c7a4ebeea275a2b23d1.r2.cloudflarestorage.com/secure-documents/class-evidence/30-1781549615898.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=e1e7f77dddec5e425c309eba9ddbccb9%2F20260615%2Fauto%2Fs3%2Faws4_request&X-Amz-Date=20260615T211348Z&X-Amz-Expires=300&X-Amz-Signature=bd49ba020bacce196cfd70347d39743a3097100db53feeba9d21358c2701c76d&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject
+                  - generic [ref=e1155]:
+                    - img [ref=e1156]
+                    - generic [ref=e1159]: Evidencia 01.png
+                    - generic [ref=e1160]: · Abner Reyes Ramírez
+                  - img [ref=e1161]
+              - generic [ref=e1165]:
+                - generic [ref=e1166]:
+                  - generic [ref=e1167]:
+                    - generic [ref=e1168]:
+                      - img [ref=e1169]
+                      - paragraph [ref=e1172]: Transportación de lesionados
+                    - paragraph [ref=e1173]: Validado · Validado por Admin SACDIA
+                  - generic [ref=e1174]: 0%
+                - link "Evidencia 01.png · Abner Reyes Ramírez" [ref=e1176] [cursor=pointer]:
+                  - /url: https://5da196c051c48c7a4ebeea275a2b23d1.r2.cloudflarestorage.com/secure-documents/class-evidence/29-1781549603667.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=e1e7f77dddec5e425c309eba9ddbccb9%2F20260615%2Fauto%2Fs3%2Faws4_request&X-Amz-Date=20260615T211348Z&X-Amz-Expires=300&X-Amz-Signature=48546479ed5583c1c20e9c249e1c76e921719cd91dc3ed7bb228fc545120ae2d&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject
+                  - generic [ref=e1177]:
+                    - img [ref=e1178]
+                    - generic [ref=e1181]: Evidencia 01.png
+                    - generic [ref=e1182]: · Abner Reyes Ramírez
+                  - img [ref=e1183]
+              - generic [ref=e1187]:
+                - generic [ref=e1188]:
+                  - generic [ref=e1189]:
+                    - generic [ref=e1190]:
+                      - img [ref=e1191]
+                      - paragraph [ref=e1194]: Emergencias diabéticas
+                    - paragraph [ref=e1195]: Validado · Validado por Admin SACDIA
+                  - generic [ref=e1196]: 0%
+                - link "Evidencia 01.pdf · Abner Reyes Ramírez" [ref=e1198] [cursor=pointer]:
+                  - /url: https://5da196c051c48c7a4ebeea275a2b23d1.r2.cloudflarestorage.com/secure-documents/class-evidence/28-1781549591865.pdf?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=e1e7f77dddec5e425c309eba9ddbccb9%2F20260615%2Fauto%2Fs3%2Faws4_request&X-Amz-Date=20260615T211348Z&X-Amz-Expires=300&X-Amz-Signature=ba14e2fe35bb8463dd9f118c6a2d6e3f0324582b012fbcdf68c83260e52f215e&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject
+                  - generic [ref=e1199]:
+                    - img [ref=e1200]
+                    - generic [ref=e1203]: Evidencia 01.pdf
+                    - generic [ref=e1204]: · Abner Reyes Ramírez
+                  - img [ref=e1205]
+          - generic [ref=e1209]:
+            - generic [ref=e1210]:
+              - generic [ref=e1211]:
+                - paragraph [ref=e1212]: Sección avanzada
+                - paragraph [ref=e1213]: 0/2 secciones completadas
+              - generic [ref=e1214]: 0%
+            - generic [ref=e1215]:
+              - generic [ref=e1216]:
+                - generic [ref=e1217]:
+                  - generic [ref=e1218]:
+                    - generic [ref=e1219]:
+                      - img [ref=e1220]
+                      - paragraph [ref=e1223]: Actividades complementarias de hogar, hospitalidad, arreglos florales y manejo del dinero
+                    - paragraph [ref=e1224]: Validado · Validado por Admin SACDIA
+                  - generic [ref=e1225]: 0%
+                - link "Evidencia 01.pdf · Abner Reyes Ramírez" [ref=e1227] [cursor=pointer]:
+                  - /url: https://5da196c051c48c7a4ebeea275a2b23d1.r2.cloudflarestorage.com/secure-documents/class-evidence/33-1781549659955.pdf?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=e1e7f77dddec5e425c309eba9ddbccb9%2F20260615%2Fauto%2Fs3%2Faws4_request&X-Amz-Date=20260615T211348Z&X-Amz-Expires=300&X-Amz-Signature=3bdd4c64ec3242308397cc1853e07898d11a9b95d69461cf2304c8976fa58292&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject
+                  - generic [ref=e1228]:
+                    - img [ref=e1229]
+                    - generic [ref=e1232]: Evidencia 01.pdf
+                    - generic [ref=e1233]: · Abner Reyes Ramírez
+                  - img [ref=e1234]
+              - generic [ref=e1238]:
+                - generic [ref=e1239]:
+                  - generic [ref=e1240]:
+                    - generic [ref=e1241]:
+                      - img [ref=e1242]
+                      - paragraph [ref=e1245]: Uso de la pañoleta
+                    - paragraph [ref=e1246]: Validado · Validado por Admin SACDIA
+                  - generic [ref=e1247]: 0%
+                - link "Evidencia 01.pdf · Abner Reyes Ramírez" [ref=e1249] [cursor=pointer]:
+                  - /url: https://5da196c051c48c7a4ebeea275a2b23d1.r2.cloudflarestorage.com/secure-documents/class-evidence/34-1781549671465.pdf?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=e1e7f77dddec5e425c309eba9ddbccb9%2F20260615%2Fauto%2Fs3%2Faws4_request&X-Amz-Date=20260615T211348Z&X-Amz-Expires=300&X-Amz-Signature=87ae8b5c19b1e227e19ec6a4ae4e22dc4227d688e481fbea2171dea8e0bced1e&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject
+                  - generic [ref=e1250]:
+                    - img [ref=e1251]
+                    - generic [ref=e1254]: Evidencia 01.pdf
+                    - generic [ref=e1255]: · Abner Reyes Ramírez
+                  - img [ref=e1256]
+      - heading "Historial de investidura" [level=3] [ref=e1260]
+      - list [ref=e1261]:
+        - listitem [ref=e1262]:
+          - img [ref=e1265]
+          - generic [ref=e1268]:
+            - paragraph [ref=e1269]: Enviado a validación
+            - paragraph [ref=e1270]: Abner Reyes · 15 jun 2026, 02:34 p.m.
+    - button "Cerrar" [active] [ref=e1271]:
+      - img
+      - generic [ref=e1272]: Cerrar
