@@ -8,6 +8,8 @@ El modulo de finanzas gestiona los movimientos economicos de cada club de Conqui
 
 Cada club tiene su propia contabilidad independiente, con registro de ingresos y egresos categorizados. El sistema ofrece un resumen financiero por club que permite a la directiva (particularmente al tesorero) tener visibilidad del balance general. Los movimientos financieros son filtrables por ano y mes, lo que facilita el cierre contable por periodo eclesiastico.
 
+Cuando el resumen se consulta con `year` y `month`, el campo `balance` representa el saldo acumulado del ano eclesiastico que contiene ese mes, desde el inicio del ano eclesiastico hasta el cierre del mes seleccionado. Los meses ya cerrados se toman desde `finance_period_closings`; los meses abiertos se calculan con movimientos activos en tiempo real.
+
 Las categorias financieras son un catalogo compartido que permite clasificar los movimientos de forma estandar entre clubes. Esto posibilita eventuales reportes consolidados a nivel de campo local o union.
 
 ## Que existe (verificado contra codigo)
@@ -60,7 +62,7 @@ Las categorias financieras son un catalogo compartido que permite clasificar los
 - **Autorizacion por rol de club**: La creacion de movimientos esta restringida a `director`, `deputy_director` y `treasurer` mediante `ClubRolesGuard`
 - **Soft delete**: Los movimientos se desactivan; esto implica que el resumen financiero debe considerar solo registros activos
 - **Categorias compartidas**: Las categorias financieras son globales, no por club, permitiendo estandarizacion
-- **Resumen calculado**: El endpoint `summary` calcula el balance en tiempo real desde los movimientos activos, no desde un campo pre-calculado
+- **Resumen acumulado por ano eclesiastico**: El endpoint `summary` con `year` + `month` calcula el saldo arrastrado del ano eclesiastico hasta el mes seleccionado; los meses cerrados usan el snapshot de `finance_period_closings` y los meses abiertos se calculan desde movimientos activos
 - **Doble superficie de lectura**: `GET /clubs/:clubId/finances` resuelve la vista mensual/anual del dashboard y `GET /clubs/:clubId/finances/transactions` cubre busqueda, filtros avanzados y paginacion server-side
 - **Filtrado temporal**: Los filtros por ano/mes se aplican a nivel de query, no como entidades separadas
 

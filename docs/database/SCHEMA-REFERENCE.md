@@ -2,7 +2,7 @@
 
 **Estado**: ACTIVE
 **Sincronizado contra**: `sacdia-backend/prisma/schema.prisma`
-**Fecha de resincronizacion**: 2026-06-18 (coordinación por zonas/asignaciones + honores: aplicabilidad por club y enlaces a clases)
+**Fecha de resincronizacion**: 2026-06-18 (coordinación por zonas/asignaciones + honores: aplicabilidad por club y enlaces a clases + asignaciones pedagógicas de clases)
 
 Referencia humana concisa del schema Prisma vigente.
 
@@ -45,6 +45,18 @@ Referencia humana concisa del schema Prisma vigente.
 - Incluye `expires_at` y `rejection_reason`.
 - La unicidad vigente es `@@unique([user_id, role_id, club_section_id, ecclesiastical_year_id, start_date])`.
 - Tambien soporta el flujo de membership requests via `status` (`pending`, `active`, `rejected`, `expired`) sobre la misma asignacion anual.
+
+### `class_counselor_assignments`
+
+- Modela la responsabilidad pedagógica anual de una clase progresiva por `user_id + club_section_id + class_id + ecclesiastical_year_id`.
+- Se vincula opcionalmente al `club_role_assignment_id` activo que sustenta la asignación operativa del usuario en esa sección/año.
+- `responsibility_type` acepta `primary`, `assistant` o `substitute`.
+- `exceptional` + `exception_reason` documentan el caso extraordinario de segunda clase asignada a la misma persona.
+- Restricciones vigentes:
+  - asignación activa única por `(user_id, club_section_id, class_id, ecclesiastical_year_id)`;
+  - máximo 1 `primary` activo por `(club_section_id, class_id, ecclesiastical_year_id)`;
+  - trigger DB limita a 3 responsables activos por clase/sección/año;
+  - trigger DB limita a 2 clases activas por persona/sección/año y exige justificación para la segunda.
 
 ### Coordinación institucional
 
@@ -396,7 +408,7 @@ Define el presupuesto de puntos por componente dentro de un eje anual:
 
 - `activity_types`, `activities`, `activity_instances`
 - `local_camporees`, `union_camporees`, `union_camporee_local_fields`, `camporee_clubs`, `camporee_members`, `camporee_payments`
-- `inventory_categories`, `club_inventory`, `inventory_history`
+- `inventory_categories`, `club_inventory`, `inventory_evidence_files`, `inventory_history`
 
 ### Finanzas y carpetas
 

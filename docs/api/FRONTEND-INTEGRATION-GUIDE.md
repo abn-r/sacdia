@@ -862,6 +862,8 @@ const summary = data?.data?.summary;
 // summary.total_income
 // summary.total_expenses
 // summary.balance
+// Si se envía year + month, balance es el saldo acumulado del año eclesiástico
+// hasta ese mes; los ingresos/egresos mensuales deben salir del listado mensual.
 ```
 
 ```dart

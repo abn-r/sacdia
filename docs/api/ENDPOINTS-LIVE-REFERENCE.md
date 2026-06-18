@@ -114,6 +114,10 @@
 | GET | `/api/v1/users/:userId/classes/:classId/progress` | JWT | - | Obtener progreso anual del usuario en una clase (`?enrollmentId=` opcional) | `src/classes/classes.controller.ts` |
 | PATCH | `/api/v1/users/:userId/classes/:classId/progress` | JWT | - | Actualizar progreso anual de sección (`enrollment_id` opcional) | `src/classes/classes.controller.ts` |
 | POST | `/api/v1/users/:userId/classes/enroll` | JWT | - | Inscribir usuario en clase; bloquea clases inactivas o fuera de ventana de disponibilidad por año eclesiástico. | `src/classes/classes.controller.ts` |
+| GET | `/api/v1/clubs/:clubId/sections/:sectionId/class-counselor-assignments` | JWT | `club_roles:read` | Listar consejeros/secretarios asignados a clases de una sección. Query opcional: `yearId`, `classId`, `active`. | `src/classes/class-counselor-assignments.controller.ts` |
+| POST | `/api/v1/clubs/:clubId/sections/:sectionId/class-counselor-assignments` | JWT | `club_roles:assign` | Asignar consejero/secretario a una clase progresiva de la sección. | `src/classes/class-counselor-assignments.controller.ts` |
+| PATCH | `/api/v1/class-counselor-assignments/:assignmentId` | JWT | `club_roles:assign` | Editar responsabilidad (`primary`, `assistant`, `substitute`), excepción o fechas de una asignación pedagógica. | `src/classes/class-counselor-assignments.controller.ts` |
+| DELETE | `/api/v1/class-counselor-assignments/:assignmentId` | JWT | `club_roles:revoke` | Revocar asignación pedagógica de clase (soft delete). | `src/classes/class-counselor-assignments.controller.ts` |
 | GET | `/api/v1/users/:userId/emergency-contacts` | JWT | - | Listar contactos de emergencia del usuario | `src/emergency-contacts/emergency-contacts.controller.ts` |
 | POST | `/api/v1/users/:userId/emergency-contacts` | JWT | `emergency_contacts:update` OR `users:update` (owner bypass) | Crear contacto de emergencia (máximo 5) | `src/emergency-contacts/emergency-contacts.controller.ts` |
 | DELETE | `/api/v1/users/:userId/emergency-contacts/:contactId` | JWT | - | Eliminar contacto de emergencia (soft delete) | `src/emergency-contacts/emergency-contacts.controller.ts` |
@@ -191,6 +195,9 @@
 - Si la resolución class-scoped es ambigua y no se envía override, la API responde `409` con código `ENROLLMENT_RESOLUTION_AMBIGUOUS`.
 - El payload exitoso de lectura expone `enrollment_id`, `ecclesiastical_year_id`, `investiture_status`, módulos, secciones, `evidence_files`, `submitted_by_name` y `validated_by_name` para hacer visible el owner anual resuelto, el estado de investidura y el detalle revisable de evidencias.
 - Una sección cuenta como completada si `status = VALIDATED` o si conserva el criterio legacy `score >= 70`; esta regla aplica tanto al detalle `GET /api/v1/users/:userId/classes/:classId/progress` como al resumen `overall_progress` de `GET /api/v1/users/:userId/classes`.
+- `class_counselor_assignments` modela responsabilidad pedagógica anual separada de `club_role_assignments`. El asignado debe tener rol activo `counselor` o `secretary` en la sección/año; `instructor` no es responsable formal de trayectoria.
+- Límites: máximo 1 `primary` y máximo 3 responsables activos por clase/sección/año; máximo 2 clases activas por persona/sección/año, donde la segunda requiere `exceptional=true` y `exception_reason`.
+- Para evidencias delegadas, el miembro objetivo (`:userId`) y el actor autenticado (`currentUser.sub`) son conceptos separados: el progreso pertenece al enrollment del miembro y `uploaded_by_id` representa quien cargó la evidencia.
 
 ### Master honors runtime notes (2026-06-04)
 
@@ -441,14 +448,24 @@
 | POST | `/api/v1/clubs/:clubId/activities` | JWT | director, subdirector, secretary, counselor | Crear actividad. Acepta `club_section_ids` e `is_joint` para actividades conjuntas (multi-seccion) | `src/activities/activities.controller.ts` |
 | GET | `/api/v1/clubs/:clubId/finances` | JWT | - | Listar movimientos financieros del club | `src/finances/finances.controller.ts` |
 | POST | `/api/v1/clubs/:clubId/finances` | JWT | director, deputy_director, treasurer | Crear movimiento financiero | `src/finances/finances.controller.ts` |
-| GET | `/api/v1/clubs/:clubId/finances/summary` | JWT | - | Resumen financiero del club | `src/finances/finances.controller.ts` |
+| GET | `/api/v1/clubs/:clubId/finances/summary` | JWT | - | Resumen financiero del club; con `year` + `month`, `balance` es acumulado del año eclesiástico hasta ese mes | `src/finances/finances.controller.ts` |
 | GET | `/api/v1/clubs/:clubId/sections` | JWT | - | Listar secciones del club | `src/clubs/clubs.controller.ts` |
 | GET | `/api/v1/clubs/:clubId/sections/:sectionId` | JWT | - | Obtener sección por ID | `src/clubs/clubs.controller.ts` |
 | POST | `/api/v1/clubs/:clubId/sections` | JWT | director, subdirector | Crear sección de club (requiere director o subdirector). Body acepta `club_type_id`, `name?`, `souls_target?`, `fee?`, `meeting_day?`, `meeting_time?`. | `src/clubs/clubs.controller.ts` |
 | PATCH | `/api/v1/clubs/:clubId/sections/:sectionId` | JWT | director, subdirector, secretary | Actualizar sección (requiere director, subdirector o secretario) | `src/clubs/clubs.controller.ts` |
-| GET | `/api/v1/clubs/:clubId/sections/:sectionId/members` | JWT | - | Listar miembros de la sección | `src/clubs/clubs.controller.ts` |
+| GET | `/api/v1/clubs/:clubId/sections/:sectionId/members` | JWT | - | Listar miembros de la sección con rol y `current_class` del año eclesiástico activo para el tipo de club de la sección | `src/clubs/clubs.controller.ts` |
 | POST | `/api/v1/clubs/:clubId/sections/:sectionId/roles` | JWT | director, subdirector, secretary | Asignar rol a un miembro (requiere director, subdirector o secretario) | `src/clubs/clubs.controller.ts` |
 | POST | `/api/v1/clubs/:clubId/sections/:sectionId/director-succession` | JWT | director-lf, assistant-lf | Sucesión anual: cierra el director activo actual y crea el nuevo director de la sección para el año eclesiástico indicado. Body: `{ current_assignment_id, successor_user_id, ecclesiastical_year_id, start_date? }`. | `src/clubs/clubs.controller.ts` |
+| GET | `/api/v1/clubs/:clubId/sections/:sectionId/class-counselor-assignments` | JWT | `club_roles:read` | Listar responsables pedagógicos asignados por clase de la sección | `src/classes/class-counselor-assignments.controller.ts` |
+| POST | `/api/v1/clubs/:clubId/sections/:sectionId/class-counselor-assignments` | JWT | `club_roles:assign` | Crear asignación pedagógica de clase para consejero/secretario activo | `src/classes/class-counselor-assignments.controller.ts` |
+| PATCH | `/api/v1/class-counselor-assignments/:assignmentId` | JWT | `club_roles:assign` | Editar responsabilidad, excepción o fechas de la asignación pedagógica | `src/classes/class-counselor-assignments.controller.ts` |
+| DELETE | `/api/v1/class-counselor-assignments/:assignmentId` | JWT | `club_roles:revoke` | Revocar asignación pedagógica de clase | `src/classes/class-counselor-assignments.controller.ts` |
+
+### Club members runtime notes
+
+- `GET /api/v1/clubs/:clubId/sections/:sectionId/members` resuelve `current_class` desde `enrollments`, no desde tablas legacy.
+- La clase se filtra por `(user_id, año eclesiástico activo, active=true, classes.club_type_id = club_sections.club_type_id)` para no marcar como "Sin clase" a miembros ya inscritos en la clase anual de su sección.
+- El objeto `current_class` expone al menos `{ id, class_id, name, club_type_id, enrollment_id, ecclesiastical_year_id, investiture_status }`; si no hay inscripción anual resoluble, se devuelve `null`.
 
 ## fcm-tokens
 
@@ -541,6 +558,7 @@ Notas contractuales de honores de usuario:
 | GET | `/api/v1/inventory/inventory/:id` | JWT | - | Obtener detalles de un item del inventario | `src/inventory/inventory.controller.ts` |
 | GET | `/api/v1/inventory/inventory/:inventoryId/history` | JWT | - | Obtener historial de cambios de un item del inventario | `src/inventory/inventory.controller.ts` |
 | PATCH | `/api/v1/inventory/inventory/:id` | JWT | - | Actualizar un item del inventario | `src/inventory/inventory.controller.ts` |
+| POST | `/api/v1/inventory/inventory/:id/evidences` | JWT | `multipart/form-data` (`file`) | Subir foto de evidencia del item (JPEG/PNG/WebP, max 5MB; max 3 activas) | `src/inventory/inventory.controller.ts` |
 
 ## notifications
 

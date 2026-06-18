@@ -25,6 +25,11 @@ La culminacion exitosa de una clase lleva a la investidura, que es el acto insti
   - `POST /users/:userId/classes/enroll` — inscribir usuario en clase (class_id + ecclesiastical_year_id); bloquea clases inactivas o fuera de ventana de disponibilidad
   - `GET /users/:userId/classes/:classId/progress` — progreso anual (acepta ?enrollmentId= como override)
   - `PATCH /users/:userId/classes/:classId/progress` — actualizar progreso de seccion (module_id, section_id, score, evidences, enrollment_id opcional)
+- **Asignación pedagógica de clases** (JwtAuthGuard + PermissionsGuard):
+  - `GET /clubs/:clubId/sections/:sectionId/class-counselor-assignments` — listar responsables de clases de una sección (`yearId`, `classId`, `active` opcionales)
+  - `POST /clubs/:clubId/sections/:sectionId/class-counselor-assignments` — asignar consejero/secretario a una clase
+  - `PATCH /class-counselor-assignments/:assignmentId` — editar responsabilidad, excepción o fechas
+  - `DELETE /class-counselor-assignments/:assignmentId` — revocar asignación (soft delete)
 - **Servicio**: `ClassesService` con spec de tests
 - **DTOs**: EnrollClassDto, UpdateProgressDto
 - **Decoradores**: @RequirePermissions('classes:read'/'classes:update'), @AuthorizationResource({ type: 'user', ownerParam: 'userId' })
@@ -46,7 +51,21 @@ La culminacion exitosa de una clase lleva a la investidura, que es el acto insti
 - `enrollments` — inscripcion anual operativa (enrollment_id, user_id, class_id, ecclesiastical_year_id, investiture_status, active). UNIQUE: (user_id, class_id, ecclesiastical_year_id). El estado `EXPIRED` preserva progreso historico cuando la duracion maxima ya vencio.
 - `class_section_progress` — progreso por seccion con enrollment_id como owner anual. UNIQUE: (enrollment_id, module_id, section_id)
 - `class_module_progress` — proyeccion de progreso por modulo. UNIQUE: (enrollment_id, module_id)
+- `class_counselor_assignments` — asignación anual de responsables pedagógicos por usuario + sección + clase + año; máximo 3 activos por clase/sección/año y máximo 2 clases activas por persona/sección/año.
 - `users_classes` — [RETIRADA] trayectoria consolidada legacy; no existe en el schema runtime actual
+
+## Asignación pedagógica de clases
+
+El rol operativo (`club_role_assignments`) y la responsabilidad pedagógica de una clase son conceptos distintos. Un usuario primero debe tener rol activo en la sección; luego puede recibir una clase mediante `class_counselor_assignments`.
+
+Reglas vigentes:
+
+- Roles asignables formalmente: `counselor` y `secretary`.
+- `instructor` no es responsable formal de la trayectoria anual; sólo imparte segmentos o especialidades.
+- Cada clase/sección/año puede tener 1 `primary` y hasta 2 apoyos (`assistant`/`substitute`), máximo 3 activos.
+- Una persona normalmente tiene 1 clase; la segunda clase requiere `exceptional=true` y `exception_reason`.
+- Director, subdirector, secretario y secretario-tesorero tendrán alcance de lectura de toda la sección para progreso/evidencias aunque no tengan asignación pedagógica directa.
+- En evidencias delegadas, el owner del progreso sigue siendo el `enrollment` del miembro objetivo; `uploaded_by_id` debe representar al actor que subió la evidencia.
 
 ## Requisitos funcionales
 
@@ -63,6 +82,8 @@ La culminacion exitosa de una clase lleva a la investidura, que es el acto insti
 11. La duracion de cursado se cuenta por anos eclesiasticos desde `enrollments.ecclesiastical_year_id`
 12. Antes de solicitar investidura, el backend exige respetar `min_duration_years` y `max_duration_years`
 13. Si un enrollment supera la duracion maxima sin investidura, pasa formalmente a `EXPIRED` y conserva su progreso como trayectoria historica
+14. Un consejero o secretario asignado a una clase puede ver el avance de miembros inscritos en esa clase.
+15. La carga delegada de evidencias debe distinguir miembro objetivo (`:userId`) de actor autenticado (`currentUser.sub`).
 
 ## Decisiones de diseno
 
@@ -75,6 +96,7 @@ La culminacion exitosa de una clase lleva a la investidura, que es el acto insti
 - **Clases legacy por disponibilidad**: `available_until_year_id = null` significa sin vencimiento; no se usa ano sentinel tipo 2100
 - **Duracion configurable por clase**: defaults `min_duration_years = 1` y `max_duration_years = 1`; Guia Mayor Avanzado/Instructor pueden extenderse por configuracion
 - **Trayectoria inmutable**: `EXPIRED` impide continuar o solicitar investidura, pero no borra progreso ni historial
+- **Asignación pedagógica separada**: `class_counselor_assignments` no reemplaza ni extiende `club_role_assignments`; evita mezclar cargo operativo, permisos y responsabilidad anual de una clase.
 
 ## Gaps y pendientes
 

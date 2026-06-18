@@ -12,6 +12,8 @@ Los roles de club (director, subdirector, secretario, tesorero, consejero, miemb
 
 Las unidades (`units`) son subdivisiones informales dentro de una seccion (tipicamente 6-8 miembros con un consejero), usadas para organizar actividades en grupos menores. Los enrollments registran la inscripcion anual operativa de cada miembro en una clase progresiva.
 
+La asignacion de un consejero/secretario a una clase progresiva concreta vive en `class_counselor_assignments`: depende de un rol activo en la seccion, pero no forma parte del cargo operativo. Esto permite que un consejero tenga unidad y tambien clase a cargo sin mezclar permisos, cupos de roles y trayectoria pedagógica.
+
 ## Que existe (verificado contra codigo)
 
 ### Backend (ClubsModule)
@@ -29,10 +31,14 @@ Las unidades (`units`) son subdivisiones informales dentro de una seccion (tipic
   - `POST /api/v1/clubs/:clubId/sections` — Crear seccion con nombre opcional y datos operativos (roles: director, subdirector)
   - `PATCH /api/v1/clubs/:clubId/sections/:sectionId` — Actualizar seccion (roles: director, subdirector, secretary)
   - `DELETE /api/v1/clubs/:clubId/sections/:sectionId` — Eliminar seccion (roles: director)
-  - `GET /api/v1/clubs/:clubId/sections/:sectionId/members` — Listar miembros de la seccion
+  - `GET /api/v1/clubs/:clubId/sections/:sectionId/members` — Listar miembros de la seccion con rol y clase anual activa (`current_class`) resuelta desde `enrollments`
   - `POST /api/v1/clubs/:clubId/sections/:sectionId/roles` — Asignar rol a miembro (roles: director, subdirector, secretary)
   - `PATCH /api/v1/club-roles/:assignmentId` — Actualizar asignacion de rol
   - `DELETE /api/v1/club-roles/:assignmentId` — Remover rol de miembro
+  - `GET /api/v1/clubs/:clubId/sections/:sectionId/class-counselor-assignments` — Listar responsables pedagógicos por clase
+  - `POST /api/v1/clubs/:clubId/sections/:sectionId/class-counselor-assignments` — Asignar consejero/secretario a clase
+  - `PATCH /api/v1/class-counselor-assignments/:assignmentId` — Editar responsabilidad/excepción/fechas
+  - `DELETE /api/v1/class-counselor-assignments/:assignmentId` — Revocar asignación pedagógica
 
 ### Admin
 - **3 paginas funcionales**: clubs list, clubs/new, clubs/[id]
@@ -56,10 +62,15 @@ Las unidades (`units`) son subdivisiones informales dentro de una seccion (tipic
 - `club_sections` — Secciones de club (unidad operativa por tipo), consolidado de las antiguas tablas `club_adventurers`, `club_pathfinders`, `club_master_guilds` (Decision 10, 2026-03-17)
 - `club_types` — Catalogo de tipos de club (Aventureros, Conquistadores, Guias Mayores)
 - `club_role_assignments` — Asignaciones de roles a usuarios en secciones (anual)
+- `class_counselor_assignments` — Asignaciones pedagógicas por usuario + sección + clase + año, vinculadas opcionalmente al `club_role_assignment` activo
 - `role_slot_limits` — Limites maximos de asignaciones activas por rol y seccion
 - `units` — Unidades dentro de secciones
 - `unit_members` — Miembros asignados a unidades
 - `enrollments` — Inscripciones anuales operativas
+
+### Contrato de miembros por sección
+
+El listado de miembros no debe inferir "Sin clase" desde la ausencia de datos en el cliente. El backend expone `current_class` por cada asignación activa de rol tomando la inscripción activa del año eclesiástico vigente y filtrándola por el `club_type_id` de la sección consultada. Si un miembro está inscrito en "Guía" de Conquistadores, la app y el panel deben renderizar esa clase en el grupo/ficha correspondiente.
 
 ## Requisitos funcionales
 
@@ -75,6 +86,8 @@ Las unidades (`units`) son subdivisiones informales dentro de una seccion (tipic
 10. Las unidades deben pertenecer a una seccion activa; sus miembros deben pertenecer a esa misma seccion
 11. Una seccion no puede tener mas cargos activos que los definidos para la directiva: `director` 1, `deputy-director` 2, `secretary` 1, `treasurer` 1 y `secretary-treasurer` 1
 12. `secretary-treasurer` es excluyente con `secretary` y `treasurer` separados dentro de la misma seccion
+13. Una clase de la sección puede tener máximo 3 responsables pedagógicos activos por año: 1 principal y hasta 2 apoyos/suplentes.
+14. Una persona puede tener hasta 2 clases activas en la misma sección/año; la segunda requiere marca de excepción y justificación.
 
 ## Decisiones de diseno
 
@@ -85,6 +98,7 @@ Las unidades (`units`) son subdivisiones informales dentro de una seccion (tipic
 - **Limites de directiva**: `role_slot_limits` define los cupos por seccion y el backend tambien conserva fallback canonico para cargos criticos aunque falte el seed. La regla se aplica al crear asignaciones directas, al actualizar un rol y al revisar solicitudes de asignacion.
 - **Contexto activo**: `users_pr.active_club_assignment_id` persiste el contexto de club activo del usuario, usado por `ClubRolesGuard` para resolver autorizacion
 - **Autorizacion por jerarquia de roles**: Director tiene todos los permisos; subdirector la mayoria; secretary puede gestionar roles y secciones
+- **Cargo vs responsabilidad pedagógica**: `club_role_assignments` define el cargo en la sección; `class_counselor_assignments` define qué clase acompaña ese actor durante el año.
 
 ## Gaps y pendientes
 

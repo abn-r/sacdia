@@ -8,7 +8,7 @@ El inventario gestiona los bienes materiales de cada club de Conquistadores, Ave
 
 El control de inventario es critico para la planificacion logistica de campamentos y camporees. Saber que tiene el club, en que estado se encuentra y que cantidad hay disponible evita gastos innecesarios y permite una distribucion equitativa de recursos entre unidades. El inventario esta categorizado mediante un catalogo compartido (`inventory_categories`) que estandariza la clasificacion entre clubes.
 
-Cada item del inventario pertenece a una instancia/seccion operativa de club (`club_section_id`) y tiene campos para nombre, descripcion, cantidad y categoria. El sistema soporta filtrado por categoria para facilitar la busqueda de items especificos.
+Cada item del inventario pertenece a una instancia/seccion operativa de club (`club_section_id`) y tiene campos para nombre, descripcion, cantidad y categoria. El sistema soporta filtrado por categoria para facilitar la busqueda de items especificos y adjuntar fotos de evidencia del articulo.
 
 ## Que existe (verificado contra codigo)
 
@@ -16,13 +16,14 @@ Cada item del inventario pertenece a una instancia/seccion operativa de club (`c
 - **Controller**: `src/inventory/inventory.controller.ts`
 - **Service**: `src/inventory/inventory.service.ts`
 - **Guards**: JwtAuthGuard, PermissionsGuard
-- **7 endpoints**:
+- **8 endpoints**:
   - `GET /api/v1/inventory/catalogs/inventory-categories` — Listar categorias de inventario
   - `GET /api/v1/inventory/clubs/:clubId/inventory` — Listar items del inventario de una instancia de club
   - `POST /api/v1/inventory/clubs/:clubId/inventory` — Agregar nuevo item al inventario
   - `GET /api/v1/inventory/inventory/:id` — Obtener detalles de un item
   - `GET /api/v1/inventory/inventory/:inventoryId/history` — Obtener historial de cambios del item
   - `PATCH /api/v1/inventory/inventory/:id` — Actualizar un item
+  - `POST /api/v1/inventory/inventory/:id/evidences` — Subir foto de evidencia del item (JPEG/PNG/WebP, maximo 3 activas)
   - `DELETE /api/v1/inventory/inventory/:id` — Eliminar logicamente un item (`active=false`)
 
 ### Admin
@@ -43,6 +44,7 @@ Cada item del inventario pertenece a una instancia/seccion operativa de club (`c
 ### Base de datos
 - `club_inventory` — Items del inventario por club/seccion, con `active` para soft delete
 - `inventory_categories` — Catalogo de categorias de inventario
+- `inventory_evidence_files` — Fotos de evidencia por item, con limite operativo de 3 archivos activos
 - `inventory_history` — Historial de cambios por campo/accion (`CREATE`, `UPDATE`, `DELETE`)
 - **Nota**: `inventory_categories` tenia un typo en el PK (`inventory_categoty_id`). Corregido en schema.prisma; migracion `20260320000000_fix_inventory_category_id_typo` creada (pendiente de deploy).
 
@@ -56,6 +58,7 @@ Cada item del inventario pertenece a una instancia/seccion operativa de club (`c
 6. El panel admin debe ofrecer gestion de inventario por club
 7. El sistema debe permitir consultar items individuales con todo su detalle
 8. El sistema debe exponer historial de cambios para auditoria basica por item
+9. Cada item puede adjuntar de 1 a 3 fotos de evidencia del articulo; la app exige al menos una foto al crear un nuevo registro
 
 ## Decisiones de diseno
 
@@ -63,12 +66,12 @@ Cada item del inventario pertenece a una instancia/seccion operativa de club (`c
 - **Namespace propio**: Los endpoints viven bajo `/inventory/` y separan categorias, listados y operaciones por item
 - **Soft delete operacional**: `DELETE` marca `club_inventory.active=false`; el item deja de aparecer en listados operativos, pero el registro y su auditoria tecnica permanecen
 - **Historial por campo**: cada alta, actualizacion o baja registra cambios en `inventory_history`, accesibles tanto desde el detalle como desde `GET /api/v1/inventory/inventory/:inventoryId/history`
+- **Evidencias fotograficas**: las fotos se guardan en almacenamiento privado (`EVIDENCE_FILES`) y la API devuelve URLs firmadas de corta duracion para consumo en app/admin
 
 ## Gaps y pendientes
 
 - **Typo en PK de categorias**: corregido en schema.prisma; migracion `20260320000000_fix_inventory_category_id_typo` creada y pendiente de deploy en produccion
 - **Sin historial de movimientos de negocio**: existe auditoria tecnica de cambios, pero no un kardex/logistica de prestamos, devoluciones o movimientos fisicos
-- **Sin fotos**: No hay soporte para adjuntar fotos de los items del inventario
 - **Sin prestamos**: No hay modelo para registrar prestamos de equipamiento entre clubes o a unidades
 - **Sin vinculacion a actividades**: No se puede asignar equipamiento a una actividad o campamento especifico
 
