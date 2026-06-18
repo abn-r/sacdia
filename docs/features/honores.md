@@ -46,6 +46,17 @@ Los estados `PENDING_REVIEW` y `APPROVED` bloquean cambios libres de modo y de a
 
 Los honores aprobados legacy anteriores a `completion_mode` no deben seguir en `UNDECIDED` si tienen artefactos externos (`document`, `certificate`, `images` o `evidence_files`). Esos registros se backfillean como `EXTERNAL` para no mostrar un estado imposible en el historico.
 
+## Notificaciones visibles
+
+Las notificaciones generadas por validación y logros deben usar la nomenclatura visible **especialidad**:
+
+- `validation:honor_submitted` muestra “Nueva especialidad enviada a revisión”.
+- `validation:honor_approved` muestra “Especialidad aprobada”.
+- `validation:honor_rejected` muestra “Especialidad rechazada”.
+- Los logros de especialidades deben evitar mostrar “Honor” en el cuerpo visible, aunque el evento interno siga siendo `honor.validated`.
+
+Los contratos internos se mantienen como `entity_type = "honor"` y `validation:honor_*` para no romper API, datos históricos ni filtros existentes.
+
 ## Maestrías de especialidades
 
 Las maestrías (`master_honors`) son parches/logros de banda derivados de especialidades aprobadas. No son un segundo flujo de revisión: se otorgan automáticamente porque solo cuentan especialidades previamente validadas.
