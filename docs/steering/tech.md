@@ -23,7 +23,7 @@
 
 ### Baseline técnica comprobable (Batch P1.1)
 
-- **Backend**: `sacdia-backend/` con NestJS 11.x (`@nestjs/common` `^11.0.1`), Prisma 7.x (`@prisma/client` `^7.3.0`) y TypeScript 5.7.x.
+- **Backend**: `sacdia-backend/` con Node.js 24.x (`engines.node: >=24 <25`), NestJS 11.x (`@nestjs/common` `^11.1.24`), Prisma 7.8.x (`@prisma/client` `^7.8.0`, `@prisma/adapter-pg` `^7.8.0`) y TypeScript 6.0.x.
 - **Admin web**: `sacdia-admin/` con Next.js 16.1.6, React 19.2.3, TypeScript 5.x, Tailwind CSS 4 y TanStack Query 5.x.
 - **Auth vigente**: Better Auth self-hosted en backend + JWT emitido/validado por backend; el admin trabaja con cookies HTTP-only hacia la API.
 - **Datos**: PostgreSQL como motor relacional; la autoridad estructural efectiva vive en `sacdia-backend/prisma/schema.prisma` hasta resincronizar la capa documental de `docs/database/`.
@@ -102,7 +102,7 @@
 ### Lenguaje
 
 **Lenguaje**: Node.js con TypeScript  
-**Versión**: TypeScript 5.7.x (runtime Node no fijado en este documento)
+**Versión**: Node.js 24.x (`>=24 <25`) + TypeScript 6.0.x
 
 **Librerías NestJS**:
 
@@ -750,7 +750,7 @@ typescript
 
 ### Versiones Mínimas
 
-**Node.js**: 20.x LTS  
+**Node.js**: 24.x para `sacdia-backend` (`>=24 <25`); otros módulos deben revisar su runtime operativo antes de fijar versión exacta.
 **Flutter**: 3.19+  
 **Dart**: 3.3+
 
@@ -1170,8 +1170,8 @@ Al sugerir instalación de packages:
 **pnpm (Backend/Admin)**:
 
 ```bash
-pnpm add @nestjs/core@^10.0.0
-pnpm add -D @types/node@^20.0.0
+pnpm add @nestjs/core@^11.0.0
+pnpm add -D @types/node@^24.0.0
 ```
 
 **Flutter**:

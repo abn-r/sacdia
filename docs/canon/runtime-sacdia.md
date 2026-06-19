@@ -62,10 +62,10 @@ Las capas documentadas del runtime son:
 
 Según la baseline técnica activa:
 
-- **Backend**: NestJS 10.x + Node.js 20.x + TypeScript 5.x <!-- VERIFICADO contra código 2026-03-14 -->
+- **Backend**: NestJS 11.x + Node.js 24.x (`>=24 <25`) + TypeScript 6.x <!-- VERIFICADO contra código 2026-06-19 -->
 - **Admin web**: Next.js 14+ + TypeScript + Tailwind + shadcn/ui <!-- VERIFICADO contra código 2026-03-14 -->
 - **App móvil**: Flutter 3.19+ <!-- VERIFICADO contra código 2026-03-14 -->
-- **Datos**: PostgreSQL 15.x en Supabase + Prisma v5 <!-- VERIFICADO contra código 2026-03-14 -->
+- **Datos**: PostgreSQL en Neon + Prisma 7.8.x con `@prisma/adapter-pg` <!-- VERIFICADO contra código 2026-06-19 -->
 - **Arquitectura técnica**: Backend REST API + múltiples clientes <!-- VERIFICADO contra código 2026-03-14 -->
 
 ---
