@@ -113,6 +113,8 @@ Add indexes:
 
 **Implementation note:** `PATCH`/`DELETE` by assignment id use a dedicated `class_counselor_assignment` authorization resource so the guard resolves the assignment's `club_section_id` before allowing mutations. Do not protect these routes with broad `active_assignment` scope.
 
+**Implementation note:** `progress-scope` and `members-progress` are implemented through `ClassProgressScopeController` + `ClassProgressScopeService`. `members-progress` must first validate the actor scope and then filter returned enrollments by active `club_role_assignments` membership in the requested section/year; validating only `class_id + ecclesiastical_year_id` is not enough because the same class exists across multiple sections.
+
 ## Task 5: Corregir actor vs target user en progreso/evidencias
 
 **Files:**
@@ -136,6 +138,8 @@ Then:
 - Store uploaded/submitted actor as `actorUserId`.
 - Authorize actor via class assignment or section-wide role.
 
+**Implementation note:** Controller now forwards both `:userId` and `currentUser.sub` for progress/evidence routes. Service methods resolve enrollment by target and record `uploaded_by_id`/`submitted_by_id` with actor.
+
 ## Task 6: Authorization helper
 
 **Files:**
@@ -147,6 +151,8 @@ Then:
 - Assigned class counselor/staff can access target member if target enrollment class/year/section matches assignment.
 - Director/subdirector/secretary/secretary-treasurer can access all class progress in their active section.
 - Global admin/coordinator behavior must remain compatible with existing guards.
+
+**Implementation note:** `ClassProgressAccessService` must resolve target member section memberships by `club_role_assignments` and class club type before accepting a counselor assignment; matching only `class_id + year` is not sufficient because the same class exists across multiple sections/clubs.
 
 ## Task 7: Admin UI
 
@@ -163,6 +169,8 @@ Then:
 - Show badge for exceptional second assignment.
 - Add revoke/edit actions.
 
+**Implementation note:** Admin web now mounts `ClassCounselorAssignmentsCard` inside `ClubSectionsPanel` for each existing section. It fetches section members through `listNormalizedClubSectionMembers`, filters assignable candidates to `counselor`/`secretary`, fetches classes by section `club_type_id`, and uses server actions for create/update/revoke assignment mutations.
+
 ## Task 8: App mobile UX
 
 **Files:**
@@ -170,6 +178,7 @@ Then:
 - Modify: `sacdia-app/lib/features/dashboard/presentation/widgets/quick_access_grid.dart`
 - Create: `sacdia-app/lib/features/classes/presentation/views/teaching_scope_view.dart`
 - Create: `sacdia-app/lib/features/classes/presentation/views/class_members_progress_view.dart`
+- Create: `sacdia-app/lib/features/classes/presentation/views/class_counselor_assignments_view.dart`
 - Modify: `sacdia-app/lib/features/classes/presentation/providers/classes_providers.dart`
 - Modify: `sacdia-app/lib/features/classes/data/datasources/classes_remote_data_source.dart`
 
@@ -180,6 +189,11 @@ Then:
 4. Opening a class shows members enrolled in that class.
 5. Tapping a member opens `ClassDetailWithProgressView` with `targetUserId` + `enrollmentId`.
 6. Upload/submit evidence uses target member route but actor auth.
+7. Directors/section operators with `club_roles:assign`/`club_roles:revoke` can open assignment management from `TeachingScopeView` and create/edit/revoke class counselor assignments in the mobile app.
+
+**Implementation note:** `sacdia-app` now wires `/home/grouped-class` to `TeachingScopeView`, backed by `classProgressScopeProvider` and `classMembersProgressProvider`. `ClassProgressQuery` accepts `targetUserId` so delegated evidence/progress calls target the member enrollment while the backend still derives the actor from the JWT.
+
+**Implementation note:** `ClassCounselorAssignmentsView` is mounted from the `TeachingScopeView` app bar for users with club-role assignment permissions. It reuses `membersNotifierProvider` to filter assignable candidates to `counselor`/`secretary`, `classesByClubTypeProvider` for the section class catalog, and `classCounselorAssignmentsProvider`/notifier for list/create/update/revoke.
 
 ## Task 9: Tests
 

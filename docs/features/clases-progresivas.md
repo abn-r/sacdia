@@ -30,19 +30,26 @@ La culminacion exitosa de una clase lleva a la investidura, que es el acto insti
   - `POST /clubs/:clubId/sections/:sectionId/class-counselor-assignments` — asignar consejero/secretario a una clase
   - `PATCH /class-counselor-assignments/:assignmentId` — editar responsabilidad, excepción o fechas
   - `DELETE /class-counselor-assignments/:assignmentId` — revocar asignación (soft delete)
+  - `GET /clubs/:clubId/sections/:sectionId/classes/progress-scope` — listar clases que el actor puede supervisar en la sección (`yearId` opcional)
+  - `GET /clubs/:clubId/sections/:sectionId/classes/:classId/members-progress` — listar avance resumido de miembros activos de esa sección inscritos en la clase (`yearId` opcional)
 - **Servicio**: `ClassesService` con spec de tests
 - **DTOs**: EnrollClassDto, UpdateProgressDto
-- **Decoradores**: @RequirePermissions('classes:read'/'classes:update'), @AuthorizationResource({ type: 'user', ownerParam: 'userId' })
+- **Decoradores**: lecturas/escrituras de progreso usan `@RequirePermissions('classes:read'/'classes:submit_progress')` + `@AuthorizationResource({ type: 'active_assignment' })`; la autorización fina de self, directiva de sección y consejero/secretario asignado vive en `ClassProgressAccessService`.
 
 ### Admin (sacdia-admin)
 - CRUD de clases activo desde catalogos/admin, incluyendo traducciones, disponibilidad por ano eclesiastico y duracion minima/maxima.
 - Consume `GET|POST|PATCH|DELETE /admin/classes` para administrar el catalogo.
+- En el detalle de club, la pestaña de secciones incluye una tarjeta “Clases asignadas” por sección para listar, crear, editar y revocar responsables pedagógicos mediante `class_counselor_assignments`.
+- La UI filtra candidatos asignables a roles `counselor` y `secretary`; `instructor` no aparece como responsable formal de clase.
 - Incluye proceso manual auditable para vencer enrollments atrasados: primero `dry_run`, luego confirmacion explicita antes de aplicar `POST /admin/classes/enrollments/expire-overdue`.
 - No gestiona progreso operativo de miembros desde el CRUD de catalogos.
 
 ### App (sacdia-app)
-- 6 screens: ClassesListView, ClassDetailView, ClassDetailWithProgressView, ClassModulesView, SectionDetailView, RequirementDetailView
-- Consume 8 endpoints incluyendo listado, detalle, modulos, inscripcion, progreso y subida/borrado de archivos de evidencia
+- 9 screens: ClassesListView, ClassDetailView, ClassDetailWithProgressView, ClassModulesView, SectionDetailView, RequirementDetailView, TeachingScopeView, ClassMembersProgressView, ClassCounselorAssignmentsView.
+- Consume endpoints de listado, detalle, modulos, inscripcion, progreso, subida/borrado de archivos de evidencia, alcance pedagógico por sección y asignación pedagógica de clases.
+- El acceso rápido `/home/grouped-class` abre `TeachingScopeView`: directores/subdirectores/secretaría ven las clases de toda la sección; consejeros con asignación ven sólo sus clases asignadas.
+- Desde `TeachingScopeView`, los usuarios con `club_roles:assign`/`club_roles:revoke` pueden abrir “Gestionar clases” para crear, editar y revocar asignaciones de consejeros/secretaría a clases de la sección.
+- `ClassMembersProgressView` lista los miembros activos de la sección inscritos en la clase y navega al detalle de progreso con `targetUserId` + `enrollmentId`; las evidencias se guardan sobre el enrollment del miembro objetivo y el actor sigue siendo el usuario autenticado.
 
 ### Base de datos
 - `classes` — catalogo de clases (class_id, name, club_type_id, order) con `available_from_year_id`, `available_until_year_id`, `min_duration_years`, `max_duration_years`
@@ -62,10 +69,13 @@ Reglas vigentes:
 
 - Roles asignables formalmente: `counselor` y `secretary`.
 - `instructor` no es responsable formal de la trayectoria anual; sólo imparte segmentos o especialidades.
+- El responsable asignable debe estar cursando o haber completado la clase `Guía Mayor`; esta elegibilidad aplica para todas las secciones (Aventureros, Conquistadores y Guías Mayores) y se valida también en backend.
 - Cada clase/sección/año puede tener 1 `primary` y hasta 2 apoyos (`assistant`/`substitute`), máximo 3 activos.
 - Una persona normalmente tiene 1 clase; la segunda clase requiere `exceptional=true` y `exception_reason`.
-- Director, subdirector, secretario y secretario-tesorero tendrán alcance de lectura de toda la sección para progreso/evidencias aunque no tengan asignación pedagógica directa.
-- En evidencias delegadas, el owner del progreso sigue siendo el `enrollment` del miembro objetivo; `uploaded_by_id` debe representar al actor que subió la evidencia.
+- Director, subdirector, secretario y secretario-tesorero tienen alcance de toda la sección para progreso/evidencias aunque no tengan asignación pedagógica directa.
+- En evidencias delegadas, el owner del progreso sigue siendo el `enrollment` del miembro objetivo; `uploaded_by_id`/`submitted_by_id` representan al actor que subió o envió la evidencia.
+- `ClassProgressAccessService` centraliza la autorización runtime: self access, bypass global ya permitido por guards (`super-admin`, admin/assistant-admin, coordinadores), asignación pedagógica activa o rol section-wide en la misma sección/año del miembro objetivo.
+- `ClassProgressScopeService` expone el scope pedagógico colectivo: `progress-scope` devuelve `access_level = section|assigned`, y `members-progress` reusa ese scope pero filtra los enrollments por membresía activa en la sección solicitada para no mezclar miembros de otras secciones que cursen la misma clase.
 
 ## Requisitos funcionales
 
@@ -82,7 +92,7 @@ Reglas vigentes:
 11. La duracion de cursado se cuenta por anos eclesiasticos desde `enrollments.ecclesiastical_year_id`
 12. Antes de solicitar investidura, el backend exige respetar `min_duration_years` y `max_duration_years`
 13. Si un enrollment supera la duracion maxima sin investidura, pasa formalmente a `EXPIRED` y conserva su progreso como trayectoria historica
-14. Un consejero o secretario asignado a una clase puede ver el avance de miembros inscritos en esa clase.
+14. Un consejero o secretario asignado a una clase puede ver el avance de miembros inscritos en esa clase, siempre que cumpla la elegibilidad de estar cursando o haber completado `Guía Mayor`.
 15. La carga delegada de evidencias debe distinguir miembro objetivo (`:userId`) de actor autenticado (`currentUser.sub`).
 
 ## Decisiones de diseno
@@ -91,7 +101,7 @@ Reglas vigentes:
 - **Clase derivada en post-registro**: el cliente no decide libremente la clase; puede omitir `class_id` y el backend la asigna, o enviarlo solo como confirmacion. Si no coincide con la clase calculada por edad/tipo de club, se devuelve `POST_REG_CLASS_NOT_ELIGIBLE`.
 - **Resolucion de enrollment**: el backend resuelve automaticamente una inscripcion activa del ano eclesiastico actual; enrollmentId es override aditivo
 - **Dos controladores separados**: ClassesController (catalogo) y UserClassesController (inscripciones) con guards diferentes
-- **PermissionsGuard con permisos finos**: classes:read y classes:update con AuthorizationResource para owner detection
+- **PermissionsGuard con permisos finos**: los endpoints de progreso usan permisos de club vía `active_assignment`; `ClassProgressAccessService` decide si el actor puede ver/modificar ese enrollment concreto (self, section-wide o asignación pedagógica activa).
 - **Backfill acotado**: filas legacy de progress sin enrollment_id solo se backfillean si mapean deterministicamente a una unica inscripcion
 - **Clases legacy por disponibilidad**: `available_until_year_id = null` significa sin vencimiento; no se usa ano sentinel tipo 2100
 - **Duracion configurable por clase**: defaults `min_duration_years = 1` y `max_duration_years = 1`; Guia Mayor Avanzado/Instructor pueden extenderse por configuracion
@@ -101,7 +111,7 @@ Reglas vigentes:
 ## Gaps y pendientes
 
 - [RESUELTO] La frontera de autoridad entre enrollments y users_classes ha sido resuelta: `users_classes` fue retirada y `enrollments` es la única autoridad
-- `/home/grouped-class` en app tiene classId hardcodeado a 1
+- [RESUELTO] `/home/grouped-class` en app ya no abre una clase fija/propia: resuelve el alcance pedagógico por sección y luego el miembro objetivo.
 - No hay proceso cron automatico para vencer enrollments; la primera iteracion usa proceso admin/manual auditable
 - Reporteria historica de clases vencidas queda para iteracion posterior
 
