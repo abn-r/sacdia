@@ -40,6 +40,7 @@ Cada item del inventario pertenece a una instancia/seccion operativa de club (`c
 - Consume categorias, listado, detalle, alta, edicion y eliminacion
 - CRUD completo desde la app
 - Incluye filtrado por categorias
+- El detalle movil muestra el tipo de club humano (Conquistadores, Aventureros o Guias Mayores) en lugar del `club_section_id` tecnico, y separa autor y fechas de auditoria en filas independientes
 
 ### Base de datos
 - `club_inventory` — Items del inventario por club/seccion, con `active` para soft delete
@@ -47,6 +48,10 @@ Cada item del inventario pertenece a una instancia/seccion operativa de club (`c
 - `inventory_evidence_files` — Fotos de evidencia por item, con limite operativo de 3 archivos activos
 - `inventory_history` — Historial de cambios por campo/accion (`CREATE`, `UPDATE`, `DELETE`)
 - **Nota**: `inventory_categories` tenia un typo en el PK (`inventory_categoty_id`). Corregido en schema.prisma; migracion `20260320000000_fix_inventory_category_id_typo` creada (pendiente de deploy).
+
+### Contrato de instancia de club
+
+Aunque el path historico conserva el nombre `:clubId`, los endpoints `GET/POST /api/v1/inventory/clubs/:clubId/inventory` reciben el identificador de la instancia/seccion operativa (`club_sections.club_section_id`). Los registros creados se persisten en `club_inventory.club_section_id` y el listado filtra por ese mismo campo.
 
 ## Requisitos funcionales
 
@@ -66,6 +71,7 @@ Cada item del inventario pertenece a una instancia/seccion operativa de club (`c
 - **Namespace propio**: Los endpoints viven bajo `/inventory/` y separan categorias, listados y operaciones por item
 - **Soft delete operacional**: `DELETE` marca `club_inventory.active=false`; el item deja de aparecer en listados operativos, pero el registro y su auditoria tecnica permanecen
 - **Historial por campo**: cada alta, actualizacion o baja registra cambios en `inventory_history`, accesibles tanto desde el detalle como desde `GET /api/v1/inventory/inventory/:inventoryId/history`
+- **Auditoria visible**: el detalle del item deriva `created_by`/`created_by_name` desde el primer evento `CREATE` de `inventory_history.performed_by`, para mostrar el usuario real que registro el articulo. Si el usuario tiene foto, la API agrega `avatar_url` firmado; si no, la app mantiene el icono de usuario.
 - **Evidencias fotograficas**: las fotos se guardan en almacenamiento privado (`EVIDENCE_FILES`) y la API devuelve URLs firmadas de corta duracion para consumo en app/admin
 
 ## Gaps y pendientes

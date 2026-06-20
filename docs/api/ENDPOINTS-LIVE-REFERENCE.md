@@ -552,13 +552,16 @@ Notas contractuales de honores de usuario:
 | Method | Path | Auth | Roles | Description | Source |
 |---|---|---|---|---|---|
 | GET | `/api/v1/inventory/catalogs/inventory-categories` | JWT | - | Listar categorías de inventario | `src/inventory/inventory.controller.ts` |
-| GET | `/api/v1/inventory/clubs/:clubId/inventory` | JWT | - | Listar items del inventario de un club | `src/inventory/inventory.controller.ts` |
-| POST | `/api/v1/inventory/clubs/:clubId/inventory` | JWT | - | Agregar nuevo item al inventario | `src/inventory/inventory.controller.ts` |
+| GET | `/api/v1/inventory/clubs/:clubId/inventory` | JWT | - | Listar items del inventario de una instancia/sección de club (`:clubId` es nombre legacy; el valor esperado es `club_sections.club_section_id`) | `src/inventory/inventory.controller.ts` |
+| POST | `/api/v1/inventory/clubs/:clubId/inventory` | JWT | - | Agregar nuevo item al inventario de una instancia/sección de club (`:clubId` es nombre legacy; el valor esperado es `club_sections.club_section_id`) | `src/inventory/inventory.controller.ts` |
 | DELETE | `/api/v1/inventory/inventory/:id` | JWT | - | Eliminar logicamente un item del inventario (`active=false`) | `src/inventory/inventory.controller.ts` |
 | GET | `/api/v1/inventory/inventory/:id` | JWT | - | Obtener detalles de un item del inventario | `src/inventory/inventory.controller.ts` |
 | GET | `/api/v1/inventory/inventory/:inventoryId/history` | JWT | - | Obtener historial de cambios de un item del inventario | `src/inventory/inventory.controller.ts` |
 | PATCH | `/api/v1/inventory/inventory/:id` | JWT | - | Actualizar un item del inventario | `src/inventory/inventory.controller.ts` |
 | POST | `/api/v1/inventory/inventory/:id/evidences` | JWT | `multipart/form-data` (`file`) | Subir foto de evidencia del item (JPEG/PNG/WebP, max 5MB; max 3 activas) | `src/inventory/inventory.controller.ts` |
+
+Notas contractuales de inventario:
+- `GET /api/v1/inventory/inventory/:id` expone `created_by`, `created_by_name`, `modified_by` y `modified_by_name` derivados de `inventory_history.performed_by`; `created_by` corresponde al evento `CREATE` del item. Cuando el actor tiene foto de perfil, `created_by.avatar_url`/`modified_by.avatar_url` se devuelven como URL firmada temporal.
 
 ## notifications
 
