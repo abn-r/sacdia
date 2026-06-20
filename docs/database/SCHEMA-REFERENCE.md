@@ -154,6 +154,8 @@ Referencia humana concisa del schema Prisma vigente.
 
 - Incluye `modified_by_id`, `club_section_id` y `post_closing_note`.
 - La relacion principal es con `club_sections`, no con tablas legacy separadas por tipo.
+- `finance_evidence_files` guarda hasta 3 fotos activas por movimiento financiero. Tiene FK `finance_id -> finances.finance_id` con `onDelete: Cascade`, FK `uploaded_by_id -> users.user_id`, metadatos de archivo (`file_url`, `file_name`, `file_type`, `file_size`) y `active`.
+- Indices de evidencias: `idx_finance_evidence_files_finance` y `idx_finance_evidence_files_uploaded_by`.
 
 ### `member_insurances`
 
@@ -412,7 +414,7 @@ Define el presupuesto de puntos por componente dentro de un eje anual:
 
 ### Finanzas y carpetas
 
-- `finances`, `finances_categories`, `FinancePeriodClosing`
+- `finances`, `finance_evidence_files`, `finances_categories`, `FinancePeriodClosing`
 - `folders`, `folders_modules`, `folders_sections`, `folder_assignments`, `folders_modules_records`, `folders_section_records`
 
 ### Enrollment anual, ranking y reportes

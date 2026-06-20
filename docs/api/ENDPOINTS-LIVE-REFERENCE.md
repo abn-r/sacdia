@@ -115,9 +115,11 @@
 | PATCH | `/api/v1/users/:userId/classes/:classId/progress` | JWT | - | Actualizar progreso anual de sección (`enrollment_id` opcional) | `src/classes/classes.controller.ts` |
 | POST | `/api/v1/users/:userId/classes/enroll` | JWT | - | Inscribir usuario en clase; bloquea clases inactivas o fuera de ventana de disponibilidad por año eclesiástico. | `src/classes/classes.controller.ts` |
 | GET | `/api/v1/clubs/:clubId/sections/:sectionId/class-counselor-assignments` | JWT | `club_roles:read` | Listar consejeros/secretarios asignados a clases de una sección. Query opcional: `yearId`, `classId`, `active`. | `src/classes/class-counselor-assignments.controller.ts` |
-| POST | `/api/v1/clubs/:clubId/sections/:sectionId/class-counselor-assignments` | JWT | `club_roles:assign` | Asignar consejero/secretario a una clase progresiva de la sección. | `src/classes/class-counselor-assignments.controller.ts` |
+| POST | `/api/v1/clubs/:clubId/sections/:sectionId/class-counselor-assignments` | JWT | `club_roles:assign` | Asignar consejero/secretario elegible por Guía Mayor a una clase progresiva de la sección. | `src/classes/class-counselor-assignments.controller.ts` |
 | PATCH | `/api/v1/class-counselor-assignments/:assignmentId` | JWT | `club_roles:assign` | Editar responsabilidad (`primary`, `assistant`, `substitute`), excepción o fechas de una asignación pedagógica. | `src/classes/class-counselor-assignments.controller.ts` |
 | DELETE | `/api/v1/class-counselor-assignments/:assignmentId` | JWT | `club_roles:revoke` | Revocar asignación pedagógica de clase (soft delete). | `src/classes/class-counselor-assignments.controller.ts` |
+| GET | `/api/v1/clubs/:clubId/sections/:sectionId/classes/progress-scope` | JWT | `classes:read` | Listar clases visibles para el actor en una sección (`yearId` opcional): todas si tiene alcance section-wide, o sólo asignadas por `class_counselor_assignments`. | `src/classes/class-progress-scope.controller.ts` |
+| GET | `/api/v1/clubs/:clubId/sections/:sectionId/classes/:classId/members-progress` | JWT | `classes:read` | Listar avance resumido de miembros activos de esa sección inscritos en la clase solicitada (`yearId` opcional). | `src/classes/class-progress-scope.controller.ts` |
 | GET | `/api/v1/users/:userId/emergency-contacts` | JWT | - | Listar contactos de emergencia del usuario | `src/emergency-contacts/emergency-contacts.controller.ts` |
 | POST | `/api/v1/users/:userId/emergency-contacts` | JWT | `emergency_contacts:update` OR `users:update` (owner bypass) | Crear contacto de emergencia (máximo 5) | `src/emergency-contacts/emergency-contacts.controller.ts` |
 | DELETE | `/api/v1/users/:userId/emergency-contacts/:contactId` | JWT | - | Eliminar contacto de emergencia (soft delete) | `src/emergency-contacts/emergency-contacts.controller.ts` |
@@ -188,16 +190,19 @@
 
 ### Class progress runtime notes (FS-03)
 
-- `GET/PATCH /api/v1/users/:userId/classes/:classId/progress` siguen siendo class-scoped en la ruta, pero el owner real del progreso es `enrollments.enrollment_id`.
+- `GET/PATCH /api/v1/users/:userId/classes/:classId/progress` siguen siendo class-scoped en la ruta, pero el owner real del progreso es `enrollments.enrollment_id`; los guards usan `active_assignment` para permitir permisos de club y `ClassProgressAccessService` hace la validación fina de self/section-wide/consejero asignado.
 - Sin override explícito, el backend resuelve una sola inscripción activa del año eclesiástico actual para `(userId, classId)`.
 - `GET` acepta `?enrollmentId=` y `PATCH` acepta `enrollment_id` como override aditivo para seleccionar una inscripción anual específica.
 - Si no existe inscripción anual resoluble, la API responde `404`.
 - Si la resolución class-scoped es ambigua y no se envía override, la API responde `409` con código `ENROLLMENT_RESOLUTION_AMBIGUOUS`.
 - El payload exitoso de lectura expone `enrollment_id`, `ecclesiastical_year_id`, `investiture_status`, módulos, secciones, `evidence_files`, `submitted_by_name` y `validated_by_name` para hacer visible el owner anual resuelto, el estado de investidura y el detalle revisable de evidencias.
-- Una sección cuenta como completada si `status = VALIDATED` o si conserva el criterio legacy `score >= 70`; esta regla aplica tanto al detalle `GET /api/v1/users/:userId/classes/:classId/progress` como al resumen `overall_progress` de `GET /api/v1/users/:userId/classes`.
+- Una sección cuenta como completada si `status = VALIDATED` o si conserva el criterio legacy `score >= 70`; esta regla aplica tanto al detalle `GET /api/v1/users/:userId/classes/:classId/progress` como al resumen `overall_progress` de `GET /api/v1/users/:userId/classes` y `GET /api/v1/clubs/:clubId/sections/:sectionId/classes/:classId/members-progress`.
 - `class_counselor_assignments` modela responsabilidad pedagógica anual separada de `club_role_assignments`. El asignado debe tener rol activo `counselor` o `secretary` en la sección/año; `instructor` no es responsable formal de trayectoria.
 - Límites: máximo 1 `primary` y máximo 3 responsables activos por clase/sección/año; máximo 2 clases activas por persona/sección/año, donde la segunda requiere `exceptional=true` y `exception_reason`.
-- Para evidencias delegadas, el miembro objetivo (`:userId`) y el actor autenticado (`currentUser.sub`) son conceptos separados: el progreso pertenece al enrollment del miembro y `uploaded_by_id` representa quien cargó la evidencia.
+- Para progreso/evidencias delegadas, el miembro objetivo (`:userId`) y el actor autenticado (`currentUser.sub`) son conceptos separados: el progreso pertenece al enrollment del miembro y `uploaded_by_id`/`submitted_by_id` representan quien cargó o envió la evidencia.
+- `ClassProgressAccessService` valida acceso después de resolver el enrollment objetivo: self access, bypass global ya permitido por guards (`super-admin`, admin/assistant-admin, coordinadores), asignación activa en `class_counselor_assignments` para la misma sección/clase/año, o rol section-wide (`director`, `deputy-director`, `secretary`, `secretary-treasurer`) en la sección del miembro.
+- `GET /clubs/:clubId/sections/:sectionId/classes/progress-scope` usa `ClassProgressScopeService` para devolver `access_level = section|assigned` y las clases visibles al actor.
+- `GET /clubs/:clubId/sections/:sectionId/classes/:classId/members-progress` reusa ese scope y además filtra los enrollments por membresía activa en la sección solicitada; no debe mezclar miembros de otras secciones que cursen la misma clase/año.
 
 ### Master honors runtime notes (2026-06-04)
 
@@ -424,6 +429,8 @@
 | GET | `/api/v1/classes` | Public | - | Listar clases disponibles para inscripción en el año eclesiástico vigente por defecto. Query: `clubTypeId?`, `page?`, `limit?`. | `src/classes/classes.controller.ts` |
 | GET | `/api/v1/classes/:classId` | Public | - | Obtener clase por ID | `src/classes/classes.controller.ts` |
 | GET | `/api/v1/classes/:classId/modules` | Public | - | Obtener módulos de una clase | `src/classes/classes.controller.ts` |
+| GET | `/api/v1/clubs/:clubId/sections/:sectionId/classes/progress-scope` | JWT | `classes:read` | Listar clases que el actor puede supervisar en una sección (`yearId` opcional) | `src/classes/class-progress-scope.controller.ts` |
+| GET | `/api/v1/clubs/:clubId/sections/:sectionId/classes/:classId/members-progress` | JWT | `classes:read` | Listar avance resumido de miembros activos de esa sección inscritos en una clase (`yearId` opcional) | `src/classes/class-progress-scope.controller.ts` |
 | POST | `/api/v1/users/:userId/classes/:classId/sections/:sectionId/submit` | JWT | `classes:submit_progress` | Enviar evidencia de sección de clase a validación. Query opcional `?enrollmentId=` para resolver el owner anual explícito. | `src/classes/classes.controller.ts` |
 | POST | `/api/v1/users/:userId/classes/:classId/sections/:sectionId/files` | JWT | `classes:submit_progress` | Subir archivo/imagen de evidencia de clase. Query opcional `?enrollmentId=` para resolver el owner anual explícito. | `src/classes/classes.controller.ts` |
 | DELETE | `/api/v1/users/:userId/classes/:classId/sections/:sectionId/files/:fileId` | JWT | `classes:submit_progress` | Borrar evidencia de clase. Query opcional `?enrollmentId=` para resolver el owner anual explícito. | `src/classes/classes.controller.ts` |
@@ -453,11 +460,13 @@
 | GET | `/api/v1/clubs/:clubId/sections/:sectionId` | JWT | - | Obtener sección por ID | `src/clubs/clubs.controller.ts` |
 | POST | `/api/v1/clubs/:clubId/sections` | JWT | director, subdirector | Crear sección de club (requiere director o subdirector). Body acepta `club_type_id`, `name?`, `souls_target?`, `fee?`, `meeting_day?`, `meeting_time?`. | `src/clubs/clubs.controller.ts` |
 | PATCH | `/api/v1/clubs/:clubId/sections/:sectionId` | JWT | director, subdirector, secretary | Actualizar sección (requiere director, subdirector o secretario) | `src/clubs/clubs.controller.ts` |
-| GET | `/api/v1/clubs/:clubId/sections/:sectionId/members` | JWT | - | Listar miembros de la sección con rol y `current_class` del año eclesiástico activo para el tipo de club de la sección | `src/clubs/clubs.controller.ts` |
+| GET | `/api/v1/clubs/:clubId/sections/:sectionId/members` | JWT | - | Listar miembros de la sección con rol, `current_class` y elegibilidad `class_counselor_eligible` para asignaciones de clase | `src/clubs/clubs.controller.ts` |
 | POST | `/api/v1/clubs/:clubId/sections/:sectionId/roles` | JWT | director, subdirector, secretary | Asignar rol a un miembro (requiere director, subdirector o secretario) | `src/clubs/clubs.controller.ts` |
 | POST | `/api/v1/clubs/:clubId/sections/:sectionId/director-succession` | JWT | director-lf, assistant-lf | Sucesión anual: cierra el director activo actual y crea el nuevo director de la sección para el año eclesiástico indicado. Body: `{ current_assignment_id, successor_user_id, ecclesiastical_year_id, start_date? }`. | `src/clubs/clubs.controller.ts` |
 | GET | `/api/v1/clubs/:clubId/sections/:sectionId/class-counselor-assignments` | JWT | `club_roles:read` | Listar responsables pedagógicos asignados por clase de la sección | `src/classes/class-counselor-assignments.controller.ts` |
-| POST | `/api/v1/clubs/:clubId/sections/:sectionId/class-counselor-assignments` | JWT | `club_roles:assign` | Crear asignación pedagógica de clase para consejero/secretario activo | `src/classes/class-counselor-assignments.controller.ts` |
+| POST | `/api/v1/clubs/:clubId/sections/:sectionId/class-counselor-assignments` | JWT | `club_roles:assign` | Crear asignación pedagógica de clase para consejero/secretario activo elegible por Guía Mayor | `src/classes/class-counselor-assignments.controller.ts` |
+| GET | `/api/v1/clubs/:clubId/sections/:sectionId/classes/progress-scope` | JWT | `classes:read` | Listar clases visibles para seguimiento de progreso en la sección | `src/classes/class-progress-scope.controller.ts` |
+| GET | `/api/v1/clubs/:clubId/sections/:sectionId/classes/:classId/members-progress` | JWT | `classes:read` | Listar avance resumido de miembros activos de la sección en una clase | `src/classes/class-progress-scope.controller.ts` |
 | PATCH | `/api/v1/class-counselor-assignments/:assignmentId` | JWT | `club_roles:assign` | Editar responsabilidad, excepción o fechas de la asignación pedagógica | `src/classes/class-counselor-assignments.controller.ts` |
 | DELETE | `/api/v1/class-counselor-assignments/:assignmentId` | JWT | `club_roles:revoke` | Revocar asignación pedagógica de clase | `src/classes/class-counselor-assignments.controller.ts` |
 
@@ -466,6 +475,7 @@
 - `GET /api/v1/clubs/:clubId/sections/:sectionId/members` resuelve `current_class` desde `enrollments`, no desde tablas legacy.
 - La clase se filtra por `(user_id, año eclesiástico activo, active=true, classes.club_type_id = club_sections.club_type_id)` para no marcar como "Sin clase" a miembros ya inscritos en la clase anual de su sección.
 - El objeto `current_class` expone al menos `{ id, class_id, name, club_type_id, enrollment_id, ecclesiastical_year_id, investiture_status }`; si no hay inscripción anual resoluble, se devuelve `null`.
+- Para UI de asignación pedagógica, la respuesta incluye `class_counselor_eligible` y `guide_major_class`; sólo son elegibles usuarios que estén cursando una inscripción activa no rechazada/expirada de `Guía Mayor` o tengan estado `APPROVED`/`INVESTIDO`.
 
 ## fcm-tokens
 
@@ -483,6 +493,7 @@
 |---|---|---|---|---|---|
 | DELETE | `/api/v1/finances/:financeId` | JWT | `finances:delete` | Desactivar movimiento | `src/finances/finances.controller.ts` |
 | GET | `/api/v1/finances/:financeId` | JWT | `finances:read` | Obtener movimiento por ID | `src/finances/finances.controller.ts` |
+| POST | `/api/v1/finances/:financeId/evidences` | JWT | `finances:update` | Subir foto de evidencia de un ingreso o egreso; multipart `file`, imagen, maximo 5MB y maximo 3 fotos activas por movimiento | `src/finances/finances.controller.ts` |
 | PATCH | `/api/v1/finances/:financeId` | JWT | `finances:update` | Actualizar movimiento | `src/finances/finances.controller.ts` |
 | GET | `/api/v1/finances/categories` | JWT | `finances:read` | Listar categorías financieras | `src/finances/finances.controller.ts` |
 | GET | `/api/v1/clubs/:clubId/finances/transactions` | JWT | `finances:read` | Listado paginado para vistas avanzadas; soporta `page`, `limit`, `type`, `search`, `startDate`, `endDate`, `sortBy`, `sortOrder` | `src/finances/finances.controller.ts` |

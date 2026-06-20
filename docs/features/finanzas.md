@@ -18,20 +18,22 @@ Las categorias financieras son un catalogo compartido que permite clasificar los
 - **Controller**: `src/finances/finances.controller.ts`
 - **Service**: `src/finances/finances.service.ts`
 - **Guards**: JwtAuthGuard, PermissionsGuard, ClubRolesGuard
-- **8 endpoints**:
+- **9 endpoints**:
   - `GET /api/v1/finances/categories` — Listar categorias financieras
   - `GET /api/v1/clubs/:clubId/finances/transactions` — Listado paginado de transacciones con `page`, `limit`, `type`, `search`, `startDate`, `endDate`, `sortBy`, `sortOrder`
   - `GET /api/v1/clubs/:clubId/finances` — Listar movimientos financieros del club
   - `GET /api/v1/clubs/:clubId/finances/summary` — Resumen financiero del club
   - `POST /api/v1/clubs/:clubId/finances` — Crear movimiento financiero (roles: director, deputy_director, treasurer)
   - `GET /api/v1/finances/:financeId` — Obtener movimiento por ID
+  - `POST /api/v1/finances/:financeId/evidences` — Subir foto de evidencia del ingreso/egreso (maximo 3 fotos activas por movimiento)
   - `PATCH /api/v1/finances/:financeId` — Actualizar movimiento
   - `DELETE /api/v1/finances/:financeId` — Desactivar movimiento
 
 ### Admin
 - **Dashboard completo**: Tarjetas resumen (ingresos/egresos/balance), tabla de transacciones con filtros por ano/mes, dialog de creacion/edicion, confirmacion de eliminacion
 - Cliente API en `src/lib/api/finances.ts`
-- **Consumo verificado**: usa `GET /api/v1/clubs/:clubId/finances`, `GET /summary`, `GET /finances/categories`, `POST /clubs/:clubId/finances`, `GET /finances/:financeId`, `PATCH /finances/:financeId`, `DELETE /finances/:financeId`
+- **Consumo verificado**: usa `GET /api/v1/clubs/:clubId/finances`, `GET /summary`, `GET /finances/categories`, `POST /clubs/:clubId/finances`, `GET /finances/:financeId`, `POST /finances/:financeId/evidences`, `PATCH /finances/:financeId`, `DELETE /finances/:financeId`
+- El dialog de creacion/edicion permite adjuntar evidencias fotograficas del comprobante, respetando el limite de 3 fotos por movimiento.
 - **Filtro actual admin**: el dashboard trabaja sobre la superficie mensual/anual de `GET /api/v1/clubs/:clubId/finances`; no usa hoy el endpoint paginado `/transactions`
 
 ### App Movil
@@ -41,9 +43,11 @@ Las categorias financieras son un catalogo compartido que permite clasificar los
 - Soporta busqueda, filtro por tipo, rango de fechas, orden y paginacion infinita en la vista completa de transacciones
 - Muestra resumen financiero (balance, total ingresos, total egresos)
 - CRUD completo de transacciones desde la app, incluyendo eliminacion con confirmacion via AlertDialog en la vista de detalle
+- Permite adjuntar hasta 3 fotos de evidencia por ingreso o egreso desde el formulario y visualizarlas en el detalle con visor interno.
 
 ### Base de datos
 - `finances` — Movimientos financieros (ingresos/egresos por club)
+- `finance_evidence_files` — Fotos de evidencia asociadas a movimientos financieros
 - `finances_categories` — Catalogo de categorias de movimientos financieros
 
 ## Requisitos funcionales
@@ -56,11 +60,13 @@ Las categorias financieras son un catalogo compartido que permite clasificar los
 6. Las categorias financieras deben ser un catalogo compartido entre clubes
 7. El panel admin debe permitir gestion y supervision financiera de los clubes
 8. El resumen financiero debe actualizarse en tiempo real conforme se registran movimientos
+9. Cada ingreso o egreso puede tener hasta 3 fotos de evidencia; las fotos no modifican saldos ni reabren periodos cerrados
 
 ## Decisiones de diseno
 
 - **Autorizacion por rol de club**: La creacion de movimientos esta restringida a `director`, `deputy_director` y `treasurer` mediante `ClubRolesGuard`
 - **Soft delete**: Los movimientos se desactivan; esto implica que el resumen financiero debe considerar solo registros activos
+- **Evidencias separadas por dominio**: Las fotos de soporte financiero viven en `finance_evidence_files`, con FK a `finances` y al usuario que sube el archivo. Se almacenan en R2 bajo el alias `EVIDENCE_FILES` y se sirven con URLs firmadas de corta duracion.
 - **Categorias compartidas**: Las categorias financieras son globales, no por club, permitiendo estandarizacion
 - **Resumen acumulado por ano eclesiastico**: El endpoint `summary` con `year` + `month` calcula el saldo arrastrado del ano eclesiastico hasta el mes seleccionado; los meses cerrados usan el snapshot de `finance_period_closings` y los meses abiertos se calculan desde movimientos activos
 - **Doble superficie de lectura**: `GET /clubs/:clubId/finances` resuelve la vista mensual/anual del dashboard y `GET /clubs/:clubId/finances/transactions` cubre busqueda, filtros avanzados y paginacion server-side

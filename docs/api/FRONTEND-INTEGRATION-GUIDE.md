@@ -885,6 +885,47 @@ Future<FinancialSummary> getFinancialSummary(
 }
 ```
 
+**Subir evidencia de ingreso/egreso**:
+
+```typescript
+// Next.js / navegador
+export async function uploadFinanceEvidence(financeId: number, file: File) {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  return apiRequestFromClient(`/finances/${financeId}/evidences`, {
+    method: 'POST',
+    body: formData,
+  });
+}
+```
+
+```dart
+// Flutter
+Future<FinanceEvidence> uploadFinanceEvidence({
+  required int financeId,
+  required String filePath,
+  required String fileName,
+  required String mimeType,
+}) async {
+  final formData = FormData.fromMap({
+    'file': await MultipartFile.fromFile(
+      filePath,
+      filename: fileName,
+      contentType: DioMediaType.parse(mimeType),
+    ),
+  });
+
+  final response = await dio.post(
+    '/finances/$financeId/evidences',
+    data: formData,
+  );
+  return FinanceEvidence.fromJson(response.data['data'] ?? response.data);
+}
+```
+
+El backend acepta solo imagenes (`multipart/form-data`, campo `file`), 5MB por foto y maximo 3 evidencias activas por movimiento.
+
 ---
 
 ### Módulo: Honors (Especialidades)
