@@ -37,13 +37,15 @@ La gestion de sesiones permite listar sesiones activas y cerrar sesiones individ
 
 ### Admin
 - **Login funcional**: `POST /auth/login`, `GET /auth/me`
+- **Persistencia de sesion**: el panel guarda `accessToken` y `refreshToken` en cookies HTTP-only persistentes. El JWT de acceso dura hasta 8h; la sesion real se sostiene con el refresh token opaco de Better Auth por hasta 7 dias con sliding refresh.
+- **Refresh automatico**: si el panel navega a `/dashboard` sin access token pero con refresh token, redirige por `/api/auth/refresh` y vuelve al destino original. Las llamadas cliente que reciben 401 refrescan una vez y reintentan antes de mandar al login.
 - **Logout**: `POST /auth/logout`
 - **Proteccion per-page**: via `requireAdminUser()` que verifica `access_panel`
 - **Dashboard birthday celebration**: el layout protegido lee `birthday` desde `GET /auth/me`; si coincide con el dia calendario local del usuario, muestra un modal celebratorio solo durante ese dia. La opcion "no volver a mostrar hoy" se persiste en `localStorage` por `user_id + anio + MM-DD`.
 - **Gestion de usuarios**: `GET /admin/users`, `GET /admin/users/:userId`, `PATCH /admin/users/:userId`, `PATCH /admin/users/:userId/approval`
 - **Revision administrativa**: `PATCH /admin/users/:userId/approval` existe como superficie de revision/compatibilidad, pero no debe entenderse como aprobacion de membresia a club/seccion ni como gate global masivo.
 - **Cuentas eliminadas/anónimas**: el panel usa `is_deleted` para mostrar una etiqueta traducida (`Cuenta eliminada`, `Deleted account`, etc.) sin usar el email técnico `deleted-{user_id}@sacdia.deleted` ni guardar textos de UI en campos de identidad.
-- No implementa: registro, MFA, OAuth, gestion de sesiones
+- No implementa UI de: registro, MFA, OAuth, gestion de sesiones
 
 ### App Movil
 - **5 screens de auth**: SplashView, LoginView, RegisterView, ForgotPasswordView, AuthGate
@@ -103,7 +105,7 @@ La gestion de sesiones permite listar sesiones activas y cerrar sesiones individ
 
 - **OAuth en app no funcional**: Google y Apple estan declarados pero lanzan excepcion "no disponible aun"
 - **`POST /auth/pr-check` fantasma**: La app consume este endpoint pero no aparece en el backend
-- **Admin sin MFA/OAuth/sesiones**: El panel admin solo implementa login/logout basico
+- **Admin sin UI MFA/OAuth/sesiones**: El panel admin implementa login/logout y refresh automatico, pero no tiene pantallas propias para MFA, OAuth ni gestion de sesiones.
 - **Semantica legacy de approval**: `PATCH /admin/users/:userId/approval` queda como superficie de revision por excepcion/compatibilidad, no como gate de membresia; la UI principal de detalle de usuario ya no debe presentarlo como accion hero global.
 - **Admin approval endpoints**: `PATCH /admin/users/:userId/approval` y `PATCH /admin/users/:userId` aparecen en el admin audit pero estaban marcados como FANTASMA en la Reality Matrix (ahora verificados en ENDPOINTS-LIVE-REFERENCE como existentes en `src/admin/admin-users.controller.ts`)
 - **Banderas de revision pendientes de formalizar**: menor sin tutor legal, nombre + fecha de nacimiento identicos a otro usuario, y nombres ofensivos.
