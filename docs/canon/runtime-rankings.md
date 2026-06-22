@@ -43,6 +43,8 @@ Fuente primaria: `annual_folder_section_evaluations` (`schema.prisma:1953-1980`)
 - `status` (enum `annual_folder_section_status_enum`, default `PENDING`): `PENDING | SUBMITTED | PREAPPROVED_LF | VALIDATED | REJECTED` (`schema.prisma:1688-1694`);
 - `union_decision` (enum): `APPROVED | REJECTED_OVERRIDE`.
 
+Regla de acumulación: sólo evaluaciones `VALIDATED` aportan `earned_points` al total de la carpeta anual. Las evaluaciones `REJECTED` cierran flujo, pero aportan 0 puntos; en un override de Unión se fuerza `earned_points = 0`.
+
 Fuente agregada: `club_annual_rankings` (`schema.prisma:2026-2051`).
 
 | Campo | Tipo | Nota |

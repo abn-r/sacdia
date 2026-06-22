@@ -24,7 +24,7 @@
 ### Baseline técnica comprobable (Batch P1.1)
 
 - **Backend**: `sacdia-backend/` con Node.js 24.x (`engines.node: >=24 <25`), NestJS 11.x (`@nestjs/common` `^11.1.24`), Prisma 7.8.x (`@prisma/client` `^7.8.0`, `@prisma/adapter-pg` `^7.8.0`) y TypeScript 6.0.x.
-- **Admin web**: `sacdia-admin/` con Next.js 16.1.6, React 19.2.3, TypeScript 5.x, Tailwind CSS 4 y TanStack Query 5.x.
+- **Admin web**: `sacdia-admin/` con Next.js 16.2.4, React 19.2.3, TypeScript 5.x, Tailwind CSS 4 y TanStack Query 5.x.
 - **Auth vigente**: Better Auth self-hosted en backend + JWT emitido/validado por backend; el admin trabaja con cookies HTTP-only hacia la API.
 - **Datos**: PostgreSQL como motor relacional; la autoridad estructural efectiva vive en `sacdia-backend/prisma/schema.prisma` hasta resincronizar la capa documental de `docs/database/`.
 - **Storage/archivos**: Cloudflare R2 como baseline global vigente; no usar Supabase Storage como supuesto por defecto.
@@ -43,7 +43,7 @@
 ### Framework Principal (Admin Panel)
 
 **Framework**: Next.js  
-**Versión**: 16.1.6 (App Router)  
+**Versión**: 16.2.4 (App Router)
 **Por qué lo elegimos**: SSR/SSG capabilities, mejor SEO, routing integrado, ideal para panel admin
 
 ### Lenguaje
@@ -70,7 +70,7 @@
 #### Routing (Admin Panel)
 
 - **Router**: Next.js App Router (built-in)
-- **Versión**: Next.js 16.1.6
+- **Versión**: Next.js 16.2.4
 
 #### Data Fetching (Admin Panel)
 
@@ -946,6 +946,28 @@ Si creces → SendGrid o AWS SES.
 - Bundle size máximo: [X] MB
 - Time to Interactive: < [Y] segundos
 - Core Web Vitals: Cumplir umbrales "Good"
+- Admin Next.js: no enviar catálogos i18n completos al cliente por defecto;
+  `NextIntlClientProvider` debe recibir sólo namespaces necesarios por layout/ruta,
+  con fallback seguro para rutas nuevas.
+- Admin Next.js: desactivar `Link` prefetch en navegación persistente, tablas,
+  filas, cards o listas de accesos visibles cuando haya muchas rutas, para
+  evitar llenar el cache cliente de payloads no visitados.
+- Admin Next.js: si se recortan mensajes de `next-intl`, validar cobertura por
+  ruta incluyendo componentes cliente importados; las rutas desconocidas deben
+  caer en fallback correcto antes que romper traducciones.
+- Mobile Flutter: mantener persistentes sólo las tabs primarias en
+  `StatefulShellRoute.indexedStack`; módulos quick-access deben vivir dentro de
+  un branch existente para evitar retener Navigators/árboles extra.
+- Mobile Flutter: imágenes de red usan el cache manager global de SACDIA; toda
+  imagen remota/local/asset renderizada como thumbnail, avatar o tarjeta debe
+  declarar tamaño de decode (`memCacheWidth/memCacheHeight` o
+  `cacheWidth/cacheHeight`) cercano al tamaño visible.
+- Mobile Flutter: providers `family` con parámetros objeto deben usar igualdad
+  por valor y, para estado de pantalla/paginado, `autoDispose`; si no, Riverpod
+  puede crear caches duplicados para los mismos IDs.
+- Mobile Flutter: todo `TextEditingController`/controller creado para un diálogo
+  o acción imperativa debe liberarse con `try/finally` o una ruta explícita de
+  `dispose()` para cancelación, validación fallida y éxito.
 
 ### Seguridad
 

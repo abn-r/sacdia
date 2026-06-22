@@ -152,7 +152,7 @@ Canoniza las operaciones admin-level sobre progresión de certificaciones de usu
 
 ### `runtime-user-folders.md`
 
-Canoniza las operaciones admin-level sobre inscripción y progreso de carpetas de usuario. Permisos propios `user_folders:read/manage`. Distinto del browse catalog (`folders:read`) y del subsistema hermano de carpetas de evidencia anual (`evidence_folders:*`). Decisión registrada: `decisiones-clave.md` §19.
+DEPRECATED: las operaciones legacy de carpetas de usuario (`user_folders:*` y `/folders/*`) fueron retiradas antes de producción. El flujo vigente vive en `annual-folders`.
 
 ### `runtime-camporees.md`
 

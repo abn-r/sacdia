@@ -238,7 +238,8 @@ Notas runtime activas de carpetas anuales:
 - Esa columna persistida es la **fuente única de verdad** del estado de la sección. Ningún consumidor — backend, admin o app — debe derivar el estado a partir de la presencia de filas de evaluación, timestamps LF/unión, o columnas de aprobación. La columna es el contrato.
 - El flujo de revisión puede ser de **dos niveles** cuando la carpeta tiene `requires_union_confirmation = true`: LF pre-aprueba (`PREAPPROVED_LF`) y la unión confirma o hace override (`VALIDATED` | `REJECTED`). Cuando el flag es `false`, la aprobación LF transiciona directamente a `VALIDATED` y el servicio espeja columnas de unión con el actor LF para simetría de auditoría.
 - El flag `requires_union_confirmation` se calcula en la creación del folder a partir de la vinculación con la carpeta de camporee y es históricamente inmutable.
-- Los módulos consumidores del estado de la carpeta anual (scoring/rankings y la vinculación con camporees via `local_camporee_id` / `union_camporee_id`) leen el estado desde la columna `status`. Sólo las filas en estado terminal (`VALIDATED` o `REJECTED`) contribuyen al cálculo de totales y al avance del folder a `evaluated`.
+- Los módulos consumidores del estado de la carpeta anual (scoring/rankings y la vinculación con camporees via `local_camporee_id` / `union_camporee_id`) leen el estado desde la columna `status`. Las filas terminales (`VALIDATED` o `REJECTED`) cuentan para decidir si el folder avanza a `evaluated`, pero sólo las filas `VALIDATED` contribuyen puntos al cálculo de totales; `REJECTED` aporta 0.
+- Permisos vigentes: `evidence_folders:read/update` queda limitado a dirección/secretaría de club (`secretary`, `secretary-treasurer`, `deputy-director`, `director`); `member`, `counselor`, `instructor` y `treasurer` no leen/cargan esta carpeta. `annual_folders:submit` lo ejecuta `director`, `secretary` o `secretary-treasurer`; `assistant-lf` y `director-lf` supervisan/evalúan con lectura institucional y `annual_folders:evaluate`, pero no envían la carpeta completa en nombre del club.
 
 ### 6.5 Operación administrativa y catálogos
 <!-- VERIFICADO contra código 2026-03-14: catalogs ALINEADO, admin geography ALINEADO, admin RBAC ALINEADO, admin reference (allergies/diseases/relationship-types/ecclesiastical-years) implementado pero SIN CANON explícito -->
@@ -332,9 +333,9 @@ Y mantiene compatibilidad transicional con permisos legacy `users:*` en ciertas 
 El módulo de evaluación de carpetas anuales aplica una política deliberada de lectura más amplia que escritura sobre el permiso `annual_folders:evaluate`:
 
 - **Operaciones de escritura** (`POST .../evaluate`, `POST .../confirm-union`, `POST .../reopen`, `PATCH evidences/:evidenceId/reviewer-note`) requieren el permiso con `type: 'global'`. Solo actores LF y de unión con alcance global pueden mutar el estado de evaluación.
-- **Operación de lectura** (`GET /annual-folders/:folderId/evaluations`) requiere el mismo permiso con `type: 'active_assignment'`. Cualquier usuario con asignación activa al club puede consultar el estado de sus propias carpetas sin tener permisos globales de escritura.
+- **Operación de lectura** (`GET /annual-folders/:folderId/evaluations`) acepta `annual_folders:evaluate` o `evidence_folders:read`, pero el servicio vuelve a validar el recurso real: el usuario debe tener el permiso en el club dueño de la carpeta, o ser actor institucional con permiso global y territorio LF/Unión coincidente.
 
-Esta asimetría es intencional: los usuarios club-scoped ven el estado de sus propias carpetas, mientras que la mutación queda restringida a actores LF y de unión. La justificación canónica vive como ADR-6 del SDD `annual-folders-ownership-rework` y el contrato está documentado en el JSDoc de `EvaluationController`.
+Esta asimetría es intencional: los usuarios club-scoped ven el estado de sus propias carpetas, mientras que la mutación queda restringida a actores LF y de unión. IMPORTANTE: una asignación/permisos en otro club no habilita lectura ni envío sobre la carpeta de este club; el chequeo final vive en `AnnualFoldersService`.
 
 ---
 

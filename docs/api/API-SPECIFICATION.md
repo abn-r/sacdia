@@ -554,7 +554,7 @@ export class CreateLegalRepresentativeDto {
 - `/api/v1/clubs`
 - `/api/v1/fcm-tokens`
 - `/api/v1/finances`
-- `/api/v1/folders`
+- `/api/v1/annual-folders`
 - `/api/v1/health`
 - `/api/v1/honors`
 - `/api/v1/inventory`

@@ -1,91 +1,28 @@
-# Carpetas de Evidencias (Folders)
+# Carpetas de Evidencias (legacy)
 
-**Estado**: IMPLEMENTADO
+**Estado**: DEPRECATED — retirado antes de producción
 
-## Descripcion de dominio
+## Decisión vigente
 
-Las carpetas de evidencias son instrumentos formativos estructurados que los miembros de los clubes deben completar como parte de su trayectoria institucional. Funcionan como un portafolio organizado donde el miembro recopila evidencias de actividades, proyectos y requisitos cumplidos a lo largo del ano eclesiastico.
+El flujo legacy de carpetas (`FoldersModule`, rutas `/folders/*`, `EvidenceFolderController` bajo `/club-sections/:sectionId/evidence-folder` y el apartado admin `/dashboard/folders`) fue retirado para evitar dos modelos paralelos.
 
-Cada carpeta sigue una estructura jerarquica de template: carpeta -> modulos -> secciones. Cada seccion tiene un puntaje maximo asignable, y el progreso se registra seccion por seccion con puntos obtenidos y evidencias adjuntas. El sistema auto-completa modulos y carpetas cuando todas sus secciones alcanzan los criterios establecidos.
+El flujo canónico es **Carpeta Anual de Evidencias** (`annual-folders`):
 
-El backend implementa dos subsistemas paralelos para carpetas: el **FoldersModule** (rutas `/folders/*`) que gestiona templates y asignaciones de usuario con progreso detallado, y el **EvidenceFolderController** (rutas `/club-sections/:sectionId/evidence-folder`) que expone un flujo contextualizado por seccion de club con subida de archivos y submit de secciones. Esta dualidad genera un desacople que necesita resolucion.
+- Carga/lectura por sección: `evidence_folders:read` / `evidence_folders:update`.
+- Envío de sección: `POST /annual-folders/:folderId/sections/:sectionId/submit`.
+- Envío de carpeta completa: `POST /annual-folders/:folderId/submit` con `annual_folders:submit`, limitado a dirección/secretaría del club.
+- Supervisión/evaluación institucional: `annual_folders:evaluate`.
+- UX de panel/app: no se pide `folder_id` ni `club_enrollment_id` manual al usuario. El club carga su carpeta por sección activa (`GET /club-sections/:sectionId/annual-folder`) y la supervisión usa la cola legible (`GET /annual-folders/evaluation/queue`).
 
-Las carpetas son diferentes de las clases progresivas: mientras las clases tienen un camino secuencial determinado por edad, las carpetas son documentos de evidencia complementarios que se asignan segun el programa del club.
+## Alcance de permisos vigente
 
-## Que existe (verificado contra codigo)
+- Carga/lectura de evidencias: `secretary`, `secretary-treasurer`, `deputy-director`, `director`.
+- Envío de carpeta completa: `secretary`, `secretary-treasurer`, `director`.
+- Lectura/supervisión institucional: `assistant-lf`, `director-lf` y roles superiores por herencia de permisos institucionales.
+- `member`, `counselor`, `instructor` y `treasurer` no cargan ni leen la carpeta anual por permisos de evidencia.
 
-### Backend — FoldersModule (FoldersController)
-- **7 endpoints** bajo `/folders/*` (JwtAuthGuard + PermissionsGuard):
-  - `GET /folders/folders` — listar templates de carpetas con paginacion y filtro por club_type
-  - `GET /folders/folders/:id` — detalle de template con modulos, secciones y puntos
-  - `POST /folders/users/:userId/folders/:folderId/enroll` — inscribir usuario en carpeta (valida pertenencia a club del tipo requerido)
-  - `GET /folders/users/:userId/folders` — listar carpetas asignadas del usuario con progreso
-  - `GET /folders/users/:userId/folders/:folderId/progress` — progreso detallado por modulos y secciones con evidencias
-  - `PATCH /folders/users/:userId/folders/:folderId/modules/:moduleId/sections/:sectionId` — actualizar progreso de seccion (puntos + evidencias, auto-completa modulo/carpeta)
-  - `DELETE /folders/users/:userId/folders/:folderId` — abandonar carpeta (soft delete)
-- **Servicio**: `FoldersService`
-- **DTO**: UpdateSectionRecordDto
-- **Permisos**: users:read_detail (lectura), users:update (escritura) con AuthorizationResource owner detection
+## Nota de datos
 
-### Backend — EvidenceFolderController (separado)
-- **4 endpoints** bajo `/club-sections/:sectionId/evidence-folder` (JwtAuthGuard):
-  - `GET /club-sections/:sectionId/evidence-folder` — obtener carpeta de evidencias por seccion de club
-  - `POST /club-sections/:sectionId/evidence-folder/sections/:efSectionId/submit` — enviar seccion a revision
-  - `POST /club-sections/:sectionId/evidence-folder/sections/:efSectionId/files` — subir archivo de evidencia (multipart)
-  - `DELETE /club-sections/:sectionId/evidence-folder/sections/:efSectionId/files/:fileId` — eliminar archivo de evidencia
-- **Servicio**: `EvidenceFolderService` con spec de tests
-- **Nota**: Este controlador usa rutas diferentes a FoldersController y no aparece en ENDPOINTS-LIVE-REFERENCE.md
+Las tablas legacy (`folders*`, `folder_assignments`, `folders_section_records`) pueden existir todavía por compatibilidad histórica y porque algunas consultas antiguas de scoring/rankings aún las referencian como fallback técnico. No exponen flujo funcional nuevo; cualquier evolución debe integrarse al módulo `annual-folders`.
 
-### Admin (sacdia-admin)
-- Carpetas legacy: listado de templates via ModuleListPage consumiendo `GET /folders/folders`.
-- Carpeta Anual de Evidencias: flujo dedicado en `/dashboard/annual-folders`.
-- Evaluacion: `/dashboard/annual-folders/evaluate` usa una cola legible por humanos (`GET /annual-folders/evaluation/queue`) para buscar por club, seccion, campo, union, plantilla o año. El usuario no necesita conocer UUIDs internos.
-- La vista de evaluacion carga la carpeta seleccionada y permite calificar/reabrir secciones con los endpoints de `annual-folders`.
-
-### App (sacdia-app)
-- 2 screens: EvidenceFolderView, EvidenceSectionDetailView
-- Consume endpoints de evidence-folder via `/clubs/:clubId/sections/:sectionId/evidence-folder` — rutas que no coinciden exactamente con ninguno de los dos controladores del backend
-
-### Base de datos
-- `folders` — templates de carpetas (id, name, club_type_id, etc.)
-- `folders_modules` — modulos por carpeta
-- `folders_sections` — secciones por modulo con puntos maximos
-- `folder_assignments` — asignacion usuario-carpeta
-- `folders_modules_records` — progreso de modulo
-- `folders_section_records` — progreso de seccion con evidencias
-
-## Requisitos funcionales
-
-1. Los templates de carpetas deben poder filtrarse por tipo de club
-2. La inscripcion valida que el usuario pertenezca a un club del tipo requerido por la carpeta
-3. Un usuario solo puede tener una asignacion activa por carpeta (constraint de unicidad con 409 en duplicado)
-4. El progreso se registra por seccion con puntos obtenidos y evidencias
-5. Los puntos no pueden exceder el maximo definido en el template de la seccion
-6. Al completar todas las secciones de un modulo, el modulo se auto-completa
-7. Al completar todos los modulos, la carpeta se auto-completa
-8. Las evidencias deben poder subirse como archivos multipart y eliminarse individualmente
-9. El submit de secciones debe marcar la seccion como enviada para revision
-10. La revision administrativa debe permitir ubicar carpetas por nombres de negocio, no por UUID/ID tecnico.
-
-## Decisiones de diseno
-
-- **Dos controladores coexistentes**: FoldersController (CRUD de asignaciones y progreso generico) y EvidenceFolderController (flujo contextualizado por seccion de club con archivos)
-- **PermissionsGuard en FoldersController**: permisos finos users:read_detail y users:update con owner detection
-- **JwtAuthGuard simple en EvidenceFolderController**: usa @CurrentUser() para resolver el usuario del token sin PermissionsGuard adicional
-- **Auto-completado jerarquico**: al actualizar una seccion, el servicio verifica y auto-completa modulo y carpeta si corresponde
-- **Soft delete en abandono**: la asignacion se desactiva pero no se elimina fisicamente
-- **Nombre visible normalizado**: Los archivos adjuntos se numeran como `Evidencia 01`, `Evidencia 02`, etc. El nombre original del picker/browser no se conserva como etiqueta visible para evitar confusiones; usuario, fecha y sección se consultan como metadata.
-- **IDs como detalle tecnico**: Las vistas administrativas deben mostrar club, seccion, campo, union, plantilla y año como identificadores humanos. Los UUIDs quedan reservados para llamadas API internas y diagnostico tecnico.
-
-## Gaps y pendientes
-
-- **Desacople de rutas**: La app consume `/clubs/:clubId/sections/:sectionId/evidence-folder` pero el backend tiene `/club-sections/:sectionId/evidence-folder` (sin clubId en la ruta). Las rutas no coinciden exactamente
-- **EvidenceFolderController no documentado**: Los 4 endpoints del EvidenceFolderController no aparecen en ENDPOINTS-LIVE-REFERENCE.md ni en el backend audit original
-- Las rutas canonicas post-consolidacion deberian usar `/clubs/:clubId/sections/:sectionId/evidence-folder` — el backend usa `/club-sections/:sectionId` que es un patron diferente
-- No hay endpoint para listar el progreso de todos los miembros de una seccion (vista de consejero/director)
-
-## Prioridad y siguiente accion
-
-- **Alta**: Alinear rutas del EvidenceFolderController con el patron canonico `/clubs/:clubId/sections/:sectionId/evidence-folder` y documentar los 4 endpoints
-- **Media**: Resolver el desacople entre las rutas que consume la app y las que expone el backend
-- **Siguiente accion concreta**: Auditar si la app puede conectar correctamente con `/club-sections/:sectionId/evidence-folder` o si necesita migration de rutas, y documentar los endpoints faltantes en ENDPOINTS-LIVE-REFERENCE.md
+Ver contrato operativo en `docs/features/annual-folders-scoring.md` y endpoints vigentes en `docs/api/ENDPOINTS-LIVE-REFERENCE.md`.

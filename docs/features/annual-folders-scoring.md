@@ -22,7 +22,8 @@ La Carpeta Anual de Evidencias conserva su propio flujo de carga de archivos e i
 ### Admin (Next.js)
 
 - Template forms actualizados con `max_points`, `minimum_points` por seccion, `closing_date`
-- Pagina de evaluacion: busqueda por folder UUID, evaluar secciones con puntos + notas, reabrir
+- Pagina de club: carga la carpeta de la sección activa con `GET /club-sections/:sectionId/annual-folder`; permite subir evidencias, enviar secciones con `POST /annual-folders/:folderId/sections/:sectionId/submit` y luego enviar la carpeta completa; no pide UUIDs internos al usuario.
+- Pagina de evaluacion: cola legible por club, sección, campo, unión, template y estado; desde esa cola se abren carpetas por deep link técnico (`?folder=`) solo como navegación interna.
 - Pagina de rankings: leaderboard con filtros, medallas top 3, recalculo manual
 - Pagina de categorias de premios: CRUD completo
 - `FolderStatusBadge` con 5 estados: open, submitted, under_evaluation, evaluated, closed
@@ -45,16 +46,28 @@ La Carpeta Anual de Evidencias conserva su propio flujo de carga de archivos e i
 - `folder_templates` — +`minimum_points`, +`closing_date`
 - `annual_folders` — +`total_earned_points`, +`total_max_points`, +`progress_percentage`, +`evaluated_at`, +`local_camporee_id`, +`union_camporee_id`, +`requires_union_confirmation` (Boolean, default false)
 
+
+## Roles y permisos vigentes
+
+- `evidence_folders:read/update` habilita la lectura/carga operativa de evidencias de la carpeta anual. Lo tienen dirección/secretaría del club: `secretary`, `secretary-treasurer`, `deputy-director`, `director`.
+- `member`, `counselor`, `instructor` y `treasurer` no tienen `evidence_folders:read/update`; no cargan ni leen esta carpeta desde el flujo anual.
+- `annual_folders:submit` envía la carpeta completa a revisión. Lo ejecuta `director`, `secretary` o `secretary-treasurer`; los usuarios operativos envían secciones, no la carpeta completa.
+- `assistant-lf` y `director-lf` participan como lectura/supervisión institucional y evaluación mediante `annual_folders:evaluate`; no envían la carpeta completa en nombre del club.
+
 ## Requisitos funcionales
 
 1. El campo local puede evaluar cada seccion de evidencia asignando puntos (0 a max_points)
 2. El campo local puede reabrir secciones evaluadas para que el club ajuste y se re-evalue
 3. Los totales del folder se recalculan automaticamente al evaluar/reabrir secciones
+4. Una inscripción anual de sección intenta crear automaticamente su Carpeta Anual de Evidencias cuando existe template vigente; si no existe template, la inscripción queda creada y la carpeta puede crearse manualmente con `POST /annual-folders/enrollments/:enrollmentId`.
+5. El envío de sección y de carpeta completa respeta `folder_templates.closing_date`; la evaluación institucional sigue permitida después del cierre.
+6. La carpeta completa solo puede enviarla dirección/secretaría del club cuando todas las secciones requeridas tienen submission y evidencia vigente.
 4. Las categorias de premios son configurables y reutilizables entre anos
 5. Los rankings se pre-calculan con un cron nocturno (dense ranking)
 6. Los rankings se filtran por tipo de club, ano eclesiastico, categoria y campo local (`local_field_id`) cuando se necesita comparar clubes dentro de una asociación/campo. El backend valida el alcance jerárquico del usuario y puede inferir el campo local desde la asignación activa de club o el perfil efectivo cuando el filtro no viene explícito.
 7. La app muestra un scorecard de progreso anual de su propia sección (`/club-sections/:sectionId/annual-ranking-progress`): puntos actuales, máximo anual, reconocimiento, ejes (`axes`), componentes y pendientes; no muestra el leaderboard de otros clubes
 8. El panel administrativo puede consultar el leaderboard por campo local/año/tipo de club vía `/annual-rankings`, con puntos derivados por eje desde `annual_ranking_configs` y rangos de `ranking_tiers`
+9. El panel administrativo no expone buscadores manuales por UUID para carpetas anuales. Los roles de club entran por su contexto activo de sección; los roles institucionales entran por la cola de evaluación.
 9. El panel administrativo configura los rangos globales vía `/ranking-tiers` y los presupuestos anuales por campo local/año/tipo de club vía `/annual-ranking-configs`. Los rangos son globales del sistema; los puntos máximos se dividen en ejes configurables `administrative` y `operational` (50/50 recomendado inicialmente), y cada eje contiene componentes canónicos: `annual_evidence_folder`, `monthly_reports_timeliness`, `finance_compliance`, `institutional_data_completeness`, `activities_registered`, `attendance_participation`, `camporee_events`, `class_investiture_progress` y `sacdia_operational_usage`
 10. El folder transiciona: open → submitted → under_evaluation → evaluated → closed
 
@@ -71,7 +84,7 @@ La evaluacion de una seccion puede atravesar hasta dos niveles de aprobacion, co
   1. El club ejecuta `submitSection`.
   2. El actor LF evalua con `POST .../evaluate`. Como el folder no requiere union, la seccion transiciona directamente de `SUBMITTED` a `VALIDATED`. Para mantener simetria de auditoria, el servicio espeja las columnas de union con el mismo actor LF (`union_approved_by`, `union_approved_at`, `union_decision = APPROVED`).
 
-Solo las filas en estado terminal (`VALIDATED` o `REJECTED`) suman puntos al total del folder y cuentan para avanzar el folder a `evaluated`. Filas en `PENDING`, `SUBMITTED` o `PREAPPROVED_LF` no contribuyen al calculo.
+Solo las filas `VALIDATED` suman puntos al total del folder. Las filas `REJECTED` son terminales para el flujo y cuentan para avanzar el folder a `evaluated`, pero aportan 0 puntos. Filas en `PENDING`, `SUBMITTED` o `PREAPPROVED_LF` no contribuyen al calculo.
 
 ## Maquina de estados de la seccion
 
@@ -165,3 +178,10 @@ Reopen (LF o union): VALIDATED | REJECTED | PREAPPROVED_LF ──> SUBMITTED
 - No hay notificaciones push cuando el campo evalua un folder
 - No hay vista de evaluacion en la app (solo admin)
 - Auto-close por `closing_date` no implementado (solo manual)
+
+## Reglas de scoring de carpeta anual
+
+- El revisor LF asigna `earned_points` entre 0 y `max_points`.
+- Solo secciones `VALIDATED` aportan puntos al total de carpeta.
+- Secciones `REJECTED` son terminales para el flujo, pero aportan 0 puntos.
+- Cuando Unión aplica `REJECTED_OVERRIDE`, el servicio fuerza `earned_points = 0` antes de recalcular totales.

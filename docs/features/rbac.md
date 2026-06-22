@@ -168,13 +168,13 @@ La app Flutter usa dos mecanismos para gating de UI, ambos scoped al contexto ac
 | Coordinacion | — | `coordinator`, `admin`, `super_admin`, `assistant_admin` |
 | Miembros | `users:read_detail` | `director`, `deputy_director`, `secretary`, `secretary_treasurer`, `counselor` |
 | Club | `clubs:update` | `director`, `deputy_director`, `secretary`, `secretary_treasurer` |
-| Carpeta de Evidencias | `users:read_detail` | `director`, `deputy_director`, `secretary`, `secretary_treasurer` |
+| Carpeta Anual de Evidencias | `evidence_folders:read` | `director`, `deputy_director`, `secretary`, `secretary_treasurer` |
 | Finanzas | `finances:read` | `director`, `treasurer`, `secretary_treasurer` |
 | Unidades | `units:update` | `director`, `deputy_director`, `counselor`, `secretary`, `secretary_treasurer` |
 | Clase Agrupada | `classes:update` | `director`, `deputy_director`, `counselor`, `instructor`, `secretary`, `secretary_treasurer` |
 | Seguros del Club | `insurance:read` | `director`, `deputy_director`, `secretary`, `secretary_treasurer` |
 | Inventario | `inventory:read` | `director`, `deputy_director`, `secretary`, `secretary_treasurer` |
-| Recursos | `folders:read` | — (todos los miembros) |
+| Recursos | `resources:read` | — (lectura operativa de recursos compartidos) |
 
 ### Seed de permisos
 

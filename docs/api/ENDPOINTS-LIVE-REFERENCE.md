@@ -498,26 +498,9 @@
 | GET | `/api/v1/finances/categories` | JWT | `finances:read` | Listar categorías financieras | `src/finances/finances.controller.ts` |
 | GET | `/api/v1/clubs/:clubId/finances/transactions` | JWT | `finances:read` | Listado paginado para vistas avanzadas; soporta `page`, `limit`, `type`, `search`, `startDate`, `endDate`, `sortBy`, `sortOrder` | `src/finances/finances.controller.ts` |
 
-## folders
+## folders / evidence-folder (legacy)
 
-| Method | Path | Auth | Roles | Description | Source |
-|---|---|---|---|---|---|
-| GET | `/api/v1/folders/folders` | JWT | - | Listar templates de carpetas disponibles | `src/folders/folders.controller.ts` |
-| GET | `/api/v1/folders/folders/:id` | JWT | - | Obtener detalles de un template de carpeta | `src/folders/folders.controller.ts` |
-| GET | `/api/v1/folders/users/:userId/folders` | JWT | - | Listar carpetas asignadas del usuario | `src/folders/folders.controller.ts` |
-| DELETE | `/api/v1/folders/users/:userId/folders/:folderId` | JWT | - | Abandonar una carpeta | `src/folders/folders.controller.ts` |
-| POST | `/api/v1/folders/users/:userId/folders/:folderId/enroll` | JWT | - | Inscribirse en una carpeta | `src/folders/folders.controller.ts` |
-| PATCH | `/api/v1/folders/users/:userId/folders/:folderId/modules/:moduleId/sections/:sectionId` | JWT | - | Actualizar progreso de una sección | `src/folders/folders.controller.ts` |
-| GET | `/api/v1/folders/users/:userId/folders/:folderId/progress` | JWT | - | Ver progreso detallado de una carpeta | `src/folders/folders.controller.ts` |
-
-## evidence-folder
-
-| Method | Path | Auth | Roles | Description | Source |
-|---|---|---|---|---|---|
-| GET | `/api/v1/club-sections/:sectionId/evidence-folder` | JWT | - | Get evidence folder for club section | `src/folders/evidence-folder.controller.ts` |
-| POST | `/api/v1/club-sections/:sectionId/evidence-folder/sections/:efSectionId/submit` | JWT | - | Submit evidence folder section | `src/folders/evidence-folder.controller.ts` |
-| POST | `/api/v1/club-sections/:sectionId/evidence-folder/sections/:efSectionId/files` | JWT | - | Upload evidence file (multipart: file) | `src/folders/evidence-folder.controller.ts` |
-| DELETE | `/api/v1/club-sections/:sectionId/evidence-folder/sections/:efSectionId/files/:fileId` | JWT | - | Delete evidence file | `src/folders/evidence-folder.controller.ts` |
+Legacy `/api/v1/folders/*` and `/api/v1/club-sections/:sectionId/evidence-folder/*` routes were retired before production. Use the canonical `annual-folders-*` endpoints below.
 
 ## health
 
@@ -665,26 +648,39 @@ Notas contractuales de inventario:
 | PATCH | `/api/v1/resource-categories/:id` | JWT | `resource_categories:update` | Actualizar categoría de recurso | `src/resources/resource-categories.controller.ts` |
 | DELETE | `/api/v1/resource-categories/:id` | JWT | `resource_categories:delete` | Soft delete de categoría (falla si tiene recursos activos) | `src/resources/resource-categories.controller.ts` |
 
+## annual-folders-templates
+
+| Method | Path | Auth | Roles | Description | Source |
+|---|---|---|---|---|---|
+| GET | `/api/v1/annual-folders/templates` | JWT | `annual_folder_templates:read` | Listar templates de Carpeta Anual de Evidencias. Sin query devuelve lista admin; con `club_type_id` + `year_id` conserva lookup activo por tipo/año. Query opcional: `active`. | `src/annual-folders/annual-folders.controller.ts` |
+| GET | `/api/v1/annual-folders/templates/:templateId` | JWT | `annual_folder_templates:read` | Obtener template con owner, tipo, año y secciones. | `src/annual-folders/annual-folders.controller.ts` |
+| POST | `/api/v1/annual-folders/templates` | JWT | `annual_folder_templates:create` | Crear template. Body soporta `name`, `club_type_id`, `ecclesiastical_year_id`, `active`, `minimum_points`, `closing_date` y exactamente un owner (`owner_union_id` o `owner_local_field_id`). | `src/annual-folders/annual-folders.controller.ts` |
+| PATCH | `/api/v1/annual-folders/templates/:templateId` | JWT | `annual_folder_templates:update` | Actualizar metadata del template, incluido `minimum_points`, `closing_date`, tipo/año y owner. | `src/annual-folders/annual-folders.controller.ts` |
+| POST | `/api/v1/annual-folders/templates/:templateId/sections` | JWT | `annual_folder_templates:update` | Agregar sección a template con `max_points` y `minimum_points`. | `src/annual-folders/annual-folders.controller.ts` |
+| PATCH | `/api/v1/annual-folders/templates/sections/:sectionId` | JWT | `annual_folder_templates:update` | Actualizar sección de template. | `src/annual-folders/annual-folders.controller.ts` |
+| DELETE | `/api/v1/annual-folders/templates/sections/:sectionId` | JWT | `annual_folder_templates:delete` | Eliminar sección si no tiene evidencias asociadas. | `src/annual-folders/annual-folders.controller.ts` |
+
 ## annual-folders-core
 
 | Method | Path | Auth | Roles | Description | Source |
 |---|---|---|---|---|---|
-| POST | `/api/v1/annual-folders/enrollments/:enrollmentId` | JWT | `evidence_folders:manage` | Crear Carpeta Anual de Evidencias para una matrícula de sección. El template se resuelve por tipo de club + año + owner (Unión primero, Campo Local fallback). | `src/annual-folders/annual-folders.controller.ts` |
-| GET | `/api/v1/club-sections/:sectionId/annual-folder` | JWT | `evidence_folders:read` | Obtener Carpeta Anual de Evidencias vigente por sección. Devuelve `200 { data: null }` cuando no hay año activo, inscripción vigente o carpeta creada todavía. | `src/annual-folders/annual-folder-by-section.controller.ts` |
+| POST | `/api/v1/annual-folders/enrollments/:enrollmentId` | JWT | `evidence_folders:update` | Crear manualmente Carpeta Anual de Evidencias para una matrícula de sección. El template se resuelve por tipo de club + año + owner (Unión primero, Campo Local fallback). Las nuevas inscripciones intentan auto-crear carpeta cuando existe template. | `src/annual-folders/annual-folders.controller.ts` |
+| GET | `/api/v1/club-sections/:sectionId/annual-folder` | JWT | `evidence_folders:read` | Obtener Carpeta Anual de Evidencias vigente por sección. Es el lookup preferido para panel/app porque evita pedir UUIDs internos al usuario. Devuelve `200 { data: null }` cuando no hay año activo, inscripción vigente o carpeta creada todavía. | `src/annual-folders/annual-folder-by-section.controller.ts` |
 | GET | `/api/v1/annual-folders/evaluation/queue` | JWT | `annual_folders:evaluate` | Listar cola de Carpetas Anuales para evaluación, filtrada por alcance del evaluador, con contexto legible: club, sección, campo, unión, plantilla, año, conteos de secciones/evidencias y nombres de secciones pendientes. Query: `search?`, `status?` (`needs_review` default, `submitted`, `preapproved`, `evaluated`, `all`), `page?`, `limit?`. | `src/annual-folders/annual-folders.controller.ts` |
 | GET | `/api/v1/annual-folders/:folderId` | JWT | `evidence_folders:read` | Obtener Carpeta Anual de Evidencias con secciones, evidencias, estados canónicos y contexto humano de inscripción (`club_enrollment.club_section.club`, campo, unión y año). | `src/annual-folders/annual-folders.controller.ts` |
 | GET | `/api/v1/annual-folders/by-enrollment/:enrollmentId` | JWT | `evidence_folders:read` | Obtener Carpeta Anual de Evidencias por matrícula de sección con contexto humano de club/sección/año. | `src/annual-folders/annual-folders.controller.ts` |
-| POST | `/api/v1/annual-folders/:folderId/sections/:sectionId/evidences` | JWT | `evidence_folders:submit` | Subir archivo/imagen de evidencia a una sección de Carpeta Anual de Evidencias. | `src/annual-folders/annual-folders.controller.ts` |
-| POST | `/api/v1/annual-folders/:folderId/sections/:sectionId/submit` | JWT | `evidence_folders:submit` | Enviar una sección de Carpeta Anual de Evidencias a revisión. Requiere al menos una evidencia. | `src/annual-folders/annual-folders.controller.ts` |
-| POST | `/api/v1/annual-folders/:folderId/submit` | JWT | `evidence_folders:submit` | Enviar Carpeta Anual de Evidencias completa a revisión. | `src/annual-folders/annual-folders.controller.ts` |
+| POST | `/api/v1/annual-folders/:folderId/sections/:sectionId/evidences` | JWT | `evidence_folders:update` | Subir archivo/imagen de evidencia a una sección de Carpeta Anual de Evidencias. | `src/annual-folders/annual-folders.controller.ts` |
+| POST | `/api/v1/annual-folders/:folderId/sections/:sectionId/submit` | JWT | `evidence_folders:update` | Enviar una sección de Carpeta Anual de Evidencias a revisión. Requiere al menos una evidencia y respeta `folder_templates.closing_date`. | `src/annual-folders/annual-folders.controller.ts` |
+| POST | `/api/v1/annual-folders/:folderId/submit` | JWT | `annual_folders:submit` | Enviar Carpeta Anual de Evidencias completa a revisión. Lo ejecuta dirección/secretaría del club con `annual_folders:submit`; usuarios operativos envían secciones con `evidence_folders:update`. Exige que todas las secciones requeridas estén enviadas y con evidencia vigente; respeta `closing_date`. | `src/annual-folders/annual-folders.controller.ts` |
 
 ## annual-folders-evaluation
 
 | Method | Path | Auth | Roles | Description | Source |
 |---|---|---|---|---|---|
 | POST | `/api/v1/annual-folders/:folderId/sections/:sectionId/evaluate` | JWT | `annual_folders:evaluate` | Evaluar una sección de Carpeta Anual de Evidencias (puntos + notas) | `src/annual-folders/evaluation.controller.ts` |
+| POST | `/api/v1/annual-folders/:folderId/sections/:sectionId/confirm-union` | JWT | `annual_folders:evaluate` | Confirmar desde Unión una sección preaprobada por Campo Local. `APPROVED` transiciona a `VALIDATED`; `REJECTED_OVERRIDE` transiciona a `REJECTED` y fuerza `earned_points = 0`. | `src/annual-folders/evaluation.controller.ts` |
 | POST | `/api/v1/annual-folders/:folderId/sections/:sectionId/reopen` | JWT | `annual_folders:evaluate` | Reabrir sección evaluada para re-evaluación | `src/annual-folders/evaluation.controller.ts` |
-| GET | `/api/v1/annual-folders/:folderId/evaluations` | JWT | `annual_folders:evaluate` | Listar evaluaciones de una Carpeta Anual de Evidencias | `src/annual-folders/evaluation.controller.ts` |
+| GET | `/api/v1/annual-folders/:folderId/evaluations` | JWT | `annual_folders:evaluate` o `evidence_folders:read` | Listar evaluaciones de una Carpeta Anual de Evidencias. Lectura permitida para el club dueño con `evidence_folders:read`, o para supervisión institucional con `annual_folders:evaluate`/`evidence_folders:read` dentro de su territorio. | `src/annual-folders/evaluation.controller.ts` |
 
 ## award-categories
 

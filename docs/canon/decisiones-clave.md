@@ -328,7 +328,7 @@ Hallazgo paralelo: la ruta admin `/dashboard/requests/membership` apuntaba al m�
 
 ### 19. User certifications + user folders son dominios canónicos propios (2026-04-22)
 
-**Estado**: Vigente <!-- VERIFICADO: certifications.controller.ts y folders/folders.controller.ts con 10 handlers migrados a user_certifications:* y user_folders:*. Colisión con permisos existentes certifications:read / folders:read (browse catalog) resuelta con prefix user_. Canonizado en docs/canon/runtime-user-certifications.md y runtime-user-folders.md. -->
+**Estado**: Parcialmente superada — `user_certifications:*` sigue vigente; `user_folders:*` y `/folders/*` fueron retirados antes de producción en favor de `annual-folders`.
 
 **Contexto**: Sprint C del audit de permisos reutilizados migró `certifications` y `folders` modules desde `users:update_profile`/`users:read_detail` hacia permisos propios. Al ejecutar, se detectó colisión semántica grave: los strings `certifications:read` y `folders:read` YA existían en el seed con semántica **browse catalog** y grants amplios (user, member, counselor, etc.). Redefinirlos para operaciones admin-level habría expandido silenciosamente el scope: cualquier rol con el permiso de browse habría ganado acceso a endpoints que manipulan progresión de otros usuarios.
 
@@ -337,22 +337,22 @@ El patrón `folders:*` también conflictuaba con `evidence_folders:*` (subsistem
 **Decisión**: El canon adopta prefijo `user_` para distinguir las operaciones admin-level sobre progresión de usuario, preservando los permisos originales de browse catalog sin cambios. Se introducen:
 
 - `user_certifications:read` / `user_certifications:manage` — para endpoints admin de progresión de certificaciones.
-- `user_folders:read` / `user_folders:manage` — para endpoints admin de inscripción/progreso de carpetas de usuario.
+- `user_folders:read` / `user_folders:manage` — DEPRECATED; endpoints admin de carpetas de usuario retirados antes de producción.
 
 Autoridades rectoras: `docs/canon/runtime-user-certifications.md` + `docs/canon/runtime-user-folders.md`. Se fija que:
 
-- `certifications:read` y `folders:read` conservan sus semánticas originales (browse catalog, broad grants) — NO se redefinen ni se retiran;
+- `certifications:read` conserva su semántica original; `folders:read` fue desactivado al retirar el runtime legacy de carpetas;
 - `user_*:read` se otorgan solo a staff con autoridad operativa sobre otros usuarios: counselor, secretary, treasurer, secretary-treasurer, deputy-director, director (CLUB) + assistant-lf + JOIN copies + admin/super_admin;
 - `user_*:manage` queda restringido a liderazgo: deputy-director, director, assistant-lf + JOIN + admin/super_admin;
-- los tres dominios de carpetas (`folders:read` browse, `user_folders:*` admin progression, `evidence_folders:*` evidencia anual) permanecen separados por diseño;
-- la migración es cambio duro con corrección: primero se retrajeron grants incorrectos de `certifications:manage` / `folders:manage` (agregados brevemente por Sprint C inicial), luego se introdujeron los `user_*` con grants correctos, finalmente se conmutaron los handlers.
+- el dominio vigente de carpeta de evidencias es `annual-folders`; `folders:read` y `user_folders:*` quedan legacy/inactivos;
+- la migración histórica de certificaciones se conserva; la porción de carpetas legacy fue cerrada antes de producción y sus permisos quedaron inactivos.
 
 **Consecuencias**:
 
 - nunca debe redefinirse un permiso existente con semántica distinta sin auditoría previa de uso y grants; el prefix `user_` queda como patrón canónico para operaciones sobre datos de otros usuarios;
 - futuros módulos similares (ej. si surge `user_*`-operations para otras entidades de trayectoria) deben seguir el mismo patrón;
 - los canons `runtime-user-certifications.md` y `runtime-user-folders.md` documentan la separación explícita de los browse catalogs públicos — cualquier intento de colapsarlos en un único permiso es violación del canon;
-- notificaciones emitidas por operaciones de progresión deben usar `source = 'user_certifications:*'` o `source = 'user_folders:*'` respectivamente.
+- notificaciones emitidas por certificaciones de usuario deben usar `source = 'user_certifications:*'`; `user_folders:*` queda legacy/inactivo.
 
 ### 20. Camporees CRUD es dominio canónico propio; attendance permanece cross-cutting (2026-04-22)
 
