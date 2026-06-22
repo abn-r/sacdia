@@ -22,8 +22,8 @@ La Carpeta Anual de Evidencias conserva su propio flujo de carga de archivos e i
 ### Admin (Next.js)
 
 - Template forms actualizados con `max_points`, `minimum_points` por seccion, `closing_date`
-- Pagina de club: carga la carpeta de la sección activa con `GET /club-sections/:sectionId/annual-folder`; permite subir evidencias, enviar secciones con `POST /annual-folders/:folderId/sections/:sectionId/submit` y luego enviar la carpeta completa; no pide UUIDs internos al usuario.
-- Pagina de evaluacion: cola legible por club, sección, campo, unión, template y estado; desde esa cola se abren carpetas por deep link técnico (`?folder=`) solo como navegación interna.
+- Pagina de club: carga la carpeta de la sección activa con `GET /club-sections/:sectionId/annual-folder`; si ya existe inscripción anual y template activo pero falta la carpeta, permite crearla con `POST /club-sections/:sectionId/annual-folder`; permite subir evidencias, enviar secciones con `POST /annual-folders/:folderId/sections/:sectionId/submit` y luego enviar la carpeta completa; no pide UUIDs internos al usuario.
+- Pagina de evaluacion: cola legible por club, sección, campo, unión, template y estado; muestra evidencias dentro del panel y del modal de evaluación, con visor interno para imágenes/PDF y zoom; para secciones `PREAPPROVED_LF` muestra confirmación/rechazo de Unión a roles `director-union`/`assistant-union`; desde esa cola se abren carpetas por deep link técnico (`?folder=`) solo como navegación interna.
 - Pagina de rankings: leaderboard con filtros, medallas top 3, recalculo manual
 - Pagina de categorias de premios: CRUD completo
 - `FolderStatusBadge` con 5 estados: open, submitted, under_evaluation, evaluated, closed
@@ -59,7 +59,7 @@ La Carpeta Anual de Evidencias conserva su propio flujo de carga de archivos e i
 1. El campo local puede evaluar cada seccion de evidencia asignando puntos (0 a max_points)
 2. El campo local puede reabrir secciones evaluadas para que el club ajuste y se re-evalue
 3. Los totales del folder se recalculan automaticamente al evaluar/reabrir secciones
-4. Una inscripción anual de sección intenta crear automaticamente su Carpeta Anual de Evidencias cuando existe template vigente; si no existe template, la inscripción queda creada y la carpeta puede crearse manualmente con `POST /annual-folders/enrollments/:enrollmentId`.
+4. Una inscripción anual de sección intenta crear automaticamente su Carpeta Anual de Evidencias cuando existe template vigente; si no existe template, la inscripción queda creada y la carpeta puede crearse manualmente por flujo interno con `POST /annual-folders/enrollments/:enrollmentId` o desde la UX de club con `POST /club-sections/:sectionId/annual-folder` sin exponer UUIDs al usuario.
 5. El envío de sección y de carpeta completa respeta `folder_templates.closing_date`; la evaluación institucional sigue permitida después del cierre.
 6. La carpeta completa solo puede enviarla dirección/secretaría del club cuando todas las secciones requeridas tienen submission y evidencia vigente.
 4. Las categorias de premios son configurables y reutilizables entre anos
@@ -69,7 +69,8 @@ La Carpeta Anual de Evidencias conserva su propio flujo de carga de archivos e i
 8. El panel administrativo puede consultar el leaderboard por campo local/año/tipo de club vía `/annual-rankings`, con puntos derivados por eje desde `annual_ranking_configs` y rangos de `ranking_tiers`
 9. El panel administrativo no expone buscadores manuales por UUID para carpetas anuales. Los roles de club entran por su contexto activo de sección; los roles institucionales entran por la cola de evaluación.
 9. El panel administrativo configura los rangos globales vía `/ranking-tiers` y los presupuestos anuales por campo local/año/tipo de club vía `/annual-ranking-configs`. Los rangos son globales del sistema; los puntos máximos se dividen en ejes configurables `administrative` y `operational` (50/50 recomendado inicialmente), y cada eje contiene componentes canónicos: `annual_evidence_folder`, `monthly_reports_timeliness`, `finance_compliance`, `institutional_data_completeness`, `activities_registered`, `attendance_participation`, `camporee_events`, `class_investiture_progress` y `sacdia_operational_usage`
-10. El folder transiciona: open → submitted → under_evaluation → evaluated → closed
+10. La configuración de ranking anual es histórica por alcance lógico: existe una fila activa por `local_field_id + ecclesiastical_year_id + club_type_id`. Para 2027 se debe crear una configuración nueva de ese año; el sistema no clona automáticamente 2026. Editar una configuración existente modifica esa fila de año/scope y reemplaza ejes/componentes, por lo que todavía no hay versionado inmutable de cambios intra-año.
+11. El folder transiciona a nivel carpeta completa como `open → submitted → under_evaluation → evaluated → closed`; sin embargo, una sección ya enviada (`annual_folder_section_evaluations.status = SUBMITTED`) puede evaluarse mientras la carpeta sigue `open`, porque otras secciones pueden continuar en carga/envío incremental.
 
 ## Flujo de revision en dos niveles
 
@@ -77,12 +78,13 @@ La evaluacion de una seccion puede atravesar hasta dos niveles de aprobacion, co
 
 - **Camino con union (`requires_union_confirmation = true`)**:
   1. El club sube evidencias y ejecuta `submitSection` por cada seccion lista para revision.
-  2. Un actor de campo local (LF) califica con `POST .../sections/:sectionId/evaluate`. La seccion pasa a `PREAPPROVED_LF` y se graba `lf_approved_by` / `lf_approved_at`.
+  2. Un actor de campo local (LF) califica con `POST .../sections/:sectionId/evaluate`. La carpeta puede seguir `open`; la precondición real es que la fila de sección esté `SUBMITTED`. La seccion pasa a `PREAPPROVED_LF` y se graba `lf_approved_by` / `lf_approved_at`.
   3. Un actor de union ejecuta `POST .../sections/:sectionId/confirm-union` con decision `APPROVED` o `REJECTED_OVERRIDE`. La seccion transiciona a `VALIDATED` o `REJECTED` respectivamente. Las columnas LF se preservan intactas para auditoria.
+  4. Si antes de la confirmación de Unión se requiere corregir la evaluación LF, el backend aún permite re-evaluar una fila `PREAPPROVED_LF`; la UX principal del panel prioriza `confirm-union` para evitar confundir esa corrección con la decisión final de Unión.
 
 - **Atajo sin union (`requires_union_confirmation = false`)**:
   1. El club ejecuta `submitSection`.
-  2. El actor LF evalua con `POST .../evaluate`. Como el folder no requiere union, la seccion transiciona directamente de `SUBMITTED` a `VALIDATED`. Para mantener simetria de auditoria, el servicio espeja las columnas de union con el mismo actor LF (`union_approved_by`, `union_approved_at`, `union_decision = APPROVED`).
+  2. El actor LF evalua con `POST .../evaluate`. La carpeta puede seguir `open`; la precondición real es que la fila de sección esté `SUBMITTED`. Como el folder no requiere union, la seccion transiciona directamente de `SUBMITTED` a `VALIDATED`. Para mantener simetria de auditoria, el servicio espeja las columnas de union con el mismo actor LF (`union_approved_by`, `union_approved_at`, `union_decision = APPROVED`).
 
 Solo las filas `VALIDATED` suman puntos al total del folder. Las filas `REJECTED` son terminales para el flujo y cuentan para avanzar el folder a `evaluated`, pero aportan 0 puntos. Filas en `PENDING`, `SUBMITTED` o `PREAPPROVED_LF` no contribuyen al calculo.
 
