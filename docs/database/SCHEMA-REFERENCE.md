@@ -234,7 +234,10 @@ Referencia humana concisa del schema Prisma vigente.
 - El CHECK `folder_templates_exactly_one_owner_check` obliga a que exactamente uno de los owners este presente.
 - La unicidad efectiva se enforce via dos indices unicos parciales: `folder_templates_union_owner_unique` sobre `(club_type_id, ecclesiastical_year_id, owner_union_id) WHERE owner_union_id IS NOT NULL` y `folder_templates_local_field_owner_unique` sobre `(club_type_id, ecclesiastical_year_id, owner_local_field_id) WHERE owner_local_field_id IS NOT NULL`.
 - Indices btree de apoyo: `idx_folder_templates_owner_union`, `idx_folder_templates_owner_local_field`.
-- Desde la unificación con ranking anual, las nuevas plantillas son borrador por default (`active=false`) y sólo se pueden activar si la suma de `folder_template_sections.max_points` coincide exactamente con el componente efectivo `annual_evidence_folder.max_points`.
+- Incluye `status folder_template_status_enum NOT NULL DEFAULT 'DRAFT'` con valores `DRAFT`, `PUBLISHED`, `ARCHIVED`; `active=true` queda reservado para plantillas `PUBLISHED` capaces de generar carpetas.
+- Indice btree `idx_folder_templates_status` para filtros administrativos por lifecycle.
+- Desde la unificación con ranking anual, las nuevas plantillas son borrador por default (`active=false`, `status='DRAFT'`) y sólo se pueden publicar si la suma de `folder_template_sections.max_points` coincide exactamente con el componente efectivo `annual_evidence_folder.max_points`.
+- Las plantillas `DRAFT` pueden editarse y eliminarse si no generaron carpetas; las `PUBLISHED`/`ARCHIVED` quedan bloqueadas y se reutilizan mediante copia a nuevo borrador.
 - La migración jerárquica desactiva plantillas activas existentes que no cumplan esa regla; las carpetas ya creadas conservan su snapshot histórico.
 
 ### `annual_folders`
@@ -453,6 +456,7 @@ Define el presupuesto de puntos por componente dentro de un eje anual:
 - `master_honor_applicability_scope_enum`
 - `master_honor_requirement_group_type_enum`
 - `honor_completion_mode_enum` (`UNDECIDED`, `IN_APP`, `EXTERNAL`)
+- `folder_template_status_enum` (`DRAFT`, `PUBLISHED`, `ARCHIVED`)
 - `honor_validation_status_enum`
 - `insurance_type_enum`
 - `investiture_action_enum`
@@ -477,6 +481,7 @@ Define el presupuesto de puntos por componente dentro de un eje anual:
 - `20260428000000_extended_rankings_schema` (8.4-C) - añade 5 columnas de score + `composite_calculated_at` a `club_annual_rankings`; crea `ranking_weight_configs` con CHECK sum=100 + índice único parcial; extiende `award_categories` con `min_composite_pct`, `max_composite_pct`, `is_legacy`; crea `idx_rankings_composite`; inserta configuración global default (60/15/15/10); agrega keys `ranking.finance_closing_deadline_day` y `ranking.recalculation_enabled` en `system_config`. Aplicada en los 3 branches Neon (development, staging, production).
 - `20260528180000_annual_ranking_scorecard` - crea `ranking_tiers`, `annual_ranking_configs` y `annual_ranking_component_configs` para soportar rangos porcentuales globales y máximos anuales por campo local/año/tipo de club.
 - `20260623160000_hierarchical_annual_ranking_configs` - agrega scope jerárquico Unión/Campo Local a `annual_ranking_configs`, reemplaza el unique local por índices parciales por scope, cambia nuevas `folder_templates` a borrador por defecto (`active=false`) y desactiva plantillas activas que no coincidan con el presupuesto efectivo de `annual_evidence_folder`.
+- `20260623193000_folder_template_lifecycle` - crea `folder_template_status_enum`, añade `folder_templates.status`, backfillea `PUBLISHED` para plantillas activas y `DRAFT` para inactivas, y agrega `idx_folder_templates_status`.
 - `20260531203000_annual_ranking_axes` - crea `annual_ranking_axis_configs`, asocia componentes a ejes administrativo/operativo, y conserva componentes legacy desconocidos como inactivos para remediación manual sin asignarlos silenciosamente a un eje.
 - `20260429000000_enrollment_rankings_schema` - (8.4-A) crea `enrollment_rankings`, `section_rankings`, `enrollment_ranking_weights` con indexes, UNIQUE constraints y CHECK constraints de rango [0,100]. Ver §14.1 de `docs/canon/runtime-rankings.md`.
 - `20260429000001_award_categories_scope` - (8.4-A) añade `scope VARCHAR(20) DEFAULT 'club'` a `award_categories` + índice `idx_award_categories_scope` on `(scope, is_legacy)`. Backfill: filas existentes → `scope='club'`.

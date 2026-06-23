@@ -15,17 +15,19 @@ La Carpeta Anual de Evidencias conserva su propio flujo de carga de archivos e i
 - **EvaluationModule**: evaluar secciones (`POST /:folderId/sections/:sectionId/evaluate`), confirmar union (`POST .../confirm-union`), reabrir secciones (`POST .../reopen`), listar evaluaciones (`GET /:folderId/evaluations`), nota de revisor por evidencia (`PATCH evidences/:evidenceId/reviewer-note`). Recalculo de totales en transaccion.
 - **AwardCategoriesModule**: CRUD completo en `/award-categories`. Catalogo reutilizable sin FK de ano. Soft-delete.
 - **RankingsModule**: `GET /annual-folders/rankings` (con filtros club_type, year, category), `GET .../club/:enrollmentId`, `POST .../recalculate`. Cron nocturno a las 2 AM. Dense ranking idempotente en transaccion.
-- **Schema**: 3 modelos nuevos (`annual_folder_section_evaluations`, `award_categories`, `club_annual_rankings`) + campos de scoring en `folder_template_sections`, `folder_templates`, `annual_folders`.
+- **Schema**: 3 modelos nuevos (`annual_folder_section_evaluations`, `award_categories`, `club_annual_rankings`) + campos de scoring en `folder_template_sections`, `folder_templates`, `annual_folders` + lifecycle explícito de plantillas (`folder_template_status_enum`).
 - **11 permisos RBAC**: `annual_folder_templates:*`, `annual_folders:evaluate`, `award_categories:*`, `rankings:read/recalculate`
 - **72 tests unitarios** (evaluation 27 + award-categories 23 + rankings 22)
 
 ### Admin (Next.js)
 
-- Template forms actualizados con `max_points`, `minimum_points` por seccion, `closing_date`
+- La entrada principal del módulo es el listado operativo de carpetas creadas. Permite filtrar por jerarquía (Unión/Campo Local), estado de carpeta, estado de revisión, tipo de club, año y avance; desde ahí se revisan/evalúan secciones y se navega internamente al detalle.
+- Template forms alineados con ranking anual: la plantilla muestra el presupuesto efectivo de `annual_evidence_folder.max_points`, no expone puntos manuales de plantilla, y cada seccion configura solo los puntos asignados que deben sumar exactamente el total requerido antes de publicar.
+- Plantillas con lifecycle: `DRAFT` se puede editar/eliminar; publicar cambia a `PUBLISHED`, la bloquea y la habilita para generar carpetas; `PUBLISHED`/`ARCHIVED` se reutilizan con "copiar como borrador" para el siguiente año.
 - Pagina de club: carga la carpeta de la sección activa con `GET /club-sections/:sectionId/annual-folder`; si ya existe inscripción anual y template activo pero falta la carpeta, permite crearla con `POST /club-sections/:sectionId/annual-folder`; permite subir evidencias, enviar secciones con `POST /annual-folders/:folderId/sections/:sectionId/submit` y luego enviar la carpeta completa; no pide UUIDs internos al usuario.
 - Pagina de evaluacion: cola legible por club, sección, campo, unión, template y estado; muestra evidencias dentro del panel y del modal de evaluación, con visor interno para imágenes/PDF y zoom; para secciones `PREAPPROVED_LF` muestra confirmación/rechazo de Unión a roles `director-union`/`assistant-union`; desde esa cola se abren carpetas por deep link técnico (`?folder=`) solo como navegación interna.
 - Pagina de rankings: leaderboard con filtros, medallas top 3, recalculo manual
-- Pagina de categorias de premios: CRUD completo
+- La configuración de reconocimientos/premios operativos vive en `ranking_tiers` dentro de Configuración de ranking. La ruta legacy `/dashboard/annual-folders/categories` redirige a esa configuración para no mantener dos flujos de premios.
 - `FolderStatusBadge` con 5 estados: open, submitted, under_evaluation, evaluated, closed
 - Navegacion en sidebar bajo "Carpeta Anual de Evidencias"
 
@@ -43,7 +45,7 @@ La Carpeta Anual de Evidencias conserva su propio flujo de carga de archivos e i
 - `award_categories` — UUID PK, `name`, `description`, `club_type_id` (nullable = todos), `min_points`, `max_points`, `icon`, `order`, `active` (soft-delete)
 - `club_annual_rankings` — UUID PK, `club_enrollment_id`, `club_type_id`, `ecclesiastical_year_id`, `award_category_id` (sentinel UUID para general), `total_earned_points`, `total_max_points`, `progress_percentage`, `rank_position`, unique(`enrollment`, `year`, `category`)
 - `folder_template_sections` — +`max_points`, +`minimum_points`
-- `folder_templates` — +`minimum_points`, +`closing_date`
+- `folder_templates` — +`minimum_points`, +`closing_date`, +`status folder_template_status_enum` (`DRAFT`, `PUBLISHED`, `ARCHIVED`)
 - `annual_folders` — +`total_earned_points`, +`total_max_points`, +`progress_percentage`, +`evaluated_at`, +`local_camporee_id`, +`union_camporee_id`, +`requires_union_confirmation` (Boolean, default false)
 
 
@@ -65,13 +67,14 @@ La Carpeta Anual de Evidencias conserva su propio flujo de carga de archivos e i
 4. Las categorias de premios son configurables y reutilizables entre anos
 5. Los rankings se pre-calculan con un cron nocturno (dense ranking)
 6. Los rankings se filtran por tipo de club, ano eclesiastico, categoria y campo local (`local_field_id`) cuando se necesita comparar clubes dentro de una asociación/campo. El backend valida el alcance jerárquico del usuario y puede inferir el campo local desde la asignación activa de club o el perfil efectivo cuando el filtro no viene explícito.
-7. La app muestra un scorecard de progreso anual de su propia sección (`/club-sections/:sectionId/annual-ranking-progress`): puntos actuales, máximo anual, reconocimiento, ejes (`axes`), componentes y pendientes; no muestra el leaderboard de otros clubes
-8. El panel administrativo puede consultar el leaderboard por campo local/año/tipo de club vía `/annual-rankings`, con puntos derivados por eje desde `annual_ranking_configs` y rangos de `ranking_tiers`
-9. El panel administrativo no expone buscadores manuales por UUID para carpetas anuales. Los roles de club entran por su contexto activo de sección; los roles institucionales entran por la cola de evaluación.
-9. El panel administrativo configura los rangos globales vía `/ranking-tiers` y los presupuestos anuales por Unión o Campo Local/año/tipo de club vía `/annual-ranking-configs`. Los rangos son globales del sistema; los puntos máximos se dividen en ejes configurables `administrative` y `operational` (50/50 recomendado inicialmente), y cada eje contiene componentes canónicos: `annual_evidence_folder`, `monthly_reports_timeliness`, `finance_compliance`, `institutional_data_completeness`, `activities_registered`, `attendance_participation`, `camporee_events`, `class_investiture_progress` y `sacdia_operational_usage`.
-10. La configuración de ranking anual es histórica por alcance lógico: existe una fila activa por `union_id + ecclesiastical_year_id + club_type_id` o por `local_field_id + ecclesiastical_year_id + club_type_id`. Para un Campo Local, la configuración efectiva se resuelve como Unión primero y Campo Local después. Para 2027 se debe crear una configuración nueva de ese año; el sistema no clona automáticamente 2026. Editar una configuración existente modifica esa fila de año/scope y reemplaza ejes/componentes, por lo que todavía no hay versionado inmutable de cambios intra-año.
-11. El componente `annual_evidence_folder.max_points` del ranking anual es la fuente de verdad para el máximo de la Carpeta Anual de Evidencias. Una plantilla activa debe distribuir exactamente ese total entre sus secciones; plantillas borrador pueden tener suma parcial, pero no generan carpetas hasta activarse válidamente.
-12. El folder transiciona a nivel carpeta completa como `open → submitted → under_evaluation → evaluated → closed`; sin embargo, una sección ya enviada (`annual_folder_section_evaluations.status = SUBMITTED`) puede evaluarse mientras la carpeta sigue `open`, porque otras secciones pueden continuar en carga/envío incremental.
+7. La app muestra un scorecard de progreso anual de su propia sección (`/club-sections/:sectionId/annual-ranking-progress`): puntos actuales, máximo anual, reconocimiento, ejes (`axes`), componentes y pendientes; no muestra el leaderboard de otros clubes.
+8. El panel administrativo puede consultar el leaderboard por campo local/año/tipo de club vía `/annual-rankings`, con puntos derivados por eje desde `annual_ranking_configs` y rangos de `ranking_tiers`.
+9. El panel administrativo no expone buscadores manuales por UUID para carpetas anuales. Los roles de club entran por su contexto activo de sección; los roles institucionales entran por la cola/listado de carpetas.
+10. El panel administrativo configura los rangos globales vía `/ranking-tiers` y los presupuestos anuales por Unión o Campo Local/año/tipo de club vía `/annual-ranking-configs`. Los rangos son globales del sistema; los puntos máximos se dividen en ejes configurables `administrative` y `operational` (50/50 recomendado inicialmente), y cada eje contiene componentes canónicos soportados por backend: `annual_evidence_folder`, `monthly_reports_timeliness`, `finance_compliance`, `institutional_data_completeness`, `activities_registered`, `attendance_participation`, `camporee_events`, `class_investiture_progress` y `sacdia_operational_usage`.
+11. La configuración de ranking anual es histórica por alcance lógico: existe una fila activa por `union_id + ecclesiastical_year_id + club_type_id` o por `local_field_id + ecclesiastical_year_id + club_type_id`. Para un Campo Local, la configuración efectiva se resuelve como Unión primero y Campo Local después. Para 2027 se debe crear una configuración nueva de ese año; el sistema no clona automáticamente 2026. Editar una configuración existente modifica esa fila de año/scope y reemplaza ejes/componentes, por lo que todavía no hay versionado inmutable de cambios intra-año.
+12. El componente `annual_evidence_folder.max_points` del ranking anual es la fuente de verdad para el máximo de la Carpeta Anual de Evidencias. Una plantilla `PUBLISHED` debe distribuir exactamente ese total entre sus secciones; plantillas `DRAFT` pueden tener suma parcial, pero no generan carpetas hasta publicarse válidamente.
+13. El folder transiciona a nivel carpeta completa como `open → submitted → under_evaluation → evaluated → closed`; sin embargo, una sección ya enviada (`annual_folder_section_evaluations.status = SUBMITTED`) puede evaluarse mientras la carpeta sigue `open`, porque otras secciones pueden continuar en carga/envío incremental.
+14. Las plantillas `PUBLISHED` o `ARCHIVED` no se editan ni eliminan para preservar auditoría. Si se necesita reutilizar una estructura, el admin crea una copia `DRAFT`; si sigue siendo borrador y no tiene carpetas generadas, puede eliminarse.
 
 ## Flujo de revision en dos niveles
 
@@ -153,13 +156,15 @@ Reopen (LF o union): VALIDATED | REJECTED | PREAPPROVED_LF ──> SUBMITTED
 - **Evaluacion en transaccion**: upsert de evaluacion + recalculo de totales atomico
 - **Rankings idempotentes**: recalcular multiples veces produce el mismo resultado
 - **Dense ranking**: empates obtienen el mismo numero (1,1,2,3) no competition (1,1,3,4)
-- **Categorias sin FK de ano**: catalogo maestro que persiste entre anos eclesiasticos
+- **Premios operativos en ranking config**: el panel usa `ranking_tiers` como fuente de verdad visual para rangos de reconocimiento. El CRUD backend de `award_categories` permanece disponible como catálogo legacy/API, pero no se expone como flujo principal del módulo.
 - **closing_date bloquea submissions pero NO evaluacion**: el campo puede evaluar despues del cierre
 - **Flutter backward-compatible**: campos nullable con fallbacks para backends sin actualizar
 - **Separacion de colas**: `EvidenceReview` no revisa la Carpeta Anual de Evidencias; el módulo `annual-folders` usa endpoints propios por folder/seccion (`POST /annual-folders/:folderId/sections/:sectionId/evidences`, `submit`, `evaluate`, `confirm-union`)
 - **Nombre visible de evidencias**: Los adjuntos del módulo `annual-folders` se etiquetan como `Evidencia 01`, `Evidencia 02`, etc. El nombre original del archivo y la clave técnica de R2 no deben presentarse como título visible; uploader, fecha y sección quedan como metadata.
 - **Ranking anual no es solo carpeta**: la app y el panel calculan componentes configurables mediante el registry de score. La Carpeta Anual de Evidencias es un componente, no el ranking completo.
 - **Ranking manda el máximo de carpeta**: `annual_evidence_folder.max_points` define el total obligatorio que las secciones de la plantilla activa deben sumar. Config Unión tiene precedencia sobre Campo Local.
+- **Lifecycle de plantillas**: `active` indica capacidad runtime de generar carpetas; `status` explica el ciclo administrativo (`DRAFT`, `PUBLISHED`, `ARCHIVED`). La UX no debe permitir editar una publicada; debe copiarla para una nueva iteración.
+- **Componentes de ranking registrados**: la UI puede reorganizar y agregar/quitar componentes soportados por el registry backend, pero no inventar claves arbitrarias sin implementar su fórmula de scoring.
 - **Uso operativo sin vanity metrics**: `sacdia_operational_usage` mide acciones útiles registradas en SACDIA (asistencia semanal, clases/progreso, informes, actividades), no sesiones ni logins.
 
 ## Formulas actuales del ranking anual por ejes
@@ -182,6 +187,7 @@ Reopen (LF o union): VALIDATED | REJECTED | PREAPPROVED_LF ──> SUBMITTED
 - No hay notificaciones push cuando el campo evalua un folder
 - No hay vista de evaluacion en la app (solo admin)
 - Auto-close por `closing_date` no implementado (solo manual)
+- No hay versionado inmutable intra-año de configuraciones de ranking; se conserva una fila activa por año/scope/tipo de club.
 
 ## Reglas de scoring de carpeta anual
 
