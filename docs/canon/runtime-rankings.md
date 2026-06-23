@@ -169,9 +169,9 @@ Rankings (permiso `rankings:read` | `rankings:recalculate`):
 
 - `GET /club-sections/:sectionId/annual-ranking-progress?year_id` — scorecard móvil de una sola sección/club. Devuelve progreso anual propio (`current_points`, `max_points`, tier actual/siguiente, componentes y pendientes). No expone lista competitiva de otros clubes; esa visibilidad queda para administración;
 - `GET /annual-rankings?local_field_id&club_type_id&year_id` — leaderboard administrativo por campo local, tipo de club y año. Calcula puntos con la configuración anual (`annual_ranking_configs`), asigna posición densa por puntos y deriva el tier actual/siguiente con `ranking_tiers`;
-- `GET /annual-ranking-configs?local_field_id&club_type_id&year_id` — lista configuraciones anuales de puntaje y budgets por componente. Permiso `ranking_weights:read`;
-- `POST /annual-ranking-configs` — crea la configuración anual por campo local/año/tipo de club. Permiso `ranking_weights:write`; valida suma de componentes = `max_points`;
-- `PATCH /annual-ranking-configs/:id` — actualiza máximo anual y reemplaza budgets de componentes. Permiso `ranking_weights:write`;
+- `GET /annual-ranking-configs?union_id&local_field_id&club_type_id&year_id` — lista configuraciones anuales de puntaje y budgets por componente. La resolución efectiva para un Campo Local prefiere la configuración activa de su Unión y luego la configuración local. Permiso `ranking_weights:read`;
+- `POST /annual-ranking-configs` — crea la configuración anual por Unión o Campo Local/año/tipo de club. El body debe incluir exactamente uno entre `union_id` y `local_field_id`; Unión tiene precedencia. Permiso `ranking_weights:write`; valida suma de ejes/componentes = `max_points` y exige componente `annual_evidence_folder`;
+- `PATCH /annual-ranking-configs/:id` — actualiza máximo anual y reemplaza budgets de ejes/componentes. Permiso `ranking_weights:write`; no permite cambiar `annual_evidence_folder.max_points` si ya existen carpetas creadas para ese scope/año/tipo;
 - `GET /ranking-tiers` — lista rangos globales activos (`ranking_tiers`) usados para derivar Diamante/Oro/etc. Permiso `ranking_weights:read`;
 - `PATCH /ranking-tiers/:id` — actualiza un rango global; `band_percentage` debe ser positivo. Permiso `ranking_weights:write`;
 - `GET /annual-folders/rankings?club_type_id&year_id[&category_id][&local_field_id]` — cada fila incluye IDs de navegación (`club_enrollment_id`, `ecclesiastical_year_id`, `local_field_id`) y los 6 campos nuevos: `folder_score_pct`, `finance_score_pct`, `camporee_score_pct`, `evidence_score_pct`, `composite_score_pct`, `composite_calculated_at`. Acepta `rankings:read` desde rol global o desde la asignación activa de club. Si `local_field_id` se omite, el backend usa primero el campo local de la asignación activa y luego el campo local efectivo/perfil del usuario; si se envía explícito, valida acceso jerárquico histórico o coincidencia con la asignación activa antes de consultar;
@@ -239,24 +239,27 @@ La superficie nueva de ranking anual (`/club-sections/:sectionId/annual-ranking-
 | `administrative` — Cumplimiento Administrativo | `annual_evidence_folder`, `monthly_reports_timeliness`, `finance_compliance`, `institutional_data_completeness` |
 | `operational` — Vida Operativa del Club | `activities_registered`, `attendance_participation`, `camporee_events`, `class_investiture_progress`, `sacdia_operational_usage` |
 
-Los presupuestos de puntos son configurables por campo local/año/tipo de club. El default recomendado sigue siendo 50/50 entre ejes, pero el sistema valida solamente que:
+Los presupuestos de puntos son configurables por scope jerárquico (`union_id` o `local_field_id`) + año + tipo de club. Unión tiene precedencia: si existe configuración activa de Unión para el año/tipo, los Campos Locales debajo no pueden publicar una configuración divergente. El default recomendado sigue siendo 50/50 entre ejes, pero el sistema valida que:
 
 ```text
 SUM(active axes.max_points) = annual_ranking_configs.max_points
 SUM(active components.max_points by axis) = axis.max_points
+annual_evidence_folder.max_points = SUM(active folder_template_sections.max_points) para cualquier plantilla activa efectiva
 ```
 
 ### Fórmulas runtime
 
-Cada componente devuelve `score_pct` en rango `0–100`, y los puntos se calculan como:
+Cada componente devuelve `score_pct` en rango `0–100`. Por default, los puntos se calculan como:
 
 ```text
 component_points = ROUND(score_pct / 100 * component.max_points)
 ```
 
+Excepción canónica: `annual_evidence_folder` usa los puntos reales snapshot de la Carpeta Anual (`total_earned_points / total_max_points`) y expone esos valores como `earned_points/max_points`. No se reescala contra un presupuesto paralelo; el presupuesto de la carpeta nace de `annual_evidence_folder.max_points` y la plantilla activa debe distribuir exactamente ese total.
+
 | Component key | Fuente runtime | Fórmula inicial |
 |---|---|---|
-| `annual_evidence_folder` | `annual_folders` | `progress_percentage` persistido de la Carpeta Anual de Evidencias; fallback a `total_earned_points / total_max_points` |
+| `annual_evidence_folder` | `annual_folders` | `total_earned_points / total_max_points` reales de la Carpeta Anual de Evidencias; `progress_percentage` solo normaliza el porcentaje |
 | `monthly_reports_timeliness` | `monthly_reports` + `ecclesiastical_years` | informes `submitted` entregados antes del día `ranking.monthly_report_deadline_day` (default 5) / meses esperados del año eclesiástico |
 | `finance_compliance` | `finance_period_closings` | cierres financieros en tiempo según `ranking.finance_closing_deadline_day` (default 5) |
 | `institutional_data_completeness` | `club_enrollments` + `club_sections` | campos institucionales completos / 10 campos esperados: dirección, horario, director, secretaría, tesorería, nombre, teléfono, email, coordenadas y meta de almas |

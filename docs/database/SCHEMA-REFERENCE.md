@@ -234,6 +234,8 @@ Referencia humana concisa del schema Prisma vigente.
 - El CHECK `folder_templates_exactly_one_owner_check` obliga a que exactamente uno de los owners este presente.
 - La unicidad efectiva se enforce via dos indices unicos parciales: `folder_templates_union_owner_unique` sobre `(club_type_id, ecclesiastical_year_id, owner_union_id) WHERE owner_union_id IS NOT NULL` y `folder_templates_local_field_owner_unique` sobre `(club_type_id, ecclesiastical_year_id, owner_local_field_id) WHERE owner_local_field_id IS NOT NULL`.
 - Indices btree de apoyo: `idx_folder_templates_owner_union`, `idx_folder_templates_owner_local_field`.
+- Desde la unificación con ranking anual, las nuevas plantillas son borrador por default (`active=false`) y sólo se pueden activar si la suma de `folder_template_sections.max_points` coincide exactamente con el componente efectivo `annual_evidence_folder.max_points`.
+- La migración jerárquica desactiva plantillas activas existentes que no cumplan esa regla; las carpetas ya creadas conservan su snapshot histórico.
 
 ### `annual_folders`
 
@@ -310,21 +312,23 @@ Tabla global de rangos de reconocimiento calculados por bandas porcentuales desd
 
 ### `annual_ranking_configs` (nueva — ranking scorecard)
 
-Configura el máximo anual por campo local, año eclesiástico y tipo de club:
+Configura el máximo anual por alcance jerárquico, año eclesiástico y tipo de club. La configuración de Unión tiene precedencia sobre Campo Local:
 
 - `annual_ranking_config_id UUID PK`.
-- `local_field_id INT` — FK → `local_fields`.
+- `union_id INT?` — FK → `unions`; scope superior.
+- `local_field_id INT?` — FK → `local_fields`; scope local permitido sólo cuando no hay configuración activa de su Unión.
 - `ecclesiastical_year_id INT` — FK → `ecclesiastical_years`.
 - `club_type_id INT` — FK → `club_types`.
-- `max_points INT` — máximo anual decidido por el campo local; debe ser positivo.
+- `max_points INT` — máximo anual del ranking; debe ser positivo. Debe incluir un componente `annual_evidence_folder` que define el total obligatorio de la Carpeta Anual.
 - `active BOOLEAN DEFAULT true`.
 - `created_by UUID?`, `updated_by UUID?` — auditoría ligera del usuario que creó/actualizó.
 
 Índices/constraints:
 
-- Unique `(local_field_id, ecclesiastical_year_id, club_type_id)`.
+- CHECK `annual_ranking_configs_exactly_one_scope_check`: exactamente uno entre `union_id` y `local_field_id`.
+- Índices únicos parciales: `annual_ranking_configs_unique_union_scope` sobre `(union_id, ecclesiastical_year_id, club_type_id)` y `annual_ranking_configs_unique_local_field_scope` sobre `(local_field_id, ecclesiastical_year_id, club_type_id)`.
 - CHECK `annual_ranking_configs_max_points_check`.
-- Índices `idx_annual_ranking_configs_year_type` y `idx_annual_ranking_configs_active`.
+- Índices `idx_annual_ranking_configs_union_id`, `idx_annual_ranking_configs_local_field_id`, `idx_annual_ranking_configs_year_type` y `idx_annual_ranking_configs_active`.
 
 ### `annual_ranking_axis_configs` (nueva — ejes del ranking anual)
 
@@ -472,6 +476,7 @@ Define el presupuesto de puntos por componente dentro de un eje anual:
 - `20260415100400_annual_folders_eager_evaluation_backfill` - migracion data-only; no-op sobre dev por ausencia de datos legacy.
 - `20260428000000_extended_rankings_schema` (8.4-C) - añade 5 columnas de score + `composite_calculated_at` a `club_annual_rankings`; crea `ranking_weight_configs` con CHECK sum=100 + índice único parcial; extiende `award_categories` con `min_composite_pct`, `max_composite_pct`, `is_legacy`; crea `idx_rankings_composite`; inserta configuración global default (60/15/15/10); agrega keys `ranking.finance_closing_deadline_day` y `ranking.recalculation_enabled` en `system_config`. Aplicada en los 3 branches Neon (development, staging, production).
 - `20260528180000_annual_ranking_scorecard` - crea `ranking_tiers`, `annual_ranking_configs` y `annual_ranking_component_configs` para soportar rangos porcentuales globales y máximos anuales por campo local/año/tipo de club.
+- `20260623160000_hierarchical_annual_ranking_configs` - agrega scope jerárquico Unión/Campo Local a `annual_ranking_configs`, reemplaza el unique local por índices parciales por scope, cambia nuevas `folder_templates` a borrador por defecto (`active=false`) y desactiva plantillas activas que no coincidan con el presupuesto efectivo de `annual_evidence_folder`.
 - `20260531203000_annual_ranking_axes` - crea `annual_ranking_axis_configs`, asocia componentes a ejes administrativo/operativo, y conserva componentes legacy desconocidos como inactivos para remediación manual sin asignarlos silenciosamente a un eje.
 - `20260429000000_enrollment_rankings_schema` - (8.4-A) crea `enrollment_rankings`, `section_rankings`, `enrollment_ranking_weights` con indexes, UNIQUE constraints y CHECK constraints de rango [0,100]. Ver §14.1 de `docs/canon/runtime-rankings.md`.
 - `20260429000001_award_categories_scope` - (8.4-A) añade `scope VARCHAR(20) DEFAULT 'club'` a `award_categories` + índice `idx_award_categories_scope` on `(scope, is_legacy)`. Backfill: filas existentes → `scope='club'`.
