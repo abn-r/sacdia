@@ -47,6 +47,7 @@ La culminacion exitosa de una clase lleva a la investidura, que es el acto insti
 ### App (sacdia-app)
 - 9 screens: ClassesListView, ClassDetailView, ClassDetailWithProgressView, ClassModulesView, SectionDetailView, RequirementDetailView, TeachingScopeView, ClassMembersProgressView, ClassCounselorAssignmentsView.
 - Consume endpoints de listado, detalle, modulos, inscripcion, progreso, subida/borrado de archivos de evidencia, alcance pedagógico por sección y asignación pedagógica de clases.
+- En post-registro, la app preselecciona la sección por edad (Aventureros 4-9, Conquistadores 10-15, Guías Mayores 16+) y la clase progresiva elegible por la mayor `minimum_age` menor o igual a la edad; el backend sigue siendo la autoridad final de la derivación.
 - El acceso rápido `/home/grouped-class` abre `TeachingScopeView`: directores/subdirectores/secretaría ven las clases de toda la sección; consejeros con asignación ven sólo sus clases asignadas.
 - Desde `TeachingScopeView`, los usuarios con `club_roles:assign`/`club_roles:revoke` pueden abrir “Gestionar clases” para crear, editar y revocar asignaciones de consejeros/secretaría a clases de la sección.
 - `ClassMembersProgressView` lista los miembros activos de la sección inscritos en la clase y navega al detalle de progreso con `targetUserId` + `enrollmentId`; las evidencias se guardan sobre el enrollment del miembro objetivo y el actor sigue siendo el usuario autenticado.

@@ -4,7 +4,7 @@
 
 ## Descripcion de dominio
 
-El club es la entidad organizacional raiz del sistema SACDIA. En la estructura de la Iglesia Adventista, cada iglesia local puede tener un club que opera una o mas secciones por tipo: Aventureros (ninos de 6-9 anos), Conquistadores (jovenes de 10-15 anos) y Guias Mayores (16+ anos). El club es la identidad institucional permanente; las secciones son las unidades operativas donde se ejecuta el programa formativo.
+El club es la entidad organizacional raiz del sistema SACDIA. En la estructura de la Iglesia Adventista, cada iglesia local puede tener un club que opera una o mas secciones por tipo: Aventureros (ninos de 4-9 anos), Conquistadores (jovenes de 10-15 anos) y Guias Mayores (16+ anos). El club es la identidad institucional permanente; las secciones son las unidades operativas donde se ejecuta el programa formativo.
 
 La jerarquia organizacional completa es: Pais > Union > Campo Local > Distrito > Iglesia > Club > Seccion de Club. Cada nivel tiene su propia entidad en la base de datos y la cadena determina la jurisdiccion administrativa. Los miembros pertenecen a secciones (no directamente al club) mediante asignaciones de rol (`club_role_assignments`) que son anuales (vinculadas a un ano eclesiastico).
 
