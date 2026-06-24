@@ -48,7 +48,7 @@ El schema de base de datos y el runtime ya sostienen investiduras como superfici
 - **Implementado y ruteado** — paginas y navegacion activas en:
   - `/dashboard/investiture` — pendientes con datos operables por defecto: miembro, clase, ano eclesiastico, club, seccion, remitente, cargo/rol del remitente, fecha de envio, estado y detalle con historial, modulos/secciones completadas, evidencias enviadas y validador por seccion
     - Si la seccion del club no tiene nombre propio (`club_sections.name` nulo), el backend expone como nombre visible el tipo de club asociado para que el operador no vea “seccion no disponible” cuando la asignacion existe.
-  - `/dashboard/investiture/pipeline` — pipeline multietapa (`club-approve`, `coordinator-approve`, `field-approve`, `reject`, `invest`)
+  - `/dashboard/investiture/pipeline` — seguimiento operativo de investiduras del ano eclesiastico en curso, con solicitudes por etapa y registros ya tratados (`club-approve`, `coordinator-approve`, `field-approve`, `reject`, `invest`)
   - `/dashboard/investiture/config` — CRUD de `investiture_config`
   - Entry en sidebar bajo "Investiduras"
 

@@ -43,6 +43,7 @@ La membresia activa es el gate operativo para funcionalidades de club/seccion. U
 - **Feature verificada dentro de Members**: `MembersView` incluye tab de solicitudes de ingreso
 - Carga solicitudes usando el contexto activo de club/seccion y muestra perfil basico del solicitante, filtros y badge de pendientes
 - Directores pueden aprobar o rechazar desde la app; al hacerlo se invalida y recarga el estado del feature
+- Los actores con permiso `club_members:approve` en su seccion activa pueden abrir el perfil del solicitante mientras la solicitud este `pending`
 - El usuario con solicitud pendiente debe conservar acceso a perfil, gestion de informacion personal y carga masiva/staging de especialidades y clases
 - El usuario con solicitud pendiente no debe ver funcionalidades operativas de club hasta que su asignacion pase a `active`; la app oculta accesos rapidos y tabs operativos cuando detecta membresia `pending`, `rejected` o `expired`
 - El club/seccion solicitado debe mostrarse como `Pendiente de aprobacion`; si no hay `active_assignment`, la app usa la solicitud no activa para mostrar el banner de estado
