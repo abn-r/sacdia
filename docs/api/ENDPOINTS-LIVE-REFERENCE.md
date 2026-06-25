@@ -447,7 +447,7 @@
 | Method | Path | Auth | Roles | Description | Source |
 |---|---|---|---|---|---|
 | GET | `/api/v1/clubs` | JWT | - | Listar clubs | `src/clubs/clubs.controller.ts` |
-| POST | `/api/v1/clubs` | JWT | - | Crear nuevo club | `src/clubs/clubs.controller.ts` |
+| POST | `/api/v1/clubs` | JWT | - | Crear nuevo club. Body acepta `name`, `local_field_id`, `districlub_type_id`, `church_id`, `description?`, `address?`, `coordinates?`. | `src/clubs/clubs.controller.ts` |
 | DELETE | `/api/v1/clubs/:clubId` | JWT | director | Desactivar club (requiere rol director) | `src/clubs/clubs.controller.ts` |
 | GET | `/api/v1/clubs/:clubId` | JWT | - | Obtener club por ID | `src/clubs/clubs.controller.ts` |
 | PATCH | `/api/v1/clubs/:clubId` | JWT | director, subdirector | Actualizar club (requiere rol director o subdirector) | `src/clubs/clubs.controller.ts` |
