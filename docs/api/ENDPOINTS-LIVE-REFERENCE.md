@@ -855,6 +855,15 @@ Errores específicos del submit de honores:
 |---|---|---|---|---|---|
 | GET | `/api/v1/admin/analytics/sla-dashboard` | JWT | admin, coordinator/zone-coordinator/general-coordinator (GlobalRoles) | Métricas SLA: pendientes, overdue, tiempos promedio, tasas de aprobación, throughput 12 semanas. Cache 60s. Scoped por `coordination/me/scope` a `club_section_ids` para coordinadores; global para roles administrativos. | `src/analytics/analytics.controller.ts` |
 
+## requests
+
+| Method | Path | Auth | Roles | Description | Source |
+|---|---|---|---|---|---|
+| POST | `/api/v1/requests/transfers` | JWT | `requests:read` | Crear solicitud propia de cambio de club. Body: `to_section_id`, `from_section_id?`, `reason?`. Si `from_section_id` se omite, backend usa el contexto activo; destino debe ser del mismo `club_type_id` para conservar la clase actual. | `src/requests/requests.controller.ts` |
+| GET | `/api/v1/requests/transfers` | JWT | `requests:read` | Listar solicitudes propias; con `sectionId` lista solicitudes de esa seccion solo si el actor pertenece activamente a ella. | `src/requests/requests.controller.ts` |
+| GET | `/api/v1/requests/transfers/:requestId` | JWT | `requests:read` | Obtener detalle de solicitud propia o de una seccion activa del actor. `requestId` es UUID. | `src/requests/requests.controller.ts` |
+| POST | `/api/v1/requests/transfers/:requestId/review` | JWT | `requests:review` | Aprobar/rechazar traslado. Al aprobar, mueve la asignacion activa a la seccion destino y conserva la clase/enrollment anual actual. | `src/requests/requests.controller.ts` |
+
 ## membership-requests
 
 | Method | Path | Auth | Roles | Description | Source |

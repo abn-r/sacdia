@@ -47,6 +47,7 @@ La asignacion de un consejero/secretario a una clase progresiva concreta vive en
 - Gestion de secciones desde el detalle del club (crear, actualizar, activar/desactivar)
 - Gestion de unidades por club/seccion, enviando `club_section_id` al backend
 - Listado de miembros por seccion
+- Perfil de miembro desde el listado de seccion: actores con lectura de miembros en su seccion activa pueden abrir el perfil basico, clases y honores si el usuario tiene asignacion activa o pendiente en esa misma seccion
 - Asignacion y revocacion de roles de club
 - Sucesion anual de director por seccion desde el detalle del club, visible solo para `director-lf` y `assistant-lf`
 
@@ -80,14 +81,15 @@ El listado de miembros no debe inferir "Sin clase" desde la ausencia de datos en
 4. Los miembros se vinculan a secciones mediante asignaciones de rol anuales
 5. Los roles de club determinan los permisos operativos (quien puede crear actividades, gestionar finanzas, etc.)
 6. Debe ser posible listar miembros de una seccion con sus roles activos
-7. Las secciones deben registrar dias y horarios de reunion, cuota y meta de almas
-8. El director del club es el unico que puede eliminar secciones y desactivar el club
-9. Las asignaciones de rol deben estar vinculadas a un ano eclesiastico para mantener historico
-10. Las unidades deben pertenecer a una seccion activa; sus miembros deben pertenecer a esa misma seccion
-11. Una seccion no puede tener mas cargos activos que los definidos para la directiva: `director` 1, `deputy-director` 2, `secretary` 1, `treasurer` 1 y `secretary-treasurer` 1
-12. `secretary-treasurer` es excluyente con `secretary` y `treasurer` separados dentro de la misma seccion
-13. Una clase de la sección puede tener máximo 3 responsables pedagógicos activos por año: 1 principal y hasta 2 apoyos/suplentes.
-14. Una persona puede tener hasta 2 clases activas en la misma sección/año; la segunda requiere marca de excepción y justificación.
+7. Debe ser posible abrir el perfil basico, clases y honores de miembros activos o solicitantes pendientes de la seccion activa sin exponer subrecursos sensibles por defecto
+8. Las secciones deben registrar dias y horarios de reunion, cuota y meta de almas
+9. El director del club es el unico que puede eliminar secciones y desactivar el club
+10. Las asignaciones de rol deben estar vinculadas a un ano eclesiastico para mantener historico
+11. Las unidades deben pertenecer a una seccion activa; sus miembros deben pertenecer a esa misma seccion
+12. Una seccion no puede tener mas cargos activos que los definidos para la directiva: `director` 1, `deputy-director` 2, `secretary` 1, `treasurer` 1 y `secretary-treasurer` 1
+13. `secretary-treasurer` es excluyente con `secretary` y `treasurer` separados dentro de la misma seccion
+14. Una clase de la sección puede tener máximo 3 responsables pedagógicos activos por año: 1 principal y hasta 2 apoyos/suplentes.
+15. Una persona puede tener hasta 2 clases activas en la misma sección/año; la segunda requiere marca de excepción y justificación.
 
 ## Decisiones de diseno
 
@@ -106,7 +108,7 @@ El listado de miembros no debe inferir "Sin clase" desde la ausencia de datos en
 - **Sin trayectoria historica**: Canon define preservar transiciones entre secciones — no hay estructura dedicada para historico de secciones
 - **Trazabilidad historica de unidades**: No hay auditoria dedicada para cambios de unidad o movimientos entre unidades
 - **Sin invitaciones**: No hay flujo para invitar miembros a un club/seccion; la vinculacion es manual
-- **Transferencias parciales**: existe flujo de solicitudes de transferencia entre secciones; al aprobar, mueve asignaciones y recalcula la clase anual por edad/tipo de club destino. Aun falta auditoria dedicada de trayectoria historica de secciones.
+- **Transferencias parciales**: existe flujo de solicitudes de transferencia entre secciones; al aprobar, mueve la asignacion activa a la seccion destino del mismo tipo de club y conserva la clase anual actual. Aun falta auditoria dedicada de trayectoria historica de secciones.
 
 ## Prioridad y siguiente accion
 
