@@ -34,6 +34,14 @@ propios solo como adaptadores: no deben duplicar ni contradecir este contrato.
 - Cambios en un repo especifico: leer este archivo y luego el `AGENTS.md`/`CLAUDE.md` local del repo.
 - Si un repo se abre aislado y no existe `../AGENTS.md`, el `AGENTS.md` local actua como adaptador minimo y debe indicar que el canon completo vive en el workspace `sacdia`.
 
+### Ownership de agentes por superficie
+
+- Para cambios integrales, seguir `docs/steering/agent-ownership.md`.
+- Codex prioriza `sacdia-backend/`, `sacdia-app/`, contratos API, seguridad, datos y documentacion tecnica.
+- Cursor Composer 2.5 prioriza `sacdia-admin/`, diseño visual, jerarquia de informacion, layouts y polish del panel administrativo.
+- El flujo debe ser contract-first: Codex define o valida endpoints/DTOs/permisos/errores antes de que el admin los consuma.
+- Codex no debe rediseñar el admin salvo pedido explicito o ajuste minimo para corregir integracion rota.
+
 ## 1) Lectura minima obligatoria (siempre)
 
 1. `CLAUDE.md`
@@ -43,7 +51,8 @@ propios solo como adaptadores: no deben duplicar ni contradecir este contrato.
 5. `docs/steering/coding-standards.md`
 6. `docs/steering/data-guidelines.md`
 7. `docs/steering/agents.md` (reglas extendidas y checklist detallado)
-8. Si se toca un modulo runtime: `sacdia-backend/AGENTS.md`, `sacdia-admin/AGENTS.md` o `sacdia-app/AGENTS.md` segun corresponda.
+8. `docs/steering/agent-ownership.md`
+9. Si se toca un modulo runtime: `sacdia-backend/AGENTS.md`, `sacdia-admin/AGENTS.md` o `sacdia-app/AGENTS.md` segun corresponda.
 
 ## 2) Router de documentacion por tipo de cambio
 

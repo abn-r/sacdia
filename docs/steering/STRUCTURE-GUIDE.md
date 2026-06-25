@@ -181,6 +181,7 @@ docs/
 │   ├── tech.md
 │   ├── coding-standards.md
 │   ├── data-guidelines.md
+│   ├── agent-ownership.md
 │   └── agents.md
 │
 ├── audit/                # Auditoría y estado
