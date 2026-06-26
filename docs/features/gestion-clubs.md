@@ -49,7 +49,8 @@ La asignacion de un consejero/secretario a una clase progresiva concreta vive en
 - Listado de miembros por seccion
 - Perfil de miembro desde el listado de seccion: actores con lectura de miembros en su seccion activa pueden abrir el perfil basico, clases y honores si el usuario tiene asignacion activa o pendiente en esa misma seccion
 - Asignacion y revocacion de roles de club
-- Sucesion anual de director por seccion desde el detalle del club, visible solo para `director-lf` y `assistant-lf`
+- Asignacion inicial de director por seccion cuando la seccion todavia no tiene director activo, visible para `super-admin`, `admin`, `director-lf` y `assistant-lf`
+- Sucesion anual de director por seccion desde el detalle del club, visible para `super-admin`, `admin`, `director-lf` y `assistant-lf`
 
 ### App Movil
 - **3 features relacionados**:
@@ -96,7 +97,8 @@ El listado de miembros no debe inferir "Sin clase" desde la ausencia de datos en
 - **Club como identidad, seccion como operacion**: El club es la entidad permanente; las secciones son las que ejecutan el programa (Decision 2 y 3 del canon)
 - **Consolidacion de secciones**: Las tres tablas originales (`club_adventurers`, `club_pathfinders`, `club_master_guilds`) se consolidaron en `club_sections` con un `club_type_id` discriminador (Decision 10)
 - **Roles anuales**: Las asignaciones de rol tienen `ecclesiastical_year_id`, permitiendo que un miembro cambie de rol entre anos sin perder historico
-- **Sucesion anual de director**: para cambiar el director en el siguiente ano eclesiastico, el Admin usa `POST /clubs/:clubId/sections/:sectionId/director-succession`, que cierra la asignacion activa anterior (`active=false`, `status=ended`, `end_date`) y crea una nueva asignacion `director` para el ano indicado. Solo `director-lf` y `assistant-lf` pueden ejecutar este flujo. No deben convivir dos directores activos en la misma seccion.
+- **Asignacion inicial de director**: para una seccion sin director activo, el Admin usa `POST /clubs/:clubId/sections/:sectionId/director-assignment`, que crea una asignacion `director` para el usuario y ano eclesiastico indicados. Si ya existe director activo, el backend rechaza el alta para mantener un solo director activo.
+- **Sucesion anual de director**: para cambiar el director en el siguiente ano eclesiastico, el Admin usa `POST /clubs/:clubId/sections/:sectionId/director-succession`, que cierra la asignacion activa anterior (`active=false`, `status=ended`, `end_date`) y crea una nueva asignacion `director` para el ano indicado. Solo `super-admin`, `admin`, `director-lf` y `assistant-lf` pueden ejecutar este flujo. No deben convivir dos directores activos en la misma seccion.
 - **Limites de directiva**: `role_slot_limits` define los cupos por seccion y el backend tambien conserva fallback canonico para cargos criticos aunque falte el seed. La regla se aplica al crear asignaciones directas, al actualizar un rol y al revisar solicitudes de asignacion.
 - **Contexto activo**: `users_pr.active_club_assignment_id` persiste el contexto de club activo del usuario, usado por `ClubRolesGuard` para resolver autorizacion
 - **Autorizacion por jerarquia de roles**: Director tiene todos los permisos; subdirector la mayoria; secretary puede gestionar roles y secciones
