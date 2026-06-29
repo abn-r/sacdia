@@ -179,7 +179,7 @@ Autoridad: `docs/canon/runtime-resiliencia-red.md` §2.3 y §5. No duplicar pol�
 
 ## 10. Emisores canónicos del runtime
 
-Features del backend que emiten notificaciones visibles (verificado 2026-06-04):
+Features del backend que emiten notificaciones visibles (verificado 2026-06-29):
 
 | Feature | Archivo | Método(s) | Tag `source` típico |
 |---------|---------|-----------|---------------------|
@@ -188,6 +188,7 @@ Features del backend que emiten notificaciones visibles (verificado 2026-06-04):
 | Activities reminder | `sacdia-backend/src/activities/activities-reminder.service.ts` | `sendToClubMembers` | `activities:reminder` |
 | Investiture | `sacdia-backend/src/investiture/investiture.service.ts` | `sendToGlobalRole` | `investiture:*` |
 | Requests | `sacdia-backend/src/requests/requests.service.ts` | `sendToSectionRole`, `sendToGlobalRole` | `requests:*` |
+| Membership requests | `sacdia-backend/src/membership-requests/membership-requests.service.ts` | `sendToSectionRole` | `membership_requests:new_request` |
 | Validation | `sacdia-backend/src/validation/validation.service.ts` | `sendToSectionRole` | `validation:*` |
 | Achievements | `sacdia-backend/src/achievements/achievements.processor.ts` | `notifySafe` | `achievements:*` |
 | Master honors | `sacdia-backend/src/honors/master-honors-evaluator.service.ts` | `notifySafe` | `master_honors:awarded`, `master_honors:recovered`, `master_honors:not_current` |
@@ -202,7 +203,7 @@ Matriz de audiencia:
 | Broadcast admin | usuarios activos | `notifications:broadcast` global (`admin`/`super-admin` por seed wildcard) |
 | Envío por club admin | miembros activos de la sección seleccionada | `notifications:club` + `active_assignment` exacto; seed lo otorga a `secretary`, `secretary-treasurer`, `deputy-director`, `director` |
 | Actividad creada/recordatorio | miembros de sección | emisión interna del backend; no depende de UI admin |
-| Validación/requests/camporees/investiduras | roles o ámbitos globales/club según servicio emisor | helpers internos `sendToSectionRole`/`sendToGlobalRole` |
+| Validación/requests/membership/camporees/investiduras | roles o ámbitos globales/club según servicio emisor | helpers internos `sendToSectionRole`/`sendToGlobalRole` |
 | Achievements/master honors/member of month/cron alerts | usuario específico | `notifySafe`, sin throw al flujo principal |
 
 Cualquier feature nuevo que emita notificaciones debe:

@@ -74,9 +74,9 @@ Los honores aprobados legacy anteriores a `completion_mode` no deben seguir en `
 
 Las notificaciones generadas por validación y logros deben usar la nomenclatura visible **especialidad**:
 
-- `validation:honor_submitted` muestra “Nueva especialidad enviada a revisión”.
-- `validation:honor_approved` muestra “Especialidad aprobada”.
-- `validation:honor_rejected` muestra “Especialidad rechazada”.
+- `validation:honor_submitted` muestra “Especialidad lista para revisar”.
+- `validation:honor_approved` muestra “¡Tu especialidad fue aprobada!”.
+- `validation:honor_rejected` muestra “Tu especialidad necesita ajustes”.
 - Los logros de especialidades deben evitar mostrar “Honor” en el cuerpo visible, aunque el evento interno siga siendo `honor.validated`.
 
 Los contratos internos se mantienen como `entity_type = "honor"` y `validation:honor_*` para no romper API, datos históricos ni filtros existentes.
@@ -157,7 +157,7 @@ La tarjeta virtual muestra maestrías vigentes y **No vigente** en la banda. El 
 
 El backend emite notificaciones de cambio de maestría con `type = master_honor_changed`. La app agrupa varias maestrías en un solo modal global para evitar apilar diálogos.
 
-Para validación de especialidades, el contrato técnico conserva `entity_type = "honor"` y fuentes `validation:honor_*`, pero el copy visible al usuario debe decir **especialidad**: "Nueva especialidad enviada a revisión", "Especialidad aprobada" y "Especialidad rechazada".
+Para validación de especialidades, el contrato técnico conserva `entity_type = "honor"` y fuentes `validation:honor_*`, pero el copy visible al usuario debe decir **especialidad**: "Especialidad lista para revisar", "¡Tu especialidad fue aprobada!" y "Tu especialidad necesita ajustes".
 
 Casos que notifican:
 
@@ -170,8 +170,7 @@ El copy de producto debe usar español neutral, sin modismos regionales.
 Ejemplo de copy para **No vigente**:
 
 ```text
-Las validaciones requeridas para la maestría {nombre} cambiaron.
-Actualmente no cumples con los requisitos, por lo que quedó marcada como No vigente.
+La maestría {nombre} necesita ajustes para volver a estar vigente.
 ```
 
 ## Backend

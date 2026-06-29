@@ -580,7 +580,7 @@ Notas contractuales de inventario:
 - Dynamic notification sources currently include:
   - `validation:class_approved`, `validation:class_rejected`, `validation:honor_approved`, `validation:honor_rejected`
   - `requests:transfer_approved`, `requests:transfer_rejected`, `requests:assignment_approved`, `requests:assignment_rejected`
-  - `system_alert:cron_failure`
+  - `membership_requests:new_request`, `monthly_reports:reminder`, `system_alert:cron_failure`
 
 ## root
 
