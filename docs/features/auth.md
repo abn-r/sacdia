@@ -50,6 +50,7 @@ La gestion de sesiones permite listar sesiones activas y cerrar sesiones individ
 ### App Movil
 - **5 screens de auth**: SplashView, LoginView, RegisterView, ForgotPasswordView, AuthGate
 - Consume 9+ endpoints incluyendo login, register, logout, password reset, completion-status, context switch
+- **Proteccion biometrica local**: la app implementa biometria como app-lock post-login, no como metodo de inicio de sesion. El switch de settings habilita un opt-in local y `BiometricGate` solo bloquea cuando existe una sesion autenticada vigente; si no hay sesion, login y rutas publicas no quedan cubiertas por el lock. Al cerrar sesion, expirar la sesion o eliminar la cuenta, la preferencia biometrica se limpia junto con la sesion local.
 - **Dashboard birthday celebration**: `DashboardView` lee `UserEntity.birthday` desde `/auth/me`; si coincide con el dia calendario local, muestra un modal celebratorio y un banner festivo arriba de `ClubInfoCard`. El banner reabre el modal hasta que el usuario pulse "no volver a mostrar hoy"; esa decision se persiste en `SharedPreferences` por `user_id + anio + MM-DD`.
 - **Post-registro paso 2**: la app precarga `gender`, `birthday`, `baptism`, `baptism_date` y `blood` desde `GET /users/:userId` al volver a datos personales. Las declaraciones explicitas "No tengo alergias/enfermedades/medicamentos" se conservan localmente en `SharedPreferences` por usuario y categoria, porque los endpoints actuales de salud exponen listas y una lista vacia no distingue "sin declarar" de "declarado como ninguno".
 - **Profile update payload**: la pantalla de edicion de perfil no envia `phone` ni `address` cuando estan vacios. `PATCH /users/:userId` valida `phone` si la propiedad existe; por eso `phone: ""` debe omitirse para representar "sin telefono".
@@ -101,6 +102,7 @@ La gestion de sesiones permite listar sesiones activas y cerrar sesiones individ
 - **Logout best-effort**: El logout acepta bearer opcional y no falla si el token ya expiro
 - **Token blacklist**: `TokenBlacklistService` invalida tokens revocados usando Redis/Upstash como cache
 - **Eliminacion de cuenta por autoservicio**: `DELETE /auth/me` revoca sesiones, desactiva FCM, marca `users.active=false`, anonimiza PII en `users`, borra credenciales/vínculos en `accounts` y registra `account_deletion_log`. Los clientes deben derivar el texto visible desde `is_deleted`/`member_is_deleted`; no se guardan etiquetas como `Cuenta eliminada` en columnas de identidad.
+- **Biometria movil como app-lock**: para la release actual, la biometria movil protege una sesion local ya autenticada. No restaura tokens, no reemplaza Better Auth/JWT ni crea un contrato backend nuevo. Un login biometrico real queda fuera de alcance y debe tratarse como feature futura con diseño propio de restauracion segura de sesion.
 
 ## Gaps y pendientes
 
