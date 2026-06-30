@@ -9,7 +9,7 @@ El flujo legacy de carpetas (`FoldersModule`, rutas `/folders/*`, `EvidenceFolde
 El flujo canónico es **Carpeta Anual de Evidencias** (`annual-folders`):
 
 - Carga/lectura por sección: `evidence_folders:read` / `evidence_folders:update`.
-- Creación de carpeta desde club: `POST /club-sections/:sectionId/annual-folder`, resolviendo la inscripción anual vigente sin pedir `club_enrollment_id` al usuario.
+- Creación de carpeta desde club: `POST /club-sections/:sectionId/annual-folder`, resolviendo la inscripción anual aprobada (`club_enrollments.status = active`) sin pedir `club_enrollment_id` al usuario.
 - Envío de sección: `POST /annual-folders/:folderId/sections/:sectionId/submit`.
 - Evaluación de sección: `POST /annual-folders/:folderId/sections/:sectionId/evaluate`; la sección debe estar enviada y la carpeta puede seguir `open` mientras otras secciones continúan su carga.
 - Envío de carpeta completa: `POST /annual-folders/:folderId/submit` con `annual_folders:submit`, limitado a dirección/secretaría del club.

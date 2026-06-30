@@ -174,9 +174,9 @@ Los modelos sin `@@map` usan el nombre del modelo como nombre físico de tabla.
 |---|---|---|---|---|
 | `units` | `units` | Unidades | Unidades (escuadrones) dentro de una sección, con roles de capitán/secretario/asesor. | `club_sections`, `club_types`, `users` (x4) |
 | `unit_members` | `unit_members` | Unidades | Membresía de un usuario en una unidad. | `units`, `users` |
-| `weekly_records` | `weekly_records` | Unidades | Registro semanal de asistencia, puntualidad y puntos de un miembro. | `users` |
+| `weekly_records` | `weekly_records` | Unidades | Planilla semanal por unidad/miembro; total materializado desde categorías, con asistencia/puntualidad legacy. | `units`, `users` |
 | `weekly_record_scores` | `weekly_record_scores` | Unidades | Detalle de puntaje por categoría para un registro semanal. | `weekly_records`, `scoring_categories` |
-| `scoring_categories` | `scoring_categories` | Unidades | Categorías de puntuación (definidas por división/unión/campo local). | `weekly_record_scores` |
+| `scoring_categories` | `scoring_categories` | Unidades | Categorías de puntuación con modo `numeric` o `boolean_full` (definidas por división/unión/campo local). | `weekly_record_scores` |
 | `member_of_month` | `member_of_month` | Unidades | Miembro del mes calculado por sección con total de puntos. | `club_sections`, `users` |
 
 ### Dominio: Certifications

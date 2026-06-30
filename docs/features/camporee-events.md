@@ -1,15 +1,15 @@
 # Camporee Events
 
-**Estado**: PROPUESTO
-**Última actualización**: 2026-05-20
-**Owner**: TBD
+**Estado**: IMPLEMENTADO PARCIAL
+**Última actualización**: 2026-06-29
+**Owner**: Backend/App/Admin
 **Dominio relacionado**: [camporees.md](./camporees.md)
 
 ## Descripción de dominio
 
 Un camporee se compone de **eventos** competitivos donde clubes y miembros son evaluados (orden cerrado, primeros auxilios, nudos, cocina, conocimiento bíblico, deportes, espirituales, etc.). Cada evento tiene reglas, puntuación, materiales requeridos, participantes esperados y penalizaciones.
 
-Hoy el dominio camporees tiene `local_camporees` y `union_camporees` pero **no modela los eventos individuales que componen cada camporee**. Esta feature agrega:
+El dominio camporees modela `local_camporees` y `union_camporees` y cuenta con instancias de eventos en `camporee_events`. Esta feature agrega:
 
 1. Un **catálogo i18n de tipos de evento** (espiritual, recreativo, cultural, deportivo, técnico, etc.) administrable.
 2. Una **biblioteca de templates reusables** (scoped por unión o por campo local) — un mismo evento se diseña una vez y se reutiliza en varios camporees.
@@ -28,19 +28,31 @@ La separación template ↔ instancia evita que ajustes específicos de un campo
 - **Soft delete (`active`)** y campos de auditoría (`created_at`, `modified_at`, `created_by`, `modified_by`).
 - **Reasignar template**: una instancia recuerda el `event_template_id` que la originó (nullable, `ON DELETE SET NULL`) para trazabilidad. Si el template se borra (soft), la instancia sobrevive con datos clonados.
 
+## Estado real verificado (2026-06-29)
+
+- Backend: `CamporeeEventsController` expone lectura y mutación para eventos locales y de unión:
+  - `GET /api/v1/local-camporees/:camporeeId/events`
+  - `GET /api/v1/union-camporees/:camporeeId/events`
+  - `POST /api/v1/local-camporees/:camporeeId/events`
+  - `POST /api/v1/union-camporees/:camporeeId/events`
+  - `PATCH /api/v1/camporee-events/:eventId`
+  - `DELETE /api/v1/camporee-events/:eventId`
+- App móvil: el detalle de Camporí consume `GET /api/v1/local-camporees/:camporeeId/events` y muestra una vista read-only para roles operativos de club.
+- RBAC: la lectura móvil de eventos se concede a director, subdirector, secretario, secretario-tesorero, tesorero y consejero con `camporee_events:read`.
+
 ## Modelo de datos
 
 ### Tabla `camporee_event_types`
 
-| Columna | Tipo | Notas |
-|---|---|---|
-| `event_type_id` | `INT PK` | autoincrement |
-| `code` | `VARCHAR(40) UNIQUE` | slug estable (`spiritual`, `recreational`, `sports`...) |
-| `name` | `VARCHAR(100) NOT NULL` | nombre en español |
-| `description` | `TEXT NULL` | descripción opcional |
-| `display_order` | `INT NULL` | orden sugerido para listas |
-| `active` | `BOOL DEFAULT true` | soft delete |
-| `created_at`, `modified_at` | `TIMESTAMPTZ` | auditoría |
+| Columna                     | Tipo                    | Notas                                                   |
+| --------------------------- | ----------------------- | ------------------------------------------------------- |
+| `event_type_id`             | `INT PK`                | autoincrement                                           |
+| `code`                      | `VARCHAR(40) UNIQUE`    | slug estable (`spiritual`, `recreational`, `sports`...) |
+| `name`                      | `VARCHAR(100) NOT NULL` | nombre en español                                       |
+| `description`               | `TEXT NULL`             | descripción opcional                                    |
+| `display_order`             | `INT NULL`              | orden sugerido para listas                              |
+| `active`                    | `BOOL DEFAULT true`     | soft delete                                             |
+| `created_at`, `modified_at` | `TIMESTAMPTZ`           | auditoría                                               |
 
 ### Tabla `camporee_event_types_translations`
 
@@ -57,30 +69,30 @@ ON DELETE CASCADE
 
 ### Tabla `camporee_event_templates`
 
-| Columna | Tipo | Notas |
-|---|---|---|
-| `event_template_id` | `INT PK` | |
-| `scope` | `VARCHAR(20) NOT NULL` | `'union'` o `'local_field'` |
-| `union_id` | `INT NULL FK unions` | exclusivo con `local_field_id` |
-| `local_field_id` | `INT NULL FK local_fields` | exclusivo con `union_id` |
-| `event_type_id` | `INT NOT NULL FK camporee_event_types` | |
-| `title` | `VARCHAR(150) NOT NULL` | |
-| `description` | `TEXT NULL` | |
-| `requirements` | `TEXT NULL` | requisitos para participar |
-| `development` | `TEXT NULL` | desarrollo / cómo se ejecuta |
-| `prerequisites` | `TEXT NULL` | requisitos previos del club/miembro |
-| `materials` | `TEXT NULL` | materiales necesarios |
-| `auxiliaries` | `TEXT NULL` | auxiliares / personal de apoyo |
-| `max_points` | `INT NOT NULL` | puntaje máximo posible |
-| `min_points` | `INT NOT NULL DEFAULT 0` | piso de participación |
-| `penalties` | `JSONB NOT NULL DEFAULT '[]'` | `[{description, points_deducted, time_seconds}]` |
-| `participants_mode` | `VARCHAR(20) NOT NULL` | `'count'` o `'by_class'` |
-| `participants_count` | `INT NULL` | requerido si `mode = 'count'` |
-| `participants_by_class` | `JSONB NULL` | requerido si `mode = 'by_class'`, `[{class_id, count}]` |
-| `duration_seconds` | `INT NULL` | duración estimada |
-| `active` | `BOOL DEFAULT true` | |
-| `created_at`, `modified_at` | `TIMESTAMPTZ` | |
-| `created_by`, `modified_by` | `UUID NULL FK users` | |
+| Columna                     | Tipo                                   | Notas                                                   |
+| --------------------------- | -------------------------------------- | ------------------------------------------------------- |
+| `event_template_id`         | `INT PK`                               |                                                         |
+| `scope`                     | `VARCHAR(20) NOT NULL`                 | `'union'` o `'local_field'`                             |
+| `union_id`                  | `INT NULL FK unions`                   | exclusivo con `local_field_id`                          |
+| `local_field_id`            | `INT NULL FK local_fields`             | exclusivo con `union_id`                                |
+| `event_type_id`             | `INT NOT NULL FK camporee_event_types` |                                                         |
+| `title`                     | `VARCHAR(150) NOT NULL`                |                                                         |
+| `description`               | `TEXT NULL`                            |                                                         |
+| `requirements`              | `TEXT NULL`                            | requisitos para participar                              |
+| `development`               | `TEXT NULL`                            | desarrollo / cómo se ejecuta                            |
+| `prerequisites`             | `TEXT NULL`                            | requisitos previos del club/miembro                     |
+| `materials`                 | `TEXT NULL`                            | materiales necesarios                                   |
+| `auxiliaries`               | `TEXT NULL`                            | auxiliares / personal de apoyo                          |
+| `max_points`                | `INT NOT NULL`                         | puntaje máximo posible                                  |
+| `min_points`                | `INT NOT NULL DEFAULT 0`               | piso de participación                                   |
+| `penalties`                 | `JSONB NOT NULL DEFAULT '[]'`          | `[{description, points_deducted, time_seconds}]`        |
+| `participants_mode`         | `VARCHAR(20) NOT NULL`                 | `'count'` o `'by_class'`                                |
+| `participants_count`        | `INT NULL`                             | requerido si `mode = 'count'`                           |
+| `participants_by_class`     | `JSONB NULL`                           | requerido si `mode = 'by_class'`, `[{class_id, count}]` |
+| `duration_seconds`          | `INT NULL`                             | duración estimada                                       |
+| `active`                    | `BOOL DEFAULT true`                    |                                                         |
+| `created_at`, `modified_at` | `TIMESTAMPTZ`                          |                                                         |
+| `created_by`, `modified_by` | `UUID NULL FK users`                   |                                                         |
 
 Constraints:
 
@@ -104,17 +116,17 @@ CHECK (
 
 ### Tabla `camporee_events` (instancias)
 
-| Columna | Tipo | Notas |
-|---|---|---|
-| `camporee_event_id` | `INT PK` | |
-| `local_camporee_id` | `INT NULL FK local_camporees` | exclusivo con `union_camporee_id` |
-| `union_camporee_id` | `INT NULL FK union_camporees` | exclusivo con `local_camporee_id` |
-| `event_template_id` | `INT NULL FK camporee_event_templates ON DELETE SET NULL` | trazabilidad |
-| `event_type_id` | `INT NOT NULL FK camporee_event_types` | snapshot — sobrevive si template cambia |
-| Todos los campos del template | (clonados al crear instancia) | |
-| `display_order` | `INT DEFAULT 0` | orden en la lista del camporee |
-| `active` | `BOOL DEFAULT true` | |
-| `created_at`, `modified_at`, `created_by`, `modified_by` | | |
+| Columna                                                  | Tipo                                                      | Notas                                   |
+| -------------------------------------------------------- | --------------------------------------------------------- | --------------------------------------- |
+| `camporee_event_id`                                      | `INT PK`                                                  |                                         |
+| `local_camporee_id`                                      | `INT NULL FK local_camporees`                             | exclusivo con `union_camporee_id`       |
+| `union_camporee_id`                                      | `INT NULL FK union_camporees`                             | exclusivo con `local_camporee_id`       |
+| `event_template_id`                                      | `INT NULL FK camporee_event_templates ON DELETE SET NULL` | trazabilidad                            |
+| `event_type_id`                                          | `INT NOT NULL FK camporee_event_types`                    | snapshot — sobrevive si template cambia |
+| Todos los campos del template                            | (clonados al crear instancia)                             |                                         |
+| `display_order`                                          | `INT DEFAULT 0`                                           | orden en la lista del camporee          |
+| `active`                                                 | `BOOL DEFAULT true`                                       |                                         |
+| `created_at`, `modified_at`, `created_by`, `modified_by` |                                                           |                                         |
 
 Constraints:
 
@@ -136,49 +148,52 @@ Prefijo `/api/v1`.
 
 ### Catálogo de tipos (admin)
 
-| Método | Path | Permiso | Descripción |
-|---|---|---|---|
-| `GET` | `/admin/camporee-event-types` | `camporee_event_types:read` o `catalogs:read` | Listar tipos |
-| `POST` | `/admin/camporee-event-types` | `camporee_event_types:create` o `catalogs:create` | Crear tipo |
-| `PATCH` | `/admin/camporee-event-types/:id` | `camporee_event_types:update` o `catalogs:update` | Editar tipo |
-| `DELETE` | `/admin/camporee-event-types/:id` | `camporee_event_types:delete` o `catalogs:delete` | Soft delete |
+| Método   | Path                              | Permiso                                           | Descripción  |
+| -------- | --------------------------------- | ------------------------------------------------- | ------------ |
+| `GET`    | `/admin/camporee-event-types`     | `camporee_event_types:read` o `catalogs:read`     | Listar tipos |
+| `POST`   | `/admin/camporee-event-types`     | `camporee_event_types:create` o `catalogs:create` | Crear tipo   |
+| `PATCH`  | `/admin/camporee-event-types/:id` | `camporee_event_types:update` o `catalogs:update` | Editar tipo  |
+| `DELETE` | `/admin/camporee-event-types/:id` | `camporee_event_types:delete` o `catalogs:delete` | Soft delete  |
 
 ### Templates (scope union o local_field)
 
-| Método | Path | Permiso | Descripción |
-|---|---|---|---|
-| `GET` | `/camporee-event-templates?scope&union_id&local_field_id&event_type_id&active` | `camporee_events:read` | Listar templates visibles para el rol |
-| `GET` | `/camporee-event-templates/:id` | `camporee_events:read` | Detalle |
-| `POST` | `/camporee-event-templates` | `camporee_events:create` | Crear template (valida scope + permisos sobre owner) |
-| `PATCH` | `/camporee-event-templates/:id` | `camporee_events:update` | Editar |
-| `DELETE` | `/camporee-event-templates/:id` | `camporee_events:delete` | Soft delete |
+| Método   | Path                                                                           | Permiso                  | Descripción                                          |
+| -------- | ------------------------------------------------------------------------------ | ------------------------ | ---------------------------------------------------- |
+| `GET`    | `/camporee-event-templates?scope&union_id&local_field_id&event_type_id&active` | `camporee_events:read`   | Listar templates visibles para el rol                |
+| `GET`    | `/camporee-event-templates/:id`                                                | `camporee_events:read`   | Detalle                                              |
+| `POST`   | `/camporee-event-templates`                                                    | `camporee_events:create` | Crear template (valida scope + permisos sobre owner) |
+| `PATCH`  | `/camporee-event-templates/:id`                                                | `camporee_events:update` | Editar                                               |
+| `DELETE` | `/camporee-event-templates/:id`                                                | `camporee_events:delete` | Soft delete                                          |
 
 Visibilidad de templates:
+
 - Admin de unión: ve templates de su unión + templates de campos locales bajo su unión.
 - Admin de campo local: ve templates de su campo local + templates de su unión padre.
 - Super-admin: ve todo.
 
 ### Instancias por camporee
 
-| Método | Path | Permiso | Descripción |
-|---|---|---|---|
-| `GET` | `/local-camporees/:id/events` | director/subdirector + camporee_events:read | Listar eventos del camporee local |
-| `GET` | `/union-camporees/:id/events` | director-unión + camporee_events:read | Listar eventos del camporee de unión |
-| `POST` | `/local-camporees/:id/events` | camporee_events:create | Crear evento (custom o desde template) |
-| `POST` | `/union-camporees/:id/events` | camporee_events:create | Idem unión |
-| `POST` | `/local-camporees/:id/events/from-template/:templateId` | camporee_events:create | Clonar template a instancia |
-| `POST` | `/union-camporees/:id/events/from-template/:templateId` | camporee_events:create | Idem unión |
-| `PATCH` | `/camporee-events/:id` | camporee_events:update | Editar instancia (overrides) |
-| `DELETE` | `/camporee-events/:id` | camporee_events:delete | Soft delete |
-| `PATCH` | `/camporee-events/:id/reorder` | camporee_events:update | Cambiar `display_order` |
+| Método   | Path                                                    | Permiso                                     | Descripción                            |
+| -------- | ------------------------------------------------------- | ------------------------------------------- | -------------------------------------- |
+| `GET`    | `/local-camporees/:id/events`                           | director/subdirector + camporee_events:read | Listar eventos del camporee local      |
+| `GET`    | `/union-camporees/:id/events`                           | director-unión + camporee_events:read       | Listar eventos del camporee de unión   |
+| `POST`   | `/local-camporees/:id/events`                           | camporee_events:create                      | Crear evento (custom o desde template) |
+| `POST`   | `/union-camporees/:id/events`                           | camporee_events:create                      | Idem unión                             |
+| `POST`   | `/local-camporees/:id/events/from-template/:templateId` | camporee_events:create                      | Clonar template a instancia            |
+| `POST`   | `/union-camporees/:id/events/from-template/:templateId` | camporee_events:create                      | Idem unión                             |
+| `PATCH`  | `/camporee-events/:id`                                  | camporee_events:update                      | Editar instancia (overrides)           |
+| `DELETE` | `/camporee-events/:id`                                  | camporee_events:delete                      | Soft delete                            |
+| `PATCH`  | `/camporee-events/:id/reorder`                          | camporee_events:update                      | Cambiar `display_order`                |
 
 ## Permisos RBAC (a sembrar)
 
 Nuevos permisos:
+
 - `camporee_event_types:read|create|update|delete` (admin/super-admin)
 - `camporee_events:read|create|update|delete` (director/subdirector club, director-unión, admin)
 
 Mapeos sugeridos:
+
 - Director club: read + create + update + delete (sobre camporees de su scope)
 - Subdirector club: read + create + update
 - Admin unión: read + create + update + delete sobre templates de su unión
@@ -189,12 +204,14 @@ Mapeos sugeridos:
 ### 1. Catálogo de tipos de evento
 
 Ruta: `/dashboard/catalogs/camporee-event-types`
+
 - List page con `PhaseECatalogCrudPage` patrón (Dialog con tabs i18n) — ≤4 campos planos: name, description, display_order, active.
 - Reutiliza factory `makeActions` con `hasDescription=true`, traducciones `['name', 'description']`.
 
 ### 2. Biblioteca de templates
 
 Ruta: `/dashboard/camporees/event-templates`
+
 - List page con filtros: scope (union/local), event_type, búsqueda por título.
 - Dedicated form pages (`new/page.tsx`, `[id]/edit/page.tsx`) — patrón club-ideal-form-page por la cantidad de campos (>4) + jsonb editors + select de event_type.
 - Editores específicos:
@@ -204,15 +221,16 @@ Ruta: `/dashboard/camporees/event-templates`
 ### 3. Eventos asignados a un camporee
 
 Tab "Eventos" en `/dashboard/camporees/[id]` (tanto local como union).
+
 - Lista de instancias con orden drag-handle (display_order).
 - Botones: "Agregar desde template" (picker), "Crear personalizado" (form modal/page).
 - Acciones por fila: editar (form prellenado), eliminar, reordenar.
 
-## UI App (sacdia-app — opcional fase 2)
+## UI App (sacdia-app)
 
-- Pantalla "Eventos" dentro del detalle de camporee.
-- Read-only: ver lista, descripción, puntos, materiales, participantes esperados.
-- No CRUD desde móvil en primera iteración.
+- Sección "Eventos" dentro del detalle de camporee.
+- Read-only: ver lista, descripción, día, horario, sede y puntos.
+- No CRUD desde móvil en esta iteración.
 
 ## Cache
 
@@ -223,6 +241,7 @@ Tab "Eventos" en `/dashboard/camporees/[id]` (tanto local como union).
 ## Migración
 
 Una sola migración SQL `prisma/migrations/<timestamp>_camporee_events/migration.sql` con:
+
 1. `CREATE TABLE camporee_event_types` + translations + named unique constraint.
 2. `CREATE TABLE camporee_event_templates` + CHECK constraints + índices.
 3. `CREATE TABLE camporee_events` + CHECK constraints + índices.
@@ -233,18 +252,18 @@ Sin transformación de datos existentes — feature aditiva.
 
 ## Plan de implementación (fases)
 
-| Fase | Alcance | Owner | Estado |
-|---|---|---|---|
-| 0 | Documentación (este archivo) | Backend | EN CURSO |
-| 1 | Migración SQL + Prisma model | Backend | PENDIENTE |
-| 2 | DTOs + service + controller + tests para `camporee_event_types` | Backend | PENDIENTE |
-| 3 | DTOs + service + controller + tests para `camporee_event_templates` | Backend | PENDIENTE |
-| 4 | DTOs + service + controller + tests para `camporee_events` (instancias) | Backend | PENDIENTE |
-| 5 | Seed permisos + asignación a roles existentes | Backend | PENDIENTE |
-| 6 | Admin: catálogo tipos | Admin | PENDIENTE |
-| 7 | Admin: biblioteca templates (list + form pages) | Admin | PENDIENTE |
-| 8 | Admin: tab eventos en detalle de camporee | Admin | PENDIENTE |
-| 9 | App: pantalla read-only de eventos en camporee | App | DEFERRED |
+| Fase | Alcance                                                                 | Owner   | Estado               |
+| ---- | ----------------------------------------------------------------------- | ------- | -------------------- |
+| 0    | Documentación (este archivo)                                            | Backend | ACTUALIZADO          |
+| 1    | Migración SQL + Prisma model                                            | Backend | IMPLEMENTADO         |
+| 2    | DTOs + service + controller + tests para `camporee_event_types`         | Backend | IMPLEMENTADO PARCIAL |
+| 3    | DTOs + service + controller + tests para `camporee_event_templates`     | Backend | IMPLEMENTADO         |
+| 4    | DTOs + service + controller + tests para `camporee_events` (instancias) | Backend | IMPLEMENTADO         |
+| 5    | Seed permisos + asignación a roles existentes                           | Backend | IMPLEMENTADO         |
+| 6    | Admin: catálogo tipos                                                   | Admin   | PENDIENTE            |
+| 7    | Admin: biblioteca templates (list + form pages)                         | Admin   | PENDIENTE            |
+| 8    | Admin: tab eventos en detalle de camporee                               | Admin   | IMPLEMENTADO         |
+| 9    | App: pantalla read-only de eventos en camporee                          | App     | IMPLEMENTADO         |
 
 ## Open questions
 
