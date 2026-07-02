@@ -12,6 +12,8 @@ El sistema adopta una única fuente de verdad: el **ciclo anual operativo** es g
 
 La culminacion exitosa de una clase lleva a la investidura, que es el acto institucional de reconocimiento formal. El flujo de validacion e investidura ya existe y ahora valida tambien la ventana de disponibilidad de la clase y su duracion minima/maxima por ano eclesiastico (ver feature `validacion-investiduras`).
 
+Las secciones ahora se separan en `BASIC`, `ADVANCED` y `EXTRA`: `BASIC` + `EXTRA` aplicables cuentan para investidura, mientras `ADVANCED` habilita la via/badge avanzado de la clase por separado.
+
 ## Que existe (verificado contra codigo)
 
 ### Backend (ClassesModule)
@@ -34,7 +36,7 @@ La culminacion exitosa de una clase lleva a la investidura, que es el acto insti
   - `GET /clubs/:clubId/sections/:sectionId/classes/:classId/members-progress` — listar avance resumido de miembros activos de esa sección inscritos en la clase (`yearId` opcional)
 - **Servicio**: `ClassesService` con spec de tests
 - **DTOs**: EnrollClassDto, UpdateProgressDto
-- **Decoradores**: lecturas/escrituras de progreso usan `@RequirePermissions('classes:read'/'classes:submit_progress')` + `@AuthorizationResource({ type: 'active_assignment' })`; la autorización fina de self, directiva de sección y consejero/secretario asignado vive en `ClassProgressAccessService`.
+- **Decoradores**: lecturas/escrituras de progreso usan `@RequirePermissions('classes:read'/'classes:submit_progress')` + `@AuthorizationResource({ type: 'active_assignment' })`; las escrituras propias declaran además `ownerParam: 'userId'` para permitir self-service antes de exigir permisos de club. La autorización fina de self, directiva de sección y consejero/secretario asignado vive en `ClassProgressAccessService`.
 
 ### Admin (sacdia-admin)
 - CRUD de clases activo desde catalogos/admin, incluyendo traducciones, disponibilidad por ano eclesiastico y duracion minima/maxima.
@@ -51,11 +53,14 @@ La culminacion exitosa de una clase lleva a la investidura, que es el acto insti
 - El acceso rápido `/home/grouped-class` abre `TeachingScopeView`: directores/subdirectores/secretaría ven las clases de toda la sección; consejeros con asignación ven sólo sus clases asignadas.
 - Desde `TeachingScopeView`, los usuarios con `club_roles:assign`/`club_roles:revoke` pueden abrir “Gestionar clases” para crear, editar y revocar asignaciones de consejeros/secretaría a clases de la sección.
 - `ClassMembersProgressView` lista los miembros activos de la sección inscritos en la clase y navega al detalle de progreso con `targetUserId` + `enrollmentId`; las evidencias se guardan sobre el enrollment del miembro objetivo y el actor sigue siendo el usuario autenticado.
+- `ClassDetailWithProgressView` consume progreso separado por `basic_progress`, `advanced_progress`, `extra_progress`, `investiture_eligibility` y `advanced_eligibility`; la tarjeta de investidura usa `overall_progress` como progreso de requisitos obligatorios, no como avance total de actividades opcionales.
+- En `ClassDetailWithProgressView`, los requisitos se presentan en secciones visuales separadas: `DESARROLLO DE CLASE` para requisitos básicos, `AVANZADO` para puntos avanzados opcionales y `ACTIVIDADES COMPLEMENTARIAS` para requisitos institucionales aplicables.
+- La tarjeta resumen de avance unifica el porcentaje principal como avance de investidura (`Desarrollo de clase` + `Actividades complementarias` aplicables); debajo sólo muestra `Sección avanzada` como avance independiente cuando la clase la tiene habilitada.
 
 ### Base de datos
-- `classes` — catalogo de clases (class_id, name, club_type_id, order) con `available_from_year_id`, `available_until_year_id`, `min_duration_years`, `max_duration_years`
+- `classes` — catalogo de clases (class_id, name, club_type_id, order) con `advanced_enabled`, `available_from_year_id`, `available_until_year_id`, `min_duration_years`, `max_duration_years`
 - `class_modules` — modulos por clase
-- `class_sections` — secciones evaluables por modulo
+- `class_sections` — secciones evaluables por modulo, segmentadas por `requirement_track` (`BASIC`, `ADVANCED`, `EXTRA`) y con owner opcional por division/union/campo local; `EXTRA` requiere exactamente un owner, `ADVANCED` nunca bloquea investidura
 - `enrollments` — inscripcion anual operativa (enrollment_id, user_id, class_id, ecclesiastical_year_id, investiture_status, active). UNIQUE: (user_id, class_id, ecclesiastical_year_id). El estado `EXPIRED` preserva progreso historico cuando la duracion maxima ya vencio.
 - `class_section_progress` — progreso por seccion con enrollment_id como owner anual. UNIQUE: (enrollment_id, module_id, section_id)
 - `class_module_progress` — proyeccion de progreso por modulo. UNIQUE: (enrollment_id, module_id)
@@ -102,7 +107,7 @@ Reglas vigentes:
 - **Clase derivada en post-registro**: el cliente no decide libremente la clase; puede omitir `class_id` y el backend la asigna, o enviarlo solo como confirmacion. Si no coincide con la clase calculada por edad/tipo de club, se devuelve `POST_REG_CLASS_NOT_ELIGIBLE`.
 - **Resolucion de enrollment**: el backend resuelve automaticamente una inscripcion activa del ano eclesiastico actual; enrollmentId es override aditivo
 - **Dos controladores separados**: ClassesController (catalogo) y UserClassesController (inscripciones) con guards diferentes
-- **PermissionsGuard con permisos finos**: los endpoints de progreso usan permisos de club vía `active_assignment`; `ClassProgressAccessService` decide si el actor puede ver/modificar ese enrollment concreto (self, section-wide o asignación pedagógica activa).
+- **PermissionsGuard con permisos finos**: los endpoints de progreso usan permisos de club vía `active_assignment`; las escrituras propias de `:userId` usan bypass owner explícito, y `ClassProgressAccessService` decide si el actor puede ver/modificar ese enrollment concreto (self, section-wide o asignación pedagógica activa).
 - **Backfill acotado**: filas legacy de progress sin enrollment_id solo se backfillean si mapean deterministicamente a una unica inscripcion
 - **Clases legacy por disponibilidad**: `available_until_year_id = null` significa sin vencimiento; no se usa ano sentinel tipo 2100
 - **Duracion configurable por clase**: defaults `min_duration_years = 1` y `max_duration_years = 1`; Guia Mayor Avanzado/Instructor pueden extenderse por configuracion

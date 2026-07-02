@@ -58,6 +58,16 @@ Cada bloque se expone solo si el actor tiene `family:read` o el fallback legacy 
 
 ---
 
+## RBAC de progreso de clases
+
+Los endpoints de progreso/evidencias de clases combinan self-service y delegación:
+
+- si `:userId` coincide con el usuario autenticado, las escrituras owner-aware (`PATCH progress`, `POST submit`, `POST files`, `DELETE files`) pueden pasar el guard sin exigir `classes:submit_progress`;
+- si el actor trabaja sobre otro miembro, debe tener `classes:submit_progress` desde su asignación activa o permisos globales efectivos;
+- en todos los casos, `ClassProgressAccessService` resuelve el enrollment anual y valida el acceso fino al progreso objetivo.
+
+Esto evita dar `classes:submit_progress` al rol `member` de forma amplia y conserva mínimo privilegio para cargas delegadas.
+
 ## RBAC de notificaciones
 
 El módulo `notifications` usa permisos finos y scopes explícitos:

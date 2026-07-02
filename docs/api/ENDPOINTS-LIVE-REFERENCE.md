@@ -190,16 +190,18 @@
 
 ### Class progress runtime notes (FS-03)
 
-- `GET/PATCH /api/v1/users/:userId/classes/:classId/progress` siguen siendo class-scoped en la ruta, pero el owner real del progreso es `enrollments.enrollment_id`; los guards usan `active_assignment` para permitir permisos de club y `ClassProgressAccessService` hace la validación fina de self/section-wide/consejero asignado.
+- `GET/PATCH /api/v1/users/:userId/classes/:classId/progress` siguen siendo class-scoped en la ruta, pero el owner real del progreso es `enrollments.enrollment_id`; los guards usan `active_assignment` para permitir permisos de club. Las escrituras propias declaran `ownerParam: 'userId'` para que el miembro pueda cargar/enviar su propio progreso sin `classes:submit_progress`; `ClassProgressAccessService` mantiene la validación fina de self/section-wide/consejero asignado.
 - Sin override explícito, el backend resuelve una sola inscripción activa del año eclesiástico actual para `(userId, classId)`.
 - `GET` acepta `?enrollmentId=` y `PATCH` acepta `enrollment_id` como override aditivo para seleccionar una inscripción anual específica.
 - Si no existe inscripción anual resoluble, la API responde `404`.
 - Si la resolución class-scoped es ambigua y no se envía override, la API responde `409` con código `ENROLLMENT_RESOLUTION_AMBIGUOUS`.
 - El payload exitoso de lectura expone `enrollment_id`, `ecclesiastical_year_id`, `investiture_status`, módulos, secciones, `evidence_files`, `submitted_by_name` y `validated_by_name` para hacer visible el owner anual resuelto, el estado de investidura y el detalle revisable de evidencias.
-- Una sección cuenta como completada si `status = VALIDATED` o si conserva el criterio legacy `score >= 70`; esta regla aplica tanto al detalle `GET /api/v1/users/:userId/classes/:classId/progress` como al resumen `overall_progress` de `GET /api/v1/users/:userId/classes` y `GET /api/v1/clubs/:clubId/sections/:sectionId/classes/:classId/members-progress`.
+- Una sección cuenta como completada si `status = VALIDATED` o si conserva el criterio legacy `score >= 70`.
+- `overall_progress` y `percentage` representan progreso de investidura: requisitos `BASIC` obligatorios + `EXTRA` aplicables al contexto institucional del enrollment. `ADVANCED` se devuelve como `advanced_progress` / `advanced_eligibility` separado.
+- `GET /api/v1/users/:userId/classes` y `GET /api/v1/users/:userId/classes/:classId/progress` exponen `basic_progress`, `advanced_progress`, `extra_progress`, `investiture_eligibility` y `advanced_eligibility`. En el detalle, `modules[].sections[]` se filtra a secciones aplicables e incluye `requirement_track`, `required_for_investiture` y `display_order`.
 - `class_counselor_assignments` modela responsabilidad pedagógica anual separada de `club_role_assignments`. El asignado debe tener rol activo `counselor` o `secretary` en la sección/año; `instructor` no es responsable formal de trayectoria.
 - Límites: máximo 1 `primary` y máximo 3 responsables activos por clase/sección/año; máximo 2 clases activas por persona/sección/año, donde la segunda requiere `exceptional=true` y `exception_reason`.
-- Para progreso/evidencias delegadas, el miembro objetivo (`:userId`) y el actor autenticado (`currentUser.sub`) son conceptos separados: el progreso pertenece al enrollment del miembro y `uploaded_by_id`/`submitted_by_id` representan quien cargó o envió la evidencia.
+- Para progreso/evidencias delegadas, el miembro objetivo (`:userId`) y el actor autenticado (`currentUser.sub`) son conceptos separados: el progreso pertenece al enrollment del miembro y `uploaded_by_id`/`submitted_by_id` representan quien cargó o envió la evidencia. Si `:userId === currentUser.sub`, el guard permite el self-service explícito; si son distintos, el actor debe tener `classes:submit_progress` y pasar el scope fino del servicio.
 - `ClassProgressAccessService` valida acceso después de resolver el enrollment objetivo: self access, bypass global ya permitido por guards (`super-admin`, admin/assistant-admin, coordinadores), asignación activa en `class_counselor_assignments` para la misma sección/clase/año, o rol section-wide (`director`, `deputy-director`, `secretary`, `secretary-treasurer`) en la sección del miembro.
 - `GET /clubs/:clubId/sections/:sectionId/classes/progress-scope` usa `ClassProgressScopeService` para devolver `access_level = section|assigned` y las clases visibles al actor.
 - `GET /clubs/:clubId/sections/:sectionId/classes/:classId/members-progress` reusa ese scope y además filtra los enrollments por membresía activa en la sección solicitada; no debe mezclar miembros de otras secciones que cursen la misma clase/año.
@@ -442,9 +444,12 @@
 | GET    | `/api/v1/classes/:classId/modules`                                            | Public | -                         | Obtener módulos de una clase                                                                                                    | `src/classes/classes.controller.ts`              |
 | GET    | `/api/v1/clubs/:clubId/sections/:sectionId/classes/progress-scope`            | JWT    | `classes:read`            | Listar clases que el actor puede supervisar en una sección (`yearId` opcional)                                                  | `src/classes/class-progress-scope.controller.ts` |
 | GET    | `/api/v1/clubs/:clubId/sections/:sectionId/classes/:classId/members-progress` | JWT    | `classes:read`            | Listar avance resumido de miembros activos de esa sección inscritos en una clase (`yearId` opcional)                            | `src/classes/class-progress-scope.controller.ts` |
-| POST   | `/api/v1/users/:userId/classes/:classId/sections/:sectionId/submit`           | JWT    | `classes:submit_progress` | Enviar evidencia de sección de clase a validación. Query opcional `?enrollmentId=` para resolver el owner anual explícito.      | `src/classes/classes.controller.ts`              |
-| POST   | `/api/v1/users/:userId/classes/:classId/sections/:sectionId/files`            | JWT    | `classes:submit_progress` | Subir archivo/imagen de evidencia de clase. Query opcional `?enrollmentId=` para resolver el owner anual explícito.             | `src/classes/classes.controller.ts`              |
-| DELETE | `/api/v1/users/:userId/classes/:classId/sections/:sectionId/files/:fileId`    | JWT    | `classes:submit_progress` | Borrar evidencia de clase. Query opcional `?enrollmentId=` para resolver el owner anual explícito.                              | `src/classes/classes.controller.ts`              |
+| POST   | `/api/v1/users/:userId/classes/:classId/sections/:sectionId/submit`           | JWT    | self owner o `classes:submit_progress` | Enviar evidencia de sección de clase a validación. Query opcional `?enrollmentId=` para resolver el owner anual explícito.      | `src/classes/classes.controller.ts`              |
+| POST   | `/api/v1/users/:userId/classes/:classId/sections/:sectionId/files`            | JWT    | self owner o `classes:submit_progress` | Subir archivo/imagen de evidencia de clase. Query opcional `?enrollmentId=` para resolver el owner anual explícito.             | `src/classes/classes.controller.ts`              |
+| DELETE | `/api/v1/users/:userId/classes/:classId/sections/:sectionId/files/:fileId`    | JWT    | self owner o `classes:submit_progress` | Borrar evidencia de clase. Query opcional `?enrollmentId=` para resolver el owner anual explícito.                              | `src/classes/classes.controller.ts`              |
+
+> [!NOTE]
+> `classes.advanced_enabled` habilita la vía avanzada de la clase. `class_sections.requirement_track` separa `BASIC`, `ADVANCED` y `EXTRA`; solo `BASIC` + `EXTRA` aplicables cuentan para investidura.
 
 ## club-roles
 
@@ -648,6 +653,7 @@ Notas contractuales de inventario:
 - `GET|POST|PATCH|DELETE /api/v1/admin/investiture/config` son endpoints activos del mismo controller y sostienen la pantalla de configuración del admin.
 - `GET /api/v1/investiture/pending` devuelve filas enriquecidas para operación humana: alias `user`, `class`, `club`, `section`, `ecclesiastical_year`, `submitted_by` con `role_name/role_label`, y `submitted_comment`, además de los campos legacy/Prisma originales. Si `club_sections.name` está vacío, `section.name` cae al nombre del `club_type` asociado para evitar mostrar una sección sin nombre.
 - El detalle admin de una investidura reutiliza `GET /api/v1/users/:userId/classes/:classId/progress?enrollmentId=` para mostrar módulos, secciones, evidencias enviadas y quién validó cada sección.
+- La validación de investidura sólo considera requisitos `BASIC` obligatorios y `EXTRA` aplicables; `ADVANCED` se registra como avance/badge de clase aparte.
 
 ## resources
 

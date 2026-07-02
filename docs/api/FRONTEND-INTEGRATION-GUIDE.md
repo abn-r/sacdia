@@ -56,6 +56,17 @@ El contrato frontend para clases progresivas incorpora clases legacy y duración
 - Mobile/Admin deben tratar `investiture_status = EXPIRED` como trayectoria histórica: mostrar progreso/registros, pero bloquear edición, subida de evidencias y envío a investidura.
 - El proceso manual usa `POST /api/v1/admin/classes/enrollments/expire-overdue`; ejecutar primero con `{ dry_run: true }` y pedir confirmación antes de `{ dry_run: false }`.
 
+## Actualizacion 2026-07-01 (Requisitos básico/avanzado/extra)
+
+El contrato de clases separa requisitos evaluables por track:
+
+- `classes.advanced_enabled` habilita la via avanzada de la clase; si esta en `false`, el frontend no debe exigir ni destacar requisitos `ADVANCED`.
+- `class_sections.requirement_track` puede ser `BASIC`, `ADVANCED` o `EXTRA`.
+- `GET /api/v1/users/:userId/classes` y `GET /api/v1/users/:userId/classes/:classId/progress` exponen `basic_progress`, `advanced_progress`, `extra_progress`, `investiture_eligibility` y `advanced_eligibility`.
+- `overall_progress` y `percentage` representan progreso de investidura: requisitos `BASIC` obligatorios + `EXTRA` aplicables al contexto institucional del miembro. `ADVANCED` se muestra como avance/badge separado.
+- En el detalle de progreso, `modules[].sections[]` ya llega filtrado a secciones aplicables para el enrollment resuelto e incluye `requirement_track`, `required_for_investiture` y `display_order`.
+- Admin puede configurar secciones `EXTRA` con exactamente un owner institucional (`division_id`, `union_id` o `local_field_id`) y ventana opcional `available_from_year_id` / `available_until_year_id`.
+
 ## Actualizacion 2026-02-17 (Admin Panel)
 
 Se agrego validacion operativa para frontend admin mediante smoke E2E en `sacdia-admin/scripts/e2e-smoke.mjs`.

@@ -179,10 +179,13 @@ Referencia humana concisa del schema Prisma vigente.
 ### `classes` y duración de trayectoria
 
 - `classes.available_from_year_id INT?` y `classes.available_until_year_id INT?` referencian `ecclesiastical_years.year_id`.
+- `classes.advanced_enabled BOOLEAN NOT NULL DEFAULT false` habilita la vía avanzada de la clase sin mezclarla con investidura.
 - `available_until_year_id = NULL` significa sin vencimiento para nuevas inscripciones; no se usa año sentinel.
 - `classes.min_duration_years INT NOT NULL DEFAULT 1` y `classes.max_duration_years INT NOT NULL DEFAULT 1` gobiernan elegibilidad antes de solicitar investidura.
 - CHECKs vigentes: `min_duration_years >= 1`, `max_duration_years >= 1`, `max_duration_years >= min_duration_years`.
 - Índices: `idx_classes_available_from_year`, `idx_classes_available_until_year`.
+- `class_sections.requirement_track` separa `BASIC`, `ADVANCED` y `EXTRA`; `BASIC` + `EXTRA` cuentan para investidura, mientras `ADVANCED` se gestiona como badge/estado aparte.
+- `class_sections` puede anclarse opcionalmente a `divisions`, `unions`, `local_fields` o ventana por `ecclesiastical_years`; `EXTRA` exige exactamente un owner y `BASIC`/`ADVANCED` no aceptan owner.
 - `enrollments.investiture_status` incluye `EXPIRED` para preservar progreso histórico cuando se supera la duración máxima sin investidura.
 - `investiture_validation_history.action` incluye `EXPIRED` para auditar vencimientos manuales o por guard de investidura.
 

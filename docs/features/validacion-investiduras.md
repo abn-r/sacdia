@@ -12,6 +12,8 @@ La Decision 6 del canon establece que registrar y validar son actos distintos: l
 
 El schema de base de datos y el runtime ya sostienen investiduras como superficie activa. El backend expone flujo multietapa, compatibilidad legacy, operaciones bulk y CRUD de configuracion; el admin tiene pantallas ruteadas para pendientes, pipeline y configuracion; la app tiene pantallas ruteadas para pendientes e historial, y expone el envio a validacion desde el detalle de clase cuando el enrollment esta 100% completado.
 
+Los requisitos `BASIC` y `EXTRA` cuentan para investidura; `ADVANCED` activa el estado/badge avanzado de la clase por separado y no entra como requisito obligatorio del flujo.
+
 ## Que existe (verificado contra codigo)
 
 ### Backend (InvestitureModule)
@@ -108,6 +110,7 @@ El schema de base de datos y el runtime ya sostienen investiduras como superfici
 12. Antes de enviar a validacion, el enrollment debe cumplir la duracion minima de su clase y no haber superado la duracion maxima
 13. Si el enrollment supera `classes.max_duration_years`, el backend debe moverlo a `EXPIRED`, registrar auditoria y preservar el progreso como trayectoria historica
 14. El vencimiento masivo debe iniciarse como `dry_run` y solo aplicar cambios con confirmacion admin/manual
+15. La validacion solo considera requisitos `BASIC` obligatorios y `EXTRA` aplicables; `ADVANCED` se refleja como avance/badge separado en la clase
 
 ## Decisiones de diseno
 
