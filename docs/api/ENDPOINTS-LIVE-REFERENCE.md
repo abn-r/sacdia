@@ -385,13 +385,34 @@
 | Method | Path                                            | Auth | Roles                 | Description                                                                                                                                         | Source                                  |
 | ------ | ----------------------------------------------- | ---- | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- |
 | GET    | `/api/v1/camporees`                             | JWT  | -                     | Listar camporees                                                                                                                                    | `src/camporees/camporees.controller.ts` |
-| POST   | `/api/v1/camporees`                             | JWT  | director, subdirector | Crear camporee local. Body admite `local_camporee_place` y coordenadas opcionales `lat`, `long`.                                                    | `src/camporees/camporees.controller.ts` |
+| POST   | `/api/v1/camporees`                             | JWT  | director, subdirector | Crear camporee local. Body admite `local_camporee_place`, coordenadas opcionales `lat`, `long` y fechas limite opcionales `club_registration_deadline`, `member_registration_deadline`, `payment_deadline`. | `src/camporees/camporees.controller.ts` |
 | DELETE | `/api/v1/camporees/:camporeeId`                 | JWT  | director              | Desactivar camporee                                                                                                                                 | `src/camporees/camporees.controller.ts` |
 | GET    | `/api/v1/camporees/:camporeeId`                 | JWT  | -                     | Obtener camporee por ID                                                                                                                             | `src/camporees/camporees.controller.ts` |
-| PATCH  | `/api/v1/camporees/:camporeeId`                 | JWT  | director, subdirector | Actualizar camporee local. Body admite coordenadas opcionales `lat`, `long`.                                                                        | `src/camporees/camporees.controller.ts` |
+| PATCH  | `/api/v1/camporees/:camporeeId`                 | JWT  | director, subdirector | Actualizar camporee local. Body admite coordenadas opcionales `lat`, `long` y fechas limite opcionales.                                             | `src/camporees/camporees.controller.ts` |
 | GET    | `/api/v1/camporees/:camporeeId/members`         | JWT  | -                     | Listar miembros del camporee                                                                                                                        | `src/camporees/camporees.controller.ts` |
 | DELETE | `/api/v1/camporees/:camporeeId/members/:userId` | JWT  | director, subdirector | Remover miembro del camporee                                                                                                                        | `src/camporees/camporees.controller.ts` |
 | POST   | `/api/v1/camporees/:camporeeId/register`        | JWT  | -                     | Registrar miembro en camporee. Body mínimo: `{ user_id }`; `camporee_type` es opcional/deprecated y el backend infiere `local` desde este endpoint. | `src/camporees/camporees.controller.ts` |
+| POST   | `/api/v1/camporees/:camporeeId/members/:memberId/payments` | JWT | attendance:manage | Registrar pago de un miembro inscrito. `memberId` es `camporee_member_id`; body usa `paid_at` y `payment_type` en `inscription\|materials\|other`. | `src/camporees/camporees.controller.ts` |
+| PATCH  | `/api/v1/camporees/payments/:camporeePaymentId` | JWT | attendance:manage | Actualizar pago por `camporee_payment_id` UUID.                                                                                                     | `src/camporees/camporees.controller.ts` |
+| PATCH  | `/api/v1/camporees/payments/:camporeePaymentId/approve` | JWT | attendance:approve_late | Aprobar pago tardio por `camporee_payment_id` UUID.                                                                                                  | `src/camporees/camporees.controller.ts` |
+| PATCH  | `/api/v1/camporees/payments/:camporeePaymentId/reject` | JWT | attendance:approve_late | Rechazar pago tardio por `camporee_payment_id` UUID.                                                                                                 | `src/camporees/camporees.controller.ts` |
+| GET    | `/api/v1/camporees/union`                       | JWT  | -                     | Listar camporees de union.                                                                                                                          | `src/camporees/camporees.controller.ts` |
+| POST   | `/api/v1/camporees/union`                       | JWT  | director, subdirector | Crear camporee de union. Body admite fechas limite opcionales `club_registration_deadline`, `member_registration_deadline`, `payment_deadline`.      | `src/camporees/camporees.controller.ts` |
+| GET    | `/api/v1/camporees/union/:camporeeId`           | JWT  | -                     | Obtener camporee de union por ID.                                                                                                                    | `src/camporees/camporees.controller.ts` |
+| PATCH  | `/api/v1/camporees/union/:camporeeId`           | JWT  | director, subdirector | Actualizar camporee de union. Body admite fechas limite opcionales.                                                                                  | `src/camporees/camporees.controller.ts` |
+| DELETE | `/api/v1/camporees/union/:camporeeId`           | JWT  | director              | Desactivar camporee de union.                                                                                                                       | `src/camporees/camporees.controller.ts` |
+
+### camporee-event-templates
+
+Los templates soportan scoring reutilizable con `scoring_enabled` y `rubrics[]`. Si `scoring_enabled=true`, la suma de `rubrics[].max_points` debe coincidir con `max_points`; al clonar el template, el backend copia las rúbricas al evento creado.
+
+| Method | Path | Auth | Roles/Permiso | Description | Source |
+| ------ | ---- | ---- | ------------- | ----------- | ------ |
+| GET | `/api/v1/camporee-event-templates` | JWT | `camporee_events:read` | Lista templates visibles por scope, incluyendo rúbricas activas. | `src/camporee-event-templates/camporee-event-templates.controller.ts` |
+| GET | `/api/v1/camporee-event-templates/:templateId` | JWT | `camporee_events:read` | Obtiene template por ID, incluyendo rúbricas activas. | `src/camporee-event-templates/camporee-event-templates.controller.ts` |
+| POST | `/api/v1/camporee-event-templates` | JWT | `camporee_events:create` | Crea template; body admite `scoring_enabled` y `rubrics[]`. | `src/camporee-event-templates/camporee-event-templates.controller.ts` |
+| PATCH | `/api/v1/camporee-event-templates/:templateId` | JWT | `camporee_events:update` | Actualiza template y reemplaza rúbricas si `rubrics[]` viene en el body. | `src/camporee-event-templates/camporee-event-templates.controller.ts` |
+| DELETE | `/api/v1/camporee-event-templates/:templateId` | JWT | `camporee_events:delete` | Desactiva template. | `src/camporee-event-templates/camporee-event-templates.controller.ts` |
 
 ### camporee-events
 
@@ -403,6 +424,28 @@
 | POST   | `/api/v1/union-camporees/:camporeeId/events` | JWT  | `camporee_events:create` | Crear evento custom para camporee de unión.                                                              | `src/camporee-events/camporee-events.controller.ts` |
 | PATCH  | `/api/v1/camporee-events/:eventId`           | JWT  | `camporee_events:update` | Actualizar instancia de evento.                                                                          | `src/camporee-events/camporee-events.controller.ts` |
 | DELETE | `/api/v1/camporee-events/:eventId`           | JWT  | `camporee_events:delete` | Desactivar instancia de evento.                                                                          | `src/camporee-events/camporee-events.controller.ts` |
+
+### camporee-scoring
+
+| Method | Path | Auth | Roles/Permiso | Description | Source |
+| ------ | ---- | ---- | ------------- | ----------- | ------ |
+| GET | `/api/v1/camporee-events/:eventId/rubrics` | JWT | `camporee_events:read` o juez activo asignado | Lista rúbricas activas del evento puntuable. | `src/camporee-scoring/camporee-scoring.controller.ts` |
+| PUT | `/api/v1/camporee-events/:eventId/rubrics` | JWT | `camporee_events:update` | Reemplaza rúbricas y habilita/deshabilita scoring; la suma debe igualar `camporee_events.max_points`. | `src/camporee-scoring/camporee-scoring.controller.ts` |
+| GET | `/api/v1/local-camporees/:camporeeId/judges` | JWT | `camporee_events:read` | Lista roster de jueces de camporee local. | `src/camporee-scoring/camporee-scoring.controller.ts` |
+| GET | `/api/v1/local-camporees/:camporeeId/judge-candidates` | JWT | `camporee_events:update` | Lista usuarios elegibles para agregar como jueces: 18+, pastor o Guía Mayor investido. | `src/camporee-scoring/camporee-scoring.controller.ts` |
+| POST | `/api/v1/local-camporees/:camporeeId/judges` | JWT | `camporee_events:update` | Agrega juez al roster de camporee local; rechaza usuarios no elegibles con `CAMPOREE_JUDGE_NOT_ELIGIBLE`. | `src/camporee-scoring/camporee-scoring.controller.ts` |
+| GET | `/api/v1/union-camporees/:camporeeId/judges` | JWT | `camporee_events:read` | Lista roster de jueces de camporee de unión. | `src/camporee-scoring/camporee-scoring.controller.ts` |
+| GET | `/api/v1/union-camporees/:camporeeId/judge-candidates` | JWT | `camporee_events:update` | Lista usuarios elegibles para agregar como jueces: 18+, pastor o Guía Mayor investido. | `src/camporee-scoring/camporee-scoring.controller.ts` |
+| POST | `/api/v1/union-camporees/:camporeeId/judges` | JWT | `camporee_events:update` | Agrega juez al roster de camporee de unión; rechaza usuarios no elegibles con `CAMPOREE_JUDGE_NOT_ELIGIBLE`. | `src/camporee-scoring/camporee-scoring.controller.ts` |
+| GET | `/api/v1/camporee-events/:eventId/judge-assignments` | JWT | `camporee_events:read` | Lista asignaciones de jueces por sección/evento. | `src/camporee-scoring/camporee-scoring.controller.ts` |
+| POST | `/api/v1/camporee-events/:eventId/judge-assignments` | JWT | `camporee_events:update` | Asigna juez principal o ayudante; sólo puede existir un principal activo por evento/sección. | `src/camporee-scoring/camporee-scoring.controller.ts` |
+| PATCH | `/api/v1/camporee-event-judge-assignments/:assignmentId` | JWT | `camporee_events:update` vía service | Actualiza rol/estado de asignación. | `src/camporee-scoring/camporee-scoring.controller.ts` |
+| DELETE | `/api/v1/camporee-event-judge-assignments/:assignmentId` | JWT | `camporee_events:update` vía service | Desactiva asignación de juez. | `src/camporee-scoring/camporee-scoring.controller.ts` |
+| GET | `/api/v1/camporee-events/:eventId/scoring-targets` | JWT | `camporee_events:read` o juez activo asignado | Lista secciones inscritas que pueden recibir puntaje. | `src/camporee-scoring/camporee-scoring.controller.ts` |
+| POST | `/api/v1/camporee-events/:eventId/sections/:clubSectionId/scores` | JWT | juez principal activo o `assistant-lf`/`director-lf` manual | Registra puntaje oficial por ítems de rúbrica y actualiza resultado activo. | `src/camporee-scoring/camporee-scoring.controller.ts` |
+| GET | `/api/v1/local-camporees/:camporeeId/leaderboard` | JWT | `camporee_events:read` | Leaderboard local por sección con puntos obtenidos/máximos/porcentaje. | `src/camporee-scoring/camporee-scoring.controller.ts` |
+| GET | `/api/v1/union-camporees/:camporeeId/leaderboard` | JWT | `camporee_events:read` | Leaderboard de unión por sección con puntos obtenidos/máximos/porcentaje. | `src/camporee-scoring/camporee-scoring.controller.ts` |
+| GET | `/api/v1/camporee-judges/me/assignments` | JWT | juez activo | Lista asignaciones del usuario actual; `can_submit_score=true` sólo para juez principal. | `src/camporee-scoring/camporee-scoring.controller.ts` |
 
 ## catalogs
 

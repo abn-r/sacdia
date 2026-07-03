@@ -268,7 +268,7 @@ Columnas nuevas desde migración `20260428*_extended_rankings_schema`:
 
 - `folder_score_pct FLOAT NOT NULL DEFAULT 0` — porcentaje de puntaje de carpeta (0-100).
 - `finance_score_pct FLOAT NOT NULL DEFAULT 0` — porcentaje de cierre financiero mensual (0-100).
-- `camporee_score_pct FLOAT NOT NULL DEFAULT 0` — porcentaje de asistencia a camporees (0-100).
+- `camporee_score_pct FLOAT NOT NULL DEFAULT 0` — porcentaje de resultados oficiales de eventos puntuables de camporee por sección (0-100); la inscripción/asistencia ya no otorga puntos.
 - `evidence_score_pct FLOAT NOT NULL DEFAULT 0` — porcentaje de evidencias validadas (0-100).
 - `composite_score_pct FLOAT NOT NULL DEFAULT 0` — promedio ponderado de los 4 componentes (0-100).
 - `composite_calculated_at TIMESTAMPTZ?` — timestamp de la última actualización del composite.
@@ -426,6 +426,8 @@ Define el presupuesto de puntos por componente dentro de un eje anual:
 - `local_camporees`, `union_camporees`, `union_camporee_local_fields`, `camporee_clubs`, `camporee_members`, `camporee_payments`
   - `local_camporees` y `union_camporees` guardan dirección textual (`local_camporee_place` / `union_camporee_place`) y coordenadas opcionales (`lat`, `long`) para vista de mapa en app.
   - Los eventos del camporee viven en `camporee_events` y se relacionan con camporee local o de unión mediante FK excluyentes.
+  - Scoring reutilizable de templates vive en `camporee_event_template_rubrics`; al clonar un template puntuable se copian criterios hacia `camporee_event_rubrics`.
+  - Scoring oficial vive en `camporee_event_rubrics`, `camporee_judges`, `camporee_event_judge_assignments`, `camporee_event_score_submissions`, `camporee_event_score_submission_items` y `camporee_event_section_results`. `camporee_events.scoring_enabled` habilita puntaje real por rúbrica; `camporee_clubs`/`camporee_members` quedan como inscripción operativa/histórica.
 - `inventory_categories`, `club_inventory`, `inventory_evidence_files`, `inventory_history`
 
 ### Finanzas y carpetas
@@ -492,6 +494,7 @@ Define el presupuesto de puntos por componente dentro de un eje anual:
 - `20260623160000_hierarchical_annual_ranking_configs` - agrega scope jerárquico Unión/Campo Local a `annual_ranking_configs`, reemplaza el unique local por índices parciales por scope, cambia nuevas `folder_templates` a borrador por defecto (`active=false`) y desactiva plantillas activas que no coincidan con el presupuesto efectivo de `annual_evidence_folder`.
 - `20260623193000_folder_template_lifecycle` - crea `folder_template_status_enum`, añade `folder_templates.status`, backfillea `PUBLISHED` para plantillas activas y `DRAFT` para inactivas, y agrega `idx_folder_templates_status`.
 - `20260629203000_camporee_location_coordinates` - agrega coordenadas opcionales `lat`/`long` a `local_camporees` y `union_camporees`, y concede `camporee_events:read` a roles operativos de club para la vista móvil de eventos.
+- `20260702193000_camporee_rubric_scoring` - agrega scoring real por rúbricas, roster/asignaciones de jueces y resultados oficiales por sección/evento.
 - `20260531203000_annual_ranking_axes` - crea `annual_ranking_axis_configs`, asocia componentes a ejes administrativo/operativo, y conserva componentes legacy desconocidos como inactivos para remediación manual sin asignarlos silenciosamente a un eje.
 - `20260429000000_enrollment_rankings_schema` - (8.4-A) crea `enrollment_rankings`, `section_rankings`, `enrollment_ranking_weights` con indexes, UNIQUE constraints y CHECK constraints de rango [0,100]. Ver §14.1 de `docs/canon/runtime-rankings.md`.
 - `20260429000001_award_categories_scope` - (8.4-A) añade `scope VARCHAR(20) DEFAULT 'club'` a `award_categories` + índice `idx_award_categories_scope` on `(scope, is_legacy)`. Backfill: filas existentes → `scope='club'`.

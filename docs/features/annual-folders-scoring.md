@@ -177,7 +177,7 @@ Reopen (LF o union): VALIDATED | REJECTED | PREAPPROVED_LF ──> SUBMITTED
 | `institutional_data_completeness` | 10 campos institucionales completos: dirección, horario, director, secretaría, tesorería, nombre, teléfono, email, coordenadas y meta de almas |
 | `activities_registered` | actividades activas de la sección durante el año / `ranking.activities_registered_target` (default 12) |
 | `attendance_participation` | promedio de `weekly_records.attendance` para miembros activos de la sección |
-| `camporee_events` | camporees en alcance con asistencia aprobada / camporees disponibles |
+| `camporee_events` | resultados oficiales activos de eventos puntuables: `sum(camporee_event_section_results.total_awarded_points) / sum(camporee_events.max_points)` por sección; inscripciones/asistencia no otorgan puntos |
 | `class_investiture_progress` | clases activas investidas/aprobadas / clases activas de miembros de la sección |
 | `sacdia_operational_usage` | usuarios activos de la sección con acciones operativas útiles / usuarios activos de la sección |
 

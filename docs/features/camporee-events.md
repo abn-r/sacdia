@@ -84,6 +84,7 @@ ON DELETE CASCADE
 | `materials`                 | `TEXT NULL`                            | materiales necesarios                                   |
 | `auxiliaries`               | `TEXT NULL`                            | auxiliares / personal de apoyo                          |
 | `max_points`                | `INT NOT NULL`                         | puntaje máximo posible                                  |
+| `scoring_enabled`           | `BOOL DEFAULT false`                   | habilita rúbricas reutilizables del template            |
 | `min_points`                | `INT NOT NULL DEFAULT 0`               | piso de participación                                   |
 | `penalties`                 | `JSONB NOT NULL DEFAULT '[]'`          | `[{description, points_deducted, time_seconds}]`        |
 | `participants_mode`         | `VARCHAR(20) NOT NULL`                 | `'count'` o `'by_class'`                                |
@@ -125,6 +126,7 @@ CHECK (
 | `event_type_id`                                          | `INT NOT NULL FK camporee_event_types`                    | snapshot — sobrevive si template cambia |
 | Todos los campos del template                            | (clonados al crear instancia)                             |                                         |
 | `display_order`                                          | `INT DEFAULT 0`                                           | orden en la lista del camporee          |
+| `scoring_enabled`                                        | `BOOL DEFAULT false`                                      | habilita scoring oficial por rúbricas   |
 | `active`                                                 | `BOOL DEFAULT true`                                       |                                         |
 | `created_at`, `modified_at`, `created_by`, `modified_by` |                                                           |                                         |
 
@@ -141,6 +143,27 @@ CHECK (
 @@index([union_camporee_id])
 @@index([event_template_id])
 ```
+
+### Scoring por rúbricas
+
+Los templates pueden traer rúbricas reutilizables (`camporee_event_template_rubrics`) cuando `camporee_event_templates.scoring_enabled=true`. Al crear un evento desde template, el backend copia esas rúbricas hacia `camporee_event_rubrics` y conserva `camporee_events.scoring_enabled=true`.
+
+Los eventos puntuables (`camporee_events.scoring_enabled=true`) usan rúbricas obligatorias. La suma de `camporee_event_rubrics.max_points` debe coincidir con `camporee_events.max_points`; el puntaje oficial se calcula desde ítems de rúbrica y queda activo en `camporee_event_section_results`.
+
+Tablas agregadas:
+
+- `camporee_event_template_rubrics` — criterios puntuables reutilizables del template.
+- `camporee_event_rubrics` — criterios puntuables del evento.
+- `camporee_judges` — roster de jueces por camporee local o de unión.
+- `camporee_event_judge_assignments` — asignación por evento/sección con rol `primary` o `assistant`; máximo un `primary` activo por evento/sección.
+- `camporee_event_score_submissions` y `camporee_event_score_submission_items` — carga auditable de puntajes.
+- `camporee_event_section_results` — resultado oficial activo por evento/sección.
+
+Autorización:
+
+- Lectura de rúbricas/scoring targets: `camporee_events:read` o juez activo asignado.
+- Gestión de rúbricas, roster y asignaciones: `camporee_events:update` con scope del camporee.
+- Envío de puntaje: juez principal activo desde app móvil, o carga manual por `assistant-lf`/`director-lf` con scope institucional. La app consume `GET /camporee-judges/me/assignments`, filtra asignaciones `primary`, carga rúbricas del evento y envía exactamente un ítem por rúbrica.
 
 ## Endpoints (backend)
 

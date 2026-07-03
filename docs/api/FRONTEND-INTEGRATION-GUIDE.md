@@ -67,6 +67,16 @@ El contrato de clases separa requisitos evaluables por track:
 - En el detalle de progreso, `modules[].sections[]` ya llega filtrado a secciones aplicables para el enrollment resuelto e incluye `requirement_track`, `required_for_investiture` y `display_order`.
 - Admin puede configurar secciones `EXTRA` con exactamente un owner institucional (`division_id`, `union_id` o `local_field_id`) y ventana opcional `available_from_year_id` / `available_until_year_id`.
 
+## Actualizacion 2026-07-02 (Camporee scoring móvil)
+
+El flujo móvil de jueces de camporee consume scoring oficial por rúbricas:
+
+- `GET /api/v1/camporee-judges/me/assignments` lista asignaciones del usuario autenticado; la app muestra para captura sólo las asignaciones activas donde `judge_role='primary'` y `can_submit_score=true`.
+- `GET /api/v1/camporee-events/:eventId/rubrics` entrega criterios activos; la pantalla de captura debe enviar exactamente un ítem por rúbrica.
+- `POST /api/v1/camporee-events/:eventId/sections/:clubSectionId/scores` envía `{ source: 'judge_primary', items[] }`; el total se calcula desde `items[].awarded_points`, no se captura como campo editable.
+- Jueces `assistant` no ven acción de envío en app; quedan como apoyo/auditoría.
+- El admin debe poblar el selector de roster con `GET /api/v1/local-camporees/:camporeeId/judge-candidates` o `GET /api/v1/union-camporees/:camporeeId/judge-candidates`, no con captura manual de UUID. El backend sólo acepta jueces 18+, pastores o Guías Mayores investidos.
+
 ## Actualizacion 2026-02-17 (Admin Panel)
 
 Se agrego validacion operativa para frontend admin mediante smoke E2E en `sacdia-admin/scripts/e2e-smoke.mjs`.
