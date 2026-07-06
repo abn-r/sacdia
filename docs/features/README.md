@@ -47,7 +47,7 @@
 | `aprobaciones-masivas` | [aprobaciones-masivas.md](aprobaciones-masivas.md) | Documento presente | `IMPLEMENTADO` |
 | `auth` | [auth.md](auth.md) | Documento presente | `IMPLEMENTADO` |
 | `camporees` | [camporees.md](camporees.md) | Documento presente | `IMPLEMENTADO` |
-| `camporee-events` | [camporee-events.md](camporee-events.md) | Documento presente | `PROPUESTO` |
+| `camporee-events` | [camporee-events.md](camporee-events.md) | Documento presente | `IMPLEMENTADO PARCIAL` |
 | `carpetas-evidencias` | [carpetas-evidencias.md](carpetas-evidencias.md) | Documento presente | `IMPLEMENTADO` |
 | `catalogos` | [catalogos.md](catalogos.md) | Documento presente | `IMPLEMENTADO` |
 | `certificaciones-guias-mayores` | [certificaciones-guias-mayores.md](certificaciones-guias-mayores.md) | Documento presente | `PARCIAL` |

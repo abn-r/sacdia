@@ -730,6 +730,5 @@ git commit -m "docs: document camporee scoring workflow"
 
 - Current `camporee_events` ranking component name stays the same but semantics change from attendance to official scoring.
 - Existing annual ranking snapshots may change after recalculation.
-- Union camporee admin detail support may require additional route work if scoring UI must be available for union camporees beyond the current list page.
+- Union camporee admin detail support is available at `/dashboard/camporees/union/[id]`; scoring UI and event agenda management reuse the same tabs with union-scoped API calls.
 - Eligibility by section/type must be enforced carefully so sections are not penalized for events that do not apply to them.
-

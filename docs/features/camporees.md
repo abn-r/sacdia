@@ -6,7 +6,7 @@
 
 Los camporees son eventos institucionales centrales en la vida de los clubes de Conquistadores y Aventureros. Son campamentos competitivos organizados a nivel de campo local (camporees locales) o de union (camporees de union) donde los clubes participan en actividades de evaluacion: orden cerrado, nudos, primeros auxilios, cocina al aire libre, orientacion, campismo, conocimiento biblico y otras disciplinas. Los camporees representan la culminacion del trabajo formativo del club durante un periodo.
 
-El modelo de datos contempla dos niveles de camporees: locales (`local_camporees`) organizados por el campo local, y de union (`union_camporees`) que agrupan clubes de todo el territorio de la union. Los camporees de union pueden referenciar campos locales participantes (`union_camporee_local_fields`). Cada camporee admite inscripcion de clubes (`camporee_clubs`), registro de miembros individuales (`camporee_members`), pagos (`camporee_payments`), fechas limite opcionales (`club_registration_deadline`, `member_registration_deadline`, `payment_deadline`) y ubicación con dirección textual más coordenadas opcionales (`lat`, `long`) para vista de mapa.
+El modelo de datos contempla dos niveles de camporees: locales (`local_camporees`) organizados por el campo local, y de union (`union_camporees`) que agrupan clubes de todo el territorio de la union. Los camporees de union pueden referenciar campos locales participantes (`union_camporee_local_fields`). Cada camporee admite inscripcion de clubes (`camporee_clubs`), registro de miembros individuales (`camporee_members`), pagos (`camporee_payments`), fechas limite opcionales (`club_registration_deadline`, `member_registration_deadline`, `payment_deadline`), apertura configurable de agenda (`agenda_visible_from`) y ubicación con dirección textual más coordenadas opcionales (`lat`, `long`) para vista de mapa.
 
 La inscripcion de miembros en camporees tiene implicaciones directas con el modulo de seguros: para participar en un camporee, los miembros generalmente requieren un seguro activo de tipo CAMPOREE o GENERAL_ACTIVITIES. Esta relacion esta modelada en la tabla `camporee_members` que referencia `member_insurances`.
 
@@ -19,11 +19,11 @@ La inscripcion de miembros en camporees tiene implicaciones directas con el modu
 - **Guards**: JwtAuthGuard, PermissionsGuard, ClubRolesGuard
 - **Endpoints principales**:
   - `GET /api/v1/camporees` — Listar camporees
-  - `POST /api/v1/camporees` — Crear camporee local; body admite `local_camporee_place`, `lat?`, `long?`, `club_registration_deadline?`, `member_registration_deadline?`, `payment_deadline?`
+  - `POST /api/v1/camporees` — Crear camporee local; body admite `local_camporee_place`, `lat?`, `long?`, `club_registration_deadline?`, `member_registration_deadline?`, `payment_deadline?`, `agenda_visible_from?`
   - `GET /api/v1/camporees/:camporeeId` — Obtener camporee por ID
-  - `PATCH /api/v1/camporees/:camporeeId` — Actualizar camporee local; body admite `lat?`, `long?` y fechas limite opcionales
+  - `PATCH /api/v1/camporees/:camporeeId` — Actualizar camporee local; body admite `lat?`, `long?`, fechas limite opcionales y `agenda_visible_from?`
   - `DELETE /api/v1/camporees/:camporeeId` — Desactivar camporee (roles: director)
-  - `GET|POST /api/v1/camporees/union` — Listar/crear camporees de union; body admite fechas limite opcionales
+  - `GET|POST /api/v1/camporees/union` — Listar/crear camporees de union; body admite fechas limite opcionales y `agenda_visible_from?`
   - `GET|PATCH|DELETE /api/v1/camporees/union/:camporeeId` — Obtener, actualizar o desactivar camporee de union
   - `POST /api/v1/camporees/:camporeeId/register` — Registrar miembro en camporee; el backend infiere `camporee_type='local'` desde el endpoint
   - `GET /api/v1/camporees/:camporeeId/members` — Listar miembros del camporee
@@ -74,6 +74,7 @@ La inscripcion de miembros en camporees tiene implicaciones directas con el modu
 - **Vinculacion con seguros**: `camporee_members` referencia `member_insurances`; un seguro activo `CAMPOREE` o `GENERAL_ACTIVITIES` es elegible para camporees. La app muestra el estado de seguro del miembro en el selector, pero no solicita capturar manualmente `insurance_id`
 - **Inscripción sin puntaje anual**: `camporee_clubs` y `camporee_members` conservan asistencia/participación como registro operativo e histórico; ya no otorgan puntos al ranking anual.
 - **Autorizacion estricta**: Solo director puede eliminar camporees; director y subdirector pueden crearlos y gestionarlos. La lectura de eventos en app se habilita para roles operativos de club: director, subdirector, secretario, secretario-tesorero, tesorero y consejero.
+- **Apertura de agenda**: `agenda_visible_from` controla cuándo la app puede mostrar día/hora/sede/responsables/bloques de eventos. Si está vacío, la agenda completa se abre al iniciar el camporee (`start_date`). Antes de esa fecha, el endpoint preview sólo expone listado, tipo, descripción/requisitos y puntos.
 
 ## Gaps y pendientes
 
@@ -81,7 +82,7 @@ La inscripcion de miembros en camporees tiene implicaciones directas con el modu
 
 ## Estado de implementacion
 
-- **Prioridad**: Completo — backend, admin y app implementados con CRUD completo; la app registra miembros desde una lista de la sección activa y el backend infiere el tipo de camporee
+- **Prioridad**: Completo — backend, admin y app implementados con CRUD completo; el admin incluye detalle de camporee local y de unión, con eventos/agenda por scope; la app registra miembros desde una lista de la sección activa y el backend infiere el tipo de camporee
 - ✅ Approval UI: Aprobacion/rechazo de inscripciones de clubes, miembros y pagos desde el admin panel (ver [aprobaciones-camporees](aprobaciones-camporees.md))
 
 

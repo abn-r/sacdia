@@ -1,7 +1,7 @@
 # Camporee Events
 
 **Estado**: IMPLEMENTADO PARCIAL
-**Última actualización**: 2026-06-29
+**Última actualización**: 2026-07-06
 **Owner**: Backend/App/Admin
 **Dominio relacionado**: [camporees.md](./camporees.md)
 
@@ -11,9 +11,11 @@ Un camporee se compone de **eventos** competitivos donde clubes y miembros son e
 
 El dominio camporees modela `local_camporees` y `union_camporees` y cuenta con instancias de eventos en `camporee_events`. Esta feature agrega:
 
-1. Un **catálogo i18n de tipos de evento** (espiritual, recreativo, cultural, deportivo, técnico, etc.) administrable.
+1. Un **catálogo i18n de tipos de evento** administrable. Los códigos base sembrados son `scoring`, `recreational`, `rest`, `spiritual`, `devotional` y `general`.
 2. Una **biblioteca de templates reusables** (scoped por unión o por campo local) — un mismo evento se diseña una vez y se reutiliza en varios camporees.
 3. **Instancias** del evento asignadas a un camporee concreto (local o de unión) — al asignar un template se clona como instancia editable, permitiendo overrides locales (más participantes, menos puntos, materiales distintos) sin modificar el template original.
+4. **Agenda liberable por fecha**: antes de `agenda_visible_from`, la app muestra preview de eventos/requisitos/puntos, pero oculta día/hora/sede/responsables/bloques.
+5. **Bloques de agenda opcionales**: un mismo evento puede dividirse en ventanas horarias con asignaciones por sección de club.
 
 La separación template ↔ instancia evita que ajustes específicos de un camporee contaminen futuros camporees que reutilicen el mismo evento base.
 
@@ -27,17 +29,22 @@ La separación template ↔ instancia evita que ajustes específicos de un campo
 - **Participantes**: `participants_mode` (`count` | `by_class`). Si `by_class`, `participants_by_class` es jsonb `[{class_id, count}]` referenciando el catálogo `classes` existente.
 - **Soft delete (`active`)** y campos de auditoría (`created_at`, `modified_at`, `created_by`, `modified_by`).
 - **Reasignar template**: una instancia recuerda el `event_template_id` que la originó (nullable, `ON DELETE SET NULL`) para trazabilidad. Si el template se borra (soft), la instancia sobrevive con datos clonados.
+- **Puntuación desacoplada del tipo**: `event_type.code='scoring'` clasifica la agenda, pero el puntaje oficial sólo existe cuando `camporee_events.scoring_enabled=true` y hay rúbricas válidas.
+- **Agenda segura para app**: `GET /events/preview` aplica `agenda_visible_from`; los usuarios administrativos con permisos de gestión pueden ver agenda completa por el endpoint normal.
 
-## Estado real verificado (2026-06-29)
+## Estado real verificado (2026-07-06)
 
 - Backend: `CamporeeEventsController` expone lectura y mutación para eventos locales y de unión:
   - `GET /api/v1/local-camporees/:camporeeId/events`
+  - `GET /api/v1/local-camporees/:camporeeId/events/preview`
   - `GET /api/v1/union-camporees/:camporeeId/events`
+  - `GET /api/v1/union-camporees/:camporeeId/events/preview`
   - `POST /api/v1/local-camporees/:camporeeId/events`
   - `POST /api/v1/union-camporees/:camporeeId/events`
   - `PATCH /api/v1/camporee-events/:eventId`
+  - `PUT /api/v1/camporee-events/:eventId/schedule-blocks`
   - `DELETE /api/v1/camporee-events/:eventId`
-- App móvil: el detalle de Camporí consume `GET /api/v1/local-camporees/:camporeeId/events` y muestra una vista read-only para roles operativos de club.
+- App móvil: el detalle de Camporí consume `GET /api/v1/local-camporees/:camporeeId/events/preview`; antes de la liberación de agenda muestra preview sin horario/sede/bloques, después muestra agenda completa.
 - RBAC: la lectura móvil de eventos se concede a director, subdirector, secretario, secretario-tesorero, tesorero y consejero con `camporee_events:read`.
 
 ## Modelo de datos
@@ -53,6 +60,17 @@ La separación template ↔ instancia evita que ajustes específicos de un campo
 | `display_order`             | `INT NULL`              | orden sugerido para listas                              |
 | `active`                    | `BOOL DEFAULT true`     | soft delete                                             |
 | `created_at`, `modified_at` | `TIMESTAMPTZ`           | auditoría                                               |
+
+Tipos base sembrados por migración:
+
+| Código | Uso |
+| ------ | --- |
+| `scoring` | Evento puntuable/competitivo; requiere `scoring_enabled` + rúbricas para contar puntos |
+| `recreational` | Actividad recreativa |
+| `rest` | Descanso, comidas o traslados |
+| `spiritual` | Culto o actividad espiritual |
+| `devotional` | Devocional |
+| `general` | Evento general/logístico |
 
 ### Tabla `camporee_event_types_translations`
 
@@ -126,6 +144,8 @@ CHECK (
 | `event_type_id`                                          | `INT NOT NULL FK camporee_event_types`                    | snapshot — sobrevive si template cambia |
 | Todos los campos del template                            | (clonados al crear instancia)                             |                                         |
 | `display_order`                                          | `INT DEFAULT 0`                                           | orden en la lista del camporee          |
+| `day_number`, `starts_at`, `ends_at`, `venue_id`          | campos de agenda                                          | ocultables por `events/preview`         |
+| `display_category`, `status`, `capacity`, `sections`      | campos de agenda                                          |                                         |
 | `scoring_enabled`                                        | `BOOL DEFAULT false`                                      | habilita scoring oficial por rúbricas   |
 | `active`                                                 | `BOOL DEFAULT true`                                       |                                         |
 | `created_at`, `modified_at`, `created_by`, `modified_by` |                                                           |                                         |
@@ -143,6 +163,31 @@ CHECK (
 @@index([union_camporee_id])
 @@index([event_template_id])
 ```
+
+### Tabla `camporee_event_schedule_blocks`
+
+Bloques opcionales para partir un evento en varios horarios/grupos.
+
+| Columna | Tipo | Notas |
+| --- | --- | --- |
+| `camporee_event_schedule_block_id` | `UUID PK` | |
+| `camporee_event_id` | `INT FK camporee_events ON DELETE CASCADE` | |
+| `title`, `description`, `notes` | texto nullable | |
+| `day_number`, `starts_at`, `ends_at` | `INT`, `VARCHAR(5)` | horarios `HH:MM`; `ends_at` debe ser posterior si ambos existen |
+| `venue_id` | `INT NULL FK camporee_venues ON DELETE SET NULL` | |
+| `display_order`, `capacity`, `active` | orden/cupo/soft-delete | |
+
+### Tabla `camporee_event_schedule_block_assignments`
+
+Asignaciones opcionales de bloques a secciones inscritas. Si un bloque no tiene asignaciones, aplica como bloque general.
+
+| Columna | Tipo | Notas |
+| --- | --- | --- |
+| `camporee_event_schedule_block_assignment_id` | `UUID PK` | |
+| `schedule_block_id` | `UUID FK camporee_event_schedule_blocks ON DELETE CASCADE` | |
+| `camporee_club_id` | `INT NULL FK camporee_clubs ON DELETE SET NULL` | sección inscrita al camporee |
+| `club_section_id` | `INT FK club_sections` | obligatorio para validar sección |
+| `active` | `BOOL DEFAULT true` | soft-delete |
 
 ### Scoring por rúbricas
 
@@ -199,12 +244,15 @@ Visibilidad de templates:
 | Método   | Path                                                    | Permiso                                     | Descripción                            |
 | -------- | ------------------------------------------------------- | ------------------------------------------- | -------------------------------------- |
 | `GET`    | `/local-camporees/:id/events`                           | director/subdirector + camporee_events:read | Listar eventos del camporee local      |
+| `GET`    | `/local-camporees/:id/events/preview`                   | camporee_events:read                        | Preview app-safe; oculta agenda antes de `agenda_visible_from` |
 | `GET`    | `/union-camporees/:id/events`                           | director-unión + camporee_events:read       | Listar eventos del camporee de unión   |
+| `GET`    | `/union-camporees/:id/events/preview`                   | camporee_events:read                        | Preview app-safe para camporee de unión |
 | `POST`   | `/local-camporees/:id/events`                           | camporee_events:create                      | Crear evento (custom o desde template) |
 | `POST`   | `/union-camporees/:id/events`                           | camporee_events:create                      | Idem unión                             |
 | `POST`   | `/local-camporees/:id/events/from-template/:templateId` | camporee_events:create                      | Clonar template a instancia            |
 | `POST`   | `/union-camporees/:id/events/from-template/:templateId` | camporee_events:create                      | Idem unión                             |
 | `PATCH`  | `/camporee-events/:id`                                  | camporee_events:update                      | Editar instancia (overrides)           |
+| `PUT`    | `/camporee-events/:id/schedule-blocks`                  | camporee_events:update                      | Reemplazar bloques y asignaciones de agenda |
 | `DELETE` | `/camporee-events/:id`                                  | camporee_events:delete                      | Soft delete                            |
 | `PATCH`  | `/camporee-events/:id/reorder`                          | camporee_events:update                      | Cambiar `display_order`                |
 
@@ -243,16 +291,26 @@ Ruta: `/dashboard/camporees/event-templates`
 
 ### 3. Eventos asignados a un camporee
 
-Tab "Eventos" en `/dashboard/camporees/[id]` (tanto local como union).
+Tab "Eventos" en `/dashboard/camporees/[id]` para camporee local y en
+`/dashboard/camporees/union/[id]` para camporee de unión.
 
 - Lista de instancias con orden drag-handle (display_order).
 - Botones: "Agregar desde template" (picker), "Crear personalizado" (form modal/page).
 - Acciones por fila: editar (form prellenado), eliminar, reordenar.
+- El formulario de evento permite seleccionar tipo de evento y configurar bloques de agenda opcionales con asignaciones a secciones inscritas.
+- Las rutas dedicadas de creación/edición existen para ambos scopes:
+  `/dashboard/camporees/[id]/events/new`,
+  `/dashboard/camporees/[id]/events/[eventId]/edit`,
+  `/dashboard/camporees/union/[id]/events/new` y
+  `/dashboard/camporees/union/[id]/events/[eventId]/edit`.
 
 ## UI App (sacdia-app)
 
 - Sección "Eventos" dentro del detalle de camporee.
-- Read-only: ver lista, descripción, día, horario, sede y puntos.
+- Read-only antes de `agenda_visible_from`: ver lista, descripción, tipo y puntos/requisitos, sin día/hora/sede/bloques.
+- Read-only después de `agenda_visible_from`: ver agenda completa, incluyendo bloques segmentados por horario/grupo cuando existan.
+- La capa de datos puede consumir preview local o unión (`local-camporees` /
+  `union-camporees`) según `camporeeType`.
 - No CRUD desde móvil en esta iteración.
 
 ## Cache
