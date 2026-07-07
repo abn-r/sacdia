@@ -1,16 +1,16 @@
 # ENDPOINTS LIVE REFERENCE (Runtime Truth)
 
-<!-- Generado estáticamente contra sacdia-backend/src/**/*controller.ts el 2026-07-06. No se levantó la app ni se ejecutó build. -->
+<!-- Generado/actualizado estáticamente contra sacdia-backend/src/**/*controller.ts el 2026-07-07. No se levantó la app ni se ejecutó build. -->
 
 > [!IMPORTANT]
 > Documento canónico operativo para clientes SACDIA. Base URL: `/api/v1`.
 > La tabla refleja los decoradores HTTP efectivos en controllers NestJS; DTOs, ejemplos y errores finos viven en Swagger/runtime y docs de feature cuando aplique.
 
 **Estado**: ACTIVE
-**Actualizado**: 2026-07-06
-**Total endpoints**: 683 decoradores HTTP en 88 controllers
-**Métodos**: GET 286 · POST 201 · PATCH 102 · DELETE 87 · PUT 7
-**Auth detectada**: JWT 671 · Public 12
+**Actualizado**: 2026-07-07
+**Total endpoints**: 697 decoradores HTTP en 90 controllers
+**Métodos**: GET 291 · POST 207 · PATCH 103 · DELETE 88 · PUT 8
+**Auth detectada**: JWT 685 · Public 12
 
 ## Cómo leer esta referencia
 
@@ -47,10 +47,11 @@
 | auth | 19 |
 | OAuth | 5 |
 | camporee-event-templates | 5 |
-| camporee-events | 14 |
+| camporee-events | 16 |
 | camporee-scoring | 17 |
+| camporee-staff | 8 |
 | camporee-venues | 9 |
-| camporees | 43 |
+| camporees | 47 |
 | catalogs | 16 |
 | admin-certificate-bulk-imports | 6 |
 | certificate-bulk-imports | 6 |
@@ -470,6 +471,8 @@
 | POST | `/api/v1/union-camporees/:camporeeId/events/from-template/:templateId` | JWT | Permisos: camporee_events:create | Clone a template as an event for a union camporee | CamporeeEventsService.createFromTemplate() | `src/camporee-events/camporee-events.controller.ts` |
 | GET | `/api/v1/camporee-events/:eventId` | JWT | Permisos: camporee_events:read | Get a camporee event instance by ID | CamporeeEventsService.getEvent() | `src/camporee-events/camporee-events.controller.ts` |
 | PATCH | `/api/v1/camporee-events/:eventId` | JWT | Permisos: camporee_events:update | Update a camporee event instance (overrides) | CamporeeEventsService.updateEvent() | `src/camporee-events/camporee-events.controller.ts` |
+| GET | `/api/v1/camporee-events/:eventId/staff-assignments` | JWT | Permisos: camporee_events:read | List staff assignments for a camporee event | CamporeeEventsService.listEventStaffAssignments() | `src/camporee-events/camporee-events.controller.ts` |
+| PUT | `/api/v1/camporee-events/:eventId/staff-assignments` | JWT | Permisos: camporee_events:update | Replace staff assignments for a camporee event | CamporeeEventsService.replaceEventStaffAssignments() | `src/camporee-events/camporee-events.controller.ts` |
 | PUT | `/api/v1/camporee-events/:eventId/schedule-blocks` | JWT | Permisos: camporee_events:update | Replace optional schedule blocks and club-section assignments for a camporee event | CamporeeEventsService.replaceScheduleBlocks() | `src/camporee-events/camporee-events.controller.ts` |
 | DELETE | `/api/v1/camporee-events/:eventId` | JWT | Permisos: camporee_events:delete | Soft delete a camporee event instance | CamporeeEventsService.deleteEvent() | `src/camporee-events/camporee-events.controller.ts` |
 | PATCH | `/api/v1/camporee-events/:eventId/reorder` | JWT | Permisos: camporee_events:update | Update display_order of a camporee event instance | CamporeeEventsService.reorderEvent() | `src/camporee-events/camporee-events.controller.ts` |
@@ -495,6 +498,19 @@
 | GET | `/api/v1/local-camporees/:camporeeId/leaderboard` | JWT | Permisos: camporee_events:read | Obtener local-camporees/{id}/leaderboard | CamporeeScoringService.getCamporeeLeaderboard() | `src/camporee-scoring/camporee-scoring.controller.ts` |
 | GET | `/api/v1/union-camporees/:camporeeId/leaderboard` | JWT | Permisos: camporee_events:read | Obtener union-camporees/{id}/leaderboard | CamporeeScoringService.getCamporeeLeaderboard() | `src/camporee-scoring/camporee-scoring.controller.ts` |
 | GET | `/api/v1/camporee-judges/me/assignments` | JWT | - | List current user camporee judge assignments | CamporeeScoringService.getMyJudgeAssignments() | `src/camporee-scoring/camporee-scoring.controller.ts` |
+
+### camporee-staff
+
+| Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
+| --- | --- | --- | --- | --- | --- | --- |
+| GET | `/api/v1/local-camporees/:camporeeId/staff` | JWT | Permisos: camporee_events:read | List staff roster for a local camporee | CamporeeStaffService.listStaff() | `src/camporee-staff/camporee-staff.controller.ts` |
+| GET | `/api/v1/local-camporees/:camporeeId/staff-candidates` | JWT | Permisos: camporee_events:update | List active users eligible for a local camporee roster | CamporeeStaffService.listStaffCandidates() | `src/camporee-staff/camporee-staff.controller.ts` |
+| POST | `/api/v1/local-camporees/:camporeeId/staff` | JWT | Permisos: camporee_events:update | Add a staff member to a local camporee roster | CamporeeStaffService.addStaffMember() | `src/camporee-staff/camporee-staff.controller.ts` |
+| GET | `/api/v1/union-camporees/:camporeeId/staff` | JWT | Permisos: camporee_events:read | List staff roster for a union camporee | CamporeeStaffService.listStaff() | `src/camporee-staff/camporee-staff.controller.ts` |
+| GET | `/api/v1/union-camporees/:camporeeId/staff-candidates` | JWT | Permisos: camporee_events:update | List active users eligible for a union camporee roster | CamporeeStaffService.listStaffCandidates() | `src/camporee-staff/camporee-staff.controller.ts` |
+| POST | `/api/v1/union-camporees/:camporeeId/staff` | JWT | Permisos: camporee_events:update | Add a staff member to a union camporee roster | CamporeeStaffService.addStaffMember() | `src/camporee-staff/camporee-staff.controller.ts` |
+| PATCH | `/api/v1/camporee-staff/:staffMemberId` | JWT | Permisos: camporee_events:update | Update a camporee staff roster member | CamporeeStaffService.updateStaffMember() | `src/camporee-staff/camporee-staff.controller.ts` |
+| DELETE | `/api/v1/camporee-staff/:staffMemberId` | JWT | Permisos: camporee_events:update | Deactivate a camporee staff roster member | CamporeeStaffService.deactivateStaffMember() | `src/camporee-staff/camporee-staff.controller.ts` |
 
 ### camporee-venues
 
@@ -523,6 +539,8 @@
 | POST | `/api/v1/camporees/union/:camporeeId/clubs` | JWT | Permisos: attendance:manage | Inscribir club en camporee de unión | CamporeesService.enrollClubToUnion() | `src/camporees/camporees.controller.ts` |
 | GET | `/api/v1/camporees/union/:camporeeId/clubs` | JWT | Permisos: attendance:read | Listar clubes inscritos en camporee de unión | CamporeesService.getUnionEnrolledClubs() | `src/camporees/camporees.controller.ts` |
 | DELETE | `/api/v1/camporees/union/:camporeeId/clubs/:camporeeClubId` | JWT | Permisos: attendance:manage | Cancelar inscripción de club en camporee de unión | CamporeesService.cancelUnionClubEnrollment() | `src/camporees/camporees.controller.ts` |
+| POST | `/api/v1/union-camporees/:camporeeId/club-registration/close` | JWT | Permisos: camporee_events:update | Close union camporee club registration | CamporeesService.closeUnionCamporeeClubRegistration() | `src/camporees/camporee-club-registration.controller.ts` |
+| POST | `/api/v1/union-camporees/:camporeeId/club-registration/reopen` | JWT | Permisos: camporee_events:update | Reopen union camporee club registration | CamporeesService.reopenUnionCamporeeClubRegistration() | `src/camporees/camporee-club-registration.controller.ts` |
 | POST | `/api/v1/camporees/union/:camporeeId/register` | JWT | Permisos: attendance:manage | Registrar miembro en camporee de unión | CamporeesService.registerMemberToUnion() | `src/camporees/camporees.controller.ts` |
 | GET | `/api/v1/camporees/union/:camporeeId/members` | JWT | Permisos: attendance:read | Listar miembros del camporee de unión | CamporeesService.getUnionMembers() | `src/camporees/camporees.controller.ts` |
 | DELETE | `/api/v1/camporees/union/:camporeeId/members/:userId` | JWT | Permisos: attendance:manage | Remover miembro del camporee de unión | CamporeesService.removeUnionMember() | `src/camporees/camporees.controller.ts` |
@@ -549,6 +567,8 @@
 | POST | `/api/v1/camporees/:camporeeId/clubs` | JWT | Permisos: attendance:manage | Inscribir club en camporee | CamporeesService.enrollClub() | `src/camporees/camporees.controller.ts` |
 | GET | `/api/v1/camporees/:camporeeId/clubs` | JWT | Permisos: attendance:read | Listar clubes inscritos en camporee | CamporeesService.getEnrolledClubs() | `src/camporees/camporees.controller.ts` |
 | DELETE | `/api/v1/camporees/:camporeeId/clubs/:camporeeClubId` | JWT | Permisos: attendance:manage | Cancelar inscripción de club | CamporeesService.cancelClubEnrollment() | `src/camporees/camporees.controller.ts` |
+| POST | `/api/v1/camporees/:camporeeId/club-registration/close` | JWT | Permisos: camporee_events:update | Close local camporee club registration | CamporeesService.closeLocalCamporeeClubRegistration() | `src/camporees/camporee-club-registration.controller.ts` |
+| POST | `/api/v1/camporees/:camporeeId/club-registration/reopen` | JWT | Permisos: camporee_events:update | Reopen local camporee club registration | CamporeesService.reopenLocalCamporeeClubRegistration() | `src/camporees/camporee-club-registration.controller.ts` |
 | POST | `/api/v1/camporees/:camporeeId/members/:memberId/payments` | JWT | Permisos: attendance:manage | Registrar pago de miembro | CamporeesService.createPayment() | `src/camporees/camporees.controller.ts` |
 | GET | `/api/v1/camporees/:camporeeId/members/:memberId/payments` | JWT | Permisos: attendance:read | Listar pagos de un miembro | CamporeesService.getMemberPayments() | `src/camporees/camporees.controller.ts` |
 | GET | `/api/v1/camporees/:camporeeId/payments` | JWT | Permisos: attendance:read | Listar todos los pagos del camporee | CamporeesService.getCamporeePayments() | `src/camporees/camporees.controller.ts` |

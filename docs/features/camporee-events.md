@@ -16,6 +16,7 @@ El dominio camporees modela `local_camporees` y `union_camporees` y cuenta con i
 3. **Instancias** del evento asignadas a un camporee concreto (local o de unión) — al asignar un template se clona como instancia editable, permitiendo overrides locales (más participantes, menos puntos, materiales distintos) sin modificar el template original.
 4. **Agenda liberable por fecha**: antes de `agenda_visible_from`, la app muestra preview de eventos/requisitos/puntos, pero oculta día/hora/sede/responsables/bloques.
 5. **Bloques de agenda opcionales**: un mismo evento puede dividirse en ventanas horarias con asignaciones por sección de club.
+6. **Asignaciones flexibles de personal**: cada actividad/evento puede tener responsable y apoyos/evaluadores tomados del roster previo del camporee.
 
 La separación template ↔ instancia evita que ajustes específicos de un camporee contaminen futuros camporees que reutilicen el mismo evento base.
 
@@ -30,6 +31,7 @@ La separación template ↔ instancia evita que ajustes específicos de un campo
 - **Soft delete (`active`)** y campos de auditoría (`created_at`, `modified_at`, `created_by`, `modified_by`).
 - **Reasignar template**: una instancia recuerda el `event_template_id` que la originó (nullable, `ON DELETE SET NULL`) para trazabilidad. Si el template se borra (soft), la instancia sobrevive con datos clonados.
 - **Puntuación desacoplada del tipo**: `event_type.code='scoring'` clasifica la agenda, pero el puntaje oficial sólo existe cuando `camporee_events.scoring_enabled=true` y hay rúbricas válidas.
+- **Personal operativo desacoplado del scoring**: las asignaciones de agenda (`camporee_event_staff_assignments`) explican quién se encarga de la actividad; las asignaciones de scoring (`camporee_event_judge_assignments`) siguen definiendo quién evalúa una sección y quién puede subir puntaje.
 - **Agenda segura para app**: `GET /events/preview` aplica `agenda_visible_from`; los usuarios administrativos con permisos de gestión pueden ver agenda completa por el endpoint normal.
 
 ## Estado real verificado (2026-07-06)
@@ -42,10 +44,13 @@ La separación template ↔ instancia evita que ajustes específicos de un campo
   - `POST /api/v1/local-camporees/:camporeeId/events`
   - `POST /api/v1/union-camporees/:camporeeId/events`
   - `PATCH /api/v1/camporee-events/:eventId`
+  - `GET /api/v1/camporee-events/:eventId/staff-assignments`
+  - `PUT /api/v1/camporee-events/:eventId/staff-assignments`
   - `PUT /api/v1/camporee-events/:eventId/schedule-blocks`
   - `DELETE /api/v1/camporee-events/:eventId`
-- App móvil: el detalle de Camporí consume `GET /api/v1/local-camporees/:camporeeId/events/preview`; antes de la liberación de agenda muestra preview sin horario/sede/bloques, después muestra agenda completa.
+- App móvil: el detalle de Camporí consume `GET /api/v1/local-camporees/:camporeeId/events/preview`; la lista principal muestra sólo icono, nombre y puntaje total. Al abrir un evento, antes de la liberación de agenda se omite horario/sede/bloques, y después se muestra el detalle con día/hora/sede y bloques segmentados si existen.
 - RBAC: la lectura móvil de eventos se concede a director, subdirector, secretario, secretario-tesorero, tesorero y consejero con `camporee_events:read`.
+- Las respuestas de eventos incluyen `staff_assignments` para conservar el registro operativo, aunque la tarjeta móvil compacta no los muestra por defecto.
 
 ## Modelo de datos
 
@@ -189,6 +194,39 @@ Asignaciones opcionales de bloques a secciones inscritas. Si un bloque no tiene 
 | `club_section_id` | `INT FK club_sections` | obligatorio para validar sección |
 | `active` | `BOOL DEFAULT true` | soft-delete |
 
+### Tabla `camporee_staff_members`
+
+Roster operativo previo del camporee. Cada fila apunta a un usuario y a exactamente un camporee local o de unión.
+
+| Columna | Tipo | Notas |
+| --- | --- | --- |
+| `camporee_staff_member_id` | `UUID PK` | |
+| `local_camporee_id` | `INT NULL FK local_camporees` | exclusivo con `union_camporee_id` |
+| `union_camporee_id` | `INT NULL FK union_camporees` | exclusivo con `local_camporee_id` |
+| `user_id` | `UUID FK users` | persona asignable |
+| `category` | `VARCHAR(30)` | `judge`, `administrative`, `kitchen`, `support`, `spiritual`, `leadership`, `other` |
+| `role_label`, `notes` | texto nullable | etiqueta humana y notas operativas |
+| `status`, `active` | texto/bool | desactivación auditada |
+
+### Tabla `camporee_event_staff_assignments`
+
+Asignaciones de personas del roster a una actividad/evento. No obliga a incluir todos los tipos de personal.
+
+| Columna | Tipo | Notas |
+| --- | --- | --- |
+| `camporee_event_staff_assignment_id` | `UUID PK` | |
+| `camporee_event_id` | `INT FK camporee_events ON DELETE CASCADE` | |
+| `camporee_staff_member_id` | `UUID FK camporee_staff_members ON DELETE CASCADE` | debe pertenecer al mismo camporee |
+| `assignment_role` | `VARCHAR(30)` | `responsible`, `assistant`, `evaluator`, `support` |
+| `title_override`, `notes` | texto nullable | etiqueta/nota por actividad |
+| `display_order`, `active` | orden/soft-delete | |
+
+Reglas:
+
+- Para publicar un evento debe existir al menos una asignación activa con `assignment_role='responsible'` y staff activo.
+- Pueden existir varios asistentes/evaluadores/apoyos.
+- Desactivar un miembro del roster no debe dejarlo satisfaciendo el responsable de un evento.
+
 ### Scoring por rúbricas
 
 Los templates pueden traer rúbricas reutilizables (`camporee_event_template_rubrics`) cuando `camporee_event_templates.scoring_enabled=true`. Al crear un evento desde template, el backend copia esas rúbricas hacia `camporee_event_rubrics` y conserva `camporee_events.scoring_enabled=true`.
@@ -207,8 +245,9 @@ Tablas agregadas:
 Autorización:
 
 - Lectura de rúbricas/scoring targets: `camporee_events:read` o juez activo asignado.
-- Gestión de rúbricas, roster y asignaciones: `camporee_events:update` con scope del camporee.
+- Gestión de rúbricas, roster, personal de agenda y asignaciones: `camporee_events:update` con scope del camporee.
 - Envío de puntaje: juez principal activo desde app móvil, o carga manual por `assistant-lf`/`director-lf` con scope institucional. La app consume `GET /camporee-judges/me/assignments`, filtra asignaciones `primary`, carga rúbricas del evento y envía exactamente un ítem por rúbrica.
+- Mutaciones de rúbricas, asignación de jueces y envío de puntaje requieren inscripción de clubes cerrada; lecturas permanecen disponibles.
 
 ## Endpoints (backend)
 
@@ -252,9 +291,24 @@ Visibilidad de templates:
 | `POST`   | `/local-camporees/:id/events/from-template/:templateId` | camporee_events:create                      | Clonar template a instancia            |
 | `POST`   | `/union-camporees/:id/events/from-template/:templateId` | camporee_events:create                      | Idem unión                             |
 | `PATCH`  | `/camporee-events/:id`                                  | camporee_events:update                      | Editar instancia (overrides)           |
+| `GET`    | `/camporee-events/:id/staff-assignments`                | camporee_events:read                        | Listar personal asignado a la actividad |
+| `PUT`    | `/camporee-events/:id/staff-assignments`                | camporee_events:update                      | Reemplazar personal asignado a la actividad |
 | `PUT`    | `/camporee-events/:id/schedule-blocks`                  | camporee_events:update                      | Reemplazar bloques y asignaciones de agenda |
 | `DELETE` | `/camporee-events/:id`                                  | camporee_events:delete                      | Soft delete                            |
 | `PATCH`  | `/camporee-events/:id/reorder`                          | camporee_events:update                      | Cambiar `display_order`                |
+
+### Roster operativo del camporee
+
+| Método   | Path                                      | Permiso                  | Descripción |
+| -------- | ----------------------------------------- | ------------------------ | ----------- |
+| `GET`    | `/local-camporees/:id/staff`              | camporee_events:read     | Listar personal del camporee local |
+| `GET`    | `/local-camporees/:id/staff-candidates`   | camporee_events:update   | Listar usuarios candidatos para roster local |
+| `POST`   | `/local-camporees/:id/staff`              | camporee_events:update   | Agregar persona al roster local |
+| `GET`    | `/union-camporees/:id/staff`              | camporee_events:read     | Listar personal del camporee de unión |
+| `GET`    | `/union-camporees/:id/staff-candidates`   | camporee_events:update   | Listar usuarios candidatos para roster de unión |
+| `POST`   | `/union-camporees/:id/staff`              | camporee_events:update   | Agregar persona al roster de unión |
+| `PATCH`  | `/camporee-staff/:staffMemberId`          | camporee_events:update   | Editar categoría/etiqueta/notas |
+| `DELETE` | `/camporee-staff/:staffMemberId`          | camporee_events:update   | Desactivar persona del roster |
 
 ## Permisos RBAC (a sembrar)
 
@@ -297,18 +351,29 @@ Tab "Eventos" en `/dashboard/camporees/[id]` para camporee local y en
 - Lista de instancias con orden drag-handle (display_order).
 - Botones: "Agregar desde template" (picker), "Crear personalizado" (form modal/page).
 - Acciones por fila: editar (form prellenado), eliminar, reordenar.
-- El formulario de evento permite seleccionar tipo de evento y configurar bloques de agenda opcionales con asignaciones a secciones inscritas.
+- El formulario de evento permite seleccionar tipo de evento, asignar responsable/apoyos desde el roster del camporee y configurar bloques de agenda opcionales con asignaciones a secciones inscritas.
 - Las rutas dedicadas de creación/edición existen para ambos scopes:
   `/dashboard/camporees/[id]/events/new`,
   `/dashboard/camporees/[id]/events/[eventId]/edit`,
   `/dashboard/camporees/union/[id]/events/new` y
   `/dashboard/camporees/union/[id]/events/[eventId]/edit`.
 
+### 4. Personal del camporee
+
+Tab "Personal" en el detalle del camporee, antes de "Eventos".
+
+- Permite cargar personas del camporee con categoría descriptiva.
+- Los candidatos salen de usuarios del scope del camporee.
+- El roster se reutiliza para asignar responsables/apoyos/evaluadores en eventos.
+- No reemplaza el scoring: para puntajes por sección se siguen usando jueces y asignaciones de scoring.
+
 ## UI App (sacdia-app)
 
 - Sección "Eventos" dentro del detalle de camporee.
-- Read-only antes de `agenda_visible_from`: ver lista, descripción, tipo y puntos/requisitos, sin día/hora/sede/bloques.
-- Read-only después de `agenda_visible_from`: ver agenda completa, incluyendo bloques segmentados por horario/grupo cuando existan.
+- Read-only en la lista: mostrar sólo icono, nombre del evento y puntaje total.
+- Read-only en detalle antes de `agenda_visible_from`: ver descripción, tipo y puntos/requisitos, sin día/hora/sede/bloques.
+- Read-only en detalle después de `agenda_visible_from`: ver tipo, día/hora, puntos máximos, sede opcional, descripción, personal asignado y bloques segmentados por horario/grupo cuando existan.
+- La sección de miembros inscritos aparece antes que la sección de eventos en el detalle móvil.
 - La capa de datos puede consumir preview local o unión (`local-camporees` /
   `union-camporees`) según `camporeeType`.
 - No CRUD desde móvil en esta iteración.

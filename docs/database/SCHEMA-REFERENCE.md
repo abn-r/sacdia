@@ -424,11 +424,14 @@ Define el presupuesto de puntos por componente dentro de un eje anual:
 
 - `activity_types`, `activities`, `activity_instances`
 - `local_camporees`, `union_camporees`, `union_camporee_local_fields`, `camporee_clubs`, `camporee_members`, `camporee_payments`
-  - `local_camporees` y `union_camporees` guardan dirección textual (`local_camporee_place` / `union_camporee_place`), coordenadas opcionales (`lat`, `long`) para vista de mapa en app y `agenda_visible_from` para abrir agenda completa antes/durante el camporee.
+  - `local_camporees` y `union_camporees` guardan dirección textual (`local_camporee_place` / `union_camporee_place`), coordenadas opcionales (`lat`, `long`) para vista de mapa en app, `agenda_visible_from` para abrir agenda completa antes/durante el camporee y `club_registration_closed_at/by` para congelar secciones competitivas.
   - Los eventos del camporee viven en `camporee_events` y se relacionan con camporee local o de unión mediante FK excluyentes.
   - Bloques opcionales de agenda viven en `camporee_event_schedule_blocks`; sus asignaciones por sección inscrita viven en `camporee_event_schedule_block_assignments`.
+  - El roster operativo vive en `camporee_staff_members`; cada fila apunta a un usuario y exactamente un camporee local o de unión, con categoría descriptiva (`judge`, `administrative`, `kitchen`, `support`, `spiritual`, `leadership`, `other`).
+  - Las asignaciones de personas a actividades viven en `camporee_event_staff_assignments`; permiten roles `responsible`, `assistant`, `evaluator` y `support`, sin forzar todos los roles en cada evento.
   - Scoring reutilizable de templates vive en `camporee_event_template_rubrics`; al clonar un template puntuable se copian criterios hacia `camporee_event_rubrics`.
   - Scoring oficial vive en `camporee_event_rubrics`, `camporee_judges`, `camporee_event_judge_assignments`, `camporee_event_score_submissions`, `camporee_event_score_submission_items` y `camporee_event_section_results`. `camporee_events.scoring_enabled` habilita puntaje real por rúbrica; `camporee_clubs`/`camporee_members` quedan como inscripción operativa/histórica.
+  - Las mutaciones de scoring oficial requieren `club_registration_closed_at` porque la lista de secciones inscritas debe estar congelada; la inscripción de miembros sigue controlada por su propio deadline.
 - `inventory_categories`, `club_inventory`, `inventory_evidence_files`, `inventory_history`
 
 ### Finanzas y carpetas
@@ -497,6 +500,7 @@ Define el presupuesto de puntos por componente dentro de un eje anual:
 - `20260629203000_camporee_location_coordinates` - agrega coordenadas opcionales `lat`/`long` a `local_camporees` y `union_camporees`, y concede `camporee_events:read` a roles operativos de club para la vista móvil de eventos.
 - `20260702193000_camporee_rubric_scoring` - agrega scoring real por rúbricas, roster/asignaciones de jueces y resultados oficiales por sección/evento.
 - `20260706120000_camporee_agenda_blocks` - agrega `agenda_visible_from` a camporees locales/de unión, crea bloques de agenda por evento con asignaciones a secciones inscritas y alinea seeds base de `camporee_event_types`.
+- `20260707160000_camporee_staff_roster` - agrega `camporee_staff_members`, `camporee_event_staff_assignments`, cierre explícito `club_registration_closed_at/by` en camporees locales/de unión y backfill de jueces existentes hacia roster de personal.
 - `20260531203000_annual_ranking_axes` - crea `annual_ranking_axis_configs`, asocia componentes a ejes administrativo/operativo, y conserva componentes legacy desconocidos como inactivos para remediación manual sin asignarlos silenciosamente a un eje.
 - `20260429000000_enrollment_rankings_schema` - (8.4-A) crea `enrollment_rankings`, `section_rankings`, `enrollment_ranking_weights` con indexes, UNIQUE constraints y CHECK constraints de rango [0,100]. Ver §14.1 de `docs/canon/runtime-rankings.md`.
 - `20260429000001_award_categories_scope` - (8.4-A) añade `scope VARCHAR(20) DEFAULT 'club'` a `award_categories` + índice `idx_award_categories_scope` on `(scope, is_legacy)`. Backfill: filas existentes → `scope='club'`.

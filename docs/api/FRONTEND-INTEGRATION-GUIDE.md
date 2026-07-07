@@ -77,6 +77,30 @@ El flujo móvil de jueces de camporee consume scoring oficial por rúbricas:
 - Jueces `assistant` no ven acción de envío en app; quedan como apoyo/auditoría.
 - El admin debe poblar el selector de roster con `GET /api/v1/local-camporees/:camporeeId/judge-candidates` o `GET /api/v1/union-camporees/:camporeeId/judge-candidates`, no con captura manual de UUID. El backend sólo acepta jueces 18+, pastores o Guías Mayores investidos.
 
+## Actualizacion 2026-07-07 (Camporee staff, agenda y cierre de clubes)
+
+El flujo administrativo de camporee separa personal operativo, agenda y scoring:
+
+- Cargar personal del camporee:
+  - `GET /api/v1/local-camporees/:camporeeId/staff`
+  - `GET /api/v1/local-camporees/:camporeeId/staff-candidates`
+  - `POST /api/v1/local-camporees/:camporeeId/staff`
+  - equivalentes `union-camporees`.
+- `staff-candidates` requiere `camporee_events:update` porque devuelve usuarios elegibles para una mutación.
+- Editar/desactivar personal:
+  - `PATCH /api/v1/camporee-staff/:staffMemberId`
+  - `DELETE /api/v1/camporee-staff/:staffMemberId`
+- Asignar personas a una actividad/agenda:
+  - `GET /api/v1/camporee-events/:eventId/staff-assignments`
+  - `PUT /api/v1/camporee-events/:eventId/staff-assignments`
+  - roles válidos: `responsible`, `assistant`, `evaluator`, `support`.
+- Para publicar un evento debe existir al menos un `responsible` activo. No se deben forzar roles de cocina/admin/apoyo en todos los eventos.
+- Cerrar/reabrir inscripción de clubes:
+  - `POST /api/v1/camporees/:camporeeId/club-registration/close|reopen`
+  - `POST /api/v1/union-camporees/:camporeeId/club-registration/close|reopen`
+- El cierre congela secciones para scoring; las mutaciones de rúbricas, asignación de jueces y captura de puntaje oficial deben mostrar el gate si `club_registration_closed_at` está vacío.
+- La inscripción de miembros sigue dependiendo de `member_registration_deadline`; no bloquear UI de miembros por cierre de clubes.
+
 ## Actualizacion 2026-02-17 (Admin Panel)
 
 Se agrego validacion operativa para frontend admin mediante smoke E2E en `sacdia-admin/scripts/e2e-smoke.mjs`.

@@ -6,7 +6,7 @@
 
 Los camporees son eventos institucionales centrales en la vida de los clubes de Conquistadores y Aventureros. Son campamentos competitivos organizados a nivel de campo local (camporees locales) o de union (camporees de union) donde los clubes participan en actividades de evaluacion: orden cerrado, nudos, primeros auxilios, cocina al aire libre, orientacion, campismo, conocimiento biblico y otras disciplinas. Los camporees representan la culminacion del trabajo formativo del club durante un periodo.
 
-El modelo de datos contempla dos niveles de camporees: locales (`local_camporees`) organizados por el campo local, y de union (`union_camporees`) que agrupan clubes de todo el territorio de la union. Los camporees de union pueden referenciar campos locales participantes (`union_camporee_local_fields`). Cada camporee admite inscripcion de clubes (`camporee_clubs`), registro de miembros individuales (`camporee_members`), pagos (`camporee_payments`), fechas limite opcionales (`club_registration_deadline`, `member_registration_deadline`, `payment_deadline`), apertura configurable de agenda (`agenda_visible_from`) y ubicación con dirección textual más coordenadas opcionales (`lat`, `long`) para vista de mapa.
+El modelo de datos contempla dos niveles de camporees: locales (`local_camporees`) organizados por el campo local, y de union (`union_camporees`) que agrupan clubes de todo el territorio de la union. Los camporees de union pueden referenciar campos locales participantes (`union_camporee_local_fields`). Cada camporee admite inscripcion de clubes (`camporee_clubs`), registro de miembros individuales (`camporee_members`), pagos (`camporee_payments`), fechas limite opcionales (`club_registration_deadline`, `member_registration_deadline`, `payment_deadline`), cierre explicito de inscripción de clubes (`club_registration_closed_at/by`), apertura configurable de agenda (`agenda_visible_from`) y ubicación con dirección textual más coordenadas opcionales (`lat`, `long`) para vista de mapa.
 
 La inscripcion de miembros en camporees tiene implicaciones directas con el modulo de seguros: para participar en un camporee, los miembros generalmente requieren un seguro activo de tipo CAMPOREE o GENERAL_ACTIVITIES. Esta relacion esta modelada en la tabla `camporee_members` que referencia `member_insurances`.
 
@@ -30,20 +30,33 @@ La inscripcion de miembros en camporees tiene implicaciones directas con el modu
   - `DELETE /api/v1/camporees/:camporeeId/members/:userId` — Remover miembro del camporee (roles: director, subdirector)
   - `POST /api/v1/camporees/:camporeeId/members/:memberId/payments` — Registrar pago. Body usa `paid_at` y `payment_type` en `inscription|materials|other`
   - `PATCH /api/v1/camporees/payments/:camporeePaymentId/approve|reject` — Aprobar o rechazar pago tardio; usa `camporee_payment_id` UUID
+  - `POST /api/v1/camporees/:camporeeId/club-registration/close|reopen` — Cerrar o reabrir inscripción de clubes de camporee local
+  - `POST /api/v1/union-camporees/:camporeeId/club-registration/close|reopen` — Cerrar o reabrir inscripción de clubes de camporee de unión
+  - `GET|POST /api/v1/local-camporees/:camporeeId/staff` — Listar o agregar personal del camporee local
+  - `GET /api/v1/local-camporees/:camporeeId/staff-candidates` — Listar candidatos de personal del camporee local
+  - `GET|POST /api/v1/union-camporees/:camporeeId/staff` — Listar o agregar personal del camporee de unión
+  - `GET /api/v1/union-camporees/:camporeeId/staff-candidates` — Listar candidatos de personal del camporee de unión
+  - `PATCH|DELETE /api/v1/camporee-staff/:staffMemberId` — Editar o desactivar una persona del roster
   - `GET /api/v1/local-camporees/:camporeeId/events` — Listar eventos registrados del camporee local
   - `GET /api/v1/union-camporees/:camporeeId/events` — Listar eventos registrados del camporee de unión
 
 ### Admin
 
-- **CRUD completo**: Lista con creacion/eliminacion, pagina de detalle con tarjeta de info y tab de miembros, dialog de creacion/edicion, registro de miembros con validacion de seguro, remocion de miembros
+- **CRUD completo**: Lista con creacion/eliminacion, pagina de detalle con tarjeta de info y tabs de personal, eventos, clubes y miembros, dialog de creacion/edicion, registro de miembros con validacion de seguro, remocion de miembros
 - Los formularios de camporee local y de unión capturan dirección textual, fechas limite opcionales y coordenadas opcionales (`lat`, `long`) como par obligatorio: se guardan ambas o ninguna.
+- El admin carga primero el roster operativo del camporee y luego asigna personas específicas a cada actividad/evento; no se fuerza que cada actividad tenga cocina/admin/apoyo/jueces.
+- El cierre de inscripción de clubes congela las secciones que podrán recibir puntajes y asignaciones de jueces; la inscripción de miembros sigue controlada por `member_registration_deadline`.
 - Reutiliza el cliente API existente (`lib/api/camporees.ts`) y las server actions (`lib/camporees/actions.ts`)
 
 ### App Movil
 
 - **4 screens**: lista de camporees, detalle con preview de miembros, selector/registro múltiple de miembros desde la sección activa, lista de miembros con opcion de remocion
+- La lista móvil de camporees muestra directamente las tarjetas disponibles, sin hero/resumen decorativo superior, para ahorrar espacio útil.
+- La UI móvil muestra las fechas como rango único y los montos con el símbolo de moneda antes de la cantidad (ej. `$450`) tanto en lista como en detalle.
 - El detalle muestra banner de Camporí, dirección primero y preview 16:9 del mapa con pin cuando hay coordenadas. Al tocar el bloque abre opciones de mapas externos.
 - Directores, subdirectores, secretarios, secretarios-tesoreros, tesoreros y consejeros pueden ver los eventos registrados del Camporí desde el detalle móvil.
+- En el detalle móvil se prioriza primero la sección de miembros inscritos y después los eventos del Camporí.
+- La lista móvil de eventos es mínima: icono, nombre del evento y puntaje total. Al entrar al evento se muestra el detalle completo con tipo, día/hora si la agenda está liberada, puntaje, lugar, descripción, personal asignado y horarios/bloques cuando existan.
 - Capa de datos completa: entidades, modelos, datasource, repositorio, providers
 - Rutas configuradas en GoRouter
 
@@ -55,6 +68,8 @@ La inscripcion de miembros en camporees tiene implicaciones directas con el modu
 - `camporee_clubs` — Clubs inscritos en camporees
 - `camporee_members` — Miembros inscritos en camporees (referencia `member_insurances`)
 - `camporee_payments` — Pagos de miembros inscritos; PK runtime `camporee_payment_id` UUID, `paid_at` como fecha de pago y `payment_type` en `inscription|materials|other`
+- `camporee_staff_members` — Roster operativo del camporee con categorías descriptivas (`judge`, `administrative`, `kitchen`, `support`, `spiritual`, `leadership`, `other`)
+- `camporee_event_staff_assignments` — Asignaciones flexibles de personas a eventos/actividades (`responsible`, `assistant`, `evaluator`, `support`)
 
 ## Requisitos funcionales
 
@@ -66,6 +81,9 @@ La inscripcion de miembros en camporees tiene implicaciones directas con el modu
 6. Los camporees deben poder desactivarse (soft delete) sin perder datos historicos
 7. El panel admin debe permitir CRUD completo de camporees con gestion de miembros
 8. La app movil permite ver camporees disponibles, inscribirse y gestionar miembros inscritos
+9. El campo local o la unión debe poder cargar el personal operativo del camporee antes de configurar actividades.
+10. Cada actividad/evento puede tener un responsable y apoyos/evaluadores sólo si aplica.
+11. La configuración de scoring oficial se habilita sólo después de cerrar la inscripción de clubes.
 
 ## Decisiones de diseno
 
@@ -73,12 +91,14 @@ La inscripcion de miembros en camporees tiene implicaciones directas con el modu
 - **Inscripcion individual**: Los miembros se registran individualmente, no como club completo, permitiendo control granular de participacion
 - **Vinculacion con seguros**: `camporee_members` referencia `member_insurances`; un seguro activo `CAMPOREE` o `GENERAL_ACTIVITIES` es elegible para camporees. La app muestra el estado de seguro del miembro en el selector, pero no solicita capturar manualmente `insurance_id`
 - **Inscripción sin puntaje anual**: `camporee_clubs` y `camporee_members` conservan asistencia/participación como registro operativo e histórico; ya no otorgan puntos al ranking anual.
+- **Cierre explícito de clubes**: `club_registration_closed_at` no reemplaza `club_registration_deadline`; el cierre congela secciones competitivas para scoring, mientras `member_registration_deadline` controla participantes/personas.
+- **Personal operativo separado de jueces de scoring**: `camporee_staff_members` describe capacidades generales del camporee; `camporee_event_staff_assignments` asigna personas a la agenda; `camporee_judges` y `camporee_event_judge_assignments` siguen siendo la autoridad de scoring por sección/evento.
 - **Autorizacion estricta**: Solo director puede eliminar camporees; director y subdirector pueden crearlos y gestionarlos. La lectura de eventos en app se habilita para roles operativos de club: director, subdirector, secretario, secretario-tesorero, tesorero y consejero.
-- **Apertura de agenda**: `agenda_visible_from` controla cuándo la app puede mostrar día/hora/sede/responsables/bloques de eventos. Si está vacío, la agenda completa se abre al iniciar el camporee (`start_date`). Antes de esa fecha, el endpoint preview sólo expone listado, tipo, descripción/requisitos y puntos.
+- **Apertura de agenda**: `agenda_visible_from` controla cuándo la app puede mostrar día/hora/sede/bloques de eventos. Si está vacío, la agenda completa se abre al iniciar el camporee (`start_date`). Antes de esa fecha, el endpoint preview sólo expone listado, tipo, descripción/requisitos y puntos.
 
 ## Gaps y pendientes
 
-- **Sin logistica**: No hay modelo para gestionar logistica del camporee (comida, transporte, alojamiento)
+- **Sin logística de inventario/compras**: El roster permite asignar responsables de cocina/apoyo/administración a actividades, pero no gestiona inventario, compras, transporte o alojamiento.
 
 ## Estado de implementacion
 
@@ -98,6 +118,8 @@ Reglas vigentes:
 - Jueces `assistant` quedan como apoyo/auditoría y no envían puntaje oficial.
 - En admin, el roster de jueces se carga seleccionando usuarios desde un buscador con foto, nombre, rol y cargo; no se debe pedir al operador capturar UUIDs manualmente.
 - Sólo pueden agregarse al roster usuarios elegibles: mayores de 18 años, usuarios con rol global `pastor`, o usuarios con investidura activa en clase de Guías Mayores. La UI filtra candidatos y el backend vuelve a validar antes de crear el juez.
+- Las mutaciones de rúbricas, asignaciones de jueces y captura de puntaje oficial requieren que la inscripción de clubes esté cerrada (`club_registration_closed_at`), porque las secciones competitivas ya deben estar congeladas.
+- Reabrir inscripción de clubes sólo es válido si todavía no existen asignaciones de jueces ni resultados activos de scoring.
 - La app móvil muestra la bandeja de evaluaciones sólo para asignaciones `primary` activas del juez autenticado y envía un ítem por rúbrica.
 - `assistant-lf` y `director-lf` pueden registrar puntaje manual sin estar asignados como jueces.
 - `camporee_event_section_results` mantiene un único resultado activo por `camporee_event_id + club_section_id`; submissions anteriores quedan auditables.
