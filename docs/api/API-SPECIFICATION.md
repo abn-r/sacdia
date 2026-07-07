@@ -8,7 +8,7 @@
 
 **Estado**: ACTIVE
 **Versión**: 3.0.0 (contrato runtime unificado)
-**Fecha**: 21 de febrero de 2026
+**Fecha**: 6 de julio de 2026
 **Status**: ✅ Producción - Endpoints canónicos en ENDPOINTS-LIVE-REFERENCE.md
 
 **Nota**:
@@ -21,9 +21,10 @@
 
 Este documento integra:
 
-- ✅ **Product vision**: `docs/00-STEERING/product.md`
-- ✅ **Stack tecnológico**: `docs/00-STEERING/tech.md`
-- ✅ **Procesos de negocio**: `docs/02-PROCESSES.md`
+- ✅ **Base documental**: `docs/README.md`
+- ✅ **Stack tecnológico**: `docs/steering/tech.md`
+- ✅ **Estándares de código/datos**: `docs/steering/coding-standards.md`, `docs/steering/data-guidelines.md`
+- ✅ **Referencia live de endpoints**: `docs/api/ENDPOINTS-LIVE-REFERENCE.md`
 - ✅ **Sistema de roles**: `docs/history/source/api/restrucura-roles.md` (histórico)
 - ✅ **Queries SQL (histórico)**: `docs/history/source/api/queries-club-role-assignments.md`
 
@@ -42,15 +43,15 @@ Este documento integra:
 
 ### Stack Final
 
-- **Backend**: NestJS 11.x + TypeScript 5.x
-- **Database**: PostgreSQL 15.x (Supabase)
+- **Backend**: NestJS 11.x + Node.js 24.x + TypeScript 6.x
+- **Database**: PostgreSQL (Neon/Postgres como baseline operacional)
 - **ORM**: Prisma 7.x
-- **Auth**: Supabase Auth (JWT + OAuth)
-- **Storage**: Supabase Storage
+- **Auth**: Better Auth self-hosted + JWT HS256 emitido/validado por backend
+- **Storage**: Cloudflare R2 vía abstracción backend `FileStorageService`
 - **Push Notifications**: Firebase Cloud Messaging (FCM)
-- **Real-time**: Socket.io (WebSockets)
-- **Cache**: Redis (Upstash)
-- **Hosting**: Vercel Serverless
+- **Real-time**: No es contrato runtime global; no asumir WebSockets salvo doc específica del módulo
+- **Cache / colas**: Redis-compatible + BullMQ cuando el módulo lo requiera
+- **Hosting**: Backend NestJS standalone; no asumir runtime serverless para la API
 
 ### Versionado
 
@@ -69,7 +70,7 @@ Este documento integra:
 - Helmet (security headers)
 - @nestjs/throttler (rate limiting: 3/seg, 20/10seg, 100/min)
 - CORS configurado con whitelist
-- JWT validation con Supabase
+- JWT validation con `JwtAuthGuard`/Passport JWT y sesiones Better Auth
 - Secrets en variables de entorno
 - Validación con class-validator
 - Sanitización XSS (sanitize-html)
@@ -77,7 +78,7 @@ Este documento integra:
 
 **Fase 4 (Avanzado)** ✅ NUEVO:
 
-- **2FA con Supabase MFA** (TOTP)
+- **2FA TOTP** vía Better Auth / backend cuando aplique
 - **Token Blacklist** (revocación antes de expiración)
 - **Session Limits** (máximo 5 sesiones por usuario)
 - **IP Whitelist** para endpoints admin (soporte CIDR)
@@ -90,29 +91,27 @@ Este documento integra:
 
 ```
 src/
-├── modules/
-│   ├── auth/                    # Autenticación y autorización (JWT + OAuth)
-│   ├── users/                   # Gestión de usuarios y perfiles
-│   ├── legal-representatives/   # Representantes legales
-│   ├── clubs/                   # Gestión de clubes y secciones
-│   ├── classes/                 # Clases progresivas
-│   ├── honors/                  # Especialidades
-│   ├── activities/              # Actividades
-│   ├── finances/                # Finanzas
-│   ├── inventory/               # ✅ Inventarios por sección de club
-│   ├── camporees/               # ✅ Campamentos con validación de seguros
-│   ├── folders/                 # ✅ Portfolios/Carpetas de evidencias
-│   ├── certifications/          # ✅ Certificaciones para GMs investidos
-│   ├── notifications/           # ✅ Push notifications (FCM)
-│   ├── catalogs/                # Catálogos maestros
-│   └── files/                   # Gestión de archivos
+├── auth/                        # Autenticación SACDIA + Better Auth bridge
+├── better-auth/                 # Config/adapter Better Auth
+├── users/                       # Gestión de usuarios y perfiles
+├── clubs/                       # Gestión de clubes y secciones
+├── classes/                     # Clases progresivas
+├── honors/                      # Especialidades/honores
+├── activities/                  # Actividades
+├── finances/                    # Finanzas
+├── inventory/                   # Inventarios por sección de club
+├── camporees*/                  # Camporees, eventos, rúbricas y jueces
+├── annual-folders/              # Carpeta Anual de Evidencias
+├── resources/                   # Recursos y URLs firmadas R2
+├── notifications/               # Push notifications (FCM)
+├── catalogs/                    # Catálogos maestros
 ├── common/
-│   ├── guards/                  # SupabaseGuard, RolesGuard
+│   ├── guards/                  # JwtAuthGuard, PermissionsGuard, GlobalRolesGuard, ClubRolesGuard
 │   ├── decorators/              # @Roles(), @Permissions(), @ClubRole()
 │   ├── interceptors/            # Response transformation
 │   ├── filters/                 # Exception handling
 │   └── pipes/                   # Validation pipes
-└── prisma.service.ts
+└── prisma/prisma.service.ts
 ```
 
 ---
@@ -220,7 +219,7 @@ CREATE TABLE club_role_assignments (
 
 ```typescript
 @Controller("clubs/:clubId/activities")
-@UseGuards(SupabaseGuard, RolesGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 export class ActivitiesController {
   @Post()
   @Roles("director", "subdirector", "secretary")
@@ -248,7 +247,7 @@ export class ActivitiesController {
 
 ```sql
 CREATE TABLE users (
-  user_id UUID PRIMARY KEY,  -- Mismo UUID de Supabase Auth
+  user_id UUID PRIMARY KEY,  -- UUID interno sincronizado con usuario Better Auth
   email VARCHAR(255) UNIQUE NOT NULL,
   name VARCHAR(100),
   paternal_last_name VARCHAR(100),
@@ -267,7 +266,7 @@ CREATE TABLE users (
   local_field_id INTEGER REFERENCES local_fields(local_field_id),
 
   -- Avatar/imagen de perfil
-  user_image TEXT,  -- URL de Supabase Storage
+  user_image TEXT,  -- URL/clave de archivo gestionada por backend sobre Cloudflare R2
 
   -- Metadata
   active BOOLEAN DEFAULT true,

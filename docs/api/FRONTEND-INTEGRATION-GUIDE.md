@@ -1,14 +1,14 @@
-# Guía de Integración Frontend - SACDIA API v2.2
+# Guía de Integración Frontend - SACDIA API v3.0
 
 **Estado**: ACTIVE
 
-**Versión**: 2.2.0
-**Fecha**: 4 de febrero de 2026
+**Versión**: 3.0.0
+**Fecha**: 6 de julio de 2026
 **Audiencia**: Desarrolladores Frontend (Admin Panel & Mobile App)
 **Estado**: ACTIVE
 
 > [!IMPORTANT]
-> Esta guía es operativa y subordinada a `docs/README.md`, `docs/00-STEERING/*` y `docs/02-API/ENDPOINTS-LIVE-REFERENCE.md`.
+> Esta guía es operativa y subordinada a `docs/README.md`, `docs/steering/*` y `docs/api/ENDPOINTS-LIVE-REFERENCE.md`.
 > Los endpoints y contratos runtime se validan contra la referencia live; los ejemplos de esta guía no reemplazan esa fuente de verdad.
 
 ---
@@ -40,10 +40,10 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 ### Endpoints Totales
 
-- Verificar cobertura y disponibilidad actual en `docs/02-API/ENDPOINTS-LIVE-REFERENCE.md`
+- Verificar cobertura y disponibilidad actual en `docs/api/ENDPOINTS-LIVE-REFERENCE.md`
 - **Versionado**: `/api/v1/` (URI-based)
 - **Formato**: JSON
-- **Autenticación**: JWT (Supabase Auth)
+- **Autenticación**: Better Auth self-hosted + JWT HS256 emitido/validado por backend
 
 ---
 
@@ -102,62 +102,58 @@ Notas operativas:
 **Instalar dependencias**:
 
 ```bash
-pnpm add @supabase/supabase-js axios swr
+pnpm add axios @tanstack/react-query
 ```
 
-**Configurar cliente API**:
+> No usar SDKs externos de autenticación en el frontend. El admin consume la API SACDIA; la sesión vive en cookies HTTP-only gestionadas por rutas same-origin de Next.js y el backend valida JWT con `JwtAuthGuard`.
+
+**Cliente API vigente**:
 
 ```typescript
-// lib/api/client.ts
+// src/lib/api/client.ts
 import axios from 'axios';
-import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL?.trim()
+  ?? 'http://localhost:3000/api/v1';
 
 const apiClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  baseURL: API_BASE_URL,
+  withCredentials: true,
+  headers: { Accept: 'application/json' },
 });
 
-// Interceptor para agregar token automáticamente
+async function getClientAuthToken() {
+  const res = await fetch('/api/auth/token', { credentials: 'include' });
+  if (!res.ok) return null;
+  const body = await res.json();
+  return typeof body.token === 'string' ? body.token : null;
+}
+
 apiClient.interceptors.request.use(async (config) => {
-  const { data: { session } } = await supabase.auth.getSession();
-
-  if (session?.access_token) {
-    config.headers.Authorization = `Bearer ${session.access_token}`;
+  const token = await getClientAuthToken();
+  if (token && !config.headers.Authorization) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
-
   return config;
 });
 
-// Interceptor para manejo de errores
-apiClient.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    if (error.response?.status === 401) {
-      // Token expirado, refrescar
-      const { data: { session } } = await supabase.auth.refreshSession();
-
-      if (session) {
-        // Reintentar request con nuevo token
-        error.config.headers.Authorization = `Bearer ${session.access_token}`;
-        return apiClient.request(error.config);
-      } else {
-        // Sesión inválida, redirigir a login
-        window.location.href = '/login';
-      }
+apiClient.interceptors.response.use(undefined, async (error) => {
+  if (error.response?.status === 401) {
+    const refresh = await fetch('/api/auth/refresh', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { Accept: 'application/json' },
+    });
+    if (refresh.ok) {
+      const body = await refresh.json();
+      error.config.headers.Authorization = `Bearer ${body.token}`;
+      return apiClient.request(error.config);
     }
-
-    return Promise.reject(error);
   }
-);
+  throw error;
+});
 
-export { apiClient, supabase };
+export { apiClient };
 ```
 
 ---
@@ -169,62 +165,30 @@ export { apiClient, supabase };
 ```yaml
 dependencies:
   dio: ^5.4.0
-  supabase_flutter: ^2.3.0
   flutter_secure_storage: ^9.0.0
+  url_launcher: ^6.2.0
 ```
 
-**Configurar cliente API**:
+**Cliente API vigente**:
 
 ```dart
-// lib/core/network/api_client.dart
-import 'package:dio/dio.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+// lib/core/network/dio_client.dart
+final dio = Dio(BaseOptions(
+  baseUrl: AppConstants.baseUrl, // incluye /api/v1
+  headers: {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+  },
+));
 
-class ApiClient {
-  late final Dio _dio;
-  final SupabaseClient _supabase;
-
-  ApiClient(this._supabase) {
-    _dio = Dio(BaseOptions(
-      baseUrl: const String.fromEnvironment(
-        'API_URL',
-        defaultValue: '',
-      ),
-      connectTimeout: const Duration(seconds: 30),
-      receiveTimeout: const Duration(seconds: 30),
-      headers: {'Content-Type': 'application/json'},
-    ));
-
-    // Interceptor para token
-    _dio.interceptors.add(InterceptorsWrapper(
-      onRequest: (options, handler) async {
-        final session = _supabase.auth.currentSession;
-        if (session != null) {
-          options.headers['Authorization'] = 'Bearer ${session.accessToken}';
-        }
-        return handler.next(options);
-      },
-      onError: (error, handler) async {
-        if (error.response?.statusCode == 401) {
-          // Token expirado, refrescar
-          final session = await _supabase.auth.refreshSession();
-          if (session.session != null) {
-            // Reintentar request
-            final opts = error.requestOptions;
-            opts.headers['Authorization'] =
-              'Bearer ${session.session!.accessToken}';
-            final response = await _dio.fetch(opts);
-            return handler.resolve(response);
-          }
-        }
-        return handler.next(error);
-      },
-    ));
-  }
-
-  Dio get dio => _dio;
-}
+dio.interceptors.addAll([
+  LoggerInterceptor(),
+  AuthInterceptor(dio: dio), // adjunta Bearer y refresca en 401
+  ErrorInterceptor(),
+]);
 ```
+
+El token se lee desde `FlutterSecureStorage` (`AppConstants.tokenKey`) y se envía como `Authorization: Bearer <token>`. El refresh reactivo usa `POST /auth/refresh` y reintenta la request original una sola vez.
 
 ---
 
@@ -235,145 +199,82 @@ class ApiClient {
 **Next.js**:
 
 ```typescript
-// app/login/actions.ts
+// src/lib/auth/actions.ts
 'use server';
 
-import { supabase } from '@/lib/api/client';
+import { apiRequest } from '@/lib/api/client';
+import { setAuthCookies } from '@/lib/auth/session';
 
 export async function loginAction(email: string, password: string) {
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
+  const response = await apiRequest('/auth/login', {
+    method: 'POST',
+    body: { email, password },
   });
 
-  if (error) {
-    return { error: error.message };
-  }
-
-  return { user: data.user, session: data.session };
+  await setAuthCookies(response.data);
+  return response.data.user;
 }
 ```
 
 **Flutter**:
 
 ```dart
-// lib/features/auth/data/datasources/auth_remote_datasource.dart
-class AuthRemoteDataSource {
-  final SupabaseClient supabase;
+Future<UserModel> login(String email, String password) async {
+  final response = await dio.post('/auth/login', data: {
+    'email': email,
+    'password': password,
+  });
 
-  Future<Session> login(String email, String password) async {
-    final response = await supabase.auth.signInWithPassword(
-      email: email,
-      password: password,
-    );
+  final data = response.data['data'] as Map<String, dynamic>;
+  await secureStorage.write(AppConstants.tokenKey, data['accessToken']);
+  await secureStorage.write(AppConstants.refreshTokenKey, data['refreshToken']);
 
-    if (response.session == null) {
-      throw ServerException('Login failed');
-    }
-
-    return response.session!;
-  }
+  return UserModel.fromJson(data['user'] as Map<String, dynamic>);
 }
 ```
 
 ---
 
-### 2. OAuth con Google
+### 2. OAuth con Google/Apple
 
-**Next.js**:
+El proveedor lo inicia el backend sobre Better Auth. El frontend no llama SDKs de autenticación externos.
 
-```typescript
-// app/login/oauth-buttons.tsx
-'use client';
+**Flujo móvil**:
 
-import { supabase } from '@/lib/api/client';
-
-export function GoogleLoginButton() {
-  const handleGoogleLogin = async () => {
-    const { data, error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
-    });
-
-    if (error) {
-      console.error('OAuth error:', error);
-    }
-  };
-
-  return (
-    <button onClick={handleGoogleLogin}>
-      Sign in with Google
-    </button>
-  );
-}
-```
-
-**Flutter**:
+1. `GET /auth/oauth/{provider}` devuelve una URL de autorización.
+2. La app abre esa URL con `url_launcher`.
+3. Better Auth redirige al deep link `io.sacdia.app://auth/callback?session_token=...&provider=...`.
+4. La app llama `POST /auth/oauth/callback` con `{ session_token, provider }`.
+5. El backend devuelve el JWT interno de SACDIA y la app lo persiste en secure storage.
 
 ```dart
-Future<void> signInWithGoogle() async {
-  final response = await supabase.auth.signInWithOAuth(
-    OAuthProvider.google,
-    redirectTo: 'com.sacdia.app://auth/callback',
-  );
+final urlResponse = await dio.get('/auth/oauth/google');
+await launchUrl(Uri.parse(urlResponse.data['data']?['url'] ?? urlResponse.data['url']));
 
-  if (!response) {
-    throw ServerException('OAuth failed');
-  }
-}
+final callback = await dio.post('/auth/oauth/callback', data: {
+  'session_token': sessionToken,
+  'provider': 'google',
+});
+
+final data = callback.data['data'] as Map<String, dynamic>;
+await secureStorage.write(AppConstants.tokenKey, data['accessToken']);
 ```
 
 ---
 
 ### 3. Verificar Autenticación
 
-**Next.js Middleware**:
+**Next.js**:
 
-```typescript
-// middleware.ts
-import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs';
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+- Server components y server actions deben leer cookies HTTP-only con helpers de `src/lib/auth/session.ts`.
+- Client components consumen `/api/auth/me` y `/api/auth/token` same-origin; no deben acceder directamente a cookies sensibles.
+- Las rutas protegidas deben redirigir a `/login` cuando no hay sesión válida o el usuario no tiene rol admin.
 
-export async function middleware(req: NextRequest) {
-  const res = NextResponse.next();
-  const supabase = createMiddlewareClient({ req, res });
+**Flutter**:
 
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-
-  // Proteger rutas
-  if (!session && req.nextUrl.pathname.startsWith('/dashboard')) {
-    return NextResponse.redirect(new URL('/login', req.url));
-  }
-
-  return res;
-}
-
-export const config = {
-  matcher: ['/dashboard/:path*', '/clubs/:path*'],
-};
-```
-
-**Flutter Route Guard**:
-
-```dart
-class AuthGuard extends AutoRouteGuard {
-  final SupabaseClient supabase;
-
-  @override
-  void onNavigation(NavigationResolver resolver, StackRouter router) {
-    if (supabase.auth.currentSession != null) {
-      resolver.next();
-    } else {
-      router.push(const LoginRoute());
-    }
-  }
-}
-```
+- `AuthNotifier` valida el estado inicial con `/auth/me`.
+- `AuthInterceptor` adjunta Bearer en cada request autenticada.
+- Un 401 fuera de endpoints públicos dispara refresh; si falla, limpia tokens y expira la sesión local.
 
 ---
 
@@ -381,55 +282,51 @@ class AuthGuard extends AutoRouteGuard {
 
 ### Pattern Recomendado: API Service Layer
 
-**Next.js** (con SWR):
+**Next.js** (con TanStack Query):
 
 ```typescript
-// lib/api/services/clubs.service.ts
+// src/lib/api/services/clubs.service.ts
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '../client';
-import useSWR from 'swr';
 
 export interface Club {
   club_id: number;
   name: string;
   local_field_id: number;
-  club_types: {
-    club_type_id: number;
-    name: string;
-  };
+  club_types?: { club_type_id: number; name: string };
   active: boolean;
 }
 
-// Fetcher genérico
-const fetcher = (url: string) => apiClient.get(url).then((res) => res.data);
-
-// Hook para listar clubs
-export function useClubs() {
-  const { data, error, isLoading, mutate } = useSWR<{
-    status: string;
-    data: Club[];
-  }>('/clubs', fetcher);
-
-  return {
-    clubs: data?.data,
-    isLoading,
-    isError: error,
-    mutate,
-  };
+async function fetchClubs() {
+  const response = await apiClient.get('/clubs');
+  return response.data.data as Club[];
 }
 
-// Función para crear club
+export function useClubs() {
+  return useQuery({
+    queryKey: ['clubs'],
+    queryFn: fetchClubs,
+  });
+}
+
 export async function createClub(clubData: Partial<Club>) {
   const response = await apiClient.post('/clubs', clubData);
   return response.data;
 }
 
-// Función para actualizar club
+export function useCreateClub() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: createClub,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['clubs'] }),
+  });
+}
+
 export async function updateClub(clubId: number, clubData: Partial<Club>) {
   const response = await apiClient.patch(`/clubs/${clubId}`, clubData);
   return response.data;
 }
 
-// Función para eliminar club
 export async function deleteClub(clubId: number) {
   const response = await apiClient.delete(`/clubs/${clubId}`);
   return response.data;
@@ -788,7 +685,10 @@ export function useClubActivities(clubId: number, filters?: {
   const query = new URLSearchParams(filters as any).toString();
   const url = `/clubs/${clubId}/activities${query ? `?${query}` : ''}`;
 
-  return useSWR(url, fetcher);
+  return useQuery({
+    queryKey: ['club-activities', clubId, filters],
+    queryFn: async () => (await apiClient.get(url)).data,
+  });
 }
 
 // Uso
@@ -870,10 +770,15 @@ export function useFinancialSummary(
     clubTypeId: '2', // Conquistadores
   });
 
-  return useSWR(
-    `/clubs/${clubId}/finances/summary?${params}`,
-    fetcher
-  );
+  return useQuery({
+    queryKey: ['financial-summary', clubId, year, month],
+    queryFn: async () => {
+      const response = await apiClient.get(
+        `/clubs/${clubId}/finances/summary?${params}`,
+      );
+      return response.data;
+    },
+  });
 }
 
 // Uso en componente
@@ -995,20 +900,19 @@ Future<Enrollment> enrollInHonor({
 
 ### 1. Cache y Revalidación
 
-**Next.js con SWR**:
+**Next.js con TanStack Query**:
 
 ```typescript
-// Revalidar automáticamente cada 5 minutos
-const { data } = useSWR('/clubs', fetcher, {
-  refreshInterval: 300000,
-  revalidateOnFocus: true,
-  revalidateOnReconnect: true,
+const { data } = useQuery({
+  queryKey: ['clubs'],
+  queryFn: fetchClubs,
+  refetchInterval: 300000,
+  refetchOnWindowFocus: true,
+  refetchOnReconnect: true,
 });
 
-// Revalidar manualmente
-const { mutate } = useSWR('/clubs', fetcher);
 await createClub(newClub);
-mutate(); // Revalidar inmediatamente
+queryClient.invalidateQueries({ queryKey: ['clubs'] });
 ```
 
 **Flutter con Riverpod**:
@@ -1037,26 +941,24 @@ ref.invalidate(clubsProvider);
 **Next.js**:
 
 ```typescript
-async function deleteActivity(activityId: number) {
-  const { data, mutate } = useSWR('/activities', fetcher);
-
-  // Optimistic update
-  mutate(
-    {
-      ...data,
-      data: data.data.filter((a: any) => a.activity_id !== activityId),
-    },
-    false // No revalidar aún
-  );
-
-  try {
-    await apiClient.delete(`/activities/${activityId}`);
-    mutate(); // Revalidar para confirmar
-  } catch (error) {
-    mutate(); // Revertir en caso de error
-    throw error;
-  }
-}
+const deleteActivityMutation = useMutation({
+  mutationFn: (activityId: number) => apiClient.delete(`/activities/${activityId}`),
+  onMutate: async (activityId) => {
+    await queryClient.cancelQueries({ queryKey: ['activities'] });
+    const previous = queryClient.getQueryData(['activities']);
+    queryClient.setQueryData(['activities'], (current: any) => ({
+      ...current,
+      data: current?.data?.filter((a: any) => a.activity_id !== activityId) ?? [],
+    }));
+    return { previous };
+  },
+  onError: (_error, _activityId, context) => {
+    queryClient.setQueryData(['activities'], context?.previous);
+  },
+  onSettled: () => {
+    queryClient.invalidateQueries({ queryKey: ['activities'] });
+  },
+});
 ```
 
 ---
@@ -1067,20 +969,22 @@ async function deleteActivity(activityId: number) {
 
 ```typescript
 export function useActivitiesPaginated(clubId: number, page = 1, limit = 20) {
-  const url = `/clubs/${clubId}/activities?page=${page}&limit=${limit}`;
-  const { data, error, isLoading } = useSWR(url, fetcher);
-
-  return {
-    activities: data?.data,
-    meta: data?.meta,
-    isLoading,
-    isError: error,
-  };
+  return useQuery({
+    queryKey: ['club-activities', clubId, page, limit],
+    queryFn: async () => {
+      const response = await apiClient.get(
+        `/clubs/${clubId}/activities?page=${page}&limit=${limit}`,
+      );
+      return response.data;
+    },
+  });
 }
 
 // Uso
 const [page, setPage] = useState(1);
-const { activities, meta } = useActivitiesPaginated(5, page, 20);
+const { data } = useActivitiesPaginated(5, page, 20);
+const activities = data?.data;
+const meta = data?.meta;
 
 // meta.total, meta.totalPages, meta.page, meta.limit
 ```
@@ -1104,58 +1008,76 @@ class ActivitiesPaginationNotifier extends StateNotifier<AsyncValue<PaginatedAct
 
 ### 4. Upload de Archivos
 
-**Next.js**:
+El baseline vigente es Cloudflare R2 mediado por backend. El frontend no debe subir a storage externo directo ni construir URLs públicas manualmente.
+
+Patrones aceptados:
+
+1. **Multipart directo al backend** cuando el endpoint del dominio lo define.
+2. **Presigned PUT a R2** cuando el módulo expone un flujo de URL firmada, por ejemplo recursos:
+   - `POST /resources/upload-url`
+   - `PUT upload_url` directamente a R2
+   - `POST /resources/from-uploaded` para registrar el recurso ya subido
+
+**Next.js / navegador**:
 
 ```typescript
-export async function uploadActivityPhoto(
-  activityId: number,
-  file: File
-) {
-  // 1. Upload a Supabase Storage
-  const fileName = `${activityId}_${Date.now()}_${file.name}`;
-  const { data: uploadData, error: uploadError } = await supabase
-    .storage
-    .from('activities')
-    .upload(fileName, file);
-
-  if (uploadError) throw uploadError;
-
-  // 2. Get public URL
-  const { data: { publicUrl } } = supabase
-    .storage
-    .from('activities')
-    .getPublicUrl(fileName);
-
-  // 3. Update activity with photo URL
-  await apiClient.patch(`/activities/${activityId}`, {
-    photos: [publicUrl], // O agregar a array existente
+async function uploadResource(file: File) {
+  const signed = await apiClient.post('/resources/upload-url', {
+    resource_type: 'document',
+    scope_level: 'system',
+    file_name: file.name,
+    mime_type: file.type,
+    file_size: file.size,
   });
 
-  return publicUrl;
+  const { upload_url, file_key } = signed.data.data ?? signed.data;
+
+  await fetch(upload_url, {
+    method: 'PUT',
+    headers: { 'Content-Type': file.type },
+    body: file,
+  });
+
+  return apiClient.post('/resources/from-uploaded', {
+    resource_type: 'document',
+    scope_level: 'system',
+    title: file.name,
+    file_name: file.name,
+    mime_type: file.type,
+    file_size: file.size,
+    file_key,
+  });
 }
 ```
 
 **Flutter**:
 
 ```dart
-Future<String> uploadActivityPhoto(int activityId, File file) async {
-  // 1. Upload to Supabase Storage
-  final fileName = '${activityId}_${DateTime.now().millisecondsSinceEpoch}_${file.path.split('/').last}';
-  final response = await supabase.storage
-      .from('activities')
-      .upload(fileName, file);
-
-  // 2. Get public URL
-  final publicUrl = supabase.storage
-      .from('activities')
-      .getPublicUrl(fileName);
-
-  // 3. Update activity
-  await dio.patch('/activities/$activityId', data: {
-    'photos': [publicUrl],
+Future<void> uploadResource(File file) async {
+  final signed = await dio.post('/resources/upload-url', data: {
+    'resource_type': 'document',
+    'scope_level': 'system',
+    'file_name': path.basename(file.path),
+    'mime_type': 'application/pdf',
+    'file_size': await file.length(),
   });
 
-  return publicUrl;
+  final data = signed.data['data'] ?? signed.data;
+  await Dio().put(
+    data['upload_url'] as String,
+    data: file.openRead(),
+    options: Options(headers: {'Content-Type': 'application/pdf'}),
+  );
+
+  await dio.post('/resources/from-uploaded', data: {
+    'resource_type': 'document',
+    'scope_level': 'system',
+    'title': path.basename(file.path),
+    'file_name': path.basename(file.path),
+    'mime_type': 'application/pdf',
+    'file_size': await file.length(),
+    'file_key': data['file_key'],
+  });
 }
 ```
 
@@ -1163,38 +1085,36 @@ Future<String> uploadActivityPhoto(int activityId, File file) async {
 
 ## Testing
 
-### Next.js Tests (Jest + React Testing Library)
+### Next.js Tests (Vitest + React Testing Library)
 
 ```typescript
-// __tests__/api/clubs.service.test.ts
+// src/lib/api/clubs.test.ts
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { renderHook, waitFor } from '@testing-library/react';
-import { SWRConfig } from 'swr';
-import { useClubs, createClub } from '@/lib/api/services/clubs.service';
+import { describe, expect, it, vi } from 'vitest';
 import { apiClient } from '@/lib/api/client';
+import { createClub, useClubs } from '@/lib/api/services/clubs.service';
 
-jest.mock('@/lib/api/client');
+vi.mock('@/lib/api/client');
 
 describe('Clubs Service', () => {
-  it('should fetch clubs', async () => {
+  it('fetches clubs', async () => {
     const mockClubs = [{ club_id: 1, name: 'Test Club' }];
-    (apiClient.get as jest.Mock).mockResolvedValue({
-      data: { data: mockClubs },
-    });
+    vi.mocked(apiClient.get).mockResolvedValue({ data: { data: mockClubs } });
 
-    const wrapper = ({ children }: any) => (
-      <SWRConfig value={{ provider: () => new Map() }}>
-        {children}
-      </SWRConfig>
+    const queryClient = new QueryClient();
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
     );
 
     const { result } = renderHook(() => useClubs(), { wrapper });
 
-    await waitFor(() => expect(result.current.clubs).toEqual(mockClubs));
+    await waitFor(() => expect(result.current.data).toEqual(mockClubs));
   });
 
-  it('should create club', async () => {
+  it('creates club', async () => {
     const newClub = { name: 'New Club', local_field_id: 1 };
-    (apiClient.post as jest.Mock).mockResolvedValue({
+    vi.mocked(apiClient.post).mockResolvedValue({
       data: { data: { club_id: 1, ...newClub } },
     });
 
@@ -1275,15 +1195,15 @@ void main() {
 
 ### Documentación Completa
 
-- **API Specification**: `/docs/02-API/API-SPECIFICATION.md`
-- **Endpoints Reference**: `/docs/02-API/ENDPOINTS-REFERENCE.md`
-- **Walkthroughs**: `/docs/01-FEATURES/*/walkthrough-*.md`
-- **Security Guide**: `/docs/02-API/SECURITY-GUIDE.md`
+- **API Specification**: `/docs/api/API-SPECIFICATION.md`
+- **Endpoints Reference**: `/docs/api/ENDPOINTS-LIVE-REFERENCE.md`
+- **Walkthroughs**: `/docs/features/*`
+- **Security Guide**: `/docs/api/SECURITY-GUIDE.md`
 
 ### Collections API
 
-- **Postman**: Importar desde `/postman/sacdia-api-v2.2.json` (próximamente)
-- **Insomnia**: Importar desde `/insomnia/sacdia-api-v2.2.json` (próximamente)
+- **Postman**: Importar desde `/postman/sacdia-api-v3.0.json` cuando exista colección publicada.
+- **Insomnia**: Importar desde `/insomnia/sacdia-api-v3.0.json` cuando exista colección publicada.
 
 ### Soporte
 
@@ -1293,6 +1213,6 @@ void main() {
 ---
 
 **Generado**: 4 de febrero de 2026
-**Revisión editorial**: 2026-03-09
-**Versión**: 2.2.0
-**Estado**: ACTIVE - validar runtime actual contra `docs/02-API/ENDPOINTS-LIVE-REFERENCE.md`
+**Revisión editorial**: 2026-07-06
+**Versión**: 3.0.0
+**Estado**: ACTIVE - validar runtime actual contra `docs/api/ENDPOINTS-LIVE-REFERENCE.md`

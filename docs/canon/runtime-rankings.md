@@ -8,6 +8,7 @@
 <!-- VERIFICADO contra código 2026-04-22: schema Prisma, rankings.service.ts, controllers de rankings/award-categories y admin UI cruzados con implementación real. -->
 <!-- VERIFICADO 8.4-C 2026-04-28: schema Prisma con columnas de componentes + composite, rankings.service.ts extendido con score-calculators, controllers de rankings/award-categories/ranking-weights y admin UI. 8.4-C shipped. -->
 <!-- VERIFICADO 8.4-A 2026-04-29: modelos enrollment_rankings, section_rankings, enrollment_ranking_weights — field names, indexes y awarded_category_id confirmados contra schema.prisma y migrations 20260429000000–20260429000003. -->
+<!-- VERIFICADO 2026-07-06: camporee_score_pct ya no usa asistencia/registro. Se calcula desde resultados oficiales de camporee_event_section_results sobre camporee_events.max_points en score-calculators/camporee-score.ts y member-rankings/services/camporee-score.service.ts. -->
 
 ---
 
@@ -61,7 +62,7 @@ Fuente agregada: `club_annual_rankings` (`schema.prisma:2026-2051`).
 | `calculated_at` | `timestamptz` | |
 | `folder_score_pct` | `float` | DEFAULT 0; porcentaje de puntaje de carpeta (0-100) |
 | `finance_score_pct` | `float` | DEFAULT 0; porcentaje de cierre financiero mensual (0-100) |
-| `camporee_score_pct` | `float` | DEFAULT 0; porcentaje de asistencia a camporees (0-100) |
+| `camporee_score_pct` | `float` | DEFAULT 0; porcentaje de resultados oficiales de eventos de camporee puntuables (0-100) |
 | `evidence_score_pct` | `float` | DEFAULT 0; porcentaje de evidencias validadas (0-100) |
 | `composite_score_pct` | `float` | DEFAULT 0; promedio ponderado de los 4 componentes (0-100) |
 | `composite_calculated_at` | `timestamptz?` | timestamp de la última actualización del composite |
@@ -265,7 +266,7 @@ Excepción canónica: `annual_evidence_folder` usa los puntos reales snapshot de
 | `institutional_data_completeness` | `club_enrollments` + `club_sections` | campos institucionales completos / 10 campos esperados: dirección, horario, director, secretaría, tesorería, nombre, teléfono, email, coordenadas y meta de almas |
 | `activities_registered` | `activity_instances` + `activities` | actividades activas de la sección en el año / `ranking.activities_registered_target` (default 12), con tope 100 |
 | `attendance_participation` | `weekly_records` + `unit_members` | promedio de `weekly_records.attendance` de miembros activos de la sección en los años calendario cubiertos por el año eclesiástico |
-| `camporee_events` | `camporee_clubs` + camporees locales/unión | camporees en alcance con asistencia aprobada / camporees disponibles |
+| `camporee_events` | `camporee_events` + `camporee_event_section_results` | puntos oficiales activos otorgados a la sección / puntos máximos de eventos puntuables locales/unión en alcance |
 | `class_investiture_progress` | `enrollments` | clases activas con `investiture_status IN ('APPROVED', 'INVESTIDO')` / clases activas de miembros de la sección |
 | `sacdia_operational_usage` | registros operativos útiles | usuarios activos de la sección con actividad operativa útil / usuarios activos de la sección; no usa logins/sesiones como métrica de vanidad |
 
@@ -281,7 +282,7 @@ El composite ranking combina cuatro criterios institucionales en un único índi
 |----------|-------|-------------|
 | **Carpeta Anual de Evidencias** | `folder_score_pct` | Porcentaje de puntos obtenidos sobre el total de la Carpeta Anual de Evidencias evaluada |
 | **Finanzas** | `finance_score_pct` | Proporción de meses con cierre financiero entregado antes del `ranking.finance_closing_deadline_day` (default: día 5) |
-| **Camporee** | `camporee_score_pct` | Proporción de camporees disponibles en el año (local + unión) a los que el club asistió con estado aprobado |
+| **Camporee** | `camporee_score_pct` | Porcentaje de puntos oficiales obtenidos por la sección en eventos de camporee puntuables activos: `sum(camporee_event_section_results.total_awarded_points) / sum(camporee_events.max_points)` |
 | **Evidencias** | `evidence_score_pct` | Proporción de evidencias de carpeta en estado `VALIDATED` sobre el total de evaluadas (pending excluidos) |
 
 ### Pesos
@@ -341,7 +342,7 @@ Tres tablas nuevas creadas por la migración `20260429000000_enrollment_rankings
 | `ecclesiastical_year_id` | `integer` NOT NULL | FK → `ecclesiastical_years(year_id)` |
 | `class_score_pct` | `NUMERIC(5,2)` | señal clases, NULL si sin progreso |
 | `investiture_score_pct` | `NUMERIC(5,2)` | señal investidura binaria, NULL si sin enrollment |
-| `camporee_score_pct` | `NUMERIC(5,2)` | señal camporees, NULL si sin camporees del año |
+| `camporee_score_pct` | `NUMERIC(5,2)` | señal de resultados oficiales de eventos camporee, NULL si no hay eventos puntuables del año |
 | `composite_score_pct` | `NUMERIC(5,2)` | puntaje compuesto final ∈ [0, 100] |
 | `rank_position` | `integer?` | asignado vía DENSE_RANK, NULLS LAST |
 | `awarded_category_id` | `uuid?` | FK → `award_categories`, nullable |
@@ -377,7 +378,7 @@ Uniqueness: `UNIQUE(club_section_id, ecclesiastical_year_id)`.
 | `ecclesiastical_year_id` | `integer?` | FK → `ecclesiastical_years`, NULL = fila global |
 | `class_pct` | `DECIMAL(5,2)` | peso señal clases |
 | `investiture_pct` | `DECIMAL(5,2)` | peso señal investidura |
-| `camporee_pct` | `DECIMAL(5,2)` | peso señal camporees |
+| `camporee_pct` | `DECIMAL(5,2)` | peso señal de resultados oficiales de eventos camporee |
 | `is_default` | `boolean` | true solo en la fila global única |
 
 Uniqueness: `UNIQUE(club_type_id, ecclesiastical_year_id)`.
@@ -394,7 +395,7 @@ Orquestador: `MemberRankingsRecalculateService.recalculateAll(yearId?)` en `sacd
 
 - `ClassScoreService` — lee `class_module_progress` filtrando por `enrollment.ecclesiastical_year_id`. Score = (módulos activos con score IS NOT NULL / total módulos activos) × 100. NULL si sin progreso.
 - `InvestitureScoreService` — lee `enrollments.investiture_status`. `INVESTIDO` → 100; `IN_PROGRESS` → 0; sin enrollment → NULL.
-- `CamporeeScoreService` — lee `camporee_members` filtrado por `user_id` y camporees del año vía `local_camporees.ecclesiastical_year`/`union_camporees.ecclesiastical_year`. Score = (camporees aprobados / total camporees del año) × 100. NULL si sin camporees del año.
+- `CamporeeScoreService` — resuelve la sección del enrollment y su jerarquía institucional; luego lee eventos puntuables activos de camporees locales/unión del año y sus resultados en `camporee_event_section_results`. Score = `sum(total_awarded_points) / sum(camporee_events.max_points) × 100`. NULL si no existen eventos puntuables del año. Las filas de asistencia/registro (`camporee_members`, `camporee_clubs`) no otorgan puntos de ranking.
 
 **Composite y sección**:
 
@@ -460,7 +461,7 @@ peso_redistribuido_i = peso_i + (peso_nulls × peso_i / sum(pesos_presentes))
 
 Si **todas** las señales son NULL → `composite_score_pct = NULL`.
 
-Esto evita penalizar a miembros cuya falta de señal se debe a datos no disponibles (sin camporees del año, sin clases abiertas) en lugar de inactividad real.
+Esto evita penalizar a miembros cuya falta de señal se debe a datos no disponibles (sin eventos camporee puntuables del año, sin clases abiertas) en lugar de inactividad real.
 
 Para el algoritmo exacto, ver `MemberCompositeScoreService` en `sacdia-backend/src/rankings/member-rankings/services/`.
 
