@@ -65,6 +65,7 @@ La gestion de sesiones permite listar sesiones activas y cerrar sesiones individ
 - `roles` — Catalogo de roles
 - `permissions` — Catalogo de permisos
 - `user_fcm_tokens` — Tokens FCM para push notifications
+- `admin_auth_sessions` — Metadata 1:1 de sesión administrativa definida en la rama backend; no forma parte del runtime de referencia
 
 ### Contrato de tokens
 - Login y refresh responden en camelCase: `accessToken`, `refreshToken`, `expiresAt`, `tokenType`
@@ -110,8 +111,9 @@ La gestion de sesiones permite listar sesiones activas y cerrar sesiones individ
 - Antes de crear sesión, firmar JWT o consultar TOTP, `validateCredentials` valida las credenciales sin efectos laterales. Luego, `AdminEligibilityService` ejecuta una consulta fresca y fail-closed sobre `users`: solo `active === true && access_panel === true` permite continuar; `access_panel = null`, usuario ausente o cualquier otro estado niegan el acceso.
 - El login no contará roles GLOBAL ni asignaciones de club para decidir acceso a la superficie. Después de autenticar, cada operación seguirá exigiendo permiso RBAC y scope backend.
 - La denegación de eligibility usará `AUTH_PANEL_ACCESS_DENIED` con HTTP 403, sin revelar qué bandera falló. Los errores de base de datos se propagarán y nunca habilitarán acceso.
-- `validateCredentials` y el service interno `AdminEligibilityService` están implementados en la rama backend `codex/sacdia-admin-ios-auth`; este último quedó registrado en el commit `37f23b4`. Ese trabajo todavía no está integrado al runtime de referencia.
-- Aún no existe un endpoint público bajo `/api/v1/auth/admin/*`. El controller se agregará únicamente cuando la sesión admin y el challenge pre-auth MFA estén finalizados.
+- En la rama backend `codex/sacdia-admin-ios-auth`, hasta `d41ef77`, están implementados `validateCredentials`, eligibility, metadata/transacción de sesión, `AdminSessionService`, JWT admin HS256 de 15 minutos y validación stateful por request. Los claims admin canónicos incluyen `aud='sacdia-admin'`, `surface='admin'`, `sid`, `jti` y `aal`; la sesión interna usa ventana de 7 días y expiración absoluta de 30 días.
+- En esa rama, la revocación se valida contra base de datos en cada request, el parser Bearer de Passport se comparte con la comprobación de blacklist y una caída de la autoridad de sesión falla segura con HTTP 503. Los providers administrativos permanecen privados en `AuthModule`.
+- No existe endpoint `/api/v1/auth/admin/*`, la migración no está desplegada ni verificada, y refresh rotation, MFA pre-auth, controller y OAuth siguen pendientes. Ningún endpoint nuevo está publicado y el contrato de tokens legacy permanece intacto.
 
 ## Gaps y pendientes
 

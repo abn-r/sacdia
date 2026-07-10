@@ -159,6 +159,20 @@ DELETE /v1/auth/mfa/disable
 - `POST /auth/refresh` revisa esa assurance para usuarios con TOTP: si existe y no expiró, emite `aal2`; si falta, vuelve a emitir `aal1` con `mfa_pending: true`.
 - `POST /auth/update-password` requiere `{ currentPassword, password }`, JWT `aal2` para usuarios MFA, revoca todas las sesiones BA del usuario y blacklistea JWTs por 8h.
 
+### Sesión administrativa nativa (implementación privada en rama)
+
+La rama backend `codex/sacdia-admin-ios-auth`, hasta `d41ef77`, implementa servicios privados para una sesión administrativa stateful sobre Better Auth:
+
+- `validateCredentials` comprueba email y contraseña sin crear sesión ni JWT y conserva una comparación bcrypt también en caminos inválidos para reducir diferencias de timing.
+- `AdminEligibilityService` consulta `users` de forma fresca y solo admite `active === true && access_panel === true`; cualquier otro estado se deniega con `AUTH_PANEL_ACCESS_DENIED`.
+- `AdminSessionService` crea metadata 1:1 en `admin_auth_sessions` y emite un JWT HS256 de 15 minutos con `aud='sacdia-admin'`, `surface='admin'` y claims canónicos sin espacios periféricos `sid`, `jti`, `sub` y `aal`. La sesión interna dura 7 días y tiene una expiración absoluta de 30 días.
+- Cada request admin valida en base de datos que sesión, usuario, assurance y expiraciones sigan vigentes. La revocación de una sesión o de todas las sesiones del usuario es inmediata; este JWT NO es stateless.
+- `JwtStrategy` mantiene compatibilidad con JWT legacy cuando `surface` está ausente. Para tokens admin exige el contrato completo, reutiliza el parser Bearer de Passport tanto para autenticación como para blacklist y falla cerrado con HTTP 503 (`AUTH_SESSION_AUTHORITY_UNAVAILABLE`) si la autoridad de sesión no está disponible, en vez de convertir la caída en credenciales válidas o en un 401 ambiguo.
+- `AdminEligibilityService`, `AdminSessionRepository` y `AdminSessionService` están registrados como providers internos de `AuthModule`: no se exportan ni están conectados a un controller.
+
+> [!IMPORTANT]
+> No existe endpoint `/api/v1/auth/admin/*`, la migración no está desplegada ni verificada, y refresh rotation, MFA pre-auth, controller y OAuth siguen pendientes. Esta implementación de rama no modifica el contrato legacy ni la referencia de endpoints vigente.
+
 ### Sessions Endpoints
 
 ```typescript

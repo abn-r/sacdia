@@ -233,6 +233,14 @@ Referencia humana concisa del schema Prisma vigente.
 - Los modelos Prisma vigentes son `session`, `account` y `verification`.
 - En base fisica se mapean a `sessions`, `accounts` y `verifications` via `@@map`.
 
+### `admin_auth_sessions` (rama backend)
+
+- Extiende `sessions` con una relación opcional 1:1: `session_id` es PK/FK y usa borrado en cascada.
+- Mantiene `surface='admin'`, `client_type='ios'`, `family_id`, assurance `aal1|aal2`, expiración absoluta y datos de revocación; el DDL aplica los checks correspondientes.
+- `active_assignment_id` es opcional, referencia `club_role_assignments` y usa `ON DELETE SET NULL`.
+- Incluye índices para `family_id`, `revoked_at` y `active_assignment_id`.
+- La migración existe únicamente en la rama backend `codex/sacdia-admin-ios-auth`; su despliegue no fue verificado y la tabla todavía no forma parte del runtime de referencia.
+
 ### `folder_templates`
 
 - Ownership polimorfico: incluye `owner_union_id` y `owner_local_field_id`, ambos nullable con FK a `unions(union_id)` y `local_fields(local_field_id)` respectivamente (`ON DELETE RESTRICT`).
@@ -399,6 +407,7 @@ Define el presupuesto de puntos por componente dentro de un eje anual:
 
 - `roles`, `permissions`, `role_permissions`, `users_roles`, `users_permissions`, `club_role_assignments`, `role_slot_limits`, `role_assignment_requests`
 - `session`, `account`, `verification`, `users_pr`, `notification_preferences`, `notification_logs`, `user_fcm_tokens`
+- `admin_auth_sessions` (definida en rama backend; no publicada en el runtime de referencia)
 
 ### Usuarios y salud
 
@@ -488,6 +497,7 @@ Define el presupuesto de puntos por componente dentro de un eje anual:
 
 ## Migraciones recientes
 
+- `20260710130000_admin_auth_sessions` - creada en la rama backend para metadata administrativa 1:1 sobre `sessions`, assurance, expiración absoluta y revocación; despliegue no verificado.
 - `20260415100000_folder_templates_polymorphic_owner` - añade owners polimorficos (`owner_union_id`, `owner_local_field_id`), dropea el unique compuesto legacy y establece el CHECK/indices parciales de exactamente-un-owner.
 - `20260415100100_annual_folders_camporee_link` - añade `local_camporee_id`, `union_camporee_id`, `requires_union_confirmation`, el CHECK de a-lo-mas-un-camporee y los indices asociados.
 - `20260415100200_section_evaluations_dual_level` - renombra `evaluated_by_id`/`evaluated_at` a `lf_approved_by`/`lf_approved_at` (ambas nullable), añade `union_approved_by`/`union_approved_at`/`union_decision`, crea `union_evaluation_decision_enum` y el CHECK de orden LF→Union.

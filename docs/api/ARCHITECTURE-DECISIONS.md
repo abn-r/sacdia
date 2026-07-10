@@ -331,7 +331,7 @@ Nuevo módulo NestJS en `src/rbac/` registrado en `app.module.ts`:
 
 ---
 
-## 7. Sacdia Admin nativo: eligibility de entrada
+## 7. Sacdia Admin nativo: eligibility y sesión administrativa privada
 
 ### ✅ DECISIÓN APROBADA — AÚN NO EXPUESTA EN RUNTIME (2026-07-10)
 
@@ -349,15 +349,21 @@ La app iOS nativa necesita una fachada de autenticación administrativa específ
 | Fallo de datos | Los errores de base de datos se propagan; nunca se interpretan como usuario elegible. |
 | Denegación | `AUTH_PANEL_ACCESS_DENIED`, HTTP 403, sin indicar qué condición falló. |
 | Roles y scope | Roles GLOBAL y asignaciones no participan en el login. Después de autenticar, cada operación exige permiso RBAC y scope backend. |
-| Estado de implementación | `validateCredentials` y `AdminEligibilityService` existen en la rama backend `codex/sacdia-admin-ios-auth`; el service de eligibility quedó registrado en `37f23b4`. La rama todavía no está integrada al runtime de referencia. |
-| Publicación | Todavía no existe un endpoint bajo `/api/v1/auth/admin/*`; el controller queda bloqueado hasta finalizar sesión admin y challenge pre-auth MFA. |
+| Persistencia | En la rama, `admin_auth_sessions` extiende 1:1 a Better Auth `sessions`; guarda familia, superficie, cliente, assurance, assignment opcional, expiración absoluta y revocación. La sesión opaca interna usa ventana de 7 días y límite absoluto de 30 días. |
+| Token admin | JWT HS256 de acceso por 15 minutos con `aud='sacdia-admin'`, `surface='admin'`, `sid`, `jti` y `aal`; los identificadores deben ser claims canónicos sin espacios periféricos. |
+| Autoridad y revocación | Cada request valida en base de datos que sesión, usuario, assurance, revocación y expiraciones sigan vigentes. El parser Bearer de Passport también alimenta la blacklist. Una caída de esta autoridad falla cerrada con HTTP 503, no con acceso concedido ni con 401 ambiguo. |
+| Compatibilidad JWT | Si `surface` está ausente, `JwtStrategy` conserva el contrato legacy. Si está presente, solo acepta el contrato admin completo y stateful. |
+| Encapsulación | `AdminEligibilityService`, `AdminSessionRepository` y `AdminSessionService` son providers privados de `AuthModule`; no se exportan ni se conectan a un controller. |
+| Estado de implementación | La rama backend `codex/sacdia-admin-ios-auth`, hasta `d41ef77`, implementa credentials sin side effects/timing diferencial evitable, eligibility `active + access_panel`, persistencia/transacción 1:1, emisión de acceso y validación/revocación stateful. Todavía no está integrada al runtime de referencia. |
+| Publicación | No existe endpoint `/api/v1/auth/admin/*`, la migración no está desplegada ni verificada, y refresh rotation, MFA pre-auth, controller y OAuth siguen pendientes. |
 
 #### Consecuencias
 
 - La nueva superficie puede evolucionar sin regresiones deliberadas sobre consumidores legacy.
 - La autorización permanece en dos capas: eligibility de entrada y permiso + scope por operación.
 - Una caída de la autoridad de datos falla cerrada y no genera credenciales administrativas.
-- Mientras la implementación no se integre y no exista el controller, no hay un endpoint público nuevo que documentar en la referencia runtime.
+- La sesión administrativa es deliberadamente stateful: la revocación en base de datos tiene efecto inmediato.
+- Mientras la implementación no se integre y no exista el controller, no hay un endpoint público nuevo que documentar en la referencia runtime ni se modifica el contrato legacy.
 
 ---
 
