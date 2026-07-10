@@ -104,6 +104,15 @@ La gestion de sesiones permite listar sesiones activas y cerrar sesiones individ
 - **Eliminacion de cuenta por autoservicio**: `DELETE /auth/me` revoca sesiones, desactiva FCM, marca `users.active=false`, anonimiza PII en `users`, borra credenciales/vínculos en `accounts` y registra `account_deletion_log`. Los clientes deben derivar el texto visible desde `is_deleted`/`member_is_deleted`; no se guardan etiquetas como `Cuenta eliminada` en columnas de identidad.
 - **Biometria movil como app-lock**: para la release actual, la biometria movil protege una sesion local ya autenticada. No restaura tokens, no reemplaza Better Auth/JWT ni crea un contrato backend nuevo. Un login biometrico real queda fuera de alcance y debe tratarse como feature futura con diseño propio de restauracion segura de sesion.
 
+### Sacdia Admin nativo (contrato aprobado; aún no expuesto en runtime)
+
+- La futura fachada `/api/v1/auth/admin/*` será aditiva; no modificará los contratos ni el comportamiento de `/auth/*` legacy.
+- Antes de crear sesión, firmar JWT o consultar TOTP, `validateCredentials` valida las credenciales sin efectos laterales. Luego, `AdminEligibilityService` ejecuta una consulta fresca y fail-closed sobre `users`: solo `active === true && access_panel === true` permite continuar; `access_panel = null`, usuario ausente o cualquier otro estado niegan el acceso.
+- El login no contará roles GLOBAL ni asignaciones de club para decidir acceso a la superficie. Después de autenticar, cada operación seguirá exigiendo permiso RBAC y scope backend.
+- La denegación de eligibility usará `AUTH_PANEL_ACCESS_DENIED` con HTTP 403, sin revelar qué bandera falló. Los errores de base de datos se propagarán y nunca habilitarán acceso.
+- `validateCredentials` y el service interno `AdminEligibilityService` están implementados en la rama backend `codex/sacdia-admin-ios-auth`; este último quedó registrado en el commit `37f23b4`. Ese trabajo todavía no está integrado al runtime de referencia.
+- Aún no existe un endpoint público bajo `/api/v1/auth/admin/*`. El controller se agregará únicamente cuando la sesión admin y el challenge pre-auth MFA estén finalizados.
+
 ## Gaps y pendientes
 
 - **OAuth en app no funcional**: Google y Apple estan declarados pero lanzan excepcion "no disponible aun"

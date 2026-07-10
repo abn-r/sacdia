@@ -331,7 +331,37 @@ Nuevo módulo NestJS en `src/rbac/` registrado en `app.module.ts`:
 
 ---
 
+## 7. Sacdia Admin nativo: eligibility de entrada
+
+### ✅ DECISIÓN APROBADA — AÚN NO EXPUESTA EN RUNTIME (2026-07-10)
+
+#### Contexto
+
+La app iOS nativa necesita una fachada de autenticación administrativa específica sin cambiar el login vigente del panel web y la app móvil. La entrada a la superficie administrativa debe separarse de la autorización fina de cada operación.
+
+#### Decisión
+
+| Tema | Contrato |
+|------|----------|
+| Compatibilidad | La futura fachada `/api/v1/auth/admin/*` será aditiva. `/auth/*` legacy conservará sus contratos y comportamiento. |
+| Orden seguro | Primero `validateCredentials` valida credenciales sin crear sesión, firmar JWT ni consultar TOTP; después `AdminEligibilityService` evalúa eligibility. |
+| Gate de superficie | Una consulta fresca a `users` permitirá continuar solo con `active === true && access_panel === true`. Usuario ausente, `active=false`, `access_panel=false` o `access_panel=null` niegan. |
+| Fallo de datos | Los errores de base de datos se propagan; nunca se interpretan como usuario elegible. |
+| Denegación | `AUTH_PANEL_ACCESS_DENIED`, HTTP 403, sin indicar qué condición falló. |
+| Roles y scope | Roles GLOBAL y asignaciones no participan en el login. Después de autenticar, cada operación exige permiso RBAC y scope backend. |
+| Estado de implementación | `validateCredentials` y `AdminEligibilityService` existen en la rama backend `codex/sacdia-admin-ios-auth`; el service de eligibility quedó registrado en `37f23b4`. La rama todavía no está integrada al runtime de referencia. |
+| Publicación | Todavía no existe un endpoint bajo `/api/v1/auth/admin/*`; el controller queda bloqueado hasta finalizar sesión admin y challenge pre-auth MFA. |
+
+#### Consecuencias
+
+- La nueva superficie puede evolucionar sin regresiones deliberadas sobre consumidores legacy.
+- La autorización permanece en dos capas: eligibility de entrada y permiso + scope por operación.
+- Una caída de la autoridad de datos falla cerrada y no genera credenciales administrativas.
+- Mientras la implementación no se integre y no exista el controller, no hay un endpoint público nuevo que documentar en la referencia runtime.
+
+---
+
 **Generado**: 2026-01-29  
 **Actualizado por**: Usuario  
-**Última actualización**: 2026-02-09 (ADR #6 — RBAC Module)  
-**Status**: ✅ Todas las decisiones confirmadas - Listo para implementación
+**Última actualización**: 2026-07-10 (ADR #7 — Sacdia Admin nativo)
+**Status**: ✅ Decisiones confirmadas; ADR #7 parcialmente implementada en rama, no expuesta en runtime
