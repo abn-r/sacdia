@@ -161,30 +161,30 @@ DELETE /v1/auth/mfa/disable
 
 ### Sesión administrativa nativa (implementación privada en rama)
 
-La rama backend `codex/sacdia-admin-ios-auth`, en el rango `c09a600..ee84d2d`, implementa servicios y persistencia privados para una sesión administrativa stateful sobre Better Auth:
+La rama backend `codex/sacdia-admin-ios-auth`, hasta `ee84d2d`, implementa servicios privados para una sesión administrativa stateful sobre Better Auth:
 
 - `validateCredentials` comprueba email y contraseña sin crear sesión ni JWT y conserva una comparación bcrypt también en caminos inválidos para reducir diferencias de timing.
 - `AdminEligibilityService` consulta `users` de forma fresca y solo admite `active === true && access_panel === true`; cualquier otro estado se deniega con `AUTH_PANEL_ACCESS_DENIED`.
+- Ese gate solo habilita la superficie: no concede roles ni grants. Cada operación administrativa sigue resolviendo RBAC y scope en backend.
 - `AdminSessionService` crea metadata 1:1 en `admin_auth_sessions` y emite un JWT HS256 de acceso por 15 minutos con `iss='https://api.sacdia.app'`, `aud='sacdia-admin-api'`, `surface='admin'`, `client_type='ios'`, `sid`, `jti`, `sub`, `aal`, `amr` y `mfa_pending=false`. No incluye email. `aal1` exige exactamente `amr=['pwd']`; `aal2`, `amr=['pwd','otp']`. `iat`, `exp` y `accessTokenExpiresAt` derivan del mismo segundo epoch. La sesión interna dura 7 días y tiene una expiración absoluta de 30 días.
 - Cada request admin valida en base de datos el vínculo entre sesión y sujeto/usuario, además de assurance, revocación y expiraciones. No hace join de `active`/`access_panel` por request: esos cambios requieren revocar las sesiones desde la mutación administrativa, integración pendiente de A5. La revocación de una sesión o de todas las sesiones del usuario es inmediata; este JWT NO es stateless.
 - `JwtStrategy` mantiene intacta la compatibilidad con JWT legacy cuando `surface` está ausente. Cuando está presente, valida manualmente y solo acepta `surface='admin'` con el contrato completo; reutiliza el parser Bearer de Passport tanto para autenticación como para blacklist y falla cerrado con HTTP 503 (`AUTH_SESSION_AUTHORITY_UNAVAILABLE`) si la autoridad de sesión no está disponible, en vez de convertir la caída en credenciales válidas o en un 401 ambiguo.
 - `AdminMfaChallengeService` emite un JWT pre-auth HS256 por 5 minutos con `iss='https://api.sacdia.app'`, `aud='sacdia-admin-mfa'`, `surface='admin'`, `client_type='ios'`, `purpose='mfa'`, `mfa_pending=true`, `aal='aal1'` y `amr=['pwd']`. En `admin_mfa_challenges` se persiste únicamente el SHA-256 del token; el token crudo solo se entrega al llamador privado.
 - `AdminMfaCompletionService` finaliza el challenge dentro de la misma transacción que la elegibilidad, el replay TOTP y la creación de sesión AAL2; los outcomes se mapean a códigos canónicos internos sin exponer tokens pre-auth en logs ni excepciones.
-- Los servicios y repositorios de eligibility, sesión, challenge MFA y refresh están registrados como providers internos de `AuthModule`: no se exportan ni están conectados a un controller.
+- Los servicios y repositorios de eligibility, sesión y challenge MFA, incluido `AdminMfaCompletionService`, están registrados como providers internos de `AuthModule`: no se exportan ni están conectados a un controller.
 
-### Persistencia de refresh administrativo nativo (diseño implementado en rama)
+### Persistencia de refresh administrativo nativo (D1 implementado en rama)
 
-El rango `c09a600..ee84d2d` también contiene el modelo y la migración de rotación de refresh. Es **diseño/persistencia en rama**, no un contrato publicado ni un runtime desplegado:
+Desde `c09a600` hasta `ee84d2d`, inclusive, la rama contiene únicamente el schema Prisma, la migración SQL y sus pruebas estáticas para soportar la futura rotación. No contiene writer, servicio de refresh, cifrado en ejecución ni emisión de refresh:
 
-- El refresh futuro será un valor opaco aleatorio de 256 bits. Solo se persiste su digest SHA-256 hexadecimal en `admin_refresh_tokens`; nunca el valor crudo, ni en la tabla actual, ni en el historial, ni en los recibos.
-- Cada `admin_auth_sessions` tiene un único refresh vigente por `session_id + family_id`, con `generation` monotónica. La sesión usa idle máximo de 7 días y expiración absoluta de 30 días; la idle nunca puede superar la absoluta.
-- Al rotar, el digest anterior pasa a `admin_refresh_token_history` y se conserva hasta la expiración absoluta de la sesión (con un mínimo técnico de 60 segundos desde `rotated_at`). La reutilización de un refresh histórico revoca la familia vinculada a `family_id + session_id`; no se acepta como sesión nueva.
-- Las solicitudes de refresh llevarán `Idempotency-Key` UUID. Los recibos de rotación se guardan como AES-256-GCM (`nonce` 12 bytes, `auth_tag` 16 bytes, `plaintext_version=1`) con `key_id` de un keyring separado; `expires_at` es exactamente `created_at + 60 segundos` y el recibo se enlaza al instante de rotación del historial.
-- Un login que queda en pre-auth/AAL1 por MFA no recibe refresh administrativo; solo una sesión AAL2 después de completar el challenge puede entrar al ciclo de rotación.
-- La migración protege el namespace de Better Auth con el sentinel `admin-disabled:<session_id>` y aborta ante colisiones. El gate D2 de exclusión de superficies no administrativas es obligatorio antes de migrar o publicar esta fachada.
+- El schema reserva un único digest SHA-256 hexadecimal vigente por `session_id + family_id`, historial hash-only y una estructura de recibos con `key_id`, `nonce` de 12 bytes, `ciphertext`, `auth_tag` de 16 bytes, `plaintext_version=1` y TTL exacto de 60 segundos.
+- La migración agrega `idle_expires_at`, acotado por `absolute_expires_at`, y marca la sesión Better Auth asociada con el sentinel `admin-disabled:<session_id>` después de comprobar colisiones.
+- El contrato futuro D1c emitirá refresh opacos aleatorios de 256 bits solo para sesiones AAL2 posteriores al challenge MFA; persistirá únicamente hashes, incrementará `generation`, conservará historial hasta la expiración absoluta, aceptará `Idempotency-Key` UUID y cifrará recibos con AES-256-GCM usando un keyring separado.
+- El contrato futuro de reuse detection revocará la familia y el `sid` vinculados cuando reaparezca un refresh histórico. Ninguna de esas acciones de rotación o revocación está implementada en runtime todavía.
+- Antes de aplicar la migración o publicar la fachada, D2 debe excluir las sesiones y tokens administrativos de los endpoints legacy de Better Auth y nunca aceptar credenciales legacy en el flujo admin. El sentinel por sí solo no es un control suficiente.
 
 > [!IMPORTANT]
-> No existe endpoint `/api/v1/auth/admin/*`, la migración no está desplegada ni verificada y ningún controller nuevo está publicado. La rotación de refresh y la finalización MFA existen solo como servicios/persistencia privados en la rama; el contrato legacy y la referencia de endpoints vigente no se modifican.
+> No existe endpoint `/api/v1/auth/admin/*`, la migración no está desplegada ni verificada y ningún controller nuevo está publicado. La finalización MFA existe como servicio privado; para refresh solo existe la persistencia D1, no writer ni rotación runtime. El contrato legacy y la referencia de endpoints vigente no se modifican.
 
 ### Sessions Endpoints
 
