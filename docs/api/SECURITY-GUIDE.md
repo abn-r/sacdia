@@ -161,17 +161,18 @@ DELETE /v1/auth/mfa/disable
 
 ### Sesión administrativa nativa (implementación privada en rama)
 
-La rama backend `codex/sacdia-admin-ios-auth`, hasta `d41ef77`, implementa servicios privados para una sesión administrativa stateful sobre Better Auth:
+La rama backend `codex/sacdia-admin-ios-auth`, hasta `b928c8b`, implementa servicios privados para una sesión administrativa stateful sobre Better Auth:
 
 - `validateCredentials` comprueba email y contraseña sin crear sesión ni JWT y conserva una comparación bcrypt también en caminos inválidos para reducir diferencias de timing.
 - `AdminEligibilityService` consulta `users` de forma fresca y solo admite `active === true && access_panel === true`; cualquier otro estado se deniega con `AUTH_PANEL_ACCESS_DENIED`.
-- `AdminSessionService` crea metadata 1:1 en `admin_auth_sessions` y emite un JWT HS256 de 15 minutos con `aud='sacdia-admin'`, `surface='admin'` y claims canónicos sin espacios periféricos `sid`, `jti`, `sub` y `aal`. La sesión interna dura 7 días y tiene una expiración absoluta de 30 días.
+- `AdminSessionService` crea metadata 1:1 en `admin_auth_sessions` y emite un JWT HS256 de acceso por 15 minutos con `iss='https://api.sacdia.app'`, `aud='sacdia-admin-api'`, `surface='admin'`, `client_type='ios'`, `sid`, `jti`, `sub`, `aal`, `amr` y `mfa_pending=false`. No incluye email. `aal1` exige exactamente `amr=['pwd']`; `aal2`, `amr=['pwd','otp']`. `iat`, `exp` y `accessTokenExpiresAt` derivan del mismo segundo epoch. La sesión interna dura 7 días y tiene una expiración absoluta de 30 días.
 - Cada request admin valida en base de datos el vínculo entre sesión y sujeto/usuario, además de assurance, revocación y expiraciones. No hace join de `active`/`access_panel` por request: esos cambios requieren revocar las sesiones desde la mutación administrativa, integración pendiente de A5. La revocación de una sesión o de todas las sesiones del usuario es inmediata; este JWT NO es stateless.
-- `JwtStrategy` mantiene compatibilidad con JWT legacy cuando `surface` está ausente. Para tokens admin exige el contrato completo, reutiliza el parser Bearer de Passport tanto para autenticación como para blacklist y falla cerrado con HTTP 503 (`AUTH_SESSION_AUTHORITY_UNAVAILABLE`) si la autoridad de sesión no está disponible, en vez de convertir la caída en credenciales válidas o en un 401 ambiguo.
-- `AdminEligibilityService`, `AdminSessionRepository` y `AdminSessionService` están registrados como providers internos de `AuthModule`: no se exportan ni están conectados a un controller.
+- `JwtStrategy` mantiene intacta la compatibilidad con JWT legacy cuando `surface` está ausente. Cuando está presente, valida manualmente y solo acepta `surface='admin'` con el contrato completo; reutiliza el parser Bearer de Passport tanto para autenticación como para blacklist y falla cerrado con HTTP 503 (`AUTH_SESSION_AUTHORITY_UNAVAILABLE`) si la autoridad de sesión no está disponible, en vez de convertir la caída en credenciales válidas o en un 401 ambiguo.
+- `AdminMfaChallengeService` emite un JWT pre-auth HS256 por 5 minutos con `iss='https://api.sacdia.app'`, `aud='sacdia-admin-mfa'`, `surface='admin'`, `client_type='ios'`, `purpose='mfa'`, `mfa_pending=true`, `aal='aal1'` y `amr=['pwd']`. En `admin_mfa_challenges` se persiste únicamente el SHA-256 del token; el token crudo solo se entrega al llamador privado.
+- Los servicios y repositorios de eligibility, sesión y challenge MFA están registrados como providers internos de `AuthModule`: no se exportan ni están conectados a un controller.
 
 > [!IMPORTANT]
-> No existe endpoint `/api/v1/auth/admin/*`, la migración no está desplegada ni verificada, y refresh rotation, MFA pre-auth, controller y OAuth siguen pendientes. Esta implementación de rama no modifica el contrato legacy ni la referencia de endpoints vigente.
+> No existe endpoint `/api/v1/auth/admin/*`, las migraciones no están desplegadas ni verificadas, y refresh rotation, finalización del challenge MFA, controller y OAuth siguen pendientes. Esta implementación de rama no modifica el contrato legacy ni la referencia de endpoints vigente.
 
 ### Sessions Endpoints
 
