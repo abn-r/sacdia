@@ -147,9 +147,9 @@ npx prisma format
 
 La migración Prisma `20260710200000_admin_refresh_rotation` existe únicamente en `sacdia-backend/prisma/migrations/` de la rama backend `codex/sacdia-admin-ios-auth`. Depende de `20260710130000_admin_auth_sessions`, no fue ejecutada ni verificada contra una base de datos y no publica endpoints runtime.
 
-Su propósito es establecer `admin_auth_sessions.idle_expires_at` como autoridad de expiración inactiva administrativa (mientras `sessions.expires_at` de Better Auth permanece como espejo de compatibilidad), reemplazar el uso administrativo de sesiones legacy con el sentinel `admin-disabled:<session_id>` y crear persistencia hash-only para refresh, historial retenido y recibos cifrados AES-GCM con `Idempotency-Key` de TTL exacta de 60 segundos. No persiste secretos raw.
+Su propósito estructural es preparar `admin_auth_sessions.idle_expires_at` como autoridad futura de expiración inactiva administrativa, reemplazar el uso administrativo de sesiones legacy con el sentinel `admin-disabled:<session_id>` y crear tablas hash-only para refresh, historial y recibos AES-GCM con `Idempotency-Key` de TTL exacta de 60 segundos. En el runtime actual, `AdminSessionRepository.isActiveForToken` todavía valida `sessions.expires_at` de Better Auth; D1c debe implementar el writer y adoptar `idle_expires_at`. Las tablas permiten cero o una fila de refresh por sesión y no contienen columnas para secretos raw.
 
-Antes de cualquier despliegue se debe completar D2: excluir tokens y sesiones legacy del flujo administrativo y verificar que las sesiones administrativas preexistentes se reautentiquen. No ejecutar esta migración manualmente ni asumir que una ruta de refresh/login/logout administrativa ya está disponible.
+El schema solo exige que el historial se retenga al menos 60 segundos; mantenerlo hasta la expiración absoluta será responsabilidad del writer y cleanup futuros. Los commits desde `c09a600` hasta `ee84d2d`, ambos inclusive, no aportan ese runtime. No ejecutar esta migración antes de D1c y D2: D2 debe excluir tokens/sesiones legacy y verificar la reautenticación de sesiones administrativas preexistentes. Tampoco debe asumirse que una ruta de refresh/login/logout administrativa ya está disponible.
 
 ### Estructura de Migraciones
 
