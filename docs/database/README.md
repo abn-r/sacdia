@@ -143,6 +143,14 @@ npx prisma format
 
 ## Migraciones
 
+### Estado de persistencia de refresh administrativo iOS
+
+La migración Prisma `20260710200000_admin_refresh_rotation` existe únicamente en `sacdia-backend/prisma/migrations/` de la rama backend `codex/sacdia-admin-ios-auth`. Depende de `20260710130000_admin_auth_sessions`, no fue ejecutada ni verificada contra una base de datos y no publica endpoints runtime.
+
+Su propósito es establecer `admin_auth_sessions.idle_expires_at` como autoridad de expiración inactiva administrativa (mientras `sessions.expires_at` de Better Auth permanece como espejo de compatibilidad), reemplazar el uso administrativo de sesiones legacy con el sentinel `admin-disabled:<session_id>` y crear persistencia hash-only para refresh, historial retenido y recibos cifrados AES-GCM con `Idempotency-Key` de TTL exacta de 60 segundos. No persiste secretos raw.
+
+Antes de cualquier despliegue se debe completar D2: excluir tokens y sesiones legacy del flujo administrativo y verificar que las sesiones administrativas preexistentes se reautentiquen. No ejecutar esta migración manualmente ni asumir que una ruta de refresh/login/logout administrativa ya está disponible.
+
 ### Estructura de Migraciones
 
 Los scripts SQL están en [`migrations/`](migrations/):

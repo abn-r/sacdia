@@ -12,6 +12,16 @@ Scripts SQL para inicialización y migración de la base de datos.
 
 ## 📋 Scripts Disponibles
 
+### Migración Prisma pendiente: refresh administrativo iOS
+
+| Migración | Ubicación efectiva | Dependencia | Estado |
+|-----------|--------------------|-------------|--------|
+| `20260710200000_admin_refresh_rotation` | `sacdia-backend/prisma/migrations/20260710200000_admin_refresh_rotation/migration.sql` en `codex/sacdia-admin-ios-auth` | `20260710130000_admin_auth_sessions` | Existe en la rama backend; **no ejecutada ni verificada contra una base de datos** |
+
+No es un script de inicialización de este directorio ni debe ejecutarse manualmente desde aquí. Agrega `idle_expires_at` como autoridad de expiración inactiva para sesiones administrativas; `sessions.expires_at` de Better Auth queda como espejo de compatibilidad. Para sesiones administrativas preexistentes, el backfill limita la fecha a la expiración absoluta y luego aplica el sentinel `admin-disabled:<session_id>` al token legacy, por lo que esas sesiones deben reautenticarse.
+
+La migración crea refresh actual hash-only, historial retenido sin FK a sesiones ni a reemplazos, y recibos de rotación cifrados AES-GCM vinculados por identidad compuesta del token previo y por `Idempotency-Key`. Los recibos usan TTL exacta de 60 segundos; no se persisten secretos raw. No existen todavía endpoints runtime administrativos de login, refresh o logout. D2 — exclusión de tokens/sesiones legacy y reautenticación comprobada — es requisito previo de despliegue.
+
 | Script | Descripción | Dependencias |
 |--------|-------------|--------------|
 | `script_01_organizacion.sql` | Setup inicial de países, uniones, campos locales | Ninguna |
