@@ -343,3 +343,9 @@ src/
 ---
 
 **Generado**: 31 de enero de 2026
+# Captura oficial de puntaje de camporee
+
+- `POST /api/v1/camporee-events/:eventId/sections/:clubSectionId/scores` autoriza `judge_primary` sólo por asignación exacta. La carga manual se limita a `assistant-lf`, `director-lf`, `assistant-union` y `director-union` dentro de scope; `admin_override` se reserva a `admin`, `assistant-admin` y `super-admin`. `camporee_events:update` no es autorización suficiente y `dto.source` nunca es autoridad.
+- Cuando existe `Idempotency-Key`, el backend toma primero `pg_advisory_xact_lock(bigint)` sobre `hashtextextended(prefijo estable + actor + clave, 0)` y después `pg_advisory_xact_lock(eventId::integer, clubSectionId::integer)`. Los casts son explícitos porque Prisma enlaza números JavaScript como `INT8`; así PostgreSQL selecciona el overload `(integer, integer)`. Los overloads separan keyspaces y el orden reduce riesgo de deadlock; el hash de 64 bits mantiene una colisión teórica que sólo puede sobre-serializar requests.
+- Un replay de misma clave/hash no muta. La defensa P2002 relee la fila tras rollback y devuelve replay o `409 IDEMPOTENCY_KEY_REUSED`, nunca expone el error de unicidad como 500. Un receipt persistido sin resultado asociado falla de forma controlada con `CAMPOREE_SCORING_RECEIPT_INCOMPLETE`.
+- Todo override de un resultado activo exige `expected_active_result_id` coincidente y motivo `notes.trim()` no vacío. El motivo queda auditado en la submission; el primer score manual sin resultado activo no lo requiere.

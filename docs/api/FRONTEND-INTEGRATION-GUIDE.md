@@ -73,7 +73,12 @@ El flujo móvil de jueces de camporee consume scoring oficial por rúbricas:
 
 - `GET /api/v1/camporee-judges/me/assignments` lista asignaciones del usuario autenticado; la app muestra para captura sólo las asignaciones activas donde `judge_role='primary'` y `can_submit_score=true`.
 - `GET /api/v1/camporee-events/:eventId/rubrics` entrega criterios activos; la pantalla de captura debe enviar exactamente un ítem por rúbrica.
-- `POST /api/v1/camporee-events/:eventId/sections/:clubSectionId/scores` envía `{ source: 'judge_primary', items[] }`; el total se calcula desde `items[].awarded_points`, no se captura como campo editable.
+- `POST /api/v1/camporee-events/:eventId/sections/:clubSectionId/scores` puede enviar `source` como intención de UI, pero el backend siempre deriva la fuente efectiva desde asignación, rol y scope. Un juez principal sin override explícito queda `judge_primary`; gestores LF/Unión quedan `manual_lf`; sólo admins globales permitidos quedan `admin_override`. El total se calcula desde `items[].awarded_points`. Para "club no se presentó", enviar `{ no_show: true, items: [], notes? }`.
+- Para tolerar reintentos de red, la app debe generar un UUID por intento lógico y enviarlo como header `Idempotency-Key`; reutilizarlo sólo para reintentar exactamente el mismo target/payload. Sin header el endpoint sigue siendo compatible, pero no hay replay idempotente.
+- El receipt devuelve `camporee_event_score_submission_id`, resultado oficial, `raw_awarded_points`, `minimum_adjustment_points`, totales oficiales, actor/timestamps, notas e ítems. `active=true` describe el estado al emitirse y permanece estable en replays aunque luego exista un override; no usarlo como consulta del estado actual. Mostrar el total oficial y conservar el detalle crudo como auditoría, no como campo editable.
+- Antes de enviar una corrección manual contra un resultado existente, admin debe leer/conservar el `camporee_event_section_result_id`, enviarlo como `expected_active_result_id` y exigir un `notes.trim()` no vacío como motivo. Ante `400 CAMPOREE_SCORING_OVERRIDE_REASON_REQUIRED`, mantener el formulario; ante `409 CAMPOREE_SCORING_RESULT_STALE`, refrescar antes de volver a decidir.
+- El backend ajusta automáticamente al `min_points` del evento cuando el total queda por debajo del mínimo configurado; si no hay mínimo, conserva el total enviado. Nunca permite superar el máximo por rúbrica/evento.
+- Una vez creado un resultado activo, el juez principal no puede reenviar ni editar; sólo gestores LF/Unión dentro de scope o admins globales autorizados pueden corregir. `camporee_events:update` sin esos roles no habilita la acción.
 - Jueces `assistant` no ven acción de envío en app; quedan como apoyo/auditoría.
 - El admin debe poblar el selector de roster con `GET /api/v1/local-camporees/:camporeeId/judge-candidates` o `GET /api/v1/union-camporees/:camporeeId/judge-candidates`, no con captura manual de UUID. El backend sólo acepta jueces 18+, pastores o Guías Mayores investidos.
 
@@ -100,6 +105,13 @@ El flujo administrativo de camporee separa personal operativo, agenda y scoring:
   - `POST /api/v1/union-camporees/:camporeeId/club-registration/close|reopen`
 - El cierre congela secciones para scoring; las mutaciones de rúbricas, asignación de jueces y captura de puntaje oficial deben mostrar el gate si `club_registration_closed_at` está vacío.
 - La inscripción de miembros sigue dependiendo de `member_registration_deadline`; no bloquear UI de miembros por cierre de clubes.
+
+## Actualizacion 2026-07-10 (Lifecycle y timezone de camporees)
+
+- En formularios de creación/edición, enviar `start_date`/`end_date` como `YYYY-MM-DD`; nunca convertirlas a medianoche ni enviar timestamp.
+- Para apertura y deadlines enviar un ISO-8601 con `Z` u offset explícito. La apertura ausente significa que clubes pueden inscribirse inmediatamente.
+- Capturar una zona IANA explícita (por ejemplo `America/Mexico_City`) cuando se confirme la sede: el backend la audita con el actor. Un PATCH sin `timezone` no borra esa verificación.
+- La UI de clubes debe distinguir `not_open_yet`, `open`, `late_approval_required` y `manually_frozen`. Al estar `not_open_yet`, no ofrecer inscripción ni flujo de aprobación tardía; el deadline es inclusivo.
 
 ## Actualizacion 2026-02-17 (Admin Panel)
 
