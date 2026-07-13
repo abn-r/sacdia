@@ -331,7 +331,45 @@ Nuevo módulo NestJS en `src/rbac/` registrado en `app.module.ts`:
 
 ---
 
+## 7. Sacdia Admin nativo: eligibility y sesión administrativa privada
+
+### ✅ DECISIÓN APROBADA — AÚN NO EXPUESTA EN RUNTIME (2026-07-10)
+
+#### Contexto
+
+La app iOS nativa necesita una fachada de autenticación administrativa específica sin cambiar el login vigente del panel web y la app móvil. La entrada a la superficie administrativa debe separarse de la autorización fina de cada operación.
+
+#### Decisión
+
+| Tema | Contrato |
+|------|----------|
+| Compatibilidad | La futura fachada `/api/v1/auth/admin/*` será aditiva. `/auth/*` legacy conservará sus contratos y comportamiento. |
+| Orden seguro | Primero `validateCredentials` valida credenciales sin crear sesión, firmar JWT ni consultar TOTP; después `AdminEligibilityService` evalúa eligibility. |
+| Gate de superficie | Una consulta fresca a `users` permitirá continuar solo con `active === true && access_panel === true`. Usuario ausente, `active=false`, `access_panel=false` o `access_panel=null` niegan. |
+| Fallo de datos | Los errores de base de datos se propagan; nunca se interpretan como usuario elegible. |
+| Denegación | `AUTH_PANEL_ACCESS_DENIED`, HTTP 403, sin indicar qué condición falló. |
+| Roles y scope | Roles GLOBAL y asignaciones no participan en el login. Después de autenticar, cada operación exige permiso RBAC y scope backend. |
+| Persistencia | En la rama, `admin_auth_sessions` extiende 1:1 a Better Auth `sessions`; guarda familia, superficie, cliente, assurance, assignment opcional, expiración absoluta y revocación. La sesión opaca interna usa ventana de 7 días y límite absoluto de 30 días. |
+| Token admin | JWT HS256 de acceso por 15 minutos con `iss='https://api.sacdia.app'`, `aud='sacdia-admin-api'`, `surface='admin'`, `client_type='ios'`, `sid`, `jti`, `aal`, `amr` y `mfa_pending=false`; no incluye email. Para `aal1`, `amr=['pwd']`; para `aal2`, `amr=['pwd','otp']`. Los identificadores deben ser claims canónicos sin espacios periféricos. |
+| Tiempo del token | `iat`, `exp` y `accessTokenExpiresAt` derivan del mismo segundo epoch: `exp = iat + 900`, sin divergencia entre la expiración pública y la firmada. |
+| Autoridad y revocación | Cada request valida en base de datos el vínculo entre sesión y sujeto/usuario, además de assurance, revocación y expiraciones. No hace join de `active`/`access_panel` por request: esos cambios requieren revocar las sesiones desde la mutación administrativa, integración pendiente de A5. El parser Bearer de Passport también alimenta la blacklist. Una caída de esta autoridad falla cerrada con HTTP 503, no con acceso concedido ni con 401 ambiguo. |
+| Compatibilidad JWT | Si `surface` está ausente, `JwtStrategy` conserva intacto el contrato legacy. Si está presente, la estrategia valida manualmente y solo acepta `surface='admin'` con el contrato administrativo completo y stateful. |
+| MFA pre-auth privado | La rama emite por 5 minutos un JWT HS256 con `iss='https://api.sacdia.app'`, `aud='sacdia-admin-mfa'`, `surface='admin'`, `client_type='ios'`, `purpose='mfa'`, `mfa_pending=true`, `aal='aal1'` y `amr=['pwd']`. Persiste únicamente SHA-256 del token junto al challenge; el token crudo solo se devuelve al llamador privado. |
+| Encapsulación | `AdminEligibilityService`, `AdminSessionRepository`, `AdminSessionService`, `AdminMfaChallengeRepository` y `AdminMfaChallengeService` son providers privados de `AuthModule`; no se exportan ni se conectan a un controller. |
+| Estado de implementación | La rama backend `codex/sacdia-admin-ios-auth`, hasta `b928c8b`, implementa credentials sin side effects/timing diferencial evitable, eligibility `active + access_panel`, persistencia/transacción 1:1, emisión y validación estricta del access token, revocación stateful y emisión/persistencia hash-only del challenge MFA pre-auth. Todavía no está integrada al runtime de referencia. |
+| Publicación | No existe endpoint `/api/v1/auth/admin/*`, las migraciones no están desplegadas ni verificadas, y refresh rotation, finalización del challenge MFA, controller y OAuth siguen pendientes. |
+
+#### Consecuencias
+
+- La nueva superficie puede evolucionar sin regresiones deliberadas sobre consumidores legacy.
+- La autorización permanece en dos capas: eligibility de entrada y permiso + scope por operación.
+- Una caída de la autoridad de datos falla cerrada y no genera credenciales administrativas.
+- La sesión administrativa es deliberadamente stateful: la revocación en base de datos tiene efecto inmediato.
+- Mientras la implementación no se integre y no exista el controller, no hay un endpoint público nuevo que documentar en la referencia runtime ni se modifica el contrato legacy.
+
+---
+
 **Generado**: 2026-01-29  
 **Actualizado por**: Usuario  
-**Última actualización**: 2026-02-09 (ADR #6 — RBAC Module)  
-**Status**: ✅ Todas las decisiones confirmadas - Listo para implementación
+**Última actualización**: 2026-07-10 (ADR #7 — Sacdia Admin nativo)
+**Status**: ✅ Decisiones confirmadas; ADR #7 parcialmente implementada en rama, no expuesta en runtime

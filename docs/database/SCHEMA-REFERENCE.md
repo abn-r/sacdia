@@ -233,6 +233,25 @@ Referencia humana concisa del schema Prisma vigente.
 - Los modelos Prisma vigentes son `session`, `account` y `verification`.
 - En base fisica se mapean a `sessions`, `accounts` y `verifications` via `@@map`.
 
+### `admin_auth_sessions` (rama backend)
+
+- Extiende `sessions` con una relación opcional 1:1: `session_id` es PK/FK y usa borrado en cascada.
+- Mantiene `surface='admin'`, `client_type='ios'`, `family_id`, assurance `aal1|aal2`, expiración absoluta, expiración inactiva (`idle_expires_at`) y datos de revocación; el DDL aplica los checks correspondientes.
+- `idle_expires_at` está diseñado para convertirse en la autoridad de expiración por inactividad cuando D1c adopte el writer y la lectura runtime. En el estado actual de la rama, `AdminSessionRepository.isActiveForToken` todavía valida `sessions.expires_at` de Better Auth; por tanto, esa fecha aún no es solo un espejo de compatibilidad.
+- `active_assignment_id` es opcional, referencia `club_role_assignments` y usa `ON DELETE SET NULL`.
+- Incluye índices para `family_id`, `revoked_at` y `active_assignment_id`.
+- La migración existe únicamente en la rama backend `codex/sacdia-admin-ios-auth`; su despliegue no fue verificado y la tabla todavía no forma parte del runtime de referencia.
+
+### Persistencia de refresh administrativo (rama backend)
+
+Esta persistencia pertenece al flujo administrativo iOS y está definida en la rama backend `codex/sacdia-admin-ios-auth`. Los commits desde `c09a600` hasta `ee84d2d`, ambos inclusive, aportan schema, migración y pruebas estructurales; todavía no existe writer, cleanup ni endpoint runtime de login, refresh o logout administrativo.
+
+- `admin_refresh_tokens` permite **cero o una fila** por `session_id`; no demuestra que hoy exista un refresh vigente. El schema exige un `token_hash` de 64 caracteres hexadecimales minúsculos, formato destinado a SHA-256, pero todavía no existe un writer que materialice ese contrato; tampoco hay columna para el secreto raw. La clave compuesta `(session_id, family_id)` enlaza la eventual fila con `admin_auth_sessions` y el borrado de la sesión la elimina.
+- `admin_refresh_token_history` está diseñado para conservar hashes de generaciones rotadas y soportar detección de reuso e idempotencia. No tiene FK a `sessions` ni FK de `replaced_by_token_id`, para permitir retención independiente del estado actual. El CHECK de base de datos garantiza únicamente `retain_until >= rotated_at + 60 seconds`; conservar cada hash hasta la expiración absoluta de su sesión será obligación del writer y cleanup futuros, no una restricción vigente del schema.
+- `admin_refresh_rotation_receipts` reserva persistencia para recibos cifrados AES-GCM mediante `key_id`, `nonce` de 12 bytes, `ciphertext` y `auth_tag` de 16 bytes, sin columna para un refresh token en claro. Un futuro writer deberá ligar el `Idempotency-Key` UUID tanto a `(previous_token_id, idempotency_key)` como a `(session_id, previous_generation, idempotency_key)` y a la identidad compuesta completa del historial previo (`token_id`, `session_id`, `family_id`, `generation`, `rotated_at`). El DDL sí exige TTL exacta de 60 segundos (`expires_at = created_at + 60 seconds`) y que `created_at` coincida con `history_rotated_at`.
+- La migración inicializa `idle_expires_at` de sesiones administrativas existentes, acotado por `absolute_expires_at`; falla si queda un null. Después deshabilita únicamente sus tokens legacy de Better Auth con el sentinel `admin-disabled:<session_id>`, previa detección de colisión. Esas sesiones requieren reautenticación para crear una familia de refresh; no se insertan refresh tokens actuales durante el backfill y las sesiones no administrativas no se modifican.
+- Esta migración **no debe ejecutarse** antes de completar D2 —exclusión de tokens/sesiones legacy y reautenticación comprobada— y D1c —writer y adopción runtime de `idle_expires_at`—. `20260710200000_admin_refresh_rotation` depende de que `20260710130000_admin_auth_sessions` ya haya creado `admin_auth_sessions`; existe en la rama backend, pero **no se ejecutó ni se verificó contra una base de datos**.
+
 ### `folder_templates`
 
 - Ownership polimorfico: incluye `owner_union_id` y `owner_local_field_id`, ambos nullable con FK a `unions(union_id)` y `local_fields(local_field_id)` respectivamente (`ON DELETE RESTRICT`).
@@ -399,6 +418,8 @@ Define el presupuesto de puntos por componente dentro de un eje anual:
 
 - `roles`, `permissions`, `role_permissions`, `users_roles`, `users_permissions`, `club_role_assignments`, `role_slot_limits`, `role_assignment_requests`
 - `session`, `account`, `verification`, `users_pr`, `notification_preferences`, `notification_logs`, `user_fcm_tokens`
+- `admin_auth_sessions` (definida en rama backend; no publicada en el runtime de referencia)
+- `admin_refresh_tokens`, `admin_refresh_token_history`, `admin_refresh_rotation_receipts` (definidas en rama backend; no publicadas en el runtime de referencia)
 
 ### Usuarios y salud
 
@@ -491,6 +512,8 @@ Define el presupuesto de puntos por componente dentro de un eje anual:
 
 ## Migraciones recientes
 
+- `20260710130000_admin_auth_sessions` - creada en la rama backend para metadata administrativa 1:1 sobre `sessions`, assurance, expiración absoluta y revocación; despliegue no verificado.
+- `20260710200000_admin_refresh_rotation` - depende de `20260710130000_admin_auth_sessions`; añade `idle_expires_at` para su adopción futura en D1c, deshabilita con sentinel las sesiones administrativas legacy y crea estructuras hash-only de refresh, historial y recibos cifrados. Existe en la rama backend, pero no fue ejecutada ni verificada contra una base de datos; no tiene writer ni publica endpoints runtime y no debe desplegarse antes de D1c + D2.
 - `20260415100000_folder_templates_polymorphic_owner` - añade owners polimorficos (`owner_union_id`, `owner_local_field_id`), dropea el unique compuesto legacy y establece el CHECK/indices parciales de exactamente-un-owner.
 - `20260415100100_annual_folders_camporee_link` - añade `local_camporee_id`, `union_camporee_id`, `requires_union_confirmation`, el CHECK de a-lo-mas-un-camporee y los indices asociados.
 - `20260415100200_section_evaluations_dual_level` - renombra `evaluated_by_id`/`evaluated_at` a `lf_approved_by`/`lf_approved_at` (ambas nullable), añade `union_approved_by`/`union_approved_at`/`union_decision`, crea `union_evaluation_decision_enum` y el CHECK de orden LF→Union.

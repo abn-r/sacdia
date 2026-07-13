@@ -65,6 +65,8 @@ La gestion de sesiones permite listar sesiones activas y cerrar sesiones individ
 - `roles` — Catalogo de roles
 - `permissions` — Catalogo de permisos
 - `user_fcm_tokens` — Tokens FCM para push notifications
+- `admin_auth_sessions` — Metadata 1:1 de sesión administrativa definida en la rama backend; no forma parte del runtime de referencia
+- `admin_mfa_challenges` — Challenges administrativos MFA hash-only definidos en la rama backend; no forman parte del runtime de referencia
 
 ### Contrato de tokens
 - Login y refresh responden en camelCase: `accessToken`, `refreshToken`, `expiresAt`, `tokenType`
@@ -103,6 +105,20 @@ La gestion de sesiones permite listar sesiones activas y cerrar sesiones individ
 - **Token blacklist**: `TokenBlacklistService` invalida tokens revocados usando Redis/Upstash como cache
 - **Eliminacion de cuenta por autoservicio**: `DELETE /auth/me` revoca sesiones, desactiva FCM, marca `users.active=false`, anonimiza PII en `users`, borra credenciales/vínculos en `accounts` y registra `account_deletion_log`. Los clientes deben derivar el texto visible desde `is_deleted`/`member_is_deleted`; no se guardan etiquetas como `Cuenta eliminada` en columnas de identidad.
 - **Biometria movil como app-lock**: para la release actual, la biometria movil protege una sesion local ya autenticada. No restaura tokens, no reemplaza Better Auth/JWT ni crea un contrato backend nuevo. Un login biometrico real queda fuera de alcance y debe tratarse como feature futura con diseño propio de restauracion segura de sesion.
+
+### Sacdia Admin nativo (contrato aprobado; aún no expuesto en runtime)
+
+- La futura fachada `/api/v1/auth/admin/*` será aditiva; no modificará los contratos ni el comportamiento de `/auth/*` legacy.
+- Antes de crear sesión, firmar JWT o consultar TOTP, `validateCredentials` valida las credenciales sin efectos laterales. Luego, `AdminEligibilityService` ejecuta una consulta fresca y fail-closed sobre `users`: solo `active === true && access_panel === true` permite continuar; `access_panel = null`, usuario ausente o cualquier otro estado niegan el acceso.
+- El login no contará roles GLOBAL ni asignaciones de club para decidir acceso a la superficie. Después de autenticar, cada operación seguirá exigiendo permiso RBAC y scope backend.
+- La denegación de eligibility usará `AUTH_PANEL_ACCESS_DENIED` con HTTP 403, sin revelar qué bandera falló. Los errores de base de datos se propagarán y nunca habilitarán acceso.
+- En la rama backend `codex/sacdia-admin-ios-auth`, hasta `ee84d2d`, están implementados `validateCredentials`, eligibility, metadata/transacción de sesión, `AdminSessionService`, JWT admin HS256 de 15 minutos, validación stateful por request, finalización transaccional AAL2, mapeo privado de errores canónicos y emisión/persistencia hash-only del challenge MFA pre-auth.
+- El access token canónico usa `iss='https://api.sacdia.app'`, `aud='sacdia-admin-api'`, `surface='admin'`, `client_type='ios'`, `sid`, `jti`, `aal`, `amr` y `mfa_pending=false`, sin email. `aal1` exige `amr=['pwd']`; `aal2`, `amr=['pwd','otp']`. `iat`, `exp` y la expiración pública derivan del mismo segundo epoch. La sesión interna usa ventana de 7 días y expiración absoluta de 30 días.
+- El token pre-auth MFA usa `iss='https://api.sacdia.app'`, `aud='sacdia-admin-mfa'`, `purpose='mfa'`, `mfa_pending=true`, `aal='aal1'` y `amr=['pwd']`; dura 5 minutos y solo su hash SHA-256 queda persistido. Su emisión todavía es privada.
+- En esa rama, la revocación se valida contra base de datos en cada request, el parser Bearer de Passport se comparte con la comprobación de blacklist y una caída de la autoridad de sesión falla segura con HTTP 503. `JwtStrategy` conserva intactos los tokens legacy sin `surface` y valida manualmente solo `surface='admin'`. Los providers administrativos permanecen privados en `AuthModule`.
+- Desde `c09a600` hasta `ee84d2d`, inclusive, solo están implementados el schema, la migración y las pruebas estáticas de persistencia refresh D1: token vigente hash-only, historial, campos de recibo con TTL exacto de 60 segundos, alta/backfill de `idle_expires_at` acotado por `absolute_expires_at` y sentinel Better Auth `admin-disabled:<session_id>`. La política runtime diseñada de idle 7 días/absoluto 30 días es preexistente; D1c deberá adoptarla y escribirla. No existe writer, cifrado en ejecución ni servicio de rotación.
+- D1c mantiene como contrato futuro refresh opacos de 256 bits solo después de completar MFA/AAL2, `generation` monotónica, historial hasta la expiración absoluta, reuse que revoca familia + `sid`, `Idempotency-Key` UUID y recibos AES-256-GCM con keyring separado. D2 debe excluir sesiones/tokens administrativos de endpoints legacy Better Auth y nunca aceptar credenciales legacy en el flujo admin; el sentinel aislado no alcanza.
+- No existe endpoint `/api/v1/auth/admin/*`, la migración no está desplegada ni verificada y ningún controller nuevo está publicado. La finalización MFA es un servicio privado y refresh sigue sin runtime; el contrato de tokens legacy permanece intacto y la fachada no debe documentarse como live.
 
 ## Gaps y pendientes
 

@@ -40,6 +40,8 @@ La base de datos está diseñada con las siguientes características verificadas
 │   ├── users
 │   ├── users_pr (post-registro)
 │   ├── users_roles
+│   ├── sessions
+│   ├── admin_auth_sessions (metadata admin, rama)
 │   ├── legal_representatives
 │   └── emergency_contacts
 │
@@ -141,6 +143,14 @@ npx prisma format
 
 ## Migraciones
 
+### Estado de persistencia de refresh administrativo iOS
+
+La migración Prisma `20260710200000_admin_refresh_rotation` existe únicamente en `sacdia-backend/prisma/migrations/` de la rama backend `codex/sacdia-admin-ios-auth`. Depende de `20260710130000_admin_auth_sessions`, no fue ejecutada ni verificada contra una base de datos y no publica endpoints runtime.
+
+Su propósito estructural es preparar `admin_auth_sessions.idle_expires_at` como autoridad futura de expiración inactiva administrativa, reemplazar el uso administrativo de sesiones legacy con el sentinel `admin-disabled:<session_id>` y crear tablas hash-only para refresh, historial y recibos AES-GCM con `Idempotency-Key` de TTL exacta de 60 segundos. En el runtime actual, `AdminSessionRepository.isActiveForToken` todavía valida `sessions.expires_at` de Better Auth; D1c debe implementar el writer y adoptar `idle_expires_at`. Las tablas permiten cero o una fila de refresh por sesión y no contienen columnas para secretos raw.
+
+El schema solo exige que el historial se retenga al menos 60 segundos; mantenerlo hasta la expiración absoluta será responsabilidad del writer y cleanup futuros. Los commits desde `c09a600` hasta `ee84d2d`, ambos inclusive, no aportan ese runtime. No ejecutar esta migración antes de D1c y D2: D2 debe excluir tokens/sesiones legacy y verificar la reautenticación de sesiones administrativas preexistentes. Tampoco debe asumirse que una ruta de refresh/login/logout administrativa ya está disponible.
+
 ### Estructura de Migraciones
 
 Los scripts SQL están en [`migrations/`](migrations/):
@@ -229,6 +239,16 @@ roles (N) ←──→ (N) permissions    [via role_permissions]
 
 users (N) ──→ (N) club instances  [via club_role_assignments]
 ```
+
+### Sesión administrativa nativa (rama backend)
+
+```text
+sessions (1) ──→ (0..1) admin_auth_sessions
+club_role_assignments (1) ──→ (N) admin_auth_sessions [active_assignment_id opcional]
+```
+
+> [!WARNING]
+> `admin_auth_sessions` está definida en la rama backend `codex/sacdia-admin-ios-auth`; la migración no fue desplegada ni verificada y todavía no forma parte del runtime de referencia.
 
 **Ver diagrama completo**: [SCHEMA-REFERENCE.md](SCHEMA-REFERENCE.md#diagrama-de-relaciones-principales)
 
