@@ -242,6 +242,20 @@ Tablas agregadas:
 - `camporee_event_score_submissions` y `camporee_event_score_submission_items` — carga auditable de puntajes.
 - `camporee_event_section_results` — resultado oficial activo por evento/sección.
 
+Estado y bloqueo del resultado:
+
+- `score_status='scored'` representa una calificación normal; `score_status='no_show'` representa "club no se presentó" y se duplica en `is_no_show=true` para filtros simples.
+- `camporee_event_score_submissions.override_of_submission_id` enlaza una corrección manual con la submission oficial anterior.
+- El juez `primary` activo puede crear el primer resultado oficial, pero no puede modificarlo ni reenviarlo si ya existe un resultado activo para el evento/sección.
+- Gestores LF/Unión dentro de scope o admins globales permitidos pueden reemplazar el resultado activo; el backend deriva `manual_lf`/`admin_override`, exige motivo y deja la corrección auditada. El permiso `camporee_events:update` aislado no autoriza scoring.
+- El backend aplica piso de puntos con `camporee_events.min_points`: bajo el mínimo se ajusta al mínimo cuando es `> 0`; nunca se permite superar el máximo de rúbricas/evento.
+- Para `no_show`, el backend permite `items: []`, asigna `min_points` si está configurado y conserva evidencia de ausencia con `score_status`/`is_no_show`.
+- Con clave idempotente, el submit oficial toma primero el overload bigint sobre `hashtextextended(prefijo + actor + clave, 0)` y luego `pg_advisory_xact_lock(eventId::integer, clubSectionId::integer)`, antes del lookup y del resultado activo. Los casts explícitos compensan el binding `INT8` de números JavaScript realizado por Prisma y fuerzan el overload PostgreSQL `(integer, integer)`. Los keyspaces son distintos; persiste riesgo teórico de colisión hash que sólo sobre-serializa.
+- El header opcional `Idempotency-Key` se asocia a `submitted_by` y a un hash canónico de target, fuente, estado, notas, `expected_active_result_id` e ítems ordenados. El mismo hash devuelve el receipt persistido; otro hash devuelve `409 IDEMPOTENCY_KEY_REUSED`.
+- Overrides manuales existentes requieren `expected_active_result_id` y `notes.trim()` no vacío; una diferencia devuelve `409 CAMPOREE_SCORING_RESULT_STALE` y un motivo ausente `400 CAMPOREE_SCORING_OVERRIDE_REASON_REQUIRED`. El primer score manual sin activo puede omitir ambos.
+- Si una carrera residual produce P2002, el backend relee la submission por actor+clave tras rollback: mismo hash y receipt completo retorna replay; hash distinto retorna `409 IDEMPOTENCY_KEY_REUSED`; receipt sin resultado retorna error interno canónico.
+- El receipt conserva `active=true` como snapshot del momento de emisión aun si un override posterior inactiva la fila de resultado; no comunica el estado actual.
+
 Autorización:
 
 - Lectura de rúbricas/scoring targets: `camporee_events:read` o juez activo asignado.
