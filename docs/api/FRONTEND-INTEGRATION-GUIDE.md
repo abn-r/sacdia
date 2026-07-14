@@ -113,6 +113,19 @@ El flujo administrativo de camporee separa personal operativo, agenda y scoring:
 - Capturar una zona IANA explícita (por ejemplo `America/Mexico_City`) cuando se confirme la sede: el backend la audita con el actor. Un PATCH sin `timezone` no borra esa verificación.
 - La UI de clubes debe distinguir `not_open_yet`, `open`, `late_approval_required` y `manually_frozen`. Al estar `not_open_yet`, no ofrecer inscripción ni flujo de aprobación tardía; el deadline es inclusivo.
 
+## Actualizacion 2026-07-14 (Inscripción contextual de sección y participantes)
+
+La app móvil debe consultar `GET /api/v1/camporees/:camporeeId/section-registration` al abrir el detalle. El response incluye identidad legible de club/sección, `status`, `disposition`, `canEnroll`, `blockingReason`, `enrollmentId`, `registeredAt` y `registeredBy`.
+
+- Mostrar el panel de inscripción de sección **antes** del bloque de participantes.
+- Si `canEnroll=true`, abrir una hoja de confirmación no editable con nombre del club, sección, camporee, costo y fecha. Confirmar con `POST /api/v1/camporees/:camporeeId/section-registration` sin body; no enviar IDs de club/sección ni actor.
+- Habilitar consulta y alta de participantes sólo cuando `status` sea `registered` o `approved`. `pending_approval`, `rejected`, `cancelled`, `not_enrolled`, loading y error deben cerrar el gate (fail-closed).
+- La UI no debe renderizar `enrollmentId`, `clubSectionId`, `clubId` ni `registeredBy.userId`; son datos técnicos para integración. Mostrar nombres, estado, fecha y `registeredBy.displayName`.
+- Ante error del GET, mostrar reintento y no cargar miembros. Ante error del POST, conservar la hoja y permitir reintentar sin duplicar taps concurrentes.
+- El backend puede devolver `422 CAMPOREE_SECTION_REGISTRATION_REQUIRED` o `422 CAMPOREE_MEMBER_OUTSIDE_ACTIVE_SECTION` al registrar participantes; el cliente debe mantener el gate cerrado y mostrar el mensaje de elegibilidad recibido.
+
+El endpoint legacy `POST /api/v1/camporees/:camporeeId/clubs` no es el flujo del director móvil. Conserva body `{ club_section_id }` para operaciones territoriales y requiere `camporees:register` con rol exacto `assistant-lf`, `director-lf`, `assistant-union` o `director-union` dentro de scope; no debe mostrarse a roles CLUB ni a admins globales por wildcard.
+
 ## Actualizacion 2026-02-17 (Admin Panel)
 
 Se agrego validacion operativa para frontend admin mediante smoke E2E en `sacdia-admin/scripts/e2e-smoke.mjs`.

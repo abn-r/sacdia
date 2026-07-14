@@ -356,7 +356,7 @@ Autoridades rectoras: `docs/canon/runtime-user-certifications.md` + `docs/canon/
 
 ### 20. Camporees CRUD es dominio canónico propio; attendance permanece cross-cutting (2026-04-22)
 
-**Estado**: Vigente <!-- VERIFICADO: camporees.controller.ts con 10 CRUD handlers migrados a camporees:*, 24 handlers attendance/registration/payments preservados en attendance:*. Permisos camporees:create/update/delete agregados al seed. Canonizado en docs/canon/runtime-camporees.md. -->
+**Estado**: Vigente para CRUD y attendance cross-cutting; la reserva de `camporees:register` fue superada por §25. <!-- VERIFICADO: camporees.controller.ts; canon actualizado en docs/canon/runtime-camporees.md. -->
 
 **Contexto**: El módulo `camporees` tenía 34 handlers gateados por dominios ajenos: 10 CRUD por `activities:*` (mezcla conceptual — crear un camporee no es equivalente a crear una actividad semanal) y 24 operaciones de attendance/registration/payments por `attendance:*` (correcto semánticamente — attendance es cross-cutting entre actividades regulares y camporees). Los permisos `camporees:read` y `camporees:register` YA existían en el seed pero nunca se usaron — gap de implementación.
 
@@ -366,7 +366,7 @@ Audit C2 clasificó `camporees` en media prioridad. Sprint D aborda la migració
 
 - `camporees:read/create/update/delete` son los permisos canónicos para CRUD de la entidad camporee (local y union);
 - `attendance:read/manage/approve_late` permanecen como permisos cross-cutting entre activities y camporees — fragmentarlos en `camporees:attendance:*` rompería consistencia con el patrón existente en activities;
-- `camporees:register` permanece en seed como permiso reservado sin uso — reactivarlo requiere decisión explícita posterior (ej. si el producto diferencia "inscripción de club" del generic `attendance:manage`);
+- `camporees:register` queda reservado en esta decisión histórica; §25 documenta su reactivación posterior para el endpoint legacy territorial;
 - la migración es cambio duro: seed otorga `camporees:*` a roles con `activities:*` mirrored antes del switch de handlers (mismo patrón de sprints anteriores).
 
 **Consecuencias**:
@@ -498,6 +498,28 @@ rectora del dominio coordinación. Se fija que:
 - no se debe usar `union_id` como scope de coordinador;
 - cualquier endpoint nuevo de coordinación debe validar scope en backend, no en
   query params manipulables.
+
+### 25. Inscripción de sección contextual separada del enrolamiento territorial legacy (2026-07-14)
+
+**Estado**: Vigente <!-- VERIFICADO: backend HEAD e72d38f, migración 20260713220000 y app móvil bb63a5a. -->
+
+**Contexto**: `attendance:manage` mezclaba el alta de participantes con la creación de la inscripción de una sección. Además, el endpoint legacy recibía `club_section_id`, mientras el director móvil ya dispone de un assignment activo que debe ser la única autoridad de su club/sección.
+
+**Decisión**:
+
+- `GET /camporees/:id/section-registration` expone el estado contextual con `camporees:read`.
+- `POST /camporees/:id/section-registration` no acepta body y usa `camporees:register_active_section`, concedido sólo a `director` `CLUB`; sección, club y actor se derivan en backend.
+- `POST /camporees/:id/clubs` conserva `{ club_section_id }` como contrato legacy territorial y usa `camporees:register`, concedido sólo a `assistant-lf`, `director-lf`, `assistant-union` y `director-union` `GLOBAL` dentro de scope.
+- Roles CLUB, división, `admin` y `super-admin` no reciben `camporees:register` por wildcard. `attendance:manage` tampoco autoriza esa ruta.
+- Un participante sólo puede crearse si la misma sección tiene inscripción activa `registered` o `approved` y el miembro pertenece a ella. La fila guarda `camporee_club_id` como lineage.
+
+**Consecuencias**:
+
+- la app presenta primero el panel de sección, confirma en una hoja no editable y mantiene participantes fail-closed hasta `registered|approved`;
+- la base impide duplicados activos por camporee/sección con índices únicos parciales local y unión;
+- `camporee_members.camporee_club_id` permanece nullable por compatibilidad legacy y otros flujos; las nuevas altas locales contextuales siempre lo persisten;
+- el endpoint legacy valida camporee, sección, club, territorio y tipo desde DB; el body no es autoridad fuera de identificar la sección;
+- los fallos de precondición de participantes usan `422 CAMPOREE_SECTION_REGISTRATION_REQUIRED` y `422 CAMPOREE_MEMBER_OUTSIDE_ACTIVE_SECTION`.
 
 ## Estados posibles de una decisión
 
