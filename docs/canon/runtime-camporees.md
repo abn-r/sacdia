@@ -35,7 +35,7 @@ Dentro del canon:
 Fuera del canon:
 - attendance de participantes, pagos y late approval de camporees (usan `attendance:*`, documentado en features);
 - UI específica admin;
-- flujos operativos pos-creación (inscripción, pago, cierre).
+- otras operaciones pos-creación, incluidos pagos y cierre; se exceptúan las inscripciones de sección canonizadas en §4.2.
 
 ---
 
