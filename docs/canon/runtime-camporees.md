@@ -3,9 +3,9 @@
 **Estado**: ACTIVE
 **Autoridad rectora**: `docs/canon/source-of-truth.md`
 **Tipo de documento**: runtime canonizado, documented-as-built
-**Ámbito**: CRUD de `camporee`, inscripción contextual de la sección activa y enrolamiento legacy territorial. Attendance de participantes, pagos y aprobaciones tardías conservan permisos cross-cutting `attendance:*`.
+**Ámbito**: CRUD de `camporee`, inscripción contextual de la sección activa y enrolamiento legacy local/de unión. Attendance de participantes, pagos, aprobaciones tardías y el enrolamiento legacy de unión conservan permisos cross-cutting `attendance:*`.
 
-<!-- VERIFICADO contra código 2026-07-14: CRUD camporees:*, section-registration contextual, legacy territorial camporees:register y participant gates. -->
+<!-- VERIFICADO contra código 2026-07-14: CRUD camporees:*, section-registration contextual, legacy local camporees:register, legacy de unión attendance:manage y participant gates. -->
 
 ---
 
@@ -15,8 +15,8 @@ Canoniza las operaciones **CRUD** sobre la entidad camporee (crear, actualizar, 
 
 - **Operation** (camporees:\*): CRUD de la entidad.
 - **Section enrollment** (`camporees:register_active_section`): el director CLUB inscribe su sección activa sin enviar IDs.
-- **Territorial enrollment legacy** (`camporees:register`): cuatro organizadores GLOBAL pueden inscribir una sección explícita dentro de scope.
-- **Participant attendance + Payments + Late approval** (attendance:\*): operaciones cross-cutting compartidas con actividades regulares.
+- **Local territorial enrollment legacy** (`camporees:register`): cuatro organizadores GLOBAL pueden inscribir una sección explícita dentro de scope.
+- **Union enrollment legacy + Participant attendance + Payments + Late approval** (attendance:\*): operaciones cross-cutting compartidas con actividades regulares.
 
 La separación intencional evita fragmentación innecesaria (no crear `camporees:attendance:*`) mientras garantiza granularidad de autoridad para el CRUD — crear un camporee es acción más privilegiada que gestionar asistencia de uno existente.
 
@@ -29,7 +29,8 @@ Dentro del canon:
 - grants por rol mirrored desde `activities:*` tras migración;
 - separación explícita de `attendance:*` cross-cutting;
 - contrato contextual `camporees:register_active_section` para director CLUB;
-- contrato legacy `camporees:register` para organizadores territoriales exactos.
+- contrato legacy local `camporees:register` para organizadores territoriales exactos;
+- preservación del contrato legacy de unión con `attendance:manage`.
 
 Fuera del canon:
 - attendance de participantes, pagos y late approval de camporees (usan `attendance:*`, documentado en features);
@@ -50,12 +51,12 @@ Permisos CRUD vigentes (migrados 2026-04-22 desde `activities:*`):
 Permisos de inscripción vigentes:
 
 - `camporees:register_active_section` — únicamente `director` de categoría `CLUB`; muta sólo su assignment activo y no acepta IDs de sección/club/actor.
-- `camporees:register` — únicamente `assistant-lf`, `director-lf`, `assistant-union`, `director-union` de categoría `GLOBAL`, dentro del field/unión correspondiente. No se hereda a roles CLUB, división, `admin` ni `super-admin`.
+- `camporees:register` — únicamente para `POST /camporees/:id/clubs`: `assistant-lf`, `director-lf`, `assistant-union`, `director-union` de categoría `GLOBAL`, dentro del field/unión correspondiente. No se hereda a roles CLUB, división, `admin` ni `super-admin`.
 
 Permisos cross-cutting preservados:
 
 - `attendance:read` — listar participantes, clubs inscritos, pagos.
-- `attendance:manage` — registrar/remover participantes, cancelar inscripciones existentes y gestionar pagos; no autoriza crear la inscripción legacy de club.
+- `attendance:manage` — registrar/remover participantes, cancelar inscripciones existentes, gestionar pagos y autorizar `POST /camporees/union/:id/clubs`; no autoriza el POST legacy **local** `/camporees/:id/clubs`.
 - `attendance:approve_late` — aprobar/rechazar inscripciones y pagos tardíos.
 
 ### Distribución de grants tras migración
@@ -90,8 +91,9 @@ Permisos cross-cutting preservados:
 | `/camporees/:id/section-registration` | GET | `camporees:read` + assignment activo |
 | `/camporees/:id/section-registration` | POST | `camporees:register_active_section` + director CLUB activo; sin body |
 | `/camporees/:id/clubs` | POST | `camporees:register` + uno de los cuatro organizadores GLOBAL dentro de scope; body `club_section_id` |
+| `/camporees/union/:id/clubs` | POST | `attendance:manage` + scope del camporee de unión; body `club_section_id` |
 
-El POST contextual deriva sección, club y actor. El legacy relee desde DB y sólo usa `club_section_id` como selector, nunca como autoridad de territorio o lineage.
+El POST contextual deriva sección, club y actor. Los dos POST legacy releen desde DB y sólo usan `club_section_id` como selector, nunca como autoridad de territorio o lineage. Sus permisos no son intercambiables: `camporees:register` corresponde al local y `attendance:manage` al de unión.
 
 ### 4.3 Cross-cutting `attendance:*`
 
@@ -103,8 +105,8 @@ Participantes, lectura/remoción, pagos y aprobación tardía siguen el patrón 
 
 - `docs/canon/runtime-sacdia.md` — camporee como actividad institucional de alcance regional.
 - `docs/canon/runtime-communications.md` — notificaciones por aprobación tardía usan `source = 'camporees:*'`.
-- `docs/canon/decisiones-clave.md` §20 y §25 — CRUD/attendance cross-cutting e inscripción contextual/legacy territorial.
-- `docs/features/camporees.md` — detalle funcional runtime de los 34 handlers completos.
+- `docs/canon/decisiones-clave.md` §20 y §25 — CRUD/attendance cross-cutting e inscripción contextual/legacy local/de unión.
+- `docs/features/camporees.md` — detalle funcional de los handlers runtime vigentes.
 
 ---
 
@@ -113,7 +115,8 @@ Participantes, lectura/remoción, pagos y aprobación tardía siguen el patrón 
 - `camporees:*` es el permiso canónico para CRUD de la entidad camporee; reutilizar `activities:*` en nuevos endpoints de camporees rompe la frontera de concerns;
 - `attendance:*` sigue cross-cutting para participantes/pagos/aprobaciones, pero no sustituye los permisos específicos de inscripción de sección;
 - `camporees:register_active_section` nunca admite body ni grants distintos de director CLUB;
-- `camporees:register` se restringe a los cuatro organizadores territoriales exactos; los wildcards administrativos no lo conceden;
+- `camporees:register` se restringe en el POST legacy local a los cuatro organizadores territoriales exactos; los wildcards administrativos no lo conceden;
+- el POST legacy de unión conserva `attendance:manage`; no extrapolarle el permiso del endpoint local;
 - participantes locales creados por el flujo contextual conservan lineage mediante `camporee_members.camporee_club_id`; la columna continúa nullable por compatibilidad legacy y por otros flujos que todavía no persisten esa relación;
 - el wildcard de `admin` (`NOT LIKE '%:delete'`) excluye `camporees:delete` — si la operación de delete debe ser accesible a admin, requiere grant explícito en el bloque de `admin` o escalación vía `super_admin`;
-- handlers futuros deben distinguir CRUD, inscripción de sección y attendance de participantes; no reutilizar `attendance:manage` para enrolar una sección.
+- handlers futuros deben distinguir CRUD, inscripción contextual, legacy local, legacy de unión y attendance de participantes; no generalizar permisos entre rutas con contratos distintos.

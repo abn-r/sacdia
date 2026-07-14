@@ -1,8 +1,8 @@
 # Schema Reference - SACDIA Database
 
 **Estado**: ACTIVE
-**Sincronizado contra**: `sacdia-backend/prisma/schema.prisma`
-**Fecha de resincronizacion**: 2026-07-14 (lineage de participantes e inscripción activa por sección de camporee)
+**Autoridad estructural**: `sacdia-backend/prisma/schema.prisma`
+**Actualización scoped**: 2026-07-14 — sólo delta Camporee de lineage e inscripción activa por sección; no implica resincronización global de esta referencia.
 
 Referencia humana concisa del schema Prisma vigente.
 

@@ -413,8 +413,9 @@ src/
 
 - `GET /api/v1/camporees/:camporeeId/section-registration` exige `camporees:read` y resuelve la sección desde el assignment activo. Los roles de lectura pueden consultar, pero no por eso mutar.
 - `POST /api/v1/camporees/:camporeeId/section-registration` exige `camporees:register_active_section`; el seed/migración elimina grants accidentales y lo concede únicamente al rol `director` de categoría `CLUB`. El servicio vuelve a exigir que el assignment activo sea exactamente ese rol.
-- `POST /api/v1/camporees/:camporeeId/clubs` es el flujo legacy territorial y exige `camporees:register`. Sólo son válidos `assistant-lf`, `director-lf`, `assistant-union` y `director-union`, todos `GLOBAL`, dentro del campo local o unión padre del camporee.
-- `camporees:register` se normaliza después de herencias/wildcards: director CLUB, roles de división, `admin` y `super-admin` quedan fuera. Tener `attendance:manage` tampoco autoriza el endpoint legacy.
+- `POST /api/v1/camporees/:camporeeId/clubs` es el flujo legacy local territorial y exige `camporees:register`. Sólo son válidos `assistant-lf`, `director-lf`, `assistant-union` y `director-union`, todos `GLOBAL`, dentro del campo local o unión padre del camporee.
+- `camporees:register` se normaliza después de herencias/wildcards: director CLUB, roles de división, `admin` y `super-admin` quedan fuera. Tener `attendance:manage` tampoco autoriza ese endpoint legacy local.
+- `POST /api/v1/camporees/union/:camporeeId/clubs` conserva el contrato legacy de unión con `attendance:manage`; no hereda `camporees:register` del endpoint local.
 - En el legacy, el body sólo aporta `club_section_id`; camporee, sección, club y tipo se bloquean y releen desde DB. El backend valida activo, territorio y tipo incluido antes de persistir IDs derivados.
 - El alta de participantes exige director y sección activa; además verifica inscripción de sección `registered|approved` y pertenencia del participante. Los fallos de elegibilidad usan `422 CAMPOREE_SECTION_REGISTRATION_REQUIRED` o `422 CAMPOREE_MEMBER_OUTSIDE_ACTIVE_SECTION`.
 

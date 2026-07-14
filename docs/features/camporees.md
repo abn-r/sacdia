@@ -30,7 +30,8 @@ La inscripcion de miembros en camporees tiene implicaciones directas con el modu
   - `GET /api/v1/camporees/:camporeeId/section-registration` — Consultar el estado de inscripción de la sección activa; disponible con `camporees:read` y contexto activo
   - `POST /api/v1/camporees/:camporeeId/section-registration` — Inscribir sin body la sección activa del director CLUB; requiere `camporees:register_active_section` y el backend deriva sección/club/actor
   - `POST /api/v1/camporees/:camporeeId/register` y `POST /api/v1/camporees/:camporeeId/participants` — Registrar miembro en camporee; exigen inscripción activa `registered|approved` de la misma sección y el backend infiere `camporee_type='local'`
-  - `POST /api/v1/camporees/:camporeeId/clubs` — Endpoint legacy con `club_section_id`, reservado por `camporees:register` a `assistant-lf`, `director-lf`, `assistant-union` y `director-union` dentro de su scope
+  - `POST /api/v1/camporees/:camporeeId/clubs` — Endpoint legacy **local** con `club_section_id`, reservado por `camporees:register` a `assistant-lf`, `director-lf`, `assistant-union` y `director-union` dentro de su scope
+  - `POST /api/v1/camporees/union/:camporeeId/clubs` — Endpoint legacy de unión con `club_section_id`; conserva `attendance:manage` y scope del camporee de unión
   - `GET /api/v1/camporees/:camporeeId/members` — Listar miembros del camporee
   - `DELETE /api/v1/camporees/:camporeeId/members/:userId` — Remover miembro del camporee (roles: director, subdirector)
   - `POST /api/v1/camporees/:camporeeId/members/:memberId/payments` — Registrar pago. Body usa `paid_at` y `payment_type` en `inscription|materials|other`
@@ -100,7 +101,7 @@ La inscripcion de miembros en camporees tiene implicaciones directas con el modu
 - **Dos niveles de camporees**: El modelo distingue camporees locales y de union con tablas separadas, permitiendo diferente estructura organizativa
 - **Inscripcion individual**: Los miembros se registran individualmente, no como club completo, permitiendo control granular de participacion
 - **Vinculacion con seguros**: `camporee_members` referencia `member_insurances`; un seguro activo `CAMPOREE` o `GENERAL_ACTIVITIES` es elegible para camporees. La app muestra el estado de seguro del miembro en el selector, pero no solicita capturar manualmente `insurance_id`
-- **Contexto antes que IDs**: el flujo del director usa `section-registration` sin body; sección, club y actor provienen del contexto autenticado. El endpoint legacy con `club_section_id` queda separado para los cuatro organizadores territoriales exactos y no se concede a director CLUB, división ni admin global.
+- **Contexto antes que IDs**: el flujo del director usa `section-registration` sin body; sección, club y actor provienen del contexto autenticado. El endpoint legacy local con `club_section_id` usa `camporees:register` para los cuatro organizadores territoriales exactos y no se concede a director CLUB, división ni admin global. El endpoint legacy de unión es un contrato separado y conserva `attendance:manage`.
 - **Lineage de participante local**: cada alta por el flujo contextual persiste `camporee_members.camporee_club_id`; la FK es nullable para no inventar asociaciones sobre datos legacy.
 - **Inscripción sin puntaje anual**: `camporee_clubs` y `camporee_members` conservan asistencia/participación como registro operativo e histórico; ya no otorgan puntos al ranking anual.
 - **Cierre explícito de clubes**: `club_registration_closed_at` no reemplaza `club_registration_deadline`; el cierre congela secciones competitivas para scoring, mientras `member_registration_deadline` controla participantes/personas.

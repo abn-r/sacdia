@@ -124,7 +124,7 @@ La app móvil debe consultar `GET /api/v1/camporees/:camporeeId/section-registra
 - Ante error del GET, mostrar reintento y no cargar miembros. Ante error del POST, conservar la hoja y permitir reintentar sin duplicar taps concurrentes.
 - El backend puede devolver `422 CAMPOREE_SECTION_REGISTRATION_REQUIRED` o `422 CAMPOREE_MEMBER_OUTSIDE_ACTIVE_SECTION` al registrar participantes; el cliente debe mantener el gate cerrado y mostrar el mensaje de elegibilidad recibido.
 
-El endpoint legacy `POST /api/v1/camporees/:camporeeId/clubs` no es el flujo del director móvil. Conserva body `{ club_section_id }` para operaciones territoriales y requiere `camporees:register` con rol exacto `assistant-lf`, `director-lf`, `assistant-union` o `director-union` dentro de scope; no debe mostrarse a roles CLUB ni a admins globales por wildcard.
+El endpoint legacy local `POST /api/v1/camporees/:camporeeId/clubs` no es el flujo del director móvil. Conserva body `{ club_section_id }` para operaciones territoriales y requiere `camporees:register` con rol exacto `assistant-lf`, `director-lf`, `assistant-union` o `director-union` dentro de scope; no debe mostrarse a roles CLUB ni a admins globales por wildcard. El POST legacy de unión es otro contrato y conserva `attendance:manage`.
 
 ## Actualizacion 2026-02-17 (Admin Panel)
 

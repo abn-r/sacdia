@@ -827,11 +827,13 @@ Los incumplimientos devuelven `422` con `code`:
 
 Al crear el participante, el backend persiste `camporee_members.camporee_club_id` con la inscripción de sección que habilitó la operación.
 
-#### Endpoint legacy de inscripción por sección
+#### Endpoint legacy local de inscripción por sección
 
 `POST /api/v1/camporees/:camporeeId/clubs` conserva body `{ "club_section_id": 22 }` exclusivamente para organizadores territoriales. Requiere `camporees:register` y uno de estos roles `GLOBAL` exactos: `assistant-lf`, `director-lf`, `assistant-union`, `director-union`. El scope debe coincidir con el campo local del camporee o con su unión padre. Roles CLUB, división, `admin` y `super-admin` no heredan esta operación por wildcard.
 
 El backend relee y bloquea camporee, sección, club y tipo desde DB antes de crear; valida activos, territorio, tipo incluido y unicidad activa. El body identifica la sección, pero no es autoridad para club, campo local, tipo ni actor.
+
+El contrato legacy de unión es distinto: `POST /api/v1/camporees/union/:camporeeId/clubs` conserva `attendance:manage` y el scope del camporee de unión.
 
 ### catalogs
 
