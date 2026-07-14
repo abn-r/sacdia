@@ -2,7 +2,7 @@
 
 **Estado:** APROBADO
 
-**Fecha:** 2026-07-13  
+**Fecha:** 2026-07-13
 **Alcance:** `sacdia-backend`, `sacdia-app`, contratos API y documentación de Camporees
 
 ## Objetivo
