@@ -1,13 +1,13 @@
 # ENDPOINTS LIVE REFERENCE (Runtime Truth)
 
-<!-- Generado/actualizado estáticamente contra sacdia-backend/src/**/*controller.ts el 2026-07-07. No se levantó la app ni se ejecutó build. -->
+<!-- Generado estáticamente contra sacdia-backend/src/**/*controller.ts el 2026-07-07. El contrato operations-dashboard se sincronizó manualmente contra el runtime final el 2026-07-15. No se levantó la app ni se ejecutó build. Los conteos agregados permanecen como snapshot del generador 2026-07-07. -->
 
 > [!IMPORTANT]
 > Documento canónico operativo para clientes SACDIA. Base URL: `/api/v1`.
 > La tabla refleja los decoradores HTTP efectivos en controllers NestJS; DTOs, ejemplos y errores finos viven en Swagger/runtime y docs de feature cuando aplique.
 
 **Estado**: ACTIVE
-**Actualizado**: 2026-07-07
+**Actualizado**: 2026-07-15
 **Total endpoints**: 697 decoradores HTTP en 90 controllers
 **Métodos**: GET 291 · POST 207 · PATCH 103 · DELETE 88 · PUT 8
 **Auth detectada**: JWT 685 · Public 12
@@ -325,11 +325,185 @@
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
 | GET | `/api/v1/admin/analytics/sla-dashboard` | JWT | Global: admin, coordinator | SLA Dashboard | AnalyticsService.getSlaDashboard() | `src/analytics/analytics.controller.ts` |
+| GET | `/api/v1/admin/analytics/operations-dashboard` | JWT | Global: admin (alias: assistant-admin), super-admin, director-dia, assistant-dia, director-union, assistant-union, director-lf, assistant-lf | Dashboard operativo jerárquico con scope forzado en servidor | OperationsDashboardService.getDashboard() | `src/analytics/analytics.controller.ts` |
 | GET | `/api/v1/admin/analytics/jobs-overview` | JWT | Global: admin, super-admin | Overview de jobs y colas BullMQ (admin only) | JobsOverviewService.getOverview() | `src/analytics/analytics.controller.ts` |
 | POST | `/api/v1/admin/analytics/jobs/:queue/:jobId/retry` | JWT | Global: super-admin | Retry failed BullMQ job (super-admin only) | JobsOverviewService.retryFailedJob() | `src/analytics/analytics.controller.ts` |
 | GET | `/api/v1/admin/analytics/queues/:queueName/health` | JWT | Global: admin, super-admin | Queue health snapshot (admin only) | JobsOverviewService.getQueueHealth() | `src/analytics/analytics.controller.ts` |
 | GET | `/api/v1/admin/analytics/cron-runs` | JWT | Global: admin, super-admin | Resumen de ejecuciones de cron jobs (admin only) | CronRunsService.getSummary() | `src/analytics/analytics.controller.ts` |
 | GET | `/api/v1/admin/analytics/cron-runs/history` | JWT | Global: admin, super-admin | Historial paginado de cron runs con filtros | CronRunsService.getHistory() | `src/analytics/analytics.controller.ts` |
+
+#### `GET /api/v1/admin/analytics/operations-dashboard`
+
+Endpoint read-only agregado. El controller admite los roles enumerados en la tabla; `assistant-admin` es aceptado por el alias `admin ↔ assistant-admin` de `GlobalRolesGuard`. Solo `super-admin` obtiene scope global. Los demás actores reciben el scope territorial resuelto por `OperationsDashboardScopeService`.
+
+##### Query
+
+| Parámetro | Requerido | Validación y comportamiento |
+| --- | --- | --- |
+| `ecclesiastical_year_id` | No | Entero `>= 1`. Si se omite, selecciona el año activo más reciente por `start_date`. |
+| `division_id` | No | Entero `>= 1`; solo puede mantener o reducir el scope autorizado. |
+| `union_id` | No | Entero `>= 1`; debe pertenecer a la cadena solicitada y al scope del actor. |
+| `local_field_id` | No | Entero `>= 1`; debe pertenecer a la cadena solicitada y al scope del actor. |
+| `report_year` | Condicional | Entero `>= 1`; debe enviarse junto con `report_month`. |
+| `report_month` | Condicional | Entero `1..12`; debe enviarse junto con `report_year`. |
+
+El periodo mensual explícito debe caer entre los meses inicial y final del año eclesiástico, inclusive. Si ambos parámetros se omiten, el servicio resuelve el último mes calendario cerrado dentro del año. Cuando el año todavía no contiene un mes cerrado, `reporting_month` es `null`, los conteos mensuales son `0`, `coverage_pct` es `null` y la calidad es `not_applicable`.
+
+El `ValidationPipe` global transforma strings numéricos, rechaza propiedades no declaradas y responde `400` ante enteros inválidos, IDs no positivos, mes fuera de rango o un periodo incompleto.
+
+##### Envelope y shape de éxito
+
+```ts
+type ScopeLevel = 'all' | 'division' | 'union' | 'local_field';
+type ChildLevel = 'division' | 'union' | 'local_field' | 'club';
+type MetricQuality =
+  | 'exact'
+  | 'current_affiliation'
+  | 'unavailable'
+  | 'not_applicable';
+
+type DashboardMetrics = {
+  administrative_clubs: {
+    total: number;
+    active: number;
+    inactive: number;
+  };
+  operations: {
+    operational_clubs: number;
+    non_operational_clubs: number;
+    operational_sections: number;
+    operational_rate_pct: number | null;
+  };
+  people: {
+    institutionally_active: number;
+    platform_accounts: { active: number; inactive: number };
+  };
+  classes: {
+    total_enrollments: number;
+    distinct_people: number;
+    by_class: Array<{
+      class_id: number;
+      class_name: string;
+      club_type_id: number;
+      club_type_name: string;
+      display_order: number;
+      enrollment_count: number;
+    }>;
+  };
+  monthly_reports: {
+    expected_sections: number;
+    submitted_sections: number;
+    draft_sections: number;
+    generated_sections: number;
+    missing_sections: number;
+    coverage_pct: number | null;
+  };
+  honors: {
+    in_progress: number | null;
+    pending_review: number | null;
+    approved: number | null;
+    attribution: 'current_affiliation' | 'unavailable';
+  };
+  activities: {
+    registered: number;
+    joint_registered: number;
+    distinct_participating_sections: number;
+  };
+  queues: {
+    role_assignments_pending: number;
+    transfers_pending: number;
+    class_validations_pending: number;
+    honors_review_pending: number | null;
+    annual_folders_pending_union: number;
+  };
+};
+
+type OperationsDashboardResponse = {
+  status: 'ok';
+  data: {
+    meta: {
+      computed_at: string; // ISO 8601
+      cached: boolean;
+      cache_ttl_seconds: number; // runtime actual: 60
+      definitions_version: string; // runtime actual: "1"
+      scope: {
+        level: ScopeLevel;
+        id: number | null;
+        name: string;
+        path: Array<{
+          level: Exclude<ScopeLevel, 'all'>;
+          id: number;
+          name: string;
+        }>;
+      };
+      period: {
+        ecclesiastical_year: {
+          id: number;
+          start_date: string; // YYYY-MM-DD
+          end_date: string; // YYYY-MM-DD
+          active: boolean;
+        };
+        reporting_month: { year: number; month: number } | null;
+      };
+    };
+    summary: DashboardMetrics;
+    children: Array<
+      {
+        id: number;
+        name: string;
+        level: ChildLevel;
+      } & DashboardMetrics
+    >;
+    data_quality: Array<{
+      metric: string;
+      status: MetricQuality;
+      note: string;
+    }>;
+  };
+};
+```
+
+`children` siempre representa el nivel inmediato: global → División → Unión → Campo local → Club. También contiene `classes.by_class`; no es un resumen compacto. Los totales de `summary` se recalculan de forma independiente y no deben reconstruirse sumando children.
+
+Para un año histórico (`ecclesiastical_year.active = false`), los conteos de especialidades y `queues.honors_review_pending` son `null`, no `0`. `operations.operational_rate_pct` es `null` cuando no hay clubes administrativos y `monthly_reports.coverage_pct` es `null` cuando no hay denominador.
+
+##### Errores
+
+| HTTP | Código/causa | Regla |
+| ---: | --- | --- |
+| `400` | Validación DTO | Query desconocida, número inválido/no positivo, periodo incompleto o `report_month` fuera de `1..12`. |
+| `400` | `ANALYTICS_SCOPE_CHAIN_INVALID` | Los IDs territoriales enviados no forman una misma cadena. |
+| `400` | `ANALYTICS_REPORTING_PERIOD_OUTSIDE_ECCLESIASTICAL_YEAR` | El mes solicitado queda fuera del año seleccionado. |
+| `401` | JWT faltante o inválido | Rechazo de `JwtAuthGuard`. |
+| `403` | `GUARD_PERMISSION_DENIED` | Rol no admitido, destino fuera de scope o geografía desconocida solicitada por un actor scoped. |
+| `403` | `ADMIN_USER_SCOPE_MISSING` | El rol requiere scope territorial, pero el perfil efectivo no contiene el ID numérico necesario. |
+| `404` | `ADMIN_ECCLESIASTICAL_YEAR_NOT_FOUND` | No existe el año explícito o no hay año activo al omitirlo. |
+| `404` | `ADMIN_DIVISION_NOT_FOUND`, `ADMIN_UNION_NOT_FOUND`, `ADMIN_LOCAL_FIELD_NOT_FOUND` | Solo para `super-admin` global que consulta geografía inexistente. |
+
+Los errores de dominio siguen el envelope canónico:
+
+```json
+{
+  "status": "error",
+  "statusCode": 403,
+  "code": "GUARD_PERMISSION_DENIED",
+  "message": "...",
+  "timestamp": "2026-07-15T00:00:00.000Z",
+  "path": "/api/v1/admin/analytics/operations-dashboard"
+}
+```
+
+Un actor territorial recibe el mismo `403 GUARD_PERMISSION_DENIED` tanto para un territorio existente fuera de alcance como para un ID geográfico inexistente. Esto evita enumeración. El `404` geográfico está reservado al actor global.
+
+##### Caché
+
+- `Map` en memoria por réplica, con TTL de 60 segundos.
+- Key por `scope.level`, `scope.id`, año eclesiástico y periodo mensual o `none`.
+- Un hit devuelve `cached: true` y conserva el `computed_at` del snapshot original.
+- Una entrada vencida se elimina y recalcula; no existe stale-on-error.
+- `cached: true` no significa stale y el contrato no expone `freshness`.
+
+Semántica funcional y límites: [operations-dashboard.md](../features/operations-dashboard.md).
 
 ### Annual Evidence Folders
 

@@ -4,6 +4,7 @@
 
 **Versión**: 1.0  
 **Fecha**: 31 de enero de 2026  
+**Actualizado**: 15 de julio de 2026
 **Status**: ✅ Implementado
 
 ---
@@ -96,6 +97,43 @@ Los listados administrativos de reportes resuelven el contexto con `Authorizatio
 | Director/secretario con asignación activa de club | Solo reportes de su sección activa |
 
 La regla se centraliza en `src/reports/report-visibility-scope.ts` y se aplica a listados mensuales, trimestrales y anuales.
+
+---
+
+## RBAC y scope del dashboard operativo
+
+`GET /api/v1/admin/analytics/operations-dashboard` usa `JwtAuthGuard` y `GlobalRolesGuard`, pero el guard de rol solo habilita la superficie. `OperationsDashboardScopeService` vuelve a resolver el perfil de autorización y fuerza el alcance territorial antes de consultar métricas.
+
+### Matriz de alcance máximo
+
+| Actor | Alcance máximo efectivo | Reducción permitida |
+| --- | --- | --- |
+| `super-admin` | Global (`all`) | División, Unión o Campo local válidos |
+| `admin`, `assistant-admin` | Scope configurado; Unión tiene precedencia, luego Campo local y finalmente División | Solo el territorio configurado y sus descendientes |
+| `director-dia`, `assistant-dia` | Su División efectiva | Unión o Campo local descendiente |
+| `director-union`, `assistant-union` | Su Unión efectiva | Campo local descendiente |
+| `director-lf`, `assistant-lf` | Su Campo local efectivo | No puede ampliar; permanece en ese Campo local |
+
+El controller declara `admin`, `super-admin` y los seis roles territoriales. `assistant-admin` entra por el alias simétrico `admin ↔ assistant-admin` de `GlobalRolesGuard`; no obtiene alcance global por ese alias. Coordinadores, pastores y actores con roles solo de club no están admitidos.
+
+### Reglas de filtros territoriales
+
+- `division_id`, `union_id` y `local_field_id` son filtros de reducción, nunca autoridad.
+- Cuando se envían varios niveles, deben representar una misma cadena territorial.
+- El backend carga la geografía objetivo, valida que esté contenida en el scope base del actor y después valida la consistencia de la cadena solicitada.
+- Un actor scoped no puede convertir su scope en global omitiendo filtros.
+- Un rol que requiere territorio y no tiene un ID efectivo numérico recibe `403 ADMIN_USER_SCOPE_MISSING`.
+
+### Respuestas que evitan enumeración territorial
+
+| Situación | Respuesta |
+| --- | --- |
+| Destino existente fuera del scope de un actor territorial | `403 GUARD_PERMISSION_DENIED` |
+| ID geográfico inexistente solicitado por un actor territorial | El mismo `403 GUARD_PERMISSION_DENIED` |
+| Cadena internamente inconsistente dentro de un scope consultable | `400 ANALYTICS_SCOPE_CHAIN_INVALID` |
+| División, Unión o Campo local inexistente consultado por `super-admin` global | `404 ADMIN_DIVISION_NOT_FOUND`, `ADMIN_UNION_NOT_FOUND` o `ADMIN_LOCAL_FIELD_NOT_FOUND` |
+
+El `404` geográfico se reserva al actor global. Para actores con scope, existencia y no pertenencia producen el mismo `403`; así la respuesta no revela territorios ajenos. La comprobación de contención precede al error de cadena, por lo que una combinación que apunta fuera del scope también responde `403`.
 
 ---
 
