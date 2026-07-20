@@ -25,6 +25,8 @@
 **Files:**
 - Create: `docs/audit/manifests/annual-2026-acv.schema.json`
 - Create: `docs/audit/manifests/pilot-role-roster.schema.json`
+- Create before scoped approval: `docs/audit/manifests/annual-2026-acv.proposal.json`
+- Create before scoped approval: `docs/audit/manifests/pilot-role-roster.proposal.json`
 - Create after owner approval: `docs/audit/manifests/annual-2026-acv.json`
 - Create after owner approval: `docs/audit/manifests/pilot-role-roster.json`
 
@@ -33,8 +35,8 @@
 1. Definir schema anual obligatorio:
    - `year_id=1`, `owner_scope=local_field`, `owner_id=4`;
    - ranking GM con máximo, ejes, componentes y pesos;
-   - plantillas AV/GM con secciones, puntos, `minimum_points` y `closing_date`;
-   - closing date de la plantilla CQ existente;
+   - plantillas AV/CQ/GM con secciones funcionales, puntos, `minimum_points` equivalente al 80% y `closing_date=2026-12-15`;
+   - normalización de la plantilla CQ existente, eliminando placeholders y conservando su `folder_template_id`;
    - `approved_by`, rol, fecha y checksum.
 2. Definir roster obligatorio:
    - director real de Aventureros ACV;

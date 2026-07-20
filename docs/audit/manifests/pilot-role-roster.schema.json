@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://sacdia.app/schemas/pilot-role-roster.schema.json",
   "title": "Roster funcional para piloto administrativo ACV",
-  "description": "Personas operativas y cuentas scoped autorizadas para el piloto. Las identidades genéricas se permiten únicamente para E2E territorial en development.",
+  "description": "Personas operativas y cuentas scoped autorizadas para el piloto. Las identidades genéricas se permiten únicamente dentro de e2e_accounts en development.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -14,7 +14,7 @@
     "approval"
   ],
   "properties": {
-    "schema_version": { "const": 1 },
+    "schema_version": { "const": 2 },
     "scope": {
       "type": "object",
       "additionalProperties": false,
@@ -50,6 +50,7 @@
               "allOf": [
                 { "$ref": "#/$defs/realPerson" },
                 {
+                  "type": "object",
                   "properties": {
                     "user_id": { "const": "104a2549-2056-4b9b-aaeb-51d8fd43191d" }
                   }
@@ -70,6 +71,7 @@
               "allOf": [
                 { "$ref": "#/$defs/realPerson" },
                 {
+                  "type": "object",
                   "properties": {
                     "user_id": { "const": "a0000001-0000-4000-8000-000000000001" }
                   }
@@ -80,6 +82,7 @@
               "allOf": [
                 { "$ref": "#/$defs/realPerson" },
                 {
+                  "type": "object",
                   "properties": {
                     "user_id": { "const": "a0000001-0000-4000-8000-000000000003" }
                   }
@@ -90,6 +93,7 @@
               "allOf": [
                 { "$ref": "#/$defs/realPerson" },
                 {
+                  "type": "object",
                   "properties": {
                     "user_id": { "const": "a0000001-0000-4000-8000-000000000004" }
                   }
@@ -116,6 +120,7 @@
           "allOf": [
             { "$ref": "#/$defs/scopedAccount" },
             {
+              "type": "object",
               "properties": {
                 "role": { "enum": ["director-union", "assistant-union"] },
                 "scope_type": { "const": "union" },
@@ -129,6 +134,7 @@
           "allOf": [
             { "$ref": "#/$defs/scopedAccount" },
             {
+              "type": "object",
               "properties": {
                 "role": { "enum": ["director-lf", "assistant-lf"] },
                 "scope_type": { "const": "local_field" },
@@ -142,6 +148,7 @@
           "allOf": [
             { "$ref": "#/$defs/scopedAccount" },
             {
+              "type": "object",
               "properties": {
                 "role": { "const": "director" },
                 "scope_type": { "const": "club_section" },
@@ -155,6 +162,7 @@
           "allOf": [
             { "$ref": "#/$defs/scopedAccount" },
             {
+              "type": "object",
               "properties": {
                 "role": { "const": "secretary" },
                 "scope_type": { "const": "club_section" },
@@ -168,6 +176,7 @@
           "allOf": [
             { "$ref": "#/$defs/scopedAccount" },
             {
+              "type": "object",
               "properties": {
                 "role": { "const": "treasurer" },
                 "scope_type": { "const": "club_section" },
@@ -181,11 +190,12 @@
           "allOf": [
             { "$ref": "#/$defs/scopedAccount" },
             {
+              "type": "object",
               "properties": {
                 "role": { "const": "member" },
                 "scope_type": { "const": "club_section" },
                 "scope_id": { "const": "2" },
-                "account_kind": { "const": "real_person" },
+                "account_kind": { "const": "generic_training" },
                 "access_panel": { "const": false }
               }
             }
@@ -201,6 +211,7 @@
       "allOf": [
         { "$ref": "#/$defs/approval" },
         {
+          "type": "object",
           "properties": {
             "approver_role": { "enum": ["director", "director-lf", "admin", "super-admin"] }
           }

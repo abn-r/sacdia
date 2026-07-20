@@ -1,0 +1,256 @@
+{
+  "proposal_status": "awaiting_scoped_approval",
+  "target_schema": "annual-2026-acv.schema.json",
+  "target_manifest": {
+    "schema_version": 2,
+    "scope": {
+      "ecclesiastical_year_id": 1,
+      "year": 2026,
+      "owner_scope": "local_field",
+      "owner_id": 4
+    },
+    "master_guides_ranking": {
+      "club_type_id": 3,
+      "max_points": 10000,
+      "axes": [
+        {
+          "key": "administrative",
+          "name": "Cumplimiento Administrativo",
+          "max_points": 5000,
+          "display_order": 1,
+          "active": true
+        },
+        {
+          "key": "operational",
+          "name": "Vida Operativa del Club",
+          "max_points": 5000,
+          "display_order": 2,
+          "active": true
+        }
+      ],
+      "components": [
+        {
+          "key": "annual_evidence_folder",
+          "axis_key": "administrative",
+          "name": "Carpeta Anual de Evidencias",
+          "max_points": 3000,
+          "display_order": 1,
+          "active": true
+        },
+        {
+          "key": "finance_compliance",
+          "axis_key": "administrative",
+          "name": "Finanzas",
+          "max_points": 2000,
+          "display_order": 2,
+          "active": true
+        },
+        {
+          "key": "camporee_events",
+          "axis_key": "operational",
+          "name": "Camporee",
+          "max_points": 2000,
+          "display_order": 1,
+          "active": true
+        },
+        {
+          "key": "activities_registered",
+          "axis_key": "operational",
+          "name": "Actividades registradas",
+          "max_points": 1000,
+          "display_order": 2,
+          "active": true
+        },
+        {
+          "key": "attendance_participation",
+          "axis_key": "operational",
+          "name": "Asistencia y participación",
+          "max_points": 1000,
+          "display_order": 3,
+          "active": true
+        },
+        {
+          "key": "sacdia_operational_usage",
+          "axis_key": "operational",
+          "name": "Uso operativo de SACDIA",
+          "max_points": 1000,
+          "display_order": 4,
+          "active": true
+        }
+      ]
+    },
+    "templates": {
+      "adventurers": {
+        "club_type_id": 1,
+        "name": "Carpeta Anual Aventureros ACV 2026",
+        "minimum_points": 2400,
+        "minimum_percentage": 80,
+        "closing_date": "2026-12-15",
+        "sections": [
+          {
+            "key": "governance_planning",
+            "name": "Gobernanza y planificación",
+            "max_points": 600,
+            "minimum_points": 480,
+            "display_order": 1,
+            "required": true
+          },
+          {
+            "key": "spiritual_development",
+            "name": "Desarrollo espiritual y formación integral",
+            "max_points": 600,
+            "minimum_points": 480,
+            "display_order": 2,
+            "required": true
+          },
+          {
+            "key": "community_service",
+            "name": "Servicio comunitario y evangelización",
+            "max_points": 600,
+            "minimum_points": 480,
+            "display_order": 3,
+            "required": true
+          },
+          {
+            "key": "educational_program",
+            "name": "Programa formativo y actividades",
+            "max_points": 600,
+            "minimum_points": 480,
+            "display_order": 4,
+            "required": true
+          },
+          {
+            "key": "annual_results",
+            "name": "Evidencias, resultados y cierre anual",
+            "max_points": 600,
+            "minimum_points": 480,
+            "display_order": 5,
+            "required": true
+          }
+        ]
+      },
+      "conquerors": {
+        "folder_template_id": "b30cc30d-e884-433e-afaa-535da748d0d9",
+        "club_type_id": 2,
+        "name": "Carpeta Anual Conquistadores ACV 2026",
+        "minimum_points": 3200,
+        "minimum_percentage": 80,
+        "closing_date": "2026-12-15",
+        "sections": [
+          {
+            "key": "governance_planning",
+            "name": "Gobernanza y planificación",
+            "max_points": 800,
+            "minimum_points": 640,
+            "display_order": 1,
+            "required": true
+          },
+          {
+            "key": "spiritual_development",
+            "name": "Desarrollo espiritual y discipulado",
+            "max_points": 800,
+            "minimum_points": 640,
+            "display_order": 2,
+            "required": true
+          },
+          {
+            "key": "community_service",
+            "name": "Servicio comunitario y evangelización",
+            "max_points": 800,
+            "minimum_points": 640,
+            "display_order": 3,
+            "required": true
+          },
+          {
+            "key": "educational_program",
+            "name": "Programa formativo y actividades",
+            "max_points": 800,
+            "minimum_points": 640,
+            "display_order": 4,
+            "required": true
+          },
+          {
+            "key": "annual_results",
+            "name": "Evidencias, resultados y cierre anual",
+            "max_points": 800,
+            "minimum_points": 640,
+            "display_order": 5,
+            "required": true
+          }
+        ]
+      },
+      "master_guides": {
+        "club_type_id": 3,
+        "name": "Carpeta Anual Guías Mayores ACV 2026",
+        "minimum_points": 2400,
+        "minimum_percentage": 80,
+        "closing_date": "2026-12-15",
+        "sections": [
+          {
+            "key": "governance_planning",
+            "name": "Gobernanza y planificación",
+            "max_points": 600,
+            "minimum_points": 480,
+            "display_order": 1,
+            "required": true
+          },
+          {
+            "key": "spiritual_development",
+            "name": "Liderazgo espiritual y mentoría",
+            "max_points": 600,
+            "minimum_points": 480,
+            "display_order": 2,
+            "required": true
+          },
+          {
+            "key": "community_service",
+            "name": "Servicio comunitario y evangelización",
+            "max_points": 600,
+            "minimum_points": 480,
+            "display_order": 3,
+            "required": true
+          },
+          {
+            "key": "leadership_program",
+            "name": "Formación de líderes y actividades",
+            "max_points": 600,
+            "minimum_points": 480,
+            "display_order": 4,
+            "required": true
+          },
+          {
+            "key": "annual_results",
+            "name": "Evidencias, resultados y cierre anual",
+            "max_points": 600,
+            "minimum_points": 480,
+            "display_order": 5,
+            "required": true
+          }
+        ]
+      }
+    },
+    "content_sha256": "a4aafb2ce98ed9fcc597a2ca2b45c7f1a81c60f9d21d137a624c4e44a814461b"
+  },
+  "required_approvals": {
+    "ranking": {
+      "required_roles": [
+        "director-union",
+        "assistant-union",
+        "admin",
+        "super-admin"
+      ],
+      "suggested_user_id": "8de9da7b-9a92-49b3-98e2-b33adbf9edba",
+      "suggested_name": "Director Union Test"
+    },
+    "templates": {
+      "required_roles": [
+        "director-lf",
+        "assistant-lf",
+        "admin",
+        "super-admin"
+      ],
+      "suggested_user_id": "b2cc3df3-bcf9-43b4-9cd3-274a6f667694",
+      "suggested_name": "Director LF Test"
+    }
+  }
+}
