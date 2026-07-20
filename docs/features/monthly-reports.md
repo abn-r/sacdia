@@ -88,12 +88,12 @@ La feature esta implementada en backend con IDs UUID y estados `draft -> generat
   - `src/lib/api/monthly-reports.ts`
   - `src/components/reports/*`
   - `src/app/(dashboard)/dashboard/reports/[reportId]/page.tsx`
-- **Drift explicito verificado**:
-  - el admin tipa `report_id` y `enrollment_id` como `number`, pero backend usa UUID
-  - la pagina `[reportId]` hace `Number(reportId)` y rechaza cualquier UUID valido
+- **Contrato reconciliado parcialmente**:
+  - el adaptador admin desempaqueta `{ status, data }` y normaliza `monthly_report_id`/`club_enrollment_id` del backend hacia el contrato local `report_id`/`enrollment_id`; crear, listar, detalle, generar, enviar y descargar PDF usan UUID válidos
+- **Drift explicito pendiente**:
   - `MonthlyReportManualData` del admin usa campos legacy como `weekly_meetings_held`, `leadership_meetings`, `souls_won`, `service_hours_total`, que NO coinciden con `UpdateManualDataDto` del backend
   - `MonthlyReportAutoData` del admin espera shape legacy (`activities_count`, `members_total`, `attendance_rate`, etc.) que no coincide con el `preview`/`snapshot_data` real actual
-- **Conclusion factual**: existe superficie admin para monthly reports, pero hoy no debe documentarse como compatible con el contrato backend vigente
+- **Conclusión factual**: la navegación y acciones por ID ya consumen el contrato UUID del backend; los payloads manuales y la presentación de datos auto-calculados siguen pendientes de reconciliación
 
 ### App Movil
 
