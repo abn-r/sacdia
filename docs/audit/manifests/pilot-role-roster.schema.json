@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://sacdia.app/schemas/pilot-role-roster.schema.json",
-  "title": "Roster real para piloto administrativo ACV",
-  "description": "Personas y cuentas scoped autorizadas para el piloto. Las cuentas Test no son válidas.",
+  "title": "Roster funcional para piloto administrativo ACV",
+  "description": "Personas operativas y cuentas scoped autorizadas para el piloto. Las identidades genéricas se permiten únicamente para E2E territorial en development.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -119,7 +119,8 @@
               "properties": {
                 "role": { "enum": ["director-union", "assistant-union"] },
                 "scope_type": { "const": "union" },
-                "scope_id": { "const": "20" }
+                "scope_id": { "const": "20" },
+                "account_kind": { "const": "generic_training" }
               }
             }
           ]
@@ -131,7 +132,8 @@
               "properties": {
                 "role": { "enum": ["director-lf", "assistant-lf"] },
                 "scope_type": { "const": "local_field" },
-                "scope_id": { "const": "4" }
+                "scope_id": { "const": "4" },
+                "account_kind": { "const": "generic_training" }
               }
             }
           ]
@@ -143,7 +145,8 @@
               "properties": {
                 "role": { "const": "director" },
                 "scope_type": { "const": "club_section" },
-                "scope_id": { "const": "2" }
+                "scope_id": { "const": "2" },
+                "account_kind": { "const": "real_person" }
               }
             }
           ]
@@ -155,7 +158,8 @@
               "properties": {
                 "role": { "const": "secretary" },
                 "scope_type": { "const": "club_section" },
-                "scope_id": { "const": "2" }
+                "scope_id": { "const": "2" },
+                "account_kind": { "const": "real_person" }
               }
             }
           ]
@@ -167,7 +171,8 @@
               "properties": {
                 "role": { "const": "treasurer" },
                 "scope_type": { "const": "club_section" },
-                "scope_id": { "const": "2" }
+                "scope_id": { "const": "2" },
+                "account_kind": { "const": "real_person" }
               }
             }
           ]
@@ -180,6 +185,7 @@
                 "role": { "const": "member" },
                 "scope_type": { "const": "club_section" },
                 "scope_id": { "const": "2" },
+                "account_kind": { "const": "real_person" },
                 "access_panel": { "const": false }
               }
             }
@@ -238,22 +244,21 @@
         "scope_id",
         "access_panel",
         "active",
-        "confirmed_real_person"
+        "account_kind"
       ],
       "properties": {
         "user_id": { "$ref": "#/$defs/uuid" },
         "full_name": {
           "type": "string",
           "minLength": 1,
-          "maxLength": 200,
-          "not": { "pattern": "[Tt][Ee][Ss][Tt]" }
+          "maxLength": 200
         },
         "role": { "type": "string", "minLength": 1 },
         "scope_type": { "enum": ["union", "local_field", "club_section"] },
         "scope_id": { "type": "string", "pattern": "^[0-9]+$" },
         "access_panel": { "type": "boolean" },
         "active": { "const": true },
-        "confirmed_real_person": { "const": true }
+        "account_kind": { "enum": ["real_person", "generic_training"] }
       }
     },
     "approval": {

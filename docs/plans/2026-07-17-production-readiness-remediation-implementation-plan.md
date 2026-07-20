@@ -40,6 +40,7 @@
    - director real de Aventureros ACV;
    - secretario y tesorero reales de Conquistadores ACV; las cuentas Test no desbloquean el piloto ni la capacitación;
    - cuentas scoped de Unión, Campo Local, director, secretario, tesorero y member.
+   - las cuentas genéricas de Unión y Campo Local se aceptan exclusivamente para E2E territorial en development, con usuario activo, aprobado, acceso al panel y scope efectivo; no sustituyen cargos operativos ni se promueven a production.
 3. Unión firma valores de ranking; Campo Local firma plantillas/fechas; ACV firma roster.
 4. Validar JSON contra schema.
 5. Bloquear Tasks 8 y 10 hasta recibir ambos archivos completos. El implementador no elige valores ni personas.
@@ -306,7 +307,7 @@
 
 **E2E:**
 
-1. Cuentas reales/scoped y sin credenciales Test compartidas.
+1. Cuentas scoped activas. Las identidades genéricas se limitan a E2E en development y no se reutilizan en production.
 2. Login/scope → corregir/resubmit → cola admin → approve → folder 4,000 → evidencia → actividad/asistencia → ingreso/egreso → inventario → reporte → ranking.
 3. Verificar historial del club, audit event, outbox, notification log/delivery/inbox y cola sin dead letters.
 4. Negativos:
@@ -323,7 +324,7 @@
 
 - Cadena exacta: DIA 1 → México 25 → UMI 20 → Campo 4 → Veracruz 17 → Díaz Aragón 1 → ACV 1.
 - Cero slot violations bajo trigger y regla anual.
-- GM enrollment refleja Carlos/Ana/Pedro; CQ director es Abner; roster operativo no usa cuentas Test para capacitación.
+- GM enrollment refleja Carlos/Ana/Pedro; CQ director es Abner; el roster operativo usa personas nominales y reserva las cuentas genéricas para E2E territorial en development.
 - Cero matrículas activas en clases inactivas; 22 IDs permanecen auditables.
 - Honores: 175 AV, 692 CQ, 1 GM; 17 progresos sin cambio de status.
 - Catálogo/inicio/validación comparten HCT canónico.

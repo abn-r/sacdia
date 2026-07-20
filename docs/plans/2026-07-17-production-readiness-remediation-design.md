@@ -57,7 +57,7 @@ Approve/reject validará el scope territorial del registro objetivo. Rechazar ex
 El orden será ranking GM → plantillas AV/GM publicadas → carpeta GM → inscripción/aprobación AV. La tarea no inicia hasta recibir:
 
 - `annual-2026-acv.json` firmado por Unión/Campo Local con pesos, secciones, puntos, mínimo y cierre;
-- `pilot-role-roster.json` con director de Aventureros y secretario/tesorero reales de Conquistadores; las cuentas Test no habilitan el piloto.
+- `pilot-role-roster.json` con director de Aventureros y secretario/tesorero reales de Conquistadores. Las identidades genéricas territoriales se permiten únicamente como cuentas E2E controladas en development; no sustituyen cargos operativos nominales.
 
 El ejecutor nunca inventa valores ni personas. El postflight valida la configuración efectiva respetando precedencia Unión→Campo Local.
 
