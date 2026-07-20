@@ -1,7 +1,7 @@
 # Diseño de remediación para el piloto administrativo SACDIA
 
-**Fecha:** 2026-07-17  
-**Fuente de evidencia:** `DATABASE_URL` de development  
+**Fecha:** 2026-07-17
+**Fuente de evidencia:** `DATABASE_URL` de development
 **Documento base:** `docs/audit/PRODUCTION-ONBOARDING-OPERATIONS-READINESS-2026-07-17.md`
 
 ## Objetivo
