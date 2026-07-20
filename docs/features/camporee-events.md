@@ -1,7 +1,7 @@
 # Camporee Events
 
 **Estado**: IMPLEMENTADO PARCIAL
-**Última actualización**: 2026-07-06
+**Última actualización**: 2026-07-20
 **Owner**: Backend/App/Admin
 **Dominio relacionado**: [camporees.md](./camporees.md)
 
@@ -48,6 +48,9 @@ La separación template ↔ instancia evita que ajustes específicos de un campo
   - `PUT /api/v1/camporee-events/:eventId/staff-assignments`
   - `PUT /api/v1/camporee-events/:eventId/schedule-blocks`
   - `DELETE /api/v1/camporee-events/:eventId`
+- El roster de jueces expone email/notas en sus listados y permite actualización o soft-deactivate por UUID con scope del camporee:
+  - `PATCH /api/v1/camporee-judges/:judgeId`
+  - `DELETE /api/v1/camporee-judges/:judgeId`
 - App móvil: el detalle de Camporí consume `GET /api/v1/local-camporees/:camporeeId/events/preview`; la lista principal muestra sólo icono, nombre y puntaje total. Al abrir un evento, antes de la liberación de agenda se omite horario/sede/bloques, y después se muestra el detalle con día/hora/sede y bloques segmentados si existen.
 - RBAC: la lectura móvil de eventos se concede a director, subdirector, secretario, secretario-tesorero, tesorero y consejero con `camporee_events:read`.
 - Las respuestas de eventos incluyen `staff_assignments` para conservar el registro operativo, aunque la tarjeta móvil compacta no los muestra por defecto.
@@ -260,6 +263,7 @@ Autorización:
 
 - Lectura de rúbricas/scoring targets: `camporee_events:read` o juez activo asignado.
 - Gestión de rúbricas, roster, personal de agenda y asignaciones: `camporee_events:update` con scope del camporee.
+- La edición/desactivación de un juez resuelve el camporee padre desde `judgeId` y vuelve a validar `camporee_events:update` + scope `current-write` en el servicio.
 - Envío de puntaje: juez principal activo desde app móvil, o carga manual por `assistant-lf`/`director-lf` con scope institucional. La app consume `GET /camporee-judges/me/assignments`, filtra asignaciones `primary`, carga rúbricas del evento y envía exactamente un ítem por rúbrica.
 - Mutaciones de rúbricas, asignación de jueces y envío de puntaje requieren inscripción de clubes cerrada; lecturas permanecen disponibles.
 
@@ -323,6 +327,17 @@ Visibilidad de templates:
 | `POST`   | `/union-camporees/:id/staff`              | camporee_events:update   | Agregar persona al roster de unión |
 | `PATCH`  | `/camporee-staff/:staffMemberId`          | camporee_events:update   | Editar categoría/etiqueta/notas |
 | `DELETE` | `/camporee-staff/:staffMemberId`          | camporee_events:update   | Desactivar persona del roster |
+
+### Roster de jueces de scoring
+
+| Método   | Path                            | Permiso                                     | Descripción                                                       |
+| -------- | ------------------------------- | ------------------------------------------- | ----------------------------------------------------------------- |
+| `GET`    | `/local-camporees/:id/judges`   | camporee_events:read + scope                | Listar jueces activos con email, notas e imagen opcional          |
+| `GET`    | `/union-camporees/:id/judges`   | camporee_events:read + scope                | Listar jueces activos con email, notas e imagen opcional          |
+| `PATCH`  | `/camporee-judges/:judgeId`     | camporee_events:update + scope del camporee | Editar notas/estado/actividad                                     |
+| `DELETE` | `/camporee-judges/:judgeId`     | camporee_events:update + scope del camporee | Soft-deactivate del juez y de todas sus asignaciones activas      |
+
+La desactivación se ejecuta en una transacción. Los scores históricos permanecen auditables y no bloquean la operación; las filas de `camporee_staff_members` no se desactivan automáticamente porque representan un roster operativo independiente.
 
 ## Permisos RBAC (a sembrar)
 
