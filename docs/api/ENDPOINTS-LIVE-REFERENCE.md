@@ -1227,6 +1227,14 @@ El contrato legacy de unión es distinto: `POST /api/v1/camporees/union/:campore
 | GET | `/api/v1/monthly-reports/admin/list` | JWT | Permisos: reports:read | Listar reportes multi-club (admin/coordinator) | MonthlyReportsService.listForAdmin() | `src/monthly-reports/monthly-reports.controller.ts` |
 | GET | `/api/v1/monthly-reports/:reportId` | JWT | Permisos: reports:read | Obtener informe mensual | MonthlyReportsService.getReport() | `src/monthly-reports/monthly-reports.controller.ts` |
 
+#### Contrato de `PATCH /api/v1/monthly-reports/:reportId/manual-data`
+
+- Solo admite reportes en `draft` y excluye del payload persistido cualquier campo `undefined`.
+- Un payload técnico vacío, o la creación de una fila compuesta únicamente por textos nullable en `null`, vacíos o whitespace, responde `400` con `code = MONTHLY_REPORT_MANUAL_DATA_REQUIRED`.
+- `null` en un campo numérico o booleano responde `400` con `code = MONTHLY_REPORT_INVALID_MANUAL_DATA`.
+- `0` y `false` explícitos son valores válidos. En una fila existente, los textos nullable aceptan `null` para limpiar su valor.
+- El error conserva el response shape global; estos códigos no modifican el contrato de los demás endpoints.
+
 ### Notifications
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |

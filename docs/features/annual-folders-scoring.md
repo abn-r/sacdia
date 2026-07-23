@@ -172,7 +172,7 @@ Reopen (LF o union): VALIDATED | REJECTED | PREAPPROVED_LF ──> SUBMITTED
 | Componente | Formula |
 |---|---|
 | `annual_evidence_folder` | puntos reales de Carpeta Anual (`total_earned_points / total_max_points`); el máximo debe coincidir con `annual_evidence_folder.max_points` del ranking efectivo |
-| `monthly_reports_timeliness` | informes mensuales `submitted` a tiempo / meses del año eclesiástico; deadline configurable en `ranking.monthly_report_deadline_day` (default 5) |
+| `monthly_reports_timeliness` | primera captura manual puntual / meses del año eclesiástico cuyo deadline ya venció |
 | `finance_compliance` | cierres financieros mensuales a tiempo / 12; deadline configurable en `ranking.finance_closing_deadline_day` (default 5) |
 | `institutional_data_completeness` | 10 campos institucionales completos: dirección, horario, director, secretaría, tesorería, nombre, teléfono, email, coordenadas y meta de almas |
 | `activities_registered` | actividades activas de la sección durante el año / `ranking.activities_registered_target` (default 12) |
@@ -180,6 +180,12 @@ Reopen (LF o union): VALIDATED | REJECTED | PREAPPROVED_LF ──> SUBMITTED
 | `camporee_events` | resultados oficiales activos de eventos puntuables: `sum(camporee_event_section_results.total_awarded_points) / sum(camporee_events.max_points)` por sección; inscripciones/asistencia no otorgan puntos |
 | `class_investiture_progress` | clases activas investidas/aprobadas / clases activas de miembros de la sección |
 | `sacdia_operational_usage` | usuarios activos de la sección con acciones operativas útiles / usuarios activos de la sección |
+
+`reports.auto_generate_day` acepta `1..28`; si falta o es inválido usa fallback `5`, y su seed vigente es `5`. Cada período abre a las `00:00:00 UTC` del primer día del mes reportado y vence a las `23:00:00 UTC` del día configurado del mes siguiente. Solo los meses con deadline vencido (`deadline_at <= CURRENT_TIMESTAMP`) entran al denominador.
+
+El cálculo aplica el valor **vigente** de `reports.auto_generate_day` a todos los meses; no existe un cutoff persistido por período. Por ello, modificar la configuración tiene efecto retroactivo: puede reclasificar capturas históricas como puntuales o tardías y cambiar qué meses son elegibles para el denominador en el momento del recálculo.
+
+Un mes suma si existe `monthly_report_manual_data` y su `created_at` cae en `[period_start_at, deadline_at)`. Si la fila no existe o fue creada tarde, aporta `0`. El cálculo no inspecciona estado, envío formal, valores `0`/`false`/`null` ni snapshot; no hay doble penalización por contenido. La app no requiere `submit` para este KPI y la generación automática permanece en `generated`.
 
 ## Gaps y pendientes
 
