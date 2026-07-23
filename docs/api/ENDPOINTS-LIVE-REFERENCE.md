@@ -74,7 +74,7 @@
 | honors | 5 |
 | user-honors | 15 |
 | user-master-honors | 3 |
-| insurance | 5 |
+| insurance | 18 |
 | inventory | 8 |
 | investiture | 20 |
 | legal-representatives | 4 |
@@ -1048,6 +1048,19 @@ credenciales:
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
+| GET | `/api/v1/insurance/products` | JWT | `insurance:configure`; solo `director-lf`/`assistant-lf` con Campo Local efectivo | Listar productos configurables del Campo Local efectivo | InsuranceConfigService.listProducts() | `src/insurance/insurance.controller.ts` |
+| POST | `/api/v1/insurance/products` | JWT | `insurance:configure`; solo `director-lf`/`assistant-lf` con Campo Local efectivo | Crear producto de seguro en el Campo Local efectivo | InsuranceConfigService.createProduct() | `src/insurance/insurance.controller.ts` |
+| PATCH | `/api/v1/insurance/products/:productId` | JWT | `insurance:configure`; solo `director-lf`/`assistant-lf` con Campo Local efectivo | Actualizar producto del propio Campo Local | InsuranceConfigService.updateProduct() | `src/insurance/insurance.controller.ts` |
+| GET | `/api/v1/insurance/cycles` | JWT | `insurance:configure`; solo `director-lf`/`assistant-lf` con Campo Local efectivo | Listar ciclos configurados del Campo Local efectivo | InsuranceConfigService.listCycles() | `src/insurance/insurance.controller.ts` |
+| POST | `/api/v1/insurance/cycles` | JWT | `insurance:configure`; solo `director-lf`/`assistant-lf` con Campo Local efectivo | Crear configuración de ciclo de un producto propio | InsuranceConfigService.createCycle() | `src/insurance/insurance.controller.ts` |
+| PATCH | `/api/v1/insurance/cycles/:cycleConfigId` | JWT | `insurance:configure`; solo `director-lf`/`assistant-lf` con Campo Local efectivo | Actualizar costo, timezone, estado o deadline de ciclo propio | InsuranceConfigService.updateCycle() | `src/insurance/insurance.controller.ts` |
+| POST | `/api/v1/club-sections/:sectionId/insurance/purchases` | JWT multipart | `insurance:create` + scope efectivo de la sección | Enviar compra con `purchase_proof` obligatorio; queda pendiente y no crea cupos | InsurancePurchasesService.submit() | `src/insurance/insurance-purchases.controller.ts` |
+| GET | `/api/v1/club-sections/:sectionId/insurance/purchases` | JWT | `insurance:read` + scope efectivo de la sección | Listar compras de la propia sección | InsurancePurchasesService.listForSection() | `src/insurance/insurance-purchases.controller.ts` |
+| GET | `/api/v1/insurance/purchases/:purchaseId` | JWT | `insurance:read` + territorio/sección efectiva | Consultar compra dentro del alcance efectivo | InsurancePurchasesService.getById() | `src/insurance/insurance-purchases.controller.ts` |
+| GET | `/api/v1/insurance/purchases/:purchaseId/proof` | JWT | `insurance:read` + territorio/sección efectiva | Generar URL R2 firmada de 5 minutos para comprobante privado | InsuranceEvidenceService.getPurchaseProofUrl() | `src/insurance/insurance-purchases.controller.ts` |
+| POST | `/api/v1/insurance/purchases/:purchaseId/confirm` | JWT | `insurance:review`; `director-lf`, `assistant-lf`, `admin` o `super-admin` dentro del alcance efectivo | Confirmar y materializar N cupos transaccionalmente; deadline inclusivo | InsurancePurchasesService.confirm() | `src/insurance/insurance-purchases.controller.ts` |
+| POST | `/api/v1/insurance/purchases/:purchaseId/reject` | JWT | `insurance:review`; mismos roles de revisión | Rechazar compra pendiente con motivo obligatorio y sin cupos | InsurancePurchasesService.reject() | `src/insurance/insurance-purchases.controller.ts` |
+| POST | `/api/v1/insurance/purchases/:purchaseId/reverse` | JWT | `insurance:review`; mismos roles de revisión | Revertir solo una compra confirmada sin cupos asignados | InsurancePurchasesService.reverse() | `src/insurance/insurance-purchases.controller.ts` |
 | GET | `/api/v1/clubs/:clubId/sections/:sectionId/members/insurance` | JWT | Permisos: insurance:read | Listar seguros de miembros por sección | InsuranceService.listMembersInsurance() | `src/insurance/insurance.controller.ts` |
 | GET | `/api/v1/insurance/expiring` | JWT | Global: admin, coordinator | Listar seguros próximos a vencer | InsuranceService.getExpiringInsurances() | `src/insurance/insurance.controller.ts` |
 | GET | `/api/v1/users/:memberId/insurance` | JWT | Permisos: insurance:read | Obtener seguro activo del miembro | InsuranceService.getMemberInsurance() | `src/insurance/insurance.controller.ts` |
