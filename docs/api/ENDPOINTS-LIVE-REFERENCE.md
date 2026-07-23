@@ -1,6 +1,6 @@
 # ENDPOINTS LIVE REFERENCE (Runtime Truth)
 
-<!-- Generado estáticamente contra sacdia-backend/src/**/*controller.ts el 2026-07-07. El contrato operations-dashboard se sincronizó manualmente contra el runtime final el 2026-07-15. No se levantó la app ni se ejecutó build. Los conteos agregados permanecen como snapshot del generador 2026-07-07. -->
+<!-- Generado estáticamente contra sacdia-backend/src/**/*controller.ts el 2026-07-14. El contrato operations-dashboard se sincronizó manualmente contra el runtime final el 2026-07-15. No se levantó la app ni se ejecutó build. Los conteos agregados permanecen como snapshot del generador 2026-07-14. -->
 
 > [!IMPORTANT]
 > Documento canónico operativo para clientes SACDIA. Base URL: `/api/v1`.
@@ -8,9 +8,9 @@
 
 **Estado**: ACTIVE
 **Actualizado**: 2026-07-15
-**Total endpoints**: 697 decoradores HTTP en 90 controllers
-**Métodos**: GET 291 · POST 207 · PATCH 103 · DELETE 88 · PUT 8
-**Auth detectada**: JWT 685 · Public 12
+**Total endpoints**: 699 decoradores HTTP en 90 controllers
+**Métodos**: GET 292 · POST 207 · PATCH 104 · DELETE 88 · PUT 8
+**Auth detectada**: JWT 687 · Public 12
 
 ## Cómo leer esta referencia
 
@@ -32,7 +32,7 @@
 | admin | 2 |
 | admin-geography | 24 |
 | Admin - Honors Requirements | 7 |
-| admin-notifications | 1 |
+| admin-notifications | 3 |
 | Admin - Phase E Catalogs (i18n) | 29 |
 | admin-reference | 38 |
 | admin-users | 7 |
@@ -230,6 +230,8 @@
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
 | GET | `/api/v1/admin/notifications/stats` | JWT | Global: admin, super-admin | FCM notification delivery metrics for administrators | AdminNotificationsService.getStats() | `src/admin/admin-notifications.controller.ts` |
+| GET | `/api/v1/admin/notifications/categories` | JWT | Global: admin, super-admin | List global notification category delivery settings | NotificationCategorySettingsService.listCategorySettings() | `src/admin/admin-notifications.controller.ts` |
+| PATCH | `/api/v1/admin/notifications/categories` | JWT | Global: admin, super-admin | Update a notification category delivery setting | NotificationCategorySettingsService.updateCategorySetting() | `src/admin/admin-notifications.controller.ts` |
 
 ### Admin - Phase E Catalogs (i18n)
 
@@ -734,7 +736,7 @@ Los `POST` y `PATCH` de camporees locales y de unión aceptan `start_date` y `en
 | DELETE | `/api/v1/camporees/union/:camporeeId/clubs/:camporeeClubId` | JWT | Permisos: attendance:manage | Cancelar inscripción de club en camporee de unión | CamporeesService.cancelUnionClubEnrollment() | `src/camporees/camporees.controller.ts` |
 | POST | `/api/v1/union-camporees/:camporeeId/club-registration/close` | JWT | Permisos: camporee_events:update | Close union camporee club registration | CamporeesService.closeUnionCamporeeClubRegistration() | `src/camporees/camporee-club-registration.controller.ts` |
 | POST | `/api/v1/union-camporees/:camporeeId/club-registration/reopen` | JWT | Permisos: camporee_events:update | Reopen union camporee club registration | CamporeesService.reopenUnionCamporeeClubRegistration() | `src/camporees/camporee-club-registration.controller.ts` |
-| POST | `/api/v1/camporees/union/:camporeeId/register` | JWT | Permisos: attendance:manage | Registrar miembro en camporee de unión | CamporeesService.registerMemberToUnion() | `src/camporees/camporees.controller.ts` |
+| POST | `/api/v1/camporees/union/:camporeeId/register` | JWT | Permisos: attendance:manage | Registrar miembro en camporee de unión; requiere `insurance_id` activo, elegible y vigente | CamporeesService.registerMemberToUnion() | `src/camporees/camporees.controller.ts` |
 | GET | `/api/v1/camporees/union/:camporeeId/members` | JWT | Permisos: attendance:read | Listar miembros del camporee de unión | CamporeesService.getUnionMembers() | `src/camporees/camporees.controller.ts` |
 | DELETE | `/api/v1/camporees/union/:camporeeId/members/:userId` | JWT | Permisos: attendance:manage | Remover miembro del camporee de unión | CamporeesService.removeUnionMember() | `src/camporees/camporees.controller.ts` |
 | POST | `/api/v1/camporees/union/:camporeeId/members/:memberId/payments` | JWT | Permisos: attendance:manage | Registrar pago de miembro en camporee de unión | CamporeesService.createUnionPayment() | `src/camporees/camporees.controller.ts` |
@@ -754,10 +756,12 @@ Los `POST` y `PATCH` de camporees locales y de unión aceptan `start_date` y `en
 | POST | `/api/v1/camporees` | JWT | Permisos: camporees:create | Crear camporee | CamporeesService.create() | `src/camporees/camporees.controller.ts` |
 | PATCH | `/api/v1/camporees/:camporeeId` | JWT | Permisos: camporees:update | Actualizar camporee | CamporeesService.update() | `src/camporees/camporees.controller.ts` |
 | DELETE | `/api/v1/camporees/:camporeeId` | JWT | Permisos: camporees:delete | Desactivar camporee | CamporeesService.remove() | `src/camporees/camporees.controller.ts` |
-| POST | `/api/v1/camporees/:camporeeId/register` | JWT | Permisos: attendance:manage | Registrar miembro en camporee | CamporeesService.registerMember() | `src/camporees/camporees.controller.ts` |
+| GET | `/api/v1/camporees/:camporeeId/section-registration` | JWT | Permisos: camporees:read | Consultar la inscripción contextual de la sección activa | CamporeesService.getActiveSectionRegistration() | `src/camporees/camporees.controller.ts` |
+| POST | `/api/v1/camporees/:camporeeId/section-registration` | JWT | Permisos: camporees:register_active_section | Inscribir la sección activa del director; no acepta `club_section_id` desde el cliente | CamporeesService.registerActiveSection() | `src/camporees/camporees.controller.ts` |
+| POST | `/api/v1/camporees/:camporeeId/register` | JWT | Permisos: attendance:manage | Registrar miembro en camporee; requiere `insurance_id` activo, elegible y vigente | CamporeesService.registerMember() | `src/camporees/camporees.controller.ts` |
 | GET | `/api/v1/camporees/:camporeeId/members` | JWT | Permisos: attendance:read | Listar miembros del camporee | CamporeesService.getMembers() | `src/camporees/camporees.controller.ts` |
 | DELETE | `/api/v1/camporees/:camporeeId/members/:userId` | JWT | Permisos: attendance:manage | Remover miembro del camporee | CamporeesService.removeMember() | `src/camporees/camporees.controller.ts` |
-| POST | `/api/v1/camporees/:camporeeId/clubs` | JWT | Permisos: attendance:manage | Inscribir club en camporee | CamporeesService.enrollClub() | `src/camporees/camporees.controller.ts` |
+| POST | `/api/v1/camporees/:camporeeId/clubs` | JWT | Permisos: camporees:register | Inscripción heredada de una sección de club en camporee local | CamporeesService.enrollClub() | `src/camporees/camporees.controller.ts` |
 | GET | `/api/v1/camporees/:camporeeId/clubs` | JWT | Permisos: attendance:read | Listar clubes inscritos en camporee | CamporeesService.getEnrolledClubs() | `src/camporees/camporees.controller.ts` |
 | DELETE | `/api/v1/camporees/:camporeeId/clubs/:camporeeClubId` | JWT | Permisos: attendance:manage | Cancelar inscripción de club | CamporeesService.cancelClubEnrollment() | `src/camporees/camporees.controller.ts` |
 | POST | `/api/v1/camporees/:camporeeId/club-registration/close` | JWT | Permisos: camporee_events:update | Close local camporee club registration | CamporeesService.closeLocalCamporeeClubRegistration() | `src/camporees/camporee-club-registration.controller.ts` |
@@ -957,18 +961,30 @@ Los `POST` y `PATCH` de camporees locales y de unión aceptan `start_date` y `en
 | POST | `/api/v1/evidence-review/:type/:id/reject` | JWT | Global: admin, super-admin, coordinator | Rechazar una evidencia con motivo | EvidenceReviewService.reject() | `src/evidence-review/evidence-review.controller.ts` |
 | GET | `/api/v1/evidence-review/:type/:id/history` | JWT | Global: admin, super-admin, coordinator | Historial de validación de una evidencia | EvidenceReviewService.getHistory() | `src/evidence-review/evidence-review.controller.ts` |
 
+#### Campos de catálogo en `EvidenceItem`
+
+`GET /api/v1/evidence-review/pending` y `GET /api/v1/evidence-review/:type/:id`
+exponen el mismo shape base de `EvidenceItem`, incluyendo:
+
+| Campo | Tipo | Origen para `class` | Origen para `honor` |
+| --- | --- | --- | --- |
+| `entity_name` | `string` | `classes.name`; fallback `Clase #{class_id}` | `honors.name`; fallback `Especialidad #{honor_id}` |
+| `section_name` | `string` | `class_sections.name`; fallback `Sección #{section_id}` | Igual a `entity_name` por compatibilidad legacy |
+| `entity_description` | `string \| null` | `class_sections.description` | `honors.description` |
+| `module_name` | `string \| null` | `class_modules.name` | Siempre `null` |
+
 ### finances
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
-| GET | `/api/v1/finances/categories` | JWT | Permisos: finances:read | Listar categorías financieras | FinancesService.getCategories() | `src/finances/finances.controller.ts` |
+| GET | `/api/v1/finances/categories` | JWT | Permisos: finances:read | Listar categorías financieras activas; `type=0` ingreso, `type=1` egreso | FinancesService.getCategories() | `src/finances/finances.controller.ts` |
 | GET | `/api/v1/clubs/:clubId/finances/transactions` | JWT | Permisos: finances:read | Listar todas las transacciones del club (paginadas) | FinancesService.getAllTransactions() | `src/finances/finances.controller.ts` |
 | GET | `/api/v1/clubs/:clubId/finances` | JWT | Permisos: finances:read | Listar movimientos financieros del club | FinancesService.findByClub() | `src/finances/finances.controller.ts` |
 | GET | `/api/v1/clubs/:clubId/finances/summary` | JWT | Permisos: finances:read | Resumen financiero del club | FinancesService.getSummary() | `src/finances/finances.controller.ts` |
-| POST | `/api/v1/clubs/:clubId/finances` | JWT | Permisos: finances:create; Club: director, deputy-director, treasurer | Crear movimiento financiero | FinancesService.create() | `src/finances/finances.controller.ts` |
+| POST | `/api/v1/clubs/:clubId/finances` | JWT | Permisos: finances:create; Club: director, deputy-director, treasurer | Crear movimiento financiero; la categoría debe existir, estar activa y ser tipo `0`/`1` | FinancesService.create() | `src/finances/finances.controller.ts` |
 | GET | `/api/v1/finances/:financeId` | JWT | Permisos: finances:read | Obtener movimiento por ID | FinancesService.findOne() | `src/finances/finances.controller.ts` |
 | POST | `/api/v1/finances/:financeId/evidences` | JWT | Permisos: finances:update | Subir foto de evidencia de un movimiento financiero | FinancesService.uploadEvidence() | `src/finances/finances.controller.ts` |
-| PATCH | `/api/v1/finances/:financeId` | JWT | Permisos: finances:update | Actualizar movimiento | FinancesService.update() | `src/finances/finances.controller.ts` |
+| PATCH | `/api/v1/finances/:financeId` | JWT | Permisos: finances:update | Actualizar movimiento; si cambia la categoría debe existir, estar activa y ser tipo `0`/`1` | FinancesService.update() | `src/finances/finances.controller.ts` |
 | DELETE | `/api/v1/finances/:financeId` | JWT | Permisos: finances:delete | Desactivar movimiento | FinancesService.remove() | `src/finances/finances.controller.ts` |
 
 ### health
@@ -976,7 +992,19 @@ Los `POST` y `PATCH` de camporees locales y de unión aceptan `start_date` y `en
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
 | GET | `/api/v1/health` | Public | - | Public ping — returns ok if API is reachable | - | `src/health/health.controller.ts` |
-| GET | `/api/v1/health/details` | JWT | Global: admin, super-admin | Detailed health status (admin only) | - | `src/health/health.controller.ts` |
+| GET | `/api/v1/health/details` | JWT | Global: admin, super-admin | Estado detallado de DB, pool, caché, FCM y Sentry; `status=degraded` si DB o caché fallan | - | `src/health/health.controller.ts` |
+
+#### `GET /api/v1/health/details`
+
+La respuesta administrativa incluye observabilidad operacional sin exponer
+credenciales:
+
+- `dependencies.database.pool`: `max`, `total`, `idle`, `active`, `waiting` y
+  `utilization` del `pg.Pool` de la réplica actual.
+- `dependencies.cache.catalogs`: contadores acumulados por proceso para `hits`,
+  `misses`, cargas concurrentes coalescidas, errores e invalidaciones.
+- La verificación de caché escribe, lee y elimina una clave efímera. El estado
+  global solo es `ok` cuando base de datos y caché responden correctamente.
 
 ### honors
 

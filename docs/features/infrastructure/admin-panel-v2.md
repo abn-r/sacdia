@@ -67,3 +67,4 @@ pnpm run scaffold:v2   # Regenerar pages bridged desde v1
 - Nuevas pantallas v2: Server Component delgado + loader + `V2PageShell` / `V2DataTable`
 - No duplicar contratos API — reutilizar `lib/api/*`
 - i18n: keys existentes; chrome v2 en `nav.v2.*`
+- **Compose panel (Sheet)**: acciones secundarias sobre listados — seguir `DESIGN-SYSTEM.md` §6.1.2 y §11.5. Referencia: `src/components/notifications/notification-compose-sheet.tsx`

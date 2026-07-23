@@ -10,7 +10,7 @@ El modelo de datos contempla dos niveles de camporees: locales (`local_camporees
 
 La fase operativa se resuelve por calendario local en la timezone del camporee: `preparation`, `registration_open`, `registration_closed`, `in_progress` y `finished`. Durante y después del evento prevalecen `in_progress`/`finished`; para inscripción de clubes se conserva la disposición independiente `not_open_yet | open | late_approval_required | manually_frozen`. El deadline es inclusivo, el cierre manual tiene prioridad y la aprobación tardía no se habilita antes de la apertura.
 
-La inscripcion de miembros en camporees tiene implicaciones directas con el modulo de seguros: para participar en un camporee, los miembros generalmente requieren un seguro activo de tipo CAMPOREE o GENERAL_ACTIVITIES. Esta relacion esta modelada en la tabla `camporee_members` que referencia `member_insurances`.
+La inscripción de miembros en camporees tiene implicaciones directas con el módulo de seguros: para participar, el miembro **debe** aportar un seguro `CAMPOREE` o `GENERAL_ACTIVITIES` activo y vigente hasta la fecha final del evento. Esta relación queda registrada en `camporee_members.insurance_id` y `insurance_verified=true`.
 
 ## Que existe (verificado contra codigo)
 
@@ -28,6 +28,8 @@ La inscripcion de miembros en camporees tiene implicaciones directas con el modu
   - `GET|POST /api/v1/camporees/union` — Listar/crear camporees de union; body admite fechas limite opcionales y `agenda_visible_from?`
   - `GET|PATCH|DELETE /api/v1/camporees/union/:camporeeId` — Obtener, actualizar o desactivar camporee de union
   - `POST /api/v1/camporees/:camporeeId/register` — Registrar miembro en camporee; el backend infiere `camporee_type='local'` desde el endpoint
+  - `GET|POST /api/v1/camporees/:camporeeId/section-registration` — Consultar o inscribir la sección activa del director. El `POST` no acepta una sección enviada por cliente y requiere `camporees:register_active_section`.
+  - `POST /api/v1/camporees/:camporeeId/clubs` — Flujo heredado de organizador local para inscribir una sección indicada en el body; requiere `camporees:register`.
   - `GET /api/v1/camporees/:camporeeId/members` — Listar miembros del camporee
   - `DELETE /api/v1/camporees/:camporeeId/members/:userId` — Remover miembro del camporee (roles: director, subdirector)
   - `POST /api/v1/camporees/:camporeeId/members/:memberId/payments` — Registrar pago. Body usa `paid_at` y `payment_type` en `inscription|materials|other`
@@ -44,15 +46,15 @@ La inscripcion de miembros en camporees tiene implicaciones directas con el modu
 
 ### Admin
 
-- **CRUD completo**: Lista con creacion/eliminacion, pagina de detalle con tarjeta de info y tabs de personal, eventos, clubes y miembros, dialog de creacion/edicion, registro de miembros con validacion de seguro, remocion de miembros
+- **CRUD y operación disponible**: Lista con creación/eliminación, página de detalle con tarjeta de información y tabs de personal, eventos, clubes y miembros, diálogo de creación/edición, registro de miembros con validación de seguro y remoción de miembros.
 - Los formularios de camporee local y de unión capturan dirección textual, fechas limite opcionales y coordenadas opcionales (`lat`, `long`) como par obligatorio: se guardan ambas o ninguna.
 - El admin carga primero el roster operativo del camporee y luego asigna personas específicas a cada actividad/evento; no se fuerza que cada actividad tenga cocina/admin/apoyo/jueces.
-- El cierre de inscripción de clubes congela las secciones que podrán recibir puntajes y asignaciones de jueces; la inscripción de miembros sigue controlada por `member_registration_deadline`.
+- El cierre de inscripción de clubes congela las secciones que podrán recibir puntajes y asignaciones de jueces; la inscripción de miembros sigue controlada por `member_registration_deadline`. El backend expone cierre/reapertura, pero el panel aún no tiene control visual para invocarlos.
 - Reutiliza el cliente API existente (`lib/api/camporees.ts`) y las server actions (`lib/camporees/actions.ts`)
 
 ### App Movil
 
-- **4 screens**: lista de camporees, detalle con preview de miembros, selector/registro múltiple de miembros desde la sección activa, lista de miembros con opcion de remocion
+- **5 superficies**: lista de camporees, detalle con preview de miembros, inscripción contextual de la sección activa, selector/registro múltiple de miembros desde la sección activa y lista de miembros con opción de remoción.
 - La lista móvil de camporees muestra directamente las tarjetas disponibles, sin hero/resumen decorativo superior, para ahorrar espacio útil.
 - La UI móvil muestra las fechas como rango único y los montos con el símbolo de moneda antes de la cantidad (ej. `$450`) tanto en lista como en detalle.
 - El detalle muestra banner de Camporí, dirección primero y preview 16:9 del mapa con pin cuando hay coordenadas. Al tocar el bloque abre opciones de mapas externos.
@@ -79,7 +81,7 @@ La inscripcion de miembros en camporees tiene implicaciones directas con el modu
 2. Los camporees deben tener nombre, fechas, ubicacion, tipo (local/union) y descripcion
 3. El sistema debe permitir inscribir miembros individualmente en un camporee
 4. Debe ser posible listar los miembros inscritos en cada camporee
-5. El registro de miembros debe validar requisitos (seguro activo, membresia vigente)
+5. El registro de miembros debe exigir seguro elegible (`CAMPOREE` o `GENERAL_ACTIVITIES`) activo y vigente, además de membresía vigente.
 6. Los camporees deben poder desactivarse (soft delete) sin perder datos historicos
 7. El panel admin debe permitir CRUD completo de camporees con gestion de miembros
 8. La app movil permite ver camporees disponibles, inscribirse y gestionar miembros inscritos
@@ -91,7 +93,7 @@ La inscripcion de miembros en camporees tiene implicaciones directas con el modu
 
 - **Dos niveles de camporees**: El modelo distingue camporees locales y de union con tablas separadas, permitiendo diferente estructura organizativa
 - **Inscripcion individual**: Los miembros se registran individualmente, no como club completo, permitiendo control granular de participacion
-- **Vinculacion con seguros**: `camporee_members` referencia `member_insurances`; un seguro activo `CAMPOREE` o `GENERAL_ACTIVITIES` es elegible para camporees. La app muestra el estado de seguro del miembro en el selector, pero no solicita capturar manualmente `insurance_id`
+- **Vinculación con seguros**: `camporee_members` referencia `member_insurances`; un seguro `CAMPOREE` o `GENERAL_ACTIVITIES` activo y vigente es obligatorio para camporees. La app selecciona el `insurance_id` elegible del miembro, sin pedirlo manualmente.
 - **Inscripción sin puntaje anual**: `camporee_clubs` y `camporee_members` conservan asistencia/participación como registro operativo e histórico; ya no otorgan puntos al ranking anual.
 - **Cierre explícito de clubes**: `club_registration_closed_at` no reemplaza `club_registration_deadline`; el cierre congela secciones competitivas para scoring, mientras `member_registration_deadline` controla participantes/personas.
 - **Personal operativo separado de jueces de scoring**: `camporee_staff_members` describe capacidades generales del camporee; `camporee_event_staff_assignments` asigna personas a la agenda; `camporee_judges` y `camporee_event_judge_assignments` siguen siendo la autoridad de scoring por sección/evento.
@@ -104,7 +106,7 @@ La inscripcion de miembros en camporees tiene implicaciones directas con el modu
 
 ## Estado de implementacion
 
-- **Prioridad**: Completo — backend, admin y app implementados con CRUD completo; el admin incluye detalle de camporee local y de unión, con eventos/agenda por scope; la app registra miembros desde una lista de la sección activa y el backend infiere el tipo de camporee
+- **Prioridad**: Operación principal cubierta — backend, admin y app implementan CRUD y registro; el admin aún debe incorporar controles de cierre/reapertura de clubes. La app registra la sección activa y participantes desde la lista de la sección activa.
 - ✅ Approval UI: Aprobacion/rechazo de inscripciones de clubes, miembros y pagos desde el admin panel (ver [aprobaciones-camporees](aprobaciones-camporees.md))
 
 

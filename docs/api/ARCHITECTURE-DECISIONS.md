@@ -369,7 +369,34 @@ La app iOS nativa necesita una fachada de autenticación administrativa específ
 
 ---
 
+## 8. Pool PostgreSQL configurable y caché distribuida fail-fast
+
+### ✅ DECISIÓN APROBADA E IMPLEMENTADA (2026-07-20)
+
+- El runtime NestJS conserva un único `pg.Pool` por proceso, entregado a
+  `PrismaPg`. Su capacidad y timeouts se configuran mediante variables validadas;
+  el presupuesto real es `PRISMA_POOL_MAX × réplicas máximas`.
+- `DATABASE_URL` es la conexión pooled del runtime y
+  `DATABASE_DIRECT_URL` queda reservada para migraciones.
+- Redis es obligatorio en producción. La caché ejecuta una operación real antes
+  de completar el startup; un fallo de URL, DNS, TLS, autenticación o conexión
+  detiene el proceso. El fallback a memoria solo se permite en desarrollo/test.
+- Los catálogos mantienen cache-aside con TTL explícito, invalidación tras
+  mutaciones y coalescencia de misses concurrentes dentro de cada proceso.
+- La invalidación total usa iteradores públicos de Keyv, que realizan `SCAN` en
+  Redis, sin depender de propiedades internas ni del comando bloqueante `KEYS`.
+  Si el store no puede iterar, se conserva un fallback estático limitado.
+- `GET /api/v1/health/details` reporta ocupación del pool y contadores del caché,
+  y degrada el estado global cuando DB o caché no responden.
+
+**Trade-off:** la coalescencia es por proceso, no distribuida entre réplicas. No
+se introduce un lock Redis para catálogos porque aumentaría complejidad y riesgo
+operacional sin evidencia actual de stampede cross-replica; TTL, invalidación y
+single-flight local cubren la carga conocida.
+
+---
+
 **Generado**: 2026-01-29  
 **Actualizado por**: Usuario  
-**Última actualización**: 2026-07-10 (ADR #7 — Sacdia Admin nativo)
-**Status**: ✅ Decisiones confirmadas; ADR #7 parcialmente implementada en rama, no expuesta en runtime
+**Última actualización**: 2026-07-20 (ADR #8 — pooling y caché productivos)
+**Status**: ✅ Decisiones confirmadas; ADR #7 parcialmente implementada en rama, ADR #8 implementada en runtime

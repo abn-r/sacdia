@@ -94,6 +94,7 @@ La feature esta implementada en backend con IDs UUID y estados `draft -> generat
   - `MonthlyReportManualData` del admin usa campos legacy como `weekly_meetings_held`, `leadership_meetings`, `souls_won`, `service_hours_total`, que NO coinciden con `UpdateManualDataDto` del backend
   - `MonthlyReportAutoData` del admin espera shape legacy (`activities_count`, `members_total`, `attendance_rate`, etc.) que no coincide con el `preview`/`snapshot_data` real actual
 - **Conclusión factual**: la navegación y acciones por ID ya consumen el contrato UUID del backend; los payloads manuales y la presentación de datos auto-calculados siguen pendientes de reconciliación
+- **Plantilla imprimible de ejemplo**: `/reports/monthly-preview` renderiza fuera del shell del dashboard un formulario HTML rellenable de dos páginas carta vertical, con botón de impresión nativa. El componente vive en `sacdia-admin/src/components/reports/monthly-report/` y usa un modelo tipado independiente; no persiste ni adapta sus campos al DTO actual porque el contrato backend no los incluye. Requiere los logos oficiales locales en `public/brand/iasd-logo-horizontal.svg` y `public/brand/iasd-symbol.svg`; mientras falten, muestra una advertencia de desarrollo sin inventar sustitutos.
 
 ### App Movil
 
