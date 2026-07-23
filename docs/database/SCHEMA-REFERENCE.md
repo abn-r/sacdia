@@ -69,6 +69,18 @@ Referencia humana concisa del schema Prisma vigente.
 - La unidad final de autorización sigue siendo `club_sections`; el backend debe resolver el alcance efectivo como `club_section_ids`.
 - La incompatibilidad director/coordinador sobre la misma `club_section` se valida en servicio, porque depende de roles activos en `club_role_assignments`.
 
+### Histórico institucional (fundación bitemporal)
+
+- Migración runtime: `sacdia-backend/prisma/migrations/20260723120000_institutional_history_foundation`.
+- Las cinco tablas de relación histórica agregan tiempo de registro (`recorded_from`/`recorded_to`), `supersedes_history_id` y `reorganization_id`.
+- La revisión lógica vigente usa `recorded_to IS NULL`; los índices abiertos y las exclusiones anti-solape aplican solo a esa vista.
+- `institutional_name_versions` guarda nombre/abreviatura por entidad tipada (XOR de FKs; sin `entity_id` polimórfico). Sus traducciones apuntan a `name_version_id`, usan `ON DELETE RESTRICT` y son append-only.
+- `institutional_reorganizations` registra actos `ESTABLISHMENT|RENAME|TRANSFER|SPLIT|MERGE|CLOSURE|CORRECTION` con `authority_source = WORLD_CHURCH_EXECUTIVE`, sin columnas de evidencia documental.
+- Participantes y aristas de linaje (`SPLIT_FROM`, `MERGED_FROM`, `CONTINUES_AS`, `CORRECTS`) son append-only a nivel DB; FKs compuestas impiden conectar participantes de reorganizaciones distintas.
+- Las relaciones históricas existentes conservan `recorded_from = created_at`; las versiones de nombre creadas por el backfill se registran con el instante de migración y precisión `system_backfill`.
+- El verificador read-only recorre objetos y arreglos JSON de `hierarchy_contexts.context` para detectar claves sensibles prohibidas en cualquier profundidad.
+- No se infieren fechas efectivas desde `modified_at` ni se inventan reorganizaciones ficticias.
+
 ### `weekly_records`, `weekly_record_scores` y `scoring_categories`
 
 - `weekly_records` materializa `unit_id`, usuario, semana ISO, total de puntos, `created_by` y `active` por `unit_id + user_id + week + year`. `attendance` y `punctuality` quedan como columnas legacy de compatibilidad y no son fuente del total.
@@ -423,6 +435,10 @@ Define el presupuesto de puntos por componente dentro de un eje anual:
 
 - `countries`, `unions`, `local_fields`, `districts`, `churches`, `clubs`, `club_sections`, `club_types`, `club_ideals`, `units`, `unit_members`
 - `coordination_zones`, `coordination_zone_districts`, `coordinator_assignments`
+- Historia institucional bitemporal: `union_division_history`, `local_field_union_history`, `district_local_field_history`, `church_district_history`, `club_institutional_history` (con `recorded_from`/`recorded_to`, `supersedes_history_id`, `reorganization_id`)
+- Versiones de nombre tipadas: `institutional_name_versions`, `institutional_name_version_translations`
+- Ledger de reorganización append-only: `institutional_reorganizations`, `institutional_reorganization_participants`, `institutional_lineage_edges`
+- Snapshots de contexto: `hierarchy_contexts`
 
 ### RBAC y auth
 

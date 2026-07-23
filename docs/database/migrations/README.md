@@ -12,6 +12,14 @@ Scripts SQL para inicialización y migración de la base de datos.
 
 ## 📋 Scripts Disponibles
 
+### Migración Prisma: foundation de histórico institucional
+
+| Migración | Ubicación efectiva | Dependencia | Estado |
+|-----------|--------------------|-------------|--------|
+| `20260723120000_institutional_history_foundation` | `sacdia-backend/prisma/migrations/20260723120000_institutional_history_foundation/migration.sql` | `20260527120000_institutional_hierarchy_history` (+ `btree_gist`) | Schema + ledger en rama `feat/institutional-history-pr1`; no desplegada hasta `prisma migrate deploy` |
+
+Extiende las cinco tablas de relación histórica con columnas bitemporales, crea versiones de nombre tipadas y el ledger append-only de reorganizaciones/linaje. Las aristas exigen participantes de la misma reorganización; las traducciones históricas son append-only y usan `ON DELETE RESTRICT`. El backfill registra las nuevas versiones de nombre al momento de migración con precisión `system_backfill`. No introduce columnas de evidencia documental. El verificador read-only (`pnpm verify:institutional-hierarchy-migration`) recorre objetos y arreglos JSON para detectar claves sensibles anidadas.
+
 ### Migración Prisma pendiente: refresh administrativo iOS
 
 | Migración | Ubicación efectiva | Dependencia | Estado |
