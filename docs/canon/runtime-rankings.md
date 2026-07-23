@@ -261,7 +261,7 @@ Excepción canónica: `annual_evidence_folder` usa los puntos reales snapshot de
 | Component key | Fuente runtime | Fórmula inicial |
 |---|---|---|
 | `annual_evidence_folder` | `annual_folders` | `total_earned_points / total_max_points` reales de la Carpeta Anual de Evidencias; `progress_percentage` solo normaliza el porcentaje |
-| `monthly_reports_timeliness` | `monthly_reports` + `ecclesiastical_years` | informes `submitted` entregados antes del día `ranking.monthly_report_deadline_day` (default 5) / meses esperados del año eclesiástico |
+| `monthly_reports_timeliness` | `monthly_reports` + `monthly_report_manual_data` + `ecclesiastical_years` + `system_config` | primera captura manual puntual / meses del año eclesiástico cuyo deadline ya venció |
 | `finance_compliance` | `finance_period_closings` | cierres financieros en tiempo según `ranking.finance_closing_deadline_day` (default 5) |
 | `institutional_data_completeness` | `club_enrollments` + `club_sections` | campos institucionales completos / 10 campos esperados: dirección, horario, director, secretaría, tesorería, nombre, teléfono, email, coordenadas y meta de almas |
 | `activities_registered` | `activity_instances` + `activities` | actividades activas de la sección en el año / `ranking.activities_registered_target` (default 12), con tope 100 |
@@ -269,6 +269,12 @@ Excepción canónica: `annual_evidence_folder` usa los puntos reales snapshot de
 | `camporee_events` | `camporee_events` + `camporee_event_section_results` | puntos oficiales activos otorgados a la sección / puntos máximos de eventos puntuables locales/unión en alcance |
 | `class_investiture_progress` | `enrollments` | clases activas con `investiture_status IN ('APPROVED', 'INVESTIDO')` / clases activas de miembros de la sección |
 | `sacdia_operational_usage` | registros operativos útiles | usuarios activos de la sección con actividad operativa útil / usuarios activos de la sección; no usa logins/sesiones como métrica de vanidad |
+
+`reports.auto_generate_day` acepta `1..28`; si falta o es inválido usa fallback `5`, y su seed vigente es `5`. Para cada mes, `period_start_at` es el primer día a las `00:00:00 UTC` y `deadline_at` es el día configurado del mes siguiente a las `23:00:00 UTC`. El denominador incluye únicamente meses con `deadline_at <= CURRENT_TIMESTAMP`, por lo que los meses futuros o abiertos no suman ni penalizan.
+
+El scoring recalcula todos los períodos con el valor **vigente** de `reports.auto_generate_day`; no persiste un cutoff por mes. Cambiar esta configuración se aplica retroactivamente y puede reclasificar capturas históricas como puntuales o tardías, además de cambiar qué meses son elegibles para el denominador al momento del cálculo.
+
+Un mes aporta si existe la fila única `monthly_report_manual_data` y su `created_at` cae en `[period_start_at, deadline_at)`. Captura ausente o tardía aporta `0`. El cálculo no inspecciona estado, envío formal, valores manuales `0`/`false`/`null` ni `snapshot_data`; no hay doble penalización por contenido y la app no necesita ejecutar `submit` para obtener este KPI. La auto-generación continúa dejando el informe en `generated`.
 
 `sacdia_operational_usage` considera acciones útiles como registros semanales, matrículas de clases, progreso de clase, informes mensuales enviados y actividades creadas dentro del año eclesiástico.
 
