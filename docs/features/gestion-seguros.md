@@ -30,6 +30,11 @@ La vinculacion de seguros con camporees es directa: la tabla `camporee_members` 
   - Un producto `GENERAL` exige `FIXED_MONTHS` y duración positiva; uno `EVENT` exige `EVENT_DATES` y no admite duración predeterminada.
   - Un ciclo pertenece al producto/Campo/año eclesiástico/tipo de club, no puede duplicar esa combinación y su `purchase_deadline` debe quedar dentro del año eclesiástico.
   - Tras existir una compra `CONFIRMED` del ciclo, su deadline queda inmutable.
+- **Compras por capacidad (7 endpoints)**: el envío `POST /api/v1/club-sections/:sectionId/insurance/purchases` es `multipart/form-data` y requiere `purchase_proof`; captura `quantity`, `total_amount` positivo, fecha y referencia de la plataforma externa. El envío no crea cupos.
+  - El backend deriva club, tipo y Campo Local desde la sección real y el perfil de autorización efectivo; nunca los acepta del cliente.
+  - La confirmación requiere `insurance:review` y los roles globales `director-lf`, `assistant-lf`, `admin` o `super-admin` dentro de su territorio efectivo; `assistant-admin` no recibe ese permiso.
+  - La confirmación toma el `unit_cost_snapshot` y deadline del ciclo, clasifica la fecha de recibo de forma inclusiva y crea exactamente N cupos en una transacción. Rechazo requiere motivo y reversión solo procede sin cupos asignados.
+  - El comprobante privado admite PDF/JPEG/PNG/WEBP con magic bytes y máximo 10 MiB. La base de datos guarda `file_key` y metadatos, nunca una URL; la lectura autorizada genera URL R2 firmada por 5 minutos. Si la transacción de base falla tras upload, el objeto R2 se borra compensatoriamente.
 
 ### Admin
 - **UI funcional**: `/dashboard/insurance` y `/dashboard/insurance/expiring`
@@ -78,7 +83,7 @@ La vinculacion de seguros con camporees es directa: la tabla `camporee_members` 
 - **Sin notificaciones de vencimiento**: No hay mecanismo para alertar cuando un seguro esta por vencer
 - **Sin historial**: Solo se muestra el seguro activo mas reciente; no hay endpoint para consultar seguros historicos de un miembro
 - **Validacion de camporee acotada al flujo de registro**: `camporees.service.ts` valida tipo `CAMPOREE`, titularidad, vigencia y estado activo cuando se envia `insurance_id`, pero no existe una superficie general de historial o auditoria de coberturas
-- **Compras y cupos no expuestos aún**: esta superficie configura productos y ciclos; no publica todavía operaciones de compra, confirmación, transferencia o asignación del modelo por capacidad.
+- **Operación de cupos parcial**: ya existen envío, revisión y reversión de compras; faltan saldos, movimientos, transferencias y asignaciones del modelo por capacidad.
 - **REALITY-MATRIX desactualizada**: La Reality Matrix marcaba seguros como "SIN CANON" y sin backend module, pero el modulo `src/insurance/` existe con 5 endpoints funcionales documentados en ENDPOINTS-LIVE-REFERENCE
 
 ## Prioridad y siguiente accion

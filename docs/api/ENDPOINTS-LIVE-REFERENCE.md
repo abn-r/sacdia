@@ -74,7 +74,7 @@
 | honors | 5 |
 | user-honors | 15 |
 | user-master-honors | 3 |
-| insurance | 11 |
+| insurance | 18 |
 | inventory | 8 |
 | investiture | 20 |
 | legal-representatives | 4 |
@@ -1031,6 +1031,13 @@ Los `POST` y `PATCH` de camporees locales y de unión aceptan `start_date` y `en
 | GET | `/api/v1/insurance/cycles` | JWT | `insurance:configure`; solo `director-lf`/`assistant-lf` con Campo Local efectivo | Listar ciclos configurados del Campo Local efectivo | InsuranceConfigService.listCycles() | `src/insurance/insurance.controller.ts` |
 | POST | `/api/v1/insurance/cycles` | JWT | `insurance:configure`; solo `director-lf`/`assistant-lf` con Campo Local efectivo | Crear configuración de ciclo de un producto propio | InsuranceConfigService.createCycle() | `src/insurance/insurance.controller.ts` |
 | PATCH | `/api/v1/insurance/cycles/:cycleConfigId` | JWT | `insurance:configure`; solo `director-lf`/`assistant-lf` con Campo Local efectivo | Actualizar costo, timezone, estado o deadline de ciclo propio | InsuranceConfigService.updateCycle() | `src/insurance/insurance.controller.ts` |
+| POST | `/api/v1/club-sections/:sectionId/insurance/purchases` | JWT multipart | `insurance:create` + scope efectivo de la sección | Enviar compra de cupos con `purchase_proof` obligatorio; solo queda pendiente y no crea cupos | InsurancePurchasesService.submit() | `src/insurance/insurance-purchases.controller.ts` |
+| GET | `/api/v1/club-sections/:sectionId/insurance/purchases` | JWT | `insurance:read` + scope efectivo de la sección | Listar compras de la propia sección | InsurancePurchasesService.listForSection() | `src/insurance/insurance-purchases.controller.ts` |
+| GET | `/api/v1/insurance/purchases/:purchaseId` | JWT | `insurance:read` + territorio efectivo | Consultar compra dentro del Campo Local/alcance efectivo | InsurancePurchasesService.getById() | `src/insurance/insurance-purchases.controller.ts` |
+| GET | `/api/v1/insurance/purchases/:purchaseId/proof` | JWT | `insurance:read` + territorio efectivo | Generar URL R2 firmada de 5 min para comprobante privado autorizado | InsuranceEvidenceService.getPurchaseProofUrl() | `src/insurance/insurance-purchases.controller.ts` |
+| POST | `/api/v1/insurance/purchases/:purchaseId/confirm` | JWT | `insurance:review`; `director-lf`, `assistant-lf`, `admin` o `super-admin` dentro de su alcance efectivo | Confirmar y crear N cupos transaccionalmente; fecha límite inclusiva | InsurancePurchasesService.confirm() | `src/insurance/insurance-purchases.controller.ts` |
+| POST | `/api/v1/insurance/purchases/:purchaseId/reject` | JWT | `insurance:review`; mismos roles de revisión | Rechazar compra pendiente con motivo obligatorio, sin cupos | InsurancePurchasesService.reject() | `src/insurance/insurance-purchases.controller.ts` |
+| POST | `/api/v1/insurance/purchases/:purchaseId/reverse` | JWT | `insurance:review`; mismos roles de revisión | Revertir solo una compra confirmada cuyos cupos sigan sin asignar | InsurancePurchasesService.reverse() | `src/insurance/insurance-purchases.controller.ts` |
 
 ### inventory
 
