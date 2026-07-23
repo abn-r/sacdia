@@ -1,8 +1,8 @@
 # Schema Reference - SACDIA Database
 
 **Estado**: ACTIVE
-**Sincronizado contra**: `sacdia-backend/prisma/schema.prisma`
-**Fecha de resincronizacion**: 2026-06-18 (coordinación por zonas/asignaciones + honores: aplicabilidad por club y enlaces a clases + asignaciones pedagógicas de clases)
+**Autoridad estructural**: `sacdia-backend/prisma/schema.prisma`
+**Actualización scoped**: 2026-07-14 — sólo delta Camporee de lineage e inscripción activa por sección; no implica resincronización global de esta referencia.
 
 Referencia humana concisa del schema Prisma vigente.
 
@@ -161,6 +161,16 @@ Referencia humana concisa del schema Prisma vigente.
 
 - Incluye `created_by_id`, `modified_by_id`, `evidence_file_url` y `evidence_file_name`.
 - Sigue relacionada con `camporee_members`.
+
+### `camporee_clubs` y `camporee_members`
+
+- Cada participante local creado por el flujo contextual conserva lineage explícito mediante `camporee_members.camporee_club_id INT NULL` hacia `camporee_clubs.camporee_club_id`.
+- La FK `fk_camporee_members_camporee_club` usa `ON DELETE NO ACTION`; la columna es nullable para conservar filas legacy que todavía no pueden asociarse con seguridad a una inscripción de sección.
+- `idx_camporee_members_camporee_club_id` soporta consultas de participantes por inscripción de sección.
+- La base impide más de una inscripción activa por camporee y sección con índices únicos parciales:
+  - `uq_camporee_clubs_active_local_section` sobre `(camporee_id, club_section_id)` cuando la fila local está activa.
+  - `uq_camporee_clubs_active_union_section` sobre `(union_camporee_id, club_section_id)` cuando la fila de unión está activa.
+- Prisma no puede expresar esos índices parciales; su autoridad ejecutable vive en `20260713220000_camporee_section_registration_context/migration.sql` y el schema conserva comentarios de paridad.
 
 ### `achievement_categories`, `achievements`, `user_achievements`, `achievement_event_log`
 
@@ -530,6 +540,7 @@ Define el presupuesto de puntos por componente dentro de un eje anual:
 - `20260708193000_camporee_score_no_show_and_lock` - agrega estado oficial `score_status`/`is_no_show` y `override_of_submission_id` para no-presentados, bloqueo one-shot de juez principal y overrides auditables de Campo Local.
 - `20260709100000_camporee_score_idempotency` - agrega clave idempotente y hash canónico por actor, auditoría de total crudo/ajuste mínimo, índice único parcial y backfill histórico conservador (`raw=total oficial`, `ajuste=0`).
 - `20260709110000_camporee_lifecycle_timezone` - agrega apertura temporal de clubes, timezone IANA y auditoría de su verificación a camporees locales/de unión; backfillea el default provisional `America/Mexico_City` sin reescribir fechas ni deadlines históricos.
+- `20260713220000_camporee_section_registration_context` - agrega `camporee_members.camporee_club_id` nullable con FK/índice, valida duplicados antes de crear los índices únicos parciales de inscripción activa local/unión y normaliza los grants de `camporees:register_active_section` y `camporees:register`.
 - `20260531203000_annual_ranking_axes` - crea `annual_ranking_axis_configs`, asocia componentes a ejes administrativo/operativo, y conserva componentes legacy desconocidos como inactivos para remediación manual sin asignarlos silenciosamente a un eje.
 - `20260429000000_enrollment_rankings_schema` - (8.4-A) crea `enrollment_rankings`, `section_rankings`, `enrollment_ranking_weights` con indexes, UNIQUE constraints y CHECK constraints de rango [0,100]. Ver §14.1 de `docs/canon/runtime-rankings.md`.
 - `20260429000001_award_categories_scope` - (8.4-A) añade `scope VARCHAR(20) DEFAULT 'club'` a `award_categories` + índice `idx_award_categories_scope` on `(scope, is_legacy)`. Backfill: filas existentes → `scope='club'`.
