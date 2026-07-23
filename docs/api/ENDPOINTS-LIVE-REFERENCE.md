@@ -74,7 +74,7 @@
 | honors | 5 |
 | user-honors | 15 |
 | user-master-honors | 3 |
-| insurance | 5 |
+| insurance | 11 |
 | inventory | 8 |
 | investiture | 20 |
 | legal-representatives | 4 |
@@ -1025,6 +1025,12 @@ Los `POST` y `PATCH` de camporees locales y de unión aceptan `start_date` y `en
 | GET | `/api/v1/users/:memberId/insurance` | JWT | Permisos: insurance:read | Obtener seguro activo del miembro | InsuranceService.getMemberInsurance() | `src/insurance/insurance.controller.ts` |
 | POST | `/api/v1/users/:memberId/insurance` | JWT | Permisos: insurance:create | Crear seguro para un miembro | InsuranceService.createInsurance() | `src/insurance/insurance.controller.ts` |
 | PATCH | `/api/v1/insurance/:insuranceId` | JWT | Permisos: insurance:update | Actualizar seguro | InsuranceService.updateInsurance() | `src/insurance/insurance.controller.ts` |
+| GET | `/api/v1/insurance/products` | JWT | `insurance:configure`; solo `director-lf`/`assistant-lf` con Campo Local efectivo | Listar productos configurables del Campo Local efectivo | InsuranceConfigService.listProducts() | `src/insurance/insurance.controller.ts` |
+| POST | `/api/v1/insurance/products` | JWT | `insurance:configure`; solo `director-lf`/`assistant-lf` con Campo Local efectivo | Crear producto de seguro en el Campo Local efectivo | InsuranceConfigService.createProduct() | `src/insurance/insurance.controller.ts` |
+| PATCH | `/api/v1/insurance/products/:productId` | JWT | `insurance:configure`; solo `director-lf`/`assistant-lf` con Campo Local efectivo | Actualizar producto del propio Campo Local | InsuranceConfigService.updateProduct() | `src/insurance/insurance.controller.ts` |
+| GET | `/api/v1/insurance/cycles` | JWT | `insurance:configure`; solo `director-lf`/`assistant-lf` con Campo Local efectivo | Listar ciclos configurados del Campo Local efectivo | InsuranceConfigService.listCycles() | `src/insurance/insurance.controller.ts` |
+| POST | `/api/v1/insurance/cycles` | JWT | `insurance:configure`; solo `director-lf`/`assistant-lf` con Campo Local efectivo | Crear configuración de ciclo de un producto propio | InsuranceConfigService.createCycle() | `src/insurance/insurance.controller.ts` |
+| PATCH | `/api/v1/insurance/cycles/:cycleConfigId` | JWT | `insurance:configure`; solo `director-lf`/`assistant-lf` con Campo Local efectivo | Actualizar costo, timezone, estado o deadline de ciclo propio | InsuranceConfigService.updateCycle() | `src/insurance/insurance.controller.ts` |
 
 ### inventory
 

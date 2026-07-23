@@ -24,6 +24,12 @@ La vinculacion de seguros con camporees es directa: la tabla `camporee_members` 
   - `GET /api/v1/users/:memberId/insurance` — Requiere `insurance:read` y `AuthorizationResource({ type: 'active_assignment' })`
   - `POST /api/v1/users/:memberId/insurance` — Requiere `insurance:create`; crea seguro con evidencia opcional (multipart, campo `evidence`)
   - `PATCH /api/v1/insurance/:insuranceId` — Requiere `insurance:update`; actualiza seguro existente con evidencia opcional (multipart)
+- **Configuración por capacidad (6 endpoints)**: `GET|POST|PATCH /api/v1/insurance/products` y `GET|POST|PATCH /api/v1/insurance/cycles`.
+  - Requieren el permiso `insurance:configure`, asignado explícitamente solo a `director-lf` y `assistant-lf`.
+  - El Campo Local se deriva exclusivamente de `request.authorizationProfile.authorization.effective.scope.global.local_field.id`; no se acepta `local_field_id` del cliente.
+  - Un producto `GENERAL` exige `FIXED_MONTHS` y duración positiva; uno `EVENT` exige `EVENT_DATES` y no admite duración predeterminada.
+  - Un ciclo pertenece al producto/Campo/año eclesiástico/tipo de club, no puede duplicar esa combinación y su `purchase_deadline` debe quedar dentro del año eclesiástico.
+  - Tras existir una compra `CONFIRMED` del ciclo, su deadline queda inmutable.
 
 ### Admin
 - **UI funcional**: `/dashboard/insurance` y `/dashboard/insurance/expiring`
@@ -41,6 +47,7 @@ La vinculacion de seguros con camporees es directa: la tabla `camporee_members` 
   - `insurance_id` (PK INT), `user_id` (FK UUID), `insurance_type` (ENUM), `policy_number`, `provider`, `start_date`, `end_date`, `coverage_amount` (DECIMAL), `active`, `evidence_file_url`, `evidence_file_name`
   - Auditoria: `created_by_id` (FK UUID), `modified_by_id` (FK UUID)
 - Relacion con `camporee_members` via `insurance_id`
+- `insurance_products` e `insurance_cycle_configs` ya sostienen la configuración del modelo por capacidad; el flujo de compras/cupos sigue separado del seguro legacy por miembro.
 
 ### Storage
 - Evidencia de seguros se almacena en Cloudflare R2, bucket `INSURANCE_EVIDENCE`
@@ -63,12 +70,15 @@ La vinculacion de seguros con camporees es directa: la tabla `camporee_members` 
 - **Tres tipos de seguro**: El enum `insurance_type_enum` distingue cobertura por contexto de uso, no por nivel de proteccion
 - **Auditoria integrada**: Los campos `created_by_id` y `modified_by_id` registran el actor que gestiona el seguro, que puede ser diferente del miembro asegurado (directores gestionan seguros de sus miembros)
 - **Almacenamiento R2**: La evidencia se guarda en Cloudflare R2 siguiendo el mismo patron que fotos de perfil y evidencias de honores
+- **Configuración territorial cerrada**: Tener `insurance:configure` no basta; el backend exige rol global `director-lf` o `assistant-lf` y scope efectivo de Campo Local. El cliente nunca elige el Campo.
+- **Deadline conservador**: No hay excepción canónica para registrar deadlines fuera del año eclesiástico, por lo que el backend los rechaza; tampoco permite cambiarlos después de una compra confirmada.
 
 ## Gaps y pendientes
 
 - **Sin notificaciones de vencimiento**: No hay mecanismo para alertar cuando un seguro esta por vencer
 - **Sin historial**: Solo se muestra el seguro activo mas reciente; no hay endpoint para consultar seguros historicos de un miembro
 - **Validacion de camporee acotada al flujo de registro**: `camporees.service.ts` valida tipo `CAMPOREE`, titularidad, vigencia y estado activo cuando se envia `insurance_id`, pero no existe una superficie general de historial o auditoria de coberturas
+- **Compras y cupos no expuestos aún**: esta superficie configura productos y ciclos; no publica todavía operaciones de compra, confirmación, transferencia o asignación del modelo por capacidad.
 - **REALITY-MATRIX desactualizada**: La Reality Matrix marcaba seguros como "SIN CANON" y sin backend module, pero el modulo `src/insurance/` existe con 5 endpoints funcionales documentados en ENDPOINTS-LIVE-REFERENCE
 
 ## Prioridad y siguiente accion

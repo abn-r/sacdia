@@ -113,6 +113,17 @@ El flujo administrativo de camporee separa personal operativo, agenda y scoring:
 - Capturar una zona IANA explícita (por ejemplo `America/Mexico_City`) cuando se confirme la sede: el backend la audita con el actor. Un PATCH sin `timezone` no borra esa verificación.
 - La UI de clubes debe distinguir `not_open_yet`, `open`, `late_approval_required` y `manually_frozen`. Al estar `not_open_yet`, no ofrecer inscripción ni flujo de aprobación tardía; el deadline es inclusivo.
 
+## Actualizacion 2026-07-23 (Configuración de productos y ciclos de seguro)
+
+La configuración de seguros por capacidad usa exclusivamente el Campo Local efectivo de la sesión:
+
+- Endpoints: `GET|POST|PATCH /api/v1/insurance/products` y `GET|POST|PATCH /api/v1/insurance/cycles`.
+- Todos requieren `insurance:configure`. El backend además limita la operación a `director-lf` y `assistant-lf` con `effective.scope.global.local_field.id` numérico; no enviar ni mostrar un selector `local_field_id`.
+- Producto GENERAL: enviar `coverage_scope: "GENERAL"`, `validity_mode: "FIXED_MONTHS"` y `default_duration_months` entero positivo. Producto EVENT: enviar `coverage_scope: "EVENT"`, `validity_mode: "EVENT_DATES"` y omitir `default_duration_months`.
+- Crear ciclo: `{ insurance_product_id, ecclesiastical_year_id, club_type_id, unit_cost, purchase_deadline: "YYYY-MM-DD", timezone, active? }`. El deadline debe estar dentro del rango del año eclesiástico; no existe excepción UI/API para fechas externas.
+- PATCH de ciclo acepta `unit_cost`, `purchase_deadline`, `timezone` y `active`. Si el backend devuelve `409 INSURANCE_CYCLE_DEADLINE_LOCKED`, refrescar y mantener el deadline actual: ya existe una compra confirmada y no puede editarse.
+- Errores relevantes: `403 INSURANCE_CONFIG_ROLE_FORBIDDEN`, `403 INSURANCE_CONFIG_LOCAL_FIELD_SCOPE_REQUIRED`, `403 INSURANCE_PRODUCT_OUTSIDE_LOCAL_FIELD`, `400 INSURANCE_PRODUCT_VALIDITY_INVALID`, `400 INSURANCE_PRODUCT_DURATION_INVALID`, `400 INSURANCE_CYCLE_DEADLINE_OUTSIDE_YEAR`, `409 INSURANCE_CYCLE_CONFIG_DUPLICATE`.
+
 ## Actualizacion 2026-02-17 (Admin Panel)
 
 Se agrego validacion operativa para frontend admin mediante smoke E2E en `sacdia-admin/scripts/e2e-smoke.mjs`.

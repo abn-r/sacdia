@@ -373,3 +373,24 @@ La app iOS nativa necesita una fachada de autenticación administrativa específ
 **Actualizado por**: Usuario  
 **Última actualización**: 2026-07-10 (ADR #7 — Sacdia Admin nativo)
 **Status**: ✅ Decisiones confirmadas; ADR #7 parcialmente implementada en rama, no expuesta en runtime
+
+---
+
+## 8. Configuración territorial de productos y ciclos de seguro
+
+### ✅ DECISIÓN EFECTIVA — 2026-07-23
+
+La configuración del modelo de seguros por capacidad se expone bajo `/api/v1/insurance/products` y `/api/v1/insurance/cycles` sin aceptar un `local_field_id` del cliente.
+
+| Tema | Decisión efectiva |
+| --- | --- |
+| Autorización | Requiere `insurance:configure` y, adicionalmente, rol global `director-lf` o `assistant-lf`. El seed final concede este permiso solo a esos dos roles. |
+| Scope | El Campo se deriva de `request.authorizationProfile.authorization.effective.scope.global.local_field.id`. Ausencia, valor no numérico u otro rol produce 403. No se reutiliza `GlobalRolesGuard` ni la resolución de Campo del dominio de materiales. |
+| Producto | `GENERAL` solo funciona con `FIXED_MONTHS` y duración positiva; `EVENT` solo con `EVENT_DATES` y sin duración predeterminada. |
+| Ciclo | La unicidad es producto + Campo + año eclesiástico + tipo de club. El deadline es `DATE`, debe estar dentro del año eclesiástico y se guarda junto a la timezone declarada. |
+| Inmutabilidad | Si el ciclo ya tiene una compra `CONFIRMED`, su deadline no puede modificarse. No existe una excepción canónica para deadline fuera de año. |
+
+### Consecuencias
+
+- La autoridad territorial no depende de parámetros manipulables por el cliente ni de helpers de otro dominio.
+- El producto/ciclo configura capacidad, pero no sustituye los endpoints legacy de `member_insurances` ni publica aún operaciones de compra, cupos o asignaciones.
