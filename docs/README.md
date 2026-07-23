@@ -117,6 +117,7 @@ Ver `audit/REALITY-MATRIX.md` para la foto completa y `features/README.md` para 
 ## Ver También
 
 - `canon/README.md`
+- `guides/domain-email-operations.md` — operación de `contacto@sacdia.com`
 - `history/README.md`
 
 ## SDD Command Parity Workflow
