@@ -74,10 +74,12 @@ Referencia humana concisa del schema Prisma vigente.
 - Migración runtime: `sacdia-backend/prisma/migrations/20260723120000_institutional_history_foundation`.
 - Las cinco tablas de relación histórica agregan tiempo de registro (`recorded_from`/`recorded_to`), `supersedes_history_id` y `reorganization_id`.
 - La revisión lógica vigente usa `recorded_to IS NULL`; los índices abiertos y las exclusiones anti-solape aplican solo a esa vista.
-- `institutional_name_versions` guarda nombre/abreviatura por entidad tipada (XOR de FKs; sin `entity_id` polimórfico). Traducciones apuntan a `name_version_id`.
+- `institutional_name_versions` guarda nombre/abreviatura por entidad tipada (XOR de FKs; sin `entity_id` polimórfico). Sus traducciones apuntan a `name_version_id`, usan `ON DELETE RESTRICT` y son append-only.
 - `institutional_reorganizations` registra actos `ESTABLISHMENT|RENAME|TRANSFER|SPLIT|MERGE|CLOSURE|CORRECTION` con `authority_source = WORLD_CHURCH_EXECUTIVE`, sin columnas de evidencia documental.
-- Participantes y aristas de linaje (`SPLIT_FROM`, `MERGED_FROM`, `CONTINUES_AS`, `CORRECTS`) son append-only a nivel DB.
-- El backfill de `recorded_from` usa `created_at`; no se infieren fechas efectivas desde `modified_at` ni se inventan reorganizaciones ficticias.
+- Participantes y aristas de linaje (`SPLIT_FROM`, `MERGED_FROM`, `CONTINUES_AS`, `CORRECTS`) son append-only a nivel DB; FKs compuestas impiden conectar participantes de reorganizaciones distintas.
+- Las relaciones históricas existentes conservan `recorded_from = created_at`; las versiones de nombre creadas por el backfill se registran con el instante de migración y precisión `system_backfill`.
+- El verificador read-only recorre objetos y arreglos JSON de `hierarchy_contexts.context` para detectar claves sensibles prohibidas en cualquier profundidad.
+- No se infieren fechas efectivas desde `modified_at` ni se inventan reorganizaciones ficticias.
 
 ### `weekly_records`, `weekly_record_scores` y `scoring_categories`
 
