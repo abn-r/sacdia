@@ -10,7 +10,7 @@ Cada club tiene su propia contabilidad independiente, con registro de ingresos y
 
 Cuando el resumen se consulta con `year` y `month`, el campo `balance` representa el saldo acumulado del ano eclesiastico que contiene ese mes, desde el inicio del ano eclesiastico hasta el cierre del mes seleccionado. Los meses ya cerrados se toman desde `finance_period_closings`; los meses abiertos se calculan con movimientos activos en tiempo real.
 
-Las categorias financieras son un catalogo compartido que permite clasificar los movimientos de forma estandar entre clubes. Esto posibilita eventuales reportes consolidados a nivel de campo local o union.
+Las categorias financieras son un catalogo compartido que permite clasificar los movimientos de forma estandar entre clubes. Cada categoria tiene un tipo fijo: `0` para ingreso o `1` para egreso. Solo categorias activas y con uno de esos tipos pueden asignarse a un movimiento. Esto posibilita eventuales reportes consolidados a nivel de campo local o union.
 
 ## Que existe (verificado contra codigo)
 
@@ -68,6 +68,7 @@ Las categorias financieras son un catalogo compartido que permite clasificar los
 - **Soft delete**: Los movimientos se desactivan; esto implica que el resumen financiero debe considerar solo registros activos
 - **Evidencias separadas por dominio**: Las fotos de soporte financiero viven en `finance_evidence_files`, con FK a `finances` y al usuario que sube el archivo. Se almacenan en R2 bajo el alias `EVIDENCE_FILES` y se sirven con URLs firmadas de corta duracion.
 - **Categorias compartidas**: Las categorias financieras son globales, no por club, permitiendo estandarizacion
+- **Integridad de categoria**: El alta y la edicion de movimientos verifican que la categoria exista, este activa y tenga tipo `0` (ingreso) o `1` (egreso); el tipo del movimiento se deriva de esa categoria
 - **Resumen acumulado por ano eclesiastico**: El endpoint `summary` con `year` + `month` calcula el saldo arrastrado del ano eclesiastico hasta el mes seleccionado; los meses cerrados usan el snapshot de `finance_period_closings` y los meses abiertos se calculan desde movimientos activos
 - **Doble superficie de lectura**: `GET /clubs/:clubId/finances` resuelve la vista mensual/anual del dashboard y `GET /clubs/:clubId/finances/transactions` cubre busqueda, filtros avanzados y paginacion server-side
 - **Filtrado temporal**: Los filtros por ano/mes se aplican a nivel de query, no como entidades separadas

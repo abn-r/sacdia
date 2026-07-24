@@ -42,6 +42,25 @@ propios solo como adaptadores: no deben duplicar ni contradecir este contrato.
 - El flujo debe ser contract-first: Codex define o valida endpoints/DTOs/permisos/errores antes de que el admin los consuma.
 - Codex no debe rediseñar el admin salvo pedido explicito o ajuste minimo para corregir integracion rota.
 
+### Handoff backend (admin / Composer)
+
+Cuando el agente trabaja desde `sacdia-admin` (o cualquier superficie admin) y el cambio requiere `sacdia-backend`:
+
+- **No editar** `sacdia-backend/` directamente.
+- **Entregar al usuario** una spec implementable para Codex u otra IA backend.
+- El admin solo consume contrato ya definido o el propuesto en esa spec.
+
+Formato minimo del handoff:
+
+1. **Objetivo** — que problema resuelve y por que no basta con frontend.
+2. **Archivos** — rutas exactas (`dto`, `service`, `controller`, tests, docs).
+3. **Cambio** — codigo o pseudocodigo concreto (query params, DTOs, `orderBy`, defaults).
+4. **Contrato API** — endpoint, params, response, permisos, errores.
+5. **Docs** — que actualizar (`docs/api/`, feature doc si aplica).
+6. **Test plan** — casos minimos a cubrir.
+
+Si el backend ya expone el contrato necesario, implementar solo en admin sin handoff.
+
 ## 1) Lectura minima obligatoria (siempre)
 
 1. `CLAUDE.md`

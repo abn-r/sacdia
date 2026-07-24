@@ -93,7 +93,7 @@ Reglas vigentes:
 6. El progreso de seccion registra puntaje y evidencias (JSON)
 7. El progreso de modulo se calcula como proyeccion sincronizada de sus secciones
 8. Si el usuario re-ejecuta post-registro por correccion/cambio de club, el backend deriva la clase por edad/tipo de club y desactiva otros enrollments activos del mismo ano antes de resolver el seleccionado
-9. Si una transferencia de club/seccion es aprobada, el backend aplica la misma regla: deriva la clase para el `club_type_id` destino y resuelve el enrollment anual activo
+9. Si una transferencia de club/sección es aprobada, el backend sólo admite el mismo tipo de club, mueve la asignación de rol activa y conserva la inscripción anual de clase actual; no deriva una clase para otro tipo de club.
 10. Una clase con `available_until_year_id = null` no expira para nuevas inscripciones; si tiene valor, deja de aparecer para inscripcion despues de ese ano eclesiastico
 11. La duracion de cursado se cuenta por anos eclesiasticos desde `enrollments.ecclesiastical_year_id`
 12. Antes de solicitar investidura, el backend exige respetar `min_duration_years` y `max_duration_years`
@@ -119,6 +119,7 @@ Reglas vigentes:
 - [RESUELTO] La frontera de autoridad entre enrollments y users_classes ha sido resuelta: `users_classes` fue retirada y `enrollments` es la única autoridad
 - [RESUELTO] `/home/grouped-class` en app ya no abre una clase fija/propia: resuelve el alcance pedagógico por sección y luego el miembro objetivo.
 - No hay proceso cron automatico para vencer enrollments; la primera iteracion usa proceso admin/manual auditable
+- No hay progresión anual automática de clase ni transición entre Aventureros, Conquistadores y Guías Mayores. Definirla requiere reglas explícitas de edad, clase destino, investidura pendiente, autorización y transferencia de sección antes de automatizarla.
 - Reporteria historica de clases vencidas queda para iteracion posterior
 
 ## Prioridad y siguiente accion

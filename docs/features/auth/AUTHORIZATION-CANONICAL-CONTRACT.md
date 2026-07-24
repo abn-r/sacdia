@@ -2,7 +2,7 @@
 
 **Status**: ACTIVE
 **Fecha**: 2026-03-10
-**Ambito**: `sacdia-backend`, `sacdia-admin`, `sacdia-app`
+**Ambito**: `sacdia-backend`, `sacdia-admin`, `sacdia-admin-ios`, `sacdia-app`
 
 ## Proposito
 
@@ -197,7 +197,7 @@ La politica canonica para clientes queda asi:
 - `GET /post-registration/status` para terceros debe limitarse al estado administrativo minimo del proceso y no necesita feedback guiado tipo `nextStep`;
 - `POST /step-{1,2,3}/complete` para terceros debe usar respuestas y errores minimos, sin devolver detalles sensibles del paso 2 ni feedback detallado del usuario objetivo;
 - datos sensibles enviados por el usuario (`health` = `allergies` + `diseases` + `medicines`, `emergency contacts`, `legal representative`, perfil sensible derivado del paso 2) NO deben quedar expuestos ni editables en clientes de terceros solo por `users:update` generico;
-- `sacdia-admin` y `sacdia-app` deben degradar u ocultar esas superficies cuando no exista una senal explicita compatible con esta politica minima.
+- `sacdia-admin`, `sacdia-admin-ios` y `sacdia-app` deben degradar u ocultar esas superficies cuando no exista una senal explicita compatible con esta politica minima.
 
 ## Registro Canonico de Exclusiones
 
@@ -220,6 +220,7 @@ Validacion documental final tras cierre de la excepcion minima:
 - backend: el contrato `user` verificado se mantiene en ownership o permiso global; `active_assignment` no habilita acceso a terceros;
 - backend: post-registro sobre terceros queda en modo administrativo minimo; owner conserva feedback detallado y terceros reciben respuestas saneadas;
 - `sacdia-admin`: el consumo canonico sigue siendo `authorization.effective.permissions` y `authorization.grants`;
+- `sacdia-admin-ios`: el inicio de sesion valida la elegibilidad del panel y despues consume `authorization.effective.permissions` y `authorization.grants` desde `/auth/me`;
 - `sacdia-app`: el gating sensible distingue familias finas, pero conserva fallback transicional a `users:read_detail` / `users:update`;
 - docs activas de auth y API quedan alineadas sobre familias finas cubiertas y exclusiones fuera de scope.
 
@@ -242,6 +243,13 @@ Validacion documental final tras cierre de la excepcion minima:
 - Debe usar `authorization.effective.scope.club` como contexto activo.
 - Debe usar `authorization.grants.club_assignments` para selector de contexto.
 - No debe leer roles de club desde `metadata.roles` ni contexto de club desde `metadata.club`.
+
+### `sacdia-admin-ios`
+
+- Debe usar `authorization.effective.permissions` para habilitar modulos y acciones.
+- Debe conservar roles globales y asignaciones de club desde `authorization.grants` para contexto y alcance.
+- Puede usar la misma lista de roles administrativos de `sacdia-admin` solo para admitir o rechazar el acceso inicial al panel; esa lista no sustituye el enforcement de permisos por operacion.
+- No debe consumir la fachada privada no publicada `/auth/admin/*`.
 
 ## Campos Legacy
 

@@ -28,7 +28,7 @@
 
 ## Introducción
 
-Esta guía proporciona ejemplos prácticos de cómo consumir la API REST de SACDIA desde aplicaciones frontend (Next.js Admin Panel y Flutter Mobile App).
+Esta guía proporciona ejemplos prácticos de cómo consumir la API REST de SACDIA desde el panel Next.js, la app Flutter y el cliente administrativo nativo iOS.
 
 ### URLs Base
 
@@ -241,6 +241,19 @@ El token se lee desde `FlutterSecureStorage` (`AppConstants.tokenKey`) y se env�
 
 ---
 
+### Native iOS Admin
+
+`sacdia-admin-ios` usa `URLSession` mediante un cliente tipado. En Release, la URL base debe ser HTTPS y terminar exactamente en `/api/v1`; cualquier configuración inválida falla cerrada. En Debug, el simulador usa por defecto `http://localhost:3000/api/v1` y HTTP se acepta únicamente para hosts loopback.
+
+- access token: solo memoria;
+- refresh token opaco: Keychain con `kSecAttrAccessibleWhenUnlockedThisDeviceOnly`;
+- refresh reactivo: `POST /auth/refresh`, coordinado como single-flight y con un único reintento;
+- autorización: siempre desde `GET /auth/me` bajo `authorization`.
+
+No debe consumir `/auth/admin/*`: esa fachada no está publicada.
+
+---
+
 ## Autenticación
 
 ### 1. Login con Email/Password
@@ -281,6 +294,22 @@ Future<UserModel> login(String email, String password) async {
   return UserModel.fromJson(data['user'] as Map<String, dynamic>);
 }
 ```
+
+**iOS Admin**:
+
+```swift
+let login = APIEndpoint(
+    method: .post,
+    path: "auth/login",
+    body: try JSONEncoder().encode(["email": email, "password": password])
+)
+let response = try await apiClient.execute(
+    login,
+    as: APIEnvelope<LoginResponse>.self
+)
+```
+
+Después del login, iOS valida la misma lista de roles admitidos por el panel web y consulta `GET /auth/me`. La sesión solo queda establecida si el perfil canónico confirma acceso administrativo. Si el JWT incluye `mfa_pending: true`, primero llama `POST /auth/mfa/verify` con el token AAL1 y luego consulta `/auth/me` con el token AAL2.
 
 ---
 
@@ -324,6 +353,15 @@ await secureStorage.write(AppConstants.tokenKey, data['accessToken']);
 - `AuthNotifier` valida el estado inicial con `/auth/me`.
 - `AuthInterceptor` adjunta Bearer en cada request autenticada.
 - Un 401 fuera de endpoints públicos dispara refresh; si falla, limpia tokens y expira la sesión local.
+
+**iOS Admin**:
+
+- `SessionCoordinator` conserva el access token en memoria y el refresh token en Keychain.
+- Al iniciar, una credencial Keychain existente restaura la sesión mediante `/auth/refresh` y después valida `/auth/me`.
+- Si refresh devuelve un JWT AAL1 con `mfa_pending`, iOS falla cerrado, elimina esa sesión persistida y exige un nuevo login con MFA; nunca instala el token degradado.
+- `/auth/me.authorization.effective.permissions` gobierna acciones y módulos; `authorization.grants` conserva roles y alcance.
+- Logout limpia primero credenciales y caché protegida locales, y después invoca `POST /auth/logout` como best effort.
+- Recuperación de contraseña usa exclusivamente `POST /auth/password/reset-request`; la respuesta visible no permite enumerar cuentas.
 
 ---
 

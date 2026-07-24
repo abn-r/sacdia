@@ -72,7 +72,7 @@ La asignacion de un consejero/secretario a una clase progresiva concreta vive en
 
 ### Contrato de miembros por sección
 
-El listado de miembros no debe inferir "Sin clase" desde la ausencia de datos en el cliente. El backend expone `current_class` por cada asignación activa de rol tomando la inscripción activa del año eclesiástico vigente y filtrándola por el `club_type_id` de la sección consultada. Si un miembro está inscrito en "Guía" de Conquistadores, la app y el panel deben renderizar esa clase en el grupo/ficha correspondiente.
+El listado de miembros no debe inferir "Sin clase" desde la ausencia de datos en el cliente. El backend expone `current_class` sólo para asignaciones de rol `active` con estado `active` del año eclesiástico vigente, tomando la inscripción activa y filtrándola por el `club_type_id` de la sección consultada. Si no existe un año eclesiástico actual configurado, el listado de miembros actuales es vacío: nunca reutiliza asignaciones históricas. Si un miembro está inscrito en "Guía" de Conquistadores, la app y el panel deben renderizar esa clase en el grupo/ficha correspondiente.
 
 ## Requisitos funcionales
 
