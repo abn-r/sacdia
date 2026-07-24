@@ -49,6 +49,7 @@ La vinculacion de seguros con camporees es directa: la tabla `camporee_members` 
   - `insurance_id` (PK INT), `user_id` (FK UUID), `insurance_type` (ENUM), `policy_number`, `provider`, `start_date`, `end_date`, `coverage_amount` (DECIMAL), `active`, `evidence_file_url`, `evidence_file_name`
   - Auditoria: `created_by_id` (FK UUID), `modified_by_id` (FK UUID)
 - Relacion con `camporee_members` via `insurance_id`
+- `insurance_products` e `insurance_cycle_configs` ya sostienen la configuración del modelo por capacidad; el flujo de compras/cupos sigue separado del seguro legacy por miembro.
 
 ### Storage
 - Evidencia de seguros se almacena en Cloudflare R2, bucket `INSURANCE_EVIDENCE`
@@ -71,12 +72,15 @@ La vinculacion de seguros con camporees es directa: la tabla `camporee_members` 
 - **Tres tipos de seguro**: El enum `insurance_type_enum` distingue cobertura por contexto de uso, no por nivel de proteccion
 - **Auditoria integrada**: Los campos `created_by_id` y `modified_by_id` registran el actor que gestiona el seguro, que puede ser diferente del miembro asegurado (directores gestionan seguros de sus miembros)
 - **Almacenamiento R2**: La evidencia se guarda en Cloudflare R2 siguiendo el mismo patron que fotos de perfil y evidencias de honores
+- **Configuración territorial cerrada**: Tener `insurance:configure` no basta; el backend exige rol global `director-lf` o `assistant-lf` y scope efectivo de Campo Local. El cliente nunca elige el Campo.
+- **Deadline conservador**: No hay excepción canónica para registrar deadlines fuera del año eclesiástico, por lo que el backend los rechaza; tampoco permite cambiarlos después de una compra confirmada.
 
 ## Gaps y pendientes
 
 - **Sin notificaciones de vencimiento**: No hay mecanismo para alertar cuando un seguro esta por vencer
 - **Sin historial**: Solo se muestra el seguro activo mas reciente; no hay endpoint para consultar seguros historicos de un miembro
 - **Validacion de camporee acotada al flujo de registro**: `camporees.service.ts` valida tipo `CAMPOREE`, titularidad, vigencia y estado activo cuando se envia `insurance_id`, pero no existe una superficie general de historial o auditoria de coberturas
+- **Operación de cupos parcial**: ya existen envío, revisión y reversión de compras; faltan saldos, movimientos, transferencias y asignaciones del modelo por capacidad.
 - **REALITY-MATRIX desactualizada**: La Reality Matrix marcaba seguros como "SIN CANON" y sin backend module, pero el modulo `src/insurance/` existe con 5 endpoints funcionales documentados en ENDPOINTS-LIVE-REFERENCE
 
 ## Prioridad y siguiente accion

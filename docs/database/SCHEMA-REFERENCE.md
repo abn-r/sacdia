@@ -452,6 +452,8 @@ Define el presupuesto de puntos por componente dentro de un eje anual:
 - `users`, `legal_representatives`, `emergency_contacts`, `relationship_types`
 - `allergies`, `diseases`, `medicines`, `users_allergies`, `users_diseases`, `users_medicines`
 - `member_insurances`
+- `insurance_products`, `insurance_cycle_configs` *(runtime parcial: configuración mediante `GET|POST|PATCH /api/v1/insurance/products` y `GET|POST|PATCH /api/v1/insurance/cycles`)*
+- `insurance_purchases`, `insurance_coverage_slots`, `insurance_slot_movements`, `insurance_assignments`, `insurance_evidence_files`, `camporee_external_participants` *(planificados; sin endpoint runtime)*
 
 ### Formacion
 
@@ -471,6 +473,7 @@ Define el presupuesto de puntos por componente dentro de un eje anual:
 
 - `activity_types`, `activities`, `activity_instances`
 - `local_camporees`, `union_camporees`, `union_camporee_local_fields`, `camporee_clubs`, `camporee_members`, `camporee_payments`
+  - `camporee_external_participants` *(planificado; sin endpoint runtime)* conserva participantes externos por un único camporee local o de Unión y se integra con asignaciones de seguros futuras.
   - `local_camporees` y `union_camporees` guardan dirección textual (`local_camporee_place` / `union_camporee_place`), coordenadas opcionales (`lat`, `long`) para vista de mapa en app, `agenda_visible_from` para abrir agenda completa antes/durante el camporee y `club_registration_closed_at/by` para congelar secciones competitivas.
   - Ambos modelos incluyen `club_registration_opens_at TIMESTAMPTZ NULL` (nulo = apertura inmediata), deadlines `TIMESTAMPTZ`, y `timezone` IANA con default histórico provisional `America/Mexico_City`. `timezone_verified_at/by` audita la confirmación; `timezone_verified_by` tiene FK nombrada a `users(user_id)`, `ON DELETE SET NULL` e índice por tabla. El backfill no modifica fechas ni deadlines históricos.
   - Los eventos del camporee viven en `camporee_events` y se relacionan con camporee local o de unión mediante FK excluyentes.
@@ -524,6 +527,15 @@ Define el presupuesto de puntos por componente dentro de un eje anual:
 - `folder_template_status_enum` (`DRAFT`, `PUBLISHED`, `ARCHIVED`)
 - `honor_validation_status_enum`
 - `insurance_type_enum`
+- `insurance_coverage_scope_enum` (`GENERAL`, `EVENT`) *(runtime parcial: configuración de productos)*
+- `insurance_validity_mode_enum` (`FIXED_MONTHS`, `EVENT_DATES`) *(runtime parcial: configuración de productos)*
+- `insurance_purchase_status_enum` (`PENDING_CONFIRMATION`, `CONFIRMED`, `REJECTED`, `REVERSED`) *(planificado; sin endpoint runtime)*
+- `insurance_purchase_classification_enum` (`ORDINARY`, `EXTRAORDINARY`, `LEGACY_UNCLASSIFIED`) *(planificado; sin endpoint runtime)*
+- `insurance_slot_status_enum` (`AVAILABLE`, `ASSIGNED`, `VOID`) *(planificado; sin endpoint runtime)*
+- `insurance_slot_movement_type_enum` (`PURCHASE_CONFIRMED`, `TRANSFERRED`, `ASSIGNED`, `RELEASED`, `REASSIGNED`, `VOIDED`, `CORRECTED`) *(planificado; sin endpoint runtime)*
+- `insurance_assignment_subject_enum` (`MEMBER`, `EVENT_EXTERNAL`) *(planificado; sin endpoint runtime)*
+- `insurance_assignment_status_enum` (`PENDING_CONFIRMATION`, `ACTIVE`, `REJECTED`, `RELEASED`, `EXPIRED`) *(planificado; sin endpoint runtime)*
+- `insurance_evidence_type_enum` (`PURCHASE_PROOF`, `INDIVIDUAL_RECEIPT`) *(planificado; sin endpoint runtime)*
 - `investiture_action_enum`
 - `investiture_status_enum`
 - `origin_level_enum`
@@ -538,6 +550,7 @@ Define el presupuesto de puntos por componente dentro de un eje anual:
 
 ## Migraciones recientes
 
+- `20260723120000_insurance_capacity_model` - agrega de forma aditiva productos, configuraciones de ciclo, compras, cupos, libro de movimientos, asignaciones, evidencias y participantes externos por evento. Conserva `member_insurances` y `camporee_members` intactos; añade CHECK de sujeto/asignación, dueño de evidencia y XOR de camporee local/unión, más el índice parcial de asignación activa. **Runtime parcial:** productos/configuraciones de ciclo se exponen en `GET|POST|PATCH /api/v1/insurance/products` y `GET|POST|PATCH /api/v1/insurance/cycles`; compras, cupos, movimientos, asignaciones, evidencias y participantes siguen sin endpoints runtime.
 - `20260710130000_admin_auth_sessions` - creada en la rama backend para metadata administrativa 1:1 sobre `sessions`, assurance, expiración absoluta y revocación; despliegue no verificado.
 - `20260710200000_admin_refresh_rotation` - depende de `20260710130000_admin_auth_sessions`; añade `idle_expires_at` para su adopción futura en D1c, deshabilita con sentinel las sesiones administrativas legacy y crea estructuras hash-only de refresh, historial y recibos cifrados. Existe en la rama backend, pero no fue ejecutada ni verificada contra una base de datos; no tiene writer ni publica endpoints runtime y no debe desplegarse antes de D1c + D2.
 - `20260415100000_folder_templates_polymorphic_owner` - añade owners polimorficos (`owner_union_id`, `owner_local_field_id`), dropea el unique compuesto legacy y establece el CHECK/indices parciales de exactamente-un-owner.
