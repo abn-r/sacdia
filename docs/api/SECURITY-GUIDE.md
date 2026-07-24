@@ -224,6 +224,8 @@ Desde `c09a600` hasta `ee84d2d`, inclusive, la rama contiene únicamente el sche
 > [!IMPORTANT]
 > No existe endpoint `/api/v1/auth/admin/*`, la migración no está desplegada ni verificada y ningún controller nuevo está publicado. La finalización MFA existe como servicio privado; para refresh solo existe la persistencia D1, no writer ni rotación runtime. El contrato legacy y la referencia de endpoints vigente no se modifican.
 
+Mientras esa fachada siga sin publicarse, `sacdia-admin-ios` consume el contrato común vigente (`/auth/login`, `/auth/mfa/verify`, `/auth/me`, `/auth/refresh`, `/auth/logout` y `/auth/password/reset-request`), igual que los clientes existentes. Esto no publica ni activa los servicios privados descritos arriba.
+
 ### Sessions Endpoints
 
 ```typescript
