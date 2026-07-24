@@ -156,7 +156,7 @@ DEPRECATED: las operaciones legacy de carpetas de usuario (`user_folders:*` y `/
 
 ### `runtime-camporees.md`
 
-Canoniza operaciones CRUD sobre la entidad camporee con permisos propios `camporees:read/create/update/delete`. Separa explícitamente de `attendance:*` cross-cutting (preservado deliberadamente entre activities y camporees). Permiso `camporees:register` reservado sin uso actual. Decisión registrada: `decisiones-clave.md` §20.
+Canoniza CRUD con `camporees:read/create/update/delete`, inscripción contextual del director con `camporees:register_active_section` e inscripción legacy **local** con `camporees:register`. El POST legacy de unión conserva `attendance:manage`; `attendance:*` también permanece cross-cutting para participantes, pagos y aprobaciones. Decisiones registradas: `decisiones-clave.md` §20 y §25.
 
 ### `runtime-validation.md`
 

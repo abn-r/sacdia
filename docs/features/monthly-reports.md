@@ -49,16 +49,27 @@ La feature esta implementada en backend con IDs UUID y estados `draft -> generat
   - administracion: `planning_meetings`, `parent_meetings`, `youth_council_attendance`, `church_board_attendance`
   - actividad misionera: `soul_target`, `unbaptized_members`, `bible_studies_receiving`, `has_weekly_bible_instruction`, `bible_studies_given`, `literature_distributed`, `baptized_this_month`, `total_baptized`
   - texto/seguimiento: `club_participation_description`, `community_service_description`, `certificates_delivered`, `members_have_booklet`, `booklet_requirements_signed`
+- **Contrato de captura manual**:
+  - `PATCH /api/v1/monthly-reports/:reportId/manual-data` excluye campos `undefined` antes de persistir
+  - payload técnico vacío, o creación compuesta solo por textos `null`, vacíos o whitespace, retorna `MONTHLY_REPORT_MANUAL_DATA_REQUIRED`
+  - `null` en campos numéricos o booleanos retorna `MONTHLY_REPORT_INVALID_MANUAL_DATA`; `0` y `false` explícitos son válidos
+  - los textos nullable aceptan `null` para limpiar una fila manual existente
 
 ### Automatizacion backend
 
-- **Cron operativo**: corre todos los dias a las `23:00` del servidor
+- **Cron operativo**: corre todos los dias con `0 23 * * *`, a las `23:00` UTC
 - Lee `system_config`:
-  - `reports.auto_generate_enabled`
-  - `reports.auto_generate_day`
-- Si el dia coincide, genera informes para el mes anterior de todas las matriculas activas
+  - `reports.auto_generate_enabled` es el kill switch; la seed vigente lo deja en `true`
+  - `reports.auto_generate_day` acepta `1..28`, usa fallback `5` y su seed vigente es `5`; es la unica fuente del corte tanto para generacion como para scoring
+- El corte de un periodo reportado es a las `23:00:00` UTC del dia configurado del mes siguiente
+- En cada ejecucion, por cada matricula con `club_enrollment.status = 'active'`, usa `start_date` y `end_date` de su `ecclesiastical_year` asociado y reconcilia todos los meses vencidos desde el mes de inicio hasta el menor entre el mes de fin y el mes anterior al actual; no exige que el año asociado conserve flag `active`, y un periodo solo entra cuando su corte ya vencio
+- Precarga en lotes de `500` los estados de los periodos vencidos y omite cualquier reporte existente cuyo estado sea distinto de `draft`
+- Solo los periodos faltantes llaman `getOrCreateDraft`/upsert; si falla la precarga de un lote, esos periodos usan el mismo fallback individual. Los borradores pasan a `generated` mediante compare-and-set
+- Un error de un periodo se registra sin frenar los demas; la ejecucion del dia siguiente vuelve a intentar lo pendiente
+- Si faltan datos, el snapshot congela `0` o `[]` segun el campo y `manual_data` puede permanecer `null`; la automatizacion deja el informe en `generated`, nunca en `submitted`
 - Usa lock distribuido `cron:monthly-reports-auto-generate`
 - **Cron de recordatorios**: corre todos los dias a las `09:00` en `America/Mexico_City` y solo emite notificaciones en dias programados
+  - la cadencia fija 27/1/4/5/6 esta alineada con el default `5`; no se recalcula al cambiar `reports.auto_generate_day` ni define el corte, que para generacion y scoring proviene exclusivamente de esa config
   - dia 27: recuerda a director y secretario registrar avances del mes actual
   - dia 1: recuerda que quedan 5 dias para cerrar el informe del mes anterior
   - dia 4: ultimo recordatorio antes del cierre
@@ -68,6 +79,15 @@ La feature esta implementada en backend con IDs UUID y estados `draft -> generat
   - fuente de notificacion: `monthly_reports:reminder`, categoria movil `reminders`
   - destinatarios: roles de club `director`, `secretary` y `secretary-treasurer`; no incluye subdirector
 - `YearEndService` tambien auto-genera informes `draft` antes del cierre anual
+
+### Scoring de puntualidad
+
+- `monthly_reports_timeliness` mide la **primera captura manual**, no el estado ni el envío formal del reporte
+- Para cada mes del año eclesiástico construye `period_start_at` a las `00:00:00 UTC` del primer día y `deadline_at` a las `23:00:00 UTC` del día configurado del mes siguiente
+- El denominador incluye solo meses con `deadline_at <= CURRENT_TIMESTAMP`; meses futuros o todavía abiertos no suman ni penalizan
+- Un mes suma si existe `monthly_report_manual_data` y su `created_at` cae en `[period_start_at, deadline_at)`; ausencia o creación tardía aporta `0`
+- El cálculo no inspecciona `status`, el momento de envío, los valores manuales `0`/`false`/`null` ni `snapshot_data`; no existe doble penalización por contenido
+- La app puede obtener este KPI sin ejecutar `submit`; la reconciliación automática mantiene el reporte en `generated`
 
 ### PDF real
 
@@ -105,10 +125,10 @@ La feature esta implementada en backend con IDs UUID y estados `draft -> generat
   - monthly reports usa `String` para `reportId` y `enrollmentId`, compatible con UUID backend
   - `EnrollmentModel` conserva `enrollmentUuid` para llamar endpoints UUID sin romper consumers legacy que aun usan `id: int`
   - `MonthlyReportModel` parsea `snapshot_data`, `manual_data`, `generated_at`, club y tipo de club
-  - la pantalla `/home/reports` permite preparar el informe del mes actual creando/abriendo `draft` y editar datos manuales; la generacion del mes queda reservada al cron/sistema en el cierre del mes siguiente
+  - la pantalla `/home/reports` permite preparar el informe del mes actual creando/abriendo `draft` y editar datos manuales; vencido el corte del mes siguiente, la siguiente reconciliacion diaria crea/genera el periodo y las ejecuciones posteriores hacen catch-up si quedo pendiente
   - el detalle movil muestra la misma informacion funcional que el PDF organizada por administracion, ensenanzas/honores, actividades, finanzas, actividad misionera y servicio/materiales
   - al guardar datos manuales, campos numericos vacios se normalizan a `0`; campos de texto vacios se envian como `null` para limpiar valores previos
-- **Pendiente cliente**: reconciliacion completa de consumidores legacy de enrollment que todavia usan IDs numericos. El `submit` no es flujo primario de director/secretario si el reporte se genera automaticamente el dia de cierre.
+- **Pendiente cliente**: reconciliacion completa de consumidores legacy de enrollment que todavia usan IDs numericos. `submit` no es requisito de `monthly_reports_timeliness`: la primera captura manual dentro de la ventana alcanza para el KPI, mientras la siguiente reconciliacion diaria crea/genera el periodo vencido y los dias posteriores hacen catch-up si quedo pendiente.
 
 ### Base de datos
 
@@ -123,7 +143,8 @@ La feature esta implementada en backend con IDs UUID y estados `draft -> generat
 3. Solo informes en `draft` deben aceptar actualizacion manual o generacion
 4. Solo informes en `generated` deben poder enviarse
 5. El PDF debe generarse desde el snapshot congelado, no desde datos en vivo
-6. Debe existir automatizacion para generar informes del mes anterior y durante cierre anual; la captura manual del club ocurre durante el mes actual
+6. Debe existir automatizacion diaria para reconciliar todos los periodos vencidos de la matricula y durante cierre anual; la captura manual del club ocurre antes del corte del periodo
+7. El KPI de puntualidad debe considerar solo períodos con deadline vencido y la primera creación de `monthly_report_manual_data` dentro de la ventana UTC
 
 ## Decisiones de diseno
 
@@ -131,6 +152,7 @@ La feature esta implementada en backend con IDs UUID y estados `draft -> generat
 - **Unicidad por periodo**: la tupla `(club_enrollment_id, month, year)` evita borradores duplicados
 - **Snapshot separado de manual_data**: el auto-calculado congelado vive en `snapshot_data`, mientras la captura humana queda normalizada en `monthly_report_manual_data`. Los campos declarativos de reuniones, actividad misionera y servicio NO deben guardarse como `activities` salvo que correspondan a eventos reales del calendario del club.
 - **PDF server-side**: el documento se genera bajo demanda desde backend y no requiere que el cliente componga el reporte
+- **Alcance del catch-up**: no cambia rutas, response shapes, schema ni flujo movil; el PATCH existente endurece la validacion de captura manual y expone errores estables
 
 ## Gaps y pendientes
 
