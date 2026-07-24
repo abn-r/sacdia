@@ -4,6 +4,7 @@
 
 **Versión**: 1.0  
 **Fecha**: 31 de enero de 2026  
+**Actualizado**: 15 de julio de 2026
 **Status**: ✅ Implementado
 
 ---
@@ -21,6 +22,7 @@ El runtime actual endurece sub-recursos sensibles de `user` con `JwtAuthGuard` +
 | `legal_representative` | `GET/POST/PATCH/DELETE /users/:userId/legal-representative` | `legal_representative:read`, `legal_representative:update` | `users:read_detail`, `users:update` |
 | `post_registration` | `GET /users/:userId/post-registration/status` | `post_registration:read` | `users:read_detail` |
 | `post_registration` | `POST /users/:userId/post-registration/step-{1,2,3}/complete` | `registration:complete` | _(sin fallback)_ |
+| `post_registration` | `POST /users/:userId/post-registration/membership-request/cancel` | `registration:complete` | _(sin fallback)_ |
 
 Reglas de seguridad:
 
@@ -32,6 +34,7 @@ Reglas de seguridad:
 
 - `GET /users/:userId/post-registration/status` para terceros queda limitado a estado administrativo mínimo;
 - `POST /users/:userId/post-registration/step-{1,2,3}/complete` para terceros queda limitado a completion administrativa mínima;
+- `POST /users/:userId/post-registration/membership-request/cancel` para terceros queda limitado a cancelación administrativa mínima;
 - respuestas y errores NO deben filtrar razones sensibles detalladas del usuario objetivo.
 
 ### Exclusiones fuera de scope
@@ -53,6 +56,84 @@ Estas rutas siguen bajo metadata legacy `users:*` y no forman parte del tiering 
 - `post_registration`.
 
 Cada bloque se expone solo si el actor tiene `family:read` o el fallback legacy `users:read_detail`.
+
+---
+
+## RBAC de progreso de clases
+
+Los endpoints de progreso/evidencias de clases combinan self-service y delegación:
+
+- si `:userId` coincide con el usuario autenticado, las escrituras owner-aware (`PATCH progress`, `POST submit`, `POST files`, `DELETE files`) pueden pasar el guard sin exigir `classes:submit_progress`;
+- si el actor trabaja sobre otro miembro, debe tener `classes:submit_progress` desde su asignación activa o permisos globales efectivos;
+- en todos los casos, `ClassProgressAccessService` resuelve el enrollment anual y valida el acceso fino al progreso objetivo.
+
+Esto evita dar `classes:submit_progress` al rol `member` de forma amplia y conserva mínimo privilegio para cargas delegadas.
+
+## RBAC de notificaciones
+
+El módulo `notifications` usa permisos finos y scopes explícitos:
+
+| Superficie | Permiso | Scope efectivo | Roles seed |
+| --- | --- | --- | --- |
+| `POST /notifications/send` | `notifications:send` | global | `admin`, `super-admin` por wildcard |
+| `POST /notifications/broadcast` | `notifications:broadcast` | global | `admin`, `super-admin` por wildcard |
+| `POST /notifications/club/:instanceType/:instanceId` | `notifications:club` | `active_assignment` exacto | `secretary`, `secretary-treasurer`, `deputy-director`, `director`; `admin`/`super-admin` por wildcard pero sin bypass del target activo |
+| `GET /notifications/targets/club` | `notifications:club` | `active_assignment` exacto | mismos roles de envío por club |
+| `GET /notifications/history` | JWT | inbox propia o auditoría admin filtrada por servicio | sin permiso de envío requerido |
+
+El envío por club falla cerrado: además del scope exacto, el backend valida que el `instanceType` de la URL coincida con el tipo real de la sección (`NOTIF_TARGET_TYPE_MISMATCH` en mismatch).
+
+---
+
+## RBAC de reportes institucionales
+
+Los listados administrativos de reportes resuelven el contexto con `AuthorizationContextService` y aplican scope jerárquico en el servidor; los filtros del cliente nunca amplían el alcance real del actor.
+
+| Actor | Alcance efectivo |
+| --- | --- |
+| `super-admin`, `admin`, `director-dia`, `assistant-dia` | Todos los reportes; pueden filtrar por `division_id`, `union_id`, `local_field_id` |
+| `director-union`, `assistant-union` | Solo clubes/campos de su unión; pueden reducir por `local_field_id` |
+| `director-lf`, `assistant-lf`, `coordinator`, `assistant-admin` | Solo clubes de su campo local |
+| Director/secretario con asignación activa de club | Solo reportes de su sección activa |
+
+La regla se centraliza en `src/reports/report-visibility-scope.ts` y se aplica a listados mensuales, trimestrales y anuales.
+
+---
+
+## RBAC y scope del dashboard operativo
+
+`GET /api/v1/admin/analytics/operations-dashboard` usa `JwtAuthGuard` y `GlobalRolesGuard`, pero el guard de rol solo habilita la superficie. `OperationsDashboardScopeService` vuelve a resolver el perfil de autorización y fuerza el alcance territorial antes de consultar métricas.
+
+### Matriz de alcance máximo
+
+| Actor | Alcance máximo efectivo | Reducción permitida |
+| --- | --- | --- |
+| `super-admin` | Global (`all`) | División, Unión o Campo local válidos |
+| `admin`, `assistant-admin` | Scope configurado; Unión tiene precedencia, luego Campo local y finalmente División | Solo el territorio configurado y sus descendientes |
+| `director-dia`, `assistant-dia` | Su División efectiva | Unión o Campo local descendiente |
+| `director-union`, `assistant-union` | Su Unión efectiva | Campo local descendiente |
+| `director-lf`, `assistant-lf` | Su Campo local efectivo | No puede ampliar; permanece en ese Campo local |
+
+El controller declara `admin`, `super-admin` y los seis roles territoriales. `assistant-admin` entra por el alias simétrico `admin ↔ assistant-admin` de `GlobalRolesGuard`; no obtiene alcance global por ese alias. Coordinadores, pastores y actores con roles solo de club no están admitidos.
+
+### Reglas de filtros territoriales
+
+- `division_id`, `union_id` y `local_field_id` son filtros de reducción, nunca autoridad.
+- Cuando se envían varios niveles, deben representar una misma cadena territorial.
+- El backend carga la geografía objetivo, valida que esté contenida en el scope base del actor y después valida la consistencia de la cadena solicitada.
+- Un actor scoped no puede convertir su scope en global omitiendo filtros.
+- Un rol que requiere territorio y no tiene un ID efectivo numérico recibe `403 ADMIN_USER_SCOPE_MISSING`.
+
+### Respuestas que evitan enumeración territorial
+
+| Situación | Respuesta |
+| --- | --- |
+| Destino existente fuera del scope de un actor territorial | `403 GUARD_PERMISSION_DENIED` |
+| ID geográfico inexistente solicitado por un actor territorial | El mismo `403 GUARD_PERMISSION_DENIED` |
+| Cadena internamente inconsistente dentro de un scope consultable | `400 ANALYTICS_SCOPE_CHAIN_INVALID` |
+| División, Unión o Campo local inexistente consultado por `super-admin` global | `404 ADMIN_DIVISION_NOT_FOUND`, `ADMIN_UNION_NOT_FOUND` o `ADMIN_LOCAL_FIELD_NOT_FOUND` |
+
+El `404` geográfico se reserva al actor global. Para actores con scope, existencia y no pertenencia producen el mismo `403`; así la respuesta no revela territorios ajenos. La comprobación de contención precede al error de cadena, por lo que una combinación que apunta fuera del scope también responde `403`.
 
 ---
 
@@ -115,6 +196,35 @@ DELETE /v1/auth/mfa/disable
 - `POST /auth/mfa/verify` puede ejecutarse con `aal1`; si el código es válido, emite JWT `aal2` y, cuando el JWT tiene `sid`, guarda assurance en `verifications` como `mfa-session:{sessionId}` hasta `sessions.expires_at`.
 - `POST /auth/refresh` revisa esa assurance para usuarios con TOTP: si existe y no expiró, emite `aal2`; si falta, vuelve a emitir `aal1` con `mfa_pending: true`.
 - `POST /auth/update-password` requiere `{ currentPassword, password }`, JWT `aal2` para usuarios MFA, revoca todas las sesiones BA del usuario y blacklistea JWTs por 8h.
+
+### Sesión administrativa nativa (implementación privada en rama)
+
+La rama backend `codex/sacdia-admin-ios-auth`, hasta `ee84d2d`, implementa servicios privados para una sesión administrativa stateful sobre Better Auth:
+
+- `validateCredentials` comprueba email y contraseña sin crear sesión ni JWT y conserva una comparación bcrypt también en caminos inválidos para reducir diferencias de timing.
+- `AdminEligibilityService` consulta `users` de forma fresca y solo admite `active === true && access_panel === true`; cualquier otro estado se deniega con `AUTH_PANEL_ACCESS_DENIED`.
+- Ese gate solo habilita la superficie: no concede roles ni grants. Cada operación administrativa sigue resolviendo RBAC y scope en backend.
+- `AdminSessionService` crea metadata 1:1 en `admin_auth_sessions` y emite un JWT HS256 de acceso por 15 minutos con `iss='https://api.sacdia.app'`, `aud='sacdia-admin-api'`, `surface='admin'`, `client_type='ios'`, `sid`, `jti`, `sub`, `aal`, `amr` y `mfa_pending=false`. No incluye email. `aal1` exige exactamente `amr=['pwd']`; `aal2`, `amr=['pwd','otp']`. `iat`, `exp` y `accessTokenExpiresAt` derivan del mismo segundo epoch. La sesión interna dura 7 días y tiene una expiración absoluta de 30 días.
+- Cada request admin valida en base de datos el vínculo entre sesión y sujeto/usuario, además de assurance, revocación y expiraciones. No hace join de `active`/`access_panel` por request: esos cambios requieren revocar las sesiones desde la mutación administrativa, integración pendiente de A5. La revocación de una sesión o de todas las sesiones del usuario es inmediata; este JWT NO es stateless.
+- `JwtStrategy` mantiene intacta la compatibilidad con JWT legacy cuando `surface` está ausente. Cuando está presente, valida manualmente y solo acepta `surface='admin'` con el contrato completo; reutiliza el parser Bearer de Passport tanto para autenticación como para blacklist y falla cerrado con HTTP 503 (`AUTH_SESSION_AUTHORITY_UNAVAILABLE`) si la autoridad de sesión no está disponible, en vez de convertir la caída en credenciales válidas o en un 401 ambiguo.
+- `AdminMfaChallengeService` emite un JWT pre-auth HS256 por 5 minutos con `iss='https://api.sacdia.app'`, `aud='sacdia-admin-mfa'`, `surface='admin'`, `client_type='ios'`, `purpose='mfa'`, `mfa_pending=true`, `aal='aal1'` y `amr=['pwd']`. En `admin_mfa_challenges` se persiste únicamente el SHA-256 del token; el token crudo solo se entrega al llamador privado.
+- `AdminMfaCompletionService` finaliza el challenge dentro de la misma transacción que la elegibilidad, el replay TOTP y la creación de sesión AAL2; los outcomes se mapean a códigos canónicos internos sin exponer tokens pre-auth en logs ni excepciones.
+- Los servicios y repositorios de eligibility, sesión y challenge MFA, incluido `AdminMfaCompletionService`, están registrados como providers internos de `AuthModule`: no se exportan ni están conectados a un controller.
+
+### Persistencia de refresh administrativo nativo (D1 implementado en rama)
+
+Desde `c09a600` hasta `ee84d2d`, inclusive, la rama contiene únicamente el schema Prisma, la migración SQL y sus pruebas estáticas para soportar la futura rotación. No contiene writer, servicio de refresh, cifrado en ejecución ni emisión de refresh:
+
+- El schema reserva un único digest SHA-256 hexadecimal vigente por `session_id + family_id`, historial hash-only y una estructura de recibos con `key_id`, `nonce` de 12 bytes, `ciphertext`, `auth_tag` de 16 bytes, `plaintext_version=1` y TTL exacto de 60 segundos.
+- La migración agrega `idle_expires_at`, acotado por `absolute_expires_at`, y marca la sesión Better Auth asociada con el sentinel `admin-disabled:<session_id>` después de comprobar colisiones.
+- El contrato futuro D1c emitirá refresh opacos aleatorios de 256 bits solo para sesiones AAL2 posteriores al challenge MFA; persistirá únicamente hashes, incrementará `generation`, conservará historial hasta la expiración absoluta, aceptará `Idempotency-Key` UUID y cifrará recibos con AES-256-GCM usando un keyring separado.
+- El contrato futuro de reuse detection revocará la familia y el `sid` vinculados cuando reaparezca un refresh histórico. Ninguna de esas acciones de rotación o revocación está implementada en runtime todavía.
+- Antes de aplicar la migración o publicar la fachada, D2 debe excluir las sesiones y tokens administrativos de los endpoints legacy de Better Auth y nunca aceptar credenciales legacy en el flujo admin. El sentinel por sí solo no es un control suficiente.
+
+> [!IMPORTANT]
+> No existe endpoint `/api/v1/auth/admin/*`, la migración no está desplegada ni verificada y ningún controller nuevo está publicado. La finalización MFA existe como servicio privado; para refresh solo existe la persistencia D1, no writer ni rotación runtime. El contrato legacy y la referencia de endpoints vigente no se modifican.
+
+Mientras esa fachada siga sin publicarse, `sacdia-admin-ios` consume el contrato común vigente (`/auth/login`, `/auth/mfa/verify`, `/auth/me`, `/auth/refresh`, `/auth/logout` y `/auth/password/reset-request`), igual que los clientes existentes. Esto no publica ni activa los servicios privados descritos arriba.
 
 ### Sessions Endpoints
 
@@ -300,3 +410,20 @@ src/
 ---
 
 **Generado**: 31 de enero de 2026
+
+## RBAC de inscripción de secciones en camporee
+
+- `GET /api/v1/camporees/:camporeeId/section-registration` exige `camporees:read` y resuelve la sección desde el assignment activo. Los roles de lectura pueden consultar, pero no por eso mutar.
+- `POST /api/v1/camporees/:camporeeId/section-registration` exige `camporees:register_active_section`; el seed/migración elimina grants accidentales y lo concede únicamente al rol `director` de categoría `CLUB`. El servicio vuelve a exigir que el assignment activo sea exactamente ese rol.
+- `POST /api/v1/camporees/:camporeeId/clubs` es el flujo legacy local territorial y exige `camporees:register`. Sólo son válidos `assistant-lf`, `director-lf`, `assistant-union` y `director-union`, todos `GLOBAL`, dentro del campo local o unión padre del camporee.
+- `camporees:register` se normaliza después de herencias/wildcards: director CLUB, roles de división, `admin` y `super-admin` quedan fuera. Tener `attendance:manage` tampoco autoriza ese endpoint legacy local.
+- `POST /api/v1/camporees/union/:camporeeId/clubs` conserva el contrato legacy de unión con `attendance:manage`; no hereda `camporees:register` del endpoint local.
+- En el legacy, el body sólo aporta `club_section_id`; camporee, sección, club y tipo se bloquean y releen desde DB. El backend valida activo, territorio y tipo incluido antes de persistir IDs derivados.
+- El alta de participantes exige director y sección activa; además verifica inscripción de sección `registered|approved` y pertenencia del participante. Los fallos de elegibilidad usan `422 CAMPOREE_SECTION_REGISTRATION_REQUIRED` o `422 CAMPOREE_MEMBER_OUTSIDE_ACTIVE_SECTION`.
+
+# Captura oficial de puntaje de camporee
+
+- `POST /api/v1/camporee-events/:eventId/sections/:clubSectionId/scores` autoriza `judge_primary` sólo por asignación exacta. La carga manual se limita a `assistant-lf`, `director-lf`, `assistant-union` y `director-union` dentro de scope; `admin_override` se reserva a `admin`, `assistant-admin` y `super-admin`. `camporee_events:update` no es autorización suficiente y `dto.source` nunca es autoridad.
+- Cuando existe `Idempotency-Key`, el backend toma primero `pg_advisory_xact_lock(bigint)` sobre `hashtextextended(prefijo estable + actor + clave, 0)` y después `pg_advisory_xact_lock(eventId::integer, clubSectionId::integer)`. Los casts son explícitos porque Prisma enlaza números JavaScript como `INT8`; así PostgreSQL selecciona el overload `(integer, integer)`. Los overloads separan keyspaces y el orden reduce riesgo de deadlock; el hash de 64 bits mantiene una colisión teórica que sólo puede sobre-serializar requests.
+- Un replay de misma clave/hash no muta. La defensa P2002 relee la fila tras rollback y devuelve replay o `409 IDEMPOTENCY_KEY_REUSED`, nunca expone el error de unicidad como 500. Un receipt persistido sin resultado asociado falla de forma controlada con `CAMPOREE_SCORING_RECEIPT_INCOMPLETE`.
+- Todo override de un resultado activo exige `expected_active_result_id` coincidente y motivo `notes.trim()` no vacío. El motivo queda auditado en la submission; el primer score manual sin resultado activo no lo requiere.

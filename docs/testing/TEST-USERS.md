@@ -4,9 +4,11 @@ Creados: 2026-03-26
 Club: Club 1, Sección 1 (Guías Mayores)
 Año Eclesiástico: 2026
 
-## Contraseña
+## Credenciales
 
-Todos los usuarios usan la misma contraseña: `Sacdia2026!`
+Las contraseñas de usuarios de prueba no se publican en documentación
+versionada. Pedilas por el canal privado del equipo o consultalas en el gestor
+de secretos del entorno de QA/development.
 
 ## Usuarios por Rol de Club
 
@@ -32,6 +34,7 @@ Todos los usuarios usan la misma contraseña: `Sacdia2026!`
 ## Notas
 
 - Solo existen en la rama `development` de Neon
+- Rotar cualquier contraseña compartida anterior antes de reutilizar estas cuentas
 - Post-registration marcado como completo (no pide onboarding)
 - Todos tienen rol global `user` asignado
 - Los permisos de cada rol se derivan del seed en `prisma/seeds/role-permissions.seed.sql`

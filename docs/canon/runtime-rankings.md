@@ -3,17 +3,18 @@
 **Estado**: ACTIVE
 **Autoridad rectora**: `docs/canon/source-of-truth.md`
 **Tipo de documento**: runtime canonizado, documented-as-built
-**Ámbito**: clasificación anual de clubes por puntaje de carpetas, categorías de premio configurables y pipeline automático de cálculo
+**Ámbito**: clasificación anual de clubes por ejes institucionales configurables, Carpeta Anual de Evidencias, categorías de premio y pipeline automático de cálculo
 
 <!-- VERIFICADO contra código 2026-04-22: schema Prisma, rankings.service.ts, controllers de rankings/award-categories y admin UI cruzados con implementación real. -->
 <!-- VERIFICADO 8.4-C 2026-04-28: schema Prisma con columnas de componentes + composite, rankings.service.ts extendido con score-calculators, controllers de rankings/award-categories/ranking-weights y admin UI. 8.4-C shipped. -->
 <!-- VERIFICADO 8.4-A 2026-04-29: modelos enrollment_rankings, section_rankings, enrollment_ranking_weights — field names, indexes y awarded_category_id confirmados contra schema.prisma y migrations 20260429000000–20260429000003. -->
+<!-- VERIFICADO 2026-07-06: camporee_score_pct ya no usa asistencia/registro. Se calcula desde resultados oficiales de camporee_event_section_results sobre camporee_events.max_points en score-calculators/camporee-score.ts y member-rankings/services/camporee-score.service.ts. -->
 
 ---
 
 ## 1. Propósito
 
-Canoniza el subsistema de **clasificación institucional de clubes** basado en puntaje de carpetas anuales evaluadas y categorías de premio configurables.
+Canoniza el subsistema de **clasificación institucional de clubes** basado en ejes configurables. La Carpeta Anual de Evidencias es un componente central del ranking, pero no agota el ranking anual.
 
 Este sistema es distinto del sistema de tiers de achievements (`docs/canon/runtime-achievements.md`). Los rankings operan a nivel club y año eclesiástico, no a nivel miembro.
 
@@ -43,6 +44,8 @@ Fuente primaria: `annual_folder_section_evaluations` (`schema.prisma:1953-1980`)
 - `status` (enum `annual_folder_section_status_enum`, default `PENDING`): `PENDING | SUBMITTED | PREAPPROVED_LF | VALIDATED | REJECTED` (`schema.prisma:1688-1694`);
 - `union_decision` (enum): `APPROVED | REJECTED_OVERRIDE`.
 
+Regla de acumulación: sólo evaluaciones `VALIDATED` aportan `earned_points` al total de la carpeta anual. Las evaluaciones `REJECTED` cierran flujo, pero aportan 0 puntos; en un override de Unión se fuerza `earned_points = 0`.
+
 Fuente agregada: `club_annual_rankings` (`schema.prisma:2026-2051`).
 
 | Campo | Tipo | Nota |
@@ -59,7 +62,7 @@ Fuente agregada: `club_annual_rankings` (`schema.prisma:2026-2051`).
 | `calculated_at` | `timestamptz` | |
 | `folder_score_pct` | `float` | DEFAULT 0; porcentaje de puntaje de carpeta (0-100) |
 | `finance_score_pct` | `float` | DEFAULT 0; porcentaje de cierre financiero mensual (0-100) |
-| `camporee_score_pct` | `float` | DEFAULT 0; porcentaje de asistencia a camporees (0-100) |
+| `camporee_score_pct` | `float` | DEFAULT 0; porcentaje de resultados oficiales de eventos de camporee puntuables (0-100) |
 | `evidence_score_pct` | `float` | DEFAULT 0; porcentaje de evidencias validadas (0-100) |
 | `composite_score_pct` | `float` | DEFAULT 0; promedio ponderado de los 4 componentes (0-100) |
 | `composite_calculated_at` | `timestamptz?` | timestamp de la última actualización del composite |
@@ -119,7 +122,7 @@ Pasos del cálculo (`recalculateRankings`, líneas 123-264):
 
 Algoritmo en `rankings.service.ts:456-475`:
 
-- agrupar por `(club_type_id, ecclesiastical_year_id, award_category_id)`;
+- agrupar por `(local_field_id, club_type_id, ecclesiastical_year_id, award_category_id)` cuando existe snapshot de jerarquía; las filas históricas sin `hierarchy_context_id` quedan en un grupo `unscoped`;
 - ordenar descendente por `composite_score_pct` (desde 8.4-C; antes se ordenaba por `total_earned_points`);
 - asignar rank con semántica densa: empates comparten rank; el siguiente grupo obtiene `prevRank + 1`.
 
@@ -165,7 +168,14 @@ No hay lista de clubes excluidos. El criterio de inclusión es operativo (tener 
 
 Rankings (permiso `rankings:read` | `rankings:recalculate`):
 
-- `GET /annual-folders/rankings?club_type_id&year_id[&category_id]` — cada fila ahora incluye los 6 campos nuevos: `folder_score_pct`, `finance_score_pct`, `camporee_score_pct`, `evidence_score_pct`, `composite_score_pct`, `composite_calculated_at`;
+- `GET /club-sections/:sectionId/annual-ranking-progress?year_id` — scorecard móvil de una sola sección/club. Devuelve progreso anual propio (`current_points`, `max_points`, tier actual/siguiente, componentes y pendientes). No expone lista competitiva de otros clubes; esa visibilidad queda para administración;
+- `GET /annual-rankings?local_field_id&club_type_id&year_id` — leaderboard administrativo por campo local, tipo de club y año. Calcula puntos con la configuración anual (`annual_ranking_configs`), asigna posición densa por puntos y deriva el tier actual/siguiente con `ranking_tiers`;
+- `GET /annual-ranking-configs?union_id&local_field_id&club_type_id&year_id` — lista configuraciones anuales de puntaje y budgets por componente. La resolución efectiva para un Campo Local prefiere la configuración activa de su Unión y luego la configuración local. Permiso `ranking_weights:read`;
+- `POST /annual-ranking-configs` — crea la configuración anual por Unión o Campo Local/año/tipo de club. El body debe incluir exactamente uno entre `union_id` y `local_field_id`; Unión tiene precedencia. Permiso `ranking_weights:write`; valida suma de ejes/componentes = `max_points` y exige componente `annual_evidence_folder`;
+- `PATCH /annual-ranking-configs/:id` — actualiza máximo anual y reemplaza budgets de ejes/componentes. Permiso `ranking_weights:write`; no permite cambiar `annual_evidence_folder.max_points` si ya existen carpetas creadas para ese scope/año/tipo;
+- `GET /ranking-tiers` — lista rangos globales activos (`ranking_tiers`) usados para derivar Diamante/Oro/etc. Permiso `ranking_weights:read`;
+- `PATCH /ranking-tiers/:id` — actualiza un rango global; `band_percentage` debe ser positivo. Permiso `ranking_weights:write`;
+- `GET /annual-folders/rankings?club_type_id&year_id[&category_id][&local_field_id]` — cada fila incluye IDs de navegación (`club_enrollment_id`, `ecclesiastical_year_id`, `local_field_id`) y los 6 campos nuevos: `folder_score_pct`, `finance_score_pct`, `camporee_score_pct`, `evidence_score_pct`, `composite_score_pct`, `composite_calculated_at`. Acepta `rankings:read` desde rol global o desde la asignación activa de club. Si `local_field_id` se omite, el backend usa primero el campo local de la asignación activa y luego el campo local efectivo/perfil del usuario; si se envía explícito, valida acceso jerárquico histórico o coincidencia con la asignación activa antes de consultar;
 - `GET /annual-folders/rankings/club/:enrollmentId?year_id` — ídem;
 - `GET /annual-folders/rankings/:enrollmentId/breakdown?year_id` — drill-down por enrollment: devuelve composite + pesos aplicados + detalle de cada componente. Permiso `rankings:read`;
 - `POST /annual-folders/rankings/recalculate?year_id`.
@@ -199,7 +209,7 @@ Contrato exacto en `docs/features/annual-folders-scoring.md` y `docs/api/ENDPOIN
 
 ## 11. Relación con otros canones
 
-- `docs/canon/runtime-sacdia.md` — carpeta anual como fuente de verdad operativa de evaluaciones.
+- `docs/canon/runtime-sacdia.md` — Carpeta Anual de Evidencias como fuente de verdad operativa de evaluaciones.
 - `docs/canon/runtime-achievements.md` — sistema de tiers de miembro (no confundir).
 - `docs/canon/dominio-sacdia.md` — club raíz, sección operativa.
 - `docs/canon/decisiones-clave.md` — decisión 12 (canonización de rankings y award categories).
@@ -217,7 +227,58 @@ Contrato exacto en `docs/features/annual-folders-scoring.md` y `docs/api/ENDPOIN
 
 ---
 
-## 13. Criterios institucionales ampliados (8.4-C)
+## 13. Ranking anual por ejes configurables
+
+**Vigente desde**: 2026-05-31
+
+La superficie nueva de ranking anual (`/club-sections/:sectionId/annual-ranking-progress`, `/annual-rankings`, `/annual-ranking-configs`) calcula puntos desde `annual_ranking_configs` y `annual_ranking_axis_configs`.
+
+### Ejes canónicos
+
+| Eje | Componentes |
+|-----|-------------|
+| `administrative` — Cumplimiento Administrativo | `annual_evidence_folder`, `monthly_reports_timeliness`, `finance_compliance`, `institutional_data_completeness` |
+| `operational` — Vida Operativa del Club | `activities_registered`, `attendance_participation`, `camporee_events`, `class_investiture_progress`, `sacdia_operational_usage` |
+
+Los presupuestos de puntos son configurables por scope jerárquico (`union_id` o `local_field_id`) + año + tipo de club. Unión tiene precedencia: si existe configuración activa de Unión para el año/tipo, los Campos Locales debajo no pueden publicar una configuración divergente. El default recomendado sigue siendo 50/50 entre ejes, pero el sistema valida que:
+
+```text
+SUM(active axes.max_points) = annual_ranking_configs.max_points
+SUM(active components.max_points by axis) = axis.max_points
+annual_evidence_folder.max_points = SUM(active folder_template_sections.max_points) para cualquier plantilla activa efectiva
+```
+
+### Fórmulas runtime
+
+Cada componente devuelve `score_pct` en rango `0–100`. Por default, los puntos se calculan como:
+
+```text
+component_points = ROUND(score_pct / 100 * component.max_points)
+```
+
+Excepción canónica: `annual_evidence_folder` usa los puntos reales snapshot de la Carpeta Anual (`total_earned_points / total_max_points`) y expone esos valores como `earned_points/max_points`. No se reescala contra un presupuesto paralelo; el presupuesto de la carpeta nace de `annual_evidence_folder.max_points` y la plantilla activa debe distribuir exactamente ese total.
+
+| Component key | Fuente runtime | Fórmula inicial |
+|---|---|---|
+| `annual_evidence_folder` | `annual_folders` | `total_earned_points / total_max_points` reales de la Carpeta Anual de Evidencias; `progress_percentage` solo normaliza el porcentaje |
+| `monthly_reports_timeliness` | `monthly_reports` + `monthly_report_manual_data` + `ecclesiastical_years` + `system_config` | primera captura manual puntual / meses del año eclesiástico cuyo deadline ya venció |
+| `finance_compliance` | `finance_period_closings` | cierres financieros en tiempo según `ranking.finance_closing_deadline_day` (default 5) |
+| `institutional_data_completeness` | `club_enrollments` + `club_sections` | campos institucionales completos / 10 campos esperados: dirección, horario, director, secretaría, tesorería, nombre, teléfono, email, coordenadas y meta de almas |
+| `activities_registered` | `activity_instances` + `activities` | actividades activas de la sección en el año / `ranking.activities_registered_target` (default 12), con tope 100 |
+| `attendance_participation` | `weekly_records` + `unit_members` | promedio de `weekly_records.attendance` de miembros activos de la sección en los años calendario cubiertos por el año eclesiástico |
+| `camporee_events` | `camporee_events` + `camporee_event_section_results` | puntos oficiales activos otorgados a la sección / puntos máximos de eventos puntuables locales/unión en alcance |
+| `class_investiture_progress` | `enrollments` | clases activas con `investiture_status IN ('APPROVED', 'INVESTIDO')` / clases activas de miembros de la sección |
+| `sacdia_operational_usage` | registros operativos útiles | usuarios activos de la sección con actividad operativa útil / usuarios activos de la sección; no usa logins/sesiones como métrica de vanidad |
+
+`reports.auto_generate_day` acepta `1..28`; si falta o es inválido usa fallback `5`, y su seed vigente es `5`. Para cada mes, `period_start_at` es el primer día a las `00:00:00 UTC` y `deadline_at` es el día configurado del mes siguiente a las `23:00:00 UTC`. El denominador incluye únicamente meses con `deadline_at <= CURRENT_TIMESTAMP`, por lo que los meses futuros o abiertos no suman ni penalizan.
+
+El scoring recalcula todos los períodos con el valor **vigente** de `reports.auto_generate_day`; no persiste un cutoff por mes. Cambiar esta configuración se aplica retroactivamente y puede reclasificar capturas históricas como puntuales o tardías, además de cambiar qué meses son elegibles para el denominador al momento del cálculo.
+
+Un mes aporta si existe la fila única `monthly_report_manual_data` y su `created_at` cae en `[period_start_at, deadline_at)`. Captura ausente o tardía aporta `0`. El cálculo no inspecciona estado, envío formal, valores manuales `0`/`false`/`null` ni `snapshot_data`; no hay doble penalización por contenido y la app no necesita ejecutar `submit` para obtener este KPI. La auto-generación continúa dejando el informe en `generated`.
+
+`sacdia_operational_usage` considera acciones útiles como registros semanales, matrículas de clases, progreso de clase, informes mensuales enviados y actividades creadas dentro del año eclesiástico.
+
+## 14. Criterios institucionales ampliados legacy (8.4-C)
 
 **Vigente desde**: 2026-04-28
 
@@ -225,14 +286,25 @@ El composite ranking combina cuatro criterios institucionales en un único índi
 
 | Criterio | Campo | Descripción |
 |----------|-------|-------------|
-| **Carpeta** | `folder_score_pct` | Porcentaje de puntos obtenidos sobre el total de la carpeta anual evaluada |
+| **Carpeta Anual de Evidencias** | `folder_score_pct` | Porcentaje de puntos obtenidos sobre el total de la Carpeta Anual de Evidencias evaluada |
 | **Finanzas** | `finance_score_pct` | Proporción de meses con cierre financiero entregado antes del `ranking.finance_closing_deadline_day` (default: día 5) |
-| **Camporee** | `camporee_score_pct` | Proporción de camporees disponibles en el año (local + unión) a los que el club asistió con estado aprobado |
+| **Camporee** | `camporee_score_pct` | Porcentaje de puntos oficiales obtenidos por la sección en eventos de camporee puntuables activos: `sum(camporee_event_section_results.total_awarded_points) / sum(camporee_events.max_points)` |
 | **Evidencias** | `evidence_score_pct` | Proporción de evidencias de carpeta en estado `VALIDATED` sobre el total de evaluadas (pending excluidos) |
 
 ### Pesos
 
 Los pesos globales por defecto son `60 / 15 / 15 / 10` (folder / finance / camporee / evidence). Pueden sobreescribirse por `club_type_id` en `ranking_weight_configs`. La suma siempre debe ser exactamente 100 (CHECK constraint + API validation).
+
+### Auditoría de alineación anual
+
+Para verificar que la configuración anual sigue alineada con ejes, componentes canónicos y la Carpeta Anual de Evidencias:
+
+```bash
+cd /Users/abner/Documents/development/sacdia/sacdia-backend
+pnpm exec tsx scripts/audit-annual-ranking-alignment.ts --dry-run
+```
+
+El modo `--dry-run` imprime los checks sin conectarse a base de datos. Sin `--dry-run`, el script usa `ANNUAL_RANKING_AUDIT_DATABASE_URL` o `DATABASE_URL` y ejecuta solo consultas `SELECT` dentro de una transacción `READ ONLY`.
 
 ### Semántica temporal
 
@@ -249,7 +321,7 @@ Las filas de `award_categories` creadas antes de 2026-04-28 están marcadas con 
 
 ---
 
-## 14. Clasificación de miembros y secciones (8.4-A)
+## 15. Clasificación de miembros y secciones (8.4-A)
 
 **Estado**: shipped 2026-04-29
 **Spec**: `docs/superpowers/specs/2026-04-29-clasificacion-seccion-miembro-design.md`
@@ -276,7 +348,7 @@ Tres tablas nuevas creadas por la migración `20260429000000_enrollment_rankings
 | `ecclesiastical_year_id` | `integer` NOT NULL | FK → `ecclesiastical_years(year_id)` |
 | `class_score_pct` | `NUMERIC(5,2)` | señal clases, NULL si sin progreso |
 | `investiture_score_pct` | `NUMERIC(5,2)` | señal investidura binaria, NULL si sin enrollment |
-| `camporee_score_pct` | `NUMERIC(5,2)` | señal camporees, NULL si sin camporees del año |
+| `camporee_score_pct` | `NUMERIC(5,2)` | señal de resultados oficiales de eventos camporee, NULL si no hay eventos puntuables del año |
 | `composite_score_pct` | `NUMERIC(5,2)` | puntaje compuesto final ∈ [0, 100] |
 | `rank_position` | `integer?` | asignado vía DENSE_RANK, NULLS LAST |
 | `awarded_category_id` | `uuid?` | FK → `award_categories`, nullable |
@@ -312,7 +384,7 @@ Uniqueness: `UNIQUE(club_section_id, ecclesiastical_year_id)`.
 | `ecclesiastical_year_id` | `integer?` | FK → `ecclesiastical_years`, NULL = fila global |
 | `class_pct` | `DECIMAL(5,2)` | peso señal clases |
 | `investiture_pct` | `DECIMAL(5,2)` | peso señal investidura |
-| `camporee_pct` | `DECIMAL(5,2)` | peso señal camporees |
+| `camporee_pct` | `DECIMAL(5,2)` | peso señal de resultados oficiales de eventos camporee |
 | `is_default` | `boolean` | true solo en la fila global única |
 
 Uniqueness: `UNIQUE(club_type_id, ecclesiastical_year_id)`.
@@ -329,7 +401,7 @@ Orquestador: `MemberRankingsRecalculateService.recalculateAll(yearId?)` en `sacd
 
 - `ClassScoreService` — lee `class_module_progress` filtrando por `enrollment.ecclesiastical_year_id`. Score = (módulos activos con score IS NOT NULL / total módulos activos) × 100. NULL si sin progreso.
 - `InvestitureScoreService` — lee `enrollments.investiture_status`. `INVESTIDO` → 100; `IN_PROGRESS` → 0; sin enrollment → NULL.
-- `CamporeeScoreService` — lee `camporee_members` filtrado por `user_id` y camporees del año vía `local_camporees.ecclesiastical_year`/`union_camporees.ecclesiastical_year`. Score = (camporees aprobados / total camporees del año) × 100. NULL si sin camporees del año.
+- `CamporeeScoreService` — resuelve la sección del enrollment y su jerarquía institucional; luego lee eventos puntuables activos de camporees locales/unión del año y sus resultados en `camporee_event_section_results`. Score = `sum(total_awarded_points) / sum(camporee_events.max_points) × 100`. NULL si no existen eventos puntuables del año. Las filas de asistencia/registro (`camporee_members`, `camporee_clubs`) no otorgan puntos de ranking.
 
 **Composite y sección**:
 
@@ -395,7 +467,7 @@ peso_redistribuido_i = peso_i + (peso_nulls × peso_i / sum(pesos_presentes))
 
 Si **todas** las señales son NULL → `composite_score_pct = NULL`.
 
-Esto evita penalizar a miembros cuya falta de señal se debe a datos no disponibles (sin camporees del año, sin clases abiertas) en lugar de inactividad real.
+Esto evita penalizar a miembros cuya falta de señal se debe a datos no disponibles (sin eventos camporee puntuables del año, sin clases abiertas) en lugar de inactividad real.
 
 Para el algoritmo exacto, ver `MemberCompositeScoreService` en `sacdia-backend/src/rankings/member-rankings/services/`.
 

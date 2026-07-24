@@ -1,14 +1,14 @@
-# Guía de Integración Frontend - SACDIA API v2.2
+# Guía de Integración Frontend - SACDIA API v3.0
 
 **Estado**: ACTIVE
 
-**Versión**: 2.2.0
-**Fecha**: 4 de febrero de 2026
+**Versión**: 3.0.0
+**Fecha**: 6 de julio de 2026
 **Audiencia**: Desarrolladores Frontend (Admin Panel & Mobile App)
 **Estado**: ACTIVE
 
 > [!IMPORTANT]
-> Esta guía es operativa y subordinada a `docs/README.md`, `docs/00-STEERING/*` y `docs/02-API/ENDPOINTS-LIVE-REFERENCE.md`.
+> Esta guía es operativa y subordinada a `docs/README.md`, `docs/steering/*` y `docs/api/ENDPOINTS-LIVE-REFERENCE.md`.
 > Los endpoints y contratos runtime se validan contra la referencia live; los ejemplos de esta guía no reemplazan esa fuente de verdad.
 
 ---
@@ -28,7 +28,7 @@
 
 ## Introducción
 
-Esta guía proporciona ejemplos prácticos de cómo consumir la API REST de SACDIA desde aplicaciones frontend (Next.js Admin Panel y Flutter Mobile App).
+Esta guía proporciona ejemplos prácticos de cómo consumir la API REST de SACDIA desde el panel Next.js, la app Flutter y el cliente administrativo nativo iOS.
 
 ### URLs Base
 
@@ -40,12 +40,91 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 ### Endpoints Totales
 
-- Verificar cobertura y disponibilidad actual en `docs/02-API/ENDPOINTS-LIVE-REFERENCE.md`
+- Verificar cobertura y disponibilidad actual en `docs/api/ENDPOINTS-LIVE-REFERENCE.md`
 - **Versionado**: `/api/v1/` (URI-based)
 - **Formato**: JSON
-- **Autenticación**: JWT (Supabase Auth)
+- **Autenticación**: Better Auth self-hosted + JWT HS256 emitido/validado por backend
 
 ---
+
+## Actualizacion 2026-05-21 (Clases legacy y duración)
+
+El contrato frontend para clases progresivas incorpora clases legacy y duración configurable:
+
+- Admin debe enviar y leer en `/api/v1/admin/classes`: `available_from_year_id`, `available_until_year_id`, `min_duration_years`, `max_duration_years`.
+- `available_until_year_id = null` significa sin expiración para nuevas inscripciones. No usar años sentinel.
+- Mobile/Admin deben tratar `investiture_status = EXPIRED` como trayectoria histórica: mostrar progreso/registros, pero bloquear edición, subida de evidencias y envío a investidura.
+- El proceso manual usa `POST /api/v1/admin/classes/enrollments/expire-overdue`; ejecutar primero con `{ dry_run: true }` y pedir confirmación antes de `{ dry_run: false }`.
+
+## Actualizacion 2026-07-01 (Requisitos básico/avanzado/extra)
+
+El contrato de clases separa requisitos evaluables por track:
+
+- `classes.advanced_enabled` habilita la via avanzada de la clase; si esta en `false`, el frontend no debe exigir ni destacar requisitos `ADVANCED`.
+- `class_sections.requirement_track` puede ser `BASIC`, `ADVANCED` o `EXTRA`.
+- `GET /api/v1/users/:userId/classes` y `GET /api/v1/users/:userId/classes/:classId/progress` exponen `basic_progress`, `advanced_progress`, `extra_progress`, `investiture_eligibility` y `advanced_eligibility`.
+- `overall_progress` y `percentage` representan progreso de investidura: requisitos `BASIC` obligatorios + `EXTRA` aplicables al contexto institucional del miembro. `ADVANCED` se muestra como avance/badge separado.
+- En el detalle de progreso, `modules[].sections[]` ya llega filtrado a secciones aplicables para el enrollment resuelto e incluye `requirement_track`, `required_for_investiture` y `display_order`.
+- Admin puede configurar secciones `EXTRA` con exactamente un owner institucional (`division_id`, `union_id` o `local_field_id`) y ventana opcional `available_from_year_id` / `available_until_year_id`.
+
+## Actualizacion 2026-07-02 (Camporee scoring móvil)
+
+El flujo móvil de jueces de camporee consume scoring oficial por rúbricas:
+
+- `GET /api/v1/camporee-judges/me/assignments` lista asignaciones del usuario autenticado; la app muestra para captura sólo las asignaciones activas donde `judge_role='primary'` y `can_submit_score=true`.
+- `GET /api/v1/camporee-events/:eventId/rubrics` entrega criterios activos; la pantalla de captura debe enviar exactamente un ítem por rúbrica.
+- `POST /api/v1/camporee-events/:eventId/sections/:clubSectionId/scores` puede enviar `source` como intención de UI, pero el backend siempre deriva la fuente efectiva desde asignación, rol y scope. Un juez principal sin override explícito queda `judge_primary`; gestores LF/Unión quedan `manual_lf`; sólo admins globales permitidos quedan `admin_override`. El total se calcula desde `items[].awarded_points`. Para "club no se presentó", enviar `{ no_show: true, items: [], notes? }`.
+- Para tolerar reintentos de red, la app debe generar un UUID por intento lógico y enviarlo como header `Idempotency-Key`; reutilizarlo sólo para reintentar exactamente el mismo target/payload. Sin header el endpoint sigue siendo compatible, pero no hay replay idempotente.
+- El receipt devuelve `camporee_event_score_submission_id`, resultado oficial, `raw_awarded_points`, `minimum_adjustment_points`, totales oficiales, actor/timestamps, notas e ítems. `active=true` describe el estado al emitirse y permanece estable en replays aunque luego exista un override; no usarlo como consulta del estado actual. Mostrar el total oficial y conservar el detalle crudo como auditoría, no como campo editable.
+- Antes de enviar una corrección manual contra un resultado existente, admin debe leer/conservar el `camporee_event_section_result_id`, enviarlo como `expected_active_result_id` y exigir un `notes.trim()` no vacío como motivo. Ante `400 CAMPOREE_SCORING_OVERRIDE_REASON_REQUIRED`, mantener el formulario; ante `409 CAMPOREE_SCORING_RESULT_STALE`, refrescar antes de volver a decidir.
+- El backend ajusta automáticamente al `min_points` del evento cuando el total queda por debajo del mínimo configurado; si no hay mínimo, conserva el total enviado. Nunca permite superar el máximo por rúbrica/evento.
+- Una vez creado un resultado activo, el juez principal no puede reenviar ni editar; sólo gestores LF/Unión dentro de scope o admins globales autorizados pueden corregir. `camporee_events:update` sin esos roles no habilita la acción.
+- Jueces `assistant` no ven acción de envío en app; quedan como apoyo/auditoría.
+- El admin debe poblar el selector de roster con `GET /api/v1/local-camporees/:camporeeId/judge-candidates` o `GET /api/v1/union-camporees/:camporeeId/judge-candidates`, no con captura manual de UUID. El backend sólo acepta jueces 18+, pastores o Guías Mayores investidos.
+
+## Actualizacion 2026-07-07 (Camporee staff, agenda y cierre de clubes)
+
+El flujo administrativo de camporee separa personal operativo, agenda y scoring:
+
+- Cargar personal del camporee:
+  - `GET /api/v1/local-camporees/:camporeeId/staff`
+  - `GET /api/v1/local-camporees/:camporeeId/staff-candidates`
+  - `POST /api/v1/local-camporees/:camporeeId/staff`
+  - equivalentes `union-camporees`.
+- `staff-candidates` requiere `camporee_events:update` porque devuelve usuarios elegibles para una mutación.
+- Editar/desactivar personal:
+  - `PATCH /api/v1/camporee-staff/:staffMemberId`
+  - `DELETE /api/v1/camporee-staff/:staffMemberId`
+- Asignar personas a una actividad/agenda:
+  - `GET /api/v1/camporee-events/:eventId/staff-assignments`
+  - `PUT /api/v1/camporee-events/:eventId/staff-assignments`
+  - roles válidos: `responsible`, `assistant`, `evaluator`, `support`.
+- Para publicar un evento debe existir al menos un `responsible` activo. No se deben forzar roles de cocina/admin/apoyo en todos los eventos.
+- Cerrar/reabrir inscripción de clubes:
+  - `POST /api/v1/camporees/:camporeeId/club-registration/close|reopen`
+  - `POST /api/v1/union-camporees/:camporeeId/club-registration/close|reopen`
+- El cierre congela secciones para scoring; las mutaciones de rúbricas, asignación de jueces y captura de puntaje oficial deben mostrar el gate si `club_registration_closed_at` está vacío.
+- La inscripción de miembros sigue dependiendo de `member_registration_deadline`; no bloquear UI de miembros por cierre de clubes.
+
+## Actualizacion 2026-07-10 (Lifecycle y timezone de camporees)
+
+- En formularios de creación/edición, enviar `start_date`/`end_date` como `YYYY-MM-DD`; nunca convertirlas a medianoche ni enviar timestamp.
+- Para apertura y deadlines enviar un ISO-8601 con `Z` u offset explícito. La apertura ausente significa que clubes pueden inscribirse inmediatamente.
+- Capturar una zona IANA explícita (por ejemplo `America/Mexico_City`) cuando se confirme la sede: el backend la audita con el actor. Un PATCH sin `timezone` no borra esa verificación.
+- La UI de clubes debe distinguir `not_open_yet`, `open`, `late_approval_required` y `manually_frozen`. Al estar `not_open_yet`, no ofrecer inscripción ni flujo de aprobación tardía; el deadline es inclusivo.
+
+## Actualizacion 2026-07-14 (Inscripción contextual de sección y participantes)
+
+La app móvil debe consultar `GET /api/v1/camporees/:camporeeId/section-registration` al abrir el detalle. El response incluye identidad legible de club/sección, `status`, `disposition`, `canEnroll`, `blockingReason`, `enrollmentId`, `registeredAt` y `registeredBy`.
+
+- Mostrar el panel de inscripción de sección **antes** del bloque de participantes.
+- Si `canEnroll=true`, abrir una hoja de confirmación no editable con nombre del club, sección, camporee, costo y fecha. Confirmar con `POST /api/v1/camporees/:camporeeId/section-registration` sin body; no enviar IDs de club/sección ni actor.
+- Habilitar consulta y alta de participantes sólo cuando `status` sea `registered` o `approved`. `pending_approval`, `rejected`, `cancelled`, `not_enrolled`, loading y error deben cerrar el gate (fail-closed).
+- La UI no debe renderizar `enrollmentId`, `clubSectionId`, `clubId` ni `registeredBy.userId`; son datos técnicos para integración. Mostrar nombres, estado, fecha y `registeredBy.displayName`.
+- Ante error del GET, mostrar reintento y no cargar miembros. Ante error del POST, conservar la hoja y permitir reintentar sin duplicar taps concurrentes.
+- El backend puede devolver `422 CAMPOREE_SECTION_REGISTRATION_REQUIRED` o `422 CAMPOREE_MEMBER_OUTSIDE_ACTIVE_SECTION` al registrar participantes; el cliente debe mantener el gate cerrado y mostrar el mensaje de elegibilidad recibido.
+
+El endpoint legacy local `POST /api/v1/camporees/:camporeeId/clubs` no es el flujo del director móvil. Conserva body `{ club_section_id }` para operaciones territoriales y requiere `camporees:register` con rol exacto `assistant-lf`, `director-lf`, `assistant-union` o `director-union` dentro de scope; no debe mostrarse a roles CLUB ni a admins globales por wildcard. El POST legacy de unión es otro contrato y conserva `attendance:manage`.
 
 ## Actualizacion 2026-02-17 (Admin Panel)
 
@@ -72,62 +151,58 @@ Notas operativas:
 **Instalar dependencias**:
 
 ```bash
-pnpm add @supabase/supabase-js axios swr
+pnpm add axios @tanstack/react-query
 ```
 
-**Configurar cliente API**:
+> No usar SDKs externos de autenticación en el frontend. El admin consume la API SACDIA; la sesión vive en cookies HTTP-only gestionadas por rutas same-origin de Next.js y el backend valida JWT con `JwtAuthGuard`.
+
+**Cliente API vigente**:
 
 ```typescript
-// lib/api/client.ts
+// src/lib/api/client.ts
 import axios from 'axios';
-import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL?.trim()
+  ?? 'http://localhost:3000/api/v1';
 
 const apiClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  baseURL: API_BASE_URL,
+  withCredentials: true,
+  headers: { Accept: 'application/json' },
 });
 
-// Interceptor para agregar token automáticamente
+async function getClientAuthToken() {
+  const res = await fetch('/api/auth/token', { credentials: 'include' });
+  if (!res.ok) return null;
+  const body = await res.json();
+  return typeof body.token === 'string' ? body.token : null;
+}
+
 apiClient.interceptors.request.use(async (config) => {
-  const { data: { session } } = await supabase.auth.getSession();
-
-  if (session?.access_token) {
-    config.headers.Authorization = `Bearer ${session.access_token}`;
+  const token = await getClientAuthToken();
+  if (token && !config.headers.Authorization) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
-
   return config;
 });
 
-// Interceptor para manejo de errores
-apiClient.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    if (error.response?.status === 401) {
-      // Token expirado, refrescar
-      const { data: { session } } = await supabase.auth.refreshSession();
-
-      if (session) {
-        // Reintentar request con nuevo token
-        error.config.headers.Authorization = `Bearer ${session.access_token}`;
-        return apiClient.request(error.config);
-      } else {
-        // Sesión inválida, redirigir a login
-        window.location.href = '/login';
-      }
+apiClient.interceptors.response.use(undefined, async (error) => {
+  if (error.response?.status === 401) {
+    const refresh = await fetch('/api/auth/refresh', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { Accept: 'application/json' },
+    });
+    if (refresh.ok) {
+      const body = await refresh.json();
+      error.config.headers.Authorization = `Bearer ${body.token}`;
+      return apiClient.request(error.config);
     }
-
-    return Promise.reject(error);
   }
-);
+  throw error;
+});
 
-export { apiClient, supabase };
+export { apiClient };
 ```
 
 ---
@@ -139,62 +214,43 @@ export { apiClient, supabase };
 ```yaml
 dependencies:
   dio: ^5.4.0
-  supabase_flutter: ^2.3.0
   flutter_secure_storage: ^9.0.0
+  url_launcher: ^6.2.0
 ```
 
-**Configurar cliente API**:
+**Cliente API vigente**:
 
 ```dart
-// lib/core/network/api_client.dart
-import 'package:dio/dio.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+// lib/core/network/dio_client.dart
+final dio = Dio(BaseOptions(
+  baseUrl: AppConstants.baseUrl, // incluye /api/v1
+  headers: {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+  },
+));
 
-class ApiClient {
-  late final Dio _dio;
-  final SupabaseClient _supabase;
-
-  ApiClient(this._supabase) {
-    _dio = Dio(BaseOptions(
-      baseUrl: const String.fromEnvironment(
-        'API_URL',
-        defaultValue: '',
-      ),
-      connectTimeout: const Duration(seconds: 30),
-      receiveTimeout: const Duration(seconds: 30),
-      headers: {'Content-Type': 'application/json'},
-    ));
-
-    // Interceptor para token
-    _dio.interceptors.add(InterceptorsWrapper(
-      onRequest: (options, handler) async {
-        final session = _supabase.auth.currentSession;
-        if (session != null) {
-          options.headers['Authorization'] = 'Bearer ${session.accessToken}';
-        }
-        return handler.next(options);
-      },
-      onError: (error, handler) async {
-        if (error.response?.statusCode == 401) {
-          // Token expirado, refrescar
-          final session = await _supabase.auth.refreshSession();
-          if (session.session != null) {
-            // Reintentar request
-            final opts = error.requestOptions;
-            opts.headers['Authorization'] =
-              'Bearer ${session.session!.accessToken}';
-            final response = await _dio.fetch(opts);
-            return handler.resolve(response);
-          }
-        }
-        return handler.next(error);
-      },
-    ));
-  }
-
-  Dio get dio => _dio;
-}
+dio.interceptors.addAll([
+  LoggerInterceptor(),
+  AuthInterceptor(dio: dio), // adjunta Bearer y refresca en 401
+  ErrorInterceptor(),
+]);
 ```
+
+El token se lee desde `FlutterSecureStorage` (`AppConstants.tokenKey`) y se envía como `Authorization: Bearer <token>`. El refresh reactivo usa `POST /auth/refresh` y reintenta la request original una sola vez.
+
+---
+
+### Native iOS Admin
+
+`sacdia-admin-ios` usa `URLSession` mediante un cliente tipado. En Release, la URL base debe ser HTTPS y terminar exactamente en `/api/v1`; cualquier configuración inválida falla cerrada. En Debug, el simulador usa por defecto `http://localhost:3000/api/v1` y HTTP se acepta únicamente para hosts loopback.
+
+- access token: solo memoria;
+- refresh token opaco: Keychain con `kSecAttrAccessibleWhenUnlockedThisDeviceOnly`;
+- refresh reactivo: `POST /auth/refresh`, coordinado como single-flight y con un único reintento;
+- autorización: siempre desde `GET /auth/me` bajo `authorization`.
+
+No debe consumir `/auth/admin/*`: esa fachada no está publicada.
 
 ---
 
@@ -205,145 +261,107 @@ class ApiClient {
 **Next.js**:
 
 ```typescript
-// app/login/actions.ts
+// src/lib/auth/actions.ts
 'use server';
 
-import { supabase } from '@/lib/api/client';
+import { apiRequest } from '@/lib/api/client';
+import { setAuthCookies } from '@/lib/auth/session';
 
 export async function loginAction(email: string, password: string) {
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
+  const response = await apiRequest('/auth/login', {
+    method: 'POST',
+    body: { email, password },
   });
 
-  if (error) {
-    return { error: error.message };
-  }
-
-  return { user: data.user, session: data.session };
+  await setAuthCookies(response.data);
+  return response.data.user;
 }
 ```
 
 **Flutter**:
 
 ```dart
-// lib/features/auth/data/datasources/auth_remote_datasource.dart
-class AuthRemoteDataSource {
-  final SupabaseClient supabase;
+Future<UserModel> login(String email, String password) async {
+  final response = await dio.post('/auth/login', data: {
+    'email': email,
+    'password': password,
+  });
 
-  Future<Session> login(String email, String password) async {
-    final response = await supabase.auth.signInWithPassword(
-      email: email,
-      password: password,
-    );
+  final data = response.data['data'] as Map<String, dynamic>;
+  await secureStorage.write(AppConstants.tokenKey, data['accessToken']);
+  await secureStorage.write(AppConstants.refreshTokenKey, data['refreshToken']);
 
-    if (response.session == null) {
-      throw ServerException('Login failed');
-    }
-
-    return response.session!;
-  }
+  return UserModel.fromJson(data['user'] as Map<String, dynamic>);
 }
 ```
+
+**iOS Admin**:
+
+```swift
+let login = APIEndpoint(
+    method: .post,
+    path: "auth/login",
+    body: try JSONEncoder().encode(["email": email, "password": password])
+)
+let response = try await apiClient.execute(
+    login,
+    as: APIEnvelope<LoginResponse>.self
+)
+```
+
+Después del login, iOS valida la misma lista de roles admitidos por el panel web y consulta `GET /auth/me`. La sesión solo queda establecida si el perfil canónico confirma acceso administrativo. Si el JWT incluye `mfa_pending: true`, primero llama `POST /auth/mfa/verify` con el token AAL1 y luego consulta `/auth/me` con el token AAL2.
 
 ---
 
-### 2. OAuth con Google
+### 2. OAuth con Google/Apple
 
-**Next.js**:
+El proveedor lo inicia el backend sobre Better Auth. El frontend no llama SDKs de autenticación externos.
 
-```typescript
-// app/login/oauth-buttons.tsx
-'use client';
+**Flujo móvil**:
 
-import { supabase } from '@/lib/api/client';
-
-export function GoogleLoginButton() {
-  const handleGoogleLogin = async () => {
-    const { data, error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
-    });
-
-    if (error) {
-      console.error('OAuth error:', error);
-    }
-  };
-
-  return (
-    <button onClick={handleGoogleLogin}>
-      Sign in with Google
-    </button>
-  );
-}
-```
-
-**Flutter**:
+1. `GET /auth/oauth/{provider}` devuelve una URL de autorización.
+2. La app abre esa URL con `url_launcher`.
+3. Better Auth redirige al deep link `io.sacdia.app://auth/callback?session_token=...&provider=...`.
+4. La app llama `POST /auth/oauth/callback` con `{ session_token, provider }`.
+5. El backend devuelve el JWT interno de SACDIA y la app lo persiste en secure storage.
 
 ```dart
-Future<void> signInWithGoogle() async {
-  final response = await supabase.auth.signInWithOAuth(
-    OAuthProvider.google,
-    redirectTo: 'com.sacdia.app://auth/callback',
-  );
+final urlResponse = await dio.get('/auth/oauth/google');
+await launchUrl(Uri.parse(urlResponse.data['data']?['url'] ?? urlResponse.data['url']));
 
-  if (!response) {
-    throw ServerException('OAuth failed');
-  }
-}
+final callback = await dio.post('/auth/oauth/callback', data: {
+  'session_token': sessionToken,
+  'provider': 'google',
+});
+
+final data = callback.data['data'] as Map<String, dynamic>;
+await secureStorage.write(AppConstants.tokenKey, data['accessToken']);
 ```
 
 ---
 
 ### 3. Verificar Autenticación
 
-**Next.js Middleware**:
+**Next.js**:
 
-```typescript
-// middleware.ts
-import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs';
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+- Server components y server actions deben leer cookies HTTP-only con helpers de `src/lib/auth/session.ts`.
+- Client components consumen `/api/auth/me` y `/api/auth/token` same-origin; no deben acceder directamente a cookies sensibles.
+- Las rutas protegidas deben redirigir a `/login` cuando no hay sesión válida o el usuario no tiene rol admin.
 
-export async function middleware(req: NextRequest) {
-  const res = NextResponse.next();
-  const supabase = createMiddlewareClient({ req, res });
+**Flutter**:
 
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+- `AuthNotifier` valida el estado inicial con `/auth/me`.
+- `AuthInterceptor` adjunta Bearer en cada request autenticada.
+- Un 401 fuera de endpoints públicos dispara refresh; si falla, limpia tokens y expira la sesión local.
 
-  // Proteger rutas
-  if (!session && req.nextUrl.pathname.startsWith('/dashboard')) {
-    return NextResponse.redirect(new URL('/login', req.url));
-  }
+**iOS Admin**:
 
-  return res;
-}
-
-export const config = {
-  matcher: ['/dashboard/:path*', '/clubs/:path*'],
-};
-```
-
-**Flutter Route Guard**:
-
-```dart
-class AuthGuard extends AutoRouteGuard {
-  final SupabaseClient supabase;
-
-  @override
-  void onNavigation(NavigationResolver resolver, StackRouter router) {
-    if (supabase.auth.currentSession != null) {
-      resolver.next();
-    } else {
-      router.push(const LoginRoute());
-    }
-  }
-}
-```
+- `SessionCoordinator` conserva el access token en memoria y el refresh token en Keychain.
+- Al iniciar, una credencial Keychain existente restaura la sesión mediante `/auth/refresh` y después valida `/auth/me`.
+- Si refresh devuelve un JWT AAL1 con `mfa_pending`, iOS falla cerrado, elimina esa sesión persistida y exige un nuevo login con MFA; nunca instala el token degradado.
+- `/auth/me.authorization.effective.permissions` gobierna acciones y módulos; `authorization.grants` conserva roles y alcance.
+- Logout limpia primero credenciales y caché protegida locales, y después invoca `POST /auth/logout` como best effort.
+- Recuperación de contraseña usa exclusivamente `POST /auth/password/reset-request`; la respuesta visible no permite enumerar cuentas.
 
 ---
 
@@ -351,55 +369,51 @@ class AuthGuard extends AutoRouteGuard {
 
 ### Pattern Recomendado: API Service Layer
 
-**Next.js** (con SWR):
+**Next.js** (con TanStack Query):
 
 ```typescript
-// lib/api/services/clubs.service.ts
+// src/lib/api/services/clubs.service.ts
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '../client';
-import useSWR from 'swr';
 
 export interface Club {
   club_id: number;
   name: string;
   local_field_id: number;
-  club_types: {
-    club_type_id: number;
-    name: string;
-  };
+  club_types?: { club_type_id: number; name: string };
   active: boolean;
 }
 
-// Fetcher genérico
-const fetcher = (url: string) => apiClient.get(url).then((res) => res.data);
-
-// Hook para listar clubs
-export function useClubs() {
-  const { data, error, isLoading, mutate } = useSWR<{
-    status: string;
-    data: Club[];
-  }>('/clubs', fetcher);
-
-  return {
-    clubs: data?.data,
-    isLoading,
-    isError: error,
-    mutate,
-  };
+async function fetchClubs() {
+  const response = await apiClient.get('/clubs');
+  return response.data.data as Club[];
 }
 
-// Función para crear club
+export function useClubs() {
+  return useQuery({
+    queryKey: ['clubs'],
+    queryFn: fetchClubs,
+  });
+}
+
 export async function createClub(clubData: Partial<Club>) {
   const response = await apiClient.post('/clubs', clubData);
   return response.data;
 }
 
-// Función para actualizar club
+export function useCreateClub() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: createClub,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['clubs'] }),
+  });
+}
+
 export async function updateClub(clubId: number, clubData: Partial<Club>) {
   const response = await apiClient.patch(`/clubs/${clubId}`, clubData);
   return response.data;
 }
 
-// Función para eliminar club
 export async function deleteClub(clubId: number) {
   const response = await apiClient.delete(`/clubs/${clubId}`);
   return response.data;
@@ -758,7 +772,10 @@ export function useClubActivities(clubId: number, filters?: {
   const query = new URLSearchParams(filters as any).toString();
   const url = `/clubs/${clubId}/activities${query ? `?${query}` : ''}`;
 
-  return useSWR(url, fetcher);
+  return useQuery({
+    queryKey: ['club-activities', clubId, filters],
+    queryFn: async () => (await apiClient.get(url)).data,
+  });
 }
 
 // Uso
@@ -840,10 +857,15 @@ export function useFinancialSummary(
     clubTypeId: '2', // Conquistadores
   });
 
-  return useSWR(
-    `/clubs/${clubId}/finances/summary?${params}`,
-    fetcher
-  );
+  return useQuery({
+    queryKey: ['financial-summary', clubId, year, month],
+    queryFn: async () => {
+      const response = await apiClient.get(
+        `/clubs/${clubId}/finances/summary?${params}`,
+      );
+      return response.data;
+    },
+  });
 }
 
 // Uso en componente
@@ -853,6 +875,8 @@ const summary = data?.data?.summary;
 // summary.total_income
 // summary.total_expenses
 // summary.balance
+// Si se envía year + month, balance es el saldo acumulado del año eclesiástico
+// hasta ese mes; los ingresos/egresos mensuales deben salir del listado mensual.
 ```
 
 ```dart
@@ -873,6 +897,47 @@ Future<FinancialSummary> getFinancialSummary(
   return FinancialSummary.fromJson(response.data['data']);
 }
 ```
+
+**Subir evidencia de ingreso/egreso**:
+
+```typescript
+// Next.js / navegador
+export async function uploadFinanceEvidence(financeId: number, file: File) {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  return apiRequestFromClient(`/finances/${financeId}/evidences`, {
+    method: 'POST',
+    body: formData,
+  });
+}
+```
+
+```dart
+// Flutter
+Future<FinanceEvidence> uploadFinanceEvidence({
+  required int financeId,
+  required String filePath,
+  required String fileName,
+  required String mimeType,
+}) async {
+  final formData = FormData.fromMap({
+    'file': await MultipartFile.fromFile(
+      filePath,
+      filename: fileName,
+      contentType: DioMediaType.parse(mimeType),
+    ),
+  });
+
+  final response = await dio.post(
+    '/finances/$financeId/evidences',
+    data: formData,
+  );
+  return FinanceEvidence.fromJson(response.data['data'] ?? response.data);
+}
+```
+
+El backend acepta solo imagenes (`multipart/form-data`, campo `file`), 5MB por foto y maximo 3 evidencias activas por movimiento.
 
 ---
 
@@ -922,20 +987,19 @@ Future<Enrollment> enrollInHonor({
 
 ### 1. Cache y Revalidación
 
-**Next.js con SWR**:
+**Next.js con TanStack Query**:
 
 ```typescript
-// Revalidar automáticamente cada 5 minutos
-const { data } = useSWR('/clubs', fetcher, {
-  refreshInterval: 300000,
-  revalidateOnFocus: true,
-  revalidateOnReconnect: true,
+const { data } = useQuery({
+  queryKey: ['clubs'],
+  queryFn: fetchClubs,
+  refetchInterval: 300000,
+  refetchOnWindowFocus: true,
+  refetchOnReconnect: true,
 });
 
-// Revalidar manualmente
-const { mutate } = useSWR('/clubs', fetcher);
 await createClub(newClub);
-mutate(); // Revalidar inmediatamente
+queryClient.invalidateQueries({ queryKey: ['clubs'] });
 ```
 
 **Flutter con Riverpod**:
@@ -964,26 +1028,24 @@ ref.invalidate(clubsProvider);
 **Next.js**:
 
 ```typescript
-async function deleteActivity(activityId: number) {
-  const { data, mutate } = useSWR('/activities', fetcher);
-
-  // Optimistic update
-  mutate(
-    {
-      ...data,
-      data: data.data.filter((a: any) => a.activity_id !== activityId),
-    },
-    false // No revalidar aún
-  );
-
-  try {
-    await apiClient.delete(`/activities/${activityId}`);
-    mutate(); // Revalidar para confirmar
-  } catch (error) {
-    mutate(); // Revertir en caso de error
-    throw error;
-  }
-}
+const deleteActivityMutation = useMutation({
+  mutationFn: (activityId: number) => apiClient.delete(`/activities/${activityId}`),
+  onMutate: async (activityId) => {
+    await queryClient.cancelQueries({ queryKey: ['activities'] });
+    const previous = queryClient.getQueryData(['activities']);
+    queryClient.setQueryData(['activities'], (current: any) => ({
+      ...current,
+      data: current?.data?.filter((a: any) => a.activity_id !== activityId) ?? [],
+    }));
+    return { previous };
+  },
+  onError: (_error, _activityId, context) => {
+    queryClient.setQueryData(['activities'], context?.previous);
+  },
+  onSettled: () => {
+    queryClient.invalidateQueries({ queryKey: ['activities'] });
+  },
+});
 ```
 
 ---
@@ -994,20 +1056,22 @@ async function deleteActivity(activityId: number) {
 
 ```typescript
 export function useActivitiesPaginated(clubId: number, page = 1, limit = 20) {
-  const url = `/clubs/${clubId}/activities?page=${page}&limit=${limit}`;
-  const { data, error, isLoading } = useSWR(url, fetcher);
-
-  return {
-    activities: data?.data,
-    meta: data?.meta,
-    isLoading,
-    isError: error,
-  };
+  return useQuery({
+    queryKey: ['club-activities', clubId, page, limit],
+    queryFn: async () => {
+      const response = await apiClient.get(
+        `/clubs/${clubId}/activities?page=${page}&limit=${limit}`,
+      );
+      return response.data;
+    },
+  });
 }
 
 // Uso
 const [page, setPage] = useState(1);
-const { activities, meta } = useActivitiesPaginated(5, page, 20);
+const { data } = useActivitiesPaginated(5, page, 20);
+const activities = data?.data;
+const meta = data?.meta;
 
 // meta.total, meta.totalPages, meta.page, meta.limit
 ```
@@ -1031,58 +1095,76 @@ class ActivitiesPaginationNotifier extends StateNotifier<AsyncValue<PaginatedAct
 
 ### 4. Upload de Archivos
 
-**Next.js**:
+El baseline vigente es Cloudflare R2 mediado por backend. El frontend no debe subir a storage externo directo ni construir URLs públicas manualmente.
+
+Patrones aceptados:
+
+1. **Multipart directo al backend** cuando el endpoint del dominio lo define.
+2. **Presigned PUT a R2** cuando el módulo expone un flujo de URL firmada, por ejemplo recursos:
+   - `POST /resources/upload-url`
+   - `PUT upload_url` directamente a R2
+   - `POST /resources/from-uploaded` para registrar el recurso ya subido
+
+**Next.js / navegador**:
 
 ```typescript
-export async function uploadActivityPhoto(
-  activityId: number,
-  file: File
-) {
-  // 1. Upload a Supabase Storage
-  const fileName = `${activityId}_${Date.now()}_${file.name}`;
-  const { data: uploadData, error: uploadError } = await supabase
-    .storage
-    .from('activities')
-    .upload(fileName, file);
-
-  if (uploadError) throw uploadError;
-
-  // 2. Get public URL
-  const { data: { publicUrl } } = supabase
-    .storage
-    .from('activities')
-    .getPublicUrl(fileName);
-
-  // 3. Update activity with photo URL
-  await apiClient.patch(`/activities/${activityId}`, {
-    photos: [publicUrl], // O agregar a array existente
+async function uploadResource(file: File) {
+  const signed = await apiClient.post('/resources/upload-url', {
+    resource_type: 'document',
+    scope_level: 'system',
+    file_name: file.name,
+    mime_type: file.type,
+    file_size: file.size,
   });
 
-  return publicUrl;
+  const { upload_url, file_key } = signed.data.data ?? signed.data;
+
+  await fetch(upload_url, {
+    method: 'PUT',
+    headers: { 'Content-Type': file.type },
+    body: file,
+  });
+
+  return apiClient.post('/resources/from-uploaded', {
+    resource_type: 'document',
+    scope_level: 'system',
+    title: file.name,
+    file_name: file.name,
+    mime_type: file.type,
+    file_size: file.size,
+    file_key,
+  });
 }
 ```
 
 **Flutter**:
 
 ```dart
-Future<String> uploadActivityPhoto(int activityId, File file) async {
-  // 1. Upload to Supabase Storage
-  final fileName = '${activityId}_${DateTime.now().millisecondsSinceEpoch}_${file.path.split('/').last}';
-  final response = await supabase.storage
-      .from('activities')
-      .upload(fileName, file);
-
-  // 2. Get public URL
-  final publicUrl = supabase.storage
-      .from('activities')
-      .getPublicUrl(fileName);
-
-  // 3. Update activity
-  await dio.patch('/activities/$activityId', data: {
-    'photos': [publicUrl],
+Future<void> uploadResource(File file) async {
+  final signed = await dio.post('/resources/upload-url', data: {
+    'resource_type': 'document',
+    'scope_level': 'system',
+    'file_name': path.basename(file.path),
+    'mime_type': 'application/pdf',
+    'file_size': await file.length(),
   });
 
-  return publicUrl;
+  final data = signed.data['data'] ?? signed.data;
+  await Dio().put(
+    data['upload_url'] as String,
+    data: file.openRead(),
+    options: Options(headers: {'Content-Type': 'application/pdf'}),
+  );
+
+  await dio.post('/resources/from-uploaded', data: {
+    'resource_type': 'document',
+    'scope_level': 'system',
+    'title': path.basename(file.path),
+    'file_name': path.basename(file.path),
+    'mime_type': 'application/pdf',
+    'file_size': await file.length(),
+    'file_key': data['file_key'],
+  });
 }
 ```
 
@@ -1090,38 +1172,36 @@ Future<String> uploadActivityPhoto(int activityId, File file) async {
 
 ## Testing
 
-### Next.js Tests (Jest + React Testing Library)
+### Next.js Tests (Vitest + React Testing Library)
 
 ```typescript
-// __tests__/api/clubs.service.test.ts
+// src/lib/api/clubs.test.ts
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { renderHook, waitFor } from '@testing-library/react';
-import { SWRConfig } from 'swr';
-import { useClubs, createClub } from '@/lib/api/services/clubs.service';
+import { describe, expect, it, vi } from 'vitest';
 import { apiClient } from '@/lib/api/client';
+import { createClub, useClubs } from '@/lib/api/services/clubs.service';
 
-jest.mock('@/lib/api/client');
+vi.mock('@/lib/api/client');
 
 describe('Clubs Service', () => {
-  it('should fetch clubs', async () => {
+  it('fetches clubs', async () => {
     const mockClubs = [{ club_id: 1, name: 'Test Club' }];
-    (apiClient.get as jest.Mock).mockResolvedValue({
-      data: { data: mockClubs },
-    });
+    vi.mocked(apiClient.get).mockResolvedValue({ data: { data: mockClubs } });
 
-    const wrapper = ({ children }: any) => (
-      <SWRConfig value={{ provider: () => new Map() }}>
-        {children}
-      </SWRConfig>
+    const queryClient = new QueryClient();
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
     );
 
     const { result } = renderHook(() => useClubs(), { wrapper });
 
-    await waitFor(() => expect(result.current.clubs).toEqual(mockClubs));
+    await waitFor(() => expect(result.current.data).toEqual(mockClubs));
   });
 
-  it('should create club', async () => {
+  it('creates club', async () => {
     const newClub = { name: 'New Club', local_field_id: 1 };
-    (apiClient.post as jest.Mock).mockResolvedValue({
+    vi.mocked(apiClient.post).mockResolvedValue({
       data: { data: { club_id: 1, ...newClub } },
     });
 
@@ -1202,15 +1282,15 @@ void main() {
 
 ### Documentación Completa
 
-- **API Specification**: `/docs/02-API/API-SPECIFICATION.md`
-- **Endpoints Reference**: `/docs/02-API/ENDPOINTS-REFERENCE.md`
-- **Walkthroughs**: `/docs/01-FEATURES/*/walkthrough-*.md`
-- **Security Guide**: `/docs/02-API/SECURITY-GUIDE.md`
+- **API Specification**: `/docs/api/API-SPECIFICATION.md`
+- **Endpoints Reference**: `/docs/api/ENDPOINTS-LIVE-REFERENCE.md`
+- **Walkthroughs**: `/docs/features/*`
+- **Security Guide**: `/docs/api/SECURITY-GUIDE.md`
 
 ### Collections API
 
-- **Postman**: Importar desde `/postman/sacdia-api-v2.2.json` (próximamente)
-- **Insomnia**: Importar desde `/insomnia/sacdia-api-v2.2.json` (próximamente)
+- **Postman**: Importar desde `/postman/sacdia-api-v3.0.json` cuando exista colección publicada.
+- **Insomnia**: Importar desde `/insomnia/sacdia-api-v3.0.json` cuando exista colección publicada.
 
 ### Soporte
 
@@ -1220,6 +1300,6 @@ void main() {
 ---
 
 **Generado**: 4 de febrero de 2026
-**Revisión editorial**: 2026-03-09
-**Versión**: 2.2.0
-**Estado**: ACTIVE - validar runtime actual contra `docs/02-API/ENDPOINTS-LIVE-REFERENCE.md`
+**Revisión editorial**: 2026-07-06
+**Versión**: 3.0.0
+**Estado**: ACTIVE - validar runtime actual contra `docs/api/ENDPOINTS-LIVE-REFERENCE.md`

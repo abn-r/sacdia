@@ -86,7 +86,7 @@ COMPOUND:   { logic: "AND|OR", conditions: [ ...sub-criterios tipo THRESHOLD... 
 
 | Nombre | Tipo | Tier | Puntos | Secreto | Repetible | Prerequisito | Criterio |
 |--------|------|------|--------|---------|-----------|--------------|----------|
-| Primer Honor | THRESHOLD | BRONZE | 10 | No | No | — | `{ "event": "honor.validated", "operator": "gte", "target": 1 }` |
+| Primera Especialidad | THRESHOLD | BRONZE | 10 | No | No | — | `{ "event": "honor.validated", "operator": "gte", "target": 1 }` |
 | Coleccionista | THRESHOLD | SILVER | 25 | No | No | — | `{ "event": "honor.validated", "operator": "gte", "target": 15 }` |
 | Maestro de Especialidades | THRESHOLD | GOLD | 50 | No | No | — | `{ "event": "honor.validated", "operator": "gte", "target": 30 }` |
 | Explorador de Categorías | COLLECTION | SILVER | 30 | No | No | — | `{ "event": "honor.validated", "operator": "distinct_count", "distinct_field": "category_id", "target": 3 }` |

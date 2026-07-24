@@ -62,10 +62,10 @@ Las capas documentadas del runtime son:
 
 Según la baseline técnica activa:
 
-- **Backend**: NestJS 10.x + Node.js 20.x + TypeScript 5.x <!-- VERIFICADO contra código 2026-03-14 -->
+- **Backend**: NestJS 11.x + Node.js 24.x (`>=24 <25`) + TypeScript 6.x <!-- VERIFICADO contra código 2026-06-19 -->
 - **Admin web**: Next.js 14+ + TypeScript + Tailwind + shadcn/ui <!-- VERIFICADO contra código 2026-03-14 -->
 - **App móvil**: Flutter 3.19+ <!-- VERIFICADO contra código 2026-03-14 -->
-- **Datos**: PostgreSQL 15.x en Supabase + Prisma v5 <!-- VERIFICADO contra código 2026-03-14 -->
+- **Datos**: PostgreSQL en Neon + Prisma 7.8.x con `@prisma/adapter-pg` <!-- VERIFICADO contra código 2026-06-19 -->
 - **Arquitectura técnica**: Backend REST API + múltiples clientes <!-- VERIFICADO contra código 2026-03-14 -->
 
 ---
@@ -83,13 +83,13 @@ El runtime actual conserva naming técnico heredado en varios puntos, pero debe 
 - `role` / `assignment` = representación técnica que no sustituye el concepto canónico de cargo o vinculación institucional.
 
 ### 4.2 Verdad anual vs trayectoria consolidada
-<!-- VERIFICADO contra código 2026-03-14: enrollments y users_classes existen en schema.prisma y son ALINEADO -->
+<!-- VERIFICADO contra código 2026-05-29: enrollments existe en schema.prisma; users_classes/users_classes_archive fueron retiradas -->
 
 La frontera runtime vigente queda documentada así:
 
 - `enrollments` = verdad operativa anual del cursado, progreso, validación e investidura del periodo; <!-- VERIFICADO -->
-- `users_classes` = trayectoria consolidada por clase a lo largo del tiempo; <!-- VERIFICADO -->
-- `users_classes.current_class` = compatibilidad legacy, no verdad operativa anual. <!-- VERIFICADO -->
+- la trayectoria histórica de clases se consulta desde `enrollments` con filtros por año eclesiástico y estado;
+- `users_classes` y `users_classes_archive` no existen en el schema runtime actual.
 
 Esta frontera está respaldada por `docs/canon/decisiones-clave.md` y por las notas runtime activas en `ENDPOINTS-LIVE-REFERENCE.md`.
 
@@ -190,7 +190,9 @@ Notas runtime activas:
 - el owner puede operar sus propias rutas sensibles;
 - terceros requieren permisos globales o permisos finos transicionales según familia;
 - `post-registration step 3` crea o reactiva alta anual en `enrollments`;
-- si el usuario cambia de clase en el mismo año, se desactivan otros enrollments activos del año antes de resolver el seleccionado.
+- `post-registration step 3` deriva la clase desde fecha de nacimiento, inicio del año eclesiástico y tipo de club seleccionado; si el cliente envía un `class_id` que no coincide, se rechaza;
+- si el usuario re-ejecuta post-registro por corrección/cambio de club, se desactivan otros enrollments activos del año antes de resolver la clase derivada;
+- si una transferencia de club/sección es aprobada, se aplica la misma regla de clase derivada para el `club_type_id` destino y se resuelve el enrollment anual activo.
 
 ### 6.3 Clubes, secciones y cargos
 <!-- VERIFICADO contra código 2026-03-14: clubs module ALINEADO en todas las capas -->
@@ -236,7 +238,8 @@ Notas runtime activas de carpetas anuales:
 - Esa columna persistida es la **fuente única de verdad** del estado de la sección. Ningún consumidor — backend, admin o app — debe derivar el estado a partir de la presencia de filas de evaluación, timestamps LF/unión, o columnas de aprobación. La columna es el contrato.
 - El flujo de revisión puede ser de **dos niveles** cuando la carpeta tiene `requires_union_confirmation = true`: LF pre-aprueba (`PREAPPROVED_LF`) y la unión confirma o hace override (`VALIDATED` | `REJECTED`). Cuando el flag es `false`, la aprobación LF transiciona directamente a `VALIDATED` y el servicio espeja columnas de unión con el actor LF para simetría de auditoría.
 - El flag `requires_union_confirmation` se calcula en la creación del folder a partir de la vinculación con la carpeta de camporee y es históricamente inmutable.
-- Los módulos consumidores del estado de la carpeta anual (scoring/rankings y la vinculación con camporees via `local_camporee_id` / `union_camporee_id`) leen el estado desde la columna `status`. Sólo las filas en estado terminal (`VALIDATED` o `REJECTED`) contribuyen al cálculo de totales y al avance del folder a `evaluated`.
+- Los módulos consumidores del estado de la carpeta anual (scoring/rankings y la vinculación con camporees via `local_camporee_id` / `union_camporee_id`) leen el estado desde la columna `status`. Las filas terminales (`VALIDATED` o `REJECTED`) cuentan para decidir si el folder avanza a `evaluated`, pero sólo las filas `VALIDATED` contribuyen puntos al cálculo de totales; `REJECTED` aporta 0.
+- Permisos vigentes: `evidence_folders:read/update` queda limitado a dirección/secretaría de club (`secretary`, `secretary-treasurer`, `deputy-director`, `director`); `member`, `counselor`, `instructor` y `treasurer` no leen/cargan esta carpeta. `annual_folders:submit` lo ejecuta `director`, `secretary` o `secretary-treasurer`; `assistant-lf` y `director-lf` supervisan/evalúan con lectura institucional y `annual_folders:evaluate`, pero no envían la carpeta completa en nombre del club.
 
 ### 6.5 Operación administrativa y catálogos
 <!-- VERIFICADO contra código 2026-03-14: catalogs ALINEADO, admin geography ALINEADO, admin RBAC ALINEADO, admin reference (allergies/diseases/relationship-types/ecclesiastical-years) implementado pero SIN CANON explícito -->
@@ -262,9 +265,13 @@ El runtime documenta superficies para:
 - notificaciones y tokens FCM. <!-- VERIFICADO -->
 
 ### 6.7 Salud operativa
-<!-- VERIFICADO contra código 2026-03-14 -->
+<!-- VERIFICADO contra código 2026-07-20 -->
 
-El runtime documenta un endpoint público `GET /api/v1/health` para estado básico de API.
+El runtime expone `GET /api/v1/health` como liveness público y
+`GET /api/v1/health/details` como diagnóstico protegido para roles globales
+`admin` y `super-admin`. El detalle verifica base de datos y caché, reporta
+ocupación del pool PostgreSQL y contadores del cache-aside de catálogos, y marca
+el sistema como `degraded` cuando DB o caché no responden.
 
 ---
 
@@ -306,6 +313,14 @@ Roles de club documentados:
 - `counselor`
 - `member`
 
+El perfil de autorización resuelto (`AuthorizationContextService`) puede
+cachearse por usuario con key versionada (`auth:context:vN:{userId}`) para
+evitar snapshots obsoletos entre cambios de semántica. Toda mutación de
+relación rol-permiso debe invalidar el cache de los usuarios que poseen ese rol,
+tanto por `users_roles` como por `club_role_assignments`, para que
+`PermissionsGuard` evalúe permisos recién asignados sin esperar expiración por
+TTL.
+
 ### 7.3 Alcance documentado de autorización sensible
 
 El runtime documenta explícitamente autorización sensible sobre:
@@ -322,9 +337,9 @@ Y mantiene compatibilidad transicional con permisos legacy `users:*` en ciertas 
 El módulo de evaluación de carpetas anuales aplica una política deliberada de lectura más amplia que escritura sobre el permiso `annual_folders:evaluate`:
 
 - **Operaciones de escritura** (`POST .../evaluate`, `POST .../confirm-union`, `POST .../reopen`, `PATCH evidences/:evidenceId/reviewer-note`) requieren el permiso con `type: 'global'`. Solo actores LF y de unión con alcance global pueden mutar el estado de evaluación.
-- **Operación de lectura** (`GET /annual-folders/:folderId/evaluations`) requiere el mismo permiso con `type: 'active_assignment'`. Cualquier usuario con asignación activa al club puede consultar el estado de sus propias carpetas sin tener permisos globales de escritura.
+- **Operación de lectura** (`GET /annual-folders/:folderId/evaluations`) acepta `annual_folders:evaluate` o `evidence_folders:read`, pero el servicio vuelve a validar el recurso real: el usuario debe tener el permiso en el club dueño de la carpeta, o ser actor institucional con permiso global y territorio LF/Unión coincidente.
 
-Esta asimetría es intencional: los usuarios club-scoped ven el estado de sus propias carpetas, mientras que la mutación queda restringida a actores LF y de unión. La justificación canónica vive como ADR-6 del SDD `annual-folders-ownership-rework` y el contrato está documentado en el JSDoc de `EvaluationController`.
+Esta asimetría es intencional: los usuarios club-scoped ven el estado de sus propias carpetas, mientras que la mutación queda restringida a actores LF y de unión. IMPORTANTE: una asignación/permisos en otro club no habilita lectura ni envío sobre la carpeta de este club; el chequeo final vive en `AnnualFoldersService`.
 
 ---
 
@@ -351,7 +366,7 @@ La persistencia documentada usa:
 
 El schema de persistencia contiene 72 modelos. Se categorizan así:
 
-- **Modelos core de trayectoria**: `users`, `enrollments`, `users_classes`, `users_honors`, `member_insurances`, `legal_representatives`, `emergency_contacts`, `users_pr`, `users_roles`, `club_role_assignments`, `unit_members`, `units`, `weekly_records`.
+- **Modelos core de trayectoria**: `users`, `enrollments`, `users_honors`, `member_insurances`, `legal_representatives`, `emergency_contacts`, `users_pr`, `users_roles`, `club_role_assignments`, `unit_members`, `units`, `weekly_records`.
 - **Modelos de catálogo (trayectoria)**: `classes`, `honors`, `honors_categories`, `master_honors`, `club_types`, `club_ideals`, `relationship_types`, `allergies`, `diseases`, `medicines`, `ecclesiastical_years`, `activity_types`, `inventory_categories`, `finances_categories`.
 - **Modelos operativos**: `clubs`, `club_sections`, `folders`, `folders_modules`, `folders_sections`, `folders_modules_records`, `folders_section_records`, `folder_assignments`, `certifications` y tablas relacionadas, `club_inventory`, `finances` y tablas relacionadas, `activities` y tablas relacionadas, `camporees` y tablas relacionadas, `notifications`.
 - **Modelos de infraestructura**: `error_logs`, `user_fcm_tokens`.
@@ -365,7 +380,7 @@ El runtime documenta al menos estos grupos de persistencia:
 - **Users & Auth**: `users`, `users_pr`, `users_roles`, `legal_representatives`, `emergency_contacts`
 - **Organization**: `countries`, `unions`, `local_fields`, `districts`, `churches`, `ecclesiastical_years`
 - **Clubs**: `clubs`, `club_sections`, `club_role_assignments`
-- **Formación**: `classes`, `users_classes`, `enrollments`
+- **Formación**: `classes`, `enrollments`
 - **RBAC**: `roles`, `permissions`, `role_permissions`
 - **Catálogos**: `club_types`, `relationship_types`, `inventory_categories`
 
@@ -387,8 +402,7 @@ El runtime documenta al menos estos grupos de persistencia:
 #### Formación
 
 - `classes` define catálogo de clases;
-- `enrollments` define ciclo anual operativo;
-- `users_classes` define trayectoria consolidada por clase.
+- `enrollments` define ciclo anual operativo y trayectoria histórica consultable por año eclesiástico/estado.
 
 #### Autoridad y jerarquía
 
@@ -427,7 +441,7 @@ El runtime canonizado de Wave 0 queda resumido así:
 - la API vigente es la publicada en `ENDPOINTS-LIVE-REFERENCE.md`;
 - la semántica del sistema se interpreta desde trayectoria, club, sección, vinculación, periodo y validación;
 - la operación anual formativa se lee desde `enrollments`;
-- la trayectoria consolidada histórica se lee desde `users_classes`;
+- la trayectoria consolidada histórica se lee desde `enrollments`;
 - la autorización runtime combina JWT, permisos globales y asignaciones contextuales;
 - las superficies documentadas cubren autenticación, perfil, post-registro, clases, investiduras, honores, certificaciones, folders, clubes, roles, finanzas, actividades, camporees, inventario y notificaciones.
 

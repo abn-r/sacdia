@@ -351,39 +351,15 @@ describe('CertificationsService', () => {
 });
 ```
 
-**Folders Service**:
+**Annual Folders Service**:
 
 ```typescript
-// src/folders/folders.service.spec.ts
-describe('FoldersService', () => {
-  describe('assignFolderToUser', () => {
-    it('should validate club type match', async () => {
-      // Usuario de Conquistadores, carpeta de Aventureros
-      const userId = 'pathfinder-user';
-      const folderId = 1; // club_type = 1 (Aventureros)
-
-      await expect(
-        service.assignFolderToUser(userId, folderId)
-      ).rejects.toThrow('User does not belong to required club type');
-    });
-  });
-
-  describe('updateSectionProgress', () => {
-    it('should use club IDs instead of user ID', async () => {
-      // Este test verifica el cambio arquitectónico
-      const spy = jest.spyOn(prismaService.folders_section_records, 'findFirst');
-
-      await service.updateSectionProgress(userId, folderId, moduleId, sectionId, dto);
-
-      // Verificar que query usa club_section_id
-      expect(spy).toHaveBeenCalledWith(
-        expect.objectContaining({
-          where: expect.objectContaining({
-            club_section_id: expect.any(Number)
-          })
-        })
-      );
-    });
+// src/annual-folders/__tests__/annual-folders-submit-folder.service.spec.ts
+describe('AnnualFoldersService — submitFolder', () => {
+  it('should require all required sections to be submitted with evidence', async () => {
+    await expect(service.submitFolder(folderId, actorId)).rejects.toThrow(
+      'ANNUAL_FOLDER_REQUIRED_SECTIONS_PENDING',
+    );
   });
 });
 ```

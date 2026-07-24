@@ -12,6 +12,24 @@ Scripts SQL para inicialización y migración de la base de datos.
 
 ## 📋 Scripts Disponibles
 
+### Migración Prisma: foundation de histórico institucional
+
+| Migración | Ubicación efectiva | Dependencia | Estado |
+|-----------|--------------------|-------------|--------|
+| `20260723120000_institutional_history_foundation` | `sacdia-backend/prisma/migrations/20260723120000_institutional_history_foundation/migration.sql` | `20260527120000_institutional_hierarchy_history` (+ `btree_gist`) | Schema + ledger en rama `feat/institutional-history-pr1`; no desplegada hasta `prisma migrate deploy` |
+
+Extiende las cinco tablas de relación histórica con columnas bitemporales, crea versiones de nombre tipadas y el ledger append-only de reorganizaciones/linaje. Las aristas exigen participantes de la misma reorganización; las traducciones históricas son append-only y usan `ON DELETE RESTRICT`. El backfill registra las nuevas versiones de nombre al momento de migración con precisión `system_backfill`. No introduce columnas de evidencia documental. El verificador read-only (`pnpm verify:institutional-hierarchy-migration`) recorre objetos y arreglos JSON para detectar claves sensibles anidadas.
+
+### Migración Prisma pendiente: refresh administrativo iOS
+
+| Migración | Ubicación efectiva | Dependencia | Estado |
+|-----------|--------------------|-------------|--------|
+| `20260710200000_admin_refresh_rotation` | `sacdia-backend/prisma/migrations/20260710200000_admin_refresh_rotation/migration.sql` en `codex/sacdia-admin-ios-auth` | `20260710130000_admin_auth_sessions` | Existe en la rama backend; **no ejecutada ni verificada contra una base de datos** |
+
+No es un script de inicialización de este directorio ni debe ejecutarse manualmente desde aquí. Agrega `idle_expires_at` para su adopción futura como autoridad de expiración inactiva; hoy `AdminSessionRepository.isActiveForToken` todavía valida `sessions.expires_at` de Better Auth. Para sesiones administrativas preexistentes, el backfill limita la fecha a la expiración absoluta y luego aplica el sentinel `admin-disabled:<session_id>` al token legacy, por lo que esas sesiones deben reautenticarse.
+
+La migración permite cero o una fila hash-only por sesión, historial sin FK a sesiones ni a reemplazos y columnas para futuros recibos AES-GCM ligados por identidad compuesta del token previo y `Idempotency-Key`; no contiene columnas para secretos raw. El DDL fija 60 segundos exactos para recibos, pero solo garantiza un mínimo de 60 segundos para el historial: retenerlo hasta la expiración absoluta corresponderá al writer y cleanup futuros. Los commits desde `c09a600` hasta `ee84d2d`, ambos inclusive, solo aportan schema, migración y pruebas estructurales; no hay writer ni endpoints runtime administrativos. Esta migración no debe ejecutarse antes de D1c y D2 —exclusión legacy y reautenticación comprobada—.
+
 | Script | Descripción | Dependencias |
 |--------|-------------|--------------|
 | `script_01_organizacion.sql` | Setup inicial de países, uniones, campos locales | Ninguna |
@@ -20,6 +38,7 @@ Scripts SQL para inicialización y migración de la base de datos.
 | `script_04_catalogos_medicos.sql` | Alergias y enfermedades | Ninguna |
 | `script_05_roles_permisos.sql` | Sistema RBAC (roles y permisos) | Ninguna |
 | `script_06_admin_permissions.sql` | Permisos del Admin Panel (resource:action) | script_05 |
+| `20260710130000_admin_auth_sessions.sql` | Espejo documental del DDL de sesión administrativa creado en la rama backend; no implica que la migración esté desplegada | `sessions`, `club_role_assignments` |
 | `verificar_catalogos.sql` | Queries de verificación | Todos los anteriores |
 
 ### Scripts de Datos Semilla (Seed Data)

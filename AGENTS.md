@@ -3,6 +3,64 @@
 Guia operativa para agentes de IA en `sacdia`.
 Objetivo: asegurar que cualquier implementacion use el contexto correcto antes de tocar codigo.
 
+## 0) GGA — Gentle AI Agent Contract
+
+Esta es la fuente de verdad operativa para agentes en el workspace SACDIA.
+Los repos runtime (`sacdia-backend`, `sacdia-admin`, `sacdia-app`) tienen `AGENTS.md`
+propios solo como adaptadores: no deben duplicar ni contradecir este contrato.
+
+### Principios de trabajo
+
+- Verificar antes de afirmar. No aceptar supuestos del usuario sin revisar codigo/docs.
+- Conceptos antes que codigo: si falta contexto o requisito, detenerse y pedir definicion.
+- IA como herramienta: el humano dirige, el agente ejecuta con trazabilidad.
+- Respuestas cortas por defecto; ampliar solo si el usuario lo pide o el riesgo lo requiere.
+- Una pregunta a la vez. Despues de preguntar, detenerse y esperar.
+- No presentar menus ni enfoques multiples salvo que exista una bifurcacion real con tradeoffs.
+- En español, responder con español neutro; no usar voseo rioplatense ni modismos argentinos.
+
+### Reglas duras
+
+- Nunca agregar `Co-Authored-By` ni atribucion de IA en commits.
+- Usar conventional commits si se pide commitear.
+- Nunca ejecutar builds despues de cambios, salvo pedido explicito posterior del usuario.
+- No cambiar contratos, schema, endpoints o flujos sin actualizar la documentacion canonica correspondiente.
+- No hardcodear secretos ni tocar `.env` reales.
+- No asumir contratos runtime: validar en docs canonicas y codigo efectivo.
+
+### Alcance por repositorio
+
+- Cambios cross-repo: partir desde este `AGENTS.md` raiz.
+- Cambios en un repo especifico: leer este archivo y luego el `AGENTS.md`/`CLAUDE.md` local del repo.
+- Si un repo se abre aislado y no existe `../AGENTS.md`, el `AGENTS.md` local actua como adaptador minimo y debe indicar que el canon completo vive en el workspace `sacdia`.
+
+### Ownership de agentes por superficie
+
+- Para cambios integrales, seguir `docs/steering/agent-ownership.md`.
+- Codex prioriza `sacdia-backend/`, `sacdia-app/`, contratos API, seguridad, datos y documentacion tecnica.
+- Cursor Composer 2.5 prioriza `sacdia-admin/`, diseño visual, jerarquia de informacion, layouts y polish del panel administrativo.
+- El flujo debe ser contract-first: Codex define o valida endpoints/DTOs/permisos/errores antes de que el admin los consuma.
+- Codex no debe rediseñar el admin salvo pedido explicito o ajuste minimo para corregir integracion rota.
+
+### Handoff backend (admin / Composer)
+
+Cuando el agente trabaja desde `sacdia-admin` (o cualquier superficie admin) y el cambio requiere `sacdia-backend`:
+
+- **No editar** `sacdia-backend/` directamente.
+- **Entregar al usuario** una spec implementable para Codex u otra IA backend.
+- El admin solo consume contrato ya definido o el propuesto en esa spec.
+
+Formato minimo del handoff:
+
+1. **Objetivo** — que problema resuelve y por que no basta con frontend.
+2. **Archivos** — rutas exactas (`dto`, `service`, `controller`, tests, docs).
+3. **Cambio** — codigo o pseudocodigo concreto (query params, DTOs, `orderBy`, defaults).
+4. **Contrato API** — endpoint, params, response, permisos, errores.
+5. **Docs** — que actualizar (`docs/api/`, feature doc si aplica).
+6. **Test plan** — casos minimos a cubrir.
+
+Si el backend ya expone el contrato necesario, implementar solo en admin sin handoff.
+
 ## 1) Lectura minima obligatoria (siempre)
 
 1. `CLAUDE.md`
@@ -12,6 +70,8 @@ Objetivo: asegurar que cualquier implementacion use el contexto correcto antes d
 5. `docs/steering/coding-standards.md`
 6. `docs/steering/data-guidelines.md`
 7. `docs/steering/agents.md` (reglas extendidas y checklist detallado)
+8. `docs/steering/agent-ownership.md`
+9. Si se toca un modulo runtime: `sacdia-backend/AGENTS.md`, `sacdia-admin/AGENTS.md` o `sacdia-app/AGENTS.md` segun corresponda.
 
 ## 2) Router de documentacion por tipo de cambio
 

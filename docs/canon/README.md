@@ -152,15 +152,19 @@ Canoniza las operaciones admin-level sobre progresión de certificaciones de usu
 
 ### `runtime-user-folders.md`
 
-Canoniza las operaciones admin-level sobre inscripción y progreso de carpetas de usuario. Permisos propios `user_folders:read/manage`. Distinto del browse catalog (`folders:read`) y del subsistema hermano de carpetas de evidencia anual (`evidence_folders:*`). Decisión registrada: `decisiones-clave.md` §19.
+DEPRECATED: las operaciones legacy de carpetas de usuario (`user_folders:*` y `/folders/*`) fueron retiradas antes de producción. El flujo vigente vive en `annual-folders`.
 
 ### `runtime-camporees.md`
 
-Canoniza operaciones CRUD sobre la entidad camporee con permisos propios `camporees:read/create/update/delete`. Separa explícitamente de `attendance:*` cross-cutting (preservado deliberadamente entre activities y camporees). Permiso `camporees:register` reservado sin uso actual. Decisión registrada: `decisiones-clave.md` §20.
+Canoniza CRUD con `camporees:read/create/update/delete`, inscripción contextual del director con `camporees:register_active_section` e inscripción legacy **local** con `camporees:register`. El POST legacy de unión conserva `attendance:manage`; `attendance:*` también permanece cross-cutting para participantes, pagos y aprobaciones. Decisiones registradas: `decisiones-clave.md` §20 y §25.
 
 ### `runtime-validation.md`
 
 Canoniza el workflow submit → review con permisos propios `validation:submit/review/read`. Coexistencia: los permisos originales `classes:*` y `users:read_detail` PERMANECEN activos para sus dominios propios. Drift histórico corregido: nav `/dashboard/validation` migrado de `investiture:read` a `validation:read`. Decisión registrada: `decisiones-clave.md` §21.
+
+### `runtime-coordination.md`
+
+Canoniza el modelo institucional de coordinación: zonas por campo local que agrupan distritos, un coordinador general activo por campo local, coordinadores por zona + sección, asignaciones directas por `club_section` y resolución común `coordinator_scope(user_id) -> club_section_ids[]`. Decisión registrada: `decisiones-clave.md` §24.
 
 ### `runtime-alerting.md`
 

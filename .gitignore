@@ -15,6 +15,9 @@ sacdia-backend/
 sacdia-app/
 sacdia-admin/
 
+# Ignore additional sacdia-admin worktrees (live next to the main checkout)
+sacdia-admin-*/
+
 # Ignore temporary files
 *.tmp
 *.log
@@ -35,3 +38,5 @@ docs/rive-base/
 .opencode/
 .worktrees/
 .atl/
+.windsurf/
+.devin/

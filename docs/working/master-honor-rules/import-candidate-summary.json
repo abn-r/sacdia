@@ -1,0 +1,1211 @@
+{
+  "version": "2026.official-master-honor-rules.import-candidate.2026-06-06",
+  "imported_master_honors": 17,
+  "pending_master_honors": 3,
+  "deferred_catalog_items": 6,
+  "included_review_items": 38,
+  "category_mappings": [
+    {
+      "master_honor": "Maestría en ADRA",
+      "source_category": "ADRA",
+      "honors_category_id": 1,
+      "db_category": "ADRA",
+      "active_honors": 9,
+      "minimum_required": 6
+    },
+    {
+      "master_honor": "Maestría en Actividades agrícolas",
+      "source_category": "Actividades agropecuarias",
+      "honors_category_id": 2,
+      "db_category": "Actividades Agropecuarias",
+      "active_honors": 17,
+      "minimum_required": 7
+    },
+    {
+      "master_honor": "Maestría en Artesanía",
+      "source_category": "Artes y actividades manuales",
+      "honors_category_id": 5,
+      "db_category": "Artes y Actividades Manuales",
+      "active_honors": 135,
+      "minimum_required": 7
+    },
+    {
+      "master_honor": "Maestría en Habilidades domésticas",
+      "source_category": "Artes domésticas",
+      "honors_category_id": 4,
+      "db_category": "Artes Domésticas",
+      "active_honors": 24,
+      "minimum_required": 7
+    },
+    {
+      "master_honor": "Maestría en Habilidades vocacionales",
+      "source_category": "Actividades vocacionales",
+      "honors_category_id": 8,
+      "db_category": "Artes Vocacionales",
+      "active_honors": 92,
+      "minimum_required": 7
+    },
+    {
+      "master_honor": "Maestría en Testificación",
+      "source_category": "Crecimiento espiritual, actividades misioneras y herencia",
+      "honors_category_id": 6,
+      "db_category": "Crecimiento Espiritual, Actividades Misioneras y Herencia",
+      "active_honors": 93,
+      "minimum_required": 7
+    }
+  ],
+  "name_differences": [
+    {
+      "master_honor_id": 1,
+      "db_name_used": "Maestría en Actividades Agrícolas",
+      "source_name": "Maestría en Actividades agrícolas"
+    },
+    {
+      "master_honor_id": 5,
+      "db_name_used": "Maestría en Ciencias Naturales",
+      "source_name": "Maestría en Ciencias naturales"
+    },
+    {
+      "master_honor_id": 7,
+      "db_name_used": "Maestría en Crecimiento Espiritual y Ministerios",
+      "source_name": "Maestría en Crecimiento espiritual y ministerios"
+    },
+    {
+      "master_honor_id": 9,
+      "db_name_used": "Maestría en Familia, Orígenes y Herencia",
+      "source_name": "Maestría en Familia, orígenes y herencia"
+    },
+    {
+      "master_honor_id": 10,
+      "db_name_used": "Maestría en Habilidades Domésticas",
+      "source_name": "Maestría en Habilidades domésticas"
+    },
+    {
+      "master_honor_id": 11,
+      "db_name_used": "Maestría en Habilidades Vocacionales",
+      "source_name": "Maestría en Habilidades vocacionales"
+    },
+    {
+      "master_honor_id": 13,
+      "db_name_used": "Maestría en Recreación",
+      "source_name": "Experto en Recreación"
+    },
+    {
+      "master_honor_id": 14,
+      "db_name_used": "Maestría en Salud y Ciencia",
+      "source_name": "Maestría en Salud y ciencia"
+    },
+    {
+      "master_honor_id": 15,
+      "db_name_used": "Maestría en Tecnología Moderna",
+      "source_name": "Maestría en Tecnología moderna"
+    },
+    {
+      "master_honor_id": 17,
+      "db_name_used": "Maestría en Vida Primitiva",
+      "source_name": "Maestría en Vida primitiva"
+    }
+  ],
+  "imported": [
+    {
+      "master_honor_id": 2,
+      "name": "Maestría en Acuática",
+      "source_name": "Maestría en Acuática",
+      "groups": 1,
+      "options": 14
+    },
+    {
+      "master_honor_id": 3,
+      "name": "Maestría en ADRA",
+      "source_name": "Maestría en ADRA",
+      "groups": 2,
+      "options": 5
+    },
+    {
+      "master_honor_id": 1,
+      "name": "Maestría en Actividades Agrícolas",
+      "source_name": "Maestría en Actividades agrícolas",
+      "groups": 1,
+      "options": 0
+    },
+    {
+      "master_honor_id": 4,
+      "name": "Maestría en Artesanía",
+      "source_name": "Maestría en Artesanía",
+      "groups": 1,
+      "options": 0
+    },
+    {
+      "master_honor_id": 5,
+      "name": "Maestría en Ciencias Naturales",
+      "source_name": "Maestría en Ciencias naturales",
+      "groups": 3,
+      "options": 35
+    },
+    {
+      "master_honor_id": 6,
+      "name": "Maestría en Conservación",
+      "source_name": "Maestría en Conservación",
+      "groups": 1,
+      "options": 16
+    },
+    {
+      "master_honor_id": 7,
+      "name": "Maestría en Crecimiento Espiritual y Ministerios",
+      "source_name": "Maestría en Crecimiento espiritual y ministerios",
+      "groups": 2,
+      "options": 19
+    },
+    {
+      "master_honor_id": 8,
+      "name": "Maestría en Deportes",
+      "source_name": "Maestría en Deportes",
+      "groups": 1,
+      "options": 15
+    },
+    {
+      "master_honor_id": 9,
+      "name": "Maestría en Familia, Orígenes y Herencia",
+      "source_name": "Maestría en Familia, orígenes y herencia",
+      "groups": 2,
+      "options": 13
+    },
+    {
+      "master_honor_id": 10,
+      "name": "Maestría en Habilidades Domésticas",
+      "source_name": "Maestría en Habilidades domésticas",
+      "groups": 1,
+      "options": 0
+    },
+    {
+      "master_honor_id": 11,
+      "name": "Maestría en Habilidades Vocacionales",
+      "source_name": "Maestría en Habilidades vocacionales",
+      "groups": 1,
+      "options": 0
+    },
+    {
+      "master_honor_id": 13,
+      "name": "Maestría en Recreación",
+      "source_name": "Experto en Recreación",
+      "groups": 1,
+      "options": 18
+    },
+    {
+      "master_honor_id": 14,
+      "name": "Maestría en Salud y Ciencia",
+      "source_name": "Maestría en Salud y ciencia",
+      "groups": 3,
+      "options": 19
+    },
+    {
+      "master_honor_id": 15,
+      "name": "Maestría en Tecnología Moderna",
+      "source_name": "Maestría en Tecnología moderna",
+      "groups": 1,
+      "options": 7
+    },
+    {
+      "master_honor_id": 16,
+      "name": "Maestría en Testificación",
+      "source_name": "Maestría en Testificación",
+      "groups": 1,
+      "options": 0
+    },
+    {
+      "master_honor_id": 17,
+      "name": "Maestría en Vida Primitiva",
+      "source_name": "Maestría en Vida primitiva",
+      "groups": 1,
+      "options": 17
+    },
+    {
+      "master_honor_id": 18,
+      "name": "Maestría en Zoología",
+      "source_name": "Maestría en Zoología",
+      "groups": 3,
+      "options": 27
+    }
+  ],
+  "pending": [
+    {
+      "name": "Maestría en Botánica",
+      "legacy_master_honor_id": null,
+      "reason": "No existe master_honor_id actual/legacy confirmado; Alcance SELECTED_DIVISIONS apunta a división/unión no existente en SACDIA actual",
+      "details": {
+        "applicability": {
+          "scope": "SELECTED_DIVISIONS",
+          "division_names": [
+            "División Sudamericana"
+          ],
+          "raw": "Esta Maestría es específica para la División Sudamericana."
+        }
+      }
+    },
+    {
+      "name": "Maestría en Ciencia y tecnología",
+      "legacy_master_honor_id": null,
+      "reason": "No existe master_honor_id actual/legacy confirmado; Alcance SELECTED_DIVISIONS apunta a división/unión no existente en SACDIA actual",
+      "details": {
+        "applicability": {
+          "scope": "SELECTED_DIVISIONS",
+          "division_names": [
+            "División Sudamericana"
+          ],
+          "raw": "Esta Maestría es específica para la División Sudamericana."
+        }
+      }
+    },
+    {
+      "name": "Maestría del Medioambiente",
+      "legacy_master_honor_id": null,
+      "reason": "No existe master_honor_id actual/legacy confirmado; Alcance SELECTED_DIVISIONS apunta a división/unión no existente en SACDIA actual",
+      "details": {
+        "applicability": {
+          "scope": "SELECTED_DIVISIONS",
+          "division_names": [
+            "Unión Franco-Belga"
+          ],
+          "raw": "Esta Maestría es específica para la Unión Franco-Belga."
+        }
+      }
+    }
+  ],
+  "deferred": [
+    {
+      "master_honor": "Maestría en Crecimiento espiritual y ministerios",
+      "group_title": "Crecimiento espiritual",
+      "label": "Biblia viva",
+      "source_line": 152,
+      "reason": "missing_from_catalog"
+    },
+    {
+      "master_honor": "Maestría del Medioambiente",
+      "group_title": "Desarrollar por lo menos 7 de las siguientes especialidades:",
+      "label": "Agricultura ecológica",
+      "source_line": 229,
+      "reason": "missing_from_catalog"
+    },
+    {
+      "master_honor": "Maestría del Medioambiente",
+      "group_title": "Desarrollar por lo menos 7 de las siguientes especialidades:",
+      "label": "Bioconstrucción",
+      "source_line": 230,
+      "reason": "missing_from_catalog"
+    },
+    {
+      "master_honor": "Maestría del Medioambiente",
+      "group_title": "Desarrollar por lo menos 7 de las siguientes especialidades:",
+      "label": "Medioambiente acuático",
+      "source_line": 233,
+      "reason": "missing_from_catalog"
+    },
+    {
+      "master_honor": "Maestría del Medioambiente",
+      "group_title": "Desarrollar por lo menos 7 de las siguientes especialidades:",
+      "label": "Medioambiente terrestre",
+      "source_line": 234,
+      "reason": "missing_from_catalog"
+    },
+    {
+      "master_honor": "Maestría del Medioambiente",
+      "group_title": "Desarrollar por lo menos 7 de las siguientes especialidades:",
+      "label": "Recogida selectiva",
+      "source_line": 235,
+      "reason": "missing_from_catalog"
+    }
+  ],
+  "included_review_items_detail": [
+    {
+      "master_honor": "Maestría en Acuática",
+      "label": "Buceo con escafandra, y/o avanzado",
+      "honor_ids": [
+        23,
+        24
+      ],
+      "matched_honors": [
+        {
+          "honor_id": 23,
+          "name": "Buceo con Escafandra",
+          "honors_category_id": 9
+        },
+        {
+          "honor_id": 24,
+          "name": "Buceo con Escafandra - Avanzado",
+          "honors_category_id": 9
+        }
+      ],
+      "reason": "included_as_equivalent_or_alternative_with_existing_ids"
+    },
+    {
+      "master_honor": "Maestría en Acuática",
+      "label": "Natacion III, y/o avanzado",
+      "honor_ids": [
+        89,
+        90
+      ],
+      "matched_honors": [
+        {
+          "honor_id": 89,
+          "name": "Natación III",
+          "honors_category_id": 9
+        },
+        {
+          "honor_id": 90,
+          "name": "Natación III - Avanzado",
+          "honors_category_id": 9
+        }
+      ],
+      "reason": "included_as_equivalent_or_alternative_with_existing_ids"
+    },
+    {
+      "master_honor": "Maestría en Ciencias naturales",
+      "label": "Cactus, y/o avanzado",
+      "honor_ids": [
+        473,
+        474
+      ],
+      "matched_honors": [
+        {
+          "honor_id": 473,
+          "name": "Cactus",
+          "honors_category_id": 7
+        },
+        {
+          "honor_id": 474,
+          "name": "Cactus - Avanzado",
+          "honors_category_id": 7
+        }
+      ],
+      "reason": "included_as_equivalent_or_alternative_with_existing_ids"
+    },
+    {
+      "master_honor": "Maestría en Ciencias naturales",
+      "label": "Semillas, y/o avanzado",
+      "honor_ids": [
+        567,
+        568
+      ],
+      "matched_honors": [
+        {
+          "honor_id": 567,
+          "name": "Semillas",
+          "honors_category_id": 7
+        },
+        {
+          "honor_id": 568,
+          "name": "Semillas - Avanzado",
+          "honors_category_id": 7
+        }
+      ],
+      "reason": "included_as_equivalent_or_alternative_with_existing_ids"
+    },
+    {
+      "master_honor": "Maestría en Ciencias naturales",
+      "label": "Aves, y/o avanzado",
+      "honor_ids": [
+        460,
+        461
+      ],
+      "matched_honors": [
+        {
+          "honor_id": 460,
+          "name": "Aves",
+          "honors_category_id": 7
+        },
+        {
+          "honor_id": 461,
+          "name": "Aves - Avanzado",
+          "honors_category_id": 7
+        }
+      ],
+      "reason": "included_as_equivalent_or_alternative_with_existing_ids"
+    },
+    {
+      "master_honor": "Maestría en Ciencias naturales",
+      "label": "Insectos, y/o avanzado",
+      "honor_ids": [
+        521,
+        522
+      ],
+      "matched_honors": [
+        {
+          "honor_id": 521,
+          "name": "Insectos",
+          "honors_category_id": 7
+        },
+        {
+          "honor_id": 522,
+          "name": "Insectos - Avanzado",
+          "honors_category_id": 7
+        }
+      ],
+      "reason": "included_as_equivalent_or_alternative_with_existing_ids"
+    },
+    {
+      "master_honor": "Maestría en Ciencias naturales",
+      "label": "Murciélagos, y/o avanzado",
+      "honor_ids": [
+        542,
+        543
+      ],
+      "matched_honors": [
+        {
+          "honor_id": 542,
+          "name": "Murciélagos",
+          "honors_category_id": 7
+        },
+        {
+          "honor_id": 543,
+          "name": "Murciélagos - Avanzado",
+          "honors_category_id": 7
+        }
+      ],
+      "reason": "included_as_equivalent_or_alternative_with_existing_ids"
+    },
+    {
+      "master_honor": "Maestría en Ciencias naturales",
+      "label": "Odonatos, y/o avanzado",
+      "honor_ids": [
+        544,
+        545
+      ],
+      "matched_honors": [
+        {
+          "honor_id": 544,
+          "name": "Odonatos",
+          "honors_category_id": 7
+        },
+        {
+          "honor_id": 545,
+          "name": "Odonatos - Avanzado",
+          "honors_category_id": 7
+        }
+      ],
+      "reason": "included_as_equivalent_or_alternative_with_existing_ids"
+    },
+    {
+      "master_honor": "Maestría en Conservación",
+      "label": "Combustibles alternativos, avanzado",
+      "honor_ids": [
+        487,
+        488
+      ],
+      "matched_honors": [
+        {
+          "honor_id": 487,
+          "name": "Combustibles Alternativos",
+          "honors_category_id": 7
+        },
+        {
+          "honor_id": 488,
+          "name": "Combustibles Alternativos - Avanzado",
+          "honors_category_id": 7
+        }
+      ],
+      "reason": "included_as_equivalent_or_alternative_with_existing_ids"
+    },
+    {
+      "master_honor": "Maestría en Conservación",
+      "label": "Dunas, y/o avanzado",
+      "honor_ids": [
+        497,
+        498
+      ],
+      "matched_honors": [
+        {
+          "honor_id": 497,
+          "name": "Dunas",
+          "honors_category_id": 7
+        },
+        {
+          "honor_id": 498,
+          "name": "Dunas - Avanzado",
+          "honors_category_id": 7
+        }
+      ],
+      "reason": "included_as_equivalent_or_alternative_with_existing_ids"
+    },
+    {
+      "master_honor": "Maestría en Conservación",
+      "label": "Ecología, y/o avanzado",
+      "honor_ids": [
+        499,
+        500
+      ],
+      "matched_honors": [
+        {
+          "honor_id": 499,
+          "name": "Ecología",
+          "honors_category_id": 7
+        },
+        {
+          "honor_id": 500,
+          "name": "Ecología - Avanzado",
+          "honors_category_id": 7
+        }
+      ],
+      "reason": "included_as_equivalent_or_alternative_with_existing_ids"
+    },
+    {
+      "master_honor": "Maestría en Conservación",
+      "label": "Geología, y/o avanzado",
+      "honor_ids": [
+        512,
+        513
+      ],
+      "matched_honors": [
+        {
+          "honor_id": 512,
+          "name": "Geología",
+          "honors_category_id": 7
+        },
+        {
+          "honor_id": 513,
+          "name": "Geología - Avanzado",
+          "honors_category_id": 7
+        }
+      ],
+      "reason": "included_as_equivalent_or_alternative_with_existing_ids"
+    },
+    {
+      "master_honor": "Maestría en Conservación",
+      "label": "Mineralogía, y/o avanzado",
+      "honor_ids": [
+        536,
+        537
+      ],
+      "matched_honors": [
+        {
+          "honor_id": 536,
+          "name": "Mineralogía",
+          "honors_category_id": 7
+        },
+        {
+          "honor_id": 537,
+          "name": "Mineralogía - Avanzado",
+          "honors_category_id": 7
+        }
+      ],
+      "reason": "included_as_equivalent_or_alternative_with_existing_ids"
+    },
+    {
+      "master_honor": "Maestría en Conservación",
+      "label": "Pantanos y ciénagas, y/o avanzado",
+      "honor_ids": [
+        550,
+        551
+      ],
+      "matched_honors": [
+        {
+          "honor_id": 550,
+          "name": "Pantanos y Ciénagas",
+          "honors_category_id": 7
+        },
+        {
+          "honor_id": 551,
+          "name": "Pantanos y Ciénagas - Avanzado",
+          "honors_category_id": 7
+        }
+      ],
+      "reason": "included_as_equivalent_or_alternative_with_existing_ids"
+    },
+    {
+      "master_honor": "Maestría en Conservación",
+      "label": "Ríos y arroyos, y/o avanzado",
+      "honor_ids": [
+        565,
+        566
+      ],
+      "matched_honors": [
+        {
+          "honor_id": 565,
+          "name": "Ríos y Arroyos",
+          "honors_category_id": 7
+        },
+        {
+          "honor_id": 566,
+          "name": "Ríos y Arroyos - Avanzado",
+          "honors_category_id": 7
+        }
+      ],
+      "reason": "included_as_equivalent_or_alternative_with_existing_ids"
+    },
+    {
+      "master_honor": "Maestría en Conservación",
+      "label": "Silvicultura, y/o avanzado",
+      "honor_ids": [
+        213,
+        705
+      ],
+      "matched_honors": [
+        {
+          "honor_id": 213,
+          "name": "Silvicultura",
+          "honors_category_id": 8
+        },
+        {
+          "honor_id": 705,
+          "name": "Silvicultura - Avanzado",
+          "honors_category_id": 8
+        }
+      ],
+      "reason": "included_as_equivalent_or_alternative_with_existing_ids"
+    },
+    {
+      "master_honor": "Maestría en Conservación",
+      "label": "Taiga, y/o avanzado",
+      "honor_ids": [
+        571,
+        572
+      ],
+      "matched_honors": [
+        {
+          "honor_id": 571,
+          "name": "Taiga",
+          "honors_category_id": 7
+        },
+        {
+          "honor_id": 572,
+          "name": "Taiga - Avanzado",
+          "honors_category_id": 7
+        }
+      ],
+      "reason": "included_as_equivalent_or_alternative_with_existing_ids"
+    },
+    {
+      "master_honor": "Maestría en Crecimiento espiritual y ministerios",
+      "label": "Aventura para Cristo , y/o avanzado",
+      "honor_ids": [
+        646,
+        647
+      ],
+      "matched_honors": [
+        {
+          "honor_id": 646,
+          "name": "Aventurero para Cristo",
+          "honors_category_id": 6
+        },
+        {
+          "honor_id": 647,
+          "name": "Aventurero para Cristo - Avanzado",
+          "honors_category_id": 6
+        }
+      ],
+      "reason": "included_as_equivalent_or_alternative_with_existing_ids"
+    },
+    {
+      "master_honor": "Maestría en Crecimiento espiritual y ministerios",
+      "label": "Marcado de la Biblia, y/o avanzado",
+      "honor_ids": [
+        409,
+        410
+      ],
+      "matched_honors": [
+        {
+          "honor_id": 409,
+          "name": "Marcado de la Biblia",
+          "honors_category_id": 6
+        },
+        {
+          "honor_id": 410,
+          "name": "Marcado de la Biblia - Avanzado",
+          "honors_category_id": 6
+        }
+      ],
+      "reason": "included_as_equivalent_or_alternative_with_existing_ids"
+    },
+    {
+      "master_honor": "Maestría en Crecimiento espiritual y ministerios",
+      "label": "Pacificadores, y/o avanzado",
+      "honor_ids": [
+        420,
+        421
+      ],
+      "matched_honors": [
+        {
+          "honor_id": 420,
+          "name": "Pacificador",
+          "honors_category_id": 6
+        },
+        {
+          "honor_id": 421,
+          "name": "Pacificador - Avanzado",
+          "honors_category_id": 6
+        }
+      ],
+      "reason": "included_as_equivalent_or_alternative_with_existing_ids"
+    },
+    {
+      "master_honor": "Maestría en Crecimiento espiritual y ministerios",
+      "label": "Arte cristiano de predicar, y/o avanzado",
+      "honor_ids": [
+        369,
+        370
+      ],
+      "matched_honors": [
+        {
+          "honor_id": 369,
+          "name": "Arte Cristiano de Predicar",
+          "honors_category_id": 6
+        },
+        {
+          "honor_id": 370,
+          "name": "Arte Cristiano de Predicar - Avanzado",
+          "honors_category_id": 6
+        }
+      ],
+      "reason": "included_as_equivalent_or_alternative_with_existing_ids"
+    },
+    {
+      "master_honor": "Maestría en Crecimiento espiritual y ministerios",
+      "label": "Lenguaje gestual, y/o avanzado",
+      "honor_ids": [
+        407,
+        408
+      ],
+      "matched_honors": [
+        {
+          "honor_id": 407,
+          "name": "Lenguaje de Signos",
+          "honors_category_id": 6
+        },
+        {
+          "honor_id": 408,
+          "name": "Lenguaje de Signos - Avanzado",
+          "honors_category_id": 6
+        }
+      ],
+      "reason": "included_as_equivalent_or_alternative_with_existing_ids"
+    },
+    {
+      "master_honor": "Maestría en Crecimiento espiritual y ministerios",
+      "label": "Predícalo, y/o avanzado",
+      "honor_ids": [
+        425,
+        426
+      ],
+      "matched_honors": [
+        {
+          "honor_id": 425,
+          "name": "Predicar",
+          "honors_category_id": 6
+        },
+        {
+          "honor_id": 426,
+          "name": "Predicar - Avanzado",
+          "honors_category_id": 6
+        }
+      ],
+      "reason": "included_as_equivalent_or_alternative_with_existing_ids"
+    },
+    {
+      "master_honor": "Maestría en Deportes",
+      "label": "Ciclismo, y/o avanzado",
+      "honor_ids": [
+        33,
+        34
+      ],
+      "matched_honors": [
+        {
+          "honor_id": 33,
+          "name": "Ciclismo",
+          "honors_category_id": 9
+        },
+        {
+          "honor_id": 34,
+          "name": "Ciclismo - Avanzado",
+          "honors_category_id": 9
+        }
+      ],
+      "reason": "included_as_equivalent_or_alternative_with_existing_ids"
+    },
+    {
+      "master_honor": "Maestría en Deportes",
+      "label": "Equitación, avanzado",
+      "honor_ids": [
+        49,
+        50
+      ],
+      "matched_honors": [
+        {
+          "honor_id": 49,
+          "name": "Equitación",
+          "honors_category_id": 9
+        },
+        {
+          "honor_id": 50,
+          "name": "Equitación - Avanzado",
+          "honors_category_id": 9
+        }
+      ],
+      "reason": "included_as_equivalent_or_alternative_with_existing_ids"
+    },
+    {
+      "master_honor": "Maestría en Familia, orígenes y herencia",
+      "label": "Banderas, y/o avanzado",
+      "honor_ids": [
+        375,
+        376
+      ],
+      "matched_honors": [
+        {
+          "honor_id": 375,
+          "name": "Banderas",
+          "honors_category_id": 6
+        },
+        {
+          "honor_id": 376,
+          "name": "Banderas - Avanzado",
+          "honors_category_id": 6
+        }
+      ],
+      "reason": "included_as_equivalent_or_alternative_with_existing_ids"
+    },
+    {
+      "master_honor": "Maestría en Familia, orígenes y herencia",
+      "label": "Creacionismo, y/o avanzado",
+      "honor_ids": [
+        384,
+        385
+      ],
+      "matched_honors": [
+        {
+          "honor_id": 384,
+          "name": "Creacionismo",
+          "honors_category_id": 6
+        },
+        {
+          "honor_id": 385,
+          "name": "Creacionismo - Avanzado",
+          "honors_category_id": 6
+        }
+      ],
+      "reason": "included_as_equivalent_or_alternative_with_existing_ids"
+    },
+    {
+      "master_honor": "Maestría en Salud y ciencia",
+      "label": "Primeros auxilios II, avanzado",
+      "honor_ids": [
+        597,
+        598
+      ],
+      "matched_honors": [
+        {
+          "honor_id": 597,
+          "name": "Primeros Auxilios II",
+          "honors_category_id": 3
+        },
+        {
+          "honor_id": 598,
+          "name": "Primeros Auxilios II - Avanzado",
+          "honors_category_id": 3
+        }
+      ],
+      "reason": "included_as_equivalent_or_alternative_with_existing_ids"
+    },
+    {
+      "master_honor": "Maestría en Tecnología moderna",
+      "label": "Computadoras, y/o avanzado",
+      "honor_ids": [
+        157,
+        158
+      ],
+      "matched_honors": [
+        {
+          "honor_id": 157,
+          "name": "Computadoras",
+          "honors_category_id": 8
+        },
+        {
+          "honor_id": 158,
+          "name": "Computadoras - Avanzado",
+          "honors_category_id": 8
+        }
+      ],
+      "reason": "included_as_equivalent_or_alternative_with_existing_ids"
+    },
+    {
+      "master_honor": "Maestría en Tecnología moderna",
+      "label": "Internet, y/o avanzado",
+      "honor_ids": [
+        183,
+        184
+      ],
+      "matched_honors": [
+        {
+          "honor_id": 183,
+          "name": "Internet",
+          "honors_category_id": 8
+        },
+        {
+          "honor_id": 184,
+          "name": "Internet - Avanzado",
+          "honors_category_id": 8
+        }
+      ],
+      "reason": "included_as_equivalent_or_alternative_with_existing_ids"
+    },
+    {
+      "master_honor": "Maestría en Zoología",
+      "label": "Cetáceaos O Mamíferos marinos",
+      "honor_ids": [
+        479,
+        531
+      ],
+      "matched_honors": [
+        {
+          "honor_id": 479,
+          "name": "Cetáceos",
+          "honors_category_id": 7
+        },
+        {
+          "honor_id": 531,
+          "name": "Mamíferos Marinos",
+          "honors_category_id": 7
+        }
+      ],
+      "reason": "included_as_equivalent_or_alternative_with_existing_ids"
+    },
+    {
+      "master_honor": "Maestría en Zoología",
+      "label": "Aves, y/o avanzado",
+      "honor_ids": [
+        460,
+        461
+      ],
+      "matched_honors": [
+        {
+          "honor_id": 460,
+          "name": "Aves",
+          "honors_category_id": 7
+        },
+        {
+          "honor_id": 461,
+          "name": "Aves - Avanzado",
+          "honors_category_id": 7
+        }
+      ],
+      "reason": "included_as_equivalent_or_alternative_with_existing_ids"
+    },
+    {
+      "master_honor": "Maestría en Zoología",
+      "label": "Dinosaurios O Fósiles",
+      "honor_ids": [
+        496,
+        664
+      ],
+      "matched_honors": [
+        {
+          "honor_id": 496,
+          "name": "Dinosaurios",
+          "honors_category_id": 7
+        },
+        {
+          "honor_id": 664,
+          "name": "Fósiles",
+          "honors_category_id": 7
+        }
+      ],
+      "reason": "included_as_equivalent_or_alternative_with_existing_ids"
+    },
+    {
+      "master_honor": "Maestría en Zoología",
+      "label": "Insectos, y/o avanzado",
+      "honor_ids": [
+        521,
+        522
+      ],
+      "matched_honors": [
+        {
+          "honor_id": 521,
+          "name": "Insectos",
+          "honors_category_id": 7
+        },
+        {
+          "honor_id": 522,
+          "name": "Insectos - Avanzado",
+          "honors_category_id": 7
+        }
+      ],
+      "reason": "included_as_equivalent_or_alternative_with_existing_ids"
+    },
+    {
+      "master_honor": "Maestría en Zoología",
+      "label": "Murciélagos, y/o avanzado",
+      "honor_ids": [
+        542,
+        543
+      ],
+      "matched_honors": [
+        {
+          "honor_id": 542,
+          "name": "Murciélagos",
+          "honors_category_id": 7
+        },
+        {
+          "honor_id": 543,
+          "name": "Murciélagos - Avanzado",
+          "honors_category_id": 7
+        }
+      ],
+      "reason": "included_as_equivalent_or_alternative_with_existing_ids"
+    },
+    {
+      "master_honor": "Maestría en Zoología",
+      "label": "Odonatos, y/o avanzado",
+      "honor_ids": [
+        544,
+        545
+      ],
+      "matched_honors": [
+        {
+          "honor_id": 544,
+          "name": "Odonatos",
+          "honors_category_id": 7
+        },
+        {
+          "honor_id": 545,
+          "name": "Odonatos - Avanzado",
+          "honors_category_id": 7
+        }
+      ],
+      "reason": "included_as_equivalent_or_alternative_with_existing_ids"
+    },
+    {
+      "master_honor": "Maestría en Zoología",
+      "label": "Aves de jaula O Loros y cacatúas",
+      "honor_ids": [
+        464,
+        528
+      ],
+      "matched_honors": [
+        {
+          "honor_id": 464,
+          "name": "Aves de Jaula",
+          "honors_category_id": 7
+        },
+        {
+          "honor_id": 528,
+          "name": "Loros y Cacatúas",
+          "honors_category_id": 7
+        }
+      ],
+      "reason": "included_as_equivalent_or_alternative_with_existing_ids"
+    },
+    {
+      "master_honor": "Maestría en Zoología",
+      "label": "Reptiles, y/o avanzado",
+      "honor_ids": [
+        563,
+        564
+      ],
+      "matched_honors": [
+        {
+          "honor_id": 563,
+          "name": "Reptiles",
+          "honors_category_id": 7
+        },
+        {
+          "honor_id": 564,
+          "name": "Reptiles - Avanzado",
+          "honors_category_id": 7
+        }
+      ],
+      "reason": "included_as_equivalent_or_alternative_with_existing_ids"
+    }
+  ],
+  "dry_run": {
+    "status": "passed",
+    "checksum": "sha256:653ddbf00239b48de7a1c706feaf79b9ac1f148ca4563635268b9f0b02b2350c",
+    "masterHonorCount": 17,
+    "groupCount": 26,
+    "optionCount": 205,
+    "equivalentHonorCount": 243,
+    "selectedDivisionCount": 0,
+    "mode": "dry-run",
+    "createCount": 0,
+    "updateCount": 17,
+    "affectedMasterHonorIds": [
+      2,
+      3,
+      1,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18
+    ],
+    "note": "Validated against configured Neon database in dry-run mode; no data was written."
+  },
+  "apply_result": {
+    "status": "applied",
+    "checksum": "sha256:653ddbf00239b48de7a1c706feaf79b9ac1f148ca4563635268b9f0b02b2350c",
+    "masterHonorCount": 17,
+    "groupCount": 26,
+    "optionCount": 205,
+    "equivalentHonorCount": 243,
+    "selectedDivisionCount": 0,
+    "mode": "apply",
+    "createCount": 0,
+    "updateCount": 17,
+    "affectedMasterHonorIds": [
+      2,
+      3,
+      1,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18
+    ],
+    "verification": {
+      "group_count": 26,
+      "option_count": 205,
+      "equivalent_honor_count": 243
+    },
+    "note": "Applied against configured Neon database. User master honor recalculation was intentionally not run."
+  },
+  "recalculation_result": {
+    "status": "applied",
+    "masterHonorCount": 17,
+    "uniqueAffectedUsers": 1,
+    "evaluatedPairs": 1,
+    "failedPairs": 0,
+    "transitionCounts": {
+      "NONE": 1
+    },
+    "affectedByMasterHonor": {
+      "3": 1
+    },
+    "deltas": {
+      "users_master_honors": 0,
+      "history": 0,
+      "notifications": 0
+    },
+    "verification": {
+      "users_master_honors_active_rows_for_affected_ids": 0,
+      "evaluation_history_count_for_affected_ids": 0,
+      "master_honor_notification_logs": 0
+    },
+    "note": "Recalculation used the real MasterHonorsEvaluatorService. No users qualified or changed status, so no history rows or notifications were created."
+  }
+}

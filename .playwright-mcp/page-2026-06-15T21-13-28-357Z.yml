@@ -1,0 +1,339 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - link "Ir al contenido principal" [ref=e3] [cursor=pointer]:
+      - /url: "#main"
+    - generic [ref=e6]:
+      - list [ref=e8]:
+        - listitem [ref=e9]:
+          - link "SACDIA SACDIA Panel Administrativo" [ref=e10] [cursor=pointer]:
+            - /url: /dashboard
+            - img "SACDIA" [ref=e12]
+            - generic [ref=e13]:
+              - generic [ref=e14]: SACDIA
+              - generic [ref=e15]: Panel Administrativo
+      - generic [ref=e16]:
+        - list [ref=e18]:
+          - listitem [ref=e19]:
+            - link "Dashboard" [ref=e20] [cursor=pointer]:
+              - /url: /dashboard
+              - img [ref=e21]
+              - generic "Dashboard" [ref=e26]
+          - listitem [ref=e27]:
+            - link "Usuarios" [ref=e28] [cursor=pointer]:
+              - /url: /dashboard/users
+              - img [ref=e29]
+              - generic "Usuarios" [ref=e34]
+        - generic [ref=e35]:
+          - generic [ref=e36]: Catálogos
+          - list [ref=e37]:
+            - listitem [ref=e38]:
+              - button "Catálogos" [ref=e39]:
+                - img [ref=e40]
+                - generic "Catálogos" [ref=e42]
+                - img [ref=e43]
+            - listitem [ref=e45]:
+              - button "Recursos" [ref=e46]:
+                - img [ref=e47]
+                - generic "Recursos" [ref=e50]
+                - img [ref=e51]
+        - generic [ref=e53]:
+          - generic [ref=e54]: Gestión de clubes
+          - list [ref=e55]:
+            - listitem [ref=e56]:
+              - link "Clubes" [ref=e57] [cursor=pointer]:
+                - /url: /dashboard/clubs
+                - img [ref=e58]
+                - generic "Clubes" [ref=e62]
+            - listitem [ref=e63]:
+              - button "Camporees" [ref=e64]:
+                - img [ref=e65]
+                - generic "Camporees" [ref=e69]
+                - img [ref=e70]
+            - listitem [ref=e72]:
+              - link "Clases" [ref=e73] [cursor=pointer]:
+                - /url: /dashboard/classes
+                - img [ref=e74]
+                - generic "Clases" [ref=e77]
+            - listitem [ref=e78]:
+              - link "Inscripciones" [ref=e79] [cursor=pointer]:
+                - /url: /dashboard/enrollments
+                - img [ref=e80]
+                - generic "Inscripciones" [ref=e83]
+            - listitem [ref=e84]:
+              - link "Especialidades" [ref=e85] [cursor=pointer]:
+                - /url: /dashboard/honors
+                - img [ref=e86]
+                - generic "Especialidades" [ref=e89]
+            - listitem [ref=e90]:
+              - link "Logros" [ref=e91] [cursor=pointer]:
+                - /url: /dashboard/achievements
+                - img [ref=e92]
+                - generic "Logros" [ref=e98]
+            - listitem [ref=e99]:
+              - link "Actividades" [ref=e100] [cursor=pointer]:
+                - /url: /dashboard/activities
+                - img [ref=e101]
+                - generic "Actividades" [ref=e103]
+            - listitem [ref=e104]:
+              - link "Finanzas" [ref=e105] [cursor=pointer]:
+                - /url: /dashboard/finances
+                - img [ref=e106]
+                - generic "Finanzas" [ref=e108]
+            - listitem [ref=e109]:
+              - link "Inventario" [ref=e110] [cursor=pointer]:
+                - /url: /dashboard/inventory
+                - img [ref=e111]
+                - generic "Inventario" [ref=e115]
+            - listitem [ref=e116]:
+              - link "Certificaciones" [ref=e117] [cursor=pointer]:
+                - /url: /dashboard/certifications
+                - img [ref=e118]
+                - generic "Certificaciones" [ref=e121]
+            - listitem [ref=e122]:
+              - button "Seguros" [ref=e123]:
+                - img [ref=e124]
+                - generic "Seguros" [ref=e126]
+                - img [ref=e127]
+        - generic [ref=e129]:
+          - generic [ref=e130]: Materiales
+          - list [ref=e131]:
+            - listitem [ref=e132]:
+              - link "Bandeja" [ref=e133] [cursor=pointer]:
+                - /url: /dashboard/materials/inbox
+                - img [ref=e134]
+                - generic "Bandeja" [ref=e137]
+            - listitem [ref=e138]:
+              - link "Comprobantes" [ref=e139] [cursor=pointer]:
+                - /url: /dashboard/materials/receipts
+                - img [ref=e140]
+                - generic "Comprobantes" [ref=e143]
+            - listitem [ref=e144]:
+              - link "Inventario" [ref=e145] [cursor=pointer]:
+                - /url: /dashboard/materials/inventory
+                - img [ref=e146]
+                - generic "Inventario" [ref=e150]
+            - listitem [ref=e151]:
+              - link "Categorías" [ref=e152] [cursor=pointer]:
+                - /url: /dashboard/materials/categories
+                - img [ref=e153]
+                - generic "Categorías" [ref=e156]
+            - listitem [ref=e157]:
+              - link "Configuración" [ref=e158] [cursor=pointer]:
+                - /url: /dashboard/materials/config
+                - img [ref=e159]
+                - generic "Configuración" [ref=e162]
+        - generic [ref=e163]:
+          - generic [ref=e164]: Operaciones
+          - list [ref=e165]:
+            - listitem [ref=e166]:
+              - link "Validación" [ref=e167] [cursor=pointer]:
+                - /url: /dashboard/validation
+                - img [ref=e168]
+                - generic "Validación" [ref=e172]
+            - listitem [ref=e173]:
+              - link "Revisión de evidencias de usuarios" [ref=e174] [cursor=pointer]:
+                - /url: /dashboard/evidence-review
+                - img [ref=e175]
+                - generic "Revisión de evidencias de usuarios" [ref=e180]
+            - listitem [ref=e181]:
+              - link "Cargas por certificado" [ref=e182] [cursor=pointer]:
+                - /url: /dashboard/certificate-bulk-imports
+                - img [ref=e183]
+                - generic "Cargas por certificado" [ref=e186]
+            - listitem [ref=e187]:
+              - button "Investidura" [expanded] [ref=e188]:
+                - img [ref=e189]
+                - generic "Investidura" [ref=e191]
+                - img [ref=e192]
+              - list [ref=e195]:
+                - listitem [ref=e196]:
+                  - link "Pendientes" [ref=e197] [cursor=pointer]:
+                    - /url: /dashboard/investiture
+                    - generic "Pendientes" [ref=e198]
+                - listitem [ref=e199]:
+                  - link "Pipeline" [ref=e200] [cursor=pointer]:
+                    - /url: /dashboard/investiture/pipeline
+                    - generic "Pipeline" [ref=e201]
+                - listitem [ref=e202]:
+                  - link "Configuración" [ref=e203] [cursor=pointer]:
+                    - /url: /dashboard/investiture/config
+                    - generic "Configuración" [ref=e204]
+            - listitem [ref=e205]:
+              - link "Carpetas Anuales de Evidencias" [ref=e206] [cursor=pointer]:
+                - /url: /dashboard/folders
+                - img [ref=e207]
+                - generic "Carpetas Anuales de Evidencias" [ref=e209]
+            - listitem [ref=e210]:
+              - button "Carpeta Anual de Evidencias" [ref=e211]:
+                - img [ref=e212]
+                - generic "Carpeta Anual de Evidencias" [ref=e215]
+                - img [ref=e216]
+            - listitem [ref=e218]:
+              - link "Cierre de año" [ref=e219] [cursor=pointer]:
+                - /url: /dashboard/year-end
+                - img [ref=e220]
+                - generic "Cierre de año" [ref=e224]
+        - generic [ref=e225]:
+          - generic [ref=e226]: Rankings y análisis
+          - list [ref=e227]:
+            - listitem [ref=e228]:
+              - link "SLA" [ref=e229] [cursor=pointer]:
+                - /url: /dashboard/sla
+                - img [ref=e230]
+                - generic "SLA" [ref=e232]
+            - listitem [ref=e233]:
+              - button "Configuración de pesos" [ref=e234]:
+                - img [ref=e235]
+                - generic "Configuración de pesos" [ref=e236]
+                - img [ref=e237]
+        - generic [ref=e239]:
+          - generic [ref=e240]: Comunicaciones
+          - list [ref=e241]:
+            - listitem [ref=e242]:
+              - button "Notificaciones" [ref=e243]:
+                - img [ref=e244]
+                - generic "Notificaciones" [ref=e247]
+                - img [ref=e248]
+        - generic [ref=e250]:
+          - generic [ref=e251]: Solicitudes y reportes
+          - list [ref=e252]:
+            - listitem [ref=e253]:
+              - button "Solicitudes" [ref=e254]:
+                - img [ref=e255]
+                - generic "Solicitudes" [ref=e258]
+                - img [ref=e259]
+            - listitem [ref=e261]:
+              - button "Reportes" [ref=e262]:
+                - img [ref=e263]
+                - generic "Reportes" [ref=e266]
+                - img [ref=e267]
+            - listitem [ref=e269]:
+              - link "Reportes de soporte" [ref=e270] [cursor=pointer]:
+                - /url: /dashboard/support
+                - img [ref=e271]
+                - generic "Reportes de soporte" [ref=e274]
+            - listitem [ref=e275]:
+              - link "Miembro del mes" [ref=e276] [cursor=pointer]:
+                - /url: /dashboard/member-of-month
+                - img [ref=e277]
+                - generic "Miembro del mes" [ref=e283]
+        - generic [ref=e284]:
+          - generic [ref=e285]: Administración
+          - list [ref=e286]:
+            - listitem [ref=e287]:
+              - button "Roles y permisos" [ref=e288]:
+                - img [ref=e289]
+                - generic "Roles y permisos" [ref=e291]
+                - img [ref=e292]
+            - listitem [ref=e294]:
+              - button "Configuración" [ref=e295]:
+                - img [ref=e296]
+                - generic "Configuración" [ref=e299]
+                - img [ref=e300]
+            - listitem [ref=e302]:
+              - link "Jobs y colas" [ref=e303] [cursor=pointer]:
+                - /url: /dashboard/system/jobs
+                - img [ref=e304]
+                - generic "Jobs y colas" [ref=e306]
+      - list [ref=e308]:
+        - listitem [ref=e309]:
+          - button "A Admin admin@sacdia.com" [ref=e310]:
+            - generic [ref=e312]: A
+            - generic [ref=e313]:
+              - generic [ref=e314]: Admin
+              - generic [ref=e315]: admin@sacdia.com
+    - main [ref=e316]:
+      - generic [ref=e317]:
+        - heading "Paleta de comandos" [level=2] [ref=e318]
+        - paragraph [ref=e319]: Buscá y navegá a cualquier sección del admin
+      - generic [ref=e320]:
+        - button "Alternar barra lateral" [ref=e321]:
+          - img
+          - generic [ref=e322]: Alternar barra lateral
+        - navigation "breadcrumb" [ref=e325]:
+          - list [ref=e326]:
+            - listitem [ref=e327]:
+              - link "Dashboard" [ref=e328] [cursor=pointer]:
+                - /url: /dashboard
+            - listitem [ref=e329]:
+              - img [ref=e330]
+            - listitem [ref=e332]:
+              - link "investiture" [disabled] [ref=e333]
+        - generic [ref=e334]:
+          - button "ACV 2025-2026" [ref=e335]:
+            - img
+            - generic [ref=e336]: ACV
+            - img
+            - generic [ref=e338]: 2025-2026
+            - img
+          - button "Búsqueda global (⌘K)" [ref=e339]:
+            - img
+            - generic [ref=e340]: ⌘K
+          - button "Cambiar a modo claro" [ref=e341]:
+            - img
+      - generic [ref=e342]:
+        - heading "Búsqueda global" [level=2] [ref=e343]
+        - paragraph [ref=e344]: Buscá páginas, catálogos y secciones del panel
+      - main [ref=e345]:
+        - generic [ref=e348]:
+          - generic [ref=e351]:
+            - heading "Investiduras" [level=1] [ref=e352]
+            - paragraph [ref=e353]: Validación y registro de investiduras de miembros de los clubes.
+          - generic [ref=e354]:
+            - generic [ref=e355]:
+              - combobox [ref=e357]:
+                - generic:
+                  - text: 2025-2026
+                  - generic: (activo)
+                - img
+              - generic [ref=e358]:
+                - paragraph [ref=e359]: 1 pendiente
+                - button "Actualizar" [ref=e360]:
+                  - img
+                  - text: Actualizar
+            - table [ref=e363]:
+              - rowgroup [ref=e364]:
+                - row "Miembro Clase / Año Club / Sección Enviado por Enviado Estado Acciones" [ref=e365]:
+                  - columnheader "Miembro" [ref=e366]
+                  - columnheader "Clase / Año" [ref=e367]
+                  - columnheader "Club / Sección" [ref=e368]
+                  - columnheader "Enviado por" [ref=e369]
+                  - columnheader "Enviado" [ref=e370]
+                  - columnheader "Estado" [ref=e371]
+                  - columnheader "Acciones" [ref=e372]
+              - rowgroup [ref=e373]:
+                - row "Abner Reyes Ramírez abner.reyes03@gmail.com Guía 2026 ACV Sección no disponible Abner Reyes Ramírez Director 15 jun 2026 Enviado Ver detalle Aprobar Rechazar" [ref=e374]:
+                  - cell "Abner Reyes Ramírez abner.reyes03@gmail.com" [ref=e375]:
+                    - generic [ref=e376]:
+                      - paragraph [ref=e377]: Abner Reyes Ramírez
+                      - paragraph [ref=e378]: abner.reyes03@gmail.com
+                  - cell "Guía 2026" [ref=e379]:
+                    - generic [ref=e380]:
+                      - paragraph [ref=e381]: Guía
+                      - paragraph [ref=e382]: "2026"
+                  - cell "ACV Sección no disponible" [ref=e383]:
+                    - generic [ref=e384]:
+                      - paragraph [ref=e385]: ACV
+                      - paragraph [ref=e386]: Sección no disponible
+                  - cell "Abner Reyes Ramírez Director" [ref=e387]:
+                    - generic [ref=e388]:
+                      - paragraph [ref=e389]: Abner Reyes Ramírez
+                      - paragraph [ref=e390]: Director
+                  - cell "15 jun 2026" [ref=e391]
+                  - cell "Enviado" [ref=e392]:
+                    - generic [ref=e393]:
+                      - img
+                      - text: Enviado
+                  - cell "Ver detalle Aprobar Rechazar" [ref=e394]:
+                    - generic [ref=e395]:
+                      - button "Ver detalle" [ref=e396]:
+                        - img
+                        - text: Ver detalle
+                      - button "Aprobar" [ref=e397]:
+                        - img
+                      - button "Rechazar" [ref=e398]:
+                        - img
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e404] [cursor=pointer]:
+    - img [ref=e405]
+  - alert [ref=e408]

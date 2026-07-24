@@ -2,13 +2,13 @@
 
 **Estado**: IMPLEMENTADO
 
-<!-- VERIFICADO contra código 2026-04-22: 8 @Cron jobs identificados en sacdia-backend/src/, ScheduleModule registrado en app.module.ts:75, timezone UTC (uno explícito, siete por default NestJS). -->
+<!-- VERIFICADO contra código 2026-05-28: jobs @Cron identificados en sacdia-backend/src/, ScheduleModule registrado en app.module.ts. La mayoría opera en UTC; monthly report reminders opera en America/Mexico_City por ser comunicación de calendario local. -->
 
 ## Descripción de dominio
 
-El backend SACDIA ejecuta 8 jobs programados que automatizan flujos institucionales recurrentes: generación de reportes mensuales, cierre financiero, cálculo de rankings anuales, evaluación de miembro del mes, recordatorios de actividades, expiración de solicitudes, cleanup de tokens/sesiones y limpieza de exportes vencidos.
+El backend SACDIA ejecuta jobs programados que automatizan flujos institucionales recurrentes: generación de reportes mensuales, recordatorios de reportes mensuales, cierre financiero, cálculo de rankings anuales, evaluación de miembro del mes, recordatorios de actividades, expiración de solicitudes, cleanup de tokens/sesiones y limpieza de exportes vencidos.
 
-Todos los jobs operan en **UTC** (ver §3), son **idempotentes por diseño** (usan locks distribuidos o verificaciones de estado previo) y siguen un patrón **fire-and-forget** desde el scheduler — fallos dentro de un job no detienen el resto del pipeline ni propagan excepciones al caller original del endpoint que disparó el flujo.
+La mayoría de los jobs operan en **UTC** (ver §3); los recordatorios de reportes mensuales operan en `America/Mexico_City` porque son mensajes de calendario local para usuarios. Son **idempotentes por diseño** (usan locks distribuidos o verificaciones de estado previo) y siguen un patrón **fire-and-forget** desde el scheduler — fallos dentro de un job no detienen el resto del pipeline ni propagan excepciones al caller original del endpoint que disparó el flujo.
 
 Varios jobs están gobernados por `system_config` o feature flags (ver §6) para habilitar/deshabilitar por ambiente sin redeploy.
 
@@ -17,7 +17,7 @@ Varios jobs están gobernados por `system_config` o feature flags (ver §6) para
 ### Infraestructura
 
 - **Módulo NestJS**: `ScheduleModule.forRoot()` registrado en `sacdia-backend/src/app.module.ts:75`.
-- **Timezone**: UTC explícito en los 8 jobs desde 2026-04-22 (opción `{ timeZone: 'UTC' }` en cada decorador `@Cron`).
+- **Timezone**: UTC explícito en los jobs operativos; excepción documentada: `monthly-reports-reminders` usa `{ timeZone: 'America/Mexico_City' }`.
 - **Locks distribuidos**: varios jobs usan lock en Redis para evitar ejecución concurrente entre múltiples instancias (ver cada job para TTL).
 - **Logging**: estructurado vía `Logger` de NestJS; fallos por entidad se loguean y continúan con el siguiente elemento del batch.
 
@@ -26,14 +26,15 @@ Varios jobs están gobernados por `system_config` o feature flags (ver §6) para
 | # | Job | Cron | Frecuencia efectiva | Módulo |
 |---|-----|------|---------------------|--------|
 | 1 | Monthly reports auto-generate | `0 23 * * *` | diario 23:00 UTC | `monthly-reports` |
-| 2 | Nightly rankings recalculation | `0 2 * * *` | diario 02:00 UTC | `annual-folders` |
-| 3 | Data export cleanup | `0 4 * * *` | diario 04:00 UTC | `data-export` |
-| 4 | Member of the month auto-evaluate | `5 0 1 * *` | día 1 del mes, 00:05 UTC | `member-of-month` |
-| 5 | Finance period closing | `0 0 1 * *` | día 1 del mes, 00:00 UTC | `finances` |
-| 6 | Activity reminders | `*/5 * * * *` | cada 5 minutos | `activities` |
-| 7 | Membership requests expiry | `0 * * * *` | cada hora en :00 | `membership-requests` |
-| 8 | Cleanup expired sessions/tokens | `EVERY_6_HOURS` (`0 */6 * * *`) | cada 6 horas | `common` |
-| 9 | Cleanup inactive FCM tokens (>90d) | `EVERY_DAY_AT_3AM` (`0 3 * * *`) | diario 03:00 UTC | `common` |
+| 2 | Monthly reports reminders | `0 9 * * *` | diario 09:00 America/Mexico_City; cadencia fija 27/1/4/5/6 | `monthly-reports` |
+| 3 | Nightly rankings recalculation | `0 2 * * *` | diario 02:00 UTC | `annual-folders` |
+| 4 | Data export cleanup | `0 4 * * *` | diario 04:00 UTC | `data-export` |
+| 5 | Member of the month auto-evaluate | `5 0 1 * *` | día 1 del mes, 00:05 UTC | `member-of-month` |
+| 6 | Finance period closing | `0 0 1 * *` | día 1 del mes, 00:00 UTC | `finances` |
+| 7 | Activity reminders | `*/5 * * * *` | cada 5 minutos | `activities` |
+| 8 | Membership requests expiry | `0 * * * *` | cada hora en :00 | `membership-requests` |
+| 9 | Cleanup expired sessions/tokens | `EVERY_6_HOURS` (`0 */6 * * *`) | cada 6 horas | `common` |
+| 10 | Cleanup inactive FCM tokens (>90d) | `EVERY_DAY_AT_3AM` (`0 3 * * *`) | diario 03:00 UTC | `common` |
 
 ## Detalle por job
 
@@ -42,14 +43,41 @@ Varios jobs están gobernados por `system_config` o feature flags (ver §6) para
 - **Archivo**: `sacdia-backend/src/monthly-reports/monthly-reports-cron.service.ts:23`
 - **Método**: `handleAutoGenerate()`
 - **Clase**: `MonthlyReportsCronService`
-- **Propósito**: Cuando la feature flag `reports.auto_generate_enabled` está activa y el día del mes actual coincide con `reports.auto_generate_day` (default 5), genera reportes mensuales del mes anterior para todos los enrollments activos.
+- **Propósito**: Cuando `reports.auto_generate_enabled` está activo, reconcilia cada enrollment con `status = 'active'` usando `start_date` y `end_date` de su `ecclesiastical_year` asociado, aunque ese año ya no conserve flag `active`; cubre desde el mes de inicio hasta el menor entre el mes de fin y el mes anterior al actual.
+- **Corte por periodo**: `reports.auto_generate_day` acepta `1..28`; si falta o es inválido usa fallback `5`, y su seed vigente es `5`. Es la única fuente del corte para generación y scoring: `23:00:00` UTC del día configurado del mes siguiente al reportado. Un periodo solo se procesa cuando ese corte ya venció.
 - **Entidades mutadas**: `monthly_reports` (getOrCreateDraft → generate), snapshots asociados.
-- **Side-effects**: logs por enrollment; procesamiento iterativo en batches.
+- **Precarga y reconciliación**: enumera los períodos vencidos y precarga sus estados en lotes de `500`. Omite cualquier reporte existente cuyo estado sea distinto de `draft`; solo procesa períodos faltantes o borradores. Si falla la precarga de un lote, esos períodos conservan el fallback individual mediante `getOrCreateDraft`.
+- **Idempotencia y concurrencia**: el lock del cron deduplica el **enqueue** entre instancias en el mismo tick. Con BullMQ se libera inmediatamente después de encolar y no protege la ejecución completa del worker. La seguridad del trabajo recae en el upsert de `getOrCreateDraft` y la transición compare-and-set de `draft` a `generated`.
+- **Datos faltantes**: el snapshot congela `0` o `[]` según el campo y `manual_data` puede permanecer `null`. La automatización nunca cambia el estado a `submitted`.
+- **Relación con scoring**: el cron no otorga el KPI por estado. `monthly_reports_timeliness` cuenta la primera fila manual creada dentro de la ventana UTC y excluye del denominador los períodos cuyo deadline todavía no vence.
+- **Side-effects**: logs por enrollment y periodo; los errores de un periodo no frenan los demás y el cron diario reintenta lo pendiente al día siguiente.
 - **Condiciones skip**:
-  - lock distribuido no adquirido (otra instancia en curso; TTL 23h);
+  - lock de deduplicación del enqueue no adquirido para ese tick;
   - `reports.auto_generate_enabled` ≠ `true`;
-  - fecha actual ≠ `reports.auto_generate_day`;
-  - reporte del enrollment ya en status distinto de `draft`.
+  - periodo sin corte vencido;
+  - reporte existente con estado distinto de `draft`.
+
+### 1.1 Monthly reports reminders
+
+- **Archivo**: `sacdia-backend/src/monthly-reports/monthly-reports-reminder-cron.service.ts`
+- **Método**: `handleReminderNotifications()`
+- **Clase**: `MonthlyReportsReminderCronService`
+- **Propósito**: Notificar a director y secretario de cada sección activa sobre la captura/cierre/disponibilidad del informe mensual.
+- **Separación de responsabilidades**: es un flujo legacy independiente del catch-up y del scoring; su calendario fijo no cambia el deadline runtime.
+- **Calendario funcional**:
+  - la cadencia 27/1/4/5/6 es fija y está alineada con el default `5`; no se recalcula al cambiar `reports.auto_generate_day` ni define el cutoff, que para generación y scoring proviene exclusivamente de esa config;
+  - día 27: registrar avances del mes actual;
+  - día 1: quedan 5 días para cerrar el informe del mes anterior;
+  - día 4: último recordatorio;
+  - día 5: registro cerrado;
+  - día 6: informe generado/disponible, solo si el informe existe en estado `generated` o `submitted`.
+- **Destinatarios**: roles de club `director`, `secretary` y `secretary-treasurer`; no incluye subdirector.
+- **Side-effects**: `NotificationsService.sendToSectionRole()` con source `monthly_reports:reminder` y categoría móvil `reminders`.
+- **Condiciones skip**:
+  - lock distribuido no adquirido;
+  - `reports.reminders_enabled` = `false`;
+  - día fuera del calendario programado;
+  - sección sin director/secretario activo o usuarios con opt-out de `reminders`.
 
 ### 2. Nightly rankings recalculation
 
@@ -138,17 +166,17 @@ Varios jobs están gobernados por `system_config` o feature flags (ver §6) para
 
 ## Política común canonizada
 
-1. **Timezone**: todos los jobs operan en UTC. La conversión a hora local es responsabilidad del cliente que presenta los datos.
-2. **Idempotencia**: cada job debe ser seguro de re-ejecutar. Los mecanismos habilitadores son lock distribuido (jobs 1, 2, 6, 7), verificación de estado previo (3, 4, 5) o `deleteMany` con condición temporal (8).
+1. **Timezone**: el job mensual de reconciliación corre a las 23:00 UTC. Los recordatorios mensuales son la excepción explícita y usan `America/Mexico_City`; cada job debe respetar el timezone configurado en su `@Cron`.
+2. **Idempotencia**: cada job debe ser seguro de re-ejecutar. En el job 1, el lock solo deduplica el enqueue y la idempotencia runtime depende de upsert/CAS; los jobs 2, 6 y 7 usan lock de ejecución. Los jobs 3, 4 y 5 verifican estado previo, y el job 8 usa `deleteMany` con condición temporal.
 3. **Fire-and-forget**: fallos dentro de un job no deben propagarse fuera del job. Los errores se loguean con contexto suficiente para diagnóstico posterior.
-4. **Batching**: jobs con alcance masivo (1, 5, 4) procesan en lotes con timeout propio. El batch siguiente se recupera en la próxima ejecución programada.
+4. **Batching**: el job 1 precarga estados en lotes de `500` y, si una precarga falla, reconcilia esos períodos individualmente. Los demás jobs masivos conservan su estrategia específica de lotes y recuperación.
 5. **Logging estructurado**: los jobs críticos (1, 2, 3, 7) emiten logs con métricas contables (procesados, omitidos, fallidos).
 
 ## Feature flags / system_config
 
 | Job | Flag o config | Default |
 |-----|---------------|---------|
-| 1. monthly-reports | `reports.auto_generate_enabled` | `false` |
+| 1. monthly-reports | `reports.auto_generate_enabled` | `true` (seed vigente) |
 | 1. monthly-reports | `reports.auto_generate_day` | `5` |
 | 7. membership-requests | `membership.pending_timeout_days` | `8` |
 | 6. activities-reminder | `activities.reminder_window_minutes` | `60` |
@@ -174,7 +202,6 @@ El resto de jobs no tiene feature flag; están siempre activos una vez `Schedule
 
 - **Sin dashboard operativo de jobs**: no hay superficie admin para ver última ejecución, tiempo de ejecución, tasa de fallo por job. Consumo actual: logs del servidor.
 - **Sin alerting automático**: fallos se loguean pero no disparan alerta inmediata.
-- **`reports.auto_generate_enabled` default false**: la generación automática de reportes mensuales está en dark launch; en producción requiere activación manual por ambiente.
 - **Cleanup de FCM tokens desactivados antiguos**: no existe job dedicado que purgue filas con `active = false` anteriores a una ventana (los tokens se desactivan pero quedan). Ver §8.
 
 ## Observabilidad admin

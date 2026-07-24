@@ -56,11 +56,12 @@ Servicio: `NotificationsService` (`sacdia-backend/src/notifications/notification
 |--------|---------|---------|-------|
 | `sendToUser(dto, sentBy, source?)` | 1 usuario | request/response | 128 |
 | `broadcast(dto, sentBy, source?)` | todos los usuarios activos | request/response | 160 |
-| `sendToClubMembers(clubSectionId, dto, sentBy, source?)` | miembros de una sección de club | request/response | 195 |
+| `sendToClubMembers(clubSectionId, dto, sentBy, source?, expectedInstanceType?)` | miembros de una sección de club | request/response | 195 |
 | `sendToSectionRole(clubSectionId, roleNames[], title, body, data?, source?)` | roles dentro de una sección | fire-and-forget | 237 |
 | `sendToGlobalRole(roleNames[], title, body, data?, localFieldId?, source?, unionId?)` | roles globales con scope | fire-and-forget | 287 |
 | `notifySafe(userId, title, body, data?, source?)` | 1 usuario, sin throw | fire-and-forget | 341 |
 | `sendSilentToSection(payload)` | silent (cache invalidation) | fire-and-forget | 372 |
+| `getAuthorizedClubTargets(callerUserId)` | target autorizado para envío club | request/response | 474 |
 
 Contrato fire-and-forget: los emisores desde otros features llaman vía `void this.notificationsService.method()` o envuelven en `setImmediate()` para no bloquear la respuesta HTTP del request original.
 
@@ -71,12 +72,13 @@ Contrato fire-and-forget: los emisores desde otros features llaman vía `void th
 Controller: `notifications.controller.ts`.
 
 ### 5.1 Emisión (admin)
-- `POST /api/v1/notifications/send` (permiso `notifications:send`);
+- `POST /api/v1/notifications/send` (permiso `notifications:send`, body `{ userId, title, body, data? }`);
 - `POST /api/v1/notifications/broadcast` (permiso `notifications:broadcast`);
-- `POST /api/v1/notifications/club/:instanceType/:instanceId` (permiso `notifications:club`, enforcement por `active_assignment`).
+- `POST /api/v1/notifications/club/:instanceType/:instanceId` (permiso `notifications:club`, enforcement por `active_assignment`; valida que `instanceType` coincida con el tipo real de la sección o responde `NOTIF_TARGET_TYPE_MISMATCH`).
+- `GET /api/v1/notifications/targets/club` (permiso `notifications:club`; devuelve `{ data: [{ clubId, clubName, sectionId, sectionName, instanceType, instanceId, label }] }` solo para `active_assignment`, ordenado por `label`).
 
 ### 5.2 Bandeja del usuario
-- `GET /api/v1/notifications/history` — historial paginado. Admins ven auditoría; usuario regular ve su bandeja.
+- `GET /api/v1/notifications/history` — historial paginado para usuario autenticado. Admins ven auditoría; usuario regular ve su bandeja.
 - `GET /api/v1/notifications/unread-count` — conteo de `notification_deliveries` con `read_at IS NULL`;
 - `PATCH /api/v1/notifications/read-all`;
 - `PATCH /api/v1/notifications/:deliveryId/read`.
@@ -87,9 +89,11 @@ Controller: `notifications.controller.ts`.
 
 ### 5.4 Tokens FCM
 Controller: `FcmTokensController` (en el mismo archivo).
-- `POST /api/v1/fcm-tokens` — registrar token al autenticarse;
+- `POST /api/v1/fcm-tokens` — registrar token legacy;
+- `POST /api/v1/users/me/fcm-tokens` — registrar token del usuario autenticado desde la app;
 - `DELETE /api/v1/fcm-tokens/by-token` — desregistrar por valor de token;
 - `DELETE /api/v1/fcm-tokens/:id` — desregistrar por id del registro;
+- `DELETE /api/v1/users/me/fcm-tokens/:tokenId` — desregistrar por id propio desde la app;
 - `GET /api/v1/fcm-tokens` — tokens activos del usuario;
 - `GET /api/v1/fcm-tokens/user/:userId` — solo owner o admin.
 
@@ -142,19 +146,20 @@ Flujo canónico para envío visible (`handleSendToUser` y hermanos):
 6. actualizar `tokens_sent` / `tokens_failed` en el log.
 
 Invariante: un usuario opted-out **no recibe push y tampoco aparece en bandeja** para esa categoría. La bandeja respeta el opt-out.
+Invariante: si Firebase/FCM no está configurado, el backend **igual debe crear log + deliveries** y omitir solo el push.
 
 ---
 
 ## 8. Ciclo de vida de tokens FCM
 
-- registro: la app llama `POST /fcm-tokens` al iniciar sesión y obtener token. Un usuario puede tener múltiples tokens activos (múltiples dispositivos).
+- registro: la app llama `POST /users/me/fcm-tokens` al iniciar sesión y obtener token. Un usuario puede tener múltiples tokens activos (múltiples dispositivos).
 - uso: cada push exitoso actualiza `last_used`.
 - desactivación automática: si FCM responde con uno de los códigos permanentes, el token se marca `active = false` (`notifications.processor.ts:102, 822-843`). Códigos permanentes canonizados:
   - `messaging/invalid-registration-token`;
   - `messaging/registration-token-not-registered`;
   - `messaging/invalid-argument`.
 - cleanup programado: `CleanupService` (`sacdia-backend/src/common/services/cleanup.service.ts:29`, `@Cron(EVERY_6_HOURS)`) purga tokens inactivos antiguos.
-- desregistro explícito: logout en la app dispara `DELETE /fcm-tokens/by-token` con el valor actual.
+- desregistro explícito: logout en la app usa `DELETE /users/me/fcm-tokens/:tokenId` cuando tiene id persistido; si no, cae a `DELETE /fcm-tokens/by-token` con el valor actual.
 
 ---
 
@@ -174,21 +179,58 @@ Autoridad: `docs/canon/runtime-resiliencia-red.md` §2.3 y §5. No duplicar pol�
 
 ## 10. Emisores canónicos del runtime
 
-Features del backend que emiten notificaciones visibles (verificado 2026-04-22):
+Features del backend que emiten notificaciones visibles (verificado 2026-06-29):
 
 | Feature | Archivo | Método(s) | Tag `source` típico |
 |---------|---------|-----------|---------------------|
 | Camporees | `sacdia-backend/src/camporees/camporees.service.ts` | `sendToGlobalRole` | `camporees:late_*` |
+| Activities | `sacdia-backend/src/activities/activities.service.ts` | `sendToClubMembers` | `activities:created` |
 | Activities reminder | `sacdia-backend/src/activities/activities-reminder.service.ts` | `sendToClubMembers` | `activities:reminder` |
 | Investiture | `sacdia-backend/src/investiture/investiture.service.ts` | `sendToGlobalRole` | `investiture:*` |
 | Requests | `sacdia-backend/src/requests/requests.service.ts` | `sendToSectionRole`, `sendToGlobalRole` | `requests:*` |
+| Membership requests | `sacdia-backend/src/membership-requests/membership-requests.service.ts` | `sendToSectionRole` | `membership_requests:new_request` |
 | Validation | `sacdia-backend/src/validation/validation.service.ts` | `sendToSectionRole` | `validation:*` |
 | Achievements | `sacdia-backend/src/achievements/achievements.processor.ts` | `notifySafe` | `achievements:*` |
+| Master honors | `sacdia-backend/src/honors/master-honors-evaluator.service.ts` | `notifySafe` | `master_honors:awarded`, `master_honors:recovered`, `master_honors:not_current` |
+| Member of month | `sacdia-backend/src/member-of-month/member-of-month.service.ts` | `notifySafe` | `units:member_of_month*` |
+| Cron alerts | `sacdia-backend/src/common/services/cron-alert.service.ts` | `notifySafe` | `system_alert:cron_failure` |
+
+Matriz de audiencia:
+
+| Escenario | Audiencia | Condición de autorización |
+|-----------|-----------|---------------------------|
+| Envío directo admin | 1 usuario por `userId` | `notifications:send` global (`admin`/`super-admin` por seed wildcard) |
+| Broadcast admin | usuarios activos | `notifications:broadcast` global (`admin`/`super-admin` por seed wildcard) |
+| Envío por club admin | miembros activos de la sección seleccionada | `notifications:club` + `active_assignment` exacto; seed lo otorga a `secretary`, `secretary-treasurer`, `deputy-director`, `director` |
+| Actividad creada/recordatorio | miembros de sección | emisión interna del backend; no depende de UI admin |
+| Validación/requests/membership/camporees/investiduras | roles o ámbitos globales/club según servicio emisor | helpers internos `sendToSectionRole`/`sendToGlobalRole` |
+| Achievements/master honors/member of month/cron alerts | usuario específico | `notifySafe`, sin throw al flujo principal |
 
 Cualquier feature nuevo que emita notificaciones debe:
 1. declarar un `source` único y trazable;
 2. usar el método de `NotificationsService` que mejor describa su alcance;
 3. no propagar excepciones del envío al flujo principal (fire-and-forget).
+
+### 10.1 Payload `master_honor_changed`
+
+El evaluador de maestrías emite una notificación visible agrupable con:
+
+```json
+{
+  "type": "master_honor_changed",
+  "transition": "awarded | recovered | not_current",
+  "master_honor_ids": "1,2",
+  "master_honor_names": "Maestría en Acuática|Maestría en Artesanía"
+}
+```
+
+Los tags `source` son:
+
+- `master_honors:awarded`;
+- `master_honors:recovered`;
+- `master_honors:not_current`.
+
+Estas fuentes se categorizan como `achievements` para preferencias de notificación porque la experiencia de usuario es de logro/banda, aunque la elegibilidad de maestrías no depende del dominio `achievements`.
 
 ---
 
@@ -199,14 +241,16 @@ Servicio: `sacdia-app/lib/core/notifications/push_notification_service.dart`.
 - registro de token al `initialize()`;
 - distinción foreground/background;
 - routing de taps contra whitelist de `RouteNames`;
-- handling tipado para `member_of_month` y `achievement_unlocked`;
-- inbox con paginación vía `notificationsInboxProvider` (Riverpod).
+- handling tipado para `member_of_month`, `achievement_unlocked` y `master_honor_changed`;
+- en foreground, `achievement_unlocked` muestra un banner flotante dedicado, refresca el estado local de logros y usa payload `{ type, achievement_id, achievement_name, tier, points }` cuando está disponible;
+- en foreground, `master_honor_changed` refresca conteo/bandeja, invalida maestrías de usuario y muestra un modal global agrupado con los nombres recibidos en `master_honor_names`;
+- inbox con paginación vía `notificationsInboxProvider` (Riverpod), supresión de errores por requests cancelados durante recarga/navegación, modal de detalle al tocar una notificación y badge de no leídas en el dashboard móvil.
 
 ### 11.2 Admin web (Next.js)
 Página: `sacdia-admin/src/app/(dashboard)/dashboard/notifications/page.tsx`.
 - `DirectNotificationForm` (1 usuario);
 - `BroadcastNotificationForm` (todos);
-- `ClubNotificationForm` (por sección).
+- `ClubNotificationForm` (por sección), con selector alimentado por `GET /api/v1/notifications/targets/club`; si no hay targets autorizados muestra estado vacío, si falla la carga muestra error específico, y en ambos casos deshabilita el envío.
 - requiere `requireAdminUser()`.
 
 ---

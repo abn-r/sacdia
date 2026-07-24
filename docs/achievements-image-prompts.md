@@ -240,7 +240,7 @@ Do NOT make it 3D, glossy, or realistic. Think flat vector engraving style.
 
 # Especialidades
 
-## 10. Primer Honor
+## 10. Primera Especialidad
 
 ```
 Design a circular badge icon in the exact style of the YouVersion Bible App achievement badges.
@@ -609,7 +609,7 @@ Cuando guardes las imágenes generadas, usá estos nombres (coinciden con el ach
 | 8 | Guía Mayor Investido | `achievement-guia-mayor-investido.png` |
 | 9 | De Aventurero a Conquistador | `achievement-de-aventurero-a-conquistador.png` |
 | 10 | De Conquistador a Guía Mayor | `achievement-de-conquistador-a-guia-mayor.png` |
-| 11 | Primer Honor | `achievement-primer-honor.png` |
+| 11 | Primera Especialidad | `achievement-primera-especialidad.png` |
 | 12 | Coleccionista | `achievement-coleccionista.png` |
 | 13 | Maestro de Especialidades | `achievement-maestro-especialidades.png` |
 | 14 | Explorador de Categorías | `achievement-explorador-categorias.png` |

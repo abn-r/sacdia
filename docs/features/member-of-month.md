@@ -4,7 +4,7 @@
 
 ## Descripcion de dominio
 
-Miembro del Mes reconoce al integrante con mayor puntaje semanal acumulado dentro de una seccion para un mes y ano determinados. El ranking se calcula sobre `weekly_record_scores` asociados a miembros activos de unidades activas de esa seccion y admite empates.
+Miembro del Mes reconoce al integrante con mayor puntaje semanal acumulado dentro de una seccion para un mes y ano determinados. El ranking se calcula sobre `weekly_record_scores` asociados a miembros activos de unidades activas de esa seccion y admite empates. Cuando existen registros con `weekly_records.unit_id`, la evaluacion usa esa unidad; los registros legacy sin unidad se usan solo como fallback para no perder historico.
 
 La feature combina consulta del ganador vigente, historial paginado, evaluacion manual protegida e evaluacion automatica por cron para el mes anterior. Tambien dispara notificaciones hacia ganadores y directores de la seccion.
 
@@ -23,7 +23,9 @@ La feature combina consulta del ganador vigente, historial paginado, evaluacion 
   - lectura por seccion requiere `mom:read`
   - supervision multi-seccion (endpoint admin/list) requiere `mom:supervise`
   - evaluacion manual requiere `mom:evaluate`, throttle de `5` requests por minuto y validacion adicional de rol director/sub-director/directora activo en la seccion
-  - la evaluacion es idempotente: borra e inserta de nuevo el periodo antes de persistir ganadores
+  - la evaluacion es idempotente: borra e inserta de nuevo el periodo antes de persistir ganadores; si la reevaluacion no encuentra scores, tambien borra ganadores previos del periodo
+  - la agregacion suma solo `weekly_record_scores.points`; columnas legacy como `attendance` y `punctuality` no participan en el total
+  - si coexisten registros legacy `unit_id = null` y registros nuevos con unidad para el mismo usuario/semana/anio, se prefiere el registro con `unit_id` para evitar doble conteo
   - el historial pagina por periodos distintos `(year, month)` y limita `limit` a `100`
 - **Cron operativo**:
   - corre el dia `1` de cada mes a las `00:05 UTC`
@@ -63,7 +65,9 @@ La feature combina consulta del ganador vigente, historial paginado, evaluacion 
 ## Decisiones de diseno
 
 - **Fuente unica de verdad: weekly scores** - no se guarda un ranking manual paralelo; el resultado se deriva de `weekly_record_scores`
+- **Unidad primero, legacy como fallback** - `weekly_records.unit_id` define la unidad real del score; `unit_id = null` solo cubre historico previo a la atribucion por unidad
 - **Persistencia idempotente por periodo** - revaluar un mes reemplaza el resultado previo del mismo periodo
+- **Sin ganadores stale** - revaluar un periodo sin puntajes deja el periodo sin ganadores persistidos
 - **Empate nativo** - la tabla permite multiples filas por periodo y seccion porque la unicidad incluye `user_id`
 - **Read model directo para clientes** - la API devuelve `members: null` si el mes actual aun no tiene evaluacion, evitando inventar un ganador vacio
 

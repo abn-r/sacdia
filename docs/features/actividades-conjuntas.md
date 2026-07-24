@@ -17,6 +17,7 @@ El concepto se implementa sobre la tabla `activity_instances` ya existente: una 
 - **Actualizacion conjunta**: `PATCH /api/v1/activities/:activityId` tambien acepta `club_section_ids` e `is_joint`. Usa patron upsert para reasociar secciones: activa instancias nuevas, desactiva las removidas, y reactiva existentes inactivas. El unique constraint `(activity_id, club_section_id)` impide usar delete+create en la misma transaccion — por eso se usa upsert.
 - **Autorizacion conjunta**: El `PermissionsGuard` verifica autorizacion contra TODAS las secciones participantes, no solo la seccion creadora. Cualquier director de una seccion participante puede editar/eliminar la actividad.
 - **Listado**: Las actividades conjuntas aparecen en el listado de cada seccion participante gracias a las instancias.
+- **Dashboard movil**: Las proximas actividades tambien se resuelven por `activity_instances.active + club_section_id`, no por el `activities.club_section_id` legacy del creador. Asi una actividad creada desde Conquistadores aparece en Guias Mayores cuando existe su instancia participante.
 
 ### App Movil
 

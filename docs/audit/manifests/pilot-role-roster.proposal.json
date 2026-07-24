@@ -1,0 +1,139 @@
+{
+  "proposal_status": "awaiting_scoped_approval",
+  "target_schema": "pilot-role-roster.schema.json",
+  "target_manifest": {
+    "schema_version": 2,
+    "scope": {
+      "ecclesiastical_year_id": 1,
+      "year": 2026,
+      "local_field_id": 4,
+      "club_id": 1
+    },
+    "assignments": {
+      "adventurers": {
+        "club_section_id": 162,
+        "director": {
+          "user_id": "104a2549-2056-4b9b-aaeb-51d8fd43191d",
+          "full_name": "Abner Reyes Ramírez",
+          "start_date": "2026-01-01",
+          "confirmed_real_person": true
+        }
+      },
+      "conquerors": {
+        "club_section_id": 2,
+        "director": {
+          "user_id": "104a2549-2056-4b9b-aaeb-51d8fd43191d",
+          "full_name": "Abner Reyes Ramírez",
+          "start_date": "2026-01-01",
+          "confirmed_real_person": true
+        },
+        "secretary": {
+          "user_id": "a0000001-0000-4000-8000-000000000003",
+          "full_name": "Ana Torres Vega",
+          "start_date": "2026-07-20",
+          "confirmed_real_person": true
+        },
+        "treasurer": {
+          "user_id": "a0000001-0000-4000-8000-000000000004",
+          "full_name": "Pedro Ramírez Soto",
+          "start_date": "2026-07-20",
+          "confirmed_real_person": true
+        }
+      },
+      "master_guides": {
+        "club_section_id": 1,
+        "director": {
+          "user_id": "a0000001-0000-4000-8000-000000000001",
+          "full_name": "Carlos Mendoza Ruiz",
+          "start_date": "2026-01-01",
+          "confirmed_real_person": true
+        },
+        "secretary": {
+          "user_id": "a0000001-0000-4000-8000-000000000003",
+          "full_name": "Ana Torres Vega",
+          "start_date": "2026-01-01",
+          "confirmed_real_person": true
+        },
+        "treasurer": {
+          "user_id": "a0000001-0000-4000-8000-000000000004",
+          "full_name": "Pedro Ramírez Soto",
+          "start_date": "2026-01-01",
+          "confirmed_real_person": true
+        }
+      }
+    },
+    "e2e_accounts": {
+      "union_reviewer": {
+        "user_id": "8de9da7b-9a92-49b3-98e2-b33adbf9edba",
+        "full_name": "Director Union Test",
+        "role": "director-union",
+        "scope_type": "union",
+        "scope_id": "20",
+        "access_panel": true,
+        "active": true,
+        "account_kind": "generic_training"
+      },
+      "local_field_reviewer": {
+        "user_id": "b2cc3df3-bcf9-43b4-9cd3-274a6f667694",
+        "full_name": "Director LF Test",
+        "role": "director-lf",
+        "scope_type": "local_field",
+        "scope_id": "4",
+        "access_panel": true,
+        "active": true,
+        "account_kind": "generic_training"
+      },
+      "club_director": {
+        "user_id": "104a2549-2056-4b9b-aaeb-51d8fd43191d",
+        "full_name": "Abner Reyes Ramírez",
+        "role": "director",
+        "scope_type": "club_section",
+        "scope_id": "2",
+        "access_panel": true,
+        "active": true,
+        "account_kind": "real_person"
+      },
+      "club_secretary": {
+        "user_id": "a0000001-0000-4000-8000-000000000003",
+        "full_name": "Ana Torres Vega",
+        "role": "secretary",
+        "scope_type": "club_section",
+        "scope_id": "2",
+        "access_panel": false,
+        "active": true,
+        "account_kind": "real_person"
+      },
+      "club_treasurer": {
+        "user_id": "a0000001-0000-4000-8000-000000000004",
+        "full_name": "Pedro Ramírez Soto",
+        "role": "treasurer",
+        "scope_type": "club_section",
+        "scope_id": "2",
+        "access_panel": false,
+        "active": true,
+        "account_kind": "real_person"
+      },
+      "member": {
+        "user_id": "e5e47a41-ceab-4f0d-b9c0-847ecff053c0",
+        "full_name": "Abril Cruz Navarro",
+        "role": "member",
+        "scope_type": "club_section",
+        "scope_id": "2",
+        "access_panel": false,
+        "active": true,
+        "account_kind": "generic_training"
+      }
+    },
+    "content_sha256": "ccc2d4ec51bc293172c14bd021447092bc4d38db2f287ffa68c8a31ccc6c1dda"
+  },
+  "required_approval": {
+    "required_roles": [
+      "director",
+      "director-lf",
+      "admin",
+      "super-admin"
+    ],
+    "suggested_user_id": "104a2549-2056-4b9b-aaeb-51d8fd43191d",
+    "suggested_name": "Abner Reyes Ramírez"
+  }
+}

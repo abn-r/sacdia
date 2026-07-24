@@ -1,0 +1,6014 @@
+{
+  "version": "2026.official-draft-source-normalization",
+  "source": "/Users/abner/.codex/attachments/0b5f2469-69ce-48de-bf5a-d1da0d50f459/pasted-text.txt",
+  "status": "matched_draft_not_importable",
+  "reason": "Matched against local legacy backup only. Category/division IDs and review-needed options must be confirmed before importer JSON.",
+  "master_honors": [
+    {
+      "name": "Maestría en Acuática",
+      "source_start_line": 1,
+      "philosophy": "Las especialidades de la Maestría en Acuática enfatizan las especialidades que involucran la recreación acuática.",
+      "notes": [
+        "Seguridad Básica en el Agua, Natación I y su nivel avanzado son cursos de natación introductorios y por eso no se incluyen en esta lista."
+      ],
+      "applicability": {
+        "scope": "ALL",
+        "division_names": [],
+        "raw": null
+      },
+      "groups": [
+        {
+          "group_type": "EXPLICIT_OPTIONS",
+          "title": null,
+          "description": null,
+          "source_rule": "Desarrollar por lo menos 7 de las siguientes especialidades:",
+          "minimum_required": 7,
+          "display_order": 0,
+          "active": true,
+          "options": [
+            {
+              "label": "Buceo",
+              "raw": "Buceo",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 5,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                22
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 22,
+                  "name": "Buceo",
+                  "honors_category_id": 9
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Buceo con escafandra, y/o avanzado",
+              "raw": "Buceo con escafandra, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 6,
+              "match_status": "needs_review",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                23,
+                24
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 23,
+                  "name": "Buceo con Escafandra",
+                  "honors_category_id": 9
+                },
+                {
+                  "honor_id": 24,
+                  "name": "Buceo con Escafandra - Avanzado",
+                  "honors_category_id": 9
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Canotaje",
+              "raw": "Canotaje",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 8,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                30
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 30,
+                  "name": "Canotaje",
+                  "honors_category_id": 9
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Clavado de trampolín",
+              "raw": "Clavado de trampolín",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 9,
+              "match_status": "matched",
+              "match_method": "alias",
+              "matched_honor_ids": [
+                36
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 36,
+                  "name": "Clavado en Trampolín",
+                  "honors_category_id": 9
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Esquí acuático",
+              "raw": "Esquí acuático",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 10,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                55
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 55,
+                  "name": "Esquí Acuático",
+                  "honors_category_id": 9
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Kayaks",
+              "raw": "Kayaks",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 11,
+              "match_status": "matched",
+              "match_method": "alias",
+              "matched_honor_ids": [
+                76
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 76,
+                  "name": "Kayak",
+                  "honors_category_id": 9
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Lancha a motor",
+              "raw": "Lancha a motor",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 12,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                77
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 77,
+                  "name": "Lancha a Motor",
+                  "honors_category_id": 9
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Natacion II",
+              "raw": "Natacion II",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 13,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                88
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 88,
+                  "name": "Natación II",
+                  "honors_category_id": 9
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Natacion III, y/o avanzado",
+              "raw": "Natacion III, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 14,
+              "match_status": "needs_review",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                89,
+                90
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 89,
+                  "name": "Natación III",
+                  "honors_category_id": 9
+                },
+                {
+                  "honor_id": 90,
+                  "name": "Natación III - Avanzado",
+                  "honors_category_id": 9
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Navegación",
+              "raw": "Navegación",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 15,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                91
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 91,
+                  "name": "Navegación",
+                  "honors_category_id": 9
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Navegación a vela",
+              "raw": "Navegación a vela",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 16,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                92
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 92,
+                  "name": "Navegación a Vela",
+                  "honors_category_id": 9
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Remo",
+              "raw": "Remo",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 17,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                108
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 108,
+                  "name": "Remo",
+                  "honors_category_id": 9
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Socorrismo",
+              "raw": "Socorrismo",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 18,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                116
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 116,
+                  "name": "Socorrismo",
+                  "honors_category_id": 9
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Surf a vela",
+              "raw": "Surf a vela",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 19,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                120
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 120,
+                  "name": "Surf a Vela",
+                  "honors_category_id": 9
+                }
+              ],
+              "suggestions": []
+            }
+          ]
+        }
+      ],
+      "normalization_warnings": [
+        "Contiene opciones con avanzado/y-o avanzado que requieren matching a honors equivalentes"
+      ],
+      "source_end_line": 21,
+      "legacy_master_honor_id": 2
+    },
+    {
+      "name": "Maestría en ADRA",
+      "source_start_line": 22,
+      "philosophy": null,
+      "notes": [],
+      "applicability": {
+        "scope": "ALL",
+        "division_names": [],
+        "raw": null
+      },
+      "groups": [
+        {
+          "group_type": "CATEGORY_COUNT",
+          "title": "ADRA",
+          "description": "Desarrollar por lo menos 6 especialidades de la categoría de ADRA y por lo menos 1 de las siguientes especialidades:",
+          "source_rule": "Desarrollar por lo menos 6 especialidades de la categoría de ADRA y por lo menos 1 de las siguientes especialidades:",
+          "minimum_required": 6,
+          "category_name": "ADRA",
+          "display_order": 0,
+          "active": true,
+          "category_match_status": "needs_db_category_match"
+        },
+        {
+          "group_type": "EXPLICIT_OPTIONS",
+          "title": null,
+          "description": null,
+          "source_rule": "Desarrollar por lo menos 6 especialidades de la categoría de ADRA y por lo menos 1 de las siguientes especialidades:",
+          "minimum_required": 1,
+          "display_order": 1,
+          "active": true,
+          "options": [
+            {
+              "label": "Herencia cultural",
+              "raw": "Herencia cultural",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 24,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                284
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 284,
+                  "name": "Herencia Cultural",
+                  "honors_category_id": 5
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Idiomas",
+              "raw": "Idiomas",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 25,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                403
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 403,
+                  "name": "Idiomas",
+                  "honors_category_id": 6
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Multiculturalidad",
+              "raw": "Multiculturalidad",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 26,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                416
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 416,
+                  "name": "Multiculturalidad",
+                  "honors_category_id": 6
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Temperancia",
+              "raw": "Temperancia",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 27,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                434
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 434,
+                  "name": "Temperancia",
+                  "honors_category_id": 6
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Testificación de menores",
+              "raw": "Testificación de menores",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 28,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                435
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 435,
+                  "name": "Testificación de Menores",
+                  "honors_category_id": 6
+                }
+              ],
+              "suggestions": []
+            }
+          ]
+        }
+      ],
+      "normalization_warnings": [],
+      "source_end_line": 30,
+      "legacy_master_honor_id": 3
+    },
+    {
+      "name": "Maestría en Actividades agrícolas",
+      "source_start_line": 31,
+      "philosophy": null,
+      "notes": [],
+      "applicability": {
+        "scope": "ALL",
+        "division_names": [],
+        "raw": null
+      },
+      "groups": [
+        {
+          "group_type": "CATEGORY_COUNT",
+          "title": "Actividades agropecuarias",
+          "description": "Desarrollar por lo menos 7 especialidades de la categoría de Actividades agropecuarias.",
+          "source_rule": "Desarrollar por lo menos 7 especialidades de la categoría de Actividades agropecuarias.",
+          "minimum_required": 7,
+          "category_name": "Actividades agropecuarias",
+          "display_order": 0,
+          "active": true,
+          "category_match_status": "needs_db_category_match"
+        }
+      ],
+      "normalization_warnings": [],
+      "source_end_line": 34,
+      "legacy_master_honor_id": 1
+    },
+    {
+      "name": "Maestría en Artesanía",
+      "source_start_line": 35,
+      "philosophy": null,
+      "notes": [],
+      "applicability": {
+        "scope": "ALL",
+        "division_names": [],
+        "raw": null
+      },
+      "groups": [
+        {
+          "group_type": "CATEGORY_COUNT",
+          "title": "Artes y actividades manuales",
+          "description": "Desarrollar por lo menos 7 especialidades de la categoría de Artes y actividades manuales.",
+          "source_rule": "Desarrollar por lo menos 7 especialidades de la categoría de Artes y actividades manuales.",
+          "minimum_required": 7,
+          "category_name": "Artes y actividades manuales",
+          "display_order": 0,
+          "active": true,
+          "category_match_status": "needs_db_category_match"
+        }
+      ],
+      "normalization_warnings": [],
+      "source_end_line": 38,
+      "legacy_master_honor_id": 4
+    },
+    {
+      "name": "Maestría en Botánica",
+      "source_start_line": 39,
+      "philosophy": null,
+      "notes": [],
+      "applicability": {
+        "scope": "SELECTED_DIVISIONS",
+        "division_names": [
+          "División Sudamericana"
+        ],
+        "raw": "Esta Maestría es específica para la División Sudamericana."
+      },
+      "groups": [
+        {
+          "group_type": "EXPLICIT_OPTIONS",
+          "title": null,
+          "description": null,
+          "source_rule": "Desarrollar por lo menos 7 de las siguientes especialidades:",
+          "minimum_required": 7,
+          "display_order": 0,
+          "active": true,
+          "options": [
+            {
+              "label": "Algas marinas",
+              "raw": "Algas marinas",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 42,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                443
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 443,
+                  "name": "Algas Marinas",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Árboles, y/o avanzado",
+              "raw": "Árboles, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 43,
+              "match_status": "needs_review",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                453,
+                454
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 453,
+                  "name": "Árboles",
+                  "honors_category_id": 7
+                },
+                {
+                  "honor_id": 454,
+                  "name": "Árboles - Avanzado",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Arbustos, y/o avanzado",
+              "raw": "Arbustos, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 44,
+              "match_status": "needs_review",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                455,
+                456
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 455,
+                  "name": "Arbustos",
+                  "honors_category_id": 7
+                },
+                {
+                  "honor_id": 456,
+                  "name": "Arbustos - Avanzado",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Briófitas",
+              "raw": "Briófitas",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 45,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                471
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 471,
+                  "name": "Briófitas",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Cactus, y/o avanzado",
+              "raw": "Cactus, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 46,
+              "match_status": "needs_review",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                473,
+                474
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 473,
+                  "name": "Cactus",
+                  "honors_category_id": 7
+                },
+                {
+                  "honor_id": 474,
+                  "name": "Cactus - Avanzado",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Citología",
+              "raw": "Citología",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 47,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                484
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 484,
+                  "name": "Citología",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Fisiología vegetal",
+              "raw": "Fisiología vegetal",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 48,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                506
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 506,
+                  "name": "Fisiología Vegetal",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Flores, y/o avanzado",
+              "raw": "Flores, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 49,
+              "match_status": "needs_review",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                507,
+                508
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 507,
+                  "name": "Flores",
+                  "honors_category_id": 7
+                },
+                {
+                  "honor_id": 508,
+                  "name": "Flores - Avanzado",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Gramíneas",
+              "raw": "Gramíneas",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 50,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                670
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 670,
+                  "name": "Gramíneas",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Helechos",
+              "raw": "Helechos",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 51,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                515
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 515,
+                  "name": "Helechos",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Hierbas",
+              "raw": "Hierbas",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 52,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                516
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 516,
+                  "name": "Hierbas",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Líquenes",
+              "raw": "Líquenes",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 53,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                524
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 524,
+                  "name": "Líquenes",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Orquídeas, y/o avanzado",
+              "raw": "Orquídeas, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 54,
+              "match_status": "needs_review",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                546,
+                547
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 546,
+                  "name": "Orquídeas",
+                  "honors_category_id": 7
+                },
+                {
+                  "honor_id": 547,
+                  "name": "Orquídeas - Avanzado",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Palmeras",
+              "raw": "Palmeras",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 55,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                548
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 548,
+                  "name": "Palmeras",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Plantas carnívoras",
+              "raw": "Plantas carnívoras",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 56,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                555
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 555,
+                  "name": "Plantas Carnívoras",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Plantas de interior",
+              "raw": "Plantas de interior",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 57,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                690
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 690,
+                  "name": "Plantas de interior",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Semillas, y/o avanzado",
+              "raw": "Semillas, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 58,
+              "match_status": "needs_review",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                567,
+                568
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 567,
+                  "name": "Semillas",
+                  "honors_category_id": 7
+                },
+                {
+                  "honor_id": 568,
+                  "name": "Semillas - Avanzado",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            }
+          ]
+        }
+      ],
+      "normalization_warnings": [
+        "Contiene opciones con avanzado/y-o avanzado que requieren matching a honors equivalentes",
+        "No existe master_honor_id legacy local exacto; puede requerir creación o confirmación de nombre"
+      ],
+      "source_end_line": 60,
+      "legacy_master_honor_id": null
+    },
+    {
+      "name": "Maestría en Ciencias naturales",
+      "source_start_line": 61,
+      "philosophy": "La Maestría en Ciencias Naturales consiste de especialidades del segundo libro de Dios, la naturaleza. Anima a los Conquistadores a explorar una gran variedad de flora y fauna.",
+      "notes": [
+        "Algunas especialidades de flora se encuentran en la lista de la Maestría en Conservación en vez de aquí por su enfoque fuerte en la conservación."
+      ],
+      "applicability": {
+        "scope": "ALL",
+        "division_names": [],
+        "raw": null
+      },
+      "groups": [
+        {
+          "group_type": "EXPLICIT_OPTIONS",
+          "title": "flora",
+          "description": null,
+          "source_rule": "Desarrollar por lo menos 4 de las siguientes especialidades (flora):",
+          "minimum_required": 4,
+          "display_order": 0,
+          "active": true,
+          "options": [
+            {
+              "label": "Árboles",
+              "raw": "Árboles",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 66,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                453
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 453,
+                  "name": "Árboles",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Arbustos",
+              "raw": "Arbustos",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 67,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                455
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 455,
+                  "name": "Arbustos",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Cactus, y/o avanzado",
+              "raw": "Cactus, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 68,
+              "match_status": "needs_review",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                473,
+                474
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 473,
+                  "name": "Cactus",
+                  "honors_category_id": 7
+                },
+                {
+                  "honor_id": 474,
+                  "name": "Cactus - Avanzado",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Cataratas",
+              "raw": "Cataratas",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 69,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                478
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 478,
+                  "name": "Cataratas",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Climatología",
+              "raw": "Climatología",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 70,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                485
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 485,
+                  "name": "Climatología",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Cosmografía",
+              "raw": "Cosmografía",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 71,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                492
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 492,
+                  "name": "Cosmografía",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Helechos",
+              "raw": "Helechos",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 72,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                515
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 515,
+                  "name": "Helechos",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Hongos",
+              "raw": "Hongos",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 73,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                518
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 518,
+                  "name": "Hongos",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Meteoritos",
+              "raw": "Meteoritos",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 74,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                535
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 535,
+                  "name": "Meteoritos",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Moluscos",
+              "raw": "Moluscos",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 75,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                538
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 538,
+                  "name": "Moluscos",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Orquídeas",
+              "raw": "Orquídeas",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 76,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                546
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 546,
+                  "name": "Orquídeas",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Plantas caseras",
+              "raw": "Plantas caseras",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 77,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                556
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 556,
+                  "name": "Plantas Caseras",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Palmeras",
+              "raw": "Palmeras",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 78,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                548
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 548,
+                  "name": "Palmeras",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Semillas, y/o avanzado",
+              "raw": "Semillas, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 79,
+              "match_status": "needs_review",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                567,
+                568
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 567,
+                  "name": "Semillas",
+                  "honors_category_id": 7
+                },
+                {
+                  "honor_id": 568,
+                  "name": "Semillas - Avanzado",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Sol de medianoche",
+              "raw": "Sol de medianoche",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 80,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                570
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 570,
+                  "name": "Sol de Medianoche",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Zarzos",
+              "raw": "Zarzos",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 81,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                575
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 575,
+                  "name": "Zarzos",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            }
+          ]
+        },
+        {
+          "group_type": "EXPLICIT_OPTIONS",
+          "title": "fauna",
+          "description": null,
+          "source_rule": "y por lo menos 2 de las siguientes especialidades (fauna):",
+          "minimum_required": 2,
+          "display_order": 1,
+          "active": true,
+          "options": [
+            {
+              "label": "Antílopes",
+              "raw": "Antílopes",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 83,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                450
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 450,
+                  "name": "Antílopes",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Anfibios",
+              "raw": "Anfibios",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 84,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                444
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 444,
+                  "name": "Anfibios",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Arácnidos",
+              "raw": "Arácnidos",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 85,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                452
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 452,
+                  "name": "Arácnidos",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Aves, y/o avanzado",
+              "raw": "Aves, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 86,
+              "match_status": "needs_review",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                460,
+                461
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 460,
+                  "name": "Aves",
+                  "honors_category_id": 7
+                },
+                {
+                  "honor_id": 461,
+                  "name": "Aves - Avanzado",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Dinosaurios",
+              "raw": "Dinosaurios",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 87,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                496
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 496,
+                  "name": "Dinosaurios",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Insectos, y/o avanzado",
+              "raw": "Insectos, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 88,
+              "match_status": "needs_review",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                521,
+                522
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 521,
+                  "name": "Insectos",
+                  "honors_category_id": 7
+                },
+                {
+                  "honor_id": 522,
+                  "name": "Insectos - Avanzado",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Lombrices",
+              "raw": "Lombrices",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 89,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                526
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 526,
+                  "name": "Lombrices",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Mariposas",
+              "raw": "Mariposas",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 90,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                533
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 533,
+                  "name": "Mariposas",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Marsupiales",
+              "raw": "Marsupiales",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 91,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                534
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 534,
+                  "name": "Marsupiales",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Murciélagos, y/o avanzado",
+              "raw": "Murciélagos, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 92,
+              "match_status": "needs_review",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                542,
+                543
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 542,
+                  "name": "Murciélagos",
+                  "honors_category_id": 7
+                },
+                {
+                  "honor_id": 543,
+                  "name": "Murciélagos - Avanzado",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Odonatos, y/o avanzado",
+              "raw": "Odonatos, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 93,
+              "match_status": "needs_review",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                544,
+                545
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 544,
+                  "name": "Odonatos",
+                  "honors_category_id": 7
+                },
+                {
+                  "honor_id": 545,
+                  "name": "Odonatos - Avanzado",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Tiburones",
+              "raw": "Tiburones",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 94,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                573
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 573,
+                  "name": "Tiburones",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Vida microscópica",
+              "raw": "Vida microscópica",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 95,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                574
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 574,
+                  "name": "Vida Microscópica",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            }
+          ]
+        },
+        {
+          "group_type": "EXPLICIT_OPTIONS",
+          "title": "fauna doméstica",
+          "description": null,
+          "source_rule": "y por lo menos 1 de las siguientes especialidades (fauna doméstica):",
+          "minimum_required": 1,
+          "display_order": 2,
+          "active": true,
+          "options": [
+            {
+              "label": "Aves de jaula",
+              "raw": "Aves de jaula",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 97,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                464
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 464,
+                  "name": "Aves de Jaula",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Aves domésticas",
+              "raw": "Aves domésticas",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 98,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                463
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 463,
+                  "name": "Aves Domésticas",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Gatos",
+              "raw": "Gatos",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 99,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                510
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 510,
+                  "name": "Gatos",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Mamíferos pequeños como mascotas",
+              "raw": "Mamíferos pequeños como mascotas",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 100,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                532
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 532,
+                  "name": "Mamíferos Pequeños Como Mascotas",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Peces",
+              "raw": "Peces",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 102,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                552
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 552,
+                  "name": "Peces",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Perros",
+              "raw": "Perros",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 103,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                554
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 554,
+                  "name": "Perros",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            }
+          ]
+        }
+      ],
+      "normalization_warnings": [
+        "Contiene opciones con avanzado/y-o avanzado que requieren matching a honors equivalentes"
+      ],
+      "source_end_line": 105,
+      "legacy_master_honor_id": 5
+    },
+    {
+      "name": "Maestría en Ciencia y tecnología",
+      "source_start_line": 106,
+      "philosophy": null,
+      "notes": [],
+      "applicability": {
+        "scope": "SELECTED_DIVISIONS",
+        "division_names": [
+          "División Sudamericana"
+        ],
+        "raw": "Esta Maestría es específica para la División Sudamericana."
+      },
+      "groups": [
+        {
+          "group_type": "EXPLICIT_OPTIONS",
+          "title": null,
+          "description": null,
+          "source_rule": "Desarrollar por lo menos 7 de las siguientes especialidades:",
+          "minimum_required": 7,
+          "display_order": 0,
+          "active": true,
+          "options": [
+            {
+              "label": "Bioquímica, y/o avanzado",
+              "raw": "Bioquímica, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 109,
+              "match_status": "needs_review",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                577,
+                578
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 577,
+                  "name": "Bioquímica",
+                  "honors_category_id": 3
+                },
+                {
+                  "honor_id": 578,
+                  "name": "Bioquímica - Avanzado",
+                  "honors_category_id": 3
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Computación I - Básico",
+              "raw": "Computación I - Básico",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 110,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                152
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 152,
+                  "name": "Computación I - Básico",
+                  "honors_category_id": 8
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Computación II - Intermedio",
+              "raw": "Computación II - Intermedio",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 111,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                153
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 153,
+                  "name": "Computación II - Intermedio",
+                  "honors_category_id": 8
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Computación III - Regular",
+              "raw": "Computación III - Regular",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 112,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                154
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 154,
+                  "name": "Computación III - Regular",
+                  "honors_category_id": 8
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Computación IV - Avanzado",
+              "raw": "Computación IV - Avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 113,
+              "match_status": "needs_review",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                155
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 155,
+                  "name": "Computación IV - Avanzado",
+                  "honors_category_id": 8
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Computación V - Especializado",
+              "raw": "Computación V - Especializado",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 114,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                156
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 156,
+                  "name": "Computación V - Especializado",
+                  "honors_category_id": 8
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Desarrollo de software",
+              "raw": "Desarrollo de software",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 115,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                165
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 165,
+                  "name": "Desarrollo de Software",
+                  "honors_category_id": 8
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Física",
+              "raw": "Física",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 116,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                583
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 583,
+                  "name": "Física",
+                  "honors_category_id": 3
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Informática programable",
+              "raw": "Informática programable",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 117,
+              "match_status": "matched",
+              "match_method": "alias",
+              "matched_honor_ids": [
+                180
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 180,
+                  "name": "Información Programable",
+                  "honors_category_id": 8
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Internet, y/o avanzado",
+              "raw": "Internet, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 118,
+              "match_status": "needs_review",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                183,
+                184
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 183,
+                  "name": "Internet",
+                  "honors_category_id": 8
+                },
+                {
+                  "honor_id": 184,
+                  "name": "Internet - Avanzado",
+                  "honors_category_id": 8
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Química",
+              "raw": "Química",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 119,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                600
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 600,
+                  "name": "Química",
+                  "honors_category_id": 3
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Óptica",
+              "raw": "Óptica",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 120,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                593
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 593,
+                  "name": "Óptica",
+                  "honors_category_id": 3
+                }
+              ],
+              "suggestions": []
+            }
+          ]
+        }
+      ],
+      "normalization_warnings": [
+        "Contiene opciones con avanzado/y-o avanzado que requieren matching a honors equivalentes",
+        "No existe master_honor_id legacy local exacto; puede requerir creación o confirmación de nombre"
+      ],
+      "source_end_line": 122,
+      "legacy_master_honor_id": null
+    },
+    {
+      "name": "Maestría en Conservación",
+      "source_start_line": 123,
+      "philosophy": "Las especialidades de la Maestría en Conservación enfatizan flora, bioma y temas que se enfocan en el entorno.",
+      "notes": [],
+      "applicability": {
+        "scope": "ALL",
+        "division_names": [],
+        "raw": null
+      },
+      "groups": [
+        {
+          "group_type": "EXPLICIT_OPTIONS",
+          "title": null,
+          "description": null,
+          "source_rule": "Desarrollar por lo menos 7 de las siguientes especialidades:",
+          "minimum_required": 7,
+          "display_order": 0,
+          "active": true,
+          "options": [
+            {
+              "label": "Arena",
+              "raw": "Arena",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 126,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                457
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 457,
+                  "name": "Arena",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Combustibles alternativos, avanzado",
+              "raw": "Combustibles alternativos, avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 127,
+              "match_status": "needs_review",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                487,
+                488
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 487,
+                  "name": "Combustibles Alternativos",
+                  "honors_category_id": 7
+                },
+                {
+                  "honor_id": 488,
+                  "name": "Combustibles Alternativos - Avanzado",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Conservación ambiental",
+              "raw": "Conservación ambiental",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 129,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                489
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 489,
+                  "name": "Conservación Ambiental",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Dunas, y/o avanzado",
+              "raw": "Dunas, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 130,
+              "match_status": "needs_review",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                497,
+                498
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 497,
+                  "name": "Dunas",
+                  "honors_category_id": 7
+                },
+                {
+                  "honor_id": 498,
+                  "name": "Dunas - Avanzado",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Ecología, y/o avanzado",
+              "raw": "Ecología, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 131,
+              "match_status": "needs_review",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                499,
+                500
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 499,
+                  "name": "Ecología",
+                  "honors_category_id": 7
+                },
+                {
+                  "honor_id": 500,
+                  "name": "Ecología - Avanzado",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Energía renovable",
+              "raw": "Energía renovable",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 132,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                501
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 501,
+                  "name": "Energía Renovable",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Especies en peligro de extinción",
+              "raw": "Especies en peligro de extinción",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 133,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                502
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 502,
+                  "name": "Especies en Peligro de Extinción",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Fósiles",
+              "raw": "Fósiles",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 135,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                664
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 664,
+                  "name": "Fósiles",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Geología, y/o avanzado",
+              "raw": "Geología, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 136,
+              "match_status": "needs_review",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                512,
+                513
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 512,
+                  "name": "Geología",
+                  "honors_category_id": 7
+                },
+                {
+                  "honor_id": 513,
+                  "name": "Geología - Avanzado",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Mineralogía, y/o avanzado",
+              "raw": "Mineralogía, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 137,
+              "match_status": "needs_review",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                536,
+                537
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 536,
+                  "name": "Mineralogía",
+                  "honors_category_id": 7
+                },
+                {
+                  "honor_id": 537,
+                  "name": "Mineralogía - Avanzado",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Montañas",
+              "raw": "Montañas",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 138,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                541
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 541,
+                  "name": "Montañas",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Pantanos y ciénagas, y/o avanzado",
+              "raw": "Pantanos y ciénagas, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 139,
+              "match_status": "needs_review",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                550,
+                551
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 550,
+                  "name": "Pantanos y Ciénagas",
+                  "honors_category_id": 7
+                },
+                {
+                  "honor_id": 551,
+                  "name": "Pantanos y Ciénagas - Avanzado",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Reciclaje",
+              "raw": "Reciclaje",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 141,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                561
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 561,
+                  "name": "Reciclaje",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Ríos y arroyos, y/o avanzado",
+              "raw": "Ríos y arroyos, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 142,
+              "match_status": "needs_review",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                565,
+                566
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 565,
+                  "name": "Ríos y Arroyos",
+                  "honors_category_id": 7
+                },
+                {
+                  "honor_id": 566,
+                  "name": "Ríos y Arroyos - Avanzado",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Silvicultura, y/o avanzado",
+              "raw": "Silvicultura, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 144,
+              "match_status": "needs_review",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                213,
+                705
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 213,
+                  "name": "Silvicultura",
+                  "honors_category_id": 8
+                },
+                {
+                  "honor_id": 705,
+                  "name": "Silvicultura - Avanzado",
+                  "honors_category_id": 8
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Taiga, y/o avanzado",
+              "raw": "Taiga, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 145,
+              "match_status": "needs_review",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                571,
+                572
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 571,
+                  "name": "Taiga",
+                  "honors_category_id": 7
+                },
+                {
+                  "honor_id": 572,
+                  "name": "Taiga - Avanzado",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            }
+          ]
+        }
+      ],
+      "normalization_warnings": [
+        "Contiene opciones con avanzado/y-o avanzado que requieren matching a honors equivalentes"
+      ],
+      "source_end_line": 147,
+      "legacy_master_honor_id": 6
+    },
+    {
+      "name": "Maestría en Crecimiento espiritual y ministerios",
+      "source_start_line": 148,
+      "philosophy": null,
+      "notes": [],
+      "applicability": {
+        "scope": "ALL",
+        "division_names": [],
+        "raw": null
+      },
+      "groups": [
+        {
+          "group_type": "EXPLICIT_OPTIONS",
+          "title": "Crecimiento espiritual",
+          "description": null,
+          "source_rule": "Desarrollar 3 de las siguientes especialidades (Crecimiento espiritual):",
+          "minimum_required": 3,
+          "display_order": 0,
+          "active": true,
+          "options": [
+            {
+              "label": "Aventura para Cristo , y/o avanzado",
+              "raw": "Aventura para Cristo , y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 150,
+              "match_status": "needs_review",
+              "match_method": "alias",
+              "matched_honor_ids": [
+                646,
+                647
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 646,
+                  "name": "Aventurero para Cristo",
+                  "honors_category_id": 6
+                },
+                {
+                  "honor_id": 647,
+                  "name": "Aventurero para Cristo - Avanzado",
+                  "honors_category_id": 6
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Biblia viva",
+              "raw": "Biblia viva",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 152,
+              "match_status": "unmatched",
+              "match_method": "unmatched",
+              "matched_honor_ids": [],
+              "matched_honors": [],
+              "suggestions": []
+            },
+            {
+              "label": "Marcado de la Biblia, y/o avanzado",
+              "raw": "Marcado de la Biblia, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 153,
+              "match_status": "needs_review",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                409,
+                410
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 409,
+                  "name": "Marcado de la Biblia",
+                  "honors_category_id": 6
+                },
+                {
+                  "honor_id": 410,
+                  "name": "Marcado de la Biblia - Avanzado",
+                  "honors_category_id": 6
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Mayordomía",
+              "raw": "Mayordomía",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 155,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                411
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 411,
+                  "name": "Mayordomía",
+                  "honors_category_id": 6
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Oración",
+              "raw": "Oración",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 156,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                418
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 418,
+                  "name": "Oración",
+                  "honors_category_id": 6
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Pacificadores, y/o avanzado",
+              "raw": "Pacificadores, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 157,
+              "match_status": "needs_review",
+              "match_method": "alias",
+              "matched_honor_ids": [
+                420,
+                421
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 420,
+                  "name": "Pacificador",
+                  "honors_category_id": 6
+                },
+                {
+                  "honor_id": 421,
+                  "name": "Pacificador - Avanzado",
+                  "honors_category_id": 6
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Santuario",
+              "raw": "Santuario",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 158,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                432
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 432,
+                  "name": "Santuario",
+                  "honors_category_id": 6
+                }
+              ],
+              "suggestions": []
+            }
+          ]
+        },
+        {
+          "group_type": "EXPLICIT_OPTIONS",
+          "title": "Ministerios",
+          "description": null,
+          "source_rule": "Desarrollar 4 de las siguientes especialidades (Ministerios):",
+          "minimum_required": 4,
+          "display_order": 1,
+          "active": true,
+          "options": [
+            {
+              "label": "Arte cristiano de predicar, y/o avanzado",
+              "raw": "Arte cristiano de predicar, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 160,
+              "match_status": "needs_review",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                369,
+                370
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 369,
+                  "name": "Arte Cristiano de Predicar",
+                  "honors_category_id": 6
+                },
+                {
+                  "honor_id": 370,
+                  "name": "Arte Cristiano de Predicar - Avanzado",
+                  "honors_category_id": 6
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Arte cristiano de vender",
+              "raw": "Arte cristiano de vender",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 162,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                144
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 144,
+                  "name": "Arte Cristiano de Vender",
+                  "honors_category_id": 8
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Colportaje",
+              "raw": "Colportaje",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 163,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                383
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 383,
+                  "name": "Colportaje",
+                  "honors_category_id": 6
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Drama cristiano",
+              "raw": "Drama cristiano",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 164,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                389
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 389,
+                  "name": "Drama Cristiano",
+                  "honors_category_id": 6
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Enfermería casera",
+              "raw": "Enfermería casera",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 165,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                582
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 582,
+                  "name": "Enfermería Casera",
+                  "honors_category_id": 3
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Enseñanza",
+              "raw": "Enseñanza",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 166,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                173
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 173,
+                  "name": "Enseñanza",
+                  "honors_category_id": 8
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Evangelismo bíblico",
+              "raw": "Evangelismo bíblico",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 167,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                174
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 174,
+                  "name": "Evangelismo Bíblico",
+                  "honors_category_id": 8
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Evangelismo personal",
+              "raw": "Evangelismo personal",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 168,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                394
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 394,
+                  "name": "Evangelismo Personal",
+                  "honors_category_id": 6
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Lenguaje gestual, y/o avanzado",
+              "raw": "Lenguaje gestual, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 169,
+              "match_status": "needs_review",
+              "match_method": "alias",
+              "matched_honor_ids": [
+                407,
+                408
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 407,
+                  "name": "Lenguaje de Signos",
+                  "honors_category_id": 6
+                },
+                {
+                  "honor_id": 408,
+                  "name": "Lenguaje de Signos - Avanzado",
+                  "honors_category_id": 6
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Narración de historias cristianas",
+              "raw": "Narración de historias cristianas",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 171,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                417
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 417,
+                  "name": "Narración de Historias Cristianas",
+                  "honors_category_id": 6
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Predícalo, y/o avanzado",
+              "raw": "Predícalo, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 173,
+              "match_status": "needs_review",
+              "match_method": "alias",
+              "matched_honor_ids": [
+                425,
+                426
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 425,
+                  "name": "Predicar",
+                  "honors_category_id": 6
+                },
+                {
+                  "honor_id": 426,
+                  "name": "Predicar - Avanzado",
+                  "honors_category_id": 6
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Testificación de menores",
+              "raw": "Testificación de menores",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 174,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                435
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 435,
+                  "name": "Testificación de Menores",
+                  "honors_category_id": 6
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Títeres",
+              "raw": "Títeres",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 175,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                436
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 436,
+                  "name": "Títeres",
+                  "honors_category_id": 6
+                }
+              ],
+              "suggestions": []
+            }
+          ]
+        }
+      ],
+      "normalization_warnings": [
+        "Contiene opciones con avanzado/y-o avanzado que requieren matching a honors equivalentes"
+      ],
+      "source_end_line": 177,
+      "legacy_master_honor_id": 7
+    },
+    {
+      "name": "Maestría en Deportes",
+      "source_start_line": 178,
+      "philosophy": "La Maestría en Deportes consiste de especialidades que involucran un premio o una situación de ganar vs. perder.",
+      "notes": [],
+      "applicability": {
+        "scope": "ALL",
+        "division_names": [],
+        "raw": null
+      },
+      "groups": [
+        {
+          "group_type": "EXPLICIT_OPTIONS",
+          "title": null,
+          "description": null,
+          "source_rule": "Desarrollar por lo menos 7 de las siguientes especialidades:",
+          "minimum_required": 7,
+          "display_order": 0,
+          "active": true,
+          "options": [
+            {
+              "label": "Baloncesto",
+              "raw": "Baloncesto",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 181,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                19
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 19,
+                  "name": "Baloncesto",
+                  "honors_category_id": 9
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Ciclismo, y/o avanzado",
+              "raw": "Ciclismo, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 182,
+              "match_status": "needs_review",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                33,
+                34
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 33,
+                  "name": "Ciclismo",
+                  "honors_category_id": 9
+                },
+                {
+                  "honor_id": 34,
+                  "name": "Ciclismo - Avanzado",
+                  "honors_category_id": 9
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Equitación, avanzado",
+              "raw": "Equitación, avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 183,
+              "match_status": "needs_review",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                49,
+                50
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 49,
+                  "name": "Equitación",
+                  "honors_category_id": 9
+                },
+                {
+                  "honor_id": 50,
+                  "name": "Equitación - Avanzado",
+                  "honors_category_id": 9
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Esquí alpino",
+              "raw": "Esquí alpino",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 184,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                57
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 57,
+                  "name": "Esquí Alpino",
+                  "honors_category_id": 9
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Fútbol",
+              "raw": "Fútbol",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 185,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                63
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 63,
+                  "name": "Fútbol",
+                  "honors_category_id": 9
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Fútbol bandera",
+              "raw": "Fútbol bandera",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 186,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                64
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 64,
+                  "name": "Fútbol bandera",
+                  "honors_category_id": 9
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Gimnasia",
+              "raw": "Gimnasia",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 187,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                71
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 71,
+                  "name": "Gimnasia",
+                  "honors_category_id": 9
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Golf",
+              "raw": "Golf",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 188,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                73
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 73,
+                  "name": "Golf",
+                  "honors_category_id": 9
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Pista y campo",
+              "raw": "Pista y campo",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 189,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                102
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 102,
+                  "name": "Pista y Campo",
+                  "honors_category_id": 9
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Softbol",
+              "raw": "Softbol",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 190,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                118
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 118,
+                  "name": "Softbol",
+                  "honors_category_id": 9
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Tenis",
+              "raw": "Tenis",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 191,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                126
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 126,
+                  "name": "Tenis",
+                  "honors_category_id": 9
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Tiro con arco",
+              "raw": "Tiro con arco",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 192,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                129
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 129,
+                  "name": "Tiro con Arco",
+                  "honors_category_id": 9
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Triatlón",
+              "raw": "Triatlón",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 193,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                132
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 132,
+                  "name": "Triatlón",
+                  "honors_category_id": 9
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Ultimate disc",
+              "raw": "Ultimate disc",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 194,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                135
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 135,
+                  "name": "Ultimate Disc",
+                  "honors_category_id": 9
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Voleibol",
+              "raw": "Voleibol",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 195,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                140
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 140,
+                  "name": "Voleibol",
+                  "honors_category_id": 9
+                }
+              ],
+              "suggestions": []
+            }
+          ]
+        }
+      ],
+      "normalization_warnings": [
+        "Contiene opciones con avanzado/y-o avanzado que requieren matching a honors equivalentes"
+      ],
+      "source_end_line": 197,
+      "legacy_master_honor_id": 8
+    },
+    {
+      "name": "Maestría en Familia, orígenes y herencia",
+      "source_start_line": 198,
+      "philosophy": null,
+      "notes": [
+        "Cada división puede sustituir una especialidad específica que se dirige a la herencia específica dentro de su división (por ejemplo, Folclore Maorí para la División del Pacífico Sur o Herencia Adventista Afroamericana dentro para la División Norteamericana)"
+      ],
+      "applicability": {
+        "scope": "ALL",
+        "division_names": [],
+        "raw": null
+      },
+      "groups": [
+        {
+          "group_type": "EXPLICIT_OPTIONS",
+          "title": null,
+          "description": null,
+          "source_rule": "Desarrollar las 2 siguientes especialidades:",
+          "minimum_required": 2,
+          "display_order": 0,
+          "active": true,
+          "options": [
+            {
+              "label": "Herencia de los pioneros adventistas",
+              "raw": "Herencia de los pioneros adventistas",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 201,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                400
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 400,
+                  "name": "Herencia de los Pioneros Adventistas",
+                  "honors_category_id": 6
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Mensajera de Dios",
+              "raw": "Mensajera de Dios",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 203,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                413
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 413,
+                  "name": "Mensajera de Dios",
+                  "honors_category_id": 6
+                }
+              ],
+              "suggestions": []
+            }
+          ]
+        },
+        {
+          "group_type": "EXPLICIT_OPTIONS",
+          "title": null,
+          "description": null,
+          "source_rule": "Desarrollar por lo menos 5 de las siguientes especialidades:",
+          "minimum_required": 5,
+          "display_order": 1,
+          "active": true,
+          "options": [
+            {
+              "label": "Arqueología bíblica",
+              "raw": "Arqueología bíblica",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 205,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                368
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 368,
+                  "name": "Arqueología bíblica",
+                  "honors_category_id": 6
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Banderas, y/o avanzado",
+              "raw": "Banderas, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 206,
+              "match_status": "needs_review",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                375,
+                376
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 375,
+                  "name": "Banderas",
+                  "honors_category_id": 6
+                },
+                {
+                  "honor_id": 376,
+                  "name": "Banderas - Avanzado",
+                  "honors_category_id": 6
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Civismo cristiano",
+              "raw": "Civismo cristiano",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 207,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                382
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 382,
+                  "name": "Civismo Cristiano",
+                  "honors_category_id": 6
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Creacionismo, y/o avanzado",
+              "raw": "Creacionismo, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 208,
+              "match_status": "needs_review",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                384,
+                385
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 384,
+                  "name": "Creacionismo",
+                  "honors_category_id": 6
+                },
+                {
+                  "honor_id": 385,
+                  "name": "Creacionismo - Avanzado",
+                  "honors_category_id": 6
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Escatología",
+              "raw": "Escatología",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 209,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                390
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 390,
+                  "name": "Escatología",
+                  "honors_category_id": 6
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Genealogía",
+              "raw": "Genealogía",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 210,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                278
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 278,
+                  "name": "Genealogía",
+                  "honors_category_id": 5
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Idiomas",
+              "raw": "Idiomas",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 211,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                403
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 403,
+                  "name": "Idiomas",
+                  "honors_category_id": 6
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Mejoramiento comunitario",
+              "raw": "Mejoramiento comunitario",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 212,
+              "match_status": "matched",
+              "match_method": "alias",
+              "matched_honor_ids": [
+                680
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 680,
+                  "name": "Mejoramiento de la comunidad",
+                  "honors_category_id": 6
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Multiculturalidad",
+              "raw": "Multiculturalidad",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 213,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                416
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 416,
+                  "name": "Multiculturalidad",
+                  "honors_category_id": 6
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Patriotismo",
+              "raw": "Patriotismo",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 214,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                423
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 423,
+                  "name": "Patriotismo",
+                  "honors_category_id": 6
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Vida familiar",
+              "raw": "Vida familiar",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 215,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                439
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 439,
+                  "name": "Vida Familiar",
+                  "honors_category_id": 6
+                }
+              ],
+              "suggestions": []
+            }
+          ]
+        }
+      ],
+      "normalization_warnings": [
+        "Contiene opciones con avanzado/y-o avanzado que requieren matching a honors equivalentes"
+      ],
+      "source_end_line": 217,
+      "legacy_master_honor_id": 9
+    },
+    {
+      "name": "Maestría en Habilidades domésticas",
+      "source_start_line": 218,
+      "philosophy": null,
+      "notes": [],
+      "applicability": {
+        "scope": "ALL",
+        "division_names": [],
+        "raw": null
+      },
+      "groups": [
+        {
+          "group_type": "CATEGORY_COUNT",
+          "title": "Artes domésticas",
+          "description": "Desarrollar por lo menos 7 especialidades de la categoría de Artes domésticas.",
+          "source_rule": "Desarrollar por lo menos 7 especialidades de la categoría de Artes domésticas.",
+          "minimum_required": 7,
+          "category_name": "Artes domésticas",
+          "display_order": 0,
+          "active": true,
+          "category_match_status": "needs_db_category_match"
+        }
+      ],
+      "normalization_warnings": [],
+      "source_end_line": 221,
+      "legacy_master_honor_id": 10
+    },
+    {
+      "name": "Maestría en Habilidades vocacionales",
+      "source_start_line": 222,
+      "philosophy": null,
+      "notes": [],
+      "applicability": {
+        "scope": "ALL",
+        "division_names": [],
+        "raw": null
+      },
+      "groups": [
+        {
+          "group_type": "CATEGORY_COUNT",
+          "title": "Actividades vocacionales",
+          "description": "Desarrollar por lo menos 7 especialidades de la categoría de Actividades vocacionales.",
+          "source_rule": "Desarrollar por lo menos 7 especialidades de la categoría de Actividades vocacionales.",
+          "minimum_required": 7,
+          "category_name": "Actividades vocacionales",
+          "display_order": 0,
+          "active": true,
+          "category_match_status": "needs_db_category_match"
+        }
+      ],
+      "normalization_warnings": [],
+      "source_end_line": 225,
+      "legacy_master_honor_id": 11
+    },
+    {
+      "name": "Maestría del Medioambiente",
+      "source_start_line": 226,
+      "philosophy": null,
+      "notes": [],
+      "applicability": {
+        "scope": "SELECTED_DIVISIONS",
+        "division_names": [
+          "Unión Franco-Belga"
+        ],
+        "raw": "Esta Maestría es específica para la Unión Franco-Belga."
+      },
+      "groups": [
+        {
+          "group_type": "EXPLICIT_OPTIONS",
+          "title": null,
+          "description": null,
+          "source_rule": "Desarrollar por lo menos 7 de las siguientes especialidades:",
+          "minimum_required": 7,
+          "display_order": 0,
+          "active": true,
+          "options": [
+            {
+              "label": "Agricultura ecológica",
+              "raw": "Agricultura ecológica",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 229,
+              "match_status": "unmatched",
+              "match_method": "unmatched",
+              "matched_honor_ids": [],
+              "matched_honors": [],
+              "suggestions": []
+            },
+            {
+              "label": "Bioconstrucción",
+              "raw": "Bioconstrucción",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 230,
+              "match_status": "unmatched",
+              "match_method": "unmatched",
+              "matched_honor_ids": [],
+              "matched_honors": [],
+              "suggestions": []
+            },
+            {
+              "label": "Ecología",
+              "raw": "Ecología",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 231,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                499
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 499,
+                  "name": "Ecología",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Energías renovables",
+              "raw": "Energías renovables",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 232,
+              "match_status": "matched",
+              "match_method": "alias",
+              "matched_honor_ids": [
+                501
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 501,
+                  "name": "Energía Renovable",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Medioambiente acuático",
+              "raw": "Medioambiente acuático",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 233,
+              "match_status": "unmatched",
+              "match_method": "unmatched",
+              "matched_honor_ids": [],
+              "matched_honors": [],
+              "suggestions": []
+            },
+            {
+              "label": "Medioambiente terrestre",
+              "raw": "Medioambiente terrestre",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 234,
+              "match_status": "unmatched",
+              "match_method": "unmatched",
+              "matched_honor_ids": [],
+              "matched_honors": [],
+              "suggestions": []
+            },
+            {
+              "label": "Recogida selectiva",
+              "raw": "Recogida selectiva",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 235,
+              "match_status": "unmatched",
+              "match_method": "unmatched",
+              "matched_honor_ids": [],
+              "matched_honors": [],
+              "suggestions": []
+            }
+          ]
+        }
+      ],
+      "normalization_warnings": [
+        "No existe master_honor_id legacy local exacto; puede requerir creación o confirmación de nombre"
+      ],
+      "source_end_line": 237,
+      "legacy_master_honor_id": null
+    },
+    {
+      "name": "Experto en Recreación",
+      "source_start_line": 238,
+      "philosophy": "La Maestría en Recreación consiste de especialidades de actividades al aire libre ue no involucran premios o situaciones de ganar vs. perder. Como hay una Maestría en Vida Primitiva, no se incluye aquí el arte de acampar. Como hay una Maestría Acuática, esta maestría sólo incluye deportes y recreación terrestres.",
+      "notes": [],
+      "applicability": {
+        "scope": "ALL",
+        "division_names": [],
+        "raw": null
+      },
+      "groups": [
+        {
+          "group_type": "EXPLICIT_OPTIONS",
+          "title": null,
+          "description": null,
+          "source_rule": "Desarrollar por lo menos 7 de las siguientes especialidades:",
+          "minimum_required": 7,
+          "display_order": 0,
+          "active": true,
+          "options": [
+            {
+              "label": "Baloncesto",
+              "raw": "Baloncesto",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 241,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                19
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 19,
+                  "name": "Baloncesto",
+                  "honors_category_id": 9
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Cometas",
+              "raw": "Cometas",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 242,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                39
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 39,
+                  "name": "Cometas",
+                  "honors_category_id": 9
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Educación física",
+              "raw": "Educación física",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 243,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                46
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 46,
+                  "name": "Educación Física",
+                  "honors_category_id": 9
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Ejercicios y marchas",
+              "raw": "Ejercicios y marchas",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 244,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                47
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 47,
+                  "name": "Ejercicios y Marchas",
+                  "honors_category_id": 9
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Equitación",
+              "raw": "Equitación",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 245,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                49
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 49,
+                  "name": "Equitación",
+                  "honors_category_id": 9
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Escalada en roca",
+              "raw": "Escalada en roca",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 246,
+              "match_status": "matched",
+              "match_method": "alias",
+              "matched_honor_ids": [
+                51
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 51,
+                  "name": "Escalada",
+                  "honors_category_id": 9
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Esquí de fondo",
+              "raw": "Esquí de fondo",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 247,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                58
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 58,
+                  "name": "Esquí de Fondo",
+                  "honors_category_id": 9
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Excursionismo",
+              "raw": "Excursionismo",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 248,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                60
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 60,
+                  "name": "Excursionismo",
+                  "honors_category_id": 9
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Excursionismo sobre la nieve",
+              "raw": "Excursionismo sobre la nieve",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 249,
+              "match_status": "matched",
+              "match_method": "alias",
+              "matched_honor_ids": [
+                114
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 114,
+                  "name": "Senderismo con Raquetas de Nieve",
+                  "honors_category_id": 9
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Exploración de cuevas",
+              "raw": "Exploración de cuevas",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 251,
+              "match_status": "matched",
+              "match_method": "alias",
+              "matched_honor_ids": [
+                660
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 660,
+                  "name": "Espeleología",
+                  "honors_category_id": 9
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Geocaching",
+              "raw": "Geocaching",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 252,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                67
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 67,
+                  "name": "Geocaching (Búsqueda por GPS)",
+                  "honors_category_id": 9
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Geocaching geológica",
+              "raw": "Geocaching geológica",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 253,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                665
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 665,
+                  "name": "Geocaching geológica",
+                  "honors_category_id": 9
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Letterboxing",
+              "raw": "Letterboxing",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 254,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                78
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 78,
+                  "name": "Letterboxing",
+                  "honors_category_id": 9
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Monociclismo",
+              "raw": "Monociclismo",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 255,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                85
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 85,
+                  "name": "Monociclismo",
+                  "honors_category_id": 9
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Orientación",
+              "raw": "Orientación",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 256,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                95
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 95,
+                  "name": "Orientación",
+                  "honors_category_id": 9
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Prospección de oro",
+              "raw": "Prospección de oro",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 257,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                103
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 103,
+                  "name": "Prospección de Oro",
+                  "honors_category_id": 9
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Senderismo",
+              "raw": "Senderismo",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 258,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                112
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 112,
+                  "name": "Senderismo",
+                  "honors_category_id": 9
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Tambores y percusión",
+              "raw": "Tambores y percusión",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 259,
+              "match_status": "matched",
+              "match_method": "alias",
+              "matched_honor_ids": [
+                709
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 709,
+                  "name": "Tamboreo y percusión - Avanzado",
+                  "honors_category_id": 9
+                }
+              ],
+              "suggestions": []
+            }
+          ]
+        }
+      ],
+      "normalization_warnings": [
+        "Nombre fuente “Experto en Recreación” coincide probablemente con master_honors “Maestría en Recreación”"
+      ],
+      "source_end_line": 261,
+      "legacy_master_honor_id": 13
+    },
+    {
+      "name": "Maestría en Salud y ciencia",
+      "source_start_line": 262,
+      "philosophy": null,
+      "notes": [],
+      "applicability": {
+        "scope": "ALL",
+        "division_names": [],
+        "raw": null
+      },
+      "groups": [
+        {
+          "group_type": "EXPLICIT_OPTIONS",
+          "title": null,
+          "description": null,
+          "source_rule": "Desarrollar por lo menos 3 de las siguientes especialidades",
+          "minimum_required": 3,
+          "display_order": 0,
+          "active": true,
+          "options": [
+            {
+              "label": "Cerebro y conducta",
+              "raw": "Cerebro y conducta",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 264,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                579
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 579,
+                  "name": "Cerebro y Conducta",
+                  "honors_category_id": 3
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Cuidado de niños",
+              "raw": "Cuidado de niños",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 265,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                386
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 386,
+                  "name": "Cuidado de Niños",
+                  "honors_category_id": 6
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Climatología",
+              "raw": "Climatología",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 266,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                485
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 485,
+                  "name": "Climatología",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Defensas de la sangre y del cuerpo",
+              "raw": "Defensas de la sangre y del cuerpo",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 267,
+              "match_status": "matched",
+              "match_method": "alias",
+              "matched_honor_ids": [
+                605
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 605,
+                  "name": "Sangre y Defensas del Cuerpo",
+                  "honors_category_id": 3
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Digestión",
+              "raw": "Digestión",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 269,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                581
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 581,
+                  "name": "Digestión",
+                  "honors_category_id": 3
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Enfermería casera",
+              "raw": "Enfermería casera",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 270,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                582
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 582,
+                  "name": "Enfermería Casera",
+                  "honors_category_id": 3
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Huesos, músculos y movimientos",
+              "raw": "Huesos, músculos y movimientos",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 271,
+              "match_status": "matched",
+              "match_method": "alias",
+              "matched_honor_ids": [
+                591
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 591,
+                  "name": "Huesos, Músculos y Movimiento",
+                  "honors_category_id": 3
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Salud y curación",
+              "raw": "Salud y curación",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 273,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                603
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 603,
+                  "name": "Salud y Curación",
+                  "honors_category_id": 3
+                }
+              ],
+              "suggestions": []
+            }
+          ]
+        },
+        {
+          "group_type": "EXPLICIT_OPTIONS",
+          "title": null,
+          "description": null,
+          "source_rule": "y por lo menos 2 de las siguientes especialidades",
+          "minimum_required": 2,
+          "display_order": 1,
+          "active": true,
+          "options": [
+            {
+              "label": "Alerta roja",
+              "raw": "Alerta roja",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 275,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                576
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 576,
+                  "name": "Alerta Roja",
+                  "honors_category_id": 3
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Primeros auxilios I",
+              "raw": "Primeros auxilios I",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 276,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                596
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 596,
+                  "name": "Primeros Auxilios I",
+                  "honors_category_id": 3
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Primeros auxilios II",
+              "raw": "Primeros auxilios II",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 277,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                597
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 597,
+                  "name": "Primeros Auxilios II",
+                  "honors_category_id": 3
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Primeros auxilios II, avanzado",
+              "raw": "Primeros auxilios II, avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 278,
+              "match_status": "needs_review",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                597,
+                598
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 597,
+                  "name": "Primeros Auxilios II",
+                  "honors_category_id": 3
+                },
+                {
+                  "honor_id": 598,
+                  "name": "Primeros Auxilios II - Avanzado",
+                  "honors_category_id": 3
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Reanimación cardiopulmonar (RCP)",
+              "raw": "Reanimación cardiopulmonar (RCP)",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 280,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                601
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 601,
+                  "name": "Reanimación Cardiopulmonar (RCP)",
+                  "honors_category_id": 3
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Rescate básico",
+              "raw": "Rescate básico",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 282,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                602
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 602,
+                  "name": "Rescate Básico",
+                  "honors_category_id": 3
+                }
+              ],
+              "suggestions": []
+            }
+          ]
+        },
+        {
+          "group_type": "EXPLICIT_OPTIONS",
+          "title": null,
+          "description": null,
+          "source_rule": "y por lo menos 2 de las siguientes especialidades",
+          "minimum_required": 2,
+          "display_order": 2,
+          "active": true,
+          "options": [
+            {
+              "label": "Física",
+              "raw": "Física",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 284,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                583
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 583,
+                  "name": "Física",
+                  "honors_category_id": 3
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Óptica",
+              "raw": "Óptica",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 285,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                593
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 593,
+                  "name": "Óptica",
+                  "honors_category_id": 3
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Química",
+              "raw": "Química",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 286,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                600
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 600,
+                  "name": "Química",
+                  "honors_category_id": 3
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Vida microscópica",
+              "raw": "Vida microscópica",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 287,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                574
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 574,
+                  "name": "Vida Microscópica",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Virus",
+              "raw": "Virus",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 288,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                608
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 608,
+                  "name": "Virus",
+                  "honors_category_id": 3
+                }
+              ],
+              "suggestions": []
+            }
+          ]
+        }
+      ],
+      "normalization_warnings": [
+        "Contiene opciones con avanzado/y-o avanzado que requieren matching a honors equivalentes"
+      ],
+      "source_end_line": 290,
+      "legacy_master_honor_id": 14
+    },
+    {
+      "name": "Maestría en Tecnología moderna",
+      "source_start_line": 291,
+      "philosophy": null,
+      "notes": [],
+      "applicability": {
+        "scope": "ALL",
+        "division_names": [],
+        "raw": null
+      },
+      "groups": [
+        {
+          "group_type": "EXPLICIT_OPTIONS",
+          "title": null,
+          "description": null,
+          "source_rule": "Desarrollar por lo menos 7 de las siguientes especialidades:",
+          "minimum_required": 7,
+          "display_order": 0,
+          "active": true,
+          "options": [
+            {
+              "label": "Computadoras, y/o avanzado",
+              "raw": "Computadoras, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 293,
+              "match_status": "needs_review",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                157,
+                158
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 157,
+                  "name": "Computadoras",
+                  "honors_category_id": 8
+                },
+                {
+                  "honor_id": 158,
+                  "name": "Computadoras - Avanzado",
+                  "honors_category_id": 8
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Ingeniería",
+              "raw": "Ingeniería",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 294,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                181
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 181,
+                  "name": "Ingeniería",
+                  "honors_category_id": 8
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Inteligencia artificial",
+              "raw": "Inteligencia artificial",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 295,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                182
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 182,
+                  "name": "Inteligencia Artificial",
+                  "honors_category_id": 8
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Internet, y/o avanzado",
+              "raw": "Internet, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 296,
+              "match_status": "needs_review",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                183,
+                184
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 183,
+                  "name": "Internet",
+                  "honors_category_id": 8
+                },
+                {
+                  "honor_id": 184,
+                  "name": "Internet - Avanzado",
+                  "honors_category_id": 8
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Procesar texto",
+              "raw": "Procesar texto",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 297,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                201
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 201,
+                  "name": "Procesar Texto",
+                  "honors_category_id": 8
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Redes sociales",
+              "raw": "Redes sociales",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 298,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                206
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 206,
+                  "name": "Redes Sociales",
+                  "honors_category_id": 8
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Video",
+              "raw": "Video",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 299,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                220
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 220,
+                  "name": "Video",
+                  "honors_category_id": 8
+                }
+              ],
+              "suggestions": []
+            }
+          ]
+        }
+      ],
+      "normalization_warnings": [
+        "Contiene opciones con avanzado/y-o avanzado que requieren matching a honors equivalentes"
+      ],
+      "source_end_line": 301,
+      "legacy_master_honor_id": 15
+    },
+    {
+      "name": "Maestría en Testificación",
+      "source_start_line": 302,
+      "philosophy": null,
+      "notes": [],
+      "applicability": {
+        "scope": "ALL",
+        "division_names": [],
+        "raw": null
+      },
+      "groups": [
+        {
+          "group_type": "CATEGORY_COUNT",
+          "title": "Crecimiento espiritual, actividades misioneras y herencia",
+          "description": "Desarrollar por lo menos 7 especialidades de la categoría de Crecimiento espiritual, actividades misioneras y herencia.",
+          "source_rule": "Desarrollar por lo menos 7 especialidades de la categoría de Crecimiento espiritual, actividades misioneras y herencia.",
+          "minimum_required": 7,
+          "category_name": "Crecimiento espiritual, actividades misioneras y herencia",
+          "display_order": 0,
+          "active": true,
+          "category_match_status": "needs_db_category_match"
+        }
+      ],
+      "normalization_warnings": [],
+      "source_end_line": 305,
+      "legacy_master_honor_id": 16
+    },
+    {
+      "name": "Maestría en Vida primitiva",
+      "source_start_line": 306,
+      "philosophy": null,
+      "notes": [],
+      "applicability": {
+        "scope": "ALL",
+        "division_names": [],
+        "raw": null
+      },
+      "groups": [
+        {
+          "group_type": "EXPLICIT_OPTIONS",
+          "title": null,
+          "description": null,
+          "source_rule": "Desarrollar por lo menos 7 de las siguientes especialidades:",
+          "minimum_required": 7,
+          "display_order": 0,
+          "active": true,
+          "options": [
+            {
+              "label": "Arte de acampar",
+              "raw": "Arte de acampar",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 308,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                18
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 18,
+                  "name": "Arte de Acampar",
+                  "honors_category_id": 9
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Campamento IV",
+              "raw": "Campamento IV",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 309,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                28
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 28,
+                  "name": "Campamento IV",
+                  "honors_category_id": 9
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Campamento en invierno",
+              "raw": "Campamento en invierno",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 310,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                29
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 29,
+                  "name": "Campamento en Invierno",
+                  "honors_category_id": 9
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Cocinando en olla holandesa",
+              "raw": "Cocinando en olla holandesa",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 311,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                37
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 37,
+                  "name": "Cocinando en Olla Holandesa",
+                  "honors_category_id": 9
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Excursionismo",
+              "raw": "Excursionismo",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 312,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                60
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 60,
+                  "name": "Excursionismo",
+                  "honors_category_id": 9
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Fogatas y cocina al aire libre",
+              "raw": "Fogatas y cocina al aire libre",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 313,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                62
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 62,
+                  "name": "Fogatas y Cocina al Aire Libre",
+                  "honors_category_id": 9
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Liderazgo al aire libre",
+              "raw": "Liderazgo al aire libre",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 315,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                80
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 80,
+                  "name": "Liderazgo al Aire Libre",
+                  "honors_category_id": 9
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Liderazgo en la naturaleza",
+              "raw": "Liderazgo en la naturaleza",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 316,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                82
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 82,
+                  "name": "Liderazgo en la Naturaleza",
+                  "honors_category_id": 9
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Nudos",
+              "raw": "Nudos",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 317,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                93
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 93,
+                  "name": "Nudos",
+                  "honors_category_id": 9
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Orientación",
+              "raw": "Orientación",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 318,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                95
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 95,
+                  "name": "Orientación",
+                  "honors_category_id": 9
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Pionerismo",
+              "raw": "Pionerismo",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 319,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                101
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 101,
+                  "name": "Pionerismo",
+                  "honors_category_id": 9
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Plantas silvestres comestibles",
+              "raw": "Plantas silvestres comestibles",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 320,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                557
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 557,
+                  "name": "Plantas Silvestres Comestibles",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Senderismo",
+              "raw": "Senderismo",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 322,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                112
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 112,
+                  "name": "Senderismo",
+                  "honors_category_id": 9
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Seguridad en campamentos",
+              "raw": "Seguridad en campamentos",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 323,
+              "match_status": "matched",
+              "match_method": "alias",
+              "matched_honor_ids": [
+                110
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 110,
+                  "name": "Seguridad en el Campamento",
+                  "honors_category_id": 9
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Supervivencia en clima frío",
+              "raw": "Supervivencia en clima frío",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 324,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                119
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 119,
+                  "name": "Supervivencia en Clima Frío",
+                  "honors_category_id": 9
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Tiendas de campaña",
+              "raw": "Tiendas de campaña",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 325,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                128
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 128,
+                  "name": "Tiendas de Campaña",
+                  "honors_category_id": 9
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Vida primitiva",
+              "raw": "Vida primitiva",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 326,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                139
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 139,
+                  "name": "Vida primitiva",
+                  "honors_category_id": 9
+                }
+              ],
+              "suggestions": []
+            }
+          ]
+        }
+      ],
+      "normalization_warnings": [],
+      "source_end_line": 328,
+      "legacy_master_honor_id": 17
+    },
+    {
+      "name": "Maestría en Zoología",
+      "source_start_line": 329,
+      "philosophy": null,
+      "notes": [],
+      "applicability": {
+        "scope": "ALL",
+        "division_names": [],
+        "raw": null
+      },
+      "groups": [
+        {
+          "group_type": "EXPLICIT_OPTIONS",
+          "title": null,
+          "description": null,
+          "source_rule": "Desarrollar por lo menos 1 de las siguientes especialidades:",
+          "minimum_required": 1,
+          "display_order": 0,
+          "active": true,
+          "options": [
+            {
+              "label": "Cetáceaos O Mamíferos marinos",
+              "raw": "Cetáceaos O Mamíferos marinos",
+              "alternatives": [
+                "Cetáceaos",
+                "Mamíferos marinos"
+              ],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 331,
+              "match_status": "needs_review",
+              "match_method": "alias+exact",
+              "matched_honor_ids": [
+                479,
+                531
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 479,
+                  "name": "Cetáceos",
+                  "honors_category_id": 7
+                },
+                {
+                  "honor_id": 531,
+                  "name": "Mamíferos Marinos",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Especies en peligro de extinción",
+              "raw": "Especies en peligro de extinción",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 333,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                502
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 502,
+                  "name": "Especies en Peligro de Extinción",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Mamíferos",
+              "raw": "Mamíferos",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 335,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                529
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 529,
+                  "name": "Mamíferos",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            }
+          ]
+        },
+        {
+          "group_type": "EXPLICIT_OPTIONS",
+          "title": "fauna silvestre",
+          "description": null,
+          "source_rule": "Desarrollar por lo menos 4 especialidades de fauna silvestre:",
+          "minimum_required": 4,
+          "display_order": 1,
+          "active": true,
+          "options": [
+            {
+              "label": "Algas marinas",
+              "raw": "Algas marinas",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 337,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                443
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 443,
+                  "name": "Algas Marinas",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Anfibios",
+              "raw": "Anfibios",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 338,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                444
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 444,
+                  "name": "Anfibios",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Antílopes",
+              "raw": "Antílopes",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 339,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                450
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 450,
+                  "name": "Antílopes",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Arácnidos",
+              "raw": "Arácnidos",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 340,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                452
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 452,
+                  "name": "Arácnidos",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Aves, y/o avanzado",
+              "raw": "Aves, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 341,
+              "match_status": "needs_review",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                460,
+                461
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 460,
+                  "name": "Aves",
+                  "honors_category_id": 7
+                },
+                {
+                  "honor_id": 461,
+                  "name": "Aves - Avanzado",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Dinosaurios O Fósiles",
+              "raw": "Dinosaurios O Fósiles",
+              "alternatives": [
+                "Dinosaurios",
+                "Fósiles"
+              ],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 342,
+              "match_status": "needs_review",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                496,
+                664
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 496,
+                  "name": "Dinosaurios",
+                  "honors_category_id": 7
+                },
+                {
+                  "honor_id": 664,
+                  "name": "Fósiles",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Insectos, y/o avanzado",
+              "raw": "Insectos, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 343,
+              "match_status": "needs_review",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                521,
+                522
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 521,
+                  "name": "Insectos",
+                  "honors_category_id": 7
+                },
+                {
+                  "honor_id": 522,
+                  "name": "Insectos - Avanzado",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Invertebrados marinos",
+              "raw": "Invertebrados marinos",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 344,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                523
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 523,
+                  "name": "Invertebrados Marinos",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Lombrices",
+              "raw": "Lombrices",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 345,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                526
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 526,
+                  "name": "Lombrices",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Mariposas",
+              "raw": "Mariposas",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 346,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                533
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 533,
+                  "name": "Mariposas",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Marsupiales",
+              "raw": "Marsupiales",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 347,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                534
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 534,
+                  "name": "Marsupiales",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Murciélagos, y/o avanzado",
+              "raw": "Murciélagos, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 348,
+              "match_status": "needs_review",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                542,
+                543
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 542,
+                  "name": "Murciélagos",
+                  "honors_category_id": 7
+                },
+                {
+                  "honor_id": 543,
+                  "name": "Murciélagos - Avanzado",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Odonatos, y/o avanzado",
+              "raw": "Odonatos, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 349,
+              "match_status": "needs_review",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                544,
+                545
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 544,
+                  "name": "Odonatos",
+                  "honors_category_id": 7
+                },
+                {
+                  "honor_id": 545,
+                  "name": "Odonatos - Avanzado",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Tiburones",
+              "raw": "Tiburones",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 350,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                573
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 573,
+                  "name": "Tiburones",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Vida microscópica",
+              "raw": "Vida microscópica",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 351,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                574
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 574,
+                  "name": "Vida Microscópica",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            }
+          ]
+        },
+        {
+          "group_type": "EXPLICIT_OPTIONS",
+          "title": "animales que son mascotas o de granja",
+          "description": null,
+          "source_rule": "Desarrollar por lo menos 2 especialidades de fauna doméstica (animales que son mascotas o de granja):",
+          "minimum_required": 2,
+          "display_order": 2,
+          "active": true,
+          "options": [
+            {
+              "label": "Animales Domésticos",
+              "raw": "Animales Domésticos",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 353,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                446
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 446,
+                  "name": "Animales Domésticos",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Aves domésticas",
+              "raw": "Aves domésticas",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 354,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                463
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 463,
+                  "name": "Aves Domésticas",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Aves de jaula O Loros y cacatúas",
+              "raw": "Aves de jaula O Loros y cacatúas",
+              "alternatives": [
+                "Aves de jaula",
+                "Loros y cacatúas"
+              ],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 355,
+              "match_status": "needs_review",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                464,
+                528
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 464,
+                  "name": "Aves de Jaula",
+                  "honors_category_id": 7
+                },
+                {
+                  "honor_id": 528,
+                  "name": "Loros y Cacatúas",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Cuidado y entrenamiento de perros",
+              "raw": "Cuidado y entrenamiento de perros",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 357,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                495
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 495,
+                  "name": "Cuidado y Entrenamiento de Perros",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Gatos",
+              "raw": "Gatos",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 359,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                510
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 510,
+                  "name": "Gatos",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Mamíferos pequeños como mascotas",
+              "raw": "Mamíferos pequeños como mascotas",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 360,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                532
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 532,
+                  "name": "Mamíferos Pequeños Como Mascotas",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Perros",
+              "raw": "Perros",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 362,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                554
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 554,
+                  "name": "Perros",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Peces",
+              "raw": "Peces",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 363,
+              "match_status": "matched",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                552
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 552,
+                  "name": "Peces",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            },
+            {
+              "label": "Reptiles, y/o avanzado",
+              "raw": "Reptiles, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 364,
+              "match_status": "needs_review",
+              "match_method": "exact",
+              "matched_honor_ids": [
+                563,
+                564
+              ],
+              "matched_honors": [
+                {
+                  "honor_id": 563,
+                  "name": "Reptiles",
+                  "honors_category_id": 7
+                },
+                {
+                  "honor_id": 564,
+                  "name": "Reptiles - Avanzado",
+                  "honors_category_id": 7
+                }
+              ],
+              "suggestions": []
+            }
+          ]
+        }
+      ],
+      "normalization_warnings": [
+        "Contiene alternativas con \"O\" que requieren confirmación de equivalencia",
+        "Contiene opciones con avanzado/y-o avanzado que requieren matching a honors equivalentes"
+      ],
+      "source_end_line": 366,
+      "legacy_master_honor_id": 18
+    }
+  ],
+  "catalog_source": "/Users/abner/Downloads/Sacdia/Respaldos/honors_rows.sql",
+  "master_honors_catalog_source": "/Users/abner/Downloads/Sacdia/Respaldos/master_honors_rows.sql",
+  "match_stats": {
+    "matched": 189,
+    "needs_review": 47,
+    "unmatched": 6
+  }
+}

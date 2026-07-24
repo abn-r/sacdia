@@ -27,7 +27,7 @@ No deben entrar decisiones menores de implementación, notas de sesión, bugs t�
 
 ### 1. La trayectoria institucional es el eje del sistema
 
-**Estado**: Vigente <!-- VERIFICADO: enrollments + users_classes + classes implementados y ALINEADO -->
+**Estado**: Vigente <!-- VERIFICADO 2026-05-29: trayectoria formativa de clases se modela con enrollments; users_classes/users_classes_archive no existen en el schema runtime actual -->
 
 **Contexto**: La documentación previa tendía a describir SACDIA como un sistema de gestión o catálogo administrativo. Esa lectura debilitaba el valor principal del producto y fragmentaba la semántica del dominio.
 
@@ -139,21 +139,20 @@ No deben entrar decisiones menores de implementación, notas de sesión, bugs t�
 
 ### 9. La verdad formativa se separa entre ciclo anual y trayectoria consolidada
 
-**Estado**: Vigente <!-- VERIFICADO: enrollments = ciclo anual, users_classes = trayectoria consolidada. Backend implementa ambos con FS-02/FS-03 -->
+**Estado**: Vigente <!-- VERIFICADO 2026-05-29: enrollments = ciclo anual + trayectoria histórica consultable; users_classes/users_classes_archive no existen en el schema runtime actual -->
 
-**Contexto**: El sistema actual usa `users_classes` y `enrollments` con semánticas parcialmente superpuestas. La intención original distingue dos planos válidos: trayectoria histórica por clase y cursado anual dentro de un año eclesiástico. El problema actual no es la existencia de ambas estructuras, sino la falta de una frontera de autoridad clara en runtime.
+**Contexto**: El sistema histórico usó `users_classes` y `enrollments` con semánticas parcialmente superpuestas. El runtime actual retiró `users_classes`; la distinción vigente se expresa dentro de `enrollments`: cursado anual operativo y lectura histórica por año eclesiástico/estado.
 
-**Decisión**: El canon adopta un modelo de responsabilidad dividida:
+**Decisión**: El canon adopta `enrollments` como fuente única del estado formativo de clases:
 
-- `enrollments` es la fuente de verdad del ciclo anual operativo de una clase, incluyendo inscripción, progreso, validación e investidura del periodo;
-- `users_classes` es la fuente de verdad de la trayectoria consolidada por clase del miembro a lo largo del tiempo.
+- ciclo anual operativo: inscripción, progreso, validación e investidura del periodo;
+- trayectoria histórica: consulta consolidada desde enrollments por usuario, clase, año eclesiástico y estado.
 
 **Consecuencias**:
 
-- `users_classes` no debe seguir tratándose como fuente operativa primaria del ciclo actual;
-- post-registro, clases, admin y certificaciones deben alinearse con esta frontera;
-- cuando un ciclo anual llegue a un estado consolidado, su resultado debe proyectarse o sincronizarse hacia `users_classes`;
-- mientras esta frontera no esté implementada de forma consistente, el runtime canónico debe seguir tratándose con cautela.
+- `users_classes` no debe usarse como fuente operativa ni histórica en nuevas implementaciones;
+- post-registro, clases, admin, certificaciones y reportes deben consultar `enrollments`;
+- cualquier documento que eleve `users_classes` por encima de `enrollments` está obsoleto frente al schema runtime actual.
 
 ### 10. Consolidación de secciones de club en tabla única (2026-03-17)
 
@@ -329,7 +328,7 @@ Hallazgo paralelo: la ruta admin `/dashboard/requests/membership` apuntaba al m�
 
 ### 19. User certifications + user folders son dominios canónicos propios (2026-04-22)
 
-**Estado**: Vigente <!-- VERIFICADO: certifications.controller.ts y folders/folders.controller.ts con 10 handlers migrados a user_certifications:* y user_folders:*. Colisión con permisos existentes certifications:read / folders:read (browse catalog) resuelta con prefix user_. Canonizado en docs/canon/runtime-user-certifications.md y runtime-user-folders.md. -->
+**Estado**: Parcialmente superada — `user_certifications:*` sigue vigente; `user_folders:*` y `/folders/*` fueron retirados antes de producción en favor de `annual-folders`.
 
 **Contexto**: Sprint C del audit de permisos reutilizados migró `certifications` y `folders` modules desde `users:update_profile`/`users:read_detail` hacia permisos propios. Al ejecutar, se detectó colisión semántica grave: los strings `certifications:read` y `folders:read` YA existían en el seed con semántica **browse catalog** y grants amplios (user, member, counselor, etc.). Redefinirlos para operaciones admin-level habría expandido silenciosamente el scope: cualquier rol con el permiso de browse habría ganado acceso a endpoints que manipulan progresión de otros usuarios.
 
@@ -338,28 +337,28 @@ El patrón `folders:*` también conflictuaba con `evidence_folders:*` (subsistem
 **Decisión**: El canon adopta prefijo `user_` para distinguir las operaciones admin-level sobre progresión de usuario, preservando los permisos originales de browse catalog sin cambios. Se introducen:
 
 - `user_certifications:read` / `user_certifications:manage` — para endpoints admin de progresión de certificaciones.
-- `user_folders:read` / `user_folders:manage` — para endpoints admin de inscripción/progreso de carpetas de usuario.
+- `user_folders:read` / `user_folders:manage` — DEPRECATED; endpoints admin de carpetas de usuario retirados antes de producción.
 
 Autoridades rectoras: `docs/canon/runtime-user-certifications.md` + `docs/canon/runtime-user-folders.md`. Se fija que:
 
-- `certifications:read` y `folders:read` conservan sus semánticas originales (browse catalog, broad grants) — NO se redefinen ni se retiran;
+- `certifications:read` conserva su semántica original; `folders:read` fue desactivado al retirar el runtime legacy de carpetas;
 - `user_*:read` se otorgan solo a staff con autoridad operativa sobre otros usuarios: counselor, secretary, treasurer, secretary-treasurer, deputy-director, director (CLUB) + assistant-lf + JOIN copies + admin/super_admin;
 - `user_*:manage` queda restringido a liderazgo: deputy-director, director, assistant-lf + JOIN + admin/super_admin;
-- los tres dominios de carpetas (`folders:read` browse, `user_folders:*` admin progression, `evidence_folders:*` evidencia anual) permanecen separados por diseño;
-- la migración es cambio duro con corrección: primero se retrajeron grants incorrectos de `certifications:manage` / `folders:manage` (agregados brevemente por Sprint C inicial), luego se introdujeron los `user_*` con grants correctos, finalmente se conmutaron los handlers.
+- el dominio vigente de carpeta de evidencias es `annual-folders`; `folders:read` y `user_folders:*` quedan legacy/inactivos;
+- la migración histórica de certificaciones se conserva; la porción de carpetas legacy fue cerrada antes de producción y sus permisos quedaron inactivos.
 
 **Consecuencias**:
 
 - nunca debe redefinirse un permiso existente con semántica distinta sin auditoría previa de uso y grants; el prefix `user_` queda como patrón canónico para operaciones sobre datos de otros usuarios;
 - futuros módulos similares (ej. si surge `user_*`-operations para otras entidades de trayectoria) deben seguir el mismo patrón;
 - los canons `runtime-user-certifications.md` y `runtime-user-folders.md` documentan la separación explícita de los browse catalogs públicos — cualquier intento de colapsarlos en un único permiso es violación del canon;
-- notificaciones emitidas por operaciones de progresión deben usar `source = 'user_certifications:*'` o `source = 'user_folders:*'` respectivamente.
+- notificaciones emitidas por certificaciones de usuario deben usar `source = 'user_certifications:*'`; `user_folders:*` queda legacy/inactivo.
 
 ### 20. Camporees CRUD es dominio canónico propio; attendance permanece cross-cutting (2026-04-22)
 
-**Estado**: Vigente <!-- VERIFICADO: camporees.controller.ts con 10 CRUD handlers migrados a camporees:*, 24 handlers attendance/registration/payments preservados en attendance:*. Permisos camporees:create/update/delete agregados al seed. Canonizado en docs/canon/runtime-camporees.md. -->
+**Estado**: Vigente para CRUD y attendance cross-cutting; la reserva de `camporees:register` fue superada por §25. <!-- VERIFICADO: camporees.controller.ts; canon actualizado en docs/canon/runtime-camporees.md. -->
 
-**Contexto**: El módulo `camporees` tenía 34 handlers gateados por dominios ajenos: 10 CRUD por `activities:*` (mezcla conceptual — crear un camporee no es equivalente a crear una actividad semanal) y 24 operaciones de attendance/registration/payments por `attendance:*` (correcto semánticamente — attendance es cross-cutting entre actividades regulares y camporees). Los permisos `camporees:read` y `camporees:register` YA existían en el seed pero nunca se usaron — gap de implementación.
+**Contexto**: El módulo `camporees` tenía sus handlers CRUD gateados por `activities:*` (mezcla conceptual — crear un camporee no es equivalente a crear una actividad semanal), mientras las operaciones de attendance/registration/payments usaban `attendance:*` (correcto semánticamente — attendance es cross-cutting entre actividades regulares y camporees). Los permisos `camporees:read` y `camporees:register` YA existían en el seed pero nunca se usaban — gap de implementación de ese momento.
 
 Audit C2 clasificó `camporees` en media prioridad. Sprint D aborda la migración con decisión explícita de scope: migrar solo CRUD, preservar attendance cross-cutting.
 
@@ -367,7 +366,7 @@ Audit C2 clasificó `camporees` en media prioridad. Sprint D aborda la migració
 
 - `camporees:read/create/update/delete` son los permisos canónicos para CRUD de la entidad camporee (local y union);
 - `attendance:read/manage/approve_late` permanecen como permisos cross-cutting entre activities y camporees — fragmentarlos en `camporees:attendance:*` rompería consistencia con el patrón existente en activities;
-- `camporees:register` permanece en seed como permiso reservado sin uso — reactivarlo requiere decisión explícita posterior (ej. si el producto diferencia "inscripción de club" del generic `attendance:manage`);
+- `camporees:register` queda reservado en esta decisión histórica; §25 documenta su reactivación posterior para el endpoint legacy local territorial;
 - la migración es cambio duro: seed otorga `camporees:*` a roles con `activities:*` mirrored antes del switch de handlers (mismo patrón de sprints anteriores).
 
 **Consecuencias**:
@@ -462,6 +461,155 @@ Hallazgo paralelo: la ruta admin `/dashboard/validation` usaba `investiture:read
 - Spec: `docs/superpowers/specs/2026-04-28-clasificacion-criterios-ampliados-design.md`
 - Plan: `docs/superpowers/plans/2026-04-28-clasificacion-criterios-ampliados.md`
 - Canon rector: `docs/canon/runtime-rankings.md` §13.
+
+### 24. Coordinación se modela por zonas y asignaciones a `club_section` (2026-06-17)
+
+**Estado**: Vigente <!-- Decisión de dominio aprobada por producto antes de salida a producción. Implementación pendiente. Canon rector: docs/canon/runtime-coordination.md. -->
+
+**Contexto**: El rol `coordinator` estaba tratado de forma demasiado genérica:
+un rol global con alcance derivado principalmente de `local_field_id`. Ese
+modelo no representa la operación real de los campos locales, donde existen
+zonas, coordinadores por sección y excepciones por club/sección. Además SACDIA
+es multirol: un usuario puede ser director y coordinador, pero no debe coordinar
+la misma sección donde ya es director.
+
+**Decisión**: El canon adopta `docs/canon/runtime-coordination.md` como fuente
+rectora del dominio coordinación. Se fija que:
+
+- las zonas de coordinación pertenecen a un campo local y agrupan distritos;
+- la cadena operacional es `local_field -> districts -> churches -> clubs -> club_sections`;
+- puede existir máximo un coordinador general activo por campo local;
+- los coordinadores de zona se asignan por `zone_id + club_type_id`;
+- el sistema debe soportar asignaciones directas por `club_section_id`;
+- la unidad final de autoridad es siempre `club_section`;
+- el backend debe resolver `coordinator_scope(user_id) -> club_section_ids[]`;
+- un usuario director activo de una `club_section` no puede ser coordinador de
+  esa misma `club_section`;
+- el rol global habilita entrada, pero no define autoridad operativa por sí solo.
+
+**Consecuencias**:
+
+- los módulos de SLA, evidencias, investiduras y clubes deben migrar a scope por
+  `club_section_ids` efectivos;
+- el admin necesita una superficie propia para zonas y asignaciones de
+  coordinadores;
+- la app móvil debe mostrar funcionalidades multirol y quitar camporees del
+  alcance coordinador;
+- no se debe usar `union_id` como scope de coordinador;
+- cualquier endpoint nuevo de coordinación debe validar scope en backend, no en
+  query params manipulables.
+
+### 25. Inscripción de sección contextual separada del enrolamiento territorial legacy (2026-07-14)
+
+**Estado**: Vigente <!-- VERIFICADO: backend HEAD e72d38f, migración 20260713220000 y app móvil bb63a5a. -->
+
+**Contexto**: `attendance:manage` mezclaba el alta de participantes con la creación local de la inscripción de una sección. Además, el endpoint legacy local recibía `club_section_id`, mientras el director móvil ya dispone de un assignment activo que debe ser la única autoridad de su club/sección.
+
+**Decisión**:
+
+- `GET /camporees/:id/section-registration` expone el estado contextual con `camporees:read`.
+- `POST /camporees/:id/section-registration` no acepta body y usa `camporees:register_active_section`, concedido sólo a `director` `CLUB`; sección, club y actor se derivan en backend.
+- `POST /camporees/:id/clubs` conserva `{ club_section_id }` como contrato legacy local territorial y usa `camporees:register`, concedido sólo a `assistant-lf`, `director-lf`, `assistant-union` y `director-union` `GLOBAL` dentro de scope.
+- `POST /camporees/union/:id/clubs` es un contrato legacy distinto y conserva `attendance:manage` dentro del scope de la unión.
+- Roles CLUB, división, `admin` y `super-admin` no reciben `camporees:register` por wildcard. `attendance:manage` tampoco autoriza la ruta legacy local.
+- Un participante sólo puede crearse si la misma sección tiene inscripción activa `registered` o `approved` y el miembro pertenece a ella. La fila guarda `camporee_club_id` como lineage.
+
+**Consecuencias**:
+
+- la app presenta primero el panel de sección, confirma en una hoja no editable y mantiene participantes fail-closed hasta `registered|approved`;
+- la base impide duplicados activos por camporee/sección con índices únicos parciales local y unión;
+- `camporee_members.camporee_club_id` permanece nullable por compatibilidad legacy y otros flujos; las nuevas altas locales contextuales siempre lo persisten;
+- el endpoint legacy local valida camporee, sección, club, territorio y tipo desde DB; el body no es autoridad fuera de identificar la sección;
+- los fallos de precondición de participantes usan `422 CAMPOREE_SECTION_REGISTRATION_REQUIRED` y `422 CAMPOREE_MEMBER_OUTSIDE_ACTIVE_SECTION`.
+
+### 26. El histórico institucional se modela por capas (2026-07-23)
+
+**Estado**: Vigente
+
+**Contexto**: SACDIA ya conserva relaciones efectivas de parte de la jerarquía y
+snapshots para carpetas anuales y rankings, pero todavía no garantiza historia
+transversal. Los nombres históricos se resuelven contra catálogos actuales,
+varios write paths cambian FKs sin mantener sus intervalos y una reorganización
+puede reatribuir reportes o ampliar acceso si cada módulo interpreta el pasado
+por su cuenta.
+
+**Decisión**: Adoptar un modelo temporal institucional compuesto por
+cuatro responsabilidades separadas:
+
+- auditoría append-only y transaccional;
+- nombres y relaciones con vigencia efectiva;
+- snapshots inmutables únicamente en raíces de agregado o actos oficiales;
+- linaje explícito para renombres, traslados, divisiones, fusiones, cierres y
+  correcciones.
+
+Las entidades tipadas y FKs actuales permanecen como proyección del estado
+vigente. No se adopta event sourcing global ni una tabla organizacional
+polimórfica en esta etapa. La atribución histórica se mantiene independiente de
+la custodia y autorización de lectura.
+
+**Consecuencias**:
+
+- las mutaciones territoriales deben ejecutarse mediante comandos
+  transaccionales, no actualizaciones directas de FKs;
+- la resolución histórica no puede hacer fallback silencioso a la jerarquía
+  actual;
+- nombres y traducciones deben versionarse;
+- los datos de backfill conservan precisión `system_backfill` o `unknown`;
+- los registros oficiales conservan su contexto aunque la organización cambie;
+- la autoridad vigente hereda lectura del histórico institucional no sensible de
+  la entidad trasladada, sin reatribuir ni permitir editar el pasado;
+- todos los agregados se adoptarán por oleadas técnicas.
+
+**Autoridad de aprobación resuelta (2026-07-23)**: cualquiera de los roles
+`director-dia`, `admin` o `super-admin` puede aprobar formalmente un renombre,
+traslado, división, fusión o cierre. La implementación deberá usar un permiso
+dedicado y no extender esta autoridad por inferencia a roles asistentes.
+
+**Fuente de decisión resuelta (2026-07-23)**: toda reorganización se origina en
+una decisión ejecutiva de la Iglesia Adventista a nivel mundial. Los roles
+autorizados controlan su registro y ejecución en SACDIA, pero no crean la
+autoridad institucional. El sistema no exige adjuntos, número de resolución,
+referencia documental ni otra evidencia; conserva el tipo de acto, la fecha
+efectiva, la descripción, el actor y la fecha de registro.
+
+**Continuidad de lectura resuelta (2026-07-23)**: cuando una entidad cambia de
+autoridad, la nueva autoridad puede consultar su trayectoria completa conforme
+a los permisos de cada módulo, excepto el contenido personal sensible. Los
+registros anteriores conservan su atribución original y el acceso heredado no
+permite reatribuirlos, editarlos ni borrarlos. La autoridad anterior conserva
+acceso de solo lectura a los registros institucionales no sensibles generados
+durante su periodo de responsabilidad, pero no a los registros posteriores al
+traslado.
+
+**Cobertura resuelta (2026-07-23)**: el histórico se implementará en todos los
+módulos. No existe una prioridad funcional entre ellos; el despliegue será por
+oleadas técnicas, comenzando por la base temporal de jerarquía, auditoría,
+consultas y autorización de la que dependen los demás agregados.
+
+**Artefactos emitidos resuelto (2026-07-23)**: una corrección histórica no
+provoca reemisión automática ni modifica certificados, reportes u otros
+artefactos oficiales ya emitidos. Si existe un error material, la emisión
+original se conserva como reemplazada o revocada y se genera una nueva emisión
+vinculada. Descargar o imprimir nuevamente el original reproduce su snapshot,
+no el estado institucional actual.
+
+**Datos sensibles resuelto (2026-07-23)**: salud, contactos de emergencia,
+representante legal, documentos privados y categorías equivalentes no heredan
+el acceso del histórico institucional. La persona titular o su representante
+legal conserva acceso propio; el responsable operativo de la sección activa ve
+solo el mínimo necesario; Campo Local requiere rol, finalidad y scope vigentes;
+Unión requiere un caso excepcional, justificado, temporal y auditado. Las
+autoridades anteriores pierden acceso al contenido sensible al terminar su
+relación efectiva.
+
+Los snapshots y logs no copian el contenido sensible. La retención se define por
+categoría y jurisdicción, sin conservación indefinida por valor histórico:
+finalizada la finalidad u obligación aplicable, los datos pasan por bloqueo y
+posterior supresión o anonimización. Los plazos exactos serán políticas
+configurables y versionadas.
+
+**Referencia de trabajo**:
+`docs/plans/2026-07-23-institutional-history-architecture-decision.md`.
 
 ## Estados posibles de una decisión
 

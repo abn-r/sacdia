@@ -161,6 +161,18 @@ La app Flutter usa dos mecanismos para gating de UI, ambos scoped al contexto ac
 
 `resolvedRoleNames` en `AuthorizationSnapshot` solo incluye roles de grants globales y del active grant — **no** de asignaciones inactivas. Esto previene escalacion de privilegios donde un rol de una seccion inactiva otorga acceso en la seccion activa.
 
+### Selector de sección en app móvil
+
+Cuando un usuario tiene asignaciones en varias secciones, el selector de
+contexto de la app móvil ordena siempre por ciclo formativo/edad:
+`Aventureros` → `Conquistadores` → `Guías Mayores`. No debe depender del orden
+de creación ni del orden en que `/auth/me` devuelve `club_assignments`.
+
+La card de contexto de club del dashboard y el selector de sección comparten
+los mismos colores de tipo de club: Conquistadores usa el color primario rojo,
+Aventureros usa azul y Guías Mayores usa verde. El mapeo vive en
+`sacdia-app/lib/core/theme/club_type.dart` para evitar divergencias visuales.
+
 ### Quick Access Grid — permisos por rol
 
 | Tarjeta | Permiso RBAC | Roles legacy (fallback) |
@@ -168,13 +180,35 @@ La app Flutter usa dos mecanismos para gating de UI, ambos scoped al contexto ac
 | Coordinacion | — | `coordinator`, `admin`, `super_admin`, `assistant_admin` |
 | Miembros | `users:read_detail` | `director`, `deputy_director`, `secretary`, `secretary_treasurer`, `counselor` |
 | Club | `clubs:update` | `director`, `deputy_director`, `secretary`, `secretary_treasurer` |
-| Carpeta de Evidencias | `users:read_detail` | `director`, `deputy_director`, `secretary`, `secretary_treasurer` |
+| Carpeta Anual de Evidencias | `evidence_folders:read` | `director`, `deputy_director`, `secretary`, `secretary_treasurer` |
+| Camporees | `camporees:read` | roles con lectura de camporees en la seccion activa |
 | Finanzas | `finances:read` | `director`, `treasurer`, `secretary_treasurer` |
 | Unidades | `units:update` | `director`, `deputy_director`, `counselor`, `secretary`, `secretary_treasurer` |
 | Clase Agrupada | `classes:update` | `director`, `deputy_director`, `counselor`, `instructor`, `secretary`, `secretary_treasurer` |
 | Seguros del Club | `insurance:read` | `director`, `deputy_director`, `secretary`, `secretary_treasurer` |
 | Inventario | `inventory:read` | `director`, `deputy_director`, `secretary`, `secretary_treasurer` |
-| Recursos | `folders:read` | — (todos los miembros) |
+| Recursos | `resources:read` | — (lectura operativa de recursos compartidos) |
+
+### Dashboard — inscripción anual de club
+
+El banner de inscripción anual en la app móvil usa el permiso canónico
+`club_instances:create` para mostrar la acción **Inscribirse** cuando no existe
+inscripción vigente. Este permiso lo reciben roles de dirección/secretaría de
+la sección activa (`director`, `secretary`, `secretary-treasurer`) y no debe
+mostrarse a `member`.
+
+Al enviarse la inscripción anual, el backend crea/actualiza
+`club_enrollments.status = pending_validation`. En ese estado la app muestra el
+mensaje de inscripción enviada/en validación por Campo Local; no vuelve a
+mostrar el botón de inscripción. Este estado visual usa el color
+amarillo/acento y escala la tarjeta al 80% respecto del aviso pendiente para
+comunicar revisión sin ocupar tanto espacio del dashboard.
+
+El panel administrativo usa `/dashboard/enrollments` como cola de validación
+de Campo Local. Consume `GET /club-enrollments/validation/queue` y permite
+aprobar/rechazar con `POST /club-enrollments/:enrollmentId/approve|reject`.
+Cuando Campo Local aprueba, la inscripción pasa a `active` y la app deja de
+mostrar la alerta de validación.
 
 ### Seed de permisos
 

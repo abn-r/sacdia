@@ -1,0 +1,2601 @@
+{
+  "version": "2026.official-draft-source-normalization",
+  "source": "/Users/abner/.codex/attachments/0b5f2469-69ce-48de-bf5a-d1da0d50f459/pasted-text.txt",
+  "status": "draft_not_importable",
+  "reason": "Uses names/category names only; honor_ids, category ids and division ids still need catalog matching and confirmation.",
+  "master_honors": [
+    {
+      "name": "Maestría en Acuática",
+      "source_start_line": 1,
+      "philosophy": "Las especialidades de la Maestría en Acuática enfatizan las especialidades que involucran la recreación acuática.",
+      "notes": [
+        "Seguridad Básica en el Agua, Natación I y su nivel avanzado son cursos de natación introductorios y por eso no se incluyen en esta lista."
+      ],
+      "applicability": {
+        "scope": "ALL",
+        "division_names": [],
+        "raw": null
+      },
+      "groups": [
+        {
+          "group_type": "EXPLICIT_OPTIONS",
+          "title": null,
+          "description": null,
+          "source_rule": "Desarrollar por lo menos 7 de las siguientes especialidades:",
+          "minimum_required": 7,
+          "display_order": 0,
+          "active": true,
+          "options": [
+            {
+              "label": "Buceo",
+              "raw": "Buceo",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 5
+            },
+            {
+              "label": "Buceo con escafandra, y/o avanzado",
+              "raw": "Buceo con escafandra, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 6
+            },
+            {
+              "label": "Canotaje",
+              "raw": "Canotaje",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 8
+            },
+            {
+              "label": "Clavado de trampolín",
+              "raw": "Clavado de trampolín",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 9
+            },
+            {
+              "label": "Esquí acuático",
+              "raw": "Esquí acuático",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 10
+            },
+            {
+              "label": "Kayaks",
+              "raw": "Kayaks",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 11
+            },
+            {
+              "label": "Lancha a motor",
+              "raw": "Lancha a motor",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 12
+            },
+            {
+              "label": "Natacion II",
+              "raw": "Natacion II",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 13
+            },
+            {
+              "label": "Natacion III, y/o avanzado",
+              "raw": "Natacion III, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 14
+            },
+            {
+              "label": "Navegación",
+              "raw": "Navegación",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 15
+            },
+            {
+              "label": "Navegación a vela",
+              "raw": "Navegación a vela",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 16
+            },
+            {
+              "label": "Remo",
+              "raw": "Remo",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 17
+            },
+            {
+              "label": "Socorrismo",
+              "raw": "Socorrismo",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 18
+            },
+            {
+              "label": "Surf a vela",
+              "raw": "Surf a vela",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 19
+            }
+          ]
+        }
+      ],
+      "normalization_warnings": [
+        "Contiene opciones con avanzado/y-o avanzado que requieren matching a honors equivalentes"
+      ],
+      "source_end_line": 21
+    },
+    {
+      "name": "Maestría en ADRA",
+      "source_start_line": 22,
+      "philosophy": null,
+      "notes": [],
+      "applicability": {
+        "scope": "ALL",
+        "division_names": [],
+        "raw": null
+      },
+      "groups": [
+        {
+          "group_type": "CATEGORY_COUNT",
+          "title": "ADRA",
+          "description": "Desarrollar por lo menos 6 especialidades de la categoría de ADRA y por lo menos 1 de las siguientes especialidades:",
+          "source_rule": "Desarrollar por lo menos 6 especialidades de la categoría de ADRA y por lo menos 1 de las siguientes especialidades:",
+          "minimum_required": 6,
+          "category_name": "ADRA",
+          "display_order": 0,
+          "active": true
+        },
+        {
+          "group_type": "EXPLICIT_OPTIONS",
+          "title": null,
+          "description": null,
+          "source_rule": "Desarrollar por lo menos 6 especialidades de la categoría de ADRA y por lo menos 1 de las siguientes especialidades:",
+          "minimum_required": 1,
+          "display_order": 1,
+          "active": true,
+          "options": [
+            {
+              "label": "Herencia cultural",
+              "raw": "Herencia cultural",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 24
+            },
+            {
+              "label": "Idiomas",
+              "raw": "Idiomas",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 25
+            },
+            {
+              "label": "Multiculturalidad",
+              "raw": "Multiculturalidad",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 26
+            },
+            {
+              "label": "Temperancia",
+              "raw": "Temperancia",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 27
+            },
+            {
+              "label": "Testificación de menores",
+              "raw": "Testificación de menores",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 28
+            }
+          ]
+        }
+      ],
+      "normalization_warnings": [],
+      "source_end_line": 30
+    },
+    {
+      "name": "Maestría en Actividades agrícolas",
+      "source_start_line": 31,
+      "philosophy": null,
+      "notes": [],
+      "applicability": {
+        "scope": "ALL",
+        "division_names": [],
+        "raw": null
+      },
+      "groups": [
+        {
+          "group_type": "CATEGORY_COUNT",
+          "title": "Actividades agropecuarias",
+          "description": "Desarrollar por lo menos 7 especialidades de la categoría de Actividades agropecuarias.",
+          "source_rule": "Desarrollar por lo menos 7 especialidades de la categoría de Actividades agropecuarias.",
+          "minimum_required": 7,
+          "category_name": "Actividades agropecuarias",
+          "display_order": 0,
+          "active": true
+        }
+      ],
+      "normalization_warnings": [],
+      "source_end_line": 34
+    },
+    {
+      "name": "Maestría en Artesanía",
+      "source_start_line": 35,
+      "philosophy": null,
+      "notes": [],
+      "applicability": {
+        "scope": "ALL",
+        "division_names": [],
+        "raw": null
+      },
+      "groups": [
+        {
+          "group_type": "CATEGORY_COUNT",
+          "title": "Artes y actividades manuales",
+          "description": "Desarrollar por lo menos 7 especialidades de la categoría de Artes y actividades manuales.",
+          "source_rule": "Desarrollar por lo menos 7 especialidades de la categoría de Artes y actividades manuales.",
+          "minimum_required": 7,
+          "category_name": "Artes y actividades manuales",
+          "display_order": 0,
+          "active": true
+        }
+      ],
+      "normalization_warnings": [],
+      "source_end_line": 38
+    },
+    {
+      "name": "Maestría en Botánica",
+      "source_start_line": 39,
+      "philosophy": null,
+      "notes": [],
+      "applicability": {
+        "scope": "SELECTED_DIVISIONS",
+        "division_names": [
+          "División Sudamericana"
+        ],
+        "raw": "Esta Maestría es específica para la División Sudamericana."
+      },
+      "groups": [
+        {
+          "group_type": "EXPLICIT_OPTIONS",
+          "title": null,
+          "description": null,
+          "source_rule": "Desarrollar por lo menos 7 de las siguientes especialidades:",
+          "minimum_required": 7,
+          "display_order": 0,
+          "active": true,
+          "options": [
+            {
+              "label": "Algas marinas",
+              "raw": "Algas marinas",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 42
+            },
+            {
+              "label": "Árboles, y/o avanzado",
+              "raw": "Árboles, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 43
+            },
+            {
+              "label": "Arbustos, y/o avanzado",
+              "raw": "Arbustos, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 44
+            },
+            {
+              "label": "Briófitas",
+              "raw": "Briófitas",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 45
+            },
+            {
+              "label": "Cactus, y/o avanzado",
+              "raw": "Cactus, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 46
+            },
+            {
+              "label": "Citología",
+              "raw": "Citología",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 47
+            },
+            {
+              "label": "Fisiología vegetal",
+              "raw": "Fisiología vegetal",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 48
+            },
+            {
+              "label": "Flores, y/o avanzado",
+              "raw": "Flores, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 49
+            },
+            {
+              "label": "Gramíneas",
+              "raw": "Gramíneas",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 50
+            },
+            {
+              "label": "Helechos",
+              "raw": "Helechos",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 51
+            },
+            {
+              "label": "Hierbas",
+              "raw": "Hierbas",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 52
+            },
+            {
+              "label": "Líquenes",
+              "raw": "Líquenes",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 53
+            },
+            {
+              "label": "Orquídeas, y/o avanzado",
+              "raw": "Orquídeas, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 54
+            },
+            {
+              "label": "Palmeras",
+              "raw": "Palmeras",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 55
+            },
+            {
+              "label": "Plantas carnívoras",
+              "raw": "Plantas carnívoras",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 56
+            },
+            {
+              "label": "Plantas de interior",
+              "raw": "Plantas de interior",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 57
+            },
+            {
+              "label": "Semillas, y/o avanzado",
+              "raw": "Semillas, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 58
+            }
+          ]
+        }
+      ],
+      "normalization_warnings": [
+        "Contiene opciones con avanzado/y-o avanzado que requieren matching a honors equivalentes"
+      ],
+      "source_end_line": 60
+    },
+    {
+      "name": "Maestría en Ciencias naturales",
+      "source_start_line": 61,
+      "philosophy": "La Maestría en Ciencias Naturales consiste de especialidades del segundo libro de Dios, la naturaleza. Anima a los Conquistadores a explorar una gran variedad de flora y fauna.",
+      "notes": [
+        "Algunas especialidades de flora se encuentran en la lista de la Maestría en Conservación en vez de aquí por su enfoque fuerte en la conservación."
+      ],
+      "applicability": {
+        "scope": "ALL",
+        "division_names": [],
+        "raw": null
+      },
+      "groups": [
+        {
+          "group_type": "EXPLICIT_OPTIONS",
+          "title": "flora",
+          "description": null,
+          "source_rule": "Desarrollar por lo menos 4 de las siguientes especialidades (flora):",
+          "minimum_required": 4,
+          "display_order": 0,
+          "active": true,
+          "options": [
+            {
+              "label": "Árboles",
+              "raw": "Árboles",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 66
+            },
+            {
+              "label": "Arbustos",
+              "raw": "Arbustos",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 67
+            },
+            {
+              "label": "Cactus, y/o avanzado",
+              "raw": "Cactus, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 68
+            },
+            {
+              "label": "Cataratas",
+              "raw": "Cataratas",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 69
+            },
+            {
+              "label": "Climatología",
+              "raw": "Climatología",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 70
+            },
+            {
+              "label": "Cosmografía",
+              "raw": "Cosmografía",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 71
+            },
+            {
+              "label": "Helechos",
+              "raw": "Helechos",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 72
+            },
+            {
+              "label": "Hongos",
+              "raw": "Hongos",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 73
+            },
+            {
+              "label": "Meteoritos",
+              "raw": "Meteoritos",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 74
+            },
+            {
+              "label": "Moluscos",
+              "raw": "Moluscos",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 75
+            },
+            {
+              "label": "Orquídeas",
+              "raw": "Orquídeas",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 76
+            },
+            {
+              "label": "Plantas caseras",
+              "raw": "Plantas caseras",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 77
+            },
+            {
+              "label": "Palmeras",
+              "raw": "Palmeras",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 78
+            },
+            {
+              "label": "Semillas, y/o avanzado",
+              "raw": "Semillas, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 79
+            },
+            {
+              "label": "Sol de medianoche",
+              "raw": "Sol de medianoche",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 80
+            },
+            {
+              "label": "Zarzos",
+              "raw": "Zarzos",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 81
+            }
+          ]
+        },
+        {
+          "group_type": "EXPLICIT_OPTIONS",
+          "title": "fauna",
+          "description": null,
+          "source_rule": "y por lo menos 2 de las siguientes especialidades (fauna):",
+          "minimum_required": 2,
+          "display_order": 1,
+          "active": true,
+          "options": [
+            {
+              "label": "Antílopes",
+              "raw": "Antílopes",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 83
+            },
+            {
+              "label": "Anfibios",
+              "raw": "Anfibios",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 84
+            },
+            {
+              "label": "Arácnidos",
+              "raw": "Arácnidos",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 85
+            },
+            {
+              "label": "Aves, y/o avanzado",
+              "raw": "Aves, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 86
+            },
+            {
+              "label": "Dinosaurios",
+              "raw": "Dinosaurios",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 87
+            },
+            {
+              "label": "Insectos, y/o avanzado",
+              "raw": "Insectos, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 88
+            },
+            {
+              "label": "Lombrices",
+              "raw": "Lombrices",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 89
+            },
+            {
+              "label": "Mariposas",
+              "raw": "Mariposas",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 90
+            },
+            {
+              "label": "Marsupiales",
+              "raw": "Marsupiales",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 91
+            },
+            {
+              "label": "Murciélagos, y/o avanzado",
+              "raw": "Murciélagos, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 92
+            },
+            {
+              "label": "Odonatos, y/o avanzado",
+              "raw": "Odonatos, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 93
+            },
+            {
+              "label": "Tiburones",
+              "raw": "Tiburones",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 94
+            },
+            {
+              "label": "Vida microscópica",
+              "raw": "Vida microscópica",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 95
+            }
+          ]
+        },
+        {
+          "group_type": "EXPLICIT_OPTIONS",
+          "title": "fauna doméstica",
+          "description": null,
+          "source_rule": "y por lo menos 1 de las siguientes especialidades (fauna doméstica):",
+          "minimum_required": 1,
+          "display_order": 2,
+          "active": true,
+          "options": [
+            {
+              "label": "Aves de jaula",
+              "raw": "Aves de jaula",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 97
+            },
+            {
+              "label": "Aves domésticas",
+              "raw": "Aves domésticas",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 98
+            },
+            {
+              "label": "Gatos",
+              "raw": "Gatos",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 99
+            },
+            {
+              "label": "Mamíferos pequeños como mascotas",
+              "raw": "Mamíferos pequeños como mascotas",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 100
+            },
+            {
+              "label": "Peces",
+              "raw": "Peces",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 102
+            },
+            {
+              "label": "Perros",
+              "raw": "Perros",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 103
+            }
+          ]
+        }
+      ],
+      "normalization_warnings": [
+        "Contiene opciones con avanzado/y-o avanzado que requieren matching a honors equivalentes"
+      ],
+      "source_end_line": 105
+    },
+    {
+      "name": "Maestría en Ciencia y tecnología",
+      "source_start_line": 106,
+      "philosophy": null,
+      "notes": [],
+      "applicability": {
+        "scope": "SELECTED_DIVISIONS",
+        "division_names": [
+          "División Sudamericana"
+        ],
+        "raw": "Esta Maestría es específica para la División Sudamericana."
+      },
+      "groups": [
+        {
+          "group_type": "EXPLICIT_OPTIONS",
+          "title": null,
+          "description": null,
+          "source_rule": "Desarrollar por lo menos 7 de las siguientes especialidades:",
+          "minimum_required": 7,
+          "display_order": 0,
+          "active": true,
+          "options": [
+            {
+              "label": "Bioquímica, y/o avanzado",
+              "raw": "Bioquímica, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 109
+            },
+            {
+              "label": "Computación I - Básico",
+              "raw": "Computación I - Básico",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 110
+            },
+            {
+              "label": "Computación II - Intermedio",
+              "raw": "Computación II - Intermedio",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 111
+            },
+            {
+              "label": "Computación III - Regular",
+              "raw": "Computación III - Regular",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 112
+            },
+            {
+              "label": "Computación IV - Avanzado",
+              "raw": "Computación IV - Avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 113
+            },
+            {
+              "label": "Computación V - Especializado",
+              "raw": "Computación V - Especializado",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 114
+            },
+            {
+              "label": "Desarrollo de software",
+              "raw": "Desarrollo de software",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 115
+            },
+            {
+              "label": "Física",
+              "raw": "Física",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 116
+            },
+            {
+              "label": "Informática programable",
+              "raw": "Informática programable",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 117
+            },
+            {
+              "label": "Internet, y/o avanzado",
+              "raw": "Internet, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 118
+            },
+            {
+              "label": "Química",
+              "raw": "Química",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 119
+            },
+            {
+              "label": "Óptica",
+              "raw": "Óptica",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 120
+            }
+          ]
+        }
+      ],
+      "normalization_warnings": [
+        "Contiene opciones con avanzado/y-o avanzado que requieren matching a honors equivalentes"
+      ],
+      "source_end_line": 122
+    },
+    {
+      "name": "Maestría en Conservación",
+      "source_start_line": 123,
+      "philosophy": "Las especialidades de la Maestría en Conservación enfatizan flora, bioma y temas que se enfocan en el entorno.",
+      "notes": [],
+      "applicability": {
+        "scope": "ALL",
+        "division_names": [],
+        "raw": null
+      },
+      "groups": [
+        {
+          "group_type": "EXPLICIT_OPTIONS",
+          "title": null,
+          "description": null,
+          "source_rule": "Desarrollar por lo menos 7 de las siguientes especialidades:",
+          "minimum_required": 7,
+          "display_order": 0,
+          "active": true,
+          "options": [
+            {
+              "label": "Arena",
+              "raw": "Arena",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 126
+            },
+            {
+              "label": "Combustibles alternativos, avanzado",
+              "raw": "Combustibles alternativos, avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 127
+            },
+            {
+              "label": "Conservación ambiental",
+              "raw": "Conservación ambiental",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 129
+            },
+            {
+              "label": "Dunas, y/o avanzado",
+              "raw": "Dunas, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 130
+            },
+            {
+              "label": "Ecología, y/o avanzado",
+              "raw": "Ecología, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 131
+            },
+            {
+              "label": "Energía renovable",
+              "raw": "Energía renovable",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 132
+            },
+            {
+              "label": "Especies en peligro de extinción",
+              "raw": "Especies en peligro de extinción",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 133
+            },
+            {
+              "label": "Fósiles",
+              "raw": "Fósiles",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 135
+            },
+            {
+              "label": "Geología, y/o avanzado",
+              "raw": "Geología, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 136
+            },
+            {
+              "label": "Mineralogía, y/o avanzado",
+              "raw": "Mineralogía, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 137
+            },
+            {
+              "label": "Montañas",
+              "raw": "Montañas",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 138
+            },
+            {
+              "label": "Pantanos y ciénagas, y/o avanzado",
+              "raw": "Pantanos y ciénagas, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 139
+            },
+            {
+              "label": "Reciclaje",
+              "raw": "Reciclaje",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 141
+            },
+            {
+              "label": "Ríos y arroyos, y/o avanzado",
+              "raw": "Ríos y arroyos, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 142
+            },
+            {
+              "label": "Silvicultura, y/o avanzado",
+              "raw": "Silvicultura, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 144
+            },
+            {
+              "label": "Taiga, y/o avanzado",
+              "raw": "Taiga, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 145
+            }
+          ]
+        }
+      ],
+      "normalization_warnings": [
+        "Contiene opciones con avanzado/y-o avanzado que requieren matching a honors equivalentes"
+      ],
+      "source_end_line": 147
+    },
+    {
+      "name": "Maestría en Crecimiento espiritual y ministerios",
+      "source_start_line": 148,
+      "philosophy": null,
+      "notes": [],
+      "applicability": {
+        "scope": "ALL",
+        "division_names": [],
+        "raw": null
+      },
+      "groups": [
+        {
+          "group_type": "EXPLICIT_OPTIONS",
+          "title": "Crecimiento espiritual",
+          "description": null,
+          "source_rule": "Desarrollar 3 de las siguientes especialidades (Crecimiento espiritual):",
+          "minimum_required": 3,
+          "display_order": 0,
+          "active": true,
+          "options": [
+            {
+              "label": "Aventura para Cristo , y/o avanzado",
+              "raw": "Aventura para Cristo , y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 150
+            },
+            {
+              "label": "Biblia viva",
+              "raw": "Biblia viva",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 152
+            },
+            {
+              "label": "Marcado de la Biblia, y/o avanzado",
+              "raw": "Marcado de la Biblia, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 153
+            },
+            {
+              "label": "Mayordomía",
+              "raw": "Mayordomía",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 155
+            },
+            {
+              "label": "Oración",
+              "raw": "Oración",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 156
+            },
+            {
+              "label": "Pacificadores, y/o avanzado",
+              "raw": "Pacificadores, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 157
+            },
+            {
+              "label": "Santuario",
+              "raw": "Santuario",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 158
+            }
+          ]
+        },
+        {
+          "group_type": "EXPLICIT_OPTIONS",
+          "title": "Ministerios",
+          "description": null,
+          "source_rule": "Desarrollar 4 de las siguientes especialidades (Ministerios):",
+          "minimum_required": 4,
+          "display_order": 1,
+          "active": true,
+          "options": [
+            {
+              "label": "Arte cristiano de predicar, y/o avanzado",
+              "raw": "Arte cristiano de predicar, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 160
+            },
+            {
+              "label": "Arte cristiano de vender",
+              "raw": "Arte cristiano de vender",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 162
+            },
+            {
+              "label": "Colportaje",
+              "raw": "Colportaje",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 163
+            },
+            {
+              "label": "Drama cristiano",
+              "raw": "Drama cristiano",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 164
+            },
+            {
+              "label": "Enfermería casera",
+              "raw": "Enfermería casera",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 165
+            },
+            {
+              "label": "Enseñanza",
+              "raw": "Enseñanza",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 166
+            },
+            {
+              "label": "Evangelismo bíblico",
+              "raw": "Evangelismo bíblico",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 167
+            },
+            {
+              "label": "Evangelismo personal",
+              "raw": "Evangelismo personal",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 168
+            },
+            {
+              "label": "Lenguaje gestual, y/o avanzado",
+              "raw": "Lenguaje gestual, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 169
+            },
+            {
+              "label": "Narración de historias cristianas",
+              "raw": "Narración de historias cristianas",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 171
+            },
+            {
+              "label": "Predícalo, y/o avanzado",
+              "raw": "Predícalo, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 173
+            },
+            {
+              "label": "Testificación de menores",
+              "raw": "Testificación de menores",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 174
+            },
+            {
+              "label": "Títeres",
+              "raw": "Títeres",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 175
+            }
+          ]
+        }
+      ],
+      "normalization_warnings": [
+        "Contiene opciones con avanzado/y-o avanzado que requieren matching a honors equivalentes"
+      ],
+      "source_end_line": 177
+    },
+    {
+      "name": "Maestría en Deportes",
+      "source_start_line": 178,
+      "philosophy": "La Maestría en Deportes consiste de especialidades que involucran un premio o una situación de ganar vs. perder.",
+      "notes": [],
+      "applicability": {
+        "scope": "ALL",
+        "division_names": [],
+        "raw": null
+      },
+      "groups": [
+        {
+          "group_type": "EXPLICIT_OPTIONS",
+          "title": null,
+          "description": null,
+          "source_rule": "Desarrollar por lo menos 7 de las siguientes especialidades:",
+          "minimum_required": 7,
+          "display_order": 0,
+          "active": true,
+          "options": [
+            {
+              "label": "Baloncesto",
+              "raw": "Baloncesto",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 181
+            },
+            {
+              "label": "Ciclismo, y/o avanzado",
+              "raw": "Ciclismo, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 182
+            },
+            {
+              "label": "Equitación, avanzado",
+              "raw": "Equitación, avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 183
+            },
+            {
+              "label": "Esquí alpino",
+              "raw": "Esquí alpino",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 184
+            },
+            {
+              "label": "Fútbol",
+              "raw": "Fútbol",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 185
+            },
+            {
+              "label": "Fútbol bandera",
+              "raw": "Fútbol bandera",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 186
+            },
+            {
+              "label": "Gimnasia",
+              "raw": "Gimnasia",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 187
+            },
+            {
+              "label": "Golf",
+              "raw": "Golf",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 188
+            },
+            {
+              "label": "Pista y campo",
+              "raw": "Pista y campo",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 189
+            },
+            {
+              "label": "Softbol",
+              "raw": "Softbol",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 190
+            },
+            {
+              "label": "Tenis",
+              "raw": "Tenis",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 191
+            },
+            {
+              "label": "Tiro con arco",
+              "raw": "Tiro con arco",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 192
+            },
+            {
+              "label": "Triatlón",
+              "raw": "Triatlón",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 193
+            },
+            {
+              "label": "Ultimate disc",
+              "raw": "Ultimate disc",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 194
+            },
+            {
+              "label": "Voleibol",
+              "raw": "Voleibol",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 195
+            }
+          ]
+        }
+      ],
+      "normalization_warnings": [
+        "Contiene opciones con avanzado/y-o avanzado que requieren matching a honors equivalentes"
+      ],
+      "source_end_line": 197
+    },
+    {
+      "name": "Maestría en Familia, orígenes y herencia",
+      "source_start_line": 198,
+      "philosophy": null,
+      "notes": [
+        "Cada división puede sustituir una especialidad específica que se dirige a la herencia específica dentro de su división (por ejemplo, Folclore Maorí para la División del Pacífico Sur o Herencia Adventista Afroamericana dentro para la División Norteamericana)"
+      ],
+      "applicability": {
+        "scope": "ALL",
+        "division_names": [],
+        "raw": null
+      },
+      "groups": [
+        {
+          "group_type": "EXPLICIT_OPTIONS",
+          "title": null,
+          "description": null,
+          "source_rule": "Desarrollar las 2 siguientes especialidades:",
+          "minimum_required": 2,
+          "display_order": 0,
+          "active": true,
+          "options": [
+            {
+              "label": "Herencia de los pioneros adventistas",
+              "raw": "Herencia de los pioneros adventistas",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 201
+            },
+            {
+              "label": "Mensajera de Dios",
+              "raw": "Mensajera de Dios",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 203
+            }
+          ]
+        },
+        {
+          "group_type": "EXPLICIT_OPTIONS",
+          "title": null,
+          "description": null,
+          "source_rule": "Desarrollar por lo menos 5 de las siguientes especialidades:",
+          "minimum_required": 5,
+          "display_order": 1,
+          "active": true,
+          "options": [
+            {
+              "label": "Arqueología bíblica",
+              "raw": "Arqueología bíblica",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 205
+            },
+            {
+              "label": "Banderas, y/o avanzado",
+              "raw": "Banderas, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 206
+            },
+            {
+              "label": "Civismo cristiano",
+              "raw": "Civismo cristiano",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 207
+            },
+            {
+              "label": "Creacionismo, y/o avanzado",
+              "raw": "Creacionismo, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 208
+            },
+            {
+              "label": "Escatología",
+              "raw": "Escatología",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 209
+            },
+            {
+              "label": "Genealogía",
+              "raw": "Genealogía",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 210
+            },
+            {
+              "label": "Idiomas",
+              "raw": "Idiomas",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 211
+            },
+            {
+              "label": "Mejoramiento comunitario",
+              "raw": "Mejoramiento comunitario",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 212
+            },
+            {
+              "label": "Multiculturalidad",
+              "raw": "Multiculturalidad",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 213
+            },
+            {
+              "label": "Patriotismo",
+              "raw": "Patriotismo",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 214
+            },
+            {
+              "label": "Vida familiar",
+              "raw": "Vida familiar",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 215
+            }
+          ]
+        }
+      ],
+      "normalization_warnings": [
+        "Contiene opciones con avanzado/y-o avanzado que requieren matching a honors equivalentes"
+      ],
+      "source_end_line": 217
+    },
+    {
+      "name": "Maestría en Habilidades domésticas",
+      "source_start_line": 218,
+      "philosophy": null,
+      "notes": [],
+      "applicability": {
+        "scope": "ALL",
+        "division_names": [],
+        "raw": null
+      },
+      "groups": [
+        {
+          "group_type": "CATEGORY_COUNT",
+          "title": "Artes domésticas",
+          "description": "Desarrollar por lo menos 7 especialidades de la categoría de Artes domésticas.",
+          "source_rule": "Desarrollar por lo menos 7 especialidades de la categoría de Artes domésticas.",
+          "minimum_required": 7,
+          "category_name": "Artes domésticas",
+          "display_order": 0,
+          "active": true
+        }
+      ],
+      "normalization_warnings": [],
+      "source_end_line": 221
+    },
+    {
+      "name": "Maestría en Habilidades vocacionales",
+      "source_start_line": 222,
+      "philosophy": null,
+      "notes": [],
+      "applicability": {
+        "scope": "ALL",
+        "division_names": [],
+        "raw": null
+      },
+      "groups": [
+        {
+          "group_type": "CATEGORY_COUNT",
+          "title": "Actividades vocacionales",
+          "description": "Desarrollar por lo menos 7 especialidades de la categoría de Actividades vocacionales.",
+          "source_rule": "Desarrollar por lo menos 7 especialidades de la categoría de Actividades vocacionales.",
+          "minimum_required": 7,
+          "category_name": "Actividades vocacionales",
+          "display_order": 0,
+          "active": true
+        }
+      ],
+      "normalization_warnings": [],
+      "source_end_line": 225
+    },
+    {
+      "name": "Maestría del Medioambiente",
+      "source_start_line": 226,
+      "philosophy": null,
+      "notes": [],
+      "applicability": {
+        "scope": "SELECTED_DIVISIONS",
+        "division_names": [
+          "Unión Franco-Belga"
+        ],
+        "raw": "Esta Maestría es específica para la Unión Franco-Belga."
+      },
+      "groups": [
+        {
+          "group_type": "EXPLICIT_OPTIONS",
+          "title": null,
+          "description": null,
+          "source_rule": "Desarrollar por lo menos 7 de las siguientes especialidades:",
+          "minimum_required": 7,
+          "display_order": 0,
+          "active": true,
+          "options": [
+            {
+              "label": "Agricultura ecológica",
+              "raw": "Agricultura ecológica",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 229
+            },
+            {
+              "label": "Bioconstrucción",
+              "raw": "Bioconstrucción",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 230
+            },
+            {
+              "label": "Ecología",
+              "raw": "Ecología",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 231
+            },
+            {
+              "label": "Energías renovables",
+              "raw": "Energías renovables",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 232
+            },
+            {
+              "label": "Medioambiente acuático",
+              "raw": "Medioambiente acuático",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 233
+            },
+            {
+              "label": "Medioambiente terrestre",
+              "raw": "Medioambiente terrestre",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 234
+            },
+            {
+              "label": "Recogida selectiva",
+              "raw": "Recogida selectiva",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 235
+            }
+          ]
+        }
+      ],
+      "normalization_warnings": [],
+      "source_end_line": 237
+    },
+    {
+      "name": "Experto en Recreación",
+      "source_start_line": 238,
+      "philosophy": "La Maestría en Recreación consiste de especialidades de actividades al aire libre ue no involucran premios o situaciones de ganar vs. perder. Como hay una Maestría en Vida Primitiva, no se incluye aquí el arte de acampar. Como hay una Maestría Acuática, esta maestría sólo incluye deportes y recreación terrestres.",
+      "notes": [],
+      "applicability": {
+        "scope": "ALL",
+        "division_names": [],
+        "raw": null
+      },
+      "groups": [
+        {
+          "group_type": "EXPLICIT_OPTIONS",
+          "title": null,
+          "description": null,
+          "source_rule": "Desarrollar por lo menos 7 de las siguientes especialidades:",
+          "minimum_required": 7,
+          "display_order": 0,
+          "active": true,
+          "options": [
+            {
+              "label": "Baloncesto",
+              "raw": "Baloncesto",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 241
+            },
+            {
+              "label": "Cometas",
+              "raw": "Cometas",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 242
+            },
+            {
+              "label": "Educación física",
+              "raw": "Educación física",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 243
+            },
+            {
+              "label": "Ejercicios y marchas",
+              "raw": "Ejercicios y marchas",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 244
+            },
+            {
+              "label": "Equitación",
+              "raw": "Equitación",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 245
+            },
+            {
+              "label": "Escalada en roca",
+              "raw": "Escalada en roca",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 246
+            },
+            {
+              "label": "Esquí de fondo",
+              "raw": "Esquí de fondo",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 247
+            },
+            {
+              "label": "Excursionismo",
+              "raw": "Excursionismo",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 248
+            },
+            {
+              "label": "Excursionismo sobre la nieve",
+              "raw": "Excursionismo sobre la nieve",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 249
+            },
+            {
+              "label": "Exploración de cuevas",
+              "raw": "Exploración de cuevas",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 251
+            },
+            {
+              "label": "Geocaching",
+              "raw": "Geocaching",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 252
+            },
+            {
+              "label": "Geocaching geológica",
+              "raw": "Geocaching geológica",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 253
+            },
+            {
+              "label": "Letterboxing",
+              "raw": "Letterboxing",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 254
+            },
+            {
+              "label": "Monociclismo",
+              "raw": "Monociclismo",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 255
+            },
+            {
+              "label": "Orientación",
+              "raw": "Orientación",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 256
+            },
+            {
+              "label": "Prospección de oro",
+              "raw": "Prospección de oro",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 257
+            },
+            {
+              "label": "Senderismo",
+              "raw": "Senderismo",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 258
+            },
+            {
+              "label": "Tambores y percusión",
+              "raw": "Tambores y percusión",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 259
+            }
+          ]
+        }
+      ],
+      "normalization_warnings": [],
+      "source_end_line": 261
+    },
+    {
+      "name": "Maestría en Salud y ciencia",
+      "source_start_line": 262,
+      "philosophy": null,
+      "notes": [],
+      "applicability": {
+        "scope": "ALL",
+        "division_names": [],
+        "raw": null
+      },
+      "groups": [
+        {
+          "group_type": "EXPLICIT_OPTIONS",
+          "title": null,
+          "description": null,
+          "source_rule": "Desarrollar por lo menos 3 de las siguientes especialidades",
+          "minimum_required": 3,
+          "display_order": 0,
+          "active": true,
+          "options": [
+            {
+              "label": "Cerebro y conducta",
+              "raw": "Cerebro y conducta",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 264
+            },
+            {
+              "label": "Cuidado de niños",
+              "raw": "Cuidado de niños",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 265
+            },
+            {
+              "label": "Climatología",
+              "raw": "Climatología",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 266
+            },
+            {
+              "label": "Defensas de la sangre y del cuerpo",
+              "raw": "Defensas de la sangre y del cuerpo",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 267
+            },
+            {
+              "label": "Digestión",
+              "raw": "Digestión",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 269
+            },
+            {
+              "label": "Enfermería casera",
+              "raw": "Enfermería casera",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 270
+            },
+            {
+              "label": "Huesos, músculos y movimientos",
+              "raw": "Huesos, músculos y movimientos",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 271
+            },
+            {
+              "label": "Salud y curación",
+              "raw": "Salud y curación",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 273
+            }
+          ]
+        },
+        {
+          "group_type": "EXPLICIT_OPTIONS",
+          "title": null,
+          "description": null,
+          "source_rule": "y por lo menos 2 de las siguientes especialidades",
+          "minimum_required": 2,
+          "display_order": 1,
+          "active": true,
+          "options": [
+            {
+              "label": "Alerta roja",
+              "raw": "Alerta roja",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 275
+            },
+            {
+              "label": "Primeros auxilios I",
+              "raw": "Primeros auxilios I",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 276
+            },
+            {
+              "label": "Primeros auxilios II",
+              "raw": "Primeros auxilios II",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 277
+            },
+            {
+              "label": "Primeros auxilios II, avanzado",
+              "raw": "Primeros auxilios II, avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 278
+            },
+            {
+              "label": "Reanimación cardiopulmonar (RCP)",
+              "raw": "Reanimación cardiopulmonar (RCP)",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 280
+            },
+            {
+              "label": "Rescate básico",
+              "raw": "Rescate básico",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 282
+            }
+          ]
+        },
+        {
+          "group_type": "EXPLICIT_OPTIONS",
+          "title": null,
+          "description": null,
+          "source_rule": "y por lo menos 2 de las siguientes especialidades",
+          "minimum_required": 2,
+          "display_order": 2,
+          "active": true,
+          "options": [
+            {
+              "label": "Física",
+              "raw": "Física",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 284
+            },
+            {
+              "label": "Óptica",
+              "raw": "Óptica",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 285
+            },
+            {
+              "label": "Química",
+              "raw": "Química",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 286
+            },
+            {
+              "label": "Vida microscópica",
+              "raw": "Vida microscópica",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 287
+            },
+            {
+              "label": "Virus",
+              "raw": "Virus",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 288
+            }
+          ]
+        }
+      ],
+      "normalization_warnings": [
+        "Contiene opciones con avanzado/y-o avanzado que requieren matching a honors equivalentes"
+      ],
+      "source_end_line": 290
+    },
+    {
+      "name": "Maestría en Tecnología moderna",
+      "source_start_line": 291,
+      "philosophy": null,
+      "notes": [],
+      "applicability": {
+        "scope": "ALL",
+        "division_names": [],
+        "raw": null
+      },
+      "groups": [
+        {
+          "group_type": "EXPLICIT_OPTIONS",
+          "title": null,
+          "description": null,
+          "source_rule": "Desarrollar por lo menos 7 de las siguientes especialidades:",
+          "minimum_required": 7,
+          "display_order": 0,
+          "active": true,
+          "options": [
+            {
+              "label": "Computadoras, y/o avanzado",
+              "raw": "Computadoras, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 293
+            },
+            {
+              "label": "Ingeniería",
+              "raw": "Ingeniería",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 294
+            },
+            {
+              "label": "Inteligencia artificial",
+              "raw": "Inteligencia artificial",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 295
+            },
+            {
+              "label": "Internet, y/o avanzado",
+              "raw": "Internet, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 296
+            },
+            {
+              "label": "Procesar texto",
+              "raw": "Procesar texto",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 297
+            },
+            {
+              "label": "Redes sociales",
+              "raw": "Redes sociales",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 298
+            },
+            {
+              "label": "Video",
+              "raw": "Video",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 299
+            }
+          ]
+        }
+      ],
+      "normalization_warnings": [
+        "Contiene opciones con avanzado/y-o avanzado que requieren matching a honors equivalentes"
+      ],
+      "source_end_line": 301
+    },
+    {
+      "name": "Maestría en Testificación",
+      "source_start_line": 302,
+      "philosophy": null,
+      "notes": [],
+      "applicability": {
+        "scope": "ALL",
+        "division_names": [],
+        "raw": null
+      },
+      "groups": [
+        {
+          "group_type": "CATEGORY_COUNT",
+          "title": "Crecimiento espiritual, actividades misioneras y herencia",
+          "description": "Desarrollar por lo menos 7 especialidades de la categoría de Crecimiento espiritual, actividades misioneras y herencia.",
+          "source_rule": "Desarrollar por lo menos 7 especialidades de la categoría de Crecimiento espiritual, actividades misioneras y herencia.",
+          "minimum_required": 7,
+          "category_name": "Crecimiento espiritual, actividades misioneras y herencia",
+          "display_order": 0,
+          "active": true
+        }
+      ],
+      "normalization_warnings": [],
+      "source_end_line": 305
+    },
+    {
+      "name": "Maestría en Vida primitiva",
+      "source_start_line": 306,
+      "philosophy": null,
+      "notes": [],
+      "applicability": {
+        "scope": "ALL",
+        "division_names": [],
+        "raw": null
+      },
+      "groups": [
+        {
+          "group_type": "EXPLICIT_OPTIONS",
+          "title": null,
+          "description": null,
+          "source_rule": "Desarrollar por lo menos 7 de las siguientes especialidades:",
+          "minimum_required": 7,
+          "display_order": 0,
+          "active": true,
+          "options": [
+            {
+              "label": "Arte de acampar",
+              "raw": "Arte de acampar",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 308
+            },
+            {
+              "label": "Campamento IV",
+              "raw": "Campamento IV",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 309
+            },
+            {
+              "label": "Campamento en invierno",
+              "raw": "Campamento en invierno",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 310
+            },
+            {
+              "label": "Cocinando en olla holandesa",
+              "raw": "Cocinando en olla holandesa",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 311
+            },
+            {
+              "label": "Excursionismo",
+              "raw": "Excursionismo",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 312
+            },
+            {
+              "label": "Fogatas y cocina al aire libre",
+              "raw": "Fogatas y cocina al aire libre",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 313
+            },
+            {
+              "label": "Liderazgo al aire libre",
+              "raw": "Liderazgo al aire libre",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 315
+            },
+            {
+              "label": "Liderazgo en la naturaleza",
+              "raw": "Liderazgo en la naturaleza",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 316
+            },
+            {
+              "label": "Nudos",
+              "raw": "Nudos",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 317
+            },
+            {
+              "label": "Orientación",
+              "raw": "Orientación",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 318
+            },
+            {
+              "label": "Pionerismo",
+              "raw": "Pionerismo",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 319
+            },
+            {
+              "label": "Plantas silvestres comestibles",
+              "raw": "Plantas silvestres comestibles",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 320
+            },
+            {
+              "label": "Senderismo",
+              "raw": "Senderismo",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 322
+            },
+            {
+              "label": "Seguridad en campamentos",
+              "raw": "Seguridad en campamentos",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 323
+            },
+            {
+              "label": "Supervivencia en clima frío",
+              "raw": "Supervivencia en clima frío",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 324
+            },
+            {
+              "label": "Tiendas de campaña",
+              "raw": "Tiendas de campaña",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 325
+            },
+            {
+              "label": "Vida primitiva",
+              "raw": "Vida primitiva",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 326
+            }
+          ]
+        }
+      ],
+      "normalization_warnings": [],
+      "source_end_line": 328
+    },
+    {
+      "name": "Maestría en Zoología",
+      "source_start_line": 329,
+      "philosophy": null,
+      "notes": [],
+      "applicability": {
+        "scope": "ALL",
+        "division_names": [],
+        "raw": null
+      },
+      "groups": [
+        {
+          "group_type": "EXPLICIT_OPTIONS",
+          "title": null,
+          "description": null,
+          "source_rule": "Desarrollar por lo menos 1 de las siguientes especialidades:",
+          "minimum_required": 1,
+          "display_order": 0,
+          "active": true,
+          "options": [
+            {
+              "label": "Cetáceaos O Mamíferos marinos",
+              "raw": "Cetáceaos O Mamíferos marinos",
+              "alternatives": [
+                "Cetáceaos",
+                "Mamíferos marinos"
+              ],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 331
+            },
+            {
+              "label": "Especies en peligro de extinción",
+              "raw": "Especies en peligro de extinción",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 333
+            },
+            {
+              "label": "Mamíferos",
+              "raw": "Mamíferos",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 335
+            }
+          ]
+        },
+        {
+          "group_type": "EXPLICIT_OPTIONS",
+          "title": "fauna silvestre",
+          "description": null,
+          "source_rule": "Desarrollar por lo menos 4 especialidades de fauna silvestre:",
+          "minimum_required": 4,
+          "display_order": 1,
+          "active": true,
+          "options": [
+            {
+              "label": "Algas marinas",
+              "raw": "Algas marinas",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 337
+            },
+            {
+              "label": "Anfibios",
+              "raw": "Anfibios",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 338
+            },
+            {
+              "label": "Antílopes",
+              "raw": "Antílopes",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 339
+            },
+            {
+              "label": "Arácnidos",
+              "raw": "Arácnidos",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 340
+            },
+            {
+              "label": "Aves, y/o avanzado",
+              "raw": "Aves, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 341
+            },
+            {
+              "label": "Dinosaurios O Fósiles",
+              "raw": "Dinosaurios O Fósiles",
+              "alternatives": [
+                "Dinosaurios",
+                "Fósiles"
+              ],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 342
+            },
+            {
+              "label": "Insectos, y/o avanzado",
+              "raw": "Insectos, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 343
+            },
+            {
+              "label": "Invertebrados marinos",
+              "raw": "Invertebrados marinos",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 344
+            },
+            {
+              "label": "Lombrices",
+              "raw": "Lombrices",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 345
+            },
+            {
+              "label": "Mariposas",
+              "raw": "Mariposas",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 346
+            },
+            {
+              "label": "Marsupiales",
+              "raw": "Marsupiales",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 347
+            },
+            {
+              "label": "Murciélagos, y/o avanzado",
+              "raw": "Murciélagos, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 348
+            },
+            {
+              "label": "Odonatos, y/o avanzado",
+              "raw": "Odonatos, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 349
+            },
+            {
+              "label": "Tiburones",
+              "raw": "Tiburones",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 350
+            },
+            {
+              "label": "Vida microscópica",
+              "raw": "Vida microscópica",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 351
+            }
+          ]
+        },
+        {
+          "group_type": "EXPLICIT_OPTIONS",
+          "title": "animales que son mascotas o de granja",
+          "description": null,
+          "source_rule": "Desarrollar por lo menos 2 especialidades de fauna doméstica (animales que son mascotas o de granja):",
+          "minimum_required": 2,
+          "display_order": 2,
+          "active": true,
+          "options": [
+            {
+              "label": "Animales Domésticos",
+              "raw": "Animales Domésticos",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 353
+            },
+            {
+              "label": "Aves domésticas",
+              "raw": "Aves domésticas",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 354
+            },
+            {
+              "label": "Aves de jaula O Loros y cacatúas",
+              "raw": "Aves de jaula O Loros y cacatúas",
+              "alternatives": [
+                "Aves de jaula",
+                "Loros y cacatúas"
+              ],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 355
+            },
+            {
+              "label": "Cuidado y entrenamiento de perros",
+              "raw": "Cuidado y entrenamiento de perros",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 357
+            },
+            {
+              "label": "Gatos",
+              "raw": "Gatos",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 359
+            },
+            {
+              "label": "Mamíferos pequeños como mascotas",
+              "raw": "Mamíferos pequeños como mascotas",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 360
+            },
+            {
+              "label": "Perros",
+              "raw": "Perros",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 362
+            },
+            {
+              "label": "Peces",
+              "raw": "Peces",
+              "alternatives": [],
+              "includes_advanced": false,
+              "needs_catalog_match": true,
+              "source_line": 363
+            },
+            {
+              "label": "Reptiles, y/o avanzado",
+              "raw": "Reptiles, y/o avanzado",
+              "alternatives": [],
+              "includes_advanced": true,
+              "needs_catalog_match": true,
+              "source_line": 364
+            }
+          ]
+        }
+      ],
+      "normalization_warnings": [
+        "Contiene alternativas con \"O\" que requieren confirmación de equivalencia",
+        "Contiene opciones con avanzado/y-o avanzado que requieren matching a honors equivalentes"
+      ],
+      "source_end_line": 366
+    }
+  ]
+}

@@ -1,11 +1,11 @@
-# Runtime — Camporees (gestión de la entidad)
+# Runtime — Camporees (entidad e inscripción de secciones)
 
 **Estado**: ACTIVE
 **Autoridad rectora**: `docs/canon/source-of-truth.md`
 **Tipo de documento**: runtime canonizado, documented-as-built
-**Ámbito**: operaciones CRUD sobre la entidad `camporee` (crear, actualizar, desactivar, listar, leer). NO cubre attendance/registration/payments — esos comparten permisos cross-cutting `attendance:*` con actividades regulares
+**Ámbito**: CRUD de `camporee`, inscripción contextual de la sección activa y enrolamiento legacy local/de unión. Attendance de participantes, pagos, aprobaciones tardías y el enrolamiento legacy de unión conservan permisos cross-cutting `attendance:*`.
 
-<!-- VERIFICADO contra código 2026-04-22: camporees.controller.ts con 10 handlers CRUD migrados a camporees:*, 24 handlers restantes preservados en attendance:* cross-cutting. -->
+<!-- VERIFICADO contra código 2026-07-14: CRUD camporees:*, section-registration contextual, legacy local camporees:register, legacy de unión attendance:manage y participant gates. -->
 
 ---
 
@@ -13,8 +13,10 @@
 
 Canoniza las operaciones **CRUD** sobre la entidad camporee (crear, actualizar, eliminar, leer) como dominio propio con permisos `camporees:*`. Separa explícitamente:
 
-- **Operation** (camporees:\*): CRUD de la entidad — alcance canonizado en este documento.
-- **Attendance + Registration + Payments + Late approval** (attendance:\*): operaciones cross-cutting compartidas con actividades regulares — no se canonizan aquí; mantienen el patrón establecido de `attendance:manage`/`attendance:read`/`attendance:approve_late`.
+- **Operation** (camporees:\*): CRUD de la entidad.
+- **Section enrollment** (`camporees:register_active_section`): el director CLUB inscribe su sección activa sin enviar IDs.
+- **Local territorial enrollment legacy** (`camporees:register`): cuatro organizadores GLOBAL pueden inscribir una sección explícita dentro de scope.
+- **Union enrollment legacy + Participant attendance + Payments + Late approval** (attendance:\*): operaciones cross-cutting compartidas con actividades regulares.
 
 La separación intencional evita fragmentación innecesaria (no crear `camporees:attendance:*`) mientras garantiza granularidad de autoridad para el CRUD — crear un camporee es acción más privilegiada que gestionar asistencia de uno existente.
 
@@ -26,32 +28,35 @@ Dentro del canon:
 - permisos `camporees:read/create/update/delete` para CRUD;
 - grants por rol mirrored desde `activities:*` tras migración;
 - separación explícita de `attendance:*` cross-cutting;
-- estado de `camporees:register` como permiso existente sin uso (reservado para eventual distinción de inscripción).
+- contrato contextual `camporees:register_active_section` para director CLUB;
+- contrato legacy local `camporees:register` para organizadores territoriales exactos;
+- preservación del contrato legacy de unión con `attendance:manage`.
 
 Fuera del canon:
-- attendance, registration, payments, late approval de camporees (usan `attendance:*`, documentado en features);
+- attendance de participantes, pagos y late approval de camporees (usan `attendance:*`, documentado en features);
 - UI específica admin;
-- flujos operativos pos-creación (inscripción, pago, cierre).
+- otras operaciones pos-creación, incluidos pagos y cierre; se exceptúan las inscripciones de sección canonizadas en §4.2.
 
 ---
 
 ## 3. Permisos canonizados
 
-Permisos vigentes (migrados 2026-04-22 desde `activities:*`):
+Permisos CRUD vigentes (migrados 2026-04-22 desde `activities:*`):
 
 - `camporees:read` — listar y leer camporees.
 - `camporees:create` — crear nuevo camporee (local o union).
 - `camporees:update` — actualizar información de camporee.
 - `camporees:delete` — desactivar/eliminar camporee.
 
-Permiso existente sin uso actual (no migrado en esta ola):
+Permisos de inscripción vigentes:
 
-- `camporees:register` — reservado para eventual separación "inscripción de club a camporee" del generic `attendance:manage`. Si el producto futuro decide diferenciar, se canonizará en decisión posterior. Hoy todos los endpoints de enrollment y payments usan `attendance:manage`.
+- `camporees:register_active_section` — únicamente `director` de categoría `CLUB`; muta sólo su assignment activo y no acepta IDs de sección/club/actor.
+- `camporees:register` — únicamente para `POST /camporees/:id/clubs`: `assistant-lf`, `director-lf`, `assistant-union`, `director-union` de categoría `GLOBAL`, dentro del field/unión correspondiente. No se hereda a roles CLUB, división, `admin` ni `super-admin`.
 
 Permisos cross-cutting preservados:
 
 - `attendance:read` — listar participantes, clubs inscritos, pagos.
-- `attendance:manage` — registrar/cancelar inscripciones, pagos.
+- `attendance:manage` — registrar/remover participantes, cancelar inscripciones existentes, gestionar pagos y autorizar `POST /camporees/union/:id/clubs`; no autoriza el POST legacy **local** `/camporees/:id/clubs`.
 - `attendance:approve_late` — aprobar/rechazar inscripciones y pagos tardíos.
 
 ### Distribución de grants tras migración
@@ -79,9 +84,20 @@ Permisos cross-cutting preservados:
 | `/camporees/union/:id` | PATCH | `updateUnion` | `camporees:update` |
 | `/camporees/union/:id` | DELETE | `removeUnion` | `camporees:delete` |
 
-### 4.2 Cross-cutting `attendance:*` (fuera del canon de este documento)
+### 4.2 Inscripción de sección
 
-24 handlers adicionales para registration, attendance, payments, late approval siguen el patrón `attendance:*`. Documentados en `docs/features/camporees.md` y el canon sigue `attendance:*` como transversal.
+| Path | Método | Autoridad |
+|------|--------|-----------|
+| `/camporees/:id/section-registration` | GET | `camporees:read` + assignment activo |
+| `/camporees/:id/section-registration` | POST | `camporees:register_active_section` + director CLUB activo; sin body |
+| `/camporees/:id/clubs` | POST | `camporees:register` + uno de los cuatro organizadores GLOBAL dentro de scope; body `club_section_id` |
+| `/camporees/union/:id/clubs` | POST | `attendance:manage` + scope del camporee de unión; body `club_section_id` |
+
+El POST contextual deriva sección, club y actor. Los dos POST legacy releen desde DB y sólo usan `club_section_id` como selector, nunca como autoridad de territorio o lineage. Sus permisos no son intercambiables: `camporees:register` corresponde al local y `attendance:manage` al de unión.
+
+### 4.3 Cross-cutting `attendance:*`
+
+Participantes, lectura/remoción, pagos y aprobación tardía siguen el patrón `attendance:*`. Antes de crear un participante local, el backend exige una inscripción activa de la misma sección con estado `registered` o `approved`; los errores de elegibilidad son `CAMPOREE_SECTION_REGISTRATION_REQUIRED` y `CAMPOREE_MEMBER_OUTSIDE_ACTIVE_SECTION`.
 
 ---
 
@@ -89,15 +105,18 @@ Permisos cross-cutting preservados:
 
 - `docs/canon/runtime-sacdia.md` — camporee como actividad institucional de alcance regional.
 - `docs/canon/runtime-communications.md` — notificaciones por aprobación tardía usan `source = 'camporees:*'`.
-- `docs/canon/decisiones-clave.md` §20 — canonización del dominio camporees + preservación explícita de `attendance:*` cross-cutting.
-- `docs/features/camporees.md` — detalle funcional runtime de los 34 handlers completos.
+- `docs/canon/decisiones-clave.md` §20 y §25 — CRUD/attendance cross-cutting e inscripción contextual/legacy local/de unión.
+- `docs/features/camporees.md` — detalle funcional de los handlers runtime vigentes.
 
 ---
 
 ## 6. Invariantes
 
 - `camporees:*` es el permiso canónico para CRUD de la entidad camporee; reutilizar `activities:*` en nuevos endpoints de camporees rompe la frontera de concerns;
-- `attendance:*` es cross-cutting deliberado entre activities y camporees; fragmentarlo en `camporees:attendance:*` rompe el patrón canonizado;
-- `camporees:register` permanece reservado; reactivar su uso requiere decisión explícita en `decisiones-clave.md`;
+- `attendance:*` sigue cross-cutting para participantes/pagos/aprobaciones, pero no sustituye los permisos específicos de inscripción de sección;
+- `camporees:register_active_section` nunca admite body ni grants distintos de director CLUB;
+- `camporees:register` se restringe en el POST legacy local a los cuatro organizadores territoriales exactos; los wildcards administrativos no lo conceden;
+- el POST legacy de unión conserva `attendance:manage`; no extrapolarle el permiso del endpoint local;
+- participantes locales creados por el flujo contextual conservan lineage mediante `camporee_members.camporee_club_id`; la columna continúa nullable por compatibilidad legacy y por otros flujos que todavía no persisten esa relación;
 - el wildcard de `admin` (`NOT LIKE '%:delete'`) excluye `camporees:delete` — si la operación de delete debe ser accesible a admin, requiere grant explícito en el bloque de `admin` o escalación vía `super_admin`;
-- handlers futuros en camporees deben clasificarse: si son CRUD de la entidad → `camporees:*`; si son operaciones de asistencia/inscripción → `attendance:*`. No mezclar.
+- handlers futuros deben distinguir CRUD, inscripción contextual, legacy local, legacy de unión y attendance de participantes; no generalizar permisos entre rutas con contratos distintos.

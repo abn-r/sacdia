@@ -1,0 +1,3 @@
+# Binary scrape artifacts are kept locally and published through R2 manifest URLs.
+/images/
+/pdf/

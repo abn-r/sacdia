@@ -593,6 +593,11 @@ psql $DATABASE_URL < backup_20260204.sql
 
 **Archivo**: `.github/workflows/deploy-backend.yml`
 
+> [!IMPORTANT]
+> El backend operativo actual despliega en Render y usa Node.js 24.x (`>=24 <25`).
+> El workflow efectivo vive en `sacdia-backend/.github/workflows/ci.yml`; este bloque
+> queda como referencia editorial de pasos CI/CD.
+
 ```yaml
 name: Deploy Backend
 
@@ -611,7 +616,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '20'
+          node-version: '24'
 
       - name: Install dependencies
         run: npm install

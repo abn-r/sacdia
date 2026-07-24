@@ -55,6 +55,17 @@ Si contestas "no" a cualquiera, **DETENTE** y crea/revisa las specs primero.
 
 ---
 
+### Ownership entre agentes
+
+Para cambios integrales entre backend, app móvil y admin web, aplicar `docs/steering/agent-ownership.md`.
+
+- Codex mantiene ownership principal de backend, app móvil, contratos API, datos, seguridad y documentación técnica.
+- Cursor Composer 2.5 mantiene ownership principal del panel administrativo: diseño, acomodo de información, layouts y polish visual.
+- Todo cambio debe ser **contract-first**: el admin consume contratos definidos; no inventa endpoints, DTOs, permisos ni reglas de negocio.
+- Codex puede revisar `sacdia-admin/` por integración, seguridad o compatibilidad contractual, pero no debe imponer decisiones visuales salvo pedido explícito.
+
+---
+
 ## Reglas Generales para Agentes IA
 
 ### 1. Lectura de Contexto
