@@ -25,16 +25,13 @@ La vinculacion de seguros con camporees es directa: la tabla `camporee_members` 
   - `POST /api/v1/users/:memberId/insurance` — Requiere `insurance:create`; crea seguro con evidencia opcional (multipart, campo `evidence`)
   - `PATCH /api/v1/insurance/:insuranceId` — Requiere `insurance:update`; actualiza seguro existente con evidencia opcional (multipart)
 - **Configuración por capacidad (6 endpoints)**: `GET|POST|PATCH /api/v1/insurance/products` y `GET|POST|PATCH /api/v1/insurance/cycles`.
-  - Requieren el permiso `insurance:configure`, asignado explícitamente solo a `director-lf` y `assistant-lf`.
-  - El Campo Local se deriva exclusivamente de `request.authorizationProfile.authorization.effective.scope.global.local_field.id`; no se acepta `local_field_id` del cliente.
-  - Un producto `GENERAL` exige `FIXED_MONTHS` y duración positiva; uno `EVENT` exige `EVENT_DATES` y no admite duración predeterminada.
-  - Un ciclo pertenece al producto/Campo/año eclesiástico/tipo de club, no puede duplicar esa combinación y su `purchase_deadline` debe quedar dentro del año eclesiástico.
-  - Tras existir una compra `CONFIRMED` del ciclo, su deadline queda inmutable.
-- **Compras por capacidad (7 endpoints)**: el envío `POST /api/v1/club-sections/:sectionId/insurance/purchases` es `multipart/form-data` y requiere `purchase_proof`; captura `quantity`, `total_amount` positivo, fecha y referencia de la plataforma externa. El envío no crea cupos.
-  - El backend deriva club, tipo y Campo Local desde la sección real y el perfil de autorización efectivo; nunca los acepta del cliente.
-  - La confirmación requiere `insurance:review` y los roles globales `director-lf`, `assistant-lf`, `admin` o `super-admin` dentro de su territorio efectivo; `assistant-admin` no recibe ese permiso.
-  - La confirmación toma el `unit_cost_snapshot` y deadline del ciclo, clasifica la fecha de recibo de forma inclusiva y crea exactamente N cupos en una transacción. Rechazo requiere motivo y reversión solo procede sin cupos asignados.
-  - El comprobante privado admite PDF/JPEG/PNG/WEBP con magic bytes y máximo 10 MiB. La base de datos guarda `file_key` y metadatos, nunca una URL; la lectura autorizada genera URL R2 firmada por 5 minutos. Si la transacción de base falla tras upload, el objeto R2 se borra compensatoriamente.
+  - Requiere `insurance:configure`, asignado únicamente a `director-lf` y `assistant-lf` con Campo Local efectivo; el cliente nunca elige el Campo.
+  - Un ciclo se limita a producto/Campo/año eclesiástico/tipo de club y su deadline debe estar dentro del año eclesiástico; el deadline se bloquea tras la primera compra confirmada.
+- **Compras por capacidad (7 endpoints)**: `POST /api/v1/club-sections/:sectionId/insurance/purchases` es `multipart/form-data` y exige `purchase_proof`; recibe cantidad, `total_amount` positivo, fecha y referencia de la plataforma externa. El envío no crea cupos.
+  - El backend deriva club, tipo y Campo Local desde la sección real y la autorización efectiva, nunca desde el cliente.
+  - `insurance:review` está asignado explícitamente solo a `director-lf`, `assistant-lf`, `admin` y `super-admin`; `assistant-admin` queda excluido. La revisión respeta el Campo Local efectivo o el alcance global del runtime.
+  - La confirmación toma `unit_cost_snapshot` y deadline del ciclo, clasifica en forma inclusiva y crea exactamente N cupos dentro de una transacción. Rechazo requiere motivo; reversión solo procede sin cupos asignados.
+  - El comprobante privado valida PDF/JPEG/PNG/WEBP con magic bytes y máximo 10 MiB. La BD conserva `file_key` y metadatos, nunca URL; la lectura autorizada genera URL R2 firmada de 5 minutos. Si falla la transacción DB tras upload, R2 se elimina compensatoriamente.
 
 ### Admin
 - **UI funcional**: `/dashboard/insurance` y `/dashboard/insurance/expiring`

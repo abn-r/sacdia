@@ -754,10 +754,13 @@ Los `POST` y `PATCH` de camporees locales y de unión aceptan `start_date` y `en
 | POST | `/api/v1/camporees` | JWT | Permisos: camporees:create | Crear camporee | CamporeesService.create() | `src/camporees/camporees.controller.ts` |
 | PATCH | `/api/v1/camporees/:camporeeId` | JWT | Permisos: camporees:update | Actualizar camporee | CamporeesService.update() | `src/camporees/camporees.controller.ts` |
 | DELETE | `/api/v1/camporees/:camporeeId` | JWT | Permisos: camporees:delete | Desactivar camporee | CamporeesService.remove() | `src/camporees/camporees.controller.ts` |
-| POST | `/api/v1/camporees/:camporeeId/register` | JWT | Permisos: attendance:manage | Registrar miembro en camporee | CamporeesService.registerMember() | `src/camporees/camporees.controller.ts` |
+| GET | `/api/v1/camporees/:camporeeId/section-registration` | JWT | Permisos: camporees:read + sección activa | Consultar inscripción contextual de la sección activa | CamporeesService.getActiveSectionRegistration() | `src/camporees/camporees.controller.ts` |
+| POST | `/api/v1/camporees/:camporeeId/section-registration` | JWT | Permisos: camporees:register_active_section; solo director CLUB activo | Inscribir la sección activa sin body ni ID enviado por cliente | CamporeesService.registerActiveSection() | `src/camporees/camporees.controller.ts` |
+| POST | `/api/v1/camporees/:camporeeId/register` | JWT | Permisos: attendance:manage | Registrar miembro; exige inscripción activa de la sección y `insurance_id` activo, elegible y vigente | CamporeesService.registerMember() | `src/camporees/camporees.controller.ts` |
+| POST | `/api/v1/camporees/:camporeeId/participants` | JWT | Permisos: attendance:manage | Alias contextual para registrar participante en la sección activa | CamporeesService.registerParticipants() | `src/camporees/camporees.controller.ts` |
 | GET | `/api/v1/camporees/:camporeeId/members` | JWT | Permisos: attendance:read | Listar miembros del camporee | CamporeesService.getMembers() | `src/camporees/camporees.controller.ts` |
 | DELETE | `/api/v1/camporees/:camporeeId/members/:userId` | JWT | Permisos: attendance:manage | Remover miembro del camporee | CamporeesService.removeMember() | `src/camporees/camporees.controller.ts` |
-| POST | `/api/v1/camporees/:camporeeId/clubs` | JWT | Permisos: attendance:manage | Inscribir club en camporee | CamporeesService.enrollClub() | `src/camporees/camporees.controller.ts` |
+| POST | `/api/v1/camporees/:camporeeId/clubs` | JWT | Permisos: camporees:register; solo assistant-lf, director-lf, assistant-union o director-union dentro de scope | Legacy: inscribir por `club_section_id` validado desde DB | CamporeesService.enrollClub() | `src/camporees/camporees.controller.ts` |
 | GET | `/api/v1/camporees/:camporeeId/clubs` | JWT | Permisos: attendance:read | Listar clubes inscritos en camporee | CamporeesService.getEnrolledClubs() | `src/camporees/camporees.controller.ts` |
 | DELETE | `/api/v1/camporees/:camporeeId/clubs/:camporeeClubId` | JWT | Permisos: attendance:manage | Cancelar inscripción de club | CamporeesService.cancelClubEnrollment() | `src/camporees/camporees.controller.ts` |
 | POST | `/api/v1/camporees/:camporeeId/club-registration/close` | JWT | Permisos: camporee_events:update | Close local camporee club registration | CamporeesService.closeLocalCamporeeClubRegistration() | `src/camporees/camporee-club-registration.controller.ts` |
@@ -770,6 +773,67 @@ Los `POST` y `PATCH` de camporees locales y de unión aceptan `start_date` y `en
 | DELETE | `/api/v1/camporees/:camporeeId/payments/:paymentId/voucher` | JWT | Permisos: attendance:manage | Remover comprobante de un pago | CamporeesService.removePaymentVoucher() | `src/camporees/camporees.controller.ts` |
 | PATCH | `/api/v1/camporees/payments/:camporeePaymentId/approve` | JWT | Permisos: attendance:approve_late | Aprobar pago tardío de camporee | CamporeeLateApprovalsService.approvePayment() | `src/camporees/camporees.controller.ts` |
 | PATCH | `/api/v1/camporees/payments/:camporeePaymentId/reject` | JWT | Permisos: attendance:approve_late | Rechazar pago tardío de camporee | CamporeeLateApprovalsService.rejectPayment() | `src/camporees/camporees.controller.ts` |
+
+#### Inscripción contextual de la sección activa
+
+`GET` devuelve `200`; `POST` devuelve `201` y **no acepta body**. Ambos derivan club y sección desde el assignment activo del actor. El cliente no debe enviar `club_section_id`, `club_id` ni `registered_by`: el backend persiste al actor autenticado.
+
+```json
+{
+  "camporeeId": 7,
+  "clubId": 11,
+  "clubName": "Club Central",
+  "clubSectionId": 22,
+  "sectionName": "Conquistadores",
+  "clubTypeId": 2,
+  "clubTypeName": "Conquistadores",
+  "status": "registered",
+  "disposition": "open",
+  "canEnroll": false,
+  "blockingReason": "already_enrolled",
+  "enrollmentId": 91,
+  "registeredAt": "2026-07-14T15:30:00.000Z",
+  "registeredBy": {
+    "userId": "550e8400-e29b-41d4-a716-446655440000",
+    "displayName": "Ana Directora"
+  }
+}
+```
+
+| Campo | Valores / regla |
+| --- | --- |
+| `status` | `not_enrolled`, `registered`, `pending_approval`, `approved`, `rejected`, `cancelled` |
+| `disposition` | `not_open_yet`, `open`, `late_approval_required`, `manually_frozen` |
+| `canEnroll` | `true` sólo sin inscripción activa, con director CLUB, tipo incluido y disposition `open` o `late_approval_required` |
+| `blockingReason` | `already_enrolled`, `director_role_required`, `club_type_not_included`, `not_open_yet`, `manually_frozen` o `null` |
+| `enrollmentId`, `registeredAt`, `registeredBy` | `null` cuando no existe inscripción; el actor contiene `userId` y `displayName` |
+
+El lifecycle aplica cierre manual antes que apertura/deadline. `open` crea estado `registered`; `late_approval_required` crea `pending_approval` y notifica revisión; `not_open_yet` y `manually_frozen` bloquean el `POST`. La lectura usa `camporees:read` para roles con contexto activo; la mutación exige además `camporees:register_active_section` y que el assignment activo sea exactamente `director` de categoría `CLUB`.
+
+Respuestas de control: `400 CAMPOREE_CLUB_REGISTRATION_CLOSED` para `not_open_yet|manually_frozen`, `400 CAMPOREE_NOT_ACTIVE`, `403 CAMPOREE_ACTIVE_SECTION_REQUIRED` cuando el contexto/rol/sección no es elegible y `404 CAMPOREE_NOT_FOUND` fuera del scope territorial. Repetir el POST sobre una inscripción activa devuelve el mismo contrato sin crear un duplicado.
+
+#### Gate de participantes y lineage
+
+`POST /:camporeeId/register` y su alias `POST /:camporeeId/participants` aceptan el DTO existente de participante (`user_id` y `insurance_id?`), pero antes de seguro/duplicados exigen:
+
+1. una única inscripción activa de la misma sección con estado `registered` o `approved`;
+2. que el assignment activo del participante pertenezca a esa misma sección;
+3. que el actor sea el director de la sección activa.
+
+Los incumplimientos devuelven `422` con `code`:
+
+- `CAMPOREE_SECTION_REGISTRATION_REQUIRED` — no existe inscripción activa elegible de la sección;
+- `CAMPOREE_MEMBER_OUTSIDE_ACTIVE_SECTION` — el participante no pertenece a la sección activa.
+
+Al crear el participante, el backend persiste `camporee_members.camporee_club_id` con la inscripción de sección que habilitó la operación.
+
+#### Endpoint legacy local de inscripción por sección
+
+`POST /api/v1/camporees/:camporeeId/clubs` conserva body `{ "club_section_id": 22 }` exclusivamente para organizadores territoriales. Requiere `camporees:register` y uno de estos roles `GLOBAL` exactos: `assistant-lf`, `director-lf`, `assistant-union`, `director-union`. El scope debe coincidir con el campo local del camporee o con su unión padre. Roles CLUB, división, `admin` y `super-admin` no heredan esta operación por wildcard.
+
+El backend relee y bloquea camporee, sección, club y tipo desde DB antes de crear; valida activos, territorio, tipo incluido y unicidad activa. El body identifica la sección, pero no es autoridad para club, campo local, tipo ni actor.
+
+El contrato legacy de unión es distinto: `POST /api/v1/camporees/union/:camporeeId/clubs` conserva `attendance:manage` y el scope del camporee de unión.
 
 ### catalogs
 
@@ -1020,6 +1084,19 @@ Los `POST` y `PATCH` de camporees locales y de unión aceptan `start_date` y `en
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
+| GET | `/api/v1/insurance/products` | JWT | `insurance:configure`; solo `director-lf`/`assistant-lf` con Campo Local efectivo | Listar productos configurables del Campo Local efectivo | InsuranceConfigService.listProducts() | `src/insurance/insurance.controller.ts` |
+| POST | `/api/v1/insurance/products` | JWT | `insurance:configure`; solo `director-lf`/`assistant-lf` con Campo Local efectivo | Crear producto de seguro en el Campo Local efectivo | InsuranceConfigService.createProduct() | `src/insurance/insurance.controller.ts` |
+| PATCH | `/api/v1/insurance/products/:productId` | JWT | `insurance:configure`; solo `director-lf`/`assistant-lf` con Campo Local efectivo | Actualizar producto del propio Campo Local | InsuranceConfigService.updateProduct() | `src/insurance/insurance.controller.ts` |
+| GET | `/api/v1/insurance/cycles` | JWT | `insurance:configure`; solo `director-lf`/`assistant-lf` con Campo Local efectivo | Listar ciclos configurados del Campo Local efectivo | InsuranceConfigService.listCycles() | `src/insurance/insurance.controller.ts` |
+| POST | `/api/v1/insurance/cycles` | JWT | `insurance:configure`; solo `director-lf`/`assistant-lf` con Campo Local efectivo | Crear configuración de ciclo de un producto propio | InsuranceConfigService.createCycle() | `src/insurance/insurance.controller.ts` |
+| PATCH | `/api/v1/insurance/cycles/:cycleConfigId` | JWT | `insurance:configure`; solo `director-lf`/`assistant-lf` con Campo Local efectivo | Actualizar costo, timezone, estado o deadline de ciclo propio | InsuranceConfigService.updateCycle() | `src/insurance/insurance.controller.ts` |
+| POST | `/api/v1/club-sections/:sectionId/insurance/purchases` | JWT multipart | `insurance:create` + scope efectivo de la sección | Enviar compra con `purchase_proof` obligatorio; queda pendiente y no crea cupos | InsurancePurchasesService.submit() | `src/insurance/insurance-purchases.controller.ts` |
+| GET | `/api/v1/club-sections/:sectionId/insurance/purchases` | JWT | `insurance:read` + scope efectivo de la sección | Listar compras de la propia sección | InsurancePurchasesService.listForSection() | `src/insurance/insurance-purchases.controller.ts` |
+| GET | `/api/v1/insurance/purchases/:purchaseId` | JWT | `insurance:read` + territorio/sección efectiva | Consultar compra dentro del alcance efectivo | InsurancePurchasesService.getById() | `src/insurance/insurance-purchases.controller.ts` |
+| GET | `/api/v1/insurance/purchases/:purchaseId/proof` | JWT | `insurance:read` + territorio/sección efectiva | Generar URL R2 firmada de 5 minutos para comprobante privado | InsuranceEvidenceService.getPurchaseProofUrl() | `src/insurance/insurance-purchases.controller.ts` |
+| POST | `/api/v1/insurance/purchases/:purchaseId/confirm` | JWT | `insurance:review`; `director-lf`, `assistant-lf`, `admin` o `super-admin` dentro del alcance efectivo | Confirmar y materializar N cupos transaccionalmente; deadline inclusivo | InsurancePurchasesService.confirm() | `src/insurance/insurance-purchases.controller.ts` |
+| POST | `/api/v1/insurance/purchases/:purchaseId/reject` | JWT | `insurance:review`; mismos roles de revisión | Rechazar compra pendiente con motivo obligatorio y sin cupos | InsurancePurchasesService.reject() | `src/insurance/insurance-purchases.controller.ts` |
+| POST | `/api/v1/insurance/purchases/:purchaseId/reverse` | JWT | `insurance:review`; mismos roles de revisión | Revertir solo una compra confirmada sin cupos asignados | InsurancePurchasesService.reverse() | `src/insurance/insurance-purchases.controller.ts` |
 | GET | `/api/v1/clubs/:clubId/sections/:sectionId/members/insurance` | JWT | Permisos: insurance:read | Listar seguros de miembros por sección | InsuranceService.listMembersInsurance() | `src/insurance/insurance.controller.ts` |
 | GET | `/api/v1/insurance/expiring` | JWT | Global: admin, coordinator | Listar seguros próximos a vencer | InsuranceService.getExpiringInsurances() | `src/insurance/insurance.controller.ts` |
 | GET | `/api/v1/users/:memberId/insurance` | JWT | Permisos: insurance:read | Obtener seguro activo del miembro | InsuranceService.getMemberInsurance() | `src/insurance/insurance.controller.ts` |
@@ -1175,6 +1252,14 @@ Los `POST` y `PATCH` de camporees locales y de unión aceptan `start_date` y `en
 | GET | `/api/v1/monthly-reports/:reportId/pdf` | JWT | Permisos: reports:download | Descargar informe mensual en PDF | MonthlyReportsPdfService.generatePdf() | `src/monthly-reports/monthly-reports.controller.ts` |
 | GET | `/api/v1/monthly-reports/admin/list` | JWT | Permisos: reports:read | Listar reportes multi-club (admin/coordinator) | MonthlyReportsService.listForAdmin() | `src/monthly-reports/monthly-reports.controller.ts` |
 | GET | `/api/v1/monthly-reports/:reportId` | JWT | Permisos: reports:read | Obtener informe mensual | MonthlyReportsService.getReport() | `src/monthly-reports/monthly-reports.controller.ts` |
+
+#### Contrato de `PATCH /api/v1/monthly-reports/:reportId/manual-data`
+
+- Solo admite reportes en `draft` y excluye del payload persistido cualquier campo `undefined`.
+- Un payload técnico vacío, o la creación de una fila compuesta únicamente por textos nullable en `null`, vacíos o whitespace, responde `400` con `code = MONTHLY_REPORT_MANUAL_DATA_REQUIRED`.
+- `null` en un campo numérico o booleano responde `400` con `code = MONTHLY_REPORT_INVALID_MANUAL_DATA`.
+- `0` y `false` explícitos son valores válidos. En una fila existente, los textos nullable aceptan `null` para limpiar su valor.
+- El error conserva el response shape global; estos códigos no modifican el contrato de los demás endpoints.
 
 ### Notifications
 

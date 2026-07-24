@@ -265,9 +265,13 @@ El runtime documenta superficies para:
 - notificaciones y tokens FCM. <!-- VERIFICADO -->
 
 ### 6.7 Salud operativa
-<!-- VERIFICADO contra código 2026-03-14 -->
+<!-- VERIFICADO contra código 2026-07-20 -->
 
-El runtime documenta un endpoint público `GET /api/v1/health` para estado básico de API.
+El runtime expone `GET /api/v1/health` como liveness público y
+`GET /api/v1/health/details` como diagnóstico protegido para roles globales
+`admin` y `super-admin`. El detalle verifica base de datos y caché, reporta
+ocupación del pool PostgreSQL y contadores del cache-aside de catálogos, y marca
+el sistema como `degraded` cuando DB o caché no responden.
 
 ---
 

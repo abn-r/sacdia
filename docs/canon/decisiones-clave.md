@@ -356,9 +356,9 @@ Autoridades rectoras: `docs/canon/runtime-user-certifications.md` + `docs/canon/
 
 ### 20. Camporees CRUD es dominio canónico propio; attendance permanece cross-cutting (2026-04-22)
 
-**Estado**: Vigente <!-- VERIFICADO: camporees.controller.ts con 10 CRUD handlers migrados a camporees:*, 24 handlers attendance/registration/payments preservados en attendance:*. Permisos camporees:create/update/delete agregados al seed. Canonizado en docs/canon/runtime-camporees.md. -->
+**Estado**: Vigente para CRUD y attendance cross-cutting; la reserva de `camporees:register` fue superada por §25. <!-- VERIFICADO: camporees.controller.ts; canon actualizado en docs/canon/runtime-camporees.md. -->
 
-**Contexto**: El módulo `camporees` tenía 34 handlers gateados por dominios ajenos: 10 CRUD por `activities:*` (mezcla conceptual — crear un camporee no es equivalente a crear una actividad semanal) y 24 operaciones de attendance/registration/payments por `attendance:*` (correcto semánticamente — attendance es cross-cutting entre actividades regulares y camporees). Los permisos `camporees:read` y `camporees:register` YA existían en el seed pero nunca se usaron — gap de implementación.
+**Contexto**: El módulo `camporees` tenía sus handlers CRUD gateados por `activities:*` (mezcla conceptual — crear un camporee no es equivalente a crear una actividad semanal), mientras las operaciones de attendance/registration/payments usaban `attendance:*` (correcto semánticamente — attendance es cross-cutting entre actividades regulares y camporees). Los permisos `camporees:read` y `camporees:register` YA existían en el seed pero nunca se usaban — gap de implementación de ese momento.
 
 Audit C2 clasificó `camporees` en media prioridad. Sprint D aborda la migración con decisión explícita de scope: migrar solo CRUD, preservar attendance cross-cutting.
 
@@ -366,7 +366,7 @@ Audit C2 clasificó `camporees` en media prioridad. Sprint D aborda la migració
 
 - `camporees:read/create/update/delete` son los permisos canónicos para CRUD de la entidad camporee (local y union);
 - `attendance:read/manage/approve_late` permanecen como permisos cross-cutting entre activities y camporees — fragmentarlos en `camporees:attendance:*` rompería consistencia con el patrón existente en activities;
-- `camporees:register` permanece en seed como permiso reservado sin uso — reactivarlo requiere decisión explícita posterior (ej. si el producto diferencia "inscripción de club" del generic `attendance:manage`);
+- `camporees:register` queda reservado en esta decisión histórica; §25 documenta su reactivación posterior para el endpoint legacy local territorial;
 - la migración es cambio duro: seed otorga `camporees:*` a roles con `activities:*` mirrored antes del switch de handlers (mismo patrón de sprints anteriores).
 
 **Consecuencias**:
@@ -498,6 +498,118 @@ rectora del dominio coordinación. Se fija que:
 - no se debe usar `union_id` como scope de coordinador;
 - cualquier endpoint nuevo de coordinación debe validar scope en backend, no en
   query params manipulables.
+
+### 25. Inscripción de sección contextual separada del enrolamiento territorial legacy (2026-07-14)
+
+**Estado**: Vigente <!-- VERIFICADO: backend HEAD e72d38f, migración 20260713220000 y app móvil bb63a5a. -->
+
+**Contexto**: `attendance:manage` mezclaba el alta de participantes con la creación local de la inscripción de una sección. Además, el endpoint legacy local recibía `club_section_id`, mientras el director móvil ya dispone de un assignment activo que debe ser la única autoridad de su club/sección.
+
+**Decisión**:
+
+- `GET /camporees/:id/section-registration` expone el estado contextual con `camporees:read`.
+- `POST /camporees/:id/section-registration` no acepta body y usa `camporees:register_active_section`, concedido sólo a `director` `CLUB`; sección, club y actor se derivan en backend.
+- `POST /camporees/:id/clubs` conserva `{ club_section_id }` como contrato legacy local territorial y usa `camporees:register`, concedido sólo a `assistant-lf`, `director-lf`, `assistant-union` y `director-union` `GLOBAL` dentro de scope.
+- `POST /camporees/union/:id/clubs` es un contrato legacy distinto y conserva `attendance:manage` dentro del scope de la unión.
+- Roles CLUB, división, `admin` y `super-admin` no reciben `camporees:register` por wildcard. `attendance:manage` tampoco autoriza la ruta legacy local.
+- Un participante sólo puede crearse si la misma sección tiene inscripción activa `registered` o `approved` y el miembro pertenece a ella. La fila guarda `camporee_club_id` como lineage.
+
+**Consecuencias**:
+
+- la app presenta primero el panel de sección, confirma en una hoja no editable y mantiene participantes fail-closed hasta `registered|approved`;
+- la base impide duplicados activos por camporee/sección con índices únicos parciales local y unión;
+- `camporee_members.camporee_club_id` permanece nullable por compatibilidad legacy y otros flujos; las nuevas altas locales contextuales siempre lo persisten;
+- el endpoint legacy local valida camporee, sección, club, territorio y tipo desde DB; el body no es autoridad fuera de identificar la sección;
+- los fallos de precondición de participantes usan `422 CAMPOREE_SECTION_REGISTRATION_REQUIRED` y `422 CAMPOREE_MEMBER_OUTSIDE_ACTIVE_SECTION`.
+
+### 26. El histórico institucional se modela por capas (2026-07-23)
+
+**Estado**: Vigente
+
+**Contexto**: SACDIA ya conserva relaciones efectivas de parte de la jerarquía y
+snapshots para carpetas anuales y rankings, pero todavía no garantiza historia
+transversal. Los nombres históricos se resuelven contra catálogos actuales,
+varios write paths cambian FKs sin mantener sus intervalos y una reorganización
+puede reatribuir reportes o ampliar acceso si cada módulo interpreta el pasado
+por su cuenta.
+
+**Decisión**: Adoptar un modelo temporal institucional compuesto por
+cuatro responsabilidades separadas:
+
+- auditoría append-only y transaccional;
+- nombres y relaciones con vigencia efectiva;
+- snapshots inmutables únicamente en raíces de agregado o actos oficiales;
+- linaje explícito para renombres, traslados, divisiones, fusiones, cierres y
+  correcciones.
+
+Las entidades tipadas y FKs actuales permanecen como proyección del estado
+vigente. No se adopta event sourcing global ni una tabla organizacional
+polimórfica en esta etapa. La atribución histórica se mantiene independiente de
+la custodia y autorización de lectura.
+
+**Consecuencias**:
+
+- las mutaciones territoriales deben ejecutarse mediante comandos
+  transaccionales, no actualizaciones directas de FKs;
+- la resolución histórica no puede hacer fallback silencioso a la jerarquía
+  actual;
+- nombres y traducciones deben versionarse;
+- los datos de backfill conservan precisión `system_backfill` o `unknown`;
+- los registros oficiales conservan su contexto aunque la organización cambie;
+- la autoridad vigente hereda lectura del histórico institucional no sensible de
+  la entidad trasladada, sin reatribuir ni permitir editar el pasado;
+- todos los agregados se adoptarán por oleadas técnicas.
+
+**Autoridad de aprobación resuelta (2026-07-23)**: cualquiera de los roles
+`director-dia`, `admin` o `super-admin` puede aprobar formalmente un renombre,
+traslado, división, fusión o cierre. La implementación deberá usar un permiso
+dedicado y no extender esta autoridad por inferencia a roles asistentes.
+
+**Fuente de decisión resuelta (2026-07-23)**: toda reorganización se origina en
+una decisión ejecutiva de la Iglesia Adventista a nivel mundial. Los roles
+autorizados controlan su registro y ejecución en SACDIA, pero no crean la
+autoridad institucional. El sistema no exige adjuntos, número de resolución,
+referencia documental ni otra evidencia; conserva el tipo de acto, la fecha
+efectiva, la descripción, el actor y la fecha de registro.
+
+**Continuidad de lectura resuelta (2026-07-23)**: cuando una entidad cambia de
+autoridad, la nueva autoridad puede consultar su trayectoria completa conforme
+a los permisos de cada módulo, excepto el contenido personal sensible. Los
+registros anteriores conservan su atribución original y el acceso heredado no
+permite reatribuirlos, editarlos ni borrarlos. La autoridad anterior conserva
+acceso de solo lectura a los registros institucionales no sensibles generados
+durante su periodo de responsabilidad, pero no a los registros posteriores al
+traslado.
+
+**Cobertura resuelta (2026-07-23)**: el histórico se implementará en todos los
+módulos. No existe una prioridad funcional entre ellos; el despliegue será por
+oleadas técnicas, comenzando por la base temporal de jerarquía, auditoría,
+consultas y autorización de la que dependen los demás agregados.
+
+**Artefactos emitidos resuelto (2026-07-23)**: una corrección histórica no
+provoca reemisión automática ni modifica certificados, reportes u otros
+artefactos oficiales ya emitidos. Si existe un error material, la emisión
+original se conserva como reemplazada o revocada y se genera una nueva emisión
+vinculada. Descargar o imprimir nuevamente el original reproduce su snapshot,
+no el estado institucional actual.
+
+**Datos sensibles resuelto (2026-07-23)**: salud, contactos de emergencia,
+representante legal, documentos privados y categorías equivalentes no heredan
+el acceso del histórico institucional. La persona titular o su representante
+legal conserva acceso propio; el responsable operativo de la sección activa ve
+solo el mínimo necesario; Campo Local requiere rol, finalidad y scope vigentes;
+Unión requiere un caso excepcional, justificado, temporal y auditado. Las
+autoridades anteriores pierden acceso al contenido sensible al terminar su
+relación efectiva.
+
+Los snapshots y logs no copian el contenido sensible. La retención se define por
+categoría y jurisdicción, sin conservación indefinida por valor histórico:
+finalizada la finalidad u obligación aplicable, los datos pasan por bloqueo y
+posterior supresión o anonimización. Los plazos exactos serán políticas
+configurables y versionadas.
+
+**Referencia de trabajo**:
+`docs/plans/2026-07-23-institutional-history-architecture-decision.md`.
 
 ## Estados posibles de una decisión
 

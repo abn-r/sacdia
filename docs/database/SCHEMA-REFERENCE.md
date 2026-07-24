@@ -1,8 +1,8 @@
 # Schema Reference - SACDIA Database
 
 **Estado**: ACTIVE
-**Sincronizado contra**: `sacdia-backend/prisma/schema.prisma`
-**Fecha de resincronizacion**: 2026-06-18 (coordinación por zonas/asignaciones + honores: aplicabilidad por club y enlaces a clases + asignaciones pedagógicas de clases)
+**Autoridad estructural**: `sacdia-backend/prisma/schema.prisma`
+**Actualización scoped**: 2026-07-14 — sólo delta Camporee de lineage e inscripción activa por sección; no implica resincronización global de esta referencia.
 
 Referencia humana concisa del schema Prisma vigente.
 
@@ -68,6 +68,18 @@ Referencia humana concisa del schema Prisma vigente.
   - `SECTION`: un coordinador directo por `club_section_id`.
 - La unidad final de autorización sigue siendo `club_sections`; el backend debe resolver el alcance efectivo como `club_section_ids`.
 - La incompatibilidad director/coordinador sobre la misma `club_section` se valida en servicio, porque depende de roles activos en `club_role_assignments`.
+
+### Histórico institucional (fundación bitemporal)
+
+- Migración runtime: `sacdia-backend/prisma/migrations/20260723120000_institutional_history_foundation`.
+- Las cinco tablas de relación histórica agregan tiempo de registro (`recorded_from`/`recorded_to`), `supersedes_history_id` y `reorganization_id`.
+- La revisión lógica vigente usa `recorded_to IS NULL`; los índices abiertos y las exclusiones anti-solape aplican solo a esa vista.
+- `institutional_name_versions` guarda nombre/abreviatura por entidad tipada (XOR de FKs; sin `entity_id` polimórfico). Sus traducciones apuntan a `name_version_id`, usan `ON DELETE RESTRICT` y son append-only.
+- `institutional_reorganizations` registra actos `ESTABLISHMENT|RENAME|TRANSFER|SPLIT|MERGE|CLOSURE|CORRECTION` con `authority_source = WORLD_CHURCH_EXECUTIVE`, sin columnas de evidencia documental.
+- Participantes y aristas de linaje (`SPLIT_FROM`, `MERGED_FROM`, `CONTINUES_AS`, `CORRECTS`) son append-only a nivel DB; FKs compuestas impiden conectar participantes de reorganizaciones distintas.
+- Las relaciones históricas existentes conservan `recorded_from = created_at`; las versiones de nombre creadas por el backfill se registran con el instante de migración y precisión `system_backfill`.
+- El verificador read-only recorre objetos y arreglos JSON de `hierarchy_contexts.context` para detectar claves sensibles prohibidas en cualquier profundidad.
+- No se infieren fechas efectivas desde `modified_at` ni se inventan reorganizaciones ficticias.
 
 ### `weekly_records`, `weekly_record_scores` y `scoring_categories`
 
@@ -162,48 +174,15 @@ Referencia humana concisa del schema Prisma vigente.
 - Incluye `created_by_id`, `modified_by_id`, `evidence_file_url` y `evidence_file_name`.
 - Sigue relacionada con `camporee_members`.
 
-### Modelo de capacidad de seguros
+### `camporee_clubs` y `camporee_members`
 
-> **Runtime parcial:** `insurance_products` e `insurance_cycle_configs` ya se
-> configuran por API mediante `GET|POST|PATCH /api/v1/insurance/products` y
-> `GET|POST|PATCH /api/v1/insurance/cycles`. Las operaciones de compras, cupos,
-> movimientos, asignaciones, evidencias y participantes externos permanecen
-> pendientes de endpoints runtime. El modelo no sustituye todavía
-> `member_insurances` ni el vínculo legacy de `camporee_members`.
-
-- `insurance_products` define productos configurables por Campo Local y su
-  alcance (`GENERAL` o `EVENT`) y modo de vigencia.
-- `insurance_cycle_configs` fija el producto efectivo por Campo, año
-  eclesiástico y tipo de club; conserva costo unitario, fecha límite como
-  `DATE` y zona horaria. Su unicidad es
-  `(insurance_product_id, local_field_id, ecclesiastical_year_id, club_type_id)`.
-- Los endpoints de productos/ciclos derivan el Campo Local del perfil de
-  autorización efectivo; no aceptan `local_field_id` del cliente. El producto
-  `GENERAL` usa `FIXED_MONTHS`, el producto `EVENT` usa `EVENT_DATES`, y el
-  deadline del ciclo debe estar dentro del año eclesiástico. Tras una compra
-  `CONFIRMED`, el deadline queda inmutable.
-- `insurance_purchases` registra la solicitud por sección. Al confirmar, debe
-  conservar el snapshot de costo, fecha del comprobante, deadline aplicado y
-  clasificación de ranking (`ORDINARY`, `EXTRAORDINARY` o
-  `LEGACY_UNCLASSIFIED`). La sección compradora y el club dueño mantienen la
-  atribución económica; la clasificación no se deriva de transferencias.
-- `insurance_coverage_slots` materializa un cupo por unidad comprada. El dueño
-  y la sección compradora son inmutables; `current_section_id` representa solo
-  la custodia actual. La secuencia es única dentro de una compra.
-- `insurance_slot_movements` es el libro inmutable de confirmaciones,
-  transferencias, asignaciones, liberaciones, reasignaciones, anulaciones y
-  correcciones. Cada movimiento conserva actor, motivo y correlación opcional.
-- `insurance_assignments` conserva el historial de uso de un cupo. Un CHECK
-  exige exactamente un sujeto: usuario SACDIA (`MEMBER`) o participante externo
-  del evento (`EVENT_EXTERNAL`). El índice parcial
-  `uq_insurance_assignment_active_slot` permite como máximo una asignación
-  `PENDING_CONFIRMATION` o `ACTIVE` por cupo.
-- `insurance_evidence_files` apunta a exactamente una compra o asignación; los
-  archivos se identifican por `file_key` privado y no por URL pública.
-- `camporee_external_participants` es un registro mínimo por evento local o de
-  Unión: solo nombre completo, tipo de rol y descripción opcional, sin crear
-  perfil global ni almacenar datos personales adicionales. Un CHECK exige
-  exactamente un camporee (`local_camporee_id` XOR `union_camporee_id`).
+- Cada participante local creado por el flujo contextual conserva lineage explícito mediante `camporee_members.camporee_club_id INT NULL` hacia `camporee_clubs.camporee_club_id`.
+- La FK `fk_camporee_members_camporee_club` usa `ON DELETE NO ACTION`; la columna es nullable para conservar filas legacy que todavía no pueden asociarse con seguridad a una inscripción de sección.
+- `idx_camporee_members_camporee_club_id` soporta consultas de participantes por inscripción de sección.
+- La base impide más de una inscripción activa por camporee y sección con índices únicos parciales:
+  - `uq_camporee_clubs_active_local_section` sobre `(camporee_id, club_section_id)` cuando la fila local está activa.
+  - `uq_camporee_clubs_active_union_section` sobre `(union_camporee_id, club_section_id)` cuando la fila de unión está activa.
+- Prisma no puede expresar esos índices parciales; su autoridad ejecutable vive en `20260713220000_camporee_section_registration_context/migration.sql` y el schema conserva comentarios de paridad.
 
 ### `achievement_categories`, `achievements`, `user_achievements`, `achievement_event_log`
 
@@ -456,6 +435,10 @@ Define el presupuesto de puntos por componente dentro de un eje anual:
 
 - `countries`, `unions`, `local_fields`, `districts`, `churches`, `clubs`, `club_sections`, `club_types`, `club_ideals`, `units`, `unit_members`
 - `coordination_zones`, `coordination_zone_districts`, `coordinator_assignments`
+- Historia institucional bitemporal: `union_division_history`, `local_field_union_history`, `district_local_field_history`, `church_district_history`, `club_institutional_history` (con `recorded_from`/`recorded_to`, `supersedes_history_id`, `reorganization_id`)
+- Versiones de nombre tipadas: `institutional_name_versions`, `institutional_name_version_translations`
+- Ledger de reorganización append-only: `institutional_reorganizations`, `institutional_reorganization_participants`, `institutional_lineage_edges`
+- Snapshots de contexto: `hierarchy_contexts`
 
 ### RBAC y auth
 
@@ -586,6 +569,7 @@ Define el presupuesto de puntos por componente dentro de un eje anual:
 - `20260708193000_camporee_score_no_show_and_lock` - agrega estado oficial `score_status`/`is_no_show` y `override_of_submission_id` para no-presentados, bloqueo one-shot de juez principal y overrides auditables de Campo Local.
 - `20260709100000_camporee_score_idempotency` - agrega clave idempotente y hash canónico por actor, auditoría de total crudo/ajuste mínimo, índice único parcial y backfill histórico conservador (`raw=total oficial`, `ajuste=0`).
 - `20260709110000_camporee_lifecycle_timezone` - agrega apertura temporal de clubes, timezone IANA y auditoría de su verificación a camporees locales/de unión; backfillea el default provisional `America/Mexico_City` sin reescribir fechas ni deadlines históricos.
+- `20260713220000_camporee_section_registration_context` - agrega `camporee_members.camporee_club_id` nullable con FK/índice, valida duplicados antes de crear los índices únicos parciales de inscripción activa local/unión y normaliza los grants de `camporees:register_active_section` y `camporees:register`.
 - `20260531203000_annual_ranking_axes` - crea `annual_ranking_axis_configs`, asocia componentes a ejes administrativo/operativo, y conserva componentes legacy desconocidos como inactivos para remediación manual sin asignarlos silenciosamente a un eje.
 - `20260429000000_enrollment_rankings_schema` - (8.4-A) crea `enrollment_rankings`, `section_rankings`, `enrollment_ranking_weights` con indexes, UNIQUE constraints y CHECK constraints de rango [0,100]. Ver §14.1 de `docs/canon/runtime-rankings.md`.
 - `20260429000001_award_categories_scope` - (8.4-A) añade `scope VARCHAR(20) DEFAULT 'club'` a `award_categories` + índice `idx_award_categories_scope` on `(scope, is_legacy)`. Backfill: filas existentes → `scope='club'`.

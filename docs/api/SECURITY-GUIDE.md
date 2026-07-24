@@ -224,6 +224,8 @@ Desde `c09a600` hasta `ee84d2d`, inclusive, la rama contiene únicamente el sche
 > [!IMPORTANT]
 > No existe endpoint `/api/v1/auth/admin/*`, la migración no está desplegada ni verificada y ningún controller nuevo está publicado. La finalización MFA existe como servicio privado; para refresh solo existe la persistencia D1, no writer ni rotación runtime. El contrato legacy y la referencia de endpoints vigente no se modifican.
 
+Mientras esa fachada siga sin publicarse, `sacdia-admin-ios` consume el contrato común vigente (`/auth/login`, `/auth/mfa/verify`, `/auth/me`, `/auth/refresh`, `/auth/logout` y `/auth/password/reset-request`), igual que los clientes existentes. Esto no publica ni activa los servicios privados descritos arriba.
+
 ### Sessions Endpoints
 
 ```typescript
@@ -408,6 +410,17 @@ src/
 ---
 
 **Generado**: 31 de enero de 2026
+
+## RBAC de inscripción de secciones en camporee
+
+- `GET /api/v1/camporees/:camporeeId/section-registration` exige `camporees:read` y resuelve la sección desde el assignment activo. Los roles de lectura pueden consultar, pero no por eso mutar.
+- `POST /api/v1/camporees/:camporeeId/section-registration` exige `camporees:register_active_section`; el seed/migración elimina grants accidentales y lo concede únicamente al rol `director` de categoría `CLUB`. El servicio vuelve a exigir que el assignment activo sea exactamente ese rol.
+- `POST /api/v1/camporees/:camporeeId/clubs` es el flujo legacy local territorial y exige `camporees:register`. Sólo son válidos `assistant-lf`, `director-lf`, `assistant-union` y `director-union`, todos `GLOBAL`, dentro del campo local o unión padre del camporee.
+- `camporees:register` se normaliza después de herencias/wildcards: director CLUB, roles de división, `admin` y `super-admin` quedan fuera. Tener `attendance:manage` tampoco autoriza ese endpoint legacy local.
+- `POST /api/v1/camporees/union/:camporeeId/clubs` conserva el contrato legacy de unión con `attendance:manage`; no hereda `camporees:register` del endpoint local.
+- En el legacy, el body sólo aporta `club_section_id`; camporee, sección, club y tipo se bloquean y releen desde DB. El backend valida activo, territorio y tipo incluido antes de persistir IDs derivados.
+- El alta de participantes exige director y sección activa; además verifica inscripción de sección `registered|approved` y pertenencia del participante. Los fallos de elegibilidad usan `422 CAMPOREE_SECTION_REGISTRATION_REQUIRED` o `422 CAMPOREE_MEMBER_OUTSIDE_ACTIVE_SECTION`.
+
 # Captura oficial de puntaje de camporee
 
 - `POST /api/v1/camporee-events/:eventId/sections/:clubSectionId/scores` autoriza `judge_primary` sólo por asignación exacta. La carga manual se limita a `assistant-lf`, `director-lf`, `assistant-union` y `director-union` dentro de scope; `admin_override` se reserva a `admin`, `assistant-admin` y `super-admin`. `camporee_events:update` no es autorización suficiente y `dto.source` nunca es autoridad.

@@ -28,7 +28,7 @@
 
 ## Introducción
 
-Esta guía proporciona ejemplos prácticos de cómo consumir la API REST de SACDIA desde aplicaciones frontend (Next.js Admin Panel y Flutter Mobile App).
+Esta guía proporciona ejemplos prácticos de cómo consumir la API REST de SACDIA desde el panel Next.js, la app Flutter y el cliente administrativo nativo iOS.
 
 ### URLs Base
 
@@ -113,16 +113,18 @@ El flujo administrativo de camporee separa personal operativo, agenda y scoring:
 - Capturar una zona IANA explícita (por ejemplo `America/Mexico_City`) cuando se confirme la sede: el backend la audita con el actor. Un PATCH sin `timezone` no borra esa verificación.
 - La UI de clubes debe distinguir `not_open_yet`, `open`, `late_approval_required` y `manually_frozen`. Al estar `not_open_yet`, no ofrecer inscripción ni flujo de aprobación tardía; el deadline es inclusivo.
 
-## Actualizacion 2026-07-23 (Configuración de productos y ciclos de seguro)
+## Actualizacion 2026-07-14 (Inscripción contextual de sección y participantes)
 
-La configuración de seguros por capacidad usa exclusivamente el Campo Local efectivo de la sesión:
+La app móvil debe consultar `GET /api/v1/camporees/:camporeeId/section-registration` al abrir el detalle. El response incluye identidad legible de club/sección, `status`, `disposition`, `canEnroll`, `blockingReason`, `enrollmentId`, `registeredAt` y `registeredBy`.
 
-- Endpoints: `GET|POST|PATCH /api/v1/insurance/products` y `GET|POST|PATCH /api/v1/insurance/cycles`.
-- Todos requieren `insurance:configure`. El backend además limita la operación a `director-lf` y `assistant-lf` con `effective.scope.global.local_field.id` numérico; no enviar ni mostrar un selector `local_field_id`.
-- Producto GENERAL: enviar `coverage_scope: "GENERAL"`, `validity_mode: "FIXED_MONTHS"` y `default_duration_months` entero positivo. Producto EVENT: enviar `coverage_scope: "EVENT"`, `validity_mode: "EVENT_DATES"` y omitir `default_duration_months`.
-- Crear ciclo: `{ insurance_product_id, ecclesiastical_year_id, club_type_id, unit_cost, purchase_deadline: "YYYY-MM-DD", timezone, active? }`. El deadline debe estar dentro del rango del año eclesiástico; no existe excepción UI/API para fechas externas.
-- PATCH de ciclo acepta `unit_cost`, `purchase_deadline`, `timezone` y `active`. Si el backend devuelve `409 INSURANCE_CYCLE_DEADLINE_LOCKED`, refrescar y mantener el deadline actual: ya existe una compra confirmada y no puede editarse.
-- Errores relevantes: `403 INSURANCE_CONFIG_ROLE_FORBIDDEN`, `403 INSURANCE_CONFIG_LOCAL_FIELD_SCOPE_REQUIRED`, `403 INSURANCE_PRODUCT_OUTSIDE_LOCAL_FIELD`, `400 INSURANCE_PRODUCT_VALIDITY_INVALID`, `400 INSURANCE_PRODUCT_DURATION_INVALID`, `400 INSURANCE_CYCLE_DEADLINE_OUTSIDE_YEAR`, `409 INSURANCE_CYCLE_CONFIG_DUPLICATE`.
+- Mostrar el panel de inscripción de sección **antes** del bloque de participantes.
+- Si `canEnroll=true`, abrir una hoja de confirmación no editable con nombre del club, sección, camporee, costo y fecha. Confirmar con `POST /api/v1/camporees/:camporeeId/section-registration` sin body; no enviar IDs de club/sección ni actor.
+- Habilitar consulta y alta de participantes sólo cuando `status` sea `registered` o `approved`. `pending_approval`, `rejected`, `cancelled`, `not_enrolled`, loading y error deben cerrar el gate (fail-closed).
+- La UI no debe renderizar `enrollmentId`, `clubSectionId`, `clubId` ni `registeredBy.userId`; son datos técnicos para integración. Mostrar nombres, estado, fecha y `registeredBy.displayName`.
+- Ante error del GET, mostrar reintento y no cargar miembros. Ante error del POST, conservar la hoja y permitir reintentar sin duplicar taps concurrentes.
+- El backend puede devolver `422 CAMPOREE_SECTION_REGISTRATION_REQUIRED` o `422 CAMPOREE_MEMBER_OUTSIDE_ACTIVE_SECTION` al registrar participantes; el cliente debe mantener el gate cerrado y mostrar el mensaje de elegibilidad recibido.
+
+El endpoint legacy local `POST /api/v1/camporees/:camporeeId/clubs` no es el flujo del director móvil. Conserva body `{ club_section_id }` para operaciones territoriales y requiere `camporees:register` con rol exacto `assistant-lf`, `director-lf`, `assistant-union` o `director-union` dentro de scope; no debe mostrarse a roles CLUB ni a admins globales por wildcard. El POST legacy de unión es otro contrato y conserva `attendance:manage`.
 
 ## Actualizacion 2026-02-17 (Admin Panel)
 
@@ -239,6 +241,19 @@ El token se lee desde `FlutterSecureStorage` (`AppConstants.tokenKey`) y se env�
 
 ---
 
+### Native iOS Admin
+
+`sacdia-admin-ios` usa `URLSession` mediante un cliente tipado. En Release, la URL base debe ser HTTPS y terminar exactamente en `/api/v1`; cualquier configuración inválida falla cerrada. En Debug, el simulador usa por defecto `http://localhost:3000/api/v1` y HTTP se acepta únicamente para hosts loopback.
+
+- access token: solo memoria;
+- refresh token opaco: Keychain con `kSecAttrAccessibleWhenUnlockedThisDeviceOnly`;
+- refresh reactivo: `POST /auth/refresh`, coordinado como single-flight y con un único reintento;
+- autorización: siempre desde `GET /auth/me` bajo `authorization`.
+
+No debe consumir `/auth/admin/*`: esa fachada no está publicada.
+
+---
+
 ## Autenticación
 
 ### 1. Login con Email/Password
@@ -279,6 +294,22 @@ Future<UserModel> login(String email, String password) async {
   return UserModel.fromJson(data['user'] as Map<String, dynamic>);
 }
 ```
+
+**iOS Admin**:
+
+```swift
+let login = APIEndpoint(
+    method: .post,
+    path: "auth/login",
+    body: try JSONEncoder().encode(["email": email, "password": password])
+)
+let response = try await apiClient.execute(
+    login,
+    as: APIEnvelope<LoginResponse>.self
+)
+```
+
+Después del login, iOS valida la misma lista de roles admitidos por el panel web y consulta `GET /auth/me`. La sesión solo queda establecida si el perfil canónico confirma acceso administrativo. Si el JWT incluye `mfa_pending: true`, primero llama `POST /auth/mfa/verify` con el token AAL1 y luego consulta `/auth/me` con el token AAL2.
 
 ---
 
@@ -322,6 +353,15 @@ await secureStorage.write(AppConstants.tokenKey, data['accessToken']);
 - `AuthNotifier` valida el estado inicial con `/auth/me`.
 - `AuthInterceptor` adjunta Bearer en cada request autenticada.
 - Un 401 fuera de endpoints públicos dispara refresh; si falla, limpia tokens y expira la sesión local.
+
+**iOS Admin**:
+
+- `SessionCoordinator` conserva el access token en memoria y el refresh token en Keychain.
+- Al iniciar, una credencial Keychain existente restaura la sesión mediante `/auth/refresh` y después valida `/auth/me`.
+- Si refresh devuelve un JWT AAL1 con `mfa_pending`, iOS falla cerrado, elimina esa sesión persistida y exige un nuevo login con MFA; nunca instala el token degradado.
+- `/auth/me.authorization.effective.permissions` gobierna acciones y módulos; `authorization.grants` conserva roles y alcance.
+- Logout limpia primero credenciales y caché protegida locales, y después invoca `POST /auth/logout` como best effort.
+- Recuperación de contraseña usa exclusivamente `POST /auth/password/reset-request`; la respuesta visible no permite enumerar cuentas.
 
 ---
 
