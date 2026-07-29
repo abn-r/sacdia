@@ -178,18 +178,39 @@ Columnas: Nombre, Campo local, Distrito, Iglesia, Secciones (activas/total), Est
 
 ---
 
-### Journey D — Secretario: "Asignar director de sección" (P2)
+### Journey D — Secretario: "Consultar director de sección" (P2)
 
 **Hoy**:
-1. Club → tab Secciones → crear/activar sección
-2. Tab Responsables → selector sección → asignar
-3. O: `section-director-succession-card` en panel de secciones
+1. Club → tab Secciones → consultar la sección
+2. Tab Responsables → selector de sección → ver al director vigente
+3. El Secretario no programa ni activa sucesiones
 
-**Fricción**: Secciones y Responsables son tabs separados del mismo concepto.
+**Fricción**: El `section-director-succession-card` puede sugerir una acción que
+el Secretario no debe ejecutar.
 
 **Ideal**:
 1. Club → sección "Mi equipo" con las 3 secciones como cards
-2. Cada card: director actual, botón asignar/cambiar, miembros count
+2. Cada card: director actual, miembros count y sucesión en modo solo lectura
+   para Secretario
+
+#### Restriccion contractual del flujo de sucesion
+
+El card de accion actual consume el `POST .../director-succession` inmediato. El pilot no
+debe presentar esa accion como preasignacion segura para el siguiente ano:
+mientras el backend P0 no este implementado y habilitado, ejecutar el POST
+termina al director vigente y crea la nueva asignacion activa en la misma
+operacion.
+
+La UX futura podra consultar los endpoints planeados
+`GET /clubs/:clubId/sections/:sectionId/director-succession` y
+`GET /clubs/:clubId/sections/:sectionId/capabilities` para mostrar preflight y
+estado. Esas lecturas no crean assignment ni grant. Una capability positiva no autoriza por sí sola.
+`can_schedule_director_succession` solo puede ser positiva para
+`director-lf` o `assistant-lf` exactos, del mismo Campo Local y dentro de la
+ventana inclusiva del 1 de octubre al 31 de diciembre. Secretario permanece
+view-only. El backend reautoriza SCHED al recibir el comando; la activacion
+posterior aplica ACT-003 y no vuelve a exigir la ventana ni la autoridad
+original de quien programo.
 
 ---
 
