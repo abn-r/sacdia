@@ -98,11 +98,61 @@ El listado de miembros no debe inferir "Sin clase" desde la ausencia de datos en
 - **Consolidacion de secciones**: Las tres tablas originales (`club_adventurers`, `club_pathfinders`, `club_master_guilds`) se consolidaron en `club_sections` con un `club_type_id` discriminador (Decision 10)
 - **Roles anuales**: Las asignaciones de rol tienen `ecclesiastical_year_id`, permitiendo que un miembro cambie de rol entre anos sin perder historico
 - **Asignacion inicial de director**: para una seccion sin director activo, el Admin usa `POST /clubs/:clubId/sections/:sectionId/director-assignment`, que crea una asignacion `director` para el usuario y ano eclesiastico indicados. Si ya existe director activo, el backend rechaza el alta para mantener un solo director activo.
-- **Sucesion anual de director**: para cambiar el director en el siguiente ano eclesiastico, el Admin usa `POST /clubs/:clubId/sections/:sectionId/director-succession`, que cierra la asignacion activa anterior (`active=false`, `status=ended`, `end_date`) y crea una nueva asignacion `director` para el ano indicado. Solo `super-admin`, `admin`, `director-lf` y `assistant-lf` pueden ejecutar este flujo. No deben convivir dos directores activos en la misma seccion.
+- **Sucesion anual de director — baseline runtime**: el Admin usa `POST /clubs/:clubId/sections/:sectionId/director-succession`, que cierra la asignacion activa anterior (`active=false`, `status=ended`, `end_date`) y crea inmediatamente una nueva asignacion `director` activa para el ano indicado. Solo `super-admin`, `admin`, `director-lf` y `assistant-lf` pueden ejecutar hoy este flujo. El baseline actual sigue ejecutando la sucesión inmediata; no programa una transicion futura y sigue siendo deuda respecto del contrato P0 descrito abajo.
 - **Limites de directiva**: `role_slot_limits` define los cupos por seccion y el backend tambien conserva fallback canonico para cargos criticos aunque falte el seed. La regla se aplica al crear asignaciones directas, al actualizar un rol y al revisar solicitudes de asignacion.
 - **Contexto activo**: `users_pr.active_club_assignment_id` persiste el contexto de club activo del usuario, usado por `ClubRolesGuard` para resolver autorizacion
 - **Autorizacion por jerarquia de roles**: Director tiene todos los permisos; subdirector la mayoria; secretary puede gestionar roles y secciones
 - **Cargo vs responsabilidad pedagógica**: `club_role_assignments` define el cargo en la sección; `class_counselor_assignments` define qué clase acompaña ese actor durante el año.
+
+## Contrato P0 propuesto/no implementado
+
+> [!WARNING]
+> El contrato P0 de scheduling todavía no está implementado ni habilitado.
+> Esta seccion define el contrato objetivo y no describe endpoints disponibles
+> en el runtime actual.
+
+El P0 separara la preasignacion del grant efectivo:
+
+1. Entre octubre y diciembre, solo un `director-lf` o `assistant-lf` exacto del
+   mismo Campo Local podra preasignar al director del siguiente ano
+   eclesiastico. La fecha efectiva se derivara del inicio de ese ano.
+2. Programar la sucesion no terminara al director vigente, no activara al
+   sucesor y no creara un `club_role_assignment`.
+3. Al cambio de ano, el backend activara la transicion de forma idempotente,
+   terminara al director saliente y creara el unico assignment efectivo del
+   sucesor.
+4. La vigencia temporal se volvera a evaluar en cada frontera. Un assignment
+   futuro, vencido, inactivo o no efectivo no aportara permisos.
+
+### Superficie futura
+
+Los siguientes endpoints estan planeados y no forman parte de la referencia
+LIVE:
+
+- `GET /clubs/:clubId/sections/:sectionId/director-succession`: preflight y
+  lectura del estado de sucesion de la seccion.
+- `GET /clubs/:clubId/sections/:sectionId/capabilities`: capacidades calculadas
+  por backend para orientar la interfaz.
+
+El preflight/GET no crea assignment ni grant. Una capability positiva no autoriza por sí sola.
+El backend deberá reautorizar al programar y al activar, con predicados
+separados:
+
+- **Programacion (SCHED)**: revalida actor vigente con rol exacto `director-lf`
+  o `assistant-lf`, mismo Campo Local y fecha de negocio entre el 1 de octubre y
+  el 31 de diciembre, inclusive.
+- **Activacion (ACT-003)**: no vuelve a exigir la ventana SCHED ni la autoridad
+  original de quien programo. Revalida plan, seccion y ano objetivo, zona IANA
+  y fecha efectiva alcanzada, saliente esperado, ausencia de otro director
+  incompatible, elegibilidad actual del sucesor, unicidad resultante y las
+  demas condiciones canonicas de activacion.
+
+Cuando se implemente el P0, el
+`POST /clubs/:clubId/sections/:sectionId/director-succession` dejara de ejecutar
+la sucesion inmediata y pasara a crear un plan para el siguiente ano. Hasta que
+backend, consumidores y referencia LIVE se actualicen juntos, los clientes
+deben asumir la semantica inmediata del baseline actual y no presentar el flujo
+como scheduling seguro.
 
 ## Gaps y pendientes
 
