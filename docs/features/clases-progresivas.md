@@ -58,7 +58,9 @@ Las secciones ahora se separan en `BASIC`, `ADVANCED` y `EXTRA`: `BASIC` + `EXTR
 - La tarjeta resumen de avance unifica el porcentaje principal como avance de investidura (`Desarrollo de clase` + `Actividades complementarias` aplicables); debajo sólo muestra `Sección avanzada` como avance independiente cuando la clase la tiene habilitada.
 
 ### Base de datos
-- `classes` — catalogo de clases (class_id, name, club_type_id, order) con `advanced_enabled`, `available_from_year_id`, `available_until_year_id`, `min_duration_years`, `max_duration_years`
+- `classes` — catalogo de clases (class_id, name, club_type_id, order) con `asset_code` único nullable como identidad estable del catálogo, `formative_program_type` (`STANDARD` | `GUIDE_MAJOR`), `advanced_enabled`, `available_from_year_id`, `available_until_year_id`, `min_duration_years`, `max_duration_years`
+- `class_progression_tracks` — un track curricular por tipo de club, activable sin borrarlo; Investiture/clases progresivas es su productor canónico.
+- `class_progression_track_transitions` — fronteras explícitas y activables entre tracks. Los seeds aprobados son `AV-06 → CQ-01` y `CQ-06 → GM-01`, resueltos sólo por `asset_code`, nunca por nombre.
 - `class_modules` — modulos por clase
 - `class_sections` — secciones evaluables por modulo, segmentadas por `requirement_track` (`BASIC`, `ADVANCED`, `EXTRA`) y con owner opcional por division/union/campo local; `EXTRA` requiere exactamente un owner, `ADVANCED` nunca bloquea investidura
 - `enrollments` — inscripcion anual operativa (enrollment_id, user_id, class_id, ecclesiastical_year_id, investiture_status, active). UNIQUE: (user_id, class_id, ecclesiastical_year_id). El estado `EXPIRED` preserva progreso historico cuando la duracion maxima ya vencio.
@@ -113,13 +115,14 @@ Reglas vigentes:
 - **Duracion configurable por clase**: defaults `min_duration_years = 1` y `max_duration_years = 1`; Guia Mayor Avanzado/Instructor pueden extenderse por configuracion
 - **Trayectoria inmutable**: `EXPIRED` impide continuar o solicitar investidura, pero no borra progreso ni historial
 - **Asignación pedagógica separada**: `class_counselor_assignments` no reemplaza ni extiende `club_role_assignments`; evita mezclar cargo operativo, permisos y responsabilidad anual de una clase.
+- **Tracks curriculares explícitos y fail-closed**: las transiciones entre tipos de club viven en `class_progression_tracks` y `class_progression_track_transitions`. Si falta el track, la transición activa o el `asset_code` esperado, no se infiere una ruta alternativa.
 
 ## Gaps y pendientes
 
 - [RESUELTO] La frontera de autoridad entre enrollments y users_classes ha sido resuelta: `users_classes` fue retirada y `enrollments` es la única autoridad
 - [RESUELTO] `/home/grouped-class` en app ya no abre una clase fija/propia: resuelve el alcance pedagógico por sección y luego el miembro objetivo.
 - No hay proceso cron automatico para vencer enrollments; la primera iteracion usa proceso admin/manual auditable
-- No hay progresión anual automática de clase ni transición entre Aventureros, Conquistadores y Guías Mayores. Definirla requiere reglas explícitas de edad, clase destino, investidura pendiente, autorización y transferencia de sección antes de automatizarla.
+- No hay lifecycle anual ni movimiento automático de miembros. Los tracks canónicos ya publican únicamente las fronteras `AV-06 → CQ-01` y `CQ-06 → GM-01`; ejecutar una transición sigue requiriendo reglas explícitas de edad, clase destino, investidura pendiente, autorización y transferencia de sección.
 - Reporteria historica de clases vencidas queda para iteracion posterior
 
 ## Prioridad y siguiente accion

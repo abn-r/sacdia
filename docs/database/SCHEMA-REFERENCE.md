@@ -200,6 +200,8 @@ Referencia humana concisa del schema Prisma vigente.
 
 ### `classes` y duración de trayectoria
 
+- `classes.asset_code VARCHAR(10)?` es la identidad estable, nullable y única del catálogo de clases; las reglas de progresión no infieren identidad por `name`.
+- `classes.formative_program_type formative_program_type_enum NOT NULL DEFAULT STANDARD` clasifica la clase como `STANDARD` o `GUIDE_MAJOR`; `idx_classes_formative_program_type` soporta las consultas por programa.
 - `classes.available_from_year_id INT?` y `classes.available_until_year_id INT?` referencian `ecclesiastical_years.year_id`.
 - `classes.advanced_enabled BOOLEAN NOT NULL DEFAULT false` habilita la vía avanzada de la clase sin mezclarla con investidura.
 - `available_until_year_id = NULL` significa sin vencimiento para nuevas inscripciones; no se usa año sentinel.
@@ -210,6 +212,16 @@ Referencia humana concisa del schema Prisma vigente.
 - `class_sections` puede anclarse opcionalmente a `divisions`, `unions`, `local_fields` o ventana por `ecclesiastical_years`; `EXTRA` exige exactamente un owner y `BASIC`/`ADVANCED` no aceptan owner.
 - `enrollments.investiture_status` incluye `EXPIRED` para preservar progreso histórico cuando se supera la duración máxima sin investidura.
 - `investiture_validation_history.action` incluye `EXPIRED` para auditar vencimientos manuales o por guard de investidura.
+
+### Tracks canónicos de progresión (`class_progression_tracks`)
+
+> **Ownership:** Investiture / clases progresivas es el productor canónico de la ruta curricular. Los consumidores futuros deben leer estas tablas; no deben duplicar ni inferir transiciones por nombre de clase.
+
+- `class_progression_tracks` habilita un track por tipo de club: `club_type_id` es único, con FK `RESTRICT` a `club_types`, y `active` permite deshabilitarlo sin borrarlo.
+- `class_progression_track_transitions` declara sólo saltos entre tracks aprobados: FKs `RESTRICT` a los tracks origen/destino, `UNIQUE (from_track_id, to_track_id)`, `CHECK (from_track_id <> to_track_id)` e índice `(from_track_id, active)`.
+- Los seeds iniciales se resuelven exclusivamente por `classes.asset_code`: `AV-06 → CQ-01` y `CQ-06 → GM-01`. No hay inferencia por `classes.name`.
+- Una transición ausente, inactiva o cuyo código de catálogo no exista permanece **fail-closed**: esta migración no crea un salto alterno ni permite inferirlo.
+- Este contrato sólo publica catálogo, tracks y transiciones. No implementa aún lifecycle anual, renovación ni movimiento automático de miembros.
 
 ### `enrollment_rankings`, `section_rankings`, `enrollment_ranking_weights` (8.4-A)
 
