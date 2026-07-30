@@ -117,12 +117,14 @@ Reglas vigentes:
 - **Lineage de renovación persistente**: `renewed_from_enrollment_id` conserva el origen con FK `RESTRICT`; el trigger exige la misma identidad de usuario/clase, evita ciclos y vuelve inmutable el enlace. El schema no copia progreso o validaciones automáticamente: W5 debe prohibir explícitamente su reutilización y validar sección/scope, ya que `enrollments` no contiene `club_section_id`.
 - **Asignación pedagógica separada**: `class_counselor_assignments` no reemplaza ni extiende `club_role_assignments`; evita mezclar cargo operativo, permisos y responsabilidad anual de una clase.
 - **Tracks curriculares explícitos y fail-closed**: las transiciones entre tipos de club viven en `class_progression_tracks` y `class_progression_track_transitions`. Si falta el track, la transición activa o el `asset_code` esperado, no se infiere una ruta alternativa.
+- **Planificador de fuente canónica (W3b1)**: `ClassEnrollmentPlanService` identifica de forma read-only el único enrollment predecesor que puede alcanzar la clase destino mediante `ClassProgressionResolver`. Ignora clases concurrentes ajenas, usa orden total año/fecha/id y falla cerrado ante fuente ausente o ambigua; todavía no modifica la inscripción runtime.
 
 ## Gaps y pendientes
 
 - [RESUELTO] La frontera de autoridad entre enrollments y users_classes ha sido resuelta: `users_classes` fue retirada y `enrollments` es la única autoridad
 - [RESUELTO] `/home/grouped-class` en app ya no abre una clase fija/propia: resuelve el alcance pedagógico por sección y luego el miembro objetivo.
 - No hay proceso cron automatico para vencer enrollments; la primera iteracion usa proceso admin/manual auditable
+- La integración del planificador en `ClassesService.enrollUser`, la serialización por usuario/ciclo/pool, los errores estables de carrera y sus pruebas de rollback pertenecen a W3b2; hasta entonces el endpoint conserva su comportamiento legacy.
 - No hay lifecycle anual, movimiento automático ni operación transaccional de renovación GM. Los tracks canónicos ya publican únicamente las fronteras `AV-06 → CQ-01` y `CQ-06 → GM-01`; ejecutar una transición o usar lineage sigue requiriendo reglas explícitas de edad, clase destino, investidura pendiente, autorización y transferencia de sección.
 - Reporteria historica de clases vencidas queda para iteracion posterior
 
