@@ -63,7 +63,7 @@ Las secciones ahora se separan en `BASIC`, `ADVANCED` y `EXTRA`: `BASIC` + `EXTR
 - `class_progression_track_transitions` — fronteras explícitas y activables entre tracks. Los seeds aprobados son `AV-06 → CQ-01` y `CQ-06 → GM-01`, resueltos sólo por `asset_code`, nunca por nombre.
 - `class_modules` — modulos por clase
 - `class_sections` — secciones evaluables por modulo, segmentadas por `requirement_track` (`BASIC`, `ADVANCED`, `EXTRA`) y con owner opcional por division/union/campo local; `EXTRA` requiere exactamente un owner, `ADVANCED` nunca bloquea investidura
-- `enrollments` — inscripcion anual operativa (enrollment_id, user_id, class_id, ecclesiastical_year_id, investiture_status, active). UNIQUE: (user_id, class_id, ecclesiastical_year_id). El estado `EXPIRED` preserva progreso historico cuando la duracion maxima ya vencio.
+- `enrollments` — inscripcion anual operativa (enrollment_id, user_id, class_id, ecclesiastical_year_id, investiture_status, active), con `renewed_from_enrollment_id` autorreferente para lineage de renovación. UNIQUE: (user_id, class_id, ecclesiastical_year_id) y un origen sólo puede tener un renovado; el estado `EXPIRED` preserva progreso historico cuando la duracion maxima ya vencio.
 - `class_section_progress` — progreso por seccion con enrollment_id como owner anual. UNIQUE: (enrollment_id, module_id, section_id)
 - `class_module_progress` — proyeccion de progreso por modulo. UNIQUE: (enrollment_id, module_id)
 - `class_counselor_assignments` — asignación anual de responsables pedagógicos por usuario + sección + clase + año; máximo 3 activos por clase/sección/año y máximo 2 clases activas por persona/sección/año.
@@ -114,6 +114,7 @@ Reglas vigentes:
 - **Clases legacy por disponibilidad**: `available_until_year_id = null` significa sin vencimiento; no se usa ano sentinel tipo 2100
 - **Duracion configurable por clase**: defaults `min_duration_years = 1` y `max_duration_years = 1`; Guia Mayor Avanzado/Instructor pueden extenderse por configuracion
 - **Trayectoria inmutable**: `EXPIRED` impide continuar o solicitar investidura, pero no borra progreso ni historial
+- **Lineage de renovación persistente**: `renewed_from_enrollment_id` conserva el origen con FK `RESTRICT`, evita auto-referencias y forks. La futura operación GM debe crear un enrollment limpio; este contrato no permite reutilizar el progreso o las validaciones del origen.
 - **Asignación pedagógica separada**: `class_counselor_assignments` no reemplaza ni extiende `club_role_assignments`; evita mezclar cargo operativo, permisos y responsabilidad anual de una clase.
 - **Tracks curriculares explícitos y fail-closed**: las transiciones entre tipos de club viven en `class_progression_tracks` y `class_progression_track_transitions`. Si falta el track, la transición activa o el `asset_code` esperado, no se infiere una ruta alternativa.
 
@@ -122,7 +123,7 @@ Reglas vigentes:
 - [RESUELTO] La frontera de autoridad entre enrollments y users_classes ha sido resuelta: `users_classes` fue retirada y `enrollments` es la única autoridad
 - [RESUELTO] `/home/grouped-class` en app ya no abre una clase fija/propia: resuelve el alcance pedagógico por sección y luego el miembro objetivo.
 - No hay proceso cron automatico para vencer enrollments; la primera iteracion usa proceso admin/manual auditable
-- No hay lifecycle anual ni movimiento automático de miembros. Los tracks canónicos ya publican únicamente las fronteras `AV-06 → CQ-01` y `CQ-06 → GM-01`; ejecutar una transición sigue requiriendo reglas explícitas de edad, clase destino, investidura pendiente, autorización y transferencia de sección.
+- No hay lifecycle anual, movimiento automático ni operación transaccional de renovación GM. Los tracks canónicos ya publican únicamente las fronteras `AV-06 → CQ-01` y `CQ-06 → GM-01`; ejecutar una transición o usar lineage sigue requiriendo reglas explícitas de edad, clase destino, investidura pendiente, autorización y transferencia de sección.
 - Reporteria historica de clases vencidas queda para iteracion posterior
 
 ## Prioridad y siguiente accion

@@ -211,6 +211,8 @@ Referencia humana concisa del schema Prisma vigente.
 - `class_sections.requirement_track` separa `BASIC`, `ADVANCED` y `EXTRA`; `BASIC` + `EXTRA` cuentan para investidura, mientras `ADVANCED` se gestiona como badge/estado aparte.
 - `class_sections` puede anclarse opcionalmente a `divisions`, `unions`, `local_fields` o ventana por `ecclesiastical_years`; `EXTRA` exige exactamente un owner y `BASIC`/`ADVANCED` no aceptan owner.
 - `enrollments.investiture_status` incluye `EXPIRED` para preservar progreso histórico cuando se supera la duración máxima sin investidura.
+- `enrollments.renewed_from_enrollment_id INT?` es el vínculo de lineage para una renovación: FK autorreferente `RESTRICT`, `CHECK` contra auto-referencia y `UNIQUE` sobre el origen para impedir forks; el índice `(user_id, class_id, active)` soporta resolver el intento vigente.
+- El vínculo no copia progreso, módulos, evidencias, aprobaciones ni validaciones. Este slice sólo publica persistencia auditable; la operación transaccional de vencer/renovar GM y su visibilidad aún no se implementan.
 - `investiture_validation_history.action` incluye `EXPIRED` para auditar vencimientos manuales o por guard de investidura.
 
 ### Tracks canónicos de progresión (`class_progression_tracks`)
