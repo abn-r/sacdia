@@ -93,7 +93,7 @@ Fuera de alcance de WU1: API/DTOs v2, transacciones de aprobación, idempotencia
 
 - **Sin reportes avanzados**: No hay endpoints para reportes por categoria, tendencias temporales o comparativas entre periodos
 - **Sin exportacion**: No hay funcionalidad para exportar movimientos a PDF o Excel
-- **Sin auditoría avanzada**: Los movimientos registran `created_by` (UUID, NOT NULL) y `modified_by_id` (UUID, nullable, FK a users); no hay audit trail de acciones en formato log
+- **Sin auditoría avanzada para movimientos legacy**: Los movimientos de `finances` registran `created_by` (UUID, NOT NULL) y `modified_by_id` (UUID, nullable, FK a users), pero no tienen audit trail de acciones en formato log. Esto no aplica a `finance_ledger_events` del ledger v2: sus eventos requieren actor y son append-only; WU1 todavía no expone operaciones v2 que los generen.
 - **Sin presupuesto**: No hay modelo para definir presupuestos anuales por categoria y comparar ejecucion vs presupuesto
 - **Ledger v2 sin API aún**: WU1 no habilita el feature flag ni expone endpoints. WU2 entregará las escrituras seguras; WU3, las lecturas y el contrato compatible.
 
