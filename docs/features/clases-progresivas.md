@@ -114,7 +114,7 @@ Reglas vigentes:
 - **Clases legacy por disponibilidad**: `available_until_year_id = null` significa sin vencimiento; no se usa ano sentinel tipo 2100
 - **Duracion configurable por clase**: defaults `min_duration_years = 1` y `max_duration_years = 1`; Guia Mayor Avanzado/Instructor pueden extenderse por configuracion
 - **Trayectoria inmutable**: `EXPIRED` impide continuar o solicitar investidura, pero no borra progreso ni historial
-- **Lineage de renovación persistente**: `renewed_from_enrollment_id` conserva el origen con FK `RESTRICT`, evita auto-referencias y forks. La futura operación GM debe crear un enrollment limpio; este contrato no permite reutilizar el progreso o las validaciones del origen.
+- **Lineage de renovación persistente**: `renewed_from_enrollment_id` conserva el origen con FK `RESTRICT`; el trigger exige la misma identidad de usuario/clase, evita ciclos y vuelve inmutable el enlace. El schema no copia progreso o validaciones automáticamente: W5 debe prohibir explícitamente su reutilización y validar sección/scope, ya que `enrollments` no contiene `club_section_id`.
 - **Asignación pedagógica separada**: `class_counselor_assignments` no reemplaza ni extiende `club_role_assignments`; evita mezclar cargo operativo, permisos y responsabilidad anual de una clase.
 - **Tracks curriculares explícitos y fail-closed**: las transiciones entre tipos de club viven en `class_progression_tracks` y `class_progression_track_transitions`. Si falta el track, la transición activa o el `asset_code` esperado, no se infiere una ruta alternativa.
 

@@ -212,7 +212,8 @@ Referencia humana concisa del schema Prisma vigente.
 - `class_sections` puede anclarse opcionalmente a `divisions`, `unions`, `local_fields` o ventana por `ecclesiastical_years`; `EXTRA` exige exactamente un owner y `BASIC`/`ADVANCED` no aceptan owner.
 - `enrollments.investiture_status` incluye `EXPIRED` para preservar progreso histórico cuando se supera la duración máxima sin investidura.
 - `enrollments.renewed_from_enrollment_id INT?` es el vínculo de lineage para una renovación: FK autorreferente `RESTRICT`, `CHECK` contra auto-referencia y `UNIQUE` sobre el origen para impedir forks; el índice `(user_id, class_id, active)` soporta resolver el intento vigente.
-- El vínculo no copia progreso, módulos, evidencias, aprobaciones ni validaciones. Este slice sólo publica persistencia auditable; la operación transaccional de vencer/renovar GM y su visibilidad aún no se implementan.
+- El trigger `enforce_enrollment_renewal_lineage_trigger` exige mismo `user_id` y `class_id`, evita ciclos de cualquier profundidad e impide cambiar o quitar un origen ya asignado. La identidad también queda inmutable mientras la fila participe como origen o destino.
+- El schema no copia progreso, módulos, evidencias, aprobaciones ni validaciones automáticamente. W5 debe prohibir explícitamente su reutilización al crear el nuevo enrollment y validar sección/scope, porque `enrollments` no almacena `club_section_id`.
 - `investiture_validation_history.action` incluye `EXPIRED` para auditar vencimientos manuales o por guard de investidura.
 
 ### Tracks canónicos de progresión (`class_progression_tracks`)
