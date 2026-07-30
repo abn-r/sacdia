@@ -168,6 +168,21 @@ Referencia humana concisa del schema Prisma vigente.
 - La relacion principal es con `club_sections`, no con tablas legacy separadas por tipo.
 - `finance_evidence_files` guarda hasta 3 fotos activas por movimiento financiero. Tiene FK `finance_id -> finances.finance_id` con `onDelete: Cascade`, FK `uploaded_by_id -> users.user_id`, metadatos de archivo (`file_url`, `file_name`, `file_type`, `file_size`) y `active`.
 - Indices de evidencias: `idx_finance_evidence_files_finance` y `idx_finance_evidence_files_uploaded_by`.
+- WU1 agregó el fundamento aditivo del ledger v2; el CRUD/API v2 aún no está expuesto. Las filas legacy `finances` y sus fotos siguen siendo la superficie legible vigente durante el rollout.
+
+### Ledger financiero v2 (WU1)
+
+- `finance_currencies` es el catálogo ISO 4217: código alfabético y numérico únicos, `minor_units` entre 0 y 4 y códigos de tres caracteres. La migración siembra `MXN`/`484` con 2 decimales.
+- `finance_ledger_entries` conserva un movimiento en centavos (`amount_centavos > 0`), moneda del catálogo, sección, categoría, fecha, registrador y ciclo `pending_approval | approved | rejected`. La relación opcional `legacy_finance_id` es única, por lo que una fila legacy sólo puede tener una entrada v2.
+- El `CHECK` de ciclo exige que los pendientes no tengan decisión; los aprobados tengan fecha de decisión y actor, salvo el backfill legacy; y los rechazados tengan actor, fecha y motivo no vacío. Todas las FKs del ledger usan `ON DELETE RESTRICT`.
+- `finance_vouchers` contiene el comprobante monetario v2 (monto, moneda, URI y metadatos de archivo) ligado a una entrada; `finance_receipt_allocations` enlaza comprobante y obligación, exige importe positivo y no permite repetir ese par. WU1 no implementa todavía la operación ni la validación transaccional de capacidad de asignación.
+- `finance_ledger_events` requiere siempre `actor_user_id`, `payload` y exactamente un objetivo (entrada, comprobante o asignación). Un trigger bloquea `UPDATE` y `DELETE`: el historial es append-only.
+- `finance_idempotency_receipts` conserva actor, llave UUID, comando, hash SHA-256 y respuesta; la llave es única por actor. Su uso por endpoints se entrega en WU2.
+- Índices: entradas por `(club_section_id, status, finance_date)` y `(club_section_id, kind, status)`; comprobantes por entrada; asignaciones por obligación; y eventos por entrada/comprobante y fecha.
+- Permisos seed: `finances:register` sólo para roles activos de categoría `CLUB` `treasurer` y `secretary-treasurer`; `finances:approve` sólo para `director`. Se eliminan ambos grants antes de reasignarlos para no heredar wildcards o resets. `finances:read` se conserva.
+- La clave de rollout `finance.ledger_v2_writes_enabled` se siembra en `false` con `ON CONFLICT DO NOTHING`; un operador puede habilitarla después sin que un reseed la vuelva a desactivar.
+- El script manual `prisma/scripts/backfill-finance-ledger-v2.sql` sólo corre con esa clave en `false`. Es idempotente y convierte cada `finances.active` válida en una entrada aprobada MXN más un evento `MIGRATED_LEGACY`; valida scope, categoría, importes, drift, conteos, totales, campos y lineage antes de `COMMIT`, por lo que falla cerradamente y revierte la transacción ante cualquier diferencia.
+- `finance_evidence_files` no participa en ese backfill: las fotos legacy siguen como adjuntos de doble lectura, nunca se convierten en `finance_vouchers` ni generan capacidad monetaria.
 
 ### `member_insurances`
 
@@ -505,6 +520,7 @@ Define el presupuesto de puntos por componente dentro de un eje anual:
 ### Finanzas y carpetas
 
 - `finances`, `finance_evidence_files`, `finances_categories`, `FinancePeriodClosing`
+- Base WU1 no expuesta aún: `finance_currencies`, `finance_ledger_entries`, `finance_vouchers`, `finance_receipt_allocations`, `finance_ledger_events`, `finance_idempotency_receipts`
 - `folders`, `folders_modules`, `folders_sections`, `folder_assignments`, `folders_modules_records`, `folders_section_records`
 
 ### Enrollment anual, ranking y reportes

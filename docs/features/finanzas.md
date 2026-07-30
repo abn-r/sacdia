@@ -1,6 +1,6 @@
 # Finanzas
 
-**Estado**: IMPLEMENTADO
+**Estado**: IMPLEMENTADO (superficie legacy) / WU1 entregado (fundamento v2, sin API v2)
 
 ## Descripcion de dominio
 
@@ -49,6 +49,21 @@ Las categorias financieras son un catalogo compartido que permite clasificar los
 - `finances` — Movimientos financieros (ingresos/egresos por club)
 - `finance_evidence_files` — Fotos de evidencia asociadas a movimientos financieros
 - `finances_categories` — Catalogo de categorias de movimientos financieros
+- WU1 añade, sin exponer todavía escritura o lectura v2: `finance_currencies`, `finance_ledger_entries`, `finance_vouchers`, `finance_receipt_allocations`, `finance_ledger_events` y `finance_idempotency_receipts`.
+
+## Fundamento del ledger v2 (WU1)
+
+Esta entrega es únicamente de base de datos, permisos, rollout y backfill. No añade endpoints, DTOs, pantallas ni cambia los endpoints legacy descritos arriba.
+
+- Las nuevas entradas usan importes enteros en centavos, moneda ISO 4217 del catálogo y estados `pending_approval`, `approved` o `rejected`. Las reglas DB impiden decisiones incompletas y conservan `registered_by`, decisión y motivo cuando corresponde.
+- Un comprobante monetario v2 (`finance_vouchers`) está ligado a una entrada y puede referenciarse por asignaciones a obligaciones. WU1 sólo crea el modelo e integridad local del par comprobante/obligación; las operaciones, autorización de ciclo y límite agregado de capacidad pertenecen a WU2.
+- Cada evento del ledger exige actor, payload y un único objetivo. La base prohíbe actualizar o borrar eventos; por tanto, el historial durable es append-only.
+- Los permisos específicos son `finances:register` para tesorero y secretario-tesorero activos de categoría `CLUB`, y `finances:approve` sólo para director activo de categoría `CLUB`. `finances:read` permanece. Estos grants todavía no sustituyen los guards de los endpoints legacy.
+- El feature flag `finance.ledger_v2_writes_enabled` nace en `false`; el reseed no revierte una activación explícita del operador.
+- El backfill manual e idempotente mantiene el flag apagado y transforma cada registro legacy activo válido en una entrada `approved` MXN con su evento `MIGRATED_LEGACY`. Antes de confirmar compara scope, categoría, importes, conteos, totales, campos y lineage; cualquier anomalía aborta la transacción completa.
+- Las fotos de `finance_evidence_files` se conservan como adjuntos del flujo legacy y de doble lectura. No son comprobantes v2 ni crean capacidad de pago/asignación.
+
+Fuera de alcance de WU1: API/DTOs v2, transacciones de aprobación, idempotencia de requests, asignaciones con capacidad agregada, lecturas compatibles v2, camporees, cuotas/cupos y seguros.
 
 ## Requisitos funcionales
 
@@ -72,6 +87,7 @@ Las categorias financieras son un catalogo compartido que permite clasificar los
 - **Resumen acumulado por ano eclesiastico**: El endpoint `summary` con `year` + `month` calcula el saldo arrastrado del ano eclesiastico hasta el mes seleccionado; los meses cerrados usan el snapshot de `finance_period_closings` y los meses abiertos se calculan desde movimientos activos
 - **Doble superficie de lectura**: `GET /clubs/:clubId/finances` resuelve la vista mensual/anual del dashboard y `GET /clubs/:clubId/finances/transactions` cubre busqueda, filtros avanzados y paginacion server-side
 - **Filtrado temporal**: Los filtros por ano/mes se aplican a nivel de query, no como entidades separadas
+- **Rollout de ledger v2**: La migración es aditiva y conserva `finances` como lectura legacy. El backfill no se ejecuta automáticamente por Prisma; se opera manualmente sólo con escrituras v2 deshabilitadas y con paridad validada antes de `COMMIT`.
 
 ## Gaps y pendientes
 
@@ -79,7 +95,8 @@ Las categorias financieras son un catalogo compartido que permite clasificar los
 - **Sin exportacion**: No hay funcionalidad para exportar movimientos a PDF o Excel
 - **Sin auditoría avanzada**: Los movimientos registran `created_by` (UUID, NOT NULL) y `modified_by_id` (UUID, nullable, FK a users); no hay audit trail de acciones en formato log
 - **Sin presupuesto**: No hay modelo para definir presupuestos anuales por categoria y comparar ejecucion vs presupuesto
+- **Ledger v2 sin API aún**: WU1 no habilita el feature flag ni expone endpoints. WU2 entregará las escrituras seguras; WU3, las lecturas y el contrato compatible.
 
 ## Estado de implementacion
 
-- **Prioridad**: Completo — backend, admin y app implementados sin gaps funcionales pendientes
+- **Prioridad**: La superficie legacy está implementada en backend, admin y app. El ledger v2 tiene WU1 de infraestructura entregado; WU2–WU5 permanecen pendientes.
