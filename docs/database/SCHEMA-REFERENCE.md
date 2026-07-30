@@ -550,6 +550,8 @@ Define el presupuesto de puntos por componente dentro de un eje anual:
 - `blood_type`
 - `evidence_type_enum`
 - `evidence_validation_enum`
+- `finance_ledger_entry_kind` (`income`, `expense`, `payable`)
+- `finance_ledger_entry_status` (`pending_approval`, `approved`, `rejected`)
 - `gender`
 - `class_honor_relation_type_enum` (`REQUIRED`, `RECOMMENDED`, `ELECTIVE`)
 - `master_honor_applicability_scope_enum`
