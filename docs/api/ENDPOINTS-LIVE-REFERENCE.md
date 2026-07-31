@@ -1184,8 +1184,24 @@ El contrato legacy de unión es distinto: `POST /api/v1/camporees/union/:campore
 | --- | --- | --- | --- | --- | --- | --- |
 | GET | `/api/v1/materials/categories` | JWT | `materiales:manage-inventory`; alcance Materials | Lista categorías, incluidas inactivas, sólo del Campo Local efectivo. `super-admin` debe indicar `?local_field_id`; un actor con alcance único no puede cambiarlo. | CategoriesService.list() | `src/materials/categories/categories.controller.ts` |
 | POST | `/api/v1/materials/categories` | JWT | `materiales:manage-inventory`; alcance Materials | Crea categoría en el Campo Local efectivo; el slug sólo debe ser único dentro de ese Campo. | CategoriesService.create() | `src/materials/categories/categories.controller.ts` |
-| PATCH | `/api/v1/materials/categories/:id` | JWT | `materiales:manage-inventory` | Actualiza una categoría existente. La autorización UUID completa no forma parte de Materials W1. | CategoriesService.update() | `src/materials/categories/categories.controller.ts` |
-| DELETE | `/api/v1/materials/categories/:id` | JWT | `materiales:manage-inventory` | Desactivación lógica; 409 si la categoría tiene productos. La autorización UUID completa no forma parte de Materials W1. | CategoriesService.softDelete() | `src/materials/categories/categories.controller.ts` |
+| PATCH | `/api/v1/materials/categories/:id` | JWT | `materiales:manage-inventory`; alcance Materials | Actualiza por UUID estable una categoría del Campo Local autorizado. Sólo `super-admin` puede reactivar una categoría inactiva; desactivarla falla si aún tiene productos activos. | CategoriesService.update() | `src/materials/categories/categories.controller.ts` |
+| DELETE | `/api/v1/materials/categories/:id` | JWT | `materiales:manage-inventory`; alcance Materials | Desactivación lógica e idempotente por UUID estable. Falla si la categoría activa tiene productos asociados; no elimina la fila. | CategoriesService.softDelete() | `src/materials/categories/categories.controller.ts` |
+
+#### Contrato de mutación UUID de categorías
+
+- `:id` debe ser UUID válido; un formato inválido devuelve 400 antes del servicio. El UUID, el `slug` y `local_field_id` no son mutables por estos endpoints.
+- `PATCH` admite únicamente `label` (string de 1 a 200), `icon` (string o `null`, máximo 100), `sort_order` (entero mayor o igual a 0) y `active` (booleano). Un body inválido devuelve 400.
+- El backend relee `local_field_id` desde la categoría identificada por UUID y lo compara con el alcance efectivo. Un actor de alcance único nunca elige el Campo mediante body o query; `super-admin` puede operar el UUID de cualquier Campo.
+- `DELETE` conserva el mismo UUID y responde `{ "id": "<uuid>", "active": false }`; repetirlo sobre una categoría ya inactiva devuelve el mismo resultado sin otra mutación.
+
+| HTTP | Código de dominio | Condición |
+| --- | --- | --- |
+| 403 | `local_field_scope_violation` | El UUID pertenece a otro Campo Local. |
+| 403 | `material_reactivation_requires_super_admin` | Un actor distinto de `super-admin` intenta reactivar una categoría inactiva. |
+| 404 | `category_not_found` | No existe la categoría UUID. |
+| 409 | `category_in_use` | `PATCH active=false` encuentra productos activos o `DELETE` encuentra cualquier producto asociado. |
+| 409 | `category_inactive` | Un actor con alcance único intenta modificar una categoría que ya está inactiva. |
+| 409 | `category_concurrent_change` | La categoría cambió durante la mutación y la relectura no produce un error más específico. |
 
 ### Materials — Config
 

@@ -421,7 +421,7 @@ src/
 - En el legacy, el body sólo aporta `club_section_id`; camporee, sección, club y tipo se bloquean y releen desde DB. El backend valida activo, territorio y tipo incluido antes de persistir IDs derivados.
 - El alta de participantes exige director y sección activa; además verifica inscripción de sección `registered|approved` y pertenencia del participante. Los fallos de elegibilidad usan `422 CAMPOREE_SECTION_REGISTRATION_REQUIRED` o `422 CAMPOREE_MEMBER_OUTSIDE_ACTIVE_SECTION`.
 
-## Alcance de categorías Materials (W1)
+## Alcance y lifecycle de categorías Materials (W1-W2)
 
 Las lecturas de catálogo que enumeran productos/categorías y `GET|POST /api/v1/materials/categories` resuelven primero un alcance de Campo Local desde el snapshot de autorización; `local_field_id` de query es una reducción/verificación, nunca autoridad.
 
@@ -433,7 +433,11 @@ Las lecturas de catálogo que enumeran productos/categorías y `GET|POST /api/v1
 
 - Los roles con autoridad de Campo Local pero sin un Campo Local efectivo fallan con `403 local_field_scope_required`; no pueden degradarse al fallback de club.
 - La categoría y el producto quedan ligados al mismo Campo por constraints de base de datos, no por el valor enviado por cliente.
-- Esta cobertura W1 no declara autorización por UUID para `PATCH|DELETE /materials/categories/:id`, lifecycle/auditoría de Materials ni pedidos; esos flujos permanecen fuera de alcance hasta sus work units posteriores.
+- `PATCH|DELETE /materials/categories/:id` resuelven primero la categoría por UUID y autorizan contra el `local_field_id` persistido; el cliente no envía ni sustituye ese ownership.
+- Para actores con alcance único, la actualización atómica exige que el UUID siga perteneciendo al mismo Campo y que la categoría continúe activa. Si el recurso cambia concurrentemente, se relee y se devuelve el error de alcance/lifecycle correspondiente o `409 category_concurrent_change`.
+- Para un actor con alcance único, una categoría inactiva queda sólo para consulta: reactivarla devuelve `403 material_reactivation_requires_super_admin` y cualquier otra edición devuelve `409 category_inactive`. `super-admin` puede editarla o reactivarla.
+- La desactivación no borra la identidad: `DELETE` conserva el UUID, es idempotente cuando ya está inactiva y se bloquea con `409 category_in_use` si existen productos asociados. `PATCH active=false` también se bloquea mientras existan productos activos.
+- Esta cobertura no declara auditoría de Materials, administración de pedidos ni cambios de Inventory o seguros; esos flujos permanecen fuera de alcance.
 
 # Captura oficial de puntaje de camporee
 

@@ -7,7 +7,7 @@
 
 Materials es el catálogo comercial y el flujo de solicitud de material que un club realiza a su Campo Local. No es el inventario físico del club: `inventory_categories` y `club_inventory` permanecen en el dominio Inventario y no son modificados por este documento. Seguros también queda fuera de Materials.
 
-## Estado real verificado: Materials W1
+## Estado real verificado: Materials W1-W2
 
 La primera unidad terminada establece el aislamiento de categorías por Campo Local y el contrato de lectura/creación que lo consume:
 
@@ -23,6 +23,17 @@ La primera unidad terminada establece el aislamiento de categorías por Campo Lo
 3. Sólo cuando no existe autoridad global de Campo Local, el sistema puede derivar el Campo desde la asignación activa de club. Un rol con autoridad territorial incompleta falla cerrado; no usa ese fallback.
 4. Un `local_field_id` de query no amplía permisos: una discrepancia contra el alcance único devuelve 403.
 
+### Identidad y lifecycle de categorías (W2)
+
+`PATCH|DELETE /api/v1/materials/categories/:id` operan sobre el UUID estable de la categoría. La categoría conserva ese UUID durante actualizaciones y desactivaciones; estos endpoints tampoco permiten cambiar `slug` ni `local_field_id`. El ownership se toma de la fila persistida y se compara con el Campo Local efectivo del actor, por lo que conocer un UUID de otro Campo no autoriza su mutación.
+
+- `PATCH` modifica `label`, `icon`, `sort_order` o `active`. Un actor con alcance único sólo puede modificar categorías activas de su Campo.
+- Sólo `super-admin` puede reactivar una categoría inactiva. Para los demás roles, la reactivación devuelve 403 y cualquier otra edición de una inactiva devuelve 409.
+- Desactivar mediante `PATCH active=false` se bloquea mientras haya productos activos. `DELETE` es una desactivación lógica e idempotente y se bloquea si existe cualquier producto asociado.
+- La actualización y la desactivación verifican nuevamente ownership y lifecycle dentro de la operación atómica. Un cambio concurrente no puede convertir una validación previa en una escritura cross-Campo.
+
+Errores de dominio estables: `local_field_scope_violation` (403), `material_reactivation_requires_super_admin` (403), `category_not_found` (404), `category_in_use`, `category_inactive` y `category_concurrent_change` (409). Un UUID o body inválido falla con 400 antes de la mutación.
+
 ## Migración y rollout
 
 La migración `20260730233000_finalize_material_category_scope` requiere que el runtime scope-aware previo esté desplegado. Bajo una sola transacción toma locks fuertes, clona categorías globales de forma determinista para cada Campo Local, remapea productos del mismo Campo y después aplica `NOT NULL`, uniques y FK compuesta.
@@ -32,7 +43,7 @@ Antes de mutar, aborta sin estado parcial si no hay Campos Locales, existen coli
 ## Límites vigentes
 
 - No se agregaron endpoints nuevos ni se modificó el flujo de pedidos, comprobantes, entregas o pagos.
-- La política de autorización por UUID de categorías (`PATCH|DELETE`), lifecycle, auditoría de Materials y administración de pedidos son W2+; no se deben asumir como cubiertos por W1.
+- La autorización UUID y el lifecycle de categorías están cubiertos por W2. Auditoría de Materials y administración de pedidos siguen pendientes; no deben inferirse de este contrato.
 - No se modificó Inventory ni el flujo de seguros.
 
 ## Referencias canónicas
