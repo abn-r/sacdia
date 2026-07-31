@@ -1173,19 +1173,19 @@ El contrato legacy de unión es distinto: `POST /api/v1/camporees/union/:campore
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
-| GET | `/api/v1/materials/catalog/categories` | JWT | Permisos: MATERIALS_READ | List all categories with active product count | CatalogService.listCategories() | `src/materials/catalog/catalog.controller.ts` |
+| GET | `/api/v1/materials/catalog/categories` | JWT | `materiales:read`; alcance Materials | Lista categorías y conteo activo del Campo Local efectivo. `super-admin` debe indicar `?local_field_id`; `admin`, `director-lf` y `assistant-lf` sólo usan su Campo Local; el fallback de club opera sólo sin autoridad de Campo Local. | CatalogService.listCategories() | `src/materials/catalog/catalog.controller.ts` |
 | GET | `/api/v1/materials/catalog/programs` | JWT | Permisos: MATERIALS_READ | List all programs (club types) | CatalogService.listPrograms() | `src/materials/catalog/catalog.controller.ts` |
-| GET | `/api/v1/materials/catalog` | JWT | Permisos: MATERIALS_READ | List products (paginated, filtered, scoped to LF) | CatalogService.list() | `src/materials/catalog/catalog.controller.ts` |
-| GET | `/api/v1/materials/catalog/:id` | JWT | Permisos: MATERIALS_READ | Get product detail by ID | CatalogService.getById() | `src/materials/catalog/catalog.controller.ts` |
+| GET | `/api/v1/materials/catalog` | JWT | `materiales:read`; alcance Materials | Lista productos activos paginados del Campo Local efectivo. `super-admin` debe indicar `?local_field_id`; el actor con alcance único no puede sustituirlo. | CatalogService.list() | `src/materials/catalog/catalog.controller.ts` |
+| GET | `/api/v1/materials/catalog/:id` | JWT | `materiales:read`; alcance Materials | Obtiene un producto activo; un actor con alcance único recibe 404 para otro Campo Local. | CatalogService.getById() | `src/materials/catalog/catalog.controller.ts` |
 
 ### Materials — Categories (admin)
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
-| GET | `/api/v1/materials/categories` | JWT | Permisos: MATERIALS_MANAGE_INVENTORY | List all material categories (admin view; includes inactive) | CategoriesService.list() | `src/materials/categories/categories.controller.ts` |
-| POST | `/api/v1/materials/categories` | JWT | Permisos: MATERIALS_MANAGE_INVENTORY | Create a new material category | CategoriesService.create() | `src/materials/categories/categories.controller.ts` |
-| PATCH | `/api/v1/materials/categories/:id` | JWT | Permisos: MATERIALS_MANAGE_INVENTORY | Update an existing category | CategoriesService.update() | `src/materials/categories/categories.controller.ts` |
-| DELETE | `/api/v1/materials/categories/:id` | JWT | Permisos: MATERIALS_MANAGE_INVENTORY | Soft-delete a category (active=false). Blocked when products reference it. | CategoriesService.softDelete() | `src/materials/categories/categories.controller.ts` |
+| GET | `/api/v1/materials/categories` | JWT | `materiales:manage-inventory`; alcance Materials | Lista categorías, incluidas inactivas, sólo del Campo Local efectivo. `super-admin` debe indicar `?local_field_id`; un actor con alcance único no puede cambiarlo. | CategoriesService.list() | `src/materials/categories/categories.controller.ts` |
+| POST | `/api/v1/materials/categories` | JWT | `materiales:manage-inventory`; alcance Materials | Crea categoría en el Campo Local efectivo; el slug sólo debe ser único dentro de ese Campo. | CategoriesService.create() | `src/materials/categories/categories.controller.ts` |
+| PATCH | `/api/v1/materials/categories/:id` | JWT | `materiales:manage-inventory` | Actualiza una categoría existente. La autorización UUID completa no forma parte de Materials W1. | CategoriesService.update() | `src/materials/categories/categories.controller.ts` |
+| DELETE | `/api/v1/materials/categories/:id` | JWT | `materiales:manage-inventory` | Desactivación lógica; 409 si la categoría tiene productos. La autorización UUID completa no forma parte de Materials W1. | CategoriesService.softDelete() | `src/materials/categories/categories.controller.ts` |
 
 ### Materials — Config
 

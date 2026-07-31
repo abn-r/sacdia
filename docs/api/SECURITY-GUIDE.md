@@ -421,6 +421,20 @@ src/
 - En el legacy, el body sólo aporta `club_section_id`; camporee, sección, club y tipo se bloquean y releen desde DB. El backend valida activo, territorio y tipo incluido antes de persistir IDs derivados.
 - El alta de participantes exige director y sección activa; además verifica inscripción de sección `registered|approved` y pertenencia del participante. Los fallos de elegibilidad usan `422 CAMPOREE_SECTION_REGISTRATION_REQUIRED` o `422 CAMPOREE_MEMBER_OUTSIDE_ACTIVE_SECTION`.
 
+## Alcance de categorías Materials (W1)
+
+Las lecturas de catálogo que enumeran productos/categorías y `GET|POST /api/v1/materials/categories` resuelven primero un alcance de Campo Local desde el snapshot de autorización; `local_field_id` de query es una reducción/verificación, nunca autoridad.
+
+| Actor | Alcance para esos endpoints |
+| --- | --- |
+| `super-admin` | Todos los Campos, pero debe enviar `local_field_id` en listados y creación para seleccionar uno de forma explícita. |
+| `admin`, `director-lf`, `assistant-lf` | Exactamente el Campo Local efectivo; otro `local_field_id` devuelve 403. |
+| Rol sin autoridad global de Campo Local | Sólo el Campo Local del club de su asignación activa; si no existe, falla cerrado. |
+
+- Los roles con autoridad de Campo Local pero sin un Campo Local efectivo fallan con `403 local_field_scope_required`; no pueden degradarse al fallback de club.
+- La categoría y el producto quedan ligados al mismo Campo por constraints de base de datos, no por el valor enviado por cliente.
+- Esta cobertura W1 no declara autorización por UUID para `PATCH|DELETE /materials/categories/:id`, lifecycle/auditoría de Materials ni pedidos; esos flujos permanecen fuera de alcance hasta sus work units posteriores.
+
 # Captura oficial de puntaje de camporee
 
 - `POST /api/v1/camporee-events/:eventId/sections/:clubSectionId/scores` autoriza `judge_primary` sólo por asignación exacta. La carga manual se limita a `assistant-lf`, `director-lf`, `assistant-union` y `director-union` dentro de scope; `admin_override` se reserva a `admin`, `assistant-admin` y `super-admin`. `camporee_events:update` no es autorización suficiente y `dto.source` nunca es autoridad.

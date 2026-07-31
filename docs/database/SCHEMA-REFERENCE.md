@@ -250,6 +250,14 @@ Referencia humana concisa del schema Prisma vigente.
 - El query param `?scope=` en `GET /api/v1/award-categories` filtra por este campo. Error canónico: `AWARD_CATEGORY_SCOPE_INVALID`.
 - POST y PATCH aceptan `scope` como campo opcional (`@IsOptional @IsIn(['club','section','member'])`).
 
+### `material_categories` — alcance final por Campo Local (Materials W1)
+
+- Cada categoría pertenece obligatoriamente a un `local_field_id`; ya no existe una categoría global reutilizable entre Campos Locales.
+- `slug` es único dentro del Campo Local mediante `uq_material_categories_lf_slug (local_field_id, slug)`, por lo que dos Campos pueden usar el mismo slug sin compartir categoría.
+- La clave única `uq_material_categories_id_lf (id, local_field_id)` permite que `material_products` tenga la FK compuesta `material_products_category_scope_fk (material_category_id, local_field_id) → material_categories (id, local_field_id)`. Un producto no puede referenciar una categoría de otro Campo Local.
+- La migración `20260730233000_finalize_material_category_scope` clona categorías globales de forma determinista por Campo Local, remapea productos del mismo campo y aborta íntegramente ante cero Campos, colisión de slug o producto/categoría de distinto alcance. Toma `ACCESS EXCLUSIVE` sobre las tablas de Materials: requiere ventana de despliegue y medición previa.
+- El rollback transaccional no deja clonados ni productos remapeados parcialmente. Debe desplegarse después del runtime de categorías scope-aware; no agrega endpoints, pedidos ni comportamiento de Inventory.
+
 ### Better Auth
 
 - Los modelos Prisma vigentes son `session`, `account` y `verification`.
@@ -486,6 +494,8 @@ Define el presupuesto de puntos por componente dentro de un eje anual:
   - `camporee_event_section_results` replica `score_status` e `is_no_show` en el resultado activo; sólo debe haber un resultado activo por evento/sección, y un override de Campo Local inactiva el anterior. El backend serializa cada mutación por `(camporee_event_id, club_section_id)` en la misma transacción antes de leer o reemplazar el activo.
   - Las mutaciones de scoring oficial requieren `club_registration_closed_at` porque la lista de secciones inscritas debe estar congelada; la inscripción de miembros sigue controlada por su propio deadline.
 - `inventory_categories`, `club_inventory`, `inventory_evidence_files`, `inventory_history`
+- Catálogo comercial Materials: `material_categories`, `material_products`, `material_variants`, `material_variant_options`, `material_orders`, `material_order_lines`, `material_comprobantes`, `material_folio_counters`, `material_config`, `material_audit_logs`. Su alcance por Campo Local es independiente de `inventory_categories` y `club_inventory`.
+  - Esos modelos y relaciones existen en el schema. Materials W1 sólo finaliza el alcance de categorías/productos y documenta el alcance de catálogo/listado/creación; no afirma que lifecycle, escritura/consulta de auditoría o autorización UUID de W2+ estén conectados al runtime.
 
 ### Finanzas y carpetas
 
@@ -551,6 +561,7 @@ Define el presupuesto de puntos por componente dentro de un eje anual:
 ## Migraciones recientes
 
 - `20260723120000_insurance_capacity_model` - agrega de forma aditiva productos, configuraciones de ciclo, compras, cupos, libro de movimientos, asignaciones, evidencias y participantes externos por evento. Conserva `member_insurances` y `camporee_members` intactos; añade CHECK de sujeto/asignación, dueño de evidencia y XOR de camporee local/unión, más el índice parcial de asignación activa. **Runtime parcial:** productos/configuraciones de ciclo se exponen en `GET|POST|PATCH /api/v1/insurance/products` y `GET|POST|PATCH /api/v1/insurance/cycles`; compras, cupos, movimientos, asignaciones, evidencias y participantes siguen sin endpoints runtime.
+- `20260730233000_finalize_material_category_scope` - finaliza `material_categories.local_field_id` como `NOT NULL`, reemplaza el slug global por unicidad `(local_field_id, slug)`, crea la clave `(id, local_field_id)` y sustituye la FK de producto por una FK compuesta anti cross-Campo. La transacción clona/remapea datos legacy con preflights de cero Campos, colisión de slug y mismatch producto/categoría; usa locks fuertes y revierte todo ante error.
 - `20260710130000_admin_auth_sessions` - creada en la rama backend para metadata administrativa 1:1 sobre `sessions`, assurance, expiración absoluta y revocación; despliegue no verificado.
 - `20260710200000_admin_refresh_rotation` - depende de `20260710130000_admin_auth_sessions`; añade `idle_expires_at` para su adopción futura en D1c, deshabilita con sentinel las sesiones administrativas legacy y crea estructuras hash-only de refresh, historial y recibos cifrados. Existe en la rama backend, pero no fue ejecutada ni verificada contra una base de datos; no tiene writer ni publica endpoints runtime y no debe desplegarse antes de D1c + D2.
 - `20260415100000_folder_templates_polymorphic_owner` - añade owners polimorficos (`owner_union_id`, `owner_local_field_id`), dropea el unique compuesto legacy y establece el CHECK/indices parciales de exactamente-un-owner.

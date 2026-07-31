@@ -28,12 +28,7 @@
 
 ## Cobertura actual del registro
 
-| Señal | Cantidad | Evidencia |
-|---|---:|---|
-| Documentos de dominio presentes | 29 | archivos `docs/features/*.md` + entradas en canon, excluyendo este `README.md` |
-| Estado funcional `IMPLEMENTADO` | 26 | declarado en los documentos de dominio |
-| Estado funcional `PARCIAL` | 1 | `certificaciones-guias-mayores` |
-| Estado funcional `NO CANON` | 2 | `achievements`; `infrastructure` declara la variante `NO CANON (infraestructura operativa)` |
+Este registro no mantiene totales agregados: la carpeta contiene documentos auxiliares que todavía no son entradas de dominio y algunas entradas canónicas viven fuera de `docs/features/`. La cobertura y el estado se verifican fila por fila en la tabla siguiente; agregar o retirar una entrada exige actualizar esa tabla, no un contador independiente.
 
 ## Dominios registrados
 
@@ -62,6 +57,7 @@
 | `inventario` | [inventario.md](inventario.md) | Documento presente | `IMPLEMENTADO` |
 | `member-of-month` | [member-of-month.md](member-of-month.md) | Documento presente | `IMPLEMENTADO` |
 | `member-rankings` | [docs/canon/runtime-rankings.md](../canon/runtime-rankings.md) §13 | Documento presente | `IMPLEMENTADO` |
+| `materiales` | [materiales.md](materiales.md) | Documento presente | `PARCIAL` |
 | `membership-requests` | [membership-requests.md](membership-requests.md) | Documento presente | `IMPLEMENTADO` |
 | `monthly-reports` | [monthly-reports.md](monthly-reports.md) | Documento presente | `IMPLEMENTADO` |
 | `clasificacion-institucional-ampliada` | — (ver spec + plan) | Documento de dominio en spec/plan | `IMPLEMENTADO` |
