@@ -219,16 +219,15 @@ La URL sera algo como: `https://sacdia-backend.onrender.com`
 curl https://sacdia-backend.onrender.com/api/v1/health
 ```
 
-Debe devolver:
+La respuesta correcta es el liveness mínimo:
 ```json
-{
-  "status": "ok",
-  "dependencies": {
-    "database": { "ok": true },
-    "cache": { "ok": true }
-  }
-}
+{ "status": "ok", "timestamp": "RFC3339" }
 ```
+
+No usar este endpoint como prueba de base de datos, caché, proveedores, readiness o
+GO. El detalle autenticado es una observación privada y sanitizada; su `HTTP 200` no
+certifica despliegue ni piloto. Consulta el
+[runbook de observabilidad](../runbooks/pilot-readiness/health-observability.md).
 
 ---
 
@@ -422,7 +421,7 @@ Los deep links para OAuth ya estan configurados:
 
 ### 8.1 Verificar que todo funciona
 
-- [ ] Backend en Render responde `/api/v1/health` con DB y Cache OK
+- [ ] Backend responde `/api/v1/health` con el liveness mínimo; no tratarlo como evidencia de DB/cache ni GO
 - [ ] Register funciona (crear usuario de prueba)
 - [ ] Login funciona (recibir JWT)
 - [ ] Auth/me funciona (validar JWT)
@@ -473,9 +472,9 @@ Script para verificar todo el flujo de auth contra el backend deployado:
 # Cambiar por tu URL
 API_URL="https://sacdia-backend.onrender.com/api/v1"
 
-# 1. Health
-echo "=== HEALTH ==="
-curl -s "$API_URL/health" | python3 -c "import sys,json; d=json.load(sys.stdin); print('DB:', d['dependencies']['database']['ok'], '| Cache:', d['dependencies']['cache']['ok'])"
+# 1. Liveness (solo proceso; no comprueba dependencias)
+echo "=== LIVENESS ==="
+curl -s "$API_URL/health" | python3 -c "import sys,json; d=json.load(sys.stdin); assert set(d) == {'status','timestamp'} and d['status'] == 'ok'; print('liveness emitted')"
 
 # 2. Register
 echo "=== REGISTER ==="

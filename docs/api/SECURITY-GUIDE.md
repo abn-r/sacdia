@@ -9,6 +9,20 @@
 
 ---
 
+
+## Health operativo: acceso y no filtración
+
+- `GET /api/v1/health` es deliberadamente público y mínimo; no expone dependencias,
+  release, ambiente ni infraestructura.
+- `GET /api/v1/health/details` requiere JWT y `GlobalRolesGuard`. El acceso efectivo
+  es `super-admin`, `admin` y el alias `assistant-admin`; ausencia/invalidación de JWT
+  devuelve `401` y un actor autenticado fuera de ese conjunto recibe `403`.
+- El detalle es privado: `Cache-Control: private, no-store, max-age=0`,
+  `Pragma: no-cache` y `Vary: Authorization`. Nunca registrar, retornar ni usar como
+  criterio de respuesta secretos, URLs, DSN, hostnames, stacks o `error.message`.
+- `HTTP 200` confirma una observación emitida, no un sistema listo ni autorización de
+  piloto.
+
 ## RBAC sensible por sub-recurso `user`
 
 El runtime actual endurece sub-recursos sensibles de `user` con `JwtAuthGuard` + `PermissionsGuard` + metadata `@AuthorizationResource({ type: 'user', ownerParam: 'userId' })`.

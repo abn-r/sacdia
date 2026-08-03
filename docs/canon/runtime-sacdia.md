@@ -265,13 +265,14 @@ El runtime documenta superficies para:
 - notificaciones y tokens FCM. <!-- VERIFICADO -->
 
 ### 6.7 Salud operativa
-<!-- VERIFICADO contra código 2026-07-20 -->
+<!-- VERIFICADO contra PR-03a c3c7aa7; stack-local, no integrado ni desplegado -->
 
-El runtime expone `GET /api/v1/health` como liveness público y
-`GET /api/v1/health/details` como diagnóstico protegido para roles globales
-`admin` y `super-admin`. El detalle verifica base de datos y caché, reporta
-ocupación del pool PostgreSQL y contadores del cache-aside de catálogos, y marca
-el sistema como `degraded` cuando DB o caché no responden.
+El contrato runtime coordinado conserva `GET /api/v1/health` como liveness público
+mínimo (`status`, `timestamp`) sin dependencias ni identidad. `GET /api/v1/health/details`
+requiere JWT y roles globales efectivos `super-admin`, `admin` o `assistant-admin`; emite
+una observación V1 sanitizada y privada. `HTTP 200` solo confirma emisión, no readiness
+ni GO. Si identidad o una dependencia requerida no están verificadas, el estado es
+`NOT_READY`; configuración no equivale a alcance ni verificación.
 
 ---
 

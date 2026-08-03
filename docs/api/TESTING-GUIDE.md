@@ -28,6 +28,16 @@ pnpm run test:e2e
 
 ---
 
+
+## Contrato de health observacional
+
+Las pruebas focales de `src/health/health.controller.spec.ts` deben cubrir: liveness
+público con claves mínimas; `401`/`403` y metadata de roles para el detalle;
+`NOT_READY` si falta verificación de identidad o dependencias requeridas; y ausencia
+total de secretos, URLs, DSN y mensajes de excepción en una respuesta serializada.
+No se reemplaza una prueba de contrato por un smoke remoto: `HTTP 200` del detalle
+sigue significando solo que se emitió la observación.
+
 ## 🎯 Estrategia de Testing
 
 ### Niveles de Testing

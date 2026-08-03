@@ -1045,8 +1045,17 @@ El contrato legacy de unión es distinto: `POST /api/v1/camporees/union/:campore
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
-| GET | `/api/v1/health` | Public | - | Public ping — returns ok if API is reachable | - | `src/health/health.controller.ts` |
-| GET | `/api/v1/health/details` | JWT | Global: admin, super-admin | Detailed health status (admin only) | - | `src/health/health.controller.ts` |
+| GET | `/api/v1/health` | Public | - | Liveness mínimo: HTTP 200 mientras responde el proceso; body exacto `status`, `timestamp`; sin dependencias ni identidad | - | `src/health/health.controller.ts` |
+| GET | `/api/v1/health/details` | JWT | Global: super-admin, admin (alias: assistant-admin) | Observación operacional V1 sanitizada; HTTP 200 solo confirma emisión, nunca readiness ni GO | - | `src/health/health.controller.ts` |
+
+El detalle responde `schemaVersion: "1"`, `status: "READY" | "NOT_READY"`,
+`observedAt`, `correlationId`, identidad de release/ambiente y las dependencias
+`database`, `redis`, `queues`, `r2`, `fcm`, `resend` y `sentry`. Cada dependencia
+expone únicamente `required`, `configured`, `reachable`, `verified`, `observedAt`,
+`status` y un código seguro opcional. `configured` no prueba alcance ni verificación.
+Sin adaptador de evidencia, los proveedores quedan `UNVERIFIED`; en esta entrega la
+identidad no está verificada y el resultado es `NOT_READY`. Véase el
+[runbook de observabilidad](../runbooks/pilot-readiness/health-observability.md).
 
 ### honors
 

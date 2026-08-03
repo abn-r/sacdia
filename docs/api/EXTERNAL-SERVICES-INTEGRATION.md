@@ -15,7 +15,8 @@ Estado actual de servicios externos en backend SACDIA:
 1. **Redis**: integración con fallback a in-memory implementada.
 2. **Firebase FCM**: módulo y endpoints operativos con hardening de seguridad aplicado.
 3. **Sentry**: inicialización condicional por `SENTRY_DSN` + interceptor global condicional.
-4. **Health check**: `GET /api/v1/health` reporta estado de `database`, `cache`, `fcm`, `sentry`.
+4. **Health**: el liveness público no reporta dependencias; el detalle autenticado
+   es observacional, sanitizado y no certifica proveedores ni readiness.
 
 ---
 
@@ -111,25 +112,15 @@ SENTRY_DSN=https://<key>@<org>.ingest.sentry.io/<project>
 
 ---
 
-## 4) Health Check de Dependencias
+## 4) Observabilidad de dependencias
 
-Endpoint:
-
-- `GET /api/v1/health`
-
-Respuesta de referencia:
-
-```json
-{
-  "status": "ok",
-  "dependencies": {
-    "database": { "ok": true },
-    "cache": { "ok": true },
-    "fcm": { "configured": true, "initialized": false },
-    "sentry": { "configured": true }
-  }
-}
-```
+`GET /api/v1/health` queda reservado para liveness mínimo y no informa
+proveedores. La única observación de dependencias es `GET /api/v1/health/details`,
+protegida y sin caché; su contrato, restricciones de datos y condición `NOT_READY`
+se documentan sin duplicación en el
+[runbook de health observability](../runbooks/pilot-readiness/health-observability.md).
+La presencia de configuración de Redis, FCM o Sentry nunca acredita alcance ni
+operación del proveedor.
 
 ---
 

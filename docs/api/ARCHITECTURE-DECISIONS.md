@@ -327,7 +327,7 @@ Nuevo módulo NestJS en `src/rbac/` registrado en `app.module.ts`:
 - `getCurrentUser()` (`session.ts`): Desenvuelve respuesta backend `{ status, data }` antes de retornar `AuthUser`
 - Sidebar: Nueva sección "Seguridad" con enlaces a Permisos y Roles
 
-**Documentación completa**: [`docs/01-FEATURES/auth/PERMISSIONS-SYSTEM.md`](../01-FEATURES/auth/PERMISSIONS-SYSTEM.md)
+**Documentación completa**: [`docs/01-FEATURES/auth/PERMISSIONS-SYSTEM.md`](../features/auth/PERMISSIONS-SYSTEM.md)
 
 ---
 
@@ -386,8 +386,9 @@ La app iOS nativa necesita una fachada de autenticación administrativa específ
 - La invalidación total usa iteradores públicos de Keyv, que realizan `SCAN` en
   Redis, sin depender de propiedades internas ni del comando bloqueante `KEYS`.
   Si el store no puede iterar, se conserva un fallback estático limitado.
-- `GET /api/v1/health/details` reporta ocupación del pool y contadores del caché,
-  y degrada el estado global cuando DB o caché no responden.
+- El contrato coordinado PR-03a de `GET /api/v1/health/details` es observacional,
+  privado y sanitizado: no reporta pool ni contadores, y no convierte configuración
+  de dependencias en verificación o readiness.
 
 **Trade-off:** la coalescencia es por proceso, no distribuida entre réplicas. No
 se introduce un lock Redis para catálogos porque aumentaría complejidad y riesgo
