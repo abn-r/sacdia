@@ -20,6 +20,12 @@ pnpm run test:cov
 pnpm run test:e2e
 ```
 
+> [!NOTE]
+> El CLI de pilot readiness aún no forma parte de estos comandos ni de CI. Su
+> contrato local, límites de `stdout`/`stderr` y casos fail-closed están en
+> [guías/pilot-readiness-cli-contract.md](../guides/pilot-readiness-cli-contract.md).
+> No interpretar ese companion como disponibilidad en `development`.
+
 ---
 
 ## 🎯 Estrategia de Testing

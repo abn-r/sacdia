@@ -2,6 +2,12 @@
 
 Tutorial paso a paso para deployar SACDIA en produccion.
 
+> [!IMPORTANT]
+> El contrato companion del CLI de pilot readiness está documentado en
+> [guías/pilot-readiness-cli-contract.md](../guides/pilot-readiness-cli-contract.md).
+> Es una referencia **planificada/stack-local**, no un comando disponible en
+> `development` ni un requisito de deploy hasta su publicación e integración.
+
 **Stack de infraestructura:**
 - Backend (NestJS): Render
 - Admin Panel (Next.js): Vercel

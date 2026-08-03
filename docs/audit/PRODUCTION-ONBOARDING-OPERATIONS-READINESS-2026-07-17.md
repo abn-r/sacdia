@@ -6,6 +6,12 @@
 
 **Criterio:** el código y los contratos runtime vigentes prevalecen sobre auditorías históricas. El seed legacy indicado por el propietario no se utilizó como fuente ni como mecanismo de arranque.
 
+> [!NOTE]
+> El contrato del CLI de pilot readiness se mantiene como companion
+> [planificado/stack-local](../guides/pilot-readiness-cli-contract.md): no está
+> integrado ni desplegado, no habilita GO y no sustituye este dictamen ni la
+> evidencia operacional externa.
+
 ## 1. Dictamen ejecutivo
 
 **SACDIA todavía no está listo para una salida general a producción ni para capacitar al personal operativo como si el ecosistema estuviera cerrado.**
