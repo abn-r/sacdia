@@ -124,6 +124,11 @@ El P0 separara la preasignacion del grant efectivo:
 4. La vigencia temporal se volvera a evaluar en cada frontera. Un assignment
    futuro, vencido, inactivo o no efectivo no aportara permisos.
 
+El esquema propuesto persiste `director_succession_plans` sin habilitar la API:
+su `effective_date` se deriva del año objetivo y la base bloquea cambios al
+inicio de un año que tenga un plan `scheduled`, para no desalinear la fecha
+efectiva, el cierre del saliente ni la auditoría de activación futura.
+
 ### Superficie futura
 
 Los siguientes endpoints estan planeados y no forman parte de la referencia

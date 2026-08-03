@@ -46,6 +46,13 @@ Referencia humana concisa del schema Prisma vigente.
 - La unicidad vigente es `@@unique([user_id, role_id, club_section_id, ecclesiastical_year_id, start_date])`.
 - Tambien soporta el flujo de membership requests via `status` (`pending`, `active`, `rejected`, `expired`) sobre la misma asignacion anual.
 
+### `director_succession_plans`
+
+- Modela la preasignación persistida de una sucesión anual por `(club_section_id, target_ecclesiastical_year_id)`.
+- Conserva referencias restrictivas al assignment saliente, sucesor, año objetivo, actor/rol/campo que programó y assignment activado opcional; no crea un grant efectivo por sí misma.
+- `effective_date` se deriva del inicio del año objetivo. Mientras el plan esté `scheduled`, un trigger rechaza cambios a `ecclesiastical_years.start_date` con SQLSTATE `23514` y constraint `director_succession_plans_scheduled_year_start_date_lock`, evitando drift con el cierre del saliente y la auditoría futura.
+- Los estados son `scheduled`, `activated`, `blocked` y `cancelled`; la unicidad de idempotencia es `(scheduled_by_id, idempotency_key)`.
+
 ### `class_counselor_assignments`
 
 - Modela la responsabilidad pedagógica anual de una clase progresiva por `user_id + club_section_id + class_id + ecclesiastical_year_id`.
