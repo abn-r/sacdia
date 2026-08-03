@@ -67,6 +67,12 @@ El contrato de clases separa requisitos evaluables por track:
 - En el detalle de progreso, `modules[].sections[]` ya llega filtrado a secciones aplicables para el enrollment resuelto e incluye `requirement_track`, `required_for_investiture` y `display_order`.
 - Admin puede configurar secciones `EXTRA` con exactamente un owner institucional (`division_id`, `union_id` o `local_field_id`) y ventana opcional `available_from_year_id` / `available_until_year_id`.
 
+## Actualizacion 2026-08-03 (Pipeline de investiduras)
+
+- `GET /api/v1/investiture/pending` responde el envelope `{ status, data: { data, meta: { page, limit, total, totalPages, hasNextPage, hasPreviousPage } } }`. Para filtrar, enviar `status`; el campo de cada enrollment sigue siendo `investiture_status`. No enviar aliases cliente como `SUBMITTED` o `INVESTED`.
+- Los estados canónicos del pipeline son `SUBMITTED_FOR_VALIDATION`, `CLUB_APPROVED`, `COORDINATOR_APPROVED`, `FIELD_APPROVED`, `INVESTIDO` y `REJECTED`.
+- `GET /api/v1/investiture/enrollments/:enrollmentId/history` responde `{ status, data: { enrollment_id, history } }`. Mostrar el actor con `performed_by.name` + `performed_by.paternal_last_name` y los comentarios con `comments`; no consumir la ruta legacy desde el pipeline.
+
 ## Actualizacion 2026-07-02 (Camporee scoring móvil)
 
 El flujo móvil de jueces de camporee consume scoring oficial por rúbricas:

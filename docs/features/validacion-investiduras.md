@@ -51,6 +51,9 @@ Los requisitos `BASIC` y `EXTRA` cuentan para investidura; `ADVANCED` activa el 
   - `/dashboard/investiture` — pendientes con datos operables por defecto: miembro, clase, ano eclesiastico, club, seccion, remitente, cargo/rol del remitente, fecha de envio, estado y detalle con historial, modulos/secciones completadas, evidencias enviadas y validador por seccion
     - Si la seccion del club no tiene nombre propio (`club_sections.name` nulo), el backend expone como nombre visible el tipo de club asociado para que el operador no vea “seccion no disponible” cuando la asignacion existe.
   - `/dashboard/investiture/pipeline` — seguimiento operativo de investiduras del ano eclesiastico en curso, con solicitudes por etapa y registros ya tratados (`club-approve`, `coordinator-approve`, `field-approve`, `reject`, `invest`)
+    - Consume `GET /investiture/pending` como `{ status, data: { data, meta: { page, limit, total, totalPages, hasNextPage, hasPreviousPage } } }`; el filtro de consulta usa `status` y el estado de cada enrollment llega en `investiture_status`.
+    - Sus estados operativos son `SUBMITTED_FOR_VALIDATION`, `CLUB_APPROVED`, `COORDINATOR_APPROVED`, `FIELD_APPROVED`, `INVESTIDO` y `REJECTED`; no usa aliases cliente `SUBMITTED` ni `INVESTED`.
+    - El historial consume `GET /investiture/enrollments/:enrollmentId/history` como `{ status, data: { enrollment_id, history } }`. Cada entrada conserva `performed_by.name`, `performed_by.paternal_last_name` y `comments` para la auditoría visible.
   - `/dashboard/investiture/config` — CRUD de `investiture_config`
   - Entry en sidebar bajo "Investiduras"
 
