@@ -8,6 +8,8 @@
 
 **Marcos normativos de referencia:** LFPDPPP 2025 (MX), COPPA (US), GDPR-K (EU), LFPC (MX), Código Civil Federal, Convención sobre los Derechos del Niño.
 
+> **Alcance y revalidación obligatoria.** Este informe fue elaborado por un agente independiente el 2026-04-17. No constituye asesoría, dictamen ni aprobación jurídica, y no determina cumplimiento normativo. Antes de usarlo para publicar, operar o tomar decisiones de cumplimiento, sus referencias y conclusiones deben ser revalidadas por un profesional competente.
+
 ---
 
 ## Resumen ejecutivo
@@ -16,7 +18,7 @@
 
 Los documentos tienen una base técnica sólida y cubren la mayoría de los requisitos formales de LFPDPPP 2025. La estructura es correcta, la cláusula de menores es razonablemente completa, y se declaran correctamente encargados y transferencias. **Sin embargo**, existen cuatro bloques de hallazgos críticos que impiden publicación tal cual:
 
-1. Consentimiento separado para datos sensibles no está granularmente implementado (se agrupa salud + religión en una sola casilla, incompatible con Art. 9 LFPDPPP).
+1. Consentimiento separado para datos sensibles no está granularmente implementado (se agrupa salud + religión en una sola casilla; el requisito de consentimiento expreso y por escrito para datos sensibles se ubica en el Art. 8 de la LFPDPPP).
 2. Inconsistencias entre T&C y Aviso (definición de "Menor", jurisdicción ARCO, alcance del consentimiento parental).
 3. Mecanismo de verificación de consentimiento parental (COPPA §312.5 / GDPR-K Art. 8) no descrito de forma verificable — solo se declara "bajo protesta de decir verdad".
 4. Riesgos PROFECO: cláusula de renovación automática sin derecho de cancelación explícito y limitación de responsabilidad potencialmente abusiva para consumidor final.
@@ -31,7 +33,7 @@ Además, 9 placeholders sin resolver, incluidos datos imprescindibles (razón so
 
 #### C-01 — Consentimiento de datos sensibles no granular
 **Ubicación:** `aviso-de-privacidad.md § 5` y `§ Consentimiento del Titular`
-**Riesgo:** LFPDPPP Art. 9 exige consentimiento **expreso y por escrito** para datos sensibles, y la doctrina INAI (aún aplicable hasta sustitución por Secretaría Anticorrupción) exige que el consentimiento para **cada categoría sensible** sea identificable y separable. El documento agrupa salud y afiliación religiosa bajo una sola casilla ("el Titular... otorga su consentimiento EXPRESO y POR ESCRITO... para a) Datos de salud... b) Afiliación religiosa"). Esto impide al Titular revocar uno sin el otro y puede invalidar el consentimiento.
+**Riesgo:** El [Art. 8 de la LFPDPPP vigente](https://www.diputados.gob.mx/LeyesBiblio/pdf/LFPDPPP.pdf) exige consentimiento **expreso y por escrito** para el tratamiento de datos personales sensibles. El Art. 9 contiene las excepciones en las que el responsable no está obligado a recabar consentimiento; no establece ese requisito. El documento agrupa salud y afiliación religiosa bajo una sola casilla ("el Titular... otorga su consentimiento EXPRESO y POR ESCRITO... para a) Datos de salud... b) Afiliación religiosa"). Esto puede impedir una revocación por categoría y requiere revalidación jurídica profesional antes de inferir sus efectos o la suficiencia del mecanismo.
 **Fix:** Dividir el consentimiento en dos casillas independientes en la UI y dos cláusulas separables en el documento:
 - Casilla 1: Consentimiento para tratamiento de datos de salud (ficha médica).
 - Casilla 2: Consentimiento para tratamiento de dato sensible de afiliación religiosa (pertenencia a club adventista).
@@ -232,7 +234,7 @@ Documentar la tabla en § 11.
 | Finalidades primarias declaradas (Art. 16-II) | ✅ | § 3, 11 finalidades primarias enumeradas |
 | Finalidades secundarias separadas con opt-in | ✅ | § 4, redacción adecuada |
 | Mecanismo de oposición a finalidades secundarias | ✅ | § 4 + § 9 |
-| Consentimiento expreso para datos sensibles (Art. 9) | ❌ | **C-01**: agrupa salud + religión en una casilla |
+| Consentimiento expreso para datos sensibles (Art. 8) | ❌ | **C-01**: agrupa salud + religión en una casilla |
 | Transferencias declaradas (Art. 36) | ⚠️ | Declaradas pero falta cláusula internacional específica — **H-01** |
 | Lista de encargados (Art. 50 Reglamento) | ✅ | § 7.2 tabla completa |
 | Derechos ARCO — descripción (Art. 22-26) | ✅ | § 8 correcto |

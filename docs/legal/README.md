@@ -24,7 +24,7 @@ Los documentos legales extensos previos se preservaron como referencia para una 
 |---|---|
 | [`aviso-de-privacidad.full-draft-2026-04-17.md`](./aviso-de-privacidad.full-draft-2026-04-17.md) | Draft legal amplio con placeholders de entidad/RFC/domicilio y controles futuros. No usar directamente para tiendas. |
 | [`terminos-y-condiciones.full-draft-2026-04-17.md`](./terminos-y-condiciones.full-draft-2026-04-17.md) | Draft legal amplio con placeholders de entidad/RFC/domicilio y controles futuros. No usar directamente para tiendas. |
-| [`REVIEW-REPORT.md`](./REVIEW-REPORT.md) | Reporte de revisión del draft legal anterior. |
+| [`REVIEW-REPORT.md`](./REVIEW-REPORT.md) | Reporte histórico de un agente independiente (2026-04-17) sobre el draft legal anterior; no constituye aprobación jurídica y requiere revalidación por un profesional competente antes de usarse para decisiones de publicación, operación o cumplimiento. |
 
 ## Reglas antes de publicar
 
