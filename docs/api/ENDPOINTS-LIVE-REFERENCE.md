@@ -926,6 +926,11 @@ El contrato legacy de unión es distinto: `POST /api/v1/camporees/union/:campore
 | POST | `/api/v1/users/:userId/classes/:classId/sections/:sectionId/files` | JWT | Permisos: classes:submit_progress | Upload evidence file for a class section | ClassesService.uploadSectionFile() | `src/classes/classes.controller.ts` |
 | DELETE | `/api/v1/users/:userId/classes/:classId/sections/:sectionId/files/:fileId` | JWT | Permisos: classes:submit_progress | Delete evidence file for a class section | ClassesService.deleteSectionFile() | `src/classes/classes.controller.ts` |
 
+#### Conflictos de capacidad de inscripción
+
+- El precheck actual de `POST /api/v1/users/:userId/classes/enroll` devuelve `409 CLASS_MAX_AVENTU_CONQUIS_ACTIVE` o `409 CLASS_MAX_GM_ACTIVE` cuando su conteo previo detecta el cupo agotado.
+- El marker PostgreSQL `23514` con `detail = SACDIA_ENROLLMENT_PROGRAM_CAPACITY` es interno; su mapeo específico a esos `409` en una carrera queda pendiente de reconciliar el runtime. Otros `23514` no deben reinterpretarse como capacidad.
+
 ### club-enrollments
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |

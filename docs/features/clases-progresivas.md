@@ -102,6 +102,8 @@ Reglas vigentes:
 13. Si un enrollment supera la duracion maxima sin investidura, pasa formalmente a `EXPIRED` y conserva su progreso como trayectoria historica
 14. Un consejero o secretario asignado a una clase puede ver el avance de miembros inscritos en esa clase, siempre que cumpla la elegibilidad de estar cursando o haber completado `Guía Mayor`.
 15. La carga delegada de evidencias debe distinguir miembro objetivo (`:userId`) de actor autenticado (`currentUser.sub`).
+16. Por usuario, año y programa formativo sólo puede existir la capacidad activa `STANDARD=1` o `GUIDE_MAJOR=2`; la garantía vive en reclamaciones materializadas, no en una validación de cliente.
+17. **Requisito pendiente de W5**: la futura operación de renovación deberá crear una inscripción independiente y no arrastrar progreso, módulos, evidencias, aprobaciones ni historial desde la inscripción previa.
 
 ## Decisiones de diseno
 
@@ -118,6 +120,7 @@ Reglas vigentes:
 - **Asignación pedagógica separada**: `class_counselor_assignments` no reemplaza ni extiende `club_role_assignments`; evita mezclar cargo operativo, permisos y responsabilidad anual de una clase.
 - **Tracks curriculares explícitos y fail-closed**: las transiciones entre tipos de club viven en `class_progression_tracks` y `class_progression_track_transitions`. Si falta el track, la transición activa o el `asset_code` esperado, no se infiere una ruta alternativa.
 - **Planificador de fuente canónica (W3b1)**: `ClassEnrollmentPlanService` identifica de forma read-only el único enrollment predecesor que puede alcanzar la clase destino mediante `ClassProgressionResolver`. Ignora clases concurrentes ajenas, usa orden total año/fecha/id y falla cerrado ante fuente ausente o ambigua; todavía no modifica la inscripción runtime.
+- **Capacidad por programa materializada**: una reclamación única por enrollment activo aplica `STANDARD=1` y `GUIDE_MAJOR=2`; el programa formativo de la clase queda inmutable y el backfill legacy asigna slots por `enrollment_id` sólo tras validar la capacidad.
 
 ## Gaps y pendientes
 

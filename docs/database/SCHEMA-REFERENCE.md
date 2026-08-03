@@ -216,6 +216,13 @@ Referencia humana concisa del schema Prisma vigente.
 - El schema no copia progreso, módulos, evidencias, aprobaciones ni validaciones automáticamente. W5 debe prohibir explícitamente su reutilización al crear el nuevo enrollment y validar sección/scope, porque `enrollments` no almacena `club_section_id`.
 - `investiture_validation_history.action` incluye `EXPIRED` para auditar vencimientos manuales o por guard de investidura.
 
+### Capacidad materializada por programa (`enrollment_program_capacity_claims`)
+
+- Cada enrollment activo reclama un slot único por `(user_id, ecclesiastical_year_id, formative_program_type, capacity_slot)`; `STANDARD` admite sólo el slot `1` y `GUIDE_MAJOR` los slots `1` o `2`.
+- El trigger sincroniza la reclamación al crear, reactivar o mover usuario/clase/año y la elimina al desactivar; la FK por `enrollment_id` usa `CASCADE`.
+- `classes.formative_program_type` es inmutable: reclasificar una clase cambiaría la capacidad de enrollments ya existentes.
+- El backfill de legacy valida primero los máximos activos y asigna slots determinísticamente por `enrollment_id`; no migra ni reutiliza progreso, evidencias o validaciones.
+
 ### Tracks canónicos de progresión (`class_progression_tracks`)
 
 > **Ownership:** Investiture / clases progresivas es el productor canónico de la ruta curricular. Los consumidores futuros deben leer estas tablas; no deben duplicar ni inferir transiciones por nombre de clase.
