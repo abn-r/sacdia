@@ -89,8 +89,10 @@ El listado de miembros no debe inferir "Sin clase" desde la ausencia de datos en
 11. Las unidades deben pertenecer a una seccion activa; sus miembros deben pertenecer a esa misma seccion
 12. Una seccion no puede tener mas cargos activos que los definidos para la directiva: `director` 1, `deputy-director` 2, `secretary` 1, `treasurer` 1 y `secretary-treasurer` 1
 13. `secretary-treasurer` es excluyente con `secretary` y `treasurer` separados dentro de la misma seccion
-14. Una clase de la sección puede tener máximo 3 responsables pedagógicos activos por año: 1 principal y hasta 2 apoyos/suplentes.
-15. Una persona puede tener hasta 2 clases activas en la misma sección/año; la segunda requiere marca de excepción y justificación.
+14. Los cupos se miden por máxima concurrencia de intervalos inclusivos; filas inactivas, con estado distinto de `active` o sin intersección temporal no consumen cupo.
+15. Crear o actualizar un cargo con fecha final anterior a la inicial se rechaza con `400 CLUB_ROLE_DATE_RANGE_INVALID` antes de escribir en la base.
+16. Una clase de la sección puede tener máximo 3 responsables pedagógicos activos por año: 1 principal y hasta 2 apoyos/suplentes.
+17. Una persona puede tener hasta 2 clases activas en la misma sección/año; la segunda requiere marca de excepción y justificación.
 
 ## Decisiones de diseno
 
@@ -100,6 +102,7 @@ El listado de miembros no debe inferir "Sin clase" desde la ausencia de datos en
 - **Asignacion inicial de director**: para una seccion sin director activo, el Admin usa `POST /clubs/:clubId/sections/:sectionId/director-assignment`, que crea una asignacion `director` para el usuario y ano eclesiastico indicados. Si ya existe director activo, el backend rechaza el alta para mantener un solo director activo.
 - **Sucesion anual de director — baseline runtime**: el Admin usa `POST /clubs/:clubId/sections/:sectionId/director-succession`, que cierra la asignacion activa anterior (`active=false`, `status=ended`, `end_date`) y crea inmediatamente una nueva asignacion `director` activa para el ano indicado. Solo `super-admin`, `admin`, `director-lf` y `assistant-lf` pueden ejecutar hoy este flujo. El baseline actual sigue ejecutando la sucesión inmediata; no programa una transicion futura y sigue siendo deuda respecto del contrato P0 descrito abajo.
 - **Limites de directiva**: `role_slot_limits` define los cupos por seccion y el backend tambien conserva fallback canonico para cargos criticos aunque falte el seed. La regla se aplica al crear asignaciones directas, al actualizar un rol y al revisar solicitudes de asignacion.
+- **Temporalidad de cupos**: `start_date` y `end_date` son inclusivas. El precheck runtime y el trigger PostgreSQL usan máxima concurrencia temporal y la base adquiere locks transaccionales para serializar carreras; el trigger sigue siendo la autoridad final.
 - **Contexto activo**: `users_pr.active_club_assignment_id` persiste el contexto de club activo del usuario, usado por `ClubRolesGuard` para resolver autorizacion
 - **Autorizacion por jerarquia de roles**: Director tiene todos los permisos; subdirector la mayoria; secretary puede gestionar roles y secciones
 - **Cargo vs responsabilidad pedagógica**: `club_role_assignments` define el cargo en la sección; `class_counselor_assignments` define qué clase acompaña ese actor durante el año.

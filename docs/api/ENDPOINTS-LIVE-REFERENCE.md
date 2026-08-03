@@ -972,6 +972,8 @@ El contrato legacy de unión es distinto: `POST /api/v1/camporees/union/:campore
 | PATCH | `/api/v1/club-roles/:assignmentId` | JWT | Permisos: club_roles:assign | Actualizar asignación de rol | ClubsService.updateRoleAssignment() | `src/clubs/clubs.controller.ts` |
 | DELETE | `/api/v1/club-roles/:assignmentId` | JWT | Permisos: club_roles:revoke | Remover rol de miembro | ClubsService.removeRoleAssignment() | `src/clubs/clubs.controller.ts` |
 
+Las rutas `POST /api/v1/clubs/:clubId/sections/:sectionId/roles` y `PATCH /api/v1/club-roles/:assignmentId` rechazan el rango resultante con `end_date < start_date` mediante `400` y código `CLUB_ROLE_DATE_RANGE_INVALID`.
+
 ### admin-coordination
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |

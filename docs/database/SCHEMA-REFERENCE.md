@@ -45,6 +45,12 @@ Referencia humana concisa del schema Prisma vigente.
 - Incluye `expires_at` y `rejection_reason`.
 - La unicidad vigente es `@@unique([user_id, role_id, club_section_id, ecclesiastical_year_id, start_date])`.
 - Tambien soporta el flujo de membership requests via `status` (`pending`, `active`, `rejected`, `expired`) sobre la misma asignacion anual.
+- Los cupos de roles se calculan por máxima concurrencia de intervalos inclusivos (`start_date` y `end_date`), no por cantidad de filas que intersectan; solo `active=true` y `status='active'` consumen cupo. La base de datos serializa la decisión concurrente.
+
+### `classes.asset_code`
+
+- `asset_code` es `String? @unique(map: "classes_asset_code_key") @db.VarChar(10)`: PostgreSQL permite múltiples valores `NULL`; repetir un valor no nulo falla con SQLSTATE `23505` y esa constraint.
+- No existe una superficie API LIVE que escriba este campo. Un writer futuro deberá traducir ese conflicto según su contrato, sin asumir un `409` actual.
 
 ### `director_succession_plans`
 
