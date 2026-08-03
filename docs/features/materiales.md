@@ -1,7 +1,7 @@
 # Materiales y pedidos al Campo Local
 
 **Estado**: PARCIAL
-**Última actualización**: 2026-07-31
+**Última actualización**: 2026-08-03
 
 ## Alcance de dominio
 
@@ -28,8 +28,9 @@ La primera unidad terminada establece el aislamiento de categorías por Campo Lo
 `PATCH|DELETE /api/v1/materials/categories/:id` operan sobre el UUID estable de la categoría. La categoría conserva ese UUID durante actualizaciones y desactivaciones; estos endpoints tampoco permiten cambiar `slug` ni `local_field_id`. El ownership se toma de la fila persistida y se compara con el Campo Local efectivo del actor, por lo que conocer un UUID de otro Campo no autoriza su mutación.
 
 - `PATCH` modifica `label`, `icon`, `sort_order` o `active`. Un actor con alcance único sólo puede modificar categorías activas de su Campo.
-- Sólo `super-admin` puede reactivar una categoría inactiva. Para los demás roles, la reactivación devuelve 403 y cualquier otra edición de una inactiva devuelve 409.
-- Desactivar mediante `PATCH active=false` se bloquea mientras haya productos activos. `DELETE` es una desactivación lógica e idempotente y se bloquea si existe cualquier producto asociado.
+- `POST /api/v1/materials/categories/:id/reactivate` no recibe body y sólo permite reactivar a `super-admin`; rechaza a los demás roles antes de resolver el UUID. Para ellos, cualquier otra edición de una inactiva devuelve 409.
+- Desactivar mediante `PATCH active=false` se bloquea mientras haya productos activos. `DELETE` es una desactivación lógica: si la categoría ya está inactiva devuelve 200 idempotente antes de contar productos; sólo una categoría activa se bloquea con `category_in_use` cuando existe cualquier producto asociado.
+- El catálogo público omite categorías inactivas; el listado administrativo sigue siendo la superficie que las conserva visibles.
 - La actualización y la desactivación verifican nuevamente ownership y lifecycle dentro de la operación atómica. Un cambio concurrente no puede convertir una validación previa en una escritura cross-Campo.
 
 Errores de dominio estables: `local_field_scope_violation` (403), `material_reactivation_requires_super_admin` (403), `category_not_found` (404), `category_in_use`, `category_inactive` y `category_concurrent_change` (409). Un UUID o body inválido falla con 400 antes de la mutación.
@@ -42,7 +43,7 @@ Antes de mutar, aborta sin estado parcial si no hay Campos Locales, existen coli
 
 ## Límites vigentes
 
-- No se agregaron endpoints nuevos ni se modificó el flujo de pedidos, comprobantes, entregas o pagos.
+- El único endpoint nuevo de W2b es `POST /materials/categories/:id/reactivate`; no se modificó el flujo de pedidos, comprobantes, entregas o pagos.
 - La autorización UUID y el lifecycle de categorías están cubiertos por W2. Auditoría de Materials y administración de pedidos siguen pendientes; no deben inferirse de este contrato.
 - No se modificó Inventory ni el flujo de seguros.
 

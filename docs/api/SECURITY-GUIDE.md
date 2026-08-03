@@ -436,7 +436,8 @@ Las lecturas de catálogo que enumeran productos/categorías y `GET|POST /api/v1
 - `PATCH|DELETE /materials/categories/:id` resuelven primero la categoría por UUID y autorizan contra el `local_field_id` persistido; el cliente no envía ni sustituye ese ownership.
 - Para actores con alcance único, la actualización atómica exige que el UUID siga perteneciendo al mismo Campo y que la categoría continúe activa. Si el recurso cambia concurrentemente, se relee y se devuelve el error de alcance/lifecycle correspondiente o `409 category_concurrent_change`.
 - Para un actor con alcance único, una categoría inactiva queda sólo para consulta: reactivarla devuelve `403 material_reactivation_requires_super_admin` y cualquier otra edición devuelve `409 category_inactive`. `super-admin` puede editarla o reactivarla.
-- La desactivación no borra la identidad: `DELETE` conserva el UUID, es idempotente cuando ya está inactiva y se bloquea con `409 category_in_use` si existen productos asociados. `PATCH active=false` también se bloquea mientras existan productos activos.
+- `POST /materials/categories/:id/reactivate` comprueba que el actor sea `super-admin` antes de resolver la categoría UUID; un rol con alcance único no puede usar ese endpoint para sondear recursos de su Campo ni de otro.
+- La desactivación no borra la identidad: `DELETE` conserva el UUID y, si la categoría ya está inactiva, devuelve 200 idempotente antes de contar productos. Sólo el intento de desactivar una categoría activa se bloquea con `409 category_in_use` cuando existe cualquier producto asociado. `PATCH active=false` también se bloquea mientras existan productos activos.
 - Esta cobertura no declara auditoría de Materials, administración de pedidos ni cambios de Inventory o seguros; esos flujos permanecen fuera de alcance.
 
 # Captura oficial de puntaje de camporee
