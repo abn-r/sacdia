@@ -967,13 +967,16 @@ Las mutaciones POST/PATCH de esta superficie rechazan un responsable sin trayect
 | GET | `/api/v1/clubs/:clubId/sections/:sectionId/members` | JWT | Permisos: club_roles:read | Listar miembros de la sección | ClubsService.getMembers() | `src/clubs/clubs.controller.ts` |
 | POST | `/api/v1/clubs/:clubId/sections/:sectionId/roles` | JWT | Permisos: club_roles:assign | Asignar rol a un miembro (requiere director, deputy director o secretary) | ClubsService.assignRole() | `src/clubs/clubs.controller.ts` |
 | POST | `/api/v1/clubs/:clubId/sections/:sectionId/director-assignment` | JWT | Permisos: club_roles:assign | Asignación inicial de director de sección | ClubsService.assignInitialSectionDirector() | `src/clubs/clubs.controller.ts` |
+| GET | `/api/v1/clubs/:clubId/sections/:sectionId/director-succession` | JWT | Permisos: club_roles:read | Leer plan durable de sucesión (`director_succession_plans`); no crea assignment ni grant | DirectorSuccessionPlansService.getBySection() | `src/clubs/clubs.controller.ts` |
+| POST | `/api/v1/clubs/:clubId/sections/:sectionId/director-succession/plans` | JWT | Permisos: club_roles:assign, club_roles:revoke | Programar plan `scheduled` idempotente; no termina al director vigente ni activa al sucesor | DirectorSuccessionPlansService.schedule() | `src/clubs/clubs.controller.ts` |
 | POST | `/api/v1/clubs/:clubId/sections/:sectionId/director-succession` | JWT | Permisos: club_roles:assign, club_roles:revoke | Sucesión inmediata de director (baseline actual): termina la asignación saliente y crea la nueva asignación activa en la misma operación | ClubsService.succeedSectionDirector() | `src/clubs/clubs.controller.ts` |
 
 > [!NOTE]
-> Esta referencia LIVE conserva únicamente el comportamiento implementado.
-> El contrato P0 de scheduling y sus lecturas de preflight/capabilities siguen
-> planeados, no implementados ni habilitados; se documentan como contrato
-> futuro en `docs/features/gestion-clubs.md` y no se incluyen en la tabla LIVE.
+> El baseline actual sigue ejecutando la sucesión inmediata en `POST .../director-succession`.
+> La superficie durable `GET .../director-succession` + `POST .../plans` programa/lee planes
+> sin activar roles. Programar la sucesión no termina al director vigente; la activación
+> transaccional al cambio de año sigue fuera de este slice (R02). Capabilities siguen
+> documentadas como contrato futuro en `docs/features/gestion-clubs.md`.
 
 ### club-roles
 
