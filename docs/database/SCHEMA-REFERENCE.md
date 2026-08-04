@@ -2,7 +2,7 @@
 
 **Estado**: ACTIVE
 **Autoridad estructural**: `sacdia-backend/prisma/schema.prisma`
-**Actualización scoped**: 2026-07-14 — sólo delta Camporee de lineage e inscripción activa por sección; no implica resincronización global de esta referencia.
+**Actualización scoped**: 2026-07-30 — deltas Camporee de lineage/inscripción activa por sección y durable audit logs; no implica resincronización global de esta referencia.
 
 Referencia humana concisa del schema Prisma vigente.
 
@@ -32,6 +32,13 @@ Referencia humana concisa del schema Prisma vigente.
 
 - Incluye `active_club_assignment_id` ademas del tracking de post-registro.
 - No existe tabla dedicada para credenciales QR: el contrato canónico nuevo usa JWT stateless y, por ahora, solo `users_pr`/`club_role_assignments` para resolver contexto visual y autorizacion.
+
+### `audit_logs`
+
+- `action` admite hasta 64 caracteres; la migración elimina el CHECK del vocabulario legacy.
+- Incluye `event_key` único nullable, metadata de actor/objetivo (`actor_kind`, `actor_role_name`, `actor_scope`, `target_user_id`, `target_scope`), `effective_at`, `correlation_id`, `idempotency_key` y `result`.
+- Las filas legacy conservan sus valores y reciben `actor_kind='user'` y `result='succeeded'`; los campos nuevos restantes son nullable.
+- Índices operativos: actor/objetivo/acción por `created_at DESC` y `correlation_id`.
 
 ### `club_sections`
 
@@ -563,6 +570,7 @@ Define el presupuesto de puntos por componente dentro de un eje anual:
 
 ## Migraciones recientes
 
+- `20260730180000_durable_audit_logs` - expande `audit_logs` de forma transaccional con acciones de hasta 64 caracteres, metadata durable de actor/objetivo, correlación, idempotencia y resultado; conserva filas existentes, usa unicidad nullable en `event_key` y crea índices de consulta por actor, objetivo, acción y correlación.
 - `20260723120000_insurance_capacity_model` - agrega de forma aditiva productos, configuraciones de ciclo, compras, cupos, libro de movimientos, asignaciones, evidencias y participantes externos por evento. Conserva `member_insurances` y `camporee_members` intactos; añade CHECK de sujeto/asignación, dueño de evidencia y XOR de camporee local/unión, más el índice parcial de asignación activa. **Runtime parcial:** productos/configuraciones de ciclo se exponen en `GET|POST|PATCH /api/v1/insurance/products` y `GET|POST|PATCH /api/v1/insurance/cycles`; compras, cupos, movimientos, asignaciones, evidencias y participantes siguen sin endpoints runtime.
 - `20260710130000_admin_auth_sessions` - creada en la rama backend para metadata administrativa 1:1 sobre `sessions`, assurance, expiración absoluta y revocación; despliegue no verificado.
 - `20260710200000_admin_refresh_rotation` - depende de `20260710130000_admin_auth_sessions`; añade `idle_expires_at` para su adopción futura en D1c, deshabilita con sentinel las sesiones administrativas legacy y crea estructuras hash-only de refresh, historial y recibos cifrados. Existe en la rama backend, pero no fue ejecutada ni verificada contra una base de datos; no tiene writer ni publica endpoints runtime y no debe desplegarse antes de D1c + D2.
