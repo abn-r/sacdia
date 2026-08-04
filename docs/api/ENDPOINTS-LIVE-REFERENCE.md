@@ -1057,6 +1057,23 @@ El contrato legacy de unión es distinto: `POST /api/v1/camporees/union/:campore
 
 Un replay con actor, `Idempotency-Key` y payload canónico idénticos devuelve el receipt persistido; el servicio mantiene la autorización antes de resolverlo. No declarar endpoint, DTO ni permiso HTTP v2 hasta que haya wiring runtime publicado.
 
+#### Decisión interna v2 (WU2a2, sin endpoint)
+
+`FinanceLedgerService.decideEntry` tampoco está registrado en `FinancesModule`: no agrega fila a la tabla de endpoints ni habilita invocación HTTP. Solo `pending_approval` puede convertirse en `approved` o `rejected`; el rechazo exige motivo recortado (máx. 500). Cada intento/replay evalúa autorización efectiva de decisión y luego maker-checker (registrador ≠ decisor) antes de receipt o mutación. Si un adaptador futuro lo expone, debe preservar:
+
+| Status | Código | Semántica |
+| --- | --- | --- |
+| 403 | `FINANCE_LEDGER_DISABLED` | El flag `finance.ledger_v2_writes_enabled` no está habilitado. |
+| 403 | `GUARD_PERMISSION_DENIED` | El adaptador niega la decisión efectiva del actor, incluso para replay. |
+| 403 | `FINANCE_LEDGER_SELF_DECISION_FORBIDDEN` | El actor intenta decidir un movimiento que él registró. |
+| 400 | `FINANCE_LEDGER_INPUT_INVALID` | Decisión inválida o motivo de rechazo > 500 caracteres. |
+| 400 | `FINANCE_LEDGER_REJECTION_REASON_REQUIRED` | Un `reject` llega sin motivo usable. |
+| 409 | `FINANCE_LEDGER_IDEMPOTENCY_REUSED` | La llave del actor se reutilizó con payload distinto. |
+| 404 | `FINANCE_LEDGER_ENTRY_NOT_FOUND` | El movimiento no existe. |
+| 409 | `FINANCE_LEDGER_STATUS_INVALID` | El movimiento ya no está en `pending_approval`. |
+
+No declarar endpoint, DTO, consumidor ni permiso HTTP v2 de decisión hasta wiring runtime publicado.
+
 ### health
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |

@@ -81,6 +81,23 @@ La rama de backend WU2a1 incorpora `FinanceLedgerService.registerEntry` como ser
 
 Los replays con la misma llave y payload retornan el receipt persistido; aun así vuelven a pasar por la autorización del adaptador. No hay contrato HTTP v2 hasta que el wiring y su endpoint se publiquen explícitamente.
 
+### Decisión interna v2 (WU2a2, sin endpoint)
+
+La rama de backend WU2a2 incorpora `FinanceLedgerService.decideEntry` como servicio de decisión interno; permanece sin registro en `FinancesModule` y sin ruta, DTO, consumidor ni permiso HTTP v2. Solo un movimiento en `pending_approval` puede pasar a `approved` o `rejected`. Un rechazo exige motivo recortado de máximo 500 caracteres. Todo intento o replay evalúa la autorización efectiva de decisión antes del maker-checker; el registrador y el actor que decide deben ser usuarios distintos en `approve` y `reject`. Una auto-decisión falla cerrada antes de consultar el receipt de idempotencia o mutar. Contratos de error del servicio:
+
+| Código | HTTP | Condición |
+| --- | --- | --- |
+| `FINANCE_LEDGER_DISABLED` | 403 | `finance.ledger_v2_writes_enabled` no es `true`. |
+| `GUARD_PERMISSION_DENIED` | 403 | El adaptador niega la decisión efectiva del actor en club/sección; también en replay. |
+| `FINANCE_LEDGER_SELF_DECISION_FORBIDDEN` | 403 | El actor intenta aprobar o rechazar un movimiento que él mismo registró. |
+| `FINANCE_LEDGER_INPUT_INVALID` | 400 | Decisión inválida o motivo de rechazo mayor a 500 caracteres. |
+| `FINANCE_LEDGER_REJECTION_REASON_REQUIRED` | 400 | Un `reject` llega sin motivo usable tras el trim. |
+| `FINANCE_LEDGER_IDEMPOTENCY_REUSED` | 409 | La misma `Idempotency-Key` del actor tiene otro payload canónico. |
+| `FINANCE_LEDGER_ENTRY_NOT_FOUND` | 404 | El movimiento solicitado no existe. |
+| `FINANCE_LEDGER_STATUS_INVALID` | 409 | El movimiento ya no está en `pending_approval`. |
+
+No hay contrato HTTP v2 de decisión hasta que el wiring y su endpoint se publiquen explícitamente.
+
 ## Requisitos funcionales
 
 1. Solo roles de tesorero, director o `deputy_director` deben poder crear movimientos financieros
