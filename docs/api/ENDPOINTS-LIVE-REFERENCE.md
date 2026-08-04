@@ -1041,6 +1041,22 @@ El contrato legacy de unión es distinto: `POST /api/v1/camporees/union/:campore
 | PATCH | `/api/v1/finances/:financeId` | JWT | Permisos: finances:update | Actualizar movimiento | FinancesService.update() | `src/finances/finances.controller.ts` |
 | DELETE | `/api/v1/finances/:financeId` | JWT | Permisos: finances:delete | Desactivar movimiento | FinancesService.remove() | `src/finances/finances.controller.ts` |
 
+#### Ledger v2 WU2a1 (contrato interno, sin ruta)
+
+`FinanceLedgerService.registerEntry` no está registrado en `FinancesModule`: no cambia la tabla de endpoints ni autoriza a clientes a invocarlo. Si un adaptador y controlador futuros lo exponen, deben preservar el envelope de errores ya definido por el servicio:
+
+| Status | Código | Semántica |
+| --- | --- | --- |
+| 403 | `FINANCE_LEDGER_DISABLED` | El flag `finance.ledger_v2_writes_enabled` no está habilitado. |
+| 403 | `GUARD_PERMISSION_DENIED` | El adaptador niega el registro efectivo del actor, incluso para replay. |
+| 400 | `FINANCE_LEDGER_INPUT_INVALID` | Centavos, moneda ISO/activa o fecha inválidos. |
+| 409 | `FINANCE_LEDGER_IDEMPOTENCY_REUSED` | La llave del actor se reutilizó con payload distinto. |
+| 404 | `FINANCE_CATEGORY_NOT_FOUND` | La categoría no existe. |
+| 400 | `FINANCE_CATEGORY_INACTIVE` | La categoría está inactiva. |
+| 400 | `FINANCE_CATEGORY_TYPE_INVALID` | La categoría no es compatible con el tipo solicitado. |
+
+Un replay con actor, `Idempotency-Key` y payload canónico idénticos devuelve el receipt persistido; el servicio mantiene la autorización antes de resolverlo. No declarar endpoint, DTO ni permiso HTTP v2 hasta que haya wiring runtime publicado.
+
 ### health
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |

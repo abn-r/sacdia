@@ -65,6 +65,22 @@ Esta entrega es únicamente de base de datos, permisos, rollout y backfill. No a
 
 Fuera de alcance de WU1: API/DTOs v2, transacciones de aprobación, idempotencia de requests, asignaciones con capacidad agregada, lecturas compatibles v2, camporees, cuotas/cupos y seguros.
 
+### Registro interno v2 (WU2a1, sin endpoint)
+
+La rama de backend WU2a1 incorpora `FinanceLedgerService.registerEntry` como servicio transaccional interno; todavía no se registra en `FinancesModule`, no habilita el flag y no agrega ruta, DTO ni consumidor. Por eso los nueve endpoints legacy de arriba siguen siendo la única superficie HTTP vigente. Cuando un adaptador autorizado exponga el registro, debe conservar estos contratos de error del servicio:
+
+| Código | HTTP | Condición |
+| --- | --- | --- |
+| `FINANCE_LEDGER_DISABLED` | 403 | `finance.ledger_v2_writes_enabled` no es `true`. |
+| `GUARD_PERMISSION_DENIED` | 403 | El adaptador niega al actor el registro efectivo en club/sección; también se evalúa en replay. |
+| `FINANCE_LEDGER_INPUT_INVALID` | 400 | Centavos, moneda ISO o fecha inválidos; también moneda inactiva. |
+| `FINANCE_LEDGER_IDEMPOTENCY_REUSED` | 409 | La misma `Idempotency-Key` del actor tiene otro payload canónico. |
+| `FINANCE_CATEGORY_NOT_FOUND` | 404 | La categoría solicitada no existe. |
+| `FINANCE_CATEGORY_INACTIVE` | 400 | La categoría existe pero está inactiva. |
+| `FINANCE_CATEGORY_TYPE_INVALID` | 400 | El tipo de categoría no coincide con `income` o `expense|payable`. |
+
+Los replays con la misma llave y payload retornan el receipt persistido; aun así vuelven a pasar por la autorización del adaptador. No hay contrato HTTP v2 hasta que el wiring y su endpoint se publiquen explícitamente.
+
 ## Requisitos funcionales
 
 1. Solo roles de tesorero, director o `deputy_director` deben poder crear movimientos financieros
