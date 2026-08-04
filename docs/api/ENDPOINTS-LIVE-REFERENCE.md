@@ -614,6 +614,8 @@ Mutaciones de assignments/membership/requests/post-registration pueden increment
 
 Runtime AuthZ que depende del Campo Local puede fallar cerrado con `503 LOCAL_FIELD_TIMEZONE_UNAVAILABLE` cuando falta o es invalida la timezone IANA; ver `docs/features/auth/AUTHORIZATION-CANONICAL-CONTRACT.md` seccion Authorization-time. No hay endpoint dedicado a este contrato.
 
+Mutaciones críticas que usan el critical audit writer fallan cerrado con `503 AUDIT_WRITE_FAILED` si no pueden confirmar auditoría durable (rollback de la misma transacción). La política exacta de super-admin write y la primitiva interna de roles globales están documentadas en `AUTHORIZATION-CANONICAL-CONTRACT.md` (secciones Critical audit writer / Exact super-admin write); no hay endpoint HTTP nuevo para esa primitiva.
+
 ### OAuth
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
