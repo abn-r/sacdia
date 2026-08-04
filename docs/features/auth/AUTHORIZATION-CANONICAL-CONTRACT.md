@@ -406,6 +406,37 @@ Limites de dia de negocio (`startOfBusinessDate`, `startOfNextBusinessDate`) usa
 
 Intenciones no autoritativas (workflow/historico) deben declarar `grantsAuthority: false` via `CLUB_ASSIGNMENT_NON_AUTHORITY_ALLOWLIST`.
 
+
+
+## Authorization context versioning (cache v4 foundation)
+
+Backend stack `#254`–`#271` (+ remediaciones `#342`/`#344`) introduce versionado durable de contexto de autorización. La foundation cache v4 permanece **sin exposición HTTP nueva**: no hay endpoint dedicado de cache; los clientes siguen usando `/auth/me` y guards existentes.
+
+### Semántica
+
+- Tabla durable `authorization_context_versions` (por `user_id`).
+- Mutaciones que cambian autoridad efectiva hacen bump **dentro de la misma transacción** que la escritura de negocio.
+- Tras commit exitoso se invalida cache Redis del usuario; si el bump falla, la mutación hace rollback y no se limpia cache.
+- Escrituras no-op / rechazadas **no** incrementan versión.
+
+### Superficies que hacen bump (contrato operativo)
+
+| Superficie | Cuándo |
+| --- | --- |
+| Asignaciones de club (`ClubsService`) | create/update/remove/end + sucesión de director |
+| Membership requests | approve/reject/create path que altera assignment; expiry bulk |
+| Requests (transfer/role) | mutaciones aprobadas que alteran assignments |
+| Post-registration step 3 | cambio scope exitoso |
+
+### Concurrencia y bulk
+
+- Bumps multi-usuario usan orden determinista (`bumpOrdered`: dedupe + sort) para evitar deadlocks.
+- Expiry masivo de membership usa `updateManyAndReturn` (usuarios exactos expirados) + `bumpMany` set-based.
+
+### Errores / timezone
+
+La foundation cache v4 **no** habilita resolución estricta de timezone en `/auth/me`. `LOCAL_FIELD_TIMEZONE_UNAVAILABLE` aplica a paths que ya dependen del resolver temporal (ver sección Authorization-time); el backfill de timezones debe completarse antes de endurecer lecturas globales.
+
 ## Referencias Relacionadas
 
 - `docs/features/auth/RBAC-ENFORCEMENT-MATRIX.md`
