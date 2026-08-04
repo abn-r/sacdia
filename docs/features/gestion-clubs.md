@@ -101,7 +101,8 @@ El listado de miembros no debe inferir "Sin clase" desde la ausencia de datos en
 - **Roles anuales**: Las asignaciones de rol tienen `ecclesiastical_year_id`, permitiendo que un miembro cambie de rol entre anos sin perder historico
 - **Asignacion inicial de director**: para una seccion sin director activo, el Admin usa `POST /clubs/:clubId/sections/:sectionId/director-assignment`, que crea una asignacion `director` para el usuario y ano eclesiastico indicados. Si ya existe director activo, el backend rechaza el alta para mantener un solo director activo.
 - **Sucesion anual de director — baseline runtime**: el Admin usa `POST /clubs/:clubId/sections/:sectionId/director-succession`, que cierra la asignacion activa anterior (`active=false`, `status=ended`, `end_date`) y crea inmediatamente una nueva asignacion `director` activa para el ano indicado. Solo `super-admin`, `admin`, `director-lf` y `assistant-lf` pueden ejecutar hoy este flujo. El baseline actual sigue ejecutando la sucesión inmediata.
-- **Sucesion durable (R01)**: `GET /clubs/:clubId/sections/:sectionId/director-succession` lee el plan; `POST .../director-succession/plans` programa un plan `scheduled` idempotente en `director_succession_plans`. Programar la sucesión no termina al director vigente, no activa al sucesor y no crea assignment ni grant. La activación al cambio de año queda en R02.
+- **Sucesion durable (R01)**: `GET /clubs/:clubId/sections/:sectionId/director-succession` lee el plan; `POST .../director-succession/plans` programa un plan `scheduled` idempotente en `director_succession_plans`. Programar la sucesión no termina al director vigente, no activa al sucesor y no crea assignment ni grant.
+- **Activacion transaccional (R02)**: `DirectorSuccessionActivationService.activateDue(now)` aplica planes `scheduled` con `effective_date <= now` en una sola transacción (fin del assignment saliente, alta del sucesor, plan `activated`, auditoría `DIRECTOR_SUCCESSION_ACTIVATED`, bump de versiones de auth). Sin HTTP/cron en este slice; falla de auditoría revierte roles.
 - **Limites de directiva**: `role_slot_limits` define los cupos por seccion y el backend tambien conserva fallback canonico para cargos criticos aunque falte el seed. La regla se aplica al crear asignaciones directas, al actualizar un rol y al revisar solicitudes de asignacion.
 - **Temporalidad de cupos**: `start_date` y `end_date` son inclusivas. El precheck runtime y el trigger PostgreSQL usan máxima concurrencia temporal y la base adquiere locks transaccionales para serializar carreras; el trigger sigue siendo la autoridad final.
 - **Contexto activo**: `users_pr.active_club_assignment_id` persiste el contexto de club activo del usuario, usado por `ClubRolesGuard` para resolver autorizacion
@@ -113,7 +114,8 @@ El listado de miembros no debe inferir "Sin clase" desde la ausencia de datos en
 > [!IMPORTANT]
 > El baseline actual sigue ejecutando la sucesión inmediata en
 > `POST .../director-succession`. La superficie durable de programación/lectura
-> ya existe; la activación transaccional (R02) y capabilities siguen pendientes.
+> y el activador transaccional (servicio) ya existen; falta cablear cron/HTTP
+> del worker y capabilities.
 
 El P0 separa la preasignacion del grant efectivo:
 
@@ -123,9 +125,10 @@ El P0 separa la preasignacion del grant efectivo:
    sucesor y no crea assignment ni grant.
 3. `GET .../director-succession` lee el plan; el preflight/GET no crea assignment
    ni grant.
-4. Al cambio de ano, el backend activara la transicion de forma idempotente
-   (R02), terminara al director saliente y creara el unico assignment efectivo
-   del sucesor.
+4. El activador (`activateDue`) aplica planes vencidos de forma idempotente:
+   termina al director saliente y crea el unico assignment efectivo del
+   sucesor con auditoría atómica. El disparo periódico del worker queda fuera
+   de R02.
 5. Endurecimiento SCHED (ventana oct–dic, rol exacto LF del mismo campo) y
    `GET .../capabilities` siguen como deuda explícita.
 
