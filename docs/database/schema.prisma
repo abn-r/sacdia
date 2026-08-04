@@ -6,6 +6,10 @@ datasource db {
   provider = "postgresql"
 }
 
+// PENDING-AUTH-STACK (#233): columns from event_key through result (and their
+// indexes below) are NOT effective on `development` until backend migration
+// `20260730180000_durable_audit_logs` is merged, deployed, and verified.
+// Do not generate runtime queries against those fields from this mirror alone.
 model audit_logs {
   audit_log_id       BigInt    @id @default(autoincrement())
   entity_type        String    @db.VarChar(50)
@@ -16,15 +20,25 @@ model audit_logs {
   summary            String?   @db.VarChar(500)
   changes            Json?
   created_at         DateTime  @default(now()) @db.Timestamptz(6)
+  /// PENDING-AUTH-STACK (#233) — not in effective runtime until migration lands
   event_key          String?   @unique(map: "audit_logs_event_key_key") @db.VarChar(160)
+  /// PENDING-AUTH-STACK (#233)
   actor_kind         String    @default("user") @db.VarChar(24)
+  /// PENDING-AUTH-STACK (#233)
   actor_role_name    String?   @db.VarChar(64)
+  /// PENDING-AUTH-STACK (#233)
   actor_scope        Json?
+  /// PENDING-AUTH-STACK (#233)
   target_user_id     String?   @db.Uuid
+  /// PENDING-AUTH-STACK (#233)
   target_scope       Json?
+  /// PENDING-AUTH-STACK (#233)
   effective_at       DateTime? @db.Timestamptz(6)
+  /// PENDING-AUTH-STACK (#233)
   correlation_id     String?   @db.Uuid
+  /// PENDING-AUTH-STACK (#233)
   idempotency_key    String?   @db.VarChar(128)
+  /// PENDING-AUTH-STACK (#233)
   result             String    @default("succeeded") @db.VarChar(32)
 
   clubs clubs? @relation(fields: [club_id], references: [club_id], onDelete: SetNull, onUpdate: NoAction)

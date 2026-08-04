@@ -9,6 +9,9 @@ Guía operativa de la base de datos PostgreSQL del sistema SACDIA.
 > `docs/database/schema.prisma` es el espejo documental sincronizado del schema efectivo y debe mantenerse alineado con el backend.
 > `docs/database/SCHEMA-REFERENCE.md` es referencia humana subordinada y no debe usarse para arbitrar diferencias estructurales.
 
+> [!WARNING]
+> **PENDING-AUTH-STACK:** el espejo documental puede adelantar migraciones del stack AUTH abiertas (p. ej. expansión durable de `audit_logs` en backend `#233`). Los campos marcados `PENDING-AUTH-STACK` en `schema.prisma` / `SCHEMA-REFERENCE.md` **no** forman parte del runtime efectivo de `development` hasta merge + deploy + verificación de esa migración. No generar clientes ni queries contra esos campos solo desde el espejo.
+
 ---
 
 ## 📋 Índice

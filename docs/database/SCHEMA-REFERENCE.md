@@ -35,7 +35,8 @@ Referencia humana concisa del schema Prisma vigente.
 
 ### `audit_logs`
 
-- `action` admite hasta 64 caracteres; la migración elimina el CHECK del vocabulario legacy.
+- **PENDING-AUTH-STACK (backend `#233`):** la expansión durable (`event_key`, metadata actor/objetivo, `effective_at`, `correlation_id`, `idempotency_key`, `result`, índices asociados y `action` hasta 64) describe el contrato de la migración `20260730180000_durable_audit_logs`. **No es schema efectivo de `development`** hasta merge + deploy + verificación. El runtime actual solo garantiza el núcleo legacy (`entity_*`, `action` corto, `club_id`, `actor_user_id`, `summary`, `changes`, `created_at`).
+- Tras aterrizar `#233`: `action` admite hasta 64 caracteres; la migración elimina el CHECK del vocabulario legacy.
 - Incluye `event_key` único nullable, metadata de actor/objetivo (`actor_kind`, `actor_role_name`, `actor_scope`, `target_user_id`, `target_scope`), `effective_at`, `correlation_id`, `idempotency_key` y `result`.
 - Las filas legacy conservan sus valores y reciben `actor_kind='user'` y `result='succeeded'`; los campos nuevos restantes son nullable.
 - Índices operativos: actor/objetivo/acción por `created_at DESC` y `correlation_id`.
