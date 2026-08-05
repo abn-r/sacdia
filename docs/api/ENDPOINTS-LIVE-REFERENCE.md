@@ -614,7 +614,7 @@ Mutaciones de assignments/membership/requests/post-registration pueden increment
 
 Runtime AuthZ que depende del Campo Local puede fallar cerrado con `503 LOCAL_FIELD_TIMEZONE_UNAVAILABLE` cuando falta o es invalida la timezone IANA; ver `docs/features/auth/AUTHORIZATION-CANONICAL-CONTRACT.md` seccion Authorization-time. No hay endpoint dedicado a este contrato.
 
-Mutaciones críticas que usan el critical audit writer fallan cerrado con `503 AUDIT_WRITE_FAILED` si no pueden confirmar auditoría durable (rollback de la misma transacción). La política exacta de super-admin write y la primitiva interna de roles globales están documentadas en `AUTHORIZATION-CANONICAL-CONTRACT.md` (secciones Critical audit writer / Exact super-admin write); no hay endpoint HTTP nuevo para esa primitiva.
+Mutaciones críticas que usan el critical audit writer fallan cerrado con `503 AUDIT_WRITE_FAILED` si no pueden confirmar auditoría durable (rollback de la misma transacción). `POST/DELETE /admin/rbac/users/:userId/roles` usan `ExactSuperAdminWriteGuard` + `GlobalUserRoleWriteService` (sin endpoint HTTP nuevo); ver `AUTHORIZATION-CANONICAL-CONTRACT.md` (Critical audit writer / Exact super-admin write).
 
 La foundation BE-11 de elegibilidad Guía Mayor para roles de club (`ClubRoleEligibilityService`) publica el código estable `403 CLUB_ROLE_GUIDE_MAJOR_REQUIRED`. **Aún no está cableada** a mutaciones live de `club-roles` / succession; ver `AUTHORIZATION-CANONICAL-CONTRACT.md` (sección Guide Major club-role eligibility). No hay endpoint HTTP dedicado.
 
@@ -1444,8 +1444,8 @@ El código `403 CLUB_ROLE_GUIDE_MAJOR_REQUIRED` existe en i18n/errores como cont
 | POST | `/api/v1/admin/rbac/users/:userId/permissions` | JWT | Permisos: permissions:assign | Asignar un permiso directo a un usuario | RbacService.assignPermissionToUser() | `src/rbac/rbac.controller.ts` |
 | DELETE | `/api/v1/admin/rbac/users/:userId/permissions/:permissionId` | JWT | Permisos: permissions:assign | Remover un permiso directo de un usuario | RbacService.removePermissionFromUser() | `src/rbac/rbac.controller.ts` |
 | GET | `/api/v1/admin/rbac/users/:userId/roles` | JWT | Global: admin, super-admin | Listar roles asignados a un usuario | RbacService.getUserRoles() | `src/rbac/rbac.controller.ts` |
-| POST | `/api/v1/admin/rbac/users/:userId/roles` | JWT | Global: admin, super-admin | Asignar un rol a un usuario | RbacService.assignRoleToUser() | `src/rbac/rbac.controller.ts` |
-| DELETE | `/api/v1/admin/rbac/users/:userId/roles/:roleId` | JWT | Global: admin, super-admin | Remover un rol de un usuario | RbacService.removeRoleFromUser() | `src/rbac/rbac.controller.ts` |
+| POST | `/api/v1/admin/rbac/users/:userId/roles` | JWT | Exact super-admin (`SUPER_ADMIN_WRITE_REQUIRED`); headers opc. `Idempotency-Key` / `X-Correlation-Id` | Asignar rol GLOBAL (idempotente; solo GLOBAL activo) | RbacService.assignRoleToUser() → GlobalUserRoleWriteService.assign() | `src/rbac/rbac.controller.ts` |
+| DELETE | `/api/v1/admin/rbac/users/:userId/roles/:roleId` | JWT | Exact super-admin (`SUPER_ADMIN_WRITE_REQUIRED`); headers opc. `Idempotency-Key` / `X-Correlation-Id` | Remover rol GLOBAL (revoke ausente = no-op) | RbacService.removeRoleFromUser() → GlobalUserRoleWriteService.revoke() | `src/rbac/rbac.controller.ts` |
 
 ### rbac-bootstrap
 

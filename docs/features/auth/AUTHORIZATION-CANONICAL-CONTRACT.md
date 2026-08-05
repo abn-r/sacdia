@@ -456,26 +456,26 @@ Denegaciones de autorización pueden registrarse vía `SecurityDenialAuditServic
 
 ## Exact super-admin write y primitiva global de roles
 
-Backend stack C07 (`#267`/`#270`/`#279` + remediaciones) añade política y primitiva internas. **No hay ruta HTTP live nueva** para assign/revoke global vía esta primitiva; los controllers RBAC existentes no deben interpretarse como migrados hasta wiring explícito.
+Backend stack C07 (`#267`/`#270`/`#279` + remediaciones) añade la política y la primitiva. Runtime R04 cablea `POST/DELETE /admin/rbac/users/:userId/roles` a `GlobalUserRoleWriteService` (sin endpoint HTTP nuevo). Otros writers de `users_roles` (p. ej. bootstrap, admin users, OAuth) **no** están migrados en este slice.
 
 ### `ExactSuperAdminWritePolicy` / guard
 
 - Exige asignación activa `users_roles` + rol `super-admin` GLOBAL activo.
 - `admin` solo, u otros roles globales, **no** satisfacen la política.
 - Error: `403 SUPER_ADMIN_WRITE_REQUIRED`.
+- En R04 el guard aplica a assign/revoke HTTP de roles de usuario; la primitiva revalida tras locks.
 
-### Primitiva `GlobalUserRoleWriteService` (interna)
+### Primitiva `GlobalUserRoleWriteService` (usada por RBAC HTTP)
 
 | Regla | Comportamiento |
 | --- | --- |
 | Actor | Debe pasar `ExactSuperAdminWritePolicy` (revalidada tras locks). |
 | Rol objetivo | Solo roles `GLOBAL` activos (`RBAC_GLOBAL_ROLE_REQUIRED` si no). |
-| Idempotencia | `event_key = rbac-global-users-role:{idempotencyKey}`; cada mutación distinta necesita su propia clave. |
-| Revoke sin fila | No-op (`changed: false`); no crea `users_roles`. |
+| Idempotencia | `event_key = rbac-global-users-role:{idempotencyKey}`; headers opcionales `Idempotency-Key` / `X-Correlation-Id` (UUID server-side si faltan). |
+| Assign ya activo / revoke ausente | No-op (`changed: false`); no lanza `RBAC_USER_ROLE_ALREADY_ASSIGNED` / `RBAC_USER_ROLE_NOT_FOUND`. |
 | Replay opuesto | Misma `idempotencyKey` con mutación contraria → `409 IDEMPOTENCY_KEY_REUSED`. |
-| Audit | Escritura vía critical audit writer dentro de la misma transacción; fallo → rollback + `AUDIT_WRITE_FAILED`. |
-
-Consumidores HTTP futuros deben versionar/invalidar contexto de autorización (sección anterior) cuando la primitiva altere autoridad efectiva; mientras no haya wiring, no afirmar integración live.
+| Audit | Critical audit writer en la misma transacción; fallo → rollback + `AUDIT_WRITE_FAILED`. |
+| Cache | `RbacService` invalida cache del target solo cuando `changed: true`. |
 
 ## Guide Major club-role eligibility (BE-11 foundation)
 
