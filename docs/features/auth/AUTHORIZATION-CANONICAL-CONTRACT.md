@@ -477,6 +477,36 @@ Backend stack C07 (`#267`/`#270`/`#279` + remediaciones) añade política y prim
 
 Consumidores HTTP futuros deben versionar/invalidar contexto de autorización (sección anterior) cuando la primitiva altere autoridad efectiva; mientras no haya wiring, no afirmar integración live.
 
+## Guide Major club-role eligibility (BE-11 foundation)
+
+Backend `#251` introduce `ClubRoleEligibilityService` como fuente P0 para el gate GM-01 sobre **asignaciones de rol de club** (categoría CLUB). **No introduce endpoint HTTP nuevo** y, en este slice, **no cablea** create/edit/schedule/activate/revoke ni succession.
+
+### Contrato `CLUB_ROLE_GUIDE_MAJOR_REQUIRED`
+
+| Campo | Valor |
+| --- | --- |
+| Código | `CLUB_ROLE_GUIDE_MAJOR_REQUIRED` |
+| HTTP | `403 FORBIDDEN` |
+| Semántica | El usuario objetivo no cumple elegibilidad Guía Mayor para el rol CLUB solicitado (salvo exención `member`). |
+| Consumo | Callers futuros deben invocar `assertEligible` / `evaluate` dentro de la misma transacción de mutación; re-evaluar en activación (no retener grants previos). |
+
+### Reglas de elegibilidad (foundation)
+
+| Caso | Resultado | `basis` |
+| --- | --- | --- |
+| `roleName === 'member'` (canónico exacto) | Elegible sin consultar enrollments | `MEMBER_EXEMPT` |
+| Enrollment `classes.asset_code = GM-01` con `investiture_status = INVESTIDO` (histórico; clase puede estar inactiva) | Elegible | `HISTORICAL_INVESTED` |
+| Enrollment activo `GM-01` con status en `IN_PROGRESS`, `SUBMITTED_FOR_VALIDATION`, `CLUB_APPROVED`, `COORDINATOR_APPROVED`, `FIELD_APPROVED` | Elegible | `ACTIVE_ENROLLMENT` |
+| Sin match (incl. solo `APPROVED` / `REJECTED` / `EXPIRED` u otros) | No elegible → `CLUB_ROLE_GUIDE_MAJOR_REQUIRED` | `null` |
+
+### Dependencia de Investiture / enrollments
+
+La foundation **lee** `enrollments` + `classes.asset_code` + `investiture_status_enum`. No crea flujo de investidura ni endpoint de validación. Los estados canónicos y el avance a `INVESTIDO` siguen viviendo en el dominio de investiduras/clases (`docs/features/validacion-investiduras.md`, `docs/features/clases-progresivas.md`).
+
+### Distinción vs gate pedagógico live
+
+Las asignaciones pedagógicas `class-counselor-assignments` ya exponen `403 CLASS_COUNSELOR_GUIDE_MAJOR_REQUIRED` con filtro legacy por nombre de clase. Ese contrato live **no** se reemplaza en `#251`. Unificar consumidores al asset `GM-01` / `ClubRoleEligibilityService` es trabajo de follow-up explícito.
+
 ## Referencias Relacionadas
 
 - `docs/features/auth/RBAC-ENFORCEMENT-MATRIX.md`

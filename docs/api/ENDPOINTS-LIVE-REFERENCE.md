@@ -616,6 +616,8 @@ Runtime AuthZ que depende del Campo Local puede fallar cerrado con `503 LOCAL_FI
 
 Mutaciones críticas que usan el critical audit writer fallan cerrado con `503 AUDIT_WRITE_FAILED` si no pueden confirmar auditoría durable (rollback de la misma transacción). La política exacta de super-admin write y la primitiva interna de roles globales están documentadas en `AUTHORIZATION-CANONICAL-CONTRACT.md` (secciones Critical audit writer / Exact super-admin write); no hay endpoint HTTP nuevo para esa primitiva.
 
+La foundation BE-11 de elegibilidad Guía Mayor para roles de club (`ClubRoleEligibilityService`) publica el código estable `403 CLUB_ROLE_GUIDE_MAJOR_REQUIRED`. **Aún no está cableada** a mutaciones live de `club-roles` / succession; ver `AUTHORIZATION-CANONICAL-CONTRACT.md` (sección Guide Major club-role eligibility). No hay endpoint HTTP dedicado.
+
 ### OAuth
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
@@ -905,6 +907,8 @@ El contrato legacy de unión es distinto: `POST /api/v1/camporees/union/:campore
 | PATCH | `/api/v1/class-counselor-assignments/:assignmentId` | JWT | Permisos: club_roles:assign | Actualizar una asignación pedagógica de clase | ClassCounselorAssignmentsService.updateAssignment() | `src/classes/class-counselor-assignments.controller.ts` |
 | DELETE | `/api/v1/class-counselor-assignments/:assignmentId` | JWT | Permisos: club_roles:revoke | Revocar una asignación pedagógica de clase | ClassCounselorAssignmentsService.removeAssignment() | `src/classes/class-counselor-assignments.controller.ts` |
 
+Las mutaciones POST/PATCH de esta superficie rechazan un responsable sin trayectoria Guía Mayor elegible con `403 CLASS_COUNSELOR_GUIDE_MAJOR_REQUIRED` (filtro legacy por nombre de clase). Ese código es distinto del foundation `CLUB_ROLE_GUIDE_MAJOR_REQUIRED` (asset `GM-01`) documentado para roles de club y aún no cableado a estos endpoints.
+
 ### class-progress-scope
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
@@ -979,6 +983,8 @@ El contrato legacy de unión es distinto: `POST /api/v1/camporees/union/:campore
 | DELETE | `/api/v1/club-roles/:assignmentId` | JWT | Permisos: club_roles:revoke | Remover rol de miembro | ClubsService.removeRoleAssignment() | `src/clubs/clubs.controller.ts` |
 
 Las rutas `POST /api/v1/clubs/:clubId/sections/:sectionId/roles` y `PATCH /api/v1/club-roles/:assignmentId` rechazan el rango resultante con `end_date < start_date` mediante `400` y código `CLUB_ROLE_DATE_RANGE_INVALID`.
+
+El código `403 CLUB_ROLE_GUIDE_MAJOR_REQUIRED` existe en i18n/errores como contrato de la foundation BE-11, pero **las mutaciones live de esta sección aún no invocan** `ClubRoleEligibilityService`. No afirmar enforcement en assign/update/succession hasta un slice de wiring explícito.
 
 ### admin-coordination
 
