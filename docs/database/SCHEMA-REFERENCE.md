@@ -134,6 +134,9 @@ Referencia humana concisa del schema Prisma vigente.
 - El estado es `String` con default `draft`; el runtime backend verificado usa `draft`, `generated` y `submitted`.
 - `snapshot_data` es `Json?` y guarda el snapshot congelado del preview auto-calculado.
 - `submitted_by` referencia `users.user_id` y permite identificar al submitter cuando el informe pasa a `submitted`.
+- El PDF canónico privado se referencia con un bloque de metadatos nullable y completo: `pdf_r2_key VARCHAR(512)`, `pdf_size_bytes BIGINT`, `pdf_sha256 CHAR(64)`, `pdf_generated_at TIMESTAMPTZ(6)` y `pdf_template_version VARCHAR(32)`.
+- `monthly_reports_pdf_metadata_complete_chk` exige que los cinco campos estén todos vacíos o todos presentes; cuando existen, el tamaño debe ser positivo y el checksum debe ser SHA-256 hexadecimal minúsculo.
+- `idx_monthly_reports_pdf_template_version` permite seleccionar artefactos ausentes o desactualizados para reparación/backfill.
 - `monthly_report_manual_data` es one-to-one por `monthly_report_id` (`@unique`) y se elimina en cascada si se elimina el informe padre.
 - Los campos manuales vigentes son administrativos, misioneros y de seguimiento; no coinciden con algunos payloads legacy de clientes.
 
