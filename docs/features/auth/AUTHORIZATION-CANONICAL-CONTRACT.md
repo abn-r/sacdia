@@ -437,6 +437,46 @@ Backend stack `#254`–`#271` (+ remediaciones `#342`/`#344`) introduce versiona
 
 La foundation cache v4 **no** habilita resolución estricta de timezone en `/auth/me`. `LOCAL_FIELD_TIMEZONE_UNAVAILABLE` aplica a paths que ya dependen del resolver temporal (ver sección Authorization-time); el backfill de timezones debe completarse antes de endurecer lecturas globales.
 
+## Critical audit writer y fallos de auditoría
+
+Backend stack C07 (`#253`/`#346`/`#259`/`#260` + remediaciones) publica un escritor transaccional de auditoría crítica. **No introduce endpoints HTTP nuevos.**
+
+### Contrato `AUDIT_WRITE_FAILED`
+
+| Campo | Valor |
+| --- | --- |
+| Código | `AUDIT_WRITE_FAILED` |
+| HTTP | `503 SERVICE_UNAVAILABLE` |
+| Semántica | La mutación crítica no pudo confirmar un evento de auditoría durable (persistencia, snapshot incompatible en replay, o carrera no recuperable). |
+| Rollback | El caller debe abortar la misma transacción de negocio. Un fallo de audit no se degrada a “éxito sin audit”. |
+| Replay exacto | Misma `event_key` + mismo snapshot canónico (incl. `Date` serializados) → `{ replayed: true }` sin segunda fila. |
+| Replay incompatible | Misma `event_key` con snapshot distinto → `AUDIT_WRITE_FAILED` (fail-closed). |
+
+Denegaciones de autorización pueden registrarse vía `SecurityDenialAuditService` sin alterar el error original del caller: si el audit durable no está disponible, el denial original se preserva y el fallo de audit se reporta solo a logs.
+
+## Exact super-admin write y primitiva global de roles
+
+Backend stack C07 (`#267`/`#270`/`#279` + remediaciones) añade política y primitiva internas. **No hay ruta HTTP live nueva** para assign/revoke global vía esta primitiva; los controllers RBAC existentes no deben interpretarse como migrados hasta wiring explícito.
+
+### `ExactSuperAdminWritePolicy` / guard
+
+- Exige asignación activa `users_roles` + rol `super-admin` GLOBAL activo.
+- `admin` solo, u otros roles globales, **no** satisfacen la política.
+- Error: `403 SUPER_ADMIN_WRITE_REQUIRED`.
+
+### Primitiva `GlobalUserRoleWriteService` (interna)
+
+| Regla | Comportamiento |
+| --- | --- |
+| Actor | Debe pasar `ExactSuperAdminWritePolicy` (revalidada tras locks). |
+| Rol objetivo | Solo roles `GLOBAL` activos (`RBAC_GLOBAL_ROLE_REQUIRED` si no). |
+| Idempotencia | `event_key = rbac-global-users-role:{idempotencyKey}`; cada mutación distinta necesita su propia clave. |
+| Revoke sin fila | No-op (`changed: false`); no crea `users_roles`. |
+| Replay opuesto | Misma `idempotencyKey` con mutación contraria → `409 IDEMPOTENCY_KEY_REUSED`. |
+| Audit | Escritura vía critical audit writer dentro de la misma transacción; fallo → rollback + `AUDIT_WRITE_FAILED`. |
+
+Consumidores HTTP futuros deben versionar/invalidar contexto de autorización (sección anterior) cuando la primitiva altere autoridad efectiva; mientras no haya wiring, no afirmar integración live.
+
 ## Referencias Relacionadas
 
 - `docs/features/auth/RBAC-ENFORCEMENT-MATRIX.md`
