@@ -610,6 +610,8 @@ Semántica funcional y límites: [operations-dashboard.md](../features/operation
 | DELETE | `/api/v1/auth/sessions/:sessionId` | JWT | - | Revoke a specific session | SessionsService.revokeSession() | `src/auth/sessions.controller.ts` |
 | DELETE | `/api/v1/auth/sessions` | JWT | - | Revoke all other sessions | SessionsService.revokeAllOtherSessions() | `src/auth/sessions.controller.ts` |
 
+Runtime AuthZ que depende del Campo Local puede fallar cerrado con `503 LOCAL_FIELD_TIMEZONE_UNAVAILABLE` cuando falta o es invalida la timezone IANA; ver `docs/features/auth/AUTHORIZATION-CANONICAL-CONTRACT.md` seccion Authorization-time. No hay endpoint dedicado a este contrato.
+
 ### OAuth
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |

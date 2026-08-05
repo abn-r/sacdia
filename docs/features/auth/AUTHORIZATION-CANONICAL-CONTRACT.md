@@ -365,6 +365,47 @@ Las credenciales QR nuevas consumen este mismo contrato de autorizacion:
 - `qr:validate` habilita `/qr/validate`;
 - `/qr/scan` permanece como alias legacy y sigue gobernado por `attendance:manage`.
 
+## Authorization-time (tiempo de negocio)
+
+La autorizacion efectiva de asignaciones de club se evalua contra un contexto temporal resuelto por Campo Local. Este contrato aplica al runtime AuthZ (backend PRs `#242`, `#334`, `#247`, `#336`); no introduce endpoints nuevos.
+
+### Orden de resolucion de timezone
+
+1. Partir del `club_section` relevante.
+2. Resolver `club` → `local_field`.
+3. Validar `local_fields.timezone` como IANA geografica canonica.
+4. Emitir `TemporalContext`:
+   - `now` (instante UTC del reloj inyectado)
+   - `businessDate` (`YYYY-MM-DD` en la timezone del Campo Local)
+   - `businessTimeZone` (IANA canonica)
+   - `localFieldId`
+
+Si el Campo Local falta o su timezone no es clasificable, el backend falla cerrado con:
+
+- HTTP `503`
+- `ErrorCode.LOCAL_FIELD_TIMEZONE_UNAVAILABLE`
+- detalle `{ reason }` (`MISSING` u otras razones de clasificacion)
+
+No se inventa timezone por defecto.
+
+### Effectivity de asignaciones
+
+`ClubAssignmentEffectivityPolicy` es la unica fuente de verdad para autoridad vigente:
+
+| Superficie | Contrato |
+| --- | --- |
+| Memoria | `isEffective(assignment, context)` |
+| Prisma | `toPrismaWhere(context)` |
+| SQL crudo | `toSql(context, assignmentAlias)` con columnas calificadas (`alias.active`, etc.) |
+
+Reglas de vigencia (`active`, `status='active'`, `start_date`/`end_date` por `businessDate`, `expires_at` por `now`) deben mantener paridad entre las tres superficies.
+
+`toSql` exige un alias SQL seguro (`^[A-Za-z_][A-Za-z0-9_]*$`) para poder embebese en joins donde `active` u otras columnas son ambiguas.
+
+Limites de dia de negocio (`startOfBusinessDate`, `startOfNextBusinessDate`) usan la timezone del contexto; los tests de politica usan `TestingClock`, que clona el instante inicial para evitar mutacion compartida del `Date`.
+
+Intenciones no autoritativas (workflow/historico) deben declarar `grantsAuthority: false` via `CLUB_ASSIGNMENT_NON_AUTHORITY_ALLOWLIST`.
+
 ## Referencias Relacionadas
 
 - `docs/features/auth/RBAC-ENFORCEMENT-MATRIX.md`
