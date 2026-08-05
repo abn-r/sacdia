@@ -94,6 +94,7 @@ La feature esta implementada en backend con IDs UUID y estados `draft -> generat
   - `MonthlyReportManualData` del admin usa campos legacy como `weekly_meetings_held`, `leadership_meetings`, `souls_won`, `service_hours_total`, que NO coinciden con `UpdateManualDataDto` del backend
   - `MonthlyReportAutoData` del admin espera shape legacy (`activities_count`, `members_total`, `attendance_rate`, etc.) que no coincide con el `preview`/`snapshot_data` real actual
 - **Conclusión factual**: la navegación y acciones por ID ya consumen el contrato UUID del backend; los payloads manuales y la presentación de datos auto-calculados siguen pendientes de reconciliación
+- **Plantilla imprimible de referencia**: `/reports/monthly-preview` renderiza fuera del shell del dashboard un formulario HTML rellenable de exactamente tres páginas carta vertical. La página 1 contiene Administración y Enseñanzas; la página 2, Actividades del club y Finanzas; la página 3, Actividad misionera, Servicio y Firmas. `/reports/monthly-preview?example=1` inicializa el mismo formulario con una fixture local de muestra. Esta plantilla no persiste ni adapta sus campos al DTO backend actual y requiere los logos oficiales locales en `public/brand/iasd-logo-horizontal.svg` y `public/brand/iasd-symbol.svg`.
 
 ### App Movil
 
