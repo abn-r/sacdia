@@ -20,6 +20,22 @@ pnpm run test:cov
 pnpm run test:e2e
 ```
 
+### Fixture PostgreSQL — activación de sucesión (R03)
+
+Prueba de integración colocada en
+`src/clubs/director-succession-activation.postgres.spec.ts` (backend `#362`).
+Requiere DB local acoplada:
+
+```bash
+export ALLOW_P0_R03_TEST_DB=1
+export P0_R03_TEST_DATABASE_URL='postgresql://USER@127.0.0.1:5432/DB'
+pnpm exec jest src/clubs/director-succession-activation.postgres.spec.ts --runInBand
+```
+
+Cubre: dos `activateDue` concurrentes → una transición/auditoría; replay sin
+duplicar; plan `blocked` sin mutación. Sin estas env vars el bloque PG se omite
+(`describe.skip`); destino no local falla cerrado.
+
 ---
 
 ## 🎯 Estrategia de Testing

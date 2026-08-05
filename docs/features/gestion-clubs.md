@@ -102,7 +102,7 @@ El listado de miembros no debe inferir "Sin clase" desde la ausencia de datos en
 - **Asignacion inicial de director**: para una seccion sin director activo, el Admin usa `POST /clubs/:clubId/sections/:sectionId/director-assignment`, que crea una asignacion `director` para el usuario y ano eclesiastico indicados. Si ya existe director activo, el backend rechaza el alta para mantener un solo director activo.
 - **Sucesion anual de director — baseline runtime**: el Admin usa `POST /clubs/:clubId/sections/:sectionId/director-succession`, que cierra la asignacion activa anterior (`active=false`, `status=ended`, `end_date`) y crea inmediatamente una nueva asignacion `director` activa para el ano indicado. Solo `super-admin`, `admin`, `director-lf` y `assistant-lf` pueden ejecutar hoy este flujo. El baseline actual sigue ejecutando la sucesión inmediata.
 - **Sucesion durable (R01)**: `GET /clubs/:clubId/sections/:sectionId/director-succession` lee el plan; `POST .../director-succession/plans` programa un plan `scheduled` idempotente en `director_succession_plans`. Programar la sucesión no termina al director vigente, no activa al sucesor y no crea assignment ni grant.
-- **Activacion transaccional (R02)**: `DirectorSuccessionActivationService.activateDue(now)` aplica planes `scheduled` con `effective_date <= now` en una sola transacción (fin del assignment saliente, alta del sucesor, plan `activated`, auditoría `DIRECTOR_SUCCESSION_ACTIVATED`, bump de versiones de auth). Sin HTTP/cron en este slice; falla de auditoría revierte roles.
+- **Activacion transaccional (R02/R03)**: `DirectorSuccessionActivationService.activateDue(now)` aplica planes `scheduled` con `effective_date <= now` en una sola transacción (fin del assignment saliente, alta del sucesor, plan `activated`, auditoría `DIRECTOR_SUCCESSION_ACTIVATED`, bump de versiones de auth). El plan se bloquea con `SELECT … FOR UPDATE` para serializar activadores concurrentes; replay no duplica roles/auditoría y planes `blocked` no mutan. Sin HTTP/cron en este slice; falla de auditoría revierte roles.
 - **Limites de directiva**: `role_slot_limits` define los cupos por seccion y el backend tambien conserva fallback canonico para cargos criticos aunque falte el seed. La regla se aplica al crear asignaciones directas, al actualizar un rol y al revisar solicitudes de asignacion.
 - **Temporalidad de cupos**: `start_date` y `end_date` son inclusivas. El precheck runtime y el trigger PostgreSQL usan máxima concurrencia temporal y la base adquiere locks transaccionales para serializar carreras; el trigger sigue siendo la autoridad final.
 - **Contexto activo**: `users_pr.active_club_assignment_id` persiste el contexto de club activo del usuario, usado por `ClubRolesGuard` para resolver autorizacion
@@ -127,8 +127,8 @@ El P0 separa la preasignacion del grant efectivo:
    ni grant.
 4. El activador (`activateDue`) aplica planes vencidos de forma idempotente:
    termina al director saliente y crea el unico assignment efectivo del
-   sucesor con auditoría atómica. El disparo periódico del worker queda fuera
-   de R02.
+   sucesor con auditoría atómica; concurrencia multi-worker se serializa por
+   row lock. El disparo periódico del worker queda fuera de R03.
 5. Endurecimiento SCHED (ventana oct–dic, rol exacto LF del mismo campo) y
    `GET .../capabilities` siguen como deuda explícita.
 

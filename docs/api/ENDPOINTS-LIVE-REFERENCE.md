@@ -976,11 +976,12 @@ Las mutaciones POST/PATCH de esta superficie rechazan un responsable sin trayect
 > La superficie durable `GET .../director-succession` + `POST .../plans` programa/lee planes
 > sin activar roles. Programar la sucesión no termina al director vigente.
 > La activación transaccional de planes `scheduled` con `effective_date <= now` vive en
-> `DirectorSuccessionActivationService.activateDue` (R02 / backend `#360`): termina al
+> `DirectorSuccessionActivationService.activateDue` (R02 `#360` + R03 `#362`): termina al
 > saliente, crea al sucesor, marca el plan `activated` y escribe auditoría crítica
-> `DIRECTOR_SUCCESSION_ACTIVATED` en la misma transacción. No hay endpoint HTTP ni cron
-> público en este slice; el servicio queda exportado para wiring de worker. Capabilities
-> siguen como contrato futuro en `docs/features/gestion-clubs.md`.
+> `DIRECTOR_SUCCESSION_ACTIVATED` en la misma transacción, con `FOR UPDATE` sobre el plan
+> para serializar activadores concurrentes. No hay endpoint HTTP ni cron público en este
+> slice; el servicio queda exportado para wiring de worker. Capabilities siguen como
+> contrato futuro en `docs/features/gestion-clubs.md`.
 
 ### club-roles
 
