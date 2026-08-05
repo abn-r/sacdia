@@ -103,6 +103,8 @@ Reglas vigentes:
 
 ## Decisiones de diseno
 
+- **Identidad de Guía Mayor**: `classes.asset_code` puede ser nulo y conserva unicidad sólo para valores no nulos. PostgreSQL permite múltiples `NULL`; un duplicado no nulo falla con `23505/classes_asset_code_key`. El runtime actual no expone un writer API para ese campo.
+
 - **Decision 9 (enrollments vs users_classes)**: la verdad operativa anual vive en `enrollments`; `users_classes` fue retirada y no participa más en el modelo operativo
 - **Clase derivada en post-registro**: el cliente no decide libremente la clase; puede omitir `class_id` y el backend la asigna, o enviarlo solo como confirmacion. Si no coincide con la clase calculada por edad/tipo de club, se devuelve `POST_REG_CLASS_NOT_ELIGIBLE`.
 - **Resolucion de enrollment**: el backend resuelve automaticamente una inscripcion activa del ano eclesiastico actual; enrollmentId es override aditivo
