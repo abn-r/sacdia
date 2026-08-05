@@ -408,15 +408,18 @@ Intenciones no autoritativas (workflow/historico) deben declarar `grantsAuthorit
 
 
 
-## Authorization context versioning (cache v4 foundation)
+## Authorization context versioning (cache v4 read path)
 
-Backend stack `#254`–`#271` (+ remediaciones `#342`/`#344`) introduce versionado durable de contexto de autorización. La foundation cache v4 permanece **sin exposición HTTP nueva**: no hay endpoint dedicado de cache; los clientes siguen usando `/auth/me` y guards existentes.
+Backend stack `#254`–`#271` (+ remediaciones `#342`/`#344`) introduce versionado durable de contexto de autorización. Runtime R05 cablea el **read-path** en `AuthorizationContextService.resolveUserAuthorization` vía `resolveAuthorizationContextV4`. **No hay endpoint HTTP dedicado de cache**; los clientes siguen usando `/auth/me` y guards existentes.
 
 ### Semántica
 
 - Tabla durable `authorization_context_versions` (por `user_id`).
+- Lecturas resuelven clave `auth:context:v4:{userId}:{version}` con envelope (`value`, `valid_until`, `territory_time_vector`).
+- Hit fresco (envelope válido) omite la fuente canónica; miss/expirado/corrupto vuelve a la fuente canónica y reescribe el envelope.
+- Fallo de Redis en get/set **no** concede autoridad desde cache: se continúa con la fuente canónica (o se deniega si esa fuente falla).
 - Mutaciones que cambian autoridad efectiva hacen bump **dentro de la misma transacción** que la escritura de negocio.
-- Tras commit exitoso se invalida cache Redis del usuario; si el bump falla, la mutación hace rollback y no se limpia cache.
+- Tras commit exitoso se invalida cache Redis del usuario (v4 actual + claves legacy v3/v2); si el bump falla, la mutación hace rollback y no se limpia cache.
 - Escrituras no-op / rechazadas **no** incrementan versión.
 
 ### Superficies que hacen bump (contrato operativo)
@@ -435,7 +438,12 @@ Backend stack `#254`–`#271` (+ remediaciones `#342`/`#344`) introduce versiona
 
 ### Errores / timezone
 
-La foundation cache v4 **no** habilita resolución estricta de timezone en `/auth/me`. `LOCAL_FIELD_TIMEZONE_UNAVAILABLE` aplica a paths que ya dependen del resolver temporal (ver sección Authorization-time); el backfill de timezones debe completarse antes de endurecer lecturas globales.
+| Código | HTTP | Cuándo |
+| --- | --- | --- |
+| `AUTH_CONTEXT_USER_NOT_FOUND` | 401 | Fuente canónica sin usuario |
+| `AUTH_CONTEXT_UNAVAILABLE` | 503 | Versión durable o fuente canónica no disponible (fail-closed; no se concede permiso) |
+
+La lectura cache v4 **no** habilita resolución estricta de timezone en `/auth/me`. `LOCAL_FIELD_TIMEZONE_UNAVAILABLE` aplica a paths que ya dependen del resolver temporal (ver sección Authorization-time); el backfill de timezones debe completarse antes de endurecer lecturas globales.
 
 ## Critical audit writer y fallos de auditoría
 

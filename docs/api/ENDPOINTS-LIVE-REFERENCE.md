@@ -610,7 +610,7 @@ Semántica funcional y límites: [operations-dashboard.md](../features/operation
 | DELETE | `/api/v1/auth/sessions/:sessionId` | JWT | - | Revoke a specific session | SessionsService.revokeSession() | `src/auth/sessions.controller.ts` |
 | DELETE | `/api/v1/auth/sessions` | JWT | - | Revoke all other sessions | SessionsService.revokeAllOtherSessions() | `src/auth/sessions.controller.ts` |
 
-Mutaciones de assignments/membership/requests/post-registration pueden incrementar `authorization_context_versions` e invalidar cache; ver `AUTHORIZATION-CANONICAL-CONTRACT.md` sección Authorization context versioning. No hay endpoint de cache v4.
+Mutaciones de assignments/membership/requests/post-registration pueden incrementar `authorization_context_versions` e invalidar cache. Lecturas de contexto (`AuthorizationContextService`) usan cache v4 fail-closed (`AUTH_CONTEXT_UNAVAILABLE` 503 si versión/fuente no disponibles); ver `AUTHORIZATION-CANONICAL-CONTRACT.md` sección Authorization context versioning. No hay endpoint de cache v4.
 
 Runtime AuthZ que depende del Campo Local puede fallar cerrado con `503 LOCAL_FIELD_TIMEZONE_UNAVAILABLE` cuando falta o es invalida la timezone IANA; ver `docs/features/auth/AUTHORIZATION-CANONICAL-CONTRACT.md` seccion Authorization-time. No hay endpoint dedicado a este contrato.
 
