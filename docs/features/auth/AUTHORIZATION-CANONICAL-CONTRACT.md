@@ -406,7 +406,19 @@ Limites de dia de negocio (`startOfBusinessDate`, `startOfNextBusinessDate`) usa
 
 Intenciones no autoritativas (workflow/historico) deben declarar `grantsAuthority: false` via `CLUB_ASSIGNMENT_NON_AUTHORITY_ALLOWLIST`.
 
+### Consumidores T08 (migración por inventario)
 
+El inventario endurecido (`club-assignment-effectivity.inventory`) clasifica predicados `club_role_assignments` como `T08` (autoridad efectiva), `T09` (scope/workflow) o `allowlist` (no autoridad).
+
+Runtime R07 migra el **path canónico de autoridad** en `AuthorizationContextService`:
+
+| Aspecto | Contrato R07 |
+| --- | --- |
+| Inventario Prisma | `where: { active: true }` sigue precargando grants; **no** es la puerta temporal de autoridad. |
+| Autoridad efectiva | `ClubAssignmentEffectivityPolicy.isEffective` con `TemporalContext` del Campo Local de cada asignación. |
+| `/auth/me` / cache miss | `effective.permissions` y `active_assignment` solo consideran asignaciones vigentes en la timezone del recurso. |
+| Fail-closed | Asignación `status='active'` sin timezone IANA clasificable → `LOCAL_FIELD_TIMEZONE_UNAVAILABLE` (503). |
+| Fuera de este slice | Guards, `clubs`/`rbac`/`auth` y demás entradas T08 del inventario (sub-slices dependientes ≤400). |
 
 ## Authorization context versioning (cache v4 read path)
 
@@ -451,8 +463,9 @@ Backend stack `#254`–`#271` (+ remediaciones `#342`/`#344`) introduce versiona
 | --- | --- | --- |
 | `AUTH_CONTEXT_USER_NOT_FOUND` | 401 | Fuente canónica sin usuario |
 | `AUTH_CONTEXT_UNAVAILABLE` | 503 | Versión durable o fuente canónica no disponible (fail-closed; no se concede permiso) |
+| `LOCAL_FIELD_TIMEZONE_UNAVAILABLE` | 503 | Fuente canónica con asignación activa cuyo Campo Local carece de timezone IANA clasificable (R07; ver Authorization-time / consumidores T08) |
 
-La lectura cache v4 **no** habilita resolución estricta de timezone en `/auth/me`. `LOCAL_FIELD_TIMEZONE_UNAVAILABLE` aplica a paths que ya dependen del resolver temporal (ver sección Authorization-time); el backfill de timezones debe completarse antes de endurecer lecturas globales.
+La lectura cache v4 **no** inventa timezone ni autoridad desde Redis. Tras R07, la fuente canónica de `AuthorizationContextService` sí evalúa effectivity con timezone de Campo Local; un envelope cacheado solo reproduce un snapshot ya resuelto bajo esas reglas.
 
 ## Critical audit writer y fallos de auditoría
 
