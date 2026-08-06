@@ -418,8 +418,9 @@ Runtime R07 migra el **path canónico de autoridad** en `AuthorizationContextSer
 | Autoridad efectiva | `ClubAssignmentEffectivityPolicy.isEffective` con `TemporalContext` del Campo Local de cada asignación. |
 | `/auth/me` / cache miss | `effective.permissions` y `active_assignment` solo consideran asignaciones vigentes en la timezone del recurso. |
 | `ClubRolesGuard` (R07b) | Resolución de club vía enrollment de investidura solo acepta asignaciones temporalmente vigentes; fail-closed sin timezone IANA clasificable. |
+| `PermissionsGuard` (R07b2) | Resource-scope de investidura/seguros y gate de perfil de sección: `active` → `isEffective`; `pending`/`null` permanece visible para workflow de membresía. |
 | Fail-closed | Asignación `status='active'` sin timezone IANA clasificable → `LOCAL_FIELD_TIMEZONE_UNAVAILABLE` (503). |
-| Fuera de este slice | `PermissionsGuard`, `clubs`/`rbac`/`auth` y demás entradas T08 del inventario (sub-slices dependientes ≤400). |
+| Fuera de este slice | `clubs`/`rbac`/`auth` y demás entradas T08 del inventario (sub-slices dependientes ≤400). |
 
 ## Authorization context versioning (cache v4 read path)
 
