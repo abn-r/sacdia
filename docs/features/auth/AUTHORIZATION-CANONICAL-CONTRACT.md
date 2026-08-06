@@ -410,17 +410,20 @@ Intenciones no autoritativas (workflow/historico) deben declarar `grantsAuthorit
 
 El inventario endurecido (`club-assignment-effectivity.inventory`) clasifica predicados `club_role_assignments` como `T08` (autoridad efectiva), `T09` (scope/workflow) o `allowlist` (no autoridad).
 
-Runtime R07 migra el **path canónico de autoridad** en `AuthorizationContextService`. Runtime R07b migra el **resource-scope de investidura** en `ClubRolesGuard`:
+Runtime R07 migra el **path canónico de autoridad** en `AuthorizationContextService`. Runtime R07b migra guards. Runtime R07c migra services `auth` / `clubs` / `rbac`:
 
-| Aspecto | Contrato R07 / R07b |
+| Aspecto | Contrato R07 / R07b / R07c |
 | --- | --- |
 | Inventario Prisma | `where: { active: true }` sigue precargando candidatos; **no** es la puerta temporal de autoridad. |
 | Autoridad efectiva | `ClubAssignmentEffectivityPolicy.isEffective` con `TemporalContext` del Campo Local de cada asignación. |
 | `/auth/me` / cache miss | `effective.permissions` y `active_assignment` solo consideran asignaciones vigentes en la timezone del recurso. |
 | `ClubRolesGuard` (R07b) | Resolución de club vía enrollment de investidura solo acepta asignaciones temporalmente vigentes; fail-closed sin timezone IANA clasificable. |
 | `PermissionsGuard` (R07b2) | Resource-scope de investidura/seguros y gate de perfil de sección: `active` → `isEffective`; `pending`/`null` permanece visible para workflow de membresía. |
+| `AuthService.setActiveClubContext` (R07c) | `PATCH /auth/me/context` solo acepta asignaciones temporalmente vigentes; futuras/expiradas/ended → `AUTH_ASSIGNMENT_NOT_FOUND`. |
+| `ClubsService` lists/directors (R07c) | `getMembers` / `getClubLeadership` y conteos de director filtran con `isEffective`. `validateRoleSlot` permanece con overlap de ventana (no es `isEffective` puntual). |
+| `RbacService` cache fanout (R07c) | Invalidación por cambio de permisos de rol solo incluye holders de club temporalmente vigentes (`#365` stack; diverge de tip T08 `#375`). |
 | Fail-closed | Asignación `status='active'` sin timezone IANA clasificable → `LOCAL_FIELD_TIMEZONE_UNAVAILABLE` (503). |
-| Fuera de este slice | `clubs`/`rbac`/`auth` y demás entradas T08 del inventario (sub-slices dependientes ≤400). |
+| Fuera de este slice | `validateRoleSlot` + classes/honors/investiture/requests/etc. (R07d+). |
 
 ## Authorization context versioning (cache v4 read path)
 
