@@ -410,15 +410,16 @@ Intenciones no autoritativas (workflow/historico) deben declarar `grantsAuthorit
 
 El inventario endurecido (`club-assignment-effectivity.inventory`) clasifica predicados `club_role_assignments` como `T08` (autoridad efectiva), `T09` (scope/workflow) o `allowlist` (no autoridad).
 
-Runtime R07 migra el **path canónico de autoridad** en `AuthorizationContextService`:
+Runtime R07 migra el **path canónico de autoridad** en `AuthorizationContextService`. Runtime R07b migra el **resource-scope de investidura** en `ClubRolesGuard`:
 
-| Aspecto | Contrato R07 |
+| Aspecto | Contrato R07 / R07b |
 | --- | --- |
-| Inventario Prisma | `where: { active: true }` sigue precargando grants; **no** es la puerta temporal de autoridad. |
+| Inventario Prisma | `where: { active: true }` sigue precargando candidatos; **no** es la puerta temporal de autoridad. |
 | Autoridad efectiva | `ClubAssignmentEffectivityPolicy.isEffective` con `TemporalContext` del Campo Local de cada asignación. |
 | `/auth/me` / cache miss | `effective.permissions` y `active_assignment` solo consideran asignaciones vigentes en la timezone del recurso. |
+| `ClubRolesGuard` (R07b) | Resolución de club vía enrollment de investidura solo acepta asignaciones temporalmente vigentes; fail-closed sin timezone IANA clasificable. |
 | Fail-closed | Asignación `status='active'` sin timezone IANA clasificable → `LOCAL_FIELD_TIMEZONE_UNAVAILABLE` (503). |
-| Fuera de este slice | Guards, `clubs`/`rbac`/`auth` y demás entradas T08 del inventario (sub-slices dependientes ≤400). |
+| Fuera de este slice | `PermissionsGuard`, `clubs`/`rbac`/`auth` y demás entradas T08 del inventario (sub-slices dependientes ≤400). |
 
 ## Authorization context versioning (cache v4 read path)
 
