@@ -410,7 +410,7 @@ Intenciones no autoritativas (workflow/historico) deben declarar `grantsAuthorit
 
 ## Authorization context versioning (cache v4 read path)
 
-Backend stack `#254`–`#271` (+ remediaciones `#342`/`#344`) introduce versionado durable de contexto de autorización. Runtime R05 cablea el **read-path** en `AuthorizationContextService.resolveUserAuthorization` vía `resolveAuthorizationContextV4`. **No hay endpoint HTTP dedicado de cache**; los clientes siguen usando `/auth/me` y guards existentes.
+Backend stack `#254`–`#271` (+ remediaciones `#342`/`#344`) introduce versionado durable de contexto de autorización. Runtime R05 cablea el **read-path** en `AuthorizationContextService.resolveUserAuthorization` vía `resolveAuthorizationContextV4`. Runtime R06 añade **controles de rollout** (feature flag + métricas/logs sin PII + rollback operativo). **No hay endpoint HTTP dedicado de cache**; los clientes siguen usando `/auth/me` y guards existentes.
 
 ### Semántica
 
@@ -421,6 +421,15 @@ Backend stack `#254`–`#271` (+ remediaciones `#342`/`#344`) introduce versiona
 - Mutaciones que cambian autoridad efectiva hacen bump **dentro de la misma transacción** que la escritura de negocio.
 - Tras commit exitoso se invalida cache Redis del usuario (v4 actual + claves legacy v3/v2); si el bump falla, la mutación hace rollback y no se limpia cache.
 - Escrituras no-op / rechazadas **no** incrementan versión.
+
+### Rollout, observabilidad y rollback (R06)
+
+| Control | Contrato |
+| --- | --- |
+| Flag `AUTH_CONTEXT_CACHE_V4_ENABLED` | Default `true` (preserva read-path R05). Valor `false` omite Redis (sin get/set) y carga solo la fuente canónica — rollback operativo sin cambiar la semántica de permisos. |
+| Métricas in-process | Contadores `hits` / `misses` / `errors` / `bypassed` vía `getAuthorizationCacheMetrics()`; sin userId, email ni otros PII. |
+| Logs seguros | Eventos `auth_context_cache outcome=hit\|miss\|error\|bypass` sin identificadores de usuario. |
+| Efecto del rollback | Con flag apagado, las decisiones de autorización coinciden con la fuente canónica aunque exista envelope corrupto o privilegiado en Redis. |
 
 ### Superficies que hacen bump (contrato operativo)
 
