@@ -86,7 +86,7 @@
 | Materials — Receipts | 4 |
 | member-of-month | 4 |
 | membership-requests | 3 |
-| monthly-reports | 9 |
+| monthly-reports | 10 |
 | Notifications | 10 |
 | FCM Tokens | 5 |
 | User Notification Preferences | 4 |
