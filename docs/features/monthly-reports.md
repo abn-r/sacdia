@@ -6,7 +6,7 @@
 
 `monthly-reports` consolida el informe mensual operativo de una matricula anual de club (`club_enrollments`) para un mes y ano dados. El runtime actual mezcla datos auto-calculados en vivo, captura manual complementaria, congelamiento de snapshot, envio formal y generacion de PDF.
 
-La feature esta implementada en backend con IDs UUID y estados `draft -> generated -> submitted`. Admin y app tienen superficies cliente para esta feature, pero hoy presentan drift respecto del contrato real del backend; en este batch solo se deja documentado ese drift.
+La feature esta implementada en backend con IDs UUID y estados `draft -> generated -> submitted`. El PDF es un artefacto privado y canónico almacenado en R2, con sobrescritura determinista al regenerar. Admin y app tienen superficies cliente para esta feature; la UI admin ya separa generación de borrador, regeneración de reportes generados y descarga de reportes enviados.
 
 ## Que existe (verificado contra codigo)
 
@@ -16,12 +16,13 @@ La feature esta implementada en backend con IDs UUID y estados `draft -> generat
 - **Service**: `src/monthly-reports/monthly-reports.service.ts`
 - **PDF**: `src/monthly-reports/monthly-reports-pdf.service.ts`
 - **Cron**: `src/monthly-reports/monthly-reports-cron.service.ts`
-- **9 endpoints directos**:
+- **10 endpoints directos**:
   - `GET /api/v1/monthly-reports/preview/:enrollmentId` - preview en vivo para una matricula y periodo
   - `POST /api/v1/monthly-reports/:enrollmentId` - obtener o crear borrador unico por `(club_enrollment_id, month, year)`
   - `PATCH /api/v1/monthly-reports/:reportId/manual-data` - guardar datos manuales solo si el informe esta en `draft`
   - `POST /api/v1/monthly-reports/:reportId/generate` - congelar `snapshot_data` y pasar a `generated`
   - `POST /api/v1/monthly-reports/:reportId/submit` - pasar de `generated` a `submitted`
+  - `POST /api/v1/monthly-reports/:reportId/regenerate` - regenerar y sobrescribir el PDF canónico desde el snapshot congelado, sin cambiar el estado
   - `GET /api/v1/monthly-reports/enrollment/:enrollmentId` - listar informes por matricula, con filtro opcional `status`
   - `GET /api/v1/monthly-reports/admin/list` - **supervision multi-club jerárquica**. Query params: `division_id`, `union_id`, `local_field_id`, `club_type_id`, `year`, `month`, `status`, `page`, `limit`. Scope: `super-admin`/`admin`/`director-dia`/`assistant-dia` ven todo y pueden filtrar; `director-union`/`assistant-union` quedan forzados a su unión; `director-lf`/`assistant-lf`/`coordinator`/`assistant-admin` quedan forzados a su campo; director/secretario de club queda limitado a su sección activa. Response paginada con club_name, club_type, local_field, submitter_name y member_count por item.
   - `GET /api/v1/monthly-reports/:reportId/pdf` - descargar PDF solo para `generated|submitted`
@@ -89,10 +90,18 @@ La feature esta implementada en backend con IDs UUID y estados `draft -> generat
 - El cálculo no inspecciona `status`, el momento de envío, los valores manuales `0`/`false`/`null` ni `snapshot_data`; no existe doble penalización por contenido
 - La app puede obtener este KPI sin ejecutar `submit`; la reconciliación automática mantiene el reporte en `generated`
 
-### PDF real
+### PDF y artefacto privado R2
 
-- El PDF se genera en backend con `pdfkit`; no es un archivo preexistente en storage
-- Solo se habilita si el informe tiene `snapshot_data` y estado `generated` o `submitted`
+- El PDF se renderiza en backend con `pdfkit` en formato carta y se almacena como un único objeto privado en el bucket `MONTHLY_REPORTS` de R2.
+- El ciclo canónico es:
+  1. `draft`: se renderiza un PDF candidato desde los datos actuales.
+  2. El candidato se sube con `contentType=application/pdf` y `overwrite=true` a una clave determinista `year/month/enrollmentId/reportId.pdf`.
+  3. Se persiste `snapshot_data` junto con `pdf_r2_key`, `pdf_size_bytes`, `pdf_sha256`, `pdf_generated_at` y `pdf_template_version`.
+  4. Sólo después de completar storage y metadatos el reporte pasa a `generated`; luego puede pasar a `submitted`.
+- `POST /regenerate` sólo acepta `generated|submitted`, usa el snapshot congelado y sobrescribe la misma clave. No crea versiones históricas ni modifica `status`, `snapshot_data`, `generated_at`, `submitted_at` o `submitted_by`.
+- `GET /pdf` requiere `reports:download`, descarga mediante el backend autorizado y nunca expone una URL pública permanente. Si falta el objeto o la metadata no corresponde a `monthly-report-v2-three-page`, ejecuta reparación perezosa desde `snapshot_data`. `draft` sigue sin ser descargable.
+- El backfill histórico es una operación explícita y segura por defecto; su procedimiento está en [`docs/runbooks/monthly-report-pdf-backfill.md`](../runbooks/monthly-report-pdf-backfill.md). Nunca se ejecuta al iniciar la aplicación.
+- Los campos históricos ausentes se muestran vacíos; el renderer no inventa métricas, nombres, fechas ni logotipos. Los SVG oficiales de marca siguen siendo un bloqueo puntual para embebido de logos y no se sustituyen por artefactos inventados.
 - Usa formato carta y arma al menos estas secciones:
   - `1. ADMINISTRACION`
   - `2. ENSENANZAS`
@@ -100,7 +109,7 @@ La feature esta implementada en backend con IDs UUID y estados `draft -> generat
   - `4. FINANZAS` (incluye balance del mes y saldo total acumulado del club)
   - `5. ACTIVIDAD MISIONERA`
   - `6. SERVICIO`
-- Toma metadatos reales de club, distrito, iglesia, tipo de club, mes/anio y submitter
+- Toma metadatos reales de club, distrito, iglesia, tipo de club, mes/anio y submitter cuando existen; los valores no disponibles quedan vacíos.
 
 ### Admin Web
 
@@ -151,16 +160,17 @@ La feature esta implementada en backend con IDs UUID y estados `draft -> generat
 - **Owner del informe = matricula anual**: el agregado se ata a `club_enrollment_id`, no al club ni a la seccion aislados
 - **Unicidad por periodo**: la tupla `(club_enrollment_id, month, year)` evita borradores duplicados
 - **Snapshot separado de manual_data**: el auto-calculado congelado vive en `snapshot_data`, mientras la captura humana queda normalizada en `monthly_report_manual_data`. Los campos declarativos de reuniones, actividad misionera y servicio NO deben guardarse como `activities` salvo que correspondan a eventos reales del calendario del club.
-- **PDF server-side**: el documento se genera bajo demanda desde backend y no requiere que el cliente componga el reporte
+- **PDF server-side y storage canónico**: el documento se renderiza desde el snapshot en backend, se guarda en un bucket R2 privado y el cliente sólo consume el endpoint autorizado de descarga
+- **Reparación idempotente**: la descarga y el backfill reutilizan `MonthlyReportArtifactsService`; las regeneraciones sobrescriben la misma clave determinista y actualizan metadata de integridad
 - **Alcance del catch-up**: no cambia rutas, response shapes, schema ni flujo movil; el PATCH existente endurece la validacion de captura manual y expone errores estables
 
 ## Gaps y pendientes
 
-- **Drift fuerte en admin**: routing, IDs y payload manual/auto no coinciden con el contrato backend actual
+- **Drift parcial en admin**: routing, IDs y ciclo de generación/regeneración/descarga ya coinciden; los payloads manuales y la presentación de datos auto-calculados todavía usan shapes legacy y requieren una reconciliación separada
 - **App movil parcialmente reconciliada**: reportes mensuales ya usan UUID y snapshot/manual_data; la app captura/edita `draft` y deja la generacion al sistema; queda pendiente limpieza de consumers legacy de enrollment numerico
 - **Estado no arbitrado mas alla de submitted**: en backend no existen estados `approved` o `rejected` para monthly reports aunque algunos clientes los modelen
 
 ## Prioridad y siguiente accion
 
 - **Prioridad**: Media - el backend esta lo bastante completo para documentar y operar, pero los clientes siguen en drift
-- **Siguiente accion**: completar admin web y definir, si hace falta, una accion administrativa auditada para reabrir/regenerar reportes
+- **Siguiente accion**: validar configuración de bucket/CORS en staging, ejecutar primero el dry-run del backfill y luego una muestra acotada con `--apply`; no ejecutar backfills de producción sin aprobación operativa explícita

@@ -86,7 +86,7 @@
 | Materials — Receipts | 4 |
 | member-of-month | 4 |
 | membership-requests | 3 |
-| monthly-reports | 9 |
+| monthly-reports | 10 |
 | Notifications | 10 |
 | FCM Tokens | 5 |
 | User Notification Preferences | 4 |
@@ -1277,7 +1277,8 @@ El código `403 CLUB_ROLE_GUIDE_MAJOR_REQUIRED` existe en i18n/errores como cont
 | POST | `/api/v1/monthly-reports/:reportId/generate` | JWT | Permisos: reports:read | Generar informe (congelar datos) | MonthlyReportsService.generate() | `src/monthly-reports/monthly-reports.controller.ts` |
 | POST | `/api/v1/monthly-reports/:reportId/submit` | JWT | Permisos: reports:read | Enviar informe al campo | MonthlyReportsService.submit() | `src/monthly-reports/monthly-reports.controller.ts` |
 | GET | `/api/v1/monthly-reports/enrollment/:enrollmentId` | JWT | Permisos: reports:read | Listar informes de una matrícula | MonthlyReportsService.listReports() | `src/monthly-reports/monthly-reports.controller.ts` |
-| GET | `/api/v1/monthly-reports/:reportId/pdf` | JWT | Permisos: reports:download | Descargar informe mensual en PDF | MonthlyReportsPdfService.generatePdf() | `src/monthly-reports/monthly-reports.controller.ts` |
+| GET | `/api/v1/monthly-reports/:reportId/pdf` | JWT | Permisos: reports:download | Descargar el artefacto PDF mensual almacenado (repara faltantes desde snapshot) | MonthlyReportArtifactsService.getStoredPdfBuffer() | `src/monthly-reports/monthly-reports.controller.ts` |
+| POST | `/api/v1/monthly-reports/:reportId/regenerate` | JWT | Permisos: reports:write | Regenerar el artefacto PDF mensual sin cambiar snapshot ni estado | MonthlyReportsService.regenerate() | `src/monthly-reports/monthly-reports.controller.ts` |
 | GET | `/api/v1/monthly-reports/admin/list` | JWT | Permisos: reports:read | Listar reportes multi-club (admin/coordinator) | MonthlyReportsService.listForAdmin() | `src/monthly-reports/monthly-reports.controller.ts` |
 | GET | `/api/v1/monthly-reports/:reportId` | JWT | Permisos: reports:read | Obtener informe mensual | MonthlyReportsService.getReport() | `src/monthly-reports/monthly-reports.controller.ts` |
 

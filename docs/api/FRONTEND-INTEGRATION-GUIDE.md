@@ -113,6 +113,15 @@ El flujo administrativo de camporee separa personal operativo, agenda y scoring:
 - Capturar una zona IANA explícita (por ejemplo `America/Mexico_City`) cuando se confirme la sede: el backend la audita con el actor. Un PATCH sin `timezone` no borra esa verificación.
 - La UI de clubes debe distinguir `not_open_yet`, `open`, `late_approval_required` y `manually_frozen`. Al estar `not_open_yet`, no ofrecer inscripción ni flujo de aprobación tardía; el deadline es inclusivo.
 
+## Actualizacion 2026-08-06 (Artefactos PDF de informes mensuales)
+
+Los informes mensuales generados tienen un único PDF canónico privado en R2:
+
+- `GET /api/v1/monthly-reports/:reportId/pdf` mantiene el permiso `reports:download` y devuelve `application/pdf` como descarga. El frontend no debe construir URLs públicas ni acceder directamente al bucket.
+- Si el informe está en estado `generated` o `submitted` pero no tiene un artefacto vigente, el backend lo repara desde `snapshot_data` antes de responder. Un informe `draft` sigue sin ser descargable.
+- `POST /api/v1/monthly-reports/:reportId/regenerate` requiere `reports:write`, acepta sólo `generated` o `submitted` y devuelve `{ status: "success", data }`. Regenera desde el snapshot congelado y sobrescribe la misma clave canónica; no cambia `status`, `snapshot_data`, `generated_at`, `submitted_at` ni `submitted_by`.
+- Después de regenerar, conservar la respuesta del informe para refrescar metadatos, pero no asumir que cambió el flujo de envío. Ante errores de almacenamiento, mantener la vista actual y permitir reintentar.
+
 ## Actualizacion 2026-07-14 (Inscripción contextual de sección y participantes)
 
 La app móvil debe consultar `GET /api/v1/camporees/:camporeeId/section-registration` al abrir el detalle. El response incluye identidad legible de club/sección, `status`, `disposition`, `canEnroll`, `blockingReason`, `enrollmentId`, `registeredAt` y `registeredBy`.
