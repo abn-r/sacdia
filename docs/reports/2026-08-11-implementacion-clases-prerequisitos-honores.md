@@ -102,7 +102,7 @@ Runners anotados: backend `jest`; admin `vitest run`; app `flutter test`.
 
 ## 7. Pendientes y riesgos
 
-- Migración `class_prerequisites` **aplicada en Neon development** (2026-08-11, vía `prisma db execute` + `migrate resolve --applied`; verificados tabla, 3 constraints, 2 índices e historial). Pendiente aplicar en staging y production.
+- Migración `class_prerequisites` **aplicada en Neon development, staging y production** (2026-08-11, vía `prisma db execute` + `migrate resolve --applied` con conexión directa por entorno; verificados en los tres: tabla, 3 constraints, 2 índices e historial `_prisma_migrations`).
 - Semántica de `class_honors.REQUIRED` sigue siendo informativa.
 - `requires_invested_gm` no migrado a `class_prerequisites`.
 - Fuera de alcance: `_triggerFilePicker`, URL historial admin, `advanced_enabled`/tracks en admin, auditoría índices legacy, resolver edad/tipo en inscripción directa.
