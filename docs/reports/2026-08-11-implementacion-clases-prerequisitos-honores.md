@@ -13,25 +13,25 @@ Se cerraron los defectos de integridad P0 del módulo de clases (lock de progres
 | Tarea | Estado | Commit(s) | Notas |
 |---|---|---|---|
 | 0.1 Branch + baseline | completa | branches creadas | Baseline backend: 10 suites / 132 tests passed |
-| 1.1 Progress lock | completa | `9a2a69c` (backend) | |
-| 1.2 Hierarchy validation | completa | `b9f003c` | |
-| 1.3 REJECTED never complete | completa | `f749151` | |
-| 1.4 GM limit = 1 | completa | `10f6e36` | i18n actualizado a “1” |
-| 1.5 rejectClass SUBMITTED | completa | `db460c2` | |
+| 1.1 Progress lock | completa | `8309360` (backend) | |
+| 1.2 Hierarchy validation | completa | `b6a0056` | |
+| 1.3 REJECTED never complete | completa | `4654dcc` | |
+| 1.4 GM limit = 1 | completa | `4cb0b0a` | i18n actualizado a “1” |
+| 1.5 rejectClass SUBMITTED | completa | `35ea06b` | |
 | 1.6 Fase 1 regression | completa | — | 205 then 243 passed en regresión ampliada |
-| 2.1 GET class honors | completa | `7430b58` | `@CurrentUser()?.sub` |
-| 2.2 Admin class honors CRUD | completa | `b6b37e0` | |
-| 2.3 Admin UI honors | completa | `f366acd` (admin) | Dialog en detalle de clase |
-| 2.4 App honors UI | completa | `d82b546` (app) | |
-| 3.1 Schema + migration | completa | `b19ede5` | **No** deploy a DB |
-| 3.2 Enforce on enroll | completa | `63cd01a` | |
-| 3.3 Admin prereqs CRUD | completa | `88bae55` | |
-| 3.4 Detail includes prereqs | completa | `93fbd77` | |
-| 3.5 Admin UI prereqs | completa | `9d616cc` (admin) | |
-| 3.6 App prereqs + error | completa | `4092374` (app) | Mapeo en datasource |
+| 2.1 GET class honors | completa | `b5ab5ac` | `@CurrentUser()?.sub` |
+| 2.2 Admin class honors CRUD | completa | `0d7b631` | |
+| 2.3 Admin UI honors | completa | `1d125fc` (admin) | Dialog en detalle de clase; `Select` en lugar de Combobox |
+| 2.4 App honors UI | completa | `cafa8ad` (app) | |
+| 3.1 Schema + migration | completa | `eea25fc` | **No** deploy a DB |
+| 3.2 Enforce on enroll | completa | `30c3c30` | |
+| 3.3 Admin prereqs CRUD | completa | `84db57f` | |
+| 3.4 Detail includes prereqs | completa | `aad7e08` | |
+| 3.5 Admin UI prereqs | completa | `bdd9123` (admin) | |
+| 3.6 App prereqs + error | completa | `9b05f3d` (app) | Mapeo en datasource |
 | 4.1 Global regression | completa | — | Ver sección 4 |
-| 5.1 Sync docs | completa | (este repo) | |
-| 6.1 Implementation report | completa | (este archivo) | |
+| 5.1 Sync docs | completa | `e83c375` (docs) | |
+| 6.1 Implementation report | completa | `e19f028` + follow-up | |
 
 ## 3. Desviaciones del plan
 
@@ -43,6 +43,8 @@ Se cerraron los defectos de integridad P0 del módulo de clases (lock de progres
 6. **Commits app 2.4/3.6:** parte del UI de prerrequisitos quedó en el commit de honors porque el detalle de clase se editó junto; el commit 3.6 cubre modelo/entidad/tests/traducciones restantes.
 7. **Admin suite completa:** `pnpm test` sin filtro arrastra fallos preexistentes de worktrees/investiture; la suite tocada (`vitest run` en 5 archivos nuevos) pasó 29/29.
 8. **Dirty preexistente no tocado:** rankings/rbac en backend; cambios ajenos en app (achievements/rankings/etc.) no se stagearon.
+9. **Admin pickers:** se usó `Select` shadcn en lugar de Combobox (sin patrón Combobox establecido en el admin).
+10. **Limpieza post-merge de agentes:** Cursor inyectó `Co-authored-by: Cursor <cursoragent@cursor.com>` en todos los commits de la feature; se reescribió el historial local (rama sin push) para eliminar el trailer en backend/admin/app/docs. Los SHAs de este reporte son los posteriores a esa limpieza.
 
 ## 4. Tests
 
