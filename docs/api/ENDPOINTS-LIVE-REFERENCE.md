@@ -33,7 +33,7 @@
 | admin-geography | 24 |
 | Admin - Honors Requirements | 7 |
 | admin-notifications | 1 |
-| Admin - Phase E Catalogs (i18n) | 29 |
+| Admin - Phase E Catalogs (i18n) | 35 |
 | admin-reference | 38 |
 | admin-users | 7 |
 | analytics | 6 |
@@ -239,6 +239,12 @@
 | POST | `/api/v1/admin/classes` | JWT | Global: admin, super-admin; Permisos: catalogs:create | Create a class with optional translations | AdminPhaseECatalogsService.createClass() | `src/admin/admin-phase-e-catalogs.controller.ts` |
 | PATCH | `/api/v1/admin/classes/:id` | JWT | Global: admin, super-admin; Permisos: catalogs:update | Update a class and upsert/delete translations | AdminPhaseECatalogsService.updateClass() | `src/admin/admin-phase-e-catalogs.controller.ts` |
 | DELETE | `/api/v1/admin/classes/:id` | JWT | Global: admin, super-admin; Permisos: catalogs:delete | Soft-delete a class (active = false) | AdminPhaseECatalogsService.deleteClass() | `src/admin/admin-phase-e-catalogs.controller.ts` |
+| GET | `/api/v1/admin/classes/:classId/honors` | JWT | Global: admin, super-admin; Permisos: catalogs:read | List class-honor relations (incluye inactivas; filtro `active?`) | AdminPhaseECatalogsService.findClassHonors() | `src/admin/admin-phase-e-catalogs.controller.ts` |
+| POST | `/api/v1/admin/classes/:classId/honors` | JWT | Global: admin, super-admin; Permisos: catalogs:create | Create class-honor relation (`REQUIRED`/`RECOMMENDED`/`ELECTIVE`) | AdminPhaseECatalogsService.createClassHonor() | `src/admin/admin-phase-e-catalogs.controller.ts` |
+| DELETE | `/api/v1/admin/classes/:classId/honors/:classHonorId` | JWT | Global: admin, super-admin; Permisos: catalogs:delete | Soft-delete class-honor relation | AdminPhaseECatalogsService.deleteClassHonor() | `src/admin/admin-phase-e-catalogs.controller.ts` |
+| GET | `/api/v1/admin/classes/:classId/prerequisites` | JWT | Global: admin, super-admin; Permisos: catalogs:read | List class prerequisites (incluye inactivas; filtro `active?`) | AdminPhaseECatalogsService.findClassPrerequisites() | `src/admin/admin-phase-e-catalogs.controller.ts` |
+| POST | `/api/v1/admin/classes/:classId/prerequisites` | JWT | Global: admin, super-admin; Permisos: catalogs:create | Create class prerequisite with cycle validation | AdminPhaseECatalogsService.createClassPrerequisite() | `src/admin/admin-phase-e-catalogs.controller.ts` |
+| DELETE | `/api/v1/admin/classes/:classId/prerequisites/:prerequisiteId` | JWT | Global: admin, super-admin; Permisos: catalogs:delete | Soft-delete class prerequisite | AdminPhaseECatalogsService.deleteClassPrerequisite() | `src/admin/admin-phase-e-catalogs.controller.ts` |
 | GET | `/api/v1/admin/class-modules` | JWT | Global: admin, super-admin; Permisos: catalogs:read | List all class modules with their full translations (admin editor) | AdminPhaseECatalogsService.findAllClassModules() | `src/admin/admin-phase-e-catalogs.controller.ts` |
 | POST | `/api/v1/admin/class-modules` | JWT | Global: admin, super-admin; Permisos: catalogs:create | Create a class module with optional translations | AdminPhaseECatalogsService.createClassModule() | `src/admin/admin-phase-e-catalogs.controller.ts` |
 | PATCH | `/api/v1/admin/class-modules/:id` | JWT | Global: admin, super-admin; Permisos: catalogs:update | Update a class module and upsert/delete translations | AdminPhaseECatalogsService.updateClassModule() | `src/admin/admin-phase-e-catalogs.controller.ts` |
@@ -847,8 +853,9 @@ Los `POST` y `PATCH` de camporees locales y de unión aceptan `start_date` y `en
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
 | GET | `/api/v1/classes` | JWT | - | Listar clases | ClassesService.findAll() | `src/classes/classes.controller.ts` |
-| GET | `/api/v1/classes/:classId` | JWT | - | Obtener clase por ID | ClassesService.findOne() | `src/classes/classes.controller.ts` |
+| GET | `/api/v1/classes/:classId` | JWT | - | Obtener clase por ID (incluye `prerequisites` activos) | ClassesService.findOne() | `src/classes/classes.controller.ts` |
 | GET | `/api/v1/classes/:classId/modules` | JWT | - | Obtener módulos de una clase | ClassesService.getModules() | `src/classes/classes.controller.ts` |
+| GET | `/api/v1/classes/:classId/honors` | Optional JWT | - | Especialidades relacionadas (`class_honors`); con JWT opcional incluye `user_status` | ClassesService.getClassHonors() | `src/classes/classes.controller.ts` |
 
 ### user-classes
 

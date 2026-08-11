@@ -20,8 +20,9 @@ Las secciones ahora se separan en `BASIC`, `ADVANCED` y `EXTRA`: `BASIC` + `EXTR
 - **Controladores**: `ClassesController` (catalogo publico, progreso/evidencias e inscripciones) + `AdminPhaseECatalogsController` (CRUD admin de clases) + `InvestitureController` (vencimiento manual de enrollments atrasados)
 - **Catalogo publico** (OptionalJwtAuthGuard):
   - `GET /classes` — listar clases con paginacion y filtro por clubTypeId; por defecto solo devuelve clases disponibles para inscripcion en el ano eclesiastico vigente
-  - `GET /classes/:classId` — detalle de clase con modulos y secciones
+  - `GET /classes/:classId` — detalle de clase con modulos/secciones y `prerequisites` activos (`[{ class_id, name }]`)
   - `GET /classes/:classId/modules` — modulos de una clase con sus secciones
+  - `GET /classes/:classId/honors` — especialidades relacionadas via `class_honors` (informativas; JWT opcional agrega `user_status`)
 - **Inscripciones de usuario** (JwtAuthGuard + PermissionsGuard):
   - `GET /users/:userId/classes` — listar inscripciones del usuario (filtro por yearId)
   - `POST /users/:userId/classes/enroll` — inscribir usuario en clase (class_id + ecclesiastical_year_id); bloquea clases inactivas o fuera de ventana de disponibilidad
@@ -100,6 +101,18 @@ Reglas vigentes:
 13. Si un enrollment supera la duracion maxima sin investidura, pasa formalmente a `EXPIRED` y conserva su progreso como trayectoria historica
 14. Un consejero o secretario asignado a una clase puede ver el avance de miembros inscritos en esa clase, siempre que cumpla la elegibilidad de estar cursando o haber completado `Guía Mayor`.
 15. La carga delegada de evidencias debe distinguir miembro objetivo (`:userId`) de actor autenticado (`currentUser.sub`).
+16. Solo puede haber **una inscripción activa por usuario/año** (índice parcial `uniq_enrollments_active_user_year`); el servicio GM alineado lanza `CLASS_MAX_GM_ACTIVE` al intentar una segunda.
+17. PATCH/upload/delete de progreso se rechazan con `CLASS_PROGRESS_LOCKED` si `locked_for_validation` o el enrollment está en estado terminal (`SUBMITTED`/`CLUB_APPROVED`/`COORDINATOR_APPROVED`/`FIELD_APPROVED`/`INVESTIDO`/`EXPIRED`). `IN_PROGRESS` y `REJECTED` permiten mutación.
+18. Un requisito con evidencia `REJECTED` nunca computa como completo para progreso ni elegibilidad, aunque `score >= 70`.
+19. El rechazo individual de evidencia de clase exige `SUBMITTED` (`EVIDENCE_REVIEW_RECORD_NOT_PENDING` en otro estado).
+
+## Prerrequisitos entre clases
+
+Tabla aditiva `class_prerequisites` (`class_id`, `prerequisite_class_id`, `active`). En inscripción, cada prerrequisito activo debe estar `INVESTIDO` para el usuario (cualquier año). Error: `CLASS_PREREQUISITE_NOT_MET` (403). `requires_invested_gm` sigue vigente y no se migra a esta tabla. Admin: `GET/POST/DELETE /admin/classes/:classId/prerequisites` con validación anti-ciclos (`ADMIN_CLASS_PREREQUISITE_CYCLE`).
+
+## Especialidades relacionadas
+
+`class_honors` activo en runtime (`REQUIRED` | `RECOMMENDED` | `ELECTIVE`). Relaciones **informativas** en esta fase: no bloquean investidura, incluso `REQUIRED`. Público: `GET /classes/:classId/honors`. Admin: `GET/POST/DELETE /admin/classes/:classId/honors`.
 
 ## Decisiones de diseno
 

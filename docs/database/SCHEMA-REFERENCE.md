@@ -122,7 +122,8 @@ Referencia humana concisa del schema Prisma vigente.
 
 - `honors.code` es el identificador estable del catalogo para imports y sincronizaciones. Es nullable durante el rollout, pero cuenta con unicidad para los registros que lo usan.
 - `honor_club_types` modela la disponibilidad/eligibilidad activa de una especialidad por tipo de club (`honor_id`, `club_type_id`, `active`), con unicidad `@@unique([honor_id, club_type_id])`.
-- `class_honors` modela la relacion curricular entre una clase y una especialidad (`class_id`, `honor_id`, `relation_type`, `active`), con unicidad `@@unique([class_id, honor_id, relation_type])`.
+- `class_honors` modela la relacion curricular entre una clase y una especialidad (`class_id`, `honor_id`, `relation_type`, `active`), con unicidad `@@unique([class_id, honor_id, relation_type])`. En runtime las relaciones son informativas (no bloquean investidura), incluso `REQUIRED`.
+- `class_prerequisites` modela prerrequisitos explicitos entre clases (`class_id`, `prerequisite_class_id`, `active`), con unicidad `@@unique([class_id, prerequisite_class_id])` y CHECK anti-auto-referencia. Cumplido = enrollment del usuario con `investiture_status = INVESTIDO` en la clase prerequisito (cualquier ano). Aditivo a `classes.requires_invested_gm`.
 - `class_honor_relation_type_enum` permite clasificar el vínculo como `REQUIRED`, `RECOMMENDED` o `ELECTIVE`.
 - `honors.club_type_id` se conserva como compatibilidad legacy durante el rollout. Los filtros nuevos de catalogo deben usar `honor_club_types`.
 - Las especialidades de Aventureros importadas usan `honors_categories.name = 'Aventureros'` solo como categoria tecnica de compatibilidad cuando el campo de categoria es requerido; la relacion con clases vive en `class_honors`.
@@ -439,7 +440,7 @@ Define el presupuesto de puntos por componente dentro de un eje anual:
 ### Honores y evidencias
 
 - `honors`, `honors_categories`, `master_honors`, `users_honors`
-- `honor_club_types`, `class_honors`
+- `honor_club_types`, `class_honors`, `class_prerequisites`
 - `honor_requirements`, `user_honor_requirement_progress`, `requirement_evidence`, `evidence_files`
 - `master_honor_divisions`, `master_honor_requirement_groups`, `master_honor_requirement_options`, `master_honor_requirement_option_honors`
 - `users_master_honors`, `master_honor_evaluation_history`
@@ -540,6 +541,7 @@ Define el presupuesto de puntos por componente dentro de un eje anual:
 - `20260521120000_class_duration_availability` - añade disponibilidad por año eclesiástico y duración min/max a `classes`; agrega `EXPIRED` a enums de investidura.
 - `20260604000000_master_honor_requirements` - agrega reglas configurables de maestrías (`applicability_scope`, `philosophy`, `notes`) y tablas `master_honor_divisions`, `master_honor_requirement_groups`, `master_honor_requirement_options`, `master_honor_requirement_option_honors`, `users_master_honors`, `master_honor_evaluation_history`.
 - `20260612000000_honor_applicability_and_class_links` - agrega `honors.code`, `honor_club_types`, `class_honors` y `class_honor_relation_type_enum`; backfill de aplicabilidad desde `honors.club_type_id` y códigos legacy para honores existentes.
+- `20260811200000_class_prerequisites` - agrega `class_prerequisites` con FKs a `classes`, unique `(class_id, prerequisite_class_id)` y CHECK anti-auto-referencia.
 - `20260429000003_enrollment_rankings_default_award_seeds` - (8.4-A) seed de categorías de premio con `scope='member'` para clasificación de miembros.
 
 ## Nota operativa

@@ -54,6 +54,8 @@ class_id + honor_id + relation_type + active
 
 Esto permite que una especialidad de Aventureros sea especifica de una clase sin mezclar niveles de clase con categorias tematicas. Las especialidades multinivel pueden existir sin enlace a una clase concreta.
 
+**Runtime activo:** `GET /api/v1/classes/:classId/honors` (Optional JWT; con usuario incluye `user_status` desde `users_honors.validation_status`) y CRUD admin `GET/POST/DELETE /api/v1/admin/classes/:classId/honors`. En esta fase las relaciones son informativas: no bloquean investidura, incluso `REQUIRED`.
+
 ## Modo de finalizacion
 
 La fuente de verdad runtime para el camino de trabajo de una especialidad inscrita es `users_honors.completion_mode`:
