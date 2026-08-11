@@ -96,6 +96,10 @@ Runners anotados: backend `jest`; admin `vitest run`; app `flutter test`.
 3. Migración versionada sin `prisma migrate deploy`.
 4. Commits selectivos para no mezclar dirty ajeno (rankings/rbac; UI app no relacionada).
 
+## 6.1 Corrección post-revisión
+
+- La revisión detectó `getClassHonors` duplicado en `classes.service.ts` (TS2393, rompía `tsc --noEmit`; jest no lo detectaba por transpilar sin type-check). Corregido en commit `cc58003` (backend): eliminada la copia duplicada. Verificado: 1 sola implementación, 0 errores TS2393, 107/107 tests de `src/classes` en verde, commit sin trailer `Co-authored-by`.
+
 ## 7. Pendientes y riesgos
 
 - Migración `class_prerequisites` versionada pero **NO** aplicada a la DB real.
