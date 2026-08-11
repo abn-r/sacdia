@@ -12,6 +12,14 @@ Scripts SQL para inicialización y migración de la base de datos.
 
 ## 📋 Scripts Disponibles
 
+### Migración Prisma pendiente: motor de certificaciones configurables
+
+| Migración | Ubicación efectiva | Dependencia | Estado |
+|-----------|--------------------|-------------|--------|
+| `20260811180000_configurable_certifications_engine` | `sacdia-backend/prisma/migrations/20260811180000_configurable_certifications_engine/migration.sql` en `feat/configurable-certifications` | tablas legacy `certifications`, `certification_modules`, `certification_sections`, `users_certifications`, `certification_section_progress` | Existe en la rama backend; **no ejecutada ni verificada contra una base de datos real (Neon)** |
+
+Expand/backfill: crea versiones publicadas `1`, fija inscripciones y módulos a esa versión, agrega progreso por `enrollment_id`, componentes, evidencias, eventos de revisión y cierre. No elimina columnas legacy ni `certification_module_progress`. Verificador de solo lectura: `sacdia-backend/scripts/verify-certifications-migration.ts` (`CERTIFICATIONS_MIGRATION_VERIFY_DATABASE_URL`, opt-in `ALLOW_NEON_CERTIFICATIONS_VERIFY`).
+
 ### Migración Prisma pendiente: refresh administrativo iOS
 
 | Migración | Ubicación efectiva | Dependencia | Estado |

@@ -434,7 +434,8 @@ Define el presupuesto de puntos por componente dentro de un eje anual:
 ### Formacion
 
 - `classes`, `class_modules`, `class_sections`, `enrollments`, `class_module_progress`, `class_section_progress`
-- `certifications`, `certification_modules`, `certification_sections`, `users_certifications`, `certification_module_progress`, `certification_section_progress`
+- `certifications`, `certification_versions`, `certification_eligibility_rules`, `certification_modules`, `certification_sections`, `certification_requirement_components`
+- `users_certifications`, `certification_section_progress`, `certification_component_responses`, `certification_evidences`, `certification_review_events`, `certification_closeout_evidences`, `certification_module_progress` (legacy projection retained)
 - `investiture_config`, `investiture_validation_history`, `validation_logs`
 
 ### Honores y evidencias
