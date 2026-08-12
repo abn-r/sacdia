@@ -165,6 +165,19 @@ Referencia humana concisa del schema Prisma vigente.
 
 - Incluye `created_by_id`, `modified_by_id`, `evidence_file_url` y `evidence_file_name`.
 - Sigue relacionada con `camporee_members`.
+- **Dual-path**: es la vía legacy de alta directa de seguros y el FK que exige camporees. El capacity model (abajo) es la vía nueva; al aprobar una orden de pago de seguro se hace upsert aquí como *bridge* para no romper `camporee_members`.
+
+### Insurance capacity model (`insurance_products`, `insurance_cycle_configs`, `insurance_purchases`, `insurance_coverage_slots`, `insurance_slot_movements`, `insurance_assignments`, `insurance_evidence_files`)
+
+Modelo de capacidad de seguros por Campo Local, vivo en runtime desde antes de este trabajo pero no documentado aquí (drift corregido 2026-08-12):
+
+- `insurance_products` — producto por LF con `coverage_scope` (`insurance_coverage_scope_enum`), `validity_mode` (`insurance_validity_mode_enum`), `default_duration_months?`. Índice `(local_field_id, active)`.
+- `insurance_cycle_configs` — costo por ciclo: FK producto/LF/`ecclesiastical_year_id`/`club_type_id`, `unit_cost DECIMAL(10,2)`, `purchase_deadline DATE`, `timezone`. Unique por scope efectivo `(producto, LF, año, club_type)`.
+- `insurance_purchases` — compra **qty anónima** por sección (`quantity`, `unit_cost_snapshot`, `total_amount`, `status insurance_purchase_status_enum` default `PENDING_CONFIRMATION`, submitter/reviewer). **Legado a reemplazar por `field_payment_orders`** (compras con beneficiarios nombrados); queda para lectura/drain.
+- `insurance_coverage_slots` — cupos materializados al confirmar una compra: `sequence_number` unique por compra, `status insurance_slot_status_enum` default `AVAILABLE`, sección compradora vs sección actual.
+- `insurance_slot_movements` — journal de movimientos de slot (`movement_type`, from/to section, `correlation_id`).
+- `insurance_assignments` — asignación de un slot a un sujeto (`subject_type insurance_assignment_subject_enum`: user o participante externo de camporee), `valid_from/valid_until DATE`, `status insurance_assignment_status_enum` default `PENDING_CONFIRMATION`. Sin API HTTP de assign hasta payment-orders.
+- `insurance_evidence_files` — evidencia privada en R2 ligada a compra o assignment (`evidence_type insurance_evidence_type_enum`, `file_key`, magic-bytes validados en upload).
 
 ### `achievement_categories`, `achievements`, `user_achievements`, `achievement_event_log`
 

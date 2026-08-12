@@ -36,6 +36,28 @@ La vinculacion de seguros con camporees es directa: la tabla `camporee_members` 
 - Soporta carga de evidencia documental
 - Espera campos `evidence_file_url` y `evidence_file_name` en las respuestas
 
+### Backend — capacity model (dual-path, verificado 2026-08-12)
+
+Además del flujo legacy `member_insurances`, el backend tiene un **modelo de capacidad** completo sin UI:
+
+- **Config por Campo Local**: `insurance_products` + `insurance_cycle_configs` (costo unitario por producto/año/tipo de club) vía `InsuranceConfigService` con permiso `insurance:configure`. Endpoints: `GET|POST /insurance/products`, `PATCH /insurance/products/:id`, `GET|POST /insurance/cycles`, `PATCH /insurance/cycles/:id`.
+- **Compras qty**: `POST|GET /club-sections/:sectionId/insurance/purchases` + detalle/proof/confirm/reject/reverse (`InsurancePurchasesService`). Compra anónima por cantidad → comprobante → `PENDING_CONFIRMATION` → confirm materializa `insurance_coverage_slots` `AVAILABLE`. **No nombra beneficiarios**.
+- **Asignaciones**: `insurance_assignments` existe en schema con domain helpers (`src/insurance/domain/insurance-policy.ts`), pero **sin API HTTP de assign**.
+
+**Dual-path vigente**:
+
+| Vía | Tablas | Estado |
+|-----|--------|--------|
+| Legacy directa | `member_insurances` | Activa; app/admin la usan; camporees exige su FK |
+| Capacity model | products/cycles/purchases/slots/assignments | Backend-only; purchases qty **legado a reemplazar** por órdenes de pago con beneficiarios nombrados (`field_payment_orders`) |
+
+El plan `docs/plans/2026-08-05-insurance-camporee-payment-orders-plan.md` cierra el gap: órdenes grupales con beneficiarios → aprobación LF → slot + assignment ACTIVE + upsert bridge a `member_insurances`.
+
+### Feature flags (rollout órdenes de pago)
+
+- `field_payment_orders_v1` (`system_config`): value JSON con lista de `local_field_id` habilitados. Flag ON en un LF: alta directa legacy y submit de purchases qty quedan bloqueados; el flujo nuevo es la única vía de alta.
+- `field_payment_orders.expiry_days` (`system_config`): días para expirar órdenes `ISSUED` sin comprobante. Default **15**.
+
 ### Base de datos
 - `member_insurances` — Seguros por miembro con campos:
   - `insurance_id` (PK INT), `user_id` (FK UUID), `insurance_type` (ENUM), `policy_number`, `provider`, `start_date`, `end_date`, `coverage_amount` (DECIMAL), `active`, `evidence_file_url`, `evidence_file_name`

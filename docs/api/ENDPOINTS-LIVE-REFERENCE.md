@@ -7,8 +7,8 @@
 > La tabla refleja los decoradores HTTP efectivos en controllers NestJS; DTOs, ejemplos y errores finos viven en Swagger/runtime y docs de feature cuando aplique.
 
 **Estado**: ACTIVE
-**Actualizado**: 2026-08-11
-**Total endpoints**: 725 decoradores HTTP en 94 controllers (certificaciones configurables sincronizadas manualmente)
+**Actualizado**: 2026-08-12
+**Total endpoints**: 738 decoradores HTTP en 94 controllers (certificaciones configurables e insurance capacity model sincronizados manualmente)
 **Métodos**: GET 291 · POST 207 · PATCH 103 · DELETE 88 · PUT 8
 **Auth detectada**: JWT 685 · Public 12
 
@@ -75,7 +75,7 @@
 | honors | 5 |
 | user-honors | 15 |
 | user-master-honors | 3 |
-| insurance | 5 |
+| insurance | 18 |
 | inventory | 8 |
 | investiture | 20 |
 | legal-representatives | 4 |
@@ -1118,8 +1118,21 @@ Path base: `/api/v1/certifications/users/:userId/certification-enrollments/:enro
 | GET | `/api/v1/clubs/:clubId/sections/:sectionId/members/insurance` | JWT | Permisos: insurance:read | Listar seguros de miembros por sección | InsuranceService.listMembersInsurance() | `src/insurance/insurance.controller.ts` |
 | GET | `/api/v1/insurance/expiring` | JWT | Global: admin, coordinator | Listar seguros próximos a vencer | InsuranceService.getExpiringInsurances() | `src/insurance/insurance.controller.ts` |
 | GET | `/api/v1/users/:memberId/insurance` | JWT | Permisos: insurance:read | Obtener seguro activo del miembro | InsuranceService.getMemberInsurance() | `src/insurance/insurance.controller.ts` |
-| POST | `/api/v1/users/:memberId/insurance` | JWT | Permisos: insurance:create | Crear seguro para un miembro | InsuranceService.createInsurance() | `src/insurance/insurance.controller.ts` |
+| POST | `/api/v1/users/:memberId/insurance` | JWT | Permisos: insurance:create | Crear seguro para un miembro (legacy directo) | InsuranceService.createInsurance() | `src/insurance/insurance.controller.ts` |
 | PATCH | `/api/v1/insurance/:insuranceId` | JWT | Permisos: insurance:update | Actualizar seguro | InsuranceService.updateInsurance() | `src/insurance/insurance.controller.ts` |
+| GET | `/api/v1/insurance/products` | JWT | Permisos: insurance:configure | Listar productos de seguro del Campo Local activo | InsuranceConfigService.listProducts() | `src/insurance/insurance.controller.ts` |
+| POST | `/api/v1/insurance/products` | JWT | Permisos: insurance:configure | Crear producto de seguro para el Campo Local activo | InsuranceConfigService.createProduct() | `src/insurance/insurance.controller.ts` |
+| PATCH | `/api/v1/insurance/products/:productId` | JWT | Permisos: insurance:configure | Actualizar producto de seguro del Campo Local activo | InsuranceConfigService.updateProduct() | `src/insurance/insurance.controller.ts` |
+| GET | `/api/v1/insurance/cycles` | JWT | Permisos: insurance:configure | Listar ciclos de seguro del Campo Local activo | InsuranceConfigService.listCycles() | `src/insurance/insurance.controller.ts` |
+| POST | `/api/v1/insurance/cycles` | JWT | Permisos: insurance:configure | Crear ciclo de seguro para el Campo Local activo | InsuranceConfigService.createCycle() | `src/insurance/insurance.controller.ts` |
+| PATCH | `/api/v1/insurance/cycles/:cycleConfigId` | JWT | Permisos: insurance:configure | Actualizar ciclo de seguro del Campo Local activo | InsuranceConfigService.updateCycle() | `src/insurance/insurance.controller.ts` |
+| POST | `/api/v1/club-sections/:sectionId/insurance/purchases` | JWT | Permisos: insurance:create | Registrar compra de cupos (qty, legacy a reemplazar por payment-orders) | InsurancePurchasesService.submit() | `src/insurance/insurance-purchases.controller.ts` |
+| GET | `/api/v1/club-sections/:sectionId/insurance/purchases` | JWT | Permisos: insurance:read | Listar compras de cupos de la sección | InsurancePurchasesService.listForSection() | `src/insurance/insurance-purchases.controller.ts` |
+| GET | `/api/v1/insurance/purchases/:purchaseId` | JWT | Permisos: insurance:read | Detalle de compra de cupos | InsurancePurchasesService.getById() | `src/insurance/insurance-purchases.controller.ts` |
+| GET | `/api/v1/insurance/purchases/:purchaseId/proof` | JWT | Permisos: insurance:read | URL firmada del comprobante de compra | InsurancePurchasesService.getById() + signed proof | `src/insurance/insurance-purchases.controller.ts` |
+| POST | `/api/v1/insurance/purchases/:purchaseId/confirm` | JWT | Permisos: insurance:review | Confirmar compra y materializar slots AVAILABLE | InsurancePurchasesService.confirm() | `src/insurance/insurance-purchases.controller.ts` |
+| POST | `/api/v1/insurance/purchases/:purchaseId/reject` | JWT | Permisos: insurance:review | Rechazar compra de cupos | InsurancePurchasesService.reject() | `src/insurance/insurance-purchases.controller.ts` |
+| POST | `/api/v1/insurance/purchases/:purchaseId/reverse` | JWT | Permisos: insurance:review | Revertir compra confirmada | InsurancePurchasesService.reverse() | `src/insurance/insurance-purchases.controller.ts` |
 
 ### inventory
 
