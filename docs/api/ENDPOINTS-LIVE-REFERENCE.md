@@ -7,8 +7,8 @@
 > La tabla refleja los decoradores HTTP efectivos en controllers NestJS; DTOs, ejemplos y errores finos viven en Swagger/runtime y docs de feature cuando aplique.
 
 **Estado**: ACTIVE
-**Actualizado**: 2026-07-15
-**Total endpoints**: 697 decoradores HTTP en 90 controllers
+**Actualizado**: 2026-08-11
+**Total endpoints**: 723 decoradores HTTP en 94 controllers (certificaciones configurables sincronizadas manualmente)
 **Métodos**: GET 291 · POST 207 · PATCH 103 · DELETE 88 · PUT 8
 **Auth detectada**: JWT 685 · Public 12
 
@@ -26,6 +26,7 @@
 | --- | ---: |
 | Achievements | 4 |
 | Admin - Achievements | 12 |
+| Admin - Certifications | 8 |
 | activities | 8 |
 | admin-auth | 6 |
 | admin-camporee-event-types | 4 |
@@ -55,7 +56,7 @@
 | catalogs | 16 |
 | admin-certificate-bulk-imports | 6 |
 | certificate-bulk-imports | 6 |
-| certifications | 7 |
+| certifications | 25 |
 | class-counselor-assignments | 4 |
 | class-progress-scope | 2 |
 | classes | 3 |
@@ -822,15 +823,98 @@ Los `POST` y `PATCH` de camporees locales y de unión aceptan `start_date` y `en
 
 ### certifications
 
+> Motor configurable versionado (`feat/configurable-certifications`). Las rutas de participante identifican la inscripción por **`userId` + `certificationId`**, no por `enrollmentId` en el path. La revisión final sí usa `enrollmentId` porque opera sobre la bandeja institucional.
+
+#### Catálogo (Optional JWT)
+
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
-| GET | `/api/v1/certifications/certifications` | JWT | - | Listar todas las certificaciones disponibles | CertificationsService.findAll() | `src/certifications/certifications.controller.ts` |
-| GET | `/api/v1/certifications/certifications/:id` | JWT | - | Obtener detalles de una certificación | CertificationsService.findOne() | `src/certifications/certifications.controller.ts` |
-| POST | `/api/v1/certifications/users/:userId/certifications/enroll` | JWT | Permisos: user_certifications:manage | Inscribirse en una certificación | CertificationsService.enrollUser() | `src/certifications/certifications.controller.ts` |
-| GET | `/api/v1/certifications/users/:userId/certifications` | JWT | Permisos: user_certifications:read | Listar certificaciones del usuario | CertificationsService.getUserCertifications() | `src/certifications/certifications.controller.ts` |
-| GET | `/api/v1/certifications/users/:userId/certifications/:certificationId/progress` | JWT | Permisos: user_certifications:read | Ver progreso detallado de una certificación | CertificationsService.getCertificationProgress() | `src/certifications/certifications.controller.ts` |
-| PATCH | `/api/v1/certifications/users/:userId/certifications/:certificationId/progress` | JWT | Permisos: user_certifications:manage | Actualizar progreso de una sección | CertificationsService.updateProgress() | `src/certifications/certifications.controller.ts` |
-| DELETE | `/api/v1/certifications/users/:userId/certifications/:certificationId` | JWT | Permisos: user_certifications:manage | Abandonar una certificación | CertificationsService.deleteCertification() | `src/certifications/certifications.controller.ts` |
+| GET | `/api/v1/certifications/certifications` | Optional JWT | - | Listar certificaciones disponibles (paginado) | CertificationsService.findAll() | `src/certifications/certifications.controller.ts` |
+| GET | `/api/v1/certifications/certifications/:id` | Optional JWT | - | Detalle de certificación con módulos y secciones | CertificationsService.findOne() | `src/certifications/certifications.controller.ts` |
+
+#### Inscripción y progreso (participante / delegado)
+
+| Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
+| --- | --- | --- | --- | --- | --- | --- |
+| POST | `/api/v1/certifications/users/:userId/certifications/enroll` | JWT | Permisos: user_certifications:manage; owner `userId` | Inscribir en la versión `PUBLISHED` vigente (evalúa elegibilidad configurable) | CertificationsService.enrollUser() | `src/certifications/certifications.controller.ts` |
+| GET | `/api/v1/certifications/users/:userId/certifications` | JWT | Permisos: user_certifications:read; owner `userId` | Listar inscripciones del usuario con resumen de progreso | CertificationsService.getUserCertifications() | `src/certifications/certifications.controller.ts` |
+| GET | `/api/v1/certifications/users/:userId/certifications/:certificationId/eligibility` | JWT | Permisos: user_certifications:read; owner `userId` | Evaluar elegibilidad explicable por regla (versión publicada) | CertificationsService.getEligibility() | `src/certifications/certifications.controller.ts` |
+| GET | `/api/v1/certifications/users/:userId/certifications/:certificationId/progress` | JWT | Permisos: user_certifications:read; owner `userId` | Progreso detallado por módulos/secciones (inscripciones versionadas usan `status` de requisito) | CertificationsService.getCertificationProgress() | `src/certifications/certifications.controller.ts` |
+| PATCH | `/api/v1/certifications/users/:userId/certifications/:certificationId/progress` | JWT | Permisos: user_certifications:manage; owner `userId` | **[LEGACY — deprecado 2026-08-11]** Toggle booleano de sección; inscripciones con `certification_version_id` reciben `410 CERT_LEGACY_ENDPOINT_DEPRECATED` | CertificationsService.updateProgress() | `src/certifications/certifications.controller.ts` |
+| DELETE | `/api/v1/certifications/users/:userId/certifications/:certificationId` | JWT | Permisos: user_certifications:manage; owner `userId` | Abandonar inscripción (soft delete) | CertificationsService.deleteCertification() | `src/certifications/certifications.controller.ts` |
+
+#### Requisitos y evidencias (participante)
+
+Path base: `/api/v1/certifications/users/:userId/certifications/:certificationId/requirements/:sectionId`
+
+| Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
+| --- | --- | --- | --- | --- | --- | --- |
+| GET | `.../requirements/:sectionId` | JWT | user_certifications:read; owner `userId` | Estado del requisito, respuestas y componentes | CertificationRequirementsService.getRequirement() | `src/certifications/controllers/user-certification-requirements.controller.ts` |
+| PUT | `.../requirements/:sectionId/draft` | JWT | user_certifications:manage; owner `userId` | Guardar borrador (solo `DRAFT` o `CHANGES_REQUESTED`) | CertificationRequirementsService.saveDraft() | `src/certifications/controllers/user-certification-requirements.controller.ts` |
+| POST | `.../requirements/:sectionId/submit` | JWT | user_certifications:manage; owner `userId` | Enviar requisito a revisión (`lock_version` obligatorio) | CertificationRequirementsService.submitRequirement() | `src/certifications/controllers/user-certification-requirements.controller.ts` |
+| POST | `.../requirements/:sectionId/evidences/presign` | JWT | user_certifications:manage; owner `userId` | URL firmada de subida R2 (`component_id`, MIME, tamaño) | CertificationEvidenceService.presign() | `src/certifications/controllers/user-certification-requirements.controller.ts` |
+| POST | `.../requirements/:sectionId/evidences/confirm` | JWT | user_certifications:manage; owner `userId` | Confirmar objeto subido (valida HEAD en R2) | CertificationEvidenceService.confirm() | `src/certifications/controllers/user-certification-requirements.controller.ts` |
+| DELETE | `/api/v1/certifications/users/:userId/certifications/:certificationId/evidences/:evidenceId` | JWT | user_certifications:manage; owner `userId` | Eliminar evidencia mientras el requisito sea editable | CertificationEvidenceService.delete() | `src/certifications/controllers/user-certification-requirements.controller.ts` |
+
+#### Cierre institucional (participante)
+
+| Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
+| --- | --- | --- | --- | --- | --- | --- |
+| POST | `/api/v1/certifications/users/:userId/certifications/:certificationId/closeout-evidence/presign` | JWT | user_certifications:manage; owner `userId` | URL firmada para comprobante de junta | CertificationCloseoutService.presignCloseoutEvidence() | `src/certifications/controllers/certification-closeout.controller.ts` |
+| POST | `/api/v1/certifications/users/:userId/certifications/:certificationId/closeout-evidence/confirm` | JWT | user_certifications:manage; owner `userId` | Confirmar comprobante de junta subido a R2 | CertificationCloseoutService.confirmCloseoutEvidence() | `src/certifications/controllers/certification-closeout.controller.ts` |
+| POST | `/api/v1/certifications/users/:userId/certifications/:certificationId/submit-final` | JWT | user_certifications:manage; owner `userId` | Enviar inscripción a revisión final (requisitos obligatorios `APPROVED` + comprobante `CONFIRMED`) | CertificationCloseoutService.submitFinal() | `src/certifications/controllers/certification-closeout.controller.ts` |
+
+#### Revisión de requisitos (institucional)
+
+| Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
+| --- | --- | --- | --- | --- | --- | --- |
+| GET | `/api/v1/certifications/reviews/requirements` | JWT | Permisos: certifications:review; scope global | Bandeja de requisitos (filtro opcional `?status=`) | CertificationReviewService.getTray() | `src/certifications/controllers/certification-review.controller.ts` |
+| GET | `/api/v1/certifications/reviews/requirements/:progressId` | JWT | Permisos: certifications:review; scope global | Detalle de requisito con respuestas, evidencias e historial | CertificationReviewService.getDetail() | `src/certifications/controllers/certification-review.controller.ts` |
+| POST | `/api/v1/certifications/reviews/requirements/:progressId/approve` | JWT | Permisos: certifications:review; scope global | Aprobar requisito `SUBMITTED` (`lock_version` obligatorio) | CertificationReviewService.approve() | `src/certifications/controllers/certification-review.controller.ts` |
+| POST | `/api/v1/certifications/reviews/requirements/:progressId/request-changes` | JWT | Permisos: certifications:review; scope global | Devolver requisito con comentario obligatorio | CertificationReviewService.requestChanges() | `src/certifications/controllers/certification-review.controller.ts` |
+
+#### Revisión final y certificación (institucional)
+
+| Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
+| --- | --- | --- | --- | --- | --- | --- |
+| GET | `/api/v1/certifications/reviews/final` | JWT | Permisos: certifications:review; scope global | Bandeja de cierres pendientes | CertificationCloseoutService.getFinalTray() | `src/certifications/controllers/certification-closeout.controller.ts` |
+| POST | `/api/v1/certifications/reviews/final/:enrollmentId/approve-closeout-evidence` | JWT | Permisos: certifications:review; scope global | Aprobar comprobante de junta → inscripción `APPROVED` | CertificationCloseoutService.approveCloseoutEvidence() | `src/certifications/controllers/certification-closeout.controller.ts` |
+| POST | `/api/v1/certifications/reviews/final/:enrollmentId/request-changes` | JWT | Permisos: certifications:review; scope global | Devolver cierre con comentario obligatorio | CertificationCloseoutService.requestChanges() | `src/certifications/controllers/certification-closeout.controller.ts` |
+| POST | `/api/v1/certifications/reviews/final/:enrollmentId/certify` | JWT | Permisos: certifications:certify; scope global | Certificar inscripción válida (idempotente) | CertificationCloseoutService.certify() | `src/certifications/controllers/certification-closeout.controller.ts` |
+
+#### Códigos de error `CERT_*`
+
+| Código | HTTP típico | Cuándo |
+| --- | --- | --- |
+| `CERT_NOT_FOUND` | 404 | Certificación inexistente o inactiva |
+| `CERT_ALREADY_ENROLLED` | 409 | Inscripción duplicada activa |
+| `CERT_ELIGIBILITY_REQUIRED` | 403 | Usuario no cumple reglas de elegibilidad al inscribir |
+| `CERT_ENROLLMENT_NOT_FOUND` | 404 | Sin inscripción activa para `userId` + `certificationId` |
+| `CERT_SECTION_INVALID` | 400 | Sección/componente fuera de la versión inscrita |
+| `CERT_VERSION_NOT_PUBLISHED` | 400 | No hay versión publicada vigente |
+| `CERT_VERSION_IMMUTABLE` | 409 | Mutación sobre versión `PUBLISHED`/`RETIRED` |
+| `CERT_REQUIREMENT_LOCKED` | 409 | Requisito en `SUBMITTED`/`APPROVED`; evidencia bloqueada |
+| `CERT_REQUIREMENT_INCOMPLETE` | 400 | Faltan entregables obligatorios o objeto R2 ausente |
+| `CERT_INVALID_TRANSITION` | 400 | Transición de estado inválida (inscripción o requisito) |
+| `CERT_EVIDENCE_INVALID_TYPE` | 400 | MIME no permitido (`jpeg`, `png`, `webp`, `pdf`) |
+| `CERT_EVIDENCE_TOO_LARGE` | 400 | Archivo > 10 MiB o divergencia vs. declarado |
+| `CERT_REVIEW_SCOPE_FORBIDDEN` | 403 | Revisor fuera de campo local del participante, sin acceso global, o es el propio participante |
+| `CERT_CLOSEOUT_INCOMPLETE` | 400 | Faltan requisitos aprobados o comprobante de junta listo |
+| `CERT_CONCURRENT_UPDATE` | 409 | `lock_version` obsoleto en envío/revisión |
+| `CERT_LEGACY_ENDPOINT_DEPRECATED` | 410 | `PATCH .../progress` sobre inscripción versionada |
+
+### Admin - Certifications
+
+| Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
+| --- | --- | --- | --- | --- | --- | --- |
+| POST | `/api/v1/admin/certifications` | JWT | Permisos: certifications:configure; scope global | Crear certificación con versión inicial `DRAFT` | CertificationDefinitionsService.createCertification() | `src/certifications/controllers/admin-certifications.controller.ts` |
+| POST | `/api/v1/admin/certifications/:certificationId/versions` | JWT | Permisos: certifications:configure | Crear versión `DRAFT` | CertificationDefinitionsService.createDraftVersion() | `src/certifications/controllers/admin-certifications.controller.ts` |
+| POST | `/api/v1/admin/certifications/:certificationId/versions/:versionId/clone` | JWT | Permisos: certifications:configure | Clonar versión `PUBLISHED`/`RETIRED` a nuevo `DRAFT` | CertificationDefinitionsService.cloneVersion() | `src/certifications/controllers/admin-certifications.controller.ts` |
+| PATCH | `/api/v1/admin/certifications/:certificationId/versions/:versionId` | JWT | Permisos: certifications:configure | Actualizar metadatos de versión `DRAFT` | CertificationDefinitionsService.updateVersionMetadata() | `src/certifications/controllers/admin-certifications.controller.ts` |
+| PATCH | `/api/v1/admin/certifications/:certificationId/versions/:versionId/eligibility-rules` | JWT | Permisos: certifications:configure | Reemplazar reglas de elegibilidad del borrador | CertificationDefinitionsService.replaceEligibilityRules() | `src/certifications/controllers/admin-certifications.controller.ts` |
+| PATCH | `/api/v1/admin/certifications/:certificationId/versions/:versionId/tree` | JWT | Permisos: certifications:configure | Reemplazar árbol módulos/secciones/componentes del borrador | CertificationDefinitionsService.replaceModulesTree() | `src/certifications/controllers/admin-certifications.controller.ts` |
+| POST | `/api/v1/admin/certifications/:certificationId/versions/:versionId/publish` | JWT | Permisos: certifications:publish | Publicar borrador (retira versión `PUBLISHED` anterior) | CertificationDefinitionsService.publishVersion() | `src/certifications/controllers/admin-certifications.controller.ts` |
+| DELETE | `/api/v1/admin/certifications/:certificationId/versions/:versionId/publish` | JWT | Permisos: certifications:publish | Retirar versión `PUBLISHED` | CertificationDefinitionsService.retireVersion() | `src/certifications/controllers/admin-certifications.controller.ts` |
 
 ### class-counselor-assignments
 

@@ -438,6 +438,14 @@ Define el presupuesto de puntos por componente dentro de un eje anual:
 - `users_certifications`, `certification_section_progress`, `certification_component_responses`, `certification_evidences`, `certification_review_events`, `certification_closeout_evidences`, `certification_module_progress` (legacy projection retained)
 - `investiture_config`, `investiture_validation_history`, `validation_logs`
 
+**Certificaciones configurables (2026-08-11):**
+
+- `certification_versions.status`: `DRAFT` | `PUBLISHED` | `RETIRED` — solo `DRAFT` es mutable.
+- `users_certifications`: `certification_version_id` (FK obligatoria en inscripciones nuevas), `status` (`ENROLLED` … `CERTIFIED`), `lock_version` (concurrencia optimista).
+- `certification_section_progress`: `enrollment_id`, `status` (`DRAFT` | `SUBMITTED` | `CHANGES_REQUESTED` | `APPROVED`); fuente de verdad del requisito.
+- `certification_evidences.upload_status`: `PENDING_UPLOAD` | `CONFIRMED`; bucket R2 privado.
+- `certification_closeout_evidences.review_status`: `PENDING` | `SUBMITTED` | `CHANGES_REQUESTED` | `APPROVED`.
+
 ### Honores y evidencias
 
 - `honors`, `honors_categories`, `master_honors`, `users_honors`
@@ -512,6 +520,14 @@ Define el presupuesto de puntos por componente dentro de un eje anual:
 - `role_category`
 - `union_evaluation_decision_enum` (`APPROVED`, `REJECTED_OVERRIDE`)
 - `user_approval_status`
+- `certification_version_status_enum` (`DRAFT`, `PUBLISHED`, `RETIRED`)
+- `certification_enrollment_status_enum` (`ENROLLED`, `IN_PROGRESS`, `READY_FOR_CLOSEOUT`, `SUBMITTED_FOR_FINAL_REVIEW`, `APPROVED`, `CERTIFIED`, `WITHDRAWN`, `EXPIRED`, `CHANGES_REQUESTED`)
+- `certification_requirement_status_enum` (`DRAFT`, `SUBMITTED`, `CHANGES_REQUESTED`, `APPROVED`)
+- `certification_component_type_enum` (`TEXT_RESPONSE`, `FILE_EVIDENCE`, `LINKED_HONOR`, `LINKED_ACTIVITY`, `ATTESTATION`, `AUTO_VALIDATION`)
+- `certification_eligibility_rule_type_enum` (`MIN_AGE`, `BAPTIZED`, `INVESTED_CLASS`, `ACTIVE_CLUB_TYPE`, `ACTIVE_ROLE`)
+- `certification_evidence_upload_status_enum` (`PENDING_UPLOAD`, `CONFIRMED`)
+- `certification_review_event_type_enum` (envíos, devoluciones, aprobaciones, certificación)
+- `certification_closeout_review_status_enum` (`PENDING`, `SUBMITTED`, `CHANGES_REQUESTED`, `APPROVED`)
 
 ---
 

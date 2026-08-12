@@ -113,6 +113,50 @@ El flujo administrativo de camporee separa personal operativo, agenda y scoring:
 - Capturar una zona IANA explícita (por ejemplo `America/Mexico_City`) cuando se confirme la sede: el backend la audita con el actor. Un PATCH sin `timezone` no borra esa verificación.
 - La UI de clubes debe distinguir `not_open_yet`, `open`, `late_approval_required` y `manually_frozen`. Al estar `not_open_yet`, no ofrecer inscripción ni flujo de aprobación tardía; el deadline es inclusivo.
 
+## Actualizacion 2026-08-11 (Motor de certificaciones configurables)
+
+Contrato mínimo para admin y app móvil. Fuente de verdad de rutas: `docs/api/ENDPOINTS-LIVE-REFERENCE.md` §certifications.
+
+### Identificación de inscripción en paths
+
+- **Participante:** las rutas de ejecución usan `/users/:userId/certifications/:certificationId/...` (no `enrollmentId` en el path).
+- **Revisión final:** la bandeja y acciones de cierre usan `:enrollmentId` porque operan sobre filas de `users_certifications`.
+
+### Envelope de respuesta
+
+```json
+{ "status": "success", "data": { /* payload */ } }
+```
+
+Listados paginados del catálogo añaden `meta`. Errores de dominio incluyen `code` (`CERT_*`) traducible vía i18n.
+
+### Tipos de componente (`certification_component_type_enum`)
+
+| Tipo | Campo en borrador | Notas |
+| --- | --- | --- |
+| `TEXT_RESPONSE` | `text_value` | Texto libre |
+| `FILE_EVIDENCE` | presign → confirm | JPEG/PNG/WebP/PDF, máx. 10 MiB |
+| `LINKED_HONOR` | `linked_user_honor_id` | Debe pertenecer al usuario |
+| `LINKED_ACTIVITY` | `linked_activity_id` | Actividad del usuario |
+| `ATTESTATION` | `attestation_confirmed: boolean` | Confirmación explícita |
+| `AUTO_VALIDATION` | — | Evaluado en servidor al enviar |
+
+### Flujo de evidencia (participante)
+
+1. `POST .../evidences/presign` con `component_id`, `file_name`, `mime_type`, `file_size` → `{ upload_url, evidence_id, object_key, expires_in }`.
+2. Subir bytes a `upload_url` (PUT directo a R2).
+3. `POST .../evidences/confirm` con `evidence_id` → estado `CONFIRMED`.
+
+Comprobante de junta repite el mismo patrón en `/closeout-evidence/presign|confirm`.
+
+### Concurrencia
+
+`submit`, `approve` y `request-changes` envían `lock_version` (entero de `users_certifications`). Ante `409 CERT_CONCURRENT_UPDATE`, refrescar progreso y reintentar.
+
+### Deprecación legacy
+
+`PATCH /certifications/users/:userId/certifications/:certificationId/progress` sigue disponible solo para inscripciones **sin** `certification_version_id`. Inscripciones del motor versionado reciben `410 CERT_LEGACY_ENDPOINT_DEPRECATED`.
+
 ## Actualizacion 2026-02-17 (Admin Panel)
 
 Se agrego validacion operativa para frontend admin mediante smoke E2E en `sacdia-admin/scripts/e2e-smoke.mjs`.

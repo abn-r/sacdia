@@ -369,7 +369,37 @@ La app iOS nativa necesita una fachada de autenticación administrativa específ
 
 ---
 
+## 8. Motor de certificaciones: bandeja propia vs. `evidence-review`
+
+### ✅ DECISIÓN FINAL (2026-08-11)
+
+#### Contexto
+
+Clases progresivas y honores comparten la cola unificada `evidence-review` con estados `VALIDATED` / `REJECTED`. El motor de certificaciones configurables introduce requisitos compuestos por componentes tipados, revisión requisito-a-requisito, comprobante de junta separado y cierre institucional con estados propios.
+
+#### Decisión
+
+| Tema | Contrato |
+|------|----------|
+| Bandeja de revisión | **Propia** bajo `/api/v1/certifications/reviews/*`. No adaptar certificaciones a `evidence-review`. |
+| Motivo | Revisión por requisito con componentes (`TEXT_RESPONSE`, `FILE_EVIDENCE`, `LINKED_HONOR`, etc.), historial append-only y cierre final desacoplado del modelo clase/honor. |
+| Costo asumido | Revisores institucionales (`director-lf`, `assistant-lf`) operan una bandeja adicional junto a la de evidencias de clases/honores. |
+| Vocabulario de estados — requisito | `DRAFT` → `SUBMITTED` → `APPROVED` \| `CHANGES_REQUESTED` → `SUBMITTED` |
+| Vocabulario de estados — clases/honores | `SUBMITTED` → `VALIDATED` \| `REJECTED` |
+| Regla de integración | **No unificar** vocabularios ni bandejas sin ADR nuevo; mapear en UI si hace falta presentación conjunta. |
+| Inscripción | Cada enrollment fija `certification_version_id` de una versión `PUBLISHED` inmutable. |
+| Concurrencia | Envíos y decisiones de revisión exigen `lock_version` de `users_certifications`. |
+| Evidencias | Bucket R2 privado; URLs firmadas de corta duración tras verificar ownership o scope de revisor. |
+
+#### Consecuencias
+
+- Admin y app móvil deben consumir endpoints documentados en `ENDPOINTS-LIVE-REFERENCE.md` §certifications, no la cola `evidence-review`.
+- El endpoint legacy `PATCH .../progress` queda deprecado (2026-08-11) para inscripciones versionadas; responde `410 CERT_LEGACY_ENDPOINT_DEPRECATED`.
+- Permisos nuevos (`certifications:configure`, `:publish`, `:review`, `:certify`) son ortogonales a `user_certifications:*` y a `certifications:read` (browse).
+
+---
+
 **Generado**: 2026-01-29  
 **Actualizado por**: Usuario  
-**Última actualización**: 2026-07-10 (ADR #7 — Sacdia Admin nativo)
+**Última actualización**: 2026-08-11 (ADR #8 — motor de certificaciones configurables)  
 **Status**: ✅ Decisiones confirmadas; ADR #7 parcialmente implementada en rama, no expuesta en runtime

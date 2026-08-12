@@ -1,79 +1,87 @@
-# Certificaciones de Guias Mayores
+# Certificaciones de Guías Mayores
 
-**Estado**: PARCIAL
+**Estado**: MOTOR VERSIONADO (backend runtime en `feat/configurable-certifications`; admin/app en migración)
 
-## Descripcion de dominio
+## Descripción de dominio
 
-Las certificaciones de Guias Mayores son programas formativos avanzados exclusivos para miembros investidos como Guias Mayores. Representan un camino de especializacion complementario a las clases progresivas, enfocado en capacitar lideres para funciones especificas dentro de la organizacion: liderazgo juvenil, instruccion, capellania, administracion, entre otros.
+Las certificaciones de Guías Mayores son programas formativos avanzados para miembros investidos. A diferencia de las clases progresivas (secuenciales por edad), son electivas y se configuran como **definiciones versionadas**: cada inscripción queda fijada a una versión `PUBLISHED` inmutable.
 
-Cada certificacion sigue una estructura jerarquica similar a las clases y carpetas: certificacion -> modulos -> secciones. El progreso se registra por seccion (completada/no completada) y se auto-completa jerarquicamente: al completar todas las secciones de un modulo, el modulo se marca como completo; al completar todos los modulos, la certificacion se marca como completa.
+Estructura: certificación → versión → módulos → secciones (requisitos) → componentes tipados. El progreso ya no es un toggle booleano por sección; cada requisito sigue estados `DRAFT` → `SUBMITTED` → `APPROVED` | `CHANGES_REQUESTED`, con revisión institucional requisito a requisito y cierre final con comprobante de junta.
 
-A diferencia de las clases progresivas (determinadas por edad y secuenciales), las certificaciones son electivas y voluntarias. Un Guia Mayor investido elige que certificaciones cursar segun sus intereses y rol en el club. El backend valida la elegibilidad al momento de la inscripcion, rechazando usuarios que no son Guias Mayores investidos.
+## Qué existe (verificado contra código — `sacdia-backend` branch `feat/configurable-certifications`)
 
-El modulo backend esta completamente implementado con CRUD de progreso. El admin tiene paginas de gestion y la app tiene screens completos, aunque quedan gaps en reportes y flujos institucionales avanzados.
+### Backend (`CertificationsModule`)
 
-## Que existe (verificado contra codigo)
+**Controladores:**
 
-### Backend (CertificationsModule)
-- **Controlador**: `CertificationsController` — **7 endpoints** (JwtAuthGuard + PermissionsGuard):
-  - `GET /certifications/certifications` — listar certificaciones disponibles con paginacion
-  - `GET /certifications/certifications/:id` — detalle de certificacion con modulos y secciones
-  - `POST /certifications/users/:userId/certifications/enroll` — inscribirse en certificacion (valida que sea Guia Mayor investido)
-  - `GET /certifications/users/:userId/certifications` — listar certificaciones del usuario con progreso
-  - `GET /certifications/users/:userId/certifications/:certificationId/progress` — progreso detallado por modulos y secciones
-  - `PATCH /certifications/users/:userId/certifications/:certificationId/progress` — actualizar progreso de seccion (auto-completa modulo y certificacion)
-  - `DELETE /certifications/users/:userId/certifications/:certificationId` — abandonar certificacion (soft delete)
-- **Servicio**: `CertificationsService`
-- **DTOs**: EnrollCertificationDto, UpdateCertificationProgressDto
-- **Permisos**: users:read_detail (lectura), users:update (escritura) con AuthorizationResource owner detection
-- **Todos los endpoints documentados** en ENDPOINTS-LIVE-REFERENCE.md y **ALINEADOS** en Reality Matrix
+| Controlador | Endpoints | Rol |
+| --- | ---: | --- |
+| `CertificationsController` / `UserCertificationsController` | 8 | Catálogo, inscripción, elegibilidad, progreso, legacy |
+| `UserCertificationRequirementsController` | 6 | Borrador, envío, evidencias por requisito |
+| `CertificationCloseoutController` | 7 | Cierre participante + bandeja/certificación final |
+| `CertificationReviewController` | 4 | Bandeja y decisión por requisito |
+| `AdminCertificationsController` | 8 | Configuración y publicación de versiones |
 
-### Admin (sacdia-admin)
-- Pagina de listado de certificaciones
-- Pagina de detalle con arbol de modulos
-- Panel de usuarios inscriptos
-- Dialog de progreso con toggle de secciones
+Referencia canónica: `docs/api/ENDPOINTS-LIVE-REFERENCE.md` §certifications y §Admin - Certifications.
 
-### App (sacdia-app)
-- **4 screens**: CertificationsListScreen, CertificationDetailScreen, CertificationProgressScreen, MyCertificationsScreen
-- Capa de datos completa: entities, models, datasource, repository, providers
-- Rutas registradas en GoRouter
+**Servicios principales:** `CertificationsService`, `CertificationEligibilityService`, `CertificationRequirementsService`, `CertificationEvidenceService`, `CertificationReviewService`, `CertificationCloseoutService`, `CertificationDefinitionsService`.
+
+**Dominio puro:** `certification-definition.types.ts`, `certification-state-machine.ts` (transiciones y bloqueos).
+
+**Permisos runtime:**
+
+- Participante/delegado: `user_certifications:read`, `user_certifications:manage`
+- Configuración: `certifications:configure`, `certifications:publish`
+- Revisión: `certifications:review`, `certifications:certify`
+
+**Legacy (deprecado 2026-08-11):** `PATCH .../progress` responde `410 CERT_LEGACY_ENDPOINT_DEPRECATED` para inscripciones con `certification_version_id`.
+
+### Admin (`sacdia-admin`)
+
+- Catálogo de solo lectura existente; **panel de configuración versionada pendiente** (handoff en `docs/plans/handoffs/configurable-certifications-admin-handoff.md`).
+
+### App (`sacdia-app`)
+
+- Screens legacy con toggle booleano; **migración al flujo por requisito pendiente**.
 
 ### Base de datos
-- `certifications` — catalogo de certificaciones
-- `certification_modules` — modulos por certificacion
-- `certification_sections` — secciones evaluables por modulo
-- `users_certifications` — inscripcion usuario-certificacion
-- `certification_module_progress` — progreso por modulo
-- `certification_section_progress` — progreso por seccion
 
-## Requisitos funcionales
+Modelos nuevos/ampliados (ver `docs/database/SCHEMA-REFERENCE.md`):
 
-1. Solo Guias Mayores investidos pueden inscribirse en certificaciones (validacion de elegibilidad en enrollment)
-2. Un usuario solo puede tener una inscripcion activa por certificacion (409 en duplicado)
-3. El progreso se registra por seccion como completa/incompleta
-4. Al completar todas las secciones de un modulo, el modulo se auto-completa
-5. Al completar todos los modulos, la certificacion se auto-completa
-6. La seccion y modulo deben ser validos para la certificacion (400 si son invalidos)
-7. El abandono es soft delete — la inscripcion se desactiva pero no se elimina
-8. El catalogo de certificaciones debe ser listable con paginacion
+- Definición: `certification_versions`, `certification_eligibility_rules`, `certification_requirement_components`
+- Ejecución: `users_certifications` (+ `certification_version_id`, `status`, `lock_version`), `certification_section_progress` (+ `status`, `enrollment_id`), `certification_component_responses`, `certification_evidences`, `certification_review_events`, `certification_closeout_evidences`
+- Proyección legacy retenida: `certification_module_progress`
 
-## Decisiones de diseno
+## Requisitos funcionales (motor versionado)
 
-- **Controlador unico**: A diferencia de honores y clases que separan catalogo y usuario, certificaciones usa un solo controlador con prefijo `/certifications`
-- **Patron de rutas compartido**: Las rutas de usuario siguen `/certifications/users/:userId/certifications/...` con el mismo patron de PermissionsGuard + AuthorizationResource
-- **Validacion de elegibilidad en enrollment**: El servicio valida que el usuario sea Guia Mayor investido antes de permitir inscripcion (403 si no cumple)
-- **Auto-completado jerarquico**: Mismo patron que folders — al actualizar una seccion se evalua completitud de modulo y certificacion
-- **Estructura DB espejo**: El schema sigue el mismo patron de clases (certifications -> modules -> sections -> progress) para consistencia
+1. Elegibilidad configurable por versión (`MIN_AGE`, `BAPTIZED`, `INVESTED_CLASS`, `ACTIVE_CLUB_TYPE`, `ACTIVE_ROLE`); evaluada al inscribir y expuesta en endpoint de elegibilidad.
+2. Una inscripción activa por usuario/certificación; fijada a versión publicada vigente.
+3. Requisitos editables solo en `DRAFT` o `CHANGES_REQUESTED`.
+4. Evidencias privadas en R2 con presign/confirm; MIME allow-list y máximo 10 MiB.
+5. Revisión institucional por requisito con bandeja propia (no `evidence-review`).
+6. Cierre: todos los requisitos obligatorios `APPROVED` + comprobante de junta confirmado → `submit-final` → revisión final → `certify`.
+7. Historial append-only en `certification_review_events`.
+
+## Decisiones de diseño
+
+- **Versiones inmutables:** solo `DRAFT` es editable; publicar retira la versión anterior.
+- **Paths de participante:** `/users/:userId/certifications/:certificationId/requirements/:sectionId/...` (sin `enrollmentId` en URL).
+- **Bandeja propia:** estados `APPROVED`/`CHANGES_REQUESTED`, distintos de clases/honores (`VALIDATED`/`REJECTED`). Ver ADR #8 en `docs/api/ARCHITECTURE-DECISIONS.md`.
+- **Browse vs progresión:** `certifications:read` (catálogo) separado de `user_certifications:*`. Ver `docs/canon/runtime-user-certifications.md`.
+
+## Flujo operativo
+
+Detalle paso a paso: [`certificaciones-guias-mayores-revision-workflow.md`](certificaciones-guias-mayores-revision-workflow.md).
 
 ## Gaps y pendientes
 
-- No hay endpoint para subida de archivos/evidencias de certificaciones (a diferencia de honores y clases que si tienen)
-- No hay flujo de validacion institucional de certificaciones completadas
-- No hay reporte administrativo de certificaciones por club o seccion
-- La validacion de "Guia Mayor investido" debe validar contra `enrollments` con investiture_status = 'invested' (`users_classes` fue retirada)
+- UI admin para configurar/publicar versiones y árbol de componentes.
+- App móvil: pantallas de requisito, presign/confirm, bandeja de revisión LF.
+- Reportes administrativos por club/campo local.
+- Seed de certificación “Capacitación básica para el personal del Club de Conquistadores” (PR 4 del plan).
+- Retirar proyección `certification_module_progress` cuando clientes dejen de depender del porcentaje legacy.
 
-## Prioridad y siguiente accion
+## Prioridad y siguiente acción
 
-- **Media**: Los gaps restantes son mejoras incrementales; la funcionalidad core esta disponible en admin y app.
-- **Siguiente accion concreta**: Evaluar soporte de evidencias para certificaciones (alineando con el patron de honores y clases)
+- **Alta:** completar consumo en app del flujo por requisito; alinear admin con `AdminCertificationsController`.
+- **Siguiente acción concreta:** implementar pantalla de detalle de requisito en app consumiendo `GET/PUT/POST .../requirements/:sectionId`.

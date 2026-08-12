@@ -4,7 +4,7 @@
 
 **Versión**: 1.0  
 **Fecha**: 31 de enero de 2026  
-**Actualizado**: 15 de julio de 2026
+**Actualizado**: 11 de agosto de 2026
 **Status**: ✅ Implementado
 
 ---
@@ -97,6 +97,42 @@ Los listados administrativos de reportes resuelven el contexto con `Authorizatio
 | Director/secretario con asignación activa de club | Solo reportes de su sección activa |
 
 La regla se centraliza en `src/reports/report-visibility-scope.ts` y se aplica a listados mensuales, trimestrales y anuales.
+
+---
+
+## RBAC del motor de certificaciones configurables
+
+El dominio separa **browse de catálogo**, **progresión del participante**, **configuración editorial** y **revisión institucional**. No reutilizar permisos de `evidence-review` (clases/honores).
+
+### Matriz de permisos
+
+| Permiso | Scope | Uso runtime | Roles seed (GLOBAL) |
+| --- | --- | --- | --- |
+| `user_certifications:read` | owner `userId` o grant explícito | Listar inscripciones, elegibilidad, progreso y leer requisitos | Liderazgo de club + `assistant-lf` + admin |
+| `user_certifications:manage` | owner `userId` o grant explícito | Inscribir, borrador/envío de requisitos, evidencias, cierre y abandono | Subconjunto de liderazgo + `assistant-lf` + admin |
+| `certifications:configure` | global | CRUD de definiciones, versiones `DRAFT`, reglas y árbol | `director-lf`, `assistant-lf`, `admin`, `super-admin` |
+| `certifications:publish` | global | Publicar o retirar versiones | `director-lf`, `assistant-lf`, `admin`, `super-admin` |
+| `certifications:review` | global + alcance institucional | Bandejas y decisiones sobre requisitos y cierre | `director-lf`, `assistant-lf`, `admin`, `super-admin` |
+| `certifications:certify` | global + alcance institucional | Marcar inscripción como `CERTIFIED` | `director-lf`, `assistant-lf`, `admin`, `super-admin` |
+
+`certifications:read` (browse de tipos de certificación) permanece distinto de `user_certifications:*`; ver `docs/canon/runtime-user-certifications.md`.
+
+### Ownership de evidencias y URLs firmadas
+
+- **Subida (participante):** `presign` + `confirm` exigen `user_certifications:manage` y `@AuthorizationResource({ type: 'user', ownerParam: 'userId' })`. El servidor genera la clave de objeto en R2 (`StorageBucketAlias.CERTIFICATION_EVIDENCE`); el cliente no elige rutas arbitrarias.
+- **Validación:** en `confirm`, el backend hace HEAD al objeto, valida MIME contra allow-list (`image/jpeg`, `image/png`, `image/webp`, `application/pdf`) y tamaño máximo **10 MiB** con tolerancia del 1 %.
+- **TTL:** URL de subida **15 min**; URL de descarga para revisión **1 h** (`certification-evidence.constants.ts`).
+- **Eliminación:** solo mientras el requisito esté editable (`DRAFT` / `CHANGES_REQUESTED`); soft-delete en DB.
+- **Revisión:** el revisor accede a evidencias vía detalle de bandeja; el servicio verifica scope antes de emitir URL firmada de lectura.
+
+### Scope de revisión institucional
+
+`CertificationReviewService` y `CertificationCloseoutService` resuelven el actor desde el JWT + perfil de autorización:
+
+- **Acceso global:** roles `admin` o `super-admin` **sin** `local_field_id` efectivo en scope global.
+- **Acceso territorial:** revisor con `local_field_id` debe coincidir con el `local_field_id` del participante.
+- **Auto-revisión prohibida:** el participante no puede aprobar/devolver/certificar su propio expediente → `403 CERT_REVIEW_SCOPE_FORBIDDEN`.
+- Fuera de scope → `403 CERT_REVIEW_SCOPE_FORBIDDEN` (sin filtrar existencia del registro).
 
 ---
 
