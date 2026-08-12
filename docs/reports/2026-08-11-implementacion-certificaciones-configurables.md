@@ -40,7 +40,7 @@ Quedan pendientes de operación humana: aplicar la migración y el seed contra N
 
 1. **[RESUELTA 2026-08-12] Rutas de participante usaban `certificationId`** en lugar de `.../certification-enrollments/:enrollmentId/...` del plan base. Corregido: controllers y services de requisitos/evidencias/cierre reciben `enrollmentId` directo y validan ownership (inscripción existente, activa y del `userId` autenticado); el draft pasó de `PUT` a `PATCH` según el contrato. App y docs (`ENDPOINTS-LIVE-REFERENCE`) actualizados en el mismo trabajo.
 2. **Specs de migración/seed bajo `src/certifications/`** porque Jest `rootDir=src` no descubre `prisma/` ni `scripts/*.spec.ts`.
-3. **Admin sin GET** de versiones/árbol/reglas; UI workbench en memoria + warning. Gap explícito para follow-up backend.
+3. **[RESUELTA 2026-08-12] Admin sin GET** de versiones/árbol/reglas. Follow-up en la misma branch agregó `GET /admin/certifications` (lista con resumen de versiones) y `GET /admin/certifications/:certificationId/versions/:versionId` (árbol completo + reglas); el workbench admin ahora carga la lista real al montar, hidrata el editor por versión (incluidos clones) y muestra PUBLISHED/RETIRED en modo lectura. Warning de "memoria de sesión" eliminado.
 4. **Retiro de versión:** `DELETE .../publish` en runtime vs `POST .../retire` del plan.
 5. **Reglas/árbol admin:** `PATCH` vs `PUT` del plan.
 6. **Historial participante:** no hay `GET .../history` dedicado; historial vía detalle de revisor / proyección en requirement view.
@@ -116,10 +116,8 @@ Quedan pendientes de operación humana: aplicar la migración y el seed contra N
 - Seed PDF **no ejecutado** contra Neon.
 - Endpoints legacy activos con `CERT_LEGACY_ENDPOINT_DEPRECATED` (410) en PATCH progreso versionado; fecha de retiro pendiente.
 - `certification_module_progress` permanece como proyección legacy.
-- Gap GET admin de versiones/árbol/reglas.
 - Honores Contabilidad / Anti-bullying I pueden faltar en catálogo → fallback TEXT_RESPONSE.
 - Fallos preexistentes admin en diálogos/worktrees.
-- Clients y docs deben seguir evolucionando juntos al cerrar el gap GET.
 
 ## 8. Verificación manual sugerida
 

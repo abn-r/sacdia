@@ -19,9 +19,11 @@ Guard stack: `JwtAuthGuard`, `PermissionsGuard` + `@AuthorizationResource({ type
 
 | Método | Path | Permiso | Servicio | Body (DTO) | Respuesta (forma) |
 |---|---|---|---|---|---|
+| `GET` | `/admin/certifications` | `certifications:configure` | `listCertificationsWithVersions` | — | `certifications[]` con `certification_versions[]` resumidas (`certification_version_id`, `version_number`, `status`, `title`, `published_at`, `retired_at`, `created_at`, `modified_at`), ordenadas por `version_number` desc |
+| `GET` | `/admin/certifications/:certificationId/versions/:versionId` | `certifications:configure` | `getVersionDetail` | — | `certification_versions` row completa + `certification_eligibility_rules[]` y `certification_modules[]` → `certification_sections[]` → `certification_requirement_components[]` (con `configuration`), todo ordenado por `sort_order`; legible en cualquier status |
 | `POST` | `/admin/certifications` | `certifications:configure` | `createCertification` | `CreateCertificationDto` | `{ certification, version }` |
 | `POST` | `/admin/certifications/:certificationId/versions` | `certifications:configure` | `createDraftVersion` | — | `certification_versions` row (status `DRAFT`) |
-| `POST` | `/admin/certifications/:certificationId/versions/:versionId/clone` | `certifications:configure` | `cloneVersion` | — | `certification_versions` row (status `DRAFT`); **no incluye** módulos/reglas en la respuesta (ver §6) |
+| `POST` | `/admin/certifications/:certificationId/versions/:versionId/clone` | `certifications:configure` | `cloneVersion` | — | `certification_versions` row (status `DRAFT`); **no incluye** módulos/reglas en la respuesta — recuperarlos vía `GET .../versions/:versionId` (§1.1) |
 | `PATCH` | `/admin/certifications/:certificationId/versions/:versionId` | `certifications:configure` | `updateVersionMetadata` | `UpsertCertificationVersionDto` | `certification_versions` row actualizado |
 | `PATCH` | `/admin/certifications/:certificationId/versions/:versionId/eligibility-rules` | `certifications:configure` | `replaceEligibilityRules` | `UpsertEligibilityRulesDto` | `certification_eligibility_rules[]` (reemplazo completo, ordenado por `sort_order`) |
 | `PATCH` | `/admin/certifications/:certificationId/versions/:versionId/tree` | `certifications:configure` | `replaceModulesTree` | `UpsertCertificationTreeDto` | `certification_modules[]` con `certification_sections[].certification_requirement_components[]` anidados (reemplazo completo, ordenado por `sort_order`) |
@@ -30,21 +32,16 @@ Guard stack: `JwtAuthGuard`, `PermissionsGuard` + `@AuthorizationResource({ type
 
 **No existen respuestas envueltas en `{ data: ... }`**: no hay `TransformInterceptor`/`ClassSerializerInterceptor` global registrado para este módulo (`src/main.ts` solo registra `AuditInterceptor` y, condicionalmente, `SentryInterceptor`). El body de éxito es el objeto/arreglo crudo devuelto por el servicio.
 
-### 1.1 GAP CRÍTICO — No hay endpoints de lectura admin
+### 1.1 GAP GET admin — RESUELTO (2026-08-12)
 
-`AdminCertificationsController` **solo expone mutaciones** (`POST`/`PATCH`/`DELETE`). No existe:
+El gap crítico original (controller admin solo con mutaciones) quedó cerrado con dos endpoints de lectura:
 
-- `GET /admin/certifications` (listar certificaciones con sus versiones y estados DRAFT/PUBLISHED/RETIRED)
-- `GET /admin/certifications/:certificationId/versions` (listar versiones de una certificación)
-- `GET /admin/certifications/:certificationId/versions/:versionId` (detalle completo de una versión: árbol + reglas de elegibilidad)
+- `GET /admin/certifications` — listado de certificaciones con resumen de versiones y estados DRAFT/PUBLISHED/RETIRED.
+- `GET /admin/certifications/:certificationId/versions/:versionId` — detalle completo de una versión (metadatos + reglas de elegibilidad + árbol módulos/secciones/componentes con `configuration`), legible en cualquier status: DRAFT para reanudar edición, PUBLISHED/RETIRED en modo lectura.
 
-El único endpoint de lectura disponible es el público `GET /certifications/certifications/:id` (`certifications.controller.ts`), que devuelve la certificación con sus **módulos y secciones actuales** pero:
-- No expone `certification_version_id`, `status`, ni metadatos de versión (título propio de versión, duración, fechas de publicación).
-- No expone `certification_eligibility_rules`.
-- No expone `certification_requirement_components` (solo módulos/secciones).
-- No permite distinguir una versión DRAFT de una PUBLISHED — el público solo ve lo que sea que el backend decida mostrar (normalmente la versión activa/publicada).
+No se agregó `GET .../versions` intermedio: el resumen de versiones viaja embebido en el listado.
 
-**Consecuencia para la UI admin:** no es posible cargar una versión DRAFT existente para reanudar su edición después de refrescar la página, ni mostrar el contenido de una versión recién clonada (el `clone` devuelve solo el stub de la nueva versión, sin su árbol/reglas copiados). La UI implementada en `sacdia-admin` documenta y mitiga esta limitación operando con estado en memoria durante la sesión de edición (ver `sacdia-admin/CLAUDE.md` / comentarios en el editor). **Se requiere trabajo de backend adicional** (fuera de este handoff) para exponer `GET /admin/certifications` y `GET /admin/certifications/:id/versions/:versionId` antes de soportar edición persistente multi-sesión.
+**Consecuencia para la UI admin:** el workbench ya no opera write-first en memoria. Al montar carga la lista real vía GET; seleccionar una versión hidrata el editor con su árbol y reglas (incluidas versiones recién clonadas), y las versiones PUBLISHED/RETIRED se muestran read-only con la acción de clonar disponible.
 
 ---
 
@@ -183,7 +180,7 @@ DRAFT ──publish──▶ PUBLISHED ──retire──▶ RETIRED
 
 - `createCertification`: crea `certification` + primera `certification_versions` en `DRAFT` (`version_number = 1`), con `title = name` de la certificación.
 - `createDraftVersion(certificationId)`: crea una nueva versión `DRAFT` con `version_number = max(existente) + 1`. No copia contenido (versión vacía).
-- `cloneVersion(certificationId, versionId)`: la versión origen debe existir y **no puede estar en `DRAFT`** (`source.status === 'DRAFT'` → `400 CERT_VERSION_NOT_PUBLISHED`; en la práctica esto significa que solo se clona desde `PUBLISHED` o `RETIRED`). Copia metadatos (`title`, `description`, duraciones), reglas de elegibilidad y árbol completo (módulos → secciones → componentes) a la nueva versión `DRAFT` (`version_number` incrementado). La respuesta HTTP de este endpoint **solo devuelve la fila de la nueva versión**, no el árbol/reglas copiados (ver GAP §1.1).
+- `cloneVersion(certificationId, versionId)`: la versión origen debe existir y **no puede estar en `DRAFT`** (`source.status === 'DRAFT'` → `400 CERT_VERSION_NOT_PUBLISHED`; en la práctica esto significa que solo se clona desde `PUBLISHED` o `RETIRED`). Copia metadatos (`title`, `description`, duraciones), reglas de elegibilidad y árbol completo (módulos → secciones → componentes) a la nueva versión `DRAFT` (`version_number` incrementado). La respuesta HTTP de este endpoint **solo devuelve la fila de la nueva versión**, no el árbol/reglas copiados; la UI los recupera con `GET .../versions/:versionId` (§1.1).
 - `publishVersion(certificationId, versionId, actorUserId)`: valida `assertVersionMutable` (debe ser `DRAFT`) y `assertPublishable` (criterio de publicación, ver §3.3). Si existe una versión `PUBLISHED` previa de la misma certificación, la retira automáticamente (`status = RETIRED`, `retired_at = now`) en la misma transacción antes de marcar la nueva como `PUBLISHED` (`published_at = now`, `published_by_id = actorUserId`). **Solo puede existir una versión `PUBLISHED` por certificación a la vez.**
 - `retireVersion(certificationId, versionId)`: requiere `status === 'PUBLISHED'` (si no, `400 CERT_VERSION_NOT_PUBLISHED`). Marca `RETIRED` + `retired_at`. No aplica `assertVersionMutable` (tiene su propia guarda de estado).
 
@@ -254,12 +251,9 @@ Los errores de validación de `class-validator` a nivel de DTO (p. ej. `name` va
 
 ## 6. Resumen de gaps y decisiones tomadas en la UI (`sacdia-admin`)
 
-1. **No hay lectura admin de versiones (§1.1).** La UI opera con un "workbench" en memoria por certificación durante la sesión: al crear una certificación, crear un draft, o guardar reglas/árbol, se usa la respuesta de la propia mutación (que sí devuelve el contenido actualizado) para mantener el estado visible. Cerrar y reabrir la página, o clonar una versión, no permite recuperar el contenido existente hasta que el backend exponga los `GET` faltantes. La UI muestra un aviso explícito de esta limitación en el flujo de clonado y al reabrir el panel.
-2. **Recomendación de endpoints a agregar (fuera de este handoff, a proponer en el repo backend en un commit separado):**
-   - `GET /admin/certifications?status=&page=&limit=` — listado con conteo de versiones por estado.
-   - `GET /admin/certifications/:certificationId/versions` — listado de versiones (metadatos únicamente).
-   - `GET /admin/certifications/:certificationId/versions/:versionId` — detalle completo (árbol + reglas) para poblar el editor al reanudar edición o revisar un clon.
-3. **No se modificó el backend** como parte de esta tarea (regla explícita del Step 2). Este documento sirve de base para un ticket de seguimiento.
+1. **[RESUELTO 2026-08-12] Lectura admin de versiones (§1.1).** El backend expone `GET /admin/certifications` y `GET /admin/certifications/:certificationId/versions/:versionId`; la UI carga la lista real al montar, hidrata el workbench por versión (incluidos clones) y muestra PUBLISHED/RETIRED en modo lectura. Se eliminaron los avisos de "estado solo en memoria de sesión" del panel y del flujo de clonado.
+2. **Endpoints agregados** (variante simplificada de la recomendación original): sin query params de paginación/filtro por ahora y sin `GET .../versions` intermedio (el resumen de versiones va embebido en el listado). Extender con filtros/paginación si el catálogo crece.
+3. El backend original de esta fase no se modificó (regla del Step 2); los GET se agregaron en un follow-up sobre la misma branch (`feat/configurable-certifications`).
 
 ---
 
