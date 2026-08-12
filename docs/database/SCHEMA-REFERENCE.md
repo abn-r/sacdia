@@ -179,6 +179,18 @@ Modelo de capacidad de seguros por Campo Local, vivo en runtime desde antes de e
 - `insurance_assignments` — asignación de un slot a un sujeto (`subject_type insurance_assignment_subject_enum`: user o participante externo de camporee), `valid_from/valid_until DATE`, `status insurance_assignment_status_enum` default `PENDING_CONFIRMATION`. Sin API HTTP de assign hasta payment-orders.
 - `insurance_evidence_files` — evidencia privada en R2 ligada a compra o assignment (`evidence_type insurance_evidence_type_enum`, `file_key`, magic-bytes validados en upload).
 
+### Field payment orders (`field_payment_orders`, `field_payment_order_lines`, `field_payment_order_proofs`, `field_payment_folio_counters`, `field_payment_order_configs`, `insurance_reassignment_requests`)
+
+Órdenes de pago territoriales (migración `20260812220000_field_payment_orders`, 2026-08-12). Fuente estructural: `sacdia-backend/prisma/schema.prisma`.
+
+- `field_payment_orders` — orden grupal por sección: `purpose field_payment_order_purpose_enum` (`INSURANCE|CAMPOREE`), `local_field_id`, `club_id`, `club_section_id`, folio secuencial por LF/año (`folio`, `folio_reference` unique por LF), referencia de propósito (`insurance_cycle_config_id?` XOR `local_camporee_id?` vía CHECK), `currency`, `unit_cost_centavos`, `total_centavos`, `status field_payment_order_status_enum` (`ISSUED|PROOF_SUBMITTED|APPROVED|PROOF_REJECTED|CANCELLED|EXPIRED`), `expires_at` (default 15 días vía `system_config`), `issued_by_id`, `idempotency_key?` (unique por emisor), auditoría de transiciones (`approved_by_id/at`, `cancelled_by_id/at`, `expired_at`).
+- `field_payment_order_lines` — beneficiario nombrado por línea: `sequence`, `beneficiary_user_id`, `unit_cost_centavos`, `purpose`, `purpose_ref_id`, `active_guard BOOLEAN` (parte del unique parcial que impide dos órdenes activas del mismo beneficiario para el mismo propósito; se apaga al cancelar/expirar).
+- `field_payment_order_proofs` — comprobantes subidos a R2 (`file_key`, `file_name`, `mime_type`, `size_bytes`), `status field_payment_order_proof_status_enum` (`SUBMITTED|APPROVED|REJECTED`), `uploaded_by_id`, `reviewed_by_id/at`, `reject_reason?`. Maker-checker: quien sube no puede aprobar.
+- `field_payment_folio_counters` — contador `(local_field_id, year)` con `last_folio`; asignación con `FOR UPDATE` dentro de la transacción de creación. Formato `ORD{year}{####}`.
+- `field_payment_order_configs` — instrucciones de pago por LF (unique `local_field_id`): datos bancarios (`bank_name/account/clabe/holder`) y/o `cash_instructions` (caja del campo), `extra_notes`, `active`. Requerida para renderizar el PDF de la orden.
+- `insurance_reassignment_requests` — solicitud de transferencia de cobertura activa entre miembros del mismo club: `insurance_assignment_id`, `from_user_id`, `to_user_id`, `reason?`, `status` (`PENDING|APPROVED|REJECTED`), reviewer + `reject_reason?`.
+- **Flags en `system_config`**: `field_payment_orders_v1` (JSON con lista de `local_field_id` habilitados) y `field_payment_orders.expiry_days` (default `15`).
+
 ### `achievement_categories`, `achievements`, `user_achievements`, `achievement_event_log`
 
 > **NO CANON** — Dominio achievements documentado como feature operativa sin promocion al canon. Autoridad estructural: `sacdia-backend/prisma/schema.prisma`.

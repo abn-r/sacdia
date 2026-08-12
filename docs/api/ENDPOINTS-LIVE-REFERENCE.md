@@ -8,9 +8,9 @@
 
 **Estado**: ACTIVE
 **Actualizado**: 2026-08-12
-**Total endpoints**: 738 decoradores HTTP en 94 controllers (certificaciones configurables e insurance capacity model sincronizados manualmente)
-**Métodos**: GET 291 · POST 207 · PATCH 103 · DELETE 88 · PUT 8
-**Auth detectada**: JWT 685 · Public 12
+**Total endpoints**: 757 decoradores HTTP en 96 controllers (certificaciones configurables, insurance capacity model y field-payment-orders sincronizados manualmente)
+**Métodos**: GET 298 · POST 219 · PATCH 103 · DELETE 88 · PUT 8
+**Auth detectada**: JWT 704 · Public 12
 
 ## Cómo leer esta referencia
 
@@ -64,7 +64,7 @@
 | club-enrollments | 7 |
 | clubs | 16 |
 | club-roles | 2 |
-| admin-coordination | 8 |
+| admin-coordination | 9 |
 | coordination | 1 |
 | dashboard | 1 |
 | data-export | 3 |
@@ -1009,6 +1009,7 @@ Path base: `/api/v1/certifications/users/:userId/certification-enrollments/:enro
 | GET | `/api/v1/admin/coordination/local-fields/:localFieldId/assignments` | JWT | Permisos: coordination:manage; Global: admin, super-admin, director-lf, assistant-lf, director-union, assistant-union, director-dia, assistant-dia | Listar asignaciones de coordinadores | CoordinationService.listAssignments() | `src/coordination/coordination.controller.ts` |
 | POST | `/api/v1/admin/coordination/local-fields/:localFieldId/assignments` | JWT | Permisos: coordination:manage; Global: admin, super-admin, director-lf, assistant-lf, director-union, assistant-union, director-dia, assistant-dia | Crear asignación de coordinador | CoordinationService.createAssignment() | `src/coordination/coordination.controller.ts` |
 | PATCH | `/api/v1/admin/coordination/assignments/:assignmentId` | JWT | Permisos: coordination:manage; Global: admin, super-admin, director-lf, assistant-lf, director-union, assistant-union, director-dia, assistant-dia | Actualizar asignación de coordinador | CoordinationService.updateAssignment() | `src/coordination/coordination.controller.ts` |
+| POST | `/api/v1/admin/coordination/local-fields/:localFieldId/backfill` | JWT | Permisos: coordination:manage; Global: admin, super-admin, director-lf, assistant-lf, director-union, assistant-union, director-dia, assistant-dia | Migrar coordinadores legacy (rol + local_field_id) a asignación GENERAL | CoordinationService.backfillLegacyAssignments() | `src/coordination/coordination.controller.ts` |
 
 ### coordination
 
@@ -1133,6 +1134,31 @@ Path base: `/api/v1/certifications/users/:userId/certification-enrollments/:enro
 | POST | `/api/v1/insurance/purchases/:purchaseId/confirm` | JWT | Permisos: insurance:review | Confirmar compra y materializar slots AVAILABLE | InsurancePurchasesService.confirm() | `src/insurance/insurance-purchases.controller.ts` |
 | POST | `/api/v1/insurance/purchases/:purchaseId/reject` | JWT | Permisos: insurance:review | Rechazar compra de cupos | InsurancePurchasesService.reject() | `src/insurance/insurance-purchases.controller.ts` |
 | POST | `/api/v1/insurance/purchases/:purchaseId/reverse` | JWT | Permisos: insurance:review | Revertir compra confirmada | InsurancePurchasesService.reverse() | `src/insurance/insurance-purchases.controller.ts` |
+
+### field-payment-orders
+
+Órdenes de pago territoriales (seguros + camporees). Flag `field_payment_orders_v1` por Campo Local; expiración default 15 días (`field_payment_orders.expiry_days`).
+
+| Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
+| --- | --- | --- | --- | --- | --- | --- |
+| POST | `/api/v1/insurance/payment-orders` | JWT | Permisos: field-payment-orders:create | Emitir orden grupal de seguro (ciclo + beneficiarios nombrados) | FieldPaymentOrdersService.createInsuranceOrder() | `src/field-payment-orders/field-payment-orders.controller.ts` |
+| POST | `/api/v1/camporees/:camporeeId/payment-orders` | JWT | Permisos: field-payment-orders:create | Emitir orden de inscripción a camporee local | FieldPaymentOrdersService.createCamporeeOrder() | `src/field-payment-orders/field-payment-orders.controller.ts` |
+| GET | `/api/v1/payment-orders` | JWT | Permisos: field-payment-orders:read | Listar órdenes del alcance del actor (filtros purpose/status/camporee_id) | FieldPaymentOrdersService.list() | `src/field-payment-orders/field-payment-orders.controller.ts` |
+| GET | `/api/v1/payment-orders/review-queue` | JWT | Permisos: field-payment-orders:review | Bandeja de revisión LF (PROOF_SUBMITTED) | FieldPaymentOrdersService.reviewQueue() | `src/field-payment-orders/field-payment-orders.controller.ts` |
+| GET | `/api/v1/payment-orders/context` | JWT | Permisos: field-payment-orders:read | Disponibilidad del flujo + ciclos de seguro para la sección activa (app) | FieldPaymentOrdersService.getIssuerContext() | `src/field-payment-orders/field-payment-orders.controller.ts` |
+| GET | `/api/v1/payment-orders/config` | JWT | Permisos: field-payment-orders:configure | Instrucciones de pago del Campo Local (banco/caja) | FieldPaymentOrderConfigsService.get() | `src/field-payment-orders/field-payment-orders.controller.ts` |
+| POST | `/api/v1/payment-orders/config` | JWT | Permisos: field-payment-orders:configure | Crear/actualizar instrucciones de pago del Campo Local | FieldPaymentOrderConfigsService.upsert() | `src/field-payment-orders/field-payment-orders.controller.ts` |
+| GET | `/api/v1/payment-orders/:orderId` | JWT | Permisos: field-payment-orders:read | Detalle de orden con líneas y comprobantes | FieldPaymentOrdersService.get() | `src/field-payment-orders/field-payment-orders.controller.ts` |
+| GET | `/api/v1/payment-orders/:orderId/document` | JWT | Permisos: field-payment-orders:read | PDF imprimible de la orden (PDFKit) | FieldPaymentOrdersService.getDocument() | `src/field-payment-orders/field-payment-orders.controller.ts` |
+| GET | `/api/v1/payment-orders/:orderId/proof` | JWT | Permisos: field-payment-orders:read | URL firmada del comprobante (TTL 15 min) | FieldPaymentOrdersService.getProofDownload() | `src/field-payment-orders/field-payment-orders.controller.ts` |
+| POST | `/api/v1/payment-orders/:orderId/proof` | JWT | Permisos: field-payment-orders:upload-proof | Subir comprobante (multipart, PDF/JPG/PNG ≤10 MB, magic bytes) | FieldPaymentOrdersService.uploadProof() | `src/field-payment-orders/field-payment-orders.controller.ts` |
+| POST | `/api/v1/payment-orders/:orderId/cancel` | JWT | Permisos: field-payment-orders:cancel | Cancelar orden ISSUED/PROOF_REJECTED | FieldPaymentOrdersService.cancel() | `src/field-payment-orders/field-payment-orders.controller.ts` |
+| POST | `/api/v1/payment-orders/:orderId/approve` | JWT | Permisos: field-payment-orders:review | Aprobar comprobante y materializar fulfillment (maker-checker) | FieldPaymentOrdersService.approve() | `src/field-payment-orders/field-payment-orders.controller.ts` |
+| POST | `/api/v1/payment-orders/:orderId/reject` | JWT | Permisos: field-payment-orders:review | Rechazar comprobante con motivo obligatorio | FieldPaymentOrdersService.reject() | `src/field-payment-orders/field-payment-orders.controller.ts` |
+| POST | `/api/v1/insurance/reassignments` | JWT | Permisos: field-payment-orders:create | Solicitar reasignación de cobertura activa (mismo club) | InsuranceReassignmentsService.create() | `src/field-payment-orders/insurance-reassignments.controller.ts` |
+| GET | `/api/v1/insurance/reassignments` | JWT | Permisos: field-payment-orders:read | Listar solicitudes de reasignación del alcance | InsuranceReassignmentsService.list() | `src/field-payment-orders/insurance-reassignments.controller.ts` |
+| POST | `/api/v1/insurance/reassignments/:requestId/approve` | JWT | Permisos: field-payment-orders:review | Aprobar reasignación (mueve assignment + slot movement) | InsuranceReassignmentsService.approve() | `src/field-payment-orders/insurance-reassignments.controller.ts` |
+| POST | `/api/v1/insurance/reassignments/:requestId/reject` | JWT | Permisos: field-payment-orders:review | Rechazar reasignación con motivo | InsuranceReassignmentsService.reject() | `src/field-payment-orders/insurance-reassignments.controller.ts` |
 
 ### inventory
 

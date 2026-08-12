@@ -102,13 +102,16 @@ La inscripcion de miembros en camporees tiene implicaciones directas con el modu
 
 - **Sin logística de inventario/compras**: El roster permite asignar responsables de cocina/apoyo/administración a actividades, pero no gestiona inventario, compras, transporte o alojamiento.
 
-## Órdenes de pago territoriales (rollout en curso)
+## Órdenes de pago territoriales (IMPLEMENTADO 2026-08-12)
 
-Plan `docs/plans/2026-08-05-insurance-camporee-payment-orders-plan.md` (+ addendum 2026-08-12): la inscripción de miembros pasa a ser payment-first mediante `field_payment_orders` grupales.
+Plan `docs/plans/2026-08-05-insurance-camporee-payment-orders-plan.md` (+ addendum 2026-08-12): la inscripción de miembros es payment-first mediante `field_payment_orders` grupales. Implementación en `sacdia-backend/src/field-payment-orders/` (branch `feat/field-payment-orders`).
 
-- **Ningún camporee es gratis**: clubes y personal de apoyo siempre pagan inscripción; `registration_cost` null/0 es error de configuración. Solo jueces (`camporee_judges`) y staff del Campo Local/Unión (`camporee_staff_members`) no pagan; sus flujos son independientes del register de miembros y no cambian.
-- **Flag `field_payment_orders_v1`** (`system_config`, lista JSON de `local_field_id`): ON → `POST /camporees/:id/register` de miembros exige orden de pago aprobada; los `camporee_members` se crean al aprobar el comprobante, no antes. OFF → register directo legacy intacto.
-- **Expiración de órdenes**: `field_payment_orders.expiry_days` (`system_config`), default 15 días.
+- **Ningún camporee es gratis**: clubes y personal de apoyo siempre pagan inscripción; `registration_cost` null/0 es error de configuración (`FIELD_PAYMENT_ORDER_COST_NOT_CONFIGURED`). Solo jueces (`camporee_judges`) y staff del Campo Local/Unión (`camporee_staff_members`) no pagan; sus flujos son independientes del register de miembros y no cambian.
+- **Emisión**: `POST /camporees/:camporeeId/payment-orders` (permiso `field-payment-orders:create`). Valida camporee local activo, club/sección inscrita, membresía activa, seguro vigente por beneficiario y deadline de registro de miembros.
+- **Fulfillment**: al aprobar el comprobante (bandeja LF, maker-checker) se crean los `camporee_members` con estado aprobado en la misma transacción, enlazados a las líneas de la orden. No se crean antes.
+- **Flag `field_payment_orders_v1`** (`system_config`, lista JSON de `local_field_id`): ON → `POST /camporees/:id/register` de miembros queda bloqueado (`FIELD_PAYMENT_ORDER_LEGACY_DISABLED`); la orden es la única vía. OFF → register directo legacy intacto (la app muestra el flujo legacy).
+- **App**: con flag ON, la vista de inscripción redirige a emitir orden de pago y a consultar las órdenes del camporee; el admin muestra pestaña "Órdenes de pago" en el detalle del camporee local.
+- **Expiración de órdenes**: `field_payment_orders.expiry_days` (`system_config`), default 15 días; lazy expiry libera a los beneficiarios para una nueva orden.
 - `camporee_payments` por miembro queda legado (histórico/unión).
 
 ## Estado de implementacion

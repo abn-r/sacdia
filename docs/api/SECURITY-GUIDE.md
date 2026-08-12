@@ -136,6 +136,31 @@ El dominio separa **browse de catálogo**, **progresión del participante**, **c
 
 ---
 
+## RBAC de órdenes de pago territoriales (field-payment-orders)
+
+El dominio separa **emisión** (directiva de club), **revisión** (liderazgo del Campo Local) y **configuración** (instrucciones de pago del LF).
+
+### Matriz de permisos
+
+| Permiso | Scope | Uso runtime | Roles seed |
+| --- | --- | --- | --- |
+| `field-payment-orders:read` | secciones activas del actor; LF completo para revisores | Listar/leer órdenes, PDF, comprobante, contexto | Directiva de club (CLUB) + liderazgo LF + admin (GLOBAL) |
+| `field-payment-orders:create` | sección activa | Emitir órdenes de seguro/camporee, solicitar reasignaciones | secretary, treasurer, secretary-treasurer, director (CLUB) |
+| `field-payment-orders:upload-proof` | sección activa | Subir comprobante de pago | Directiva de club |
+| `field-payment-orders:cancel` | sección activa | Cancelar orden ISSUED/PROOF_REJECTED | Directiva de club |
+| `field-payment-orders:review` | `local_field_id` del actor (global para admin) | Bandeja, aprobar/rechazar comprobantes y reasignaciones | `director-lf`, `assistant-lf`, `admin`, `super-admin` |
+| `field-payment-orders:configure` | LF propio; admin global puede indicar `local_field_id` | Instrucciones de pago (banco/caja) | `director-lf`, `assistant-lf`, `admin`, `super-admin` |
+
+### Controles clave
+
+- **Maker-checker en approve:** quien subió el comprobante no puede aprobarlo → `403 FIELD_PAYMENT_ORDER_MAKER_CHECKER`. La aprobación re-lee la orden dentro de la transacción con filtro de status para serializar aprobaciones concurrentes (perder la carrera → `409 FIELD_PAYMENT_ORDER_INVALID_TRANSITION`).
+- **Ownership de comprobantes:** archivos en R2 con clave generada por el servidor; descarga solo vía URL firmada con TTL 15 min emitida tras verificar scope (sección propia, o revisor del mismo LF). Upload valida MIME allow-list (`application/pdf`, `image/jpeg`, `image/png`), magic bytes y ≤10 MB.
+- **Scope territorial:** los revisores solo ven/mutan órdenes de su `local_field_id`; fuera de scope → `403 FIELD_PAYMENT_ORDER_FORBIDDEN` sin filtrar existencia.
+- **Idempotencia de emisión:** header de idempotencia por emisor (`idempotency_key` unique) y unique parcial `active_guard` que impide dos órdenes activas del mismo beneficiario para el mismo propósito.
+- **Feature flag fail-closed:** con `field_payment_orders_v1` OFF para el LF, la emisión responde `403 FIELD_PAYMENT_ORDER_FLAG_DISABLED`; con flag ON, los flujos legacy (alta directa de seguros, purchases qty, register directo de camporee) responden `403 FIELD_PAYMENT_ORDER_LEGACY_DISABLED`.
+
+---
+
 ## RBAC y scope del dashboard operativo
 
 `GET /api/v1/admin/analytics/operations-dashboard` usa `JwtAuthGuard` y `GlobalRolesGuard`, pero el guard de rol solo habilita la superficie. `OperationsDashboardScopeService` vuelve a resolver el perfil de autorización y fuerza el alcance territorial antes de consultar métricas.

@@ -113,6 +113,31 @@ El flujo administrativo de camporee separa personal operativo, agenda y scoring:
 - Capturar una zona IANA explícita (por ejemplo `America/Mexico_City`) cuando se confirme la sede: el backend la audita con el actor. Un PATCH sin `timezone` no borra esa verificación.
 - La UI de clubes debe distinguir `not_open_yet`, `open`, `late_approval_required` y `manually_frozen`. Al estar `not_open_yet`, no ofrecer inscripción ni flujo de aprobación tardía; el deadline es inclusivo.
 
+## Actualizacion 2026-08-12 (Órdenes de pago territoriales)
+
+Contrato para admin y app. Rutas completas: `docs/api/ENDPOINTS-LIVE-REFERENCE.md` §field-payment-orders. Contrato detallado para admin: `sacdia-admin/docs/plans/handoffs/field-payment-orders-admin-handoff.md`.
+
+### Decidir qué flujo mostrar (app)
+
+`GET /payment-orders/context` → `{ enabled, local_field_id, club_section_id, insurance_cycles[] }`. Con `enabled: false`, mostrar los flujos legacy (alta directa de seguro, register directo de camporee). Con `enabled: true`, la emisión de órdenes es la única vía; los endpoints legacy responden `403 FIELD_PAYMENT_ORDER_LEGACY_DISABLED`.
+
+### Ciclo de vida de la orden
+
+`ISSUED → PROOF_SUBMITTED → APPROVED` | `PROOF_REJECTED` (permite re-subir o cancelar) | `CANCELLED` | `EXPIRED` (lazy, default 15 días).
+
+1. Emitir: `POST /insurance/payment-orders` (`insurance_cycle_config_id` + `beneficiary_user_ids[]`) o `POST /camporees/:id/payment-orders` (`beneficiary_user_ids[]`).
+2. PDF: `GET /payment-orders/:id/document` (binario `application/pdf`; el Bearer va en el header, nunca en la URL).
+3. Comprobante: `POST /payment-orders/:id/proof` multipart campo `file` (PDF/JPG/PNG ≤10 MB).
+4. Revisión (admin): `GET /payment-orders/review-queue` → `POST /payment-orders/:id/approve|reject` (reject requiere `reason`). Approve materializa cobertura/inscripciones automáticamente.
+
+### Montos
+
+`unit_cost_centavos` y `total_centavos` son enteros en centavos MXN. Los ciclos de seguro (`insurance_cycles[].unit_cost`) llegan como decimal en pesos (string) — convertir a centavos en cliente.
+
+### Errores de dominio
+
+Envelope estándar con `code` `FIELD_PAYMENT_ORDER_*` (i18n en los 4 locales de app/admin). Claves frecuentes: `FLAG_DISABLED`, `LEGACY_DISABLED`, `DUPLICATE_BENEFICIARY`, `ELIGIBILITY_FAILED`, `COST_NOT_CONFIGURED`, `EXPIRED`, `MAKER_CHECKER`, `INVALID_TRANSITION`.
+
 ## Actualizacion 2026-08-11 (Motor de certificaciones configurables)
 
 Contrato mínimo para admin y app móvil. Fuente de verdad de rutas: `docs/api/ENDPOINTS-LIVE-REFERENCE.md` §certifications.

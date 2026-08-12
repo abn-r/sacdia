@@ -53,10 +53,34 @@ Además del flujo legacy `member_insurances`, el backend tiene un **modelo de ca
 
 El plan `docs/plans/2026-08-05-insurance-camporee-payment-orders-plan.md` cierra el gap: órdenes grupales con beneficiarios → aprobación LF → slot + assignment ACTIVE + upsert bridge a `member_insurances`.
 
+### Órdenes de pago territoriales (IMPLEMENTADO 2026-08-12)
+
+Módulo `src/field-payment-orders/` (branch `feat/field-payment-orders` en los tres repos):
+
+- **Emisión**: `POST /insurance/payment-orders` (ciclo + beneficiarios nombrados, permiso `field-payment-orders:create`). Valida ciclo activo del LF/club_type, membresía activa en la sección, sin cobertura activa duplicada y sin otra orden activa del mismo beneficiario (unique parcial `active_guard`). Folio secuencial `ORD{year}{####}` por LF con `FOR UPDATE`.
+- **Documento**: `GET /payment-orders/:id/document` genera PDF (PDFKit) con beneficiarios, totales e instrucciones de pago del LF (`field_payment_order_configs`: banco y/o caja del campo; se configura en admin → Seguros → Configuración).
+- **Comprobante**: `POST /payment-orders/:id/proof` (multipart, PDF/JPG/PNG ≤10 MB con magic bytes, R2). Estado `ISSUED → PROOF_SUBMITTED`.
+- **Revisión LF**: bandeja `GET /payment-orders/review-queue`; `approve` exige maker-checker (quien subió el comprobante no puede aprobar) y materializa en la misma transacción: `insurance_purchases` CONFIRMED + `insurance_coverage_slots` + `insurance_assignments` ACTIVE + slot movements + **upsert bridge a `member_insurances`** (camporees sigue funcionando). `reject` requiere motivo y permite re-subir.
+- **Expiración**: lazy expiry al listar/leer; órdenes `ISSUED` vencidas pasan a `EXPIRED` y liberan `active_guard`.
+- **Reasignaciones**: `POST/GET /insurance/reassignments` + approve/reject. Transferencia de cobertura activa entre miembros del mismo club; aprueba LF; mueve el assignment y registra slot movement.
+- **Superficies**: admin (`/dashboard/payment-orders` bandeja + reasignaciones; `/dashboard/insurance/config` productos/ciclos/instrucciones de pago) y app (emitir orden con multi-selección de elegibles, PDF, subir comprobante, timeline de estados; FAB de seguros redirige al flujo nuevo con flag ON).
+- **Observabilidad**: eventos estructurados `field_payment_order.{issued,proof_submitted,approved,rejected,cancelled,expired,fulfill_fail}` con `approve_latency_ms` en logs del backend.
+
 ### Feature flags (rollout órdenes de pago)
 
 - `field_payment_orders_v1` (`system_config`): value JSON con lista de `local_field_id` habilitados. Flag ON en un LF: alta directa legacy y submit de purchases qty quedan bloqueados; el flujo nuevo es la única vía de alta.
 - `field_payment_orders.expiry_days` (`system_config`): días para expirar órdenes `ISSUED` sin comprobante. Default **15**.
+
+### Runbook — piloto por Campo Local (operación humana post-merge)
+
+Pasos para habilitar el flujo en un LF piloto (NO ejecutar como parte del deploy automático):
+
+1. **Seed de catálogo**: crear `insurance_products` + `insurance_cycle_configs` del LF (admin → Seguros → Configuración, permiso `insurance:configure`), con `unit_cost` y `purchase_deadline` del año vigente.
+2. **Instrucciones de pago**: capturar `field_payment_order_configs` del LF (banco y/o caja del campo). Sin config activa, el PDF de la orden falla con `FIELD_PAYMENT_ORDER_CONFIG_NOT_FOUND`.
+3. **Permisos**: verificar que el seed de `field-payment-orders:*` está aplicado (`prisma/seeds/permissions.seed.sql` + `role-permissions.seed.sql`).
+4. **Flag ON**: agregar el `local_field_id` a `system_config.field_payment_orders_v1` (JSON array). Desde ese momento el alta directa legacy y el submit de purchases qty quedan bloqueados en ese LF.
+5. **Drain de purchases pendientes**: resolver (confirmar/rechazar) las `insurance_purchases` en `PENDING_CONFIRMATION` del LF antes del flag ON, para no dejar compras huérfanas.
+6. **Rollback**: quitar el `local_field_id` del flag restaura el flujo legacy sin tocar datos; las órdenes ya aprobadas conservan su cobertura materializada.
 
 ### Base de datos
 - `member_insurances` — Seguros por miembro con campos:
