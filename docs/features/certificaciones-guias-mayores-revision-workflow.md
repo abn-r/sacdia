@@ -59,8 +59,9 @@ Errores frecuentes: `CERT_REQUIREMENT_INCOMPLETE`, `CERT_EVIDENCE_INVALID_TYPE`,
 ## 4. Flujo del revisor (por requisito)
 
 1. **Bandeja:** `GET /certifications/reviews/requirements?status=SUBMITTED` (u otro filtro)
-2. **Detalle:** `GET /certifications/reviews/requirements/:progressId` (incluye URLs firmadas de lectura para evidencias)
-3. **Decisión:**
+2. **Detalle:** `GET /certifications/reviews/requirements/:progressId` (metadata de respuestas/evidencias/historial; sin URLs firmadas embebidas)
+3. **Descarga de evidencia:** `GET /certifications/reviews/requirements/:progressId/evidences/:evidenceId/download` — URL firmada on-demand (TTL 15 min); solo evidencias activas `CONFIRMED` dentro de scope
+4. **Decisión:**
    - Aprobar: `POST .../approve` con `{ lock_version, comment? }`
    - Devolver: `POST .../request-changes` con `{ lock_version, comment }` (**obligatorio**)
 
@@ -80,15 +81,28 @@ Cada decisión registra evento en `certification_review_events`. Fuera de scope 
 
 ### Revisor
 
-1. **Bandeja de cierres:** `GET /certifications/reviews/final`
-2. **Aprobar comprobante:** `POST /certifications/reviews/final/:enrollmentId/approve-closeout-evidence` → inscripción `APPROVED`
-3. **Devolver cierre:** `POST .../request-changes` con comentario → inscripción `CHANGES_REQUESTED`; participante corrige y reinicia desde requisitos/cierre según corresponda
+1. **Bandeja de cierres:** `GET /certifications/reviews/final` (incluye `SUBMITTED_FOR_FINAL_REVIEW` y `APPROVED` para habilitar Certificar)
+2. **Ver comprobante:** `GET /certifications/reviews/final/:enrollmentId/closeout-evidence/download` (URL firmada on-demand, TTL 15 min)
+3. **Aprobar comprobante:** `POST /certifications/reviews/final/:enrollmentId/approve-closeout-evidence` → inscripción `APPROVED`
+4. **Devolver cierre:** `POST .../request-changes` con comentario → inscripción `CHANGES_REQUESTED`; participante corrige y reinicia desde requisitos/cierre según corresponda
 
 ### Certificador
 
 - `POST /certifications/reviews/final/:enrollmentId/certify` — revalida requisitos obligatorios `APPROVED` y comprobante `APPROVED`; transiciona a `CERTIFIED` (idempotente).
 
 Errores de cierre: `CERT_CLOSEOUT_INCOMPLETE`, `CERT_INVALID_TRANSITION`.
+
+---
+
+## 5.1 UI de revisión en admin
+
+Ruta: `/dashboard/certifications/reviews` (tabs **Requisitos** / **Cierres**).
+
+- Visibilidad: `certifications:review`. Botón **Certificar** además requiere `certifications:certify`.
+- Cliente API: `sacdia-admin/src/lib/api/certification-reviews.ts`.
+- Requisitos: filtro default `SUBMITTED`; detalle en Sheet; “Ver” pide URL firmada al click (no se cachea); devolver exige comentario no vacío.
+- Cierres: aprobar/devolver comprobante; certificar con diálogo de confirmación sobre filas `APPROVED`.
+- Sin paginación en esta fase (bandejas cortas).
 
 ---
 
@@ -130,4 +144,5 @@ No mapear estados automáticamente entre dominios sin ADR explícito.
 ## 8. Gaps documentados
 
 - No hay endpoint de historial dedicado por requisito en path de participante; el historial se expone en detalle de revisión (`GET .../reviews/requirements/:progressId`).
-- Clientes admin/app aún no implementan las bandejas descritas.
+- La app móvil del participante aún no implementa bandeja de revisión (fuera de alcance de la fase admin 2026-08-12).
+- Paginación/filtros avanzados de bandejas admin: extensión futura.

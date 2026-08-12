@@ -118,6 +118,7 @@ Quedan pendientes de operación humana: aplicar la migración y el seed contra N
 - `certification_module_progress` permanece como proyección legacy.
 - Honores Contabilidad / Anti-bullying I pueden faltar en catálogo → fallback TEXT_RESPONSE.
 - Fallos preexistentes admin en diálogos/worktrees.
+- **[RESUELTA 2026-08-12] Bandeja de revisión sin UI admin:** implementada en `/dashboard/certifications/reviews` (requisitos + cierres + descarga firmada on-demand). Queda fuera de alcance la bandeja en la app móvil y la paginación avanzada.
 
 ## 8. Verificación manual sugerida
 

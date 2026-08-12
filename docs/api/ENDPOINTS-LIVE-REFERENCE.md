@@ -8,7 +8,7 @@
 
 **Estado**: ACTIVE
 **Actualizado**: 2026-08-11
-**Total endpoints**: 723 decoradores HTTP en 94 controllers (certificaciones configurables sincronizadas manualmente)
+**Total endpoints**: 725 decoradores HTTP en 94 controllers (certificaciones configurables sincronizadas manualmente)
 **Métodos**: GET 291 · POST 207 · PATCH 103 · DELETE 88 · PUT 8
 **Auth detectada**: JWT 685 · Public 12
 
@@ -870,6 +870,7 @@ Path base: `/api/v1/certifications/users/:userId/certification-enrollments/:enro
 | --- | --- | --- | --- | --- | --- | --- |
 | GET | `/api/v1/certifications/reviews/requirements` | JWT | Permisos: certifications:review; scope global | Bandeja de requisitos (filtro opcional `?status=`) | CertificationReviewService.getTray() | `src/certifications/controllers/certification-review.controller.ts` |
 | GET | `/api/v1/certifications/reviews/requirements/:progressId` | JWT | Permisos: certifications:review; scope global | Detalle de requisito con respuestas, evidencias e historial | CertificationReviewService.getDetail() | `src/certifications/controllers/certification-review.controller.ts` |
+| GET | `/api/v1/certifications/reviews/requirements/:progressId/evidences/:evidenceId/download` | JWT | Permisos: certifications:review; scope global | URL firmada efímera (TTL 15 min) de evidencia activa `CONFIRMED` del requisito; no acepta object key del cliente | CertificationReviewService.getEvidenceDownloadUrl() | `src/certifications/controllers/certification-review.controller.ts` |
 | POST | `/api/v1/certifications/reviews/requirements/:progressId/approve` | JWT | Permisos: certifications:review; scope global | Aprobar requisito `SUBMITTED` (`lock_version` obligatorio) | CertificationReviewService.approve() | `src/certifications/controllers/certification-review.controller.ts` |
 | POST | `/api/v1/certifications/reviews/requirements/:progressId/request-changes` | JWT | Permisos: certifications:review; scope global | Devolver requisito con comentario obligatorio | CertificationReviewService.requestChanges() | `src/certifications/controllers/certification-review.controller.ts` |
 
@@ -877,7 +878,8 @@ Path base: `/api/v1/certifications/users/:userId/certification-enrollments/:enro
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
-| GET | `/api/v1/certifications/reviews/final` | JWT | Permisos: certifications:review; scope global | Bandeja de cierres pendientes | CertificationCloseoutService.getFinalTray() | `src/certifications/controllers/certification-closeout.controller.ts` |
+| GET | `/api/v1/certifications/reviews/final` | JWT | Permisos: certifications:review; scope global | Bandeja de cierres (`SUBMITTED_FOR_FINAL_REVIEW` y `APPROVED`) con metadata del comprobante | CertificationCloseoutService.getFinalTray() | `src/certifications/controllers/certification-closeout.controller.ts` |
+| GET | `/api/v1/certifications/reviews/final/:enrollmentId/closeout-evidence/download` | JWT | Permisos: certifications:review; scope global | URL firmada efímera (TTL 15 min) del comprobante de junta activo `CONFIRMED` | CertificationCloseoutService.getCloseoutEvidenceDownloadUrl() | `src/certifications/controllers/certification-closeout.controller.ts` |
 | POST | `/api/v1/certifications/reviews/final/:enrollmentId/approve-closeout-evidence` | JWT | Permisos: certifications:review; scope global | Aprobar comprobante de junta → inscripción `APPROVED` | CertificationCloseoutService.approveCloseoutEvidence() | `src/certifications/controllers/certification-closeout.controller.ts` |
 | POST | `/api/v1/certifications/reviews/final/:enrollmentId/request-changes` | JWT | Permisos: certifications:review; scope global | Devolver cierre con comentario obligatorio | CertificationCloseoutService.requestChanges() | `src/certifications/controllers/certification-closeout.controller.ts` |
 | POST | `/api/v1/certifications/reviews/final/:enrollmentId/certify` | JWT | Permisos: certifications:certify; scope global | Certificar inscripción válida (idempotente) | CertificationCloseoutService.certify() | `src/certifications/controllers/certification-closeout.controller.ts` |
