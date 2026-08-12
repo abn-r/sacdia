@@ -102,6 +102,15 @@ La inscripcion de miembros en camporees tiene implicaciones directas con el modu
 
 - **Sin logística de inventario/compras**: El roster permite asignar responsables de cocina/apoyo/administración a actividades, pero no gestiona inventario, compras, transporte o alojamiento.
 
+## Órdenes de pago territoriales (rollout en curso)
+
+Plan `docs/plans/2026-08-05-insurance-camporee-payment-orders-plan.md` (+ addendum 2026-08-12): la inscripción de miembros pasa a ser payment-first mediante `field_payment_orders` grupales.
+
+- **Ningún camporee es gratis**: clubes y personal de apoyo siempre pagan inscripción; `registration_cost` null/0 es error de configuración. Solo jueces (`camporee_judges`) y staff del Campo Local/Unión (`camporee_staff_members`) no pagan; sus flujos son independientes del register de miembros y no cambian.
+- **Flag `field_payment_orders_v1`** (`system_config`, lista JSON de `local_field_id`): ON → `POST /camporees/:id/register` de miembros exige orden de pago aprobada; los `camporee_members` se crean al aprobar el comprobante, no antes. OFF → register directo legacy intacto.
+- **Expiración de órdenes**: `field_payment_orders.expiry_days` (`system_config`), default 15 días.
+- `camporee_payments` por miembro queda legado (histórico/unión).
+
 ## Estado de implementacion
 
 - **Prioridad**: Completo — backend, admin y app implementados con CRUD completo; el admin incluye detalle de camporee local y de unión, con eventos/agenda por scope; la app registra miembros desde una lista de la sección activa y el backend infiere el tipo de camporee
