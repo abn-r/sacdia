@@ -110,7 +110,8 @@ ISSUED
   │     ├── APPROVED
   │     └── PROOF_REJECTED ──> PROOF_SUBMITTED   (mismo folio)
   ├── CANCELLED   (solo desde ISSUED / PROOF_REJECTED)
-  └── EXPIRED     (job o check lazy desde ISSUED sin proof)
+  └── EXPIRED     (job o check lazy desde ISSUED sin proof; plazo configurable
+                   en system_config `field_payment_orders.expiry_days`, default 15 días)
 ```
 
 Beneficiarios, precios, producto/evento: inmutables desde `ISSUED`. Cambiar = cancelar + nueva orden.
@@ -155,7 +156,7 @@ Beneficiarios, precios, producto/evento: inmutables desde `ISSUED`. Cambiar = ca
 3. Opcional: 1 `camporee_payments` agregado o link `order_id` en metadata — **no** N pagos parciales.
 4. Si uno falla elegibilidad → rechazar approve completo, cero miembros nuevos.
 
-**Camporee gratis** (`registration_cost` null/0): conservar `POST …/register` directo; sin orden ni ledger.
+**Camporee sin pago** — SUPERSEDED (addendum 2026-08-12): ningún camporee es gratis para clubes ni personal de apoyo; toda inscripción de miembros pasa por orden de pago con flag ON. Solo jueces (`camporee_judges`) y staff de Campo Local/Unión (`camporee_staff_members`) no pagan inscripción, y esos flujos ya son separados del register de miembros — no se tocan. `registration_cost` null/0 en un camporee = error de configuración: bloquear creación de órdenes y register de miembros con error explícito.
 
 ---
 
@@ -290,7 +291,7 @@ Copiar estilo `materials/orders/state-machine.ts` y `folio.service.ts`. Prefijo 
 - Create: `sacdia-backend/src/field-payment-orders/field-payment-order-pdf.service.ts`
 - Pattern: PDFKit como monthly-reports
 
-Debe incluir: folio, concepto, club/sección, beneficiarios, precio unitario, total, vencimiento, instrucciones caja, leyenda **“Orden de pago — no es comprobante fiscal”**.
+Debe incluir: folio, concepto, club/sección, beneficiarios, precio unitario, total, vencimiento, instrucciones de pago (datos bancarios Y opción de pago en la caja del Campo Local, según config del LF), leyenda **“Orden de pago — no es comprobante fiscal”**.
 
 **Commit:** `feat(field-payment-orders): generate printable order PDF`
 
@@ -402,11 +403,11 @@ Approve/reject llaman ports `InsuranceFulfillment` / `CamporeeFulfillment` (stub
 
 **Commit:** `feat(camporees): fulfill payment orders into members`
 
-### Task 3.3: Gate register/payment legacy when flag ON + cost > 0
+### Task 3.3: Gate register/payment legacy when flag ON
 
 **Files:**
 - `camporees.service.ts` register + payments endpoints
-- Free path untouched
+- SUPERSEDED "free path" (addendum 2026-08-12): con flag ON, TODO register de miembros exige orden aprobada; sin excepción por costo 0 (costo 0/null = error de config). Flujos de jueces y staff LF/Unión intactos (no pagan, no usan register de miembros).
 
 **Commit:** `feat(camporees): gate paid direct register behind payment orders flag`
 
@@ -483,6 +484,28 @@ Contract-first: ningún PR app/admin mergea sin endpoints documentados en LIVE r
 - Migración inventada de folios para `member_insurances` históricos
 
 ---
+
+## Addendum — verificación de runtime y ajustes de producto (2026-08-12)
+
+### Verificación contra `development`
+
+Las anclas de la sección 0 fueron re-verificadas el 2026-08-12: **todas confirmadas** con una excepción parcial:
+
+- **Feature flags (parcial):** existe `system_config` (tabla + `SystemConfigService.get()`) pero es global; NO hay flags por `local_field_id` ni módulo de feature flags. Resolución: usar `system_config` con key `field_payment_orders_v1` cuyo value JSON contiene la lista de `local_field_id` habilitados. Cumple "no inventar segundo mecanismo".
+- El plan no está implementado: cero rastro de `field_payment_orders` en schema, migraciones, seeds o código de los 3 repos.
+
+### Precisiones de runtime que el plan no registraba
+
+1. **Colisión de ruta admin:** `/dashboard/insurance` YA existe (CRUD de `member_insurances` + expiring). La config de productos/ciclos (Task 2.5) va en subruta propia (p.ej. `/dashboard/insurance/config`) sin pisar la existente.
+2. **Admin camporee ya maduro:** detalle con tabs clubs/members/payments/aprobaciones + voucher (`camporee-detail-tabs.tsx`). Task 3.4 = integrar la bandeja de órdenes a esa superficie, no construir desde cero.
+3. **Permiso de review:** `attendance:approve_late` existe (scope LF/Unión) pero su semántica es late-enrollment. Decisión: permiso único `field-payment-orders:review` para la bandeja de ambos propósitos, con grants espejo de `insurance:review` (`director-lf`, `assistant-lf`, `admin`, `super-admin`).
+4. **Prefijo HTTP real:** `/api/v1/...` confirmado; purchases usan `club-sections/:sectionId/insurance/purchases`.
+
+### Ajustes de producto (usuario, 2026-08-12)
+
+1. **Pago en banco O en caja del Campo Local.** La configuración por LF (`field_payment_order_configs`) debe soportar ambos: datos bancarios (cuenta/CLABE) e instrucciones de pago en caja. El PDF muestra las opciones configuradas.
+2. **Ningún camporee es gratis.** Clubes y personal de apoyo siempre pagan inscripción. Solo jueces y staff del Campo Local/Unión no pagan (sus flujos `camporee_judges`/`camporee_staff_members` son separados y no se tocan). Se elimina el "free path" del register de miembros: con flag ON, toda inscripción de miembros exige orden aprobada; `registration_cost` null/0 = error de configuración que bloquea órdenes y register.
+3. **Expiración configurable:** `system_config` key `field_payment_orders.expiry_days`, default **15 días**. Check lazy en lecturas/transiciones + job opcional.
 
 ## Key Learnings
 
