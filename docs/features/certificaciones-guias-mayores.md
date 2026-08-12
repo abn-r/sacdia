@@ -65,7 +65,7 @@ Modelos nuevos/ampliados (ver `docs/database/SCHEMA-REFERENCE.md`):
 ## Decisiones de diseño
 
 - **Versiones inmutables:** solo `DRAFT` es editable; publicar retira la versión anterior.
-- **Paths de participante:** `/users/:userId/certifications/:certificationId/requirements/:sectionId/...` (sin `enrollmentId` en URL).
+- **Paths de participante:** `/users/:userId/certification-enrollments/:enrollmentId/requirements/:requirementId/...` (contrato del plan base; ownership validado sobre la inscripción activa).
 - **Bandeja propia:** estados `APPROVED`/`CHANGES_REQUESTED`, distintos de clases/honores (`VALIDATED`/`REJECTED`). Ver ADR #8 en `docs/api/ARCHITECTURE-DECISIONS.md`.
 - **Browse vs progresión:** `certifications:read` (catálogo) separado de `user_certifications:*`. Ver `docs/canon/runtime-user-certifications.md`.
 
@@ -84,4 +84,4 @@ Detalle paso a paso: [`certificaciones-guias-mayores-revision-workflow.md`](cert
 ## Prioridad y siguiente acción
 
 - **Alta:** completar consumo en app del flujo por requisito; alinear admin con `AdminCertificationsController`.
-- **Siguiente acción concreta:** implementar pantalla de detalle de requisito en app consumiendo `GET/PUT/POST .../requirements/:sectionId`.
+- **Siguiente acción concreta:** implementar pantalla de detalle de requisito en app consumiendo `GET/PATCH/POST .../requirements/:requirementId`.

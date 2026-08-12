@@ -845,24 +845,24 @@ Los `POST` y `PATCH` de camporees locales y de unión aceptan `start_date` y `en
 
 #### Requisitos y evidencias (participante)
 
-Path base: `/api/v1/certifications/users/:userId/certifications/:certificationId/requirements/:sectionId`
+Path base: `/api/v1/certifications/users/:userId/certification-enrollments/:enrollmentId/requirements/:requirementId`. La inscripción se identifica por `enrollmentId` (debe existir, estar activa y pertenecer al `userId` autenticado).
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
-| GET | `.../requirements/:sectionId` | JWT | user_certifications:read; owner `userId` | Estado del requisito, respuestas y componentes | CertificationRequirementsService.getRequirement() | `src/certifications/controllers/user-certification-requirements.controller.ts` |
-| PUT | `.../requirements/:sectionId/draft` | JWT | user_certifications:manage; owner `userId` | Guardar borrador (solo `DRAFT` o `CHANGES_REQUESTED`) | CertificationRequirementsService.saveDraft() | `src/certifications/controllers/user-certification-requirements.controller.ts` |
-| POST | `.../requirements/:sectionId/submit` | JWT | user_certifications:manage; owner `userId` | Enviar requisito a revisión (`lock_version` obligatorio) | CertificationRequirementsService.submitRequirement() | `src/certifications/controllers/user-certification-requirements.controller.ts` |
-| POST | `.../requirements/:sectionId/evidences/presign` | JWT | user_certifications:manage; owner `userId` | URL firmada de subida R2 (`component_id`, MIME, tamaño) | CertificationEvidenceService.presign() | `src/certifications/controllers/user-certification-requirements.controller.ts` |
-| POST | `.../requirements/:sectionId/evidences/confirm` | JWT | user_certifications:manage; owner `userId` | Confirmar objeto subido (valida HEAD en R2) | CertificationEvidenceService.confirm() | `src/certifications/controllers/user-certification-requirements.controller.ts` |
-| DELETE | `/api/v1/certifications/users/:userId/certifications/:certificationId/evidences/:evidenceId` | JWT | user_certifications:manage; owner `userId` | Eliminar evidencia mientras el requisito sea editable | CertificationEvidenceService.delete() | `src/certifications/controllers/user-certification-requirements.controller.ts` |
+| GET | `.../requirements/:requirementId` | JWT | user_certifications:read; owner `userId` | Estado del requisito, respuestas y componentes | CertificationRequirementsService.getRequirement() | `src/certifications/controllers/user-certification-requirements.controller.ts` |
+| PATCH | `.../requirements/:requirementId/draft` | JWT | user_certifications:manage; owner `userId` | Guardar borrador (solo `DRAFT` o `CHANGES_REQUESTED`) | CertificationRequirementsService.saveDraft() | `src/certifications/controllers/user-certification-requirements.controller.ts` |
+| POST | `.../requirements/:requirementId/submit` | JWT | user_certifications:manage; owner `userId` | Enviar requisito a revisión (`lock_version` obligatorio) | CertificationRequirementsService.submitRequirement() | `src/certifications/controllers/user-certification-requirements.controller.ts` |
+| POST | `.../requirements/:requirementId/evidences/presign` | JWT | user_certifications:manage; owner `userId` | URL firmada de subida R2 (`component_id`, MIME, tamaño) | CertificationEvidenceService.presign() | `src/certifications/controllers/user-certification-requirements.controller.ts` |
+| POST | `.../requirements/:requirementId/evidences/confirm` | JWT | user_certifications:manage; owner `userId` | Confirmar objeto subido (valida HEAD en R2) | CertificationEvidenceService.confirm() | `src/certifications/controllers/user-certification-requirements.controller.ts` |
+| DELETE | `/api/v1/certifications/users/:userId/certification-enrollments/:enrollmentId/evidences/:evidenceId` | JWT | user_certifications:manage; owner `userId` | Eliminar evidencia mientras el requisito sea editable | CertificationEvidenceService.delete() | `src/certifications/controllers/user-certification-requirements.controller.ts` |
 
 #### Cierre institucional (participante)
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
-| POST | `/api/v1/certifications/users/:userId/certifications/:certificationId/closeout-evidence/presign` | JWT | user_certifications:manage; owner `userId` | URL firmada para comprobante de junta | CertificationCloseoutService.presignCloseoutEvidence() | `src/certifications/controllers/certification-closeout.controller.ts` |
-| POST | `/api/v1/certifications/users/:userId/certifications/:certificationId/closeout-evidence/confirm` | JWT | user_certifications:manage; owner `userId` | Confirmar comprobante de junta subido a R2 | CertificationCloseoutService.confirmCloseoutEvidence() | `src/certifications/controllers/certification-closeout.controller.ts` |
-| POST | `/api/v1/certifications/users/:userId/certifications/:certificationId/submit-final` | JWT | user_certifications:manage; owner `userId` | Enviar inscripción a revisión final (requisitos obligatorios `APPROVED` + comprobante `CONFIRMED`) | CertificationCloseoutService.submitFinal() | `src/certifications/controllers/certification-closeout.controller.ts` |
+| POST | `/api/v1/certifications/users/:userId/certification-enrollments/:enrollmentId/closeout-evidence/presign` | JWT | user_certifications:manage; owner `userId` | URL firmada para comprobante de junta | CertificationCloseoutService.presignCloseoutEvidence() | `src/certifications/controllers/certification-closeout.controller.ts` |
+| POST | `/api/v1/certifications/users/:userId/certification-enrollments/:enrollmentId/closeout-evidence/confirm` | JWT | user_certifications:manage; owner `userId` | Confirmar comprobante de junta subido a R2 | CertificationCloseoutService.confirmCloseoutEvidence() | `src/certifications/controllers/certification-closeout.controller.ts` |
+| POST | `/api/v1/certifications/users/:userId/certification-enrollments/:enrollmentId/submit-final` | JWT | user_certifications:manage; owner `userId` | Enviar inscripción a revisión final (requisitos obligatorios `APPROVED` + comprobante `CONFIRMED`) | CertificationCloseoutService.submitFinal() | `src/certifications/controllers/certification-closeout.controller.ts` |
 
 #### Revisión de requisitos (institucional)
 

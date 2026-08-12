@@ -44,12 +44,12 @@ Edición y evidencias bloqueadas en `SUBMITTED` y `APPROVED` (`CERT_REQUIREMENT_
 
 ## 3. Flujo del participante (por requisito)
 
-1. **Leer requisito:** `GET /certifications/users/:userId/certifications/:certificationId/requirements/:sectionId`
-2. **Guardar borrador:** `PUT .../requirements/:sectionId/draft` con `responses[]` por `component_id`.
+1. **Leer requisito:** `GET /certifications/users/:userId/certification-enrollments/:enrollmentId/requirements/:requirementId`
+2. **Guardar borrador:** `PATCH .../requirements/:requirementId/draft` con `responses[]` por `component_id`.
 3. **Evidencia de archivo (si aplica):**
    - `POST .../evidences/presign` → subir a R2 → `POST .../evidences/confirm`
    - Eliminar: `DELETE .../evidences/:evidenceId` (solo en estados editables)
-4. **Enviar:** `POST .../requirements/:sectionId/submit` con `{ lock_version }`
+4. **Enviar:** `POST .../requirements/:requirementId/submit` con `{ lock_version }`
 5. Repetir para cada sección obligatoria hasta que todas estén `APPROVED`.
 
 Errores frecuentes: `CERT_REQUIREMENT_INCOMPLETE`, `CERT_EVIDENCE_INVALID_TYPE`, `CERT_EVIDENCE_TOO_LARGE`, `CERT_CONCURRENT_UPDATE`.

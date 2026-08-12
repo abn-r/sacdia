@@ -66,14 +66,14 @@ Paths efectivos bajo `/api/v1` (detalle en `ENDPOINTS-LIVE-REFERENCE.md`):
 | --- | --- | --- |
 | Inscripción | `POST .../users/:userId/certifications/enroll` | `user_certifications:manage` |
 | Lectura | `GET .../users/:userId/certifications`, `.../eligibility`, `.../progress` | `user_certifications:read` |
-| Requisito | `GET/PUT/POST .../certifications/:certificationId/requirements/:sectionId/...` | read / manage |
+| Requisito | `GET/PATCH/POST .../certification-enrollments/:enrollmentId/requirements/:requirementId/...` | read / manage |
 | Cierre participante | `POST .../closeout-evidence/*`, `POST .../submit-final` | `user_certifications:manage` |
 | Revisión | `GET/POST /certifications/reviews/requirements/*` | `certifications:review` |
 | Certificación final | `POST /certifications/reviews/final/:enrollmentId/certify` | `certifications:certify` |
 | Configuración | `POST/PATCH /admin/certifications/...` | `configure` / `publish` |
 | Legacy | `PATCH .../progress` | `user_certifications:manage` — **deprecado 2026-08-11** para inscripciones versionadas (`410 CERT_LEGACY_ENDPOINT_DEPRECATED`) |
 
-**Invariante de path:** rutas de participante identifican la inscripción con **`userId` + `certificationId`**, no con `enrollmentId`. La revisión final usa `enrollmentId` en bandeja institucional.
+**Invariante de path:** rutas de ejecución de participante (requisitos, evidencias y cierre) identifican la inscripción con **`userId` + `enrollmentId`** (`.../certification-enrollments/:enrollmentId/...`), validando que la inscripción exista, esté activa y pertenezca al `userId` autenticado. La revisión final también usa `enrollmentId` en bandeja institucional.
 
 Catálogo público: `GET /certifications/certifications`, `GET /certifications/certifications/:id` — `OptionalJwtAuthGuard`, sin `@RequirePermissions`.
 

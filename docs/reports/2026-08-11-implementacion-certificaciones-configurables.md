@@ -13,7 +13,7 @@
 
 Se implementó de extremo a extremo el motor de certificaciones configurables: dominio versionado e inmutable al publicar, migración expand/backfill, CRUD admin de borradores/publicación, elegibilidad por reglas, ejecución por requisito con evidencias R2 privadas, bandeja de revisión propia, cierre con comprobante de junta + certify, seed de la capacitación básica Pathfinder, app móvil del participante, panel admin de versiones y documentación canónica.
 
-Quedan pendientes de operación humana: aplicar la migración y el seed contra Neon, agregar GET admin de versiones/árbol (hoy el workbench es write-first en memoria de sesión), y alinear rutas de participante a `enrollmentId` (hoy usan `certificationId` resolviendo la inscripción activa).
+Quedan pendientes de operación humana: aplicar la migración y el seed contra Neon, y agregar GET admin de versiones/árbol (hoy el workbench es write-first en memoria de sesión).
 
 ## 2. Tareas del plan
 
@@ -38,7 +38,7 @@ Quedan pendientes de operación humana: aplicar la migración y el seed contra N
 
 ## 3. Desviaciones del plan
 
-1. **Rutas de participante usan `certificationId`**, no `.../certification-enrollments/:enrollmentId/...` del plan base. Los servicios resuelven la inscripción activa del usuario+certificación. Motivo: implementación inicial simplificada; documentado en handoff/ENDPOINTS. Riesgo si hubiera varias inscripciones no terminales (mitigado por unique parcial activa).
+1. **[RESUELTA 2026-08-12] Rutas de participante usaban `certificationId`** en lugar de `.../certification-enrollments/:enrollmentId/...` del plan base. Corregido: controllers y services de requisitos/evidencias/cierre reciben `enrollmentId` directo y validan ownership (inscripción existente, activa y del `userId` autenticado); el draft pasó de `PUT` a `PATCH` según el contrato. App y docs (`ENDPOINTS-LIVE-REFERENCE`) actualizados en el mismo trabajo.
 2. **Specs de migración/seed bajo `src/certifications/`** porque Jest `rootDir=src` no descubre `prisma/` ni `scripts/*.spec.ts`.
 3. **Admin sin GET** de versiones/árbol/reglas; UI workbench en memoria + warning. Gap explícito para follow-up backend.
 4. **Retiro de versión:** `DELETE .../publish` en runtime vs `POST .../retire` del plan.
@@ -117,7 +117,6 @@ Quedan pendientes de operación humana: aplicar la migración y el seed contra N
 - Endpoints legacy activos con `CERT_LEGACY_ENDPOINT_DEPRECATED` (410) en PATCH progreso versionado; fecha de retiro pendiente.
 - `certification_module_progress` permanece como proyección legacy.
 - Gap GET admin de versiones/árbol/reglas.
-- Paths participante con `certificationId` vs contrato plan `enrollmentId`.
 - Honores Contabilidad / Anti-bullying I pueden faltar en catálogo → fallback TEXT_RESPONSE.
 - Fallos preexistentes admin en diálogos/worktrees.
 - Clients y docs deben seguir evolucionando juntos al cerrar el gap GET.
