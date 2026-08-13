@@ -346,3 +346,22 @@ Resincronizacion ejecutada por agente `docs/audit-sync-reality-2026-05-11`. Cada
 - Auth stack completo migrado de Supabase a Better Auth — `EXTERNAL-SERVICES-AUDIT.md` actualizado.
 - Hay un mismatch de path entre app (que llama `/clubs/:clubId/sections/:sectionId/evidence-folder`) y backend (que expone `/club-sections/:sectionId/evidence-folder`). Documentado en la fila correspondiente — requiere revision de contrato.
 - `REALITY-MATRIX.md` ya estaba sincronizado desde Wave 2 (mostraba estos endpoints como ALINEADO). Solo `DECISIONS-PENDING.md` y `EXTERNAL-SERVICES-AUDIT.md` estaban desincronizados.
+
+---
+
+## Órdenes de pago para camporees de unión (v1.1) — 2026-08-12
+
+**Estado: PENDIENTE — requiere decisión de negocio antes de estimar/implementar.**
+
+Contexto: el flujo de órdenes de pago territoriales (v1) cubre seguros y camporees **locales**. Los camporees de unión quedaron explícitamente fuera de alcance (plan `2026-08-12-ordenes-pago-territoriales-plan-ejecucion.md` §fuera-de-alcance). El kernel es agnóstico del propósito (puertos de fulfillment), así que la extensión técnica es acotada — pero hay una bifurcación de negocio que la condiciona.
+
+**Decisión de negocio abierta: ¿quién cobra la inscripción de un camporee de unión?**
+
+| Opción | Flujo de dinero | Impacto técnico | Estimación |
+|---|---|---|---|
+| A. El campo local cobra (y remite a la unión por fuera del sistema) | Club → caja/banco de su campo local, igual que hoy | Bajo: reutiliza folios, instrucciones de pago, revisores y scope territorial existentes. Cambios: DTO acepta `camporee_type`, fulfillment consulta `union_camporees` + valida `union_camporee_local_fields`, register con `camporee_type: 'union'`, UI app/admin muestran camporees de unión | ~2–4 días |
+| B. La unión cobra directo | Club → banco de la unión | Alto: el modelo territorial del kernel asume campo local como emisor/receptor (folios `ORD{año}{LF}`, `field_payment_order_configs` por LF, revisores `director-lf`/`assistant-lf`). Requiere nueva dimensión de scope (unión), instrucciones de pago de unión, folios de unión y revisores `director-union`/`assistant-union` | ~1–2 semanas |
+
+Datos ya disponibles: `union_camporees.registration_cost` existe (mismo costo para todos los campos); el acoplamiento actual del fulfillment a `local_camporees` está en 2 queries (`camporee-fulfillment.service.ts`).
+
+Preguntas adicionales tras decidir A/B: ¿el costo puede variar por campo local participante? ¿el drain/maker-checker de comprobantes lo opera la unión o cada campo?
