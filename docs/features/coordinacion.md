@@ -47,18 +47,30 @@ La unidad final de autoridad es `club_sections`.
 - Módulo de coordinación para zonas y asignaciones: `CoordinationModule`.
 - Resolver común `coordinator_scope(user_id)` expuesto como
   `GET /api/v1/coordination/me/scope`.
+- Backfill admin
+  `POST /api/v1/admin/coordination/local-fields/:localFieldId/backfill`
+  (`dry_run` default `true`) para migrar rol + `local_field_id` a `GENERAL`.
 - Validaciones de integridad y conflicto director/coordinador en servicio.
-- Filtros por scope en SLA, evidencias e investiduras. El scope expone secciones/clubes para la superficie de clubes.
+- Filtros por scope en SLA, evidencias, investiduras, progreso de clases,
+  reportes institucionales, QR de asistencia, soporte admin, seguros por vencer
+  y miembro del mes (admin/list). `OwnerOrAdminGuard` ya no trata el rol como
+  admin. Camporee no usa el rol como atajo de campo local. El scope expone
+  secciones/clubes para la superficie de clubes.
+- `AuthorizationContext.canAccessHierarchyScope` no trata el rol coordinador
+  como actor de campo local. La autoridad real sigue en `club_section_ids`.
 
 ### Admin Web
 
-- Pantalla `/dashboard/coordination` para administrar zonas y coordinadores por campo local.
+- Pantalla `/dashboard/coordination` implementada para administrar zonas y
+  coordinadores por campo local.
 - Requiere rol institucional administrativo y permiso efectivo
   `coordination:manage`; los roles de coordinador runtime no administran este
   panel.
 - Creación/activación de zonas.
 - Asociación de distritos a zonas.
 - Asignación general, por zona + sección y directa por sección.
+- Migración de coordinadores legacy (rol + `users.local_field_id`) a una
+  asignación `GENERAL` por campo, con dry-run por defecto.
 - La vista consume los endpoints `/api/v1/admin/coordination/*`.
 
 ### App Móvil
@@ -89,3 +101,5 @@ La unidad final de autoridad es `club_sections`.
 
 - Completar vistas de cobertura agregada por coordinador si se requiere más detalle que la lista de asignaciones.
 - Evaluar si en el futuro conviene agregar un endpoint específico de clubes bajo coordinación; por ahora la app deriva clubes desde `sections` en `coordination/me/scope`.
+- El backfill solo crea `GENERAL`. Zonas y asignaciones `ZONE`/`SECTION` siguen siendo carga manual: no hay datos de zona/distrito confiables para inferirlas.
+- El dashboard de campo local solo queda habilitado para coordinadores con asignación `GENERAL`.

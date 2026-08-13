@@ -1270,7 +1270,7 @@ Path base: `/api/v1/certifications/users/:userId/certification-enrollments/:enro
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
-| GET | `/api/v1/member-of-month/admin/list` | JWT | Permisos: mom:supervise | Listar miembro del mes multi-sección (admin/coordinator) | MemberOfMonthService.listForAdmin() | `src/member-of-month/member-of-month.controller.ts` |
+| GET | `/api/v1/member-of-month/admin/list` | JWT | Permisos: mom:supervise. Coordinator: `club_section_ids` (ignora `local_field_id`). | Listar miembro del mes multi-sección (admin/coordinator por asignaciones) | MemberOfMonthService.listForAdmin() | `src/member-of-month/member-of-month.controller.ts` |
 | GET | `/api/v1/clubs/:clubId/sections/:sectionId/member-of-month` | JWT | Permisos: mom:read | Obtener miembro del mes actual de la sección | MemberOfMonthService.getCurrentMemberOfMonth() | `src/member-of-month/member-of-month.controller.ts` |
 | GET | `/api/v1/clubs/:clubId/sections/:sectionId/member-of-month/history` | JWT | Permisos: mom:read | Obtener historial paginado de miembro del mes | MemberOfMonthService.getMemberOfMonthHistory() | `src/member-of-month/member-of-month.controller.ts` |
 | POST | `/api/v1/clubs/:clubId/sections/:sectionId/member-of-month/evaluate` | JWT | Permisos: mom:evaluate | Disparar evaluación manual de miembro del mes | MemberOfMonthService.evaluateMemberOfMonth() | `src/member-of-month/member-of-month.controller.ts` |
@@ -1320,7 +1320,7 @@ Path base: `/api/v1/certifications/users/:userId/certification-enrollments/:enro
 | DELETE | `/api/v1/fcm-tokens/by-token` | JWT | - | Unregister FCM token by token string | FcmTokensService.unregisterToken() | `src/notifications/notifications.controller.ts` |
 | DELETE | `/api/v1/fcm-tokens/:id` | JWT | - | Unregister FCM token by record ID | FcmTokensService.unregisterTokenById() | `src/notifications/notifications.controller.ts` |
 | GET | `/api/v1/fcm-tokens` | JWT | - | Get current user FCM tokens | FcmTokensService.getUserTokens() | `src/notifications/notifications.controller.ts` |
-| GET | `/api/v1/fcm-tokens/user/:userId` | JWT | - | Get FCM tokens by user ID (owner/admin only) | FcmTokensService.getUserTokens() | `src/notifications/notifications.controller.ts` |
+| GET | `/api/v1/fcm-tokens/user/:userId` | JWT | Owner o global: admin, assistant-admin, super-admin. `coordinator` no es atajo. | Get FCM tokens by user ID (owner/admin only) | FcmTokensService.getUserTokens() | `src/notifications/notifications.controller.ts` |
 
 ### User Notification Preferences
 
