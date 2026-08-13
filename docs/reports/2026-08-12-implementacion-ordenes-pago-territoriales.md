@@ -83,13 +83,13 @@ Nota F7: la suite `club-assignment-effectivity.inventory.spec.ts` detectó (corr
 
 ## 7. Pendientes y riesgos
 
-- **Migración `20260812220000_field_payment_orders` versionada, NO aplicada a Neon** (dev/staging/prod).
-- **Seeds de permisos** (`field-payment-orders:*`) y **keys de `system_config`** (`field_payment_orders_v1`, `field_payment_orders.expiry_days`) **NO aplicados a Neon**.
-- **Flag OFF por defecto en todos los LF**; el piloto es operación humana post-merge (runbook en `docs/features/gestion-seguros.md` §Runbook: seed de productos/ciclos, instrucciones de pago, flag ON, drain de purchases pendientes, rollback).
+- ~~Migración NO aplicada a Neon~~ → **Migración `20260812220000_field_payment_orders` aplicada y registrada en `_prisma_migrations` en los 3 entornos Neon** (2026-08-12): development (`ep-rough-hill`), staging (`ep-noisy-breeze`) y production (`ep-dark-thunder`). Verificado en cada uno: 6 tablas, permisos, grants y keys de config.
+- ~~Seeds NO aplicados~~ → **Seeds de permisos** (`field-payment-orders:*`, 6 permisos / 34 grants) y **keys de `system_config`** (`field_payment_orders_v1`, `field_payment_orders.expiry_days=15`) **aplicados en dev, staging y production**.
+- **Flag por entorno**: dev `[4]` (piloto Asociación Centro de Veracruz, con producto/ciclos/instrucciones de prueba sembrados); staging y production `[]` (OFF). Encender en producción sigue el runbook de `docs/features/gestion-seguros.md` §Runbook (seed de productos/ciclos reales, instrucciones de pago, drain de purchases pendientes, flag ON, rollback).
 - **Drain de purchases legacy pendiente** antes de encender el flag en un LF.
 - **Fallos preexistentes del baseline**: `verify-iana-timezone-real-gpg.spec.ts` (7 tests, ambiental por versión local de GnuPG); `monthly-report.test.tsx` en admin es flaky por timeout bajo suite completa.
 - Camporees de unión quedan fuera (v1.1); el flujo nuevo solo cubre camporees locales.
-- Los branches `feat/field-payment-orders` no están mergeados ni pusheados; falta PR por repo.
+- PRs abiertos hacia `development` (pendientes de merge): backend [#392](https://github.com/abn-r/sacdia-backend/pull/392), admin [#211](https://github.com/abn-r/sacdia-admin/pull/211), app [#142](https://github.com/abn-r/sacdia-app/pull/142).
 
 ## 8. Verificación manual sugerida
 
