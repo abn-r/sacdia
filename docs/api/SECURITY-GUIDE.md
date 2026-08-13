@@ -155,7 +155,8 @@ El dominio separa **emisión** (directiva de club), **revisión** (liderazgo del
 
 - **Maker-checker en approve:** quien subió el comprobante no puede aprobarlo → `403 FIELD_PAYMENT_ORDER_MAKER_CHECKER`. La aprobación re-lee la orden dentro de la transacción con filtro de status para serializar aprobaciones concurrentes (perder la carrera → `409 FIELD_PAYMENT_ORDER_INVALID_TRANSITION`).
 - **Ownership de comprobantes:** archivos en R2 con clave generada por el servidor; descarga solo vía URL firmada con TTL 15 min emitida tras verificar scope (sección propia, o revisor del mismo LF). Upload valida MIME allow-list (`application/pdf`, `image/jpeg`, `image/png`), magic bytes y ≤10 MB.
-- **Scope territorial:** los revisores solo ven/mutan órdenes de su `local_field_id`; fuera de scope → `403 FIELD_PAYMENT_ORDER_FORBIDDEN` sin filtrar existencia.
+- **Scope territorial:** los revisores solo ven/mutan órdenes de su `local_field_id`; fuera de scope → `403 FIELD_PAYMENT_ORDER_FORBIDDEN` sin filtrar existencia. Aplica igual a órdenes de camporees de unión (v1.1, opción A): el LF emisor cobra y revisa; la emisión valida además que el LF participe en el camporee (`union_camporee_local_fields`).
+- **Gating legacy de unión:** `POST /camporees/union/:id/register` se bloquea (`409 FIELD_PAYMENT_ORDER_LEGACY_DISABLED`) cuando el LF del club del miembro tiene el flag activo, cerrando el doble camino orden/register.
 - **Idempotencia de emisión:** header de idempotencia por emisor (`idempotency_key` unique) y unique parcial `active_guard` que impide dos órdenes activas del mismo beneficiario para el mismo propósito.
 - **Feature flag fail-closed:** con `field_payment_orders_v1` OFF para el LF, la emisión responde `403 FIELD_PAYMENT_ORDER_FLAG_DISABLED`; con flag ON, los flujos legacy (alta directa de seguros, purchases qty, register directo de camporee) responden `403 FIELD_PAYMENT_ORDER_LEGACY_DISABLED`.
 

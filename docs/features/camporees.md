@@ -114,6 +114,17 @@ Plan `docs/plans/2026-08-05-insurance-camporee-payment-orders-plan.md` (+ addend
 - **Expiración de órdenes**: `field_payment_orders.expiry_days` (`system_config`), default 15 días; lazy expiry libera a los beneficiarios para una nueva orden.
 - `camporee_payments` por miembro queda legado (histórico/unión).
 
+### Camporees de unión (v1.1, IMPLEMENTADO 2026-08-13)
+
+Decisión de negocio (opción A, `docs/audit/DECISIONS-PENDING.md`): **el campo local cobra** la inscripción del camporee de unión y reporta internamente a la unión; el traslado del dinero LF → Unión es físico, fuera del sistema. La unión ve el pago reflejado en los `camporee_members` creados por el approve.
+
+- **Emisión**: `POST /union-camporees/:camporeeId/payment-orders`. Valida camporee de unión activo, que el LF del emisor esté en `union_camporee_local_fields` (activo), sección inscrita (`camporee_clubs.union_camporee_id`), seguro vigente y deadline. Costo: `union_camporees.registration_cost` (uniforme para todos los campos).
+- **Modelo**: `field_payment_orders.union_camporee_id` (migración `20260813130000`); CHECK exige exactamente una referencia (`local_camporee_id` XOR `union_camporee_id`) para purpose CAMPOREE.
+- **Fulfillment**: crea `camporee_members` con `camporee_type: 'union'` + `union_camporee_id`, mismo maker-checker y revisores del Campo Local.
+- **Gating legacy**: `POST /camporees/union/:id/register` queda bloqueado (`FIELD_PAYMENT_ORDER_LEGACY_DISABLED`) cuando el LF del club del miembro tiene el flag activo.
+- **Filtros**: `GET /payment-orders` y `/payment-orders/review-queue` aceptan `union_camporee_id`.
+- **App**: ruta de emisión `/camporee/:id/payment-orders/issue?type=union`. **Admin**: pestaña "Órdenes de pago" también en el detalle de camporees de unión.
+
 ## Estado de implementacion
 
 - **Prioridad**: Completo — backend, admin y app implementados con CRUD completo; el admin incluye detalle de camporee local y de unión, con eventos/agenda por scope; la app registra miembros desde una lista de la sección activa y el backend infiere el tipo de camporee

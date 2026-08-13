@@ -8,7 +8,7 @@
 
 **Estado**: ACTIVE
 **Actualizado**: 2026-08-12
-**Total endpoints**: 757 decoradores HTTP en 96 controllers (certificaciones configurables, insurance capacity model y field-payment-orders sincronizados manualmente)
+**Total endpoints**: 758 decoradores HTTP en 96 controllers (certificaciones configurables, insurance capacity model y field-payment-orders sincronizados manualmente)
 **Métodos**: GET 298 · POST 219 · PATCH 103 · DELETE 88 · PUT 8
 **Auth detectada**: JWT 704 · Public 12
 
@@ -1143,7 +1143,8 @@ Path base: `/api/v1/certifications/users/:userId/certification-enrollments/:enro
 | --- | --- | --- | --- | --- | --- | --- |
 | POST | `/api/v1/insurance/payment-orders` | JWT | Permisos: field-payment-orders:create | Emitir orden grupal de seguro (ciclo + beneficiarios nombrados) | FieldPaymentOrdersService.createInsuranceOrder() | `src/field-payment-orders/field-payment-orders.controller.ts` |
 | POST | `/api/v1/camporees/:camporeeId/payment-orders` | JWT | Permisos: field-payment-orders:create | Emitir orden de inscripción a camporee local | FieldPaymentOrdersService.createCamporeeOrder() | `src/field-payment-orders/field-payment-orders.controller.ts` |
-| GET | `/api/v1/payment-orders` | JWT | Permisos: field-payment-orders:read | Listar órdenes del alcance del actor (filtros purpose/status/camporee_id) | FieldPaymentOrdersService.list() | `src/field-payment-orders/field-payment-orders.controller.ts` |
+| POST | `/api/v1/union-camporees/:camporeeId/payment-orders` | JWT | Permisos: field-payment-orders:create | Emitir orden de inscripción a camporee de unión (v1.1: cobra el Campo Local del emisor) | FieldPaymentOrdersService.createUnionCamporeeOrder() | `src/field-payment-orders/field-payment-orders.controller.ts` |
+| GET | `/api/v1/payment-orders` | JWT | Permisos: field-payment-orders:read | Listar órdenes del alcance del actor (filtros purpose/status/camporee_id/union_camporee_id) | FieldPaymentOrdersService.list() | `src/field-payment-orders/field-payment-orders.controller.ts` |
 | GET | `/api/v1/payment-orders/review-queue` | JWT | Permisos: field-payment-orders:review | Bandeja de revisión LF (PROOF_SUBMITTED) | FieldPaymentOrdersService.reviewQueue() | `src/field-payment-orders/field-payment-orders.controller.ts` |
 | GET | `/api/v1/payment-orders/context` | JWT | Permisos: field-payment-orders:read | Disponibilidad del flujo + ciclos de seguro para la sección activa (app) | FieldPaymentOrdersService.getIssuerContext() | `src/field-payment-orders/field-payment-orders.controller.ts` |
 | GET | `/api/v1/payment-orders/config` | JWT | Permisos: field-payment-orders:configure | Instrucciones de pago del Campo Local (banco/caja) | FieldPaymentOrderConfigsService.get() | `src/field-payment-orders/field-payment-orders.controller.ts` |

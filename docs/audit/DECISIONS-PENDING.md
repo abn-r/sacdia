@@ -351,7 +351,16 @@ Resincronizacion ejecutada por agente `docs/audit-sync-reality-2026-05-11`. Cada
 
 ## Órdenes de pago para camporees de unión (v1.1) — 2026-08-12
 
-**Estado: PENDIENTE — requiere decisión de negocio antes de estimar/implementar.**
+**Estado: RESUELTO (2026-08-13) — opción A, implementada.**
+
+Decisión de negocio (2026-08-13): **el campo local cobra** la inscripción y reporta internamente a la unión cuánto pagó; el traslado del dinero LF → Unión es físico, fuera del sistema. La unión ve a los miembros registrados/pagados vía `camporee_members` (creados por el approve de la orden).
+
+Implementación (branches `feat/payment-orders-union-camporees` en los 3 repos):
+- Backend: columna `field_payment_orders.union_camporee_id` (migración `20260813130000`), endpoint `POST /union-camporees/:camporeeId/payment-orders`, fulfillment valida `union_camporee_local_fields` y crea members con `camporee_type: 'union'`; el register legacy de unión queda bloqueado cuando el LF del club del miembro tiene el flag activo.
+- App: emisión vía ruta `/camporee/:id/payment-orders/issue?type=union`.
+- Admin: tab "Órdenes de pago" habilitado también en camporees de unión (filtro `union_camporee_id`).
+
+Respuestas a las preguntas abiertas: el costo es el de `union_camporees.registration_cost` (uniforme para todos los campos); el maker-checker de comprobantes lo opera cada campo local (mismos revisores `director-lf`/`assistant-lf`).
 
 Contexto: el flujo de órdenes de pago territoriales (v1) cubre seguros y camporees **locales**. Los camporees de unión quedaron explícitamente fuera de alcance (plan `2026-08-12-ordenes-pago-territoriales-plan-ejecucion.md` §fuera-de-alcance). El kernel es agnóstico del propósito (puertos de fulfillment), así que la extensión técnica es acotada — pero hay una bifurcación de negocio que la condiciona.
 
