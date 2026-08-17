@@ -96,6 +96,7 @@ propios solo como adaptadores: no deben duplicar ni contradecir este contrato.
 Para cambios de negocio, ubicar primero el dominio en `docs/features/`:
 
 - `actividades`
+- `audit-log`
 - `auth`
 - `catalogos`
 - `certificaciones-guias-mayores`

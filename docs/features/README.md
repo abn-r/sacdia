@@ -1,7 +1,7 @@
 # Feature Registry - SACDIA
 
 **Estado**: ACTIVE
-**Actualizado**: 2026-04-28
+**Actualizado**: 2026-08-17
 **Propósito**: registrar qué dominios tienen documento en `docs/features/` y separar cobertura editorial de estado funcional declarado.
 
 > [!IMPORTANT]
@@ -30,9 +30,9 @@
 
 | Señal | Cantidad | Evidencia |
 |---|---:|---|
-| Documentos de dominio presentes | 29 | archivos `docs/features/*.md` + entradas en canon, excluyendo este `README.md` |
+| Documentos de dominio presentes | 30 | archivos `docs/features/*.md` + entradas en canon, excluyendo este `README.md` |
 | Estado funcional `IMPLEMENTADO` | 26 | declarado en los documentos de dominio |
-| Estado funcional `PARCIAL` | 1 | `certificaciones-guias-mayores` |
+| Estado funcional `PARCIAL` | 2 | `audit-log`; `certificaciones-guias-mayores` |
 | Estado funcional `NO CANON` | 2 | `achievements`; `infrastructure` declara la variante `NO CANON (infraestructura operativa)` |
 
 ## Dominios registrados
@@ -46,6 +46,7 @@
 | `aprobaciones-camporees` | [aprobaciones-camporees.md](aprobaciones-camporees.md) | Documento presente | `IMPLEMENTADO` |
 | `aprobaciones-masivas` | [aprobaciones-masivas.md](aprobaciones-masivas.md) | Documento presente | `IMPLEMENTADO` |
 | `auth` | [auth.md](auth.md) | Documento presente | `IMPLEMENTADO` |
+| `audit-log` | [audit-log.md](audit-log.md) | Documento presente | `PARCIAL` |
 | `camporees` | [camporees.md](camporees.md) | Documento presente | `IMPLEMENTADO` |
 | `camporee-events` | [camporee-events.md](camporee-events.md) | Documento presente | `IMPLEMENTADO PARCIAL` |
 | `carpetas-evidencias` | [carpetas-evidencias.md](carpetas-evidencias.md) | Documento presente | `IMPLEMENTADO` |

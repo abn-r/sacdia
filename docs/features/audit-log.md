@@ -1,5 +1,7 @@
 # Audit Log Interno de Operaciones
 
+**Estado**: PARCIAL
+
 Registro persistente en `audit_logs` de toda mutación del sistema: quién, qué, cuándo y con qué resultado. Fase 1 implementada el 2026-08-12.
 
 ## Arquitectura: 3 niveles
