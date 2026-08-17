@@ -374,3 +374,19 @@ Contexto: el flujo de órdenes de pago territoriales (v1) cubre seguros y campor
 Datos ya disponibles: `union_camporees.registration_cost` existe (mismo costo para todos los campos); el acoplamiento actual del fulfillment a `local_camporees` está en 2 queries (`camporee-fulfillment.service.ts`).
 
 Preguntas adicionales tras decidir A/B: ¿el costo puede variar por campo local participante? ¿el drain/maker-checker de comprobantes lo opera la unión o cada campo?
+
+## Migración `audit_http_operations` huérfana en staging/prod — 2026-08-17
+
+**Estado: PENDIENTE — dueño: flujo de auditoría HTTP (`wip/audit-http-operations`).**
+
+Hallazgo (2026-08-17, durante rollout de payment orders v1.1): la migración `20260812190000_audit_http_operations` está **aplicada y registrada** en Neon staging y producción, pero su archivo vive solo en la rama local `wip/audit-http-operations` de `sacdia-backend` (commit `4f05fac`, sin pushear, no mergeada a `development`). Neon development NO la tiene.
+
+SQL de la migración (aditivo, riesgo bajo): agrega `audit_logs.source` (VARCHAR con default `'service'`), `audit_logs.request_context` (JSONB nullable) e índice `idx_audit_logs_created` sobre `created_at`.
+
+Impacto actual: ninguno operativo — `prisma migrate deploy` solo emite un aviso ("migration from the database not found locally") y sigue. Verificado en el rollout v1.1 del 2026-08-17.
+
+Riesgos si no se cierra:
+1. Drift permanente: staging/prod tienen columnas que `schema.prisma` de `development` no modela.
+2. Inverso: si el código de auditoría se mergea esperando esas columnas, development truena hasta aplicar la migración en Neon dev.
+
+Acción requerida: mergear `wip/audit-http-operations` (para que el archivo de migración llegue a `development`) y aplicar la migración en Neon dev; o revertir las columnas en staging/prod si el trabajo se descarta.
