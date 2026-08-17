@@ -28,7 +28,7 @@ Las integraciones externas de infraestructura incluyen Sentry para monitoreo de 
   - `permissions.guard.ts` — Verificacion de permisos `resource:action`
   - `club-roles.guard.ts` — Verificacion de roles de club en seccion activa
   - `global-roles.guard.ts` — Verificacion de roles globales
-  - `owner-or-admin.guard.ts` — Self-service o acceso administrativo
+  - `owner-or-admin.guard.ts` — Self-service o acceso administrativo (`admin` / `assistant-admin` / `super-admin`; el coordinador no es atajo)
   - `optional-jwt-auth.guard.ts` — JWT opcional (endpoints mixtos)
   - `ip-whitelist.guard.ts` — Restriccion por IP
 - **Decorators (7)**:

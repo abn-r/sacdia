@@ -4,7 +4,9 @@
 
 ## Descripcion de dominio
 
-Las aprobaciones de camporees son el proceso mediante el cual un coordinador o administrador revisa y aprueba (o rechaza) las inscripciones de clubes, miembros y pagos en camporees locales y de union. Este flujo garantiza que solo participantes elegibles y con documentacion completa asistan a los eventos institucionales.
+Las aprobaciones de camporees son el proceso mediante el cual un administrador o un organizador territorial (campo/unión) revisa y aprueba (o rechaza) las inscripciones de clubes, miembros y pagos en camporees locales y de union. Este flujo garantiza que solo participantes elegibles y con documentacion completa asistan a los eventos institucionales.
+
+El rol `coordinator` no es atajo de campo para este dominio: `docs/canon/runtime-coordination.md` deja las aprobaciones de camporee fuera de la superficie de coordinación. Un coordinador que también es director de club sigue operando por su asignación de club, no por `users.local_field_id`.
 
 El proceso abarca tres tipos de aprobaciones: (1) inscripcion del club al camporee, (2) inscripcion individual de cada miembro con validacion de seguro y elegibilidad, y (3) registro de pagos asociados. Para camporees de union, las inscripciones pasan por un flujo de routing que involucra al campo local antes de llegar a la union.
 
@@ -14,7 +16,7 @@ El proceso abarca tres tipos de aprobaciones: (1) inscripcion del club al campor
 - Reutiliza el CamporeesModule existente con endpoints de aprobacion adicionales
 - Soporte para aprobaciones de club, miembro y pago
 - Routing de union: inscripciones de campo local se enrutan a la union para aprobacion final
-- Guards: JwtAuthGuard, GlobalRolesGuard (admin, coordinator)
+- Guards: JwtAuthGuard, PermissionsGuard (`camporees:*`). El rol `coordinator` no otorga alcance de campo.
 
 ### Admin (sacdia-admin)
 - **UI de aprobaciones**: Pagina dedicada con tabs para clubes, miembros y pagos pendientes
@@ -29,7 +31,7 @@ El proceso abarca tres tipos de aprobaciones: (1) inscripcion del club al campor
 
 ## Requisitos funcionales
 
-1. Coordinadores y admins deben poder ver inscripciones pendientes de aprobacion
+1. Admins y organizadores territoriales deben poder ver inscripciones pendientes de aprobacion. El coordinador runtime no aprueba camporee por el rol.
 2. Debe soportar aprobacion/rechazo de clubes, miembros y pagos de forma independiente
 3. El rechazo debe requerir una razon obligatoria
 4. Para camporees de union, las inscripciones deben pasar por el campo local antes de la union

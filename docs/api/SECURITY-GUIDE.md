@@ -4,8 +4,49 @@
 
 **Versión**: 1.0  
 **Fecha**: 31 de enero de 2026  
-**Actualizado**: 11 de agosto de 2026
+**Actualizado**: 12 de agosto de 2026
 **Status**: ✅ Implementado
+
+---
+
+## Autenticación global deny-by-default (`GlobalJwtAuthGuard`)
+
+Desde 2026-08-12 la autenticación JWT es un `APP_GUARD` global
+(`GlobalJwtAuthGuard` en `src/app.module.ts`): **todo endpoint requiere JWT
+salvo que esté marcado con `@Public()`** (`src/common/decorators/public.decorator.ts`).
+Un `@UseGuards(JwtAuthGuard)` olvidado ya no expone un endpoint.
+
+Reglas:
+
+- `@Public()` a nivel de ruta o clase exime **solo** del guard global.
+- `JwtAuthGuard` local (route-level) ignora `@Public()` a propósito: dentro de
+  un controller `@Public()` + `OptionalJwtAuthGuard` (catálogos, honors,
+  classes, certifications), las rutas con `@UseGuards(JwtAuthGuard)` siguen
+  exigiendo auth.
+- Endpoints públicos canónicos (12): `GET /` (hello), `GET /health`,
+  `POST /auth/{register,login,refresh,logout}`,
+  `POST /auth/password/reset-request`, `POST /auth/verify-email/confirm`,
+  `POST /auth/oauth/{google,apple,callback}`,
+  `POST /admin/rbac/bootstrap-admin` (protegido por `x-bootstrap-secret`).
+- Cualquier endpoint público nuevo debe declararse con `@Public()` y
+  justificarse en esta guía.
+
+---
+
+## Límites de tamaño en uploads (multipart)
+
+Desde 2026-08-12 **todos** los `FileInterceptor` declaran límite de tamaño:
+
+- Default: `DEFAULT_UPLOAD_OPTIONS` (`src/common/constants/upload-limits.constants.ts`),
+  `fileSize: 10 MB`. Multer corta el stream a mitad de subida y responde `413`,
+  a diferencia de la validación por pipe/DTO que solo corre con el archivo ya
+  en memoria.
+- Excepciones inline: `resources` (50 MB), `finances` e `inventory` (5 MB),
+  `achievements` admin (2 MB).
+- Coincide con el límite de body JSON de 10 MB en `main.ts` y el fallback de
+  `MulterModule.register()` en `app.module.ts`.
+- Todo endpoint de upload nuevo debe pasar `DEFAULT_UPLOAD_OPTIONS` (o un
+  límite propio justificado) como segundo argumento de `FileInterceptor`.
 
 ---
 
@@ -93,7 +134,8 @@ Los listados administrativos de reportes resuelven el contexto con `Authorizatio
 | --- | --- |
 | `super-admin`, `admin`, `director-dia`, `assistant-dia` | Todos los reportes; pueden filtrar por `division_id`, `union_id`, `local_field_id` |
 | `director-union`, `assistant-union` | Solo clubes/campos de su unión; pueden reducir por `local_field_id` |
-| `director-lf`, `assistant-lf`, `coordinator`, `assistant-admin` | Solo clubes de su campo local |
+| `director-lf`, `assistant-lf`, `assistant-admin` | Solo clubes de su campo local |
+| `coordinator`, `zone-coordinator`, `general-coordinator` | Solo clubes/secciones de `coordinator_assignments` (`club_section_ids`) |
 | Director/secretario con asignación activa de club | Solo reportes de su sección activa |
 
 La regla se centraliza en `src/reports/report-visibility-scope.ts` y se aplica a listados mensuales, trimestrales y anuales.
