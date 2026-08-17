@@ -377,12 +377,6 @@ Preguntas adicionales tras decidir A/B: ¿el costo puede variar por campo local 
 
 ## Migración `audit_http_operations` huérfana en staging/prod — 2026-08-17
 
-**Estado: EN CURSO (2026-08-17) — PR [abn-r/sacdia-backend#402](https://github.com/abn-r/sacdia-backend/pull/402).**
+**Estado: RESUELTO (2026-08-17).**
 
-Hallazgo (2026-08-17, durante rollout de payment orders v1.1): la migración `20260812190000_audit_http_operations` está **aplicada y registrada** en Neon staging y producción, pero su archivo vivía solo en la rama local `wip/audit-http-operations` (commit `4f05fac`, sin pushear). Neon development NO la tiene.
-
-SQL (aditivo, riesgo bajo): `audit_logs.source` (VARCHAR default `'service'`), `audit_logs.request_context` (JSONB nullable), índice `idx_audit_logs_created`.
-
-Acción hecha: rebase sobre `development`, tests (31) verdes, rama `feat/audit-http-operations` + PR #402. El SQL es idéntico al ya aplicado en staging/prod.
-
-Pendiente: mergear #402 y `prisma migrate deploy` en Neon **development** (staging/prod ya registradas; no reaplicar).
+Código mergeado en `development` vía [PR #402](https://github.com/abn-r/sacdia-backend/pull/402). `prisma migrate deploy` en Neon development: schema up to date — columnas `audit_logs.source` / `request_context` presentes y `20260812190000_audit_http_operations` registrada (`finished_at` 2026-08-12). Staging/prod ya la tenían; no se reaplicó.
