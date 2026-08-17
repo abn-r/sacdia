@@ -22,6 +22,32 @@ pnpm run test:e2e
 
 ---
 
+## 🧪 E2E en CI (gate bloqueante)
+
+Desde 2026-08-13 el job `Backend E2E Tests` corre en cada push/PR contra
+Postgres 18 y Redis 7 efímeros (services de GitHub Actions), sin secretos
+reales: los e2e mockean `BetterAuthService`/R2/Resend y solo necesitan valores
+dummy para pasar la validación de entorno.
+
+- **Schema**: se materializa con `prisma migrate diff --from-empty --to-schema`
+  (+ prelude de schemas `extensions`/`auth`), NO con `migrate deploy`, porque
+  el historial de migraciones no es reproducible desde cero (drift
+  pre-baseline: p. ej. `weekly_records.year` y las tablas de scoring no las
+  crea ninguna migración). Reparar ese historial queda como pendiente.
+- **Suites bloqueantes (12, verdes)**: activities, app, auth, certifications,
+  classes-progress-migration, clubs, field-payment-orders, finances,
+  insurance, member-rankings, notifications-security, section-rankings.
+- **Suites pendientes de realineación (12, con specs desactualizados)**:
+  admin-catalogs, admin-users, admin-users-scope, camporees, catalogs,
+  classes, confirm-union-http, evidence-folder, honors, investiture,
+  post-registration, users. Drift típico: campos renombrados
+  (`year_id` → `ecclesiastical_year_id`), validaciones nuevas (UUID en params),
+  imports a módulos movidos y lógica de scope migrada a snapshots de
+  autorización. Al arreglar cada una, agregarla a la lista bloqueante del
+  workflow (`.github/workflows/ci.yml`, job `backend_e2e_tests`).
+
+---
+
 ## 🎯 Estrategia de Testing
 
 ### Niveles de Testing

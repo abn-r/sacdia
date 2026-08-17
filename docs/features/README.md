@@ -53,7 +53,7 @@
 | `certificaciones-guias-mayores` | [certificaciones-guias-mayores.md](certificaciones-guias-mayores.md) | Documento presente | `PARCIAL` |
 | `clases-progresivas` | [clases-progresivas.md](clases-progresivas.md) | Documento presente | `IMPLEMENTADO` |
 | `communications` | [communications.md](communications.md) | Documento presente | `IMPLEMENTADO` |
-| `coordinacion` | [coordinacion.md](coordinacion.md) | Documento presente | `PROPUESTO` |
+| `coordinacion` | [coordinacion.md](coordinacion.md) | Documento presente | `EN IMPLEMENTACIÓN` |
 | `finanzas` | [finanzas.md](finanzas.md) | Documento presente | `IMPLEMENTADO` |
 | `gestion-clubs` | [gestion-clubs.md](gestion-clubs.md) | Documento presente | `IMPLEMENTADO` |
 | `gestion-seguros` | [gestion-seguros.md](gestion-seguros.md) | Documento presente | `IMPLEMENTADO` |

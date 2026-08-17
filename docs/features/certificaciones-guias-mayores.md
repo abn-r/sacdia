@@ -43,6 +43,8 @@ Referencia canónica: `docs/api/ENDPOINTS-LIVE-REFERENCE.md` §certifications y 
 ### App (`sacdia-app`)
 
 - Screens legacy con toggle booleano; **migración al flujo por requisito pendiente**.
+- Entradas de navegación (2026-08-12): chip "Certificaciones" en el tab Clases del bottom nav (`classes_list_view.dart` → `/home/certifications`) y sección "Mis Certificaciones" en el perfil (`profile_certifications_section.dart`, grid 3 columnas espejo de "Mis Clases", tap → `CertificationProgressView`). Antes el módulo solo era alcanzable por deep link de push.
+- Elegibilidad en detalle (2026-08-12): la vista de detalle consume `GET .../eligibility` (`certificationEligibilityProvider`) y muestra la sección "Requisitos de inscripción" con cada regla evaluada (✓/✗ + motivo por `reason_code`); el CTA de inscripción se deshabilita si `eligible=false` o si la versión no tiene reglas configuradas. `CERT_ELIGIBILITY_REQUIRED` y `CERT_ALREADY_ENROLLED` se mapean a mensajes localizados como respaldo.
 
 ### Base de datos
 
