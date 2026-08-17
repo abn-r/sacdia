@@ -36,7 +36,9 @@ Referencia humana concisa del schema Prisma vigente.
 ### `club_sections`
 
 - Es la estructura vigente para secciones de club.
-- Incluye datos operativos propios (`name`, `phone`, `email`, `website`, `logo_url`, `address`, `lat`, `long`).
+- Cada club tiene una fila por tipo de catálogo activo (`club_types`); no tiene nombre propio. La etiqueta visible es `{clubs.name} · {club_types.name}`.
+- `active` indica si el club opera esa sección. Unirse, post-registro, camporee y QR solo usan secciones activas.
+- Incluye datos operativos propios (`phone`, `email`, `website`, `logo_url`, `address`, `lat`, `long`).
 - La unicidad vigente es `@@unique([main_club_id, club_type_id])`.
 
 ### `club_role_assignments`
@@ -148,6 +150,16 @@ Referencia humana concisa del schema Prisma vigente.
 - Nuevas keys desde 8.4-C (2026-04-28):
   - `ranking.finance_closing_deadline_day` (default `5`) — día del mes límite para cierre financiero en el cálculo de `finance_score_pct`.
   - `ranking.recalculation_enabled` (default `true`) — kill-switch que inhibe el cron y el endpoint manual de recálculo de rankings cuando es `false`.
+
+### `audit_logs`
+
+- Tabla única del audit trail interno. Base extendida por `20260730180000_durable_audit_logs` (`event_key` único, `actor_kind`, `actor_scope`, `target_user_id`, `target_scope`, `effective_at`, `correlation_id`, `idempotency_key`, `result`; `action` amplió a VARCHAR(64)).
+- Desde `20260812190000_audit_http_operations` (2026-08-12):
+  - `source VARCHAR(24) NOT NULL DEFAULT 'service'` — `'http'` para filas generadas por `HttpAuditInterceptor` (mutaciones HTTP automáticas), `'service'` para eventos de dominio explícitos.
+  - `request_context JSONB?` — solo filas `source='http'`: `{ method, path, status_code, duration_ms, ip, user_agent }`. Nunca contiene el body del request.
+  - Índice `idx_audit_logs_created` sobre `created_at` para retención y consultas por rango temporal.
+- `correlation_id` enlaza todas las filas escritas durante un mismo request HTTP (contexto `AsyncLocalStorage`; honra header `x-request-id` si es UUID válido).
+- Ver `docs/features/audit-log.md` para el diseño completo del trail.
 
 ### `activities` y `activity_instances`
 

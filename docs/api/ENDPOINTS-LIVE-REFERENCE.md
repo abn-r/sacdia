@@ -975,12 +975,12 @@ Path base: `/api/v1/certifications/users/:userId/certification-enrollments/:enro
 | --- | --- | --- | --- | --- | --- | --- |
 | GET | `/api/v1/clubs` | JWT | - | Listar clubs | ClubsService.findAll() | `src/clubs/clubs.controller.ts` |
 | GET | `/api/v1/clubs/:clubId` | JWT | Permisos: clubs:read | Obtener club por ID | ClubsService.findOne() | `src/clubs/clubs.controller.ts` |
-| POST | `/api/v1/clubs` | JWT | Permisos: clubs:create | Crear nuevo club | ClubsService.create() | `src/clubs/clubs.controller.ts` |
+| POST | `/api/v1/clubs` | JWT | Permisos: clubs:create | Crear club y una sección por cada `club_type` activo; `enabled_club_type_ids` marca cuáles quedan `active=true` (mínimo 1) | ClubsService.create() | `src/clubs/clubs.controller.ts` |
 | PATCH | `/api/v1/clubs/:clubId` | JWT | Permisos: clubs:update; Club: director, deputy-director | Actualizar club (requiere rol director o deputy director) | ClubsService.update() | `src/clubs/clubs.controller.ts` |
 | DELETE | `/api/v1/clubs/:clubId` | JWT | Permisos: clubs:delete; Club: director | Desactivar club (requiere rol director) | ClubsService.remove() | `src/clubs/clubs.controller.ts` |
-| GET | `/api/v1/clubs/:clubId/sections` | JWT | - | Obtener secciones del club | ClubsService.getSections() | `src/clubs/clubs.controller.ts` |
+| GET | `/api/v1/clubs/:clubId/sections` | JWT | - | Listar secciones del club. Por defecto solo `active=true` (post-registro/membresía). `?includeInactive=true` para gestión. Sin `name`; el tipo va en `club_types` | ClubsService.getSections() | `src/clubs/clubs.controller.ts` |
 | GET | `/api/v1/clubs/:clubId/sections/:sectionId` | JWT | Permisos: club_sections:read | Obtener sección por ID | ClubsService.getSection() | `src/clubs/clubs.controller.ts` |
-| POST | `/api/v1/clubs/:clubId/sections` | JWT | Permisos: club_sections:create; Club: director, deputy-director | Crear sección de club (requiere director o deputy director) | ClubsService.createSection() | `src/clubs/clubs.controller.ts` |
+| POST | `/api/v1/clubs/:clubId/sections` | JWT | Permisos: club_sections:create; Club: director, deputy-director | Crear sección si falta el tipo (club pre-migración). 409 si el tipo ya existe. Sin nombre propio | ClubsService.createSection() | `src/clubs/clubs.controller.ts` |
 | PATCH | `/api/v1/clubs/:clubId/sections/:sectionId` | JWT | Permisos: club_sections:update; Club: director, deputy-director, secretary | Actualizar sección (requiere director, deputy director o secretary) | ClubsService.updateSection() | `src/clubs/clubs.controller.ts` |
 | GET | `/api/v1/clubs/:clubId/leadership` | JWT | Permisos: clubs:read | Liderazgo del club | ClubsService.getClubLeadership() | `src/clubs/clubs.controller.ts` |
 | GET | `/api/v1/clubs/:clubId/overview` | JWT | Permisos: clubs:read | Resumen agregado del club | ClubsService.getClubOverview() | `src/clubs/clubs.controller.ts` |
