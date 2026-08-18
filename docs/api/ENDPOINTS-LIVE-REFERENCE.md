@@ -276,7 +276,7 @@
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
-| POST | `/api/v1/admin/catalogs/cache/invalidate` | JWT | Global: admin, super-admin; Permisos: catalogs:update | Invalidate all catalog caches | CatalogCacheService.invalidateAll() | `src/admin/admin-reference.controller.ts` |
+| POST | `/api/v1/admin/catalogs/cache/invalidate` | JWT | Global: admin, super-admin; Permisos: catalogs:update | Invalidate all catalog caches (SCAN `cache:catalogs:*` + epoch bump de honores) | CatalogCacheService.invalidateAll() | `src/admin/admin-reference.controller.ts` |
 | GET | `/api/v1/admin/activity-types` | JWT | Global: admin, super-admin; Permisos: catalogs:read | List activity types for admin management | AdminReferenceService.listActivityTypes() | `src/admin/admin-reference.controller.ts` |
 | POST | `/api/v1/admin/activity-types` | JWT | Global: admin, super-admin; Permisos: catalogs:create | Create activity type | AdminReferenceService.createActivityType() | `src/admin/admin-reference.controller.ts` |
 | PATCH | `/api/v1/admin/activity-types/:activityTypeId` | JWT | Global: admin, super-admin; Permisos: catalogs:update | Update activity type | AdminReferenceService.updateActivityType() | `src/admin/admin-reference.controller.ts` |
@@ -571,7 +571,7 @@ Semántica funcional y límites: [operations-dashboard.md](../features/operation
 | GET | `/api/v1/annual-folders/rankings` | JWT | Permisos: rankings:read | Get club rankings for a given year and club type | RankingsService.getRankings() | `src/annual-folders/rankings.controller.ts` |
 | GET | `/api/v1/annual-folders/rankings/club/:enrollmentId` | JWT | Permisos: rankings:read | Get all rankings for a specific club enrollment | RankingsService.getRankingForClub() | `src/annual-folders/rankings.controller.ts` |
 | GET | `/api/v1/annual-folders/rankings/:enrollmentId/breakdown` | JWT | Permisos: rankings:read | Per-component score breakdown for a club enrollment | RankingsService.getBreakdown() | `src/annual-folders/rankings.controller.ts` |
-| POST | `/api/v1/annual-folders/rankings/recalculate` | JWT | Permisos: rankings:recalculate | Manually trigger a rankings recalculation | RankingsService.recalculateRankings() | `src/annual-folders/rankings.controller.ts` |
+| POST | `/api/v1/annual-folders/rankings/recalculate` | JWT | Permisos: rankings:recalculate | Encola recálculo de rankings de club (202). Poll GET rankings. | RankingsService.enqueueRecalculation() | `src/annual-folders/rankings.controller.ts` |
 
 ### annual-reports
 
@@ -1057,7 +1057,7 @@ Path base: `/api/v1/certifications/users/:userId/certification-enrollments/:enro
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
-| GET | `/api/v1/finances/categories` | JWT | Permisos: finances:read | Listar categorías financieras | FinancesService.getCategories() | `src/finances/finances.controller.ts` |
+| GET | `/api/v1/finances/categories` | JWT | Permisos: finances:read | Listar categorías financieras (Redis TTL 1h; epoch bump al mutar) | FinancesService.getCategories() | `src/finances/finances.controller.ts` |
 | GET | `/api/v1/clubs/:clubId/finances/transactions` | JWT | Permisos: finances:read | Listar todas las transacciones del club (paginadas) | FinancesService.getAllTransactions() | `src/finances/finances.controller.ts` |
 | GET | `/api/v1/clubs/:clubId/finances` | JWT | Permisos: finances:read | Listar movimientos financieros del club | FinancesService.findByClub() | `src/finances/finances.controller.ts` |
 | GET | `/api/v1/clubs/:clubId/finances/summary` | JWT | Permisos: finances:read | Resumen financiero del club | FinancesService.getSummary() | `src/finances/finances.controller.ts` |
@@ -1080,8 +1080,8 @@ Path base: `/api/v1/certifications/users/:userId/certification-enrollments/:enro
 | --- | --- | --- | --- | --- | --- | --- |
 | GET | `/api/v1/honors/:honorId/requirements` | JWT | - | Obtener requisitos de un honor | HonorRequirementsService.getRequirements() | `src/honors/honor-requirements.controller.ts` |
 | GET | `/api/v1/honors` | JWT | - | Listar honores | HonorsService.findAll() | `src/honors/honors.controller.ts` |
-| GET | `/api/v1/honors/categories` | JWT | - | Listar categorías de honores | HonorsService.getCategories() | `src/honors/honors.controller.ts` |
-| GET | `/api/v1/honors/grouped-by-category` | JWT | - | Listar honores agrupados por categoría | HonorsService.getGroupedByCategory() | `src/honors/honors.controller.ts` |
+| GET | `/api/v1/honors/categories` | JWT | - | Listar categorías de honores (Redis TTL 1h; epoch bump al mutar categorías/honores) | HonorsService.getCategories() | `src/honors/honors.controller.ts` |
+| GET | `/api/v1/honors/grouped-by-category` | JWT | - | Listar honores agrupados por categoría (Redis TTL 1h; epoch bump al mutar honores/categorías/tipos de club) | HonorsService.getGroupedByCategory() | `src/honors/honors.controller.ts` |
 | GET | `/api/v1/honors/:honorId` | JWT | - | Obtener honor por ID | HonorsService.findOne() | `src/honors/honors.controller.ts` |
 
 ### user-honors
@@ -1172,7 +1172,7 @@ Path base: `/api/v1/certifications/users/:userId/certification-enrollments/:enro
 | PATCH | `/api/v1/inventory/inventory/:id` | JWT | Permisos: inventory:update | Actualizar un item del inventario | InventoryService.update() | `src/inventory/inventory.controller.ts` |
 | POST | `/api/v1/inventory/inventory/:id/evidences` | JWT | Permisos: inventory:update | Subir foto de evidencia de un item de inventario | InventoryService.uploadEvidence() | `src/inventory/inventory.controller.ts` |
 | DELETE | `/api/v1/inventory/inventory/:id` | JWT | Permisos: inventory:delete | Eliminar un item del inventario | InventoryService.delete() | `src/inventory/inventory.controller.ts` |
-| GET | `/api/v1/inventory/catalogs/inventory-categories` | JWT | Permisos: inventory:read | Listar categorías de inventario | InventoryService.findAllCategories() | `src/inventory/inventory.controller.ts` |
+| GET | `/api/v1/inventory/catalogs/inventory-categories` | JWT | Permisos: inventory:read | Listar categorías de inventario (Redis TTL 1h) | InventoryService.findAllCategories() | `src/inventory/inventory.controller.ts` |
 
 ### investiture
 
@@ -1291,10 +1291,11 @@ Path base: `/api/v1/certifications/users/:userId/certification-enrollments/:enro
 | GET | `/api/v1/monthly-reports/preview/:enrollmentId` | JWT | Permisos: reports:read | Vista previa del informe mensual | MonthlyReportsService.preview() | `src/monthly-reports/monthly-reports.controller.ts` |
 | POST | `/api/v1/monthly-reports/:enrollmentId` | JWT | Permisos: reports:read | Obtener o crear borrador de informe mensual | MonthlyReportsService.getOrCreateDraft() | `src/monthly-reports/monthly-reports.controller.ts` |
 | PATCH | `/api/v1/monthly-reports/:reportId/manual-data` | JWT | Permisos: reports:read | Actualizar datos manuales del informe | MonthlyReportsService.updateManualData() | `src/monthly-reports/monthly-reports.controller.ts` |
-| POST | `/api/v1/monthly-reports/:reportId/generate` | JWT | Permisos: reports:read | Generar informe (congelar datos) | MonthlyReportsService.generate() | `src/monthly-reports/monthly-reports.controller.ts` |
+| POST | `/api/v1/monthly-reports/:reportId/generate` | JWT | Permisos: reports:read | Encola congelar snapshot + PDF (202). Poll GET :reportId hasta generated. | MonthlyReportsService.enqueueGenerate() | `src/monthly-reports/monthly-reports.controller.ts` |
 | POST | `/api/v1/monthly-reports/:reportId/submit` | JWT | Permisos: reports:read | Enviar informe al campo | MonthlyReportsService.submit() | `src/monthly-reports/monthly-reports.controller.ts` |
 | GET | `/api/v1/monthly-reports/enrollment/:enrollmentId` | JWT | Permisos: reports:read | Listar informes de una matrícula | MonthlyReportsService.listReports() | `src/monthly-reports/monthly-reports.controller.ts` |
 | GET | `/api/v1/monthly-reports/:reportId/pdf` | JWT | Permisos: reports:download | Descargar informe mensual en PDF | MonthlyReportsPdfService.generatePdf() | `src/monthly-reports/monthly-reports.controller.ts` |
+| POST | `/api/v1/monthly-reports/:reportId/regenerate` | JWT | Permisos: reports:write | Encola rerender del PDF almacenado (202) | MonthlyReportsService.enqueueRegenerate() | `src/monthly-reports/monthly-reports.controller.ts` |
 | GET | `/api/v1/monthly-reports/admin/list` | JWT | Permisos: reports:read | Listar reportes multi-club (admin/coordinator) | MonthlyReportsService.listForAdmin() | `src/monthly-reports/monthly-reports.controller.ts` |
 | GET | `/api/v1/monthly-reports/:reportId` | JWT | Permisos: reports:read | Obtener informe mensual | MonthlyReportsService.getReport() | `src/monthly-reports/monthly-reports.controller.ts` |
 
@@ -1421,7 +1422,7 @@ Path base: `/api/v1/certifications/users/:userId/certification-enrollments/:enro
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
 | GET | `/api/v1/member-rankings/me` | JWT | Permisos: member_rankings:read_self | Get the calling member own ranking | MemberRankingsService.getMyRanking() | `src/rankings/member-rankings/member-rankings.controller.ts` |
-| POST | `/api/v1/member-rankings/recalculate` | JWT | Permisos: member_ranking_weights:write | Manually trigger member + section ranking recalculation | MemberRankingsService.triggerRecalculate() | `src/rankings/member-rankings/member-rankings.controller.ts` |
+| POST | `/api/v1/member-rankings/recalculate` | JWT | Permisos: member_ranking_weights:write | Encola recálculo member + section (y club). Responde al encolar. | MemberRankingsService.triggerRecalculate() | `src/rankings/member-rankings/member-rankings.controller.ts` |
 | GET | `/api/v1/member-rankings/:enrollmentId/breakdown` | JWT | Permisos: member_rankings:read_self, member_rankings:read_section, member_rankings:read_club, member_rankings:read_lf, member_rankings:read_global (any) | Get score breakdown for a specific enrollment | MemberRankingsService.getBreakdown() | `src/rankings/member-rankings/member-rankings.controller.ts` |
 | GET | `/api/v1/member-rankings` | JWT | Permisos: member_rankings:read_self, member_rankings:read_section, member_rankings:read_club, member_rankings:read_lf, member_rankings:read_global (any) | List member rankings (paginated, RBAC scope-filtered) | MemberRankingsService.list() | `src/rankings/member-rankings/member-rankings.controller.ts` |
 
@@ -1480,7 +1481,7 @@ Path base: `/api/v1/certifications/users/:userId/certification-enrollments/:enro
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
 | POST | `/api/v1/resource-categories` | JWT | Permisos: resource_categories:create | Crear categoría de recurso | ResourceCategoriesService.create() | `src/resources/resource-categories.controller.ts` |
-| GET | `/api/v1/resource-categories` | JWT | Permisos: resource_categories:read | Listar categorías de recursos activas | ResourceCategoriesService.findAll() | `src/resources/resource-categories.controller.ts` |
+| GET | `/api/v1/resource-categories` | JWT | Permisos: resource_categories:read | Listar categorías de recursos activas (Redis TTL 1h) | ResourceCategoriesService.findAll() | `src/resources/resource-categories.controller.ts` |
 | GET | `/api/v1/resource-categories/:id` | JWT | Permisos: resource_categories:read | Obtener categoría de recurso por ID | ResourceCategoriesService.findOne() | `src/resources/resource-categories.controller.ts` |
 | PATCH | `/api/v1/resource-categories/:id` | JWT | Permisos: resource_categories:update | Actualizar categoría de recurso | ResourceCategoriesService.update() | `src/resources/resource-categories.controller.ts` |
 | DELETE | `/api/v1/resource-categories/:id` | JWT | Permisos: resource_categories:delete | Desactivar categoría de recurso (soft delete) | ResourceCategoriesService.remove() | `src/resources/resource-categories.controller.ts` |

@@ -2,7 +2,7 @@
 
 **Estado**: ACTIVE
 **Sincronizado contra**: `sacdia-backend/prisma/schema.prisma`
-**Fecha de resincronizacion**: 2026-06-18 (coordinación por zonas/asignaciones + honores: aplicabilidad por club y enlaces a clases + asignaciones pedagógicas de clases)
+**Fecha de resincronizacion**: 2026-08-18 (índices de búsqueda/filtrado + queries SLA/MoM)
 
 Referencia humana concisa del schema Prisma vigente.
 
@@ -74,8 +74,35 @@ Referencia humana concisa del schema Prisma vigente.
 ### `weekly_records`, `weekly_record_scores` y `scoring_categories`
 
 - `weekly_records` materializa `unit_id`, usuario, semana ISO, total de puntos, `created_by` y `active` por `unit_id + user_id + week + year`. `attendance` y `punctuality` quedan como columnas legacy de compatibilidad y no son fuente del total.
+- Índice de acceso por usuario/año/semana: `idx_weekly_records_user_year_week` `(user_id, year, week)` — cubre MoM y scores de carpeta anual.
 - `weekly_record_scores` guarda el desglose por categoria con unicidad `(record_id, category_id)`.
 - `scoring_categories` define categorias heredadas o propias por `origin_level` + `origin_id`, con `scoring_mode` (`numeric` o `boolean_full`) para decidir si acepta valores intermedios o solo todo/nada.
+
+### Índices de rendimiento (2026-08-18)
+
+Migración `20260818190000_query_performance_indexes` (btree `CONCURRENTLY` + GIN `pg_trgm`). Cierra sequential scans en filtros/búsqueda.
+
+| Tabla | Índice | Uso |
+| --- | --- | --- |
+| `investiture_validation_history` | `(enrollment_id, created_at)`, `(action, created_at)`, parcial `INVESTIDO` | SLA dashboard / throughput |
+| `weekly_records` | `(user_id, year, week)` | MoM, scores de asistencia/uso |
+| `honors` | `(active, honors_category_id, name)`, `(club_type_id, active)` | catálogo agrupado |
+| `clubs` | `church_id`, `(districlub_type_id, active)`, `(active, name)`, GIN `name` | listado/filtro/ILIKE |
+| `churches` / `districts` / `local_fields` | FK + `active` | joins de geografía |
+| `emergency_contacts` | `(owner_id, active)` | CRUD por dueño |
+| `insurance_evidence_files` | purchase / assignment / uploaded_by | lookup de evidencias |
+| `accounts` | `user_id` | Better Auth por usuario |
+| `resources` / `finances` / `support_reports` / `material_products` | GIN trigram en texto | `contains` / ILIKE |
+| `enrollments` | `(ecclesiastical_year_id, investiture_status, active)`; parcial `(status, submitted_at) WHERE active` | validación por año + overdue SLA |
+| `club_role_assignments` | `(ecclesiastical_year_id, active, status)` | dashboard de personas |
+| `activities` | `created_by`, `created_at DESC`, `(created_by, activity_date)` | listado y scores |
+| `annual_folders` | `status`; `(status, modified_at DESC)` | colas de evaluación |
+| `folders` | `ecclesiastical_year_id` | scores de evidencias |
+| `weekly_records` | btree + parcial `WHERE active` | MoM / scores |
+| `camporee_events` | GIN `title`; `(camporee_id, day, starts_at, display_order)` | listado/`q` |
+| `union_camporee_local_fields` | `(local_field_id, active)` | listas de union camporee por campo |
+
+Los GIN/parciales no caben en `@@index` de Prisma; el SQL de la migración es la fuente de esas formas. Los btree sí están declarados en `prisma/schema.prisma`.
 
 ### `member_of_month`
 

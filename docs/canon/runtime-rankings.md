@@ -98,7 +98,7 @@ Un club califica para una categoría cuando `total_earned_points ∈ [min_points
 Servicio: `sacdia-backend/src/annual-folders/rankings.service.ts`.
 
 - Cron `@Cron('0 2 * * *')` (línea 66) ejecuta `handleRankingsRecalculation()` diariamente a las 02:00 UTC;
-- recálculo manual vía endpoint `POST /annual-folders/rankings/recalculate?year_id=...` (controller línea 125). Rate limit: 1 vez cada 5 minutos;
+- recálculo manual vía endpoint `POST /annual-folders/rankings/recalculate?year_id=...`. Encola job `rankings.recalculate` en `background-jobs` y responde 202. Rate limit: 1 vez cada 5 minutos. Sin Redis corre inline;
 - lock distribuido de 10 minutos por año eclesiástico (evita concurrencia entre cron y manual).
 - Kill-switch: `system_config[ranking.recalculation_enabled]` (default `true`) cortocircuita tanto el cron como el punto de entrada manual; cuando está en `false`, el pipeline retorna sin ejecutar ningún cálculo.
 - El cron ahora calcula los puntajes de componente (folder / finance / camporee / evidence) y el composite mediante los servicios `score-calculators/*` antes del upsert.
@@ -178,7 +178,7 @@ Rankings (permiso `rankings:read` | `rankings:recalculate`):
 - `GET /annual-folders/rankings?club_type_id&year_id[&category_id][&local_field_id]` — cada fila incluye IDs de navegación (`club_enrollment_id`, `ecclesiastical_year_id`, `local_field_id`) y los 6 campos nuevos: `folder_score_pct`, `finance_score_pct`, `camporee_score_pct`, `evidence_score_pct`, `composite_score_pct`, `composite_calculated_at`. Acepta `rankings:read` desde rol global o desde la asignación activa de club. Si `local_field_id` se omite, el backend usa primero el campo local de la asignación activa y luego el campo local efectivo/perfil del usuario; si se envía explícito, valida acceso jerárquico histórico o coincidencia con la asignación activa antes de consultar;
 - `GET /annual-folders/rankings/club/:enrollmentId?year_id` — ídem;
 - `GET /annual-folders/rankings/:enrollmentId/breakdown?year_id` — drill-down por enrollment: devuelve composite + pesos aplicados + detalle de cada componente. Permiso `rankings:read`;
-- `POST /annual-folders/rankings/recalculate?year_id`.
+- `POST /annual-folders/rankings/recalculate?year_id` — encola recálculo de club y responde 202; poll GET rankings;
 
 Award categories (permisos `award_categories:*`):
 
@@ -431,7 +431,7 @@ Errores canónicos:
 - BullMQ jobId dedup: cada ejecución usa `jobId` único por año para evitar duplicados en cola.
 - Kill-switches duales en `system_config`:
   - `ranking.recalculation_enabled` (boolean) — controla el pipeline club-level existente.
-  - `member_ranking.recalculation_enabled` (boolean) — controla exclusivamente el pipeline 8.4-A (enrollment + section). Validado en `POST /api/v1/member-rankings/recalculate` antes de ejecutar; responde `400 RECALCULATION_DISABLED` si está deshabilitado.
+  - `member_ranking.recalculation_enabled` (boolean) — controla exclusivamente el pipeline 8.4-A (enrollment + section). Validado en `POST /api/v1/member-rankings/recalculate` antes de encolar; responde `400 RECALCULATION_DISABLED` si está deshabilitado. El endpoint encola `recalculateAll` y no espera el cálculo.
 - Rate limit manual: 5 minutos entre disparos de `POST /api/v1/member-rankings/recalculate`.
 
 ---
