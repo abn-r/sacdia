@@ -20,7 +20,7 @@ La feature esta implementada en backend con IDs UUID y estados `draft -> generat
   - `GET /api/v1/monthly-reports/preview/:enrollmentId` - preview en vivo para una matricula y periodo
   - `POST /api/v1/monthly-reports/:enrollmentId` - obtener o crear borrador unico por `(club_enrollment_id, month, year)`
   - `PATCH /api/v1/monthly-reports/:reportId/manual-data` - guardar datos manuales solo si el informe esta en `draft`
-  - `POST /api/v1/monthly-reports/:reportId/generate` - congelar `snapshot_data` y pasar a `generated`
+  - `POST /api/v1/monthly-reports/:reportId/generate` - encola congelar `snapshot_data` + PDF; responde 202; poll GET hasta `generated`
   - `POST /api/v1/monthly-reports/:reportId/submit` - pasar de `generated` a `submitted`
   - `GET /api/v1/monthly-reports/enrollment/:enrollmentId` - listar informes por matricula, con filtro opcional `status`
   - `GET /api/v1/monthly-reports/admin/list` - **supervision multi-club jerárquica**. Query params: `division_id`, `union_id`, `local_field_id`, `club_type_id`, `year`, `month`, `status`, `page`, `limit`. Scope: `super-admin`/`admin`/`director-dia`/`assistant-dia` ven todo y pueden filtrar; `director-union`/`assistant-union` quedan forzados a su unión; `director-lf`/`assistant-lf`/`assistant-admin` quedan forzados a su campo; `coordinator`/`zone-coordinator`/`general-coordinator` quedan forzados a `club_section_ids` de `coordinator_assignments`; director/secretario de club queda limitado a su sección activa. Response paginada con club_name, club_type, local_field, submitter_name y member_count por item.
@@ -71,7 +71,8 @@ La feature esta implementada en backend con IDs UUID y estados `draft -> generat
 
 ### PDF real
 
-- El PDF se genera en backend con `pdfkit`; no es un archivo preexistente en storage
+- El PDF se genera en backend con `pdfkit` y se guarda en R2; `POST generate`/`regenerate` encolan el render (202). GET pdf repara el artefacto si el worker aún no terminó.
+- HTTP JSON serializa `pdf_size_bytes` como `number` (Prisma `BigInt` no es JSON-safe; list/get/generate/submit lo convierten).
 - Solo se habilita si el informe tiene `snapshot_data` y estado `generated` o `submitted`
 - Usa formato carta y arma al menos estas secciones:
   - `1. ADMINISTRACION`
@@ -91,6 +92,7 @@ La feature esta implementada en backend con IDs UUID y estados `draft -> generat
 - **Contrato reconciliado parcialmente**:
   - el adaptador admin desempaqueta `{ status, data }` y normaliza `monthly_report_id`/`club_enrollment_id` del backend hacia el contrato local `report_id`/`enrollment_id`; crear, listar, detalle, generar, enviar y descargar PDF usan UUID válidos
 - **Drift explicito pendiente**:
+  - `POST generate` ahora responde 202 con `{ queued: true, status: 'draft' }` hasta que el worker congela el snapshot; el admin/app que esperaban 200 + `generated` en la misma request deben poll `GET :reportId`
   - `MonthlyReportManualData` del admin usa campos legacy como `weekly_meetings_held`, `leadership_meetings`, `souls_won`, `service_hours_total`, que NO coinciden con `UpdateManualDataDto` del backend
   - `MonthlyReportAutoData` del admin espera shape legacy (`activities_count`, `members_total`, `attendance_rate`, etc.) que no coincide con el `preview`/`snapshot_data` real actual
 - **Conclusión factual**: la navegación y acciones por ID ya consumen el contrato UUID del backend; los payloads manuales y la presentación de datos auto-calculados siguen pendientes de reconciliación
