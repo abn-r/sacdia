@@ -53,11 +53,15 @@ Los anos eclesiasticos son un catalogo particularmente critico: definen los peri
   - `GET /api/v1/admin/club-ideals` — Listar ideales de club
 
 ### Admin Panel
-- **13 paginas funcionales** con hub de catalogos:
-  - Geografia CRUD: countries, unions, local-fields, districts, churches
-  - Referencia CRUD: allergies, diseases, relationship-types, ecclesiastical-years
-  - Read-only: club-types, club-ideals
-  - Honor categories: CRUD completo (consume endpoints FANTASMA — no existen en backend)
+- **Páginas de catálogo** bajo `/dashboard/catalogs/*`.
+- El editor CRUD de catálogos (geografía, referencia, Phase E, honores, tipos de evento camporee) está restringido a roles globales `admin` / `assistant-admin` / `super-admin`, alineado con `@GlobalRoles('admin', 'super-admin')` del backend.
+- `catalogs:read` no abre esas pantallas: es un permiso de referencia compartido por roles de campo y de club (dropdowns y catálogos públicos).
+- El sidebar y la paleta de comandos ocultan los editores si el usuario no tiene esos roles. Una URL directa no llama al API admin: el layout muestra un estado de sin permiso.
+- Excepción: `/dashboard/catalogs/certifications` no usa GlobalRoles de admin; se filtra por `certifications:configure` / `certifications:publish` y `director-lf` sí puede administrarlo.
+- Geografia CRUD: countries, unions, local-fields, districts, churches
+- Referencia CRUD: allergies, diseases, relationship-types, ecclesiastical-years
+- Phase E: classes, class-modules, class-sections, finance-categories, inventory-categories
+- Honor categories y honors: CRUD admin
 
 ### App Movil
 - Consume catalogos compartidos via `CatalogsRemoteDataSourceImpl`:
@@ -73,12 +77,13 @@ Los anos eclesiasticos son un catalogo particularmente critico: definen los peri
 
 1. Todos los catalogos de lectura deben ser publicos (sin JWT) para alimentar formularios de registro
 2. La administracion CRUD de catalogos debe estar restringida a super_admin y admin
-3. La jerarquia geografica debe mantener integridad referencial (no eliminar un pais con uniones activas)
-4. Las operaciones de eliminacion deben ser soft delete (campo `active = false`)
-5. Los anos eclesiasticos deben tener fechas de inicio y fin, y el sistema debe poder resolver el ano actual
-6. Los catalogos de salud (alergias, enfermedades, medicamentos) deben estar disponibles tanto en lectura publica como en CRUD admin
-7. Los tipos de club deben ser inmutables desde el admin (read-only)
-8. Los ideales de club deben ser consultables pero no modificables desde el admin
+3. El panel admin no debe ofrecer entradas de UI (sidebar, paleta, URL que dispara el API) a editores de catalogo si el actor no tiene esos roles globales
+4. La jerarquia geografica debe mantener integridad referencial (no eliminar un pais con uniones activas)
+5. Las operaciones de eliminacion deben ser soft delete (campo `active = false`)
+6. Los anos eclesiasticos deben tener fechas de inicio y fin, y el sistema debe poder resolver el ano actual
+7. Los catalogos de salud (alergias, enfermedades, medicamentos) deben estar disponibles tanto en lectura publica como en CRUD admin
+8. Los tipos de club deben ser inmutables desde el admin (read-only)
+9. Los ideales de club deben ser consultables pero no modificables desde el admin
 
 ## Decisiones de diseno
 
@@ -87,6 +92,7 @@ Los anos eclesiasticos son un catalogo particularmente critico: definen los peri
 - **Jerarquia con filtros cascada**: Los endpoints de geografia soportan filtros por parent (ej: uniones por pais, campos por union)
 - **Ano eclesiastico como eje temporal**: Todas las operaciones anuales (enrollments, roles de club, progreso) referencian el ano eclesiastico, no el ano calendario
 - **CatalogCrudPage en admin**: Patron generico reutilizable para todas las paginas CRUD de catalogos
+- **Gating de UI alineado a GlobalRoles**: `catalogs:read` no autoriza el editor admin; el frontend combina permiso + rol `admin`/`super-admin` para nav y layout
 
 ## Gaps y pendientes
 

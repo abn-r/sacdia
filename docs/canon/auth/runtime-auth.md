@@ -303,6 +303,7 @@ Estos puntos NO deben maquillarse como cerrados:
 
 ### `sacdia-admin`
 - usa `authorization.effective.permissions` para gating de páginas, acciones y mutaciones;
+- usa `authorization.grants` (roles globales y asignaciones) cuando el backend combina `@GlobalRoles` con `@RequirePermissions`; un permiso como `catalogs:read` no abre editores admin que además exigen rol `admin`/`super-admin`;
 - usa `authorization.grants` para matrices, detalle de roles y selector de contexto;
 - no reconstruye RBAC desde joins locales.
 

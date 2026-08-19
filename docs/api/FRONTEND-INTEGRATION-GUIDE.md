@@ -587,7 +587,7 @@ interface ApiError {
 | 201 | Created | Recurso creado exitosamente |
 | 400 | Bad Request | Validar datos de entrada |
 | 401 | Unauthorized | Refrescar token o redirigir a login |
-| 403 | Forbidden | Usuario sin permisos. El cliente Axios de `sacdia-admin` no redirige a `/login` ni limpia el token en 403: eso es permiso denegado, no sesión caducada. |
+| 403 | Forbidden | Usuario sin permisos. En `sacdia-admin`, no ofrecer la entrada de UI (sidebar/paleta) ni disparar el API; mostrar estado de sin permiso en la ruta si llega por URL directa. El cliente Axios no redirige a `/login` ni limpia el token en 403: eso es permiso denegado, no sesión caducada. |
 | 404 | Not Found | Recurso no existe, manejar caso |
 | 409 | Conflict | Duplicado, mostrar mensaje específico |
 | 422 | Validation Error | Mostrar errores de validación |
@@ -782,6 +782,7 @@ Límites transitorios que deben quedar explícitos:
 Checklist final de consistencia para frontend:
 
 - `sacdia-admin` debe seguir usando `authorization.effective.permissions` para gating operativo y `authorization.grants` para contexto y detalle;
+- si un endpoint admin combina `@GlobalRoles('admin', 'super-admin')` con un permiso amplio (`catalogs:read`, `users:read`, `countries:read`), el panel no debe mostrar esa pantalla ni llamar al API solo porque el permiso existe; el rol global también tiene que coincidir;
 - `sacdia-app` debe separar `administrative completion` de acceso a datos sensibles: `users:update` no alcanza por si solo para salud/contactos/legal de terceros;
 - ni admin ni mobile deben crear permisos frontend nuevos para cerrar el `GAP FORMAL`;
 - la UX sobre terceros debe limitarse a la política mínima documentada y degradar el resto, aun cuando el actor tenga `users:update`.
@@ -1012,6 +1013,20 @@ Future<Enrollment> enrollInHonor({
 ---
 
 ## Best Practices
+
+### 0. Gating de UI en el admin (RBAC)
+
+No ofrezcas una pantalla admin solo porque el usuario tiene un permiso amplio. Si el backend combina `@GlobalRoles('admin', 'super-admin')` con `@RequirePermissions` (p. ej. `GET /admin/finance-categories` + `catalogs:read`), el panel debe:
+
+- ocultar el ítem en sidebar y paleta de comandos;
+- no llamar al API admin cuando el rol global no coincide;
+- mostrar un estado de sin permiso si la URL se abre de forma directa.
+
+`catalogs:read` es permiso de referencia (dropdowns / catálogos públicos), no autorización del editor `/dashboard/catalogs/*`.
+
+En `/dashboard/rbac` (roles, matriz, selector de permisos) el panel debe mostrar la etiqueta localizada del permiso, no solo `permission_name` ni `description` de la DB. La clave técnica se mantiene visible como apoyo.
+
+Copiar permisos entre roles (solo super-admin) reutiliza `PUT /api/v1/admin/rbac/roles/:id/permissions`: lee los `permission_id` activos del origen y sincroniza el destino. No hay endpoint de copia dedicado. `super-admin` queda fuera como origen y como destino.
 
 ### 1. Cache y Revalidación
 

@@ -46,12 +46,15 @@ El sistema incluye un mecanismo de permisos sensibles para sub-recursos de usuar
   - `DELETE /api/v1/admin/rbac/roles/:id/permissions/:permissionId` — Remover permiso de rol (roles: super_admin)
 
 ### Admin
-- **3 paginas funcionales**:
+- **3 paginas funcionales de RBAC**:
   - `rbac/permissions` — CRUD completo de permisos
   - `rbac/roles` — Listado de roles con asignacion de permisos
   - `rbac/matrix` — Matriz interactiva roles vs permisos
 - Hub de navegacion en `/dashboard/rbac`
 - Consume todos los endpoints del RbacModule
+- La matriz, el listado de roles y el selector de permisos muestran **etiquetas localizadas** (`rbac.permissions.*` / `rbac.permissionGroups.*`) y dejan la clave técnica `resource:action` como texto secundario. La descripción en inglés de la DB no es la etiqueta de UI.
+- Super-admin puede copiar permisos de un rol a otro en `/dashboard/configuration/roles` (reemplazo total via `PUT /admin/rbac/roles/:id/permissions`). No se copia desde ni hacia `super-admin`.
+- El sidebar filtra por `authorization.effective.permissions` y, cuando el backend declara `@GlobalRoles`, también por roles globales. Ejemplo: editores `/dashboard/catalogs/*` (salvo certificaciones) requieren `admin`/`super-admin`; `catalogs:read` no alcanza.
 
 ### App Movil
 - **No tiene UI de RBAC** — La app consume el sistema de permisos implicitamente a traves de guards y decorators del backend
