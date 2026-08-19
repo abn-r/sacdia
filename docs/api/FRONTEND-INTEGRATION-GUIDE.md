@@ -71,7 +71,8 @@ El contrato de clases separa requisitos evaluables por track:
 
 El flujo móvil de jueces de camporee consume scoring oficial por rúbricas:
 
-- `GET /api/v1/camporee-judges/me/assignments` lista asignaciones del usuario autenticado; la app muestra para captura sólo las asignaciones activas donde `judge_role='primary'` y `can_submit_score=true`.
+- `GET /api/v1/camporee-judges/me/assignments` lista asignaciones del usuario autenticado; la app muestra para captura sólo las asignaciones activas donde `judge_role='primary'` y `can_submit_score=true`. Acceso rápido pinta el tile **Evaluar camporee** sólo si hay al menos una de esas asignaciones; loading/error ocultan el atajo.
+- `GET /api/v1/local-camporees/:camporeeId/leaderboard` y `GET /api/v1/union-camporees/:camporeeId/leaderboard` (permiso `camporee_events:read`) alimentan la clasificación en el detalle del camporee, con la misma visibilidad que eventos. Scope por defecto: local. No hay un segundo tile de ranking en Acceso rápido (choca con ranking anual).
 - `GET /api/v1/camporee-events/:eventId/rubrics` entrega criterios activos; la pantalla de captura debe enviar exactamente un ítem por rúbrica.
 - `POST /api/v1/camporee-events/:eventId/sections/:clubSectionId/scores` puede enviar `source` como intención de UI, pero el backend siempre deriva la fuente efectiva desde asignación, rol y scope. Un juez principal sin override explícito queda `judge_primary`; gestores LF/Unión quedan `manual_lf`; sólo admins globales permitidos quedan `admin_override`. El total se calcula desde `items[].awarded_points`. Para "club no se presentó", enviar `{ no_show: true, items: [], notes? }`.
 - Para tolerar reintentos de red, la app debe generar un UUID por intento lógico y enviarlo como header `Idempotency-Key`; reutilizarlo sólo para reintentar exactamente el mismo target/payload. Sin header el endpoint sigue siendo compatible, pero no hay replay idempotente.
@@ -103,12 +104,17 @@ El flujo administrativo de camporee separa personal operativo, agenda y scoring:
 - Cerrar/reabrir inscripción de clubes:
   - `POST /api/v1/camporees/:camporeeId/club-registration/close|reopen`
   - `POST /api/v1/union-camporees/:camporeeId/club-registration/close|reopen`
+- El admin expone esas acciones en el detalle (`/dashboard/campamentos/:id` y `/dashboard/campamentos/union/:id`) con permiso `camporee_events:update`. Close exige al menos una sección `registered`/`approved`. Reopen queda bloqueado si hay puntajes o asignaciones de jueces.
 - El cierre congela secciones para scoring; las mutaciones de rúbricas, asignación de jueces y captura de puntaje oficial deben mostrar el gate si `club_registration_closed_at` está vacío.
 - La inscripción de miembros sigue dependiendo de `member_registration_deadline`; no bloquear UI de miembros por cierre de clubes.
 
 ## Actualizacion 2026-07-10 (Lifecycle y timezone de camporees)
 
 - En formularios de creación/edición, enviar `start_date`/`end_date` como `YYYY-MM-DD`; nunca convertirlas a medianoche ni enviar timestamp.
+- `lat`/`long` son un par opcional. El admin los fija con el mapa (Google Maps, mismo `LocationPicker` que clubes); si no hay pin, omitir ambos. Sin coordenadas, la app no muestra preview de mapa.
+- Para pintar esas fechas en UI, usar el prefijo de calendario `YYYY-MM-DD` (no `new Date("2026-08-21")` + TZ local, ni `DateTime.parse` + `toLocal()` en Flutter): Node y el browser discrepan y Next muestra overlay de hidratación; en México el 21 se vuelve 20.
+- El formulario admin de camporee local carga campos con `GET /catalogs/local-fields` (vía `listLocalFieldsForTerritory`), no `GET /admin/local-fields` (ese endpoint es Global admin/super-admin). Un director-lf queda con su campo bloqueado. Un 403 de permiso no debe redirigir a `/login`.
+- Ranking/puntajes: formatear con decimal ASCII y sin grouping ICU (espacio estrecho vs espacio). No usar `Intl.NumberFormat("es-MX")` en HTML SSR.
 - Para apertura y deadlines enviar un ISO-8601 con `Z` u offset explícito. La apertura ausente significa que clubes pueden inscribirse inmediatamente.
 - Capturar una zona IANA explícita (por ejemplo `America/Mexico_City`) cuando se confirme la sede: el backend la audita con el actor. Un PATCH sin `timezone` no borra esa verificación.
 - La UI de clubes debe distinguir `not_open_yet`, `open`, `late_approval_required` y `manually_frozen`. Al estar `not_open_yet`, no ofrecer inscripción ni flujo de aprobación tardía; el deadline es inclusivo.
@@ -120,6 +126,10 @@ Contrato para admin y app. Rutas completas: `docs/api/ENDPOINTS-LIVE-REFERENCE.m
 ### Decidir qué flujo mostrar (app)
 
 `GET /payment-orders/context` → `{ enabled, local_field_id, club_section_id, insurance_cycles[] }`. Con `enabled: false`, mostrar los flujos legacy (alta directa de seguro, register directo de camporee). Con `enabled: true`, la emisión de órdenes es la única vía; los endpoints legacy responden `403 FIELD_PAYMENT_ORDER_LEGACY_DISABLED`.
+
+Mientras el contexto carga o falla, **no** mostrar el flujo legacy: el primer paint con `enabled: false` por default provoca un flash de “Seleccionar miembros” y un POST que el backend rechaza si el flag está ON. Loading → spinner; error → retry. Solo `enabled: true` redirige a emitir orden.
+
+En la emisión de camporee, la lista de beneficiarios omite miembros ya inscritos (`registered` / `pending_approval` / `approved`). No pintar la lista hasta que esos IDs hayan cargado.
 
 ### Ciclo de vida de la orden
 
@@ -577,7 +587,7 @@ interface ApiError {
 | 201 | Created | Recurso creado exitosamente |
 | 400 | Bad Request | Validar datos de entrada |
 | 401 | Unauthorized | Refrescar token o redirigir a login |
-| 403 | Forbidden | Usuario sin permisos, mostrar mensaje |
+| 403 | Forbidden | Usuario sin permisos. El cliente Axios de `sacdia-admin` no redirige a `/login` ni limpia el token en 403: eso es permiso denegado, no sesión caducada. |
 | 404 | Not Found | Recurso no existe, manejar caso |
 | 409 | Conflict | Duplicado, mostrar mensaje específico |
 | 422 | Validation Error | Mostrar errores de validación |

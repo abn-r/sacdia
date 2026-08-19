@@ -45,19 +45,23 @@ La inscripcion de miembros en camporees tiene implicaciones directas con el modu
 ### Admin
 
 - **CRUD completo**: Lista con creacion/eliminacion, pagina de detalle con tarjeta de info y tabs de personal, eventos, clubes y miembros, dialog de creacion/edicion, registro de miembros con validacion de seguro, remocion de miembros
-- Los formularios de camporee local y de unión capturan dirección textual, fechas limite opcionales y coordenadas opcionales (`lat`, `long`) como par obligatorio: se guardan ambas o ninguna.
+- Los formularios de camporee local y de unión capturan dirección textual, fechas limite opcionales y coordenadas opcionales (`lat`, `long`) como par obligatorio: se guardan ambas o ninguna. El admin fija el par con el mismo mapa de Google Maps que clubes (buscar / clic / arrastrar pin); sin `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` muestra el aviso de configuración.
+- El create/edit local no usa `GET /admin/local-fields` (403 para director-lf y bounce a login). Carga `GET /catalogs/local-fields` filtrado por territorio; director-lf ve su campo bloqueado.
 - El admin carga primero el roster operativo del camporee y luego asigna personas específicas a cada actividad/evento; no se fuerza que cada actividad tenga cocina/admin/apoyo/jueces.
 - El cierre de inscripción de clubes congela las secciones que podrán recibir puntajes y asignaciones de jueces; la inscripción de miembros sigue controlada por `member_registration_deadline`.
+- El detalle admin (`/dashboard/campamentos/:id` y `/union/:id`) expone cerrar/reabrir inscripción de clubes (`POST .../club-registration/close|reopen`, permiso `camporee_events:update`). Close exige secciones `registered`/`approved`. Reopen queda bloqueado si hay puntajes o asignaciones de jueces. Las pestañas Jueces y Puntajes muestran el gate mientras `club_registration_closed_at` esté vacío.
+- Fechas de calendario (`start_date`/`end_date` como `YYYY-MM-DD`) se muestran por el prefijo ISO, no con `new Date(dateOnly)` en TZ local: evita overlay de hidratación y el desfase 21–23 → 20–22. Ranking y puntajes usan números tabulares ASCII (`formatTabularNumber`) sin agrupación ICU. El nav no cambia árbol colapsado/expandido hasta hidratar.
 - Reutiliza el cliente API existente (`lib/api/camporees.ts`) y las server actions (`lib/camporees/actions.ts`)
 
 ### App Movil
 
 - **4 screens**: lista de camporees, detalle con preview de miembros, selector/registro múltiple de miembros desde la sección activa, lista de miembros con opcion de remocion
 - La lista móvil de camporees muestra directamente las tarjetas disponibles, sin hero/resumen decorativo superior, para ahorrar espacio útil.
-- La UI móvil muestra las fechas como rango único y los montos con el símbolo de moneda antes de la cantidad (ej. `$450`) tanto en lista como en detalle.
+- La UI móvil muestra las fechas como rango único y los montos con el símbolo de moneda antes de la cantidad (ej. `$450`) tanto en lista como en detalle. `start_date`/`end_date` se parsean por prefijo `YYYY-MM-DD` (`SacDateFormatter.parseCalendarDate`); no `DateTime.parse` + `toLocal()`, que en México convierte 21–23 ago en 20–22.
 - El detalle muestra banner de Camporí, dirección primero y preview 16:9 del mapa con pin cuando hay coordenadas. Al tocar el bloque abre opciones de mapas externos.
-- Directores, subdirectores, secretarios, secretarios-tesoreros, tesoreros y consejeros pueden ver los eventos registrados del Camporí desde el detalle móvil.
-- En el detalle móvil se prioriza primero la sección de miembros inscritos y después los eventos del Camporí.
+- Directores, subdirectores, secretarios, secretarios-tesoreros, tesoreros y consejeros pueden ver los eventos registrados y la clasificación oficial (`GET /local-camporees/:id/leaderboard` o `GET /union-camporees/:id/leaderboard`) desde el detalle móvil. La clasificación va debajo de eventos.
+- Acceso rápido muestra **Evaluar camporee** sólo si `GET /camporee-judges/me/assignments` trae al menos una asignación activa `primary` con `can_submit_score`. Loading/error no pintan el atajo (sin flash para no jueces).
+- En el detalle móvil se prioriza primero la sección de miembros inscritos, después los eventos del Camporí y luego la clasificación.
 - La lista móvil de eventos es mínima: icono, nombre del evento y puntaje total. Al entrar al evento se muestra el detalle completo con tipo, día/hora si la agenda está liberada, puntaje, lugar, descripción, personal asignado y horarios/bloques cuando existan.
 - Capa de datos completa: entidades, modelos, datasource, repositorio, providers
 - Rutas configuradas en GoRouter
@@ -110,7 +114,7 @@ Plan `docs/plans/2026-08-05-insurance-camporee-payment-orders-plan.md` (+ addend
 - **Emisión**: `POST /camporees/:camporeeId/payment-orders` (permiso `field-payment-orders:create`). Valida camporee local activo, club/sección inscrita, membresía activa, seguro vigente por beneficiario y deadline de registro de miembros.
 - **Fulfillment**: al aprobar el comprobante (bandeja LF, maker-checker) se crean los `camporee_members` con estado aprobado en la misma transacción, enlazados a las líneas de la orden. No se crean antes.
 - **Flag `field_payment_orders_v1`** (`system_config`, lista JSON de `local_field_id`): ON → `POST /camporees/:id/register` de miembros queda bloqueado (`FIELD_PAYMENT_ORDER_LEGACY_DISABLED`); la orden es la única vía. OFF → register directo legacy intacto (la app muestra el flujo legacy).
-- **App**: con flag ON, la vista de inscripción redirige a emitir orden de pago y a consultar las órdenes del camporee; el admin muestra pestaña "Órdenes de pago" en el detalle del camporee local.
+- **App**: con flag ON, la vista de inscripción espera el contexto de órdenes (loading/error fail-closed; no pinta el register legacy) y redirige a emitir orden de pago y a consultar las órdenes del camporee; la lista de beneficiarios omite miembros ya inscritos (`registered`/`pending_approval`/`approved`). El admin muestra pestaña "Órdenes de pago" en el detalle del camporee local.
 - **Expiración de órdenes**: `field_payment_orders.expiry_days` (`system_config`), default 15 días; lazy expiry libera a los beneficiarios para una nueva orden.
 - `camporee_payments` por miembro queda legado (histórico/unión).
 
@@ -145,7 +149,7 @@ Reglas vigentes:
 - Sólo pueden agregarse al roster usuarios elegibles: mayores de 18 años, usuarios con rol global `pastor`, o usuarios con investidura activa en clase de Guías Mayores. La UI filtra candidatos y el backend vuelve a validar antes de crear el juez.
 - Las mutaciones de rúbricas, asignaciones de jueces y captura de puntaje oficial requieren que la inscripción de clubes esté cerrada (`club_registration_closed_at`), porque las secciones competitivas ya deben estar congeladas.
 - Reabrir inscripción de clubes sólo es válido si todavía no existen asignaciones de jueces ni resultados activos de scoring.
-- La app móvil muestra la bandeja de evaluaciones sólo para asignaciones `primary` activas del juez autenticado y envía un ítem por rúbrica.
+- La app móvil muestra la bandeja de evaluaciones sólo para asignaciones `primary` activas del juez autenticado y envía un ítem por rúbrica. El atajo vive en Acceso rápido, no en el detalle del camporee (las asignaciones no traen `camporeeId`).
 - `assistant-lf`, `director-lf`, `assistant-union` y `director-union` pueden registrar puntaje manual dentro de su scope; `admin`, `assistant-admin` y `super-admin` generan override administrativo auditado. El permiso genérico `camporee_events:update` no basta.
 - `camporee_event_section_results` mantiene un único resultado activo por `camporee_event_id + club_section_id`; submissions anteriores quedan auditables.
 - El juez principal sólo puede enviar una calificación oficial por evento/sección. `source` se deriva en servidor: una intención `admin_override` enviada por un gestor territorial queda `manual_lf`; sólo admins globales permitidos producen `admin_override`.
