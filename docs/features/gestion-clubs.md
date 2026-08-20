@@ -24,12 +24,12 @@ La asignacion de un consejero/secretario a una clase progresiva concreta vive en
   - `GET /api/v1/clubs` — Listar clubs
   - `POST /api/v1/clubs` — Crear club y, en la misma transaccion, una fila de `club_sections` por cada `club_types` activo. El body exige `enabled_club_type_ids` (minimo 1) para marcar cuales quedan `active=true`; el resto se crea inactivo.
   - `GET /api/v1/clubs/:clubId` — Obtener club por ID
-  - `PATCH /api/v1/clubs/:clubId` — Actualizar club (roles: director, subdirector)
+  - `PATCH /api/v1/clubs/:clubId` — Actualizar ficha del club (roles: director, deputy-director, secretary, secretary-treasurer; permiso `clubs:update`)
   - `DELETE /api/v1/clubs/:clubId` — Desactivar club (roles: director)
   - `GET /api/v1/clubs/:clubId/sections` — Listar secciones (por defecto solo `active=true`; `?includeInactive=true` para gestion de director/admin). Sin columna `name`; el tipo viene en `club_types`.
   - `GET /api/v1/clubs/:clubId/sections/:sectionId` — Obtener seccion por ID
   - `POST /api/v1/clubs/:clubId/sections` — Camino residual para clubs pre-migracion si falta el tipo; 409 si el tipo ya existe. No acepta nombre propio.
-  - `PATCH /api/v1/clubs/:clubId/sections/:sectionId` — Actualizar seccion; `active` es el unico switch de “este club opera esa seccion” (roles: director, subdirector, secretary)
+  - `PATCH /api/v1/clubs/:clubId/sections/:sectionId` — Actualizar seccion; `active` es el unico switch de “este club opera esa seccion” (roles: director, deputy-director, secretary, secretary-treasurer)
   - `DELETE /api/v1/clubs/:clubId/sections/:sectionId` — Eliminar seccion (roles: director)
   - `GET /api/v1/clubs/:clubId/sections/:sectionId/members` — Listar miembros de la seccion con rol y clase anual activa (`current_class`) resuelta desde `enrollments`
   - `POST /api/v1/clubs/:clubId/sections/:sectionId/roles` — Asignar rol a miembro (roles: director, subdirector, secretary)
@@ -101,7 +101,7 @@ El listado de miembros no debe inferir "Sin clase" desde la ausencia de datos en
 - **Sucesion anual de director**: para cambiar el director en el siguiente ano eclesiastico, el Admin usa `POST /clubs/:clubId/sections/:sectionId/director-succession`, que cierra la asignacion activa anterior (`active=false`, `status=ended`, `end_date`) y crea una nueva asignacion `director` para el ano indicado. Solo `super-admin`, `admin`, `director-lf` y `assistant-lf` pueden ejecutar este flujo. No deben convivir dos directores activos en la misma seccion.
 - **Limites de directiva**: `role_slot_limits` define los cupos por seccion y el backend tambien conserva fallback canonico para cargos criticos aunque falte el seed. La regla se aplica al crear asignaciones directas, al actualizar un rol y al revisar solicitudes de asignacion.
 - **Contexto activo**: `users_pr.active_club_assignment_id` persiste el contexto de club activo del usuario, usado por `ClubRolesGuard` para resolver autorizacion
-- **Autorizacion por jerarquia de roles**: Director tiene todos los permisos; subdirector la mayoria; secretary puede gestionar roles y secciones
+- **Autorizacion por jerarquia de roles**: Director y subdirector cubren la mayoria de escrituras; secretary y secretary-treasurer tambien editan la ficha del club (`clubs:update`) y la seccion (`club_sections:update`)
 - **Cargo vs responsabilidad pedagógica**: `club_role_assignments` define el cargo en la sección; `class_counselor_assignments` define qué clase acompaña ese actor durante el año.
 
 ## Gaps y pendientes

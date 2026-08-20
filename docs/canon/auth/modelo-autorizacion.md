@@ -208,6 +208,8 @@ Regla canónica:
 - usa `authorization.effective.permissions` para habilitar o bloquear acciones;
 - usa `authorization.grants` para mostrar roles, asignaciones y selectores de contexto;
 - si el backend combina `@GlobalRoles` con un permiso amplio (`catalogs:read`), el panel no ofrece esa pantalla solo por el permiso;
+- el layout del dashboard vuelve a aplicar el mapa `NAV_ITEM_ACCESS`; una URL directa sin permiso no carga la pagina;
+- mutar catalogo o matriz RBAC queda en `super-admin` (UI y API);
 - no recompone permisos con joins locales ni heurísticas propias.
 
 ### App móvil

@@ -976,12 +976,12 @@ Path base: `/api/v1/certifications/users/:userId/certification-enrollments/:enro
 | GET | `/api/v1/clubs` | JWT | - | Listar clubs | ClubsService.findAll() | `src/clubs/clubs.controller.ts` |
 | GET | `/api/v1/clubs/:clubId` | JWT | Permisos: clubs:read | Obtener club por ID | ClubsService.findOne() | `src/clubs/clubs.controller.ts` |
 | POST | `/api/v1/clubs` | JWT | Permisos: clubs:create | Crear club y una sección por cada `club_type` activo; `enabled_club_type_ids` marca cuáles quedan `active=true` (mínimo 1) | ClubsService.create() | `src/clubs/clubs.controller.ts` |
-| PATCH | `/api/v1/clubs/:clubId` | JWT | Permisos: clubs:update; Club: director, deputy-director | Actualizar club (requiere rol director o deputy director) | ClubsService.update() | `src/clubs/clubs.controller.ts` |
+| PATCH | `/api/v1/clubs/:clubId` | JWT | Permisos: clubs:update; Club: director, deputy-director, secretary, secretary-treasurer | Actualizar ficha del club (dirección o secretaría de la sección activa) | ClubsService.update() | `src/clubs/clubs.controller.ts` |
 | DELETE | `/api/v1/clubs/:clubId` | JWT | Permisos: clubs:delete; Club: director | Desactivar club (requiere rol director) | ClubsService.remove() | `src/clubs/clubs.controller.ts` |
 | GET | `/api/v1/clubs/:clubId/sections` | JWT | - | Listar secciones del club. Por defecto solo `active=true` (post-registro/membresía). `?includeInactive=true` para gestión. Sin `name`; el tipo va en `club_types` | ClubsService.getSections() | `src/clubs/clubs.controller.ts` |
 | GET | `/api/v1/clubs/:clubId/sections/:sectionId` | JWT | Permisos: club_sections:read | Obtener sección por ID | ClubsService.getSection() | `src/clubs/clubs.controller.ts` |
 | POST | `/api/v1/clubs/:clubId/sections` | JWT | Permisos: club_sections:create; Club: director, deputy-director | Crear sección si falta el tipo (club pre-migración). 409 si el tipo ya existe. Sin nombre propio | ClubsService.createSection() | `src/clubs/clubs.controller.ts` |
-| PATCH | `/api/v1/clubs/:clubId/sections/:sectionId` | JWT | Permisos: club_sections:update; Club: director, deputy-director, secretary | Actualizar sección (requiere director, deputy director o secretary) | ClubsService.updateSection() | `src/clubs/clubs.controller.ts` |
+| PATCH | `/api/v1/clubs/:clubId/sections/:sectionId` | JWT | Permisos: club_sections:update; Club: director, deputy-director, secretary, secretary-treasurer | Actualizar sección (dirección o secretaría de la sección activa) | ClubsService.updateSection() | `src/clubs/clubs.controller.ts` |
 | GET | `/api/v1/clubs/:clubId/leadership` | JWT | Permisos: clubs:read | Liderazgo del club | ClubsService.getClubLeadership() | `src/clubs/clubs.controller.ts` |
 | GET | `/api/v1/clubs/:clubId/overview` | JWT | Permisos: clubs:read | Resumen agregado del club | ClubsService.getClubOverview() | `src/clubs/clubs.controller.ts` |
 | GET | `/api/v1/clubs/:clubId/history` | JWT | Permisos: clubs:read | Historial de auditoría del club | ClubsService.getClubHistory() | `src/clubs/clubs.controller.ts` |
@@ -1045,13 +1045,13 @@ Path base: `/api/v1/certifications/users/:userId/certification-enrollments/:enro
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
-| GET | `/api/v1/evidence-review/pending` | JWT | Global: admin, super-admin, coordinator | Listar evidencias pendientes de revisión | EvidenceReviewService.getPending() | `src/evidence-review/evidence-review.controller.ts` |
-| POST | `/api/v1/evidence-review/bulk-approve` | JWT | Global: admin, super-admin, coordinator | Aprobar múltiples evidencias en bloque | EvidenceReviewService.bulkApprove() | `src/evidence-review/evidence-review.controller.ts` |
-| POST | `/api/v1/evidence-review/bulk-reject` | JWT | Global: admin, super-admin, coordinator | Rechazar múltiples evidencias en bloque | EvidenceReviewService.bulkReject() | `src/evidence-review/evidence-review.controller.ts` |
-| GET | `/api/v1/evidence-review/:type/:id` | JWT | Global: admin, super-admin, coordinator | Obtener detalle de una evidencia con archivos adjuntos | EvidenceReviewService.getDetail() | `src/evidence-review/evidence-review.controller.ts` |
-| POST | `/api/v1/evidence-review/:type/:id/approve` | JWT | Global: admin, super-admin, coordinator | Aprobar una evidencia | EvidenceReviewService.approve() | `src/evidence-review/evidence-review.controller.ts` |
-| POST | `/api/v1/evidence-review/:type/:id/reject` | JWT | Global: admin, super-admin, coordinator | Rechazar una evidencia con motivo | EvidenceReviewService.reject() | `src/evidence-review/evidence-review.controller.ts` |
-| GET | `/api/v1/evidence-review/:type/:id/history` | JWT | Global: admin, super-admin, coordinator | Historial de validación de una evidencia | EvidenceReviewService.getHistory() | `src/evidence-review/evidence-review.controller.ts` |
+| GET | `/api/v1/evidence-review/pending` | JWT | Global: admin, super-admin, coordinator; Permisos: validation:review | Listar evidencias pendientes de revisión | EvidenceReviewService.getPending() | `src/evidence-review/evidence-review.controller.ts` |
+| POST | `/api/v1/evidence-review/bulk-approve` | JWT | Global: admin, super-admin, coordinator; Permisos: validation:review | Aprobar múltiples evidencias en bloque | EvidenceReviewService.bulkApprove() | `src/evidence-review/evidence-review.controller.ts` |
+| POST | `/api/v1/evidence-review/bulk-reject` | JWT | Global: admin, super-admin, coordinator; Permisos: validation:review | Rechazar múltiples evidencias en bloque | EvidenceReviewService.bulkReject() | `src/evidence-review/evidence-review.controller.ts` |
+| GET | `/api/v1/evidence-review/:type/:id` | JWT | Global: admin, super-admin, coordinator; Permisos: validation:review | Obtener detalle de una evidencia con archivos adjuntos | EvidenceReviewService.getDetail() | `src/evidence-review/evidence-review.controller.ts` |
+| POST | `/api/v1/evidence-review/:type/:id/approve` | JWT | Global: admin, super-admin, coordinator; Permisos: validation:review | Aprobar una evidencia | EvidenceReviewService.approve() | `src/evidence-review/evidence-review.controller.ts` |
+| POST | `/api/v1/evidence-review/:type/:id/reject` | JWT | Global: admin, super-admin, coordinator; Permisos: validation:review | Rechazar una evidencia con motivo | EvidenceReviewService.reject() | `src/evidence-review/evidence-review.controller.ts` |
+| GET | `/api/v1/evidence-review/:type/:id/history` | JWT | Global: admin, super-admin, coordinator; Permisos: validation:review | Historial de validación de una evidencia | EvidenceReviewService.getHistory() | `src/evidence-review/evidence-review.controller.ts` |
 
 ### finances
 
@@ -1184,10 +1184,10 @@ Path base: `/api/v1/certifications/users/:userId/certification-enrollments/:enro
 | POST | `/api/v1/investiture/enrollments/:enrollmentId/field-approve` | JWT | Permisos: investiture:validate; Global: admin | Campo local aprueba enrollment para investidura | InvestitureService.fieldApprove() | `src/investiture/investiture.controller.ts` |
 | POST | `/api/v1/investiture/enrollments/:enrollmentId/invest` | JWT | Permisos: investiture:mark_invested; Global: admin, coordinator | Registrar investidura formal de un enrollment (después de FIELD_APPROVED) | InvestitureService.markInvestido() | `src/investiture/investiture.controller.ts` |
 | POST | `/api/v1/investiture/enrollments/:enrollmentId/reject` | JWT | Permisos: investiture:validate; Global: admin, coordinator | Rechazar enrollment en cualquier nivel del flujo de aprobación | InvestitureService.reject() | `src/investiture/investiture.controller.ts` |
-| POST | `/api/v1/investiture/enrollments/bulk-approve` | JWT | Global: admin, coordinator | Aprobar múltiples enrollments en bloque | InvestitureService.bulkApproveEnrollments() | `src/investiture/investiture.controller.ts` |
-| POST | `/api/v1/investiture/enrollments/bulk-reject` | JWT | Global: admin, coordinator | Rechazar múltiples enrollments en bloque | InvestitureService.bulkRejectEnrollments() | `src/investiture/investiture.controller.ts` |
+| POST | `/api/v1/investiture/enrollments/bulk-approve` | JWT | Global: admin, coordinator; Permisos: investiture:validate | Aprobar múltiples enrollments en bloque | InvestitureService.bulkApproveEnrollments() | `src/investiture/investiture.controller.ts` |
+| POST | `/api/v1/investiture/enrollments/bulk-reject` | JWT | Global: admin, coordinator; Permisos: investiture:validate | Rechazar múltiples enrollments en bloque | InvestitureService.bulkRejectEnrollments() | `src/investiture/investiture.controller.ts` |
 | POST | `/api/v1/admin/classes/enrollments/expire-overdue` | JWT | Permisos: catalogs:update; Global: admin | Vencer manualmente enrollments atrasados por duración de clase | InvestitureService.expireOverdueEnrollments() | `src/investiture/investiture.controller.ts` |
-| GET | `/api/v1/investiture/pending` | JWT | Global: admin, coordinator | Listar enrollments pendientes de aprobación (filtrable por nivel) | InvestitureService.getPending() | `src/investiture/investiture.controller.ts` |
+| GET | `/api/v1/investiture/pending` | JWT | Global: admin, coordinator; Permisos: investiture:read | Listar enrollments pendientes de aprobación (filtrable por nivel) | InvestitureService.getPending() | `src/investiture/investiture.controller.ts` |
 | GET | `/api/v1/investiture/enrollments/:enrollmentId/history` | JWT | - | Historial de validación de investidura de un enrollment | InvestitureService.getHistory() | `src/investiture/investiture.controller.ts` |
 | POST | `/api/v1/enrollments/:enrollmentId/submit-for-validation` | JWT | Permisos: investiture:submit; Club: director, counselor | [LEGACY] Enviar enrollment a validación de investidura | InvestitureService.submitForValidation() | `src/investiture/investiture.controller.ts` |
 | POST | `/api/v1/enrollments/:enrollmentId/validate` | JWT | Permisos: investiture:validate; Global: admin, coordinator | [LEGACY] Aprobar o rechazar enrollment para investidura | InvestitureService.validateEnrollment() | `src/investiture/investiture.controller.ts` |
@@ -1439,17 +1439,17 @@ Path base: `/api/v1/certifications/users/:userId/certification-enrollments/:enro
 | --- | --- | --- | --- | --- | --- | --- |
 | GET | `/api/v1/admin/rbac/permissions` | JWT | Permisos: permissions:read | Listar todos los permisos | RbacService.listPermissions() | `src/rbac/rbac.controller.ts` |
 | GET | `/api/v1/admin/rbac/permissions/:id` | JWT | Permisos: permissions:read | Obtener un permiso por ID | RbacService.getPermissionById() | `src/rbac/rbac.controller.ts` |
-| POST | `/api/v1/admin/rbac/permissions` | JWT | Permisos: permissions:assign | Crear un nuevo permiso | RbacService.createPermission() | `src/rbac/rbac.controller.ts` |
-| PATCH | `/api/v1/admin/rbac/permissions/:id` | JWT | Permisos: permissions:assign | Actualizar un permiso | RbacService.updatePermission() | `src/rbac/rbac.controller.ts` |
-| DELETE | `/api/v1/admin/rbac/permissions/:id` | JWT | Permisos: permissions:assign | Desactivar un permiso | RbacService.deletePermission() | `src/rbac/rbac.controller.ts` |
+| POST | `/api/v1/admin/rbac/permissions` | JWT | Global: super-admin; Permisos: permissions:assign | Crear un nuevo permiso | RbacService.createPermission() | `src/rbac/rbac.controller.ts` |
+| PATCH | `/api/v1/admin/rbac/permissions/:id` | JWT | Global: super-admin; Permisos: permissions:assign | Actualizar un permiso | RbacService.updatePermission() | `src/rbac/rbac.controller.ts` |
+| DELETE | `/api/v1/admin/rbac/permissions/:id` | JWT | Global: super-admin; Permisos: permissions:assign | Desactivar un permiso | RbacService.deletePermission() | `src/rbac/rbac.controller.ts` |
 | GET | `/api/v1/admin/rbac/roles` | JWT | Permisos: roles:read | Listar roles con sus permisos | RbacService.listRoles() | `src/rbac/rbac.controller.ts` |
 | GET | `/api/v1/admin/rbac/roles/:id` | JWT | Permisos: roles:read | Obtener rol con sus permisos | RbacService.getRoleWithPermissions() | `src/rbac/rbac.controller.ts` |
 | POST | `/api/v1/admin/rbac/roles` | JWT | Global: super-admin | Crear un nuevo rol | RbacService.createRole() | `src/rbac/rbac.controller.ts` |
 | PATCH | `/api/v1/admin/rbac/roles/:id` | JWT | Global: super-admin | Actualizar descripción y/o permisos de un rol | RbacService.updateRole() | `src/rbac/rbac.controller.ts` |
 | DELETE | `/api/v1/admin/rbac/roles/:id` | JWT | Global: super-admin | Desactivar (soft delete) un rol | RbacService.deactivateRole() | `src/rbac/rbac.controller.ts` |
-| POST | `/api/v1/admin/rbac/roles/:id/permissions` | JWT | Permisos: permissions:assign | Asignar permisos a un rol | RbacService.assignPermissionsToRole() | `src/rbac/rbac.controller.ts` |
-| PUT | `/api/v1/admin/rbac/roles/:id/permissions` | JWT | Permisos: permissions:assign | Sincronizar permisos de un rol (reemplaza todos) | RbacService.syncRolePermissions() | `src/rbac/rbac.controller.ts` |
-| DELETE | `/api/v1/admin/rbac/roles/:id/permissions/:permissionId` | JWT | Permisos: permissions:assign | Remover un permiso de un rol | RbacService.removePermissionFromRole() | `src/rbac/rbac.controller.ts` |
+| POST | `/api/v1/admin/rbac/roles/:id/permissions` | JWT | Global: super-admin; Permisos: permissions:assign | Asignar permisos a un rol | RbacService.assignPermissionsToRole() | `src/rbac/rbac.controller.ts` |
+| PUT | `/api/v1/admin/rbac/roles/:id/permissions` | JWT | Global: super-admin; Permisos: permissions:assign | Sincronizar permisos de un rol (reemplaza todos) | RbacService.syncRolePermissions() | `src/rbac/rbac.controller.ts` |
+| DELETE | `/api/v1/admin/rbac/roles/:id/permissions/:permissionId` | JWT | Global: super-admin; Permisos: permissions:assign | Remover un permiso de un rol | RbacService.removePermissionFromRole() | `src/rbac/rbac.controller.ts` |
 | GET | `/api/v1/admin/rbac/users/:userId/permissions` | JWT | Permisos: permissions:read | Listar permisos directos de un usuario | RbacService.getUserPermissions() | `src/rbac/rbac.controller.ts` |
 | POST | `/api/v1/admin/rbac/users/:userId/permissions` | JWT | Permisos: permissions:assign | Asignar un permiso directo a un usuario | RbacService.assignPermissionToUser() | `src/rbac/rbac.controller.ts` |
 | DELETE | `/api/v1/admin/rbac/users/:userId/permissions/:permissionId` | JWT | Permisos: permissions:assign | Remover un permiso directo de un usuario | RbacService.removePermissionFromUser() | `src/rbac/rbac.controller.ts` |
@@ -1596,8 +1596,8 @@ Path base: `/api/v1/certifications/users/:userId/certification-enrollments/:enro
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
-| GET | `/api/v1/year-end/:yearId/preview` | JWT | Global: admin, super-admin | Vista previa del impacto de cierre de ano | YearEndService.previewClosureImpact() | `src/year-end/year-end.controller.ts` |
-| POST | `/api/v1/year-end/:yearId/close` | JWT | Global: admin, super-admin | Cerrar ano eclesiastico | YearEndService.closeYear() | `src/year-end/year-end.controller.ts` |
+| GET | `/api/v1/year-end/:yearId/preview` | JWT | Global: admin, super-admin; Permisos: ecclesiastical_years:update | Vista previa del impacto de cierre de ano | YearEndService.previewClosureImpact() | `src/year-end/year-end.controller.ts` |
+| POST | `/api/v1/year-end/:yearId/close` | JWT | Global: admin, super-admin; Permisos: ecclesiastical_years:update | Cerrar ano eclesiastico | YearEndService.closeYear() | `src/year-end/year-end.controller.ts` |
 
 ## Nota de mantenimiento
 

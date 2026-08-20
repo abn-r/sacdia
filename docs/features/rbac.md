@@ -178,19 +178,21 @@ Aventureros usa azul y Guías Mayores usa verde. El mapeo vive en
 
 ### Quick Access Grid — permisos por rol
 
-| Tarjeta | Permiso RBAC | Roles legacy (fallback) |
+| Tarjeta | Permiso RBAC | Quien lo recibe (seed) |
 | --- | --- | --- |
-| Coordinacion | — | `coordinator`, `admin`, `super_admin`, `assistant_admin` |
-| Miembros | `users:read_detail` | `director`, `deputy_director`, `secretary`, `secretary_treasurer`, `counselor` |
-| Club | `clubs:update` | `director`, `deputy_director`, `secretary`, `secretary_treasurer` |
-| Carpeta Anual de Evidencias | `evidence_folders:read` | `director`, `deputy_director`, `secretary`, `secretary_treasurer` |
-| Camporees | `camporees:read` | roles con lectura de camporees en la seccion activa |
-| Finanzas | `finances:read` | `director`, `treasurer`, `secretary_treasurer` |
-| Unidades | `units:update` | `director`, `deputy_director`, `counselor`, `secretary`, `secretary_treasurer` |
-| Clase Agrupada | `classes:update` | `director`, `deputy_director`, `counselor`, `instructor`, `secretary`, `secretary_treasurer` |
-| Seguros del Club | `insurance:read` | `director`, `deputy_director`, `secretary`, `secretary_treasurer` |
-| Inventario | `inventory:read` | `director`, `deputy_director`, `secretary`, `secretary_treasurer` |
-| Recursos | `resources:read` | — (lectura operativa de recursos compartidos) |
+| Coordinacion | — (rol global) | `coordinator`, `zone-coordinator`, `general-coordinator`, `admin`, `super-admin` |
+| Miembros | `users:read_detail` | counselor+ (no member, no instructor) |
+| Club | `clubs:update` | `director`, `deputy-director`, `secretary`, `secretary-treasurer` |
+| Carpeta Anual de Evidencias | `evidence_folders:read` | secretary / deputy / director (y secretary-treasurer) |
+| Camporees | `camporees:read` | secretary+ de seccion (no member/counselor/instructor) |
+| Finanzas | `finances:read` | treasurer, deputy, director, secretary-treasurer |
+| Unidades | `units:update` | counselor+ ; crear usa `units:create` (direccion/secretaria/tesoreria) |
+| Clase Agrupada | `classes:submit_progress` | counselor+ (no member, no instructor) |
+| Seguros del Club | `insurance:read` | counselor+ |
+| Inventario | `inventory:read` | secretary, deputy, director, secretary-treasurer |
+| Materiales | `materiales:create` | director, deputy, secretary, secretary-treasurer |
+| Recursos | `resources:read` | todos los roles de club, incluido member |
+| Reportes | `reports:read` | secretary / treasurer / deputy / director |
 
 ### Dashboard — inscripción anual de club
 
@@ -215,7 +217,13 @@ mostrar la alerta de validación.
 
 ### Seed de permisos
 
-El archivo `prisma/seeds/role-permissions.seed.sql` es **idempotente**: cada bloque de rol hace `DELETE` + `INSERT`. Correr el seed siempre produce el set exacto de permisos definido en el archivo. Despues de ejecutar el seed, reiniciar el backend para invalidar el cache de Redis.
+El archivo `prisma/seeds/role-permissions.seed.sql` es **idempotente**: cada bloque de rol hace `DELETE` + `INSERT`. Despues de esos bloques hay `INSERT ... ON CONFLICT DO NOTHING` para permisos que el listado del rol no copiaba bien:
+
+- `clubs:update` — ficha del club: `director`, `deputy-director`, `secretary`, `secretary-treasurer`
+- `units:create` / `units:delete`
+- `materiales:*` (si no se reafirman aqui, un re-seed borra los grants de la migracion 20260513)
+
+Correr `permissions.seed.sql` y luego `role-permissions.seed.sql`. Reiniciar el backend para invalidar el cache de Redis (TTL ~5 min).
 
 ## Bugs corregidos (2026-04-10)
 
@@ -229,9 +237,10 @@ El archivo `prisma/seeds/role-permissions.seed.sql` es **idempotente**: cada blo
 ## Gaps y pendientes
 
 - **Sin UI en app**: Correcto por diseno — la app no necesita interfaz de administracion de RBAC
-- **Permisos directos a usuarios poco documentados**: La tabla `users_permissions` existe pero el workflow para asignar permisos directos no esta expuesto en admin
+- **Permisos directos a usuarios poco documentados**: La tabla `users_permissions` existe pero `AuthorizationContextService` no la fusiona en `effective.permissions`
 - **Sin auditoria de cambios**: No hay log de quien modifico la matriz de permisos y cuando
 - **Transicion de permisos legacy**: El OR transicional entre permisos finos y `users:*` deberia tener fecha de sunset definida
+- **PermissionsGuard no es APP_GUARD**: rutas nuevas deben declarar `@RequirePermissions` + `@AuthorizationResource` a proposito
 
 ## Prioridad y siguiente accion
 

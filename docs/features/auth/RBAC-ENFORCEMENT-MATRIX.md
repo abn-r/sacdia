@@ -48,7 +48,8 @@ Nota de implementacion:
 | `users:update` | Editar usuario | `global` o `user` | permiso global o guard de ownership | Admin y self-service |
 | `clubs:read` | Ver club | `club` | permiso global territorial o contexto club | Admin y App |
 | `clubs:create` | Crear club | `global` | permiso global | Admin |
-| `clubs:update` | Editar club | `club` | permiso global territorial o active assignment compatible | Admin y App |
+| `clubs:update` | Editar club | `club` | permiso + ClubRoles director/deputy/secretary/secretary-treasurer o bypass territorial | Admin y App |
+| `club_sections:update` | Editar seccion | `club` | permiso + ClubRoles director/deputy/secretary/secretary-treasurer o bypass territorial | Admin y App |
 | `clubs:delete` | Desactivar club | `club` | permiso global territorial o active assignment compatible | Admin |
 | `club_instances:read` | Ver instancias | `club` | permiso global territorial o contexto club | Admin y App |
 | `club_instances:create` | Crear instancia | `club` | permiso global territorial o active assignment compatible | Admin |
@@ -77,7 +78,7 @@ Nota de implementacion:
 | `notifications:broadcast` | Enviar notificacion masiva | `global` | permiso global explicito | Admin |
 | `notifications:club` | Enviar notificacion a club | `active_assignment` | permiso efectivo + asignacion activa exacta | Admin |
 | `permissions:read` | Ver RBAC | `global` | permiso global | Admin |
-| `permissions:assign` | Cambiar permisos | `global` | permiso global | Admin |
+| `permissions:assign` | Cambiar permisos | `global` | permiso + `@GlobalRoles('super-admin')` | Admin |
 | `roles:read` | Ver roles | `global` | permiso global | Admin |
 
 ## Cobertura y Limites de Stage 1

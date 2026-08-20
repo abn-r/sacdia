@@ -782,7 +782,10 @@ Límites transitorios que deben quedar explícitos:
 Checklist final de consistencia para frontend:
 
 - `sacdia-admin` debe seguir usando `authorization.effective.permissions` para gating operativo y `authorization.grants` para contexto y detalle;
+- el layout del dashboard revalida el mapa `NAV_ITEM_ACCESS`; una URL directa sin permiso no debe cargar la pagina;
+- mutar catalogo o matriz RBAC queda en `super-admin`;
 - si un endpoint admin combina `@GlobalRoles('admin', 'super-admin')` con un permiso amplio (`catalogs:read`, `users:read`, `countries:read`), el panel no debe mostrar esa pantalla ni llamar al API solo porque el permiso existe; el rol global también tiene que coincidir;
+- `sacdia-app` pinta la ficha del club con `clubs:update` (director, deputy-director, secretary, secretary-treasurer) y unidades con `units:create` / `units:update` / `units:delete`;
 - `sacdia-app` debe separar `administrative completion` de acceso a datos sensibles: `users:update` no alcanza por si solo para salud/contactos/legal de terceros;
 - ni admin ni mobile deben crear permisos frontend nuevos para cerrar el `GAP FORMAL`;
 - la UX sobre terceros debe limitarse a la política mínima documentada y degradar el resto, aun cuando el actor tenga `users:update`.
