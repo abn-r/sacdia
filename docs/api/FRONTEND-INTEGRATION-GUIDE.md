@@ -138,7 +138,7 @@ En la emisión de camporee, la lista de beneficiarios omite miembros ya inscrito
 1. Emitir: `POST /insurance/payment-orders` (`insurance_cycle_config_id` + `beneficiary_user_ids[]`), `POST /camporees/:id/payment-orders` (camporee local) o `POST /union-camporees/:id/payment-orders` (camporee de unión, v1.1 — cobra el Campo Local del emisor; requiere que el LF participe en el camporee). Body en ambos casos de camporee: `beneficiary_user_ids[]`. Filtros de lista: `camporee_id` (local) / `union_camporee_id` (unión).
 2. PDF: `GET /payment-orders/:id/document` (binario `application/pdf`; el Bearer va en el header, nunca en la URL).
 3. Comprobante: `POST /payment-orders/:id/proof` multipart campo `file` (PDF/JPG/PNG ≤10 MB).
-4. Revisión (admin): `GET /payment-orders/review-queue` → `POST /payment-orders/:id/approve|reject` (reject requiere `reason`). Approve materializa cobertura/inscripciones automáticamente.
+4. Revisión (admin): `GET /payment-orders/review-queue` → `POST /payment-orders/:id/approve|reject` (reject requiere `reason`). Approve materializa cobertura/inscripciones automáticamente. En camporee, el approve también escribe un `camporee_payments` de inscripción `approved` por beneficiario; la pestaña Pagos del admin debe mostrar ese cobro (y las órdenes `APPROVED` / `PROOF_SUBMITTED` del camporee) en el badge y en movimientos, sin doble conteo.
 
 ### Montos
 

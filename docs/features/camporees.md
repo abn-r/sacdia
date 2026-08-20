@@ -112,11 +112,11 @@ Plan `docs/plans/2026-08-05-insurance-camporee-payment-orders-plan.md` (+ addend
 
 - **Ningún camporee es gratis**: clubes y personal de apoyo siempre pagan inscripción; `registration_cost` null/0 es error de configuración (`FIELD_PAYMENT_ORDER_COST_NOT_CONFIGURED`). Solo jueces (`camporee_judges`) y staff del Campo Local/Unión (`camporee_staff_members`) no pagan; sus flujos son independientes del register de miembros y no cambian.
 - **Emisión**: `POST /camporees/:camporeeId/payment-orders` (permiso `field-payment-orders:create`). Valida camporee local activo, club/sección inscrita, membresía activa, seguro vigente por beneficiario y deadline de registro de miembros.
-- **Fulfillment**: al aprobar el comprobante (bandeja LF, maker-checker) se crean los `camporee_members` con estado aprobado en la misma transacción, enlazados a las líneas de la orden. No se crean antes.
+- **Fulfillment**: al aprobar el comprobante (bandeja LF, maker-checker) se crean los `camporee_members` con estado aprobado y un `camporee_payments` de inscripción `approved` por línea, en la misma transacción, enlazados a las líneas de la orden. No se materializan miembros ni pagos antes del approve.
 - **Flag `field_payment_orders_v1`** (`system_config`, lista JSON de `local_field_id`): ON → `POST /camporees/:id/register` de miembros queda bloqueado (`FIELD_PAYMENT_ORDER_LEGACY_DISABLED`); la orden es la única vía. OFF → register directo legacy intacto (la app muestra el flujo legacy).
 - **App**: con flag ON, la vista de inscripción espera el contexto de órdenes (loading/error fail-closed; no pinta el register legacy) y redirige a emitir orden de pago y a consultar las órdenes del camporee; la lista de beneficiarios omite miembros ya inscritos (`registered`/`pending_approval`/`approved`). El admin muestra pestaña "Órdenes de pago" en el detalle del camporee local.
 - **Expiración de órdenes**: `field_payment_orders.expiry_days` (`system_config`), default 15 días; lazy expiry libera a los beneficiarios para una nueva orden.
-- `camporee_payments` por miembro queda legado (histórico/unión).
+- `camporee_payments` sigue existiendo como ledger de inscripción: el fulfill de órdenes lo escribe al aprobar. El admin (pestaña Pagos) une esos renglones con órdenes `APPROVED` / `PROOF_SUBMITTED` del mismo camporee y usa `max(legado, orden)` por miembro para no doble-contar. El badge de la pestaña y el listado de movimientos usan esa misma unión (la fila real de `camporee_payments` gana si ya existe). Con órdenes presentes, el botón legado "Registrar pago" se oculta.
 
 ### Camporees de unión (v1.1, IMPLEMENTADO 2026-08-13)
 
