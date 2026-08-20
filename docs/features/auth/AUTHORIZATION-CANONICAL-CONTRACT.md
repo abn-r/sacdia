@@ -38,6 +38,7 @@ type AuthorizationPayload = {
         role_name: string;
         permissions: string[];
         scope: {
+          division?: { id: number | string; name?: string | null };
           country?: { id: number | string; name?: string | null };
           union?: { id: number | string; name?: string | null };
           local_field?: { id: number | string; name?: string | null };
@@ -55,6 +56,7 @@ type AuthorizationPayload = {
           instance_name?: string | null;
         };
         scope: {
+          division?: { id: number | string; name?: string | null };
           country?: { id: number | string; name?: string | null };
           union?: { id: number | string; name?: string | null };
           local_field?: { id: number | string; name?: string | null };
@@ -71,6 +73,7 @@ type AuthorizationPayload = {
       permissions: string[];
       scope: {
         global: {
+          division?: { id: number | string; name?: string | null };
           country?: { id: number | string; name?: string | null };
           union?: { id: number | string; name?: string | null };
           local_field?: { id: number | string; name?: string | null };
@@ -113,8 +116,10 @@ Describe cual asignacion de club esta activa en la sesion actual.
 Describe lo que el backend ya resolvio para la sesion actual.
 
 - `effective.permissions`: permisos listos para gating en clientes (roles globales ∪ `direct_permissions` ∪ assignment activa).
-- `effective.scope.global`: alcance territorial resuelto.
+- `effective.scope.global`: alcance territorial resuelto (`division` / `union` / `local_field`; `country` es geografía, no recorte operativo).
 - `effective.scope.club`: contexto activo exacto de club e instancia.
+
+El recorte operativo es **rol-primero**: el backend lee `grants.global_roles` antes de `effective.scope.global.local_field.id`. Un `director-union` o `assistant-union` con campo de casa sigue en nivel `union`. Los clientes no envían query params para ampliar territorio; un ID fuera de alcance responde `403 GUARD_PERMISSION_DENIED` (no se filtra existencia). `GET /catalogs/*` permanece directorio completo (post-registro y traslados). `GET /clubs` recorta solo si el JWT tiene rol territorial; sin ese rol (post-registro) la lista sigue amplia.
 
 ## Reglas Canonicas para Recursos `user`
 

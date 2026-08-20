@@ -733,8 +733,8 @@ Los `POST` y `PATCH` de camporees locales y de unión aceptan `start_date` y `en
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
-| GET | `/api/v1/camporees` | JWT | Permisos: camporees:read | Listar camporees | CamporeesService.findAll() | `src/camporees/camporees.controller.ts` |
-| GET | `/api/v1/camporees/union` | JWT | Permisos: camporees:read | Listar camporees de unión | CamporeesService.findAllUnion() | `src/camporees/camporees.controller.ts` |
+| GET | `/api/v1/camporees` | JWT | Permisos: camporees:read. Recorte territorial rol-primero (`director-lf`/unión/división y admin con ancla); coordinador sin asignación de club → denegado. | Listar camporees | CamporeesService.findAll() | `src/camporees/camporees.controller.ts` |
+| GET | `/api/v1/camporees/union` | JWT | Permisos: camporees:read. Mismo recorte rol-primero que el listado local (campo / unión / división). | Listar camporees de unión | CamporeesService.findAllUnion() | `src/camporees/camporees.controller.ts` |
 | GET | `/api/v1/camporees/union/:camporeeId` | JWT | Permisos: camporees:read | Obtener camporee de unión por ID | CamporeesService.findOneUnion() | `src/camporees/camporees.controller.ts` |
 | POST | `/api/v1/camporees/union` | JWT | Permisos: camporees:create | Crear camporee de unión | CamporeesService.createUnion() | `src/camporees/camporees.controller.ts` |
 | PATCH | `/api/v1/camporees/union/:camporeeId` | JWT | Permisos: camporees:update | Actualizar camporee de unión | CamporeesService.updateUnion() | `src/camporees/camporees.controller.ts` |
@@ -976,9 +976,9 @@ Path base: `/api/v1/certifications/users/:userId/certification-enrollments/:enro
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
-| GET | `/api/v1/clubs` | JWT | SkipPermissions (picker post-registro) | Listar clubs | ClubsService.findAll() | `src/clubs/clubs.controller.ts` |
+| GET | `/api/v1/clubs` | JWT | SkipPermissions (picker post-registro). Con rol territorial el backend recorta por JWT; filtros fuera de alcance → 403 `GUARD_PERMISSION_DENIED`. Sin rol territorial la lista sigue amplia. | Listar clubs | ClubsService.findAll() | `src/clubs/clubs.controller.ts` |
 | GET | `/api/v1/clubs/:clubId` | JWT | Permisos: clubs:read | Obtener club por ID | ClubsService.findOne() | `src/clubs/clubs.controller.ts` |
-| POST | `/api/v1/clubs` | JWT | Permisos: clubs:create | Crear club y una sección por cada `club_type` activo; `enabled_club_type_ids` marca cuáles quedan `active=true` (mínimo 1) | ClubsService.create() | `src/clubs/clubs.controller.ts` |
+| POST | `/api/v1/clubs` | JWT | Permisos: clubs:create. `local_field_id` debe estar dentro del alcance territorial del actor (`403 GUARD_PERMISSION_DENIED` si no). | Crear club y una sección por cada `club_type` activo; `enabled_club_type_ids` marca cuáles quedan `active=true` (mínimo 1) | ClubsService.create() | `src/clubs/clubs.controller.ts` |
 | PATCH | `/api/v1/clubs/:clubId` | JWT | Permisos: clubs:update; Club: director, deputy-director, secretary, secretary-treasurer | Actualizar ficha del club (dirección o secretaría de la sección activa) | ClubsService.update() | `src/clubs/clubs.controller.ts` |
 | DELETE | `/api/v1/clubs/:clubId` | JWT | Permisos: clubs:delete; Club: director | Desactivar club (requiere rol director) | ClubsService.remove() | `src/clubs/clubs.controller.ts` |
 | GET | `/api/v1/clubs/:clubId/sections` | JWT | SkipPermissions (picker post-registro) | Listar secciones del club. Por defecto solo `active=true` (post-registro/membresía). `?includeInactive=true` para gestión. Sin `name`; el tipo va en `club_types` | ClubsService.getSections() | `src/clubs/clubs.controller.ts` |

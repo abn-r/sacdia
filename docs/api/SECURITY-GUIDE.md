@@ -49,6 +49,13 @@ Reglas:
 - `@SkipPermissions` es el opt-out explícito cuando el lock es JWT, ownership
   o `@GlobalRoles` (self-service, picker post-registro, inbox, QR propio,
   dashboards admin que no hablan el catálogo).
+- `GET /clubs` usa `@SkipPermissions` para el picker de post-registro, **no**
+  para lista mundial de actores territoriales. Con JWT de `director-lf` /
+  `assistant-lf`, `director-union` / `assistant-union` o `director-dia` /
+  `assistant-dia` (y `admin`/`assistant-admin` con ancla), el listado se
+  recorta rol-primero. Un `localFieldId` / `districtId` / `churchId` fuera
+  de alcance responde `403 GUARD_PERMISSION_DENIED` (no revela existencia).
+  Sin rol territorial, el listado sigue amplio. `GET /catalogs/*` no se recorta.
 - `@Public()` también salta el guard de permisos.
 - No promover un lint que prohíba `@SkipPermissions`: es el opt-out documentado.
 - `PATCH /clubs/:clubId/sections/:sectionId` usa recurso `club_section`: la

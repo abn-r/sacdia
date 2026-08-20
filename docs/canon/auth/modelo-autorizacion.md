@@ -116,9 +116,13 @@ El `scope territorial` limita el alcance de roles globales.
 
 Niveles actuales del modelo:
 
-- `country`
+- `division`
 - `union`
 - `local_field`
+
+El alcance operativo se resuelve **rol-primero**: `super-admin` es global; `director-dia` / `assistant-dia` cubren la división; `director-union` / `assistant-union` cubren la unión aunque el usuario tenga `local_field_id` de casa; `director-lf` / `assistant-lf` cubren solo el campo; `admin` / `assistant-admin` usan la ancla configurada (unión, luego campo, luego división). Un ID de campo en el payload nunca amplía ni reduce un rol de unión o división.
+
+`country` puede seguir apareciendo en el payload de geografía del usuario; no es un nivel de recorte operativo.
 
 Esto significa que dos usuarios con el mismo rol global no necesariamente tienen el mismo alcance efectivo.
 
