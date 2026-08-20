@@ -37,6 +37,11 @@ Desde 2026-08-20 `PermissionsGuard` también es `APP_GUARD` (después de
 `GlobalJwtAuthGuard`). JWT ya no basta: un handler autenticado sin metadata
 responde `GUARD_RBAC_MISCONFIGURATION` (500), no un allow silencioso.
 
+Nest `.overrideGuard(PermissionsGuard)` no rebinda este `APP_GUARD`. Los e2e
+que ya mockeaban el guard llaman `useE2ePermissionsPassthrough()` (env
+`E2E_PASSTHROUGH_PERMISSIONS=true` solo en ese suite). No usar en production
+ni en unit tests.
+
 Reglas:
 
 - `@RequirePermissions` + `@AuthorizationResource` (o `@SensitiveUserSubresource`,
