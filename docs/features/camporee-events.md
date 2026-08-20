@@ -261,7 +261,7 @@ Estado y bloqueo del resultado:
 
 Autorización:
 
-- Lectura de rúbricas/scoring targets: `camporee_events:read` o juez activo asignado.
+- Lectura de rúbricas/scoring targets: `camporee_events:read` o juez activo asignado. Esos GET y el `POST .../scores` usan `@SkipPermissions()`; el servicio autoriza al juez asignado o al gestor con permiso+scope.
 - Gestión de rúbricas, roster, personal de agenda y asignaciones: `camporee_events:update` con scope del camporee.
 - La edición/desactivación de un juez resuelve el camporee padre desde `judgeId` y vuelve a validar `camporee_events:update` + scope `current-write` en el servicio.
 - Envío de puntaje: juez principal activo desde app móvil, o carga manual por `assistant-lf`/`director-lf` con scope institucional. La app consume `GET /camporee-judges/me/assignments`, filtra asignaciones `primary`, carga rúbricas del evento y envía exactamente un ítem por rúbrica.
@@ -344,7 +344,7 @@ La desactivación se ejecuta en una transacción. Los scores históricos permane
 Nuevos permisos:
 
 - `camporee_event_types:read|create|update|delete` (admin/super-admin)
-- `camporee_events:read|create|update|delete` (director/subdirector club, director-unión, admin)
+- `camporee_events:read|create|update|delete` (director/subdirector club, `director-lf`/`assistant-lf`, `director-union`/`assistant-union`, admin)
 
 Mapeos sugeridos:
 
