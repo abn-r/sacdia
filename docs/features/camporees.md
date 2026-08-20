@@ -137,7 +137,7 @@ Decisión de negocio (opción A, `docs/audit/DECISIONS-PENDING.md`): **el campo 
 
 ## Scoring oficial por rúbricas
 
-El puntaje competitivo del camporee se registra por evento y sección de club. Un evento puntuable usa `camporee_events.scoring_enabled=true` y debe tener rúbricas activas en `camporee_event_rubrics`; la suma de `max_points` de las rúbricas debe igualar `camporee_events.max_points`. Los templates reutilizables pueden definir rúbricas en `camporee_event_template_rubrics`; al clonar un template puntuable, esas rúbricas se copian al evento.
+El puntaje competitivo del camporee se registra por evento y sección de club. Un evento puntuable usa `camporee_events.scoring_enabled=true` y debe tener rúbricas activas en `camporee_event_rubrics`; la suma de `max_points` de las rúbricas debe igualar `camporee_events.max_points`. `PATCH` de evento con scoring activo rechaza un `max_points` distinto de esa suma (`CAMPOREE_SCORING_RUBRIC_SUM_MISMATCH`); si todavía no hay rúbricas activas, el chequeo se omite. Los templates reutilizables pueden definir rúbricas en `camporee_event_template_rubrics`; al clonar un template puntuable, esas rúbricas se copian al evento.
 
 Reglas vigentes:
 
@@ -157,5 +157,5 @@ Reglas vigentes:
 - El estado `no_show` marca "club no se presentó": se guarda `score_status='no_show'`, `is_no_show=true`, no requiere ítems de rúbrica y asigna el mínimo del evento; si no hay mínimo configurado, asigna `0`.
 - La captura con `Idempotency-Key` usa un lock bigint basado en hash de 64 bits para actor+clave y luego `pg_advisory_xact_lock(eventId::integer, clubSectionId::integer)`. Los casts explícitos son necesarios porque Prisma enlaza números JavaScript como `INT8` y PostgreSQL debe resolver el overload `(integer, integer)`. Los keyspaces quedan separados; una colisión teórica del hash sólo sobre-serializa. Si aun así aparece P2002, el backend relee y devuelve replay o conflicto canónico.
 - Cada submission conserva la suma cruda (`raw_awarded_points`), el ajuste del mínimo (`minimum_adjustment_points`) y el total oficial. Una clave usada con payload canónico diferente devuelve `IDEMPOTENCY_KEY_REUSED`.
-- Una corrección manual contra un resultado existente debe comparar `expected_active_result_id` y guardar motivo no vacío en `notes`; si falta devuelve `CAMPOREE_SCORING_OVERRIDE_REASON_REQUIRED`, y si cambió el resultado devuelve `CAMPOREE_SCORING_RESULT_STALE` sin desactivar nada.
+- Una corrección manual contra un resultado existente debe comparar `expected_active_result_id` (leído de `active_result_id` en scoring-targets) y guardar motivo no vacío en `notes`; si falta devuelve `CAMPOREE_SCORING_OVERRIDE_REASON_REQUIRED`, y si cambió el resultado devuelve `CAMPOREE_SCORING_RESULT_STALE` sin desactivar nada.
 - En un receipt, `active=true` es el snapshot de emisión y se mantiene en replays; el estado actual del resultado puede ser inactivo si luego fue reemplazado.
