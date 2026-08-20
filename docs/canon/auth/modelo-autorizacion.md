@@ -108,6 +108,7 @@ Ejemplos:
 Los permisos pueden venir de:
 
 - grants globales;
+- grants directos de `users_permissions`;
 - asignación activa de club.
 
 ## 3. Scope territorial
@@ -159,8 +160,11 @@ Sin esto, la autorización de club se vuelve ambigua y peligrosa.
 
 Se calcula combinando:
 
-- permisos globales aplicables;
+- permisos globales aplicables (roles GLOBAL);
+- permisos directos de `users_permissions` (excepciones por usuario, no por rol);
 - permisos de la asignación activa de club.
+
+Un permiso directo cuenta como grant global: abre acciones de tipo `global` y se une a los de club para recursos de sección. No mezcla assignments inactivas.
 
 No representa “todo lo que el usuario podría llegar a hacer en algún contexto”.
 Representa lo que puede hacer AHORA en la sesión actual.
@@ -181,6 +185,7 @@ Esta diferencia no es opcional. Es estructural.
 ### Grants
 `grants` responde:
 - qué roles globales tiene el usuario;
+- qué permisos directos (`users_permissions`) tiene el usuario;
 - qué asignaciones de club tiene disponibles.
 
 `grants` describe inventario de acceso.
@@ -234,6 +239,7 @@ Regla canónica:
 - no hablar de SACDIA como si usara `RBAC puro`;
 - no mezclar permisos de varias asignaciones de club activas a la vez;
 - no resolver autorización solo desde frontend;
+- no olvidar `@RequirePermissions` + `@AuthorizationResource` (o `@SkipPermissions` / `@Public`) en un endpoint nuevo: `PermissionsGuard` es `APP_GUARD` y falla cerrado (`GUARD_RBAC_MISCONFIGURATION`) si falta metadata;
 - no usar campos legacy como contrato nuevo;
 - no crear roles nuevos para cada variación contextual que en realidad debe resolverse con scope o assignment;
 - no convertir el sistema en `ABAC puro` sin una razón estructural muy fuerte.

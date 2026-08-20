@@ -31,6 +31,24 @@ Reglas:
 - Cualquier endpoint público nuevo debe declararse con `@Public()` y
   justificarse en esta guía.
 
+## Autorización global fail-closed (`PermissionsGuard`)
+
+Desde 2026-08-20 `PermissionsGuard` también es `APP_GUARD` (después de
+`GlobalJwtAuthGuard`). JWT ya no basta: un handler autenticado sin metadata
+responde `GUARD_RBAC_MISCONFIGURATION` (500), no un allow silencioso.
+
+Reglas:
+
+- `@RequirePermissions` + `@AuthorizationResource` (o `@SensitiveUserSubresource`,
+  que aplica ambos) es el camino normal.
+- `@SkipPermissions` es el opt-out explícito cuando el lock es JWT, ownership
+  o `@GlobalRoles` (self-service, picker post-registro, inbox, QR propio,
+  dashboards admin que no hablan el catálogo).
+- `@Public()` también salta el guard de permisos.
+- No promover un lint que prohíba `@SkipPermissions`: es el opt-out documentado.
+- `PATCH /clubs/:clubId/sections/:sectionId` usa recurso `club_section`: la
+  secretaría de la sección A no actualiza la sección B del mismo club.
+
 ---
 
 ## Límites de tamaño en uploads (multipart)

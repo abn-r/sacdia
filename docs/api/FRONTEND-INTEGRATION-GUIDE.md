@@ -764,7 +764,7 @@ Para `/api/v1/users/:userId/...` en superficies sensibles verificadas (`allergie
 
 - frontend no debe interpretar estas rutas como mero "JWT-only";
 - self-service depende de ownership sobre `userId`;
-- acceso sobre terceros requiere permiso global resuelto (`users:read_detail` o `users:update`), no permisos de club derivados del contexto activo;
+- acceso sobre terceros requiere permiso global resuelto (`users:read_detail` o `users:update_profile`, o el permiso fino de familia). Sunset del OR `users:*`: `2027-03-31`;
 - no introducir gating fino por salud/legal/contactos porque el backend todavía no expone permisos separados para esas categorías.
 
 Límites transitorios que deben quedar explícitos:
@@ -783,8 +783,9 @@ Checklist final de consistencia para frontend:
 
 - `sacdia-admin` debe seguir usando `authorization.effective.permissions` para gating operativo y `authorization.grants` para contexto y detalle;
 - el layout del dashboard revalida el mapa `NAV_ITEM_ACCESS`; una URL directa sin permiso no debe cargar la pagina;
+- URL de dashboard no mapeada (ni sidebar ni aliases de `require-page-access`) se deniega; aliases cubren materials/request, materials/config, rbac/user-permissions, coming-soon, v2 y hubs de configuration/annual-folders;
 - mutar catalogo o matriz RBAC queda en `super-admin`;
-- si un endpoint admin combina `@GlobalRoles('admin', 'super-admin')` con un permiso amplio (`catalogs:read`, `users:read`, `countries:read`), el panel no debe mostrar esa pantalla ni llamar al API solo porque el permiso existe; el rol global también tiene que coincidir;
+- si un endpoint admin combina `@GlobalRoles('admin', 'super-admin')` con un permiso amplio (`catalogs:read`, `users:read`, `countries:read`), el panel no debe mostrar esa pantalla ni llamar al API solo porque el permiso existe; el rol global también tiene que coincidir (`assistant-admin` entra al panel por `ALLOWED_ADMIN_ROLES` y el alias `admin ↔ assistant-admin` de `GlobalRolesGuard`);
 - `sacdia-app` pinta la ficha del club con `clubs:update` (director, deputy-director, secretary, secretary-treasurer) y unidades con `units:create` / `units:update` / `units:delete`;
 - `sacdia-app` debe separar `administrative completion` de acceso a datos sensibles: `users:update` no alcanza por si solo para salud/contactos/legal de terceros;
 - ni admin ni mobile deben crear permisos frontend nuevos para cerrar el `GAP FORMAL`;
@@ -1024,6 +1025,7 @@ No ofrezcas una pantalla admin solo porque el usuario tiene un permiso amplio. S
 - ocultar el ítem en sidebar y paleta de comandos;
 - no llamar al API admin cuando el rol global no coincide;
 - mostrar un estado de sin permiso si la URL se abre de forma directa.
+- denegar (fail-closed) cualquier ruta `/dashboard/*` que no este en el sidebar ni en aliases explicitos.
 
 `catalogs:read` es permiso de referencia (dropdowns / catálogos públicos), no autorización del editor `/dashboard/catalogs/*`.
 

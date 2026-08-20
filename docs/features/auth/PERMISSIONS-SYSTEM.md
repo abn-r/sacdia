@@ -35,7 +35,7 @@ Regla:
 ### Enforcement en backend
 
 - JWT autentica identidad.
-- `PermissionsGuard` autoriza por permiso + recurso.
+- `PermissionsGuard` es `APP_GUARD` fail-closed: autoriza por permiso + recurso, o exige `@SkipPermissions` / `@Public`.
 - Metadata de recurso (`@AuthorizationResource(...)`) define estrategia de scope.
 - Frontend no es barrera de seguridad.
 
@@ -95,10 +95,9 @@ Regla:
 Notas canonicas del modelo vigente:
 
 - las familias sensibles del change son `health`, `emergency_contacts`, `legal_representative` y `post_registration`;
-- OR transicional vigente: para terceros, lectura fina acepta `family:read` o el legado de la familia `users:*` (`users:read_detail`); escritura fina acepta `family:update` o el legado `users:update`;
+- OR transicional vigente: para terceros, lectura fina acepta `family:read` o el legado de la familia `users:*` (`users:read_detail`); escritura fina acepta `family:update` o el legado `users:update_profile`. Sunset: `2027-03-31` (`USERS_LEGACY_OR_SUNSET_DATE`). El OR no se apaga en este change;
 - excepcion: los endpoints `POST /step-{1,2,3}/complete` ahora usan `registration:complete` (permiso global dedicado) en lugar de `post_registration:update` con fallback a `users:update`. Roles asignados: super_admin, admin, assistant-lf, director-lf (y equivalentes union/dia por herencia). El owner siempre puede completar su propio registro;
-- `qr:issue_self` es el permiso de self-service para leer la credencial virtual del usuario autenticado y su token vigente;
-- `qr:validate` habilita el escaneo/verificacion canonica del QR para roles con alcance operativo;
+- `qr:validate` habilita el escaneo/verificacion canonica del QR para roles con alcance operativo. Las rutas `/qr/me*` son self-service con `@SkipPermissions` (el permiso `qr:issue_self` esta retirado de esas rutas);
 - exclusiones fuera de scope: `GET/PATCH /users/:userId`, `POST/DELETE /users/:userId/profile-picture`, `GET /users/:userId/age` y `GET /users/:userId/requires-legal-representative` siguen en metadata legacy `users:*`;
 - excepcion minima vigente: terceros pueden consultar `post_registration/status` solo en modo administrativo minimo, sin feedback sensible adicional.
 

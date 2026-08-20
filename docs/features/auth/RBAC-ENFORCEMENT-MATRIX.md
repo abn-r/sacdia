@@ -20,6 +20,7 @@ La regla principal es:
 |------|-------------|------------|
 | `global` | Recurso administrativo o territorial | Permisos globales + scope territorial |
 | `club` | Recurso de club padre | Permiso efectivo + bypass global o contexto club activo |
+| `club_section` | Recurso de una seccion concreta | Permiso efectivo + asignacion activa de esa `sectionId` (no basta el club padre) |
 | `club_instance` | Recurso de instancia exacta | Permiso efectivo + asignacion activa exacta |
 | `active_assignment` | Recurso ligado al contexto operativo activo del actor | Permiso efectivo + asignacion activa exacta |
 | `club_assignment` | Recurso de asignacion | Permiso efectivo + relacion con `assignment_id` |
@@ -31,13 +32,13 @@ Nota de implementacion:
 
 ## Reglas de Evaluacion
 
-1. Para recursos globales, solo cuentan grants globales.
+1. Para recursos globales, solo cuentan grants globales y `direct_permissions`.
 2. Para recursos de club, puede entrar:
-   - un permiso global suficiente dentro del territorio;
+   - un permiso global suficiente dentro del territorio (incluye grant directo);
    - o la asignacion activa exacta del usuario.
 3. Los permisos de club salen solo de `active_assignment`.
 4. No se unen todas las asignaciones del usuario para una request.
-5. JWT-only solo es aceptable en self-service estricto con ownership real.
+5. JWT-only solo es aceptable con `@SkipPermissions` o `@Public`, y solo en self-service estricto, pickers post-registro o superficies `GlobalRoles` que no hablan el catalogo de permisos. Un handler JWT nuevo sin metadata falla cerrado.
 
 ## Matriz Operativa
 
@@ -59,7 +60,7 @@ Nota de implementacion:
 | `club_roles:assign` | Actualizar asignacion (`PATCH /club-roles/:assignmentId`) | `club_assignment` | permiso efectivo + active assignment o bypass global | Admin y App |
 | `club_roles:revoke` | Revocar asignacion (`DELETE /club-roles/:assignmentId`) | `club_assignment` | permiso efectivo + active assignment o bypass global | Admin |
 | `activities:read` | Ver actividades | `club` | permiso global territorial o contexto club | Admin y App |
-| `activities:create` | Crear actividad | `club` | permiso efectivo + contexto valido | Admin y App |
+| `activities:create` | Crear actividad | `club` | permiso + ClubRoles director/deputy/secretary/secretary-treasurer/counselor o bypass territorial | Admin y App |
 | `activities:update` | Editar actividad | `club_instance` | permiso efectivo + instancia exacta o bypass global | Admin y App |
 | `activities:delete` | Eliminar actividad | `club_instance` | permiso efectivo + instancia exacta o bypass global | Admin |
 | `attendance:read` | Ver asistencia | `club_instance` | permiso efectivo + instancia exacta o bypass global | Admin y App |
@@ -67,7 +68,7 @@ Nota de implementacion:
 | `qr:issue_self` | Ver credencial QR propia | `global` | permiso global dedicado de self-service | Admin y App |
 | `qr:validate` | Validar QR de un miembro | `active_assignment` | permiso efectivo + asignacion activa exacta o bypass global | Admin y App |
 | `finances:read` | Ver finanzas | `club` | permiso global territorial o contexto club | Admin y App |
-| `finances:create` | Crear movimiento | `club` | permiso efectivo + contexto valido | Admin y App |
+| `finances:create` | Crear movimiento | `club` | permiso + ClubRoles director/deputy/treasurer/secretary-treasurer o bypass territorial | Admin y App |
 | `finances:update` | Editar movimiento | `club_instance` | permiso efectivo + instancia exacta o bypass global | Admin y App |
 | `finances:delete` | Eliminar movimiento | `club_instance` | permiso efectivo + instancia exacta o bypass global | Admin |
 | `inventory:read` | Ver inventario | `club` | permiso global territorial o contexto club | Admin y App |
@@ -91,10 +92,10 @@ Nota de implementacion:
 
 | Superficie | Rutas verificadas | Permiso runtime | Enforcement backend | Estado |
 |------------|-------------------|-----------------|---------------------|--------|
-| Perfil y derivados (fuera de scope) | `GET/PATCH /users/:userId`, `GET /age`, `GET /requires-legal-representative`, `POST/DELETE /profile-picture` | `users:read_detail` o `users:update` | ownership o permiso global; metadata legacy `users:*` | Verificado |
-| Salud | `GET/PUT /allergies`, `GET/PUT /diseases`, `GET/PUT /medicines`, `DELETE /allergies/:allergyId`, `DELETE /diseases/:diseaseId`, `DELETE /medicines/:medicineId` | `health:read` / `health:update` OR fallback `users:read_detail` / `users:update` | ownership o permiso global; baseline activo limitado a `allergies` + `diseases` + `medicines` | Verificado |
-| Contactos de emergencia | `GET/POST/PATCH/DELETE /emergency-contacts` | `emergency_contacts:read` / `emergency_contacts:update` OR fallback `users:read_detail` / `users:update` | ownership o permiso global | Verificado |
-| Representante legal | `GET/POST/PATCH/DELETE /legal-representative` | `legal_representative:read` / `legal_representative:update` OR fallback `users:read_detail` / `users:update` | ownership o permiso global | Verificado |
+| Perfil y derivados (fuera de scope) | `GET/PATCH /users/:userId`, `GET /age`, `GET /requires-legal-representative`, `POST/DELETE /profile-picture` | `users:read_detail` o `users:update_profile` | ownership o permiso global; metadata legacy `users:*` | Verificado |
+| Salud | `GET/PUT /allergies`, `GET/PUT /diseases`, `GET/PUT /medicines`, `DELETE /allergies/:allergyId`, `DELETE /diseases/:diseaseId`, `DELETE /medicines/:medicineId` | `health:read` / `health:update` OR fallback `users:read_detail` / `users:update_profile` | ownership o permiso global; baseline activo limitado a `allergies` + `diseases` + `medicines` | Verificado |
+| Contactos de emergencia | `GET/POST/PATCH/DELETE /emergency-contacts` | `emergency_contacts:read` / `emergency_contacts:update` OR fallback `users:read_detail` / `users:update_profile` | ownership o permiso global | Verificado |
+| Representante legal | `GET/POST/PATCH/DELETE /legal-representative` | `legal_representative:read` / `legal_representative:update` OR fallback `users:read_detail` / `users:update_profile` | ownership o permiso global | Verificado |
 | Post-registro (lectura) | `GET /post-registration/status` | `post_registration:read` OR fallback `users:read_detail` | ownership o permiso global | Verificado runtime |
 | Post-registro (completar) | `POST /step-1/complete`, `POST /step-2/complete`, `POST /step-3/complete` | `registration:complete` _(sin fallback)_ | ownership o permiso global dedicado; terceros quedan en modo administrativo minimo | Verificado runtime |
 
@@ -102,7 +103,8 @@ Notas:
 
 - `PermissionsGuard` permite owner fallback antes de resolver permisos explicitos en recursos `user`.
 - Para actores no owner, solo cuentan permisos globales; un `active_assignment` con permisos de club no abre acceso a datos `user` de terceros.
-- OR transicional vigente en backend: permiso fino de familia o fallback legacy de la familia `users:*` (`users:read_detail` para lectura, `users:update` para escritura). Excepcion: `registration:complete` no tiene fallback legacy.
+- OR transicional vigente en backend: permiso fino de familia o fallback legacy de la familia `users:*` (`users:read_detail` para lectura, `users:update_profile` para escritura). Excepcion: `registration:complete` no tiene fallback legacy.
+- Sunset del OR: `USERS_LEGACY_OR_SUNSET_DATE = 2027-03-31` en `sensitive-user-subresource-policy.ts`. Hasta esa fecha el fallback sigue canonico; no se apaga el OR en runtime. Despues, terceros necesitan el permiso fino de familia. El self-service del owner no cambia.
 - `registration:complete` es un permiso global dedicado asignado a roles de campo (super_admin, admin, assistant-lf, director-lf y equivalentes union/dia por herencia). El owner siempre puede completar su propio registro sin este permiso.
 - Baseline health activo verificado: `allergies` + `diseases` + `medicines`.
 - `medicines` se limita a catalogo + relacion sensible `user -> medicines`; no existe vinculo runtime `medicine <-> disease` en esta fase.

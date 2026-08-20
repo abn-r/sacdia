@@ -7,7 +7,7 @@
 > La tabla refleja los decoradores HTTP efectivos en controllers NestJS; DTOs, ejemplos y errores finos viven en Swagger/runtime y docs de feature cuando aplique.
 
 **Estado**: ACTIVE
-**Actualizado**: 2026-08-12
+**Actualizado**: 2026-08-20
 **Total endpoints**: 758 decoradores HTTP en 96 controllers (certificaciones configurables, insurance capacity model y field-payment-orders sincronizados manualmente)
 **Métodos**: GET 298 · POST 219 · PATCH 103 · DELETE 88 · PUT 8
 **Auth detectada**: JWT 704 · Public 12
@@ -15,7 +15,8 @@
 ## Cómo leer esta referencia
 
 - `Auth`: `JWT` cuando el controller/método declara `JwtAuthGuard`, `AuthGuard` o `ApiBearerAuth`; `Public` cuando no se detecta guard bearer en el controller/método.
-- `Roles/Permisos`: combina `@RequirePermissions`, `@GlobalRoles`, `@ClubRoles` y `@Roles` detectados a nivel clase/método.
+- `Roles/Permisos`: combina `@RequirePermissions`, `@GlobalRoles`, `@ClubRoles` y `@Roles` detectados a nivel clase/método. Celda `-` en un endpoint JWT significa `@SkipPermissions` (JWT es el lock: picker post-registro, self-service o superficie `GlobalRoles`).
+- Runtime: `PermissionsGuard` es `APP_GUARD` fail-closed. Un handler JWT nuevo sin `@RequirePermissions`, `@SkipPermissions` o `@Public` no queda abierto.
 - `Uso`: sale de `@ApiOperation.summary` cuando existe; si no existe, se infiere desde el nombre del handler y el método HTTP.
 - `Uso backend`: primeras llamadas a servicios/repositorios inyectados detectadas en el handler. `-` significa que el handler responde inline o usa lógica privada no capturada por esta extracción estática.
 - `Source`: controller de origen para verificar el contrato antes de tocar clientes.
@@ -150,7 +151,7 @@
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
 | GET | `/api/v1/clubs/:clubId/activities` | JWT | Permisos: activities:read | Listar actividades del club | ActivitiesService.findByClub() | `src/activities/activities.controller.ts` |
-| POST | `/api/v1/clubs/:clubId/activities` | JWT | Permisos: activities:create; Club: director, deputy-director, secretary, counselor | Crear actividad | ActivitiesService.create() | `src/activities/activities.controller.ts` |
+| POST | `/api/v1/clubs/:clubId/activities` | JWT | Permisos: activities:create; Club: director, deputy-director, secretary, secretary-treasurer, counselor | Crear actividad | ActivitiesService.create() | `src/activities/activities.controller.ts` |
 | GET | `/api/v1/activities/:activityId` | JWT | Permisos: activities:read | Obtener actividad por ID | ActivitiesService.findOne() | `src/activities/activities.controller.ts` |
 | PATCH | `/api/v1/activities/:activityId` | JWT | Permisos: activities:update | Actualizar actividad | ActivitiesService.update() | `src/activities/activities.controller.ts` |
 | DELETE | `/api/v1/activities/:activityId` | JWT | Permisos: activities:delete | Desactivar actividad | ActivitiesService.remove() | `src/activities/activities.controller.ts` |
@@ -973,15 +974,15 @@ Path base: `/api/v1/certifications/users/:userId/certification-enrollments/:enro
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
-| GET | `/api/v1/clubs` | JWT | - | Listar clubs | ClubsService.findAll() | `src/clubs/clubs.controller.ts` |
+| GET | `/api/v1/clubs` | JWT | SkipPermissions (picker post-registro) | Listar clubs | ClubsService.findAll() | `src/clubs/clubs.controller.ts` |
 | GET | `/api/v1/clubs/:clubId` | JWT | Permisos: clubs:read | Obtener club por ID | ClubsService.findOne() | `src/clubs/clubs.controller.ts` |
 | POST | `/api/v1/clubs` | JWT | Permisos: clubs:create | Crear club y una sección por cada `club_type` activo; `enabled_club_type_ids` marca cuáles quedan `active=true` (mínimo 1) | ClubsService.create() | `src/clubs/clubs.controller.ts` |
 | PATCH | `/api/v1/clubs/:clubId` | JWT | Permisos: clubs:update; Club: director, deputy-director, secretary, secretary-treasurer | Actualizar ficha del club (dirección o secretaría de la sección activa) | ClubsService.update() | `src/clubs/clubs.controller.ts` |
 | DELETE | `/api/v1/clubs/:clubId` | JWT | Permisos: clubs:delete; Club: director | Desactivar club (requiere rol director) | ClubsService.remove() | `src/clubs/clubs.controller.ts` |
-| GET | `/api/v1/clubs/:clubId/sections` | JWT | - | Listar secciones del club. Por defecto solo `active=true` (post-registro/membresía). `?includeInactive=true` para gestión. Sin `name`; el tipo va en `club_types` | ClubsService.getSections() | `src/clubs/clubs.controller.ts` |
+| GET | `/api/v1/clubs/:clubId/sections` | JWT | SkipPermissions (picker post-registro) | Listar secciones del club. Por defecto solo `active=true` (post-registro/membresía). `?includeInactive=true` para gestión. Sin `name`; el tipo va en `club_types` | ClubsService.getSections() | `src/clubs/clubs.controller.ts` |
 | GET | `/api/v1/clubs/:clubId/sections/:sectionId` | JWT | Permisos: club_sections:read | Obtener sección por ID | ClubsService.getSection() | `src/clubs/clubs.controller.ts` |
 | POST | `/api/v1/clubs/:clubId/sections` | JWT | Permisos: club_sections:create; Club: director, deputy-director | Crear sección si falta el tipo (club pre-migración). 409 si el tipo ya existe. Sin nombre propio | ClubsService.createSection() | `src/clubs/clubs.controller.ts` |
-| PATCH | `/api/v1/clubs/:clubId/sections/:sectionId` | JWT | Permisos: club_sections:update; Club: director, deputy-director, secretary, secretary-treasurer | Actualizar sección (dirección o secretaría de la sección activa) | ClubsService.updateSection() | `src/clubs/clubs.controller.ts` |
+| PATCH | `/api/v1/clubs/:clubId/sections/:sectionId` | JWT | Permisos: club_sections:update; recurso `club_section`; Club: director, deputy-director, secretary, secretary-treasurer de esa sección | Actualizar sección (dirección o secretaría de la sección activa; no cruza a otra sección del mismo club) | ClubsService.updateSection() | `src/clubs/clubs.controller.ts` |
 | GET | `/api/v1/clubs/:clubId/leadership` | JWT | Permisos: clubs:read | Liderazgo del club | ClubsService.getClubLeadership() | `src/clubs/clubs.controller.ts` |
 | GET | `/api/v1/clubs/:clubId/overview` | JWT | Permisos: clubs:read | Resumen agregado del club | ClubsService.getClubOverview() | `src/clubs/clubs.controller.ts` |
 | GET | `/api/v1/clubs/:clubId/history` | JWT | Permisos: clubs:read | Historial de auditoría del club | ClubsService.getClubHistory() | `src/clubs/clubs.controller.ts` |
@@ -1061,7 +1062,7 @@ Path base: `/api/v1/certifications/users/:userId/certification-enrollments/:enro
 | GET | `/api/v1/clubs/:clubId/finances/transactions` | JWT | Permisos: finances:read | Listar todas las transacciones del club (paginadas) | FinancesService.getAllTransactions() | `src/finances/finances.controller.ts` |
 | GET | `/api/v1/clubs/:clubId/finances` | JWT | Permisos: finances:read | Listar movimientos financieros del club | FinancesService.findByClub() | `src/finances/finances.controller.ts` |
 | GET | `/api/v1/clubs/:clubId/finances/summary` | JWT | Permisos: finances:read | Resumen financiero del club | FinancesService.getSummary() | `src/finances/finances.controller.ts` |
-| POST | `/api/v1/clubs/:clubId/finances` | JWT | Permisos: finances:create; Club: director, deputy-director, treasurer | Crear movimiento financiero | FinancesService.create() | `src/finances/finances.controller.ts` |
+| POST | `/api/v1/clubs/:clubId/finances` | JWT | Permisos: finances:create; Club: director, deputy-director, treasurer, secretary-treasurer | Crear movimiento financiero | FinancesService.create() | `src/finances/finances.controller.ts` |
 | GET | `/api/v1/finances/:financeId` | JWT | Permisos: finances:read | Obtener movimiento por ID | FinancesService.findOne() | `src/finances/finances.controller.ts` |
 | POST | `/api/v1/finances/:financeId/evidences` | JWT | Permisos: finances:update | Subir foto de evidencia de un movimiento financiero | FinancesService.uploadEvidence() | `src/finances/finances.controller.ts` |
 | PATCH | `/api/v1/finances/:financeId` | JWT | Permisos: finances:update | Actualizar movimiento | FinancesService.update() | `src/finances/finances.controller.ts` |
@@ -1117,7 +1118,7 @@ Path base: `/api/v1/certifications/users/:userId/certification-enrollments/:enro
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
 | GET | `/api/v1/clubs/:clubId/sections/:sectionId/members/insurance` | JWT | Permisos: insurance:read | Listar seguros de miembros por sección | InsuranceService.listMembersInsurance() | `src/insurance/insurance.controller.ts` |
-| GET | `/api/v1/insurance/expiring` | JWT | Global: admin, coordinator | Listar seguros próximos a vencer | InsuranceService.getExpiringInsurances() | `src/insurance/insurance.controller.ts` |
+| GET | `/api/v1/insurance/expiring` | JWT | Global: admin, coordinator; SkipPermissions | Listar seguros próximos a vencer | InsuranceService.getExpiringInsurances() | `src/insurance/insurance.controller.ts` |
 | GET | `/api/v1/users/:memberId/insurance` | JWT | Permisos: insurance:read | Obtener seguro activo del miembro | InsuranceService.getMemberInsurance() | `src/insurance/insurance.controller.ts` |
 | POST | `/api/v1/users/:memberId/insurance` | JWT | Permisos: insurance:create | Crear seguro para un miembro (legacy directo) | InsuranceService.createInsurance() | `src/insurance/insurance.controller.ts` |
 | PATCH | `/api/v1/insurance/:insuranceId` | JWT | Permisos: insurance:update | Actualizar seguro | InsuranceService.updateInsurance() | `src/insurance/insurance.controller.ts` |
@@ -1451,8 +1452,8 @@ Path base: `/api/v1/certifications/users/:userId/certification-enrollments/:enro
 | PUT | `/api/v1/admin/rbac/roles/:id/permissions` | JWT | Global: super-admin; Permisos: permissions:assign | Sincronizar permisos de un rol (reemplaza todos) | RbacService.syncRolePermissions() | `src/rbac/rbac.controller.ts` |
 | DELETE | `/api/v1/admin/rbac/roles/:id/permissions/:permissionId` | JWT | Global: super-admin; Permisos: permissions:assign | Remover un permiso de un rol | RbacService.removePermissionFromRole() | `src/rbac/rbac.controller.ts` |
 | GET | `/api/v1/admin/rbac/users/:userId/permissions` | JWT | Permisos: permissions:read | Listar permisos directos de un usuario | RbacService.getUserPermissions() | `src/rbac/rbac.controller.ts` |
-| POST | `/api/v1/admin/rbac/users/:userId/permissions` | JWT | Permisos: permissions:assign | Asignar un permiso directo a un usuario | RbacService.assignPermissionToUser() | `src/rbac/rbac.controller.ts` |
-| DELETE | `/api/v1/admin/rbac/users/:userId/permissions/:permissionId` | JWT | Permisos: permissions:assign | Remover un permiso directo de un usuario | RbacService.removePermissionFromUser() | `src/rbac/rbac.controller.ts` |
+| POST | `/api/v1/admin/rbac/users/:userId/permissions` | JWT | Global: super-admin; Permisos: permissions:assign | Asignar un permiso directo a un usuario | RbacService.assignPermissionToUser() | `src/rbac/rbac.controller.ts` |
+| DELETE | `/api/v1/admin/rbac/users/:userId/permissions/:permissionId` | JWT | Global: super-admin; Permisos: permissions:assign | Remover un permiso directo de un usuario | RbacService.removePermissionFromUser() | `src/rbac/rbac.controller.ts` |
 | GET | `/api/v1/admin/rbac/users/:userId/roles` | JWT | Global: admin, super-admin | Listar roles asignados a un usuario | RbacService.getUserRoles() | `src/rbac/rbac.controller.ts` |
 | POST | `/api/v1/admin/rbac/users/:userId/roles` | JWT | Global: admin, super-admin | Asignar un rol a un usuario | RbacService.assignRoleToUser() | `src/rbac/rbac.controller.ts` |
 | DELETE | `/api/v1/admin/rbac/users/:userId/roles/:roleId` | JWT | Global: admin, super-admin | Remover un rol de un usuario | RbacService.removeRoleFromUser() | `src/rbac/rbac.controller.ts` |

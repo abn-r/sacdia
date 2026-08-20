@@ -43,6 +43,7 @@ type AuthorizationPayload = {
           local_field?: { id: number | string; name?: string | null };
         };
       }>;
+      direct_permissions: string[];
       club_assignments: Array<{
         assignment_id: string;
         role_name: string;
@@ -97,6 +98,7 @@ type AuthorizationPayload = {
 Describe lo que el usuario tiene asignado en el sistema.
 
 - `global_roles`: inventario de roles globales con alcance territorial.
+- `direct_permissions`: grants excepcionales de `users_permissions` (activos). Cuentan como grant global en `PermissionsGuard`.
 - `club_assignments`: inventario de asignaciones exactas por club e instancia.
 
 ### `authorization.active_assignment`
@@ -110,7 +112,7 @@ Describe cual asignacion de club esta activa en la sesion actual.
 
 Describe lo que el backend ya resolvio para la sesion actual.
 
-- `effective.permissions`: permisos listos para gating en clientes.
+- `effective.permissions`: permisos listos para gating en clientes (roles globales ∪ `direct_permissions` ∪ assignment activa).
 - `effective.scope.global`: alcance territorial resuelto.
 - `effective.scope.club`: contexto activo exacto de club e instancia.
 
@@ -119,7 +121,7 @@ Describe lo que el backend ya resolvio para la sesion actual.
 Cuando una ruta usa `@AuthorizationResource({ type: 'user', ownerParam: 'userId' })`, el contrato runtime vigente es:
 
 - ownership real sobre `userId` habilita self-service estricto para el propio usuario;
-- si no hay ownership, el actor necesita permiso global suficiente (`users:read_detail` para lecturas, `users:update` para escrituras);
+- si no hay ownership, el actor necesita permiso global suficiente (`users:read_detail` para lecturas, `users:update_profile` para escrituras);
 - permisos provenientes solo de `active_assignment` no habilitan acceso transversal a recursos `user` de terceros.
 
 Sub-recursos sensibles hoy cubiertos por familias finas:
@@ -152,8 +154,10 @@ Regla de enforcement:
 OR transicional vigente:
 
 - lecturas finas aceptan `family:read` O el legado de la familia `users:*` para lectura (`users:read_detail`);
-- escrituras finas aceptan `family:update` O el legado de la familia `users:*` para escritura (`users:update`);
+- escrituras finas aceptan `family:update` O el legado de la familia `users:*` para escritura (`users:update_profile`);
 - excepcion: `registration:complete` es un permiso global dedicado sin fallback legacy. Asignado a roles de campo (super_admin, admin, assistant-lf, director-lf y equivalentes union/dia por herencia). El owner siempre puede completar su propio registro sin este permiso.
+
+Sunset: `USERS_LEGACY_OR_SUNSET_DATE = 2027-03-31`. El OR permanece encendido hasta esa fecha. No se apaga en runtime en este change. Despues del sunset, terceros requieren el permiso fino; el owner self-service no cambia.
 
 Esto existe para compatibilidad transicional y NO redefine el contrato objetivo de largo plazo.
 
@@ -280,6 +284,7 @@ Regla:
             }
           }
         ],
+        "direct_permissions": [],
         "club_assignments": [
           {
             "assignment_id": "2b111111-2222-3333-4444-555555555555",

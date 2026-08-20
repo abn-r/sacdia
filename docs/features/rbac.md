@@ -18,7 +18,7 @@ El sistema incluye un mecanismo de permisos sensibles para sub-recursos de usuar
 - **Controller**: `src/rbac/rbac.controller.ts`
 - **Guards utilizados en todo el sistema**:
   - `JwtAuthGuard` — Autenticacion JWT (en `src/common/guards/jwt-auth.guard.ts`)
-  - `PermissionsGuard` — Verificacion de permisos globales (en `src/common/guards/permissions.guard.ts`)
+  - `PermissionsGuard` — `APP_GUARD` fail-closed (en `src/common/guards/permissions.guard.ts`)
   - `ClubRolesGuard` — Verificacion de roles de club (en `src/common/guards/club-roles.guard.ts`)
   - `GlobalRolesGuard` — Verificacion de roles globales (en `src/common/guards/global-roles.guard.ts`)
   - `OwnerOrAdminGuard` — Self-service o acceso admin (en `src/common/guards/owner-or-admin.guard.ts`)
@@ -31,6 +31,7 @@ El sistema incluye un mecanismo de permisos sensibles para sub-recursos de usuar
   - `@CurrentUser()` — en `src/common/decorators/current-user.decorator.ts`
   - `@AuthorizationResource()` — en `src/common/decorators/authorization-resource.decorator.ts`
   - `@SensitiveUserSubresource()` — en `src/common/decorators/sensitive-user-subresource.decorator.ts`
+  - `@SkipPermissions()` — opt-out explicito del `PermissionsGuard` global (`src/common/decorators/skip-permissions.decorator.ts`)
 - **Authorization Context Service**: `src/common/services/authorization-context.service.ts` — resuelve el contexto de autorizacion efectivo del actor
 - **Sensitive Subresource Policy**: `src/common/guards/sensitive-user-subresource-policy.ts`
 - **10 endpoints RBAC admin**:
@@ -84,7 +85,7 @@ El sistema incluye un mecanismo de permisos sensibles para sub-recursos de usuar
 - **Guards como middleware**: La autorizacion se resuelve en la capa de guards de NestJS, no en la logica de negocio del servicio
 - **Contexto de autorizacion**: `AuthorizationContextService` resuelve el actor, sus roles, permisos y el contexto de club activo para cada request
 - **Permisos finos para sub-recursos sensibles**: `health:read`, `emergency_contacts:update`, etc. permiten granularidad mayor que el permiso legacy `users:read_detail`
-- **OR transicional**: Para terceros, el sistema acepta el permiso fino O el fallback legacy `users:*` durante el periodo de transicion
+- **OR transicional**: Para terceros, el sistema acepta el permiso fino O el fallback legacy `users:*` hasta `2027-03-31` (`USERS_LEGACY_OR_SUNSET_DATE`). El OR no se apaga en runtime todavia.
 - **Sync vs Assign**: `PUT` reemplaza todos los permisos (sync), `POST` agrega sin eliminar existentes (assign)
 
 ## Permisos sensibles por sub-recurso de usuario
@@ -96,11 +97,11 @@ El sistema RBAC implementa permisos finos (fine-grained) para 4 familias de sub-
 | Familia | Permiso fino | Fallback legacy | Endpoints afectados |
 | --- | --- | --- | --- |
 | `health` | `health:read` | `users:read_detail` | `GET /users/:userId/allergies`, `GET /users/:userId/diseases`, `GET /users/:userId/medicines` |
-| `health` | `health:update` | `users:update` | `PUT /users/:userId/allergies`, `PUT /users/:userId/diseases`, `PUT /users/:userId/medicines`, `DELETE` item-level |
+| `health` | `health:update` | `users:update_profile` | `PUT /users/:userId/allergies`, `PUT /users/:userId/diseases`, `PUT /users/:userId/medicines`, `DELETE` item-level |
 | `emergency_contacts` | `emergency_contacts:read` | `users:read_detail` | `GET /users/:userId/emergency-contacts` |
-| `emergency_contacts` | `emergency_contacts:update` | `users:update` | `POST/PATCH/DELETE /users/:userId/emergency-contacts` |
+| `emergency_contacts` | `emergency_contacts:update` | `users:update_profile` | `POST/PATCH/DELETE /users/:userId/emergency-contacts` |
 | `legal_representative` | `legal_representative:read` | `users:read_detail` | `GET /users/:userId/legal-representative` |
-| `legal_representative` | `legal_representative:update` | `users:update` | `POST/PATCH/DELETE /users/:userId/legal-representative` |
+| `legal_representative` | `legal_representative:update` | `users:update_profile` | `POST/PATCH/DELETE /users/:userId/legal-representative` |
 | `post_registration` | `post_registration:read` | `users:read_detail` | `GET /users/:userId/post-registration/status` |
 | `post_registration` | `registration:complete` | _(sin fallback)_ | `POST /users/:userId/post-registration/step-{1,2,3}/complete` |
 
@@ -223,7 +224,7 @@ El archivo `prisma/seeds/role-permissions.seed.sql` es **idempotente**: cada blo
 - `units:create` / `units:delete`
 - `materiales:*` (si no se reafirman aqui, un re-seed borra los grants de la migracion 20260513)
 
-Correr `permissions.seed.sql` y luego `role-permissions.seed.sql`. Reiniciar el backend para invalidar el cache de Redis (TTL ~5 min).
+Correr `permissions.seed.sql` y luego `role-permissions.seed.sql`. El snapshot Redis usa `auth:context:v5:{userId}` (TTL ~5 min); mutar `users_permissions` o roles invalida esa clave.
 
 ## Bugs corregidos (2026-04-10)
 
@@ -237,12 +238,12 @@ Correr `permissions.seed.sql` y luego `role-permissions.seed.sql`. Reiniciar el 
 ## Gaps y pendientes
 
 - **Sin UI en app**: Correcto por diseno — la app no necesita interfaz de administracion de RBAC
-- **Permisos directos a usuarios poco documentados**: La tabla `users_permissions` existe pero `AuthorizationContextService` no la fusiona en `effective.permissions`
-- **Sin auditoria de cambios**: No hay log de quien modifico la matriz de permisos y cuando
-- **Transicion de permisos legacy**: El OR transicional entre permisos finos y `users:*` deberia tener fecha de sunset definida
-- **PermissionsGuard no es APP_GUARD**: rutas nuevas deben declarar `@RequirePermissions` + `@AuthorizationResource` a proposito
+- **Permisos directos a usuarios**: `users_permissions` entra en `effective.permissions` y en el set global del PermissionsGuard. Mutar esos grants es `super-admin`.
+- **Auditoria de matriz**: las mutaciones de `role_permissions`, `users_permissions` y `users_roles` escriben `audit_logs` de dominio (`source: service`) con actor y `changes`. CRUD de catalogo de permisos/roles queda en el interceptor HTTP generico.
+- **OR `users:*`**: sunset documentado `2027-03-31`; el fallback sigue encendido.
+- **PermissionsGuard es APP_GUARD**: un endpoint JWT nuevo sin `@RequirePermissions`, `@SkipPermissions` o `@Public` responde `GUARD_RBAC_MISCONFIGURATION`.
 
 ## Prioridad y siguiente accion
 
-- **Prioridad**: Baja — feature completamente funcional en backend, admin y app movil
-- **Siguiente accion**: Definir fecha de sunset para el OR transicional de permisos legacy. Considerar agregar auditoria de cambios en la matriz de permisos.
+- **Prioridad**: Baja — feature funcional en backend, admin y app movil
+- **Siguiente accion**: El 2027-03-31 apagar el OR `users:*` para terceros y exigir el permiso fino de familia.

@@ -172,6 +172,7 @@ La fuente oficial para autorización resuelta por sesión es `GET /api/v1/auth/m
 
 Campos canónicos relevantes:
 - `authorization.grants.global_roles`
+- `authorization.grants.direct_permissions`
 - `authorization.grants.club_assignments`
 - `authorization.active_assignment`
 - `authorization.effective.permissions`
@@ -182,6 +183,8 @@ Reglas vigentes:
 - clientes consumen autorización resuelta;
 - `authorization.effective.permissions` es la fuente operativa para gating de UX;
 - permisos de club salen solo de la asignación activa;
+- `users_permissions` activos entran a `direct_permissions` y a `effective.permissions` (grant global);
+- cache Redis `auth:context:v5:{userId}` (TTL 5 min); mutar roles/permisos invalida la clave;
 - los campos legacy `roles`, `permissions`, `club` y `club_context` siguen expuestos solo por compatibilidad temporal.
 
 ## Contexto activo de club
@@ -285,8 +288,9 @@ Regla vigente:
 
 ## Seguridad runtime vigente
 - JWT autentica identidad;
-- `JwtAuthGuard` protege endpoints autenticados;
-- `PermissionsGuard` y metadata de recurso endurecen autorización en rutas sensibles;
+- `GlobalJwtAuthGuard` es `APP_GUARD`: todo endpoint requiere JWT salvo `@Public()`;
+- `PermissionsGuard` es `APP_GUARD` fail-closed: exige `@RequirePermissions` + `@AuthorizationResource`, o un opt-out explícito (`@SkipPermissions` / `@Public()`);
+- `@SkipPermissions` queda reservado a self-service, pickers post-registro y superficies que solo hablan `@GlobalRoles`;
 - frontend no actúa como barrera de seguridad;
 - logout y cierre de sesiones deben asumirse como operaciones defensivas, no como única garantía;
 - datos sensibles del usuario siguen reglas específicas de ownership o permiso global en recursos `user`.
@@ -305,6 +309,7 @@ Estos puntos NO deben maquillarse como cerrados:
 - usa `authorization.effective.permissions` para gating de páginas, acciones y mutaciones;
 - el layout del dashboard revalida el mismo mapa `NAV_ITEM_ACCESS` que el sidebar; una URL directa sin permiso no carga la página;
 - mutar catálogo o matriz RBAC queda en `super-admin` (UI y API);
+- `assistant-admin` entra al panel (`ALLOWED_ADMIN_ROLES`); el backend aliasa `admin ↔ assistant-admin`;
 - usa `authorization.grants` (roles globales y asignaciones) cuando el backend combina `@GlobalRoles` con `@RequirePermissions`; un permiso como `catalogs:read` no abre editores admin que además exigen rol `admin`/`super-admin`;
 - usa `authorization.grants` para matrices, detalle de roles y selector de contexto;
 - no reconstruye RBAC desde joins locales.
