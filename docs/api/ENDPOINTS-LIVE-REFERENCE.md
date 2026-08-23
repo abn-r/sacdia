@@ -796,12 +796,12 @@ Los `POST` y `PATCH` de camporees locales y de unión aceptan `start_date` y `en
 | GET | `/api/v1/catalogs/club-types` | JWT | - | Obtener tipos de club | CatalogsService.getClubTypes() | `src/catalogs/catalogs.controller.ts` |
 | GET | `/api/v1/catalogs/activity-types` | JWT | - | Obtener tipos de actividad | CatalogsService.getActivityTypes() | `src/catalogs/catalogs.controller.ts` |
 | GET | `/api/v1/catalogs/relationship-types` | JWT | - | Obtener tipos de relación | CatalogsService.getRelationshipTypes() | `src/catalogs/catalogs.controller.ts` |
-| GET | `/api/v1/catalogs/countries` | JWT | - | Obtener países | CatalogsService.getCountries() | `src/catalogs/catalogs.controller.ts` |
-| GET | `/api/v1/catalogs/divisions` | JWT | - | Obtener divisiones | CatalogsService.getDivisions() | `src/catalogs/catalogs.controller.ts` |
-| GET | `/api/v1/catalogs/unions` | JWT | - | Obtener uniones | CatalogsService.getUnions() | `src/catalogs/catalogs.controller.ts` |
-| GET | `/api/v1/catalogs/local-fields` | JWT | - | Obtener campos locales | CatalogsService.getLocalFields() | `src/catalogs/catalogs.controller.ts` |
-| GET | `/api/v1/catalogs/districts` | JWT | - | Obtener distritos | CatalogsService.getDistricts() | `src/catalogs/catalogs.controller.ts` |
-| GET | `/api/v1/catalogs/churches` | JWT | - | Obtener iglesias | CatalogsService.getChurches() | `src/catalogs/catalogs.controller.ts` |
+| GET | `/api/v1/catalogs/countries` | JWT opcional (`@Public` + OptionalJwt) | - | Países. Sin JWT / sin rol territorial: directorio completo. Con rol territorial: solo el país del actor. | CatalogsService.getCountries() | `src/catalogs/catalogs.controller.ts` |
+| GET | `/api/v1/catalogs/divisions` | JWT opcional (`@Public` + OptionalJwt) | - | Divisiones. Con rol territorial: solo las que tienen uniones en el país del actor. | CatalogsService.getDivisions() | `src/catalogs/catalogs.controller.ts` |
+| GET | `/api/v1/catalogs/unions` | JWT opcional (`@Public` + OptionalJwt) | - | Uniones. Con rol territorial: uniones del país del actor; `countryId`/`divisionId` de otro país → 403 `GUARD_PERMISSION_DENIED`. | CatalogsService.getUnions() | `src/catalogs/catalogs.controller.ts` |
+| GET | `/api/v1/catalogs/local-fields` | JWT opcional (`@Public` + OptionalJwt) | - | Campos locales. Con rol territorial: campos del país del actor; `unionId` de otro país → 403 `GUARD_PERMISSION_DENIED`. | CatalogsService.getLocalFields() | `src/catalogs/catalogs.controller.ts` |
+| GET | `/api/v1/catalogs/districts` | JWT opcional (`@Public` + OptionalJwt) | - | Distritos. Con rol territorial: distritos del país del actor; `localFieldId` de otro país → 403 `GUARD_PERMISSION_DENIED`. | CatalogsService.getDistricts() | `src/catalogs/catalogs.controller.ts` |
+| GET | `/api/v1/catalogs/churches` | JWT opcional (`@Public` + OptionalJwt) | - | Iglesias. Con rol territorial: iglesias del país del actor; `districtId` de otro país → 403 `GUARD_PERMISSION_DENIED`. | CatalogsService.getChurches() | `src/catalogs/catalogs.controller.ts` |
 | GET | `/api/v1/catalogs/roles` | JWT | - | Obtener roles disponibles | CatalogsService.getRoles() | `src/catalogs/catalogs.controller.ts` |
 | GET | `/api/v1/catalogs/ecclesiastical-years` | JWT | - | Obtener años eclesiásticos | CatalogsService.getEcclesiasticalYears() | `src/catalogs/catalogs.controller.ts` |
 | GET | `/api/v1/catalogs/ecclesiastical-years/current` | JWT | - | Obtener año eclesiástico actual | CatalogsService.getCurrentEcclesiasticalYear() | `src/catalogs/catalogs.controller.ts` |

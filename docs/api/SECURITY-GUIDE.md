@@ -55,7 +55,7 @@ Reglas:
   `assistant-dia` (y `admin`/`assistant-admin` con ancla), el listado se
   recorta rol-primero. Un `localFieldId` / `districtId` / `churchId` fuera
   de alcance responde `403 GUARD_PERMISSION_DENIED` (no revela existencia).
-  Sin rol territorial, el listado sigue amplio. `GET /catalogs/*` no se recorta.
+  Sin rol territorial, el listado sigue amplio. `GET /catalogs/{countries,divisions,unions,local-fields,districts,churches}` recorta al país del actor territorial; sin JWT o sin ese rol el directorio geográfico sigue completo. Un filtro de otro país responde `403 GUARD_PERMISSION_DENIED`. El resto de `GET /catalogs/*` no se recorta.
 - `@Public()` también salta el guard de permisos.
 - No promover un lint que prohíba `@SkipPermissions`: es el opt-out documentado.
 - `PATCH /clubs/:clubId/sections/:sectionId` usa recurso `club_section`: la
