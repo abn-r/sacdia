@@ -119,7 +119,7 @@ Describe lo que el backend ya resolvio para la sesion actual.
 - `effective.scope.global`: alcance territorial resuelto (`division` / `union` / `local_field`; `country` es geografía, no recorte operativo).
 - `effective.scope.club`: contexto activo exacto de club e instancia.
 
-El recorte operativo es **rol-primero**: el backend lee `grants.global_roles` antes de `effective.scope.global.local_field.id`. Un `director-union` o `assistant-union` con campo de casa sigue en nivel `union`. Los clientes no envían query params para ampliar territorio; un ID fuera de alcance responde `403 GUARD_PERMISSION_DENIED` (no se filtra existencia). `GET /catalogs/*` permanece directorio completo (post-registro y traslados). `GET /clubs` recorta solo si el JWT tiene rol territorial; sin ese rol (post-registro) la lista sigue amplia.
+El recorte operativo es **rol-primero**: el backend lee `grants.global_roles` antes de `effective.scope.global.local_field.id`. Un `director-union` o `assistant-union` con campo de casa sigue en nivel `union`. Los clientes no envían query params para ampliar territorio; un ID fuera de alcance responde `403 GUARD_PERMISSION_DENIED` (no se filtra existencia). `GET /catalogs/*` permanece directorio completo (post-registro y traslados). `GET /clubs` recorta solo si el JWT tiene rol territorial; sin ese rol (post-registro) la lista sigue amplia. `GET /materials/config/all` recorta al territorio del actor.
 
 ## Reglas Canonicas para Recursos `user`
 

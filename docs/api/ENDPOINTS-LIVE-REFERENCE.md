@@ -1234,7 +1234,7 @@ Path base: `/api/v1/certifications/users/:userId/certification-enrollments/:enro
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
 | GET | `/api/v1/materials/config` | JWT | Permisos: MATERIALS_READ | Get the caller's local_field payment + delivery configuration | ConfigService.get() | `src/materials/config/config.controller.ts` |
-| GET | `/api/v1/materials/config/all` | JWT | Permisos: MATERIALS_CONFIGURE | List materials configuration for every local_field (unscoped admins) | ConfigService.listAll() | `src/materials/config/config.controller.ts` |
+| GET | `/api/v1/materials/config/all` | JWT | Permisos: MATERIALS_CONFIGURE | Lista config de materiales en el territorio del actor (todos los campos si es unscoped; unión/división/LF recortan) | ConfigService.listForScope() | `src/materials/config/config.controller.ts` |
 | PATCH | `/api/v1/materials/config` | JWT | Permisos: MATERIALS_CONFIGURE | Upsert the materials configuration for a local_field (matches caller scope) | ConfigService.upsert() | `src/materials/config/config.controller.ts` |
 | PATCH | `/api/v1/materials/config/:localFieldId` | JWT | Permisos: MATERIALS_CONFIGURE | Upsert config for a specific local_field (admin direct) | ConfigService.upsert() | `src/materials/config/config.controller.ts` |
 
