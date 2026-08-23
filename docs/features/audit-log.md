@@ -21,7 +21,8 @@ Una operación produce **una sola fila**: si un servicio escribe un evento expl�
 | `src/audit-logs/audit-request-context.ts` | Contexto por request (`AsyncLocalStorage`): `correlationId` + flag `explicitAuditRecorded`. Middleware registrado en `main.ts`. |
 | `src/audit-logs/http-audit.interceptor.ts` | Interceptor global: log de aplicación para todo request + persistencia de mutaciones en `audit_logs` con `source='http'`. Reemplazó a `common/interceptors/audit.interceptor.ts`. |
 | `src/common/decorators/audit.decorator.ts` | `@Audit({ skip })` excluye un endpoint; `@Audit({ entityType, action })` corrige la derivación automática. Aplica a handler o controller. |
-| `src/audit-logs/audit-logs.service.ts` | `recordEvent` extendido: `result`, `source`, `request_context`, `correlation_id` (autocompletado desde el contexto), `actor_kind`. Marca el flag de dedup para eventos `source='service'`. |
+| `src/audit-logs/audit-logs.service.ts` | `recordEvent` + `listByClub` + `listAdmin` + `getById`. List admin no incluye `changes` ni `request_context`. |
+| `src/audit-logs/admin-audit-logs.controller.ts` | `GET /admin/audit-logs` y `GET /admin/audit-logs/:id`. `super-admin` + `audit:read`. `@Audit({ skip: true })`. |
 | `src/audit-logs/critical-audit-writer.service.ts` | Sin cambios de datos; ahora marca el flag de dedup al escribir. |
 | `prisma/migrations/20260812190000_audit_http_operations/` | Columnas `source`, `request_context` + índice `idx_audit_logs_created`. |
 
@@ -59,12 +60,14 @@ Sobre el path sanitizado (query strings y segmentos tipo token eliminados), sin 
 ## Fases
 
 - **Fase 1 (hecha)**: migración, contexto, interceptor, decorador, dedup, tests.
-- **Fase 2 (pendiente)**: `GET /admin/audit-logs` con filtros (`entity_type`, `actor_user_id`, `action`, `result`, fechas) + permiso `audit:read` + UI en sacdia-admin. Contract-first: definir DTOs antes de consumir.
+- **Fase 2 (hecha, 2026-08-23)**: `GET /admin/audit-logs` + `GET /admin/audit-logs/:id` + permiso `audit:read` solo en `super-admin`. `admin` no recibe el permiso (wildcard excluye `audit:read`). Sin recorte territorial. List no incluye `changes` ni `request_context`. `@Audit({ skip: true })` en el controller. Historial de club sigue en `GET /clubs/:clubId/history` (`clubs:read`).
+- **Admin UI**: historial de club en tab Historial. Visor global en `/dashboard/configuration/audit` gated a `super-admin`.
 - **Fase 3 (pendiente)**: cron de retención — exportar filas > 24 meses a R2 (NDJSON comprimido) y purgar; filas con `event_key` (críticas) se conservan más tiempo (definir con negocio).
 
 ## Tests
 
 - `src/audit-logs/http-audit.interceptor.spec.ts` — derivación, exclusiones, overrides, dedup, correlación, fallos.
 - `src/audit-logs/audit-request-context.spec.ts` — contexto ALS y middleware.
-- `src/audit-logs/audit-logs.service.spec.ts` — campos nuevos de `recordEvent`.
+- `src/audit-logs/audit-logs.service.spec.ts` — `recordEvent`, `listByClub`, `listAdmin`, `getById`.
+- `src/audit-logs/admin-audit-logs.controller.spec.ts` — guards (`super-admin`, `audit:read`) y skip de HTTP audit.
 - `src/audit-logs/audit-http-operations.migration.spec.ts` — migración (gated: `ALLOW_AUTHORIZATION_P0_INTEGRATION_DB=1` + `AUTHORIZATION_P0_INTEGRATION_DATABASE_URL`).

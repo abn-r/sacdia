@@ -240,6 +240,7 @@ Correr `permissions.seed.sql` y luego `role-permissions.seed.sql`. El snapshot R
 - **Sin UI en app**: Correcto por diseno — la app no necesita interfaz de administracion de RBAC
 - **Permisos directos a usuarios**: `users_permissions` entra en `effective.permissions` y en el set global del PermissionsGuard. Mutar esos grants es `super-admin`.
 - **Auditoria de matriz**: las mutaciones de `role_permissions`, `users_permissions` y `users_roles` escriben `audit_logs` de dominio (`source: service`) con actor y `changes`. CRUD de catalogo de permisos/roles queda en el interceptor HTTP generico.
+- **`audit:read`**: solo `super-admin`. El wildcard de `admin` (todo excepto `:delete`) excluye este permiso. Protege `GET /admin/audit-logs` y `GET /admin/audit-logs/:id`. El historial de club (`GET /clubs/:clubId/history`) sigue en `clubs:read`.
 - **OR `users:*`**: sunset documentado `2027-03-31`; el fallback sigue encendido.
 - **PermissionsGuard es APP_GUARD**: un endpoint JWT nuevo sin `@RequirePermissions`, `@SkipPermissions` o `@Public` responde `GUARD_RBAC_MISCONFIGURATION`.
 

@@ -186,6 +186,14 @@
 | GET | `/api/v1/admin/cron-alerts` | JWT | Global: admin, super-admin | Paginated cron alert history | AdminCronAlertsService.getAlertHistory() | `src/admin/admin-cron-alerts.controller.ts` |
 | POST | `/api/v1/admin/cron-alerts/:id/resolve` | JWT | Global: admin, super-admin; Global: super-admin | Manually resolve a cron alert (super-admin only) | AdminCronAlertsService.resolveAlert() | `src/admin/admin-cron-alerts.controller.ts` |
 
+### admin-audit-logs
+
+| Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
+| --- | --- | --- | --- | --- | --- | --- |
+| GET | `/api/v1/admin/audit-logs` | JWT | Global: super-admin; Permisos: audit:read. Sin recorte territorial. `admin` → 403. | Listar audit logs globales (cursor `audit_log_id` desc; default 50, max 100). Query: `entity_type`, `actor_user_id`, `action`, `result`, `source`, `from`, `to`, `club_id`, `correlation_id`, `limit`, `cursor`. List no incluye `changes` ni `request_context`. | AuditLogsService.listAdmin() | `src/audit-logs/admin-audit-logs.controller.ts` |
+| GET | `/api/v1/admin/audit-logs/:id` | JWT | Global: super-admin; Permisos: audit:read | Detalle con `changes` (solo dominio) y `request_context`. Nunca body de request. | AuditLogsService.getById() | `src/audit-logs/admin-audit-logs.controller.ts` |
+
+
 ### admin-geography
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
