@@ -16,7 +16,7 @@ Los anos eclesiasticos son un catalogo particularmente critico: definen los peri
 
 ### Backend — CatalogsModule (lectura publica)
 - **Controller**: `src/catalogs/catalogs.controller.ts`
-- **14 endpoints publicos** (sin autenticacion):
+- **14 endpoints publicos** (`@Public` + JWT opcional). Sin token o sin rol territorial el directorio geográfico es completo (registro / post-registro). Con JWT territorial (`director-lf` / `director-union` / `director-dia` y asistentes) países, uniones, campos, distritos e iglesias se recortan al **país** del actor. El resto de catálogos (tipos, salud, roles) no se recorta:
   - `GET /api/v1/catalogs/club-types` — Tipos de club
   - `GET /api/v1/catalogs/activity-types` — Tipos de actividad (SIN documentacion API)
   - `GET /api/v1/catalogs/relationship-types` — Tipos de relacion
@@ -75,7 +75,7 @@ Los anos eclesiasticos son un catalogo particularmente critico: definen los peri
 
 ## Requisitos funcionales
 
-1. Todos los catalogos de lectura deben ser publicos (sin JWT) para alimentar formularios de registro
+1. Los catalogos de lectura siguen disponibles sin JWT para formularios de registro. Un JWT territorial recorta solo la geografía al país del actor; no abre CRUD admin.
 2. La administracion CRUD de catalogos debe estar restringida a super_admin y admin
 3. El panel admin no debe ofrecer entradas de UI (sidebar, paleta, URL que dispara el API) a editores de catalogo si el actor no tiene esos roles globales
 4. La jerarquia geografica debe mantener integridad referencial (no eliminar un pais con uniones activas)
