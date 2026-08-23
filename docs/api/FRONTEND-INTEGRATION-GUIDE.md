@@ -781,7 +781,7 @@ Límites transitorios que deben quedar explícitos:
 
 Checklist final de consistencia para frontend:
 
-- el alcance territorial operativo es rol-primero (`authorization.grants.global_roles` antes de `effective.scope.global.local_field`); un director de unión con campo de casa no se bloquea a un solo campo. El panel usa `listLocalFieldsForTerritory` y no `GET /admin/local-fields` para filtros de clubes. `GET /clubs` recorta si el JWT es territorial; `GET /catalogs/*` sigue siendo directorio completo para post-registro;
+- el alcance territorial operativo es rol-primero (`authorization.grants.global_roles` antes de `effective.scope.global.local_field`); un director de unión con campo de casa no se bloquea a un solo campo. El panel usa `listLocalFieldsForTerritory` y no `GET /admin/local-fields` para filtros de clubes, inventario de materiales, pagos y entrega. `GET /clubs` recorta si el JWT es territorial; `GET /catalogs/*` sigue siendo directorio completo para post-registro; `GET /materials/config/all` recorta al territorio;
 - `sacdia-admin` debe seguir usando `authorization.effective.permissions` para gating operativo y `authorization.grants` para contexto y detalle;
 - el layout del dashboard revalida el mapa `NAV_ITEM_ACCESS`; una URL directa sin permiso no debe cargar la pagina;
 - URL de dashboard no mapeada (ni sidebar ni aliases de `require-page-access`) se deniega; aliases cubren materials/request, materials/config, rbac/user-permissions, coming-soon, v2 y hubs de configuration/annual-folders;
