@@ -1,7 +1,7 @@
 # Feature Registry - SACDIA
 
 **Estado**: ACTIVE
-**Actualizado**: 2026-08-17
+**Actualizado**: 2026-08-24
 **Propósito**: registrar qué dominios tienen documento en `docs/features/` y separar cobertura editorial de estado funcional declarado.
 
 > [!IMPORTANT]
@@ -10,7 +10,7 @@
 >
 > Separación usada en este registro:
 > - **Estado editorial**: taxonomía documental (`ACTIVE`, `DRAFT`, `HISTORICAL`, `DEPRECATED`).
-> - **Estado funcional**: etiqueta declarada dentro de cada documento de dominio (`IMPLEMENTADO`, `PARCIAL`, `NO CANON`).
+> - **Estado funcional**: etiqueta declarada dentro de cada documento de dominio (`IMPLEMENTADO`, `EN IMPLEMENTACIÓN`, `PARCIAL`, `NO CANON`).
 >
 > Si hay conflicto, usar en este orden:
 > 1. `docs/canon/source-of-truth.md`
@@ -30,8 +30,9 @@
 
 | Señal | Cantidad | Evidencia |
 |---|---:|---|
-| Documentos de dominio presentes | 30 | archivos `docs/features/*.md` + entradas en canon, excluyendo este `README.md` |
+| Documentos de dominio presentes | 31 | archivos `docs/features/*.md` + entradas en canon, excluyendo este `README.md` |
 | Estado funcional `IMPLEMENTADO` | 26 | declarado en los documentos de dominio |
+| Estado funcional `EN IMPLEMENTACIÓN` | 2 | `coordinacion`; `camporee-orders` |
 | Estado funcional `PARCIAL` | 2 | `audit-log`; `certificaciones-guias-mayores` |
 | Estado funcional `NO CANON` | 2 | `achievements`; `infrastructure` declara la variante `NO CANON (infraestructura operativa)` |
 
@@ -49,6 +50,7 @@
 | `audit-log` | [audit-log.md](audit-log.md) | Documento presente | `PARCIAL` |
 | `camporees` | [camporees.md](camporees.md) | Documento presente | `IMPLEMENTADO` |
 | `camporee-events` | [camporee-events.md](camporee-events.md) | Documento presente | `IMPLEMENTADO PARCIAL` |
+| `camporee-orders` | [camporee-orders.md](camporee-orders.md) | Documento presente | `EN IMPLEMENTACIÓN` |
 | `carpetas-evidencias` | [carpetas-evidencias.md](carpetas-evidencias.md) | Documento presente | `IMPLEMENTADO` |
 | `catalogos` | [catalogos.md](catalogos.md) | Documento presente | `IMPLEMENTADO` |
 | `certificaciones-guias-mayores` | [certificaciones-guias-mayores.md](certificaciones-guias-mayores.md) | Documento presente | `PARCIAL` |

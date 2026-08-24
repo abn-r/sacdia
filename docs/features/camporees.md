@@ -19,6 +19,7 @@ La inscripcion de miembros en camporees tiene implicaciones directas con el modu
 - **Controller**: `src/camporees/camporees.controller.ts`
 - **Service**: `src/camporees/camporees.service.ts`
 - **Guards**: JwtAuthGuard, PermissionsGuard, ClubRolesGuard
+- **Uploads**: `POST /camporees/:camporeeId/payments/:paymentId/voucher` exige JPG/PNG/WebP/PDF ≤10 MB y magic bytes alineados al MIME (`FileValidationPipe` + chequeo en servicio).
 - **Endpoints principales**:
   - `GET /api/v1/camporees` — Listar camporees
   - `POST /api/v1/camporees` — Crear camporee local; body admite `local_camporee_place`, `lat?`, `long?`, `club_registration_deadline?`, `member_registration_deadline?`, `payment_deadline?`, `agenda_visible_from?`
@@ -104,7 +105,7 @@ La inscripcion de miembros en camporees tiene implicaciones directas con el modu
 
 ## Gaps y pendientes
 
-- **Sin logística de inventario/compras**: El roster permite asignar responsables de cocina/apoyo/administración a actividades, pero no gestiona inventario, compras, transporte o alojamiento.
+- **Sin logística de inventario/compras**: El roster permite asignar responsables de cocina/apoyo/administración a actividades, pero no gestiona inventario, compras, transporte o alojamiento. Los pedidos de mercancía del camporee (playeras, gorras, materiales formativos) son un dominio aparte —no logística de cocina—: ver [camporee-orders.md](camporee-orders.md).
 
 ## Órdenes de pago territoriales (IMPLEMENTADO 2026-08-12)
 
@@ -128,6 +129,12 @@ Decisión de negocio (opción A, `docs/audit/DECISIONS-PENDING.md`): **el campo 
 - **Gating legacy**: `POST /camporees/union/:id/register` queda bloqueado (`FIELD_PAYMENT_ORDER_LEGACY_DISABLED`) cuando el LF del club del miembro tiene el flag activo.
 - **Filtros**: `GET /payment-orders` y `/payment-orders/review-queue` aceptan `union_camporee_id`.
 - **App**: ruta de emisión `/camporee/:id/payment-orders/issue?type=union`. **Admin**: pestaña "Órdenes de pago" también en el detalle de camporees de unión.
+
+## Pedidos de artículos (EN IMPLEMENTACIÓN / PLANNED)
+
+Canon: [camporee-orders.md](camporee-orders.md). Bounded context independiente; no extiende `field_payment_orders`, Materials, `camporee_payments`, recursos ni inventario de club. ADR [#9](../api/ARCHITECTURE-DECISIONS.md#9-bounded-context-camporee-orders-independiente-de-materials-y-fieldpaymentorders).
+
+Una sección inscrita puede emitir uno o más pedidos de artículos con líneas nominadas a miembros inscritos (`registered` \| `approved`). El pago es independiente de la inscripción. El campo local cobra (también en camporee de unión). Los endpoints están **PLANNED**; no constan como runtime en `ENDPOINTS-LIVE-REFERENCE.md`.
 
 ## Estado de implementacion
 

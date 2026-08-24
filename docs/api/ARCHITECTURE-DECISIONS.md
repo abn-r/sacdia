@@ -399,7 +399,45 @@ Clases progresivas y honores comparten la cola unificada `evidence-review` con e
 
 ---
 
-**Generado**: 2026-01-29  
-**Actualizado por**: Usuario  
-**Última actualización**: 2026-08-11 (ADR #8 — motor de certificaciones configurables)  
-**Status**: ✅ Decisiones confirmadas; ADR #7 parcialmente implementada en rama, no expuesta en runtime
+## 9. Bounded context `camporee-orders` independiente de Materials y FieldPaymentOrders
+
+### ✅ DECISIÓN FINAL (2026-08-24)
+
+#### Contexto
+
+Una sección inscrita en un campamento o camporee necesita pedir artículos (playeras, gorras, pañoletas, libros) asignados a personas concretas, pagar esa obligación aparte de la inscripción y seguir la entrega hasta cada miembro.
+
+Ya existen Materials (catálogo LF, stock, líneas anónimas), Field Payment Orders (purpose y costo uniforme por beneficiario de inscripción/seguro), `camporee_payments` (ledger por miembro sin carrito) y recursos/inventario de club (archivos digitales o bienes operativos). Extender cualquiera de esos modelos para un carrito heterogéneo, hecho bajo pedido y nominado al inscrito mezclaría invariantes y ampliaría regresiones.
+
+#### Decisión
+
+| Tema | Contrato |
+|------|----------|
+| Persistencia | Nuevo bounded context `camporee-orders`. No extender `MaterialProduct` / `MaterialOrder`, el purpose de `field_payment_orders`, `camporee_payments`, `resources` ni `club_inventory`. Reutilizar patrones (folio, state machine, proof, PDF, scope, caja LF), no tablas. |
+| Elegibilidad | Solo inscritos: cada línea referencia `camporee_member_id` activo con estado `registered` \| `approved` del mismo camporee y sección. El cliente no envía `user_id` libre como autoridad. |
+| Líneas | Nominadas; consolidado derivado `SUM(qty)` / `SUM(line_total_centavos)`. Sin tabla de allocations. |
+| Pago | Independiente de la inscripción. Varios pedidos independientes por sección y camporee (suplementarios permitidos). |
+| Cobro | El campo local cobra siempre, incluso catálogo Unión/División. Hecho bajo pedido en v1 (sin stock). |
+| Tallas | Un eje `LETTER` \| `NUMERIC` \| `NONE`. Género = dos productos. |
+| Proof | Flujo normal: upload → maker-checker → `PAID`. Excepción LF `authorize-without-proof` con motivo obligatorio; habilita entrega; un proof posterior no cambia `PAID` \| `DELIVERED`. |
+| Entrega | Dos niveles: LF → sección (`DELIVERED`); el director marca cada línea `delivered_to_member`. `distribution_status` derivado `NOT_STARTED` \| `PARTIAL` \| `COMPLETE`. |
+| Permisos | Familia `camporee-orders:*`. Read model `payment-obligations` une `field_payment_orders` + `material_orders` + `camporee_orders` sin fusionar folios. |
+| Settings | En `local_camporees` / `union_camporees`: `orders_enabled` default `false`, `orders_opens_at`, `orders_deadline`. |
+| Folio | `PED{yyyy}{####}`. |
+| HTTP | Contratos **PLANNED** bajo `/api/v1` documentados en `docs/features/camporee-orders.md`. No registrarlos como runtime en `ENDPOINTS-LIVE-REFERENCE.md` hasta implementación verificada. |
+| Plan | [`docs/plans/2026-08-24-pedidos-camporees-consolidado-codex.md`](../plans/2026-08-24-pedidos-camporees-consolidado-codex.md) |
+
+#### Consecuencias
+
+- Materials, Field Payment Orders e inscripción de camporee conservan sus invariantes; un defecto de pedidos no muta esas tablas.
+- “Pagos pendientes” es lectura agregada; cada acción abre el flujo dueño de la fuente.
+- La elegibilidad “cualquier miembro activo de la sección” queda rechazada; el roster del camporee es la autoridad.
+- Admin y app no deben diseñar catálogo ni emisión hasta que backend, schema, permisos y errores estén cerrados (contract-first).
+- Mientras no exista runtime, los códigos `CAMPOREE_ORDER_*` y las rutas `/camporee-orders` son canon de diseño, no superficie viva.
+
+---
+
+**Generado**: 2026-01-29
+**Actualizado por**: Usuario
+**Última actualización**: 2026-08-24 (ADR #9 — bounded context camporee-orders)
+**Status**: ✅ Decisiones confirmadas; ADR #7 parcialmente implementada en rama, no expuesta en runtime; ADR #9 documentada, runtime pendiente
