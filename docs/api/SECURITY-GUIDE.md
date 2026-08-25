@@ -4,7 +4,7 @@
 
 **Versión**: 1.0  
 **Fecha**: 31 de enero de 2026  
-**Actualizado**: 12 de agosto de 2026
+**Actualizado**: 25 de agosto de 2026
 **Status**: ✅ Implementado
 
 ---
@@ -231,6 +231,40 @@ El dominio separa **emisión** (directiva de club), **revisión** (liderazgo del
 - **Gating legacy de unión:** `POST /camporees/union/:id/register` se bloquea (`409 FIELD_PAYMENT_ORDER_LEGACY_DISABLED`) cuando el LF del club del miembro tiene el flag activo, cerrando el doble camino orden/register.
 - **Idempotencia de emisión:** header de idempotencia por emisor (`idempotency_key` unique) y unique parcial `active_guard` que impide dos órdenes activas del mismo beneficiario para el mismo propósito.
 - **Feature flag fail-closed:** con `field_payment_orders_v1` OFF para el LF, la emisión responde `403 FIELD_PAYMENT_ORDER_FLAG_DISABLED`; con flag ON, los flujos legacy (alta directa de seguros, purchases qty, register directo de camporee) responden `403 FIELD_PAYMENT_ORDER_LEGACY_DISABLED`.
+
+---
+
+## RBAC de pedidos de mercancía de camporee (camporee-orders)
+
+Familia propia `camporee-orders:*` (rama `feat/camporee-orders`; seeds no aplicados a Neon). No reutiliza `field-payment-orders:*` ni `materiales:*`. El checkout `sacdia-backend` principal no incluye estas rutas.
+
+### Matriz de permisos
+
+| Permiso | Scope | Uso runtime | Roles seed |
+| --- | --- | --- | --- |
+| `camporee-orders:read` | sección activa; territorio para liderazgo | Catálogo visible, órdenes, PDF, proof | Directiva de club (sin consejero) + LF/unión/división + admin |
+| `camporee-orders:catalog-manage` | owner territorial exacto | CRUD biblioteca (producto + opciones) | `director-lf`/`assistant-lf`, unión, división, admin (GLOBAL) |
+| `camporee-orders:offering-configure` | camporee del territorio organizador | Settings y ofertas | Liderazgo del territorio + admin |
+| `camporee-orders:create` | sección activa (`ISSUER_CLUB_ROLES`) | Emitir/cancelar pedido propio | director, deputy-director, secretary, secretary-treasurer, treasurer |
+| `camporee-orders:upload-proof` | sección activa | Subir comprobante | Mismos emisores |
+| `camporee-orders:review` | `local_field_id` cobrador | Bandeja, approve/reject | `director-lf`, `assistant-lf`, `admin`, `super-admin` |
+| `camporee-orders:authorize-without-proof` | mismo LF | Excepción de caja; motivo obligatorio | Mismos revisores LF |
+| `camporee-orders:deliver` | mismo LF | `PAID` → `DELIVERED` (LF → sección) | Mismos revisores LF |
+| `camporee-orders:distribute` | director activo de la sección emisora | Marcar línea entregada al miembro | Solo `director` de club |
+
+`GET /payment-obligations/pending` exige **cualquiera** de `camporee-orders:read`, `field-payment-orders:read` o `materiales:read`.
+
+### Controles clave
+
+- **Elegibilidad:** cada línea exige `camporee_member_id` activo `registered|approved` del mismo camporee y sección. `user_id` del cliente no es autoridad.
+- **Precio en servidor:** el body de emisión solo acepta `lines[]` (`camporee_member_id`, `offering_id`, `option_id?`, `qty` 1–99).
+- **Maker-checker:** quien subió el proof no puede aprobarlo → `403 CAMPOREE_ORDER_MAKER_CHECKER`.
+- **Proof privado:** clave R2 generada por el servidor (`EVIDENCE_FILES`); descarga con URL firmada TTL 900 s tras scope. Upload: JPEG/PNG/WebP/PDF, magic bytes, ≤10 MB → `CAMPOREE_ORDER_PROOF_INVALID_FILE`.
+- **Scope territorial:** fuera de alcance → `403 CAMPOREE_ORDER_FORBIDDEN` sin filtrar existencia. En camporee de unión el LF emisor cobra y revisa; la emisión exige participación activa en `union_camporee_local_fields`.
+- **Distribución:** solo el director de la sección emisora y solo si la orden está `DELIVERED` → `CAMPOREE_ORDER_DISTRIBUTION_FORBIDDEN` / `CAMPOREE_ORDER_NOT_DELIVERED_TO_SECTION`. Admin no impersona esta mutación.
+- **Idempotencia:** `Idempotency-Key` UUID unique por emisor. No hay unique que impida pedidos suplementarios de la misma sección.
+- **Ventana fail-closed:** `orders_enabled=false` → `CAMPOREE_ORDERS_DISABLED`. Fuera de `orders_opens_at`/`orders_deadline` → `CAMPOREE_ORDERS_NOT_OPEN` / `CAMPOREE_ORDERS_CLOSED`.
+- **Aislamiento:** ninguna mutación de pedido escribe `field_payment_orders`, `material_orders` ni `camporee_payments`.
 
 ---
 

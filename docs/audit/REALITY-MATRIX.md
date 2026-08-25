@@ -1,5 +1,25 @@
 # Reality Matrix — SACDIA
-Fecha: 2026-03-26 | Última actualización: 2026-04-17
+Fecha: 2026-03-26 | Última actualización: 2026-08-25
+
+## Addendum 2026-08-25 — camporee-orders (rama, no Neon)
+
+Los conteos del snapshot 2026-03-26 **no** se reescriben aquí. Este addendum registra el bounded context `camporee-orders` verificado en código de rama, no en el checkout `sacdia-backend` principal ni en Neon.
+
+| Capa | Estado | Evidencia |
+|------|--------|-----------|
+| Backend Nest | Código en `feat/camporee-orders` (worktree `/private/tmp/sacdia-backend-camporee-orders`, `47d12f3`) | 27 rutas: catálogo 6, ofertas/settings 6, pedidos 14, `GET /payment-obligations/pending` 1 |
+| Schema | Migración escrita, **no** aplicada a Neon | `20260824190000_camporee_orders`; 7 modelos + 4 enums + flags en `local_camporees`/`union_camporees` |
+| Doc API | Sí, con salvedad de rama | `ENDPOINTS-LIVE-REFERENCE.md` §camporee orders |
+| Canon / feature | Sí | `docs/features/camporee-orders.md`, ADR #9 |
+| Admin | UI en `feat/camporee-orders` `99a5ab5` | Catálogo producto sí; POST/PATCH de tallas no cableado; no impersona `deliver-to-member` |
+| App | Flujo en `feat/camporee-orders` `3c6c8413` | Emisión, proof, obligaciones, distribución director |
+| Neon / checkout principal | Ausente | `sacdia-backend` en `fix/security-hardening-lote`; seeds/permisos no aplicados |
+
+Estado de feature: **PARCIAL** (implementado en rama, no desplegado). No FANTASMA: el código existe. No ALINEADO de producción: falta merge + migrate.
+
+Modelos de rama (espejo en `docs/database/schema.prisma`): `camporee_order_products`, `camporee_order_product_options`, `camporee_order_offerings`, `camporee_orders`, `camporee_order_lines`, `camporee_order_proofs`, `camporee_order_folio_counters`.
+
+---
 
 ## Resumen
 
@@ -609,16 +629,18 @@ Convenciones:
 | recursos | Si (ResourcesModule, 14 endpoints) | Si (categorias CRUD + recursos CRUD) | Si (Clean Architecture completa) | Si (recursos.md) | ALINEADO |
 | infrastructure (health, logging) | Si (CommonModule, AppModule) | No | No | Si (runtime 6.7) | PARCIAL |
 | validacion-investiduras | Si (InvestitureModule, 5 endpoints) | Si (table + dialogs + history) | Si (3 screens) | Si (dominio: validacion) | ALINEADO |
+| camporee-orders (pedidos de mercancía) | Si en rama `feat/camporee-orders` (no en checkout principal ni Neon) | Si parcial (catálogo/settings/bandeja; sin CRUD de tallas ni impersonate distribute) | Si (emisión + obligaciones + distribución) | Si (camporee-orders.md, ADR #9) | PARCIAL |
 
 ### Conteos features
 
 - **ALINEADO**: 16
-- **PARCIAL**: 1 (infrastructure — cross-cutting, sin client UI dedicada)
+- **PARCIAL**: 2 (infrastructure; camporee-orders en rama, no Neon — addendum 2026-08-25)
 - **SIN CANON**: 0
 - **FANTASMA**: 0
 - **DRIFT**: 0
 
 > **Notas**:
+> - **camporee-orders (2026-08-25)**: PARCIAL — runtime en rama `feat/camporee-orders`, no Neon / no checkout principal. Ver addendum al inicio de este archivo.
 > - **actividades**: Admin UI completa implementada en commit 1179598 (2026-03-20). Era PARCIAL (placeholder).
 > - **finanzas**: Admin dashboard completo implementado en commit 1179598 (2026-03-20). Era PARCIAL (placeholder).
 > - **camporees**: Admin CRUD + gestion de miembros en commit c18cc07 (2026-03-20). App 4 screens en commit bfa3231 (2026-03-20). Era PARCIAL.

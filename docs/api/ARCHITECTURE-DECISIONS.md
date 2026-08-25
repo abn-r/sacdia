@@ -424,7 +424,7 @@ Ya existen Materials (catálogo LF, stock, líneas anónimas), Field Payment Ord
 | Permisos | Familia `camporee-orders:*`. Read model `payment-obligations` une `field_payment_orders` + `material_orders` + `camporee_orders` sin fusionar folios. |
 | Settings | En `local_camporees` / `union_camporees`: `orders_enabled` default `false`, `orders_opens_at`, `orders_deadline`. |
 | Folio | `PED{yyyy}{####}`. |
-| HTTP | Contratos **PLANNED** bajo `/api/v1` documentados en `docs/features/camporee-orders.md`. No registrarlos como runtime en `ENDPOINTS-LIVE-REFERENCE.md` hasta implementación verificada. |
+| HTTP | 27 rutas bajo `/api/v1` en controllers Nest de `feat/camporee-orders` (worktree `/private/tmp/sacdia-backend-camporee-orders`, HEAD `47d12f3`). Registradas en `ENDPOINTS-LIVE-REFERENCE.md` con salvedad de rama: no están en el checkout principal ni en Neon. |
 | Plan | [`docs/plans/2026-08-24-pedidos-camporees-consolidado-codex.md`](../plans/2026-08-24-pedidos-camporees-consolidado-codex.md) |
 
 #### Consecuencias
@@ -432,12 +432,12 @@ Ya existen Materials (catálogo LF, stock, líneas anónimas), Field Payment Ord
 - Materials, Field Payment Orders e inscripción de camporee conservan sus invariantes; un defecto de pedidos no muta esas tablas.
 - “Pagos pendientes” es lectura agregada; cada acción abre el flujo dueño de la fuente.
 - La elegibilidad “cualquier miembro activo de la sección” queda rechazada; el roster del camporee es la autoridad.
-- Admin y app no deben diseñar catálogo ni emisión hasta que backend, schema, permisos y errores estén cerrados (contract-first).
-- Mientras no exista runtime, los códigos `CAMPOREE_ORDER_*` y las rutas `/camporee-orders` son canon de diseño, no superficie viva.
+- Admin y app consumen los contratos de la rama; admin no impersona `deliver-to-member` y aún no cablea POST/PATCH de tallas en UI.
+- Hasta merge + migración Neon, las rutas `/camporee-orders` y `GET /payment-obligations/pending` no existen en el runtime desplegado. Los códigos `CAMPOREE_ORDER_*` están en `ErrorCode` del worktree; i18n `errors.json` puede seguir incompleto.
 
 ---
 
 **Generado**: 2026-01-29
 **Actualizado por**: Usuario
-**Última actualización**: 2026-08-24 (ADR #9 — bounded context camporee-orders)
-**Status**: ✅ Decisiones confirmadas; ADR #7 parcialmente implementada en rama, no expuesta en runtime; ADR #9 documentada, runtime pendiente
+**Última actualización**: 2026-08-25 (ADR #9 — camporee-orders en rama `feat/camporee-orders`, no Neon)
+**Status**: ✅ Decisiones confirmadas; ADR #7 parcialmente implementada en rama, no expuesta en runtime; ADR #9 implementada en `feat/camporee-orders` (worktree), no merge / no Neon

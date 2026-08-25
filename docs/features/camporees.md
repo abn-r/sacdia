@@ -130,11 +130,13 @@ Decisión de negocio (opción A, `docs/audit/DECISIONS-PENDING.md`): **el campo 
 - **Filtros**: `GET /payment-orders` y `/payment-orders/review-queue` aceptan `union_camporee_id`.
 - **App**: ruta de emisión `/camporee/:id/payment-orders/issue?type=union`. **Admin**: pestaña "Órdenes de pago" también en el detalle de camporees de unión.
 
-## Pedidos de artículos (EN IMPLEMENTACIÓN / PLANNED)
+## Pedidos de artículos (IMPLEMENTADO PARCIAL — rama `feat/camporee-orders`)
 
 Canon: [camporee-orders.md](camporee-orders.md). Bounded context independiente; no extiende `field_payment_orders`, Materials, `camporee_payments`, recursos ni inventario de club. ADR [#9](../api/ARCHITECTURE-DECISIONS.md#9-bounded-context-camporee-orders-independiente-de-materials-y-fieldpaymentorders).
 
-Una sección inscrita puede emitir uno o más pedidos de artículos con líneas nominadas a miembros inscritos (`registered` \| `approved`). El pago es independiente de la inscripción. El campo local cobra (también en camporee de unión). Los endpoints están **PLANNED**; no constan como runtime en `ENDPOINTS-LIVE-REFERENCE.md`.
+Una sección inscrita puede emitir uno o más pedidos de artículos con líneas nominadas a miembros inscritos (`registered` \| `approved`). El pago es independiente de la inscripción. El campo local cobra (también en camporee de unión).
+
+Runtime en `feat/camporee-orders` (backend worktree `/private/tmp/sacdia-backend-camporee-orders`, admin `99a5ab5`, app `3c6c8413`). Las 27 rutas están en `ENDPOINTS-LIVE-REFERENCE.md` con salvedad de rama: **no** están en el checkout `sacdia-backend` principal ni en Neon (migración `20260824190000_camporee_orders` no aplicada). Settings: `orders_enabled` (default `false`), `orders_opens_at`, `orders_deadline` en `GET`/`PATCH` del camporee; no hay `GET` dedicado de orders-settings.
 
 ## Estado de implementacion
 

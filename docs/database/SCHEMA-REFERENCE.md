@@ -1,8 +1,8 @@
 # Schema Reference - SACDIA Database
 
 **Estado**: ACTIVE
-**Sincronizado contra**: `sacdia-backend/prisma/schema.prisma`
-**Fecha de resincronizacion**: 2026-08-18 (índices de búsqueda/filtrado + queries SLA/MoM)
+**Sincronizado contra**: `sacdia-backend/prisma/schema.prisma` (checkout principal) **más** modelos `camporee_order_*` de la rama `feat/camporee-orders` (worktree; no Neon)
+**Fecha de resincronizacion**: 2026-08-25 (camporee-orders: 7 modelos + 4 enums + flags en camporees; migración no aplicada a Neon)
 
 Referencia humana concisa del schema Prisma vigente.
 
@@ -14,8 +14,8 @@ Referencia humana concisa del schema Prisma vigente.
 
 ## Cifras vigentes
 
-- **Modelos Prisma**: 184
-- **Enums Prisma**: 36
+- **Modelos Prisma**: 191 (184 del checkout principal + 7 `camporee_order_*` en rama `feat/camporee-orders`, no Neon)
+- **Enums Prisma**: 40 (36 del checkout principal + 4 de camporee-orders en la misma rama)
 - **Tablas Better Auth mapeadas**: `session -> sessions`, `account -> accounts`, `verification -> verifications`
 
 ---
@@ -229,6 +229,20 @@ Modelo de capacidad de seguros por Campo Local, vivo en runtime desde antes de e
 - `field_payment_order_configs` — instrucciones de pago por LF (unique `local_field_id`): datos bancarios (`bank_name/account/clabe/holder`) y/o `cash_instructions` (caja del campo), `extra_notes`, `active`. Requerida para renderizar el PDF de la orden.
 - `insurance_reassignment_requests` — solicitud de transferencia de cobertura activa entre miembros del mismo club: `insurance_assignment_id`, `from_user_id`, `to_user_id`, `reason?`, `status` (`PENDING|APPROVED|REJECTED`), reviewer + `reject_reason?`.
 - **Flags en `system_config`**: `field_payment_orders_v1` (JSON con lista de `local_field_id` habilitados) y `field_payment_orders.expiry_days` (default `15`).
+
+### Camporee orders (`camporee_order_products`, `camporee_order_product_options`, `camporee_order_offerings`, `camporee_orders`, `camporee_order_lines`, `camporee_order_proofs`, `camporee_order_folio_counters`)
+
+Pedidos de mercancía nominados (migración `20260824190000_camporee_orders` en rama `feat/camporee-orders`; **no aplicada a Neon**). Fuente estructural de la rama: worktree `/private/tmp/sacdia-backend-camporee-orders/prisma/schema.prisma`. El checkout `sacdia-backend` principal no incluye estas tablas.
+
+- `local_camporees` / `union_camporees` — flags `orders_enabled BOOLEAN NOT NULL DEFAULT false`, `orders_opens_at TIMESTAMPTZ?`, `orders_deadline TIMESTAMPTZ?`.
+- `camporee_order_products` — biblioteca territorial: `owner_scope` (`DIVISION|UNION|LOCAL_FIELD`) + un owner id, `size_scheme` (`LETTER|NUMERIC|NONE`), `club_type_id?`, `active`.
+- `camporee_order_product_options` — un eje de talla por producto; unique `(product_id, label)`; soft-delete.
+- `camporee_order_offerings` — producto ofertado en un camporee (`local_camporee_id` XOR `union_camporee_id`, CHECKs en SQL) con `price_centavos`.
+- `camporee_orders` — pedido de sección: folio `PED{yyyy}{####}` unique por LF, `status camporee_order_status_enum` (`ISSUED|PROOF_SUBMITTED|PROOF_REJECTED|PAID|DELIVERED|CANCELLED|EXPIRED`), `total_centavos` calculado en servidor, `authorized_without_proof`, snapshot de caja LF, `idempotency_key?` unique por emisor. Sin unique que impida pedidos suplementarios de la misma sección.
+- `camporee_order_lines` — línea nominada: `camporee_member_id` (elegibilidad), snapshots de nombre/producto/talla/precio, `qty`, `delivered_to_member_at?`. Unique `(order_id, camporee_member_id, offering_id, option_id)` + unique parcial `option_id IS NULL` en SQL.
+- `camporee_order_proofs` — comprobante R2 (`r2_key`), `status` (`SUBMITTED|APPROVED|REJECTED`), maker-checker.
+- `camporee_order_folio_counters` — contador `(local_field_id, year)` con `last_folio`.
+- **Flag en `system_config`**: `camporee_orders.expiry_days` (default `15`).
 
 ### `achievement_categories`, `achievements`, `user_achievements`, `achievement_event_log`
 
@@ -523,6 +537,7 @@ Define el presupuesto de puntos por componente dentro de un eje anual:
 - `activity_types`, `activities`, `activity_instances`
 - `local_camporees`, `union_camporees`, `union_camporee_local_fields`, `camporee_clubs`, `camporee_members`, `camporee_payments`
   - `local_camporees` y `union_camporees` guardan dirección textual (`local_camporee_place` / `union_camporee_place`), coordenadas opcionales (`lat`, `long`) para vista de mapa en app, `agenda_visible_from` para abrir agenda completa antes/durante el camporee y `club_registration_closed_at/by` para congelar secciones competitivas.
+  - En rama `feat/camporee-orders` ambos modelos añaden `orders_enabled` (default `false`), `orders_opens_at` y `orders_deadline` para la ventana de pedidos de mercancía. Migración no aplicada a Neon.
   - Ambos modelos incluyen `club_registration_opens_at TIMESTAMPTZ NULL` (nulo = apertura inmediata), deadlines `TIMESTAMPTZ`, y `timezone` IANA con default histórico provisional `America/Mexico_City`. `timezone_verified_at/by` audita la confirmación; `timezone_verified_by` tiene FK nombrada a `users(user_id)`, `ON DELETE SET NULL` e índice por tabla. El backfill no modifica fechas ni deadlines históricos.
   - Los eventos del camporee viven en `camporee_events` y se relacionan con camporee local o de unión mediante FK excluyentes.
   - Bloques opcionales de agenda viven en `camporee_event_schedule_blocks`; sus asignaciones por sección inscrita viven en `camporee_event_schedule_block_assignments`.
@@ -592,11 +607,16 @@ Define el presupuesto de puntos por componente dentro de un eje anual:
 - `certification_evidence_upload_status_enum` (`PENDING_UPLOAD`, `CONFIRMED`)
 - `certification_review_event_type_enum` (envíos, devoluciones, aprobaciones, certificación)
 - `certification_closeout_review_status_enum` (`PENDING`, `SUBMITTED`, `CHANGES_REQUESTED`, `APPROVED`)
+- `camporee_order_owner_scope_enum` (`DIVISION`, `UNION`, `LOCAL_FIELD`) — rama `feat/camporee-orders`, no Neon
+- `camporee_order_size_scheme_enum` (`LETTER`, `NUMERIC`, `NONE`)
+- `camporee_order_status_enum` (`ISSUED`, `PROOF_SUBMITTED`, `PROOF_REJECTED`, `PAID`, `DELIVERED`, `CANCELLED`, `EXPIRED`)
+- `camporee_order_proof_status_enum` (`SUBMITTED`, `APPROVED`, `REJECTED`)
 
 ---
 
 ## Migraciones recientes
 
+- `20260824190000_camporee_orders` - crea enums/tablas de pedidos de mercancía y añade `orders_enabled`/`orders_opens_at`/`orders_deadline` a `local_camporees` y `union_camporees`. Existe en `feat/camporee-orders` (worktree); **no ejecutada ni verificada contra Neon**.
 - `20260710130000_admin_auth_sessions` - creada en la rama backend para metadata administrativa 1:1 sobre `sessions`, assurance, expiración absoluta y revocación; despliegue no verificado.
 - `20260710200000_admin_refresh_rotation` - depende de `20260710130000_admin_auth_sessions`; añade `idle_expires_at` para su adopción futura en D1c, deshabilita con sentinel las sesiones administrativas legacy y crea estructuras hash-only de refresh, historial y recibos cifrados. Existe en la rama backend, pero no fue ejecutada ni verificada contra una base de datos; no tiene writer ni publica endpoints runtime y no debe desplegarse antes de D1c + D2.
 - `20260415100000_folder_templates_polymorphic_owner` - añade owners polimorficos (`owner_union_id`, `owner_local_field_id`), dropea el unique compuesto legacy y establece el CHECK/indices parciales de exactamente-un-owner.

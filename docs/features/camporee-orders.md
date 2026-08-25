@@ -1,10 +1,16 @@
 # Feature: Pedidos de camporee
 
-**Estado**: EN IMPLEMENTACIÓN / PLANNED
-**Fecha**: 2026-08-24
-**Módulo backend previsto**: `CamporeeOrdersModule` (`src/camporee-orders/`) — aún no existe en runtime
+**Estado**: IMPLEMENTADO PARCIAL
+**Fecha**: 2026-08-25
+**Módulo backend**: `CamporeeOrdersModule` (`src/camporee-orders/`) + `PaymentObligationsModule` (`src/payment-obligations/`)
 **Plan canónico**: [`docs/plans/2026-08-24-pedidos-camporees-consolidado-codex.md`](../plans/2026-08-24-pedidos-camporees-consolidado-codex.md)
 **ADR**: [#9 — Bounded context `camporee-orders`](../api/ARCHITECTURE-DECISIONS.md#9-bounded-context-camporee-orders-independiente-de-materials-y-fieldpaymentorders)
+
+> Runtime verificado en rama `feat/camporee-orders`, **no** en el checkout principal de `sacdia-backend` (`fix/security-hardening-lote`) ni en Neon.
+> Backend efectivo: worktree `/private/tmp/sacdia-backend-camporee-orders` (HEAD `47d12f3`).
+> Admin: `sacdia-admin` `feat/camporee-orders` `99a5ab5`.
+> App: `sacdia-app` `feat/camporee-orders` `3c6c8413`.
+> La rama backend **no está pusheada**. Migración `20260824190000_camporee_orders` **no aplicada** a Neon. Seeds/permisos **no aplicados** a Neon.
 
 ---
 
@@ -14,7 +20,15 @@ Permite que una sección **inscrita** en un campamento o camporee (local o de un
 
 El dominio es un bounded context independiente. Reutiliza patrones (folio, máquina de estados, proof privado, PDF, alcance territorial, caja/banco del campo local) de Materials y Field Payment Orders **sin extender** sus tablas, purposes ni permisos.
 
-No está implementado en backend, admin ni app. Los contratos HTTP de este documento son **PLANNED**. No pertenecen a `docs/api/ENDPOINTS-LIVE-REFERENCE.md` hasta que existan en runtime verificado.
+### Superficies
+
+| Superficie | Estado | Evidencia |
+|------------|--------|-----------|
+| Backend Nest (catálogo, ofertas, emisión, proof, entrega, PaymentObligations) | Código en `feat/camporee-orders` | Controllers en el worktree; Jest focalizado |
+| Schema / migración | Escrita, no desplegada | `prisma/migrations/20260824190000_camporee_orders/` |
+| Admin (catálogo, settings, ofertas, bandeja, detalle, obligaciones) | UI en `feat/camporee-orders` | Product CRUD sí; POST/PATCH de tallas **no** cableado en UI |
+| App (emisión nominada, proof, pagos pendientes, distribución director) | Flujo en `feat/camporee-orders` | `flutter test test/features/camporee_orders test/features/payment_orders` |
+| Neon / checkout backend principal | Ausente | Migración y seeds no aplicados; `sacdia-backend` no está en esta rama |
 
 ---
 
@@ -112,9 +126,11 @@ Emisores v1: `director`, `deputy-director`, `secretary`, `secretary-treasurer`, 
 
 ---
 
-## Endpoints (PLANNED)
+## Endpoints (rama `feat/camporee-orders`)
 
-Prefijo `/api/v1`. Envelope y errores según contratos vigentes. **Ninguno está en runtime.** No copiar esta tabla a `ENDPOINTS-LIVE-REFERENCE.md` como implementada.
+Prefijo `/api/v1`. Envelope y errores según contratos vigentes. Decoradores HTTP en el worktree; registrados en `docs/api/ENDPOINTS-LIVE-REFERENCE.md` con la misma salvedad de rama hasta el merge.
+
+**No existe** `GET .../orders-settings`. La lectura de la ventana va en `GET /camporees/:id` / `GET /camporees/union/:id` (campos `orders_enabled`, `orders_opens_at`, `orders_deadline`) y en `GET .../order-offerings` (`settings` + `items`). La escritura dedicada es `PATCH .../orders-settings`. `POST`/`PATCH` de camporee también aceptan esos campos en el DTO del worktree.
 
 Cuerpo de emisión (el cliente no envía montos, club, sección ni campo local):
 
@@ -131,6 +147,8 @@ Cuerpo de emisión (el cliente no envía montos, club, sección ni campo local):
 }
 ```
 
+`qty` es 1–99. Header opcional `Idempotency-Key` (UUID).
+
 ### Biblioteca territorial
 
 | Method | Path | Permiso | Descripción |
@@ -142,18 +160,18 @@ Cuerpo de emisión (el cliente no envía montos, club, sección ni campo local):
 | POST | `/camporee-order-products/:productId/options` | `camporee-orders:catalog-manage` | Crear opción de talla |
 | PATCH | `/camporee-order-product-options/:optionId` | `camporee-orders:catalog-manage` | Actualizar opción (soft-delete; no hard-delete si hay órdenes) |
 
+Admin: el cliente HTTP expone las seis rutas; la UI de catálogo crea/edita producto, pero **no** llama POST/PATCH de opciones de talla.
+
 ### Settings y ofertas
 
 | Method | Path | Permiso | Descripción |
 |--------|------|---------|-------------|
 | PATCH | `/camporees/:camporeeId/orders-settings` | `camporee-orders:offering-configure` | Ventana de pedidos del camporee local |
 | PATCH | `/union-camporees/:camporeeId/orders-settings` | `camporee-orders:offering-configure` | Ventana de pedidos del camporee de unión |
-| GET | `/camporees/:camporeeId/order-offerings` | `camporee-orders:read` | Ofertas del camporee local |
-| GET | `/union-camporees/:camporeeId/order-offerings` | `camporee-orders:read` | Ofertas del camporee de unión |
+| GET | `/camporees/:camporeeId/order-offerings` | `camporee-orders:read` | Ofertas + settings del camporee local |
+| GET | `/union-camporees/:camporeeId/order-offerings` | `camporee-orders:read` | Ofertas + settings del camporee de unión |
 | PUT | `/camporees/:camporeeId/order-offerings` | `camporee-orders:offering-configure` | Reemplazar ofertas del camporee local |
 | PUT | `/union-camporees/:camporeeId/order-offerings` | `camporee-orders:offering-configure` | Reemplazar ofertas del camporee de unión |
-
-El GET de detalle del camporee incluirá settings para evitar un round-trip extra.
 
 ### Pedido
 
@@ -162,29 +180,33 @@ El GET de detalle del camporee incluirá settings para evitar un round-trip extr
 | POST | `/camporees/:camporeeId/orders` | `camporee-orders:create` | Emitir pedido de sección (camporee local) |
 | POST | `/union-camporees/:camporeeId/orders` | `camporee-orders:create` | Emitir pedido de sección (camporee de unión) |
 | GET | `/camporee-orders` | `camporee-orders:read` | Listar pedidos visibles (no colapsa suplementarios) |
-| GET | `/camporee-orders/review-queue` | `camporee-orders:review` | Bandeja de revisión LF |
+| GET | `/camporee-orders/review-queue` | `camporee-orders:review` | Bandeja de revisión LF (`PROOF_SUBMITTED`) |
 | GET | `/camporee-orders/:orderId` | `camporee-orders:read` | Detalle: cabecera, líneas nominadas, summary derivado, `distribution_status` |
 | GET | `/camporee-orders/:orderId/document` | `camporee-orders:read` | PDF del pedido |
-| GET | `/camporee-orders/:orderId/proof` | `camporee-orders:read` | Metadata / URL firmada del proof |
-| POST | `/camporee-orders/:orderId/proof` | `camporee-orders:upload-proof` | Subir comprobante (JPG/PNG/WebP/PDF ≤10 MB) |
-| POST | `/camporee-orders/:orderId/cancel` | `camporee-orders:create` / `:review` | Cancelar pedido |
+| GET | `/camporee-orders/:orderId/proof` | `camporee-orders:read` | Metadata / URL firmada del proof (TTL 900 s) |
+| POST | `/camporee-orders/:orderId/proof` | `camporee-orders:upload-proof` | Subir comprobante (JPG/PNG/WebP/PDF ≤10 MB, bucket `EVIDENCE_FILES`) |
+| POST | `/camporee-orders/:orderId/cancel` | `camporee-orders:create` **o** `:review` | Cancelar pedido |
 | POST | `/camporee-orders/:orderId/approve` | `camporee-orders:review` | Aprobar proof (maker-checker) |
 | POST | `/camporee-orders/:orderId/reject` | `camporee-orders:review` | Rechazar proof (motivo obligatorio) |
 | POST | `/camporee-orders/:orderId/authorize-without-proof` | `camporee-orders:authorize-without-proof` | Excepción LF; motivo obligatorio |
 | POST | `/camporee-orders/:orderId/deliver` | `camporee-orders:deliver` | Entrega LF → sección (`PAID` → `DELIVERED`) |
 | POST | `/camporee-orders/:orderId/lines/:lineId/deliver-to-member` | `camporee-orders:distribute` | Director marca línea entregada al miembro |
 
-### Read model transversal (PLANNED)
+Admin visualiza el progreso de distribución; **no** impersona al director para `deliver-to-member`. Esa mutación vive en la app.
 
-| Method | Path | Descripción |
-|--------|------|-------------|
-| GET | `/payment-obligations/pending` | Une `field_payment_orders` + `material_orders` + `camporee_orders` sin fusionar folios. Query opcional `camporee_id` / `union_camporee_id`. |
+### Read model transversal
 
-**Total PLANNED: 27** (6 biblioteca + 6 settings/ofertas + 14 pedido + 1 read model).
+| Method | Path | Permiso | Descripción |
+|--------|------|---------|-------------|
+| GET | `/payment-obligations/pending` | cualquiera de `camporee-orders:read`, `field-payment-orders:read`, `materiales:read` | Une `field_payment_orders` + `material_orders` + `camporee_orders` sin fusionar folios. Query opcional mutuamente exclusiva `camporee_id` / `union_camporee_id`. |
+
+**Total en controllers de la rama: 27** (6 biblioteca + 6 settings/ofertas + 14 pedido + 1 read model).
 
 ---
 
-## Errores previstos (no runtime)
+## Errores runtime (`ErrorCode`)
+
+Presentes en `src/common/errors/error-codes.ts` del worktree. Las claves `CAMPOREE_ORDER_*` **pueden faltar** en `src/i18n/*/errors.json` (admin/app tienen copy local).
 
 ```text
 CAMPOREE_ORDERS_DISABLED
@@ -202,6 +224,7 @@ CAMPOREE_ORDER_PRODUCT_SCOPE_INVALID
 CAMPOREE_ORDER_PAYMENT_CONFIG_REQUIRED
 CAMPOREE_ORDER_MAKER_CHECKER
 CAMPOREE_ORDER_PROOF_INVALID_FILE
+CAMPOREE_ORDER_PROOF_NOT_FOUND
 CAMPOREE_ORDER_REJECT_REASON_REQUIRED
 CAMPOREE_ORDER_AUTHORIZATION_REASON_REQUIRED
 CAMPOREE_ORDER_NOT_DELIVERED_TO_SECTION
@@ -211,7 +234,7 @@ CAMPOREE_ORDER_DISTRIBUTION_FORBIDDEN
 
 ---
 
-## Máquina de estados prevista
+## Máquina de estados
 
 ```text
 ISSUED ──► PROOF_SUBMITTED ──► PAID ──► DELIVERED
@@ -225,23 +248,25 @@ ISSUED ──► PROOF_SUBMITTED ──► PAID ──► DELIVERED
   └──► EXPIRED
 ```
 
-`DELIVERED`, `CANCELLED` y `EXPIRED` son terminales respecto del pedido financiero. La distribución a miembros no añade estados a esa máquina.
+`DELIVERED`, `CANCELLED` y `EXPIRED` son terminales respecto del pedido financiero. La distribución a miembros no añade estados a esa máquina. Expiración lazy: `camporee_orders.expiry_days` en `system_config` (default 15).
 
 ---
 
-## Permisos previstos
+## Permisos
 
-| Permiso | Uso |
-|---------|-----|
-| `camporee-orders:read` | Catálogo visible, órdenes propias/territoriales, PDF |
-| `camporee-orders:catalog-manage` | CRUD biblioteca dentro del scope |
-| `camporee-orders:offering-configure` | Settings y ofertas del camporee propio |
-| `camporee-orders:create` | Emitir/cancelar orden propia |
-| `camporee-orders:upload-proof` | Subir proof de orden propia |
-| `camporee-orders:review` | Approve/reject LF |
-| `camporee-orders:authorize-without-proof` | Excepción LF |
-| `camporee-orders:deliver` | Entrega LF → sección |
-| `camporee-orders:distribute` | Registrar entrega de una línea al miembro |
+Familia sembrada en `prisma/seeds/permissions.seed.sql` + grants en `role-permissions.seed.sql` **de la rama**; no aplicados a Neon.
+
+| Permiso | Uso | Seed |
+|---------|-----|------|
+| `camporee-orders:read` | Catálogo visible, órdenes propias/territoriales, PDF | Directiva de club (sin consejero) + liderazgo territorial + admin |
+| `camporee-orders:catalog-manage` | CRUD biblioteca dentro del scope | `director-lf`/`assistant-lf`, unión, división, admin (GLOBAL) |
+| `camporee-orders:offering-configure` | Settings y ofertas del camporee propio | Liderazgo del territorio organizador + admin |
+| `camporee-orders:create` | Emitir/cancelar orden propia | `director`, `deputy-director`, `secretary`, `secretary-treasurer`, `treasurer` |
+| `camporee-orders:upload-proof` | Subir proof de orden propia | Mismos emisores |
+| `camporee-orders:review` | Approve/reject LF | `director-lf`, `assistant-lf`, `admin`, `super-admin` |
+| `camporee-orders:authorize-without-proof` | Excepción LF | Mismos revisores LF |
+| `camporee-orders:deliver` | Entrega LF → sección | Mismos revisores LF |
+| `camporee-orders:distribute` | Registrar entrega de una línea al miembro | Solo `director` de club |
 
 Ninguna mutación carga una orden solo por UUID y permiso: siempre resuelve territorio y relación con la sección.
 
@@ -249,7 +274,7 @@ Ninguna mutación carga una orden solo por UUID y permiso: siempre resuelve terr
 
 ## Settings del camporee
 
-En `local_camporees` y `union_camporees` (migración prevista, no aplicada a Neon):
+En `local_camporees` y `union_camporees` (migración de rama, no aplicada a Neon):
 
 | Campo | Regla |
 |-------|--------|
@@ -272,6 +297,8 @@ Timezone IANA del camporee; no interpretar fechas con la zona del dispositivo.
 - Carrito persistente en servidor antes de emitir.
 - Entrega parcial de la cantidad de una misma línea.
 - Logística de cocina/compras operativas del evento (sigue siendo gap de [camporees.md](camporees.md)).
+- Impersonación admin de `deliver-to-member`.
+- CRUD de tallas en la UI admin (el API sí existe).
 
 ---
 
@@ -283,3 +310,14 @@ Timezone IANA del camporee; no interpretar fechas con la zona del dispositivo.
 | Field Payment Orders | Solo patrón (folio, proof, caja LF). Inscripción permanece en `field_payment_orders`. |
 | Materials | Solo patrón. Catálogo general y stock no se reutilizan. |
 | Pagos pendientes | Read model unificado; mutaciones siguen siendo dueñas de cada fuente. |
+
+---
+
+## Desviaciones honestas (2026-08-25)
+
+- El checkout `sacdia-backend` del workspace **no** es esta rama; el runtime vive en el worktree `/private/tmp/sacdia-backend-camporee-orders`.
+- `feat/camporee-orders` backend no está en remoto.
+- Migración, seeds de permisos y grants **no** están en Neon: contra la DB compartida las rutas fallarían por schema/RBAC.
+- i18n backend `errors.json` puede no incluir `CAMPOREE_ORDER_*`.
+- Task 1 del plan quedó históricamente como `feat(payments)...` (`9972925`); no reescribir historia.
+- Admin no emite pedidos de sección ni marca distribución a miembros.
