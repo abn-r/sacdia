@@ -1480,6 +1480,7 @@ model local_camporees {
   orders_enabled               Boolean              @default(false)
   orders_opens_at              DateTime?            @db.Timestamptz(6)
   orders_deadline              DateTime?            @db.Timestamptz(6)
+  supply_edit_cutoff_local_time String              @default("21:00") @db.VarChar(5)
   agenda_visible_from          DateTime?            @db.Timestamptz(6)
   ecclesiastical_year          Int
   active                       Boolean              @default(true)
@@ -1777,6 +1778,7 @@ model union_camporees {
   orders_enabled               Boolean                       @default(false)
   orders_opens_at              DateTime?                     @db.Timestamptz(6)
   orders_deadline              DateTime?                     @db.Timestamptz(6)
+  supply_edit_cutoff_local_time String                       @default("21:00") @db.VarChar(5)
   agenda_visible_from          DateTime?                     @db.Timestamptz(6)
   ecclesiastical_year          Int
   active                       Boolean                       @default(true)

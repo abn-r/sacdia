@@ -7,10 +7,10 @@
 > La tabla refleja los decoradores HTTP efectivos en controllers NestJS; DTOs, ejemplos y errores finos viven en Swagger/runtime y docs de feature cuando aplique.
 
 **Estado**: ACTIVE
-**Actualizado**: 2026-08-25
-**Total endpoints**: 785 decoradores HTTP en 100 controllers (certificaciones configurables, insurance capacity model, field-payment-orders sincronizados manualmente; camporee-orders + payment-obligations añadidos desde `feat/camporee-orders` — no están en el checkout principal ni en Neon)
-**Métodos**: GET 308 · POST 230 · PATCH 107 · DELETE 88 · PUT 10
-**Auth detectada**: JWT 731 · Public 12
+**Actualizado**: 2026-08-26
+**Total endpoints**: 814 decoradores HTTP en 102 controllers (certificaciones configurables, insurance capacity model, field-payment-orders sincronizados manualmente; camporee-orders + camporee-supplies + payment-obligations desde worktree `feat/camporee-supplies` — no están en Neon)
+**Métodos**: GET 318 · POST 239 · PATCH 115 · DELETE 88 · PUT 12
+**Auth detectada**: JWT 760 · Public 12
 
 ## Cómo leer esta referencia
 
@@ -57,6 +57,7 @@
 | camporee order products | 6 |
 | camporee order offerings | 6 |
 | camporee orders | 14 |
+| camporee supplies | 29 |
 | catalogs | 16 |
 | admin-certificate-bulk-imports | 6 |
 | certificate-bulk-imports | 6 |
@@ -745,6 +746,8 @@ Los `POST` y `PATCH` de camporees locales y de unión aceptan `start_date` y `en
 
 En rama `feat/camporee-orders` (worktree, no Neon), `GET`/`POST`/`PATCH` de camporee local y de unión incluyen `orders_enabled`, `orders_opens_at` y `orders_deadline`. No hay `GET` dedicado de orders-settings; la ventana también viaja en `GET .../order-offerings`. Mutación dedicada: `PATCH .../orders-settings`. Ver §camporee orders.
 
+En rama `feat/camporee-supplies`, los mismos `GET`/`POST` de camporee aceptan `supply_edit_cutoff_local_time` (default `21:00`). Mutación dedicada: `PATCH .../supply-settings`. Ver §camporee supplies.
+
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
 | GET | `/api/v1/camporees` | JWT | Permisos: camporees:read. Recorte territorial rol-primero (`director-lf`/unión/división y admin con ancla); coordinador sin asignación de club → denegado. | Listar camporees | CamporeesService.findAll() | `src/camporees/camporees.controller.ts` |
@@ -1227,11 +1230,47 @@ Folio `PED{yyyy}{####}`. Máquina: `ISSUED` → `PROOF_SUBMITTED` → `PAID` →
 
 ### payment obligations
 
-Read model de solo lectura. No fusiona folios ni muta `field_payment_orders`, `material_orders` o `camporee_orders`. Misma salvedad de rama que camporee-orders.
+Read model de solo lectura. No fusiona folios ni muta `field_payment_orders`, `material_orders`, `camporee_orders` o `camporee_supply_payment_docs`. Misma salvedad de rama que camporee-orders / camporee-supplies.
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
-| GET | `/api/v1/payment-obligations/pending` | JWT | Permisos (any): camporee-orders:read, field-payment-orders:read, materiales:read | Listar obligaciones pendientes (inscripción, materiales y pedidos) sin fusionar folios | PaymentObligationsService.listPending() | `src/payment-obligations/payment-obligations.controller.ts` |
+| GET | `/api/v1/payment-obligations/pending` | JWT | Permisos (any): camporee-orders:read, camporee-supplies:read, field-payment-orders:read, materiales:read | Listar obligaciones pendientes (inscripción, materiales, pedidos e insumos) sin fusionar folios | PaymentObligationsService.listPending() | `src/payment-obligations/payment-obligations.controller.ts` |
+
+### camporee supplies
+
+> Insumos de sección (`feat/camporee-supplies`). Controllers en worktree `/private/tmp/sacdia-backend-camporee-orders`. **No** están en Neon hasta merge + `migrate deploy`. Distintos de `/camporee-orders` (mercancía PED) y `/payment-orders` (inscripción). Folio `INS{yyyy}{####}`.
+
+| Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
+| --- | --- | --- | --- | --- | --- | --- |
+| GET | `/api/v1/camporees/:camporeeId/supply-catalog` | JWT | Permisos: camporee-supplies:read | Catálogo de slots y productos del camporee local | CamporeeSupplyConfigService.getCatalog() | `src/camporee-supplies/config.controller.ts` |
+| GET | `/api/v1/union-camporees/:camporeeId/supply-catalog` | JWT | Permisos: camporee-supplies:read | Catálogo de slots y productos del camporee de unión | CamporeeSupplyConfigService.getCatalog() | `src/camporee-supplies/config.controller.ts` |
+| PATCH | `/api/v1/camporees/:camporeeId/supply-settings` | JWT | Permisos: camporee-supplies:configure | Actualizar corte de edición de insumos (local) | CamporeeSupplyConfigService.updateSettings() | `src/camporee-supplies/config.controller.ts` |
+| PATCH | `/api/v1/union-camporees/:camporeeId/supply-settings` | JWT | Permisos: camporee-supplies:configure | Actualizar corte de edición de insumos (unión) | CamporeeSupplyConfigService.updateSettings() | `src/camporee-supplies/config.controller.ts` |
+| POST | `/api/v1/camporees/:camporeeId/supply-slots` | JWT | Permisos: camporee-supplies:configure | Crear horario de entrega (local) | CamporeeSupplyConfigService.createSlot() | `src/camporee-supplies/config.controller.ts` |
+| POST | `/api/v1/union-camporees/:camporeeId/supply-slots` | JWT | Permisos: camporee-supplies:configure | Crear horario de entrega (unión) | CamporeeSupplyConfigService.createSlot() | `src/camporee-supplies/config.controller.ts` |
+| PATCH | `/api/v1/camporees/:camporeeId/supply-slots/:slotId` | JWT | Permisos: camporee-supplies:configure | Actualizar horario de entrega (local) | CamporeeSupplyConfigService.updateSlot() | `src/camporee-supplies/config.controller.ts` |
+| PATCH | `/api/v1/union-camporees/:camporeeId/supply-slots/:slotId` | JWT | Permisos: camporee-supplies:configure | Actualizar horario de entrega (unión) | CamporeeSupplyConfigService.updateSlot() | `src/camporee-supplies/config.controller.ts` |
+| POST | `/api/v1/camporees/:camporeeId/supply-products` | JWT | Permisos: camporee-supplies:configure | Crear producto de insumos (local) | CamporeeSupplyConfigService.createProduct() | `src/camporee-supplies/config.controller.ts` |
+| POST | `/api/v1/union-camporees/:camporeeId/supply-products` | JWT | Permisos: camporee-supplies:configure | Crear producto de insumos (unión) | CamporeeSupplyConfigService.createProduct() | `src/camporee-supplies/config.controller.ts` |
+| PATCH | `/api/v1/camporees/:camporeeId/supply-products/:productId` | JWT | Permisos: camporee-supplies:configure | Actualizar producto; precio bloqueado si hay plan SUBMITTED | CamporeeSupplyConfigService.updateProduct() | `src/camporee-supplies/config.controller.ts` |
+| PATCH | `/api/v1/union-camporees/:camporeeId/supply-products/:productId` | JWT | Permisos: camporee-supplies:configure | Actualizar producto de unión | CamporeeSupplyConfigService.updateProduct() | `src/camporee-supplies/config.controller.ts` |
+| GET | `/api/v1/camporees/:camporeeId/supply-plan` | JWT | Permisos: camporee-supplies:plan | Plan de insumos de la sección activa (local) | CamporeeSupplyPlansService.getOwnPlan() | `src/camporee-supplies/plans.controller.ts` |
+| GET | `/api/v1/union-camporees/:camporeeId/supply-plan` | JWT | Permisos: camporee-supplies:plan | Plan de insumos de la sección activa (unión) | CamporeeSupplyPlansService.getOwnPlan() | `src/camporee-supplies/plans.controller.ts` |
+| PUT | `/api/v1/camporees/:camporeeId/supply-plan` | JWT | Permisos: camporee-supplies:plan | Reemplazar líneas del plan en DRAFT (local) | CamporeeSupplyPlansService.replaceDraft() | `src/camporee-supplies/plans.controller.ts` |
+| PUT | `/api/v1/union-camporees/:camporeeId/supply-plan` | JWT | Permisos: camporee-supplies:plan | Reemplazar líneas del plan en DRAFT (unión) | CamporeeSupplyPlansService.replaceDraft() | `src/camporee-supplies/plans.controller.ts` |
+| POST | `/api/v1/camporees/:camporeeId/supply-plan/submit` | JWT | Permisos: camporee-supplies:plan | Enviar plan y emitir folio PRINCIPAL INS (local) | CamporeeSupplyPlansService.submit() | `src/camporee-supplies/plans.controller.ts` |
+| POST | `/api/v1/union-camporees/:camporeeId/supply-plan/submit` | JWT | Permisos: camporee-supplies:plan | Enviar plan y emitir folio PRINCIPAL INS (unión) | CamporeeSupplyPlansService.submit() | `src/camporee-supplies/plans.controller.ts` |
+| PATCH | `/api/v1/camporees/:camporeeId/supply-plan/lines` | JWT | Permisos (any): camporee-supplies:plan, review-pay, configure | Ajustar línea SUBMITTED; CHARGE/REFUND; bypass freeze con motivo | CamporeeSupplyPlansService.adjustLine() | `src/camporee-supplies/plans.controller.ts` |
+| PATCH | `/api/v1/union-camporees/:camporeeId/supply-plan/lines` | JWT | Permisos (any): camporee-supplies:plan, review-pay, configure | Ajustar línea SUBMITTED (unión) | CamporeeSupplyPlansService.adjustLine() | `src/camporee-supplies/plans.controller.ts` |
+| GET | `/api/v1/camporees/:camporeeId/supply-plans` | JWT | Permisos: camporee-supplies:read | Listar planes de insumos del camporee local | CamporeeSupplyPlansService.listPlans() | `src/camporee-supplies/plans.controller.ts` |
+| GET | `/api/v1/union-camporees/:camporeeId/supply-plans` | JWT | Permisos: camporee-supplies:read | Listar planes de insumos del camporee de unión | CamporeeSupplyPlansService.listPlans() | `src/camporee-supplies/plans.controller.ts` |
+| POST | `/api/v1/camporees/:camporeeId/supply-lines/:lineId/deliveries` | JWT | Permisos: camporee-supplies:deliver | Entrega parcial a la sección (local) | CamporeeSupplyPlansService.deliver() | `src/camporee-supplies/plans.controller.ts` |
+| POST | `/api/v1/union-camporees/:camporeeId/supply-lines/:lineId/deliveries` | JWT | Permisos: camporee-supplies:deliver | Entrega parcial a la sección (unión) | CamporeeSupplyPlansService.deliver() | `src/camporee-supplies/plans.controller.ts` |
+| GET | `/api/v1/camporees/:camporeeId/supply-reports/kitchen` | JWT | Permisos: camporee-supplies:read | Demanda de cocina (opcional `?date=`) | CamporeeSupplyPlansService.kitchenReport() | `src/camporee-supplies/plans.controller.ts` |
+| GET | `/api/v1/union-camporees/:camporeeId/supply-reports/kitchen` | JWT | Permisos: camporee-supplies:read | Demanda de cocina (unión) | CamporeeSupplyPlansService.kitchenReport() | `src/camporee-supplies/plans.controller.ts` |
+| GET | `/api/v1/camporees/:camporeeId/supply-reports/cash` | JWT | Permisos: camporee-supplies:read | Totales de caja por sección (local) | CamporeeSupplyPlansService.cashReport() | `src/camporee-supplies/plans.controller.ts` |
+| GET | `/api/v1/union-camporees/:camporeeId/supply-reports/cash` | JWT | Permisos: camporee-supplies:read | Totales de caja por sección (unión) | CamporeeSupplyPlansService.cashReport() | `src/camporee-supplies/plans.controller.ts` |
+| POST | `/api/v1/camporee-supply-payments/:paymentId/mark-paid` | JWT | Permisos: camporee-supplies:review-pay | Marcar folio INS (principal, cargo o devolución) como pagado | CamporeeSupplyPlansService.markPaid() | `src/camporee-supplies/plans.controller.ts` |
 
 ### inventory
 

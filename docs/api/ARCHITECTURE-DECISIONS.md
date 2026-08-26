@@ -437,7 +437,41 @@ Ya existen Materials (catálogo LF, stock, líneas anónimas), Field Payment Ord
 
 ---
 
+## 10. Bounded context `camporee-supplies` independiente de `camporee-orders`
+
+### ✅ DECISIÓN FINAL (2026-08-26)
+
+#### Contexto
+
+Una sección inscrita necesita planificar insumos de cocina por horario de entrega (hielo, tortillas, garrafones), pagar un total antes del evento y ajustar solo días no congelados. Mercancía (`camporee-orders`) es nominada a `camporee_member_id`, folio PED inmutable y entrega LF→sección→miembro. Materials y Field Payment Orders tampoco modelan día/slot/kg del camporee.
+
+#### Decisión
+
+| Tema | Contrato |
+|------|----------|
+| Persistencia | Nuevo bounded context `camporee-supplies`. No extender `camporee_orders`, `MaterialOrder`, `field_payment_orders` ni inventario de club. Reutilizar patrones (folio, scope territorial, caja LF, Pagos pendientes), no tablas. |
+| Unidad | La **sección** inscrita (`registered\|approved`). Un plan por sección. Sin líneas nominadas. |
+| Líneas | `(date, slot_id, product_id, qty)`. El club elige slots del organizador; no inventa horarios. Totales de día derivados. |
+| Emisores club | Solo `director`, `secretary`, `secretary-treasurer`. |
+| Config / caja | LF `director-lf` / `assistant-lf`; unión si el evento es de unión; admin por rol. |
+| Freeze | TZ del camporee. `supply_edit_cutoff_local_time` default `21:00`. DRAFT libre. SUBMITTED: no hoy/pasado; mañana solo antes del corte. Club → `CAMPOREE_SUPPLIES_DAY_LOCKED`. LF/unión/admin bypass con motivo obligatorio. |
+| Precio | Snapshot del catálogo. PATCH de costo bloqueado si hay algún plan SUBMITTED (`CAMPOREE_SUPPLIES_PRICE_LOCKED`). |
+| Pago | Primer submit → un PRINCIPAL `INS{yyyy}{####}` (contador propio). Aumentos CHARGE; reducciones REFUND. PRINCIPAL no se reescribe. |
+| Entrega | Parcial a la sección. No exige PRINCIPAL PAID. No hay `delivered_to_member`. |
+| UX | Dentro de la ficha/detalle del camporee. Admin no impersona submit del club. |
+| Pagos pendientes | Fuentes `CAMPOREE_SUPPLY_CHARGE` / `CAMPOREE_SUPPLY_REFUND`, purpose `CAMPOREE_SUPPLIES`, acciones `PAY_AT_CAMP` / `PROCESS_REFUND`. No fusionar con PED. |
+| HTTP | 29 rutas bajo `/api/v1` en `feat/camporee-supplies` (worktree `/private/tmp/sacdia-backend-camporee-orders`). |
+| Plan | [`docs/plans/2026-08-26-camporee-supplies.md`](../plans/2026-08-26-camporee-supplies.md) |
+
+#### Consecuencias
+
+- Un defecto de insumos no muta mercancía, inscripción ni materiales.
+- Folios INS y PED conviven en Pagos pendientes como filas distintas.
+- Hasta merge + migración Neon, las rutas `/supply-*` no existen en el runtime desplegado.
+
+---
+
 **Generado**: 2026-01-29
 **Actualizado por**: Usuario
-**Última actualización**: 2026-08-25 (ADR #9 — camporee-orders en rama `feat/camporee-orders`, no Neon)
-**Status**: ✅ Decisiones confirmadas; ADR #7 parcialmente implementada en rama, no expuesta en runtime; ADR #9 implementada en `feat/camporee-orders` (worktree), no merge / no Neon
+**Última actualización**: 2026-08-26 (ADR #10 — camporee-supplies en rama `feat/camporee-supplies`, no Neon)
+**Status**: ✅ Decisiones confirmadas; ADR #7 parcialmente implementada en rama, no expuesta en runtime; ADR #9 y #10 implementadas en worktree `feat/camporee-supplies` / historial de orders, no merge Neon
