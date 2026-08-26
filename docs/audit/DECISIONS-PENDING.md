@@ -6,6 +6,25 @@ Fuente: Reality Matrix + Canon verification
 
 ---
 
+## Pedidos de camporee — elegibilidad de beneficiarios (2026-08-24)
+
+**Estado: RESUELTA (2026-08-24) — solo inscritos.**
+
+Pregunta: ¿cualquier miembro activo de la sección puede figurar en un pedido de artículos del camporee, o solo quienes están inscritos en ese evento?
+
+| Opción | Resolución |
+|--------|------------|
+| Cualquier miembro activo de la sección | Rechazada |
+| Solo `camporee_members` activos `registered` \| `approved` del mismo camporee y sección | **Adoptada** |
+
+El cliente no envía `user_id` libre como autoridad; cada línea referencia `camporee_member_id`. Miembros `pending_approval`, rechazados, inactivos, de otra sección o de otro camporee no son elegibles.
+
+Referencia: ADR [#9](../api/ARCHITECTURE-DECISIONS.md#9-bounded-context-camporee-orders-independiente-de-materials-y-fieldpaymentorders); plan [`docs/plans/2026-08-24-pedidos-camporees-consolidado-codex.md`](../plans/2026-08-24-pedidos-camporees-consolidado-codex.md); feature [`docs/features/camporee-orders.md`](../features/camporee-orders.md).
+
+La decisión de quién cobra en camporees de unión (campo local) no se reabre; aplica también a estos pedidos.
+
+---
+
 ## Consolidación club_sections (2026-03-17)
 
 | Item | Detalle | Resolucion |

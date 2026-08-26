@@ -2,7 +2,7 @@
 
 **Estado**: ACTIVE
 
-**Última actualización**: 4 de marzo de 2026
+**Última actualización**: 25 de agosto de 2026
 **Estado**: Documento canónico de testing API
 
 > [!IMPORTANT]
@@ -37,6 +37,8 @@ dummy para pasar la validación de entorno.
 - **Suites bloqueantes (12, verdes)**: activities, app, auth, certifications,
   classes-progress-migration, clubs, field-payment-orders, finances,
   insurance, member-rankings, notifications-security, section-rankings.
+  `camporee-orders` / `payment-obligations` **no** están en este gate: el
+  runtime vive en `feat/camporee-orders` (worktree), sin e2e de CI ni merge.
 - **Suites pendientes de realineación (12, con specs desactualizados)**:
   admin-catalogs, admin-users, admin-users-scope, camporees, catalogs,
   classes, confirm-union-http, evidence-folder, honors, investiture,
@@ -45,6 +47,27 @@ dummy para pasar la validación de entorno.
   imports a módulos movidos y lógica de scope migrada a snapshots de
   autorización. Al arreglar cada una, agregarla a la lista bloqueante del
   workflow (`.github/workflows/ci.yml`, job `backend_e2e_tests`).
+
+### Pedidos de camporee (unitarios en rama, 2026-08-25)
+
+No hay e2e de CI. Verificación focalizada sobre `feat/camporee-orders` (sin nest/next/flutter build, sin `prisma migrate`):
+
+```bash
+# Backend worktree /private/tmp/sacdia-backend-camporee-orders
+pnpm exec jest src/camporee-orders src/payment-obligations --runInBand
+# 2026-08-25: 11 suites / 173 tests passed
+
+# App sacdia-app feat/camporee-orders
+flutter test test/features/camporee_orders test/features/payment_orders
+# 2026-08-25: 64 tests passed
+
+# Admin sacdia-admin feat/camporee-orders
+pnpm exec vitest run src/lib/api/camporee-orders.test.ts \
+  src/lib/api/payment-obligations.test.ts \
+  src/components/camporee-orders \
+  src/components/payment-orders/payment-obligations-client.test.tsx
+# 2026-08-25: 5 files / 26 tests passed
+```
 
 ---
 

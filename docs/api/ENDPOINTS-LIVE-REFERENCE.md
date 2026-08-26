@@ -7,10 +7,10 @@
 > La tabla refleja los decoradores HTTP efectivos en controllers NestJS; DTOs, ejemplos y errores finos viven en Swagger/runtime y docs de feature cuando aplique.
 
 **Estado**: ACTIVE
-**Actualizado**: 2026-08-20
-**Total endpoints**: 758 decoradores HTTP en 96 controllers (certificaciones configurables, insurance capacity model y field-payment-orders sincronizados manualmente)
-**Métodos**: GET 298 · POST 219 · PATCH 103 · DELETE 88 · PUT 8
-**Auth detectada**: JWT 704 · Public 12
+**Actualizado**: 2026-08-25
+**Total endpoints**: 785 decoradores HTTP en 100 controllers (certificaciones configurables, insurance capacity model, field-payment-orders sincronizados manualmente; camporee-orders + payment-obligations añadidos desde `feat/camporee-orders` — no están en el checkout principal ni en Neon)
+**Métodos**: GET 308 · POST 230 · PATCH 107 · DELETE 88 · PUT 10
+**Auth detectada**: JWT 731 · Public 12
 
 ## Cómo leer esta referencia
 
@@ -54,6 +54,9 @@
 | camporee-staff | 8 |
 | camporee-venues | 9 |
 | camporees | 47 |
+| camporee order products | 6 |
+| camporee order offerings | 6 |
+| camporee orders | 14 |
 | catalogs | 16 |
 | admin-certificate-bulk-imports | 6 |
 | certificate-bulk-imports | 6 |
@@ -92,6 +95,7 @@
 | Notifications | 10 |
 | FCM Tokens | 5 |
 | User Notification Preferences | 4 |
+| payment obligations | 1 |
 | post-registration | 6 |
 | qr | 6 |
 | quarterly-reports | 9 |
@@ -739,6 +743,8 @@ Semántica funcional y límites: [operations-dashboard.md](../features/operation
 
 Los `POST` y `PATCH` de camporees locales y de unión aceptan `start_date` y `end_date` exclusivamente como `YYYY-MM-DD` válido. `club_registration_opens_at`, `club_registration_deadline`, `member_registration_deadline` y `payment_deadline` exigen ISO-8601 con `Z` u offset explícito; no se aceptan fechas sin hora. `timezone` debe ser IANA: al enviarla explícitamente, el backend registra la verificación con el actor autenticado; omitirla en `PATCH` conserva la verificación anterior. La política única resuelve la fase por calendario local y la disposición de clubes: cierre manual primero, luego `not_open_yet`, `open` hasta el deadline inclusivo, y `late_approval_required` sólo después. `not_open_yet` no crea ni habilita aprobación tardía.
 
+En rama `feat/camporee-orders` (worktree, no Neon), `GET`/`POST`/`PATCH` de camporee local y de unión incluyen `orders_enabled`, `orders_opens_at` y `orders_deadline`. No hay `GET` dedicado de orders-settings; la ventana también viaja en `GET .../order-offerings`. Mutación dedicada: `PATCH .../orders-settings`. Ver §camporee orders.
+
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
 | GET | `/api/v1/camporees` | JWT | Permisos: camporees:read. Recorte territorial rol-primero (`director-lf`/unión/división y admin con ancla); coordinador sin asignación de club → denegado. | Listar camporees | CamporeesService.findAll() | `src/camporees/camporees.controller.ts` |
@@ -1171,6 +1177,61 @@ Path base: `/api/v1/certifications/users/:userId/certification-enrollments/:enro
 | GET | `/api/v1/insurance/reassignments` | JWT | Permisos: field-payment-orders:read | Listar solicitudes de reasignación del alcance | InsuranceReassignmentsService.list() | `src/field-payment-orders/insurance-reassignments.controller.ts` |
 | POST | `/api/v1/insurance/reassignments/:requestId/approve` | JWT | Permisos: field-payment-orders:review | Aprobar reasignación (mueve assignment + slot movement) | InsuranceReassignmentsService.approve() | `src/field-payment-orders/insurance-reassignments.controller.ts` |
 | POST | `/api/v1/insurance/reassignments/:requestId/reject` | JWT | Permisos: field-payment-orders:review | Rechazar reasignación con motivo | InsuranceReassignmentsService.reject() | `src/field-payment-orders/insurance-reassignments.controller.ts` |
+
+### camporee order products
+
+> Pedidos de mercancía (`feat/camporee-orders`). Controllers en worktree `/private/tmp/sacdia-backend-camporee-orders`. **No** están en el checkout `sacdia-backend` principal ni en Neon hasta merge + `migrate deploy`. Distintos de `/payment-orders` (inscripción/seguro).
+
+| Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
+| --- | --- | --- | --- | --- | --- | --- |
+| POST | `/api/v1/camporee-order-products` | JWT | Permisos: camporee-orders:catalog-manage | Crear producto de la biblioteca territorial | CatalogService.create() | `src/camporee-orders/catalog.controller.ts` |
+| GET | `/api/v1/camporee-order-products` | JWT | Permisos: camporee-orders:read | Listar productos visibles en la cascada territorial | CatalogService.list() | `src/camporee-orders/catalog.controller.ts` |
+| GET | `/api/v1/camporee-order-products/:productId` | JWT | Permisos: camporee-orders:read | Obtener un producto de la biblioteca | CatalogService.getById() | `src/camporee-orders/catalog.controller.ts` |
+| PATCH | `/api/v1/camporee-order-products/:productId` | JWT | Permisos: camporee-orders:catalog-manage | Actualizar un producto (soft-delete con active=false) | CatalogService.update() | `src/camporee-orders/catalog.controller.ts` |
+| POST | `/api/v1/camporee-order-products/:productId/options` | JWT | Permisos: camporee-orders:catalog-manage | Agregar una opción de talla al producto | CatalogService.addOption() | `src/camporee-orders/catalog.controller.ts` |
+| PATCH | `/api/v1/camporee-order-product-options/:optionId` | JWT | Permisos: camporee-orders:catalog-manage | Actualizar una opción (label inmutable si hay líneas) | CatalogService.updateOption() | `src/camporee-orders/catalog.controller.ts` |
+
+### camporee order offerings
+
+No existe `GET .../orders-settings`. Settings en `GET` de camporee y en este GET de ofertas. Escritura: `PATCH .../orders-settings`.
+
+| Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
+| --- | --- | --- | --- | --- | --- | --- |
+| PATCH | `/api/v1/camporees/:camporeeId/orders-settings` | JWT | Permisos: camporee-orders:offering-configure | Actualizar ventana de pedidos del camporee local | OfferingsService.updateSettings() | `src/camporee-orders/offerings.controller.ts` |
+| PATCH | `/api/v1/union-camporees/:camporeeId/orders-settings` | JWT | Permisos: camporee-orders:offering-configure | Actualizar ventana de pedidos del camporee de unión | OfferingsService.updateSettings() | `src/camporee-orders/offerings.controller.ts` |
+| GET | `/api/v1/camporees/:camporeeId/order-offerings` | JWT | Permisos: camporee-orders:read | Listar ofertas y settings de pedidos del camporee local | OfferingsService.getOfferings() | `src/camporee-orders/offerings.controller.ts` |
+| GET | `/api/v1/union-camporees/:camporeeId/order-offerings` | JWT | Permisos: camporee-orders:read | Listar ofertas y settings de pedidos del camporee de unión | OfferingsService.getOfferings() | `src/camporee-orders/offerings.controller.ts` |
+| PUT | `/api/v1/camporees/:camporeeId/order-offerings` | JWT | Permisos: camporee-orders:offering-configure | Reemplazar de forma idempotente las ofertas del camporee local | OfferingsService.replaceOfferings() | `src/camporee-orders/offerings.controller.ts` |
+| PUT | `/api/v1/union-camporees/:camporeeId/order-offerings` | JWT | Permisos: camporee-orders:offering-configure | Reemplazar de forma idempotente las ofertas del camporee de unión | OfferingsService.replaceOfferings() | `src/camporee-orders/offerings.controller.ts` |
+
+### camporee orders
+
+Folio `PED{yyyy}{####}`. Máquina: `ISSUED` → `PROOF_SUBMITTED` → `PAID` → `DELIVERED` (más rechazo, cancelación, expiración y excepción `authorize-without-proof`). El cliente no envía montos.
+
+| Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
+| --- | --- | --- | --- | --- | --- | --- |
+| POST | `/api/v1/camporees/:camporeeId/orders` | JWT | Permisos: camporee-orders:create | Emitir un pedido de sección para un camporee local | CamporeeOrdersService.create() | `src/camporee-orders/camporee-orders.controller.ts` |
+| POST | `/api/v1/union-camporees/:camporeeId/orders` | JWT | Permisos: camporee-orders:create | Emitir un pedido de sección para un camporee de unión | CamporeeOrdersService.create() | `src/camporee-orders/camporee-orders.controller.ts` |
+| GET | `/api/v1/camporee-orders` | JWT | Permisos: camporee-orders:read | Listar pedidos visibles (no colapsa suplementarios) | CamporeeOrdersService.list() | `src/camporee-orders/camporee-orders.controller.ts` |
+| GET | `/api/v1/camporee-orders/review-queue` | JWT | Permisos: camporee-orders:review | Bandeja de revisión de pedidos con comprobante (Campo Local) | CamporeeOrdersService.reviewQueue() | `src/camporee-orders/camporee-orders.controller.ts` |
+| GET | `/api/v1/camporee-orders/:orderId` | JWT | Permisos: camporee-orders:read | Detalle de pedido con líneas nominadas, summary y snapshot de pago | CamporeeOrdersService.get() | `src/camporee-orders/camporee-orders.controller.ts` |
+| GET | `/api/v1/camporee-orders/:orderId/document` | JWT | Permisos: camporee-orders:read | Descargar PDF imprimible del pedido | CamporeeOrdersService.getDocument() | `src/camporee-orders/camporee-orders.controller.ts` |
+| GET | `/api/v1/camporee-orders/:orderId/proof` | JWT | Permisos: camporee-orders:read | URL firmada del comprobante vigente (TTL 900 s) | CamporeeOrdersService.getProofDownload() | `src/camporee-orders/camporee-orders.controller.ts` |
+| POST | `/api/v1/camporee-orders/:orderId/proof` | JWT | Permisos: camporee-orders:upload-proof | Subir comprobante de pago (multipart, campo file) | CamporeeOrdersService.uploadProof() | `src/camporee-orders/camporee-orders.controller.ts` |
+| POST | `/api/v1/camporee-orders/:orderId/cancel` | JWT | Permisos: camporee-orders:create **o** camporee-orders:review | Cancelar un pedido emitido o con comprobante rechazado | CamporeeOrdersService.cancel() | `src/camporee-orders/camporee-orders.controller.ts` |
+| POST | `/api/v1/camporee-orders/:orderId/approve` | JWT | Permisos: camporee-orders:review | Aprobar comprobante y marcar el pedido como pagado | CamporeeOrdersService.approve() | `src/camporee-orders/camporee-orders.controller.ts` |
+| POST | `/api/v1/camporee-orders/:orderId/reject` | JWT | Permisos: camporee-orders:review | Rechazar comprobante (permite re-subida) | CamporeeOrdersService.reject() | `src/camporee-orders/camporee-orders.controller.ts` |
+| POST | `/api/v1/camporee-orders/:orderId/authorize-without-proof` | JWT | Permisos: camporee-orders:authorize-without-proof | Marcar pagado sin comprobante (excepción de caja del Campo Local) | CamporeeOrdersService.authorizeWithoutProof() | `src/camporee-orders/camporee-orders.controller.ts` |
+| POST | `/api/v1/camporee-orders/:orderId/deliver` | JWT | Permisos: camporee-orders:deliver | Marcar el bulto entregado del Campo Local a la sección | CamporeeOrdersService.deliverToSection() | `src/camporee-orders/camporee-orders.controller.ts` |
+| POST | `/api/v1/camporee-orders/:orderId/lines/:lineId/deliver-to-member` | JWT | Permisos: camporee-orders:distribute | Marcar una línea nominada como entregada al miembro (solo director de la sección) | CamporeeOrdersService.deliverToMember() | `src/camporee-orders/camporee-orders.controller.ts` |
+
+### payment obligations
+
+Read model de solo lectura. No fusiona folios ni muta `field_payment_orders`, `material_orders` o `camporee_orders`. Misma salvedad de rama que camporee-orders.
+
+| Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
+| --- | --- | --- | --- | --- | --- | --- |
+| GET | `/api/v1/payment-obligations/pending` | JWT | Permisos (any): camporee-orders:read, field-payment-orders:read, materiales:read | Listar obligaciones pendientes (inscripción, materiales y pedidos) sin fusionar folios | PaymentObligationsService.listPending() | `src/payment-obligations/payment-obligations.controller.ts` |
 
 ### inventory
 

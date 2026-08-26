@@ -148,6 +148,34 @@ En la emisión de camporee, la lista de beneficiarios omite miembros ya inscrito
 
 Envelope estándar con `code` `FIELD_PAYMENT_ORDER_*` (i18n en los 4 locales de app/admin). Claves frecuentes: `FLAG_DISABLED`, `LEGACY_DISABLED`, `DUPLICATE_BENEFICIARY`, `ELIGIBILITY_FAILED`, `COST_NOT_CONFIGURED`, `EXPIRED`, `MAKER_CHECKER`, `INVALID_TRANSITION`.
 
+## Actualizacion 2026-08-25 (Pedidos de mercancía de camporee)
+
+Contrato para admin y app. Rutas: `docs/api/ENDPOINTS-LIVE-REFERENCE.md` §camporee orders. Feature: `docs/features/camporee-orders.md`. Handoff admin: `docs/plans/handoffs/camporee-orders-admin-handoff.md`.
+
+**Salvedad de rama:** los controllers viven en `feat/camporee-orders` (worktree `/private/tmp/sacdia-backend-camporee-orders`). El checkout `sacdia-backend` del workspace y Neon **no** tienen schema, seeds ni estas rutas. Distinguir siempre de `/payment-orders` (inscripción/seguro).
+
+### Settings (no hay GET dedicado)
+
+- Lectura: `GET /camporees/:id` o `GET /camporees/union/:id` (`orders_enabled`, `orders_opens_at`, `orders_deadline`) y `GET /camporees/:id/order-offerings` / `GET /union-camporees/:id/order-offerings` (`settings` + `items`).
+- Escritura de ventana: `PATCH .../orders-settings`. `orders_enabled` default `false` oculta CTA y rechaza emisión (`CAMPOREE_ORDERS_DISABLED`).
+- Ofertas: `PUT .../order-offerings` con `{ items: [{ product_id, price_centavos, sort_order? }] }`.
+
+### Emisión (app; no impersonar desde admin)
+
+Cuerpo: `{ "lines": [{ "camporee_member_id", "offering_id", "option_id?", "qty" }] }`. El cliente **no** envía precio, total, `club_id`, `club_section_id` ni `local_field_id`. Header opcional `Idempotency-Key` (UUID). Solo inscritos `registered|approved` de la misma sección.
+
+### Ciclo del pedido
+
+`ISSUED → PROOF_SUBMITTED → PAID → DELIVERED`, con `PROOF_REJECTED`, `CANCELLED`, `EXPIRED` y excepción `POST .../authorize-without-proof` (motivo obligatorio; roles LF). Proof: multipart `file`, JPG/PNG/WebP/PDF ≤10 MB. Maker-checker en approve. `DELIVERED` es LF → sección; el director marca `POST .../lines/:lineId/deliver-to-member`. Admin visualiza `distribution_status`; no llama esa ruta.
+
+### Pagos pendientes
+
+`GET /payment-obligations/pending?camporee_id=` o `union_camporee_id=` (mutuamente exclusivos). Tres fuentes, filas separadas: `FIELD_PAYMENT_ORDER`, `MATERIAL_ORDER`, `CAMPOREE_ORDER`. No fusionar folios.
+
+### Montos y errores
+
+`total_centavos` / `unit_price_centavos` / `line_total_centavos` son enteros MXN. Códigos `CAMPOREE_ORDER_*` / `CAMPOREE_ORDERS_*`. El i18n backend `errors.json` puede no tener las claves; admin/app llevan copy local.
+
 ## Actualizacion 2026-08-11 (Motor de certificaciones configurables)
 
 Contrato mínimo para admin y app móvil. Fuente de verdad de rutas: `docs/api/ENDPOINTS-LIVE-REFERENCE.md` §certifications.
