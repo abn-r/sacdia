@@ -1,7 +1,7 @@
 # Feature Registry - SACDIA
 
 **Estado**: ACTIVE
-**Actualizado**: 2026-08-25
+**Actualizado**: 2026-08-26
 **Propósito**: registrar qué dominios tienen documento en `docs/features/` y separar cobertura editorial de estado funcional declarado.
 
 > [!IMPORTANT]
@@ -30,11 +30,11 @@
 
 | Señal | Cantidad | Evidencia |
 |---|---:|---|
-| Documentos de dominio presentes | 31 | archivos `docs/features/*.md` + entradas en canon, excluyendo este `README.md` |
+| Documentos de dominio presentes | 32 | archivos `docs/features/*.md` + entradas en canon, excluyendo este `README.md` |
 | Estado funcional `IMPLEMENTADO` | 26 | declarado en los documentos de dominio |
 | Estado funcional `EN IMPLEMENTACIÓN` | 1 | `coordinacion` |
 | Estado funcional `PARCIAL` | 2 | `audit-log`; `certificaciones-guias-mayores` |
-| Estado funcional `IMPLEMENTADO PARCIAL` | 2 | `camporee-events`; `camporee-orders` (rama `feat/camporee-orders`, no Neon) |
+| Estado funcional `IMPLEMENTADO PARCIAL` | 3 | `camporee-events`; `camporee-orders`; `camporee-supplies` (rama `feat/camporee-supplies`, no Neon) |
 | Estado funcional `NO CANON` | 2 | `achievements`; `infrastructure` declara la variante `NO CANON (infraestructura operativa)` |
 
 ## Dominios registrados
@@ -52,6 +52,7 @@
 | `camporees` | [camporees.md](camporees.md) | Documento presente | `IMPLEMENTADO` |
 | `camporee-events` | [camporee-events.md](camporee-events.md) | Documento presente | `IMPLEMENTADO PARCIAL` |
 | `camporee-orders` | [camporee-orders.md](camporee-orders.md) | Documento presente | `IMPLEMENTADO PARCIAL` |
+| `camporee-supplies` | [camporee-supplies.md](camporee-supplies.md) | Documento presente | `IMPLEMENTADO PARCIAL` |
 | `carpetas-evidencias` | [carpetas-evidencias.md](carpetas-evidencias.md) | Documento presente | `IMPLEMENTADO` |
 | `catalogos` | [catalogos.md](catalogos.md) | Documento presente | `IMPLEMENTADO` |
 | `certificaciones-guias-mayores` | [certificaciones-guias-mayores.md](certificaciones-guias-mayores.md) | Documento presente | `PARCIAL` |

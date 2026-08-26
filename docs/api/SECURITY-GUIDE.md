@@ -252,7 +252,7 @@ Familia propia `camporee-orders:*` (rama `feat/camporee-orders`; seeds no aplica
 | `camporee-orders:deliver` | mismo LF | `PAID` → `DELIVERED` (LF → sección) | Mismos revisores LF |
 | `camporee-orders:distribute` | director activo de la sección emisora | Marcar línea entregada al miembro | Solo `director` de club |
 
-`GET /payment-obligations/pending` exige **cualquiera** de `camporee-orders:read`, `field-payment-orders:read` o `materiales:read`.
+`GET /payment-obligations/pending` exige **cualquiera** de `camporee-orders:read`, `camporee-supplies:read`, `field-payment-orders:read` o `materiales:read`.
 
 ### Controles clave
 
@@ -265,6 +265,34 @@ Familia propia `camporee-orders:*` (rama `feat/camporee-orders`; seeds no aplica
 - **Idempotencia:** `Idempotency-Key` UUID unique por emisor. No hay unique que impida pedidos suplementarios de la misma sección.
 - **Ventana fail-closed:** `orders_enabled=false` → `CAMPOREE_ORDERS_DISABLED`. Fuera de `orders_opens_at`/`orders_deadline` → `CAMPOREE_ORDERS_NOT_OPEN` / `CAMPOREE_ORDERS_CLOSED`.
 - **Aislamiento:** ninguna mutación de pedido escribe `field_payment_orders`, `material_orders` ni `camporee_payments`.
+
+---
+
+## RBAC de insumos de camporee (camporee-supplies)
+
+Familia propia `camporee-supplies:*` (rama `feat/camporee-supplies`; seeds no aplicados a Neon). No reutiliza `camporee-orders:*`, `field-payment-orders:*` ni `materials:*`.
+
+### Matriz de permisos
+
+| Permiso | Scope | Uso runtime | Roles seed |
+| --- | --- | --- | --- |
+| `camporee-supplies:read` | sección activa; territorio LF/unión/admin | Catálogo, planes, reportes cocina/caja | Emisores club + LF/unión + admin |
+| `camporee-supplies:plan` | sección activa (`SUPPLY_ISSUER_CLUB_ROLES`) | DRAFT, submit PRINCIPAL, adjust días abiertos | `director`, `secretary`, `secretary-treasurer` |
+| `camporee-supplies:configure` | organizador del camporee (LF; unión si aplica) | Slots, productos, corte | `director-lf`/`assistant-lf`, unión, admin |
+| `camporee-supplies:review-pay` | LF cobrador / admin | Mark-paid, bypass freeze con motivo | `director-lf`, `assistant-lf`, `admin`, `super-admin` |
+| `camporee-supplies:deliver` | mismo que review-pay | Entrega parcial a la sección | Mismos de review-pay |
+
+`GET /payment-obligations/pending` también admite `camporee-supplies:read` en modo `any`.
+
+### Controles clave
+
+- **Elegibilidad:** un plan por sección inscrita `registered|approved`. El cliente no envía `club_id` / `local_field_id` como autoridad.
+- **Precio en servidor:** qty decimal; `line_total_centavos` half-up `qty × unit_cost`. PATCH de costo → `CAMPOREE_SUPPLIES_PRICE_LOCKED` si hay plan SUBMITTED.
+- **Freeze:** TZ del camporee; corte `supply_edit_cutoff_local_time` default 21:00. Club en día congelado → `403 CAMPOREE_SUPPLIES_DAY_LOCKED`. Bypass LF/unión/admin exige `bypass_reason` → `CAMPOREE_SUPPLIES_BYPASS_REASON_REQUIRED`.
+- **Folio:** `INS{yyyy}{####}` en contador propio. PRINCIPAL inmutable; CHARGE/REFUND hijos. No usa el contador PED.
+- **Entrega:** parcial a la sección; no exige PRINCIPAL PAID; no hay entrega a miembro. Exceso → `CAMPOREE_SUPPLIES_OVER_DELIVERY`.
+- **Admin:** no impersona `POST …/supply-plan/submit`.
+- **Aislamiento:** ninguna mutación de insumos escribe `camporee_orders`, `field_payment_orders` ni `material_orders`.
 
 ---
 

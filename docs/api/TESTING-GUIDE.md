@@ -69,6 +69,27 @@ pnpm exec vitest run src/lib/api/camporee-orders.test.ts \
 # 2026-08-25: 5 files / 26 tests passed
 ```
 
+### Insumos de camporee (unitarios en rama, 2026-08-26)
+
+No hay e2e de CI. Verificación focalizada sobre `feat/camporee-supplies` (sin nest/next/flutter build, sin `prisma migrate`):
+
+```bash
+# Backend worktree /private/tmp/sacdia-backend-camporee-orders
+pnpm exec jest src/camporee-supplies src/payment-obligations --runInBand
+# 2026-08-26: 6 suites / 39 tests passed
+
+# App sacdia-app feat/camporee-supplies
+flutter test test/features/camporee_supplies test/features/payment_orders/data/models/payment_obligation_model_test.dart
+
+# Admin sacdia-admin feat/camporee-supplies
+pnpm exec vitest run src/lib/api/camporee-supplies.test.ts \
+  src/lib/api/payment-obligations.test.ts \
+  src/components/camporee-supplies \
+  src/components/payment-orders/payment-obligations-client.test.tsx
+# 2026-08-26: 4 files / 15 tests passed
+```
+
+
 ---
 
 ## 🎯 Estrategia de Testing
