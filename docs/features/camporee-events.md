@@ -227,6 +227,7 @@ Asignaciones de personas del roster a una actividad/evento. No obliga a incluir 
 Reglas:
 
 - Para publicar un evento debe existir al menos una asignación activa con `assignment_role='responsible'` y staff activo.
+- `POST` de evento con `status=publicado` se rechaza (`CAMPOREE_EVENT_RESPONSIBLE_REQUIRED`): el evento aún no existe y no puede tener staff. El alta queda en `programado`. `leader_user_id` / `leader_name_override` son etiqueta de agenda, no sustituyen el roster.
 - Pueden existir varios asistentes/evaluadores/apoyos.
 - Desactivar un miembro del roster no debe dejarlo satisfaciendo el responsable de un evento.
 
@@ -394,7 +395,7 @@ Tab "Eventos" en `/dashboard/camporees/[id]` para camporee local y en
 - Lista de instancias con orden drag-handle (display_order).
 - Botones: "Agregar desde template" (picker), "Crear personalizado" (form modal/page).
 - Acciones por fila: editar (form prellenado), eliminar, reordenar.
-- El formulario de evento permite seleccionar tipo de evento, asignar responsable/apoyos desde el roster del camporee, configurar bloques de agenda opcionales con asignaciones a secciones inscritas y elegir especialidades de preparación del catálogo de honores.
+- El formulario de evento permite seleccionar tipo de evento, un líder de agenda (usuario o nombre externo), bloques de horario opcionales con asignaciones a secciones inscritas y especialidades de preparación del catálogo. El alta siempre queda `programado`; publicar pide un responsable del roster de personal, distinto del líder de agenda.
 - Las rutas dedicadas de creación/edición existen para ambos scopes:
   `/dashboard/camporees/[id]/events/new`,
   `/dashboard/camporees/[id]/events/[eventId]/edit`,
