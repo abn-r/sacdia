@@ -230,6 +230,20 @@ Reglas:
 - Pueden existir varios asistentes/evaluadores/apoyos.
 - Desactivar un miembro del roster no debe dejarlo satisfaciendo el responsable de un evento.
 
+### Tabla `camporee_event_honors`
+
+Especialidades de preparación ligadas a una **instancia** de evento. Consultivo: no inscribe, no bloquea puntaje ni inscripción.
+
+| Columna | Tipo | Notas |
+| --- | --- | --- |
+| `camporee_event_honor_id` | `INT PK` | identity |
+| `camporee_event_id` | `INT FK camporee_events ON DELETE CASCADE` | |
+| `honor_id` | `INT FK honors ON DELETE RESTRICT` | catálogo |
+| `display_order` | `INT DEFAULT 0` | orden de `honor_ids` |
+| `created_at` | `TIMESTAMPTZ` | |
+
+`@@unique([camporee_event_id, honor_id])`. Máx. 20 por evento. No vive en templates; clonar desde template no copia honores.
+
 ### Scoring por rúbricas
 
 Los templates pueden traer rúbricas reutilizables (`camporee_event_template_rubrics`) cuando `camporee_event_templates.scoring_enabled=true`. Al crear un evento desde template, el backend copia esas rúbricas hacia `camporee_event_rubrics` y conserva `camporee_events.scoring_enabled=true`.
@@ -380,7 +394,7 @@ Tab "Eventos" en `/dashboard/camporees/[id]` para camporee local y en
 - Lista de instancias con orden drag-handle (display_order).
 - Botones: "Agregar desde template" (picker), "Crear personalizado" (form modal/page).
 - Acciones por fila: editar (form prellenado), eliminar, reordenar.
-- El formulario de evento permite seleccionar tipo de evento, asignar responsable/apoyos desde el roster del camporee y configurar bloques de agenda opcionales con asignaciones a secciones inscritas.
+- El formulario de evento permite seleccionar tipo de evento, asignar responsable/apoyos desde el roster del camporee, configurar bloques de agenda opcionales con asignaciones a secciones inscritas y elegir especialidades de preparación del catálogo de honores.
 - Las rutas dedicadas de creación/edición existen para ambos scopes:
   `/dashboard/camporees/[id]/events/new`,
   `/dashboard/camporees/[id]/events/[eventId]/edit`,
@@ -400,8 +414,8 @@ Tab "Personal" en el detalle del camporee, antes de "Eventos".
 
 - Sección "Eventos" dentro del detalle de camporee.
 - Read-only en la lista: mostrar sólo icono, nombre del evento y puntaje total.
-- Read-only en detalle antes de `agenda_visible_from`: ver descripción, tipo y puntos/requisitos, sin día/hora/sede/bloques.
-- Read-only en detalle después de `agenda_visible_from`: ver tipo, día/hora, puntos máximos, sede opcional, descripción, personal asignado y bloques segmentados por horario/grupo cuando existan.
+- Read-only en detalle antes de `agenda_visible_from`: ver descripción, tipo, puntos/requisitos y especialidades de preparación (PDF), sin día/hora/sede/bloques.
+- Read-only en detalle después de `agenda_visible_from`: ver tipo, día/hora, puntos máximos, sede opcional, descripción, especialidades de preparación, personal asignado y bloques segmentados por horario/grupo cuando existan.
 - La sección de miembros inscritos aparece antes que la sección de eventos en el detalle móvil.
 - La capa de datos puede consumir preview local o unión (`local-camporees` /
   `union-camporees`) según `camporeeType`.

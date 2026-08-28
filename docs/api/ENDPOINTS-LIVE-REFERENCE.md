@@ -7,9 +7,9 @@
 > La tabla refleja los decoradores HTTP efectivos en controllers NestJS; DTOs, ejemplos y errores finos viven en Swagger/runtime y docs de feature cuando aplique.
 
 **Estado**: ACTIVE
-**Actualizado**: 2026-08-26
-**Total endpoints**: 814 decoradores HTTP en 102 controllers (certificaciones configurables, insurance capacity model, field-payment-orders sincronizados manualmente; camporee-orders + camporee-supplies + payment-obligations desde worktree `feat/camporee-supplies` — no están en Neon)
-**Métodos**: GET 318 · POST 239 · PATCH 115 · DELETE 88 · PUT 12
+**Actualizado**: 2026-08-28
+**Total endpoints**: 815 decoradores HTTP en 102 controllers (certificaciones configurables, insurance capacity model, field-payment-orders sincronizados manualmente; camporee-orders + camporee-supplies + payment-obligations desde worktree `feat/camporee-supplies` — no están en Neon)
+**Métodos**: GET 318 · POST 239 · PATCH 116 · DELETE 88 · PUT 12
 **Auth detectada**: JWT 760 · Public 12
 
 ## Cómo leer esta referencia
@@ -35,7 +35,7 @@
 | admin-geography | 24 |
 | Admin - Honors Requirements | 7 |
 | admin-notifications | 1 |
-| Admin - Phase E Catalogs (i18n) | 35 |
+| Admin - Phase E Catalogs (i18n) | 36 |
 | admin-reference | 38 |
 | admin-users | 7 |
 | analytics | 6 |
@@ -254,8 +254,9 @@
 | POST | `/api/v1/admin/classes` | JWT | Global: admin, super-admin; Permisos: catalogs:create | Create a class with optional translations | AdminPhaseECatalogsService.createClass() | `src/admin/admin-phase-e-catalogs.controller.ts` |
 | PATCH | `/api/v1/admin/classes/:id` | JWT | Global: admin, super-admin; Permisos: catalogs:update | Update a class and upsert/delete translations | AdminPhaseECatalogsService.updateClass() | `src/admin/admin-phase-e-catalogs.controller.ts` |
 | DELETE | `/api/v1/admin/classes/:id` | JWT | Global: admin, super-admin; Permisos: catalogs:delete | Soft-delete a class (active = false) | AdminPhaseECatalogsService.deleteClass() | `src/admin/admin-phase-e-catalogs.controller.ts` |
-| GET | `/api/v1/admin/classes/:classId/honors` | JWT | Global: admin, super-admin; Permisos: catalogs:read | List class-honor relations (incluye inactivas; filtro `active?`) | AdminPhaseECatalogsService.findClassHonors() | `src/admin/admin-phase-e-catalogs.controller.ts` |
-| POST | `/api/v1/admin/classes/:classId/honors` | JWT | Global: admin, super-admin; Permisos: catalogs:create | Create class-honor relation (`REQUIRED`/`RECOMMENDED`/`ELECTIVE`) | AdminPhaseECatalogsService.createClassHonor() | `src/admin/admin-phase-e-catalogs.controller.ts` |
+| GET | `/api/v1/admin/classes/:classId/honors` | JWT | Global: admin, super-admin; Permisos: catalogs:read | List class-honor relations (incluye inactivas; filtro `active?`; `module_id`/`module`/`material_url`) | AdminPhaseECatalogsService.findClassHonors() | `src/admin/admin-phase-e-catalogs.controller.ts` |
+| POST | `/api/v1/admin/classes/:classId/honors` | JWT | Global: admin, super-admin; Permisos: catalogs:create | Create class-honor relation (`REQUIRED`/`RECOMMENDED`/`ELECTIVE`; `module_id?` del mismo `class_id`) | AdminPhaseECatalogsService.createClassHonor() | `src/admin/admin-phase-e-catalogs.controller.ts` |
+| PATCH | `/api/v1/admin/classes/:classId/honors/:classHonorId` | JWT | Global: admin, super-admin; Permisos: catalogs:update | Asigna o limpia el módulo (`module_id` number o `null`; omitir deja el módulo igual) | AdminPhaseECatalogsService.updateClassHonor() | `src/admin/admin-phase-e-catalogs.controller.ts` |
 | DELETE | `/api/v1/admin/classes/:classId/honors/:classHonorId` | JWT | Global: admin, super-admin; Permisos: catalogs:delete | Soft-delete class-honor relation | AdminPhaseECatalogsService.deleteClassHonor() | `src/admin/admin-phase-e-catalogs.controller.ts` |
 | GET | `/api/v1/admin/classes/:classId/prerequisites` | JWT | Global: admin, super-admin; Permisos: catalogs:read | List class prerequisites (incluye inactivas; filtro `active?`) | AdminPhaseECatalogsService.findClassPrerequisites() | `src/admin/admin-phase-e-catalogs.controller.ts` |
 | POST | `/api/v1/admin/classes/:classId/prerequisites` | JWT | Global: admin, super-admin; Permisos: catalogs:create | Create class prerequisite with cycle validation | AdminPhaseECatalogsService.createClassPrerequisite() | `src/admin/admin-phase-e-catalogs.controller.ts` |
@@ -672,6 +673,8 @@ Semántica funcional y límites: [operations-dashboard.md](../features/operation
 | DELETE | `/api/v1/camporee-events/:eventId` | JWT | Permisos: camporee_events:delete | Soft delete a camporee event instance | CamporeeEventsService.deleteEvent() | `src/camporee-events/camporee-events.controller.ts` |
 | PATCH | `/api/v1/camporee-events/:eventId/reorder` | JWT | Permisos: camporee_events:update | Update display_order of a camporee event instance | CamporeeEventsService.reorderEvent() | `src/camporee-events/camporee-events.controller.ts` |
 
+POST/PATCH de instancia aceptan `honor_ids?: number[]` (máx. 20, únicos, honores activos). Omitir en PATCH no toca la lista; `[]` la vacía. GET, list y preview incluyen `honors[]` (`honor_id`, `name`, `honor_image`, `material_url`, `honors_category_id`, `category_name`, `skill_level`, `active`, `display_order`). Preview no oculta honores aunque la agenda esté cerrada. Errores: `CAMPOREE_EVENT_HONOR_NOT_FOUND`, `CAMPOREE_EVENT_HONOR_DUPLICATE`, `CAMPOREE_EVENT_HONOR_LIMIT`. No hay ruta dedicada. Templates y `from-template` no copian honores.
+
 ### camporee-scoring
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
@@ -961,9 +964,9 @@ Path base: `/api/v1/certifications/users/:userId/certification-enrollments/:enro
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
 | GET | `/api/v1/classes` | JWT | - | Listar clases | ClassesService.findAll() | `src/classes/classes.controller.ts` |
-| GET | `/api/v1/classes/:classId` | JWT | - | Obtener clase por ID (incluye `prerequisites` activos) | ClassesService.findOne() | `src/classes/classes.controller.ts` |
-| GET | `/api/v1/classes/:classId/modules` | JWT | - | Obtener módulos de una clase | ClassesService.getModules() | `src/classes/classes.controller.ts` |
-| GET | `/api/v1/classes/:classId/honors` | Optional JWT | - | Especialidades relacionadas (`class_honors`); con JWT opcional incluye `user_status` | ClassesService.getClassHonors() | `src/classes/classes.controller.ts` |
+| GET | `/api/v1/classes/:classId` | JWT | - | Obtener clase por ID (incluye `prerequisites` activos y `honors[]` por módulo) | ClassesService.findOne() | `src/classes/classes.controller.ts` |
+| GET | `/api/v1/classes/:classId/modules` | JWT | - | Obtener módulos de una clase (embebe `honors[]` por módulo, sin `user_status`) | ClassesService.getModules() | `src/classes/classes.controller.ts` |
+| GET | `/api/v1/classes/:classId/honors` | Optional JWT | - | Especialidades relacionadas (`class_honors`); `module_id`, `module_name`, `material_url`; con JWT opcional incluye `user_status`. Informativo: no bloquea módulo ni investidura | ClassesService.getClassHonors() | `src/classes/classes.controller.ts` |
 
 ### user-classes
 

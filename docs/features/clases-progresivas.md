@@ -21,8 +21,8 @@ Las secciones ahora se separan en `BASIC`, `ADVANCED` y `EXTRA`: `BASIC` + `EXTR
 - **Catalogo publico** (OptionalJwtAuthGuard):
   - `GET /classes` — listar clases con paginacion y filtro por clubTypeId; por defecto solo devuelve clases disponibles para inscripcion en el ano eclesiastico vigente
   - `GET /classes/:classId` — detalle de clase con modulos/secciones y `prerequisites` activos (`[{ class_id, name }]`)
-  - `GET /classes/:classId/modules` — modulos de una clase con sus secciones
-  - `GET /classes/:classId/honors` — especialidades relacionadas via `class_honors` (informativas; JWT opcional agrega `user_status`)
+  - `GET /classes/:classId/modules` — módulos de una clase con sus secciones y `honors[]` embebidos
+  - `GET /classes/:classId/honors` — especialidades relacionadas via `class_honors` (informativas; JWT opcional agrega `user_status`; incluye `module_id`, `module_name`, `material_url`)
 - **Inscripciones de usuario** (JwtAuthGuard + PermissionsGuard):
   - `GET /users/:userId/classes` — listar inscripciones del usuario (filtro por yearId)
   - `POST /users/:userId/classes/enroll` — inscribir usuario en clase (class_id + ecclesiastical_year_id); bloquea clases inactivas o fuera de ventana de disponibilidad
@@ -108,11 +108,11 @@ Reglas vigentes:
 
 ## Prerrequisitos entre clases
 
-Tabla aditiva `class_prerequisites` (`class_id`, `prerequisite_class_id`, `active`). En inscripción, cada prerrequisito activo debe estar `INVESTIDO` para el usuario (cualquier año). Error: `CLASS_PREREQUISITE_NOT_MET` (403). `requires_invested_gm` sigue vigente y no se migra a esta tabla. Admin: `GET/POST/DELETE /admin/classes/:classId/prerequisites` con validación anti-ciclos (`ADMIN_CLASS_PREREQUISITE_CYCLE`).
+Tabla aditiva `class_prerequisites` (`class_id`, `prerequisite_class_id`, `active`). En inscripción, cada prerrequisito activo debe estar `INVESTIDO` para el usuario (cualquier año). Error: `CLASS_PREREQUISITE_NOT_MET` (403). `requires_invested_gm` sigue vigente y no se migra a esta tabla: la clase de entrada `Guía Mayor` debe tenerlo en `false` (primera inscripción GM sin investidura previa); `Guía Mayor Avanzado` e `Instructor` lo usan en `true`. Error: `CLASS_GM_INVESTITURE_REQUIRED` (403). Admin: `GET/POST/DELETE /admin/classes/:classId/prerequisites` con validación anti-ciclos (`ADMIN_CLASS_PREREQUISITE_CYCLE`).
 
 ## Especialidades relacionadas
 
-`class_honors` activo en runtime (`REQUIRED` | `RECOMMENDED` | `ELECTIVE`). Relaciones **informativas** en esta fase: no bloquean investidura, incluso `REQUIRED`. Público: `GET /classes/:classId/honors`. Admin: `GET/POST/DELETE /admin/classes/:classId/honors`.
+`class_honors` activo en runtime (`REQUIRED` | `RECOMMENDED` | `ELECTIVE`), con `module_id` opcional que ancla la especialidad a un módulo de la misma clase. Relaciones **informativas**: no bloquean progreso de módulo ni investidura, incluso `REQUIRED`. Público: `GET /classes/:classId/honors` (`module_id`, `module_name`, `material_url`; JWT opcional agrega `user_status`). `GET /classes/:classId` y `GET /classes/:classId/modules` embeben `honors[]` por módulo (sin `user_status`). Admin: `GET/POST/PATCH/DELETE /admin/classes/:classId/honors` (`PATCH` asigna o limpia `module_id`). La app abre el PDF de `honors.material_url` e inscribe por `POST /users/:userId/honors`.
 
 ## Decisiones de diseno
 

@@ -2,7 +2,7 @@
 
 **Estado**: ACTIVE
 **Sincronizado contra**: `sacdia-backend/prisma/schema.prisma` (checkout principal) **más** modelos `camporee_order_*` de `feat/camporee-orders` y `camporee_supply_*` de `feat/camporee-supplies` (worktree `/private/tmp/sacdia-backend-camporee-orders`; no Neon)
-**Fecha de resincronizacion**: 2026-08-26 (camporee-supplies: 8 modelos + 4 enums + `supply_edit_cutoff_local_time`; migración no aplicada a Neon)
+**Fecha de resincronizacion**: 2026-08-28 (`20260828140000_class_honors_module` aplicada en Neon development/staging/production; `20260828120000_camporee_event_honors` ya estaba aplicada en las tres)
 
 Referencia humana concisa del schema Prisma vigente.
 
@@ -14,7 +14,7 @@ Referencia humana concisa del schema Prisma vigente.
 
 ## Cifras vigentes
 
-- **Modelos Prisma**: 199 (184 del checkout principal + 7 `camporee_order_*` + 8 `camporee_supply_*` en worktree `feat/camporee-supplies`; no Neon)
+- **Modelos Prisma**: 200 (checkout `feat/camporee-event-honors` incluye `camporee_event_honors`; 199 en `development` + pedidos/insumos en ramas previas)
 - **Enums Prisma**: 44 (36 del checkout principal + 4 de camporee-orders + 4 de camporee-supplies en la misma worktree)
 - **Tablas Better Auth mapeadas**: `session -> sessions`, `account -> accounts`, `verification -> verifications`
 
@@ -151,8 +151,9 @@ Los GIN/parciales no caben en `@@index` de Prisma; el SQL de la migración es la
 
 - `honors.code` es el identificador estable del catalogo para imports y sincronizaciones. Es nullable durante el rollout, pero cuenta con unicidad para los registros que lo usan.
 - `honor_club_types` modela la disponibilidad/eligibilidad activa de una especialidad por tipo de club (`honor_id`, `club_type_id`, `active`), con unicidad `@@unique([honor_id, club_type_id])`.
-- `class_honors` modela la relacion curricular entre una clase y una especialidad (`class_id`, `honor_id`, `relation_type`, `active`), con unicidad `@@unique([class_id, honor_id, relation_type])`. En runtime las relaciones son informativas (no bloquean investidura), incluso `REQUIRED`.
+- `class_honors` modela la relacion curricular entre una clase y una especialidad (`class_id`, `honor_id`, `relation_type`, `module_id?`, `active`), con unicidad `@@unique([class_id, honor_id, relation_type])`. `module_id` ancla la especialidad a un módulo de la misma clase (`ON DELETE SET NULL`). En runtime las relaciones son informativas (no bloquean módulo ni investidura), incluso `REQUIRED`.
 - `class_prerequisites` modela prerrequisitos explicitos entre clases (`class_id`, `prerequisite_class_id`, `active`), con unicidad `@@unique([class_id, prerequisite_class_id])` y CHECK anti-auto-referencia. Cumplido = enrollment del usuario con `investiture_status = INVESTIDO` en la clase prerequisito (cualquier ano). Aditivo a `classes.requires_invested_gm`.
+- `classes.requires_invested_gm` es un flag por clase, no por tipo de club. La clase de entrada `Guía Mayor` debe quedar en `false`; las clases GM posteriores (Avanzado, Instructor) pueden exigir un enrollment `INVESTIDO` en cualquier clase de Guías Mayores. Error runtime: `CLASS_GM_INVESTITURE_REQUIRED`.
 - `class_honor_relation_type_enum` permite clasificar el vínculo como `REQUIRED`, `RECOMMENDED` o `ELECTIVE`.
 - `honors.club_type_id` se conserva como compatibilidad legacy durante el rollout. Los filtros nuevos de catalogo deben usar `honor_club_types`.
 - Las especialidades de Aventureros importadas usan `honors_categories.name = 'Aventureros'` solo como categoria tecnica de compatibilidad cuando el campo de categoria es requerido; la relacion con clases vive en `class_honors`.
@@ -232,7 +233,7 @@ Modelo de capacidad de seguros por Campo Local, vivo en runtime desde antes de e
 
 ### Camporee supplies (`camporee_supply_slots`, `camporee_supply_products`, `camporee_supply_plans`, `camporee_supply_lines`, `camporee_supply_payment_docs`, `camporee_supply_deliveries`, `camporee_supply_plan_audits`, `camporee_supply_folio_counters`)
 
-Insumos de sección (migración `20260826120000_camporee_supplies` en rama `feat/camporee-supplies`; **no aplicada a Neon**). Fuente estructural: worktree `/private/tmp/sacdia-backend-camporee-orders/prisma/schema.prisma`. No reutiliza tablas de `camporee_orders`. Unique parcial plan `(sección, camporee)` vive en SQL, no en `@@unique` Prisma.
+Insumos de sección (migración `20260826120000_camporee_supplies` aplicada en Neon development/staging/production el 2026-08-28). No reutiliza tablas de `camporee_orders`. Unique parcial plan `(sección, camporee)` vive en SQL, no en `@@unique` Prisma.
 
 - `local_camporees` / `union_camporees` — `supply_edit_cutoff_local_time VARCHAR(5) NOT NULL DEFAULT '21:00'` (hora local del freeze).
 - `camporee_supply_slots` — horario del organizador (`label`, `deliver_time` HH:MM, `sort_order`, `active`). XOR local/unión.
@@ -552,12 +553,13 @@ Define el presupuesto de puntos por componente dentro de un eje anual:
 - `local_camporees`, `union_camporees`, `union_camporee_local_fields`, `camporee_clubs`, `camporee_members`, `camporee_payments`
   - `local_camporees` y `union_camporees` guardan dirección textual (`local_camporee_place` / `union_camporee_place`), coordenadas opcionales (`lat`, `long`) para vista de mapa en app, `agenda_visible_from` para abrir agenda completa antes/durante el camporee y `club_registration_closed_at/by` para congelar secciones competitivas.
   - En rama `feat/camporee-orders` ambos modelos añaden `orders_enabled` (default `false`), `orders_opens_at` y `orders_deadline` para la ventana de pedidos de mercancía. Migración no aplicada a Neon.
-  - En rama `feat/camporee-supplies` ambos modelos añaden `supply_edit_cutoff_local_time VARCHAR(5) DEFAULT '21:00'` para el freeze de insumos. Migración `20260826120000_camporee_supplies` no aplicada a Neon.
+  - En rama `feat/camporee-supplies` ambos modelos añaden `supply_edit_cutoff_local_time VARCHAR(5) DEFAULT '21:00'` para el freeze de insumos. Migración `20260826120000_camporee_supplies` aplicada en Neon development (previa) y staging/production el 2026-08-28.
   - Ambos modelos incluyen `club_registration_opens_at TIMESTAMPTZ NULL` (nulo = apertura inmediata), deadlines `TIMESTAMPTZ`, y `timezone` IANA con default histórico provisional `America/Mexico_City`. `timezone_verified_at/by` audita la confirmación; `timezone_verified_by` tiene FK nombrada a `users(user_id)`, `ON DELETE SET NULL` e índice por tabla. El backfill no modifica fechas ni deadlines históricos.
   - Los eventos del camporee viven en `camporee_events` y se relacionan con camporee local o de unión mediante FK excluyentes.
   - Bloques opcionales de agenda viven en `camporee_event_schedule_blocks`; sus asignaciones por sección inscrita viven en `camporee_event_schedule_block_assignments`.
   - El roster operativo vive en `camporee_staff_members`; cada fila apunta a un usuario y exactamente un camporee local o de unión, con categoría descriptiva (`judge`, `administrative`, `kitchen`, `support`, `spiritual`, `leadership`, `other`).
   - Las asignaciones de personas a actividades viven en `camporee_event_staff_assignments`; permiten roles `responsible`, `assistant`, `evaluator` y `support`, sin forzar todos los roles en cada evento.
+  - Especialidades de preparación viven en `camporee_event_honors` (`camporee_event_id` + `honor_id`, unique, `display_order`). Consultivo: no inscribe ni bloquea. Máx. 20. FK honor `ON DELETE RESTRICT`. Rama `feat/camporee-event-honors`; migración `20260828120000_camporee_event_honors` aplicada en Neon development/staging/production el 2026-08-28.
   - Scoring reutilizable de templates vive en `camporee_event_template_rubrics`; al clonar un template puntuable se copian criterios hacia `camporee_event_rubrics`.
   - Scoring oficial vive en `camporee_event_rubrics`, `camporee_judges`, `camporee_event_judge_assignments`, `camporee_event_score_submissions`, `camporee_event_score_submission_items` y `camporee_event_section_results`. `camporee_events.scoring_enabled` habilita puntaje real por rúbrica; `camporee_clubs`/`camporee_members` quedan como inscripción operativa/histórica.
   - `camporee_event_score_submissions` guarda `score_status` (`scored`/`no_show`), `is_no_show` y `override_of_submission_id` para auditar ausencias y correcciones manuales del resultado oficial anterior. Además persiste `idempotency_key UUID?` y `request_hash VARCHAR(64)?`; el índice único parcial `(submitted_by, idempotency_key)` sólo aplica cuando la clave no es nula. `raw_awarded_points` conserva la suma de rúbrica antes del piso y `minimum_adjustment_points` la diferencia aplicada; `total_awarded_points` sigue siendo el total oficial. La migración `20260709100000` backfillea conservadoramente filas históricas con `raw_awarded_points = total_awarded_points` y `minimum_adjustment_points = 0` porque no puede reconstruir ajustes previos.
@@ -662,6 +664,8 @@ Define el presupuesto de puntos por componente dentro de un eje anual:
 - `20260521120000_class_duration_availability` - añade disponibilidad por año eclesiástico y duración min/max a `classes`; agrega `EXPIRED` a enums de investidura.
 - `20260604000000_master_honor_requirements` - agrega reglas configurables de maestrías (`applicability_scope`, `philosophy`, `notes`) y tablas `master_honor_divisions`, `master_honor_requirement_groups`, `master_honor_requirement_options`, `master_honor_requirement_option_honors`, `users_master_honors`, `master_honor_evaluation_history`.
 - `20260612000000_honor_applicability_and_class_links` - agrega `honors.code`, `honor_club_types`, `class_honors` y `class_honor_relation_type_enum`; backfill de aplicabilidad desde `honors.club_type_id` y códigos legacy para honores existentes.
+- `20260828120000_camporee_event_honors` - tabla puente `camporee_event_honors` para especialidades de preparación en instancias de evento (consultivo, sin gate). Aplicada en Neon development/staging/production el 2026-08-28.
+- `20260828140000_class_honors_module` - añade `class_honors.module_id` nullable FK a `class_modules` (`ON DELETE SET NULL`) para anclar especialidades a un módulo. Informativo: no bloquea progreso ni investidura. Aplicada en Neon development/staging/production el 2026-08-28.
 - `20260811200000_class_prerequisites` - agrega `class_prerequisites` con FKs a `classes`, unique `(class_id, prerequisite_class_id)` y CHECK anti-auto-referencia.
 - `20260429000003_enrollment_rankings_default_award_seeds` - (8.4-A) seed de categorías de premio con `scope='member'` para clasificación de miembros.
 

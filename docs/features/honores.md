@@ -49,12 +49,12 @@ Por eso `clubTypeId` en el catalogo publico filtra por aplicabilidad activa, no 
 La relacion entre una especialidad y una clase vive en `class_honors`:
 
 ```text
-class_id + honor_id + relation_type + active
+class_id + honor_id + relation_type + module_id? + active
 ```
 
-Esto permite que una especialidad de Aventureros sea especifica de una clase sin mezclar niveles de clase con categorias tematicas. Las especialidades multinivel pueden existir sin enlace a una clase concreta.
+Esto permite que una especialidad de Aventureros sea especifica de una clase sin mezclar niveles de clase con categorias tematicas. Las especialidades multinivel pueden existir sin enlace a una clase concreta. `module_id` ancla la especialidad a un módulo de la misma clase (`ON DELETE SET NULL`); las filas existentes quedan con `module_id` null (nivel de clase).
 
-**Runtime activo:** `GET /api/v1/classes/:classId/honors` (Optional JWT; con usuario incluye `user_status` desde `users_honors.validation_status`) y CRUD admin `GET/POST/DELETE /api/v1/admin/classes/:classId/honors`. En esta fase las relaciones son informativas: no bloquean investidura, incluso `REQUIRED`.
+**Runtime activo:** `GET /api/v1/classes/:classId/honors` (Optional JWT; con usuario incluye `user_status` desde `users_honors.validation_status`; también `module_id`, `module_name`, `material_url`) y CRUD admin `GET/POST/PATCH/DELETE /api/v1/admin/classes/:classId/honors`. `PATCH` asigna o limpia el módulo (`module_id: null`). Los módulos de `GET /classes/:classId` y `GET /classes/:classId/modules` embeben `honors[]` (sin `user_status`). En esta fase las relaciones son informativas: no bloquean progreso de módulo ni investidura, incluso `REQUIRED`. La app consulta el PDF público (`honors.material_url`) e inscribe por el flujo existente `POST /users/:userId/honors`.
 
 ## Modo de finalizacion
 
@@ -287,6 +287,7 @@ La app Flutter consume:
 - progreso por requisitos;
 - carga de evidencia;
 - `POST /validation/submit` para enviar a revision.
+- detalle de evento de camporee en solo lectura: especialidades de preparación con PDF (`material_url`) vía `SacPdfViewer`. Ese vínculo no inscribe ni abre el flujo de cursar.
 
 El catalogo movil se filtra por la seccion activa y no debe exponer un selector manual "Todas / Aventureros / Conquistadores-Guías" cuando ya existe contexto de seccion. La regla vigente es asimetrica: Aventureros ve `club_type_id = 1`; Conquistadores ve solo `club_type_id = 2`; Guias Mayores ve `club_type_id = 2` y `club_type_id = 3`, porque puede reutilizar especialidades de Conquistadores y ademas tener especialidades exclusivas de Guias Mayores. Si no existe contexto de seccion activa, la app puede mostrar el catalogo cargado completo como fallback defensivo.
 
