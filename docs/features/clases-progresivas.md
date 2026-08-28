@@ -112,7 +112,7 @@ Tabla aditiva `class_prerequisites` (`class_id`, `prerequisite_class_id`, `activ
 
 ## Especialidades relacionadas
 
-`class_honors` activo en runtime (`REQUIRED` | `RECOMMENDED` | `ELECTIVE`), con `module_id` opcional que ancla la especialidad a un módulo de la misma clase. Relaciones **informativas**: no bloquean progreso de módulo ni investidura, incluso `REQUIRED`. Público: `GET /classes/:classId/honors` (`module_id`, `module_name`, `material_url`; JWT opcional agrega `user_status`). `GET /classes/:classId` y `GET /classes/:classId/modules` embeben `honors[]` por módulo (sin `user_status`). Admin: `GET/POST/PATCH/DELETE /admin/classes/:classId/honors` (`PATCH` asigna o limpia `module_id`). La app abre el PDF de `honors.material_url` e inscribe por `POST /users/:userId/honors`.
+`class_honors` activo en runtime (`REQUIRED` | `RECOMMENDED` | `ELECTIVE`), con `module_id` opcional que ancla la especialidad a un módulo de la misma clase. Relaciones **informativas**: no bloquean progreso de módulo ni investidura, incluso `REQUIRED`. Público: `GET /classes/:classId/honors` (`module_id`, `module_name`, `material_url`; JWT opcional agrega `user_status`). `GET /classes/:classId` y `GET /classes/:classId/modules` embeben `honors[]` por módulo (sin `user_status`). Admin: `GET/POST/PATCH/DELETE /admin/classes/:classId/honors` (`PATCH` asigna o limpia `module_id`). La app muestra todas las especialidades de la clase en el carrusel de sugerencias (aunque tengan módulo) y las repite dentro del módulo anclado; abre el PDF de `honors.material_url` e inscribe por `POST /users/:userId/honors`.
 
 ## Decisiones de diseno
 

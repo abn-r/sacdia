@@ -93,8 +93,8 @@ Detalle de clase (`ClassHonorsDialog`):
 
 Fuente de lista: `GET /classes/:classId/honors` (ya usado).
 
-- Carrusel de la clase (`_RecommendedHonorsSection`): solo `module_id == null`.
-- En cada módulo (progreso: agrupar por `module_id` vs `ClassModuleDetail.id`; catálogo: `honors[]` del GET modules): tarjeta imagen, nombre, tipo, PDF, CTA de inscripción.
+- Carrusel de la clase (`_RecommendedHonorsSection`), encima de los módulos: todas las especialidades de `GET /classes/:classId/honors` (con o sin `module_id`).
+- En cada módulo (progreso: agrupar por `module_id` vs `ClassModuleDetail.id`; catálogo: `honors[]` del GET modules): tarjeta imagen, nombre, tipo, PDF, CTA de inscripción. El encabezado colapsado indica cuántas especialidades tiene.
 
 CTA:
 
@@ -121,7 +121,7 @@ i18n: `es`, `en`, `pt-BR`, `fr`.
 - Admin asigna una especialidad a un módulo de la misma clase, o la deja sin módulo.
 - PATCH `module_id: null` la devuelve al nivel clase.
 - GET público trae `material_url`, `module_id`, `module_name`.
-- App: especialidad con módulo aparece en el módulo; sin módulo en el carrusel de la clase.
+- App: especialidad con módulo aparece en el módulo y también en el carrusel de la clase; sin módulo solo en el carrusel.
 - App abre PDF y navega al flujo de inscripción existente.
 - Completar secciones / investidura no consulta `class_honors`.
 - Módulo de otra clase rechazado.
