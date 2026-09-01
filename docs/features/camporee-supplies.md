@@ -19,6 +19,8 @@
 
 Permite que una **sección inscrita** (`registered|approved`) planifique insumos de cocina (hielo, tortillas, garrafones) por **producto × horario de entrega**, pague un folio **PRINCIPAL** `INS{yyyy}{####}` y ajuste días no congelados con hijos **CHARGE** / **REFUND**. La unidad logística es la sección, no el miembro.
 
+En la app, el plan abre con la **orden de pago** (estimado en borrador; neto y folios INS al enviar). Debajo, **Agregar insumo** (icono +, texto y chevron) abre el sheet de alta; el formulario no vive en la lista. Luego hay un bloque por cada día del camporee y, dentro, los insumos agrupados por horario de entrega.
+
 No reutiliza tablas, folios PED ni permisos de mercancía (`camporee-orders`). Contraste: allá cada línea es un `camporee_member_id`; acá no hay “garrafón de Juan”.
 
 ### Superficies
@@ -28,7 +30,7 @@ No reutiliza tablas, folios PED ni permisos de mercancía (`camporee-orders`). C
 | Backend Nest (catálogo, plan, freeze, folio INS, entrega, reportes, PaymentObligations) | Código en `feat/camporee-supplies` | Controllers en el worktree; Jest `src/camporee-supplies` + `src/payment-obligations` |
 | Schema / migración | Escrita, no desplegada | `prisma/migrations/20260826120000_camporee_supplies/` |
 | Admin (tab Insumos en ficha) | UI en `feat/camporee-supplies` | Config, planes, caja, cocina, mark-paid, entrega parcial. **No** impersona submit del club |
-| App (plan en detalle de camporee) | Flujo en `feat/camporee-supplies` | CTA + `CamporeeSupplyPlanView`; `flutter test test/features/camporee_supplies` |
+| App (plan en detalle de camporee) | Flujo en `feat/camporee-supplies` | `CamporeeSupplyPlanView`: orden de pago; CTA Agregar insumo; insumos por día y horario; alta en sheet |
 | Neon / checkout backend principal | Ausente | Migración y seeds no aplicados |
 
 ---
