@@ -8,7 +8,9 @@ Las actividades son el eje operativo del dia a dia de un club de Conquistadores,
 
 El registro de asistencia a actividades es fundamental para el seguimiento formativo de los miembros. La asistencia alimenta la trayectoria del miembro dentro del club y puede ser requisito para completar secciones de clases progresivas o para validar la participacion en investiduras. Las actividades tambien soportan geolocalizacion, permitiendo documentar el lugar exacto donde se realiza cada evento.
 
-El modelo contempla `activity_instances` como instancias de una actividad por seccion. La funcionalidad principal actual es soportar **actividades conjuntas** — actividades que abarcan multiples secciones del club (ver [actividades-conjuntas](actividades-conjuntas.md)). Cuando una actividad es conjunta (`is_joint=true`), se crea una instancia por cada seccion participante.
+El modelo contempla `activity_instances` como instancias de una actividad por seccion. Eso **no es recurrencia**: cada fila es “una actividad × una seccion”. La recurrencia vive en `activity_series` (cabecera) + N filas `activities` con `activity_series_id`. La funcionalidad principal de instancias sigue siendo **actividades conjuntas** — actividades que abarcan multiples secciones del club (ver [actividades-conjuntas](actividades-conjuntas.md)). Cuando una actividad es conjunta (`is_joint=true`), se crea una instancia por cada seccion participante.
+
+Las series recurrentes materializan de inmediato copias independientes (cada N dias o un dia de la semana, hasta una fecha `until` dentro del año eclesiastico activo). Editar una sesion no cambia a las hermanas ni la receta. `POST /clubs/:clubId/activities` sigue creando una sola actividad; el interruptor “Repetir” usa `POST /clubs/:clubId/activity-series`.
 
 ## Que existe (verificado contra codigo)
 
@@ -16,23 +18,30 @@ El modelo contempla `activity_instances` como instancias de una actividad por se
 - **Controller**: `src/activities/activities.controller.ts`
 - **Service**: `src/activities/activities.service.ts`
 - **Guards**: JwtAuthGuard, PermissionsGuard, ClubRolesGuard
-- **7 endpoints**:
-  - `GET /api/v1/clubs/:clubId/activities` — Listar actividades del club
+- **13 endpoints**:
+  - `GET /api/v1/clubs/:clubId/activities` — Listar actividades del club (query opcional `seriesId`)
   - `POST /api/v1/clubs/:clubId/activities` — Crear actividad (roles: director, subdirector, secretary, counselor)
+  - `POST /api/v1/clubs/:clubId/activity-series/preview` — Vista previa de fechas de una serie
+  - `POST /api/v1/clubs/:clubId/activity-series` — Crear serie y materializar N actividades
+  - `GET /api/v1/activity-series/:seriesId` — Receta y conteos de la serie
+  - `POST /api/v1/activity-series/:seriesId/cancel-future` — Desactivar sesiones de hoy en adelante
+  - `POST /api/v1/activity-series/:seriesId/extend` — Alargar `until` y crear fechas que aun no existen
   - `GET /api/v1/activities/:activityId` — Obtener actividad por ID
   - `PATCH /api/v1/activities/:activityId` — Actualizar actividad
   - `DELETE /api/v1/activities/:activityId` — Desactivar actividad
+  - `POST /api/v1/activities/:activityId/image` — Subir imagen
   - `POST /api/v1/activities/:activityId/attendance` — Registrar asistencia
   - `GET /api/v1/activities/:activityId/attendance` — Obtener asistencia
 
 ### Admin
 - **UI completa**: Pagina de lista con selector de club, pagina de detalle con panel de asistencia, dialog de creacion/edicion, confirmacion de eliminacion
+- Dialog de alta con interruptor **Repetir esta actividad**, preview de fechas y `POST .../activity-series`
+- Detalle: badge de serie, ver serie (`?seriesId=`), cancelar futuras, agregar mas
 - Cliente API en `src/lib/api/activities.ts`
-- Consume los 7 endpoints del backend
 
 ### App Movil
 - **4 screens**: ActivitiesListView, ActivityDetailView, CreateActivityView, LocationPickerView
-- Consume los 7 endpoints del backend
+- Mismo interruptor de repeticion, preview y acciones de serie en detalle/lista
 - Incluye selector de ubicacion en mapa (LocationPickerView)
 - `ActivitiesListView` resuelve `clubId` desde `clubContextProvider` (bug de hardcodeo a 1 corregido)
 - Edicion y eliminacion de actividades disponibles en la vista de detalle (`EditActivityView` + confirmacion de borrado)
@@ -69,9 +78,11 @@ El modelo contempla `activity_instances` como instancias de una actividad por se
 - `SacDropdownField` reemplazado por `BottomSheetPicker` para seleccion de tipo y seccion
 
 ### Base de datos
-- `activities` — Actividades del club
+- `activities` — Actividades del club (`activity_series_id` opcional agrupa copias de una serie)
 - `activity_types` — Catalogo de tipos de actividad
-- `activity_instances` — Instancias de actividades (recurrencia)
+- `activity_instances` — Instancias de una actividad por seccion (conjuntas; **no** es recurrencia)
+- `activity_series` — Receta de una serie recurrente (kind `interval` | `weekly`, `until_date`)
+- `activity_series_sections` — Secciones de una serie conjunta, usadas al extender
 
 ## Requisitos funcionales
 

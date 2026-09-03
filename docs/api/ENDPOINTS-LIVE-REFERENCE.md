@@ -28,7 +28,7 @@
 | Achievements | 4 |
 | Admin - Achievements | 12 |
 | Admin - Certifications | 8 |
-| activities | 8 |
+| activities | 13 |
 | admin-auth | 6 |
 | admin-camporee-event-types | 4 |
 | admin | 2 |
@@ -157,6 +157,11 @@
 | --- | --- | --- | --- | --- | --- | --- |
 | GET | `/api/v1/clubs/:clubId/activities` | JWT | Permisos: activities:read | Listar actividades del club | ActivitiesService.findByClub() | `src/activities/activities.controller.ts` |
 | POST | `/api/v1/clubs/:clubId/activities` | JWT | Permisos: activities:create; Club: director, deputy-director, secretary, secretary-treasurer, counselor | Crear actividad | ActivitiesService.create() | `src/activities/activities.controller.ts` |
+| POST | `/api/v1/clubs/:clubId/activity-series/preview` | JWT | Permisos: activities:create; Club: director, deputy-director, secretary, secretary-treasurer, counselor | Vista previa de serie de actividades | ActivitiesService.previewActivitySeries() | `src/activities/activities.controller.ts` |
+| POST | `/api/v1/clubs/:clubId/activity-series` | JWT | Permisos: activities:create; Club: director, deputy-director, secretary, secretary-treasurer, counselor | Crear serie de actividades | ActivitiesService.createActivitySeries() | `src/activities/activities.controller.ts` |
+| GET | `/api/v1/activity-series/:seriesId` | JWT | Permisos: activities:read | Obtener serie de actividades | ActivitiesService.findActivitySeries() | `src/activities/activities.controller.ts` |
+| POST | `/api/v1/activity-series/:seriesId/cancel-future` | JWT | Permisos: activities:delete | Cancelar sesiones futuras de una serie | ActivitiesService.cancelFutureActivitySeries() | `src/activities/activities.controller.ts` |
+| POST | `/api/v1/activity-series/:seriesId/extend` | JWT | Permisos: activities:create | Agregar más sesiones a una serie | ActivitiesService.extendActivitySeries() | `src/activities/activities.controller.ts` |
 | GET | `/api/v1/activities/:activityId` | JWT | Permisos: activities:read | Obtener actividad por ID | ActivitiesService.findOne() | `src/activities/activities.controller.ts` |
 | PATCH | `/api/v1/activities/:activityId` | JWT | Permisos: activities:update | Actualizar actividad | ActivitiesService.update() | `src/activities/activities.controller.ts` |
 | DELETE | `/api/v1/activities/:activityId` | JWT | Permisos: activities:delete | Desactivar actividad | ActivitiesService.remove() | `src/activities/activities.controller.ts` |
@@ -753,7 +758,7 @@ En rama `feat/camporee-supplies`, los mismos `GET`/`POST` de camporee aceptan `s
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
-| GET | `/api/v1/camporees` | JWT | Permisos: camporees:read. Recorte territorial rol-primero (`director-lf`/unión/división y admin con ancla); coordinador sin asignación de club → denegado. | Listar camporees | CamporeesService.findAll() | `src/camporees/camporees.controller.ts` |
+| GET | `/api/v1/camporees` | JWT | Permisos: camporees:read. Recorte territorial rol-primero (`director-lf`/unión/división y admin con ancla); coordinador sin asignación de club → denegado. Query opcional `club_type_id` (1=Aventureros, 2=Conquistadores, 3=Guías Mayores) recorta por `includes_*`; sin el query el catálogo territorial queda completo (admin). | Listar camporees | CamporeesService.findAll() | `src/camporees/camporees.controller.ts` |
 | GET | `/api/v1/camporees/union` | JWT | Permisos: camporees:read. Mismo recorte rol-primero que el listado local (campo / unión / división). | Listar camporees de unión | CamporeesService.findAllUnion() | `src/camporees/camporees.controller.ts` |
 | GET | `/api/v1/camporees/union/:camporeeId` | JWT | Permisos: camporees:read | Obtener camporee de unión por ID | CamporeesService.findOneUnion() | `src/camporees/camporees.controller.ts` |
 | POST | `/api/v1/camporees/union` | JWT | Permisos: camporees:create | Crear camporee de unión | CamporeesService.createUnion() | `src/camporees/camporees.controller.ts` |

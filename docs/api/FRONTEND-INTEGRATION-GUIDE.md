@@ -67,6 +67,15 @@ El contrato de clases separa requisitos evaluables por track:
 - En el detalle de progreso, `modules[].sections[]` ya llega filtrado a secciones aplicables para el enrollment resuelto e incluye `requirement_track`, `required_for_investiture` y `display_order`.
 - Admin puede configurar secciones `EXTRA` con exactamente un owner institucional (`division_id`, `union_id` o `local_field_id`) y ventana opcional `available_from_year_id` / `available_until_year_id`.
 
+## Actualizacion 2026-09-01 (Lista de camporees por tipo de sección)
+
+La app móvil no debe mostrar camporees de otro ciclo JA cuando hay sección activa:
+
+- `GET /api/v1/camporees?active=true&club_type_id=` con el `club_type_id` del grant activo (`1` Aventureros, `2` Conquistadores, `3` Guías Mayores).
+- El backend recorta por `includes_adventurers` / `includes_pathfinders` / `includes_master_guides`. Un camporee con varios flags sigue saliendo para cada tipo incluido.
+- Sin `club_type_id` (admin, o actor sin sección) el listado territorial no cambia.
+- La app vuelve a filtrar en cliente con los mismos flags por si el API aún no recorta.
+
 ## Actualizacion 2026-07-02 (Camporee scoring móvil)
 
 El flujo móvil de jueces de camporee consume scoring oficial por rúbricas:
@@ -830,6 +839,7 @@ export function useClubActivities(clubId: number, filters?: {
   clubTypeId?: number;
   active?: boolean;
   activityType?: string;
+  seriesId?: number;
 }) {
   const query = new URLSearchParams(filters as any).toString();
   const url = `/clubs/${clubId}/activities${query ? `?${query}` : ''}`;
@@ -899,6 +909,16 @@ Future<Attendance> registerAttendance(int activityId, String userId) async {
   return Attendance.fromJson(response.data['data']);
 }
 ```
+
+**Series recurrentes** (`activity_series`):
+
+- Crear una sola actividad sigue siendo `POST /clubs/:clubId/activities`.
+- Interruptor “Repetir” apagado por defecto. Encendido: `POST /clubs/:clubId/activity-series/preview` y luego `POST /clubs/:clubId/activity-series` con el mismo body mas `recurrence` (`kind`: `weekly` | `interval`, `weekdays` de longitud 1 o `interval_days`, `until` opcional).
+- `GET /activity-series/:seriesId` — receta y conteos. No embebe todas las ocurrencias.
+- Listado: cada actividad trae `activity_series_id`. Query `seriesId` filtra la serie.
+- `POST /activity-series/:seriesId/cancel-future` — soft-delete de sesiones con fecha ≥ hoy.
+- `POST /activity-series/:seriesId/extend` body `{ until }` — no resucita canceladas; plantilla = cabecera.
+- Zona de calendario: `America/Mexico_City`. Max 366 sesiones. Permisos iguales a crear/borrar actividad.
 
 ---
 

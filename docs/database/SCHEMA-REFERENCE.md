@@ -189,10 +189,12 @@ Los GIN/parciales no caben en `@@index` de Prisma; el SQL de la migración es la
 - `correlation_id` enlaza todas las filas escritas durante un mismo request HTTP (contexto `AsyncLocalStorage`; honra header `x-request-id` si es UUID válido).
 - Ver `docs/features/audit-log.md` para el diseño completo del trail.
 
-### `activities` y `activity_instances`
+### `activities`, `activity_instances` y `activity_series`
 
-- `activities` incluye `activity_date`, `activity_end_date`, `reminder_sent`, `activity_type_id`, `club_section_id` e `is_joint`.
-- `activity_instances` sigue vigente para materializar una actividad por seccion.
+- `activities` incluye `activity_date`, `activity_end_date`, `reminder_sent`, `activity_type_id`, `club_section_id`, `is_joint` y `activity_series_id` (nullable). Unique parcial `(activity_series_id, activity_date)` cuando hay serie.
+- `activity_instances` materializa una actividad por seccion (actividades conjuntas). **No** modela recurrencia.
+- `activity_series` guarda la receta (`kind` interval/weekly, `interval_days`, `weekdays`, `first_date`, `until_date`) dentro del año eclesiastico de la fila.
+- `activity_series_sections` recuerda las secciones de una serie conjunta para extender.
 
 ### `finances`
 
