@@ -2,7 +2,7 @@
 
 **Estado**: ACTIVE
 **Sincronizado contra**: `sacdia-backend/prisma/schema.prisma` (checkout principal) **más** modelos `camporee_order_*` de `feat/camporee-orders` y `camporee_supply_*` de `feat/camporee-supplies` (worktree `/private/tmp/sacdia-backend-camporee-orders`; no Neon)
-**Fecha de resincronizacion**: 2026-08-28 (`20260828140000_class_honors_module` aplicada en Neon development/staging/production; `20260828120000_camporee_event_honors` ya estaba aplicada en las tres)
+**Fecha de resincronizacion**: 2026-09-03 (`20260903180000_cross_type_active_enrollment_slots` en el schema runtime; índices parciales de cursado cruzado). Neon: aplicar esa migración en cada entorno.
 
 Referencia humana concisa del schema Prisma vigente.
 
@@ -93,7 +93,7 @@ Migración `20260818190000_query_performance_indexes` (btree `CONCURRENTLY` + GI
 | `insurance_evidence_files` | purchase / assignment / uploaded_by | lookup de evidencias |
 | `accounts` | `user_id` | Better Auth por usuario |
 | `resources` / `finances` / `support_reports` / `material_products` | GIN trigram en texto | `contains` / ILIKE |
-| `enrollments` | `(ecclesiastical_year_id, investiture_status, active)`; parcial `(status, submitted_at) WHERE active` | validación por año + overdue SLA |
+| `enrollments` | `(ecclesiastical_year_id, investiture_status, active)`; parcial `(status, submitted_at) WHERE active`; parcial único regular y cruzado `(user_id, ecclesiastical_year_id) WHERE active` | validación por año + overdue SLA + cursado cruzado GM |
 | `club_role_assignments` | `(ecclesiastical_year_id, active, status)` | dashboard de personas |
 | `activities` | `created_by`, `created_at DESC`, `(created_by, activity_date)` | listado y scores |
 | `annual_folders` | `status`; `(status, modified_at DESC)` | colas de evaluación |
@@ -286,6 +286,7 @@ Pedidos de mercancía nominados (migración `20260824190000_camporee_orders` en 
 - `class_sections.requirement_track` separa `BASIC`, `ADVANCED` y `EXTRA`; `BASIC` + `EXTRA` cuentan para investidura, mientras `ADVANCED` se gestiona como badge/estado aparte.
 - `class_sections` puede anclarse opcionalmente a `divisions`, `unions`, `local_fields` o ventana por `ecclesiastical_years`; `EXTRA` exige exactamente un owner y `BASIC`/`ADVANCED` no aceptan owner.
 - `enrollments.investiture_status` incluye `EXPIRED` para preservar progreso histórico cuando se supera la duración máxima sin investidura.
+- `enrollments.cross_type_enrollment` marca el privilegio de un Guía Mayor investido que cursa una clase de Aventureros o Conquistadores en el mismo año. Los índices parciales `uniq_enrollments_active_user_year_regular` y `uniq_enrollments_active_user_year_cross_type` permiten una activa de cada tipo por usuario/año.
 - `investiture_validation_history.action` incluye `EXPIRED` para auditar vencimientos manuales o por guard de investidura.
 
 ### `enrollment_rankings`, `section_rankings`, `enrollment_ranking_weights` (8.4-A)

@@ -47,6 +47,17 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 ---
 
+## Actualizacion 2026-09-03 (Cursado cruzado de Guía Mayor investido)
+
+Un Guía Mayor ya investido (`GM-01`) puede inscribirse en **una** clase de Aventureros o Conquistadores que aún no tenga investida, en el mismo año eclesiástico:
+
+- Usar `POST /api/v1/users/:userId/classes/enroll` (la app ya lo usa desde el sheet de inscripción).
+- El backend marca `cross_type_enrollment = true` y no aplica el filtro de edad de post-registro.
+- Sigue valiendo el tope de una clase Aventureros/Conquistadores activa (`CLASS_MAX_AVENTU_CONQUIS_ACTIVE`).
+- Si no está investido y ya tiene otra clase activa: `403 CLASS_CROSS_TYPE_GM_REQUIRED`.
+- Si esa clase ya está investida en su historial: `409 CLASS_ALREADY_INVESTED`.
+- Admin: `GET /api/v1/admin/users/:userId` expone `current_operational_enrollment` (clase regular) y `current_cross_type_enrollment` (clase cruzada). Un par 1+1 no es conflicto.
+
 ## Actualizacion 2026-05-21 (Clases legacy y duración)
 
 El contrato frontend para clases progresivas incorpora clases legacy y duración configurable:

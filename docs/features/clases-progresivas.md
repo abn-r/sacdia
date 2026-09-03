@@ -55,6 +55,7 @@ Las secciones ahora se separan en `BASIC`, `ADVANCED` y `EXTRA`: `BASIC` + `EXTR
 - Desde `TeachingScopeView`, los usuarios con `club_roles:assign`/`club_roles:revoke` pueden abrir “Gestionar clases” para crear, editar y revocar asignaciones de consejeros/secretaría a clases de la sección.
 - `ClassMembersProgressView` lista los miembros activos de la sección inscritos en la clase y navega al detalle de progreso con `targetUserId` + `enrollmentId`; las evidencias se guardan sobre el enrollment del miembro objetivo y el actor sigue siendo el usuario autenticado.
 - `ClassDetailWithProgressView` consume progreso separado por `basic_progress`, `advanced_progress`, `extra_progress`, `investiture_eligibility` y `advanced_eligibility`; la tarjeta de investidura usa `overall_progress` como progreso de requisitos obligatorios, no como avance total de actividades opcionales.
+- En el roadmap "Mi Camino", cada nodo muestra `classes.minimum_age` (p. ej. Amigo = desde 10 años), no el rango del track. El header del track sigue mostrando 6–9 / 10–15 / 16+. Estados del recorrido: completada (`INVESTIDO`), cursando (inscrita no investida), no cursada (sin inscripción y con progreso posterior; escudo gris + candado), por cursar (aún adelante; mismo tratamiento visual) y vencida (`EXPIRED`). La pastilla del nodo distingue no cursada vs por cursar.
 - En `ClassDetailWithProgressView`, los requisitos se presentan en secciones visuales separadas: `DESARROLLO DE CLASE` para requisitos básicos, `AVANZADO` para puntos avanzados opcionales y `ACTIVIDADES COMPLEMENTARIAS` para requisitos institucionales aplicables.
 - La tarjeta resumen de avance unifica el porcentaje principal como avance de investidura (`Desarrollo de clase` + `Actividades complementarias` aplicables); debajo sólo muestra `Sección avanzada` como avance independiente cuando la clase la tiene habilitada.
 
@@ -62,7 +63,7 @@ Las secciones ahora se separan en `BASIC`, `ADVANCED` y `EXTRA`: `BASIC` + `EXTR
 - `classes` — catalogo de clases (class_id, name, club_type_id, order) con `advanced_enabled`, `available_from_year_id`, `available_until_year_id`, `min_duration_years`, `max_duration_years`
 - `class_modules` — modulos por clase
 - `class_sections` — secciones evaluables por modulo, segmentadas por `requirement_track` (`BASIC`, `ADVANCED`, `EXTRA`) y con owner opcional por division/union/campo local; `EXTRA` requiere exactamente un owner, `ADVANCED` nunca bloquea investidura
-- `enrollments` — inscripcion anual operativa (enrollment_id, user_id, class_id, ecclesiastical_year_id, investiture_status, active). UNIQUE: (user_id, class_id, ecclesiastical_year_id). El estado `EXPIRED` preserva progreso historico cuando la duracion maxima ya vencio.
+- `enrollments` — inscripcion anual operativa (enrollment_id, user_id, class_id, ecclesiastical_year_id, investiture_status, active, `cross_type_enrollment`). UNIQUE: (user_id, class_id, ecclesiastical_year_id). Índices parciales: una activa regular y una activa cruzada por usuario/año. El estado `EXPIRED` preserva progreso historico cuando la duracion maxima ya vencio.
 - `class_section_progress` — progreso por seccion con enrollment_id como owner anual. UNIQUE: (enrollment_id, module_id, section_id)
 - `class_module_progress` — proyeccion de progreso por modulo. UNIQUE: (enrollment_id, module_id)
 - `class_counselor_assignments` — asignación anual de responsables pedagógicos por usuario + sección + clase + año; máximo 3 activos por clase/sección/año y máximo 2 clases activas por persona/sección/año.
@@ -93,7 +94,7 @@ Reglas vigentes:
 5. Si la resolucion class-scoped es ambigua (multiples enrollments), la API responde 409 con ENROLLMENT_RESOLUTION_AMBIGUOUS
 6. El progreso de seccion registra puntaje y evidencias (JSON)
 7. El progreso de modulo se calcula como proyeccion sincronizada de sus secciones
-8. Si el usuario re-ejecuta post-registro por correccion/cambio de club, el backend deriva la clase por edad/tipo de club y desactiva otros enrollments activos del mismo ano antes de resolver el seleccionado
+8. Si el usuario re-ejecuta post-registro por correccion/cambio de club, el backend deriva la clase por edad/tipo de club y desactiva otras inscripciones **regulares** activas del mismo ano antes de resolver la seleccionada; no toca el slot cruzado de un GM investido.
 9. Si una transferencia de club/seccion es aprobada, el backend aplica la misma regla: deriva la clase para el `club_type_id` destino y resuelve el enrollment anual activo
 10. Una clase con `available_until_year_id = null` no expira para nuevas inscripciones; si tiene valor, deja de aparecer para inscripcion despues de ese ano eclesiastico
 11. La duracion de cursado se cuenta por anos eclesiasticos desde `enrollments.ecclesiastical_year_id`
@@ -101,10 +102,11 @@ Reglas vigentes:
 13. Si un enrollment supera la duracion maxima sin investidura, pasa formalmente a `EXPIRED` y conserva su progreso como trayectoria historica
 14. Un consejero o secretario asignado a una clase puede ver el avance de miembros inscritos en esa clase, siempre que cumpla la elegibilidad de estar cursando o haber completado `Guía Mayor`.
 15. La carga delegada de evidencias debe distinguir miembro objetivo (`:userId`) de actor autenticado (`currentUser.sub`).
-16. Solo puede haber **una inscripción activa por usuario/año** (índice parcial `uniq_enrollments_active_user_year`); el servicio GM alineado lanza `CLASS_MAX_GM_ACTIVE` al intentar una segunda.
+16. Hay **como máximo una inscripción activa regular y una cruzada por usuario/año** (`uniq_enrollments_active_user_year_regular` / `_cross_type`). Una segunda clase GM regular lanza `CLASS_MAX_GM_ACTIVE`. Una segunda de Aventureros/Conquistadores lanza `CLASS_MAX_AVENTU_CONQUIS_ACTIVE`.
 17. PATCH/upload/delete de progreso se rechazan con `CLASS_PROGRESS_LOCKED` si `locked_for_validation` o el enrollment está en estado terminal (`SUBMITTED`/`CLUB_APPROVED`/`COORDINATOR_APPROVED`/`FIELD_APPROVED`/`INVESTIDO`/`EXPIRED`). `IN_PROGRESS` y `REJECTED` permiten mutación.
 18. Un requisito con evidencia `REJECTED` nunca computa como completo para progreso ni elegibilidad, aunque `score >= 70`.
 19. El rechazo individual de evidencia de clase exige `SUBMITTED` (`EVIDENCE_REVIEW_RECORD_NOT_PENDING` en otro estado).
+20. **Privilegio de cursado cruzado:** un Guía Mayor investido (`classes.asset_code = GM-01`, `investiture_status = INVESTIDO`) puede inscribirse en una clase de Aventureros o Conquistadores que aún no tenga investida, en el mismo año que su clase GM. El alta marca `cross_type_enrollment = true` y no exige edad. Errores: `CLASS_CROSS_TYPE_GM_REQUIRED` (403) si no está investido y ya tiene otra activa; `CLASS_ALREADY_INVESTED` (409) si esa clase ya está investida.
 
 ## Prerrequisitos entre clases
 
@@ -126,6 +128,7 @@ Tabla aditiva `class_prerequisites` (`class_id`, `prerequisite_class_id`, `activ
 - **Duracion configurable por clase**: defaults `min_duration_years = 1` y `max_duration_years = 1`; Guia Mayor Avanzado/Instructor pueden extenderse por configuracion
 - **Trayectoria inmutable**: `EXPIRED` impide continuar o solicitar investidura, pero no borra progreso ni historial
 - **Asignación pedagógica separada**: `class_counselor_assignments` no reemplaza ni extiende `club_role_assignments`; evita mezclar cargo operativo, permisos y responsabilidad anual de una clase.
+- **Cursado cruzado de GM investido**: un Guía Mayor investido puede tener, en el mismo año, su clase regular y una clase de Aventureros o Conquistadores pendiente (`cross_type_enrollment`). No aplica a aspirantes ni a dos clases del mismo pool Aventureros/Conquistadores.
 
 ## Gaps y pendientes
 

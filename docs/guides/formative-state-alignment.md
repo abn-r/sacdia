@@ -55,7 +55,7 @@ Si el cliente envia `class_id`, solo funciona como confirmacion. Si no coincide 
 - Leer clase actual desde `enrollments` activos del año eclesiastico correspondiente.
 - Leer historial desde `enrollments`, no desde `users_classes`.
 - Mantener idempotencia al crear/reactivar enrollments por la llave `user_id + class_id + ecclesiastical_year_id`.
-- Desactivar otros enrollments activos del mismo usuario/año cuando se resuelve una nueva clase operacional.
+- Desactivar otras inscripciones **regulares** activas del mismo usuario/año cuando se resuelve una nueva clase operacional. No desactivar el slot cruzado (`cross_type_enrollment = true`) de un Guía Mayor investido.
 - Rechazar clases que no correspondan por edad, tipo de club o ventana de disponibilidad.
 
 ## Cambios admin requeridos para nuevas features

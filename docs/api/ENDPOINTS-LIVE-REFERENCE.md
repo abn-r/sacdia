@@ -978,7 +978,7 @@ Path base: `/api/v1/certifications/users/:userId/certification-enrollments/:enro
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
 | GET | `/api/v1/users/:userId/classes` | JWT | Permisos: classes:read | Obtener inscripciones del usuario | ClassesService.getUserEnrollments() | `src/classes/classes.controller.ts` |
-| POST | `/api/v1/users/:userId/classes/enroll` | JWT | Permisos: classes:submit_progress | Inscribir usuario en clase | ClassesService.enrollUser() | `src/classes/classes.controller.ts` |
+| POST | `/api/v1/users/:userId/classes/enroll` | JWT | Permisos: classes:submit_progress | Inscribir usuario en clase. GM investido puede añadir una clase cruzada de Aventureros/Conquistadores (`cross_type_enrollment`). Errores: `CLASS_MAX_AVENTU_CONQUIS_ACTIVE`, `CLASS_MAX_GM_ACTIVE`, `CLASS_CROSS_TYPE_GM_REQUIRED`, `CLASS_ALREADY_INVESTED`, `CLASS_ALREADY_ENROLLED` | ClassesService.enrollUser() | `src/classes/classes.controller.ts` |
 | GET | `/api/v1/users/:userId/classes/:classId/progress` | JWT | Permisos: classes:read | Obtener progreso del usuario en una clase | ClassesService.getUserProgress() | `src/classes/classes.controller.ts` |
 | PATCH | `/api/v1/users/:userId/classes/:classId/progress` | JWT | Permisos: classes:submit_progress | Actualizar progreso de sección | ClassesService.updateSectionProgress() | `src/classes/classes.controller.ts` |
 | POST | `/api/v1/users/:userId/classes/:classId/sections/:sectionId/submit` | JWT | Permisos: classes:submit_progress | Submit a class section for validation | ClassesService.submitSection() | `src/classes/classes.controller.ts` |

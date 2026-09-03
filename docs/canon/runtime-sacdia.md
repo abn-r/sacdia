@@ -230,7 +230,7 @@ Notas runtime activas:
 - sin override, el backend resuelve una sola inscripción activa del año eclesiástico actual;
 - si no existe inscripción resoluble devuelve `404`;
 - si hay ambigüedad devuelve `409 ENROLLMENT_RESOLUTION_AMBIGUOUS`;
-- `GET /api/v1/admin/users/:userId` expone `current_operational_enrollment` como presente anual y `trajectory_classes` como histórico consolidado.
+- `GET /api/v1/admin/users/:userId` expone `current_operational_enrollment` como presente anual regular, `current_cross_type_enrollment` como cursado cruzado de GM investido, y `trajectory_classes` como histórico consolidado.
 
 Notas runtime activas de carpetas anuales:
 

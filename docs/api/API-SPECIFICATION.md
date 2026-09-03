@@ -719,8 +719,11 @@ Este endpoint mantiene envelope `{ status, data }` y añade semántica explícit
 
 - `data.current_operational_enrollment`
   - Nullable.
-  - Fuente de verdad operativa anual: **solo** `enrollments` del año eclesiástico activo.
+  - Fuente de verdad operativa anual **regular** (no cruzada): `enrollments` del año eclesiástico activo con `cross_type_enrollment = false`.
   - No usa `users_classes.current_class` para inferir presente.
+- `data.current_cross_type_enrollment`
+  - Nullable.
+  - Clase cruzada del mismo año cuando un Guía Mayor investido cursa Aventureros o Conquistadores (`cross_type_enrollment = true`).
 - `data.trajectory_classes`
   - Arreglo (puede ser vacío).
   - Fuente de verdad de trayectoria consolidada/histórica: **solo** `enrollments` con filtros por año eclesiástico/estado.
@@ -728,17 +731,17 @@ Este endpoint mantiene envelope `{ status, data }` y añade semántica explícit
   - Alias legacy **deprecado** de `trajectory_classes` para compatibilidad.
   - Mantiene semántica de trayectoria (NO semántica operativa anual).
 
-Reglas de nulidad para `current_operational_enrollment`:
+Reglas de nulidad para `current_operational_enrollment` / `current_cross_type_enrollment`:
 
 - no hay año eclesiástico activo resoluble;
-- no hay enrollment activo del usuario para el año activo;
-- hay más de un enrollment candidato para el año activo.
+- no hay enrollment activo del slot correspondiente para el año activo;
+- hay más de un enrollment **regular** activo, o más de uno **cruzado** activo, para el año activo (conflicto real; 1 regular + 1 cruzado es válido).
 
-En esos casos se retorna `null` sin selección silenciosa ni inferencia desde trayectoria.
+En esos casos el campo afectado se retorna `null` sin selección silenciosa ni inferencia desde trayectoria. Un par válido 1+1 no genera `formative_read_model_conflict`.
 
 #### Nota de rollout
 
-- Consumidores actualizados deben usar `current_operational_enrollment` para estado anual presente y `trajectory_classes` para histórico.
+- Consumidores actualizados deben usar `current_operational_enrollment` para la clase anual regular, `current_cross_type_enrollment` para el cursado cruzado de GM investido, y `trajectory_classes` para histórico.
 - Consumidores deben tolerar `current_operational_enrollment = null`.
 - Durante FS-01 no se eliminan writes legacy ni se retira `classes`.
 - Nota runtime 2026-05-29: `users_classes` y `users_classes_archive` ya no existen en el schema efectivo; cualquier consumidor nuevo debe leer trayectoria desde `enrollments`.
