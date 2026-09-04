@@ -153,7 +153,7 @@ GET /api/v1/users/:userId/master-honors/roadmap
 GET /api/v1/users/:userId/master-honors/:masterHonorId
 ```
 
-La tarjeta virtual muestra maestrías vigentes y **No vigente** en la banda. El perfil muestra solo un resumen compacto, similar al resumen de logros: conteo, logos circulares de maestrías obtenidas y un acceso a la pantalla dedicada de maestrías. La pantalla dedicada (`/home/master-honors`) lista el roadmap completo y permite abrir el detalle con avance y requisitos pendientes. Para esto usa `roadmap` y no infiere reglas desde `honors.master_honors_id`. La app debe invalidar estos datos cuando recibe una notificación de cambio de maestría.
+La tarjeta virtual muestra maestrías vigentes y **No vigente** en la banda. El perfil muestra solo un resumen compacto, similar al resumen de logros: conteo, logos circulares de maestrías obtenidas y un acceso a la pantalla dedicada de maestrías. La pantalla dedicada (`/home/master-honors`) lista el roadmap completo con el mismo lenguaje visual de logros (parche, contador de grupos y barra de avance) y permite abrir el detalle. El detalle es un sheet blanco: parche contenido sobre el fondo, estado pastel (`Obtenida` / `En progreso` / `No vigente` / `Sin avance`), barra de avance por grupos de requisito (el porcentaje del total solo si discrepa) y requisitos agrupados, con opciones incompletas colapsadas. Para esto usa `roadmap` y no infiere reglas desde `honors.master_honors_id`. La app debe invalidar estos datos cuando recibe una notificación de cambio de maestría.
 
 ### Notificaciones y modal global
 
@@ -248,7 +248,7 @@ El backend bloquea el submit si:
 
 Cada honor puede tener requisitos en `honor_requirements`. El avance del usuario vive en `user_honor_requirement_progress`.
 
-En modo `IN_APP`, la app muestra estos requisitos como checklist/arbol de trabajo. Las respuestas textuales viven en `user_honor_requirement_progress.text_response` y las evidencias puntuales viven en `requirement_evidence`.
+En modo `IN_APP`, la app muestra estos requisitos como checklist/arbol de trabajo. Cada requisito hoja muestra un campo de respuesta visible y no se puede marcar como completado sin texto. Las respuestas textuales viven en `user_honor_requirement_progress.text_response` y las evidencias puntuales viven en `requirement_evidence`. Cuando `validation_status` es `PENDING_REVIEW` o `APPROVED`, el checklist es de solo lectura: no se pueden editar respuestas, checks ni evidencia por requisito.
 
 En modo `EXTERNAL`, el checklist no es requisito de elegibilidad para submit. Puede existir progreso legacy, pero el backend no lo usa como bloqueo del flujo externo.
 
@@ -293,11 +293,11 @@ El catalogo movil se filtra por la seccion activa y no debe exponer un selector 
 
 La app debe tratar `validation_status` como estado canonico de revision y `completion_mode` como estado canonico del camino de trabajo:
 
-- `UNDECIDED`: mostrar selector de modo y no mezclar CTAs de checklist/formato.
+- `UNDECIDED`: mostrar selector de modo en una pantalla de trabajo (barra blanca, parche sobre el fondo) y no mezclar CTAs de checklist/formato. El miembro elige un camino y confirma con la CTA inferior.
 - `IN_APP`: mostrar requisitos, respuestas y evidencia por requisito; no pedir formato completado como accion primaria.
-- `EXTERNAL`: mostrar descarga de formato/material, carga de `document`, evidencias generales y submit; no exigir checklist como accion primaria.
+- `EXTERNAL`: mostrar una pantalla de trabajo (barra blanca, parche sobre el fondo). El color de categoria es acento en iconos y en la CTA inferior (`Formato y evidencias`). Incluye descarga de formato/material, estado del `document` y evidencias generales; no exigir checklist como accion primaria. El cambio de modo es una accion secundaria explicita. La pantalla de evidencias no repite el hero de categoria ni duplica CTAs de pie: zonas de carga con la accion dentro de cada zona. Tocar formato abre el selector de archivos (PDF) sin un sheet de una sola opcion. El formato completado se previsualiza en la app (`SacPdfViewer`), igual que en el historico validado; no abrir el navegador. La barra inferior solo aparece para enviar a revision cuando el formato y al menos una evidencia general ya estan cargados.
 
-El perfil funciona como superficie de continuidad del trabajo del miembro. Al tocar una especialidad ya inscrita desde Perfil, la app debe abrir directamente el flujo activo segun `completion_mode`: requisitos para `IN_APP`, evidencias/formato para `EXTERNAL`, y detalle con selector solo si sigue en `UNDECIDED`. Las especialidades `APPROVED` abren el detalle historico para mostrar validacion y evidencia registrada.
+El perfil funciona como superficie de continuidad del trabajo del miembro. Al tocar una especialidad ya inscrita desde Perfil, la app debe abrir directamente el flujo activo segun `completion_mode`: requisitos para `IN_APP`, evidencias/formato para `EXTERNAL`, y detalle con selector solo si sigue en `UNDECIDED`. Las especialidades `APPROVED` abren el detalle historico para mostrar validacion y evidencia registrada. En la grilla de perfil, cada especialidad muestra el estado de validacion en texto (badge pastel bajo el nombre).
 
 Despues de una seleccion exitosa, detalle, requisitos y evidencias deben resolver el mismo `completion_mode` efectivo. Si una respuesta o refetch llega desfasado temporalmente, la app puede conservar el modo confirmado por el usuario en el estado de sesion hasta que backend devuelva el mismo estado canonico.
 
