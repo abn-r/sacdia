@@ -51,7 +51,7 @@ La separación template ↔ instancia evita que ajustes específicos de un campo
 - El roster de jueces expone email/notas en sus listados y permite actualización o soft-deactivate por UUID con scope del camporee:
   - `PATCH /api/v1/camporee-judges/:judgeId`
   - `DELETE /api/v1/camporee-judges/:judgeId`
-- App móvil: el detalle de Camporí consume `GET /api/v1/local-camporees/:camporeeId/events/preview`; la lista principal muestra sólo icono, nombre y puntaje total. Al abrir un evento, antes de la liberación de agenda se omite horario/sede/bloques, y después se muestra el detalle con día/hora/sede y bloques segmentados si existen.
+- App móvil: el detalle de Camporí consume `GET /api/v1/local-camporees/:camporeeId/events/preview`. La pestaña Eventos muestra sólo actividades con puntuación (`scoring_enabled`, o `event_type.code=scoring` si el preview omite el flag): icono, nombre y puntaje total. La pestaña Agenda muestra todos los tipos en orden cronológico (día/hora). Al abrir un evento, antes de la liberación de agenda se omite horario/sede/bloques, y después se muestra el detalle con día/hora/sede y bloques segmentados si existen.
 - RBAC: la lectura móvil de eventos se concede a director, subdirector, secretario, secretario-tesorero, tesorero y consejero con `camporee_events:read`.
 - Las respuestas de eventos incluyen `staff_assignments` para conservar el registro operativo, aunque la tarjeta móvil compacta no los muestra por defecto.
 
@@ -279,7 +279,7 @@ Autorización:
 - Lectura de rúbricas/scoring targets: `camporee_events:read` o juez activo asignado. Esos GET y el `POST .../scores` usan `@SkipPermissions()`; el servicio autoriza al juez asignado o al gestor con permiso+scope.
 - Gestión de rúbricas, roster, personal de agenda y asignaciones: `camporee_events:update` con scope del camporee.
 - La edición/desactivación de un juez resuelve el camporee padre desde `judgeId` y vuelve a validar `camporee_events:update` + scope `current-write` en el servicio.
-- Envío de puntaje: juez principal activo desde app móvil, o carga manual por `assistant-lf`/`director-lf` con scope institucional. La app consume `GET /camporee-judges/me/assignments`, filtra asignaciones `primary`, carga rúbricas del evento y envía exactamente un ítem por rúbrica.
+- Envío de puntaje: juez principal activo desde app móvil, o carga manual por `assistant-lf`/`director-lf` con scope institucional. La app consume `GET /camporee-judges/me/assignments`, filtra asignaciones `primary`, agrupa la bandeja por evento (filas = clubes), carga rúbricas del evento y envía exactamente un ítem por rúbrica.
 - Mutaciones de rúbricas, asignación de jueces y envío de puntaje requieren inscripción de clubes cerrada; lecturas permanecen disponibles.
 
 ## Endpoints (backend)
@@ -413,11 +413,11 @@ Tab "Personal" en el detalle del camporee, antes de "Eventos".
 
 ## UI App (sacdia-app)
 
-- Sección "Eventos" dentro del detalle de camporee.
-- Read-only en la lista: mostrar sólo icono, nombre del evento y puntaje total.
-- Read-only en detalle antes de `agenda_visible_from`: ver descripción, tipo, puntos/requisitos y especialidades de preparación (PDF), sin día/hora/sede/bloques.
+- Pestañas del detalle: **Detalle / Asistentes / Eventos / Agenda**. Eventos = solo puntuados + clasificación. Agenda = programa completo cronológico.
+- Read-only en Eventos: mostrar sólo icono, nombre del evento y puntaje total.
+- Read-only en detalle antes de `agenda_visible_from`: ver descripción, tipo, puntos/requisitos y especialidades de preparación (PDF), sin día/hora/sede/bloques. Agenda tampoco revela hora/sede.
 - Read-only en detalle después de `agenda_visible_from`: ver tipo, día/hora, puntos máximos, sede opcional, descripción, especialidades de preparación, personal asignado y bloques segmentados por horario/grupo cuando existan.
-- La sección de miembros inscritos aparece antes que la sección de eventos en el detalle móvil.
+- Los asistentes inscritos viven en la pestaña Asistentes; Eventos y Agenda quedan después para roles operativos.
 - La capa de datos puede consumir preview local o unión (`local-camporees` /
   `union-camporees`) según `camporeeType`.
 - No CRUD desde móvil en esta iteración.

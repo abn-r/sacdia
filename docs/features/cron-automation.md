@@ -213,6 +213,7 @@ El admin tiene dos superficies complementarias de observabilidad: BullMQ (colas)
   ```
   { queues: [{ name, waiting, active, completed, failed, delayed, paused }], recent_failed: [{ job_id, queue, name, failed_reason, attempts, timestamp }] }
   ```
+  BullMQ 6: `paused` en overview queda 0. Jobs de cola pausada viven en `waiting`. Health `GET .../queues/:queueName/health` sigue con `paused` booleano vía `queue.isPaused()`.
 - Es lector puro del estado transitorio de BullMQ (no persiste, no muta).
 
 ### Cron runs (persistencia histórica)
