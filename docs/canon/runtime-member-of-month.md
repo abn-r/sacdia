@@ -94,7 +94,7 @@ Tanto la evaluación automática como la manual son **idempotentes**: antes de i
 
 ## 6. Fuente del scoring
 
-La agregación se hace sobre `weekly_record_scores` de miembros activos de unidades activas de la sección durante el periodo `(month, year)`. El cruce usa semanas de scoring domingo–sábado (`America/Mexico_City`) cuyo **sábado** cae en ese mes calendario.
+La agregación se hace sobre `weekly_record_scores` de miembros activos de unidades activas de la sección durante el periodo `(month, year)`. El cruce usa semanas de scoring domingo–sábado (`America/Mexico_City`) cuyo **sábado** cae en ese mes calendario (`getScoringWeekRangeForMonth` en `src/common/clock/scoring-week.ts`). Canon de calendario: `docs/canon/decisiones-clave.md` §25.
 
 Referencia feature: `docs/features/weekly-records.md` + canon `runtime-sacdia.md` §unit operation. El scoring semanal es el eje; MoM es un agregado mensual derivado.
 

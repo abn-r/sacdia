@@ -19,6 +19,7 @@ El modelo vigente es por unidad + usuario + semana **domingo–sábado** (hora `
   - `POST /api/v1/clubs/:clubId/units/:unitId/weekly-records` - crear registro semanal individual solo para la semana vigente (domingo–sábado, hora México)
   - `POST /api/v1/clubs/:clubId/units/:unitId/weekly-records/bulk` - crear o actualizar atomica e idempotentemente la planilla semanal de la unidad
   - `PATCH /api/v1/clubs/:clubId/units/:unitId/weekly-records/:recordId` - actualizar estado activo o puntajes por categoria solo si el registro pertenece a la semana vigente
+- **Calendario**: `src/common/clock/scoring-week.ts` (`getScoringWeekPeriod`, `getScoringWeekRangeForMonth`). Timezone fija `America/Mexico_City`.
 - **Soporte relacionado**:
   - `GET /api/v1/local-fields/:fieldId/scoring-categories` provee categorias activas que el admin y la app usan para capturar puntajes, incluyendo `scoring_mode`
 - **Permisos**:
@@ -72,7 +73,8 @@ El modelo vigente es por unidad + usuario + semana **domingo–sábado** (hora `
 - **Modelo por semana domingo–sábado en hora México**: la semana abre domingo 00:00 y cierra sábado 23:59 `America/Mexico_City`. `year`/`week` se atribuyen al sábado que cierra el periodo. Un domingo después de la reunión del sábado es semana nueva, sin gracia. No hay job de reset (evita el cluster de crons a medianoche).
 - **Semana vigente como periodo abierto**: la captura se puede corregir durante toda la semana vigente; semanas anteriores quedan cerradas. Tener actividad programada no es requisito de escritura.
 - **Planilla semanal, no sesion diaria**: si el club se reune varias veces en la misma semana, se actualiza el mismo registro semanal por miembro. Clubes que se reunen sábado y domingo caen en semanas distintas; son pocos y se acepta.
-- **Actividades en la planilla (app)**: la pantalla de unidad muestra las actividades activas de la sección para la semana vigente. Informativo.
+- **Actividades en la planilla (app)**: `UnitDetailView` lista las actividades **activas** de la **sección** de la unidad cuyo `activity_date`/`activity_end_date` cruza la semana vigente. Actividades conjuntas entran por `activity_instances`. Informativo: empty state si no hay reunión; la planilla sigue editable. No se usa `club_sections.meeting_day` ni un gate a nivel club.
+- **Canon**: `docs/canon/decisiones-clave.md` §25.
 - **Total materializado + detalle normalizado**: `weekly_records.points` acelera lecturas, mientras `weekly_record_scores` conserva el desglose editable. El total suma solo categorias.
 - **Asistencia/puntualidad como categorias reales**: si asistencia, puntualidad, Biblia, uniforme u otro concepto debe puntuar, debe existir como `scoring_category`.
 - **Modo de captura por categoria**: `numeric` permite valores intermedios; `boolean_full` representa todo-o-nada.
@@ -90,4 +92,4 @@ El modelo vigente es por unidad + usuario + semana **domingo–sábado** (hora `
 ## Prioridad y siguiente accion
 
 - **Prioridad**: Media - feature funcional en backend, admin y app movil
-- **Siguiente accion**: si el club necesita varias reuniones con historico independiente en una misma semana, disenar una entidad de reuniones/sesiones separada de la planilla semanal agregada
+- **Siguiente accion**: ninguna de calendario. El grano diario/por reunión quedó descartado (2026-09-07).

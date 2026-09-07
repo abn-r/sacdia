@@ -499,6 +499,30 @@ rectora del dominio coordinación. Se fija que:
 - cualquier endpoint nuevo de coordinación debe validar scope en backend, no en
   query params manipulables.
 
+### 25. Puntaje de unidades usa semana domingo–sábado en hora México (2026-09-07)
+
+**Estado**: Vigente <!-- VERIFICADO: `src/common/clock/scoring-week.ts`, UnitsService y MemberOfMonthService en sacdia-backend; `lib/core/utils/scoring_week.dart` y banner en UnitDetailView en sacdia-app. -->
+
+**Contexto**: El scoring de unidades usaba semana ISO (lunes–domingo). Los clubes se reúnen sobre todo el sábado; cargar el domingo siguiente debe abrir semana nueva. Un gate por “actividad programada hoy” habría bloqueado la planilla si el calendario no está al día. Un cron a medianoche chocaba con otros jobs.
+
+**Decisión**: El periodo abierto de `weekly_records` es **domingo 00:00 → sábado 23:59** en `America/Mexico_City`. Se fija que:
+
+- el grano sigue siendo **semanal**, no diario ni por reunión;
+- no hay gracia: el domingo posterior a la reunión del sábado es semana nueva;
+- `year` y `week` se atribuyen al **sábado** que cierra el periodo; Miembro del Mes suma las semanas cuyo sábado cae en ese mes calendario;
+- no hay cron de reset: el periodo vigente se calcula al leer/escribir;
+- la planilla se edita **toda la semana vigente**; tener actividad programada **no** es requisito de escritura;
+- la app muestra las actividades **de esa semana** en la **sección** de la unidad (incluidas conjuntas vía `activity_instances`), solo como información;
+- clubes que se reúnen sábado y domingo caen en semanas distintas; son pocos y se acepta.
+
+**Consecuencias**:
+
+- cualquier cliente que calcule `week`/`year` debe usar el mismo calendario, no ISO 8601;
+- registros históricos escritos con semana ISO no se reescriben;
+- un gate futuro por actividad sería cambio de esta decisión, no un detalle de UI.
+
+**Referencias**: `docs/features/weekly-records.md`, `docs/canon/runtime-member-of-month.md` §6, `docs/database/SCHEMA-REFERENCE.md`.
+
 ## Estados posibles de una decisión
 
 Las decisiones de este documento deben estar en uno de estos estados:

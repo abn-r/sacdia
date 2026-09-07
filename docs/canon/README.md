@@ -136,7 +136,11 @@ Canoniza el SLA dashboard como lector puro de datos operacionales (investiture, 
 
 ### `runtime-member-of-month.md`
 
-Canoniza el reconocimiento mensual del miembro con mayor puntaje por sección, evaluación automática por cron + manual por director con idempotencia, empates permitidos con ganadores múltiples, notificación a ganador + liderazgo, superficie admin multi-sección, y permisos propios `mom:*`. Decisión registrada: `decisiones-clave.md` §16.
+Canoniza el reconocimiento mensual del miembro con mayor puntaje por sección, evaluación automática por cron + manual por director con idempotencia, empates permitidos con ganadores múltiples, notificación a ganador + liderazgo, superficie admin multi-sección, y permisos propios `mom:*`. Decisión registrada: `decisiones-clave.md` §16. El cruce mensual usa semanas domingo–sábado (`decisiones-clave.md` §25).
+
+### Calendario de `weekly_records`
+
+No tiene runtime propio. La semana abierta de puntaje de unidades es domingo 00:00 → sábado 23:59 `America/Mexico_City`; `year`/`week` se atribuyen al sábado. Actividad programada no es gate de escritura. Decisión registrada: `decisiones-clave.md` §25. Feature: `docs/features/weekly-records.md`.
 
 ### `runtime-scoring-categories.md`
 
