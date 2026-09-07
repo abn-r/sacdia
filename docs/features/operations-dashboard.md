@@ -1,6 +1,6 @@
 # Dashboard operativo jerárquico
 
-**Estado:** backend implementado en la rama de trabajo; consumo admin pendiente
+**Estado:** implementado en backend y en `sacdia-admin` (`/dashboard`)
 **Endpoint:** `GET /api/v1/admin/analytics/operations-dashboard`
 **Versión de definiciones:** `1`
 
@@ -172,18 +172,21 @@ Las notas de calidad forman parte del contrato y deben mostrarse o quedar dispon
 
 ## Consumo previsto en `sacdia-admin`
 
-El MVP del panel debe:
+El home `/dashboard` consume únicamente este agregado. No calcula métricas de negocio en cliente y no hace fan-out.
 
-1. consumir únicamente este agregado para indicadores, sin fan-out ni métricas de negocio calculadas en cliente;
-2. usar la misma vista para global, División, Unión y Campo local;
-3. navegar la jerarquía con `children`, incluyendo la tabla de clubes al llegar a Campo local;
-4. mostrar el año y mes resueltos por backend;
-5. no exponer selector histórico en la primera versión, aunque el endpoint soporte `ecclesiastical_year_id`;
-6. distinguir `0`, `null`, `not_applicable`, error HTTP y dato cacheado;
-7. no convertir errores en un dashboard lleno de ceros;
-8. etiquetar correctamente “club operativo”, “persona institucional”, “cuenta de plataforma”, “actividad registrada” y la atribución de especialidades.
+La vista es una bandeja operativa, no un briefing analítico:
 
-Las rutas existentes de clubes, actividades y validaciones no conservan necesariamente el scope analítico División/Unión. Deben tratarse como navegación general salvo que el destino pueda representar el mismo corte.
+1. la misma pantalla sirve para global, División, Unión y Campo local;
+2. **Para atender** lista solo colas con pendientes > 0 y enlaza a destinos reales del panel (`/dashboard/requests/*`, `/dashboard/clubs/validations`, `/dashboard/annual-folders/evaluate`);
+3. los KPI y módulos enlazan a clubes, usuarios, reportes, inscripciones, actividades y campamentos cuando el actor tiene acceso;
+4. la jerarquía se navega con `children` (tabla territorial; clubes abren ficha);
+5. el año y el mes los resuelve el backend; no hay selector histórico;
+6. se distinguen `0`, `null`, `not_applicable`, error HTTP y dato cacheado;
+7. un error HTTP no se convierte en un dashboard lleno de ceros;
+8. las etiquetas distinguen club operativo, persona institucional, cuenta de plataforma, actividad registrada y la atribución de especialidades;
+9. las notas de `data_quality` quedan plegadas; no ocupan el primer pantallazo.
+
+Las rutas de destino no conservan el scope analítico División/Unión. Son navegación general al módulo.
 
 ## Límites conocidos
 
