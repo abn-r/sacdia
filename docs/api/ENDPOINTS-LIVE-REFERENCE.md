@@ -1677,9 +1677,9 @@ Read model de solo lectura. No fusiona folios ni muta `field_payment_orders`, `m
 | POST | `/api/v1/clubs/:clubId/units/:unitId/members` | JWT | Permisos: units:update | Agregar miembro a la unidad | UnitsService.addMember() | `src/units/units.controller.ts` |
 | DELETE | `/api/v1/clubs/:clubId/units/:unitId/members/:memberId` | JWT | Permisos: units:update | Remover miembro de la unidad (soft delete) | UnitsService.removeMember() | `src/units/units.controller.ts` |
 | GET | `/api/v1/clubs/:clubId/units/:unitId/weekly-records` | JWT | Permisos: units:read | Listar registros semanales de la unidad | UnitsService.findWeeklyRecords() | `src/units/units.controller.ts` |
-| POST | `/api/v1/clubs/:clubId/units/:unitId/weekly-records` | JWT | Permisos: units:update | Crear registro semanal | UnitsService.createWeeklyRecord() | `src/units/units.controller.ts` |
-| POST | `/api/v1/clubs/:clubId/units/:unitId/weekly-records/bulk` | JWT | Permisos: units:update | Crear o actualizar registros semanales de forma atómica | UnitsService.bulkUpsertWeeklyRecords() | `src/units/units.controller.ts` |
-| PATCH | `/api/v1/clubs/:clubId/units/:unitId/weekly-records/:recordId` | JWT | Permisos: units:update | Actualizar registro semanal | UnitsService.updateWeeklyRecord() | `src/units/units.controller.ts` |
+| POST | `/api/v1/clubs/:clubId/units/:unitId/weekly-records` | JWT | Permisos: units:update | Crear registro semanal (solo semana vigente domingo–sábado, hora México) | UnitsService.createWeeklyRecord() | `src/units/units.controller.ts` |
+| POST | `/api/v1/clubs/:clubId/units/:unitId/weekly-records/bulk` | JWT | Permisos: units:update | Crear o actualizar registros semanales de forma atómica (semana vigente domingo–sábado, hora México) | UnitsService.bulkUpsertWeeklyRecords() | `src/units/units.controller.ts` |
+| PATCH | `/api/v1/clubs/:clubId/units/:unitId/weekly-records/:recordId` | JWT | Permisos: units:update | Actualizar registro semanal (solo si pertenece a la semana vigente) | UnitsService.updateWeeklyRecord() | `src/units/units.controller.ts` |
 
 ### users
 

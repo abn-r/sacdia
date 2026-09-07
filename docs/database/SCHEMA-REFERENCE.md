@@ -73,7 +73,7 @@ Referencia humana concisa del schema Prisma vigente.
 
 ### `weekly_records`, `weekly_record_scores` y `scoring_categories`
 
-- `weekly_records` materializa `unit_id`, usuario, semana ISO, total de puntos, `created_by` y `active` por `unit_id + user_id + week + year`. `attendance` y `punctuality` quedan como columnas legacy de compatibilidad y no son fuente del total.
+- `weekly_records` materializa `unit_id`, usuario, semana domingo–sábado (hora México), total de puntos, `created_by` y `active` por `unit_id + user_id + week + year`. `attendance` y `punctuality` quedan como columnas legacy de compatibilidad y no son fuente del total.
 - Índice de acceso por usuario/año/semana: `idx_weekly_records_user_year_week` `(user_id, year, week)` — cubre MoM y scores de carpeta anual.
 - `weekly_record_scores` guarda el desglose por categoria con unicidad `(record_id, category_id)`.
 - `scoring_categories` define categorias heredadas o propias por `origin_level` + `origin_id`, con `scoring_mode` (`numeric` o `boolean_full`) para decidir si acepta valores intermedios o solo todo/nada.

@@ -6,7 +6,7 @@
 
 Los registros semanales consolidan puntajes por categorias para miembros de una unidad. Son la base operativa del scoring semanal y, en runtime, tambien alimentan procesos derivados como `member-of-month`.
 
-El modelo vigente es por unidad + usuario + semana ISO + ano. Cada registro tiene puntajes desglosados por categoria en `weekly_record_scores`, y el total materializado en `weekly_records.points` se recalcula desde esas categorias. `attendance` y `punctuality` quedan como columnas legacy de compatibilidad: no son fuente de puntos.
+El modelo vigente es por unidad + usuario + semana **domingo–sábado** (hora `America/Mexico_City`) + ano del sábado que cierra la semana. Cada registro tiene puntajes desglosados por categoria en `weekly_record_scores`, y el total materializado en `weekly_records.points` se recalcula desde esas categorias. `attendance` y `punctuality` quedan como columnas legacy de compatibilidad: no son fuente de puntos.
 
 ## Que existe (verificado contra codigo)
 
@@ -16,9 +16,9 @@ El modelo vigente es por unidad + usuario + semana ISO + ano. Cada registro tien
 - **DTOs**: `src/units/dto/units.dto.ts`
 - **4 endpoints directos**:
   - `GET /api/v1/clubs/:clubId/units/:unitId/weekly-records` - listar registros activos de miembros activos de la unidad
-  - `POST /api/v1/clubs/:clubId/units/:unitId/weekly-records` - crear registro semanal individual solo para la semana ISO vigente
+  - `POST /api/v1/clubs/:clubId/units/:unitId/weekly-records` - crear registro semanal individual solo para la semana vigente (domingo–sábado, hora México)
   - `POST /api/v1/clubs/:clubId/units/:unitId/weekly-records/bulk` - crear o actualizar atomica e idempotentemente la planilla semanal de la unidad
-  - `PATCH /api/v1/clubs/:clubId/units/:unitId/weekly-records/:recordId` - actualizar estado activo o puntajes por categoria solo si el registro pertenece a la semana ISO vigente
+  - `PATCH /api/v1/clubs/:clubId/units/:unitId/weekly-records/:recordId` - actualizar estado activo o puntajes por categoria solo si el registro pertenece a la semana vigente
 - **Soporte relacionado**:
   - `GET /api/v1/local-fields/:fieldId/scoring-categories` provee categorias activas que el admin y la app usan para capturar puntajes, incluyendo `scoring_mode`
 - **Permisos**:
@@ -28,7 +28,7 @@ El modelo vigente es por unidad + usuario + semana ISO + ano. Cada registro tien
 - **Reglas verificadas**:
   - solo se puede crear para miembros activos de la unidad
   - la tupla nueva `(unit_id, user_id, week, year)` es unica; registros legacy con `unit_id = null` se leen como fallback
-  - las escrituras de weekly records se limitan a la semana ISO vigente; semanas anteriores quedan cerradas para edicion retroactiva
+  - las escrituras de weekly records se limitan a la semana vigente (domingo 00:00 → sábado 23:59 `America/Mexico_City`); semanas anteriores quedan cerradas para edicion retroactiva. No hay cron de reset: el periodo se calcula al leer/escribir.
   - el endpoint bulk ejecuta toda la planilla dentro de una unica transaccion; si un miembro/categoria/periodo falla, no se persiste ningun registro del lote
   - las categorias de puntaje se validan contra el campo local del club de la unidad
   - cada score se valida segun `scoring_mode`: `numeric` permite enteros `0..max_points`; `boolean_full` solo permite `0` o `max_points`
@@ -38,13 +38,13 @@ El modelo vigente es por unidad + usuario + semana ISO + ano. Cada registro tien
 
 ### Admin
 - **Surface verificada en detalle de unidad**: `WeeklyRecordsPanel` dentro de `UnitDetailPanel`
-- Permite lazy load de registros y categorias, crear nuevos registros en la semana ISO vigente y editar inline scores por categoria solo para la semana abierta
+- Permite lazy load de registros y categorias, crear nuevos registros en la semana vigente y editar inline scores por categoria solo para la semana abierta
 - El total mostrado en la UI se deriva de los scores cargados para cada fila
 - Las categorias `boolean_full` se capturan como si/no; las `numeric` como valor numerico con acciones rapidas `0` y `maximo`
 
 ### App Movil
 - **Capture UI verificada**: `UnitDetailView`
-- La app opera como planilla semanal: precarga los registros de la semana ISO vigente y guarda la unidad completa mediante el endpoint bulk atomico
+- La app opera como planilla semanal: precarga los registros de la semana vigente (domingo–sábado, hora México) y guarda la unidad completa mediante el endpoint bulk atomico. La pantalla de la unidad lista las actividades de esa semana en la sección de la unidad (informativo; no bloquea la captura).
 - Pueden registrar o ajustar puntajes directores, subdirectores/secretarios del contexto activo, consejeros y capitan de la unidad
 - La lista movil filtra unidades por seccion activa del contexto; una unidad creada en Aventureros no debe mostrarse al cambiar a otra seccion del mismo club
 - La UI movil incluye acciones por miembro para asignar todos los puntos configurados o limpiar todos los puntos
@@ -63,15 +63,16 @@ El modelo vigente es por unidad + usuario + semana ISO + ano. Cada registro tien
 2. No debe permitirse duplicar un registro para la misma unidad/usuario/semana/anio
 3. Los puntajes por categoria deben validarse contra categorias activas del campo local correspondiente
 4. Ninguna categoria puede exceder su `max_points`; si es `boolean_full`, solo acepta `0` o `max_points`
-5. Debe ser posible ajustar puntajes existentes de la semana ISO vigente sin recrear el registro completo
+5. Debe ser posible ajustar puntajes existentes de la semana vigente sin recrear el registro completo
 6. El total de puntos debe quedar consistente con el detalle por categoria
 7. Debe ser posible guardar la planilla semanal completa de una unidad sin partial success
 
 ## Decisiones de diseno
 
-- **Modelo por semana ISO y ano**: evita ambiguedad cuando la semana cruza meses o anos
-- **Semana vigente como periodo abierto**: la captura semanal se puede corregir durante la semana ISO actual; semanas anteriores quedan cerradas
-- **Planilla semanal, no sesion diaria**: si el club se reune varias veces en la misma semana, se actualiza el mismo registro semanal por miembro en lugar de crear registros diarios
+- **Modelo por semana domingo–sábado en hora México**: la semana abre domingo 00:00 y cierra sábado 23:59 `America/Mexico_City`. `year`/`week` se atribuyen al sábado que cierra el periodo. Un domingo después de la reunión del sábado es semana nueva, sin gracia. No hay job de reset (evita el cluster de crons a medianoche).
+- **Semana vigente como periodo abierto**: la captura se puede corregir durante toda la semana vigente; semanas anteriores quedan cerradas. Tener actividad programada no es requisito de escritura.
+- **Planilla semanal, no sesion diaria**: si el club se reune varias veces en la misma semana, se actualiza el mismo registro semanal por miembro. Clubes que se reunen sábado y domingo caen en semanas distintas; son pocos y se acepta.
+- **Actividades en la planilla (app)**: la pantalla de unidad muestra las actividades activas de la sección para la semana vigente. Informativo.
 - **Total materializado + detalle normalizado**: `weekly_records.points` acelera lecturas, mientras `weekly_record_scores` conserva el desglose editable. El total suma solo categorias.
 - **Asistencia/puntualidad como categorias reales**: si asistencia, puntualidad, Biblia, uniforme u otro concepto debe puntuar, debe existir como `scoring_category`.
 - **Modo de captura por categoria**: `numeric` permite valores intermedios; `boolean_full` representa todo-o-nada.
