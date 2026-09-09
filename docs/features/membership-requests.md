@@ -91,3 +91,16 @@ La membresia activa es el gate operativo para funcionalidades de club/seccion. U
 
 - **Prioridad**: Media - feature operativa y consumida por admin/app, con alcance acotado a revision de pendientes
 - **Siguiente accion**: verificar end-to-end con backend real que cancelar reabra post-registro y que aprobar active permisos operativos en el siguiente refresh de autorizacion
+
+## Fantasma (ghost) vs pending — distinción clave
+
+`pending` y `inactive` son estados de `club_role_assignments` con semántica distinta:
+
+| Estado | Cuándo | Permisos | Origen |
+|---|---|---|---|
+| `pending` | Primera vez: post-registro esperando aprobación | Perfil, especialidades, staging. Sin operaciones club | Post-registro paso 3 |
+| `inactive` | Año anterior: usuario no continuó ni fue marcado | Igual que pending: perfil sin operaciones club. Banner «No inscrito este año. La directiva realiza tu inscripción» | Year-cut o nunca marcado en lista anual |
+
+**`inactive` NO es un membership-request** — no aparece en la bandeja de aprobación. La inscripción anual la realiza la directiva vía `POST /club-sections/:sectionId/annual-continuations`. `POST /users/:userId/membership/annual-enroll` está bloqueado (D01): **403** `ANNUAL_ENROLL_REQUIRES_DIRECTIVE`.
+
+`pending` sigue siendo **solo para primer ingreso**. La inscripción anual de miembros ya existentes nunca crea estado `pending`.

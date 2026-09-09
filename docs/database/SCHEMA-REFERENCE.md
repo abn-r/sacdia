@@ -46,7 +46,19 @@ Referencia humana concisa del schema Prisma vigente.
 - La relacion operativa es contra `club_section_id`.
 - Incluye `expires_at` y `rejection_reason`.
 - La unicidad vigente es `@@unique([user_id, role_id, club_section_id, ecclesiastical_year_id, start_date])`.
-- Tambien soporta el flujo de membership requests via `status` (`pending`, `active`, `rejected`, `expired`) sobre la misma asignacion anual.
+- `status` (`varchar(20)`): `pending`, `active`, `rejected`, `expired` (membership requests); `designated` es **legado** (director futuro previo a T2; no crear filas nuevas); `ended` (cargo cerrado, p. ej. destitución o corte de año); `inactive` (`active=true`) representa pertenencia **no inscrita** del año de la fila, no autorización. La directiva activa esa misma fila al inscribir. No reescribir un cargo `ended` para simular el retorno.
+- Índice único parcial `uniq_cra_director_status_section_year` (migración `20260908180000_director_year_slots`; Prisma no lo expresa): `(club_section_id, ecclesiastical_year_id, role_id, status) WHERE active = true AND status IN ('active', 'designated') AND role_id = <uuid del rol CLUB director>`. Garantiza a lo sumo un director operativo y un designado por sección+año (el mismo `role_id` con `status` distinto no choca). No aplica a otros roles de club.
+- Índice único parcial `uniq_cra_annual_member_section_year` (migración `20260909120000_annual_membership_cycle`): `(user_id, club_section_id, ecclesiastical_year_id) WHERE active = true AND status IN ('active', 'inactive') AND role_id = <uuid del rol CLUB member> AND club_section_id IS NOT NULL`. Una membresía anual equivalente por usuario/sección/año. Duplicados existentes bloquean la migración; no se borran automáticamente.
+
+### `director_succession_plans`
+
+- Programación privada del director del periodo siguiente. `outgoing_assignment_id` es nullable para permitir sección vacante.
+- Unicidad abierta: índice parcial `uniq_director_succession_open_section_year` (migración `20260909130000_director_succession_open_unique`) `(club_section_id, target_ecclesiastical_year_id) WHERE status IN ('scheduled','activated','blocked')`. Un plan cancelado no bloquea reprogramar. No crea CRA `designated`.
+- Idempotencia de alta: único `(scheduled_by_id, idempotency_key)` + `request_hash`.
+
+### `club_year_transitions`
+
+- Ledger único `(club_id, ecclesiastical_year_id)` del corte anual por club (`pending` / `in_progress` / `completed` / `failed`). Escritura de aplicación restringida a `YearCutService`. No sustituye el lock Redis del cron. Migración `20260909120000_annual_membership_cycle` local, no declarada aplicada a Neon.
 
 ### `class_counselor_assignments`
 
@@ -94,7 +106,7 @@ Migración `20260818190000_query_performance_indexes` (btree `CONCURRENTLY` + GI
 | `accounts` | `user_id` | Better Auth por usuario |
 | `resources` / `finances` / `support_reports` / `material_products` | GIN trigram en texto | `contains` / ILIKE |
 | `enrollments` | `(ecclesiastical_year_id, investiture_status, active)`; parcial `(status, submitted_at) WHERE active`; parcial único regular y cruzado `(user_id, ecclesiastical_year_id) WHERE active` | validación por año + overdue SLA + cursado cruzado GM |
-| `club_role_assignments` | `(ecclesiastical_year_id, active, status)` | dashboard de personas |
+| `club_role_assignments` | `(ecclesiastical_year_id, active, status)`; único parcial `uniq_cra_director_status_section_year` (rol director CLUB, `active`+`designated` por sección+año) | dashboard de personas; un director operativo y un designado por sección/año |
 | `activities` | `created_by`, `created_at DESC`, `(created_by, activity_date)` | listado y scores |
 | `annual_folders` | `status`; `(status, modified_at DESC)` | colas de evaluación |
 | `folders` | `ecclesiastical_year_id` | scores de evidencias |
@@ -640,6 +652,9 @@ Define el presupuesto de puntos por componente dentro de un eje anual:
 
 ## Migraciones recientes
 
+- `20260909130000_director_succession_open_unique` - único parcial `uniq_director_succession_open_section_year` (planes `scheduled`/`activated`/`blocked`). SQL escrito, no aplicado a Neon.
+- `20260909120000_annual_membership_cycle` - `outgoing_assignment_id` nullable, `club_year_transitions`, único parcial member anual. SQL escrito, no aplicado a Neon.
+- `20260908180000_director_year_slots` - índice único parcial `uniq_cra_director_status_section_year` (rol director CLUB, `active`+`designated` por sección+año).
 - `20260826120000_camporee_supplies` - crea enums/tablas de insumos de sección, unique parcial plan por sección+camporee, y añade `supply_edit_cutoff_local_time` a `local_camporees` y `union_camporees`. Existe en `feat/camporee-supplies` (worktree `/private/tmp/sacdia-backend-camporee-orders`); **no ejecutada ni verificada contra Neon**.
 - `20260824190000_camporee_orders` - crea enums/tablas de pedidos de mercancía y añade `orders_enabled`/`orders_opens_at`/`orders_deadline` a `local_camporees` y `union_camporees`. Existe en `feat/camporee-orders` (worktree); **no ejecutada ni verificada contra Neon**.
 - `20260710130000_admin_auth_sessions` - creada en la rama backend para metadata administrativa 1:1 sobre `sessions`, assurance, expiración absoluta y revocación; despliegue no verificado.

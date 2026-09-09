@@ -47,6 +47,17 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 ---
 
+## Actualizacion 2026-09-09 (Inscripción anual por directiva)
+
+La renovación anual **no** es autoinscripción del miembro. La directiva de la sección destino completa el trámite.
+
+- `GET /api/v1/club-sections/:sectionId/annual-continuations` — no inscritos del año eclesiástico vigente (`page`, `limit`, `search`). Cada ítem: `{ user_id, name, base_section_id, ecclesiastical_year_id, annual_status, current_role, eligibility, blocked_reason, suggested_class }`. No es el roster exclusivo del año pasado. No usar `originYearId` ni `already_continued`.
+- `POST` la misma ruta, body `{ user_ids }` (1–100 distintos). Respuesta `{ results: [{ user_id, outcome, club_section_id, ecclesiastical_year_id, enrollment_id, error_code }] }` con `enrolled|already_enrolled|blocked|failed`. `enrollment_id` llega en `enrolled`. En `already_enrolled` puede venir `null`; el cliente debe tratar el outcome, no exigir el id. Un cargo de director en otra sección no cuenta como inscrito aquí.
+- Copy del banner de no inscrito: **«No inscrito este año. La directiva realiza tu inscripción»**. No hay CTA «Inscribirme».
+- `POST /api/v1/users/:userId/membership/annual-enroll` está bloqueado mientras D01 esté pendiente: **403** `ANNUAL_ENROLL_REQUIRES_DIRECTIVE`, sin efectos. No convertirlo en `pending` de post-registro.
+- D02 abierto: no habilitar cruce AV→CQ ni clase GM investido/multianual por esta vía. Esos casos llegan `blocked` `ANNUAL_CLASS_POLICY_UNRESOLVED`.
+- Preelección de director N+1: `POST/GET/PATCH/DELETE /api/v1/clubs/:clubId/sections/:sectionId/director-designation`. POST exige `Idempotency-Key`. Reemplazo es **PATCH** `{ succession_id, version, successor_user_id }` (no PUT). Año de preelección no futuro → 400 `CLUB_DIRECTOR_PLAN_YEAR_INVALID`. Assignment/succession/update del año vigente siguen usando `CLUB_DIRECTOR_DESIGNATION_YEAR_INVALID`. Fila CRA `designated` legado no reconciliada: 409 `CLUB_DIRECTOR_DESIGNATED_UNRECONCILED`. Contrato canónico: `docs/api/ENDPOINTS-LIVE-REFERENCE.md` y handoff `docs/plans/handoffs/director-designation-admin-handoff.md`.
+
 ## Actualizacion 2026-09-03 (Cursado cruzado de Guía Mayor investido)
 
 Un Guía Mayor ya investido (`GM-01`) puede inscribirse en **una** clase de Aventureros o Conquistadores que aún no tenga investida, en el mismo año eclesiástico:

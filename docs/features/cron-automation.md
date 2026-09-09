@@ -2,7 +2,7 @@
 
 **Estado**: IMPLEMENTADO
 
-<!-- VERIFICADO contra código 2026-05-28: jobs @Cron identificados en sacdia-backend/src/, ScheduleModule registrado en app.module.ts. La mayoría opera en UTC; monthly report reminders opera en America/Mexico_City por ser comunicación de calendario local. -->
+<!-- VERIFICADO contra código 2026-09-09: jobs @Cron identificados en sacdia-backend/src/, ScheduleModule registrado en app.module.ts. Job 11 (year-cut) ya no activa CRA designated ni crea member active; ledger/SQL anual no declarado aplicado a Neon. La mayoría opera en UTC; monthly report reminders opera en America/Mexico_City por ser comunicación de calendario local. -->
 
 ## Descripción de dominio
 
@@ -35,6 +35,7 @@ Varios jobs están gobernados por `system_config` o feature flags (ver §6) para
 | 8 | Membership requests expiry | `0 * * * *` | cada hora en :00 | `membership-requests` |
 | 9 | Cleanup expired sessions/tokens | `EVERY_6_HOURS` (`0 */6 * * *`) | cada 6 horas | `common` |
 | 10 | Cleanup inactive FCM tokens (>90d) | `EVERY_DAY_AT_3AM` (`0 3 * * *`) | diario 03:00 UTC | `common` |
+| 11 | **Ecclesiastical year cut** | `5 6 * * *` | diario 06:05 UTC (~00:05 CST / ~23:05 CDT México) | `year-cut` |
 
 ## Detalle por job
 
@@ -157,10 +158,31 @@ Varios jobs están gobernados por `system_config` o feature flags (ver §6) para
 - **Side-effects**: logs de inicio (con `cutoff` ISO) + fin (con `count`); `logger.error` con stack trace en caso de fallo, sin throw.
 - **Condiciones skip**: no-op si no hay filas inactivas; errores capturados y loggeados.
 
+### 11. Ecclesiastical year cut
+
+- **Archivo**: `sacdia-backend/src/year-cut/year-cut-cron.service.ts`
+- **Método**: `handleYearCut()`; también `onModuleInit()` (misma ruta, recuperación al arrancar)
+- **Clase**: `YearCutCronService`
+- **Servicio de lógica**: `YearCutService.applyCut()` (`src/year-cut/year-cut.service.ts`)
+- **Propósito**: Transición anual **por club** al inicio del año eclesiástico vigente:
+  1. Selecciona cargos `status=active` cuyo `ecclesiastical_years.end_date` es anterior a `currentYear.start_date`. No usa `ecclesiastical_year_id != vigente` (no cierra futuros).
+  2. Termina esos cargos → `status=ended`, `active=false`, `end_date` = fin del periodo saliente (conserva un `end_date` anterior más temprano; no reescribe con `currentYear.start_date`). Cierra `class_counselor_assignments` vencidas; no crea autoridad pedagógica nueva.
+  3. Activa planes `director_succession_plans` en `scheduled` con `effective_date <= currentYear.start_date` creando CRA director `status=active`. **No** activa filas CRA `designated`.
+  4. Resuelve estado final: junta AV/CQ → `member inactive` en GM vía política anual; consejero/member en **esa** sección. Si ya hay director `active` en el destino, no crea member extra. No crea clases ni `member active`.
+- **Cron**: `5 6 * * *` UTC (~00:05 CST en horario estándar México).
+- **Lock**: Redis `cron:ecclesiastical-year-cut` (TTL ~23 horas) **y** `pg_advisory_xact_lock(club_id, year_id)` dentro de la transacción por club.
+- **job_name**: `ecclesiastical-year-cut` (en `cron_run_log`).
+- **Entidades mutadas**: `club_role_assignments`; `director_succession_plans` (`scheduled` → `activated`); `class_counselor_assignments`; `club_year_transitions`; `authorization_context_versions` (bumpMany en tx).
+- **Side-effects**: `AuthorizationContextService.invalidateUserAuthorizationCache` por usuario afectado (post-commit, try/catch por usuario). Fallo de caché/FCM **no** revierte ni duplica el corte. **NO llama** `YearEndService.closeYear`. **NO hace blacklist de JWT**.
+- **Idempotencia**: ledger `club_year_transitions` único `(club_id, ecclesiastical_year_id)`; si `status=completed` el club se omite. Reintento con `in_progress`/fallo relee candidatos bajo lock y reutiliza `ensureNotEnrolled`.
+- **Retorno**: `{ ended, activated, returnedNotEnrolled, usersInvalidated }`. `itemsProcessed` del cron = ended + activated + returnedNotEnrolled. Ya no existe `gmMembersCreated` ni `ghostsMarked`.
+- **Condiciones skip**: lock Redis no adquirido (`trackSkipped`); ningún club candidato (log + return temprano, sin tx); transición del club ya `completed`.
+- **Migraciones**: `20260909120000_annual_membership_cycle` (ledger + unique member) y relacionadas de planes; SQL local, no declarar aplicado a Neon.
+
 ## Política común canonizada
 
 1. **Timezone**: todos los jobs operan en UTC. La conversión a hora local es responsabilidad del cliente que presenta los datos.
-2. **Idempotencia**: cada job debe ser seguro de re-ejecutar. Los mecanismos habilitadores son lock distribuido (jobs 1, 2, 6, 7), verificación de estado previo (3, 4, 5) o `deleteMany` con condición temporal (8).
+2. **Idempotencia**: cada job debe ser seguro de re-ejecutar. Los mecanismos habilitadores son lock distribuido (jobs 1, 2, 6, 7, 11 Redis), verificación de estado previo (3, 4, 5), `deleteMany` con condición temporal (8) o ledger `club_year_transitions` + lock de transacción por club (job 11).
 3. **Fire-and-forget**: fallos dentro de un job no deben propagarse fuera del job. Los errores se loguean con contexto suficiente para diagnóstico posterior.
 4. **Batching**: jobs con alcance masivo (1, 5, 4) procesan en lotes con timeout propio. El batch siguiente se recupera en la próxima ejecución programada.
 5. **Logging estructurado**: los jobs críticos (1, 2, 3, 7) emiten logs con métricas contables (procesados, omitidos, fallidos).
@@ -220,7 +242,7 @@ El admin tiene dos superficies complementarias de observabilidad: BullMQ (colas)
 
 - Tabla: `cron_run_log` (`sacdia-backend/prisma/schema.prisma`). Migración manual: `prisma/migrations/20260422000000_add_cron_run_log/migration.sql`.
 - Helper reusable: `CronRunLogger` en `sacdia-backend/src/common/services/cron-run-logger.service.ts` con métodos `track(jobName, fn, meta?)` y `trackSkipped(jobName, reason?)`. Exportado desde `CommonModule` (global).
-- Instrumentación: los 9 `@Cron` envuelven su lógica en `cronLogger.track(...)` retornando `{ itemsProcessed: number }` donde aplique.
+- Instrumentación: los 11 `@Cron` envuelven su lógica en `cronLogger.track(...)` retornando `{ itemsProcessed: number }` donde aplique.
 - Naming canónico de jobs (columna `job_name`):
   - `monthly-reports-auto-generate`
   - `rankings-recalculate`
@@ -231,6 +253,7 @@ El admin tiene dos superficies complementarias de observabilidad: BullMQ (colas)
   - `membership-requests-expiry`
   - `cleanup-expired-records`
   - `fcm-tokens-cleanup`
+  - `ecclesiastical-year-cut`
 - Status valores: `running | completed | failed | skipped` (CHECK constraint en SQL).
 - Endpoint: `GET /api/v1/admin/analytics/cron-runs` — retorna `{ recent[], stats[] }`. `recent` es última ejecución por job vía `DISTINCT ON (job_name)`. `stats` agrega `avg_duration_ms_30d`, `failure_rate_7d`, `last_success`, `last_failure`, `total_runs_7d` por job.
 - Sin dependencia de Redis — siempre disponible.
@@ -239,7 +262,7 @@ El admin tiene dos superficies complementarias de observabilidad: BullMQ (colas)
 
 `/dashboard/system/jobs` — Server Component `revalidate=30` con `Promise.allSettled` sobre ambos endpoints:
 - Sección "Colas BullMQ": cards por cola (failed en rojo si > 0), tabla de últimos 20 fallos con tooltip, refresh button.
-- Sección "Cron Jobs": tabla con las 9 rows siempre visibles (join con lista hardcoded), columnas Job / Última ejecución / Status / Duración / Items / Último éxito / Último fallo / Tasa fallo 7d / Runs 7d. Status badges coloreados.
+- Sección "Cron Jobs": tabla con las 11 rows siempre visibles (join con lista hardcoded), columnas Job / Última ejecución / Status / Duración / Items / Último éxito / Último fallo / Tasa fallo 7d / Runs 7d. Status badges coloreados.
 - Degradación grácil: si una de las 2 llamadas falla, la otra renderiza normalmente.
 - Nav: entrada "Jobs & Colas" en sección Sistema, icon `Activity`, permiso `system_config:read`.
 

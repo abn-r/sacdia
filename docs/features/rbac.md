@@ -144,7 +144,7 @@ El sistema soporta usuarios con multiples asignaciones de club (ej: Director en 
 - **Campo canonico**: `users_pr.active_club_assignment_id` en la DB
 - **Seteo**: `PATCH /auth/me/context` con `{ assignment_id }` — escribe en DB, invalida cache Redis, re-resuelve autorizacion
 - **Lectura**: Tanto `GET /auth/me` como `GET /dashboard/summary` leen del mismo campo canonico
-- **Cache**: Redis con TTL 5 min. Se invalida explicitamente en cada context switch
+- **Cache**: Redis `auth:context:v7:{userId}` con revisión de calendario; TTL ≤ 5 min y no cruza el fin del año eclesiástico. Se invalida en cada context switch y en el corte.
 
 ### Calculo de effectivePermissions
 

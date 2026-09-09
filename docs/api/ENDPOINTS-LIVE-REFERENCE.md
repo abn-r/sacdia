@@ -7,9 +7,9 @@
 > La tabla refleja los decoradores HTTP efectivos en controllers NestJS; DTOs, ejemplos y errores finos viven en Swagger/runtime y docs de feature cuando aplique.
 
 **Estado**: ACTIVE
-**Actualizado**: 2026-08-28
-**Total endpoints**: 815 decoradores HTTP en 102 controllers (certificaciones configurables, insurance capacity model, field-payment-orders sincronizados manualmente; camporee-orders + camporee-supplies + payment-obligations desde worktree `feat/camporee-supplies` — no están en Neon)
-**Métodos**: GET 318 · POST 239 · PATCH 116 · DELETE 88 · PUT 12
+**Actualizado**: 2026-09-09
+**Total endpoints**: 822 decoradores HTTP en 103 controllers (certificaciones configurables, insurance capacity model, field-payment-orders sincronizados manualmente; camporee-orders + camporee-supplies + payment-obligations desde worktree `feat/camporee-supplies` — no están en Neon; +4 `director-designation` GET/POST/PATCH/DELETE el 2026-09-09; +3 `annual-membership` GET/POST/POST el 2026-09-08)
+**Métodos**: GET 320 · POST 242 · PATCH 117 · DELETE 89 · PUT 12
 **Auth detectada**: JWT 760 · Public 12
 
 ## Cómo leer esta referencia
@@ -67,7 +67,7 @@
 | classes | 3 |
 | user-classes | 7 |
 | club-enrollments | 7 |
-| clubs | 16 |
+| clubs | 20 |
 | club-roles | 2 |
 | admin-coordination | 9 |
 | coordination | 1 |
@@ -91,6 +91,7 @@
 | Materials — Orders | 8 |
 | Materials — Receipts | 4 |
 | member-of-month | 4 |
+| annual-membership | 3 |
 | membership-requests | 3 |
 | monthly-reports | 9 |
 | Notifications | 10 |
@@ -625,8 +626,8 @@ Semántica funcional y límites: [operations-dashboard.md](../features/operation
 | POST | `/api/v1/auth/verify-email/send` | JWT | - | Enviar email de verificación al usuario autenticado | AuthService.sendVerificationEmail() | `src/auth/auth.controller.ts` |
 | POST | `/api/v1/auth/verify-email/confirm` | Public | - | Confirmar verificación de email con token | AuthService.confirmEmailVerification() | `src/auth/auth.controller.ts` |
 | POST | `/api/v1/auth/update-password` | JWT | - | Update authenticated user password | AuthService.updateOwnPassword() | `src/auth/auth.controller.ts` |
-| GET | `/api/v1/auth/me` | JWT | - | Obtener perfil del usuario autenticado | AuthService.getProfile() | `src/auth/auth.controller.ts` |
-| PATCH | `/api/v1/auth/me/context` | JWT | - | Cambiar contexto activo de club/instancia del usuario | AuthService.setActiveClubContext() | `src/auth/auth.controller.ts` |
+| GET | `/api/v1/auth/me` | JWT | - | Perfil + autorización. Pertenencia no inscrita actual con permisos vacíos. No incluye programación de director. Año solapado → 409 `ECCLESIASTICAL_YEAR_AMBIGUOUS` | AuthService.getProfile() | `src/auth/auth.controller.ts` |
+| PATCH | `/api/v1/auth/me/context` | JWT | - | Cambiar contexto activo. `inactive`/`ended`/año no vigente/`designated` → 400 `AUTH_ASSIGNMENT_YEAR_MISMATCH`. Corte del club no completado → 503 `CLUB_CYCLE_NOT_READY`. No invalida JWT | AuthService.setActiveClubContext() | `src/auth/auth.controller.ts` |
 | GET | `/api/v1/auth/profile/completion-status` | JWT | - | Obtener estado del post-registro | AuthService.getCompletionStatus() | `src/auth/auth.controller.ts` |
 | DELETE | `/api/v1/auth/me` | JWT | - | Eliminar cuenta del usuario autenticado | AccountDeletionService.deleteAccount() | `src/auth/auth.controller.ts` |
 | POST | `/api/v1/auth/mfa/enroll` | JWT | - | Habilitar 2FA (TOTP) | MfaService.enrollMfa() | `src/auth/mfa.controller.ts` |
@@ -962,7 +963,7 @@ Path base: `/api/v1/certifications/users/:userId/certification-enrollments/:enro
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
 | GET | `/api/v1/clubs/:clubId/sections/:sectionId/classes/progress-scope` | JWT | Permisos: classes:read | Listar clases visibles para seguimiento de progreso | ClassProgressScopeService.getProgressScope() | `src/classes/class-progress-scope.controller.ts` |
-| GET | `/api/v1/clubs/:clubId/sections/:sectionId/classes/:classId/members-progress` | JWT | Permisos: classes:read | Listar avance de miembros por clase en una sección | ClassProgressScopeService.getClassMembersProgress() | `src/classes/class-progress-scope.controller.ts` |
+| GET | `/api/v1/clubs/:clubId/sections/:sectionId/classes/:classId/members-progress` | JWT | Permisos: classes:read | Listar avance de miembros por clase en una sección. Response `members[]` incluye `cross_type_enrollment: boolean`. Devuelve miembros regulares de la sección **y** GMs con `cross_type_enrollment=true` de cualquier sección del mismo club. | ClassProgressScopeService.getClassMembersProgress() | `src/classes/class-progress-scope.controller.ts` |
 
 ### classes
 
@@ -1010,19 +1011,23 @@ Path base: `/api/v1/certifications/users/:userId/certification-enrollments/:enro
 | GET | `/api/v1/clubs/:clubId/sections/:sectionId` | JWT | Permisos: club_sections:read | Obtener sección por ID | ClubsService.getSection() | `src/clubs/clubs.controller.ts` |
 | POST | `/api/v1/clubs/:clubId/sections` | JWT | Permisos: club_sections:create; Club: director, deputy-director | Crear sección si falta el tipo (club pre-migración). 409 si el tipo ya existe. Sin nombre propio | ClubsService.createSection() | `src/clubs/clubs.controller.ts` |
 | PATCH | `/api/v1/clubs/:clubId/sections/:sectionId` | JWT | Permisos: club_sections:update; recurso `club_section`; Club: director, deputy-director, secretary, secretary-treasurer de esa sección | Actualizar sección (dirección o secretaría de la sección activa; no cruza a otra sección del mismo club) | ClubsService.updateSection() | `src/clubs/clubs.controller.ts` |
-| GET | `/api/v1/clubs/:clubId/leadership` | JWT | Permisos: clubs:read | Liderazgo del club | ClubsService.getClubLeadership() | `src/clubs/clubs.controller.ts` |
+| GET | `/api/v1/clubs/:clubId/leadership` | JWT | Permisos: clubs:read | Liderazgo del club: solo `status=active` del año eclesiástico vigente (excluye `designated`) | ClubsService.getClubLeadership() | `src/clubs/clubs.controller.ts` |
 | GET | `/api/v1/clubs/:clubId/overview` | JWT | Permisos: clubs:read | Resumen agregado del club | ClubsService.getClubOverview() | `src/clubs/clubs.controller.ts` |
 | GET | `/api/v1/clubs/:clubId/history` | JWT | Permisos: clubs:read | Historial de auditoría del club | ClubsService.getClubHistory() | `src/clubs/clubs.controller.ts` |
 | GET | `/api/v1/clubs/:clubId/sections/:sectionId/members` | JWT | Permisos: club_roles:read | Listar miembros de la sección | ClubsService.getMembers() | `src/clubs/clubs.controller.ts` |
 | POST | `/api/v1/clubs/:clubId/sections/:sectionId/roles` | JWT | Permisos: club_roles:assign | Asignar rol a un miembro (requiere director, deputy director o secretary) | ClubsService.assignRole() | `src/clubs/clubs.controller.ts` |
-| POST | `/api/v1/clubs/:clubId/sections/:sectionId/director-assignment` | JWT | Permisos: club_roles:assign | Asignación inicial de director de sección | ClubsService.assignInitialSectionDirector() | `src/clubs/clubs.controller.ts` |
-| POST | `/api/v1/clubs/:clubId/sections/:sectionId/director-succession` | JWT | Permisos: club_roles:assign, club_roles:revoke | Sucesión anual de director de sección | ClubsService.succeedSectionDirector() | `src/clubs/clubs.controller.ts` |
+| POST | `/api/v1/clubs/:clubId/sections/:sectionId/director-assignment` | JWT | Permisos: club_roles:assign | Asignación inicial de director de sección del **año vigente**. Year distinto → 400 `CLUB_DIRECTOR_DESIGNATION_YEAR_INVALID` | ClubsService.assignInitialSectionDirector() | `src/clubs/clubs.controller.ts` |
+| POST | `/api/v1/clubs/:clubId/sections/:sectionId/director-succession` | JWT | Permisos: club_roles:assign, club_roles:revoke; actores: super-admin, admin, director-lf, assistant-lf + canManageClub | Destitución del director en el **año eclesiástico vigente** (`getCurrentYear()`). El year del body y el de `current_assignment_id` deben coincidir con ese año; si no → 400 `CLUB_DIRECTOR_DESIGNATION_YEAR_INVALID`. **No** es la herramienta de diciembre para N+1 (usar `director-designation`) | ClubsService.succeedSectionDirector() | `src/clubs/clubs.controller.ts` |
+| POST | `/api/v1/clubs/:clubId/sections/:sectionId/director-designation` | JWT | Permisos: club_roles:assign; `@AuthorizationResource` club; assertCanDesignateDirector (super-admin, admin, director-lf, assistant-lf + canManageClub). Sección debe pertenecer a `clubId`. Header `Idempotency-Key` obligatorio | Preelegir director de un año futuro: crea fila en `director_succession_plans` (`status=scheduled`). No crea CRA `designated` ni invalida caché del sucesor. Vacante → `outgoing_assignment_id` null. Body `{ user_id, ecclesiastical_year_id }`. 201 data `{ succession_id, user_id, ecclesiastical_year_id, effective_date, status, version, outgoing_assignment_id }`. Misma clave+payload reutiliza el plan; distinta payload → 409 `IDEMPOTENCY_KEY_REUSED`. Plan abierto existente → 409 `CLUB_DIRECTOR_PLAN_CONFLICT`. Año no futuro (fechas, no `year_id`) → 400 `CLUB_DIRECTOR_PLAN_YEAR_INVALID`. Falta header → 400 `CLUB_DIRECTOR_PLAN_IDEMPOTENCY_REQUIRED`. `CLUB_DIRECTOR_DESIGNATION_YEAR_INVALID` queda para assignment/succession/update del **año vigente**, no para preelección | DirectorDesignationService.designate() | `src/clubs/clubs.controller.ts` |
+| GET | `/api/v1/clubs/:clubId/sections/:sectionId/director-designation` | JWT | Mismos actores que POST (permiso + assertCanDesignateDirector; no basta el permiso solo) | Plan abierto (`scheduled`/`activated`/`blocked`) del año `?yearId=` o `null`. Nunca CRA `designated` | DirectorDesignationService.getDesignation() | `src/clubs/clubs.controller.ts` |
+| PATCH | `/api/v1/clubs/:clubId/sections/:sectionId/director-designation` | JWT | Mismos actores que POST | Reemplazar sucesor de un plan `scheduled`. Body `{ succession_id, version, successor_user_id }`. No muta al director operativo. 404 `CLUB_DIRECTOR_PLAN_NOT_FOUND`; versión obsoleta → 409 `CLUB_DIRECTOR_PLAN_VERSION_CONFLICT` | DirectorDesignationService.replacePlan() | `src/clubs/clubs.controller.ts` |
+| DELETE | `/api/v1/clubs/:clubId/sections/:sectionId/director-designation` | JWT | Mismos actores que POST | Cancelar plan `scheduled`. Query `successionId` + `version`. No muta al director operativo. Tras cancelar se puede reprogramar | DirectorDesignationService.cancelPlan() | `src/clubs/clubs.controller.ts` |
 
 ### club-roles
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
-| PATCH | `/api/v1/club-roles/:assignmentId` | JWT | Permisos: club_roles:assign | Actualizar asignación de rol | ClubsService.updateRoleAssignment() | `src/clubs/clubs.controller.ts` |
+| PATCH | `/api/v1/club-roles/:assignmentId` | JWT | Permisos: club_roles:assign | Actualizar asignación de rol. No admite escribir `status=designated` (400 `CLUB_DIRECTOR_DESIGNATION_YEAR_INVALID`). Una fila ya `designated` no reconciliada rechaza cualquier mutación → 409 `CLUB_DIRECTOR_DESIGNATED_UNRECONCILED`. No mover un director a un año no vigente | ClubsService.updateRoleAssignment() | `src/clubs/clubs.controller.ts` |
 | DELETE | `/api/v1/club-roles/:assignmentId` | JWT | Permisos: club_roles:revoke | Remover rol de miembro | ClubsService.removeRoleAssignment() | `src/clubs/clubs.controller.ts` |
 
 ### admin-coordination
@@ -1394,6 +1399,17 @@ Read model de solo lectura. No fusiona folios ni muta `field_payment_orders`, `m
 | GET | `/api/v1/clubs/:clubId/sections/:sectionId/member-of-month` | JWT | Permisos: mom:read | Obtener miembro del mes actual de la sección | MemberOfMonthService.getCurrentMemberOfMonth() | `src/member-of-month/member-of-month.controller.ts` |
 | GET | `/api/v1/clubs/:clubId/sections/:sectionId/member-of-month/history` | JWT | Permisos: mom:read | Obtener historial paginado de miembro del mes | MemberOfMonthService.getMemberOfMonthHistory() | `src/member-of-month/member-of-month.controller.ts` |
 | POST | `/api/v1/clubs/:clubId/sections/:sectionId/member-of-month/evaluate` | JWT | Permisos: mom:evaluate | Disparar evaluación manual de miembro del mes | MemberOfMonthService.evaluateMemberOfMonth() | `src/member-of-month/member-of-month.controller.ts` |
+
+### annual-membership
+
+> **Inscripción anual de miembros** — la directiva de la sección destino inscribe a no inscritos del **año vigente**. No copia cargos. D01 bloquea autoactivación del titular.
+> POST crea matrícula de clase en la misma transacción (`NextClassResolver` + `ClassEnrollmentPolicyService` modo `annual` + `ClassEnrollmentWriter`). No usa `ClassesService.enrollUser`. D02: catálogo incompleto, tipo agotado o clase de otra sección → `blocked` `ANNUAL_CLASS_POLICY_UNRESOLVED`.
+
+| Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
+| --- | --- | --- | --- | --- | --- | --- |
+| GET | `/api/v1/club-sections/:sectionId/annual-continuations` | JWT | Permisos: club_members:approve · `@AuthorizationResource` club_section | Listar no inscritos de la pertenencia de esa sección en el año vigente. Query: `page`, `limit`, `search`. Respuesta paginada: `{ user_id, name, base_section_id, ecclesiastical_year_id, annual_status, current_role, eligibility, blocked_reason, suggested_class }`. `suggested_class`: `{ status: 'resolved', class_id }` o `{ status: 'blocked', code }` (p. ej. `ANNUAL_CLASS_POLICY_UNRESOLVED`). No lista exclusiva del año pasado. No filtra elegibilidad por `active=true` de cargos históricos. | AnnualMembershipService.listContinuations() | `src/annual-membership/annual-continuations.controller.ts` |
+| POST | `/api/v1/club-sections/:sectionId/annual-continuations` | JWT | Permisos: club_members:approve · `@AuthorizationResource` club_section | Inscribir. Body: `{ user_ids: string[] }` 1–100 distintos. Activa `member inactive` del año actual en **esta** sección y crea/reactiva `enrollments` de la siguiente clase del mismo tipo (sin exigir investidura del predecesor inmediato). Idempotente `already_enrolled` si ya hay `member active` aquí (`enrollment_id` puede ser `null` en ese outcome). Un director operativo en otra sección no cuenta como inscrito aquí. Lote por usuario: `enrolled\|already_enrolled\|blocked\|failed`. `enrollment_id` en `enrolled`. Actor registrado. Dueño del perfil **no** autoriza este POST. | AnnualMembershipService.continueUsers() | `src/annual-membership/annual-continuations.controller.ts` |
+| POST | `/api/v1/users/:userId/membership/annual-enroll` | JWT | Permisos: registration:complete · Owner bypass (guard) | **D01 pendiente.** Siempre **403** `ANNUAL_ENROLL_REQUIRES_DIRECTIVE`, sin efectos. No éxito engañoso ni `pending`. | AnnualMembershipService.annualEnroll() | `src/annual-membership/annual-enroll.controller.ts` |
 
 ### membership-requests
 

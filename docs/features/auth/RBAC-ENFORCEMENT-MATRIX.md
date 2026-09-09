@@ -56,7 +56,12 @@ Nota de implementacion:
 | `club_instances:create` | Crear instancia | `club` | permiso global territorial o active assignment compatible | Admin |
 | `club_instances:update` | Editar instancia | `club_instance` | permiso efectivo + asignacion activa exacta o bypass global | Admin y App |
 | `club_roles:read` | Ver miembros y asignaciones | `club` | permiso global territorial o contexto club | Admin y App |
+| `club_members:approve` | Listar no inscritos del año vigente (`GET /club-sections/:sectionId/annual-continuations`) | `club_section` | permiso + `@AuthorizationResource` club_section (idParam: sectionId) | Admin |
+| `club_members:approve` | Inscribir no inscritos (`POST /club-sections/:sectionId/annual-continuations`) | `club_section` | permiso + `@AuthorizationResource` club_section (idParam: sectionId). Owner del perfil **no** autoriza. | Admin |
+| `registration:complete` | Autoinscripción anual (`POST /users/:userId/membership/annual-enroll`) | `user` | Guard: permiso + owner bypass. Servicio: **403** `ANNUAL_ENROLL_REQUIRES_DIRECTIVE` (D01). Sin efectos. | App |
 | `club_roles:assign` | Crear asignacion (`POST /clubs/:clubId/instances/:type/:instanceId/roles`) | `club` | permiso + contexto club valido + reglas complementarias (`ClubRolesGuard`) | Admin y App |
+| `club_roles:assign` | Preelegir / reemplazar / cancelar director N+1 (`POST`/`PATCH`/`DELETE /clubs/:clubId/sections/:sectionId/director-designation`) | `club` | permiso + `@AuthorizationResource` club + `assertCanDesignateDirector` (super-admin, admin, director-lf, assistant-lf **y** `canManageClub`); sección ∈ club de la URL | Admin |
+| `club_roles:assign` | Leer programación de director (`GET /clubs/:clubId/sections/:sectionId/director-designation`) | `club` | mismos actores que POST (el permiso solo no basta; GET también exige `assertCanDesignateDirector`) | Admin |
 | `club_roles:assign` | Actualizar asignacion (`PATCH /club-roles/:assignmentId`) | `club_assignment` | permiso efectivo + active assignment o bypass global | Admin y App |
 | `club_roles:revoke` | Revocar asignacion (`DELETE /club-roles/:assignmentId`) | `club_assignment` | permiso efectivo + active assignment o bypass global | Admin |
 | `activities:read` | Ver actividades | `club` | permiso global territorial o contexto club | Admin y App |
