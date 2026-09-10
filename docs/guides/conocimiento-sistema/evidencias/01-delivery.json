@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "deliver",
+  "type": "architecture",
+  "input": "/Users/abner/Documents/development/sacdia/docs/guides/conocimiento-sistema/diagramas/01-mapa-sistema.architecture.json",
+  "output": "/Users/abner/Documents/development/sacdia/docs/guides/conocimiento-sistema/diagramas/01-mapa-sistema.html",
+  "specification": {
+    "sha256": "99552233cdb6037fbf5424ff1f2e2bfded9e3cee9d733dc3c23e6c001816c6ee",
+    "bytes": 1747
+  },
+  "artifact": {
+    "sha256": "153a02b623a14f9da162ccf1819e204ec061c8c3cd117f32b542fc5697d9af99",
+    "bytes": 800042
+  },
+  "validation": {
+    "checksPassed": 9,
+    "checkCount": 9,
+    "compositionProfile": "showcase",
+    "compositionStatus": "pass",
+    "errors": 0,
+    "warnings": 0
+  }
+}

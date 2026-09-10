@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "deliver",
+  "type": "workflow",
+  "input": "/Users/abner/Documents/development/sacdia/docs/guides/conocimiento-sistema/diagramas/02-revision-evidencias.workflow.json",
+  "output": "/Users/abner/Documents/development/sacdia/docs/guides/conocimiento-sistema/diagramas/02-revision-evidencias.html",
+  "specification": {
+    "sha256": "7257afeaf22c869994ea27eb191fb7673b952a45bce03b004f809a3ee3dc2bc9",
+    "bytes": 3488
+  },
+  "artifact": {
+    "sha256": "523b63f48bca9314dcd73fc375e01df585ac3235a2a01af0f6414bdd5765f3df",
+    "bytes": 803434
+  },
+  "validation": {
+    "checksPassed": 9,
+    "checkCount": 9,
+    "compositionProfile": "showcase",
+    "compositionStatus": "pass",
+    "errors": 0,
+    "warnings": 0
+  }
+}

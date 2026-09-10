@@ -1,0 +1,99 @@
+{
+  "cut_date": "2026-09-10",
+  "method": "Documentary review; no product execution or deployment verification",
+  "workspace_head": "a249d914f3f9db39e3698c698395c0fab57bbbfb",
+  "archify_revision": "10722002bb8777ecb639d93c49586fae4adf3ae4",
+  "sources": [
+    {
+      "path": "docs/canon/source-of-truth.md",
+      "sha256": "e8690dac615c1946fedb5e53762da87aad124db1a83a53eacdda7fe041b43224",
+      "bytes": 9321,
+      "changed_since_initial": false,
+      "local_status": ""
+    },
+    {
+      "path": "docs/README.md",
+      "sha256": "f50eb742968bf40cbb95da8375ab82dfaf03ca0392a21dc0e87a752cee4436cf",
+      "bytes": 5419,
+      "changed_since_initial": false,
+      "local_status": ""
+    },
+    {
+      "path": "docs/canon/dominio-sacdia.md",
+      "sha256": "9309ba8fb711ea557fbc6d7bdc57775c161df52c491a3a69c48cbea9ff30489e",
+      "bytes": 13500,
+      "changed_since_initial": false,
+      "local_status": ""
+    },
+    {
+      "path": "docs/canon/identidad-sacdia.md",
+      "sha256": "d2d91eafb9ccb49adf7af5fd1a94465515e8da6f66d9ba69809a4becc253b00b",
+      "bytes": 3367,
+      "changed_since_initial": false,
+      "local_status": ""
+    },
+    {
+      "path": "docs/canon/gobernanza-canon.md",
+      "sha256": "8b54aefa278c614c8977ec099c2367e6d3cfd2bda4ef25f1174235a097e44a2e",
+      "bytes": 4800,
+      "changed_since_initial": false,
+      "local_status": ""
+    },
+    {
+      "path": "docs/canon/arquitectura-sacdia.md",
+      "sha256": "d5f56645c77316fb599cc42c9ea12beab14c11ca6f35a488c47367117e123d67",
+      "bytes": 6916,
+      "changed_since_initial": false,
+      "local_status": ""
+    },
+    {
+      "path": "docs/features/README.md",
+      "sha256": "2d088db0cacad34b0da36b560e2e7e54750d04d641abd6555e23d8b60590db40",
+      "bytes": 6721,
+      "changed_since_initial": false,
+      "local_status": ""
+    },
+    {
+      "path": "docs/features/rbac.md",
+      "sha256": "cfefbd78243925959f8c2c1f17142b99fa984cea6258104ca12e7351f1e404b3",
+      "bytes": 19199,
+      "changed_since_initial": true,
+      "local_status": ""
+    },
+    {
+      "path": "docs/features/gestion-clubs.md",
+      "sha256": "e444ff2c2f03ed6d3b20cd4c0bf625ce5314d41d34cb9b3b8400fc6817b43647",
+      "bytes": 17636,
+      "changed_since_initial": true,
+      "local_status": ""
+    },
+    {
+      "path": "docs/features/validacion-evidencias.md",
+      "sha256": "880844a53ab10250648594fec0f69115818facfadf55118d68ad1188aaaf42b9",
+      "bytes": 5810,
+      "changed_since_initial": false,
+      "local_status": ""
+    },
+    {
+      "path": "docs/features/auth/RBAC-ENFORCEMENT-MATRIX.md",
+      "sha256": "8a0e350e494118d1a1bdebdb3df2182933e891c7d89740fc30ce7c1153de672e",
+      "bytes": 13537,
+      "changed_since_initial": true,
+      "local_status": ""
+    },
+    {
+      "path": "docs/api/ENDPOINTS-LIVE-REFERENCE.md",
+      "sha256": "b8d210f3462aeb11b93411c439a2bf00fee74d17b3eac7b04e7910946977a8ad",
+      "bytes": 238683,
+      "changed_since_initial": true,
+      "local_status": ""
+    },
+    {
+      "path": "docs/features/auth/AUTHORIZATION-CANONICAL-CONTRACT.md",
+      "sha256": "c6299ef3f889bf7a5c8e342d553782ab03372bf3a49b830364ba20523606e7c5",
+      "bytes": 16365,
+      "changed_since_initial": true,
+      "local_status": ""
+    }
+  ]
+}

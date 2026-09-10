@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {"title": "SACDIA · Cómo se conectan sus partes", "quality_profile": "showcase", "viewBox": [1300, 620]},
+  "components": [
+    {"id": "actores", "type": "external", "label": "Personas", "sublabel": "Miembros y responsables", "pos": [35, 260], "size": [215, 82]},
+    {"id": "app", "type": "frontend", "label": "App móvil", "sublabel": "Operación cotidiana", "pos": [350, 85], "size": [215, 82]},
+    {"id": "admin", "type": "frontend", "label": "Panel administrativo", "sublabel": "Gestión y supervisión", "pos": [350, 435], "size": [215, 82]},
+    {"id": "backend", "type": "backend", "label": "Reglas del sistema", "sublabel": "Backend · permisos y procesos", "pos": [700, 260], "size": [230, 82]},
+    {"id": "datos", "type": "database", "label": "Datos institucionales", "sublabel": "Persistencia e integridad", "pos": [1040, 260], "size": [230, 82]}
+  ],
+  "connections": [
+    {"id": "personas-app", "from": "actores", "to": "app"},
+    {"id": "personas-admin", "from": "actores", "to": "admin"},
+    {"id": "app-backend", "from": "app", "to": "backend", "label": "Solicitudes"},
+    {"id": "admin-backend", "from": "admin", "to": "backend", "label": "Solicitudes"},
+    {"id": "backend-datos", "from": "backend", "to": "datos", "label": "Lee y guarda"}
+  ],
+  "cards": [
+    {"dot": "cyan", "title": "Dos puertas, reglas compartidas", "items": ["App y panel dependen del backend.", "El acceso depende del rol y del contexto; no todos ven lo mismo."]},
+    {"dot": "amber", "title": "Alcance de esta lectura", "items": ["Síntesis de la arquitectura canónica; no es un mapa de despliegue.", "No certifica disponibilidad productiva ni historial completo."]}
+  ]
+}

@@ -1,0 +1,173 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "Clases y honores · Revisión de evidencias",
+    "quality_profile": "showcase",
+    "legend": {
+      "entries": {
+        "frontend": {
+          "label": "Interfaz"
+        },
+        "backend": {
+          "label": "Sistema"
+        },
+        "database": {
+          "label": "Registro"
+        },
+        "external": {
+          "label": "Persona"
+        }
+      }
+    }
+  },
+  "lanes": [
+    {
+      "id": "captura",
+      "label": "Miembro o consejero"
+    },
+    {
+      "id": "sistema",
+      "label": "Sistema"
+    },
+    {
+      "id": "revision",
+      "label": "Revisor autorizado"
+    },
+    {
+      "id": "rechazo",
+      "label": "Si no se aprueba",
+      "variant": "exception"
+    }
+  ],
+  "mainPath": [
+    "cargar",
+    "pendiente",
+    "revisar",
+    "aprobar",
+    "aprobada"
+  ],
+  "nodes": [
+    {
+      "id": "cargar",
+      "lane": "captura",
+      "col": 0,
+      "type": "frontend",
+      "label": "Presentar evidencia",
+      "sublabel": "Carga y envío según tipo",
+      "width": 220
+    },
+    {
+      "id": "pendiente",
+      "lane": "sistema",
+      "col": 1,
+      "type": "backend",
+      "label": "Pendiente",
+      "sublabel": "Cola de revisión",
+      "width": 220
+    },
+    {
+      "id": "revisar",
+      "lane": "revision",
+      "col": 2,
+      "type": "external",
+      "label": "Revisar archivos",
+      "sublabel": "Evaluación humana",
+      "width": 220
+    },
+    {
+      "id": "aprobar",
+      "lane": "revision",
+      "col": 3,
+      "type": "external",
+      "label": "Aprobar",
+      "sublabel": "Confirmar decisión",
+      "width": 220
+    },
+    {
+      "id": "aprobada",
+      "lane": "sistema",
+      "col": 4,
+      "type": "database",
+      "label": "Aprobación",
+      "sublabel": "Acción en historial",
+      "width": 220
+    },
+    {
+      "id": "rechazar",
+      "lane": "rechazo",
+      "col": 3,
+      "type": "external",
+      "label": "Rechazar",
+      "sublabel": "Motivo obligatorio",
+      "width": 220
+    },
+    {
+      "id": "rechazada",
+      "lane": "rechazo",
+      "col": 4,
+      "type": "database",
+      "label": "Rechazo",
+      "sublabel": "Acción en historial",
+      "width": 220
+    }
+  ],
+  "edges": [
+    {
+      "id": "carga-cola",
+      "from": "cargar",
+      "to": "pendiente",
+      "role": "main"
+    },
+    {
+      "id": "consulta-revisor",
+      "from": "pendiente",
+      "to": "revisar",
+      "role": "main",
+      "label": "Consultar"
+    },
+    {
+      "id": "decision-si",
+      "from": "revisar",
+      "to": "aprobar",
+      "role": "main",
+      "label": "Conforme"
+    },
+    {
+      "id": "guardar-aprobacion",
+      "from": "aprobar",
+      "to": "aprobada",
+      "role": "main"
+    },
+    {
+      "id": "decision-no",
+      "from": "revisar",
+      "to": "rechazar",
+      "role": "branch",
+      "label": "No conforme"
+    },
+    {
+      "id": "guardar-rechazo",
+      "from": "rechazar",
+      "to": "rechazada"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Quién revisa",
+      "items": [
+        "Contrato: admin, super-admin o coordinator, más validation:review.",
+        "El alcance efectivo debe verificarse para cada cuenta."
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Qué no significa",
+      "items": [
+        "Aprobar evidencia no equivale a investidura.",
+        "Las carpetas anuales tienen un circuito separado."
+      ]
+    }
+  ]
+}
