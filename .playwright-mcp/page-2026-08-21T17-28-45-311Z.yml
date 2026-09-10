@@ -1,0 +1,465 @@
+- generic [active] [ref=e1]:
+  - link "Ir al contenido" [ref=e2] [cursor=pointer]:
+    - /url: "#_top"
+  - generic [ref=e3]:
+    - banner [ref=e4]:
+      - generic [ref=e5]:
+        - generic [ref=e7]:
+          - link "Inicio — Manual operativo" [ref=e8] [cursor=pointer]:
+            - /url: /
+            - generic [ref=e9]: S
+            - generic [ref=e10]:
+              - generic [ref=e11]: SACDIA
+              - generic [ref=e12]: Operativo
+          - navigation "Cambiar portal de documentación" [ref=e13]:
+            - link "Operativo" [ref=e14] [cursor=pointer]:
+              - /url: http://localhost:4321
+            - link "Administrativo" [ref=e15] [cursor=pointer]:
+              - /url: http://localhost:4322
+            - link "Técnico" [ref=e16] [cursor=pointer]:
+              - /url: http://localhost:4323
+        - button "Buscar" [ref=e19] [cursor=pointer]:
+          - generic [ref=e23]:
+            - generic [ref=e24]: ⌘
+            - generic [ref=e25]: K
+        - generic [ref=e29]:
+          - generic [ref=e30]: Seleccionar tema
+          - combobox "Seleccionar tema" [ref=e31] [cursor=pointer]:
+            - option "Oscuro"
+            - option "Claro"
+            - option "Automático" [selected]
+    - navigation "Primario":
+      - list [ref=e35]:
+        - listitem [ref=e36]:
+          - group [ref=e37]:
+            - generic "Primeros pasos" [ref=e38] [cursor=pointer]
+            - list [ref=e42]:
+              - listitem [ref=e43]:
+                - link "Primeros pasos" [ref=e44] [cursor=pointer]:
+                  - /url: /primeros-pasos/
+        - listitem [ref=e45]:
+          - group [ref=e46]:
+            - generic "Pantallas" [ref=e47] [cursor=pointer]
+            - list [ref=e51]:
+              - listitem [ref=e52]:
+                - link "Pantallas de la aplicación" [ref=e53] [cursor=pointer]:
+                  - /url: /pantallas/
+              - listitem [ref=e54]:
+                - link "Acceso, registro y recuperación" [ref=e55] [cursor=pointer]:
+                  - /url: /pantallas/acceso-y-registro/
+              - listitem [ref=e56]:
+                - link "Actividades y asistencia" [ref=e57] [cursor=pointer]:
+                  - /url: /pantallas/actividades/
+              - listitem [ref=e58]:
+                - link "Ajustes y accesibilidad" [ref=e59] [cursor=pointer]:
+                  - /url: /pantallas/ajustes/
+              - listitem [ref=e60]:
+                - link "Ayuda y soporte" [ref=e61] [cursor=pointer]:
+                  - /url: /pantallas/ayuda-soporte/
+              - listitem [ref=e62]:
+                - link "Bloqueo biométrico" [ref=e63] [cursor=pointer]:
+                  - /url: /pantallas/bloqueo-biometrico/
+              - listitem [ref=e64]:
+                - link "Camporees" [ref=e65] [cursor=pointer]:
+                  - /url: /pantallas/camporees/
+              - listitem [ref=e66]:
+                - link "Carga de certificados" [ref=e67] [cursor=pointer]:
+                  - /url: /pantallas/carga-certificados/
+              - listitem [ref=e68]:
+                - link "Mis cargos y asignaciones" [ref=e69] [cursor=pointer]:
+                  - /url: /pantallas/cargos/
+              - listitem [ref=e70]:
+                - link "Carpeta anual de evidencias" [ref=e71] [cursor=pointer]:
+                  - /url: /pantallas/carpeta-evidencias/
+              - listitem [ref=e72]:
+                - link "Certificaciones de Guías Mayores" [ref=e73] [cursor=pointer]:
+                  - /url: /pantallas/certificaciones/
+              - listitem [ref=e74]:
+                - link "Clases progresivas" [ref=e75] [cursor=pointer]:
+                  - /url: /pantallas/clases-progresivas/
+              - listitem [ref=e76]:
+                - link "Clasificaciones" [ref=e77] [cursor=pointer]:
+                  - /url: /pantallas/clasificaciones/
+              - listitem [ref=e78]:
+                - link "Completar el perfil inicial" [ref=e79] [cursor=pointer]:
+                  - /url: /pantallas/completar-perfil/
+              - listitem [ref=e80]:
+                - link "Coordinación territorial" [ref=e81] [cursor=pointer]:
+                  - /url: /pantallas/coordinacion/
+              - listitem [ref=e82]:
+                - link "Credencial digital" [ref=e83] [cursor=pointer]:
+                  - /url: /pantallas/credencial-digital/
+              - listitem [ref=e84]:
+                - link "Escáner QR" [ref=e85] [cursor=pointer]:
+                  - /url: /pantallas/escaner-qr/
+              - listitem [ref=e86]:
+                - link "Especialidades" [ref=e87] [cursor=pointer]:
+                  - /url: /pantallas/especialidades/
+              - listitem [ref=e88]:
+                - link "Finanzas del club" [ref=e89] [cursor=pointer]:
+                  - /url: /pantallas/finanzas/
+              - listitem [ref=e90]:
+                - link "Informes mensuales" [ref=e91] [cursor=pointer]:
+                  - /url: /pantallas/informes-mensuales/
+              - listitem [ref=e92]:
+                - link "Inicio de la aplicación" [ref=e93] [cursor=pointer]:
+                  - /url: /pantallas/inicio/
+              - listitem [ref=e94]:
+                - link "Inscripción anual del club" [ref=e95] [cursor=pointer]:
+                  - /url: /pantallas/inscripcion-club/
+              - listitem [ref=e96]:
+                - link "Inventario del club" [ref=e97] [cursor=pointer]:
+                  - /url: /pantallas/inventario/
+              - listitem [ref=e98]:
+                - link "Investiduras" [ref=e99] [cursor=pointer]:
+                  - /url: /pantallas/investiduras/
+              - listitem [ref=e100]:
+                - link "Logros" [ref=e101] [cursor=pointer]:
+                  - /url: /pantallas/logros/
+              - listitem [ref=e102]:
+                - link "Maestrías de especialidades" [ref=e103] [cursor=pointer]:
+                  - /url: /pantallas/maestrias/
+              - listitem [ref=e104]:
+                - link "Materiales y pedidos" [ref=e105] [cursor=pointer]:
+                  - /url: /pantallas/materiales/
+              - listitem [ref=e106]:
+                - link "Mi club y mi sección" [ref=e107] [cursor=pointer]:
+                  - /url: /pantallas/mi-club/
+              - listitem [ref=e108]:
+                - link "Miembros y cargos" [ref=e109] [cursor=pointer]:
+                  - /url: /pantallas/miembros/
+              - listitem [ref=e110]:
+                - link "Notificaciones" [ref=e111] [cursor=pointer]:
+                  - /url: /pantallas/notificaciones/
+              - listitem [ref=e112]:
+                - link "Órdenes de pago" [ref=e113] [cursor=pointer]:
+                  - /url: /pantallas/ordenes-pago/
+              - listitem [ref=e114]:
+                - link "Perfil, salud y sesiones" [ref=e115] [cursor=pointer]:
+                  - /url: /pantallas/perfil/
+              - listitem [ref=e116]:
+                - link "Recursos" [ref=e117] [cursor=pointer]:
+                  - /url: /pantallas/recursos/
+              - listitem [ref=e118]:
+                - link "Seguros" [ref=e119] [cursor=pointer]:
+                  - /url: /pantallas/seguros/
+              - listitem [ref=e120]:
+                - link "Tablero principal" [ref=e121] [cursor=pointer]:
+                  - /url: /pantallas/tablero/
+              - listitem [ref=e122]:
+                - link "Traslados de club o sección" [ref=e123] [cursor=pointer]:
+                  - /url: /pantallas/traslados/
+              - listitem [ref=e124]:
+                - link "Unidades y registros semanales" [ref=e125] [cursor=pointer]:
+                  - /url: /pantallas/unidades/
+              - listitem [ref=e126]:
+                - link "Estados de validación" [ref=e127] [cursor=pointer]:
+                  - /url: /pantallas/validaciones/
+        - listitem [ref=e128]:
+          - group [ref=e129]:
+            - generic "Procesos" [ref=e130] [cursor=pointer]
+            - list [ref=e134]:
+              - listitem [ref=e135]:
+                - link "Procesos de SACDIA" [ref=e136] [cursor=pointer]:
+                  - /url: /procesos/
+              - listitem [ref=e137]:
+                - link "Planear una actividad y registrar asistencia" [ref=e138] [cursor=pointer]:
+                  - /url: /procesos/actividad-y-asistencia/
+              - listitem [ref=e139]:
+                - link "Alta de cuenta y membresía" [ref=e140] [cursor=pointer]:
+                  - /url: /procesos/alta-y-membresia/
+              - listitem [ref=e141]:
+                - link "Reconocer formación desde certificados" [ref=e142] [cursor=pointer]:
+                  - /url: /procesos/carga-certificados/
+              - listitem [ref=e143]:
+                - link "Completar y validar la carpeta anual" [ref=e144] [cursor=pointer]:
+                  - /url: /procesos/carpeta-anual/
+              - listitem [ref=e145]:
+                - link "Registrar y supervisar finanzas" [ref=e146] [cursor=pointer]:
+                  - /url: /procesos/cierre-financiero/
+              - listitem [ref=e147]:
+                - link "Publicar una comunicación o recurso" [ref=e148] [cursor=pointer]:
+                  - /url: /procesos/comunicacion-recursos/
+              - listitem [ref=e149]:
+                - link "Registrar puntajes y consultar clasificaciones" [ref=e150] [cursor=pointer]:
+                  - /url: /procesos/evaluacion-y-clasificacion/
+              - listitem [ref=e151]:
+                - link "Completar formación y solicitar investidura" [ref=e152] [cursor=pointer]:
+                  - /url: /procesos/formacion-e-investidura/
+              - listitem [ref=e153]:
+                - link "Gestionar un club y su sección" [ref=e154] [cursor=pointer]:
+                  - /url: /procesos/gestion-club-seccion/
+              - listitem [ref=e155]:
+                - link "Completar y supervisar el informe mensual" [ref=e156] [cursor=pointer]:
+                  - /url: /procesos/informe-mensual/
+              - listitem [ref=e157]:
+                - link "Inscribir y operar un camporee" [ref=e158] [cursor=pointer]:
+                  - /url: /procesos/participacion-camporee/
+              - listitem [ref=e159]:
+                - link "Registrar seguro mediante orden de pago" [ref=e160] [cursor=pointer]:
+                  - /url: /procesos/seguro-y-orden-pago/
+              - listitem [ref=e161]:
+                - link "Solicitar, pagar y recibir materiales" [ref=e162] [cursor=pointer]:
+                  - /url: /procesos/solicitud-materiales/
+              - listitem [ref=e163]:
+                - link "Trasladar un miembro" [ref=e164] [cursor=pointer]:
+                  - /url: /procesos/traslado-miembro/
+        - listitem [ref=e165]:
+          - group [ref=e166]:
+            - generic "Ayuda" [ref=e167] [cursor=pointer]
+            - list [ref=e171]:
+              - listitem [ref=e172]:
+                - link "Ayuda y preguntas frecuentes" [ref=e173] [cursor=pointer]:
+                  - /url: /ayuda/
+    - generic [ref=e175]:
+      - complementary [ref=e176]:
+        - navigation [ref=e181]:
+          - heading "En esta página" [level=2] [ref=e182]
+          - list [ref=e183]:
+            - listitem [ref=e184]:
+              - link "Sinopsis" [ref=e185] [cursor=pointer]:
+                - /url: "#_top"
+            - listitem [ref=e186]:
+              - link "Resultado esperado" [ref=e187] [cursor=pointer]:
+                - /url: "#resultado-esperado"
+            - listitem [ref=e188]:
+              - link "Quién puede utilizarlo" [ref=e189] [cursor=pointer]:
+                - /url: "#quién-puede-utilizarlo"
+            - listitem [ref=e190]:
+              - link "Pantallas incluidas" [ref=e191] [cursor=pointer]:
+                - /url: "#pantallas-incluidas"
+            - listitem [ref=e192]:
+              - link "Antes de comenzar" [ref=e193] [cursor=pointer]:
+                - /url: "#antes-de-comenzar"
+            - listitem [ref=e194]:
+              - link "Ruta rápida" [ref=e195] [cursor=pointer]:
+                - /url: "#ruta-rápida"
+            - listitem [ref=e196]:
+              - link "Entiende el progreso" [ref=e197] [cursor=pointer]:
+                - /url: "#entiende-el-progreso"
+            - listitem [ref=e198]:
+              - link "Estados de un requisito" [ref=e199] [cursor=pointer]:
+                - /url: "#estados-de-un-requisito"
+            - listitem [ref=e200]:
+              - link "Registrar y enviar evidencia" [ref=e201] [cursor=pointer]:
+                - /url: "#registrar-y-enviar-evidencia"
+            - listitem [ref=e202]:
+              - link "Enviar la clase a investidura" [ref=e203] [cursor=pointer]:
+                - /url: "#enviar-la-clase-a-investidura"
+            - listitem [ref=e204]:
+              - link "Cómo verificarlo" [ref=e205] [cursor=pointer]:
+                - /url: "#cómo-verificarlo"
+            - listitem [ref=e206]:
+              - link "Errores frecuentes" [ref=e207] [cursor=pointer]:
+                - /url: "#errores-frecuentes"
+            - listitem [ref=e208]:
+              - link "Procesos relacionados" [ref=e209] [cursor=pointer]:
+                - /url: "#procesos-relacionados"
+            - listitem [ref=e210]:
+              - link "Fuente de verificación" [ref=e211] [cursor=pointer]:
+                - /url: "#fuente-de-verificación"
+      - main [ref=e213]:
+        - heading "Clases progresivas" [level=1] [ref=e216]
+        - generic [ref=e218]:
+          - generic [ref=e219]:
+            - paragraph [ref=e220]:
+              - text: Usa
+              - strong [ref=e221]: Clases
+              - text: para consultar tu inscripción anual, trabajar requisitos y saber qué falta antes de que el club envíe la clase al proceso de investidura.
+            - generic [ref=e222]:
+              - heading "Resultado esperado" [level=2] [ref=e223]
+              - link "Sección titulada «Resultado esperado»" [ref=e224] [cursor=pointer]:
+                - /url: "#resultado-esperado"
+            - paragraph [ref=e229]: Podrás identificar tu clase activa, registrar evidencias en el requisito correcto y distinguir entre un requisito editable, enviado, validado o devuelto.
+            - generic [ref=e230]:
+              - heading "Quién puede utilizarlo" [level=2] [ref=e231]
+              - link "Sección titulada «Quién puede utilizarlo»" [ref=e232] [cursor=pointer]:
+                - /url: "#quién-puede-utilizarlo"
+            - list [ref=e237]:
+              - listitem [ref=e238]: Cada miembro consulta y trabaja su propia clase.
+              - listitem [ref=e239]: Consejeros y responsables pedagógicos consultan únicamente las clases y miembros incluidos en su asignación.
+              - listitem [ref=e240]: Dirección y secretaría supervisan el alcance habilitado para su sección.
+            - paragraph [ref=e241]: Ver una clase no concede permisos para revisar evidencias ni para enviarla a investidura.
+            - generic [ref=e242]:
+              - heading "Pantallas incluidas" [level=2] [ref=e243]
+              - link "Sección titulada «Pantallas incluidas»" [ref=e244] [cursor=pointer]:
+                - /url: "#pantallas-incluidas"
+            - list [ref=e249]:
+              - listitem [ref=e250]: Mis clases y catálogo
+              - listitem [ref=e251]: Detalle y progreso
+              - listitem [ref=e252]: Módulos y requisitos
+              - listitem [ref=e253]: Hoja de ruta
+              - listitem [ref=e254]: Progreso de miembros
+              - listitem [ref=e255]: Pendientes e historial de investidura
+            - generic [ref=e256]:
+              - heading "Antes de comenzar" [level=2] [ref=e257]
+              - link "Sección titulada «Antes de comenzar»" [ref=e258] [cursor=pointer]:
+                - /url: "#antes-de-comenzar"
+            - list [ref=e263]:
+              - listitem [ref=e264]: Confirma que estás en el club y sección correctos.
+              - listitem [ref=e265]: Comprueba cuál inscripción corresponde al año eclesiástico activo.
+              - listitem [ref=e266]: Prepara archivos legibles y relacionados con un solo requisito.
+              - listitem [ref=e267]: No abras otra inscripción para corregir un requisito existente.
+            - generic [ref=e268]:
+              - heading "Ruta rápida" [level=2] [ref=e269]
+              - link "Sección titulada «Ruta rápida»" [ref=e270] [cursor=pointer]:
+                - /url: "#ruta-rápida"
+            - list [ref=e275]:
+              - listitem [ref=e276]:
+                - text: Abre
+                - strong [ref=e277]: Clases
+                - text: y selecciona tu clase activa.
+              - listitem [ref=e278]: Revisa el resumen de progreso antes de abrir un módulo.
+              - listitem [ref=e279]: Entra al requisito que deseas trabajar.
+              - listitem [ref=e280]: Adjunta la evidencia y confirma que aparezca en la lista.
+              - listitem [ref=e281]: Envía el requisito una sola vez y espera la resolución.
+            - generic [ref=e282]:
+              - heading "Entiende el progreso" [level=2] [ref=e283]
+              - link "Sección titulada «Entiende el progreso»" [ref=e284] [cursor=pointer]:
+                - /url: "#entiende-el-progreso"
+            - paragraph [ref=e289]: "El detalle separa el trabajo por bloques. No todos tienen la misma función:"
+            - table [ref=e290]:
+              - rowgroup [ref=e291]:
+                - row [ref=e292]:
+                  - columnheader "Bloque" [ref=e293]
+                  - columnheader "Qué representa" [ref=e294]
+                  - columnheader "Qué debes confirmar" [ref=e295]
+              - rowgroup [ref=e296]:
+                - row [ref=e297]:
+                  - cell "Desarrollo básico" [ref=e298]
+                  - cell "Requisitos principales de la clase" [ref=e299]
+                  - cell "Que no queden requisitos obligatorios pendientes." [ref=e300]
+                - row [ref=e301]:
+                  - cell "Actividades complementarias" [ref=e302]
+                  - cell "Requisitos adicionales según el contexto institucional" [ref=e303]
+                  - cell "Que el requisito corresponda a tu club, sección y periodo." [ref=e304]
+                - row [ref=e305]:
+                  - cell "Sección avanzada" [ref=e306]
+                  - cell "Desarrollo adicional cuando la clase lo habilita" [ref=e307]
+                  - cell "Que su avance se muestre separado del progreso obligatorio." [ref=e308]
+            - paragraph [ref=e309]: El porcentaje es un resumen. La decisión real depende del estado de cada requisito obligatorio, no solo del número mostrado en la tarjeta.
+            - generic [ref=e310]:
+              - heading "Estados de un requisito" [level=2] [ref=e311]
+              - link "Sección titulada «Estados de un requisito»" [ref=e312] [cursor=pointer]:
+                - /url: "#estados-de-un-requisito"
+            - table [ref=e317]:
+              - rowgroup [ref=e318]:
+                - row [ref=e319]:
+                  - columnheader "Estado" [ref=e320]
+                  - columnheader "Significado" [ref=e321]
+                  - columnheader "Acción correcta" [ref=e322]
+              - rowgroup [ref=e323]:
+                - row [ref=e324]:
+                  - cell [ref=e325]:
+                    - code [ref=e326]: PENDING
+                  - cell "Todavía puedes trabajar el requisito." [ref=e327]
+                  - cell "Agrega o elimina evidencia antes de enviarlo." [ref=e328]
+                - row [ref=e329]:
+                  - cell [ref=e330]:
+                    - code [ref=e331]: SUBMITTED
+                  - cell "El requisito está esperando revisión." [ref=e332]
+                  - cell "No lo vuelvas a enviar ni dupliques archivos." [ref=e333]
+                - row [ref=e334]:
+                  - cell [ref=e335]:
+                    - code [ref=e336]: VALIDATED
+                  - cell "La evidencia fue aprobada." [ref=e337]
+                  - cell "Consérvalo como terminado y continúa con otro requisito." [ref=e338]
+                - row [ref=e339]:
+                  - cell [ref=e340]:
+                    - code [ref=e341]: REJECTED
+                  - cell "La revisión solicita una corrección." [ref=e342]
+                  - cell "Lee la observación, corrige el mismo requisito y vuelve a enviarlo." [ref=e343]
+            - paragraph [ref=e344]: Un requisito enviado o validado deja de ser libremente editable. Si la pantalla todavía muestra información anterior, actualiza antes de repetir una acción.
+            - generic [ref=e345]:
+              - heading "Registrar y enviar evidencia" [level=2] [ref=e346]
+              - link "Sección titulada «Registrar y enviar evidencia»" [ref=e347] [cursor=pointer]:
+                - /url: "#registrar-y-enviar-evidencia"
+            - list [ref=e352]:
+              - listitem [ref=e353]: Abre el módulo y selecciona el requisito.
+              - listitem [ref=e354]: Lee la descripción y revisa la evidencia que ya existe.
+              - listitem [ref=e355]: Pulsa la acción para agregar archivo y espera a que termine la carga.
+              - listitem [ref=e356]: Confirma nombre, tipo y cantidad de archivos.
+              - listitem [ref=e357]:
+                - text: Pulsa
+                - strong [ref=e358]: Enviar
+                - text: únicamente cuando la evidencia esté completa.
+              - listitem [ref=e359]: Regresa al resumen y comprueba que el estado cambió a enviado.
+            - paragraph [ref=e360]: Si un requisito fue devuelto, conserva el registro original. El historial y la observación pertenecen a ese requisito; crear otro rompe la continuidad de la revisión.
+            - generic [ref=e361]:
+              - heading "Enviar la clase a investidura" [level=2] [ref=e362]
+              - link "Sección titulada «Enviar la clase a investidura»" [ref=e363] [cursor=pointer]:
+                - /url: "#enviar-la-clase-a-investidura"
+            - paragraph [ref=e368]: "Completar requisitos no registra automáticamente la investidura. El proceso continúa así:"
+            - list [ref=e369]:
+              - listitem [ref=e370]: Todos los requisitos obligatorios quedan validados.
+              - listitem [ref=e371]: El sistema confirma duración, inscripción activa y configuración del periodo.
+              - listitem [ref=e372]: Un consejero o responsable autorizado envía la inscripción.
+              - listitem [ref=e373]: Dirección de club, coordinación y campo local resuelven sus etapas.
+              - listitem [ref=e374]: La ceremonia se registra y el estado final cambia a investido.
+            - paragraph [ref=e375]: "Durante la validación la inscripción puede quedar bloqueada. Si eres miembro y no ves la acción de envío institucional, es esperado: completar evidencia y aprobar la investidura son responsabilidades distintas."
+            - generic [ref=e376]:
+              - heading "Cómo verificarlo" [level=2] [ref=e377]
+              - link "Sección titulada «Cómo verificarlo»" [ref=e378] [cursor=pointer]:
+                - /url: "#cómo-verificarlo"
+            - list [ref=e383]:
+              - listitem [ref=e384]: El requisito conserva los archivos que cargaste.
+              - listitem [ref=e385]: El estado visible coincide con la última acción confirmada.
+              - listitem [ref=e386]: El resumen separa progreso básico, complementario y avanzado.
+              - listitem [ref=e387]: Una devolución conserva su observación y permite continuar sobre el mismo requisito cuando vuelve a estar editable.
+            - generic [ref=e388]:
+              - heading "Errores frecuentes" [level=2] [ref=e389]
+              - link "Sección titulada «Errores frecuentes»" [ref=e390] [cursor=pointer]:
+                - /url: "#errores-frecuentes"
+            - table [ref=e395]:
+              - rowgroup [ref=e396]:
+                - row [ref=e397]:
+                  - columnheader "Problema" [ref=e398]
+                  - columnheader "Qué hacer" [ref=e399]
+              - rowgroup [ref=e400]:
+                - row [ref=e401]:
+                  - cell "No aparece la clase activa" [ref=e402]
+                  - cell "Confirma el año eclesiástico, club y sección. No elijas otra clase solo para continuar." [ref=e403]
+                - row [ref=e404]:
+                  - cell "No aparece la acción" [ref=e405]
+                  - cell "Tu cargo, asignación o estado actual no permite esa acción. Solicita revisión de acceso." [ref=e406]
+                - row [ref=e407]:
+                  - cell [ref=e408]:
+                    - strong [ref=e409]: Agregar evidencia
+                    - text: no abre el selector después de una devolución
+                  - cell "Conserva la evidencia existente y repórtalo desde Ayuda con el nombre del requisito. No abras otra inscripción." [ref=e410]
+                - row [ref=e411]:
+                  - cell "El requisito sigue como pendiente" [ref=e412]
+                  - cell "Actualiza la pantalla y confirma que la carga terminó antes de volver a enviarlo." [ref=e413]
+                - row [ref=e414]:
+                  - cell "La inscripción está bloqueada" [ref=e415]
+                  - cell "Espera la resolución institucional o la devolución; no intentes modificarla mediante otra ruta." [ref=e416]
+            - generic [ref=e417]:
+              - heading "Procesos relacionados" [level=2] [ref=e418]
+              - link "Sección titulada «Procesos relacionados»" [ref=e419] [cursor=pointer]:
+                - /url: "#procesos-relacionados"
+            - list [ref=e424]:
+              - listitem [ref=e425]:
+                - link "Completar formación y solicitar investidura" [ref=e426] [cursor=pointer]:
+                  - /url: /procesos/formacion-e-investidura/
+              - listitem [ref=e427]:
+                - link "Trasladar a un miembro" [ref=e428] [cursor=pointer]:
+                  - /url: /procesos/traslado-miembro/
+            - generic [ref=e429]:
+              - heading "Fuente de verificación" [level=2] [ref=e430]
+              - link "Sección titulada «Fuente de verificación»" [ref=e431] [cursor=pointer]:
+                - /url: "#fuente-de-verificación"
+            - paragraph [ref=e436]:
+              - text: Manual contrastado el 2026-08-21 con el flujo efectivo de progreso, evidencia, supervisión e investidura de
+              - code [ref=e437]: sacdia-app
+              - text: ", y con el análisis canónico de Clases Progresivas."
+          - generic [ref=e438]:
+            - paragraph [ref=e440]:
+              - text: "Última actualización:"
+              - time [ref=e441]: 20 ago 2026
+            - generic [ref=e442]:
+              - link [ref=e443] [cursor=pointer]:
+                - /url: /pantallas/certificaciones/
+                - generic [ref=e446]: Página anteriorCertificaciones de Guías Mayores
+              - link [ref=e447] [cursor=pointer]:
+                - /url: /pantallas/clasificaciones/
+                - generic [ref=e450]: Siguiente páginaClasificaciones

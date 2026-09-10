@@ -1,0 +1,205 @@
+- generic [active] [ref=f35e1]:
+  - link "Ir al contenido" [ref=f35e2] [cursor=pointer]:
+    - /url: "#_top"
+  - generic [ref=f35e3]:
+    - banner [ref=f35e4]:
+      - generic [ref=f35e5]:
+        - link "Inicio — Manual operativo" [ref=f35e8] [cursor=pointer]:
+          - /url: /
+          - generic [ref=f35e9]: S
+          - generic [ref=f35e10]:
+            - generic [ref=f35e11]: SACDIA
+            - generic [ref=f35e12]: Operativo
+        - button "Buscar" [ref=f35e15] [cursor=pointer]
+    - navigation "Primario":
+      - button "Menú" [ref=f35e18] [cursor=pointer]
+      - option "Oscuro"
+      - option "Claro"
+      - option "Automático" [selected]
+    - generic [ref=f35e22]:
+      - complementary:
+        - navigation [ref=f35e23]:
+          - group [ref=f35e24]:
+            - generic "En esta página Sinopsis" [ref=f35e25]:
+              - generic [ref=f35e26] [cursor=pointer]: En esta página
+              - generic [ref=f35e29]: Sinopsis
+      - main [ref=f35e31]:
+        - heading "Miembros y cargos" [level=1] [ref=f35e34]
+        - generic [ref=f35e36]:
+          - generic [ref=f35e37]:
+            - paragraph [ref=f35e38]: Consultar miembros de la sección, revisar solicitudes y administrar cargos autorizados.
+            - generic [ref=f35e39]:
+              - heading "Resultado esperado" [level=2] [ref=f35e40]
+              - link "Sección titulada «Resultado esperado»" [ref=f35e41] [cursor=pointer]:
+                - /url: "#resultado-esperado"
+            - paragraph [ref=f35e46]: Al terminar este recorrido, podrás consultar miembros de la sección, revisar solicitudes y administrar cargos autorizados.
+            - generic [ref=f35e47]:
+              - heading "Quién puede utilizarlo" [level=2] [ref=f35e48]
+              - link "Sección titulada «Quién puede utilizarlo»" [ref=f35e49] [cursor=pointer]:
+                - /url: "#quién-puede-utilizarlo"
+            - paragraph [ref=f35e54]:
+              - text: Miembros con lectura de su sección. La app utiliza
+              - code [ref=f35e55]: club_roles:assign
+              - text: o
+              - code [ref=f35e56]: club_roles:revoke
+              - text: como control visual para mostrar acciones administrativas, mientras el backend exige
+              - code [ref=f35e57]: club_members:approve
+              - text: y el alcance de la sección para listar y decidir solicitudes de ingreso.
+            - generic [ref=f35e58]:
+              - heading "Pantallas incluidas" [level=2] [ref=f35e59]
+              - link "Sección titulada «Pantallas incluidas»" [ref=f35e60] [cursor=pointer]:
+                - /url: "#pantallas-incluidas"
+            - list [ref=f35e65]:
+              - listitem [ref=f35e66]: Miembros y solicitudes
+              - listitem [ref=f35e67]: Perfil del miembro
+              - listitem [ref=f35e68]: Asignación de cargo
+            - generic [ref=f35e69]:
+              - heading "Reconoce la pantalla" [level=2] [ref=f35e70]
+              - link "Sección titulada «Reconoce la pantalla»" [ref=f35e71] [cursor=pointer]:
+                - /url: "#reconoce-la-pantalla"
+            - figure "Usa las pestañas Miembros y Solicitudes para cambiar entre el padrón de la sección y las solicitudes de ingreso." [ref=f35e76]:
+              - img "Pantalla móvil de Miembros con la pestaña Solicitudes seleccionada, filtros de estado y un estado sin solicitudes pendientes" [ref=f35e77]
+            - generic [ref=f35e79]:
+              - heading "Antes de comenzar" [level=2] [ref=f35e80]
+              - link "Sección titulada «Antes de comenzar»" [ref=f35e81] [cursor=pointer]:
+                - /url: "#antes-de-comenzar"
+            - list [ref=f35e86]:
+              - listitem [ref=f35e87]: Inicia sesión y confirma el club o sección activos.
+              - listitem [ref=f35e88]: Mantén conexión estable para acciones que guardan o envían información.
+              - listitem [ref=f35e89]: Si una acción no aparece, revisa primero el cargo y el contexto.
+            - generic [ref=f35e90]:
+              - heading "Tareas principales" [level=2] [ref=f35e91]
+              - link "Sección titulada «Tareas principales»" [ref=f35e92] [cursor=pointer]:
+                - /url: "#tareas-principales"
+            - list [ref=f35e97]:
+              - listitem [ref=f35e98]: Buscar miembros y filtrar por clase.
+              - listitem [ref=f35e99]: Abrir perfil, clases, especialidades y datos permitidos.
+              - listitem [ref=f35e100]: Revisar solicitudes de ingreso.
+              - listitem [ref=f35e101]: Asignar, cambiar o revocar un cargo dentro de la sección.
+            - generic [ref=f35e102]:
+              - heading "Revisar solicitudes en la app" [level=2] [ref=f35e103]
+              - link "Sección titulada «Revisar solicitudes en la app»" [ref=f35e104] [cursor=pointer]:
+                - /url: "#revisar-solicitudes-en-la-app"
+            - list [ref=f35e109]:
+              - listitem [ref=f35e110]:
+                - text: Abre
+                - strong [ref=f35e111]: Miembros
+                - text: y confirma el club y la sección activos.
+              - listitem [ref=f35e112]:
+                - text: Selecciona la pestaña
+                - strong [ref=f35e113]: Solicitudes
+                - text: .
+              - listitem [ref=f35e114]: Busca a la persona y abre su perfil antes de decidir.
+              - listitem [ref=f35e115]:
+                - text: Si aparecen las acciones y cuentas con
+                - code [ref=f35e116]: club_members:approve
+                - text: en esa sección, pulsa
+                - strong [ref=f35e117]: Aprobar
+                - text: o
+                - strong [ref=f35e118]: Rechazar
+                - text: una sola vez.
+              - listitem [ref=f35e119]: Actualiza la lista y confirma que la solicitud dejó de estar pendiente.
+            - paragraph [ref=f35e120]: En la versión actual, ambas acciones se envían sin confirmación adicional y el rechazo móvil no solicita un motivo. Revisa con cuidado antes de pulsar.
+            - paragraph [ref=f35e121]:
+              - text: "Existe una diferencia conocida entre permisos: dirección recibe el permiso visual y"
+              - code [ref=f35e122]: club_members:approve
+              - text: ", pero subdirección, secretaría y secretaría-tesorería pueden tener autorización backend para revisar sin recibir"
+              - code [ref=f35e123]: club_roles:assign
+              - text: o
+              - code [ref=f35e124]: club_roles:revoke
+              - text: ". En ese caso los botones quedan ocultos aunque el backend permita la decisión. No intentes entrar al panel administrativo: reporta la inconsistencia de acceso para que se corrija el canal móvil."
+            - generic [ref=f35e125]:
+              - heading "Flujo recomendado" [level=2] [ref=f35e126]
+              - link "Sección titulada «Flujo recomendado»" [ref=f35e127] [cursor=pointer]:
+                - /url: "#flujo-recomendado"
+            - list [ref=f35e132]:
+              - listitem [ref=f35e133]:
+                - text: Abre
+                - strong [ref=f35e134]: Miembros
+                - text: y confirma la sección activa.
+              - listitem [ref=f35e135]:
+                - text: Selecciona la pestaña
+                - strong [ref=f35e136]: Miembros
+                - text: o
+                - strong [ref=f35e137]: Solicitudes
+                - text: .
+              - listitem [ref=f35e138]: Para una solicitud, sigue el recorrido anterior y decide una sola vez.
+              - listitem [ref=f35e139]:
+                - text: Para un miembro activo, abre su perfil y, si tienes permiso, selecciona
+                - strong [ref=f35e140]: Asignar cargo
+                - text: .
+              - listitem [ref=f35e141]: Elige el rol, guarda y comprueba el cargo en la lista.
+            - generic [ref=f35e142]:
+              - heading "Cómo verificarlo" [level=2] [ref=f35e143]
+              - link "Sección titulada «Cómo verificarlo»" [ref=f35e144] [cursor=pointer]:
+                - /url: "#cómo-verificarlo"
+            - paragraph [ref=f35e149]: Una solicitud resuelta deja la cola pendiente después de actualizar. Para cambios de cargo, el miembro aparece en la sección correcta y el cargo activo coincide con la asignación guardada.
+            - generic [ref=f35e150]:
+              - heading "Errores frecuentes" [level=2] [ref=f35e151]
+              - link "Sección titulada «Errores frecuentes»" [ref=f35e152] [cursor=pointer]:
+                - /url: "#errores-frecuentes"
+            - table [ref=f35e157]:
+              - rowgroup [ref=f35e158]:
+                - row [ref=f35e159]:
+                  - columnheader "Problema" [ref=f35e160]
+                  - columnheader "Qué hacer" [ref=f35e161]
+              - rowgroup [ref=f35e162]:
+                - row [ref=f35e163]:
+                  - cell "No aparece la acción" [ref=f35e164]
+                  - cell "Tu cargo o contexto no incluye el permiso. Confirma la sección o solicita revisión de acceso; no intentes otra cuenta." [ref=f35e165]
+                - row [ref=f35e166]:
+                  - cell "La acción aparece pero devuelve acceso denegado" [ref=f35e167]
+                  - cell [ref=f35e168]:
+                    - text: Confirma
+                    - code [ref=f35e169]: club_members:approve
+                    - text: y el alcance de sección antes de reintentar.
+                - row [ref=f35e170]:
+                  - cell "Tu cargo puede revisar, pero no aparecen los botones" [ref=f35e171]
+                  - cell "El control visual móvil puede excluir subdirección o secretaría. Reporta la inconsistencia; el cargo de club no habilita el panel." [ref=f35e172]
+                - row [ref=f35e173]:
+                  - cell "La pantalla no carga" [ref=f35e174]
+                  - cell [ref=f35e175]:
+                    - text: Comprueba la conexión y usa
+                    - strong [ref=f35e176]: Reintentar
+                    - text: . Si continúa, conserva el mensaje y repórtalo desde Ayuda.
+                - row [ref=f35e177]:
+                  - cell "El estado no cambia" [ref=f35e178]
+                  - cell "Actualiza la pantalla antes de repetir. No envíes una operación por segunda vez sin confirmar el resultado." [ref=f35e179]
+                - row [ref=f35e180]:
+                  - cell "Aparece otro club o sección" [ref=f35e181]
+                  - cell "Vuelve al tablero y cambia o confirma el contexto activo antes de guardar información." [ref=f35e182]
+            - generic [ref=f35e183]:
+              - heading "Procesos relacionados" [level=2] [ref=f35e184]
+              - link "Sección titulada «Procesos relacionados»" [ref=f35e185] [cursor=pointer]:
+                - /url: "#procesos-relacionados"
+            - list [ref=f35e190]:
+              - listitem [ref=f35e191]:
+                - link "Alta de cuenta y membresía" [ref=f35e192] [cursor=pointer]:
+                  - /url: /procesos/alta-y-membresia/
+              - listitem [ref=f35e193]:
+                - link "Gestión de club y sección" [ref=f35e194] [cursor=pointer]:
+                  - /url: /procesos/gestion-club-seccion/
+            - generic [ref=f35e195]:
+              - heading "Fuente de verificación" [level=2] [ref=f35e196]
+              - link "Sección titulada «Fuente de verificación»" [ref=f35e197] [cursor=pointer]:
+                - /url: "#fuente-de-verificación"
+            - paragraph [ref=f35e202]:
+              - text: Manual contrastado el 2026-08-21 con las vistas, rutas, permisos backend y controles efectivos del módulo
+              - code [ref=f35e203]: members
+              - text: de la aplicación.
+          - generic [ref=f35e204]:
+            - paragraph [ref=f35e206]:
+              - text: "Última actualización:"
+              - time [ref=f35e207]: 20 ago 2026
+            - generic [ref=f35e208]:
+              - link [ref=f35e209] [cursor=pointer]:
+                - /url: /pantallas/mi-club/
+                - generic [ref=f35e212]: Página anteriorMi club y mi sección
+              - link [ref=f35e213] [cursor=pointer]:
+                - /url: /pantallas/notificaciones/
+                - generic [ref=f35e216]: Siguiente páginaNotificaciones
+  - generic [ref=f35e219]:
+    - button [ref=f35e220]
+    - button [ref=f35e226]
+    - button [ref=f35e230]
+    - button [ref=f35e238]

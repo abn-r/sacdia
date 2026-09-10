@@ -1,0 +1,268 @@
+- generic [active] [ref=f7e1]:
+  - link "Ir al contenido" [ref=f7e2] [cursor=pointer]:
+    - /url: "#_top"
+  - generic [ref=f7e3]:
+    - banner [ref=f7e4]:
+      - generic [ref=f7e5]:
+        - link "Inicio — Manual administrativo" [ref=f7e8] [cursor=pointer]:
+          - /url: /
+          - generic [ref=f7e9]: S
+          - generic [ref=f7e10]:
+            - generic [ref=f7e11]: SACDIA
+            - generic [ref=f7e12]: Administrativo
+        - button "Buscar" [ref=f7e15] [cursor=pointer]
+    - navigation "Primario":
+      - button "Menú" [ref=f7e18] [cursor=pointer]
+      - option "Oscuro"
+      - option "Claro"
+      - option "Automático" [selected]
+    - generic [ref=f7e22]:
+      - complementary:
+        - navigation [ref=f7e23]:
+          - group [ref=f7e24]:
+            - generic "En esta página" [ref=f7e25]
+      - main [ref=f7e30]:
+        - heading "Certificaciones de Guías Mayores" [level=1] [ref=f7e33]
+        - generic [ref=f7e35]:
+          - generic [ref=f7e36]:
+            - paragraph [ref=f7e37]:
+              - text: Usa
+              - strong [ref=f7e38]: Certificaciones de Guías Mayores
+              - text: para consultar el avance de las inscripciones y resolver las bandejas de requisitos y cierres.
+            - generic [ref=f7e39]:
+              - heading "Resultado esperado" [level=2] [ref=f7e40]
+              - link "Sección titulada «Resultado esperado»" [ref=f7e41] [cursor=pointer]:
+                - /url: "#resultado-esperado"
+            - paragraph [ref=f7e46]: Podrás abrir el expediente correcto, revisar su evidencia dentro del alcance autorizado y ejecutar únicamente la transición que corresponde a su estado.
+            - generic [ref=f7e47]:
+              - heading "Acceso requerido" [level=2] [ref=f7e48]
+              - link "Sección titulada «Acceso requerido»" [ref=f7e49] [cursor=pointer]:
+                - /url: "#acceso-requerido"
+            - list [ref=f7e54]:
+              - listitem [ref=f7e55]:
+                - code [ref=f7e56]: user_certifications:read
+                - text: ": consultar catálogo, inscritos y progreso."
+              - listitem [ref=f7e57]:
+                - code [ref=f7e58]: certifications:review
+                - text: ": abrir bandejas y aprobar o solicitar cambios."
+              - listitem [ref=f7e59]:
+                - code [ref=f7e60]: certifications:certify
+                - text: ": ejecutar la certificación final después de aprobar el cierre."
+            - paragraph [ref=f7e61]:
+              - text: Configurar o publicar versiones usa permisos distintos y se documenta en
+              - strong [ref=f7e62]: Catálogos
+              - text: . Ver una guía no concede acceso ni reemplaza la autorización del backend.
+            - generic [ref=f7e63]:
+              - heading "Rutas incluidas" [level=2] [ref=f7e64]
+              - link "Sección titulada «Rutas incluidas»" [ref=f7e65] [cursor=pointer]:
+                - /url: "#rutas-incluidas"
+            - table [ref=f7e70]:
+              - rowgroup [ref=f7e71]:
+                - row [ref=f7e72]:
+                  - columnheader "Ruta" [ref=f7e73]
+                  - columnheader "Uso" [ref=f7e74]
+              - rowgroup [ref=f7e75]:
+                - row [ref=f7e76]:
+                  - cell [ref=f7e77]:
+                    - code [ref=f7e78]: /dashboard/certifications
+                  - cell "Catálogo operativo y acceso a inscripciones." [ref=f7e79]
+                - row [ref=f7e80]:
+                  - cell [ref=f7e81]:
+                    - code [ref=f7e82]: /dashboard/certifications/[id]
+                  - cell "Estructura, inscritos y progreso de una certificación." [ref=f7e83]
+                - row [ref=f7e84]:
+                  - cell [ref=f7e85]:
+                    - code [ref=f7e86]: /dashboard/certifications/reviews
+                  - cell "Bandejas institucionales de requisitos y cierres." [ref=f7e87]
+            - generic [ref=f7e88]:
+              - heading "Antes de comenzar" [level=2] [ref=f7e89]
+              - link "Sección titulada «Antes de comenzar»" [ref=f7e90] [cursor=pointer]:
+                - /url: "#antes-de-comenzar"
+            - list [ref=f7e95]:
+              - listitem [ref=f7e96]: Confirma la cuenta y el campo local con el que vas a revisar.
+              - listitem [ref=f7e97]: Busca por certificación, participante y estado antes de tomar una decisión.
+              - listitem [ref=f7e98]: Comprueba que no estás revisando tu propio expediente.
+              - listitem [ref=f7e99]: No uses una URL directa para intentar ampliar el alcance.
+            - generic [ref=f7e100]:
+              - heading "Elegir la bandeja correcta" [level=2] [ref=f7e101]
+              - link "Sección titulada «Elegir la bandeja correcta»" [ref=f7e102] [cursor=pointer]:
+                - /url: "#elegir-la-bandeja-correcta"
+            - paragraph [ref=f7e107]: "La página de revisiones separa dos decisiones que NO son intercambiables:"
+            - table [ref=f7e108]:
+              - rowgroup [ref=f7e109]:
+                - row [ref=f7e110]:
+                  - columnheader "Bandeja" [ref=f7e111]
+                  - columnheader "Qué recibes" [ref=f7e112]
+                  - columnheader "Resultado posible" [ref=f7e113]
+              - rowgroup [ref=f7e114]:
+                - row [ref=f7e115]:
+                  - cell [ref=f7e116]:
+                    - strong [ref=f7e117]: Requisitos
+                  - cell "Un requisito enviado con respuestas, componentes y evidencias." [ref=f7e118]
+                  - cell "Aprobar o solicitar cambios sobre ese requisito." [ref=f7e119]
+                - row [ref=f7e120]:
+                  - cell [ref=f7e121]:
+                    - strong [ref=f7e122]: Cierres
+                  - cell "El expediente con requisitos aprobados y comprobante de junta." [ref=f7e123]
+                  - cell "Aprobar el comprobante, solicitar cambios o certificar cuando corresponda." [ref=f7e124]
+            - paragraph [ref=f7e125]:
+              - text: Si buscas una respuesta o archivo de un requisito, usa
+              - strong [ref=f7e126]: Requisitos
+              - text: . Si la persona ya terminó el programa y presentó el comprobante, usa
+              - strong [ref=f7e127]: Cierres
+              - text: .
+            - generic [ref=f7e128]:
+              - heading "Revisar un requisito" [level=2] [ref=f7e129]
+              - link "Sección titulada «Revisar un requisito»" [ref=f7e130] [cursor=pointer]:
+                - /url: "#revisar-un-requisito"
+            - list [ref=f7e135]:
+              - listitem [ref=f7e136]:
+                - text: Abre
+                - strong [ref=f7e137]: Revisiones > Requisitos
+                - text: .
+              - listitem [ref=f7e138]: Mantén el filtro en enviados o selecciona el estado que necesitas consultar.
+              - listitem [ref=f7e139]: Abre el registro y confirma participante, certificación, módulo y requisito.
+              - listitem [ref=f7e140]: Revisa todas las respuestas y componentes obligatorios.
+              - listitem [ref=f7e141]:
+                - text: Pulsa
+                - strong [ref=f7e142]: Ver
+                - text: para solicitar el acceso temporal a cada evidencia.
+              - listitem [ref=f7e143]:
+                - text: "Elige una sola resolución:"
+                - list [ref=f7e144]:
+                  - listitem [ref=f7e145]:
+                    - strong [ref=f7e146]: Aprobar
+                    - text: ", si el requisito está completo;"
+                  - listitem [ref=f7e147]:
+                    - strong [ref=f7e148]: Solicitar cambios
+                    - text: ", indicando claramente qué debe corregirse."
+              - listitem [ref=f7e149]: Actualiza la bandeja y confirma el nuevo estado.
+            - paragraph [ref=f7e150]: La URL de descarga de una evidencia se genera al abrirla y tiene duración limitada. No copies el enlace a otro sistema ni lo uses como archivo permanente.
+            - generic [ref=f7e151]:
+              - heading "Solicitar cambios útiles" [level=2] [ref=f7e152]
+              - link "Sección titulada «Solicitar cambios útiles»" [ref=f7e153] [cursor=pointer]:
+                - /url: "#solicitar-cambios-útiles"
+            - paragraph [ref=f7e158]: "El comentario es obligatorio al devolver un requisito o cierre. Escribe una instrucción que la persona pueda ejecutar:"
+            - list [ref=f7e159]:
+              - listitem [ref=f7e160]: identifica el componente incompleto;
+              - listitem [ref=f7e161]: explica qué evidencia o respuesta falta;
+              - listitem [ref=f7e162]: evita comentarios genéricos como “corregir”;
+              - listitem [ref=f7e163]: no solicites datos personales que el requisito no exige.
+            - paragraph [ref=f7e164]: La persona debe corregir el mismo requisito. No le pidas crear otra inscripción.
+            - generic [ref=f7e165]:
+              - heading "Resolver el cierre final" [level=2] [ref=f7e166]
+              - link "Sección titulada «Resolver el cierre final»" [ref=f7e167] [cursor=pointer]:
+                - /url: "#resolver-el-cierre-final"
+            - list [ref=f7e172]:
+              - listitem [ref=f7e173]:
+                - text: Abre
+                - strong [ref=f7e174]: Revisiones > Cierres
+                - text: .
+              - listitem [ref=f7e175]: Selecciona un expediente enviado para revisión final.
+              - listitem [ref=f7e176]: Confirma que los requisitos obligatorios estén aprobados.
+              - listitem [ref=f7e177]: Abre el comprobante de junta y valida que corresponda al expediente.
+              - listitem [ref=f7e178]:
+                - text: "Elige:"
+                - list [ref=f7e179]:
+                  - listitem [ref=f7e180]:
+                    - strong [ref=f7e181]: Aprobar comprobante
+                    - text: ", si cumple;"
+                  - listitem [ref=f7e182]:
+                    - strong [ref=f7e183]: Solicitar cambios
+                    - text: ", si necesita corrección."
+              - listitem [ref=f7e184]:
+                - text: Cuando el expediente esté
+                - code [ref=f7e185]: APPROVED
+                - text: ", pulsa"
+                - strong [ref=f7e186]: Certificar
+                - text: solo si tienes
+                - code [ref=f7e187]: certifications:certify
+                - text: .
+              - listitem [ref=f7e188]: Confirma la operación y actualiza la fila.
+            - paragraph [ref=f7e189]:
+              - strong [ref=f7e190]: Aprobar comprobante
+              - text: "y"
+              - strong [ref=f7e191]: Certificar
+              - text: son etapas diferentes. No certifiques un expediente que todavía esté enviado para revisión o con cambios solicitados.
+            - generic [ref=f7e192]:
+              - heading "Cómo verificarlo" [level=2] [ref=f7e193]
+              - link "Sección titulada «Cómo verificarlo»" [ref=f7e194] [cursor=pointer]:
+                - /url: "#cómo-verificarlo"
+            - list [ref=f7e199]:
+              - listitem [ref=f7e200]: El registro desaparece del filtro de enviados o muestra el nuevo estado.
+              - listitem [ref=f7e201]: La decisión queda asociada al requisito o cierre que abriste.
+              - listitem [ref=f7e202]:
+                - strong [ref=f7e203]: Certificar
+                - text: solo aparece con el permiso correcto y sobre filas aprobadas.
+              - listitem [ref=f7e204]: El expediente final cambia a certificado, no únicamente a aprobado.
+            - generic [ref=f7e205]:
+              - heading "Errores frecuentes" [level=2] [ref=f7e206]
+              - link "Sección titulada «Errores frecuentes»" [ref=f7e207] [cursor=pointer]:
+                - /url: "#errores-frecuentes"
+            - table [ref=f7e212]:
+              - rowgroup [ref=f7e213]:
+                - row [ref=f7e214]:
+                  - columnheader "Problema" [ref=f7e215]
+                  - columnheader "Qué hacer" [ref=f7e216]
+              - rowgroup [ref=f7e217]:
+                - row [ref=f7e218]:
+                  - cell "No aparece la bandeja" [ref=f7e219]
+                  - cell [ref=f7e220]:
+                    - text: Confirma
+                    - code [ref=f7e221]: certifications:review
+                    - text: y el alcance territorial efectivo.
+                - row [ref=f7e222]:
+                  - cell "La evidencia ya no abre" [ref=f7e223]
+                  - cell [ref=f7e224]:
+                    - text: Regresa al detalle y pulsa
+                    - strong [ref=f7e225]: Ver
+                    - text: para solicitar una URL nueva.
+                - row [ref=f7e226]:
+                  - cell "Solicita un comentario" [ref=f7e227]
+                  - cell "Describe la corrección concreta; no envíes una devolución vacía." [ref=f7e228]
+                - row [ref=f7e229]:
+                  - cell "El registro cambió mientras lo revisabas" [ref=f7e230]
+                  - cell "Actualiza el detalle y vuelve a evaluar el estado; no repitas la decisión anterior." [ref=f7e231]
+                - row [ref=f7e232]:
+                  - cell [ref=f7e233]:
+                    - text: No aparece
+                    - strong [ref=f7e234]: Certificar
+                  - cell [ref=f7e235]:
+                    - text: El cierre debe estar aprobado y tu cuenta necesita
+                    - code [ref=f7e236]: certifications:certify
+                    - text: .
+                - row [ref=f7e237]:
+                  - cell "El expediente está fuera de alcance" [ref=f7e238]
+                  - cell "No cambies la URL ni la cuenta para saltar el control; solicita la asignación correcta." [ref=f7e239]
+            - generic [ref=f7e240]:
+              - heading "Procesos relacionados" [level=2] [ref=f7e241]
+              - link "Sección titulada «Procesos relacionados»" [ref=f7e242] [cursor=pointer]:
+                - /url: "#procesos-relacionados"
+            - list [ref=f7e247]:
+              - listitem [ref=f7e248]:
+                - link "Completar formación y solicitar investidura" [ref=f7e249] [cursor=pointer]:
+                  - /url: /procesos/formacion-e-investidura/
+            - generic [ref=f7e250]:
+              - heading "Fuente de verificación" [level=2] [ref=f7e251]
+              - link "Sección titulada «Fuente de verificación»" [ref=f7e252] [cursor=pointer]:
+                - /url: "#fuente-de-verificación"
+            - paragraph [ref=f7e257]:
+              - text: Manual contrastado el 2026-08-21 con las rutas, componentes, permisos y pruebas efectivas de las bandejas de requisitos y cierres de
+              - code [ref=f7e258]: sacdia-admin
+              - text: ", y con el contrato canónico de revisión de Certificaciones de Guías Mayores."
+          - generic [ref=f7e259]:
+            - paragraph [ref=f7e261]:
+              - text: "Última actualización:"
+              - time [ref=f7e262]: 20 ago 2026
+            - generic [ref=f7e263]:
+              - link [ref=f7e264] [cursor=pointer]:
+                - /url: /investiduras/carpetas-anuales/
+                - generic [ref=f7e267]: Página anteriorCarpetas anuales y clasificación
+              - link [ref=f7e268] [cursor=pointer]:
+                - /url: /investiduras/cierre-anio/
+                - generic [ref=f7e271]: Siguiente páginaCierre de año eclesiástico
+  - generic [ref=f7e274]:
+    - button [ref=f7e275]
+    - button [ref=f7e281]
+    - button [ref=f7e285]
+    - button [ref=f7e290]

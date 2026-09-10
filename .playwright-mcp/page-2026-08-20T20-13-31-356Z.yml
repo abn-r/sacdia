@@ -1,0 +1,64 @@
+- generic [active] [ref=f14e1]:
+  - link "Ir al contenido" [ref=f14e2] [cursor=pointer]:
+    - /url: "#_top"
+  - generic [ref=f14e3]:
+    - banner [ref=f14e4]:
+      - generic [ref=f14e5]:
+        - generic [ref=f14e7]:
+          - link "Inicio — Manual operativo" [ref=f14e8] [cursor=pointer]:
+            - /url: /
+            - generic [ref=f14e9]: S
+            - generic [ref=f14e10]:
+              - generic [ref=f14e11]: SACDIA
+              - generic [ref=f14e12]: Operativo
+          - navigation "Cambiar portal de documentación" [ref=f14e13]:
+            - link "Operativo" [ref=f14e14] [cursor=pointer]:
+              - /url: http://localhost:4321
+            - link "Administrativo" [ref=f14e15] [cursor=pointer]:
+              - /url: http://localhost:4322
+            - link "Técnico" [ref=f14e16] [cursor=pointer]:
+              - /url: http://localhost:4323
+        - button "Buscar" [ref=f14e19] [cursor=pointer]:
+          - generic [ref=f14e23]:
+            - generic [ref=f14e24]: ⌘
+            - generic [ref=f14e25]: K
+        - generic [ref=f14e29]:
+          - generic [ref=f14e30]: Seleccionar tema
+          - combobox "Seleccionar tema" [ref=f14e31] [cursor=pointer]:
+            - option "Oscuro" [selected]
+            - option "Claro"
+            - option "Automático"
+    - main [ref=f14e35]:
+      - heading "Manual operativo de SACDIA" [level=1] [ref=f14e38]
+      - generic [ref=f14e40]:
+        - generic [ref=f14e41]:
+          - region [ref=f14e42]:
+            - paragraph [ref=f14e43]: Aplicación móvil
+            - heading "Resuelve tu siguiente tarea" [level=1] [ref=f14e44]
+            - paragraph [ref=f14e45]: Manuales claros para registrar información, dar seguimiento a tu club y completar procesos desde la aplicación.
+          - generic [ref=f14e46]:
+            - link "Comenzar con SACDIA Conoce el acceso, tu perfil y la navegación principal." [ref=f14e47] [cursor=pointer]:
+              - /url: /primeros-pasos/
+              - strong [ref=f14e48]: Comenzar con SACDIA
+              - generic [ref=f14e49]: Conoce el acceso, tu perfil y la navegación principal.
+            - link "Buscar una pantalla Encuentra qué hace cada sección de la aplicación." [ref=f14e50] [cursor=pointer]:
+              - /url: /pantallas/
+              - strong [ref=f14e51]: Buscar una pantalla
+              - generic [ref=f14e52]: Encuentra qué hace cada sección de la aplicación.
+            - link "Completar un proceso Sigue recorridos completos sin perder el contexto." [ref=f14e53] [cursor=pointer]:
+              - /url: /procesos/
+              - strong [ref=f14e54]: Completar un proceso
+              - generic [ref=f14e55]: Sigue recorridos completos sin perder el contexto.
+          - generic [ref=f14e56]:
+            - heading "Documentación en crecimiento" [level=2] [ref=f14e57]
+            - link "Sección titulada «Documentación en crecimiento»" [ref=f14e58] [cursor=pointer]:
+              - /url: "#documentación-en-crecimiento"
+          - paragraph [ref=f14e63]: Estamos construyendo un manual por pantalla y una guía por cada proceso continuo. El contenido se publicará solamente después de validar el comportamiento real de SACDIA.
+        - paragraph [ref=f14e66]:
+          - text: "Última actualización:"
+          - time [ref=f14e67]: 20 ago 2026
+  - generic [ref=f14e70]:
+    - button [ref=f14e71]
+    - button [ref=f14e77]
+    - button [ref=f14e81]
+    - button [ref=f14e86]

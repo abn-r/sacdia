@@ -1,0 +1,162 @@
+- generic [active] [ref=f13e1]:
+  - link "Ir al contenido" [ref=f13e2] [cursor=pointer]:
+    - /url: "#_top"
+  - generic [ref=f13e3]:
+    - banner [ref=f13e4]:
+      - generic [ref=f13e5]:
+        - link "Inicio — Manual administrativo" [ref=f13e8] [cursor=pointer]:
+          - /url: /
+          - generic [ref=f13e9]: S
+          - generic [ref=f13e10]:
+            - generic [ref=f13e11]: SACDIA
+            - generic [ref=f13e12]: Administrativo
+        - button "Buscar" [ref=f13e15] [cursor=pointer]
+    - navigation "Primario":
+      - button "Menú" [ref=f13e18] [cursor=pointer]
+      - option "Oscuro"
+      - option "Claro"
+      - option "Automático" [selected]
+    - generic [ref=f13e22]:
+      - complementary:
+        - navigation [ref=f13e23]:
+          - group [ref=f13e24]:
+            - generic "En esta página Sinopsis" [ref=f13e25]:
+              - generic [ref=f13e26] [cursor=pointer]: En esta página
+              - generic [ref=f13e29]: Sinopsis
+      - main [ref=f13e31]:
+        - heading "Solicitudes de cargos y traslados" [level=1] [ref=f13e34]
+        - generic [ref=f13e36]:
+          - generic [ref=f13e37]:
+            - paragraph [ref=f13e38]:
+              - text: Utiliza estas bandejas para solicitudes de
+              - strong [ref=f13e39]: cargos
+              - text: o
+              - strong [ref=f13e40]: traslados
+              - text: . La membresía inicial tiene su propia pantalla y manual.
+            - generic [ref=f13e41]:
+              - heading "Resultado esperado" [level=2] [ref=f13e42]
+              - link "Sección titulada «Resultado esperado»" [ref=f13e43] [cursor=pointer]:
+                - /url: "#resultado-esperado"
+            - paragraph [ref=f13e48]: Podrás abrir la bandeja correcta, revisar el detalle disponible y registrar una decisión dentro de tu alcance administrativo.
+            - generic [ref=f13e49]:
+              - heading "Acceso requerido" [level=2] [ref=f13e50]
+              - link "Sección titulada «Acceso requerido»" [ref=f13e51] [cursor=pointer]:
+                - /url: "#acceso-requerido"
+            - list [ref=f13e56]:
+              - listitem [ref=f13e57]: Sesión válida en el panel administrativo.
+              - listitem [ref=f13e58]: Cargo y alcance compatibles con la solicitud.
+            - paragraph [ref=f13e59]: El backend valida cada consulta y decisión. Si una bandeja devuelve acceso denegado, no intentes saltar el control con una URL directa.
+            - generic [ref=f13e60]:
+              - heading "Rutas incluidas" [level=2] [ref=f13e61]
+              - link "Sección titulada «Rutas incluidas»" [ref=f13e62] [cursor=pointer]:
+                - /url: "#rutas-incluidas"
+            - table [ref=f13e67]:
+              - rowgroup [ref=f13e68]:
+                - row [ref=f13e69]:
+                  - columnheader "Ruta" [ref=f13e70]
+                  - columnheader "Uso" [ref=f13e71]
+              - rowgroup [ref=f13e72]:
+                - row [ref=f13e73]:
+                  - cell [ref=f13e74]:
+                    - code [ref=f13e75]: /dashboard/requests/assignments
+                  - cell "Solicitudes de asignación de cargo." [ref=f13e76]
+                - row [ref=f13e77]:
+                  - cell [ref=f13e78]:
+                    - code [ref=f13e79]: /dashboard/requests/transfers
+                  - cell "Solicitudes de traslado entre contextos." [ref=f13e80]
+            - paragraph [ref=f13e81]:
+              - text: Para ingresos iniciales, utiliza
+              - link "Solicitudes de membresía" [ref=f13e82] [cursor=pointer]:
+                - /url: /clubes/solicitudes-membresia/
+              - text: .
+            - generic [ref=f13e83]:
+              - heading "Elegir la bandeja correcta" [level=2] [ref=f13e84]
+              - link "Sección titulada «Elegir la bandeja correcta»" [ref=f13e85] [cursor=pointer]:
+                - /url: "#elegir-la-bandeja-correcta"
+            - list [ref=f13e90]:
+              - listitem [ref=f13e91]:
+                - text: Abre
+                - strong [ref=f13e92]: Cargos
+                - text: cuando la persona ya pertenece al contexto y solicita una responsabilidad distinta.
+              - listitem [ref=f13e93]:
+                - text: Abre
+                - strong [ref=f13e94]: Traslados
+                - text: cuando la solicitud cambia el contexto de origen o destino.
+              - listitem [ref=f13e95]: No uses ninguna de estas bandejas para aprobar el ingreso inicial como miembro.
+            - generic [ref=f13e96]:
+              - heading "Flujo recomendado" [level=2] [ref=f13e97]
+              - link "Sección titulada «Flujo recomendado»" [ref=f13e98] [cursor=pointer]:
+                - /url: "#flujo-recomendado"
+            - list [ref=f13e103]:
+              - listitem [ref=f13e104]: Abre la bandeja correspondiente.
+              - listitem [ref=f13e105]: Filtra por estado y sección cuando esos controles estén disponibles.
+              - listitem [ref=f13e106]: Revisa persona, contexto, cargo u origen/destino antes de decidir.
+              - listitem [ref=f13e107]: Registra la aprobación o rechazo una sola vez.
+              - listitem [ref=f13e108]: Actualiza la lista y confirma que el estado cambió.
+            - generic [ref=f13e109]:
+              - heading "Cómo verificarlo" [level=2] [ref=f13e110]
+              - link "Sección titulada «Cómo verificarlo»" [ref=f13e111] [cursor=pointer]:
+                - /url: "#cómo-verificarlo"
+            - paragraph [ref=f13e116]: La solicitud deja la cola pendiente y el cargo o traslado se refleja en el contexto correcto, sin crear una segunda solicitud para compensar la primera.
+            - generic [ref=f13e117]:
+              - heading "Errores frecuentes" [level=2] [ref=f13e118]
+              - link "Sección titulada «Errores frecuentes»" [ref=f13e119] [cursor=pointer]:
+                - /url: "#errores-frecuentes"
+            - table [ref=f13e124]:
+              - rowgroup [ref=f13e125]:
+                - row [ref=f13e126]:
+                  - columnheader "Problema" [ref=f13e127]
+                  - columnheader "Qué hacer" [ref=f13e128]
+              - rowgroup [ref=f13e129]:
+                - row [ref=f13e130]:
+                  - cell "La solicitud no aparece" [ref=f13e131]
+                  - cell "Revisa tipo de bandeja, estado y alcance territorial." [ref=f13e132]
+                - row [ref=f13e133]:
+                  - cell "El registro está fuera de alcance" [ref=f13e134]
+                  - cell "Confirma la cuenta y el contexto administrativo activos." [ref=f13e135]
+                - row [ref=f13e136]:
+                  - cell "El estado no cambia" [ref=f13e137]
+                  - cell "Actualiza antes de repetir; otra persona pudo resolver la solicitud." [ref=f13e138]
+                - row [ref=f13e139]:
+                  - cell "Abriste una membresía inicial" [ref=f13e140]
+                  - cell "Vuelve a la bandeja específica de membresía." [ref=f13e141]
+            - generic [ref=f13e142]:
+              - heading "Procesos relacionados" [level=2] [ref=f13e143]
+              - link "Sección titulada «Procesos relacionados»" [ref=f13e144] [cursor=pointer]:
+                - /url: "#procesos-relacionados"
+            - list [ref=f13e149]:
+              - listitem [ref=f13e150]:
+                - link "Alta de cuenta y membresía" [ref=f13e151] [cursor=pointer]:
+                  - /url: /procesos/alta-y-membresia/
+              - listitem [ref=f13e152]:
+                - link "Gestión de club y sección" [ref=f13e153] [cursor=pointer]:
+                  - /url: /procesos/gestion-club-seccion/
+              - listitem [ref=f13e154]:
+                - link "Traslado de miembro" [ref=f13e155] [cursor=pointer]:
+                  - /url: /procesos/traslado-miembro/
+            - generic [ref=f13e156]:
+              - heading "Fuente de verificación" [level=2] [ref=f13e157]
+              - link "Sección titulada «Fuente de verificación»" [ref=f13e158] [cursor=pointer]:
+                - /url: "#fuente-de-verificación"
+            - paragraph [ref=f13e163]:
+              - text: Manual contrastado el 2026-08-21 con las rutas
+              - code [ref=f13e164]: /dashboard/requests/assignments
+              - text: "y"
+              - code [ref=f13e165]: /dashboard/requests/transfers
+              - text: y sus clientes API efectivos.
+          - generic [ref=f13e166]:
+            - paragraph [ref=f13e168]:
+              - text: "Última actualización:"
+              - time [ref=f13e169]: 20 ago 2026
+            - generic [ref=f13e170]:
+              - link [ref=f13e171] [cursor=pointer]:
+                - /url: /clubes/inscripciones/
+                - generic [ref=f13e174]: Página anteriorInscripciones anuales
+              - link [ref=f13e175] [cursor=pointer]:
+                - /url: /clubes/solicitudes-membresia/
+                - generic [ref=f13e178]: Siguiente páginaSolicitudes de membresía
+  - generic [ref=f13e181]:
+    - button [ref=f13e182]
+    - button [ref=f13e188]
+    - button [ref=f13e192]
+    - button [ref=f13e200]

@@ -1,0 +1,319 @@
+- generic [active] [ref=f36e1]:
+  - link "Ir al contenido" [ref=f36e2] [cursor=pointer]:
+    - /url: "#_top"
+  - generic [ref=f36e3]:
+    - banner [ref=f36e4]:
+      - generic [ref=f36e5]:
+        - link "Inicio — Manual operativo" [ref=f36e8] [cursor=pointer]:
+          - /url: /
+          - generic [ref=f36e9]: S
+          - generic [ref=f36e10]:
+            - generic [ref=f36e11]: SACDIA
+            - generic [ref=f36e12]: Operativo
+        - button "Buscar" [ref=f36e15] [cursor=pointer]
+    - navigation "Primario":
+      - button "Menú" [ref=f36e18] [cursor=pointer]
+      - option "Oscuro"
+      - option "Claro"
+      - option "Automático" [selected]
+    - generic [ref=f36e22]:
+      - complementary:
+        - navigation [ref=f36e23]:
+          - group [ref=f36e24]:
+            - generic "En esta página Sinopsis" [ref=f36e25]:
+              - generic [ref=f36e26] [cursor=pointer]: En esta página
+              - generic [ref=f36e29]: Sinopsis
+      - main [ref=f36e31]:
+        - heading "Alta de cuenta y membresía" [level=1] [ref=f36e34]
+        - generic [ref=f36e36]:
+          - generic [ref=f36e37]:
+            - paragraph [ref=f36e38]: Este proceso comienza en la app, continúa en la sección que revisa la solicitud y termina cuando la membresía queda activa.
+            - generic [ref=f36e39]:
+              - heading "Resultado esperado" [level=2] [ref=f36e40]
+              - link "Sección titulada «Resultado esperado»" [ref=f36e41] [cursor=pointer]:
+                - /url: "#resultado-esperado"
+            - paragraph [ref=f36e46]: La persona conserva una sola cuenta, completa su perfil, recibe la inscripción anual correspondiente y entra a la sección correcta con una membresía aprobada.
+            - generic [ref=f36e47]:
+              - heading "No confundas cuenta y membresía" [level=2] [ref=f36e48]
+              - link "Sección titulada «No confundas cuenta y membresía»" [ref=f36e49] [cursor=pointer]:
+                - /url: "#no-confundas-cuenta-y-membresía"
+            - paragraph [ref=f36e54]: "SACDIA maneja registros distintos:"
+            - list [ref=f36e55]:
+              - listitem [ref=f36e56]:
+                - strong [ref=f36e57]: "Cuenta:"
+                - text: identidad con correo y contraseña que permite autenticarse.
+              - listitem [ref=f36e58]:
+                - strong [ref=f36e59]: "Post-registro:"
+                - text: foto, datos personales y selección territorial.
+              - listitem [ref=f36e60]:
+                - strong [ref=f36e61]: "Inscripción anual:"
+                - text: vínculo de la persona con una clase progresiva durante el año eclesiástico.
+              - listitem [ref=f36e62]:
+                - strong [ref=f36e63]: "Membresía:"
+                - text: asignación de miembro dentro de una sección, inicialmente
+                - code [ref=f36e64]: pending
+                - text: .
+            - paragraph [ref=f36e65]: Una persona puede iniciar sesión y tener inscripción anual mientras su membresía sigue pendiente. En ese estado ve el tablero restringido, pero no las funciones operativas del club.
+            - generic [ref=f36e66]:
+              - heading "Participantes" [level=2] [ref=f36e67]
+              - link "Sección titulada «Participantes»" [ref=f36e68] [cursor=pointer]:
+                - /url: "#participantes"
+            - list [ref=f36e73]:
+              - listitem [ref=f36e74]: Persona solicitante.
+              - listitem [ref=f36e75]: Dirección, subdirección o secretaría de la sección cuando cuenta con los permisos efectivos para revisar desde la app.
+              - listitem [ref=f36e76]: Personal administrativo o territorial admitido en el panel y con alcance sobre la sección.
+              - listitem [ref=f36e77]: SACDIA, que deriva clase, controla estados y vence pendientes.
+            - generic [ref=f36e78]:
+              - heading "Matriz de responsabilidades" [level=2] [ref=f36e79]
+              - link "Sección titulada «Matriz de responsabilidades»" [ref=f36e80] [cursor=pointer]:
+                - /url: "#matriz-de-responsabilidades"
+            - table [ref=f36e85]:
+              - rowgroup [ref=f36e86]:
+                - row [ref=f36e87]:
+                  - columnheader "Etapa" [ref=f36e88]
+                  - columnheader "Persona solicitante" [ref=f36e89]
+                  - columnheader "Revisor de la sección" [ref=f36e90]
+                  - columnheader "Sistema" [ref=f36e91]
+              - rowgroup [ref=f36e92]:
+                - row [ref=f36e93]:
+                  - cell "Cuenta" [ref=f36e94]
+                  - cell "Captura datos reales y conserva el correo." [ref=f36e95]
+                  - cell "No crea otra cuenta por la persona." [ref=f36e96]
+                  - cell "Crea identidad y sesión." [ref=f36e97]
+                - row [ref=f36e98]:
+                  - cell "Perfil inicial" [ref=f36e99]
+                  - cell "Carga foto, datos, contactos y selección correcta." [ref=f36e100]
+                  - cell "Orienta sin pedir contraseñas ni datos médicos por canales externos." [ref=f36e101]
+                  - cell "Valida los tres pasos." [ref=f36e102]
+                - row [ref=f36e103]:
+                  - cell "Inscripción anual" [ref=f36e104]
+                  - cell "Revisa la clase mostrada." [ref=f36e105]
+                  - cell "Corrige excepciones por el proceso autorizado." [ref=f36e106]
+                  - cell "Deriva clase por edad/tipo y crea o reactiva el registro anual." [ref=f36e107]
+                - row [ref=f36e108]:
+                  - cell "Membresía" [ref=f36e109]
+                  - cell "Espera y conserva la misma cuenta; cancela o vuelve a solicitar solo si la app muestra la acción." [ref=f36e110]
+                  - cell [ref=f36e111]:
+                    - text: Aprueba o rechaza con
+                    - code [ref=f36e112]: club_members:approve
+                    - text: en su alcance.
+                  - cell [ref=f36e113]:
+                    - text: Crea la asignación
+                    - code [ref=f36e114]: pending
+                    - text: ", notifica y actualiza permisos."
+            - generic [ref=f36e115]:
+              - heading "Flujo completo" [level=2] [ref=f36e116]
+              - link "Sección titulada «Flujo completo»" [ref=f36e117] [cursor=pointer]:
+                - /url: "#flujo-completo"
+            - list [ref=f36e122]:
+              - listitem [ref=f36e123]: La persona crea una cuenta con nombre, apellidos, correo y contraseña.
+              - listitem [ref=f36e124]: La app inicia la sesión y abre el post-registro.
+              - listitem [ref=f36e125]: La persona carga la foto requerida.
+              - listitem [ref=f36e126]: Captura género, nacimiento, bautismo, al menos un contacto y representante legal si es menor.
+              - listitem [ref=f36e127]: Declara alergias, enfermedades y medicamentos, incluso cuando no tiene ninguno.
+              - listitem [ref=f36e128]: Selecciona país, unión, campo local, club y sección.
+              - listitem [ref=f36e129]:
+                - text: SACDIA deriva la clase para el año eclesiástico y crea o reactiva la
+                - strong [ref=f36e130]: inscripción anual
+                - text: .
+              - listitem [ref=f36e131]:
+                - text: En la misma operación crea la membresía como
+                - code [ref=f36e132]: pending
+                - text: ", con vencimiento inicial de 8 días."
+              - listitem [ref=f36e133]: SACDIA notifica a los cargos revisores configurados de la sección.
+              - listitem [ref=f36e134]:
+                - text: Una persona con
+                - code [ref=f36e135]: club_members:approve
+                - text: confirma la sección y aprueba o rechaza.
+              - listitem [ref=f36e136]: La persona actualiza o vuelve a entrar en la app para recibir el estado nuevo.
+            - paragraph [ref=f36e137]: La notificación puede llegar a dirección, subdirección, secretaría o secretaría-tesorería, pero el permiso efectivo y el alcance de sección son la autorización final.
+            - generic [ref=f36e138]:
+              - heading "Canal de revisión según el cargo" [level=2] [ref=f36e139]
+              - link "Sección titulada «Canal de revisión según el cargo»" [ref=f36e140] [cursor=pointer]:
+                - /url: "#canal-de-revisión-según-el-cargo"
+            - list [ref=f36e145]:
+              - listitem [ref=f36e146]:
+                - strong [ref=f36e147]: "Cargos de club:"
+                - text: revisan desde
+                - strong [ref=f36e148]: Miembros → Solicitudes
+                - text: en la app cuando la acción está disponible. El control visual móvil usa
+                - code [ref=f36e149]: club_roles:assign
+                - text: o
+                - code [ref=f36e150]: club_roles:revoke
+                - text: ", mientras el backend exige"
+                - code [ref=f36e151]: club_members:approve
+                - text: en la sección. Dirección recibe ambos permisos en la configuración inicial; subdirección, secretaría y secretaría-tesorería pueden tener autorización backend, pero sus botones quedan ocultos por el control visual actual.
+              - listitem [ref=f36e152]:
+                - strong [ref=f36e153]: "Roles administrativos o territoriales:"
+                - text: revisan desde
+                - strong [ref=f36e154]: Solicitudes → Membresía
+                - text: en el panel, siempre que su rol sea admitido allí y tengan
+                - code [ref=f36e155]: club_members:approve
+                - text: en el alcance correspondiente.
+            - paragraph [ref=f36e156]: Los canales no son intercambiables. Los cargos de club no obtienen acceso al panel solo por su cargo, y una cuenta administrativa no debe decidir fuera de su alcance territorial. Si una persona autorizada no ve la acción móvil, debe reportar la inconsistencia de acceso.
+            - generic [ref=f36e157]:
+              - heading "Estados de la solicitud" [level=2] [ref=f36e158]
+              - link "Sección titulada «Estados de la solicitud»" [ref=f36e159] [cursor=pointer]:
+                - /url: "#estados-de-la-solicitud"
+            - paragraph [ref=f36e164]:
+              - text: La ruta esperada es
+              - code [ref=f36e165]: pending
+              - text: →
+              - code [ref=f36e166]: active
+              - text: .
+            - table [ref=f36e167]:
+              - rowgroup [ref=f36e168]:
+                - row [ref=f36e169]:
+                  - columnheader "Estado" [ref=f36e170]
+                  - columnheader "Quién lo produce" [ref=f36e171]
+                  - columnheader "Qué debe ocurrir después" [ref=f36e172]
+              - rowgroup [ref=f36e173]:
+                - row [ref=f36e174]:
+                  - cell [ref=f36e175]:
+                    - code [ref=f36e176]: pending
+                  - cell "SACDIA al finalizar el paso 3." [ref=f36e177]
+                  - cell "La sección revisa antes del vencimiento." [ref=f36e178]
+                - row [ref=f36e179]:
+                  - cell [ref=f36e180]:
+                    - code [ref=f36e181]: active
+                  - cell "Revisor autorizado." [ref=f36e182]
+                  - cell "Se habilitan superficies según cargo y permisos." [ref=f36e183]
+                - row [ref=f36e184]:
+                  - cell [ref=f36e185]:
+                    - code [ref=f36e186]: rejected
+                  - cell "Revisor autorizado." [ref=f36e187]
+                  - cell "La persona corrige y vuelve a solicitar si la app muestra la acción; de lo contrario, pide asistencia." [ref=f36e188]
+                - row [ref=f36e189]:
+                  - cell [ref=f36e190]:
+                    - code [ref=f36e191]: cancelled
+                  - cell "Persona solicitante, cuando la acción está visible." [ref=f36e192]
+                  - cell "Se reabre la selección de club y sección." [ref=f36e193]
+                - row [ref=f36e194]:
+                  - cell [ref=f36e195]:
+                    - code [ref=f36e196]: expired
+                  - cell "Proceso automático." [ref=f36e197]
+                  - cell "La persona vuelve a solicitar si la app muestra la acción; de lo contrario, pide asistencia." [ref=f36e198]
+            - paragraph [ref=f36e199]:
+              - text: Los pendientes vencen según
+              - code [ref=f36e200]: membership.pending_timeout_days
+              - text: ; el valor predeterminado es 8 días y la revisión automática se ejecuta cada hora.
+            - generic [ref=f36e201]:
+              - heading "Corregir sin duplicar" [level=2] [ref=f36e202]
+              - link "Sección titulada «Corregir sin duplicar»" [ref=f36e203] [cursor=pointer]:
+                - /url: "#corregir-sin-duplicar"
+            - list [ref=f36e208]:
+              - listitem [ref=f36e209]:
+                - text: "Club o sección equivocados: usa"
+                - strong [ref=f36e210]: Cancelar solicitud
+                - text: si está visible y repite solo el paso 3.
+              - listitem [ref=f36e211]:
+                - text: "Solicitud rechazada o vencida: usa"
+                - strong [ref=f36e212]: Volver a solicitar
+                - text: si está visible.
+              - listitem [ref=f36e213]: "Contraseña olvidada: utiliza recuperación de contraseña."
+              - listitem [ref=f36e214]: "Datos personales incorrectos: actualiza el perfil o solicita la corrección autorizada."
+            - paragraph [ref=f36e215]: "La autocorrección no siempre aparece: una cuenta nueva sin asignación activa puede recibir el tablero restringido que solo enlaza al perfil, aunque backend y componente ya soporten cancelar o volver a solicitar. Si falta la acción, conserva el correo y solicita apoyo a una persona autorizada del club o a soporte para corregir el estado."
+            - paragraph [ref=f36e216]:
+              - strong [ref=f36e217]: No crees otra cuenta
+              - text: para corregir membresía, inscripción, correo olvidado o un rechazo. Duplicar la identidad separa el historial y complica la revisión.
+            - generic [ref=f36e218]:
+              - heading "Cómo utilizar esta guía" [level=2] [ref=f36e219]
+              - link "Sección titulada «Cómo utilizar esta guía»" [ref=f36e220] [cursor=pointer]:
+                - /url: "#cómo-utilizar-esta-guía"
+            - paragraph [ref=f36e225]:
+              - text: La persona sigue las pantallas de acceso y post-registro. Cuando aparece
+              - code [ref=f36e226]: pending
+              - text: ", el proceso cambia de responsable y continúa en"
+              - strong [ref=f36e227]: Miembros → Solicitudes
+              - text: de la app o en la bandeja del panel, según el cargo y los permisos efectivos del revisor.
+            - generic [ref=f36e228]:
+              - heading "Manuales relacionados en este portal" [level=2] [ref=f36e229]
+              - link "Sección titulada «Manuales relacionados en este portal»" [ref=f36e230] [cursor=pointer]:
+                - /url: "#manuales-relacionados-en-este-portal"
+            - list [ref=f36e235]:
+              - listitem [ref=f36e236]:
+                - link "Acceso, registro y recuperación" [ref=f36e237] [cursor=pointer]:
+                  - /url: /pantallas/acceso-y-registro/
+              - listitem [ref=f36e238]:
+                - link "Completar el perfil inicial" [ref=f36e239] [cursor=pointer]:
+                  - /url: /pantallas/completar-perfil/
+              - listitem [ref=f36e240]:
+                - link "Tablero principal" [ref=f36e241] [cursor=pointer]:
+                  - /url: /pantallas/tablero/
+              - listitem [ref=f36e242]:
+                - link "Perfil, salud y sesiones" [ref=f36e243] [cursor=pointer]:
+                  - /url: /pantallas/perfil/
+              - listitem [ref=f36e244]:
+                - link "Miembros y cargos" [ref=f36e245] [cursor=pointer]:
+                  - /url: /pantallas/miembros/
+            - generic [ref=f36e246]:
+              - heading "Cómo verificarlo" [level=2] [ref=f36e247]
+              - link "Sección titulada «Cómo verificarlo»" [ref=f36e248] [cursor=pointer]:
+                - /url: "#cómo-verificarlo"
+            - list [ref=f36e253]:
+              - listitem [ref=f36e254]: La persona entra con la misma cuenta.
+              - listitem [ref=f36e255]:
+                - text: La comprobación visual confiable es
+                - code [ref=f36e256]: active
+                - text: ": después de aprobar, desaparece la espera y se habilita el contexto correspondiente."
+              - listitem [ref=f36e257]: El contexto activo corresponde al club y sección aprobados.
+              - listitem [ref=f36e258]: La clase anual es la derivada para el periodo.
+              - listitem [ref=f36e259]: Solo aparecen las funciones permitidas por el cargo activo.
+            - paragraph [ref=f36e260]:
+              - text: Para
+              - code [ref=f36e261]: rejected
+              - text: o
+              - code [ref=f36e262]: expired
+              - text: ", la autorización puede actualizarse sin que el tablero nuevo muestre el estado o el botón de corrección. Si la app queda sin una salida visible, utiliza el canal de soporte descrito en la limitación de autocorrección."
+            - generic [ref=f36e263]:
+              - heading "Errores frecuentes" [level=2] [ref=f36e264]
+              - link "Sección titulada «Errores frecuentes»" [ref=f36e265] [cursor=pointer]:
+                - /url: "#errores-frecuentes"
+            - table [ref=f36e270]:
+              - rowgroup [ref=f36e271]:
+                - row [ref=f36e272]:
+                  - columnheader "Problema" [ref=f36e273]
+                  - columnheader "Recuperación segura" [ref=f36e274]
+              - rowgroup [ref=f36e275]:
+                - row [ref=f36e276]:
+                  - cell "El revisor no encuentra la solicitud" [ref=f36e277]
+                  - cell "Confirma la sección exacta y actualiza la bandeja; solo muestra pendientes activos." [ref=f36e278]
+                - row [ref=f36e279]:
+                  - cell [ref=f36e280]:
+                    - text: La app sigue mostrando
+                    - code [ref=f36e281]: pending
+                    - text: después de aprobar
+                  - cell "Refresca o vuelve a iniciar sesión para renovar la autorización." [ref=f36e282]
+                - row [ref=f36e283]:
+                  - cell "La solicitud desapareció" [ref=f36e284]
+                  - cell "Revisa si fue cancelada, rechazada o vencida antes de repetir." [ref=f36e285]
+                - row [ref=f36e286]:
+                  - cell "La clase no corresponde" [ref=f36e287]
+                  - cell "Corrige nacimiento o sección; no crees otra inscripción manualmente." [ref=f36e288]
+                - row [ref=f36e289]:
+                  - cell "Se eligió el club equivocado" [ref=f36e290]
+                  - cell [ref=f36e291]:
+                    - text: Usa
+                    - strong [ref=f36e292]: Cancelar solicitud
+                    - text: si aparece; si no, solicita la corrección autorizada sin crear otra cuenta.
+            - generic [ref=f36e293]:
+              - heading "Fuente de verificación" [level=2] [ref=f36e294]
+              - link "Sección titulada «Fuente de verificación»" [ref=f36e295] [cursor=pointer]:
+                - /url: "#fuente-de-verificación"
+            - paragraph [ref=f36e300]: Proceso contrastado el 2026-08-21 con autenticación, post-registro, inscripción anual, contexto de autorización, avisos móviles y revisión administrativa de membresías.
+          - generic [ref=f36e301]:
+            - paragraph [ref=f36e303]:
+              - text: "Última actualización:"
+              - time [ref=f36e304]: 20 ago 2026
+            - generic [ref=f36e305]:
+              - link [ref=f36e306] [cursor=pointer]:
+                - /url: /procesos/actividad-y-asistencia/
+                - generic [ref=f36e309]: Página anteriorPlanear una actividad y registrar asistencia
+              - link [ref=f36e310] [cursor=pointer]:
+                - /url: /procesos/carga-certificados/
+                - generic [ref=f36e313]: Siguiente páginaReconocer formación desde certificados
+  - generic [ref=f36e316]:
+    - button [ref=f36e317]
+    - button [ref=f36e323]
+    - button [ref=f36e327]
+    - button [ref=f36e335]

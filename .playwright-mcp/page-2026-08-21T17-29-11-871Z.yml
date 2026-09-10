@@ -1,0 +1,285 @@
+- generic [active] [ref=f6e1]:
+  - link "Ir al contenido" [ref=f6e2] [cursor=pointer]:
+    - /url: "#_top"
+  - generic [ref=f6e3]:
+    - banner [ref=f6e4]:
+      - generic [ref=f6e5]:
+        - link "Inicio — Manual operativo" [ref=f6e8] [cursor=pointer]:
+          - /url: /
+          - generic [ref=f6e9]: S
+          - generic [ref=f6e10]:
+            - generic [ref=f6e11]: SACDIA
+            - generic [ref=f6e12]: Operativo
+        - button "Buscar" [ref=f6e15] [cursor=pointer]
+    - navigation "Primario":
+      - button "Menú" [ref=f6e18] [cursor=pointer]
+      - option "Oscuro"
+      - option "Claro"
+      - option "Automático" [selected]
+    - generic [ref=f6e22]:
+      - complementary:
+        - navigation [ref=f6e23]:
+          - group [ref=f6e24]:
+            - generic "En esta página" [ref=f6e25]
+      - main [ref=f6e30]:
+        - heading "Certificaciones de Guías Mayores" [level=1] [ref=f6e33]
+        - generic [ref=f6e35]:
+          - generic [ref=f6e36]:
+            - paragraph [ref=f6e37]:
+              - text: Usa
+              - strong [ref=f6e38]: Certificaciones
+              - text: para comprobar tu elegibilidad, trabajar los requisitos de una versión publicada y solicitar el cierre institucional.
+            - generic [ref=f6e39]:
+              - heading "Resultado esperado" [level=2] [ref=f6e40]
+              - link "Sección titulada «Resultado esperado»" [ref=f6e41] [cursor=pointer]:
+                - /url: "#resultado-esperado"
+            - paragraph [ref=f6e46]: Podrás distinguir el borrador de un requisito enviado, atender una solicitud de cambios y completar el cierre sin saltar la revisión final.
+            - generic [ref=f6e47]:
+              - heading "Quién puede utilizarlo" [level=2] [ref=f6e48]
+              - link "Sección titulada «Quién puede utilizarlo»" [ref=f6e49] [cursor=pointer]:
+                - /url: "#quién-puede-utilizarlo"
+            - paragraph [ref=f6e54]: Los miembros elegibles pueden inscribirse y administrar su propio expediente. Los permisos delegados permiten lectura o gestión según el alcance, pero el participante no puede revisar su propia certificación.
+            - generic [ref=f6e55]:
+              - heading "Pantallas incluidas" [level=2] [ref=f6e56]
+              - link "Sección titulada «Pantallas incluidas»" [ref=f6e57] [cursor=pointer]:
+                - /url: "#pantallas-incluidas"
+            - list [ref=f6e62]:
+              - listitem [ref=f6e63]: Catálogo de certificaciones
+              - listitem [ref=f6e64]: Mis certificaciones
+              - listitem [ref=f6e65]: Elegibilidad y detalle
+              - listitem [ref=f6e66]: Progreso por módulos
+              - listitem [ref=f6e67]: Detalle de requisito
+              - listitem [ref=f6e68]: Cierre de certificación
+            - generic [ref=f6e69]:
+              - heading "Cómo entrar" [level=2] [ref=f6e70]
+              - link "Sección titulada «Cómo entrar»" [ref=f6e71] [cursor=pointer]:
+                - /url: "#cómo-entrar"
+            - list [ref=f6e76]:
+              - listitem [ref=f6e77]:
+                - text: Desde
+                - strong [ref=f6e78]: Clases
+                - text: ", pulsa el acceso"
+                - strong [ref=f6e79]: Certificaciones
+                - text: .
+              - listitem [ref=f6e80]:
+                - text: Desde
+                - strong [ref=f6e81]: Perfil
+                - text: ", abre"
+                - strong [ref=f6e82]: Mis certificaciones
+                - text: para continuar una inscripción.
+            - paragraph [ref=f6e83]:
+              - text: Usa el catálogo para empezar y
+              - strong [ref=f6e84]: Mis certificaciones
+              - text: para retomar trabajo ya guardado.
+            - generic [ref=f6e85]:
+              - heading "Antes de inscribirte" [level=2] [ref=f6e86]
+              - link "Sección titulada «Antes de inscribirte»" [ref=f6e87] [cursor=pointer]:
+                - /url: "#antes-de-inscribirte"
+            - list [ref=f6e92]:
+              - listitem [ref=f6e93]: Abre una certificación del catálogo.
+              - listitem [ref=f6e94]:
+                - text: Revisa cada condición de la sección
+                - strong [ref=f6e95]: Requisitos de inscripción
+                - text: .
+              - listitem [ref=f6e96]: Confirma que todas aparezcan como cumplidas.
+              - listitem [ref=f6e97]:
+                - text: Pulsa
+                - strong [ref=f6e98]: Inscribirme
+                - text: una sola vez.
+              - listitem [ref=f6e99]:
+                - text: Abre la nueva tarjeta desde
+                - strong [ref=f6e100]: Mis certificaciones
+                - text: .
+            - paragraph [ref=f6e101]: La elegibilidad puede considerar edad, bautismo, clase investida, tipo de club o cargo activo. Si la versión publicada no tiene reglas configuradas, la app deshabilita la inscripción en lugar de asumir que eres elegible.
+            - generic [ref=f6e102]:
+              - heading "Entender el progreso" [level=2] [ref=f6e103]
+              - link "Sección titulada «Entender el progreso»" [ref=f6e104] [cursor=pointer]:
+                - /url: "#entender-el-progreso"
+            - paragraph [ref=f6e109]: "Cada inscripción queda asociada a una versión específica de la certificación. Los módulos contienen requisitos y cada requisito puede combinar distintos componentes:"
+            - list [ref=f6e110]:
+              - listitem [ref=f6e111]: respuesta de texto;
+              - listitem [ref=f6e112]: declaración o confirmación;
+              - listitem [ref=f6e113]: especialidad relacionada;
+              - listitem [ref=f6e114]: actividad relacionada;
+              - listitem [ref=f6e115]: archivo de evidencia;
+              - listitem [ref=f6e116]: validación automática.
+            - paragraph [ref=f6e117]: Completa lo que realmente aparece en el requisito. No sustituyas un componente obligatorio con un comentario o archivo en otro espacio.
+            - generic [ref=f6e118]:
+              - heading "Trabajar un requisito" [level=2] [ref=f6e119]
+              - link "Sección titulada «Trabajar un requisito»" [ref=f6e120] [cursor=pointer]:
+                - /url: "#trabajar-un-requisito"
+            - list [ref=f6e125]:
+              - listitem [ref=f6e126]:
+                - text: Abre
+                - strong [ref=f6e127]: Progreso
+                - text: y entra al módulo correspondiente.
+              - listitem [ref=f6e128]: Selecciona un requisito en estado editable.
+              - listitem [ref=f6e129]: Completa sus respuestas y adjunta la evidencia solicitada.
+              - listitem [ref=f6e130]: Guarda el borrador y confirma que la información permanezca al volver.
+              - listitem [ref=f6e131]:
+                - text: Pulsa
+                - strong [ref=f6e132]: Enviar requisito
+                - text: cuando todos los componentes estén completos.
+              - listitem [ref=f6e133]: Espera la revisión antes de modificarlo nuevamente.
+            - table [ref=f6e134]:
+              - rowgroup [ref=f6e135]:
+                - row [ref=f6e136]:
+                  - columnheader "Estado" [ref=f6e137]
+                  - columnheader "Significado" [ref=f6e138]
+                  - columnheader "Acción correcta" [ref=f6e139]
+              - rowgroup [ref=f6e140]:
+                - row [ref=f6e141]:
+                  - cell [ref=f6e142]:
+                    - code [ref=f6e143]: DRAFT
+                  - cell "El requisito está en preparación." [ref=f6e144]
+                  - cell "Editar, guardar y gestionar evidencias." [ref=f6e145]
+                - row [ref=f6e146]:
+                  - cell [ref=f6e147]:
+                    - code [ref=f6e148]: SUBMITTED
+                  - cell "Está en la bandeja de revisión." [ref=f6e149]
+                  - cell "Esperar; respuestas y archivos quedan bloqueados." [ref=f6e150]
+                - row [ref=f6e151]:
+                  - cell [ref=f6e152]:
+                    - code [ref=f6e153]: CHANGES_REQUESTED
+                  - cell "La persona revisora pidió ajustes." [ref=f6e154]
+                  - cell "Leer el comentario, corregir y reenviar el mismo requisito." [ref=f6e155]
+                - row [ref=f6e156]:
+                  - cell [ref=f6e157]:
+                    - code [ref=f6e158]: APPROVED
+                  - cell "El requisito fue aprobado." [ref=f6e159]
+                  - cell "Continuar con otro requisito." [ref=f6e160]
+            - paragraph [ref=f6e161]:
+              - text: No elimines evidencia ni repitas el envío mientras el estado sea
+              - code [ref=f6e162]: SUBMITTED
+              - text: .
+            - generic [ref=f6e163]:
+              - heading "Cerrar la certificación" [level=2] [ref=f6e164]
+              - link "Sección titulada «Cerrar la certificación»" [ref=f6e165] [cursor=pointer]:
+                - /url: "#cerrar-la-certificación"
+            - paragraph [ref=f6e170]:
+              - text: Cuando todos los requisitos obligatorios están aprobados, la inscripción cambia a
+              - code [ref=f6e171]: READY_FOR_CLOSEOUT
+              - text: "y habilita el cierre:"
+            - list [ref=f6e172]:
+              - listitem [ref=f6e173]:
+                - text: Abre
+                - strong [ref=f6e174]: Cierre
+                - text: desde el resumen de progreso.
+              - listitem [ref=f6e175]: Adjunta el comprobante de junta en el espacio indicado.
+              - listitem [ref=f6e176]: Espera a que la carga quede confirmada.
+              - listitem [ref=f6e177]:
+                - text: Pulsa
+                - strong [ref=f6e178]: Solicitar revisión final
+                - text: .
+              - listitem [ref=f6e179]: Consulta el estado hasta recibir aprobación, cambios solicitados o la certificación final.
+            - paragraph [ref=f6e180]:
+              - text: La aprobación del comprobante no equivale todavía a estar certificado. Después de esa resolución, una persona con permiso institucional debe ejecutar la etapa
+              - strong [ref=f6e181]: Certificar
+              - text: .
+            - generic [ref=f6e182]:
+              - heading "Estados finales que verás" [level=2] [ref=f6e183]
+              - link "Sección titulada «Estados finales que verás»" [ref=f6e184] [cursor=pointer]:
+                - /url: "#estados-finales-que-verás"
+            - table [ref=f6e189]:
+              - rowgroup [ref=f6e190]:
+                - row [ref=f6e191]:
+                  - columnheader "Estado" [ref=f6e192]
+                  - columnheader "Qué ocurre" [ref=f6e193]
+              - rowgroup [ref=f6e194]:
+                - row [ref=f6e195]:
+                  - cell [ref=f6e196]:
+                    - code [ref=f6e197]: READY_FOR_CLOSEOUT
+                  - cell "Los requisitos obligatorios están aprobados y puedes preparar el cierre." [ref=f6e198]
+                - row [ref=f6e199]:
+                  - cell [ref=f6e200]:
+                    - code [ref=f6e201]: SUBMITTED_FOR_FINAL_REVIEW
+                  - cell "El comprobante está esperando revisión." [ref=f6e202]
+                - row [ref=f6e203]:
+                  - cell [ref=f6e204]:
+                    - code [ref=f6e205]: CHANGES_REQUESTED
+                  - cell "Debes corregir el requisito o cierre indicado." [ref=f6e206]
+                - row [ref=f6e207]:
+                  - cell [ref=f6e208]:
+                    - code [ref=f6e209]: APPROVED
+                  - cell "El cierre fue aprobado y espera certificación institucional." [ref=f6e210]
+                - row [ref=f6e211]:
+                  - cell [ref=f6e212]:
+                    - code [ref=f6e213]: CERTIFIED
+                  - cell "El proceso terminó." [ref=f6e214]
+            - generic [ref=f6e215]:
+              - heading "Cómo verificarlo" [level=2] [ref=f6e216]
+              - link "Sección titulada «Cómo verificarlo»" [ref=f6e217] [cursor=pointer]:
+                - /url: "#cómo-verificarlo"
+            - list [ref=f6e222]:
+              - listitem [ref=f6e223]:
+                - text: La inscripción aparece en
+                - strong [ref=f6e224]: Mis certificaciones
+                - text: sin duplicados.
+              - listitem [ref=f6e225]: Un requisito enviado conserva respuestas y evidencia en modo de lectura.
+              - listitem [ref=f6e226]: El cierre solo se habilita después de aprobar requisitos obligatorios.
+              - listitem [ref=f6e227]:
+                - text: El estado final cambia a
+                - code [ref=f6e228]: CERTIFIED
+                - text: ", no solamente a aprobado."
+            - generic [ref=f6e229]:
+              - heading "Errores frecuentes" [level=2] [ref=f6e230]
+              - link "Sección titulada «Errores frecuentes»" [ref=f6e231] [cursor=pointer]:
+                - /url: "#errores-frecuentes"
+            - table [ref=f6e236]:
+              - rowgroup [ref=f6e237]:
+                - row [ref=f6e238]:
+                  - columnheader "Problema" [ref=f6e239]
+                  - columnheader "Qué hacer" [ref=f6e240]
+              - rowgroup [ref=f6e241]:
+                - row [ref=f6e242]:
+                  - cell [ref=f6e243]:
+                    - strong [ref=f6e244]: Inscribirme
+                    - text: está deshabilitado
+                  - cell "Abre el detalle de elegibilidad y revisa la condición marcada como pendiente." [ref=f6e245]
+                - row [ref=f6e246]:
+                  - cell "El requisito aparece bloqueado" [ref=f6e247]
+                  - cell "Si está enviado o aprobado, espera la resolución; no abras otra inscripción." [ref=f6e248]
+                - row [ref=f6e249]:
+                  - cell "La evidencia no termina de cargar" [ref=f6e250]
+                  - cell "Conserva el archivo y reintenta solo después de comprobar la conexión y el estado." [ref=f6e251]
+                - row [ref=f6e252]:
+                  - cell "Solicita cambios" [ref=f6e253]
+                  - cell "Abre el mismo requisito o cierre, lee el comentario y corrige ahí." [ref=f6e254]
+                - row [ref=f6e255]:
+                  - cell "El cierre no aparece" [ref=f6e256]
+                  - cell [ref=f6e257]:
+                    - text: Confirma que todos los requisitos obligatorios estén
+                    - code [ref=f6e258]: APPROVED
+                    - text: .
+            - generic [ref=f6e259]:
+              - heading "Procesos relacionados" [level=2] [ref=f6e260]
+              - link "Sección titulada «Procesos relacionados»" [ref=f6e261] [cursor=pointer]:
+                - /url: "#procesos-relacionados"
+            - list [ref=f6e266]:
+              - listitem [ref=f6e267]:
+                - link "Completar formación y solicitar investidura" [ref=f6e268] [cursor=pointer]:
+                  - /url: /procesos/formacion-e-investidura/
+            - generic [ref=f6e269]:
+              - heading "Fuente de verificación" [level=2] [ref=f6e270]
+              - link "Sección titulada «Fuente de verificación»" [ref=f6e271] [cursor=pointer]:
+                - /url: "#fuente-de-verificación"
+            - paragraph [ref=f6e276]:
+              - text: Manual contrastado el 2026-08-21 con las vistas de catálogo, elegibilidad, progreso, requisito y cierre de
+              - code [ref=f6e277]: sacdia-app
+              - text: ", y con el contrato versionado de Certificaciones de Guías Mayores."
+          - generic [ref=f6e278]:
+            - paragraph [ref=f6e280]:
+              - text: "Última actualización:"
+              - time [ref=f6e281]: 20 ago 2026
+            - generic [ref=f6e282]:
+              - link [ref=f6e283] [cursor=pointer]:
+                - /url: /pantallas/carpeta-evidencias/
+                - generic [ref=f6e286]: Página anteriorCarpeta anual de evidencias
+              - link [ref=f6e287] [cursor=pointer]:
+                - /url: /pantallas/clases-progresivas/
+                - generic [ref=f6e290]: Siguiente páginaClases progresivas
+  - generic [ref=f6e293]:
+    - button [ref=f6e294]
+    - button [ref=f6e300]
+    - button [ref=f6e304]
+    - button [ref=f6e312]

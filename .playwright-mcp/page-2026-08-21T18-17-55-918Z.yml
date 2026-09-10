@@ -1,0 +1,394 @@
+- generic [active] [ref=f7e1]:
+  - link "Ir al contenido" [ref=f7e2] [cursor=pointer]:
+    - /url: "#_top"
+  - generic [ref=f7e3]:
+    - banner [ref=f7e4]:
+      - generic [ref=f7e5]:
+        - generic [ref=f7e7]:
+          - link "Inicio — Manual administrativo" [ref=f7e8] [cursor=pointer]:
+            - /url: /
+            - generic [ref=f7e9]: S
+            - generic [ref=f7e10]:
+              - generic [ref=f7e11]: SACDIA
+              - generic [ref=f7e12]: Administrativo
+          - navigation "Cambiar portal de documentación" [ref=f7e13]:
+            - link "Operativo" [ref=f7e14] [cursor=pointer]:
+              - /url: http://localhost:4321
+            - link "Administrativo" [ref=f7e15] [cursor=pointer]:
+              - /url: http://localhost:4322
+            - link "Técnico" [ref=f7e16] [cursor=pointer]:
+              - /url: http://localhost:4323
+        - button "Buscar" [ref=f7e19] [cursor=pointer]:
+          - generic [ref=f7e23]:
+            - generic [ref=f7e24]: ⌘
+            - generic [ref=f7e25]: K
+        - generic [ref=f7e29]:
+          - generic [ref=f7e30]: Seleccionar tema
+          - combobox "Seleccionar tema" [ref=f7e31] [cursor=pointer]:
+            - option "Oscuro"
+            - option "Claro"
+            - option "Automático" [selected]
+    - navigation "Primario":
+      - list [ref=f7e35]:
+        - listitem [ref=f7e36]:
+          - group [ref=f7e37]:
+            - generic "Primeros pasos" [ref=f7e38] [cursor=pointer]
+            - list [ref=f7e42]:
+              - listitem [ref=f7e43]:
+                - link "Primeros pasos en el panel" [ref=f7e44] [cursor=pointer]:
+                  - /url: /primeros-pasos/
+              - listitem [ref=f7e45]:
+                - link "Acceso al panel" [ref=f7e46] [cursor=pointer]:
+                  - /url: /primeros-pasos/acceso/
+              - listitem [ref=f7e47]:
+                - link "Páginas no disponibles" [ref=f7e48] [cursor=pointer]:
+                  - /url: /primeros-pasos/paginas-no-disponibles/
+              - listitem [ref=f7e49]:
+                - link "Tablero administrativo" [ref=f7e50] [cursor=pointer]:
+                  - /url: /primeros-pasos/tablero/
+        - listitem [ref=f7e51]:
+          - group [ref=f7e52]:
+            - generic "Clubes" [ref=f7e53] [cursor=pointer]
+            - list [ref=f7e57]:
+              - listitem [ref=f7e58]:
+                - link "Gestión de clubes y personas" [ref=f7e59] [cursor=pointer]:
+                  - /url: /clubes/
+              - listitem [ref=f7e60]:
+                - link "Actividades y asistencia de clubes" [ref=f7e61] [cursor=pointer]:
+                  - /url: /clubes/actividades/
+              - listitem [ref=f7e62]:
+                - link "Administración de camporees" [ref=f7e63] [cursor=pointer]:
+                  - /url: /clubes/campamentos/
+              - listitem [ref=f7e64]:
+                - link "Coordinación territorial" [ref=f7e65] [cursor=pointer]:
+                  - /url: /clubes/coordinacion/
+              - listitem [ref=f7e66]:
+                - link "Gestión de clubes" [ref=f7e67] [cursor=pointer]:
+                  - /url: /clubes/gestion-clubes/
+              - listitem [ref=f7e68]:
+                - link "Inscripciones anuales" [ref=f7e69] [cursor=pointer]:
+                  - /url: /clubes/inscripciones/
+              - listitem [ref=f7e70]:
+                - link "Solicitudes de cargos y traslados" [ref=f7e71] [cursor=pointer]:
+                  - /url: /clubes/solicitudes/
+              - listitem [ref=f7e72]:
+                - link "Solicitudes de membresía" [ref=f7e73] [cursor=pointer]:
+                  - /url: /clubes/solicitudes-membresia/
+              - listitem [ref=f7e74]:
+                - link "Administración de usuarios" [ref=f7e75] [cursor=pointer]:
+                  - /url: /clubes/usuarios/
+        - listitem [ref=f7e76]:
+          - group [ref=f7e77]:
+            - generic "Finanzas" [ref=f7e78] [cursor=pointer]
+            - list [ref=f7e82]:
+              - listitem [ref=f7e83]:
+                - link "Finanzas y seguros" [ref=f7e84] [cursor=pointer]:
+                  - /url: /finanzas/
+              - listitem [ref=f7e85]:
+                - link "Finanzas de clubes" [ref=f7e86] [cursor=pointer]:
+                  - /url: /finanzas/finanzas-clubes/
+              - listitem [ref=f7e87]:
+                - link "Revisión de órdenes de pago" [ref=f7e88] [cursor=pointer]:
+                  - /url: /finanzas/ordenes-pago/
+              - listitem [ref=f7e89]:
+                - link "Gestión de seguros" [ref=f7e90] [cursor=pointer]:
+                  - /url: /finanzas/seguros/
+        - listitem [ref=f7e91]:
+          - group [ref=f7e92]:
+            - generic "Materiales" [ref=f7e93] [cursor=pointer]
+            - list [ref=f7e97]:
+              - listitem [ref=f7e98]:
+                - link "Materiales, inventario y recursos" [ref=f7e99] [cursor=pointer]:
+                  - /url: /materiales/
+              - listitem [ref=f7e100]:
+                - link "Inventario de clubes" [ref=f7e101] [cursor=pointer]:
+                  - /url: /materiales/inventario-clubes/
+              - listitem [ref=f7e102]:
+                - link "Publicación de recursos" [ref=f7e103] [cursor=pointer]:
+                  - /url: /materiales/recursos/
+              - listitem [ref=f7e104]:
+                - link "Solicitudes y entrega de materiales" [ref=f7e105] [cursor=pointer]:
+                  - /url: /materiales/solicitudes-materiales/
+        - listitem [ref=f7e106]:
+          - group [ref=f7e107]:
+            - generic "Investiduras" [ref=f7e108] [cursor=pointer]
+            - list [ref=f7e112]:
+              - listitem [ref=f7e113]:
+                - link "Formación, validaciones y análisis" [ref=f7e114] [cursor=pointer]:
+                  - /url: /investiduras/
+              - listitem [ref=f7e115]:
+                - link "Revisión de cargas de certificados" [ref=f7e116] [cursor=pointer]:
+                  - /url: /investiduras/cargas-certificados/
+              - listitem [ref=f7e117]:
+                - link "Carpetas anuales y clasificación" [ref=f7e118] [cursor=pointer]:
+                  - /url: /investiduras/carpetas-anuales/
+              - listitem [ref=f7e119]:
+                - link "Certificaciones de Guías Mayores" [ref=f7e120] [cursor=pointer]:
+                  - /url: /investiduras/certificaciones/
+              - listitem [ref=f7e121]:
+                - link "Cierre de año eclesiástico" [ref=f7e122] [cursor=pointer]:
+                  - /url: /investiduras/cierre-anio/
+              - listitem [ref=f7e123]:
+                - link "Clasificaciones por sección" [ref=f7e124] [cursor=pointer]:
+                  - /url: /investiduras/clasificaciones-seccion/
+              - listitem [ref=f7e125]:
+                - link "Informes mensuales y supervisión" [ref=f7e126] [cursor=pointer]:
+                  - /url: /investiduras/informes/
+              - listitem [ref=f7e127]:
+                - link "Validación de investiduras" [ref=f7e128] [cursor=pointer]:
+                  - /url: /investiduras/investiduras/
+              - listitem [ref=f7e129]:
+                - link "Miembro del mes" [ref=f7e130] [cursor=pointer]:
+                  - /url: /investiduras/miembro-del-mes/
+              - listitem [ref=f7e131]:
+                - link "Pesos de clasificación" [ref=f7e132] [cursor=pointer]:
+                  - /url: /investiduras/pesos-clasificacion/
+        - listitem [ref=f7e133]:
+          - group [ref=f7e134]:
+            - generic "Configuración" [ref=f7e135] [cursor=pointer]
+            - list [ref=f7e139]:
+              - listitem [ref=f7e140]:
+                - link "Configuración del sistema" [ref=f7e141] [cursor=pointer]:
+                  - /url: /configuracion/
+              - listitem [ref=f7e142]:
+                - link "Catálogos del sistema" [ref=f7e143] [cursor=pointer]:
+                  - /url: /configuracion/catalogos/
+              - listitem [ref=f7e144]:
+                - link "Categorías de puntuación" [ref=f7e145] [cursor=pointer]:
+                  - /url: /configuracion/categorias-puntuacion/
+              - listitem [ref=f7e146]:
+                - link "Configuración de logros" [ref=f7e147] [cursor=pointer]:
+                  - /url: /configuracion/logros/
+              - listitem [ref=f7e148]:
+                - link "Administración de notificaciones" [ref=f7e149] [cursor=pointer]:
+                  - /url: /configuracion/notificaciones/
+              - listitem [ref=f7e150]:
+                - link "Roles y permisos" [ref=f7e151] [cursor=pointer]:
+                  - /url: /configuracion/roles-permisos/
+              - listitem [ref=f7e152]:
+                - link "Centro de configuración" [ref=f7e153] [cursor=pointer]:
+                  - /url: /configuracion/sistema/
+              - listitem [ref=f7e154]:
+                - link "Trabajos programados" [ref=f7e155] [cursor=pointer]:
+                  - /url: /configuracion/trabajos-programados/
+        - listitem [ref=f7e156]:
+          - group [ref=f7e157]:
+            - generic "Procesos" [ref=f7e158] [cursor=pointer]
+            - list [ref=f7e162]:
+              - listitem [ref=f7e163]:
+                - link "Procesos de SACDIA" [ref=f7e164] [cursor=pointer]:
+                  - /url: /procesos/
+              - listitem [ref=f7e165]:
+                - link "Planear una actividad y registrar asistencia" [ref=f7e166] [cursor=pointer]:
+                  - /url: /procesos/actividad-y-asistencia/
+              - listitem [ref=f7e167]:
+                - link "Alta de cuenta y membresía" [ref=f7e168] [cursor=pointer]:
+                  - /url: /procesos/alta-y-membresia/
+              - listitem [ref=f7e169]:
+                - link "Reconocer formación desde certificados" [ref=f7e170] [cursor=pointer]:
+                  - /url: /procesos/carga-certificados/
+              - listitem [ref=f7e171]:
+                - link "Completar y validar la carpeta anual" [ref=f7e172] [cursor=pointer]:
+                  - /url: /procesos/carpeta-anual/
+              - listitem [ref=f7e173]:
+                - link "Registrar y supervisar finanzas" [ref=f7e174] [cursor=pointer]:
+                  - /url: /procesos/cierre-financiero/
+              - listitem [ref=f7e175]:
+                - link "Publicar una comunicación o recurso" [ref=f7e176] [cursor=pointer]:
+                  - /url: /procesos/comunicacion-recursos/
+              - listitem [ref=f7e177]:
+                - link "Registrar puntajes y consultar clasificaciones" [ref=f7e178] [cursor=pointer]:
+                  - /url: /procesos/evaluacion-y-clasificacion/
+              - listitem [ref=f7e179]:
+                - link "Completar formación y solicitar investidura" [ref=f7e180] [cursor=pointer]:
+                  - /url: /procesos/formacion-e-investidura/
+              - listitem [ref=f7e181]:
+                - link "Gestionar un club y su sección" [ref=f7e182] [cursor=pointer]:
+                  - /url: /procesos/gestion-club-seccion/
+              - listitem [ref=f7e183]:
+                - link "Completar y supervisar el informe mensual" [ref=f7e184] [cursor=pointer]:
+                  - /url: /procesos/informe-mensual/
+              - listitem [ref=f7e185]:
+                - link "Inscribir y operar un camporee" [ref=f7e186] [cursor=pointer]:
+                  - /url: /procesos/participacion-camporee/
+              - listitem [ref=f7e187]:
+                - link "Registrar seguro mediante orden de pago" [ref=f7e188] [cursor=pointer]:
+                  - /url: /procesos/seguro-y-orden-pago/
+              - listitem [ref=f7e189]:
+                - link "Solicitar, pagar y recibir materiales" [ref=f7e190] [cursor=pointer]:
+                  - /url: /procesos/solicitud-materiales/
+              - listitem [ref=f7e191]:
+                - link "Trasladar un miembro" [ref=f7e192] [cursor=pointer]:
+                  - /url: /procesos/traslado-miembro/
+    - generic [ref=f7e194]:
+      - complementary [ref=f7e195]:
+        - navigation [ref=f7e200]:
+          - heading "En esta página" [level=2] [ref=f7e201]
+          - list [ref=f7e202]:
+            - listitem [ref=f7e203]:
+              - link "Sinopsis" [ref=f7e204] [cursor=pointer]:
+                - /url: "#_top"
+            - listitem [ref=f7e205]:
+              - link "Resultado esperado" [ref=f7e206] [cursor=pointer]:
+                - /url: "#resultado-esperado"
+            - listitem [ref=f7e207]:
+              - link "Acceso requerido" [ref=f7e208] [cursor=pointer]:
+                - /url: "#acceso-requerido"
+            - listitem [ref=f7e209]:
+              - link "Rutas incluidas" [ref=f7e210] [cursor=pointer]:
+                - /url: "#rutas-incluidas"
+            - listitem [ref=f7e211]:
+              - link "Elegir la bandeja correcta" [ref=f7e212] [cursor=pointer]:
+                - /url: "#elegir-la-bandeja-correcta"
+            - listitem [ref=f7e213]:
+              - link "Flujo recomendado" [ref=f7e214] [cursor=pointer]:
+                - /url: "#flujo-recomendado"
+            - listitem [ref=f7e215]:
+              - link "Cómo verificarlo" [ref=f7e216] [cursor=pointer]:
+                - /url: "#cómo-verificarlo"
+            - listitem [ref=f7e217]:
+              - link "Errores frecuentes" [ref=f7e218] [cursor=pointer]:
+                - /url: "#errores-frecuentes"
+            - listitem [ref=f7e219]:
+              - link "Procesos relacionados" [ref=f7e220] [cursor=pointer]:
+                - /url: "#procesos-relacionados"
+            - listitem [ref=f7e221]:
+              - link "Fuente de verificación" [ref=f7e222] [cursor=pointer]:
+                - /url: "#fuente-de-verificación"
+      - main [ref=f7e224]:
+        - heading "Solicitudes de cargos y traslados" [level=1] [ref=f7e227]
+        - generic [ref=f7e229]:
+          - generic [ref=f7e230]:
+            - paragraph [ref=f7e231]:
+              - text: Utiliza estas bandejas para solicitudes de
+              - strong [ref=f7e232]: cargos
+              - text: o
+              - strong [ref=f7e233]: traslados
+              - text: . La membresía inicial tiene su propia pantalla y manual.
+            - generic [ref=f7e234]:
+              - heading "Resultado esperado" [level=2] [ref=f7e235]
+              - link "Sección titulada «Resultado esperado»" [ref=f7e236] [cursor=pointer]:
+                - /url: "#resultado-esperado"
+            - paragraph [ref=f7e241]: Podrás abrir la bandeja correcta, revisar el detalle disponible y registrar una decisión dentro de tu alcance administrativo.
+            - generic [ref=f7e242]:
+              - heading "Acceso requerido" [level=2] [ref=f7e243]
+              - link "Sección titulada «Acceso requerido»" [ref=f7e244] [cursor=pointer]:
+                - /url: "#acceso-requerido"
+            - list [ref=f7e249]:
+              - listitem [ref=f7e250]: Sesión válida en el panel administrativo.
+              - listitem [ref=f7e251]: Cargo y alcance compatibles con la solicitud.
+            - paragraph [ref=f7e252]: El backend valida cada consulta y decisión. Si una bandeja devuelve acceso denegado, no intentes saltar el control con una URL directa.
+            - generic [ref=f7e253]:
+              - heading "Rutas incluidas" [level=2] [ref=f7e254]
+              - link "Sección titulada «Rutas incluidas»" [ref=f7e255] [cursor=pointer]:
+                - /url: "#rutas-incluidas"
+            - table [ref=f7e260]:
+              - rowgroup [ref=f7e261]:
+                - row [ref=f7e262]:
+                  - columnheader "Ruta" [ref=f7e263]
+                  - columnheader "Uso" [ref=f7e264]
+              - rowgroup [ref=f7e265]:
+                - row [ref=f7e266]:
+                  - cell [ref=f7e267]:
+                    - code [ref=f7e268]: /dashboard/requests/assignments
+                  - cell "Solicitudes de asignación de cargo." [ref=f7e269]
+                - row [ref=f7e270]:
+                  - cell [ref=f7e271]:
+                    - code [ref=f7e272]: /dashboard/requests/transfers
+                  - cell "Solicitudes de traslado entre contextos." [ref=f7e273]
+            - paragraph [ref=f7e274]:
+              - text: Para ingresos iniciales, utiliza
+              - link "Solicitudes de membresía" [ref=f7e275] [cursor=pointer]:
+                - /url: /clubes/solicitudes-membresia/
+              - text: .
+            - generic [ref=f7e276]:
+              - heading "Elegir la bandeja correcta" [level=2] [ref=f7e277]
+              - link "Sección titulada «Elegir la bandeja correcta»" [ref=f7e278] [cursor=pointer]:
+                - /url: "#elegir-la-bandeja-correcta"
+            - list [ref=f7e283]:
+              - listitem [ref=f7e284]:
+                - text: Abre
+                - strong [ref=f7e285]: Cargos
+                - text: cuando la persona ya pertenece al contexto y solicita una responsabilidad distinta.
+              - listitem [ref=f7e286]:
+                - text: Abre
+                - strong [ref=f7e287]: Traslados
+                - text: cuando la solicitud cambia el contexto de origen o destino.
+              - listitem [ref=f7e288]: No uses ninguna de estas bandejas para aprobar el ingreso inicial como miembro.
+            - generic [ref=f7e289]:
+              - heading "Flujo recomendado" [level=2] [ref=f7e290]
+              - link "Sección titulada «Flujo recomendado»" [ref=f7e291] [cursor=pointer]:
+                - /url: "#flujo-recomendado"
+            - list [ref=f7e296]:
+              - listitem [ref=f7e297]: Abre la bandeja correspondiente.
+              - listitem [ref=f7e298]: Filtra por estado y sección cuando esos controles estén disponibles.
+              - listitem [ref=f7e299]: Revisa persona, contexto, cargo u origen/destino antes de decidir.
+              - listitem [ref=f7e300]: Registra la aprobación o rechazo una sola vez.
+              - listitem [ref=f7e301]: Actualiza la lista y confirma que el estado cambió.
+            - generic [ref=f7e302]:
+              - heading "Cómo verificarlo" [level=2] [ref=f7e303]
+              - link "Sección titulada «Cómo verificarlo»" [ref=f7e304] [cursor=pointer]:
+                - /url: "#cómo-verificarlo"
+            - paragraph [ref=f7e309]: La solicitud deja la cola pendiente y el cargo o traslado se refleja en el contexto correcto, sin crear una segunda solicitud para compensar la primera.
+            - generic [ref=f7e310]:
+              - heading "Errores frecuentes" [level=2] [ref=f7e311]
+              - link "Sección titulada «Errores frecuentes»" [ref=f7e312] [cursor=pointer]:
+                - /url: "#errores-frecuentes"
+            - table [ref=f7e317]:
+              - rowgroup [ref=f7e318]:
+                - row [ref=f7e319]:
+                  - columnheader "Problema" [ref=f7e320]
+                  - columnheader "Qué hacer" [ref=f7e321]
+              - rowgroup [ref=f7e322]:
+                - row [ref=f7e323]:
+                  - cell "La solicitud no aparece" [ref=f7e324]
+                  - cell "Revisa tipo de bandeja, estado y alcance territorial." [ref=f7e325]
+                - row [ref=f7e326]:
+                  - cell "El registro está fuera de alcance" [ref=f7e327]
+                  - cell "Confirma la cuenta y el contexto administrativo activos." [ref=f7e328]
+                - row [ref=f7e329]:
+                  - cell "El estado no cambia" [ref=f7e330]
+                  - cell "Actualiza antes de repetir; otra persona pudo resolver la solicitud." [ref=f7e331]
+                - row [ref=f7e332]:
+                  - cell "Abriste una membresía inicial" [ref=f7e333]
+                  - cell "Vuelve a la bandeja específica de membresía." [ref=f7e334]
+            - generic [ref=f7e335]:
+              - heading "Procesos relacionados" [level=2] [ref=f7e336]
+              - link "Sección titulada «Procesos relacionados»" [ref=f7e337] [cursor=pointer]:
+                - /url: "#procesos-relacionados"
+            - list [ref=f7e342]:
+              - listitem [ref=f7e343]:
+                - link "Alta de cuenta y membresía" [ref=f7e344] [cursor=pointer]:
+                  - /url: /procesos/alta-y-membresia/
+              - listitem [ref=f7e345]:
+                - link "Gestión de club y sección" [ref=f7e346] [cursor=pointer]:
+                  - /url: /procesos/gestion-club-seccion/
+              - listitem [ref=f7e347]:
+                - link "Traslado de miembro" [ref=f7e348] [cursor=pointer]:
+                  - /url: /procesos/traslado-miembro/
+            - generic [ref=f7e349]:
+              - heading "Fuente de verificación" [level=2] [ref=f7e350]
+              - link "Sección titulada «Fuente de verificación»" [ref=f7e351] [cursor=pointer]:
+                - /url: "#fuente-de-verificación"
+            - paragraph [ref=f7e356]:
+              - text: Manual contrastado el 2026-08-21 con las rutas
+              - code [ref=f7e357]: /dashboard/requests/assignments
+              - text: "y"
+              - code [ref=f7e358]: /dashboard/requests/transfers
+              - text: y sus clientes API efectivos.
+          - generic [ref=f7e359]:
+            - paragraph [ref=f7e361]:
+              - text: "Última actualización:"
+              - time [ref=f7e362]: 20 ago 2026
+            - generic [ref=f7e363]:
+              - link [ref=f7e364] [cursor=pointer]:
+                - /url: /clubes/inscripciones/
+                - generic [ref=f7e367]: Página anteriorInscripciones anuales
+              - link [ref=f7e368] [cursor=pointer]:
+                - /url: /clubes/solicitudes-membresia/
+                - generic [ref=f7e371]: Siguiente páginaSolicitudes de membresía
+  - generic [ref=f7e374]:
+    - button [ref=f7e375]
+    - button [ref=f7e381]
+    - button [ref=f7e385]
+    - button [ref=f7e390]

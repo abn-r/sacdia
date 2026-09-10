@@ -1,0 +1,463 @@
+- generic [active] [ref=f25e1]:
+  - link "Ir al contenido" [ref=f25e2] [cursor=pointer]:
+    - /url: "#_top"
+  - generic [ref=f25e3]:
+    - banner [ref=f25e4]:
+      - generic [ref=f25e5]:
+        - generic [ref=f25e7]:
+          - link "Inicio — Manual operativo" [ref=f25e8] [cursor=pointer]:
+            - /url: /
+            - generic [ref=f25e9]: S
+            - generic [ref=f25e10]:
+              - generic [ref=f25e11]: SACDIA
+              - generic [ref=f25e12]: Operativo
+          - navigation "Cambiar portal de documentación" [ref=f25e13]:
+            - link "Operativo" [ref=f25e14] [cursor=pointer]:
+              - /url: http://localhost:4321
+            - link "Administrativo" [ref=f25e15] [cursor=pointer]:
+              - /url: http://localhost:4322
+            - link "Técnico" [ref=f25e16] [cursor=pointer]:
+              - /url: http://localhost:4323
+        - button "Buscar" [ref=f25e19] [cursor=pointer]:
+          - generic [ref=f25e23]:
+            - generic [ref=f25e24]: ⌘
+            - generic [ref=f25e25]: K
+        - generic [ref=f25e29]:
+          - generic [ref=f25e30]: Seleccionar tema
+          - combobox "Seleccionar tema" [ref=f25e31] [cursor=pointer]:
+            - option "Oscuro"
+            - option "Claro"
+            - option "Automático" [selected]
+    - navigation "Primario":
+      - list [ref=f25e35]:
+        - listitem [ref=f25e36]:
+          - group [ref=f25e37]:
+            - generic "Primeros pasos" [ref=f25e38] [cursor=pointer]
+            - list [ref=f25e42]:
+              - listitem [ref=f25e43]:
+                - link "Primeros pasos" [ref=f25e44] [cursor=pointer]:
+                  - /url: /primeros-pasos/
+        - listitem [ref=f25e45]:
+          - group [ref=f25e46]:
+            - generic "Pantallas" [ref=f25e47] [cursor=pointer]
+            - list [ref=f25e51]:
+              - listitem [ref=f25e52]:
+                - link "Pantallas de la aplicación" [ref=f25e53] [cursor=pointer]:
+                  - /url: /pantallas/
+              - listitem [ref=f25e54]:
+                - link "Acceso, registro y recuperación" [ref=f25e55] [cursor=pointer]:
+                  - /url: /pantallas/acceso-y-registro/
+              - listitem [ref=f25e56]:
+                - link "Actividades y asistencia" [ref=f25e57] [cursor=pointer]:
+                  - /url: /pantallas/actividades/
+              - listitem [ref=f25e58]:
+                - link "Ajustes y accesibilidad" [ref=f25e59] [cursor=pointer]:
+                  - /url: /pantallas/ajustes/
+              - listitem [ref=f25e60]:
+                - link "Ayuda y soporte" [ref=f25e61] [cursor=pointer]:
+                  - /url: /pantallas/ayuda-soporte/
+              - listitem [ref=f25e62]:
+                - link "Bloqueo biométrico" [ref=f25e63] [cursor=pointer]:
+                  - /url: /pantallas/bloqueo-biometrico/
+              - listitem [ref=f25e64]:
+                - link "Camporees" [ref=f25e65] [cursor=pointer]:
+                  - /url: /pantallas/camporees/
+              - listitem [ref=f25e66]:
+                - link "Carga de certificados" [ref=f25e67] [cursor=pointer]:
+                  - /url: /pantallas/carga-certificados/
+              - listitem [ref=f25e68]:
+                - link "Mis cargos y asignaciones" [ref=f25e69] [cursor=pointer]:
+                  - /url: /pantallas/cargos/
+              - listitem [ref=f25e70]:
+                - link "Carpeta anual de evidencias" [ref=f25e71] [cursor=pointer]:
+                  - /url: /pantallas/carpeta-evidencias/
+              - listitem [ref=f25e72]:
+                - link "Certificaciones de Guías Mayores" [ref=f25e73] [cursor=pointer]:
+                  - /url: /pantallas/certificaciones/
+              - listitem [ref=f25e74]:
+                - link "Clases progresivas" [ref=f25e75] [cursor=pointer]:
+                  - /url: /pantallas/clases-progresivas/
+              - listitem [ref=f25e76]:
+                - link "Clasificaciones" [ref=f25e77] [cursor=pointer]:
+                  - /url: /pantallas/clasificaciones/
+              - listitem [ref=f25e78]:
+                - link "Completar el perfil inicial" [ref=f25e79] [cursor=pointer]:
+                  - /url: /pantallas/completar-perfil/
+              - listitem [ref=f25e80]:
+                - link "Coordinación territorial" [ref=f25e81] [cursor=pointer]:
+                  - /url: /pantallas/coordinacion/
+              - listitem [ref=f25e82]:
+                - link "Credencial digital" [ref=f25e83] [cursor=pointer]:
+                  - /url: /pantallas/credencial-digital/
+              - listitem [ref=f25e84]:
+                - link "Escáner QR" [ref=f25e85] [cursor=pointer]:
+                  - /url: /pantallas/escaner-qr/
+              - listitem [ref=f25e86]:
+                - link "Especialidades" [ref=f25e87] [cursor=pointer]:
+                  - /url: /pantallas/especialidades/
+              - listitem [ref=f25e88]:
+                - link "Finanzas del club" [ref=f25e89] [cursor=pointer]:
+                  - /url: /pantallas/finanzas/
+              - listitem [ref=f25e90]:
+                - link "Informes mensuales" [ref=f25e91] [cursor=pointer]:
+                  - /url: /pantallas/informes-mensuales/
+              - listitem [ref=f25e92]:
+                - link "Inicio de la aplicación" [ref=f25e93] [cursor=pointer]:
+                  - /url: /pantallas/inicio/
+              - listitem [ref=f25e94]:
+                - link "Inscripción anual del club" [ref=f25e95] [cursor=pointer]:
+                  - /url: /pantallas/inscripcion-club/
+              - listitem [ref=f25e96]:
+                - link "Inventario del club" [ref=f25e97] [cursor=pointer]:
+                  - /url: /pantallas/inventario/
+              - listitem [ref=f25e98]:
+                - link "Investiduras" [ref=f25e99] [cursor=pointer]:
+                  - /url: /pantallas/investiduras/
+              - listitem [ref=f25e100]:
+                - link "Logros" [ref=f25e101] [cursor=pointer]:
+                  - /url: /pantallas/logros/
+              - listitem [ref=f25e102]:
+                - link "Maestrías de especialidades" [ref=f25e103] [cursor=pointer]:
+                  - /url: /pantallas/maestrias/
+              - listitem [ref=f25e104]:
+                - link "Materiales y pedidos" [ref=f25e105] [cursor=pointer]:
+                  - /url: /pantallas/materiales/
+              - listitem [ref=f25e106]:
+                - link "Mi club y mi sección" [ref=f25e107] [cursor=pointer]:
+                  - /url: /pantallas/mi-club/
+              - listitem [ref=f25e108]:
+                - link "Miembros y cargos" [ref=f25e109] [cursor=pointer]:
+                  - /url: /pantallas/miembros/
+              - listitem [ref=f25e110]:
+                - link "Notificaciones" [ref=f25e111] [cursor=pointer]:
+                  - /url: /pantallas/notificaciones/
+              - listitem [ref=f25e112]:
+                - link "Órdenes de pago" [ref=f25e113] [cursor=pointer]:
+                  - /url: /pantallas/ordenes-pago/
+              - listitem [ref=f25e114]:
+                - link "Perfil, salud y sesiones" [ref=f25e115] [cursor=pointer]:
+                  - /url: /pantallas/perfil/
+              - listitem [ref=f25e116]:
+                - link "Recursos" [ref=f25e117] [cursor=pointer]:
+                  - /url: /pantallas/recursos/
+              - listitem [ref=f25e118]:
+                - link "Seguros" [ref=f25e119] [cursor=pointer]:
+                  - /url: /pantallas/seguros/
+              - listitem [ref=f25e120]:
+                - link "Tablero principal" [ref=f25e121] [cursor=pointer]:
+                  - /url: /pantallas/tablero/
+              - listitem [ref=f25e122]:
+                - link "Traslados de club o sección" [ref=f25e123] [cursor=pointer]:
+                  - /url: /pantallas/traslados/
+              - listitem [ref=f25e124]:
+                - link "Unidades y registros semanales" [ref=f25e125] [cursor=pointer]:
+                  - /url: /pantallas/unidades/
+              - listitem [ref=f25e126]:
+                - link "Estados de validación" [ref=f25e127] [cursor=pointer]:
+                  - /url: /pantallas/validaciones/
+        - listitem [ref=f25e128]:
+          - group [ref=f25e129]:
+            - generic "Procesos" [ref=f25e130] [cursor=pointer]
+            - list [ref=f25e134]:
+              - listitem [ref=f25e135]:
+                - link "Procesos de SACDIA" [ref=f25e136] [cursor=pointer]:
+                  - /url: /procesos/
+              - listitem [ref=f25e137]:
+                - link "Planear una actividad y registrar asistencia" [ref=f25e138] [cursor=pointer]:
+                  - /url: /procesos/actividad-y-asistencia/
+              - listitem [ref=f25e139]:
+                - link "Alta de cuenta y membresía" [ref=f25e140] [cursor=pointer]:
+                  - /url: /procesos/alta-y-membresia/
+              - listitem [ref=f25e141]:
+                - link "Reconocer formación desde certificados" [ref=f25e142] [cursor=pointer]:
+                  - /url: /procesos/carga-certificados/
+              - listitem [ref=f25e143]:
+                - link "Completar y validar la carpeta anual" [ref=f25e144] [cursor=pointer]:
+                  - /url: /procesos/carpeta-anual/
+              - listitem [ref=f25e145]:
+                - link "Registrar y supervisar finanzas" [ref=f25e146] [cursor=pointer]:
+                  - /url: /procesos/cierre-financiero/
+              - listitem [ref=f25e147]:
+                - link "Publicar una comunicación o recurso" [ref=f25e148] [cursor=pointer]:
+                  - /url: /procesos/comunicacion-recursos/
+              - listitem [ref=f25e149]:
+                - link "Registrar puntajes y consultar clasificaciones" [ref=f25e150] [cursor=pointer]:
+                  - /url: /procesos/evaluacion-y-clasificacion/
+              - listitem [ref=f25e151]:
+                - link "Completar formación y solicitar investidura" [ref=f25e152] [cursor=pointer]:
+                  - /url: /procesos/formacion-e-investidura/
+              - listitem [ref=f25e153]:
+                - link "Gestionar un club y su sección" [ref=f25e154] [cursor=pointer]:
+                  - /url: /procesos/gestion-club-seccion/
+              - listitem [ref=f25e155]:
+                - link "Completar y supervisar el informe mensual" [ref=f25e156] [cursor=pointer]:
+                  - /url: /procesos/informe-mensual/
+              - listitem [ref=f25e157]:
+                - link "Inscribir y operar un camporee" [ref=f25e158] [cursor=pointer]:
+                  - /url: /procesos/participacion-camporee/
+              - listitem [ref=f25e159]:
+                - link "Registrar seguro mediante orden de pago" [ref=f25e160] [cursor=pointer]:
+                  - /url: /procesos/seguro-y-orden-pago/
+              - listitem [ref=f25e161]:
+                - link "Solicitar, pagar y recibir materiales" [ref=f25e162] [cursor=pointer]:
+                  - /url: /procesos/solicitud-materiales/
+              - listitem [ref=f25e163]:
+                - link "Trasladar un miembro" [ref=f25e164] [cursor=pointer]:
+                  - /url: /procesos/traslado-miembro/
+        - listitem [ref=f25e165]:
+          - group [ref=f25e166]:
+            - generic "Ayuda" [ref=f25e167] [cursor=pointer]
+            - list [ref=f25e171]:
+              - listitem [ref=f25e172]:
+                - link "Ayuda y preguntas frecuentes" [ref=f25e173] [cursor=pointer]:
+                  - /url: /ayuda/
+    - generic [ref=f25e175]:
+      - complementary [ref=f25e176]:
+        - navigation [ref=f25e181]:
+          - heading "En esta página" [level=2] [ref=f25e182]
+          - list [ref=f25e183]:
+            - listitem [ref=f25e184]:
+              - link "Sinopsis" [ref=f25e185] [cursor=pointer]:
+                - /url: "#_top"
+            - listitem [ref=f25e186]:
+              - link "Resultado esperado" [ref=f25e187] [cursor=pointer]:
+                - /url: "#resultado-esperado"
+            - listitem [ref=f25e188]:
+              - link "Quién puede utilizarlo" [ref=f25e189] [cursor=pointer]:
+                - /url: "#quién-puede-utilizarlo"
+            - listitem [ref=f25e190]:
+              - link "Pantallas incluidas" [ref=f25e191] [cursor=pointer]:
+                - /url: "#pantallas-incluidas"
+            - listitem [ref=f25e192]:
+              - link "Elegir el acceso correcto" [ref=f25e193] [cursor=pointer]:
+                - /url: "#elegir-el-acceso-correcto"
+            - listitem [ref=f25e194]:
+              - link "Crear una cuenta" [ref=f25e195] [cursor=pointer]:
+                - /url: "#crear-una-cuenta"
+            - listitem [ref=f25e196]:
+              - link "Iniciar sesión" [ref=f25e197] [cursor=pointer]:
+                - /url: "#iniciar-sesión"
+            - listitem [ref=f25e198]:
+              - link "Recuperar la contraseña" [ref=f25e199] [cursor=pointer]:
+                - /url: "#recuperar-la-contraseña"
+            - listitem [ref=f25e200]:
+              - link "Después de autenticarte" [ref=f25e201] [cursor=pointer]:
+                - /url: "#después-de-autenticarte"
+            - listitem [ref=f25e202]:
+              - link "Cómo verificarlo" [ref=f25e203] [cursor=pointer]:
+                - /url: "#cómo-verificarlo"
+            - listitem [ref=f25e204]:
+              - link "Errores frecuentes" [ref=f25e205] [cursor=pointer]:
+                - /url: "#errores-frecuentes"
+            - listitem [ref=f25e206]:
+              - link "Procesos relacionados" [ref=f25e207] [cursor=pointer]:
+                - /url: "#procesos-relacionados"
+            - listitem [ref=f25e208]:
+              - link "Fuente de verificación" [ref=f25e209] [cursor=pointer]:
+                - /url: "#fuente-de-verificación"
+      - main [ref=f25e211]:
+        - heading "Acceso, registro y recuperación" [level=1] [ref=f25e214]
+        - generic [ref=f25e216]:
+          - generic [ref=f25e217]:
+            - paragraph [ref=f25e218]: Utiliza esta guía cuando abras SACDIA sin una sesión activa.
+            - generic [ref=f25e219]:
+              - heading "Resultado esperado" [level=2] [ref=f25e220]
+              - link "Sección titulada «Resultado esperado»" [ref=f25e221] [cursor=pointer]:
+                - /url: "#resultado-esperado"
+            - paragraph [ref=f25e226]: Podrás entrar con una cuenta existente, crear una nueva o solicitar la recuperación de la contraseña sin duplicar usuarios.
+            - generic [ref=f25e227]:
+              - heading "Quién puede utilizarlo" [level=2] [ref=f25e228]
+              - link "Sección titulada «Quién puede utilizarlo»" [ref=f25e229] [cursor=pointer]:
+                - /url: "#quién-puede-utilizarlo"
+            - list [ref=f25e234]:
+              - listitem [ref=f25e235]: Personas que todavía no tienen cuenta.
+              - listitem [ref=f25e236]: Usuarios registrados que necesitan iniciar sesión.
+              - listitem [ref=f25e237]: Usuarios que olvidaron su contraseña.
+            - paragraph [ref=f25e238]:
+              - text: La pantalla vigente ofrece acceso con
+              - strong [ref=f25e239]: correo y contraseña
+              - text: . Aunque el sistema tiene infraestructura para Google y Apple, esos botones no aparecen en el inicio de sesión actual; no los presentes como una opción disponible.
+            - generic [ref=f25e240]:
+              - heading "Pantallas incluidas" [level=2] [ref=f25e241]
+              - link "Sección titulada «Pantallas incluidas»" [ref=f25e242] [cursor=pointer]:
+                - /url: "#pantallas-incluidas"
+            - list [ref=f25e247]:
+              - listitem [ref=f25e248]: Inicio de sesión.
+              - listitem [ref=f25e249]: Registro.
+              - listitem [ref=f25e250]: Recuperar contraseña.
+              - listitem [ref=f25e251]: Pantalla de carga que decide el siguiente destino.
+            - generic [ref=f25e252]:
+              - heading "Elegir el acceso correcto" [level=2] [ref=f25e253]
+              - link "Sección titulada «Elegir el acceso correcto»" [ref=f25e254] [cursor=pointer]:
+                - /url: "#elegir-el-acceso-correcto"
+            - table [ref=f25e259]:
+              - rowgroup [ref=f25e260]:
+                - row [ref=f25e261]:
+                  - columnheader "Situación" [ref=f25e262]
+                  - columnheader "Acción correcta" [ref=f25e263]
+              - rowgroup [ref=f25e264]:
+                - row [ref=f25e265]:
+                  - cell "Ya tienes una cuenta" [ref=f25e266]
+                  - cell "Escribe el mismo correo con el que te registraste y tu contraseña." [ref=f25e267]
+                - row [ref=f25e268]:
+                  - cell "Nunca has utilizado SACDIA" [ref=f25e269]
+                  - cell [ref=f25e270]:
+                    - text: Pulsa
+                    - strong [ref=f25e271]: Regístrate
+                    - text: y crea una sola cuenta.
+                - row [ref=f25e272]:
+                  - cell "Olvidaste la contraseña" [ref=f25e273]
+                  - cell [ref=f25e274]:
+                    - text: Pulsa
+                    - strong [ref=f25e275]: ¿Olvidaste tu contraseña?
+                    - text: ; no abras otra cuenta.
+                - row [ref=f25e276]:
+                  - cell "Te registraste pero no terminaste el perfil" [ref=f25e277]
+                  - cell "Inicia sesión normalmente. La app retomará el post-registro pendiente." [ref=f25e278]
+                - row [ref=f25e279]:
+                  - cell "Tu membresía fue rechazada o venció" [ref=f25e280]
+                  - cell [ref=f25e281]:
+                    - text: Entra con la cuenta existente. Si la app no muestra
+                    - strong [ref=f25e282]: Volver a solicitar
+                    - text: ", pide apoyo a una persona autorizada del club o a soporte; no abras otra cuenta."
+            - generic [ref=f25e283]:
+              - heading "Crear una cuenta" [level=2] [ref=f25e284]
+              - link "Sección titulada «Crear una cuenta»" [ref=f25e285] [cursor=pointer]:
+                - /url: "#crear-una-cuenta"
+            - list [ref=f25e290]:
+              - listitem [ref=f25e291]:
+                - text: Desde
+                - strong [ref=f25e292]: Iniciar sesión
+                - text: ", pulsa"
+                - strong [ref=f25e293]: Regístrate
+                - text: .
+              - listitem [ref=f25e294]: Captura nombre, apellido paterno y apellido materno.
+              - listitem [ref=f25e295]: Escribe un correo al que tengas acceso. Será tu identificador para entrar y recuperar la contraseña.
+              - listitem [ref=f25e296]: Crea una contraseña de al menos ocho caracteres con mayúscula, minúscula, número y carácter especial.
+              - listitem [ref=f25e297]: Repite exactamente la contraseña.
+              - listitem [ref=f25e298]:
+                - text: Pulsa
+                - strong [ref=f25e299]: Crear cuenta
+                - text: una sola vez y espera la confirmación.
+            - paragraph [ref=f25e300]: El botón se habilita cuando todos los campos están completos, el correo tiene formato válido y ambas contraseñas coinciden. Después del registro, la sesión queda iniciada y la app dirige al perfil inicial de tres pasos.
+            - generic [ref=f25e301]:
+              - heading "Iniciar sesión" [level=2] [ref=f25e302]
+              - link "Sección titulada «Iniciar sesión»" [ref=f25e303] [cursor=pointer]:
+                - /url: "#iniciar-sesión"
+            - list [ref=f25e308]:
+              - listitem [ref=f25e309]: Escribe tu correo completo y revisa que no tenga espacios.
+              - listitem [ref=f25e310]: Captura la contraseña respetando mayúsculas y minúsculas.
+              - listitem [ref=f25e311]:
+                - text: Pulsa
+                - strong [ref=f25e312]: Iniciar sesión
+                - text: y espera el resultado antes de volver a intentarlo.
+            - paragraph [ref=f25e313]:
+              - text: Después de tres intentos fallidos consecutivos, la pantalla bloquea temporalmente el botón durante
+              - strong [ref=f25e314]: 30 segundos
+              - text: ". No uses ese tiempo para crear otra cuenta: revisa el correo o inicia la recuperación."
+            - generic [ref=f25e315]:
+              - heading "Recuperar la contraseña" [level=2] [ref=f25e316]
+              - link "Sección titulada «Recuperar la contraseña»" [ref=f25e317] [cursor=pointer]:
+                - /url: "#recuperar-la-contraseña"
+            - list [ref=f25e322]:
+              - listitem [ref=f25e323]:
+                - text: Pulsa
+                - strong [ref=f25e324]: ¿Olvidaste tu contraseña?
+                - text: .
+              - listitem [ref=f25e325]: Escribe el correo registrado.
+              - listitem [ref=f25e326]:
+                - text: Pulsa
+                - strong [ref=f25e327]: Enviar instrucciones
+                - text: .
+              - listitem [ref=f25e328]: Cuando aparezca la confirmación, revisa la bandeja de entrada y correo no deseado.
+              - listitem [ref=f25e329]: Abre el enlace recibido y define la nueva contraseña.
+              - listitem [ref=f25e330]: Regresa a la app e inicia sesión con la contraseña nueva.
+            - paragraph [ref=f25e331]: Si no recibes el mensaje, confirma primero que escribiste el mismo correo de la cuenta. Repetir la solicitud no corrige un correo distinto.
+            - generic [ref=f25e332]:
+              - heading "Después de autenticarte" [level=2] [ref=f25e333]
+              - link "Sección titulada «Después de autenticarte»" [ref=f25e334] [cursor=pointer]:
+                - /url: "#después-de-autenticarte"
+            - paragraph [ref=f25e339]: "La pantalla de carga revisa el estado del perfil:"
+            - list [ref=f25e340]:
+              - listitem [ref=f25e341]:
+                - text: si el post-registro está incompleto, abre
+                - strong [ref=f25e342]: Completar perfil
+                - text: en el paso pendiente;
+              - listitem [ref=f25e343]: si ya está completo, abre el tablero;
+              - listitem [ref=f25e344]:
+                - text: si la membresía sigue
+                - code [ref=f25e345]: pending
+                - text: ", el tablero muestra el estado, pero oculta las superficies operativas del club hasta que la solicitud quede activa."
+            - paragraph [ref=f25e346]: Tener una sesión válida no significa que la membresía de club ya fue aprobada. Son estados diferentes.
+            - generic [ref=f25e347]:
+              - heading "Cómo verificarlo" [level=2] [ref=f25e348]
+              - link "Sección titulada «Cómo verificarlo»" [ref=f25e349] [cursor=pointer]:
+                - /url: "#cómo-verificarlo"
+            - paragraph [ref=f25e354]: La app deja la pantalla de acceso y abre el post-registro o el tablero correspondiente a la misma cuenta.
+            - generic [ref=f25e355]:
+              - heading "Errores frecuentes" [level=2] [ref=f25e356]
+              - link "Sección titulada «Errores frecuentes»" [ref=f25e357] [cursor=pointer]:
+                - /url: "#errores-frecuentes"
+            - table [ref=f25e362]:
+              - rowgroup [ref=f25e363]:
+                - row [ref=f25e364]:
+                  - columnheader "Problema" [ref=f25e365]
+                  - columnheader "Qué hacer" [ref=f25e366]
+              - rowgroup [ref=f25e367]:
+                - row [ref=f25e368]:
+                  - cell "El correo ya está registrado" [ref=f25e369]
+                  - cell [ref=f25e370]:
+                    - text: Regresa a
+                    - strong [ref=f25e371]: Iniciar sesión
+                    - text: o recupera la contraseña. No crees otra cuenta.
+                - row [ref=f25e372]:
+                  - cell "Las contraseñas no coinciden" [ref=f25e373]
+                  - cell "Corrige ambos campos antes de enviar." [ref=f25e374]
+                - row [ref=f25e375]:
+                  - cell "El botón quedó bloqueado" [ref=f25e376]
+                  - cell "Espera los 30 segundos y verifica las credenciales antes de reintentar." [ref=f25e377]
+                - row [ref=f25e378]:
+                  - cell "No llega el correo de recuperación" [ref=f25e379]
+                  - cell "Revisa correo no deseado y confirma la dirección. Si persiste, repórtalo sin compartir tu contraseña." [ref=f25e380]
+                - row [ref=f25e381]:
+                  - cell "La app abre el perfil inicial" [ref=f25e382]
+                  - cell "La cuenta es válida, pero todavía falta completar el post-registro." [ref=f25e383]
+            - generic [ref=f25e384]:
+              - heading "Procesos relacionados" [level=2] [ref=f25e385]
+              - link "Sección titulada «Procesos relacionados»" [ref=f25e386] [cursor=pointer]:
+                - /url: "#procesos-relacionados"
+            - list [ref=f25e391]:
+              - listitem [ref=f25e392]:
+                - link "Alta de cuenta y membresía" [ref=f25e393] [cursor=pointer]:
+                  - /url: /procesos/alta-y-membresia/
+              - listitem [ref=f25e394]:
+                - link "Completar el perfil inicial" [ref=f25e395] [cursor=pointer]:
+                  - /url: /pantallas/completar-perfil/
+            - generic [ref=f25e396]:
+              - heading "Fuente de verificación" [level=2] [ref=f25e397]
+              - link "Sección titulada «Fuente de verificación»" [ref=f25e398] [cursor=pointer]:
+                - /url: "#fuente-de-verificación"
+            - paragraph [ref=f25e403]:
+              - text: Manual contrastado el 2026-08-21 con
+              - code [ref=f25e404]: login_view.dart
+              - text: ","
+              - code [ref=f25e405]: register_view.dart
+              - text: ","
+              - code [ref=f25e406]: forgot_password_view.dart
+              - text: ", el router móvil y los endpoints efectivos de autenticación."
+          - generic [ref=f25e407]:
+            - paragraph [ref=f25e409]:
+              - text: "Última actualización:"
+              - time [ref=f25e410]: 20 ago 2026
+            - generic [ref=f25e411]:
+              - link [ref=f25e412] [cursor=pointer]:
+                - /url: /pantallas/
+                - generic [ref=f25e415]: Página anteriorPantallas de la aplicación
+              - link [ref=f25e416] [cursor=pointer]:
+                - /url: /pantallas/actividades/
+                - generic [ref=f25e419]: Siguiente páginaActividades y asistencia
+  - generic [ref=f25e422]:
+    - button [ref=f25e423]
+    - button [ref=f25e429]
+    - button [ref=f25e433]
+    - button [ref=f25e438]

@@ -1,0 +1,229 @@
+- generic [active] [ref=f33e1]:
+  - link "Ir al contenido" [ref=f33e2] [cursor=pointer]:
+    - /url: "#_top"
+  - generic [ref=f33e3]:
+    - banner [ref=f33e4]:
+      - generic [ref=f33e5]:
+        - link "Inicio — Manual operativo" [ref=f33e8] [cursor=pointer]:
+          - /url: /
+          - generic [ref=f33e9]: S
+          - generic [ref=f33e10]:
+            - generic [ref=f33e11]: SACDIA
+            - generic [ref=f33e12]: Operativo
+        - button "Buscar" [ref=f33e15] [cursor=pointer]
+    - navigation "Primario":
+      - button "Menú" [ref=f33e18] [cursor=pointer]
+      - option "Oscuro"
+      - option "Claro"
+      - option "Automático" [selected]
+    - generic [ref=f33e22]:
+      - complementary:
+        - navigation [ref=f33e23]:
+          - group [ref=f33e24]:
+            - generic "En esta página" [ref=f33e25]
+      - main [ref=f33e30]:
+        - heading "Acceso, registro y recuperación" [level=1] [ref=f33e33]
+        - generic [ref=f33e35]:
+          - generic [ref=f33e36]:
+            - paragraph [ref=f33e37]: Utiliza esta guía cuando abras SACDIA sin una sesión activa.
+            - generic [ref=f33e38]:
+              - heading "Resultado esperado" [level=2] [ref=f33e39]
+              - link "Sección titulada «Resultado esperado»" [ref=f33e40] [cursor=pointer]:
+                - /url: "#resultado-esperado"
+            - paragraph [ref=f33e45]: Podrás entrar con una cuenta existente, crear una nueva o solicitar la recuperación de la contraseña sin duplicar usuarios.
+            - generic [ref=f33e46]:
+              - heading "Quién puede utilizarlo" [level=2] [ref=f33e47]
+              - link "Sección titulada «Quién puede utilizarlo»" [ref=f33e48] [cursor=pointer]:
+                - /url: "#quién-puede-utilizarlo"
+            - list [ref=f33e53]:
+              - listitem [ref=f33e54]: Personas que todavía no tienen cuenta.
+              - listitem [ref=f33e55]: Usuarios registrados que necesitan iniciar sesión.
+              - listitem [ref=f33e56]: Usuarios que olvidaron su contraseña.
+            - paragraph [ref=f33e57]:
+              - text: La pantalla vigente ofrece acceso con
+              - strong [ref=f33e58]: correo y contraseña
+              - text: . Aunque el sistema tiene infraestructura para Google y Apple, esos botones no aparecen en el inicio de sesión actual; no los presentes como una opción disponible.
+            - generic [ref=f33e59]:
+              - heading "Pantallas incluidas" [level=2] [ref=f33e60]
+              - link "Sección titulada «Pantallas incluidas»" [ref=f33e61] [cursor=pointer]:
+                - /url: "#pantallas-incluidas"
+            - list [ref=f33e66]:
+              - listitem [ref=f33e67]: Inicio de sesión.
+              - listitem [ref=f33e68]: Registro.
+              - listitem [ref=f33e69]: Recuperar contraseña.
+              - listitem [ref=f33e70]: Pantalla de carga que decide el siguiente destino.
+            - generic [ref=f33e71]:
+              - heading "Elegir el acceso correcto" [level=2] [ref=f33e72]
+              - link "Sección titulada «Elegir el acceso correcto»" [ref=f33e73] [cursor=pointer]:
+                - /url: "#elegir-el-acceso-correcto"
+            - table [ref=f33e78]:
+              - rowgroup [ref=f33e79]:
+                - row [ref=f33e80]:
+                  - columnheader "Situación" [ref=f33e81]
+                  - columnheader "Acción correcta" [ref=f33e82]
+              - rowgroup [ref=f33e83]:
+                - row [ref=f33e84]:
+                  - cell "Ya tienes una cuenta" [ref=f33e85]
+                  - cell "Escribe el mismo correo con el que te registraste y tu contraseña." [ref=f33e86]
+                - row [ref=f33e87]:
+                  - cell "Nunca has utilizado SACDIA" [ref=f33e88]
+                  - cell [ref=f33e89]:
+                    - text: Pulsa
+                    - strong [ref=f33e90]: Regístrate
+                    - text: y crea una sola cuenta.
+                - row [ref=f33e91]:
+                  - cell "Olvidaste la contraseña" [ref=f33e92]
+                  - cell [ref=f33e93]:
+                    - text: Pulsa
+                    - strong [ref=f33e94]: ¿Olvidaste tu contraseña?
+                    - text: ; no abras otra cuenta.
+                - row [ref=f33e95]:
+                  - cell "Te registraste pero no terminaste el perfil" [ref=f33e96]
+                  - cell "Inicia sesión normalmente. La app retomará el post-registro pendiente." [ref=f33e97]
+                - row [ref=f33e98]:
+                  - cell "Tu membresía fue rechazada o venció" [ref=f33e99]
+                  - cell [ref=f33e100]:
+                    - text: Entra con la cuenta existente. Si la app no muestra
+                    - strong [ref=f33e101]: Volver a solicitar
+                    - text: ", pide apoyo a una persona autorizada del club o a soporte; no abras otra cuenta."
+            - generic [ref=f33e102]:
+              - heading "Crear una cuenta" [level=2] [ref=f33e103]
+              - link "Sección titulada «Crear una cuenta»" [ref=f33e104] [cursor=pointer]:
+                - /url: "#crear-una-cuenta"
+            - list [ref=f33e109]:
+              - listitem [ref=f33e110]:
+                - text: Desde
+                - strong [ref=f33e111]: Iniciar sesión
+                - text: ", pulsa"
+                - strong [ref=f33e112]: Regístrate
+                - text: .
+              - listitem [ref=f33e113]: Captura nombre, apellido paterno y apellido materno.
+              - listitem [ref=f33e114]: Escribe un correo al que tengas acceso. Será tu identificador para entrar y recuperar la contraseña.
+              - listitem [ref=f33e115]: Crea una contraseña de al menos ocho caracteres con mayúscula, minúscula, número y carácter especial.
+              - listitem [ref=f33e116]: Repite exactamente la contraseña.
+              - listitem [ref=f33e117]:
+                - text: Pulsa
+                - strong [ref=f33e118]: Crear cuenta
+                - text: una sola vez y espera la confirmación.
+            - paragraph [ref=f33e119]: El botón se habilita cuando todos los campos están completos, el correo tiene formato válido y ambas contraseñas coinciden. Después del registro, la sesión queda iniciada y la app dirige al perfil inicial de tres pasos.
+            - generic [ref=f33e120]:
+              - heading "Iniciar sesión" [level=2] [ref=f33e121]
+              - link "Sección titulada «Iniciar sesión»" [ref=f33e122] [cursor=pointer]:
+                - /url: "#iniciar-sesión"
+            - list [ref=f33e127]:
+              - listitem [ref=f33e128]: Escribe tu correo completo y revisa que no tenga espacios.
+              - listitem [ref=f33e129]: Captura la contraseña respetando mayúsculas y minúsculas.
+              - listitem [ref=f33e130]:
+                - text: Pulsa
+                - strong [ref=f33e131]: Iniciar sesión
+                - text: y espera el resultado antes de volver a intentarlo.
+            - paragraph [ref=f33e132]:
+              - text: Después de tres intentos fallidos consecutivos, la pantalla bloquea temporalmente el botón durante
+              - strong [ref=f33e133]: 30 segundos
+              - text: ". No uses ese tiempo para crear otra cuenta: revisa el correo o inicia la recuperación."
+            - generic [ref=f33e134]:
+              - heading "Recuperar la contraseña" [level=2] [ref=f33e135]
+              - link "Sección titulada «Recuperar la contraseña»" [ref=f33e136] [cursor=pointer]:
+                - /url: "#recuperar-la-contraseña"
+            - list [ref=f33e141]:
+              - listitem [ref=f33e142]:
+                - text: Pulsa
+                - strong [ref=f33e143]: ¿Olvidaste tu contraseña?
+                - text: .
+              - listitem [ref=f33e144]: Escribe el correo registrado.
+              - listitem [ref=f33e145]:
+                - text: Pulsa
+                - strong [ref=f33e146]: Enviar instrucciones
+                - text: .
+              - listitem [ref=f33e147]: Cuando aparezca la confirmación, revisa la bandeja de entrada y correo no deseado.
+              - listitem [ref=f33e148]: Abre el enlace recibido y define la nueva contraseña.
+              - listitem [ref=f33e149]: Regresa a la app e inicia sesión con la contraseña nueva.
+            - paragraph [ref=f33e150]: Si no recibes el mensaje, confirma primero que escribiste el mismo correo de la cuenta. Repetir la solicitud no corrige un correo distinto.
+            - generic [ref=f33e151]:
+              - heading "Después de autenticarte" [level=2] [ref=f33e152]
+              - link "Sección titulada «Después de autenticarte»" [ref=f33e153] [cursor=pointer]:
+                - /url: "#después-de-autenticarte"
+            - paragraph [ref=f33e158]: "La pantalla de carga revisa el estado del perfil:"
+            - list [ref=f33e159]:
+              - listitem [ref=f33e160]:
+                - text: si el post-registro está incompleto, abre
+                - strong [ref=f33e161]: Completar perfil
+                - text: en el paso pendiente;
+              - listitem [ref=f33e162]: si ya está completo, abre el tablero;
+              - listitem [ref=f33e163]:
+                - text: si la membresía sigue
+                - code [ref=f33e164]: pending
+                - text: ", el tablero muestra el estado, pero oculta las superficies operativas del club hasta que la solicitud quede activa."
+            - paragraph [ref=f33e165]: Tener una sesión válida no significa que la membresía de club ya fue aprobada. Son estados diferentes.
+            - generic [ref=f33e166]:
+              - heading "Cómo verificarlo" [level=2] [ref=f33e167]
+              - link "Sección titulada «Cómo verificarlo»" [ref=f33e168] [cursor=pointer]:
+                - /url: "#cómo-verificarlo"
+            - paragraph [ref=f33e173]: La app deja la pantalla de acceso y abre el post-registro o el tablero correspondiente a la misma cuenta.
+            - generic [ref=f33e174]:
+              - heading "Errores frecuentes" [level=2] [ref=f33e175]
+              - link "Sección titulada «Errores frecuentes»" [ref=f33e176] [cursor=pointer]:
+                - /url: "#errores-frecuentes"
+            - table [ref=f33e181]:
+              - rowgroup [ref=f33e182]:
+                - row [ref=f33e183]:
+                  - columnheader "Problema" [ref=f33e184]
+                  - columnheader "Qué hacer" [ref=f33e185]
+              - rowgroup [ref=f33e186]:
+                - row [ref=f33e187]:
+                  - cell "El correo ya está registrado" [ref=f33e188]
+                  - cell [ref=f33e189]:
+                    - text: Regresa a
+                    - strong [ref=f33e190]: Iniciar sesión
+                    - text: o recupera la contraseña. No crees otra cuenta.
+                - row [ref=f33e191]:
+                  - cell "Las contraseñas no coinciden" [ref=f33e192]
+                  - cell "Corrige ambos campos antes de enviar." [ref=f33e193]
+                - row [ref=f33e194]:
+                  - cell "El botón quedó bloqueado" [ref=f33e195]
+                  - cell "Espera los 30 segundos y verifica las credenciales antes de reintentar." [ref=f33e196]
+                - row [ref=f33e197]:
+                  - cell "No llega el correo de recuperación" [ref=f33e198]
+                  - cell "Revisa correo no deseado y confirma la dirección. Si persiste, repórtalo sin compartir tu contraseña." [ref=f33e199]
+                - row [ref=f33e200]:
+                  - cell "La app abre el perfil inicial" [ref=f33e201]
+                  - cell "La cuenta es válida, pero todavía falta completar el post-registro." [ref=f33e202]
+            - generic [ref=f33e203]:
+              - heading "Procesos relacionados" [level=2] [ref=f33e204]
+              - link "Sección titulada «Procesos relacionados»" [ref=f33e205] [cursor=pointer]:
+                - /url: "#procesos-relacionados"
+            - list [ref=f33e210]:
+              - listitem [ref=f33e211]:
+                - link "Alta de cuenta y membresía" [ref=f33e212] [cursor=pointer]:
+                  - /url: /procesos/alta-y-membresia/
+              - listitem [ref=f33e213]:
+                - link "Completar el perfil inicial" [ref=f33e214] [cursor=pointer]:
+                  - /url: /pantallas/completar-perfil/
+            - generic [ref=f33e215]:
+              - heading "Fuente de verificación" [level=2] [ref=f33e216]
+              - link "Sección titulada «Fuente de verificación»" [ref=f33e217] [cursor=pointer]:
+                - /url: "#fuente-de-verificación"
+            - paragraph [ref=f33e222]:
+              - text: Manual contrastado el 2026-08-21 con
+              - code [ref=f33e223]: login_view.dart
+              - text: ","
+              - code [ref=f33e224]: register_view.dart
+              - text: ","
+              - code [ref=f33e225]: forgot_password_view.dart
+              - text: ", el router móvil y los endpoints efectivos de autenticación."
+          - generic [ref=f33e226]:
+            - paragraph [ref=f33e228]:
+              - text: "Última actualización:"
+              - time [ref=f33e229]: 20 ago 2026
+            - generic [ref=f33e230]:
+              - link [ref=f33e231] [cursor=pointer]:
+                - /url: /pantallas/
+                - generic [ref=f33e234]: Página anteriorPantallas de la aplicación
+              - link [ref=f33e235] [cursor=pointer]:
+                - /url: /pantallas/actividades/
+                - generic [ref=f33e238]: Siguiente páginaActividades y asistencia
+  - generic [ref=f33e241]:
+    - button [ref=f33e242]
+    - button [ref=f33e248]
+    - button [ref=f33e252]
+    - button [ref=f33e257]

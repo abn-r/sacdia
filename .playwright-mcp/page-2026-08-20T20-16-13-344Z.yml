@@ -1,0 +1,985 @@
+- generic [active] [ref=f28e1]:
+  - link "Ir al contenido" [ref=f28e2] [cursor=pointer]:
+    - /url: "#_top"
+  - generic [ref=f28e3]:
+    - banner [ref=f28e4]:
+      - generic [ref=f28e5]:
+        - generic [ref=f28e7]:
+          - link "Inicio — Documentación técnica" [ref=f28e8] [cursor=pointer]:
+            - /url: /
+            - generic [ref=f28e9]: S
+            - generic [ref=f28e10]:
+              - generic [ref=f28e11]: SACDIA
+              - generic [ref=f28e12]: Técnico
+          - navigation "Cambiar portal de documentación" [ref=f28e13]:
+            - link "Operativo" [ref=f28e14] [cursor=pointer]:
+              - /url: http://localhost:4321
+            - link "Administrativo" [ref=f28e15] [cursor=pointer]:
+              - /url: http://localhost:4322
+            - link "Técnico" [ref=f28e16] [cursor=pointer]:
+              - /url: http://localhost:4323
+        - button "Buscar" [ref=f28e19] [cursor=pointer]:
+          - generic [ref=f28e23]:
+            - generic [ref=f28e24]: ⌘
+            - generic [ref=f28e25]: K
+        - generic [ref=f28e29]:
+          - generic [ref=f28e30]: Seleccionar tema
+          - combobox "Seleccionar tema" [ref=f28e31] [cursor=pointer]:
+            - option "Oscuro"
+            - option "Claro"
+            - option "Automático" [selected]
+    - navigation "Primario":
+      - list [ref=f28e35]:
+        - listitem [ref=f28e36]:
+          - group [ref=f28e37]:
+            - generic "API" [ref=f28e38] [cursor=pointer]
+            - list [ref=f28e42]:
+              - listitem [ref=f28e43]:
+                - link "API Reference" [ref=f28e44] [cursor=pointer]:
+                  - /url: /api/
+              - listitem [ref=f28e45]:
+                - link "Decisiones de Arquitectura" [ref=f28e46] [cursor=pointer]:
+                  - /url: /api/decisiones-arquitectura/
+              - listitem [ref=f28e47]:
+                - link "Endpoints — Live Reference" [ref=f28e48] [cursor=pointer]:
+                  - /url: /api/endpoints/
+              - listitem [ref=f28e49]:
+                - link "Especificación Técnica REST API" [ref=f28e50] [cursor=pointer]:
+                  - /url: /api/especificacion/
+              - listitem [ref=f28e51]:
+                - group [ref=f28e52]:
+                  - generic "integracion-frontend" [ref=f28e53] [cursor=pointer]
+                  - list [ref=f28e57]:
+                    - listitem [ref=f28e58]:
+                      - link "Integración Frontend" [ref=f28e59] [cursor=pointer]:
+                        - /url: /api/integracion-frontend/
+                    - listitem [ref=f28e60]:
+                      - link "Autenticación" [ref=f28e61] [cursor=pointer]:
+                        - /url: /api/integracion-frontend/autenticacion/
+                    - listitem [ref=f28e62]:
+                      - link "Best Practices" [ref=f28e63] [cursor=pointer]:
+                        - /url: /api/integracion-frontend/best-practices/
+                    - listitem [ref=f28e64]:
+                      - link "Ejemplos por Módulo" [ref=f28e65] [cursor=pointer]:
+                        - /url: /api/integracion-frontend/ejemplos-modulos/
+                    - listitem [ref=f28e66]:
+                      - link "Consumo de Endpoints" [ref=f28e67] [cursor=pointer]:
+                        - /url: /api/integracion-frontend/endpoints/
+                    - listitem [ref=f28e68]:
+                      - link "Manejo de Errores" [ref=f28e69] [cursor=pointer]:
+                        - /url: /api/integracion-frontend/manejo-errores/
+                    - listitem [ref=f28e70]:
+                      - link "Setup Inicial" [ref=f28e71] [cursor=pointer]:
+                        - /url: /api/integracion-frontend/setup/
+                    - listitem [ref=f28e72]:
+                      - link "Testing de Integracion Frontend" [ref=f28e73] [cursor=pointer]:
+                        - /url: /api/integracion-frontend/testing/
+              - listitem [ref=f28e74]:
+                - link "Guía de Seguridad" [ref=f28e75] [cursor=pointer]:
+                  - /url: /api/seguridad/
+              - listitem [ref=f28e76]:
+                - link "Integración de Servicios Externos" [ref=f28e77] [cursor=pointer]:
+                  - /url: /api/servicios-externos/
+              - listitem [ref=f28e78]:
+                - link "Guía de Testing" [ref=f28e79] [cursor=pointer]:
+                  - /url: /api/testing/
+              - listitem [ref=f28e80]:
+                - link "Versionado de la API" [ref=f28e81] [cursor=pointer]:
+                  - /url: /api/versionado/
+        - listitem [ref=f28e82]:
+          - group [ref=f28e83]:
+            - generic "Arquitectura" [ref=f28e84] [cursor=pointer]
+            - list [ref=f28e88]:
+              - listitem [ref=f28e89]:
+                - link "Arquitectura" [ref=f28e90] [cursor=pointer]:
+                  - /url: /arquitectura/
+              - listitem [ref=f28e91]:
+                - group [ref=f28e92]:
+                  - generic "fundamentos" [ref=f28e93] [cursor=pointer]
+                  - list [ref=f28e97]:
+                    - listitem [ref=f28e98]:
+                      - link "Fundamentos" [ref=f28e99] [cursor=pointer]:
+                        - /url: /arquitectura/fundamentos/
+                    - listitem [ref=f28e100]:
+                      - link "Arquitectura del sistema" [ref=f28e101] [cursor=pointer]:
+                        - /url: /arquitectura/fundamentos/arquitectura/
+                    - listitem [ref=f28e102]:
+                      - link "Decisiones clave" [ref=f28e103] [cursor=pointer]:
+                        - /url: /arquitectura/fundamentos/decisiones-clave/
+                    - listitem [ref=f28e104]:
+                      - link "Modelo del dominio" [ref=f28e105] [cursor=pointer]:
+                        - /url: /arquitectura/fundamentos/dominio/
+                    - listitem [ref=f28e106]:
+                      - link "Identidad del sistema" [ref=f28e107] [cursor=pointer]:
+                        - /url: /arquitectura/fundamentos/identidad/
+                    - listitem [ref=f28e108]:
+                      - link "Runtime SACDIA" [ref=f28e109] [cursor=pointer]:
+                        - /url: /arquitectura/fundamentos/runtime/
+                    - listitem [ref=f28e110]:
+                      - link "Source of Truth" [ref=f28e111] [cursor=pointer]:
+                        - /url: /arquitectura/fundamentos/source-of-truth/
+        - listitem [ref=f28e112]:
+          - group [ref=f28e113]:
+            - generic "Base de datos" [ref=f28e114] [cursor=pointer]
+            - list [ref=f28e118]:
+              - listitem [ref=f28e119]:
+                - link "Base de Datos" [ref=f28e120] [cursor=pointer]:
+                  - /url: /base-de-datos/
+              - listitem [ref=f28e121]:
+                - link "Migraciones" [ref=f28e122] [cursor=pointer]:
+                  - /url: /base-de-datos/migraciones/
+              - listitem [ref=f28e123]:
+                - group [ref=f28e124]:
+                  - generic "schema-reference" [ref=f28e125] [cursor=pointer]
+                  - list [ref=f28e129]:
+                    - listitem [ref=f28e130]:
+                      - link "Schema Reference" [ref=f28e131] [cursor=pointer]:
+                        - /url: /base-de-datos/schema-reference/
+                    - listitem [ref=f28e132]:
+                      - link "Actividades y Camporees" [ref=f28e133] [cursor=pointer]:
+                        - /url: /base-de-datos/schema-reference/actividades-camporees/
+                    - listitem [ref=f28e134]:
+                      - link "Carpetas y Evaluacion" [ref=f28e135] [cursor=pointer]:
+                        - /url: /base-de-datos/schema-reference/carpetas-evaluacion/
+                    - listitem [ref=f28e136]:
+                      - link "Clases y Honores" [ref=f28e137] [cursor=pointer]:
+                        - /url: /base-de-datos/schema-reference/clases-honores/
+                    - listitem [ref=f28e138]:
+                      - link "Clubs" [ref=f28e139] [cursor=pointer]:
+                        - /url: /base-de-datos/schema-reference/clubs/
+                    - listitem [ref=f28e140]:
+                      - link "Inventario y Finanzas" [ref=f28e141] [cursor=pointer]:
+                        - /url: /base-de-datos/schema-reference/inventario-finanzas/
+                    - listitem [ref=f28e142]:
+                      - link "Investidura y Certificaciones" [ref=f28e143] [cursor=pointer]:
+                        - /url: /base-de-datos/schema-reference/investidura-certificaciones/
+                    - listitem [ref=f28e144]:
+                      - link "Jerarquia Organizacional" [ref=f28e145] [cursor=pointer]:
+                        - /url: /base-de-datos/schema-reference/organizacion/
+                    - listitem [ref=f28e146]:
+                      - link "RBAC — Roles y Permisos" [ref=f28e147] [cursor=pointer]:
+                        - /url: /base-de-datos/schema-reference/rbac/
+                    - listitem [ref=f28e148]:
+                      - link "Salud e Insurance" [ref=f28e149] [cursor=pointer]:
+                        - /url: /base-de-datos/schema-reference/salud-insurance/
+                    - listitem [ref=f28e150]:
+                      - link "Sistema y Recursos" [ref=f28e151] [cursor=pointer]:
+                        - /url: /base-de-datos/schema-reference/sistema-recursos/
+                    - listitem [ref=f28e152]:
+                      - link "Users & Auth" [ref=f28e153] [cursor=pointer]:
+                        - /url: /base-de-datos/schema-reference/users-auth/
+        - listitem [ref=f28e154]:
+          - group [ref=f28e155]:
+            - generic "Producto" [ref=f28e156] [cursor=pointer]
+            - list [ref=f28e160]:
+              - listitem [ref=f28e161]:
+                - group [ref=f28e162]:
+                  - generic "funcionalidades" [ref=f28e163] [cursor=pointer]
+                  - list [ref=f28e167]:
+                    - listitem [ref=f28e168]:
+                      - link "Funcionalidades" [ref=f28e169] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/
+                    - listitem [ref=f28e170]:
+                      - link "Actividades" [ref=f28e171] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/actividades/
+                    - listitem [ref=f28e172]:
+                      - link "Actividades Conjuntas" [ref=f28e173] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/actividades-conjuntas/
+                    - listitem [ref=f28e174]:
+                      - link "Calificacion de Carpetas Anuales" [ref=f28e175] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/annual-folders-scoring/
+                    - listitem [ref=f28e176]:
+                      - link "Aprobaciones de Camporees" [ref=f28e177] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/aprobaciones-camporees/
+                    - listitem [ref=f28e178]:
+                      - link "Aprobaciones Masivas" [ref=f28e179] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/aprobaciones-masivas/
+                    - listitem [ref=f28e180]:
+                      - link "Audit Logs" [ref=f28e181] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/audit-logs/
+                    - listitem [ref=f28e182]:
+                      - link "Camporees" [ref=f28e183] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/camporees/
+                    - listitem [ref=f28e184]:
+                      - link "Carpetas de Evidencias" [ref=f28e185] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/carpetas-evidencias/
+                    - listitem [ref=f28e186]:
+                      - link "Catalogos" [ref=f28e187] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/catalogos/
+                    - listitem [ref=f28e188]:
+                      - link "Certificaciones de Guias Mayores" [ref=f28e189] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/certificaciones-guias-mayores/
+                    - listitem [ref=f28e190]:
+                      - link "Clases Progresivas" [ref=f28e191] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/clases-progresivas/
+                    - listitem [ref=f28e192]:
+                      - link "Comunicaciones" [ref=f28e193] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/comunicaciones/
+                    - listitem [ref=f28e194]:
+                      - link "Finanzas" [ref=f28e195] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/finanzas/
+                    - listitem [ref=f28e196]:
+                      - link "Gestion de Clubs" [ref=f28e197] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/gestion-clubs/
+                    - listitem [ref=f28e198]:
+                      - link "Gestion de Seguros" [ref=f28e199] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/gestion-seguros/
+                    - listitem [ref=f28e200]:
+                      - link "Honores" [ref=f28e201] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/honores/
+                    - listitem [ref=f28e202]:
+                      - link "Inventario" [ref=f28e203] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/inventario/
+                    - listitem [ref=f28e204]:
+                      - link "Materiales" [ref=f28e205] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/materiales/
+                    - listitem [ref=f28e206]:
+                      - link "RBAC" [ref=f28e207] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/rbac/
+                    - listitem [ref=f28e208]:
+                      - link "Recursos" [ref=f28e209] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/recursos/
+                    - listitem [ref=f28e210]:
+                      - link "SLA Dashboard" [ref=f28e211] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/sla-dashboard/
+                    - listitem [ref=f28e212]:
+                      - link "Validacion de Evidencias" [ref=f28e213] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/validacion-evidencias/
+                    - listitem [ref=f28e214]:
+                      - link "Validacion de Investiduras" [ref=f28e215] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/validacion-investiduras/
+        - listitem [ref=f28e216]:
+          - group [ref=f28e217]:
+            - generic "Seguridad" [ref=f28e218] [cursor=pointer]
+            - list [ref=f28e222]:
+              - listitem [ref=f28e223]:
+                - link "Seguridad" [ref=f28e224] [cursor=pointer]:
+                  - /url: /seguridad/
+              - listitem [ref=f28e225]:
+                - group [ref=f28e226]:
+                  - generic "autorizacion" [ref=f28e227] [cursor=pointer]
+                  - list [ref=f28e231]:
+                    - listitem [ref=f28e232]:
+                      - link "Autorización" [ref=f28e233] [cursor=pointer]:
+                        - /url: /seguridad/autorizacion/
+                    - listitem [ref=f28e234]:
+                      - link "Contrato canónico de autorización" [ref=f28e235] [cursor=pointer]:
+                        - /url: /seguridad/autorizacion/contrato-canonico/
+                    - listitem [ref=f28e236]:
+                      - link "Matriz de enforcement RBAC" [ref=f28e237] [cursor=pointer]:
+                        - /url: /seguridad/autorizacion/matriz-rbac/
+                    - listitem [ref=f28e238]:
+                      - link "Modelo de autorización" [ref=f28e239] [cursor=pointer]:
+                        - /url: /seguridad/autorizacion/modelo/
+                    - listitem [ref=f28e240]:
+                      - link "Sistema de permisos" [ref=f28e241] [cursor=pointer]:
+                        - /url: /seguridad/autorizacion/permisos/
+                    - listitem [ref=f28e242]:
+                      - link "Runtime de autenticación y autorización" [ref=f28e243] [cursor=pointer]:
+                        - /url: /seguridad/autorizacion/runtime/
+        - listitem [ref=f28e244]:
+          - group [ref=f28e245]:
+            - generic "Integración" [ref=f28e246] [cursor=pointer]
+            - list [ref=f28e250]:
+              - listitem [ref=f28e251]:
+                - link "Integración" [ref=f28e252] [cursor=pointer]:
+                  - /url: /integracion/
+        - listitem [ref=f28e253]:
+          - group [ref=f28e254]:
+            - generic "Frontend" [ref=f28e255] [cursor=pointer]
+            - list [ref=f28e259]:
+              - listitem [ref=f28e260]:
+                - group [ref=f28e261]:
+                  - generic "sistema-de-diseno" [ref=f28e262] [cursor=pointer]
+                  - list [ref=f28e266]:
+                    - listitem [ref=f28e267]:
+                      - link "Sistema de Diseño" [ref=f28e268] [cursor=pointer]:
+                        - /url: /frontend/sistema-de-diseno/
+                    - listitem [ref=f28e269]:
+                      - link "Componentes UI" [ref=f28e270] [cursor=pointer]:
+                        - /url: /frontend/sistema-de-diseno/componentes/
+                    - listitem [ref=f28e271]:
+                      - link "Dark Mode y Responsive" [ref=f28e272] [cursor=pointer]:
+                        - /url: /frontend/sistema-de-diseno/dark-mode-y-responsive/
+                    - listitem [ref=f28e273]:
+                      - link "Estructura de Archivos" [ref=f28e274] [cursor=pointer]:
+                        - /url: /frontend/sistema-de-diseno/estructura-archivos/
+                    - listitem [ref=f28e275]:
+                      - link "Formularios" [ref=f28e276] [cursor=pointer]:
+                        - /url: /frontend/sistema-de-diseno/formularios/
+                    - listitem [ref=f28e277]:
+                      - link "Patrones CRUD" [ref=f28e278] [cursor=pointer]:
+                        - /url: /frontend/sistema-de-diseno/patrones-crud/
+                    - listitem [ref=f28e279]:
+                      - link "Presentacion de Datos" [ref=f28e280] [cursor=pointer]:
+                        - /url: /frontend/sistema-de-diseno/presentacion-datos/
+                    - listitem [ref=f28e281]:
+                      - link "Stack y Paleta de Color" [ref=f28e282] [cursor=pointer]:
+                        - /url: /frontend/sistema-de-diseno/stack-y-paleta/
+                    - listitem [ref=f28e283]:
+                      - link "Tipografia y Espaciado" [ref=f28e284] [cursor=pointer]:
+                        - /url: /frontend/sistema-de-diseno/tipografia-y-espaciado/
+        - listitem [ref=f28e285]:
+          - group [ref=f28e286]:
+            - generic "Estándares" [ref=f28e287] [cursor=pointer]
+            - list [ref=f28e291]:
+              - listitem [ref=f28e292]:
+                - link "Estandares" [ref=f28e293] [cursor=pointer]:
+                  - /url: /estandares/
+              - listitem [ref=f28e294]:
+                - link "Coding Standards" [ref=f28e295] [cursor=pointer]:
+                  - /url: /estandares/coding-standards/
+              - listitem [ref=f28e296]:
+                - link "Data Guidelines" [ref=f28e297] [cursor=pointer]:
+                  - /url: /estandares/data-guidelines/
+              - listitem [ref=f28e298]:
+                - link "Guia de Estructura" [ref=f28e299] [cursor=pointer]:
+                  - /url: /estandares/guia-estructura/
+              - listitem [ref=f28e300]:
+                - group [ref=f28e301]:
+                  - generic "stack-tecnologico" [ref=f28e302] [cursor=pointer]
+                  - list [ref=f28e306]:
+                    - listitem [ref=f28e307]:
+                      - link "Stack Tecnologico" [ref=f28e308] [cursor=pointer]:
+                        - /url: /estandares/stack-tecnologico/
+                    - listitem [ref=f28e309]:
+                      - link "Backend — NestJS API" [ref=f28e310] [cursor=pointer]:
+                        - /url: /estandares/stack-tecnologico/backend/
+                    - listitem [ref=f28e311]:
+                      - link "Decisiones Tecnicas" [ref=f28e312] [cursor=pointer]:
+                        - /url: /estandares/stack-tecnologico/decisiones/
+                    - listitem [ref=f28e313]:
+                      - link "Frontend — Admin Panel" [ref=f28e314] [cursor=pointer]:
+                        - /url: /estandares/stack-tecnologico/frontend/
+                    - listitem [ref=f28e315]:
+                      - link "Infraestructura" [ref=f28e316] [cursor=pointer]:
+                        - /url: /estandares/stack-tecnologico/infraestructura/
+                    - listitem [ref=f28e317]:
+                      - link "App Movil — Flutter" [ref=f28e318] [cursor=pointer]:
+                        - /url: /estandares/stack-tecnologico/mobile/
+                    - listitem [ref=f28e319]:
+                      - link "Servicios de Terceros" [ref=f28e320] [cursor=pointer]:
+                        - /url: /estandares/stack-tecnologico/servicios/
+        - listitem [ref=f28e321]:
+          - group [ref=f28e322]:
+            - generic "Pruebas" [ref=f28e323] [cursor=pointer]
+            - list [ref=f28e327]:
+              - listitem [ref=f28e328]:
+                - link "Testing" [ref=f28e329] [cursor=pointer]:
+                  - /url: /testing/
+              - listitem [ref=f28e330]:
+                - link "Usuarios de Prueba" [ref=f28e331] [cursor=pointer]:
+                  - /url: /testing/usuarios-prueba/
+        - listitem [ref=f28e332]:
+          - group [ref=f28e333]:
+            - generic "Guías" [ref=f28e334] [cursor=pointer]
+            - list [ref=f28e338]:
+              - listitem [ref=f28e339]:
+                - link "Guias" [ref=f28e340] [cursor=pointer]:
+                  - /url: /guias/
+              - listitem [ref=f28e341]:
+                - link "Admin Integration" [ref=f28e342] [cursor=pointer]:
+                  - /url: /guias/admin-integration/
+              - listitem [ref=f28e343]:
+                - link "Deployment" [ref=f28e344] [cursor=pointer]:
+                  - /url: /guias/deployment/
+              - listitem [ref=f28e345]:
+                - link "Developer Workflow" [ref=f28e346] [cursor=pointer]:
+                  - /url: /guias/developer-workflow/
+              - listitem [ref=f28e347]:
+                - link "Idea to Spec" [ref=f28e348] [cursor=pointer]:
+                  - /url: /guias/idea-to-spec/
+        - listitem [ref=f28e349]:
+          - group [ref=f28e350]:
+            - generic "Referencia" [ref=f28e351] [cursor=pointer]
+            - list [ref=f28e355]:
+              - listitem [ref=f28e356]:
+                - link "Documentación de Desarrollo" [ref=f28e357] [cursor=pointer]:
+                  - /url: /referencia/
+    - generic [ref=f28e359]:
+      - complementary [ref=f28e360]:
+        - navigation [ref=f28e365]:
+          - heading "En esta página" [level=2] [ref=f28e366]
+          - list [ref=f28e367]:
+            - listitem [ref=f28e368]:
+              - link "Sinopsis" [ref=f28e369] [cursor=pointer]:
+                - /url: "#_top"
+            - listitem [ref=f28e370]:
+              - link "6. Patrones de CRUD" [ref=f28e371] [cursor=pointer]:
+                - /url: "#6-patrones-de-crud"
+              - list [ref=f28e372]:
+                - listitem [ref=f28e373]:
+                  - link "6.1 Crear / Editar -> Flujo por paginas (default)" [ref=f28e374] [cursor=pointer]:
+                    - /url: "#61-crear--editar---flujo-por-paginas-default"
+                - listitem [ref=f28e375]:
+                  - link "6.2 Eliminar / Desactivar -> Confirmacion (AlertDialog)" [ref=f28e376] [cursor=pointer]:
+                    - /url: "#62-eliminar--desactivar---confirmacion-alertdialog"
+                - listitem [ref=f28e377]:
+                  - link "6.3 Flujo Completo de CRUD" [ref=f28e378] [cursor=pointer]:
+                    - /url: "#63-flujo-completo-de-crud"
+                - listitem [ref=f28e379]:
+                  - link "6.4 Layout de Pagina CRUD" [ref=f28e380] [cursor=pointer]:
+                    - /url: "#64-layout-de-pagina-crud"
+            - listitem [ref=f28e381]:
+              - link "7. Componentes Compartidos" [ref=f28e382] [cursor=pointer]:
+                - /url: "#7-componentes-compartidos"
+              - list [ref=f28e383]:
+                - listitem [ref=f28e384]:
+                  - link "7.1 PageHeader" [ref=f28e385] [cursor=pointer]:
+                    - /url: "#71-pageheader"
+                - listitem [ref=f28e386]:
+                  - link "7.2 EmptyState" [ref=f28e387] [cursor=pointer]:
+                    - /url: "#72-emptystate"
+                - listitem [ref=f28e388]:
+                  - link "7.3 LoadingSkeleton" [ref=f28e389] [cursor=pointer]:
+                    - /url: "#73-loadingskeleton"
+                - listitem [ref=f28e390]:
+                  - link "7.4 StatusBadge" [ref=f28e391] [cursor=pointer]:
+                    - /url: "#74-statusbadge"
+                - listitem [ref=f28e392]:
+                  - link "7.5 DataTable" [ref=f28e393] [cursor=pointer]:
+                    - /url: "#75-datatable"
+                - listitem [ref=f28e394]:
+                  - link "7.6 DataTablePagination" [ref=f28e395] [cursor=pointer]:
+                    - /url: "#76-datatablepagination"
+                - listitem [ref=f28e396]:
+                  - link "7.7 ConfirmDialog" [ref=f28e397] [cursor=pointer]:
+                    - /url: "#77-confirmdialog"
+                - listitem [ref=f28e398]:
+                  - link "7.8 CatalogFormPage" [ref=f28e399] [cursor=pointer]:
+                    - /url: "#78-catalogformpage"
+                - listitem [ref=f28e400]:
+                  - link "7.9 CatalogDeleteDialog" [ref=f28e401] [cursor=pointer]:
+                    - /url: "#79-catalogdeletedialog"
+                - listitem [ref=f28e402]:
+                  - link "7.10 AppToaster" [ref=f28e403] [cursor=pointer]:
+                    - /url: "#710-apptoaster"
+            - listitem [ref=f28e404]:
+              - link "Checklist para Nuevas Interfaces" [ref=f28e405] [cursor=pointer]:
+                - /url: "#checklist-para-nuevas-interfaces"
+      - main [ref=f28e407]:
+        - heading "Patrones CRUD" [level=1] [ref=f28e410]
+        - generic [ref=f28e412]:
+          - generic [ref=f28e413]:
+            - generic [ref=f28e414]:
+              - heading "6. Patrones de CRUD" [level=2] [ref=f28e415]
+              - link "Sección titulada «6. Patrones de CRUD»" [ref=f28e416] [cursor=pointer]:
+                - /url: "#6-patrones-de-crud"
+            - generic [ref=f28e421]:
+              - heading "6.1 Crear / Editar -> Flujo por paginas (default)" [level=3] [ref=f28e422]
+              - link "Sección titulada «6.1 Crear / Editar -> Flujo por paginas (default)»" [ref=f28e423] [cursor=pointer]:
+                - /url: "#61-crear--editar---flujo-por-paginas-default"
+            - paragraph [ref=f28e428]:
+              - strong [ref=f28e429]: REGLA
+              - text: ": Crear y Editar usan paginas dedicadas ("
+              - code [ref=f28e430]: /new
+              - text: "y"
+              - code [ref=f28e431]: /[id]
+              - text: ) por default.
+            - paragraph [ref=f28e432]:
+              - strong [ref=f28e433]: Excepcion
+              - text: "(DS §6.1.1, decision 2026-05-11):"
+            - list [ref=f28e434]:
+              - listitem [ref=f28e435]: "Dialog SE PERMITE solo si: ≤4 campos planos, sin relaciones, sin uploads, sin tabs."
+              - listitem [ref=f28e436]: Cualquier flujo con >4 campos O con relaciones / imagenes / tabs DEBE usar pagina dedicada.
+            - paragraph [ref=f28e437]:
+              - strong [ref=f28e438]: Helpers existentes
+              - text: ":"
+            - list [ref=f28e439]:
+              - listitem [ref=f28e440]:
+                - code [ref=f28e441]: <CatalogCrudPage>
+                - text: — pagina CRUD generica con tabla + form
+              - listitem [ref=f28e442]:
+                - code [ref=f28e443]: <PhaseECatalogCrudPage>
+                - text: — wrapper para los 24+ catalogos i18n-aware (gestiona
+                - code [ref=f28e444]: TranslationsTabsField
+                - text: +
+                - code [ref=f28e445]: <entity>_translations
+                - text: overlay automaticamente)
+            - figure [ref=f28e447]:
+              - code [ref=f28e449]:
+                - generic [ref=f28e450]: // Listado -> alta
+                - generic [ref=f28e452]: "<Link href={`${routeBase}/new`}>"
+                - generic [ref=f28e454]: <Button>
+                - generic [ref=f28e456]: <Plus className="mr-2 h-4 w-4" />
+                - generic [ref=f28e458]: Nuevo elemento
+                - generic [ref=f28e461]: </Button>
+                - generic [ref=f28e463]: </Link>
+                - generic [ref=f28e467]: // Listado -> edicion
+                - generic [ref=f28e469]: "<Link href={`${routeBase}/${itemId}`}>"
+                - generic [ref=f28e471]: <Button variant="ghost" size="icon" className="h-8 w-8">
+                - generic [ref=f28e473]: <Pencil className="h-3.5 w-3.5" />
+                - generic [ref=f28e475]: </Button>
+                - generic [ref=f28e477]: </Link>
+              - button "Copiar al portapapeles" [ref=f28e480] [cursor=pointer]
+            - paragraph [ref=f28e482]:
+              - strong [ref=f28e483]: "Comportamiento esperado del flujo por paginas:"
+            - list [ref=f28e484]:
+              - listitem [ref=f28e485]:
+                - text: Crear (
+                - code [ref=f28e486]: /new
+                - text: "): submit -> POST ->"
+                - code [ref=f28e487]: toast.success
+                - text: "-> redirect al listado."
+              - listitem [ref=f28e488]:
+                - text: Editar (
+                - code [ref=f28e489]: /[id]
+                - text: "): submit -> PUT/PATCH ->"
+                - code [ref=f28e490]: toast.success
+                - text: "-> redirect al listado."
+              - listitem [ref=f28e491]:
+                - text: Mantener
+                - code [ref=f28e492]: PageHeader
+                - text: ", boton “Volver” y estado loading del submit."
+            - separator [ref=f28e493]
+            - generic [ref=f28e494]:
+              - heading "6.2 Eliminar / Desactivar -> Confirmacion (AlertDialog)" [level=3] [ref=f28e495]
+              - link "Sección titulada «6.2 Eliminar / Desactivar -> Confirmacion (AlertDialog)»" [ref=f28e496] [cursor=pointer]:
+                - /url: "#62-eliminar--desactivar---confirmacion-alertdialog"
+            - paragraph [ref=f28e501]:
+              - strong [ref=f28e502]: REGLA
+              - text: ": Eliminar y desactivar SIEMPRE usan"
+              - code [ref=f28e503]: AlertDialog
+              - text: con confirmacion obligatoria.
+            - figure [ref=f28e505]:
+              - code [ref=f28e507]:
+                - generic [ref=f28e508]: "import {"
+                - generic [ref=f28e510]: AlertDialog,
+                - generic [ref=f28e513]: AlertDialogAction,
+                - generic [ref=f28e516]: AlertDialogCancel,
+                - generic [ref=f28e519]: AlertDialogContent,
+                - generic [ref=f28e522]: AlertDialogDescription,
+                - generic [ref=f28e525]: AlertDialogFooter,
+                - generic [ref=f28e528]: AlertDialogHeader,
+                - generic [ref=f28e531]: AlertDialogMedia,
+                - generic [ref=f28e534]: AlertDialogTitle,
+                - generic [ref=f28e537]: "} from \"@/components/ui/alert-dialog\";"
+                - generic [ref=f28e541]: "<AlertDialog open={open} onOpenChange={setOpen}>"
+                - generic [ref=f28e543]: <AlertDialogContent>
+                - generic [ref=f28e545]: <AlertDialogHeader>
+                - generic [ref=f28e547]: <AlertDialogMedia className="bg-destructive/10">
+                - generic [ref=f28e549]: <AlertTriangle className="h-5 w-5 text-destructive" />
+                - generic [ref=f28e551]: </AlertDialogMedia>
+                - generic [ref=f28e553]: <AlertDialogTitle>Desactivar registro?</AlertDialogTitle>
+                - generic [ref=f28e555]: <AlertDialogDescription>
+                - generic [ref=f28e558]:
+                  - text: Estas a punto de desactivar
+                  - generic [ref=f28e560]: <strong
+                  - text: className="text-foreground">"Nombre"
+                  - generic [ref=f28e561]: </strong>
+                  - text: .
+                - generic [ref=f28e562]: Este registro no se eliminara permanentemente, pero dejara de estar disponible.
+                - generic [ref=f28e565]: </AlertDialogDescription>
+                - generic [ref=f28e567]: </AlertDialogHeader>
+                - generic [ref=f28e569]: <AlertDialogFooter>
+                - generic [ref=f28e571]: "<AlertDialogCancel disabled={loading}>Cancelar</AlertDialogCancel>"
+                - generic [ref=f28e573]: "<AlertDialogAction variant=\"destructive\" onClick={handleConfirm} disabled={loading}>"
+                - generic [ref=f28e575]: "{loading ? ("
+                - generic [ref=f28e577]: <>
+                - generic [ref=f28e579]: <Loader2 className="h-4 w-4 animate-spin" />
+                - generic [ref=f28e581]: Procesando...
+                - generic [ref=f28e584]: </>
+                - generic [ref=f28e586]: ") : ("
+                - generic [ref=f28e589]: "\"Desactivar\""
+                - generic [ref=f28e591]: ")}"
+                - generic [ref=f28e594]: </AlertDialogAction>
+                - generic [ref=f28e596]: </AlertDialogFooter>
+                - generic [ref=f28e598]: </AlertDialogContent>
+                - generic [ref=f28e600]: </AlertDialog>
+              - button "Copiar al portapapeles" [ref=f28e603] [cursor=pointer]
+            - paragraph [ref=f28e605]:
+              - strong [ref=f28e606]: "Tamanos de AlertDialog:"
+            - list [ref=f28e607]:
+              - listitem [ref=f28e608]:
+                - code [ref=f28e609]: size="default"
+                - text: "->"
+                - code [ref=f28e610]: sm:max-w-lg
+                - text: (eliminacion con contexto)
+              - listitem [ref=f28e611]:
+                - code [ref=f28e612]: size="sm"
+                - text: "->"
+                - code [ref=f28e613]: max-w-xs
+                - text: (confirmacion rapida)
+            - separator [ref=f28e614]
+            - generic [ref=f28e615]:
+              - heading "6.3 Flujo Completo de CRUD" [level=3] [ref=f28e616]
+              - link "Sección titulada «6.3 Flujo Completo de CRUD»" [ref=f28e617] [cursor=pointer]:
+                - /url: "#63-flujo-completo-de-crud"
+            - figure [ref=f28e623]:
+              - code [ref=f28e625]:
+                - generic [ref=f28e626]: "[Pagina de Listado]"
+                - generic [ref=f28e628]: "|"
+                - generic [ref=f28e631]: "|-- Boton \"Crear nuevo\" (esquina superior derecha)"
+                - generic [ref=f28e634]: "| -> Navega a /new (pagina de formulario)"
+                - generic [ref=f28e637]: "| -> onSubmit: POST -> toast.success -> redirect al listado"
+                - generic [ref=f28e640]: "|"
+                - generic [ref=f28e643]: "|-- Boton \"Editar\" (en cada fila / card)"
+                - generic [ref=f28e646]: "| -> Navega a /[id] (pagina de formulario prellenado)"
+                - generic [ref=f28e649]: "| -> onSubmit: PUT/PATCH -> toast.success -> redirect al listado"
+                - generic [ref=f28e652]: "|"
+                - generic [ref=f28e655]: "|-- Boton \"Eliminar/Desactivar\" (en cada fila / card)"
+                - generic [ref=f28e658]: "| -> Abre AlertDialog de confirmacion"
+                - generic [ref=f28e661]: "| -> onConfirm: DELETE -> toast.success -> recarga lista"
+              - button "Copiar al portapapeles" [ref=f28e665] [cursor=pointer]
+            - separator [ref=f28e667]
+            - generic [ref=f28e668]:
+              - heading "6.4 Layout de Pagina CRUD" [level=3] [ref=f28e669]
+              - link "Sección titulada «6.4 Layout de Pagina CRUD»" [ref=f28e670] [cursor=pointer]:
+                - /url: "#64-layout-de-pagina-crud"
+            - figure [ref=f28e676]:
+              - code [ref=f28e678]:
+                - generic [ref=f28e680]:
+                  - generic [ref=f28e681]: <div
+                  - text: className="space-y-5">
+                - generic [ref=f28e682]: "{/* Header */}"
+                - generic [ref=f28e685]:
+                  - generic [ref=f28e686]: <div
+                  - text: className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+                - generic [ref=f28e687]: <div>
+                - generic [ref=f28e691]:
+                  - generic [ref=f28e692]: <h1
+                  - text: className="text-2xl font-bold text-foreground">Titulo
+                  - generic [ref=f28e693]: </h1>
+                - generic [ref=f28e695]:
+                  - generic [ref=f28e696]: <p
+                  - text: className="mt-1 text-sm text-muted-foreground">Descripcion
+                  - generic [ref=f28e697]: </p>
+                - generic [ref=f28e698]: </div>
+                - generic [ref=f28e701]: "<Link href={`${routeBase}/new`} className=\"shrink-0\">"
+                - generic [ref=f28e703]: <Button>
+                - generic [ref=f28e705]: <Plus className="mr-2 h-4 w-4" />
+                - generic [ref=f28e707]: Nuevo elemento
+                - generic [ref=f28e710]: </Button>
+                - generic [ref=f28e712]: </Link>
+                - generic [ref=f28e714]: </div>
+                - generic [ref=f28e719]: "{/* Buscador */}"
+                - generic [ref=f28e722]:
+                  - generic [ref=f28e723]: <div
+                  - text: className="relative max-w-sm">
+                - generic [ref=f28e724]: "<Search className=\"absolute left-3 top-2.5 text-muted-foreground\" size={18} />"
+                - generic [ref=f28e726]: <Input placeholder="Buscar..." className="pl-10" />
+                - generic [ref=f28e728]: </div>
+                - generic [ref=f28e733]: "{/* Tabla */}"
+                - generic [ref=f28e736]:
+                  - generic [ref=f28e737]: <div
+                  - text: className="overflow-x-auto rounded-xl border border-border bg-card shadow-sm">
+                - generic [ref=f28e738]: <Table>...</Table>
+                - generic [ref=f28e740]: </div>
+                - generic [ref=f28e745]: "{/* Footer */}"
+                - generic [ref=f28e748]:
+                  - generic [ref=f28e749]: <div
+                  - text: className="flex items-center justify-between border-t border-border pt-4">
+                - generic [ref=f28e751]:
+                  - generic [ref=f28e752]: <p
+                  - text: className="text-sm text-muted-foreground">
+                - generic [ref=f28e754]:
+                  - text: Mostrando
+                  - generic [ref=f28e756]: <span
+                  - text: "className=\"font-medium text-foreground\">{filtered}"
+                  - generic [ref=f28e757]: </span>
+                  - text: "de{\" \"}"
+                - generic [ref=f28e759]:
+                  - generic [ref=f28e760]: <span
+                  - text: "className=\"font-medium text-foreground\">{total}"
+                  - generic [ref=f28e761]: </span>
+                  - text: registros
+                - generic [ref=f28e762]: </p>
+                - generic [ref=f28e765]: </div>
+                - generic [ref=f28e768]: </div>
+              - button "Copiar al portapapeles" [ref=f28e772] [cursor=pointer]
+            - separator [ref=f28e774]
+            - generic [ref=f28e775]:
+              - heading "7. Componentes Compartidos" [level=2] [ref=f28e776]
+              - link "Sección titulada «7. Componentes Compartidos»" [ref=f28e777] [cursor=pointer]:
+                - /url: "#7-componentes-compartidos"
+            - generic [ref=f28e782]:
+              - heading "7.1 PageHeader" [level=3] [ref=f28e783]
+              - link "Sección titulada «7.1 PageHeader»" [ref=f28e784] [cursor=pointer]:
+                - /url: "#71-pageheader"
+            - paragraph [ref=f28e789]:
+              - strong [ref=f28e790]: "Import:"
+              - code [ref=f28e791]: "@/components/shared/page-header"
+            - figure [ref=f28e793]:
+              - code [ref=f28e795]:
+                - generic [ref=f28e796]: <PageHeader
+                - generic [ref=f28e798]: "icon={ShieldCheck} // Opcional: LucideIcon"
+                - generic [ref=f28e800]: title="Titulo de la pagina"
+                - generic [ref=f28e802]: description="Descripcion corta de la seccion."
+                - generic [ref=f28e804]: "actions={<Button>Accion</Button>} // Opcional: ReactNode"
+                - generic [ref=f28e806]: />
+              - button "Copiar al portapapeles" [ref=f28e809] [cursor=pointer]
+            - list [ref=f28e811]:
+              - listitem [ref=f28e812]:
+                - text: Icono en contenedor
+                - code [ref=f28e813]: h-9 w-9 rounded-lg bg-primary/10 text-primary
+              - listitem [ref=f28e814]:
+                - text: "Titulo:"
+                - code [ref=f28e815]: text-xl font-semibold tracking-tight
+              - listitem [ref=f28e816]:
+                - text: "Descripcion:"
+                - code [ref=f28e817]: text-[13px] text-muted-foreground
+            - separator [ref=f28e818]
+            - generic [ref=f28e819]:
+              - heading "7.2 EmptyState" [level=3] [ref=f28e820]
+              - link "Sección titulada «7.2 EmptyState»" [ref=f28e821] [cursor=pointer]:
+                - /url: "#72-emptystate"
+            - paragraph [ref=f28e826]:
+              - strong [ref=f28e827]: "Import:"
+              - code [ref=f28e828]: "@/components/shared/empty-state"
+            - figure [ref=f28e830]:
+              - code [ref=f28e832]:
+                - generic [ref=f28e833]: <EmptyState
+                - generic [ref=f28e835]: "icon={Inbox} // Default: Inbox"
+                - generic [ref=f28e837]: title="Sin registros"
+                - generic [ref=f28e839]: description="Ajusta tus filtros o agrega un nuevo elemento."
+                - generic [ref=f28e841]: "action={<Button size=\"sm\">Crear</Button>} // Opcional"
+                - generic [ref=f28e843]: />
+              - button "Copiar al portapapeles" [ref=f28e846] [cursor=pointer]
+            - list [ref=f28e848]:
+              - listitem [ref=f28e849]:
+                - text: Envuelto en
+                - code [ref=f28e850]: Card
+                - text: con
+                - code [ref=f28e851]: border-dashed
+              - listitem [ref=f28e852]:
+                - text: Icono en circulo
+                - code [ref=f28e853]: h-12 w-12 rounded-full bg-muted
+              - listitem [ref=f28e854]:
+                - text: "Centrado:"
+                - code [ref=f28e855]: flex-col items-center justify-center px-6 py-12 text-center
+            - separator [ref=f28e856]
+            - generic [ref=f28e857]:
+              - heading "7.3 LoadingSkeleton" [level=3] [ref=f28e858]
+              - link "Sección titulada «7.3 LoadingSkeleton»" [ref=f28e859] [cursor=pointer]:
+                - /url: "#73-loadingskeleton"
+            - paragraph [ref=f28e864]:
+              - strong [ref=f28e865]: "Import:"
+              - code [ref=f28e866]: "@/components/shared/loading-skeleton"
+            - figure [ref=f28e868]:
+              - code [ref=f28e870]:
+                - generic [ref=f28e871]: "<LoadingSkeleton rows={5} />"
+              - button "Copiar al portapapeles" [ref=f28e874] [cursor=pointer]
+            - list [ref=f28e876]:
+              - listitem [ref=f28e877]: Simula toolbar + tabla con Skeleton pulses
+              - listitem [ref=f28e878]: Envuelto en Card
+            - separator [ref=f28e879]
+            - generic [ref=f28e880]:
+              - heading "7.4 StatusBadge" [level=3] [ref=f28e881]
+              - link "Sección titulada «7.4 StatusBadge»" [ref=f28e882] [cursor=pointer]:
+                - /url: "#74-statusbadge"
+            - paragraph [ref=f28e887]:
+              - strong [ref=f28e888]: "Import:"
+              - code [ref=f28e889]: "@/components/shared/status-badge"
+            - figure [ref=f28e891]:
+              - code [ref=f28e893]:
+                - generic [ref=f28e894]: "<StatusBadge active={true} /> // -> Badge variant=\"success\" \"Activo\""
+                - generic [ref=f28e896]: "<StatusBadge active={false} /> // -> Badge variant=\"destructive\" \"Inactivo\""
+              - button "Copiar al portapapeles" [ref=f28e899] [cursor=pointer]
+            - separator [ref=f28e901]
+            - generic [ref=f28e902]:
+              - heading "7.5 DataTable" [level=3] [ref=f28e903]
+              - link "Sección titulada «7.5 DataTable»" [ref=f28e904] [cursor=pointer]:
+                - /url: "#75-datatable"
+            - paragraph [ref=f28e909]:
+              - strong [ref=f28e910]: "Import:"
+              - code [ref=f28e911]: "@/components/shared/data-table"
+            - paragraph [ref=f28e912]: Tabla completa con busqueda integrada, basada en TanStack Table.
+            - figure [ref=f28e914]:
+              - code [ref=f28e916]:
+                - generic [ref=f28e917]: <DataTable
+                - generic [ref=f28e919]: "columns={["
+                - generic [ref=f28e921]: "{ key: \"name\", title: \"Nombre\", render: (item) => item.name, searchableValue: (item) => item.name },"
+                - generic [ref=f28e924]: "{ key: \"status\", title: \"Estado\", render: (item) => <StatusBadge active={item.active} /> },"
+                - generic [ref=f28e927]: "]}"
+                - generic [ref=f28e930]: "rows={items}"
+                - generic [ref=f28e932]: searchPlaceholder="Buscar miembros..."
+                - generic [ref=f28e934]: emptyTitle="Sin miembros"
+                - generic [ref=f28e936]: emptyDescription="No hay miembros registrados aun."
+                - generic [ref=f28e938]: />
+              - button "Copiar al portapapeles" [ref=f28e941] [cursor=pointer]
+            - separator [ref=f28e943]
+            - generic [ref=f28e944]:
+              - heading "7.6 DataTablePagination" [level=3] [ref=f28e945]
+              - link "Sección titulada «7.6 DataTablePagination»" [ref=f28e946] [cursor=pointer]:
+                - /url: "#76-datatablepagination"
+            - paragraph [ref=f28e951]:
+              - strong [ref=f28e952]: "Import:"
+              - code [ref=f28e953]: "@/components/shared/data-table-pagination"
+            - figure [ref=f28e955]:
+              - code [ref=f28e957]:
+                - generic [ref=f28e958]: "<DataTablePagination page={1} totalPages={5} onPageChange={setPage} />"
+              - button "Copiar al portapapeles" [ref=f28e961] [cursor=pointer]
+            - separator [ref=f28e963]
+            - generic [ref=f28e964]:
+              - heading "7.7 ConfirmDialog" [level=3] [ref=f28e965]
+              - link "Sección titulada «7.7 ConfirmDialog»" [ref=f28e966] [cursor=pointer]:
+                - /url: "#77-confirmdialog"
+            - paragraph [ref=f28e971]:
+              - strong [ref=f28e972]: "Import:"
+              - code [ref=f28e973]: "@/components/shared/confirm-dialog"
+            - paragraph [ref=f28e974]: Wrapper reutilizable de AlertDialog para acciones destructivas.
+            - figure [ref=f28e976]:
+              - code [ref=f28e978]:
+                - generic [ref=f28e979]: <ConfirmDialog
+                - generic [ref=f28e981]: title="Desactivar usuario?"
+                - generic [ref=f28e983]: description="El usuario dejara de tener acceso al sistema."
+                - generic [ref=f28e985]: triggerLabel="Desactivar"
+                - generic [ref=f28e987]: confirmLabel="Si, desactivar"
+                - generic [ref=f28e990]:
+                  - text: "onConfirm={"
+                  - generic [ref=f28e991]: async
+                  - text: ()
+                  - generic [ref=f28e992]: "=> { await"
+                  - text: "deleteUser(id); }}"
+                - generic [ref=f28e993]: triggerVariant="destructive"
+                - generic [ref=f28e995]: />
+              - button "Copiar al portapapeles" [ref=f28e998] [cursor=pointer]
+            - separator [ref=f28e1000]
+            - generic [ref=f28e1001]:
+              - heading "7.8 CatalogFormPage" [level=3] [ref=f28e1002]
+              - link "Sección titulada «7.8 CatalogFormPage»" [ref=f28e1003] [cursor=pointer]:
+                - /url: "#78-catalogformpage"
+            - paragraph [ref=f28e1008]:
+              - strong [ref=f28e1009]: "Import:"
+              - code [ref=f28e1010]: "@/components/catalogs/catalog-form-page"
+            - paragraph [ref=f28e1011]:
+              - text: Componente de pagina para formularios CRUD de catalogos. Exponer
+              - code [ref=f28e1012]: CatalogNewPage
+              - text: "y"
+              - code [ref=f28e1013]: CatalogEditPage
+              - text: como patron oficial para
+              - code [ref=f28e1014]: /new
+              - text: "y"
+              - code [ref=f28e1015]: /[id]
+              - text: .
+            - separator [ref=f28e1016]
+            - generic [ref=f28e1017]:
+              - heading "7.9 CatalogDeleteDialog" [level=3] [ref=f28e1018]
+              - link "Sección titulada «7.9 CatalogDeleteDialog»" [ref=f28e1019] [cursor=pointer]:
+                - /url: "#79-catalogdeletedialog"
+            - paragraph [ref=f28e1024]:
+              - strong [ref=f28e1025]: "Import:"
+              - code [ref=f28e1026]: "@/components/catalogs/catalog-delete-dialog"
+            - paragraph [ref=f28e1027]: AlertDialog generico para desactivacion de registros de catalogo.
+            - separator [ref=f28e1028]
+            - generic [ref=f28e1029]:
+              - heading "7.10 AppToaster" [level=3] [ref=f28e1030]
+              - link "Sección titulada «7.10 AppToaster»" [ref=f28e1031] [cursor=pointer]:
+                - /url: "#710-apptoaster"
+            - paragraph [ref=f28e1036]:
+              - strong [ref=f28e1037]: "Import:"
+              - code [ref=f28e1038]: "@/components/shared/app-toaster"
+            - list [ref=f28e1039]:
+              - listitem [ref=f28e1040]: Provider global de Sonner
+              - listitem [ref=f28e1041]:
+                - text: "Posicion:"
+                - code [ref=f28e1042]: top-right
+              - listitem [ref=f28e1043]:
+                - code [ref=f28e1044]: richColors
+                - text: habilitado
+              - listitem [ref=f28e1045]:
+                - code [ref=f28e1046]: closeButton
+                - text: habilitado
+            - paragraph [ref=f28e1047]:
+              - strong [ref=f28e1048]: "Uso de toasts:"
+            - figure [ref=f28e1050]:
+              - code [ref=f28e1052]:
+                - generic [ref=f28e1053]: "import { toast } from \"sonner\";"
+                - generic [ref=f28e1057]: toast.success("Registro creado correctamente");
+                - generic [ref=f28e1059]: toast.error("Error al guardar el registro");
+                - generic [ref=f28e1061]: toast.warning("El registro ya existe");
+              - button "Copiar al portapapeles" [ref=f28e1064] [cursor=pointer]
+            - separator [ref=f28e1066]
+            - generic [ref=f28e1067]:
+              - heading "Checklist para Nuevas Interfaces" [level=2] [ref=f28e1068]
+              - link "Sección titulada «Checklist para Nuevas Interfaces»" [ref=f28e1069] [cursor=pointer]:
+                - /url: "#checklist-para-nuevas-interfaces"
+            - paragraph [ref=f28e1074]: "Antes de entregar cualquier nueva pantalla o componente, verificar:"
+            - list [ref=f28e1075]:
+              - listitem [ref=f28e1076]:
+                - checkbox [disabled] [ref=f28e1077]
+                - text: Solo usa componentes de
+                - code [ref=f28e1078]: "@/components/ui/*"
+                - text: (nunca HTML nativo para inputs, botones, tablas)
+              - listitem [ref=f28e1079]:
+                - checkbox [disabled] [ref=f28e1080]
+                - text: Excepciones de HTML nativo documentadas (ej.
+                - code [ref=f28e1081]: input hidden
+                - text: ", integraciones sin wrapper)"
+              - listitem [ref=f28e1082]:
+                - checkbox [disabled] [ref=f28e1083]
+                - text: Colores usan tokens semanticos por defecto (hardcoded solo por solicitud visual explicita)
+              - listitem [ref=f28e1084]:
+                - checkbox [disabled] [ref=f28e1085]
+                - text: Funciona correctamente en dark mode
+              - listitem [ref=f28e1086]:
+                - checkbox [disabled] [ref=f28e1087]
+                - text: Formularios de crear/editar usan flujo por paginas (
+                - code [ref=f28e1088]: /new
+                - text: ","
+                - code [ref=f28e1089]: /[id]
+                - text: )
+              - listitem [ref=f28e1090]:
+                - checkbox [disabled] [ref=f28e1091]
+                - text: Eliminaciones usan
+                - code [ref=f28e1092]: AlertDialog
+                - text: con confirmacion
+              - listitem [ref=f28e1093]:
+                - checkbox [disabled] [ref=f28e1094]
+                - text: Iconos son de
+                - code [ref=f28e1095]: lucide-react
+                - text: con tamanos estandar
+              - listitem [ref=f28e1096]:
+                - checkbox [disabled] [ref=f28e1097]
+                - text: Textos en espanol por defecto y listos para i18n
+              - listitem [ref=f28e1098]:
+                - checkbox [disabled] [ref=f28e1099]
+                - text: Loading states implementados (Skeleton o Loader2)
+              - listitem [ref=f28e1100]:
+                - checkbox [disabled] [ref=f28e1101]
+                - text: Empty states implementados (EmptyState component)
+              - listitem [ref=f28e1102]:
+                - checkbox [disabled] [ref=f28e1103]
+                - text: Errores mostrados con estilo destructive
+              - listitem [ref=f28e1104]:
+                - checkbox [disabled] [ref=f28e1105]
+                - text: Toasts para feedback de acciones
+              - listitem [ref=f28e1106]:
+                - checkbox [disabled] [ref=f28e1107]
+                - text: Responsive (mobile cards + desktop tabla si aplica)
+              - listitem [ref=f28e1108]:
+                - checkbox [disabled] [ref=f28e1109]
+                - text: Hover/focus states presentes en elementos interactivos
+              - listitem [ref=f28e1110]:
+                - checkbox [disabled] [ref=f28e1111]
+                - code [ref=f28e1112]: PageHeader
+                - text: usado como encabezado de pagina
+              - listitem [ref=f28e1113]:
+                - checkbox [disabled] [ref=f28e1114]
+                - text: Footer con conteo de registros si es listado
+              - listitem [ref=f28e1115]:
+                - checkbox [disabled] [ref=f28e1116]
+                - text: Acciones en tabla con Tooltip (1-2 acciones) o DropdownMenu (3+)
+              - listitem [ref=f28e1117]:
+                - checkbox [disabled] [ref=f28e1118]
+                - text: No hay imports sin usar
+              - listitem [ref=f28e1119]:
+                - checkbox [disabled] [ref=f28e1120]
+                - code [ref=f28e1121]: pnpm build
+                - text: compila sin errores
+          - generic [ref=f28e1122]:
+            - paragraph [ref=f28e1124]:
+              - text: "Última actualización:"
+              - time [ref=f28e1125]: 20 ago 2026
+            - generic [ref=f28e1126]:
+              - link [ref=f28e1127] [cursor=pointer]:
+                - /url: /frontend/sistema-de-diseno/formularios/
+                - generic [ref=f28e1130]: Página anteriorFormularios
+              - link [ref=f28e1131] [cursor=pointer]:
+                - /url: /frontend/sistema-de-diseno/presentacion-datos/
+                - generic [ref=f28e1134]: Siguiente páginaPresentacion de Datos
+  - generic [ref=f28e1137]:
+    - button [ref=f28e1138]
+    - button [ref=f28e1144]
+    - button [ref=f28e1148]
+    - button [ref=f28e1153]

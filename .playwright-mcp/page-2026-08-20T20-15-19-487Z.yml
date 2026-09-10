@@ -1,0 +1,64 @@
+- generic [active] [ref=f16e1]:
+  - link "Ir al contenido" [ref=f16e2] [cursor=pointer]:
+    - /url: "#_top"
+  - generic [ref=f16e3]:
+    - banner [ref=f16e4]:
+      - generic [ref=f16e5]:
+        - generic [ref=f16e7]:
+          - link "Inicio — Manual administrativo" [ref=f16e8] [cursor=pointer]:
+            - /url: /
+            - generic [ref=f16e9]: S
+            - generic [ref=f16e10]:
+              - generic [ref=f16e11]: SACDIA
+              - generic [ref=f16e12]: Administrativo
+          - navigation "Cambiar portal de documentación" [ref=f16e13]:
+            - link "Operativo" [ref=f16e14] [cursor=pointer]:
+              - /url: http://localhost:4321
+            - link "Administrativo" [ref=f16e15] [cursor=pointer]:
+              - /url: http://localhost:4322
+            - link "Técnico" [ref=f16e16] [cursor=pointer]:
+              - /url: http://localhost:4323
+        - button "Buscar" [ref=f16e19] [cursor=pointer]:
+          - generic [ref=f16e23]:
+            - generic [ref=f16e24]: ⌘
+            - generic [ref=f16e25]: K
+        - generic [ref=f16e29]:
+          - generic [ref=f16e30]: Seleccionar tema
+          - combobox "Seleccionar tema" [ref=f16e31] [cursor=pointer]:
+            - option "Oscuro"
+            - option "Claro"
+            - option "Automático" [selected]
+    - main [ref=f16e35]:
+      - heading "Manual administrativo de SACDIA" [level=1] [ref=f16e38]
+      - generic [ref=f16e40]:
+        - generic [ref=f16e41]:
+          - region [ref=f16e42]:
+            - paragraph [ref=f16e43]: Panel administrativo
+            - heading "Gestiona SACDIA con claridad" [level=1] [ref=f16e44]
+            - paragraph [ref=f16e45]: Manuales privados para administrar clubes, finanzas, materiales, investiduras y configuración.
+          - generic [ref=f16e46]:
+            - link "Comenzar en el panel Entiende el alcance y la organización del manual." [ref=f16e47] [cursor=pointer]:
+              - /url: /primeros-pasos/
+              - strong [ref=f16e48]: Comenzar en el panel
+              - generic [ref=f16e49]: Entiende el alcance y la organización del manual.
+            - link "Gestionar finanzas Consulta los manuales de las pantallas financieras." [ref=f16e50] [cursor=pointer]:
+              - /url: /finanzas/
+              - strong [ref=f16e51]: Gestionar finanzas
+              - generic [ref=f16e52]: Consulta los manuales de las pantallas financieras.
+            - link "Completar un proceso Sigue recorridos que conectan varias áreas del sistema." [ref=f16e53] [cursor=pointer]:
+              - /url: /procesos/
+              - strong [ref=f16e54]: Completar un proceso
+              - generic [ref=f16e55]: Sigue recorridos que conectan varias áreas del sistema.
+          - generic [ref=f16e56]:
+            - heading "Acceso privado" [level=2] [ref=f16e57]
+            - link "Sección titulada «Acceso privado»" [ref=f16e58] [cursor=pointer]:
+              - /url: "#acceso-privado"
+          - paragraph [ref=f16e63]: Este portal está dirigido a personas autorizadas a utilizar el panel administrativo. Cloudflare Access controla el acceso; las cabeceras del sitio solo evitan la indexación accidental.
+        - paragraph [ref=f16e66]:
+          - text: "Última actualización:"
+          - time [ref=f16e67]: 20 ago 2026
+  - generic [ref=f16e70]:
+    - button [ref=f16e71]
+    - button [ref=f16e77]
+    - button [ref=f16e81]
+    - button [ref=f16e86]

@@ -1,0 +1,844 @@
+- generic [active] [ref=f29e1]:
+  - link "Ir al contenido" [ref=f29e2] [cursor=pointer]:
+    - /url: "#_top"
+  - generic [ref=f29e3]:
+    - banner [ref=f29e4]:
+      - generic [ref=f29e5]:
+        - generic [ref=f29e7]:
+          - link "Inicio — Documentación técnica" [ref=f29e8] [cursor=pointer]:
+            - /url: /
+            - generic [ref=f29e9]: S
+            - generic [ref=f29e10]:
+              - generic [ref=f29e11]: SACDIA
+              - generic [ref=f29e12]: Técnico
+          - navigation "Cambiar portal de documentación" [ref=f29e13]:
+            - link "Operativo" [ref=f29e14] [cursor=pointer]:
+              - /url: http://localhost:4321
+            - link "Administrativo" [ref=f29e15] [cursor=pointer]:
+              - /url: http://localhost:4322
+            - link "Técnico" [ref=f29e16] [cursor=pointer]:
+              - /url: http://localhost:4323
+        - button "Buscar" [ref=f29e19] [cursor=pointer]:
+          - generic [ref=f29e23]:
+            - generic [ref=f29e24]: ⌘
+            - generic [ref=f29e25]: K
+        - generic [ref=f29e29]:
+          - generic [ref=f29e30]: Seleccionar tema
+          - combobox "Seleccionar tema" [ref=f29e31] [cursor=pointer]:
+            - option "Oscuro"
+            - option "Claro"
+            - option "Automático" [selected]
+    - navigation "Primario":
+      - list [ref=f29e35]:
+        - listitem [ref=f29e36]:
+          - group [ref=f29e37]:
+            - generic "API" [ref=f29e38] [cursor=pointer]
+            - list [ref=f29e42]:
+              - listitem [ref=f29e43]:
+                - link "API Reference" [ref=f29e44] [cursor=pointer]:
+                  - /url: /api/
+              - listitem [ref=f29e45]:
+                - link "Decisiones de Arquitectura" [ref=f29e46] [cursor=pointer]:
+                  - /url: /api/decisiones-arquitectura/
+              - listitem [ref=f29e47]:
+                - link "Endpoints — Live Reference" [ref=f29e48] [cursor=pointer]:
+                  - /url: /api/endpoints/
+              - listitem [ref=f29e49]:
+                - link "Especificación Técnica REST API" [ref=f29e50] [cursor=pointer]:
+                  - /url: /api/especificacion/
+              - listitem [ref=f29e51]:
+                - group [ref=f29e52]:
+                  - generic "integracion-frontend" [ref=f29e53] [cursor=pointer]
+                  - list [ref=f29e57]:
+                    - listitem [ref=f29e58]:
+                      - link "Integración Frontend" [ref=f29e59] [cursor=pointer]:
+                        - /url: /api/integracion-frontend/
+                    - listitem [ref=f29e60]:
+                      - link "Autenticación" [ref=f29e61] [cursor=pointer]:
+                        - /url: /api/integracion-frontend/autenticacion/
+                    - listitem [ref=f29e62]:
+                      - link "Best Practices" [ref=f29e63] [cursor=pointer]:
+                        - /url: /api/integracion-frontend/best-practices/
+                    - listitem [ref=f29e64]:
+                      - link "Ejemplos por Módulo" [ref=f29e65] [cursor=pointer]:
+                        - /url: /api/integracion-frontend/ejemplos-modulos/
+                    - listitem [ref=f29e66]:
+                      - link "Consumo de Endpoints" [ref=f29e67] [cursor=pointer]:
+                        - /url: /api/integracion-frontend/endpoints/
+                    - listitem [ref=f29e68]:
+                      - link "Manejo de Errores" [ref=f29e69] [cursor=pointer]:
+                        - /url: /api/integracion-frontend/manejo-errores/
+                    - listitem [ref=f29e70]:
+                      - link "Setup Inicial" [ref=f29e71] [cursor=pointer]:
+                        - /url: /api/integracion-frontend/setup/
+                    - listitem [ref=f29e72]:
+                      - link "Testing de Integracion Frontend" [ref=f29e73] [cursor=pointer]:
+                        - /url: /api/integracion-frontend/testing/
+              - listitem [ref=f29e74]:
+                - link "Guía de Seguridad" [ref=f29e75] [cursor=pointer]:
+                  - /url: /api/seguridad/
+              - listitem [ref=f29e76]:
+                - link "Integración de Servicios Externos" [ref=f29e77] [cursor=pointer]:
+                  - /url: /api/servicios-externos/
+              - listitem [ref=f29e78]:
+                - link "Guía de Testing" [ref=f29e79] [cursor=pointer]:
+                  - /url: /api/testing/
+              - listitem [ref=f29e80]:
+                - link "Versionado de la API" [ref=f29e81] [cursor=pointer]:
+                  - /url: /api/versionado/
+        - listitem [ref=f29e82]:
+          - group [ref=f29e83]:
+            - generic "Arquitectura" [ref=f29e84] [cursor=pointer]
+            - list [ref=f29e88]:
+              - listitem [ref=f29e89]:
+                - link "Arquitectura" [ref=f29e90] [cursor=pointer]:
+                  - /url: /arquitectura/
+              - listitem [ref=f29e91]:
+                - group [ref=f29e92]:
+                  - generic "fundamentos" [ref=f29e93] [cursor=pointer]
+                  - list [ref=f29e97]:
+                    - listitem [ref=f29e98]:
+                      - link "Fundamentos" [ref=f29e99] [cursor=pointer]:
+                        - /url: /arquitectura/fundamentos/
+                    - listitem [ref=f29e100]:
+                      - link "Arquitectura del sistema" [ref=f29e101] [cursor=pointer]:
+                        - /url: /arquitectura/fundamentos/arquitectura/
+                    - listitem [ref=f29e102]:
+                      - link "Decisiones clave" [ref=f29e103] [cursor=pointer]:
+                        - /url: /arquitectura/fundamentos/decisiones-clave/
+                    - listitem [ref=f29e104]:
+                      - link "Modelo del dominio" [ref=f29e105] [cursor=pointer]:
+                        - /url: /arquitectura/fundamentos/dominio/
+                    - listitem [ref=f29e106]:
+                      - link "Identidad del sistema" [ref=f29e107] [cursor=pointer]:
+                        - /url: /arquitectura/fundamentos/identidad/
+                    - listitem [ref=f29e108]:
+                      - link "Runtime SACDIA" [ref=f29e109] [cursor=pointer]:
+                        - /url: /arquitectura/fundamentos/runtime/
+                    - listitem [ref=f29e110]:
+                      - link "Source of Truth" [ref=f29e111] [cursor=pointer]:
+                        - /url: /arquitectura/fundamentos/source-of-truth/
+        - listitem [ref=f29e112]:
+          - group [ref=f29e113]:
+            - generic "Base de datos" [ref=f29e114] [cursor=pointer]
+            - list [ref=f29e118]:
+              - listitem [ref=f29e119]:
+                - link "Base de Datos" [ref=f29e120] [cursor=pointer]:
+                  - /url: /base-de-datos/
+              - listitem [ref=f29e121]:
+                - link "Migraciones" [ref=f29e122] [cursor=pointer]:
+                  - /url: /base-de-datos/migraciones/
+              - listitem [ref=f29e123]:
+                - group [ref=f29e124]:
+                  - generic "schema-reference" [ref=f29e125] [cursor=pointer]
+                  - list [ref=f29e129]:
+                    - listitem [ref=f29e130]:
+                      - link "Schema Reference" [ref=f29e131] [cursor=pointer]:
+                        - /url: /base-de-datos/schema-reference/
+                    - listitem [ref=f29e132]:
+                      - link "Actividades y Camporees" [ref=f29e133] [cursor=pointer]:
+                        - /url: /base-de-datos/schema-reference/actividades-camporees/
+                    - listitem [ref=f29e134]:
+                      - link "Carpetas y Evaluacion" [ref=f29e135] [cursor=pointer]:
+                        - /url: /base-de-datos/schema-reference/carpetas-evaluacion/
+                    - listitem [ref=f29e136]:
+                      - link "Clases y Honores" [ref=f29e137] [cursor=pointer]:
+                        - /url: /base-de-datos/schema-reference/clases-honores/
+                    - listitem [ref=f29e138]:
+                      - link "Clubs" [ref=f29e139] [cursor=pointer]:
+                        - /url: /base-de-datos/schema-reference/clubs/
+                    - listitem [ref=f29e140]:
+                      - link "Inventario y Finanzas" [ref=f29e141] [cursor=pointer]:
+                        - /url: /base-de-datos/schema-reference/inventario-finanzas/
+                    - listitem [ref=f29e142]:
+                      - link "Investidura y Certificaciones" [ref=f29e143] [cursor=pointer]:
+                        - /url: /base-de-datos/schema-reference/investidura-certificaciones/
+                    - listitem [ref=f29e144]:
+                      - link "Jerarquia Organizacional" [ref=f29e145] [cursor=pointer]:
+                        - /url: /base-de-datos/schema-reference/organizacion/
+                    - listitem [ref=f29e146]:
+                      - link "RBAC — Roles y Permisos" [ref=f29e147] [cursor=pointer]:
+                        - /url: /base-de-datos/schema-reference/rbac/
+                    - listitem [ref=f29e148]:
+                      - link "Salud e Insurance" [ref=f29e149] [cursor=pointer]:
+                        - /url: /base-de-datos/schema-reference/salud-insurance/
+                    - listitem [ref=f29e150]:
+                      - link "Sistema y Recursos" [ref=f29e151] [cursor=pointer]:
+                        - /url: /base-de-datos/schema-reference/sistema-recursos/
+                    - listitem [ref=f29e152]:
+                      - link "Users & Auth" [ref=f29e153] [cursor=pointer]:
+                        - /url: /base-de-datos/schema-reference/users-auth/
+        - listitem [ref=f29e154]:
+          - group [ref=f29e155]:
+            - generic "Producto" [ref=f29e156] [cursor=pointer]
+            - list [ref=f29e160]:
+              - listitem [ref=f29e161]:
+                - group [ref=f29e162]:
+                  - generic "funcionalidades" [ref=f29e163] [cursor=pointer]
+                  - list [ref=f29e167]:
+                    - listitem [ref=f29e168]:
+                      - link "Funcionalidades" [ref=f29e169] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/
+                    - listitem [ref=f29e170]:
+                      - link "Actividades" [ref=f29e171] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/actividades/
+                    - listitem [ref=f29e172]:
+                      - link "Actividades Conjuntas" [ref=f29e173] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/actividades-conjuntas/
+                    - listitem [ref=f29e174]:
+                      - link "Calificacion de Carpetas Anuales" [ref=f29e175] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/annual-folders-scoring/
+                    - listitem [ref=f29e176]:
+                      - link "Aprobaciones de Camporees" [ref=f29e177] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/aprobaciones-camporees/
+                    - listitem [ref=f29e178]:
+                      - link "Aprobaciones Masivas" [ref=f29e179] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/aprobaciones-masivas/
+                    - listitem [ref=f29e180]:
+                      - link "Audit Logs" [ref=f29e181] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/audit-logs/
+                    - listitem [ref=f29e182]:
+                      - link "Camporees" [ref=f29e183] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/camporees/
+                    - listitem [ref=f29e184]:
+                      - link "Carpetas de Evidencias" [ref=f29e185] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/carpetas-evidencias/
+                    - listitem [ref=f29e186]:
+                      - link "Catalogos" [ref=f29e187] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/catalogos/
+                    - listitem [ref=f29e188]:
+                      - link "Certificaciones de Guias Mayores" [ref=f29e189] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/certificaciones-guias-mayores/
+                    - listitem [ref=f29e190]:
+                      - link "Clases Progresivas" [ref=f29e191] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/clases-progresivas/
+                    - listitem [ref=f29e192]:
+                      - link "Comunicaciones" [ref=f29e193] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/comunicaciones/
+                    - listitem [ref=f29e194]:
+                      - link "Finanzas" [ref=f29e195] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/finanzas/
+                    - listitem [ref=f29e196]:
+                      - link "Gestion de Clubs" [ref=f29e197] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/gestion-clubs/
+                    - listitem [ref=f29e198]:
+                      - link "Gestion de Seguros" [ref=f29e199] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/gestion-seguros/
+                    - listitem [ref=f29e200]:
+                      - link "Honores" [ref=f29e201] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/honores/
+                    - listitem [ref=f29e202]:
+                      - link "Inventario" [ref=f29e203] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/inventario/
+                    - listitem [ref=f29e204]:
+                      - link "Materiales" [ref=f29e205] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/materiales/
+                    - listitem [ref=f29e206]:
+                      - link "RBAC" [ref=f29e207] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/rbac/
+                    - listitem [ref=f29e208]:
+                      - link "Recursos" [ref=f29e209] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/recursos/
+                    - listitem [ref=f29e210]:
+                      - link "SLA Dashboard" [ref=f29e211] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/sla-dashboard/
+                    - listitem [ref=f29e212]:
+                      - link "Validacion de Evidencias" [ref=f29e213] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/validacion-evidencias/
+                    - listitem [ref=f29e214]:
+                      - link "Validacion de Investiduras" [ref=f29e215] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/validacion-investiduras/
+        - listitem [ref=f29e216]:
+          - group [ref=f29e217]:
+            - generic "Seguridad" [ref=f29e218] [cursor=pointer]
+            - list [ref=f29e222]:
+              - listitem [ref=f29e223]:
+                - link "Seguridad" [ref=f29e224] [cursor=pointer]:
+                  - /url: /seguridad/
+              - listitem [ref=f29e225]:
+                - group [ref=f29e226]:
+                  - generic "autorizacion" [ref=f29e227] [cursor=pointer]
+                  - list [ref=f29e231]:
+                    - listitem [ref=f29e232]:
+                      - link "Autorización" [ref=f29e233] [cursor=pointer]:
+                        - /url: /seguridad/autorizacion/
+                    - listitem [ref=f29e234]:
+                      - link "Contrato canónico de autorización" [ref=f29e235] [cursor=pointer]:
+                        - /url: /seguridad/autorizacion/contrato-canonico/
+                    - listitem [ref=f29e236]:
+                      - link "Matriz de enforcement RBAC" [ref=f29e237] [cursor=pointer]:
+                        - /url: /seguridad/autorizacion/matriz-rbac/
+                    - listitem [ref=f29e238]:
+                      - link "Modelo de autorización" [ref=f29e239] [cursor=pointer]:
+                        - /url: /seguridad/autorizacion/modelo/
+                    - listitem [ref=f29e240]:
+                      - link "Sistema de permisos" [ref=f29e241] [cursor=pointer]:
+                        - /url: /seguridad/autorizacion/permisos/
+                    - listitem [ref=f29e242]:
+                      - link "Runtime de autenticación y autorización" [ref=f29e243] [cursor=pointer]:
+                        - /url: /seguridad/autorizacion/runtime/
+        - listitem [ref=f29e244]:
+          - group [ref=f29e245]:
+            - generic "Integración" [ref=f29e246] [cursor=pointer]
+            - list [ref=f29e250]:
+              - listitem [ref=f29e251]:
+                - link "Integración" [ref=f29e252] [cursor=pointer]:
+                  - /url: /integracion/
+        - listitem [ref=f29e253]:
+          - group [ref=f29e254]:
+            - generic "Frontend" [ref=f29e255] [cursor=pointer]
+            - list [ref=f29e259]:
+              - listitem [ref=f29e260]:
+                - group [ref=f29e261]:
+                  - generic "sistema-de-diseno" [ref=f29e262] [cursor=pointer]
+                  - list [ref=f29e266]:
+                    - listitem [ref=f29e267]:
+                      - link "Sistema de Diseño" [ref=f29e268] [cursor=pointer]:
+                        - /url: /frontend/sistema-de-diseno/
+                    - listitem [ref=f29e269]:
+                      - link "Componentes UI" [ref=f29e270] [cursor=pointer]:
+                        - /url: /frontend/sistema-de-diseno/componentes/
+                    - listitem [ref=f29e271]:
+                      - link "Dark Mode y Responsive" [ref=f29e272] [cursor=pointer]:
+                        - /url: /frontend/sistema-de-diseno/dark-mode-y-responsive/
+                    - listitem [ref=f29e273]:
+                      - link "Estructura de Archivos" [ref=f29e274] [cursor=pointer]:
+                        - /url: /frontend/sistema-de-diseno/estructura-archivos/
+                    - listitem [ref=f29e275]:
+                      - link "Formularios" [ref=f29e276] [cursor=pointer]:
+                        - /url: /frontend/sistema-de-diseno/formularios/
+                    - listitem [ref=f29e277]:
+                      - link "Patrones CRUD" [ref=f29e278] [cursor=pointer]:
+                        - /url: /frontend/sistema-de-diseno/patrones-crud/
+                    - listitem [ref=f29e279]:
+                      - link "Presentacion de Datos" [ref=f29e280] [cursor=pointer]:
+                        - /url: /frontend/sistema-de-diseno/presentacion-datos/
+                    - listitem [ref=f29e281]:
+                      - link "Stack y Paleta de Color" [ref=f29e282] [cursor=pointer]:
+                        - /url: /frontend/sistema-de-diseno/stack-y-paleta/
+                    - listitem [ref=f29e283]:
+                      - link "Tipografia y Espaciado" [ref=f29e284] [cursor=pointer]:
+                        - /url: /frontend/sistema-de-diseno/tipografia-y-espaciado/
+        - listitem [ref=f29e285]:
+          - group [ref=f29e286]:
+            - generic "Estándares" [ref=f29e287] [cursor=pointer]
+            - list [ref=f29e291]:
+              - listitem [ref=f29e292]:
+                - link "Estandares" [ref=f29e293] [cursor=pointer]:
+                  - /url: /estandares/
+              - listitem [ref=f29e294]:
+                - link "Coding Standards" [ref=f29e295] [cursor=pointer]:
+                  - /url: /estandares/coding-standards/
+              - listitem [ref=f29e296]:
+                - link "Data Guidelines" [ref=f29e297] [cursor=pointer]:
+                  - /url: /estandares/data-guidelines/
+              - listitem [ref=f29e298]:
+                - link "Guia de Estructura" [ref=f29e299] [cursor=pointer]:
+                  - /url: /estandares/guia-estructura/
+              - listitem [ref=f29e300]:
+                - group [ref=f29e301]:
+                  - generic "stack-tecnologico" [ref=f29e302] [cursor=pointer]
+                  - list [ref=f29e306]:
+                    - listitem [ref=f29e307]:
+                      - link "Stack Tecnologico" [ref=f29e308] [cursor=pointer]:
+                        - /url: /estandares/stack-tecnologico/
+                    - listitem [ref=f29e309]:
+                      - link "Backend — NestJS API" [ref=f29e310] [cursor=pointer]:
+                        - /url: /estandares/stack-tecnologico/backend/
+                    - listitem [ref=f29e311]:
+                      - link "Decisiones Tecnicas" [ref=f29e312] [cursor=pointer]:
+                        - /url: /estandares/stack-tecnologico/decisiones/
+                    - listitem [ref=f29e313]:
+                      - link "Frontend — Admin Panel" [ref=f29e314] [cursor=pointer]:
+                        - /url: /estandares/stack-tecnologico/frontend/
+                    - listitem [ref=f29e315]:
+                      - link "Infraestructura" [ref=f29e316] [cursor=pointer]:
+                        - /url: /estandares/stack-tecnologico/infraestructura/
+                    - listitem [ref=f29e317]:
+                      - link "App Movil — Flutter" [ref=f29e318] [cursor=pointer]:
+                        - /url: /estandares/stack-tecnologico/mobile/
+                    - listitem [ref=f29e319]:
+                      - link "Servicios de Terceros" [ref=f29e320] [cursor=pointer]:
+                        - /url: /estandares/stack-tecnologico/servicios/
+        - listitem [ref=f29e321]:
+          - group [ref=f29e322]:
+            - generic "Pruebas" [ref=f29e323] [cursor=pointer]
+            - list [ref=f29e327]:
+              - listitem [ref=f29e328]:
+                - link "Testing" [ref=f29e329] [cursor=pointer]:
+                  - /url: /testing/
+              - listitem [ref=f29e330]:
+                - link "Usuarios de Prueba" [ref=f29e331] [cursor=pointer]:
+                  - /url: /testing/usuarios-prueba/
+        - listitem [ref=f29e332]:
+          - group [ref=f29e333]:
+            - generic "Guías" [ref=f29e334] [cursor=pointer]
+            - list [ref=f29e338]:
+              - listitem [ref=f29e339]:
+                - link "Guias" [ref=f29e340] [cursor=pointer]:
+                  - /url: /guias/
+              - listitem [ref=f29e341]:
+                - link "Admin Integration" [ref=f29e342] [cursor=pointer]:
+                  - /url: /guias/admin-integration/
+              - listitem [ref=f29e343]:
+                - link "Deployment" [ref=f29e344] [cursor=pointer]:
+                  - /url: /guias/deployment/
+              - listitem [ref=f29e345]:
+                - link "Developer Workflow" [ref=f29e346] [cursor=pointer]:
+                  - /url: /guias/developer-workflow/
+              - listitem [ref=f29e347]:
+                - link "Idea to Spec" [ref=f29e348] [cursor=pointer]:
+                  - /url: /guias/idea-to-spec/
+        - listitem [ref=f29e349]:
+          - group [ref=f29e350]:
+            - generic "Referencia" [ref=f29e351] [cursor=pointer]
+            - list [ref=f29e355]:
+              - listitem [ref=f29e356]:
+                - link "Documentación de Desarrollo" [ref=f29e357] [cursor=pointer]:
+                  - /url: /referencia/
+    - generic [ref=f29e359]:
+      - complementary [ref=f29e360]:
+        - navigation [ref=f29e365]:
+          - heading "En esta página" [level=2] [ref=f29e366]
+          - list [ref=f29e367]:
+            - listitem [ref=f29e368]:
+              - link "Sinopsis" [ref=f29e369] [cursor=pointer]:
+                - /url: "#_top"
+            - listitem [ref=f29e370]:
+              - link "1. Stack de UI" [ref=f29e371] [cursor=pointer]:
+                - /url: "#1-stack-de-ui"
+            - listitem [ref=f29e372]:
+              - link "2. Paleta Ember (OKLCH)" [ref=f29e373] [cursor=pointer]:
+                - /url: "#2-paleta-ember-oklch"
+              - list [ref=f29e374]:
+                - listitem [ref=f29e375]:
+                  - link "2.1 Tokens de Superficie" [ref=f29e376] [cursor=pointer]:
+                    - /url: "#21-tokens-de-superficie"
+                - listitem [ref=f29e377]:
+                  - link "2.2 Colores Semanticos" [ref=f29e378] [cursor=pointer]:
+                    - /url: "#22-colores-semanticos"
+                - listitem [ref=f29e379]:
+                  - link "2.3 Bordes e Input" [ref=f29e380] [cursor=pointer]:
+                    - /url: "#23-bordes-e-input"
+                - listitem [ref=f29e381]:
+                  - link "2.4 Charts (orden Ember)" [ref=f29e382] [cursor=pointer]:
+                    - /url: "#24-charts-orden-ember"
+                - listitem [ref=f29e383]:
+                  - link "2.5 Sidebar" [ref=f29e384] [cursor=pointer]:
+                    - /url: "#25-sidebar"
+                - listitem [ref=f29e385]:
+                  - link "2.6 Badge variants (Ember)" [ref=f29e386] [cursor=pointer]:
+                    - /url: "#26-badge-variants-ember"
+                - listitem [ref=f29e387]:
+                  - link "2.7 Reglas de uso de color" [ref=f29e388] [cursor=pointer]:
+                    - /url: "#27-reglas-de-uso-de-color"
+      - main [ref=f29e390]:
+        - heading "Stack y Paleta de Color" [level=1] [ref=f29e393]
+        - generic [ref=f29e395]:
+          - generic [ref=f29e396]:
+            - blockquote [ref=f29e397]:
+              - paragraph [ref=f29e398]:
+                - strong [ref=f29e399]: Fuente canonica
+                - text: ":"
+                - code [ref=f29e400]: sacdia-admin/DESIGN-SYSTEM.md
+                - text: (auditado 2026-04-16). Esta pagina espeja la seccion 1-2 del DS. Si hay drift, manda el DS del admin.
+            - generic [ref=f29e401]:
+              - heading "1. Stack de UI" [level=2] [ref=f29e402]
+              - link "Sección titulada «1. Stack de UI»" [ref=f29e403] [cursor=pointer]:
+                - /url: "#1-stack-de-ui"
+            - table [ref=f29e408]:
+              - rowgroup [ref=f29e409]:
+                - row [ref=f29e410]:
+                  - columnheader "Capa" [ref=f29e411]
+                  - columnheader "Tecnologia" [ref=f29e412]
+                  - columnheader "Version" [ref=f29e413]
+              - rowgroup [ref=f29e414]:
+                - row [ref=f29e415]:
+                  - cell "Framework" [ref=f29e416]
+                  - cell [ref=f29e417]:
+                    - text: Next.js (App Router +
+                    - code [ref=f29e418]: proxy.ts
+                    - text: )
+                  - cell "16.x" [ref=f29e419]
+                - row [ref=f29e420]:
+                  - cell "Componentes" [ref=f29e421]
+                  - cell [ref=f29e422]:
+                    - text: shadcn/ui (estilo
+                    - code [ref=f29e423]: new-york
+                    - text: )
+                  - cell "latest" [ref=f29e424]
+                - row [ref=f29e425]:
+                  - cell "Primitivos" [ref=f29e426]
+                  - cell [ref=f29e427]:
+                    - text: Radix UI (
+                    - code [ref=f29e428]: radix-ui
+                    - text: )
+                  - cell "1.4.x" [ref=f29e429]
+                - row [ref=f29e430]:
+                  - cell "Estilos" [ref=f29e431]
+                  - cell [ref=f29e432]:
+                    - text: Tailwind CSS v4 +
+                    - code [ref=f29e433]: tw-animate-css
+                  - cell "4.x" [ref=f29e434]
+                - row [ref=f29e435]:
+                  - cell "Iconos" [ref=f29e436]
+                  - cell [ref=f29e437]:
+                    - code [ref=f29e438]: lucide-react
+                  - cell "0.563+" [ref=f29e439]
+                - row [ref=f29e440]:
+                  - cell "Graficos" [ref=f29e441]
+                  - cell "Recharts" [ref=f29e442]
+                  - cell "3.x" [ref=f29e443]
+                - row [ref=f29e444]:
+                  - cell "Formularios" [ref=f29e445]
+                  - cell "React Hook Form + Zod" [ref=f29e446]
+                  - cell "7.x / 4.x" [ref=f29e447]
+                - row [ref=f29e448]:
+                  - cell "Toasts" [ref=f29e449]
+                  - cell "Sonner" [ref=f29e450]
+                  - cell "2.x" [ref=f29e451]
+                - row [ref=f29e452]:
+                  - cell "Temas" [ref=f29e453]
+                  - cell "next-themes" [ref=f29e454]
+                  - cell "0.4.x" [ref=f29e455]
+                - row [ref=f29e456]:
+                  - cell "Server state" [ref=f29e457]
+                  - cell "TanStack Query v5" [ref=f29e458]
+                  - cell "5.x" [ref=f29e459]
+                - row [ref=f29e460]:
+                  - cell "i18n" [ref=f29e461]
+                  - cell "next-intl" [ref=f29e462]
+                  - cell "4.x" [ref=f29e463]
+                - row [ref=f29e464]:
+                  - cell "Utilidad CSS" [ref=f29e465]
+                  - cell [ref=f29e466]:
+                    - code [ref=f29e467]: cn()
+                    - text: de
+                    - code [ref=f29e468]: clsx
+                    - text: +
+                    - code [ref=f29e469]: tailwind-merge
+                  - cell "-" [ref=f29e470]
+            - paragraph [ref=f29e471]:
+              - strong [ref=f29e472]: Regla absoluta
+              - text: ": toda interfaz usa componentes de"
+              - code [ref=f29e473]: "@/components/ui/*"
+              - text: (shadcn/Radix). Si falta, instalar con
+              - code [ref=f29e474]: npx shadcn@latest add <componente>
+              - text: .
+            - paragraph [ref=f29e475]:
+              - strong [ref=f29e476]: Excepciones permitidas
+              - text: ":"
+            - list [ref=f29e477]:
+              - listitem [ref=f29e478]:
+                - code [ref=f29e479]: <input type="hidden">
+                - text: para forms/server actions
+              - listitem [ref=f29e480]: Elementos nativos requeridos por APIs del navegador
+              - listitem [ref=f29e481]: Casos documentados en PR con justificacion tecnica
+            - separator [ref=f29e482]
+            - generic [ref=f29e483]:
+              - heading "2. Paleta Ember (OKLCH)" [level=2] [ref=f29e484]
+              - link "Sección titulada «2. Paleta Ember (OKLCH)»" [ref=f29e485] [cursor=pointer]:
+                - /url: "#2-paleta-ember-oklch"
+            - paragraph [ref=f29e490]:
+              - text: El sistema usa CSS custom properties en OKLCH para precision perceptual. La paleta actual es
+              - strong [ref=f29e491]: Ember
+              - text: ": naranja cobre como primary, stone calido como base. Cambio desde paleta violeta original aplicado en commits Fase 1-4 del rediseño."
+            - generic [ref=f29e492]:
+              - heading "2.1 Tokens de Superficie" [level=3] [ref=f29e493]
+              - link "Sección titulada «2.1 Tokens de Superficie»" [ref=f29e494] [cursor=pointer]:
+                - /url: "#21-tokens-de-superficie"
+            - table [ref=f29e499]:
+              - rowgroup [ref=f29e500]:
+                - row [ref=f29e501]:
+                  - columnheader "Token" [ref=f29e502]
+                  - columnheader "Light Mode" [ref=f29e503]
+                  - columnheader "Dark Mode" [ref=f29e504]
+                  - columnheader "Uso" [ref=f29e505]
+              - rowgroup [ref=f29e506]:
+                - row [ref=f29e507]:
+                  - cell [ref=f29e508]:
+                    - code [ref=f29e509]: "--background"
+                  - cell [ref=f29e510]:
+                    - code [ref=f29e511]: oklch(0.975 0.004 75)
+                  - cell [ref=f29e512]:
+                    - code [ref=f29e513]: oklch(0.155 0.012 60)
+                  - cell "Fondo general (stone calido)" [ref=f29e514]
+                - row [ref=f29e515]:
+                  - cell [ref=f29e516]:
+                    - code [ref=f29e517]: "--foreground"
+                  - cell [ref=f29e518]:
+                    - code [ref=f29e519]: oklch(0.18 0.015 60)
+                  - cell [ref=f29e520]:
+                    - code [ref=f29e521]: oklch(0.96 0.005 75)
+                  - cell "Texto principal" [ref=f29e522]
+                - row [ref=f29e523]:
+                  - cell [ref=f29e524]:
+                    - code [ref=f29e525]: "--card"
+                  - cell [ref=f29e526]:
+                    - code [ref=f29e527]: oklch(1 0 0)
+                  - cell [ref=f29e528]:
+                    - code [ref=f29e529]: oklch(0.19 0.014 60)
+                  - cell "Fondo tarjetas" [ref=f29e530]
+                - row [ref=f29e531]:
+                  - cell [ref=f29e532]:
+                    - code [ref=f29e533]: "--card-foreground"
+                  - cell [ref=f29e534]:
+                    - code [ref=f29e535]: oklch(0.18 0.015 60)
+                  - cell [ref=f29e536]:
+                    - code [ref=f29e537]: oklch(0.96 0.005 75)
+                  - cell "Texto en tarjetas" [ref=f29e538]
+                - row [ref=f29e539]:
+                  - cell [ref=f29e540]:
+                    - code [ref=f29e541]: "--popover"
+                  - cell [ref=f29e542]:
+                    - code [ref=f29e543]: oklch(1 0 0)
+                  - cell [ref=f29e544]:
+                    - code [ref=f29e545]: oklch(0.21 0.015 60)
+                  - cell "Fondo popovers/menus" [ref=f29e546]
+                - row [ref=f29e547]:
+                  - cell [ref=f29e548]:
+                    - code [ref=f29e549]: "--muted"
+                  - cell [ref=f29e550]:
+                    - code [ref=f29e551]: oklch(0.96 0.008 75)
+                  - cell [ref=f29e552]:
+                    - code [ref=f29e553]: oklch(0.23 0.015 60)
+                  - cell "Superficies secundarias" [ref=f29e554]
+                - row [ref=f29e555]:
+                  - cell [ref=f29e556]:
+                    - code [ref=f29e557]: "--muted-foreground"
+                  - cell [ref=f29e558]:
+                    - code [ref=f29e559]: oklch(0.52 0.012 60)
+                  - cell [ref=f29e560]:
+                    - code [ref=f29e561]: oklch(0.68 0.012 60)
+                  - cell "Texto auxiliar" [ref=f29e562]
+                - row [ref=f29e563]:
+                  - cell [ref=f29e564]:
+                    - code [ref=f29e565]: "--accent"
+                  - cell [ref=f29e566]:
+                    - code [ref=f29e567]: oklch(0.94 0.015 70)
+                  - cell [ref=f29e568]:
+                    - code [ref=f29e569]: oklch(0.26 0.018 60)
+                  - cell "Hover backgrounds" [ref=f29e570]
+                - row [ref=f29e571]:
+                  - cell [ref=f29e572]:
+                    - code [ref=f29e573]: "--secondary"
+                  - cell [ref=f29e574]:
+                    - code [ref=f29e575]: oklch(0.96 0.008 75)
+                  - cell [ref=f29e576]:
+                    - code [ref=f29e577]: oklch(0.23 0.015 60)
+                  - cell "Botones secundarios" [ref=f29e578]
+            - generic [ref=f29e579]:
+              - heading "2.2 Colores Semanticos" [level=3] [ref=f29e580]
+              - link "Sección titulada «2.2 Colores Semanticos»" [ref=f29e581] [cursor=pointer]:
+                - /url: "#22-colores-semanticos"
+            - table [ref=f29e586]:
+              - rowgroup [ref=f29e587]:
+                - row [ref=f29e588]:
+                  - columnheader "Token" [ref=f29e589]
+                  - columnheader "Light" [ref=f29e590]
+                  - columnheader "Dark" [ref=f29e591]
+                  - columnheader "Uso" [ref=f29e592]
+              - rowgroup [ref=f29e593]:
+                - row [ref=f29e594]:
+                  - cell [ref=f29e595]:
+                    - code [ref=f29e596]: "--primary"
+                  - cell [ref=f29e597]:
+                    - code [ref=f29e598]: oklch(0.66 0.21 42)
+                  - cell [ref=f29e599]:
+                    - code [ref=f29e600]: oklch(0.72 0.19 42)
+                  - cell [ref=f29e601]:
+                    - strong [ref=f29e602]: Naranja cobre Ember
+                    - text: (~#F05A28). Acciones principales, brand.
+                - row [ref=f29e603]:
+                  - cell [ref=f29e604]:
+                    - code [ref=f29e605]: "--destructive"
+                  - cell [ref=f29e606]:
+                    - code [ref=f29e607]: oklch(0.58 0.22 27)
+                  - cell [ref=f29e608]:
+                    - code [ref=f29e609]: oklch(0.67 0.22 27)
+                  - cell "Errores, eliminaciones" [ref=f29e610]
+                - row [ref=f29e611]:
+                  - cell [ref=f29e612]:
+                    - code [ref=f29e613]: "--success"
+                  - cell [ref=f29e614]:
+                    - code [ref=f29e615]: oklch(0.56 0.15 152)
+                  - cell [ref=f29e616]:
+                    - code [ref=f29e617]: oklch(0.66 0.16 152)
+                  - cell "Estados activos, confirmaciones" [ref=f29e618]
+                - row [ref=f29e619]:
+                  - cell [ref=f29e620]:
+                    - code [ref=f29e621]: "--warning"
+                  - cell [ref=f29e622]:
+                    - code [ref=f29e623]: oklch(0.75 0.15 80)
+                  - cell [ref=f29e624]:
+                    - code [ref=f29e625]: oklch(0.78 0.14 80)
+                  - cell "Pendientes, alertas suaves" [ref=f29e626]
+                - row [ref=f29e627]:
+                  - cell [ref=f29e628]:
+                    - code [ref=f29e629]: "--info"
+                  - cell [ref=f29e630]:
+                    - code [ref=f29e631]: oklch(0.6 0.15 240)
+                  - cell [ref=f29e632]:
+                    - code [ref=f29e633]: oklch(0.7 0.15 240)
+                  - cell "Informacion neutra" [ref=f29e634]
+            - generic [ref=f29e635]:
+              - heading "2.3 Bordes e Input" [level=3] [ref=f29e636]
+              - link "Sección titulada «2.3 Bordes e Input»" [ref=f29e637] [cursor=pointer]:
+                - /url: "#23-bordes-e-input"
+            - table [ref=f29e642]:
+              - rowgroup [ref=f29e643]:
+                - row [ref=f29e644]:
+                  - columnheader "Token" [ref=f29e645]
+                  - columnheader "Light" [ref=f29e646]
+                  - columnheader "Dark" [ref=f29e647]
+              - rowgroup [ref=f29e648]:
+                - row [ref=f29e649]:
+                  - cell [ref=f29e650]:
+                    - code [ref=f29e651]: "--border"
+                  - cell [ref=f29e652]:
+                    - code [ref=f29e653]: oklch(0.92 0.006 60)
+                  - cell [ref=f29e654]:
+                    - code [ref=f29e655]: oklch(0.32 0.012 60)
+                - row [ref=f29e656]:
+                  - cell [ref=f29e657]:
+                    - code [ref=f29e658]: "--input"
+                  - cell [ref=f29e659]:
+                    - text: igual a
+                    - code [ref=f29e660]: "--border"
+                  - cell [ref=f29e661]:
+                    - text: igual a
+                    - code [ref=f29e662]: "--border"
+                - row [ref=f29e663]:
+                  - cell [ref=f29e664]:
+                    - code [ref=f29e665]: "--ring"
+                  - cell [ref=f29e666]:
+                    - code [ref=f29e667]: oklch(0.66 0.21 42)
+                  - cell [ref=f29e668]:
+                    - code [ref=f29e669]: oklch(0.72 0.19 42)
+            - generic [ref=f29e670]:
+              - heading "2.4 Charts (orden Ember)" [level=3] [ref=f29e671]
+              - link "Sección titulada «2.4 Charts (orden Ember)»" [ref=f29e672] [cursor=pointer]:
+                - /url: "#24-charts-orden-ember"
+            - table [ref=f29e677]:
+              - rowgroup [ref=f29e678]:
+                - row [ref=f29e679]:
+                  - columnheader "Token" [ref=f29e680]
+                  - columnheader "Uso" [ref=f29e681]
+              - rowgroup [ref=f29e682]:
+                - row [ref=f29e683]:
+                  - cell [ref=f29e684]:
+                    - code [ref=f29e685]: "--chart-1"
+                  - cell "Serie primaria (= primary)" [ref=f29e686]
+                - row [ref=f29e687]:
+                  - cell [ref=f29e688]:
+                    - code [ref=f29e689]: "--chart-2"
+                  - cell "Serie secundaria" [ref=f29e690]
+                - row [ref=f29e691]:
+                  - cell [ref=f29e692]:
+                    - code [ref=f29e693]: "--chart-3"
+                  - cell "Serie terciaria" [ref=f29e694]
+                - row [ref=f29e695]:
+                  - cell [ref=f29e696]:
+                    - code [ref=f29e697]: "--chart-4"
+                  - cell "Serie cuaternaria (warning-like)" [ref=f29e698]
+                - row [ref=f29e699]:
+                  - cell [ref=f29e700]:
+                    - code [ref=f29e701]: "--chart-5"
+                  - cell "Serie quinaria (purpura/cool)" [ref=f29e702]
+            - generic [ref=f29e703]:
+              - heading "2.5 Sidebar" [level=3] [ref=f29e704]
+              - link "Sección titulada «2.5 Sidebar»" [ref=f29e705] [cursor=pointer]:
+                - /url: "#25-sidebar"
+            - table [ref=f29e710]:
+              - rowgroup [ref=f29e711]:
+                - row [ref=f29e712]:
+                  - columnheader "Token" [ref=f29e713]
+                  - columnheader "Uso" [ref=f29e714]
+              - rowgroup [ref=f29e715]:
+                - row [ref=f29e716]:
+                  - cell [ref=f29e717]:
+                    - code [ref=f29e718]: "--sidebar"
+                  - cell "Fondo (claro en light, oscuro en dark)" [ref=f29e719]
+                - row [ref=f29e720]:
+                  - cell [ref=f29e721]:
+                    - code [ref=f29e722]: "--sidebar-foreground"
+                  - cell "Texto normal" [ref=f29e723]
+                - row [ref=f29e724]:
+                  - cell [ref=f29e725]:
+                    - code [ref=f29e726]: "--sidebar-primary"
+                  - cell "Pill naranja en item activo (estilo Finexy)" [ref=f29e727]
+                - row [ref=f29e728]:
+                  - cell [ref=f29e729]:
+                    - code [ref=f29e730]: "--sidebar-accent"
+                  - cell "Hover background" [ref=f29e731]
+                - row [ref=f29e732]:
+                  - cell [ref=f29e733]:
+                    - code [ref=f29e734]: "--sidebar-border"
+                  - cell "Borde del sidebar" [ref=f29e735]
+            - generic [ref=f29e736]:
+              - heading "2.6 Badge variants (Ember)" [level=3] [ref=f29e737]
+              - link "Sección titulada «2.6 Badge variants (Ember)»" [ref=f29e738] [cursor=pointer]:
+                - /url: "#26-badge-variants-ember"
+            - paragraph [ref=f29e743]: "Badge soporta variantes “soft tinted” para status:"
+            - list [ref=f29e744]:
+              - listitem [ref=f29e745]:
+                - code [ref=f29e746]: default
+                - text: ","
+                - code [ref=f29e747]: secondary
+                - text: ","
+                - code [ref=f29e748]: outline
+                - text: ","
+                - code [ref=f29e749]: link
+                - text: ","
+                - code [ref=f29e750]: destructive
+              - listitem [ref=f29e751]:
+                - code [ref=f29e752]: soft
+                - text: ","
+                - code [ref=f29e753]: soft-info
+                - text: ","
+                - code [ref=f29e754]: soft-success
+                - text: ","
+                - code [ref=f29e755]: soft-warning
+                - text: (fondos tenues con foreground tonal)
+            - paragraph [ref=f29e756]:
+              - text: "Componente unificado:"
+              - code [ref=f29e757]: <StatusBadge>
+              - text: con 9 intents incluyendo
+              - code [ref=f29e758]: progress-1/2/3
+              - text: para pipelines ordenados.
+            - generic [ref=f29e759]:
+              - heading "2.7 Reglas de uso de color" [level=3] [ref=f29e760]
+              - link "Sección titulada «2.7 Reglas de uso de color»" [ref=f29e761] [cursor=pointer]:
+                - /url: "#27-reglas-de-uso-de-color"
+            - figure [ref=f29e767]:
+              - code [ref=f29e769]:
+                - generic [ref=f29e770]: "HACER:"
+                - generic [ref=f29e772]: bg-primary/10 -> Fondo tenue para iconos o badges
+                - generic [ref=f29e775]: bg-destructive/10 -> Fondo tenue para estados de error
+                - generic [ref=f29e778]: bg-success/10 -> Fondo tenue para estados activos
+                - generic [ref=f29e781]: bg-warning/10 -> Fondo tenue para estados pendientes
+                - generic [ref=f29e784]: text-muted-foreground -> Texto auxiliar, labels secundarios
+                - generic [ref=f29e787]: bg-muted -> Fondos neutros (skeletons, placeholders)
+                - generic [ref=f29e792]: "EVITAR POR DEFECTO:"
+                - generic [ref=f29e794]: bg-blue-50, bg-red-100, bg-amber-50 -> Colores hardcoded de Tailwind
+                - generic [ref=f29e797]: text-blue-600, text-red-500 -> Usar tokens semanticos
+                - generic [ref=f29e802]: "EXCEPCION:"
+                - generic [ref=f29e804]: Se permiten colores hardcoded SOLO si hay solicitud explicita de mejora visual
+                - generic [ref=f29e807]: y se valida compatibilidad en dark mode.
+              - button "Copiar al portapapeles" [ref=f29e811] [cursor=pointer]
+          - generic [ref=f29e813]:
+            - paragraph [ref=f29e815]:
+              - text: "Última actualización:"
+              - time [ref=f29e816]: 20 ago 2026
+            - generic [ref=f29e817]:
+              - link [ref=f29e818] [cursor=pointer]:
+                - /url: /frontend/sistema-de-diseno/presentacion-datos/
+                - generic [ref=f29e821]: Página anteriorPresentacion de Datos
+              - link [ref=f29e822] [cursor=pointer]:
+                - /url: /frontend/sistema-de-diseno/tipografia-y-espaciado/
+                - generic [ref=f29e825]: Siguiente páginaTipografia y Espaciado
+  - generic [ref=f29e828]:
+    - button [ref=f29e829]
+    - button [ref=f29e835]
+    - button [ref=f29e839]
+    - button [ref=f29e844]

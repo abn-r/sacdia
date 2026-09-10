@@ -1,0 +1,500 @@
+- generic [active] [ref=f4e1]:
+  - link "Ir al contenido" [ref=f4e2] [cursor=pointer]:
+    - /url: "#_top"
+  - generic [ref=f4e3]:
+    - banner [ref=f4e4]:
+      - generic [ref=f4e5]:
+        - generic [ref=f4e7]:
+          - link "Inicio — Manual administrativo" [ref=f4e8] [cursor=pointer]:
+            - /url: /
+            - generic [ref=f4e9]: S
+            - generic [ref=f4e10]:
+              - generic [ref=f4e11]: SACDIA
+              - generic [ref=f4e12]: Administrativo
+          - navigation "Cambiar portal de documentación" [ref=f4e13]:
+            - link "Operativo" [ref=f4e14] [cursor=pointer]:
+              - /url: http://localhost:4321
+            - link "Administrativo" [ref=f4e15] [cursor=pointer]:
+              - /url: http://localhost:4322
+            - link "Técnico" [ref=f4e16] [cursor=pointer]:
+              - /url: http://localhost:4323
+        - button "Buscar" [ref=f4e19] [cursor=pointer]:
+          - generic [ref=f4e23]:
+            - generic [ref=f4e24]: ⌘
+            - generic [ref=f4e25]: K
+        - generic [ref=f4e29]:
+          - generic [ref=f4e30]: Seleccionar tema
+          - combobox "Seleccionar tema" [ref=f4e31] [cursor=pointer]:
+            - option "Oscuro"
+            - option "Claro"
+            - option "Automático" [selected]
+    - navigation "Primario":
+      - list [ref=f4e35]:
+        - listitem [ref=f4e36]:
+          - group [ref=f4e37]:
+            - generic "Primeros pasos" [ref=f4e38] [cursor=pointer]
+            - list [ref=f4e42]:
+              - listitem [ref=f4e43]:
+                - link "Primeros pasos en el panel" [ref=f4e44] [cursor=pointer]:
+                  - /url: /primeros-pasos/
+              - listitem [ref=f4e45]:
+                - link "Acceso al panel" [ref=f4e46] [cursor=pointer]:
+                  - /url: /primeros-pasos/acceso/
+              - listitem [ref=f4e47]:
+                - link "Páginas no disponibles" [ref=f4e48] [cursor=pointer]:
+                  - /url: /primeros-pasos/paginas-no-disponibles/
+              - listitem [ref=f4e49]:
+                - link "Tablero administrativo" [ref=f4e50] [cursor=pointer]:
+                  - /url: /primeros-pasos/tablero/
+        - listitem [ref=f4e51]:
+          - group [ref=f4e52]:
+            - generic "Clubes" [ref=f4e53] [cursor=pointer]
+            - list [ref=f4e57]:
+              - listitem [ref=f4e58]:
+                - link "Gestión de clubes y personas" [ref=f4e59] [cursor=pointer]:
+                  - /url: /clubes/
+              - listitem [ref=f4e60]:
+                - link "Administración de camporees" [ref=f4e61] [cursor=pointer]:
+                  - /url: /clubes/campamentos/
+              - listitem [ref=f4e62]:
+                - link "Coordinación territorial" [ref=f4e63] [cursor=pointer]:
+                  - /url: /clubes/coordinacion/
+              - listitem [ref=f4e64]:
+                - link "Gestión de clubes" [ref=f4e65] [cursor=pointer]:
+                  - /url: /clubes/gestion-clubes/
+              - listitem [ref=f4e66]:
+                - link "Inscripciones anuales" [ref=f4e67] [cursor=pointer]:
+                  - /url: /clubes/inscripciones/
+              - listitem [ref=f4e68]:
+                - link "Solicitudes de membresía, cargos y traslados" [ref=f4e69] [cursor=pointer]:
+                  - /url: /clubes/solicitudes/
+              - listitem [ref=f4e70]:
+                - link "Administración de usuarios" [ref=f4e71] [cursor=pointer]:
+                  - /url: /clubes/usuarios/
+        - listitem [ref=f4e72]:
+          - group [ref=f4e73]:
+            - generic "Finanzas" [ref=f4e74] [cursor=pointer]
+            - list [ref=f4e78]:
+              - listitem [ref=f4e79]:
+                - link "Finanzas y seguros" [ref=f4e80] [cursor=pointer]:
+                  - /url: /finanzas/
+              - listitem [ref=f4e81]:
+                - link "Finanzas de clubes" [ref=f4e82] [cursor=pointer]:
+                  - /url: /finanzas/finanzas-clubes/
+              - listitem [ref=f4e83]:
+                - link "Revisión de órdenes de pago" [ref=f4e84] [cursor=pointer]:
+                  - /url: /finanzas/ordenes-pago/
+              - listitem [ref=f4e85]:
+                - link "Gestión de seguros" [ref=f4e86] [cursor=pointer]:
+                  - /url: /finanzas/seguros/
+        - listitem [ref=f4e87]:
+          - group [ref=f4e88]:
+            - generic "Materiales" [ref=f4e89] [cursor=pointer]
+            - list [ref=f4e93]:
+              - listitem [ref=f4e94]:
+                - link "Materiales, inventario y recursos" [ref=f4e95] [cursor=pointer]:
+                  - /url: /materiales/
+              - listitem [ref=f4e96]:
+                - link "Inventario de clubes" [ref=f4e97] [cursor=pointer]:
+                  - /url: /materiales/inventario-clubes/
+              - listitem [ref=f4e98]:
+                - link "Publicación de recursos" [ref=f4e99] [cursor=pointer]:
+                  - /url: /materiales/recursos/
+              - listitem [ref=f4e100]:
+                - link "Solicitudes y entrega de materiales" [ref=f4e101] [cursor=pointer]:
+                  - /url: /materiales/solicitudes-materiales/
+        - listitem [ref=f4e102]:
+          - group [ref=f4e103]:
+            - generic "Investiduras" [ref=f4e104] [cursor=pointer]
+            - list [ref=f4e108]:
+              - listitem [ref=f4e109]:
+                - link "Formación, validaciones y análisis" [ref=f4e110] [cursor=pointer]:
+                  - /url: /investiduras/
+              - listitem [ref=f4e111]:
+                - link "Revisión de cargas de certificados" [ref=f4e112] [cursor=pointer]:
+                  - /url: /investiduras/cargas-certificados/
+              - listitem [ref=f4e113]:
+                - link "Carpetas anuales y clasificación" [ref=f4e114] [cursor=pointer]:
+                  - /url: /investiduras/carpetas-anuales/
+              - listitem [ref=f4e115]:
+                - link "Certificaciones de Guías Mayores" [ref=f4e116] [cursor=pointer]:
+                  - /url: /investiduras/certificaciones/
+              - listitem [ref=f4e117]:
+                - link "Cierre de año eclesiástico" [ref=f4e118] [cursor=pointer]:
+                  - /url: /investiduras/cierre-anio/
+              - listitem [ref=f4e119]:
+                - link "Clasificaciones por sección" [ref=f4e120] [cursor=pointer]:
+                  - /url: /investiduras/clasificaciones-seccion/
+              - listitem [ref=f4e121]:
+                - link "Informes mensuales y supervisión" [ref=f4e122] [cursor=pointer]:
+                  - /url: /investiduras/informes/
+              - listitem [ref=f4e123]:
+                - link "Validación de investiduras" [ref=f4e124] [cursor=pointer]:
+                  - /url: /investiduras/investiduras/
+              - listitem [ref=f4e125]:
+                - link "Miembro del mes" [ref=f4e126] [cursor=pointer]:
+                  - /url: /investiduras/miembro-del-mes/
+              - listitem [ref=f4e127]:
+                - link "Pesos de clasificación" [ref=f4e128] [cursor=pointer]:
+                  - /url: /investiduras/pesos-clasificacion/
+        - listitem [ref=f4e129]:
+          - group [ref=f4e130]:
+            - generic "Configuración" [ref=f4e131] [cursor=pointer]
+            - list [ref=f4e135]:
+              - listitem [ref=f4e136]:
+                - link "Configuración del sistema" [ref=f4e137] [cursor=pointer]:
+                  - /url: /configuracion/
+              - listitem [ref=f4e138]:
+                - link "Catálogos del sistema" [ref=f4e139] [cursor=pointer]:
+                  - /url: /configuracion/catalogos/
+              - listitem [ref=f4e140]:
+                - link "Categorías de puntuación" [ref=f4e141] [cursor=pointer]:
+                  - /url: /configuracion/categorias-puntuacion/
+              - listitem [ref=f4e142]:
+                - link "Configuración de logros" [ref=f4e143] [cursor=pointer]:
+                  - /url: /configuracion/logros/
+              - listitem [ref=f4e144]:
+                - link "Administración de notificaciones" [ref=f4e145] [cursor=pointer]:
+                  - /url: /configuracion/notificaciones/
+              - listitem [ref=f4e146]:
+                - link "Roles y permisos" [ref=f4e147] [cursor=pointer]:
+                  - /url: /configuracion/roles-permisos/
+              - listitem [ref=f4e148]:
+                - link "Centro de configuración" [ref=f4e149] [cursor=pointer]:
+                  - /url: /configuracion/sistema/
+              - listitem [ref=f4e150]:
+                - link "Trabajos programados" [ref=f4e151] [cursor=pointer]:
+                  - /url: /configuracion/trabajos-programados/
+        - listitem [ref=f4e152]:
+          - group [ref=f4e153]:
+            - generic "Procesos" [ref=f4e154] [cursor=pointer]
+            - list [ref=f4e158]:
+              - listitem [ref=f4e159]:
+                - link "Procesos de SACDIA" [ref=f4e160] [cursor=pointer]:
+                  - /url: /procesos/
+              - listitem [ref=f4e161]:
+                - link "Planear una actividad y registrar asistencia" [ref=f4e162] [cursor=pointer]:
+                  - /url: /procesos/actividad-y-asistencia/
+              - listitem [ref=f4e163]:
+                - link "Alta de cuenta y membresía" [ref=f4e164] [cursor=pointer]:
+                  - /url: /procesos/alta-y-membresia/
+              - listitem [ref=f4e165]:
+                - link "Reconocer formación desde certificados" [ref=f4e166] [cursor=pointer]:
+                  - /url: /procesos/carga-certificados/
+              - listitem [ref=f4e167]:
+                - link "Completar y validar la carpeta anual" [ref=f4e168] [cursor=pointer]:
+                  - /url: /procesos/carpeta-anual/
+              - listitem [ref=f4e169]:
+                - link "Registrar y supervisar finanzas" [ref=f4e170] [cursor=pointer]:
+                  - /url: /procesos/cierre-financiero/
+              - listitem [ref=f4e171]:
+                - link "Publicar una comunicación o recurso" [ref=f4e172] [cursor=pointer]:
+                  - /url: /procesos/comunicacion-recursos/
+              - listitem [ref=f4e173]:
+                - link "Registrar puntajes y consultar clasificaciones" [ref=f4e174] [cursor=pointer]:
+                  - /url: /procesos/evaluacion-y-clasificacion/
+              - listitem [ref=f4e175]:
+                - link "Completar formación y solicitar investidura" [ref=f4e176] [cursor=pointer]:
+                  - /url: /procesos/formacion-e-investidura/
+              - listitem [ref=f4e177]:
+                - link "Gestionar un club y su sección" [ref=f4e178] [cursor=pointer]:
+                  - /url: /procesos/gestion-club-seccion/
+              - listitem [ref=f4e179]:
+                - link "Completar y supervisar el informe mensual" [ref=f4e180] [cursor=pointer]:
+                  - /url: /procesos/informe-mensual/
+              - listitem [ref=f4e181]:
+                - link "Inscribir y operar un camporee" [ref=f4e182] [cursor=pointer]:
+                  - /url: /procesos/participacion-camporee/
+              - listitem [ref=f4e183]:
+                - link "Registrar seguro mediante orden de pago" [ref=f4e184] [cursor=pointer]:
+                  - /url: /procesos/seguro-y-orden-pago/
+              - listitem [ref=f4e185]:
+                - link "Solicitar, pagar y recibir materiales" [ref=f4e186] [cursor=pointer]:
+                  - /url: /procesos/solicitud-materiales/
+              - listitem [ref=f4e187]:
+                - link "Trasladar un miembro" [ref=f4e188] [cursor=pointer]:
+                  - /url: /procesos/traslado-miembro/
+    - generic [ref=f4e190]:
+      - complementary [ref=f4e191]:
+        - navigation [ref=f4e196]:
+          - heading "En esta página" [level=2] [ref=f4e197]
+          - list [ref=f4e198]:
+            - listitem [ref=f4e199]:
+              - link "Sinopsis" [ref=f4e200] [cursor=pointer]:
+                - /url: "#_top"
+            - listitem [ref=f4e201]:
+              - link "Resultado esperado" [ref=f4e202] [cursor=pointer]:
+                - /url: "#resultado-esperado"
+            - listitem [ref=f4e203]:
+              - link "Acceso requerido" [ref=f4e204] [cursor=pointer]:
+                - /url: "#acceso-requerido"
+            - listitem [ref=f4e205]:
+              - link "Rutas incluidas" [ref=f4e206] [cursor=pointer]:
+                - /url: "#rutas-incluidas"
+            - listitem [ref=f4e207]:
+              - link "Antes de comenzar" [ref=f4e208] [cursor=pointer]:
+                - /url: "#antes-de-comenzar"
+            - listitem [ref=f4e209]:
+              - link "Elegir la bandeja correcta" [ref=f4e210] [cursor=pointer]:
+                - /url: "#elegir-la-bandeja-correcta"
+            - listitem [ref=f4e211]:
+              - link "Revisar un requisito" [ref=f4e212] [cursor=pointer]:
+                - /url: "#revisar-un-requisito"
+            - listitem [ref=f4e213]:
+              - link "Solicitar cambios útiles" [ref=f4e214] [cursor=pointer]:
+                - /url: "#solicitar-cambios-útiles"
+            - listitem [ref=f4e215]:
+              - link "Resolver el cierre final" [ref=f4e216] [cursor=pointer]:
+                - /url: "#resolver-el-cierre-final"
+            - listitem [ref=f4e217]:
+              - link "Cómo verificarlo" [ref=f4e218] [cursor=pointer]:
+                - /url: "#cómo-verificarlo"
+            - listitem [ref=f4e219]:
+              - link "Errores frecuentes" [ref=f4e220] [cursor=pointer]:
+                - /url: "#errores-frecuentes"
+            - listitem [ref=f4e221]:
+              - link "Procesos relacionados" [ref=f4e222] [cursor=pointer]:
+                - /url: "#procesos-relacionados"
+            - listitem [ref=f4e223]:
+              - link "Fuente de verificación" [ref=f4e224] [cursor=pointer]:
+                - /url: "#fuente-de-verificación"
+      - main [ref=f4e226]:
+        - heading "Certificaciones de Guías Mayores" [level=1] [ref=f4e229]
+        - generic [ref=f4e231]:
+          - generic [ref=f4e232]:
+            - paragraph [ref=f4e233]:
+              - text: Usa
+              - strong [ref=f4e234]: Certificaciones de Guías Mayores
+              - text: para consultar el avance de las inscripciones y resolver las bandejas de requisitos y cierres.
+            - generic [ref=f4e235]:
+              - heading "Resultado esperado" [level=2] [ref=f4e236]
+              - link "Sección titulada «Resultado esperado»" [ref=f4e237] [cursor=pointer]:
+                - /url: "#resultado-esperado"
+            - paragraph [ref=f4e242]: Podrás abrir el expediente correcto, revisar su evidencia dentro del alcance autorizado y ejecutar únicamente la transición que corresponde a su estado.
+            - generic [ref=f4e243]:
+              - heading "Acceso requerido" [level=2] [ref=f4e244]
+              - link "Sección titulada «Acceso requerido»" [ref=f4e245] [cursor=pointer]:
+                - /url: "#acceso-requerido"
+            - list [ref=f4e250]:
+              - listitem [ref=f4e251]:
+                - code [ref=f4e252]: user_certifications:read
+                - text: ": consultar catálogo, inscritos y progreso."
+              - listitem [ref=f4e253]:
+                - code [ref=f4e254]: certifications:review
+                - text: ": abrir bandejas y aprobar o solicitar cambios."
+              - listitem [ref=f4e255]:
+                - code [ref=f4e256]: certifications:certify
+                - text: ": ejecutar la certificación final después de aprobar el cierre."
+            - paragraph [ref=f4e257]:
+              - text: Configurar o publicar versiones usa permisos distintos y se documenta en
+              - strong [ref=f4e258]: Catálogos
+              - text: . Ver una guía no concede acceso ni reemplaza la autorización del backend.
+            - generic [ref=f4e259]:
+              - heading "Rutas incluidas" [level=2] [ref=f4e260]
+              - link "Sección titulada «Rutas incluidas»" [ref=f4e261] [cursor=pointer]:
+                - /url: "#rutas-incluidas"
+            - table [ref=f4e266]:
+              - rowgroup [ref=f4e267]:
+                - row [ref=f4e268]:
+                  - columnheader "Ruta" [ref=f4e269]
+                  - columnheader "Uso" [ref=f4e270]
+              - rowgroup [ref=f4e271]:
+                - row [ref=f4e272]:
+                  - cell [ref=f4e273]:
+                    - code [ref=f4e274]: /dashboard/certifications
+                  - cell "Catálogo operativo y acceso a inscripciones." [ref=f4e275]
+                - row [ref=f4e276]:
+                  - cell [ref=f4e277]:
+                    - code [ref=f4e278]: /dashboard/certifications/[id]
+                  - cell "Estructura, inscritos y progreso de una certificación." [ref=f4e279]
+                - row [ref=f4e280]:
+                  - cell [ref=f4e281]:
+                    - code [ref=f4e282]: /dashboard/certifications/reviews
+                  - cell "Bandejas institucionales de requisitos y cierres." [ref=f4e283]
+            - generic [ref=f4e284]:
+              - heading "Antes de comenzar" [level=2] [ref=f4e285]
+              - link "Sección titulada «Antes de comenzar»" [ref=f4e286] [cursor=pointer]:
+                - /url: "#antes-de-comenzar"
+            - list [ref=f4e291]:
+              - listitem [ref=f4e292]: Confirma la cuenta y el campo local con el que vas a revisar.
+              - listitem [ref=f4e293]: Busca por certificación, participante y estado antes de tomar una decisión.
+              - listitem [ref=f4e294]: Comprueba que no estás revisando tu propio expediente.
+              - listitem [ref=f4e295]: No uses una URL directa para intentar ampliar el alcance.
+            - generic [ref=f4e296]:
+              - heading "Elegir la bandeja correcta" [level=2] [ref=f4e297]
+              - link "Sección titulada «Elegir la bandeja correcta»" [ref=f4e298] [cursor=pointer]:
+                - /url: "#elegir-la-bandeja-correcta"
+            - paragraph [ref=f4e303]: "La página de revisiones separa dos decisiones que NO son intercambiables:"
+            - table [ref=f4e304]:
+              - rowgroup [ref=f4e305]:
+                - row [ref=f4e306]:
+                  - columnheader "Bandeja" [ref=f4e307]
+                  - columnheader "Qué recibes" [ref=f4e308]
+                  - columnheader "Resultado posible" [ref=f4e309]
+              - rowgroup [ref=f4e310]:
+                - row [ref=f4e311]:
+                  - cell [ref=f4e312]:
+                    - strong [ref=f4e313]: Requisitos
+                  - cell "Un requisito enviado con respuestas, componentes y evidencias." [ref=f4e314]
+                  - cell "Aprobar o solicitar cambios sobre ese requisito." [ref=f4e315]
+                - row [ref=f4e316]:
+                  - cell [ref=f4e317]:
+                    - strong [ref=f4e318]: Cierres
+                  - cell "El expediente con requisitos aprobados y comprobante de junta." [ref=f4e319]
+                  - cell "Aprobar el comprobante, solicitar cambios o certificar cuando corresponda." [ref=f4e320]
+            - paragraph [ref=f4e321]:
+              - text: Si buscas una respuesta o archivo de un requisito, usa
+              - strong [ref=f4e322]: Requisitos
+              - text: . Si la persona ya terminó el programa y presentó el comprobante, usa
+              - strong [ref=f4e323]: Cierres
+              - text: .
+            - generic [ref=f4e324]:
+              - heading "Revisar un requisito" [level=2] [ref=f4e325]
+              - link "Sección titulada «Revisar un requisito»" [ref=f4e326] [cursor=pointer]:
+                - /url: "#revisar-un-requisito"
+            - list [ref=f4e331]:
+              - listitem [ref=f4e332]:
+                - text: Abre
+                - strong [ref=f4e333]: Revisiones > Requisitos
+                - text: .
+              - listitem [ref=f4e334]: Mantén el filtro en enviados o selecciona el estado que necesitas consultar.
+              - listitem [ref=f4e335]: Abre el registro y confirma participante, certificación, módulo y requisito.
+              - listitem [ref=f4e336]: Revisa todas las respuestas y componentes obligatorios.
+              - listitem [ref=f4e337]:
+                - text: Pulsa
+                - strong [ref=f4e338]: Ver
+                - text: para solicitar el acceso temporal a cada evidencia.
+              - listitem [ref=f4e339]:
+                - text: "Elige una sola resolución:"
+                - list [ref=f4e340]:
+                  - listitem [ref=f4e341]:
+                    - strong [ref=f4e342]: Aprobar
+                    - text: ", si el requisito está completo;"
+                  - listitem [ref=f4e343]:
+                    - strong [ref=f4e344]: Solicitar cambios
+                    - text: ", indicando claramente qué debe corregirse."
+              - listitem [ref=f4e345]: Actualiza la bandeja y confirma el nuevo estado.
+            - paragraph [ref=f4e346]: La URL de descarga de una evidencia se genera al abrirla y tiene duración limitada. No copies el enlace a otro sistema ni lo uses como archivo permanente.
+            - generic [ref=f4e347]:
+              - heading "Solicitar cambios útiles" [level=2] [ref=f4e348]
+              - link "Sección titulada «Solicitar cambios útiles»" [ref=f4e349] [cursor=pointer]:
+                - /url: "#solicitar-cambios-útiles"
+            - paragraph [ref=f4e354]: "El comentario es obligatorio al devolver un requisito o cierre. Escribe una instrucción que la persona pueda ejecutar:"
+            - list [ref=f4e355]:
+              - listitem [ref=f4e356]: identifica el componente incompleto;
+              - listitem [ref=f4e357]: explica qué evidencia o respuesta falta;
+              - listitem [ref=f4e358]: evita comentarios genéricos como “corregir”;
+              - listitem [ref=f4e359]: no solicites datos personales que el requisito no exige.
+            - paragraph [ref=f4e360]: La persona debe corregir el mismo requisito. No le pidas crear otra inscripción.
+            - generic [ref=f4e361]:
+              - heading "Resolver el cierre final" [level=2] [ref=f4e362]
+              - link "Sección titulada «Resolver el cierre final»" [ref=f4e363] [cursor=pointer]:
+                - /url: "#resolver-el-cierre-final"
+            - list [ref=f4e368]:
+              - listitem [ref=f4e369]:
+                - text: Abre
+                - strong [ref=f4e370]: Revisiones > Cierres
+                - text: .
+              - listitem [ref=f4e371]: Selecciona un expediente enviado para revisión final.
+              - listitem [ref=f4e372]: Confirma que los requisitos obligatorios estén aprobados.
+              - listitem [ref=f4e373]: Abre el comprobante de junta y valida que corresponda al expediente.
+              - listitem [ref=f4e374]:
+                - text: "Elige:"
+                - list [ref=f4e375]:
+                  - listitem [ref=f4e376]:
+                    - strong [ref=f4e377]: Aprobar comprobante
+                    - text: ", si cumple;"
+                  - listitem [ref=f4e378]:
+                    - strong [ref=f4e379]: Solicitar cambios
+                    - text: ", si necesita corrección."
+              - listitem [ref=f4e380]:
+                - text: Cuando el expediente esté
+                - code [ref=f4e381]: APPROVED
+                - text: ", pulsa"
+                - strong [ref=f4e382]: Certificar
+                - text: solo si tienes
+                - code [ref=f4e383]: certifications:certify
+                - text: .
+              - listitem [ref=f4e384]: Confirma la operación y actualiza la fila.
+            - paragraph [ref=f4e385]:
+              - strong [ref=f4e386]: Aprobar comprobante
+              - text: "y"
+              - strong [ref=f4e387]: Certificar
+              - text: son etapas diferentes. No certifiques un expediente que todavía esté enviado para revisión o con cambios solicitados.
+            - generic [ref=f4e388]:
+              - heading "Cómo verificarlo" [level=2] [ref=f4e389]
+              - link "Sección titulada «Cómo verificarlo»" [ref=f4e390] [cursor=pointer]:
+                - /url: "#cómo-verificarlo"
+            - list [ref=f4e395]:
+              - listitem [ref=f4e396]: El registro desaparece del filtro de enviados o muestra el nuevo estado.
+              - listitem [ref=f4e397]: La decisión queda asociada al requisito o cierre que abriste.
+              - listitem [ref=f4e398]:
+                - strong [ref=f4e399]: Certificar
+                - text: solo aparece con el permiso correcto y sobre filas aprobadas.
+              - listitem [ref=f4e400]: El expediente final cambia a certificado, no únicamente a aprobado.
+            - generic [ref=f4e401]:
+              - heading "Errores frecuentes" [level=2] [ref=f4e402]
+              - link "Sección titulada «Errores frecuentes»" [ref=f4e403] [cursor=pointer]:
+                - /url: "#errores-frecuentes"
+            - table [ref=f4e408]:
+              - rowgroup [ref=f4e409]:
+                - row [ref=f4e410]:
+                  - columnheader "Problema" [ref=f4e411]
+                  - columnheader "Qué hacer" [ref=f4e412]
+              - rowgroup [ref=f4e413]:
+                - row [ref=f4e414]:
+                  - cell "No aparece la bandeja" [ref=f4e415]
+                  - cell [ref=f4e416]:
+                    - text: Confirma
+                    - code [ref=f4e417]: certifications:review
+                    - text: y el alcance territorial efectivo.
+                - row [ref=f4e418]:
+                  - cell "La evidencia ya no abre" [ref=f4e419]
+                  - cell [ref=f4e420]:
+                    - text: Regresa al detalle y pulsa
+                    - strong [ref=f4e421]: Ver
+                    - text: para solicitar una URL nueva.
+                - row [ref=f4e422]:
+                  - cell "Solicita un comentario" [ref=f4e423]
+                  - cell "Describe la corrección concreta; no envíes una devolución vacía." [ref=f4e424]
+                - row [ref=f4e425]:
+                  - cell "El registro cambió mientras lo revisabas" [ref=f4e426]
+                  - cell "Actualiza el detalle y vuelve a evaluar el estado; no repitas la decisión anterior." [ref=f4e427]
+                - row [ref=f4e428]:
+                  - cell [ref=f4e429]:
+                    - text: No aparece
+                    - strong [ref=f4e430]: Certificar
+                  - cell [ref=f4e431]:
+                    - text: El cierre debe estar aprobado y tu cuenta necesita
+                    - code [ref=f4e432]: certifications:certify
+                    - text: .
+                - row [ref=f4e433]:
+                  - cell "El expediente está fuera de alcance" [ref=f4e434]
+                  - cell "No cambies la URL ni la cuenta para saltar el control; solicita la asignación correcta." [ref=f4e435]
+            - generic [ref=f4e436]:
+              - heading "Procesos relacionados" [level=2] [ref=f4e437]
+              - link "Sección titulada «Procesos relacionados»" [ref=f4e438] [cursor=pointer]:
+                - /url: "#procesos-relacionados"
+            - list [ref=f4e443]:
+              - listitem [ref=f4e444]:
+                - link "Completar formación y solicitar investidura" [ref=f4e445] [cursor=pointer]:
+                  - /url: /procesos/formacion-e-investidura/
+            - generic [ref=f4e446]:
+              - heading "Fuente de verificación" [level=2] [ref=f4e447]
+              - link "Sección titulada «Fuente de verificación»" [ref=f4e448] [cursor=pointer]:
+                - /url: "#fuente-de-verificación"
+            - paragraph [ref=f4e453]:
+              - text: Manual contrastado el 2026-08-21 con las rutas, componentes, permisos y pruebas efectivas de las bandejas de requisitos y cierres de
+              - code [ref=f4e454]: sacdia-admin
+              - text: ", y con el contrato canónico de revisión de Certificaciones de Guías Mayores."
+          - generic [ref=f4e455]:
+            - paragraph [ref=f4e457]:
+              - text: "Última actualización:"
+              - time [ref=f4e458]: 20 ago 2026
+            - generic [ref=f4e459]:
+              - link [ref=f4e460] [cursor=pointer]:
+                - /url: /investiduras/carpetas-anuales/
+                - generic [ref=f4e463]: Página anteriorCarpetas anuales y clasificación
+              - link [ref=f4e464] [cursor=pointer]:
+                - /url: /investiduras/cierre-anio/
+                - generic [ref=f4e467]: Siguiente páginaCierre de año eclesiástico

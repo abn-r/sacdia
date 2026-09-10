@@ -1,0 +1,267 @@
+- generic [active] [ref=f10e1]:
+  - link "Ir al contenido" [ref=f10e2] [cursor=pointer]:
+    - /url: "#_top"
+  - generic [ref=f10e3]:
+    - banner [ref=f10e4]:
+      - generic [ref=f10e5]:
+        - link "Inicio — Manual operativo" [ref=f10e8] [cursor=pointer]:
+          - /url: /
+          - generic [ref=f10e9]: S
+          - generic [ref=f10e10]:
+            - generic [ref=f10e11]: SACDIA
+            - generic [ref=f10e12]: Operativo
+        - button "Buscar" [ref=f10e15] [cursor=pointer]
+    - navigation "Primario":
+      - button "Menú" [ref=f10e18] [cursor=pointer]
+      - option "Oscuro"
+      - option "Claro"
+      - option "Automático" [selected]
+    - generic [ref=f10e22]:
+      - complementary:
+        - navigation [ref=f10e23]:
+          - group [ref=f10e24]:
+            - generic "En esta página Sinopsis" [ref=f10e25]:
+              - generic [ref=f10e26] [cursor=pointer]: En esta página
+              - generic [ref=f10e29]: Sinopsis
+      - main [ref=f10e31]:
+        - heading "Completar el perfil inicial" [level=1] [ref=f10e34]
+        - generic [ref=f10e36]:
+          - generic [ref=f10e37]:
+            - paragraph [ref=f10e38]: El post-registro aparece después de crear una cuenta o al iniciar sesión con un perfil incompleto. La app retoma automáticamente el primer paso pendiente.
+            - generic [ref=f10e39]:
+              - heading "Resultado esperado" [level=2] [ref=f10e40]
+              - link "Sección titulada «Resultado esperado»" [ref=f10e41] [cursor=pointer]:
+                - /url: "#resultado-esperado"
+            - paragraph [ref=f10e46]: Tendrás una foto, datos personales suficientes, al menos un contacto de emergencia y una solicitud de membresía vinculada al club y sección correctos.
+            - generic [ref=f10e47]:
+              - heading "Quién puede utilizarlo" [level=2] [ref=f10e48]
+              - link "Sección titulada «Quién puede utilizarlo»" [ref=f10e49] [cursor=pointer]:
+                - /url: "#quién-puede-utilizarlo"
+            - paragraph [ref=f10e54]: Usuarios autenticados cuyo post-registro todavía no está completo. Cada persona completa su propia información; un cargo administrativo no debe reemplazar este recorrido salvo una corrección autorizada.
+            - generic [ref=f10e55]:
+              - heading "Antes de comenzar" [level=2] [ref=f10e56]
+              - link "Sección titulada «Antes de comenzar»" [ref=f10e57] [cursor=pointer]:
+                - /url: "#antes-de-comenzar"
+            - list [ref=f10e62]:
+              - listitem [ref=f10e63]: Ten disponible una foto clara o permiso para usar la cámara.
+              - listitem [ref=f10e64]: Confirma fecha de nacimiento, estado de bautismo y datos de un contacto de emergencia.
+              - listitem [ref=f10e65]: Si eres menor de 18 años, prepara la información del representante legal.
+              - listitem [ref=f10e66]: Identifica país, unión, campo local y club antes de elegir la sección.
+            - generic [ref=f10e67]:
+              - 'heading "Paso 1: foto" [level=2] [ref=f10e68]'
+              - 'link "Sección titulada «Paso 1: foto»" [ref=f10e69] [cursor=pointer]':
+                - /url: "#paso-1-foto"
+            - list [ref=f10e74]:
+              - listitem [ref=f10e75]:
+                - text: Elige
+                - strong [ref=f10e76]: Tomar foto
+                - text: o
+                - strong [ref=f10e77]: Seleccionar de galería
+                - text: .
+              - listitem [ref=f10e78]: Ajusta el recorte cuadrado y confirma.
+              - listitem [ref=f10e79]: Espera a que termine la carga.
+              - listitem [ref=f10e80]:
+                - text: Pulsa
+                - strong [ref=f10e81]: Siguiente
+                - text: cuando el botón quede habilitado.
+            - paragraph [ref=f10e82]: La interfaz vigente exige una foto para completar este paso. No cierres la pantalla mientras se está cargando; si falla, vuelve a seleccionarla y espera la confirmación.
+            - generic [ref=f10e83]:
+              - 'heading "Paso 2: datos personales y contactos" [level=2] [ref=f10e84]'
+              - 'link "Sección titulada «Paso 2: datos personales y contactos»" [ref=f10e85] [cursor=pointer]':
+                - /url: "#paso-2-datos-personales-y-contactos"
+            - paragraph [ref=f10e90]: "Completa primero los datos que bloquean el avance:"
+            - list [ref=f10e91]:
+              - listitem [ref=f10e92]: género;
+              - listitem [ref=f10e93]: fecha de nacimiento;
+              - listitem [ref=f10e94]:
+                - text: bautismo en
+                - strong [ref=f10e95]: Sí
+                - text: o
+                - strong [ref=f10e96]: "No"
+                - text: ;
+              - listitem [ref=f10e97]:
+                - text: fecha de bautismo cuando elegiste
+                - strong [ref=f10e98]: Sí
+                - text: ;
+              - listitem [ref=f10e99]: por lo menos un contacto de emergencia activo;
+              - listitem [ref=f10e100]: representante legal cuando el sistema determina que eres menor de 18 años.
+            - paragraph [ref=f10e101]: El tipo de sangre se puede registrar en el mismo paso, pero no bloquea el botón. La app permite hasta cinco contactos de emergencia; evita registrar a la misma persona varias veces.
+            - generic [ref=f10e102]:
+              - heading "Declarar salud sin ambigüedad" [level=2] [ref=f10e103]
+              - link "Sección titulada «Declarar salud sin ambigüedad»" [ref=f10e104] [cursor=pointer]:
+                - /url: "#declarar-salud-sin-ambigüedad"
+            - paragraph [ref=f10e109]:
+              - text: Revisa por separado
+              - strong [ref=f10e110]: Alergias
+              - text: ","
+              - strong [ref=f10e111]: Enfermedades
+              - text: "y"
+              - strong [ref=f10e112]: Medicamentos
+              - text: ":"
+            - list [ref=f10e113]:
+              - listitem [ref=f10e114]: Si tienes registros, abre cada catálogo y selecciona los correspondientes.
+              - listitem [ref=f10e115]:
+                - text: Si no tienes ninguno, marca explícitamente la opción
+                - strong [ref=f10e116]: No tengo
+                - text: de esa categoría.
+              - listitem [ref=f10e117]: "No dejes una categoría vacía por olvido: una lista vacía no distingue por sí sola entre “sin información” y “sin padecimientos”."
+              - listitem [ref=f10e118]: Antes de continuar, vuelve a la pantalla principal y confirma los contadores.
+            - paragraph [ref=f10e119]: Estas declaraciones ayudan a la operación segura del club. La validación técnica del paso se concentra en los datos personales, el contacto y el representante, por lo que debes revisar salud aunque el botón ya esté habilitado.
+            - generic [ref=f10e120]:
+              - 'heading "Paso 3: club, sección y clase" [level=2] [ref=f10e121]'
+              - 'link "Sección titulada «Paso 3: club, sección y clase»" [ref=f10e122] [cursor=pointer]':
+                - /url: "#paso-3-club-sección-y-clase"
+            - list [ref=f10e127]:
+              - listitem [ref=f10e128]:
+                - text: Selecciona
+                - strong [ref=f10e129]: País
+                - text: .
+              - listitem [ref=f10e130]:
+                - text: Selecciona la
+                - strong [ref=f10e131]: Unión
+                - text: disponible para ese país.
+              - listitem [ref=f10e132]:
+                - text: Selecciona el
+                - strong [ref=f10e133]: Campo local
+                - text: .
+              - listitem [ref=f10e134]:
+                - text: Elige el
+                - strong [ref=f10e135]: Club
+                - text: correcto.
+              - listitem [ref=f10e136]:
+                - text: Revisa la
+                - strong [ref=f10e137]: Sección
+                - text: recomendada según tu edad.
+              - listitem [ref=f10e138]:
+                - text: Confirma la clase progresiva mostrada y pulsa
+                - strong [ref=f10e139]: Finalizar
+                - text: .
+            - paragraph [ref=f10e140]: Cuando solo hay una opción, la app puede seleccionarla automáticamente. La sección, el tipo de club y la clase se derivan de la fecha de nacimiento y de los catálogos; el backend vuelve a calcular la clase al guardar, por lo que no debes intentar forzar otra desde la interfaz.
+            - paragraph [ref=f10e141]: "Al finalizar ocurren dos cosas distintas dentro de la misma operación:"
+            - list [ref=f10e142]:
+              - listitem [ref=f10e143]:
+                - text: se crea o reactiva la
+                - strong [ref=f10e144]: inscripción anual
+                - text: de la clase correspondiente;
+              - listitem [ref=f10e145]:
+                - text: se crea la asignación de miembro en estado
+                - code [ref=f10e146]: pending
+                - text: para que la sección la revise.
+            - paragraph [ref=f10e147]:
+              - text: La solicitud recibe una fecha de vencimiento de
+              - strong [ref=f10e148]: 8 días
+              - text: . Completar el perfil no equivale todavía a tener una membresía activa.
+            - generic [ref=f10e149]:
+              - heading "Mientras la solicitud está pendiente" [level=2] [ref=f10e150]
+              - link "Sección titulada «Mientras la solicitud está pendiente»" [ref=f10e151] [cursor=pointer]:
+                - /url: "#mientras-la-solicitud-está-pendiente"
+            - paragraph [ref=f10e156]:
+              - text: La app abre el tablero y muestra el estado de espera. Mientras la asignación siga
+              - code [ref=f10e157]: pending
+              - text: ":"
+            - list [ref=f10e158]:
+              - listitem [ref=f10e159]: puedes consultar tu perfil;
+              - listitem [ref=f10e160]: el tablero puede ofrecer la carga de certificados;
+              - listitem [ref=f10e161]: los accesos operativos del club permanecen ocultos;
+              - listitem [ref=f10e162]: la fecha visible indica cuándo vence la solicitud;
+              - listitem [ref=f10e163]: no debes crear otra cuenta ni repetir el post-registro.
+            - paragraph [ref=f10e164]:
+              - text: Cuando la sección aprueba, el estado cambia a
+              - code [ref=f10e165]: active
+              - text: y las funciones se habilitan según el cargo y los permisos de esa asignación.
+            - generic [ref=f10e166]:
+              - heading "Cancelar y elegir otra sección" [level=2] [ref=f10e167]
+              - link "Sección titulada «Cancelar y elegir otra sección»" [ref=f10e168] [cursor=pointer]:
+                - /url: "#cancelar-y-elegir-otra-sección"
+            - paragraph [ref=f10e173]: "Si elegiste un club o sección incorrectos:"
+            - list [ref=f10e174]:
+              - listitem [ref=f10e175]:
+                - text: En el aviso de solicitud pendiente, pulsa
+                - strong [ref=f10e176]: Cancelar solicitud
+                - text: .
+              - listitem [ref=f10e177]: Confirma la cancelación.
+              - listitem [ref=f10e178]: La app reabre el paso de selección de club.
+              - listitem [ref=f10e179]: Elige la sección correcta y vuelve a finalizar.
+            - paragraph [ref=f10e180]:
+              - text: La cancelación cambia la solicitud anterior a
+              - code [ref=f10e181]: cancelled
+              - text: ", la desactiva y conserva la cuenta, la foto y los datos personales. Si la solicitud aparece como"
+              - code [ref=f10e182]: rejected
+              - text: o
+              - code [ref=f10e183]: expired
+              - text: ", utiliza"
+              - strong [ref=f10e184]: Volver a solicitar
+              - text: para regresar al mismo paso; tampoco necesitas otra cuenta.
+            - generic [ref=f10e185]:
+              - heading "Cómo verificarlo" [level=2] [ref=f10e186]
+              - link "Sección titulada «Cómo verificarlo»" [ref=f10e187] [cursor=pointer]:
+                - /url: "#cómo-verificarlo"
+            - paragraph [ref=f10e192]: Comprueba que el tablero muestre el club y la sección solicitados, la fecha de vencimiento y el estado pendiente. Después de la aprobación, el aviso desaparece y se muestran solo las funciones permitidas por el cargo activo.
+            - generic [ref=f10e193]:
+              - heading "Errores frecuentes" [level=2] [ref=f10e194]
+              - link "Sección titulada «Errores frecuentes»" [ref=f10e195] [cursor=pointer]:
+                - /url: "#errores-frecuentes"
+            - table [ref=f10e200]:
+              - rowgroup [ref=f10e201]:
+                - row [ref=f10e202]:
+                  - columnheader "Problema" [ref=f10e203]
+                  - columnheader "Qué hacer" [ref=f10e204]
+              - rowgroup [ref=f10e205]:
+                - row [ref=f10e206]:
+                  - cell [ref=f10e207]:
+                    - strong [ref=f10e208]: Siguiente
+                    - text: no se habilita en la foto
+                  - cell "Espera a que termine la carga o selecciona otra imagen." [ref=f10e209]
+                - row [ref=f10e210]:
+                  - cell "No puedes completar los datos personales" [ref=f10e211]
+                  - cell "Confirma género, nacimiento, bautismo, un contacto y representante legal si corresponde." [ref=f10e212]
+                - row [ref=f10e213]:
+                  - cell "No aparece una sección" [ref=f10e214]
+                  - cell "Revisa país, unión, campo local y club; las opciones dependen de la selección anterior." [ref=f10e215]
+                - row [ref=f10e216]:
+                  - cell "La clase parece incorrecta" [ref=f10e217]
+                  - cell "Verifica la fecha de nacimiento y la sección. La clase se deriva por edad y tipo de club." [ref=f10e218]
+                - row [ref=f10e219]:
+                  - cell "El tablero dice solicitud pendiente" [ref=f10e220]
+                  - cell "El post-registro terminó; falta la decisión de una persona con permiso en esa sección." [ref=f10e221]
+                - row [ref=f10e222]:
+                  - cell "Elegiste la sección equivocada" [ref=f10e223]
+                  - cell "Cancela la solicitud pendiente y corrige el paso 3. No crees otra cuenta." [ref=f10e224]
+            - generic [ref=f10e225]:
+              - heading "Procesos relacionados" [level=2] [ref=f10e226]
+              - link "Sección titulada «Procesos relacionados»" [ref=f10e227] [cursor=pointer]:
+                - /url: "#procesos-relacionados"
+            - list [ref=f10e232]:
+              - listitem [ref=f10e233]:
+                - link "Alta de cuenta y membresía" [ref=f10e234] [cursor=pointer]:
+                  - /url: /procesos/alta-y-membresia/
+              - listitem [ref=f10e235]:
+                - link "Acceso, registro y recuperación" [ref=f10e236] [cursor=pointer]:
+                  - /url: /pantallas/acceso-y-registro/
+              - listitem [ref=f10e237]:
+                - link "Tablero principal" [ref=f10e238] [cursor=pointer]:
+                  - /url: /pantallas/tablero/
+            - generic [ref=f10e239]:
+              - heading "Fuente de verificación" [level=2] [ref=f10e240]
+              - link "Sección titulada «Fuente de verificación»" [ref=f10e241] [cursor=pointer]:
+                - /url: "#fuente-de-verificación"
+            - paragraph [ref=f10e246]:
+              - text: Manual contrastado el 2026-08-21 con el shell de post-registro, sus providers, el servicio
+              - code [ref=f10e247]: PostRegistrationService
+              - text: ", la bandeja de estado de membresía y la autorización efectiva de las superficies operativas."
+          - generic [ref=f10e248]:
+            - paragraph [ref=f10e250]:
+              - text: "Última actualización:"
+              - time [ref=f10e251]: 20 ago 2026
+            - generic [ref=f10e252]:
+              - link [ref=f10e253] [cursor=pointer]:
+                - /url: /pantallas/clasificaciones/
+                - generic [ref=f10e256]: Página anteriorClasificaciones
+              - link [ref=f10e257] [cursor=pointer]:
+                - /url: /pantallas/coordinacion/
+                - generic [ref=f10e260]: Siguiente páginaCoordinación territorial
+  - generic [ref=f10e263]:
+    - button [ref=f10e264]
+    - button [ref=f10e270]
+    - button [ref=f10e274]
+    - button [ref=f10e282]

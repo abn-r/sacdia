@@ -1,0 +1,1641 @@
+- generic [active] [ref=f27e1]:
+  - link "Ir al contenido" [ref=f27e2] [cursor=pointer]:
+    - /url: "#_top"
+  - generic [ref=f27e3]:
+    - banner [ref=f27e4]:
+      - generic [ref=f27e5]:
+        - generic [ref=f27e7]:
+          - link "Inicio — Documentación técnica" [ref=f27e8] [cursor=pointer]:
+            - /url: /
+            - generic [ref=f27e9]: S
+            - generic [ref=f27e10]:
+              - generic [ref=f27e11]: SACDIA
+              - generic [ref=f27e12]: Técnico
+          - navigation "Cambiar portal de documentación" [ref=f27e13]:
+            - link "Operativo" [ref=f27e14] [cursor=pointer]:
+              - /url: http://localhost:4321
+            - link "Administrativo" [ref=f27e15] [cursor=pointer]:
+              - /url: http://localhost:4322
+            - link "Técnico" [ref=f27e16] [cursor=pointer]:
+              - /url: http://localhost:4323
+        - button "Buscar" [ref=f27e19] [cursor=pointer]:
+          - generic [ref=f27e23]:
+            - generic [ref=f27e24]: ⌘
+            - generic [ref=f27e25]: K
+        - generic [ref=f27e29]:
+          - generic [ref=f27e30]: Seleccionar tema
+          - combobox "Seleccionar tema" [ref=f27e31] [cursor=pointer]:
+            - option "Oscuro"
+            - option "Claro"
+            - option "Automático" [selected]
+    - navigation "Primario":
+      - list [ref=f27e35]:
+        - listitem [ref=f27e36]:
+          - group [ref=f27e37]:
+            - generic "API" [ref=f27e38] [cursor=pointer]
+            - list [ref=f27e42]:
+              - listitem [ref=f27e43]:
+                - link "API Reference" [ref=f27e44] [cursor=pointer]:
+                  - /url: /api/
+              - listitem [ref=f27e45]:
+                - link "Decisiones de Arquitectura" [ref=f27e46] [cursor=pointer]:
+                  - /url: /api/decisiones-arquitectura/
+              - listitem [ref=f27e47]:
+                - link "Endpoints — Live Reference" [ref=f27e48] [cursor=pointer]:
+                  - /url: /api/endpoints/
+              - listitem [ref=f27e49]:
+                - link "Especificación Técnica REST API" [ref=f27e50] [cursor=pointer]:
+                  - /url: /api/especificacion/
+              - listitem [ref=f27e51]:
+                - group [ref=f27e52]:
+                  - generic "integracion-frontend" [ref=f27e53] [cursor=pointer]
+                  - list [ref=f27e57]:
+                    - listitem [ref=f27e58]:
+                      - link "Integración Frontend" [ref=f27e59] [cursor=pointer]:
+                        - /url: /api/integracion-frontend/
+                    - listitem [ref=f27e60]:
+                      - link "Autenticación" [ref=f27e61] [cursor=pointer]:
+                        - /url: /api/integracion-frontend/autenticacion/
+                    - listitem [ref=f27e62]:
+                      - link "Best Practices" [ref=f27e63] [cursor=pointer]:
+                        - /url: /api/integracion-frontend/best-practices/
+                    - listitem [ref=f27e64]:
+                      - link "Ejemplos por Módulo" [ref=f27e65] [cursor=pointer]:
+                        - /url: /api/integracion-frontend/ejemplos-modulos/
+                    - listitem [ref=f27e66]:
+                      - link "Consumo de Endpoints" [ref=f27e67] [cursor=pointer]:
+                        - /url: /api/integracion-frontend/endpoints/
+                    - listitem [ref=f27e68]:
+                      - link "Manejo de Errores" [ref=f27e69] [cursor=pointer]:
+                        - /url: /api/integracion-frontend/manejo-errores/
+                    - listitem [ref=f27e70]:
+                      - link "Setup Inicial" [ref=f27e71] [cursor=pointer]:
+                        - /url: /api/integracion-frontend/setup/
+                    - listitem [ref=f27e72]:
+                      - link "Testing de Integracion Frontend" [ref=f27e73] [cursor=pointer]:
+                        - /url: /api/integracion-frontend/testing/
+              - listitem [ref=f27e74]:
+                - link "Guía de Seguridad" [ref=f27e75] [cursor=pointer]:
+                  - /url: /api/seguridad/
+              - listitem [ref=f27e76]:
+                - link "Integración de Servicios Externos" [ref=f27e77] [cursor=pointer]:
+                  - /url: /api/servicios-externos/
+              - listitem [ref=f27e78]:
+                - link "Guía de Testing" [ref=f27e79] [cursor=pointer]:
+                  - /url: /api/testing/
+              - listitem [ref=f27e80]:
+                - link "Versionado de la API" [ref=f27e81] [cursor=pointer]:
+                  - /url: /api/versionado/
+        - listitem [ref=f27e82]:
+          - group [ref=f27e83]:
+            - generic "Arquitectura" [ref=f27e84] [cursor=pointer]
+            - list [ref=f27e88]:
+              - listitem [ref=f27e89]:
+                - link "Arquitectura" [ref=f27e90] [cursor=pointer]:
+                  - /url: /arquitectura/
+              - listitem [ref=f27e91]:
+                - group [ref=f27e92]:
+                  - generic "fundamentos" [ref=f27e93] [cursor=pointer]
+                  - list [ref=f27e97]:
+                    - listitem [ref=f27e98]:
+                      - link "Fundamentos" [ref=f27e99] [cursor=pointer]:
+                        - /url: /arquitectura/fundamentos/
+                    - listitem [ref=f27e100]:
+                      - link "Arquitectura del sistema" [ref=f27e101] [cursor=pointer]:
+                        - /url: /arquitectura/fundamentos/arquitectura/
+                    - listitem [ref=f27e102]:
+                      - link "Decisiones clave" [ref=f27e103] [cursor=pointer]:
+                        - /url: /arquitectura/fundamentos/decisiones-clave/
+                    - listitem [ref=f27e104]:
+                      - link "Modelo del dominio" [ref=f27e105] [cursor=pointer]:
+                        - /url: /arquitectura/fundamentos/dominio/
+                    - listitem [ref=f27e106]:
+                      - link "Identidad del sistema" [ref=f27e107] [cursor=pointer]:
+                        - /url: /arquitectura/fundamentos/identidad/
+                    - listitem [ref=f27e108]:
+                      - link "Runtime SACDIA" [ref=f27e109] [cursor=pointer]:
+                        - /url: /arquitectura/fundamentos/runtime/
+                    - listitem [ref=f27e110]:
+                      - link "Source of Truth" [ref=f27e111] [cursor=pointer]:
+                        - /url: /arquitectura/fundamentos/source-of-truth/
+        - listitem [ref=f27e112]:
+          - group [ref=f27e113]:
+            - generic "Base de datos" [ref=f27e114] [cursor=pointer]
+            - list [ref=f27e118]:
+              - listitem [ref=f27e119]:
+                - link "Base de Datos" [ref=f27e120] [cursor=pointer]:
+                  - /url: /base-de-datos/
+              - listitem [ref=f27e121]:
+                - link "Migraciones" [ref=f27e122] [cursor=pointer]:
+                  - /url: /base-de-datos/migraciones/
+              - listitem [ref=f27e123]:
+                - group [ref=f27e124]:
+                  - generic "schema-reference" [ref=f27e125] [cursor=pointer]
+                  - list [ref=f27e129]:
+                    - listitem [ref=f27e130]:
+                      - link "Schema Reference" [ref=f27e131] [cursor=pointer]:
+                        - /url: /base-de-datos/schema-reference/
+                    - listitem [ref=f27e132]:
+                      - link "Actividades y Camporees" [ref=f27e133] [cursor=pointer]:
+                        - /url: /base-de-datos/schema-reference/actividades-camporees/
+                    - listitem [ref=f27e134]:
+                      - link "Carpetas y Evaluacion" [ref=f27e135] [cursor=pointer]:
+                        - /url: /base-de-datos/schema-reference/carpetas-evaluacion/
+                    - listitem [ref=f27e136]:
+                      - link "Clases y Honores" [ref=f27e137] [cursor=pointer]:
+                        - /url: /base-de-datos/schema-reference/clases-honores/
+                    - listitem [ref=f27e138]:
+                      - link "Clubs" [ref=f27e139] [cursor=pointer]:
+                        - /url: /base-de-datos/schema-reference/clubs/
+                    - listitem [ref=f27e140]:
+                      - link "Inventario y Finanzas" [ref=f27e141] [cursor=pointer]:
+                        - /url: /base-de-datos/schema-reference/inventario-finanzas/
+                    - listitem [ref=f27e142]:
+                      - link "Investidura y Certificaciones" [ref=f27e143] [cursor=pointer]:
+                        - /url: /base-de-datos/schema-reference/investidura-certificaciones/
+                    - listitem [ref=f27e144]:
+                      - link "Jerarquia Organizacional" [ref=f27e145] [cursor=pointer]:
+                        - /url: /base-de-datos/schema-reference/organizacion/
+                    - listitem [ref=f27e146]:
+                      - link "RBAC — Roles y Permisos" [ref=f27e147] [cursor=pointer]:
+                        - /url: /base-de-datos/schema-reference/rbac/
+                    - listitem [ref=f27e148]:
+                      - link "Salud e Insurance" [ref=f27e149] [cursor=pointer]:
+                        - /url: /base-de-datos/schema-reference/salud-insurance/
+                    - listitem [ref=f27e150]:
+                      - link "Sistema y Recursos" [ref=f27e151] [cursor=pointer]:
+                        - /url: /base-de-datos/schema-reference/sistema-recursos/
+                    - listitem [ref=f27e152]:
+                      - link "Users & Auth" [ref=f27e153] [cursor=pointer]:
+                        - /url: /base-de-datos/schema-reference/users-auth/
+        - listitem [ref=f27e154]:
+          - group [ref=f27e155]:
+            - generic "Producto" [ref=f27e156] [cursor=pointer]
+            - list [ref=f27e160]:
+              - listitem [ref=f27e161]:
+                - group [ref=f27e162]:
+                  - generic "funcionalidades" [ref=f27e163] [cursor=pointer]
+                  - list [ref=f27e167]:
+                    - listitem [ref=f27e168]:
+                      - link "Funcionalidades" [ref=f27e169] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/
+                    - listitem [ref=f27e170]:
+                      - link "Actividades" [ref=f27e171] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/actividades/
+                    - listitem [ref=f27e172]:
+                      - link "Actividades Conjuntas" [ref=f27e173] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/actividades-conjuntas/
+                    - listitem [ref=f27e174]:
+                      - link "Calificacion de Carpetas Anuales" [ref=f27e175] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/annual-folders-scoring/
+                    - listitem [ref=f27e176]:
+                      - link "Aprobaciones de Camporees" [ref=f27e177] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/aprobaciones-camporees/
+                    - listitem [ref=f27e178]:
+                      - link "Aprobaciones Masivas" [ref=f27e179] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/aprobaciones-masivas/
+                    - listitem [ref=f27e180]:
+                      - link "Audit Logs" [ref=f27e181] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/audit-logs/
+                    - listitem [ref=f27e182]:
+                      - link "Camporees" [ref=f27e183] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/camporees/
+                    - listitem [ref=f27e184]:
+                      - link "Carpetas de Evidencias" [ref=f27e185] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/carpetas-evidencias/
+                    - listitem [ref=f27e186]:
+                      - link "Catalogos" [ref=f27e187] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/catalogos/
+                    - listitem [ref=f27e188]:
+                      - link "Certificaciones de Guias Mayores" [ref=f27e189] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/certificaciones-guias-mayores/
+                    - listitem [ref=f27e190]:
+                      - link "Clases Progresivas" [ref=f27e191] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/clases-progresivas/
+                    - listitem [ref=f27e192]:
+                      - link "Comunicaciones" [ref=f27e193] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/comunicaciones/
+                    - listitem [ref=f27e194]:
+                      - link "Finanzas" [ref=f27e195] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/finanzas/
+                    - listitem [ref=f27e196]:
+                      - link "Gestion de Clubs" [ref=f27e197] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/gestion-clubs/
+                    - listitem [ref=f27e198]:
+                      - link "Gestion de Seguros" [ref=f27e199] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/gestion-seguros/
+                    - listitem [ref=f27e200]:
+                      - link "Honores" [ref=f27e201] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/honores/
+                    - listitem [ref=f27e202]:
+                      - link "Inventario" [ref=f27e203] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/inventario/
+                    - listitem [ref=f27e204]:
+                      - link "Materiales" [ref=f27e205] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/materiales/
+                    - listitem [ref=f27e206]:
+                      - link "RBAC" [ref=f27e207] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/rbac/
+                    - listitem [ref=f27e208]:
+                      - link "Recursos" [ref=f27e209] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/recursos/
+                    - listitem [ref=f27e210]:
+                      - link "SLA Dashboard" [ref=f27e211] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/sla-dashboard/
+                    - listitem [ref=f27e212]:
+                      - link "Validacion de Evidencias" [ref=f27e213] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/validacion-evidencias/
+                    - listitem [ref=f27e214]:
+                      - link "Validacion de Investiduras" [ref=f27e215] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/validacion-investiduras/
+        - listitem [ref=f27e216]:
+          - group [ref=f27e217]:
+            - generic "Seguridad" [ref=f27e218] [cursor=pointer]
+            - list [ref=f27e222]:
+              - listitem [ref=f27e223]:
+                - link "Seguridad" [ref=f27e224] [cursor=pointer]:
+                  - /url: /seguridad/
+              - listitem [ref=f27e225]:
+                - group [ref=f27e226]:
+                  - generic "autorizacion" [ref=f27e227] [cursor=pointer]
+                  - list [ref=f27e231]:
+                    - listitem [ref=f27e232]:
+                      - link "Autorización" [ref=f27e233] [cursor=pointer]:
+                        - /url: /seguridad/autorizacion/
+                    - listitem [ref=f27e234]:
+                      - link "Contrato canónico de autorización" [ref=f27e235] [cursor=pointer]:
+                        - /url: /seguridad/autorizacion/contrato-canonico/
+                    - listitem [ref=f27e236]:
+                      - link "Matriz de enforcement RBAC" [ref=f27e237] [cursor=pointer]:
+                        - /url: /seguridad/autorizacion/matriz-rbac/
+                    - listitem [ref=f27e238]:
+                      - link "Modelo de autorización" [ref=f27e239] [cursor=pointer]:
+                        - /url: /seguridad/autorizacion/modelo/
+                    - listitem [ref=f27e240]:
+                      - link "Sistema de permisos" [ref=f27e241] [cursor=pointer]:
+                        - /url: /seguridad/autorizacion/permisos/
+                    - listitem [ref=f27e242]:
+                      - link "Runtime de autenticación y autorización" [ref=f27e243] [cursor=pointer]:
+                        - /url: /seguridad/autorizacion/runtime/
+        - listitem [ref=f27e244]:
+          - group [ref=f27e245]:
+            - generic "Integración" [ref=f27e246] [cursor=pointer]
+            - list [ref=f27e250]:
+              - listitem [ref=f27e251]:
+                - link "Integración" [ref=f27e252] [cursor=pointer]:
+                  - /url: /integracion/
+        - listitem [ref=f27e253]:
+          - group [ref=f27e254]:
+            - generic "Frontend" [ref=f27e255] [cursor=pointer]
+            - list [ref=f27e259]:
+              - listitem [ref=f27e260]:
+                - group [ref=f27e261]:
+                  - generic "sistema-de-diseno" [ref=f27e262] [cursor=pointer]
+                  - list [ref=f27e266]:
+                    - listitem [ref=f27e267]:
+                      - link "Sistema de Diseño" [ref=f27e268] [cursor=pointer]:
+                        - /url: /frontend/sistema-de-diseno/
+                    - listitem [ref=f27e269]:
+                      - link "Componentes UI" [ref=f27e270] [cursor=pointer]:
+                        - /url: /frontend/sistema-de-diseno/componentes/
+                    - listitem [ref=f27e271]:
+                      - link "Dark Mode y Responsive" [ref=f27e272] [cursor=pointer]:
+                        - /url: /frontend/sistema-de-diseno/dark-mode-y-responsive/
+                    - listitem [ref=f27e273]:
+                      - link "Estructura de Archivos" [ref=f27e274] [cursor=pointer]:
+                        - /url: /frontend/sistema-de-diseno/estructura-archivos/
+                    - listitem [ref=f27e275]:
+                      - link "Formularios" [ref=f27e276] [cursor=pointer]:
+                        - /url: /frontend/sistema-de-diseno/formularios/
+                    - listitem [ref=f27e277]:
+                      - link "Patrones CRUD" [ref=f27e278] [cursor=pointer]:
+                        - /url: /frontend/sistema-de-diseno/patrones-crud/
+                    - listitem [ref=f27e279]:
+                      - link "Presentacion de Datos" [ref=f27e280] [cursor=pointer]:
+                        - /url: /frontend/sistema-de-diseno/presentacion-datos/
+                    - listitem [ref=f27e281]:
+                      - link "Stack y Paleta de Color" [ref=f27e282] [cursor=pointer]:
+                        - /url: /frontend/sistema-de-diseno/stack-y-paleta/
+                    - listitem [ref=f27e283]:
+                      - link "Tipografia y Espaciado" [ref=f27e284] [cursor=pointer]:
+                        - /url: /frontend/sistema-de-diseno/tipografia-y-espaciado/
+        - listitem [ref=f27e285]:
+          - group [ref=f27e286]:
+            - generic "Estándares" [ref=f27e287] [cursor=pointer]
+            - list [ref=f27e291]:
+              - listitem [ref=f27e292]:
+                - link "Estandares" [ref=f27e293] [cursor=pointer]:
+                  - /url: /estandares/
+              - listitem [ref=f27e294]:
+                - link "Coding Standards" [ref=f27e295] [cursor=pointer]:
+                  - /url: /estandares/coding-standards/
+              - listitem [ref=f27e296]:
+                - link "Data Guidelines" [ref=f27e297] [cursor=pointer]:
+                  - /url: /estandares/data-guidelines/
+              - listitem [ref=f27e298]:
+                - link "Guia de Estructura" [ref=f27e299] [cursor=pointer]:
+                  - /url: /estandares/guia-estructura/
+              - listitem [ref=f27e300]:
+                - group [ref=f27e301]:
+                  - generic "stack-tecnologico" [ref=f27e302] [cursor=pointer]
+                  - list [ref=f27e306]:
+                    - listitem [ref=f27e307]:
+                      - link "Stack Tecnologico" [ref=f27e308] [cursor=pointer]:
+                        - /url: /estandares/stack-tecnologico/
+                    - listitem [ref=f27e309]:
+                      - link "Backend — NestJS API" [ref=f27e310] [cursor=pointer]:
+                        - /url: /estandares/stack-tecnologico/backend/
+                    - listitem [ref=f27e311]:
+                      - link "Decisiones Tecnicas" [ref=f27e312] [cursor=pointer]:
+                        - /url: /estandares/stack-tecnologico/decisiones/
+                    - listitem [ref=f27e313]:
+                      - link "Frontend — Admin Panel" [ref=f27e314] [cursor=pointer]:
+                        - /url: /estandares/stack-tecnologico/frontend/
+                    - listitem [ref=f27e315]:
+                      - link "Infraestructura" [ref=f27e316] [cursor=pointer]:
+                        - /url: /estandares/stack-tecnologico/infraestructura/
+                    - listitem [ref=f27e317]:
+                      - link "App Movil — Flutter" [ref=f27e318] [cursor=pointer]:
+                        - /url: /estandares/stack-tecnologico/mobile/
+                    - listitem [ref=f27e319]:
+                      - link "Servicios de Terceros" [ref=f27e320] [cursor=pointer]:
+                        - /url: /estandares/stack-tecnologico/servicios/
+        - listitem [ref=f27e321]:
+          - group [ref=f27e322]:
+            - generic "Pruebas" [ref=f27e323] [cursor=pointer]
+            - list [ref=f27e327]:
+              - listitem [ref=f27e328]:
+                - link "Testing" [ref=f27e329] [cursor=pointer]:
+                  - /url: /testing/
+              - listitem [ref=f27e330]:
+                - link "Usuarios de Prueba" [ref=f27e331] [cursor=pointer]:
+                  - /url: /testing/usuarios-prueba/
+        - listitem [ref=f27e332]:
+          - group [ref=f27e333]:
+            - generic "Guías" [ref=f27e334] [cursor=pointer]
+            - list [ref=f27e338]:
+              - listitem [ref=f27e339]:
+                - link "Guias" [ref=f27e340] [cursor=pointer]:
+                  - /url: /guias/
+              - listitem [ref=f27e341]:
+                - link "Admin Integration" [ref=f27e342] [cursor=pointer]:
+                  - /url: /guias/admin-integration/
+              - listitem [ref=f27e343]:
+                - link "Deployment" [ref=f27e344] [cursor=pointer]:
+                  - /url: /guias/deployment/
+              - listitem [ref=f27e345]:
+                - link "Developer Workflow" [ref=f27e346] [cursor=pointer]:
+                  - /url: /guias/developer-workflow/
+              - listitem [ref=f27e347]:
+                - link "Idea to Spec" [ref=f27e348] [cursor=pointer]:
+                  - /url: /guias/idea-to-spec/
+        - listitem [ref=f27e349]:
+          - group [ref=f27e350]:
+            - generic "Referencia" [ref=f27e351] [cursor=pointer]
+            - list [ref=f27e355]:
+              - listitem [ref=f27e356]:
+                - link "Documentación de Desarrollo" [ref=f27e357] [cursor=pointer]:
+                  - /url: /referencia/
+    - generic [ref=f27e359]:
+      - complementary [ref=f27e360]:
+        - navigation [ref=f27e365]:
+          - heading "En esta página" [level=2] [ref=f27e366]
+          - list [ref=f27e367]:
+            - listitem [ref=f27e368]:
+              - link "Sinopsis" [ref=f27e369] [cursor=pointer]:
+                - /url: "#_top"
+            - listitem [ref=f27e370]:
+              - link "Arquitectura de Deployment" [ref=f27e371] [cursor=pointer]:
+                - /url: "#arquitectura-de-deployment"
+              - list [ref=f27e372]:
+                - listitem [ref=f27e373]:
+                  - link "Stack de Infraestructura" [ref=f27e374] [cursor=pointer]:
+                    - /url: "#stack-de-infraestructura"
+                - listitem [ref=f27e375]:
+                  - link "Ambientes" [ref=f27e376] [cursor=pointer]:
+                    - /url: "#ambientes"
+            - listitem [ref=f27e377]:
+              - link "Backend (NestJS)" [ref=f27e378] [cursor=pointer]:
+                - /url: "#backend-nestjs"
+              - list [ref=f27e379]:
+                - listitem [ref=f27e380]:
+                  - link "Deployment en Render.com" [ref=f27e381] [cursor=pointer]:
+                    - /url: "#deployment-en-rendercom"
+                - listitem [ref=f27e382]:
+                  - 'link "Deployment Alternativo: Railway" [ref=f27e383] [cursor=pointer]':
+                    - /url: "#deployment-alternativo-railway"
+            - listitem [ref=f27e384]:
+              - link "Admin Panel (Next.js)" [ref=f27e385] [cursor=pointer]:
+                - /url: "#admin-panel-nextjs"
+              - list [ref=f27e386]:
+                - listitem [ref=f27e387]:
+                  - link "Deployment en Vercel" [ref=f27e388] [cursor=pointer]:
+                    - /url: "#deployment-en-vercel"
+            - listitem [ref=f27e389]:
+              - link "Mobile App (Flutter)" [ref=f27e390] [cursor=pointer]:
+                - /url: "#mobile-app-flutter"
+              - list [ref=f27e391]:
+                - listitem [ref=f27e392]:
+                  - link "Deployment iOS (App Store)" [ref=f27e393] [cursor=pointer]:
+                    - /url: "#deployment-ios-app-store"
+                - listitem [ref=f27e394]:
+                  - link "Deployment Android (Google Play)" [ref=f27e395] [cursor=pointer]:
+                    - /url: "#deployment-android-google-play"
+            - listitem [ref=f27e396]:
+              - link "Base de Datos" [ref=f27e397] [cursor=pointer]:
+                - /url: "#base-de-datos"
+              - list [ref=f27e398]:
+                - listitem [ref=f27e399]:
+                  - link "Neon" [ref=f27e400] [cursor=pointer]:
+                    - /url: "#neon"
+            - listitem [ref=f27e401]:
+              - link "CI/CD" [ref=f27e402] [cursor=pointer]:
+                - /url: "#cicd"
+              - list [ref=f27e403]:
+                - listitem [ref=f27e404]:
+                  - link "GitHub Actions - Backend" [ref=f27e405] [cursor=pointer]:
+                    - /url: "#github-actions---backend"
+                - listitem [ref=f27e406]:
+                  - link "GitHub Actions - Admin Panel" [ref=f27e407] [cursor=pointer]:
+                    - /url: "#github-actions---admin-panel"
+            - listitem [ref=f27e408]:
+              - link "Monitoring" [ref=f27e409] [cursor=pointer]:
+                - /url: "#monitoring"
+              - list [ref=f27e410]:
+                - listitem [ref=f27e411]:
+                  - link "Sentry (Error Tracking)" [ref=f27e412] [cursor=pointer]:
+                    - /url: "#sentry-error-tracking"
+                - listitem [ref=f27e413]:
+                  - link "Vercel Analytics" [ref=f27e414] [cursor=pointer]:
+                    - /url: "#vercel-analytics"
+                - listitem [ref=f27e415]:
+                  - link "Uptime Monitoring (Uptime Robot)" [ref=f27e416] [cursor=pointer]:
+                    - /url: "#uptime-monitoring-uptime-robot"
+            - listitem [ref=f27e417]:
+              - link "Troubleshooting" [ref=f27e418] [cursor=pointer]:
+                - /url: "#troubleshooting"
+              - list [ref=f27e419]:
+                - listitem [ref=f27e420]:
+                  - link "Backend no levanta en Vercel" [ref=f27e421] [cursor=pointer]:
+                    - /url: "#backend-no-levanta-en-vercel"
+                - listitem [ref=f27e422]:
+                  - link "Migraciones de Prisma fallan" [ref=f27e423] [cursor=pointer]:
+                    - /url: "#migraciones-de-prisma-fallan"
+                - listitem [ref=f27e424]:
+                  - link "CORS Errors en Frontend" [ref=f27e425] [cursor=pointer]:
+                    - /url: "#cors-errors-en-frontend"
+                - listitem [ref=f27e426]:
+                  - link "Mobile App crashes al abrir" [ref=f27e427] [cursor=pointer]:
+                    - /url: "#mobile-app-crashes-al-abrir"
+            - listitem [ref=f27e428]:
+              - link "Checklist de Deployment" [ref=f27e429] [cursor=pointer]:
+                - /url: "#checklist-de-deployment"
+              - list [ref=f27e430]:
+                - listitem [ref=f27e431]:
+                  - link "Pre-Deployment" [ref=f27e432] [cursor=pointer]:
+                    - /url: "#pre-deployment"
+                - listitem [ref=f27e433]:
+                  - link "Deployment" [ref=f27e434] [cursor=pointer]:
+                    - /url: "#deployment"
+                - listitem [ref=f27e435]:
+                  - link "Post-Deployment" [ref=f27e436] [cursor=pointer]:
+                    - /url: "#post-deployment"
+      - main [ref=f27e438]:
+        - heading "Deployment" [level=1] [ref=f27e441]
+        - generic [ref=f27e443]:
+          - generic [ref=f27e444]:
+            - paragraph [ref=f27e445]:
+              - strong [ref=f27e446]: Estado
+              - text: ": ACTIVE"
+              - strong [ref=f27e447]: Fecha
+              - text: ": 4 de febrero de 2026"
+              - strong [ref=f27e448]: Stack
+              - text: ": NestJS Backend + Next.js Admin + Flutter App"
+            - separator [ref=f27e449]
+            - generic [ref=f27e450]:
+              - heading "Arquitectura de Deployment" [level=2] [ref=f27e451]
+              - link "Sección titulada «Arquitectura de Deployment»" [ref=f27e452] [cursor=pointer]:
+                - /url: "#arquitectura-de-deployment"
+            - generic [ref=f27e457]:
+              - heading "Stack de Infraestructura" [level=3] [ref=f27e458]
+              - link "Sección titulada «Stack de Infraestructura»" [ref=f27e459] [cursor=pointer]:
+                - /url: "#stack-de-infraestructura"
+            - figure [ref=f27e465]:
+              - code [ref=f27e467]:
+                - generic [ref=f27e468]: +----------------------------------------------------------+
+                - generic [ref=f27e470]: "| PRODUCCION |"
+                - generic [ref=f27e472]: +----------------------------------------------------------+
+                - generic [ref=f27e474]: "| |"
+                - generic [ref=f27e476]: "| +--------------+ +--------------+ +--------------+ |"
+                - generic [ref=f27e478]: "| | Render.com | | Vercel | | App Store / | |"
+                - generic [ref=f27e480]: "| | (API) | | (Admin) | | Google Play | |"
+                - generic [ref=f27e482]: "| | NestJS 11 | | Next.js 16 | | Flutter | |"
+                - generic [ref=f27e484]: "| +------+-------+ +------+-------+ +------+-------+ |"
+                - generic [ref=f27e486]: "| | | | |"
+                - generic [ref=f27e488]: "| +------------------+------------------+ |"
+                - generic [ref=f27e490]: "| | |"
+                - generic [ref=f27e492]: "| +---------v---------+ |"
+                - generic [ref=f27e494]: "| | Neon | |"
+                - generic [ref=f27e496]: "| | PostgreSQL 16 | |"
+                - generic [ref=f27e498]: "| | dev/staging/prod | |"
+                - generic [ref=f27e500]: "| +---------+---------+ |"
+                - generic [ref=f27e502]: "| | |"
+                - generic [ref=f27e504]: "| +------------------+------------------+ |"
+                - generic [ref=f27e506]: "| | | | |"
+                - generic [ref=f27e508]: "| +------v------+ +-------v-------+ +------v-------+ |"
+                - generic [ref=f27e510]: "| | Better Auth | | Cloudflare R2 | | Redis | |"
+                - generic [ref=f27e512]: "| | (in NestJS) | | (Storage) | | (BullMQ + | |"
+                - generic [ref=f27e514]: "| +-------------+ +---------------+ | cache) | |"
+                - generic [ref=f27e516]: "| +--------------+ |"
+                - generic [ref=f27e518]: "| +----------------+-----------------+ |"
+                - generic [ref=f27e520]: "| | | | |"
+                - generic [ref=f27e522]: "| +------v------+ +------v------+ +------v------+ |"
+                - generic [ref=f27e524]: "| | Firebase | | Sentry | | GitHub | |"
+                - generic [ref=f27e526]: "| | FCM | | Monitoring | | Actions | |"
+                - generic [ref=f27e528]: "| +-------------+ +------------+ +-------------+ |"
+                - generic [ref=f27e530]: +----------------------------------------------------------+
+              - button "Copiar al portapapeles" [ref=f27e533] [cursor=pointer]
+            - generic [ref=f27e535]:
+              - heading "Ambientes" [level=3] [ref=f27e536]
+              - link "Sección titulada «Ambientes»" [ref=f27e537] [cursor=pointer]:
+                - /url: "#ambientes"
+            - table [ref=f27e542]:
+              - rowgroup [ref=f27e543]:
+                - row [ref=f27e544]:
+                  - columnheader "Ambiente" [ref=f27e545]
+                  - columnheader "Proposito" [ref=f27e546]
+                  - columnheader "URL Base" [ref=f27e547]
+              - rowgroup [ref=f27e548]:
+                - row [ref=f27e549]:
+                  - cell [ref=f27e550]:
+                    - strong [ref=f27e551]: Development
+                  - cell "Desarrollo local" [ref=f27e552]
+                  - cell [ref=f27e553]:
+                    - code [ref=f27e554]: http://localhost:3000
+                - row [ref=f27e555]:
+                  - cell [ref=f27e556]:
+                    - strong [ref=f27e557]: Staging
+                  - cell "Testing pre-produccion" [ref=f27e558]
+                  - cell [ref=f27e559]:
+                    - code [ref=f27e560]: https://api-staging.sacdia.app
+                - row [ref=f27e561]:
+                  - cell [ref=f27e562]:
+                    - strong [ref=f27e563]: Production
+                  - cell "Produccion" [ref=f27e564]
+                  - cell [ref=f27e565]:
+                    - code [ref=f27e566]: https://api.sacdia.app
+            - separator [ref=f27e567]
+            - generic [ref=f27e568]:
+              - heading "Backend (NestJS)" [level=2] [ref=f27e569]
+              - link "Sección titulada «Backend (NestJS)»" [ref=f27e570] [cursor=pointer]:
+                - /url: "#backend-nestjs"
+            - generic [ref=f27e575]:
+              - heading "Deployment en Render.com" [level=3] [ref=f27e576]
+              - link "Sección titulada «Deployment en Render.com»" [ref=f27e577] [cursor=pointer]:
+                - /url: "#deployment-en-rendercom"
+            - blockquote [ref=f27e582]:
+              - paragraph [ref=f27e583]:
+                - text: El backend se despliega en
+                - strong [ref=f27e584]: Render.com
+                - text: (Web Service). Vercel fue removido del pipeline.
+            - generic [ref=f27e585]:
+              - heading "1. Configuracion del servicio" [level=4] [ref=f27e586]
+              - link "Sección titulada «1. Configuracion del servicio»" [ref=f27e587] [cursor=pointer]:
+                - /url: "#1-configuracion-del-servicio"
+            - list [ref=f27e592]:
+              - listitem [ref=f27e593]:
+                - strong [ref=f27e594]: Runtime
+                - text: ": Node 22.x"
+              - listitem [ref=f27e595]:
+                - strong [ref=f27e596]: Build command
+                - text: ":"
+                - code [ref=f27e597]: pnpm install && pnpm prisma generate && pnpm run build
+              - listitem [ref=f27e598]:
+                - strong [ref=f27e599]: Start command
+                - text: ":"
+                - code [ref=f27e600]: pnpm run start:prod
+              - listitem [ref=f27e601]:
+                - strong [ref=f27e602]: Health check
+                - text: ":"
+                - code [ref=f27e603]: /api/v1/health
+              - listitem [ref=f27e604]:
+                - strong [ref=f27e605]: Auto-deploy
+                - text: ": rama"
+                - code [ref=f27e606]: preproduction
+                - text: → staging service,
+                - code [ref=f27e607]: production
+                - text: → production service.
+            - paragraph [ref=f27e608]:
+              - strong [ref=f27e609]:
+                - code [ref=f27e610]: package.json
+                - text: (scripts relevantes)
+              - text: ":"
+            - figure [ref=f27e612]:
+              - code [ref=f27e614]:
+                - generic [ref=f27e615]: "{"
+                - generic [ref=f27e617]: "\"scripts\": {"
+                - generic [ref=f27e619]: "\"build\": \"nest build\","
+                - generic [ref=f27e621]: "\"start:prod\": \"node dist/main\","
+                - generic [ref=f27e623]: "\"prisma:deploy\": \"prisma migrate deploy\""
+                - generic [ref=f27e625]: "}"
+                - generic [ref=f27e628]: "}"
+              - button "Copiar al portapapeles" [ref=f27e631] [cursor=pointer]
+            - paragraph [ref=f27e633]:
+              - text: Render corre
+              - code [ref=f27e634]: prisma migrate deploy
+              - text: automaticamente como pre-deploy hook.
+            - separator [ref=f27e635]
+            - generic [ref=f27e636]:
+              - heading "2. Variables de Entorno en Render" [level=4] [ref=f27e637]
+              - link "Sección titulada «2. Variables de Entorno en Render»" [ref=f27e638] [cursor=pointer]:
+                - /url: "#2-variables-de-entorno-en-render"
+            - paragraph [ref=f27e643]:
+              - strong [ref=f27e644]: Dashboard del servicio → Environment
+              - text: ":"
+            - figure "Ventana de terminal" [ref=f27e646]:
+              - code [ref=f27e651]:
+                - generic [ref=f27e652]: "# Database (Neon)"
+                - generic [ref=f27e654]: DATABASE_URL="postgresql://<user>:<pwd>@ep-<branch>.us-east-1.aws.neon.tech/sacdia?sslmode=require"
+                - generic [ref=f27e658]: "# Better Auth (Option C: BA autentica, SACDIA firma JWT con este secret)"
+                - generic [ref=f27e660]: "BETTER_AUTH_SECRET=\"<SECRET>\" # 32+ bytes random; mismo secret se usa para firmar JWT HS256"
+                - generic [ref=f27e662]: BETTER_AUTH_URL="https://api.sacdia.app"
+                - generic [ref=f27e666]: "# OAuth (Better Auth)"
+                - generic [ref=f27e668]: GOOGLE_CLIENT_ID="..."
+                - generic [ref=f27e670]: GOOGLE_CLIENT_SECRET="<SECRET>"
+                - generic [ref=f27e672]: APPLE_CLIENT_ID="..."
+                - generic [ref=f27e674]: APPLE_CLIENT_SECRET="<SECRET>"
+                - generic [ref=f27e676]: APPLE_TEAM_ID="..."
+                - generic [ref=f27e678]: APPLE_KEY_ID="..."
+                - generic [ref=f27e682]: "# Cloudflare R2 (Storage)"
+                - generic [ref=f27e684]: R2_ACCOUNT_ID="..."
+                - generic [ref=f27e686]: R2_ACCESS_KEY_ID="..."
+                - generic [ref=f27e688]: R2_SECRET_ACCESS_KEY="<SECRET>"
+                - generic [ref=f27e690]: R2_BUCKET="sacdia-prod"
+                - generic [ref=f27e692]: R2_PUBLIC_URL="https://r2.sacdia.app"
+                - generic [ref=f27e696]: "# R2 buckets adicionales (materiales)"
+                - generic [ref=f27e698]: R2_MATERIALES_COMPROBANTES_BUCKET="sacdia-materiales-prod"
+                - generic [ref=f27e702]: "# Firebase (FCM)"
+                - generic [ref=f27e704]: FIREBASE_PROJECT_ID="sacdia-app"
+                - generic [ref=f27e706]: FIREBASE_CLIENT_EMAIL="firebase-adminsdk@..."
+                - generic [ref=f27e708]: FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
+                - generic [ref=f27e712]: "# Redis (BullMQ + cache-aside + throttler distribuido)"
+                - generic [ref=f27e714]: "REDIS_URL=\"redis://...\" # REQUERIDO en produccion — app falla si no esta disponible"
+                - generic [ref=f27e718]: "# CORS"
+                - generic [ref=f27e720]: CORS_ORIGIN="https://admin.sacdia.app,https://sacdia.app"
+                - generic [ref=f27e724]: "# Rate Limiting (Throttler)"
+                - generic [ref=f27e726]: THROTTLER_TTL="60"
+                - generic [ref=f27e728]: THROTTLER_LIMIT="100"
+                - generic [ref=f27e732]: "# Sentry"
+                - generic [ref=f27e734]: SENTRY_DSN="https://..."
+                - generic [ref=f27e738]: "# Swagger (opcional, default OFF en prod)"
+                - generic [ref=f27e740]: SWAGGER_ENABLED="false"
+              - button "Copiar al portapapeles" [ref=f27e743] [cursor=pointer]
+            - blockquote [ref=f27e745]:
+              - paragraph [ref=f27e746]:
+                - text: La fuente de verdad de los nombres de env vars es
+                - code [ref=f27e747]: sacdia-backend/.env.example
+                - text: . Claves marcadas
+                - code [ref=f27e748]: "# <SECRET>"
+                - text: viven en el secret manager de Render por ambiente; nunca se commitean.
+            - separator [ref=f27e749]
+            - generic [ref=f27e750]:
+              - heading "3. Deployment desde CLI" [level=4] [ref=f27e751]
+              - link "Sección titulada «3. Deployment desde CLI»" [ref=f27e752] [cursor=pointer]:
+                - /url: "#3-deployment-desde-cli"
+            - figure "Ventana de terminal" [ref=f27e758]:
+              - code [ref=f27e763]:
+                - generic [ref=f27e764]: "# Instalar Vercel CLI"
+                - generic [ref=f27e766]: npm i -g vercel
+                - generic [ref=f27e770]: "# Login"
+                - generic [ref=f27e772]: vercel login
+                - generic [ref=f27e776]: "# Deploy a Preview (staging)"
+                - generic [ref=f27e778]: vercel
+                - generic [ref=f27e782]: "# Deploy a Production"
+                - generic [ref=f27e784]: vercel --prod
+                - generic [ref=f27e788]: "# Ver logs"
+                - generic [ref=f27e790]: vercel logs [deployment-url]
+              - button "Copiar al portapapeles" [ref=f27e793] [cursor=pointer]
+            - separator [ref=f27e795]
+            - generic [ref=f27e796]:
+              - heading "4. Deployment desde GitHub" [level=4] [ref=f27e797]
+              - link "Sección titulada «4. Deployment desde GitHub»" [ref=f27e798] [cursor=pointer]:
+                - /url: "#4-deployment-desde-github"
+            - paragraph [ref=f27e803]:
+              - strong [ref=f27e804]: Configurar en Vercel Dashboard
+              - text: ":"
+            - list [ref=f27e805]:
+              - listitem [ref=f27e806]:
+                - paragraph [ref=f27e807]:
+                  - text: "Conectar repositorio:"
+                  - code [ref=f27e808]: github.com/abn-r/sacdia-backend
+              - listitem [ref=f27e809]:
+                - paragraph [ref=f27e810]: "Configurar:"
+                - list [ref=f27e811]:
+                  - listitem [ref=f27e812]:
+                    - strong [ref=f27e813]: Framework Preset
+                    - text: ": Other"
+                  - listitem [ref=f27e814]:
+                    - strong [ref=f27e815]: Build Command
+                    - text: ":"
+                    - code [ref=f27e816]: npm run build
+                  - listitem [ref=f27e817]:
+                    - strong [ref=f27e818]: Output Directory
+                    - text: ":"
+                    - code [ref=f27e819]: dist
+                  - listitem [ref=f27e820]:
+                    - strong [ref=f27e821]: Install Command
+                    - text: ":"
+                    - code [ref=f27e822]: npm install
+              - listitem [ref=f27e823]:
+                - paragraph [ref=f27e824]:
+                  - strong [ref=f27e825]: Git Integration
+                  - text: ":"
+                - list [ref=f27e826]:
+                  - listitem [ref=f27e827]:
+                    - code [ref=f27e828]: main
+                    - text: branch -> Production
+                  - listitem [ref=f27e829]:
+                    - code [ref=f27e830]: development
+                    - text: branch -> Preview (Staging)
+                  - listitem [ref=f27e831]: Pull Requests -> Preview URLs automaticos
+            - separator [ref=f27e832]
+            - generic [ref=f27e833]:
+              - heading "5. Post-Deployment" [level=4] [ref=f27e834]
+              - link "Sección titulada «5. Post-Deployment»" [ref=f27e835] [cursor=pointer]:
+                - /url: "#5-post-deployment"
+            - paragraph [ref=f27e840]:
+              - strong [ref=f27e841]: Ejecutar migraciones
+              - text: "(una vez):"
+            - figure "Ventana de terminal" [ref=f27e843]:
+              - code [ref=f27e848]:
+                - generic [ref=f27e849]: "# Desde local conectado a produccion"
+                - generic [ref=f27e851]: DATABASE_URL="postgresql://..." npx prisma migrate deploy
+                - generic [ref=f27e855]: "# O configurar en Vercel"
+                - generic [ref=f27e857]: "# Build Command: npm run build && npx prisma migrate deploy"
+              - button "Copiar al portapapeles" [ref=f27e860] [cursor=pointer]
+            - paragraph [ref=f27e862]:
+              - strong [ref=f27e863]: Verificar deployment
+              - text: ":"
+            - figure "Ventana de terminal" [ref=f27e865]:
+              - code [ref=f27e870]:
+                - generic [ref=f27e871]: curl https://api.sacdia.app/api/v1/health
+                - generic [ref=f27e873]: "# Response: { \"status\": \"ok\" }"
+                - generic [ref=f27e877]: curl https://api.sacdia.app/api
+                - generic [ref=f27e879]: "# Debe redirigir a Swagger UI"
+              - button "Copiar al portapapeles" [ref=f27e882] [cursor=pointer]
+            - separator [ref=f27e884]
+            - generic [ref=f27e885]:
+              - 'heading "Deployment Alternativo: Railway" [level=3] [ref=f27e886]'
+              - 'link "Sección titulada «Deployment Alternativo: Railway»" [ref=f27e887] [cursor=pointer]':
+                - /url: "#deployment-alternativo-railway"
+            - paragraph [ref=f27e892]: "Si prefieres Railway en lugar de Vercel:"
+            - paragraph [ref=f27e893]:
+              - strong [ref=f27e894]: railway.json
+              - text: ":"
+            - figure [ref=f27e896]:
+              - code [ref=f27e898]:
+                - generic [ref=f27e899]: "{"
+                - generic [ref=f27e901]: "\"$schema\": \"https://railway.app/railway.schema.json\","
+                - generic [ref=f27e903]: "\"build\": {"
+                - generic [ref=f27e905]: "\"builder\": \"NIXPACKS\""
+                - generic [ref=f27e907]: "},"
+                - generic [ref=f27e910]: "\"deploy\": {"
+                - generic [ref=f27e912]: "\"startCommand\": \"npm run start:prod\","
+                - generic [ref=f27e914]: "\"restartPolicyType\": \"ON_FAILURE\","
+                - generic [ref=f27e916]: "\"restartPolicyMaxRetries\": 10"
+                - generic [ref=f27e918]: "}"
+                - generic [ref=f27e921]: "}"
+              - button "Copiar al portapapeles" [ref=f27e924] [cursor=pointer]
+            - paragraph [ref=f27e926]:
+              - strong [ref=f27e927]: Variables de entorno
+              - text: ": Mismas que Vercel"
+            - paragraph [ref=f27e928]:
+              - strong [ref=f27e929]: Comandos
+              - text: ":"
+            - figure "Ventana de terminal" [ref=f27e931]:
+              - code [ref=f27e936]:
+                - generic [ref=f27e937]: "# Instalar CLI"
+                - generic [ref=f27e939]: npm i -g @railway/cli
+                - generic [ref=f27e943]: "# Login"
+                - generic [ref=f27e945]: railway login
+                - generic [ref=f27e949]: "# Vincular proyecto"
+                - generic [ref=f27e951]: railway link
+                - generic [ref=f27e955]: "# Deploy"
+                - generic [ref=f27e957]: railway up
+              - button "Copiar al portapapeles" [ref=f27e960] [cursor=pointer]
+            - separator [ref=f27e962]
+            - generic [ref=f27e963]:
+              - heading "Admin Panel (Next.js)" [level=2] [ref=f27e964]
+              - link "Sección titulada «Admin Panel (Next.js)»" [ref=f27e965] [cursor=pointer]:
+                - /url: "#admin-panel-nextjs"
+            - generic [ref=f27e970]:
+              - heading "Deployment en Vercel" [level=3] [ref=f27e971]
+              - link "Sección titulada «Deployment en Vercel»" [ref=f27e972] [cursor=pointer]:
+                - /url: "#deployment-en-vercel"
+            - generic [ref=f27e977]:
+              - heading "1. Configuracion" [level=4] [ref=f27e978]
+              - link "Sección titulada «1. Configuracion»" [ref=f27e979] [cursor=pointer]:
+                - /url: "#1-configuracion"
+            - paragraph [ref=f27e984]:
+              - strong [ref=f27e985]: Archivo
+              - text: ":"
+              - code [ref=f27e986]: vercel.json
+              - text: (opcional si usas defaults)
+            - figure [ref=f27e988]:
+              - code [ref=f27e990]:
+                - generic [ref=f27e991]: "{"
+                - generic [ref=f27e993]: "\"buildCommand\": \"pnpm build\","
+                - generic [ref=f27e995]: "\"devCommand\": \"pnpm dev\","
+                - generic [ref=f27e997]: "\"installCommand\": \"pnpm install\","
+                - generic [ref=f27e999]: "\"framework\": \"nextjs\","
+                - generic [ref=f27e1001]: "\"outputDirectory\": \".next\""
+                - generic [ref=f27e1003]: "}"
+              - button "Copiar al portapapeles" [ref=f27e1006] [cursor=pointer]
+            - separator [ref=f27e1008]
+            - generic [ref=f27e1009]:
+              - heading "2. Variables de Entorno" [level=4] [ref=f27e1010]
+              - link "Sección titulada «2. Variables de Entorno»" [ref=f27e1011] [cursor=pointer]:
+                - /url: "#2-variables-de-entorno"
+            - figure "Ventana de terminal" [ref=f27e1017]:
+              - code [ref=f27e1022]:
+                - generic [ref=f27e1023]: "# API"
+                - generic [ref=f27e1025]: NEXT_PUBLIC_API_URL="https://api.sacdia.app/api/v1"
+                - generic [ref=f27e1029]: "# Opcional: Analytics"
+                - generic [ref=f27e1031]: NEXT_PUBLIC_VERCEL_ANALYTICS_ID="xxx"
+              - button "Copiar al portapapeles" [ref=f27e1034] [cursor=pointer]
+            - blockquote [ref=f27e1036]:
+              - paragraph [ref=f27e1037]:
+                - text: El admin
+                - strong [ref=f27e1038]: "NO"
+                - text: usa
+                - code [ref=f27e1039]: NEXT_PUBLIC_SUPABASE_*
+                - text: ni nada de Supabase. La autenticacion vive en backend via Better Auth; el admin solo lee la cookie
+                - code [ref=f27e1040]: ACCESS_TOKEN_COOKIE
+                - text: (httpOnly) que emite el backend.
+            - separator [ref=f27e1041]
+            - generic [ref=f27e1042]:
+              - heading "3. Deployment" [level=4] [ref=f27e1043]
+              - link "Sección titulada «3. Deployment»" [ref=f27e1044] [cursor=pointer]:
+                - /url: "#3-deployment"
+            - paragraph [ref=f27e1049]:
+              - strong [ref=f27e1050]: Desde Dashboard
+              - text: ":"
+            - list [ref=f27e1051]:
+              - listitem [ref=f27e1052]:
+                - text: "Conectar repo:"
+                - code [ref=f27e1053]: github.com/abn-r/sacdia-admin
+              - listitem [ref=f27e1054]: "Framework: Next.js (detectado automaticamente)"
+              - listitem [ref=f27e1055]:
+                - text: "Root Directory:"
+                - code [ref=f27e1056]: ./
+                - text: o
+                - code [ref=f27e1057]: sacdia-admin/
+                - text: si es monorepo
+              - listitem [ref=f27e1058]:
+                - text: "Build Command:"
+                - code [ref=f27e1059]: pnpm build
+            - paragraph [ref=f27e1060]:
+              - strong [ref=f27e1061]: Desde CLI
+              - text: ":"
+            - figure "Ventana de terminal" [ref=f27e1063]:
+              - code [ref=f27e1068]:
+                - generic [ref=f27e1069]: cd sacdia-admin
+                - generic [ref=f27e1071]: vercel --prod
+              - button "Copiar al portapapeles" [ref=f27e1074] [cursor=pointer]
+            - separator [ref=f27e1076]
+            - generic [ref=f27e1077]:
+              - heading "4. Optimizaciones" [level=4] [ref=f27e1078]
+              - link "Sección titulada «4. Optimizaciones»" [ref=f27e1079] [cursor=pointer]:
+                - /url: "#4-optimizaciones"
+            - paragraph [ref=f27e1084]:
+              - strong [ref=f27e1085]: next.config.js
+              - text: ":"
+            - figure [ref=f27e1087]:
+              - code [ref=f27e1089]:
+                - generic [ref=f27e1090]: "/** @type {import('next').NextConfig} */"
+                - generic [ref=f27e1092]: "const nextConfig = {"
+                - generic [ref=f27e1094]: // Output standalone para menor tamano
+                - generic [ref=f27e1096]: "output: 'standalone',"
+                - generic [ref=f27e1101]: // Optimizacion de imagenes
+                - generic [ref=f27e1103]: "images: {"
+                - generic [ref=f27e1106]: "remotePatterns: ["
+                - generic [ref=f27e1109]: "{ protocol: 'https', hostname: 'r2.sacdia.app' },"
+                - generic [ref=f27e1112]: "{ protocol: 'https', hostname: '*.r2.cloudflarestorage.com' },"
+                - generic [ref=f27e1115]: "],"
+                - generic [ref=f27e1118]: "formats: ['image/avif', 'image/webp'],"
+                - generic [ref=f27e1121]: "},"
+                - generic [ref=f27e1126]: // Comprimir respuestas
+                - generic [ref=f27e1128]: "compress: true,"
+                - generic [ref=f27e1133]: // Headers de seguridad
+                - generic [ref=f27e1135]: "async headers() {"
+                - generic [ref=f27e1138]: return [
+                - generic [ref=f27e1141]: "{"
+                - generic [ref=f27e1144]: "source: '/:path*',"
+                - generic [ref=f27e1147]: "headers: ["
+                - generic [ref=f27e1150]: "{"
+                - generic [ref=f27e1153]: "key: 'X-DNS-Prefetch-Control',"
+                - generic [ref=f27e1156]: "value: 'on'"
+                - generic [ref=f27e1159]: "},"
+                - generic [ref=f27e1162]: "{"
+                - generic [ref=f27e1165]: "key: 'Strict-Transport-Security',"
+                - generic [ref=f27e1168]: "value: 'max-age=63072000; includeSubDomains; preload'"
+                - generic [ref=f27e1171]: "},"
+                - generic [ref=f27e1174]: "{"
+                - generic [ref=f27e1177]: "key: 'X-Content-Type-Options',"
+                - generic [ref=f27e1180]: "value: 'nosniff'"
+                - generic [ref=f27e1183]: "},"
+                - generic [ref=f27e1186]: "{"
+                - generic [ref=f27e1189]: "key: 'X-Frame-Options',"
+                - generic [ref=f27e1192]: "value: 'DENY'"
+                - generic [ref=f27e1195]: "},"
+                - generic [ref=f27e1198]: "],"
+                - generic [ref=f27e1201]: "},"
+                - generic [ref=f27e1204]: "];"
+                - generic [ref=f27e1207]: "},"
+                - generic [ref=f27e1210]: "};"
+                - generic [ref=f27e1215]:
+                  - text: module.exports =
+                  - generic [ref=f27e1216]: nextConfig;
+              - button "Copiar al portapapeles" [ref=f27e1218] [cursor=pointer]
+            - separator [ref=f27e1220]
+            - generic [ref=f27e1221]:
+              - heading "Mobile App (Flutter)" [level=2] [ref=f27e1222]
+              - link "Sección titulada «Mobile App (Flutter)»" [ref=f27e1223] [cursor=pointer]:
+                - /url: "#mobile-app-flutter"
+            - generic [ref=f27e1228]:
+              - heading "Deployment iOS (App Store)" [level=3] [ref=f27e1229]
+              - link "Sección titulada «Deployment iOS (App Store)»" [ref=f27e1230] [cursor=pointer]:
+                - /url: "#deployment-ios-app-store"
+            - generic [ref=f27e1235]:
+              - heading "1. Preparacion" [level=4] [ref=f27e1236]
+              - link "Sección titulada «1. Preparacion»" [ref=f27e1237] [cursor=pointer]:
+                - /url: "#1-preparacion"
+            - paragraph [ref=f27e1242]:
+              - strong [ref=f27e1243]: Actualizar version
+              - text: en
+              - code [ref=f27e1244]: pubspec.yaml
+              - text: ":"
+            - figure [ref=f27e1246]:
+              - code [ref=f27e1248]:
+                - generic [ref=f27e1249]: "version: 1.0.0+1"
+                - generic [ref=f27e1251]: "# format: version+build"
+                - generic [ref=f27e1253]: "# 1.0.0 = semantic version"
+                - generic [ref=f27e1255]: "# +1 = build number"
+              - button "Copiar al portapapeles" [ref=f27e1258] [cursor=pointer]
+            - paragraph [ref=f27e1260]:
+              - strong [ref=f27e1261]: Configurar firma
+              - text: ":"
+            - figure "Ventana de terminal" [ref=f27e1263]:
+              - code [ref=f27e1268]:
+                - generic [ref=f27e1269]: "# En Xcode"
+                - generic [ref=f27e1271]: 1. Abrir ios/Runner.xcworkspace
+                - generic [ref=f27e1273]: 2. Runner -> Signing & Capabilities
+                - generic [ref=f27e1275]: "3. Team: Seleccionar Apple Developer Account"
+                - generic [ref=f27e1277]: "4. Bundle Identifier: com.sacdia.app"
+              - button "Copiar al portapapeles" [ref=f27e1280] [cursor=pointer]
+            - separator [ref=f27e1282]
+            - generic [ref=f27e1283]:
+              - heading "2. Build para App Store" [level=4] [ref=f27e1284]
+              - link "Sección titulada «2. Build para App Store»" [ref=f27e1285] [cursor=pointer]:
+                - /url: "#2-build-para-app-store"
+            - figure "Ventana de terminal" [ref=f27e1291]:
+              - code [ref=f27e1296]:
+                - generic [ref=f27e1297]: "# Limpiar"
+                - generic [ref=f27e1299]: flutter clean
+                - generic [ref=f27e1301]: flutter pub get
+                - generic [ref=f27e1305]: "# Build Release"
+                - generic [ref=f27e1307]: flutter build ios --release
+                - generic [ref=f27e1311]: "# Abrir en Xcode"
+                - generic [ref=f27e1313]: open ios/Runner.xcworkspace
+              - button "Copiar al portapapeles" [ref=f27e1316] [cursor=pointer]
+            - paragraph [ref=f27e1318]:
+              - strong [ref=f27e1319]: En Xcode
+              - text: ":"
+            - list [ref=f27e1320]:
+              - listitem [ref=f27e1321]: Product -> Archive
+              - listitem [ref=f27e1322]: Esperar a que compile
+              - listitem [ref=f27e1323]: Window -> Organizer
+              - listitem [ref=f27e1324]: Seleccionar archive -> Distribute App
+              - listitem [ref=f27e1325]: App Store Connect -> Upload
+            - separator [ref=f27e1326]
+            - generic [ref=f27e1327]:
+              - heading "3. App Store Connect" [level=4] [ref=f27e1328]
+              - link "Sección titulada «3. App Store Connect»" [ref=f27e1329] [cursor=pointer]:
+                - /url: "#3-app-store-connect"
+            - list [ref=f27e1334]:
+              - listitem [ref=f27e1335]:
+                - paragraph [ref=f27e1336]:
+                  - text: Crear app en
+                  - link "App Store Connect" [ref=f27e1337] [cursor=pointer]:
+                    - /url: https://appstoreconnect.apple.com
+              - listitem [ref=f27e1338]:
+                - paragraph [ref=f27e1339]: "Completar metadata:"
+                - list [ref=f27e1340]:
+                  - listitem [ref=f27e1341]: "Nombre: “SACDIA - Clubes JA”"
+                  - listitem [ref=f27e1342]: "Categoria: Educacion"
+                  - listitem [ref=f27e1343]: Screenshots (required)
+                  - listitem [ref=f27e1344]: Descripcion
+                  - listitem [ref=f27e1345]: Keywords
+                  - listitem [ref=f27e1346]: Privacy Policy URL
+              - listitem [ref=f27e1347]:
+                - paragraph [ref=f27e1348]: "Version:"
+                - list [ref=f27e1349]:
+                  - listitem [ref=f27e1350]: Subir build
+                  - listitem [ref=f27e1351]: Agregar “What’s New”
+                  - listitem [ref=f27e1352]: Submit for Review
+            - separator [ref=f27e1353]
+            - generic [ref=f27e1354]:
+              - heading "Deployment Android (Google Play)" [level=3] [ref=f27e1355]
+              - link "Sección titulada «Deployment Android (Google Play)»" [ref=f27e1356] [cursor=pointer]:
+                - /url: "#deployment-android-google-play"
+            - generic [ref=f27e1361]:
+              - heading "1. Configurar Firma" [level=4] [ref=f27e1362]
+              - link "Sección titulada «1. Configurar Firma»" [ref=f27e1363] [cursor=pointer]:
+                - /url: "#1-configurar-firma"
+            - paragraph [ref=f27e1368]:
+              - strong [ref=f27e1369]: Crear keystore
+              - text: ":"
+            - figure "Ventana de terminal" [ref=f27e1371]:
+              - code [ref=f27e1376]:
+                - generic [ref=f27e1377]: keytool -genkey -v -keystore ~/sacdia-upload-keystore.jks \
+                - generic [ref=f27e1379]: "-keyalg RSA -keysize 2048 -validity 10000 \\"
+                - generic [ref=f27e1381]: "-alias sacdia-key"
+              - button "Copiar al portapapeles" [ref=f27e1384] [cursor=pointer]
+            - paragraph [ref=f27e1386]:
+              - strong [ref=f27e1387]: Archivo
+              - text: ":"
+              - code [ref=f27e1388]: android/key.properties
+            - figure "Ventana de terminal" [ref=f27e1390]:
+              - code [ref=f27e1395]:
+                - generic [ref=f27e1396]: storePassword=<password>
+                - generic [ref=f27e1398]: keyPassword=<password>
+                - generic [ref=f27e1400]: keyAlias=sacdia-key
+                - generic [ref=f27e1402]: storeFile=/Users/abner/sacdia-upload-keystore.jks
+              - button "Copiar al portapapeles" [ref=f27e1405] [cursor=pointer]
+            - paragraph [ref=f27e1407]:
+              - strong [ref=f27e1408]: Actualizar
+              - code [ref=f27e1409]: android/app/build.gradle
+              - text: ":"
+            - figure [ref=f27e1411]:
+              - code [ref=f27e1413]:
+                - generic [ref=f27e1414]: def keystoreProperties = new Properties()
+                - generic [ref=f27e1416]: def keystorePropertiesFile = rootProject.file('key.properties')
+                - generic [ref=f27e1418]: "if (keystorePropertiesFile.exists()) {"
+                - generic [ref=f27e1420]: keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+                - generic [ref=f27e1423]: "}"
+                - generic [ref=f27e1427]: "android {"
+                - generic [ref=f27e1429]: ...
+                - generic [ref=f27e1431]: "signingConfigs {"
+                - generic [ref=f27e1434]: "release {"
+                - generic [ref=f27e1437]: keyAlias keystoreProperties['keyAlias']
+                - generic [ref=f27e1440]: keyPassword keystoreProperties['keyPassword']
+                - generic [ref=f27e1443]: "storeFile keystoreProperties['storeFile'] ? file(keystoreProperties['storeFile']) : null"
+                - generic [ref=f27e1446]: storePassword keystoreProperties['storePassword']
+                - generic [ref=f27e1449]: "}"
+                - generic [ref=f27e1452]: "}"
+                - generic [ref=f27e1455]: "buildTypes {"
+                - generic [ref=f27e1458]: "release {"
+                - generic [ref=f27e1461]: signingConfig signingConfigs.release
+                - generic [ref=f27e1464]: "}"
+                - generic [ref=f27e1467]: "}"
+                - generic [ref=f27e1470]: "}"
+              - button "Copiar al portapapeles" [ref=f27e1473] [cursor=pointer]
+            - separator [ref=f27e1475]
+            - generic [ref=f27e1476]:
+              - heading "2. Build App Bundle" [level=4] [ref=f27e1477]
+              - link "Sección titulada «2. Build App Bundle»" [ref=f27e1478] [cursor=pointer]:
+                - /url: "#2-build-app-bundle"
+            - figure "Ventana de terminal" [ref=f27e1484]:
+              - code [ref=f27e1489]:
+                - generic [ref=f27e1490]: "# Limpiar"
+                - generic [ref=f27e1492]: flutter clean
+                - generic [ref=f27e1494]: flutter pub get
+                - generic [ref=f27e1498]: "# Build App Bundle (recomendado)"
+                - generic [ref=f27e1500]: flutter build appbundle --release
+                - generic [ref=f27e1504]: "# O APK (no recomendado para Play Store)"
+                - generic [ref=f27e1506]: flutter build apk --release
+                - generic [ref=f27e1510]: "# Output: build/app/outputs/bundle/release/app-release.aab"
+              - button "Copiar al portapapeles" [ref=f27e1513] [cursor=pointer]
+            - separator [ref=f27e1515]
+            - generic [ref=f27e1516]:
+              - heading "3. Google Play Console" [level=4] [ref=f27e1517]
+              - link "Sección titulada «3. Google Play Console»" [ref=f27e1518] [cursor=pointer]:
+                - /url: "#3-google-play-console"
+            - list [ref=f27e1523]:
+              - listitem [ref=f27e1524]:
+                - paragraph [ref=f27e1525]:
+                  - text: Crear app en
+                  - link "Google Play Console" [ref=f27e1526] [cursor=pointer]:
+                    - /url: https://play.google.com/console
+              - listitem [ref=f27e1527]:
+                - paragraph [ref=f27e1528]: "Completar Store Listing:"
+                - list [ref=f27e1529]:
+                  - listitem [ref=f27e1530]: "Titulo: “SACDIA - Clubes JA”"
+                  - listitem [ref=f27e1531]: Descripcion corta
+                  - listitem [ref=f27e1532]: Descripcion completa
+                  - listitem [ref=f27e1533]: Screenshots (min 2)
+                  - listitem [ref=f27e1534]: Icono (512x512)
+              - listitem [ref=f27e1535]:
+                - paragraph [ref=f27e1536]: "Version:"
+                - list [ref=f27e1537]:
+                  - listitem [ref=f27e1538]:
+                    - text: Upload
+                    - code [ref=f27e1539]: app-release.aab
+                  - listitem [ref=f27e1540]: Agregar Release Notes
+                  - listitem [ref=f27e1541]: Submit for Review
+            - separator [ref=f27e1542]
+            - generic [ref=f27e1543]:
+              - heading "4. CI/CD con GitHub Actions" [level=4] [ref=f27e1544]
+              - link "Sección titulada «4. CI/CD con GitHub Actions»" [ref=f27e1545] [cursor=pointer]:
+                - /url: "#4-cicd-con-github-actions"
+            - paragraph [ref=f27e1550]:
+              - strong [ref=f27e1551]: Archivo
+              - text: ":"
+              - code [ref=f27e1552]: .github/workflows/deploy-android.yml
+            - figure [ref=f27e1554]:
+              - code [ref=f27e1556]:
+                - generic [ref=f27e1557]: "name: Deploy Android"
+                - generic [ref=f27e1561]: "on:"
+                - generic [ref=f27e1563]: "push:"
+                - generic [ref=f27e1565]: "branches: [main]"
+                - generic [ref=f27e1567]: "tags:"
+                - generic [ref=f27e1569]: "- 'v*.*.*'"
+                - generic [ref=f27e1574]: "jobs:"
+                - generic [ref=f27e1576]: "deploy:"
+                - generic [ref=f27e1578]: "runs-on: ubuntu-latest"
+                - generic [ref=f27e1580]: "steps:"
+                - generic [ref=f27e1582]: "- uses: actions/checkout@v3"
+                - generic [ref=f27e1587]: "- uses: actions/setup-java@v3"
+                - generic [ref=f27e1590]: "with:"
+                - generic [ref=f27e1592]: "distribution: 'zulu'"
+                - generic [ref=f27e1594]: "java-version: '11'"
+                - generic [ref=f27e1598]: "- uses: subosito/flutter-action@v2"
+                - generic [ref=f27e1601]: "with:"
+                - generic [ref=f27e1603]: "flutter-version: '3.16.0'"
+                - generic [ref=f27e1605]: "channel: 'stable'"
+                - generic [ref=f27e1609]: "- run: flutter pub get"
+                - generic [ref=f27e1612]: "- run: flutter test"
+                - generic [ref=f27e1615]: "- run: flutter build appbundle --release"
+                - generic [ref=f27e1620]: "- name: Upload to Play Store"
+                - generic [ref=f27e1623]: "uses: r0adkll/upload-google-play@v1"
+                - generic [ref=f27e1625]: "with:"
+                - generic [ref=f27e1627]: "serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT }}"
+                - generic [ref=f27e1629]: "packageName: com.sacdia.app"
+                - generic [ref=f27e1631]: "releaseFiles: build/app/outputs/bundle/release/app-release.aab"
+                - generic [ref=f27e1633]: "track: production"
+                - generic [ref=f27e1635]: "status: completed"
+              - button "Copiar al portapapeles" [ref=f27e1638] [cursor=pointer]
+            - separator [ref=f27e1640]
+            - generic [ref=f27e1641]:
+              - heading "Base de Datos" [level=2] [ref=f27e1642]
+              - link "Sección titulada «Base de Datos»" [ref=f27e1643] [cursor=pointer]:
+                - /url: "#base-de-datos"
+            - generic [ref=f27e1648]:
+              - heading "Neon" [level=3] [ref=f27e1649]
+              - link "Sección titulada «Neon»" [ref=f27e1650] [cursor=pointer]:
+                - /url: "#neon"
+            - paragraph [ref=f27e1655]:
+              - text: "PostgreSQL hosteado en Neon. 1 proyecto con 3 branches:"
+              - code [ref=f27e1656]: development
+              - text: ","
+              - code [ref=f27e1657]: staging
+              - text: ","
+              - code [ref=f27e1658]: production
+              - text: . Cada branch tiene su propio endpoint y connection string.
+            - paragraph [ref=f27e1659]:
+              - strong [ref=f27e1660]: Migraciones
+              - text: ":"
+            - figure "Ventana de terminal" [ref=f27e1662]:
+              - code [ref=f27e1667]:
+                - generic [ref=f27e1668]: "# Aplicar migraciones a un branch especifico"
+                - generic [ref=f27e1670]: DATABASE_URL=$(neonctl connection-string --branch production) pnpm prisma migrate deploy
+              - button "Copiar al portapapeles" [ref=f27e1673] [cursor=pointer]
+            - blockquote [ref=f27e1675]:
+              - paragraph [ref=f27e1676]:
+                - strong [ref=f27e1677]: Gotcha conocido
+                - text: ":"
+                - code [ref=f27e1678]: prisma migrate dev
+                - text: "puede fallar contra Neon porque el shadow DB no se puede crear en una rama existente. Workaround: usar"
+                - code [ref=f27e1679]: prisma migrate diff --script
+                - text: para generar SQL, aplicarlo via psql, y registrar la migracion en
+                - code [ref=f27e1680]: _prisma_migrations
+                - text: manualmente.
+            - paragraph [ref=f27e1681]:
+              - strong [ref=f27e1682]: Backups
+              - text: ":"
+            - list [ref=f27e1683]:
+              - listitem [ref=f27e1684]: "Neon: branch copy-on-write + Point-in-Time Recovery (PITR) configurable por plan."
+              - listitem [ref=f27e1685]:
+                - text: "Para snapshots manuales:"
+                - code [ref=f27e1686]: neonctl branches create --parent production --name backup-YYYYMMDD
+                - text: .
+            - paragraph [ref=f27e1687]:
+              - strong [ref=f27e1688]: Backup manual (export logico)
+              - text: ":"
+            - figure "Ventana de terminal" [ref=f27e1690]:
+              - code [ref=f27e1695]:
+                - generic [ref=f27e1696]: pg_dump $DATABASE_URL > backup_$(date +%Y%m%d).sql
+                - generic [ref=f27e1698]: psql $DATABASE_URL < backup_20260204.sql
+              - button "Copiar al portapapeles" [ref=f27e1701] [cursor=pointer]
+            - separator [ref=f27e1703]
+            - generic [ref=f27e1704]:
+              - heading "CI/CD" [level=2] [ref=f27e1705]
+              - link "Sección titulada «CI/CD»" [ref=f27e1706] [cursor=pointer]:
+                - /url: "#cicd"
+            - generic [ref=f27e1711]:
+              - heading "GitHub Actions - Backend" [level=3] [ref=f27e1712]
+              - link "Sección titulada «GitHub Actions - Backend»" [ref=f27e1713] [cursor=pointer]:
+                - /url: "#github-actions---backend"
+            - paragraph [ref=f27e1718]:
+              - strong [ref=f27e1719]: Archivo
+              - text: ":"
+              - code [ref=f27e1720]: .github/workflows/deploy-backend.yml
+            - figure [ref=f27e1722]:
+              - code [ref=f27e1724]:
+                - generic [ref=f27e1725]: "name: Deploy Backend"
+                - generic [ref=f27e1729]: "on:"
+                - generic [ref=f27e1731]: "push:"
+                - generic [ref=f27e1733]: "branches: [main]"
+                - generic [ref=f27e1735]: "pull_request:"
+                - generic [ref=f27e1737]: "branches: [main]"
+                - generic [ref=f27e1741]: "jobs:"
+                - generic [ref=f27e1743]: "test:"
+                - generic [ref=f27e1745]: "runs-on: ubuntu-latest"
+                - generic [ref=f27e1747]: "env:"
+                - generic [ref=f27e1749]: "FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'"
+                - generic [ref=f27e1751]: "steps:"
+                - generic [ref=f27e1753]: "- uses: actions/checkout@v4"
+                - generic [ref=f27e1758]: "- uses: actions/setup-node@v4"
+                - generic [ref=f27e1761]: "with:"
+                - generic [ref=f27e1763]: "node-version: '22'"
+                - generic [ref=f27e1767]: "- uses: pnpm/action-setup@v4"
+                - generic [ref=f27e1770]: "with:"
+                - generic [ref=f27e1772]: "version: '10'"
+                - generic [ref=f27e1776]: "- run: pnpm install"
+                - generic [ref=f27e1779]: "- run: pnpm run lint"
+                - generic [ref=f27e1782]: "- run: pnpm prisma generate"
+                - generic [ref=f27e1785]: "- run: pnpm run test # bloqueante"
+                - generic [ref=f27e1788]: "- run: pnpm run test:e2e"
+                - generic [ref=f27e1791]: "env:"
+                - generic [ref=f27e1793]: "DATABASE_URL: ${{ secrets.TEST_DATABASE_URL }}"
+                - generic [ref=f27e1797]: "deploy:"
+                - generic [ref=f27e1799]: "needs: test"
+                - generic [ref=f27e1801]: "runs-on: ubuntu-latest"
+                - generic [ref=f27e1803]: "if: github.ref == 'refs/heads/production'"
+                - generic [ref=f27e1805]: "steps:"
+                - generic [ref=f27e1807]: "- uses: actions/checkout@v4"
+                - generic [ref=f27e1812]: "# Render.com auto-deploy en push a production — no requiere step adicional."
+                - generic [ref=f27e1814]: "# Migraciones se aplican en el pre-deploy hook del servicio."
+              - button "Copiar al portapapeles" [ref=f27e1817] [cursor=pointer]
+            - separator [ref=f27e1819]
+            - generic [ref=f27e1820]:
+              - heading "GitHub Actions - Admin Panel" [level=3] [ref=f27e1821]
+              - link "Sección titulada «GitHub Actions - Admin Panel»" [ref=f27e1822] [cursor=pointer]:
+                - /url: "#github-actions---admin-panel"
+            - paragraph [ref=f27e1827]:
+              - strong [ref=f27e1828]: Archivo
+              - text: ":"
+              - code [ref=f27e1829]: .github/workflows/deploy-admin.yml
+            - figure [ref=f27e1831]:
+              - code [ref=f27e1833]:
+                - generic [ref=f27e1834]: "name: Deploy Admin Panel"
+                - generic [ref=f27e1838]: "on:"
+                - generic [ref=f27e1840]: "push:"
+                - generic [ref=f27e1842]: "branches: [main]"
+                - generic [ref=f27e1846]: "jobs:"
+                - generic [ref=f27e1848]: "deploy:"
+                - generic [ref=f27e1850]: "runs-on: ubuntu-latest"
+                - generic [ref=f27e1852]: "steps:"
+                - generic [ref=f27e1854]: "- uses: actions/checkout@v3"
+                - generic [ref=f27e1859]: "- name: Setup Node.js"
+                - generic [ref=f27e1862]: "uses: actions/setup-node@v3"
+                - generic [ref=f27e1864]: "with:"
+                - generic [ref=f27e1866]: "node-version: '20'"
+                - generic [ref=f27e1870]: "- name: Install pnpm"
+                - generic [ref=f27e1873]: "run: npm install -g pnpm"
+                - generic [ref=f27e1877]: "- name: Install dependencies"
+                - generic [ref=f27e1880]: "run: pnpm install"
+                - generic [ref=f27e1884]: "- name: Build"
+                - generic [ref=f27e1887]: "run: pnpm build"
+                - generic [ref=f27e1889]: "env:"
+                - generic [ref=f27e1891]: "NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}"
+                - generic [ref=f27e1895]: "- name: Deploy to Vercel"
+                - generic [ref=f27e1898]: "uses: amondnet/vercel-action@v25"
+                - generic [ref=f27e1900]: "with:"
+                - generic [ref=f27e1902]: "vercel-token: ${{ secrets.VERCEL_TOKEN }}"
+                - generic [ref=f27e1904]: "vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}"
+                - generic [ref=f27e1906]: "vercel-project-id: ${{ secrets.VERCEL_ADMIN_PROJECT_ID }}"
+                - generic [ref=f27e1908]: "vercel-args: '--prod'"
+              - button "Copiar al portapapeles" [ref=f27e1911] [cursor=pointer]
+            - separator [ref=f27e1913]
+            - generic [ref=f27e1914]:
+              - heading "Monitoring" [level=2] [ref=f27e1915]
+              - link "Sección titulada «Monitoring»" [ref=f27e1916] [cursor=pointer]:
+                - /url: "#monitoring"
+            - generic [ref=f27e1921]:
+              - heading "Sentry (Error Tracking)" [level=3] [ref=f27e1922]
+              - link "Sección titulada «Sentry (Error Tracking)»" [ref=f27e1923] [cursor=pointer]:
+                - /url: "#sentry-error-tracking"
+            - paragraph [ref=f27e1928]:
+              - strong [ref=f27e1929]: Backend (NestJS)
+              - text: ":"
+            - figure "Ventana de terminal" [ref=f27e1931]:
+              - code [ref=f27e1936]:
+                - generic [ref=f27e1937]: npm install @sentry/node @sentry/tracing
+              - button "Copiar al portapapeles" [ref=f27e1940] [cursor=pointer]
+            - paragraph [ref=f27e1942]:
+              - strong [ref=f27e1943]: main.ts
+              - text: ":"
+            - figure [ref=f27e1945]:
+              - code [ref=f27e1947]:
+                - generic [ref=f27e1948]: import * as Sentry from '@sentry/node';
+                - generic [ref=f27e1952]: "Sentry.init({"
+                - generic [ref=f27e1954]: "dsn: process.env.SENTRY_DSN,"
+                - generic [ref=f27e1957]: "environment: process.env.NODE_ENV,"
+                - generic [ref=f27e1960]: "tracesSampleRate: 1.0,"
+                - generic [ref=f27e1963]: "});"
+                - generic [ref=f27e1967]: app.use(Sentry.Handlers.requestHandler());
+                - generic [ref=f27e1969]: app.use(Sentry.Handlers.tracingHandler());
+                - generic [ref=f27e1973]: // Al final
+                - generic [ref=f27e1975]: app.use(Sentry.Handlers.errorHandler());
+              - button "Copiar al portapapeles" [ref=f27e1978] [cursor=pointer]
+            - separator [ref=f27e1980]
+            - paragraph [ref=f27e1981]:
+              - strong [ref=f27e1982]: Frontend (Next.js)
+              - text: ":"
+            - figure "Ventana de terminal" [ref=f27e1984]:
+              - code [ref=f27e1989]:
+                - generic [ref=f27e1990]: npx @sentry/wizard@latest -i nextjs
+              - button "Copiar al portapapeles" [ref=f27e1993] [cursor=pointer]
+            - paragraph [ref=f27e1995]:
+              - strong [ref=f27e1996]: Configuracion automatica
+              - text: en
+              - code [ref=f27e1997]: sentry.client.config.ts
+              - text: "y"
+              - code [ref=f27e1998]: sentry.server.config.ts
+              - text: .
+            - separator [ref=f27e1999]
+            - paragraph [ref=f27e2000]:
+              - strong [ref=f27e2001]: Mobile (Flutter)
+              - text: ":"
+            - figure [ref=f27e2003]:
+              - code [ref=f27e2005]:
+                - generic [ref=f27e2006]: "dependencies:"
+                - generic [ref=f27e2008]: "sentry_flutter: ^7.14.0"
+              - button "Copiar al portapapeles" [ref=f27e2011] [cursor=pointer]
+            - figure [ref=f27e2014]:
+              - code [ref=f27e2016]:
+                - generic [ref=f27e2017]: import 'package:sentry_flutter/sentry_flutter.dart';
+                - generic [ref=f27e2021]: "Future<void> main() async {"
+                - generic [ref=f27e2023]: await SentryFlutter.init(
+                - generic [ref=f27e2025]: "(options) {"
+                - generic [ref=f27e2028]: options.dsn = 'https://...@sentry.io/...';
+                - generic [ref=f27e2031]: options.tracesSampleRate = 1.0;
+                - generic [ref=f27e2034]: "},"
+                - generic [ref=f27e2037]: "appRunner: () => runApp(MyApp()),"
+                - generic [ref=f27e2040]: );
+                - generic [ref=f27e2043]: "}"
+              - button "Copiar al portapapeles" [ref=f27e2046] [cursor=pointer]
+            - separator [ref=f27e2048]
+            - generic [ref=f27e2049]:
+              - heading "Vercel Analytics" [level=3] [ref=f27e2050]
+              - link "Sección titulada «Vercel Analytics»" [ref=f27e2051] [cursor=pointer]:
+                - /url: "#vercel-analytics"
+            - paragraph [ref=f27e2056]:
+              - strong [ref=f27e2057]: Automatico
+              - text: para proyectos en Vercel.
+            - paragraph [ref=f27e2058]:
+              - strong [ref=f27e2059]: Dashboard
+              - text: ": Vercel -> Proyecto -> Analytics"
+            - paragraph [ref=f27e2060]: "Metricas:"
+            - list [ref=f27e2061]:
+              - listitem [ref=f27e2062]: Requests por segundo
+              - listitem [ref=f27e2063]: Latencia p50, p75, p99
+              - listitem [ref=f27e2064]: Errores 4xx, 5xx
+              - listitem [ref=f27e2065]: Bandwidth
+            - separator [ref=f27e2066]
+            - generic [ref=f27e2067]:
+              - heading "Uptime Monitoring (Uptime Robot)" [level=3] [ref=f27e2068]
+              - link "Sección titulada «Uptime Monitoring (Uptime Robot)»" [ref=f27e2069] [cursor=pointer]:
+                - /url: "#uptime-monitoring-uptime-robot"
+            - list [ref=f27e2074]:
+              - listitem [ref=f27e2075]:
+                - paragraph [ref=f27e2076]:
+                  - text: Crear cuenta en
+                  - link "Uptime Robot" [ref=f27e2077] [cursor=pointer]:
+                    - /url: https://uptimerobot.com
+              - listitem [ref=f27e2078]:
+                - paragraph [ref=f27e2079]: "Agregar monitors:"
+                - list [ref=f27e2080]:
+                  - listitem [ref=f27e2081]:
+                    - code [ref=f27e2082]: https://api.sacdia.app/api/v1/health
+                    - text: (cada 5 min)
+                  - listitem [ref=f27e2083]:
+                    - code [ref=f27e2084]: https://admin.sacdia.app
+                    - text: (cada 5 min)
+              - listitem [ref=f27e2085]:
+                - paragraph [ref=f27e2086]: "Configurar alertas:"
+                - list [ref=f27e2087]:
+                  - listitem [ref=f27e2088]: Email
+                  - listitem [ref=f27e2089]: Slack
+                  - listitem [ref=f27e2090]: SMS (opcional)
+            - separator [ref=f27e2091]
+            - generic [ref=f27e2092]:
+              - heading "Troubleshooting" [level=2] [ref=f27e2093]
+              - link "Sección titulada «Troubleshooting»" [ref=f27e2094] [cursor=pointer]:
+                - /url: "#troubleshooting"
+            - generic [ref=f27e2099]:
+              - heading "Backend no levanta en Vercel" [level=3] [ref=f27e2100]
+              - link "Sección titulada «Backend no levanta en Vercel»" [ref=f27e2101] [cursor=pointer]:
+                - /url: "#backend-no-levanta-en-vercel"
+            - paragraph [ref=f27e2106]:
+              - strong [ref=f27e2107]: Problema
+              - text: ":"
+              - code [ref=f27e2108]: "Error: Cannot find module 'dist/main'"
+            - paragraph [ref=f27e2109]:
+              - strong [ref=f27e2110]: Solucion
+              - text: ":"
+            - list [ref=f27e2111]:
+              - listitem [ref=f27e2112]:
+                - text: Verificar
+                - code [ref=f27e2113]: vercel.json
+                - text: apunta a
+                - code [ref=f27e2114]: src/main.ts
+              - listitem [ref=f27e2115]:
+                - text: Verificar
+                - code [ref=f27e2116]: package.json
+                - text: tiene script
+                - code [ref=f27e2117]: vercel-build
+              - listitem [ref=f27e2118]:
+                - text: "Revisar logs:"
+                - code [ref=f27e2119]: vercel logs [deployment-url]
+            - separator [ref=f27e2120]
+            - generic [ref=f27e2121]:
+              - heading "Migraciones de Prisma fallan" [level=3] [ref=f27e2122]
+              - link "Sección titulada «Migraciones de Prisma fallan»" [ref=f27e2123] [cursor=pointer]:
+                - /url: "#migraciones-de-prisma-fallan"
+            - paragraph [ref=f27e2128]:
+              - strong [ref=f27e2129]: Problema
+              - text: ":"
+              - code [ref=f27e2130]: "Error: Migration failed"
+            - paragraph [ref=f27e2131]:
+              - strong [ref=f27e2132]: Solucion
+              - text: ":"
+            - list [ref=f27e2133]:
+              - listitem [ref=f27e2134]:
+                - paragraph [ref=f27e2135]: "Resetear DB (solo en staging):"
+                - figure "Ventana de terminal" [ref=f27e2137]:
+                  - code [ref=f27e2142]:
+                    - generic [ref=f27e2143]: npx prisma migrate reset
+                  - button "Copiar al portapapeles" [ref=f27e2146] [cursor=pointer]
+              - listitem [ref=f27e2148]:
+                - paragraph [ref=f27e2149]: "En produccion, crear migracion manual:"
+                - figure "Ventana de terminal" [ref=f27e2151]:
+                  - code [ref=f27e2156]:
+                    - generic [ref=f27e2157]: npx prisma migrate deploy --skip-generate
+                  - button "Copiar al portapapeles" [ref=f27e2160] [cursor=pointer]
+            - separator [ref=f27e2162]
+            - generic [ref=f27e2163]:
+              - heading "CORS Errors en Frontend" [level=3] [ref=f27e2164]
+              - link "Sección titulada «CORS Errors en Frontend»" [ref=f27e2165] [cursor=pointer]:
+                - /url: "#cors-errors-en-frontend"
+            - paragraph [ref=f27e2170]:
+              - strong [ref=f27e2171]: Problema
+              - text: ":"
+              - code [ref=f27e2172]: Access-Control-Allow-Origin error
+            - paragraph [ref=f27e2173]:
+              - strong [ref=f27e2174]: Solucion
+              - text: ": Verificar"
+              - code [ref=f27e2175]: CORS_ORIGIN
+              - text: "en backend incluye URL del frontend:"
+            - figure [ref=f27e2177]:
+              - code [ref=f27e2179]:
+                - generic [ref=f27e2180]: "app.enableCors({"
+                - generic [ref=f27e2182]: "origin: process.env.CORS_ORIGIN?.split(','),"
+                - generic [ref=f27e2185]: "credentials: true,"
+                - generic [ref=f27e2188]: "});"
+              - button "Copiar al portapapeles" [ref=f27e2191] [cursor=pointer]
+            - separator [ref=f27e2193]
+            - generic [ref=f27e2194]:
+              - heading "Mobile App crashes al abrir" [level=3] [ref=f27e2195]
+              - link "Sección titulada «Mobile App crashes al abrir»" [ref=f27e2196] [cursor=pointer]:
+                - /url: "#mobile-app-crashes-al-abrir"
+            - paragraph [ref=f27e2201]:
+              - strong [ref=f27e2202]: Problema
+              - text: ": App cierra inmediatamente despues de abrir"
+            - paragraph [ref=f27e2203]:
+              - strong [ref=f27e2204]: Solucion
+              - text: ":"
+            - list [ref=f27e2205]:
+              - listitem [ref=f27e2206]:
+                - paragraph [ref=f27e2207]: "Revisar logs:"
+                - figure "Ventana de terminal" [ref=f27e2209]:
+                  - code [ref=f27e2214]:
+                    - generic [ref=f27e2215]: "# iOS"
+                    - generic [ref=f27e2217]: flutter logs
+                    - generic [ref=f27e2221]: "# Android"
+                    - generic [ref=f27e2223]: adb logcat
+                  - button "Copiar al portapapeles" [ref=f27e2226] [cursor=pointer]
+              - listitem [ref=f27e2228]:
+                - paragraph [ref=f27e2229]:
+                  - text: Verificar configuracion de Better Auth + base URL en
+                  - code [ref=f27e2230]: main.dart
+                  - text: (dart-define
+                  - code [ref=f27e2231]: API_URL
+                  - text: )
+              - listitem [ref=f27e2232]:
+                - paragraph [ref=f27e2233]:
+                  - text: Verificar permisos en
+                  - code [ref=f27e2234]: AndroidManifest.xml
+                  - text: /
+                  - code [ref=f27e2235]: Info.plist
+            - separator [ref=f27e2236]
+            - generic [ref=f27e2237]:
+              - heading "Checklist de Deployment" [level=2] [ref=f27e2238]
+              - link "Sección titulada «Checklist de Deployment»" [ref=f27e2239] [cursor=pointer]:
+                - /url: "#checklist-de-deployment"
+            - generic [ref=f27e2244]:
+              - heading "Pre-Deployment" [level=3] [ref=f27e2245]
+              - link "Sección titulada «Pre-Deployment»" [ref=f27e2246] [cursor=pointer]:
+                - /url: "#pre-deployment"
+            - list [ref=f27e2251]:
+              - listitem [ref=f27e2252]:
+                - checkbox [disabled] [ref=f27e2253]
+                - text: Tests passing (unit + E2E)
+              - listitem [ref=f27e2254]:
+                - checkbox [disabled] [ref=f27e2255]
+                - text: Linter sin errores
+              - listitem [ref=f27e2256]:
+                - checkbox [disabled] [ref=f27e2257]
+                - text: Migraciones creadas
+              - listitem [ref=f27e2258]:
+                - checkbox [disabled] [ref=f27e2259]
+                - text: Variables de entorno configuradas
+              - listitem [ref=f27e2260]:
+                - checkbox [disabled] [ref=f27e2261]
+                - text: Secrets actualizados
+              - listitem [ref=f27e2262]:
+                - checkbox [disabled] [ref=f27e2263]
+                - text: Documentacion actualizada
+            - generic [ref=f27e2264]:
+              - heading "Deployment" [level=3] [ref=f27e2265]
+              - link "Sección titulada «Deployment»" [ref=f27e2266] [cursor=pointer]:
+                - /url: "#deployment"
+            - list [ref=f27e2271]:
+              - listitem [ref=f27e2272]:
+                - checkbox [disabled] [ref=f27e2273]
+                - text: Deploy a staging primero
+              - listitem [ref=f27e2274]:
+                - checkbox [disabled] [ref=f27e2275]
+                - text: Smoke tests en staging
+              - listitem [ref=f27e2276]:
+                - checkbox [disabled] [ref=f27e2277]
+                - text: Ejecutar migraciones
+              - listitem [ref=f27e2278]:
+                - checkbox [disabled] [ref=f27e2279]
+                - text: Deploy a produccion
+              - listitem [ref=f27e2280]:
+                - checkbox [disabled] [ref=f27e2281]
+                - text: Verificar health endpoint
+              - listitem [ref=f27e2282]:
+                - checkbox [disabled] [ref=f27e2283]
+                - text: Verificar Swagger UI
+              - listitem [ref=f27e2284]:
+                - checkbox [disabled] [ref=f27e2285]
+                - text: Tests E2E contra produccion
+            - generic [ref=f27e2286]:
+              - heading "Post-Deployment" [level=3] [ref=f27e2287]
+              - link "Sección titulada «Post-Deployment»" [ref=f27e2288] [cursor=pointer]:
+                - /url: "#post-deployment"
+            - list [ref=f27e2293]:
+              - listitem [ref=f27e2294]:
+                - checkbox [disabled] [ref=f27e2295]
+                - text: Monitoring activo (Sentry, Vercel Analytics)
+              - listitem [ref=f27e2296]:
+                - checkbox [disabled] [ref=f27e2297]
+                - text: Uptime checks configurados
+              - listitem [ref=f27e2298]:
+                - checkbox [disabled] [ref=f27e2299]
+                - text: Backups verificados
+              - listitem [ref=f27e2300]:
+                - checkbox [disabled] [ref=f27e2301]
+                - text: Team notificado
+              - listitem [ref=f27e2302]:
+                - checkbox [disabled] [ref=f27e2303]
+                - text: Changelog actualizado
+          - generic [ref=f27e2304]:
+            - paragraph [ref=f27e2306]:
+              - text: "Última actualización:"
+              - time [ref=f27e2307]: 20 ago 2026
+            - generic [ref=f27e2308]:
+              - link [ref=f27e2309] [cursor=pointer]:
+                - /url: /guias/admin-integration/
+                - generic [ref=f27e2312]: Página anteriorAdmin Integration
+              - link [ref=f27e2313] [cursor=pointer]:
+                - /url: /guias/developer-workflow/
+                - generic [ref=f27e2316]: Siguiente páginaDeveloper Workflow
+  - generic [ref=f27e2319]:
+    - button [ref=f27e2320]
+    - button [ref=f27e2326]
+    - button [ref=f27e2330]
+    - button [ref=f27e2335]

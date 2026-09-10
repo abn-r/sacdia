@@ -1,0 +1,530 @@
+- generic [active] [ref=f1e1]:
+  - link "Ir al contenido" [ref=f1e2] [cursor=pointer]:
+    - /url: "#_top"
+  - generic [ref=f1e3]:
+    - banner [ref=f1e4]:
+      - generic [ref=f1e5]:
+        - generic [ref=f1e7]:
+          - link "Inicio — Manual administrativo" [ref=f1e8] [cursor=pointer]:
+            - /url: /
+            - generic [ref=f1e9]: S
+            - generic [ref=f1e10]:
+              - generic [ref=f1e11]: SACDIA
+              - generic [ref=f1e12]: Administrativo
+          - navigation "Cambiar portal de documentación" [ref=f1e13]:
+            - link "Operativo" [ref=f1e14] [cursor=pointer]:
+              - /url: http://localhost:4321
+            - link "Administrativo" [ref=f1e15] [cursor=pointer]:
+              - /url: http://localhost:4322
+            - link "Técnico" [ref=f1e16] [cursor=pointer]:
+              - /url: http://localhost:4323
+        - button "Buscar" [ref=f1e19] [cursor=pointer]:
+          - generic [ref=f1e23]:
+            - generic [ref=f1e24]: ⌘
+            - generic [ref=f1e25]: K
+        - generic [ref=f1e29]:
+          - generic [ref=f1e30]: Seleccionar tema
+          - combobox "Seleccionar tema" [ref=f1e31] [cursor=pointer]:
+            - option "Oscuro"
+            - option "Claro"
+            - option "Automático" [selected]
+    - navigation "Primario":
+      - list [ref=f1e35]:
+        - listitem [ref=f1e36]:
+          - group [ref=f1e37]:
+            - generic "Primeros pasos" [ref=f1e38] [cursor=pointer]
+            - list [ref=f1e42]:
+              - listitem [ref=f1e43]:
+                - link "Primeros pasos en el panel" [ref=f1e44] [cursor=pointer]:
+                  - /url: /primeros-pasos/
+              - listitem [ref=f1e45]:
+                - link "Acceso al panel" [ref=f1e46] [cursor=pointer]:
+                  - /url: /primeros-pasos/acceso/
+              - listitem [ref=f1e47]:
+                - link "Páginas no disponibles" [ref=f1e48] [cursor=pointer]:
+                  - /url: /primeros-pasos/paginas-no-disponibles/
+              - listitem [ref=f1e49]:
+                - link "Tablero administrativo" [ref=f1e50] [cursor=pointer]:
+                  - /url: /primeros-pasos/tablero/
+        - listitem [ref=f1e51]:
+          - group [ref=f1e52]:
+            - generic "Clubes" [ref=f1e53] [cursor=pointer]
+            - list [ref=f1e57]:
+              - listitem [ref=f1e58]:
+                - link "Gestión de clubes y personas" [ref=f1e59] [cursor=pointer]:
+                  - /url: /clubes/
+              - listitem [ref=f1e60]:
+                - link "Actividades y asistencia de clubes" [ref=f1e61] [cursor=pointer]:
+                  - /url: /clubes/actividades/
+              - listitem [ref=f1e62]:
+                - link "Administración de camporees" [ref=f1e63] [cursor=pointer]:
+                  - /url: /clubes/campamentos/
+              - listitem [ref=f1e64]:
+                - link "Coordinación territorial" [ref=f1e65] [cursor=pointer]:
+                  - /url: /clubes/coordinacion/
+              - listitem [ref=f1e66]:
+                - link "Gestión de clubes" [ref=f1e67] [cursor=pointer]:
+                  - /url: /clubes/gestion-clubes/
+              - listitem [ref=f1e68]:
+                - link "Inscripciones anuales" [ref=f1e69] [cursor=pointer]:
+                  - /url: /clubes/inscripciones/
+              - listitem [ref=f1e70]:
+                - link "Solicitudes de cargos y traslados" [ref=f1e71] [cursor=pointer]:
+                  - /url: /clubes/solicitudes/
+              - listitem [ref=f1e72]:
+                - link "Solicitudes de membresía" [ref=f1e73] [cursor=pointer]:
+                  - /url: /clubes/solicitudes-membresia/
+              - listitem [ref=f1e74]:
+                - link "Administración de usuarios" [ref=f1e75] [cursor=pointer]:
+                  - /url: /clubes/usuarios/
+        - listitem [ref=f1e76]:
+          - group [ref=f1e77]:
+            - generic "Finanzas" [ref=f1e78] [cursor=pointer]
+            - list [ref=f1e82]:
+              - listitem [ref=f1e83]:
+                - link "Finanzas y seguros" [ref=f1e84] [cursor=pointer]:
+                  - /url: /finanzas/
+              - listitem [ref=f1e85]:
+                - link "Finanzas de clubes" [ref=f1e86] [cursor=pointer]:
+                  - /url: /finanzas/finanzas-clubes/
+              - listitem [ref=f1e87]:
+                - link "Revisión de órdenes de pago" [ref=f1e88] [cursor=pointer]:
+                  - /url: /finanzas/ordenes-pago/
+              - listitem [ref=f1e89]:
+                - link "Gestión de seguros" [ref=f1e90] [cursor=pointer]:
+                  - /url: /finanzas/seguros/
+        - listitem [ref=f1e91]:
+          - group [ref=f1e92]:
+            - generic "Materiales" [ref=f1e93] [cursor=pointer]
+            - list [ref=f1e97]:
+              - listitem [ref=f1e98]:
+                - link "Materiales, inventario y recursos" [ref=f1e99] [cursor=pointer]:
+                  - /url: /materiales/
+              - listitem [ref=f1e100]:
+                - link "Inventario de clubes" [ref=f1e101] [cursor=pointer]:
+                  - /url: /materiales/inventario-clubes/
+              - listitem [ref=f1e102]:
+                - link "Publicación de recursos" [ref=f1e103] [cursor=pointer]:
+                  - /url: /materiales/recursos/
+              - listitem [ref=f1e104]:
+                - link "Solicitudes y entrega de materiales" [ref=f1e105] [cursor=pointer]:
+                  - /url: /materiales/solicitudes-materiales/
+        - listitem [ref=f1e106]:
+          - group [ref=f1e107]:
+            - generic "Investiduras" [ref=f1e108] [cursor=pointer]
+            - list [ref=f1e112]:
+              - listitem [ref=f1e113]:
+                - link "Formación, validaciones y análisis" [ref=f1e114] [cursor=pointer]:
+                  - /url: /investiduras/
+              - listitem [ref=f1e115]:
+                - link "Revisión de cargas de certificados" [ref=f1e116] [cursor=pointer]:
+                  - /url: /investiduras/cargas-certificados/
+              - listitem [ref=f1e117]:
+                - link "Carpetas anuales y clasificación" [ref=f1e118] [cursor=pointer]:
+                  - /url: /investiduras/carpetas-anuales/
+              - listitem [ref=f1e119]:
+                - link "Certificaciones de Guías Mayores" [ref=f1e120] [cursor=pointer]:
+                  - /url: /investiduras/certificaciones/
+              - listitem [ref=f1e121]:
+                - link "Cierre de año eclesiástico" [ref=f1e122] [cursor=pointer]:
+                  - /url: /investiduras/cierre-anio/
+              - listitem [ref=f1e123]:
+                - link "Clasificaciones por sección" [ref=f1e124] [cursor=pointer]:
+                  - /url: /investiduras/clasificaciones-seccion/
+              - listitem [ref=f1e125]:
+                - link "Informes mensuales y supervisión" [ref=f1e126] [cursor=pointer]:
+                  - /url: /investiduras/informes/
+              - listitem [ref=f1e127]:
+                - link "Validación de investiduras" [ref=f1e128] [cursor=pointer]:
+                  - /url: /investiduras/investiduras/
+              - listitem [ref=f1e129]:
+                - link "Miembro del mes" [ref=f1e130] [cursor=pointer]:
+                  - /url: /investiduras/miembro-del-mes/
+              - listitem [ref=f1e131]:
+                - link "Pesos de clasificación" [ref=f1e132] [cursor=pointer]:
+                  - /url: /investiduras/pesos-clasificacion/
+        - listitem [ref=f1e133]:
+          - group [ref=f1e134]:
+            - generic "Configuración" [ref=f1e135] [cursor=pointer]
+            - list [ref=f1e139]:
+              - listitem [ref=f1e140]:
+                - link "Configuración del sistema" [ref=f1e141] [cursor=pointer]:
+                  - /url: /configuracion/
+              - listitem [ref=f1e142]:
+                - link "Catálogos del sistema" [ref=f1e143] [cursor=pointer]:
+                  - /url: /configuracion/catalogos/
+              - listitem [ref=f1e144]:
+                - link "Categorías de puntuación" [ref=f1e145] [cursor=pointer]:
+                  - /url: /configuracion/categorias-puntuacion/
+              - listitem [ref=f1e146]:
+                - link "Configuración de logros" [ref=f1e147] [cursor=pointer]:
+                  - /url: /configuracion/logros/
+              - listitem [ref=f1e148]:
+                - link "Administración de notificaciones" [ref=f1e149] [cursor=pointer]:
+                  - /url: /configuracion/notificaciones/
+              - listitem [ref=f1e150]:
+                - link "Roles y permisos" [ref=f1e151] [cursor=pointer]:
+                  - /url: /configuracion/roles-permisos/
+              - listitem [ref=f1e152]:
+                - link "Centro de configuración" [ref=f1e153] [cursor=pointer]:
+                  - /url: /configuracion/sistema/
+              - listitem [ref=f1e154]:
+                - link "Trabajos programados" [ref=f1e155] [cursor=pointer]:
+                  - /url: /configuracion/trabajos-programados/
+        - listitem [ref=f1e156]:
+          - group [ref=f1e157]:
+            - generic "Procesos" [ref=f1e158] [cursor=pointer]
+            - list [ref=f1e162]:
+              - listitem [ref=f1e163]:
+                - link "Procesos de SACDIA" [ref=f1e164] [cursor=pointer]:
+                  - /url: /procesos/
+              - listitem [ref=f1e165]:
+                - link "Planear una actividad y registrar asistencia" [ref=f1e166] [cursor=pointer]:
+                  - /url: /procesos/actividad-y-asistencia/
+              - listitem [ref=f1e167]:
+                - link "Alta de cuenta y membresía" [ref=f1e168] [cursor=pointer]:
+                  - /url: /procesos/alta-y-membresia/
+              - listitem [ref=f1e169]:
+                - link "Reconocer formación desde certificados" [ref=f1e170] [cursor=pointer]:
+                  - /url: /procesos/carga-certificados/
+              - listitem [ref=f1e171]:
+                - link "Completar y validar la carpeta anual" [ref=f1e172] [cursor=pointer]:
+                  - /url: /procesos/carpeta-anual/
+              - listitem [ref=f1e173]:
+                - link "Registrar y supervisar finanzas" [ref=f1e174] [cursor=pointer]:
+                  - /url: /procesos/cierre-financiero/
+              - listitem [ref=f1e175]:
+                - link "Publicar una comunicación o recurso" [ref=f1e176] [cursor=pointer]:
+                  - /url: /procesos/comunicacion-recursos/
+              - listitem [ref=f1e177]:
+                - link "Registrar puntajes y consultar clasificaciones" [ref=f1e178] [cursor=pointer]:
+                  - /url: /procesos/evaluacion-y-clasificacion/
+              - listitem [ref=f1e179]:
+                - link "Completar formación y solicitar investidura" [ref=f1e180] [cursor=pointer]:
+                  - /url: /procesos/formacion-e-investidura/
+              - listitem [ref=f1e181]:
+                - link "Gestionar un club y su sección" [ref=f1e182] [cursor=pointer]:
+                  - /url: /procesos/gestion-club-seccion/
+              - listitem [ref=f1e183]:
+                - link "Completar y supervisar el informe mensual" [ref=f1e184] [cursor=pointer]:
+                  - /url: /procesos/informe-mensual/
+              - listitem [ref=f1e185]:
+                - link "Inscribir y operar un camporee" [ref=f1e186] [cursor=pointer]:
+                  - /url: /procesos/participacion-camporee/
+              - listitem [ref=f1e187]:
+                - link "Registrar seguro mediante orden de pago" [ref=f1e188] [cursor=pointer]:
+                  - /url: /procesos/seguro-y-orden-pago/
+              - listitem [ref=f1e189]:
+                - link "Solicitar, pagar y recibir materiales" [ref=f1e190] [cursor=pointer]:
+                  - /url: /procesos/solicitud-materiales/
+              - listitem [ref=f1e191]:
+                - link "Trasladar un miembro" [ref=f1e192] [cursor=pointer]:
+                  - /url: /procesos/traslado-miembro/
+    - generic [ref=f1e194]:
+      - complementary [ref=f1e195]:
+        - navigation [ref=f1e200]:
+          - heading "En esta página" [level=2] [ref=f1e201]
+          - list [ref=f1e202]:
+            - listitem [ref=f1e203]:
+              - link "Sinopsis" [ref=f1e204] [cursor=pointer]:
+                - /url: "#_top"
+            - listitem [ref=f1e205]:
+              - link "Resultado esperado" [ref=f1e206] [cursor=pointer]:
+                - /url: "#resultado-esperado"
+            - listitem [ref=f1e207]:
+              - link "Acceso requerido" [ref=f1e208] [cursor=pointer]:
+                - /url: "#acceso-requerido"
+            - listitem [ref=f1e209]:
+              - link "Ruta incluida" [ref=f1e210] [cursor=pointer]:
+                - /url: "#ruta-incluida"
+            - listitem [ref=f1e211]:
+              - link "Reconoce la pantalla" [ref=f1e212] [cursor=pointer]:
+                - /url: "#reconoce-la-pantalla"
+            - listitem [ref=f1e213]:
+              - link "Seleccionar la sección" [ref=f1e214] [cursor=pointer]:
+                - /url: "#seleccionar-la-sección"
+            - listitem [ref=f1e215]:
+              - link "Revisar antes de decidir" [ref=f1e216] [cursor=pointer]:
+                - /url: "#revisar-antes-de-decidir"
+            - listitem [ref=f1e217]:
+              - link "Aprobar" [ref=f1e218] [cursor=pointer]:
+                - /url: "#aprobar"
+            - listitem [ref=f1e219]:
+              - link "Rechazar" [ref=f1e220] [cursor=pointer]:
+                - /url: "#rechazar"
+            - listitem [ref=f1e221]:
+              - link "Estados y vencimiento" [ref=f1e222] [cursor=pointer]:
+                - /url: "#estados-y-vencimiento"
+            - listitem [ref=f1e223]:
+              - link "Limitación del plazo" [ref=f1e224] [cursor=pointer]:
+                - /url: "#limitación-del-plazo"
+            - listitem [ref=f1e225]:
+              - link "Limitación de auditoría" [ref=f1e226] [cursor=pointer]:
+                - /url: "#limitación-de-auditoría"
+            - listitem [ref=f1e227]:
+              - link "Cómo verificarlo" [ref=f1e228] [cursor=pointer]:
+                - /url: "#cómo-verificarlo"
+            - listitem [ref=f1e229]:
+              - link "Errores frecuentes" [ref=f1e230] [cursor=pointer]:
+                - /url: "#errores-frecuentes"
+            - listitem [ref=f1e231]:
+              - link "Procesos relacionados" [ref=f1e232] [cursor=pointer]:
+                - /url: "#procesos-relacionados"
+            - listitem [ref=f1e233]:
+              - link "Fuente de verificación" [ref=f1e234] [cursor=pointer]:
+                - /url: "#fuente-de-verificación"
+      - main [ref=f1e236]:
+        - heading "Solicitudes de membresía" [level=1] [ref=f1e239]
+        - generic [ref=f1e241]:
+          - generic [ref=f1e242]:
+            - paragraph [ref=f1e243]: Esta bandeja corresponde únicamente a las solicitudes de ingreso como miembro. Las solicitudes de cargos y los traslados siguen recorridos separados.
+            - generic [ref=f1e244]:
+              - heading "Resultado esperado" [level=2] [ref=f1e245]
+              - link "Sección titulada «Resultado esperado»" [ref=f1e246] [cursor=pointer]:
+                - /url: "#resultado-esperado"
+            - paragraph [ref=f1e251]: Podrás revisar la sección correcta, decidir una solicitud pendiente y confirmar que desapareció de la cola sin duplicar asignaciones.
+            - generic [ref=f1e252]:
+              - heading "Acceso requerido" [level=2] [ref=f1e253]
+              - link "Sección titulada «Acceso requerido»" [ref=f1e254] [cursor=pointer]:
+                - /url: "#acceso-requerido"
+            - list [ref=f1e259]:
+              - listitem [ref=f1e260]: Sesión válida y un rol admitido en el panel administrativo.
+              - listitem [ref=f1e261]:
+                - text: Permiso
+                - code [ref=f1e262]: club_members:approve
+                - text: dentro de la sección que vas a revisar.
+            - paragraph [ref=f1e263]:
+              - text: "Los cargos de club no obtienen acceso al panel solo por su cargo: deben revisar desde"
+              - strong [ref=f1e264]: Miembros → Solicitudes
+              - text: en la app cuando esa superficie muestre la acción. El backend valida el permiso y el alcance de cada decisión. Abrir la ruta no concede acceso a secciones fuera del cargo activo.
+            - generic [ref=f1e265]:
+              - heading "Ruta incluida" [level=2] [ref=f1e266]
+              - link "Sección titulada «Ruta incluida»" [ref=f1e267] [cursor=pointer]:
+                - /url: "#ruta-incluida"
+            - paragraph [ref=f1e272]:
+              - code [ref=f1e273]: /dashboard/requests/membership
+            - generic [ref=f1e274]:
+              - heading "Reconoce la pantalla" [level=2] [ref=f1e275]
+              - link "Sección titulada «Reconoce la pantalla»" [ref=f1e276] [cursor=pointer]:
+                - /url: "#reconoce-la-pantalla"
+            - figure "Confirma la sección antes de decidir; la bandeja contiene solo solicitudes en estado pending y con la asignación activa dentro del contexto elegido." [ref=f1e281]:
+              - img "Panel de Solicitudes de Membresía con selector de sección, contador de pendientes y botón Actualizar" [ref=f1e282]
+            - generic [ref=f1e284]:
+              - heading "Seleccionar la sección" [level=2] [ref=f1e285]
+              - link "Sección titulada «Seleccionar la sección»" [ref=f1e286] [cursor=pointer]:
+                - /url: "#seleccionar-la-sección"
+            - list [ref=f1e291]:
+              - listitem [ref=f1e292]:
+                - text: Abre
+                - strong [ref=f1e293]: Solicitudes → Membresía
+                - text: .
+              - listitem [ref=f1e294]:
+                - text: Revisa el selector
+                - strong [ref=f1e295]: Sección del club
+                - text: antes de utilizar la tabla.
+              - listitem [ref=f1e296]: El panel selecciona inicialmente la primera sección disponible; no supongas que es la que vas a operar.
+              - listitem [ref=f1e297]:
+                - text: Elige la opción identificada por
+                - strong [ref=f1e298]: Club · Tipo de sección
+                - text: .
+              - listitem [ref=f1e299]: Espera a que el contador y la tabla terminen de actualizarse.
+            - paragraph [ref=f1e300]: Si aparece un error de permisos, confirma tu cargo y el contexto. No intentes resolverlo cambiando manualmente el identificador de la URL.
+            - generic [ref=f1e301]:
+              - heading "Revisar antes de decidir" [level=2] [ref=f1e302]
+              - link "Sección titulada «Revisar antes de decidir»" [ref=f1e303] [cursor=pointer]:
+                - /url: "#revisar-antes-de-decidir"
+            - paragraph [ref=f1e308]:
+              - text: La cola muestra únicamente asignaciones en estado
+              - code [ref=f1e309]: pending
+              - text: y con la bandera
+              - code [ref=f1e310]: "active: true"
+              - text: ", ordenadas desde la solicitud más antigua. Aquí"
+              - code [ref=f1e311]: active
+              - text: "describe la vigencia del registro, no el estado aprobado de la membresía. Antes de actuar, verifica:"
+            - list [ref=f1e312]:
+              - listitem [ref=f1e313]: nombre y correo de la persona;
+              - listitem [ref=f1e314]: cargo solicitado, normalmente miembro;
+              - listitem [ref=f1e315]: fecha en que se creó la solicitud;
+              - listitem [ref=f1e316]: fecha y hora de vencimiento;
+              - listitem [ref=f1e317]: club y sección seleccionados en el filtro.
+            - paragraph [ref=f1e318]:
+              - text: Un icono de reloj resalta las solicitudes que vencen en menos de
+              - strong [ref=f1e319]: 48 horas
+              - text: . Priorízalas, pero no apruebes sin confirmar la identidad y la sección.
+            - generic [ref=f1e320]:
+              - heading "Aprobar" [level=2] [ref=f1e321]
+              - link "Sección titulada «Aprobar»" [ref=f1e322] [cursor=pointer]:
+                - /url: "#aprobar"
+            - list [ref=f1e327]:
+              - listitem [ref=f1e328]: Revisa toda la fila.
+              - listitem [ref=f1e329]: Pulsa el icono de aprobación una sola vez.
+              - listitem [ref=f1e330]: Espera el mensaje de confirmación y la actualización automática de la tabla.
+              - listitem [ref=f1e331]: Confirma que la persona ya no aparece en pendientes.
+            - paragraph [ref=f1e332]:
+              - text: "La aprobación no abre un diálogo de confirmación: el clic envía la decisión inmediatamente. El estado cambia a"
+              - code [ref=f1e333]: active
+              - text: ", se elimina la fecha de vencimiento y se invalida el contexto de autorización para que la app reciba los permisos del cargo."
+            - generic [ref=f1e334]:
+              - heading "Rechazar" [level=2] [ref=f1e335]
+              - link "Sección titulada «Rechazar»" [ref=f1e336] [cursor=pointer]:
+                - /url: "#rechazar"
+            - list [ref=f1e341]:
+              - listitem [ref=f1e342]: Pulsa el icono de rechazo.
+              - listitem [ref=f1e343]: Revisa nuevamente el nombre mostrado en el diálogo.
+              - listitem [ref=f1e344]:
+                - text: Escribe una razón clara cuando ayude a la persona a corregir la solicitud. El
+                - strong [ref=f1e345]: motivo es opcional
+                - text: y admite hasta 500 caracteres.
+              - listitem [ref=f1e346]:
+                - text: Pulsa
+                - strong [ref=f1e347]: Rechazar
+                - text: y espera la confirmación.
+              - listitem [ref=f1e348]: Comprueba que la fila desapareció de la cola.
+            - paragraph [ref=f1e349]:
+              - text: El estado cambia a
+              - code [ref=f1e350]: rejected
+              - text: y la app puede mostrar la razón capturada. No incluyas datos médicos, contraseñas ni información que no sea necesaria para corregir el ingreso.
+            - generic [ref=f1e351]:
+              - heading "Estados y vencimiento" [level=2] [ref=f1e352]
+              - link "Sección titulada «Estados y vencimiento»" [ref=f1e353] [cursor=pointer]:
+                - /url: "#estados-y-vencimiento"
+            - table [ref=f1e358]:
+              - rowgroup [ref=f1e359]:
+                - row [ref=f1e360]:
+                  - columnheader "Estado" [ref=f1e361]
+                  - columnheader "Significado" [ref=f1e362]
+                  - columnheader "Siguiente acción" [ref=f1e363]
+              - rowgroup [ref=f1e364]:
+                - row [ref=f1e365]:
+                  - cell [ref=f1e366]:
+                    - code [ref=f1e367]: pending
+                  - cell "La persona terminó el post-registro y espera decisión." [ref=f1e368]
+                  - cell "Aprobar o rechazar dentro del plazo." [ref=f1e369]
+                - row [ref=f1e370]:
+                  - cell [ref=f1e371]:
+                    - code [ref=f1e372]: active
+                  - cell "La sección aprobó la membresía." [ref=f1e373]
+                  - cell "La persona ya puede operar según su cargo." [ref=f1e374]
+                - row [ref=f1e375]:
+                  - cell [ref=f1e376]:
+                    - code [ref=f1e377]: rejected
+                  - cell "La solicitud fue rechazada." [ref=f1e378]
+                  - cell "La persona corrige y vuelve a solicitar si la app muestra la acción; de lo contrario, pide asistencia." [ref=f1e379]
+                - row [ref=f1e380]:
+                  - cell [ref=f1e381]:
+                    - code [ref=f1e382]: cancelled
+                  - cell "La persona canceló su propia solicitud." [ref=f1e383]
+                  - cell "Selecciona otra sección cuando la app reabra el paso." [ref=f1e384]
+                - row [ref=f1e385]:
+                  - cell [ref=f1e386]:
+                    - code [ref=f1e387]: expired
+                  - cell "El plazo terminó sin decisión." [ref=f1e388]
+                  - cell "La persona vuelve a solicitar si la app muestra la acción; de lo contrario, pide asistencia." [ref=f1e389]
+            - paragraph [ref=f1e390]:
+              - text: Al crear la solicitud, SACDIA fija
+              - code [ref=f1e391]: expires_at
+              - text: en
+              - strong [ref=f1e392]: 8 días
+              - text: y la tabla utiliza esa fecha para mostrar el vencimiento y la prioridad de 48 horas. Por separado, el proceso automático se ejecuta cada hora y vence solicitudes al comparar
+              - code [ref=f1e393]: created_at
+              - text: con
+              - code [ref=f1e394]: membership.pending_timeout_days
+              - text: ", cuyo valor predeterminado también es 8."
+            - generic [ref=f1e395]:
+              - heading "Limitación del plazo" [level=2] [ref=f1e396]
+              - link "Sección titulada «Limitación del plazo»" [ref=f1e397] [cursor=pointer]:
+                - /url: "#limitación-del-plazo"
+            - paragraph [ref=f1e402]:
+              - text: Si
+              - code [ref=f1e403]: membership.pending_timeout_days
+              - text: "se configura con un valor distinto de 8, la fecha visible y el vencimiento automático pueden divergir: el proceso no consulta"
+              - code [ref=f1e404]: expires_at
+              - text: . No prometas la fecha mostrada como garantía exacta del cierre hasta que ambos cálculos usen la misma fuente.
+            - generic [ref=f1e405]:
+              - heading "Limitación de auditoría" [level=2] [ref=f1e406]
+              - link "Sección titulada «Limitación de auditoría»" [ref=f1e407] [cursor=pointer]:
+                - /url: "#limitación-de-auditoría"
+            - paragraph [ref=f1e412]:
+              - text: La asignación guarda el estado, el motivo de rechazo y actualiza
+              - code [ref=f1e413]: modified_at
+              - text: "al decidir. Esa marca conserva la hora de la última modificación, pero no demuestra por sí sola qué operación ocurrió ni quién la realizó: el modelo no persiste al actor ni campos semánticos"
+              - code [ref=f1e414]: approved_at
+              - text: o
+              - code [ref=f1e415]: rejected_at
+              - text: . No uses esta bandeja como única evidencia de autoría; si el procedimiento institucional exige trazabilidad nominal, registra el respaldo en el canal autorizado hasta que existan esos campos en SACDIA.
+            - generic [ref=f1e416]:
+              - heading "Cómo verificarlo" [level=2] [ref=f1e417]
+              - link "Sección titulada «Cómo verificarlo»" [ref=f1e418] [cursor=pointer]:
+                - /url: "#cómo-verificarlo"
+            - paragraph [ref=f1e423]:
+              - text: Pulsa
+              - strong [ref=f1e424]: Actualizar
+              - text: y confirma que la solicitud ya no aparece en la sección. Después de aprobar, la persona debe refrescar o volver a entrar y comprobar que la membresía quedó
+              - code [ref=f1e425]: active
+              - text: . En cambio, un rechazo o vencimiento puede no mostrar un aviso ni las acciones de corrección en una cuenta nueva; si ocurre, conserva la cuenta y utiliza el canal de soporte documentado.
+            - generic [ref=f1e426]:
+              - heading "Errores frecuentes" [level=2] [ref=f1e427]
+              - link "Sección titulada «Errores frecuentes»" [ref=f1e428] [cursor=pointer]:
+                - /url: "#errores-frecuentes"
+            - table [ref=f1e433]:
+              - rowgroup [ref=f1e434]:
+                - row [ref=f1e435]:
+                  - columnheader "Problema" [ref=f1e436]
+                  - columnheader "Qué hacer" [ref=f1e437]
+              - rowgroup [ref=f1e438]:
+                - row [ref=f1e439]:
+                  - cell "La persona no aparece" [ref=f1e440]
+                  - cell "Confirma la sección; la bandeja no mezcla clubes ni muestra estados finalizados." [ref=f1e441]
+                - row [ref=f1e442]:
+                  - cell "Aparece acceso denegado" [ref=f1e443]
+                  - cell [ref=f1e444]:
+                    - text: Falta
+                    - code [ref=f1e445]: club_members:approve
+                    - text: o la sección está fuera de tu alcance.
+                - row [ref=f1e446]:
+                  - cell "La solicitud desapareció antes de decidir" [ref=f1e447]
+                  - cell "Pudo ser cancelada o vencer. Actualiza antes de repetir cualquier acción." [ref=f1e448]
+                - row [ref=f1e449]:
+                  - cell "La acción devuelve conflicto" [ref=f1e450]
+                  - cell "Otra persona o el proceso automático ya cambió el estado. Actualiza la lista." [ref=f1e451]
+                - row [ref=f1e452]:
+                  - cell "Aprobaste la fila equivocada" [ref=f1e453]
+                  - cell "No intentes compensarlo creando otra asignación; repórtalo con el identificador de la persona y la sección." [ref=f1e454]
+            - generic [ref=f1e455]:
+              - heading "Procesos relacionados" [level=2] [ref=f1e456]
+              - link "Sección titulada «Procesos relacionados»" [ref=f1e457] [cursor=pointer]:
+                - /url: "#procesos-relacionados"
+            - list [ref=f1e462]:
+              - listitem [ref=f1e463]:
+                - link "Alta de cuenta y membresía" [ref=f1e464] [cursor=pointer]:
+                  - /url: /procesos/alta-y-membresia/
+              - listitem [ref=f1e465]:
+                - link "Gestión de club y sección" [ref=f1e466] [cursor=pointer]:
+                  - /url: /procesos/gestion-club-seccion/
+              - listitem [ref=f1e467]:
+                - link "Solicitudes de cargos y traslados" [ref=f1e468] [cursor=pointer]:
+                  - /url: /clubes/solicitudes/
+            - generic [ref=f1e469]:
+              - heading "Fuente de verificación" [level=2] [ref=f1e470]
+              - link "Sección titulada «Fuente de verificación»" [ref=f1e471] [cursor=pointer]:
+                - /url: "#fuente-de-verificación"
+            - paragraph [ref=f1e476]:
+              - text: Manual contrastado el 2026-08-21 con la ruta administrativa,
+              - code [ref=f1e477]: MembershipRequestsClientPage
+              - text: ","
+              - code [ref=f1e478]: PendingMembersTable
+              - text: ", el diálogo de rechazo y"
+              - code [ref=f1e479]: MembershipRequestsService
+              - text: .
+          - generic [ref=f1e481]:
+            - link [ref=f1e482] [cursor=pointer]:
+              - /url: /clubes/solicitudes/
+              - generic [ref=f1e485]: Página anteriorSolicitudes de cargos y traslados
+            - link [ref=f1e486] [cursor=pointer]:
+              - /url: /clubes/usuarios/
+              - generic [ref=f1e489]: Siguiente páginaAdministración de usuarios
+  - generic [ref=f1e492]:
+    - button [ref=f1e493]
+    - button [ref=f1e499]
+    - button [ref=f1e503]
+    - button [ref=f1e511]

@@ -1,0 +1,437 @@
+- generic [active] [ref=f27e1]:
+  - link "Ir al contenido" [ref=f27e2] [cursor=pointer]:
+    - /url: "#_top"
+  - generic [ref=f27e3]:
+    - banner [ref=f27e4]:
+      - generic [ref=f27e5]:
+        - generic [ref=f27e7]:
+          - link "Inicio — Manual operativo" [ref=f27e8] [cursor=pointer]:
+            - /url: /
+            - generic [ref=f27e9]: S
+            - generic [ref=f27e10]:
+              - generic [ref=f27e11]: SACDIA
+              - generic [ref=f27e12]: Operativo
+          - navigation "Cambiar portal de documentación" [ref=f27e13]:
+            - link "Operativo" [ref=f27e14] [cursor=pointer]:
+              - /url: http://localhost:4321
+            - link "Administrativo" [ref=f27e15] [cursor=pointer]:
+              - /url: http://localhost:4322
+            - link "Técnico" [ref=f27e16] [cursor=pointer]:
+              - /url: http://localhost:4323
+        - button "Buscar" [ref=f27e19] [cursor=pointer]:
+          - generic [ref=f27e23]:
+            - generic [ref=f27e24]: ⌘
+            - generic [ref=f27e25]: K
+        - generic [ref=f27e29]:
+          - generic [ref=f27e30]: Seleccionar tema
+          - combobox "Seleccionar tema" [ref=f27e31] [cursor=pointer]:
+            - option "Oscuro"
+            - option "Claro"
+            - option "Automático" [selected]
+    - navigation "Primario":
+      - list [ref=f27e35]:
+        - listitem [ref=f27e36]:
+          - group [ref=f27e37]:
+            - generic "Primeros pasos" [ref=f27e38] [cursor=pointer]
+            - list [ref=f27e42]:
+              - listitem [ref=f27e43]:
+                - link "Primeros pasos" [ref=f27e44] [cursor=pointer]:
+                  - /url: /primeros-pasos/
+        - listitem [ref=f27e45]:
+          - group [ref=f27e46]:
+            - generic "Pantallas" [ref=f27e47] [cursor=pointer]
+            - list [ref=f27e51]:
+              - listitem [ref=f27e52]:
+                - link "Pantallas de la aplicación" [ref=f27e53] [cursor=pointer]:
+                  - /url: /pantallas/
+              - listitem [ref=f27e54]:
+                - link "Acceso, registro y recuperación" [ref=f27e55] [cursor=pointer]:
+                  - /url: /pantallas/acceso-y-registro/
+              - listitem [ref=f27e56]:
+                - link "Actividades y asistencia" [ref=f27e57] [cursor=pointer]:
+                  - /url: /pantallas/actividades/
+              - listitem [ref=f27e58]:
+                - link "Ajustes y accesibilidad" [ref=f27e59] [cursor=pointer]:
+                  - /url: /pantallas/ajustes/
+              - listitem [ref=f27e60]:
+                - link "Ayuda y soporte" [ref=f27e61] [cursor=pointer]:
+                  - /url: /pantallas/ayuda-soporte/
+              - listitem [ref=f27e62]:
+                - link "Bloqueo biométrico" [ref=f27e63] [cursor=pointer]:
+                  - /url: /pantallas/bloqueo-biometrico/
+              - listitem [ref=f27e64]:
+                - link "Camporees" [ref=f27e65] [cursor=pointer]:
+                  - /url: /pantallas/camporees/
+              - listitem [ref=f27e66]:
+                - link "Carga de certificados" [ref=f27e67] [cursor=pointer]:
+                  - /url: /pantallas/carga-certificados/
+              - listitem [ref=f27e68]:
+                - link "Mis cargos y asignaciones" [ref=f27e69] [cursor=pointer]:
+                  - /url: /pantallas/cargos/
+              - listitem [ref=f27e70]:
+                - link "Carpeta anual de evidencias" [ref=f27e71] [cursor=pointer]:
+                  - /url: /pantallas/carpeta-evidencias/
+              - listitem [ref=f27e72]:
+                - link "Certificaciones de Guías Mayores" [ref=f27e73] [cursor=pointer]:
+                  - /url: /pantallas/certificaciones/
+              - listitem [ref=f27e74]:
+                - link "Clases progresivas" [ref=f27e75] [cursor=pointer]:
+                  - /url: /pantallas/clases-progresivas/
+              - listitem [ref=f27e76]:
+                - link "Clasificaciones" [ref=f27e77] [cursor=pointer]:
+                  - /url: /pantallas/clasificaciones/
+              - listitem [ref=f27e78]:
+                - link "Completar el perfil inicial" [ref=f27e79] [cursor=pointer]:
+                  - /url: /pantallas/completar-perfil/
+              - listitem [ref=f27e80]:
+                - link "Coordinación territorial" [ref=f27e81] [cursor=pointer]:
+                  - /url: /pantallas/coordinacion/
+              - listitem [ref=f27e82]:
+                - link "Credencial digital" [ref=f27e83] [cursor=pointer]:
+                  - /url: /pantallas/credencial-digital/
+              - listitem [ref=f27e84]:
+                - link "Escáner QR" [ref=f27e85] [cursor=pointer]:
+                  - /url: /pantallas/escaner-qr/
+              - listitem [ref=f27e86]:
+                - link "Especialidades" [ref=f27e87] [cursor=pointer]:
+                  - /url: /pantallas/especialidades/
+              - listitem [ref=f27e88]:
+                - link "Finanzas del club" [ref=f27e89] [cursor=pointer]:
+                  - /url: /pantallas/finanzas/
+              - listitem [ref=f27e90]:
+                - link "Informes mensuales" [ref=f27e91] [cursor=pointer]:
+                  - /url: /pantallas/informes-mensuales/
+              - listitem [ref=f27e92]:
+                - link "Inicio de la aplicación" [ref=f27e93] [cursor=pointer]:
+                  - /url: /pantallas/inicio/
+              - listitem [ref=f27e94]:
+                - link "Inscripción anual del club" [ref=f27e95] [cursor=pointer]:
+                  - /url: /pantallas/inscripcion-club/
+              - listitem [ref=f27e96]:
+                - link "Inventario del club" [ref=f27e97] [cursor=pointer]:
+                  - /url: /pantallas/inventario/
+              - listitem [ref=f27e98]:
+                - link "Investiduras" [ref=f27e99] [cursor=pointer]:
+                  - /url: /pantallas/investiduras/
+              - listitem [ref=f27e100]:
+                - link "Logros" [ref=f27e101] [cursor=pointer]:
+                  - /url: /pantallas/logros/
+              - listitem [ref=f27e102]:
+                - link "Maestrías de especialidades" [ref=f27e103] [cursor=pointer]:
+                  - /url: /pantallas/maestrias/
+              - listitem [ref=f27e104]:
+                - link "Materiales y pedidos" [ref=f27e105] [cursor=pointer]:
+                  - /url: /pantallas/materiales/
+              - listitem [ref=f27e106]:
+                - link "Mi club y mi sección" [ref=f27e107] [cursor=pointer]:
+                  - /url: /pantallas/mi-club/
+              - listitem [ref=f27e108]:
+                - link "Miembros y cargos" [ref=f27e109] [cursor=pointer]:
+                  - /url: /pantallas/miembros/
+              - listitem [ref=f27e110]:
+                - link "Notificaciones" [ref=f27e111] [cursor=pointer]:
+                  - /url: /pantallas/notificaciones/
+              - listitem [ref=f27e112]:
+                - link "Órdenes de pago" [ref=f27e113] [cursor=pointer]:
+                  - /url: /pantallas/ordenes-pago/
+              - listitem [ref=f27e114]:
+                - link "Perfil, salud y sesiones" [ref=f27e115] [cursor=pointer]:
+                  - /url: /pantallas/perfil/
+              - listitem [ref=f27e116]:
+                - link "Recursos" [ref=f27e117] [cursor=pointer]:
+                  - /url: /pantallas/recursos/
+              - listitem [ref=f27e118]:
+                - link "Seguros" [ref=f27e119] [cursor=pointer]:
+                  - /url: /pantallas/seguros/
+              - listitem [ref=f27e120]:
+                - link "Tablero principal" [ref=f27e121] [cursor=pointer]:
+                  - /url: /pantallas/tablero/
+              - listitem [ref=f27e122]:
+                - link "Traslados de club o sección" [ref=f27e123] [cursor=pointer]:
+                  - /url: /pantallas/traslados/
+              - listitem [ref=f27e124]:
+                - link "Unidades y registros semanales" [ref=f27e125] [cursor=pointer]:
+                  - /url: /pantallas/unidades/
+              - listitem [ref=f27e126]:
+                - link "Estados de validación" [ref=f27e127] [cursor=pointer]:
+                  - /url: /pantallas/validaciones/
+        - listitem [ref=f27e128]:
+          - group [ref=f27e129]:
+            - generic "Procesos" [ref=f27e130] [cursor=pointer]
+            - list [ref=f27e134]:
+              - listitem [ref=f27e135]:
+                - link "Procesos de SACDIA" [ref=f27e136] [cursor=pointer]:
+                  - /url: /procesos/
+              - listitem [ref=f27e137]:
+                - link "Planear una actividad y registrar asistencia" [ref=f27e138] [cursor=pointer]:
+                  - /url: /procesos/actividad-y-asistencia/
+              - listitem [ref=f27e139]:
+                - link "Alta de cuenta y membresía" [ref=f27e140] [cursor=pointer]:
+                  - /url: /procesos/alta-y-membresia/
+              - listitem [ref=f27e141]:
+                - link "Reconocer formación desde certificados" [ref=f27e142] [cursor=pointer]:
+                  - /url: /procesos/carga-certificados/
+              - listitem [ref=f27e143]:
+                - link "Completar y validar la carpeta anual" [ref=f27e144] [cursor=pointer]:
+                  - /url: /procesos/carpeta-anual/
+              - listitem [ref=f27e145]:
+                - link "Registrar y supervisar finanzas" [ref=f27e146] [cursor=pointer]:
+                  - /url: /procesos/cierre-financiero/
+              - listitem [ref=f27e147]:
+                - link "Publicar una comunicación o recurso" [ref=f27e148] [cursor=pointer]:
+                  - /url: /procesos/comunicacion-recursos/
+              - listitem [ref=f27e149]:
+                - link "Registrar puntajes y consultar clasificaciones" [ref=f27e150] [cursor=pointer]:
+                  - /url: /procesos/evaluacion-y-clasificacion/
+              - listitem [ref=f27e151]:
+                - link "Completar formación y solicitar investidura" [ref=f27e152] [cursor=pointer]:
+                  - /url: /procesos/formacion-e-investidura/
+              - listitem [ref=f27e153]:
+                - link "Gestionar un club y su sección" [ref=f27e154] [cursor=pointer]:
+                  - /url: /procesos/gestion-club-seccion/
+              - listitem [ref=f27e155]:
+                - link "Completar y supervisar el informe mensual" [ref=f27e156] [cursor=pointer]:
+                  - /url: /procesos/informe-mensual/
+              - listitem [ref=f27e157]:
+                - link "Inscribir y operar un camporee" [ref=f27e158] [cursor=pointer]:
+                  - /url: /procesos/participacion-camporee/
+              - listitem [ref=f27e159]:
+                - link "Registrar seguro mediante orden de pago" [ref=f27e160] [cursor=pointer]:
+                  - /url: /procesos/seguro-y-orden-pago/
+              - listitem [ref=f27e161]:
+                - link "Solicitar, pagar y recibir materiales" [ref=f27e162] [cursor=pointer]:
+                  - /url: /procesos/solicitud-materiales/
+              - listitem [ref=f27e163]:
+                - link "Trasladar un miembro" [ref=f27e164] [cursor=pointer]:
+                  - /url: /procesos/traslado-miembro/
+        - listitem [ref=f27e165]:
+          - group [ref=f27e166]:
+            - generic "Ayuda" [ref=f27e167] [cursor=pointer]
+            - list [ref=f27e171]:
+              - listitem [ref=f27e172]:
+                - link "Ayuda y preguntas frecuentes" [ref=f27e173] [cursor=pointer]:
+                  - /url: /ayuda/
+    - generic [ref=f27e175]:
+      - complementary [ref=f27e176]:
+        - navigation [ref=f27e181]:
+          - heading "En esta página" [level=2] [ref=f27e182]
+          - list [ref=f27e183]:
+            - listitem [ref=f27e184]:
+              - link "Sinopsis" [ref=f27e185] [cursor=pointer]:
+                - /url: "#_top"
+            - listitem [ref=f27e186]:
+              - link "Resultado esperado" [ref=f27e187] [cursor=pointer]:
+                - /url: "#resultado-esperado"
+            - listitem [ref=f27e188]:
+              - link "Quién puede utilizarlo" [ref=f27e189] [cursor=pointer]:
+                - /url: "#quién-puede-utilizarlo"
+            - listitem [ref=f27e190]:
+              - link "Pantallas incluidas" [ref=f27e191] [cursor=pointer]:
+                - /url: "#pantallas-incluidas"
+            - listitem [ref=f27e192]:
+              - link "Reconoce la pantalla" [ref=f27e193] [cursor=pointer]:
+                - /url: "#reconoce-la-pantalla"
+            - listitem [ref=f27e194]:
+              - link "Antes de comenzar" [ref=f27e195] [cursor=pointer]:
+                - /url: "#antes-de-comenzar"
+            - listitem [ref=f27e196]:
+              - link "Tareas principales" [ref=f27e197] [cursor=pointer]:
+                - /url: "#tareas-principales"
+            - listitem [ref=f27e198]:
+              - link "Revisar solicitudes en la app" [ref=f27e199] [cursor=pointer]:
+                - /url: "#revisar-solicitudes-en-la-app"
+            - listitem [ref=f27e200]:
+              - link "Flujo recomendado" [ref=f27e201] [cursor=pointer]:
+                - /url: "#flujo-recomendado"
+            - listitem [ref=f27e202]:
+              - link "Cómo verificarlo" [ref=f27e203] [cursor=pointer]:
+                - /url: "#cómo-verificarlo"
+            - listitem [ref=f27e204]:
+              - link "Errores frecuentes" [ref=f27e205] [cursor=pointer]:
+                - /url: "#errores-frecuentes"
+            - listitem [ref=f27e206]:
+              - link "Procesos relacionados" [ref=f27e207] [cursor=pointer]:
+                - /url: "#procesos-relacionados"
+            - listitem [ref=f27e208]:
+              - link "Fuente de verificación" [ref=f27e209] [cursor=pointer]:
+                - /url: "#fuente-de-verificación"
+      - main [ref=f27e211]:
+        - heading "Miembros y cargos" [level=1] [ref=f27e214]
+        - generic [ref=f27e216]:
+          - generic [ref=f27e217]:
+            - paragraph [ref=f27e218]: Consultar miembros de la sección, revisar solicitudes y administrar cargos autorizados.
+            - generic [ref=f27e219]:
+              - heading "Resultado esperado" [level=2] [ref=f27e220]
+              - link "Sección titulada «Resultado esperado»" [ref=f27e221] [cursor=pointer]:
+                - /url: "#resultado-esperado"
+            - paragraph [ref=f27e226]: Al terminar este recorrido, podrás consultar miembros de la sección, revisar solicitudes y administrar cargos autorizados.
+            - generic [ref=f27e227]:
+              - heading "Quién puede utilizarlo" [level=2] [ref=f27e228]
+              - link "Sección titulada «Quién puede utilizarlo»" [ref=f27e229] [cursor=pointer]:
+                - /url: "#quién-puede-utilizarlo"
+            - paragraph [ref=f27e234]:
+              - text: Miembros con lectura de su sección. La app utiliza
+              - code [ref=f27e235]: club_roles:assign
+              - text: o
+              - code [ref=f27e236]: club_roles:revoke
+              - text: como control visual para mostrar acciones administrativas, mientras el backend exige
+              - code [ref=f27e237]: club_members:approve
+              - text: y el alcance de la sección para listar y decidir solicitudes de ingreso.
+            - generic [ref=f27e238]:
+              - heading "Pantallas incluidas" [level=2] [ref=f27e239]
+              - link "Sección titulada «Pantallas incluidas»" [ref=f27e240] [cursor=pointer]:
+                - /url: "#pantallas-incluidas"
+            - list [ref=f27e245]:
+              - listitem [ref=f27e246]: Miembros y solicitudes
+              - listitem [ref=f27e247]: Perfil del miembro
+              - listitem [ref=f27e248]: Asignación de cargo
+            - generic [ref=f27e249]:
+              - heading "Reconoce la pantalla" [level=2] [ref=f27e250]
+              - link "Sección titulada «Reconoce la pantalla»" [ref=f27e251] [cursor=pointer]:
+                - /url: "#reconoce-la-pantalla"
+            - figure "Usa las pestañas Miembros y Solicitudes para cambiar entre el padrón de la sección y las solicitudes de ingreso." [ref=f27e256]:
+              - img "Pantalla móvil de Miembros con la pestaña Solicitudes seleccionada, filtros de estado y un estado sin solicitudes pendientes" [ref=f27e257]
+            - generic [ref=f27e259]:
+              - heading "Antes de comenzar" [level=2] [ref=f27e260]
+              - link "Sección titulada «Antes de comenzar»" [ref=f27e261] [cursor=pointer]:
+                - /url: "#antes-de-comenzar"
+            - list [ref=f27e266]:
+              - listitem [ref=f27e267]: Inicia sesión y confirma el club o sección activos.
+              - listitem [ref=f27e268]: Mantén conexión estable para acciones que guardan o envían información.
+              - listitem [ref=f27e269]: Si una acción no aparece, revisa primero el cargo y el contexto.
+            - generic [ref=f27e270]:
+              - heading "Tareas principales" [level=2] [ref=f27e271]
+              - link "Sección titulada «Tareas principales»" [ref=f27e272] [cursor=pointer]:
+                - /url: "#tareas-principales"
+            - list [ref=f27e277]:
+              - listitem [ref=f27e278]: Buscar miembros y filtrar por clase.
+              - listitem [ref=f27e279]: Abrir perfil, clases, especialidades y datos permitidos.
+              - listitem [ref=f27e280]: Revisar solicitudes de ingreso.
+              - listitem [ref=f27e281]: Asignar, cambiar o revocar un cargo dentro de la sección.
+            - generic [ref=f27e282]:
+              - heading "Revisar solicitudes en la app" [level=2] [ref=f27e283]
+              - link "Sección titulada «Revisar solicitudes en la app»" [ref=f27e284] [cursor=pointer]:
+                - /url: "#revisar-solicitudes-en-la-app"
+            - list [ref=f27e289]:
+              - listitem [ref=f27e290]:
+                - text: Abre
+                - strong [ref=f27e291]: Miembros
+                - text: y confirma el club y la sección activos.
+              - listitem [ref=f27e292]:
+                - text: Selecciona la pestaña
+                - strong [ref=f27e293]: Solicitudes
+                - text: .
+              - listitem [ref=f27e294]: Busca a la persona y abre su perfil antes de decidir.
+              - listitem [ref=f27e295]:
+                - text: Si aparecen las acciones y cuentas con
+                - code [ref=f27e296]: club_members:approve
+                - text: en esa sección, pulsa
+                - strong [ref=f27e297]: Aprobar
+                - text: o
+                - strong [ref=f27e298]: Rechazar
+                - text: una sola vez.
+              - listitem [ref=f27e299]: Actualiza la lista y confirma que la solicitud dejó de estar pendiente.
+            - paragraph [ref=f27e300]: En la versión actual, ambas acciones se envían sin confirmación adicional y el rechazo móvil no solicita un motivo. Revisa con cuidado antes de pulsar.
+            - paragraph [ref=f27e301]:
+              - text: "Existe una diferencia conocida entre permisos: dirección recibe el permiso visual y"
+              - code [ref=f27e302]: club_members:approve
+              - text: ", pero subdirección, secretaría y secretaría-tesorería pueden tener autorización backend para revisar sin recibir"
+              - code [ref=f27e303]: club_roles:assign
+              - text: o
+              - code [ref=f27e304]: club_roles:revoke
+              - text: ". En ese caso los botones quedan ocultos aunque el backend permita la decisión. No intentes entrar al panel administrativo: reporta la inconsistencia de acceso para que se corrija el canal móvil."
+            - generic [ref=f27e305]:
+              - heading "Flujo recomendado" [level=2] [ref=f27e306]
+              - link "Sección titulada «Flujo recomendado»" [ref=f27e307] [cursor=pointer]:
+                - /url: "#flujo-recomendado"
+            - list [ref=f27e312]:
+              - listitem [ref=f27e313]:
+                - text: Abre
+                - strong [ref=f27e314]: Miembros
+                - text: y confirma la sección activa.
+              - listitem [ref=f27e315]:
+                - text: Selecciona la pestaña
+                - strong [ref=f27e316]: Miembros
+                - text: o
+                - strong [ref=f27e317]: Solicitudes
+                - text: .
+              - listitem [ref=f27e318]: Para una solicitud, sigue el recorrido anterior y decide una sola vez.
+              - listitem [ref=f27e319]:
+                - text: Para un miembro activo, abre su perfil y, si tienes permiso, selecciona
+                - strong [ref=f27e320]: Asignar cargo
+                - text: .
+              - listitem [ref=f27e321]: Elige el rol, guarda y comprueba el cargo en la lista.
+            - generic [ref=f27e322]:
+              - heading "Cómo verificarlo" [level=2] [ref=f27e323]
+              - link "Sección titulada «Cómo verificarlo»" [ref=f27e324] [cursor=pointer]:
+                - /url: "#cómo-verificarlo"
+            - paragraph [ref=f27e329]: Una solicitud resuelta deja la cola pendiente después de actualizar. Para cambios de cargo, el miembro aparece en la sección correcta y el cargo activo coincide con la asignación guardada.
+            - generic [ref=f27e330]:
+              - heading "Errores frecuentes" [level=2] [ref=f27e331]
+              - link "Sección titulada «Errores frecuentes»" [ref=f27e332] [cursor=pointer]:
+                - /url: "#errores-frecuentes"
+            - table [ref=f27e337]:
+              - rowgroup [ref=f27e338]:
+                - row [ref=f27e339]:
+                  - columnheader "Problema" [ref=f27e340]
+                  - columnheader "Qué hacer" [ref=f27e341]
+              - rowgroup [ref=f27e342]:
+                - row [ref=f27e343]:
+                  - cell "No aparece la acción" [ref=f27e344]
+                  - cell "Tu cargo o contexto no incluye el permiso. Confirma la sección o solicita revisión de acceso; no intentes otra cuenta." [ref=f27e345]
+                - row [ref=f27e346]:
+                  - cell "La acción aparece pero devuelve acceso denegado" [ref=f27e347]
+                  - cell [ref=f27e348]:
+                    - text: Confirma
+                    - code [ref=f27e349]: club_members:approve
+                    - text: y el alcance de sección antes de reintentar.
+                - row [ref=f27e350]:
+                  - cell "Tu cargo puede revisar, pero no aparecen los botones" [ref=f27e351]
+                  - cell "El control visual móvil puede excluir subdirección o secretaría. Reporta la inconsistencia; el cargo de club no habilita el panel." [ref=f27e352]
+                - row [ref=f27e353]:
+                  - cell "La pantalla no carga" [ref=f27e354]
+                  - cell [ref=f27e355]:
+                    - text: Comprueba la conexión y usa
+                    - strong [ref=f27e356]: Reintentar
+                    - text: . Si continúa, conserva el mensaje y repórtalo desde Ayuda.
+                - row [ref=f27e357]:
+                  - cell "El estado no cambia" [ref=f27e358]
+                  - cell "Actualiza la pantalla antes de repetir. No envíes una operación por segunda vez sin confirmar el resultado." [ref=f27e359]
+                - row [ref=f27e360]:
+                  - cell "Aparece otro club o sección" [ref=f27e361]
+                  - cell "Vuelve al tablero y cambia o confirma el contexto activo antes de guardar información." [ref=f27e362]
+            - generic [ref=f27e363]:
+              - heading "Procesos relacionados" [level=2] [ref=f27e364]
+              - link "Sección titulada «Procesos relacionados»" [ref=f27e365] [cursor=pointer]:
+                - /url: "#procesos-relacionados"
+            - list [ref=f27e370]:
+              - listitem [ref=f27e371]:
+                - link "Alta de cuenta y membresía" [ref=f27e372] [cursor=pointer]:
+                  - /url: /procesos/alta-y-membresia/
+              - listitem [ref=f27e373]:
+                - link "Gestión de club y sección" [ref=f27e374] [cursor=pointer]:
+                  - /url: /procesos/gestion-club-seccion/
+            - generic [ref=f27e375]:
+              - heading "Fuente de verificación" [level=2] [ref=f27e376]
+              - link "Sección titulada «Fuente de verificación»" [ref=f27e377] [cursor=pointer]:
+                - /url: "#fuente-de-verificación"
+            - paragraph [ref=f27e382]:
+              - text: Manual contrastado el 2026-08-21 con las vistas, rutas, permisos backend y controles efectivos del módulo
+              - code [ref=f27e383]: members
+              - text: de la aplicación.
+          - generic [ref=f27e384]:
+            - paragraph [ref=f27e386]:
+              - text: "Última actualización:"
+              - time [ref=f27e387]: 20 ago 2026
+            - generic [ref=f27e388]:
+              - link [ref=f27e389] [cursor=pointer]:
+                - /url: /pantallas/mi-club/
+                - generic [ref=f27e392]: Página anteriorMi club y mi sección
+              - link [ref=f27e393] [cursor=pointer]:
+                - /url: /pantallas/notificaciones/
+                - generic [ref=f27e396]: Siguiente páginaNotificaciones
+  - generic [ref=f27e399]:
+    - button [ref=f27e400]
+    - button [ref=f27e406]
+    - button [ref=f27e410]
+    - button [ref=f27e418]

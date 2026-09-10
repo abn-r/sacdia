@@ -1,0 +1,1606 @@
+- generic [active] [ref=f25e1]:
+  - link "Ir al contenido" [ref=f25e2] [cursor=pointer]:
+    - /url: "#_top"
+  - generic [ref=f25e3]:
+    - banner [ref=f25e4]:
+      - generic [ref=f25e5]:
+        - generic [ref=f25e7]:
+          - link "Inicio — Documentación técnica" [ref=f25e8] [cursor=pointer]:
+            - /url: /
+            - generic [ref=f25e9]: S
+            - generic [ref=f25e10]:
+              - generic [ref=f25e11]: SACDIA
+              - generic [ref=f25e12]: Técnico
+          - navigation "Cambiar portal de documentación" [ref=f25e13]:
+            - link "Operativo" [ref=f25e14] [cursor=pointer]:
+              - /url: http://localhost:4321
+            - link "Administrativo" [ref=f25e15] [cursor=pointer]:
+              - /url: http://localhost:4322
+            - link "Técnico" [ref=f25e16] [cursor=pointer]:
+              - /url: http://localhost:4323
+        - button "Buscar" [ref=f25e19] [cursor=pointer]:
+          - generic [ref=f25e23]:
+            - generic [ref=f25e24]: ⌘
+            - generic [ref=f25e25]: K
+        - generic [ref=f25e29]:
+          - generic [ref=f25e30]: Seleccionar tema
+          - combobox "Seleccionar tema" [ref=f25e31] [cursor=pointer]:
+            - option "Oscuro"
+            - option "Claro"
+            - option "Automático" [selected]
+    - navigation "Primario":
+      - list [ref=f25e35]:
+        - listitem [ref=f25e36]:
+          - group [ref=f25e37]:
+            - generic "API" [ref=f25e38] [cursor=pointer]
+            - list [ref=f25e42]:
+              - listitem [ref=f25e43]:
+                - link "API Reference" [ref=f25e44] [cursor=pointer]:
+                  - /url: /api/
+              - listitem [ref=f25e45]:
+                - link "Decisiones de Arquitectura" [ref=f25e46] [cursor=pointer]:
+                  - /url: /api/decisiones-arquitectura/
+              - listitem [ref=f25e47]:
+                - link "Endpoints — Live Reference" [ref=f25e48] [cursor=pointer]:
+                  - /url: /api/endpoints/
+              - listitem [ref=f25e49]:
+                - link "Especificación Técnica REST API" [ref=f25e50] [cursor=pointer]:
+                  - /url: /api/especificacion/
+              - listitem [ref=f25e51]:
+                - group [ref=f25e52]:
+                  - generic "integracion-frontend" [ref=f25e53] [cursor=pointer]
+                  - list [ref=f25e57]:
+                    - listitem [ref=f25e58]:
+                      - link "Integración Frontend" [ref=f25e59] [cursor=pointer]:
+                        - /url: /api/integracion-frontend/
+                    - listitem [ref=f25e60]:
+                      - link "Autenticación" [ref=f25e61] [cursor=pointer]:
+                        - /url: /api/integracion-frontend/autenticacion/
+                    - listitem [ref=f25e62]:
+                      - link "Best Practices" [ref=f25e63] [cursor=pointer]:
+                        - /url: /api/integracion-frontend/best-practices/
+                    - listitem [ref=f25e64]:
+                      - link "Ejemplos por Módulo" [ref=f25e65] [cursor=pointer]:
+                        - /url: /api/integracion-frontend/ejemplos-modulos/
+                    - listitem [ref=f25e66]:
+                      - link "Consumo de Endpoints" [ref=f25e67] [cursor=pointer]:
+                        - /url: /api/integracion-frontend/endpoints/
+                    - listitem [ref=f25e68]:
+                      - link "Manejo de Errores" [ref=f25e69] [cursor=pointer]:
+                        - /url: /api/integracion-frontend/manejo-errores/
+                    - listitem [ref=f25e70]:
+                      - link "Setup Inicial" [ref=f25e71] [cursor=pointer]:
+                        - /url: /api/integracion-frontend/setup/
+                    - listitem [ref=f25e72]:
+                      - link "Testing de Integracion Frontend" [ref=f25e73] [cursor=pointer]:
+                        - /url: /api/integracion-frontend/testing/
+              - listitem [ref=f25e74]:
+                - link "Guía de Seguridad" [ref=f25e75] [cursor=pointer]:
+                  - /url: /api/seguridad/
+              - listitem [ref=f25e76]:
+                - link "Integración de Servicios Externos" [ref=f25e77] [cursor=pointer]:
+                  - /url: /api/servicios-externos/
+              - listitem [ref=f25e78]:
+                - link "Guía de Testing" [ref=f25e79] [cursor=pointer]:
+                  - /url: /api/testing/
+              - listitem [ref=f25e80]:
+                - link "Versionado de la API" [ref=f25e81] [cursor=pointer]:
+                  - /url: /api/versionado/
+        - listitem [ref=f25e82]:
+          - group [ref=f25e83]:
+            - generic "Arquitectura" [ref=f25e84] [cursor=pointer]
+            - list [ref=f25e88]:
+              - listitem [ref=f25e89]:
+                - link "Arquitectura" [ref=f25e90] [cursor=pointer]:
+                  - /url: /arquitectura/
+              - listitem [ref=f25e91]:
+                - group [ref=f25e92]:
+                  - generic "fundamentos" [ref=f25e93] [cursor=pointer]
+                  - list [ref=f25e97]:
+                    - listitem [ref=f25e98]:
+                      - link "Fundamentos" [ref=f25e99] [cursor=pointer]:
+                        - /url: /arquitectura/fundamentos/
+                    - listitem [ref=f25e100]:
+                      - link "Arquitectura del sistema" [ref=f25e101] [cursor=pointer]:
+                        - /url: /arquitectura/fundamentos/arquitectura/
+                    - listitem [ref=f25e102]:
+                      - link "Decisiones clave" [ref=f25e103] [cursor=pointer]:
+                        - /url: /arquitectura/fundamentos/decisiones-clave/
+                    - listitem [ref=f25e104]:
+                      - link "Modelo del dominio" [ref=f25e105] [cursor=pointer]:
+                        - /url: /arquitectura/fundamentos/dominio/
+                    - listitem [ref=f25e106]:
+                      - link "Identidad del sistema" [ref=f25e107] [cursor=pointer]:
+                        - /url: /arquitectura/fundamentos/identidad/
+                    - listitem [ref=f25e108]:
+                      - link "Runtime SACDIA" [ref=f25e109] [cursor=pointer]:
+                        - /url: /arquitectura/fundamentos/runtime/
+                    - listitem [ref=f25e110]:
+                      - link "Source of Truth" [ref=f25e111] [cursor=pointer]:
+                        - /url: /arquitectura/fundamentos/source-of-truth/
+        - listitem [ref=f25e112]:
+          - group [ref=f25e113]:
+            - generic "Base de datos" [ref=f25e114] [cursor=pointer]
+            - list [ref=f25e118]:
+              - listitem [ref=f25e119]:
+                - link "Base de Datos" [ref=f25e120] [cursor=pointer]:
+                  - /url: /base-de-datos/
+              - listitem [ref=f25e121]:
+                - link "Migraciones" [ref=f25e122] [cursor=pointer]:
+                  - /url: /base-de-datos/migraciones/
+              - listitem [ref=f25e123]:
+                - group [ref=f25e124]:
+                  - generic "schema-reference" [ref=f25e125] [cursor=pointer]
+                  - list [ref=f25e129]:
+                    - listitem [ref=f25e130]:
+                      - link "Schema Reference" [ref=f25e131] [cursor=pointer]:
+                        - /url: /base-de-datos/schema-reference/
+                    - listitem [ref=f25e132]:
+                      - link "Actividades y Camporees" [ref=f25e133] [cursor=pointer]:
+                        - /url: /base-de-datos/schema-reference/actividades-camporees/
+                    - listitem [ref=f25e134]:
+                      - link "Carpetas y Evaluacion" [ref=f25e135] [cursor=pointer]:
+                        - /url: /base-de-datos/schema-reference/carpetas-evaluacion/
+                    - listitem [ref=f25e136]:
+                      - link "Clases y Honores" [ref=f25e137] [cursor=pointer]:
+                        - /url: /base-de-datos/schema-reference/clases-honores/
+                    - listitem [ref=f25e138]:
+                      - link "Clubs" [ref=f25e139] [cursor=pointer]:
+                        - /url: /base-de-datos/schema-reference/clubs/
+                    - listitem [ref=f25e140]:
+                      - link "Inventario y Finanzas" [ref=f25e141] [cursor=pointer]:
+                        - /url: /base-de-datos/schema-reference/inventario-finanzas/
+                    - listitem [ref=f25e142]:
+                      - link "Investidura y Certificaciones" [ref=f25e143] [cursor=pointer]:
+                        - /url: /base-de-datos/schema-reference/investidura-certificaciones/
+                    - listitem [ref=f25e144]:
+                      - link "Jerarquia Organizacional" [ref=f25e145] [cursor=pointer]:
+                        - /url: /base-de-datos/schema-reference/organizacion/
+                    - listitem [ref=f25e146]:
+                      - link "RBAC — Roles y Permisos" [ref=f25e147] [cursor=pointer]:
+                        - /url: /base-de-datos/schema-reference/rbac/
+                    - listitem [ref=f25e148]:
+                      - link "Salud e Insurance" [ref=f25e149] [cursor=pointer]:
+                        - /url: /base-de-datos/schema-reference/salud-insurance/
+                    - listitem [ref=f25e150]:
+                      - link "Sistema y Recursos" [ref=f25e151] [cursor=pointer]:
+                        - /url: /base-de-datos/schema-reference/sistema-recursos/
+                    - listitem [ref=f25e152]:
+                      - link "Users & Auth" [ref=f25e153] [cursor=pointer]:
+                        - /url: /base-de-datos/schema-reference/users-auth/
+        - listitem [ref=f25e154]:
+          - group [ref=f25e155]:
+            - generic "Producto" [ref=f25e156] [cursor=pointer]
+            - list [ref=f25e160]:
+              - listitem [ref=f25e161]:
+                - group [ref=f25e162]:
+                  - generic "funcionalidades" [ref=f25e163] [cursor=pointer]
+                  - list [ref=f25e167]:
+                    - listitem [ref=f25e168]:
+                      - link "Funcionalidades" [ref=f25e169] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/
+                    - listitem [ref=f25e170]:
+                      - link "Actividades" [ref=f25e171] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/actividades/
+                    - listitem [ref=f25e172]:
+                      - link "Actividades Conjuntas" [ref=f25e173] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/actividades-conjuntas/
+                    - listitem [ref=f25e174]:
+                      - link "Calificacion de Carpetas Anuales" [ref=f25e175] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/annual-folders-scoring/
+                    - listitem [ref=f25e176]:
+                      - link "Aprobaciones de Camporees" [ref=f25e177] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/aprobaciones-camporees/
+                    - listitem [ref=f25e178]:
+                      - link "Aprobaciones Masivas" [ref=f25e179] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/aprobaciones-masivas/
+                    - listitem [ref=f25e180]:
+                      - link "Audit Logs" [ref=f25e181] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/audit-logs/
+                    - listitem [ref=f25e182]:
+                      - link "Camporees" [ref=f25e183] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/camporees/
+                    - listitem [ref=f25e184]:
+                      - link "Carpetas de Evidencias" [ref=f25e185] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/carpetas-evidencias/
+                    - listitem [ref=f25e186]:
+                      - link "Catalogos" [ref=f25e187] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/catalogos/
+                    - listitem [ref=f25e188]:
+                      - link "Certificaciones de Guias Mayores" [ref=f25e189] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/certificaciones-guias-mayores/
+                    - listitem [ref=f25e190]:
+                      - link "Clases Progresivas" [ref=f25e191] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/clases-progresivas/
+                    - listitem [ref=f25e192]:
+                      - link "Comunicaciones" [ref=f25e193] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/comunicaciones/
+                    - listitem [ref=f25e194]:
+                      - link "Finanzas" [ref=f25e195] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/finanzas/
+                    - listitem [ref=f25e196]:
+                      - link "Gestion de Clubs" [ref=f25e197] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/gestion-clubs/
+                    - listitem [ref=f25e198]:
+                      - link "Gestion de Seguros" [ref=f25e199] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/gestion-seguros/
+                    - listitem [ref=f25e200]:
+                      - link "Honores" [ref=f25e201] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/honores/
+                    - listitem [ref=f25e202]:
+                      - link "Inventario" [ref=f25e203] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/inventario/
+                    - listitem [ref=f25e204]:
+                      - link "Materiales" [ref=f25e205] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/materiales/
+                    - listitem [ref=f25e206]:
+                      - link "RBAC" [ref=f25e207] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/rbac/
+                    - listitem [ref=f25e208]:
+                      - link "Recursos" [ref=f25e209] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/recursos/
+                    - listitem [ref=f25e210]:
+                      - link "SLA Dashboard" [ref=f25e211] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/sla-dashboard/
+                    - listitem [ref=f25e212]:
+                      - link "Validacion de Evidencias" [ref=f25e213] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/validacion-evidencias/
+                    - listitem [ref=f25e214]:
+                      - link "Validacion de Investiduras" [ref=f25e215] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/validacion-investiduras/
+        - listitem [ref=f25e216]:
+          - group [ref=f25e217]:
+            - generic "Seguridad" [ref=f25e218] [cursor=pointer]
+            - list [ref=f25e222]:
+              - listitem [ref=f25e223]:
+                - link "Seguridad" [ref=f25e224] [cursor=pointer]:
+                  - /url: /seguridad/
+              - listitem [ref=f25e225]:
+                - group [ref=f25e226]:
+                  - generic "autorizacion" [ref=f25e227] [cursor=pointer]
+                  - list [ref=f25e231]:
+                    - listitem [ref=f25e232]:
+                      - link "Autorización" [ref=f25e233] [cursor=pointer]:
+                        - /url: /seguridad/autorizacion/
+                    - listitem [ref=f25e234]:
+                      - link "Contrato canónico de autorización" [ref=f25e235] [cursor=pointer]:
+                        - /url: /seguridad/autorizacion/contrato-canonico/
+                    - listitem [ref=f25e236]:
+                      - link "Matriz de enforcement RBAC" [ref=f25e237] [cursor=pointer]:
+                        - /url: /seguridad/autorizacion/matriz-rbac/
+                    - listitem [ref=f25e238]:
+                      - link "Modelo de autorización" [ref=f25e239] [cursor=pointer]:
+                        - /url: /seguridad/autorizacion/modelo/
+                    - listitem [ref=f25e240]:
+                      - link "Sistema de permisos" [ref=f25e241] [cursor=pointer]:
+                        - /url: /seguridad/autorizacion/permisos/
+                    - listitem [ref=f25e242]:
+                      - link "Runtime de autenticación y autorización" [ref=f25e243] [cursor=pointer]:
+                        - /url: /seguridad/autorizacion/runtime/
+        - listitem [ref=f25e244]:
+          - group [ref=f25e245]:
+            - generic "Integración" [ref=f25e246] [cursor=pointer]
+            - list [ref=f25e250]:
+              - listitem [ref=f25e251]:
+                - link "Integración" [ref=f25e252] [cursor=pointer]:
+                  - /url: /integracion/
+        - listitem [ref=f25e253]:
+          - group [ref=f25e254]:
+            - generic "Frontend" [ref=f25e255] [cursor=pointer]
+            - list [ref=f25e259]:
+              - listitem [ref=f25e260]:
+                - group [ref=f25e261]:
+                  - generic "sistema-de-diseno" [ref=f25e262] [cursor=pointer]
+                  - list [ref=f25e266]:
+                    - listitem [ref=f25e267]:
+                      - link "Sistema de Diseño" [ref=f25e268] [cursor=pointer]:
+                        - /url: /frontend/sistema-de-diseno/
+                    - listitem [ref=f25e269]:
+                      - link "Componentes UI" [ref=f25e270] [cursor=pointer]:
+                        - /url: /frontend/sistema-de-diseno/componentes/
+                    - listitem [ref=f25e271]:
+                      - link "Dark Mode y Responsive" [ref=f25e272] [cursor=pointer]:
+                        - /url: /frontend/sistema-de-diseno/dark-mode-y-responsive/
+                    - listitem [ref=f25e273]:
+                      - link "Estructura de Archivos" [ref=f25e274] [cursor=pointer]:
+                        - /url: /frontend/sistema-de-diseno/estructura-archivos/
+                    - listitem [ref=f25e275]:
+                      - link "Formularios" [ref=f25e276] [cursor=pointer]:
+                        - /url: /frontend/sistema-de-diseno/formularios/
+                    - listitem [ref=f25e277]:
+                      - link "Patrones CRUD" [ref=f25e278] [cursor=pointer]:
+                        - /url: /frontend/sistema-de-diseno/patrones-crud/
+                    - listitem [ref=f25e279]:
+                      - link "Presentacion de Datos" [ref=f25e280] [cursor=pointer]:
+                        - /url: /frontend/sistema-de-diseno/presentacion-datos/
+                    - listitem [ref=f25e281]:
+                      - link "Stack y Paleta de Color" [ref=f25e282] [cursor=pointer]:
+                        - /url: /frontend/sistema-de-diseno/stack-y-paleta/
+                    - listitem [ref=f25e283]:
+                      - link "Tipografia y Espaciado" [ref=f25e284] [cursor=pointer]:
+                        - /url: /frontend/sistema-de-diseno/tipografia-y-espaciado/
+        - listitem [ref=f25e285]:
+          - group [ref=f25e286]:
+            - generic "Estándares" [ref=f25e287] [cursor=pointer]
+            - list [ref=f25e291]:
+              - listitem [ref=f25e292]:
+                - link "Estandares" [ref=f25e293] [cursor=pointer]:
+                  - /url: /estandares/
+              - listitem [ref=f25e294]:
+                - link "Coding Standards" [ref=f25e295] [cursor=pointer]:
+                  - /url: /estandares/coding-standards/
+              - listitem [ref=f25e296]:
+                - link "Data Guidelines" [ref=f25e297] [cursor=pointer]:
+                  - /url: /estandares/data-guidelines/
+              - listitem [ref=f25e298]:
+                - link "Guia de Estructura" [ref=f25e299] [cursor=pointer]:
+                  - /url: /estandares/guia-estructura/
+              - listitem [ref=f25e300]:
+                - group [ref=f25e301]:
+                  - generic "stack-tecnologico" [ref=f25e302] [cursor=pointer]
+                  - list [ref=f25e306]:
+                    - listitem [ref=f25e307]:
+                      - link "Stack Tecnologico" [ref=f25e308] [cursor=pointer]:
+                        - /url: /estandares/stack-tecnologico/
+                    - listitem [ref=f25e309]:
+                      - link "Backend — NestJS API" [ref=f25e310] [cursor=pointer]:
+                        - /url: /estandares/stack-tecnologico/backend/
+                    - listitem [ref=f25e311]:
+                      - link "Decisiones Tecnicas" [ref=f25e312] [cursor=pointer]:
+                        - /url: /estandares/stack-tecnologico/decisiones/
+                    - listitem [ref=f25e313]:
+                      - link "Frontend — Admin Panel" [ref=f25e314] [cursor=pointer]:
+                        - /url: /estandares/stack-tecnologico/frontend/
+                    - listitem [ref=f25e315]:
+                      - link "Infraestructura" [ref=f25e316] [cursor=pointer]:
+                        - /url: /estandares/stack-tecnologico/infraestructura/
+                    - listitem [ref=f25e317]:
+                      - link "App Movil — Flutter" [ref=f25e318] [cursor=pointer]:
+                        - /url: /estandares/stack-tecnologico/mobile/
+                    - listitem [ref=f25e319]:
+                      - link "Servicios de Terceros" [ref=f25e320] [cursor=pointer]:
+                        - /url: /estandares/stack-tecnologico/servicios/
+        - listitem [ref=f25e321]:
+          - group [ref=f25e322]:
+            - generic "Pruebas" [ref=f25e323] [cursor=pointer]
+            - list [ref=f25e327]:
+              - listitem [ref=f25e328]:
+                - link "Testing" [ref=f25e329] [cursor=pointer]:
+                  - /url: /testing/
+              - listitem [ref=f25e330]:
+                - link "Usuarios de Prueba" [ref=f25e331] [cursor=pointer]:
+                  - /url: /testing/usuarios-prueba/
+        - listitem [ref=f25e332]:
+          - group [ref=f25e333]:
+            - generic "Guías" [ref=f25e334] [cursor=pointer]
+            - list [ref=f25e338]:
+              - listitem [ref=f25e339]:
+                - link "Guias" [ref=f25e340] [cursor=pointer]:
+                  - /url: /guias/
+              - listitem [ref=f25e341]:
+                - link "Admin Integration" [ref=f25e342] [cursor=pointer]:
+                  - /url: /guias/admin-integration/
+              - listitem [ref=f25e343]:
+                - link "Deployment" [ref=f25e344] [cursor=pointer]:
+                  - /url: /guias/deployment/
+              - listitem [ref=f25e345]:
+                - link "Developer Workflow" [ref=f25e346] [cursor=pointer]:
+                  - /url: /guias/developer-workflow/
+              - listitem [ref=f25e347]:
+                - link "Idea to Spec" [ref=f25e348] [cursor=pointer]:
+                  - /url: /guias/idea-to-spec/
+        - listitem [ref=f25e349]:
+          - group [ref=f25e350]:
+            - generic "Referencia" [ref=f25e351] [cursor=pointer]
+            - list [ref=f25e355]:
+              - listitem [ref=f25e356]:
+                - link "Documentación de Desarrollo" [ref=f25e357] [cursor=pointer]:
+                  - /url: /referencia/
+    - generic [ref=f25e359]:
+      - complementary [ref=f25e360]:
+        - navigation [ref=f25e365]:
+          - heading "En esta página" [level=2] [ref=f25e366]
+          - list [ref=f25e367]:
+            - listitem [ref=f25e368]:
+              - link "Sinopsis" [ref=f25e369] [cursor=pointer]:
+                - /url: "#_top"
+            - listitem [ref=f25e370]:
+              - link "Resumen" [ref=f25e371] [cursor=pointer]:
+                - /url: "#resumen"
+            - listitem [ref=f25e372]:
+              - link "Indice de modulos" [ref=f25e373] [cursor=pointer]:
+                - /url: "#indice-de-modulos"
+            - listitem [ref=f25e374]:
+              - link "auth" [ref=f25e375] [cursor=pointer]:
+                - /url: "#auth"
+            - listitem [ref=f25e376]:
+              - link "users" [ref=f25e377] [cursor=pointer]:
+                - /url: "#users"
+            - listitem [ref=f25e378]:
+              - link "clubs" [ref=f25e379] [cursor=pointer]:
+                - /url: "#clubs"
+            - listitem [ref=f25e380]:
+              - link "activities" [ref=f25e381] [cursor=pointer]:
+                - /url: "#activities"
+            - listitem [ref=f25e382]:
+              - link "admin-geography" [ref=f25e383] [cursor=pointer]:
+                - /url: "#admin-geography"
+            - listitem [ref=f25e384]:
+              - link "admin-reference" [ref=f25e385] [cursor=pointer]:
+                - /url: "#admin-reference"
+            - listitem [ref=f25e386]:
+              - link "admin-users" [ref=f25e387] [cursor=pointer]:
+                - /url: "#admin-users"
+            - listitem [ref=f25e388]:
+              - link "App" [ref=f25e389] [cursor=pointer]:
+                - /url: "#app"
+            - listitem [ref=f25e390]:
+              - link "camporees" [ref=f25e391] [cursor=pointer]:
+                - /url: "#camporees"
+            - listitem [ref=f25e392]:
+              - link "catalogs" [ref=f25e393] [cursor=pointer]:
+                - /url: "#catalogs"
+            - listitem [ref=f25e394]:
+              - link "certifications" [ref=f25e395] [cursor=pointer]:
+                - /url: "#certifications"
+            - listitem [ref=f25e396]:
+              - link "classes" [ref=f25e397] [cursor=pointer]:
+                - /url: "#classes"
+            - listitem [ref=f25e398]:
+              - link "club-roles" [ref=f25e399] [cursor=pointer]:
+                - /url: "#club-roles"
+            - listitem [ref=f25e400]:
+              - link "emergency-contacts" [ref=f25e401] [cursor=pointer]:
+                - /url: "#emergency-contacts"
+            - listitem [ref=f25e402]:
+              - link "FCM Tokens" [ref=f25e403] [cursor=pointer]:
+                - /url: "#fcm-tokens"
+            - listitem [ref=f25e404]:
+              - link "finances" [ref=f25e405] [cursor=pointer]:
+                - /url: "#finances"
+            - listitem [ref=f25e406]:
+              - link "folders" [ref=f25e407] [cursor=pointer]:
+                - /url: "#folders"
+            - listitem [ref=f25e408]:
+              - link "health" [ref=f25e409] [cursor=pointer]:
+                - /url: "#health"
+            - listitem [ref=f25e410]:
+              - link "honors" [ref=f25e411] [cursor=pointer]:
+                - /url: "#honors"
+            - listitem [ref=f25e412]:
+              - link "inventory" [ref=f25e413] [cursor=pointer]:
+                - /url: "#inventory"
+            - listitem [ref=f25e414]:
+              - link "legal-representatives" [ref=f25e415] [cursor=pointer]:
+                - /url: "#legal-representatives"
+            - listitem [ref=f25e416]:
+              - link "Notifications" [ref=f25e417] [cursor=pointer]:
+                - /url: "#notifications"
+            - listitem [ref=f25e418]:
+              - link "OAuth" [ref=f25e419] [cursor=pointer]:
+                - /url: "#oauth"
+            - listitem [ref=f25e420]:
+              - link "post-registration" [ref=f25e421] [cursor=pointer]:
+                - /url: "#post-registration"
+            - listitem [ref=f25e422]:
+              - link "rbac" [ref=f25e423] [cursor=pointer]:
+                - /url: "#rbac"
+            - listitem [ref=f25e424]:
+              - link "user-classes" [ref=f25e425] [cursor=pointer]:
+                - /url: "#user-classes"
+            - listitem [ref=f25e426]:
+              - link "user-honors" [ref=f25e427] [cursor=pointer]:
+                - /url: "#user-honors"
+      - main [ref=f25e429]:
+        - heading "Endpoints — Live Reference" [level=1] [ref=f25e432]
+        - generic [ref=f25e434]:
+          - generic [ref=f25e435]:
+            - generic [ref=f25e436]:
+              - heading "Resumen" [level=2] [ref=f25e437]
+              - link "Sección titulada «Resumen»" [ref=f25e438] [cursor=pointer]:
+                - /url: "#resumen"
+            - table [ref=f25e443]:
+              - rowgroup [ref=f25e444]:
+                - row [ref=f25e445]:
+                  - columnheader "Metrica" [ref=f25e446]
+                  - columnheader "Valor" [ref=f25e447]
+              - rowgroup [ref=f25e448]:
+                - row [ref=f25e449]:
+                  - cell "API version" [ref=f25e450]
+                  - cell [ref=f25e451]:
+                    - code [ref=f25e452]: 2.2.0
+                - row [ref=f25e453]:
+                  - cell "Total endpoints" [ref=f25e454]
+                  - cell [ref=f25e455]:
+                    - strong [ref=f25e456]: "189"
+                - row [ref=f25e457]:
+                  - cell "Autenticados (Bearer)" [ref=f25e458]
+                  - cell "158" [ref=f25e459]
+                - row [ref=f25e460]:
+                  - cell "Tags / modulos" [ref=f25e461]
+                  - cell "27" [ref=f25e462]
+                - row [ref=f25e463]:
+                  - cell "Generado" [ref=f25e464]
+                  - cell "2026-08-20" [ref=f25e465]
+                - row [ref=f25e466]:
+                  - cell "Spec fuente" [ref=f25e467]
+                  - cell [ref=f25e468]:
+                    - code [ref=f25e469]: sacdia-backend/sacdia-api-spec.json
+            - blockquote [ref=f25e470]:
+              - paragraph [ref=f25e471]:
+                - text: Esta pagina se regenera desde el OpenAPI spec del backend. Si ves drift contra el codigo, regenera con
+                - code [ref=f25e472]: pnpm sync:endpoints
+                - text: . La autoridad final es
+                - code [ref=f25e473]: SwaggerModule.createDocument
+                - text: corriendo sobre el codigo NestJS.
+            - generic [ref=f25e474]:
+              - heading "Indice de modulos" [level=2] [ref=f25e475]
+              - link "Sección titulada «Indice de modulos»" [ref=f25e476] [cursor=pointer]:
+                - /url: "#indice-de-modulos"
+            - list [ref=f25e481]:
+              - listitem [ref=f25e482]:
+                - link "auth" [ref=f25e483] [cursor=pointer]:
+                  - /url: "#auth"
+                - text: — 16 endpoints
+              - listitem [ref=f25e484]:
+                - link "users" [ref=f25e485] [cursor=pointer]:
+                  - /url: "#users"
+                - text: — 10 endpoints
+              - listitem [ref=f25e486]:
+                - link "clubs" [ref=f25e487] [cursor=pointer]:
+                  - /url: "#clubs"
+                - text: — 11 endpoints
+              - listitem [ref=f25e488]:
+                - link "activities" [ref=f25e489] [cursor=pointer]:
+                  - /url: "#activities"
+                - text: — 7 endpoints
+              - listitem [ref=f25e490]:
+                - link "admin-geography" [ref=f25e491] [cursor=pointer]:
+                  - /url: "#admin-geography"
+                - text: — 20 endpoints
+              - listitem [ref=f25e492]:
+                - link "admin-reference" [ref=f25e493] [cursor=pointer]:
+                  - /url: "#admin-reference"
+                - text: — 16 endpoints
+              - listitem [ref=f25e494]:
+                - link "admin-users" [ref=f25e495] [cursor=pointer]:
+                  - /url: "#admin-users"
+                - text: — 2 endpoints
+              - listitem [ref=f25e496]:
+                - link "App" [ref=f25e497] [cursor=pointer]:
+                  - /url: "#app"
+                - text: — 1 endpoints
+              - listitem [ref=f25e498]:
+                - link "camporees" [ref=f25e499] [cursor=pointer]:
+                  - /url: "#camporees"
+                - text: — 8 endpoints
+              - listitem [ref=f25e500]:
+                - link "catalogs" [ref=f25e501] [cursor=pointer]:
+                  - /url: "#catalogs"
+                - text: — 14 endpoints
+              - listitem [ref=f25e502]:
+                - link "certifications" [ref=f25e503] [cursor=pointer]:
+                  - /url: "#certifications"
+                - text: — 7 endpoints
+              - listitem [ref=f25e504]:
+                - link "classes" [ref=f25e505] [cursor=pointer]:
+                  - /url: "#classes"
+                - text: — 3 endpoints
+              - listitem [ref=f25e506]:
+                - link "club-roles" [ref=f25e507] [cursor=pointer]:
+                  - /url: "#club-roles"
+                - text: — 2 endpoints
+              - listitem [ref=f25e508]:
+                - link "emergency-contacts" [ref=f25e509] [cursor=pointer]:
+                  - /url: "#emergency-contacts"
+                - text: — 5 endpoints
+              - listitem [ref=f25e510]:
+                - link "FCM Tokens" [ref=f25e511] [cursor=pointer]:
+                  - /url: "#fcm-tokens"
+                - text: — 4 endpoints
+              - listitem [ref=f25e512]:
+                - link "finances" [ref=f25e513] [cursor=pointer]:
+                  - /url: "#finances"
+                - text: — 7 endpoints
+              - listitem [ref=f25e514]:
+                - link "folders" [ref=f25e515] [cursor=pointer]:
+                  - /url: "#folders"
+                - text: — 7 endpoints
+              - listitem [ref=f25e516]:
+                - link "health" [ref=f25e517] [cursor=pointer]:
+                  - /url: "#health"
+                - text: — 1 endpoints
+              - listitem [ref=f25e518]:
+                - link "honors" [ref=f25e519] [cursor=pointer]:
+                  - /url: "#honors"
+                - text: — 4 endpoints
+              - listitem [ref=f25e520]:
+                - link "inventory" [ref=f25e521] [cursor=pointer]:
+                  - /url: "#inventory"
+                - text: — 6 endpoints
+              - listitem [ref=f25e522]:
+                - link "legal-representatives" [ref=f25e523] [cursor=pointer]:
+                  - /url: "#legal-representatives"
+                - text: — 4 endpoints
+              - listitem [ref=f25e524]:
+                - link "Notifications" [ref=f25e525] [cursor=pointer]:
+                  - /url: "#notifications"
+                - text: — 3 endpoints
+              - listitem [ref=f25e526]:
+                - link "OAuth" [ref=f25e527] [cursor=pointer]:
+                  - /url: "#oauth"
+                - text: — 5 endpoints
+              - listitem [ref=f25e528]:
+                - link "post-registration" [ref=f25e529] [cursor=pointer]:
+                  - /url: "#post-registration"
+                - text: — 4 endpoints
+              - listitem [ref=f25e530]:
+                - link "rbac" [ref=f25e531] [cursor=pointer]:
+                  - /url: "#rbac"
+                - text: — 10 endpoints
+              - listitem [ref=f25e532]:
+                - link "user-classes" [ref=f25e533] [cursor=pointer]:
+                  - /url: "#user-classes"
+                - text: — 4 endpoints
+              - listitem [ref=f25e534]:
+                - link "user-honors" [ref=f25e535] [cursor=pointer]:
+                  - /url: "#user-honors"
+                - text: — 8 endpoints
+            - generic [ref=f25e536]:
+              - heading "auth" [level=2] [ref=f25e537]
+              - link "Sección titulada «auth»" [ref=f25e538] [cursor=pointer]:
+                - /url: "#auth"
+            - list [ref=f25e543]:
+              - listitem [ref=f25e544]:
+                - text: 🔓
+                - code [ref=f25e545]: POST /api/v1/auth/login
+                - text: — Iniciar sesión
+              - listitem [ref=f25e546]:
+                - text: 🔓
+                - code [ref=f25e547]: POST /api/v1/auth/logout
+                - text: — Cerrar sesión
+              - listitem [ref=f25e548]:
+                - text: 🔒
+                - code [ref=f25e549]: GET /api/v1/auth/me
+                - text: — Obtener perfil del usuario autenticado
+              - listitem [ref=f25e550]:
+                - text: 🔒
+                - code [ref=f25e551]: PATCH /api/v1/auth/me/context
+                - text: — Cambiar contexto activo de club/instancia del usuario
+              - listitem [ref=f25e552]:
+                - text: 🔒
+                - code [ref=f25e553]: POST /api/v1/auth/mfa/enroll
+                - text: — Iniciar enrolamiento de 2FA
+              - listitem [ref=f25e554]:
+                - text: 🔒
+                - code [ref=f25e555]: GET /api/v1/auth/mfa/factors
+                - text: — Listar factores MFA configurados
+              - listitem [ref=f25e556]:
+                - text: 🔒
+                - code [ref=f25e557]: GET /api/v1/auth/mfa/status
+                - text: — Verificar estado de 2FA
+              - listitem [ref=f25e558]:
+                - text: 🔒
+                - code [ref=f25e559]: DELETE /api/v1/auth/mfa/unenroll
+                - text: — Deshabilitar 2FA
+              - listitem [ref=f25e560]:
+                - text: 🔒
+                - code [ref=f25e561]: POST /api/v1/auth/mfa/verify
+                - text: — Verificar y activar 2FA
+              - listitem [ref=f25e562]:
+                - text: 🔓
+                - code [ref=f25e563]: POST /api/v1/auth/password/reset-request
+                - text: — Solicitar recuperación de contraseña
+              - listitem [ref=f25e564]:
+                - text: 🔒
+                - code [ref=f25e565]: GET /api/v1/auth/profile/completion-status
+                - text: — Obtener estado del post-registro
+              - listitem [ref=f25e566]:
+                - text: 🔓
+                - code [ref=f25e567]: POST /api/v1/auth/refresh
+                - text: — Refrescar sesión con refresh token
+              - listitem [ref=f25e568]:
+                - text: 🔓
+                - code [ref=f25e569]: POST /api/v1/auth/register
+                - text: — Registrar nuevo usuario
+              - listitem [ref=f25e570]:
+                - text: 🔒
+                - code [ref=f25e571]: GET /api/v1/auth/sessions
+                - text: — Listar sesiones activas
+              - listitem [ref=f25e572]:
+                - text: 🔒
+                - code [ref=f25e573]: DELETE /api/v1/auth/sessions
+                - text: — Cerrar todas las sesiones
+              - listitem [ref=f25e574]:
+                - text: 🔒
+                - code [ref=f25e575]: "DELETE /api/v1/auth/sessions/{sessionId}"
+                - text: — Cerrar una sesión específica
+            - separator [ref=f25e576]
+            - generic [ref=f25e577]:
+              - heading "users" [level=2] [ref=f25e578]
+              - link "Sección titulada «users»" [ref=f25e579] [cursor=pointer]:
+                - /url: "#users"
+            - list [ref=f25e584]:
+              - listitem [ref=f25e585]:
+                - text: 🔒
+                - code [ref=f25e586]: "GET /api/v1/users/{userId}"
+                - text: — Obtener información de un usuario
+              - listitem [ref=f25e587]:
+                - text: 🔒
+                - code [ref=f25e588]: "PATCH /api/v1/users/{userId}"
+                - text: — Actualizar información personal del usuario
+              - listitem [ref=f25e589]:
+                - text: 🔒
+                - code [ref=f25e590]: "GET /api/v1/users/{userId}/age"
+                - text: — Calcular edad del usuario
+              - listitem [ref=f25e591]:
+                - text: 🔒
+                - code [ref=f25e592]: "PUT /api/v1/users/{userId}/allergies"
+                - text: — Guardar alergias del usuario
+              - listitem [ref=f25e593]:
+                - text: 🔒
+                - code [ref=f25e594]: "DELETE /api/v1/users/{userId}/allergies/{allergyId}"
+                - text: — Eliminar alergia del usuario (borrado lógico)
+              - listitem [ref=f25e595]:
+                - text: 🔒
+                - code [ref=f25e596]: "PUT /api/v1/users/{userId}/diseases"
+                - text: — Guardar enfermedades del usuario
+              - listitem [ref=f25e597]:
+                - text: 🔒
+                - code [ref=f25e598]: "DELETE /api/v1/users/{userId}/diseases/{diseaseId}"
+                - text: — Eliminar enfermedad del usuario (borrado lógico)
+              - listitem [ref=f25e599]:
+                - text: 🔒
+                - code [ref=f25e600]: "POST /api/v1/users/{userId}/profile-picture"
+                - text: — Subir foto de perfil
+              - listitem [ref=f25e601]:
+                - text: 🔒
+                - code [ref=f25e602]: "DELETE /api/v1/users/{userId}/profile-picture"
+                - text: — Eliminar foto de perfil
+              - listitem [ref=f25e603]:
+                - text: 🔒
+                - code [ref=f25e604]: "GET /api/v1/users/{userId}/requires-legal-representative"
+                - text: — Verificar si el usuario requiere representante legal
+            - separator [ref=f25e605]
+            - generic [ref=f25e606]:
+              - heading "clubs" [level=2] [ref=f25e607]
+              - link "Sección titulada «clubs»" [ref=f25e608] [cursor=pointer]:
+                - /url: "#clubs"
+            - list [ref=f25e613]:
+              - listitem [ref=f25e614]:
+                - text: 🔒
+                - code [ref=f25e615]: GET /api/v1/clubs
+                - code [ref=f25e616]: "?localFieldId?&districtId?&churchId?&active?&page?&limit?"
+                - text: — Listar clubs
+              - listitem [ref=f25e617]:
+                - text: 🔒
+                - code [ref=f25e618]: POST /api/v1/clubs
+                - text: — Crear nuevo club
+              - listitem [ref=f25e619]:
+                - text: 🔒
+                - code [ref=f25e620]: "GET /api/v1/clubs/{clubId}"
+                - text: — Obtener club por ID
+              - listitem [ref=f25e621]:
+                - text: 🔒
+                - code [ref=f25e622]: "PATCH /api/v1/clubs/{clubId}"
+                - text: — Actualizar club (requiere rol director o deputy director)
+              - listitem [ref=f25e623]:
+                - text: 🔒
+                - code [ref=f25e624]: "DELETE /api/v1/clubs/{clubId}"
+                - text: — Desactivar club (requiere rol director)
+              - listitem [ref=f25e625]:
+                - text: 🔒
+                - code [ref=f25e626]: "GET /api/v1/clubs/{clubId}/instances"
+                - text: — Obtener instancias del club
+              - listitem [ref=f25e627]:
+                - text: 🔒
+                - code [ref=f25e628]: "POST /api/v1/clubs/{clubId}/instances"
+                - text: — Crear instancia de club (requiere director o deputy director)
+              - listitem [ref=f25e629]:
+                - text: 🔒
+                - code [ref=f25e630]: "GET /api/v1/clubs/{clubId}/instances/{type}"
+                - text: — Obtener instancia por tipo
+              - listitem [ref=f25e631]:
+                - text: 🔒
+                - code [ref=f25e632]: "PATCH /api/v1/clubs/{clubId}/instances/{type}/{instanceId}"
+                - text: — Actualizar instancia (requiere director, deputy director o secretary)
+              - listitem [ref=f25e633]:
+                - text: 🔒
+                - code [ref=f25e634]: "GET /api/v1/clubs/{clubId}/instances/{type}/{instanceId}/members"
+                - text: — Listar miembros de la instancia
+              - listitem [ref=f25e635]:
+                - text: 🔒
+                - code [ref=f25e636]: "POST /api/v1/clubs/{clubId}/instances/{type}/{instanceId}/roles"
+                - text: — Asignar rol a un miembro (requiere director, deputy director o secretary)
+            - separator [ref=f25e637]
+            - generic [ref=f25e638]:
+              - heading "activities" [level=2] [ref=f25e639]
+              - link "Sección titulada «activities»" [ref=f25e640] [cursor=pointer]:
+                - /url: "#activities"
+            - list [ref=f25e645]:
+              - listitem [ref=f25e646]:
+                - text: 🔒
+                - code [ref=f25e647]: "GET /api/v1/activities/{activityId}"
+                - text: — Obtener actividad por ID
+              - listitem [ref=f25e648]:
+                - text: 🔒
+                - code [ref=f25e649]: "PATCH /api/v1/activities/{activityId}"
+                - text: — Actualizar actividad
+              - listitem [ref=f25e650]:
+                - text: 🔒
+                - code [ref=f25e651]: "DELETE /api/v1/activities/{activityId}"
+                - text: — Desactivar actividad
+              - listitem [ref=f25e652]:
+                - text: 🔒
+                - code [ref=f25e653]: "GET /api/v1/activities/{activityId}/attendance"
+                - text: — Obtener asistencia
+              - listitem [ref=f25e654]:
+                - text: 🔒
+                - code [ref=f25e655]: "POST /api/v1/activities/{activityId}/attendance"
+                - text: — Registrar asistencia
+              - listitem [ref=f25e656]:
+                - text: 🔒
+                - code [ref=f25e657]: "GET /api/v1/clubs/{clubId}/activities"
+                - code [ref=f25e658]: "?clubTypeId?&active?&activityTypeId?&page?&limit?"
+                - text: — Listar actividades del club
+              - listitem [ref=f25e659]:
+                - text: 🔒
+                - code [ref=f25e660]: "POST /api/v1/clubs/{clubId}/activities"
+                - text: — Crear actividad
+            - separator [ref=f25e661]
+            - generic [ref=f25e662]:
+              - heading "admin-geography" [level=2] [ref=f25e663]
+              - link "Sección titulada «admin-geography»" [ref=f25e664] [cursor=pointer]:
+                - /url: "#admin-geography"
+            - list [ref=f25e669]:
+              - listitem [ref=f25e670]:
+                - text: 🔒
+                - code [ref=f25e671]: GET /api/v1/admin/churches
+                - code [ref=f25e672]: "?districtId?"
+                - text: — List churches for admin management
+              - listitem [ref=f25e673]:
+                - text: 🔒
+                - code [ref=f25e674]: POST /api/v1/admin/churches
+                - text: — Create church
+              - listitem [ref=f25e675]:
+                - text: 🔒
+                - code [ref=f25e676]: "PATCH /api/v1/admin/churches/{churchId}"
+                - text: — Update church
+              - listitem [ref=f25e677]:
+                - text: 🔒
+                - code [ref=f25e678]: "DELETE /api/v1/admin/churches/{churchId}"
+                - text: — Soft delete church
+              - listitem [ref=f25e679]:
+                - text: 🔒
+                - code [ref=f25e680]: GET /api/v1/admin/countries
+                - text: — List countries for admin management
+              - listitem [ref=f25e681]:
+                - text: 🔒
+                - code [ref=f25e682]: POST /api/v1/admin/countries
+                - text: — Create country
+              - listitem [ref=f25e683]:
+                - text: 🔒
+                - code [ref=f25e684]: "PATCH /api/v1/admin/countries/{countryId}"
+                - text: — Update country
+              - listitem [ref=f25e685]:
+                - text: 🔒
+                - code [ref=f25e686]: "DELETE /api/v1/admin/countries/{countryId}"
+                - text: — Soft delete country
+              - listitem [ref=f25e687]:
+                - text: 🔒
+                - code [ref=f25e688]: GET /api/v1/admin/districts
+                - code [ref=f25e689]: "?localFieldId?"
+                - text: — List districts for admin management
+              - listitem [ref=f25e690]:
+                - text: 🔒
+                - code [ref=f25e691]: POST /api/v1/admin/districts
+                - text: — Create district
+              - listitem [ref=f25e692]:
+                - text: 🔒
+                - code [ref=f25e693]: "PATCH /api/v1/admin/districts/{districtId}"
+                - text: — Update district
+              - listitem [ref=f25e694]:
+                - text: 🔒
+                - code [ref=f25e695]: "DELETE /api/v1/admin/districts/{districtId}"
+                - text: — Soft delete district
+              - listitem [ref=f25e696]:
+                - text: 🔒
+                - code [ref=f25e697]: GET /api/v1/admin/local-fields
+                - code [ref=f25e698]: "?unionId?"
+                - text: — List local fields for admin management
+              - listitem [ref=f25e699]:
+                - text: 🔒
+                - code [ref=f25e700]: POST /api/v1/admin/local-fields
+                - text: — Create local field
+              - listitem [ref=f25e701]:
+                - text: 🔒
+                - code [ref=f25e702]: "PATCH /api/v1/admin/local-fields/{localFieldId}"
+                - text: — Update local field
+              - listitem [ref=f25e703]:
+                - text: 🔒
+                - code [ref=f25e704]: "DELETE /api/v1/admin/local-fields/{localFieldId}"
+                - text: — Soft delete local field
+              - listitem [ref=f25e705]:
+                - text: 🔒
+                - code [ref=f25e706]: GET /api/v1/admin/unions
+                - code [ref=f25e707]: "?countryId?"
+                - text: — List unions for admin management
+              - listitem [ref=f25e708]:
+                - text: 🔒
+                - code [ref=f25e709]: POST /api/v1/admin/unions
+                - text: — Create union
+              - listitem [ref=f25e710]:
+                - text: 🔒
+                - code [ref=f25e711]: "PATCH /api/v1/admin/unions/{unionId}"
+                - text: — Update union
+              - listitem [ref=f25e712]:
+                - text: 🔒
+                - code [ref=f25e713]: "DELETE /api/v1/admin/unions/{unionId}"
+                - text: — Soft delete union
+            - separator [ref=f25e714]
+            - generic [ref=f25e715]:
+              - heading "admin-reference" [level=2] [ref=f25e716]
+              - link "Sección titulada «admin-reference»" [ref=f25e717] [cursor=pointer]:
+                - /url: "#admin-reference"
+            - list [ref=f25e722]:
+              - listitem [ref=f25e723]:
+                - text: 🔒
+                - code [ref=f25e724]: GET /api/v1/admin/allergies
+                - text: — List allergies for admin management
+              - listitem [ref=f25e725]:
+                - text: 🔒
+                - code [ref=f25e726]: POST /api/v1/admin/allergies
+                - text: — Create allergy
+              - listitem [ref=f25e727]:
+                - text: 🔒
+                - code [ref=f25e728]: "PATCH /api/v1/admin/allergies/{allergyId}"
+                - text: — Update allergy
+              - listitem [ref=f25e729]:
+                - text: 🔒
+                - code [ref=f25e730]: "DELETE /api/v1/admin/allergies/{allergyId}"
+                - text: — Soft delete allergy
+              - listitem [ref=f25e731]:
+                - text: 🔒
+                - code [ref=f25e732]: GET /api/v1/admin/diseases
+                - text: — List diseases for admin management
+              - listitem [ref=f25e733]:
+                - text: 🔒
+                - code [ref=f25e734]: POST /api/v1/admin/diseases
+                - text: — Create disease
+              - listitem [ref=f25e735]:
+                - text: 🔒
+                - code [ref=f25e736]: "PATCH /api/v1/admin/diseases/{diseaseId}"
+                - text: — Update disease
+              - listitem [ref=f25e737]:
+                - text: 🔒
+                - code [ref=f25e738]: "DELETE /api/v1/admin/diseases/{diseaseId}"
+                - text: — Soft delete disease
+              - listitem [ref=f25e739]:
+                - text: 🔒
+                - code [ref=f25e740]: GET /api/v1/admin/ecclesiastical-years
+                - text: — List ecclesiastical years for admin management
+              - listitem [ref=f25e741]:
+                - text: 🔒
+                - code [ref=f25e742]: POST /api/v1/admin/ecclesiastical-years
+                - text: — Create ecclesiastical year
+              - listitem [ref=f25e743]:
+                - text: 🔒
+                - code [ref=f25e744]: "PATCH /api/v1/admin/ecclesiastical-years/{yearId}"
+                - text: — Update ecclesiastical year
+              - listitem [ref=f25e745]:
+                - text: 🔒
+                - code [ref=f25e746]: "DELETE /api/v1/admin/ecclesiastical-years/{yearId}"
+                - text: — Soft delete ecclesiastical year
+              - listitem [ref=f25e747]:
+                - text: 🔒
+                - code [ref=f25e748]: GET /api/v1/admin/relationship-types
+                - text: — List relationship types for admin management
+              - listitem [ref=f25e749]:
+                - text: 🔒
+                - code [ref=f25e750]: POST /api/v1/admin/relationship-types
+                - text: — Create relationship type
+              - listitem [ref=f25e751]:
+                - text: 🔒
+                - code [ref=f25e752]: "PATCH /api/v1/admin/relationship-types/{relationshipTypeId}"
+                - text: — Update relationship type
+              - listitem [ref=f25e753]:
+                - text: 🔒
+                - code [ref=f25e754]: "DELETE /api/v1/admin/relationship-types/{relationshipTypeId}"
+                - text: — Soft delete relationship type
+            - separator [ref=f25e755]
+            - generic [ref=f25e756]:
+              - heading "admin-users" [level=2] [ref=f25e757]
+              - link "Sección titulada «admin-users»" [ref=f25e758] [cursor=pointer]:
+                - /url: "#admin-users"
+            - list [ref=f25e763]:
+              - listitem [ref=f25e764]:
+                - text: 🔒
+                - code [ref=f25e765]: GET /api/v1/admin/users
+                - code [ref=f25e766]: "?page?&limit?&search?&role?&active?&unionId?&localFieldId?"
+                - text: — Listar usuarios administrativos con alcance por rol (ALL/UNION/LOCAL_FIELD)
+              - listitem [ref=f25e767]:
+                - text: 🔒
+                - code [ref=f25e768]: "GET /api/v1/admin/users/{userId}"
+                - text: — Obtener detalle de usuario validando alcance por rol del actor
+            - separator [ref=f25e769]
+            - generic [ref=f25e770]:
+              - heading "App" [level=2] [ref=f25e771]
+              - link "Sección titulada «App»" [ref=f25e772] [cursor=pointer]:
+                - /url: "#app"
+            - list [ref=f25e777]:
+              - listitem [ref=f25e778]:
+                - text: 🔓
+                - code [ref=f25e779]: GET /api/v1
+                - text: — AppController_getHello_v1
+            - separator [ref=f25e780]
+            - generic [ref=f25e781]:
+              - heading "camporees" [level=2] [ref=f25e782]
+              - link "Sección titulada «camporees»" [ref=f25e783] [cursor=pointer]:
+                - /url: "#camporees"
+            - list [ref=f25e788]:
+              - listitem [ref=f25e789]:
+                - text: 🔒
+                - code [ref=f25e790]: GET /api/v1/camporees
+                - code [ref=f25e791]: "?active?&page?&limit?"
+                - text: — Listar camporees
+              - listitem [ref=f25e792]:
+                - text: 🔒
+                - code [ref=f25e793]: POST /api/v1/camporees
+                - text: — Crear camporee
+              - listitem [ref=f25e794]:
+                - text: 🔒
+                - code [ref=f25e795]: "GET /api/v1/camporees/{camporeeId}"
+                - text: — Obtener camporee por ID
+              - listitem [ref=f25e796]:
+                - text: 🔒
+                - code [ref=f25e797]: "PATCH /api/v1/camporees/{camporeeId}"
+                - text: — Actualizar camporee
+              - listitem [ref=f25e798]:
+                - text: 🔒
+                - code [ref=f25e799]: "DELETE /api/v1/camporees/{camporeeId}"
+                - text: — Desactivar camporee
+              - listitem [ref=f25e800]:
+                - text: 🔒
+                - code [ref=f25e801]: "GET /api/v1/camporees/{camporeeId}/members"
+                - text: — Listar miembros del camporee
+              - listitem [ref=f25e802]:
+                - text: 🔒
+                - code [ref=f25e803]: "DELETE /api/v1/camporees/{camporeeId}/members/{userId}"
+                - text: — Remover miembro del camporee
+              - listitem [ref=f25e804]:
+                - text: 🔒
+                - code [ref=f25e805]: "POST /api/v1/camporees/{camporeeId}/register"
+                - text: — Registrar miembro en camporee
+            - separator [ref=f25e806]
+            - generic [ref=f25e807]:
+              - heading "catalogs" [level=2] [ref=f25e808]
+              - link "Sección titulada «catalogs»" [ref=f25e809] [cursor=pointer]:
+                - /url: "#catalogs"
+            - list [ref=f25e814]:
+              - listitem [ref=f25e815]:
+                - text: 🔓
+                - code [ref=f25e816]: GET /api/v1/catalogs/activity-types
+                - text: — Obtener tipos de actividad
+              - listitem [ref=f25e817]:
+                - text: 🔓
+                - code [ref=f25e818]: GET /api/v1/catalogs/allergies
+                - text: — Obtener catálogo de alergias
+              - listitem [ref=f25e819]:
+                - text: 🔓
+                - code [ref=f25e820]: GET /api/v1/catalogs/churches
+                - code [ref=f25e821]: "?districtId?"
+                - text: — Obtener iglesias
+              - listitem [ref=f25e822]:
+                - text: 🔓
+                - code [ref=f25e823]: GET /api/v1/catalogs/club-ideals
+                - code [ref=f25e824]: "?clubTypeId?"
+                - text: — Obtener ideales de club
+              - listitem [ref=f25e825]:
+                - text: 🔓
+                - code [ref=f25e826]: GET /api/v1/catalogs/club-types
+                - text: — Obtener tipos de club
+              - listitem [ref=f25e827]:
+                - text: 🔓
+                - code [ref=f25e828]: GET /api/v1/catalogs/countries
+                - text: — Obtener países
+              - listitem [ref=f25e829]:
+                - text: 🔓
+                - code [ref=f25e830]: GET /api/v1/catalogs/diseases
+                - text: — Obtener catálogo de enfermedades
+              - listitem [ref=f25e831]:
+                - text: 🔓
+                - code [ref=f25e832]: GET /api/v1/catalogs/districts
+                - code [ref=f25e833]: "?localFieldId?"
+                - text: — Obtener distritos
+              - listitem [ref=f25e834]:
+                - text: 🔓
+                - code [ref=f25e835]: GET /api/v1/catalogs/ecclesiastical-years
+                - text: — Obtener años eclesiásticos
+              - listitem [ref=f25e836]:
+                - text: 🔓
+                - code [ref=f25e837]: GET /api/v1/catalogs/ecclesiastical-years/current
+                - text: — Obtener año eclesiástico actual
+              - listitem [ref=f25e838]:
+                - text: 🔓
+                - code [ref=f25e839]: GET /api/v1/catalogs/local-fields
+                - code [ref=f25e840]: "?unionId?"
+                - text: — Obtener campos locales
+              - listitem [ref=f25e841]:
+                - text: 🔓
+                - code [ref=f25e842]: GET /api/v1/catalogs/relationship-types
+                - text: — Obtener tipos de relación
+              - listitem [ref=f25e843]:
+                - text: 🔓
+                - code [ref=f25e844]: GET /api/v1/catalogs/roles
+                - code [ref=f25e845]: "?category?"
+                - text: — Obtener roles disponibles
+              - listitem [ref=f25e846]:
+                - text: 🔓
+                - code [ref=f25e847]: GET /api/v1/catalogs/unions
+                - code [ref=f25e848]: "?countryId?"
+                - text: — Obtener uniones
+            - separator [ref=f25e849]
+            - generic [ref=f25e850]:
+              - heading "certifications" [level=2] [ref=f25e851]
+              - link "Sección titulada «certifications»" [ref=f25e852] [cursor=pointer]:
+                - /url: "#certifications"
+            - list [ref=f25e857]:
+              - listitem [ref=f25e858]:
+                - text: 🔒
+                - code [ref=f25e859]: GET /api/v1/certifications/certifications
+                - code [ref=f25e860]: "?page?&limit?"
+                - text: — Listar todas las certificaciones disponibles
+              - listitem [ref=f25e861]:
+                - text: 🔒
+                - code [ref=f25e862]: "GET /api/v1/certifications/certifications/{id}"
+                - text: — Obtener detalles de una certificación
+              - listitem [ref=f25e863]:
+                - text: 🔒
+                - code [ref=f25e864]: "GET /api/v1/certifications/users/{userId}/certifications"
+                - text: — Listar certificaciones del usuario
+              - listitem [ref=f25e865]:
+                - text: 🔒
+                - code [ref=f25e866]: "DELETE /api/v1/certifications/users/{userId}/certifications/{certificationId}"
+                - text: — Abandonar una certificación
+              - listitem [ref=f25e867]:
+                - text: 🔒
+                - code [ref=f25e868]: "GET /api/v1/certifications/users/{userId}/certifications/{certificationId}/progress"
+                - text: — Ver progreso detallado de una certificación
+              - listitem [ref=f25e869]:
+                - text: 🔒
+                - code [ref=f25e870]: "PATCH /api/v1/certifications/users/{userId}/certifications/{certificationId}/progress"
+                - text: — Actualizar progreso de una sección
+              - listitem [ref=f25e871]:
+                - text: 🔒
+                - code [ref=f25e872]: "POST /api/v1/certifications/users/{userId}/certifications/enroll"
+                - text: — Inscribirse en una certificación
+            - separator [ref=f25e873]
+            - generic [ref=f25e874]:
+              - heading "classes" [level=2] [ref=f25e875]
+              - link "Sección titulada «classes»" [ref=f25e876] [cursor=pointer]:
+                - /url: "#classes"
+            - list [ref=f25e881]:
+              - listitem [ref=f25e882]:
+                - text: 🔓
+                - code [ref=f25e883]: GET /api/v1/classes
+                - code [ref=f25e884]: "?clubTypeId?&page?&limit?"
+                - text: — Listar clases
+              - listitem [ref=f25e885]:
+                - text: 🔓
+                - code [ref=f25e886]: "GET /api/v1/classes/{classId}"
+                - text: — Obtener clase por ID
+              - listitem [ref=f25e887]:
+                - text: 🔓
+                - code [ref=f25e888]: "GET /api/v1/classes/{classId}/modules"
+                - text: — Obtener módulos de una clase
+            - separator [ref=f25e889]
+            - generic [ref=f25e890]:
+              - heading "club-roles" [level=2] [ref=f25e891]
+              - link "Sección titulada «club-roles»" [ref=f25e892] [cursor=pointer]:
+                - /url: "#club-roles"
+            - list [ref=f25e897]:
+              - listitem [ref=f25e898]:
+                - text: 🔒
+                - code [ref=f25e899]: "PATCH /api/v1/club-roles/{assignmentId}"
+                - text: — Actualizar asignación de rol
+              - listitem [ref=f25e900]:
+                - text: 🔒
+                - code [ref=f25e901]: "DELETE /api/v1/club-roles/{assignmentId}"
+                - text: — Remover rol de miembro
+            - separator [ref=f25e902]
+            - generic [ref=f25e903]:
+              - heading "emergency-contacts" [level=2] [ref=f25e904]
+              - link "Sección titulada «emergency-contacts»" [ref=f25e905] [cursor=pointer]:
+                - /url: "#emergency-contacts"
+            - list [ref=f25e910]:
+              - listitem [ref=f25e911]:
+                - text: 🔒
+                - code [ref=f25e912]: "GET /api/v1/users/{userId}/emergency-contacts"
+                - text: — Listar contactos de emergencia del usuario
+              - listitem [ref=f25e913]:
+                - text: 🔒
+                - code [ref=f25e914]: "POST /api/v1/users/{userId}/emergency-contacts"
+                - text: — Crear contacto de emergencia (máximo 5)
+              - listitem [ref=f25e915]:
+                - text: 🔒
+                - code [ref=f25e916]: "GET /api/v1/users/{userId}/emergency-contacts/{contactId}"
+                - text: — Obtener un contacto específico
+              - listitem [ref=f25e917]:
+                - text: 🔒
+                - code [ref=f25e918]: "PATCH /api/v1/users/{userId}/emergency-contacts/{contactId}"
+                - text: — Actualizar contacto de emergencia
+              - listitem [ref=f25e919]:
+                - text: 🔒
+                - code [ref=f25e920]: "DELETE /api/v1/users/{userId}/emergency-contacts/{contactId}"
+                - text: — Eliminar contacto de emergencia (soft delete)
+            - separator [ref=f25e921]
+            - generic [ref=f25e922]:
+              - heading "FCM Tokens" [level=2] [ref=f25e923]
+              - link "Sección titulada «FCM Tokens»" [ref=f25e924] [cursor=pointer]:
+                - /url: "#fcm-tokens"
+            - list [ref=f25e929]:
+              - listitem [ref=f25e930]:
+                - text: 🔒
+                - code [ref=f25e931]: GET /api/v1/fcm-tokens
+                - text: — Get current user FCM tokens
+              - listitem [ref=f25e932]:
+                - text: 🔒
+                - code [ref=f25e933]: POST /api/v1/fcm-tokens
+                - text: — Register FCM token
+              - listitem [ref=f25e934]:
+                - text: 🔒
+                - code [ref=f25e935]: "DELETE /api/v1/fcm-tokens/{token}"
+                - text: — Unregister FCM token
+              - listitem [ref=f25e936]:
+                - text: 🔒
+                - code [ref=f25e937]: "GET /api/v1/fcm-tokens/user/{userId}"
+                - text: — Get FCM tokens by user ID (owner/admin only)
+            - separator [ref=f25e938]
+            - generic [ref=f25e939]:
+              - heading "finances" [level=2] [ref=f25e940]
+              - link "Sección titulada «finances»" [ref=f25e941] [cursor=pointer]:
+                - /url: "#finances"
+            - list [ref=f25e946]:
+              - listitem [ref=f25e947]:
+                - text: 🔒
+                - code [ref=f25e948]: "GET /api/v1/clubs/{clubId}/finances"
+                - code [ref=f25e949]: "?year?&month?&clubTypeId?&categoryId?&page?&limit?"
+                - text: — Listar movimientos financieros del club
+              - listitem [ref=f25e950]:
+                - text: 🔒
+                - code [ref=f25e951]: "POST /api/v1/clubs/{clubId}/finances"
+                - text: — Crear movimiento financiero
+              - listitem [ref=f25e952]:
+                - text: 🔒
+                - code [ref=f25e953]: "GET /api/v1/clubs/{clubId}/finances/summary"
+                - code [ref=f25e954]: "?year?&month?"
+                - text: — Resumen financiero del club
+              - listitem [ref=f25e955]:
+                - text: 🔒
+                - code [ref=f25e956]: "GET /api/v1/finances/{financeId}"
+                - text: — Obtener movimiento por ID
+              - listitem [ref=f25e957]:
+                - text: 🔒
+                - code [ref=f25e958]: "PATCH /api/v1/finances/{financeId}"
+                - text: — Actualizar movimiento
+              - listitem [ref=f25e959]:
+                - text: 🔒
+                - code [ref=f25e960]: "DELETE /api/v1/finances/{financeId}"
+                - text: — Desactivar movimiento
+              - listitem [ref=f25e961]:
+                - text: 🔒
+                - code [ref=f25e962]: GET /api/v1/finances/categories
+                - code [ref=f25e963]: "?type?"
+                - text: — Listar categorías financieras
+            - separator [ref=f25e964]
+            - generic [ref=f25e965]:
+              - heading "folders" [level=2] [ref=f25e966]
+              - link "Sección titulada «folders»" [ref=f25e967] [cursor=pointer]:
+                - /url: "#folders"
+            - list [ref=f25e972]:
+              - listitem [ref=f25e973]:
+                - text: 🔒
+                - code [ref=f25e974]: GET /api/v1/folders/folders
+                - code [ref=f25e975]: "?club_type?&page?&limit?"
+                - text: — Listar templates de carpetas disponibles
+              - listitem [ref=f25e976]:
+                - text: 🔒
+                - code [ref=f25e977]: "GET /api/v1/folders/folders/{id}"
+                - text: — Obtener detalles de un template de carpeta
+              - listitem [ref=f25e978]:
+                - text: 🔒
+                - code [ref=f25e979]: "GET /api/v1/folders/users/{userId}/folders"
+                - text: — Listar carpetas asignadas del usuario
+              - listitem [ref=f25e980]:
+                - text: 🔒
+                - code [ref=f25e981]: "DELETE /api/v1/folders/users/{userId}/folders/{folderId}"
+                - text: — Abandonar una carpeta
+              - listitem [ref=f25e982]:
+                - text: 🔒
+                - code [ref=f25e983]: "POST /api/v1/folders/users/{userId}/folders/{folderId}/enroll"
+                - text: — Inscribirse en una carpeta
+              - listitem [ref=f25e984]:
+                - text: 🔒
+                - code [ref=f25e985]: "PATCH /api/v1/folders/users/{userId}/folders/{folderId}/modules/{moduleId}/sections/{sectionId}"
+                - text: — Actualizar progreso de una sección
+              - listitem [ref=f25e986]:
+                - text: 🔒
+                - code [ref=f25e987]: "GET /api/v1/folders/users/{userId}/folders/{folderId}/progress"
+                - text: — Ver progreso detallado de una carpeta
+            - separator [ref=f25e988]
+            - generic [ref=f25e989]:
+              - heading "health" [level=2] [ref=f25e990]
+              - link "Sección titulada «health»" [ref=f25e991] [cursor=pointer]:
+                - /url: "#health"
+            - list [ref=f25e996]:
+              - listitem [ref=f25e997]:
+                - text: 🔓
+                - code [ref=f25e998]: GET /api/v1/health
+                - text: — Check API status
+            - separator [ref=f25e999]
+            - generic [ref=f25e1000]:
+              - heading "honors" [level=2] [ref=f25e1001]
+              - link "Sección titulada «honors»" [ref=f25e1002] [cursor=pointer]:
+                - /url: "#honors"
+            - list [ref=f25e1007]:
+              - listitem [ref=f25e1008]:
+                - text: 🔓
+                - code [ref=f25e1009]: GET /api/v1/honors
+                - code [ref=f25e1010]: "?categoryId?&clubTypeId?&skillLevel?&page?&limit?"
+                - text: — Listar honores
+              - listitem [ref=f25e1011]:
+                - text: 🔓
+                - code [ref=f25e1012]: "GET /api/v1/honors/{honorId}"
+                - text: — Obtener honor por ID
+              - listitem [ref=f25e1013]:
+                - text: 🔓
+                - code [ref=f25e1014]: GET /api/v1/honors/categories
+                - text: — Listar categorías de honores
+              - listitem [ref=f25e1015]:
+                - text: 🔓
+                - code [ref=f25e1016]: GET /api/v1/honors/grouped-by-category
+                - code [ref=f25e1017]: "?categoryId?&clubTypeId?&skillLevel?"
+                - text: — Listar honores agrupados por categoría
+            - separator [ref=f25e1018]
+            - generic [ref=f25e1019]:
+              - heading "inventory" [level=2] [ref=f25e1020]
+              - link "Sección titulada «inventory»" [ref=f25e1021] [cursor=pointer]:
+                - /url: "#inventory"
+            - list [ref=f25e1026]:
+              - listitem [ref=f25e1027]:
+                - text: 🔒
+                - code [ref=f25e1028]: GET /api/v1/inventory/catalogs/inventory-categories
+                - text: — Listar categorías de inventario
+              - listitem [ref=f25e1029]:
+                - text: 🔒
+                - code [ref=f25e1030]: "GET /api/v1/inventory/clubs/{clubId}/inventory"
+                - code [ref=f25e1031]: "?instanceType&category?"
+                - text: — Listar items del inventario de un club
+              - listitem [ref=f25e1032]:
+                - text: 🔒
+                - code [ref=f25e1033]: "POST /api/v1/inventory/clubs/{clubId}/inventory"
+                - text: — Agregar nuevo item al inventario
+              - listitem [ref=f25e1034]:
+                - text: 🔒
+                - code [ref=f25e1035]: "GET /api/v1/inventory/inventory/{id}"
+                - text: — Obtener detalles de un item del inventario
+              - listitem [ref=f25e1036]:
+                - text: 🔒
+                - code [ref=f25e1037]: "PATCH /api/v1/inventory/inventory/{id}"
+                - text: — Actualizar un item del inventario
+              - listitem [ref=f25e1038]:
+                - text: 🔒
+                - code [ref=f25e1039]: "DELETE /api/v1/inventory/inventory/{id}"
+                - text: — Eliminar un item del inventario
+            - separator [ref=f25e1040]
+            - generic [ref=f25e1041]:
+              - heading "legal-representatives" [level=2] [ref=f25e1042]
+              - link "Sección titulada «legal-representatives»" [ref=f25e1043] [cursor=pointer]:
+                - /url: "#legal-representatives"
+            - list [ref=f25e1048]:
+              - listitem [ref=f25e1049]:
+                - text: 🔒
+                - code [ref=f25e1050]: "GET /api/v1/users/{userId}/legal-representative"
+                - text: — Obtener representante legal del usuario
+              - listitem [ref=f25e1051]:
+                - text: 🔒
+                - code [ref=f25e1052]: "POST /api/v1/users/{userId}/legal-representative"
+                - text: — Registrar representante legal (solo para menores de 18)
+              - listitem [ref=f25e1053]:
+                - text: 🔒
+                - code [ref=f25e1054]: "PATCH /api/v1/users/{userId}/legal-representative"
+                - text: — Actualizar representante legal
+              - listitem [ref=f25e1055]:
+                - text: 🔒
+                - code [ref=f25e1056]: "DELETE /api/v1/users/{userId}/legal-representative"
+                - text: — Eliminar representante legal
+            - separator [ref=f25e1057]
+            - generic [ref=f25e1058]:
+              - heading "Notifications" [level=2] [ref=f25e1059]
+              - link "Sección titulada «Notifications»" [ref=f25e1060] [cursor=pointer]:
+                - /url: "#notifications"
+            - list [ref=f25e1065]:
+              - listitem [ref=f25e1066]:
+                - text: 🔒
+                - code [ref=f25e1067]: POST /api/v1/notifications/broadcast
+                - text: — Send notification to all users
+              - listitem [ref=f25e1068]:
+                - text: 🔒
+                - code [ref=f25e1069]: "POST /api/v1/notifications/club/{instanceType}/{instanceId}"
+                - text: — Send notification to club members
+              - listitem [ref=f25e1070]:
+                - text: 🔒
+                - code [ref=f25e1071]: POST /api/v1/notifications/send
+                - text: — Send notification to specific user
+            - separator [ref=f25e1072]
+            - generic [ref=f25e1073]:
+              - heading "OAuth" [level=2] [ref=f25e1074]
+              - link "Sección titulada «OAuth»" [ref=f25e1075] [cursor=pointer]:
+                - /url: "#oauth"
+            - list [ref=f25e1080]:
+              - listitem [ref=f25e1081]:
+                - text: 🔒
+                - code [ref=f25e1082]: "DELETE /api/v1/auth/oauth/{provider}"
+                - text: — Desconectar un provider
+              - listitem [ref=f25e1083]:
+                - text: 🔓
+                - code [ref=f25e1084]: POST /api/v1/auth/oauth/apple
+                - text: — Iniciar autenticación con Apple
+              - listitem [ref=f25e1085]:
+                - text: 🔓
+                - code [ref=f25e1086]: POST /api/v1/auth/oauth/callback
+                - text: — Finalizar callback de OAuth
+              - listitem [ref=f25e1087]:
+                - text: 🔓
+                - code [ref=f25e1088]: POST /api/v1/auth/oauth/google
+                - text: — Iniciar autenticación con Google
+              - listitem [ref=f25e1089]:
+                - text: 🔒
+                - code [ref=f25e1090]: GET /api/v1/auth/oauth/providers
+                - text: — Obtener providers conectados
+            - separator [ref=f25e1091]
+            - generic [ref=f25e1092]:
+              - heading "post-registration" [level=2] [ref=f25e1093]
+              - link "Sección titulada «post-registration»" [ref=f25e1094] [cursor=pointer]:
+                - /url: "#post-registration"
+            - list [ref=f25e1099]:
+              - listitem [ref=f25e1100]:
+                - text: 🔒
+                - code [ref=f25e1101]: "GET /api/v1/users/{userId}/post-registration/status"
+                - text: — Obtener estado del post-registro
+              - listitem [ref=f25e1102]:
+                - text: 🔒
+                - code [ref=f25e1103]: "POST /api/v1/users/{userId}/post-registration/step-1/complete"
+                - text: "— Completar Paso 1: Foto de perfil"
+              - listitem [ref=f25e1104]:
+                - text: 🔒
+                - code [ref=f25e1105]: "POST /api/v1/users/{userId}/post-registration/step-2/complete"
+                - text: "— Completar Paso 2: Información personal"
+              - listitem [ref=f25e1106]:
+                - text: 🔒
+                - code [ref=f25e1107]: "POST /api/v1/users/{userId}/post-registration/step-3/complete"
+                - text: "— Completar Paso 3: Selección de club"
+            - separator [ref=f25e1108]
+            - generic [ref=f25e1109]:
+              - heading "rbac" [level=2] [ref=f25e1110]
+              - link "Sección titulada «rbac»" [ref=f25e1111] [cursor=pointer]:
+                - /url: "#rbac"
+            - list [ref=f25e1116]:
+              - listitem [ref=f25e1117]:
+                - text: 🔒
+                - code [ref=f25e1118]: GET /api/v1/admin/rbac/permissions
+                - text: — Listar todos los permisos
+              - listitem [ref=f25e1119]:
+                - text: 🔒
+                - code [ref=f25e1120]: POST /api/v1/admin/rbac/permissions
+                - text: — Crear un nuevo permiso
+              - listitem [ref=f25e1121]:
+                - text: 🔒
+                - code [ref=f25e1122]: "GET /api/v1/admin/rbac/permissions/{id}"
+                - text: — Obtener un permiso por ID
+              - listitem [ref=f25e1123]:
+                - text: 🔒
+                - code [ref=f25e1124]: "PATCH /api/v1/admin/rbac/permissions/{id}"
+                - text: — Actualizar un permiso
+              - listitem [ref=f25e1125]:
+                - text: 🔒
+                - code [ref=f25e1126]: "DELETE /api/v1/admin/rbac/permissions/{id}"
+                - text: — Desactivar un permiso
+              - listitem [ref=f25e1127]:
+                - text: 🔒
+                - code [ref=f25e1128]: GET /api/v1/admin/rbac/roles
+                - text: — Listar roles con sus permisos
+              - listitem [ref=f25e1129]:
+                - text: 🔒
+                - code [ref=f25e1130]: "GET /api/v1/admin/rbac/roles/{id}"
+                - text: — Obtener rol con sus permisos
+              - listitem [ref=f25e1131]:
+                - text: 🔒
+                - code [ref=f25e1132]: "POST /api/v1/admin/rbac/roles/{id}/permissions"
+                - text: — Asignar permisos a un rol
+              - listitem [ref=f25e1133]:
+                - text: 🔒
+                - code [ref=f25e1134]: "PUT /api/v1/admin/rbac/roles/{id}/permissions"
+                - text: — Sincronizar permisos de un rol (reemplaza todos)
+              - listitem [ref=f25e1135]:
+                - text: 🔒
+                - code [ref=f25e1136]: "DELETE /api/v1/admin/rbac/roles/{id}/permissions/{permissionId}"
+                - text: — Remover un permiso de un rol
+            - separator [ref=f25e1137]
+            - generic [ref=f25e1138]:
+              - heading "user-classes" [level=2] [ref=f25e1139]
+              - link "Sección titulada «user-classes»" [ref=f25e1140] [cursor=pointer]:
+                - /url: "#user-classes"
+            - list [ref=f25e1145]:
+              - listitem [ref=f25e1146]:
+                - text: 🔒
+                - code [ref=f25e1147]: "GET /api/v1/users/{userId}/classes"
+                - code [ref=f25e1148]: "?yearId?"
+                - text: — Obtener inscripciones del usuario
+              - listitem [ref=f25e1149]:
+                - text: 🔒
+                - code [ref=f25e1150]: "GET /api/v1/users/{userId}/classes/{classId}/progress"
+                - text: — Obtener progreso del usuario en una clase
+              - listitem [ref=f25e1151]:
+                - text: 🔒
+                - code [ref=f25e1152]: "PATCH /api/v1/users/{userId}/classes/{classId}/progress"
+                - text: — Actualizar progreso de sección
+              - listitem [ref=f25e1153]:
+                - text: 🔒
+                - code [ref=f25e1154]: "POST /api/v1/users/{userId}/classes/enroll"
+                - text: — Inscribir usuario en clase
+            - separator [ref=f25e1155]
+            - generic [ref=f25e1156]:
+              - heading "user-honors" [level=2] [ref=f25e1157]
+              - link "Sección titulada «user-honors»" [ref=f25e1158] [cursor=pointer]:
+                - /url: "#user-honors"
+            - list [ref=f25e1163]:
+              - listitem [ref=f25e1164]:
+                - text: 🔒
+                - code [ref=f25e1165]: "GET /api/v1/users/{userId}/honors"
+                - code [ref=f25e1166]: "?validated?"
+                - text: — Obtener honores del usuario
+              - listitem [ref=f25e1167]:
+                - text: 🔒
+                - code [ref=f25e1168]: "POST /api/v1/users/{userId}/honors"
+                - text: — Registrar honor con datos iniciales
+              - listitem [ref=f25e1169]:
+                - text: 🔒
+                - code [ref=f25e1170]: "POST /api/v1/users/{userId}/honors/{honorId}"
+                - text: — Iniciar un honor
+              - listitem [ref=f25e1171]:
+                - text: 🔒
+                - code [ref=f25e1172]: "PATCH /api/v1/users/{userId}/honors/{honorId}"
+                - text: — Actualizar progreso de honor
+              - listitem [ref=f25e1173]:
+                - text: 🔒
+                - code [ref=f25e1174]: "DELETE /api/v1/users/{userId}/honors/{honorId}"
+                - text: — Abandonar honor
+              - listitem [ref=f25e1175]:
+                - text: 🔒
+                - code [ref=f25e1176]: "POST /api/v1/users/{userId}/honors/{honorId}/files"
+                - text: — Subir evidencias del honor
+              - listitem [ref=f25e1177]:
+                - text: 🔒
+                - code [ref=f25e1178]: "POST /api/v1/users/{userId}/honors/bulk"
+                - text: — Registrar honores de usuario de forma masiva
+              - listitem [ref=f25e1179]:
+                - text: 🔒
+                - code [ref=f25e1180]: "GET /api/v1/users/{userId}/honors/stats"
+                - text: — Obtener estadísticas de honores del usuario
+          - generic [ref=f25e1181]:
+            - paragraph [ref=f25e1183]:
+              - text: "Última actualización:"
+              - time [ref=f25e1184]: 20 ago 2026
+            - generic [ref=f25e1185]:
+              - link [ref=f25e1186] [cursor=pointer]:
+                - /url: /api/decisiones-arquitectura/
+                - generic [ref=f25e1189]: Página anteriorDecisiones de Arquitectura
+              - link [ref=f25e1190] [cursor=pointer]:
+                - /url: /api/especificacion/
+                - generic [ref=f25e1193]: Siguiente páginaEspecificación Técnica REST API
+  - generic [ref=f25e1196]:
+    - button [ref=f25e1197]
+    - button [ref=f25e1203]
+    - button [ref=f25e1207]
+    - button [ref=f25e1212]

@@ -1,0 +1,262 @@
+- generic [active] [ref=f37e1]:
+  - link "Ir al contenido" [ref=f37e2] [cursor=pointer]:
+    - /url: "#_top"
+  - generic [ref=f37e3]:
+    - banner [ref=f37e4]:
+      - generic [ref=f37e5]:
+        - link "Inicio — Manual administrativo" [ref=f37e8] [cursor=pointer]:
+          - /url: /
+          - generic [ref=f37e9]: S
+          - generic [ref=f37e10]:
+            - generic [ref=f37e11]: SACDIA
+            - generic [ref=f37e12]: Administrativo
+        - button "Buscar" [ref=f37e15] [cursor=pointer]
+    - navigation "Primario":
+      - button "Menú" [ref=f37e18] [cursor=pointer]
+      - option "Oscuro"
+      - option "Claro"
+      - option "Automático" [selected]
+    - generic [ref=f37e22]:
+      - complementary:
+        - navigation [ref=f37e23]:
+          - group [ref=f37e24]:
+            - generic "En esta página Sinopsis" [ref=f37e25]:
+              - generic [ref=f37e26] [cursor=pointer]: En esta página
+              - generic [ref=f37e29]: Sinopsis
+      - main [ref=f37e31]:
+        - heading "Solicitudes de membresía" [level=1] [ref=f37e34]
+        - generic [ref=f37e36]:
+          - generic [ref=f37e37]:
+            - paragraph [ref=f37e38]: Esta bandeja corresponde únicamente a las solicitudes de ingreso como miembro. Las solicitudes de cargos y los traslados siguen recorridos separados.
+            - generic [ref=f37e39]:
+              - heading "Resultado esperado" [level=2] [ref=f37e40]
+              - link "Sección titulada «Resultado esperado»" [ref=f37e41] [cursor=pointer]:
+                - /url: "#resultado-esperado"
+            - paragraph [ref=f37e46]: Podrás revisar la sección correcta, decidir una solicitud pendiente y confirmar que desapareció de la cola sin duplicar asignaciones.
+            - generic [ref=f37e47]:
+              - heading "Acceso requerido" [level=2] [ref=f37e48]
+              - link "Sección titulada «Acceso requerido»" [ref=f37e49] [cursor=pointer]:
+                - /url: "#acceso-requerido"
+            - list [ref=f37e54]:
+              - listitem [ref=f37e55]: Sesión válida y un rol admitido en el panel administrativo.
+              - listitem [ref=f37e56]:
+                - text: Permiso
+                - code [ref=f37e57]: club_members:approve
+                - text: dentro de la sección que vas a revisar.
+            - paragraph [ref=f37e58]:
+              - text: "Los cargos de club no obtienen acceso al panel solo por su cargo: deben revisar desde"
+              - strong [ref=f37e59]: Miembros → Solicitudes
+              - text: en la app cuando esa superficie muestre la acción. El backend valida el permiso y el alcance de cada decisión. Abrir la ruta no concede acceso a secciones fuera del cargo activo.
+            - generic [ref=f37e60]:
+              - heading "Ruta incluida" [level=2] [ref=f37e61]
+              - link "Sección titulada «Ruta incluida»" [ref=f37e62] [cursor=pointer]:
+                - /url: "#ruta-incluida"
+            - paragraph [ref=f37e67]:
+              - code [ref=f37e68]: /dashboard/requests/membership
+            - generic [ref=f37e69]:
+              - heading "Reconoce la pantalla" [level=2] [ref=f37e70]
+              - link "Sección titulada «Reconoce la pantalla»" [ref=f37e71] [cursor=pointer]:
+                - /url: "#reconoce-la-pantalla"
+            - figure "Confirma la sección antes de decidir; la bandeja contiene solo solicitudes pendientes y activas del contexto elegido." [ref=f37e76]:
+              - img "Panel de Solicitudes de Membresía con selector de sección, contador de pendientes y botón Actualizar" [ref=f37e77]
+            - generic [ref=f37e79]:
+              - heading "Seleccionar la sección" [level=2] [ref=f37e80]
+              - link "Sección titulada «Seleccionar la sección»" [ref=f37e81] [cursor=pointer]:
+                - /url: "#seleccionar-la-sección"
+            - list [ref=f37e86]:
+              - listitem [ref=f37e87]:
+                - text: Abre
+                - strong [ref=f37e88]: Solicitudes → Membresía
+                - text: .
+              - listitem [ref=f37e89]:
+                - text: Revisa el selector
+                - strong [ref=f37e90]: Sección del club
+                - text: antes de utilizar la tabla.
+              - listitem [ref=f37e91]: El panel selecciona inicialmente la primera sección disponible; no supongas que es la que vas a operar.
+              - listitem [ref=f37e92]:
+                - text: Elige la opción identificada por
+                - strong [ref=f37e93]: Club · Tipo de sección
+                - text: .
+              - listitem [ref=f37e94]: Espera a que el contador y la tabla terminen de actualizarse.
+            - paragraph [ref=f37e95]: Si aparece un error de permisos, confirma tu cargo y el contexto. No intentes resolverlo cambiando manualmente el identificador de la URL.
+            - generic [ref=f37e96]:
+              - heading "Revisar antes de decidir" [level=2] [ref=f37e97]
+              - link "Sección titulada «Revisar antes de decidir»" [ref=f37e98] [cursor=pointer]:
+                - /url: "#revisar-antes-de-decidir"
+            - paragraph [ref=f37e103]:
+              - text: La cola muestra únicamente asignaciones
+              - code [ref=f37e104]: pending
+              - text: "y activas, ordenadas desde la solicitud más antigua. Antes de actuar, verifica:"
+            - list [ref=f37e105]:
+              - listitem [ref=f37e106]: nombre y correo de la persona;
+              - listitem [ref=f37e107]: cargo solicitado, normalmente miembro;
+              - listitem [ref=f37e108]: fecha en que se creó la solicitud;
+              - listitem [ref=f37e109]: fecha y hora de vencimiento;
+              - listitem [ref=f37e110]: club y sección seleccionados en el filtro.
+            - paragraph [ref=f37e111]:
+              - text: Un icono de reloj resalta las solicitudes que vencen en menos de
+              - strong [ref=f37e112]: 48 horas
+              - text: . Priorízalas, pero no apruebes sin confirmar la identidad y la sección.
+            - generic [ref=f37e113]:
+              - heading "Aprobar" [level=2] [ref=f37e114]
+              - link "Sección titulada «Aprobar»" [ref=f37e115] [cursor=pointer]:
+                - /url: "#aprobar"
+            - list [ref=f37e120]:
+              - listitem [ref=f37e121]: Revisa toda la fila.
+              - listitem [ref=f37e122]: Pulsa el icono de aprobación una sola vez.
+              - listitem [ref=f37e123]: Espera el mensaje de confirmación y la actualización automática de la tabla.
+              - listitem [ref=f37e124]: Confirma que la persona ya no aparece en pendientes.
+            - paragraph [ref=f37e125]:
+              - text: "La aprobación no abre un diálogo de confirmación: el clic envía la decisión inmediatamente. El estado cambia a"
+              - code [ref=f37e126]: active
+              - text: ", se elimina la fecha de vencimiento y se invalida el contexto de autorización para que la app reciba los permisos del cargo."
+            - generic [ref=f37e127]:
+              - heading "Rechazar" [level=2] [ref=f37e128]
+              - link "Sección titulada «Rechazar»" [ref=f37e129] [cursor=pointer]:
+                - /url: "#rechazar"
+            - list [ref=f37e134]:
+              - listitem [ref=f37e135]: Pulsa el icono de rechazo.
+              - listitem [ref=f37e136]: Revisa nuevamente el nombre mostrado en el diálogo.
+              - listitem [ref=f37e137]:
+                - text: Escribe una razón clara cuando ayude a la persona a corregir la solicitud. El
+                - strong [ref=f37e138]: motivo es opcional
+                - text: y admite hasta 500 caracteres.
+              - listitem [ref=f37e139]:
+                - text: Pulsa
+                - strong [ref=f37e140]: Rechazar
+                - text: y espera la confirmación.
+              - listitem [ref=f37e141]: Comprueba que la fila desapareció de la cola.
+            - paragraph [ref=f37e142]:
+              - text: El estado cambia a
+              - code [ref=f37e143]: rejected
+              - text: y la app puede mostrar la razón capturada. No incluyas datos médicos, contraseñas ni información que no sea necesaria para corregir el ingreso.
+            - generic [ref=f37e144]:
+              - heading "Estados y vencimiento" [level=2] [ref=f37e145]
+              - link "Sección titulada «Estados y vencimiento»" [ref=f37e146] [cursor=pointer]:
+                - /url: "#estados-y-vencimiento"
+            - table [ref=f37e151]:
+              - rowgroup [ref=f37e152]:
+                - row [ref=f37e153]:
+                  - columnheader "Estado" [ref=f37e154]
+                  - columnheader "Significado" [ref=f37e155]
+                  - columnheader "Siguiente acción" [ref=f37e156]
+              - rowgroup [ref=f37e157]:
+                - row [ref=f37e158]:
+                  - cell [ref=f37e159]:
+                    - code [ref=f37e160]: pending
+                  - cell "La persona terminó el post-registro y espera decisión." [ref=f37e161]
+                  - cell "Aprobar o rechazar dentro del plazo." [ref=f37e162]
+                - row [ref=f37e163]:
+                  - cell [ref=f37e164]:
+                    - code [ref=f37e165]: active
+                  - cell "La sección aprobó la membresía." [ref=f37e166]
+                  - cell "La persona ya puede operar según su cargo." [ref=f37e167]
+                - row [ref=f37e168]:
+                  - cell [ref=f37e169]:
+                    - code [ref=f37e170]: rejected
+                  - cell "La solicitud fue rechazada." [ref=f37e171]
+                  - cell "La persona corrige y vuelve a solicitar si la app muestra la acción; de lo contrario, pide asistencia." [ref=f37e172]
+                - row [ref=f37e173]:
+                  - cell [ref=f37e174]:
+                    - code [ref=f37e175]: cancelled
+                  - cell "La persona canceló su propia solicitud." [ref=f37e176]
+                  - cell "Selecciona otra sección cuando la app reabra el paso." [ref=f37e177]
+                - row [ref=f37e178]:
+                  - cell [ref=f37e179]:
+                    - code [ref=f37e180]: expired
+                  - cell "El plazo terminó sin decisión." [ref=f37e181]
+                  - cell "La persona vuelve a solicitar si la app muestra la acción; de lo contrario, pide asistencia." [ref=f37e182]
+            - paragraph [ref=f37e183]:
+              - text: El plazo se configura con
+              - code [ref=f37e184]: membership.pending_timeout_days
+              - text: y usa
+              - strong [ref=f37e185]: 8 días
+              - text: cuando no existe una configuración distinta. Un proceso automático revisa cada hora los pendientes antiguos; por eso una fila puede desaparecer sin que alguien pulse aprobar o rechazar.
+            - generic [ref=f37e186]:
+              - heading "Limitación de auditoría" [level=2] [ref=f37e187]
+              - link "Sección titulada «Limitación de auditoría»" [ref=f37e188] [cursor=pointer]:
+                - /url: "#limitación-de-auditoría"
+            - paragraph [ref=f37e193]:
+              - text: La asignación guarda el estado, el motivo de rechazo y actualiza
+              - code [ref=f37e194]: modified_at
+              - text: "al decidir. Esa marca conserva la hora de la última modificación, pero no demuestra por sí sola qué operación ocurrió ni quién la realizó: el modelo no persiste al actor ni campos semánticos"
+              - code [ref=f37e195]: approved_at
+              - text: o
+              - code [ref=f37e196]: rejected_at
+              - text: . No uses esta bandeja como única evidencia de autoría; si el procedimiento institucional exige trazabilidad nominal, registra el respaldo en el canal autorizado hasta que existan esos campos en SACDIA.
+            - generic [ref=f37e197]:
+              - heading "Cómo verificarlo" [level=2] [ref=f37e198]
+              - link "Sección titulada «Cómo verificarlo»" [ref=f37e199] [cursor=pointer]:
+                - /url: "#cómo-verificarlo"
+            - paragraph [ref=f37e204]:
+              - text: Pulsa
+              - strong [ref=f37e205]: Actualizar
+              - text: y confirma que la solicitud ya no aparece en la sección. Después de aprobar, la persona debe refrescar o volver a entrar y comprobar que la membresía quedó
+              - code [ref=f37e206]: active
+              - text: . En cambio, un rechazo o vencimiento puede no mostrar un aviso ni las acciones de corrección en una cuenta nueva; si ocurre, conserva la cuenta y utiliza el canal de soporte documentado.
+            - generic [ref=f37e207]:
+              - heading "Errores frecuentes" [level=2] [ref=f37e208]
+              - link "Sección titulada «Errores frecuentes»" [ref=f37e209] [cursor=pointer]:
+                - /url: "#errores-frecuentes"
+            - table [ref=f37e214]:
+              - rowgroup [ref=f37e215]:
+                - row [ref=f37e216]:
+                  - columnheader "Problema" [ref=f37e217]
+                  - columnheader "Qué hacer" [ref=f37e218]
+              - rowgroup [ref=f37e219]:
+                - row [ref=f37e220]:
+                  - cell "La persona no aparece" [ref=f37e221]
+                  - cell "Confirma la sección; la bandeja no mezcla clubes ni muestra estados finalizados." [ref=f37e222]
+                - row [ref=f37e223]:
+                  - cell "Aparece acceso denegado" [ref=f37e224]
+                  - cell [ref=f37e225]:
+                    - text: Falta
+                    - code [ref=f37e226]: club_members:approve
+                    - text: o la sección está fuera de tu alcance.
+                - row [ref=f37e227]:
+                  - cell "La solicitud desapareció antes de decidir" [ref=f37e228]
+                  - cell "Pudo ser cancelada o vencer. Actualiza antes de repetir cualquier acción." [ref=f37e229]
+                - row [ref=f37e230]:
+                  - cell "La acción devuelve conflicto" [ref=f37e231]
+                  - cell "Otra persona o el proceso automático ya cambió el estado. Actualiza la lista." [ref=f37e232]
+                - row [ref=f37e233]:
+                  - cell "Aprobaste la fila equivocada" [ref=f37e234]
+                  - cell "No intentes compensarlo creando otra asignación; repórtalo con el identificador de la persona y la sección." [ref=f37e235]
+            - generic [ref=f37e236]:
+              - heading "Procesos relacionados" [level=2] [ref=f37e237]
+              - link "Sección titulada «Procesos relacionados»" [ref=f37e238] [cursor=pointer]:
+                - /url: "#procesos-relacionados"
+            - list [ref=f37e243]:
+              - listitem [ref=f37e244]:
+                - link "Alta de cuenta y membresía" [ref=f37e245] [cursor=pointer]:
+                  - /url: /procesos/alta-y-membresia/
+              - listitem [ref=f37e246]:
+                - link "Gestión de club y sección" [ref=f37e247] [cursor=pointer]:
+                  - /url: /procesos/gestion-club-seccion/
+              - listitem [ref=f37e248]:
+                - link "Solicitudes de cargos y traslados" [ref=f37e249] [cursor=pointer]:
+                  - /url: /clubes/solicitudes/
+            - generic [ref=f37e250]:
+              - heading "Fuente de verificación" [level=2] [ref=f37e251]
+              - link "Sección titulada «Fuente de verificación»" [ref=f37e252] [cursor=pointer]:
+                - /url: "#fuente-de-verificación"
+            - paragraph [ref=f37e257]:
+              - text: Manual contrastado el 2026-08-21 con la ruta administrativa,
+              - code [ref=f37e258]: MembershipRequestsClientPage
+              - text: ","
+              - code [ref=f37e259]: PendingMembersTable
+              - text: ", el diálogo de rechazo y"
+              - code [ref=f37e260]: MembershipRequestsService
+              - text: .
+          - generic [ref=f37e262]:
+            - link [ref=f37e263] [cursor=pointer]:
+              - /url: /clubes/solicitudes/
+              - generic [ref=f37e266]: Página anteriorSolicitudes de cargos y traslados
+            - link [ref=f37e267] [cursor=pointer]:
+              - /url: /clubes/usuarios/
+              - generic [ref=f37e270]: Siguiente páginaAdministración de usuarios
+  - generic [ref=f37e273]:
+    - button [ref=f37e274]
+    - button [ref=f37e280]
+    - button [ref=f37e284]
+    - button [ref=f37e292]

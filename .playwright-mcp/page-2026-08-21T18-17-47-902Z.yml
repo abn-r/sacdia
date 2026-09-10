@@ -1,0 +1,507 @@
+- generic [active] [ref=f4e1]:
+  - link "Ir al contenido" [ref=f4e2] [cursor=pointer]:
+    - /url: "#_top"
+  - generic [ref=f4e3]:
+    - banner [ref=f4e4]:
+      - generic [ref=f4e5]:
+        - generic [ref=f4e7]:
+          - link "Inicio — Manual operativo" [ref=f4e8] [cursor=pointer]:
+            - /url: /
+            - generic [ref=f4e9]: S
+            - generic [ref=f4e10]:
+              - generic [ref=f4e11]: SACDIA
+              - generic [ref=f4e12]: Operativo
+          - navigation "Cambiar portal de documentación" [ref=f4e13]:
+            - link "Operativo" [ref=f4e14] [cursor=pointer]:
+              - /url: http://localhost:4321
+            - link "Administrativo" [ref=f4e15] [cursor=pointer]:
+              - /url: http://localhost:4322
+            - link "Técnico" [ref=f4e16] [cursor=pointer]:
+              - /url: http://localhost:4323
+        - button "Buscar" [ref=f4e19] [cursor=pointer]:
+          - generic [ref=f4e23]:
+            - generic [ref=f4e24]: ⌘
+            - generic [ref=f4e25]: K
+        - generic [ref=f4e29]:
+          - generic [ref=f4e30]: Seleccionar tema
+          - combobox "Seleccionar tema" [ref=f4e31] [cursor=pointer]:
+            - option "Oscuro"
+            - option "Claro"
+            - option "Automático" [selected]
+    - navigation "Primario":
+      - list [ref=f4e35]:
+        - listitem [ref=f4e36]:
+          - group [ref=f4e37]:
+            - generic "Primeros pasos" [ref=f4e38] [cursor=pointer]
+            - list [ref=f4e42]:
+              - listitem [ref=f4e43]:
+                - link "Primeros pasos" [ref=f4e44] [cursor=pointer]:
+                  - /url: /primeros-pasos/
+        - listitem [ref=f4e45]:
+          - group [ref=f4e46]:
+            - generic "Pantallas" [ref=f4e47] [cursor=pointer]
+            - list [ref=f4e51]:
+              - listitem [ref=f4e52]:
+                - link "Pantallas de la aplicación" [ref=f4e53] [cursor=pointer]:
+                  - /url: /pantallas/
+              - listitem [ref=f4e54]:
+                - link "Acceso, registro y recuperación" [ref=f4e55] [cursor=pointer]:
+                  - /url: /pantallas/acceso-y-registro/
+              - listitem [ref=f4e56]:
+                - link "Actividades y asistencia" [ref=f4e57] [cursor=pointer]:
+                  - /url: /pantallas/actividades/
+              - listitem [ref=f4e58]:
+                - link "Ajustes y accesibilidad" [ref=f4e59] [cursor=pointer]:
+                  - /url: /pantallas/ajustes/
+              - listitem [ref=f4e60]:
+                - link "Ayuda y soporte" [ref=f4e61] [cursor=pointer]:
+                  - /url: /pantallas/ayuda-soporte/
+              - listitem [ref=f4e62]:
+                - link "Bloqueo biométrico" [ref=f4e63] [cursor=pointer]:
+                  - /url: /pantallas/bloqueo-biometrico/
+              - listitem [ref=f4e64]:
+                - link "Camporees" [ref=f4e65] [cursor=pointer]:
+                  - /url: /pantallas/camporees/
+              - listitem [ref=f4e66]:
+                - link "Carga de certificados" [ref=f4e67] [cursor=pointer]:
+                  - /url: /pantallas/carga-certificados/
+              - listitem [ref=f4e68]:
+                - link "Mis cargos y asignaciones" [ref=f4e69] [cursor=pointer]:
+                  - /url: /pantallas/cargos/
+              - listitem [ref=f4e70]:
+                - link "Carpeta anual de evidencias" [ref=f4e71] [cursor=pointer]:
+                  - /url: /pantallas/carpeta-evidencias/
+              - listitem [ref=f4e72]:
+                - link "Certificaciones de Guías Mayores" [ref=f4e73] [cursor=pointer]:
+                  - /url: /pantallas/certificaciones/
+              - listitem [ref=f4e74]:
+                - link "Clases progresivas" [ref=f4e75] [cursor=pointer]:
+                  - /url: /pantallas/clases-progresivas/
+              - listitem [ref=f4e76]:
+                - link "Clasificaciones" [ref=f4e77] [cursor=pointer]:
+                  - /url: /pantallas/clasificaciones/
+              - listitem [ref=f4e78]:
+                - link "Completar el perfil inicial" [ref=f4e79] [cursor=pointer]:
+                  - /url: /pantallas/completar-perfil/
+              - listitem [ref=f4e80]:
+                - link "Coordinación territorial" [ref=f4e81] [cursor=pointer]:
+                  - /url: /pantallas/coordinacion/
+              - listitem [ref=f4e82]:
+                - link "Credencial digital" [ref=f4e83] [cursor=pointer]:
+                  - /url: /pantallas/credencial-digital/
+              - listitem [ref=f4e84]:
+                - link "Escáner QR" [ref=f4e85] [cursor=pointer]:
+                  - /url: /pantallas/escaner-qr/
+              - listitem [ref=f4e86]:
+                - link "Especialidades" [ref=f4e87] [cursor=pointer]:
+                  - /url: /pantallas/especialidades/
+              - listitem [ref=f4e88]:
+                - link "Finanzas del club" [ref=f4e89] [cursor=pointer]:
+                  - /url: /pantallas/finanzas/
+              - listitem [ref=f4e90]:
+                - link "Informes mensuales" [ref=f4e91] [cursor=pointer]:
+                  - /url: /pantallas/informes-mensuales/
+              - listitem [ref=f4e92]:
+                - link "Inicio de la aplicación" [ref=f4e93] [cursor=pointer]:
+                  - /url: /pantallas/inicio/
+              - listitem [ref=f4e94]:
+                - link "Inscripción anual del club" [ref=f4e95] [cursor=pointer]:
+                  - /url: /pantallas/inscripcion-club/
+              - listitem [ref=f4e96]:
+                - link "Inventario del club" [ref=f4e97] [cursor=pointer]:
+                  - /url: /pantallas/inventario/
+              - listitem [ref=f4e98]:
+                - link "Investiduras" [ref=f4e99] [cursor=pointer]:
+                  - /url: /pantallas/investiduras/
+              - listitem [ref=f4e100]:
+                - link "Logros" [ref=f4e101] [cursor=pointer]:
+                  - /url: /pantallas/logros/
+              - listitem [ref=f4e102]:
+                - link "Maestrías de especialidades" [ref=f4e103] [cursor=pointer]:
+                  - /url: /pantallas/maestrias/
+              - listitem [ref=f4e104]:
+                - link "Materiales y pedidos" [ref=f4e105] [cursor=pointer]:
+                  - /url: /pantallas/materiales/
+              - listitem [ref=f4e106]:
+                - link "Mi club y mi sección" [ref=f4e107] [cursor=pointer]:
+                  - /url: /pantallas/mi-club/
+              - listitem [ref=f4e108]:
+                - link "Miembros y cargos" [ref=f4e109] [cursor=pointer]:
+                  - /url: /pantallas/miembros/
+              - listitem [ref=f4e110]:
+                - link "Notificaciones" [ref=f4e111] [cursor=pointer]:
+                  - /url: /pantallas/notificaciones/
+              - listitem [ref=f4e112]:
+                - link "Órdenes de pago" [ref=f4e113] [cursor=pointer]:
+                  - /url: /pantallas/ordenes-pago/
+              - listitem [ref=f4e114]:
+                - link "Perfil, salud y sesiones" [ref=f4e115] [cursor=pointer]:
+                  - /url: /pantallas/perfil/
+              - listitem [ref=f4e116]:
+                - link "Recursos" [ref=f4e117] [cursor=pointer]:
+                  - /url: /pantallas/recursos/
+              - listitem [ref=f4e118]:
+                - link "Seguros" [ref=f4e119] [cursor=pointer]:
+                  - /url: /pantallas/seguros/
+              - listitem [ref=f4e120]:
+                - link "Tablero principal" [ref=f4e121] [cursor=pointer]:
+                  - /url: /pantallas/tablero/
+              - listitem [ref=f4e122]:
+                - link "Traslados de club o sección" [ref=f4e123] [cursor=pointer]:
+                  - /url: /pantallas/traslados/
+              - listitem [ref=f4e124]:
+                - link "Unidades y registros semanales" [ref=f4e125] [cursor=pointer]:
+                  - /url: /pantallas/unidades/
+              - listitem [ref=f4e126]:
+                - link "Estados de validación" [ref=f4e127] [cursor=pointer]:
+                  - /url: /pantallas/validaciones/
+        - listitem [ref=f4e128]:
+          - group [ref=f4e129]:
+            - generic "Procesos" [ref=f4e130] [cursor=pointer]
+            - list [ref=f4e134]:
+              - listitem [ref=f4e135]:
+                - link "Procesos de SACDIA" [ref=f4e136] [cursor=pointer]:
+                  - /url: /procesos/
+              - listitem [ref=f4e137]:
+                - link "Planear una actividad y registrar asistencia" [ref=f4e138] [cursor=pointer]:
+                  - /url: /procesos/actividad-y-asistencia/
+              - listitem [ref=f4e139]:
+                - link "Alta de cuenta y membresía" [ref=f4e140] [cursor=pointer]:
+                  - /url: /procesos/alta-y-membresia/
+              - listitem [ref=f4e141]:
+                - link "Reconocer formación desde certificados" [ref=f4e142] [cursor=pointer]:
+                  - /url: /procesos/carga-certificados/
+              - listitem [ref=f4e143]:
+                - link "Completar y validar la carpeta anual" [ref=f4e144] [cursor=pointer]:
+                  - /url: /procesos/carpeta-anual/
+              - listitem [ref=f4e145]:
+                - link "Registrar y supervisar finanzas" [ref=f4e146] [cursor=pointer]:
+                  - /url: /procesos/cierre-financiero/
+              - listitem [ref=f4e147]:
+                - link "Publicar una comunicación o recurso" [ref=f4e148] [cursor=pointer]:
+                  - /url: /procesos/comunicacion-recursos/
+              - listitem [ref=f4e149]:
+                - link "Registrar puntajes y consultar clasificaciones" [ref=f4e150] [cursor=pointer]:
+                  - /url: /procesos/evaluacion-y-clasificacion/
+              - listitem [ref=f4e151]:
+                - link "Completar formación y solicitar investidura" [ref=f4e152] [cursor=pointer]:
+                  - /url: /procesos/formacion-e-investidura/
+              - listitem [ref=f4e153]:
+                - link "Gestionar un club y su sección" [ref=f4e154] [cursor=pointer]:
+                  - /url: /procesos/gestion-club-seccion/
+              - listitem [ref=f4e155]:
+                - link "Completar y supervisar el informe mensual" [ref=f4e156] [cursor=pointer]:
+                  - /url: /procesos/informe-mensual/
+              - listitem [ref=f4e157]:
+                - link "Inscribir y operar un camporee" [ref=f4e158] [cursor=pointer]:
+                  - /url: /procesos/participacion-camporee/
+              - listitem [ref=f4e159]:
+                - link "Registrar seguro mediante orden de pago" [ref=f4e160] [cursor=pointer]:
+                  - /url: /procesos/seguro-y-orden-pago/
+              - listitem [ref=f4e161]:
+                - link "Solicitar, pagar y recibir materiales" [ref=f4e162] [cursor=pointer]:
+                  - /url: /procesos/solicitud-materiales/
+              - listitem [ref=f4e163]:
+                - link "Trasladar un miembro" [ref=f4e164] [cursor=pointer]:
+                  - /url: /procesos/traslado-miembro/
+        - listitem [ref=f4e165]:
+          - group [ref=f4e166]:
+            - generic "Ayuda" [ref=f4e167] [cursor=pointer]
+            - list [ref=f4e171]:
+              - listitem [ref=f4e172]:
+                - link "Ayuda y preguntas frecuentes" [ref=f4e173] [cursor=pointer]:
+                  - /url: /ayuda/
+    - generic [ref=f4e175]:
+      - complementary [ref=f4e176]:
+        - navigation [ref=f4e181]:
+          - heading "En esta página" [level=2] [ref=f4e182]
+          - list [ref=f4e183]:
+            - listitem [ref=f4e184]:
+              - link "Sinopsis" [ref=f4e185] [cursor=pointer]:
+                - /url: "#_top"
+            - listitem [ref=f4e186]:
+              - link "Resultado esperado" [ref=f4e187] [cursor=pointer]:
+                - /url: "#resultado-esperado"
+            - listitem [ref=f4e188]:
+              - link "No confundas cuenta y membresía" [ref=f4e189] [cursor=pointer]:
+                - /url: "#no-confundas-cuenta-y-membresía"
+            - listitem [ref=f4e190]:
+              - link "Participantes" [ref=f4e191] [cursor=pointer]:
+                - /url: "#participantes"
+            - listitem [ref=f4e192]:
+              - link "Matriz de responsabilidades" [ref=f4e193] [cursor=pointer]:
+                - /url: "#matriz-de-responsabilidades"
+            - listitem [ref=f4e194]:
+              - link "Flujo completo" [ref=f4e195] [cursor=pointer]:
+                - /url: "#flujo-completo"
+            - listitem [ref=f4e196]:
+              - link "Estados de la solicitud" [ref=f4e197] [cursor=pointer]:
+                - /url: "#estados-de-la-solicitud"
+            - listitem [ref=f4e198]:
+              - link "Corregir sin duplicar" [ref=f4e199] [cursor=pointer]:
+                - /url: "#corregir-sin-duplicar"
+            - listitem [ref=f4e200]:
+              - link "Cómo utilizar esta guía" [ref=f4e201] [cursor=pointer]:
+                - /url: "#cómo-utilizar-esta-guía"
+            - listitem [ref=f4e202]:
+              - link "Manuales relacionados en este portal" [ref=f4e203] [cursor=pointer]:
+                - /url: "#manuales-relacionados-en-este-portal"
+            - listitem [ref=f4e204]:
+              - link "Cómo verificarlo" [ref=f4e205] [cursor=pointer]:
+                - /url: "#cómo-verificarlo"
+            - listitem [ref=f4e206]:
+              - link "Errores frecuentes" [ref=f4e207] [cursor=pointer]:
+                - /url: "#errores-frecuentes"
+            - listitem [ref=f4e208]:
+              - link "Fuente de verificación" [ref=f4e209] [cursor=pointer]:
+                - /url: "#fuente-de-verificación"
+      - main [ref=f4e211]:
+        - heading "Alta de cuenta y membresía" [level=1] [ref=f4e214]
+        - generic [ref=f4e216]:
+          - generic [ref=f4e217]:
+            - paragraph [ref=f4e218]: Este proceso comienza en la app, continúa en la sección que revisa la solicitud y termina cuando la membresía queda activa.
+            - generic [ref=f4e219]:
+              - heading "Resultado esperado" [level=2] [ref=f4e220]
+              - link "Sección titulada «Resultado esperado»" [ref=f4e221] [cursor=pointer]:
+                - /url: "#resultado-esperado"
+            - paragraph [ref=f4e226]: La persona conserva una sola cuenta, completa su perfil, recibe la inscripción anual correspondiente y entra a la sección correcta con una membresía aprobada.
+            - generic [ref=f4e227]:
+              - heading "No confundas cuenta y membresía" [level=2] [ref=f4e228]
+              - link "Sección titulada «No confundas cuenta y membresía»" [ref=f4e229] [cursor=pointer]:
+                - /url: "#no-confundas-cuenta-y-membresía"
+            - paragraph [ref=f4e234]: "SACDIA maneja registros distintos:"
+            - list [ref=f4e235]:
+              - listitem [ref=f4e236]:
+                - strong [ref=f4e237]: "Cuenta:"
+                - text: identidad con correo y contraseña que permite autenticarse.
+              - listitem [ref=f4e238]:
+                - strong [ref=f4e239]: "Post-registro:"
+                - text: foto, datos personales y selección territorial.
+              - listitem [ref=f4e240]:
+                - strong [ref=f4e241]: "Inscripción anual:"
+                - text: vínculo de la persona con una clase progresiva durante el año eclesiástico.
+              - listitem [ref=f4e242]:
+                - strong [ref=f4e243]: "Membresía:"
+                - text: asignación de miembro dentro de una sección, inicialmente
+                - code [ref=f4e244]: pending
+                - text: .
+            - paragraph [ref=f4e245]: Una persona puede iniciar sesión y tener inscripción anual mientras su membresía sigue pendiente. En ese estado ve el tablero restringido, pero no las funciones operativas del club.
+            - generic [ref=f4e246]:
+              - heading "Participantes" [level=2] [ref=f4e247]
+              - link "Sección titulada «Participantes»" [ref=f4e248] [cursor=pointer]:
+                - /url: "#participantes"
+            - list [ref=f4e253]:
+              - listitem [ref=f4e254]: Persona solicitante.
+              - listitem [ref=f4e255]: Dirección, subdirección o secretaría de la sección cuando su cargo incluye la revisión.
+              - listitem [ref=f4e256]: Personal administrativo para excepciones de cuenta o alcance, no como aprobación global de todos los usuarios.
+              - listitem [ref=f4e257]: SACDIA, que deriva clase, controla estados y vence pendientes.
+            - generic [ref=f4e258]:
+              - heading "Matriz de responsabilidades" [level=2] [ref=f4e259]
+              - link "Sección titulada «Matriz de responsabilidades»" [ref=f4e260] [cursor=pointer]:
+                - /url: "#matriz-de-responsabilidades"
+            - table [ref=f4e265]:
+              - rowgroup [ref=f4e266]:
+                - row [ref=f4e267]:
+                  - columnheader "Etapa" [ref=f4e268]
+                  - columnheader "Persona solicitante" [ref=f4e269]
+                  - columnheader "Revisor de la sección" [ref=f4e270]
+                  - columnheader "Sistema" [ref=f4e271]
+              - rowgroup [ref=f4e272]:
+                - row [ref=f4e273]:
+                  - cell "Cuenta" [ref=f4e274]
+                  - cell "Captura datos reales y conserva el correo." [ref=f4e275]
+                  - cell "No crea otra cuenta por la persona." [ref=f4e276]
+                  - cell "Crea identidad y sesión." [ref=f4e277]
+                - row [ref=f4e278]:
+                  - cell "Perfil inicial" [ref=f4e279]
+                  - cell "Carga foto, datos, contactos y selección correcta." [ref=f4e280]
+                  - cell "Orienta sin pedir contraseñas ni datos médicos por canales externos." [ref=f4e281]
+                  - cell "Valida los tres pasos." [ref=f4e282]
+                - row [ref=f4e283]:
+                  - cell "Inscripción anual" [ref=f4e284]
+                  - cell "Revisa la clase mostrada." [ref=f4e285]
+                  - cell "Corrige excepciones por el proceso autorizado." [ref=f4e286]
+                  - cell "Deriva clase por edad/tipo y crea o reactiva el registro anual." [ref=f4e287]
+                - row [ref=f4e288]:
+                  - cell "Membresía" [ref=f4e289]
+                  - cell "Espera, cancela o vuelve a solicitar con la misma cuenta." [ref=f4e290]
+                  - cell [ref=f4e291]:
+                    - text: Aprueba o rechaza con
+                    - code [ref=f4e292]: club_members:approve
+                    - text: en su alcance.
+                  - cell [ref=f4e293]:
+                    - text: Crea la asignación
+                    - code [ref=f4e294]: pending
+                    - text: ", notifica y actualiza permisos."
+            - generic [ref=f4e295]:
+              - heading "Flujo completo" [level=2] [ref=f4e296]
+              - link "Sección titulada «Flujo completo»" [ref=f4e297] [cursor=pointer]:
+                - /url: "#flujo-completo"
+            - list [ref=f4e302]:
+              - listitem [ref=f4e303]: La persona crea una cuenta con nombre, apellidos, correo y contraseña.
+              - listitem [ref=f4e304]: La app inicia la sesión y abre el post-registro.
+              - listitem [ref=f4e305]: La persona carga la foto requerida.
+              - listitem [ref=f4e306]: Captura género, nacimiento, bautismo, al menos un contacto y representante legal si es menor.
+              - listitem [ref=f4e307]: Declara alergias, enfermedades y medicamentos, incluso cuando no tiene ninguno.
+              - listitem [ref=f4e308]: Selecciona país, unión, campo local, club y sección.
+              - listitem [ref=f4e309]:
+                - text: SACDIA deriva la clase para el año eclesiástico y crea o reactiva la
+                - strong [ref=f4e310]: inscripción anual
+                - text: .
+              - listitem [ref=f4e311]:
+                - text: En la misma operación crea la membresía como
+                - code [ref=f4e312]: pending
+                - text: ", con vencimiento inicial de 8 días."
+              - listitem [ref=f4e313]: SACDIA notifica a los cargos revisores configurados de la sección.
+              - listitem [ref=f4e314]:
+                - text: Una persona con
+                - code [ref=f4e315]: club_members:approve
+                - text: confirma la sección y aprueba o rechaza.
+              - listitem [ref=f4e316]: La persona actualiza o vuelve a entrar en la app para recibir el estado nuevo.
+            - paragraph [ref=f4e317]: La notificación puede llegar a dirección, subdirección, secretaría o secretaría-tesorería, pero el permiso efectivo y el alcance de sección son la autorización final.
+            - generic [ref=f4e318]:
+              - heading "Estados de la solicitud" [level=2] [ref=f4e319]
+              - link "Sección titulada «Estados de la solicitud»" [ref=f4e320] [cursor=pointer]:
+                - /url: "#estados-de-la-solicitud"
+            - paragraph [ref=f4e325]:
+              - text: La ruta esperada es
+              - code [ref=f4e326]: pending
+              - text: →
+              - code [ref=f4e327]: active
+              - text: .
+            - table [ref=f4e328]:
+              - rowgroup [ref=f4e329]:
+                - row [ref=f4e330]:
+                  - columnheader "Estado" [ref=f4e331]
+                  - columnheader "Quién lo produce" [ref=f4e332]
+                  - columnheader "Qué debe ocurrir después" [ref=f4e333]
+              - rowgroup [ref=f4e334]:
+                - row [ref=f4e335]:
+                  - cell [ref=f4e336]:
+                    - code [ref=f4e337]: pending
+                  - cell "SACDIA al finalizar el paso 3." [ref=f4e338]
+                  - cell "La sección revisa antes del vencimiento." [ref=f4e339]
+                - row [ref=f4e340]:
+                  - cell [ref=f4e341]:
+                    - code [ref=f4e342]: active
+                  - cell "Revisor autorizado." [ref=f4e343]
+                  - cell "Se habilitan superficies según cargo y permisos." [ref=f4e344]
+                - row [ref=f4e345]:
+                  - cell [ref=f4e346]:
+                    - code [ref=f4e347]: rejected
+                  - cell "Revisor autorizado." [ref=f4e348]
+                  - cell "La persona lee el motivo, corrige y vuelve a solicitar." [ref=f4e349]
+                - row [ref=f4e350]:
+                  - cell [ref=f4e351]:
+                    - code [ref=f4e352]: cancelled
+                  - cell "Persona solicitante." [ref=f4e353]
+                  - cell "Se reabre la selección de club y sección." [ref=f4e354]
+                - row [ref=f4e355]:
+                  - cell [ref=f4e356]:
+                    - code [ref=f4e357]: expired
+                  - cell "Proceso automático." [ref=f4e358]
+                  - cell "La persona vuelve a solicitar desde la app." [ref=f4e359]
+            - paragraph [ref=f4e360]:
+              - text: Los pendientes vencen según
+              - code [ref=f4e361]: membership.pending_timeout_days
+              - text: ; el valor predeterminado es 8 días y la revisión automática se ejecuta cada hora.
+            - generic [ref=f4e362]:
+              - heading "Corregir sin duplicar" [level=2] [ref=f4e363]
+              - link "Sección titulada «Corregir sin duplicar»" [ref=f4e364] [cursor=pointer]:
+                - /url: "#corregir-sin-duplicar"
+            - list [ref=f4e369]:
+              - listitem [ref=f4e370]: "Club o sección equivocados: cancela la solicitud pendiente y repite solo el paso 3."
+              - listitem [ref=f4e371]:
+                - text: "Solicitud rechazada: corrige la causa y pulsa"
+                - strong [ref=f4e372]: Volver a solicitar
+                - text: .
+              - listitem [ref=f4e373]: "Solicitud vencida: vuelve a solicitar desde el aviso del tablero."
+              - listitem [ref=f4e374]: "Contraseña olvidada: utiliza recuperación de contraseña."
+              - listitem [ref=f4e375]: "Datos personales incorrectos: actualiza el perfil o solicita la corrección autorizada."
+            - paragraph [ref=f4e376]:
+              - strong [ref=f4e377]: No crees otra cuenta
+              - text: para corregir membresía, inscripción, correo olvidado o un rechazo. Duplicar la identidad separa el historial y complica la revisión.
+            - generic [ref=f4e378]:
+              - heading "Cómo utilizar esta guía" [level=2] [ref=f4e379]
+              - link "Sección titulada «Cómo utilizar esta guía»" [ref=f4e380] [cursor=pointer]:
+                - /url: "#cómo-utilizar-esta-guía"
+            - paragraph [ref=f4e385]:
+              - text: La persona sigue las pantallas de acceso y post-registro. Cuando aparece
+              - code [ref=f4e386]: pending
+              - text: ", el proceso cambia de responsable y debe continuar en la bandeja administrativa de la sección."
+            - generic [ref=f4e387]:
+              - heading "Manuales relacionados en este portal" [level=2] [ref=f4e388]
+              - link "Sección titulada «Manuales relacionados en este portal»" [ref=f4e389] [cursor=pointer]:
+                - /url: "#manuales-relacionados-en-este-portal"
+            - list [ref=f4e394]:
+              - listitem [ref=f4e395]:
+                - link "Acceso, registro y recuperación" [ref=f4e396] [cursor=pointer]:
+                  - /url: /pantallas/acceso-y-registro/
+              - listitem [ref=f4e397]:
+                - link "Completar el perfil inicial" [ref=f4e398] [cursor=pointer]:
+                  - /url: /pantallas/completar-perfil/
+              - listitem [ref=f4e399]:
+                - link "Tablero principal" [ref=f4e400] [cursor=pointer]:
+                  - /url: /pantallas/tablero/
+              - listitem [ref=f4e401]:
+                - link "Perfil, salud y sesiones" [ref=f4e402] [cursor=pointer]:
+                  - /url: /pantallas/perfil/
+            - generic [ref=f4e403]:
+              - heading "Cómo verificarlo" [level=2] [ref=f4e404]
+              - link "Sección titulada «Cómo verificarlo»" [ref=f4e405] [cursor=pointer]:
+                - /url: "#cómo-verificarlo"
+            - list [ref=f4e410]:
+              - listitem [ref=f4e411]: La persona entra con la misma cuenta.
+              - listitem [ref=f4e412]: El tablero ya no muestra un estado pendiente, rechazado o vencido.
+              - listitem [ref=f4e413]: El contexto activo corresponde al club y sección aprobados.
+              - listitem [ref=f4e414]: La clase anual es la derivada para el periodo.
+              - listitem [ref=f4e415]: Solo aparecen las funciones permitidas por el cargo activo.
+            - generic [ref=f4e416]:
+              - heading "Errores frecuentes" [level=2] [ref=f4e417]
+              - link "Sección titulada «Errores frecuentes»" [ref=f4e418] [cursor=pointer]:
+                - /url: "#errores-frecuentes"
+            - table [ref=f4e423]:
+              - rowgroup [ref=f4e424]:
+                - row [ref=f4e425]:
+                  - columnheader "Problema" [ref=f4e426]
+                  - columnheader "Recuperación segura" [ref=f4e427]
+              - rowgroup [ref=f4e428]:
+                - row [ref=f4e429]:
+                  - cell "El revisor no encuentra la solicitud" [ref=f4e430]
+                  - cell "Confirma la sección exacta y actualiza la bandeja; solo muestra pendientes activos." [ref=f4e431]
+                - row [ref=f4e432]:
+                  - cell [ref=f4e433]:
+                    - text: La app sigue mostrando
+                    - code [ref=f4e434]: pending
+                    - text: después de aprobar
+                  - cell "Refresca o vuelve a iniciar sesión para renovar la autorización." [ref=f4e435]
+                - row [ref=f4e436]:
+                  - cell "La solicitud desapareció" [ref=f4e437]
+                  - cell "Revisa si fue cancelada, rechazada o vencida antes de repetir." [ref=f4e438]
+                - row [ref=f4e439]:
+                  - cell "La clase no corresponde" [ref=f4e440]
+                  - cell "Corrige nacimiento o sección; no crees otra inscripción manualmente." [ref=f4e441]
+                - row [ref=f4e442]:
+                  - cell "Se eligió el club equivocado" [ref=f4e443]
+                  - cell "Cancela la solicitud pendiente desde la app y selecciona nuevamente." [ref=f4e444]
+            - generic [ref=f4e445]:
+              - heading "Fuente de verificación" [level=2] [ref=f4e446]
+              - link "Sección titulada «Fuente de verificación»" [ref=f4e447] [cursor=pointer]:
+                - /url: "#fuente-de-verificación"
+            - paragraph [ref=f4e452]: Proceso contrastado el 2026-08-21 con autenticación, post-registro, inscripción anual, contexto de autorización, avisos móviles y revisión administrativa de membresías.
+          - generic [ref=f4e453]:
+            - paragraph [ref=f4e455]:
+              - text: "Última actualización:"
+              - time [ref=f4e456]: 20 ago 2026
+            - generic [ref=f4e457]:
+              - link [ref=f4e458] [cursor=pointer]:
+                - /url: /procesos/actividad-y-asistencia/
+                - generic [ref=f4e461]: Página anteriorPlanear una actividad y registrar asistencia
+              - link [ref=f4e462] [cursor=pointer]:
+                - /url: /procesos/carga-certificados/
+                - generic [ref=f4e465]: Siguiente páginaReconocer formación desde certificados
+  - generic [ref=f4e468]:
+    - button [ref=f4e469]
+    - button [ref=f4e475]
+    - button [ref=f4e479]
+    - button [ref=f4e484]

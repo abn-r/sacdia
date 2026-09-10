@@ -1,0 +1,47 @@
+- generic [active] [ref=f33e1]:
+  - link "Ir al contenido" [ref=f33e2] [cursor=pointer]:
+    - /url: "#_top"
+  - generic [ref=f33e3]:
+    - banner [ref=f33e4]:
+      - generic [ref=f33e5]:
+        - link "Inicio — Manual operativo" [ref=f33e8] [cursor=pointer]:
+          - /url: /
+          - generic [ref=f33e9]: S
+          - generic [ref=f33e10]:
+            - generic [ref=f33e11]: SACDIA
+            - generic [ref=f33e12]: Operativo
+        - button "Buscar" [ref=f33e15] [cursor=pointer]
+    - main [ref=f33e21]:
+      - heading "Manual operativo de SACDIA" [level=1] [ref=f33e24]
+      - generic [ref=f33e26]:
+        - generic [ref=f33e27]:
+          - region [ref=f33e28]:
+            - paragraph [ref=f33e29]: Aplicación móvil
+            - heading "Resuelve tu siguiente tarea" [level=1] [ref=f33e30]
+            - paragraph [ref=f33e31]: Manuales claros para registrar información, dar seguimiento a tu club y completar procesos desde la aplicación.
+          - generic [ref=f33e32]:
+            - link "Comenzar con SACDIA Conoce el acceso, tu perfil y la navegación principal." [ref=f33e33] [cursor=pointer]:
+              - /url: /primeros-pasos/
+              - strong [ref=f33e34]: Comenzar con SACDIA
+              - generic [ref=f33e35]: Conoce el acceso, tu perfil y la navegación principal.
+            - link "Buscar una pantalla Encuentra qué hace cada sección de la aplicación." [ref=f33e36] [cursor=pointer]:
+              - /url: /pantallas/
+              - strong [ref=f33e37]: Buscar una pantalla
+              - generic [ref=f33e38]: Encuentra qué hace cada sección de la aplicación.
+            - link "Completar un proceso Sigue recorridos completos sin perder el contexto." [ref=f33e39] [cursor=pointer]:
+              - /url: /procesos/
+              - strong [ref=f33e40]: Completar un proceso
+              - generic [ref=f33e41]: Sigue recorridos completos sin perder el contexto.
+          - generic [ref=f33e42]:
+            - heading "Documentación en crecimiento" [level=2] [ref=f33e43]
+            - link "Sección titulada «Documentación en crecimiento»" [ref=f33e44] [cursor=pointer]:
+              - /url: "#documentación-en-crecimiento"
+          - paragraph [ref=f33e49]: Estamos construyendo un manual por pantalla y una guía por cada proceso continuo. El contenido se publicará solamente después de validar el comportamiento real de SACDIA.
+        - paragraph [ref=f33e52]:
+          - text: "Última actualización:"
+          - time [ref=f33e53]: 20 ago 2026
+  - generic [ref=f33e56]:
+    - button [ref=f33e57]
+    - button [ref=f33e63]
+    - button [ref=f33e67]
+    - button [ref=f33e72]

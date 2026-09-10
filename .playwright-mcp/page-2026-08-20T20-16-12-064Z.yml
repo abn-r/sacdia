@@ -1,0 +1,604 @@
+- generic [active] [ref=f26e1]:
+  - link "Ir al contenido" [ref=f26e2] [cursor=pointer]:
+    - /url: "#_top"
+  - generic [ref=f26e3]:
+    - banner [ref=f26e4]:
+      - generic [ref=f26e5]:
+        - generic [ref=f26e7]:
+          - link "Inicio — Documentación técnica" [ref=f26e8] [cursor=pointer]:
+            - /url: /
+            - generic [ref=f26e9]: S
+            - generic [ref=f26e10]:
+              - generic [ref=f26e11]: SACDIA
+              - generic [ref=f26e12]: Técnico
+          - navigation "Cambiar portal de documentación" [ref=f26e13]:
+            - link "Operativo" [ref=f26e14] [cursor=pointer]:
+              - /url: http://localhost:4321
+            - link "Administrativo" [ref=f26e15] [cursor=pointer]:
+              - /url: http://localhost:4322
+            - link "Técnico" [ref=f26e16] [cursor=pointer]:
+              - /url: http://localhost:4323
+        - button "Buscar" [ref=f26e19] [cursor=pointer]:
+          - generic [ref=f26e23]:
+            - generic [ref=f26e24]: ⌘
+            - generic [ref=f26e25]: K
+        - generic [ref=f26e29]:
+          - generic [ref=f26e30]: Seleccionar tema
+          - combobox "Seleccionar tema" [ref=f26e31] [cursor=pointer]:
+            - option "Oscuro"
+            - option "Claro"
+            - option "Automático" [selected]
+    - navigation "Primario":
+      - list [ref=f26e35]:
+        - listitem [ref=f26e36]:
+          - group [ref=f26e37]:
+            - generic "API" [ref=f26e38] [cursor=pointer]
+            - list [ref=f26e42]:
+              - listitem [ref=f26e43]:
+                - link "API Reference" [ref=f26e44] [cursor=pointer]:
+                  - /url: /api/
+              - listitem [ref=f26e45]:
+                - link "Decisiones de Arquitectura" [ref=f26e46] [cursor=pointer]:
+                  - /url: /api/decisiones-arquitectura/
+              - listitem [ref=f26e47]:
+                - link "Endpoints — Live Reference" [ref=f26e48] [cursor=pointer]:
+                  - /url: /api/endpoints/
+              - listitem [ref=f26e49]:
+                - link "Especificación Técnica REST API" [ref=f26e50] [cursor=pointer]:
+                  - /url: /api/especificacion/
+              - listitem [ref=f26e51]:
+                - group [ref=f26e52]:
+                  - generic "integracion-frontend" [ref=f26e53] [cursor=pointer]
+                  - list [ref=f26e57]:
+                    - listitem [ref=f26e58]:
+                      - link "Integración Frontend" [ref=f26e59] [cursor=pointer]:
+                        - /url: /api/integracion-frontend/
+                    - listitem [ref=f26e60]:
+                      - link "Autenticación" [ref=f26e61] [cursor=pointer]:
+                        - /url: /api/integracion-frontend/autenticacion/
+                    - listitem [ref=f26e62]:
+                      - link "Best Practices" [ref=f26e63] [cursor=pointer]:
+                        - /url: /api/integracion-frontend/best-practices/
+                    - listitem [ref=f26e64]:
+                      - link "Ejemplos por Módulo" [ref=f26e65] [cursor=pointer]:
+                        - /url: /api/integracion-frontend/ejemplos-modulos/
+                    - listitem [ref=f26e66]:
+                      - link "Consumo de Endpoints" [ref=f26e67] [cursor=pointer]:
+                        - /url: /api/integracion-frontend/endpoints/
+                    - listitem [ref=f26e68]:
+                      - link "Manejo de Errores" [ref=f26e69] [cursor=pointer]:
+                        - /url: /api/integracion-frontend/manejo-errores/
+                    - listitem [ref=f26e70]:
+                      - link "Setup Inicial" [ref=f26e71] [cursor=pointer]:
+                        - /url: /api/integracion-frontend/setup/
+                    - listitem [ref=f26e72]:
+                      - link "Testing de Integracion Frontend" [ref=f26e73] [cursor=pointer]:
+                        - /url: /api/integracion-frontend/testing/
+              - listitem [ref=f26e74]:
+                - link "Guía de Seguridad" [ref=f26e75] [cursor=pointer]:
+                  - /url: /api/seguridad/
+              - listitem [ref=f26e76]:
+                - link "Integración de Servicios Externos" [ref=f26e77] [cursor=pointer]:
+                  - /url: /api/servicios-externos/
+              - listitem [ref=f26e78]:
+                - link "Guía de Testing" [ref=f26e79] [cursor=pointer]:
+                  - /url: /api/testing/
+              - listitem [ref=f26e80]:
+                - link "Versionado de la API" [ref=f26e81] [cursor=pointer]:
+                  - /url: /api/versionado/
+        - listitem [ref=f26e82]:
+          - group [ref=f26e83]:
+            - generic "Arquitectura" [ref=f26e84] [cursor=pointer]
+            - list [ref=f26e88]:
+              - listitem [ref=f26e89]:
+                - link "Arquitectura" [ref=f26e90] [cursor=pointer]:
+                  - /url: /arquitectura/
+              - listitem [ref=f26e91]:
+                - group [ref=f26e92]:
+                  - generic "fundamentos" [ref=f26e93] [cursor=pointer]
+                  - list [ref=f26e97]:
+                    - listitem [ref=f26e98]:
+                      - link "Fundamentos" [ref=f26e99] [cursor=pointer]:
+                        - /url: /arquitectura/fundamentos/
+                    - listitem [ref=f26e100]:
+                      - link "Arquitectura del sistema" [ref=f26e101] [cursor=pointer]:
+                        - /url: /arquitectura/fundamentos/arquitectura/
+                    - listitem [ref=f26e102]:
+                      - link "Decisiones clave" [ref=f26e103] [cursor=pointer]:
+                        - /url: /arquitectura/fundamentos/decisiones-clave/
+                    - listitem [ref=f26e104]:
+                      - link "Modelo del dominio" [ref=f26e105] [cursor=pointer]:
+                        - /url: /arquitectura/fundamentos/dominio/
+                    - listitem [ref=f26e106]:
+                      - link "Identidad del sistema" [ref=f26e107] [cursor=pointer]:
+                        - /url: /arquitectura/fundamentos/identidad/
+                    - listitem [ref=f26e108]:
+                      - link "Runtime SACDIA" [ref=f26e109] [cursor=pointer]:
+                        - /url: /arquitectura/fundamentos/runtime/
+                    - listitem [ref=f26e110]:
+                      - link "Source of Truth" [ref=f26e111] [cursor=pointer]:
+                        - /url: /arquitectura/fundamentos/source-of-truth/
+        - listitem [ref=f26e112]:
+          - group [ref=f26e113]:
+            - generic "Base de datos" [ref=f26e114] [cursor=pointer]
+            - list [ref=f26e118]:
+              - listitem [ref=f26e119]:
+                - link "Base de Datos" [ref=f26e120] [cursor=pointer]:
+                  - /url: /base-de-datos/
+              - listitem [ref=f26e121]:
+                - link "Migraciones" [ref=f26e122] [cursor=pointer]:
+                  - /url: /base-de-datos/migraciones/
+              - listitem [ref=f26e123]:
+                - group [ref=f26e124]:
+                  - generic "schema-reference" [ref=f26e125] [cursor=pointer]
+                  - list [ref=f26e129]:
+                    - listitem [ref=f26e130]:
+                      - link "Schema Reference" [ref=f26e131] [cursor=pointer]:
+                        - /url: /base-de-datos/schema-reference/
+                    - listitem [ref=f26e132]:
+                      - link "Actividades y Camporees" [ref=f26e133] [cursor=pointer]:
+                        - /url: /base-de-datos/schema-reference/actividades-camporees/
+                    - listitem [ref=f26e134]:
+                      - link "Carpetas y Evaluacion" [ref=f26e135] [cursor=pointer]:
+                        - /url: /base-de-datos/schema-reference/carpetas-evaluacion/
+                    - listitem [ref=f26e136]:
+                      - link "Clases y Honores" [ref=f26e137] [cursor=pointer]:
+                        - /url: /base-de-datos/schema-reference/clases-honores/
+                    - listitem [ref=f26e138]:
+                      - link "Clubs" [ref=f26e139] [cursor=pointer]:
+                        - /url: /base-de-datos/schema-reference/clubs/
+                    - listitem [ref=f26e140]:
+                      - link "Inventario y Finanzas" [ref=f26e141] [cursor=pointer]:
+                        - /url: /base-de-datos/schema-reference/inventario-finanzas/
+                    - listitem [ref=f26e142]:
+                      - link "Investidura y Certificaciones" [ref=f26e143] [cursor=pointer]:
+                        - /url: /base-de-datos/schema-reference/investidura-certificaciones/
+                    - listitem [ref=f26e144]:
+                      - link "Jerarquia Organizacional" [ref=f26e145] [cursor=pointer]:
+                        - /url: /base-de-datos/schema-reference/organizacion/
+                    - listitem [ref=f26e146]:
+                      - link "RBAC — Roles y Permisos" [ref=f26e147] [cursor=pointer]:
+                        - /url: /base-de-datos/schema-reference/rbac/
+                    - listitem [ref=f26e148]:
+                      - link "Salud e Insurance" [ref=f26e149] [cursor=pointer]:
+                        - /url: /base-de-datos/schema-reference/salud-insurance/
+                    - listitem [ref=f26e150]:
+                      - link "Sistema y Recursos" [ref=f26e151] [cursor=pointer]:
+                        - /url: /base-de-datos/schema-reference/sistema-recursos/
+                    - listitem [ref=f26e152]:
+                      - link "Users & Auth" [ref=f26e153] [cursor=pointer]:
+                        - /url: /base-de-datos/schema-reference/users-auth/
+        - listitem [ref=f26e154]:
+          - group [ref=f26e155]:
+            - generic "Producto" [ref=f26e156] [cursor=pointer]
+            - list [ref=f26e160]:
+              - listitem [ref=f26e161]:
+                - group [ref=f26e162]:
+                  - generic "funcionalidades" [ref=f26e163] [cursor=pointer]
+                  - list [ref=f26e167]:
+                    - listitem [ref=f26e168]:
+                      - link "Funcionalidades" [ref=f26e169] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/
+                    - listitem [ref=f26e170]:
+                      - link "Actividades" [ref=f26e171] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/actividades/
+                    - listitem [ref=f26e172]:
+                      - link "Actividades Conjuntas" [ref=f26e173] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/actividades-conjuntas/
+                    - listitem [ref=f26e174]:
+                      - link "Calificacion de Carpetas Anuales" [ref=f26e175] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/annual-folders-scoring/
+                    - listitem [ref=f26e176]:
+                      - link "Aprobaciones de Camporees" [ref=f26e177] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/aprobaciones-camporees/
+                    - listitem [ref=f26e178]:
+                      - link "Aprobaciones Masivas" [ref=f26e179] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/aprobaciones-masivas/
+                    - listitem [ref=f26e180]:
+                      - link "Audit Logs" [ref=f26e181] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/audit-logs/
+                    - listitem [ref=f26e182]:
+                      - link "Camporees" [ref=f26e183] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/camporees/
+                    - listitem [ref=f26e184]:
+                      - link "Carpetas de Evidencias" [ref=f26e185] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/carpetas-evidencias/
+                    - listitem [ref=f26e186]:
+                      - link "Catalogos" [ref=f26e187] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/catalogos/
+                    - listitem [ref=f26e188]:
+                      - link "Certificaciones de Guias Mayores" [ref=f26e189] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/certificaciones-guias-mayores/
+                    - listitem [ref=f26e190]:
+                      - link "Clases Progresivas" [ref=f26e191] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/clases-progresivas/
+                    - listitem [ref=f26e192]:
+                      - link "Comunicaciones" [ref=f26e193] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/comunicaciones/
+                    - listitem [ref=f26e194]:
+                      - link "Finanzas" [ref=f26e195] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/finanzas/
+                    - listitem [ref=f26e196]:
+                      - link "Gestion de Clubs" [ref=f26e197] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/gestion-clubs/
+                    - listitem [ref=f26e198]:
+                      - link "Gestion de Seguros" [ref=f26e199] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/gestion-seguros/
+                    - listitem [ref=f26e200]:
+                      - link "Honores" [ref=f26e201] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/honores/
+                    - listitem [ref=f26e202]:
+                      - link "Inventario" [ref=f26e203] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/inventario/
+                    - listitem [ref=f26e204]:
+                      - link "Materiales" [ref=f26e205] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/materiales/
+                    - listitem [ref=f26e206]:
+                      - link "RBAC" [ref=f26e207] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/rbac/
+                    - listitem [ref=f26e208]:
+                      - link "Recursos" [ref=f26e209] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/recursos/
+                    - listitem [ref=f26e210]:
+                      - link "SLA Dashboard" [ref=f26e211] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/sla-dashboard/
+                    - listitem [ref=f26e212]:
+                      - link "Validacion de Evidencias" [ref=f26e213] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/validacion-evidencias/
+                    - listitem [ref=f26e214]:
+                      - link "Validacion de Investiduras" [ref=f26e215] [cursor=pointer]:
+                        - /url: /producto/funcionalidades/validacion-investiduras/
+        - listitem [ref=f26e216]:
+          - group [ref=f26e217]:
+            - generic "Seguridad" [ref=f26e218] [cursor=pointer]
+            - list [ref=f26e222]:
+              - listitem [ref=f26e223]:
+                - link "Seguridad" [ref=f26e224] [cursor=pointer]:
+                  - /url: /seguridad/
+              - listitem [ref=f26e225]:
+                - group [ref=f26e226]:
+                  - generic "autorizacion" [ref=f26e227] [cursor=pointer]
+                  - list [ref=f26e231]:
+                    - listitem [ref=f26e232]:
+                      - link "Autorización" [ref=f26e233] [cursor=pointer]:
+                        - /url: /seguridad/autorizacion/
+                    - listitem [ref=f26e234]:
+                      - link "Contrato canónico de autorización" [ref=f26e235] [cursor=pointer]:
+                        - /url: /seguridad/autorizacion/contrato-canonico/
+                    - listitem [ref=f26e236]:
+                      - link "Matriz de enforcement RBAC" [ref=f26e237] [cursor=pointer]:
+                        - /url: /seguridad/autorizacion/matriz-rbac/
+                    - listitem [ref=f26e238]:
+                      - link "Modelo de autorización" [ref=f26e239] [cursor=pointer]:
+                        - /url: /seguridad/autorizacion/modelo/
+                    - listitem [ref=f26e240]:
+                      - link "Sistema de permisos" [ref=f26e241] [cursor=pointer]:
+                        - /url: /seguridad/autorizacion/permisos/
+                    - listitem [ref=f26e242]:
+                      - link "Runtime de autenticación y autorización" [ref=f26e243] [cursor=pointer]:
+                        - /url: /seguridad/autorizacion/runtime/
+        - listitem [ref=f26e244]:
+          - group [ref=f26e245]:
+            - generic "Integración" [ref=f26e246] [cursor=pointer]
+            - list [ref=f26e250]:
+              - listitem [ref=f26e251]:
+                - link "Integración" [ref=f26e252] [cursor=pointer]:
+                  - /url: /integracion/
+        - listitem [ref=f26e253]:
+          - group [ref=f26e254]:
+            - generic "Frontend" [ref=f26e255] [cursor=pointer]
+            - list [ref=f26e259]:
+              - listitem [ref=f26e260]:
+                - group [ref=f26e261]:
+                  - generic "sistema-de-diseno" [ref=f26e262] [cursor=pointer]
+                  - list [ref=f26e266]:
+                    - listitem [ref=f26e267]:
+                      - link "Sistema de Diseño" [ref=f26e268] [cursor=pointer]:
+                        - /url: /frontend/sistema-de-diseno/
+                    - listitem [ref=f26e269]:
+                      - link "Componentes UI" [ref=f26e270] [cursor=pointer]:
+                        - /url: /frontend/sistema-de-diseno/componentes/
+                    - listitem [ref=f26e271]:
+                      - link "Dark Mode y Responsive" [ref=f26e272] [cursor=pointer]:
+                        - /url: /frontend/sistema-de-diseno/dark-mode-y-responsive/
+                    - listitem [ref=f26e273]:
+                      - link "Estructura de Archivos" [ref=f26e274] [cursor=pointer]:
+                        - /url: /frontend/sistema-de-diseno/estructura-archivos/
+                    - listitem [ref=f26e275]:
+                      - link "Formularios" [ref=f26e276] [cursor=pointer]:
+                        - /url: /frontend/sistema-de-diseno/formularios/
+                    - listitem [ref=f26e277]:
+                      - link "Patrones CRUD" [ref=f26e278] [cursor=pointer]:
+                        - /url: /frontend/sistema-de-diseno/patrones-crud/
+                    - listitem [ref=f26e279]:
+                      - link "Presentacion de Datos" [ref=f26e280] [cursor=pointer]:
+                        - /url: /frontend/sistema-de-diseno/presentacion-datos/
+                    - listitem [ref=f26e281]:
+                      - link "Stack y Paleta de Color" [ref=f26e282] [cursor=pointer]:
+                        - /url: /frontend/sistema-de-diseno/stack-y-paleta/
+                    - listitem [ref=f26e283]:
+                      - link "Tipografia y Espaciado" [ref=f26e284] [cursor=pointer]:
+                        - /url: /frontend/sistema-de-diseno/tipografia-y-espaciado/
+        - listitem [ref=f26e285]:
+          - group [ref=f26e286]:
+            - generic "Estándares" [ref=f26e287] [cursor=pointer]
+            - list [ref=f26e291]:
+              - listitem [ref=f26e292]:
+                - link "Estandares" [ref=f26e293] [cursor=pointer]:
+                  - /url: /estandares/
+              - listitem [ref=f26e294]:
+                - link "Coding Standards" [ref=f26e295] [cursor=pointer]:
+                  - /url: /estandares/coding-standards/
+              - listitem [ref=f26e296]:
+                - link "Data Guidelines" [ref=f26e297] [cursor=pointer]:
+                  - /url: /estandares/data-guidelines/
+              - listitem [ref=f26e298]:
+                - link "Guia de Estructura" [ref=f26e299] [cursor=pointer]:
+                  - /url: /estandares/guia-estructura/
+              - listitem [ref=f26e300]:
+                - group [ref=f26e301]:
+                  - generic "stack-tecnologico" [ref=f26e302] [cursor=pointer]
+                  - list [ref=f26e306]:
+                    - listitem [ref=f26e307]:
+                      - link "Stack Tecnologico" [ref=f26e308] [cursor=pointer]:
+                        - /url: /estandares/stack-tecnologico/
+                    - listitem [ref=f26e309]:
+                      - link "Backend — NestJS API" [ref=f26e310] [cursor=pointer]:
+                        - /url: /estandares/stack-tecnologico/backend/
+                    - listitem [ref=f26e311]:
+                      - link "Decisiones Tecnicas" [ref=f26e312] [cursor=pointer]:
+                        - /url: /estandares/stack-tecnologico/decisiones/
+                    - listitem [ref=f26e313]:
+                      - link "Frontend — Admin Panel" [ref=f26e314] [cursor=pointer]:
+                        - /url: /estandares/stack-tecnologico/frontend/
+                    - listitem [ref=f26e315]:
+                      - link "Infraestructura" [ref=f26e316] [cursor=pointer]:
+                        - /url: /estandares/stack-tecnologico/infraestructura/
+                    - listitem [ref=f26e317]:
+                      - link "App Movil — Flutter" [ref=f26e318] [cursor=pointer]:
+                        - /url: /estandares/stack-tecnologico/mobile/
+                    - listitem [ref=f26e319]:
+                      - link "Servicios de Terceros" [ref=f26e320] [cursor=pointer]:
+                        - /url: /estandares/stack-tecnologico/servicios/
+        - listitem [ref=f26e321]:
+          - group [ref=f26e322]:
+            - generic "Pruebas" [ref=f26e323] [cursor=pointer]
+            - list [ref=f26e327]:
+              - listitem [ref=f26e328]:
+                - link "Testing" [ref=f26e329] [cursor=pointer]:
+                  - /url: /testing/
+              - listitem [ref=f26e330]:
+                - link "Usuarios de Prueba" [ref=f26e331] [cursor=pointer]:
+                  - /url: /testing/usuarios-prueba/
+        - listitem [ref=f26e332]:
+          - group [ref=f26e333]:
+            - generic "Guías" [ref=f26e334] [cursor=pointer]
+            - list [ref=f26e338]:
+              - listitem [ref=f26e339]:
+                - link "Guias" [ref=f26e340] [cursor=pointer]:
+                  - /url: /guias/
+              - listitem [ref=f26e341]:
+                - link "Admin Integration" [ref=f26e342] [cursor=pointer]:
+                  - /url: /guias/admin-integration/
+              - listitem [ref=f26e343]:
+                - link "Deployment" [ref=f26e344] [cursor=pointer]:
+                  - /url: /guias/deployment/
+              - listitem [ref=f26e345]:
+                - link "Developer Workflow" [ref=f26e346] [cursor=pointer]:
+                  - /url: /guias/developer-workflow/
+              - listitem [ref=f26e347]:
+                - link "Idea to Spec" [ref=f26e348] [cursor=pointer]:
+                  - /url: /guias/idea-to-spec/
+        - listitem [ref=f26e349]:
+          - group [ref=f26e350]:
+            - generic "Referencia" [ref=f26e351] [cursor=pointer]
+            - list [ref=f26e355]:
+              - listitem [ref=f26e356]:
+                - link "Documentación de Desarrollo" [ref=f26e357] [cursor=pointer]:
+                  - /url: /referencia/
+    - generic [ref=f26e359]:
+      - complementary [ref=f26e360]:
+        - navigation [ref=f26e365]:
+          - heading "En esta página" [level=2] [ref=f26e366]
+          - list [ref=f26e367]:
+            - listitem [ref=f26e368]:
+              - link "Sinopsis" [ref=f26e369] [cursor=pointer]:
+                - /url: "#_top"
+            - listitem [ref=f26e370]:
+              - link "Next.js Tests (Vitest + MSW + RTL)" [ref=f26e371] [cursor=pointer]:
+                - /url: "#nextjs-tests-vitest--msw--rtl"
+              - list [ref=f26e372]:
+                - listitem [ref=f26e373]:
+                  - link "Test de error handling" [ref=f26e374] [cursor=pointer]:
+                    - /url: "#test-de-error-handling"
+                - listitem [ref=f26e375]:
+                  - link "Form primitive tests" [ref=f26e376] [cursor=pointer]:
+                    - /url: "#form-primitive-tests"
+                - listitem [ref=f26e377]:
+                  - link "E2E smoke" [ref=f26e378] [cursor=pointer]:
+                    - /url: "#e2e-smoke"
+            - listitem [ref=f26e379]:
+              - link "Flutter Tests (Mockito + Dio mock)" [ref=f26e380] [cursor=pointer]:
+                - /url: "#flutter-tests-mockito--dio-mock"
+              - list [ref=f26e381]:
+                - listitem [ref=f26e382]:
+                  - link "Test de autenticacion" [ref=f26e383] [cursor=pointer]:
+                    - /url: "#test-de-autenticacion"
+      - main [ref=f26e385]:
+        - heading "Testing de Integracion Frontend" [level=1] [ref=f26e388]
+        - generic [ref=f26e390]:
+          - generic [ref=f26e391]:
+            - generic [ref=f26e392]:
+              - heading "Next.js Tests (Vitest + MSW + RTL)" [level=2] [ref=f26e393]
+              - link "Sección titulada «Next.js Tests (Vitest + MSW + RTL)»" [ref=f26e394] [cursor=pointer]:
+                - /url: "#nextjs-tests-vitest--msw--rtl"
+            - paragraph [ref=f26e399]:
+              - text: El admin usa
+              - strong [ref=f26e400]: Vitest
+              - text: como runner y
+              - strong [ref=f26e401]: MSW
+              - text: (Mock Service Worker) para interceptar fetch. No usamos Jest ni Playwright.
+            - figure "tests/setup.ts" [ref=f26e403]:
+              - code [ref=f26e407]:
+                - generic [ref=f26e408]: "import { afterAll, afterEach, beforeAll } from 'vitest';"
+                - generic [ref=f26e410]: "import { setupServer } from 'msw/node';"
+                - generic [ref=f26e412]: "import { http, HttpResponse } from 'msw';"
+                - generic [ref=f26e416]: export const server = setupServer(
+                - generic [ref=f26e418]: http.get('*/api/v1/clubs', () =>
+                - generic [ref=f26e420]: "HttpResponse.json({ status: 'success', data: [{ club_id: 1, name: 'Test Club' }] }),"
+                - generic [ref=f26e422]: ),
+                - generic [ref=f26e424]: );
+                - generic [ref=f26e428]: "beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));"
+                - generic [ref=f26e430]: afterEach(() => server.resetHandlers());
+                - generic [ref=f26e432]: afterAll(() => server.close());
+              - button "Copiar al portapapeles" [ref=f26e435] [cursor=pointer]
+            - figure "tests/hooks/use-clubs.test.tsx" [ref=f26e438]:
+              - code [ref=f26e442]:
+                - generic [ref=f26e443]: "import { describe, it, expect } from 'vitest';"
+                - generic [ref=f26e445]: "import { renderHook, waitFor } from '@testing-library/react';"
+                - generic [ref=f26e447]: "import { QueryClient, QueryClientProvider } from '@tanstack/react-query';"
+                - generic [ref=f26e449]: "import { useClubs } from '@/hooks/use-clubs';"
+                - generic [ref=f26e454]:
+                  - text: function wrapper(
+                  - generic [ref=f26e455]: "{ children }"
+                  - text: ": { children: React.ReactNode }) {"
+                - generic [ref=f26e456]: "const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });"
+                - generic [ref=f26e458]: "return <QueryClientProvider client={qc}>{children}</QueryClientProvider>;"
+                - generic [ref=f26e460]: "}"
+                - generic [ref=f26e464]: "describe('useClubs', () => {"
+                - generic [ref=f26e466]: "it('returns clubs from API', async () => {"
+                - generic [ref=f26e468]: "const { result } = renderHook(() => useClubs(), { wrapper });"
+                - generic [ref=f26e470]: await waitFor(() => expect(result.current.isSuccess).toBe(true));
+                - generic [ref=f26e472]: "expect(result.current.data).toEqual([{ club_id: 1, name: 'Test Club' }]);"
+                - generic [ref=f26e474]: "});"
+                - generic [ref=f26e477]: "});"
+              - button "Copiar al portapapeles" [ref=f26e480] [cursor=pointer]
+            - generic [ref=f26e482]:
+              - heading "Test de error handling" [level=3] [ref=f26e483]
+              - link "Sección titulada «Test de error handling»" [ref=f26e484] [cursor=pointer]:
+                - /url: "#test-de-error-handling"
+            - figure [ref=f26e490]:
+              - code [ref=f26e492]:
+                - generic [ref=f26e493]: "import { http, HttpResponse } from 'msw';"
+                - generic [ref=f26e495]: "import { server } from '../setup';"
+                - generic [ref=f26e499]: "it('handles 401 by redirecting to login', async () => {"
+                - generic [ref=f26e501]: server.use(
+                - generic [ref=f26e504]: http.get('*/api/v1/clubs', () =>
+                - generic [ref=f26e507]: "HttpResponse.json({ status: 'error', message: 'Unauthorized' }, { status: 401 }),"
+                - generic [ref=f26e510]: ),
+                - generic [ref=f26e513]: );
+                - generic [ref=f26e518]: // Assert that the error boundary or interceptor redirects to /login
+                - generic [ref=f26e520]: "});"
+              - button "Copiar al portapapeles" [ref=f26e523] [cursor=pointer]
+            - generic [ref=f26e525]:
+              - heading "Form primitive tests" [level=3] [ref=f26e526]
+              - link "Sección titulada «Form primitive tests»" [ref=f26e527] [cursor=pointer]:
+                - /url: "#form-primitive-tests"
+            - paragraph [ref=f26e532]:
+              - text: El admin tiene
+              - code [ref=f26e533]: aria-invalid
+              - text: wired en el primitive
+              - code [ref=f26e534]: <Form />
+              - text: . Tests verifican que campos invalidos exponen
+              - code [ref=f26e535]: aria-invalid="true"
+              - text: para a11y.
+            - generic [ref=f26e536]:
+              - heading "E2E smoke" [level=3] [ref=f26e537]
+              - link "Sección titulada «E2E smoke»" [ref=f26e538] [cursor=pointer]:
+                - /url: "#e2e-smoke"
+            - paragraph [ref=f26e543]:
+              - text: "Script:"
+              - code [ref=f26e544]: sacdia-admin/scripts/e2e-smoke.mjs
+              - text: (Node, NO Playwright).
+            - figure "Ventana de terminal" [ref=f26e546]:
+              - code [ref=f26e551]:
+                - generic [ref=f26e552]: set -a; source .env.e2e.local; set +a; pnpm test:e2e:smoke
+                - generic [ref=f26e554]: "E2E_ENABLE_WRITE=1 pnpm test:e2e:smoke # incluye create/edit"
+              - button "Copiar al portapapeles" [ref=f26e557] [cursor=pointer]
+            - paragraph [ref=f26e559]: "El script:"
+            - list [ref=f26e560]:
+              - listitem [ref=f26e561]: Verifica endpoints criticos.
+              - listitem [ref=f26e562]:
+                - text: Maneja fallback
+                - code [ref=f26e563]: localhost -> 127.0.0.1
+                - text: (IPv4/IPv6).
+              - listitem [ref=f26e564]: Reporta degradacion si hay 429 sin bloquear toda la corrida.
+            - separator [ref=f26e565]
+            - generic [ref=f26e566]:
+              - heading "Flutter Tests (Mockito + Dio mock)" [level=2] [ref=f26e567]
+              - link "Sección titulada «Flutter Tests (Mockito + Dio mock)»" [ref=f26e568] [cursor=pointer]:
+                - /url: "#flutter-tests-mockito--dio-mock"
+            - figure "test/features/clubs/data/datasources/clubs_remote_datasource_test.dart" [ref=f26e574]:
+              - code [ref=f26e578]:
+                - generic [ref=f26e579]: "@GenerateMocks([Dio])"
+                - generic [ref=f26e581]: "void main() {"
+                - generic [ref=f26e583]: late ClubsRemoteDataSource dataSource;
+                - generic [ref=f26e585]: late MockDio mockDio;
+                - generic [ref=f26e589]: "setUp(() {"
+                - generic [ref=f26e591]: mockDio = MockDio();
+                - generic [ref=f26e594]: dataSource = ClubsRemoteDataSource(mockDio);
+                - generic [ref=f26e597]: "});"
+                - generic [ref=f26e602]: "test('returns list of clubs on success', () async {"
+                - generic [ref=f26e604]: when(mockDio.get('/clubs')).thenAnswer(
+                - generic [ref=f26e606]: (_) async => Response(
+                - generic [ref=f26e609]: "data: { 'status': 'success', 'data': [{ 'club_id': 1, 'name': 'Test Club' }] },"
+                - generic [ref=f26e612]: "statusCode: 200,"
+                - generic [ref=f26e615]: "requestOptions: RequestOptions(path: '/clubs'),"
+                - generic [ref=f26e618]: ),
+                - generic [ref=f26e621]: );
+                - generic [ref=f26e626]: final result = await dataSource.getClubs();
+                - generic [ref=f26e628]: expect(result.length, 1);
+                - generic [ref=f26e630]: expect(result.first.name, 'Test Club');
+                - generic [ref=f26e632]: "});"
+                - generic [ref=f26e637]: "test('throws ServerException on 500', () async {"
+                - generic [ref=f26e639]: when(mockDio.get('/clubs')).thenThrow(
+                - generic [ref=f26e641]: DioException(
+                - generic [ref=f26e643]: "requestOptions: RequestOptions(path: '/clubs'),"
+                - generic [ref=f26e646]: "response: Response(statusCode: 500, requestOptions: RequestOptions(path: '/clubs')),"
+                - generic [ref=f26e649]: ),
+                - generic [ref=f26e652]: );
+                - generic [ref=f26e657]: expect(() => dataSource.getClubs(), throwsA(isA<ServerException>()));
+                - generic [ref=f26e659]: "});"
+                - generic [ref=f26e662]: "}"
+              - button "Copiar al portapapeles" [ref=f26e665] [cursor=pointer]
+            - generic [ref=f26e667]:
+              - heading "Test de autenticacion" [level=3] [ref=f26e668]
+              - link "Sección titulada «Test de autenticacion»" [ref=f26e669] [cursor=pointer]:
+                - /url: "#test-de-autenticacion"
+            - figure [ref=f26e675]:
+              - code [ref=f26e677]:
+                - generic [ref=f26e678]: "test('returns AuthTokens on successful login', () async {"
+                - generic [ref=f26e680]: "when(mockDio.post('/auth/login', data: anyNamed('data'))).thenAnswer("
+                - generic [ref=f26e682]: (_) async => Response(
+                - generic [ref=f26e685]: "data: {"
+                - generic [ref=f26e688]: "'status': 'success',"
+                - generic [ref=f26e690]: "'data': {"
+                - generic [ref=f26e692]: "'accessToken': 'token123',"
+                - generic [ref=f26e694]: "'refreshToken': 'refresh123',"
+                - generic [ref=f26e696]: "'expiresAt': '2026-12-31T00:00:00Z',"
+                - generic [ref=f26e698]: "},"
+                - generic [ref=f26e701]: "},"
+                - generic [ref=f26e704]: "statusCode: 200,"
+                - generic [ref=f26e707]: "requestOptions: RequestOptions(path: '/auth/login'),"
+                - generic [ref=f26e710]: ),
+                - generic [ref=f26e713]: );
+                - generic [ref=f26e718]: final result = await dataSource.login('test@test.com', 'password123');
+                - generic [ref=f26e720]: expect(result.accessToken, 'token123');
+                - generic [ref=f26e722]: "});"
+              - button "Copiar al portapapeles" [ref=f26e725] [cursor=pointer]
+          - generic [ref=f26e727]:
+            - paragraph [ref=f26e729]:
+              - text: "Última actualización:"
+              - time [ref=f26e730]: 20 ago 2026
+            - generic [ref=f26e731]:
+              - link [ref=f26e732] [cursor=pointer]:
+                - /url: /api/integracion-frontend/setup/
+                - generic [ref=f26e735]: Página anteriorSetup Inicial
+              - link [ref=f26e736] [cursor=pointer]:
+                - /url: /api/seguridad/
+                - generic [ref=f26e739]: Siguiente páginaGuía de Seguridad
+  - generic [ref=f26e742]:
+    - button [ref=f26e743]
+    - button [ref=f26e749]
+    - button [ref=f26e753]
+    - button [ref=f26e758]
