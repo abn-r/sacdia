@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "ok": false,
+  "command": "validate",
+  "stage": "render",
+  "type": "architecture",
+  "input": "/Users/abner/Documents/development/sacdia/docs/guides/conocimiento-sistema/diagramas/06-arquitectura-panel.architecture.json",
+  "error": "Architecture layout validation failed:\n- [clean-flow/endpoint-side-direction] architecture connections[6] id \"next-backend\" \"next\" -> \"backend\" first segment 0 [445.4, 65] -> [445.4, 20] does not honor fromSide \"top\" — it must run vertical upward; keep automatic routing so the renderer can use a side-aware bridge, or set truthful fromSide/toSide with perpendicular via segments.\n- [clean-flow/endpoint-side-direction] architecture connections[6] id \"next-backend\" \"next\" -> \"backend\" final segment 2 [1209.7, 20] -> [1209.7, 310] does not honor toSide \"top\" — it must run vertical downward from above; keep automatic routing so the renderer can use a side-aware bridge, or set truthful fromSide/toSide with perpendicular via segments.",
+  "diagnostics": [
+    {
+      "code": "clean-flow/endpoint-side-direction",
+      "severity": "error",
+      "message": "[clean-flow/endpoint-side-direction] architecture connections[6] id \"next-backend\" \"next\" -> \"backend\" first segment 0 [445.4, 65] -> [445.4, 20] does not honor fromSide \"top\" — it must run vertical upward; keep automatic routing so the renderer can use a side-aware bridge, or set truthful fromSide/toSide with perpendicular via segments.",
+      "subject": {
+        "diagramType": "architecture",
+        "collection": "connections",
+        "index": 6,
+        "id": "next-backend",
+        "from": "next",
+        "to": "backend"
+      },
+      "evidence": {
+        "endpoint": "source",
+        "authoredField": "fromSide",
+        "sideOrigin": "authored",
+        "side": "top",
+        "segmentIndex": 0,
+        "from": [
+          445.445,
+          65
+        ],
+        "to": [
+          445.44,
+          20
+        ],
+        "expectedAxis": "vertical",
+        "expectedDirection": "upward"
+      },
+      "supportedFixes": [
+        "keep automatic routing so the renderer can use a side-aware bridge, or set truthful fromSide/toSide with perpendicular via segments"
+      ]
+    },
+    {
+      "code": "clean-flow/endpoint-side-direction",
+      "severity": "error",
+      "message": "[clean-flow/endpoint-side-direction] architecture connections[6] id \"next-backend\" \"next\" -> \"backend\" final segment 2 [1209.7, 20] -> [1209.7, 310] does not honor toSide \"top\" — it must run vertical downward from above; keep automatic routing so the renderer can use a side-aware bridge, or set truthful fromSide/toSide with perpendicular via segments.",
+      "subject": {
+        "diagramType": "architecture",
+        "collection": "connections",
+        "index": 6,
+        "id": "next-backend",
+        "from": "next",
+        "to": "backend"
+      },
+      "evidence": {
+        "endpoint": "target",
+        "authoredField": "toSide",
+        "sideOrigin": "authored",
+        "side": "top",
+        "segmentIndex": 2,
+        "from": [
+          1209.68,
+          20
+        ],
+        "to": [
+          1209.685,
+          310
+        ],
+        "expectedAxis": "vertical",
+        "expectedDirection": "downward from above"
+      },
+      "supportedFixes": [
+        "keep automatic routing so the renderer can use a side-aware bridge, or set truthful fromSide/toSide with perpendicular via segments"
+      ]
+    }
+  ]
+}

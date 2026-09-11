@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "ok": false,
+  "command": "validate",
+  "stage": "render",
+  "type": "architecture",
+  "input": "/Users/abner/Documents/development/sacdia/docs/guides/conocimiento-sistema/diagramas/03-arquitectura-general.architecture.json",
+  "error": "Architecture layout validation failed:\n- [composition/label-route-clearance] showcase architecture label \"Prisma / SQL\" on connections[2] id \"api-db\" \"api\" -> \"db\" label \"Prisma / SQL\" is 0px from connections[4] id \"api-r2\" \"api\" -> \"r2\" label \"Archivos\" segment 1 [855, 320] -> [855, 89] (label rect [821, 274, 68, 14]; minimum 4px) — adjust labelAt, labelDx, labelDy, or labelSegment; otherwise adjust the other relationship route/via/channel.",
+  "diagnostics": [
+    {
+      "code": "composition/label-route-clearance",
+      "severity": "error",
+      "message": "[composition/label-route-clearance] showcase architecture label \"Prisma / SQL\" on connections[2] id \"api-db\" \"api\" -> \"db\" label \"Prisma / SQL\" is 0px from connections[4] id \"api-r2\" \"api\" -> \"r2\" label \"Archivos\" segment 1 [855, 320] -> [855, 89] (label rect [821, 274, 68, 14]; minimum 4px) — adjust labelAt, labelDx, labelDy, or labelSegment; otherwise adjust the other relationship route/via/channel.",
+      "subject": {
+        "diagramType": "architecture",
+        "collection": "connections",
+        "index": 2,
+        "id": "api-db",
+        "from": "api",
+        "to": "db"
+      },
+      "evidence": {
+        "label": "Prisma / SQL",
+        "otherRelationship": {
+          "diagramType": "architecture",
+          "collection": "connections",
+          "index": 4,
+          "id": "api-r2",
+          "from": "api",
+          "to": "r2"
+        },
+        "segmentIndex": 1,
+        "clearancePx": 0,
+        "minimumPx": 4,
+        "labelRect": {
+          "relation": {
+            "id": "api-db",
+            "from": "api",
+            "to": "db",
+            "label": "Prisma / SQL",
+            "labelDy": -40
+          },
+          "relationIndex": 2,
+          "label": "Prisma / SQL",
+          "x": 821.2,
+          "y": 274,
+          "width": 67.6,
+          "height": 14,
+          "lx": 855,
+          "ly": 284
+        },
+        "from": [
+          855,
+          320
+        ],
+        "to": [
+          855,
+          89
+        ]
+      },
+      "supportedFixes": [
+        "adjust labelAt, labelDx, labelDy, or labelSegment; otherwise adjust the other relationship route/via/channel"
+      ]
+    }
+  ]
+}

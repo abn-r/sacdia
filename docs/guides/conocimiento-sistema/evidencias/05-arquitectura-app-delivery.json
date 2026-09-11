@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "deliver",
+  "type": "architecture",
+  "input": "/Users/abner/Documents/development/sacdia/docs/guides/conocimiento-sistema/diagramas/05-arquitectura-app.architecture.json",
+  "output": "/Users/abner/Documents/development/sacdia/docs/guides/conocimiento-sistema/diagramas/05-arquitectura-app.html",
+  "specification": {
+    "sha256": "97892af34ae5ed44ce4938228fd10c5beb3ea6d9585e51a519dcda6814c85ba8",
+    "bytes": 4080
+  },
+  "artifact": {
+    "sha256": "5043680ea44b7527015ad60a54d6ba574873bca1f5eef91d4024711c75a413dc",
+    "bytes": 808508
+  },
+  "validation": {
+    "checksPassed": 9,
+    "checkCount": 9,
+    "compositionProfile": "showcase",
+    "compositionStatus": "pass",
+    "errors": 0,
+    "warnings": 0
+  }
+}

@@ -1,0 +1,169 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "SACDIA · Arquitectura técnica general",
+    "quality_profile": "showcase",
+    "viewBox": [
+      1340,
+      700
+    ]
+  },
+  "components": [
+    {
+      "id": "mobile",
+      "type": "frontend",
+      "label": "App móvil",
+      "sublabel": "Flutter · Riverpod · Dio",
+      "pos": [
+        40,
+        150
+      ],
+      "size": [
+        220,
+        78
+      ]
+    },
+    {
+      "id": "web",
+      "type": "frontend",
+      "label": "Panel web",
+      "sublabel": "Next.js · React · Axios / fetch",
+      "pos": [
+        40,
+        440
+      ],
+      "size": [
+        220,
+        78
+      ]
+    },
+    {
+      "id": "api",
+      "type": "backend",
+      "label": "Backend API",
+      "sublabel": "NestJS · módulos · Better Auth",
+      "pos": [
+        460,
+        295
+      ],
+      "size": [
+        240,
+        78
+      ]
+    },
+    {
+      "id": "db",
+      "type": "database",
+      "label": "PostgreSQL · Neon",
+      "sublabel": "Prisma · adaptador pg",
+      "pos": [
+        1010,
+        295
+      ],
+      "size": [
+        240,
+        78
+      ]
+    },
+    {
+      "id": "redis",
+      "type": "database",
+      "label": "Redis",
+      "sublabel": "Caché · sesiones · colas",
+      "pos": [
+        460,
+        50
+      ],
+      "size": [
+        240,
+        78
+      ]
+    },
+    {
+      "id": "r2",
+      "type": "cloud",
+      "label": "Cloudflare R2",
+      "sublabel": "Archivos · API compatible S3",
+      "pos": [
+        1010,
+        50
+      ],
+      "size": [
+        240,
+        78
+      ]
+    },
+    {
+      "id": "messaging",
+      "type": "external",
+      "label": "FCM · Resend",
+      "sublabel": "Push y correo · con configuración",
+      "pos": [
+        1010,
+        540
+      ],
+      "size": [
+        260,
+        78
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "mobile-api",
+      "from": "mobile",
+      "to": "api",
+      "label": "REST + JWT"
+    },
+    {
+      "id": "web-api",
+      "from": "web",
+      "to": "api",
+      "label": "REST + JWT"
+    },
+    {
+      "id": "api-db",
+      "from": "api",
+      "to": "db",
+      "label": "Prisma / SQL",
+      "labelDy": -40
+    },
+    {
+      "id": "api-redis",
+      "from": "api",
+      "to": "redis",
+      "label": "Caché / BullMQ"
+    },
+    {
+      "id": "api-r2",
+      "from": "api",
+      "to": "r2",
+      "label": "Archivos"
+    },
+    {
+      "id": "api-messaging",
+      "from": "api",
+      "to": "messaging",
+      "label": "Envíos"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Una API, dos clientes",
+      "items": [
+        "El panel combina peticiones desde servidor y navegador.",
+        "Better Auth está integrado en el backend; no es un backend adicional."
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Alcance técnico",
+      "items": [
+        "Diagrama lógico del código, no auditoría del despliegue.",
+        "BullMQ, correo y push dependen de configuración; observabilidad: Pino / Sentry."
+      ]
+    }
+  ]
+}

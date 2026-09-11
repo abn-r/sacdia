@@ -1,0 +1,231 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Backend · NestJS modular",
+    "quality_profile": "showcase",
+    "viewBox": [
+      1380,
+      735
+    ]
+  },
+  "components": [
+    {
+      "id": "ingress",
+      "type": "security",
+      "label": "Entrada y seguridad",
+      "sublabel": "JWT · permisos · límites",
+      "pos": [
+        25.88,
+        310
+      ],
+      "size": [
+        189.75,
+        78
+      ]
+    },
+    {
+      "id": "controllers",
+      "type": "backend",
+      "label": "Controllers + DTOs",
+      "sublabel": "Rutas versionadas · validación",
+      "pos": [
+        306.19,
+        310
+      ],
+      "size": [
+        189.75,
+        78
+      ]
+    },
+    {
+      "id": "services",
+      "type": "backend",
+      "label": "Servicios de dominio",
+      "sublabel": "Reglas · procesos · transacciones",
+      "pos": [
+        586.5,
+        310
+      ],
+      "size": [
+        189.75,
+        78
+      ]
+    },
+    {
+      "id": "prisma",
+      "type": "backend",
+      "label": "PrismaService",
+      "sublabel": "PrismaPg · pool de conexiones",
+      "pos": [
+        866.81,
+        310
+      ],
+      "size": [
+        189.75,
+        78
+      ]
+    },
+    {
+      "id": "postgres",
+      "type": "database",
+      "label": "PostgreSQL",
+      "sublabel": "Persistencia relacional",
+      "pos": [
+        1147.12,
+        310
+      ],
+      "size": [
+        189.75,
+        78
+      ]
+    },
+    {
+      "id": "auth",
+      "type": "security",
+      "label": "Auth + Better Auth",
+      "sublabel": "Sesiones · OAuth · firma JWT",
+      "pos": [
+        306.19,
+        65
+      ],
+      "size": [
+        189.75,
+        78
+      ]
+    },
+    {
+      "id": "jobs",
+      "type": "messagebus",
+      "label": "BullMQ + processors",
+      "sublabel": "Registro condicional por Redis",
+      "pos": [
+        586.5,
+        65
+      ],
+      "size": [
+        189.75,
+        78
+      ]
+    },
+    {
+      "id": "cache",
+      "type": "database",
+      "label": "Redis",
+      "sublabel": "Caché compartida + colas",
+      "pos": [
+        866.81,
+        65
+      ],
+      "size": [
+        189.75,
+        78
+      ]
+    },
+    {
+      "id": "cron",
+      "type": "backend",
+      "label": "Tareas programadas",
+      "sublabel": "ScheduleModule · cron",
+      "pos": [
+        586.5,
+        555
+      ],
+      "size": [
+        189.75,
+        78
+      ]
+    },
+    {
+      "id": "adapters",
+      "type": "cloud",
+      "label": "Adaptadores externos",
+      "sublabel": "R2 · FCM · Resend",
+      "pos": [
+        866.81,
+        555
+      ],
+      "size": [
+        189.75,
+        78
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "ingress-controllers",
+      "from": "ingress",
+      "to": "controllers"
+    },
+    {
+      "id": "controllers-services",
+      "from": "controllers",
+      "to": "services"
+    },
+    {
+      "id": "services-prisma",
+      "from": "services",
+      "to": "prisma"
+    },
+    {
+      "id": "prisma-postgres",
+      "from": "prisma",
+      "to": "postgres",
+      "label": "SQL"
+    },
+    {
+      "id": "controllers-auth",
+      "from": "controllers",
+      "to": "auth",
+      "label": "Login / sesión"
+    },
+    {
+      "id": "services-jobs",
+      "from": "services",
+      "to": "jobs",
+      "label": "Encola"
+    },
+    {
+      "id": "jobs-cache",
+      "from": "jobs",
+      "to": "cache",
+      "label": "Redis"
+    },
+    {
+      "id": "services-cache",
+      "from": "services",
+      "to": "cache",
+      "label": "Caché"
+    },
+    {
+      "id": "cron-services",
+      "from": "cron",
+      "to": "services",
+      "label": "Ejecuta"
+    },
+    {
+      "id": "services-adapters",
+      "from": "services",
+      "to": "adapters",
+      "label": "I/O externo"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Organización",
+      "items": [
+        "Un AppModule integra módulos por dominio; no son microservicios separados.",
+        "CommonModule agrupa autorización, storage, reloj y filtros de errores."
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Ejecución y límites",
+      "items": [
+        "Cron y processors son componentes Nest; no se infiere un despliegue aparte.",
+        "Redis requerido en producción para caché; dashboards también tienen caché local."
+      ]
+    }
+  ]
+}

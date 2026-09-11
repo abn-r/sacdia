@@ -14,6 +14,8 @@ Esta guía explica y conecta fuentes; **no reemplaza el canon ni certifica produ
 4. [Mapa interactivo del sistema](diagramas/01-mapa-sistema.html).
 5. [Diagrama del flujo de revisión](diagramas/02-revision-evidencias.html).
 6. [Roles, permisos y contexto](03-roles-permisos-contexto.md).
+7. [Arquitectura técnica](04-arquitectura-tecnica.md): backend y app validados;
+   general y panel pendientes de terminar el trazado.
 
 Los diagramas son HTML autónomos: abrir en navegador, sin levantar SACDIA.
 El contenido está en español; los controles fijos del visor Archify y su atributo

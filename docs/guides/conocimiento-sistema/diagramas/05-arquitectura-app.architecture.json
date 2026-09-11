@@ -1,0 +1,213 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "App móvil · Flutter por funcionalidades",
+    "quality_profile": "showcase",
+    "viewBox": [
+      1380,
+      735
+    ]
+  },
+  "components": [
+    {
+      "id": "ui",
+      "type": "frontend",
+      "label": "Vistas y widgets",
+      "sublabel": "Presentation · GoRouter",
+      "pos": [
+        24.79,
+        310
+      ],
+      "size": [
+        181.8,
+        78
+      ]
+    },
+    {
+      "id": "state",
+      "type": "frontend",
+      "label": "Providers Riverpod",
+      "sublabel": "Estado · composición / DI",
+      "pos": [
+        293.35,
+        310
+      ],
+      "size": [
+        181.8,
+        78
+      ]
+    },
+    {
+      "id": "domain",
+      "type": "backend",
+      "label": "Dominio",
+      "sublabel": "Casos de uso + contratos",
+      "pos": [
+        561.92,
+        310
+      ],
+      "size": [
+        181.8,
+        78
+      ]
+    },
+    {
+      "id": "data",
+      "type": "backend",
+      "label": "Capa de datos",
+      "sublabel": "RepositoryImpl + RemoteDataSource",
+      "pos": [
+        830.48,
+        310
+      ],
+      "size": [
+        206.59,
+        78
+      ]
+    },
+    {
+      "id": "api",
+      "type": "external",
+      "label": "Backend SACDIA",
+      "sublabel": "API REST · reglas y permisos",
+      "pos": [
+        1140.36,
+        310
+      ],
+      "size": [
+        181.8,
+        78
+      ]
+    },
+    {
+      "id": "auth",
+      "type": "security",
+      "label": "AppAuthService",
+      "sublabel": "Tokens en FlutterSecureStorage",
+      "pos": [
+        830.48,
+        65
+      ],
+      "size": [
+        206.59,
+        78
+      ]
+    },
+    {
+      "id": "dio",
+      "type": "backend",
+      "label": "Dio + interceptores",
+      "sublabel": "Bearer · refresh · errores",
+      "pos": [
+        1140.36,
+        65
+      ],
+      "size": [
+        181.8,
+        78
+      ]
+    },
+    {
+      "id": "local",
+      "type": "database",
+      "label": "Persistencia local",
+      "sublabel": "SharedPreferences · Hive selectivo",
+      "pos": [
+        293.35,
+        555
+      ],
+      "size": [
+        206.59,
+        78
+      ]
+    },
+    {
+      "id": "fcm",
+      "type": "external",
+      "label": "Firebase Messaging",
+      "sublabel": "Push · invalidación bajo flag",
+      "pos": [
+        293.35,
+        65
+      ],
+      "size": [
+        206.59,
+        78
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "ui-state",
+      "from": "ui",
+      "to": "state"
+    },
+    {
+      "id": "state-domain",
+      "from": "state",
+      "to": "domain",
+      "label": "Invoca"
+    },
+    {
+      "id": "domain-data",
+      "from": "domain",
+      "to": "data",
+      "label": "Contrato / implementación",
+      "labelDy": -33
+    },
+    {
+      "id": "data-dio",
+      "from": "data",
+      "to": "dio",
+      "label": "HTTP"
+    },
+    {
+      "id": "dio-api",
+      "from": "dio",
+      "to": "api",
+      "label": "REST + JWT",
+      "labelDy": 24
+    },
+    {
+      "id": "dio-auth",
+      "from": "dio",
+      "to": "auth",
+      "label": "Lee / renueva tokens"
+    },
+    {
+      "id": "state-local",
+      "from": "state",
+      "to": "local",
+      "label": "Providers",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "fcm-state",
+      "from": "fcm",
+      "to": "state",
+      "label": "Eventos",
+      "fromSide": "bottom",
+      "toSide": "top"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Estructura comprobada",
+      "items": [
+        "features/<dominio>/{presentation,domain,data}; actividades es el ejemplo trazado.",
+        "La flecha dominio → datos representa ejecución por contrato, no un import de implementación."
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Sin promesas offline globales",
+      "items": [
+        "Tokens en almacenamiento seguro; Hive no es el almacén de sesión actual.",
+        "La invalidación silenciosa FCM viene desactivada por defecto; caché local es selectiva."
+      ]
+    }
+  ]
+}

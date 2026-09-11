@@ -1,0 +1,126 @@
+{
+  "date": "2026-09-10",
+  "scope": "Código local leído; no certifica despliegue. HEAD no incluye cambios sin commit.",
+  "heads": {
+    "sacdia-backend": "42b523aa7fda24d6eaea8d2d538e61f24fa26681",
+    "sacdia-app": "f44b0d1b30f393cfc8c107318f615b0bb99a505e",
+    "sacdia-admin": "ae453167c0e1f83ca83bdd3b54e63566db4ed4e2"
+  },
+  "sources": [
+    {
+      "path": "sacdia-backend/package.json",
+      "sha256": "d697b087b53eef64a7583fd4ad840f3135e1df70bc45128394275064e517a2d6",
+      "bytes": 6501
+    },
+    {
+      "path": "sacdia-backend/src/app.module.ts",
+      "sha256": "bbd073dfee6f863efffd9e64c87e32a7563719f2cd2f93bf3d43ea2a4854bf7f",
+      "bytes": 12526
+    },
+    {
+      "path": "sacdia-backend/src/main.ts",
+      "sha256": "d6c7112f0ae2948dde2c21ac369a2ac52c685fdf1102ec6855f59c8324a53214",
+      "bytes": 16303
+    },
+    {
+      "path": "sacdia-backend/src/prisma/prisma.service.ts",
+      "sha256": "caa6dce8f2581f4a3f396a680904da30aca5c3247c56664fe6fc0ba015210563",
+      "bytes": 3869
+    },
+    {
+      "path": "sacdia-backend/src/config/bullmq.config.ts",
+      "sha256": "bed17274603198cf83bf270231e507c8134ce0106fe57553e397952c669efb57",
+      "bytes": 2567
+    },
+    {
+      "path": "sacdia-backend/src/config/cache.config.ts",
+      "sha256": "64080accb09a2c4cdd62577f3852e0c58a03efc437e2678ce19b9ba5f4ade2a9",
+      "bytes": 2985
+    },
+    {
+      "path": "sacdia-backend/src/common/common.module.ts",
+      "sha256": "f104671c8d7eea19f4eb4b37456b7a8e5904b030037d95362ef9d7464a0015a4",
+      "bytes": 5803
+    },
+    {
+      "path": "sacdia-backend/src/auth/auth.module.ts",
+      "sha256": "655bc413dddd012a6552376888ead79ac03857df9114bc0b55236b425fe42efc",
+      "bytes": 2091
+    },
+    {
+      "path": "sacdia-app/pubspec.yaml",
+      "sha256": "0316633e8c6315e864403a8cf4665240ffcb43f1a80ad491f5fa2d46d8501f1f",
+      "bytes": 5089
+    },
+    {
+      "path": "sacdia-app/lib/core/auth/app_auth_service.dart",
+      "sha256": "6bab9a27941506b479846ba2bf14fc6fa0d653301c5001135707a281ab00d1c8",
+      "bytes": 8037
+    },
+    {
+      "path": "sacdia-app/lib/core/network/dio_client.dart",
+      "sha256": "1ba45126173a3fda68d54cbd1a1a9e2787829b42e709c165706b8e34b3c6ed73",
+      "bytes": 4474
+    },
+    {
+      "path": "sacdia-app/lib/core/storage/secure_storage.dart",
+      "sha256": "9bd30152ffd58513f90d8d6f577e2a622aacd086e3e0e5d1d6910ae6586c8a0a",
+      "bytes": 1539
+    },
+    {
+      "path": "sacdia-app/lib/core/storage/local_storage.dart",
+      "sha256": "3dd0072a317346bf6222c9a4e759b25a61c36ada1586f4d8a40cd965a09670c3",
+      "bytes": 5787
+    },
+    {
+      "path": "sacdia-app/lib/core/realtime/feature_flags.dart",
+      "sha256": "2df95cdbc593e9f30187d102afdcb7e575a1e5f11b5f877abef3aee8a03cb020",
+      "bytes": 769
+    },
+    {
+      "path": "sacdia-app/lib/features/activities/presentation/providers/activities_providers.dart",
+      "sha256": "96f2c65bf5214e9c7c1376b66c458bf90df29a99d28298f23493a0dfac07d857",
+      "bytes": 21448
+    },
+    {
+      "path": "sacdia-app/lib/features/activities/domain/usecases/get_club_activities.dart",
+      "sha256": "affc911cac967a7f07e79174895e7a783c5e7e07268ac0cd541ab543085e5784",
+      "bytes": 1106
+    },
+    {
+      "path": "sacdia-admin/package.json",
+      "sha256": "743afd8a76c30c81883d0204d3a48f5af6ef2aa501bb145820a645372c02e4cb",
+      "bytes": 2431
+    },
+    {
+      "path": "sacdia-admin/src/lib/api/client.ts",
+      "sha256": "95c0ea3a18bb802800f22c91eed4dd0d9afbd2af26febe4e27160e20ccb81e3a",
+      "bytes": 14171
+    },
+    {
+      "path": "sacdia-admin/src/lib/auth/cookies.ts",
+      "sha256": "f666c81d4afd9b5c47c1c3256b5e9c2446be6d2136a36264e9471daeb1a0bbb8",
+      "bytes": 403
+    },
+    {
+      "path": "sacdia-admin/src/app/api/auth/token/route.ts",
+      "sha256": "713e089e5ede833c1737d3962c38355f013459f11d427a4046007930ab7a981b",
+      "bytes": 1509
+    },
+    {
+      "path": "sacdia-admin/src/app/(dashboard)/layout.tsx",
+      "sha256": "3997f0994dc418dad7650a4589d4bda5a1553d568346d1d75ea5fcf44ae40078",
+      "bytes": 4077
+    },
+    {
+      "path": "sacdia-admin/src/app/api/evidence-review/pdf/route.ts",
+      "sha256": "724b87f1d3cfc2757b5eec40d16590bbafcb25828a8f17678e587c8716032b5d",
+      "bytes": 3781
+    },
+    {
+      "path": "sacdia-admin/src/proxy.ts",
+      "sha256": "1480302b5734d596afbb6ed66b434aae2a11a648aed1ca70a899a599be28f480",
+      "bytes": 1029
+    }
+  ]
+}

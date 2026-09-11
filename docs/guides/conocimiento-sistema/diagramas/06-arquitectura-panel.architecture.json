@@ -1,0 +1,219 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Panel · Next.js con acceso API dual",
+    "quality_profile": "showcase",
+    "viewBox": [
+      1380,
+      735
+    ]
+  },
+  "components": [
+    {
+      "id": "ui",
+      "type": "frontend",
+      "label": "Interfaz React",
+      "sublabel": "shadcn/ui · formularios · tablas",
+      "pos": [
+        26.2,
+        310
+      ],
+      "size": [
+        205.25,
+        78
+      ]
+    },
+    {
+      "id": "query",
+      "type": "frontend",
+      "label": "Consultas del cliente",
+      "sublabel": "TanStack Query · helpers de dominio",
+      "pos": [
+        336.27,
+        310
+      ],
+      "size": [
+        218.35,
+        78
+      ]
+    },
+    {
+      "id": "axios",
+      "type": "frontend",
+      "label": "Cliente Axios",
+      "sublabel": "Bearer en memoria del navegador",
+      "pos": [
+        676.9,
+        310
+      ],
+      "size": [
+        222.72,
+        78
+      ]
+    },
+    {
+      "id": "backend",
+      "type": "external",
+      "label": "Backend SACDIA",
+      "sublabel": "API REST · autorización final",
+      "pos": [
+        1100.51,
+        310
+      ],
+      "size": [
+        218.35,
+        78
+      ]
+    },
+    {
+      "id": "next",
+      "type": "backend",
+      "label": "Servidor Next.js",
+      "sublabel": "App Router · layouts · fetch",
+      "pos": [
+        336.27,
+        65
+      ],
+      "size": [
+        218.35,
+        78
+      ]
+    },
+    {
+      "id": "auth",
+      "type": "security",
+      "label": "Sesión y cookies",
+      "sublabel": "httpOnly · /api/auth/token",
+      "pos": [
+        676.9,
+        65
+      ],
+      "size": [
+        222.72,
+        78
+      ]
+    },
+    {
+      "id": "pdf",
+      "type": "backend",
+      "label": "Rutas de archivos",
+      "sublabel": "Proxy de PDFs autenticado",
+      "pos": [
+        676.9,
+        555
+      ],
+      "size": [
+        222.72,
+        78
+      ]
+    },
+    {
+      "id": "prefs",
+      "type": "frontend",
+      "label": "Preferencias e idioma",
+      "sublabel": "Zustand · next-intl · tema",
+      "pos": [
+        26.2,
+        555
+      ],
+      "size": [
+        218.35,
+        78
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "ui-query",
+      "from": "ui",
+      "to": "query"
+    },
+    {
+      "id": "query-axios",
+      "from": "query",
+      "to": "axios",
+      "label": "apiRequest"
+    },
+    {
+      "id": "axios-backend",
+      "from": "axios",
+      "to": "backend",
+      "label": "REST + JWT"
+    },
+    {
+      "id": "ui-next",
+      "from": "ui",
+      "to": "next",
+      "label": "Navegación / SSR"
+    },
+    {
+      "id": "next-auth",
+      "from": "next",
+      "to": "auth",
+      "label": "Sesión"
+    },
+    {
+      "id": "axios-auth",
+      "from": "axios",
+      "to": "auth",
+      "label": "Obtiene JWT"
+    },
+    {
+      "id": "next-backend",
+      "from": "next",
+      "to": "backend",
+      "label": "fetch + JWT",
+      "fromSide": "top",
+      "toSide": "top",
+      "via": [
+        [
+          445.44,
+          20
+        ],
+        [
+          1209.68,
+          20
+        ]
+      ]
+    },
+    {
+      "id": "ui-prefs",
+      "from": "ui",
+      "to": "prefs",
+      "label": "Contexto UI",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "ui-pdf",
+      "from": "ui",
+      "to": "pdf",
+      "label": "Solicita PDF"
+    },
+    {
+      "id": "pdf-backend",
+      "from": "pdf",
+      "to": "backend",
+      "label": "Detalle autorizado"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Dos caminos reales",
+      "items": [
+        "Navegador: Axios llama directamente al backend; Next entrega el JWT al mismo origen.",
+        "Servidor: apiRequest usa fetch y lee el token de cookies. No es un BFF exclusivo."
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Responsabilidades",
+      "items": [
+        "proxy.ts y layouts filtran navegación; el backend sigue siendo la barrera de seguridad.",
+        "Las rutas PDF son una excepción de proxy; preferencias no sustituyen estado del servidor."
+      ]
+    }
+  ]
+}

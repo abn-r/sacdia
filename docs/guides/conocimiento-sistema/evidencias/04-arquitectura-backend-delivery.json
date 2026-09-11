@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "deliver",
+  "type": "architecture",
+  "input": "/Users/abner/Documents/development/sacdia/docs/guides/conocimiento-sistema/diagramas/04-arquitectura-backend.architecture.json",
+  "output": "/Users/abner/Documents/development/sacdia/docs/guides/conocimiento-sistema/diagramas/04-arquitectura-backend.html",
+  "specification": {
+    "sha256": "ca35f6c0a6d49537827672c351d09b849a6d3e799bfd8a6683a10dd7c5368888",
+    "bytes": 4380
+  },
+  "artifact": {
+    "sha256": "e33cbe23c1fe6461b86667bf81299ed8b05b6121a9e6ce47e1f4f8a00dd4ca6f",
+    "bytes": 809328
+  },
+  "validation": {
+    "checksPassed": 9,
+    "checkCount": 9,
+    "compositionProfile": "showcase",
+    "compositionStatus": "pass",
+    "errors": 0,
+    "warnings": 0
+  }
+}
