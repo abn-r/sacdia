@@ -785,7 +785,7 @@ Los modelos sin `@@map` usan el nombre del modelo como nombre físico de tabla.
 
 | Operación | Tablas |
 |---|---|
-| **Reads** | `users` (findUnique), `enrollments` (findFirst), `users_honors` (findMany), `users_pr` (findUnique), `club_role_assignments` (findFirst x2), `class_section_progress` (count), `class_sections` (count), `activities` (findMany) |
+| **Reads** | `users` (findUnique con `users_pr`, `users_honors`, `enrollments` take 1, `club_role_assignments` activas), `activities` (findMany). El progreso de clase lo calcula `ClassRequirementEligibilityService.calculateForEnrollmentRecord` (sin re-fetch de enrollment). |
 | **Writes** | — Solo lectura |
 
 ---
