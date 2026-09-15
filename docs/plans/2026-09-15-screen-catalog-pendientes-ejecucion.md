@@ -112,15 +112,16 @@ Cómo saber el `kind` en cada action: mirar su firma (`scope`, `camporeeType`, `
 
 Registradas en `docs/audit/DECISIONS-PENDING.md`; el plan solo las lista para que no se pierdan.
 
-- Vencimientos de seguros (`GET /insurance/expiring`) es solo `admin`/`coordinator`: ¿deben verlo director-lf / pastor / roles de club? Si sí → abrir el GET (backend), no la UI.
-- Sucesión anual de director: la UI exige LF-only; el API acepta también `admin`/`super-admin`. ¿Formalizar LF-only en backend o aflojar la UI?
-- Ideales / tipos de club y años eclesiásticos: `admin` sin Crear/Eliminar porque el método exige `super-admin`. ¿Correcto o bajar a `admin`?
-- Coordinator sin `investiture:mark_invested` en seed: ¿debe poder marcar investido? Si sí → seed.
-- 15 pantallas sin clave en `nav.items` (título literal del sidebar en matriz/picker); lista en `screen-title.test.ts`. Agregar claves i18n cuando se toque esa zona.
+- Vencimientos de seguros (`GET /insurance/expiring`) → **HECHO 2026-09-15**: `admin`/`coordinator`; `director-lf`/`assistant-lf` entran por alias de coordinator (union/dia fuera). Recorte LF a su `local_field`. Pastor y roles CLUB fuera.
+- Sucesión anual de director → **HECHO 2026-09-15**: UI alineada al API. `clubs.succeed_director` = `director-lf` / `assistant-lf` / `admin` / `super-admin` (no `deputy-director`). Backend sin cambio.
+- Ideales / tipos de club y años eclesiásticos → **HECHO 2026-09-15**: Crear/Eliminar solo `super-admin`. PATCH de años sigue en admin.
+- Coordinator `investiture:mark_invested` → **HECHO 2026-09-15**: seed + migración para coordinator/zone/general.
+- `director-lf`/`assistant-lf` ≡ coordinator (investidura, SLA, tickets) → **HECHO 2026-09-15**: alias `coordinator` (no listing `director-lf` en el decorador).
+- 15 pantallas sin clave en `nav.items` → **HECHO 2026-09-15**: claves snake_case en `nav.items` (es/en/fr/pt-BR) + alias `clubs-evidence-folders-templates` → `annual_folders_templates`. Matriz/picker ya no caen al título literal del sidebar.
 
 ## Criterio de éxito global
 
-- `rg -n "hasPermission\(|hasAnyPermission\(" sacdia-admin/src/app sacdia-admin/src/components sacdia-admin/src/lib --glob '!*.test.*' --glob '!**/permission-utils.ts'` devuelve **0** líneas fuera de `permission-utils.ts` y de helpers documentados como "fuera del catálogo" (`confirm-union`, sucesión LF, `canViewAdministrativeCompletion`).
+- `rg -n "hasPermission\(|hasAnyPermission\(" sacdia-admin/src/app sacdia-admin/src/components sacdia-admin/src/lib --glob '!*.test.*' --glob '!**/permission-utils.ts'` devuelve **0** líneas fuera de `permission-utils.ts` y de helpers documentados como "fuera del catálogo" (`confirm-union`, `canViewAdministrativeCompletion`).
 - `rg -n "extractRoles\(" sacdia-admin/src/app --glob '*.tsx'` devuelve solo `investiture/pipeline` (variante de vista) y `users/new` (jerarquía).
 - Suite admin en verde; `screen-catalog.test.ts` sin allowlist nueva.
 - App: quick access gateado por `screenId`; test de paridad en verde en ambos repos.

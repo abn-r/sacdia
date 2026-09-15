@@ -332,9 +332,9 @@
 | PATCH | `/api/v1/admin/medicines/:medicineId` | JWT | Global: admin, super-admin; Permisos: catalogs:update | Update medicine | AdminReferenceService.updateMedicine() | `src/admin/admin-reference.controller.ts` |
 | DELETE | `/api/v1/admin/medicines/:medicineId` | JWT | Global: admin, super-admin; Permisos: catalogs:delete | Soft delete medicine | AdminReferenceService.deleteMedicine() | `src/admin/admin-reference.controller.ts` |
 | GET | `/api/v1/admin/ecclesiastical-years` | JWT | Global: admin, super-admin; Permisos: ecclesiastical_years:read | List ecclesiastical years for admin management | AdminReferenceService.listEcclesiasticalYears() | `src/admin/admin-reference.controller.ts` |
-| POST | `/api/v1/admin/ecclesiastical-years` | JWT | Global: admin, super-admin; Permisos: ecclesiastical_years:create | Create ecclesiastical year | AdminReferenceService.createEcclesiasticalYear() | `src/admin/admin-reference.controller.ts` |
+| POST | `/api/v1/admin/ecclesiastical-years` | JWT | Global: super-admin; Permisos: ecclesiastical_years:create | Create ecclesiastical year | AdminReferenceService.createEcclesiasticalYear() | `src/admin/admin-reference.controller.ts` |
 | PATCH | `/api/v1/admin/ecclesiastical-years/:yearId` | JWT | Global: admin, super-admin; Permisos: ecclesiastical_years:update | Update ecclesiastical year | AdminReferenceService.updateEcclesiasticalYear() | `src/admin/admin-reference.controller.ts` |
-| DELETE | `/api/v1/admin/ecclesiastical-years/:yearId` | JWT | Global: admin, super-admin; Permisos: ecclesiastical_years:delete | Soft delete ecclesiastical year | AdminReferenceService.deleteEcclesiasticalYear() | `src/admin/admin-reference.controller.ts` |
+| DELETE | `/api/v1/admin/ecclesiastical-years/:yearId` | JWT | Global: super-admin; Permisos: ecclesiastical_years:delete | Soft delete ecclesiastical year | AdminReferenceService.deleteEcclesiasticalYear() | `src/admin/admin-reference.controller.ts` |
 
 ### admin-users
 
@@ -352,7 +352,7 @@
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
-| GET | `/api/v1/admin/analytics/sla-dashboard` | JWT | Global: admin, coordinator | SLA Dashboard | AnalyticsService.getSlaDashboard() | `src/analytics/analytics.controller.ts` |
+| GET | `/api/v1/admin/analytics/sla-dashboard` | JWT | Global: admin, coordinator (alias: zone/general + director-lf/assistant-lf; LF recorta a secciones del campo) | SLA Dashboard | AnalyticsService.getSlaDashboard() | `src/analytics/analytics.controller.ts` |
 | GET | `/api/v1/admin/analytics/operations-dashboard` | JWT | Global: admin (alias: assistant-admin), super-admin, director-dia, assistant-dia, director-union, assistant-union, director-lf, assistant-lf | Dashboard operativo jerárquico con scope forzado en servidor | OperationsDashboardService.getDashboard() | `src/analytics/analytics.controller.ts` |
 | GET | `/api/v1/admin/analytics/jobs-overview` | JWT | Global: admin, super-admin | Overview de jobs y colas BullMQ (admin only) | JobsOverviewService.getOverview() | `src/analytics/analytics.controller.ts` |
 | POST | `/api/v1/admin/analytics/jobs/:queue/:jobId/retry` | JWT | Global: super-admin | Retry failed BullMQ job (super-admin only) | JobsOverviewService.retryFailedJob() | `src/analytics/analytics.controller.ts` |
@@ -1150,7 +1150,7 @@ Path base: `/api/v1/certifications/users/:userId/certification-enrollments/:enro
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
 | GET | `/api/v1/clubs/:clubId/sections/:sectionId/members/insurance` | JWT | Permisos: insurance:read | Listar seguros de miembros por sección | InsuranceService.listMembersInsurance() | `src/insurance/insurance.controller.ts` |
-| GET | `/api/v1/insurance/expiring` | JWT | Global: admin, coordinator; SkipPermissions | Listar seguros próximos a vencer | InsuranceService.getExpiringInsurances() | `src/insurance/insurance.controller.ts` |
+| GET | `/api/v1/insurance/expiring` | JWT | Global: admin, coordinator (alias: zone/general + director-lf/assistant-lf; LF recorta a local_field); SkipPermissions | Listar seguros próximos a vencer | InsuranceService.getExpiringInsurances() | `src/insurance/insurance.controller.ts` |
 | GET | `/api/v1/users/:memberId/insurance` | JWT | Permisos: insurance:read | Obtener seguro activo del miembro | InsuranceService.getMemberInsurance() | `src/insurance/insurance.controller.ts` |
 | POST | `/api/v1/users/:memberId/insurance` | JWT | Permisos: insurance:create | Crear seguro para un miembro (legacy directo) | InsuranceService.createInsurance() | `src/insurance/insurance.controller.ts` |
 | PATCH | `/api/v1/insurance/:insuranceId` | JWT | Permisos: insurance:update | Actualizar seguro | InsuranceService.updateInsurance() | `src/insurance/insurance.controller.ts` |
@@ -1663,9 +1663,9 @@ Read model de solo lectura. No fusiona folios ni muta `field_payment_orders`, `m
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
-| GET | `/api/v1/admin/support/reports` | JWT | Global: admin, coordinator | Listar reportes de soporte | SupportService.listReports() | `src/support/support-admin.controller.ts` |
-| GET | `/api/v1/admin/support/reports/:reportId` | JWT | Global: admin, coordinator | Obtener detalle de un reporte de soporte | SupportService.getReport() | `src/support/support-admin.controller.ts` |
-| PATCH | `/api/v1/admin/support/reports/:reportId/status` | JWT | Global: admin, coordinator | Actualizar estado de un reporte de soporte | SupportService.updateReportStatus() | `src/support/support-admin.controller.ts` |
+| GET | `/api/v1/admin/support/reports` | JWT | Global: admin, coordinator (alias: zone/general + director-lf/assistant-lf; LF recorta a local_field) | Listar reportes de soporte | SupportService.listReports() | `src/support/support-admin.controller.ts` |
+| GET | `/api/v1/admin/support/reports/:reportId` | JWT | Global: admin, coordinator (alias: zone/general + director-lf/assistant-lf; LF recorta a local_field) | Obtener detalle de un reporte de soporte | SupportService.getReport() | `src/support/support-admin.controller.ts` |
+| PATCH | `/api/v1/admin/support/reports/:reportId/status` | JWT | Global: admin, coordinator (alias: zone/general + director-lf/assistant-lf; LF recorta a local_field) | Actualizar estado de un reporte de soporte | SupportService.updateReportStatus() | `src/support/support-admin.controller.ts` |
 
 ### support
 

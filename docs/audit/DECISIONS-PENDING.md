@@ -2,7 +2,25 @@
 
 Generado: 2026-03-14
 Fuente: Reality Matrix + Canon verification
-**Estado: 1 ABIERTA (sucesión anual LF); el resto resuelto**
+**Estado: TODAS LAS DECISIONES RESUELTAS**
+
+---
+
+## ¿Crear/Eliminar ideales, tipos de club y años eclesiásticos queda en super-admin? (2026-09-15)
+
+**Estado: RESUELTA — sí, solo super-admin.** POST/DELETE de ideales y tipos ya exigían `@GlobalRoles('super-admin')`. Años eclesiásticos ahora igual (POST/DELETE). PATCH/update sigue en admin. El catálogo de pantallas oculta Crear/Eliminar a `admin`.
+
+---
+
+## ¿Sembrar `investiture:mark_invested` a coordinadores? (2026-09-15)
+
+**Estado: RESUELTA — sí.** Seed + migración `20260915210000_grant_investiture_mark_invested_coordinators` para `coordinator` / `zone-coordinator` / `general-coordinator`. El botón sigue exigiendo el permiso; sin grant no aparece.
+
+---
+
+## ¿director-lf / assistant-lf hacen todo lo de coordinator? (2026-09-15)
+
+**Estado: RESUELTA — sí.** `GLOBAL_ROLE_ALIASES.coordinator` incluye `director-lf` y `assistant-lf` (no union/dia). Gates `@GlobalRoles('admin','coordinator')` (investidura, SLA, tickets, vencimientos) los dejan pasar. Recorte: campo local (`local_field` / secciones del campo), no asignaciones de coordinador ni vista global de admin.
 
 ---
 
@@ -16,13 +34,9 @@ La app no comparte el módulo TS. Opción A (export JSON en el build admin → `
 
 ## ¿Formalizar en backend la regla LF-only de sucesión anual? (2026-09-15)
 
-**Estado: ABIERTA** — dueño: backend. No implementar desde el catálogo de pantallas.
+**Estado: RESUELTA — alinear UI al API.** Roles: `super-admin`, `admin`, `director-lf`, `assistant-lf`. No entra subdirector de club (`deputy-director`).
 
-Hoy el panel (`succeedClubSectionDirectorAction` en `sacdia-admin/src/lib/clubs/actions.ts`) oculta la acción a quien no sea `director-lf` o `assistant-lf`. El API `POST /clubs/:clubId/sections/:sectionId/director-succession` exige `club_roles:assign` + `club_roles:revoke` y scope de club (`clubs.controller.ts:419-421`). El servicio (`assertCanSucceedSectionDirector`, `clubs.service.ts:1690-1700`) acepta también `super-admin` y `admin` + `canManageClub`.
-
-La UI es más estricta que el API. El catálogo no la modela: `evaluateAccess` hace bypass de super-admin y mostraría un botón que la UI actual oculta.
-
-Pregunta: ¿restringir el servicio a LF-only (alineado a la UI) o mostrar el botón también a admin/super-admin (alineado al API)?
+El servicio ya comparaba esa lista literal (`clubs.service.ts:1694-1700`) más `canManageClub`. El panel ahora usa `canCapability(..., "clubs", "succeed_director")`: `club_roles:assign` + `club_roles:revoke` (`requireAll`) + `exactRoles` sobre la misma lista. El API no cambió.
 
 ---
 

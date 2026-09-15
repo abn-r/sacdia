@@ -51,7 +51,7 @@ Endpoint único:
 
 - `GET /api/v1/admin/analytics/sla-dashboard`;
 - guards: `JwtAuthGuard`, `GlobalRolesGuard`;
-- roles permitidos: `admin`, `coordinator`;
+- roles permitidos: `admin`, `coordinator` (alias: zone/general + `director-lf`/`assistant-lf`);
 - query params: ninguno (el scope se deriva del usuario autenticado);
 - response shape: `{ status: "ok", data: SlaDashboardDto }`.
 
@@ -70,9 +70,10 @@ El DTO raíz (`SlaDashboardDto`) lleva:
 
 ## 5. Política de scope
 
-- **Coordinador**: las métricas se filtran por `local_field_id` de su asignación activa. No ve datos de otros campos locales;
+- **Coordinador**: las métricas se filtran por las secciones asignadas (`coordinator_assignments`).
+- **Director de campo (`director-lf` / `assistant-lf`)**: secciones activas de clubes de su `local_field`.
 - **Admin**: ve vista global (agregada sobre todos los campos locales);
-- **Otros roles**: no admitidos; `GlobalRolesGuard` bloquea.
+- **Otros roles** (p. ej. union/dia sin alias): `GlobalRolesGuard` bloquea.
 
 El scope se deriva del JWT + asignaciones del usuario (`club_role_assignments` / global roles), no de query params. Esto evita que un coordinador pueda solicitar datos de otro campo manipulando la URL.
 
@@ -166,4 +167,4 @@ No existe vista SLA en la app móvil (Flutter). Si se requiere en el futuro, cor
 - el cache in-memory con TTL 60s es aceptable; no debe migrarse a Redis sin evaluar beneficio real;
 - las ventanas temporales (30d overdue, 90d approval rate, 12w throughput) son canon — cambios requieren actualizar este documento y `docs/features/sla-dashboard.md`;
 - ninguna métrica puede calcularse a partir de una tabla `sla_*` dedicada; el subsistema permanece como lector puro de datos operacionales existentes;
-- roles admitidos: solo `admin` y `coordinator`; cualquier otro acceso debe rechazarse en el guard.
+- roles admitidos: `admin` y `coordinator` (LF entra por alias; union/dia no).
