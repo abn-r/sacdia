@@ -2,7 +2,27 @@
 
 Generado: 2026-03-14
 Fuente: Reality Matrix + Canon verification
-**Estado: TODAS LAS DECISIONES RESUELTAS**
+**Estado: 1 ABIERTA (sucesión anual LF); el resto resuelto**
+
+---
+
+## ¿Catálogo de pantallas de la app: JSON generado o registro Dart hermano? (2026-09-15)
+
+**Estado: RESUELTA — opción B (registro Dart hermano).** Primer corte del bloque 4.
+
+La app no comparte el módulo TS. Opción A (export JSON en el build admin → `assets/screen-catalog.json`) añade un paso cross-repo. Opción B duplica `evaluateAccess` + alias + las pantallas `surfaces` incluye `app`, con fixture `sacdia-app/test/fixtures/screen-catalog.snapshot.json` que debe coincidir con `dumpAppCatalog()` del admin. Pasar a A solo si la lista de pantallas compartidas crece.
+
+---
+
+## ¿Formalizar en backend la regla LF-only de sucesión anual? (2026-09-15)
+
+**Estado: ABIERTA** — dueño: backend. No implementar desde el catálogo de pantallas.
+
+Hoy el panel (`succeedClubSectionDirectorAction` en `sacdia-admin/src/lib/clubs/actions.ts`) oculta la acción a quien no sea `director-lf` o `assistant-lf`. El API `POST /clubs/:clubId/sections/:sectionId/director-succession` exige `club_roles:assign` + `club_roles:revoke` y scope de club (`clubs.controller.ts:419-421`). El servicio (`assertCanSucceedSectionDirector`, `clubs.service.ts:1690-1700`) acepta también `super-admin` y `admin` + `canManageClub`.
+
+La UI es más estricta que el API. El catálogo no la modela: `evaluateAccess` hace bypass de super-admin y mostraría un botón que la UI actual oculta.
+
+Pregunta: ¿restringir el servicio a LF-only (alineado a la UI) o mostrar el botón también a admin/super-admin (alineado al API)?
 
 ---
 

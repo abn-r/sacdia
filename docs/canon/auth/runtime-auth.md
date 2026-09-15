@@ -307,7 +307,8 @@ Estos puntos NO deben maquillarse como cerrados:
 
 ### `sacdia-admin`
 - usa `authorization.effective.permissions` para gating de páginas, acciones y mutaciones;
-- el layout del dashboard revalida el mismo mapa `NAV_ITEM_ACCESS` que el sidebar; una URL directa sin permiso no carga la página;
+- el layout del dashboard revalida el mismo screen catalog (`viewAny` por pantalla, rutas de capability para subrutas) que el sidebar; una URL directa sin permiso no carga la página;
+- el `viewAny` de cada hoja del menú replica el `@RequirePermissions` / `@GlobalRoles` del GET o acción principal; no se OR-ean permisos de otro recurso;
 - mutar catálogo o matriz RBAC queda en `super-admin` (UI y API);
 - `assistant-admin` entra al panel (`ALLOWED_ADMIN_ROLES`); el backend aliasa `admin ↔ assistant-admin`;
 - usa `authorization.grants` (roles globales y asignaciones) cuando el backend combina `@GlobalRoles` con `@RequirePermissions`; un permiso como `catalogs:read` no abre editores admin que además exigen rol `admin`/`super-admin`;

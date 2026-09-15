@@ -217,7 +217,8 @@ Regla canónica:
 - usa `authorization.effective.permissions` para habilitar o bloquear acciones;
 - usa `authorization.grants` para mostrar roles, asignaciones y selectores de contexto;
 - si el backend combina `@GlobalRoles` con un permiso amplio (`catalogs:read`), el panel no ofrece esa pantalla solo por el permiso;
-- el layout del dashboard vuelve a aplicar el mapa `NAV_ITEM_ACCESS`; una URL directa sin permiso no carga la pagina;
+- el layout del dashboard vuelve a aplicar el `viewAny` del screen catalog (`sacdia-admin/src/lib/auth/screen-catalog/`, antes `NAV_ITEM_ACCESS`); una URL directa sin permiso no carga la pagina;
+- el `viewAny` de cada hoja replica el permiso (y rol global) del GET o acción principal; no se OR-ean permisos de otro recurso;
 - mutar catalogo o matriz RBAC queda en `super-admin` (UI y API);
 - no recompone permisos con joins locales ni heurísticas propias.
 

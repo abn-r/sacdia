@@ -7,7 +7,7 @@
 > La tabla refleja los decoradores HTTP efectivos en controllers NestJS; DTOs, ejemplos y errores finos viven en Swagger/runtime y docs de feature cuando aplique.
 
 **Estado**: ACTIVE
-**Actualizado**: 2026-09-09
+**Actualizado**: 2026-09-15
 **Total endpoints**: 822 decoradores HTTP en 103 controllers (certificaciones configurables, insurance capacity model, field-payment-orders sincronizados manualmente; camporee-orders + camporee-supplies + payment-obligations desde worktree `feat/camporee-supplies` — no están en Neon; +4 `director-designation` GET/POST/PATCH/DELETE el 2026-09-09; +3 `annual-membership` GET/POST/POST el 2026-09-08)
 **Métodos**: GET 320 · POST 242 · PATCH 117 · DELETE 89 · PUT 12
 **Auth detectada**: JWT 760 · Public 12
@@ -340,9 +340,9 @@
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
-| GET | `/api/v1/admin/users` | JWT | Global: admin, super-admin; Permisos: users:read | Listar usuarios administrativos con alcance por rol (ALL/UNION/LOCAL_FIELD) | AdminUsersService.listUsers() | `src/admin/admin-users.controller.ts` |
+| GET | `/api/v1/admin/users` | JWT | Global: admin, super-admin, director-lf, assistant-lf, director-union, assistant-union, director-dia, assistant-dia (USER_MANAGEMENT_ROLES, pisa la cerca de clase); Permisos: users:read | Listar usuarios administrativos con alcance por rol (ALL/DIVISION/UNION/LOCAL_FIELD) | AdminUsersService.listUsers() | `src/admin/admin-users.controller.ts` |
 | GET | `/api/v1/admin/users/bulk-template` | JWT | Global: admin, super-admin; Permisos: users:bulk_create; Global: admin, super-admin, director-lf, assistant-lf, director-union, assistant-union, director-dia, assistant-dia | Descarga plantilla .xlsx para carga masiva de usuarios | AdminUsersService.getBulkTemplateBuffer() | `src/admin/admin-users.controller.ts` |
-| GET | `/api/v1/admin/users/:userId` | JWT | Global: admin, super-admin; Permisos: users:read_detail | Obtener detalle de usuario validando alcance por rol del actor | AdminUsersService.getUserById() | `src/admin/admin-users.controller.ts` |
+| GET | `/api/v1/admin/users/:userId` | JWT | Global: admin, super-admin, director-lf, assistant-lf, director-union, assistant-union, director-dia, assistant-dia (USER_MANAGEMENT_ROLES, pisa la cerca de clase); Permisos: users:read_detail | Obtener detalle de usuario validando alcance por rol del actor | AdminUsersService.getUserById() | `src/admin/admin-users.controller.ts` |
 | PATCH | `/api/v1/admin/users/:userId/approval` | JWT | Global: admin, super-admin; Permisos: users:update_admin | Approve or reject a user | AdminUsersService.updateUserApproval() | `src/admin/admin-users.controller.ts` |
 | PATCH | `/api/v1/admin/users/:userId` | JWT | Global: admin, super-admin; Permisos: users:update_admin | Update user administrative fields | AdminUsersService.updateUser() | `src/admin/admin-users.controller.ts` |
 | POST | `/api/v1/admin/users` | JWT | Global: admin, super-admin; Permisos: users:create; Global: admin, super-admin, director-lf, assistant-lf, director-union, assistant-union, director-dia, assistant-dia | Crear usuario manualmente (admin-iniciado, con invite por email) | AdminUsersService.createAdminUser() | `src/admin/admin-users.controller.ts` |

@@ -842,7 +842,8 @@ Checklist final de consistencia para frontend:
 
 - el alcance territorial operativo es rol-primero (`authorization.grants.global_roles` antes de `effective.scope.global.local_field`); un director de unión con campo de casa no se bloquea a un solo campo. El panel usa `listLocalFieldsForTerritory` y no `GET /admin/local-fields` para filtros de clubes, inventario de materiales, pagos y entrega. `GET /clubs` recorta si el JWT es territorial. `GET /catalogs` geográfico (países, uniones, campos, distritos, iglesias) recorta al país del actor territorial; sin rol territorial (post-registro) el directorio sigue completo. Listar clubs de un campo de otro territorio sigue 403. `GET /materials/config/all` recorta al territorio;
 - `sacdia-admin` debe seguir usando `authorization.effective.permissions` para gating operativo y `authorization.grants` para contexto y detalle;
-- el layout del dashboard revalida el mapa `NAV_ITEM_ACCESS`; una URL directa sin permiso no debe cargar la pagina;
+- el layout del dashboard revalida el screen catalog (`sacdia-admin/src/lib/auth/screen-catalog/`); una URL directa sin permiso no debe cargar la pagina;
+- el `viewAny` de cada hoja del sidebar es el permiso (y `@GlobalRoles` si aplica) del GET o acción principal de esa pantalla, no un OR de claves parientes; hojas sin mapa se ocultan;
 - URL de dashboard no mapeada (ni sidebar ni aliases de `require-page-access`) se deniega; aliases cubren materials/request, materials/config, rbac/user-permissions, coming-soon, v2 y hubs de configuration/annual-folders;
 - mutar catalogo o matriz RBAC queda en `super-admin`;
 - si un endpoint admin combina `@GlobalRoles('admin', 'super-admin')` con un permiso amplio (`catalogs:read`, `users:read`, `countries:read`), el panel no debe mostrar esa pantalla ni llamar al API solo porque el permiso existe; el rol global también tiene que coincidir (`assistant-admin` entra al panel por `ALLOWED_ADMIN_ROLES` y el alias `admin ↔ assistant-admin` de `GlobalRolesGuard`);
@@ -1097,6 +1098,7 @@ No ofrezcas una pantalla admin solo porque el usuario tiene un permiso amplio. S
 - no llamar al API admin cuando el rol global no coincide;
 - mostrar un estado de sin permiso si la URL se abre de forma directa.
 - denegar (fail-closed) cualquier ruta `/dashboard/*` que no este en el sidebar ni en aliases explicitos.
+- usar como `viewAny` el permiso de la tarea principal de la página (lista `:read`, bandeja/config el verbo de esa acción). No OR de recursos distintos. Pestañas de un mismo hub se ocultan si el actor no puede cargar ese tab.
 
 `catalogs:read` es permiso de referencia (dropdowns / catálogos públicos), no autorización del editor `/dashboard/catalogs/*`.
 
