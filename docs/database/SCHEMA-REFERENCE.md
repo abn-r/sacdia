@@ -58,7 +58,7 @@ Referencia humana concisa del schema Prisma vigente.
 
 ### `club_year_transitions`
 
-- Ledger único `(club_id, ecclesiastical_year_id)` del corte anual por club (`pending` / `in_progress` / `completed` / `failed`). Escritura de aplicación restringida a `YearCutService`. No sustituye el lock Redis del cron. Migración `20260909120000_annual_membership_cycle` local, no declarada aplicada a Neon.
+- Ledger único `(club_id, ecclesiastical_year_id)` del corte anual por club (`pending` / `in_progress` / `completed` / `failed`). Escritura de aplicación restringida a `YearCutService`. No sustituye el lock Redis del cron. Migración `20260909120000_annual_membership_cycle` aplicada a Neon development (2026-09-11).
 
 ### `class_counselor_assignments`
 
@@ -652,9 +652,9 @@ Define el presupuesto de puntos por componente dentro de un eje anual:
 
 ## Migraciones recientes
 
-- `20260909130000_director_succession_open_unique` - único parcial `uniq_director_succession_open_section_year` (planes `scheduled`/`activated`/`blocked`). SQL escrito, no aplicado a Neon.
-- `20260909120000_annual_membership_cycle` - `outgoing_assignment_id` nullable, `club_year_transitions`, único parcial member anual. SQL escrito, no aplicado a Neon.
-- `20260908180000_director_year_slots` - índice único parcial `uniq_cra_director_status_section_year` (rol director CLUB, `active`+`designated` por sección+año).
+- `20260909130000_director_succession_open_unique` - único parcial `uniq_director_succession_open_section_year` (planes `scheduled`/`activated`/`blocked`). Aplicada a Neon development (2026-09-11).
+- `20260909120000_annual_membership_cycle` - `outgoing_assignment_id` nullable, `club_year_transitions`, único parcial member anual. Aplicada a Neon development (2026-09-11). Preflight: 0 grupos member duplicados; 2 CRA director test de `director-club@sacdia.com` cerradas (`ended`) antes de `20260908180000`.
+- `20260908180000_director_year_slots` - índice único parcial `uniq_cra_director_status_section_year` (rol director CLUB, `active`+`designated` por sección+año). Aplicada a Neon development (2026-09-11).
 - `20260826120000_camporee_supplies` - crea enums/tablas de insumos de sección, unique parcial plan por sección+camporee, y añade `supply_edit_cutoff_local_time` a `local_camporees` y `union_camporees`. Existe en `feat/camporee-supplies` (worktree `/private/tmp/sacdia-backend-camporee-orders`); **no ejecutada ni verificada contra Neon**.
 - `20260824190000_camporee_orders` - crea enums/tablas de pedidos de mercancía y añade `orders_enabled`/`orders_opens_at`/`orders_deadline` a `local_camporees` y `union_camporees`. Existe en `feat/camporee-orders` (worktree); **no ejecutada ni verificada contra Neon**.
 - `20260710130000_admin_auth_sessions` - creada en la rama backend para metadata administrativa 1:1 sobre `sessions`, assurance, expiración absoluta y revocación; despliegue no verificado.

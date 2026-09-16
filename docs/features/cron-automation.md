@@ -177,7 +177,7 @@ Varios jobs están gobernados por `system_config` o feature flags (ver §6) para
 - **Idempotencia**: ledger `club_year_transitions` único `(club_id, ecclesiastical_year_id)`; si `status=completed` el club se omite. Reintento con `in_progress`/fallo relee candidatos bajo lock y reutiliza `ensureNotEnrolled`.
 - **Retorno**: `{ ended, activated, returnedNotEnrolled, usersInvalidated }`. `itemsProcessed` del cron = ended + activated + returnedNotEnrolled. Ya no existe `gmMembersCreated` ni `ghostsMarked`.
 - **Condiciones skip**: lock Redis no adquirido (`trackSkipped`); ningún club candidato (log + return temprano, sin tx); transición del club ya `completed`.
-- **Migraciones**: `20260909120000_annual_membership_cycle` (ledger + unique member) y relacionadas de planes; SQL local, no declarar aplicado a Neon.
+- **Migraciones**: `20260908180000_director_year_slots`, `20260909120000_annual_membership_cycle` (ledger + unique member) y `20260909130000_director_succession_open_unique` aplicadas a Neon development (2026-09-11).
 
 ## Política común canonizada
 
