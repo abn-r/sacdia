@@ -6,6 +6,12 @@ Fuente: Reality Matrix + Canon verification
 
 ---
 
+## D02 salto formativo AV→CQ / CQ→GM (2026-09-16)
+
+**Estado: RESUELTA — salto cerrado; GM multianual sigue abierto.** Spec [2026-09-16-p0-d02-cierre-design.md](../superpowers/specs/2026-09-16-p0-d02-cierre-design.md). R13–R14: cursar la última clase del tipo origen basta; edad al inicio del año destino; inscripción automática en year-cut y manual en `annual-continuations`. R05 exceptuado solo para ese salto. R04 (directivo que vuelve a GM) no es este camino. D01 sigue 403. Clases GM con `max_duration_years > 1` no se habilitan aquí.
+
+---
+
 ## ¿Crear/Eliminar ideales, tipos de club y años eclesiásticos queda en super-admin? (2026-09-15)
 
 **Estado: RESUELTA — sí, solo super-admin.** POST/DELETE de ideales y tipos ya exigían `@GlobalRoles('super-admin')`. Años eclesiásticos ahora igual (POST/DELETE). PATCH/update sigue en admin. El catálogo de pantallas oculta Crear/Eliminar a `admin`.

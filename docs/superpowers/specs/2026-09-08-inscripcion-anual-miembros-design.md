@@ -6,6 +6,8 @@
 **Alcance**: backend, app y consumo administrativo; sin pagos ni rediseño visual.  
 **Plan ejecutable**: [2026-09-08-inscripcion-anual-miembros.md](../plans/2026-09-08-inscripcion-anual-miembros.md)
 
+> **Enmienda 2026-09-16:** el salto formativo AV→CQ / CQ→GM (D02) y las reglas R13–R20 viven en [2026-09-16-p0-d02-cierre-design.md](2026-09-16-p0-d02-cierre-design.md). R05 queda exceptuado **solo** para ese salto (el cron puede inscribirlo). R01–R12 siguen. Clases GM con `max_duration_years > 1` siguen abiertas. D01 (`annual-enroll` 403) no cambia.
+
 > Esta revisión sustituye la versión que inscribía automáticamente al exdirectivo al regresar a GM. El usuario aclaró dos reglas: vuelve a **no inscritos** y **la directiva realiza la inscripción anual**. No volver a implementar ni probar el comportamiento anterior.
 
 ## 1. Fuentes y precedencia
