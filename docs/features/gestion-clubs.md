@@ -22,14 +22,14 @@ La asignacion de un consejero/secretario a una clase progresiva concreta vive en
 - **Guards**: JwtAuthGuard, PermissionsGuard, ClubRolesGuard
 - **14 endpoints**:
   - `GET /api/v1/clubs` — Listar clubs
-  - `POST /api/v1/clubs` — Crear club y, en la misma transaccion, una fila de `club_sections` por cada `club_types` activo. El body exige `enabled_club_type_ids` (minimo 1) para marcar cuales quedan `active=true`; el resto se crea inactivo.
+  - `POST /api/v1/clubs` — Crear club y, en la misma transaccion, una fila de `club_sections` por cada `club_types` activo. Aventureros y Conquistadores son opcionales via `enabled_club_type_ids`. Guías Mayores (detectada por name/slug/code del catalogo, nunca por `club_type_id` numerico) queda `active=true` siempre: si se omite, el backend la inyecta. Array vacio es valido si el catalogo tiene GM; si no hay fila GM → `400 CLUB_SECTION_TYPES_REQUIRED`. Catalogo vacio o id inexistente → `400 CLUB_TYPE_NOT_FOUND`. No se inventa un id GM. El resto de tipos no enviados se crea inactivo.
   - `GET /api/v1/clubs/:clubId` — Obtener club por ID
   - `PATCH /api/v1/clubs/:clubId` — Actualizar ficha del club (roles: director, deputy-director, secretary, secretary-treasurer; permiso `clubs:update`)
   - `DELETE /api/v1/clubs/:clubId` — Desactivar club (roles: director)
   - `GET /api/v1/clubs/:clubId/sections` — Listar secciones (por defecto solo `active=true`; `?includeInactive=true` para gestion de director/admin). Sin columna `name`; el tipo viene en `club_types`.
   - `GET /api/v1/clubs/:clubId/sections/:sectionId` — Obtener seccion por ID
   - `POST /api/v1/clubs/:clubId/sections` — Camino residual para clubs pre-migracion si falta el tipo; 409 si el tipo ya existe. No acepta nombre propio.
-  - `PATCH /api/v1/clubs/:clubId/sections/:sectionId` — Actualizar seccion; `active` es el unico switch de “este club opera esa seccion” (roles: director, deputy-director, secretary, secretary-treasurer)
+  - `PATCH /api/v1/clubs/:clubId/sections/:sectionId` — Actualizar seccion; `active` es el unico switch de “este club opera esa seccion” para Aventureros y Conquistadores (roles: director, deputy-director, secretary, secretary-treasurer). Guías Mayores no se puede apagar: `400 CLUB_SECTION_MASTER_GUIDES_REQUIRED`. `active=true` en una GM inactiva (legado) esta permitido. `fee`, `souls_target` y meeting no se bloquean. El admin tambien bloquea el toggle en UI.
   - `DELETE /api/v1/clubs/:clubId/sections/:sectionId` — Eliminar seccion (roles: director)
   - `GET /api/v1/clubs/:clubId/sections/:sectionId/members` — Listar miembros de la seccion con rol y clase anual activa (`current_class`) resuelta desde `enrollments`
   - `POST /api/v1/clubs/:clubId/sections/:sectionId/roles` — Asignar rol a miembro (roles: director, subdirector, secretary)
@@ -50,8 +50,9 @@ La asignacion de un consejero/secretario a una clase progresiva concreta vive en
 ### Admin
 - **3 paginas funcionales**: clubs list, clubs/new, clubs/[id]
 - CRUD completo de clubs
-- Creacion de club con seleccion encadenada Campo Local > Distrito > Iglesia y checkboxes para habilitar tipos (Aventureros, Conquistadores, Guias Mayores). No hay input de nombre de seccion.
-- Gestion de secciones desde el detalle del club: siempre las 3 cards del catalogo, con badge activo/inactivo y toggle `active`. No hay formulario de alta con nombre.
+- Alta manual (`/dashboard/clubs/new`) e import masivo (`/dashboard/clubs/import`): el panel exige `clubs:create` (`canCreateClubs` + capabilities `clubs.create` / `clubs.bulk_create`). Seed: `admin`, `super-admin` y `assistant-admin` (wildcard de no-delete). `director-lf` / `assistant-lf` listan y gestionan clubs de su territorio; no crean. El API `POST /clubs` no tiene bypass de rol.
+- Creacion de club con seleccion encadenada Campo Local > Distrito > Iglesia y checkboxes para habilitar tipos. Aventureros y Conquistadores son opcionales. Guías Mayores llega marcada, bloqueada y se envia siempre en `enabled_club_type_ids` (checkbox deshabilitado + hidden; el payload también la inyecta por nombre/slug/code del catalogo, no por id numerico). GM sola cumple el minimo de una seccion. No hay input de nombre de seccion. Si el actor es `director-lf` / `assistant-lf` (territorio `local_field`) el campo local llega preseleccionado y bloqueado.
+- Gestion de secciones desde el detalle del club: KPI y hero cuentan solo `club_sections.active=true`. La pestaña Secciones muestra los slots del catalogo (`GET /catalogs/club-types`, no `/admin/club-types`) con badge activo/inactivo. Aventureros y Conquistadores se pueden encender o apagar; Guías Mayores activa no se puede desactivar (switch bloqueado + la action admin rechaza `active=false`). Si el catalogo no llega, deriva los tipos de las filas existentes. No hay formulario de alta con nombre.
 - Gestion de unidades por club/seccion, enviando `club_section_id` al backend
 - Listado de miembros por seccion
 - Perfil de miembro desde el listado de seccion: actores con lectura de miembros en su seccion activa pueden abrir el perfil basico, clases y honores si el usuario tiene asignacion activa o pendiente en esa misma seccion
@@ -85,7 +86,7 @@ El listado de miembros no debe inferir "Sin clase" desde la ausencia de datos en
 ## Requisitos funcionales
 
 1. Debe ser posible crear clubs asociados a una iglesia
-2. Al crear un club se generan siempre las filas de `club_types` activos (hoy Aventureros, Conquistadores, Guias Mayores). Los checkboxes solo marcan `club_sections.active`; al menos un tipo debe quedar habilitado.
+2. Al crear un club se generan siempre las filas de `club_types` activos (hoy Aventureros, Conquistadores, Guias Mayores). Los checkboxes de Aventureros y Conquistadores marcan `club_sections.active`. Guías Mayores queda `active=true` aunque no tenga director y aunque el actor no la marque. Al menos un tipo debe quedar habilitado; GM sola basta.
 3. La constraint unique `(main_club_id, club_type_id)` impide duplicar secciones del mismo tipo
 4. Los miembros se vinculan a secciones mediante asignaciones de rol anuales
 5. Los roles de club determinan los permisos operativos (quien puede crear actividades, gestionar finanzas, etc.)
@@ -102,7 +103,8 @@ El listado de miembros no debe inferir "Sin clase" desde la ausencia de datos en
 
 ## Decisiones de diseno
 
-- **Club como identidad, seccion como slot tipado**: El club (`clubs.name`) es la identidad visible. Las secciones no tienen nombre propio; la etiqueta canonica es `{clubs.name} · {club_types.name}` (ej. `Panteras · Conquistadores`). Unirse, post-registro, camporee y QR solo usan secciones `active=true`. Directores y admin ven las tres para encender o apagar.
+- **Club como identidad, seccion como slot tipado**: El club (`clubs.name`) es la identidad visible. Las secciones no tienen nombre propio; la etiqueta canonica es `{clubs.name} · {club_types.name}` (ej. `Panteras · Conquistadores`). Unirse, post-registro, camporee y QR solo usan secciones `active=true`. Aventureros y Conquistadores se pueden apagar; Guías Mayores permanece activa en todo club.
+- **Guías Mayores siempre activa**: Runtime: cada club opera una seccion GM `active=true` desde el alta (`POST /clubs` inyecta el tipo por name/slug/code si se omite). No se puede desactivar (`PATCH .../sections/:sectionId` con `active=false` → `400 CLUB_SECTION_MASTER_GUIDES_REQUIRED`). No exige director. Quien no se inscriba en GM simplemente no participa de las actividades de asociacion de ese tipo. Crecimiento: oficiales se autoinscriben por la app (post-registro 16+) en GM de ese club como `member pending` y despues reciben cargos de AV/CQ via `assignRole`. El admin identifica GM por nombre/slug/code del catalogo (`Guías Mayores`, `Guias Mayores`, `Master Guides`, `master_guides`, `master_guilds`), no por `club_type_id` numerico. El panel ya bloquea el checkbox/switch; el API es la fuente de verdad.
 - **Consolidacion de secciones**: Las tres tablas originales (`club_adventurers`, `club_pathfinders`, `club_master_guilds`) se consolidaron en `club_sections` con un `club_type_id` discriminador (Decision 10)
 - **Roles anuales**: Las asignaciones de rol tienen `ecclesiastical_year_id`, permitiendo que un miembro cambie de rol entre anos sin perder historico
 - **Asignacion inicial de director**: para una seccion sin director operativo del año vigente, el Admin usa `POST /clubs/:clubId/sections/:sectionId/director-assignment`, que crea una asignacion `director` `status=active` para el usuario y **año eclesiástico vigente**. Un year distinto del vigente → 400 `CLUB_DIRECTOR_DESIGNATION_YEAR_INVALID`. Si ya existe director operativo de ese año, el backend rechaza el alta.
