@@ -57,7 +57,7 @@ Representación técnica propuesta: una fila `club_role_assignments`, rol `membe
 - Nunca cambiar la sección de una asignación histórica para simular el retorno.
 - Conservar el historial de participación pasada aunque el usuario no continúe.
 - No usar indiscriminadamente «última asignación» como pertenencia base: puede ser un cargo externo, una solicitud rechazada o un club abandonado.
-- Resolver la base con membresía válida conocida y movimientos aceptados; en el caso confirmado de retorno AV/CQ a GM, usar GM del mismo club. Investidura GM-01 y vínculo GM válido son evidencias, no permiso para inventar un club.
+- Resolver la base con membresía válida conocida y movimientos aceptados; en el caso confirmado de retorno AV/CQ a GM, usar GM del mismo club. El cargo administrativo que termina (director, subdirector, secretario, tesorero o secretario-tesorero) basta para ese retorno: no se exige investidura GM-01 ni una asignación previa en la sección GM. Si esa sección no está activa, no se inventa el vínculo.
 - Si no se puede resolver una sección base única y habilitada, registrar incidencia administrativa. No crear un vínculo arbitrario ni dar acceso como fallback.
 
 ### 3.3 Precedencia por usuario y sección

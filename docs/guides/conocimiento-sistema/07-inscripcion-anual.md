@@ -118,9 +118,13 @@ Si la política o el writer fallan, el `member` no queda activado parcialmente.
   Continuidad en el mismo tipo: siguiente `display_order`. El salto formativo
   AV→CQ / CQ→GM (R13–R14) no se infiere solo por edad: exige última clase
   cursada del origen, edad mínima al 1 de enero destino y sección destino activa.
-- **Guías Mayores:** el corte puede retornar directivos de AV/CQ a GM como
-  `member inactive` aun sin CRA previo de GM. La inscripción se bloquea si falta
-  investidura GM requerida o si no está definida la siguiente clase.
+- **Guías Mayores:** al cerrar el año, director, subdirector, secretario,
+  tesorero y secretario-tesorero de Aventureros o Conquistadores regresan a la
+  sección activa de Guías Mayores del mismo club como `member inactive`. No se
+  exige investidura ni un cargo previo en esa sección, y no se abre clase por
+  el regreso. Si esa sección no está activa, no se inventa el vínculo. La
+  inscripción de clase se bloquea aparte si falta una investidura GM requerida
+  o si no está definida la siguiente clase.
 - **Director nuevo/viejo:** el viejo termina en el año saliente; el sucesor
   programado se crea como director operativo del nuevo año y no como `member`.
   Si el sucesor ya es director activo en otra sección, eso no lo inscribe en la
