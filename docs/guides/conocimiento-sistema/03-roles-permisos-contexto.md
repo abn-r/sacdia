@@ -2,6 +2,10 @@
 
 **Estado**: DRAFT · **Revisión documental**: 2026-09-10
 
+**Continuación 2026-09-14:** consultar la [matriz contrastada con código](05-matriz-roles-verificada.md),
+el [ingreso inicial](06-ingreso-inicial.md) y la [inscripción anual](07-inscripcion-anual.md).
+Este capítulo conserva el contexto documental del corte anterior.
+
 Este capítulo explica el modelo documentado de autorización. No es todavía un
 catálogo exhaustivo de roles configurados ni una auditoría de permisos efectivos.
 

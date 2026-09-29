@@ -71,6 +71,7 @@ Las categorias financieras son un catalogo compartido que permite clasificar los
 - **Resumen acumulado por ano eclesiastico**: El endpoint `summary` con `year` + `month` calcula el saldo arrastrado del ano eclesiastico hasta el mes seleccionado; los meses cerrados usan el snapshot de `finance_period_closings` y los meses abiertos se calculan desde movimientos activos
 - **Doble superficie de lectura**: `GET /clubs/:clubId/finances` resuelve la vista mensual/anual del dashboard y `GET /clubs/:clubId/finances/transactions` cubre busqueda, filtros avanzados y paginacion server-side
 - **Filtrado temporal**: Los filtros por ano/mes se aplican a nivel de query, no como entidades separadas
+- **Ranking anual no usa movimientos**: `finance_compliance` puntúa meses con `finance_period_closings` cerrados a tiempo (cron UTC día 1, 00:00). Ingresos/egresos en `finances` no suman puntos por sí solos.
 
 ## Gaps y pendientes
 

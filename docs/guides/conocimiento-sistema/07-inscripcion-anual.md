@@ -98,12 +98,12 @@ El resultado conserva la sección de origen y no habilita cruce de tipo.
 
 `ClassEnrollmentPolicyService` en modo `annual` omite la investidura de la clase
 predecesora inmediata del mismo tipo, pero mantiene prerrequisitos independientes
-y `requires_invested_gm`. Una clase con `max_duration_years > 1`, catálogo vacío,
-trayectoria agotada o clase resuelta en otra sección produce
+y `requires_invested_gm`. Una clase con `max_duration_years > 1`, catálogo vacío
+o clase resuelta en otra sección produce
 `ANNUAL_CLASS_POLICY_UNRESOLVED`; prerrequisito incumplido y falta de investidura
-GM producen códigos específicos. La activación de membresía y la matrícula son
-una sola transacción: si la política o el writer fallan, el `member` no queda
-activado parcialmente.
+GM producen códigos específicos. Guía Mayor es la última clase: la misma
+transacción activa la membresía y no crea otra inscripción (`path_complete`).
+Si la política o el writer fallan, el `member` no queda activado parcialmente.
 
 ### Bordes relevantes
 

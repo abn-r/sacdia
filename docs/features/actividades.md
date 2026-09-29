@@ -18,7 +18,7 @@ Las series recurrentes materializan de inmediato copias independientes (cada N d
 - **Controller**: `src/activities/activities.controller.ts`
 - **Service**: `src/activities/activities.service.ts`
 - **Guards**: JwtAuthGuard, PermissionsGuard, ClubRolesGuard
-- **13 endpoints**:
+- **Endpoints**:
   - `GET /api/v1/clubs/:clubId/activities` — Listar actividades del club (query opcional `seriesId`)
   - `POST /api/v1/clubs/:clubId/activities` — Crear actividad (roles: director, subdirector, secretary, counselor)
   - `POST /api/v1/clubs/:clubId/activity-series/preview` — Vista previa de fechas de una serie
@@ -30,22 +30,31 @@ Las series recurrentes materializan de inmediato copias independientes (cada N d
   - `PATCH /api/v1/activities/:activityId` — Actualizar actividad
   - `DELETE /api/v1/activities/:activityId` — Desactivar actividad
   - `POST /api/v1/activities/:activityId/image` — Subir imagen
-  - `POST /api/v1/activities/:activityId/attendance` — Registrar asistencia
-  - `GET /api/v1/activities/:activityId/attendance` — Obtener asistencia
+  - `POST /api/v1/activities/:activityId/attendance` — Registrar asistencia confirmada
+  - `GET /api/v1/activities/:activityId/attendance` — Obtener asistencia confirmada
+  - `GET /api/v1/activities/:activityId/rsvp` — Intención del usuario en una actividad virtual
+  - `PUT /api/v1/activities/:activityId/rsvp` — Marcar `going` o `not_going` (no confirma asistencia)
+  - `GET /api/v1/activities/:activityId/attendance-roster` — Miembros de la sección para confirmar asistencia virtual
 
 ### Admin
 - **UI completa**: Pagina de lista con selector de club, pagina de detalle con panel de asistencia, dialog de creacion/edicion, confirmacion de eliminacion
-- Dialog de alta con interruptor **Repetir esta actividad**, preview de fechas y `POST .../activity-series`
-- Detalle: badge de serie, ver serie (`?seriesId=`), cancelar futuras, agregar mas
+- Dialog de alta con interruptor **Repetir esta actividad**, preview de fechas y `POST .../activity-series`. Con repetición activa se oculta la fecha de fin de la sesión; el límite de la serie es `until`
+- El alta elige público: toda la sección, directiva, o clases del tipo de club seleccionado, con el logo de cada clase. Por defecto van todas marcadas. El panel crea una sola sección; la conjunta sigue en la app
+- El listado y el detalle muestran ese público. Si es por clases, el detalle incluye el logo y el nombre. El API agrega `audience_classes` en el listado y en el detalle
+- El detalle no ofrece ver la serie, cancelar sesiones futuras ni agregar más sesiones
 - Cliente API en `src/lib/api/activities.ts`
 
 ### App Movil
 - **4 screens**: ActivitiesListView, ActivityDetailView, CreateActivityView, LocationPickerView
-- Mismo interruptor de repeticion, preview y acciones de serie en detalle/lista
+- Mismo interruptor de repeticion y preview al crear. El detalle no muestra acciones de serie
 - Incluye selector de ubicacion en mapa (LocationPickerView)
 - `ActivitiesListView` resuelve `clubId` desde `clubContextProvider` (bug de hardcodeo a 1 corregido)
+- El listado pide todas las páginas de `GET /clubs/:clubId/activities` (el API devuelve 20 por defecto). Sin eso, la vista de todas se corta en las actividades más recientes
+- Al crear se elige el público: toda la sección, directiva, o clases. Por defecto, todas las clases de las secciones elegidas. En conjunta se listan las clases de esas secciones con su logo. `audience=board` la ven solo director, subdirector, secretario, tesorero y secretario-tesorero. `audience=classes` la ven quienes están en una clase marcada y también la directiva de la sección, para poder operarla
+- El listado y el detalle muestran para quién es. En clases se ven el logo y el nombre (`audience_classes`)
 - Edicion y eliminacion de actividades disponibles en la vista de detalle (`EditActivityView` + confirmacion de borrado)
 - El boton "Agregar" en `ActivitiesListView` solo se muestra a usuarios con permiso `activities:create` o con roles legacy `director`, `deputy_director`, `secretary`, `counselor` — evaluado via `canByPermissionOrLegacyRole`
+- Widget de inicio **Próxima actividad** (iOS WidgetKit y Android App Widget). Muestra título, fecha y club de la primera `upcomingActivities` del dashboard. Se actualiza al cargar o refrescar el inicio y se vacía al cerrar sesión. Un toque abre `/activity/:activityId`. En iOS hace falta el App Group `group.com.sacdia.app` en el equipo de firma.
 
 **Entidad Activity — campos adicionales (post-rediseno):**
 - `lat`, `longitude` — coordenadas de la ubicacion
@@ -62,10 +71,10 @@ Las series recurrentes materializan de inmediato copias independientes (cada N d
 - Badge de modalidad (Presencial / Virtual / Hibrido) en la fila del titulo, no sobre el hero
 - La fila de ubicacion muestra la direccion completa y deja la accion de navegacion en una linea inferior
 - Seccion de participantes con avatares apilados en paleta calida
-- Accion interna de asistencia ubicada antes de participantes; usuarios con `attendance:manage` o rol operacional (`director`, `deputy-director`, `secretary`, `treasurer`, `secretary-treasurer`, `counselor`) escanean QR, y el resto ve "Mostrar mi QR"
+- Accion interna de asistencia ubicada antes de participantes. En presencial e híbrido, usuarios con `attendance:manage` o rol operacional (`director`, `deputy-director`, `secretary`, `treasurer`, `secretary-treasurer`, `counselor`) escanean QR, y el resto ve "Mostrar mi QR". En virtual no hay QR: el miembro marca Asistiré / No asistiré y quien confirma elige entre todos los miembros de la sección
 - Footer card de organizador con nombre e imagen del creador
 - Estado de carga con shimmer skeleton (`activity_detail_skeleton.dart`)
-- Boton "Confirmar asistencia" eliminado — la asistencia es gestionada por administradores, no es opt-in del usuario
+- En virtual el miembro marca intención (Asistiré / No asistiré). La asistencia real la confirma un usuario con `attendance:manage` entre todos los miembros de la sección
 
 **Nuevos widgets extraidos:**
 - `activity_hero_section.dart` — hero condicional: google_maps_flutter (presencial) o imagen (virtual/hibrido)
@@ -74,11 +83,11 @@ Las series recurrentes materializan de inmediato copias independientes (cada N d
 - `activity_detail_skeleton.dart` — skeleton shimmer de carga
 
 **CreateActivityView — cambios de formulario:**
-- Agregados date pickers para fecha de inicio y fecha de fin
+- Agregados date pickers para fecha de inicio y fecha de fin. Con «Repetir esta actividad» se oculta la fecha de fin y no se envía `activity_end_date`; el límite queda en «Repetir hasta»
 - `SacDropdownField` reemplazado por `BottomSheetPicker` para seleccion de tipo y seccion
 
 ### Base de datos
-- `activities` — Actividades del club (`activity_series_id` opcional agrupa copias de una serie)
+- `activities` — Actividades del club (`activity_series_id` opcional agrupa copias de una serie; `rsvp` guarda la intención en virtuales)
 - `activity_types` — Catalogo de tipos de actividad
 - `activity_instances` — Instancias de una actividad por seccion (conjuntas; **no** es recurrencia)
 - `activity_series` — Receta de una serie recurrente (kind `interval` | `weekly`, `until_date`)
@@ -100,7 +109,7 @@ Las series recurrentes materializan de inmediato copias independientes (cada N d
 - **Soft delete**: Las actividades se desactivan, no se eliminan fisicamente
 - **Autorizacion por rol de club**: Solo roles operativos (director, subdirector, secretary, counselor) pueden crear actividades; la lectura es abierta a miembros con JWT. La app oculta el boton de creacion si el usuario no tiene el permiso `activities:create` ni alguno de esos roles legacy
 - **Campo `image` opcional en `CreateActivityDto`**: El campo `image` es opcional (`@IsOptional()`) — solo aplica para actividades virtuales. En el DTO de actualizacion (`UpdateActivityDto`) tambien es opcional
-- **Asistencia no es self-service**: El boton "Confirmar asistencia" fue eliminado de la app. La asistencia la registran usuarios autorizados via QR en la app movil (`attendance:manage` o roles operacionales de club: director, subdirector, secretario, tesorero, secretario-tesorero o consejero) o administradores via panel admin (`POST /activities/:id/attendance`), no los propios miembros como opt-in
+- **Asistencia confirmada no es self-service**: En presencial e híbrido la asistencia la registran usuarios autorizados via QR (`attendance:manage` o roles operacionales de club) o el panel admin (`POST /activities/:id/attendance`). En virtual (`platform = 1`) el QR no registra asistencia. El miembro marca intención en `activities.rsvp` (`going` = hará lo posible, `not_going` = no asistirá, reversible). Esa intención no escribe `attendees` ni emite `activity.attended`. Quien tiene `attendance:manage` confirma la asistencia real entre todos los miembros activos de las secciones de la actividad, aunque hayan dicho que no irían
 - **BottomSheetPicker en formularios**: El formulario de creacion de actividad adopta `BottomSheetPicker` en lugar de `SacDropdownField` para la seleccion de tipo y seccion, alineandose con el patron de pickers del resto de la app
 - **Geolocalizacion**: La app implementa seleccion de ubicacion en mapa (LocationPickerView) usando `google_maps_flutter` + `geolocator`. El backend almacena coordenadas en campos `lat`/`longitude` del modelo. En el detalle, actividades presenciales muestran un hero edge-to-edge con Google Maps; virtuales muestran una imagen de portada. La migracion de `flutter_map` a `google_maps_flutter` requiere API keys configuradas en `ios/Runner/AppDelegate.swift` y `android/app/src/main/AndroidManifest.xml`
 - **URLs privadas no bloqueantes**: Las imagenes privadas de actividades y perfiles se firman con R2 cuando la configuracion esta disponible. Si R2 no puede firmar una URL en lectura, el backend registra un warning y devuelve el valor almacenado para no romper listados, dashboard ni detalle por un asset no critico.

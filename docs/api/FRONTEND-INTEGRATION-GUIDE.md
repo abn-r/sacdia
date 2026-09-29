@@ -47,15 +47,45 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 ---
 
+## Actualizacion 2026-09-21 (Bandeja institucional de certificados)
+
+Guía Mayor Avanzado (`GM-02`) e Instructor (`GM-03`) no entran a la cola de Campo Local.
+
+- El dueño envía `POST /api/v1/certificate-import-institutional-requests` con `class_id`, `file_id` de un archivo `CONFIRMED` y `completed_at` (`YYYY-MM-DD`).
+- Consulta `GET /api/v1/certificate-import-institutional-requests` y el detalle por `requestId`. `APPROVED` significa validación institucional, no clase inscrita. `enrollment_created` viene siempre en `false`. El detalle incluye `batch_id` para pedir la URL firmada del comprobante.
+- La bandeja admin es `GET/POST /api/v1/admin/certificate-import-institutional-requests`. Solo `super-admin`. Campo Local, admin genérico y Unión no deben mostrar esas acciones.
+- Aprobar exige `expected_revision`. Si falta el periodo eclesiástico, la respuesta es `CERTIFICATE_IMPORT_YEAR_NOT_FOUND` y el documento no se rechaza por eso. Rechazar exige `reason`.
+- El comprobante se ve con `GET /api/v1/certificate-bulk-imports/:batchId/files/:fileId/download` (`download_url`, vence en 15 minutos). No usar `file_url` como vista pública.
+- El detalle de Campo Local incluye `class.asset_code`, `approval_blockers` y, cuando aplica, `operational_reconciliation` (`enrollment_id`, `modified_at`). Aprobar esa fila envía `reconcile_enrollment_id` y `expected_modified_at`. Sin ellos la respuesta es `CERTIFICATE_IMPORT_ENROLLMENT_RECONCILIATION_REQUIRED`. Un identificador ajeno es `CERTIFICATE_IMPORT_ENROLLMENT_MISMATCH`. Una versión vieja es `CERTIFICATE_IMPORT_ENROLLMENT_VERSION_CONFLICT`. La inscripción sigue operativa: se actualizan la investidura y su historial.
+- `GM-01` sustituye la inscripción actual; no se conservan dos filas. Esa sustitución no usa `operational_reconciliation`.
+- `GET /api/v1/users/:userId/classes` incluye `record_kind`, `course_open`, `certificate_proof` (`batch_id`, `file_id`) y `progress_archive`. Un certificado histórico llega con `course_open: false` y no calcula el checklist. El progreso previo va en `progress_archive`. La ficha no muestra `enrollment_date` como inicio de cursado. El comprobante se abre en el expediente del lote.
+- Cada fila se decide sola. El lote no pasa a `PARTIALLY_APPROVED` por una decisión nueva. Ese estado queda para expedientes anteriores.
+- `POST /certificate-bulk-imports/:batchId/process-ocr` encola Google Vision para JPEG, PNG y WebP. Un PDF responde `CERTIFICATE_IMPORT_OCR_UNSUPPORTED_TYPE` y el archivo sellado permanece para captura manual. Sin `GOOGLE_VISION_API_KEY` o sin Redis la respuesta es `CERTIFICATE_IMPORT_OCR_UNAVAILABLE`.
+
+---
+
+## Actualizacion 2026-09-16 (Lista admin de usuarios: orden A–Z del conjunto)
+
+`GET /api/v1/admin/users` ordena el conjunto filtrado **antes** de paginar.
+
+- Query: `sortBy` (`name` \| `created_at`, default `name`) y `sortOrder` (`asc` \| `desc`, default `asc`). Valor fuera de enum → 400.
+- Default: `name`, `paternal_last_name`, `maternal_last_name` (nulls last) + `user_id` asc. El panel debe enviar `sortBy=name&sortOrder=asc` y **no** reordenar solo la página actual.
+- Comportamiento previo: `sortBy=created_at&sortOrder=desc`.
+- Filtros existentes (`search`, `role`, `active`, `unionId`, `localFieldId`) no cambian. `role` sigue siendo OR entre rol global y rol de club.
+- El Select de rol en `/dashboard/users` no lista todo el catálogo para cargos territoriales. Canon (`AdminUsersService.ROLE_HIERARCHY` + `role_category` CLUB): `admin`/`super-admin`/`assistant-admin` ven todos los roles; división ve unión hacia abajo; unión ve campo local hacia abajo (LF + T5 + club); campo local ve solo roles CLUB. `Todos los roles` omite `role` (listado territorial completo), no “todos los roles del sistema” como opciones. `meta.scope.type` se traduce (`LOCAL_FIELD` → Campo local / Local field / Champ local / Campo local); no se pinta el enum crudo.
+- Columna Roles del listado: un badge por cargo (`Director`, `Secretario`, `Consejero`, `Miembro`), sin sección. El mismo cargo en varias secciones se colapsa a uno. `GET /admin/users` sigue enviando `club_assignments` (con sección) y `roles[]` aplanado; el panel no pinta la sección por ahora.
+
+---
+
 ## Actualizacion 2026-09-09 (Inscripción anual por directiva)
 
 La renovación anual **no** es autoinscripción del miembro. La directiva de la sección destino completa el trámite.
 
 - `GET /api/v1/club-sections/:sectionId/annual-continuations` — no inscritos del año eclesiástico vigente (`page`, `limit`, `search`). Cada ítem: `{ user_id, name, base_section_id, ecclesiastical_year_id, annual_status, current_role, eligibility, blocked_reason, suggested_class }`. No es el roster exclusivo del año pasado. No usar `originYearId` ni `already_continued`.
-- `POST` la misma ruta, body `{ user_ids }` (1–100 distintos). Respuesta `{ results: [{ user_id, outcome, club_section_id, ecclesiastical_year_id, enrollment_id, error_code }] }` con `enrolled|already_enrolled|blocked|failed`. `enrollment_id` llega en `enrolled`. En `already_enrolled` puede venir `null`; el cliente debe tratar el outcome, no exigir el id. Un cargo de director en otra sección no cuenta como inscrito aquí.
+- `POST` la misma ruta, body `{ user_ids }` (1–100 distintos). Respuesta `{ results: [{ user_id, outcome, club_section_id, ecclesiastical_year_id, enrollment_id, error_code }] }` con `enrolled|path_complete|already_enrolled|blocked|failed`. `enrollment_id` llega en `enrolled`. `path_complete` deja la membresía y no trae inscripción nueva: Guía Mayor ya es la última clase. En `already_enrolled` puede venir `null`; el cliente debe tratar el outcome, no exigir el id. Un cargo de director en otra sección no cuenta como inscrito aquí.
 - Copy del banner de no inscrito: **«No inscrito este año. La directiva realiza tu inscripción»**. No hay CTA «Inscribirme».
 - `POST /api/v1/users/:userId/membership/annual-enroll` está bloqueado mientras D01 esté pendiente: **403** `ANNUAL_ENROLL_REQUIRES_DIRECTIVE`, sin efectos. No convertirlo en `pending` de post-registro.
-- D02 salto formativo AV→CQ / CQ→GM **cerrado** (R13–R14, spec 2026-09-16): la lista y el POST de continuaciones incluyen esos candidatos cuando hay edad, última clase cursada y sección destino activa. `ANNUAL_CLASS_POLICY_UNRESOLVED` queda para catálogo incompleto, edad insuficiente, sin sección destino o última GM. Clases GM con `max_duration_years > 1` siguen abiertas; no usar esta vía para GM investido/multianual.
+- D02 salto formativo AV→CQ / CQ→GM **cerrado** (R13–R14, spec 2026-09-16): la lista y el POST de continuaciones incluyen esos candidatos cuando hay edad, última clase cursada y sección destino activa. `ANNUAL_CLASS_POLICY_UNRESOLVED` queda para catálogo incompleto, edad insuficiente o sin sección destino. La última Guía Mayor no usa ese código. Clases GM con `max_duration_years > 1` siguen abiertas; no usar esta vía para GM investido/multianual.
 - Preelección de director N+1: `POST/GET/PATCH/DELETE /api/v1/clubs/:clubId/sections/:sectionId/director-designation`. POST exige `Idempotency-Key`. Reemplazo es **PATCH** `{ succession_id, version, successor_user_id }` (no PUT). Año de preelección no futuro → 400 `CLUB_DIRECTOR_PLAN_YEAR_INVALID`. Assignment/succession/update del año vigente siguen usando `CLUB_DIRECTOR_DESIGNATION_YEAR_INVALID`. Fila CRA `designated` legado no reconciliada: 409 `CLUB_DIRECTOR_DESIGNATED_UNRECONCILED`. Contrato canónico: `docs/api/ENDPOINTS-LIVE-REFERENCE.md` y handoff `docs/plans/handoffs/director-designation-admin-handoff.md`.
 
 ## Actualizacion 2026-09-03 (Cursado cruzado de Guía Mayor investido)
@@ -933,9 +963,18 @@ Future<Attendance> registerAttendance(int activityId, String userId) async {
 }
 ```
 
+**Actividad virtual** (`platform = 1`): no usar QR para asistencia.
+
+- `GET /activities/:activityId/rsvp` — `{ status: "going" | "not_going" | null, eligible }`.
+- `PUT /activities/:activityId/rsvp` body `{ status }`. Intención del miembro. No escribe `attendees` ni emite `activity.attended`.
+- `GET /activities/:activityId/attendance-roster` — todos los miembros activos de las secciones, con `rsvp` y `confirmed`.
+- La confirmación real sigue en `POST /activities/:activityId/attendance` con `{ user_ids }`. En virtual cada id debe ser miembro de la sección. El QR de una actividad virtual responde `QR_ACTIVITY_VIRTUAL_NO_SCAN`.
+
 **Series recurrentes** (`activity_series`):
 
 - Crear una sola actividad sigue siendo `POST /clubs/:clubId/activities`.
+- `audience`: `all` (toda la sección, default), `board` (directiva de las secciones) o `classes` con `classes: number[]`. Las clases deben pertenecer al tipo de club de las secciones elegidas.
+- El listado y el detalle incluyen `audience` y, si es `classes`, `audience_classes`: `{ class_id, name, asset_code, club_type_id }[]`.
 - Interruptor “Repetir” apagado por defecto. Encendido: `POST /clubs/:clubId/activity-series/preview` y luego `POST /clubs/:clubId/activity-series` con el mismo body mas `recurrence` (`kind`: `weekly` | `interval`, `weekdays` de longitud 1 o `interval_days`, `until` opcional).
 - `GET /activity-series/:seriesId` — receta y conteos. No embebe todas las ocurrencias.
 - Listado: cada actividad trae `activity_series_id`. Query `seriesId` filtra la serie.

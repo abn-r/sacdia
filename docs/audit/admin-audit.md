@@ -63,7 +63,7 @@ Metodo: Scan automatico de codigo fuente
 | /login | POST /auth/login, GET /auth/me | lib/auth/actions.ts |
 | /dashboard | GET /admin/users?limit=1&page=1, GET /clubs?status=active&limit=1, GET /honors?limit=1, GET /classes, GET /admin/users?limit=5&page=1 | lib/api/client.ts (inline) |
 | /dashboard/users | GET /admin/users (paginated) | lib/api/admin-users.ts |
-| /dashboard/users/[userId] | GET /admin/users/:userId, PATCH /admin/users/:userId/approval, PATCH /admin/users/:userId | lib/api/admin-users.ts, lib/admin-users/actions.ts |
+| /dashboard/users/[userId] | GET /admin/users/:userId, PATCH /admin/users/:userId | lib/api/admin-users.ts |
 | /dashboard/clubs | GET /clubs | lib/api/client.ts (inline) |
 | /dashboard/clubs/new | GET /admin/local-fields, GET /admin/districts, GET /admin/churches, POST /clubs | lib/catalogs/service.ts, lib/api/clubs.ts, lib/clubs/actions.ts |
 | /dashboard/clubs/[id] | GET /clubs/:id, GET /clubs/:id/instances, POST /clubs/:id/instances, PATCH /clubs/:id/instances/:type/:instanceId, GET /clubs/:id/instances/:type/:instanceId/members, POST /clubs/:id/instances/:type/:instanceId/roles, PATCH /club-roles/:assignmentId, DELETE /club-roles/:assignmentId, PATCH /clubs/:id, DELETE /clubs/:id | lib/api/clubs.ts, lib/clubs/actions.ts, lib/catalogs/service.ts |

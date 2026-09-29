@@ -1,0 +1,295 @@
+{
+  "schema": "openai.presentation.layout/v4",
+  "unit": "px",
+  "slide": {
+    "aid": "sl/qnncf3",
+    "id": "qnncf3",
+    "slide": 1,
+    "layoutId": "4488c7e4-d647-44aa-8931-329a231da695",
+    "layoutName": "Title Slide",
+    "layoutType": "title",
+    "masterLayoutId": "deabe122-b298-454f-807c-dcc693bd9ade",
+    "masterLayoutName": "Master",
+    "backgroundColor": "#183D35",
+    "frame": {
+      "left": 0,
+      "top": 0,
+      "width": 1280,
+      "height": 720
+    }
+  },
+  "theme": {
+    "colorSchemeName": "ChatGPT",
+    "colors": {
+      "accent1": "#156082",
+      "accent2": "#E97132",
+      "accent3": "#196B24",
+      "accent4": "#0F9ED5",
+      "accent5": "#A02B93",
+      "accent6": "#4EA72E",
+      "bg1": "#FFFFFF",
+      "bg2": "#000000",
+      "tx1": "#1F1F1F",
+      "tx2": "#FFFFFF",
+      "dk1": "#000000",
+      "lt1": "#FFFFFF",
+      "dk2": "#0E2841",
+      "lt2": "#E8E8E8",
+      "hlink": "#467886",
+      "folHlink": "#96607D"
+    },
+    "typefaces": [
+      "Helvetica Neue"
+    ]
+  },
+  "inheritedLayers": [
+    {
+      "scope": "layout",
+      "id": "4488c7e4-d647-44aa-8931-329a231da695",
+      "name": "Title Slide",
+      "type": "title",
+      "parentLayoutId": "deabe122-b298-454f-807c-dcc693bd9ade",
+      "elements": []
+    },
+    {
+      "scope": "master",
+      "id": "deabe122-b298-454f-807c-dcc693bd9ade",
+      "name": "Master",
+      "type": "master",
+      "elements": []
+    }
+  ],
+  "elements": [
+    {
+      "order": 1,
+      "kind": "image",
+      "scope": "slide",
+      "aid": "im/i90v6lgr",
+      "id": "1",
+      "bbox": [
+        0,
+        0,
+        1280,
+        720
+      ],
+      "alt": "Ilustración conceptual de un campamento en bosque",
+      "contentType": "image/png",
+      "imageFit": "cover",
+      "asset": {
+        "assetId": "9c30f0d8-77ed-42a7-94e6-4775a076231d",
+        "contentType": "image/png",
+        "byteLength": 2451521
+      }
+    },
+    {
+      "order": 2,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/kbud0nq9",
+      "id": "2",
+      "bbox": [
+        64,
+        190,
+        720,
+        110
+      ],
+      "geometry": "rect",
+      "text": "SACDIA",
+      "textPreview": "SACDIA",
+      "resolvedFontSize": 78,
+      "resolvedTextStyle": {
+        "fontSize": 78,
+        "typeface": "Helvetica Neue",
+        "color": "#FFFFFF",
+        "bold": true,
+        "alignment": "left",
+        "autoFit": "none",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "SACDIA"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "SACDIA",
+          "resolvedTextStyle": {
+            "fontSize": 78,
+            "typeface": "Helvetica Neue",
+            "color": "#FFFFFF",
+            "bold": true
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "SACDIA",
+              "fontSize": 78,
+              "typeface": "Helvetica Neue",
+              "color": "#FFFFFF",
+              "bold": true
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 3,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/5c3e9sru",
+      "id": "3",
+      "bbox": [
+        68,
+        320,
+        690,
+        160
+      ],
+      "geometry": "rect",
+      "text": "Administración y seguimiento\nde los clubes juveniles",
+      "textPreview": "Administración y seguimiento | de los clubes juveniles",
+      "resolvedFontSize": 36,
+      "resolvedTextStyle": {
+        "fontSize": 36,
+        "typeface": "Helvetica Neue",
+        "color": "#FFFFFF",
+        "alignment": "left",
+        "autoFit": "none",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Administración y seguimiento"
+          },
+          {
+            "index": 2,
+            "text": "de los clubes juveniles"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Administración y seguimiento",
+          "resolvedTextStyle": {
+            "fontSize": 36,
+            "typeface": "Helvetica Neue",
+            "color": "#FFFFFF"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Administración y seguimiento",
+              "fontSize": 36,
+              "typeface": "Helvetica Neue",
+              "color": "#FFFFFF"
+            }
+          ],
+          "marginLeft": 0
+        },
+        {
+          "index": 2,
+          "text": "de los clubes juveniles",
+          "resolvedTextStyle": {
+            "fontSize": 36,
+            "typeface": "Helvetica Neue",
+            "color": "#FFFFFF"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "de los clubes juveniles",
+              "fontSize": 36,
+              "typeface": "Helvetica Neue",
+              "color": "#FFFFFF"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 4,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/alsvud87",
+      "id": "4",
+      "bbox": [
+        68,
+        575,
+        740,
+        40
+      ],
+      "geometry": "rect",
+      "text": "Unión Mexicana Interoceánica",
+      "textPreview": "Unión Mexicana Interoceánica",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Helvetica Neue",
+        "color": "#E4EBDD",
+        "alignment": "left",
+        "autoFit": "none",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Unión Mexicana Interoceánica"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Unión Mexicana Interoceánica",
+          "resolvedTextStyle": {
+            "fontSize": 24,
+            "typeface": "Helvetica Neue",
+            "color": "#E4EBDD"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Unión Mexicana Interoceánica",
+              "fontSize": 24,
+              "typeface": "Helvetica Neue",
+              "color": "#E4EBDD"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    }
+  ],
+  "composeRuns": []
+}

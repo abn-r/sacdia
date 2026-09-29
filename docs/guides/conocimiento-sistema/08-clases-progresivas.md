@@ -86,7 +86,7 @@ la política **omite** la investidura del predecesor inmediato del mismo tipo;
 prerrequisitos de otro tipo y `requires_invested_gm` siguen bloqueando
 (`sacdia-backend/src/classes/class-enrollment-policy.service.ts`:100-134).
 `max_duration_years > 1`, catálogo vacío, edad insuficiente, sin sección destino
-o última GM: `ANNUAL_CLASS_POLICY_UNRESOLVED` ([07](07-inscripcion-anual.md)).
+Guía Mayor es la última clase: la continuación deja la membresía y no abre otra inscripción ([07](07-inscripcion-anual.md)).
 
 **C — Explícita.** `enrollUser` exige clase activa y disponible, prerrequisitos
 activos en estado `INVESTIDO` (cualquier año), `requires_invested_gm` si aplica,

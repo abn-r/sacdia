@@ -2,6 +2,8 @@
 
 **Estado**: IMPLEMENTADO
 
+> El pipeline descrito abajo sigue siendo el runtime. El acuerdo nuevo, todavía sin implementar, está en `docs/plans/2026-09-28-investidura-autorizacion.md`. El documento de ceremonia colectiva del 2026-09-21 quedó reemplazado.
+
 ## Descripcion de dominio
 
 La validacion de investiduras es el proceso institucional mediante el cual el avance formativo de un miembro recibe reconocimiento formal. Es el cierre del ciclo formativo: un miembro completa su clase progresiva durante el ano eclesiastico, su progreso es validado por las autoridades del club y del campo local, y finalmente es investido en una ceremonia oficial.
@@ -121,6 +123,14 @@ Los requisitos `BASIC` y `EXTRA` cuentan para investidura; `ADVANCED` activa el 
 - **Separacion de registrar y validar** (Decision 6): Actores diferentes (consejero vs coordinador), momentos diferentes, reglas diferentes
 - **Duracion por ano eclesiastico**: la elegibilidad se calcula desde `enrollments.ecclesiastical_year_id`; no desde fechas sueltas de progreso
 - **Vencimiento auditable**: el proceso manual usa `investiture_validation_history.action = EXPIRED` para dejar rastro del cambio
+
+## Acreditación histórica por certificado
+
+Distinta del pipeline anual de esta página. La aprobación de certificado CLASS ya la escribe así.
+
+El cursado anual sigue exigiendo requisitos, duración y ceremonia, y termina en `INVESTIDO` solo después de `FIELD_APPROVED`. Un comprobante histórico no recorre esas etapas: Campo Local acredita el hecho ya ocurrido como `INVESTIDO`, con la fecha del certificado y la fecha de validación por separado. No exige clase en curso ni secuencia curricular.
+
+La excepción de Guía Mayor (`GM-01`) sustituye la inscripción actual de esa clase y deja una sola fila. Guía Mayor Avanzado e Instructor no entran a este pipeline ni a la acreditación ordinaria de certificados.
 
 ## Gaps y pendientes
 

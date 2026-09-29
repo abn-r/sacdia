@@ -42,8 +42,12 @@ La gestion de sesiones permite listar sesiones activas y cerrar sesiones individ
 - **Logout**: `POST /auth/logout`
 - **Proteccion per-page**: via `requireAdminUser()` que verifica `access_panel`
 - **Dashboard birthday celebration**: el layout protegido lee `birthday` desde `GET /auth/me`; si coincide con el dia calendario local del usuario, muestra un modal celebratorio solo durante ese dia. La opcion "no volver a mostrar hoy" se persiste en `localStorage` por `user_id + anio + MM-DD`.
-- **Gestion de usuarios**: `GET /admin/users`, `GET /admin/users/:userId`, `PATCH /admin/users/:userId`, `PATCH /admin/users/:userId/approval`
-- **Revision administrativa**: `PATCH /admin/users/:userId/approval` existe como superficie de revision/compatibilidad, pero no debe entenderse como aprobacion de membresia a club/seccion ni como gate global masivo.
+- **Gestion de usuarios**: `GET /admin/users`, `GET /admin/users/:userId`, `PATCH /admin/users/:userId` (flags `access_app`, `access_panel`, `active`). El listado muestra un badge por cargo de club (director, subdirector, secretario, consejero, miembro) sin sección; el mismo cargo en varias secciones se colapsa a uno.
+- **Ficha de usuario — Accesos (`access_app` / `access_panel` / `active`)**: solo `admin` y `super-admin` (y `assistant-admin` por alias de `GlobalRolesGuard`) ven esas flags: switches en Roles, grid de solo lectura en Resumen (App móvil / Panel admin / Estado) y filas equivalentes del aside. Directores de campo local (`director-lf`), unión, división o club no las ven ni las mutan. Roles de sección de club y Roles de sistema no usan este gate. `PATCH /admin/users/:userId` ya exige clase `@GlobalRoles('admin', 'super-admin')` + `users:update_admin`.
+- **Ficha de usuario — Salud**: Resumen y la pestaña Salud muestran los datos médicos de frente si el actor tiene `health:read` (o el OR legado). No hay segundo click de «información protegida» en Resumen; quien no tiene el permiso no ve el bloque ni la pestaña.
+- **Revision administrativa de cuenta**: el backend conserva `PATCH /admin/users/:userId/approval` y el campo `approval_status`; el panel admin **no** muestra ni muta ese estado. No confundir con post-registro ni con aprobacion de membresia de club (`club_members:approve`).
+- **MFA**: el backend conserva enroll/verify/status/disable y admin reset (`GET/DELETE /admin/users/:userId/mfa`); el panel admin **no** muestra ni resetea MFA en ficha de usuario.
+- **Sesiones de ficha**: el backend conserva `GET/DELETE /admin/users/:userId/sessions` (cerca `USER_MANAGEMENT_ROLES` + `users:read_detail` + recorte territorial) y self-service `GET/DELETE /auth/sessions`; el panel admin **no** muestra ni revoca sesiones en ficha de usuario.
 - **Cuentas eliminadas/anónimas**: el panel usa `is_deleted` para mostrar una etiqueta traducida (`Cuenta eliminada`, `Deleted account`, etc.) sin usar el email técnico `deleted-{user_id}@sacdia.deleted` ni guardar textos de UI en campos de identidad.
 - No implementa UI de: registro, MFA, OAuth, gestion de sesiones
 
@@ -127,8 +131,8 @@ La gestion de sesiones permite listar sesiones activas y cerrar sesiones individ
 - **OAuth en app no funcional**: Google y Apple estan declarados pero lanzan excepcion "no disponible aun"
 - **`POST /auth/pr-check` fantasma**: La app consume este endpoint pero no aparece en el backend
 - **Admin sin UI MFA/OAuth/sesiones**: El panel admin implementa login/logout y refresh automatico, pero no tiene pantallas propias para MFA, OAuth ni gestion de sesiones.
-- **Semantica legacy de approval**: `PATCH /admin/users/:userId/approval` queda como superficie de revision por excepcion/compatibilidad, no como gate de membresia; la UI principal de detalle de usuario ya no debe presentarlo como accion hero global.
-- **Admin approval endpoints**: `PATCH /admin/users/:userId/approval` y `PATCH /admin/users/:userId` aparecen en el admin audit pero estaban marcados como FANTASMA en la Reality Matrix (ahora verificados en ENDPOINTS-LIVE-REFERENCE como existentes en `src/admin/admin-users.controller.ts`)
+- **Semantica legacy de approval**: `PATCH /admin/users/:userId/approval` existe en backend por compatibilidad; el panel admin ya no lo consume ni muestra «Revisión administrativa» en el detalle de usuario.
+- **Admin approval endpoints**: `PATCH /admin/users/:userId/approval` y `PATCH /admin/users/:userId` estan verificados en ENDPOINTS-LIVE-REFERENCE (`src/admin/admin-users.controller.ts`). El panel solo usa el PATCH generico para flags de acceso/activo, y solo lo expone en Accesos a actores `admin` / `super-admin`.
 - **Banderas de revision pendientes de formalizar**: menor sin tutor legal, nombre + fecha de nacimiento identicos a otro usuario, y nombres ofensivos.
 
 ## Prioridad y siguiente accion

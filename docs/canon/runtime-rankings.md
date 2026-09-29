@@ -262,7 +262,7 @@ Excepción canónica: `annual_evidence_folder` usa los puntos reales snapshot de
 |---|---|---|
 | `annual_evidence_folder` | `annual_folders` | `total_earned_points / total_max_points` reales de la Carpeta Anual de Evidencias; `progress_percentage` solo normaliza el porcentaje |
 | `monthly_reports_timeliness` | `monthly_reports` + `ecclesiastical_years` | informes `submitted` entregados antes del día `ranking.monthly_report_deadline_day` (default 5) / meses esperados del año eclesiástico |
-| `finance_compliance` | `finance_period_closings` | cierres financieros en tiempo según `ranking.finance_closing_deadline_day` (default 5) |
+| `finance_compliance` | `finance_period_closings` | cierres del mes calendario UTC anterior, en tiempo según `ranking.finance_closing_deadline_day` (default 5, 23:59:59 UTC del mes siguiente) |
 | `institutional_data_completeness` | `club_enrollments` + `club_sections` | campos institucionales completos / 10 campos esperados: dirección, horario, director, secretaría, tesorería, nombre, teléfono, email, coordenadas y meta de almas |
 | `activities_registered` | `activity_instances` + `activities` | actividades activas de la sección en el año / `ranking.activities_registered_target` (default 12), con tope 100 |
 | `attendance_participation` | `weekly_records` + `unit_members` | promedio de `weekly_records.attendance` de miembros activos de la sección en los años calendario cubiertos por el año eclesiástico |
@@ -406,7 +406,7 @@ Orquestador: `MemberRankingsRecalculateService.recalculateAll(yearId?)` en `sacd
 Rutas de archivo:
 - `sacdia-backend/src/rankings/member-rankings/services/`
 - `sacdia-backend/src/rankings/section-rankings/services/`
-- `sacdia-backend/src/annual-folders/rankings.service.ts` — orquestador cron (integra club + enrollment + section secuencialmente)
+- `sacdia-backend/src/annual-folders/rankings.service.ts` — orquestador cron (integra club + enrollment + section secuencialmente). El barrido de miembros solo incluye inscripciones `record_kind = OPERATIONAL`. Si una inscripción ya pasó a certificado histórico, el recálculo borra su fila de `enrollment_rankings`. El listado, el desglose y el promedio de sección tampoco la cuentan.
 
 ---
 

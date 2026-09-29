@@ -1,10 +1,20 @@
 # Concentrado de conocimiento de SACDIA
 
-**Estado**: DRAFT · **Corte inicial**: 2026-09-09 · **Continuación**: 2026-09-10
+**Estado**: DRAFT · **Corte inicial**: 2026-09-09 · **Continuación**: 2026-09-14
 
 Material de estudio solicitado por el responsable del proyecto. La presentación
-al director de jóvenes de la Unión Mexicana Interoceánica se preparará después.
+se dirige al director de jóvenes de la Unión Mexicana Interoceánica.
 Esta guía explica y conecta fuentes; **no reemplaza el canon ni certifica producción**.
+La presentación ejecutiva se congeló el 2026-09-14 (15 láminas) sobre el corte
+de evidencia de las fichas 01–13. No certifica producción.
+
+**Dos productos distintos:**
+
+| Material | Uso |
+|---|---|
+| [Mapa de producto para la iglesia](14-mapa-producto-iglesia.md) | Fuente escrita: cómo queda SACDIA, qué está en código, qué sigue en proceso. |
+| [PPTX de venta (19 láminas)](presentacion/entrega/SACDIA-presentacion-venta-iglesia-2026-09-14.pptx) | Presentación para vender el sistema a la iglesia (~25–30 min). |
+| [PPTX congelado de 15 láminas](presentacion/README.md) | Recorte prudente de una cita corta. |
 
 ## Por dónde empezar
 
@@ -16,6 +26,18 @@ Esta guía explica y conecta fuentes; **no reemplaza el canon ni certifica produ
 6. [Roles, permisos y contexto](03-roles-permisos-contexto.md).
 7. [Arquitectura técnica](04-arquitectura-tecnica.md): backend y app validados;
    general y panel pendientes de terminar el trazado.
+8. [Matriz de roles contrastada con código](05-matriz-roles-verificada.md).
+9. [Ingreso inicial](06-ingreso-inicial.md).
+10. [Inscripción anual, corte y sucesión](07-inscripcion-anual.md).
+11. [Clases progresivas, avance e investidura](08-clases-progresivas.md).
+12. [Especialidades (honores), caminos y revisión](09-honores.md).
+13. [Certificaciones electivas](10-certificaciones.md).
+14. [Camporees: inscripción, aprobación, agenda y evaluación](11-camporees.md).
+15. [Supervisión institucional: informes, carpeta anual y tableros](12-supervision-institucional.md).
+16. [Operación de la sección (recorte de demo)](13-operacion-seccion.md).
+17. [Mapa de producto para la iglesia (fuente de venta)](14-mapa-producto-iglesia.md).
+18. [Presentación ejecutiva (15 láminas, congelada)](presentacion/README.md).
+19. [Presentación de venta a la iglesia (19 láminas)](presentacion/entrega/SACDIA-presentacion-venta-iglesia-2026-09-14.pptx).
 
 Los diagramas son HTML autónomos: abrir en navegador, sin levantar SACDIA.
 El contenido está en español; los controles fijos del visor Archify y su atributo
@@ -29,17 +51,24 @@ una explicación, fichas de flujos, evidencia y los diagramas que realmente ayud
 | Orden | Bloque | Pregunta principal | Avance de esta entrega |
 |---|---|---|---|
 | 1 | Propósito y estructura | ¿Qué administra y cómo se organiza? | Primera síntesis documental |
-| 2 | Personas, cargos y permisos | ¿Quién puede hacer qué, dónde y durante qué periodo? | Capítulo documental y ejemplos; matriz exacta pendiente |
-| 3 | Ingreso y continuidad | ¿Cómo entra, se inscribe, cambia de sección y continúa una persona? | Pendiente; cambio anual en conciliación |
-| 4 | Formación y reconocimiento | ¿Cómo avanza en clases/honores y quién valida? | Un flujo documental de evidencias; resto pendiente |
-| 5 | Operación de la sección | ¿Cómo se administran unidades, actividades, finanzas, seguros e inventario? | Inventariado, sin análisis detallado |
-| 6 | Eventos y camporees | ¿Cómo se organiza, registra, aprueba y evalúa la participación? | Inventariado, sin análisis detallado |
-| 7 | Supervisión institucional | ¿Qué se reporta, evalúa y consulta por nivel? | Inventariado, sin análisis detallado |
-| 8 | Límites y operación real | ¿Qué está disponible, qué falta y de qué depende? | Registro inicial de incertidumbres |
+| 2 | Personas, cargos y permisos | ¿Quién puede hacer qué, dónde y durante qué periodo? | Matriz de acciones críticas contrastada con código/seeds; grants reales pendientes |
+| 3 | Ingreso y continuidad | ¿Cómo entra, se inscribe, cambia de sección y continúa una persona? | Ingreso y ciclo anual trazados en código; brechas de UI y negocio explícitas |
+| 4 | Formación y reconocimiento | ¿Cómo avanza en clases/honores y quién valida? | Cerrado en fichas 02, 08, 09 y 10 (corte 2026-09-14); no es auditoría de piloto |
+| 5 | Operación de la sección | ¿Cómo se administran unidades, actividades, finanzas, seguros e inventario? | Recorte de demo en ficha 13; finanzas/inventario/seguros no profundizados |
+| 6 | Eventos y camporees | ¿Cómo se organiza, registra, aprueba y evalúa la participación? | Cerrado en ficha 11 (corte 2026-09-14); pedidos/insumos fuera del demo |
+| 7 | Supervisión institucional | ¿Qué se reporta, evalúa y consulta por nivel? | Cerrado en ficha 12 (corte 2026-09-14); rankings solo nombrados |
+| 8 | Límites y operación real | ¿Qué está disponible, qué falta y de qué depende? | Guía del expositor + ensayo ficticio; PPTX congelado (15 láminas) |
+| 9 | Mapa de venta a la iglesia | ¿Cómo queda el producto completo para venderlo? | [Ficha 14](14-mapa-producto-iglesia.md) + PPTX de 19 láminas; no pisa el deck de 15 |
 
-**Próximo bloque:** cerrar la matriz de roles y verificar el ciclo de ingreso e
-inscripción anual. No asumir que el cargo institucional del
-destinatario equivale a un administrador técnico del sistema.
+**Bloques 2 y 3:** cierre analítico del corte 2026-09-14, no auditoría exhaustiva
+de permisos ni certificación de producción. **Bloque 4:** cerrado (fichas 02,
+08, 09, 10). **Bloque 5:** recorte de demo (ficha 13). **Bloque 6:** cerrado
+(ficha 11). **Bloque 7:** cerrado (ficha 12). **Bloque 8:** guía del expositor
+y ensayo con cuentas ficticias. **PPTX congelado** (15 láminas, 2026-09-14).
+**Bloque 9:** mapa de producto para armar presentaciones de venta (ficha 14).
+El ensayo vivo con login queda pendiente de ejecutarse en el entorno ficticio.
+No asumir que el cargo institucional del destinatario equivale a un
+administrador técnico del sistema.
 
 ## Qué debe contener cada ficha de flujo
 

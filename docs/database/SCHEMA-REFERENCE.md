@@ -105,7 +105,7 @@ Migración `20260818190000_query_performance_indexes` (btree `CONCURRENTLY` + GI
 | `insurance_evidence_files` | purchase / assignment / uploaded_by | lookup de evidencias |
 | `accounts` | `user_id` | Better Auth por usuario |
 | `resources` / `finances` / `support_reports` / `material_products` | GIN trigram en texto | `contains` / ILIKE |
-| `enrollments` | `(ecclesiastical_year_id, investiture_status, active)`; parcial `(status, submitted_at) WHERE active`; parcial único regular y cruzado `(user_id, ecclesiastical_year_id) WHERE active` | validación por año + overdue SLA + cursado cruzado GM |
+| `enrollments` | `(ecclesiastical_year_id, investiture_status, active)`; parcial `(status, submitted_at) WHERE active`; parcial único regular y cruzado `(user_id, ecclesiastical_year_id) WHERE active AND record_kind = OPERATIONAL` | validación por año + overdue SLA + cursado cruzado GM; el histórico por certificado no ocupa cupo |
 | `club_role_assignments` | `(ecclesiastical_year_id, active, status)`; único parcial `uniq_cra_director_status_section_year` (rol director CLUB, `active`+`designated` por sección+año) | dashboard de personas; un director operativo y un designado por sección/año |
 | `activities` | `created_by`, `created_at DESC`, `(created_by, activity_date)` | listado y scores |
 | `annual_folders` | `status`; `(status, modified_at DESC)` | colas de evaluación |
@@ -203,7 +203,7 @@ Los GIN/parciales no caben en `@@index` de Prisma; el SQL de la migración es la
 
 ### `activities`, `activity_instances` y `activity_series`
 
-- `activities` incluye `activity_date`, `activity_end_date`, `reminder_sent`, `activity_type_id`, `club_section_id`, `is_joint` y `activity_series_id` (nullable). Unique parcial `(activity_series_id, activity_date)` cuando hay serie.
+- `activities` incluye `activity_date`, `activity_end_date`, `reminder_sent`, `activity_type_id`, `club_section_id`, `is_joint` y `activity_series_id` (nullable). Unique parcial `(activity_series_id, activity_date)` cuando hay serie. `attendees` es la asistencia confirmada. `rsvp` (jsonb) guarda la intención en actividades virtuales: `{ "<user_id>": "going" | "not_going" }`. No confirma asistencia. `audience` es `all` (toda la sección), `board` (directiva) o `classes` (ids en `classes`).
 - `activity_instances` materializa una actividad por seccion (actividades conjuntas). **No** modela recurrencia.
 - `activity_series` guarda la receta (`kind` interval/weekly, `interval_days`, `weekdays`, `first_date`, `until_date`) dentro del año eclesiastico de la fila.
 - `activity_series_sections` recuerda las secciones de una serie conjunta para extender.
@@ -298,7 +298,12 @@ Pedidos de mercancía nominados (migración `20260824190000_camporee_orders` en 
 - `class_sections.requirement_track` separa `BASIC`, `ADVANCED` y `EXTRA`; `BASIC` + `EXTRA` cuentan para investidura, mientras `ADVANCED` se gestiona como badge/estado aparte.
 - `class_sections` puede anclarse opcionalmente a `divisions`, `unions`, `local_fields` o ventana por `ecclesiastical_years`; `EXTRA` exige exactamente un owner y `BASIC`/`ADVANCED` no aceptan owner.
 - `enrollments.investiture_status` incluye `EXPIRED` para preservar progreso histórico cuando se supera la duración máxima sin investidura.
-- `enrollments.cross_type_enrollment` marca el privilegio de un Guía Mayor investido que cursa una clase de Aventureros o Conquistadores en el mismo año. Los índices parciales `uniq_enrollments_active_user_year_regular` y `uniq_enrollments_active_user_year_cross_type` permiten una activa de cada tipo por usuario/año.
+- `ecclesiastical_years` no admite rangos solapados (`ecclesiastical_years_no_overlap`, daterange inclusivo). Un periodo histórico puede permanecer inactivo.
+- `enrollments.record_kind` distingue `OPERATIONAL` (default) de `HISTORICAL_CERTIFICATE`. Los índices parciales `uniq_enrollments_active_user_year_regular` y `uniq_enrollments_active_user_year_cross_type` solo aplican a filas operativas activas. Un histórico exige `INVESTIDO`, fecha, `active` y progreso bloqueado. Guía Mayor (`GM-01`) admite una sola fila por persona.
+- `certificate_bulk_import_files` guarda el comprobante privado: `upload_status`, `staging_key`, `object_key`, `size_bytes`, `confirmed_at` y `jurisdiction` (`CAMPO_LOCAL` o `INSTITUTIONAL`). La descarga usa la clave sellada, no una URL pública. Las filas anteriores quedan `CONFIRMED` sin `object_key` hasta una carga nueva.
+- `certificate_bulk_import_batches.revision` y `certificate_bulk_import_items.revision` empiezan en 0. El cliente puede enviar `expected_revision`; si no coincide, el cambio se rechaza.
+- `institutional_certificate_requests` guarda la solicitud de Guía Mayor Avanzado o Instructor. Estados: `PENDING_REVIEW`, `APPROVED`, `REJECTED`. Aprobar no crea `enrollments`. El índice `uniq_institutional_certificate_request_open` impide dos solicitudes abiertas o aprobadas para la misma persona, clase, archivo y fecha.
+- `enrollments.cross_type_enrollment` marca el privilegio de un Guía Mayor investido que cursa una clase de Aventureros o Conquistadores en el mismo año. Los índices parciales permiten una activa operativa de cada tipo por usuario/año.
 - `investiture_validation_history.action` incluye `EXPIRED` para auditar vencimientos manuales o por guard de investidura.
 
 ### `enrollment_rankings`, `section_rankings`, `enrollment_ranking_weights` (8.4-A)

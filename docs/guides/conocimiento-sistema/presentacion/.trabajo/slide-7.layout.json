@@ -1,0 +1,692 @@
+{
+  "schema": "openai.presentation.layout/v4",
+  "unit": "px",
+  "slide": {
+    "aid": "sl/1u6jp7",
+    "id": "1u6jp7",
+    "slide": 7,
+    "layoutId": "4488c7e4-d647-44aa-8931-329a231da695",
+    "layoutName": "Title Slide",
+    "layoutType": "title",
+    "masterLayoutId": "deabe122-b298-454f-807c-dcc693bd9ade",
+    "masterLayoutName": "Master",
+    "backgroundColor": "#F6F4EE",
+    "frame": {
+      "left": 0,
+      "top": 0,
+      "width": 1280,
+      "height": 720
+    }
+  },
+  "theme": {
+    "colorSchemeName": "ChatGPT",
+    "colors": {
+      "accent1": "#156082",
+      "accent2": "#E97132",
+      "accent3": "#196B24",
+      "accent4": "#0F9ED5",
+      "accent5": "#A02B93",
+      "accent6": "#4EA72E",
+      "bg1": "#FFFFFF",
+      "bg2": "#000000",
+      "tx1": "#1F1F1F",
+      "tx2": "#FFFFFF",
+      "dk1": "#000000",
+      "lt1": "#FFFFFF",
+      "dk2": "#0E2841",
+      "lt2": "#E8E8E8",
+      "hlink": "#467886",
+      "folHlink": "#96607D"
+    },
+    "typefaces": [
+      "Helvetica Neue"
+    ]
+  },
+  "inheritedLayers": [
+    {
+      "scope": "layout",
+      "id": "4488c7e4-d647-44aa-8931-329a231da695",
+      "name": "Title Slide",
+      "type": "title",
+      "parentLayoutId": "deabe122-b298-454f-807c-dcc693bd9ade",
+      "elements": []
+    },
+    {
+      "scope": "master",
+      "id": "deabe122-b298-454f-807c-dcc693bd9ade",
+      "name": "Master",
+      "type": "master",
+      "elements": []
+    }
+  ],
+  "elements": [
+    {
+      "order": 1,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/bql03mh0",
+      "id": "1",
+      "bbox": [
+        64,
+        52,
+        1148,
+        105
+      ],
+      "geometry": "rect",
+      "text": "Ingreso inicial",
+      "textPreview": "Ingreso inicial",
+      "resolvedFontSize": 44,
+      "resolvedTextStyle": {
+        "fontSize": 44,
+        "typeface": "Helvetica Neue",
+        "color": "#183D35",
+        "bold": true,
+        "alignment": "left",
+        "autoFit": "none",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Ingreso inicial"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Ingreso inicial",
+          "resolvedTextStyle": {
+            "fontSize": 44,
+            "typeface": "Helvetica Neue",
+            "color": "#183D35",
+            "bold": true
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Ingreso inicial",
+              "fontSize": 44,
+              "typeface": "Helvetica Neue",
+              "color": "#183D35",
+              "bold": true
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 2,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/cre1cryl",
+      "id": "2",
+      "bbox": [
+        1170,
+        655,
+        54,
+        28
+      ],
+      "geometry": "rect",
+      "text": "07",
+      "textPreview": "07",
+      "resolvedFontSize": 16,
+      "resolvedTextStyle": {
+        "fontSize": 16,
+        "typeface": "Helvetica Neue",
+        "color": "#66746D",
+        "alignment": "left",
+        "autoFit": "none",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "07"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "07",
+          "resolvedTextStyle": {
+            "fontSize": 16,
+            "typeface": "Helvetica Neue",
+            "color": "#66746D"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "07",
+              "fontSize": 16,
+              "typeface": "Helvetica Neue",
+              "color": "#66746D"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 3,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/xcni5wz6",
+      "id": "3",
+      "bbox": [
+        64,
+        260,
+        354.67,
+        108
+      ],
+      "geometry": "rect",
+      "text": "Cuenta y perfil",
+      "textPreview": "Cuenta y perfil",
+      "resolvedFontSize": 27,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 27,
+        "typeface": "Helvetica Neue",
+        "color": "#183D35",
+        "bold": true,
+        "alignment": "center",
+        "verticalAlignment": "middle",
+        "autoFit": "none",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Cuenta y perfil"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Cuenta y perfil",
+          "resolvedTextStyle": {
+            "fontSize": 27,
+            "typeface": "Helvetica Neue",
+            "color": "#183D35",
+            "bold": true,
+            "alignment": "center"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Cuenta y perfil",
+              "fontSize": 27,
+              "typeface": "Helvetica Neue",
+              "color": "#183D35",
+              "bold": true,
+              "alignment": "center"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "fillColor": "#E5ECE1",
+      "lineColor": "#86A095",
+      "lineWidth": 1
+    },
+    {
+      "order": 4,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/2lcj6hgj",
+      "id": "4",
+      "bbox": [
+        64,
+        388,
+        354.67,
+        150
+      ],
+      "geometry": "rect",
+      "text": "Foto, datos personales, contacto y representante si aplica.",
+      "textPreview": "Foto, datos personales, contacto y representante si aplica.",
+      "resolvedFontSize": 23,
+      "resolvedTextStyle": {
+        "fontSize": 23,
+        "typeface": "Helvetica Neue",
+        "color": "#33453F",
+        "alignment": "left",
+        "autoFit": "none",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 3,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Foto, datos personales,"
+          },
+          {
+            "index": 2,
+            "text": "contacto y representante si"
+          },
+          {
+            "index": 3,
+            "text": "aplica."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Foto, datos personales, contacto y representante si aplica.",
+          "resolvedTextStyle": {
+            "fontSize": 23,
+            "typeface": "Helvetica Neue",
+            "color": "#33453F"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Foto, datos personales, contacto y representante si aplica.",
+              "fontSize": 23,
+              "typeface": "Helvetica Neue",
+              "color": "#33453F"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 5,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/3ml0zmh4",
+      "id": "5",
+      "bbox": [
+        462.67,
+        260,
+        354.67,
+        108
+      ],
+      "geometry": "rect",
+      "text": "Solicitud",
+      "textPreview": "Solicitud",
+      "resolvedFontSize": 27,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 27,
+        "typeface": "Helvetica Neue",
+        "color": "#183D35",
+        "bold": true,
+        "alignment": "center",
+        "verticalAlignment": "middle",
+        "autoFit": "none",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Solicitud"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Solicitud",
+          "resolvedTextStyle": {
+            "fontSize": 27,
+            "typeface": "Helvetica Neue",
+            "color": "#183D35",
+            "bold": true,
+            "alignment": "center"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Solicitud",
+              "fontSize": 27,
+              "typeface": "Helvetica Neue",
+              "color": "#183D35",
+              "bold": true,
+              "alignment": "center"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "fillColor": "#E5ECE1",
+      "lineColor": "#86A095",
+      "lineWidth": 1
+    },
+    {
+      "order": 6,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/onu18ryp",
+      "id": "6",
+      "bbox": [
+        462.67,
+        388,
+        354.67,
+        150
+      ],
+      "geometry": "rect",
+      "text": "Territorio, club y sección; la clase la resuelve el backend.",
+      "textPreview": "Territorio, club y sección; la clase la resuelve el backend.",
+      "resolvedFontSize": 23,
+      "resolvedTextStyle": {
+        "fontSize": 23,
+        "typeface": "Helvetica Neue",
+        "color": "#33453F",
+        "alignment": "left",
+        "autoFit": "none",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Territorio, club y sección; la"
+          },
+          {
+            "index": 2,
+            "text": "clase la resuelve el backend."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Territorio, club y sección; la clase la resuelve el backend.",
+          "resolvedTextStyle": {
+            "fontSize": 23,
+            "typeface": "Helvetica Neue",
+            "color": "#33453F"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Territorio, club y sección; la clase la resuelve el backend.",
+              "fontSize": 23,
+              "typeface": "Helvetica Neue",
+              "color": "#33453F"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 7,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/po3i1cza",
+      "id": "7",
+      "bbox": [
+        861.33,
+        260,
+        354.67,
+        108
+      ],
+      "geometry": "rect",
+      "text": "Aprobación",
+      "textPreview": "Aprobación",
+      "resolvedFontSize": 27,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 27,
+        "typeface": "Helvetica Neue",
+        "color": "#183D35",
+        "bold": true,
+        "alignment": "center",
+        "verticalAlignment": "middle",
+        "autoFit": "none",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Aprobación"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Aprobación",
+          "resolvedTextStyle": {
+            "fontSize": 27,
+            "typeface": "Helvetica Neue",
+            "color": "#183D35",
+            "bold": true,
+            "alignment": "center"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Aprobación",
+              "fontSize": 27,
+              "typeface": "Helvetica Neue",
+              "color": "#183D35",
+              "bold": true,
+              "alignment": "center"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "fillColor": "#E5ECE1",
+      "lineColor": "#86A095",
+      "lineWidth": 1
+    },
+    {
+      "order": 8,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/mhwji1gn",
+      "id": "8",
+      "bbox": [
+        861.33,
+        388,
+        354.67,
+        150
+      ],
+      "geometry": "rect",
+      "text": "La directiva autorizada decide si activa la membresía.",
+      "textPreview": "La directiva autorizada decide si activa la membresía.",
+      "resolvedFontSize": 23,
+      "resolvedTextStyle": {
+        "fontSize": 23,
+        "typeface": "Helvetica Neue",
+        "color": "#33453F",
+        "alignment": "left",
+        "autoFit": "none",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "La directiva autorizada decide si"
+          },
+          {
+            "index": 2,
+            "text": "activa la membresía."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "La directiva autorizada decide si activa la membresía.",
+          "resolvedTextStyle": {
+            "fontSize": 23,
+            "typeface": "Helvetica Neue",
+            "color": "#33453F"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "La directiva autorizada decide si activa la membresía.",
+              "fontSize": 23,
+              "typeface": "Helvetica Neue",
+              "color": "#33453F"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 9,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/7i50b6x8",
+      "id": "9",
+      "bbox": [
+        418.67,
+        314,
+        44,
+        0
+      ],
+      "geometry": "straightConnector1",
+      "lineColor": "#B78339",
+      "lineWidth": 2
+    },
+    {
+      "order": 10,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/bud4nid8",
+      "id": "10",
+      "bbox": [
+        817.33,
+        314,
+        44,
+        0
+      ],
+      "geometry": "straightConnector1",
+      "lineColor": "#B78339",
+      "lineWidth": 2
+    },
+    {
+      "order": 11,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/qt4nedcn",
+      "id": "11",
+      "bbox": [
+        64,
+        602,
+        1120,
+        48
+      ],
+      "geometry": "rect",
+      "text": "Completar el formulario deja la membresía pendiente, no activa.",
+      "textPreview": "Completar el formulario deja la membresía pendiente, no activa.",
+      "resolvedFontSize": 21,
+      "resolvedTextStyle": {
+        "fontSize": 21,
+        "typeface": "Helvetica Neue",
+        "color": "#66746D",
+        "alignment": "left",
+        "autoFit": "none",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Completar el formulario deja la membresía pendiente, no activa."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Completar el formulario deja la membresía pendiente, no activa.",
+          "resolvedTextStyle": {
+            "fontSize": 21,
+            "typeface": "Helvetica Neue",
+            "color": "#66746D"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Completar el formulario deja la membresía pendiente, no activa.",
+              "fontSize": 21,
+              "typeface": "Helvetica Neue",
+              "color": "#66746D"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    }
+  ],
+  "composeRuns": []
+}

@@ -1,0 +1,228 @@
+{"kind":"deck","id":"pr/88nt6j","name":"Deck"}
+{"kind":"layout","layoutId":"8d2d429b-5fed-4526-b323-240eb718cb0f","name":"Master","type":"master"}
+{"kind":"layout","layoutId":"14c6fac8-e1d9-4ab4-9509-f9d53e7e0f6b","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/mfv6v1","slide":1,"title":"SACDIA","textShapes":3}
+{"kind":"textbox","id":"sh/32l0vip4","slide":1,"text":"SACDIA","textPreview":"SACDIA","textChars":6,"textLines":1,"bbox":[64,190,720,110]}
+{"kind":"textbox","id":"sh/21cjmd8j","slide":1,"text":"Cómo queda el sistema\npara la iglesia","textPreview":"Cómo queda el sistema | para la iglesia","textChars":37,"textLines":2,"bbox":[64,318,690,150]}
+{"kind":"textbox","id":"sh/103its7y","slide":1,"text":"Ministerio Juvenil Adventista","textPreview":"Ministerio Juvenil Adventista","textChars":29,"textLines":1,"bbox":[64,575,740,40]}
+{"kind":"image","id":"im/xsjy10va","slide":1,"name":"","alt":"Ilustración conceptual de un campamento en bosque","bbox":[0,0,1280,720]}
+{"kind":"notes","id":"nt/mfv6v1","slide":1,"text":"Deck de venta de producto completo. Distinto del PPTX congelado de 15 minutos. Audiencia: ministerio juvenil / iglesia, con Unión Mexicana Interoceánica como primer territorio. Corte 14 de septiembre de 2026. No certifica despliegue en toda la Unión ni en la Iglesia.\n\nFuente: 14-mapa-producto-iglesia.md"}
+{"kind":"slide","id":"sl/5ztopl","slide":2,"title":"El problema que resuelve","textShapes":10}
+{"kind":"textbox","id":"sh/0butsr2h","slide":2,"text":"El problema que resuelve","textPreview":"El problema que resuelve","textChars":24,"textLines":1,"bbox":[64,48,1100,88]}
+{"kind":"textbox","id":"sh/za1szmlw","slide":2,"text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[1188,668,48,28]}
+{"kind":"textbox","id":"sh/y9sbqhkb","slide":2,"text":"Memoria frágil","textPreview":"Memoria frágil","textChars":14,"textLines":1,"bbox":[64,188,330,80]}
+{"kind":"textbox","id":"sh/903a5w3y","slide":2,"text":"Historial en papeles y hojas sueltas. Se pierde al cambiar de director.","textPreview":"Historial en papeles y hojas sueltas. Se pierde al cambiar de director.","textChars":71,"textLines":1,"bbox":[420,188,760,80]}
+{"kind":"textbox","id":"sh/8futwb2t","slide":2,"text":"Cargos opacos","textPreview":"Cargos opacos","textChars":13,"textLines":1,"bbox":[64,284,330,80]}
+{"kind":"textbox","id":"sh/nels36l8","slide":2,"text":"No queda claro quién responde, en qué sección y en qué año.","textPreview":"No queda claro quién responde, en qué sección y en qué año.","textChars":59,"textLines":1,"bbox":[420,284,760,80]}
+{"kind":"textbox","id":"sh/mdcbu1kn","slide":2,"text":"Validación opaca","textPreview":"Validación opaca","textChars":16,"textLines":1,"bbox":[64,380,330,80]}
+{"kind":"textbox","id":"sh/pkjatc3u","slide":2,"text":"Se sube un archivo y se asume que ya hay investidura o especialidad.","textPreview":"Se sube un archivo y se asume que ya hay investidura o especialidad.","textChars":68,"textLines":1,"bbox":[420,380,760,80]}
+{"kind":"textbox","id":"sh/ojqtk729","slide":2,"text":"Vista partida","textPreview":"Vista partida","textChars":13,"textLines":1,"bbox":[64,476,330,80]}
+{"kind":"textbox","id":"sh/u5wjux03","slide":2,"text":"La sección opera en un lado; campo y Unión no comparten la misma foto.","textPreview":"La sección opera en un lado; campo y Unión no comparten la misma foto.","textChars":70,"textLines":1,"bbox":[420,476,760,80]}
+{"kind":"notes","id":"nt/5ztopl","slide":2,"text":"Abrir con el dolor institucional, no con módulos. No inventar cifras de pérdida. SACDIA no sustituye el ministerio humano: le da memoria y operación.\n\nFuentes: docs/canon/identidad-sacdia.md; 14-mapa-producto-iglesia.md"}
+{"kind":"slide","id":"sl/gv5k3x","slide":3,"title":"Qué es SACDIA","textShapes":7}
+{"kind":"textbox","id":"sh/0vilgni9","slide":3,"text":"Qué es SACDIA","textPreview":"Qué es SACDIA","textChars":13,"textLines":1,"bbox":[64,48,1100,88]}
+{"kind":"textbox","id":"sh/fu947i1o","slide":3,"text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[1188,668,48,28]}
+{"kind":"shape","id":"sh/et03exk3","slide":3,"bbox":[64,188,536,400]}
+{"kind":"shape","id":"sh/p0bmdcjq","slide":3,"bbox":[680,188,536,400]}
+{"kind":"textbox","id":"sh/oz2lk7i5","slide":3,"text":"Es","textPreview":"Es","textChars":2,"textLines":1,"bbox":[92,212,480,44]}
+{"kind":"textbox","id":"sh/ny94b21k","slide":3,"text":"Trazabilidad institucional de Aventureros, Conquistadores y Guías Mayores.\n\nLa trayectoria queda con contexto: quién, dónde, en qué año, bajo qué cargo.\n\nEl reconocimiento lo decide un responsable.","textPreview":"Trazabilidad institucional de Aventureros, Conquistadores y Guías Mayores. |  | La trayectoria queda con contexto: quién, dónde, en qué a...","textChars":197,"textLines":5,"bbox":[92,268,480,292]}
+{"kind":"textbox","id":"sh/2x03ix0z","slide":3,"text":"No es","textPreview":"No es","textChars":5,"textLines":1,"bbox":[708,212,480,44]}
+{"kind":"textbox","id":"sh/xobmhcjm","slide":3,"text":"Una biblioteca de especialidades.\n\nUn Excel en la nube.\n\nUn sistema que aprueba todo solo.\n\nUn ERP genérico de la iglesia.","textPreview":"Una biblioteca de especialidades. |  | Un Excel en la nube. |  | Un sistema que aprueba todo solo. |  | Un ERP genérico de la iglesia.","textChars":122,"textLines":7,"bbox":[708,268,480,292]}
+{"kind":"textbox","id":"sh/cn25o7i1","slide":3,"text":"Clubes, clases, camporees y tableros existen para sostener la trayectoria del miembro.","textPreview":"Clubes, clases, camporees y tableros existen para sostener la trayectoria del miembro.","textChars":86,"textLines":1,"bbox":[64,628,1080,36]}
+{"kind":"notes","id":"nt/gv5k3x","slide":3,"text":"Unidad de valor: la trayectoria. Si preguntan por tesorería o ranking: sostienen esa historia, no la reemplazan.\n\nFuentes: docs/canon/identidad-sacdia.md; docs/canon/dominio-sacdia.md"}
+{"kind":"slide","id":"sl/lf4i1x","slide":4,"title":"La unidad de valor","textShapes":4}
+{"kind":"textbox","id":"sh/mhor610j","slide":4,"text":"La unidad de valor","textPreview":"La unidad de valor","textChars":18,"textLines":1,"bbox":[64,48,1100,88]}
+{"kind":"textbox","id":"sh/9kzahwzu","slide":4,"text":"04","textPreview":"04","textChars":2,"textLines":1,"bbox":[1188,668,48,28]}
+{"kind":"textbox","id":"sh/8jq98bi9","slide":4,"text":"La trayectoria de cada persona","textPreview":"La trayectoria de cada persona","textChars":30,"textLines":1,"bbox":[64,200,1100,120]}
+{"kind":"textbox","id":"sh/zexsbmhs","slide":4,"text":"La cuenta continúa de un año a otro. La inscripción, los cargos y el reconocimiento se resuelven en el periodo vigente, con responsables que deciden.","textPreview":"La cuenta continúa de un año a otro. La inscripción, los cargos y el reconocimiento se resuelven en el periodo vigente, con responsables ...","textChars":149,"textLines":1,"bbox":[64,360,1100,180]}
+{"kind":"notes","id":"nt/lf4i1x","slide":4,"text":"Lámina de ancla. Después viene el recorrido. No decir que el historial de todos los cambios de sección ya está completo: ese hueco va en implantación.\n\nFuente: 14-mapa-producto-iglesia.md"}
+{"kind":"slide","id":"sl/mh6gnv","slide":5,"title":"A quién sirve","textShapes":3}
+{"kind":"textbox","id":"sh/g36hgnqp","slide":5,"text":"A quién sirve","textPreview":"A quién sirve","textChars":13,"textLines":1,"bbox":[64,48,1100,88]}
+{"kind":"textbox","id":"sh/v2d07i94","slide":5,"text":"05","textPreview":"05","textChars":2,"textLines":1,"bbox":[1188,668,48,28]}
+{"kind":"textbox","id":"sh/5sfidsr6","slide":5,"text":"Un cargo de iglesia no equivale a administrador del software.","textPreview":"Un cargo de iglesia no equivale a administrador del software.","textChars":61,"textLines":1,"bbox":[64,628,1080,36]}
+{"kind":"table","id":"tb/76tc7qp4","slide":5,"name":"","rows":6,"cols":2,"preview":"Actor | Qué gana cuando el sistema está implantado","bbox":[64,168,1152,400]}
+{"kind":"notes","id":"nt/mh6gnv","slide":5,"text":"Padres, consejero y coordinador de zona existen; no saturar la lámina. Coordinador revisa evidencias de su alcance: no es atajo de campo para camporee. Director de Unión no es admin técnico.\n\nFuentes: 03-roles-permisos-contexto.md; 05-matriz-roles-verificada.md; 14-mapa-producto-iglesia.md"}
+{"kind":"slide","id":"sl/lcbdmf","slide":6,"title":"Recorrido de una persona","textShapes":24}
+{"kind":"textbox","id":"sh/mxsnulsf","slide":6,"text":"Recorrido de una persona","textPreview":"Recorrido de una persona","textChars":24,"textLines":1,"bbox":[64,48,1100,88]}
+{"kind":"textbox","id":"sh/90j65gb6","slide":6,"text":"06","textPreview":"06","textChars":2,"textLines":1,"bbox":[1188,668,48,28]}
+{"kind":"textbox","id":"sh/ozapwval","slide":6,"text":"1","textPreview":"1","textChars":1,"textLines":1,"bbox":[64,160,40,40]}
+{"kind":"textbox","id":"sh/zuhoz6t4","slide":6,"text":"Pide sección","textPreview":"Pide sección","textChars":12,"textLines":1,"bbox":[120,156,470,30]}
+{"kind":"textbox","id":"sh/et8nq1cj","slide":6,"text":"Se registra y pide una sección. Queda pendiente hasta que la directiva decide.","textPreview":"Se registra y pide una sección. Queda pendiente hasta que la directiva decide.","textChars":78,"textLines":1,"bbox":[120,188,470,70]}
+{"kind":"textbox","id":"sh/1wj61gba","slide":6,"text":"2","textPreview":"2","textChars":1,"textLines":1,"bbox":[64,272,40,40]}
+{"kind":"textbox","id":"sh/0vq5sbap","slide":6,"text":"La directiva decide","textPreview":"La directiva decide","textChars":19,"textLines":1,"bbox":[120,268,470,30]}
+{"kind":"textbox","id":"sh/jqlobat8","slide":6,"text":"Al aprobar, el sistema resuelve la clase del año según las reglas vigentes.","textPreview":"Al aprobar, el sistema resuelve la clase del año según las reglas vigentes.","textChars":75,"textLines":1,"bbox":[120,300,470,70]}
+{"kind":"textbox","id":"sh/ypc725sn","slide":6,"text":"3","textPreview":"3","textChars":1,"textLines":1,"bbox":[64,384,40,40]}
+{"kind":"textbox","id":"sh/sjuhoreh","slide":6,"text":"Avanza formación","textPreview":"Avanza formación","textChars":16,"textLines":1,"bbox":[120,380,470,30]}
+{"kind":"textbox","id":"sh/tknihwfm","slide":6,"text":"Clase, especialidades y, si aplica, una certificación electiva.","textPreview":"Clase, especialidades y, si aplica, una certificación electiva.","textChars":63,"textLines":1,"bbox":[120,412,470,70]}
+{"kind":"textbox","id":"sh/6hczm1wb","slide":6,"text":"4","textPreview":"4","textChars":1,"textLines":1,"bbox":[64,496,40,40]}
+{"kind":"textbox","id":"sh/7il0f6xw","slide":6,"text":"Hay reconocimiento","textPreview":"Hay reconocimiento","textChars":18,"textLines":1,"bbox":[120,492,470,30]}
+{"kind":"textbox","id":"sh/kfuhkre5","slide":6,"text":"Cada acto lo cierra un responsable: consejero, director, campo o Unión.","textPreview":"Cada acto lo cierra un responsable: consejero, director, campo o Unión.","textChars":71,"textLines":1,"bbox":[120,524,470,70]}
+{"kind":"textbox","id":"sh/5g3idwfq","slide":6,"text":"5","textPreview":"5","textChars":1,"textLines":1,"bbox":[660,160,40,40]}
+{"kind":"textbox","id":"sh/idczihwz","slide":6,"text":"La sección opera","textPreview":"La sección opera","textChars":16,"textLines":1,"bbox":[716,156,470,30]}
+{"kind":"textbox","id":"sh/jel0bmxk","slide":6,"text":"Informe del mes, carpeta anual y participación en camporee.","textPreview":"Informe del mes, carpeta anual y participación en camporee.","textChars":59,"textLines":1,"bbox":[716,188,470,70]}
+{"kind":"textbox","id":"sh/wbahg7y9","slide":6,"text":"6","textPreview":"6","textChars":1,"textLines":1,"bbox":[660,272,40,40]}
+{"kind":"textbox","id":"sh/xc3i9cfu","slide":6,"text":"El territorio ve","textPreview":"El territorio ve","textChars":16,"textLines":1,"bbox":[716,268,470,30]}
+{"kind":"textbox","id":"sh/x8byd87i","slide":6,"text":"Campo y Unión consultan operación y pendientes de su alcance.","textPreview":"Campo y Unión consultan operación y pendientes de su alcance.","textChars":61,"textLines":1,"bbox":[716,300,470,70]}
+{"kind":"textbox","id":"sh/c72xk3qx","slide":6,"text":"7","textPreview":"7","textChars":1,"textLines":1,"bbox":[660,384,40,40]}
+{"kind":"textbox","id":"sh/b6tgbypc","slide":6,"text":"Sigue el año","textPreview":"Sigue el año","textChars":12,"textLines":1,"bbox":[716,380,470,30]}
+{"kind":"textbox","id":"sh/a5kfit8r","slide":6,"text":"La cuenta permanece. Inscripción y cargos se resuelven de nuevo.","textPreview":"La cuenta permanece. Inscripción y cargos se resuelven de nuevo.","textChars":64,"textLines":1,"bbox":[716,412,470,70]}
+{"kind":"textbox","id":"sh/p4be9876","slide":6,"text":"Tesorería, inventario y materiales sostienen esta historia; no la reemplazan.","textPreview":"Tesorería, inventario y materiales sostienen esta historia; no la reemplazan.","textChars":77,"textLines":1,"bbox":[64,628,1080,36]}
+{"kind":"notes","id":"nt/lcbdmf","slide":6,"text":"Esta historia ES el producto. Ejemplo ficticio: Panteras. No afirmar que subir una foto ya investe. Al año siguiente no se copia el roster.\n\nFuentes: 06, 07, 08, 09, 10, 11, 12, 13, 14"}
+{"kind":"slide","id":"sl/bocr7h","slide":7,"title":"Club, sección y año","textShapes":9}
+{"kind":"textbox","id":"sh/50z2pgv6","slide":7,"text":"Club, sección y año","textPreview":"Club, sección y año","textChars":19,"textLines":1,"bbox":[64,48,1100,88]}
+{"kind":"textbox","id":"sh/ix8je1wv","slide":7,"text":"07","textPreview":"07","textChars":2,"textLines":1,"bbox":[1188,668,48,28]}
+{"kind":"textbox","id":"sh/jyhkn6dg","slide":7,"text":"Club","textPreview":"Club","textChars":4,"textLines":1,"bbox":[64,210,341.33,88]}
+{"kind":"textbox","id":"sh/wv61cbep","slide":7,"text":"Identidad de la iglesia. Continúa aunque cambie la directiva.","textPreview":"Identidad de la iglesia. Continúa aunque cambie la directiva.","textChars":61,"textLines":1,"bbox":[64,318,341.33,140]}
+{"kind":"textbox","id":"sh/xwf2lwva","slide":7,"text":"Sección","textPreview":"Sección","textChars":7,"textLines":1,"bbox":[469.33,210,341.33,88]}
+{"kind":"textbox","id":"sh/atoja1wj","slide":7,"text":"Aventureros, Conquistadores o Guías Mayores. Ahí se opera.","textPreview":"Aventureros, Conquistadores o Guías Mayores. Ahí se opera.","textChars":58,"textLines":1,"bbox":[469.33,318,341.33,140]}
+{"kind":"textbox","id":"sh/vuxkj6d4","slide":7,"text":"Año eclesiástico","textPreview":"Año eclesiástico","textChars":16,"textLines":1,"bbox":[874.67,210,341.33,88]}
+{"kind":"textbox","id":"sh/or618red","slide":7,"text":"Contexto de inscripción y cargos. No se hereda el roster.","textPreview":"Contexto de inscripción y cargos. No se hereda el roster.","textChars":57,"textLines":1,"bbox":[874.67,318,341.33,140]}
+{"kind":"shape","id":"sh/9sfihwvy","slide":7,"bbox":[0,0,0,0]}
+{"kind":"shape","id":"sh/5wnuxs76","slide":7,"bbox":[0,0,0,0]}
+{"kind":"textbox","id":"sh/4vud47ql","slide":7,"text":"El corte de año cierra cargos vencidos y procesa sucesores; no inscribe a nadie.","textPreview":"El corte de año cierra cargos vencidos y procesa sucesores; no inscribe a nadie.","textChars":80,"textLines":1,"bbox":[64,628,1080,36]}
+{"kind":"notes","id":"nt/bocr7h","slide":7,"text":"Las flechas son contexto, no un trámite. Una persona puede conservar cuenta sin estar inscrita este año. Estados canónicos de vinculación (suspendido, apoyo) no están todos en runtime: no venderlos como hechos.\n\nFuentes: 01-fundamentos.md; 07-inscripcion-anual.md"}
+{"kind":"slide","id":"sl/zqfjo3","slide":8,"title":"Cómo entra una persona","textShapes":9}
+{"kind":"textbox","id":"sh/f29o3yd4","slide":8,"text":"Cómo entra una persona","textPreview":"Cómo entra una persona","textChars":22,"textLines":1,"bbox":[64,48,1100,88]}
+{"kind":"textbox","id":"sh/g3i5w3up","slide":8,"text":"08","textPreview":"08","textChars":2,"textLines":1,"bbox":[1188,668,48,28]}
+{"kind":"textbox","id":"sh/h4r658va","slide":8,"text":"Cuenta y ficha","textPreview":"Cuenta y ficha","textChars":14,"textLines":1,"bbox":[64,210,341.33,88]}
+{"kind":"textbox","id":"sh/6dgnqtcn","slide":8,"text":"Foto, datos y representante si es menor. Correo, Google o Apple.","textPreview":"Foto, datos y representante si es menor. Correo, Google o Apple.","textChars":64,"textLines":1,"bbox":[64,318,341.33,140]}
+{"kind":"textbox","id":"sh/7yp4zyd8","slide":8,"text":"Solicitud","textPreview":"Solicitud","textChars":9,"textLines":1,"bbox":[469.33,210,341.33,88]}
+{"kind":"textbox","id":"sh/szy5s3ud","slide":8,"text":"Elige territorio, club y sección. La clase la resuelve el sistema.","textPreview":"Elige territorio, club y sección. La clase la resuelve el sistema.","textChars":66,"textLines":1,"bbox":[469.33,318,341.33,140]}
+{"kind":"textbox","id":"sh/t07m18vy","slide":8,"text":"Aprobación","textPreview":"Aprobación","textChars":10,"textLines":1,"bbox":[874.67,210,341.33,88]}
+{"kind":"textbox","id":"sh/q90n2xcr","slide":8,"text":"La directiva autorizada activa la membresía o rechaza.","textPreview":"La directiva autorizada activa la membresía o rechaza.","textChars":54,"textLines":1,"bbox":[874.67,318,341.33,140]}
+{"kind":"shape","id":"sh/rutobidc","slide":8,"bbox":[0,0,0,0]}
+{"kind":"shape","id":"sh/r21gzqhg","slide":8,"bbox":[0,0,0,0]}
+{"kind":"textbox","id":"sh/61sz6lgv","slide":8,"text":"Completar el formulario deja la membresía pendiente, no activa.","textPreview":"Completar el formulario deja la membresía pendiente, no activa.","textChars":63,"textLines":1,"bbox":[64,628,1080,36]}
+{"kind":"notes","id":"nt/zqfjo3","slide":8,"text":"OAuth y MFA opcionales. La solicitud puede cancelarse o vencer. No afirmar correo verificado como requisito si no está comprobado en el entorno del piloto.\n\nFuente: 06-ingreso-inicial.md"}
+{"kind":"slide","id":"sl/loapvw","slide":9,"title":"Formación y reconocimiento","textShapes":3}
+{"kind":"textbox","id":"sh/but0vyl0","slide":9,"text":"Formación y reconocimiento","textPreview":"Formación y reconocimiento","textChars":26,"textLines":1,"bbox":[64,48,1100,88]}
+{"kind":"textbox","id":"sh/cv21o3ml","slide":9,"text":"09","textPreview":"09","textChars":2,"textLines":1,"bbox":[1188,668,48,28]}
+{"kind":"textbox","id":"sh/yxkjqd4r","slide":9,"text":"Registrar un archivo no valida. Aprobar un requisito no investe.","textPreview":"Registrar un archivo no valida. Aprobar un requisito no investe.","textChars":64,"textLines":1,"bbox":[64,628,1080,36]}
+{"kind":"table","id":"tb/4zedcvq9","slide":9,"name":"","rows":5,"cols":3,"preview":"Camino | Qué es | Quién cierra","bbox":[64,175,1152,365]}
+{"kind":"notes","id":"nt/loapvw","slide":9,"text":"Cuatro caminos distintos. Coordinación por zonas y aprobaciones masivas de investidura: en proceso; no presentarlos como recorrido estable. Certificaciones: hay pantallas; no se ensayó piloto.\n\nFuentes: 02, 08, 09, 10, 12"}
+{"kind":"slide","id":"sl/c6g7h4","slide":10,"title":"Registrar no es validar","textShapes":9}
+{"kind":"textbox","id":"sh/3qdgjm9k","slide":10,"text":"Registrar no es validar","textPreview":"Registrar no es validar","textChars":23,"textLines":1,"bbox":[64,48,1100,88]}
+{"kind":"textbox","id":"sh/ormhsrq5","slide":10,"text":"10","textPreview":"10","textChars":2,"textLines":1,"bbox":[1188,668,48,28]}
+{"kind":"textbox","id":"sh/psvylwrq","slide":10,"text":"Presentación","textPreview":"Presentación","textChars":12,"textLines":1,"bbox":[64,210,341.33,88]}
+{"kind":"textbox","id":"sh/qtozu18b","slide":10,"text":"El archivo entra al proceso que corresponde.","textPreview":"El archivo entra al proceso que corresponde.","textChars":44,"textLines":1,"bbox":[64,318,341.33,140]}
+{"kind":"textbox","id":"sh/buxgn69g","slide":10,"text":"Revisión","textPreview":"Revisión","textChars":8,"textLines":1,"bbox":[469.33,210,341.33,88]}
+{"kind":"textbox","id":"sh/cf6hwbq1","slide":10,"text":"Quien tiene permiso evalúa esa evidencia.","textPreview":"Quien tiene permiso evalúa esa evidencia.","textChars":41,"textLines":1,"bbox":[469.33,318,341.33,140]}
+{"kind":"textbox","id":"sh/dgfypwrm","slide":10,"text":"Decisión","textPreview":"Decisión","textChars":8,"textLines":1,"bbox":[874.67,210,341.33,88]}
+{"kind":"textbox","id":"sh/6xkfixsr","slide":10,"text":"Se aprueba o se rechaza, y queda registro.","textPreview":"Se aprueba o se rechaza, y queda registro.","textChars":42,"textLines":1,"bbox":[874.67,318,341.33,140]}
+{"kind":"shape","id":"sh/rytgb29c","slide":10,"bbox":[0,0,0,0]}
+{"kind":"shape","id":"sh/zytwnmhk","slide":10,"bbox":[0,0,0,0]}
+{"kind":"textbox","id":"sh/yxkfeh0z","slide":10,"text":"El sistema no concede reconocimiento institucional por sí solo.","textPreview":"El sistema no concede reconocimiento institucional por sí solo.","textChars":63,"textLines":1,"bbox":[64,628,1080,36]}
+{"kind":"notes","id":"nt/c6g7h4","slide":10,"text":"Si preguntan: clase/investidura, especialidad y certificación son colas distintas. La carpeta anual no es esa bandeja. No afirmar que cualquier foto entra a revisión.\n\nFuentes: 02-revision-evidencias.md; 08; 09; 10"}
+{"kind":"slide","id":"sl/ze5hgh","slide":11,"title":"La vida de la sección","textShapes":11}
+{"kind":"textbox","id":"sh/ju9g36hc","slide":11,"text":"La vida de la sección","textPreview":"La vida de la sección","textChars":21,"textLines":1,"bbox":[64,48,1100,88]}
+{"kind":"textbox","id":"sh/kvixwbix","slide":11,"text":"11","textPreview":"11","textChars":2,"textLines":1,"bbox":[1188,668,48,28]}
+{"kind":"shape","id":"sh/5wry5gzi","slide":11,"bbox":[64,156,558,188]}
+{"kind":"textbox","id":"sh/a5gfqh0v","slide":11,"text":"Miembros y cargos","textPreview":"Miembros y cargos","textChars":17,"textLines":1,"bbox":[92,178,502,40]}
+{"kind":"textbox","id":"sh/v6pwzmhg","slide":11,"text":"Lista por sección, clase del año y perfil. Los cargos son del periodo vigente.","textPreview":"Lista por sección, clase del año y perfil. Los cargos son del periodo vigente.","textChars":78,"textLines":1,"bbox":[92,226,502,96]}
+{"kind":"shape","id":"sh/wryxsri1","slide":11,"bbox":[658,156,558,188]}
+{"kind":"textbox","id":"sh/xs7y1wzm","slide":11,"text":"Unidades","textPreview":"Unidades","textChars":8,"textLines":1,"bbox":[686,178,502,40]}
+{"kind":"textbox","id":"sh/m1wfmh0j","slide":11,"text":"Grupos menores dentro de la sección. Una unidad activa por persona.","textPreview":"Grupos menores dentro de la sección. Una unidad activa por persona.","textChars":67,"textLines":1,"bbox":[686,226,502,96]}
+{"kind":"shape","id":"sh/n2pwvm14","slide":11,"bbox":[64,368,558,188]}
+{"kind":"textbox","id":"sh/b2pc76lc","slide":11,"text":"Actividades","textPreview":"Actividades","textChars":11,"textLines":1,"bbox":[92,390,502,40]}
+{"kind":"textbox","id":"sh/q1gbe1kr","slide":11,"text":"Calendario, series y conjuntas. La asistencia la registra la directiva.","textPreview":"Calendario, series y conjuntas. La asistencia la registra la directiva.","textChars":71,"textLines":1,"bbox":[92,438,502,96]}
+{"kind":"shape","id":"sh/d47u9w32","slide":11,"bbox":[658,368,558,188]}
+{"kind":"textbox","id":"sh/c3ytgr2x","slide":11,"text":"Planilla semanal","textPreview":"Planilla semanal","textChars":16,"textLines":1,"bbox":[686,390,502,40]}
+{"kind":"textbox","id":"sh/z6pcb618","slide":11,"text":"Puntos por categoría en la semana vigente. Alimenta reconocimientos internos.","textPreview":"Puntos por categoría en la semana vigente. Alimenta reconocimientos internos.","textChars":77,"textLines":1,"bbox":[686,438,502,96]}
+{"kind":"textbox","id":"sh/y5gbi1kn","slide":11,"text":"La directiva opera el club aquí. Campo y Unión no sustituyen ese trabajo diario.","textPreview":"La directiva opera el club aquí. Campo y Unión no sustituyen ese trabajo diario.","textChars":80,"textLines":1,"bbox":[64,628,1080,36]}
+{"kind":"notes","id":"nt/ze5hgh","slide":11,"text":"Unidad no es sección ni clase. Actividad registrada no equivale a realizada. Planilla semanal no es la asistencia de una actividad.\n\nFuente: 13-operacion-seccion.md"}
+{"kind":"slide","id":"sl/qtickx","slide":12,"title":"Tesorería, inventario y seguros","textShapes":11}
+{"kind":"textbox","id":"sh/wnid4b6t","slide":12,"text":"Tesorería, inventario y seguros","textPreview":"Tesorería, inventario y seguros","textChars":31,"textLines":1,"bbox":[64,48,1100,88]}
+{"kind":"textbox","id":"sh/bm9cvqpo","slide":12,"text":"12","textPreview":"12","textChars":2,"textLines":1,"bbox":[1188,668,48,28]}
+{"kind":"textbox","id":"sh/a10b2lo3","slide":12,"text":"Finanzas","textPreview":"Finanzas","textChars":8,"textLines":1,"bbox":[64,188,330,80]}
+{"kind":"textbox","id":"sh/lsbu107q","slide":12,"text":"Ingresos, egresos, resumen y cierre de mes de la sección.","textPreview":"Ingresos, egresos, resumen y cierre de mes de la sección.","textChars":57,"textLines":1,"bbox":[420,188,760,80]}
+{"kind":"textbox","id":"sh/krid8v65","slide":12,"text":"Inventario","textPreview":"Inventario","textChars":10,"textLines":1,"bbox":[64,284,330,80]}
+{"kind":"textbox","id":"sh/jq9czqpk","slide":12,"text":"Bienes a cargo de la sección, con registro institucional.","textPreview":"Bienes a cargo de la sección, con registro institucional.","textChars":57,"textLines":1,"bbox":[420,284,760,80]}
+{"kind":"textbox","id":"sh/yp0v6loz","slide":12,"text":"Seguros","textPreview":"Seguros","textChars":7,"textLines":1,"bbox":[64,380,330,80]}
+{"kind":"textbox","id":"sh/twbu507m","slide":12,"text":"Actividades generales, camporee y alto riesgo. Condición para camporee.","textPreview":"Actividades generales, camporee y alto riesgo. Condición para camporee.","textChars":71,"textLines":1,"bbox":[420,380,760,80]}
+{"kind":"textbox","id":"sh/8v2dcv61","slide":12,"text":"Traslados","textPreview":"Traslados","textChars":9,"textLines":1,"bbox":[64,476,330,80]}
+{"kind":"textbox","id":"sh/ehcjip0j","slide":12,"text":"Solicitud y aprobación entre secciones. El historial largo es limitado.","textPreview":"Solicitud y aprobación entre secciones. El historial largo es limitado.","textChars":71,"textLines":1,"bbox":[420,476,760,80]}
+{"kind":"textbox","id":"sh/fi50bu14","slide":12,"text":"Forma parte del producto. En una cita de 15 minutos no hace falta abrirlos.","textPreview":"Forma parte del producto. En una cita de 15 minutos no hace falta abrirlos.","textChars":75,"textLines":1,"bbox":[64,628,1080,36]}
+{"kind":"notes","id":"nt/qtickx","slide":12,"text":"Vender como parte del producto implantado, no como demo de 15 minutos. No inventar fórmulas de ranking ni ahorros. Historial de transiciones: hueco declarado.\n\nFuentes: 13; inventario de dominios (finanzas, inventario, gestion-seguros)"}
+{"kind":"slide","id":"sl/42cxsi","slide":13,"title":"Camporees institucionales","textShapes":11}
+{"kind":"textbox","id":"sh/xkfqdcbe","slide":13,"text":"Camporees institucionales","textPreview":"Camporees institucionales","textChars":25,"textLines":1,"bbox":[64,48,1100,88]}
+{"kind":"textbox","id":"sh/ahorixs3","slide":13,"text":"13","textPreview":"13","textChars":2,"textLines":1,"bbox":[1188,668,48,28]}
+{"kind":"textbox","id":"sh/bix8b2to","slide":13,"text":"Dos niveles","textPreview":"Dos niveles","textChars":11,"textLines":1,"bbox":[64,188,330,80]}
+{"kind":"textbox","id":"sh/k769o7a5","slide":13,"text":"Camporee de campo y camporee de Unión. No se mezclan.","textPreview":"Camporee de campo y camporee de Unión. No se mezclan.","textChars":53,"textLines":1,"bbox":[420,188,760,80]}
+{"kind":"textbox","id":"sh/l8fqhcrq","slide":13,"text":"Dos inscripciones","textPreview":"Dos inscripciones","textChars":17,"textLines":1,"bbox":[64,284,330,80]}
+{"kind":"textbox","id":"sh/y5ormxsz","slide":13,"text":"Inscribir la sección no inscribe personas. Las personas tienen su propio alta.","textPreview":"Inscribir la sección no inscribe personas. Las personas tienen su propio alta.","textChars":78,"textLines":1,"bbox":[420,284,760,80]}
+{"kind":"textbox","id":"sh/j6x8f29k","slide":13,"text":"Cobro","textPreview":"Cobro","textChars":5,"textLines":1,"bbox":[64,380,330,80]}
+{"kind":"textbox","id":"sh/0bmpcna1","slide":13,"text":"El campo recauda. El dinero campo–Unión queda fuera del sistema.","textPreview":"El campo recauda. El dinero campo–Unión queda fuera del sistema.","textChars":64,"textLines":1,"bbox":[420,380,760,80]}
+{"kind":"textbox","id":"sh/1cvq5sbm","slide":13,"text":"Evaluación","textPreview":"Evaluación","textChars":10,"textLines":1,"bbox":[64,476,330,80]}
+{"kind":"textbox","id":"sh/1cf2tkf2","slide":13,"text":"Rúbricas y juez principal, después de cerrar clubes. No es el ranking anual.","textPreview":"Rúbricas y juez principal, después de cerrar clubes. No es el ranking anual.","textChars":76,"textLines":1,"bbox":[420,476,760,80]}
+{"kind":"textbox","id":"sh/gb61kzeh","slide":13,"text":"El coordinador de zona no aprueba camporee. Unión no cobra en la aplicación.","textPreview":"El coordinador de zona no aprueba camporee. Unión no cobra en la aplicación.","textChars":76,"textLines":1,"bbox":[64,628,1080,36]}
+{"kind":"notes","id":"nt/42cxsi","slide":13,"text":"Con órdenes de pago, los asistentes nacen al aprobar el comprobante. Pedidos de playeras, gorras e insumos de cocina: otra rama, no el piloto. No vender logística de campamento.\n\nFuente: 11-camporees.md"}
+{"kind":"slide","id":"sl/wamzai","slide":14,"title":"Lo que ven campo y Unión","textShapes":11}
+{"kind":"textbox","id":"sh/tk32p4ry","slide":14,"text":"Lo que ven campo y Unión","textPreview":"Lo que ven campo y Unión","textChars":24,"textLines":1,"bbox":[64,48,1100,88]}
+{"kind":"textbox","id":"sh/6hcjups7","slide":14,"text":"14","textPreview":"14","textChars":2,"textLines":1,"bbox":[1188,668,48,28]}
+{"kind":"textbox","id":"sh/rilknu9s","slide":14,"text":"Informe mensual","textPreview":"Informe mensual","textChars":15,"textLines":1,"bbox":[64,188,330,80]}
+{"kind":"textbox","id":"sh/g7el0zq9","slide":14,"text":"Corte del mes y PDF. Unión consulta; no hay sello de aprobar o rechazar.","textPreview":"Corte del mes y PDF. Unión consulta; no hay sello de aprobar o rechazar.","textChars":72,"textLines":1,"bbox":[420,188,760,80]}
+{"kind":"textbox","id":"sh/18n2t4ru","slide":14,"text":"Carpeta anual","textPreview":"Carpeta anual","textChars":13,"textLines":1,"bbox":[64,284,330,80]}
+{"kind":"textbox","id":"sh/elc3y9sj","slide":14,"text":"El campo califica el expediente de la sección. Unión confirma si el caso lo pide.","textPreview":"El campo califica el expediente de la sección. Unión confirma si el caso lo pide.","textChars":81,"textLines":1,"bbox":[420,284,760,80]}
+{"kind":"textbox","id":"sh/f65kre94","slide":14,"text":"Tablero operativo","textPreview":"Tablero operativo","textChars":17,"textLines":1,"bbox":[64,380,330,80]}
+{"kind":"textbox","id":"sh/obel4jql","slide":14,"text":"Cobertura de clubes, colas y pendientes del territorio. Vista de inicio de Unión.","textPreview":"Cobertura de clubes, colas y pendientes del territorio. Vista de inicio de Unión.","textChars":81,"textLines":1,"bbox":[420,380,760,80]}
+{"kind":"textbox","id":"sh/pcn2xor6","slide":14,"text":"Clasificación","textPreview":"Clasificación","textChars":13,"textLines":1,"bbox":[64,476,330,80]}
+{"kind":"textbox","id":"sh/18nal87i","slide":14,"text":"Ejes anuales de la sección. Existe en el producto; las fórmulas no se abren aquí.","textPreview":"Ejes anuales de la sección. Existe en el producto; las fórmulas no se abren aquí.","textChars":81,"textLines":1,"bbox":[420,476,760,80]}
+{"kind":"textbox","id":"sh/0ne9s36x","slide":14,"text":"El tablero de tiempos de cola no es la vista del director de jóvenes.","textPreview":"El tablero de tiempos de cola no es la vista del director de jóvenes.","textChars":69,"textLines":1,"bbox":[64,628,1080,36]}
+{"kind":"notes","id":"nt/wamzai","slide":14,"text":"SLA: admin y coordinador, no director-unión. Miembro del mes: derivado de planilla; no profundizar. No decir que Unión sella el informe.\n\nFuente: 12-supervision-institucional.md"}
+{"kind":"slide","id":"sl/b1hmbs","slide":15,"title":"Una plataforma, dos interfaces","textShapes":9}
+{"kind":"textbox","id":"sh/94zyhcfy","slide":15,"text":"Una plataforma, dos interfaces","textPreview":"Una plataforma, dos interfaces","textChars":30,"textLines":1,"bbox":[64,48,1100,88]}
+{"kind":"textbox","id":"sh/mh8z6xwn","slide":15,"text":"15","textPreview":"15","textChars":2,"textLines":1,"bbox":[1188,668,48,28]}
+{"kind":"textbox","id":"sh/72hgf2x8","slide":15,"text":"App del club","textPreview":"App del club","textChars":12,"textLines":1,"bbox":[64,210,341.33,88]}
+{"kind":"textbox","id":"sh/w7ahcrep","slide":15,"text":"Operación diaria: miembros, avance, avisos y credencial.","textPreview":"Operación diaria: miembros, avance, avisos y credencial.","textChars":56,"textLines":1,"bbox":[64,318,341.33,140]}
+{"kind":"textbox","id":"sh/h8jylwva","slide":15,"text":"Panel territorial","textPreview":"Panel territorial","textChars":17,"textLines":1,"bbox":[469.33,210,341.33,88]}
+{"kind":"textbox","id":"sh/u58zahwj","slide":15,"text":"Campo, Unión y administración: revisiones, carpetas, tablero.","textPreview":"Campo, Unión y administración: revisiones, carpetas, tablero.","textChars":61,"textLines":1,"bbox":[469.33,318,341.33,140]}
+{"kind":"textbox","id":"sh/v6hgjmd4","slide":15,"text":"Reglas comunes","textPreview":"Reglas comunes","textChars":14,"textLines":1,"bbox":[874.67,210,341.33,88]}
+{"kind":"textbox","id":"sh/cb6h0nel","slide":15,"text":"Las mismas reglas. Las pantallas no coinciden una a una.","textPreview":"Las mismas reglas. Las pantallas no coinciden una a una.","textChars":56,"textLines":1,"bbox":[874.67,318,341.33,140]}
+{"kind":"shape","id":"sh/xcfy9sf6","slide":15,"bbox":[0,0,0,0]}
+{"kind":"shape","id":"sh/9sjqtwbu","slide":15,"bbox":[0,0,0,0]}
+{"kind":"textbox","id":"sh/ora90ru9","slide":15,"text":"También hay materiales por alcance y notificaciones; no cubren todos los eventos.","textPreview":"También hay materiales por alcance y notificaciones; no cubren todos los eventos.","textChars":81,"textLines":1,"bbox":[64,628,1080,36]}
+{"kind":"notes","id":"nt/b1hmbs","slide":15,"text":"Ejemplo de paridad: inscripción anual conectada en app; el panel aún no consume ese flujo. Recursos digitales: por unión/campo/tipo. Auditoría: parcial. Logros gamificados: no vender.\n\nFuentes: 04-arquitectura-tecnica.md; 14"}
+{"kind":"slide","id":"sl/ex6kdf","slide":16,"title":"El cargo no abre todo","textShapes":7}
+{"kind":"textbox","id":"sh/6d0vep4f","slide":16,"text":"El cargo no abre todo","textPreview":"El cargo no abre todo","textChars":21,"textLines":1,"bbox":[64,48,1100,88]}
+{"kind":"textbox","id":"sh/t0bup4n6","slide":16,"text":"16","textPreview":"16","textChars":2,"textLines":1,"bbox":[1188,668,48,28]}
+{"kind":"shape","id":"sh/8fidgzml","slide":16,"bbox":[64,188,536,400]}
+{"kind":"shape","id":"sh/v2tcru5c","slide":16,"bbox":[680,188,536,400]}
+{"kind":"textbox","id":"sh/u1kvip4r","slide":16,"text":"El sistema comprueba","textPreview":"El sistema comprueba","textChars":20,"textLines":1,"bbox":[92,212,480,44]}
+{"kind":"textbox","id":"sh/h4bet432","slide":16,"text":"Identidad y permisos.\n\nSección o territorio del recurso.\n\nVigencia del cargo en el año.","textPreview":"Identidad y permisos. |  | Sección o territorio del recurso. |  | Vigencia del cargo en el año.","textChars":87,"textLines":5,"bbox":[92,268,480,292]}
+{"kind":"textbox","id":"sh/g32dkzmh","slide":16,"text":"No concede acceso","textPreview":"No concede acceso","textChars":17,"textLines":1,"bbox":[708,212,480,44]}
+{"kind":"textbox","id":"sh/b6pcfa5s","slide":16,"text":"Conocer un identificador.\n\nVer un botón en pantalla.\n\nHaber tenido el cargo otro año.","textPreview":"Conocer un identificador. |  | Ver un botón en pantalla. |  | Haber tenido el cargo otro año.","textChars":85,"textLines":5,"bbox":[708,268,480,292]}
+{"kind":"textbox","id":"sh/a5gv6547","slide":16,"text":"Nadie ve todo por el título. El director de Unión no es el administrador técnico.","textPreview":"Nadie ve todo por el título. El director de Unión no es el administrador técnico.","textChars":81,"textLines":1,"bbox":[64,628,1080,36]}
+{"kind":"notes","id":"nt/ex6kdf","slide":16,"text":"Síntesis, no auditoría de grants de producción. Si preguntan por coordinador: evidencias de su zona, no camporee.\n\nFuente: 05-matriz-roles-verificada.md"}
+{"kind":"slide","id":"sl/bgu6i2","slide":17,"title":"En implantación, no en toda la Unión","textShapes":11}
+{"kind":"textbox","id":"sh/bmh4vylc","slide":17,"text":"En implantación, no en toda la Unión","textPreview":"En implantación, no en toda la Unión","textChars":36,"textLines":1,"bbox":[64,48,1100,88]}
+{"kind":"textbox","id":"sh/wna543mx","slide":17,"text":"17","textPreview":"17","textChars":2,"textLines":1,"bbox":[1188,668,48,28]}
+{"kind":"textbox","id":"sh/xojmxo3i","slide":17,"text":"Cómo hablarlo","textPreview":"Cómo hablarlo","textChars":13,"textLines":1,"bbox":[64,188,330,80]}
+{"kind":"textbox","id":"sh/ypsn6t43","slide":17,"text":"El producto está modelado. La adopción es territorio por territorio, con piloto.","textPreview":"El producto está modelado. La adopción es territorio por territorio, con piloto.","textChars":80,"textLines":1,"bbox":[420,188,760,80]}
+{"kind":"textbox","id":"sh/jq14zylo","slide":17,"text":"Aún en proceso","textPreview":"Aún en proceso","textChars":14,"textLines":1,"bbox":[64,284,330,80]}
+{"kind":"textbox","id":"sh/kra5832t","slide":17,"text":"Coordinación por zonas y cierre masivo de investiduras. Pedidos de camporee en otra rama.","textPreview":"Coordinación por zonas y cierre masivo de investiduras. Pedidos de camporee en otra rama.","textChars":89,"textLines":1,"bbox":[420,284,760,80]}
+{"kind":"textbox","id":"sh/lsj6183e","slide":17,"text":"Aún no listo","textPreview":"Aún no listo","textChars":12,"textLines":1,"bbox":[64,380,330,80]}
+{"kind":"textbox","id":"sh/6tsnadkz","slide":17,"text":"Historial completo de cambios de sección. Logística de campamento. Operación sin red.","textPreview":"Historial completo de cambios de sección. Logística de campamento. Operación sin red.","textChars":85,"textLines":1,"bbox":[420,380,760,80]}
+{"kind":"textbox","id":"sh/7ulo3ilk","slide":17,"text":"Sin cifras","textPreview":"Sin cifras","textChars":10,"textLines":1,"bbox":[64,476,330,80]}
+{"kind":"textbox","id":"sh/b69cbypo","slide":17,"text":"No hay ahorro, adopción ni disponibilidad medida para esta presentación.","textPreview":"No hay ahorro, adopción ni disponibilidad medida para esta presentación.","textChars":72,"textLines":1,"bbox":[420,476,760,80]}
+{"kind":"textbox","id":"sh/a5gb2t83","slide":17,"text":"Código no equivale a pantalla ensayada. El piloto acota secciones y recorridos.","textPreview":"Código no equivale a pantalla ensayada. El piloto acota secciones y recorridos.","textChars":79,"textLines":1,"bbox":[64,628,1080,36]}
+{"kind":"notes","id":"nt/bgu6i2","slide":17,"text":"Lámina de honestidad: protege la venta. Frases vetadas: ya está en toda la Unión; el coordinador aprueba camporees; Unión cobra en la app; subir la foto ya investe; el informe lo sella Unión.\n\nFuente: 14-mapa-producto-iglesia.md"}
+{"kind":"slide","id":"sl/0cjgh6","slide":18,"title":"Cómo empezar con la iglesia","textShapes":11}
+{"kind":"textbox","id":"sh/qpo76poj","slide":18,"text":"Cómo empezar con la iglesia","textPreview":"Cómo empezar con la iglesia","textChars":27,"textLines":1,"bbox":[64,48,1100,88]}
+{"kind":"textbox","id":"sh/dsf6h47u","slide":18,"text":"18","textPreview":"18","textChars":2,"textLines":1,"bbox":[1188,668,48,28]}
+{"kind":"textbox","id":"sh/sr6p8z6p","slide":18,"text":"Alcance acotado","textPreview":"Alcance acotado","textChars":15,"textLines":1,"bbox":[64,188,330,80]}
+{"kind":"textbox","id":"sh/fuhojep0","slide":18,"text":"Elegir secciones y responsables. No un interruptor nacional.","textPreview":"Elegir secciones y responsables. No un interruptor nacional.","textChars":60,"textLines":1,"bbox":[420,188,760,80]}
+{"kind":"textbox","id":"sh/et87a9of","slide":18,"text":"Primer recorrido","textPreview":"Primer recorrido","textChars":16,"textLines":1,"bbox":[64,284,330,80]}
+{"kind":"textbox","id":"sh/1wzql476","slide":18,"text":"Ingreso, inscripción anual y una evidencia. Camporee o carpeta si el entorno ya los tiene.","textPreview":"Ingreso, inscripción anual y una evidencia. Camporee o carpeta si el entorno ya los tiene.","textChars":90,"textLines":1,"bbox":[420,284,760,80]}
+{"kind":"textbox","id":"sh/0vqpcj6l","slide":18,"text":"Permisos reales","textPreview":"Permisos reales","textChars":15,"textLines":1,"bbox":[64,380,330,80]}
+{"kind":"textbox","id":"sh/vydo7apw","slide":18,"text":"Probar lo permitido y lo denegado con cuentas distintas, no con un solo administrador.","textPreview":"Probar lo permitido y lo denegado con cuentas distintas, no con un solo administrador.","textChars":86,"textLines":1,"bbox":[420,380,760,80]}
+{"kind":"textbox","id":"sh/ux47y5ob","slide":18,"text":"Evaluación","textPreview":"Evaluación","textChars":10,"textLines":1,"bbox":[64,476,330,80]}
+{"kind":"textbox","id":"sh/kbml4729","slide":18,"text":"Incidencias, tiempos reales y capacitación. Luego se amplía el mapa de producto.","textPreview":"Incidencias, tiempos reales y capacitación. Luego se amplía el mapa de producto.","textChars":80,"textLines":1,"bbox":[420,476,760,80]}
+{"kind":"textbox","id":"sh/lcv2dcju","slide":18,"text":"Fechas y responsables se acuerdan con la Unión. Esta lámina no es un contrato.","textPreview":"Fechas y responsables se acuerdan con la Unión. Esta lámina no es un contrato.","textChars":78,"textLines":1,"bbox":[64,628,1080,36]}
+{"kind":"notes","id":"nt/0cjgh6","slide":18,"text":"Demo viva: solo lo ensayado en verde (ensayo-cuentas-ficticias.md). El resto se explica con esta presentación, sin improvisar pantallas.\n\nFuentes: 14; presentacion/ensayo-cuentas-ficticias.md"}
+{"kind":"slide","id":"sl/gl503t","slide":19,"title":"Decisión para la iglesia","textShapes":5}
+{"kind":"textbox","id":"sh/9cnahk3u","slide":19,"text":"Decisión para la iglesia","textPreview":"Decisión para la iglesia","textChars":24,"textLines":1,"bbox":[64,48,1100,88]}
+{"kind":"textbox","id":"sh/m9wrm5k3","slide":19,"text":"19","textPreview":"19","textChars":2,"textLines":1,"bbox":[1188,668,48,28]}
+{"kind":"textbox","id":"sh/na5sfalo","slide":19,"text":"Acordar el piloto y sus responsables","textPreview":"Acordar el piloto y sus responsables","textChars":36,"textLines":1,"bbox":[64,200,1100,120]}
+{"kind":"textbox","id":"sh/07e9kv2d","slide":19,"text":"Definir qué secciones participan, qué se demuestra primero y quién resuelve las excepciones del año. SACDIA queda como memoria y operación del ministerio; la implantación se decide aquí.","textPreview":"Definir qué secciones participan, qué se demuestra primero y quién resuelve las excepciones del año. SACDIA queda como memoria y operació...","textChars":186,"textLines":1,"bbox":[64,360,1100,180]}
+{"kind":"textbox","id":"sh/l8nqd03i","slide":19,"text":"Sin presupuesto ni plazo en esta lámina. El alcance se acuerda con la Unión.","textPreview":"Sin presupuesto ni plazo en esta lámina. El alcance se acuerda con la Unión.","textChars":76,"textLines":1,"bbox":[64,628,1080,36]}
+{"kind":"notes","id":"nt/gl503t","slide":19,"text":"Cerrar con acuerdo, no con roll-out nacional. No presupuesto ni plazo en esta presentación. Si piden el deck corto de 15 minutos, está congelado por separado.\n\nFuente: 14-mapa-producto-iglesia.md"}

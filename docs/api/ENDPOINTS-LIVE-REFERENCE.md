@@ -60,7 +60,9 @@
 | camporee supplies | 29 |
 | catalogs | 16 |
 | admin-certificate-bulk-imports | 6 |
-| certificate-bulk-imports | 6 |
+| certificate-bulk-imports | 13 |
+| certificate-import-institutional-requests | 3 |
+| admin-certificate-import-institutional-requests | 4 |
 | certifications | 25 |
 | class-counselor-assignments | 4 |
 | class-progress-scope | 2 |
@@ -167,16 +169,19 @@
 | PATCH | `/api/v1/activities/:activityId` | JWT | Permisos: activities:update | Actualizar actividad | ActivitiesService.update() | `src/activities/activities.controller.ts` |
 | DELETE | `/api/v1/activities/:activityId` | JWT | Permisos: activities:delete | Desactivar actividad | ActivitiesService.remove() | `src/activities/activities.controller.ts` |
 | POST | `/api/v1/activities/:activityId/image` | JWT | Permisos: activities:update | Subir imagen de actividad | ActivitiesService.uploadImage() | `src/activities/activities.controller.ts` |
-| POST | `/api/v1/activities/:activityId/attendance` | JWT | Permisos: attendance:manage | Registrar asistencia | ActivitiesService.recordAttendance() | `src/activities/activities.controller.ts` |
-| GET | `/api/v1/activities/:activityId/attendance` | JWT | Permisos: attendance:read | Obtener asistencia | ActivitiesService.getAttendance() | `src/activities/activities.controller.ts` |
+| POST | `/api/v1/activities/:activityId/attendance` | JWT | Permisos: attendance:manage | Registrar asistencia confirmada. En virtual solo miembros de la sección | ActivitiesService.recordAttendance() | `src/activities/activities.controller.ts` |
+| GET | `/api/v1/activities/:activityId/attendance` | JWT | Permisos: attendance:read | Obtener asistencia confirmada | ActivitiesService.getAttendance() | `src/activities/activities.controller.ts` |
+| GET | `/api/v1/activities/:activityId/rsvp` | JWT | Permisos: activities:read | Intención de asistencia del usuario (solo virtual) | ActivitiesService.getMyRsvp() | `src/activities/activities.controller.ts` |
+| PUT | `/api/v1/activities/:activityId/rsvp` | JWT | Permisos: activities:read | Marcar going o not_going. No confirma asistencia | ActivitiesService.setRsvp() | `src/activities/activities.controller.ts` |
+| GET | `/api/v1/activities/:activityId/attendance-roster` | JWT | Permisos: attendance:manage | Miembros de la sección con intención y confirmación (solo virtual) | ActivitiesService.getAttendanceRoster() | `src/activities/activities.controller.ts` |
 
 ### admin-auth
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
-| GET | `/api/v1/admin/users/:userId/sessions` | JWT | Global: admin, super-admin; Permisos: users:update_admin | List all active sessions for a user | AdminAuthService.listUserSessions() | `src/admin/admin-auth.controller.ts` |
-| DELETE | `/api/v1/admin/users/:userId/sessions/:sessionId` | JWT | Global: admin, super-admin; Permisos: users:update_admin | Revoke a specific session for a user | AdminAuthService.revokeUserSession() | `src/admin/admin-auth.controller.ts` |
-| DELETE | `/api/v1/admin/users/:userId/sessions` | JWT | Global: admin, super-admin; Permisos: users:update_admin | Revoke all sessions for a user | AdminAuthService.revokeAllUserSessions() | `src/admin/admin-auth.controller.ts` |
+| GET | `/api/v1/admin/users/:userId/sessions` | JWT | Global: USER_MANAGEMENT_ROLES (admin + lf/union/dia); Permisos: users:read_detail; recorte territorial | List all active sessions for a user | AdminAuthService.listUserSessions() | `src/admin/admin-auth.controller.ts` |
+| DELETE | `/api/v1/admin/users/:userId/sessions/:sessionId` | JWT | Global: USER_MANAGEMENT_ROLES; Permisos: users:read_detail; recorte territorial | Revoke a specific session for a user | AdminAuthService.revokeUserSession() | `src/admin/admin-auth.controller.ts` |
+| DELETE | `/api/v1/admin/users/:userId/sessions` | JWT | Global: USER_MANAGEMENT_ROLES; Permisos: users:read_detail; recorte territorial | Revoke all sessions for a user | AdminAuthService.revokeAllUserSessions() | `src/admin/admin-auth.controller.ts` |
 | GET | `/api/v1/admin/users/:userId/mfa/status` | JWT | Global: admin, super-admin; Permisos: users:update_admin | Get MFA enrollment status for a user | AdminAuthService.getUserMfaStatus() | `src/admin/admin-auth.controller.ts` |
 | DELETE | `/api/v1/admin/users/:userId/mfa` | JWT | Global: admin, super-admin; Permisos: users:update_admin | Reset (disable) MFA for a user | AdminAuthService.resetUserMfa() | `src/admin/admin-auth.controller.ts` |
 | POST | `/api/v1/admin/users/:userId/password` | JWT | Global: admin, super-admin; Permisos: users:update_admin | Set a new password for a user | AdminAuthService.setUserPassword() | `src/admin/admin-auth.controller.ts` |
@@ -340,7 +345,7 @@
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
-| GET | `/api/v1/admin/users` | JWT | Global: admin, super-admin, director-lf, assistant-lf, director-union, assistant-union, director-dia, assistant-dia (USER_MANAGEMENT_ROLES, pisa la cerca de clase); Permisos: users:read | Listar usuarios administrativos con alcance por rol (ALL/DIVISION/UNION/LOCAL_FIELD) | AdminUsersService.listUsers() | `src/admin/admin-users.controller.ts` |
+| GET | `/api/v1/admin/users` | JWT | Global: admin, super-admin, director-lf, assistant-lf, director-union, assistant-union, director-dia, assistant-dia (USER_MANAGEMENT_ROLES, pisa la cerca de clase); Permisos: users:read | Listar usuarios administrativos con alcance por rol (ALL/DIVISION/UNION/LOCAL_FIELD). Ordena el conjunto filtrado **antes** de `skip`/`take`. Query: `search`, `role` (OR global o club), `active`, `unionId`, `localFieldId`, `sortBy` (`name` | `created_at`, default `name`), `sortOrder` (`asc` | `desc`, default `asc`), `page`, `limit`. `sortBy=name`: `name`, `paternal_last_name`, `maternal_last_name` (nulls last) + `user_id` asc. `sortBy=created_at`: `created_at` + `user_id` asc. Enum inválido → 400. Cada ítem incluye `roles` (slugs únicos global+club) y `club_assignments` compactos `{ assignment_id, role_name, section_name, club_name }`. El panel de lista muestra un badge por cargo (sin sección; el mismo cargo en varias secciones se colapsa). | AdminUsersService.listUsers() | `src/admin/admin-users.controller.ts` |
 | GET | `/api/v1/admin/users/bulk-template` | JWT | Global: admin, super-admin; Permisos: users:bulk_create; Global: admin, super-admin, director-lf, assistant-lf, director-union, assistant-union, director-dia, assistant-dia | Descarga plantilla .xlsx para carga masiva de usuarios | AdminUsersService.getBulkTemplateBuffer() | `src/admin/admin-users.controller.ts` |
 | GET | `/api/v1/admin/users/:userId` | JWT | Global: admin, super-admin, director-lf, assistant-lf, director-union, assistant-union, director-dia, assistant-dia (USER_MANAGEMENT_ROLES, pisa la cerca de clase); Permisos: users:read_detail | Obtener detalle de usuario validando alcance por rol del actor | AdminUsersService.getUserById() | `src/admin/admin-users.controller.ts` |
 | PATCH | `/api/v1/admin/users/:userId/approval` | JWT | Global: admin, super-admin; Permisos: users:update_admin | Approve or reject a user | AdminUsersService.updateUserApproval() | `src/admin/admin-users.controller.ts` |
@@ -834,21 +839,47 @@ En rama `feat/camporee-supplies`, los mismos `GET`/`POST` de camporee aceptan `s
 | --- | --- | --- | --- | --- | --- | --- |
 | GET | `/api/v1/admin/certificate-bulk-imports/pending` | JWT | Global: super-admin, admin, assistant-admin, director-lf, assistant-lf | Listar cargas por certificado pendientes | AdminCertificateBulkImportsService.listPending() | `src/certificate-bulk-imports/admin-certificate-bulk-imports.controller.ts` |
 | GET | `/api/v1/admin/certificate-bulk-imports/:batchId` | JWT | Global: super-admin, admin, assistant-admin, director-lf, assistant-lf | Obtener detalle de carga por certificado | AdminCertificateBulkImportsService.getDetail() | `src/certificate-bulk-imports/admin-certificate-bulk-imports.controller.ts` |
-| POST | `/api/v1/admin/certificate-bulk-imports/:batchId/approve` | JWT | Global: super-admin, admin, assistant-admin, director-lf, assistant-lf | Aprobar todas las filas pendientes de un lote | AdminCertificateBulkImportsService.approveBatch() | `src/certificate-bulk-imports/admin-certificate-bulk-imports.controller.ts` |
-| POST | `/api/v1/admin/certificate-bulk-imports/:batchId/reject` | JWT | Global: super-admin, admin, assistant-admin, director-lf, assistant-lf | Rechazar un lote completo y solicitar corrección | AdminCertificateBulkImportsService.rejectBatch() | `src/certificate-bulk-imports/admin-certificate-bulk-imports.controller.ts` |
-| POST | `/api/v1/admin/certificate-bulk-imports/:batchId/items/:itemId/approve` | JWT | Global: super-admin, admin, assistant-admin, director-lf, assistant-lf | Aprobar una fila del lote | AdminCertificateBulkImportsService.approveItem() | `src/certificate-bulk-imports/admin-certificate-bulk-imports.controller.ts` |
+| POST | `/api/v1/admin/certificate-bulk-imports/:batchId/approve` | JWT | Global: super-admin, admin, assistant-admin, director-lf, assistant-lf | Rechaza decidir el lote entero. Cada fila se aprueba sola | AdminCertificateBulkImportsService.approveBatch() | `src/certificate-bulk-imports/admin-certificate-bulk-imports.controller.ts` |
+| POST | `/api/v1/admin/certificate-bulk-imports/:batchId/reject` | JWT | Global: super-admin, admin, assistant-admin, director-lf, assistant-lf | Rechaza decidir el lote entero. Cada fila se rechaza sola | AdminCertificateBulkImportsService.rejectBatch() | `src/certificate-bulk-imports/admin-certificate-bulk-imports.controller.ts` |
+| POST | `/api/v1/admin/certificate-bulk-imports/:batchId/items/:itemId/approve` | JWT | Global: super-admin, admin, assistant-admin, director-lf, assistant-lf | Aprobar una fila. Si hay cursado operativo no investido del mismo periodo, exige `reconcile_enrollment_id` y `expected_modified_at` | AdminCertificateBulkImportsService.approveItem() | `src/certificate-bulk-imports/admin-certificate-bulk-imports.controller.ts` |
 | POST | `/api/v1/admin/certificate-bulk-imports/:batchId/items/:itemId/reject` | JWT | Global: super-admin, admin, assistant-admin, director-lf, assistant-lf | Rechazar una fila del lote con motivo | AdminCertificateBulkImportsService.rejectItem() | `src/certificate-bulk-imports/admin-certificate-bulk-imports.controller.ts` |
 
 ### certificate-bulk-imports
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
+| GET | `/api/v1/certificate-bulk-imports` | JWT | Dueño, desde el JWT | Listar expedientes propios | CertificateBulkImportsService.listMine() | `src/certificate-bulk-imports/certificate-bulk-imports.controller.ts` |
 | POST | `/api/v1/certificate-bulk-imports` | JWT | - | Crear un borrador de carga por certificado | CertificateBulkImportsService.createDraft() | `src/certificate-bulk-imports/certificate-bulk-imports.controller.ts` |
-| POST | `/api/v1/certificate-bulk-imports/:batchId/process-ocr` | JWT | - | Procesar OCR de un borrador del miembro | CertificateBulkImportsService.processOcr() | `src/certificate-bulk-imports/certificate-bulk-imports.controller.ts` |
+| POST | `/api/v1/certificate-bulk-imports/:batchId/items` | JWT | Dueño, borrador | Alta manual de fila | CertificateBulkImportsService.addItem() | `src/certificate-bulk-imports/certificate-bulk-imports.controller.ts` |
+| DELETE | `/api/v1/certificate-bulk-imports/:batchId/items/:itemId` | JWT | Dueño, borrador | Quitar fila no enviada | CertificateBulkImportsService.removeItem() | `src/certificate-bulk-imports/certificate-bulk-imports.controller.ts` |
+| POST | `/api/v1/certificate-bulk-imports/:batchId/process-ocr` | JWT | - | Encola la lectura del borrador con Google Vision para JPEG, PNG y WebP. PDF: `CERTIFICATE_IMPORT_OCR_UNSUPPORTED_TYPE`. Sin Redis o sin `GOOGLE_VISION_API_KEY`: `CERTIFICATE_IMPORT_OCR_UNAVAILABLE`, sin `OCR_PROCESSED` | CertificateBulkImportsService.processOcr() | `src/certificate-bulk-imports/certificate-bulk-imports.controller.ts` |
 | GET | `/api/v1/certificate-bulk-imports/:batchId` | JWT | - | Obtener detalle de una carga por certificado | CertificateBulkImportsService.getBatch() | `src/certificate-bulk-imports/certificate-bulk-imports.controller.ts` |
 | PATCH | `/api/v1/certificate-bulk-imports/:batchId/items/:itemId` | JWT | - | Corregir o completar una fila detectada por OCR | CertificateBulkImportsService.updateItem() | `src/certificate-bulk-imports/certificate-bulk-imports.controller.ts` |
 | POST | `/api/v1/certificate-bulk-imports/:batchId/submit` | JWT | - | Enviar carga por certificado a validación de Campo Local | CertificateBulkImportsService.submit() | `src/certificate-bulk-imports/certificate-bulk-imports.controller.ts` |
 | POST | `/api/v1/certificate-bulk-imports/:batchId/items/:itemId/resubmit` | JWT | - | Corregir y reenviar una fila rechazada | CertificateBulkImportsService.resubmitItem() | `src/certificate-bulk-imports/certificate-bulk-imports.controller.ts` |
+| POST | `/api/v1/certificate-bulk-imports/:batchId/files/presign` | JWT | Dueño del lote | Preparar subida firmada de un comprobante | CertificateImportFilesService.presign() | `src/certificate-bulk-imports/certificate-bulk-imports.controller.ts` |
+| POST | `/api/v1/certificate-bulk-imports/:batchId/files/:fileId/confirm` | JWT | Dueño del lote | Confirmar bytes reales y sellar la clave | CertificateImportFilesService.confirm() | `src/certificate-bulk-imports/certificate-bulk-imports.controller.ts` |
+| GET | `/api/v1/certificate-bulk-imports/:batchId/files/:fileId/download` | JWT | Dueño; Campo Local en su ámbito; evidencia institucional solo dueño o super-admin | URL efímera del objeto sellado | CertificateImportFilesService.download() | `src/certificate-bulk-imports/certificate-bulk-imports.controller.ts` |
+| DELETE | `/api/v1/certificate-bulk-imports/:batchId/files/:fileId` | JWT | Dueño, solo expediente editable y sin filas enviadas | Retirar comprobante no enviado | CertificateImportFilesService.remove() | `src/certificate-bulk-imports/certificate-bulk-imports.controller.ts` |
+
+### certificate-import-institutional-requests
+
+Aprobar no crea `enrollments` ni reactiva la clase. En HTTP, Campo Local, admin genérico y Unión reciben `GUARD_PERMISSION_DENIED`. Si el guard no aplica, el servicio responde `CERTIFICATE_IMPORT_INSTITUTIONAL_FORBIDDEN`. En la bandeja común, Unión pasa el alias de `director-lf` y el servicio responde `CERTIFICATE_IMPORT_REVIEWER_SCOPE_REQUIRED`.
+
+| Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
+| --- | --- | --- | --- | --- | --- | --- |
+| POST | `/api/v1/certificate-import-institutional-requests` | JWT | Dueño | Enviar solicitud de Guía Mayor Avanzado o Instructor | InstitutionalCertificateRequestsService.submit() | `src/certificate-bulk-imports/institutional-certificate-requests.controller.ts` |
+| GET | `/api/v1/certificate-import-institutional-requests` | JWT | Dueño | Consultar sus solicitudes | InstitutionalCertificateRequestsService.listMine() | `src/certificate-bulk-imports/institutional-certificate-requests.controller.ts` |
+| GET | `/api/v1/certificate-import-institutional-requests/:requestId` | JWT | Dueño | Detalle, motivo y bloqueo de periodo | InstitutionalCertificateRequestsService.getMine() | `src/certificate-bulk-imports/institutional-certificate-requests.controller.ts` |
+
+### admin-certificate-import-institutional-requests
+
+| Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
+| --- | --- | --- | --- | --- | --- | --- |
+| GET | `/api/v1/admin/certificate-import-institutional-requests` | JWT | Solo super-admin | Bandeja institucional. Query: `page`, `limit`, `status`, `class_id`, `q` | InstitutionalCertificateRequestsService.listForReview() | `src/certificate-bulk-imports/admin-institutional-certificate-requests.controller.ts` |
+| GET | `/api/v1/admin/certificate-import-institutional-requests/:requestId` | JWT | Solo super-admin | Detalle institucional | InstitutionalCertificateRequestsService.getForReview() | `src/certificate-bulk-imports/admin-institutional-certificate-requests.controller.ts` |
+| POST | `/api/v1/admin/certificate-import-institutional-requests/:requestId/approve` | JWT | Solo super-admin | Validar expediente, sin crear `enrollments` | InstitutionalCertificateRequestsService.approve() | `src/certificate-bulk-imports/admin-institutional-certificate-requests.controller.ts` |
+| POST | `/api/v1/admin/certificate-import-institutional-requests/:requestId/reject` | JWT | Solo super-admin | Rechazar con motivo | InstitutionalCertificateRequestsService.reject() | `src/certificate-bulk-imports/admin-institutional-certificate-requests.controller.ts` |
 
 ### certifications
 
@@ -1403,11 +1434,11 @@ Read model de solo lectura. No fusiona folios ni muta `field_payment_orders`, `m
 ### annual-membership
 
 > **Inscripción anual de miembros** — la directiva de la sección destino inscribe a no inscritos del **año vigente**. No copia cargos. D01 bloquea autoactivación del titular.
-> POST crea matrícula de clase en la misma transacción (`NextClassResolver` + `ClassEnrollmentPolicyService` modo `annual` + `ClassEnrollmentWriter`). No usa `ClassesService.enrollUser`. GET une no inscritos locales con graduados de tipo (R14: última clase AV/CQ cursada, edad al inicio del año destino, sección destino activa). Salto AV→CQ / CQ→GM: `NextClassResolver` `crossed_type: true` e inscripción en la sección destino del POST; si el resolver apunta a otra sección, `blocked`. Catálogo incompleto, edad insuficiente, sin sección destino o última GM: `blocked` `ANNUAL_CLASS_POLICY_UNRESOLVED`. Clases GM con `max_duration_years > 1` siguen abiertas (no es este salto). El DTO de resultado no expone `crossed_type`.
+> POST crea matrícula de clase en la misma transacción (`NextClassResolver` + `ClassEnrollmentPolicyService` modo `annual` + `ClassEnrollmentWriter`). No usa `ClassesService.enrollUser`. GET une no inscritos locales con graduados de tipo (R14: última clase AV/CQ cursada, edad al inicio del año destino, sección destino activa). Salto AV→CQ / CQ→GM: `NextClassResolver` `crossed_type: true` e inscripción en la sección destino del POST; si el resolver apunta a otra sección, `blocked`. Catálogo incompleto, edad insuficiente o sin sección destino: `blocked` `ANNUAL_CLASS_POLICY_UNRESOLVED`. Última clase Guía Mayor: `path_complete`, membresía activa y sin inscripción nueva. Clases GM con `max_duration_years > 1` siguen abiertas (no es este salto). El DTO de resultado no expone `crossed_type`.
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
-| GET | `/api/v1/club-sections/:sectionId/annual-continuations` | JWT | Permisos: club_members:approve · `@AuthorizationResource` club_section | Listar no inscritos de la pertenencia de esa sección en el año vigente **y** candidatos de salto de tipo hacia esta sección (última AV→CQ o última CQ→GM, R14). Query: `page`, `limit`, `search`. Respuesta paginada: `{ user_id, name, base_section_id, ecclesiastical_year_id, annual_status, current_role, eligibility, blocked_reason, suggested_class }`. `suggested_class`: `{ status: 'resolved', class_id }` o `{ status: 'blocked', code }` (p. ej. `ANNUAL_CLASS_POLICY_UNRESOLVED`). No lista exclusiva del año pasado. No filtra elegibilidad por `active=true` de cargos históricos. Directivo AV/CQ que retorna a GM (R04) no aparece aquí como graduado de tipo. | AnnualMembershipService.listContinuations() | `src/annual-membership/annual-continuations.controller.ts` |
+| GET | `/api/v1/club-sections/:sectionId/annual-continuations` | JWT | Permisos: club_members:approve · `@AuthorizationResource` club_section | Listar no inscritos de la pertenencia de esa sección en el año vigente **y** candidatos de salto de tipo hacia esta sección (última AV→CQ o última CQ→GM, R14). Query: `page`, `limit`, `search`. Respuesta paginada: `{ user_id, name, base_section_id, ecclesiastical_year_id, annual_status, current_role, eligibility, blocked_reason, suggested_class }`. `suggested_class`: `{ status: 'resolved', class_id }`, `{ status: 'complete' }` cuando Guía Mayor ya es la última clase, o `{ status: 'blocked', code }` (p. ej. `ANNUAL_CLASS_POLICY_UNRESOLVED`). El alta responde `path_complete` sin `enrollment_id` nuevo. No lista exclusiva del año pasado. No filtra elegibilidad por `active=true` de cargos históricos. Directivo AV/CQ que retorna a GM (R04) no aparece aquí como graduado de tipo. | AnnualMembershipService.listContinuations() | `src/annual-membership/annual-continuations.controller.ts` |
 | POST | `/api/v1/club-sections/:sectionId/annual-continuations` | JWT | Permisos: club_members:approve · `@AuthorizationResource` club_section | Inscribir. Body: `{ user_ids: string[] }` 1–100 distintos. Activa `member inactive` del año actual en **esta** sección **o crea** `member` active en destino si el salto de tipo es aceptado y la base no coincide. Matricula la clase resuelta (secuencia en el mismo tipo o clase por edad en el tipo destino). Sin exigir investidura del predecesor. Idempotente `already_enrolled` si ya hay `member active` aquí (`enrollment_id` puede ser `null` en ese outcome). Un director operativo en otra sección no cuenta como inscrito aquí. Lote por usuario: `enrolled\|already_enrolled\|blocked\|failed`. `enrollment_id` en `enrolled`. Actor registrado. Dueño del perfil **no** autoriza este POST. | AnnualMembershipService.continueUsers() | `src/annual-membership/annual-continuations.controller.ts` |
 | POST | `/api/v1/users/:userId/membership/annual-enroll` | JWT | Permisos: registration:complete · Owner bypass (guard) | **D01 pendiente.** Siempre **403** `ANNUAL_ENROLL_REQUIRES_DIRECTIVE`, sin efectos. No éxito engañoso ni `pending`. | AnnualMembershipService.annualEnroll() | `src/annual-membership/annual-enroll.controller.ts` |
 

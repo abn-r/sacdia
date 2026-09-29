@@ -48,7 +48,7 @@ Nota de implementacion:
 | `users:read_detail` | Ver detalle de usuario | `global` o `user` | permiso global o ownership segun ruta | Admin y self-service |
 | `users:update` | Editar usuario | `global` o `user` | permiso global o guard de ownership | Admin y self-service |
 | `clubs:read` | Ver club | `club` | permiso global territorial o contexto club | Admin y App |
-| `clubs:create` | Crear club | `global` | permiso global | Admin |
+| `clubs:create` | Crear club | `global` | permiso global; sin bypass de rol. Seed: admin, super-admin, assistant-admin. No director-lf/assistant-lf | Admin: `/dashboard/clubs/new` e import (`canCreateClubs` / `clubs.create`) |
 | `clubs:update` | Editar club | `club` | permiso + ClubRoles director/deputy/secretary/secretary-treasurer o bypass territorial | Admin y App |
 | `club_sections:update` | Editar seccion | `club` | permiso + ClubRoles director/deputy/secretary/secretary-treasurer o bypass territorial | Admin y App |
 | `clubs:delete` | Desactivar club | `club` | permiso global territorial o active assignment compatible | Admin |

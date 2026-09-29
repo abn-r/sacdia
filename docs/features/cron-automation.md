@@ -107,13 +107,14 @@ Varios jobs están gobernados por `system_config` o feature flags (ver §6) para
 
 ### 5. Finance period closing
 
-- **Archivo**: `sacdia-backend/src/finances/finance-period.service.ts:122`
+- **Archivo**: `sacdia-backend/src/finances/finance-period.service.ts`
 - **Método**: `handleMonthlyClosing()`
 - **Clase**: `FinancePeriodService`
-- **Propósito**: Cierra período financiero del mes anterior para todos los clubs activos. Crea `financePeriodClosing` con breakdown por categoría y sección.
-- **Entidades mutadas**: `financePeriodClosing` (create por club). Solo lectura de `finances`, `club_sections`, `finances_categories`.
+- **Propósito**: Cierra el período financiero del **mes calendario anterior en UTC** para todos los clubs activos. El cron corre `0 0 1 * *` UTC; `previousUtcMonth()` usa `getUTCMonth`/`getUTCFullYear` para no cerrar el mes -2 en zonas UTC-oeste (p. ej. México). Crea o deja intacto `finance_period_closings` con breakdown por categoría y sección.
+- **Entidades mutadas**: `finance_period_closings` (create por club). Solo lectura de `finances`, `club_sections`, `finances_categories`.
 - **Side-effects**: logs por club; batch de 50 clubs por iteración.
 - **Condiciones skip**: skip si ya existe closing para `(club_id, year, month)`; errores por club se loguean y continúan batch.
+- **Rebuild**: `tsx scripts/rebuild-finance-period-closings.ts --apply` regenera meses ya cerrados del año eclesiástico activo con `closed_at` = 00:00 UTC del día 1 del mes siguiente (el instante en que el cron UTC debió correr).
 
 ### 6. Activity reminders
 

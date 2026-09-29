@@ -1,0 +1,341 @@
+[
+  {
+    "kind": "cover",
+    "title": "Administración y seguimiento\nde los clubes juveniles",
+    "notes": "Objetivo: presentar qué organiza SACDIA, quién interviene y qué requiere su adopción. Duración sugerida: 15 minutos. Audiencia: dirección de jóvenes de Unión Mexicana Interoceánica. Portada: imagen conceptual, no fotografía de un evento real. Corte de análisis: 14 de septiembre de 2026. PPTX congelado en semana 3 (15 láminas). No certifica producción.\n\nFuentes: concentrado docs/guides/conocimiento-sistema/; docs/canon/identidad-sacdia.md"
+  },
+  {
+    "kind": "rows",
+    "title": "Qué organiza SACDIA",
+    "rows": [
+      [
+        "Personas",
+        "Participación, responsabilidades y trayectoria institucional."
+      ],
+      [
+        "Secciones de club",
+        "La operación de Aventureros, Conquistadores y Guías Mayores."
+      ],
+      [
+        "Formación",
+        "Avances y evidencias que requieren revisión y reconocimiento."
+      ],
+      [
+        "Periodos",
+        "El contexto anual de membresía y cargos."
+      ]
+    ],
+    "notes": "SACDIA no es solo una app ni una biblioteca. Su propósito es conservar contexto institucional. Presentar esto como alcance del producto; la cobertura operativa de cada módulo se confirma antes del piloto.\n\nFuentes: /Users/abner/Documents/development/sacdia/docs/canon/identidad-sacdia.md; /Users/abner/Documents/development/sacdia/docs/canon/dominio-sacdia.md"
+  },
+  {
+    "kind": "flow",
+    "title": "Club, sección y periodo",
+    "labels": [
+      "Club",
+      "Sección",
+      "Año eclesiástico"
+    ],
+    "desc": [
+      "Identidad institucional que continúa.",
+      "Unidad donde se organiza la operación.",
+      "Contexto de inscripción y responsabilidades."
+    ],
+    "note": "Ejemplo ficticio: Panteras → Panteras · Conquistadores → año vigente.",
+    "notes": "Las flechas expresan contexto organizacional, no una secuencia de trámites. Un club no es sinónimo de cada sección. Una persona puede conservar su cuenta y su historial sin estar inscrita en el periodo actual.\n\nFuentes: /Users/abner/Documents/development/sacdia/docs/canon/dominio-sacdia.md"
+  },
+  {
+    "kind": "table",
+    "title": "Beneficios esperados y sus condiciones",
+    "values": [
+      [
+        "Beneficio",
+        "Mecanismo",
+        "Condición"
+      ],
+      [
+        "Información reunida",
+        "Registros compartidos",
+        "Mantener los datos al día"
+      ],
+      [
+        "Responsabilidades claras",
+        "Permisos por operación",
+        "Configurar cargos y cuentas"
+      ],
+      [
+        "Avance visible",
+        "Evidencias y decisiones",
+        "Atender revisiones y rechazos"
+      ],
+      [
+        "Continuidad anual",
+        "Cuenta, cargo e inscripción separados",
+        "Ejecutar el ciclo anual"
+      ]
+    ],
+    "widths": [
+      345,
+      410,
+      397
+    ],
+    "height": 365,
+    "size": 24,
+    "note": "Son beneficios cualitativos; no se presentan porcentajes de ahorro ni capacidad medida.",
+    "notes": "No sustituir estas condiciones por promesas de automatización total. El valor depende tanto de las reglas del sistema como de responsables que mantengan los datos.\n\nFuentes: /Users/abner/Documents/development/sacdia/docs/canon/identidad-sacdia.md; /Users/abner/Documents/development/sacdia/docs/guides/conocimiento-sistema/01-fundamentos.md",
+    "top": 180
+  },
+  {
+    "kind": "table",
+    "title": "Responsabilidades en la operación",
+    "values": [
+      [
+        "Actor",
+        "Responsabilidad",
+        "Condición de acceso"
+      ],
+      [
+        "Miembro",
+        "Datos propios y participación",
+        "Identidad y recursos propios"
+      ],
+      [
+        "Directiva de sección",
+        "Gestión de miembros",
+        "Permiso y sección vigente"
+      ],
+      [
+        "Revisor autorizado",
+        "Decisión sobre evidencias",
+        "Rol y permiso de revisión"
+      ],
+      [
+        "Campo / Unión",
+        "Supervisión territorial",
+        "Territorio y permisos"
+      ],
+      [
+        "Administración técnica",
+        "Configuración de accesos",
+        "Facultades específicas"
+      ]
+    ],
+    "widths": [
+      315,
+      440,
+      397
+    ],
+    "height": 350,
+    "size": 23,
+    "note": "Un cargo institucional no concede acceso universal ni reemplaza los permisos.",
+    "notes": "Esta es una síntesis de responsabilidades, no una asignación automática a personas ni una certificación de la base de producción. La matriz técnica distingue rutas, bypasses y permisos configurables.\n\nFuentes: /Users/abner/Documents/development/sacdia/docs/guides/conocimiento-sistema/05-matriz-roles-verificada.md",
+    "top": 180
+  },
+  {
+    "kind": "pair",
+    "title": "El acceso depende del contexto",
+    "left": [
+      "Lo que el sistema comprueba",
+      "Identidad y permisos.\n\nSección o territorio del recurso.\n\nVigencia de la responsabilidad."
+    ],
+    "right": [
+      "Lo que no concede acceso",
+      "Conocer un identificador.\n\nVer un botón o un catálogo.\n\nHaber tenido el cargo otro año."
+    ],
+    "note": "El backend decide; las pantallas no sustituyen sus controles.",
+    "notes": "Explicación conceptual: no todos los endpoints ejecutan los controles en idéntico orden. Las asignaciones y permisos son datos configurables. No atribuir al director de Unión el rol técnico admin por el título de su cargo.\n\nFuentes: /Users/abner/Documents/development/sacdia/docs/guides/conocimiento-sistema/05-matriz-roles-verificada.md"
+  },
+  {
+    "kind": "flow",
+    "title": "Ingreso inicial",
+    "labels": [
+      "Cuenta y perfil",
+      "Solicitud",
+      "Aprobación"
+    ],
+    "desc": [
+      "Foto, datos personales, contacto y representante si aplica.",
+      "Territorio, club y sección; la clase la resuelve el backend.",
+      "La directiva autorizada decide si activa la membresía."
+    ],
+    "notes": "Recorrido: autenticación → wizard → membresía pending y enrollment de clase → aprobación. No afirmar correo verificado como requisito del wizard: bloqueo no confirmado. Menores requieren representante legal. La solicitud puede rechazarse, cancelarse o vencer. Fuentes: /Users/abner/Documents/development/sacdia/docs/guides/conocimiento-sistema/06-ingreso-inicial.md; /Users/abner/Documents/development/sacdia/sacdia-backend/src/post-registration/post-registration.service.ts:239-355,459-579; /Users/abner/Documents/development/sacdia/sacdia-backend/src/membership-requests/membership-requests.service.ts:68-201.",
+    "note": "Completar el formulario deja la membresía pendiente, no activa."
+  },
+  {
+    "kind": "flow",
+    "title": "Inscripción en el año vigente",
+    "labels": [
+      "Corte de año",
+      "No inscritos",
+      "Inscripción"
+    ],
+    "desc": [
+      "Cierra cargos vencidos y procesa sucesores programados.",
+      "La directiva consulta a quién falta inscribir en su sección.",
+      "Activa membresía y resuelve la clase aplicable en una transacción."
+    ],
+    "notes": "El corte NO inscribe ni crea clases: puede preparar member inactive del nuevo año. Directiva o actor autorizado necesita club_members:approve sobre sección destino. No es copiar roster anterior. Director en otra sección no es miembro ya inscrito aquí. Conectado en app; no consumo annual-continuations en admin/src. Fuentes: /Users/abner/Documents/development/sacdia/docs/guides/conocimiento-sistema/07-inscripcion-anual.md; /Users/abner/Documents/development/sacdia/sacdia-backend/src/annual-membership/annual-continuations.controller.ts:36-118; /Users/abner/Documents/development/sacdia/sacdia-backend/src/year-cut/year-cut.service.ts:199-324.",
+    "note": "La cuenta continúa. Los cargos no se copian y el titular no puede autoinscribirse."
+  },
+  {
+    "kind": "table",
+    "title": "Resultados y excepciones del ciclo anual",
+    "values": [
+      [
+        "Resultado",
+        "Significado",
+        "Acción del responsable"
+      ],
+      [
+        "Inscrito",
+        "Inscripción completada",
+        "Verificar el resultado del lote"
+      ],
+      [
+        "Ya inscrito",
+        "La pertenencia ya estaba activa",
+        "No duplicar la operación"
+      ],
+      [
+        "Bloqueado",
+        "Una política impide continuar",
+        "Resolver requisitos o excepción"
+      ],
+      [
+        "Fallido",
+        "La operación no pudo completarse",
+        "Revisar motivo y reintento"
+      ]
+    ],
+    "widths": [
+      350,
+      420,
+      382
+    ],
+    "notes": "POST: enrolled, already_enrolled, blocked y failed por persona. Cada persona tiene transacción; lote puede terminar parcialmente. Bloqueo de clase revierte su activación. Annual avanza por trayectoria del mismo tipo, no regla universal por edad. D01/D02 pendientes en documentación. La app permite seleccionar suggested_class bloqueada y recibe error al POST. Fuentes: /Users/abner/Documents/development/sacdia/docs/guides/conocimiento-sistema/07-inscripcion-anual.md; /Users/abner/Documents/development/sacdia/sacdia-backend/src/annual-membership/annual-membership.service.ts:254-526.",
+    "height": 365,
+    "size": 24,
+    "note": "No se automatizan todos los cruces de tipo, clases multianuales o casos de Guías Mayores.",
+    "top": 180
+  },
+  {
+    "kind": "flow",
+    "title": "Registrar evidencia no equivale a validar",
+    "labels": [
+      "Presentación",
+      "Revisión",
+      "Decisión"
+    ],
+    "desc": [
+      "El archivo se incorpora al proceso correspondiente.",
+      "La persona autorizada evalúa la evidencia.",
+      "Aprobación o rechazo con su registro."
+    ],
+    "note": "Aprobar una evidencia no completa por sí solo la clase ni concede investidura.",
+    "notes": "Tres circuitos distintos si preguntan: clase/investidura (ficha 08), especialidad (09), certificación electiva (10). La carpeta anual NO es esa cola (ficha 12). No afirmar que subir cualquier archivo lo envía a revisión. Demostrar solo un recorrido ensayado.\n\nFuentes: 02-revision-evidencias.md; 08-clases-progresivas.md; 09-honores.md; 10-certificaciones.md"
+  },
+  {
+    "kind": "rows",
+    "title": "Lo que corresponde a Unión",
+    "rows": [
+      [
+        "Camporee",
+        "Local y de unión son distintos. Inscribir la sección no inscribe personas."
+      ],
+      [
+        "Cobro",
+        "El campo recauda. El traslado campo–unión queda fuera del sistema."
+      ],
+      [
+        "Carpeta anual",
+        "El campo califica. Unión confirma solo si el folder lo exige."
+      ],
+      [
+        "Informes y tablero",
+        "Se consulta cobertura y PDF. No hay sello de aprobación ni vista SLA."
+      ]
+    ],
+    "note": "El coordinador de zona no aprueba camporee. El home de Unión es el tablero operativo.",
+    "notes": "Lámina de audiencia. Detalle en fichas 11 y 12. No abrir scoring de jueces, pedidos de playeras ni SLA. Flag de órdenes de pago: ON bloquea el register directo. Informes: draft→generated→submitted, sin approved. Carpeta: confirm-union solo director-union/assistant-union.\n\nFuentes: 11-camporees.md; 12-supervision-institucional.md"
+  },
+  {
+    "kind": "flow",
+    "title": "Una plataforma, dos interfaces",
+    "labels": [
+      "App y panel",
+      "API compartida",
+      "Datos y archivos"
+    ],
+    "desc": [
+      "Operación móvil y gestión desde navegador.",
+      "Reglas de negocio y autorización.",
+      "Persistencia e integraciones configuradas."
+    ],
+    "note": "Las interfaces pueden tener distinta cobertura; conectarse a la misma API no garantiza paridad.",
+    "notes": "Diagrama lógico ejecutivo, no arquitectura de despliegue. Backend NestJS modular; app Flutter; panel Next.js. No prometer disponibilidad o capacidad a partir de esta estructura.\n\nFuentes: /Users/abner/Documents/development/sacdia/docs/guides/conocimiento-sistema/04-arquitectura-tecnica.md"
+  },
+  {
+    "kind": "table",
+    "title": "Límites que acompañan la propuesta",
+    "values": [
+      [
+        "Límite",
+        "Implicación para la operación"
+      ],
+      [
+        "Configuración y datos",
+        "Los permisos y periodos deben revisarse con cuentas reales del piloto."
+      ],
+      [
+        "Fuera de esta sesión",
+        "Finanzas, inventario, ranking y SLA del coordinador existen; no se demuestran hoy."
+      ],
+      [
+        "Procesos humanos",
+        "Las inscripciones autorizadas y validaciones requieren responsables."
+      ],
+      [
+        "Diferencias entre interfaces",
+        "La inscripción anual está conectada en app; el panel aún no consume ese flujo."
+      ]
+    ],
+    "widths": [
+      330,
+      822
+    ],
+    "height": 365,
+    "note": "Antes del piloto: ensayar el entorno, resolver permisos y definir tratamiento de excepciones.",
+    "notes": "No certifica despliegue, seguridad integral ni un SLA contractual. El dashboard SLA es otra superficie (admin/coordinator), no el home de Unión. Finanzas/inventario: ficha 13, no el demo. Hallazgos de interfaces: ingreso y ciclo anual.\n\nFuentes: 04-arquitectura-tecnica.md; 07-inscripcion-anual.md; 12-supervision-institucional.md; 13-operacion-seccion.md",
+    "top": 180
+  },
+  {
+    "kind": "rows",
+    "title": "Piloto propuesto",
+    "rows": [
+      [
+        "Alcance acotado",
+        "Seleccionar secciones y responsables institucionales."
+      ],
+      [
+        "Recorridos críticos",
+        "Ingreso, inscripción anual y una evidencia. Camporee o carpeta solo si el entorno ya los tiene."
+      ],
+      [
+        "Controles de acceso",
+        "Probar acciones permitidas y denegadas con cuentas distintas."
+      ],
+      [
+        "Evaluación",
+        "Registrar incidencias, tiempos reales y necesidades de capacitación."
+      ]
+    ],
+    "note": "Propuesta de adopción: el alcance, las fechas y los responsables se acuerdan con la Unión.",
+    "notes": "No es compromiso comercial ni fecha de lanzamiento. Criterios: casos de error, no solo happy path. Recortar el piloto a lo que el ensayo ficticio ya recorrió en verde (ensayo-cuentas-ficticias.md)."
+  },
+  {
+    "kind": "closing",
+    "title": "Decisiones para iniciar",
+    "main": "Definir el piloto y sus responsables",
+    "body": "Acordar qué secciones participan, qué procesos se demostrarán y quién resolverá las excepciones del ciclo anual.",
+    "notes": "Cerrar con acuerdos concretos, no roll-out nacional. Antes de la cita: ensayo con cuentas ficticias, año vigente, flag de órdenes de pago anotado. No hay presupuesto ni plazo en esta presentación."
+  }
+]

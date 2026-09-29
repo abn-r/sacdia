@@ -1,0 +1,319 @@
+{
+  "schema": "openai.presentation.layout/v4",
+  "unit": "px",
+  "slide": {
+    "aid": "sl/pneway",
+    "id": "pneway",
+    "slide": 15,
+    "layoutId": "4488c7e4-d647-44aa-8931-329a231da695",
+    "layoutName": "Title Slide",
+    "layoutType": "title",
+    "masterLayoutId": "deabe122-b298-454f-807c-dcc693bd9ade",
+    "masterLayoutName": "Master",
+    "backgroundColor": "#183D35",
+    "frame": {
+      "left": 0,
+      "top": 0,
+      "width": 1280,
+      "height": 720
+    }
+  },
+  "theme": {
+    "colorSchemeName": "ChatGPT",
+    "colors": {
+      "accent1": "#156082",
+      "accent2": "#E97132",
+      "accent3": "#196B24",
+      "accent4": "#0F9ED5",
+      "accent5": "#A02B93",
+      "accent6": "#4EA72E",
+      "bg1": "#FFFFFF",
+      "bg2": "#000000",
+      "tx1": "#1F1F1F",
+      "tx2": "#FFFFFF",
+      "dk1": "#000000",
+      "lt1": "#FFFFFF",
+      "dk2": "#0E2841",
+      "lt2": "#E8E8E8",
+      "hlink": "#467886",
+      "folHlink": "#96607D"
+    },
+    "typefaces": [
+      "Helvetica Neue"
+    ]
+  },
+  "inheritedLayers": [
+    {
+      "scope": "layout",
+      "id": "4488c7e4-d647-44aa-8931-329a231da695",
+      "name": "Title Slide",
+      "type": "title",
+      "parentLayoutId": "deabe122-b298-454f-807c-dcc693bd9ade",
+      "elements": []
+    },
+    {
+      "scope": "master",
+      "id": "deabe122-b298-454f-807c-dcc693bd9ade",
+      "name": "Master",
+      "type": "master",
+      "elements": []
+    }
+  ],
+  "elements": [
+    {
+      "order": 1,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/6pk3ypwn",
+      "id": "1",
+      "bbox": [
+        64,
+        52,
+        1148,
+        105
+      ],
+      "geometry": "rect",
+      "text": "Decisiones para iniciar",
+      "textPreview": "Decisiones para iniciar",
+      "resolvedFontSize": 44,
+      "resolvedTextStyle": {
+        "fontSize": 44,
+        "typeface": "Helvetica Neue",
+        "color": "#FFFFFF",
+        "bold": true,
+        "alignment": "left",
+        "autoFit": "none",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Decisiones para iniciar"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Decisiones para iniciar",
+          "resolvedTextStyle": {
+            "fontSize": 44,
+            "typeface": "Helvetica Neue",
+            "color": "#FFFFFF",
+            "bold": true
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Decisiones para iniciar",
+              "fontSize": 44,
+              "typeface": "Helvetica Neue",
+              "color": "#FFFFFF",
+              "bold": true
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 2,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/tsbm9kfy",
+      "id": "2",
+      "bbox": [
+        1170,
+        655,
+        54,
+        28
+      ],
+      "geometry": "rect",
+      "text": "15",
+      "textPreview": "15",
+      "resolvedFontSize": 16,
+      "resolvedTextStyle": {
+        "fontSize": 16,
+        "typeface": "Helvetica Neue",
+        "color": "#C4D3CA",
+        "alignment": "left",
+        "autoFit": "none",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "15"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "15",
+          "resolvedTextStyle": {
+            "fontSize": 16,
+            "typeface": "Helvetica Neue",
+            "color": "#C4D3CA"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "15",
+              "fontSize": 16,
+              "typeface": "Helvetica Neue",
+              "color": "#C4D3CA"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 3,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/sr2l0zet",
+      "id": "3",
+      "bbox": [
+        64,
+        218,
+        1060,
+        170
+      ],
+      "geometry": "rect",
+      "text": "Definir el piloto y sus responsables",
+      "textPreview": "Definir el piloto y sus responsables",
+      "resolvedFontSize": 42,
+      "resolvedTextStyle": {
+        "fontSize": 42,
+        "typeface": "Helvetica Neue",
+        "color": "#FFFFFF",
+        "bold": true,
+        "alignment": "left",
+        "autoFit": "none",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Definir el piloto y sus responsables"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Definir el piloto y sus responsables",
+          "resolvedTextStyle": {
+            "fontSize": 42,
+            "typeface": "Helvetica Neue",
+            "color": "#FFFFFF",
+            "bold": true
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Definir el piloto y sus responsables",
+              "fontSize": 42,
+              "typeface": "Helvetica Neue",
+              "color": "#FFFFFF",
+              "bold": true
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 4,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/j29k3axw",
+      "id": "4",
+      "bbox": [
+        64,
+        433,
+        1050,
+        165
+      ],
+      "geometry": "rect",
+      "text": "Acordar qué secciones participan, qué procesos se demostrarán y quién resolverá las excepciones del ciclo anual.",
+      "textPreview": "Acordar qué secciones participan, qué procesos se demostrarán y quién resolverá las excepciones del ciclo anual.",
+      "resolvedFontSize": 28,
+      "resolvedTextStyle": {
+        "fontSize": 28,
+        "typeface": "Helvetica Neue",
+        "color": "#DCE7DC",
+        "alignment": "left",
+        "autoFit": "none",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Acordar qué secciones participan, qué procesos se demostrarán y quién resolverá"
+          },
+          {
+            "index": 2,
+            "text": "las excepciones del ciclo anual."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Acordar qué secciones participan, qué procesos se demostrarán y quién resolverá las excepciones del ciclo anual.",
+          "resolvedTextStyle": {
+            "fontSize": 28,
+            "typeface": "Helvetica Neue",
+            "color": "#DCE7DC"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Acordar qué secciones participan, qué procesos se demostrarán y quién resolverá las excepciones del ciclo anual.",
+              "fontSize": 28,
+              "typeface": "Helvetica Neue",
+              "color": "#DCE7DC"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    }
+  ],
+  "composeRuns": []
+}

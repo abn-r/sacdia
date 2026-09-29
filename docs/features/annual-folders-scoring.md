@@ -173,7 +173,7 @@ Reopen (LF o union): VALIDATED | REJECTED | PREAPPROVED_LF ──> SUBMITTED
 |---|---|
 | `annual_evidence_folder` | puntos reales de Carpeta Anual (`total_earned_points / total_max_points`); el máximo debe coincidir con `annual_evidence_folder.max_points` del ranking efectivo |
 | `monthly_reports_timeliness` | informes mensuales `submitted` a tiempo / meses del año eclesiástico; deadline configurable en `ranking.monthly_report_deadline_day` (default 5) |
-| `finance_compliance` | cierres financieros mensuales a tiempo / 12; deadline configurable en `ranking.finance_closing_deadline_day` (default 5) |
+| `finance_compliance` | cierres financieros mensuales a tiempo / 12; el mes cerrado es el calendario UTC anterior al 1º 00:00 UTC; deadline configurable en `ranking.finance_closing_deadline_day` (default 5, 23:59:59 UTC del mes siguiente) |
 | `institutional_data_completeness` | 10 campos institucionales completos: dirección, horario, director, secretaría, tesorería, nombre, teléfono, email, coordenadas y meta de almas |
 | `activities_registered` | actividades activas de la sección durante el año / `ranking.activities_registered_target` (default 12) |
 | `attendance_participation` | promedio de `weekly_records.attendance` para miembros activos de la sección |

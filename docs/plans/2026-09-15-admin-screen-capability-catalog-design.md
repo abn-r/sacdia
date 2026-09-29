@@ -285,7 +285,7 @@ Hecho:
 - `NAV_ITEM_ACCESS` y `EXTRA_PATH_ACCESS` eliminados; `sidebar-item-access.ts` es adaptador sobre `getScreenViewAny`. `require-page-access.ts` resuelve por catálogo.
 - `path` de pantalla opcional: se toma de la `url` del sidebar con el mismo `id`. Test exige que toda pantalla resuelva path y que toda hoja del sidebar tenga pantalla.
 - Alias de roles (`GLOBAL_ROLE_ALIASES`) en sidebar, page gate y capabilities; test compara con `global-roles.guard.ts`.
-- Usuarios: `useCanManageUsers` y `ALLOWED_PAGE_ROLES` eliminados; toolbar, `/users/new`, `/users/bulk-upload` y ficha (MFA = `update_admin`, familias = `*.read`) usan `canCapability`.
+- Usuarios: `useCanManageUsers` y `ALLOWED_PAGE_ROLES` eliminados; toolbar, `/users/new`, `/users/bulk-upload` y ficha (familias = `*.read`) usan `canCapability`. Las capabilities `sessions.read` / `sessions.revoke` se retiraron del catálogo: el panel ya no expone la pestaña Sesiones (API admin de sesiones se conserva).
 - Picker (`permission-picker.tsx`) y matriz (`permissions-matrix.tsx`) agrupan por pantalla con `groupByScreen`; huérfanos en "Otros permisos"; aviso de rol requerido por pantalla. Matriz: checkbox "Pantalla completa" tri-estado y cascadas (`planToggle`/`planBundle`) con un solo `PUT` (`setRolePermissionsAction`).
 - i18n: `rbac.pages.matrix.{fullScreen,otherGroup,requiresRoles,bundleUpdatedTitle,bundleUpdatedDesc}`, `rbac.permissionPicker.{otherGroup,requiresRoles}`, `rbac.permissions.{users:create,users:bulk_create}` en es/en/fr/pt-BR; `messages.d.ts` regenerado.
 - Corrección: `catalogs-club-ideals` / `catalogs-club-types` usaban claves inexistentes (`club_ideals:read`, `club_types:read`); ahora `catalogs:read` + admin, como el API.
