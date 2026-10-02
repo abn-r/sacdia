@@ -1245,3 +1245,14 @@ Veo que necesitas [X]. Podríamos usar [librería Y] que:
 
 **Última actualización**: 2026-03-09  
 **Revisado por**: Usuario - Stack completo definido
+
+
+## Decisión vigente: OCR de certificados con ADC (2026-10-01)
+
+Bibliotecas **autorizadas explícitamente por el usuario**: `@google-cloud/vision` (SDK oficial 6.1.1) y `pdf-lib` (1.17.1), solo backend. Reemplazan autenticación por API key y permiten analizar PDFs reales. No añadir una dependencia PDF ni credenciales Google al frontend.
+
+- `GoogleVisionCertificateOcrProvider`: cliente singleton lazy por instancia Nest, ADC validado antes de RPC, `fallback: false` (gRPC), Buffer/protobuf. Evita expansión base64 REST/JSON para conservar el límite binario existente 10 MiB. No GCS, objeto público ni renovación OAuth manual. Envío gRPC limitado a 12 MiB, recepción 16 MiB; deadline 25 s/sin retries SDK; cola BullMQ independiente mantiene dos intentos/concurrencia 1.
+- PDF de 1–5 páginas completas; `pdf-lib` valida estructura/conteo y rechaza cifrado sin `ignoreEncryption`. Helper compartido en confirmación y OCR legado; verificación mínima de cierre/xref, **no** conformidad ISO completa ni aislamiento/límite de CPU del parser. Buffer validado se sella con clave PDF exclusiva por intento para no depender de staging mutable/concurrente.
+- ADC opcional al arrancar: `GOOGLE_APPLICATION_CREDENTIALS`, `GOOGLE_CLOUD_PROJECT`, `GOOGLE_CLOUD_QUOTA_PROJECT`. `GOOGLE_VISION_API_KEY` no autentica este proveedor. Sin Redis/ADC no hay éxito OCR, pero captura manual con evidencia válida sigue posible.
+- Tradeoff: SDK/gRPC agrega dependencias; parser de entrada es una superficie no confiable y requiere monitorización. Pin `@grpc/grpc-js` 1.14.5 en lockfile para la corrección auditada; no afirmar que todo el audit del backend está limpio: persisten hallazgos ajenos del baseline (Joi, brace-expansion, engine.io). Sin prueba Vision live ni despliegue en este trabajo.
+- [Runbook Mac/Render, privilegios y operación](../guides/google-vision-certificate-ocr.md). Canonical workflow de aprobación humana/investidura no cambia.

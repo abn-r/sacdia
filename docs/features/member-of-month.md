@@ -45,8 +45,9 @@ La feature combina consulta del ganador vigente, historial paginado, evaluacion 
 ### App Movil
 - **Surface verificada en Units**:
   - `UnitsListView` muestra una card destacada cuando existe ganador actual
+  - Quien tiene `mom:read` ve en la lista de unidades un acceso al historial, aunque el mes en curso aún no tenga ganador. El detalle de unidad no muestra ese acceso; el historial también se abre desde la notificación al director
   - `MemberOfMonthHistoryView` expone historial con scroll infinito
-  - `PushNotificationService` deep-linkea notificaciones `member_of_month` al historial y `member_of_month_director` a la vista de unidades
+  - `PushNotificationService` deep-linkea `member_of_month` y `member_of_month_director` al historial de la sección cuando el payload trae `club_id` y `section_id`
 - No se verifico consumo movil del endpoint manual de evaluacion
 
 ### Base de datos

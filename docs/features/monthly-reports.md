@@ -72,6 +72,8 @@ La feature esta implementada en backend con IDs UUID y estados `draft -> generat
 ### PDF real
 
 - El PDF se genera en backend con `pdfkit` y se guarda en R2; `POST generate`/`regenerate` encolan el render (202). GET pdf repara el artefacto si el worker aún no terminó.
+- La clave en R2 sigue siendo `{prefijo}/{año}/{mes}/{club_enrollment_id}/{monthly_report_id}.pdf`. El nombre que ve el usuario al descargar o compartir es `informe-mensual-{club}-{tipo}-{mes}-{año}.pdf` (ejemplo: `informe-mensual-Senderos-del-Rey-Conquistadores-agosto-2026.pdf`). Club y tipo salen de la matrícula, sin acentos ni caracteres fuera de letras, números y guiones. El mes va en español. `Content-Disposition` lo fija el backend; el admin lo lee (CORS expone ese header) y la app guarda el temporal con ese nombre para compartir.
+- La misma estructura aplica al trimestral (`informe-trimestral-{club}-{tipos}-{trimestre}-{año}.pdf`, por ejemplo `1er-trimestre-2026`) y al anual (`informe-anual-{club}-{tipos}-{año}.pdf`, con el rango del año eclesiástico, por ejemplo `2025-2026`). Esos dos informes son del club, no de una matrícula: si hay varias secciones, los tipos van juntos y ordenados. El PDF se genera al descargar; no hay artefacto en R2.
 - HTTP JSON serializa `pdf_size_bytes` como `number` (Prisma `BigInt` no es JSON-safe; list/get/generate/submit lo convierten).
 - Solo se habilita si el informe tiene `snapshot_data` y estado `generated` o `submitted`
 - Usa formato carta y arma al menos estas secciones:

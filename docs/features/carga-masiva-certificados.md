@@ -21,7 +21,7 @@ OCR propone, el miembro confirma y Campo Local valida. La aprobacion aplica a la
 - Controlador admin: `AdminCertificateBulkImportsController`
 - Servicio workflow: `CertificateBulkImportsService`
 - Servicio aplicacion: `CertificateBulkImportApplicationService`
-- OCR seam: `CertificateOcrProvider` + `NoopCertificateOcrProvider`
+- OCR seam: `CertificateOcrProvider` + `GoogleVisionCertificateOcrProvider` (cliente oficial, ADC).
 
 ### Endpoints miembro
 
@@ -104,7 +104,13 @@ Tablas finales existentes:
 
 ## Reglas confirmadas el 2026-09-21
 
-La aprobación de una fila CLASS ya acredita el hecho histórico. La subida nueva pide una URL firmada, confirma los bytes y guarda la clave sellada. La lectura automática usa Google Cloud Vision sobre JPEG, PNG y WebP, y solo propone filas. Un PDF no se envía. La petición del miembro encola el trabajo en `certificate-import-ocr` (concurrencia 1, dos intentos). No comparte el worker de finanzas ni rankings. Sin Redis no llama al proveedor y no escribe `OCR_PROCESSED`. Sin `GOOGLE_VISION_API_KEY`, con un PDF, con un archivo de más de 10 MB o si Vision responde cuota, el worker responde error y el expediente se completa a mano. La app abre la revisión aunque la lectura falle, y espera unos segundos si la cola aceptó el trabajo. El comprobante se abre con la descarga firmada, no con `file_url`. La bandeja institucional ya tiene contrato, persistencia y panel exclusivo del superadministrador.
+La aprobación de una fila CLASS ya acredita el hecho histórico. La subida nueva pide una URL firmada, confirma los bytes y guarda la clave sellada. La lectura automática usa Google Cloud Vision con **Application Default Credentials (ADC)** sobre JPEG, PNG, WebP y PDF completos de **1 a 5 páginas**, con máximo binario de **10 MiB** por documento. `GOOGLE_VISION_API_KEY` ya no autentica este proveedor. El SDK oficial usa gRPC con bytes, no REST/base64, GCS ni una URL pública.
+
+La petición del miembro encola el trabajo en `certificate-import-ocr` (concurrencia 1, dos intentos); no comparte el worker de finanzas ni rankings. Aceptar la cola **no** significa que OCR terminó. Sin Redis la petición responde `CERTIFICATE_IMPORT_OCR_UNAVAILABLE`. ADC ausente/inválido, cuota, deadline o fallo de lectura se detectan en el worker; no se registra `OCR_PROCESSED` ante fallo o respuesta PDF incompleta. La app espera brevemente tras encolar y abre la revisión incluso cuando falla la lectura: el miembro puede agregar/corregir filas a mano si conserva evidencia confirmada válida. El OCR no verifica autenticidad, no aprueba ni acredita el certificado.
+
+En confirmación, el backend analiza el PDF real con `pdf-lib`: rechaza cifrado, corrupto/truncado, sin páginas o con más de cinco páginas antes de sellar/confirmar. Sella **el mismo Buffer validado** en una clave exclusiva por intento (`batches/{batchId}/sealed/{fileId}-{attemptUuid}.pdf`), no una copia posterior del staging mutable. Antes de OCR se vuelve a validar el PDF, incluidos comprobantes antiguos. La verificación de cierre/xref es mínima, no una certificación completa ISO ni un límite de CPU/descompresión del parser. La app informa el máximo de páginas sin duplicar el parser. [Operación, identidad y limitaciones](../guides/google-vision-certificate-ocr.md).
+
+El comprobante se abre con la descarga firmada, no con `file_url`. La bandeja institucional mantiene contrato, persistencia y panel exclusivo del superadministrador.
 
 Un expediente admite un documento activo. El dueño descarga su comprobante sellado. Campo Local descarga los de su campo. Una evidencia `INSTITUTIONAL` solo la descargan el dueño y el superadministrador. No hay fallback a URL pública. El bucket `R2_BUCKET_CERTIFICATE_IMPORTS` es opcional al arrancar; sin esa configuración la subida responde `CERTIFICATE_IMPORT_STORAGE_UNAVAILABLE`.
 
@@ -119,7 +125,7 @@ Tres vías distintas:
 
 ## Despliegue
 
-El orden es schema aditivo, backend con la cola apagada si no hay Redis, y después los clientes. Sin `GOOGLE_VISION_API_KEY` la lectura no corre y el expediente se completa a mano. La clave se restringe a Cloud Vision API. Ante una falla, se dejan de aceptar cargas y aprobaciones nuevas; la lectura y la auditoría se conservan. No se borran hechos ya acreditados ni se restauran índices viejos. `scripts/audit-certificate-imports.ts` solo informa y rechaza `--apply`. No usa `DATABASE_URL`.
+El orden es schema aditivo, backend con la cola apagada si no hay Redis, y después los clientes. ADC debe estar disponible para el worker; sin credenciales o Redis no hay lectura exitosa y el expediente válido puede completarse a mano. Usar una identidad dedicada por ambiente y privilegios mínimos; nunca subir ADC personal a Render. El código está implementado en worktrees aislados, **no desplegado**. Configuración Render y smoke OCR real siguen pendientes de autorización. Ver [runbook](../guides/google-vision-certificate-ocr.md). Ante una falla, se dejan de aceptar cargas y aprobaciones nuevas; la lectura y la auditoría se conservan. No se borran hechos ya acreditados ni se restauran índices viejos. `scripts/audit-certificate-imports.ts` solo informa y rechaza `--apply`. No usa `DATABASE_URL`.
 
 ### Estados de la bandeja institucional
 
@@ -151,11 +157,14 @@ Ya usados por el runtime, como `BadRequestException` con mensaje estable:
 - `CERTIFICATE_IMPORT_CLASS_NOT_INSTITUTIONAL`: la clase no es Guía Mayor Avanzado ni Instructor.
 - `CERTIFICATE_IMPORT_REQUEST_NOT_FOUND`
 - `CERTIFICATE_IMPORT_STATUS_INVALID`
-- `CERTIFICATE_IMPORT_OCR_UNAVAILABLE`: no hay `GOOGLE_VISION_API_KEY`, o no hay Redis. El expediente se completa a mano.
-- `CERTIFICATE_IMPORT_OCR_UNSUPPORTED_TYPE`: el comprobante no es JPEG, PNG ni WebP. Un PDF no se envía a Vision.
+- `CERTIFICATE_IMPORT_OCR_UNAVAILABLE`: Redis ausente al encolar, o credenciales ADC/autorización no disponibles en el worker. Evidencia válida confirmada permite captura manual.
+- `CERTIFICATE_IMPORT_OCR_UNSUPPORTED_TYPE`: el comprobante no es JPEG, PNG, WebP ni PDF.
 - `CERTIFICATE_IMPORT_OCR_QUOTA`: Vision rechazó la lectura por cuota.
-- `CERTIFICATE_IMPORT_OCR_FILE_TOO_LARGE`: el archivo supera 10 MB, el tope del comprobante.
-- `CERTIFICATE_IMPORT_OCR_FAILED`: la lectura no devolvió texto usable. El archivo sellado permanece.
+- `CERTIFICATE_IMPORT_OCR_FILE_TOO_LARGE`: el archivo supera 10 MiB, el tope binario del comprobante.
+- `CERTIFICATE_IMPORT_OCR_FAILED`: fallo/deadline, páginas faltantes/duplicadas/extra o con error, o ausencia de texto usable. El archivo sellado válido permanece.
+- HTTP 400 `CERTIFICATE_IMPORT_PDF_TOO_MANY_PAGES`: dividir o extraer hasta cinco páginas y volver a subir.
+- HTTP 400 `CERTIFICATE_IMPORT_PDF_ENCRYPTED`: quitar contraseña/protección y volver a subir.
+- HTTP 400 `CERTIFICATE_IMPORT_PDF_INVALID`: volver a exportar el PDF y subirlo; nunca se muestran detalles internos del parser.
 
 La aprobación de `GM-01` es la confirmación de sustitución: reutiliza la fila existente, la pasa a `HISTORICAL_CERTIFICATE` / `INVESTIDO` y conserva el mismo `enrollment_id`. `investiture_date` es la fecha del certificado. `enrollment_date` de un alta nueva es la fecha técnica del registro, no el inicio del cursado. Un hecho final idéntico solo vincula el comprobante. Cada fila se decide sola. El lote sigue `SUBMITTED` mientras quede alguna fila sin decidir. Pasa a `APPROVED` cuando todas quedaron aprobadas y a `NEEDS_CORRECTION` cuando todas quedaron decididas y al menos una fue rechazada. `PARTIALLY_APPROVED` permanece en el enum y en el filtro de la bandeja para expedientes anteriores; una decisión nueva no lo asigna. Una fila institucional no se decide en esta bandeja.
 

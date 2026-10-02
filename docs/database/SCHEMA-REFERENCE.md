@@ -22,6 +22,48 @@ Referencia humana concisa del schema Prisma vigente.
 
 ## Correcciones de drift relevantes
 
+### `local_field_class_thresholds` (2026-09-30)
+
+- Tabla nueva, no aplicada a producción en este cambio.
+- Clave `(local_field_id, ecclesiastical_year_id)`, `minimum_percent` 0–100, default 80.
+- La usa el cálculo de requisitos de clase. Sin fila, el porcentaje efectivo es 80.
+- Migración: `sacdia-backend/prisma/migrations/20260930120000_local_field_class_thresholds/migration.sql`.
+
+### `local_field_investiture_windows` (2026-10-01)
+
+- Tabla nueva, no aplicada a producción en este cambio.
+- Clave `(local_field_id, ecclesiastical_year_id)`. `start_date` y `end_date` inclusivos, con `start_date <= end_date`.
+- Sin fila, si el 1 de octubre y el 20 de diciembre intersectan el año, la ventana efectiva es ese recorte. Si no hay intersección y no hay una fila válida dentro del año, no hay ventana: la API responde `start_date` y `end_date` en null y la lectura no inserta. Una fila fuera del año no abre la ventana ni se reescribe al leer.
+- No sustituye `investiture_config.investiture_date` ni cierra el pipeline anterior.
+- Migración: `sacdia-backend/prisma/migrations/20261001130000_local_field_investiture_windows/migration.sql`.
+
+### `investiture_pastor_quota` y `district_investiture_pastors` (2026-10-01)
+
+- Tablas nuevas, no aplicadas a producción en este cambio.
+- El cupo es una fila global (`quota_id = 1`) con `slots >= 0`. Sin fila, el valor efectivo es 2 y la lectura no inserta.
+- Cambiar `slots` y dar de alta o reactivar toman el mismo `pg_advisory_xact_lock` antes de leer ocupación o cupo. El caso sin fila queda cubierto. Bajar el cupo no borra asignaciones.
+- La asignación es `(districlub_type_id, user_id)`. `active` distingue el cupo ocupado. Como máximo, los `slots` vigentes por distrito.
+- El distrito de una autorización se lee por `clubs.church_id` → `churches.districlub_type_id`, no por `clubs.districlub_type_id`.
+- No sustituye el rol global `pastor` ni cierra el pipeline anterior.
+- Migración: `sacdia-backend/prisma/migrations/20261001143000_district_investiture_pastors/migration.sql`.
+
+### `investiture_authorization_requests` e `investiture_authorization_people` (2026-10-01)
+
+- Tablas nuevas, no aplicadas a producción en este cambio.
+- Una solicitud pertenece a una sección y a un año. Las personas guardan clase, enrollment, fecha y estado.
+- Estados: `PENDING`, `INVESTED`, `REJECTED_BY_PERSON`, `REJECTED_BY_SYSTEM`, `REMOVED`, `CLOSED_YEAR`.
+- `authorization_comment`, `rejection_reason` y `system_reason` guardan el comentario opcional, el motivo humano y el texto largo del sistema. Autorizar escribe `INVESTED` y pasa el enrollment a `INVESTIDO` sin `FIELD_APPROVED`. El rechazo humano escribe `REJECTED_BY_PERSON` y no cambia el enrollment. Quien ya no cumple queda `REJECTED_BY_SYSTEM` con `resolution_code` `REQUIREMENTS`.
+- `single_slot` true es Aventureros o Conquistadores regulares: una fila `PENDING` por persona. false es la excepción de Guía Mayor: una `PENDING` por persona y clase.
+- Quitar usa `resolution_code` `REMOVED`. Un pendiente de alguien que ya está `INVESTIDO` en esa clase pasa a `REMOVED` con `resolution_code` `ALREADY_INVESTED`.
+- Presentar, agregar y resolver toman, en este orden y dentro de la misma transacción, `pg_advisory_xact_lock` de la sección y el año (`investiture-authorization-section:`), luego el de cada usuario (`investiture-authorization-user:`) y luego el de cada enrollment (`investiture-authorization-enrollment:`). El de sección cubre el alta del grupo aunque todavía no exista la cabecera. Agregar a una cabecera explícita, bajo ese candado, no la reactiva si otra de la misma sección y año ya tiene pendientes. Quitar y cambiar fecha siguen tomando solo el candado de usuario. El cierre de una fila por fin de año usa el mismo orden de sección, usuario y enrollment, y solo escribe si sigue `PENDING`.
+- Escribir progreso, evidencia, envío o revisión de ese enrollment toma el mismo candado de enrollment y vuelve a leer el pendiente antes de guardar. La subida no toca almacenamiento si ya hay pendiente. El borrado de almacenamiento ocurre después de esa comprobación.
+- Índices únicos parciales, solo en el SQL: una `PENDING` por `(user_id, class_id)` y una `PENDING` con `single_slot` true por `user_id`. Prisma no los expresa. El modelo tampoco declara las llaves hacia `club_sections`, `ecclesiastical_years` ni `enrollments`; esas llaves están en el SQL.
+- `prisma migrate diff` contra el esquema no aplica esos índices ni esas llaves. No sustituye la migración.
+- No sustituye el pipeline anterior ni marca `locked_for_validation`.
+- Migración de las tablas: `sacdia-backend/prisma/migrations/20261001193000_investiture_authorization_requests/migration.sql`. Los tres textos van en `sacdia-backend/prisma/migrations/20261002183000_investiture_authorization_resolution/migration.sql`. Ninguna está aplicada a producción.
+
+## Correcciones anteriores
+
 ### `users`
 
 - Incluye `email_verified`, `approval_status` y `rejection_reason`.

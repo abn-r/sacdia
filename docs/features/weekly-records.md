@@ -50,7 +50,7 @@ El modelo vigente es por unidad + usuario + semana **domingo–sábado** (hora `
 - La lista movil filtra unidades por seccion activa del contexto; una unidad creada en Aventureros no debe mostrarse al cambiar a otra seccion del mismo club
 - La UI movil incluye acciones por miembro para asignar todos los puntos configurados o limpiar todos los puntos
 - La UI movil renderiza `boolean_full` como switch/chip si/no y `numeric` como selector numerico con maximo
-- Tambien existe data layer para listar, crear y actualizar weekly records, pero en este batch no se verifico una pantalla movil dedicada de historial tabular equivalente al admin
+- `UnitPointsHistoryView`, abierta desde el detalle de la unidad, lista en solo lectura los puntos por miembro de las semanas que caen en el año eclesiástico activo. La captura sigue limitada a la semana vigente.
 
 ### Base de datos
 - `weekly_records` - registro cabecera por unidad/usuario/semana/anio con asistencia/puntualidad legacy, total, `created_by` y `active`

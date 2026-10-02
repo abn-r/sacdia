@@ -4,12 +4,12 @@
 
 **Goal:** El directivo de la sección marca en la app a quienes cumplen, y un pastor del distrito o el Campo Local los autoriza en el panel dentro de la ventana configurada. `INVESTIDO` solo existe después de esa autorización.
 
-**Architecture:** Una solicitud pertenece a una sola sección y agrupa el envío y el correo. El resultado y el bloqueo de progreso son por persona y por clase. La ventana del Campo gobierna la presentación y la autorización; los recordatorios por correo tienen frecuencia según el rol. El pipeline actual club → coordinación → campo deja de ser la vía operativa para llegar a `INVESTIDO`. Los certificados históricos no cambian.
+**Architecture:** Una solicitud pertenece a una sola sección y agrupa el envío y el correo. El resultado y el bloqueo de progreso son por persona y por clase. La ventana del Campo gobierna la presentación y la autorización; los recordatorios por correo tienen frecuencia según el rol. El pipeline actual club → coordinación → campo deja de ser la vía operativa para llegar a `INVESTIDO`. Se conserva el historial de certificados ya registrado; las nuevas acreditaciones de clases deben validar la edad histórica antes de aceptarse.
 
 **Tech Stack:** NestJS, Prisma, PostgreSQL, Next.js admin, Flutter app, correo Resend, bandeja de notificaciones existente.
 
-- **Estado:** acuerdo funcional del 2026-09-28, actualizado con las decisiones de revisión hasta el 2026-09-29. Sin implementación.
-- **Cambios de esta revisión:** solicitud de una sola sección; fechas sobre personas seleccionadas; excepción GM por clase sin ampliar inscripciones; bloqueo de progreso y resolución concurrente; ventana operativa sin plazo individual de siete días; permisos de consulta/edición de fechas; cierre anual sin arrastre y recordatorios acumulativos por rol.
+- **Estado:** acuerdo funcional del 2026-09-28, actualizado con las decisiones de revisión hasta el 2026-10-01. Implementación parcial; ver los informes de implementación y revisión independiente en `docs/reviews/`. W1 fue corregido y cerrado en revisión independiente; la fase 2 continúa parcial y el cambio de vía y despliegue siguen bloqueados.
+- **Cambios de esta revisión:** solicitud de una sola sección; fechas sobre personas seleccionadas; excepción GM por clase sin ampliar inscripciones; bloqueo de progreso y resolución concurrente; ventana operativa sin plazo individual de siete días; permisos de consulta/edición de fechas; cierre anual sin arrastre; recordatorios acumulativos y separados por rol; logros al confirmar la investidura; validación preventiva de edad histórica en certificados de clases.
 - **Reemplaza:** `docs/plans/2026-09-21-investiture-ceremony-functional-design.md` para este alcance. Ese documento no se implementa.
 - **No es contrato runtime.** Al implementar hay que actualizar `docs/features/validacion-investiduras.md`, `docs/api/` y `docs/database/`.
 
@@ -90,7 +90,7 @@ La fecha de investidura y los extremos de la ventana son días civiles, sin hora
 | IA-20 | La fecha es obligatoria. Quienes se marcan juntos salen con la misma fecha. |
 | IA-21 | Al agregar más personas, se muestra la fecha anterior. Si se cambia en ese momento, el cambio vale solo para quienes se están agregando. |
 | IA-22 | Se aceptan fechas futuras, de hoy y pasadas, si caen en la ventana del Campo y en el año eclesiástico en curso. |
-| IA-23 | La ventana por defecto es del 1 de octubre al 20 de diciembre de ese año. Si alguna de esas fechas cae fuera de `ecclesiastical_years.start_date` / `end_date`, el valor por defecto se recorta al rango del año. |
+| IA-23 | La ventana por defecto es del 1 de octubre al 20 de diciembre de ese año, recortada a `ecclesiastical_years.start_date` / `end_date`. Si no hay intersección y no existe configuración explícita válida, la ventana permanece cerrada: no se permite presentar, agregar personas ni autorizar. No se sustituye el período vacío por todo el año. Un editor autorizado según IA-24 puede configurar un rango válido dentro del año en curso; siguen aplicando IA-27 e IA-29. |
 | IA-24 | `director-lf` y `assistant-lf` del Campo, `admin` y `super-admin` pueden mover o ampliar los dos extremos según su alcance. No tienen que seguir en octubre–diciembre, pero sí dentro del año eclesiástico en curso. Unión y división sólo consultan. |
 | IA-25 | Si un cambio de ventana deja una fecha pendiente afuera, hay que corregirla antes de autorizar. La corrección aplica una misma fecha válida a todas las personas pendientes seleccionadas. No modifica personas no seleccionadas ni quien ya está `INVESTIDO`. Pueden corregirla el director, el secretario o el secretario-tesorero de esa sección, o `super-admin`. |
 | IA-26 | Aunque la fecha siga siendo válida, el director, el secretario o el secretario-tesorero de la sección pueden cambiarla para los pendientes seleccionados. El cambio aplica a todos los seleccionados, sin tocar a los demás ni a los `INVESTIDO`. La nueva fecha debe caer en el año y en la ventana vigentes. |
@@ -99,6 +99,8 @@ La fecha de investidura y los extremos de la ventana son días civiles, sin hora
 | IA-29 | Pasado el fin del año, o cerrado administrativamente ese año, no se modifica la fecha ni se autoriza. La ventana no puede superar `end_date` ni reabrir solicitudes de un año cerrado. |
 
 El ejemplo de ventana del 1 de octubre al 10 de diciembre ilustra una configuración de un Campo; no reemplaza la preconfiguración de IA-23. Cada Campo puede ajustar su rango dentro del año.
+
+**Aclaración aprobada el 2026-10-01 (W1):** si el año eclesiástico va del 1 de enero al 30 de junio, no intersecta el período predeterminado de octubre–diciembre. Sin configuración explícita, la lectura debe comunicar que no hay ventana operativa y que hace falta configurarla, sin insertar una fila ni inventar fechas de apertura. Configurarla no habilita días fuera del rango guardado ni reabre un año terminado o cerrado. La corrección del backend fue verificada independientemente y W1 está cerrado en el árbol de trabajo sin commit. No cierra la fase 2, no autoriza despliegue y no apaga el pipeline anterior.
 
 `admin` y `super-admin` no obtienen permiso para autorizar por poder editar la ventana, ni dentro ni fuera de ella. `super-admin` conserva la edición del porcentaje cuando ya no puede el Campo y la corrección de fechas pendientes que quedaron fuera de la ventana. Cambiar la fecha individual ya no reinicia ningún plazo de siete días.
 
@@ -134,6 +136,10 @@ Las notificaciones de resultado son in-app, por la bandeja existente (`src/notif
 
 Estos correos de presentación y las notificaciones de resultado son distintos de los recordatorios periódicos de la sección 3.7. Para los recordatorios se usa únicamente correo; no se necesita crear una bandeja personal de notificaciones en el panel.
 
+| ID | Regla |
+| --- | --- |
+| IA-51 | La evaluación y concesión de logros asociada a la investidura ocurre únicamente después de confirmar la autorización y el cambio a `INVESTIDO`, nunca al presentar la solicitud. Se conserva el evento existente `class.completed` y sus criterios de logros, sin crear logros nuevos ni duplicar efectos por reintentos. Un rechazo, retiro, cierre anual o transacción fallida no concede el logro de investidura. |
+
 ### 3.6 Qué ve cada quien
 
 | Dónde | Qué |
@@ -166,7 +172,8 @@ Todos se envían a las **10:00 a. m. en `local_fields.timezone`**, no a una hora
 | IA-46 | El correo informa cuántas solicitudes siguen pendientes y permite abrirlas en el panel. Una solicitud parcialmente resuelta cuenta como pendiente mientras tenga al menos una persona pendiente; las personas ya resueltas no se presentan como pendientes de validar. Se respeta el alcance territorial del destinatario. |
 | IA-47 | Si termina la ventana y aún quedan pendientes, los recordatorios continúan con la misma frecuencia. Deben indicar que la ventana está cerrada y que es necesario ampliarla para autorizar, siempre dentro del año. El pastor solicita esa ampliación al Campo; el recordatorio no le concede permisos para editarla. |
 | IA-48 | Sin solicitudes pendientes no se envía recordatorio. Al terminar o cerrarse administrativamente el año, cesan los recordatorios de esas solicitudes aunque el proceso de cierre todavía esté pendiente de ejecución. No se arrastran al año siguiente. |
-| IA-49 | El envío debe admitir reintentos sin duplicar un mismo recordatorio programado. Antes de enviarlo se vuelve a comprobar el alcance, el año y los pendientes. Esta protección técnica no cambia la regla de dos correos iniciales por rol de IA-37. |
+| IA-49 | El envío debe admitir reintentos sin duplicar un mismo recordatorio programado para el mismo destinatario, rol y alcance. Antes de enviarlo se vuelve a comprobar el alcance, el año y los pendientes. Esta protección técnica no fusiona correos de roles distintos ni cambia los dos correos iniciales de IA-37. |
+| IA-50 | Una persona que sea pastor y director o asistente del Campo recibe dos recordatorios separados el lunes, uno por cada rol, si existen pendientes en ambos alcances. Miércoles y viernes recibe solo el pastoral. Compartir cuenta o dirección de correo no elimina un rol destinatario; `admin` y `super-admin` siguen sin recibir recordatorios por esos roles. |
 
 ### 3.8 Orden de requisitos y controles
 
@@ -176,6 +183,20 @@ Todos se envían a las **10:00 a. m. en `local_fields.timezone`**, no a una hora
 4. **Resolver:** comprobar nuevamente actor, territorio, estado pendiente, año, ventana, fecha, progreso y duración. Confirmar cada resultado de manera atómica con su enrollment y auditoría; emitir las notificaciones solo por resultados confirmados.
 5. **Dar seguimiento:** enviar los recordatorios según rol, incluyendo pendientes acumulados. El vencimiento de la ventana no equivale al cierre anual.
 6. **Cerrar el año:** cerrar definitivamente los pendientes como no investidos, conservar el historial y detener sus recordatorios, sin alterar la política anual de inscripción y continuidad.
+
+### 3.9 Prevención de certificados incompatibles con la edad
+
+Los certificados de clases son una vía de acreditación histórica distinta de la solicitud operativa, pero no pueden aceptar una clase que la persona todavía no podía cursar por edad en el año acreditado. La validación debe prevenir el dato inconsistente, no aceptarlo y después cerrar la solicitud actual para ocultar el conflicto.
+
+| ID | Regla |
+| --- | --- |
+| IA-52 | Para acreditar un certificado de clase se resuelve el año eclesiástico de su fecha de realización y se calcula la edad con la fecha de nacimiento completa al inicio de ese año, usando el mismo criterio temporal del postregistro. Debe alcanzar la edad mínima de esa clase en el catálogo. No basta la edad actual ni restar únicamente los números de año. |
+| IA-53 | El backend valida al confirmar los datos del ítem como listo para enviar, al enviar o reenviar el lote y nuevamente al aprobar cada ítem de clase, incluidas las aprobaciones masivas. Se reutiliza un criterio compartido; una llamada directa a la API, un reintento o datos modificados después del envío no pueden omitirlo. |
+| IA-54 | Sin fecha de nacimiento válida, edad mínima definida o un año eclesiástico inequívoco para la fecha del certificado, no se acepta el ítem para validación ni se acredita. El error debe indicar qué dato falta o por qué la edad no corresponde; no se presume una edad ni se acepta por omisión. Se conservan las comprobaciones existentes de fecha futura, catálogo, permisos y reconciliación. |
+| IA-55 | Subir el archivo o extraerlo por OCR no equivale a aceptar sus datos: un ítem incompatible puede conservarse como borrador para corregirlo, pero no quedar listo, enviarse ni aprobarse. Un fallo de esta validación no crea un enrollment `INVESTIDO`, no reconcilia ni modifica el enrollment operativo o su solicitud pendiente, y no emite eventos ni concede logros de acreditación. |
+| IA-56 | Se compara la edad histórica con el mínimo de la clase acreditada; no se exige que sea la clase que hoy correspondería por edad ni se introduce una edad máxima. Tampoco se impone una prohibición general por coincidir con una inscripción actual: los casos compatibles siguen las reglas existentes de reconciliación y Guías Mayores. Esta validación no borra ni reescribe certificados ya acreditados; cualquier inconsistencia previa requiere inventario y tratamiento aprobado. |
+
+**Ejemplo de regresión:** nacimiento el 1 de enero de 2016, clase Amigo con edad mínima de 10 y años eclesiásticos que comienzan el 1 de enero. El postregistro de 2026 asigna Amigo a los 10 años; un certificado de Amigo fechado en 2025 se bloquea porque al inicio de ese año tenía 9. La solicitud operativa de 2026 permanece sin cambios. En cambio, un certificado de una clase anterior con edad histórica suficiente no se rechaza solo porque hoy la persona sea mayor.
 
 ## 4. Textos cerrados
 
@@ -206,6 +227,8 @@ La app ya tiene pendientes, envío e historial en `sacdia-app/lib/features/inves
 
 Los certificados históricos (`enrollment_record_kind = HISTORICAL_CERTIFICATE`) no entran en esta solicitud.
 
+La revisión del 2026-09-30 comprobó que `ClassAssignmentResolverService` asigna la clase del postregistro por edad al inicio del año, pero `certificate-bulk-imports` no consulta nacimiento ni edad mínima al enviar o aprobar. Una prueba aislada con los servicios reales y base de datos simulada reprodujo el ejemplo de Amigo de la sección 3.9. No es evidencia de casos existentes en producción. La nueva validación está pendiente de implementación.
+
 ## 6. Datos nuevos
 
 Estas piezas requieren diseño e implementación para el flujo nuevo. Sus nombres son conceptuales, no nombres definitivos de tablas ni un contrato de schema. Se reutilizan las entidades y mecanismos existentes cuando corresponda.
@@ -218,7 +241,7 @@ Estas piezas requieren diseño e implementación para el flujo nuevo. Sus nombre
 | Ventana del Campo | `local_field_id`, `ecclesiastical_year_id`, inicio y fin inclusivos. Habilita presentación y autorización. Por defecto, IA-23. Lectura y edición según la sección 2. |
 | Solicitud | Una sección, su club, año eclesiástico, quién la creó y cuándo. Puede agrupar clases distintas, pero nunca secciones distintas. |
 | Persona en la solicitud | Persona, clase y enrollment asociado, fecha, estado pendiente / investido / rechazado por persona / rechazado por sistema / quitado / cerrado por fin de año. Quién autorizó o rechazó, cuándo, comentario opcional, motivo humano, motivo del sistema. |
-| Seguimiento de envíos | Identidad de la ejecución programada y su destinatario/alcance, estado de envío y reintentos; permite evitar duplicados sin perder recordatorios ante fallos. La solución concreta se define en el diseño técnico. |
+| Seguimiento de envíos | Identidad de la ejecución programada y su destinatario, rol y alcance, estado de envío y reintentos; permite evitar duplicados sin fusionar roles distintos ni perder recordatorios ante fallos. La solución concreta se define en el diseño técnico. |
 
 El estado de la persona en la solicitud no reemplaza el enum `investiture_status_enum` con una cadena paralela de club, coordinación y campo. Al autorizar, el enrollment pasa a `INVESTIDO`. Un rechazo o retiro libera el bloqueo de solicitud de ese enrollment, no los bloqueos de año cerrado o estado terminal. Permite corregir y volver a marcar si sigue siendo elegible. El fin de año no lo pasa a `INVESTIDO` ni lo marca con el texto de falta de requisitos.
 
@@ -232,7 +255,28 @@ Esta actualización es únicamente documental: las fases siguientes son trabajo 
 
 Definir primero los contratos backend de solicitud, selección de personas, cambio de fecha, resolución y configuración: DTOs, estados, permisos por acción, alcance territorial, errores de negocio y concurrencia. Definir la consistencia entre registro, enrollment, auditoría y envío de comunicaciones. No asumir endpoints nuevos a partir de los del pipeline anterior.
 
+Incluir los errores de validación de edad histórica y datos faltantes de certificados, con mensajes accionables para app y panel. Definir cómo se confirma la acreditación usando los datos revalidados, sin una carrera entre comprobación y escritura. No crear una excepción administrativa que omita la edad mínima.
+
 **Validaciones:** matriz de permisos de la sección 2; transición desde cada estado; selección de una sola sección; protección de solicitudes activas simultáneas; cierre manual y automático idempotente. Documentar el contrato antes de integrarlo en app y panel. El ajuste del admin es funcional y de integración, no un rediseño visual.
+
+### Fase 0B — Validación preventiva de certificados de clases
+
+Cerrar esta brecha antes de desplegar el nuevo flujo operativo. No depende de crear solicitudes ni recordatorios.
+
+**Archivos:** `sacdia-backend/src/certificate-bulk-imports/certificate-bulk-imports.service.ts`, `sacdia-backend/src/certificate-bulk-imports/certificate-bulk-imports-application.service.ts` y sus pruebas `.spec.ts`. Reutilizar el cálculo de edad de `sacdia-backend/src/common/services/class-assignment-resolver.service.ts` y la resolución existente del año del certificado mediante una validación compartida, sin reutilizar la selección de la clase de mayor edad como criterio para certificados anteriores. Integrar los errores en los consumidores de certificados de app y panel sin rediseñarlos.
+
+**Secuencia:** primero agregar la prueba de regresión y comprobar que falla por aceptación indebida; después implementar la validación compartida y conectarla a todas las rutas de IA-53; finalmente ejecutar las pruebas del módulo y verificar que la regresión y los casos válidos pasan. No ejecutar builds.
+
+**Pruebas:**
+
+- El ejemplo de Amigo de la sección 3.9 se bloquea al marcar listo, enviar, reenviar y aprobar, también mediante API directa y aprobación masiva. No crea historial investido ni modifica el pendiente de 2026.
+- Edad histórica exactamente igual al mínimo permite continuar con las demás validaciones; un año menos lo impide. Cubrir cumpleaños antes, el día y después del inicio del año eclesiástico, usando mes y día completos.
+- El cumpleaños posterior al inicio del ciclo no cambia la edad de referencia para acreditar ese ciclo. Cubrir un año eclesiástico cuyo inicio no sea el 1 de enero.
+- Faltan nacimiento o mínimo, o la fecha corresponde a ningún año o a más de uno: error explícito, sin acreditar ni enviar el ítem.
+- Cargar un archivo/OCR permite corregir un borrador inválido; el OCR o el estado recibido del cliente no sustituyen la validación del backend.
+- Si nacimiento, fecha, clase o mínimo cambian después del envío, la aprobación usa los datos vigentes y bloquea la incompatibilidad. Una carrera con su modificación no confirma una acreditación basada en datos que dejaron de ser válidos.
+- Un certificado históricamente válido de una clase anterior sigue siendo admisible para una persona mayor. Coincidir con una inscripción actual no omite la reconciliación explícita existente ni las restricciones de Guías Mayores.
+- Fallar la validación no deja efectos parciales de acreditación, no cierra la solicitud operativa y no emite eventos/logros de investidura. Los certificados previamente acreditados siguen legibles y no se reescriben.
 
 ### Fase 1 — Porcentaje del Campo
 
@@ -246,13 +290,25 @@ Definir primero los contratos backend de solicitud, selección de personas, camb
 
 **Pruebas:** el año nuevo nace del 1 de octubre al 20 de diciembre, recortado al rango del año. Se rechazan extremos fuera del año o un inicio posterior al fin. `director-lf`, `assistant-lf`, `admin` y `super-admin` pueden editar según su alcance. Unión y división consultan sus Campos, pero no editan, tampoco mediante llamadas directas a la API. No se leen ni editan Campos ajenos al alcance. El inicio y el último día son inclusivos según la zona local. La misma ventana bloquea presentación, adiciones y autorización fuera de rango. Editarla no otorga permiso de autorización ni de edición del porcentaje.
 
+**Regresión obligatoria W1 antes de cerrar esta fase:**
+- Año activo `2026-01-01`–`2026-06-30`, sin configuración, día local `2026-02-15`: lectura sin escrituras, ausencia explícita de ventana operativa y `allowsOperation = false`. No devolver todo el año como apertura ni fabricar un rango invertido para simular cierre.
+- Tras guardar un rango válido con un editor autorizado, se permite operar únicamente dentro de ese rango y del año activo. Año terminado o inactivo continúa bloqueado, incluso para `super-admin`.
+- Con intersección parcial se conserva el recorte; con año enero–diciembre se conserva octubre 1–diciembre 20. Mantener pruebas de límites inclusivos, zona horaria y permisos.
+- Cubrir helper, servicio y respuesta HTTP del caso sin intersección; documentar la representación pública de ausencia de ventana en `docs/api/` y sincronizar `docs/features/validacion-investiduras.md`. Reemplazar la expectativa anterior de apertura anual, sin borrar la evidencia histórica de la revisión.
+
 ### Fase 3 — Pastores del distrito
 
 **Archivos:** schema nuevo, asignación desde Campo y unión, lectura para saber quién autoriza.
 
 **Pruebas:** el cupo global arranca en 2. `super-admin` lo cambia y el tope vale para todos los distritos. Asignan `director-lf`, `assistant-lf`, `director-union` y `assistant-union`, solo dentro de su alcance territorial. No se asigna un pastor de más. Los dos cupos quedan habilitados para autorizar. El distrito se resuelve por iglesia del club, no por un dato suelto del usuario.
 
+La corrección P3-1 fue cerrada en la octava revisión independiente del 2026-10-01: 234 pruebas de regresión y 7 de concurrencia en PostgreSQL real, exclusivo y temporal. El cambio de cupo y el alta o la reactivación toman el mismo candado advisory antes de leer, también sin fila de cupo. El backend de cupos/asignaciones queda verificado en ese alcance y permite continuar con fase 4; no certifica UI ni integración operativa completa, no cierra la fase 2, no autoriza despliegue y no apaga el pipeline anterior. Los specs HTTP sustituyen guard y Prisma. La prueba PostgreSQL no cubre HTTP ni los `CHECK` exclusivos del SQL de la migración de pastores. Ver `docs/reviews/investidura-autorizacion-independent-review.md`.
+
 ### Fase 4 — Marcar, quitar y fecha en la app
+
+El backend de esta fase está en el árbol de trabajo, en el módulo hermano `sacdia-backend/src/investiture-requests/`, y quedó verificado en el alcance de la undécima revisión independiente. La fase completa no está terminada: no incluye la pantalla de `sacdia-app`. No certifica UI, autenticación real ni la aplicación de la migración. La fase 2 sigue parcial. No hay despliegue y el pipeline anterior sigue activo.
+
+La undécima revisión independiente del 2026-10-02 cierra P4-4 residual. Se verificaron `INVESTITURE_REQUEST_STALE` cuando otra cabecera está activa, reutilización sin otra activa y ambos órdenes de la carrera agregar/presentar, sin mover personas ni perder pendientes en el GET. Pasaron 291 pruebas de regresión, 9 PostgreSQL y 4 escenarios de aceptación independiente. P4-1, P4-2 y P4-3 permanecen cerrados. Puede continuar el desarrollo de fase 5, sin certificar UI, autenticación real ni aplicación de la migración. El despliegue sigue bloqueado y el pipeline anterior activo. Detalle y límites en `docs/reviews/investidura-autorizacion-independent-review.md`.
 
 **Archivos:** módulo nuevo de solicitud en `sacdia-backend/src/investiture/` o un módulo hermano. App: flujo nuevo en `sacdia-app/lib/features/investiture/`, sin reutilizar el envío a validación como si fuera esta solicitud.
 
@@ -276,6 +332,8 @@ Definir primero los contratos backend de solicitud, selección de personas, camb
 
 ### Fase 5 — Autorizar en el panel
 
+El backend de la resolución está en el árbol, en `sacdia-backend/src/investiture-requests/`, y espera revisión. No incluye la pantalla del panel ni los correos. No aprueba la fase. No hay despliegue y el pipeline anterior sigue activo. La pantalla de la app de la fase 4 sigue pendiente.
+
 **Archivos:** resolución del flujo nuevo en `sacdia-backend/src/investiture/` o módulo hermano; integración admin en `sacdia-admin/src/components/investiture/`, separada de `investiture-client-page.tsx` del pipeline viejo. El enlace del correo abre esta solicitud.
 
 **Pruebas:**
@@ -291,6 +349,7 @@ Definir primero los contratos backend de solicitud, selección de personas, camb
 - Rechazo humano sin motivo se rechaza. El comentario de autorización puede ir vacío.
 - Unos quedan investidos y otros pendientes en la misma solicitud.
 - El enrollment autorizado queda `INVESTIDO` sin pasar por `FIELD_APPROVED`.
+- `class.completed` activa la evaluación de logros existente solo después de confirmar la investidura. Presentar, rechazar, quitar, cerrar el año o fallar la transacción no concede ese logro; reintentar la misma autorización no duplica eventos ni efectos.
 - Ante autorización/rechazo simultáneos gana la primera decisión confirmada; la otra recibe aviso de resolución previa. También se protege la carrera con retiro y cierre anual.
 - Fallar antes de confirmar no deja el registro, el enrollment y la auditoría en estados distintos. Reintentar una decisión confirmada no duplica efectos ni comunicaciones.
 
@@ -303,6 +362,7 @@ Definir primero los contratos backend de solicitud, selección de personas, camb
 **Pruebas de recordatorios:**
 
 - Pastor: lunes, miércoles y viernes. Campo: solo lunes. Todos a las 10:00 a. m. locales, con casos de Campos en distintas zonas horarias.
+- Una misma cuenta con rol pastoral y de director/asistente del Campo recibe dos recordatorios el lunes si ambos alcances tienen pendientes; miércoles y viernes, solo el pastoral. Los reintentos deduplican dentro del mismo rol y ejecución, nunca entre roles.
 - El resumen del Campo agrupa todo su pendiente acumulado: una solicitud de hace dos semanas aparece en ambos lunes si sigue pendiente. No filtrar solo por fecha de creación desde el último corte.
 - Una solicitud parcialmente resuelta cuenta una vez y muestra como accionables solo las personas pendientes.
 - Solo se incluyen solicitudes del distrito o Campo del destinatario. No se envían correos a `admin` ni a `super-admin` por esos roles.
@@ -319,7 +379,7 @@ Definir primero los contratos backend de solicitud, selección de personas, camb
 
 ### Fase 8 — Apagar la vía vieja
 
-Dejar de aceptar transiciones nuevas del pipeline club → coordinación → campo hacia `INVESTIDO`. Conservar la lectura del historial ya grabado y los certificados históricos. Quitar de la app y del admin las acciones que envían, aprueban o invisten por esa vía. Cubrir también aliases de enrollments (`submit-for-validation`, `validate`, `investiture`) y operaciones masivas: no pueden quedar rutas alternativas que eludan el flujo nuevo.
+Dejar de aceptar transiciones nuevas del pipeline club → coordinación → campo hacia `INVESTIDO`. Conservar la lectura del historial ya grabado y los certificados históricos; su nueva acreditación queda sujeta a la fase 0B. Preservar en la autorización nueva el evento `class.completed` que hoy dispara `markInvestido`, conforme a IA-51. Quitar de la app y del admin las acciones que envían, aprueban o invisten por esa vía. Cubrir también aliases de enrollments (`submit-for-validation`, `validate`, `investiture`) y operaciones masivas: no pueden quedar rutas alternativas que eludan el flujo nuevo.
 
 **Condición de despliegue:** inventariar los expedientes del pipeline anterior antes de retirarlo. La regla de no arrastre entre años está cerrada; no equivale a haber aprobado una conversión o un reinicio masivo de expedientes del mismo año. Si existen pendientes de ese año en producción, documentar y aprobar su tratamiento antes del cambio de vía, sin perder historia ni desbloquear duplicados.
 
@@ -332,6 +392,7 @@ Actualizar los contratos antes de integrar consumidores y mantener la documentac
 - `docs/features/validacion-investiduras.md`
 - `docs/api/ENDPOINTS-LIVE-REFERENCE.md`
 - `docs/api/FRONTEND-INTEGRATION-GUIDE.md`
+- Contratos y documentación funcional de certificados: criterio de edad histórica, datos obligatorios, errores al preparar/enviar/aprobar y conservación de las reglas de reconciliación existentes.
 - `docs/database/SCHEMA-REFERENCE.md` y `docs/database/schema.prisma`
 - `docs/features/clases-progresivas.md`, por el porcentaje 80 y la continuidad sin investidura previa
 - `docs/features/communications.md`, por los recordatorios de investidura y su diferencia frente a las notificaciones de resultado
@@ -345,6 +406,7 @@ Actualizar los contratos antes de integrar consumidores y mantener la documentac
 - Plazo individual de siete días después de la fecha: lo reemplaza la ventana operativa del Campo.
 - Solicitudes que mezclen secciones o acceso de la directiva a solicitudes de otra sección.
 - Ampliar el número o tipo de inscripciones simultáneas permitidas para Guías Mayores.
+- Reescribir certificados ya acreditados o corregir automáticamente datos históricos inconsistentes. La validación preventiva de nuevas acreditaciones sí está incluida.
 - Crear notificaciones periódicas o una bandeja personal nueva en el panel para estos recordatorios.
 - Enviar recordatorios a `admin` o `super-admin` por esos roles.
 - Trasladar o reabrir solicitudes pendientes en el año siguiente.

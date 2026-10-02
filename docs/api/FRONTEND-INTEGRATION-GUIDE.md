@@ -47,6 +47,72 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 ---
 
+## Actualizacion 2026-09-30 (Edad histórica del certificado)
+
+No hay endpoints nuevos. Estas respuestas salen de las rutas de carga por certificado y de la bandeja institucional.
+
+- `CERTIFICATE_IMPORT_BIRTHDAY_REQUIRED`: la persona no tiene fecha de nacimiento.
+- `CERTIFICATE_IMPORT_CLASS_MINIMUM_AGE_REQUIRED`: la clase no tiene `minimum_age`.
+- `CERTIFICATE_IMPORT_AGE_BELOW_MINIMUM`: la edad al inicio del año eclesiástico de `completed_at` es menor que el mínimo. `namedArgs` trae `age` y `minimumAge`.
+- Siguen vigentes `CERTIFICATE_IMPORT_DATE_REQUIRED`, `CERTIFICATE_IMPORT_YEAR_NOT_FOUND` y `CERTIFICATE_IMPORT_YEAR_AMBIGUOUS`.
+- Alta que quedaría lista, envío, reenvío y aprobación de fila o de solicitud institucional rechazan con esos códigos y no acreditan la clase.
+- `PATCH .../items/:itemId` con `mark_as_ready: true` y edad inválida no guarda la fila.
+- El mismo `PATCH` sobre una fila de clase que ya está `READY`, omitiendo `mark_as_ready` o enviándolo en `false`, guarda la corrección y deja la fila en `NEEDS_REVIEW` si la edad ya no alcanza.
+- El porcentaje de requisitos de clase es el del Campo (`local_field_class_thresholds.minimum_percent`, default 80). Una inscripción cruzada usa el Campo de su sección de origen. El detalle y el listado colectivo usan el mismo número.
+
+## Actualizacion 2026-10-01 (Porcentaje de clase del Campo)
+
+`GET` y `PATCH /api/v1/local-fields/:localFieldId/class-thresholds/:ecclesiasticalYearId`.
+
+- Lectura y escritura: `director-lf` y `assistant-lf` en su Campo, y `super-admin` en cualquiera. Admin, unión, división y otro Campo responden `GUARD_PERMISSION_DENIED`.
+- Sin fila, `minimum_percent` es 80 y `configured` es false. No se crea la fila al leer.
+- `can_edit` dice si ese usuario puede guardarlo ahora.
+- El cuerpo del PATCH es `{ "minimum_percent": 90 }`, entero de 0 a 100. Si el valor no pasa esa forma (`101`, `-1`, `90.5`, `"90"`, `null`), la ruta responde HTTP 400 del `I18nValidationPipe`: `statusCode`, `message` en arreglo y `error: "Bad Request"`. Esa respuesta no incluye `code`. `CLASS_THRESHOLD_PERCENT_INVALID` queda para llamadas internas al servicio, no para el cliente de esta ruta.
+- El director y el asistente pueden guardarlo hasta el 30 de junio a las 23:59 en la zona del Campo, si ese momento cae dentro del año pedido. Después, `CLASS_THRESHOLD_EDIT_CLOSED`. `super-admin` sigue pudiendo guardarlo dentro de ese año y recibe el mismo 403 fuera del año.
+- Campo o año inexistente: `CLASS_THRESHOLD_FIELD_NOT_FOUND` o `CLASS_THRESHOLD_YEAR_NOT_FOUND`.
+
+## Actualizacion 2026-10-01 (Ventana de investidura del Campo)
+
+`GET` y `PATCH /api/v1/local-fields/:localFieldId/investiture-windows/:ecclesiasticalYearId`.
+
+- Sin fila y con intersección, `start_date` y `end_date` son el 1 de octubre y el 20 de diciembre recortados al año eclesiástico. `configured` es false, `operational` es true y la lectura no crea la fila.
+- Sin fila y sin intersección, `start_date` y `end_date` son `null`, `configured` es false y `operational` es false. Esa es la ausencia de ventana: no se inventan fechas ni se abre el año completo. `can_edit` puede seguir en true para quien puede guardar un rango válido.
+- `operational` dice si existe un rango. No dice si el día local de hoy cae dentro. Presentar y agregar personas usan ese predicado en las rutas de solicitud. Autorizar todavía no tiene ruta.
+- Una fila guardada fuera del año, con inicio posterior al fin o con un día imposible no abre la ventana. La lectura no la reescribe ni la borra.
+- Consultan sus Campos: director y asistente del Campo, admin, assistant-admin, unión, división y super-admin. No leen un Campo fuera de su alcance.
+- Guardan, mientras el año está activo y el día local cae dentro de ese año: director y asistente solo en su Campo, admin y assistant-admin en su alcance, super-admin en cualquiera. Unión y división reciben `GUARD_PERMISSION_DENIED` al guardar. Fuera de ese año, o con el año inactivo, `INVESTITURE_WINDOW_EDIT_CLOSED`.
+- El cuerpo es `{ "start_date": "2026-10-01", "end_date": "2026-12-20" }`. Los dos días son inclusivos en la zona del Campo. Deben quedar dentro del año y el inicio no puede ser posterior al fin: `INVESTITURE_WINDOW_OUTSIDE_YEAR`, `INVESTITURE_WINDOW_START_AFTER_END`. Un día imposible (`2026-02-31`) es `INVESTITURE_WINDOW_DATE_INVALID`. Si el texto no tiene forma `YYYY-MM-DD`, el `I18nValidationPipe` responde HTTP 400 con `statusCode`, `message` y `error`, sin `code`.
+- `can_edit` no significa permiso para autorizar ni para cambiar el porcentaje de clase. Las rutas del pipeline anterior siguen activas y no consultan esta ventana.
+- Presentar y agregar personas usan el mismo predicado: abierto desde el primer día local hasta el último, inclusive. Autorizar todavía no tiene ruta. Esta ventana no inviste.
+
+## Actualizacion 2026-10-01 (Pastores del distrito)
+
+`GET` y `PATCH /api/v1/investiture-pastor-quota`. `GET` y `POST /api/v1/districts/:districtId/investiture-pastors`. `DELETE` de esa asignación por `userId`. `GET /api/v1/clubs/:clubId/investiture-authorizers`.
+
+- Sin fila, `slots` es 2 y `configured` es false. La lectura no crea la fila. `can_edit` es true solo para `super-admin`.
+- Solo `super-admin` cambia el entero. El mismo tope vale para todos los distritos. No puede bajar de los pastores ya activos en algún distrito: `INVESTITURE_PASTOR_QUOTA_BELOW_ASSIGNMENTS`. Ese cambio y las altas o reactivaciones se coordinan en la misma transacción, también cuando todavía no hay fila de cupo. La lectura no toma ese candado ni inserta la fila.
+- Asignan, dentro de su alcance, director y asistente del Campo y de la unión. `super-admin`, admin y división no asignan por esos roles. Un director de Campo no asigna el distrito de otro Campo. La unión sí asigna los distritos de sus Campos.
+- El usuario asignado necesita el rol global `pastor`. Los dos cupos activos quedan con `can_authorize: true`. Un tercero recibe `INVESTITURE_PASTOR_QUOTA_FULL`. Quitar libera el cupo y deja `can_authorize` en false.
+- Quién autoriza por un club se resuelve con la iglesia del club, no con `clubs.districlub_type_id` ni con un dato del usuario. `resolved_from` es `church`.
+- Esta asignación no inviste, no rechaza y no pasa por `submit`, `club-approve`, `coordinator-approve`, `field-approve` ni `invest`.
+
+## Actualizacion 2026-10-01 (Solicitud de investidura por autorización)
+
+`POST /api/v1/club-sections/:sectionId/investiture-requests`. `GET` de esa ruta con `ecclesiastical_year_id`. `POST /api/v1/investiture-requests/:requestId/people`. `DELETE .../people/:personId`. `PATCH .../dates`. Para autorizar: `GET /api/v1/investiture-requests?ecclesiastical_year_id=`, `GET /api/v1/investiture-requests/:requestId` y `POST .../resolutions`.
+
+- La presentan el director, el secretario o el secretario-tesorero de esa sección y año. El subdirector recibe 403 `INVESTITURE_REQUEST_FORBIDDEN` también al leer, agregar, quitar y cambiar la fecha. `super-admin` solo cambia la fecha.
+- El día local fuera de la ventana impide presentar y agregar, aunque la fecha de investidura sea válida. Corregir la fecha de quienes ya están pendientes sí se puede con el día local fuera de la ventana, si el año sigue abierto y la fecha nueva entra en la ventana y en el año.
+- Agregar con otra fecha no reescribe a quienes ya estaban. Cambiar fecha aplica una sola fecha a los pendientes seleccionados. Si uno ya no está pendiente, no cambia a ninguno.
+- Aventureros y Conquistadores: una solicitud activa por persona. Guía Mayor, incluido quien ya está investido de GM y cursa otra clase, puede tener una activa por clase distinta. La clase cruzada se presenta en la sección del mismo club cuyo tipo coincide con la clase. La membresía puede seguir en la sección de Guía Mayor de ese club. La sección de GM no presenta la clase de Conquistadores, y un club distinto tampoco. Quien ya está `INVESTIDO` en esa clase no entra, y el pendiente anterior de esa persona y clase queda `REMOVED` con `resolution_code` `ALREADY_INVESTED`. `can_authorize` es false.
+- Una clase de varios años conserva el enrollment del año de inicio. La duración se cuenta desde ese inicio hasta el año de la solicitud. El primer año no entra si falta la mínima. Si ya pasó la máxima, o el estado es `EXPIRED`, responde `INVESTITURE_DURATION_EXPIRED` y no reescribe el enrollment.
+- Dos personas distintas presentadas a la vez quedan en una sola solicitud de esa sección y año. La lectura incluye a ambas. Agregar a una solicitud anterior, cuando ya hay otra con pendientes, responde `INVESTITURE_REQUEST_STALE`. Hay que volver a cargar el listado. No se mueven personas en silencio.
+- Quitar deja `REMOVED` y libera solo el bloqueo de progreso de ese enrollment. Mientras sigue pendiente, puntaje, archivo, envío, aprobación y rechazo de ese enrollment responden `INVESTITURE_REQUEST_PROGRESS_LOCKED`. Otra clase de la misma persona no.
+- Autorizan el pastor asignado al distrito de la iglesia del club, o `director-lf` y `assistant-lf` de ese Campo. `admin`, `super-admin`, unión, división y el directivo de sección no autorizan por esos cargos. Otro territorio recibe 403.
+- `POST .../resolutions` acepta `invest` y `reject` en la misma llamada. El comentario puede ir vacío. El rechazo humano exige motivo. Quien dejó de cumplir queda rechazado por el sistema con el texto largo; los demás pueden quedar `INVESTIDO` sin pasar por `FIELD_APPROVED`. El resto de la solicitud sigue pendiente.
+- Se autoriza mientras el día local esté dentro de la ventana, hasta el último día. Una fecha del 1 de noviembre se puede autorizar el 10 de diciembre si ese día entra en la ventana. No hay plazo de siete días. Ampliar la ventana dentro del año reabre la resolución. Cambiar solo la fecha no. Con el año cerrado, o después de `end_date`, no autoriza.
+- Si la decisión ya quedó confirmada, la siguiente recibe `INVESTITURE_REQUEST_ALREADY_RESOLVED`. Hay que volver a cargar la solicitud.
+- El logro `class.completed` sale solo después de confirmar `INVESTIDO`. Esta fase no envía correo ni notificación. El panel de autorización todavía no está integrado. La app tampoco tiene la pantalla de presentar.
+
 ## Actualizacion 2026-09-21 (Bandeja institucional de certificados)
 
 Guía Mayor Avanzado (`GM-02`) e Instructor (`GM-03`) no entran a la cola de Campo Local.
@@ -60,7 +126,10 @@ Guía Mayor Avanzado (`GM-02`) e Instructor (`GM-03`) no entran a la cola de Cam
 - `GM-01` sustituye la inscripción actual; no se conservan dos filas. Esa sustitución no usa `operational_reconciliation`.
 - `GET /api/v1/users/:userId/classes` incluye `record_kind`, `course_open`, `certificate_proof` (`batch_id`, `file_id`) y `progress_archive`. Un certificado histórico llega con `course_open: false` y no calcula el checklist. El progreso previo va en `progress_archive`. La ficha no muestra `enrollment_date` como inicio de cursado. El comprobante se abre en el expediente del lote.
 - Cada fila se decide sola. El lote no pasa a `PARTIALLY_APPROVED` por una decisión nueva. Ese estado queda para expedientes anteriores.
-- `POST /certificate-bulk-imports/:batchId/process-ocr` encola Google Vision para JPEG, PNG y WebP. Un PDF responde `CERTIFICATE_IMPORT_OCR_UNSUPPORTED_TYPE` y el archivo sellado permanece para captura manual. Sin `GOOGLE_VISION_API_KEY` o sin Redis la respuesta es `CERTIFICATE_IMPORT_OCR_UNAVAILABLE`.
+- `POST /certificate-bulk-imports/:batchId/process-ocr` encola Google Vision ADC para JPEG/PNG/WebP y PDF de **1–5 páginas**, máximo **10 MiB**. La app no lleva credenciales Vision ni parser PDF. `GOOGLE_VISION_API_KEY` ya no autentica el proveedor.
+- Subida: crear borrador → presign → PUT R2 privado **sin Authorization ni redirects** → confirm → consultar lote. Mostrar el límite PDF antes de seleccionar/subir; backend valida el documento completo. Confirm rechaza HTTP400 con `message` exacto `CERTIFICATE_IMPORT_PDF_TOO_MANY_PAGES`, `CERTIFICATE_IMPORT_PDF_ENCRYPTED` o `CERTIFICATE_IMPORT_PDF_INVALID` (BadRequest legacy; no asumir `code`). Localizar esos tres códigos en la app: dividir/extraer ≤5 páginas, quitar protección o re-exportar PDF. Si un backend entrega `code`, los mismos tres códigos se reconocen; conservar otros mensajes amigables. No pintar detalles del parser, rutas internas ni la representación de Dio/Exception.
+- Encolar no significa lectura terminada. Sin Redis se recibe `CERTIFICATE_IMPORT_OCR_UNAVAILABLE` al llamar; ADC/auth, cuota y fallos/deadline/resultados PDF incompletos fallan **después en el worker**, sin `OCR_PROCESSED`. No existe un nuevo contrato público de estado/error de job. La app espera brevemente y abre revisión aunque OCR falle, permitiendo agregar/corregir filas con evidencia confirmada válida. Luego el miembro envía y el revisor autorizado decide: OCR no aprueba ni verifica autenticidad.
+- [Runbook ADC, límites y despliegue pendiente](../guides/google-vision-certificate-ocr.md).
 
 ---
 
@@ -119,6 +188,10 @@ El contrato de clases separa requisitos evaluables por track:
 - En el detalle de progreso, `modules[].sections[]` ya llega filtrado a secciones aplicables para el enrollment resuelto e incluye `requirement_track`, `required_for_investiture` y `display_order`.
 - Admin puede configurar secciones `EXTRA` con exactamente un owner institucional (`division_id`, `union_id` o `local_field_id`) y ventana opcional `available_from_year_id` / `available_until_year_id`.
 
+## Actualizacion 2026-10-01 (Camporees vigentes e histórico)
+
+La app pide `GET /api/v1/camporees?active=true&club_type_id=&limit=100`. El alcance de campo o unión sigue en el API. La pantalla principal muestra solo camporees con `end_date` de hoy en adelante. Los cerrados van a Histórico y el detalle se abre en consulta: asistentes, órdenes, eventos y puntajes, sin inscribir sección, altas, bajas, pedidos ni suministros.
+
 ## Actualizacion 2026-09-01 (Lista de camporees por tipo de sección)
 
 La app móvil no debe mostrar camporees de otro ciclo JA cuando hay sección activa:
@@ -134,12 +207,13 @@ El flujo móvil de jueces de camporee consume scoring oficial por rúbricas:
 
 - `GET /api/v1/camporee-judges/me/assignments` lista asignaciones del usuario autenticado e incluye `event_title`, `club_name` y `section_name` para pintar el club (no el id de sección). La app muestra para captura sólo las asignaciones activas donde `judge_role='primary'` y `can_submit_score=true`. Acceso rápido pinta el tile **Evaluar camporee** sólo si hay al menos una de esas asignaciones; loading/error ocultan el atajo.
 - `GET /api/v1/local-camporees/:camporeeId/leaderboard` y `GET /api/v1/union-camporees/:camporeeId/leaderboard` (permiso `camporee_events:read`) alimentan la clasificación en el detalle del camporee, con la misma visibilidad que eventos. Scope por defecto: local. No hay un segundo tile de ranking en Acceso rápido (choca con ranking anual).
-- `GET /api/v1/camporee-events/:eventId/rubrics` entrega criterios activos; la pantalla de captura debe enviar exactamente un ítem por rúbrica.
+- `GET /api/v1/camporee-events/:eventId/rubrics` entrega criterios activos en `data` y el piso del evento en `min_points`. La pantalla de captura muestra ese mínimo y, si es mayor que cero y la suma queda debajo, pinta el total oficial ya elevado. El POST sigue enviando exactamente un ítem por rúbrica con los puntos capturados.
 - `POST /api/v1/camporee-events/:eventId/sections/:clubSectionId/scores` puede enviar `source` como intención de UI, pero el backend siempre deriva la fuente efectiva desde asignación, rol y scope. Un juez principal sin override explícito queda `judge_primary`; gestores LF/Unión quedan `manual_lf`; sólo admins globales permitidos quedan `admin_override`. El total se calcula desde `items[].awarded_points`. Para "club no se presentó", enviar `{ no_show: true, items: [], notes? }`.
 - Para tolerar reintentos de red, la app debe generar un UUID por intento lógico y enviarlo como header `Idempotency-Key`; reutilizarlo sólo para reintentar exactamente el mismo target/payload. Sin header el endpoint sigue siendo compatible, pero no hay replay idempotente.
 - El receipt devuelve `camporee_event_score_submission_id`, resultado oficial, `raw_awarded_points`, `minimum_adjustment_points`, totales oficiales, actor/timestamps, notas e ítems. `active=true` describe el estado al emitirse y permanece estable en replays aunque luego exista un override; no usarlo como consulta del estado actual. Mostrar el total oficial y conservar el detalle crudo como auditoría, no como campo editable.
 - Antes de enviar una corrección manual contra un resultado existente, admin debe leer `active_result_id` en `GET /camporee-events/:eventId/scoring-targets`, enviarlo como `expected_active_result_id` y exigir un `notes.trim()` no vacío como motivo. Ante `400 CAMPOREE_SCORING_OVERRIDE_REASON_REQUIRED`, mantener el formulario; ante `409 CAMPOREE_SCORING_RESULT_STALE`, refrescar targets antes de volver a decidir.
 - El backend ajusta automáticamente al `min_points` del evento cuando el total queda por debajo del mínimo configurado; si no hay mínimo, conserva el total enviado. Nunca permite superar el máximo por rúbrica/evento.
+- `GET /api/v1/camporee-events/:eventId/sections/:clubSectionId/score` devuelve el resultado oficial activo o `data: null`. Si hay resultado, la app muestra los puntos por criterio, el total y `evaluator_name`, y no ofrece enviar otro puntaje.
 - Una vez creado un resultado activo, el juez principal no puede reenviar ni editar; sólo gestores LF/Unión dentro de scope o admins globales autorizados pueden corregir. `camporee_events:update` sin esos roles no habilita la acción.
 - Jueces `assistant` no ven acción de envío en app; quedan como apoyo/auditoría.
 - El admin debe poblar el selector de roster con `GET /api/v1/local-camporees/:camporeeId/judge-candidates` o `GET /api/v1/union-camporees/:camporeeId/judge-candidates`, no con captura manual de UUID. El backend sólo acepta jueces 18+, pastores o Guías Mayores investidos.
