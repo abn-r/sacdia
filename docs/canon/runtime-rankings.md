@@ -310,16 +310,16 @@ Las filas de `award_categories` creadas antes de 2026-04-28 están marcadas con 
 
 ### Referencias
 
-- Spec: `docs/superpowers/specs/2026-04-28-clasificacion-criterios-ampliados-design.md`
-- Plan: `docs/superpowers/plans/2026-04-28-clasificacion-criterios-ampliados.md`
+- Spec: `docs/history/superpowers/specs/2026-04-28-clasificacion-criterios-ampliados-design.md` (histórico)
+- Plan: `2026-04-28-clasificacion-criterios-ampliados.md` (plan eliminado; git conserva el historial)
 
 ---
 
 ## 15. Clasificación de miembros y secciones (8.4-A)
 
 **Estado**: shipped 2026-04-29
-**Spec**: `docs/superpowers/specs/2026-04-29-clasificacion-seccion-miembro-design.md`
-**Audit**: `docs/superpowers/audits/2026-04-29-section-member-schema-audit.md` (commit `643b694`)
+**Spec**: `docs/history/superpowers/specs/2026-04-29-clasificacion-seccion-miembro-design.md` (histórico)
+**Audit**: `2026-04-29-section-member-schema-audit.md` (auditoría eliminada; git conserva el historial) (commit `643b694`)
 **Canon de decisión**: `docs/canon/decisiones-clave.md` §22
 
 Este subsistema extiende el pipeline existente de clasificación institucional de clubes hacia un nivel más granular: enrollment (miembro activo) y sección de club. Funciona de forma independiente con dark-launch propio (kill-switches separados) y no altera el pipeline club-level §5.
@@ -473,7 +473,7 @@ Para el algoritmo exacto, ver `MemberCompositeScoreService` en `sacdia-backend/s
 
 **5-tier waterfall para member-rankings** (`GET /api/v1/member-rankings` y `GET /:enrollmentId/breakdown`):
 
-1. `member_rankings:read_global` — admin/super_admin: ve todos los enrollments sin filtro de club.
+1. `member_rankings:read_global` — admin/super-admin: ve todos los enrollments sin filtro de club.
 2. `member_rankings:read_lf` — coordinador de campo local: ve enrollments de clubes en su campo.
 3. `member_rankings:read_club` — director de club: ve enrollments de su club.
 4. `member_rankings:read_section` — director de sección: ve enrollments de su sección.
@@ -483,7 +483,7 @@ Sin ninguno de estos permisos → acceso denegado (403).
 
 **3-tier para section-rankings** (`GET /api/v1/section-rankings`):
 
-1. `section_rankings:read_global` — admin/super_admin.
+1. `section_rankings:read_global` — admin/super-admin.
 2. `section_rankings:read_lf` — coordinador campo local.
 3. `section_rankings:read_club` — director de club.
 

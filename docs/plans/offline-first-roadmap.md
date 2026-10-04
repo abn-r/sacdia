@@ -1,5 +1,8 @@
 # Offline-first — roadmap
 
+> **Estado real (revisado 2026-10-04 contra `development`)**: No iniciado. En la app, Hive solo guarda borradores de certificaciones; la resiliencia vigente es caché e invalidación (`docs/canon/runtime-resiliencia-red.md`).
+
+
 **Estado**: PLANIFICADO (aspiracional)
 **Autoridad rectora de la capacidad actual**: `docs/canon/runtime-resiliencia-red.md`
 

@@ -236,7 +236,7 @@ El dominio separa **emisión** (directiva de club), **revisión** (liderazgo del
 
 ## RBAC de pedidos de mercancía de camporee (camporee-orders)
 
-Familia propia `camporee-orders:*` (rama `feat/camporee-orders`; seeds no aplicados a Neon). No reutiliza `field-payment-orders:*` ni `materiales:*`. El checkout `sacdia-backend` principal no incluye estas rutas.
+Familia propia `camporee-orders:*` (`src/camporee-orders/permissions.ts`; seeds en `prisma/seeds/permissions.seed.sql` y `role-permissions.seed.sql`). No reutiliza `field-payment-orders:*` ni `materiales:*`.
 
 ### Matriz de permisos
 
@@ -270,7 +270,7 @@ Familia propia `camporee-orders:*` (rama `feat/camporee-orders`; seeds no aplica
 
 ## RBAC de insumos de camporee (camporee-supplies)
 
-Familia propia `camporee-supplies:*` (rama `feat/camporee-supplies`; seeds no aplicados a Neon). No reutiliza `camporee-orders:*`, `field-payment-orders:*` ni `materials:*`.
+Familia propia `camporee-supplies:*` (`src/camporee-supplies/permissions.ts`; seeds en `prisma/seeds/permissions.seed.sql` y `role-permissions.seed.sql`). No reutiliza `camporee-orders:*`, `field-payment-orders:*` ni `materiales:*`.
 
 ### Matriz de permisos
 
@@ -340,11 +340,11 @@ El `404` geográfico se reserva al actor global. Para actores con scope, existen
 | Característica   | Archivo                    | Descripción                                     |
 | ---------------- | -------------------------- | ----------------------------------------------- |
 | Helmet           | `main.ts`                  | Security headers (CSP, HSTS, X-Frame-Options)   |
-| Rate Limiting    | `app.module.ts`            | 3 tiers: 3/seg, 20/10seg, 100/min               |
+| Rate Limiting    | `config/throttler.config.ts` | 3 tiers: 3/seg, 20/10seg, 100/min (en `development`: 30/s, 200/10s, 1000/min); storage Redis distribuido |
 | Compression      | `main.ts`                  | gzip para responses                             |
 | CORS             | `main.ts`                  | Whitelist configurable                          |
 | XSS Sanitization | `sanitize.pipe.ts`         | Remueve HTML de inputs                          |
-| Audit Logging    | `audit.interceptor.ts`     | Log de todas las requests                       |
+| Audit Logging    | `audit-logs/http-audit.interceptor.ts` | Auditoría durable de operaciones HTTP (`audit-logs/`) |
 | Error Handling   | `http-exception.filter.ts` | Oculta detalles en producción                   |
 | Password Policy  | `register.dto.ts`          | Requiere mayúscula, minúscula, número, especial |
 
@@ -354,8 +354,7 @@ El `404` geográfico se reserva al actor global. Para actores con scope, existen
 | --------------- | ------------------------------- | ------------------------------------------ |
 | 2FA (TOTP)      | `mfa.service.ts`                | TOTP propio sobre Better Auth + tabla `verifications` |
 | Token Blacklist | `token-blacklist.service.ts`    | Revocación de JWT SACDIA                   |
-| Session Limits  | Better Auth `sessions`          | Máximo de sesiones gestionado por BA/runtime |
-| IP Whitelist    | `ip-whitelist.guard.ts`         | Restricción de acceso admin por IP         |
+| Session Limits  | `session-management.service.ts` | Máximo 5 sesiones por usuario (`MAX_SESSIONS`) |
 
 ---
 
@@ -515,22 +514,6 @@ const status = await mfaService.getMfaStatus(userId);
 await mfaService.disableMfa(userId, currentPassword);
 ```
 
-### IP Whitelist Guard
-
-```typescript
-import { AdminOnly } from "./common/guards/ip-whitelist.guard";
-
-// En controlador
-@Controller("admin")
-export class AdminController {
-  @AdminOnly() // Solo IPs en whitelist
-  @Get("sensitive-data")
-  async getSensitiveData() {
-    // Solo accesible desde IPs permitidas
-  }
-}
-```
-
 ---
 
 ## 🔧 Configuración de Variables de Entorno
@@ -545,10 +528,9 @@ ALLOWED_ORIGINS=https://sacdia.app,https://admin.sacdia.app
 # ===========================================
 # SEGURIDAD - Fase 4
 # ===========================================
-# IP Whitelist para endpoints admin (soporta CIDR)
-ADMIN_ALLOWED_IPS=192.168.1.100,10.0.0.0/24,203.0.113.50
-
-# Redis (para cache distribuido - opcional)
+# Redis: caché, throttler distribuido, blacklist JWT y BullMQ.
+# Obligatoria en producción (la app falla al iniciar si falta o no conecta).
+# En development/test hay fallback in-memory para caché.
 REDIS_URL=redis://localhost:6379
 ```
 
@@ -581,18 +563,19 @@ REDIS_URL=redis://localhost:6379
 src/
 ├── common/
 │   ├── guards/
-│   │   └── ip-whitelist.guard.ts       # IP whitelist para admin
-│   ├── interceptors/
-│   │   └── audit.interceptor.ts        # Logging de requests
+│   │   ├── global-jwt-auth.guard.ts    # APP_GUARD: JWT por defecto salvo @Public()
+│   │   └── permissions.guard.ts        # APP_GUARD fail-closed
 │   ├── filters/
 │   │   ├── http-exception.filter.ts    # Errores HTTP seguros
 │   │   └── all-exceptions.filter.ts    # Catch-all
 │   ├── pipes/
 │   │   └── sanitize.pipe.ts            # XSS sanitization
 │   └── services/
-│       ├── token-blacklist.service.ts  # Revocación de tokens
-│       ├── token-blacklist.service.ts  # Revocación user-wide de JWTs
+│       ├── token-blacklist.service.ts  # Revocación de tokens y revocación user-wide
+│       ├── session-management.service.ts # Límite de sesiones
 │       └── mfa.service.ts              # TOTP + assurance por sesión BA
+├── audit-logs/
+│   └── http-audit.interceptor.ts       # Auditoría HTTP durable
 ├── auth/
 │   ├── mfa.controller.ts               # Endpoints de 2FA
 │   ├── sessions.controller.ts          # Endpoints de sesiones

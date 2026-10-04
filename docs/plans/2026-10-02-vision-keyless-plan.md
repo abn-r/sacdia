@@ -1,5 +1,8 @@
 # Plan de implementación local — OCR keyless
 
+> **Estado real (revisado 2026-10-04 contra `development`)**: No ejecutado en ninguna rama. Depende de que el PR #448 se integre antes.
+
+
 **Estado documental:** ACTIVE
 **Fecha:** 2026-10-02
 **Diseño aceptado; implementación pendiente; no ejecutado ni desplegado.**

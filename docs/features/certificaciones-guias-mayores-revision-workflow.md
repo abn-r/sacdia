@@ -1,6 +1,6 @@
 # Certificaciones GM — Flujo de revisión y cierre
 
-**Estado**: ACTIVE (runtime backend verificado en `feat/configurable-certifications`)  
+**Estado**: ACTIVE (runtime verificado en `development`)  
 **Relacionado:** [`certificaciones-guias-mayores.md`](certificaciones-guias-mayores.md), ADR #8 en `docs/api/ARCHITECTURE-DECISIONS.md`
 
 ---

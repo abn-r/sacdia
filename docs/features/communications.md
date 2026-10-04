@@ -13,11 +13,11 @@ El envio soporta tres niveles: directo a un usuario, broadcast global y envio a 
 ## Que existe (verificado contra codigo)
 
 ### Backend (NotificationsModule)
-- **Controllers**: `src/notifications/notifications.controller.ts` (notificaciones + bandeja) y `FcmTokensController` en el mismo archivo
-- **Services**: `src/notifications/notifications.service.ts`, `src/notifications/fcm-tokens.service.ts`, `src/notifications/notification-preferences.service.ts`
+- **Controllers**: `src/notifications/notifications.controller.ts` (notificaciones + bandeja) y `FcmTokensController` en el mismo archivo; `src/notifications/user-notification-preferences.controller.ts` (`/users/me/*`); `src/admin/admin-notifications.controller.ts` (`/admin/notifications/*`)
+- **Services**: `src/notifications/notifications.service.ts`, `src/notifications/fcm-tokens.service.ts`, `src/notifications/notification-preferences.service.ts`, `src/notifications/notification-category-settings.service.ts`; processor BullMQ `src/notifications/notifications.processor.ts` (cola `notifications`)
 - **Module**: `src/notifications/notifications.module.ts`
 - **Integracion**: FirebaseAdminModule (FCM) + persistencia en `notification_logs`, `notification_deliveries` y `notification_preferences`
-- **17 endpoints totales**:
+- **21 endpoints totales**:
   - Notificaciones y bandeja:
     - `POST /api/v1/notifications/send` — Enviar notificacion directa (`notifications:send`, body `{ userId, title, body, data? }`)
     - `POST /api/v1/notifications/broadcast` — Enviar broadcast global (`notifications:broadcast`)
@@ -29,6 +29,13 @@ El envio soporta tres niveles: directo a un usuario, broadcast global y envio a 
     - `PATCH /api/v1/notifications/:deliveryId/read` — Marcar una entrega como leida
     - `GET /api/v1/notifications/preferences` — Obtener preferencias por categoria
     - `PUT /api/v1/notifications/preferences/:category` — Actualizar preferencia por categoria
+  - Preferencias de la app (`/users/me`, `@SkipPermissions`, solo JWT):
+    - `GET /api/v1/users/me/notification-preferences` — 5 toggles de categoria (`activities`, `achievements`, `approvals`, `invitations`, `reminders`) + flag `master`; sin fila, `true` (modelo opt-out)
+    - `PATCH /api/v1/users/me/notification-preferences` — Actualizacion parcial de esos toggles
+  - Admin (`GlobalRoles` `admin`/`super-admin`):
+    - `GET /api/v1/admin/notifications/stats` — Tokens FCM activos/inactivos y tasa de entrega diaria
+    - `GET /api/v1/admin/notifications/categories` — Configuracion global de entrega por categoria
+    - `PATCH /api/v1/admin/notifications/categories` — Actualiza `mobileEnabled` / `defaultEnabled` de una categoria
   - FCM tokens:
     - `POST /api/v1/fcm-tokens` — Registrar token FCM legacy
     - `POST /api/v1/users/me/fcm-tokens` — Registrar token FCM propio desde la app
@@ -39,13 +46,18 @@ El envio soporta tres niveles: directo a un usuario, broadcast global y envio a 
     - `GET /api/v1/fcm-tokens/user/:userId` — Obtener tokens por `userId` (owner/admin)
 
 ### Admin
-- **2 paginas presentes**: envio y auditoria
-  - `/dashboard/notifications` — formularios para envio directo, broadcast y envio por club
-  - `/dashboard/notifications/history` — tabla paginada de historial/auditoria
+- **Paginas en `/dashboard/configuration/notifications`**:
+  - `/dashboard/configuration/notifications` — hub con metricas de entrega (`GET /admin/notifications/stats`)
+  - `/dashboard/configuration/notifications/history` — historial/auditoria paginado; el envio directo, broadcast y por club se abre desde aqui (`?compose=1&type=direct|broadcast|club`)
+  - `/dashboard/configuration/notifications/categories` — configuracion global por categoria (`GET/PATCH /admin/notifications/categories`)
+  - `/dashboard/configuration/notifications/send` redirige al historial con el formulario de envio abierto
+  - Las rutas legacy `/dashboard/notifications` y `/dashboard/notifications/history` redirigen a `/dashboard/configuration/notifications` y `/history`
 - **Cobertura verificada**:
   - envio directo y broadcast consumen rutas vigentes
   - historial administrativo consume `GET /api/v1/notifications/history`
   - el formulario de envio por club del admin ya consume la ruta canonica `POST /api/v1/notifications/club/:instanceType/:instanceId` (alineado 2026-04-22; la ruta legacy `POST /notifications/section/:sectionId` nunca existio en backend y producia 404 silencioso hasta el fix)
+
+- **Invalidacion realtime**: `NotificationsService.sendSilentToSection({ sectionId, resource, action, entityId, actorId })` encola el job `realtime.invalidate` (fire-and-forget; sin Redis se descarta y no crea `notification_logs` ni `notification_deliveries`); el processor envia un FCM data-only (`type: 'cache_invalidate'`) a la seccion, excluyendo al actor. Recursos que se invalidan hoy: `activities` (`ActivitiesService`) y `members` (`ClubsService`, `UnitsService`, `MembershipRequestsService`). En la app lo consume `lib/core/realtime/` detras de `RealtimeFeatureFlags.realtimeInvalidationEnabled`
 
 ### App Movil
 - **Tiene bandeja funcional**: `NotificationsInboxView` con paginacion, pull-to-refresh y carga incremental
@@ -72,7 +84,7 @@ El envio soporta tres niveles: directo a un usuario, broadcast global y envio a 
 7. Las notificaciones deben incluir titulo, cuerpo y datos opcionales
 8. Cada usuario debe poder consultar historial, contar no leidas y marcar entregas como leidas
 9. Cada usuario debe poder configurar preferencias por categoria
-10. El admin debe ofrecer UI para envio y auditoria basica
+10. El admin debe ofrecer UI para envio, auditoria basica, metricas de entrega y configuracion por categoria
 
 ## Decisiones de diseno
 

@@ -8,7 +8,7 @@ Fuente: Reality Matrix + Canon verification
 
 ## D02 salto formativo AV→CQ / CQ→GM (2026-09-16)
 
-**Estado: RESUELTA — salto cerrado; GM multianual sigue abierto.** Spec [2026-09-16-p0-d02-cierre-design.md](../superpowers/specs/2026-09-16-p0-d02-cierre-design.md). R13–R14: cursar la última clase del tipo origen basta; edad al inicio del año destino; inscripción automática en year-cut y manual en `annual-continuations`. R05 exceptuado solo para ese salto. R04 (directivo que vuelve a GM) no es este camino. D01 sigue 403. Clases GM con `max_duration_years > 1` no se habilitan aquí.
+**Estado: RESUELTA — salto cerrado; GM multianual sigue abierto.** Spec [2026-09-16-p0-d02-cierre-design.md](../history/superpowers/specs/2026-09-16-p0-d02-cierre-design.md). R13–R14: cursar la última clase del tipo origen basta; edad al inicio del año destino; inscripción automática en year-cut y manual en `annual-continuations`. R05 exceptuado solo para ese salto. R04 (directivo que vuelve a GM) no es este camino. D01 sigue 403. Clases GM con `max_duration_years > 1` no se habilitan aquí.
 
 ---
 
@@ -59,7 +59,7 @@ Pregunta: ¿cualquier miembro activo de la sección puede figurar en un pedido d
 
 El cliente no envía `user_id` libre como autoridad; cada línea referencia `camporee_member_id`. Miembros `pending_approval`, rechazados, inactivos, de otra sección o de otro camporee no son elegibles.
 
-Referencia: ADR [#9](../api/ARCHITECTURE-DECISIONS.md#9-bounded-context-camporee-orders-independiente-de-materials-y-fieldpaymentorders); plan [`docs/plans/2026-08-24-pedidos-camporees-consolidado-codex.md`](../plans/2026-08-24-pedidos-camporees-consolidado-codex.md); feature [`docs/features/camporee-orders.md`](../features/camporee-orders.md).
+Referencia: ADR [#9](../api/ARCHITECTURE-DECISIONS.md#9-bounded-context-camporee-orders-independiente-de-materials-y-fieldpaymentorders); plan [`docs/history/plans/2026-08-24-pedidos-camporees-consolidado-codex.md`](../history/plans/2026-08-24-pedidos-camporees-consolidado-codex.md); feature [`docs/features/camporee-orders.md`](../features/camporee-orders.md).
 
 La decisión de quién cobra en camporees de unión (campo local) no se reabre; aplica también a estos pedidos.
 
@@ -167,7 +167,7 @@ La decisión de quién cobra en camporees de unión (campo local) no se reabre; 
 
 ## Gaps de implementacion — Wave 2 (2026-03-20)
 
-Descubiertos durante auditoría Wave 2. Fuente: docs de features bajo `docs/features/` y `docs/canon/completion-matrix.md` (OPEN).
+Descubiertos durante auditoría Wave 2. Fuente: docs de features bajo `docs/features/` y la matriz de completitud del canon, hoy retirada (ver historial git).
 
 ### GAP-W2-01: Validacion de Investiduras — RESUELTO
 

@@ -567,7 +567,7 @@ Esta guía reúne **49 flujos y familias de flujos funcionales** para explicar e
 - **Resultado esperado:** reconocimiento individual trazable a la lista autorizada de la ceremonia, no una aprobación genérica de toda la sección.
 - **Canales/evidencia:** **A**, acuerdos RF-01–RF-19 del documento funcional. Solicitud, revisión, seguimiento y configuración son superficies propuestas; su distribución entre app y panel y sus contratos no están definidos. No se acreditan endpoints, jobs ni notificaciones implementados para este nuevo proceso.
 - **Pendientes antes de implementar:** hora/zona/cálculo exacto del corte; alcance por sección y número de ceremonias; ventanas y cambios de configuración; elegibilidad y clases multianuales; permisos y autoridades; entrega de notificaciones; cancelación/reprogramación/correcciones; transición del pipeline individual y manejo de fallos automáticos. Son P-01–P-08 del documento fuente, **no decisiones resueltas por esta guía**.
-- **Para explicar:** “El club propone quiénes se investirán; Campo Local autoriza la lista y, según el diseño acordado, el sistema registrará esas investiduras al terminar la ceremonia”. [Fuente completa: acuerdos, pendientes y contraste con runtime](../../plans/2026-09-21-investiture-ceremony-functional-design.md).
+- **Para explicar:** “El club propone quiénes se investirán; Campo Local autoriza la lista y, según el diseño acordado, el sistema registrará esas investiduras al terminar la ceremonia”. [Fuente completa: acuerdos, pendientes y contraste con runtime](../../history/plans/2026-09-21-investiture-ceremony-functional-design.md).
 
 <a id="excepciones"></a>
 ## Excepciones y correcciones que completan el recorrido

@@ -56,7 +56,7 @@ Distribución tras migración:
 | `general-coordinator` | — | ✓ | ✓ |
 | `pastor` | — | — | ✓ |
 | `assistant-lf` (+ JOIN copies) | ✓ | ✓ | ✓ |
-| `admin` / `super_admin` | ✓ (wildcard) | ✓ | ✓ |
+| `admin` / `super-admin` | ✓ (wildcard) | ✓ | ✓ |
 
 Grant de `validation:submit` a `member` es deliberado — members envían su propio progreso para revisión.
 
@@ -88,17 +88,28 @@ Exact paths pueden variar según el controller — los handlers son los 5 canoni
 
 ---
 
-## 6. Admin
+## 6. Clientes
 
-Nav entry `/dashboard/validation` usa `validation:read` tras migración. Drift histórico detectado en Sprint E: la entrada previamente usaba `investiture:read` (módulo distinto) — corregido a `validation:read`, dominio correcto.
+<!-- VERIFICADO contra código 2026-10-04 -->
 
-Las otras 4 entries del mismo grupo de nav ("Validación e Investiduras") — `evidence-review`, `investiture`, `sla-dashboard`, `year-end` — permanecen con sus permisos originales, pertenecen a dominios distintos.
+Admin web (tras el studio admin reset, sacdia-admin `6bed06e`, 2026-07-14):
+
+- la ruta `/dashboard/validation` ya no existe;
+- la bandeja vigente es `/dashboard/clubs/validations` (`src/app/(dashboard)/dashboard/clubs/validations/page.tsx`, componentes en `src/components/clubs/validations/` y `src/components/validation/`);
+- el gate de la pantalla es `validations-investitures` en el screen catalog (`src/lib/auth/screen-catalog/screens/clubs.ts`) con `validation:read`; la entrada del sidebar ("Validaciones" → "Investiduras de club") usa el mismo id;
+- el cliente HTTP vive en `src/lib/api/validation.ts` (`/validation/pending`, `/validation/:entityType/:entityId/history`, `/validation/eligibility/:userId`, `/validation/submit`).
+
+App móvil:
+
+- `sacdia-app/lib/features/validation/` (datasource `validation_remote_data_source.dart`) y su uso desde honores (`honor_evidence_view.dart`, envío con `SubmitValidationNotifier`).
+
+Drift histórico (lesson learned): la entrada de nav anterior usaba `investiture:read` en lugar de `validation:read`; se corrigió antes del reset y el screen catalog conserva `validation:read`.
 
 ---
 
 ## 7. Relación con otros canones
 
-- `docs/canon/runtime-user-certifications.md` + `runtime-user-folders.md` — patrones de migración con prefix `user_` por colisión. Validation no tuvo colisión — permisos `validation:*` son nuevos sin conflicto.
+- `docs/canon/runtime-user-certifications.md` (y el archivado `docs/history/canon/runtime-user-folders.md`) — patrones de migración con prefix `user_` por colisión. Validation no tuvo colisión — permisos `validation:*` son nuevos sin conflicto.
 - `docs/canon/runtime-communications.md` — notificaciones por revisión deben usar `source = 'validation:*'`.
 - `docs/canon/decisiones-clave.md` §21 — canonización del dominio validation + coexistencia.
 

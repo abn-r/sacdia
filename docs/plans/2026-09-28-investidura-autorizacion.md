@@ -1,5 +1,8 @@
 # Investidura por autorización — plan funcional
 
+> **Estado real (revisado 2026-10-04 contra `development`)**: Implementación: Pendiente de merge (PR #448 de sacdia-backend, rama `feat/investiture-authorization-ocr`, commit `113d8ba`). En `development` no existen todavía las tablas `local_field_class_thresholds`, `investiture_windows`, `district_investiture_pastors` ni `authorization_requests`; la vía vigente para llegar a `INVESTIDO` sigue siendo el pipeline club → coordinación → campo.
+
+
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
 **Goal:** El directivo de la sección marca en la app a quienes cumplen, y un pastor del distrito o el Campo Local los autoriza en el panel dentro de la ventana configurada. `INVESTIDO` solo existe después de esa autorización.
@@ -10,7 +13,7 @@
 
 - **Estado:** acuerdo funcional del 2026-09-28, actualizado con las decisiones de revisión hasta el 2026-10-01. Implementación parcial; ver los informes de implementación y revisión independiente en `docs/reviews/`. W1 fue corregido y cerrado en revisión independiente; la fase 2 continúa parcial y el cambio de vía y despliegue siguen bloqueados.
 - **Cambios de esta revisión:** solicitud de una sola sección; fechas sobre personas seleccionadas; excepción GM por clase sin ampliar inscripciones; bloqueo de progreso y resolución concurrente; ventana operativa sin plazo individual de siete días; permisos de consulta/edición de fechas; cierre anual sin arrastre; recordatorios acumulativos y separados por rol; logros al confirmar la investidura; validación preventiva de edad histórica en certificados de clases.
-- **Reemplaza:** `docs/plans/2026-09-21-investiture-ceremony-functional-design.md` para este alcance. Ese documento no se implementa.
+- **Reemplaza:** `docs/history/plans/2026-09-21-investiture-ceremony-functional-design.md` para este alcance. Ese documento no se implementa.
 - **No es contrato runtime.** Al implementar hay que actualizar `docs/features/validacion-investiduras.md`, `docs/api/` y `docs/database/`.
 
 ## 1. Decisión central

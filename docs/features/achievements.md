@@ -10,7 +10,7 @@
 
 Achievements / gamification reconoce hitos de progresion y participacion a partir de eventos emitidos por el runtime. El backend expone catalogo, progreso del usuario, detalle protegido para logros secretos y una superficie administrativa para CRUD, estadisticas, carga de badge y evaluacion retroactiva.
 
-La feature existe hoy en backend, admin, app movil y base de datos, pero la documentacion operativa venia con drift: `docs/api/ENDPOINTS-LIVE-REFERENCE.md` omite el modulo y `docs/database/SCHEMA-REFERENCE.md` solo lo menciona en el inventario resumido. Este documento fija la capa primaria de referencia operativa sin promover el dominio al canon.
+La feature existe en backend, admin, app movil y base de datos. Los endpoints estan en `docs/api/ENDPOINTS-LIVE-REFERENCE.md` (secciones `Achievements` y `Admin - Achievements`) y los modelos en `docs/database/SCHEMA-REFERENCE.md`. Este documento fija la capa primaria de referencia operativa sin promover el dominio al canon.
 
 ## Que existe (verificado contra codigo)
 
@@ -50,12 +50,11 @@ La feature existe hoy en backend, admin, app movil y base de datos, pero la docu
 
 ### Superficie de usuario y consumo cliente
 - **App movil**: `sacdia-app/lib/features/achievements/data/datasources/achievements_remote_data_source.dart`
-  - consume catalogo, `me`, detalle y categorias
-  - el contrato esperado para catalogo y `me` coincide con el grouping verificado en backend
-  - el detalle hoy se parsea como si el backend devolviera directamente un `AchievementModel`, pero runtime responde `{ achievement, userProgress }`; esto es drift de cliente, no contrato documental
+  - consume catalogo, `me` y categorias
+  - el contrato esperado para catalogo y `me` coincide con el grouping verificado en backend; cada item desenvuelve `achievement` y `user_achievement`
 - **Admin web**: `sacdia-admin/src/lib/api/achievements.ts`
-  - evidencia que el panel intenta operar CRUD, estadisticas, upload y evaluacion retroactiva
-  - no debe usarse como fuente primaria porque hoy tiene drift visible contra runtime en metodos HTTP, enums, query params y multipart field
+  - opera CRUD, estadisticas, upload de badge y evaluacion retroactiva
+  - usa `PATCH` para updates, `scope` `GLOBAL|CLUB_TYPE|ECCLESIASTICAL_YEAR` y el campo multipart `file`, alineados con runtime
 
 ### Eventos emitidos que alimentan achievements
 - **Verificados en runtime**:
@@ -71,24 +70,11 @@ La feature existe hoy en backend, admin, app movil y base de datos, pero la docu
   - `ranking.calculated`
   - `member_of_month.awarded`
 
-## Gaps y drift verificados
-
-- `docs/api/ENDPOINTS-LIVE-REFERENCE.md` no registra hoy ningun endpoint de achievements pese a existir controllers activos.
-- `docs/database/SCHEMA-REFERENCE.md` solo lista el dominio en el inventario resumido y no explica relaciones ni semantica operativa.
-- El cliente admin hoy deriva contratos que no coinciden con runtime, por ejemplo:
-  - usa `PUT` para updates donde el controller expone `PATCH`
-  - usa `scope` con valores `GLOBAL|CLUB|UNIT`, pero Prisma/runtime define `GLOBAL|CLUB_TYPE|ECCLESIASTICAL_YEAR`
-  - envia `category_id`, `tier`, `search` y otros params no visibles en el controller auditado
-  - envia multipart field `image`, pero runtime exige `file`
-- El cliente movil tiene drift puntual en detalle de logro: espera un objeto plano cuando el backend devuelve wrapper con `achievement` y `userProgress`.
-
 ## Referencias subordinadas y exclusiones
 
-- `docs/achievements-seed-draft.md` se usa solo como contexto subordinado; mezcla contenido seed y narrativa aspiracional.
-- `docs/achievements-ui-redesign-spec.md` se usa solo como referencia de UI; no fija contrato backend ni de datos.
 - Todo comportamiento no verificado en runtime o Prisma queda fuera de esta documentacion o debe leerse como `Por verificar`.
 
 ## Prioridad y siguiente accion
 
-- **Prioridad**: Media - la feature existe y tiene superficie real multi-cliente, pero la capa documental operativa estaba incompleta.
-- **Siguiente accion**: resincronizar `docs/api/ENDPOINTS-LIVE-REFERENCE.md` y `docs/database/SCHEMA-REFERENCE.md` solo con la superficie ya verificada, dejando explicitado el drift de clientes sin copiarlo como contrato.
+- **Prioridad**: Media - la feature existe y tiene superficie real multi-cliente.
+- **Siguiente accion**: emitir los eventos definidos que aun no se publican (`activity.completed`, `camporee.completed`, `ranking.calculated`, `member_of_month.awarded`) cuando se decida su alcance.

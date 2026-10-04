@@ -156,7 +156,7 @@ User-facing (JWT requerido):
 - `GET /api/v1/achievements/categories` — categorías activas ordenadas por `display_order`;
 - `GET /api/v1/achievements/:achievementId` — detalle con progreso y masking.
 
-Admin (JWT + `GlobalRoles(admin|super_admin)` + permiso `achievements:manage`):
+Admin (JWT + `GlobalRoles(admin|super-admin)` + permiso `achievements:manage`):
 
 - stats, categorías CRUD, achievements CRUD, upload de badge (`POST /:achievementId/image`, multipart, ≤2 MB, PNG/SVG/WebP), evaluación retroactiva.
 

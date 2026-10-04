@@ -86,9 +86,11 @@ Declarar compartición/procesamiento con proveedores técnicos necesarios, no co
 - Vercel — panel web.
 - Cloudflare R2 — almacenamiento de archivos.
 - Google/Firebase — autenticación Google, FCM, Android y mapas cuando aplique.
+- Google Cloud Vision — lectura automática (OCR) de imágenes de certificados que sube el usuario.
 - Apple — autenticación Apple y servicios iOS cuando aplique.
 - Sentry — errores y estabilidad.
 - OpenStreetMap/Nominatim/geocoding — búsqueda o selección de lugares.
+- Resend — correo transaccional para verificación, seguridad o soporte.
 - Proveedor de correo transaccional — verificación, seguridad o soporte.
 
 ## 5. Seguridad de datos

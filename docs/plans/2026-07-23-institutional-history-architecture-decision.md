@@ -1,5 +1,8 @@
 # ADR/RFC — Histórico institucional transversal
 
+> **Estado real (revisado 2026-10-04 contra `development`)**: ACTIVE; implementación parcial. En `development` solo está el PR1: migración `20260723120000_institutional_history_foundation`, políticas de dominio en `sacdia-backend/src/institutional-history/` y spec del schema. Faltan los PR2 a PR6 (comandos de reorganización, snapshots, consumo en módulos y clientes).
+
+
 ## Estado
 
 ACTIVE

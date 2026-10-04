@@ -42,6 +42,7 @@ La inscripcion de miembros en camporees tiene implicaciones directas con el modu
   - `PATCH|DELETE /api/v1/camporee-staff/:staffMemberId` — Editar o desactivar una persona del roster
   - `GET /api/v1/local-camporees/:camporeeId/events` — Listar eventos registrados del camporee local
   - `GET /api/v1/union-camporees/:camporeeId/events` — Listar eventos registrados del camporee de unión
+  - Sedes reutilizables para la agenda: ver [camporee-venues.md](camporee-venues.md)
 
 ### Admin
 
@@ -50,7 +51,7 @@ La inscripcion de miembros en camporees tiene implicaciones directas con el modu
 - El create/edit local no usa `GET /admin/local-fields` (403 para director-lf y bounce a login). Carga `GET /catalogs/local-fields` filtrado por territorio; director-lf ve su campo bloqueado.
 - El admin carga primero el roster operativo del camporee y luego asigna personas específicas a cada actividad/evento; no se fuerza que cada actividad tenga cocina/admin/apoyo/jueces.
 - El cierre de inscripción de clubes congela las secciones que podrán recibir puntajes y asignaciones de jueces; la inscripción de miembros sigue controlada por `member_registration_deadline`.
-- El detalle admin (`/dashboard/campamentos/:id` y `/union/:id`) expone cerrar/reabrir inscripción de clubes (`POST .../club-registration/close|reopen`, permiso `camporee_events:update`). Close exige secciones `registered`/`approved`. Reopen queda bloqueado si hay puntajes o asignaciones de jueces. Las pestañas Jueces y Puntajes muestran el gate mientras `club_registration_closed_at` esté vacío.
+- El detalle admin (`/dashboard/campamentos/[id]` y `/dashboard/campamentos/union/[id]`) expone cerrar/reabrir inscripción de clubes (`POST .../club-registration/close|reopen`, permiso `camporee_events:update`). Close exige secciones `registered`/`approved`. Reopen queda bloqueado si hay puntajes o asignaciones de jueces. Las pestañas Jueces y Puntajes muestran el gate mientras `club_registration_closed_at` esté vacío.
 - Fechas de calendario (`start_date`/`end_date` como `YYYY-MM-DD`) se muestran por el prefijo ISO, no con `new Date(dateOnly)` en TZ local: evita overlay de hidratación y el desfase 21–23 → 20–22. Ranking y puntajes usan números tabulares ASCII (`formatTabularNumber`) sin agrupación ICU. El nav no cambia árbol colapsado/expandido hasta hidratar.
 - Reutiliza el cliente API existente (`lib/api/camporees.ts`) y las server actions (`lib/camporees/actions.ts`)
 
@@ -112,7 +113,7 @@ La inscripcion de miembros en camporees tiene implicaciones directas con el modu
 
 ## Órdenes de pago territoriales (IMPLEMENTADO 2026-08-12)
 
-Plan `docs/plans/2026-08-05-insurance-camporee-payment-orders-plan.md` (+ addendum 2026-08-12): la inscripción de miembros es payment-first mediante `field_payment_orders` grupales. Implementación en `sacdia-backend/src/field-payment-orders/` (branch `feat/field-payment-orders`).
+La inscripción de miembros es payment-first mediante `field_payment_orders` grupales. Implementación en `sacdia-backend/src/field-payment-orders/` (migración `20260812220000_field_payment_orders`).
 
 - **Ningún camporee es gratis**: clubes y personal de apoyo siempre pagan inscripción; `registration_cost` null/0 es error de configuración (`FIELD_PAYMENT_ORDER_COST_NOT_CONFIGURED`). Solo jueces (`camporee_judges`) y staff del Campo Local/Unión (`camporee_staff_members`) no pagan; sus flujos son independientes del register de miembros y no cambian.
 - **Emisión**: `POST /camporees/:camporeeId/payment-orders` (permiso `field-payment-orders:create`). Valida camporee local activo, club/sección inscrita, membresía activa, seguro vigente por beneficiario y deadline de registro de miembros.
@@ -133,13 +134,19 @@ Decisión de negocio (opción A, `docs/audit/DECISIONS-PENDING.md`): **el campo 
 - **Filtros**: `GET /payment-orders` y `/payment-orders/review-queue` aceptan `union_camporee_id`.
 - **App**: ruta de emisión `/camporee/:id/payment-orders/issue?type=union`. **Admin**: pestaña "Órdenes de pago" también en el detalle de camporees de unión.
 
-## Pedidos de artículos (IMPLEMENTADO PARCIAL — rama `feat/camporee-orders`)
+## Inscripción contextual de la sección activa
+
+- `GET /camporees/:camporeeId/section-registration` (`camporees:read`) devuelve el estado de inscripción de la sección activa del actor.
+- `POST /camporees/:camporeeId/section-registration` (`camporees:register_active_section`) inscribe la sección activa; no acepta un ID de sección del cliente.
+- `POST /camporees/:camporeeId/participants` (`attendance:manage`) es el alias contextual para registrar participantes con la sección activa del director. Responde 422 `CAMPOREE_SECTION_REGISTRATION_REQUIRED` o `CAMPOREE_MEMBER_OUTSIDE_ACTIVE_SECTION`.
+
+## Pedidos de artículos (IMPLEMENTADO PARCIAL)
 
 Canon: [camporee-orders.md](camporee-orders.md). Bounded context independiente; no extiende `field_payment_orders`, Materials, `camporee_payments`, recursos ni inventario de club. ADR [#9](../api/ARCHITECTURE-DECISIONS.md#9-bounded-context-camporee-orders-independiente-de-materials-y-fieldpaymentorders).
 
 Una sección inscrita puede emitir uno o más pedidos de artículos con líneas nominadas a miembros inscritos (`registered` \| `approved`). El pago es independiente de la inscripción. El campo local cobra (también en camporee de unión).
 
-Runtime en `feat/camporee-orders` (backend worktree `/private/tmp/sacdia-backend-camporee-orders`, admin `99a5ab5`, app `3c6c8413`). Las 27 rutas están en `ENDPOINTS-LIVE-REFERENCE.md` con salvedad de rama: **no** están en el checkout `sacdia-backend` principal ni en Neon (migración `20260824190000_camporee_orders` no aplicada). Settings: `orders_enabled` (default `false`), `orders_opens_at`, `orders_deadline` en `GET`/`PATCH` del camporee; no hay `GET` dedicado de orders-settings.
+Integrado en `development` (migración `20260824190000_camporee_orders`; admin `/dashboard/campamentos/pedidos/*`; app `lib/features/camporee_orders`). Las 27 rutas están en `ENDPOINTS-LIVE-REFERENCE.md`. Los insumos de cocina por sección son otro dominio: ver [camporee-supplies.md](camporee-supplies.md). Settings: `orders_enabled` (default `false`), `orders_opens_at`, `orders_deadline` en `GET`/`PATCH` del camporee; no hay `GET` dedicado de orders-settings.
 
 ## Estado de implementacion
 

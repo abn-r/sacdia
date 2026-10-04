@@ -4,7 +4,7 @@
 
 **Actualizado**: 2026-07-07 — entrevista stakeholder (3 respuestas)
 
-**Estado**: Fase 0 completada — listo para Fase 1 (foundation)
+**Estado**: HISTÓRICO — discovery de la Fase 0 (2026-07-07). El admin se reconstruyó después sobre el shell Studio Admin; las rutas citadas aquí (`/dashboard/clubs/v2`, `/dashboard/design-system`, `/dashboard/classes`, `/dashboard/clubs/[id]/units/*`) no existen en `development`. Conservado solo como registro de decisiones.
 **Decisiones tomadas**:
 - Preset visual: **Maia** (`radix-maia`)
 - Módulo piloto: **Clubs**

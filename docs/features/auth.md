@@ -30,10 +30,12 @@ La gestion de sesiones permite listar sesiones activas y cerrar sesiones individ
 ### Post-Registration (PostRegistrationModule)
 - **Controller**: `src/post-registration/post-registration.controller.ts`
 - **4 endpoints**:
+  - `GET /api/v1/users/:userId/post-registration/photo-status` — Indica si el usuario ya subió foto de perfil
   - `GET /api/v1/users/:userId/post-registration/status` — Estado del post-registro
   - `POST /api/v1/users/:userId/post-registration/step-1/complete` — Paso 1: foto de perfil
   - `POST /api/v1/users/:userId/post-registration/step-2/complete` — Paso 2: informacion personal
   - `POST /api/v1/users/:userId/post-registration/step-3/complete` — Paso 3: seleccion de club + alta anual en `enrollments`
+  - `POST /api/v1/users/:userId/post-registration/membership-request/cancel` — Cancela la solicitud de membresía pendiente para volver a elegir club/sección (`registration:complete`)
 
 ### Admin
 - **Login funcional**: `POST /auth/login`, `GET /auth/me`
@@ -128,8 +130,7 @@ La gestion de sesiones permite listar sesiones activas y cerrar sesiones individ
 
 ## Gaps y pendientes
 
-- **OAuth en app no funcional**: Google y Apple estan declarados pero lanzan excepcion "no disponible aun"
-- **`POST /auth/pr-check` fantasma**: La app consume este endpoint pero no aparece en el backend
+- **OAuth en app desalineado**: la app inicia Google y Apple con `GET /auth/oauth/google` y `GET /auth/oauth/apple` (`sacdia-app/lib/features/auth/data/datasources/auth_remote_data_source.dart`), pero el backend expone esas rutas como `POST` (`src/auth/oauth.controller.ts`)
 - **Admin sin UI MFA/OAuth/sesiones**: El panel admin implementa login/logout y refresh automatico, pero no tiene pantallas propias para MFA, OAuth ni gestion de sesiones.
 - **Semantica legacy de approval**: `PATCH /admin/users/:userId/approval` existe en backend por compatibilidad; el panel admin ya no lo consume ni muestra «Revisión administrativa» en el detalle de usuario.
 - **Admin approval endpoints**: `PATCH /admin/users/:userId/approval` y `PATCH /admin/users/:userId` estan verificados en ENDPOINTS-LIVE-REFERENCE (`src/admin/admin-users.controller.ts`). El panel solo usa el PATCH generico para flags de acceso/activo, y solo lo expone en Accesos a actores `admin` / `super-admin`.

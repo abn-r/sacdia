@@ -30,8 +30,8 @@ visual_review: passed
 correction_rounds: 0
 ```
 
-Recibos: [01-delivery.json](01-delivery.json),
-[01-browser-command.json](01-browser-command.json).
+Recibos: `01-delivery.json` (artefacto retirado; consultar historial git),
+`01-browser-command.json` (artefacto retirado; consultar historial git).
 
 ## Revisión de evidencias
 
@@ -46,5 +46,5 @@ visual_review: passed
 correction_rounds: 2
 ```
 
-Recibos: [02-delivery.json](02-delivery.json),
-[02-browser-command.json](02-browser-command.json).
+Recibos: `02-delivery.json` (artefacto retirado; consultar historial git),
+`02-browser-command.json` (artefacto retirado; consultar historial git).

@@ -1,16 +1,16 @@
 # ENDPOINTS LIVE REFERENCE (Runtime Truth)
 
-<!-- Generado estáticamente contra sacdia-backend/src/**/*controller.ts el 2026-07-07. El contrato operations-dashboard se sincronizó manualmente contra el runtime final el 2026-07-15. No se levantó la app ni se ejecutó build. Los conteos agregados permanecen como snapshot del generador 2026-07-07. -->
+<!-- Generado estáticamente contra sacdia-backend/src/**/*controller.ts el 2026-07-07. Resincronizado contra la rama development (commit 66f4ade) el 2026-10-04: conteos recalculados con el mismo extractor estático de decoradores, 12 rutas reales añadidas y 20 rutas de la rama feat/investiture-authorization-ocr marcadas como pendientes de merge. No se levantó la app ni se ejecutó build. -->
 
 > [!IMPORTANT]
 > Documento canónico operativo para clientes SACDIA. Base URL: `/api/v1`.
 > La tabla refleja los decoradores HTTP efectivos en controllers NestJS; DTOs, ejemplos y errores finos viven en Swagger/runtime y docs de feature cuando aplique.
 
 **Estado**: ACTIVE
-**Actualizado**: 2026-09-15
-**Total endpoints**: 822 decoradores HTTP en 103 controllers (certificaciones configurables, insurance capacity model, field-payment-orders sincronizados manualmente; camporee-orders + camporee-supplies + payment-obligations desde worktree `feat/camporee-supplies` — no están en Neon; +4 `director-designation` GET/POST/PATCH/DELETE el 2026-09-09; +3 `annual-membership` GET/POST/POST el 2026-09-08)
-**Métodos**: GET 320 · POST 242 · PATCH 117 · DELETE 89 · PUT 12
-**Auth detectada**: JWT 760 · Public 12
+**Actualizado**: 2026-10-04
+**Total endpoints**: 866 decoradores HTTP en 108 archivos `*.controller.ts` de `development`. La matriz tiene además 20 filas **pendientes de merge (PR #448 de sacdia-backend)**: secciones `class-thresholds`, `investiture-windows`, `investiture-pastors`, `investiture-requests` y el `GET .../sections/:clubSectionId/score` de camporee-scoring.
+**Métodos (development)**: GET 353 · POST 279 · PATCH 125 · DELETE 96 · PUT 13
+**Auth detectada (development)**: Public 13 · JWT u Optional JWT 853
 
 ## Cómo leer esta referencia
 
@@ -23,22 +23,24 @@
 
 ## Resumen por dominio
 
+Conteo de filas por sección de la matriz. Las filas marcadas como pendientes de merge no cuentan en el total de `development`.
+
 | Dominio/API tag | Endpoints |
 | --- | ---: |
 | Achievements | 4 |
 | Admin - Achievements | 12 |
-| Admin - Certifications | 8 |
-| activities | 13 |
+| activities | 16 |
 | admin-auth | 6 |
 | admin-camporee-event-types | 4 |
 | admin | 2 |
+| admin-audit-logs | 2 |
 | admin-geography | 24 |
 | Admin - Honors Requirements | 7 |
-| admin-notifications | 1 |
+| admin-notifications | 3 |
 | Admin - Phase E Catalogs (i18n) | 36 |
 | admin-reference | 38 |
 | admin-users | 7 |
-| analytics | 6 |
+| analytics | 8 |
 | Annual Evidence Folders | 13 |
 | Annual Evidence Folders - Templates | 9 |
 | Award Categories | 5 |
@@ -46,27 +48,28 @@
 | Annual Evidence Folders - Rankings | 4 |
 | annual-reports | 9 |
 | app.controller.ts | 1 |
-| auth | 19 |
+| auth | 20 |
 | OAuth | 5 |
 | camporee-event-templates | 5 |
 | camporee-events | 16 |
-| camporee-scoring | 17 |
+| camporee-scoring | 19 (+1 pendiente de merge, PR #448) |
 | camporee-staff | 8 |
 | camporee-venues | 9 |
-| camporees | 47 |
-| camporee order products | 6 |
-| camporee order offerings | 6 |
-| camporee orders | 14 |
-| camporee supplies | 29 |
+| camporees | 50 |
 | catalogs | 16 |
 | admin-certificate-bulk-imports | 6 |
 | certificate-bulk-imports | 13 |
 | certificate-import-institutional-requests | 3 |
 | admin-certificate-import-institutional-requests | 4 |
-| certifications | 25 |
+| certifications | 27 |
+| Admin - Certifications | 10 |
 | class-counselor-assignments | 4 |
 | class-progress-scope | 2 |
-| classes | 3 |
+| class-thresholds (pendiente de merge, PR #448) | 2 |
+| investiture-windows (pendiente de merge, PR #448) | 2 |
+| investiture-pastors (pendiente de merge, PR #448) | 6 |
+| investiture-requests (pendiente de merge, PR #448) | 8 |
+| classes | 4 |
 | user-classes | 7 |
 | club-enrollments | 7 |
 | clubs | 20 |
@@ -83,6 +86,12 @@
 | user-honors | 15 |
 | user-master-honors | 3 |
 | insurance | 18 |
+| field-payment-orders | 19 |
+| camporee order products | 6 |
+| camporee order offerings | 6 |
+| camporee orders | 14 |
+| payment obligations | 1 |
+| camporee supplies | 29 |
 | inventory | 8 |
 | investiture | 20 |
 | legal-representatives | 4 |
@@ -95,11 +104,10 @@
 | member-of-month | 4 |
 | annual-membership | 3 |
 | membership-requests | 3 |
-| monthly-reports | 9 |
+| monthly-reports | 10 |
 | Notifications | 10 |
 | FCM Tokens | 5 |
 | User Notification Preferences | 4 |
-| payment obligations | 1 |
 | post-registration | 6 |
 | qr | 6 |
 | quarterly-reports | 9 |
@@ -256,6 +264,8 @@
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
 | GET | `/api/v1/admin/notifications/stats` | JWT | Global: admin, super-admin | FCM notification delivery metrics for administrators | AdminNotificationsService.getStats() | `src/admin/admin-notifications.controller.ts` |
+| GET | `/api/v1/admin/notifications/categories` | JWT | Global: admin, super-admin | Listar la configuración global de entrega por categoría de notificación | NotificationCategorySettingsService.listCategorySettings() | `src/admin/admin-notifications.controller.ts` |
+| PATCH | `/api/v1/admin/notifications/categories` | JWT | Global: admin, super-admin | Actualizar una categoría (`PatchNotificationCategorySettingDto`: `category`, `mobileEnabled`, `defaultEnabled`); responde la lista completa | NotificationCategorySettingsService.updateCategorySetting() | `src/admin/admin-notifications.controller.ts` |
 
 ### Admin - Phase E Catalogs (i18n)
 
@@ -358,6 +368,7 @@
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
 | GET | `/api/v1/admin/analytics/sla-dashboard` | JWT | Global: admin, coordinator (alias: zone/general + director-lf/assistant-lf; LF recorta a secciones del campo) | SLA Dashboard | AnalyticsService.getSlaDashboard() | `src/analytics/analytics.controller.ts` |
+| GET | `/api/v1/admin/analytics/local-field-dashboard` | JWT | Global: admin, super-admin, coordinator, director-lf, assistant-lf, director-union, assistant-union, director-dia, assistant-dia | Dashboard operativo del campo local (miembros activos, inscripciones anuales, cobertura de informes mensuales, distribución por clase, especialidades y actividades). Query opcional `local_field_id`: los roles de campo ven su propio campo; admin puede filtrar | LocalFieldDashboardService.getDashboard() | `src/analytics/analytics.controller.ts` |
 | GET | `/api/v1/admin/analytics/operations-dashboard` | JWT | Global: admin (alias: assistant-admin), super-admin, director-dia, assistant-dia, director-union, assistant-union, director-lf, assistant-lf | Dashboard operativo jerárquico con scope forzado en servidor | OperationsDashboardService.getDashboard() | `src/analytics/analytics.controller.ts` |
 | GET | `/api/v1/admin/analytics/jobs-overview` | JWT | Global: admin, super-admin | Overview de jobs y colas BullMQ (admin only) | JobsOverviewService.getOverview() | `src/analytics/analytics.controller.ts` |
 | POST | `/api/v1/admin/analytics/jobs/:queue/:jobId/retry` | JWT | Global: super-admin | Retry failed BullMQ job (super-admin only) | JobsOverviewService.retryFailedJob() | `src/analytics/analytics.controller.ts` |
@@ -628,6 +639,7 @@ Semántica funcional y límites: [operations-dashboard.md](../features/operation
 | POST | `/api/v1/auth/refresh` | Public | - | Refrescar sesión con refresh token | AuthService.refreshSession() | `src/auth/auth.controller.ts` |
 | POST | `/api/v1/auth/logout` | Public | - | Cerrar sesión | AuthService.logout() | `src/auth/auth.controller.ts` |
 | POST | `/api/v1/auth/password/reset-request` | Public | - | Solicitar recuperación de contraseña | AuthService.requestPasswordReset() | `src/auth/auth.controller.ts` |
+| POST | `/api/v1/auth/password/reset` | Public | - | Confirmar recuperación de contraseña (`ResetPasswordDto`). Throttle 5/min. No emite sesión ni JWT: el cliente debe iniciar sesión de nuevo. Token inválido o expirado → 400 | AuthService.confirmPasswordReset() | `src/auth/auth.controller.ts` |
 | POST | `/api/v1/auth/verify-email/send` | JWT | - | Enviar email de verificación al usuario autenticado | AuthService.sendVerificationEmail() | `src/auth/auth.controller.ts` |
 | POST | `/api/v1/auth/verify-email/confirm` | Public | - | Confirmar verificación de email con token | AuthService.confirmEmailVerification() | `src/auth/auth.controller.ts` |
 | POST | `/api/v1/auth/update-password` | JWT | - | Update authenticated user password | AuthService.updateOwnPassword() | `src/auth/auth.controller.ts` |
@@ -705,7 +717,7 @@ POST/PATCH de instancia aceptan `honor_ids?: number[]` (máx. 20, únicos, honor
 | PATCH | `/api/v1/camporee-event-judge-assignments/:assignmentId` | JWT | - | Actualizar camporee-event-judge-assignments/{id} | CamporeeScoringService.updateJudgeAssignment() | `src/camporee-scoring/camporee-scoring.controller.ts` |
 | DELETE | `/api/v1/camporee-event-judge-assignments/:assignmentId` | JWT | - | Eliminar/desactivar camporee-event-judge-assignments/{id} | CamporeeScoringService.deactivateJudgeAssignment() | `src/camporee-scoring/camporee-scoring.controller.ts` |
 | GET | `/api/v1/camporee-events/:eventId/scoring-targets` | JWT | - | List enrolled sections that can receive scores; each row includes `active_result_id` (`null` if the section has no official result yet) | CamporeeScoringService.getScoringTargets() | `src/camporee-scoring/camporee-scoring.controller.ts` |
-| GET | `/api/v1/camporee-events/:eventId/sections/:clubSectionId/score` | JWT | - | Active official score for one section, or `data: null` when none exists. Includes items, totals and `evaluator_name` | CamporeeScoringService.getOfficialScore() | `src/camporee-scoring/camporee-scoring.controller.ts` |
+| GET | `/api/v1/camporee-events/:eventId/sections/:clubSectionId/score` | JWT | - | **Pendiente de merge (PR #448 de sacdia-backend)**: en `development` solo existe el `POST .../scores`. Active official score for one section, or `data: null` when none exists. Includes items, totals and `evaluator_name` | CamporeeScoringService.getOfficialScore() | `src/camporee-scoring/camporee-scoring.controller.ts` |
 | POST | `/api/v1/camporee-events/:eventId/sections/:clubSectionId/scores` | JWT | Header opcional `Idempotency-Key: <UUID>`; juez primary o override autorizado | Submit official camporee score/no-show with serialized target and replay-safe receipt | CamporeeScoringService.submitScore() | `src/camporee-scoring/camporee-scoring.controller.ts` |
 
 #### Contrato de captura oficial de score
@@ -759,9 +771,9 @@ POST/PATCH de instancia aceptan `honor_ids?: number[]` (máx. 20, únicos, honor
 
 Los `POST` y `PATCH` de camporees locales y de unión aceptan `start_date` y `end_date` exclusivamente como `YYYY-MM-DD` válido. `club_registration_opens_at`, `club_registration_deadline`, `member_registration_deadline` y `payment_deadline` exigen ISO-8601 con `Z` u offset explícito; no se aceptan fechas sin hora. `timezone` debe ser IANA: al enviarla explícitamente, el backend registra la verificación con el actor autenticado; omitirla en `PATCH` conserva la verificación anterior. La política única resuelve la fase por calendario local y la disposición de clubes: cierre manual primero, luego `not_open_yet`, `open` hasta el deadline inclusivo, y `late_approval_required` sólo después. `not_open_yet` no crea ni habilita aprobación tardía.
 
-En rama `feat/camporee-orders` (worktree, no Neon), `GET`/`POST`/`PATCH` de camporee local y de unión incluyen `orders_enabled`, `orders_opens_at` y `orders_deadline`. No hay `GET` dedicado de orders-settings; la ventana también viaja en `GET .../order-offerings`. Mutación dedicada: `PATCH .../orders-settings`. Ver §camporee orders.
+`GET`/`POST`/`PATCH` de camporee local y de unión incluyen `orders_enabled`, `orders_opens_at` y `orders_deadline`. No hay `GET` dedicado de orders-settings; la ventana también viaja en `GET .../order-offerings`. Mutación dedicada: `PATCH .../orders-settings`. Ver §camporee orders.
 
-En rama `feat/camporee-supplies`, los mismos `GET`/`POST` de camporee aceptan `supply_edit_cutoff_local_time` (default `21:00`). Mutación dedicada: `PATCH .../supply-settings`. Ver §camporee supplies.
+Los mismos `GET`/`POST` de camporee aceptan `supply_edit_cutoff_local_time` (default `21:00`). Mutación dedicada: `PATCH .../supply-settings`. Ver §camporee supplies.
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -792,11 +804,14 @@ En rama `feat/camporee-supplies`, los mismos `GET`/`POST` de camporee aceptan `s
 | PATCH | `/api/v1/camporees/:camporeeId/clubs/:camporeeClubId/reject` | JWT | Permisos: attendance:approve_late | Rechazar inscripción tardía de club | CamporeeLateApprovalsService.rejectLocalClubEnrollment() | `src/camporees/camporees.controller.ts` |
 | PATCH | `/api/v1/camporees/:camporeeId/members/:camporeeMemberId/approve` | JWT | Permisos: attendance:approve_late | Aprobar inscripción tardía de miembro | CamporeeLateApprovalsService.approveLocalMemberEnrollment() | `src/camporees/camporees.controller.ts` |
 | PATCH | `/api/v1/camporees/:camporeeId/members/:camporeeMemberId/reject` | JWT | Permisos: attendance:approve_late | Rechazar inscripción tardía de miembro | CamporeeLateApprovalsService.rejectLocalMemberEnrollment() | `src/camporees/camporees.controller.ts` |
+| GET | `/api/v1/camporees/:camporeeId/section-registration` | JWT | Permisos: camporees:read | Estado contextual de inscripción al camporee de la sección activa del actor (`CamporeeSectionRegistrationDto`) | CamporeesService.getActiveSectionRegistration() | `src/camporees/camporees.controller.ts` |
+| POST | `/api/v1/camporees/:camporeeId/section-registration` | JWT | Permisos: camporees:register_active_section | Inscribir la sección activa del actor. No acepta un ID de sección enviado por el cliente. 400 si la inscripción no está disponible | CamporeesService.registerActiveSection() | `src/camporees/camporees.controller.ts` |
 | GET | `/api/v1/camporees/:camporeeId` | JWT | Permisos: camporees:read | Obtener camporee por ID | CamporeesService.findOne() | `src/camporees/camporees.controller.ts` |
 | POST | `/api/v1/camporees` | JWT | Permisos: camporees:create | Crear camporee | CamporeesService.create() | `src/camporees/camporees.controller.ts` |
 | PATCH | `/api/v1/camporees/:camporeeId` | JWT | Permisos: camporees:update | Actualizar camporee | CamporeesService.update() | `src/camporees/camporees.controller.ts` |
 | DELETE | `/api/v1/camporees/:camporeeId` | JWT | Permisos: camporees:delete | Desactivar camporee | CamporeesService.remove() | `src/camporees/camporees.controller.ts` |
 | POST | `/api/v1/camporees/:camporeeId/register` | JWT | Permisos: attendance:manage | Registrar miembro en camporee | CamporeesService.registerMember() | `src/camporees/camporees.controller.ts` |
+| POST | `/api/v1/camporees/:camporeeId/participants` | JWT | Permisos: attendance:manage | Alias contextual para registrar participantes con la sección activa del director (`RegisterMemberDto`). 422 `CAMPOREE_SECTION_REGISTRATION_REQUIRED` o `CAMPOREE_MEMBER_OUTSIDE_ACTIVE_SECTION` | CamporeesService.registerParticipants() | `src/camporees/camporees.controller.ts` |
 | GET | `/api/v1/camporees/:camporeeId/members` | JWT | Permisos: attendance:read | Listar miembros del camporee | CamporeesService.getMembers() | `src/camporees/camporees.controller.ts` |
 | DELETE | `/api/v1/camporees/:camporeeId/members/:userId` | JWT | Permisos: attendance:manage | Remover miembro del camporee | CamporeesService.removeMember() | `src/camporees/camporees.controller.ts` |
 | POST | `/api/v1/camporees/:camporeeId/clubs` | JWT | Permisos: attendance:manage | Inscribir club en camporee | CamporeesService.enrollClub() | `src/camporees/camporees.controller.ts` |
@@ -900,7 +915,7 @@ Aprobar no crea `enrollments` ni reactiva la clase. En HTTP, Campo Local, admin 
 
 ### certifications
 
-> Motor configurable versionado (`feat/configurable-certifications`). Las rutas de participante identifican la inscripción por **`userId` + `certificationId`**, no por `enrollmentId` en el path. La revisión final sí usa `enrollmentId` porque opera sobre la bandeja institucional.
+> Motor configurable versionado (migración `20260811180000_configurable_certifications_engine`). La inscripción y el progreso identifican la inscripción por **`userId` + `certificationId`**. Requisitos, evidencias, cierre y revisión final usan `enrollmentId` (`certification-enrollments/:enrollmentId`).
 
 #### Catálogo (Optional JWT)
 
@@ -926,11 +941,11 @@ Path base: `/api/v1/certifications/users/:userId/certification-enrollments/:enro
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
-| GET | `.../requirements/:requirementId` | JWT | user_certifications:read; owner `userId` | Estado del requisito, respuestas y componentes | CertificationRequirementsService.getRequirement() | `src/certifications/controllers/user-certification-requirements.controller.ts` |
-| PATCH | `.../requirements/:requirementId/draft` | JWT | user_certifications:manage; owner `userId` | Guardar borrador (solo `DRAFT` o `CHANGES_REQUESTED`) | CertificationRequirementsService.saveDraft() | `src/certifications/controllers/user-certification-requirements.controller.ts` |
-| POST | `.../requirements/:requirementId/submit` | JWT | user_certifications:manage; owner `userId` | Enviar requisito a revisión (`lock_version` obligatorio) | CertificationRequirementsService.submitRequirement() | `src/certifications/controllers/user-certification-requirements.controller.ts` |
-| POST | `.../requirements/:requirementId/evidences/presign` | JWT | user_certifications:manage; owner `userId` | URL firmada de subida R2 (`component_id`, MIME, tamaño) | CertificationEvidenceService.presign() | `src/certifications/controllers/user-certification-requirements.controller.ts` |
-| POST | `.../requirements/:requirementId/evidences/confirm` | JWT | user_certifications:manage; owner `userId` | Confirmar objeto subido (valida HEAD en R2) | CertificationEvidenceService.confirm() | `src/certifications/controllers/user-certification-requirements.controller.ts` |
+| GET | `/api/v1/certifications/users/:userId/certification-enrollments/:enrollmentId/requirements/:requirementId` | JWT | user_certifications:read; owner `userId` | Estado del requisito, respuestas y componentes | CertificationRequirementsService.getRequirement() | `src/certifications/controllers/user-certification-requirements.controller.ts` |
+| PATCH | `/api/v1/certifications/users/:userId/certification-enrollments/:enrollmentId/requirements/:requirementId/draft` | JWT | user_certifications:manage; owner `userId` | Guardar borrador (solo `DRAFT` o `CHANGES_REQUESTED`) | CertificationRequirementsService.saveDraft() | `src/certifications/controllers/user-certification-requirements.controller.ts` |
+| POST | `/api/v1/certifications/users/:userId/certification-enrollments/:enrollmentId/requirements/:requirementId/submit` | JWT | user_certifications:manage; owner `userId` | Enviar requisito a revisión (`lock_version` obligatorio) | CertificationRequirementsService.submitRequirement() | `src/certifications/controllers/user-certification-requirements.controller.ts` |
+| POST | `/api/v1/certifications/users/:userId/certification-enrollments/:enrollmentId/requirements/:requirementId/evidences/presign` | JWT | user_certifications:manage; owner `userId` | URL firmada de subida R2 (`component_id`, MIME, tamaño) | CertificationEvidenceService.presign() | `src/certifications/controllers/user-certification-requirements.controller.ts` |
+| POST | `/api/v1/certifications/users/:userId/certification-enrollments/:enrollmentId/requirements/:requirementId/evidences/confirm` | JWT | user_certifications:manage; owner `userId` | Confirmar objeto subido (valida HEAD en R2) | CertificationEvidenceService.confirm() | `src/certifications/controllers/user-certification-requirements.controller.ts` |
 | DELETE | `/api/v1/certifications/users/:userId/certification-enrollments/:enrollmentId/evidences/:evidenceId` | JWT | user_certifications:manage; owner `userId` | Eliminar evidencia mientras el requisito sea editable | CertificationEvidenceService.delete() | `src/certifications/controllers/user-certification-requirements.controller.ts` |
 
 #### Cierre institucional (participante)
@@ -1015,6 +1030,9 @@ Path base: `/api/v1/certifications/users/:userId/certification-enrollments/:enro
 
 ### class-thresholds
 
+> [!WARNING]
+> **Pendiente de merge (PR #448 de sacdia-backend).** Estas rutas viven en la rama `feat/investiture-authorization-ocr` y todavía no existen en `development`. El `Source` citado es el de esa rama.
+
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
 | GET | `/api/v1/local-fields/:localFieldId/class-thresholds/:ecclesiasticalYearId` | JWT | `director-lf` y `assistant-lf` solo en su Campo; `super-admin` en cualquier Campo. Admin, unión, división y un Campo ajeno: 403 `GUARD_PERMISSION_DENIED`. El alias de `GlobalRolesGuard` deja entrar a unión y división; el servicio igual responde 403. | Leer el porcentaje efectivo. Sin fila: `minimum_percent` 80 y `configured` false. La respuesta incluye `can_edit`. | FieldClassThresholdConfigService.get() | `src/classes/field-class-threshold.controller.ts` |
@@ -1022,12 +1040,18 @@ Path base: `/api/v1/certifications/users/:userId/certification-enrollments/:enro
 
 ### investiture-windows
 
+> [!WARNING]
+> **Pendiente de merge (PR #448 de sacdia-backend).** Estas rutas viven en la rama `feat/investiture-authorization-ocr` y todavía no existen en `development`. El `Source` citado es el de esa rama.
+
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
 | GET | `/api/v1/local-fields/:localFieldId/investiture-windows/:ecclesiasticalYearId` | JWT | Consultan, dentro de su alcance: `director-lf`, `assistant-lf`, `admin`, `assistant-admin`, `director-union`, `assistant-union`, `director-dia`, `assistant-dia` y `super-admin`. Fuera de alcance: 403 `GUARD_PERMISSION_DENIED`. El alias de `GlobalRolesGuard` deja entrar a unión y división; el servicio igual recorta el Campo. | Sin fila y con intersección: 1 de octubre a 20 de diciembre, recortado al año, `configured` false, `operational` true, sin insertar. Sin intersección y sin configuración válida: `start_date` null, `end_date` null, `configured` false, `operational` false. No se devuelve el año completo ni un rango invertido. `operational` indica que existe un rango, no que el día local caiga dentro. Incluye `can_edit`. Una fila fuera del año, con inicio posterior al fin o con un día imposible no abre la ventana y la lectura no la reescribe. Editar la ventana no autoriza investiduras ni habilita el porcentaje de clase. | FieldInvestitureWindowConfigService.get() | `src/classes/field-investiture-window.controller.ts` |
 | PATCH | `/api/v1/local-fields/:localFieldId/investiture-windows/:ecclesiasticalYearId` | JWT | Escriben, con el año activo y el día local dentro de ese año: `director-lf` y `assistant-lf` solo en su Campo; `admin` y `assistant-admin` en su alcance; `super-admin` en cualquier Campo. Unión y división no escriben: 403 `GUARD_PERMISSION_DENIED`. Año inactivo o día local fuera del año: 403 `INVESTITURE_WINDOW_EDIT_CLOSED`. | Cuerpo `start_date` y `end_date` (`YYYY-MM-DD`), inclusivos, dentro del año y con inicio no posterior al fin. Un cuerpo que no tiene esa forma lo rechaza el `I18nValidationPipe` con HTTP 400 sin `code`. Día imposible: 400 `INVESTITURE_WINDOW_DATE_INVALID`. Fuera del año: 400 `INVESTITURE_WINDOW_OUTSIDE_YEAR`. Inicio posterior al fin: 400 `INVESTITURE_WINDOW_START_AFTER_END`. Campo o año ausente: 404 `INVESTITURE_WINDOW_FIELD_NOT_FOUND` o `INVESTITURE_WINDOW_YEAR_NOT_FOUND`. | FieldInvestitureWindowConfigService.update() | `src/classes/field-investiture-window.controller.ts` |
 
 ### investiture-pastors
+
+> [!WARNING]
+> **Pendiente de merge (PR #448 de sacdia-backend).** Estas rutas viven en la rama `feat/investiture-authorization-ocr` y todavía no existen en `development`. El `Source` citado es el de esa rama.
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -1039,6 +1063,9 @@ Path base: `/api/v1/certifications/users/:userId/certification-enrollments/:enro
 | GET | `/api/v1/clubs/:clubId/investiture-authorizers` | JWT | La misma lectura que el listado del distrito, aplicada al distrito resuelto. | El distrito sale de `clubs.church_id` → `churches.districlub_type_id`. No usa `clubs.districlub_type_id` ni un distrito del usuario. `resolved_from` es `church`. Cada pastor activo tiene `can_authorize: true`. Club o iglesia ausente: 404 `INVESTITURE_PASTOR_CLUB_NOT_FOUND` o `INVESTITURE_PASTOR_CHURCH_NOT_FOUND`. | DistrictInvestiturePastorService.authorizersForClub() | `src/classes/district-investiture-pastors.controller.ts` |
 
 ### investiture-requests
+
+> [!WARNING]
+> **Pendiente de merge (PR #448 de sacdia-backend).** Estas rutas viven en la rama `feat/investiture-authorization-ocr` y todavía no existen en `development`. El `Source` citado es el de esa rama.
 
 Módulo hermano de `InvestitureModule`. No llama a `submit`, `club-approve`, `coordinator-approve`, `field-approve` ni `invest`, y no envía correo. El controlador usa `JwtAuthGuard` y `@SkipPermissions()`. No usa `GlobalRolesGuard`. El cargo se resuelve en el servicio: director, secretario o secretario-tesorero de esa sección y año, con asignación operativa y `status` active. El subdirector recibe 403 `INVESTITURE_REQUEST_FORBIDDEN` al presentar, leer, agregar, quitar y cambiar fecha. `super-admin` solo puede cambiar la fecha. Un cuerpo que no tiene la forma descrita lo rechaza el `I18nValidationPipe` con HTTP 400 sin `code`.
 
@@ -1290,7 +1317,7 @@ Mientras una persona sigue `PENDING`, puntaje, alta o baja de evidencia, envío 
 
 ### camporee order products
 
-> Pedidos de mercancía (`feat/camporee-orders`). Controllers en worktree `/private/tmp/sacdia-backend-camporee-orders`. **No** están en el checkout `sacdia-backend` principal ni en Neon hasta merge + `migrate deploy`. Distintos de `/payment-orders` (inscripción/seguro).
+> Pedidos de mercancía (`src/camporee-orders`, migración `20260824190000_camporee_orders`). Distintos de `/payment-orders` (inscripción/seguro).
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -1337,7 +1364,7 @@ Folio `PED{yyyy}{####}`. Máquina: `ISSUED` → `PROOF_SUBMITTED` → `PAID` →
 
 ### payment obligations
 
-Read model de solo lectura. No fusiona folios ni muta `field_payment_orders`, `material_orders`, `camporee_orders` o `camporee_supply_payment_docs`. Misma salvedad de rama que camporee-orders / camporee-supplies.
+Read model de solo lectura. No fusiona folios ni muta `field_payment_orders`, `material_orders`, `camporee_orders` o `camporee_supply_payment_docs`.
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -1345,7 +1372,7 @@ Read model de solo lectura. No fusiona folios ni muta `field_payment_orders`, `m
 
 ### camporee supplies
 
-> Insumos de sección (`feat/camporee-supplies`). Controllers en worktree `/private/tmp/sacdia-backend-camporee-orders`. **No** están en Neon hasta merge + `migrate deploy`. Distintos de `/camporee-orders` (mercancía PED) y `/payment-orders` (inscripción). Folio `INS{yyyy}{####}`.
+> Insumos de sección (`src/camporee-supplies`, migración `20260826120000_camporee_supplies`). Distintos de `/camporee-orders` (mercancía PED) y `/payment-orders` (inscripción). Folio `INS{yyyy}{####}`.
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |

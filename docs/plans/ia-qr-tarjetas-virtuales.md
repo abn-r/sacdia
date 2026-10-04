@@ -1,14 +1,16 @@
 # IA, QR y tarjetas virtuales — roadmap
 
-**Estado**: PLANIFICADO (aspiracional / exploración)
+**Estado**: QR y tarjeta virtual IMPLEMENTADOS; línea de IA PLANIFICADA (actualizado 2026-10-04, verificado contra `development`)
 
-> Ninguna de las capacidades descritas está implementada. Este documento captura hipótesis de valor y candidatos a exploración. No comunicar como vigente.
+> **Hecho** (en `development`): QR firmado del miembro, validación y escaneo de QR, credencial virtual con PDF y modo offline.
+> **Falta**: toda la línea de IA aplicada (§3); integración con Apple/Google Wallet; inscripción rápida por QR de club.
+> El diseño ya implementado de QR y credencial está archivado en `docs/history/plans/`.
 
 ---
 
 ## 1. Motivación
 
-Explorar capacidades diferenciales frente a soluciones tradicionales (SGC) con tres líneas de trabajo candidatas:
+Explorar capacidades diferenciales frente a soluciones tradicionales (SGC) con tres líneas de trabajo:
 
 - **IA aplicada** — asistente institucional, generación de reportes, análisis predictivo, sugerencias contextuales;
 - **Códigos QR** — identificación rápida de miembros, asistencia por escaneo, integración con eventos presenciales;
@@ -16,7 +18,13 @@ Explorar capacidades diferenciales frente a soluciones tradicionales (SGC) con t
 
 ## 2. Estado actual
 
-Nada implementado. Verificado por grep negativo al 2026-04-22: no hay módulos, endpoints ni UI relacionados con IA, QR o tarjetas virtuales en `sacdia-backend/`, `sacdia-admin/` ni `sacdia-app/`.
+| Línea | Estado | Evidencia |
+|---|---|---|
+| QR del miembro | Implementado | Módulo `sacdia-backend/src/qr/`: `GET /qr/member/token` emite un JWT HS256 de 24 h firmado con `QR_JWT_SECRET` (`aud=sacdia:qr-member`, no válido como token de API); `GET /qr/me`, `GET /qr/me/card`, `GET /qr/me/card.pdf`; `POST /qr/validate` (`qr:validate`) y `POST /qr/scan` (alias legacy con captura de asistencia, `attendance:manage`) |
+| Escaneo en la app | Implementado | `sacdia-app/lib/features/qr/` (`qr_scanner_view.dart`, `mobile_scanner`) |
+| Tarjeta virtual | Implementado | `sacdia-app/lib/features/virtual_card/`: credencial con QR, compartir como imagen/PDF (`credential_image_pdf.dart`) y copia cacheada mostrada como offline si falla la red |
+| Wallets nativos | No implementado | Sin integración Apple Wallet / Google Wallet |
+| IA aplicada | No implementado | Ningún módulo, endpoint ni dependencia de modelos de IA en los repos runtime |
 
 ## 3. Hipótesis de valor — IA aplicada
 
@@ -36,6 +44,8 @@ Decisiones pendientes:
 
 ## 4. Hipótesis de valor — QR
 
+> Casos 1, 2 y 4 implementados (ver §2): el QR usa un JWT firmado de 24 h, no una firma HMAC sobre `user_id`; el escáner va embebido en la app. El caso 3 sigue pendiente.
+
 Casos candidatos:
 
 1. **QR del miembro** — identificación única escaneable (usa `users.user_id` + firma HMAC).
@@ -51,6 +61,8 @@ Decisiones pendientes:
 
 ## 5. Hipótesis de valor — Tarjetas virtuales
 
+> Casos 1 y 2 implementados (ver §2). Los casos 3 y 4 siguen pendientes.
+
 Casos candidatos:
 
 1. **Credencial del miembro** — foto, nombre, rol institucional activo, club, sección, vigencia.
@@ -64,13 +76,12 @@ Decisiones pendientes:
 - vigencia y renovación;
 - qué roles son visibles públicamente en la tarjeta.
 
-## 6. Secuencia tentativa de exploración
+## 6. Secuencia
 
-1. spike IA (asistente lectura sobre canon + docs; riesgo bajo; valor demostrativo);
-2. QR miembro (infraestructura menor; alto valor en presencial);
-3. Tarjeta virtual básica (PDF/imagen descargable, sin wallets nativos).
-
-El resto queda en exploración pasiva hasta que haya señales de demanda.
+1. QR miembro — hecho.
+2. Tarjeta virtual básica (imagen/PDF, sin wallets) — hecho.
+3. Spike de IA (asistente de lectura sobre canon y documentación; riesgo bajo, valor demostrativo) — pendiente.
+4. Wallets nativos e inscripción por QR de club — exploración pasiva hasta que haya demanda.
 
 ## 7. Riesgos
 
@@ -86,7 +97,7 @@ El resto queda en exploración pasiva hasta que haya señales de demanda.
 | QR miembro | captura de asistencia 3× más rápida que manual |
 | Tarjeta virtual | descarga disponible y válida ante consulta institucional |
 
-## 9. Estado actual
+## 9. Siguiente paso
 
-- **Prioridad**: baja. Son diferenciadores estratégicos, no urgencias operativas.
-- **Decisión inmediata**: dejar en backlog exploratorio. Priorizar una sola línea si surge demanda concreta.
+- **Prioridad**: baja para IA; es un diferenciador estratégico, no una urgencia operativa.
+- **Decisión inmediata**: mantener la línea de IA en backlog exploratorio y priorizarla solo si surge demanda concreta. Las decisiones pendientes de §3 (modelo, privacidad de datos de menores, presupuesto) deben cerrarse antes de cualquier spike.

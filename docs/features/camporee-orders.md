@@ -1,16 +1,12 @@
 # Feature: Pedidos de camporee
 
 **Estado**: IMPLEMENTADO PARCIAL
-**Fecha**: 2026-08-25
+**Fecha**: 2026-08-25 (estado actualizado 2026-10-04)
 **Módulo backend**: `CamporeeOrdersModule` (`src/camporee-orders/`) + `PaymentObligationsModule` (`src/payment-obligations/`)
-**Plan canónico**: [`docs/plans/2026-08-24-pedidos-camporees-consolidado-codex.md`](../plans/2026-08-24-pedidos-camporees-consolidado-codex.md)
 **ADR**: [#9 — Bounded context `camporee-orders`](../api/ARCHITECTURE-DECISIONS.md#9-bounded-context-camporee-orders-independiente-de-materials-y-fieldpaymentorders)
 
-> Runtime verificado en rama `feat/camporee-orders`, **no** en el checkout principal de `sacdia-backend` (`fix/security-hardening-lote`) ni en Neon.
-> Backend efectivo: worktree `/private/tmp/sacdia-backend-camporee-orders` (HEAD `47d12f3`).
-> Admin: `sacdia-admin` `feat/camporee-orders` `99a5ab5`.
-> App: `sacdia-app` `feat/camporee-orders` `3c6c8413`.
-> La rama backend **no está pusheada**. Migración `20260824190000_camporee_orders` **no aplicada** a Neon. Seeds/permisos **no aplicados** a Neon.
+> Integrado en `development` en los tres repos: backend `src/camporee-orders` + `src/payment-obligations` (migración `20260824190000_camporee_orders`, permisos en `prisma/seeds/permissions.seed.sql` y `role-permissions.seed.sql`), admin `/dashboard/campamentos/pedidos/{bandeja,catalogo}` y app `lib/features/camporee_orders`.
+> Sigue en `IMPLEMENTADO PARCIAL` por los pendientes de la sección «Desviaciones honestas».
 
 ---
 
@@ -24,11 +20,10 @@ El dominio es un bounded context independiente. Reutiliza patrones (folio, máqu
 
 | Superficie | Estado | Evidencia |
 |------------|--------|-----------|
-| Backend Nest (catálogo, ofertas, emisión, proof, entrega, PaymentObligations) | Código en `feat/camporee-orders` | Controllers en el worktree; Jest focalizado |
-| Schema / migración | Escrita, no desplegada | `prisma/migrations/20260824190000_camporee_orders/` |
-| Admin (catálogo, settings, ofertas, bandeja, detalle, obligaciones) | UI en `feat/camporee-orders` | Product CRUD sí; POST/PATCH de tallas **no** cableado en UI |
-| App (emisión nominada, proof, pagos pendientes, distribución director) | Flujo en `feat/camporee-orders` | `flutter test test/features/camporee_orders test/features/payment_orders` |
-| Neon / checkout backend principal | Ausente | Migración y seeds no aplicados; `sacdia-backend` no está en esta rama |
+| Backend Nest (catálogo, ofertas, emisión, proof, entrega, PaymentObligations) | En `development` | `src/camporee-orders` (26 rutas) + `src/payment-obligations` (1 ruta); Jest focalizado y `test/camporee-orders.e2e-spec.ts` (no bloqueante en CI) |
+| Schema / migración | En `development` | `prisma/migrations/20260824190000_camporee_orders/` |
+| Admin (catálogo, settings, ofertas, bandeja, detalle, obligaciones) | En `development` | `/dashboard/campamentos/pedidos/bandeja`, `/dashboard/campamentos/pedidos/catalogo`. Product CRUD sí; POST/PATCH de tallas existen en `src/lib/api/camporee-orders.ts` pero **no** están cableados en UI |
+| App (emisión nominada, proof, pagos pendientes, distribución director) | En `development` | `lib/features/camporee_orders`, `lib/features/payment_orders`; `flutter test test/features/camporee_orders test/features/payment_orders` |
 
 ---
 
@@ -126,11 +121,11 @@ Emisores v1: `director`, `deputy-director`, `secretary`, `secretary-treasurer`, 
 
 ---
 
-## Endpoints (rama `feat/camporee-orders`)
+## Endpoints
 
-Prefijo `/api/v1`. Envelope y errores según contratos vigentes. Decoradores HTTP en el worktree; registrados en `docs/api/ENDPOINTS-LIVE-REFERENCE.md` con la misma salvedad de rama hasta el merge.
+Prefijo `/api/v1`. Envelope y errores según contratos vigentes. Registrados en `docs/api/ENDPOINTS-LIVE-REFERENCE.md` (secciones `camporee order products`, `camporee order offerings`, `camporee orders` y `payment obligations`).
 
-**No existe** `GET .../orders-settings`. La lectura de la ventana va en `GET /camporees/:id` / `GET /camporees/union/:id` (campos `orders_enabled`, `orders_opens_at`, `orders_deadline`) y en `GET .../order-offerings` (`settings` + `items`). La escritura dedicada es `PATCH .../orders-settings`. `POST`/`PATCH` de camporee también aceptan esos campos en el DTO del worktree.
+**No existe** `GET .../orders-settings`. La lectura de la ventana va en `GET /camporees/:id` / `GET /camporees/union/:id` (campos `orders_enabled`, `orders_opens_at`, `orders_deadline`) y en `GET .../order-offerings` (`settings` + `items`). La escritura dedicada es `PATCH .../orders-settings`. `POST`/`PATCH` de camporee también aceptan esos campos en su DTO.
 
 Cuerpo de emisión (el cliente no envía montos, club, sección ni campo local):
 
@@ -200,13 +195,13 @@ Admin visualiza el progreso de distribución; **no** impersona al director para 
 |--------|------|---------|-------------|
 | GET | `/payment-obligations/pending` | cualquiera de `camporee-orders:read`, `field-payment-orders:read`, `materiales:read` | Une `field_payment_orders` + `material_orders` + `camporee_orders` sin fusionar folios. Query opcional mutuamente exclusiva `camporee_id` / `union_camporee_id`. |
 
-**Total en controllers de la rama: 27** (6 biblioteca + 6 settings/ofertas + 14 pedido + 1 read model).
+**Total: 27** (6 biblioteca + 6 settings/ofertas + 14 pedido + 1 read model).
 
 ---
 
 ## Errores runtime (`ErrorCode`)
 
-Presentes en `src/common/errors/error-codes.ts` del worktree. Las claves `CAMPOREE_ORDER_*` **pueden faltar** en `src/i18n/*/errors.json` (admin/app tienen copy local).
+Presentes en `src/common/errors/error-codes.ts`. Las claves `CAMPOREE_ORDER_*` **no están** en `src/i18n/*/errors.json` (admin/app tienen copy local).
 
 ```text
 CAMPOREE_ORDERS_DISABLED
@@ -254,7 +249,7 @@ ISSUED ──► PROOF_SUBMITTED ──► PAID ──► DELIVERED
 
 ## Permisos
 
-Familia sembrada en `prisma/seeds/permissions.seed.sql` + grants en `role-permissions.seed.sql` **de la rama**; no aplicados a Neon.
+Familia sembrada en `prisma/seeds/permissions.seed.sql` + grants en `role-permissions.seed.sql`; constantes en `src/camporee-orders/permissions.ts`.
 
 | Permiso | Uso | Seed |
 |---------|-----|------|
@@ -274,7 +269,7 @@ Ninguna mutación carga una orden solo por UUID y permiso: siempre resuelve terr
 
 ## Settings del camporee
 
-En `local_camporees` y `union_camporees` (migración de rama, no aplicada a Neon):
+En `local_camporees` y `union_camporees` (migración `20260824190000_camporee_orders`):
 
 | Campo | Regla |
 |-------|--------|
@@ -313,11 +308,10 @@ Timezone IANA del camporee; no interpretar fechas con la zona del dispositivo.
 
 ---
 
-## Desviaciones honestas (2026-08-25)
+## Desviaciones honestas (revisadas 2026-10-04)
 
-- El checkout `sacdia-backend` del workspace **no** es esta rama; el runtime vive en el worktree `/private/tmp/sacdia-backend-camporee-orders`.
-- `feat/camporee-orders` backend no está en remoto.
-- Migración, seeds de permisos y grants **no** están en Neon: contra la DB compartida las rutas fallarían por schema/RBAC.
-- i18n backend `errors.json` puede no incluir `CAMPOREE_ORDER_*`.
+- i18n backend `errors.json` no incluye `CAMPOREE_ORDER_*`.
+- `test/camporee-orders.e2e-spec.ts` existe pero no está en el subset bloqueante del CI.
+- La aplicación de la migración y los seeds en cada base Neon se verifica por entorno; este documento no lo asegura.
 - Task 1 del plan quedó históricamente como `feat(payments)...` (`9972925`); no reescribir historia.
 - Admin no emite pedidos de sección ni marca distribución a miembros.

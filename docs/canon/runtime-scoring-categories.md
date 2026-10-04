@@ -53,7 +53,7 @@ Permisos vigentes (dominio propio, migrados desde `units:*` en 2026-04-22):
 - `scoring_categories:manage` — crear/actualizar/eliminar categorías de unión y campo local.
 
 Distribución:
-- `scoring_categories:read` — todos los roles de club + globales field-level+ + admin/super_admin.
+- `scoring_categories:read` — todos los roles de club + globales field-level+ + admin/super-admin.
 - `scoring_categories:manage` — mismo listado excepto `member`.
 
 El permiso `scoring_categories:read` también cubre los endpoints de `division`-level que antes carecían de `@RequirePermissions` (gap de seguridad cerrado en la misma ola de migración).
@@ -77,7 +77,7 @@ El permiso `scoring_categories:read` también cubre los endpoints de `division`-
 | `/local-fields/:fieldId/scoring-categories/:id` | PATCH | `scoring_categories:manage` |
 | `/local-fields/:fieldId/scoring-categories/:id` | DELETE | `scoring_categories:manage` |
 
-Todos los endpoints de division también usan `@GlobalRolesGuard + @GlobalRoles('admin', 'super_admin')` para limitar la edición a roles globales, alineado con el scope del nivel.
+Todos los endpoints de division también usan `@GlobalRolesGuard + @GlobalRoles('admin', 'super-admin')` para limitar la edición a roles globales, alineado con el scope del nivel.
 
 ---
 

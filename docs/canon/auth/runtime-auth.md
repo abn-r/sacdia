@@ -2,7 +2,7 @@
 
 ## Estado
 ACTIVE
-<!-- VERIFICADO contra código 2026-04-13: runtime auth alineado con Better Auth, verify-email, OAuth callback POST y MFA aal1/aal2 -->
+<!-- VERIFICADO contra código 2026-04-13: runtime auth alineado con Better Auth, verify-email, OAuth callback POST y MFA aal1/aal2. Reverificado 2026-10-04: key de cache `v7`, `POST /auth/password/reset` y `DELETE /auth/me`. -->
 
 ## Propósito
 Este documento define el comportamiento técnico vigente del dominio de autenticación y autorización.
@@ -72,12 +72,14 @@ Responsabilidades actuales:
 - `POST /api/v1/auth/refresh` <!-- VERIFICADO -->
 - `POST /api/v1/auth/logout` <!-- VERIFICADO -->
 - `POST /api/v1/auth/password/reset-request` <!-- VERIFICADO -->
+- `POST /api/v1/auth/password/reset` <!-- VERIFICADO 2026-10-04: confirma el token de recuperación; no emite sesión ni JWT, el cliente debe iniciar sesión de nuevo -->
 - `POST /api/v1/auth/verify-email/send` <!-- VERIFICADO -->
 - `POST /api/v1/auth/verify-email/confirm` <!-- VERIFICADO -->
 - `POST /api/v1/auth/update-password` <!-- VERIFICADO -->
 - `GET /api/v1/auth/me` <!-- VERIFICADO -->
 - `PATCH /api/v1/auth/me/context` <!-- VERIFICADO -->
 - `GET /api/v1/auth/profile/completion-status` <!-- VERIFICADO -->
+- `DELETE /api/v1/auth/me` <!-- VERIFICADO 2026-10-04: borrado de cuenta propia (AccountDeletionService); requiere contraseña actual, responde 204, límite 1/hora -->
 
 ### OAuth
 - `POST /api/v1/auth/oauth/google` <!-- VERIFICADO -->
@@ -184,7 +186,7 @@ Reglas vigentes:
 - `authorization.effective.permissions` es la fuente operativa para gating de UX;
 - permisos de club salen solo de la asignación activa;
 - `users_permissions` activos entran a `direct_permissions` y a `effective.permissions` (grant global);
-- cache Redis `auth:context:v5:{userId}` (TTL 5 min); mutar roles/permisos invalida la clave;
+- cache Redis `auth:context:v7:{userId}` (TTL 5 min); mutar roles/permisos invalida la clave. Al invalidar también se borran las claves heredadas (`v2`–`v6` y la clave sin versión) definidas en `authorization-context.service.ts`;
 - los campos legacy `roles`, `permissions`, `club` y `club_context` siguen expuestos solo por compatibilidad temporal.
 
 ## Contexto activo de club

@@ -1,6 +1,6 @@
 # Coordinación
 
-**Estado**: EN IMPLEMENTACIÓN
+**Estado**: IMPLEMENTADO (backend `admin/coordination` + `coordination/me/scope`, admin `/dashboard/coordination`, app `lib/features/coordinator`; pendientes menores en «Gaps y pendientes»)
 
 ## Descripción de dominio
 

@@ -114,7 +114,7 @@ En el estado actual del workspace, SACDIA se expresa en:
 - `docs/` como capa documental canónica y operativa;
 - base de datos relacional como soporte de persistencia y trazabilidad.
 
-> Los conteos concretos de módulos, endpoints, pantallas o modelos no viven en este documento canónico. Para métricas actualizadas consultar `docs/audit/REALITY-MATRIX.md` y `docs/api/ENDPOINTS-LIVE-REFERENCE.md`. Canon describe organización técnica, no tamaño.
+> Los conteos concretos de módulos, endpoints, pantallas o modelos no viven en este documento canónico. Para cifras actualizadas consultar `docs/canon/runtime-sacdia.md` (§5 y §8), `docs/api/ENDPOINTS-LIVE-REFERENCE.md` y el estado por dominio en `docs/features/README.md`. Canon describe organización técnica, no tamaño.
 
 La estructura concreta de carpetas o repositorios debe leerse como implementación de esta arquitectura, no como la arquitectura misma.
 
