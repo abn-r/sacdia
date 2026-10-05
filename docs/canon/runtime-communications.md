@@ -101,7 +101,7 @@ Controller: `FcmTokensController` (en el mismo archivo).
 
 ## 6. Persistencia canonizada
 
-### 6.1 `notification_logs` (`schema.prisma:1108-1128`)
+### 6.1 `notification_logs` (modelo en `sacdia-backend/prisma/schema.prisma`)
 Auditoría por envío (no por recipient). Campos clave:
 - `log_id` (int, autoincrement);
 - `type` ∈ `{ USER, CLUB, BROADCAST, SECTION_ROLE, GLOBAL_ROLE }`;
@@ -111,7 +111,7 @@ Auditoría por envío (no por recipient). Campos clave:
 - `source` (varchar 100) — **tag obligatorio** para trazabilidad (ej. `admin:manual_send`, `camporees:late_registration`, `achievements:unlocked`);
 - `tokens_sent`, `tokens_failed` — métricas FCM.
 
-### 6.2 `notification_deliveries` (`schema.prisma:1130-1144`)
+### 6.2 `notification_deliveries` (modelo en `sacdia-backend/prisma/schema.prisma`)
 Una fila por recipient:
 - `delivery_id` (uuid, PK);
 - `log_id` (FK a `notification_logs`);
@@ -120,13 +120,13 @@ Una fila por recipient:
 - uniqueness: `(log_id, user_id)`.
 - índices: `(user_id, read_at)`, `(user_id, created_at DESC)` para bandeja.
 
-### 6.3 `notification_preferences` (`schema.prisma:1093-1106`)
+### 6.3 `notification_preferences` (modelo en `sacdia-backend/prisma/schema.prisma`)
 Opt-out por categoría:
 - `(user_id, category)` único;
 - `enabled` default `true`;
 - si no hay fila, asumir `enabled = true` (opt-out, no opt-in).
 
-### 6.4 `user_fcm_tokens` (`schema.prisma:1146-1161`)
+### 6.4 `user_fcm_tokens` (modelo en `sacdia-backend/prisma/schema.prisma`)
 - `token` (varchar 255, unique);
 - `device_type`, `device_name` (nullables);
 - `active` (boolean) — se desactiva en errores FCM permanentes (ver §8);

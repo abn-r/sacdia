@@ -327,7 +327,7 @@ Nuevo módulo NestJS en `src/rbac/` registrado en `app.module.ts`:
 - `getCurrentUser()` (`session.ts`): Desenvuelve respuesta backend `{ status, data }` antes de retornar `AuthUser`
 - Sidebar: Nueva sección "Seguridad" con enlaces a Permisos y Roles
 
-**Documentación completa**: [`docs/01-FEATURES/auth/PERMISSIONS-SYSTEM.md`](../01-FEATURES/auth/PERMISSIONS-SYSTEM.md)
+**Documentación completa**: [`docs/features/auth/PERMISSIONS-SYSTEM.md`](../features/auth/PERMISSIONS-SYSTEM.md)
 
 ---
 
@@ -424,16 +424,16 @@ Ya existen Materials (catálogo LF, stock, líneas anónimas), Field Payment Ord
 | Permisos | Familia `camporee-orders:*`. Read model `payment-obligations` une `field_payment_orders` + `material_orders` + `camporee_orders` sin fusionar folios. |
 | Settings | En `local_camporees` / `union_camporees`: `orders_enabled` default `false`, `orders_opens_at`, `orders_deadline`. |
 | Folio | `PED{yyyy}{####}`. |
-| HTTP | 27 rutas bajo `/api/v1` en controllers Nest de `feat/camporee-orders` (worktree `/private/tmp/sacdia-backend-camporee-orders`, HEAD `47d12f3`). Registradas en `ENDPOINTS-LIVE-REFERENCE.md` con salvedad de rama: no están en el checkout principal ni en Neon. |
-| Plan | [`docs/plans/2026-08-24-pedidos-camporees-consolidado-codex.md`](../plans/2026-08-24-pedidos-camporees-consolidado-codex.md) |
+| HTTP | 27 rutas bajo `/api/v1`: 26 en `src/camporee-orders` y `GET /payment-obligations/pending` en `src/payment-obligations`. Integradas en `development` (migración `20260824190000_camporee_orders`) y registradas en `ENDPOINTS-LIVE-REFERENCE.md`. |
+| Feature | [`docs/features/camporee-orders.md`](../features/camporee-orders.md) |
 
 #### Consecuencias
 
 - Materials, Field Payment Orders e inscripción de camporee conservan sus invariantes; un defecto de pedidos no muta esas tablas.
 - “Pagos pendientes” es lectura agregada; cada acción abre el flujo dueño de la fuente.
 - La elegibilidad “cualquier miembro activo de la sección” queda rechazada; el roster del camporee es la autoridad.
-- Admin y app consumen los contratos de la rama; admin no impersona `deliver-to-member` y aún no cablea POST/PATCH de tallas en UI.
-- Hasta merge + migración Neon, las rutas `/camporee-orders` y `GET /payment-obligations/pending` no existen en el runtime desplegado. Los códigos `CAMPOREE_ORDER_*` están en `ErrorCode` del worktree; i18n `errors.json` puede seguir incompleto.
+- Admin (`/dashboard/campamentos/pedidos/*`) y app (`lib/features/camporee_orders`) consumen el contrato; admin no impersona `deliver-to-member`.
+- Los códigos `CAMPOREE_ORDER_*` están en `src/common/errors/error-codes.ts`.
 
 ---
 
@@ -460,18 +460,17 @@ Una sección inscrita necesita planificar insumos de cocina por horario de entre
 | Entrega | Parcial a la sección. No exige PRINCIPAL PAID. No hay `delivered_to_member`. |
 | UX | Dentro de la ficha/detalle del camporee. Admin no impersona submit del club. |
 | Pagos pendientes | Fuentes `CAMPOREE_SUPPLY_CHARGE` / `CAMPOREE_SUPPLY_REFUND`, purpose `CAMPOREE_SUPPLIES`, acciones `PAY_AT_CAMP` / `PROCESS_REFUND`. No fusionar con PED. |
-| HTTP | 29 rutas bajo `/api/v1` en `feat/camporee-supplies` (worktree `/private/tmp/sacdia-backend-camporee-orders`). |
-| Plan | [`docs/plans/2026-08-26-camporee-supplies.md`](../plans/2026-08-26-camporee-supplies.md) |
+| HTTP | 29 rutas bajo `/api/v1` en `src/camporee-supplies`. Integradas en `development` (migración `20260826120000_camporee_supplies`). |
+| Feature | [`docs/features/camporee-supplies.md`](../features/camporee-supplies.md) |
 
 #### Consecuencias
 
 - Un defecto de insumos no muta mercancía, inscripción ni materiales.
 - Folios INS y PED conviven en Pagos pendientes como filas distintas.
-- Hasta merge + migración Neon, las rutas `/supply-*` no existen en el runtime desplegado.
 
 ---
 
 **Generado**: 2026-01-29
 **Actualizado por**: Usuario
-**Última actualización**: 2026-08-26 (ADR #10 — camporee-supplies en rama `feat/camporee-supplies`, no Neon)
-**Status**: ✅ Decisiones confirmadas; ADR #7 parcialmente implementada en rama, no expuesta en runtime; ADR #9 y #10 implementadas en worktree `feat/camporee-supplies` / historial de orders, no merge Neon
+**Última actualización**: 2026-10-04 (ADR #9 y #10 marcadas como implementadas en `development`)
+**Status**: ✅ Decisiones confirmadas; ADR #7 parcialmente implementada en la rama `codex/sacdia-admin-ios-auth`, no expuesta en runtime; ADR #9 y #10 implementadas en `development`

@@ -51,7 +51,7 @@ La capacidad vigente es **cache local + TTL + invalidación por FCM silent messa
 ### 2.3 Backend (sacdia-backend)
 
 - servicio emisor: `NotificationsService.sendSilentToSection(payload)` (`notifications.service.ts:372`) encola job `realtime.invalidate` en BullMQ;
-- processor: `NotificationsProcessor.handleRealtimeInvalidate()` (`notifications.processor.ts:678`) resuelve tokens FCM filtrando por `club_role_assignments.club_section_id + active:true`, excluye al `actorId` emisor;
+- processor: `NotificationsProcessor.handleRealtimeInvalidate()` (`notifications.processor.ts:839`) resuelve tokens FCM filtrando por `club_role_assignments.club_section_id + active:true`, excluye al `actorId` emisor;
 - multicast: `sendSilentMulticast()` construye payload `data`:
   - `type: 'cache_invalidate'`
   - `sectionId: <string>`
@@ -101,7 +101,7 @@ El admin web no consume invalidaciones por FCM silent — el único canal actual
 
 La capacidad vigente está **acotada a `activities`**. Cerrar el gap por feature requiere dos cambios simultáneos:
 
-1. en el servicio backend correspondiente, agregar método privado análogo a `activities.service.ts:381` (`emitRealtimeInvalidation`) y llamarlo tras cada create/update/delete;
+1. en el servicio backend correspondiente, agregar método privado análogo a `activities.service.ts:442` (`emitRealtimeInvalidation`) y llamarlo tras cada create/update/delete;
 2. en Flutter, registrar el resource en `realtime_resource_registry.dart` con su handler que invalide el/los providers Riverpod afectados.
 
 El feature flag `realtimeInvalidationEnabled` (default `false`) gobierna el rollout; extender cobertura es independiente de activar el flag en producción.
@@ -112,12 +112,22 @@ El feature flag `realtimeInvalidationEnabled` (default `false`) gobierna el roll
 
 Confirmado por grep negativo en el código:
 
-- **Offline-first con queue de mutaciones persistida**: no hay `hive`, `sqflite`, `drift` ni `isar` en `sacdia-app/` (ni en `pubspec.yaml` ni en imports);
+- **Offline-first con queue de mutaciones persistida**: no hay `sqflite`, `drift` ni `isar` en `sacdia-app/`, ni una cola de mutaciones pendientes. `hive`/`hive_flutter` sí están en `pubspec.yaml` (`main.dart` llama a `Hive.initFlutter()`), pero solo para persistencia local puntual (ver §4.1);
 - **Sincronización diferida con reconciliación**: no existen símbolos `offline_queue`, `pendingMutations` ni `syncQueue`;
 - **Endpoints `/sync` o `/delta-sync`**: no existen en `sacdia-backend/src/`;
 - **FCM web en admin**: no hay integración push nativa en el admin.
 
 Toda comunicación pública o documental que afirme offline-first debe corregirse antes de publicación. La capacidad actual es **cache + invalidación**, no offline-first.
+
+### 4.1 Persistencia local puntual (vigente, no offline-first)
+
+<!-- VERIFICADO contra código 2026-10-04 -->
+
+- **Borradores de certificación**: `Hive.openBox<String>` en `sacdia-app/lib/main.dart` y `certification_draft_local_data_source.dart` guardan borradores en el dispositivo. No se sincronizan solos: el usuario los envía cuando hay red.
+- **Credencial virtual**: `virtual_card_repository_impl.dart` guarda la última credencial en `SharedPreferences`; si la llamada remota falla, `virtual_card_providers.dart` muestra la copia cacheada con `isOffline: true`.
+- **Sesión**: los tokens viven en `flutter_secure_storage` (`core/auth/app_auth_service.dart`), no en Hive.
+
+Nada de esto encola mutaciones ni reconcilia conflictos; por eso no cambia la clasificación de la capacidad.
 
 ---
 
@@ -145,10 +155,10 @@ Canonizada:
 
 ## 7. Frontera con roadmap
 
-La evolución hacia offline-first transversal **no es parte de este canon**. Corresponde a `docs/plans/offline-first-roadmap.md` (por crear en P3). Ese plan deberá:
+La evolución hacia offline-first transversal **no es parte de este canon**. Corresponde a `docs/plans/offline-first-roadmap.md`. Ese plan deberá:
 
 - definir alcance (qué features necesitan mutaciones offline);
-- definir tecnología (`hive`, `drift`, `isar`);
+- definir tecnología (ampliar `hive` o adoptar `drift`/`isar`);
 - definir política de conflictos;
 - definir UX de estado "desconectado".
 

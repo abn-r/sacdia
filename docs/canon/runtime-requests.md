@@ -44,8 +44,8 @@ Permisos vigentes (dominio propio, migrados desde `clubs:*`/`club_roles:*` en 20
 - `requests:review` — crear solicitud de asignación + aprobar/rechazar ambos tipos.
 
 Distribución tras migración:
-- `requests:read` → todos los roles con contexto institucional (user, member, counselor, secretary, treasurer, secretary-treasurer, deputy-director, director, coordinator, zone-coordinator, general-coordinator, pastor, assistant-lf + JOIN copies) + admin/super_admin.
-- `requests:review` → director (CLUB), assistant-lf (GLOBAL) + JOIN copies (director-lf, assistant-union, director-union, assistant-dia, director-dia) + admin/super_admin.
+- `requests:read` → todos los roles con contexto institucional (user, member, counselor, secretary, treasurer, secretary-treasurer, deputy-director, director, coordinator, zone-coordinator, general-coordinator, pastor, assistant-lf + JOIN copies) + admin/super-admin.
+- `requests:review` → director (CLUB), assistant-lf (GLOBAL) + JOIN copies (director-lf, assistant-union, director-union, assistant-dia, director-dia) + admin/super-admin.
 
 ---
 

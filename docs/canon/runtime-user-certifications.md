@@ -82,7 +82,7 @@ Catálogo público: `GET /certifications/certifications`, `GET /certifications/c
 ## 5. Relación con otros canones
 
 - `docs/canon/runtime-member-of-month.md` §7 — patrón de dominio propio tras migración.
-- `docs/canon/runtime-user-folders.md` — dominio hermano corregido por colisión de Sprint C.
+- `docs/history/canon/runtime-user-folders.md` (archivado) — dominio hermano corregido por colisión de Sprint C; las rutas `/folders/*` se retiraron.
 - `docs/canon/decisiones-clave.md` §19 — decisión conjunta Sprint C + fix colisión.
 - `docs/api/ARCHITECTURE-DECISIONS.md` §8 — bandeja propia vs. `evidence-review`.
 

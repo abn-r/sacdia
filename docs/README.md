@@ -1,147 +1,139 @@
 # SACDIA — Documentación
 
 **Estado**: ACTIVE
+**Actualizado**: 2026-10-04
 
 > [!IMPORTANT]
-> Este directorio es la fuente de verdad documental del proyecto.
-> La documentación histórica se encuentra en `docs/history/`.
-> La precedencia global es: `docs/canon/source-of-truth.md` → `docs/canon/*` aplicable → `docs/README.md` → documentación operativa subordinada → material histórico.
+> Este README es un índice de navegación. La precedencia documental se define **solo** en [`canon/source-of-truth.md`](canon/source-of-truth.md); aquí se resume.
+> La realidad efectiva es el código de la rama `development` de los repos runtime. Si un documento la contradice, se corrige el documento.
+
+---
+
+## Precedencia (resumen)
+
+1. `canon/source-of-truth.md`
+2. `canon/*` (gobernanza → dominio → identidad → arquitectura → runtime → decisiones)
+3. Contratos: `sacdia-backend/prisma/schema.prisma` (datos) y `api/ENDPOINTS-LIVE-REFERENCE.md` (API)
+4. `steering/*`
+5. `features/*`
+6. Documentación operativa (`api/`, `database/`, `guides/`, `deployment/`, `runbooks/`, `storage/`, `testing/`, `legal/`, `architecture/`)
+7. Navegación: este README, `README.md`, `CLAUDE.md` y `AGENTS.md` raíz
+8. Trabajo temporal: `plans/`, `reviews/`, `working/`
+9. `history/`: nunca es estado actual
 
 ---
 
 ## Estructura
 
-| Carpeta | Contenido | Autoridad |
-|---------|-----------|-----------|
-| `canon/` | Verdad del negocio, verificada contra código | Máxima — rige sobre todo |
-| `audit/` | Auditorías de código + Reality Matrix | Foto del código al 2026-03-14 |
-| `features/` | Estado verificado por dominio funcional | Derivado de audit + canon |
-| `api/` | Contratos API (endpoints, seguridad, testing) | Operacional, subordinado a canon |
-| `database/` | Schema documental + referencia + migraciones | Operacional; si hay drift manda `sacdia-backend/prisma/schema.prisma` |
-| `steering/` | Estándares técnicos y de código | Normativo |
-| `guides/` | Guías operativas y workflows | Práctico |
-| `plans/` | Planes de implementación activos | Temporal |
-| `superpowers/` | Specs y planes de diseño (SDD) | Temporal |
-| `templates/` | Plantillas para nuevos features | Referencia |
-| `history/` | Todo documento inactivo, archivado | Solo contexto histórico |
+| Carpeta | Contenido | Nivel |
+|---------|-----------|-------|
+| `canon/` | Verdad del negocio y del runtime, verificada contra código | Canon |
+| `api/` | Contrato de endpoints, decisiones de arquitectura API, seguridad, testing e integración | Contrato / operativo |
+| `database/` | Guía de datos, referencia del schema y espejo documental `schema.prisma` | Operativo (manda `sacdia-backend/prisma/schema.prisma`) |
+| `api-database/` | Trazabilidad servicio backend → tablas | Operativo |
+| `steering/` | Stack, estructura, estándares de código y datos, reglas para agentes | Normativo |
+| `features/` | Un documento por dominio funcional; `features/README.md` registra el estado | Dominio |
+| `guides/` | Guías prácticas (setup, flujo de trabajo, correo, OCR, material de estudio) | Operativo |
+| `deployment/` | Guía de despliegue alineada con `sacdia-backend/render.yaml` | Operativo |
+| `runbooks/` | Procedimientos puntuales de operación | Operativo |
+| `storage/` | Convenciones de buckets y prefijos en Cloudflare R2 | Operativo |
+| `testing/` | Usuarios de prueba del seed | Operativo |
+| `legal/` | Aviso de privacidad, términos y checklist para tiendas | Operativo |
+| `architecture/` | Notas de arquitectura de áreas concretas (exportación de datos) | Operativo |
+| `performance/` | Guía de profiling | Operativo |
+| `audit/` | Decisiones pendientes y auditoría de servicios externos | Operativo |
+| `bases/`, `strategy/` | Visión institucional y posicionamiento | Contexto de producto |
+| `plans/` | Planes y roadmaps **pendientes** | Temporal |
+| `reviews/` | Revisiones de trabajo en curso | Temporal |
+| `working/` | Material de trabajo y fuentes para seeds | Temporal |
+| `history/` | Documentos archivados con valor de contexto | Histórico |
 
-## Jerarquía de Autoridad
+El portal de manuales vive en el repo `sacdia-docs` (gitlink en la raíz de este workspace) y está pendiente de rediseño como portal sin permisos por rol.
 
-Definida en `canon/source-of-truth.md`:
+---
 
-1. `canon/source-of-truth.md` (gateway operativo)
-2. `canon/*` (según tipo de pregunta)
-3. Este README (navegación estructural)
-4. `api/ENDPOINTS-LIVE-REFERENCE.md` (runtime API)
-5. `sacdia-backend/prisma/schema.prisma` (estructura de datos efectiva)
-6. `steering/*` (estándares)
-
-## Navegación por Tipo de Pregunta
+## Navegación por tipo de pregunta
 
 | Pregunta | Consultar en orden |
 |----------|-------------------|
-| Producto/Alcance | canon/source-of-truth → canon/dominio → canon/identidad → features/ |
-| Arquitectura | canon/source-of-truth → canon/arquitectura → canon/decisiones-clave → steering/ |
-| API/Runtime | canon/source-of-truth → api/ENDPOINTS-LIVE-REFERENCE → api/ARCHITECTURE-DECISIONS |
-| Datos/Schema | canon/source-of-truth → sacdia-backend/prisma/schema.prisma → database/README.md → database/schema.prisma → database/SCHEMA-REFERENCE |
-| Estado de features | features/README.md → features/{dominio}.md → audit/REALITY-MATRIX.md |
-| Decisiones pendientes | audit/DECISIONS-PENDING.md |
-
-## Regla Operativa de Autoridad DB
-
-- La autoridad estructural efectiva del modelo de datos vive en `sacdia-backend/prisma/schema.prisma`.
-- `docs/database/schema.prisma` es un espejo documental y puede quedar rezagado hasta su resincronización explícita.
-- `docs/database/SCHEMA-REFERENCE.md` ayuda a lectura humana, pero no arbitra drift contra el schema efectivo del backend.
-- Si aparece contradicción entre docs de datos, se escala el arbitraje; no se mezclan fuentes.
+| Producto o alcance | `canon/dominio-sacdia.md` → `canon/identidad-sacdia.md` → `features/` |
+| Arquitectura | `canon/arquitectura-sacdia.md` → `canon/runtime-sacdia.md` → `canon/decisiones-clave.md` → `steering/` |
+| API | `api/ENDPOINTS-LIVE-REFERENCE.md` → `api/ARCHITECTURE-DECISIONS.md` → `features/<dominio>.md` |
+| Datos | `sacdia-backend/prisma/schema.prisma` → `database/README.md` → `database/SCHEMA-REFERENCE.md` |
+| Estado de un dominio | `features/README.md` → `features/<dominio>.md` |
+| Decisiones pendientes | `audit/DECISIONS-PENDING.md` |
+| Despliegue | `deployment/DEPLOYMENT-GUIDE.md` |
+| Poner en marcha un equipo | `guides/SETUP-NEW-PC.md` → `guides/developer-workflow.md` |
 
 ---
 
-## Rutas Canónicas por Rol
+## Rutas de lectura por rol
 
 ### Canon base
 
-1. `canon/dominio-sacdia.md`
-2. `canon/identidad-sacdia.md`
-3. `canon/gobernanza-canon.md`
-4. `canon/arquitectura-sacdia.md`
-5. `canon/runtime-sacdia.md`
-6. `canon/decisiones-clave.md`
+1. `canon/source-of-truth.md`
+2. `canon/dominio-sacdia.md`
+3. `canon/identidad-sacdia.md`
+4. `canon/gobernanza-canon.md`
+5. `canon/arquitectura-sacdia.md`
+6. `canon/runtime-sacdia.md`
+7. `canon/decisiones-clave.md`
 
 ### Backend
 
-1. `canon/dominio-sacdia.md`
-2. `canon/runtime-sacdia.md`
-3. `steering/tech.md`
+1. `canon/runtime-sacdia.md`
+2. `canon/auth/runtime-auth.md`
+3. `steering/tech.md` y `steering/coding-standards.md`
 4. `api/ENDPOINTS-LIVE-REFERENCE.md`
-5. `api/API-SPECIFICATION.md`
-6. `database/schema.prisma`
+5. `sacdia-backend/prisma/schema.prisma` y `database/README.md`
 
-### Mobile
+### App móvil
 
-1. `canon/dominio-sacdia.md`
-2. `canon/runtime-sacdia.md`
-3. `steering/tech.md`
-4. `api/ENDPOINTS-LIVE-REFERENCE.md`
-5. `features/`
+1. `canon/runtime-sacdia.md`
+2. `steering/tech.md` y `steering/STRUCTURE-GUIDE.md`
+3. `api/ENDPOINTS-LIVE-REFERENCE.md` y `api/FRONTEND-INTEGRATION-GUIDE.md`
+4. `features/`
 
-### Admin Web
+### Admin web
 
-1. `canon/dominio-sacdia.md`
-2. `canon/runtime-sacdia.md`
-3. `steering/tech.md`
-4. `api/ENDPOINTS-LIVE-REFERENCE.md`
+1. `canon/runtime-sacdia.md`
+2. `steering/tech.md` y `steering/STRUCTURE-GUIDE.md`
+3. `api/ENDPOINTS-LIVE-REFERENCE.md` y `api/FRONTEND-INTEGRATION-GUIDE.md`
+4. `guides/admin-integration.md`
 5. `features/`
 
 ---
 
-## Estado de Documento
+## Estados de documento
 
-- `ACTIVE`: documento vigente.
-- `DRAFT`: documento en construcción.
+- `ACTIVE`: vigente.
+- `DRAFT`: en construcción.
 - `HISTORICAL`: contexto histórico, no contrato vigente.
-- `DEPRECATED`: reemplazado por documento canónico.
+- `DEPRECATED`: reemplazado; debe apuntar al documento vigente.
 
-## Convención Editorial para Pendientes y Aspiracional
+Convención para pendientes:
 
-- No crear estados nuevos para "pending", "future" o "planned".
-- Si un documento sigue siendo canónico, mantener `ACTIVE` y etiquetar el texto puntual como `Pendiente`, `Planificado`, `Recomendado` o `Por verificar`.
-- Si el valor principal del documento es una foto de una etapa previa, marcarlo `HISTORICAL` y enlazar el reemplazo activo.
-- Si un documento fue sustituido, marcarlo `DEPRECATED` y apuntar al documento vigente.
-
-## Estado del Proyecto
-
-Ver `audit/REALITY-MATRIX.md` para la foto completa y `features/README.md` para estado por dominio.
+- No crear estados nuevos como "pending", "future" o "planned".
+- En un documento `ACTIVE`, marcar el texto puntual como `Pendiente`, `Planificado`, `Recomendado` o `Por verificar`.
+- Si lo descrito vive en una rama sin integrar, añadir "Pendiente de merge (PR #N de <repo>)".
+- En los planes, la cabecera indica qué está hecho, qué falta y en qué rama vive el trabajo.
 
 ---
 
-## Ver También
+## Scripts de verificación documental
+
+Viven en `scripts/` y corren en CI (`.github/workflows/`):
+
+| Script | Workflow | Qué comprueba |
+|---|---|---|
+| `scripts/verify-api-docs-consistency.mjs` | `docs-api-consistency.yml` | Consistencia de `api/ENDPOINTS-LIVE-REFERENCE.md` con las rutas del backend |
+| `scripts/verify-permissions-consistency.mjs` | `rbac-permissions-consistency.yml` | Permisos del seed frente a la navegación del admin. **Hoy apunta a `sacdia-admin/src/components/layout/nav-config.ts`, que se borró el 2026-07-14: imprime `SKIP` y no valida nada.** Debe migrarse al screen catalog (`src/lib/auth/screen-catalog/`). |
+| `scripts/check-sdd-command-parity.mjs` | `sdd-command-parity.yml` | Contratos de comandos SDD (`sdd-*.md`); en CI usa `scripts/__fixtures__`, en local busca `~/.config/opencode/commands` (`--command-dir <ruta>` para otra ubicación, `--json` para salida máquina) |
+
+---
+
+## Ver también
 
 - `canon/README.md`
+- `features/README.md`
 - `history/README.md`
-
-## SDD Command Parity Workflow
-
-Use this guardrail whenever SDD command contracts are changed.
-
-Local run:
-
-```bash
-node scripts/check-sdd-command-parity.mjs
-```
-
-Useful options:
-
-- `--json` for machine-readable output.
-- `--command-dir <path>` to validate fixtures or CI mirrors.
-
-Failure triage order:
-
-1. `required-command-presence` — missing `sdd-*.md` contracts.
-2. `placeholder-contract.required` — missing `{argument}`, `{project}`, `{workdir}` tokens.
-3. `persistence-modes.required` — incomplete `engram|openspec|hybrid|none` guidance.
-4. `result-contract.required-fields` — missing `status`, `executive_summary`, `artifacts`, `next_recommended` in phase commands.
-5. `meta-state-guidance.required` — missing `sdd/{argument}/state` references for `sdd-new`, `sdd-continue`, `sdd-ff`.
-
-CI runs this as an enforced gate; failures block the workflow.
-
-**Última actualización**: 2026-03-14

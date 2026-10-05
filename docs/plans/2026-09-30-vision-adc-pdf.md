@@ -1,5 +1,8 @@
 # Google Vision ADC y PDF de certificados — Implementation Plan
 
+> **Estado real (revisado 2026-10-04 contra `development`)**: Implementación: Pendiente de merge (PR #448 de sacdia-backend, rama `feat/investiture-authorization-ocr`, commit `113d8ba`): `@google-cloud/vision` y `pdf-lib`. En `development` el OCR aún no usa ADC ni lee PDF.
+
+
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
 **Goal:** Leer imágenes y todas las páginas de PDF de 1–5 páginas mediante Google Vision autenticado con ADC, sin sustituir la corrección del miembro ni la aprobación humana.

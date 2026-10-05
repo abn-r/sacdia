@@ -2,12 +2,11 @@
 
 **Estado**: ACTIVE
 
-**Última actualización**: 25 de agosto de 2026
+**Última actualización**: 4 de octubre de 2026
 **Estado**: Documento canónico de testing API
 
 > [!IMPORTANT]
 > Este documento consolida la guía rápida de pruebas (`TESTING.md`) y la guía extendida.
-> Para evitar duplicación, `TESTING.md` fue movido a `docs/history/api/TESTING.md`.
 
 ---
 
@@ -37,31 +36,35 @@ dummy para pasar la validación de entorno.
 - **Suites bloqueantes (12, verdes)**: activities, app, auth, certifications,
   classes-progress-migration, clubs, field-payment-orders, finances,
   insurance, member-rankings, notifications-security, section-rankings.
-  `camporee-orders` / `payment-obligations` **no** están en este gate: el
-  runtime vive en `feat/camporee-orders` (worktree), sin e2e de CI ni merge.
+  `camporee-orders` / `payment-obligations` ya están en `development` y
+  existe `test/camporee-orders.e2e-spec.ts`, pero esa suite **no** está en el
+  subset bloqueante.
 - **Suites pendientes de realineación (12, con specs desactualizados)**:
   admin-catalogs, admin-users, admin-users-scope, camporees, catalogs,
   classes, confirm-union-http, evidence-folder, honors, investiture,
-  post-registration, users. Drift típico: campos renombrados
+  post-registration, users. Tampoco están en el subset bloqueante las suites
+  añadidas después: annual-cycle-postgres, annual-membership-http,
+  camporee-orders y certificate-import-{http,journey,postgres}.
+  Drift típico: campos renombrados
   (`year_id` → `ecclesiastical_year_id`), validaciones nuevas (UUID en params),
   imports a módulos movidos y lógica de scope migrada a snapshots de
   autorización. Al arreglar cada una, agregarla a la lista bloqueante del
   workflow (`.github/workflows/ci.yml`, job `backend_e2e_tests`).
 
-### Pedidos de camporee (unitarios en rama, 2026-08-25)
+### Pedidos de camporee (unitarios, 2026-08-25)
 
-No hay e2e de CI. Verificación focalizada sobre `feat/camporee-orders` (sin nest/next/flutter build, sin `prisma migrate`):
+Verificación focalizada registrada al integrar la feature (sin nest/next/flutter build, sin `prisma migrate`). Las rutas de prueba existen en `development`:
 
 ```bash
-# Backend worktree /private/tmp/sacdia-backend-camporee-orders
+# Backend (sacdia-backend)
 pnpm exec jest src/camporee-orders src/payment-obligations --runInBand
 # 2026-08-25: 11 suites / 173 tests passed
 
-# App sacdia-app feat/camporee-orders
+# App (sacdia-app)
 flutter test test/features/camporee_orders test/features/payment_orders
 # 2026-08-25: 64 tests passed
 
-# Admin sacdia-admin feat/camporee-orders
+# Admin (sacdia-admin)
 pnpm exec vitest run src/lib/api/camporee-orders.test.ts \
   src/lib/api/payment-obligations.test.ts \
   src/components/camporee-orders \
@@ -69,19 +72,19 @@ pnpm exec vitest run src/lib/api/camporee-orders.test.ts \
 # 2026-08-25: 5 files / 26 tests passed
 ```
 
-### Insumos de camporee (unitarios en rama, 2026-08-26)
+### Insumos de camporee (unitarios, 2026-08-26)
 
-No hay e2e de CI. Verificación focalizada sobre `feat/camporee-supplies` (sin nest/next/flutter build, sin `prisma migrate`):
+Sin e2e de CI. Verificación focalizada registrada al integrar la feature (sin nest/next/flutter build, sin `prisma migrate`):
 
 ```bash
-# Backend worktree /private/tmp/sacdia-backend-camporee-orders
+# Backend (sacdia-backend)
 pnpm exec jest src/camporee-supplies src/payment-obligations --runInBand
 # 2026-08-26: 6 suites / 39 tests passed
 
-# App sacdia-app feat/camporee-supplies
+# App (sacdia-app)
 flutter test test/features/camporee_supplies test/features/payment_orders/data/models/payment_obligation_model_test.dart
 
-# Admin sacdia-admin feat/camporee-supplies
+# Admin (sacdia-admin)
 pnpm exec vitest run src/lib/api/camporee-supplies.test.ts \
   src/lib/api/payment-obligations.test.ts \
   src/components/camporee-supplies \
@@ -471,8 +474,10 @@ describe('Certifications (e2e)', () => {
 
 ### Tests de Carga
 
+El backend trae `scripts/benchmark-api.js` (perfiles reproducibles vía `pnpm run benchmark:*`) y `scripts/load-test.js` (wrapper legacy con perfil `smoke`). El ejemplo siguiente es ilustrativo; no existe como script en el repo.
+
 ```javascript
-// scripts/load-test-certifications.js
+// Ejemplo ilustrativo con autocannon
 import autocannon from 'autocannon';
 
 const result = await autocannon({
@@ -523,30 +528,9 @@ open coverage/lcov-report/index.html
 
 ---
 
-## 🔍 Testing Manual con Postman/Insomnia
+## 🔍 Testing manual
 
-### Colección Postman
-
-Ver archivo: `docs/postman/SACDIA-Backend-v2.2.json`
-
-**Carpetas importantes**:
-- `Auth` - Login, OAuth, tokens
-- `Certifications` - Todos los endpoints de certificaciones
-- `Folders` - Todos los endpoints de carpetas
-- `Inventory` - Gestión de inventario
-
-### Variables de entorno
-
-```json
-{
-  "base_url": "http://localhost:3000",
-  "auth_token": "{{JWT_TOKEN}}",
-  "user_id": "{{TEST_USER_ID}}",
-  "certification_id": "1",
-  "folder_id": "1",
-  "club_id": "1"
-}
-```
+No hay colección Postman versionada. Para pruebas manuales usa Swagger en `http://localhost:3000/api` (opt-in: requiere `SWAGGER_ENABLED=true`, ver `sacdia-backend/src/main.ts`) e importa el OpenAPI desde ahí en Postman/Insomnia si lo necesitas. Contratos: `docs/api/ENDPOINTS-LIVE-REFERENCE.md`.
 
 ---
 

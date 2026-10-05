@@ -1,8 +1,8 @@
 # Schema Reference - SACDIA Database
 
 **Estado**: ACTIVE
-**Sincronizado contra**: `sacdia-backend/prisma/schema.prisma` (checkout principal) **más** modelos `camporee_order_*` de `feat/camporee-orders` y `camporee_supply_*` de `feat/camporee-supplies` (worktree `/private/tmp/sacdia-backend-camporee-orders`; no Neon)
-**Fecha de resincronizacion**: 2026-09-03 (`20260903180000_cross_type_active_enrollment_slots` en el schema runtime; índices parciales de cursado cruzado). Neon: aplicar esa migración en cada entorno.
+**Sincronizado contra**: `sacdia-backend/prisma/schema.prisma` en la rama `development` (commit `66f4ade`)
+**Fecha de resincronizacion**: 2026-10-04 (última migración en `development`: `20260923170000_activity_audience`)
 
 Referencia humana concisa del schema Prisma vigente.
 
@@ -14,13 +14,17 @@ Referencia humana concisa del schema Prisma vigente.
 
 ## Cifras vigentes
 
-- **Modelos Prisma**: 200 (checkout `feat/camporee-event-honors` incluye `camporee_event_honors`; 199 en `development` + pedidos/insumos en ramas previas)
-- **Enums Prisma**: 44 (36 del checkout principal + 4 de camporee-orders + 4 de camporee-supplies en la misma worktree)
+- **Modelos Prisma**: 248 (incluye 27 modelos `*_translations` de i18n)
+- **Enums Prisma**: 75
+- **Migraciones Prisma**: 171 directorios en `prisma/migrations/`
 - **Tablas Better Auth mapeadas**: `session -> sessions`, `account -> accounts`, `verification -> verifications`
 
 ---
 
-## Correcciones de drift relevantes
+## Pendiente de merge (PR #448 de sacdia-backend)
+
+> [!WARNING]
+> Las tablas de esta sección **no existen en `development`**. Están en la rama `feat/investiture-authorization-ocr` (PR #448 de sacdia-backend), junto con sus migraciones (`20260930120000_local_field_class_thresholds`, `20261001130000_local_field_investiture_windows`, `20261001143000_district_investiture_pastors`, `20261001193000_investiture_authorization_requests` y `20261002183000_investiture_authorization_resolution`). Tampoco están en `docs/database/schema.prisma`, que es espejo de `development`. Pasarán a vigentes cuando el PR se integre.
 
 ### `local_field_class_thresholds` (2026-09-30)
 
@@ -61,6 +65,52 @@ Referencia humana concisa del schema Prisma vigente.
 - `prisma migrate diff` contra el esquema no aplica esos índices ni esas llaves. No sustituye la migración.
 - No sustituye el pipeline anterior ni marca `locked_for_validation`.
 - Migración de las tablas: `sacdia-backend/prisma/migrations/20261001193000_investiture_authorization_requests/migration.sql`. Los tres textos van en `sacdia-backend/prisma/migrations/20261002183000_investiture_authorization_resolution/migration.sql`. Ninguna está aplicada a producción.
+
+## Modelos añadidos a esta referencia (resincronización 2026-10-04)
+
+Resumen por grupo de modelos que ya estaban en el schema de `development` y faltaban en esta página.
+
+### Historia institucional (`institutional_*`, `*_history`, `hierarchy_contexts`)
+
+Migraciones `20260527120000_institutional_hierarchy_history`, `20260527193000_closed_output_hierarchy_snapshots` y `20260723120000_institutional_history_foundation`. Código de dominio en `sacdia-backend/src/institutional-history/` (sin controller propio).
+
+- `institutional_reorganizations` — reorganización institucional (`type`, `effective_on`, `description`, `authority_source` default `WORLD_CHURCH_EXECUTIVE`, `idempotency_key` único, `approved_by`). `corrects_reorganization_id` enlaza una corrección con la reorganización corregida.
+- `institutional_reorganization_participants` — participantes de una reorganización: una entidad entre división, unión, campo local, distrito, iglesia o club.
+- `institutional_lineage_edges` — aristas de linaje entre participantes (`from_participant_id` → `to_participant_id`, `relation_type`).
+- `institutional_name_versions` y `institutional_name_version_translations` — nombres y abreviaturas versionados por vigencia (`valid_from`/`valid_to`) y por registro (`recorded_from`/`recorded_to`), con `supersedes_name_version_id` y `reorganization_id` opcional.
+- `union_division_history`, `local_field_union_history`, `district_local_field_history`, `church_district_history` y `club_institutional_history` — pertenencia jerárquica con vigencia y bitemporalidad (`valid_*`, `recorded_*`, `supersedes_*`, `precision` default `system_backfill`).
+- `hierarchy_contexts` — snapshot de la cadena jerárquica a una fecha (`as_of`, `source`, `context` JSON). Lo referencian `enrollment_rankings` y `section_rankings` para congelar el contexto de salidas cerradas.
+
+### Autorización
+
+- `authorization_context_versions` — una fila por usuario (`user_id` PK, `version BIGINT`). `AuthorizationContextVersionService` (`src/common/authorization/`) la incrementa dentro de la transacción que cambia asignaciones o geografía, para invalidar el contexto de autorización cacheado. Migración `20260730150000_authorization_temporal_context`.
+
+### Camporees (personal, participantes externos, plantillas y sedes)
+
+- `camporee_staff_members` y `camporee_event_staff_assignments` — roster operativo y asignaciones por evento (ver la sección de camporees del inventario).
+- `camporee_external_participants` — participante externo sin cuenta (`full_name`, `role_type`, `role_description?`, `active`), ligado a un camporee local o de unión. Puede ser sujeto de `insurance_assignments`. Migración `20260723120000_insurance_capacity_model`.
+- `camporee_event_templates`, `camporee_event_template_rubrics` y `camporee_venues` — plantillas reutilizables de eventos y sedes.
+
+### Materiales (`material_*`)
+
+Modelos Prisma en PascalCase mapeados a tablas snake_case: `MaterialCategory` (`material_categories`), `MaterialProduct` (`material_products`), `MaterialVariant` (`material_variants`), `MaterialVariantOption` (`material_variant_options`), `MaterialOrder` (`material_orders`), `MaterialOrderLine` (`material_order_lines`), `MaterialComprobante` (`material_comprobantes`), `MaterialFolioCounter` (`material_folio_counters`) y `MaterialConfig` (`material_config`). Módulo `src/materials`.
+
+### Importación de certificados y solicitudes institucionales
+
+- `certificate_bulk_import_batches`, `certificate_bulk_import_items`, `certificate_bulk_import_files` y `certificate_bulk_import_item_events` — lotes de importación masiva, archivos privados (OCR) y bitácora por ítem.
+- `institutional_certificate_requests` e `institutional_certificate_request_events` — bandeja institucional de solicitudes de certificado (migración `20260921190000_institutional_certificate_requests`).
+
+### Reportes, operación y cuentas
+
+- `quarterly_reports` y `annual_reports` — reportes trimestral y anual.
+- `cron_run_log` y `cron_alerts_log` — ejecuciones y alertas de cron jobs (`/admin/analytics/cron-runs`).
+- `data_export_requests` — solicitudes de exportación de datos (R2 `data-exports`).
+- `account_deletion_log` — bitácora de eliminación de cuentas.
+- `notification_deliveries` — entregas por usuario para bandeja y conteo de no leídas.
+
+### i18n
+
+27 modelos `*_translations` (por ejemplo `countries_translations`, `honors_translations`, `classes_translations`, `club_ideals_translations`). Cada tabla guarda traducciones distintas de `es` con `UNIQUE (<fk>, locale)`.
 
 ## Correcciones anteriores
 
@@ -289,7 +339,7 @@ Modelo de capacidad de seguros por Campo Local, vivo en runtime desde antes de e
 
 ### Camporee supplies (`camporee_supply_slots`, `camporee_supply_products`, `camporee_supply_plans`, `camporee_supply_lines`, `camporee_supply_payment_docs`, `camporee_supply_deliveries`, `camporee_supply_plan_audits`, `camporee_supply_folio_counters`)
 
-Insumos de sección (migración `20260826120000_camporee_supplies` aplicada en Neon development/staging/production el 2026-08-28). No reutiliza tablas de `camporee_orders`. Unique parcial plan `(sección, camporee)` vive en SQL, no en `@@unique` Prisma.
+Insumos de sección (migración `20260826120000_camporee_supplies`, en `development`). No reutiliza tablas de `camporee_orders`. Unique parcial plan `(sección, camporee)` vive en SQL, no en `@@unique` Prisma.
 
 - `local_camporees` / `union_camporees` — `supply_edit_cutoff_local_time VARCHAR(5) NOT NULL DEFAULT '21:00'` (hora local del freeze).
 - `camporee_supply_slots` — horario del organizador (`label`, `deliver_time` HH:MM, `sort_order`, `active`). XOR local/unión.
@@ -303,7 +353,7 @@ Insumos de sección (migración `20260826120000_camporee_supplies` aplicada en N
 
 ### Camporee orders (`camporee_order_products`, `camporee_order_product_options`, `camporee_order_offerings`, `camporee_orders`, `camporee_order_lines`, `camporee_order_proofs`, `camporee_order_folio_counters`)
 
-Pedidos de mercancía nominados (migración `20260824190000_camporee_orders` en rama `feat/camporee-orders`; **no aplicada a Neon**). Fuente estructural de la rama: worktree `/private/tmp/sacdia-backend-camporee-orders/prisma/schema.prisma`. El checkout `sacdia-backend` principal no incluye estas tablas.
+Pedidos de mercancía nominados (migración `20260824190000_camporee_orders`, en `development`). Fuente estructural: `sacdia-backend/prisma/schema.prisma`.
 
 - `local_camporees` / `union_camporees` — flags `orders_enabled BOOLEAN NOT NULL DEFAULT false`, `orders_opens_at TIMESTAMPTZ?`, `orders_deadline TIMESTAMPTZ?`.
 - `camporee_order_products` — biblioteca territorial: `owner_scope` (`DIVISION|UNION|LOCAL_FIELD`) + un owner id, `size_scheme` (`LETTER|NUMERIC|NONE`), `club_type_id?`, `active`.
@@ -392,7 +442,7 @@ Pedidos de mercancía nominados (migración `20260824190000_camporee_orders` en 
 - Los modelos Prisma vigentes son `session`, `account` y `verification`.
 - En base fisica se mapean a `sessions`, `accounts` y `verifications` via `@@map`.
 
-### `admin_auth_sessions` (rama backend)
+### `admin_auth_sessions` (rama `codex/sacdia-admin-ios-auth`, no en `development`)
 
 - Extiende `sessions` con una relación opcional 1:1: `session_id` es PK/FK y usa borrado en cascada.
 - Mantiene `surface='admin'`, `client_type='ios'`, `family_id`, assurance `aal1|aal2`, expiración absoluta, expiración inactiva (`idle_expires_at`) y datos de revocación; el DDL aplica los checks correspondientes.
@@ -401,7 +451,7 @@ Pedidos de mercancía nominados (migración `20260824190000_camporee_orders` en 
 - Incluye índices para `family_id`, `revoked_at` y `active_assignment_id`.
 - La migración existe únicamente en la rama backend `codex/sacdia-admin-ios-auth`; su despliegue no fue verificado y la tabla todavía no forma parte del runtime de referencia.
 
-### Persistencia de refresh administrativo (rama backend)
+### Persistencia de refresh administrativo (rama `codex/sacdia-admin-ios-auth`, no en `development`)
 
 Esta persistencia pertenece al flujo administrativo iOS y está definida en la rama backend `codex/sacdia-admin-ios-auth`. Los commits desde `c09a600` hasta `ee84d2d`, ambos inclusive, aportan schema, migración y pruebas estructurales; todavía no existe writer, cleanup ni endpoint runtime de login, refresh o logout administrativo.
 
@@ -577,8 +627,9 @@ Define el presupuesto de puntos por componente dentro de un eje anual:
 
 - `roles`, `permissions`, `role_permissions`, `users_roles`, `users_permissions`, `club_role_assignments`, `role_slot_limits`, `role_assignment_requests`
 - `session`, `account`, `verification`, `users_pr`, `notification_preferences`, `notification_logs`, `user_fcm_tokens`
-- `admin_auth_sessions` (definida en rama backend; no publicada en el runtime de referencia)
-- `admin_refresh_tokens`, `admin_refresh_token_history`, `admin_refresh_rotation_receipts` (definidas en rama backend; no publicadas en el runtime de referencia)
+- `admin_auth_sessions` (solo en la rama `codex/sacdia-admin-ios-auth`; no está en `development`)
+- `admin_refresh_tokens`, `admin_refresh_token_history`, `admin_refresh_rotation_receipts` (solo en la rama `codex/sacdia-admin-ios-auth`; no están en `development`)
+- `authorization_context_versions`
 
 ### Usuarios y salud
 
@@ -614,14 +665,14 @@ Define el presupuesto de puntos por componente dentro de un eje anual:
 - `activity_types`, `activities`, `activity_instances`
 - `local_camporees`, `union_camporees`, `union_camporee_local_fields`, `camporee_clubs`, `camporee_members`, `camporee_payments`
   - `local_camporees` y `union_camporees` guardan dirección textual (`local_camporee_place` / `union_camporee_place`), coordenadas opcionales (`lat`, `long`) para vista de mapa en app, `agenda_visible_from` para abrir agenda completa antes/durante el camporee y `club_registration_closed_at/by` para congelar secciones competitivas.
-  - En rama `feat/camporee-orders` ambos modelos añaden `orders_enabled` (default `false`), `orders_opens_at` y `orders_deadline` para la ventana de pedidos de mercancía. Migración no aplicada a Neon.
-  - En rama `feat/camporee-supplies` ambos modelos añaden `supply_edit_cutoff_local_time VARCHAR(5) DEFAULT '21:00'` para el freeze de insumos. Migración `20260826120000_camporee_supplies` aplicada en Neon development (previa) y staging/production el 2026-08-28.
+  - Ambos modelos incluyen `orders_enabled` (default `false`), `orders_opens_at` y `orders_deadline` para la ventana de pedidos de mercancía (migración `20260824190000_camporee_orders`).
+  - Ambos modelos incluyen `supply_edit_cutoff_local_time VARCHAR(5) DEFAULT '21:00'` para el freeze de insumos (migración `20260826120000_camporee_supplies`).
   - Ambos modelos incluyen `club_registration_opens_at TIMESTAMPTZ NULL` (nulo = apertura inmediata), deadlines `TIMESTAMPTZ`, y `timezone` IANA con default histórico provisional `America/Mexico_City`. `timezone_verified_at/by` audita la confirmación; `timezone_verified_by` tiene FK nombrada a `users(user_id)`, `ON DELETE SET NULL` e índice por tabla. El backfill no modifica fechas ni deadlines históricos.
   - Los eventos del camporee viven en `camporee_events` y se relacionan con camporee local o de unión mediante FK excluyentes.
   - Bloques opcionales de agenda viven en `camporee_event_schedule_blocks`; sus asignaciones por sección inscrita viven en `camporee_event_schedule_block_assignments`.
   - El roster operativo vive en `camporee_staff_members`; cada fila apunta a un usuario y exactamente un camporee local o de unión, con categoría descriptiva (`judge`, `administrative`, `kitchen`, `support`, `spiritual`, `leadership`, `other`).
   - Las asignaciones de personas a actividades viven en `camporee_event_staff_assignments`; permiten roles `responsible`, `assistant`, `evaluator` y `support`, sin forzar todos los roles en cada evento.
-  - Especialidades de preparación viven en `camporee_event_honors` (`camporee_event_id` + `honor_id`, unique, `display_order`). Consultivo: no inscribe ni bloquea. Máx. 20. FK honor `ON DELETE RESTRICT`. Rama `feat/camporee-event-honors`; migración `20260828120000_camporee_event_honors` aplicada en Neon development/staging/production el 2026-08-28.
+  - Especialidades de preparación viven en `camporee_event_honors` (`camporee_event_id` + `honor_id`, unique, `display_order`). Consultivo: no inscribe ni bloquea. Máx. 20. FK honor `ON DELETE RESTRICT`. Migración `20260828120000_camporee_event_honors`.
   - Scoring reutilizable de templates vive en `camporee_event_template_rubrics`; al clonar un template puntuable se copian criterios hacia `camporee_event_rubrics`.
   - Scoring oficial vive en `camporee_event_rubrics`, `camporee_judges`, `camporee_event_judge_assignments`, `camporee_event_score_submissions`, `camporee_event_score_submission_items` y `camporee_event_section_results`. `camporee_events.scoring_enabled` habilita puntaje real por rúbrica; `camporee_clubs`/`camporee_members` quedan como inscripción operativa/histórica.
   - `camporee_event_score_submissions` guarda `score_status` (`scored`/`no_show`), `is_no_show` y `override_of_submission_id` para auditar ausencias y correcciones manuales del resultado oficial anterior. Además persiste `idempotency_key UUID?` y `request_hash VARCHAR(64)?`; el índice único parcial `(submitted_by, idempotency_key)` sólo aplica cuando la clave no es nula. `raw_awarded_points` conserva la suma de rúbrica antes del piso y `minimum_adjustment_points` la diferencia aplicada; `total_awarded_points` sigue siendo el total oficial. La migración `20260709100000` backfillea conservadoramente filas históricas con `raw_awarded_points = total_awarded_points` y `minimum_adjustment_points = 0` porque no puede reconstruir ajustes previos.
@@ -686,11 +737,11 @@ Define el presupuesto de puntos por componente dentro de un eje anual:
 - `certification_evidence_upload_status_enum` (`PENDING_UPLOAD`, `CONFIRMED`)
 - `certification_review_event_type_enum` (envíos, devoluciones, aprobaciones, certificación)
 - `certification_closeout_review_status_enum` (`PENDING`, `SUBMITTED`, `CHANGES_REQUESTED`, `APPROVED`)
-- `camporee_order_owner_scope_enum` (`DIVISION`, `UNION`, `LOCAL_FIELD`) — rama `feat/camporee-orders`, no Neon
+- `camporee_order_owner_scope_enum` (`DIVISION`, `UNION`, `LOCAL_FIELD`)
 - `camporee_order_size_scheme_enum` (`LETTER`, `NUMERIC`, `NONE`)
 - `camporee_order_status_enum` (`ISSUED`, `PROOF_SUBMITTED`, `PROOF_REJECTED`, `PAID`, `DELIVERED`, `CANCELLED`, `EXPIRED`)
 - `camporee_order_proof_status_enum` (`SUBMITTED`, `APPROVED`, `REJECTED`)
-- `camporee_supply_uom_enum` (`KG`, `L`, `BAG`, `UNIT`) — rama `feat/camporee-supplies`, no Neon
+- `camporee_supply_uom_enum` (`KG`, `L`, `BAG`, `UNIT`)
 - `camporee_supply_plan_status_enum` (`DRAFT`, `SUBMITTED`)
 - `camporee_supply_payment_kind_enum` (`PRINCIPAL`, `CHARGE`, `REFUND`)
 - `camporee_supply_payment_status_enum` (`ISSUED`, `PAID`, `CANCELLED`)
@@ -699,13 +750,19 @@ Define el presupuesto de puntos por componente dentro de un eje anual:
 
 ## Migraciones recientes
 
+- `20260923170000_activity_audience` y `20260923160000_activity_rsvp` - audiencia y RSVP de actividades.
+- `20260921190000_institutional_certificate_requests` - bandeja institucional de solicitudes de certificado.
+- `20260921180000_certificate_import_revision` y `20260921170000_certificate_import_private_files` - revisión y archivos privados de la importación de certificados.
+- `20260921153000_ecclesiastical_year_no_overlap` - evita años eclesiásticos solapados.
+- `20260921140000_historical_certificate_enrollments` - crea `enrollment_record_kind` (`OPERATIONAL` y registros históricos) para separar los hechos históricos de certificados del slot operativo de inscripción.
+- `20260915210000_grant_investiture_mark_invested_coordinators` - permiso de marcar investido para coordinadores.
 - `20260909130000_director_succession_open_unique` - único parcial `uniq_director_succession_open_section_year` (planes `scheduled`/`activated`/`blocked`). Aplicada a Neon development (2026-09-11).
 - `20260909120000_annual_membership_cycle` - `outgoing_assignment_id` nullable, `club_year_transitions`, único parcial member anual. Aplicada a Neon development (2026-09-11). Preflight: 0 grupos member duplicados; 2 CRA director test de `director-club@sacdia.com` cerradas (`ended`) antes de `20260908180000`.
 - `20260908180000_director_year_slots` - índice único parcial `uniq_cra_director_status_section_year` (rol director CLUB, `active`+`designated` por sección+año). Aplicada a Neon development (2026-09-11).
-- `20260826120000_camporee_supplies` - crea enums/tablas de insumos de sección, unique parcial plan por sección+camporee, y añade `supply_edit_cutoff_local_time` a `local_camporees` y `union_camporees`. Existe en `feat/camporee-supplies` (worktree `/private/tmp/sacdia-backend-camporee-orders`); **no ejecutada ni verificada contra Neon**.
-- `20260824190000_camporee_orders` - crea enums/tablas de pedidos de mercancía y añade `orders_enabled`/`orders_opens_at`/`orders_deadline` a `local_camporees` y `union_camporees`. Existe en `feat/camporee-orders` (worktree); **no ejecutada ni verificada contra Neon**.
-- `20260710130000_admin_auth_sessions` - creada en la rama backend para metadata administrativa 1:1 sobre `sessions`, assurance, expiración absoluta y revocación; despliegue no verificado.
-- `20260710200000_admin_refresh_rotation` - depende de `20260710130000_admin_auth_sessions`; añade `idle_expires_at` para su adopción futura en D1c, deshabilita con sentinel las sesiones administrativas legacy y crea estructuras hash-only de refresh, historial y recibos cifrados. Existe en la rama backend, pero no fue ejecutada ni verificada contra una base de datos; no tiene writer ni publica endpoints runtime y no debe desplegarse antes de D1c + D2.
+- `20260826120000_camporee_supplies` - crea enums/tablas de insumos de sección, unique parcial plan por sección+camporee, y añade `supply_edit_cutoff_local_time` a `local_camporees` y `union_camporees`.
+- `20260824190000_camporee_orders` - crea enums/tablas de pedidos de mercancía y añade `orders_enabled`/`orders_opens_at`/`orders_deadline` a `local_camporees` y `union_camporees`.
+- `20260710130000_admin_auth_sessions` - **solo en la rama `codex/sacdia-admin-ios-auth`, no en `development`**; creada para metadata administrativa 1:1 sobre `sessions`, assurance, expiración absoluta y revocación; despliegue no verificado.
+- `20260710200000_admin_refresh_rotation` - **solo en la rama `codex/sacdia-admin-ios-auth`**; depende de `20260710130000_admin_auth_sessions`; añade `idle_expires_at` para su adopción futura en D1c, deshabilita con sentinel las sesiones administrativas legacy y crea estructuras hash-only de refresh, historial y recibos cifrados. Existe en la rama backend, pero no fue ejecutada ni verificada contra una base de datos; no tiene writer ni publica endpoints runtime y no debe desplegarse antes de D1c + D2.
 - `20260415100000_folder_templates_polymorphic_owner` - añade owners polimorficos (`owner_union_id`, `owner_local_field_id`), dropea el unique compuesto legacy y establece el CHECK/indices parciales de exactamente-un-owner.
 - `20260415100100_annual_folders_camporee_link` - añade `local_camporee_id`, `union_camporee_id`, `requires_union_confirmation`, el CHECK de a-lo-mas-un-camporee y los indices asociados.
 - `20260415100200_section_evaluations_dual_level` - renombra `evaluated_by_id`/`evaluated_at` a `lf_approved_by`/`lf_approved_at` (ambas nullable), añade `union_approved_by`/`union_approved_at`/`union_decision`, crea `union_evaluation_decision_enum` y el CHECK de orden LF→Union.

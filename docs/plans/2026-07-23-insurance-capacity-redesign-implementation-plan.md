@@ -1,5 +1,8 @@
 # Insurance Capacity Redesign Implementation Plan
 
+> **Estado real (revisado 2026-10-04 contra `development`)**: Implementación parcial en `development`. Backend hecho (`src/insurance/`, migración `20260723120000_insurance_capacity_model`); admin consume productos, ciclos y reasignaciones, pero no compras; la app no consume el modelo nuevo.
+
+
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
 **Goal:** Replace the user-first insurance model with configurable products, section purchases, individual coverage slots, auditable transfers and assignments, event-scoped external participants, and proportional annual-ranking scoring for late purchases.

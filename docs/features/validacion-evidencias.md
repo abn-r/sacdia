@@ -23,8 +23,8 @@ Las evidencias pueden ser archivos (fotos, PDFs, documentos) que demuestran la r
 - Guards: JwtAuthGuard, GlobalRolesGuard (admin, coordinator)
 
 ### Admin (sacdia-admin)
-- **Pagina dedicada**: `/dashboard/evidence-review`
-- **Componentes**: `src/components/evidence-review/`
+- **Pagina**: `/dashboard/clubs/validations` (pestañas `honors`, `modules`, `sections` y `certificates`; la revisión de evidencias usa `getEvidencePending`). Ya no existe la ruta `/dashboard/evidence-review`.
+- **Componentes**: `src/components/clubs/validations/` (cliente de pestañas) y `src/components/evidence-review/` (tabla, diálogos y acciones masivas)
 - **Vista unificada**: Evidencias de clases y honores en una sola interfaz
 - **Filtros por tipo**: Selector para filtrar por tipo de evidencia
 - **File gallery preview**: Visualizacion de archivos con preview de imagenes y PDFs

@@ -1,26 +1,44 @@
 # Admin Integration Guide
 
 **Estado**: ACTIVE
+**Actualizado**: 2026-10-04
 
-Guía operativa resumida para integrar frontend admin con contratos backend vigentes.
+Guía resumida para integrar pantallas de `sacdia-admin` con los contratos del backend.
 
-## Contrato fuente de verdad
+## Fuentes de verdad
 
-- `docs/02-API/ENDPOINTS-LIVE-REFERENCE.md`
-- `docs/02-API/FRONTEND-INTEGRATION-GUIDE.md`
-- `docs/PHASE-3-ADMIN-PROGRAM.md`
+- Contrato API: `docs/api/ENDPOINTS-LIVE-REFERENCE.md`
+- Integración frontend: `docs/api/FRONTEND-INTEGRATION-GUIDE.md`
+- Dominio: `docs/features/<dominio>.md`
+- Acceso a pantallas: screen catalog en `sacdia-admin/src/lib/auth/screen-catalog/`
+- Reparto de trabajo backend/admin: `docs/steering/agent-ownership.md`
+
+## Sesión y llamadas a la API
+
+- El login guarda access y refresh token en cookies httpOnly (`sacdia_admin_access_token`, `sacdia_admin_refresh_token`) a través de `src/app/api/auth/*`. El código cliente no lee tokens.
+- `src/proxy.ts` redirige a login cualquier `/dashboard/*` sin token.
+- Las llamadas pasan por `src/lib/api/client.ts` (un archivo por recurso en `src/lib/api/`). Ante un 401 el cliente intenta `POST /api/auth/refresh` una vez; un 403 es permiso denegado y no cierra la sesión.
+
+## Acceso a pantallas
+
+- Cada pantalla tiene una definición en `src/lib/auth/screen-catalog/screens/*.ts` (`viewAny` con permisos o roles, más `capabilities` para acciones dentro de la pantalla).
+- La visibilidad se decide con `canViewScreen(subject, screenId)` y las acciones con `canCapability(...)`. No comprobar roles nominales a mano.
+- El id de la pantalla se reutiliza en `src/navigation/sidebar/sidebar-items.ts`.
+- Los permisos del catálogo deben coincidir con los `@RequirePermissions(...)` / `@GlobalRoles(...)` del backend para ese endpoint.
+- Si una pantalla también existe en la app (`surfaces: ["admin", "app"]` o `["app"]`), el cambio afecta al fixture `sacdia-app/test/fixtures/screen-catalog.snapshot.json`.
 
 ## Reglas de integración
 
-1. Usar siempre endpoints runtime vigentes en `ENDPOINTS-LIVE-REFERENCE.md`.
-2. Respetar alcance por rol (scope) retornado por backend.
-3. Tratar 401/403/404/429/5xx como estados esperados con degradación de UX.
-4. No asumir permisos por rol nominal: validar permisos efectivos en sesión.
+1. Usar solo endpoints vigentes en `ENDPOINTS-LIVE-REFERENCE.md` (y verificados en el controller).
+2. Respetar el alcance por rol que devuelve el backend; no filtrar en cliente datos que el backend no debería enviar.
+3. Tratar 401, 403, 404, 409, 429 y 5xx como estados esperados con UX de degradación.
+4. Textos con `next-intl` en los cuatro `messages/*.json`.
+5. Si falta un endpoint o un campo, no inventarlo: preparar un handoff para backend con la plantilla de `agent-ownership.md`.
 
 ## Checklist mínimo
 
-- [ ] Guard auth JWT funcionando.
-- [ ] Scope por rol representado en UI.
-- [ ] Manejo de errores estándar implementado.
-- [ ] Smoke E2E ejecutado en rutas críticas.
-
+- [ ] Pantalla registrada en el screen catalog y en el sidebar con el mismo id.
+- [ ] Permisos alineados con el backend.
+- [ ] Estados de carga, vacío y error implementados.
+- [ ] Textos traducidos en los cuatro locales.
+- [ ] `pnpm test` y `pnpm typecheck` en verde.

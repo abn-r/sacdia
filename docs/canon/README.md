@@ -8,7 +8,7 @@ Esta carpeta contiene la capa documental canónica y activa del proyecto.
 
 Su objetivo es reducir contradicciones entre documentos históricos, walkthroughs, notas de implementación y contratos realmente vigentes.
 
-Acá debe vivir la fuente de verdad operativa para dominios, runtime y procesos clave.
+Aquí debe vivir la fuente de verdad operativa para dominios, runtime y procesos clave.
 
 ## Regla principal
 Si un documento dentro de `docs/canon/` contradice un documento fuera de esta carpeta, manda `docs/canon/`.
@@ -24,7 +24,7 @@ En `docs/canon/` solo deben vivir documentos que cumplan al menos una de estas f
 - mapear la relación entre documentos canónicos y documentos legacy.
 
 ## Qué no debe vivir en esta carpeta
-No deben vivir acá:
+No deben vivir aquí:
 
 - walkthroughs históricos;
 - notas exploratorias sin validar;
@@ -33,21 +33,21 @@ No deben vivir acá:
 - documentación duplicada cuyo contrato activo ya exista en otro documento canónico.
 
 ## Precedencia dentro de la capa canónica
-Orden de autoridad actual:
+La precedencia global del workspace (canon frente a API, schema, steering, features, guías e histórico) se define **solo** en `source-of-truth.md`. Dentro de esta carpeta, el orden es:
 
 1. `gobernanza-canon.md`
 2. `dominio-sacdia.md`
 3. `identidad-sacdia.md`
 4. `arquitectura-sacdia.md`
-5. `runtime-sacdia.md`
+5. `runtime-sacdia.md` y los `runtime-*.md` / `auth/*.md` específicos
 6. `decisiones-clave.md`
 
 Semántica:
-- `gobernanza-canon.md` manda en precedencia y reglas documentales;
+- `gobernanza-canon.md` manda en reglas documentales;
 - `dominio-sacdia.md` manda en lenguaje, conceptos y semántica del sistema;
 - `identidad-sacdia.md` manda en propósito, alcance y frontera;
 - `arquitectura-sacdia.md` manda en organización técnica y responsabilidades;
-- `runtime-sacdia.md` manda en verdad operativa actual, subordinada al dominio;
+- `runtime-sacdia.md` manda en verdad operativa general; cada `runtime-*.md` manda en su área, subordinado al dominio;
 - `decisiones-clave.md` conserva memoria estructural y justificación.
 
 ## Resolución de conflictos
@@ -72,23 +72,40 @@ Cada documento canónico debe declarar uno de estos estados:
 - Si un documento sigue siendo canónico, mantener `ACTIVE` y marcar dentro del texto lo que esté `Pendiente`, `Por definir`, `Por verificar` o `Planificado`.
 - No presentar como vigente algo que todavía no existe en runtime.
 
-## Estructura actual recomendada
+## Estructura actual
 ```text
-docs/
-  canon/
-    README.md
-    dominio-sacdia.md
-    identidad-sacdia.md
-    gobernanza-canon.md
-    arquitectura-sacdia.md
-    runtime-sacdia.md
-    decisiones-clave.md
-    auth/
-      modelo-autorizacion.md
-      runtime-auth.md
+docs/canon/
+  README.md
+  source-of-truth.md
+  gobernanza-canon.md
+  dominio-sacdia.md
+  identidad-sacdia.md
+  arquitectura-sacdia.md
+  runtime-sacdia.md
+  decisiones-clave.md
+  runtime-achievements.md
+  runtime-alerting.md
+  runtime-camporees.md
+  runtime-communications.md
+  runtime-coordination.md
+  runtime-member-of-month.md
+  runtime-rankings.md
+  runtime-requests.md
+  runtime-resiliencia-red.md
+  runtime-scoring-categories.md
+  runtime-sla-dashboard.md
+  runtime-user-certifications.md
+  runtime-validation.md
+  auth/
+    modelo-autorizacion.md
+    runtime-auth.md
 ```
 
 ## Documentos canónicos actuales
+
+### `source-of-truth.md`
+
+Única definición de la precedencia documental del workspace y de las fuentes no autorizadas como estado actual.
 
 ### `dominio-sacdia.md`
 
@@ -108,7 +125,7 @@ Traduce el dominio a una organización técnica coherente para backend, admin we
 
 ### `runtime-sacdia.md`
 
-Describe la verdad operativa actual del sistema. Mientras no termine su verificación contra código, permanece en estado `DRAFT`.
+Describe la verdad operativa actual del sistema: stack, topología, superficie API, roles, persistencia e integraciones. Estado `ACTIVE`, reverificado contra código el 2026-10-04.
 
 ### `decisiones-clave.md`
 
@@ -124,7 +141,7 @@ Canoniza la clasificación anual de clubes por puntaje de carpetas, categorías 
 
 ### `runtime-resiliencia-red.md`
 
-Canoniza la capacidad vigente de cache local + TTL + invalidación por FCM silent messages, y la separa explícitamente de un modelo offline-first (no implementado hoy). Decisión registrada: `decisiones-clave.md` §13.
+Canoniza la capacidad vigente de cache local + TTL + invalidación por FCM silent messages y la persistencia local puntual (Hive para borradores, credencial cacheada), y la separa explícitamente de un modelo offline-first (no implementado hoy). Decisión registrada: `decisiones-clave.md` §13.
 
 ### `runtime-communications.md`
 
@@ -132,7 +149,7 @@ Canoniza las comunicaciones visibles (notificaciones push + bandeja), persistenc
 
 ### `runtime-sla-dashboard.md`
 
-Canoniza el SLA dashboard como lector puro de datos operacionales (investiture, validation, camporee), con cache in-memory TTL 60s, scope por `local_field_id` del coordinador derivado del JWT, y ventanas temporales fijas (30d overdue, 90d approval rate, 12w throughput). Sin tablas dedicadas. Decisión registrada: `decisiones-clave.md` §15.
+Canoniza el SLA dashboard como lector puro de datos operacionales (investiture, validation, camporee), con cache in-memory TTL 60s, scope por `local_field_id` del coordinador derivado del JWT, y ventanas temporales fijas (30d overdue, 90d approval rate, 12w throughput). Sin tablas dedicadas. El consumidor actual es el hub de coordinación de la app móvil. Decisión registrada: `decisiones-clave.md` §15.
 
 ### `runtime-member-of-month.md`
 
@@ -154,21 +171,21 @@ Canoniza el workflow de solicitudes de transferencia de miembros entre clubes y 
 
 Canoniza las operaciones admin-level sobre progresión de certificaciones de usuario (enrollUser, getUserCertifications, updateProgress, etc.). Permisos propios `user_certifications:read/manage` con prefix `user_` para evitar colisión con el browse catalog público `certifications:read`. Decisión registrada: `decisiones-clave.md` §19.
 
-### `runtime-user-folders.md`
-
-DEPRECATED: las operaciones legacy de carpetas de usuario (`user_folders:*` y `/folders/*`) fueron retiradas antes de producción. El flujo vigente vive en `annual-folders`.
-
 ### `runtime-camporees.md`
 
-Canoniza operaciones CRUD sobre la entidad camporee con permisos propios `camporees:read/create/update/delete`. Separa explícitamente de `attendance:*` cross-cutting (preservado deliberadamente entre activities y camporees). Permiso `camporees:register` reservado sin uso actual. Decisión registrada: `decisiones-clave.md` §20.
+Canoniza operaciones CRUD sobre la entidad camporee con permisos propios `camporees:read/create/update/delete` y los permisos de inscripción `camporees:register` (organizadores LF/unión) y `camporees:register_active_section` (director de club). Separa explícitamente de `attendance:*` cross-cutting (preservado deliberadamente entre activities y camporees). Decisión registrada: `decisiones-clave.md` §20.
 
 ### `runtime-validation.md`
 
-Canoniza el workflow submit → review con permisos propios `validation:submit/review/read`. Coexistencia: los permisos originales `classes:*` y `users:read_detail` PERMANECEN activos para sus dominios propios. Drift histórico corregido: nav `/dashboard/validation` migrado de `investiture:read` a `validation:read`. Decisión registrada: `decisiones-clave.md` §21.
+Canoniza el workflow submit → review con permisos propios `validation:submit/review/read`. Coexistencia: los permisos originales `classes:*` y `users:read_detail` PERMANECEN activos para sus dominios propios. En el admin la bandeja vive en `/dashboard/clubs/validations` (pantalla `validations-investitures`, `validation:read`). Decisión registrada: `decisiones-clave.md` §21.
 
 ### `runtime-coordination.md`
 
 Canoniza el modelo institucional de coordinación: zonas por campo local que agrupan distritos, un coordinador general activo por campo local, coordinadores por zona + sección, asignaciones directas por `club_section` y resolución común `coordinator_scope(user_id) -> club_section_ids[]`. Decisión registrada: `decisiones-clave.md` §24.
+
+### Documentos retirados
+
+`runtime-user-folders.md` (lápida DEPRECATED de las rutas `/folders/*`) se archivó en `docs/history/canon/`. `completion-matrix.md` se eliminó (git conserva el historial). El estado por dominio vive en `docs/features/README.md`.
 
 ### `runtime-alerting.md`
 
@@ -180,7 +197,7 @@ Canoniza la capa de alerting Sentry sobre los 3 runtimes (backend/admin/app). Se
 - `modelo-<tema>.md` — decisión conceptual canónica cuando un tema necesita más profundidad que dominio o runtime;
 - `runtime-<area>.md` — comportamiento técnico vigente;
 - `procesos-<area>.md` — flujos operativos canónicos;
-- `legacy-map.md` — mapa de reemplazo documental cuando haga falta cortar autoridad a material viejo.
+- `legacy-map.md` — nombre reservado para un mapa de reemplazo documental si alguna vez hace falta (hoy no existe).
 
 ## Cómo migrar documentación existente
 La migración no se hace borrando todo. Se hace así:

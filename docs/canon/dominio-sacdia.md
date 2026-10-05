@@ -270,7 +270,7 @@ Puede existir avance, evidencia o carga operativa sin reconocimiento institucion
 ## Notas de mapeo con runtime
 
 - En la implementación actual, `Miembro` suele aparecer como `user` en API y base de datos.
-- En la implementación actual, `Sección de club` aparece como `instance` y se materializa en tablas separadas por tipo.
+- En la implementación actual, `Sección de club` se materializa en la tabla única `club_sections`, diferenciada por `club_type_id` (Decisión 10, consolidación 2026-03-17). El término `instance` sobrevive solo en algunos nombres técnicos heredados (por ejemplo, permisos `club_instances:*`).
 - En la implementación actual, `Periodo operativo` se representa principalmente mediante `ecclesiastical_year_id`.
 - En la implementación actual, parte de la relación entre cargos y participación aparece en estructuras como `club_role_assignments`.
 

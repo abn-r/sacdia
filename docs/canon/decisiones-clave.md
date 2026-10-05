@@ -203,7 +203,7 @@ No deben entrar decisiones menores de implementación, notas de sesión, bugs t�
 
 ### 13. SACDIA no es offline-first; es cache + invalidación (2026-04-22)
 
-**Estado**: Vigente <!-- VERIFICADO: ausencia de hive/sqflite/drift/isar y de endpoints /sync; presencia de RealtimeInvalidationHandler + React Query + FCM silent messages. Canonizado en docs/canon/runtime-resiliencia-red.md. -->
+**Estado**: Vigente <!-- VERIFICADO 2026-04-22: ausencia de cola offline y de endpoints /sync (Hive llegó después solo para borradores; ver actualización); presencia de RealtimeInvalidationHandler + React Query + FCM silent messages. Canonizado en docs/canon/runtime-resiliencia-red.md. -->
 
 **Contexto**: Material estratégico anterior y el documento base describían "offline selectivo" como capacidad parcial. La implementación real **no es offline-first**: no hay queue persistida de mutaciones, no hay sincronización diferida, no hay endpoints delta. Lo que sí existe es cache local + TTL + invalidación por FCM silent messages en móvil, y React Query con staleTime + invalidación manual en admin.
 
@@ -214,7 +214,9 @@ No deben entrar decisiones menores de implementación, notas de sesión, bugs t�
 - ninguna comunicación oficial puede afirmar que SACDIA es offline-first mientras este canon esté vigente;
 - la emisión de `cache_invalidate` no debe crear `notification_logs` ni `notification_deliveries`;
 - la cobertura de invalidación por FCM hoy está acotada a `activities`; extender a otros features requiere registro explícito en `RealtimeResourceRegistry` del cliente y cableado en el servicio backend correspondiente;
-- la evolución hacia offline-first transversal corresponde a `docs/plans/offline-first-roadmap.md` (aún no creado).
+- la evolución hacia offline-first transversal corresponde a `docs/plans/offline-first-roadmap.md`.
+
+**Actualización 2026-10-04**: la app ya tiene persistencia local puntual: Hive (`hive`, `hive_flutter`) para borradores de certificación y `SharedPreferences` para la última credencial virtual, que se muestra marcada como offline si falla la red. No cambia la decisión: sigue sin haber cola de mutaciones ni sincronización diferida. Detalle en `docs/canon/runtime-resiliencia-red.md`.
 
 ### 14. Comunicaciones visibles son canon operativo (2026-04-22)
 
@@ -261,6 +263,8 @@ No deben entrar decisiones menores de implementación, notas de sesión, bugs t�
 - si en el futuro se canonizan alertas sobre umbrales del SLA (gap actual), la emisión debe seguir `docs/canon/runtime-communications.md` con `source = 'analytics:sla:*'`;
 - mover el cache a Redis rompe este canon — cualquier cambio arquitectural debe actualizar la decisión.
 
+**Actualización 2026-10-04**: la página admin `/dashboard/sla` se eliminó en el studio admin reset (sacdia-admin `6bed06e`, 2026-07-14). La superficie consumidora es hoy el hub de coordinación de la app móvil (`sacdia-app/lib/features/coordinator`). El endpoint y la decisión no cambian.
+
 ### 16. Miembro del mes es dominio canónico propio (2026-04-22)
 
 **Estado**: Vigente <!-- VERIFICADO: member-of-month.service.ts con runEvaluation idempotente, schema con empates permitidos, cron mensual, notificaciones a ganador + directores, superficie admin multi-sección. Canonizado en docs/canon/runtime-member-of-month.md. -->
@@ -293,7 +297,7 @@ No deben entrar decisiones menores de implementación, notas de sesión, bugs t�
 
 - el subsistema es puramente de **configuración** — los datos operativos de scoring viven en `weekly_record_scores` y otros features consumidores (weekly-records, MoM, annual-folders-scoring);
 - la jerarquía `division → union → local-field` se preserva con herencia automática (categorías de niveles superiores se aplican a niveles inferiores sin duplicación en datos);
-- los 4 endpoints `division` mantienen `@GlobalRolesGuard + @GlobalRoles('admin','super_admin')` ADEMÁS del permiso, porque son configuración global reservada;
+- los 4 endpoints `division` mantienen `@GlobalRolesGuard + @GlobalRoles('admin','super-admin')` ADEMÁS del permiso, porque son configuración global reservada;
 - la migración es cambio duro (sin compat window) porque el seed otorga `scoring_categories:*` a todos los roles que tenían `units:*` antes del switch de handlers — continuidad garantizada.
 
 **Consecuencias**:
@@ -322,7 +326,7 @@ Hallazgo paralelo: la ruta admin `/dashboard/requests/membership` apuntaba al m�
 
 - directores de club (CLUB), asistentes de campo local (GLOBAL) + JOIN copies (director-lf, assistant-union, director-union, assistant-dia, director-dia) mantienen capacidad de review tras migración;
 - directores de club + assistant-lf + JOIN copies reciben `requests:review` explícito;
-- admin/super_admin capturan via wildcard;
+- admin/super-admin capturan via wildcard;
 - futuros casos de self-service de asignación pueden introducir `requests:create` sin romper este canon, pero requieren extender la decisión;
 - cualquier notificación emitida por aprobación/rechazo debe usar `source = 'requests:*'` siguiendo `docs/canon/runtime-communications.md`.
 
@@ -339,11 +343,11 @@ El patrón `folders:*` también conflictuaba con `evidence_folders:*` (subsistem
 - `user_certifications:read` / `user_certifications:manage` — para endpoints admin de progresión de certificaciones.
 - `user_folders:read` / `user_folders:manage` — DEPRECATED; endpoints admin de carpetas de usuario retirados antes de producción.
 
-Autoridades rectoras: `docs/canon/runtime-user-certifications.md` + `docs/canon/runtime-user-folders.md`. Se fija que:
+Autoridades rectoras: `docs/canon/runtime-user-certifications.md` + `docs/history/canon/runtime-user-folders.md` (archivado tras retirar `/folders/*`). Se fija que:
 
 - `certifications:read` conserva su semántica original; `folders:read` fue desactivado al retirar el runtime legacy de carpetas;
-- `user_*:read` se otorgan solo a staff con autoridad operativa sobre otros usuarios: counselor, secretary, treasurer, secretary-treasurer, deputy-director, director (CLUB) + assistant-lf + JOIN copies + admin/super_admin;
-- `user_*:manage` queda restringido a liderazgo: deputy-director, director, assistant-lf + JOIN + admin/super_admin;
+- `user_*:read` se otorgan solo a staff con autoridad operativa sobre otros usuarios: counselor, secretary, treasurer, secretary-treasurer, deputy-director, director (CLUB) + assistant-lf + JOIN copies + admin/super-admin;
+- `user_*:manage` queda restringido a liderazgo: deputy-director, director, assistant-lf + JOIN + admin/super-admin;
 - el dominio vigente de carpeta de evidencias es `annual-folders`; `folders:read` y `user_folders:*` quedan legacy/inactivos;
 - la migración histórica de certificaciones se conserva; la porción de carpetas legacy fue cerrada antes de producción y sus permisos quedaron inactivos.
 
@@ -351,7 +355,7 @@ Autoridades rectoras: `docs/canon/runtime-user-certifications.md` + `docs/canon/
 
 - nunca debe redefinirse un permiso existente con semántica distinta sin auditoría previa de uso y grants; el prefix `user_` queda como patrón canónico para operaciones sobre datos de otros usuarios;
 - futuros módulos similares (ej. si surge `user_*`-operations para otras entidades de trayectoria) deben seguir el mismo patrón;
-- los canons `runtime-user-certifications.md` y `runtime-user-folders.md` documentan la separación explícita de los browse catalogs públicos — cualquier intento de colapsarlos en un único permiso es violación del canon;
+- los canons `runtime-user-certifications.md` y `runtime-user-folders.md` (este último archivado en `docs/history/canon/`) documentan la separación explícita de los browse catalogs públicos — cualquier intento de colapsarlos en un único permiso es violación del canon;
 - notificaciones emitidas por certificaciones de usuario deben usar `source = 'user_certifications:*'`; `user_folders:*` queda legacy/inactivo.
 
 ### 20. Camporees CRUD es dominio canónico propio; attendance permanece cross-cutting (2026-04-22)
@@ -373,8 +377,10 @@ Audit C2 clasificó `camporees` en media prioridad. Sprint D aborda la migració
 
 - creación/eliminación de camporees tiene autoridad independiente de creación de actividades semanales — roles pueden ser otorgados/revocados sin afectar el otro dominio;
 - attendance en camporees comparte UX y permiso con attendance en actividades — coherente para staff que opera ambos contextos;
-- el wildcard de `admin` (`NOT LIKE '%:delete'`) excluye `camporees:delete` — si se requiere acceso admin a delete, debe agregarse explícitamente; hoy solo `super_admin` captura via wildcard full;
+- el wildcard de `admin` (`NOT LIKE '%:delete'`) excluye `camporees:delete` — si se requiere acceso admin a delete, debe agregarse explícitamente; hoy solo `super-admin` captura via wildcard full;
 - handlers futuros en camporees deben clasificarse en las dos capas antes de elegir permiso; documentar en el canon cualquier caso borderline.
+
+**Actualización 2026-10-04**: `camporees:register` se reactivó (migración `20260713220000_camporee_section_registration_context`) para `POST /camporees/:camporeeId/clubs`, reservado a `assistant-lf`, `director-lf`, `assistant-union` y `director-union`. Se añadió `camporees:register_active_section` (solo `director` de club) para `POST /camporees/:camporeeId/section-registration`. El controller tiene hoy 46 handlers. Detalle en `docs/canon/runtime-camporees.md`.
 
 ### 21. Validation es dominio canónico propio con coexistencia (2026-04-22)
 
@@ -458,8 +464,8 @@ Hallazgo paralelo: la ruta admin `/dashboard/validation` usaba `investiture:read
 
 **Referencias**:
 
-- Spec: `docs/superpowers/specs/2026-04-28-clasificacion-criterios-ampliados-design.md`
-- Plan: `docs/superpowers/plans/2026-04-28-clasificacion-criterios-ampliados.md`
+- Spec: `docs/history/superpowers/specs/2026-04-28-clasificacion-criterios-ampliados-design.md` (histórico)
+- Plan: `2026-04-28-clasificacion-criterios-ampliados.md` (plan eliminado; git conserva el historial)
 - Canon rector: `docs/canon/runtime-rankings.md` §13.
 
 ### 24. Coordinación se modela por zonas y asignaciones a `club_section` (2026-06-17)

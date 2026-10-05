@@ -1,310 +1,186 @@
 # ESTRUCTURA SACDIA — Guía Operativa
 
 **Estado**: ACTIVE
-**Última actualización**: 2026-03-20
-**Base de autoridad**: `source-of-truth.md` (gobernanza documental)
-**Propósito**: navegación práctica de la estructura del monorepo y sus convenciones.
+**Actualizado**: 2026-10-04 (verificado contra `development` de los tres repos runtime)
+
+> Dónde vive cada cosa en el workspace. El stack y las versiones están en `docs/steering/tech.md`; la topología y las cifras, en `docs/canon/runtime-sacdia.md`.
 
 ---
 
-## 1. Layout del Monorepo
+## 1. Layout del workspace
 
+```text
+sacdia/                     # repo de documentación (este)
+|- docs/                    # documentación global
+|- scripts/                 # verificaciones documentales (CI en .github/workflows/)
+|- assets/                  # recursos compartidos
+|- sacdia-docs/             # portal de manuales (gitlink; pendiente de rediseño)
+|- sacdia-backend/          # repo propio — API NestJS
+|- sacdia-admin/            # repo propio — panel Next.js
+`- sacdia-app/              # repo propio — app Flutter
 ```
-sacdia/
-├── sacdia-backend/          # API REST (NestJS + Prisma)
-├── sacdia-admin/            # Panel web (Next.js 16 + shadcn/ui)
-├── sacdia-app/              # App móvil (Flutter + Clean Architecture)
-├── docs/                    # Documentación técnica centralizada
-└── CLAUDE.md                # Guía global del proyecto
-```
+
+Los tres repos runtime están en el `.gitignore` de `sacdia`: cada uno tiene su historial, su CI y su flujo `development` → `preproduction` → `main`.
 
 ---
 
-## 2. Backend — NestJS + Prisma
+## 2. Backend — `sacdia-backend`
 
-**Ubicación**: `/sacdia-backend`
-
-### Módulos principales
-```
+```text
 src/
-├── auth/                 # Autenticación (Supabase JWT)
-├── users/                # Usuarios, progreso de clases
-├── catalogs/             # Catálogos (honores, medicinas, etc.)
-├── clubs/                # Gestión de clubes
-├── classes/              # Clases progresivas
-├── honors/               # Honores y categorías
-├── activities/           # Actividades de club
-├── finances/             # Finanzas
-├── camporees/            # Camporees
-├── certifications/       # Certificaciones Guías Mayores
-├── folders/              # Carpetas de evidencias
-├── inventory/            # Inventario
-├── rbac/                 # Control de acceso basado en roles
-├── admin/                # Endpoints de administración
-├── common/               # Guards, decorators, filtros, interceptores
-├── investiture/          # Validación de investiduras
-├── notifications/        # Firebase FCM + notificaciones
-└── prisma/               # Migraciones, seeds, esquema
+|- main.ts                  # bootstrap: helmet, CORS, pipes, prefijo /api + versión v1, Swagger opt-in
+|- app.module.ts            # módulos + guards globales (throttler, JWT, permisos)
+|- <módulo>/                # un módulo Nest por dominio (≈60), por ejemplo:
+|   |- <módulo>.module.ts
+|   |- <módulo>.controller.ts
+|   |- <módulo>.service.ts
+|   |- *.spec.ts            # tests unitarios junto al código
+|   `- dto/                 # DTOs con class-validator
+|- rankings/                # agrupa submódulos (member-rankings, section-rankings, annual-ranking-progress, member-ranking-weights)
+|- common/                  # guards, decorators, filters, interceptors, pipes, errors (AppException + ErrorCode), email, services compartidos
+|- config/                  # validación de entorno (Joi), cache, BullMQ, throttler, trust proxy
+|- prisma/                  # PrismaService
+`- i18n/{es,en,fr,pt-BR}/   # mensajes de nestjs-i18n
+prisma/
+|- schema.prisma            # autoridad estructural de datos
+|- migrations/              # Prisma Migrate
+`- seeds/                   # seeds SQL (permisos, grants) y TS (usuarios de prueba, logros...)
+test/                       # e2e (*.e2e-spec.ts)
+scripts/                    # utilidades: auditorías, backfills, importadores, benchmarks
+render.yaml                 # blueprint de Render
+.env.example                # catálogo de variables de entorno
 ```
 
-### Stack
-- **Runtime**: NestJS 11 + TypeScript
-- **ORM**: Prisma 7 → PostgreSQL (Supabase)
-- **Auth**: JWT vía JWKS (ES256) desde Supabase
-- **Cache**: Redis (fallback in-memory)
-- **Push**: Firebase Cloud Messaging
-- **Prefijo API**: `/api/v1/*`
-
-### Convenciones
-- Respuesta admin: `{ status, data }`
-- Guards: `JwtAuthGuard`, `GlobalRolesGuard`, `OwnerOrAdminGuard`
-- Async/await para todas las operaciones
-- Validación de entrada vía decoradores de NestJS
+Lista de módulos por área: `docs/canon/runtime-sacdia.md` §5.2.
 
 ---
 
-## 3. Admin — Next.js 16 + shadcn/ui
+## 3. Admin — `sacdia-admin`
 
-**Ubicación**: `/sacdia-admin`
-
-### Estructura
+```text
+src/
+|- app/
+|   |- (auth)/login/                    # login
+|   |- (dashboard)/dashboard/<sección>/ # páginas del panel (clubs, users, catalogs, campamentos, investiture, ...)
+|   `- api/auth/{token,refresh,me,logout}/  # rutas que gestionan cookies httpOnly
+|- components/<dominio>/                # componentes por dominio; components/ui/ = shadcn
+|- lib/
+|   |- api/                             # cliente HTTP (client.ts) y un archivo por recurso
+|   |- auth/                            # sesión, cookies, roles, permisos
+|   |   `- screen-catalog/              # gates de pantallas y capacidades (admin y app)
+|   `- <dominio>/                       # lógica y server actions por dominio
+|- navigation/sidebar/                  # ítems del sidebar (ids = ids del screen catalog)
+|- server/                              # utilidades de servidor y server actions compartidas
+|- stores/preferences/                  # Zustand: tema, layout, sidebar
+|- i18n/                                # configuración de next-intl
+`- proxy.ts                             # protege /dashboard/*
+messages/{es,en,fr,pt-BR}.json          # traducciones
 ```
-app/
-├── (auth)/               # Rutas públicas (login, register)
-├── (dashboard)/          # Dashboard protegido
-│   ├── clubs/
-│   ├── users/
-│   ├── activities/
-│   ├── finances/
-│   └── [otros]
-├── api/                  # API Routes de Next.js
-└── layout.tsx
 
-components/
-├── ui/                   # shadcn/ui componentes base
-├── clubs/                # Componentes específicos del feature
-├── activities/
-├── finances/
-└── [otros features]/
+---
 
+## 4. App móvil — `sacdia-app`
+
+Organización **feature-first**; cada feature aplica Clean Architecture internamente.
+
+```text
 lib/
-├── supabase/             # Cliente Supabase (SSR)
-└── api/                  # Clientes HTTP para backend
+|- main.dart
+|- core/                    # transversal: auth, authorization (screen catalog Dart), config (router, route_names),
+|                           # constants (api_endpoints, app_constants), network (Dio + interceptores), notifications,
+|                           # realtime (invalidación FCM), storage, theme, l10n, widgets, utils, analytics
+|- features/<feature>/      # ~40 features (activities, classes, honors, camporees, coordinator, virtual_card, ...)
+|   |- data/               # datasources (remote/local), models, repositories (impl)
+|   |- domain/             # entities, repositories (contratos con Either<Failure, T>), usecases
+|   `- presentation/       # providers (Riverpod), views, widgets
+|- shared/                  # modelos, datos y widgets compartidos entre features
+`- providers/               # providers globales (Dio, storage, catálogos)
+assets/translations/{es,en,fr,pt-BR}.json
+test/                       # tests unitarios y de widgets; test/fixtures/screen-catalog.snapshot.json
+integration_test/
 ```
-
-### Stack
-- **Framework**: Next.js 16 (App Router)
-- **UI**: shadcn/ui + Tailwind CSS v4
-- **Icons**: lucide-react
-- **Forms**: React Hook Form + Zod
-- **Auth**: Supabase Auth (SSR con cookies)
-- **Design System**: Ver `DESIGN-SYSTEM.md` para detalles
-
-### Convenciones
-- Server Components por defecto; `'use client'` solo donde necesario
-- CRUD dialogs: crear/editar → Dialog modal
-- Delete → AlertDialog confirmación
-- Semantic colors en Tailwind (no hardcoded: `bg-primary/10`, `text-muted-foreground`)
 
 ---
 
-## 4. App Móvil — Flutter + Clean Architecture
+## 5. Documentación — `sacdia/docs`
 
-**Ubicación**: `/sacdia-app`
-
-### Estructura
-```
-lib/
-├── core/
-│   ├── constants/        # URLs, claves, constantes globales
-│   ├── theme/            # Tema Material + colores
-│   └── utils/            # Funciones utilitarias
-├── data/
-│   ├── models/           # Mapeos JSON ↔ Dart
-│   ├── repositories/     # Implementación de repositorios
-│   └── datasources/      # Clientes HTTP (Dio)
-├── domain/
-│   ├── entities/         # Entidades del negocio (puros)
-│   ├── repositories/     # Contratos abstractos
-│   └── usecases/         # Lógica de negocio
-└── presentation/
-    ├── screens/          # Pantallas principales
-    ├── widgets/          # Componentes reutilizables
-    └── providers/        # Riverpod state management
-```
-
-### Stack
-- **Framework**: Flutter 3.x
-- **Architecture**: Clean Architecture (3 capas)
-- **State**: Riverpod (DI + state)
-- **HTTP**: Dio
-- **Storage local**: Hive
-- **Auth**: Supabase Auth
-
-### Convenciones
-- Dependency injection via Riverpod providers
-- Offline first: cache en Hive antes de red
-- JWT almacenado seguro en Hive
-- Async/await para operaciones de datos
+La tabla de carpetas y su nivel de autoridad está en `docs/README.md`. La precedencia, en `docs/canon/source-of-truth.md`.
 
 ---
 
-## 5. Documentación — Estructura Centralizada
+## 6. Nombrado
 
-**Ubicación**: `/docs`
+### TypeScript (backend y admin)
 
-### Carpetas principales
-```
-docs/
-├── canon/                # Autoridad de negocio y arquitectura
-│   ├── dominio-sacdia.md
-│   ├── identidad-sacdia.md
-│   ├── arquitectura-sacdia.md
-│   └── decisiones-clave.md
-│
-├── features/             # Especificaciones de dominio (16 specs)
-│   ├── auth.md
-│   ├── gestion-clubs.md
-│   ├── actividades.md
-│   └── [más dominios]
-│
-├── api/                  # Runtime de API
-│   └── ENDPOINTS-LIVE-REFERENCE.md (220 endpoints, autoridad)
-│
-├── database/             # Esquema y referencias
-│   ├── schema.prisma (fuente única de verdad)
-│   └── SCHEMA-REFERENCE.md (~72 modelos)
-│
-├── steering/             # Convenciones operativas
-│   ├── source-of-truth.md (gobernanza)
-│   ├── STRUCTURE-GUIDE.md (ESTE documento)
-│   ├── tech.md
-│   ├── coding-standards.md
-│   ├── data-guidelines.md
-│   ├── agent-ownership.md
-│   └── agents.md
-│
-├── audit/                # Auditoría y estado
-│   ├── completion-matrix.md (cobertura documental)
-│   └── REALITY-MATRIX.md (estado de implementación)
-│
-├── guides/               # Guías operativas
-│   └── [walkthroughs por feature]
-│
-└── history/              # Documentación histórica (referencia)
-    └── [archivos previos]
-```
+- Variables y funciones: `camelCase`; clases, interfaces y tipos: `PascalCase`.
+- Archivos: `kebab-case` con sufijo de rol en el backend (`*.controller.ts`, `*.service.ts`, `*.module.ts`, `*.dto.ts`, `*.spec.ts`).
+- Códigos de error: `UPPER_SNAKE_CASE` en `common/errors/error-codes.ts`.
 
-### Convención de autoridad
-1. **Canon** (`canon/*.md`): identidad y decisiones duraderas
-2. **API Live Reference** (`api/ENDPOINTS-LIVE-REFERENCE.md`): 220 endpoints
-3. **Schema Prisma** (`schema.prisma`): fuente de verdad del modelo
-4. **Feature Specs** (`features/*.md`): 16 dominios completos
-5. **Steering** (`steering/*.md`): convenciones subordinadas
+### SQL / Prisma
 
----
+- Tablas y columnas: `snake_case`. Los modelos Prisma usan el mismo nombre que la tabla.
+- PKs con nombre propio por tabla (`user_id`, `club_section_id`, `enrollment_id`, `user_pr_id`...). Las tablas de Better Auth (`account`, `session`, `verification`) usan `id`.
+- FKs: `<entidad>_id`.
+- Timestamps: `created_at` y, según la tabla, `modified_at` o `updated_at`.
+- Baja lógica: columna `active`.
+- Traducciones de catálogos: tabla `<catálogo>_translations`.
 
-## 6. Nombrado — Convenciones Globales
+### Permisos
 
-### TypeScript (Backend + Admin)
-- **Variables/funciones**: `camelCase`
-- **Clases/interfaces**: `PascalCase`
-- **Enums**: `UPPER_CASE`
-- **Archivos**: `kebab-case` (`.controller.ts`, `.service.ts`)
+- `recurso:acción` en `snake_case` (`annual_folders:evaluate`, `camporees:register_active_section`).
 
-### SQL/Prisma
-- **Tablas/columnas**: `snake_case`
-- **PKs**: `id` (sempre)
-- **FKs**: `[tabla]_id`
-- **Timestamps**: `created_at`, `updated_at`
+### Roles
 
-### Flutter/Dart
-- **Classes**: `PascalCase`
-- **Variables/functions**: `camelCase`
-- **Files**: `snake_case.dart`
-- **Folders**: `snake_case`
+- `kebab-case` (`super-admin`, `director-lf`, `deputy-director`, `secretary-treasurer`).
+
+### Flutter / Dart
+
+- Clases: `PascalCase`; variables y funciones: `camelCase`; archivos y carpetas: `snake_case`.
+- Vistas: `*_view.dart`; providers: `*_providers.dart`; datasources: `*_remote_data_source.dart` / `*_local_data_source.dart`.
 
 ### Git
-- **Commits**: `feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:`
-- **Ramas**: `feature/`, `fix/`, `docs/`
-- **PRs**: Descripción clara en body; no en título
+
+- Commits: Conventional Commits (`feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:`, `perf:`).
+- Ramas de trabajo con prefijo de tipo (`feat/`, `fix/`, `perf/`...) creadas desde `development`.
+- Ramas permanentes: `development`, `preproduction`, `main`.
 
 ---
 
 ## 7. Encontrar cosas rápidamente
 
-### Buscar endpoint
-→ `docs/api/ENDPOINTS-LIVE-REFERENCE.md` (Ctrl+F por módulo o método)
-
-### Buscar modelo de datos
-→ `docs/database/SCHEMA-REFERENCE.md` (referencia humana)
-→ `sacdia-backend/prisma/schema.prisma` (autoridad)
-
-### Buscar especificación de feature
-→ `docs/features/{nombre-dominio}.md`
-Ejemplo: `docs/features/actividades.md`
-
-### Buscar componente de admin
-→ `sacdia-admin/components/[feature]/` o `app/(dashboard)/[feature]/`
-
-### Buscar pantalla de app
-→ `sacdia-app/lib/presentation/screens/` o `lib/domain/usecases/`
-
-### Buscar estándar de código
-→ `docs/steering/coding-standards.md`
-
-### Entender decisiones arquitectónicas
-→ `docs/canon/decisiones-clave.md` o `docs/canon/arquitectura-sacdia.md`
+| Busco | Dónde |
+|---|---|
+| Un endpoint | `docs/api/ENDPOINTS-LIVE-REFERENCE.md`; en código, `sacdia-backend/src/**/*.controller.ts` |
+| Un modelo de datos | `sacdia-backend/prisma/schema.prisma` (autoridad); `docs/database/SCHEMA-REFERENCE.md` (lectura) |
+| Un permiso o su reparto | `sacdia-backend/prisma/seeds/permissions.seed.sql` y `role-permissions.seed.sql` |
+| La spec de un dominio | `docs/features/README.md` → `docs/features/<dominio>.md` |
+| Una pantalla del admin | `sacdia-admin/src/app/(dashboard)/dashboard/<sección>/` y su gate en `src/lib/auth/screen-catalog/screens/` |
+| Una pantalla de la app | `sacdia-app/lib/features/<feature>/presentation/views/`; rutas en `lib/core/config/route_names.dart` |
+| Un estándar de código | `docs/steering/coding-standards.md` |
+| Una decisión de arquitectura | `docs/canon/decisiones-clave.md`, `docs/api/ARCHITECTURE-DECISIONS.md` |
 
 ---
 
-## 8. URLs de desarrollo
+## 8. Comandos esenciales
 
-```
-Backend API:     http://localhost:3000
-Admin web:       http://localhost:3001
-API Docs:        http://localhost:3000/api
-Supabase:        Configurar en .env de cada repo
-```
-
----
-
-## 9. Comandos esenciales
-
-**Backend**
 ```bash
+# Backend
 cd sacdia-backend
-pnpm run start:dev       # Dev server
-pnpm prisma migrate dev  # Crear/ejecutar migración
-pnpm test                # Tests unitarios
-```
+pnpm install
+pnpm run start:dev          # http://localhost:3000/api/v1
+pnpm prisma migrate dev     # crear/aplicar migración en local
+pnpm test                   # unit tests (Jest)
+pnpm run test:e2e
 
-**Admin**
-```bash
+# Admin
 cd sacdia-admin
-pnpm dev                 # Dev server (puerto 3001)
-pnpm build               # Build producción
-```
+pnpm install
+pnpm dev                    # http://localhost:3001
+pnpm test && pnpm typecheck && pnpm lint
 
-**App**
-```bash
+# App
 cd sacdia-app
-flutter run              # En emulador/device
-flutter test             # Tests
+flutter pub get
+flutter run --dart-define=API_BASE_URL=http://localhost:3000/api/v1
+flutter analyze && flutter test
 ```
-
----
-
-## 10. Validación de estructura
-
-Verificar que estás en la estructura correcta:
-
-- ✅ Backend tiene `/src/[modulo]/` con `.module.ts`, `.service.ts`, `.controller.ts`
-- ✅ Admin tiene `/app/(dashboard)/[feature]/` con `page.tsx` + componentes en `/components`
-- ✅ App tiene `/lib/domain/`, `/lib/data/`, `/lib/presentation/` claros
-- ✅ Docs tiene `/canon/`, `/features/`, `/api/`, `/steering/`, `/database/` como autoridad
-- ✅ Commits siguen `feat:`, `fix:`, `docs:` (sin "Co-Authored-By")
-
----
-
-**Última validación**: 2026-03-20 — Actualizado post-Wave 2 (GAP-W2-01 a 05 cerrados, 16 dominios implementados, 220 endpoints documentados).

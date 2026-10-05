@@ -1,18 +1,18 @@
 # SLA Dashboard
 
-**Estado**: IMPLEMENTADO
+**Estado**: IMPLEMENTADO (endpoint backend consumido por la app, hub del coordinador). El admin no tiene página SLA.
 
 ## Descripcion de dominio
 
-El SLA Dashboard es un panel de analiticas operacionales que permite a coordinadores y administradores monitorear el estado de los procesos de aprobacion y validacion del sistema. Muestra metricas clave como aprobaciones pendientes, items vencidos, tiempos promedio de aprobacion, tasas de aprobacion y throughput semanal.
+El SLA Dashboard es un endpoint de analiticas operacionales que la app movil muestra en el hub del coordinador para monitorear el estado de los procesos de aprobacion y validacion del sistema. Muestra metricas clave como aprobaciones pendientes, items vencidos, tiempos promedio de aprobacion, tasas de aprobacion y throughput semanal.
 
-El dashboard cubre tres pipelines operacionales: (1) investiduras — envio, validacion y ceremonia, (2) validacion de clases y honores — revision de evidencias y progreso, y (3) inscripciones de camporees — aprobaciones de clubes, miembros y pagos. Las metricas estan scopeadas al contexto del coordinador (campo local) y se cachean durante 60 segundos para evitar carga excesiva en la base de datos.
+El dashboard cubre tres pipelines operacionales: (1) investiduras — envio, validacion y ceremonia, (2) validacion de clases y honores — revision de evidencias y progreso, y (3) inscripciones de camporees — aprobaciones de clubes, miembros y pagos. Las metricas estan scopeadas a las secciones asignadas al coordinador (o a las del campo para `director-lf`/`assistant-lf`, via alias de coordinador; admin ve todo) y se cachean 60 segundos en memoria del proceso para evitar carga excesiva en la base de datos.
 
 ## Que existe (verificado contra codigo)
 
 ### Backend (AnalyticsModule)
-- **Modulo nuevo**: `src/analytics/`
-- **1 endpoint**:
+- **Modulo**: `src/analytics/` (`AnalyticsController`, 8 endpoints en total; los demas son `local-field-dashboard`, `operations-dashboard` —ver [operations-dashboard.md](operations-dashboard.md)—, `jobs-overview`, `jobs/:queue/:jobId/retry`, `queues/:queueName/health`, `cron-runs` y `cron-runs/history` —ver [cron-automation.md](cron-automation.md)—)
+- **Endpoint SLA**:
   - `GET /api/v1/admin/analytics/sla-dashboard` — Metricas SLA completas
 - Respuesta incluye:
   - Conteos de pendientes por pipeline (investiture, validation, camporee)
@@ -21,16 +21,15 @@ El dashboard cubre tres pipelines operacionales: (1) investiduras — envio, val
   - Tasas de aprobacion (porcentaje)
   - Throughput de 12 semanas (aprobaciones por semana)
 - Cache de 60 segundos para performance
-- Scoped por campo local del coordinador
-- Guards: JwtAuthGuard, GlobalRolesGuard (admin, coordinator)
+- Scope resuelto por `CoordinationService.resolveCoordinatorLikeSectionScope`
+- Guards: JwtAuthGuard, GlobalRolesGuard (`admin`, `coordinator`; el alias de `coordinator` incluye zona/general y `director-lf`/`assistant-lf`)
+
+### App movil (sacdia-app)
+- `lib/features/coordinator`: `slaDashboardProvider` (`coordinator_providers.dart`) y `coordinator_hub_view.dart` muestran las metricas en el hub del coordinador, con refresco manual (`ref.invalidate`).
+- La pantalla esta registrada en el screen catalog de app (`sacdia-admin/src/lib/auth/screen-catalog/screens/app.ts`).
 
 ### Admin (sacdia-admin)
-- **Pagina dedicada**: `/dashboard/sla`
-- **Componentes**: `src/components/sla/`
-- **Tarjetas de resumen**: Pendientes, overdue, tiempos promedio, tasas de aprobacion
-- **Grafico de throughput**: 12 semanas de tendencia de aprobaciones
-- **Desglose por pipeline**: Metricas separadas para investiduras, validacion y camporees
-- **Auto-refresh**: Actualizacion periodica alineada con el cache del backend
+- **Sin pagina**: no existe `/dashboard/sla` ni `src/components/sla/`. `src/lib/api/analytics.ts` conserva `getSlaDashboard()`, pero ninguna pagina la usa. El panel usa el [operations-dashboard](operations-dashboard.md).
 
 ### Base de datos
 - Sin cambios de schema — consultas agregadas sobre tablas existentes
@@ -63,5 +62,6 @@ El dashboard cubre tres pipelines operacionales: (1) investiduras — envio, val
 
 ## Estado de implementacion
 
-- Backend: AnalyticsModule con 1 endpoint y cache de 60s
-- Admin: Dashboard con tarjetas, grafico de throughput y desglose por pipeline
+- Backend: endpoint `sla-dashboard` en `AnalyticsModule` con cache de 60s en memoria del proceso
+- App: hub del coordinador (`lib/features/coordinator`)
+- Admin: sin pagina SLA

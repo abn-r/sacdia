@@ -1,5 +1,8 @@
 # Diseño: Rediseño de seguros por compras, cupos y asignaciones
 
+> **Estado real (revisado 2026-10-04 contra `development`)**: Implementación parcial en `development`. Backend: migración `20260723120000_insurance_capacity_model`, productos, ciclos, compras, cupos y reasignaciones (`src/insurance/`). Admin: consume productos, ciclos y reasignaciones, pero no compras. App: no consume el modelo nuevo. Falta el componente de ranking `insurance_purchase_timeliness`.
+
+
 **Estado**: DRAFT aprobado como dirección de producto  
 **Fecha**: 2026-07-23  
 **Alcance**: `sacdia-backend`, `sacdia-admin`, `sacdia-app`, ranking anual y documentación canónica  

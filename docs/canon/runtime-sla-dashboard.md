@@ -5,7 +5,7 @@
 **Tipo de documento**: runtime canonizado, documented-as-built
 **Ámbito**: panel unificado de métricas operacionales de SLA sobre pipelines de aprobación y validación del sistema (investiduras, validación, camporees)
 
-<!-- VERIFICADO contra código 2026-04-22: analytics.controller.ts, analytics.service.ts, sla-dashboard.dto.ts, admin page y componentes SLA cruzados con implementación real. -->
+<!-- VERIFICADO contra código 2026-04-22: analytics.controller.ts, analytics.service.ts, sla-dashboard.dto.ts. Cliente (§10) reverificado 2026-10-04: el consumidor es la app (coordinator hub); la página admin se eliminó. -->
 
 ---
 
@@ -139,15 +139,21 @@ Invariante: **el SLA dashboard nunca muta datos**. Es un lector puro. Cualquier 
 
 ---
 
-## 10. Cliente (admin)
+## 10. Cliente
 
-- página: `sacdia-admin/src/app/(dashboard)/dashboard/sla/page.tsx`;
-- guard: `requireAdminUser()` server-side;
-- revalidación: `export const revalidate = 60` (alineado con el TTL del backend);
-- fetch: Server Component via `getSlaDashboard()` en `sacdia-admin/src/lib/api/analytics.ts:63-68`;
-- componentes: `SlaDashboardClient`, `SlaRefreshButton`, `SlaStatCards`, `SlaPipelineChart`, `SlaThroughputChart`, `SlaValidationCard`, `SlaCamporeeCard`.
+<!-- VERIFICADO contra código 2026-10-04: la página admin `/dashboard/sla` y `components/sla` se eliminaron en el studio admin reset (sacdia-admin `6bed06e`, 2026-07-14). -->
 
-No existe vista SLA en la app móvil (Flutter). Si se requiere en el futuro, corresponde evaluarse como feature separada.
+El consumidor vigente es la **app móvil**, dentro del hub de coordinación:
+
+- datasource: `sacdia-app/lib/features/coordinator/data/datasources/coordinator_remote_data_source.dart` (`getSlaDashboard()` → `GET /admin/analytics/sla-dashboard`);
+- provider: `slaDashboardProvider` en `sacdia-app/lib/features/coordinator/presentation/providers/coordinator_providers.dart`;
+- vistas: `coordinator_hub_view.dart` (resumen) y `sla_dashboard_view.dart` (detalle con pull-to-refresh, que invalida el provider);
+- gate de pantalla: `coordinator-hub` (`/coordinator`) en el screen catalog (`sacdia-admin/src/lib/auth/screen-catalog/screens/app.ts`), con `roleOnlyAccess(["admin", "coordinator"])`, alineado con `@GlobalRoles('admin','coordinator')` del backend.
+
+Admin web:
+
+- no existe página SLA en `sacdia-admin` desde el studio admin reset;
+- queda `getSlaDashboard()` en `sacdia-admin/src/lib/api/analytics.ts` sin consumidor de página. Si se vuelve a crear la pantalla en el admin, debe registrarse en el screen catalog y en este documento.
 
 ---
 

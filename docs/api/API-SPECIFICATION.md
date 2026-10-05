@@ -9,7 +9,7 @@
 **Estado**: ACTIVE
 **Versión**: 3.0.0 (contrato runtime unificado)
 **Fecha**: 6 de julio de 2026
-**Status**: ✅ Producción - Endpoints canónicos en ENDPOINTS-LIVE-REFERENCE.md
+**Status**: ACTIVE en `development` (el producto aún no está en producción). Endpoints canónicos en ENDPOINTS-LIVE-REFERENCE.md
 
 **Nota**:
 - Este documento conserva decisiones de arquitectura, seguridad y contratos.
@@ -25,8 +25,7 @@ Este documento integra:
 - ✅ **Stack tecnológico**: `docs/steering/tech.md`
 - ✅ **Estándares de código/datos**: `docs/steering/coding-standards.md`, `docs/steering/data-guidelines.md`
 - ✅ **Referencia live de endpoints**: `docs/api/ENDPOINTS-LIVE-REFERENCE.md`
-- ✅ **Sistema de roles**: `docs/history/source/api/restrucura-roles.md` (histórico)
-- ✅ **Queries SQL (histórico)**: `docs/history/source/api/queries-club-role-assignments.md`
+- ✅ **Contrato de roles de club**: `docs/features/auth/CLUB-ROLE-ASSIGNMENT-FIRST-CONTRACT.md`
 
 ###Decisiones Finales Aplicadas
 
@@ -81,13 +80,14 @@ Este documento integra:
 - **2FA TOTP** vía Better Auth / backend cuando aplique
 - **Token Blacklist** (revocación antes de expiración)
 - **Session Limits** (máximo 5 sesiones por usuario)
-- **IP Whitelist** para endpoints admin (soporte CIDR)
 - **Audit Logging** (todas las requests)
 - **Error Handling seguro** (oculta detalles en producción)
 
 ---
 
 ## 📐 Arquitectura de Módulos
+
+Extracto de `sacdia-backend/src/` (66 directorios en `development`). La lista completa de controllers y rutas está en [ENDPOINTS-LIVE-REFERENCE.md](ENDPOINTS-LIVE-REFERENCE.md).
 
 ```
 src/
@@ -106,7 +106,7 @@ src/
 ├── notifications/               # Push notifications (FCM)
 ├── catalogs/                    # Catálogos maestros
 ├── common/
-│   ├── guards/                  # JwtAuthGuard, PermissionsGuard, GlobalRolesGuard, ClubRolesGuard
+│   ├── guards/                  # GlobalJwtAuthGuard y PermissionsGuard (APP_GUARD), JwtAuthGuard, GlobalRolesGuard, ClubRolesGuard, OwnerOrAdminGuard
 │   ├── decorators/              # @Roles(), @Permissions(), @ClubRole()
 │   ├── interceptors/            # Response transformation
 │   ├── filters/                 # Exception handling
@@ -539,25 +539,9 @@ export class CreateLegalRepresentativeDto {
 > El listado completo y vigente de endpoints del backend está en [ENDPOINTS-LIVE-REFERENCE.md](ENDPOINTS-LIVE-REFERENCE.md).
 > Esta especificación se mantiene para arquitectura, seguridad, contratos y decisiones técnicas.
 
-### Módulos Runtime (Resumen)
+### Módulos Runtime
 
-- `/api/v1/auth`
-- `/api/v1/users`
-- `/api/v1/activities`
-- `/api/v1/admin`
-- `/api/v1/camporees`
-- `/api/v1/catalogs`
-- `/api/v1/certifications`
-- `/api/v1/classes`
-- `/api/v1/club-roles`
-- `/api/v1/clubs`
-- `/api/v1/fcm-tokens`
-- `/api/v1/finances`
-- `/api/v1/annual-folders`
-- `/api/v1/health`
-- `/api/v1/honors`
-- `/api/v1/inventory`
-- `/api/v1/notifications`
+No se mantiene una lista de módulos aquí. El resumen por dominio y la matriz completa (866 rutas en `development`) están en [ENDPOINTS-LIVE-REFERENCE.md](ENDPOINTS-LIVE-REFERENCE.md).
 
 ## 📊 Respuestas Estándar
 
@@ -750,19 +734,19 @@ En esos casos el campo afectado se retorna `null` sin selección silenciosa ni i
 
 ## 🚀 Estado de Implementación
 
-- API backend en producción con contrato runtime centralizado en [ENDPOINTS-LIVE-REFERENCE.md](ENDPOINTS-LIVE-REFERENCE.md).
-- Módulos activos: auth, users, clubs, classes, honors, activities, camporees, finances, inventory, folders, notifications, catalogs, admin geography/reference y rbac.
+- API backend en `development` (aún no en producción; flujo `development` → `preproduction` → `main`) con contrato runtime centralizado en [ENDPOINTS-LIVE-REFERENCE.md](ENDPOINTS-LIVE-REFERENCE.md).
+- El módulo legacy `folders` fue retirado; la carpeta anual vive en `annual-folders`.
 - Para consumo por agentes (App + Panel Admin), usar siempre el documento canónico de endpoints en vivo.
 
 ## 📝 Recursos Adicionales
 
-- **Queries SQL (histórico)**: [queries-club-role-assignments.md](../history/source/api/queries-club-role-assignments.md)
-- **Análisis de Roles (histórico)**: [analisis-club-members-vs-roles.md](../history/source/api/analisis-club-members-vs-roles.md)
-- **Decisiones (histórico)**: [decisiones-estandarizacion.md](../history/source/api/decisiones-estandarizacion.md)
+- **Contrato de roles de club**: [CLUB-ROLE-ASSIGNMENT-FIRST-CONTRACT.md](../features/auth/CLUB-ROLE-ASSIGNMENT-FIRST-CONTRACT.md)
+- **Decisiones de arquitectura**: [ARCHITECTURE-DECISIONS.md](./ARCHITECTURE-DECISIONS.md)
+- Los análisis de roles y queries de enero de 2026 se retiraron de `docs/history`; siguen en el historial de git.
 
 ---
 
 **Generado**: 2026-01-29
-**Actualizado**: 2026-03-18
+**Actualizado**: 2026-10-04
 **Versión**: 3.0.0 (contrato runtime unificado)
-**Status**: ✅ Producción - Endpoints canónicos en ENDPOINTS-LIVE-REFERENCE.md
+**Status**: ACTIVE en `development` (el producto aún no está en producción). Endpoints canónicos en ENDPOINTS-LIVE-REFERENCE.md

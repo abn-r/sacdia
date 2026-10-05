@@ -1,6 +1,6 @@
 # Clases progresivas — análisis técnico y funcional integral
 
-> **Estado:** análisis verificado del runtime actual
+> **Estado:** diagnóstico con fecha de corte; varias divergencias de la tabla ya figuran como RESUELTO. Verificar contra `development` antes de actuar.
 > **Fecha de corte:** 2026-08-11
 > **Alcance:** backend NestJS, PostgreSQL/Prisma, app Flutter, panel Next.js y documentación vigente
 > **Naturaleza:** documento de diagnóstico; no reemplaza los contratos canónicos
@@ -711,7 +711,7 @@ El módulo podría considerarse estabilizado cuando:
 - `sacdia-backend/src/classes/classes.controller.ts` — rutas y guards de catálogo/progreso.
 - `sacdia-backend/src/classes/classes.service.ts` — inscripción, progreso y evidencias.
 - `sacdia-backend/src/classes/dto/classes.dto.ts` — entradas de inscripción/progreso.
-- `sacdia-backend/src/classes/class-assignment-resolver.service.ts` — asignación por edad.
+- `sacdia-backend/src/common/services/class-assignment-resolver.service.ts` — asignación por edad.
 - `sacdia-backend/src/post-registration/post-registration.service.ts` — alta anual inicial.
 - `sacdia-backend/src/classes/class-requirement-eligibility.service.ts` — tracks y elegibilidad.
 - `sacdia-backend/src/classes/class-counselor-assignments.controller.ts` y servicio — responsables pedagógicos.

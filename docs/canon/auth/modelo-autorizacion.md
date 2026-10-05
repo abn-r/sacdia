@@ -84,9 +84,9 @@ Los roles representan responsabilidades agrupadas.
 
 Ejemplos conceptuales:
 
-- `super_admin`
+- `super-admin`
 - `admin`
-- `assistant_admin`
+- `assistant-admin`
 - `coordinator`
 - roles de club como director, secretario, consejero u otros equivalentes
 

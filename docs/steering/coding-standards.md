@@ -1,557 +1,116 @@
 # Coding Standards
 
 **Estado**: ACTIVE
+**Actualizado**: 2026-10-04
 
-> Estándares de código específicos para mantener consistencia y calidad
-
----
-
-## Principios Generales
-
-### SOLID Principles
-
-1. **Single Responsibility**: Una clase/función = una responsabilidad
-2. **Open/Closed**: Abierto a extensión, cerrado a modificación  
-3. **Liskov Substitution**: Subtipos deben ser sustituibles
-4. **Interface Segregation**: Interfaces específicas > generales
-5. **Dependency Inversion**: Depender de abstracciones, no concreciones
-
-### DRY, KISS, YAGNI
-
-- **DRY** (Don't Repeat Yourself): No código duplicado
-- **KISS** (Keep It Simple, Stupid): Soluciones simples
-- **YAGNI** (You Aren't Gonna Need It): No código especulativo
+> Reglas de código que el proyecto aplica de verdad (configuración, CI o patrones dominantes en el código de `development`). Si una regla no está aquí, se sigue el patrón del código vecino.
 
 ---
 
-## TypeScript / JavaScript
+## 1. Reglas comunes
 
-### Variables
-
-**Usa `const` por defecto, `let` cuando sea necesario**:
-
-```typescript
-// ✅ Bien
-const MAX_RETRIES = 3;
-const userData = await fetchUser();
-let counter = 0;
-
-// ❌ Mal
-var MAX_RETRIES = 3;  // No usar var
-let userData = await fetchUser();  // Debería ser const
-```
-
-**Nombres descriptivos**:
-
-```typescript
-// ✅ Bien
-const userAge = calculateAge(birthDate);
-const isAuthenticated = checkAuthStatus();
-const products = await fetchProducts();
-
-// ❌ Mal
-const a = calculateAge(birthDate);  // ¿Qué es 'a'?
-const flag = checkAuthStatus();     // ¿Qué flag?
-const data = await fetchProducts(); // Muy genérico
-```
-
-### Funciones
-
-**Funciones pequeñas y enfocadas**:
-
-```typescript
-// ✅ Bien - Hace una cosa bien
-function validateEmail(email: string): boolean {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailRegex.test(email);
-}
-
-// ❌ Mal - Hace demasiadas cosas
-function processUser(email: string, name: string, age: number) {
-  // Valida email
-  // Valida nombre
-  // Valida edad
-  // Crea usuario
-  // Envía email
-  // Loggea evento
-  // ...50 líneas más
-}
-```
-
-**Parámetros con desestructuración**:
-
-```typescript
-// ✅ Bien - Claro qué necesita
-interface CreateUserParams {
-  email: string;
-  name: string;
-  age: number;
-}
-
-function createUser({ email, name, age }: CreateUserParams) {
-  // ...
-}
-
-// ❌ Evitar - Muchos parámetros posicionales
-function createUser(email: string, name: string, age: number, role: string, status: string) {
-  // difícil de llamar: createUser('email', 'name', 25, 'user', 'active')
-}
-```
-
-**Funciones puras cuando sea posible**:
-
-```typescript
-// ✅ Bien - Función pura
-function addTax(price: number, taxRate: number): number {
-  return price * (1 + taxRate);
-}
-
-// ❌ Mal - Modifica estado externo
-let total = 0;
-function addToTotal(price: number) {
-  total += price;  // Side effect
-}
-```
-
-### Types e Interfaces
-
-**Usar interfaces para objetos, types para uniones/intersecciones**:
-
-```typescript
-// ✅ Bien
-interface User {
-  id: string;
-  email: string;
-  name: string;
-}
-
-type UserRole = 'admin' | 'user' | 'guest';
-type UserWithRole = User & { role: UserRole };
-
-// Ambos son válidos, pero interface es más extensible
-interface ExtendedUser extends User {
-  avatar: string;
-}
-```
-
-**Evitar `any`, usar `unknown` si es necesario**:
-
-```typescript
-// ✅ Bien
-function processData(data: unknown) {
-  if (typeof data === 'string') {
-    return data.toUpperCase();
-  }
-  throw new Error('Invalid data type');
-}
-
-// ❌ Mal
-function processData(data: any) {
-  return data.toUpperCase();  // No type safety
-}
-```
-
-### Async/Await
-
-**Preferir async/await sobre callbacks**:
-
-```typescript
-// ✅ Bien
-async function fetchUserData(userId: string) {
-  try {
-    const user = await userService.findById(userId);
-    const orders = await orderService.findByUserId(userId);
-    return { user, orders };
-  } catch (error) {
-    logger.error('Error fetching user data', error);
-    throw error;
-  }
-}
-
-// ❌ Evitar (callback hell)
-function fetchUserData(userId, callback) {
-  userService.findById(userId, (err, user) => {
-    if (err) return callback(err);
-    orderService.findByUserId(userId, (err, orders) => {
-      if (err) return callback(err);
-      callback(null, { user, orders });
-    });
-  });
-}
-```
-
-### Error Handling
-
-**Errores específicos**:
-
-```typescript
-// ✅ Bien - Errores específicos
-class ValidationError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = 'ValidationError';
-  }
-}
-
-class NotFoundError extends Error {
-  constructor(resource: string, id: string) {
-    super(`${resource} with id ${id} not found`);
-    this.name = 'NotFoundError';
-  }
-}
-
-// Uso
-if (!user) {
-  throw new NotFoundError('User', userId);
-}
-```
-
-**Manejo de errores completo**:
-
-```typescript
-// ✅ Bien
-async function deleteUser(userId: string) {
-  try {
-    const user = await userRepository.findById(userId);
-    
-    if (!user) {
-      throw new NotFoundError('User', userId);
-    }
-    
-    await userRepository.delete(userId);
-    logger.info(`User ${userId} deleted successfully`);
-    
-    return { success: true };
-    
-  } catch (error) {
-    if (error instanceof NotFoundError) {
-      logger.warn(`Attempted to delete non-existent user: ${userId}`);
-      throw error;
-    }
-    
-    logger.error('Error deleting user', { userId, error });
-    throw new Error('Failed to delete user');
-  }
-}
-```
+- **Commits**: Conventional Commits (`feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:`, `perf:`).
+- **Ramas**: desde `development`; integración `development` → `preproduction` → `main`.
+- **Async**: `async/await`; nada de callbacks ni `.then()` encadenados en código nuevo.
+- **Validación**: toda entrada de usuario se valida en el borde (DTO en backend, `zod` en formularios del admin, validadores de formulario en la app).
+- **Errores**: `try/catch` en operaciones asíncronas que pueden fallar; no tragar errores sin log.
+- **Secretos**: nunca en el código ni en documentación versionada; los nombres de variables viven en `sacdia-backend/.env.example`.
+- **Textos de UI**: siempre traducibles (admin con `next-intl`, app con `easy_localization`); los cuatro locales son `es`, `en`, `fr` y `pt-BR`.
+- **Documentación**: si cambia comportamiento, se actualiza la documentación en el mismo trabajo (ver `AGENTS.md` §5).
 
 ---
 
-## React / Vue
+## 2. Backend (NestJS + Prisma)
 
-### Componentes
+### Estructura
 
-**Functional components con hooks**:
+- Un módulo por dominio en `src/<módulo>/` con `*.module.ts`, `*.controller.ts`, `*.service.ts` y `dto/`.
+- Los controllers solo traducen HTTP ↔ servicio; la lógica vive en servicios.
+- Lo transversal va en `src/common/` (guards, decorators, pipes, filters, errores, email).
 
-```typescript
-// ✅ Bien - Functional component
-import React, { useState, useEffect } from 'react';
+### Validación de entrada
 
-interface UserProfileProps {
-  userId: string;
-  onUpdate?: (user: User) => void;
-}
+- DTOs con `class-validator` + `class-transformer` (`@Type(() => Number)` para query params numéricos).
+- El pipe global es `I18nValidationPipe` con `whitelist: true`, `forbidNonWhitelisted: true` y `transform: true`, precedido por `SanitizePipe`. Un campo no declarado en el DTO provoca 400: declara todo lo que el cliente envía.
+- Paginación con `PaginationDto` (`page` desde 1, `limit` por defecto 20, máximo 100) y `createPaginatedResult` (`src/common/dto/pagination.dto.ts`).
 
-export const UserProfile: React.FC<UserProfileProps> = ({ userId, onUpdate }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-  
-  useEffect(() => {
-    loadUser();
-  }, [userId]);
-  
-  async function loadUser() {
-    try {
-      const data = await fetchUser(userId);
-      setUser(data);
-    } finally {
-      setLoading(false);
-    }
-  }
-  
-  if (loading) return <LoadingSpinner />;
-  if (!user) return <NotFound />;
-  
-  return (
-    <div className="user-profile">
-      <h1>{user.name}</h1>
-      {/* ... */}
-    </div>
-  );
-};
-```
+### Autorización
 
-**Separar lógica de presentación**:
+- `PermissionsGuard` es global y deny-by-default: cada handler nuevo declara `@Public()`, `@SkipPermissions()` o `@RequirePermissions('recurso:acción')` con su recurso de autorización. Sin eso el endpoint responde error de configuración.
+- `@GlobalRoles(...)` solo para superficies reservadas a roles de plataforma (`admin`, `super-admin`, `coordinator`).
+- Un permiso nuevo se añade a `prisma/seeds/permissions.seed.sql` y se reparte en `role-permissions.seed.sql`; después se refleja en el screen catalog del admin si afecta a una pantalla.
+- Reutilizar permisos de otro dominio rompe la frontera de concerns (ver `docs/canon/decisiones-clave.md` §16–§21).
 
-```typescript
-// ✅ Bien - Lógica en custom hook
-function useUserData(userId: string) {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-  
-  useEffect(() => {
-    fetchUser(userId)
-      .then(setUser)
-      .catch(setError)
-      .finally(() => setLoading(false));
-  }, [userId]);
-  
-  return { user, loading, error };
-}
+### Respuestas y errores
 
-// Componente solo presenta
-export const UserProfile: React.FC<Props> = ({ userId }) => {
-  const { user, loading, error } = useUserData(userId);
-  
-  if (loading) return <Loading />;
-  if (error) return <Error error={error} />;
-  if (!user) return <NotFound />;
-  
-  return <UserView user={user} />;
-};
-```
+- Éxito: `{ status: 'success', data }` (algunos endpoints de analytics usan `status: 'ok'`; no extender esa variante).
+- Errores de dominio: `throw new AppException(ErrorCode.X, HttpStatus.Y)` o sus subclases (`AppForbiddenException`, `AppConflictException`...). El filtro global traduce `errors.<CODE>` con `nestjs-i18n` y responde `{ status: 'error', code, message }`.
+- Códigos nuevos: añadirlos a `src/common/errors/error-codes.ts` y traducirlos en `src/i18n/<locale>/errors.json` para los cuatro locales.
 
-### Props
+### Datos
 
-**Desestructurar props**:
+- Prisma como única vía de acceso a datos; `$transaction` cuando una operación toca varias tablas que deben quedar consistentes.
+- Cambios de schema solo con migración Prisma (`pnpm prisma migrate dev`), nunca `db push` contra entornos compartidos.
+- Reglas de datos detalladas en `docs/steering/data-guidelines.md`.
 
-```typescript
-// ✅ Bien
-export const Button: React.FC<ButtonProps> = ({ 
-  label, 
-  onClick, 
-  variant = 'primary',
-  disabled = false 
-}) => {
-  return (
-    <button 
-      onClick={onClick} 
-      className={`btn btn-${variant}`}
-      disabled={disabled}
-    >
-      {label}
-    </button>
-  );
-};
+### Efectos secundarios
 
-// ❌ Evitar
-export const Button: React.FC<ButtonProps> = (props) => {
-  return <button onClick={props.onClick}>{props.label}</button>;
-};
-```
+- Notificaciones, invalidación realtime y logros se disparan **fire-and-forget**: el fallo del transporte no puede romper la respuesta del endpoint.
+- Trabajo pesado o diferible va a BullMQ (`emails`, `notifications`, `achievements`, `background-jobs`, `master-honors`, `certificate-import-ocr`).
 
-### State Management
+### Logs
 
-**useState para estado local simple**:
+- `Logger` de NestJS (salida `nestjs-pino`) con `new Logger(<Clase>.name)`. No usar `console.log` en código de servidor.
+- No registrar PII ni tokens.
 
-```typescript
-const [count, setCount] = useState(0);
-const [isOpen, setIsOpen] = useState(false);
-```
+### Calidad
 
-**useReducer para estado complejo**:
-
-```typescript
-interface State {
-  data: User[];
-  loading: boolean;
-  error: Error | null;
-  filter: FilterOptions;
-}
-
-type Action = 
-  | { type: 'FETCH_START' }
-  | { type: 'FETCH_SUCCESS'; payload: User[] }
-  | { type: 'FETCH_ERROR'; payload: Error }
-  | { type: 'SET_FILTER'; payload: FilterOptions };
-
-function reducer(state: State, action: Action): State {
-  switch (action.type) {
-    case 'FETCH_START':
-      return { ...state, loading: true, error: null };
-    case 'FETCH_SUCCESS':
-      return { ...state, loading: false, data: action.payload };
-    // ...
-  }
-}
-
-const [state, dispatch] = useReducer(reducer, initialState);
-```
+- Formato: Prettier (`singleQuote`, `trailingComma: all`); `pnpm run format`.
+- Lint: ESLint (`pnpm run lint`); las reglas `no-unsafe-*` están desactivadas por compatibilidad con Prisma.
+- Tests: Jest; los unitarios van junto al código (`*.spec.ts`), los e2e en `test/*.e2e-spec.ts`.
+- CI bloqueante: `prisma validate`, lint, build, tests unitarios y `pnpm run audit:security`.
 
 ---
 
-## CSS / Styling
+## 3. Admin (Next.js 16)
 
-### Nombres de Clases (si usas CSS/SCSS)
-
-**BEM o similar**:
-
-```css
-/* ✅ Bien - BEM */
-.user-card { }
-.user-card__header { }
-.user-card__title { }
-.user-card--featured { }
-
-/* ❌ Evitar - Nombres genéricos */
-.card { }
-.header { }
-.title { }
-```
-
-### CSS Modules
-
-```typescript
-// UserCard.module.css
-.container { }
-.header { }
-.title { }
-
-// UserCard.tsx
-import styles from './UserCard.module.css';
-
-<div className={styles.container}>
-  <div className={styles.header}>
-    <h2 className={styles.title}>Title</h2>
-  </div>
-</div>
-```
+- App Router: Server Components por defecto; `'use client'` solo cuando hace falta interacción o estado de navegador.
+- Llamadas a la API con el cliente de `src/lib/api/client.ts` (un archivo por recurso en `src/lib/api/`). No llamar al backend con `fetch` suelto.
+- La sesión vive en cookies httpOnly gestionadas por `src/app/api/auth/*`; el código cliente no lee tokens.
+- Toda pantalla nueva se registra en el screen catalog (`src/lib/auth/screen-catalog/screens/`) con los mismos permisos que exige el backend, y su entrada de sidebar usa el mismo id.
+- UI con componentes de `src/components/ui/` (shadcn) y Tailwind v4; reutilizar antes de crear.
+- Formularios con `react-hook-form` + `zod`.
+- Estado de servidor con TanStack Query; estado de preferencias con Zustand.
+- Textos con `next-intl`; añadir la clave a los cuatro archivos de `messages/`.
+- Tests con Vitest + Testing Library (`*.test.ts(x)` junto al código). CI: `pnpm build`, `pnpm test`, `pnpm typecheck`.
 
 ---
 
-## Base de Datos
+## 4. App móvil (Flutter)
 
-### Queries
-
-**Usar prepared statements o ORM**:
-
-```typescript
-// ✅ Bien - ORM
-const user = await prisma.user.findUnique({
-  where: { email: userEmail }
-});
-
-// ✅ Bien - Prepared statement
-const user = await db.query(
-  'SELECT * FROM users WHERE email = $1',
-  [userEmail]
-);
-
-// ❌ NUNCA - SQL injection vulnerable
-const user = await db.query(
-  `SELECT * FROM users WHERE email = '${userEmail}'`
-);
-```
-
-### Migrations
-
-```sql
--- ✅ Bien - Reversible
--- UP
-CREATE TABLE users (
-    id UUID PRIMARY KEY,
-    email VARCHAR(255) UNIQUE NOT NULL
-);
-
--- DOWN
-DROP TABLE users;
-```
+- Feature-first: `lib/features/<feature>/{data,domain,presentation}`; lo transversal en `lib/core/` y `lib/shared/`.
+- Dominio: entidades y contratos de repositorio en `domain/`; los repositorios devuelven `Either<Failure, T>` (`dartz`).
+- Estado e inyección de dependencias con Riverpod; nada de singletons globales nuevos.
+- HTTP con el `Dio` de `lib/providers/dio_provider.dart` y rutas en `lib/core/constants/api_endpoints.dart`. El interceptor añade el token.
+- Navegación con `go_router`; nombres en `lib/core/config/route_names.dart`.
+- Acceso a pantallas con `canViewScreen(screenId)` (`lib/core/authorization/`); si cambia un gate `app` en el screen catalog del admin, regenerar `test/fixtures/screen-catalog.snapshot.json`.
+- Textos con `easy_localization` (`'clave'.tr()`) en los cuatro archivos de `assets/translations/`.
+- Tokens solo en `flutter_secure_storage`.
+- CI bloqueante: `dart format --set-exit-if-changed`, `flutter analyze` y `flutter test`.
 
 ---
 
-## Testing
+## 5. Seguridad
 
-### Estructura de Tests
+Nunca:
 
-```typescript
-describe('UserService', () => {
-  // Setup
-  beforeEach(() => {
-    // Reset mocks, database, etc.
-  });
-  
-  describe('createUser', () => {
-    it('should create user with valid data', async () => {
-      // Arrange
-      const userData = { email: 'test@example.com', name: 'Test' };
-      
-      // Act
-      const user = await userService.createUser(userData);
-      
-      // Assert
-      expect(user).toBeDefined();
-      expect(user.email).toBe(userData.email);
-    });
-    
-    it('should throw ValidationError with invalid email', async () => {
-      // Arrange
-      const userData = { email: 'invalid', name: 'Test' };
-      
-      // Act & Assert
-      await expect(userService.createUser(userData))
-        .rejects
-        .toThrow(ValidationError);
-    });
-  });
-});
-```
+- desactivar `PermissionsGuard` o marcar `@Public()` un endpoint que lee datos de usuario;
+- exponer Swagger en producción ni relajar `ALLOWED_ORIGINS`;
+- guardar tokens fuera de cookies httpOnly (admin) o `flutter_secure_storage` (app);
+- reutilizar `BETTER_AUTH_SECRET` como `QR_JWT_SECRET`;
+- devolver URLs públicas de buckets privados (usar URLs firmadas).
 
-### Qué Testear
+Siempre:
 
-✅ **Testear**:
-- Lógica de negocio compleja
-- Edge cases y errores
-- Transformaciones de datos
-- Validaciones
-
-❌ **No testear excesivamente**:
-- Getters/setters triviales
-- Third-party code
-- Configuración estática
-
----
-
-## Seguridad
-
-### Never
-
-**❌ NUNCA**:
-- Hardcodear credentials
-- Confiar en input de usuario sin validar
-- Exponer stack traces al cliente
-- Usar `eval()` o `Function()` con input de usuario
-- Concatenar SQL strings
-
-### Always
-
-**✅ SIEMPRE**:
-- Validar y sanitizar inputs
-- Usar HTTPS en producción
-- Hash passwords (bcrypt, argon2)
-- Implementar rate limiting
-- Loggear eventos de seguridad
-
----
-
-## Notas para IA
-
-**Cuando escribas código**:
-
-1. **Sigue estos estándares**
-   - No inventes tu propio estilo
-   - Pregunta si algo no está claro
-
-2. **Si ves código que no sigue estándares**:
-   - Menciona la desviación
-   - Sugiere refactor si es significativo
-   - No asumas que está bien "porque ya existe"
-
-3. **Cuando refactorices**:
-   - Explica qué mejora
-   - Muestra antes/después
-   - Mantén funcionalidad idéntica
-
----
-
-**Última actualización**: [YYYY-MM-DD]
+- validar ownership o alcance territorial en el servicio cuando el permiso no basta (patrón de `AnnualFoldersService` y superficies sensibles de usuario);
+- aplicar rate limit específico (`@Throttle`) a endpoints sensibles de auth.

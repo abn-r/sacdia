@@ -9,7 +9,7 @@
 | Qué | Dónde |
 |---|---|
 | Entrega (congelada) | [entrega/SACDIA-presentacion-ejecutiva-2026-09-14.pptx](entrega/SACDIA-presentacion-ejecutiva-2026-09-14.pptx) |
-| Fuente editable | [.trabajo/contenido.json](.trabajo/contenido.json) |
+| Fuente editable | `.trabajo/contenido.json` (artefacto retirado; consultar historial git) |
 | Guía del expositor | [guia-expositor.md](guia-expositor.md) |
 | Ensayo con cuentas ficticias | [ensayo-cuentas-ficticias.md](ensayo-cuentas-ficticias.md) |
 | Concentrado de estudio | [../README.md](../README.md) |
@@ -24,7 +24,7 @@ está en [14-mapa-producto-iglesia.md](../14-mapa-producto-iglesia.md).
 |---|---|
 | Deck de venta (19 láminas, ~25–30 min) | [entrega/SACDIA-presentacion-venta-iglesia-2026-09-14.pptx](entrega/SACDIA-presentacion-venta-iglesia-2026-09-14.pptx) |
 | Guía del expositor (venta) | [guia-expositor-venta.md](guia-expositor-venta.md) |
-| Fuente editable de venta | [.trabajo/contenido-venta.json](.trabajo/contenido-venta.json) |
+| Fuente editable de venta | `.trabajo/contenido-venta.json` (artefacto retirado; consultar historial git) |
 
 No regenerar el PPTX **ejecutivo** congelado desde el mapa 14. El de venta
 sí se genera con `node crear-venta.mjs` en `.trabajo/`.

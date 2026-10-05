@@ -58,9 +58,12 @@ No hay endpoints nuevos. Estas respuestas salen de las rutas de carga por certif
 - Alta que quedaría lista, envío, reenvío y aprobación de fila o de solicitud institucional rechazan con esos códigos y no acreditan la clase.
 - `PATCH .../items/:itemId` con `mark_as_ready: true` y edad inválida no guarda la fila.
 - El mismo `PATCH` sobre una fila de clase que ya está `READY`, omitiendo `mark_as_ready` o enviándolo en `false`, guarda la corrección y deja la fila en `NEEDS_REVIEW` si la edad ya no alcanza.
-- El porcentaje de requisitos de clase es el del Campo (`local_field_class_thresholds.minimum_percent`, default 80). Una inscripción cruzada usa el Campo de su sección de origen. El detalle y el listado colectivo usan el mismo número.
+- El porcentaje de requisitos de clase es el del Campo (`local_field_class_thresholds.minimum_percent`, default 80; **pendiente de merge, PR #448 de sacdia-backend**). Una inscripción cruzada usa el Campo de su sección de origen. El detalle y el listado colectivo usan el mismo número.
 
 ## Actualizacion 2026-10-01 (Porcentaje de clase del Campo)
+
+> [!WARNING]
+> **Pendiente de merge (PR #448 de sacdia-backend).** Estas rutas viven en la rama `feat/investiture-authorization-ocr` y todavía no existen en `development`.
 
 `GET` y `PATCH /api/v1/local-fields/:localFieldId/class-thresholds/:ecclesiasticalYearId`.
 
@@ -72,6 +75,9 @@ No hay endpoints nuevos. Estas respuestas salen de las rutas de carga por certif
 - Campo o año inexistente: `CLASS_THRESHOLD_FIELD_NOT_FOUND` o `CLASS_THRESHOLD_YEAR_NOT_FOUND`.
 
 ## Actualizacion 2026-10-01 (Ventana de investidura del Campo)
+
+> [!WARNING]
+> **Pendiente de merge (PR #448 de sacdia-backend).** Estas rutas viven en la rama `feat/investiture-authorization-ocr` y todavía no existen en `development`.
 
 `GET` y `PATCH /api/v1/local-fields/:localFieldId/investiture-windows/:ecclesiasticalYearId`.
 
@@ -87,6 +93,9 @@ No hay endpoints nuevos. Estas respuestas salen de las rutas de carga por certif
 
 ## Actualizacion 2026-10-01 (Pastores del distrito)
 
+> [!WARNING]
+> **Pendiente de merge (PR #448 de sacdia-backend).** Estas rutas viven en la rama `feat/investiture-authorization-ocr` y todavía no existen en `development`.
+
 `GET` y `PATCH /api/v1/investiture-pastor-quota`. `GET` y `POST /api/v1/districts/:districtId/investiture-pastors`. `DELETE` de esa asignación por `userId`. `GET /api/v1/clubs/:clubId/investiture-authorizers`.
 
 - Sin fila, `slots` es 2 y `configured` es false. La lectura no crea la fila. `can_edit` es true solo para `super-admin`.
@@ -97,6 +106,9 @@ No hay endpoints nuevos. Estas respuestas salen de las rutas de carga por certif
 - Esta asignación no inviste, no rechaza y no pasa por `submit`, `club-approve`, `coordinator-approve`, `field-approve` ni `invest`.
 
 ## Actualizacion 2026-10-01 (Solicitud de investidura por autorización)
+
+> [!WARNING]
+> **Pendiente de merge (PR #448 de sacdia-backend).** Estas rutas viven en la rama `feat/investiture-authorization-ocr` y todavía no existen en `development`.
 
 `POST /api/v1/club-sections/:sectionId/investiture-requests`. `GET` de esa ruta con `ecclesiastical_year_id`. `POST /api/v1/investiture-requests/:requestId/people`. `DELETE .../people/:personId`. `PATCH .../dates`. Para autorizar: `GET /api/v1/investiture-requests?ecclesiastical_year_id=`, `GET /api/v1/investiture-requests/:requestId` y `POST .../resolutions`.
 
@@ -155,7 +167,7 @@ La renovación anual **no** es autoinscripción del miembro. La directiva de la 
 - Copy del banner de no inscrito: **«No inscrito este año. La directiva realiza tu inscripción»**. No hay CTA «Inscribirme».
 - `POST /api/v1/users/:userId/membership/annual-enroll` está bloqueado mientras D01 esté pendiente: **403** `ANNUAL_ENROLL_REQUIRES_DIRECTIVE`, sin efectos. No convertirlo en `pending` de post-registro.
 - D02 salto formativo AV→CQ / CQ→GM **cerrado** (R13–R14, spec 2026-09-16): la lista y el POST de continuaciones incluyen esos candidatos cuando hay edad, última clase cursada y sección destino activa. `ANNUAL_CLASS_POLICY_UNRESOLVED` queda para catálogo incompleto, edad insuficiente o sin sección destino. La última Guía Mayor no usa ese código. Clases GM con `max_duration_years > 1` siguen abiertas; no usar esta vía para GM investido/multianual.
-- Preelección de director N+1: `POST/GET/PATCH/DELETE /api/v1/clubs/:clubId/sections/:sectionId/director-designation`. POST exige `Idempotency-Key`. Reemplazo es **PATCH** `{ succession_id, version, successor_user_id }` (no PUT). Año de preelección no futuro → 400 `CLUB_DIRECTOR_PLAN_YEAR_INVALID`. Assignment/succession/update del año vigente siguen usando `CLUB_DIRECTOR_DESIGNATION_YEAR_INVALID`. Fila CRA `designated` legado no reconciliada: 409 `CLUB_DIRECTOR_DESIGNATED_UNRECONCILED`. Contrato canónico: `docs/api/ENDPOINTS-LIVE-REFERENCE.md` y handoff `docs/plans/handoffs/director-designation-admin-handoff.md`.
+- Preelección de director N+1: `POST/GET/PATCH/DELETE /api/v1/clubs/:clubId/sections/:sectionId/director-designation`. POST exige `Idempotency-Key`. Reemplazo es **PATCH** `{ succession_id, version, successor_user_id }` (no PUT). Año de preelección no futuro → 400 `CLUB_DIRECTOR_PLAN_YEAR_INVALID`. Assignment/succession/update del año vigente siguen usando `CLUB_DIRECTOR_DESIGNATION_YEAR_INVALID`. Fila CRA `designated` legado no reconciliada: 409 `CLUB_DIRECTOR_DESIGNATED_UNRECONCILED`. Contrato canónico: `docs/api/ENDPOINTS-LIVE-REFERENCE.md`.
 
 ## Actualizacion 2026-09-03 (Cursado cruzado de Guía Mayor investido)
 
@@ -256,7 +268,7 @@ El flujo administrativo de camporee separa personal operativo, agenda y scoring:
 
 ## Actualizacion 2026-08-12 (Órdenes de pago territoriales)
 
-Contrato para admin y app. Rutas completas: `docs/api/ENDPOINTS-LIVE-REFERENCE.md` §field-payment-orders. Contrato detallado para admin: `sacdia-admin/docs/plans/handoffs/field-payment-orders-admin-handoff.md`.
+Contrato para admin y app. Rutas completas: `docs/api/ENDPOINTS-LIVE-REFERENCE.md` §field-payment-orders.
 
 ### Decidir qué flujo mostrar (app)
 
@@ -285,9 +297,9 @@ Envelope estándar con `code` `FIELD_PAYMENT_ORDER_*` (i18n en los 4 locales de 
 
 ## Actualizacion 2026-08-25 (Pedidos de mercancía de camporee)
 
-Contrato para admin y app. Rutas: `docs/api/ENDPOINTS-LIVE-REFERENCE.md` §camporee orders. Feature: `docs/features/camporee-orders.md`. Handoff admin: `docs/plans/handoffs/camporee-orders-admin-handoff.md`.
+Contrato para admin y app. Rutas: `docs/api/ENDPOINTS-LIVE-REFERENCE.md` §camporee orders. Feature: `docs/features/camporee-orders.md`.
 
-**Salvedad de rama:** los controllers viven en `feat/camporee-orders` (worktree `/private/tmp/sacdia-backend-camporee-orders`). El checkout `sacdia-backend` del workspace y Neon **no** tienen schema, seeds ni estas rutas. Distinguir siempre de `/payment-orders` (inscripción/seguro).
+Integrado en `development` (`src/camporee-orders`, migración `20260824190000_camporee_orders`). Distinguir siempre de `/payment-orders` (inscripción/seguro).
 
 ### Settings (no hay GET dedicado)
 
@@ -317,7 +329,8 @@ Contrato mínimo para admin y app móvil. Fuente de verdad de rutas: `docs/api/E
 
 ### Identificación de inscripción en paths
 
-- **Participante:** las rutas de ejecución usan `/users/:userId/certifications/:certificationId/...` (no `enrollmentId` en el path).
+- **Participante (inscripción y progreso):** `/users/:userId/certifications/:certificationId/...`.
+- **Participante (requisitos, evidencias y cierre):** `/users/:userId/certification-enrollments/:enrollmentId/...`.
 - **Revisión final:** la bandeja y acciones de cierre usan `:enrollmentId` porque operan sobre filas de `users_certifications`.
 
 ### Envelope de respuesta
@@ -563,7 +576,7 @@ await secureStorage.write(AppConstants.tokenKey, data['accessToken']);
 **Next.js** (con TanStack Query):
 
 ```typescript
-// src/lib/api/services/clubs.service.ts
+// Ejemplo ilustrativo (no existe en sacdia-admin; ver src/lib/api/*.ts)
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '../client';
 
@@ -1409,7 +1422,7 @@ Future<void> uploadResource(File file) async {
 ### Next.js Tests (Vitest + React Testing Library)
 
 ```typescript
-// src/lib/api/clubs.test.ts
+// Ejemplo ilustrativo (los tests reales viven junto a src/lib/api/*.ts)
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { renderHook, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';

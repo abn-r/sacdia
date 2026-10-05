@@ -2,7 +2,11 @@
 
 **Propósito:** Documento de referencia que mapea cada servicio NestJS del backend SACDIA con las tablas de PostgreSQL (modelos Prisma) que lee o escribe. Permite responder rápidamente "¿quién toca `club_role_assignments`?" o "¿qué tablas modifica el módulo de investidura?".
 
-**Fecha de generación:** 2026-04-14
+**Fecha de generación:** 2026-04-14 (secciones A, B y D: snapshot manual)
+**Regeneración parcial:** 2026-10-04 (sección C regenerada automáticamente contra `sacdia-backend` `development`, commit `66f4ade`: 248 modelos Prisma)
+
+> [!IMPORTANT]
+> Las secciones A y B son un snapshot del 2026-04-14 y no cubren los modelos añadidos después (seguros, insumos y pedidos de camporee, órdenes de pago, certificaciones versionadas, importación de certificados, historia institucional, materiales, rankings anuales, etc.). La **sección C** es el índice vigente: cubre todos los modelos del schema de `development`. Para la descripción de cada modelo, ver [`docs/database/SCHEMA-REFERENCE.md`](../database/SCHEMA-REFERENCE.md).
 
 **Cómo mantenerlo actualizado:**
 - Cuando se agrega un nuevo servicio: agregar subsección en Sección B y actualizar Sección C.
@@ -849,118 +853,203 @@ Los modelos sin `@@map` usan el nombre del modelo como nombre físico de tabla.
 
 ## Sección C — Índice Inverso: Tabla → Servicios
 
-| Tabla | Servicios que leen | Servicios que escriben |
-|---|---|---|
-| `users` | `auth.service`, `oauth.service`, `better-auth.service`, `users.service`, `post-registration.service`, `admin-users.service`, `admin-auth.service`, `legal-representatives.service`, `rbac.service`, `authorization-context.service`, `investiture.service`, `validation.service`, `dashboard.service`, `folders.service`, `achievements/admin`, `notifications.service` | `better-auth.service` (create), `auth.service` (update), `users.service` (update) |
-| `users_pr` | `auth.service`, `oauth.service`, `post-registration.service`, `dashboard.service` | `auth.service` (upsert), `post-registration.service` (update) |
-| `session` | `admin-auth.service`, `better-auth.service` | `better-auth.service` (create, deleteMany), `admin-auth.service` (delete, deleteMany), `cleanup.service` (deleteMany) |
-| `account` | `oauth.service`, `better-auth.service` | `better-auth.service` (create, update), `oauth.service` (deleteMany) |
-| `verification` | `auth.service`, `better-auth.service` | `auth.service` (create, delete), `better-auth.service` (create, deleteMany), `admin-auth.service` (deleteMany), `cleanup.service` (deleteMany) |
-| `club_role_assignments` | `clubs.service`, `auth.service`, `investiture.service`, `validation.service`, `notifications.service`, `dashboard.service`, `membership-requests.service`, `requests.service`, `scoring-categories.service`, `member-of-month.service`, `monthly-reports.service`, `admin-reference.service`, `notifications.processor` | `clubs.service` (create, update), `membership-requests.service` (update, updateMany), `requests.service` (create vía tx) |
-| `club_sections` | `clubs.service`, `activities.service`, `finances.service`, `finance-period.service`, `inventory.service`, `units.service`, `requests.service`, `member-of-month.service`, `analytics.service`, `camporees.service` | `clubs.service` (create, update) |
-| `clubs` | `clubs.service`, `activities.service`, `finances.service`, `finance-period.service`, `units.service`, `authorization-context.service` | `clubs.service` (create, update) |
-| `club_types` | `catalogs.service`, `annual-folders.service`, `award-categories.service` | — |
-| `ecclesiastical_years` | `classes.service`, `camporees.service`, `investiture.service`, `admin-reference.service`, `catalogs.service`, `annual-folders.service`, `rankings.service`, `year-end.service`, `club-enrollments.service` | `admin-reference.service` (update — activate/deactivate) |
-| `club_enrollments` | `club-enrollments.service`, `annual-folders.service`, `monthly-reports.service`, `monthly-reports-cron.service`, `rankings.service`, `year-end.service` | `club-enrollments.service` (create, update), `year-end.service` (update vía tx) |
-| `enrollments` | `classes.service`, `investiture.service`, `validation.service`, `admin-users.service`, `certifications.service`, `analytics.service`, `dashboard.service` | `classes.service` (create vía tx), `investiture.service` (update vía tx) |
-| `class_section_progress` | `classes.service`, `evidence-review.service`, `dashboard.service`, `analytics.service` | `classes.service` (create, update), `evidence-review.service` (update vía tx), `validation.service` (vía tx) |
-| `class_module_progress` | — | `classes.service` (create vía tx implícito) |
-| `class_sections` | `classes.service`, `dashboard.service` | — |
-| `class_modules` | `classes.service` | — |
-| `classes` | `classes.service` | — |
-| `investiture_validation_history` | `investiture.service`, `analytics.service` | `investiture.service` (create vía tx) |
-| `investiture_config` | `investiture.service` | `investiture.service` (create, update) |
-| `honors` | `honors.service`, `admin-honors.service`, `admin-reference.service`, `catalogs.service` (vía join) | — |
-| `honors_categories` | `honors.service`, `admin-reference.service` | `admin-reference.service` (create, update) |
-| `master_honors` | — | — |
-| `users_honors` | `honors.service`, `honor-requirements.service`, `validation.service`, `evidence-review.service`, `dashboard.service`, `monthly-reports.service`, `analytics.service` | `honors.service` (create, update), `validation.service` (update vía tx), `evidence-review.service` (update vía tx) |
-| `honor_requirements` | `honors.service` (indirecto), `honor-requirements.service`, `admin-honors.service` | `admin-honors.service` (update, updateMany), `honor-requirements.service` (implícito vía progress) |
-| `user_honor_requirement_progress` | `honor-requirements.service` | `honor-requirements.service` (upsert vía tx) |
-| `requirement_evidence` | `honor-requirements.service` | `honor-requirements.service` (create, update) |
-| `activities` | `activities.service`, `activities-reminder.service`, `dashboard.service`, `monthly-reports.service` | `activities.service` (create, update), `activities-reminder.service` (update — reminder_sent) |
-| `activity_instances` | — | `activities.service` (updateMany, upsert) |
-| `activity_types` | `admin-reference.service`, `catalogs.service` | `admin-reference.service` (create, update) |
-| `folders` | `folders.service` | — |
-| `folders_modules` | — | — |
-| `folders_sections` | — | — |
-| `folder_assignments` | `folders.service` | `folders.service` (create, update) |
-| `folders_modules_records` | `folders.service` | — |
-| `folders_section_records` | `folders.service`, `evidence-review.service` | `evidence-review.service` (update vía tx), `validation.service` (vía tx) |
-| `evidence_files` | — | `validation.service` (vía tx), `evidence-review.service` (vía tx) |
-| `folder_templates` | `annual-folders.service` | `annual-folders.service` (create) |
-| `folder_template_sections` | `annual-folders.service` | `annual-folders.service` (create, update, delete) |
-| `annual_folders` | `annual-folders.service`, `evaluation.service`, `rankings.service`, `year-end.service` | `annual-folders.service` (create, update), `evaluation.service` (update vía tx), `year-end.service` (implícito) |
-| `annual_folder_evidences` | `annual-folders.service` | `annual-folders.service` (create, update, delete) |
-| `annual_folder_section_evaluations` | `annual-folders.service`, `evaluation.service` | `evaluation.service` (upsert vía tx) |
-| `annual_folder_section_submissions` | `annual-folders.service` | `annual-folders.service` (upsert) |
-| `award_categories` | `annual-folders.service`, `award-categories.service`, `rankings.service` | `award-categories.service` (create, update) |
-| `club_annual_rankings` | `rankings.service` | `rankings.service` (upsert vía tx) |
-| `finances` | `finances.service`, `finance-period.service`, `monthly-reports.service` | `finances.service` (create, update) |
-| `finances_categories` | `finances.service` | — |
-| `FinancePeriodClosing` (`finance_period_closings`) | `finance-period.service` | `finance-period.service` (create) |
-| `local_camporees` | `camporees.service` | `camporees.service` (create, update) |
-| `union_camporees` | `camporees.service` | `camporees.service` (create, update) |
-| `union_camporee_local_fields` | — | `camporees.service` (vía tx implícito) |
-| `camporee_clubs` | `camporees.service`, `camporee-late-approvals.service`, `analytics.service` | `camporees.service` (update), `camporee-late-approvals.service` (vía tx) |
-| `camporee_members` | `camporees.service`, `camporee-late-approvals.service`, `analytics.service` | `camporees.service` (update), `camporee-late-approvals.service` (vía tx) |
-| `camporee_payments` | `camporees.service`, `camporee-late-approvals.service`, `analytics.service` | `camporees.service` (update), `camporee-late-approvals.service` (vía tx) |
-| `member_insurances` | — | — |
-| `notification_logs` | `notifications.service` | `notifications.service` (vía tx) |
-| `notification_deliveries` | `notifications.service` | `notifications.service` (update, updateMany, vía tx) |
-| `notification_preferences` | `notification-preferences.service` | `notification-preferences.service` (upsert) |
-| `user_fcm_tokens` | `notifications.service`, `fcm-tokens.service`, `notifications.processor` | `fcm-tokens.service` (update, create, updateMany, deleteMany), `notifications.service` (updateMany — invalida tokens) |
-| `units` | `units.service` | `units.service` (create, update) |
-| `unit_members` | `units.service` | `units.service` (update, create) |
-| `weekly_records` | `units.service` | `units.service` (create/update vía tx) |
-| `weekly_record_scores` | — | `units.service` (updateMany vía tx) |
-| `scoring_categories` | `scoring-categories.service` | `scoring-categories.service` (create, update) |
-| `member_of_month` | `member-of-month.service` | `member-of-month.service` (updateMany vía tx) |
-| `certifications` | `certifications.service` | — |
-| `certification_modules` | — | — |
-| `certification_sections` | — | — |
-| `users_certifications` | `certifications.service` | `certifications.service` (create, update) |
-| `certification_module_progress` | `certifications.service` | — |
-| `certification_section_progress` | `certifications.service` | — |
-| `monthly_reports` | `monthly-reports.service`, `monthly-reports-pdf.service`, `year-end.service` | `monthly-reports.service` (create, update), `year-end.service` (update vía tx) |
-| `monthly_report_manual_data` | `monthly-reports.service` | `monthly-reports.service` (create, update) |
-| `club_transfer_requests` | `requests.service` | `requests.service` (create, update) |
-| `role_assignment_requests` | `requests.service` | `requests.service` (create, update) |
-| `validation_logs` | `validation.service`, `evidence-review.service` | `validation.service` (vía tx), `evidence-review.service` (vía tx) |
-| `resource_categories` | `resource-categories.service`, `resources.service` | `resource-categories.service` (create, update) |
-| `resources` | `resources.service`, `resource-categories.service` (count) | `resources.service` (create, update) |
-| `achievement_categories` | `achievements.service`, `admin-achievements.service` | `admin-achievements.service` (create, update) |
-| `achievements` | `achievements.service`, `admin-achievements.service`, `achievements.processor` | `admin-achievements.service` (create, update) |
-| `user_achievements` | `achievements.service`, `admin-achievements.service`, `achievements.processor` | `achievements.processor` (create, update) |
-| `achievement_event_log` | `achievements.service` (handlers), `achievements.processor` | `achievements.service` (create) |
-| `system_config` | `system-config.service`, `activities-reminder.service`, `membership-requests.service`, `monthly-reports-cron.service`, `validation.service` | `system-config.service` (update) |
-| `allergies` | `users.service`, `admin-reference.service`, `catalogs.service` | `admin-reference.service` (create, update) |
-| `diseases` | `users.service`, `admin-reference.service`, `catalogs.service` | `admin-reference.service` (create, update) |
-| `medicines` | `users.service`, `admin-reference.service`, `catalogs.service` | `admin-reference.service` (create, update) |
-| `users_allergies` | `users.service`, `admin-reference.service` (count) | `users.service` (updateMany) |
-| `users_diseases` | `users.service`, `admin-reference.service` (count) | `users.service` (updateMany) |
-| `users_medicines` | `users.service`, `admin-reference.service` (count) | `users.service` (updateMany) |
-| `emergency_contacts` | `emergency-contacts.service`, `post-registration.service` (count) | `emergency-contacts.service` (create, update, updateMany) |
-| `legal_representatives` | `legal-representatives.service`, `admin-reference.service` (count) | `legal-representatives.service` (create, update, delete) |
-| `relationship_types` | `emergency-contacts.service`, `legal-representatives.service`, `admin-reference.service`, `catalogs.service` | `admin-reference.service` (create, update) |
-| `countries` | `users.service`, `admin-geography.service`, `catalogs.service` | `admin-geography.service` (create, update) |
-| `unions` | `users.service`, `admin-geography.service`, `catalogs.service`, `camporees.service` | `admin-geography.service` (create, update) |
-| `local_fields` | `users.service`, `admin-geography.service`, `catalogs.service`, `camporees.service`, `scoring-categories.service`, `investiture.service` | `admin-geography.service` (create, update) |
-| `districts` | `admin-geography.service`, `catalogs.service` | `admin-geography.service` (create, update) |
-| `churches` | `admin-geography.service`, `catalogs.service` | `admin-geography.service` (create, update) |
-| `clubs` | `clubs.service`, `activities.service`, `finances.service`, `units.service`, `authorization-context.service`, `admin-geography.service` (vía churches) | `clubs.service` (create, update) |
-| `roles` | `clubs.service`, `rbac.service`, `requests.service`, `catalogs.service` | `rbac.service` (create implícito) |
-| `permissions` | `rbac.service` | `rbac.service` (create, update) |
-| `role_permissions` | `rbac.service` | `rbac.service` (create, update, updateMany) |
-| `users_roles` | `rbac.service`, `notifications.service`, `notifications.processor` | `rbac.service` (create, update) |
-| `users_permissions` | `rbac.service` | `rbac.service` (create, update) |
-| `role_slot_limits` | `clubs.service`, `requests.service` | — |
-| `club_ideals` | `admin-reference.service`, `catalogs.service` | — |
-| `inventory_categories` | `inventory.service` | — |
-| `club_inventory` | `inventory.service` | `inventory.service` (create, update) |
-| `inventory_history` | `inventory.service` | `inventory.service` (createMany) |
-| `error_logs` ⚠️ **DEPRECATED** | — | — |
+Regenerado el 2026-10-04 con una extracción estática: llamadas `<cliente>.<modelo>.<operación>(` en `sacdia-backend/src/**/*.ts` (sin `*.spec.ts`). Lecturas: `findUnique`, `findFirst`, `findMany`, `count`, `aggregate`, `groupBy` y variantes `OrThrow`. Escrituras: `create*`, `update*`, `upsert`, `delete*`. No detecta `include`/`select` anidados, `$queryRaw`/`$executeRaw` ni accesos dinámicos por nombre (por ejemplo, las tablas `*_translations` que escribe `TranslationService`). Las rutas son relativas a `sacdia-backend/src/`.
 
----
+| Tabla (modelo Prisma) | Archivos que leen | Archivos que escriben |
+|---|---|---|
+| `account_deletion_log` | — | `auth/account-deletion.service.ts` |
+| `accounts` (`account`) | `auth/account-deletion.service.ts`, `auth/oauth.service.ts`, `better-auth/better-auth.service.ts` | `auth/account-deletion.service.ts`, `auth/oauth.service.ts`, `better-auth/better-auth.service.ts` |
+| `achievement_categories` | `achievements/achievements.service.ts`, `achievements/admin/admin-achievements.service.ts` | `achievements/admin/admin-achievements.service.ts` |
+| `achievement_event_log` | `achievements/handlers/collection.handler.ts`, `achievements/handlers/compound.handler.ts`, `achievements/handlers/milestone.handler.ts`, `achievements/handlers/streak.handler.ts`, `achievements/handlers/threshold.handler.ts` | `achievements/achievements.processor.ts`, `achievements/achievements.service.ts` |
+| `achievements` | `achievements/achievements.processor.ts`, `achievements/achievements.service.ts`, `achievements/admin/admin-achievements.service.ts` | `achievements/admin/admin-achievements.service.ts` |
+| `activities` | `activities/activities-reminder.service.ts`, `activities/activities.service.ts`, `admin/admin-reference.service.ts`, `annual-reports/annual-reports.service.ts`, `clubs/clubs.service.ts`, `common/guards/permissions.guard.ts`, `dashboard/dashboard.service.ts`, `monthly-reports/monthly-reports.service.ts`, `qr/qr.service.ts`, `quarterly-reports/quarterly-reports.service.ts` | `activities/activities-reminder.service.ts`, `activities/activities.service.ts`, `qr/qr.service.ts` |
+| `activity_instances` | — | `activities/activities.service.ts` |
+| `activity_series` | `activities/activities.service.ts`, `common/guards/permissions.guard.ts` | `activities/activities.service.ts` |
+| `activity_series_sections` | — | `activities/activities.service.ts` |
+| `activity_types` | `admin/admin-reference.service.ts`, `catalogs/catalogs.service.ts` | `admin/admin-reference.service.ts` |
+| `allergies` | `admin/admin-reference.service.ts`, `catalogs/catalogs.service.ts`, `users/users.service.ts` | `admin/admin-reference.service.ts` |
+| `annual_folder_evidences` | `annual-folders/annual-folders.service.ts` | `annual-folders/annual-folders.service.ts` |
+| `annual_folder_section_evaluations` | `annual-folders/__tests__/confirm-union.e2e-spec.ts`, `annual-folders/annual-folders.service.ts`, `annual-folders/evaluation.service.ts` | `annual-folders/__tests__/confirm-union.e2e-spec.ts`, `annual-folders/annual-folders.service.ts`, `annual-folders/evaluation.service.ts` |
+| `annual_folder_section_submissions` | `annual-folders/annual-folders.service.ts` | `annual-folders/annual-folders.service.ts` |
+| `annual_folders` | `annual-folders/annual-folders.service.ts`, `annual-folders/evaluation.service.ts`, `annual-folders/rankings.service.ts`, `annual-folders/score-calculators/folder-score.ts`, `rankings/annual-ranking-progress/annual-ranking-config.service.ts`, `rankings/annual-ranking-progress/annual-ranking-progress.service.ts`, `year-end/year-end.service.ts` | `annual-folders/__tests__/confirm-union.e2e-spec.ts`, `annual-folders/annual-folders.service.ts`, `annual-folders/evaluation.service.ts`, `annual-folders/rankings.service.ts`, `year-end/year-end.service.ts` |
+| `annual_ranking_axis_configs` | — | `rankings/annual-ranking-progress/annual-ranking-config.service.ts` |
+| `annual_ranking_component_configs` | — | `rankings/annual-ranking-progress/annual-ranking-config.service.ts` |
+| `annual_ranking_configs` | `annual-folders/annual-folders.service.ts`, `rankings/annual-ranking-progress/annual-ranking-config.service.ts` | `rankings/annual-ranking-progress/annual-ranking-config.service.ts` |
+| `annual_reports` | `annual-reports/annual-reports-pdf.service.ts`, `annual-reports/annual-reports.service.ts` | `annual-reports/annual-reports.service.ts` |
+| `audit_logs` | `audit-logs/audit-logs.service.ts`, `audit-logs/critical-audit-writer.service.ts`, `rbac/global-user-role-write.service.ts` | `audit-logs/audit-logs.service.ts`, `audit-logs/critical-audit-writer.service.ts` |
+| `authorization_context_versions` | `common/authorization/authorization-context-version.service.ts` | `common/authorization/authorization-context-version.service.ts` |
+| `award_categories` | `annual-folders/award-categories.service.ts`, `annual-folders/rankings.service.ts` | `annual-folders/award-categories.service.ts` |
+| `camporee_clubs` | `analytics/analytics.service.ts`, `annual-folders/annual-folders.service.ts`, `camporee-events/camporee-events.service.ts`, `camporee-orders/eligibility.service.ts`, `camporee-scoring/camporee-scoring.service.ts`, `camporee-supplies/plans.service.ts`, `camporees/camporee-late-approvals.service.ts`, `camporees/camporees.service.ts`, `field-payment-orders/fulfillment/camporee-fulfillment.service.ts` | `camporees/camporee-late-approvals.service.ts`, `camporees/camporees.service.ts` |
+| `camporee_event_honors` | `camporee-events/camporee-events.service.ts` | `camporee-events/camporee-events.service.ts` |
+| `camporee_event_judge_assignments` | `camporee-scoring/camporee-scoring.service.ts`, `camporees/camporees.service.ts` | `camporee-scoring/camporee-scoring.service.ts` |
+| `camporee_event_rubrics` | `camporee-events/camporee-events.service.ts`, `camporee-scoring/camporee-scoring.service.ts` | `camporee-events/camporee-events.service.ts`, `camporee-scoring/camporee-scoring.service.ts` |
+| `camporee_event_schedule_blocks` | `camporee-events/camporee-events.service.ts` | `camporee-events/camporee-events.service.ts` |
+| `camporee_event_score_submission_items` | — | `camporee-scoring/camporee-scoring.service.ts` |
+| `camporee_event_score_submissions` | `camporee-scoring/camporee-scoring.service.ts` | `camporee-scoring/camporee-scoring.service.ts` |
+| `camporee_event_section_results` | `camporee-scoring/camporee-scoring.service.ts`, `camporees/camporees.service.ts` | `camporee-scoring/camporee-scoring.service.ts` |
+| `camporee_event_staff_assignments` | `camporee-events/camporee-events.service.ts` | `camporee-events/camporee-events.service.ts`, `camporee-staff/camporee-staff.service.ts` |
+| `camporee_event_template_rubrics` | — | `camporee-event-templates/camporee-event-templates.service.ts` |
+| `camporee_event_templates` | `camporee-event-templates/camporee-event-templates.service.ts`, `camporee-events/camporee-events.service.ts` | `camporee-event-templates/camporee-event-templates.service.ts` |
+| `camporee_event_types` | `admin/admin-camporee-event-types.service.ts`, `camporee-event-templates/camporee-event-templates.service.ts`, `camporee-events/camporee-events.service.ts` | `admin/admin-camporee-event-types.service.ts` |
+| `camporee_events` | `admin/admin-camporee-event-types.service.ts`, `camporee-events/camporee-events.service.ts`, `camporee-scoring/camporee-scoring.service.ts`, `common/guards/permissions.guard.ts` | `camporee-events/camporee-events.service.ts`, `camporee-scoring/camporee-scoring.service.ts` |
+| `camporee_judges` | `camporee-scoring/camporee-scoring.service.ts` | `camporee-scoring/camporee-scoring.service.ts` |
+| `camporee_members` | `analytics/analytics.service.ts`, `camporee-orders/eligibility.service.ts`, `camporees/camporee-late-approvals.service.ts`, `camporees/camporees.service.ts`, `field-payment-orders/fulfillment/camporee-fulfillment.service.ts`, `rankings/member-rankings/member-rankings.service.ts` | `camporees/camporee-late-approvals.service.ts`, `camporees/camporees.service.ts`, `field-payment-orders/fulfillment/camporee-fulfillment.service.ts` |
+| `camporee_order_lines` | `camporee-orders/catalog.service.ts`, `camporee-orders/distribution.service.ts` | `camporee-orders/distribution.service.ts` |
+| `camporee_order_offerings` | `camporee-orders/camporee-orders.service.ts`, `camporee-orders/offerings.service.ts` | `camporee-orders/offerings.service.ts` |
+| `camporee_order_product_options` | `camporee-orders/catalog.service.ts` | `camporee-orders/catalog.service.ts` |
+| `camporee_order_products` | `camporee-orders/catalog.service.ts`, `camporee-orders/offerings.service.ts` | `camporee-orders/catalog.service.ts` |
+| `camporee_order_proofs` | `camporee-orders/camporee-orders.service.ts`, `camporee-orders/proof.service.ts` | `camporee-orders/camporee-orders.service.ts`, `camporee-orders/proof.service.ts` |
+| `camporee_orders` | `camporee-orders/camporee-orders.service.ts`, `payment-obligations/payment-obligations.service.ts` | `camporee-orders/camporee-orders.service.ts`, `camporee-orders/proof.service.ts` |
+| `camporee_payments` | `analytics/analytics.service.ts`, `camporees/camporee-late-approvals.service.ts`, `camporees/camporees.service.ts` | `camporees/camporee-late-approvals.service.ts`, `camporees/camporees.service.ts`, `field-payment-orders/fulfillment/camporee-fulfillment.service.ts` |
+| `camporee_staff_members` | `camporee-staff/camporee-staff.service.ts` | `camporee-staff/camporee-staff.service.ts` |
+| `camporee_supply_deliveries` | — | `camporee-supplies/plans.service.ts` |
+| `camporee_supply_lines` | `camporee-supplies/plans.service.ts` | `camporee-supplies/plans.service.ts` |
+| `camporee_supply_payment_docs` | `camporee-supplies/plans.service.ts`, `payment-obligations/payment-obligations.service.ts` | `camporee-supplies/plans.service.ts` |
+| `camporee_supply_plan_audits` | — | `camporee-supplies/plans.service.ts` |
+| `camporee_supply_plans` | `camporee-supplies/config.service.ts`, `camporee-supplies/plans.service.ts` | `camporee-supplies/plans.service.ts` |
+| `camporee_supply_products` | `camporee-supplies/config.service.ts`, `camporee-supplies/plans.service.ts` | `camporee-supplies/config.service.ts` |
+| `camporee_supply_slots` | `camporee-supplies/config.service.ts`, `camporee-supplies/plans.service.ts` | `camporee-supplies/config.service.ts` |
+| `camporee_venues` | `camporee-venues/camporee-venues.service.ts`, `common/guards/permissions.guard.ts` | `camporee-venues/camporee-venues.service.ts` |
+| `certificate_bulk_import_batches` | `certificate-bulk-imports/admin-certificate-bulk-imports.service.ts`, `certificate-bulk-imports/certificate-bulk-imports.service.ts`, `certificate-bulk-imports/certificate-import-files.service.ts` | `certificate-bulk-imports/admin-certificate-bulk-imports.service.ts`, `certificate-bulk-imports/certificate-bulk-imports-application.service.ts`, `certificate-bulk-imports/certificate-bulk-imports.service.ts` |
+| `certificate_bulk_import_files` | `certificate-bulk-imports/certificate-bulk-imports.service.ts`, `certificate-bulk-imports/certificate-import-files.service.ts`, `certificate-bulk-imports/institutional-certificate-requests.service.ts` | `certificate-bulk-imports/certificate-import-files.service.ts`, `certificate-bulk-imports/institutional-certificate-requests.service.ts` |
+| `certificate_bulk_import_item_events` | — | `certificate-bulk-imports/admin-certificate-bulk-imports.service.ts`, `certificate-bulk-imports/certificate-bulk-imports-application.service.ts`, `certificate-bulk-imports/certificate-bulk-imports.service.ts` |
+| `certificate_bulk_import_items` | `certificate-bulk-imports/admin-certificate-bulk-imports.service.ts`, `certificate-bulk-imports/certificate-bulk-imports-application.service.ts`, `certificate-bulk-imports/certificate-bulk-imports.service.ts`, `certificate-bulk-imports/certificate-import-files.service.ts`, `classes/classes.service.ts` | `certificate-bulk-imports/admin-certificate-bulk-imports.service.ts`, `certificate-bulk-imports/certificate-bulk-imports-application.service.ts`, `certificate-bulk-imports/certificate-bulk-imports.service.ts` |
+| `certification_closeout_evidences` | `certifications/closeout/certification-closeout.service.ts` | `certifications/closeout/certification-closeout.service.ts` |
+| `certification_component_responses` | `certifications/requirements/certification-requirements.service.ts`, `certifications/review/certification-review.service.ts` | `certifications/evidence/certification-evidence.service.ts`, `certifications/requirements/certification-requirements.service.ts` |
+| `certification_eligibility_rules` | `certifications/definitions/certification-definitions.service.ts`, `certifications/eligibility/certification-eligibility.service.ts` | `certifications/definitions/certification-definitions.service.ts` |
+| `certification_evidences` | `certifications/evidence/certification-evidence.service.ts`, `certifications/review/certification-review.service.ts` | `certifications/evidence/certification-evidence.service.ts` |
+| `certification_module_progress` | `certifications/certifications.service.ts` | `certifications/certifications.service.ts` |
+| `certification_modules` | `certifications/certifications.service.ts`, `certifications/definitions/certification-definitions.service.ts` | `certifications/definitions/certification-definitions.service.ts` |
+| `certification_requirement_components` | — | `certifications/definitions/certification-definitions.service.ts` |
+| `certification_review_events` | `certifications/review/certification-review.service.ts` | `certifications/closeout/certification-closeout.service.ts`, `certifications/requirements/certification-requirements.service.ts`, `certifications/review/certification-review.service.ts` |
+| `certification_section_progress` | `certifications/certifications.service.ts`, `certifications/closeout/certification-closeout.service.ts`, `certifications/evidence/certification-evidence.service.ts`, `certifications/requirements/certification-requirements.service.ts`, `certifications/review/certification-review.service.ts` | `certifications/certifications.service.ts`, `certifications/evidence/certification-evidence.service.ts`, `certifications/requirements/certification-requirements.service.ts`, `certifications/review/certification-review.service.ts` |
+| `certification_sections` | `certifications/certifications.service.ts`, `certifications/closeout/certification-closeout.service.ts`, `certifications/evidence/certification-evidence.service.ts`, `certifications/requirements/certification-requirements.service.ts`, `certifications/review/certification-review.service.ts` | `certifications/definitions/certification-definitions.service.ts` |
+| `certification_versions` | `certifications/certifications.service.ts`, `certifications/definitions/certification-definitions.service.ts`, `certifications/eligibility/certification-eligibility.service.ts` | `certifications/definitions/certification-definitions.service.ts` |
+| `certifications` | `certifications/certifications.service.ts`, `certifications/definitions/certification-definitions.service.ts` | `certifications/definitions/certification-definitions.service.ts` |
+| `churches` | `admin/admin-geography.service.ts`, `catalogs/catalogs.service.ts`, `common/authorization/actor-territory-scope.ts` | `admin/admin-geography.service.ts` |
+| `class_counselor_assignments` | `classes/class-counselor-assignments.service.ts`, `classes/class-progress-access.service.ts`, `classes/class-progress-scope.service.ts`, `common/guards/permissions.guard.ts`, `year-cut/year-cut.service.ts` | `classes/class-counselor-assignments.service.ts`, `year-cut/year-cut.service.ts` |
+| `class_honors` | `admin/admin-phase-e-catalogs.service.ts`, `classes/classes.service.ts` | `admin/admin-phase-e-catalogs.service.ts`, `honors/adventurer-specialties-importer.ts` |
+| `class_module_progress` | `classes/classes.service.ts` | `classes/classes.service.ts` |
+| `class_modules` | `admin/admin-phase-e-catalogs.service.ts`, `evidence-review/evidence-review.service.ts` | `admin/admin-phase-e-catalogs.service.ts` |
+| `class_prerequisites` | `admin/admin-phase-e-catalogs.service.ts`, `classes/class-enrollment-policy.service.ts`, `classes/classes.service.ts` | `admin/admin-phase-e-catalogs.service.ts` |
+| `class_section_progress` | `analytics/analytics.service.ts`, `classes/class-progress-scope.service.ts`, `classes/class-requirement-eligibility.service.ts`, `classes/classes.service.ts`, `data-export/data-export.service.ts`, `evidence-review/evidence-review.service.ts` | `classes/classes.service.ts`, `evidence-review/evidence-review.service.ts` |
+| `class_sections` | `admin/admin-phase-e-catalogs.service.ts`, `classes/class-progress-scope.service.ts`, `classes/class-requirement-eligibility.service.ts`, `classes/classes.service.ts`, `evidence-review/evidence-review.service.ts` | `admin/admin-phase-e-catalogs.service.ts` |
+| `classes` | `activities/activities.service.ts`, `admin/admin-phase-e-catalogs.service.ts`, `annual-folders/rankings.service.ts`, `annual-membership/annual-membership.service.ts`, `certificate-bulk-imports/certificate-bulk-imports-application.service.ts`, `certificate-bulk-imports/certificate-bulk-imports.service.ts`, `certificate-bulk-imports/institutional-certificate-requests.service.ts`, `classes/class-counselor-assignments.service.ts`, `classes/class-enrollment-policy.service.ts`, `classes/class-enrollment-writer.service.ts`, `classes/class-progress-scope.service.ts`, `classes/classes.service.ts`, `classes/next-class.resolver.ts`, `common/services/class-assignment-resolver.service.ts`, `honors/adventurer-specialties-importer.ts`, `post-registration/post-registration.service.ts` | `admin/admin-phase-e-catalogs.service.ts` |
+| `club_annual_rankings` | `annual-folders/rankings.service.ts`, `annual-reports/annual-reports.service.ts`, `rankings/annual-ranking-progress/annual-rankings.service.ts` | `annual-folders/rankings.service.ts` |
+| `club_enrollments` | `analytics/local-field-dashboard.service.ts`, `annual-folders/annual-folders.service.ts`, `annual-folders/rankings.service.ts`, `annual-reports/annual-reports.service.ts`, `club-enrollments/club-enrollments.service.ts`, `common/guards/permissions.guard.ts`, `monthly-reports/monthly-reports.service.ts`, `rankings/annual-ranking-progress/annual-ranking-progress.service.ts`, `year-end/year-end.service.ts` | `annual-folders/__tests__/confirm-union.e2e-spec.ts`, `club-enrollments/club-enrollments.service.ts`, `year-end/year-end.service.ts` |
+| `club_ideals` | `admin/admin-reference.service.ts`, `catalogs/catalogs.service.ts` | `admin/admin-reference.service.ts` |
+| `club_inventory` | `common/guards/permissions.guard.ts`, `inventory/inventory.service.ts` | `inventory/inventory.service.ts` |
+| `club_role_assignments` | `activities/activities-reminder.service.ts`, `activities/activities.service.ts`, `admin/admin-reference.service.ts`, `annual-folders/annual-folders.service.ts`, `annual-membership/annual-membership-policy.service.ts`, `annual-membership/annual-membership.service.ts`, `annual-reports/annual-reports.service.ts`, `auth/auth.service.ts`, `camporees/camporees.service.ts`, `certifications/eligibility/eligibility-rule-handlers.ts`, `classes/class-counselor-assignments.service.ts`, `classes/class-progress-access.service.ts`, `classes/class-progress-scope.service.ts`, `classes/class-requirement-eligibility.service.ts`, `clubs/clubs.service.ts`, `clubs/director-designation.service.ts`, `common/guards/club-roles.guard.ts`, `common/guards/permissions.guard.ts`, `coordination/coordination.service.ts`, `data-export/data-export.service.ts`, `field-payment-orders/fulfillment/camporee-fulfillment.service.ts`, `field-payment-orders/fulfillment/insurance-fulfillment.service.ts`, `field-payment-orders/insurance-reassignments.service.ts`, `honors/honor-validation-workflow.service.ts`, `honors/honors.service.ts`, `honors/master-honors-evaluator.service.ts`, `honors/master-honors.service.ts`, `insurance/insurance.service.ts`, `investiture/investiture.service.ts`, `member-of-month/member-of-month.service.ts`, `membership-requests/membership-requests.service.ts`, `monthly-reports/monthly-reports.service.ts`, `notifications/notifications.processor.ts`, `notifications/notifications.service.ts`, `post-registration/post-registration.service.ts`, `qr/qr.service.ts`, `quarterly-reports/quarterly-reports.service.ts`, `rankings/member-rankings/services/enrollment-club-resolver.service.ts`, `rbac/rbac.service.ts`, `requests/requests.service.ts`, `scoring-categories/scoring-categories.service.ts`, `units/units.service.ts`, `validation/validation.service.ts`, `year-cut/year-cut.service.ts` | `annual-membership/annual-membership-policy.service.ts`, `annual-membership/annual-membership.service.ts`, `clubs/clubs.service.ts`, `membership-requests/membership-requests.service.ts`, `post-registration/post-registration.service.ts`, `requests/requests.service.ts`, `year-cut/year-cut.service.ts` |
+| `club_sections` | `activities/activities.service.ts`, `admin/admin-reference.service.ts`, `annual-folders/rankings.service.ts`, `annual-membership/annual-membership-policy.service.ts`, `annual-membership/annual-membership.service.ts`, `annual-reports/annual-reports.service.ts`, `camporee-orders/camporee-orders.service.ts`, `camporees/camporees.service.ts`, `classes/class-counselor-assignments.service.ts`, `classes/class-progress-scope.service.ts`, `classes/next-class.resolver.ts`, `club-enrollments/club-enrollments.service.ts`, `clubs/clubs.service.ts`, `clubs/director-designation.service.ts`, `common/authorization/local-field-timezone.resolver.ts`, `common/guards/permissions.guard.ts`, `coordination/coordination.service.ts`, `field-payment-orders/field-payment-orders.service.ts`, `field-payment-orders/fulfillment/camporee-fulfillment.service.ts`, `field-payment-orders/fulfillment/insurance-fulfillment.service.ts`, `field-payment-orders/insurance-reassignments.service.ts`, `finances/finance-period.service.ts`, `finances/finances.service.ts`, `insurance/insurance-purchases.service.ts`, `insurance/insurance.service.ts`, `inventory/inventory.service.ts`, `materials/orders/orders.service.ts`, `member-of-month/member-of-month-cron.service.ts`, `member-of-month/member-of-month.service.ts`, `notifications/notifications.service.ts`, `post-registration/post-registration.service.ts`, `quarterly-reports/quarterly-reports.service.ts`, `rankings/annual-ranking-progress/annual-ranking-progress.service.ts`, `rankings/section-rankings/section-rankings.service.ts`, `requests/requests.service.ts`, `units/units.service.ts` | `annual-folders/__tests__/confirm-union.e2e-spec.ts`, `clubs/clubs.service.ts` |
+| `club_transfer_requests` | `annual-membership/annual-membership-policy.service.ts`, `requests/requests.service.ts` | `requests/requests.service.ts` |
+| `club_types` | `admin/admin-reference.service.ts`, `analytics/local-field-dashboard.service.ts`, `annual-folders/annual-folders.service.ts`, `annual-folders/award-categories.service.ts`, `annual-membership/annual-membership-policy.service.ts`, `annual-membership/annual-membership.service.ts`, `catalogs/catalogs.service.ts`, `classes/classes.service.ts`, `classes/next-class.resolver.ts`, `clubs/clubs.service.ts`, `coordination/coordination.service.ts`, `honors/adventurer-specialties-importer.ts`, `materials/catalog/catalog.service.ts`, `materials/inventory/inventory.service.ts`, `resources/resources.service.ts`, `year-cut/year-cut.service.ts` | `admin/admin-reference.service.ts` |
+| `club_year_transitions` | `common/services/club-cycle-readiness.service.ts`, `year-cut/year-cut.service.ts` | `year-cut/year-cut.service.ts` |
+| `clubs` | `activities/activities.service.ts`, `analytics/local-field-dashboard.service.ts`, `annual-folders/rankings.service.ts`, `annual-reports/annual-reports.service.ts`, `camporee-orders/camporee-orders.service.ts`, `clubs/clubs.service.ts`, `field-payment-orders/field-payment-orders.service.ts`, `field-payment-orders/fulfillment/camporee-fulfillment.service.ts`, `finances/finance-period.service.ts`, `finances/finances.service.ts`, `materials/shared/actor-local-field.ts`, `quarterly-reports/quarterly-reports.service.ts`, `units/units.service.ts` | `clubs/clubs.service.ts` |
+| `coordination_zone_districts` | `coordination/coordination.service.ts` | `coordination/coordination.service.ts` |
+| `coordination_zones` | `coordination/coordination.service.ts` | `coordination/coordination.service.ts` |
+| `coordinator_assignments` | `coordination/coordination.service.ts` | `coordination/coordination.service.ts` |
+| `countries` | `admin/admin-geography.service.ts`, `catalogs/catalogs.service.ts`, `users/users.service.ts` | `admin/admin-geography.service.ts` |
+| `cron_run_log` | `analytics/cron-runs.service.ts`, `common/services/cron-alert.service.ts` | `common/services/cron-run-logger.service.ts` |
+| `data_export_requests` | `data-export/data-export.service.ts` | `data-export/data-export.service.ts` |
+| `director_succession_plans` | `clubs/director-designation.service.ts`, `year-cut/year-cut.service.ts` | `clubs/director-designation.service.ts`, `year-cut/year-cut.service.ts` |
+| `diseases` | `admin/admin-reference.service.ts`, `catalogs/catalogs.service.ts`, `users/users.service.ts` | `admin/admin-reference.service.ts` |
+| `districts` | `admin/admin-geography.service.ts`, `catalogs/catalogs.service.ts`, `common/authorization/actor-territory-scope.ts`, `coordination/coordination.service.ts` | `admin/admin-geography.service.ts` |
+| `divisions` | `admin/admin-phase-e-catalogs.service.ts`, `analytics/operations-dashboard-scope.service.ts`, `honors/master-honor-rule-importer.ts` | — |
+| `ecclesiastical_years` | `activities/activities-reminder.service.ts`, `activities/activities.service.ts`, `admin/admin-reference.service.ts`, `admin/admin-users.service.ts`, `analytics/local-field-dashboard.service.ts`, `analytics/operations-dashboard.repository.ts`, `annual-folders/annual-folders.service.ts`, `annual-folders/rankings.service.ts`, `annual-reports/annual-reports-cron.service.ts`, `annual-reports/annual-reports.service.ts`, `camporees/camporees.service.ts`, `catalogs/catalogs.service.ts`, `certificate-bulk-imports/admin-certificate-bulk-imports.service.ts`, `certificate-bulk-imports/certificate-bulk-imports-application.service.ts`, `certificate-bulk-imports/certificate-import-year-resolver.service.ts`, `certificate-bulk-imports/institutional-certificate-requests.service.ts`, `classes/class-counselor-assignments.service.ts`, `classes/class-progress-scope.service.ts`, `classes/classes.service.ts`, `classes/next-class.resolver.ts`, `clubs/director-designation.service.ts`, `common/services/ecclesiastical-year.service.ts`, `finances/finance-period.service.ts`, `finances/finances.service.ts`, `insurance/insurance-config.service.ts`, `investiture/investiture.service.ts`, `post-registration/post-registration.service.ts`, `quarterly-reports/quarterly-reports.service.ts`, `rankings/annual-ranking-progress/annual-ranking-progress.service.ts`, `rankings/annual-ranking-progress/annual-rankings.service.ts`, `rankings/member-rankings/member-rankings.service.ts`, `rankings/member-rankings/services/camporee-score.service.ts`, `requests/requests.service.ts`, `year-end/year-end.service.ts` | `admin/admin-reference.service.ts`, `year-end/year-end.service.ts` |
+| `emergency_contacts` | `emergency-contacts/emergency-contacts.service.ts`, `post-registration/post-registration.service.ts`, `qr/qr.service.ts` | `emergency-contacts/emergency-contacts.service.ts` |
+| `enrollment_ranking_weights` (`EnrollmentRankingWeight`) | `rankings/member-ranking-weights/member-ranking-weights.service.ts`, `rankings/member-rankings/services/enrollment-weights-resolver.service.ts` | `rankings/member-ranking-weights/member-ranking-weights.service.ts` |
+| `enrollment_rankings` (`EnrollmentRanking`) | `annual-folders/rankings.service.ts`, `rankings/member-rankings/member-rankings.service.ts`, `rankings/section-rankings/section-rankings.service.ts`, `rankings/section-rankings/services/section-aggregation.service.ts` | `annual-folders/rankings.service.ts` |
+| `enrollments` | `activities/activities-reminder.service.ts`, `activities/activities.service.ts`, `admin/admin-users.service.ts`, `analytics/analytics.service.ts`, `annual-folders/rankings.service.ts`, `annual-membership/annual-membership.service.ts`, `certificate-bulk-imports/admin-certificate-bulk-imports.service.ts`, `certificate-bulk-imports/certificate-bulk-imports-application.service.ts`, `certifications/eligibility/eligibility-rule-handlers.ts`, `classes/class-counselor-assignments.service.ts`, `classes/class-enrollment-policy.service.ts`, `classes/class-enrollment-writer.service.ts`, `classes/class-progress-access.service.ts`, `classes/class-progress-scope.service.ts`, `classes/class-requirement-eligibility.service.ts`, `classes/classes.service.ts`, `classes/next-class.resolver.ts`, `clubs/club-role-eligibility.service.ts`, `clubs/clubs.service.ts`, `common/guards/club-roles.guard.ts`, `common/guards/permissions.guard.ts`, `investiture/investiture.service.ts`, `post-registration/post-registration.service.ts`, `qr/qr.service.ts`, `rankings/member-rankings/member-rankings.service.ts`, `rankings/member-rankings/services/class-score.service.ts`, `rankings/member-rankings/services/enrollment-club-resolver.service.ts`, `rankings/member-rankings/services/investiture-score.service.ts`, `rankings/member-rankings/services/member-composite-score.service.ts`, `validation/validation.service.ts` | `certificate-bulk-imports/certificate-bulk-imports-application.service.ts`, `classes/class-enrollment-writer.service.ts`, `classes/classes.service.ts`, `investiture/investiture.service.ts`, `post-registration/post-registration.service.ts`, `validation/validation.service.ts` |
+| `evidence_files` | `classes/classes.service.ts`, `data-export/data-export.service.ts`, `honors/honor-validation-workflow.service.ts` | `certificate-bulk-imports/certificate-bulk-imports-application.service.ts`, `classes/classes.service.ts` |
+| `field_payment_order_configs` | `camporee-orders/camporee-orders.service.ts`, `field-payment-orders/field-payment-order-configs.service.ts`, `field-payment-orders/field-payment-orders.service.ts` | `field-payment-orders/field-payment-order-configs.service.ts` |
+| `field_payment_order_lines` | — | `field-payment-orders/field-payment-orders.service.ts`, `field-payment-orders/fulfillment/camporee-fulfillment.service.ts`, `field-payment-orders/fulfillment/insurance-fulfillment.service.ts` |
+| `field_payment_order_proofs` | `field-payment-orders/field-payment-order-proof.service.ts`, `field-payment-orders/field-payment-orders.service.ts` | `field-payment-orders/field-payment-order-proof.service.ts`, `field-payment-orders/field-payment-orders.service.ts` |
+| `field_payment_orders` | `field-payment-orders/field-payment-orders.service.ts`, `payment-obligations/payment-obligations.service.ts` | `field-payment-orders/field-payment-order-proof.service.ts`, `field-payment-orders/field-payment-orders.service.ts` |
+| `finance_period_closings` (`FinancePeriodClosing`) | `finances/finance-period.service.ts`, `finances/finances.service.ts` | `finances/finance-period.service.ts` |
+| `finances` | `annual-reports/annual-reports.service.ts`, `common/guards/permissions.guard.ts`, `finances/finance-period.service.ts`, `finances/finances.service.ts`, `quarterly-reports/quarterly-reports.service.ts` | `finances/finances.service.ts` |
+| `finances_categories` | `admin/admin-phase-e-catalogs.service.ts`, `finances/finances.service.ts` | `admin/admin-phase-e-catalogs.service.ts` |
+| `folder_template_sections` | `annual-folders/__tests__/confirm-union.e2e-spec.ts`, `annual-folders/annual-folders.service.ts`, `annual-folders/evaluation.service.ts` | `annual-folders/annual-folders.service.ts` |
+| `folder_templates` | `annual-folders/__tests__/confirm-union.e2e-spec.ts`, `annual-folders/annual-folders.service.ts` | `annual-folders/annual-folders.service.ts` |
+| `hierarchy_contexts` | `annual-folders/rankings.service.ts`, `rankings/member-rankings/member-rankings.service.ts` | — |
+| `honor_club_types` | — | `honors/adventurer-specialties-importer.ts` |
+| `honor_requirements` | `admin/admin-honors.service.ts`, `evidence-review/evidence-review.service.ts`, `honors/honor-requirements.service.ts`, `honors/honor-validation-workflow.service.ts` | `admin/admin-honors.service.ts`, `honors/adventurer-specialties-importer.ts` |
+| `honors` | `admin/admin-honors.service.ts`, `admin/admin-phase-e-catalogs.service.ts`, `admin/admin-reference.service.ts`, `camporee-events/camporee-events.service.ts`, `certificate-bulk-imports/certificate-bulk-imports.service.ts`, `honors/adventurer-specialties-importer.ts`, `honors/honor-requirements.service.ts`, `honors/honors.service.ts`, `honors/master-honor-rule-importer.ts` | `admin/admin-phase-e-catalogs.service.ts`, `honors/adventurer-specialties-importer.ts` |
+| `honors_categories` | `admin/admin-phase-e-catalogs.service.ts`, `admin/admin-reference.service.ts`, `honors/honors.service.ts`, `honors/master-honor-rule-importer.ts` | `admin/admin-reference.service.ts`, `honors/adventurer-specialties-importer.ts` |
+| `institutional_certificate_request_events` | — | `certificate-bulk-imports/institutional-certificate-requests.service.ts` |
+| `institutional_certificate_requests` | `certificate-bulk-imports/institutional-certificate-requests.service.ts` | `certificate-bulk-imports/institutional-certificate-requests.service.ts` |
+| `insurance_assignments` | `field-payment-orders/fulfillment/camporee-fulfillment.service.ts`, `field-payment-orders/fulfillment/insurance-fulfillment.service.ts`, `field-payment-orders/insurance-reassignments.service.ts`, `insurance/insurance.service.ts` | `field-payment-orders/fulfillment/insurance-fulfillment.service.ts`, `field-payment-orders/insurance-reassignments.service.ts` |
+| `insurance_coverage_slots` | `insurance/insurance-purchases.service.ts` | `field-payment-orders/fulfillment/insurance-fulfillment.service.ts`, `insurance/insurance-purchases.service.ts` |
+| `insurance_cycle_configs` | `field-payment-orders/field-payment-orders.service.ts`, `field-payment-orders/fulfillment/insurance-fulfillment.service.ts`, `insurance/insurance-config.service.ts`, `insurance/insurance-purchases.service.ts` | `insurance/insurance-config.service.ts` |
+| `insurance_evidence_files` | `insurance/insurance-evidence.service.ts` | `insurance/insurance-evidence.service.ts` |
+| `insurance_products` | `insurance/insurance-config.service.ts` | `insurance/insurance-config.service.ts` |
+| `insurance_purchases` | `insurance/insurance-config.service.ts`, `insurance/insurance-purchases.service.ts` | `field-payment-orders/fulfillment/insurance-fulfillment.service.ts`, `insurance/insurance-purchases.service.ts` |
+| `insurance_reassignment_requests` | `field-payment-orders/insurance-reassignments.service.ts` | `field-payment-orders/insurance-reassignments.service.ts` |
+| `insurance_slot_movements` | — | `field-payment-orders/fulfillment/insurance-fulfillment.service.ts`, `field-payment-orders/insurance-reassignments.service.ts`, `insurance/insurance-purchases.service.ts` |
+| `inventory_categories` | `admin/admin-phase-e-catalogs.service.ts`, `inventory/inventory.service.ts` | `admin/admin-phase-e-catalogs.service.ts` |
+| `inventory_history` | `inventory/inventory.service.ts` | `inventory/inventory.service.ts` |
+| `investiture_config` | `investiture/investiture.service.ts` | `investiture/investiture.service.ts` |
+| `investiture_validation_history` | `analytics/analytics.service.ts`, `investiture/investiture.service.ts` | `certificate-bulk-imports/certificate-bulk-imports-application.service.ts`, `investiture/investiture.service.ts`, `validation/validation.service.ts` |
+| `legal_representatives` | `admin/admin-reference.service.ts`, `legal-representatives/legal-representatives.service.ts` | `legal-representatives/legal-representatives.service.ts` |
+| `local_camporees` | `annual-folders/annual-folders.service.ts`, `camporee-events/camporee-events.service.ts`, `camporee-orders/camporee-orders.service.ts`, `camporee-orders/offerings.service.ts`, `camporee-scoring/camporee-scoring.service.ts`, `camporee-staff/camporee-staff.service.ts`, `camporee-supplies/camporee-context.ts`, `camporee-venues/camporee-venues.service.ts`, `camporees/camporee-late-approvals.service.ts`, `camporees/camporees.service.ts`, `common/guards/permissions.guard.ts`, `field-payment-orders/field-payment-orders.service.ts`, `field-payment-orders/fulfillment/camporee-fulfillment.service.ts`, `payment-obligations/payment-obligations.service.ts`, `rankings/member-rankings/member-rankings.service.ts` | `camporee-orders/offerings.service.ts`, `camporee-supplies/config.service.ts`, `camporees/camporees.service.ts` |
+| `local_fields` | `admin/admin-geography.service.ts`, `analytics/local-field-dashboard.service.ts`, `analytics/operations-dashboard-scope.service.ts`, `annual-folders/annual-folders.service.ts`, `camporee-event-templates/camporee-event-templates.service.ts`, `camporee-orders/camporee-orders.service.ts`, `camporee-orders/catalog.service.ts`, `camporees/camporees.service.ts`, `catalogs/catalogs.service.ts`, `common/authorization/actor-territory-scope.ts`, `common/guards/permissions.guard.ts`, `coordination/coordination.service.ts`, `field-payment-orders/field-payment-orders.service.ts`, `investiture/investiture.service.ts`, `materials/config/config.service.ts`, `materials/inventory/inventory.service.ts`, `rankings/annual-ranking-progress/annual-ranking-config.service.ts`, `resources/resources.service.ts`, `scoring-categories/scoring-categories.service.ts`, `users/users.service.ts` | `admin/admin-geography.service.ts` |
+| `master_honor_divisions` | — | `admin/admin-phase-e-catalogs.service.ts`, `honors/master-honor-rule-importer.ts` |
+| `master_honor_evaluation_history` | — | `honors/master-honors-evaluator.service.ts` |
+| `master_honor_requirement_groups` | — | `admin/admin-phase-e-catalogs.service.ts`, `honors/master-honor-rule-importer.ts` |
+| `master_honors` | `admin/admin-phase-e-catalogs.service.ts`, `honors/master-honor-rule-importer.ts`, `honors/master-honors-evaluator.service.ts`, `honors/master-honors-recalculation.processor.ts`, `honors/master-honors.service.ts` | `admin/admin-phase-e-catalogs.service.ts`, `honors/master-honor-rule-importer.ts` |
+| `material_categories` (`MaterialCategory`) | `materials/catalog/catalog.service.ts`, `materials/categories/categories.service.ts`, `materials/inventory/inventory.service.ts` | `materials/categories/categories.service.ts` |
+| `material_comprobantes` (`MaterialComprobante`) | `materials/receipts/receipts.service.ts` | `materials/receipts/receipts.service.ts` |
+| `material_config` (`MaterialConfig`) | `materials/config/config.service.ts`, `materials/orders/orders.service.ts` | `materials/config/config.service.ts` |
+| `material_order_lines` (`MaterialOrderLine`) | `materials/inventory/inventory.service.ts`, `materials/orders/orders.service.ts` | `materials/orders/orders.service.ts` |
+| `material_orders` (`MaterialOrder`) | `materials/orders/orders.service.ts`, `materials/receipts/receipts.service.ts`, `payment-obligations/payment-obligations.service.ts` | `materials/orders/orders.service.ts`, `materials/receipts/receipts.service.ts` |
+| `material_products` (`MaterialProduct`) | `materials/catalog/catalog.service.ts`, `materials/categories/categories.service.ts`, `materials/inventory/inventory.service.ts`, `materials/orders/orders.service.ts` | `materials/inventory/inventory.service.ts`, `materials/orders/stock.service.ts` |
+| `material_variant_options` (`MaterialVariantOption`) | `materials/inventory/inventory.service.ts`, `materials/orders/orders.service.ts` | `materials/inventory/inventory.service.ts`, `materials/orders/stock.service.ts` |
+| `medicines` | `admin/admin-reference.service.ts`, `catalogs/catalogs.service.ts`, `users/users.service.ts` | `admin/admin-reference.service.ts` |
+| `member_insurances` | `camporees/camporees.service.ts`, `common/guards/permissions.guard.ts`, `field-payment-orders/fulfillment/camporee-fulfillment.service.ts`, `field-payment-orders/fulfillment/insurance-fulfillment.service.ts`, `insurance/insurance.service.ts` | `field-payment-orders/fulfillment/insurance-fulfillment.service.ts`, `insurance/insurance.service.ts` |
+| `member_of_month` | `member-of-month/member-of-month.service.ts` | `member-of-month/member-of-month.service.ts` |
+| `monthly_report_manual_data` | `monthly-reports/monthly-reports.service.ts` | `monthly-reports/monthly-reports.service.ts` |
+| `monthly_reports` | `annual-reports/annual-reports.service.ts`, `common/guards/permissions.guard.ts`, `monthly-reports/monthly-report-artifacts.service.ts`, `monthly-reports/monthly-reports-pdf.service.ts`, `monthly-reports/monthly-reports.service.ts`, `year-end/year-end.service.ts` | `monthly-reports/monthly-report-artifacts.service.ts`, `monthly-reports/monthly-reports.service.ts` |
+| `notification_deliveries` | `data-export/data-export.service.ts`, `notifications/notifications.service.ts` | `notifications/notifications.processor.ts`, `notifications/notifications.service.ts` |
+| `notification_logs` | `notifications/notifications.service.ts` | `notifications/notifications.processor.ts`, `notifications/notifications.service.ts` |
+| `notification_preferences` | `data-export/data-export.service.ts`, `notifications/notification-preferences.service.ts` | `notifications/notification-preferences.service.ts` |
+| `permissions` | `rbac/rbac.service.ts` | `rbac/rbac.service.ts` |
+| `quarterly_reports` | `quarterly-reports/quarterly-reports-pdf.service.ts`, `quarterly-reports/quarterly-reports.service.ts` | `quarterly-reports/quarterly-reports.service.ts` |
+| `ranking_tiers` | `rankings/annual-ranking-progress/annual-ranking-progress.service.ts`, `rankings/annual-ranking-progress/annual-rankings.service.ts`, `rankings/annual-ranking-progress/ranking-tiers.service.ts` | `rankings/annual-ranking-progress/ranking-tiers.service.ts` |
+| `ranking_weight_configs` | `annual-folders/score-calculators/weights-resolver.ts`, `ranking-weights/ranking-weights.service.ts` | `ranking-weights/ranking-weights.service.ts` |
+| `relationship_types` | `admin/admin-reference.service.ts`, `catalogs/catalogs.service.ts`, `emergency-contacts/emergency-contacts.service.ts`, `legal-representatives/legal-representatives.service.ts` | `admin/admin-reference.service.ts` |
+| `requirement_evidence` | `honors/honor-requirements.service.ts` | `honors/honor-requirements.service.ts` |
+| `resource_categories` | `resources/resource-categories.service.ts`, `resources/resources.service.ts` | `resources/resource-categories.service.ts` |
+| `resources` | `resources/resource-categories.service.ts`, `resources/resources.service.ts` | `resources/resources.service.ts` |
+| `role_assignment_requests` | `clubs/clubs.service.ts`, `requests/requests.service.ts` | `requests/requests.service.ts` |
+| `role_permissions` | `rbac/rbac.service.ts` | `rbac/rbac.service.ts` |
+| `role_slot_limits` | `clubs/clubs.service.ts`, `requests/requests.service.ts` | — |
+| `roles` | `admin/admin-users.service.ts`, `annual-membership/annual-membership-policy.service.ts`, `annual-membership/annual-membership.service.ts`, `auth/auth.service.ts`, `auth/oauth.service.ts`, `catalogs/catalogs.service.ts`, `clubs/clubs.service.ts`, `clubs/director-designation.service.ts`, `post-registration/post-registration.service.ts`, `rbac/global-user-role-write.service.ts`, `rbac/rbac.service.ts`, `requests/requests.service.ts`, `year-cut/year-cut.service.ts` | `rbac/rbac.service.ts` |
+| `scoring_categories` | `scoring-categories/scoring-categories.service.ts` | `scoring-categories/scoring-categories.service.ts` |
+| `section_rankings` (`SectionRanking`) | `rankings/section-rankings/section-rankings.service.ts` | `annual-folders/rankings.service.ts` |
+| `sessions` (`session`) | `admin/admin-auth.service.ts`, `auth/sessions.service.ts`, `better-auth/better-auth.service.ts`, `data-export/data-export.service.ts` | `admin/admin-auth.service.ts`, `auth/account-deletion.service.ts`, `auth/auth.service.ts`, `auth/sessions.service.ts`, `better-auth/better-auth.service.ts`, `common/services/cleanup.service.ts` |
+| `support_reports` | `support/support.service.ts` | `support/support.service.ts` |
+| `system_config` | `activities/activities-reminder.service.ts`, `annual-folders/rankings.service.ts`, `annual-folders/score-calculators/activities-registered-score.ts`, `annual-folders/score-calculators/finance-score.ts`, `annual-folders/score-calculators/monthly-reports-timeliness-score.ts`, `annual-reports/annual-reports-cron.service.ts`, `camporee-orders/camporee-orders.service.ts`, `field-payment-orders/field-payment-orders-flag.service.ts`, `membership-requests/membership-requests.service.ts`, `monthly-reports/monthly-reports.service.ts`, `notifications/notification-category-settings.service.ts`, `quarterly-reports/quarterly-reports-cron.service.ts`, `scoring-categories/scoring-categories.service.ts`, `system-config/system-config.service.ts`, `validation/validation.service.ts` | `notifications/notification-category-settings.service.ts`, `system-config/system-config.service.ts` |
+| `union_camporee_local_fields` | `camporee-orders/eligibility.service.ts`, `camporee-supplies/config.service.ts`, `camporee-supplies/plans.service.ts`, `camporees/camporees.service.ts` | `camporees/camporees.service.ts` |
+| `union_camporees` | `camporee-events/camporee-events.service.ts`, `camporee-orders/camporee-orders.service.ts`, `camporee-orders/offerings.service.ts`, `camporee-scoring/camporee-scoring.service.ts`, `camporee-staff/camporee-staff.service.ts`, `camporee-supplies/camporee-context.ts`, `camporee-venues/camporee-venues.service.ts`, `camporees/camporee-late-approvals.service.ts`, `camporees/camporees.service.ts`, `common/guards/permissions.guard.ts`, `field-payment-orders/field-payment-orders.service.ts`, `field-payment-orders/fulfillment/camporee-fulfillment.service.ts`, `payment-obligations/payment-obligations.service.ts`, `rankings/member-rankings/member-rankings.service.ts` | `annual-folders/__tests__/confirm-union.e2e-spec.ts`, `camporee-orders/offerings.service.ts`, `camporee-supplies/config.service.ts`, `camporees/camporees.service.ts` |
+| `unions` | `admin/admin-geography.service.ts`, `analytics/operations-dashboard-scope.service.ts`, `camporee-orders/catalog.service.ts`, `camporees/camporees.service.ts`, `common/authorization/actor-territory-scope.ts`, `common/guards/permissions.guard.ts`, `rankings/annual-ranking-progress/annual-ranking-config.service.ts`, `resources/resources.service.ts`, `users/users.service.ts` | `admin/admin-geography.service.ts` |
+| `unit_members` | `clubs/clubs.service.ts`, `units/units.service.ts` | `units/units.service.ts` |
+| `units` | `units/units.service.ts` | `units/units.service.ts` |
+| `user_achievements` | `achievements/achievements.processor.ts`, `achievements/achievements.service.ts`, `achievements/admin/admin-achievements.service.ts` | `achievements/achievements.processor.ts` |
+| `user_fcm_tokens` | `admin/admin-notifications.service.ts`, `data-export/data-export.service.ts`, `notifications/fcm-tokens.service.ts`, `notifications/notifications.processor.ts`, `notifications/notifications.service.ts` | `auth/account-deletion.service.ts`, `common/services/cleanup.service.ts`, `notifications/fcm-tokens.service.ts`, `notifications/notifications.processor.ts`, `notifications/notifications.service.ts` |
+| `user_honor_requirement_progress` | `evidence-review/evidence-review.service.ts`, `honors/honor-requirements.service.ts`, `honors/honor-validation-workflow.service.ts` | `honors/honor-requirements.service.ts` |
+| `users` | `achievements/admin/admin-achievements.service.ts`, `activities/activities.service.ts`, `admin/admin-auth.service.ts`, `admin/admin-users.service.ts`, `annual-folders/__tests__/confirm-union.e2e-spec.ts`, `annual-folders/annual-folders.service.ts`, `audit-logs/audit-logs.service.ts`, `auth/account-deletion.service.ts`, `auth/auth.service.ts`, `auth/oauth.service.ts`, `better-auth/better-auth.service.ts`, `camporee-orders/camporee-orders.service.ts`, `camporee-scoring/camporee-scoring.service.ts`, `camporee-staff/camporee-staff.service.ts`, `camporees/camporees.service.ts`, `certificate-bulk-imports/admin-certificate-bulk-imports.service.ts`, `certificate-bulk-imports/certificate-bulk-imports.service.ts`, `certificate-bulk-imports/certificate-import-files.service.ts`, `certificate-bulk-imports/institutional-certificate-requests.service.ts`, `certifications/eligibility/certification-eligibility.service.ts`, `certifications/review/certification-review.service.ts`, `classes/next-class.resolver.ts`, `common/guards/permissions.guard.ts`, `common/services/authorization-context.service.ts`, `common/services/class-assignment-resolver.service.ts`, `coordination/coordination.service.ts`, `dashboard/dashboard.service.ts`, `data-export/data-export.service.ts`, `field-payment-orders/field-payment-orders.service.ts`, `insurance/insurance.service.ts`, `investiture/investiture.service.ts`, `legal-representatives/legal-representatives.service.ts`, `member-of-month/member-of-month.service.ts`, `notifications/notifications.processor.ts`, `notifications/notifications.service.ts`, `post-registration/post-registration.service.ts`, `qr/qr.service.ts`, `rbac/global-user-role-write.service.ts`, `rbac/rbac.service.ts`, `requests/requests.service.ts`, `units/units.service.ts`, `users/users.service.ts` | `admin/admin-users.service.ts`, `annual-folders/__tests__/confirm-union.e2e-spec.ts`, `auth/account-deletion.service.ts`, `auth/auth.service.ts`, `auth/oauth.service.ts`, `better-auth/better-auth.service.ts`, `post-registration/post-registration.service.ts`, `users/users.service.ts` |
+| `users_allergies` | `admin/admin-reference.service.ts`, `users/users.service.ts` | `users/users.service.ts` |
+| `users_certifications` | `certifications/certifications.service.ts`, `certifications/closeout/certification-closeout.service.ts`, `certifications/evidence/certification-evidence.service.ts`, `certifications/requirements/certification-requirements.service.ts`, `certifications/review/certification-review.service.ts` | `certifications/certifications.service.ts`, `certifications/closeout/certification-closeout.service.ts`, `certifications/requirements/certification-requirements.service.ts`, `certifications/review/certification-review.service.ts` |
+| `users_diseases` | `admin/admin-reference.service.ts`, `users/users.service.ts` | `users/users.service.ts` |
+| `users_honors` | `analytics/analytics.service.ts`, `annual-reports/annual-reports.service.ts`, `certificate-bulk-imports/certificate-bulk-imports-application.service.ts`, `certifications/requirements/certification-requirements.service.ts`, `classes/classes.service.ts`, `data-export/data-export.service.ts`, `evidence-review/evidence-review.service.ts`, `honors/honor-requirements.service.ts`, `honors/honor-validation-workflow.service.ts`, `honors/honors.service.ts`, `honors/master-honors-evaluator.service.ts`, `honors/master-honors-recalculation.processor.ts`, `honors/master-honors.service.ts`, `monthly-reports/monthly-reports.service.ts`, `quarterly-reports/quarterly-reports.service.ts`, `validation/validation.service.ts` | `certificate-bulk-imports/certificate-bulk-imports-application.service.ts`, `honors/honor-requirements.service.ts`, `honors/honor-validation-workflow.service.ts`, `honors/honors.service.ts` |
+| `users_master_honors` | `honors/master-honors-evaluator.service.ts`, `honors/master-honors-recalculation.processor.ts`, `honors/master-honors.service.ts` | `honors/master-honors-evaluator.service.ts` |
+| `users_medicines` | `admin/admin-reference.service.ts`, `users/users.service.ts` | `users/users.service.ts` |
+| `users_permissions` | `rbac/rbac.service.ts` | `rbac/rbac.service.ts` |
+| `users_pr` | `auth/auth.service.ts`, `auth/oauth.service.ts`, `classes/class-requirement-eligibility.service.ts`, `honors/honors.service.ts`, `honors/master-honors-evaluator.service.ts`, `honors/master-honors.service.ts`, `post-registration/post-registration.service.ts`, `requests/requests.service.ts` | `auth/auth.service.ts`, `auth/oauth.service.ts`, `membership-requests/membership-requests.service.ts`, `post-registration/post-registration.service.ts` |
+| `users_roles` | `annual-folders/annual-folders.service.ts`, `annual-folders/evaluation.service.ts`, `auth/oauth.service.ts`, `common/services/cron-alert.service.ts`, `notifications/notifications.processor.ts`, `notifications/notifications.service.ts`, `rbac/exact-super-admin-write.policy.ts`, `rbac/global-user-role-write.service.ts`, `rbac/rbac.service.ts` | `admin/admin-users.service.ts`, `auth/auth.service.ts`, `auth/oauth.service.ts`, `rbac/global-user-role-write.service.ts`, `rbac/rbac.service.ts` |
+| `validation_logs` | `evidence-review/evidence-review.service.ts`, `validation/validation.service.ts` | `evidence-review/evidence-review.service.ts`, `honors/honor-validation-workflow.service.ts`, `validation/validation.service.ts` |
+| `verifications` (`verification`) | `auth/auth.service.ts`, `better-auth/better-auth.service.ts` | `admin/admin-auth.service.ts`, `auth/auth.service.ts`, `better-auth/better-auth.service.ts`, `common/services/cleanup.service.ts` |
+| `weekly_record_scores` | `units/units.service.ts` | `units/units.service.ts` |
+| `weekly_records` | `clubs/clubs.service.ts`, `units/units.service.ts` | `units/units.service.ts` |
 
 ## Sección D — Gaps y Observaciones
 
@@ -983,16 +1072,65 @@ Los modelos sin `@@map` usan el nombre del modelo como nombre físico de tabla.
 | `monthly-reports/monthly-reports-pdf.service.ts` | Solo lee `monthly_reports`; genera PDF sin escrituras |
 | `folders/evidence-folder.service.ts` | Sin llamadas Prisma detectadas |
 
-### Tablas con cero referencias de servicio (posible código inactivo o solo manejado vía migraciones)
+### Tablas sin llamadas Prisma directas detectadas (2026-10-04)
 
-| Tabla | Observación |
-|---|---|
-| `error_logs` ⚠️ **DEPRECATED (2026-04-14)** | Marcado como DEPRECADO. Ningún servicio escribe en ella, ningún controller la expone, y no hay triggers conocidos poblándola. **Acción pendiente**: crear migración Prisma para eliminar la tabla en la próxima ventana de schema changes. Por ahora se mantiene físicamente para no romper backups históricos. |
-| `master_honors` | Originally flagged as orphan, corrected 2026-04-14 — `honors.service.ts:187` carga via `include: { master_honors: { select: { name: true } } }`. Modelo HAS SERVICE (vía include). |
-| `club_ideals` | Originally flagged as orphan, corrected 2026-04-14 — leída directamente vía `this.prisma.club_ideals.findMany()` en `catalogs.service.ts:328` y `admin-reference.service.ts:599`. Endpoints expuestos: `GET /catalogs/club-ideals` y `GET /admin/club-ideals`. HAS SERVICE. |
-| `inventory_categories` | Originally flagged as orphan, corrected 2026-04-14 — leída directamente con múltiples `findMany`/`findUnique` en `inventory.service.ts` (líneas 33, 93, 125, 198, 273, 412). Endpoint expuesto: `GET /catalogs/inventory-categories`. HAS SERVICE. |
-| `certification_modules` | Originally flagged as orphan, corrected 2026-04-14 — accedida directamente vía `tx.certification_modules.findMany()` en `certifications.service.ts:496` y también vía include. Endpoints expuestos via `GET /certifications`, `GET /certifications/:id`, y progreso. HAS SERVICE. |
-| `certification_sections` | Originally flagged as orphan, corrected 2026-04-14 — accedida directamente vía `tx.certification_sections.findFirst()` (línea 399) y `tx.certification_sections.findMany()` (línea 448) en `certifications.service.ts`. HAS SERVICE. |
+Con la extracción de la sección C, estos modelos no tienen llamadas `<cliente>.<modelo>.<operación>(` directas. Muchos sí se usan por otras vías: `include` anidado, SQL crudo (por ejemplo, la historia institucional en `common/services/institutional-hierarchy.service.ts` y los contadores de folio) o acceso dinámico (`*_translations` vía `TranslationService`). `error_logs` sigue marcada como DEPRECATED desde 2026-04-14. Las tablas `folders*` pertenecen al módulo legacy `folders`, ya retirado.
+
+- `activity_types_translations`
+- `allergies_translations`
+- `camporee_event_schedule_block_assignments`
+- `camporee_event_types_translations`
+- `camporee_external_participants`
+- `camporee_order_folio_counters`
+- `camporee_supply_folio_counters`
+- `church_district_history`
+- `churches_translations`
+- `class_modules_translations`
+- `class_sections_translations`
+- `classes_translations`
+- `club_ideals_translations`
+- `club_institutional_history`
+- `club_types_translations`
+- `countries_translations`
+- `cron_alerts_log`
+- `diseases_translations`
+- `district_local_field_history`
+- `districts_translations`
+- `divisions_translations`
+- `error_logs`
+- `field_payment_folio_counters`
+- `finance_evidence_files`
+- `finances_categories_translations`
+- `folder_assignments`
+- `folders`
+- `folders_modules`
+- `folders_modules_records`
+- `folders_modules_translations`
+- `folders_section_records`
+- `folders_sections`
+- `folders_sections_translations`
+- `folders_translations`
+- `honors_categories_translations`
+- `honors_translations`
+- `institutional_lineage_edges`
+- `institutional_name_version_translations`
+- `institutional_name_versions`
+- `institutional_reorganization_participants`
+- `institutional_reorganizations`
+- `inventory_categories_translations`
+- `inventory_evidence_files`
+- `local_field_union_history`
+- `local_fields_translations`
+- `master_honor_requirement_option_honors`
+- `master_honor_requirement_options`
+- `master_honors_translations`
+- `material_folio_counters` (`MaterialFolioCounter`)
+- `material_variants` (`MaterialVariant`)
+- `medicines_translations`
+- `relationship_types_translations`
+- `scoring_categories_translations`
+- `union_division_history`
+- `unions_translations`
 
 ### Observaciones sorprendentes
 

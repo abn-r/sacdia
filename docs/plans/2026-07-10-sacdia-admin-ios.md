@@ -1,5 +1,8 @@
 # Sacdia Admin iOS Implementation Plan
 
+> **Estado real (revisado 2026-10-04 contra `development`)**: No ejecutado en el workspace. No existe el repositorio `sacdia-admin-ios/`; la fachada `/api/v1/auth/admin/*` solo existe en la rama `codex/sacdia-admin-ios-auth`, sin integrar en `development`.
+
+
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
 **Goal:** Crear `Sacdia Admin` (`com.zarzaroja.sacdiadmin`) como app nativa SwiftUI para iPhone+iPad con paridad funcional verificable del panel administrativo.
