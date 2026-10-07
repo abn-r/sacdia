@@ -98,8 +98,9 @@ El runtime actual endurece sub-recursos sensibles de `user` con `JwtAuthGuard` +
 Reglas de seguridad:
 
 - el owner del `userId` mantiene self-service aunque no tenga permisos globales explícitos;
-- para terceros, solo cuentan permisos globales;
-- permisos provenientes solo de `authorization.active_assignment` no habilitan acceso transversal a recursos `user`.
+- para terceros, cuentan permisos globales (fino o fallback legacy);
+- excepción club-scoped de solo lectura: el permiso fino `family:read` en la asignación de club activa habilita la lectura del sub-recurso cuando el `userId` es miembro activo (no `pending`) de la sección activa del actor; sin fallback `users:read_detail` y nunca para `update`;
+- fuera de esa excepción, permisos provenientes solo de `authorization.active_assignment` no habilitan acceso transversal a recursos `user`.
 
 ### Excepción mínima de terceros en `post_registration`
 
