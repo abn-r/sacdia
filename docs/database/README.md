@@ -27,7 +27,7 @@ La base de datos está diseñada con las siguientes características verificadas
 
 - **PostgreSQL** como motor relacional operativo
 - **Prisma ORM** como abstracción
-- **UUIDs** para todas las tablas principales
+- **Claves mixtas**: UUID en usuarios y entidades de auth (`user_id`); enteros autoincrementales en la mayoría de catálogos y entidades organizacionales (`club_id`, `union_id`, `club_section_id`)
 - **Soft deletes** mediante campo `active`
 - **Timestamps** automáticos (`created_at`, `updated_at`)
 - **Constraints** para integridad de datos
@@ -41,16 +41,18 @@ La base de datos está diseñada con las siguientes características verificadas
 │   ├── users_pr (post-registro)
 │   ├── users_roles
 │   ├── sessions
-│   ├── admin_auth_sessions (metadata admin, rama)
+│   ├── authorization_context_versions
 │   ├── legal_representatives
 │   └── emergency_contacts
 │
 ├── 🏛️ Organization
 │   ├── countries
+│   ├── divisions
 │   ├── unions
 │   ├── local_fields
 │   ├── districts
-│   └── churches
+│   ├── churches
+│   └── institutional_* / *_history / hierarchy_contexts (historia institucional)
 │
 ├── 🏕️ Clubs
 │   ├── clubs (contenedor)
@@ -71,6 +73,16 @@ La base de datos está diseñada con las siguientes características verificadas
 │   ├── role_permissions
 │   └── users_permissions
 │
+├── 🏕️ Camporees y pagos
+│   ├── local_camporees, union_camporees, camporee_events, camporee_staff_members, camporee_external_participants
+│   ├── camporee_order_* (pedidos de mercancía), camporee_supply_* (insumos)
+│   ├── field_payment_orders (+ lines, proofs, configs)
+│   └── insurance_* (capacity model de seguros)
+│
+├── 🎓 Certificaciones e importación
+│   ├── certification_versions, users_certifications, certification_*
+│   └── certificate_bulk_import_*, institutional_certificate_requests
+│
 └── 📊 Catalogs
     ├── club_types
     ├── relationship_types
@@ -79,6 +91,8 @@ La base de datos está diseñada con las siguientes características verificadas
     ├── medicines
     └── ecclesiastical_years
 ```
+
+El schema de `development` tiene 248 modelos y 75 enums. El inventario por dominio está en [SCHEMA-REFERENCE.md](SCHEMA-REFERENCE.md).
 
 ---
 
@@ -89,8 +103,7 @@ La base de datos está diseñada con las siguientes características verificadas
 | `sacdia-backend/prisma/schema.prisma` | **Schema efectivo del runtime** - fuente de verdad estructural |
 | [schema.prisma](schema.prisma) | Espejo documental sincronizado del schema Prisma del backend |
 | [SCHEMA-REFERENCE.md](SCHEMA-REFERENCE.md) | Referencia humana subordinada: tablas, relaciones y naming conventions |
-| [migrations/](migrations/) | Scripts SQL de migración e inicialización |
-| [examples/](examples/) | Ejemplos de respuestas JSON de la API |
+| [migrations/](migrations/) | Scripts SQL legacy anteriores a Prisma y SQL de referencia (las migraciones vigentes están en `sacdia-backend/prisma/migrations/`) |
 
 ---
 
@@ -143,13 +156,11 @@ npx prisma format
 
 ## Migraciones
 
-### Estado de persistencia de refresh administrativo iOS
+### Migraciones vigentes
 
-La migración Prisma `20260710200000_admin_refresh_rotation` existe únicamente en `sacdia-backend/prisma/migrations/` de la rama backend `codex/sacdia-admin-ios-auth`. Depende de `20260710130000_admin_auth_sessions`, no fue ejecutada ni verificada contra una base de datos y no publica endpoints runtime.
+Las migraciones Prisma viven en `sacdia-backend/prisma/migrations/` (171 en `development`) y se aplican con `pnpm prisma migrate deploy`.
 
-Su propósito estructural es preparar `admin_auth_sessions.idle_expires_at` como autoridad futura de expiración inactiva administrativa, reemplazar el uso administrativo de sesiones legacy con el sentinel `admin-disabled:<session_id>` y crear tablas hash-only para refresh, historial y recibos AES-GCM con `Idempotency-Key` de TTL exacta de 60 segundos. En el runtime actual, `AdminSessionRepository.isActiveForToken` todavía valida `sessions.expires_at` de Better Auth; D1c debe implementar el writer y adoptar `idle_expires_at`. Las tablas permiten cero o una fila de refresh por sesión y no contienen columnas para secretos raw.
-
-El schema solo exige que el historial se retenga al menos 60 segundos; mantenerlo hasta la expiración absoluta será responsabilidad del writer y cleanup futuros. Los commits desde `c09a600` hasta `ee84d2d`, ambos inclusive, no aportan ese runtime. No ejecutar esta migración antes de D1c y D2: D2 debe excluir tokens/sesiones legacy y verificar la reautenticación de sesiones administrativas preexistentes. Tampoco debe asumirse que una ruta de refresh/login/logout administrativa ya está disponible.
+La sesión administrativa iOS (`admin_auth_sessions`, `admin_refresh_*`, migraciones `20260710130000_admin_auth_sessions` y `20260710200000_admin_refresh_rotation`) solo existe en la rama backend `codex/sacdia-admin-ios-auth`. No está en `development` y no debe ejecutarse antes de completar D1c y D2.
 
 ### Estructura de Migraciones
 
@@ -158,11 +169,15 @@ Los scripts SQL están en [`migrations/`](migrations/):
 ```
 migrations/
 ├── README.md                        # Guía de uso
+├── 20260313_fs03_enrollment_aware_progress.sql  # Lo lee el e2e classes-progress-migration (no borrar)
+├── 20260710130000_admin_auth_sessions.sql       # Espejo de la rama codex/sacdia-admin-ios-auth
 ├── script_01_organizacion.sql       # Setup países/uniones/campos
 ├── script_02_clubes_clases.sql      # Clubes y clases progresivas
 ├── script_03_especialidades.sql     # Honores y categorías
 ├── script_04_catalogos_medicos.sql  # Alergias y enfermedades
 ├── script_05_roles_permisos.sql     # Sistema RBAC
+├── script_06_admin_permissions.sql  # Permisos del panel admin
+├── countries.sql, unios.sql, local_fields.sql, districts.sql  # Datos geográficos
 └── verificar_catalogos.sql          # Queries de verificación
 ```
 
@@ -173,12 +188,7 @@ migrations/
 psql -U postgres -d sacdia -f migrations/script_01_organizacion.sql
 ```
 
-**Opción 2: Desde Supabase Dashboard**
-1. Ve a SQL Editor
-2. Copia contenido del script
-3. Ejecuta
-
-**Opción 3: Desde Prisma**
+**Opción 2: Desde Prisma**
 ```bash
 npx prisma db execute --file migrations/script_01_organizacion.sql
 ```
@@ -207,11 +217,10 @@ Ejecutar en este orden para evitar errores de FK:
 - ✅ **IDs explícitos**: `user_id`, `club_type_id` (no `uid`, `ct_id`)
 
 ### Convenciones de ID
-- **Tablas principales**: `{tabla}_id` UUID (ej: `user_id`, `club_id`)
-- **Tablas pivote**: `id` UUID como PK, FKs con nombres descriptivos
-- **Excepciones**: Secciones de club usan INT (`club_section_id`)
+- **Nombre**: `{tabla}_id` (ej: `user_id`, `club_id`, `club_section_id`)
+- **Tipo**: UUID en `users` y tablas nuevas de historia institucional; INT autoincremental en clubes, secciones, organización y la mayoría de catálogos
 
-**Ver detalles**: [SCHEMA-REFERENCE.md](SCHEMA-REFERENCE.md#convenciones-de-naming)
+**Ver detalles**: [SCHEMA-REFERENCE.md](SCHEMA-REFERENCE.md)
 
 ---
 
@@ -219,6 +228,7 @@ Ejecutar en este orden para evitar errores de FK:
 
 ### Jerarquía Organizacional
 ```
+divisions (1) ──→ (N) unions
 countries (1) ──→ (N) unions
 unions (1) ──→ (N) local_fields
 local_fields (1) ──→ (N) districts
@@ -240,17 +250,7 @@ roles (N) ←──→ (N) permissions    [via role_permissions]
 users (N) ──→ (N) club instances  [via club_role_assignments]
 ```
 
-### Sesión administrativa nativa (rama backend)
-
-```text
-sessions (1) ──→ (0..1) admin_auth_sessions
-club_role_assignments (1) ──→ (N) admin_auth_sessions [active_assignment_id opcional]
-```
-
-> [!WARNING]
-> `admin_auth_sessions` está definida en la rama backend `codex/sacdia-admin-ios-auth`; la migración no fue desplegada ni verificada y todavía no forma parte del runtime de referencia.
-
-**Ver diagrama completo**: [SCHEMA-REFERENCE.md](SCHEMA-REFERENCE.md#diagrama-de-relaciones-principales)
+**Ver inventario completo**: [SCHEMA-REFERENCE.md](SCHEMA-REFERENCE.md)
 
 ---
 
@@ -260,7 +260,7 @@ club_role_assignments (1) ──→ (N) admin_auth_sessions [active_assignment_i
 ```sql
 SELECT r.role_name, r.role_category
 FROM users_roles ur
-JOIN roles r ON r.id = ur.role_id
+JOIN roles r ON r.role_id = ur.role_id
 WHERE ur.user_id = 'uuid-del-usuario';
 ```
 
@@ -268,13 +268,12 @@ WHERE ur.user_id = 'uuid-del-usuario';
 ```sql
 SELECT u.name, u.paternal_last_name, r.role_name
 FROM club_role_assignments cra
-JOIN users u ON u.id = cra.user_id
-JOIN roles r ON r.id = cra.role_id
+JOIN users u ON u.user_id = cra.user_id
+JOIN roles r ON r.role_id = cra.role_id
 WHERE cra.club_section_id = 123
   AND cra.active = true;
 ```
 
-**Más queries**: [SCHEMA-REFERENCE.md](SCHEMA-REFERENCE.md#queries-útiles)
 
 ---
 
@@ -288,5 +287,5 @@ WHERE cra.club_section_id = 123
 ---
 
 **Ver también**:
-- [API Specification](../02-API/API-SPECIFICATION.md) - Cómo la API usa estos modelos
-- [Architecture Decisions](../02-API/ARCHITECTURE-DECISIONS.md) - Por qué se tomaron ciertas decisiones
+- [API Specification](../api/API-SPECIFICATION.md) - Cómo la API usa estos modelos
+- [Architecture Decisions](../api/ARCHITECTURE-DECISIONS.md) - Por qué se tomaron ciertas decisiones

@@ -1,9 +1,12 @@
 # Camporee Operational Hardening — Diseño
 
+> **Estado real (revisado 2026-10-04 contra `development`)**: APROBADO; implementación parcial en `development`. Hecho: política de ciclo de vida (`CamporeeLifecyclePolicy`), plantillas de eventos y rúbricas, scoring con idempotencia y bloqueo. Falta: ledger de penalizaciones, aclaraciones y documentos privados.
+
+
 **Estado:** APROBADO
 
 **Fecha:** 2026-07-09
-**Origen:** auditoría `docs/audit/2026-07-09-camporee-flow-security-review.md`
+**Origen:** auditoría `docs/history/audit/2026-07-09-camporee-flow-security-review.md`
 
 ## Objetivo
 

@@ -47,7 +47,7 @@ Cada item del inventario pertenece a una instancia/seccion operativa de club (`c
 - `inventory_categories` — Catalogo de categorias de inventario
 - `inventory_evidence_files` — Fotos de evidencia por item, con limite operativo de 3 archivos activos
 - `inventory_history` — Historial de cambios por campo/accion (`CREATE`, `UPDATE`, `DELETE`)
-- **Nota**: `inventory_categories` tenia un typo en el PK (`inventory_categoty_id`). Corregido en schema.prisma; migracion `20260320000000_fix_inventory_category_id_typo` creada (pendiente de deploy).
+- **Nota**: `inventory_categories` tenia un typo en el PK (`inventory_categoty_id`). Corregido en schema.prisma; migracion `20260320000000_fix_inventory_category_id_typo`.
 
 ### Contrato de instancia de club
 
@@ -76,7 +76,6 @@ Aunque el path historico conserva el nombre `:clubId`, los endpoints `GET/POST /
 
 ## Gaps y pendientes
 
-- **Typo en PK de categorias**: corregido en schema.prisma; migracion `20260320000000_fix_inventory_category_id_typo` creada y pendiente de deploy en produccion
 - **Sin historial de movimientos de negocio**: existe auditoria tecnica de cambios, pero no un kardex/logistica de prestamos, devoluciones o movimientos fisicos
 - **Sin prestamos**: No hay modelo para registrar prestamos de equipamiento entre clubes o a unidades
 - **Sin vinculacion a actividades**: No se puede asignar equipamiento a una actividad o campamento especifico
@@ -84,4 +83,4 @@ Aunque el path historico conserva el nombre `:clubId`, los endpoints `GET/POST /
 ## Prioridad y siguiente accion
 
 - **Prioridad**: Media — feature operativa en backend, admin y app; las brechas restantes son logisticas/fotograficas, no de CRUD base
-- **Siguiente accion**: Si el negocio lo necesita, extender de auditoria tecnica a movimientos de inventario (prestamos, devoluciones y asignacion a actividades) y deployar la migracion `20260320000000_fix_inventory_category_id_typo` en produccion.
+- **Siguiente accion**: Si el negocio lo necesita, extender de auditoria tecnica a movimientos de inventario (prestamos, devoluciones y asignacion a actividades).

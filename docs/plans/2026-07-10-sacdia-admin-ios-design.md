@@ -1,5 +1,8 @@
 # Sacdia Admin iOS — Diseño aprobado
 
+> **Estado real (revisado 2026-10-04 contra `development`)**: APROBADO, sin implementar en el workspace. No existe el repositorio `sacdia-admin-ios/`; la fachada de auth del backend solo existe en la rama `codex/sacdia-admin-ios-auth`, sin integrar en `development`.
+
+
 Este documento define cómo construir **Sacdia Admin**, una aplicación nativa para iPhone y iPad que preserve todas las capacidades productivas del panel administrativo sin copiar sus layouts de escritorio. La implementación será contract-first, SwiftUI-only y medirá paridad mediante la cadena `capacidad → permiso → endpoint → UX nativa → prueba`.
 
 ## Decisión ejecutiva

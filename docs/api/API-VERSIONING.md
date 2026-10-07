@@ -492,9 +492,11 @@ export class UserResponseV2 {
 // shared/auth.service.ts
 @Injectable()
 export class SharedAuthService {
+  constructor(private readonly authService: AuthService) {}
+
   async authenticateUser(email: string, password: string) {
-    // Lógica compartida entre v1 y v2
-    return supabase.auth.signInWithPassword({ email, password });
+    // Lógica compartida entre v1 y v2 (Better Auth + JWT SACDIA)
+    return this.authService.login({ email, password });
   }
 }
 

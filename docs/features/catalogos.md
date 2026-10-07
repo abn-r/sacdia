@@ -16,11 +16,12 @@ Los anos eclesiasticos son un catalogo particularmente critico: definen los peri
 
 ### Backend — CatalogsModule (lectura publica)
 - **Controller**: `src/catalogs/catalogs.controller.ts`
-- **14 endpoints publicos** (`@Public` + JWT opcional). Sin token o sin rol territorial el directorio geográfico es completo (registro / post-registro). Con JWT territorial (`director-lf` / `director-union` / `director-dia` y asistentes) países, uniones, campos, distritos e iglesias se recortan al **país** del actor. El resto de catálogos (tipos, salud, roles) no se recorta:
+- **16 endpoints publicos** (`@Public` + JWT opcional). Sin token o sin rol territorial el directorio geográfico es completo (registro / post-registro). Con JWT territorial (`director-lf` / `director-union` / `director-dia` y asistentes) países, uniones, campos, distritos e iglesias se recortan al **país** del actor. El resto de catálogos (tipos, salud, roles) no se recorta:
   - `GET /api/v1/catalogs/club-types` — Tipos de club
-  - `GET /api/v1/catalogs/activity-types` — Tipos de actividad (SIN documentacion API)
+  - `GET /api/v1/catalogs/activity-types` — Tipos de actividad
   - `GET /api/v1/catalogs/relationship-types` — Tipos de relacion
   - `GET /api/v1/catalogs/countries` — Paises
+  - `GET /api/v1/catalogs/divisions` — Divisiones
   - `GET /api/v1/catalogs/unions` — Uniones
   - `GET /api/v1/catalogs/local-fields` — Campos locales
   - `GET /api/v1/catalogs/districts` — Distritos
@@ -31,6 +32,7 @@ Los anos eclesiasticos son un catalogo particularmente critico: definen los peri
   - `GET /api/v1/catalogs/club-ideals` — Ideales de club
   - `GET /api/v1/catalogs/allergies` — Catalogo de alergias
   - `GET /api/v1/catalogs/diseases` — Catalogo de enfermedades
+  - `GET /api/v1/catalogs/medicines` — Catalogo de medicamentos
 
 ### Backend — AdminModule (CRUD admin)
 - **Controllers**:
@@ -96,14 +98,10 @@ Los anos eclesiasticos son un catalogo particularmente critico: definen los peri
 
 ## Gaps y pendientes
 
-- **4 endpoints de `/admin/medicines` sin documentacion API** en ENDPOINTS-LIVE-REFERENCE
-- **`GET /catalogs/activity-types` sin documentacion API**
-- **Honor categories FANTASMA**: Admin consume `/admin/honor-categories` (CRUD completo) pero estos endpoints no existen en el backend — pendiente de implementacion
-- **Club ideals FANTASMA**: Admin consume `/admin/club-ideals` como endpoint read-only pero no esta en backend audit — pendiente verificacion
 - **Sin versionado de catalogos**: Los cambios en catalogos no tienen historial; un rename de alergia se pierde
 - **Sin importacion masiva**: No hay endpoint para carga masiva de datos geograficos o de referencia
 
 ## Prioridad y siguiente accion
 
-- **Prioridad**: Media — catalogos funcionales pero con endpoints fantasma pendientes
-- **Siguiente accion**: Implementar endpoints de `/admin/honor-categories` en el backend. Documentar los 4 endpoints de medicines y activity-types en ENDPOINTS-LIVE-REFERENCE. Verificar estado real de `/admin/club-ideals`.
+- **Prioridad**: Baja — catalogos funcionales; `/admin/honor-categories`, `/admin/club-ideals` y `/admin/medicines` existen y estan en ENDPOINTS-LIVE-REFERENCE
+- **Siguiente accion**: evaluar historial de cambios e importacion masiva de catalogos (gaps abiertos arriba).

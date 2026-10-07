@@ -4,31 +4,23 @@ Scripts SQL para inicialización y migración de la base de datos.
 
 ---
 
-> [!IMPORTANT]
-> Este README consolida la guía operativa principal y el contexto de backup/restore.
-> La versión histórica anterior está en `docs/history/database/README_BACKUP.md`.
-
----
-
 ## 📋 Scripts Disponibles
 
-### Migración Prisma pendiente: motor de certificaciones configurables
+> [!IMPORTANT]
+> Las migraciones vigentes viven en `sacdia-backend/prisma/migrations/` y se aplican con `pnpm prisma migrate deploy`. Este directorio **no** es fuente de migraciones: guarda scripts legacy anteriores a Prisma y dos SQL de referencia. Los seeds canónicos de RBAC están en `sacdia-backend/prisma/seeds/` (`permissions.seed.sql`, `role-permissions.seed.sql`).
 
-| Migración | Ubicación efectiva | Dependencia | Estado |
-|-----------|--------------------|-------------|--------|
-| `20260811180000_configurable_certifications_engine` | `sacdia-backend/prisma/migrations/20260811180000_configurable_certifications_engine/migration.sql` en `feat/configurable-certifications` | tablas legacy `certifications`, `certification_modules`, `certification_sections`, `users_certifications`, `certification_section_progress` | Existe en la rama backend; **no ejecutada ni verificada contra una base de datos real (Neon)** |
+### SQL de referencia
 
-Expand/backfill: crea versiones publicadas `1`, fija inscripciones y módulos a esa versión, agrega progreso por `enrollment_id`, componentes, evidencias, eventos de revisión y cierre. No elimina columnas legacy ni `certification_module_progress`. Verificador de solo lectura: `sacdia-backend/scripts/verify-certifications-migration.ts` (`CERTIFICATIONS_MIGRATION_VERIFY_DATABASE_URL`, opt-in `ALLOW_NEON_CERTIFICATIONS_VERIFY`).
+| Archivo | Uso | Estado |
+|---------|-----|--------|
+| `20260313_fs03_enrollment_aware_progress.sql` | Copia de `prisma/migrations/20260313000000_fs03_enrollment_aware_progress` con `BEGIN/COMMIT` y queries de revisión | **No borrar**: `sacdia-backend/test/classes-progress-migration.e2e-spec.ts` lo lee (`../../docs/database/migrations/...`) y esa suite es bloqueante en CI |
+| `20260710130000_admin_auth_sessions.sql` | Espejo documental del DDL de sesión administrativa de la rama backend `codex/sacdia-admin-ios-auth` (plan `sacdia-admin-ios*`) | No integrado en `development`: la tabla `admin_auth_sessions` no existe en `prisma/schema.prisma`. No ejecutar |
 
-### Migración Prisma pendiente: refresh administrativo iOS
+La migración `20260811180000_configurable_certifications_engine` ya está en `development` (`prisma/migrations/`). La migración `20260710200000_admin_refresh_rotation` solo existe en la rama `codex/sacdia-admin-ios-auth`.
 
-| Migración | Ubicación efectiva | Dependencia | Estado |
-|-----------|--------------------|-------------|--------|
-| `20260710200000_admin_refresh_rotation` | `sacdia-backend/prisma/migrations/20260710200000_admin_refresh_rotation/migration.sql` en `codex/sacdia-admin-ios-auth` | `20260710130000_admin_auth_sessions` | Existe en la rama backend; **no ejecutada ni verificada contra una base de datos** |
+### Scripts legacy (anteriores a Prisma)
 
-No es un script de inicialización de este directorio ni debe ejecutarse manualmente desde aquí. Agrega `idle_expires_at` para su adopción futura como autoridad de expiración inactiva; hoy `AdminSessionRepository.isActiveForToken` todavía valida `sessions.expires_at` de Better Auth. Para sesiones administrativas preexistentes, el backfill limita la fecha a la expiración absoluta y luego aplica el sentinel `admin-disabled:<session_id>` al token legacy, por lo que esas sesiones deben reautenticarse.
-
-La migración permite cero o una fila hash-only por sesión, historial sin FK a sesiones ni a reemplazos y columnas para futuros recibos AES-GCM ligados por identidad compuesta del token previo y `Idempotency-Key`; no contiene columnas para secretos raw. El DDL fija 60 segundos exactos para recibos, pero solo garantiza un mínimo de 60 segundos para el historial: retenerlo hasta la expiración absoluta corresponderá al writer y cleanup futuros. Los commits desde `c09a600` hasta `ee84d2d`, ambos inclusive, solo aportan schema, migración y pruebas estructurales; no hay writer ni endpoints runtime administrativos. Esta migración no debe ejecutarse antes de D1c y D2 —exclusión legacy y reautenticación comprobada—.
+Scripts de inicialización manual de enero de 2026. Se conservan como referencia; ningún código del backend los ejecuta.
 
 | Script | Descripción | Dependencias |
 |--------|-------------|--------------|
@@ -38,14 +30,16 @@ La migración permite cero o una fila hash-only por sesión, historial sin FK a 
 | `script_04_catalogos_medicos.sql` | Alergias y enfermedades | Ninguna |
 | `script_05_roles_permisos.sql` | Sistema RBAC (roles y permisos) | Ninguna |
 | `script_06_admin_permissions.sql` | Permisos del Admin Panel (resource:action) | script_05 |
-| `20260710130000_admin_auth_sessions.sql` | Espejo documental del DDL de sesión administrativa creado en la rama backend; no implica que la migración esté desplegada | `sessions`, `club_role_assignments` |
 | `verificar_catalogos.sql` | Queries de verificación | Todos los anteriores |
 
 ### Scripts de Datos Semilla (Seed Data)
+
+Datos geográficos (`INSERT … ON CONFLICT`). Ningún código ni script del backend los referencia.
+
 | Script | Descripción |
 |--------|-------------|
 | `countries.sql` | Lista de países |
-| `unions.sql` | Uniones por país |
+| `unios.sql` | Uniones por país |
 | `districts.sql` | Distritos por campo local |
 | `local_fields.sql` | Campos locales por unión |
 
@@ -83,16 +77,7 @@ psql -U postgres -d sacdia -f migrations/script_01_organizacion.sql
 
 ---
 
-### Opción 2: Desde Supabase Dashboard
-
-1. Ir a **SQL Editor** en Supabase Dashboard
-2. Copiar contenido del script
-3. Ejecutar
-4. Verificar resultados en **Table Editor**
-
----
-
-### Opción 3: Desde Prisma
+### Opción 2: Desde Prisma
 
 ```bash
 # Ejecutar un script SQL
@@ -100,12 +85,12 @@ npx prisma db execute --file migrations/script_01_organizacion.sql
 
 # O desde el directorio específico
 cd sacdia-backend
-npx prisma db execute --file ../docs/03-DATABASE/migrations/script_01_organizacion.sql
+npx prisma db execute --file ../docs/database/migrations/script_01_organizacion.sql
 ```
 
 ---
 
-### Opción 4: Script Bash Completo
+### Opción 3: Script Bash Completo
 
 Crear `/scripts/seed-database.sh`:
 
@@ -180,7 +165,6 @@ Son solo para desarrollo e inicialización de entornos nuevos.
 - Antes de cambios críticos, generar backup lógico completo de la base.
 - En restauraciones parciales por tabla, usar scripts versionados y validar FKs antes de aplicar.
 - Mantener pruebas de restore periódicas en entorno de staging.
-- Ver guía histórica detallada: `docs/history/database/README_BACKUP.md`.
 
 ---
 
@@ -238,4 +222,4 @@ ALTER TABLE users DROP COLUMN IF EXISTS new_column;
 
 ---
 
-**Última actualización**: 2026-01-30
+**Última actualización**: 2026-10-04

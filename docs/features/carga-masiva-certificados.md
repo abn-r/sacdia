@@ -1,6 +1,8 @@
 # Carga masiva por certificados OCR
 
-**Estado**: EN IMPLEMENTACION
+**Estado**: IMPLEMENTADO (en `development`). La variante de OCR con ADC y la validación de PDF con `pdf-lib` están **pendientes de merge (PR #448 de sacdia-backend)**.
+
+Superficies en `development`: backend `src/certificate-bulk-imports` (26 rutas), admin `/dashboard/certificate-bulk-imports*` y `/dashboard/institutional-certificate-requests*`, app `lib/features/certificate_import`.
 
 ## Descripcion de dominio
 
@@ -21,7 +23,7 @@ OCR propone, el miembro confirma y Campo Local valida. La aprobacion aplica a la
 - Controlador admin: `AdminCertificateBulkImportsController`
 - Servicio workflow: `CertificateBulkImportsService`
 - Servicio aplicacion: `CertificateBulkImportApplicationService`
-- OCR seam: `CertificateOcrProvider` + `GoogleVisionCertificateOcrProvider` (cliente oficial, ADC).
+- OCR seam: `CertificateOcrProvider` + `GoogleVisionCertificateOcrProvider`. En `development` llama a la API REST `images:annotate` autenticada con `GOOGLE_VISION_API_KEY`; sin clave responde `CERTIFICATE_IMPORT_OCR_UNAVAILABLE`. El cliente oficial con ADC está pendiente de merge (PR #448).
 
 ### Endpoints miembro
 
@@ -104,6 +106,9 @@ Tablas finales existentes:
 
 ## Reglas confirmadas el 2026-09-21
 
+> [!WARNING]
+> **Pendiente de merge (PR #448 de sacdia-backend).** Lo que esta sección dice de ADC, gRPC, PDF de 1 a 5 páginas y validación con `pdf-lib` describe la rama `feat/investiture-authorization-ocr`. En `development` el proveedor usa `GOOGLE_VISION_API_KEY` sobre REST.
+
 La aprobación de una fila CLASS ya acredita el hecho histórico. La subida nueva pide una URL firmada, confirma los bytes y guarda la clave sellada. La lectura automática usa Google Cloud Vision con **Application Default Credentials (ADC)** sobre JPEG, PNG, WebP y PDF completos de **1 a 5 páginas**, con máximo binario de **10 MiB** por documento. `GOOGLE_VISION_API_KEY` ya no autentica este proveedor. El SDK oficial usa gRPC con bytes, no REST/base64, GCS ni una URL pública.
 
 La petición del miembro encola el trabajo en `certificate-import-ocr` (concurrencia 1, dos intentos); no comparte el worker de finanzas ni rankings. Aceptar la cola **no** significa que OCR terminó. Sin Redis la petición responde `CERTIFICATE_IMPORT_OCR_UNAVAILABLE`. ADC ausente/inválido, cuota, deadline o fallo de lectura se detectan en el worker; no se registra `OCR_PROCESSED` ante fallo o respuesta PDF incompleta. La app espera brevemente tras encolar y abre la revisión incluso cuando falla la lectura: el miembro puede agregar/corregir filas a mano si conserva evidencia confirmada válida. El OCR no verifica autenticidad, no aprueba ni acredita el certificado.
@@ -125,7 +130,7 @@ Tres vías distintas:
 
 ## Despliegue
 
-El orden es schema aditivo, backend con la cola apagada si no hay Redis, y después los clientes. ADC debe estar disponible para el worker; sin credenciales o Redis no hay lectura exitosa y el expediente válido puede completarse a mano. Usar una identidad dedicada por ambiente y privilegios mínimos; nunca subir ADC personal a Render. El código está implementado en worktrees aislados, **no desplegado**. Configuración Render y smoke OCR real siguen pendientes de autorización. Ver [runbook](../guides/google-vision-certificate-ocr.md). Ante una falla, se dejan de aceptar cargas y aprobaciones nuevas; la lectura y la auditoría se conservan. No se borran hechos ya acreditados ni se restauran índices viejos. `scripts/audit-certificate-imports.ts` solo informa y rechaza `--apply`. No usa `DATABASE_URL`.
+El orden es schema aditivo, backend con la cola apagada si no hay Redis, y después los clientes. ADC debe estar disponible para el worker; sin credenciales o Redis no hay lectura exitosa y el expediente válido puede completarse a mano. Usar una identidad dedicada por ambiente y privilegios mínimos; nunca subir ADC personal a Render. El flujo base está en `development`; la parte ADC está pendiente de merge (PR #448). Configuración Render y smoke OCR real siguen pendientes de autorización. Ver [runbook](../guides/google-vision-certificate-ocr.md). Ante una falla, se dejan de aceptar cargas y aprobaciones nuevas; la lectura y la auditoría se conservan. No se borran hechos ya acreditados ni se restauran índices viejos. `scripts/audit-certificate-imports.ts` solo informa y rechaza `--apply`. No usa `DATABASE_URL`.
 
 ### Estados de la bandeja institucional
 

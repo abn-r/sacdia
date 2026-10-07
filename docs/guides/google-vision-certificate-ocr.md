@@ -1,6 +1,10 @@
 # Google Vision ADC para certificados — runbook
 
 **Estado**: ACTIVE (operación propuesta; despliegue pendiente)  
+
+> [!WARNING]
+> **Pendiente de merge (PR #448 de sacdia-backend, rama `feat/investiture-authorization-ocr`).** Este runbook describe el proveedor con `@google-cloud/vision` (ADC) y `pdf-lib` de esa rama. En `development` el proveedor (`src/certificate-bulk-imports/ocr/google-vision-certificate-ocr.provider.ts`) todavía usa `GOOGLE_VISION_API_KEY` + `fetch` contra `vision.googleapis.com`, acepta solo imágenes y `env.validation.ts` sigue validando esa clave. No usar esta guía como referencia operativa hasta el merge.
+
 **Verificado**: 2026-10-01 contra implementación revisada, integrada al workspace principal por autorización expresa, y documentación oficial.
 
 ## Qué hace y qué NO hace

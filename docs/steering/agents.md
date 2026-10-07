@@ -1,550 +1,125 @@
 # Agents Configuration
 
 **Estado**: ACTIVE
+**Actualizado**: 2026-10-04
 
-> Este archivo configura el comportamiento de los agentes de IA para tu proyecto  
-> Compatible con el estándar AGENTS.md y IDEs con IA como Cursor, Windsurf, Copilot, etc.
-
----
-
-## Filosofía del Proyecto
-
-Este proyecto sigue una filosofía de **spec-driven development** (desarrollo basado en especificaciones). Todas las features comienzan con especificaciones detalladas antes de escribir código.
-
-### Valores Fundamentales
-
-1. **Claridad sobre Velocidad**: Preferimos pensar antes de codear
-2. **Documentación Viva**: Las specs no son documentos muertos, evolucionan con el código
-3. **Trazabilidad**: Cada línea de código debe ser trazable a un requisito
-4. **Calidad sobre Cantidad**: Código bien testeado > código rápido
+> Reglas extendidas para agentes de IA en SACDIA. El contrato corto está en `AGENTS.md` (raíz); este archivo lo detalla y no lo contradice. Reparto de trabajo entre agentes: `docs/steering/agent-ownership.md`.
 
 ---
 
-## Workflow de Desarrollo
+## 1. Principios
 
-### Proceso Estándar
-
-Cuando trabajas en una nueva feature, **SIEMPRE** sigue este flujo:
-
-```
-1. Leer specs existentes (docs/steering/)
-   ↓
-2. Crear/Actualizar requirements.md
-   ↓
-3. Crear/Actualizar design.md
-   ↓
-4. Crear/Actualizar tasks.md
-   ↓
-5. Implementar según tasks.md
-   ↓
-6. Escribir tests
-   ↓
-7. Actualizar documentación
-   ↓
-8. Code review
-```
-
-### Checkpoint Important
-
-**ANTES de escribir una sola línea de código**:
-- [ ] ¿Existe un `requirements.md` para esta feature?
-- [ ] ¿Está aprobado por el equipo?
-- [ ] ¿Entiendes completamente los criterios EARS?
-
-Si contestas "no" a cualquiera, **DETENTE** y crea/revisa las specs primero.
+1. **Verificar antes de afirmar**: cada dato técnico que se escribe (endpoint, permiso, tabla, versión, ruta) se comprueba en el código de `development`.
+2. **Contract-first**: backend define o valida endpoints, DTOs, permisos y errores antes de que el admin o la app los consuman.
+3. **Documentación viva**: si cambia comportamiento, la documentación se actualiza en el mismo trabajo.
+4. **Preguntar antes de asumir**: si falta un requisito, se detiene la implementación y se pide definición. Una pregunta a la vez.
 
 ---
 
-### Ownership entre agentes
+## 2. Flujo de trabajo
 
-Para cambios integrales entre backend, app móvil y admin web, aplicar `docs/steering/agent-ownership.md`.
+```text
+1. Leer contexto: AGENTS.md → CLAUDE.md del repo → docs/features/<dominio>.md → canon/runtime del área
+2. Verificar el estado real en el código de development
+3. Si el cambio es grande: escribir diseño/plan en docs/plans/
+4. Implementar en una rama desde development
+5. Tests y verificaciones del repo afectado
+6. Actualizar documentación (api, database, features, canon, steering)
+7. PR a development → QA en preproduction → release en main
+```
 
-- Codex mantiene ownership principal de backend, app móvil, contratos API, datos, seguridad y documentación técnica.
-- Cursor Composer 2.5 mantiene ownership principal del panel administrativo: diseño, acomodo de información, layouts y polish visual.
-- Todo cambio debe ser **contract-first**: el admin consume contratos definidos; no inventa endpoints, DTOs, permisos ni reglas de negocio.
-- Codex puede revisar `sacdia-admin/` por integración, seguridad o compatibilidad contractual, pero no debe imponer decisiones visuales salvo pedido explícito.
+### Planes
+
+- Los diseños y planes de trabajo grande viven en `docs/plans/` con nombre `YYYY-MM-DD-<tema>-design.md` / `-plan.md`.
+- La cabecera del plan indica su estado real: qué está hecho, qué falta y en qué rama vive el código.
+- Al terminar: el diseño con decisiones de valor se archiva en `docs/history/`; los planes paso a paso, handoffs y listas de tareas se eliminan (git conserva el historial). Lo vigente se refleja en `docs/features/` y, si aplica, en `docs/canon/`.
+
+### Trabajo sin integrar
+
+- Lo que vive en una rama o PR sin merge no es estado actual. Si se documenta, se marca "Pendiente de merge (PR #N de <repo>)".
 
 ---
 
-## Reglas Generales para Agentes IA
+## 3. Lectura de contexto
 
-### 1. Lectura de Contexto
+Orden mínimo antes de tocar código: ver `AGENTS.md` §1. Además:
 
-**ANTES de implementar cualquier código**:
+- precedencia documental: `docs/canon/source-of-truth.md`;
+- stack y modelo de auth: `docs/steering/tech.md`;
+- dónde vive cada cosa: `docs/steering/STRUCTURE-GUIDE.md`;
+- reglas de código y datos: `docs/steering/coding-standards.md` y `docs/steering/data-guidelines.md`.
 
-```markdown
-1. Lee TODOS los steering files en `docs/steering/`:
-   - tech.md (stack tecnológico)
-   - coding-standards.md (estándares de código)
-   - data-guidelines.md (manejo de datos)
-
-2. Si existe una spec para la feature actual:
-   - Lee requirements.md
-   - Lee design.md
-   - Lee tasks.md
-   
-3. Busca implementaciones similares en el codebase
-```
-
-### 2. Pregunta Antes de Asumir
-
-Si algo no está claro en las especificaciones:
-- ❌ **NO** asumas la respuesta
-- ❌ **NO** inventes requisitos
-- ✅ **SÍ** pregunta al usuario
-- ✅ **SÍ** sugiere opciones con pros/contras
-
-### 3. Prioriza la Consistencia
-
-- Sigue los patrones existentes en el codebase
-- No introduzcas nuevas librerías sin justificación
-- Mantén el mismo estilo de código que el proyecto
-- Respeta las convenciones de nombres
-
-### 4. Testing es Obligatorio
-
-Para **CADA** funcionalidad que implementes:
-- ✅ Escribe unit tests
-- ✅ Asegura coverage >80% para lógica de negocio
-- ✅ Incluye casos de error, no solo casos felices
-- ✅ Documenta los tests
-
-### 5. Seguridad Primero
-
-**NUNCA**:
-- ❌ Hardcodees credenciales o secrets
-- ❌ Concatenes strings en SQL queries
-- ❌ Confíes en input del usuario sin validar
-- ❌ Expongas stack traces al cliente
-- ❌ Uses dependencias con vulnerabilidades conocidas
-
-**SIEMPRE**:
-- ✅ Usa variables de entorno para secrets
-- ✅ Valida y sanitiza inputs
-- ✅ Usa prepared statements o ORMs
-- ✅ Implementa rate limiting en APIs
-- ✅ Loggea operaciones sensibles
+No usar como fuente de estado actual: `docs/history/**`, planes ya cerrados, bloques `<claude-mem-context>`.
 
 ---
 
-## Convenciones de Código
-
-### Lenguajes y Frameworks
-
-**Backend**:
-- Lenguaje: [Especificar en tech.md]
-- Framework: [Especificar en tech.md]
-
-**Frontend**:
-- Lenguaje: [Especificar en tech.md]
-- Framework: [Especificar en tech.md]
-
-### Estructura de Archivos
-
-Sigue **ESTRICTAMENTE** la estructura definida en `structure.md`.
-
-### Nombres
-
-**Variables y Funciones**:
-- `camelCase` para JavaScript/TypeScript
-- `snake_case` para Python
-- Nombres descriptivos, no abreviaturas crípticas
-
-❌ Mal:
-```javascript
-const u = getUserData();
-const d = new Date();
-```
-
-✅ Bien:
-```javascript
-const userData = getUserData();
-const currentDate = new Date();
-```
-
-**Archivos**:
-- Componentes React: `PascalCase.tsx` (ej: `UserProfile.tsx`)
-- Utilities: `camelCase.ts` (ej: `formatDate.ts`)
-- Constantes: `UPPER_SNAKE_CASE.ts` (ej: `API_ENDPOINTS.ts`)
-
-### Comentarios
-
-**Comenta el "por qué", no el "qué"**:
-
-❌ Mal:
-```javascript
-// Incrementa el contador
-counter++;
-```
-
-✅ Bien:
-```javascript
-// Incrementamos aquí en lugar de en el reducer porque necesitamos
-// el valor inmediatamente para el cálculo que sigue
-counter++;
-```
-
-**Documenta funciones públicas**:
-```typescript
-/**
- * Valida un email usando regex RFC 5322 simplificado
- * 
- * @param email - Email a validar
- * @returns true si el email es válido, false en caso contrario
- * @throws Error si email es null o undefined
- */
-function validateEmail(email: string): boolean {
-  // implementación
-}
-```
-
----
-
-## Manejo de Errores
-
-### Estrategia General
-
-1. **Valida Temprano**: Falla rápido en inputs inválidos
-2. **Errores Específicos**: Usa tipos de error específicos
-3. **Logging Completo**: Loggea contexto suficiente para debugging
-4. **Mensajes Amigables**: Al usuario, mensajes claros; en logs, detalles técnicos
-
-### Ejemplo Backend
-
-```javascript
-try {
-  // Validación temprana
-  if (!userId) {
-    throw new ValidationError('userId es requerido');
-  }
-  
-  const user = await userService.findById(userId);
-  
-  if (!user) {
-    throw new NotFoundError(`Usuario ${userId} no encontrado`);
-  }
-  
-  // Lógica de negocio
-  
-} catch (error) {
-  logger.error('Error al procesar usuario', {
-    userId,
-    error: error.message,
-    stack: error.stack,
-    requestId: req.id
-  });
-  
-  if (error instanceof ValidationError) {
-    return res.status(400).json({
-      success: false,
-      error: {
-        code: 'VALIDATION_ERROR',
-        message: error.message
-      }
-    });
-  }
-  
-  if (error instanceof NotFoundError) {
-    return res.status(404).json({
-      success: false,
-      error: {
-        code: 'NOT_FOUND',
-        message: error.message
-      }
-    });
-  }
-  
-  // Error no esperado
-  return res.status(500).json({
-    success: false,
-    error: {
-      code: 'INTERNAL_ERROR',
-      message: 'Ocurrió un error inesperado'
-      // NO incluir detalles técnicos al cliente
-    }
-  });
-}
-```
-
----
-
-## Git y Control de Versiones
-
-### Commits
-
-**Formato**:
-```
-<tipo>(<alcance>): <descripción corta>
-
-<descripción detallada opcional>
-
-<footer opcional>
-```
-
-**Tipos**:
-- `feat`: Nueva funcionalidad
-- `fix`: Bug fix
-- `docs`: Cambios en documentación
-- `style`: Formato, no afecta lógica
-- `refactor`: Refactorización
-- `test`: Agregar/modificar tests
-- `chore`: Tareas de mantenimiento
-
-**Ejemplos**:
-```
-feat(auth): implementar login con JWT
-
-- Agregar endpoint POST /auth/login
-- Validar credenciales contra database
-- Generar JWT con expiración de 1h
-- Incluir tests de integración
-
-Closes #123
-```
-
-```
-fix(api): corregir race condition en cache
-
-El cache de Redis no se estaba invalidando correctamente
-cuando múltiples requests actualizaban el mismo recurso
-simultáneamente.
-
-Solución: Implementar locks distribuidos con Redlock.
-```
-
-### Branches
-
-**Estrategia**: [Git Flow | GitHub Flow | Trunk-based]
-
-**Nombres de Branches**:
-- `main` / `master`: Producción
-- `development`: Desarrollo
-- `feature/[nombre]`: Nueva feature
-- `fix/[nombre]`: Bug fix
-- `hotfix/[nombre]`: Fix crítico en producción
-
-**Ejemplo**:
-```bash
-git checkout -b feature/user-authentication
-```
-
----
-
-## Testing
-
-### Niveles de Testing
-
-1. **Unit Tests**: Funciones individuales, clases
-   - Coverage objetivo: >80% para lógica de negocio
-   
-2. **Integration Tests**: Interacción entre componentes
-   - Endpoints de API
-   - Flujos de datos
-   
-3. **E2E Tests**: User journeys completos
-   - Solo para flujos críticos (login, checkout, etc.)
-
-### Convenciones
-
-**Nombres de Tests**:
-```javascript
-describe('UserService', () => {
-  describe('create', () => {
-    it('should create user with valid data', async () => {
-      // Arrange
-      const userData = { email: 'test@example.com', name: 'Test' };
-      
-      // Act
-      const user = await userService.create(userData);
-      
-      // Assert
-      expect(user).toBeDefined();
-      expect(user.email).toBe(userData.email);
-    });
-    
-    it('should throw ValidationError when email is invalid', async () => {
-      // Arrange
-      const userData = { email: 'invalid-email', name: 'Test' };
-      
-      // Act & Assert
-      await expect(userService.create(userData))
-        .rejects
-        .toThrow(ValidationError);
-    });
-  });
-});
-```
-
-### Qué Testear
-
-✅ **SÍ Testear**:
-- Lógica de negocio
-- Validaciones
-- Transformaciones de datos
-- Manejo de errores
-- Edge cases
-
-❌ **NO Testear** (o testear mínimamente):
-- Third-party libraries (ya están testeadas)
-- Código trivial (getters/setters simples)
-- Configuración estática
-
----
-
-## Performance
+## 4. Reglas por repositorio
 
 ### Backend
 
-- Usa índices en queries frecuentes
-- Implementa paginación (no retornes miles de registros)
-- Cachea datos que cambian poco
-- Usa connection pooling para DB
-- Implementa rate limiting
+- Todo handler nuevo declara `@Public()`, `@SkipPermissions()` o `@RequirePermissions(...)` (guard global deny-by-default).
+- Permisos nuevos: `permissions.seed.sql` + reparto en `role-permissions.seed.sql` + screen catalog si afecta a una pantalla.
+- Cambio de schema: migración Prisma + actualización de `docs/database/`.
+- Cambio de endpoint: actualización de `docs/api/ENDPOINTS-LIVE-REFERENCE.md`.
 
-### Frontend
+### Admin
 
-- Code splitting para reducir bundle size
-- Lazy loading de imágenes
-- Memoización de componentes pesados (React.memo)
-- Debounce/throttle en inputs de búsqueda
-- Optimistic updates para mejor UX
+- Pantalla nueva = página en `src/app/(dashboard)/dashboard/` + entrada en el screen catalog + entrada de sidebar con el mismo id + textos en los cuatro `messages/*.json`.
+- No modificar `sacdia-backend` desde un trabajo de admin: entregar handoff (plantilla en `docs/steering/agent-ownership.md`).
 
----
+### App
 
-## Interacción con el Usuario
-
-### Cuando Necesites Input
-
-**Pregunta Estructurada**:
-```markdown
-Necesito tu decisión sobre [tema]:
-
-**Opciones**:
-1. [Opción A]
-   - Pros: [lista]
-   - Contras: [lista]
-   
-2. [Opción B]
-   - Pros: [lista]
-   - Contras: [lista]
-
-**Recomendación**: Sugiero [opción] porque [razón].
-
-¿Cuál prefieres?
-```
-
-### Cuando Propongas Cambios
-
-**Formato**:
-```markdown
-**Situación Actual**: [Descripción]
-
-**Problema**: [Qué está mal]
-
-**Propuesta**: [Qué cambiaría]
-
-**Impacto**: 
-- Archivos afectados: [lista]
-- Tiempo estimado: [X horas]
-- Riesgos: [lista]
-
-¿Procedo con este cambio?
-```
+- Feature nueva en `lib/features/<feature>/{data,domain,presentation}`.
+- Gate de pantalla con `canViewScreen`; si cambia un gate `app` en el admin, regenerar `test/fixtures/screen-catalog.snapshot.json`.
+- Textos en los cuatro `assets/translations/*.json`.
 
 ---
 
-## Antipatrones a Evitar
+## 5. Git
 
-### ❌ NO Hagas
-
-1. **Copiar-Pegar Código**: Refactoriza en función reutilizable
-2. **Funciones de 100+ Líneas**: Divide en funciones más pequeñas
-3. **God Objects**: Clases que hacen demasiado
-4. **Magic Numbers**: Usa constantes nombradas
-5. **Comentarios Obsoletos**: Elimina o actualiza
-6. **Try-Catch Vacíos**: Siempre loggea errores
-7. **Ignorar Warnings**: Arregla warnings del linter
-8. **Premature Optimization**: Optimiza solo con datos que lo justifiquen
-
-### ✅ SÍ Haz
-
-1. **DRY (Don't Repeat Yourself)**: Reutiliza código
-2. **KISS (Keep It Simple, Stupid)**: Soluciones simples > complejas
-3. **YAGNI (You Aren't Gonna Need It)**: No código especulativo
-4. **Single Responsibility**: Una clase/función = una responsabilidad
-5. **Fail Fast**: Valida y falla temprano
-6. **Code Review**: Todo código debe ser revisado
-7. **Refactor Constantemente**: Mejora código continuamente
-8. **Documenta Decisiones**: Especialmente las no obvias
+- Conventional Commits. No añadir atribución de IA ni `Co-Authored-By` salvo que el usuario lo pida.
+- Ramas permanentes: `development` (integración), `preproduction` (QA), `main` (release). Ramas de trabajo con prefijo de tipo (`feat/`, `fix/`, `perf/`...).
+- Commitear, hacer push o abrir PR solo cuando el usuario lo pide.
+- No reescribir historia de ramas compartidas.
 
 ---
 
-## Checklist de Pre-Implementación
+## 6. Verificaciones
 
-Antes de empezar a codear, verifica:
-
-- [ ] ¿Leíste todos los steering files?
-- [ ] ¿Leíste la spec de esta feature (requirements + design + tasks)?
-- [ ] ¿Entiendes completamente qué se espera?
-- [ ] ¿Identificaste qué task específica implementarás?
-- [ ] ¿Revisaste código similar en el proyecto?
-- [ ] ¿Conoces las dependencias de esta tarea?
-- [ ] ¿Sabes cómo testear lo que implementarás?
-
-Si contestas "no" a alguna, **DETENTE y resuelve primero**.
+- No ejecutar builds salvo pedido explícito del usuario.
+- Sí ejecutar, cuando el cambio lo amerita, las verificaciones rápidas del repo: `pnpm test`/`pnpm run lint` (backend), `pnpm test`/`pnpm typecheck` (admin), `flutter analyze`/`flutter test` (app).
+- En `sacdia`: `node scripts/verify-api-docs-consistency.mjs` tras tocar la Live Reference.
 
 ---
 
-## Checklist Post-Implementación
+## 7. Seguridad
 
-Después de implementar, verifica:
-
-- [ ] ¿El código cumple los criterios de aceptación del requirement?
-- [ ] ¿Escribiste tests con coverage >80%?
-- [ ] ¿Los tests pasan localmente?
-- [ ] ¿Corriste el linter y no hay errores?
-- [ ] ¿Documentaste funciones públicas?
-- [ ] ¿Actualizaste task.md marcando como completado?
-- [ ] ¿El código sigue las convenciones del proyecto?
-- [ ] ¿No hay secrets hardcodeados?
-- [ ] ¿Agregaste manejo de errores apropiado?
-- [ ] ¿Actualizaste documentación relevante?
+- No tocar archivos `.env` reales ni escribir secretos en código o documentación.
+- No publicar contraseñas de usuarios de prueba ni datos personales en documentación versionada.
+- No relajar guards, CORS, Swagger en producción ni el alcance territorial sin decisión explícita.
 
 ---
 
-## Recursos Adicionales
+## 8. Comunicación con el usuario
 
-### Documentación Interna
-- `docs/steering/tech.md`: Stack tecnológico
-- `docs/steering/coding-standards.md`: Estándares detallados
-- `docs/guides/`: Guías de uso del sistema
-
-### Cuando Tengas Dudas
-
-1. Revisa specs existentes
-2. Busca código similar en el proyecto
-3. Consulta steering files
-4. Pregunta al usuario con opciones claras
+- Español neutro; sin voseo ni modismos regionales.
+- Respuestas cortas por defecto; ampliar solo si se pide o si el riesgo lo exige.
+- No presentar menús de opciones salvo que exista una bifurcación real con tradeoffs.
+- Al proponer un cambio: qué se cambia, por qué, qué archivos toca y cómo se verifica.
 
 ---
 
-## Actualización de Este Archivo
+## 9. Checklists
 
-Este archivo debe evolucionar con el proyecto:
-- Actualiza cuando cambien procesos
-- Agrega nuevas reglas según aprendizajes
-- Elimina reglas obsoletas
-- Mantén ejemplos actualizados
+### Antes de implementar
 
-**Última revisión**: [YYYY-MM-DD]  
-**Próxima revisión sugerida**: [YYYY-MM-DD]
+- [ ] Leí la documentación del dominio y verifiqué el estado en `development`.
+- [ ] El contrato (endpoint, DTO, permisos, errores) está definido.
+- [ ] Sé qué documentos tendré que actualizar.
 
----
+### Antes de cerrar
 
-## Nota Final
-
-> La IA es una herramienta poderosa, pero tú (humano) eres quien toma las decisiones finales.
-> Este archivo es una guía, no una prisión. Úsalo para mantener consistencia y calidad,
-> pero siéntete libre de desviarte cuando tenga sentido.
-> 
-> **Principio rector**: Pregunta cuando dudes, sugiere cuando sepas, implementa cuando esté claro.
+- [ ] Tests y verificaciones relevantes ejecutados.
+- [ ] Documentación actualizada (api, database, features, canon, steering según corresponda).
+- [ ] Trabajo sin integrar marcado como "Pendiente de merge".
+- [ ] Sin secretos ni datos personales en el diff.

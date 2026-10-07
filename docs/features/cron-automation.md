@@ -170,14 +170,15 @@ Varios jobs están gobernados por `system_config` o feature flags (ver §6) para
   2. Termina esos cargos → `status=ended`, `active=false`, `end_date` = fin del periodo saliente (conserva un `end_date` anterior más temprano; no reescribe con `currentYear.start_date`). Cierra `class_counselor_assignments` vencidas; no crea autoridad pedagógica nueva.
   3. Activa planes `director_succession_plans` en `scheduled` con `effective_date <= currentYear.start_date` creando CRA director `status=active`. **No** activa filas CRA `designated`.
      - Si el sucesor no es elegible para `director` en esa sección (regla de Guía Mayor), el plan se **omite**: queda `scheduled`, se emite `logger.warn` (plan, usuario, código) y, tras el commit del club, se notifica (fire-and-forget, fuente `admin:year_cut_director_plan_skipped`, textos en `notifications.notifications.year_cut.*` de los 4 locales) a `super-admin`/`admin` y a `director-lf`/`assistant-lf` del campo local del club. Un fallo al notificar se loguea y no aborta el corte.
-  4. Resuelve estado final: junta AV/CQ → `member inactive` en GM vía política anual; consejero/member en **esa** sección. Si ya hay director `active` en el destino, no crea member extra. No crea clases ni `member active`.
+  4. Egresados de tipo: si el resolvedor de siguiente clase indica que el miembro cruza de tipo de club (`crossed_type`), escribe su inscripción anual en la sección destino (`AnnualMembershipService.writeTypeJumpEnrollment`); esos usuarios no se devuelven a `not-enrolled`.
+  5. Resuelve estado final: junta AV/CQ → `member inactive` en GM vía política anual; consejero/member en **esa** sección. Si ya hay director `active` en el destino, no crea member extra. No crea clases ni `member active`.
 - **Cron**: `5 6 * * *` UTC (~00:05 CST en horario estándar México).
 - **Lock**: Redis `cron:ecclesiastical-year-cut` (TTL ~23 horas) **y** `pg_advisory_xact_lock(club_id, year_id)` dentro de la transacción por club.
 - **job_name**: `ecclesiastical-year-cut` (en `cron_run_log`).
 - **Entidades mutadas**: `club_role_assignments`; `director_succession_plans` (`scheduled` → `activated`); `class_counselor_assignments`; `club_year_transitions`; `authorization_context_versions` (bumpMany en tx).
 - **Side-effects**: `AuthorizationContextService.invalidateUserAuthorizationCache` por usuario afectado (post-commit, try/catch por usuario). Fallo de caché/FCM **no** revierte ni duplica el corte. **NO llama** `YearEndService.closeYear`. **NO hace blacklist de JWT**.
 - **Idempotencia**: ledger `club_year_transitions` único `(club_id, ecclesiastical_year_id)`; si `status=completed` el club se omite. Reintento con `in_progress`/fallo relee candidatos bajo lock y reutiliza `ensureNotEnrolled`.
-- **Retorno**: `{ ended, activated, returnedNotEnrolled, usersInvalidated }`. `itemsProcessed` del cron = ended + activated + returnedNotEnrolled. Ya no existe `gmMembersCreated` ni `ghostsMarked`.
+- **Retorno**: `{ ended, activated, returnedNotEnrolled, typeGraduatesEnrolled, usersInvalidated }`. `itemsProcessed` del cron = ended + activated + returnedNotEnrolled + typeGraduatesEnrolled. Ya no existe `gmMembersCreated` ni `ghostsMarked`.
 - **Condiciones skip**: lock Redis no adquirido (`trackSkipped`); ningún club candidato (log + return temprano, sin tx); transición del club ya `completed`.
 - **Migraciones**: `20260908180000_director_year_slots`, `20260909120000_annual_membership_cycle` (ledger + unique member) y `20260909130000_director_succession_open_unique` aplicadas a Neon development (2026-09-11).
 

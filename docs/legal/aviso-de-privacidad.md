@@ -131,9 +131,11 @@ Entre los proveedores o servicios que pueden participar se encuentran:
 - **Vercel**: hosting del panel web;
 - **Cloudflare R2**: almacenamiento de archivos, imágenes, evidencias, certificados, comprobantes y exportaciones;
 - **Google**: inicio de sesión con Google, Firebase Cloud Messaging, servicios de Android y mapas cuando aplique;
+- **Google Cloud Vision**: lectura automática (OCR) de imágenes de certificados que el usuario sube para proponer sus datos;
 - **Apple**: inicio de sesión con Apple y servicios del sistema operativo cuando aplique;
 - **Sentry**: monitoreo de errores y estabilidad;
 - **OpenStreetMap/Nominatim y servicios de geocodificación**: búsqueda o selección de lugares;
+- **Resend**: envío de correo transaccional para verificación, seguridad o soporte;
 - proveedores de correo o mensajería transaccional configurados para verificación, seguridad o soporte.
 
 Estos proveedores pueden procesar datos en México, Estados Unidos u otros países, según su infraestructura.

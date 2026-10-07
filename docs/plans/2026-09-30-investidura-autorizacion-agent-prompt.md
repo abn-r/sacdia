@@ -1,5 +1,8 @@
 # Prompt para el agente implementador — investidura por autorización
 
+> **Estado real (revisado 2026-10-04 contra `development`)**: Prompt ya ejecutado; su resultado: Pendiente de merge (PR #448 de sacdia-backend, rama `feat/investiture-authorization-ocr`, commit `113d8ba`). Las rutas `/Users/abner/...` son del equipo de origen. Al hacer merge, este archivo puede eliminarse.
+
+
 Implementa el plan completo de investidura por autorización de SACDIA, no únicamente la validación de certificados:
 
 `/Users/abner/Documents/development/sacdia/docs/plans/2026-09-28-investidura-autorizacion.md`

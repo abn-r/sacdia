@@ -111,9 +111,9 @@ Permisos vigentes (dominio propio, migrados desde `units:*` en 2026-04-22):
 - `mom:evaluate` — disparar evaluación manual (mantiene validación adicional de rol director activo en la sección).
 
 Distribución inicial tras migración:
-- `mom:read` — todos los roles de club (member, counselor, secretary, treasurer, secretary-treasurer, deputy-director, director) + globales field-level+ (assistant-lf y copias JOIN) + admin/super_admin.
+- `mom:read` — todos los roles de club (member, counselor, secretary, treasurer, secretary-treasurer, deputy-director, director) + globales field-level+ (assistant-lf y copias JOIN) + admin/super-admin.
 - `mom:evaluate` — mismo listado que `mom:read` excepto `member` (evaluación manual requiere rol con `units:update` histórico).
-- `mom:supervise` — globales field-level+ (assistant-lf, director-lf, assistant-union, director-union, assistant-dia, director-dia) + admin/super_admin + `coordinator`/`zone-coordinator`/`general-coordinator` (alcance por `coordinator_assignments`, no por campo local).
+- `mom:supervise` — globales field-level+ (assistant-lf, director-lf, assistant-union, director-union, assistant-dia, director-dia) + admin/super-admin + `coordinator`/`zone-coordinator`/`general-coordinator` (alcance por `coordinator_assignments`, no por campo local).
 
 El permiso anterior `units:read`/`units:update` ya no rige en los 4 handlers de MoM. La migración es cambio duro (sin compat window) porque el seed otorga `mom:*` a todos los roles que tenían `units:*` antes de que los handlers conmuten — garantizando continuidad de acceso sin ventana de deprecación necesaria.
 
@@ -128,7 +128,7 @@ El permiso anterior `units:read`/`units:update` ya no rige en los 4 handlers de 
 | `/clubs/:clubId/sections/:sectionId/member-of-month/evaluate` | POST | evaluación manual | `mom:evaluate` |
 | `/member-of-month/admin/list` | GET | supervisión multi-sección (admin/coordinator) | `mom:supervise` |
 
-Scope del endpoint admin: admin/super_admin ve todo; coordinator queda forzado a `club_section_ids` de `getEffectiveCoordinatorSectionIds` (el query `local_field_id` se ignora). Roles territoriales de campo siguen usando su `local_field_id`.
+Scope del endpoint admin: admin/super-admin ve todo; coordinator queda forzado a `club_section_ids` de `getEffectiveCoordinatorSectionIds` (el query `local_field_id` se ignora). Roles territoriales de campo siguen usando su `local_field_id`.
 
 ---
 

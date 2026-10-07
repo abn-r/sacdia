@@ -29,7 +29,7 @@ visual_review: passed
 correction_rounds: 2
 ```
 
-Recibos: [delivery](04-arquitectura-backend-delivery.json), [navegador](04-arquitectura-backend-browser.json).
+Recibos: `delivery` (artefacto retirado; consultar historial git), `navegador` (artefacto retirado; consultar historial git).
 
 ### 05-arquitectura-app
 
@@ -44,7 +44,7 @@ visual_review: passed
 correction_rounds: 2
 ```
 
-Recibos: [delivery](05-arquitectura-app-delivery.json), [navegador](05-arquitectura-app-browser.json).
+Recibos: `delivery` (artefacto retirado; consultar historial git), `navegador` (artefacto retirado; consultar historial git).
 
 ## Candidatos no entregados
 
@@ -54,8 +54,8 @@ Recibos: [delivery](05-arquitectura-app-delivery.json), [navegador](05-arquitect
   coordenadas deja 0.005 px de diferencia horizontal en los segmentos verticales
   explícitos. Requiere recalcular via con los centros exactos antes de validar.
 
-Recibos: [general](03-arquitectura-general-validation.json),
-[panel](06-arquitectura-panel-validation.json). Sus JSON siguen como borradores.
+Recibos: `general` (artefacto retirado; consultar historial git),
+`panel` (artefacto retirado; consultar historial git). Sus JSON siguen como borradores.
 No tienen evidencia de navegador ni revisión perceptual de HTML final.
 
 ## Reproducibilidad

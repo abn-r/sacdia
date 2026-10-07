@@ -1,5 +1,8 @@
 # Institutional History Implementation Plan
 
+> **Estado real (revisado 2026-10-04 contra `development`)**: Implementación parcial. En `development` solo está el PR1 (migración `20260723120000_institutional_history_foundation` y políticas de dominio en `src/institutional-history/`). Faltan los PR2 a PR6.
+
+
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
 **Goal:** Implementar en SACDIA un histórico institucional transversal que preserve nombres, relaciones, linaje, atribución oficial, autorización histórica y gobernanza de datos sensibles sin reinterpretar el pasado.

@@ -182,7 +182,7 @@ Bloques opcionales para partir un evento en varios horarios/grupos.
 | `camporee_event_id` | `INT FK camporee_events ON DELETE CASCADE` | |
 | `title`, `description`, `notes` | texto nullable | |
 | `day_number`, `starts_at`, `ends_at` | `INT`, `VARCHAR(5)` | horarios `HH:MM`; `ends_at` debe ser posterior si ambos existen |
-| `venue_id` | `INT NULL FK camporee_venues ON DELETE SET NULL` | |
+| `venue_id` | `INT NULL FK camporee_venues ON DELETE SET NULL` | Catálogo de sedes: [camporee-venues.md](camporee-venues.md) |
 | `display_order`, `capacity`, `active` | orden/cupo/soft-delete | |
 
 ### Tabla `camporee_event_schedule_block_assignments`
@@ -379,7 +379,7 @@ Ruta: `/dashboard/catalogs/camporee-event-types`
 
 ### 2. Biblioteca de templates
 
-Ruta: `/dashboard/camporees/event-templates`
+Ruta: `/dashboard/campamentos/plantillas` (alta en `/plantillas/new`, edición en `/plantillas/[id]/edit`)
 
 - List page con filtros: scope (union/local), event_type, búsqueda por título.
 - Dedicated form pages (`new/page.tsx`, `[id]/edit/page.tsx`) — patrón club-ideal-form-page por la cantidad de campos (>4) + jsonb editors + select de event_type.
@@ -389,18 +389,18 @@ Ruta: `/dashboard/camporees/event-templates`
 
 ### 3. Eventos asignados a un camporee
 
-Tab "Eventos" en `/dashboard/camporees/[id]` para camporee local y en
-`/dashboard/camporees/union/[id]` para camporee de unión.
+Tab "Eventos" en `/dashboard/campamentos/[id]` para camporee local y en
+`/dashboard/campamentos/union/[id]` para camporee de unión.
 
 - Lista de instancias con orden drag-handle (display_order).
 - Botones: "Agregar desde template" (picker), "Crear personalizado" (form modal/page).
 - Acciones por fila: editar (form prellenado), eliminar, reordenar.
 - El formulario de evento permite seleccionar tipo de evento, un líder de agenda (usuario o nombre externo), bloques de horario opcionales con asignaciones a secciones inscritas y especialidades de preparación del catálogo. El alta siempre queda `programado`; publicar pide un responsable del roster de personal, distinto del líder de agenda.
 - Las rutas dedicadas de creación/edición existen para ambos scopes:
-  `/dashboard/camporees/[id]/events/new`,
-  `/dashboard/camporees/[id]/events/[eventId]/edit`,
-  `/dashboard/camporees/union/[id]/events/new` y
-  `/dashboard/camporees/union/[id]/events/[eventId]/edit`.
+  `/dashboard/campamentos/[id]/events/new`,
+  `/dashboard/campamentos/[id]/events/[eventId]/edit`,
+  `/dashboard/campamentos/union/[id]/events/new` y
+  `/dashboard/campamentos/union/[id]/events/[eventId]/edit`.
 
 ### 4. Personal del camporee
 

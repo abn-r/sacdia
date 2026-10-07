@@ -1,5 +1,8 @@
 # Sacdia Admin Adaptive iOS Implementation Plan
 
+> **Estado real (revisado 2026-10-04 contra `development`)**: No ejecutado. Depende del repositorio `sacdia-admin-ios/`, que no existe en el workspace, y de la rama de backend `codex/sacdia-admin-ios-auth`, sin integrar.
+
+
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
 **Goal:** Implementar la composición adaptativa nativa de Sacdia Admin para iPhone/iPad, cerrar auth productiva contract-first y conservar los contratos, permisos y view-models actuales.

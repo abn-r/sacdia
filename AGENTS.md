@@ -46,29 +46,32 @@ propios solo como adaptadores: no deben duplicar ni contradecir este contrato.
 
 1. `CLAUDE.md`
 2. `README.md`
-3. `docs/README.md`
+3. `docs/README.md` (navegacion) y `docs/canon/source-of-truth.md` (precedencia)
 4. `docs/steering/tech.md`
 5. `docs/steering/coding-standards.md`
 6. `docs/steering/data-guidelines.md`
 7. `docs/steering/agents.md` (reglas extendidas y checklist detallado)
 8. `docs/steering/agent-ownership.md`
-9. Si se toca un modulo runtime: `sacdia-backend/AGENTS.md`, `sacdia-admin/AGENTS.md` o `sacdia-app/AGENTS.md` segun corresponda.
+9. Si se toca un modulo runtime: `sacdia-backend/AGENTS.md` o `sacdia-admin/AGENTS.md`; en `sacdia-app` (no tiene `AGENTS.md`) leer `sacdia-app/CLAUDE.md`.
 
 ## 2) Router de documentacion por tipo de cambio
 
 ### Backend y API (NestJS)
 
 - Codigo: `sacdia-backend/`
-- Contexto local: `sacdia-backend/CLAUDE.md`
-- Referencia API runtime (canónica): `docs/api/ENDPOINTS-LIVE-REFERENCE.md`
+- Contexto local: `sacdia-backend/CLAUDE.md`, `sacdia-backend/AGENTS.md`
+- Runtime base: `docs/canon/runtime-sacdia.md`; auth: `docs/canon/auth/runtime-auth.md`
+- Referencia API runtime (canonica): `docs/api/ENDPOINTS-LIVE-REFERENCE.md`
 - Seguridad: `docs/api/SECURITY-GUIDE.md`
 - Testing: `docs/api/TESTING-GUIDE.md`
+- Despliegue: `docs/deployment/DEPLOYMENT-GUIDE.md` (fuente: `sacdia-backend/render.yaml` y `.env.example`)
 
 ### Admin Web (Next.js)
 
 - Codigo: `sacdia-admin/`
-- Contexto local: `sacdia-admin/CLAUDE.md`
-- Integracion con API: `docs/api/FRONTEND-INTEGRATION-GUIDE.md`
+- Contexto local: `sacdia-admin/CLAUDE.md`, `sacdia-admin/AGENTS.md`
+- Integracion con API: `docs/api/FRONTEND-INTEGRATION-GUIDE.md` y `docs/guides/admin-integration.md`
+- Acceso a pantallas: screen catalog en `sacdia-admin/src/lib/auth/screen-catalog/`
 - Feature docs: `docs/features/`
 
 ### App Movil (Flutter)
@@ -76,55 +79,54 @@ propios solo como adaptadores: no deben duplicar ni contradecir este contrato.
 - Codigo: `sacdia-app/`
 - Contexto local: `sacdia-app/CLAUDE.md`
 - Integracion con API: `docs/api/FRONTEND-INTEGRATION-GUIDE.md`
+- Acceso a pantallas: `sacdia-app/lib/core/authorization/` (hermano Dart del screen catalog del admin)
 - Feature docs: `docs/features/`
 
-### Base de datos (Supabase/PostgreSQL/Prisma)
+### Base de datos (PostgreSQL en Neon + Prisma)
 
+- Schema efectivo (autoridad): `sacdia-backend/prisma/schema.prisma`
+- Migraciones: `sacdia-backend/prisma/migrations/` (Prisma Migrate)
 - Contexto DB: `docs/database/README.md`
-- Schema referencia: `docs/database/SCHEMA-REFERENCE.md`
-- Prisma schema: `docs/database/schema.prisma`
-- Migraciones SQL: `docs/database/migrations/`
+- Schema referencia (lectura humana): `docs/database/SCHEMA-REFERENCE.md`
+- `docs/database/schema.prisma` es solo un espejo documental; nunca arbitra contra el del backend.
 
-### Roadmap, estado y arquitectura global
+### Estado, decisiones y arquitectura global
 
-- Arquitectura/API decisiones: `docs/api/ARCHITECTURE-DECISIONS.md`
-- Servicios externos: `docs/EXTERNAL-SERVICES-AUDIT.md`
-- Resumenes de fase: `docs/PHASE-1-COMPLETION-SUMMARY.md`
+- Estado por dominio: `docs/features/README.md`
+- Decisiones de arquitectura API: `docs/api/ARCHITECTURE-DECISIONS.md`
+- Decisiones del sistema: `docs/canon/decisiones-clave.md`
+- Decisiones pendientes: `docs/audit/DECISIONS-PENDING.md`
+- Servicios externos: `docs/api/EXTERNAL-SERVICES-INTEGRATION.md`, `docs/features/servicios-externos.md` y `docs/canon/runtime-sacdia.md` §9
+- Planes pendientes: `docs/plans/` (no son estado actual)
+- Historico: `docs/history/` (nunca es estado actual)
 
 ## 3) Router de features
 
-Para cambios de negocio, ubicar primero el dominio en `docs/features/`:
+Para cambios de negocio, ubicar primero el dominio en `docs/features/README.md`. Ese registro lista cada documento de dominio y su estado funcional declarado. Los documentos son planos (`docs/features/<dominio>.md`), con subcarpetas solo para detalle extra (por ejemplo `docs/features/auth/`).
 
-- `actividades`
-- `audit-log`
-- `auth`
-- `catalogos`
-- `certificaciones-guias-mayores`
-- `clases-progresivas`
-- `communications`
-- `finanzas`
-- `gestion-clubs`
-- `gestion-seguros`
-- `honores`
-- `infrastructure`
-- `inventario`
-- `recursos`
-- `validacion-investiduras`
+Grupos principales:
 
-Orden recomendado dentro de cada feature:
+- Acceso: `auth`, `rbac` (y `docs/features/auth/*`)
+- Club: `gestion-clubs`, `membership-requests`, `actividades`, `actividades-conjuntas`, `finanzas`, `inventario`, `recursos`, `weekly-records`
+- Formacion: `clases-progresivas`, `honores`, `certificaciones-guias-mayores`, `carga-masiva-certificados`, `validacion-evidencias`, `validacion-investiduras`, `achievements`, `member-of-month`
+- Carpetas y clasificacion: `carpetas-evidencias`, `annual-folders-scoring`, `monthly-reports`
+- Camporees: `camporees`, `camporee-events`, `camporee-orders`, `camporee-supplies`, `aprobaciones-camporees`
+- Operacion: `coordinacion`, `sla-dashboard`, `operations-dashboard`, `communications`, `cron-automation`, `audit-log`, `gestion-seguros`, `catalogos`, `infrastructure`
 
-1. `CLAUDE.md` (si existe contexto operativo)
-2. `requirements.md` (si existe)
-3. `design.md` (si existe)
-4. `walkthrough-*.md` (si existe)
-5. `tasks.md` (si existe)
+Orden recomendado dentro de un dominio:
+
+1. `docs/features/<dominio>.md`
+2. `docs/canon/runtime-<area>.md` si existe
+3. Seccion correspondiente de `docs/api/ENDPOINTS-LIVE-REFERENCE.md`
+4. Codigo en `development`
 
 ## 4) Reglas de implementacion
 
-- No asumir contratos: validar en documentacion del dominio.
+- No asumir contratos: validar en documentacion del dominio y en el codigo de `development`.
 - Priorizar consistencia con patrones ya existentes.
 - Implementar con pruebas y validaciones, no solo happy path.
 - Si falta un requisito, detener implementacion y pedir definicion.
+- Trabajar en ramas desde `development`; el flujo de integracion es `development` → `preproduction` (QA) → `main`.
 
 ## 5) Regla de sincronizacion codigo-documentacion
 
@@ -132,8 +134,9 @@ Si se modifica codigo que cambie comportamiento, actualizar documentacion en el 
 
 - Cambio de endpoint/DTO/errores: actualizar `docs/api/`.
 - Cambio de schema o relaciones: actualizar `docs/database/`.
-- Cambio de flujo funcional: actualizar `docs/features/`.
-- Cambio transversal de arquitectura: actualizar `docs/steering/`.
+- Cambio de flujo funcional: actualizar `docs/features/` (y el canon `runtime-*` del area si existe).
+- Cambio transversal de arquitectura o stack: actualizar `docs/steering/` y `docs/canon/runtime-sacdia.md`.
+- Trabajo que queda en una rama sin integrar: marcar la documentacion "Pendiente de merge (PR #N de <repo>)".
 
 ## 6) Checklist rapido antes de cerrar
 
@@ -146,53 +149,10 @@ Si se modifica codigo que cambie comportamiento, actualizar documentacion en el 
 
 Algunos `CLAUDE.md` incluyen bloques `<claude-mem-context>` autogenerados.
 No usar esos bloques como unica fuente de verdad para requisitos tecnicos.
-La fuente de verdad funcional y tecnica debe ser `docs/steering/`, `docs/features/`, `docs/api/` y `docs/database/`.
+La fuente de verdad funcional y tecnica es la definida en `docs/canon/source-of-truth.md`.
 
-## 8) Skills de workspace
+## 8) Herramientas locales de agentes
 
-| Skill | Descripcion | Archivo |
-|------|-------------|---------|
-| `sacdia-code-review` | Playbook reusable para revisar PRs y cambios cross-repo en `sacdia-backend`, `sacdia-admin` y `sacdia-app`, con checklist y templates. | [SKILL.md](.agents/skills/sacdia-code-review/SKILL.md) |
-| `repo-researcher` | Agente liviano de solo lectura para buscar codigo, docs y datos en el repo. Usa haiku por defecto, sonnet solo para busquedas complejas. | [SKILL.md](~/.claude/skills/repo-researcher/SKILL.md) |
-
-<!-- graft:start -->
-## Graft — repo context graph
-
-This repo is indexed in `graft/`: small linked markdown nodes that explain each
-system and carry exact file:line spans, kept in sync with the code through git.
-
-For ANY task here — understanding how something works, finding where code lives,
-or scoping a change — get context from the graph before grepping or opening
-source files. Re-ask freely (it's cheap) and reuse literal identifiers you
-already have (symbol, error string, file name) as the query. New to this repo?
-Run `graft map` first — a token-budgeted orientation (dir clusters, hubs,
-hotspots), no LLM, no key.
-
-- Run `graft ask "<your question>" --source` → ranked nodes with the relevant
-  code spans inlined (each hit's ≤8-line crux by default; `--full` for whole
-  definitions when the crux isn't enough). Match the tool to the task shape:
-  for understanding or editing, the top node IS the answer — cite its
-  `covers:` file:line spans and edit straight from `--source`. For
-  exhaustive tasks ("every occurrence / every caller of this pattern"), ranked
-  results are top-N, not complete — run `graft grep "<literal>"` instead
-  (exhaustive over indexed files, grouped by enclosing symbol), falling back
-  to raw `grep -rn` only for unindexed files.
-- `graft skeleton <file>` → every definition's signature + span, ~10× cheaper
-  than reading the file; use it to skim an API surface.
-- `graft callers <symbol>` gives precomputed, exact edges — who calls this.
-  Add `--direction out` for what it calls, or `--depth N` to walk
-  transitively for the full blast radius. For structural questions, skip
-  ranking and use this directly.
-- Or browse: `graft/INDEX.md` lists every node; follow the links.
-- Monorepos and folders of multiple repos rank fairly across sub-projects —
-  hits carry `[scope/]` labels naming which one they're from. Narrow with
-  `graft ask "<task>" --in <scope>/` once you know where you're working.
-
-If a returned span is truncated ("+N more lines"), open the file at that exact
-range before finalizing. Only open source files when a node genuinely lacks a
-needed detail, and then at the exact file:line the node points to — never
-re-read whole files.
-
-After big code changes, refresh the graph with `graft build` (deterministic,
-no API key, $0).
-<!-- graft:end -->
+- Las skills y la configuracion de agentes (`.agents/`, `.claude/`, `.opencode/` y similares) estan en `.gitignore`: son locales de cada equipo y no forman parte del repo. Si una skill existe en tu maquina, puedes usarla, pero ningun documento versionado debe depender de ella.
+- `skills-lock.json` registra skills de terceros instaladas en el workspace; no es documentacion del proyecto.
+- `graft/` (grafo de contexto) tambien es local y esta ignorado. Si lo tienes generado (`graft build`), puedes consultarlo con `graft ask "<pregunta>"`; si no existe, usa la documentacion y busqueda directa en el codigo.

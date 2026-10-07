@@ -8,9 +8,9 @@
 
 La infraestructura de SACDIA comprende los componentes transversales que soportan la operacion del backend: health checks, logging, seguridad, rate limiting, validacion, serializacion, manejo de errores, y las integraciones con servicios externos de monitoreo y cache. Estos componentes no implementan logica de negocio pero son fundamentales para la disponibilidad, seguridad y observabilidad del sistema.
 
-El backend esta construido sobre NestJS con una arquitectura modular donde el `CommonModule` centraliza toda la infraestructura compartida: guards de autorizacion (7), decorators (7), services transversales (6), pipes de validacion (1), filters de excepciones (2) e interceptors (2). Este modulo es importado por todos los modulos de dominio.
+El backend esta construido sobre NestJS con una arquitectura modular donde el `CommonModule` (`src/common/common.module.ts`) centraliza la infraestructura compartida: guards, decorators, servicios transversales, pipes, filters, interceptors, email y caché. Dos guards son `APP_GUARD` globales en `src/app.module.ts`: `GlobalJwtAuthGuard` (JWT por defecto salvo `@Public()`) y `PermissionsGuard` (fail-closed: exige `@RequirePermissions`, `@SkipPermissions` o `@Public`). El throttler (`UserAwareThrottlerGuard`) también es `APP_GUARD`.
 
-Las integraciones externas de infraestructura incluyen Sentry para monitoreo de errores (condicional), Redis/Upstash para cache y blacklist de tokens (condicional), y Cloudflare R2 para almacenamiento de archivos. La seguridad global se implementa mediante helmet, compression y un sistema de rate limiting en tres capas.
+Las integraciones externas de infraestructura son Sentry (condicional), Redis (caché, blacklist de tokens, rate limiting distribuido y colas BullMQ; obligatorio en producción), Resend (correo), Firebase FCM y Cloudflare R2. La autenticación es Better Auth self-hosted (`src/better-auth/`) con JWT HS256 firmados por SACDIA; no hay Supabase en el backend. El detalle de servicios externos está en `docs/api/EXTERNAL-SERVICES-INTEGRATION.md`.
 
 ## Que existe (verificado contra codigo)
 
@@ -23,43 +23,36 @@ Las integraciones externas de infraestructura incluyen Sentry para monitoreo de 
 
 #### CommonModule (`src/common/`)
 - **Module**: `src/common/common.module.ts`
-- **Guards (7)**:
-  - `jwt-auth.guard.ts` — Validacion JWT via Supabase
-  - `permissions.guard.ts` — Verificacion de permisos `resource:action`
+- **Guards** (`src/common/guards/`):
+  - `global-jwt-auth.guard.ts` — `APP_GUARD`: valida el JWT HS256 de SACDIA en todas las rutas salvo `@Public()`
+  - `jwt-auth.guard.ts` — Validacion JWT (Passport) usada explicitamente por controllers
+  - `permissions.guard.ts` — `APP_GUARD` fail-closed: permisos `resource:action` + `@AuthorizationResource`
+  - `global-roles.guard.ts` — Verificacion de roles globales (con alias, `GLOBAL_ROLE_ALIASES`)
   - `club-roles.guard.ts` — Verificacion de roles de club en seccion activa
-  - `global-roles.guard.ts` — Verificacion de roles globales
   - `owner-or-admin.guard.ts` — Self-service o acceso administrativo (`admin` / `assistant-admin` / `super-admin`; el coordinador no es atajo)
   - `optional-jwt-auth.guard.ts` — JWT opcional (endpoints mixtos)
-  - `ip-whitelist.guard.ts` — Restriccion por IP
-- **Decorators (7)**:
-  - `permissions.decorator.ts` — `@Permissions()`
-  - `global-roles.decorator.ts` — `@GlobalRoles()`
-  - `club-roles.decorator.ts` — `@ClubRoles()`
-  - `current-user.decorator.ts` — `@CurrentUser()`
-  - `get-user.decorator.ts` — `@GetUser()`
-  - `authorization-resource.decorator.ts` — `@AuthorizationResource()`
-  - `sensitive-user-subresource.decorator.ts` — `@SensitiveUserSubresource()`
-- **Services (6)**:
-  - `authorization-context.service.ts` — Resolucion de contexto de autorizacion del actor
-  - `mfa.service.ts` — Logica de autenticacion multifactor
-  - `session-management.service.ts` — Gestion de sesiones activas
-  - `token-blacklist.service.ts` — Blacklist de tokens revocados (Redis)
-  - `file-storage.service.ts` — Interfaz abstracta de almacenamiento
-  - `r2-file-storage.service.ts` — Implementacion Cloudflare R2 (S3-compatible)
-- **Pipes (1)**: Validacion global con class-validator y class-transformer
-- **Filters (2)**:
+  - `mfa.guard.ts` — Bloquea JWT con `mfa_pending` salvo `@SkipMfaCheck()`
+- **Decorators** (`src/common/decorators/`): `@RequirePermissions` (`permissions.decorator.ts`), `@SkipPermissions`, `@Public`, `@SkipMfaCheck`, `@GlobalRoles`, `@ClubRoles`, `@AuthorizationResource`, `@SensitiveUserSubresource`, `@CurrentUser`, `@GetUser`, `@Audit`
+- **Services** (`src/common/services/`): `authorization-context.service.ts`, `mfa.service.ts`, `session-management.service.ts`, `token-blacklist.service.ts` (Redis), `file-storage.service.ts` + `r2-file-storage.service.ts`, `distributed-lock.service.ts`, `cleanup.service.ts`, `cron-run-logger.service.ts`, `cron-alert.service.ts`, `translation.service.ts`, `institutional-hierarchy.service.ts`, `ecclesiastical-year.service.ts`, `club-cycle-readiness.service.ts`, `class-assignment-resolver.service.ts`
+- **Pipes**: `sanitize.pipe.ts` (XSS), `file-validation.pipe.ts`; ValidationPipe global (class-validator + class-transformer)
+- **Filters**:
   - `all-exceptions.filter.ts` — Captura global de excepciones
   - `http-exception.filter.ts` — Manejo de excepciones HTTP
-- **Interceptors (2)**:
-  - `audit.interceptor.ts` — Interceptor de auditoria
+- **Interceptors**:
   - `sentry.interceptor.ts` — Reporte de errores a Sentry
+  - Auditoria HTTP durable: `src/audit-logs/http-audit.interceptor.ts` (modulo `audit-logs`, ver [audit-log.md](audit-log.md))
+- **Email**: `src/common/email/` (proveedor Resend, cola BullMQ `emails`)
 - **Policy**: `sensitive-user-subresource-policy.ts` — Politica de acceso a sub-recursos sensibles
-- **Supabase**: `supabase.service.ts` — Servicio de integracion con Supabase
+
+#### Colas y jobs en segundo plano
+- BullMQ sobre Redis (`src/config/bullmq.config.ts`). Colas: `emails`, `notifications`, `achievements`, `background-jobs`, `master-honors`, `certificate-import-ocr`.
+- `src/background-jobs/` procesa trabajos encolados por HTTP (recalculo de rankings, informe mensual). Sin Redis, esos flujos corren inline.
+- Monitoreo admin en `/dashboard/system/jobs` (ver [cron-automation.md](cron-automation.md)).
 
 #### Seguridad Global (configurada en `main.ts`)
 - **Helmet**: Headers de seguridad HTTP
 - **Compression**: Compresion gzip de respuestas
-- **Rate Limiting**: Tres capas configuradas:
+- **Rate Limiting** (`src/config/throttler.config.ts`, storage Redis distribuido): Tres capas configuradas (en `development`: 30/s, 200/10s, 1000/min):
   - 3 requests / 1 segundo (burst)
   - 20 requests / 10 segundos (sustained)
   - 100 requests / 60 segundos (long-term)
@@ -72,19 +65,24 @@ Las integraciones externas de infraestructura incluyen Sentry para monitoreo de 
 | Servicio | Estado | Condicional | Uso |
 |----------|--------|-------------|-----|
 | Sentry | Configurado | Si (env) | Monitoreo de errores en produccion |
-| Redis/Upstash | Configurado | Si (env) | Cache, token blacklist, rate limiting |
+| Redis | Configurado | Obligatorio en produccion; fallback in-memory solo en development/test | Cache, token blacklist, rate limiting, colas BullMQ |
+| Resend | Configurado | Si (`EMAIL_ENABLED`) | Correo transaccional |
+| Google Vision | Configurado | Si (`GOOGLE_VISION_API_KEY`) | OCR de importacion de certificados |
 | Cloudflare R2 | Configurado | No | Almacenamiento de archivos (fotos, evidencias, polizas) |
 | Firebase Admin | Configurado | Si (env) | Push notifications (FCM) |
-| Supabase Auth | Configurado | No | Identity provider |
+| Better Auth | Configurado | No | Identity provider self-hosted (`src/better-auth/`) |
 
 ### Admin
-- **No implementado** — No hay paginas de infraestructura, monitoreo o diagnostico
+- `/dashboard/system/jobs` y `/dashboard/system/jobs/history` — colas BullMQ y ejecuciones de cron (`/admin/analytics/jobs-overview`, `/admin/analytics/cron-runs`)
+- No hay pagina de health check
 
 ### App Movil
 - **No implementado** — No hay pantallas de estado o diagnostico
 
 ### Base de datos
-- `error_logs` — Tabla para logs de errores
+- `error_logs` — Tabla legacy marcada DEPRECATED (ningun servicio escribe en ella)
+- `cron_run_log`, `cron_alerts_log` — Ejecuciones y alertas de cron
+- `audit_logs` — Auditoria durable
 
 ## Requisitos funcionales
 
@@ -99,21 +97,20 @@ Las integraciones externas de infraestructura incluyen Sentry para monitoreo de 
 ## Decisiones de diseno
 
 - **CommonModule global**: Toda la infraestructura compartida vive en un solo modulo importado universalmente
-- **Guards como capas**: La autorizacion se compone apilando guards (JWT -> Permissions -> ClubRoles); cada uno es independiente
+- **Guards como capas**: `GlobalJwtAuthGuard` y `PermissionsGuard` corren globalmente (fail-closed); `GlobalRolesGuard`, `ClubRolesGuard` y `OwnerOrAdminGuard` se agregan por controller
 - **Rate limiting en tres capas**: Proteccion contra burst, sustained y DDoS sin afectar uso normal
 - **Storage abstraction**: `FileStorageService` como interfaz con `R2FileStorageService` como implementacion, permitiendo cambio de proveedor
-- **Condicional por env**: Sentry, Redis y Firebase se activan solo si las variables de entorno estan configuradas, evitando fallos en desarrollo local
+- **Condicional por env**: Sentry, Firebase, Resend y Google Vision se activan solo si sus variables estan configuradas. Redis es opcional en desarrollo, pero en produccion la app falla al iniciar sin Redis
 - **Pino para logging**: Logger estructurado JSON para facilitar parseo en herramientas de observabilidad
 
 ## Gaps y pendientes
 
-- **Sin UI de monitoreo**: No hay dashboard de salud, metricas o diagnostico en admin
+- **Sin UI de health**: el admin muestra colas y cron, pero no el estado de `GET /health`
 - **Sin alertas**: No hay sistema de alertas configurado mas alla de Sentry para errores
-- **Storage drift**: Canon documenta Supabase Storage pero el runtime usa Cloudflare R2 — reemplazo no documentado en canon
-- **Error logs sin uso claro**: La tabla `error_logs` existe pero no esta claro como se puebla o se consulta
+- **`error_logs` deprecated**: la tabla sigue en el schema sin escritores; pendiente de migracion de borrado
 - **Sin metricas de negocio**: No hay instrumentacion de metricas de negocio (usuarios activos, actividades creadas, etc.)
 
 ## Prioridad y siguiente accion
 
 - **Prioridad**: Baja — infraestructura operativa estable; no afecta canon de negocio
-- **Siguiente accion**: Actualizar canon para documentar Cloudflare R2 como storage provider real (reemplazando Supabase Storage). Considerar agregar dashboard de salud en admin para administradores.
+- **Siguiente accion**: Considerar exponer el estado de `GET /health` en el admin y retirar `error_logs`.

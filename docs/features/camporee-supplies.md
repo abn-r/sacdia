@@ -1,17 +1,11 @@
 # Feature: Insumos de camporee
 
 **Estado**: IMPLEMENTADO PARCIAL
-**Fecha**: 2026-08-26
+**Fecha**: 2026-08-26 (estado actualizado 2026-10-04)
 **Módulo backend**: `CamporeeSuppliesModule` (`src/camporee-supplies/`) + fuentes en `PaymentObligationsModule`
-**Plan canónico**: [`docs/plans/2026-08-26-camporee-supplies.md`](../plans/2026-08-26-camporee-supplies.md)
-**Diseño**: [`docs/plans/2026-08-26-camporee-supplies-design.md`](../plans/2026-08-26-camporee-supplies-design.md)
 **ADR**: [#10 — Bounded context `camporee-supplies`](../api/ARCHITECTURE-DECISIONS.md#10-bounded-context-camporee-supplies-independiente-de-camporee-orders)
 
-> Runtime verificado en rama `feat/camporee-supplies`, **no** en Neon.
-> Backend efectivo: worktree `/private/tmp/sacdia-backend-camporee-orders` (HEAD `e2038e2` + cambios locales).
-> App: `sacdia-app` `feat/camporee-supplies`.
-> Admin: `sacdia-admin` `feat/camporee-supplies` (tab en ficha de camporee; sin nav global).
-> Migración `20260826120000_camporee_supplies` **no aplicada** a Neon. Seeds/permisos **no aplicados** a Neon.
+> Integrado en `development` en los tres repos: backend `src/camporee-supplies` (migración `20260826120000_camporee_supplies`, permisos en `prisma/seeds/permissions.seed.sql` y `role-permissions.seed.sql`), admin (tab Insumos en la ficha de camporee, `src/components/camporee-supplies`; sin nav global) y app `lib/features/camporee_supplies`.
 
 ---
 
@@ -27,11 +21,10 @@ No reutiliza tablas, folios PED ni permisos de mercancía (`camporee-orders`). C
 
 | Superficie | Estado | Evidencia |
 |------------|--------|-----------|
-| Backend Nest (catálogo, plan, freeze, folio INS, entrega, reportes, PaymentObligations) | Código en `feat/camporee-supplies` | Controllers en el worktree; Jest `src/camporee-supplies` + `src/payment-obligations` |
-| Schema / migración | Escrita, no desplegada | `prisma/migrations/20260826120000_camporee_supplies/` |
-| Admin (tab Insumos en ficha) | UI en `feat/camporee-supplies` | Config, planes, caja, cocina, mark-paid, entrega parcial. **No** impersona submit del club |
-| App (plan en detalle de camporee) | Flujo en `feat/camporee-supplies` | `CamporeeSupplyPlanView`: orden de pago; CTA Agregar insumo; insumos por día y horario; alta en sheet |
-| Neon / checkout backend principal | Ausente | Migración y seeds no aplicados |
+| Backend Nest (catálogo, plan, freeze, folio INS, entrega, reportes, PaymentObligations) | En `development` | `src/camporee-supplies` (29 rutas); Jest `src/camporee-supplies` + `src/payment-obligations` |
+| Schema / migración | En `development` | `prisma/migrations/20260826120000_camporee_supplies/` |
+| Admin (tab Insumos en ficha) | En `development` | `camporee-supplies-tab.tsx`: config, planes, caja, cocina, mark-paid, entrega parcial. **No** impersona submit del club |
+| App (plan en detalle de camporee) | En `development` | `CamporeeSupplyPlanView`: orden de pago; CTA Agregar insumo; insumos por día y horario; alta en sheet |
 
 ---
 

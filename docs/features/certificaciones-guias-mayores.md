@@ -1,6 +1,6 @@
 # Certificaciones de Guías Mayores
 
-**Estado**: MOTOR VERSIONADO (backend runtime en `feat/configurable-certifications`; admin/app en migración)
+**Estado**: MOTOR VERSIONADO, IMPLEMENTADO en `development` (migración `20260811180000_configurable_certifications_engine`; backend, admin y app)
 
 ## Descripción de dominio
 
@@ -8,7 +8,7 @@ Las certificaciones de Guías Mayores son programas formativos avanzados para mi
 
 Estructura: certificación → versión → módulos → secciones (requisitos) → componentes tipados. El progreso ya no es un toggle booleano por sección; cada requisito sigue estados `DRAFT` → `SUBMITTED` → `APPROVED` | `CHANGES_REQUESTED`, con revisión institucional requisito a requisito y cierre final con comprobante de junta.
 
-## Qué existe (verificado contra código — `sacdia-backend` branch `feat/configurable-certifications`)
+## Qué existe (verificado contra código de `development`, 2026-10-04)
 
 ### Backend (`CertificationsModule`)
 
@@ -38,11 +38,12 @@ Referencia canónica: `docs/api/ENDPOINTS-LIVE-REFERENCE.md` §certifications y 
 
 ### Admin (`sacdia-admin`)
 
-- Catálogo de solo lectura existente; **panel de configuración versionada pendiente** (handoff en `docs/plans/handoffs/configurable-certifications-admin-handoff.md`).
+- Configuración de certificaciones en `/dashboard/catalogs/certifications` y `/dashboard/catalogs/certifications/[certificationId]` (cliente `src/lib/api/certifications.ts`).
+- Seguimiento y revisión en `/dashboard/certifications`, `/dashboard/certifications/[id]` y `/dashboard/certifications/reviews`.
 
 ### App (`sacdia-app`)
 
-- Screens legacy con toggle booleano; **migración al flujo por requisito pendiente**.
+- Flujo por requisito en `lib/features/certifications`: `requirement_detail_view.dart` (borrador, envío, presign/confirm de evidencias) y `certification_closeout_view.dart` (cierre).
 - Entradas de navegación (2026-08-12): chip "Certificaciones" en el tab Clases del bottom nav (`classes_list_view.dart` → `/home/certifications`) y sección "Mis Certificaciones" en el perfil (`profile_certifications_section.dart`, grid 3 columnas espejo de "Mis Clases", tap → `CertificationProgressView`). Antes el módulo solo era alcanzable por deep link de push.
 - Elegibilidad en detalle (2026-08-12): la vista de detalle consume `GET .../eligibility` (`certificationEligibilityProvider`) y muestra la sección "Requisitos de inscripción" con cada regla evaluada (✓/✗ + motivo por `reason_code`); el CTA de inscripción se deshabilita si `eligible=false` o si la versión no tiene reglas configuradas. `CERT_ELIGIBILITY_REQUIRED` y `CERT_ALREADY_ENROLLED` se mapean a mensajes localizados como respaldo.
 
@@ -77,13 +78,10 @@ Detalle paso a paso: [`certificaciones-guias-mayores-revision-workflow.md`](cert
 
 ## Gaps y pendientes
 
-- UI admin para configurar/publicar versiones y árbol de componentes.
-- App móvil: pantallas de requisito, presign/confirm, bandeja de revisión LF.
 - Reportes administrativos por club/campo local.
-- Seed de certificación “Capacitación básica para el personal del Club de Conquistadores” (PR 4 del plan).
 - Retirar proyección `certification_module_progress` cuando clientes dejen de depender del porcentaje legacy.
 
 ## Prioridad y siguiente acción
 
-- **Alta:** completar consumo en app del flujo por requisito; alinear admin con `AdminCertificationsController`.
-- **Siguiente acción concreta:** implementar pantalla de detalle de requisito en app consumiendo `GET/PATCH/POST .../requirements/:requirementId`.
+- **Media:** reportes administrativos por club/campo local.
+- **Siguiente acción concreta:** retirar la proyección `certification_module_progress` cuando ningún cliente use el porcentaje legacy.

@@ -1,5 +1,8 @@
 # Camporee Operational Hardening Implementation Plan
 
+> **Estado real (revisado 2026-10-04 contra `development`)**: Implementación parcial en `development`. Hecho: política de ciclo de vida, plantillas de eventos y rúbricas, scoring con idempotencia y bloqueo. Falta: ledger de penalizaciones, aclaraciones y documentos privados.
+
+
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
 **Goal:** Completar y asegurar el flujo operativo de camporees: lifecycle, templates reutilizables, eventos y rúbricas atómicos, scoring temporal auditable, admisiones tardías penalizadas, documentos privados y experiencias admin/app coherentes.
@@ -1413,7 +1416,7 @@ Expected: cada endpoint/permiso implementado aparece en docs y no quedan rutas d
 ### Task 19: Ejecutar regresión focalizada y triage de dependencias
 
 **Files:**
-- Update only if verified: `docs/audit/2026-07-09-camporee-flow-security-review.md`
+- Update only if verified: `docs/history/audit/2026-07-09-camporee-flow-security-review.md`
 - Do not modify dependency files in this feature batch unless a reachable vulnerability has a safe isolated patch.
 
 **Step 1: Backend**

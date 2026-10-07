@@ -2,7 +2,9 @@
 
 Guía para configurar una PC nueva con cuenta de Claude distinta, replicando el flujo de trabajo de SACDIA: git/gh, convenciones de commits/PRs, Claude Code (plugins, skills, hooks) y workflow SDD.
 
-> **Audiencia**: desarrollador que recibe la PC nueva y necesita arrancar listo para colaborar en los 3 repos (`sacdia-backend`, `sacdia-admin`, `sacdia-app`).
+> **Audiencia**: desarrollador que recibe la PC nueva y necesita arrancar listo para colaborar en el workspace: repo de documentación `sacdia` y los 3 repos runtime (`sacdia-backend`, `sacdia-admin`, `sacdia-app`).
+>
+> **Actualizado**: 2026-10-04 (repos, toolchain y flujo de ramas). Las secciones de Claude Code (§3–§4) describen preferencias del equipo, no requisitos del proyecto.
 
 ---
 
@@ -60,18 +62,79 @@ gh ssh-key add ~/.ssh/id_ed25519.pub --title "PC-nueva-$(date +%Y%m)"
 
 ### 1.5 Acceso a repos privados
 
-Los 3 repos son privados bajo `abn-r`. La cuenta nueva necesita ser **collaborator** o miembro del org. Pedir invitación al owner antes de seguir.
+Los repos son privados bajo `abn-r`. La cuenta nueva necesita ser **collaborator** o miembro del org. Pedir invitación al owner antes de seguir.
 
 ### 1.6 Clonar repos
 
+El workspace es el repo `sacdia` (documentación global) con los tres repos runtime clonados dentro. Están en su `.gitignore`, así que cada uno conserva su propio historial.
+
 ```bash
-mkdir -p ~/Documents/development/sacdia
-cd ~/Documents/development/sacdia
+mkdir -p ~/Documents/development
+cd ~/Documents/development
+
+git clone https://github.com/abn-r/sacdia.git
+cd sacdia
 
 git clone https://github.com/abn-r/sacdia-backend.git
 git clone https://github.com/abn-r/sacdia-admin.git
 git clone https://github.com/abn-r/sacdia-app.git
+
+# Trabajar siempre partiendo de development en los repos runtime
+for r in sacdia-backend sacdia-admin sacdia-app; do git -C "$r" checkout development; done
 ```
+
+`sacdia-docs` (portal de manuales) aparece en `sacdia` como gitlink sin `.gitmodules`. Está pendiente de rediseño; no hace falta para desarrollar.
+
+### 1.7 Toolchain
+
+| Herramienta | Versión | Notas |
+|---|---|---|
+| Node.js | 24.x | El backend exige `engines.node: >=24 <25` (CI `24.13.1`). El admin también funciona con Node 24 (su CI usa 22) |
+| pnpm | 10.x | `corepack enable` y deja que `packageManager` del backend fije `pnpm@10.29.3` |
+| Flutter | estable; el CI usa `3.41.6` | Dart SDK `^3.6.1`. Requiere Xcode (iOS) y Android Studio / SDK (Android) |
+| Redis | cualquier 7.x local | Opcional en desarrollo (hay fallback en memoria); obligatorio en producción |
+| PostgreSQL | Neon | Pedir la cadena de conexión de la rama de desarrollo de Neon; no se usa Postgres local por defecto |
+
+```bash
+# macOS (ejemplo)
+brew install node@24 redis
+corepack enable
+# Flutter: seguir https://docs.flutter.dev/get-started/install y luego
+flutter doctor
+```
+
+### 1.8 Primer arranque local
+
+```bash
+# Backend — http://localhost:3000/api/v1
+cd sacdia-backend
+cp .env.example .env        # completar DATABASE_URL, BETTER_AUTH_SECRET, QR_JWT_SECRET, R2_*... (pedir valores al owner)
+pnpm install
+pnpm run start:dev
+
+# Admin — http://localhost:3001
+cd ../sacdia-admin
+echo "NEXT_PUBLIC_API_URL=http://localhost:3000" > .env.local
+pnpm install
+pnpm dev
+
+# App
+cd ../sacdia-app
+flutter pub get
+flutter run --dart-define=API_BASE_URL=http://localhost:3000/api/v1
+```
+
+Los archivos de Firebase de la app (`google-services.json`, `GoogleService-Info.plist`) no están en el repo: pedirlos al owner. Nunca commitear `.env` ni credenciales.
+
+### 1.9 Flujo de ramas
+
+```text
+feat/<tema> ──PR──▶ development ──▶ preproduction (QA) ──▶ main (release)
+```
+
+- Crear ramas de trabajo desde `development` actualizado.
+- `preproduction` es QA; `main` es release. El producto todavía no está en producción.
+- La CI de backend y app corre en las tres ramas permanentes.
 
 ---
 
@@ -355,16 +418,18 @@ Probar el flujo completo:
 
 ## 7. Recursos del proyecto
 
-- `CLAUDE.md` raíz — visión general del monorepo
+- `CLAUDE.md` raíz — visión general del workspace
+- `AGENTS.md` raíz — reglas para agentes de IA
 - `sacdia-backend/CLAUDE.md` — API, endpoints, tests
 - `sacdia-admin/CLAUDE.md` — Next.js, components, routes
 - `sacdia-app/CLAUDE.md` — Flutter, screens, providers
 - `docs/api/ENDPOINTS-LIVE-REFERENCE.md` — referencia runtime canónica
 - `docs/database/SCHEMA-REFERENCE.md` — esquema DB
-- `docs/audit/REALITY-MATRIX.md` — estado real vs documentado
-- `docs/features/README.md` — feature registry
+- `docs/canon/runtime-sacdia.md` — stack, topología y cifras del runtime
+- `docs/deployment/DEPLOYMENT-GUIDE.md` — despliegue
+- `docs/features/README.md` — feature registry y estado por dominio
 
 ---
 
-**Última actualización**: 2026-05-08
-**Owner**: Abner Reyes (`abner.reyes03@gmail.com`)
+**Última actualización**: 2026-10-04
+**Owner**: Abner Reyes

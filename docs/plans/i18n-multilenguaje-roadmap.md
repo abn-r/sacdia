@@ -1,28 +1,31 @@
 # i18n multilenguaje — roadmap
 
-**Estado**: PLANIFICADO (aspiracional)
+**Estado**: PARCIALMENTE IMPLEMENTADO (actualizado 2026-10-04, verificado contra `development`)
 
-> La capacidad actual es monolenguaje operativo (Español), con dos locales en admin (`es-MX`, `es-ES`) y base `intl` en Flutter. No debe comunicarse como trilingüe.
+> **Hecho**: infraestructura i18n con cuatro locales (`es` base, `en`, `fr`, `pt-BR`) en backend, admin y app, y 27 tablas `*_translations` para catálogos.
+> **Falta**: que los clientes propaguen el idioma elegido al backend, traducir los catálogos en lecturas públicas, revisar cobertura y calidad de traducciones, y canonizar el runtime i18n.
+> **Rama**: todo lo hecho está en `development` de los tres repos.
 
 ---
 
 ## 1. Motivación
 
-SACDIA tiene presencia regional potencial en países de habla española y portuguesa dentro del ecosistema DIA. Habilitar multilenguaje abre mercado y mejora la experiencia institucional.
+SACDIA tiene presencia regional potencial en países de habla española, portuguesa, inglesa y francesa dentro del ecosistema DIA. Habilitar multilenguaje abre mercado y mejora la experiencia institucional.
 
 ## 2. Estado actual
 
-- **Admin (Next.js)**: 2 locales configurados (`es-MX`, `es-ES`) en `sacdia-admin/src/lib/i18n/messages.ts`. Cobertura limitada (mensajes de login principalmente).
-- **App móvil (Flutter)**: `flutter_localizations` + `intl` en `pubspec.yaml`, pero sin catálogo de traducciones (`/l10n`, `/translations`) ni locales activos más allá del default.
-- **Backend**: textos hardcoded en Español (logs, validaciones, respuestas de error).
+- **Backend**: `nestjs-i18n` con `src/i18n/{es,en,fr,pt-BR}/` (namespaces `errors`, `emails`, `notifications`, `monthly_reports`, `quarterly_reports`, `annual_reports`). Resuelve el idioma por query `?lang=` y luego por `Accept-Language`; fallback `es`. Los errores de dominio (`AppException` + `ErrorCode`) y los mensajes de validación se traducen; el PDF del informe mensual usa el locale de la petición.
+- **Catálogos**: 27 tablas `*_translations` (fila base en español; `CHECK (locale <> 'es')`). Hoy la traducción se edita y se lee en endpoints admin; las lecturas públicas de `catalogs.service.ts` siguen sin depender del locale.
+- **Admin (Next.js)**: `next-intl` con `messages/{es,en,fr,pt-BR}.json` usado en todo el panel. El locale se toma de la cookie `sacdia_admin_locale` (`src/i18n/request.ts`). Los formularios de catálogos tienen pestañas de traducción.
+- **App móvil (Flutter)**: `easy_localization` con `assets/translations/{es,en,fr,pt-BR}.json` y selector de idioma en Ajustes (`language_picker_tile.dart`).
+- **Brecha**: ni la app ni el cliente HTTP del admin envían de forma explícita el idioma elegido (`Accept-Language` o `?lang=`) al backend, así que los textos generados por el backend no siguen necesariamente la selección del usuario.
 
 ## 3. Alcance candidato
 
 Idiomas objetivo:
 
-- `es` (base — ya parcial);
-- `pt-BR` (Brasil — mercado regional grande);
-- `en` (opcional, alcance global).
+- `es` (base) — hecho;
+- `pt-BR`, `en`, `fr` — archivos de traducción presentes en los tres repos; pendiente revisión de calidad y cobertura.
 
 Superficies a cubrir:
 
@@ -31,27 +34,26 @@ Superficies a cubrir:
 - templates de notificaciones push y bandeja;
 - PDFs generados (monthly reports, certificados).
 
-## 4. Arquitectura tentativa
+## 4. Arquitectura adoptada
 
-- **Admin**: adoptar `next-intl` con archivos JSON por locale, rutas con prefijo `/:locale/...` o header-based.
-- **App móvil**: adoptar `easy_localization` o `flutter_gen_l10n` con archivos ARB o JSON por locale.
-- **Backend**: capa de i18n por `Accept-Language` header, fallback a Español. Catálogo compartido con clientes vía build-time sync o endpoint `GET /api/v1/i18n/:locale/:namespace`.
-- **Base de datos**: considerar si catálogos institucionales (club_types, category names) requieren versiones por locale.
+- **Admin**: `next-intl` con un JSON por locale; locale por cookie, sin prefijo en la ruta.
+- **App móvil**: `easy_localization` con un JSON por locale.
+- **Backend**: `nestjs-i18n` con resolvers `?lang=` y `Accept-Language`, fallback `es`. No hay endpoint para compartir catálogos de mensajes con los clientes: cada cliente mantiene los suyos.
+- **Base de datos**: tablas `<catálogo>_translations` por locale distinto de `es`.
 
-## 5. Hitos tentativos
+## 5. Hitos
 
-1. **Fase 0** — relevamiento exhaustivo de textos hardcoded por cliente y backend. Inventario de strings.
-2. **Fase 1** — adopción de librería en admin, migración de strings, escritura de `pt-BR`.
-3. **Fase 2** — adopción en app móvil con catálogo ARB, traducción de strings.
-4. **Fase 3** — i18n de backend (errores + notificaciones).
-5. **Fase 4** — i18n de PDFs y artefactos generados.
-6. **Fase 5** — canonización en `docs/canon/runtime-i18n.md` (promoción a canon).
+1. **Fase 0** — inventario de textos. Hecho (inventario archivado en `docs/history/audit/i18n-strings-inventory.md`).
+2. **Fase 1** — librería y catálogos de mensajes en admin (`next-intl`). Hecho.
+3. **Fase 2** — librería y catálogos en la app (`easy_localization`) con selector de idioma. Hecho.
+4. **Fase 3** — i18n de backend (errores, validación, correos, notificaciones). Infraestructura hecha; pendiente que los clientes envíen el idioma.
+5. **Fase 4** — PDFs y artefactos generados. Parcial: el informe mensual usa el locale de la petición; falta revisar trimestral, anual y certificados.
+6. **Fase 5** — catálogos traducidos en lecturas públicas y canonización en `docs/canon/runtime-i18n.md`. Pendiente.
 
 ## 6. Decisiones pendientes
 
-- locales prioritarios (`pt-BR` primero, o directamente `en`);
 - estrategia de traducción (manual vs traductor automático + revisión humana);
-- si los catálogos institucionales deben traducirse o permanecer en Español;
+- si las lecturas públicas de catálogos deben devolver la traducción del locale;
 - si las notificaciones push deben respetar el locale del usuario.
 
 ## 7. Criterio de éxito
@@ -67,7 +69,8 @@ Superficies a cubrir:
 - drift entre versiones traducidas cuando la fuente cambia;
 - costo recurrente de mantener traducciones al agregar features.
 
-## 9. Estado actual
+## 9. Siguiente paso
 
-- **Prioridad**: baja hasta tener demanda concreta de un mercado no hispano.
-- **Decisión inmediata**: mantener default Español. Canonizar la infraestructura mínima vigente (`es-MX`, `es-ES`) como "2 locales parciales, cobertura limitada".
+- Enviar `Accept-Language` (o `?lang=`) desde el interceptor de Dio y desde `src/lib/api/client.ts` con el locale activo.
+- Decidir si las lecturas públicas de catálogos deben devolver la traducción del locale.
+- Revisar con hablantes nativos las traducciones `en`, `fr` y `pt-BR` antes de anunciar soporte multilenguaje.

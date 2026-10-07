@@ -1,681 +1,258 @@
 # SACDIA — Deployment Guide
 
-Tutorial paso a paso para deployar SACDIA en produccion.
+**Estado**: ACTIVE
+**Actualizado**: 2026-10-04
+**Fuentes**: `sacdia-backend/render.yaml`, `sacdia-backend/.env.example`, `sacdia-backend/src/config/env.validation.ts`, `.github/workflows/ci.yml` de cada repo.
 
-**Stack de infraestructura:**
-- Backend (NestJS): Render
-- Admin Panel (Next.js): Vercel
-- Base de Datos: Neon (PostgreSQL serverless)
-- App Movil: Flutter (App Store + Play Store)
-- Auth: Better Auth (self-hosted en el backend, HS256 JWT)
-- Storage: Cloudflare R2
-- Cache: Upstash Redis
-- Push Notifications: Firebase FCM
-- Monitoring: Sentry
+> [!IMPORTANT]
+> El producto **todavía no está en producción**. Esta guía describe cómo desplegar cada entorno. Si contradice `render.yaml` o `.env.example`, mandan esos archivos y esta guía se corrige.
 
----
+**Infraestructura:**
 
-## Tabla de Contenidos
-
-1. [Requisitos previos](#1-requisitos-previos)
-2. [Neon (PostgreSQL)](#2-neon-postgresql)
-3. [Render (Backend NestJS)](#3-render-backend-nestjs)
-4. [Vercel (Admin Panel Next.js)](#4-vercel-admin-panel-nextjs)
-5. [Google OAuth](#5-google-oauth)
-6. [Apple Sign In](#6-apple-sign-in)
-7. [Flutter (App Store + Play Store)](#7-flutter-app-store--play-store)
-8. [Cutover: Apagar Supabase](#8-cutover-apagar-supabase)
-9. [Verificacion E2E](#9-verificacion-e2e)
-10. [Upgrade a Produccion (planes pagos)](#10-upgrade-a-produccion-planes-pagos)
-11. [Troubleshooting](#11-troubleshooting)
+| Pieza | Servicio |
+|---|---|
+| Backend (NestJS) | Render (blueprint `render.yaml`) |
+| Admin (Next.js) | Vercel |
+| Base de datos | Neon (PostgreSQL) |
+| Cache, colas y rate limit | Redis (Upstash recomendado) |
+| Archivos | Cloudflare R2 |
+| Auth | Better Auth dentro del backend (JWT HS256) |
+| Push | Firebase Cloud Messaging |
+| Correo | Resend |
+| Monitoreo | Sentry |
+| App | Flutter → App Store y Play Store |
 
 ---
 
-## 1. Requisitos previos
+## 1. Entornos y ramas
 
-Antes de empezar, necesitas cuentas en:
+Los tres repos runtime siguen el mismo flujo:
 
-| Servicio | URL | Costo (testing) | Costo (produccion) |
-|----------|-----|-----------------|---------------------|
-| Neon | https://neon.com | $0 (Free) | $19/mo (Launch) |
-| Render | https://render.com | $0 (Free) | $7-25/mo (Starter/Standard) |
-| Vercel | https://vercel.com | $0 (Hobby) | $20/mo (Pro) |
-| Google Cloud Console | https://console.cloud.google.com | $0 | $0 |
-| Apple Developer | https://developer.apple.com | $99/year | $99/year |
-| Firebase | https://console.firebase.google.com | $0 | $0 (Blaze pay-as-you-go) |
-| Upstash | https://upstash.com | $0 (Free) | Pay-as-you-go |
-| Cloudflare R2 | https://dash.cloudflare.com | $0 (10GB free) | $0.015/GB |
-| Sentry | https://sentry.io | $0 (Developer) | $26/mo (Team) |
-
-**Herramientas locales necesarias:**
-```bash
-node --version   # v20+ requerido
-pnpm --version   # v9+ requerido (NO usar npm para better-auth)
-flutter --version # 3.x
-git --version
+```text
+development  →  preproduction (QA)  →  main (release)
 ```
 
+| Rama | Uso |
+|---|---|
+| `development` | Integración diaria. Base de datos: rama de desarrollo de Neon |
+| `preproduction` | QA antes de release |
+| `main` | Release |
+
+Reglas:
+
+- Cada entorno tiene su propia base Neon, su propio Redis y sus propios secretos. No compartir `BETTER_AUTH_SECRET`, `QR_JWT_SECRET` ni la base de Redis entre entornos (`.env.example` lo exige para Upstash).
+- Se promueve código mergeando `development` → `preproduction` → `main`; las migraciones viajan con el código y se aplican en el deploy.
+- La CI de backend y app corre en las tres ramas; la del admin, en sus workflows `build`, `tests` y `typecheck`.
+
 ---
 
-## 2. Neon (PostgreSQL)
-
-### 2.1 Crear proyectos
-
-1. Ir a [neon.com/console](https://neon.com/console)
-2. Crear 3 proyectos:
-
-| Proyecto | Auto-suspend | Region |
-|----------|-------------|--------|
-| `sacdia-dev` | ON (5 min) | US East 1 |
-| `sacdia-staging` | ON (5 min) | US East 1 |
-| `sacdia-prod` | **OFF** (siempre encendido) | US East 1 |
-
-3. Para cada proyecto, anotar las dos connection strings:
-   - **Pooled** (tiene `-pooler` en el hostname): para runtime
-   - **Direct** (sin `-pooler`): para migraciones
-
-### 2.2 Aplicar migraciones
-
-Desde `sacdia-backend/`, correr para cada ambiente:
+## 2. Requisitos
 
 ```bash
-# Dev
-DATABASE_URL="postgresql://...pooler..." \
-DATABASE_DIRECT_URL="postgresql://...direct..." \
-npx prisma migrate deploy
-
-# Staging (misma logica, distinto connection string)
-# Prod (misma logica, distinto connection string)
+node --version     # 24.x (backend: engines >=24 <25; CI 24.13.1)
+pnpm --version     # 10.x (backend fija pnpm@10.29.3 en packageManager)
+flutter --version  # estable; el CI de la app usa 3.41.6
 ```
 
-### 2.3 Seedear roles base
-
-Cada base de datos nueva necesita los roles base para que el register funcione:
-
-```bash
-DATABASE_URL="<pooled_url>" \
-DATABASE_DIRECT_URL="<direct_url>" \
-npx prisma db execute --stdin <<'SQL'
-INSERT INTO roles (role_id, role_name, role_category, active, created_at, modified_at)
-VALUES
-  (gen_random_uuid(), 'user', 'GLOBAL', true, NOW(), NOW()),
-  (gen_random_uuid(), 'admin', 'GLOBAL', true, NOW(), NOW()),
-  (gen_random_uuid(), 'super_admin', 'GLOBAL', true, NOW(), NOW())
-ON CONFLICT (role_name) DO NOTHING;
-SQL
-```
-
-Repetir para dev, staging y prod.
-
-### 2.4 Nota sobre connection strings
-
-```
-Pooled (runtime):  postgresql://user:pass@ep-xxx-pooler.region.aws.neon.tech/neondb?sslmode=require
-Direct (migrate):  postgresql://user:pass@ep-xxx.region.aws.neon.tech/neondb?sslmode=require
-                                              ^ sin -pooler
-```
-
-El `prisma.config.ts` ya esta configurado para usar ambas:
-```typescript
-datasource: {
-  url: process.env["DATABASE_URL"],        // pooled
-  directUrl: process.env["DATABASE_DIRECT_URL"],  // direct
-}
-```
+Cuentas: Neon, Render, Vercel, Upstash (o Redis compatible con TLS), Cloudflare (R2), Firebase, Google Cloud (OAuth y Maps), Apple Developer, Resend y Sentry.
 
 ---
 
-## 3. Render (Backend NestJS)
+## 3. Neon (PostgreSQL)
 
-### 3.1 Crear servicio
+1. Crear una base por entorno (o una rama de Neon por entorno).
+2. Anotar dos cadenas de conexión:
+   - **pooled** (host con `-pooler`): `DATABASE_URL`, la usa la app;
+   - **direct** (sin `-pooler`): `DATABASE_DIRECT_URL`, la usan las migraciones (`prisma.config.ts`).
+3. Las migraciones se aplican solas en Render (`preDeployCommand`). Para aplicarlas a mano:
 
-1. Ir a [render.com](https://render.com) -> login con GitHub
-2. **"New" -> "Web Service"**
-3. Conectar repo: `abn-r/sacdia-backend`
+   ```bash
+   cd sacdia-backend
+   DATABASE_URL="<pooled>" DATABASE_DIRECT_URL="<direct>" pnpm prisma migrate deploy
+   ```
 
-### 3.2 Configurar
+   Nunca usar `prisma db push` contra un entorno compartido.
+
+4. Base nueva: cargar catálogos, roles y permisos en este orden (`prisma/seeds/README.md`):
+
+   ```bash
+   pnpm prisma db seed                                   # prisma/seed.ts: catálogos y roles
+   psql "$DATABASE_URL" -f prisma/seeds/permissions.seed.sql
+   psql "$DATABASE_URL" -f prisma/seeds/role-permissions.seed.sql
+   ```
+
+   El SQL de grants no crea roles: si `seed.ts` no corrió antes, los grants no se aplican. Los seeds de datos de prueba (`core.ts`, `test-users.seed.ts`) son solo para desarrollo.
+
+---
+
+## 4. Render (backend)
+
+### 4.1 Blueprint
+
+El servicio se define en `sacdia-backend/render.yaml`:
 
 | Campo | Valor |
-|-------|-------|
-| Name | `sacdia-backend` |
-| Region | Oregon (US West) o el mas cercano |
-| Branch | `development` (o `main` cuando mergees) |
-| Runtime | Node |
-| Build Command | `pnpm install && pnpm run build` |
-| Start Command | `pnpm run start:prod` |
-| Instance Type | Free (testing) o Starter $7/mo (produccion) |
+|---|---|
+| Tipo / runtime | `web` / `node` |
+| Nombre | `sacdia-backend` |
+| Región / plan | `oregon` / `starter` |
+| Build | `pnpm install --frozen-lockfile && pnpm prisma generate && pnpm build` |
+| Pre-deploy | `pnpm prisma migrate deploy` (aplica migraciones antes de servir tráfico) |
+| Start | `pnpm start:prod` (`node dist/src/main.js`) |
+| Health check | `/api/v1/health` |
 
-**IMPORTANTE**: El `package.json` tiene un script `prebuild` que corre `prisma generate` automaticamente antes del build. Si por alguna razon no funciona, cambia el Build Command a:
-```
-pnpm install && pnpm prisma generate && pnpm run build
-```
+Variables fijadas en el blueprint: `NODE_ENV=production`, `TRUST_PROXY_HOPS=1`, `SWAGGER_ENABLED=false`, `AUTH_REJECT_SNAKE_CASE=true`. Las secretas (`sync: false`) se cargan en el dashboard de Render: `ALLOWED_ORIGINS`, `DATABASE_URL`, `BETTER_AUTH_SECRET`, `QR_JWT_SECRET`, `REDIS_URL` y el resto de la tabla 4.2.
 
-### 3.3 Variables de entorno
+Crear el servicio: Render → New → Blueprint → repo `abn-r/sacdia-backend`, y elegir la rama que despliega cada entorno.
 
-Agregar TODAS estas en Render Dashboard -> tu servicio -> Environment:
+### 4.2 Variables de entorno
 
-```env
-# Core
-NODE_ENV=production
-PORT=3000
+Catálogo completo y comentado: `sacdia-backend/.env.example`. Las marcadas como obligatorias impiden el arranque si faltan (`env.validation.ts`).
 
-# Database (Neon) - usar las del ambiente correspondiente
-DATABASE_URL=postgresql://...pooler...
-DATABASE_DIRECT_URL=postgresql://...direct...
+| Grupo | Variables | Obligatoria en producción |
+|---|---|---|
+| App | `NODE_ENV`, `PORT` (3000), `TRUST_PROXY_HOPS`, `FRONTEND_URL`, `REQUEST_TIMEOUT_MS`, `LOG_LEVEL`, `LOG_PRETTY` | — |
+| CORS y OAuth | `ALLOWED_ORIGINS` (lista separada por comas de orígenes del admin/app), `ALLOWED_OAUTH_REDIRECT_URLS` | `ALLOWED_ORIGINS` sí |
+| Seguridad | `SWAGGER_ENABLED` (debe ser `false`), `AUTH_REJECT_SNAKE_CASE`, `BOOTSTRAP_SECRET` (opcional, habilita `POST /admin/rbac/bootstrap-admin`) | — |
+| Base de datos | `DATABASE_URL`, `DATABASE_DIRECT_URL`, `DATABASE_APPLICATION_NAME`, `PRISMA_POOL_*` | `DATABASE_URL` sí |
+| Auth | `BETTER_AUTH_SECRET` (≥ 32 caracteres), `QR_JWT_SECRET` (≥ 32, distinto del anterior), `BETTER_AUTH_BASE_URL` | Los dos secretos sí |
+| OAuth | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `APPLE_CLIENT_ID`, `APPLE_TEAM_ID`, `APPLE_KEY_ID`, `APPLE_PRIVATE_KEY` | Si se usa el proveedor |
+| Redis | `REDIS_URL` (`redis://` o `rediss://`), `CACHE_DEFAULT_TTL_MS`, `CACHE_REDIS_CONNECTION_TIMEOUT_MS` | Sí (cache, rate limit y colas fallan al arrancar sin Redis) |
+| R2 | `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_REGION=auto`, `R2_SIGNED_URL_EXPIRES_SECONDS` y, por alias, `R2_BUCKET_*`, `R2_PUBLIC_URL_*`, `R2_KEY_PREFIX_*` | `HONORS_PDF`, `EVIDENCE_FILES`, `INSURANCE_EVIDENCE`, `DATA_EXPORTS`, `MONTHLY_REPORTS` y `RESOURCES_FILES` sí; el resto, al usarse |
+| Carga de certificados | `CERTIFICATE_IMPORT_ALLOWED_FILE_HOSTS`, `GOOGLE_VISION_API_KEY` (OCR de imágenes; vacío = lectura manual) | — |
+| Firebase | `FIREBASE_SERVICE_ACCOUNT_JSON_BASE64` (recomendado) o `FIREBASE_SERVICE_ACCOUNT_JSON` o `FIREBASE_PROJECT_ID` + `FIREBASE_PRIVATE_KEY` + `FIREBASE_CLIENT_EMAIL` | Para push |
+| Correo | `EMAIL_ENABLED`, `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, `RESEND_REPLY_TO` | Si `EMAIL_ENABLED=true`, también `RESEND_API_KEY`, `RESEND_FROM_EMAIL` y `REDIS_URL` |
+| Sentry | `SENTRY_DSN`, `SENTRY_RELEASE` (si no se define, se usa `RENDER_GIT_COMMIT`, que inyecta Render) | — |
 
-# Better Auth
-BETTER_AUTH_SECRET=<genera un string random de 32+ caracteres>
-BETTER_AUTH_BASE_URL=https://sacdia-backend.onrender.com
+Buckets, prefijos y acceso de cada alias: `docs/storage/r2-keyprefix-conventions.md`. Operación del correo: `docs/guides/domain-email-operations.md`.
 
-# Frontend URL (admin panel en Vercel)
-FRONTEND_URL=https://sacdia-admin.vercel.app
-
-# Google OAuth
-GOOGLE_CLIENT_ID=<tu client ID del paso 5>
-GOOGLE_CLIENT_SECRET=<tu client secret del paso 5>
-
-# Apple OAuth (cuando tengas Apple Developer Account)
-# APPLE_CLIENT_ID=
-# APPLE_TEAM_ID=
-# APPLE_KEY_ID=
-# APPLE_PRIVATE_KEY=
-
-# Upstash Redis
-REDIS_URL=rediss://default:...@....upstash.io:6379
-
-# Firebase FCM
-FIREBASE_SERVICE_ACCOUNT_JSON_BASE64=<tu base64 de service account>
-
-# Cloudflare R2
-R2_ACCOUNT_ID=<tu account id>
-R2_ACCESS_KEY_ID=<tu access key>
-R2_SECRET_ACCESS_KEY=<tu secret key>
-R2_REGION=auto
-
-# Sentry
-SENTRY_DSN=https://...@....ingest.sentry.io/...
-```
-
-**Para generar BETTER_AUTH_SECRET:**
-```bash
-node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
-```
-
-### 3.4 Deploy
-
-Click "Deploy Web Service". Render clona, instala, builda y deploya automaticamente.
-
-La URL sera algo como: `https://sacdia-backend.onrender.com`
-
-### 3.5 Verificar
+Generar secretos:
 
 ```bash
-curl https://sacdia-backend.onrender.com/api/v1/health
+openssl rand -hex 32   # BETTER_AUTH_SECRET
+openssl rand -hex 32   # QR_JWT_SECRET (otro valor)
 ```
 
-Debe devolver:
-```json
-{
-  "status": "ok",
-  "dependencies": {
-    "database": { "ok": true },
-    "cache": { "ok": true }
-  }
-}
+> **Pendiente de merge (PR #448 de sacdia-backend).** Esa rama sustituye `GOOGLE_VISION_API_KEY` por ADC (`GOOGLE_APPLICATION_CREDENTIALS` como Secret File de Render, `GOOGLE_CLOUD_PROJECT`, `GOOGLE_CLOUD_QUOTA_PROJECT`) y añade `POSTHOG_PROJECT_TOKEN`/`POSTHOG_HOST`. Ver `docs/guides/google-vision-certificate-ocr.md`.
+
+### 4.3 Verificar
+
+```bash
+curl https://<backend>/api/v1/health
+# {"status":"ok","timestamp":"..."}
 ```
+
+`GET /api/v1/health/details` (solo admin, con JWT) devuelve el estado de base de datos, cache, FCM y Sentry; `status` es `ok` si base de datos y cache responden y `degraded` si no.
 
 ---
 
-## 4. Vercel (Admin Panel Next.js)
+## 5. Vercel (admin)
 
-### 4.1 Crear proyecto
+1. Vercel → Add New → Project → repo `abn-r/sacdia-admin` (framework Next.js autodetectado).
+2. Elegir la rama de cada entorno (por ejemplo, `main` como producción y `preproduction` como preview de QA).
+3. Variables:
 
-1. Ir a [vercel.com](https://vercel.com) -> login con GitHub
-2. **"Add New" -> "Project"**
-3. Importar repo: `abn-r/sacdia-admin`
+| Variable | Uso |
+|---|---|
+| `NEXT_PUBLIC_API_URL` | URL del backend. Acepta `https://<host>`, `https://<host>/api` o `https://<host>/api/v1` (el cliente normaliza a `/api/v1`). Sin valor cae a `http://localhost:3000/api/v1` |
+| `NEXT_PUBLIC_APP_URL` | URL pública del admin |
+| `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`, `NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID` | Mapas |
+| `NEXT_PUBLIC_SENTRY_DSN` | Sentry (release por `VERCEL_GIT_COMMIT_SHA`, que inyecta Vercel) |
+| `NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN`, `NEXT_PUBLIC_POSTHOG_HOST` | Analítica |
+| `NEXT_PUBLIC_RBAC_LEGACY_FALLBACK` | Opcional |
 
-### 4.2 Configurar
-
-| Campo | Valor |
-|-------|-------|
-| Framework Preset | Next.js (auto-detectado) |
-| Root Directory | `.` |
-| Build Command | auto |
-| Output Directory | auto |
-
-**IMPORTANTE**: En Settings -> Git -> Production Branch, cambiar a `development` (o `main` cuando mergees). Si no, Vercel deploya la branch `main` que no tiene los cambios de Wave 3.
-
-### 4.3 Variables de entorno
-
-```env
-NEXT_PUBLIC_API_URL=https://sacdia-backend.onrender.com/api/v1
-```
-
-Solo esa variable es requerida. Opcional:
-```env
-NEXT_PUBLIC_RBAC_LEGACY_FALLBACK=true
-```
-
-### 4.4 Deploy
-
-Click "Deploy". Vercel builda y deploya automaticamente.
-
-La URL sera algo como: `https://sacdia-admin.vercel.app`
-
-### 4.5 Verificar
-
-Abrir la URL en el browser. Deberias ver la pagina de login del admin panel.
+4. Añadir el dominio del admin a `ALLOWED_ORIGINS` del backend del mismo entorno.
+5. Verificar: la URL debe mostrar el login; tras iniciar sesión, `/dashboard` carga con las cookies `sacdia_admin_access_token` y `sacdia_admin_refresh_token`.
 
 ---
 
-## 5. Google OAuth
+## 6. Google OAuth
 
-### 5.1 Crear credenciales (si no las tenes)
+1. Google Cloud Console → APIs & Services → Credentials → OAuth client ID (Web application).
+2. Authorized redirect URIs: la callback de Better Auth en cada backend, `https://<backend>/api/auth/callback/google` (y `http://localhost:3000/api/auth/callback/google` para desarrollo).
+3. Cargar `GOOGLE_CLIENT_ID` y `GOOGLE_CLIENT_SECRET` en Render.
+4. Pantalla de consentimiento: tipo External, scopes `email`, `profile`, `openid`.
+5. Registrar en `ALLOWED_OAUTH_REDIRECT_URLS` las URLs de retorno exactas de admin y app.
 
-1. Ir a [Google Cloud Console](https://console.cloud.google.com)
-2. Seleccionar tu proyecto (o crear uno nuevo)
-3. **APIs & Services -> Credentials -> "+ Create Credentials" -> "OAuth client ID"**
-4. Application type: **"Web application"**
-5. Name: `Sacdia Backend`
+## 7. Apple Sign In
 
-### 5.2 Configurar redirect URIs
+Requiere Apple Developer Program.
 
-En **"Authorized redirect URIs"** agregar:
-
-```
-http://localhost:3000/api/auth/callback/google
-https://sacdia-backend.onrender.com/api/auth/callback/google
-https://tu-dominio-produccion.com/api/auth/callback/google
-```
-
-### 5.3 Guardar credenciales
-
-Te da:
-- **Client ID**: `xxxx.apps.googleusercontent.com`
-- **Client Secret**: `GOCSPX-xxxx`
-
-Agregar ambos como env vars en Render (ya documentado en paso 3.3).
-
-### 5.4 Configurar pantalla de consentimiento
-
-Si no lo hiciste:
-1. **APIs & Services -> OAuth consent screen**
-2. User type: External
-3. Completar nombre de la app, email de contacto, logo
-4. Scopes: `email`, `profile`, `openid`
-5. Test users: agregar tu email para testing
+1. App ID de la app (bundle `com.sacdia.app` en `ios/Runner.xcodeproj`) con "Sign in with Apple".
+2. Services ID (es el valor de `APPLE_CLIENT_ID`, no el bundle ID) con dominio del backend y Return URL `https://<backend>/api/auth/callback/apple`.
+3. Key de "Sign in with Apple": descargar el `.p8` y anotar el Key ID.
+4. Cargar `APPLE_CLIENT_ID`, `APPLE_TEAM_ID`, `APPLE_KEY_ID` y `APPLE_PRIVATE_KEY` (contenido del `.p8`, saltos de línea como `\n`) en Render.
 
 ---
 
-## 6. Apple Sign In
+## 8. App móvil (Flutter)
 
-**Requiere Apple Developer Account ($99/year)**
-
-### 6.1 Crear App ID
-
-1. Ir a [developer.apple.com](https://developer.apple.com) -> Certificates, Identifiers & Profiles
-2. **Identifiers -> "+" -> App IDs**
-3. Bundle ID: `io.sacdia.app`
-4. Habilitar "Sign in with Apple"
-
-### 6.2 Crear Service ID
-
-1. **Identifiers -> "+" -> Services IDs**
-2. Identifier: `io.sacdia.app.auth`
-3. Habilitar "Sign in with Apple"
-4. Configurar:
-   - **Domains**: `sacdia-backend.onrender.com` (o tu dominio)
-   - **Return URLs**: `https://sacdia-backend.onrender.com/api/auth/callback/apple`
-
-### 6.3 Crear Key
-
-1. **Keys -> "+" -> "Sign in with Apple"**
-2. Descargar el archivo `.p8` (private key)
-3. Anotar el Key ID
-
-### 6.4 Agregar env vars
-
-En Render, agregar:
-```env
-APPLE_CLIENT_ID=io.sacdia.app.auth
-APPLE_TEAM_ID=<tu Team ID>
-APPLE_KEY_ID=<el Key ID del paso 6.3>
-APPLE_PRIVATE_KEY=<contenido del .p8, en una sola linea>
-```
-
----
-
-## 7. Flutter (App Store + Play Store)
-
-### 7.1 Configurar URL del backend
-
-En `lib/core/constants/app_constants.dart` (o donde este configurado), cambiar la base URL:
-
-```dart
-static const String baseUrl = 'https://sacdia-backend.onrender.com/api/v1';
-```
-
-O usar flavor/environment config para dev/staging/prod.
-
-### 7.2 Build Android
+La URL del backend se inyecta en compilación; `AppConstants.resolveBaseUrl` lanza error en release si `API_BASE_URL` falta o no es HTTPS.
 
 ```bash
 cd sacdia-app
+flutter pub get
 
-# Limpiar
-flutter clean && flutter pub get
+# Android (Play Store)
+flutter build appbundle --release \
+  --obfuscate --split-debug-info=build/app/outputs/symbols \
+  --dart-define=API_BASE_URL=https://<backend>/api/v1 \
+  --dart-define=GOOGLE_MAPS_API_KEY=<key> \
+  -P GOOGLE_MAPS_API_KEY=<key>
 
-# Build APK (testing)
-flutter build apk --release
-
-# Build App Bundle (Play Store)
-flutter build appbundle --release
+# iOS (App Store / TestFlight)
+flutter build ipa --release \
+  --dart-define=API_BASE_URL=https://<backend>/api/v1 \
+  --dart-define=GOOGLE_MAPS_API_KEY=<key>
 ```
 
-El `.aab` esta en `build/app/outputs/bundle/release/app-release.aab`
-
-### 7.3 Subir a Play Store
-
-1. Ir a [Google Play Console](https://play.google.com/console)
-2. Seleccionar tu app (o crear una nueva)
-3. **Testing -> Internal testing -> "Create new release"**
-4. Subir el `.aab`
-5. Agregar notas: "Updated authentication system"
-6. Publicar en internal track
-
-### 7.4 Build iOS
-
-```bash
-# Build
-flutter build ipa --release
-```
-
-El `.ipa` esta en `build/ios/ipa/`
-
-### 7.5 Subir a App Store
-
-1. Abrir Xcode -> **Product -> Archive** (o usar el `.ipa` generado)
-2. **Distribute App -> App Store Connect**
-3. En [App Store Connect](https://appstoreconnect.apple.com):
-   - **TestFlight -> "+" -> Add build**
-   - Subir el build
-   - Agregar testers al grupo de TestFlight
-
-### 7.6 Nota sobre deep links
-
-Los deep links para OAuth ya estan configurados:
-- iOS: `Info.plist` tiene `CFBundleURLSchemes` con `io.sacdia.app`
-- Android: `AndroidManifest.xml` tiene el intent-filter
-- Router: `/auth/callback` GoRoute maneja el callback
+- Identificadores: Android `applicationId = com.sacdia.app`; iOS `com.sacdia.app`. El esquema de deep link para OAuth es `io.sacdia.app` (`Info.plist`).
+- Archivos de Firebase (`android/app/google-services.json`, `ios/Runner/GoogleService-Info.plist`) no están en el repo.
+- CI (`sacdia-app/.github/workflows/ci.yml`): con los secrets `API_BASE_URL`, `GOOGLE_SERVICES_JSON_BASE64`, `GOOGLE_MAPS_API_KEY` y `ANDROID_KEYSTORE_*` genera el AAB firmado y sube símbolos a Sentry (`SENTRY_AUTH_TOKEN`, `dart run sentry_dart_plugin`). Sin keystore solo genera un APK de verificación firmado con la clave debug.
+- Subida: Play Console (Internal testing) y App Store Connect (TestFlight). Antes del envío a tiendas revisar `docs/legal/store-submission-privacy-checklist.md`.
 
 ---
 
-## 8. Cutover: Apagar Supabase
-
-**Solo hacer esto cuando TODO lo anterior este funcionando y verificado.**
-
-### 8.1 Verificar que todo funciona
-
-- [ ] Backend en Render responde `/api/v1/health` con DB y Cache OK
-- [ ] Register funciona (crear usuario de prueba)
-- [ ] Login funciona (recibir JWT)
-- [ ] Auth/me funciona (validar JWT)
-- [ ] Refresh funciona (nuevo JWT desde session token)
-- [ ] Logout funciona (401 despues de logout)
-- [ ] Admin panel carga y permite login
-- [ ] Flutter app conecta al backend correctamente
-
-### 8.2 Pausar Supabase (NO borrar)
-
-1. Ir a [supabase.com](https://supabase.com/dashboard)
-2. Para cada proyecto (dev, staging, prod):
-   - Settings -> General -> **"Pause Project"**
-3. **NO borrar** los proyectos todavia
-
-### 8.3 Remover env vars de Supabase
-
-En Render, verificar que estas variables NO existan:
-```
-SUPABASE_URL          <- borrar si existe
-SUPABASE_ANON_KEY     <- borrar si existe
-SUPABASE_SERVICE_ROLE_KEY <- borrar si existe
-SUPABASE_JWT_SECRET   <- borrar si existe
-```
-
-### 8.4 Monitorear 24h
-
-Despues del cutover, monitorear:
-- Error rate en `/auth/login` (debe ser < 5%)
-- Error rate en `/auth/me` (debe ser < 2%)
-- Logs en Render Dashboard -> tu servicio -> Logs
-- Sentry para errores no capturados
-
-### 8.5 Borrar Supabase (30 dias despues)
-
-**Esperar 30 dias** despues de pausar. Si no hubo problemas:
-1. Ir a cada proyecto en Supabase
-2. Settings -> General -> **"Delete Project"**
-3. Confirmar borrado
-
----
-
-## 9. Verificacion E2E
-
-Script para verificar todo el flujo de auth contra el backend deployado:
+## 9. Verificación de extremo a extremo
 
 ```bash
-# Cambiar por tu URL
-API_URL="https://sacdia-backend.onrender.com/api/v1"
+API="https://<backend>/api/v1"
 
-# 1. Health
-echo "=== HEALTH ==="
-curl -s "$API_URL/health" | python3 -c "import sys,json; d=json.load(sys.stdin); print('DB:', d['dependencies']['database']['ok'], '| Cache:', d['dependencies']['cache']['ok'])"
+curl -s "$API/health"
 
-# 2. Register
-echo "=== REGISTER ==="
-curl -s -X POST "$API_URL/auth/register" \
-  -H "Content-Type: application/json" \
-  -d '{"email":"test@sacdia.com","password":"TestPass123!","name":"Test","paternal_last_name":"User","maternal_last_name":"E2E"}'
-echo ""
-
-# 3. Login
-echo "=== LOGIN ==="
-LOGIN=$(curl -s -X POST "$API_URL/auth/login" \
-  -H "Content-Type: application/json" \
-  -d '{"email":"test@sacdia.com","password":"TestPass123!"}')
+LOGIN=$(curl -s -X POST "$API/auth/login" -H "Content-Type: application/json" \
+  -d '{"email":"<usuario>","password":"<contraseña>"}')
 AT=$(echo "$LOGIN" | python3 -c "import sys,json; print(json.load(sys.stdin)['data']['accessToken'])")
 RT=$(echo "$LOGIN" | python3 -c "import sys,json; print(json.load(sys.stdin)['data']['refreshToken'])")
-echo "JWT received: $([ ${#AT} -gt 20 ] && echo YES || echo NO)"
 
-# 4. Auth/me
-echo "=== AUTH/ME ==="
-curl -s "$API_URL/auth/me" -H "Authorization: Bearer $AT" | \
-  python3 -c "import sys,json; d=json.load(sys.stdin); print('Email:', d['data']['email'], '| Roles:', d['data']['roles'])"
-
-# 5. Refresh
-echo "=== REFRESH ==="
-curl -s -X POST "$API_URL/auth/refresh" \
-  -H "Content-Type: application/json" \
-  -d "{\"refreshToken\":\"$RT\"}" | \
-  python3 -c "import sys,json; d=json.load(sys.stdin); print('Status:', d['status'])"
-
-# 6. Logout
-echo "=== LOGOUT ==="
-curl -s -X POST "$API_URL/auth/logout" \
-  -H "Authorization: Bearer $AT" \
-  -H "Content-Type: application/json" \
-  -d "{\"refreshToken\":\"$RT\"}" | \
-  python3 -c "import sys,json; d=json.load(sys.stdin); print('Status:', d.get('status','done'))"
-
-# 7. Verify blocked
-echo "=== VERIFY BLOCKED ==="
-HTTP=$(curl -s -o /dev/null -w "%{http_code}" "$API_URL/auth/me" -H "Authorization: Bearer $AT")
-echo "Post-logout: HTTP $HTTP (expect 401)"
+curl -s "$API/auth/me" -H "Authorization: Bearer $AT"
+curl -s -X POST "$API/auth/refresh" -H "Content-Type: application/json" -d "{\"refreshToken\":\"$RT\"}"
+curl -s -X POST "$API/auth/logout" -H "Authorization: Bearer $AT" -H "Content-Type: application/json" -d "{\"refreshToken\":\"$RT\"}"
+curl -s -o /dev/null -w "%{http_code}\n" "$API/auth/me" -H "Authorization: Bearer $AT"   # esperado 401
 ```
+
+Usuarios de prueba (solo desarrollo): `docs/testing/TEST-USERS.md`.
+
+Checklist:
+
+- [ ] `/api/v1/health` responde `ok` y `/health/details` muestra base de datos y cache OK.
+- [ ] Login, `GET /auth/me`, refresh y logout funcionan.
+- [ ] El admin inicia sesión y carga `/dashboard`.
+- [ ] La app conecta con el `API_BASE_URL` del entorno.
+- [ ] Sentry recibe eventos con el release correcto.
 
 ---
 
-## 10. Upgrade a Produccion (planes pagos)
+## 10. Troubleshooting
 
-Cuando estes listo para produccion real:
-
-### Backend: Render Free -> Starter/Standard
-
-| Plan | Costo | RAM | CPU | Auto-suspend |
-|------|-------|-----|-----|-------------|
-| Free | $0 | 512MB | Shared | SI (15 min) |
-| **Starter** | **$7/mo** | 512MB | 0.5 | NO |
-| **Standard** | **$25/mo** | 2GB | 1 | NO |
-
-Recomendado: **Starter ($7/mo)** para arrancar. Si ves problemas de memoria, subir a Standard.
-
-Para cambiar: Render Dashboard -> tu servicio -> Settings -> Instance Type.
-
-### Alternativa: Migrar a Railway
-
-Si preferis mejor DX y pricing por uso:
-
-1. Crear cuenta en [railway.com](https://railway.com)
-2. **"New Project" -> "Deploy from GitHub"** -> `abn-r/sacdia-backend`
-3. Agregar las mismas env vars
-4. Railway auto-detecta NestJS y deploya
-
-Costo estimado: ~$7-15/mo (usage-based).
-
-### DB: Neon Free -> Launch
-
-Para produccion, el proyecto `sacdia-prod` en Neon debe ser **Launch ($19/mo)**:
-- Auto-suspend deshabilitado
-- Mayor pool de conexiones
-- Backups automaticos
-
-Cambiar en Neon Console -> tu proyecto -> Settings -> Plan.
-
-### Costo total estimado (produccion)
-
-| Servicio | Costo |
-|----------|-------|
-| Render Starter (backend) | $7/mo |
-| Vercel Free (admin) | $0 |
-| Neon Launch (prod DB) | $19/mo |
-| Neon Free (dev + staging) | $0 |
-| **Total** | **~$26/mo** |
-
----
-
-## 11. Troubleshooting
-
-### Build falla con "Property X does not exist on type PrismaService"
-
-**Causa**: `prisma generate` no se corrio antes del build.
-**Fix**: Verificar que `package.json` tiene:
-```json
-"prebuild": "prisma generate"
-```
-
-### Register devuelve 500 "User role not found"
-
-**Causa**: La tabla `roles` esta vacia en esa base de datos.
-**Fix**: Correr el seed SQL del paso 2.3.
-
-### Cold start de 30s-2min en Render Free
-
-**Causa**: Render Free apaga el servicio despues de 15 min sin trafico.
-**Fix**: Upgrade a Render Starter ($7/mo) que es always-on. O aceptarlo para testing.
-
-### "Cannot find module dist/main"
-
-**Causa**: El build no genero la carpeta `dist/`.
-**Fix**: Verificar que el Build Command es `pnpm install && pnpm run build`.
-
-### Login funciona pero el admin no puede hacer requests
-
-**Causa**: Falta el interceptor de Authorization header en client-side.
-**Fix**: Verificar que existe `src/app/api/auth/token/route.ts` y el interceptor en `src/lib/api/client.ts`.
-
-### OAuth redirect falla con "redirect_uri_mismatch"
-
-**Causa**: La URL del backend no esta en las Authorized redirect URIs de Google Console.
-**Fix**: Agregar `https://tu-backend.onrender.com/api/auth/callback/google` en Google Cloud Console -> Credentials -> tu OAuth client.
-
-### Vercel deploya sin los cambios de Wave 3
-
-**Causa**: Vercel esta deployando desde la branch `main` que no tiene los cambios.
-**Fix**: Settings -> Git -> Production Branch -> cambiar a `development`.
-
-### Flutter: "No se recibio ID de usuario" al registrar
-
-**Causa**: El parsing de la respuesta de register no matchea el formato del backend.
-**Fix**: El backend devuelve `{ success: true, userId: "uuid" }`. Verificar que el datasource parsea `response.data['userId']`.
-
----
-
-## Arquitectura final
-
-```
-                    Usuarios
-                       |
-          +------------+------------+
-          |                         |
-     Flutter App              Admin Panel
-     (App Store /             (Vercel)
-      Play Store)                |
-          |                      |
-          +----------+-----------+
-                     |
-              sacdia-backend
-              (Render / Railway)
-                     |
-          +----------+----------+
-          |          |          |
-       Neon DB   Upstash    Cloudflare
-      (PostgreSQL) (Redis)    R2 (Storage)
-          |
-    +-----+-----+
-    |     |     |
-   dev  staging prod
-```
-
-## Variables de entorno - Referencia completa
-
-```env
-# === CORE ===
-NODE_ENV=production
-PORT=3000
-
-# === DATABASE (Neon) ===
-DATABASE_URL=postgresql://...pooler.../neondb?sslmode=require
-DATABASE_DIRECT_URL=postgresql://.../neondb?sslmode=require
-
-# === AUTH (Better Auth) ===
-BETTER_AUTH_SECRET=<32+ chars random hex>
-BETTER_AUTH_BASE_URL=https://tu-backend.com
-
-# === FRONTEND ===
-FRONTEND_URL=https://tu-admin.vercel.app
-
-# === GOOGLE OAUTH ===
-GOOGLE_CLIENT_ID=xxx.apps.googleusercontent.com
-GOOGLE_CLIENT_SECRET=GOCSPX-xxx
-
-# === APPLE OAUTH (requiere Apple Developer Account) ===
-APPLE_CLIENT_ID=io.sacdia.app.auth
-APPLE_TEAM_ID=<Team ID>
-APPLE_KEY_ID=<Key ID>
-APPLE_PRIVATE_KEY=<contenido .p8>
-
-# === REDIS (Upstash) ===
-REDIS_URL=rediss://default:xxx@xxx.upstash.io:6379
-
-# === FIREBASE ===
-FIREBASE_SERVICE_ACCOUNT_JSON_BASE64=<base64 del service account JSON>
-
-# === CLOUDFLARE R2 ===
-R2_ACCOUNT_ID=xxx
-R2_ACCESS_KEY_ID=xxx
-R2_SECRET_ACCESS_KEY=xxx
-R2_REGION=auto
-
-# === MONITORING ===
-SENTRY_DSN=https://xxx@xxx.ingest.sentry.io/xxx
-```
+| Síntoma | Causa probable | Solución |
+|---|---|---|
+| El arranque falla con error de validación de entorno | Falta una variable obligatoria (por ejemplo `ALLOWED_ORIGINS`, `QR_JWT_SECRET`, un `R2_BUCKET_*` requerido) o `SWAGGER_ENABLED=true` en producción | Revisar el mensaje de Joi y la tabla 4.2 |
+| `REDIS_URL is required ... in production` | Producción sin Redis | Configurar `REDIS_URL` del entorno |
+| `QR_JWT_SECRET must be distinct from BETTER_AUTH_SECRET` | Mismo valor en ambos | Generar otro secreto |
+| Error de Prisma en el pre-deploy | Migración que no aplica sobre la base del entorno | Revisar la migración en local contra una rama de Neon; no usar `db push` |
+| `Property X does not exist on type PrismaService` al compilar | No se generó el cliente | El build del blueprint ya ejecuta `pnpm prisma generate`; en local, `pnpm prisma generate` |
+| El registro responde que no existe el rol `user` | Base sin `prisma/seed.ts` | Ejecutar los seeds del §3 |
+| `redirect_uri_mismatch` en OAuth | URL de callback no registrada | Añadir `https://<backend>/api/auth/callback/<provider>` en el proveedor |
+| El navegador bloquea las llamadas del admin (CORS) | Origen del admin fuera de `ALLOWED_ORIGINS` | Añadirlo y redeplegar |
+| La app release se cierra al abrir | Falta `API_BASE_URL` HTTPS en el build | Compilar con `--dart-define=API_BASE_URL=https://...` |

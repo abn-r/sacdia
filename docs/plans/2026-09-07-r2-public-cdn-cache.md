@@ -1,5 +1,8 @@
 # R2 Public CDN Cache Implementation Plan
 
+> **Estado real (revisado 2026-10-04 contra `development`)**: No ejecutado. `R2FileStorageService` no escribe `CacheControl` y los buckets públicos siguen sin dominio propio con caché. Ver `docs/storage/r2-keyprefix-conventions.md`.
+
+
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
 **Goal:** Serve public R2 assets (profile photos, honor images/PDFs, class docs, achievement badges) through Cloudflare custom domains with `Cache-Control`, without caching authenticated API JSON or private signed objects.
@@ -394,8 +397,8 @@ EOF
 - Modify: `docs/runbooks/r2-user-profiles-public-flip.md` (extend into a public-CDN runbook, keep the M-04 history)
 - Modify: `docs/storage/r2-keyprefix-conventions.md`
 - Modify: `sacdia-backend/docs/storage/r2-keyprefix-conventions.md` (keep in sync)
-- Modify: `docs/audit/EXTERNAL-SERVICES-AUDIT.md` (user-profiles is public CDN, not private)
-- Modify: `docs/audit/REALITY-MATRIX.md` (`INFRA-01` stays OPEN until staging/prod DNS + env are done; note this plan)
+- Modify: `docs/api/EXTERNAL-SERVICES-INTEGRATION.md` (user-profiles is public CDN, not private)
+- Modify: `docs/history/audit/REALITY-MATRIX.md` (`INFRA-01` stays OPEN until staging/prod DNS + env are done; note this plan)
 - Modify: `sacdia-backend/.env.example` comments under `R2_PUBLIC_URL_*` (example custom domains, bare host, never S3 API endpoint for public buckets)
 
 **Runbook checklist to add (manual, per env: development / staging / production):**
@@ -432,8 +435,8 @@ curl -sI "https://materials.cdn.sacdia.app/honors_pdf/<known>.pdf" | head
 git add docs/plans/2026-09-07-r2-public-cdn-cache.md \
   docs/runbooks/r2-user-profiles-public-flip.md \
   docs/storage/r2-keyprefix-conventions.md \
-  docs/audit/EXTERNAL-SERVICES-AUDIT.md \
-  docs/audit/REALITY-MATRIX.md
+  docs/api/EXTERNAL-SERVICES-INTEGRATION.md \
+  docs/history/audit/REALITY-MATRIX.md
 git commit -m "$(cat <<'EOF'
 docs(storage): plan public R2 CDN domains and cache headers
 

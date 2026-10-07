@@ -30,7 +30,6 @@ La asignacion de un consejero/secretario a una clase progresiva concreta vive en
   - `GET /api/v1/clubs/:clubId/sections/:sectionId` — Obtener seccion por ID
   - `POST /api/v1/clubs/:clubId/sections` — Camino residual para clubs pre-migracion si falta el tipo; 409 si el tipo ya existe. No acepta nombre propio.
   - `PATCH /api/v1/clubs/:clubId/sections/:sectionId` — Actualizar seccion; `active` es el unico switch de “este club opera esa seccion” para Aventureros y Conquistadores (roles: director, deputy-director, secretary, secretary-treasurer). Guías Mayores no se puede apagar: `400 CLUB_SECTION_MASTER_GUIDES_REQUIRED`. `active=true` en una GM inactiva (legado) esta permitido. `fee`, `souls_target` y meeting no se bloquean. El admin tambien bloquea el toggle en UI.
-  - `DELETE /api/v1/clubs/:clubId/sections/:sectionId` — Eliminar seccion (roles: director)
   - `GET /api/v1/clubs/:clubId/sections/:sectionId/members` — Listar miembros de la seccion con rol y clase anual activa (`current_class`) resuelta desde `enrollments`
   - `POST /api/v1/clubs/:clubId/sections/:sectionId/roles` — Asignar rol a miembro (roles: director, subdirector, secretary)
   - `POST /api/v1/clubs/:clubId/sections/:sectionId/director-assignment` — Asignación inicial de director operativo del año indicado

@@ -1,5 +1,8 @@
 # Sacdia Admin Adaptive iOS — Diseño
 
+> **Estado real (revisado 2026-10-04 contra `development`)**: APROBADO, sin implementar. Depende del repositorio `sacdia-admin-ios/`, que no existe en el workspace.
+
+
 **Estado:** APROBADO
 
 **Fecha:** 2026-07-12

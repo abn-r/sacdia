@@ -20,7 +20,7 @@ Para evitar contratos paralelos, la precedencia oficial es:
 
 1. `AUTHORIZATION-CANONICAL-CONTRACT.md` (shape y semantica del payload `authorization`).
 2. `RBAC-ENFORCEMENT-MATRIX.md` (como se enforcea cada permiso en backend).
-3. `CLUB-ROLE-ASSIGNMENT-FIRST-CONTRACT.md` (modelo de escrituras/lecturas de asignaciones de club).
+3. [`CLUB-ROLE-ASSIGNMENT-FIRST-CONTRACT.md`](./CLUB-ROLE-ASSIGNMENT-FIRST-CONTRACT.md) (modelo de escrituras/lecturas de asignaciones de club).
 
 Regla explicita:
 

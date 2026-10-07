@@ -51,7 +51,7 @@ Además del flujo legacy `member_insurances`, el backend tiene un **modelo de ca
 | Legacy directa | `member_insurances` | Activa; app/admin la usan; camporees exige su FK |
 | Capacity model | products/cycles/purchases/slots/assignments | Backend-only; purchases qty **legado a reemplazar** por órdenes de pago con beneficiarios nombrados (`field_payment_orders`) |
 
-El plan `docs/plans/2026-08-05-insurance-camporee-payment-orders-plan.md` cierra el gap: órdenes grupales con beneficiarios → aprobación LF → slot + assignment ACTIVE + upsert bridge a `member_insurances`.
+El plan `docs/history/plans/2026-08-05-insurance-camporee-payment-orders-plan.md` cierra el gap: órdenes grupales con beneficiarios → aprobación LF → slot + assignment ACTIVE + upsert bridge a `member_insurances`.
 
 ### Órdenes de pago territoriales (IMPLEMENTADO 2026-08-12)
 

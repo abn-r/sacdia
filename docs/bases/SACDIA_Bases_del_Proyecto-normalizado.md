@@ -199,8 +199,7 @@ Dashboards accionables adicionales y expansión a nuevos dominios siguen como l�
 Composite ranking implementado (2026-04-28): promedio ponderado de 4 criterios (carpeta/finanzas/camporee/evidencias), pesos configurables por `club_type` en `ranking_weight_configs`, endpoint de drill-down por club (`/breakdown`) y CRUD de configuración de pesos (`/ranking-weights`). Canon rector: `docs/canon/runtime-rankings.md` §13. Decisión estructural: `docs/canon/decisiones-clave.md` §22.
 
 Referencias:
-- Spec: `docs/superpowers/specs/2026-04-28-clasificacion-criterios-ampliados-design.md`
-- Plan: `docs/superpowers/plans/2026-04-28-clasificacion-criterios-ampliados.md`
+- Spec: `docs/history/superpowers/specs/2026-04-28-clasificacion-criterios-ampliados-design.md`
 
 #### 8.4 A/B/D/E — Pendientes [ROADMAP]
 **[ROADMAP]**  
@@ -212,7 +211,7 @@ Las siguientes sub-líneas de 8.4 permanecen como evolución futura:
 
 ### 8.5 QR y tarjetas virtuales
 **[VIGENTE]**
-Credencial digital del miembro implementada en app móvil (`sacdia-app/lib/features/virtual_card/`) con tarjeta visual estilo boarding-pass (5 tiers, light + dark, accesibilidad). Backend QR canónico stateless con HMAC-SHA256 firmado con `BETTER_AUTH_SECRET` (Option C), endpoint `/qr/validate`, escáner móvil alineado al contrato runtime. Ver `docs/plans/qr-tarjetas-virtuales-implementacion.md` y `docs/plans/tarjeta-virtual-design-spec.md`.
+Credencial digital del miembro implementada en app móvil (`sacdia-app/lib/features/virtual_card/`) con tarjeta visual estilo boarding-pass (5 tiers, light + dark, accesibilidad). Backend QR canónico stateless con HMAC-SHA256 firmado con `BETTER_AUTH_SECRET` (Option C), endpoint `/qr/validate`, escáner móvil alineado al contrato runtime. Ver `docs/history/plans/qr-tarjetas-virtuales-implementacion.md` y `docs/history/plans/tarjeta-virtual-design-spec.md`.
 
 ### 8.6 IA aplicada y capacidades diferenciales
 **[ROADMAP]**
