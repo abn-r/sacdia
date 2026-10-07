@@ -158,6 +158,9 @@ Convenciones:
 | DELETE `/clubs/:clubId/sections/:sectionId` | No | No | No | — |
 | GET `/clubs/:clubId/sections/:sectionId/members` | Si | Si | Si | ALINEADO |
 | POST `/clubs/:clubId/sections/:sectionId/roles` | Si | Si | Si | ALINEADO |
+| GET `/clubs/:clubId/sections/:sectionId/members/:userId/assignable-roles` | Si | Si | Si | ALINEADO |
+
+> Nota (2026-10-06): las escrituras de `club_role_assignments` aplican elegibilidad GM (reglas 1-3; `CLUB_ROLE_GUIDE_MAJOR_REQUIRED`, `CLUB_ROLE_MEMBER_REQUIRES_GUIDE_MAJOR_SECTION`). Limpieza de infractores existentes pendiente de aprobacion por entorno.
 
 > Nota: `DELETE /clubs/:clubId/sections/:sectionId` removido como FANTASMA en Wave 2 — no existe en backend.
 

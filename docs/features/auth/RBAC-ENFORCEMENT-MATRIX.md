@@ -47,6 +47,8 @@ Nota de implementacion:
 | `users:read` | Listar usuarios | `global` | permiso global | Admin |
 | `users:read_detail` | Ver detalle de usuario | `global` o `user` | permiso global o ownership segun ruta | Admin y self-service |
 | `users:update` | Editar usuario | `global` o `user` | permiso global o guard de ownership | Admin y self-service |
+| `club_roles:read` | Roles asignables a un miembro (`GET .../members/:userId/assignable-roles`) | `club` | permiso + seccion perteneciente al club | Admin y App |
+| `club_roles:assign` | Asignar/actualizar cargo de club | `club` | permiso + regla de elegibilidad GM (403 `CLUB_ROLE_GUIDE_MAJOR_REQUIRED` / `CLUB_ROLE_MEMBER_REQUIRES_GUIDE_MAJOR_SECTION`) dentro de la transaccion | Admin y App |
 | `clubs:read` | Ver club | `club` | permiso global territorial o contexto club | Admin y App |
 | `clubs:create` | Crear club | `global` | permiso global; sin bypass de rol. Seed: admin, super-admin, assistant-admin. No director-lf/assistant-lf | Admin: `/dashboard/clubs/new` e import (`canCreateClubs` / `clubs.create`) |
 | `clubs:update` | Editar club | `club` | permiso + ClubRoles director/deputy/secretary/secretary-treasurer o bypass territorial | Admin y App |
