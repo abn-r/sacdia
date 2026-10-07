@@ -100,10 +100,10 @@ Nota de implementacion:
 | Superficie | Rutas verificadas | Permiso runtime | Enforcement backend | Estado |
 |------------|-------------------|-----------------|---------------------|--------|
 | Perfil y derivados (fuera de scope) | `GET/PATCH /users/:userId`, `GET /age`, `GET /requires-legal-representative`, `POST/DELETE /profile-picture` | `users:read_detail` o `users:update_profile` | ownership o permiso global; metadata legacy `users:*` | Verificado |
-| Salud | `GET/PUT /allergies`, `GET/PUT /diseases`, `GET/PUT /medicines`, `DELETE /allergies/:allergyId`, `DELETE /diseases/:diseaseId`, `DELETE /medicines/:medicineId` | `health:read` / `health:update` OR fallback `users:read_detail` / `users:update_profile` | ownership o permiso global; baseline activo limitado a `allergies` + `diseases` + `medicines` | Verificado |
-| Contactos de emergencia | `GET/POST/PATCH/DELETE /emergency-contacts` | `emergency_contacts:read` / `emergency_contacts:update` OR fallback `users:read_detail` / `users:update_profile` | ownership o permiso global | Verificado |
-| Representante legal | `GET/POST/PATCH/DELETE /legal-representative` | `legal_representative:read` / `legal_representative:update` OR fallback `users:read_detail` / `users:update_profile` | ownership o permiso global | Verificado |
-| Post-registro (lectura) | `GET /post-registration/status` | `post_registration:read` OR fallback `users:read_detail` | ownership o permiso global | Verificado runtime |
+| Salud | `GET/PUT /allergies`, `GET/PUT /diseases`, `GET/PUT /medicines`, `DELETE /allergies/:allergyId`, `DELETE /diseases/:diseaseId`, `DELETE /medicines/:medicineId` | `health:read` / `health:update` OR fallback `users:read_detail` / `users:update_profile` | ownership, permiso global, o lectura club-scoped (`health:read` del club activo + miembro activo de la sección); baseline activo limitado a `allergies` + `diseases` + `medicines` | Verificado |
+| Contactos de emergencia | `GET/POST/PATCH/DELETE /emergency-contacts` | `emergency_contacts:read` / `emergency_contacts:update` OR fallback `users:read_detail` / `users:update_profile` | ownership, permiso global, o lectura club-scoped (miembro activo de la sección) | Verificado |
+| Representante legal | `GET/POST/PATCH/DELETE /legal-representative` | `legal_representative:read` / `legal_representative:update` OR fallback `users:read_detail` / `users:update_profile` | ownership, permiso global, o lectura club-scoped (miembro activo de la sección) | Verificado |
+| Post-registro (lectura) | `GET /post-registration/status` | `post_registration:read` OR fallback `users:read_detail` | ownership, permiso global, o lectura club-scoped (miembro activo de la sección) | Verificado runtime |
 | Post-registro (completar) | `POST /step-1/complete`, `POST /step-2/complete`, `POST /step-3/complete` | `registration:complete` _(sin fallback)_ | ownership o permiso global dedicado; terceros quedan en modo administrativo minimo | Verificado runtime |
 
 Notas:
@@ -123,7 +123,7 @@ Notas:
 | Capa | Evidencia verificada | Resultado |
 |------|----------------------|-----------|
 | Docs auth | `AUTHORIZATION-CANONICAL-CONTRACT.md` y esta matriz usan las mismas familias finas, fallback legacy y exclusiones fuera de scope | Alineado |
-| Backend | `PermissionsGuard` mantiene ownership o permiso global para recurso `user`; permisos de club no alcanzan terceros | Alineado |
+| Backend | `PermissionsGuard` mantiene ownership o permiso global para recurso `user`; permisos de club solo alcanzan terceros en lectura de perfil de sección y en `family:read` sensible sobre miembros activos de la sección activa (sin fallback legacy, nunca `update`) | Alineado |
 | Admin | consumo canonico desde `authorization.effective.permissions` y `authorization.grants` | Alineado |
 | Mobile | helpers separan `administrative completion` de acceso a datos sensibles y no tratan `users:update` como permiso sensible de lectura | Alineado |
 

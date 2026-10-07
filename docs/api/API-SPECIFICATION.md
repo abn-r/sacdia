@@ -653,6 +653,7 @@ Reglas:
 - Son sub-recursos sensibles `user`, no recursos health globales.
 - Deben usar `@AuthorizationResource({ type: 'user', ownerParam: 'userId' })`.
 - Owner-or-global: ownership sobre `userId` habilita self-service; para terceros, lectura acepta `health:read` o fallback legacy `users:read_detail`, y escritura acepta `health:update` o fallback legacy `users:update`.
+- Club-scoped read: `health:read` en la asignación de club activa permite leer la salud de un miembro activo de la sección activa del actor (sin fallback legacy; escritura sigue requiriendo permiso global).
 - Permisos de club provenientes solo de `active_assignment` no habilitan acceso a health de terceros.
 - Responden con envelope `{ status: 'success', data: [...] }`.
 - `GET` devuelve una lista plana de selecciones activas:

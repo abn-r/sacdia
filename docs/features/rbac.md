@@ -126,7 +126,7 @@ El sistema RBAC implementa permisos finos (fine-grained) para 4 familias de sub-
 
 1. **Owner bypass (self-service)**: El propietario del `userId` tiene acceso completo a sus propios sub-recursos sin necesidad de permisos globales explícitos
 2. **Terceros**: Solo se evaluan permisos globales. Se acepta el permiso fino **O** el fallback legacy (OR transicional). Excepcion: `registration:complete` no tiene fallback legacy
-3. **Permisos de club no aplican**: Los permisos provenientes unicamente de `authorization.active_assignment` no habilitan acceso transversal a recursos `user`
+3. **Lectura club-scoped de miembros de la sección**: un permiso fino `family:read` (`health:read`, `emergency_contacts:read`, `legal_representative:read`, `post_registration:read`) en la asignación de club activa habilita **solo lectura** de ese sub-recurso cuando el `userId` es miembro **activo** (no `pending`) de la sección activa del actor. El fallback legacy `users:read_detail` **no** aplica por esta vía, y los modos `update` siguen requiriendo permiso global. Fuera de ese caso, los permisos de `authorization.active_assignment` no habilitan acceso transversal a recursos `user`
 
 ### Pruning administrativo
 
