@@ -47,6 +47,14 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 ---
 
+## Actualizacion 2026-10-06 (Elegibilidad de cargos por Guía Mayor)
+
+- Solo quien es elegible GM (`GM-01` en `INVESTIDO`/`APPROVED`, o inscripción activa en `IN_PROGRESS`..`FIELD_APPROVED`; `REJECTED`/`EXPIRED` no) puede tener cargos distintos de `member`. Un elegible GM no puede ser `member` de una sección AV/CQ. Errores 403: `CLUB_ROLE_GUIDE_MAJOR_REQUIRED` y `CLUB_ROLE_MEMBER_REQUIRES_GUIDE_MAJOR_SECTION`.
+- Los selectores de cargo deben usar `GET /api/v1/clubs/:clubId/sections/:sectionId/members/:userId/assignable-roles`: devuelve todos los roles con `allowed` y `violation_code`; deshabilitar los no permitidos y mostrar el motivo. No replicar la regla en el cliente.
+- `GET .../members` agrega `guide_major_eligible` y `guide_major_basis`; `class_counselor_eligible` queda como alias.
+- Inscripción anual: un miembro no elegible para la sección destino sale `blocked` con el código; el resto del lote continúa. Aprobar una transferencia con un cargo que viole la regla en la sección destino responde 403 y no mueve nada.
+- Fuera de alcance: no se reevalúan cargos cuando la inscripción cambia después.
+
 ## Actualizacion 2026-09-30 (Edad histórica del certificado)
 
 No hay endpoints nuevos. Estas respuestas salen de las rutas de carga por certificado y de la bandeja institucional.

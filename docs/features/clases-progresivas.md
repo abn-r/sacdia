@@ -78,6 +78,7 @@ Reglas vigentes:
 - Roles asignables formalmente: `counselor` y `secretary`.
 - `instructor` no es responsable formal de la trayectoria anual; sólo imparte segmentos o especialidades.
 - El responsable asignable debe estar cursando o haber completado la clase `Guía Mayor`; esta elegibilidad aplica para todas las secciones (Aventureros, Conquistadores y Guías Mayores) y se valida también en backend.
+  - Desde la consolidacion de elegibilidad GM, la misma implementacion (`ClubRoleEligibilityService.evaluateGuideMajor`) decide para consejeros y cargos de club; `APPROVED` y `INVESTIDO` cuentan, `REJECTED` y `EXPIRED` no, y el error del consejero sigue siendo `CLASS_COUNSELOR_GUIDE_MAJOR_REQUIRED` (400). Ver reglas 1-3 en `gestion-clubs.md`.
 - Cada clase/sección/año puede tener 1 `primary` y hasta 2 apoyos (`assistant`/`substitute`), máximo 3 activos.
 - Una persona normalmente tiene 1 clase; la segunda clase requiere `exceptional=true` y `exception_reason`.
 - Director, subdirector, secretario y secretario-tesorero tienen alcance de toda la sección para progreso/evidencias aunque no tengan asignación pedagógica directa.
