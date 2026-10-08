@@ -218,12 +218,12 @@ export const INVESTITURE_PASTOR_ASSIGN_ROLES = ["director-lf", "assistant-lf", "
 
 ### Task 5b: Acceso del pastor (decisión del 2026-10-08)
 
-El pastor entra al panel y, de momento, solo ve «Autorizaciones de investidura» y su perfil (plan funcional §1).
+El pastor entra al panel y, de momento, solo ve «Autorizaciones de investidura» (plan funcional §1). El perfil del pastor es solo de la app.
 
 **Files:** Modify la página de inicio del dashboard (`src/app/(dashboard)/dashboard/page.tsx`) y `src/navigation/sidebar/sidebar-items.ts` si hace falta; Test `src/lib/auth/screen-catalog/screen-catalog.investiture.test.ts` y una prueba de la página de inicio.
 
 - [ ] **Step 1: Pruebas rojas:**
-  - Un usuario cuyo único rol admin es `pastor` ve en el sidebar solo `investiture-requests` y el acceso a su perfil (el item de perfil que ya exista; localizarlo con `rg -n "profile|perfil" src/navigation/sidebar/sidebar-items.ts`).
+  - Un usuario cuyo único rol admin es `pastor` ve en el sidebar solo `investiture-requests`.
   - `/dashboard` redirige a `/dashboard/investiture-requests` para ese usuario. Un `director-lf` sigue viendo el inicio actual.
 - [ ] **Step 2:** FAIL.
 - [ ] **Step 3:** Implementar la redirección en la página de inicio con `extractRoles(user)` de `src/lib/auth/roles.ts`: si el conjunto de roles admin del usuario es exactamente `{pastor}`, hacer `redirect("/dashboard/investiture-requests")`. Revisar con el screen-catalog que ninguna otra screen incluya `pastor` (las pruebas existentes que le niegan acceso deben seguir verdes).

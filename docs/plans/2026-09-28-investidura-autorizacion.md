@@ -24,7 +24,7 @@ Se guarda quién autorizó. No hay lugar. No hay quien certifica. No hay ofician
 
 Marcar, quitar, corregir la fecha y ver la solicitud es en la app, de momento. Autorizar y rechazar se hace en el panel y, por decisión del 2026-10-08, también en la app. El enlace del correo abre esa solicitud en el panel.
 
-**Decisión del 2026-10-08 — acceso del pastor.** Aunque `pastor` es un rol global sin club, el pastor puede iniciar sesión en el panel y en la app. En ambos ve, de momento, solo la pantalla para autorizar las solicitudes de sus distritos y su perfil. Qué más ve el pastor se define después. El `director-lf` y el `assistant-lf` conservan su acceso actual y también pueden autorizar desde la app. El backend no cambia: la autorización ya valida actor y territorio en `POST /investiture-requests/:requestId/resolutions`.
+**Decisión del 2026-10-08 — acceso del pastor.** Aunque `pastor` es un rol global sin club, el pastor puede iniciar sesión en el panel y en la app. En el panel ve, de momento, solo la pantalla para autorizar las solicitudes de sus distritos. En la app ve esa pantalla y su perfil. Qué más ve el pastor se define después. El `director-lf` y el `assistant-lf` conservan su acceso actual y también pueden autorizar desde la app. El backend no cambia: la autorización ya valida actor y territorio en `POST /investiture-requests/:requestId/resolutions`.
 
 El subdirector (`deputy-director`) no marca, no corrige fechas, no ve la solicitud y no recibe las notificaciones de resultado.
 
