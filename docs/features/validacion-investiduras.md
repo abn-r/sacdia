@@ -141,6 +141,23 @@ La excepción de Guía Mayor (`GM-01`) sustituye la inscripción actual de esa c
 
 Fecha: 2026-10-06. Esta sección inventaría la vía club → coordinación → campo y fija su tratamiento. No apaga rutas, no borra pantallas y no modifica filas. No se consultó Neon ni producción: no hay conteos reales en este documento. Esos conteos, si se necesitan, exigen una lectura aparte y aprobada. La fase 8 no está ejecutada.
 
+**Conteo real en producción (2026-10-08, aprobado por el usuario).** Lectura en una transacción `READ ONLY` sobre la rama `production` de Neon (endpoint `ep-dark-thunder-anpobd36`):
+
+| Dato | Valor |
+| --- | --- |
+| Usuarios / clubes / años eclesiásticos | 0 / 0 / 0 |
+| Enrollments (total) | 0 |
+| Expedientes abiertos del flujo anterior (`SUBMITTED_FOR_VALIDATION`, `CLUB_APPROVED`, `COORDINATOR_APPROVED`, `FIELD_APPROVED`, `APPROVED`) | 0 |
+| Enrollments con `locked_for_validation` y sin `INVESTIDO` | 0 |
+| Última migración aplicada | `20260903180000_cross_type_active_enrollment_slots` |
+
+Consecuencias:
+- En producción no hay expedientes del flujo anterior que tratar: el apagado no requiere conversión ni desbloqueo de datos.
+- Ninguna migración de investidura posterior al 2026-09-03 está aplicada en producción (no existen `record_kind`, `investiture_authorization_*`, `local_field_*`, `district_investiture_pastors`). El despliegue debe aplicar en orden todas las migraciones pendientes desde esa fecha, no solo las de esta entrega.
+- La rama `staging` está archivada.
+
+**Desbloqueo aprobado (2026-10-08).** Después del apagado, una operación explícita suelta `locked_for_validation` solo si el enrollment no está `INVESTIDO` y no tiene una persona `PENDING`; el estado no cambia. Con producción vacía hoy, aplica a datos que se creen antes del apagado o a otros entornos (por ejemplo `development`).
+
 Un expediente de esta vía es un `enrollments` con `record_kind = OPERATIONAL` y un `investiture_status` de la cadena, más las filas ya grabadas en `investiture_validation_history`. El certificado histórico (`HISTORICAL_CERTIFICATE`) no es este expediente. Si hay una persona `PENDING` de esa clase, el mismo año rechaza el certificado y un año anterior retira a esa persona al acreditar. Las rutas de esta vía siguen activas.
 
 ### Rutas que siguen activas
