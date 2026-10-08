@@ -190,11 +190,16 @@ Todas responden bajo `/api/v1`. Las 17 retiradas están en `sacdia-backend/src/i
 - **Escritura** (`dry_run: false`): una transacción por enrollment, bajo el candado `investiture-authorization-enrollment:`. Pone `locked_for_validation` en false y deja una fila `LEGACY_LOCK_RELEASED` en `investiture_validation_history`, con el `super-admin` como `performed_by`. El `investiture_status` no cambia. Idempotente.
 - **Respuesta:** `{ "status": "success", "data": { "dry_run", "candidates": [], "skipped_pending": [], "released": [] } }`.
 - **Cómo correrlo, por entorno y solo con aprobación del usuario en cada uno:** (1) confirmar que la migración `20261009120000_investiture_legacy_lock_release_action` ya está aplicada en ese entorno; (2) correr `dry_run` y revisar `candidates` y `skipped_pending`; (3) solo entonces `dry_run: false`. Sin la migración, el `INSERT` del historial falla por el valor de enum.
+- **Reintento:** una fila omitida por `skipped_pending` sigue bloqueada. Vuelve a ser candidata solo cuando esa solicitud se resuelve (la persona deja de estar `PENDING`), así que hay que volver a correr el desbloqueo después, primero con `dry_run`. Es idempotente: las filas ya liberadas no aparecen otra vez.
 - **Después:** un expediente liberado se puede presentar por la solicitud nueva aunque su estado sea `CLUB_APPROVED` o similar (decisión B5, abajo). Uno que no se libera sigue bloqueado y la solicitud nueva responde `INVESTITURE_REQUEST_LEGACY_PIPELINE_ACTIVE`.
 
 ### Decisión B5 (2026-10-08): X-1 mira solo `locked_for_validation`
 
 `enrollmentOnLegacyInvestiturePipeline` (`sacdia-backend/src/investiture-requests/investiture-request-lock.ts`) ya no mira el estado de la cadena: devuelve true solo si `locked_for_validation` es true. Presentar y agregar rechazan con `INVESTITURE_REQUEST_LEGACY_PIPELINE_ACTIVE` únicamente con el bloqueo. Al resolver, un enrollment bloqueado que no está en `FIELD_APPROVED` deja a la persona `REMOVED` con `LEGACY_PIPELINE_ACTIVE`; un `FIELD_APPROVED` con la persona `PENDING` lo escribe la resolución, aunque el bloqueo siga activo. Una fila sin bloqueo en `CLUB_APPROVED` ya no se bloquea sola.
+
+### Progreso de clase tras el apagado (decisión del orquestador, 2026-10-08)
+
+El progreso de clase (puntaje, evidencias, subida y borrado de archivos) se bloquea solo con `locked_for_validation` en true o con un `investiture_status` terminal (`INVESTIDO` o `EXPIRED`), en `assertClassProgressMutable` (`sacdia-backend/src/classes/class-progress-mutable.ts`). Los estados de la cadena anterior (`SUBMITTED_FOR_VALIDATION`, `CLUB_APPROVED`, `COORDINATOR_APPROVED`, `FIELD_APPROVED`, `APPROVED`) ya no bloquean por sí solos: un expediente liberado por el desbloqueo vuelve a admitir progreso, igual que ya puede presentarse (decisión B5). Mientras haya una persona `PENDING` sigue aplicando `INVESTITURE_REQUEST_PROGRESS_LOCKED`.
 
 ### Expedientes y tratamiento
 
