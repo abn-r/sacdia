@@ -70,6 +70,13 @@ Referencia humana concisa del schema Prisma vigente.
 - No sustituye el pipeline anterior ni marca `locked_for_validation`.
 - Migración de las tablas: `sacdia-backend/prisma/migrations/20261001193000_investiture_authorization_requests/migration.sql`. Los tres textos van en `sacdia-backend/prisma/migrations/20261002183000_investiture_authorization_resolution/migration.sql`. Ninguna está aplicada a producción.
 
+### `investiture_validation_history` y `LEGACY_LOCK_RELEASED` (fase 8, 2026-10-09)
+
+- Valor nuevo de `investiture_action_enum`: `LEGACY_LOCK_RELEASED`. Migración `sacdia-backend/prisma/migrations/20261009120000_investiture_legacy_lock_release_action/migration.sql` (`ALTER TYPE ... ADD VALUE IF NOT EXISTS`). Implementada en la rama `feat/investiture-legacy-shutdown`, sin aplicar en ningún entorno de Neon.
+- Solo la escribe `POST /api/v1/admin/investiture/legacy-locks/release` cuando suelta `locked_for_validation`: una fila por enrollment liberado, con `performed_by` el `super-admin` que corrió la operación y un comentario fijo. El `investiture_status` del enrollment no cambia.
+- La tabla `investiture_validation_history` se conserva y solo se lee; `investiture_config` también se conserva, sin lecturas ni escrituras por HTTP (sus rutas responden 410).
+- Una app o un panel viejos que listen el historial reciben un valor de `action` que no conocen. La app vieja lo muestra como «Enviado para validación».
+
 ## Modelos añadidos a esta referencia (resincronización 2026-10-04)
 
 Resumen por grupo de modelos que ya estaban en el schema de `development` y faltaban en esta página.
@@ -724,7 +731,7 @@ Define el presupuesto de puntos por componente dentro de un eje anual:
 - `folder_template_status_enum` (`DRAFT`, `PUBLISHED`, `ARCHIVED`)
 - `honor_validation_status_enum`
 - `insurance_type_enum`
-- `investiture_action_enum`
+- `investiture_action_enum` (incluye `LEGACY_LOCK_RELEASED`, migración `20261009120000_investiture_legacy_lock_release_action`, sin aplicar en Neon; la escribe solo el desbloqueo de la vía anterior de la fase 8 y no cambia `investiture_status`)
 - `investiture_status_enum`
 - `origin_level_enum`
 - `user_master_honor_status_enum`

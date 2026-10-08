@@ -95,7 +95,7 @@
 | `system-config` | [system-config.md](system-config.md) | Documento presente | `IMPLEMENTADO` |
 | `units` | [units.md](units.md) | Documento presente | `IMPLEMENTADO` |
 | `validacion-evidencias` | [validacion-evidencias.md](validacion-evidencias.md) | Documento presente | `IMPLEMENTADO` |
-| `validacion-investiduras` | [validacion-investiduras.md](validacion-investiduras.md) | Documento presente | `IMPLEMENTADO` (ventanas, cupo de pastores y solicitudes: pendiente de merge, PR #448) |
+| `validacion-investiduras` | [validacion-investiduras.md](validacion-investiduras.md) | Documento presente | `IMPLEMENTADO` (ventanas, cupo de pastores y solicitudes: pendiente de merge, PR #448). Fase 8, apagado de la vía anterior (rutas en 410, pantallas borradas, desbloqueo): implementada en código, sin desplegar |
 | `weekly-records` | [weekly-records.md](weekly-records.md) | Documento presente | `IMPLEMENTADO` |
 
 ## Documentos complementarios

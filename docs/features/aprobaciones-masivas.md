@@ -1,6 +1,6 @@
 # Aprobaciones Masivas de Investiduras
 
-**Estado**: IMPLEMENTADO
+**Estado**: RETIRADO por la fase 8 (implementado en código, sin desplegar). `POST /api/v1/investiture/enrollments/bulk-approve` y `bulk-reject` responden HTTP 410 `INVESTITURE_LEGACY_PIPELINE_RETIRED`, y el panel borró la tabla de investiduras con su barra de acciones masivas. El resto del documento describe el comportamiento anterior al apagado. Ver `docs/features/validacion-investiduras.md`, sección «Fase 8 — apagado».
 
 ## Descripcion de dominio
 
