@@ -260,6 +260,7 @@ Pendiente de revisión independiente. No apaga el pipeline de arriba.
 - Un año eclesiástico con `active` en false no admite cambiar el porcentaje, aunque el día de hoy caiga dentro de sus fechas.
 - Cambiar la fecha guarda `date_changed_by_id` y `date_changed_at`. Quitar y cambiar la fecha usan el reloj inyectable.
 - `district_investiture_pastors.user_id` referencia `users` con `ON DELETE RESTRICT`. La migración no está aplicada en Neon.
+- Si el pastor cambia de Campo o queda sin Campo (por ejemplo al eliminar su cuenta), o si el distrito pasa a otro Campo, la asignación pasa a `active = false` y libera el cupo; hasta que el distrito tenga un pastor nuevo autorizan el `director-lf` y el `assistant-lf` del Campo. Lo hacen dos triggers de la migración `20261008120000_district_pastor_field_change`, que no está aplicada en Neon. Esto acota la regla de arriba: una cuenta eliminada que pierde su Campo ya no sigue ocupando cupo.
 - Enviar una sección, o aprobar o rechazar una evidencia, sobre un enrollment `INVESTIDO` o `EXPIRED` responde `CLASS_PROGRESS_LOCKED` y no escribe.
 - Crear un lote de certificados con `mark_as_ready: true` aplica la misma validación que marcar listo. Si la edad no alcanza, o el catálogo no existe o está inactivo (`CERTIFICATE_IMPORT_CATALOG_NOT_FOUND`), el ítem nace `NEEDS_REVIEW` con ese código en `rejection_reason` y no falla el lote; una fecha futura se trata igual aunque `mark_as_ready` sea false. Editar un ítem existente (`PATCH`) sigue respondiendo 400 con esos códigos.
 
