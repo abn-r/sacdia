@@ -110,6 +110,12 @@ El envio soporta tres niveles: directo a un usuario, broadcast global y envio a 
 | Requests/validación/camporees/investiduras | roles/ámbitos calculados por servicio | helpers internos por sección o rol global |
 | Achievements/member of month/alertas cron | usuario específico | `notifySafe` |
 
+## Investidura por autorización
+
+El resultado de una autorización entra en esta bandeja con origen `investiture:invested` o `investiture:rejected`. Ambos quedan en la categoría `approvals`. El destinatario es la persona y cada directivo activo de esa sección: director, secretario y secretario-tesorero. El subdirector no. Una misma resolución con investidos y rechazados deja un aviso por resultado. El texto de la persona rechazada es fijo. El motivo humano no se copia al cuerpo. Quien apaga `approvals` no recibe ese aviso. La fila de bandeja lleva `notification_logs.idempotency_key`. Si esa escritura falla, el aviso no queda entregado. El push no crea ni confirma la bandeja.
+
+El correo de presentación y el recordatorio no pasan por esta bandeja. Salen por la cola `emails`, trabajo `email.investiture-notice`. Aceptar el trabajo lo deja `queued`. `sent` llega con el acuse del proveedor. Cada presentación tiene su propia identidad y recuperarla no cambia el envío ya atendido. Si el acuse se pierde y el envío sigue permitido, el reintento usa el contenido guardado durante 24 horas y después queda `uncertain`, sin reenviar solo. Antes de cada llamada al proveedor, también con ese contenido congelado, se vuelven a leer destinatario, rol, territorio, año y pendientes. Si ya no corresponde, o si solo queda autorizada una parte del contenido congelado, no se envía y no se cambia el cuerpo ni la clave. Ese cuerpo, su destino y su alcance salen de la misma instantánea con la que se armó el correo. El recordatorio lo dispara el cron de la sección 13 de `cron-automation.md`. No hay avisos periódicos de investidura en el panel.
+
 ## Gaps y pendientes
 
 - **Scope admin resuelto en historial**: `GET /notifications/history` filtra auditoria administrativa por territorio/scope del caller; `super_admin` conserva la vista completa

@@ -1,0 +1,78 @@
+{
+  "date": "2026-10-05",
+  "head": "113d8ba9b5f0befc7c5a913ebbc7d7c872d2174a",
+  "branch": "development",
+  "worktree": "uncommitted; no reviewer runtime edits",
+  "verdict": "P5-2 closed; P5-1/P5-3 and window mock remain closed. Backend verified within reviewed scope; phase6 development may continue. Full phase5/UI/deployment not approved.",
+  "checks": [
+    {
+      "command": "NODE_ENV=test DOTENV_CONFIG_PATH=/dev/null ./node_modules/.bin/jest --runInBand --no-coverage --runTestsByPath src/certificate-bulk-imports/class-certificate-historical-age.spec.ts src/certificate-bulk-imports/certificate-bulk-imports-application.service.spec.ts src/certificate-bulk-imports/certificate-bulk-imports.service.spec.ts src/certificate-bulk-imports/institutional-certificate-requests.service.spec.ts src/classes/field-class-threshold.spec.ts src/classes/class-requirement-eligibility.service.spec.ts src/classes/class-progress-scope.service.spec.ts src/classes/classes.service.spec.ts src/classes/field-class-threshold-config.service.spec.ts src/classes/field-investiture-window-config.service.spec.ts src/classes/field-investiture-window.spec.ts src/classes/field-investiture-window.controller.spec.ts src/classes/district-investiture-pastors.service.spec.ts src/classes/district-investiture-pastors.controller.spec.ts src/investiture-requests/investiture-authorization-requests.service.spec.ts src/investiture-requests/investiture-authorization-requests.controller.spec.ts src/evidence-review/evidence-review.service.spec.ts src/achievements/achievements.service.spec.ts src/achievements/achievements.processor.spec.ts src/admin/admin-reference.service.spec.ts src/year-end/year-end.service.spec.ts src/investiture-requests/investiture-achievement-intent.reconciler.spec.ts src/certificate-bulk-imports/certificate-import-files.service.spec.ts",
+      "exit_code": 0,
+      "suites": 23,
+      "tests": 417,
+      "log": "p5r3-regression.log"
+    },
+    {
+      "command": "./node_modules/.bin/tsc --noEmit --incremental false -p tsconfig.build.json",
+      "exit_code": 0,
+      "log": "p5r3-types.log"
+    },
+    {
+      "command": "./node_modules/.bin/eslint src/achievements/achievements.service.ts src/achievements/achievements-failed-job.spec.ts src/investiture-requests/investiture-authorization-requests.service.spec.ts src/certificate-bulk-imports/certificate-import-files.service.ts",
+      "exit_code": 0,
+      "log": "p5r3-lint.log"
+    },
+    {
+      "command": "bash ../docs/reviews/investidura-autorizacion-review-evidence/p5r3-postgres-run.sh",
+      "exit_code": 0,
+      "delivered_pg_tests": 24,
+      "independent_acceptance_cases": 8,
+      "logs": [
+        "p5r3-postgres-postgres-tests.log",
+        "p5r3-postgres-probe.log",
+        "p5r3-postgres-redis.log"
+      ]
+    }
+  ],
+  "cleanup": {
+    "path": "/tmp/sacdia-p5r3-independent.Cj064s",
+    "pg_ctl_status": 3,
+    "redis_shutdown_logged": true,
+    "removed": true
+  },
+  "source_sha256": {
+    "prisma/schema.prisma": "9777d5ae664a81cf078617afeca9e31788690b3fb94f817a04933272cdee3013",
+    "src/achievements/achievements.processor.spec.ts": "034ee7fac99efebc74fcbcee833f767e80e32a1e31aac5dd4de0a87809abf0d2",
+    "src/achievements/achievements.processor.ts": "5d981c6d12aceb54fef857fbca7e99b7f86d46670f702c2b9a8fc4bbfe005515",
+    "src/achievements/achievements.service.spec.ts": "4954e2d5d844ae4b710d719027ee36c9d3822b436742e2e9f79a0868871360c1",
+    "src/achievements/achievements.service.ts": "7f7f3a05ceeaaab9d15fbb0448f1cc60b95a13a60e0cdaa55fd911cd22d244cd",
+    "src/admin/admin-reference.service.spec.ts": "b08d3b5a338b12e5672f1f6719b49b65b430624378b04eecc229429e1308287b",
+    "src/admin/admin-reference.service.ts": "7c50e1b4f27ba2a5c217a6231bbf32b693731d0879bcc19b4c593cc2e2999e3b",
+    "src/certificate-bulk-imports/certificate-import-files.service.spec.ts": "bdac3541115fc31fa49207165da9e78c1f7bae5a48325a04a74cec9797bcb4e5",
+    "src/certificate-bulk-imports/certificate-import-files.service.ts": "7e2a5f99018e0044031e77181848b69ac9e1bc6af36bef10fbc55f366019d953",
+    "src/classes/district-investiture-pastors.service.ts": "4b799583e495d77c3e863e89355a294bd74b3408555875a0ea7109d6591195db",
+    "src/classes/field-investiture-window-config.service.spec.ts": "819be6e5e7187ee5ea3a08cddf844b82e0134e04d041f5706dcbd553dfa51102",
+    "src/classes/field-investiture-window-config.service.ts": "2ace8b4109c0e14d63f2af0a9d5437c65ded09e54bafd460b7731db6c669ca3a",
+    "src/classes/field-investiture-window.controller.spec.ts": "b7307a4bd1ea801eed34ff289544ac809faac2370d45497c6be672658be7e304",
+    "src/investiture-requests/investiture-authorization-requests.service.spec.ts": "ea538e180efd570381cbc66ceebd0155b075621e9398fa7fe2b7171176a82d59",
+    "src/investiture-requests/investiture-authorization-requests.service.ts": "81475bd57bf3fabea81a41da346a269345f1dd4fa3a9e137ea11ab690646a6b7",
+    "src/investiture-requests/investiture-request-lock.ts": "42e45ff9b9519c04636dc5a5efd8c9bcb82a5c08afc17cdbcc963d6c84601669",
+    "src/investiture-requests/investiture-requests.module.ts": "cbff04a5f09fa820b3c5831c2a576684bcd5a27764298f715e366264b229ba6f",
+    "src/year-end/year-end.service.spec.ts": "e77e37821fa9f27222fafb2d8c03d627da804550db7df82922638d4450a912b7",
+    "src/year-end/year-end.service.ts": "a2fd2b197fe00191c8365209d3186b0e67091640020fdddf27d37a6bd6760b30",
+    "test/investiture-authorization-requests-postgres.e2e-spec.ts": "a21cb798c561fc3fae6f1cf17d8b56475c8699436b54eb87f4a1e91113148393",
+    "src/investiture-requests/investiture-achievement-intent.reconciler.ts": "aa9dc2ef4b77d79c62323a1682468b4709a93669e210a0bb8019f86843ed2240",
+    "src/investiture-requests/investiture-achievement-intent.reconciler.spec.ts": "cd1d9e800b58e1d0a254e5c4d39834f48129b0e74f932912150f10c4b6ebc03c",
+    "src/achievements/achievements-failed-job.spec.ts": "fdaeeaeea28e37ea1857a94e764173fbf774afe9f9ec3fc6a4fa5c86d9103e4e",
+    "prisma/migrations/20261002200000_investiture_authorization_achievement_intent/migration.sql": "cd33eb4d11758aaa3ef821c5619458bdb244d4270f09438d1b180ade65c065fe"
+  },
+  "limits": [
+    "Real private temporary PostgreSQL and Redis, actual BullMQ Queue/Worker/application processor.",
+    "No matching achievement seeded: processed=true does not certify award or notification.",
+    "Auth snapshots, eligibility stub, injected clock and DB read faults; no HTTP/auth/UI integration.",
+    "Prisma migrate diff plus partial indexes, not applied migration SQL.",
+    "Certificate file has concurrent OCR/CAS work beyond type narrowing; passing suite/typecheck is not approval of entire OCR change.",
+    "Did not separately run delivered achievements-failed-job.spec.ts: independent Redis+PG probe covers the scenario.",
+    "No runtime edits/builds/commits/cloud/production/existing database or queue."
+  ]
+}

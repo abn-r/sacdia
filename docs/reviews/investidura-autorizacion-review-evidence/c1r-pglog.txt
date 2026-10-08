@@ -1,0 +1,35 @@
+91-2026-10-07 14:23:03.583 CST [23373] DETAIL:  Process holding the lock: 23371. Wait queue: 23373.
+92-2026-10-07 14:23:03.583 CST [23373] STATEMENT:  SELECT pg_advisory_xact_lock(hashtextextended($1, 0))
+93:2026-10-07 14:23:03.583 CST [23371] ERROR:  deadlock detected
+94-2026-10-07 14:23:03.583 CST [23371] DETAIL:  Process 23371 waits for ExclusiveLock on advisory lock [16384,4095860669,1154988224,1]; blocked by process 23373.
+95-	Process 23373 waits for ExclusiveLock on advisory lock [16384,627846134,4121738797,1]; blocked by process 23371.
+96-	Process 23371: SELECT pg_advisory_xact_lock(hashtextextended($1, 0))
+97-	Process 23373: SELECT pg_advisory_xact_lock(hashtextextended($1, 0))
+98-2026-10-07 14:23:03.583 CST [23371] HINT:  See server log for query details.
+99-2026-10-07 14:23:03.583 CST [23371] STATEMENT:  SELECT pg_advisory_xact_lock(hashtextextended($1, 0))
+100-2026-10-07 14:23:03.583 CST [23373] LOG:  process 23373 acquired ExclusiveLock on advisory lock [16384,627846134,4121738797,1] after 201.395 ms
+101-2026-10-07 14:23:03.583 CST [23373] STATEMENT:  SELECT pg_advisory_xact_lock(hashtextextended($1, 0))
+--
+106-2026-10-07 14:23:03.859 CST [23373] DETAIL:  Process holding the lock: 23371. Wait queue: .
+107-2026-10-07 14:23:03.859 CST [23373] STATEMENT:  SELECT pg_advisory_xact_lock(hashtextextended($1, 0))
+108:2026-10-07 14:23:03.859 CST [23373] ERROR:  deadlock detected
+109-2026-10-07 14:23:03.859 CST [23373] DETAIL:  Process 23373 waits for ExclusiveLock on advisory lock [16384,4095860669,1154988224,1]; blocked by process 23371.
+110-	Process 23371 waits for ExclusiveLock on advisory lock [16384,627846134,4121738797,1]; blocked by process 23373.
+111-	Process 23373: SELECT pg_advisory_xact_lock(hashtextextended($1, 0))
+112-	Process 23371: SELECT pg_advisory_xact_lock(hashtextextended($1, 0))
+113-2026-10-07 14:23:03.859 CST [23373] HINT:  See server log for query details.
+114-2026-10-07 14:23:03.859 CST [23373] STATEMENT:  SELECT pg_advisory_xact_lock(hashtextextended($1, 0))
+115-2026-10-07 14:23:03.859 CST [23371] LOG:  process 23371 acquired ExclusiveLock on advisory lock [16384,627846134,4121738797,1] after 201.107 ms
+116-2026-10-07 14:23:03.859 CST [23371] STATEMENT:  SELECT pg_advisory_xact_lock(hashtextextended($1, 0))
+--
+118-2026-10-07 14:23:04.109 CST [23371] DETAIL:  Process holding the lock: 23373. Wait queue: .
+119-2026-10-07 14:23:04.109 CST [23371] STATEMENT:  SELECT pg_advisory_xact_lock(hashtextextended($1, 0))
+120:2026-10-07 14:23:04.109 CST [23371] ERROR:  deadlock detected
+121-2026-10-07 14:23:04.109 CST [23371] DETAIL:  Process 23371 waits for ExclusiveLock on advisory lock [16384,4095860669,1154988224,1]; blocked by process 23373.
+122-	Process 23373 waits for ExclusiveLock on advisory lock [16384,627846134,4121738797,1]; blocked by process 23371.
+123-	Process 23371: SELECT pg_advisory_xact_lock(hashtextextended($1, 0))
+124-	Process 23373: SELECT pg_advisory_xact_lock(hashtextextended($1, 0))
+125-2026-10-07 14:23:04.109 CST [23371] HINT:  See server log for query details.
+126-2026-10-07 14:23:04.109 CST [23371] STATEMENT:  SELECT pg_advisory_xact_lock(hashtextextended($1, 0))
+127-2026-10-07 14:23:04.109 CST [23373] LOG:  process 23373 still waiting for ExclusiveLock on advisory lock [16384,627846134,4121738797,1] after 200.410 ms
+128-2026-10-07 14:23:04.109 CST [23373] DETAIL:  Process holding the lock: 23371. Wait queue: 23373.

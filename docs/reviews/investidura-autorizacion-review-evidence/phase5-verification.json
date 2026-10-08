@@ -1,0 +1,65 @@
+{
+  "date": "2026-10-02",
+  "branch": "development",
+  "head": "113d8ba9b5f0befc7c5a913ebbc7d7c872d2174a",
+  "backend_clean": true,
+  "verdict": "Fase 5 backend NO APROBADA: P5-1 y P5-2 abiertos. No despliegue ni cambio de pipeline.",
+  "checks": [
+    {
+      "command": "NODE_ENV=test DOTENV_CONFIG_PATH=/dev/null ./node_modules/.bin/jest --runInBand --no-coverage --runTestsByPath src/certificate-bulk-imports/class-certificate-historical-age.spec.ts src/certificate-bulk-imports/certificate-bulk-imports-application.service.spec.ts src/certificate-bulk-imports/certificate-bulk-imports.service.spec.ts src/certificate-bulk-imports/institutional-certificate-requests.service.spec.ts src/classes/field-class-threshold.spec.ts src/classes/class-requirement-eligibility.service.spec.ts src/classes/class-progress-scope.service.spec.ts src/classes/classes.service.spec.ts src/classes/field-class-threshold-config.service.spec.ts src/classes/field-investiture-window-config.service.spec.ts src/classes/field-investiture-window.spec.ts src/classes/field-investiture-window.controller.spec.ts src/classes/district-investiture-pastors.service.spec.ts src/classes/district-investiture-pastors.controller.spec.ts src/investiture-requests/investiture-authorization-requests.service.spec.ts src/investiture-requests/investiture-authorization-requests.controller.spec.ts src/evidence-review/evidence-review.service.spec.ts",
+      "exit_code": 0,
+      "suites": 17,
+      "tests": 302,
+      "log": "phase5-regression.log"
+    },
+    {
+      "command": "./node_modules/.bin/tsc --noEmit --incremental false -p tsconfig.build.json",
+      "exit_code": 0,
+      "log": "phase5-types.log"
+    },
+    {
+      "command": "./node_modules/.bin/eslint src/investiture-requests/**/*.ts src/investiture-requests/*.ts test/investiture-authorization-requests-postgres.e2e-spec.ts",
+      "exit_code": 0,
+      "log": "phase5-lint.log"
+    },
+    {
+      "command": "bash ../docs/reviews/investidura-autorizacion-review-evidence/phase5-postgres-run.sh",
+      "exit_code": 0,
+      "delivered_pg_tests": 17,
+      "independent_defect_scenarios": 4,
+      "exit_zero_means": "Defects reproduced, NOT acceptance",
+      "log": "phase5-postgres-postgres-tests.log",
+      "probe_log": "phase5-postgres-probe.log"
+    }
+  ],
+  "cleanup": {
+    "path": "/tmp/sacdia-phase5-independent.veD0YV",
+    "pg_ctl_status": 3,
+    "removed": true
+  },
+  "source_sha256": {
+    "src/investiture-requests/investiture-authorization-requests.controller.ts": "639bfbe30905ed24e95d4725f64434d1d0361f3b882e2df74fa61fba2eb4239b",
+    "src/investiture-requests/investiture-authorization-requests.controller.spec.ts": "e3ab8bd5d05bc9b7957807db353c8c994c0e5862f2f09245fa73b48933852383",
+    "src/investiture-requests/investiture-authorization-requests.service.ts": "b6cefa20fa15f0a0d9b3cea18d70e83946a243e4cfadcb065224491d17ec58e9",
+    "src/investiture-requests/investiture-request-lock.ts": "f58a6ec3d016ff582658b271b2a887bbab2029452c3f5953e3c5a5cc29ab5ea5",
+    "src/investiture-requests/investiture-requests.module.ts": "3d9e942b97641b5cee015e6bf762da0689eafc038ace10250f95b55b9142c8b8",
+    "src/investiture-requests/investiture-authorization-requests.service.spec.ts": "9a87c28e447a39cb3261281c92e008217d569b5bedf399ca1405737fac1a71a9",
+    "src/investiture-requests/dto/add-investiture-request-people.dto.ts": "56c23026de9b8348bc33e1a2599aa57253415013b3e63055d8dac5e7cb5bb86c",
+    "src/investiture-requests/dto/present-investiture-request.dto.ts": "e0e15659afe9695f91b02e8dd04f328dbf6c83336a178be1d6339b58cd61aafb",
+    "src/investiture-requests/dto/resolve-investiture-request.dto.ts": "b19c1beafaeb85892446a3e15ebee3dd46439ae2e356081e2f1a4185add4be63",
+    "src/investiture-requests/dto/change-investiture-request-dates.dto.ts": "859ccdd4abd2e8626b308306af337c5f0bfff0e48c35fea31de1c60abc0a1fc1",
+    "src/achievements/achievements.service.ts": "892b0bdbfe19c8c412569ae9407afc5ef0941b1a3732a8893d0a275a7f8fbc9c",
+    "test/investiture-authorization-requests-postgres.e2e-spec.ts": "315ea971a1a78b1763b4da2a21494f4302482cf347ffc94d0dd9ed7617d5538d",
+    "test/helpers/annual-cycle-db.helper.ts": "9ca8f950f36fa8265f0f81c1dd08db4f1e3a65809044cdb0aef42186fe7f3541",
+    "prisma/schema.prisma": "6b9e7bb8e7f644017ef5d33f2cc4be920c20b5995155f18a7b06fb46cfe5b438",
+    "prisma/migrations/20261001193000_investiture_authorization_requests/migration.sql": "7fc769fa0ffce97ae5fe0ca31ff397b68c3ac211cfef67e741d35f914c01482d"
+  },
+  "limits": [
+    "First sandbox test run failed with listen EPERM; elevated local HTTP rerun passed.",
+    "Auth snapshots and eligibility are supplied seams; not real authentication or HTTP+database integration.",
+    "Three controller tests are prior phase4 routes: no resolution HTTP test.",
+    "PG helper rebuilds schema using prisma migrate diff plus partial indexes; does not apply investiture migration.",
+    "Event failure is fault-injected at DB event insert while using real AchievementsService; no actual outage induced.",
+    "No runtime edits, builds, commits, production, Neon, shared/existing DB, UI or deployed migrations."
+  ]
+}

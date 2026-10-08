@@ -1,0 +1,51 @@
+{
+  "date": "2026-10-01",
+  "scope": "Revisión fase2; W1 requiere definición, no aprobación",
+  "head": "9d8fe1d3d1fd0e56256043ee8208d26c9bfcc39b",
+  "checks": [
+    {
+      "command": "./node_modules/.bin/jest --runInBand --no-coverage --runTestsByPath src/certificate-bulk-imports/class-certificate-historical-age.spec.ts src/certificate-bulk-imports/certificate-bulk-imports-application.service.spec.ts src/certificate-bulk-imports/certificate-bulk-imports.service.spec.ts src/certificate-bulk-imports/institutional-certificate-requests.service.spec.ts src/classes/field-class-threshold.spec.ts src/classes/class-requirement-eligibility.service.spec.ts src/classes/class-progress-scope.service.spec.ts src/classes/classes.service.spec.ts src/classes/field-class-threshold-config.service.spec.ts src/classes/field-investiture-window-config.service.spec.ts src/classes/field-investiture-window.spec.ts",
+      "exit_code": 0,
+      "suites_passed": 11,
+      "tests_passed": 208,
+      "log": "phase2-unit-tests.log"
+    },
+    {
+      "command": "./node_modules/.bin/tsc --noEmit --incremental false -p tsconfig.build.json",
+      "exit_code": 0,
+      "log": "phase2-runtime-types.log"
+    },
+    {
+      "command": "./node_modules/.bin/eslint src/classes/field-investiture-window.ts src/classes/field-investiture-window.spec.ts src/classes/field-investiture-window-config.service.ts src/classes/field-investiture-window-config.service.spec.ts src/classes/field-investiture-window.controller.ts src/classes/dto/update-investiture-window.dto.ts",
+      "exit_code": 0,
+      "log": "phase2-lint.log"
+    },
+    {
+      "command": "TS_NODE_SKIP_PROJECT=true TS_NODE_COMPILER_OPTIONS='{\"module\":\"CommonJS\",\"moduleResolution\":\"Node\",\"ignoreDeprecations\":\"6.0\",\"experimentalDecorators\":true,\"emitDecoratorMetadata\":true,\"esModuleInterop\":true,\"target\":\"ES2022\"}' node -r ./node_modules/ts-node/register/transpile-only ../docs/reviews/investidura-autorizacion-review-evidence/phase2-default-probe.cjs",
+      "exit_code": 0,
+      "result": "Reproduce apertura de febrero para ciclo enero-junio sin configuración",
+      "log": "phase2-default-probe.log"
+    },
+    {
+      "command": "git diff --check, raíz y backend",
+      "exit_code": 0
+    }
+  ],
+  "not_executed": [
+    "PostgreSQL",
+    "migración",
+    "HTTP de ventana",
+    "UI",
+    "build",
+    "despliegue"
+  ],
+  "source_sha256": {
+    "src/classes/field-investiture-window.ts": "93b5db542f74720df429d6844571a37c4a880a8638bb1c43db20b9b7ad6a9b03",
+    "src/classes/field-investiture-window.spec.ts": "53471e51f253b42ba46c0512b1c45c8ffd8840a8c01bc329b010677eabe29fef",
+    "src/classes/field-investiture-window-config.service.ts": "025b15d8c2fbc629c2bf36949fa25349c41c17b8a9884d45f9213dc9e0117fde",
+    "src/classes/field-investiture-window-config.service.spec.ts": "92a44f982f525c690fb565ff183c3e9ba132c3a210a4a0a940253af96faea549",
+    "src/classes/field-investiture-window.controller.ts": "2f26911b81fe23343a9cb5a2a01f47635ef35d2f078506e578e2c4940a22316e",
+    "src/classes/dto/update-investiture-window.dto.ts": "34a3ae0f06d9c257b7d3265fb8f05a039f4eaaf90c452d04c1b1df0fab8eae56",
+    "prisma/migrations/20261001130000_local_field_investiture_windows/migration.sql": "6156b83b46a726a288f726cb682380f9f8bc1ea34894930d08a2e972fe6895c8"
+  }
+}

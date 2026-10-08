@@ -1,0 +1,59 @@
+{
+  "date": "2026-10-01",
+  "scope": "Cierre independiente N1/N2; no certifica plan completo ni producción",
+  "cwd": "/Users/abner/Documents/development/sacdia/sacdia-backend",
+  "head": "9d8fe1d3d1fd0e56256043ee8208d26c9bfcc39b",
+  "checks": [
+    {
+      "command": "./node_modules/.bin/jest --runInBand --no-coverage --runTestsByPath src/certificate-bulk-imports/class-certificate-historical-age.spec.ts src/certificate-bulk-imports/certificate-bulk-imports-application.service.spec.ts src/certificate-bulk-imports/certificate-bulk-imports.service.spec.ts src/certificate-bulk-imports/institutional-certificate-requests.service.spec.ts src/classes/field-class-threshold.spec.ts src/classes/class-requirement-eligibility.service.spec.ts src/classes/class-progress-scope.service.spec.ts src/classes/classes.service.spec.ts",
+      "exit_code": 0,
+      "suites_passed": 8,
+      "tests_passed": 171,
+      "log": "n1n2-unit-tests.log"
+    },
+    {
+      "command": "./node_modules/.bin/tsc --noEmit --incremental false -p tsconfig.build.json",
+      "exit_code": 0,
+      "diagnostics": 0,
+      "log": "n1n2-runtime-types.log"
+    },
+    {
+      "command": "TS_NODE_SKIP_PROJECT=true TS_NODE_COMPILER_OPTIONS='{\"module\":\"CommonJS\",\"moduleResolution\":\"Node\",\"ignoreDeprecations\":\"6.0\",\"experimentalDecorators\":true,\"emitDecoratorMetadata\":true,\"target\":\"ES2022\"}' node -r ./node_modules/ts-node/register/transpile-only ../docs/reviews/investidura-autorizacion-review-evidence/n1n2-submit-probe.cjs",
+      "exit_code": 0,
+      "log": "n1n2-submit-probe.log"
+    },
+    {
+      "command": "ESLint sin --fix, ocho archivos runtime; ver lista en n1n2-lint.json",
+      "exit_code": 1,
+      "errors": 52,
+      "all_rules": "prettier/prettier",
+      "log": "n1n2-lint.json"
+    },
+    {
+      "command": "git diff --check, raíz y backend",
+      "exit_code": 0
+    }
+  ],
+  "not_executed": [
+    "PostgreSQL",
+    "migración",
+    "contratos HTTP",
+    "UI",
+    "build",
+    "despliegue"
+  ],
+  "source_sha256": {
+    "src/certificate-bulk-imports/institutional-certificate-requests.service.ts": "d45fdf15976ae9d099c3a52c4cf98f3b56e6ea9db75d71a82ce04351d278afdc",
+    "src/classes/class-requirement-eligibility.service.ts": "a8b0a39daf7da797ca57aa1ccd9fe7d9004b9004c076dec9051f971061592751",
+    "src/certificate-bulk-imports/class-certificate-historical-age.ts": "991d7eb8dd02f19230c7d4282e3a94e4162cf6ae83c0e597fc6fb8537998ff0b",
+    "src/classes/field-class-threshold.ts": "92205f80cd6579234f111f4090c9f318ce214c05df9fd3288e57d9c9f555d880",
+    "src/certificate-bulk-imports/class-certificate-historical-age.spec.ts": "e63310d7b0f9006b58f3cef8c01607af6798d1d00476028fdcc60a0a272f6912",
+    "src/certificate-bulk-imports/certificate-bulk-imports-application.service.spec.ts": "cbbecbea569644fc899b67bd0d1bef5008ce8a8b6f54f968b6e8c973617dcb38",
+    "src/certificate-bulk-imports/certificate-bulk-imports.service.spec.ts": "0d2562b7ded1c5143291c1b0ecdd2f6a5bf8aba35b8cf370ad2d2599ed61f0e7",
+    "src/certificate-bulk-imports/institutional-certificate-requests.service.spec.ts": "df8ce2139e0f5e022162a122f1f3848206bcbde3c662429eac06af2284122773",
+    "src/classes/field-class-threshold.spec.ts": "4b3bdfce41864776bc5b139d47c97e6b00378351943a68e09a269aa56c20795c",
+    "src/classes/class-requirement-eligibility.service.spec.ts": "b53de39d1807df926bca9aa539c4f07349cfb9803bdfc2ab88d647f00fe0ef29",
+    "src/classes/class-progress-scope.service.spec.ts": "a7e5b200e0bfc275cccc401e8df7519c76a818bbab3dfe3de9f3230e21db94d0",
+    "src/classes/classes.service.spec.ts": "c0157bb473f7ce2a969bc919a20a0680248d960ca183d08dddbc5f3ef264ce36"
+  }
+}

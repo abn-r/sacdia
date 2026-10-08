@@ -1,0 +1,60 @@
+{
+  "date": "2026-10-01",
+  "head": "9d8fe1d3d1fd0e56256043ee8208d26c9bfcc39b",
+  "verdict": "Fase3 requiere corregir P3-1; W1/F1/N1/N2 permanecen cerrados",
+  "checks": [
+    {
+      "command": "./node_modules/.bin/jest --runInBand --no-coverage --runTestsByPath src/certificate-bulk-imports/class-certificate-historical-age.spec.ts src/certificate-bulk-imports/certificate-bulk-imports-application.service.spec.ts src/certificate-bulk-imports/certificate-bulk-imports.service.spec.ts src/certificate-bulk-imports/institutional-certificate-requests.service.spec.ts src/classes/field-class-threshold.spec.ts src/classes/class-requirement-eligibility.service.spec.ts src/classes/class-progress-scope.service.spec.ts src/classes/classes.service.spec.ts src/classes/field-class-threshold-config.service.spec.ts src/classes/field-investiture-window-config.service.spec.ts src/classes/field-investiture-window.spec.ts src/classes/field-investiture-window.controller.spec.ts src/classes/district-investiture-pastors.service.spec.ts src/classes/district-investiture-pastors.controller.spec.ts",
+      "exit_code": 0,
+      "suites_passed": 14,
+      "tests_passed": 226,
+      "log": "phase3-tests.log",
+      "environment": "escalación autorizada para HTTP efímero"
+    },
+    {
+      "command": "./node_modules/.bin/tsc --noEmit --incremental false -p tsconfig.build.json",
+      "exit_code": 0,
+      "log": "phase3-runtime-types.log"
+    },
+    {
+      "command": "./node_modules/.bin/eslint src/classes/district-investiture-pastors.service.ts src/classes/district-investiture-pastors.service.spec.ts src/classes/district-investiture-pastors.controller.ts src/classes/district-investiture-pastors.controller.spec.ts src/classes/dto/assign-district-investiture-pastor.dto.ts src/classes/dto/update-investiture-pastor-quota.dto.ts src/classes/classes.module.ts",
+      "exit_code": 0,
+      "log": "phase3-lint.log"
+    },
+    {
+      "command": "TS_NODE_SKIP_PROJECT=true TS_NODE_COMPILER_OPTIONS='{\"module\":\"CommonJS\",\"moduleResolution\":\"Node\",\"ignoreDeprecations\":\"6.0\",\"experimentalDecorators\":true,\"emitDecoratorMetadata\":true,\"esModuleInterop\":true,\"target\":\"ES2022\"}' node -r ./node_modules/ts-node/register/transpile-only ../docs/reviews/investidura-autorizacion-review-evidence/phase3-quota-race-probe.cjs",
+      "exit_code": 0,
+      "result": "P3-1 reproducido con servicio real y DB simulada, cuatro intercalaciones",
+      "log": "phase3-quota-race-probe.log"
+    },
+    {
+      "command": "git diff --check (raíz y backend)",
+      "exit_code": 0
+    }
+  ],
+  "not_executed": [
+    "PostgreSQL concurrente",
+    "migración",
+    "prisma generate",
+    "rojo histórico del implementador",
+    "UI",
+    "build",
+    "despliegue"
+  ],
+  "limits": [
+    "HTTP guards/Prisma simulados sin AppModule/prefijo público",
+    "Probe de carrera sintético, no prueba PG ni producción",
+    "Otros cambios concurrentes ajenos fuera de alcance"
+  ],
+  "source_sha256": {
+    "src/classes/district-investiture-pastors.service.ts": "da556027b721125120b840edadeece170deca4cf6c25d059bede85cc78eebb24",
+    "src/classes/district-investiture-pastors.service.spec.ts": "a82a1d093b09c5ecd1c21a28678852596089b5c1a5d7836ffe396abfe8fbfa02",
+    "src/classes/district-investiture-pastors.controller.ts": "936d410e0f8986eecf410cbf8ff847004362ec10c8fe256af9f86363e9780bbc",
+    "src/classes/district-investiture-pastors.controller.spec.ts": "5b0749a85b713154ac17a35778bb00421dcdf21e9399907e10dbddeef84f69f0",
+    "src/classes/dto/assign-district-investiture-pastor.dto.ts": "e47eed66336c555ac5e3eb08c3dada092125b2eea00e3035c1b4bbf2e18e86b5",
+    "src/classes/dto/update-investiture-pastor-quota.dto.ts": "32899f051e2b9c2a37a8ddf7d0834aeb18dd93af156b901b42e1b22f98218c41",
+    "src/classes/classes.module.ts": "9f588543590b9597e4b0f294c064f55e5739af0ac3562aa90097a7848afd735a",
+    "prisma/migrations/20261001143000_district_investiture_pastors/migration.sql": "d3d8978a059f44ada140df0aa33d775760dda7de3ee0427b5dd85f723b487a11"
+  },
+  "probe_sha256": "bf6fd9d5a9d58ea8f866cf108800a0c10148431e58b86e169a866c286fee840d"
+}

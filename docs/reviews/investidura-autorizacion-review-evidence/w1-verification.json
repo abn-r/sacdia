@@ -1,0 +1,66 @@
+{
+  "date": "2026-10-01",
+  "scope": "Cierre independiente W1; no cierre de fase2 ni despliegue",
+  "head": "9d8fe1d3d1fd0e56256043ee8208d26c9bfcc39b",
+  "checks": [
+    {
+      "command": "./node_modules/.bin/jest --runInBand --no-coverage --runTestsByPath src/certificate-bulk-imports/class-certificate-historical-age.spec.ts src/certificate-bulk-imports/certificate-bulk-imports-application.service.spec.ts src/certificate-bulk-imports/certificate-bulk-imports.service.spec.ts src/certificate-bulk-imports/institutional-certificate-requests.service.spec.ts src/classes/field-class-threshold.spec.ts src/classes/class-requirement-eligibility.service.spec.ts src/classes/class-progress-scope.service.spec.ts src/classes/classes.service.spec.ts src/classes/field-class-threshold-config.service.spec.ts src/classes/field-investiture-window-config.service.spec.ts src/classes/field-investiture-window.spec.ts src/classes/field-investiture-window.controller.spec.ts",
+      "exit_code": 0,
+      "suites_passed": 12,
+      "tests_passed": 214,
+      "log": "w1-tests.log"
+    },
+    {
+      "command": "./node_modules/.bin/tsc --noEmit --incremental false -p tsconfig.build.json",
+      "exit_code": 0,
+      "log": "w1-runtime-types.log"
+    },
+    {
+      "command": "./node_modules/.bin/eslint src/classes/field-investiture-window.ts src/classes/field-investiture-window.spec.ts src/classes/field-investiture-window-config.service.ts src/classes/field-investiture-window-config.service.spec.ts src/classes/field-investiture-window.controller.ts src/classes/dto/update-investiture-window.dto.ts src/classes/field-investiture-window.controller.spec.ts",
+      "exit_code": 0,
+      "log": "w1-lint.log"
+    },
+    {
+      "command": "TS_NODE_SKIP_PROJECT=true TS_NODE_COMPILER_OPTIONS='{\"module\":\"CommonJS\",\"moduleResolution\":\"Node\",\"ignoreDeprecations\":\"6.0\",\"experimentalDecorators\":true,\"emitDecoratorMetadata\":true,\"esModuleInterop\":true,\"target\":\"ES2022\"}' node -r ./node_modules/ts-node/register/transpile-only ../docs/reviews/investidura-autorizacion-review-evidence/w1-closure-probe.cjs",
+      "exit_code": 0,
+      "result": "W1 PASS; sin intersección cerrado, lectura sin escrituras, configuración válida, límites locales y cierre de año",
+      "log": "w1-closure-probe.log"
+    },
+    {
+      "command": "git diff --check, raíz y backend",
+      "exit_code": 0
+    }
+  ],
+  "sandbox_attempt": {
+    "exit_code": 1,
+    "tests_passed": 212,
+    "http_tests_blocked": 2,
+    "reason": "listen EPERM",
+    "log": "w1-tests-sandbox.log",
+    "retry": "Autorizada escalación; comando completo 214/214"
+  },
+  "limitations": [
+    "HTTP con guards/Prisma simulados, sin AppModule, prefijo público ni pipes globales de producción",
+    "allowsOperation usado solo en pruebas",
+    "No se repitió el rojo histórico reportado"
+  ],
+  "not_executed": [
+    "PostgreSQL",
+    "migración",
+    "UI",
+    "build",
+    "despliegue"
+  ],
+  "source_sha256": {
+    "src/classes/field-investiture-window.ts": "e67b30e748ebebba1d31f6d57b7ec5ae6eecc6200d925eaa2d83d22726c82a01",
+    "src/classes/field-investiture-window.spec.ts": "55ff0c7cb4b05d89c96036aed784bbc2c048bc806040e9c8eea6abb949966b10",
+    "src/classes/field-investiture-window-config.service.ts": "13209833fd5c225a0c1c7222245693c83d6666fa2870afb943b5058075c30443",
+    "src/classes/field-investiture-window-config.service.spec.ts": "8dcc5905b67ce23c6799512b2937a9d2c046f57ee91a21b205cd1da8ffe4a884",
+    "src/classes/field-investiture-window.controller.ts": "878da8d375c4167b9ec65a2647471a1ba9494a0beaf54ae7bfb6afa4e8ac76cc",
+    "src/classes/dto/update-investiture-window.dto.ts": "34a3ae0f06d9c257b7d3265fb8f05a039f4eaaf90c452d04c1b1df0fab8eae56",
+    "prisma/migrations/20261001130000_local_field_investiture_windows/migration.sql": "6156b83b46a726a288f726cb682380f9f8bc1ea34894930d08a2e972fe6895c8",
+    "src/classes/field-investiture-window.controller.spec.ts": "c567a4ca731dbfbefa0ceeb262f02eedb8f7e6b8a2d6c2e17559656676e90c93"
+  },
+  "probe_sha256": "8cce277c1fa2bd8aee19fb910e88174dc2d1f74e03b14bc93e2eb6402434de4d",
+  "historical_probe_sha256": "b3437b25d8ce570d1a0a199effab44c262908ace8ff9a93571d5bd247df1bcab"
+}

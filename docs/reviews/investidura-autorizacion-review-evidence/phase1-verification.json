@@ -1,0 +1,53 @@
+{
+  "date": "2026-10-01",
+  "scope": "Fase1 backend; continuidad con observación documental F1. No despliegue ni aprobación integral.",
+  "head": "9d8fe1d3d1fd0e56256043ee8208d26c9bfcc39b",
+  "checks": [
+    {
+      "command": "./node_modules/.bin/jest --runInBand --no-coverage --runTestsByPath src/certificate-bulk-imports/class-certificate-historical-age.spec.ts src/certificate-bulk-imports/certificate-bulk-imports-application.service.spec.ts src/certificate-bulk-imports/certificate-bulk-imports.service.spec.ts src/certificate-bulk-imports/institutional-certificate-requests.service.spec.ts src/classes/field-class-threshold.spec.ts src/classes/class-requirement-eligibility.service.spec.ts src/classes/class-progress-scope.service.spec.ts src/classes/classes.service.spec.ts src/classes/field-class-threshold-config.service.spec.ts",
+      "exit_code": 0,
+      "suites_passed": 9,
+      "tests_passed": 185,
+      "log": "phase1-unit-tests.log"
+    },
+    {
+      "command": "./node_modules/.bin/tsc --noEmit --incremental false -p tsconfig.build.json",
+      "exit_code": 0,
+      "diagnostics": 0,
+      "log": "phase1-runtime-types.log"
+    },
+    {
+      "command": "./node_modules/.bin/eslint src/classes/field-class-threshold-config.service.ts src/classes/field-class-threshold-config.service.spec.ts src/classes/field-class-threshold.controller.ts src/classes/dto/update-field-class-threshold.dto.ts src/classes/field-class-threshold.ts",
+      "exit_code": 0,
+      "log": "phase1-lint.log"
+    },
+    {
+      "command": "TS_NODE_SKIP_PROJECT=true TS_NODE_COMPILER_OPTIONS='{\"module\":\"CommonJS\",\"moduleResolution\":\"Node\",\"ignoreDeprecations\":\"6.0\",\"experimentalDecorators\":true,\"emitDecoratorMetadata\":true,\"esModuleInterop\":true,\"target\":\"ES2022\"}' node -r ./node_modules/ts-node/register/transpile-only ../docs/reviews/investidura-autorizacion-review-evidence/phase1-http-probe.cjs",
+      "exit_code": 0,
+      "requests_asserted": 32,
+      "log": "phase1-http-probe.log",
+      "scope": "HTTP local; JWT, autorización, DB, reloj y traducción simulados. Controller/service/GlobalRolesGuard/DTO/pipes/filtro I18n reales."
+    },
+    {
+      "command": "git diff --check, raíz y backend",
+      "exit_code": 0
+    }
+  ],
+  "remaining": [
+    "Alinear error HTTP documentado de porcentaje inválido (F1)",
+    "Pruebas con JWT/DB reales",
+    "Migración productiva no aplicada",
+    "UI pendiente",
+    "Fases2–8 pendientes"
+  ],
+  "source_sha256": {
+    "src/classes/field-class-threshold-config.service.ts": "0b4d77f4c90a60c3ecbdf0901176033c676c5d42fe8eddc968a904227b7f14b4",
+    "src/classes/field-class-threshold-config.service.spec.ts": "a6eb5c4227ca9e3ecfd9f6bd56e64f7f6f8970b4a1da84f911a4e4543b2dbf2a",
+    "src/classes/field-class-threshold.controller.ts": "ea0cab557eff031eea2ce6a7da97c19c8604ca6b5d56887eff9465cd6d76e8c5",
+    "src/classes/dto/update-field-class-threshold.dto.ts": "7f286f3d40694a6b346eec242b4806dd04e4122287d64abeef6fdcb5dae18bb4",
+    "src/classes/field-class-threshold.ts": "92205f80cd6579234f111f4090c9f318ce214c05df9fd3288e57d9c9f555d880",
+    "src/classes/classes.module.ts": "e05e11648acde0545868c40148e1878f74a5b0606dba560a835cf82099144daf",
+    "src/common/guards/global-roles.guard.ts": "74d67c2ceb8d63258365b579c970bfd6f83b463205b8b15405bbec78c03422d3",
+    "src/common/common.module.ts": "f104671c8d7eea19f4eb4b37456b7a8e5904b030037d95362ef9d7464a0015a4"
+  }
+}

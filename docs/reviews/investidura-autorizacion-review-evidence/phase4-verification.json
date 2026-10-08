@@ -1,0 +1,99 @@
+{
+  "date": "2026-10-02",
+  "head": "9d8fe1d3d1fd0e56256043ee8208d26c9bfcc39b",
+  "branch": "development",
+  "verdict": "Fase4 backend NO APROBADO; P4-1 a P4-4 requieren corrección. Fase2 parcial, despliegue bloqueado, pipeline viejo activo.",
+  "checks": [
+    {
+      "command": "NODE_ENV=test DOTENV_CONFIG_PATH=/dev/null ./node_modules/.bin/jest --runInBand --no-coverage --runTestsByPath src/certificate-bulk-imports/class-certificate-historical-age.spec.ts src/certificate-bulk-imports/certificate-bulk-imports-application.service.spec.ts src/certificate-bulk-imports/certificate-bulk-imports.service.spec.ts src/certificate-bulk-imports/institutional-certificate-requests.service.spec.ts src/classes/field-class-threshold.spec.ts src/classes/class-requirement-eligibility.service.spec.ts src/classes/class-progress-scope.service.spec.ts src/classes/classes.service.spec.ts src/classes/field-class-threshold-config.service.spec.ts src/classes/field-investiture-window-config.service.spec.ts src/classes/field-investiture-window.spec.ts src/classes/field-investiture-window.controller.spec.ts src/classes/district-investiture-pastors.service.spec.ts src/classes/district-investiture-pastors.controller.spec.ts src/investiture-requests/investiture-authorization-requests.service.spec.ts src/investiture-requests/investiture-authorization-requests.controller.spec.ts",
+      "exit_code": 0,
+      "suites_passed": 16,
+      "tests_passed": 266,
+      "log": "phase4-regression.log"
+    },
+    {
+      "command": "./node_modules/.bin/tsc --noEmit --incremental false -p tsconfig.build.json",
+      "exit_code": 0,
+      "log": "phase4-runtime-types.log"
+    },
+    {
+      "command": "./node_modules/.bin/eslint src/investiture-requests/**/*.ts src/investiture-requests/*.ts test/investiture-authorization-requests-postgres.e2e-spec.ts",
+      "exit_code": 0,
+      "log": "phase4-lint.log"
+    },
+    {
+      "command": "bash ../docs/reviews/investidura-autorizacion-review-evidence/phase4-postgres-run.sh",
+      "exit_code": 0,
+      "tests_passed": 3,
+      "probes_reproduced": [
+        "P4-1",
+        "P4-2",
+        "P4-4"
+      ],
+      "log": "phase4-postgres-postgres-tests.log",
+      "probe_log": "phase4-postgres-probe.log"
+    },
+    {
+      "command": "TS_NODE_SKIP_PROJECT=true TS_NODE_COMPILER_OPTIONS='{\"module\":\"CommonJS\",\"moduleResolution\":\"Node\",\"ignoreDeprecations\":\"6.0\",\"experimentalDecorators\":true,\"emitDecoratorMetadata\":true,\"esModuleInterop\":true,\"target\":\"ES2022\"}' node -r ./node_modules/ts-node/register/transpile-only ../docs/reviews/investidura-autorizacion-review-evidence/phase4-progress-probe.cjs",
+      "exit_code": 0,
+      "probes_reproduced": [
+        "P4-3 omitted writers",
+        "P4-3 TOCTOU"
+      ],
+      "log": "phase4-progress-probe.log"
+    },
+    {
+      "command": "git diff --check",
+      "cwd": "/Users/abner/Documents/development/sacdia",
+      "exit_code": 0
+    },
+    {
+      "command": "git diff --check",
+      "cwd": "/Users/abner/Documents/development/sacdia/sacdia-backend",
+      "exit_code": 0
+    }
+  ],
+  "cleanup": [
+    {
+      "path": "/tmp/sacdia-phase4-independent.gS6jfw",
+      "pg_ctl_status_exit_code": 3,
+      "removed": true
+    },
+    {
+      "path": "/tmp/sacdia-phase4-independent.ociUqN",
+      "pg_ctl_status_exit_code": 3,
+      "removed": true
+    }
+  ],
+  "limits": [
+    "No HTTP/auth real/UI. HTTP guards/Prisma sustituidos sin /api/v1.",
+    "PG esquema desde migrate diff + dos índices parciales; no aplica la migración nueva.",
+    "PG probes ejecutan servicio real con DB real, elegibilidad positiva simulada y snapshots de autorización; barrera de scheduling en P4-4.",
+    "P4-3 probe con DB simulada y seams de autorización/resolución/año; no certifica concurrencia PostgreSQL.",
+    "Probes exit0 reproduce defectos; no prueba aceptación ni datos de producción.",
+    "Primer HTTP intentado en sandbox falla por EPERM; repetido con autorización para puerto local.",
+    "Primer probe multianual genérico repetido con clase GM legítima.",
+    "Sin runtime edits/builds/deploy/commits/prisma generate ni .env real."
+  ],
+  "source_sha256": {
+    "src/investiture-requests/investiture-authorization-requests.controller.ts": "921ef03a0f99aeeac019217516441791d5091b33fbc6534a146ac32757413c64",
+    "src/investiture-requests/investiture-authorization-requests.controller.spec.ts": "ceb67892a71b10008e8afa2b69f39da5c9507fe9f5b9c8e333274948d75ca051",
+    "src/investiture-requests/investiture-authorization-requests.service.ts": "fe4080432bc5ec64a750b23c8efa4246c8cc56af86ec80f21af8c3934addc8fc",
+    "src/investiture-requests/investiture-request-lock.ts": "a6ae1126983a5237853f87baef96bba2e74f29fd9c59c667a017538454279a94",
+    "src/investiture-requests/investiture-requests.module.ts": "980a81d0c00aae04ebebc9ef9597b1f2c948596bd6e5570a8bad348f979f55fe",
+    "src/investiture-requests/investiture-authorization-requests.service.spec.ts": "169b325cc871b0581d9a5e0636bcebdddf164badbbf1b2bcf37243150cc9a44b",
+    "src/investiture-requests/dto/add-investiture-request-people.dto.ts": "56c23026de9b8348bc33e1a2599aa57253415013b3e63055d8dac5e7cb5bb86c",
+    "src/investiture-requests/dto/present-investiture-request.dto.ts": "e0e15659afe9695f91b02e8dd04f328dbf6c83336a178be1d6339b58cd61aafb",
+    "src/investiture-requests/dto/change-investiture-request-dates.dto.ts": "859ccdd4abd2e8626b308306af337c5f0bfff0e48c35fea31de1c60abc0a1fc1",
+    "src/classes/classes.service.ts": "ef48d2cb9a652b9254763d169ff0f25138f42f599322c39bfe5592c473506fda",
+    "src/evidence-review/evidence-review.service.ts": "c6f6267ca63563b6a54fb6421bc8f62543a0a4b22b26000422b06dde7efd8d92",
+    "test/investiture-authorization-requests-postgres.e2e-spec.ts": "6cf18cfaaf4499ccaa65f0771360689386100332222ac041870daf593ea98131",
+    "test/helpers/annual-cycle-db.helper.ts": "9ca8f950f36fa8265f0f81c1dd08db4f1e3a65809044cdb0aef42186fe7f3541",
+    "prisma/schema.prisma": "f11da1dec3105f08bc7431f5daaee8493035260335ceb27f597176caac535cc1",
+    "prisma/migrations/20261001193000_investiture_authorization_requests/migration.sql": "7fc769fa0ffce97ae5fe0ca31ff397b68c3ac211cfef67e741d35f914c01482d"
+  },
+  "probe_sha256": {
+    "phase4-progress-probe.cjs": "ceb1eb47948af3583fa78eb813c9b946ca59edcc71df864a4e1ecc74e9dd2533",
+    "phase4-postgres-probe.cjs": "d827d8dce71753fe0aa78e08ac482eec27f8527374fd9c2ae7e940ef3b3495e7"
+  }
+}
