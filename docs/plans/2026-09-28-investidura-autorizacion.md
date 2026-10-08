@@ -51,6 +51,8 @@ Consultar o editar fechas no habilita a autorizar investiduras. Tampoco amplía 
 
 Hoy `pastor` es un rol global, sin iglesia ni distrito. La asignación al distrito no existe y hay que crearla. Los dos cupos pueden autorizar.
 
+**Decisión del 2026-10-08 — un pastor solo se asigna a un distrito de su propio Campo.** `POST /districts/:districtId/investiture-pastors` exige que `users.local_field_id` del pastor sea igual al `local_field_id` del distrito. Un pastor de otro Campo, aunque sea de la misma unión, o sin Campo, se rechaza con 400 `INVESTITURE_PASTOR_FIELD_MISMATCH`. La regla se evalúa dentro de la transacción, después de los candados y del rol, y también al reactivar una asignación inactiva. `director-union` y `assistant-union` siguen asignando en cualquier distrito de su unión, pero solo pastores del Campo de ese distrito. La búsqueda `GET /investiture-pastor-candidates` acepta `districtId` opcional para devolver solo los pastores del Campo de ese distrito. Las asignaciones activas que ya existían no se tocan.
+
 ## 3. Reglas
 
 ### 3.1 Solicitud y personas

@@ -140,7 +140,7 @@ export async function resolveInvestitureRequest(requestId: string, input: Invest
 
 **Files:** Create `src/lib/api/investiture-field-config.ts` + test.
 
-- [ ] **Step 1: Prueba roja** — `updateInvestitureWindow(7, 3, {start_date, end_date})` hace `PATCH /local-fields/7/investiture-windows/3`; `searchPastorCandidates("ana")` hace `GET /investiture-pastor-candidates` con `q`.
+- [ ] **Step 1: Prueba roja** — `updateInvestitureWindow(7, 3, {start_date, end_date})` hace `PATCH /local-fields/7/investiture-windows/3`; `searchPastorCandidates("ana", 5)` hace `GET /investiture-pastor-candidates` con `q` y `districtId`.
 - [ ] **Step 2:** Correr → FAIL.
 - [ ] **Step 3: Implementación** con estos tipos y funciones (mismo patrón que Task 1):
 
@@ -157,7 +157,7 @@ export type PastorCandidate = { user_id: string; user_name: string | null; email
 // GET/PATCH /investiture-pastor-quota                     body { slots }
 // GET/POST  /districts/:d/investiture-pastors             body { user_id }
 // DELETE    /districts/:d/investiture-pastors/:userId
-// GET       /investiture-pastor-candidates?q=
+// GET       /investiture-pastor-candidates?q=&districtId=   (districtId: Campo del distrito que se edita)
 export async function getInvestitureWindow(localFieldId: number, yearId: number): Promise<InvestitureWindow> { /* apiRequest + unwrapApiData */ }
 export async function updateInvestitureWindow(localFieldId: number, yearId: number, body: { start_date: string; end_date: string }): Promise<InvestitureWindow> { /* apiRequestFromClient PATCH */ }
 export async function getFieldClassThreshold(localFieldId: number, yearId: number): Promise<FieldClassThreshold> { /* … */ }
@@ -300,7 +300,7 @@ Comportamiento (IA-13, IA-19, IA-23, IA-24):
 Comportamiento (sección 2 del plan funcional, BC-6/BCR-6):
 - Lista de distritos del Campo (`listAdminDistricts` de `src/lib/api/admin-districts.ts` filtrado por `local_field_id`; respetar `normalizeDistrict` y la PK `districlub_type_id`), con picker de Campo para roles de unión.
 - Por distrito: tarjeta con «{n}/{cupo} pastores» y la lista de pastores (nombre, correo). Badges: `role_missing` → «Sin rol de pastor», `account_inactive` → «Cuenta inactiva»; ambos con texto «Ocupa cupo, no autoriza ni recibe correos». Acción «Quitar» con `AlertDialog` destructivo.
-- «Asignar pastor» (solo si `can_assign` y hay cupo libre): `AssignPastorDialog` con un combobox (Popover + Command) que busca con `searchPastorCandidates` a partir de 3 caracteres, con debounce de 300 ms. Un solo campo, así que Dialog es correcto según §6.1.1.
+- «Asignar pastor» (solo si `can_assign` y hay cupo libre): `AssignPastorDialog` con un combobox (Popover + Command) que busca con `searchPastorCandidates(q, districtId)` a partir de 3 caracteres, con debounce de 300 ms. Decisión del 2026-10-08: siempre envía el `districtId` del distrito que se edita, porque el backend solo acepta pastores del Campo de ese distrito (400 `INVESTITURE_PASTOR_FIELD_MISMATCH`, mapeado en el mapa de errores). Un solo campo, así que Dialog es correcto según §6.1.1.
 - Tarjeta superior «Cupo de pastores por distrito»: número; editable solo si `can_edit` del cupo (super-admin). Bajar el cupo por debajo de los activos devuelve un error del backend que se muestra con el mapa.
 
 - [ ] **Step 1: Pruebas rojas** — badges `role_missing` y `account_inactive`; no se muestra «Asignar» sin cupo; el diálogo no busca con menos de 3 caracteres; «Quitar» pide confirmación.

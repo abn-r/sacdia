@@ -210,6 +210,7 @@ created_at: string;
 
 - [ ] **Step 2:** Correr. Esperado: FAIL.
 
+  - **Decisión del 2026-10-08 (mismo Campo):** un pastor solo se asigna a un distrito de su propio Campo. `POST /districts/:districtId/investiture-pastors` responde 400 `INVESTITURE_PASTOR_FIELD_MISMATCH` si `users.local_field_id` del pastor no es el `local_field_id` del distrito (incluido un pastor sin Campo y la reactivación de una asignación inactiva). La búsqueda acepta `districtId` opcional: autoriza el distrito como al asignar y devuelve solo pastores de su Campo; sin él conserva el comportamiento por territorio. Implementado en la rama `feat/investiture-ui-backend-support` (commit `feat(investiture): require pastors to belong to the district field`).
   - **Decisión del 2026-10-08 (privacidad):** la búsqueda devuelve solo pastores cuyo `users.local_field_id` está dentro del alcance de quien busca (su Campo; para `director-union`/`assistant-union`, los Campos de su unión). Cada palabra de `q` debe tener al menos 2 caracteres. Un pastor sin `local_field_id` no aparece en la búsqueda hasta que se le registre el Campo.
 - [ ] **Step 3:** Implementar en `district-investiture-pastors.service.ts` y `.controller.ts` (DTO `SearchPastorCandidatesDto` con `@IsString() @MinLength(3) q`). El nombre se arma igual que en `requestLabels` del servicio de solicitudes.
 
