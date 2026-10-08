@@ -1,0 +1,71 @@
+{
+  "date": "2026-10-05",
+  "head": "113d8ba9b5f0befc7c5a913ebbc7d7c872d2174a",
+  "branch": "development",
+  "worktree": "uncommitted changes retained; reviewer made no runtime edits",
+  "verdict": "Fase5 backend NO APROBADA: P5-1 reloj residual, P5-2 recuperación residual, P5-3 jobId BullMQ inválido; regresión HTTP de ventana también pendiente.",
+  "checks": [
+    {
+      "command": "NODE_ENV=test DOTENV_CONFIG_PATH=/dev/null ./node_modules/.bin/jest --runInBand --no-coverage --runTestsByPath src/certificate-bulk-imports/class-certificate-historical-age.spec.ts src/certificate-bulk-imports/certificate-bulk-imports-application.service.spec.ts src/certificate-bulk-imports/certificate-bulk-imports.service.spec.ts src/certificate-bulk-imports/institutional-certificate-requests.service.spec.ts src/classes/field-class-threshold.spec.ts src/classes/class-requirement-eligibility.service.spec.ts src/classes/class-progress-scope.service.spec.ts src/classes/classes.service.spec.ts src/classes/field-class-threshold-config.service.spec.ts src/classes/field-investiture-window-config.service.spec.ts src/classes/field-investiture-window.spec.ts src/classes/field-investiture-window.controller.spec.ts src/classes/district-investiture-pastors.service.spec.ts src/classes/district-investiture-pastors.controller.spec.ts src/investiture-requests/investiture-authorization-requests.service.spec.ts src/investiture-requests/investiture-authorization-requests.controller.spec.ts src/evidence-review/evidence-review.service.spec.ts src/achievements/achievements.service.spec.ts src/achievements/achievements.processor.spec.ts src/admin/admin-reference.service.spec.ts src/year-end/year-end.service.spec.ts",
+      "exit_code": 1,
+      "suites_passed": 20,
+      "suites_failed": 1,
+      "tests_passed": 388,
+      "tests_failed": 1,
+      "log": "p5fix-regression.log",
+      "failure": "field-investiture-window.controller.spec.ts expects200 gets500; mock lacks $transaction"
+    },
+    {
+      "command": "./node_modules/.bin/tsc --noEmit --incremental false -p tsconfig.build.json",
+      "exit_code": 0,
+      "log": "p5fix-types.log"
+    },
+    {
+      "command": "ESLint read-only on changed request, achievements, admin-reference, year-end, window, pastor services/specs and PG spec",
+      "exit_code": 0,
+      "log": "p5fix-lint.log"
+    },
+    {
+      "command": "bash ../docs/reviews/investidura-autorizacion-review-evidence/p5fix-postgres-run.sh",
+      "exit_code": 0,
+      "postgres_delivered_tests": 21,
+      "independent_acceptances": 4,
+      "independent_residual_reproductions": 3,
+      "log": "p5fix-postgres-postgres-tests.log",
+      "probe_log": "p5fix-postgres-probe.log",
+      "note": "probe exit0 validates observations, not overall acceptance"
+    }
+  ],
+  "cleanup": {
+    "path": "/tmp/sacdia-p5fix-independent.u83cDZ",
+    "pg_ctl_status": 3,
+    "removed": true
+  },
+  "source_sha256": {
+    "prisma/schema.prisma": "9777d5ae664a81cf078617afeca9e31788690b3fb94f817a04933272cdee3013",
+    "src/achievements/achievements.processor.spec.ts": "034ee7fac99efebc74fcbcee833f767e80e32a1e31aac5dd4de0a87809abf0d2",
+    "src/achievements/achievements.processor.ts": "5d981c6d12aceb54fef857fbca7e99b7f86d46670f702c2b9a8fc4bbfe005515",
+    "src/achievements/achievements.service.spec.ts": "31766b89ab94157bc3b8ccd00adf21ccc564f12d38e5f838f12c09424f9c5798",
+    "src/achievements/achievements.service.ts": "8f0093fe9ef0885e9fa960a29d7ca6c7e4073304cdbcae70bd343d99d6f77e77",
+    "src/admin/admin-reference.service.spec.ts": "b08d3b5a338b12e5672f1f6719b49b65b430624378b04eecc229429e1308287b",
+    "src/admin/admin-reference.service.ts": "7c50e1b4f27ba2a5c217a6231bbf32b693731d0879bcc19b4c593cc2e2999e3b",
+    "src/classes/district-investiture-pastors.service.ts": "4b799583e495d77c3e863e89355a294bd74b3408555875a0ea7109d6591195db",
+    "src/classes/field-investiture-window-config.service.spec.ts": "819be6e5e7187ee5ea3a08cddf844b82e0134e04d041f5706dcbd553dfa51102",
+    "src/classes/field-investiture-window-config.service.ts": "2ace8b4109c0e14d63f2af0a9d5437c65ded09e54bafd460b7731db6c669ca3a",
+    "src/investiture-requests/investiture-authorization-requests.service.spec.ts": "45abf78ffcaf62ccfa5630ca6a4d9437157517a5b98effa3a2a7a55c51d6d066",
+    "src/investiture-requests/investiture-authorization-requests.service.ts": "0603a9c01fcc3ad0072d401405ed962a337a63490339f6ee69c626d658b6e8e1",
+    "src/investiture-requests/investiture-request-lock.ts": "42e45ff9b9519c04636dc5a5efd8c9bcb82a5c08afc17cdbcc963d6c84601669",
+    "src/year-end/year-end.service.spec.ts": "e77e37821fa9f27222fafb2d8c03d627da804550db7df82922638d4450a912b7",
+    "src/year-end/year-end.service.ts": "a2fd2b197fe00191c8365209d3186b0e67091640020fdddf27d37a6bd6760b30",
+    "test/investiture-authorization-requests-postgres.e2e-spec.ts": "e8acb3f93ac9054c62fd7bcd61840d17229052d58abf62266fd73d9d35da7910",
+    "prisma/migrations/20261002200000_investiture_authorization_achievement_intent/migration.sql": "cd33eb4d11758aaa3ef821c5619458bdb244d4270f09438d1b180ade65c065fe"
+  },
+  "limits": [
+    "No runtime edits/builds/commits/production/Neon/existing databases.",
+    "Real PostgreSQL; supplied auth snapshots and eligibility; no HTTP auth integration/UI.",
+    "Real installed BullMQ5.81.0 validator called through queue seam, no Redis connection.",
+    "JS wall-clock advanced while waiting on real PG advisory lock; no OS clock change.",
+    "New service instance validates no in-memory dependency; not process kill/restart.",
+    "PG helper uses migrate diff and partial indexes, not migration deployment."
+  ]
+}

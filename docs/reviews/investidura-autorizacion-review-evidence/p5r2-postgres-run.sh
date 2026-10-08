@@ -1,0 +1,30 @@
+set -eu
+pgbin=/opt/homebrew/opt/postgresql@18/bin
+scratch=$(mktemp -d /tmp/sacdia-p5r2-independent.XXXXXX)
+printf '%s\n' "$scratch" > /tmp/sacdia-p5r2-independent-path
+port=$(python3 -c 'import socket; s=socket.socket(); s.bind(("127.0.0.1",0)); print(s.getsockname()[1]); s.close()')
+redis_pid=""
+cleanup() { if [ -n "$redis_pid" ]; then kill "$redis_pid" 2>/dev/null || true; wait "$redis_pid" 2>/dev/null || true; fi; "$pgbin/pg_ctl" -D "$scratch/data" -m fast -w stop > "$scratch/stop.log" 2>&1 || true; }
+trap cleanup EXIT INT TERM
+"$pgbin/initdb" -D "$scratch/data" -U codex_p5r2_review -A trust --no-locale -E UTF8 > "$scratch/initdb.log" 2>&1
+mkdir "$scratch/socket"
+"$pgbin/pg_ctl" -D "$scratch/data" -l "$scratch/postgres.log" -o "-h 127.0.0.1 -p $port -k $scratch/socket" -w start > "$scratch/start.log" 2>&1
+"$pgbin/createdb" -h127.0.0.1 -p "$port" -U codex_p5r2_review sacdia_p5r2_review_test
+"$pgbin/psql" -X -h127.0.0.1 -p "$port" -U codex_p5r2_review -d sacdia_p5r2_review_test -vON_ERROR_STOP=1 -Atc "SELECT current_database(), inet_server_addr(), current_setting('data_directory'), current_setting('transaction_isolation');" > "$scratch/identity.log"
+export SACDIA_TEST_DATABASE_URL="postgresql://codex_p5r2_review@127.0.0.1:$port/sacdia_p5r2_review_test"
+export DATABASE_URL="$SACDIA_TEST_DATABASE_URL" DATABASE_DIRECT_URL="$SACDIA_TEST_DATABASE_URL" DOTENV_CONFIG_PATH=/dev/null NODE_ENV=test EMAIL_ENABLED=false REDIS_URL=''
+set +e
+./node_modules/.bin/jest --config test/jest-e2e.json --runInBand --no-coverage --runTestsByPath test/investiture-authorization-requests-postgres.e2e-spec.ts > "$scratch/postgres-tests.log" 2>&1
+result=$?
+set -e
+printf '%s\n' "$result" > "$scratch/exit-code"
+cat "$scratch/identity.log"; tail -18 "$scratch/postgres-tests.log"
+if [ "$result" != 0 ]; then exit "$result"; fi
+redis_port=$(python3 -c 'import socket; s=socket.socket(); s.bind(("127.0.0.1",0)); print(s.getsockname()[1]); s.close()')
+/opt/homebrew/bin/redis-server --bind 127.0.0.1 --port "$redis_port" --save '' --appendonly no --dir "$scratch" > "$scratch/redis.log" 2>&1 &
+redis_pid=$!
+export REVIEW_REDIS_PORT="$redis_port"
+export TS_NODE_SKIP_PROJECT=true
+export TS_NODE_COMPILER_OPTIONS='{"module":"CommonJS","moduleResolution":"Node","ignoreDeprecations":"6.0","experimentalDecorators":true,"emitDecoratorMetadata":true,"esModuleInterop":true,"target":"ES2022"}'
+node -r ./node_modules/ts-node/register/transpile-only ../docs/reviews/investidura-autorizacion-review-evidence/p5r2-queue-acceptance-probe.cjs > "$scratch/probe.log" 2>&1
+cat "$scratch/probe.log"

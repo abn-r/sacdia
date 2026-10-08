@@ -36,6 +36,7 @@ Varios jobs están gobernados por `system_config` o feature flags (ver §6) para
 | 9 | Cleanup expired sessions/tokens | `EVERY_6_HOURS` (`0 */6 * * *`) | cada 6 horas | `common` |
 | 10 | Cleanup inactive FCM tokens (>90d) | `EVERY_DAY_AT_3AM` (`0 3 * * *`) | diario 03:00 UTC | `common` |
 | 11 | **Ecclesiastical year cut** | `5 6 * * *` | diario 06:05 UTC (~00:05 CST / ~23:05 CDT México) | `year-cut` |
+| 12 | Investiture achievement intent | `*/5 * * * *` | cada 5 minutos UTC, y también al arrancar | `investiture-requests` |
 
 ## Detalle por job
 
@@ -166,18 +167,19 @@ Varios jobs están gobernados por `system_config` o feature flags (ver §6) para
 - **Clase**: `YearCutCronService`
 - **Servicio de lógica**: `YearCutService.applyCut()` (`src/year-cut/year-cut.service.ts`)
 - **Propósito**: Transición anual **por club** al inicio del año eclesiástico vigente:
-  1. Selecciona cargos `status=active` cuyo `ecclesiastical_years.end_date` es anterior a `currentYear.start_date`. No usa `ecclesiastical_year_id != vigente` (no cierra futuros).
+  1. Selecciona cargos `status=active` cuyo `ecclesiastical_years.end_date` es anterior a `currentYear.start_date`. No usa `ecclesiastical_year_id != vigente` (no cierra futuros). También incluye clubes con una solicitud de investidura `PENDING` de un año ya terminado, aunque no tengan cargos vencidos ni una transición incompleta.
   2. Termina esos cargos → `status=ended`, `active=false`, `end_date` = fin del periodo saliente (conserva un `end_date` anterior más temprano; no reescribe con `currentYear.start_date`). Cierra `class_counselor_assignments` vencidas; no crea autoridad pedagógica nueva.
   3. Activa planes `director_succession_plans` en `scheduled` con `effective_date <= currentYear.start_date` creando CRA director `status=active`. **No** activa filas CRA `designated`.
-  4. Resuelve estado final: junta AV/CQ → `member inactive` en GM vía política anual; consejero/member en **esa** sección. Si ya hay director `active` en el destino, no crea member extra. No crea clases ni `member active`.
+  4. Resuelve estado final: junta AV/CQ → `member inactive` en GM vía política anual; consejero/member en **esa** sección. Si ya hay director `active` en el destino, no crea member extra. No crea clases ni `member active`. Esa política no se sustituye por un alta automática.
+  5. Antes de recorrer los clubes, toma el candado del año de cada año ya terminado y cierra sus `PENDING` como `CLOSED_YEAR`. Una alta que esperaba ese candado queda incluida. El recorrido del club vuelve a cerrar lo que siga `PENDING`. No toca `INVESTED`, no escribe el texto de falta de requisitos y no copia la solicitud al año siguiente. Si la transición del club ya está `completed`, no reinscribe ni activa cargos.
 - **Cron**: `5 6 * * *` UTC (~00:05 CST en horario estándar México).
 - **Lock**: Redis `cron:ecclesiastical-year-cut` (TTL ~23 horas) **y** `pg_advisory_xact_lock(club_id, year_id)` dentro de la transacción por club.
 - **job_name**: `ecclesiastical-year-cut` (en `cron_run_log`).
-- **Entidades mutadas**: `club_role_assignments`; `director_succession_plans` (`scheduled` → `activated`); `class_counselor_assignments`; `club_year_transitions`; `authorization_context_versions` (bumpMany en tx).
+- **Entidades mutadas**: `club_role_assignments`; `director_succession_plans` (`scheduled` → `activated`); `class_counselor_assignments`; `club_year_transitions`; `authorization_context_versions` (bumpMany en tx); `investiture_authorization_people` pendientes de años terminados de ese club.
 - **Side-effects**: `AuthorizationContextService.invalidateUserAuthorizationCache` por usuario afectado (post-commit, try/catch por usuario). Fallo de caché/FCM **no** revierte ni duplica el corte. **NO llama** `YearEndService.closeYear`. **NO hace blacklist de JWT**.
-- **Idempotencia**: ledger `club_year_transitions` único `(club_id, ecclesiastical_year_id)`; si `status=completed` el club se omite. Reintento con `in_progress`/fallo relee candidatos bajo lock y reutiliza `ensureNotEnrolled`.
-- **Retorno**: `{ ended, activated, returnedNotEnrolled, usersInvalidated }`. `itemsProcessed` del cron = ended + activated + returnedNotEnrolled. Ya no existe `gmMembersCreated` ni `ghostsMarked`.
-- **Condiciones skip**: lock Redis no adquirido (`trackSkipped`); ningún club candidato (log + return temprano, sin tx); transición del club ya `completed`.
+- **Idempotencia**: ledger `club_year_transitions` único `(club_id, ecclesiastical_year_id)`. Si `status=completed`, no repite cargos ni `ensureNotEnrolled`, pero sí vuelve a cerrar pendientes de investidura que hayan quedado: el `updateMany` solo coincide con `PENDING`. Reintento con `in_progress`/fallo relee candidatos bajo lock y reutiliza `ensureNotEnrolled`.
+- **Retorno**: `{ ended, activated, returnedNotEnrolled, typeGraduatesEnrolled, usersInvalidated, investiturePendingClosed }`. `itemsProcessed` del cron = ended + activated + returnedNotEnrolled + typeGraduatesEnrolled. Ya no existe `gmMembersCreated` ni `ghostsMarked`.
+- **Condiciones skip**: lock Redis no adquirido (`trackSkipped`); ningún club candidato y ningún pendiente de investidura de un año terminado (log + return temprano). Si solo hay esos pendientes, el barrido los cierra y no recorre cargos. Una transición `completed` no repite la continuidad anual.
 - **Migraciones**: `20260908180000_director_year_slots`, `20260909120000_annual_membership_cycle` (ledger + unique member) y `20260909130000_director_succession_open_unique` aplicadas a Neon development (2026-09-11).
 
 ## Política común canonizada
@@ -298,6 +300,24 @@ Threshold alerting (failure_rate > umbral) se configura en la UI de Sentry via i
 - Response: `{ total, page, limit, items: CronHistoryItem[] }`. Max limit 100.
 - Página admin: `/dashboard/system/jobs/history` Server Component `revalidate=0` + Client Component con filtros URL-searchParams, tabla paginada, Dialog de detalle con metadata JSON + error_message completo.
 - Link "Ver historial" junto al header de sección "Cron Jobs" en `/dashboard/system/jobs`.
+
+### 12. Investiture achievement intent
+
+- **Archivo**: `sacdia-backend/src/investiture-requests/investiture-achievement-intent.reconciler.ts`
+- **Método**: `reconcile()` y `onModuleInit()`
+- **Clase**: `InvestitureAchievementIntentReconciler`
+- **Propósito**: entregar `class.completed` de una investidura ya confirmada si el insert o la cola fallaron. También corre al arrancar. No autoriza de nuevo y no envía correo.
+- **Condiciones**: solo filas `INVESTED` con `achievement_intent_key` cuyo evento no está `processed`. El año, la ventana y la asignación pueden estar cerrados.
+
+### 13. Investiture authorization reminders
+
+- **Archivo**: `sacdia-backend/src/investiture-requests/investiture-reminder.cron.ts`
+- **Método**: `run()`
+- **Clase**: `InvestitureReminderCron`
+- **Cron**: `*/15 * * * *`, zona `UTC`
+- **Lock**: `cron:investiture-authorization-reminders`, 14 minutos
+- **Propósito**: correo de recordatorio cuando en `local_fields.timezone` son las 10:00 y el minuto es menor que 15. Pastor: lunes, miércoles y viernes, un correo por Campo con los distritos de esa persona. Director y asistente del Campo: solo lunes, un correo por rol. La corrida del día se registra por Campo y rol en `investiture_reminder_runs` aunque no haya pendientes; si la de las 10:00 no ocurrió, la primera ejecución disponible del mismo día la reclama una vez, y si ya ocurrió no hay envío tardío para destinatarios nuevos. Un Campo cuyo render falla (por ejemplo `ADMIN_PANEL_URL` vacío) libera su reclamo y no consume el día. Cada entrega de un recordatorio a la cola es un único intento ante el proveedor (`attempts: 1`). Después recupera intenciones pendientes, filas `failed`, claims `sending` con lease vencido y trabajos `queued` cuyo job falta o quedó `failed`. Un job `failed` se reactiva con el mismo id.
+- **Condiciones**: el año eclesiástico del Campo tiene que estar activo y el día local dentro de `start_date` y `end_date`. Hace falta al menos un pendiente. Con la ventana cerrada el correo sigue y pide ampliarla. Sin fila de ventana se usa el mismo rango por defecto del primer envío. Esas condiciones se vuelven a leer antes de cada llamada al proveedor, también si el contenido ya está congelado. Si el destinatario, el año o los pendientes ya no corresponden, o si solo queda autorizada una parte del contenido congelado, no se envía y no se cambia el cuerpo ni la clave. Ese cuerpo, su destino y su alcance salen de la misma instantánea con la que se armó el correo. Un intento que sigue permitido y ya fue aceptado por el proveedor no se recompone: durante 24 horas se reintenta el contenido guardado y después queda `uncertain`, sin un segundo envío automático. No escribe en la bandeja del panel. No autoriza ni cierra solicitudes.
 
 ## Prioridad y siguiente acción
 

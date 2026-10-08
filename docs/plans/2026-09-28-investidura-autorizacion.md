@@ -175,6 +175,12 @@ Todos se envían a las **10:00 a. m. en `local_fields.timezone`**, no a una hora
 | IA-49 | El envío debe admitir reintentos sin duplicar un mismo recordatorio programado para el mismo destinatario, rol y alcance. Antes de enviarlo se vuelve a comprobar el alcance, el año y los pendientes. Esta protección técnica no fusiona correos de roles distintos ni cambia los dos correos iniciales de IA-37. |
 | IA-50 | Una persona que sea pastor y director o asistente del Campo recibe dos recordatorios separados el lunes, uno por cada rol, si existen pendientes en ambos alcances. Miércoles y viernes recibe solo el pastoral. Compartir cuenta o dirección de correo no elimina un rol destinatario; `admin` y `super-admin` siguen sin recibir recordatorios por esos roles. |
 
+**Decisiones del 2026-10-07 (cierre del backend):**
+
+- **Recordatorio perdido:** si la ejecución de las 10:00 no ocurre porque el servicio no estaba disponible, el recordatorio sale en la primera ejecución disponible del **mismo día local** (hasta las 23:59), una sola vez. Nunca se recupera al día siguiente. Los reintentos por fallo también valen solo dentro de ese día.
+- **Pastor sin rol global `pastor`:** su asignación sigue ocupando cupo hasta que el Campo o la unión la quiten, pero no autoriza, no figura entre los autorizadores y no recibe correos ni recordatorios.
+- **Avisos de resultado (§3.5):** la directiva recibe como máximo dos avisos por decisión: uno de investidos y uno de rechazados. El de rechazados junta los rechazos del pastor o del Campo y los del sistema, e indica quién decidió en cada caso, sin el motivo humano.
+
 ### 3.8 Orden de requisitos y controles
 
 1. **Preparar el año:** configurar porcentaje, ventana y zona horaria del Campo; asignar los pastores de cada distrito. Verificar permisos de lectura y edición de la configuración.
@@ -195,6 +201,17 @@ Los certificados de clases son una vía de acreditación histórica distinta de 
 | IA-54 | Sin fecha de nacimiento válida, edad mínima definida o un año eclesiástico inequívoco para la fecha del certificado, no se acepta el ítem para validación ni se acredita. El error debe indicar qué dato falta o por qué la edad no corresponde; no se presume una edad ni se acepta por omisión. Se conservan las comprobaciones existentes de fecha futura, catálogo, permisos y reconciliación. |
 | IA-55 | Subir el archivo o extraerlo por OCR no equivale a aceptar sus datos: un ítem incompatible puede conservarse como borrador para corregirlo, pero no quedar listo, enviarse ni aprobarse. Un fallo de esta validación no crea un enrollment `INVESTIDO`, no reconcilia ni modifica el enrollment operativo o su solicitud pendiente, y no emite eventos ni concede logros de acreditación. |
 | IA-56 | Se compara la edad histórica con el mínimo de la clase acreditada; no se exige que sea la clase que hoy correspondería por edad ni se introduce una edad máxima. Tampoco se impone una prohibición general por coincidir con una inscripción actual: los casos compatibles siguen las reglas existentes de reconciliación y Guías Mayores. Esta validación no borra ni reescribe certificados ya acreditados; cualquier inconsistencia previa requiere inventario y tratamiento aprobado. |
+
+**Decisiones del 2026-10-07 — certificado frente a solicitud viva.** La edad histórica (IA-52) no distingue dos casos en los que la edad sí cuadra: un certificado del mismo año eclesiástico en curso, y un Guía Mayor adulto con un certificado de años anteriores. Para esos casos rigen IA-57 a IA-60.
+
+| ID | Regla |
+| --- | --- |
+| IA-57 | Un certificado de clase cuyo año eclesiástico es el año en curso de una inscripción operativa con un registro `PENDING` de esa misma persona y clase se rechaza. En el año en curso manda la autorización. Si el pastor o el Campo rechazan a la persona, o la directiva la quita, el certificado puede volver a presentarse y se evalúa con IA-58. |
+| IA-58 | Un certificado del año en curso sin solicitud vigente de esa persona y clase se acepta con las reglas existentes de edad, catálogo, reconciliación y permisos. Lo aprueban los roles que ya aprueban certificados; esta regla no cambia esos roles. Si se rechaza y el año termina sin investidura, la clase queda no investida de ese año. |
+| IA-59 | Un certificado de un año anterior para una persona y clase con un registro `PENDING` se acepta si cumple las demás reglas. En la misma transacción ese registro se cierra como no activo con un motivo informativo («Investidura aplicada por certificado de un año anterior»), distinto de un rechazo. No usa el texto de falta de requisitos, no emite `class.completed` desde la solicitud, sale de los recordatorios y queda visible para quienes autorizan y para la directiva de la sección. |
+| IA-61 | Decisión del 2026-10-07. Si la solicitud de una persona y clase terminó sin autorización porque el año eclesiástico de esa solicitud ya terminó (registro `CLOSED_YEAR`, o `PENDING` de un año terminado), un certificado de ese mismo año puede acreditarse con la aprobación de `director-lf` o `assistant-lf` del Campo de esa solicitud, o de `admin`, `assistant-admin` o `super-admin` dentro de su alcance; basta uno. Un Campo ajeno no lo aprueba. Cubre la omisión de un pastor que nunca validó: el Campo y la administración son autoridad superior al pastor. El registro de la solicitud conserva `CLOSED_YEAR` como auditoría y las lecturas indican que la investidura de ese año se acreditó después por certificado validado por el Campo. No es el camino ordinario y puede retirarse si la iglesia lo decide. Mientras el año sigue en curso rige IA-57. |
+| IA-62 | Decisión del 2026-10-07. Las clases institucionales de legado (`GM-02`, `GM-03`) no admiten solicitudes de investidura: son solo reconocimiento y su acreditación sigue por la vía institucional de certificados. Presentar o agregar una de esas clases se rechaza. Se reconsidera solo si la iglesia lo solicita. |
+| IA-60 | La comprobación de IA-57 e IA-59 corre al aprobar, dentro de la transacción y bajo los mismos candados de usuario y enrollment que usan la solicitud y la resolución, para que no exista una carrera entre presentar, autorizar y aprobar el certificado. |
 
 **Ejemplo de regresión:** nacimiento el 1 de enero de 2016, clase Amigo con edad mínima de 10 y años eclesiásticos que comienzan el 1 de enero. El postregistro de 2026 asigna Amigo a los 10 años; un certificado de Amigo fechado en 2025 se bloquea porque al inicio de ese año tenía 9. La solicitud operativa de 2026 permanece sin cambios. En cambio, un certificado de una clase anterior con edad histórica suficiente no se rechaza solo porque hoy la persona sea mayor.
 
@@ -332,7 +349,7 @@ La undécima revisión independiente del 2026-10-02 cierra P4-4 residual. Se ver
 
 ### Fase 5 — Autorizar en el panel
 
-El backend de la resolución está en el árbol, en `sacdia-backend/src/investiture-requests/`, y espera revisión. No incluye la pantalla del panel ni los correos. No aprueba la fase. No hay despliegue y el pipeline anterior sigue activo. La pantalla de la app de la fase 4 sigue pendiente.
+El backend de la resolución está en `sacdia-backend/src/investiture-requests/`. La decimoquinta revisión independiente (2026-10-05) cierra **P5-2** y mantiene cerrados **P5-1, P5-3 y la regresión del mock de ventana**. El backend queda verificado en el alcance revisado y permite continuar el desarrollo de fase 6. **No cierra la fase 5 completa:** faltan pantalla del panel e integración; los correos corresponden a fase 6. No hay despliegue y el pipeline anterior sigue activo. La pantalla de la app de la fase 4 y la fase 2 parcial siguen pendientes. Ver `docs/reviews/investidura-autorizacion-independent-review.md`.
 
 **Archivos:** resolución del flujo nuevo en `sacdia-backend/src/investiture/` o módulo hermano; integración admin en `sacdia-admin/src/components/investiture/`, separada de `investiture-client-page.tsx` del pipeline viejo. El enlace del correo abre esta solicitud.
 
@@ -349,7 +366,7 @@ El backend de la resolución está en el árbol, en `sacdia-backend/src/investit
 - Rechazo humano sin motivo se rechaza. El comentario de autorización puede ir vacío.
 - Unos quedan investidos y otros pendientes en la misma solicitud.
 - El enrollment autorizado queda `INVESTIDO` sin pasar por `FIELD_APPROVED`.
-- `class.completed` activa la evaluación de logros existente solo después de confirmar la investidura. Presentar, rechazar, quitar, cerrar el año o fallar la transacción no concede ese logro; reintentar la misma autorización no duplica eventos ni efectos.
+- `class.completed` activa la evaluación de logros existente solo después de confirmar la investidura. Presentar, rechazar, quitar, cerrar el año o fallar la transacción no concede ese logro. Una intención ya confirmada se entrega aunque después cierren el año o la ventana; esa entrega no reabre la decisión. Reintentar no duplica eventos ni efectos.
 - Ante autorización/rechazo simultáneos gana la primera decisión confirmada; la otra recibe aviso de resolución previa. También se protege la carrera con retiro y cierre anual.
 - Fallar antes de confirmar no deja el registro, el enrollment y la auditoría en estados distintos. Reintentar una decisión confirmada no duplica efectos ni comunicaciones.
 
@@ -371,11 +388,15 @@ El backend de la resolución está en el árbol, en `sacdia-backend/src/investit
 - Reejecutar la misma ejecución programada no duplica el recordatorio; un fallo de envío puede reintentarse sin perderlo.
 - No se generan notificaciones periódicas en el panel. Las notificaciones de resultado de la app siguen funcionando.
 
+**Estado de esta entrega:** el backend está en el árbol, sin commit. La vigesimoprimera revisión independiente (2026-10-06) cierra **P6-3 en el alcance comprobado**: cuerpo, destino y alcance comparten instantánea; el retiro durante render bloquea el reintento sin modificar cuerpo/clave. P6-1/P6-2/P6-4/P6-5 y P5 conservan sus cierres. **Backend de fase 6 aceptado para continuar el desarrollo de fase 7, NO para despliegue ni como cierre integral del plan.** La fase 7 está en el árbol, sin aprobación y sin pantallas. P7-2 y P7-3 quedaron cerrados. El residuo temporal de P7-1 está corregido en el árbol y la fase sigue sin aprobar. Fase 2 parcial, pantallas/integración pendientes y pipeline anterior activo. Ver verificaciones y límites en `docs/reviews/investidura-autorizacion-independent-review.md`.
+
 ### Fase 7 — Historial, anuario y fin de año
 
 **Archivos:** `sacdia-backend/src/year-end/year-end.service.ts`, `sacdia-backend/src/year-cut/year-cut.service.ts`, `sacdia-backend/src/year-cut/year-cut-cron.service.ts`, integración con la política anual existente, historial de la app y vista de anuario del club en la app.
 
 **Pruebas:** tanto el cierre administrativo como el corte automático cierran los registros pendientes como no investidos de ese año. Ejecutarlos de nuevo o ejecutar ambos no duplica efectos ni cambia a quienes ya estaban investidos. No se copian ni reabren solicitudes en el año siguiente. El historial conserva clase y año, sin el texto de falta de requisitos. Cesan los recordatorios del año cerrado. La continuidad anual deja a la persona por inscribir y, al inscribirla, en la clase siguiente, sin exigir la investidura anterior; no se sustituye esa política por un alta automática. El anuario lista inscripciones por clase y por año para la directiva dentro de su sección. Esta fase no cierra la máquina de estados de unidades ni de finanzas.
+
+**Estado de esta entrega:** **backend ACEPTADO LOCALMENTE PARA CONTINUAR** por la vigesimocuarta revisión; P7-1/P7-2/P7-3 cerrados. Presentar y agregar consultan el reloj nuevamente después de los candados si no hay override explícito; los cuatro cruces de ventana/año rechazan sin insertar personas ni preparar avisos. Pasaron 103 pruebas unitarias, 38 PostgreSQL, cuatro aceptaciones del probe independiente, tipos y lint focal. La fase integral sigue pendiente de pantalla e integración: esta aceptación NO autoriza despliegue ni certifica HTTP, autenticación real o aplicación de migraciones. Fase 6 conserva su aceptación local. Cambios sin commit; fase 8 no iniciada y pipeline anterior activo. Siguiente paso: preparar fase 8 con inventario y tratamiento de expedientes anteriores antes de retirar la vía vieja. Ver `docs/reviews/investidura-autorizacion-independent-review.md`.
 
 ### Fase 8 — Apagar la vía vieja
 
@@ -384,6 +405,8 @@ Dejar de aceptar transiciones nuevas del pipeline club → coordinación → cam
 **Condición de despliegue:** inventariar los expedientes del pipeline anterior antes de retirarlo. La regla de no arrastre entre años está cerrada; no equivale a haber aprobado una conversión o un reinicio masivo de expedientes del mismo año. Si existen pendientes de ese año en producción, documentar y aprobar su tratamiento antes del cambio de vía, sin perder historia ni desbloquear duplicados.
 
 **Pruebas:** un enrollment operativo nuevo no llega a `INVESTIDO` por `markInvestido`, `FIELD_APPROVED`, un alias ni una operación masiva del pipeline retirado. Un historial viejo sigue leyéndose. Un certificado histórico no se mezcla con la solicitud. No se pierde ni se resuelve silenciosamente un expediente anterior pendiente durante el despliegue.
+
+**Estado de esta preparación (2026-10-07):** el inventario de rutas, pantallas y expedientes está en `docs/features/validacion-investiduras.md`, sección «Preparación de fase 8». El 2026-10-07 se completó ese inventario con `ValidationModule` para `entity_type` class, la conciliación de certificados y la pantalla `/dashboard/clubs/validations`. También quedó una propuesta, sin decisión, para soltar más adelante el bloqueo de un expediente viejo. No se desactivó ninguna ruta y no se cambió la conciliación de certificados. No se consultó ni modificó producción, así que no hay conteos reales. El tratamiento vigente es conservar cada estado grabado: los expedientes abiertos no se resuelven, no se arrastran, no se copian a la solicitud nueva y no se les libera el bloqueo. La fase 8 no está ejecutada ni aprobada. El pipeline anterior sigue activo, con la exclusión mutua descrita en el informe, sección «X-1 a X-4». Esa exclusión no es el apagado. El backend de la fase 7 conserva su aceptación local para continuar, no para desplegar. La vigesimoquinta revisión cerró X-2, X-3 y X-4 con observaciones y dejó X-1 abierto. H1 a H5 están en el árbol y no están cerrados. No autorizan despliegue ni apagan el pipeline.
 
 ### Fase 9 — Documentación
 

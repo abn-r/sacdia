@@ -1,0 +1,78 @@
+{
+  "date": "2026-10-02",
+  "head": "9d8fe1d3d1fd0e56256043ee8208d26c9bfcc39b",
+  "verdict": "P4-1/P4-2/P4-3 cerrados en alcance de correcciones; P4-4 parcial: reapertura de cabecera histórica duplica grupos activos. Fase4 NO APROBADA.",
+  "checks": [
+    {
+      "command": "NODE_ENV=test DOTENV_CONFIG_PATH=/dev/null ./node_modules/.bin/jest --runInBand --no-coverage --runTestsByPath src/certificate-bulk-imports/class-certificate-historical-age.spec.ts src/certificate-bulk-imports/certificate-bulk-imports-application.service.spec.ts src/certificate-bulk-imports/certificate-bulk-imports.service.spec.ts src/certificate-bulk-imports/institutional-certificate-requests.service.spec.ts src/classes/field-class-threshold.spec.ts src/classes/class-requirement-eligibility.service.spec.ts src/classes/class-progress-scope.service.spec.ts src/classes/classes.service.spec.ts src/classes/field-class-threshold-config.service.spec.ts src/classes/field-investiture-window-config.service.spec.ts src/classes/field-investiture-window.spec.ts src/classes/field-investiture-window.controller.spec.ts src/classes/district-investiture-pastors.service.spec.ts src/classes/district-investiture-pastors.controller.spec.ts src/investiture-requests/investiture-authorization-requests.service.spec.ts src/investiture-requests/investiture-authorization-requests.controller.spec.ts src/evidence-review/evidence-review.service.spec.ts",
+      "exit_code": 0,
+      "suites": 17,
+      "tests": 288,
+      "log": "p4fix-regression.log"
+    },
+    {
+      "command": "./node_modules/.bin/tsc --noEmit --incremental false -p tsconfig.build.json",
+      "exit_code": 0,
+      "log": "p4fix-types.log"
+    },
+    {
+      "command": "./node_modules/.bin/eslint src/investiture-requests/**/*.ts src/investiture-requests/*.ts test/investiture-authorization-requests-postgres.e2e-spec.ts src/evidence-review/evidence-review.service.spec.ts",
+      "exit_code": 0,
+      "log": "p4fix-lint.log"
+    },
+    {
+      "command": "bash ../docs/reviews/investidura-autorizacion-review-evidence/p4fix-postgres-run.sh",
+      "exit_code": 0,
+      "tests": 7,
+      "log": "p4fix-postgres-postgres-tests.log",
+      "probe_log": "p4fix-postgres-probe.log",
+      "probe_result": "Residual P4-4 reproduced; exit0 is not acceptance"
+    },
+    {
+      "command": "git diff --check",
+      "cwd": "/Users/abner/Documents/development/sacdia",
+      "exit_code": 0
+    },
+    {
+      "command": "git diff --check",
+      "cwd": "/Users/abner/Documents/development/sacdia/sacdia-backend",
+      "exit_code": 0
+    }
+  ],
+  "cleanup": {
+    "path": "/tmp/sacdia-p4fix-independent.h3QM9b",
+    "status_exit": 3,
+    "removed": true
+  },
+  "historical_probes_unchanged": true,
+  "source_sha256": {
+    "src/investiture-requests/investiture-authorization-requests.controller.ts": "921ef03a0f99aeeac019217516441791d5091b33fbc6534a146ac32757413c64",
+    "src/investiture-requests/investiture-authorization-requests.controller.spec.ts": "ceb67892a71b10008e8afa2b69f39da5c9507fe9f5b9c8e333274948d75ca051",
+    "src/investiture-requests/investiture-authorization-requests.service.ts": "b88701f512727ed827bce3ee8332381ce4beb8eff39512205d701c7be3900cac",
+    "src/investiture-requests/investiture-request-lock.ts": "f58a6ec3d016ff582658b271b2a887bbab2029452c3f5953e3c5a5cc29ab5ea5",
+    "src/investiture-requests/investiture-requests.module.ts": "980a81d0c00aae04ebebc9ef9597b1f2c948596bd6e5570a8bad348f979f55fe",
+    "src/investiture-requests/investiture-authorization-requests.service.spec.ts": "fda98b421eda26cd1b18fbc4f14140b07858fbc4c0bc6b3f4453b1338593115f",
+    "src/investiture-requests/dto/add-investiture-request-people.dto.ts": "56c23026de9b8348bc33e1a2599aa57253415013b3e63055d8dac5e7cb5bb86c",
+    "src/investiture-requests/dto/present-investiture-request.dto.ts": "e0e15659afe9695f91b02e8dd04f328dbf6c83336a178be1d6339b58cd61aafb",
+    "src/investiture-requests/dto/change-investiture-request-dates.dto.ts": "859ccdd4abd2e8626b308306af337c5f0bfff0e48c35fea31de1c60abc0a1fc1",
+    "src/classes/classes.service.ts": "5412426aaa46e475d4448f7a359c8f8d6c7e93b3118b9cd87f3d83e29bee26a8",
+    "src/classes/classes.service.spec.ts": "b1e641dfaadd6fe44b604ab88feca383f12cbb5145566d786f9d9847a6951458",
+    "src/evidence-review/evidence-review.service.ts": "9ecf6722d5f0c6935c6e66840bb38842eade11d76c50fa94af60d5630fcc9062",
+    "src/evidence-review/evidence-review.service.spec.ts": "f95327378286684f02656f34aba0293bda3af3184724195d997e7b63ff2ad44e",
+    "test/investiture-authorization-requests-postgres.e2e-spec.ts": "d11cfcaf930db47ed12ab45a3915e479bb98ae8ada1af49bf922ea11a270ee24",
+    "test/helpers/annual-cycle-db.helper.ts": "9ca8f950f36fa8265f0f81c1dd08db4f1e3a65809044cdb0aef42186fe7f3541",
+    "prisma/schema.prisma": "f11da1dec3105f08bc7431f5daaee8493035260335ceb27f597176caac535cc1",
+    "prisma/migrations/20261001193000_investiture_authorization_requests/migration.sql": "7fc769fa0ffce97ae5fe0ca31ff397b68c3ac211cfef67e741d35f914c01482d"
+  },
+  "limits": [
+    "Mocks of eligibility/auth in PG; no real HTTP/auth/UI/storage.",
+    "PG created from migrate diff+partial unique indexes; actual migration not applied.",
+    "No runtime edits, build, commit, deploy, existingDB, cloud or .env real.",
+    "Initial escalation review failed due quota, no execution; authorized retry after user continua succeeded.",
+    "P4-3 real PG concurrency covers request before progress write; storage tests use mocks."
+  ],
+  "source_hashes_rechecked_after_review": true,
+  "probe_sha256": {
+    "p4fix-request-reuse-probe.cjs": "f0005bf20c83074b55f0387e1f7fd47a331224cdf200c4b00027b26bd300908c"
+  }
+}

@@ -1,0 +1,5 @@
+ad90536b810d18a18db00cc34f6280f7b82c98f3ed7ba01da084b3cd2c1429bd  sacdia-backend/src/investiture-requests/investiture-authorization-requests.service.ts
+c88177328b09d0752f0211db1d3e041fcdfaf030f6fdc8806a2db7eda4e3d0ba  sacdia-backend/src/investiture-requests/investiture-year-close.ts
+8e41f9b9ce3c78de4b364960e49c1fa6a563f722cb9e9f1fcf2049c7c4c1e6ec  sacdia-backend/src/year-cut/year-cut.service.ts
+f3273a04ae5b33310f13d33e08ce57d07b76732e5f50f6142822aa2df3a1d69a  sacdia-backend/src/year-end/year-end.service.ts
+b810959059d98cafabbd9765ef4a3fcc4d553a0b137e30f48407999c99b81aab  sacdia-backend/test/investiture-authorization-requests-postgres.e2e-spec.ts
