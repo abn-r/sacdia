@@ -471,7 +471,48 @@ Una sección inscrita necesita planificar insumos de cocina por horario de entre
 
 ---
 
+## 11. Proxy OCR keyless: Render → HTTPS HMAC → Cloud Run → Vision US
+
+### ✅ DECISIÓN ACEPTADA (2026-10-02; revisada 2026-10-07) — aprobada en local, NO desplegada
+
+#### Contexto
+
+La lectura OCR de certificados usa Google Cloud Vision. En la Mac funciona con ADC personal (modo `direct`), pero Render no puede usar ADC personal ni una clave de cuenta de servicio: la organización de Google impone `iam.disableServiceAccountKeyCreation` y no se propone debilitar esa política ni se probó una excepción exclusiva. Render tampoco tiene una identidad de Google nativa. Hacía falta una vía de autenticación hacia Vision sin credenciales Google de larga vida en Render.
+
+#### Decisión
+
+| Tema | Contrato |
+|------|----------|
+| Ruta | Render (API y worker) → HTTPS con HMAC-SHA256 entre servidores → proxy en Cloud Run (`us-east4`) → Vision en el endpoint `us-vision.googleapis.com`. Cloud Run usa su identidad de servicio (ADC), sin claves. |
+| Estado | Aprobado en local en Task0, 1, 1b, 2, R, 3 y 4 (`PASS_LOCAL_SLICE`). **No desplegado**: no existen Cloud Run, Firestore, Secret Manager ni el modo `remote` en Render. |
+| Autenticación | HMAC v1 con `kid`, llave actual y anterior para rotación, secreto de al menos 32 bytes por entorno, nonce y ventana de ±120 s. El replay es durable (Firestore). Invocación pública de Cloud Run con `run.googleapis.com/invoker-iam-disabled`, sin `allUsers`; la firma es la única barrera de aplicación. |
+| Estado durable | Firestore Standard regional (`us-east4`), solo metadata: operación, nonce y cuota diaria. `CALLING` se confirma antes de llamar a Vision. Incertidumbre o respuesta `COMPLETE` perdida: revisión manual, sin segunda llamada. No hay exactly-once ni caché de texto. |
+| Cuota | 400 páginas por día UTC y por entorno, compartidas entre usuarios (`OCR_MAX_PAGES_PER_ENV_PER_DAY`, 1..400). |
+| Contención PDF | `pdf-lib` ya corría en el proceso API de Render sin aislamiento. Se aplicó un parche a `pdf-lib` 1.17.1 (tope de descompresión 1 MiB por stream y 2 MiB acumulados, con `AsyncLocalStorage`) y la validación corre en un `worker_thread` descartable con heap acotado, un worker a la vez, dimensionado para el plan Free de Render (512 MB, 0,1 CPU). Render cuenta las páginas y las firma (`X-Ocr-Page-Count`); el proxy **no** parsea PDF y exige cobertura exacta de Vision. `confirm` responde HTTP 429 `CERTIFICATE_IMPORT_PDF_BUSY` cuando no hay turno. |
+| Errores | Solo un sobre JSON v1 válido decide el código. 429/5xx/504 de plataforma sin sobre es `CERTIFICATE_IMPORT_OCR_UNAVAILABLE`, nunca `CERTIFICATE_IMPORT_OCR_QUOTA`. API pública, schema, Flutter y aprobación humana no cambian. |
+| Plazos y perfil | Vision 25 s, proxy 35 s, cliente 40 s; 1 vCPU, 512 MiB, instancias mínimas 0, máximas 1, concurrencia 1. Valores tentativos hasta el humo. |
+| Modos | `OCR_MODE=direct` (ADC en la Mac) o `remote`. Obligatorio con `NODE_ENV=production`; `remote` incompleto no arranca ni cae a ADC. |
+
+#### Alternativas
+
+- **Clave de cuenta de servicio en Render**: imposible, la organización bloquea su creación.
+- **Worker en Google que pide trabajos a un endpoint privado de Render**: evita el ingreso público al proxy, pero exige leases, acuses, planificación y estados de entrega nuevos, y no encaja con el contrato síncrono interno elegido.
+- **API key estándar de Vision (evaluada y descartada el 2026-10-07)**: la organización permite API keys estándar (solo bloquea las vinculadas a cuentas de servicio), pero Vision solo tiene cuotas **por minuto** (1800 por minuto por defecto) y ningún tope diario para estas llamadas. Una key filtrada expondría del orden de **US$19 000 por día** (1800 solicitudes por minuto durante 24 horas con PDF de cinco páginas, a US$1,50 por 1000 unidades). Un HMAC filtrado queda acotado por la cuota diaria a **400 páginas, unos US$0,60 por día**. Decisión humana: seguir con el proxy.
+- **Pre-escaneo `zlib` del PDF para acotar la descompresión**: rechazado en revisión (evadible con nombres escapados, comentarios y cabeceras partidas; rechazaba filtros que `pdf-lib` no decodifica). Se reemplazó por el parche del decodificador más el worker descartable.
+- **Parseo de PDF dentro del proxy (proceso hijo con `pdf-lib`)**: reemplazado. El riesgo vive primero en Render, que ya valida y cuenta las páginas; un PDF que miente cuesta como máximo las N ≤ 5 páginas pedidas.
+
+#### Consecuencias
+
+- Se agregan un servicio (Cloud Run) y un almacén durable (Firestore) adicionales, con su costo y su operación.
+- La seguridad descansa en el secreto HMAC y en la cuota diaria; Google keyless **no** elimina el secreto de aplicación ni el riesgo de costo. Las instancias máximas y las alertas no son un tope de factura.
+- Ante respuesta perdida o ejecución incierta, el documento va a revisión manual: se acepta no repetir Vision a cambio de no duplicar el gasto.
+- Con Render en plan Free, el worker PDF y sus supuestos de memoria no están medidos en Render. Al pasar a un plan de pago hay que revisar topes y plazos y sincronizar `render.yaml` (declara `starter`).
+- Pendientes antes de desplegar: entrypoint de producción del proxy, campo `expireAt` de tipo `Timestamp` en todos los documentos del ledger (decisión del usuario, 2026-10-07: opción a) y política TTL de Firestore sobre `expireAt` en `operations`, `nonces` y `quota` una vez desplegado ese código (las fechas de purga lógica siguen siendo texto ISO y siguen decidiendo la lógica; el TTL solo borra físicamente y no es autenticación), herramienta de humo y verificación de las políticas de la organización en el proyecto de producción.
+- Nada de esto es una autorización de infraestructura. Pasos, permisos mínimos y rollback: [runbook de infraestructura](../guides/ocr-proxy-preprod-infra.md) y [runbook de uso](../guides/google-vision-certificate-ocr.md). Diseño y plan: [diseño](../plans/2026-10-02-vision-keyless-design.md), [plan](../plans/2026-10-02-vision-keyless-plan.md).
+
+---
+
 **Generado**: 2026-01-29
 **Actualizado por**: Usuario
-**Última actualización**: 2026-08-26 (ADR #10 — camporee-supplies en rama `feat/camporee-supplies`, no Neon)
+**Última actualización**: 2026-10-07 (ADR #11 — proxy OCR keyless, aprobado en local, no desplegado). Anterior: 2026-08-26 (ADR #10 — camporee-supplies en rama `feat/camporee-supplies`, no Neon)
 **Status**: ✅ Decisiones confirmadas; ADR #7 parcialmente implementada en rama, no expuesta en runtime; ADR #9 y #10 implementadas en worktree `feat/camporee-supplies` / historial de orders, no merge Neon

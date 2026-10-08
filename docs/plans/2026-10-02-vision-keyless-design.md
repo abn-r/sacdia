@@ -2,7 +2,16 @@
 
 **Estado documental:** ACTIVE
 **Fecha:** 2026-10-02
-**Diseño:** aceptado; **implementación:** pendiente; **despliegue:** no realizado.
+**Diseño:** aceptado; revisado el 2026-10-07; **implementación:** parcial en local; **despliegue:** no realizado.
+
+> **Revisión 2026-10-07.** (a) El proxy ya no parsea PDF: Render envía `X-Ocr-Page-Count` firmado
+> y el proxy llama a Vision con `pages: [1..N]`, exigiendo `totalPages == N`. (b) La contención de
+> descompresión PDF se hace en Render, donde pdf-lib ya corre sin aislamiento, con un pre-escaneo
+> `zlib` acotado (TaskR). (c) 429/5xx sin envelope v1 válido es `UNAVAILABLE`, no cuota. (d) Gates de
+> org verificados en dev: sin DRS, `requireInvokerIam` no impuesta, ubicaciones libres. (e) API key
+> estándar evaluada y descartada: Vision no tiene tope diario y una key filtrada expone mucho más
+> que un HMAC acotado a 400 páginas/día. Detalle en el [plan](2026-10-02-vision-keyless-plan.md).
+> Donde este documento contradiga la revisión, prevalece la revisión.
 
 Este documento registra decisiones aprobadas, no una autorización para crear infraestructura,
 instalar dependencias, generar secretos, ejecutar builds, desplegar o llamar a Vision.
@@ -66,8 +75,8 @@ IAM debe pasar el preflight. No se aprobó un grant público ni desactivar una p
 1. Flutter sube mediante signed PUT; Render confirma evidencia privada y ownership.
 2. El worker Render obtiene el Buffer sellado y contexto de operación estable por archivo.
 3. El adaptador firma y envía una solicitud binaria a `POST /v1/ocr`.
-4. Proxy limita lectura, verifica HMAC/hash/replay y valida MIME/PDF; después admite operación
-   y reserva páginas atómicamente en Firestore.
+4. Proxy limita lectura, verifica HMAC/hash/replay y magic bytes del MIME, sin parsear PDF;
+   después admite operación y reserva atómicamente el conteo de páginas firmado por Render.
 5. Confirma durablemente `CALLING`, fuera de la transacción ejecuta una única llamada Vision.
 6. Valida cobertura total, limita respuesta y registra solo resultado técnico `COMPLETE`.
 7. Devuelve texto completo por páginas. Render ejecuta su parser y workflow actuales.
@@ -94,6 +103,7 @@ Campos firmados en orden fijo:
 | entorno, `kid` | allowlist propia del entorno; clave actual/anterior durante ventana acotada |
 | `operationId`, `issuedAt` | opaco, estable por archivo; fecha inmutable del origen de operación |
 | MIME, longitud | tipos admitidos; longitud real exacta dentro de 10 MiB |
+| páginas | `1`..`5` validado por Render; imagen = `1` (revisión 2026-10-07) |
 | timestamp, nonce | timestamp UTC; nonce aleatorio de al menos 128 bits por intento HTTP |
 | SHA-256 | digest de **los bytes reales**, vinculado a todos los campos anteriores |
 
@@ -115,10 +125,12 @@ intento; no usar `operationId`, digest o nonce como etiquetas de logs.
 ## 6. Replay, expiración y Firestore metadata
 
 - Tolerancia de reloj **±120 segundos**. Un timestamp futuro aceptado puede seguir válido
-  hasta **240 segundos** desde recepción. El nonce consumido se retiene hasta superar toda
-  esa ventana; limpieza elegible a partir de **cinco minutos**, nunca antes de la expiración lógica.
+  hasta **240 segundos** desde recepción. El nonce consumido se retiene al menos **cinco minutos
+  después** de ese vencimiento lógico. La limpieza no ocurre antes de ese umbral.
 - Una operación es válida hasta **siete días** desde su `issuedAt` inmutable. Ledger y contador
   son elegibles para purga a partir de **ocho días**, sin reducir el horizonte de idempotencia.
+- Borrado físico (revisión 2026-10-07): cada documento lleva `expireAt` (`Timestamp`) igual a su
+  purga lógica, para la política TTL de Firestore. Solo sirve para borrar; la lógica no lo lee.
 - Expiración se evalúa en código, aunque el documento todavía exista. TTL no es autenticación,
   no valida expiración y no garantiza borrado físico inmediato. [TTL de Firestore](https://firebase.google.com/docs/firestore/ttl).
 - Colecciones conceptuales aisladas por entorno: operaciones, nonces y cuota diaria UTC.
@@ -169,6 +181,8 @@ almacén, SDK y otros servicios también pueden facturar.
 | 429 | cuota de aplicación o Google | `CERTIFICATE_IMPORT_OCR_QUOTA`; `Retry-After` informativo, sin agendar mañana |
 | 503 | indisponible antes de RPC | `CERTIFICATE_IMPORT_OCR_UNAVAILABLE`; repetir solo con prueba de cero side effects |
 | 504/fallo post-`CALLING` | ejecución incierta | `CERTIFICATE_IMPORT_OCR_FAILED`; manual, sin repetir Vision |
+| 502 `PAGE_COUNT_MISMATCH` | `totalPages` ≠ conteo firmado | `CERTIFICATE_IMPORT_OCR_FAILED`; terminal, sin repetir Vision |
+| cualquier status sin envelope v1 | plataforma Cloud Run (p. ej. 429 sin instancia libre) | `CERTIFICATE_IMPORT_OCR_UNAVAILABLE`; nunca `QUOTA` |
 
 No se añade un campo público de job/error ni HTTP retroactivo tras encolar. El catálogo y cuatro
 locales actuales deben verificarse al implementar. Los dos intentos BullMQ reutilizan operación;
@@ -190,8 +204,8 @@ El grant humano temporal OrgPolicyAdmin fue retirado; no se necesita reinstalarl
 
 Recursos iniciales **tentativos**: 1 vCPU, 512 MiB, min instances 0, max instances 1,
 concurrencia 1; SDK 25 s/retries desactivados, proxy 35 s, cliente Render 40 s.
-Perfil de cold start y aislamiento PDF con deadline/memoria deben demostrar viabilidad antes
- de habilitarlo; límite de páginas no limita CPU. No aumentar recursos silenciosamente.
+Sin parser PDF en el proxy (revisión 2026-10-07), la memoria queda acotada por cuerpo y respuesta;
+la contención de descompresión se demuestra en Render (TaskR). No aumentar recursos silenciosamente.
 Un [504 de Cloud Run](https://docs.cloud.google.com/run/docs/configuring/request-timeout)
 no garantiza que el trabajo se detuvo. Max instances y alertas tampoco son límites de factura.
 No registrar certificados/texto, headers firmados, nonce/digest/opid, secretos o excepciones completas;

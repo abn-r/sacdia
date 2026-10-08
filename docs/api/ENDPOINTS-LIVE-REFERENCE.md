@@ -855,13 +855,13 @@ Edad histórica de una fila de clase, al inicio del año eclesiástico de `compl
 | POST | `/api/v1/certificate-bulk-imports` | JWT | - | Crear un borrador de carga por certificado | CertificateBulkImportsService.createDraft() | `src/certificate-bulk-imports/certificate-bulk-imports.controller.ts` |
 | POST | `/api/v1/certificate-bulk-imports/:batchId/items` | JWT | Dueño, borrador | Alta manual de fila | CertificateBulkImportsService.addItem() | `src/certificate-bulk-imports/certificate-bulk-imports.controller.ts` |
 | DELETE | `/api/v1/certificate-bulk-imports/:batchId/items/:itemId` | JWT | Dueño, borrador | Quitar fila no enviada | CertificateBulkImportsService.removeItem() | `src/certificate-bulk-imports/certificate-bulk-imports.controller.ts` |
-| POST | `/api/v1/certificate-bulk-imports/:batchId/process-ocr` | JWT | - | Encola lectura Google Vision ADC para JPEG/PNG/WebP y PDF completo de 1–5 páginas (≤10 MiB). Sin Redis: `CERTIFICATE_IMPORT_OCR_UNAVAILABLE`. Credenciales, cuota y lectura fallida se resuelven asíncronamente; no hay `OCR_PROCESSED` ante fallo | CertificateBulkImportsService.processOcr() | `src/certificate-bulk-imports/certificate-bulk-imports.controller.ts` |
+| POST | `/api/v1/certificate-bulk-imports/:batchId/process-ocr` | JWT | - | Encola lectura Google Vision para JPEG/PNG/WebP y PDF completo de 1–5 páginas (≤10 MiB), vía ADC local (`OCR_MODE=direct`) o proxy keyless (`OCR_MODE=remote`, aprobado en local, no desplegado). Sin Redis: `CERTIFICATE_IMPORT_OCR_UNAVAILABLE`. Credenciales, cuota y lectura fallida se resuelven asíncronamente; no hay `OCR_PROCESSED` ante fallo | CertificateBulkImportsService.processOcr() | `src/certificate-bulk-imports/certificate-bulk-imports.controller.ts` |
 | GET | `/api/v1/certificate-bulk-imports/:batchId` | JWT | - | Obtener detalle de una carga por certificado | CertificateBulkImportsService.getBatch() | `src/certificate-bulk-imports/certificate-bulk-imports.controller.ts` |
 | PATCH | `/api/v1/certificate-bulk-imports/:batchId/items/:itemId` | JWT | - | Corregir o completar una fila detectada por OCR | CertificateBulkImportsService.updateItem() | `src/certificate-bulk-imports/certificate-bulk-imports.controller.ts` |
 | POST | `/api/v1/certificate-bulk-imports/:batchId/submit` | JWT | - | Enviar carga por certificado a validación de Campo Local | CertificateBulkImportsService.submit() | `src/certificate-bulk-imports/certificate-bulk-imports.controller.ts` |
 | POST | `/api/v1/certificate-bulk-imports/:batchId/items/:itemId/resubmit` | JWT | - | Corregir y reenviar una fila rechazada | CertificateBulkImportsService.resubmitItem() | `src/certificate-bulk-imports/certificate-bulk-imports.controller.ts` |
 | POST | `/api/v1/certificate-bulk-imports/:batchId/files/presign` | JWT | Dueño del lote | Preparar subida firmada de un comprobante | CertificateImportFilesService.presign() | `src/certificate-bulk-imports/certificate-bulk-imports.controller.ts` |
-| POST | `/api/v1/certificate-bulk-imports/:batchId/files/:fileId/confirm` | JWT | Dueño del lote | Confirmar bytes reales y sellar; PDF válido 1–5 páginas, no cifrado. PDF_INVALID/PDF_ENCRYPTED/PDF_TOO_MANY_PAGES → 400 | CertificateImportFilesService.confirm() | `src/certificate-bulk-imports/certificate-bulk-imports.controller.ts` |
+| POST | `/api/v1/certificate-bulk-imports/:batchId/files/:fileId/confirm` | JWT | Dueño del lote | Confirmar bytes reales y sellar; PDF válido 1–5 páginas, no cifrado. PDF_INVALID/PDF_ENCRYPTED/PDF_TOO_MANY_PAGES → 400. Cola de validación llena o espera vencida → 429 `CERTIFICATE_IMPORT_PDF_BUSY`; el archivo no queda confirmado | CertificateImportFilesService.confirm() | `src/certificate-bulk-imports/certificate-bulk-imports.controller.ts` |
 | GET | `/api/v1/certificate-bulk-imports/:batchId/files/:fileId/download` | JWT | Dueño; Campo Local en su ámbito; evidencia institucional solo dueño o super-admin | URL efímera del objeto sellado | CertificateImportFilesService.download() | `src/certificate-bulk-imports/certificate-bulk-imports.controller.ts` |
 | DELETE | `/api/v1/certificate-bulk-imports/:batchId/files/:fileId` | JWT | Dueño, solo expediente editable y sin filas enviadas | Retirar comprobante no enviado | CertificateImportFilesService.remove() | `src/certificate-bulk-imports/certificate-bulk-imports.controller.ts` |
 
@@ -875,9 +875,45 @@ Edad histórica de una fila de clase, al inicio del año eclesiástico de `compl
 {"status":"error","statusCode":400,"message":"CERTIFICATE_IMPORT_PDF_TOO_MANY_PAGES"}
 ```
 
-- `process-ocr` devuelve el lote tras **encolar**, no el resultado de Vision. Redis ausente falla al encolar (`CERTIFICATE_IMPORT_OCR_UNAVAILABLE`); en el worker ADC/auth falla con el mismo código, cuota con `CERTIFICATE_IMPORT_OCR_QUOTA`, fallo/deadline/resultados incompletos con `CERTIFICATE_IMPORT_OCR_FAILED`. Estos fallos posteriores **no son** respuesta HTTP retroactiva ni un nuevo campo público de estado de job. No escribe `OCR_PROCESSED` salvo lectura completa exitosa. El SDK usa ADC, gRPC/Buffer, deadline 25 s y sin retries internos; BullMQ conserva dos intentos/concurrencia 1.
+- `confirm` sin turno de validación (cola llena o espera de 2 s vencida) responde HTTP **429** `CERTIFICATE_IMPORT_PDF_BUSY`. El archivo no queda confirmado; se puede reintentar el mismo `confirm`. Mismo sobre legacy: el código va en **`message`**. No es `CERTIFICATE_IMPORT_OCR_UNAVAILABLE`. Ejemplo (timestamp/path omitidos):
+
+```json
+{"status":"error","statusCode":429,"message":"CERTIFICATE_IMPORT_PDF_BUSY"}
+```
+
+- `process-ocr` devuelve el lote tras **encolar**, no el resultado de Vision. Redis ausente falla al encolar (`CERTIFICATE_IMPORT_OCR_UNAVAILABLE`); en el worker ADC/auth (o proxy no disponible) falla con el mismo código, cuota con `CERTIFICATE_IMPORT_OCR_QUOTA`, fallo/deadline/resultados incompletos con `CERTIFICATE_IMPORT_OCR_FAILED`. Estos fallos posteriores **no son** respuesta HTTP retroactiva ni un nuevo campo público de estado de job. No escribe `OCR_PROCESSED` salvo lectura completa exitosa. El SDK usa ADC, gRPC/Buffer, deadline 25 s y sin retries internos; BullMQ conserva dos intentos/concurrencia 1. Los códigos terminales (`FAILED`, `QUOTA`, `UNSUPPORTED_TYPE`, `FILE_TOO_LARGE`, `PDF_*`) no gastan el segundo intento; `CERTIFICATE_IMPORT_OCR_UNAVAILABLE` sí es reintentable.
 - PDF antiguo confirmado se valida nuevamente antes de Vision; se exige exactamente una respuesta sin error por cada página `1..pageCount`. OCR solo propone; agregar/corregir filas manualmente y aprobación autorizada continúan separados.
-- Implementación revisada e integrada al workspace principal; configuración remota en Render, despliegue y smoke OCR real siguen pendientes. [Runbook ADC/operación](../guides/google-vision-certificate-ocr.md).
+- `CERTIFICATE_IMPORT_PDF_BUSY` es de `confirm` y es el único código de este contrato con HTTP 429 hacia la app. Está **aprobado en local**; sigue sin desplegar. El 429 conserva `message` (en producción el filtro sustituye `message` cuando `status >= 500`, por eso no se usó 503).
+- Implementación revisada e integrada al workspace principal; el proxy OCR keyless está **aprobado en local** (`PASS_LOCAL_SLICE` en Task0, 1, 1b, 2, R, 3 y 4) pero **no desplegado**: no existen Cloud Run, Firestore, Secret Manager ni el modo `remote` en Render. Configuración en Render y humo OCR real siguen pendientes. [Runbook de operación](../guides/google-vision-certificate-ocr.md) · [infraestructura de preproducción](../guides/ocr-proxy-preprod-infra.md).
+
+#### Contrato interno OCR (backend a proxy)
+
+No agrega endpoints públicos: la app y el admin no lo consumen. Lo llama solo el worker de Render cuando `OCR_MODE=remote` (estado: aprobado en local, no desplegado). Variables del backend: `OCR_MODE` (`direct` | `remote`; obligatoria en producción), `OCR_PROXY_URL` (URL completa `https://<host>/v1/ocr`), `OCR_PROXY_ENV`, `OCR_PROXY_KID`, `OCR_PROXY_SECRET` (base64 de ≥ 32 bytes; el mismo valor que `OCR_SECRET_CURRENT` del proxy para ese `kid`).
+
+| Aspecto | Contrato |
+|---|---|
+| Solicitud | `POST /v1/ocr`, cuerpo binario sin compresión ni redirects, ≤ 10 MiB; JPEG, PNG, WebP o PDF de 1–5 páginas. |
+| Autenticación | HMAC-SHA256 sobre una cuerda canónica v1 con headers `X-Ocr-*` (versión, entorno, `kid`, `operationId`, `issuedAt`, MIME, longitud, `X-Ocr-Page-Count`, timestamp ±120 s, nonce, SHA-256 del cuerpo, firma). Sin Bearer ni credenciales Google. |
+| Identidad | `operationId` = `file_id` persistido; `issuedAt` = `confirmed_at`. Estables entre reintentos. Nunca viaja un identificador de usuario. |
+| Páginas | Render valida y cuenta el PDF y firma `X-Ocr-Page-Count`; el proxy no parsea PDF y exige cobertura exacta y `totalPages == N`. |
+| Cuota | 400 páginas por día UTC y por entorno (`OCR_MAX_PAGES_PER_ENV_PER_DAY`, 1..400), compartidas entre usuarios. |
+| Plazos | Vision 25 s; proxy 35 s; cliente de Render 40 s absolutos. |
+| Respuesta 200 | JSON UTF-8 v1 `{version, operationId, pageCount, pages:[{pageNumber, text}]}`, ≤ 16 MiB. |
+| Error | `{version, code, requestId}` sin texto OCR ni datos humanos. |
+
+Mapeo del código interno al código que ve la app (sin endpoint nuevo):
+
+| Código interno (HTTP) | Código en la app |
+|---|---|
+| `UNAUTHORIZED` (401), `FORBIDDEN` (403), `UNAVAILABLE` (503), `DISCONNECTED` (503) | `CERTIFICATE_IMPORT_OCR_UNAVAILABLE` |
+| `UNSUPPORTED_TYPE` (400) | `CERTIFICATE_IMPORT_OCR_UNSUPPORTED_TYPE` |
+| `PAYLOAD_TOO_LARGE` (413) | `CERTIFICATE_IMPORT_OCR_FILE_TOO_LARGE` |
+| `PDF_TOO_MANY_PAGES`, `PDF_ENCRYPTED`, `PDF_INVALID` (400) | el mismo nombre `CERTIFICATE_IMPORT_PDF_*` |
+| `INVALID_CONTRACT` (400), `ENCODED` (400), `EMPTY_DOCUMENT` (400), `CONFLICT` (409), `RESPONSE_TOO_LARGE` (504), `UNCERTAIN` (504), `PAGE_COUNT_MISMATCH` (502) | `CERTIFICATE_IMPORT_OCR_FAILED` |
+| `QUOTA` (429, sobre v1 válido) | `CERTIFICATE_IMPORT_OCR_QUOTA` |
+| Cualquier 429, 5xx o 504 **sin sobre v1 válido** (por ejemplo Cloud Run sin instancia libre con máximo 1) | `CERTIFICATE_IMPORT_OCR_UNAVAILABLE`, nunca `QUOTA` |
+
+Garantías limitadas: tras `CALLING` confirmado no hay segunda llamada a Vision; la incertidumbre y la respuesta `COMPLETE` perdida van a revisión manual. No hay exactly-once. Si un reintento de BullMQ encuentra el lease del ledger vigente (60 s), el proxy responde `CONFLICT` y la app ve `CERTIFICATE_IMPORT_OCR_FAILED`. Dependencias de despliegue: [infraestructura de preproducción](../guides/ocr-proxy-preprod-infra.md).
 
 ### certificate-import-institutional-requests
 

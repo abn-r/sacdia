@@ -21,7 +21,7 @@ OCR propone, el miembro confirma y Campo Local valida. La aprobacion aplica a la
 - Controlador admin: `AdminCertificateBulkImportsController`
 - Servicio workflow: `CertificateBulkImportsService`
 - Servicio aplicacion: `CertificateBulkImportApplicationService`
-- OCR seam: `CertificateOcrProvider` + `GoogleVisionCertificateOcrProvider` (cliente oficial, ADC).
+- OCR seam: `CertificateOcrProvider`, con dos proveedores elegidos por `OCR_MODE`: `GoogleVisionCertificateOcrProvider` (modo `direct`, cliente oficial con ADC local) y `CloudRunCertificateOcrProvider` (modo `remote`, HTTPS firmado con HMAC hacia el proxy `sacdia-ocr-proxy`). Estado: ambos aprobados en local; el proxy **no está desplegado**.
 
 ### Endpoints miembro
 
@@ -104,11 +104,11 @@ Tablas finales existentes:
 
 ## Reglas confirmadas el 2026-09-21
 
-La aprobación de una fila CLASS ya acredita el hecho histórico. La subida nueva pide una URL firmada, confirma los bytes y guarda la clave sellada. La lectura automática usa Google Cloud Vision con **Application Default Credentials (ADC)** sobre JPEG, PNG, WebP y PDF completos de **1 a 5 páginas**, con máximo binario de **10 MiB** por documento. `GOOGLE_VISION_API_KEY` ya no autentica este proveedor. El SDK oficial usa gRPC con bytes, no REST/base64, GCS ni una URL pública.
+La aprobación de una fila CLASS ya acredita el hecho histórico. La subida nueva pide una URL firmada, confirma los bytes y guarda la clave sellada. La lectura automática usa Google Cloud Vision con **Application Default Credentials (ADC)** sobre JPEG, PNG, WebP y PDF completos de **1 a 5 páginas**, con máximo binario de **10 MiB** por documento. `GOOGLE_VISION_API_KEY` ya no autentica este proveedor. El SDK oficial usa gRPC con bytes, no REST/base64, GCS ni una URL pública. ADC es el modo `direct`, solo para la Mac del desarrollador.
 
 La petición del miembro encola el trabajo en `certificate-import-ocr` (concurrencia 1, dos intentos); no comparte el worker de finanzas ni rankings. Aceptar la cola **no** significa que OCR terminó. Sin Redis la petición responde `CERTIFICATE_IMPORT_OCR_UNAVAILABLE`. ADC ausente/inválido, cuota, deadline o fallo de lectura se detectan en el worker; no se registra `OCR_PROCESSED` ante fallo o respuesta PDF incompleta. La app espera brevemente tras encolar y abre la revisión incluso cuando falla la lectura: el miembro puede agregar/corregir filas a mano si conserva evidencia confirmada válida. El OCR no verifica autenticidad, no aprueba ni acredita el certificado.
 
-En confirmación, el backend analiza el PDF real con `pdf-lib`: rechaza cifrado, corrupto/truncado, sin páginas o con más de cinco páginas antes de sellar/confirmar. Sella **el mismo Buffer validado** en una clave exclusiva por intento (`batches/{batchId}/sealed/{fileId}-{attemptUuid}.pdf`), no una copia posterior del staging mutable. Antes de OCR se vuelve a validar el PDF, incluidos comprobantes antiguos. La verificación de cierre/xref es mínima, no una certificación completa ISO ni un límite de CPU/descompresión del parser. La app informa el máximo de páginas sin duplicar el parser. [Operación, identidad y limitaciones](../guides/google-vision-certificate-ocr.md).
+En confirmación, el backend analiza el PDF real con `pdf-lib` dentro de un `worker_thread` descartable (un worker a la vez, con tope de descompresión): rechaza cifrado, corrupto/truncado, sin páginas o con más de cinco páginas antes de sellar/confirmar. Si no obtiene turno de validación, `confirm` responde HTTP 429 `CERTIFICATE_IMPORT_PDF_BUSY` y el archivo no queda confirmado. Sella **el mismo Buffer validado** en una clave exclusiva por intento (`batches/{batchId}/sealed/{fileId}-{attemptUuid}.pdf`), no una copia posterior del staging mutable. Antes de OCR se vuelve a validar el PDF, incluidos comprobantes antiguos. La verificación de cierre/xref es mínima, no una certificación completa ISO; la contención de memoria y descompresión (TaskR) está aprobada en local y no se midió en Render. La app informa el máximo de páginas sin duplicar el parser. [Operación, identidad y limitaciones](../guides/google-vision-certificate-ocr.md).
 
 El comprobante se abre con la descarga firmada, no con `file_url`. La bandeja institucional mantiene contrato, persistencia y panel exclusivo del superadministrador.
 
@@ -125,7 +125,15 @@ Tres vías distintas:
 
 ## Despliegue
 
-El orden es schema aditivo, backend con la cola apagada si no hay Redis, y después los clientes. ADC debe estar disponible para el worker; sin credenciales o Redis no hay lectura exitosa y el expediente válido puede completarse a mano. Usar una identidad dedicada por ambiente y privilegios mínimos; nunca subir ADC personal a Render. El código está implementado en worktrees aislados, **no desplegado**. Configuración Render y smoke OCR real siguen pendientes de autorización. Ver [runbook](../guides/google-vision-certificate-ocr.md). Ante una falla, se dejan de aceptar cargas y aprobaciones nuevas; la lectura y la auditoría se conservan. No se borran hechos ya acreditados ni se restauran índices viejos. `scripts/audit-certificate-imports.ts` solo informa y rechaza `--apply`. No usa `DATABASE_URL`.
+El orden es schema aditivo, backend con la cola apagada si no hay Redis, y después los clientes. Sin Redis o sin una vía de lectura disponible no hay lectura exitosa y el expediente válido puede completarse a mano. Nunca subir ADC personal a Render ni generar claves de cuenta de servicio o API keys: la organización bloquea las claves y el diseño es keyless.
+
+Estado del OCR automático (2026-10-07), distinguiendo local de desplegado:
+
+- **Aprobado en local** (`PASS_LOCAL_SLICE`): contrato HMAC v1, ledger Firestore y cuota (probado con emulador), contención PDF en Render, handler del proxy con Vision simulado y adaptador `remote` del backend.
+- **No desplegado**: no existen Cloud Run, Firestore, Secret Manager ni el modo `remote` en Render. Los servicios de Render están en plan Free (512 MB, 0,1 CPU). El entrypoint de producción del proxy sigue en implementación. El humo con Vision real no se ejecutó.
+- `OCR_MODE` elige el proveedor: `direct` (ADC en la Mac) o `remote` (proxy). Es obligatorio con `NODE_ENV=production`; un `remote` incompleto impide el arranque y no cae a ADC.
+
+Flujo `remote`: Render lee el comprobante sellado, valida y cuenta las páginas del PDF y envía el Buffer firmado al proxy; el proxy reserva hasta 400 páginas por día UTC y por entorno (compartidas entre usuarios), confirma `CALLING` en Firestore y hace una sola llamada a Vision. Una incertidumbre (crash, plazo, red, respuesta perdida) pasa a revisión manual sin segunda llamada; no hay exactly-once. El texto OCR nunca se guarda en el ledger. Ver [runbook](../guides/google-vision-certificate-ocr.md), [infraestructura de preproducción](../guides/ocr-proxy-preprod-infra.md) y [ADR 11](../api/ARCHITECTURE-DECISIONS.md). Ante una falla, se dejan de aceptar cargas y aprobaciones nuevas; la lectura y la auditoría se conservan. No se borran hechos ya acreditados ni se restauran índices viejos. `scripts/audit-certificate-imports.ts` solo informa y rechaza `--apply`. No usa `DATABASE_URL`.
 
 ### Estados de la bandeja institucional
 
@@ -157,14 +165,15 @@ Ya usados por el runtime, como `BadRequestException` con mensaje estable:
 - `CERTIFICATE_IMPORT_CLASS_NOT_INSTITUTIONAL`: la clase no es Guía Mayor Avanzado ni Instructor.
 - `CERTIFICATE_IMPORT_REQUEST_NOT_FOUND`
 - `CERTIFICATE_IMPORT_STATUS_INVALID`
-- `CERTIFICATE_IMPORT_OCR_UNAVAILABLE`: Redis ausente al encolar, o credenciales ADC/autorización no disponibles en el worker. Evidencia válida confirmada permite captura manual.
+- `CERTIFICATE_IMPORT_OCR_UNAVAILABLE`: Redis ausente al encolar, credenciales ADC/autorización no disponibles (`direct`), o proxy no disponible (`remote`): 401/403/503, redirect, plazo de 40 s, o cualquier 429/5xx/504 de plataforma sin sobre v1 válido. Evidencia válida confirmada permite captura manual. No es la cola de validación PDF de `confirm`.
 - `CERTIFICATE_IMPORT_OCR_UNSUPPORTED_TYPE`: el comprobante no es JPEG, PNG, WebP ni PDF.
-- `CERTIFICATE_IMPORT_OCR_QUOTA`: Vision rechazó la lectura por cuota.
+- `CERTIFICATE_IMPORT_OCR_QUOTA`: Vision rechazó la lectura por cuota, o el proxy agotó las 400 páginas diarias del entorno (solo con un sobre v1 `QUOTA` válido). Un 429 de plataforma sin sobre no es cuota.
 - `CERTIFICATE_IMPORT_OCR_FILE_TOO_LARGE`: el archivo supera 10 MiB, el tope binario del comprobante.
-- `CERTIFICATE_IMPORT_OCR_FAILED`: fallo/deadline, páginas faltantes/duplicadas/extra o con error, o ausencia de texto usable. El archivo sellado válido permanece.
+- `CERTIFICATE_IMPORT_OCR_FAILED`: fallo/deadline, páginas faltantes/duplicadas/extra o con error, ausencia de texto usable, ejecución incierta, conflicto de operación o lease vigente en el ledger (`remote`). Va a revisión manual sin repetir Vision. El archivo sellado válido permanece.
 - HTTP 400 `CERTIFICATE_IMPORT_PDF_TOO_MANY_PAGES`: dividir o extraer hasta cinco páginas y volver a subir.
 - HTTP 400 `CERTIFICATE_IMPORT_PDF_ENCRYPTED`: quitar contraseña/protección y volver a subir.
 - HTTP 400 `CERTIFICATE_IMPORT_PDF_INVALID`: volver a exportar el PDF y subirlo; nunca se muestran detalles internos del parser.
+- HTTP 429 `CERTIFICATE_IMPORT_PDF_BUSY`: hay otros archivos en validación. Reintentar el mismo `confirm` en unos segundos. No borrar el staging. Distinto de `CERTIFICATE_IMPORT_OCR_UNAVAILABLE`.
 
 La aprobación de `GM-01` es la confirmación de sustitución: reutiliza la fila existente, la pasa a `HISTORICAL_CERTIFICATE` / `INVESTIDO` y conserva el mismo `enrollment_id`. `investiture_date` es la fecha del certificado. `enrollment_date` de un alta nueva es la fecha técnica del registro, no el inicio del cursado. Un hecho final idéntico solo vincula el comprobante. Cada fila se decide sola. El lote sigue `SUBMITTED` mientras quede alguna fila sin decidir. Pasa a `APPROVED` cuando todas quedaron aprobadas y a `NEEDS_CORRECTION` cuando todas quedaron decididas y al menos una fue rechazada. `PARTIALLY_APPROVED` permanece en el enum y en el filtro de la bandeja para expedientes anteriores; una decisión nueva no lo asigna. Una fila institucional no se decide en esta bandeja.
 
