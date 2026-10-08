@@ -1,0 +1,20 @@
+{
+  "name": "sacdia-ocr-proxy",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Contrato HMAC, ledger local y handler OCR con adaptador Vision inyectable. Sin servicio remoto.",
+  "license": "UNLICENSED",
+  "type": "module",
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "scripts": {
+    "start": "node src/main.ts",
+    "test": "node --test --test-reporter=spec test/ocr-contract.spec.ts test/ocr-signature.spec.ts test/ocr-ledger.spec.ts test/ocr-admission.spec.ts test/firestore-emulator-ownership.spec.ts test/vision-text-reader.spec.ts test/ocr-handler.spec.ts test/runtime-config.spec.ts test/production-server.spec.ts",
+    "test:emulator": "node --test --test-reporter=spec --test-timeout=180000 test/firestore-ocr-ledger.integration.spec.ts"
+  },
+  "dependencies": {
+    "@google-cloud/firestore": "9.3.1",
+    "@google-cloud/vision": "6.1.1"
+  }
+}
