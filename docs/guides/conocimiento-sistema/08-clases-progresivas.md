@@ -267,10 +267,9 @@ inscribir al honor por otro endpoint. Flujo propio: siguiente ficha.
 | `CLASS_PREREQUISITE_NOT_MET` | Enroll explícito sin predecesor investido | Que el anual y el explícito sean iguales |
 | `CLASS_LEVEL_TOO_HIGH` | Salto de más de un nivel por año | “Puede saltar a Guía si tiene 16” |
 | `CLASS_MAX_*_ACTIVE` / cruce GM | Tope de una regular + una cruzada | Dos clases regulares AV/CQ a la vez |
-| `CLASS_PROGRESS_LOCKED` | En validación o estado terminal | Editar mientras se revisa la investidura |
+| `CLASS_PROGRESS_LOCKED` | `locked_for_validation` en true, o estado `INVESTIDO`/`EXPIRED` | Editar un expediente bloqueado o ya investido |
 | `CLASS_PROGRESS_YEAR_NOT_OPERATIONAL` | Enrollment de otro año | “Se corrige el histórico igual que el vigente” |
 | `INVESTITURE_DURATION_MIN_NOT_MET` / `EXPIRED` | Años eclesiásticos fuera de rango | Investidura el mismo día del alta si `min>0` |
-| `INVESTITURE_REQUIREMENTS_INCOMPLETE` | Elegibilidad BASIC+EXTRA incompleta | Enviar “casi listo” |
 | Rechazo | Motivo obligatorio; vuelve editable | Que el rechazo borre el progreso |
 
 Carga masiva OCR de certificados escribe sobre `enrollments` e historial; no

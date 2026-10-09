@@ -1,11 +1,13 @@
 # Validacion de Investiduras
 
-**Estado**: IMPLEMENTADO (pipeline de abajo, en `development`)
+**Estado**: la vía club → coordinación → campo (envío, aprobaciones de club, coordinación y Campo, `invest`, operaciones en bloque, aliases de `enrollments` y `ValidationModule` para clases) está **apagada en el código** de la fase 8: sus rutas responden HTTP 410 `INVESTITURE_LEGACY_PIPELINE_RETIRED` y el panel y la app borraron sus pantallas. **Nada está desplegado ni mergeado**, las migraciones no están aplicadas en Neon y el desbloqueo no se ejecutó en ningún entorno. Lo que queda de esa vía: lectura del historial, `expire-overdue` y el desbloqueo de bloqueos.
 
 > [!WARNING]
 > **Pendiente de merge (PR #448 de sacdia-backend).** La ventana del Campo, el cupo y la asignación de pastores, `investiture-authorizers` y las solicitudes `investiture-requests` descritas en esta nota están en la rama `feat/investiture-authorization-ocr`, no en `development`.
 
-> El pipeline descrito abajo sigue siendo el runtime. El acuerdo nuevo, todavía sin implementar en la operación, está en `docs/plans/2026-09-28-investidura-autorizacion.md`. El documento de ceremonia colectiva del 2026-09-21 quedó reemplazado. La ventana del Campo (`GET` y `PATCH /api/v1/local-fields/:localFieldId/investiture-windows/:ecclesiasticalYearId`) ya se puede leer y guardar. Sin fila, si octubre–diciembre intersecta el año, la respuesta trae ese recorte, `configured: false` y `operational: true`. Si no hay intersección y no hay una configuración válida dentro del año, `start_date` y `end_date` son `null`, `configured` es false y `operational` es false: no se abre el año completo y la lectura no inserta una fila. `operational` indica que existe un rango, no que el día local esté dentro. El cupo de pastores del distrito y su asignación (`/api/v1/investiture-pastor-quota`, `/api/v1/districts/:districtId/investiture-pastors`, `/api/v1/clubs/:clubId/investiture-authorizers`) ya se pueden leer y guardar. El cambio de cupo y las altas o reactivaciones se coordinan en la misma transacción, también si todavía no hay fila de cupo. El distrito de esa lectura sale de la iglesia del club. Esa configuración y esa asignación no pasan por las rutas `submit`, `club-approve`, `coordinator-approve`, `field-approve` ni `invest`, y no las apagan. La solicitud nueva (`POST /api/v1/club-sections/:sectionId/investiture-requests` y las rutas de personas, lectura y fecha) marca, quita y corrige la fecha dentro de la sección. Una clase de varios años conserva el enrollment de inicio. Una clase cruzada de Guía Mayor se presenta en la sección de esa clase, del mismo club. Mientras hay un pendiente, el progreso de ese enrollment no se escribe. Agregar a una solicitud anterior, cuando ya hay otra con pendientes, se rechaza y hay que volver a cargar el listado. La autorización (`GET /api/v1/investiture-requests` y `POST /api/v1/investiture-requests/:requestId/resolutions`) la hace el pastor del distrito de la iglesia o el Campo de esa solicitud. Vuelve a comprobar año, ventana y pastor dentro de la transacción, con el instante leído después de los candados. Pasa el enrollment a `INVESTIDO` sin el pipeline de abajo y deja una intención de `class.completed`. Esa intención se entrega una sola vez aunque después cierren el año o la ventana; esa entrega no vuelve a autorizar. El identificador de la cola no es la clave guardada. Si ese trabajo queda en `failed`, se reintenta el mismo id sin abrir otra fila. Después de confirmar la presentación, la intención del correo queda en esa transacción con una identidad propia de esa operación, y el envío se materializa después. Recuperar no cambia esa identidad ni reenvía a quien ya fue atendido. Encolar no es entregar. Si el acuse del proveedor se pierde y el envío sigue permitido, el reintento conserva el mismo contenido durante 24 horas y después queda incierto, sin reenviar solo. Antes de esa llamada se vuelven a comprobar destinatario, año y pendientes. Si ya no corresponde, o si solo queda autorizada una parte del contenido congelado, no se envía y no se cambia el cuerpo ni la clave. Ese cuerpo, su destino y su alcance salen de la misma instantánea con la que se armó el correo. La resolución confirmada avisa en la bandeja de la app con una clave única, sin el motivo humano. El recordatorio sale por correo a las 10:00 locales, se vuelve a comprobar al entregar y no abre una bandeja nueva en el panel. El cierre administrativo del año y el corte automático dejan cada pendiente de ese año en `CLOSED_YEAR`, sin el texto de falta de requisitos y sin copiar la solicitud al año siguiente. Repetirlos no cambia a quien ya estaba investido. El historial (`GET /api/v1/investiture-history` y `GET /api/v1/club-sections/:sectionId/investiture-history`) conserva clase y año. El anuario (`GET /api/v1/club-sections/:sectionId/investiture-yearbook`) lista la inscripción operativa en la sección de su tipo de clase, dentro del mismo club, para el director, el secretario o el secretario-tesorero. Una clase de Conquistadores de quien tiene membresía en Guías Mayores no aparece en el anuario de Guías Mayores. No inscribe solo ni cierra unidades o finanzas. El panel todavía no muestra esa pantalla. No apaga el pipeline de abajo. La app no tiene la pantalla de presentar. Este corte no está aprobado.
+> **Fase 8 implementada en código, sin desplegar (2026-10-09).** Ramas: backend `feat/investiture-legacy-shutdown` (sobre `f52e684`, PR #466), panel `feat/investiture-legacy-screens-removal` y app `feat/investiture-legacy-app-removal`. Los PRs están pendientes. Migraciones sin aplicar en Neon: `20261008120000_district_pastor_field_change` y `20261009120000_investiture_legacy_lock_release_action`, además de las anteriores de investidura. El desbloqueo de la sección «Fase 8 — apagado» no se corrió en ningún entorno.
+
+> El acuerdo vigente es la autorización por solicitud, en `docs/plans/2026-09-28-investidura-autorizacion.md`. Las secciones que describen el flujo multietapa (descripción de dominio, requisitos funcionales y decisiones de diseño) documentan la vía anterior tal como era antes del apagado. El documento de ceremonia colectiva del 2026-09-21 quedó reemplazado. La ventana del Campo (`GET` y `PATCH /api/v1/local-fields/:localFieldId/investiture-windows/:ecclesiasticalYearId`) ya se puede leer y guardar. Sin fila, si octubre–diciembre intersecta el año, la respuesta trae ese recorte, `configured: false` y `operational: true`. Si no hay intersección y no hay una configuración válida dentro del año, `start_date` y `end_date` son `null`, `configured` es false y `operational` es false: no se abre el año completo y la lectura no inserta una fila. `operational` indica que existe un rango, no que el día local esté dentro. El cupo de pastores del distrito y su asignación (`/api/v1/investiture-pastor-quota`, `/api/v1/districts/:districtId/investiture-pastors`, `/api/v1/clubs/:clubId/investiture-authorizers`) ya se pueden leer y guardar. El cambio de cupo y las altas o reactivaciones se coordinan en la misma transacción, también si todavía no hay fila de cupo. El distrito de esa lectura sale de la iglesia del club. Esa configuración y esa asignación nunca pasaron por las rutas `submit`, `club-approve`, `coordinator-approve`, `field-approve` ni `invest`, que hoy responden 410. La solicitud nueva (`POST /api/v1/club-sections/:sectionId/investiture-requests` y las rutas de personas, lectura y fecha) marca, quita y corrige la fecha dentro de la sección. Una clase de varios años conserva el enrollment de inicio. Una clase cruzada de Guía Mayor se presenta en la sección de esa clase, del mismo club. Mientras hay un pendiente, el progreso de ese enrollment no se escribe. Agregar a una solicitud anterior, cuando ya hay otra con pendientes, se rechaza y hay que volver a cargar el listado. La autorización (`GET /api/v1/investiture-requests` y `POST /api/v1/investiture-requests/:requestId/resolutions`) la hace el pastor del distrito de la iglesia o el Campo de esa solicitud. Vuelve a comprobar año, ventana y pastor dentro de la transacción, con el instante leído después de los candados. Pasa el enrollment a `INVESTIDO` sin el pipeline de abajo y deja una intención de `class.completed`. Esa intención se entrega una sola vez aunque después cierren el año o la ventana; esa entrega no vuelve a autorizar. El identificador de la cola no es la clave guardada. Si ese trabajo queda en `failed`, se reintenta el mismo id sin abrir otra fila. Después de confirmar la presentación, la intención del correo queda en esa transacción con una identidad propia de esa operación, y el envío se materializa después. Recuperar no cambia esa identidad ni reenvía a quien ya fue atendido. Encolar no es entregar. Si el acuse del proveedor se pierde y el envío sigue permitido, el reintento conserva el mismo contenido durante 24 horas y después queda incierto, sin reenviar solo. Antes de esa llamada se vuelven a comprobar destinatario, año y pendientes. Si ya no corresponde, o si solo queda autorizada una parte del contenido congelado, no se envía y no se cambia el cuerpo ni la clave. Ese cuerpo, su destino y su alcance salen de la misma instantánea con la que se armó el correo. La resolución confirmada avisa en la bandeja de la app con una clave única, sin el motivo humano. El recordatorio sale por correo a las 10:00 locales, se vuelve a comprobar al entregar y no abre una bandeja nueva en el panel. El cierre administrativo del año y el corte automático dejan cada pendiente de ese año en `CLOSED_YEAR`, sin el texto de falta de requisitos y sin copiar la solicitud al año siguiente. Repetirlos no cambia a quien ya estaba investido. El historial (`GET /api/v1/investiture-history` y `GET /api/v1/club-sections/:sectionId/investiture-history`) conserva clase y año. El anuario (`GET /api/v1/club-sections/:sectionId/investiture-yearbook`) lista la inscripción operativa en la sección de su tipo de clase, dentro del mismo club, para el director, el secretario o el secretario-tesorero. Una clase de Conquistadores de quien tiene membresía en Guías Mayores no aparece en el anuario de Guías Mayores. No inscribe solo ni cierra unidades o finanzas. El panel y la app todavía no tienen las pantallas de presentar y autorizar en `development`; están en los planes `docs/plans/2026-10-08-investidura-ui-1-panel.md` y `docs/plans/2026-10-08-investidura-ui-2-app.md`.
 
 ## Descripcion de dominio
 
@@ -15,33 +17,20 @@ El proceso tiene multiples etapas definidas por el canon: (1) el miembro complet
 
 La Decision 6 del canon establece que registrar y validar son actos distintos: la captura operativa (registrar progreso dia a dia) y la validacion institucional (aprobar y reconocer formalmente) tienen actores, momentos y reglas diferentes. Al entrar en validacion, el registro deja de ser editable — esto es un efecto de dominio critico que protege la integridad del proceso.
 
-El schema de base de datos y el runtime ya sostienen investiduras como superficie activa. El backend expone flujo multietapa, compatibilidad legacy, operaciones bulk y CRUD de configuracion; el admin tiene pantallas ruteadas para pendientes, pipeline y configuracion; la app tiene pantallas ruteadas para pendientes e historial, y expone el envio a validacion desde el detalle de clase cuando el enrollment esta 100% completado.
+El schema conserva las tablas y los enums del flujo multietapa (`investiture_validation_history`, `investiture_config`, los campos de investidura de `enrollments`). Desde la fase 8 el backend ya no lo expone: las rutas de envío, aprobación, investidura, rechazo, bloque, aliases y configuración responden 410, y el panel y la app borraron sus pantallas. Quedan la lectura del historial, `expire-overdue` y el desbloqueo de `locked_for_validation`.
 
 Los requisitos `BASIC` y `EXTRA` cuentan para investidura; `ADVANCED` activa el estado/badge avanzado de la clase por separado y no entra como requisito obligatorio del flujo.
 
 ## Que existe (verificado contra codigo)
 
+Verificado contra las ramas de la fase 8 (backend `feat/investiture-legacy-shutdown`, panel `feat/investiture-legacy-screens-removal`, app `feat/investiture-legacy-app-removal`). No está desplegado.
+
 ### Backend (InvestitureModule)
-- **InvestitureModule implementado** — `InvestitureController`, `InvestitureService`, DTOs de pipeline/config/bulk, registrado en `AppModule`
-- **Superficie canonica activa**:
-  - `POST /investiture/enrollments/:enrollmentId/submit`
-  - `POST /investiture/enrollments/:enrollmentId/club-approve`
-  - `POST /investiture/enrollments/:enrollmentId/coordinator-approve`
-  - `POST /investiture/enrollments/:enrollmentId/field-approve`
-  - `POST /investiture/enrollments/:enrollmentId/invest`
-  - `POST /investiture/enrollments/:enrollmentId/reject`
-  - `GET /investiture/pending`
-  - `GET /investiture/enrollments/:enrollmentId/history`
-  - `POST /investiture/enrollments/bulk-approve`
-  - `POST /investiture/enrollments/bulk-reject`
-  - `GET|POST|PATCH|DELETE /admin/investiture/config`
-  - `POST /admin/classes/enrollments/expire-overdue` — proceso admin/manual para vencer enrollments atrasados por duracion maxima de clase
-- **Compatibilidad legacy aun activa**:
-  - `POST /enrollments/:enrollmentId/submit-for-validation`
-  - `POST /enrollments/:enrollmentId/validate`
-  - `POST /enrollments/:enrollmentId/investiture`
-  - `GET /enrollments/:enrollmentId/investiture-history`
-- El `enrollments` model en Prisma tiene campos de investidura expuestos via los endpoints anteriores:
+- `InvestitureController`: `POST /admin/classes/enrollments/expire-overdue`, `POST /admin/investiture/legacy-locks/release`, `GET /investiture/enrollments/:enrollmentId/history` y su alias `GET /enrollments/:enrollmentId/investiture-history`.
+- `LegacyInvestitureRetiredController`: las 17 rutas retiradas, todas 410 `INVESTITURE_LEGACY_PIPELINE_RETIRED`, sin cuerpo ni pipes, con `@SkipPermissions` (solo el JWT global). Ver «Fase 8 — apagado».
+- `LegacyLockReleaseService` (con `ExactSuperAdminWritePolicy`): el desbloqueo.
+- `InvestitureService` conserva solo `getHistory` y `expireOverdueEnrollments`. Se borró el código muerto de la cadena y de la configuración.
+- Campos de `enrollments` que la vía anterior escribía y hoy solo se leen o se conservan:
   - `investiture_status` (investiture_status_enum)
   - `submitted_for_validation` (Boolean, default false)
   - `submitted_at` (DateTime?)
@@ -52,23 +41,12 @@ Los requisitos `BASIC` y `EXTRA` cuentan para investidura; `ADVANCED` activa el 
   - `locked_for_validation` (Boolean, default false)
 
 ### Admin (sacdia-admin)
-- **Implementado y ruteado** — paginas y navegacion activas en:
-  - `/dashboard/investiture` — pendientes con datos operables por defecto: miembro, clase, ano eclesiastico, club, seccion, remitente, cargo/rol del remitente, fecha de envio, estado y detalle con historial, modulos/secciones completadas, evidencias enviadas y validador por seccion
-    - La etiqueta visible de seccion es `{clubs.name} · {club_types.name}`. Las secciones no tienen nombre propio.
-  - `/dashboard/investiture/pipeline` — seguimiento operativo de investiduras del ano eclesiastico en curso, con solicitudes por etapa y registros ya tratados (`club-approve`, `coordinator-approve`, `field-approve`, `reject`, `invest`)
-  - `/dashboard/investiture/config` — CRUD de `investiture_config`
-  - Entry en sidebar bajo "Investiduras"
+- Borrado en la fase 8: `/dashboard/investiture`, `/dashboard/investiture/pipeline`, `/dashboard/investiture/config`, `/dashboard/enrollments` (la cola de inscripciones pendientes de investidura que llamaba `GET /investiture/pending`) y la pestaña «Módulos» (clases) de `/dashboard/clubs/validations`, con sus entradas de sidebar, catálogo de pantallas y textos. `/dashboard/clubs/validations` conserva honores.
+- La pantalla de autorización nueva está en el plan `docs/plans/2026-10-08-investidura-ui-1-panel.md`.
 
 ### App (sacdia-app)
-- **Implementado y expuesto en flujos principales**:
-  - `InvestiturePendingListView` esta ruteada en GoRouter (`/investiture/pending`) y permite aprobar/rechazar/marcar investido segun rol
-  - `InvestitureHistoryView` esta ruteada en GoRouter (`/investiture/enrollment/:enrollmentId/history`)
-  - `ClassDetailWithProgressView` muestra una tarjeta de investidura cuando la clase tiene 100% de requisitos validados:
-    - si el usuario activo es `director` o `counselor`, permite enviar el enrollment a validacion
-    - si el usuario no tiene ese rol, muestra la indicacion de que un consejero/director debe enviarlo
-    - si ya fue enviado/aprobado/investido, muestra el estado y acceso al historial
-  - `InvestitureSubmitView` existe en codigo para un listado de miembros, pero no tiene entrada de navegacion dedicada
-  - Data layer, providers y widgets de estado existen para submit, pending e history
+- Borrada en la fase 8 la feature de investidura vieja: pendientes, historial, envío, rutas, capa de datos, tarjeta del hub de coordinación y entrada del push en la lista permitida. El detalle de clase ya no muestra la tarjeta de envío a validación: una clase investida muestra la insignia «Investido».
+- Las pantallas de autorización nuevas están en el plan `docs/plans/2026-10-08-investidura-ui-2-app.md`.
 
 ### Base de datos (schema y runtime alineados)
 
@@ -94,12 +72,15 @@ Los requisitos `BASIC` y `EXTRA` cuentan para investidura; `ADVANCED` activa el 
 - IN_PROGRESS, SUBMITTED_FOR_VALIDATION, CLUB_APPROVED, COORDINATOR_APPROVED, FIELD_APPROVED, APPROVED, REJECTED, INVESTIDO, EXPIRED
 
 **Enum `investiture_action_enum`**:
-- SUBMITTED, CLUB_APPROVED, COORDINATOR_APPROVED, FIELD_APPROVED, APPROVED, REJECTED, REINVESTITURE_REQUESTED, INVESTIDO, EXPIRED
+- SUBMITTED, CLUB_APPROVED, COORDINATOR_APPROVED, FIELD_APPROVED, APPROVED, REJECTED, REINVESTITURE_REQUESTED, INVESTIDO, EXPIRED, LEGACY_LOCK_RELEASED
+- `LEGACY_LOCK_RELEASED` es de la fase 8 (migración `20261009120000_investiture_legacy_lock_release_action`, sin aplicar en Neon). Solo la escribe el desbloqueo y no cambia `investiture_status`.
 
 **Enum `evidence_validation_enum`**:
 - PENDING, VALIDATED, REJECTED
 
 ## Requisitos funcionales
+
+> Los requisitos 1 a 11 describen la vía anterior y ya no se cumplen por HTTP desde la fase 8 (sus rutas responden 410). Los 12 a 15 siguen vigentes (duración, vencimiento manual y requisitos que cuentan).
 
 1. Un consejero o director debe poder enviar un enrollment a validacion (cambiar status a SUBMITTED_FOR_VALIDATION)
 2. Al enviar a validacion, el enrollment debe bloquearse (locked_for_validation = true) y dejar de ser editable
@@ -119,7 +100,7 @@ Los requisitos `BASIC` y `EXTRA` cuentan para investidura; `ADVANCED` activa el 
 
 ## Decisiones de diseno
 
-- **Maquina de estados en enrollments**: El campo `investiture_status` define el pipeline vigente: IN_PROGRESS -> SUBMITTED_FOR_VALIDATION -> CLUB_APPROVED -> COORDINATOR_APPROVED -> FIELD_APPROVED -> INVESTIDO, con `REJECTED` como salida de correccion y `EXPIRED` como salida terminal por vencimiento de duracion maxima
+- **Maquina de estados en enrollments** (vía anterior, apagada por la fase 8; los estados grabados se conservan): El campo `investiture_status` define el pipeline vigente: IN_PROGRESS -> SUBMITTED_FOR_VALIDATION -> CLUB_APPROVED -> COORDINATOR_APPROVED -> FIELD_APPROVED -> INVESTIDO, con `REJECTED` como salida de correccion y `EXPIRED` como salida terminal por vencimiento de duracion maxima
 - **Bloqueo en validacion**: `locked_for_validation` impide edicion de progreso mientras esta en revision — proteccion de integridad de dominio
 - **Historia de validacion**: Tabla dedicada `investiture_validation_history` con audit trail completo de cada accion
 - **Configuracion por campo local**: `investiture_config` permite que cada campo local defina sus propias fechas de deadline y ceremonia por ano eclesiastico
@@ -137,84 +118,125 @@ Si el año del certificado es el de la solicitud `PENDING` de esa persona y clas
 
 La excepción de Guía Mayor (`GM-01`) sustituye la inscripción actual de esa clase y deja una sola fila. Guía Mayor Avanzado e Instructor no entran a este pipeline ni a la acreditación ordinaria de certificados.
 
-## Preparación de fase 8 — inventario, sin apagado
+## Fase 8 — apagado
 
-Fecha: 2026-10-06. Esta sección inventaría la vía club → coordinación → campo y fija su tratamiento. No apaga rutas, no borra pantallas y no modifica filas. No se consultó Neon ni producción: no hay conteos reales en este documento. Esos conteos, si se necesitan, exigen una lectura aparte y aprobada. La fase 8 no está ejecutada.
+Fecha del inventario: 2026-10-06. Ejecución en código: 2026-10-09. **Implementada en ramas locales; no desplegada, no mergeada, migraciones sin aplicar en Neon y desbloqueo no ejecutado en ningún entorno.** Esta sección conserva el inventario original (columnas «Antes») y registra qué quedó apagado. No se consultó Neon para esta ejecución; el único conteo real es el de producción de abajo.
 
-Un expediente de esta vía es un `enrollments` con `record_kind = OPERATIONAL` y un `investiture_status` de la cadena, más las filas ya grabadas en `investiture_validation_history`. El certificado histórico (`HISTORICAL_CERTIFICATE`) no es este expediente. Si hay una persona `PENDING` de esa clase, el mismo año rechaza el certificado y un año anterior retira a esa persona al acreditar. Las rutas de esta vía siguen activas.
+**Conteo real en producción (2026-10-08, aprobado por el usuario).** Lectura en una transacción `READ ONLY` sobre la rama `production` de Neon (endpoint `ep-dark-thunder-anpobd36`):
 
-### Rutas que siguen activas
+| Dato | Valor |
+| --- | --- |
+| Usuarios / clubes / años eclesiásticos | 0 / 0 / 0 |
+| Enrollments (total) | 0 |
+| Expedientes abiertos del flujo anterior (`SUBMITTED_FOR_VALIDATION`, `CLUB_APPROVED`, `COORDINATOR_APPROVED`, `FIELD_APPROVED`, `APPROVED`) | 0 |
+| Enrollments con `locked_for_validation` y sin `INVESTIDO` | 0 |
+| Última migración aplicada | `20260903180000_cross_type_active_enrollment_slots` |
 
-Todas responden bajo `/api/v1`. El controlador es `sacdia-backend/src/investiture/investiture.controller.ts`.
+Consecuencias:
+- En producción no hay expedientes del flujo anterior que tratar: el apagado no requiere conversión ni desbloqueo de datos.
+- Ninguna migración de investidura posterior al 2026-09-03 está aplicada en producción (no existen `record_kind`, `investiture_authorization_*`, `local_field_*`, `district_investiture_pastors`). El despliegue debe aplicar en orden todas las migraciones pendientes desde esa fecha, no solo las de esta entrega.
+- La rama `staging` está archivada.
 
-| Método y ruta | Escritura | Efecto actual |
+**Desbloqueo aprobado (2026-10-08) e implementado en código (2026-10-09), sin ejecutar.** Después del apagado, una operación explícita suelta `locked_for_validation` y deja el `investiture_status` como estaba. Con producción vacía hoy, aplica a datos que se creen antes del apagado o a otros entornos (por ejemplo `development`). Ver «Desbloqueo de la vía anterior» más abajo.
+
+Un expediente de esta vía es un `enrollments` con `record_kind = OPERATIONAL` y un `investiture_status` de la cadena, más las filas ya grabadas en `investiture_validation_history`. El certificado histórico (`HISTORICAL_CERTIFICATE`) no es este expediente. Si hay una persona `PENDING` de esa clase, el mismo año rechaza el certificado y un año anterior retira a esa persona al acreditar. Las rutas de esta vía responden 410.
+
+### Rutas retiradas (410) y rutas que siguen
+
+Todas responden bajo `/api/v1`. Las 17 retiradas están en `sacdia-backend/src/investiture/legacy-investiture-retired.controller.ts` y devuelven 410 `INVESTITURE_LEGACY_PIPELINE_RETIRED` sin leer cuerpo ni parámetros, con `@SkipPermissions` (solo el JWT global): ningún actor recibe un 403 ni un 400 que oculte el 410. Las que siguen están en `investiture.controller.ts`. El `message` sale del catálogo del idioma de la petición; una app o un panel viejos, que no mandan `Accept-Language`, lo reciben en español.
+
+| Método y ruta | Antes (inventario del 2026-10-06) | Ahora |
 | --- | --- | --- |
-| `POST /investiture/enrollments/:enrollmentId/submit` | Sí | `IN_PROGRESS` → `SUBMITTED_FOR_VALIDATION`. Deja `locked_for_validation`. |
-| `POST /enrollments/:enrollmentId/submit-for-validation` | Sí | El mismo `submitForValidation`. Alias. |
-| `POST /investiture/enrollments/:enrollmentId/club-approve` | Sí | `SUBMITTED_FOR_VALIDATION` → `CLUB_APPROVED`. |
-| `POST /investiture/enrollments/:enrollmentId/coordinator-approve` | Sí | `CLUB_APPROVED` → `COORDINATOR_APPROVED`. |
-| `POST /investiture/enrollments/:enrollmentId/field-approve` | Sí | `COORDINATOR_APPROVED` → `FIELD_APPROVED`. |
-| `POST /investiture/enrollments/:enrollmentId/invest` | Sí | Solo desde `FIELD_APPROVED` → `INVESTIDO`. Copia la fecha de `investiture_config` y emite `class.completed`. |
-| `POST /enrollments/:enrollmentId/investiture` | Sí | El mismo `markInvestido`. Alias. |
-| `POST /investiture/enrollments/:enrollmentId/reject` | Sí | Desde `SUBMITTED_FOR_VALIDATION`, `CLUB_APPROVED`, `COORDINATOR_APPROVED` o `FIELD_APPROVED` → `REJECTED`. Libera `locked_for_validation`. |
-| `POST /enrollments/:enrollmentId/validate` | Sí | Alias. Solo si está `SUBMITTED_FOR_VALIDATION`. `APPROVED` escribe `CLUB_APPROVED`. `REJECTED` escribe `REJECTED` y libera el bloqueo. |
-| `POST /investiture/enrollments/bulk-approve` | Sí | `coordinator-approve`, `field-approve` o `invest`. No incluye `club-approve`. `invest` también llega a `INVESTIDO`. |
-| `POST /investiture/enrollments/bulk-reject` | Sí | Los cuatro estados rechazables → `REJECTED`. |
-| `POST /admin/classes/enrollments/expire-overdue` | Sí | `IN_PROGRESS` o `REJECTED` que superan la duración → `EXPIRED`, con historia `EXPIRED`. |
-| `GET /investiture/pending` | No | Lista operativos activos en los cuatro estados de la cadena. Por defecto los cuatro; `status` filtra uno. |
-| `GET /investiture/enrollments/:enrollmentId/history` | No | Lee `investiture_validation_history`. |
-| `GET /enrollments/:enrollmentId/investiture-history` | No | La misma lectura. Alias. |
-| `GET /admin/investiture/config` y `GET /admin/investiture/config/:configId` | No | Leen la fecha que usa `markInvestido`. |
-| `POST`, `PATCH` y `DELETE /admin/investiture/config` | Sí | Crean, editan o dejan inactiva esa configuración. El `DELETE` no borra la fila: pone `active = false`. |
+| `POST /investiture/enrollments/:enrollmentId/submit` | `IN_PROGRESS` → `SUBMITTED_FOR_VALIDATION`. Dejaba `locked_for_validation`. | **410** |
+| `POST /enrollments/:enrollmentId/submit-for-validation` | Alias de `submit`. | **410** |
+| `POST /investiture/enrollments/:enrollmentId/club-approve` | `SUBMITTED_FOR_VALIDATION` → `CLUB_APPROVED`. | **410** |
+| `POST /investiture/enrollments/:enrollmentId/coordinator-approve` | `CLUB_APPROVED` → `COORDINATOR_APPROVED`. | **410** |
+| `POST /investiture/enrollments/:enrollmentId/field-approve` | `COORDINATOR_APPROVED` → `FIELD_APPROVED`. | **410** |
+| `POST /investiture/enrollments/:enrollmentId/invest` | Solo desde `FIELD_APPROVED` → `INVESTIDO`. Copiaba la fecha de `investiture_config` y emitía `class.completed`. | **410** |
+| `POST /enrollments/:enrollmentId/investiture` | Alias de `invest` (`markInvestido`). | **410** |
+| `POST /investiture/enrollments/:enrollmentId/reject` | Cualquiera de los cuatro estados de la cadena → `REJECTED`; liberaba el bloqueo. | **410** |
+| `POST /enrollments/:enrollmentId/validate` | Alias de aprobar o rechazar desde `SUBMITTED_FOR_VALIDATION`. | **410** |
+| `POST /investiture/enrollments/bulk-approve` | `coordinator-approve`, `field-approve` o `invest` en bloque. | **410** |
+| `POST /investiture/enrollments/bulk-reject` | Rechazo en bloque. | **410** |
+| `GET /investiture/pending` | Lista de los cuatro estados de la cadena. | **410** (la lectura también) |
+| `GET /admin/investiture/config` y `GET /admin/investiture/config/:configId` | Leían la fecha que usaba `markInvestido`. | **410** (la lectura también) |
+| `POST`, `PATCH` y `DELETE /admin/investiture/config` | Creaban, editaban o dejaban inactiva esa configuración. | **410** |
+| `POST /admin/classes/enrollments/expire-overdue` | `IN_PROGRESS` o `REJECTED` que superan la duración → `EXPIRED`, con historia `EXPIRED`. | Sigue. Omite al enrollment con una persona `PENDING`. |
+| `GET /investiture/enrollments/:enrollmentId/history` y `GET /enrollments/:enrollmentId/investiture-history` | Leían `investiture_validation_history`. | Siguen. Pueden devolver `LEGACY_LOCK_RELEASED`. |
+| `POST /admin/investiture/legacy-locks/release` | No existía. | Nuevo: el desbloqueo. |
 
-### Pantallas que siguen activas
+### Pantallas borradas
 
-| Superficie | Ruta | Qué hace hoy |
+| Superficie | Ruta | Estado |
 | --- | --- | --- |
-| Panel | `/dashboard/investiture` | Pendientes. Llama `GET /investiture/pending`. |
-| Panel | `/dashboard/investiture/pipeline` | Aprueba, rechaza e inviste por la cadena, también en bloque. |
-| Panel | `/dashboard/investiture/config` | Alta, edición y baja lógica de `investiture_config`. |
-| App | `/investiture/pending` | Lista pendientes y llama `POST /enrollments/:enrollmentId/validate`. |
-| App | `/investiture/enrollment/:enrollmentId/history` | Lee el historial alias. |
-| App | Detalle de clase completada | Llama `POST /enrollments/:enrollmentId/submit-for-validation`. |
-| App | `InvestitureSubmitView` | Existe en código y no tiene ruta propia. |
-| App | Proveedor `markInvestido` | Llama `POST /enrollments/:enrollmentId/investiture`. Ninguna vista lo invoca. |
+| Panel | `/dashboard/investiture` | Borrada. |
+| Panel | `/dashboard/investiture/pipeline` | Borrada. |
+| Panel | `/dashboard/investiture/config` | Borrada. |
+| Panel | `/dashboard/enrollments` | Borrada. Era la cola de inscripciones pendientes de investidura (`GET /investiture/pending`). |
+| Panel | `/dashboard/clubs/validations`, pestaña «Módulos» (clases) | Borrada. La pantalla conserva honores. |
+| App | `/investiture/pending` | Borrada. |
+| App | `/investiture/enrollment/:enrollmentId/history` | Borrada. |
+| App | Detalle de clase: tarjeta de envío a validación | Borrada; una clase investida muestra la insignia «Investido». |
+| App | `InvestitureSubmitView`, proveedor `markInvestido`, tarjeta del hub de coordinación, entrada del push | Borrados. |
+
+### Desbloqueo de la vía anterior
+
+`POST /api/v1/admin/investiture/legacy-locks/release`, `sacdia-backend/src/investiture/legacy-lock-release.service.ts`. **No se ejecutó en ningún entorno.**
+
+- **Quién:** solo `super-admin` exacto (`ExactSuperAdminWritePolicy`, 403 `SUPER_ADMIN_WRITE_REQUIRED` para otro actor). La ruta usa `@SkipPermissions`; la comprobación está en el servicio.
+- **Cuerpo:** `{ "dry_run"?: boolean }`, por defecto `true`. Con `dry_run: true` solo lista.
+- **Candidatos:** `enrollments` con `locked_for_validation` true, `record_kind` `OPERATIONAL` e `investiture_status` distinto de `INVESTIDO`. Sin filtro por `active` ni por el estado de la cadena: una fila inactiva o `REJECTED`/`EXPIRED` que conserve el bloqueo también se suelta.
+- **Omisión:** un enrollment con una persona `PENDING` en `investiture_authorization_people` no se toca y va a `skipped_pending`.
+- **Escritura** (`dry_run: false`): una transacción por enrollment, bajo el candado `investiture-authorization-enrollment:`. Pone `locked_for_validation` en false y deja una fila `LEGACY_LOCK_RELEASED` en `investiture_validation_history`, con el `super-admin` como `performed_by`. El `investiture_status` no cambia. Idempotente.
+- **Respuesta:** `{ "status": "success", "data": { "dry_run", "candidates": [], "skipped_pending": [], "released": [] } }`.
+- **Cómo correrlo, por entorno y solo con aprobación del usuario en cada uno:** (1) confirmar que la migración `20261009120000_investiture_legacy_lock_release_action` ya está aplicada en ese entorno; (2) correr `dry_run` y revisar `candidates` y `skipped_pending`; (3) solo entonces `dry_run: false`. Sin la migración, el `INSERT` del historial falla por el valor de enum.
+- **Reintento:** una fila omitida por `skipped_pending` sigue bloqueada. Vuelve a ser candidata solo cuando esa solicitud se resuelve (la persona deja de estar `PENDING`), así que hay que volver a correr el desbloqueo después, primero con `dry_run`. Es idempotente: las filas ya liberadas no aparecen otra vez.
+- **Después:** un expediente liberado se puede presentar por la solicitud nueva aunque su estado sea `CLUB_APPROVED` o similar (decisión B5, abajo). Uno que no se libera sigue bloqueado y la solicitud nueva responde `INVESTITURE_REQUEST_LEGACY_PIPELINE_ACTIVE`.
+
+### Decisión B5 (2026-10-08): X-1 mira solo `locked_for_validation`
+
+`enrollmentOnLegacyInvestiturePipeline` (`sacdia-backend/src/investiture-requests/investiture-request-lock.ts`) ya no mira el estado de la cadena: devuelve true solo si `locked_for_validation` es true. Presentar y agregar rechazan con `INVESTITURE_REQUEST_LEGACY_PIPELINE_ACTIVE` únicamente con el bloqueo. Al resolver, un enrollment bloqueado que no está en `FIELD_APPROVED` deja a la persona `REMOVED` con `LEGACY_PIPELINE_ACTIVE`; un `FIELD_APPROVED` con la persona `PENDING` lo escribe la resolución, aunque el bloqueo siga activo. Una fila sin bloqueo en `CLUB_APPROVED` ya no se bloquea sola.
+
+### Progreso de clase tras el apagado (decisión del orquestador, 2026-10-08)
+
+El progreso de clase (puntaje, evidencias, subida y borrado de archivos) se bloquea solo con `locked_for_validation` en true o con un `investiture_status` terminal (`INVESTIDO` o `EXPIRED`), en `assertClassProgressMutable` (`sacdia-backend/src/classes/class-progress-mutable.ts`). Los estados de la cadena anterior (`SUBMITTED_FOR_VALIDATION`, `CLUB_APPROVED`, `COORDINATOR_APPROVED`, `FIELD_APPROVED`, `APPROVED`) ya no bloquean por sí solos: un expediente liberado por el desbloqueo vuelve a admitir progreso, igual que ya puede presentarse (decisión B5). Mientras haya una persona `PENDING` sigue aplicando `INVESTITURE_REQUEST_PROGRESS_LOCKED`.
 
 ### Expedientes y tratamiento
 
-Hasta una aprobación posterior, el tratamiento es conservar el estado grabado.
+El apagado conserva el estado grabado de cada expediente. Lo único que se puede cambiar después es `locked_for_validation`, con el desbloqueo.
 
-| Estado o registro | Papel | Tratamiento mientras la vía siga activa, y también como condición previa a apagarla |
+| Estado o registro | Papel | Tratamiento tras el apagado |
 | --- | --- | --- |
 | `IN_PROGRESS` | Todavía no entra a la cadena. | No se convierte ni se envía solo. Sigue en el enrollment. |
-| `SUBMITTED_FOR_VALIDATION`, `CLUB_APPROVED`, `COORDINATOR_APPROVED`, `FIELD_APPROVED` | Expediente abierto del mismo año. `locked_for_validation` está en true. | No se resuelve en silencio, no se arrastra al año siguiente, no se copia a `investiture_authorization_requests` y no se libera el bloqueo. Un apagado posterior no puede cerrarlos ni duplicar su investidura por la vía nueva sin una decisión aparte. |
-| `REJECTED` | Salió de la cadena para corrección. El bloqueo de esa validación ya está en false. | No se reinicia en masa. |
+| `SUBMITTED_FOR_VALIDATION`, `CLUB_APPROVED`, `COORDINATOR_APPROVED`, `FIELD_APPROVED` | Expediente abierto del mismo año. `locked_for_validation` está en true. | No se resuelve en silencio, no se arrastra al año siguiente y no se copia a `investiture_authorization_requests`. Siguen bloqueados hasta que un `super-admin` corra el desbloqueo en ese entorno; la solicitud nueva responde `LEGACY_PIPELINE_ACTIVE` mientras el bloqueo esté en true. Ya liberados, se presentan por la solicitud nueva. |
+| `REJECTED` | Salió de la cadena para corrección. El bloqueo de esa validación ya está en false. | No se reinicia en masa. Si por algún motivo conserva el bloqueo, el desbloqueo lo suelta. |
 | `INVESTIDO` | Terminal de esta vía. | Se conserva. No se reescribe. |
 | `EXPIRED` | Terminal por duración. | Se conserva. No se reabre. |
-| `APPROVED` | Lo escribe `POST /validation/class/:id/review` con acción approved, y deja `locked_for_validation` en true. El alias `validate` no deja el enrollment en `APPROVED`: escribe `CLUB_APPROVED`. Cuenta como clase completada en el puntaje, el club, la asignación de consejero y el resumen de validación. | Esta preparación no convierte una fila `APPROVED`. El apagado tiene que tratarla junto con el resto de expedientes abiertos. |
-| `investiture_validation_history` | Auditoría ya grabada. | Solo se lee. No se borra. |
-| `investiture_config` | Fecha de la investidura formal vieja. | Sigue. Esta preparación no apaga su CRUD ni borra filas. |
+| `APPROVED` | Lo escribía `POST /validation/class/:id/review` con acción approved, y dejaba `locked_for_validation` en true. Esa ruta ya responde 410 para `class`. Sigue contando como clase completada (ver «Validación de clase»). | El apagado no convierte una fila `APPROVED`: se conserva y cuenta como completada. Si conserva el bloqueo, el desbloqueo la suelta. |
+| `investiture_validation_history` | Auditoría ya grabada. | Solo se lee. No se borra. El desbloqueo agrega filas `LEGACY_LOCK_RELEASED`. |
+| `investiture_config` | Fecha de la investidura formal vieja. | La tabla y sus filas se conservan. Su CRUD y sus lecturas responden 410. |
 | `HISTORICAL_CERTIFICATE` | Fuera de esta cadena. | Sigue la fase 0B. |
 
 No hay conversión ni reinicio masivo de expedientes del mismo año. La regla de no arrastre entre años pertenece a la solicitud nueva y no autoriza ese reinicio.
 
-`class.completed` de una investidura nueva sale de la autorización, después de confirmar `INVESTIDO`. `markInvestido` sigue pudiendo emitirlo mientras esta vía esté activa. Esta preparación no cambia ninguno de los dos.
+`class.completed` sale solo de la autorización nueva, después de confirmar `INVESTIDO`. `markInvestido` se borró: ya no hay otra ruta que lo emita.
 
 ### Validación de clase
 
-`ValidationModule` también mueve el enrollment de una clase. El honor no entra en esta fila: `entity_type` distinto de `class` sigue en el flujo de honores y esta entrega no lo cambia.
+`ValidationModule` también movía el enrollment de una clase. Desde la fase 8, `entity_type` `class` responde 410 `INVESTITURE_LEGACY_PIPELINE_RETIRED` en `POST /validation/submit` y en `POST /validation/:entityType/:entityId/review` (aprobar o rechazar, con o sin comentario), sin leer ni escribir. Esas rutas conservan `validation:submit` y `validation:review`, así que sin el permiso la respuesta es 403 antes que el 410. `GET /validation/pending` devuelve `classes: []`. `GET /validation/:entityType/:entityId/history` sigue leyendo. El honor no cambia: `entity_type` distinto de `class` sigue en el flujo de honores.
 
-| Método y ruta | Archivo | Qué escribe | Quién lo consume |
-| --- | --- | --- | --- |
-| `POST /api/v1/validation/submit` con `entity_type` `class` | `sacdia-backend/src/validation/validation.controller.ts:44` y `validation.service.ts` `submitClassForReview` (líneas 43–72) | De `IN_PROGRESS` a `SUBMITTED_FOR_VALIDATION`, `submitted_for_validation` true y `locked_for_validation` true. También escribe `investiture_validation_history`. | El miembro, con permiso `validation:submit`. |
-| `POST /api/v1/validation/class/:id/review` | `validation.controller.ts:78` y `reviewClass` (líneas 162–207) | Aprobar deja `APPROVED` y el bloqueo en true. Rechazar vuelve a `IN_PROGRESS`, suelta el bloqueo y limpia el envío. También actúa sobre un expediente que ya envió la vía club → coordinación → campo, si ese enrollment está `SUBMITTED_FOR_VALIDATION`. | Panel `/dashboard/clubs/validations`, pestaña de clase. `clubs-validations-client.tsx` línea 123 arma esa cola. `reviewValidation` en `sacdia-admin/src/lib/api/validation.ts:177` llama el POST. El diálogo está en `validation-review-dialog.tsx`. |
+| Método y ruta | Antes | Ahora |
+| --- | --- | --- |
+| `POST /api/v1/validation/submit` con `entity_type` `class` | De `IN_PROGRESS` a `SUBMITTED_FOR_VALIDATION` con `locked_for_validation` true, más historia. | 410 |
+| `POST /api/v1/validation/class/:id/review` | Aprobar dejaba `APPROVED` y el bloqueo en true; rechazar volvía a `IN_PROGRESS`. | 410 |
+| Panel `/dashboard/clubs/validations`, pestaña de clase | Armaba esa cola y llamaba el POST. | Pestaña borrada. |
 
-`APPROVED` cuenta como completada en:
+`APPROVED` sigue contando como clase completada (se conserva el estado grabado y hay pruebas que lo fijan) en:
 
-- `sacdia-backend/src/annual-folders/score-calculators/class-investiture-progress-score.ts:34`
-- `sacdia-backend/src/clubs/clubs.service.ts:1464`
-- `sacdia-backend/src/classes/class-counselor-assignments.service.ts:38`
-- `sacdia-backend/src/validation/validation.service.ts:413`
+- `sacdia-backend/src/annual-folders/score-calculators/class-investiture-progress-score.ts`
+- `sacdia-backend/src/validation/validation.service.ts` (resumen de elegibilidad de investidura)
+- `sacdia-backend/src/club-role-eligibility/club-role-eligibility.service.ts` (elegibilidad de Guía Mayor, base `APPROVED`)
+- `sacdia-backend/src/clubs/clubs.service.ts`: `investidos_year` del resumen del club cuenta `APPROVED` o `INVESTIDO` con `record_kind` `OPERATIONAL`. Antes solo contaba `APPROVED`, que la vía nueva nunca escribe.
 
 ### Conciliación de certificados
 
@@ -233,7 +255,7 @@ La aprobación de un certificado de clase mira `investiture_authorization_people
 
 ### Lecturas, cupo y avisos (2026-10-07)
 
-Pendiente de revisión independiente. No apaga el pipeline de arriba.
+Pendiente de revisión independiente.
 
 - La persona, en `GET /api/v1/investiture-history`, ve su pendiente con «En espera de autorización.», la investidura con fecha, clase y comentario, y cualquier rechazo como `REJECTED` con solo «Falta de requisitos para investidura». No ve el motivo humano, el texto largo ni quién rechazó. El cierre anual no usa ese texto. Las notas de certificado posterior e histórico se conservan.
 - La directiva ve el motivo humano y el texto largo. El autorizador ve el texto largo y no el motivo humano. Ambas lecturas traen el nombre de la persona, la clase, la sección y quien decidió. Un rechazo del sistema nombra «Sistema». `super-admin` lee una solicitud por id, con esa forma de directiva, y no presenta ni autoriza.
@@ -243,26 +265,29 @@ Pendiente de revisión independiente. No apaga el pipeline de arriba.
 - Un año eclesiástico con `active` en false no admite cambiar el porcentaje, aunque el día de hoy caiga dentro de sus fechas.
 - Cambiar la fecha guarda `date_changed_by_id` y `date_changed_at`. Quitar y cambiar la fecha usan el reloj inyectable.
 - `district_investiture_pastors.user_id` referencia `users` con `ON DELETE RESTRICT`. La migración no está aplicada en Neon.
+- Si el pastor cambia de Campo o queda sin Campo (por ejemplo al eliminar su cuenta), o si el distrito pasa a otro Campo, la asignación pasa a `active = false` y libera el cupo; hasta que el distrito tenga un pastor nuevo autorizan el `director-lf` y el `assistant-lf` del Campo. Lo hacen dos triggers de la migración `20261008120000_district_pastor_field_change`, que no está aplicada en Neon. Esto acota la regla de arriba: una cuenta eliminada que pierde su Campo ya no sigue ocupando cupo.
 - Enviar una sección, o aprobar o rechazar una evidencia, sobre un enrollment `INVESTIDO` o `EXPIRED` responde `CLASS_PROGRESS_LOCKED` y no escribe.
 - Crear un lote de certificados con `mark_as_ready: true` aplica la misma validación que marcar listo. Si la edad no alcanza, o el catálogo no existe o está inactivo (`CERTIFICATE_IMPORT_CATALOG_NOT_FOUND`), el ítem nace `NEEDS_REVIEW` con ese código en `rejection_reason` y no falla el lote; una fecha futura se trata igual aunque `mark_as_ready` sea false. Editar un ítem existente (`PATCH`) sigue respondiendo 400 con esos códigos.
 
-### Propuesta, sin decisión: expediente bloqueado después del apagado
+### Qué falta para cerrar la fase 8
 
-Hoy, si la vía nueva rechaza un expediente con `locked_for_validation` true, nadie suelta ese bloqueo y el enrollment sigue trabado hasta el fin de año. Con la exclusión de X-1 la vía nueva ya no lo acepta al presentar ni al agregar.
-
-Propuesta, pendiente de aprobación y no aplicada: una operación posterior y explícita soltaría `locked_for_validation` solo en filas que no están `INVESTIDO` y que no tienen una persona `PENDING` en la solicitud nueva. El `investiture_status` no cambiaría. Hasta esa aprobación, la fila sigue bloqueada y no se presenta por la vía nueva. Esta entrega no ejecuta ese desbloqueo ni apaga rutas.
+- Mergear los PRs de backend, panel y app (pendientes).
+- Aplicar en orden, en cada entorno, las migraciones pendientes de investidura desde `20260903180000`, incluidas `20261008120000_district_pastor_field_change` y `20261009120000_investiture_legacy_lock_release_action`. En producción no hay ninguna aplicada (ver el conteo de arriba).
+- Correr el desbloqueo por entorno, con `dry_run` primero y con aprobación del usuario en cada uno. Hoy no se corrió en ninguno.
+- Este documento no certifica el despliegue: describe lo implementado en las ramas.
 
 ## Gaps y pendientes
 
-- `InvestitureSubmitView` de listado existe en app pero no esta expuesta por una ruta dedicada; el envio visible principal se realiza desde el detalle de clase completada
-- No hay notificaciones asociadas a cambios de estado de validacion — Iteracion 2
-- No hay reportes de investiduras por periodo/campo local/club — Iteracion 2
-- No hay cron automatico de vencimiento; el proceso inicial es admin/manual
+- Las pantallas de presentar y autorizar (panel y app) siguen en los planes `docs/plans/2026-10-08-investidura-ui-*.md`.
+- No hay notificaciones asociadas a la vía anterior; la solicitud nueva avisa en la bandeja de la app.
+- No hay reportes de investiduras por periodo/campo local/club — Iteracion 2.
+- No hay cron automatico de vencimiento; el proceso es admin/manual (`expire-overdue`).
+- El tablero SLA de analytics sigue leyendo la historia ya grabada (`FIELD_APPROVED`); no se reescribió.
 
 ## Implementacion completada
 
-- ✅ Backend: modulo activo con pipeline multietapa, compat legacy, bulk ops y CRUD de configuracion
-- ✅ Admin: pendientes, pipeline y configuracion accesibles desde rutas del dashboard y sidebar
-- ✅ App: pending/history ruteados; envio visible desde detalle de clase completada para `director`/`counselor`
-- ✅ Bulk operations: hasta 200 enrollments por operacion; `club-approve` sigue siendo individual
+- ✅ Backend (rama `feat/investiture-legacy-shutdown`, sin desplegar): 17 rutas retiradas con 410, `ValidationModule` `class` con 410, historial y `expire-overdue` intactos, desbloqueo para `super-admin`, `investidos_year` contando `APPROVED` o `INVESTIDO`, X-1 solo por `locked_for_validation`
+- ✅ Admin (rama `feat/investiture-legacy-screens-removal`): pantallas de investidura vieja, `/dashboard/enrollments` y pestaña «Módulos» borradas
+- ✅ App (rama `feat/investiture-legacy-app-removal`): feature vieja, rutas, tarjeta del hub, entrada del push y tarjeta de estado de clase quitadas; insignia «Investido»
 - ✅ Vencimiento manual de enrollments atrasados por duracion maxima con modo `dry_run` y auditoria `EXPIRED`
+- ⏳ Sin mergear, sin desplegar, migraciones sin aplicar en Neon, desbloqueo sin ejecutar

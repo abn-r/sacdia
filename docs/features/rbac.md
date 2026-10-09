@@ -225,11 +225,17 @@ mostrar el botón de inscripción. Este estado visual usa el color
 amarillo/acento y escala la tarjeta al 80% respecto del aviso pendiente para
 comunicar revisión sin ocupar tanto espacio del dashboard.
 
-El panel administrativo usa `/dashboard/enrollments` como cola de validación
-de Campo Local. Consume `GET /club-enrollments/validation/queue` y permite
-aprobar/rechazar con `POST /club-enrollments/:enrollmentId/approve|reject`.
+El panel administrativo ya no tiene la ruta `/dashboard/enrollments`: la fase 8
+(implementada en código, sin desplegar) la borró. Esa ruta nunca consumió
+`GET /club-enrollments/validation/queue` ni `POST /club-enrollments/:enrollmentId/approve|reject`
+(ver `club-enrollments.md`: no hay pantalla para esa bandeja); listaba inscripciones
+de clase pendientes de investidura.
 Cuando Campo Local aprueba, la inscripción pasa a `active` y la app deja de
 mostrar la alerta de validación.
+
+### Permisos de la vía anterior de investidura (fase 8)
+
+`investiture:submit`, `investiture:validate`, `investiture:mark_invested` e `investiture_config:*` quedan **inertes** desde la fase 8 (implementada en código, sin desplegar): las rutas que los exigían responden 410 y ahora usan `@SkipPermissions`, y el panel borró las pantallas que los usaban. `investiture:read` sigue en uso: lo exigen las dos lecturas del historial. Se conservan en los seeds y en la base; no se borran ni se reasignan. `validation:submit` y `validation:review` siguen vigentes (`ValidationModule` los exige antes del 410 de `class`). `docs/features/auth/RBAC-ENFORCEMENT-MATRIX.md` no listaba estas rutas y no cambia.
 
 ### Seed de permisos
 

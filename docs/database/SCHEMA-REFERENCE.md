@@ -50,7 +50,8 @@ Referencia humana concisa del schema Prisma vigente.
 - El distrito de una autorización se lee por `clubs.church_id` → `churches.districlub_type_id`, no por `clubs.districlub_type_id`.
 - No sustituye el rol global `pastor` ni cierra el pipeline anterior.
 - `user_id` referencia `users.user_id` con `ON DELETE RESTRICT` y `ON UPDATE NO ACTION`. La relación Prisma se llama `district_investiture_pastor_user`. Si el usuario pierde el rol global `pastor`, la fila sigue `active` y sigue contando para el cupo. El listado la devuelve con `can_authorize` false y `role_missing` true. Si la cuenta está eliminada (`users.active = false`), la fila también sigue `active` y ocupando cupo, y el listado la devuelve con `can_authorize` false y `account_inactive` true. En ambos casos no entra en los autorizadores del club, no autoriza y no recibe correos.
-- Migraciones: `sacdia-backend/prisma/migrations/20261001143000_district_investiture_pastors/migration.sql` y `sacdia-backend/prisma/migrations/20261007180000_district_investiture_pastor_user_fk/migration.sql`. La llave foránea no está aplicada en Neon. En la base de prueba reconstruida no había huérfanos; la restricción es `district_investiture_pastors_user_id_fkey`.
+- Cambio de Campo (2026-10-08): dos triggers `AFTER UPDATE OF local_field_id` desactivan (`active = false`, `modified_at = now()`) las asignaciones activas cuyo pastor y distrito dejan de estar en el mismo Campo. `trg_users_drop_district_pastors_on_field_change` en `users` (función `drop_district_pastors_on_user_field_change`) cubre que el pastor cambie de Campo o quede sin Campo, como en la eliminación de cuenta; `trg_districts_drop_district_pastors_on_field_change` en `districts` (función `drop_district_pastors_on_district_field_change`) cubre que el distrito pase a otro Campo. Solo disparan si el valor cambia; no borran filas y liberan el cupo. La migración también desactiva una vez las filas activas que ya cruzaban Campos. Los triggers no están en `schema.prisma`. Reactivar sigue regido por `INVESTITURE_PASTOR_FIELD_MISMATCH`. Por eso una cuenta eliminada que pierde su Campo ya no sigue ocupando cupo.
+- Migraciones: `sacdia-backend/prisma/migrations/20261001143000_district_investiture_pastors/migration.sql`, `sacdia-backend/prisma/migrations/20261007180000_district_investiture_pastor_user_fk/migration.sql` y `sacdia-backend/prisma/migrations/20261008120000_district_pastor_field_change/migration.sql` (sin aplicar en Neon). La llave foránea no está aplicada en Neon. En la base de prueba reconstruida no había huérfanos; la restricción es `district_investiture_pastors_user_id_fkey`.
 
 ### `investiture_authorization_requests` e `investiture_authorization_people` (2026-10-01)
 
@@ -68,6 +69,13 @@ Referencia humana concisa del schema Prisma vigente.
 - `prisma migrate diff` contra el esquema no aplica esos índices ni esas llaves. No sustituye la migración.
 - No sustituye el pipeline anterior ni marca `locked_for_validation`.
 - Migración de las tablas: `sacdia-backend/prisma/migrations/20261001193000_investiture_authorization_requests/migration.sql`. Los tres textos van en `sacdia-backend/prisma/migrations/20261002183000_investiture_authorization_resolution/migration.sql`. Ninguna está aplicada a producción.
+
+### `investiture_validation_history` y `LEGACY_LOCK_RELEASED` (fase 8, 2026-10-09)
+
+- Valor nuevo de `investiture_action_enum`: `LEGACY_LOCK_RELEASED`. Migración `sacdia-backend/prisma/migrations/20261009120000_investiture_legacy_lock_release_action/migration.sql` (`ALTER TYPE ... ADD VALUE IF NOT EXISTS`). Implementada en la rama `feat/investiture-legacy-shutdown`, sin aplicar en ningún entorno de Neon.
+- Solo la escribe `POST /api/v1/admin/investiture/legacy-locks/release` cuando suelta `locked_for_validation`: una fila por enrollment liberado, con `performed_by` el `super-admin` que corrió la operación y un comentario fijo. El `investiture_status` del enrollment no cambia.
+- La tabla `investiture_validation_history` se conserva y solo se lee; `investiture_config` también se conserva, sin lecturas ni escrituras por HTTP (sus rutas responden 410).
+- Una app o un panel viejos que listen el historial reciben un valor de `action` que no conocen. La app vieja lo muestra como «Enviado para validación».
 
 ## Modelos añadidos a esta referencia (resincronización 2026-10-04)
 
@@ -723,7 +731,7 @@ Define el presupuesto de puntos por componente dentro de un eje anual:
 - `folder_template_status_enum` (`DRAFT`, `PUBLISHED`, `ARCHIVED`)
 - `honor_validation_status_enum`
 - `insurance_type_enum`
-- `investiture_action_enum`
+- `investiture_action_enum` (incluye `LEGACY_LOCK_RELEASED`, migración `20261009120000_investiture_legacy_lock_release_action`, sin aplicar en Neon; la escribe solo el desbloqueo de la vía anterior de la fase 8 y no cambia `investiture_status`)
 - `investiture_status_enum`
 - `origin_level_enum`
 - `user_master_honor_status_enum`

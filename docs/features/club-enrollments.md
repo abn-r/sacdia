@@ -43,7 +43,7 @@ Reglas verificadas en `club-enrollments.service.ts`:
 ### Admin
 
 - `src/lib/api/club-enrollments.ts` solo usa `GET …/enrollments/current`, desde la página de informes (`/dashboard/reports`).
-- No hay pantalla para la bandeja de validación (`/club-enrollments/validation/queue`, `approve`, `reject`). `/dashboard/enrollments` es otra cosa: lista inscripciones de clase pendientes de investidura (`/investiture/pending`).
+- No hay pantalla para la bandeja de validación (`/club-enrollments/validation/queue`, `approve`, `reject`). `/dashboard/enrollments` era otra cosa: listaba inscripciones de clase pendientes de investidura (`/investiture/pending`). La fase 8 la borró (implementada en código, sin desplegar).
 
 ### Base de datos
 

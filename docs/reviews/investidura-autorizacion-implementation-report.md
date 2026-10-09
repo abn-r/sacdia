@@ -66,7 +66,7 @@ Decisión de esta entrega, revisable: un `FIELD_APPROVED` que ya tiene una perso
 
 La vía anterior toma solo el candado `investiture-authorization-enrollment:` dentro de la transacción que escribe, en `pendingInvestitureAuthorization` (`investiture-request-lock.ts`, alrededor de la línea 137). Si hay un `PENDING`, la ruta individual responde 409 `INVESTITURE_REQUEST_PROGRESS_LOCKED`. Entran submit, los alias `submit-for-validation`, `validate` e `investiture`, club-approve, coordinator-approve, field-approve, invest, reject, y la validación de clase. En `bulk-approve` y `bulk-reject` solo el ítem con `PENDING` va a `failed` con ese código; el resto continúa. `expire-overdue` omite ese enrollment y no aborta el lote. El honor no cambia.
 
-`invest` escribe con `updateMany` condicionado a `FIELD_APPROVED`. Si la resolución ya dejó `INVESTIDO`, el conteo es 0, responde `INVESTITURE_CONCURRENT_UPDATE` y no emite. Si `invest` toma el candado primero y ve el `PENDING`, no escribe y no emite; después escribe la resolución.
+`invest` escribe con `updateMany` condicionado a `FIELD_APPROVED`. Si la resolución ya dejó `INVESTIDO`, el conteo es 0, responde `INVESTITURE_CONCURRENT_UPDATE` (código eliminado en la fase 8) y no emite. Si `invest` toma el candado primero y ve el `PENDING`, no escribe y no emite; después escribe la resolución.
 
 ### X-2. IA-06 por persona y clase
 
@@ -113,7 +113,7 @@ No hay migración nueva. No se aplicó nada a Neon ni a producción.
 | `INVESTITURE_REQUEST_LEGACY_PIPELINE_ACTIVE` | 409 | Presentar y agregar. El desajuste del `updateMany` en la resolución ya no usa este 409; ver «X-1 residual (H1–H5)». Textos en es, en, fr y pt-BR. |
 | `INVESTITURE_REQUEST_ALREADY_INVESTED` | 409 | Presentar y agregar cuando otro enrollment de la misma persona y clase ya está `INVESTIDO`. |
 | `INVESTITURE_REQUEST_PROGRESS_LOCKED` | 409 | Rutas individuales de la vía anterior y la validación de clase, si hay un `PENDING`. En bloque, el ítem va a `failed` con ese código. |
-| `INVESTITURE_CONCURRENT_UPDATE` | 409 | `invest` si el enrollment ya no está `FIELD_APPROVED` al escribir. |
+| `INVESTITURE_CONCURRENT_UPDATE` (código eliminado en la fase 8) | 409 | `invest` si el enrollment ya no está `FIELD_APPROVED` al escribir. |
 
 La resolución que retira por `ALREADY_INVESTED` o `LEGACY_PIPELINE_ACTIVE` no responde esos códigos: deja `REMOVED` y `resolution_code`. El honor no usa `INVESTITURE_REQUEST_PROGRESS_LOCKED`.
 
@@ -145,7 +145,7 @@ Fallos de esa corrida:
 - `keeps the other person invested when one enrollment no longer matches`: `AppConflictException` `INVESTITURE_REQUEST_LEGACY_PIPELINE_ACTIVE` en el `updateMany` de la resolución.
 - `locks the enrollment before the conditional submit write`: el candado apareció y la escritura condicional no (`writeAt` -1).
 - `does not submit when the enrollment left IN_PROGRESS under the lock`: se resolvió `SUBMITTED_FOR_VALIDATION`.
-- `does not reject when FIELD_APPROVED changed under the lock`: se resolvió en lugar de `INVESTITURE_CONCURRENT_UPDATE`.
+- `does not reject when FIELD_APPROVED changed under the lock`: se resolvió en lugar de `INVESTITURE_CONCURRENT_UPDATE` (código eliminado en la fase 8).
 - `does not send investiture mail while the switch is off and does not flush it later`: `dispatchReminders` devolvió 3.
 
 La corrida roja de PostgreSQL aislado fue:
@@ -156,7 +156,7 @@ Salida roja: exit 1. 3 failed, 38 skipped, 5 passed, 46 total. Fallaron `resolve
 
 ### H1. La vía anterior sobrescribe un INVESTIDO
 
-`submitForValidation` (`investiture.service.ts`, línea 250), `reject` (línea 433), `validateEnrollment` (líneas 1236 y 1261) y la validación de clase (`validation.service.ts`, líneas 68 y 201) escriben con `updateMany` condicionado al estado leído, dentro de la transacción que ya tomó `investiture-authorization-enrollment:`. Si `count` no es 1, responden 409 `INVESTITURE_CONCURRENT_UPDATE` y no escriben historial, evento ni notificación. El helper está en `claimEnrollmentStatus` (línea 2272) y `claimClassStatus` (línea 467).
+`submitForValidation` (`investiture.service.ts`, línea 250), `reject` (línea 433), `validateEnrollment` (líneas 1236 y 1261) y la validación de clase (`validation.service.ts`, líneas 68 y 201) escriben con `updateMany` condicionado al estado leído, dentro de la transacción que ya tomó `investiture-authorization-enrollment:`. Si `count` no es 1, responden 409 `INVESTITURE_CONCURRENT_UPDATE` (código eliminado en la fase 8) y no escriben historial, evento ni notificación. El helper está en `claimEnrollmentStatus` (línea 2272) y `claimClassStatus` (línea 467).
 
 En bloque, `bulk-approve` invest (línea 1494), el approve que no es invest (línea 1550) y `bulk-reject` (línea 1762) mandan solo ese ítem a `failed` con el mismo código. El historial se escribe solo para las filas con `count` 1. `expireEnrollment` (línea 2323) usa el mismo 409 si la fila ya no está en un estado vencible. `expire-overdue` ya limitaba el historial a las filas que sí quedaron `EXPIRED`; no se le agregó una lista `failed` porque esa ruta no la tiene. `transitionApprovalState` y `markInvestido` ya condicionaban la escritura y se dejaron así.
 
@@ -218,7 +218,7 @@ No hay migración nueva. No se aplicó nada a Neon ni a producción.
 
 | Cambio | Dónde |
 | --- | --- |
-| 409 `INVESTITURE_CONCURRENT_UPDATE` si la vía anterior escribe y el estado de origen ya no coincide. En bloque, solo ese ítem va a `failed`. | `docs/api/ENDPOINTS-LIVE-REFERENCE.md` y `docs/api/FRONTEND-INTEGRATION-GUIDE.md` |
+| 409 `INVESTITURE_CONCURRENT_UPDATE` (código eliminado en la fase 8) si la vía anterior escribe y el estado de origen ya no coincide. En bloque, solo ese ítem va a `failed`. | `docs/api/ENDPOINTS-LIVE-REFERENCE.md` y `docs/api/FRONTEND-INTEGRATION-GUIDE.md` |
 | Desajuste de la resolución: esa persona queda `REMOVED` con `ALREADY_INVESTED`, `LEGACY_PIPELINE_ACTIVE` o `CONCURRENT_STATUS`. El resto se confirma. El `INVESTIDO` deja `locked_for_validation` en false. | Los mismos dos documentos |
 | `INVESTITURE_EMAIL_ENABLED` apagado por defecto. `ADMIN_PANEL_URL` solo si está encendido. Intenciones de presentación y recordatorios `skipped` con `investiture_email_disabled`, sin reenvío al encender. La bandeja no depende del interruptor. | `.env.example`, `render.yaml`, `docs/runbooks/resend-setup.md` y los dos documentos de API |
 

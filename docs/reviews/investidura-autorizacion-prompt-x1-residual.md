@@ -25,7 +25,7 @@ Trabajás en `/Users/abner/Documents/development/sacdia`, rama `development` de 
 
 **Corrección:** en **cada** escritura de la vía anterior que cambie `investiture_status` o `locked_for_validation`, el estado de origen se condiciona dentro de la transacción que ya toma el candado: `updateMany` con el estado esperado y verificación de `count`, o relectura bajo candado. Aplica a submit, sus alias, club-approve, coordinator-approve, field-approve, reject, validate, las operaciones en bloque, `expire-overdue`/`expireEnrollment` y la validación de clase (submit y review). Si el estado no coincide:
 - no se escribe historial, no se emite evento y no se envía notificación;
-- la respuesta es un 409 explícito (reutilizá `INVESTITURE_CONCURRENT_UPDATE` o justificá un código nuevo);
+- la respuesta es un 409 explícito (reutilizá `INVESTITURE_CONCURRENT_UPDATE` (código eliminado en la fase 8) o justificá un código nuevo);
 - en bloque, solo ese ítem va a `failed`.
 
 **Aceptación:**

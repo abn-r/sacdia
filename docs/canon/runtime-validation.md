@@ -78,9 +78,9 @@ Los handlers de `validation/` usan exclusivamente `validation:*`. Si en el futur
 
 | Path | Método | Handler | Permiso |
 |------|--------|---------|---------|
-| `/validation/submit` | POST | `submitForReview` | `validation:submit` |
-| `/validation/review` | POST/PATCH | `review` | `validation:review` |
-| `/validation/pending` | GET | `getPendingReviews` | `validation:read` |
+| `/validation/submit` | POST | `submitForReview` | `validation:submit` (desde la fase 8, `entity_type` `class` responde 410 `INVESTITURE_LEGACY_PIPELINE_RETIRED`; honores sin cambio) |
+| `/validation/review` | POST/PATCH | `review` | `validation:review` (desde la fase 8, `class` responde 410; el 403 por falta de permiso va antes) |
+| `/validation/pending` | GET | `getPendingReviews` | `validation:read` (desde la fase 8, `classes` siempre `[]`) |
 | `/validation/history` | GET | `getValidationHistory` | `validation:read` |
 | `/validation/eligibility` | GET | `checkEligibility` | `validation:read` |
 
