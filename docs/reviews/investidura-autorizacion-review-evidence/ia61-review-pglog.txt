@@ -1,0 +1,43 @@
+2026-10-07 16:16:26.106 CST [95397] ERROR:  duplicate key value violates unique constraint "uq_investiture_message_dispatch"
+2026-10-07 16:16:26.106 CST [95397] DETAIL:  Key (kind, execution_key, recipient_user_id, role, scope_key)=(REMINDER, 2026-10-05, aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa, pastor, field:1) already exists.
+2026-10-07 16:16:26.106 CST [95397] STATEMENT:  INSERT INTO "public"."investiture_message_dispatches" ("kind","execution_key","recipient_user_id","role","scope_key","status","attempts","payload","created_at","modified_at") VALUES (CAST($1::text AS "public"."investiture_message_kind"),$2,$3,$4,$5,CAST($6::text AS "public"."investiture_message_status"),$7,$8,$9,$10) RETURNING "public"."investiture_message_dispatches"."dispatch_id", "public"."investiture_message_dispatches"."kind"::text, "public"."investiture_message_dispatches"."execution_key", "public"."investiture_message_dispatches"."recipient_user_id", "public"."investiture_message_dispatches"."role", "public"."investiture_message_dispatches"."scope_key", "public"."investiture_message_dispatches"."status"::text, "public"."investiture_message_dispatches"."attempts", "public"."investiture_message_dispatches"."payload", "public"."investiture_message_dispatches"."last_error", "public"."investiture_message_dispatches"."lease_until", "public"."investiture_message_dispatches"."claim_token", "public"."investiture_message_dispatches"."created_at", "public"."investiture_message_dispatches"."modified_at", "public"."investiture_message_dispatches"."sent_at"
+2026-10-07 16:16:26.928 CST [95453] WARNING:  there is no transaction in progress
+2026-10-07 16:16:26.989 CST [95456] WARNING:  there is no transaction in progress
+2026-10-07 16:16:27.087 CST [95459] WARNING:  there is no transaction in progress
+2026-10-07 16:16:27.185 CST [95466] WARNING:  there is no transaction in progress
+2026-10-07 16:16:27.243 CST [95469] WARNING:  there is no transaction in progress
+2026-10-07 16:16:27.300 CST [95472] WARNING:  there is no transaction in progress
+2026-10-07 16:16:27.393 CST [95476] WARNING:  there is no transaction in progress
+2026-10-07 16:16:27.450 CST [95479] WARNING:  there is no transaction in progress
+2026-10-07 16:16:34.831 CST [95637] ERROR:  duplicate key value violates unique constraint "uniq_enrollments_active_user_year_regular"
+2026-10-07 16:16:34.831 CST [95637] DETAIL:  Key (user_id, ecclesiastical_year_id)=(4f951c66-a30b-483c-89f0-e78cce26466f, 2) already exists.
+2026-10-07 16:16:34.831 CST [95637] STATEMENT:  INSERT INTO enrollments (user_id, class_id, ecclesiastical_year_id)
+	           VALUES ($1, $2, $3)
+2026-10-07 16:16:34.868 CST [95641] ERROR:  duplicate key value violates unique constraint "uniq_enrollments_active_user_year_regular"
+2026-10-07 16:16:34.868 CST [95641] DETAIL:  Key (user_id, ecclesiastical_year_id)=(6709950d-1607-4f0e-8bdc-33f180c2723b, 2) already exists.
+2026-10-07 16:16:34.868 CST [95641] STATEMENT:  INSERT INTO enrollments (user_id, class_id, ecclesiastical_year_id)
+	           VALUES ($1, $2, $3)
+2026-10-07 16:16:34.878 CST [95643] ERROR:  new row for relation "enrollments" violates check constraint "enrollments_historical_certificate_shape"
+2026-10-07 16:16:34.878 CST [95643] DETAIL:  Failing row contains (8, 54833c59-cc61-4517-a8d4-3ee9ddaf4770, 10, 2, 2026-10-07 16:16:34.876238-06, IN_PROGRESS, f, null, null, null, null, null, f, t, f, HISTORICAL_CERTIFICATE, t, 2026-10-07 16:16:34.876238-06, 2026-10-07 16:16:34.876238-06, 2026-10-07 16:16:34.876238-06).
+2026-10-07 16:16:34.878 CST [95643] STATEMENT:  INSERT INTO enrollments (
+	             user_id, class_id, ecclesiastical_year_id, record_kind,
+	             investiture_status, active, locked_for_validation
+	           ) VALUES ($1, $2, $3, 'HISTORICAL_CERTIFICATE', 'IN_PROGRESS', true, true)
+2026-10-07 16:16:34.889 CST [95645] ERROR:  ENROLLMENT_GM_SINGLE_ROW
+2026-10-07 16:16:34.889 CST [95645] CONTEXT:  PL/pgSQL function enforce_single_guide_major_enrollment() line 22 at RAISE
+2026-10-07 16:16:34.889 CST [95645] STATEMENT:  INSERT INTO enrollments (user_id, class_id, ecclesiastical_year_id)
+	           VALUES ($1, $2, $3)
+2026-10-07 16:16:34.901 CST [95647] ERROR:  ENROLLMENT_GM_SINGLE_ROW
+2026-10-07 16:16:34.901 CST [95647] CONTEXT:  PL/pgSQL function enforce_single_guide_major_enrollment() line 22 at RAISE
+2026-10-07 16:16:34.901 CST [95647] STATEMENT:  INSERT INTO enrollments (user_id, class_id, ecclesiastical_year_id)
+	           VALUES ($1, $2, $3)
+2026-10-07 16:16:34.908 CST [95649] ERROR:  conflicting key value violates exclusion constraint "ecclesiastical_years_no_overlap"
+2026-10-07 16:16:34.908 CST [95649] DETAIL:  Key (daterange(start_date, end_date, '[]'::text))=([1990-06-01,1991-06-01)) conflicts with existing key (daterange(start_date, end_date, '[]'::text))=([1990-01-01,1991-01-01)).
+2026-10-07 16:16:34.908 CST [95649] STATEMENT:  INSERT INTO ecclesiastical_years (start_date, end_date, active)
+	         VALUES ('1990-06-01', '1991-05-31', false)
+2026-10-07 16:16:34.920 CST [95651] ERROR:  duplicate key value violates unique constraint "uniq_institutional_certificate_request_open"
+2026-10-07 16:16:34.920 CST [95651] DETAIL:  Key (user_id, class_id, file_id, completed_at)=(66e4595d-dca9-4342-9165-017fb3e174f4, 23, f1593ad2-900b-4599-9088-7f0c77b73e1d, 2008-07-07) already exists.
+2026-10-07 16:16:34.920 CST [95651] STATEMENT:  INSERT INTO institutional_certificate_requests (
+	             user_id, class_id, file_id, batch_id, completed_at
+	           ) VALUES ($1, $2, $3, $4, DATE '2008-07-07')
+2026-10-07 16:16:35.808 CST [95658] WARNING:  there is no transaction in progress

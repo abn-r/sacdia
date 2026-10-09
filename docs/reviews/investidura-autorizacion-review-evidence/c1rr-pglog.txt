@@ -1,0 +1,87 @@
+2026-10-07 15:04:01.670 CST [52533] LOG:  starting PostgreSQL 18.3 (Homebrew) on aarch64-apple-darwin25.2.0, compiled by Apple clang version 17.0.0 (clang-1700.6.3.2), 64-bit
+2026-10-07 15:04:01.670 CST [52533] LOG:  listening on IPv4 address "127.0.0.1", port 55447
+2026-10-07 15:04:01.671 CST [52533] LOG:  listening on Unix socket "/private/tmp/c1rr-pg/.s.PGSQL.55447"
+2026-10-07 15:04:01.680 CST [52542] LOG:  database system was shut down at 2026-10-07 15:04:01 CST
+2026-10-07 15:04:01.682 CST [52533] LOG:  database system is ready to accept connections
+2026-10-07 15:04:01.993 CST [52643] WARNING:  c1rr-control-marker
+2026-10-07 15:04:01.993 CST [52643] CONTEXT:  PL/pgSQL function inline_code_block line 1 at RAISE
+2026-10-07 15:05:25.443 CST [54672] ERROR:  duplicate key value violates unique constraint "uq_investiture_message_dispatch"
+2026-10-07 15:05:25.443 CST [54672] DETAIL:  Key (kind, execution_key, recipient_user_id, role, scope_key)=(REMINDER, 2026-10-05, aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa, pastor, field:1) already exists.
+2026-10-07 15:05:25.443 CST [54672] STATEMENT:  INSERT INTO "public"."investiture_message_dispatches" ("kind","execution_key","recipient_user_id","role","scope_key","status","attempts","payload","created_at","modified_at") VALUES (CAST($1::text AS "public"."investiture_message_kind"),$2,$3,$4,$5,CAST($6::text AS "public"."investiture_message_status"),$7,$8,$9,$10) RETURNING "public"."investiture_message_dispatches"."dispatch_id", "public"."investiture_message_dispatches"."kind"::text, "public"."investiture_message_dispatches"."execution_key", "public"."investiture_message_dispatches"."recipient_user_id", "public"."investiture_message_dispatches"."role", "public"."investiture_message_dispatches"."scope_key", "public"."investiture_message_dispatches"."status"::text, "public"."investiture_message_dispatches"."attempts", "public"."investiture_message_dispatches"."payload", "public"."investiture_message_dispatches"."last_error", "public"."investiture_message_dispatches"."lease_until", "public"."investiture_message_dispatches"."claim_token", "public"."investiture_message_dispatches"."created_at", "public"."investiture_message_dispatches"."modified_at", "public"."investiture_message_dispatches"."sent_at"
+2026-10-07 15:05:26.251 CST [54725] WARNING:  there is no transaction in progress
+2026-10-07 15:05:26.308 CST [54728] WARNING:  there is no transaction in progress
+2026-10-07 15:05:26.397 CST [54731] WARNING:  there is no transaction in progress
+2026-10-07 15:05:26.487 CST [54735] WARNING:  there is no transaction in progress
+2026-10-07 15:05:26.545 CST [54738] WARNING:  there is no transaction in progress
+2026-10-07 15:05:26.602 CST [54741] WARNING:  there is no transaction in progress
+2026-10-07 15:05:26.689 CST [54744] WARNING:  there is no transaction in progress
+2026-10-07 15:05:26.747 CST [54747] WARNING:  there is no transaction in progress
+2026-10-07 15:05:34.138 CST [54915] ERROR:  duplicate key value violates unique constraint "uniq_enrollments_active_user_year_regular"
+2026-10-07 15:05:34.138 CST [54915] DETAIL:  Key (user_id, ecclesiastical_year_id)=(bbcd85c3-f958-4476-939a-eb03efde6463, 2) already exists.
+2026-10-07 15:05:34.138 CST [54915] STATEMENT:  INSERT INTO enrollments (user_id, class_id, ecclesiastical_year_id)
+	           VALUES ($1, $2, $3)
+2026-10-07 15:05:34.176 CST [54919] ERROR:  duplicate key value violates unique constraint "uniq_enrollments_active_user_year_regular"
+2026-10-07 15:05:34.176 CST [54919] DETAIL:  Key (user_id, ecclesiastical_year_id)=(4da2694c-af6c-4b04-a62d-72fb59d96975, 2) already exists.
+2026-10-07 15:05:34.176 CST [54919] STATEMENT:  INSERT INTO enrollments (user_id, class_id, ecclesiastical_year_id)
+	           VALUES ($1, $2, $3)
+2026-10-07 15:05:34.186 CST [54921] ERROR:  new row for relation "enrollments" violates check constraint "enrollments_historical_certificate_shape"
+2026-10-07 15:05:34.186 CST [54921] DETAIL:  Failing row contains (8, c57cd794-bc74-4d9f-bc15-3736b722eb3b, 10, 2, 2026-10-07 15:05:34.184368-06, IN_PROGRESS, f, null, null, null, null, null, f, t, f, HISTORICAL_CERTIFICATE, t, 2026-10-07 15:05:34.184368-06, 2026-10-07 15:05:34.184368-06, 2026-10-07 15:05:34.184368-06).
+2026-10-07 15:05:34.186 CST [54921] STATEMENT:  INSERT INTO enrollments (
+	             user_id, class_id, ecclesiastical_year_id, record_kind,
+	             investiture_status, active, locked_for_validation
+	           ) VALUES ($1, $2, $3, 'HISTORICAL_CERTIFICATE', 'IN_PROGRESS', true, true)
+2026-10-07 15:05:34.197 CST [54923] ERROR:  ENROLLMENT_GM_SINGLE_ROW
+2026-10-07 15:05:34.197 CST [54923] CONTEXT:  PL/pgSQL function enforce_single_guide_major_enrollment() line 22 at RAISE
+2026-10-07 15:05:34.197 CST [54923] STATEMENT:  INSERT INTO enrollments (user_id, class_id, ecclesiastical_year_id)
+	           VALUES ($1, $2, $3)
+2026-10-07 15:05:34.209 CST [54925] ERROR:  ENROLLMENT_GM_SINGLE_ROW
+2026-10-07 15:05:34.209 CST [54925] CONTEXT:  PL/pgSQL function enforce_single_guide_major_enrollment() line 22 at RAISE
+2026-10-07 15:05:34.209 CST [54925] STATEMENT:  INSERT INTO enrollments (user_id, class_id, ecclesiastical_year_id)
+	           VALUES ($1, $2, $3)
+2026-10-07 15:05:34.216 CST [54927] ERROR:  conflicting key value violates exclusion constraint "ecclesiastical_years_no_overlap"
+2026-10-07 15:05:34.216 CST [54927] DETAIL:  Key (daterange(start_date, end_date, '[]'::text))=([1990-06-01,1991-06-01)) conflicts with existing key (daterange(start_date, end_date, '[]'::text))=([1990-01-01,1991-01-01)).
+2026-10-07 15:05:34.216 CST [54927] STATEMENT:  INSERT INTO ecclesiastical_years (start_date, end_date, active)
+	         VALUES ('1990-06-01', '1991-05-31', false)
+2026-10-07 15:05:34.227 CST [54929] ERROR:  duplicate key value violates unique constraint "uniq_institutional_certificate_request_open"
+2026-10-07 15:05:34.227 CST [54929] DETAIL:  Key (user_id, class_id, file_id, completed_at)=(0ee17624-d68e-4d59-b21f-068ef6e2a347, 23, c0293a01-f676-4a15-8995-df30e367d65a, 2008-07-07) already exists.
+2026-10-07 15:05:34.227 CST [54929] STATEMENT:  INSERT INTO institutional_certificate_requests (
+	             user_id, class_id, file_id, batch_id, completed_at
+	           ) VALUES ($1, $2, $3, $4, DATE '2008-07-07')
+2026-10-07 15:05:35.129 CST [54936] WARNING:  there is no transaction in progress
+2026-10-07 15:05:56.313 CST [55089] ERROR:  duplicate key value violates unique constraint "uq_investiture_message_dispatch"
+2026-10-07 15:05:56.313 CST [55089] DETAIL:  Key (kind, execution_key, recipient_user_id, role, scope_key)=(REMINDER, 2026-10-05, aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa, pastor, field:1) already exists.
+2026-10-07 15:05:56.313 CST [55089] STATEMENT:  INSERT INTO "public"."investiture_message_dispatches" ("kind","execution_key","recipient_user_id","role","scope_key","status","attempts","payload","created_at","modified_at") VALUES (CAST($1::text AS "public"."investiture_message_kind"),$2,$3,$4,$5,CAST($6::text AS "public"."investiture_message_status"),$7,$8,$9,$10) RETURNING "public"."investiture_message_dispatches"."dispatch_id", "public"."investiture_message_dispatches"."kind"::text, "public"."investiture_message_dispatches"."execution_key", "public"."investiture_message_dispatches"."recipient_user_id", "public"."investiture_message_dispatches"."role", "public"."investiture_message_dispatches"."scope_key", "public"."investiture_message_dispatches"."status"::text, "public"."investiture_message_dispatches"."attempts", "public"."investiture_message_dispatches"."payload", "public"."investiture_message_dispatches"."last_error", "public"."investiture_message_dispatches"."lease_until", "public"."investiture_message_dispatches"."claim_token", "public"."investiture_message_dispatches"."created_at", "public"."investiture_message_dispatches"."modified_at", "public"."investiture_message_dispatches"."sent_at"
+2026-10-07 15:05:57.089 CST [55149] WARNING:  there is no transaction in progress
+2026-10-07 15:05:57.148 CST [55152] WARNING:  there is no transaction in progress
+2026-10-07 15:05:57.239 CST [55155] WARNING:  there is no transaction in progress
+2026-10-07 15:05:57.326 CST [55159] WARNING:  there is no transaction in progress
+2026-10-07 15:05:57.387 CST [55162] WARNING:  there is no transaction in progress
+2026-10-07 15:05:57.442 CST [55165] WARNING:  there is no transaction in progress
+2026-10-07 15:05:57.530 CST [55168] WARNING:  there is no transaction in progress
+2026-10-07 15:05:57.588 CST [55171] WARNING:  there is no transaction in progress
+2026-10-07 15:06:04.265 CST [55294] ERROR:  duplicate key value violates unique constraint "uq_investiture_message_dispatch"
+2026-10-07 15:06:04.265 CST [55294] DETAIL:  Key (kind, execution_key, recipient_user_id, role, scope_key)=(REMINDER, 2026-10-05, aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa, pastor, field:1) already exists.
+2026-10-07 15:06:04.265 CST [55294] STATEMENT:  INSERT INTO "public"."investiture_message_dispatches" ("kind","execution_key","recipient_user_id","role","scope_key","status","attempts","payload","created_at","modified_at") VALUES (CAST($1::text AS "public"."investiture_message_kind"),$2,$3,$4,$5,CAST($6::text AS "public"."investiture_message_status"),$7,$8,$9,$10) RETURNING "public"."investiture_message_dispatches"."dispatch_id", "public"."investiture_message_dispatches"."kind"::text, "public"."investiture_message_dispatches"."execution_key", "public"."investiture_message_dispatches"."recipient_user_id", "public"."investiture_message_dispatches"."role", "public"."investiture_message_dispatches"."scope_key", "public"."investiture_message_dispatches"."status"::text, "public"."investiture_message_dispatches"."attempts", "public"."investiture_message_dispatches"."payload", "public"."investiture_message_dispatches"."last_error", "public"."investiture_message_dispatches"."lease_until", "public"."investiture_message_dispatches"."claim_token", "public"."investiture_message_dispatches"."created_at", "public"."investiture_message_dispatches"."modified_at", "public"."investiture_message_dispatches"."sent_at"
+2026-10-07 15:06:05.037 CST [55344] WARNING:  there is no transaction in progress
+2026-10-07 15:06:05.098 CST [55347] WARNING:  there is no transaction in progress
+2026-10-07 15:06:05.189 CST [55350] WARNING:  there is no transaction in progress
+2026-10-07 15:06:05.277 CST [55354] WARNING:  there is no transaction in progress
+2026-10-07 15:06:05.338 CST [55357] WARNING:  there is no transaction in progress
+2026-10-07 15:06:05.395 CST [55361] WARNING:  there is no transaction in progress
+2026-10-07 15:06:05.483 CST [55364] WARNING:  there is no transaction in progress
+2026-10-07 15:06:05.539 CST [55367] WARNING:  there is no transaction in progress
+2026-10-07 15:06:08.765 CST [55425] ERROR:  could not obtain lock on row in relation "ecclesiastical_years"
+2026-10-07 15:06:08.765 CST [55425] STATEMENT:  SELECT year_id FROM ecclesiastical_years WHERE year_id = $1 FOR UPDATE NOWAIT
+2026-10-07 15:06:08.951 CST [55433] ERROR:  could not obtain lock on row in relation "ecclesiastical_years"
+2026-10-07 15:06:08.951 CST [55433] STATEMENT:  SELECT year_id FROM ecclesiastical_years WHERE year_id = $1 FOR UPDATE NOWAIT
+2026-10-07 15:06:13.281 CST [55499] ERROR:  duplicate key value violates unique constraint "uq_investiture_message_dispatch"
+2026-10-07 15:06:13.281 CST [55499] DETAIL:  Key (kind, execution_key, recipient_user_id, role, scope_key)=(REMINDER, 2026-10-05, aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa, pastor, field:1) already exists.
+2026-10-07 15:06:13.281 CST [55499] STATEMENT:  INSERT INTO "public"."investiture_message_dispatches" ("kind","execution_key","recipient_user_id","role","scope_key","status","attempts","payload","created_at","modified_at") VALUES (CAST($1::text AS "public"."investiture_message_kind"),$2,$3,$4,$5,CAST($6::text AS "public"."investiture_message_status"),$7,$8,$9,$10) RETURNING "public"."investiture_message_dispatches"."dispatch_id", "public"."investiture_message_dispatches"."kind"::text, "public"."investiture_message_dispatches"."execution_key", "public"."investiture_message_dispatches"."recipient_user_id", "public"."investiture_message_dispatches"."role", "public"."investiture_message_dispatches"."scope_key", "public"."investiture_message_dispatches"."status"::text, "public"."investiture_message_dispatches"."attempts", "public"."investiture_message_dispatches"."payload", "public"."investiture_message_dispatches"."last_error", "public"."investiture_message_dispatches"."lease_until", "public"."investiture_message_dispatches"."claim_token", "public"."investiture_message_dispatches"."created_at", "public"."investiture_message_dispatches"."modified_at", "public"."investiture_message_dispatches"."sent_at"
+2026-10-07 15:06:14.071 CST [55556] WARNING:  there is no transaction in progress
+2026-10-07 15:06:14.129 CST [55559] WARNING:  there is no transaction in progress
+2026-10-07 15:06:14.220 CST [55562] WARNING:  there is no transaction in progress
+2026-10-07 15:06:14.307 CST [55566] WARNING:  there is no transaction in progress
+2026-10-07 15:06:14.366 CST [55569] WARNING:  there is no transaction in progress
+2026-10-07 15:06:14.423 CST [55572] WARNING:  there is no transaction in progress
+2026-10-07 15:06:14.511 CST [55575] WARNING:  there is no transaction in progress
+2026-10-07 15:06:14.571 CST [55578] WARNING:  there is no transaction in progress

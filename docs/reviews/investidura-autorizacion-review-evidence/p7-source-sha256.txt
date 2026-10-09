@@ -1,0 +1,6 @@
+a53d5e1f6411bfbc4f5fae3c2b703330f3edee5ec4647bf7e7ac73f59fd806bf  sacdia-backend/src/investiture-requests/investiture-year-close.ts
+5fb641a035b9a7942f8606c8cca0e832517c532c09d8176c4e4500a4ba855e1b  sacdia-backend/src/investiture-requests/investiture-authorization-requests.service.ts
+702ed8ab5b4e08a3d2a03b7991afc0e7a1818bcdc97400be245af8ef7b220751  sacdia-backend/src/investiture-requests/investiture-authorization-requests.controller.ts
+cf326ef3af5ebf7c0a668bd090921eddbeeab019bb50a87f00a2b1aae954e5c1  sacdia-backend/src/year-end/year-end.service.ts
+f3f306cc4518c688bb09aa837da59f7e4139110a63a5674edcebc25af809b8c5  sacdia-backend/src/year-cut/year-cut.service.ts
+2aeefe5496cd177ab4f482f65ba00b71666ad502a7238ee7d3cfd59f55905ea4  sacdia-backend/src/year-cut/year-cut-cron.service.ts

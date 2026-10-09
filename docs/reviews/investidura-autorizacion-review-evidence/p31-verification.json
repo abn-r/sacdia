@@ -1,0 +1,79 @@
+{
+  "date": "2026-10-01",
+  "timezone": "America/Mexico_City",
+  "head": "9d8fe1d3d1fd0e56256043ee8208d26c9bfcc39b",
+  "verdict": "P3-1 cerrado; continuidad fase4 permitida en desarrollo; no despliegue",
+  "checks": [
+    {
+      "command": "./node_modules/.bin/jest --runInBand --no-coverage --runTestsByPath src/certificate-bulk-imports/class-certificate-historical-age.spec.ts src/certificate-bulk-imports/certificate-bulk-imports-application.service.spec.ts src/certificate-bulk-imports/certificate-bulk-imports.service.spec.ts src/certificate-bulk-imports/institutional-certificate-requests.service.spec.ts src/classes/field-class-threshold.spec.ts src/classes/class-requirement-eligibility.service.spec.ts src/classes/class-progress-scope.service.spec.ts src/classes/classes.service.spec.ts src/classes/field-class-threshold-config.service.spec.ts src/classes/field-investiture-window-config.service.spec.ts src/classes/field-investiture-window.spec.ts src/classes/field-investiture-window.controller.spec.ts src/classes/district-investiture-pastors.service.spec.ts src/classes/district-investiture-pastors.controller.spec.ts",
+      "exit_code": 0,
+      "suites_passed": 14,
+      "tests_passed": 234,
+      "log": "p31-unit-tests.log",
+      "environment": "escalación autorizada para HTTP efímero"
+    },
+    {
+      "command": "SACDIA_TEST_DATABASE_URL=<new-exclusive-loopback-_test-db> DATABASE_URL=<same> DATABASE_DIRECT_URL=<same> DOTENV_CONFIG_PATH=/dev/null ./node_modules/.bin/jest --config test/jest-e2e.json --runInBand --no-coverage --runTestsByPath test/district-investiture-pastors-postgres.e2e-spec.ts",
+      "exit_code": 0,
+      "suites_passed": 1,
+      "tests_passed": 7,
+      "log": "p31-postgres-tests.log"
+    },
+    {
+      "command": "./node_modules/.bin/tsc --noEmit --incremental false -p tsconfig.build.json",
+      "exit_code": 0,
+      "log": "p31-runtime-types.log"
+    },
+    {
+      "command": "./node_modules/.bin/eslint src/classes/district-investiture-pastors.service.ts src/classes/district-investiture-pastors.service.spec.ts src/classes/district-investiture-pastors.controller.spec.ts test/district-investiture-pastors-postgres.e2e-spec.ts",
+      "exit_code": 0,
+      "log": "p31-lint.log"
+    },
+    {
+      "command": "git diff --check (root and backend)",
+      "exit_code": 0
+    }
+  ],
+  "postgres": {
+    "version": "18.3 (Homebrew)",
+    "server_binary": "/opt/homebrew/opt/postgresql@18/bin",
+    "new_exclusive_cluster": "/tmp/sacdia-p31-independent.kAIEey/data",
+    "bind": "127.0.0.1",
+    "port": "ephemeral",
+    "database": "sacdia_p31_review_test",
+    "transaction_isolation": "read committed",
+    "dotenv_config_path": "/dev/null",
+    "identity_log": "p31-postgres-identity.log",
+    "stopped": true,
+    "pg_ctl_status_exit": 3,
+    "temporary_cluster_removed": true,
+    "neon_or_existing_database_used": false
+  },
+  "setup_attempt": {
+    "initial_binary": "/opt/homebrew/bin/initdb (libpq)",
+    "result": "failed before initialization: postgres binary absent",
+    "retry": "PostgreSQL18 server binaries; succeeded"
+  },
+  "not_executed": [
+    "build",
+    "client generation",
+    "new pastor SQL migration application",
+    "UI",
+    "real HTTP authentication",
+    "historical red/probe"
+  ],
+  "limitations": [
+    "Helper rebuilds public from schema diff plus prior cycle SQL, not new pastor migration CHECKs",
+    "HTTP guards/Prisma substituted; no AppModule or public prefix",
+    "Other concurrent checkout work outside scope"
+  ],
+  "source_sha256": {
+    "src/classes/district-investiture-pastors.service.ts": "337faa364f114840cb3e4ba2b4fd757aa2cc0dee57805468422b66839373ef5b",
+    "src/classes/district-investiture-pastors.service.spec.ts": "b5401415e52e8f53acbdcc0eb6e98cbb3f508e9f9fb08190cda8934def43c7b7",
+    "src/classes/district-investiture-pastors.controller.spec.ts": "fe345e78ac74c0790373842440fddc200c6a3afa0660c58b508e293578070872",
+    "test/district-investiture-pastors-postgres.e2e-spec.ts": "f78ed34c3d12dfd768478c1c32f58c3d5f7b547624c6f6879783d1a0da5d5c83",
+    "test/helpers/annual-cycle-db.helper.ts": "9ca8f950f36fa8265f0f81c1dd08db4f1e3a65809044cdb0aef42186fe7f3541",
+    "prisma/migrations/20261001143000_district_investiture_pastors/migration.sql": "d3d8978a059f44ada140df0aa33d775760dda7de3ee0427b5dd85f723b487a11"
+  },
+  "historical_probe_sha256": "bf6fd9d5a9d58ea8f866cf108800a0c10148431e58b86e169a866c286fee840d"
+}

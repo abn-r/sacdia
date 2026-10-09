@@ -1,0 +1,5 @@
+b30d7f689c35f24945ba311da101c3b8c706282c132e145ec47a4db849c9b025  sacdia-backend/src/common/email/email.processor.ts
+977fbc203e2f839206d3a3cd8ce250c1e0ef99be7b9fcaeb2432bee0d0b04319  sacdia-backend/src/common/email/investiture-mail.gate.ts
+16c9d09312aed9570615b7c3be97260e9181ee1c18de25346aa7b8d0e1b49f8f  sacdia-backend/src/investiture-requests/investiture-communications.service.ts
+bdb073d7e0c4decf9e70569f72c6b11268ad54ed4635a22b011e30e5c18a80bd  sacdia-backend/src/investiture-requests/investiture-communications.rules.ts
+4011c93d5c9bd3fb1277f2279d71f518d13e68445dd4830a6f9a8cdb236442fe  sacdia-backend/src/investiture-requests/investiture-authorization-requests.service.ts

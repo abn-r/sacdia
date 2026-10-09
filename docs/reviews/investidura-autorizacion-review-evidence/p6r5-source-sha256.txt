@@ -1,0 +1,4 @@
+18a88218d38fc22dedd71bb214a8dcd321f3be30334d9428493fcb9cf72cc8fb  sacdia-backend/src/common/email/email.processor.ts
+512f849094ee9e996dd842f933ef3cfdffb4f3df69a8f004c08506ece560088f  sacdia-backend/src/common/email/investiture-mail.gate.ts
+851bfa08ce95e01d26f73158cd5c2bf8a416c8e1e8edd2a221588bfcc1869ea0  sacdia-backend/src/investiture-requests/investiture-communications.service.ts
+633a9d54ff9f46a443153b68680812a988eebb54dbb6ec89973ef8c7305131de  sacdia-backend/src/investiture-requests/investiture-communications.delivery.spec.ts
