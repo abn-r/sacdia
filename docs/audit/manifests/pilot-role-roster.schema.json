@@ -1,0 +1,294 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sacdia.app/schemas/pilot-role-roster.schema.json",
+  "title": "Roster funcional para piloto administrativo ACV",
+  "description": "Personas operativas y cuentas scoped autorizadas para el piloto. Las identidades genéricas se permiten únicamente dentro de e2e_accounts en development.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "scope",
+    "assignments",
+    "e2e_accounts",
+    "content_sha256",
+    "approval"
+  ],
+  "properties": {
+    "schema_version": { "const": 2 },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ecclesiastical_year_id", "year", "local_field_id", "club_id"],
+      "properties": {
+        "ecclesiastical_year_id": { "const": 1 },
+        "year": { "const": 2026 },
+        "local_field_id": { "const": 4 },
+        "club_id": { "const": 1 }
+      }
+    },
+    "assignments": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["adventurers", "conquerors", "master_guides"],
+      "properties": {
+        "adventurers": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["club_section_id", "director"],
+          "properties": {
+            "club_section_id": { "const": 162 },
+            "director": { "$ref": "#/$defs/realPerson" }
+          }
+        },
+        "conquerors": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["club_section_id", "director", "secretary", "treasurer"],
+          "properties": {
+            "club_section_id": { "const": 2 },
+            "director": {
+              "allOf": [
+                { "$ref": "#/$defs/realPerson" },
+                {
+                  "type": "object",
+                  "properties": {
+                    "user_id": { "const": "104a2549-2056-4b9b-aaeb-51d8fd43191d" }
+                  }
+                }
+              ]
+            },
+            "secretary": { "$ref": "#/$defs/realPerson" },
+            "treasurer": { "$ref": "#/$defs/realPerson" }
+          }
+        },
+        "master_guides": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["club_section_id", "director", "secretary", "treasurer"],
+          "properties": {
+            "club_section_id": { "const": 1 },
+            "director": {
+              "allOf": [
+                { "$ref": "#/$defs/realPerson" },
+                {
+                  "type": "object",
+                  "properties": {
+                    "user_id": { "const": "a0000001-0000-4000-8000-000000000001" }
+                  }
+                }
+              ]
+            },
+            "secretary": {
+              "allOf": [
+                { "$ref": "#/$defs/realPerson" },
+                {
+                  "type": "object",
+                  "properties": {
+                    "user_id": { "const": "a0000001-0000-4000-8000-000000000003" }
+                  }
+                }
+              ]
+            },
+            "treasurer": {
+              "allOf": [
+                { "$ref": "#/$defs/realPerson" },
+                {
+                  "type": "object",
+                  "properties": {
+                    "user_id": { "const": "a0000001-0000-4000-8000-000000000004" }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "e2e_accounts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "union_reviewer",
+        "local_field_reviewer",
+        "club_director",
+        "club_secretary",
+        "club_treasurer",
+        "member"
+      ],
+      "properties": {
+        "union_reviewer": {
+          "allOf": [
+            { "$ref": "#/$defs/scopedAccount" },
+            {
+              "type": "object",
+              "properties": {
+                "role": { "enum": ["director-union", "assistant-union"] },
+                "scope_type": { "const": "union" },
+                "scope_id": { "const": "20" },
+                "account_kind": { "const": "generic_training" }
+              }
+            }
+          ]
+        },
+        "local_field_reviewer": {
+          "allOf": [
+            { "$ref": "#/$defs/scopedAccount" },
+            {
+              "type": "object",
+              "properties": {
+                "role": { "enum": ["director-lf", "assistant-lf"] },
+                "scope_type": { "const": "local_field" },
+                "scope_id": { "const": "4" },
+                "account_kind": { "const": "generic_training" }
+              }
+            }
+          ]
+        },
+        "club_director": {
+          "allOf": [
+            { "$ref": "#/$defs/scopedAccount" },
+            {
+              "type": "object",
+              "properties": {
+                "role": { "const": "director" },
+                "scope_type": { "const": "club_section" },
+                "scope_id": { "const": "2" },
+                "account_kind": { "const": "real_person" }
+              }
+            }
+          ]
+        },
+        "club_secretary": {
+          "allOf": [
+            { "$ref": "#/$defs/scopedAccount" },
+            {
+              "type": "object",
+              "properties": {
+                "role": { "const": "secretary" },
+                "scope_type": { "const": "club_section" },
+                "scope_id": { "const": "2" },
+                "account_kind": { "const": "real_person" }
+              }
+            }
+          ]
+        },
+        "club_treasurer": {
+          "allOf": [
+            { "$ref": "#/$defs/scopedAccount" },
+            {
+              "type": "object",
+              "properties": {
+                "role": { "const": "treasurer" },
+                "scope_type": { "const": "club_section" },
+                "scope_id": { "const": "2" },
+                "account_kind": { "const": "real_person" }
+              }
+            }
+          ]
+        },
+        "member": {
+          "allOf": [
+            { "$ref": "#/$defs/scopedAccount" },
+            {
+              "type": "object",
+              "properties": {
+                "role": { "const": "member" },
+                "scope_type": { "const": "club_section" },
+                "scope_id": { "const": "2" },
+                "account_kind": { "const": "generic_training" },
+                "access_panel": { "const": false }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "content_sha256": {
+      "description": "SHA-256 del JSON canónico excluyendo content_sha256 y approval.",
+      "$ref": "#/$defs/sha256"
+    },
+    "approval": {
+      "allOf": [
+        { "$ref": "#/$defs/approval" },
+        {
+          "type": "object",
+          "properties": {
+            "approver_role": { "enum": ["director", "director-lf", "admin", "super-admin"] }
+          }
+        }
+      ]
+    }
+  },
+  "$defs": {
+    "uuid": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "realPerson": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["user_id", "full_name", "start_date", "confirmed_real_person"],
+      "properties": {
+        "user_id": { "$ref": "#/$defs/uuid" },
+        "full_name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "not": { "pattern": "[Tt][Ee][Ss][Tt]" }
+        },
+        "start_date": { "type": "string", "format": "date" },
+        "confirmed_real_person": { "const": true }
+      }
+    },
+    "scopedAccount": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "user_id",
+        "full_name",
+        "role",
+        "scope_type",
+        "scope_id",
+        "access_panel",
+        "active",
+        "account_kind"
+      ],
+      "properties": {
+        "user_id": { "$ref": "#/$defs/uuid" },
+        "full_name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "role": { "type": "string", "minLength": 1 },
+        "scope_type": { "enum": ["union", "local_field", "club_section"] },
+        "scope_id": { "type": "string", "pattern": "^[0-9]+$" },
+        "access_panel": { "type": "boolean" },
+        "active": { "const": true },
+        "account_kind": { "enum": ["real_person", "generic_training"] }
+      }
+    },
+    "approval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "approved_by_user_id",
+        "approved_by_name",
+        "approver_role",
+        "approved_at",
+        "content_sha256"
+      ],
+      "properties": {
+        "approved_by_user_id": { "$ref": "#/$defs/uuid" },
+        "approved_by_name": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "approver_role": { "type": "string" },
+        "approved_at": { "type": "string", "format": "date-time" },
+        "content_sha256": { "$ref": "#/$defs/sha256" }
+      }
+    }
+  }
+}
