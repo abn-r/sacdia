@@ -29,7 +29,7 @@ Las evidencias pueden ser archivos (fotos, PDFs, documentos) que demuestran la r
 - **Filtros por tipo**: Selector para filtrar por tipo de evidencia
 - **File gallery preview**: Visualizacion de archivos con preview de imagenes y PDFs
 - **URLs firmadas**: El detalle de revision devuelve URLs firmadas de corta duracion para archivos privados de clases y honores; el admin no debe consumir rutas R2 privadas crudas.
-- **Visor PDF local**: Los PDFs se abren mediante `/api/evidence-review/pdf`, una ruta del admin que valida la sesion, recupera el detalle en backend, selecciona el archivo por `fileId` y transmite el PDF como `inline` para evitar iframes rotos con URLs privadas/cross-origin.
+- **Visor PDF local**: Al abrir un PDF, el admin vuelve a pedir el detalle al backend desde el navegador (las URLs prefirmadas vencen a los 5 minutos), toma la URL fresca por `fileId` y descarga el PDF directo desde R2 para mostrarlo como `blob:` dentro del panel. No pasa por funciones de Vercel. Requiere una regla CORS en los buckets de R2 para el origen del admin.
 - **Zoom de imagenes**: El visor de imagenes agranda el tamano real del elemento, no usa `transform: scale`, para que el contenedor scrollable permita recorrer toda la imagen ampliada.
 - **Modo de trabajo de honores**: En evidencias de honores, el panel muestra si la especialidad fue trabajada dentro de la app (`IN_APP`) o fuera de la app (`EXTERNAL`) antes de revisar archivos/requisitos.
 - **Bulk operations**: Seleccion multiple para aprobar/rechazar en lote (mismo tipo)
