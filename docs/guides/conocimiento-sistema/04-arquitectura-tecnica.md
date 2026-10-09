@@ -85,8 +85,9 @@ httpOnly, ese endpoint entrega el token al código JavaScript del navegador: no
 corresponde describirlo como un BFF exclusivo ni como un token inaccesible a JS.
 
 Los layouts y `proxy.ts` controlan navegación y acceso al dashboard; la
-autorización de las operaciones permanece en el backend. Algunas rutas Next
-actúan como proxy autenticado para PDFs. TanStack Query participa en consultas
+autorización de las operaciones permanece en el backend. Los PDFs de evidencia
+se descargan directo desde R2 con URLs prefirmadas, sin pasar por funciones de
+Vercel. TanStack Query participa en consultas
 cliente, y preferencias/idioma son responsabilidades diferentes de los datos
 remotos. La flecha UI → consultas resume ese consumo de estado.
 
@@ -94,7 +95,7 @@ Fuentes: [cliente API](../../../sacdia-admin/src/lib/api/client.ts),
 [relay de token](../../../sacdia-admin/src/app/api/auth/token/route.ts),
 [cookies](../../../sacdia-admin/src/lib/auth/cookies.ts),
 [layout](../../../sacdia-admin/src/app/(dashboard)/layout.tsx),
-[proxy PDF](../../../sacdia-admin/src/app/api/evidence-review/pdf/route.ts).
+[visor PDF](../../../sacdia-admin/src/components/shared/pdf-inline-viewer.tsx).
 
 ## Evidencia y pendientes
 
