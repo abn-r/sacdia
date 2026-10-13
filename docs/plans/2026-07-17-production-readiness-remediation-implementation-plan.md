@@ -1,5 +1,7 @@
 # Production Readiness Remediation Implementation Plan
 
+> **Estado (2026-10-13):** parcial; la mayor parte sigue pendiente. Implementado: el núcleo de seguridad de scripts (`sacdia-backend/scripts/remediate-production-readiness.ts`: manifiesto, huella de base, respaldo cifrado, attestation y autorización de apply; sacdia-backend #191), el guard HTTPS de `API_BASE_URL` en el release Android (sacdia-app #143 y #144) y el DTO móvil de inscripción anual con `meeting_schedule` como arreglo (`enrollment_remote_data_source.dart`). **Pendiente:** el comando operativo (no hay CLI `dry-run`/`apply`/`verify`/`rollback-clone`), la cola admin independiente `/dashboard/annual-enrollments` (no existe en el panel), la aprobación anual con outbox idempotente y carpeta obligatoria en la misma transacción (hoy la carpeta se crea solo «si existe plantilla»), el ejecutor de los manifiestos ACV (ver `docs/audit/2026-10-13-july-docs-status.md`), el script de piloto en clon y el piloto E2E. No determinado desde el código: si se hicieron las correcciones de datos de la base `development` (jerarquía, cargos, matrículas, honores), porque no se consultó la base.
+
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
 **Goal:** Corregir los P0 de datos y contratos, completar la configuración anual de ACV y certificar un piloto administrativo E2E con Conquistadores ACV.

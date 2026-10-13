@@ -1,5 +1,7 @@
 # Preparación para producción, onboarding y operación de SACDIA
 
+> **Estado (2026-10-13):** parcialmente superado; el dictamen NO-GO del 17 de julio ya no refleja el código. Resuelto: URL de API en el APK release (sacdia-app #143 y #144, 2026-08-12, y job `Validate API_BASE_URL` en el CI), lanzador «Demo temporal de animaciones» retirado (#143) y año eclesiástico sin solapamiento (migración `20260921153000_ecclesiastical_year_no_overlap`, sacdia-backend #447). Parcial: bootstrap de RBAC y catálogos (hay seeds versionados en `sacdia-backend/prisma/seeds/` y el orden está en `docs/deployment/DEPLOYMENT-GUIDE.md` §3, pero no se verificó una base vacía de punta a punta). **Pendiente:** aprobación de la inscripción anual sin interfaz (`GET /club-enrollments/validation/queue` y approve/reject existen en el backend; el panel y la app no los consumen), integridad geográfica del post-registro (`resolveSelectedClub` no exige sección activa ni deriva la geografía), selección de División en el alta y manifest/comando de readiness. El §13 es una foto de la base `development` al 2026-07-17 (hoy es la base viva, ver el despliegue); no se reverificó. Seguimiento en `docs/audit/2026-10-13-july-docs-status.md`.
+
 **Fecha de corte:** 2026-07-17
 
 **Alcance:** documentación canónica, backend NestJS, panel administrativo Next.js, app Flutter, esquema Prisma efectivo y memorias Engram.

@@ -1,5 +1,7 @@
 # Camporee Section Enrollment Implementation Plan
 
+> **Estado (2026-10-13):** implementado. Backend: `GET` y `POST /camporees/:camporeeId/section-registration`, migración `20260713220000_camporee_section_registration_context` y la FK `camporee_members.camporee_club_id` (sacdia-backend #175, 2026-07-15). App: modelos, panel y hoja de inscripción en `lib/features/camporees/` (sacdia-app #117). Plan ejecutado; no se reverificó cada tarea por separado ni se ejecutaron las pruebas.
+
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
 **Goal:** Permitir que sólo el director inscriba su sección activa a un Camporí, registrar quién realizó la acción y bloquear participantes hasta que la sección esté inscrita o aprobada.
