@@ -36,8 +36,8 @@ Verificados leyendo `sacdia-ocr-proxy/` y `sacdia-backend/` el 2026-10-07. No se
 
 | # | Hallazgo | Paso afectado |
 |---|---|---|
-| 1 | `sacdia-ocr-proxy/package.json` no tiene script `start` y `listenOcr` solo escucha en `127.0.0.1`. El entrypoint de producción (`0.0.0.0:$PORT`, variables `OCR_*`) lo implementa otro trabajo en paralelo. | Despliegue (fase 5) |
-| 2 | Decisión del usuario (opción a, 2026-10-07): el ledger agrega a **todos** sus documentos (operaciones, nonces y cuota diaria) el campo `expireAt` de tipo `Timestamp` de Firestore, con el mismo instante que su purga lógica. Las fechas `purgeEligibleAt`, `retainUntil` y `logicalExpiresAt` siguen siendo texto ISO y siguen decidiendo la lógica; `expireAt` solo sirve al borrado físico por TTL. El cambio de código lo implementa otro trabajo en paralelo y no está desplegado. | TTL (fase 2.3) |
+| 1 | **Resuelto (commit `f0fece78`).** Entrypoint `src/main.ts` en `0.0.0.0:$PORT` con config validada; script `start` = `node src/main.ts`. | Despliegue (fase 5) |
+| 2 | **Resuelto (commit `f0fece78`).** Todos los documentos del ledger llevan `expireAt` (`Timestamp`) igual a su purga lógica; la lógica no lo lee. | TTL (fase 2.3) |
 | 3 | No existe una herramienta de humo que firme solicitudes `POST /v1/ocr` contra una URL real. El firmante del backend (`ocr-proxy-signer.ts`) puede reutilizarse desde un script fuera del repositorio. | Humo (fase 7) |
 | 4 | `engines.node` del proxy es `>=24 <25`. La documentación de los buildpacks de Node desaconseja los operadores `>`; confirmar en el log de build que se resolvió Node 24. | Despliegue (fase 5) |
 | 5 | `OCR_PROXY_URL` debe ser la URL **completa del endpoint** (`https://<host>/v1/ocr`): el proveedor del backend hace el POST a esa URL tal cual, y la ruta firmada es fija. | Render (fase 6) |
@@ -185,6 +185,8 @@ gcloud projects add-iam-policy-binding "$PROJECT" \
   --member="serviceAccount:$RUNTIME_SA" --role=roles/serviceusage.serviceUsageConsumer --condition=None
 # el binding de secretAccessor va por secreto, en la fase 4
 ```
+
+> **Ejecutado en preproducción (2026-10-08).** 3.1 aplicada (`roles/datastore.user`). 3.2 **simplificada por decisión del usuario**: el operador despliega con su propia cuenta (owner del proyecto) y el deployer separado se crea cuando haya CI. Se creó en cambio la cuenta de build `sacdia-ocr-builder` (sin claves, solo `roles/run.builder`), pasada con `--build-service-account`, porque la cuenta de Compute por defecto que usa Cloud Build no tiene roles (la org bloquea los grants automáticos). Servicio desplegado: `sacdia-ocr-proxy-preprod`, revisión `00001-vdp`, URL `https://sacdia-ocr-proxy-preprod-4ki73q3wma-uk.a.run.app` (endpoint: `/v1/ocr`). Build con Node v24.19.0.
 
 ### 3.2 Deployer (`$DEPLOYER_SA`)
 
