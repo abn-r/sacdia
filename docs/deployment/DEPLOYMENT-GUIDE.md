@@ -43,7 +43,7 @@ Neon ramas staging y production: existen y están migradas, sin uso.
 | OCR | Proxy keyless en Cloud Run; runbook en `docs/guides/ocr-proxy-preprod-infra.md` |
 | Otros servicios | Redis, R2, Firebase, Resend y Sentry según la tabla 4.2; su cuenta y plan concretos no se documentan aquí |
 
-> No hay entorno de preproducción separado: cada merge a `development` de backend o admin llega a la instancia en línea. Y como el pre-deploy de Render corre `prisma migrate deploy` contra la base viva, **cada migración que se mergea se aplica de inmediato a datos reales**. Revisar migraciones con ese criterio antes de mergear (ver 0.4).
+> No hay entorno de preproducción separado: cada merge a `development` de backend o admin llega a la instancia en línea. Y como el build command de Render termina con `prisma migrate deploy` contra la base viva, **cada migración que se mergea se aplica de inmediato a datos reales**. Revisar migraciones con ese criterio antes de mergear (ver 0.4).
 
 ### 0.1 Render "API Sacdia"
 
@@ -51,7 +51,8 @@ Neon ramas staging y production: existen y están migradas, sin uso.
 |---|---|
 | Tipo / plan | web service / **Free** (512 MB de RAM) |
 | Rama | `development`, auto-deploy activado |
-| Pre-deploy | `prisma migrate deploy` (aplica migraciones antes de servir tráfico; nunca `db push`) |
+| Build | `corepack pnpm install --frozen-lockfile && NODE_OPTIONS=--max-old-space-size=4096 corepack pnpm run build && corepack pnpm exec prisma migrate deploy` |
+| Pre-deploy | **No disponible**: el plan Free de Render no admite pre-deploy command. Las migraciones corren al final del build (nunca `db push`) |
 | Start | `node --max-old-space-size=320 --max-semi-space-size=2 dist/src/main.js` |
 | Health check | endpoint `GET /api/v1/health` (recomendado fijarlo como Health Check Path, ver abajo) |
 
@@ -67,7 +68,8 @@ Neon ramas staging y production: existen y están migradas, sin uso.
 - Un proyecto, tres ramas: `development`, `staging`, `production`.
 - **`development` es la base viva**: `DATABASE_URL` de "API Sacdia" apunta a su endpoint (`ep-rough-hill-anztwk76`, cadena pooled). Es lo que el servicio en línea lee y escribe.
 - `staging` y `production` existen y están migradas, pero **ningún servicio las consume**. No tratarlas como respaldo de `development`: no reciben sus datos.
-- Las migraciones se aplican solas en el pre-deploy de Render contra la rama que indique `DATABASE_URL`. Para aplicarlas a mano a otra rama, ver el §3.
+- Las migraciones se aplican al final del build de Render contra la rama que indique `DATABASE_URL`. Como esa cadena es pooled, el servicio necesita también `DATABASE_DIRECT_URL` (misma rama, host sin `-pooler`) para que `prisma migrate deploy` use una conexión directa. `staging` y `production` no las reciben solas: se aplican a mano, con aprobación, como indica el §3.
+- **Historia (2026-10-13):** hasta esa fecha el build no migraba y el servicio no tenía pre-deploy (el plan Free no lo admite), así que todas las migraciones de octubre se aplicaron a mano. Antes de un deploy con migración, confirmar en el log del build que aparezca `All migrations have been successfully applied` o `No pending migrations to apply`.
 - Nunca incluir cadenas de conexión completas ni contraseñas en docs, tickets o chats; el endpoint (`ep-…`) identifica la rama, el resto es secreto.
 
 ### 0.3 Admin y OCR
@@ -80,7 +82,8 @@ Neon ramas staging y production: existen y están migradas, sin uso.
 - **Nunca `CREATE INDEX CONCURRENTLY` en una migración que también tenga bloques `DO`.** Prisma ejecuta el archivo como un solo lote; Postgres rechaza `CONCURRENTLY` dentro de una transacción y `migrate deploy` falla con **P3018** (error de base de datos **25001**). Pasó con `20261013100000_honor_instructor_proposals` y se corrigió en sacdia-backend (PR #485: índices sin `CONCURRENTLY` y una prueba que lo exige).
 - Para tablas nuevas y vacías (el caso habitual), un `CREATE INDEX` normal es instantáneo. Escribir las migraciones **re-ejecutables** (`IF NOT EXISTS`, `DROP CONSTRAINT IF EXISTS`, manejo de `duplicate_object`) para que un reintento tras un fallo parcial no tropiece.
 - Si de verdad hace falta un índice concurrente sobre una tabla grande y existente, hacerlo fuera de `migrate deploy` (a mano con `psql`, con aprobación) y dejar la migración sin ese índice o con `IF NOT EXISTS`.
-- Una migración fallida queda registrada en `_prisma_migrations` y bloquea los deploys siguientes (**P3009**) hasta resolverla (corregir y `prisma migrate resolve`). Con auto-deploy sobre la base viva, un fallo así deja el servicio sin desplegar: vigilar el log del pre-deploy tras cada merge con migraciones.
+- Una migración fallida queda registrada en `_prisma_migrations` y bloquea los deploys siguientes (**P3009**) hasta resolverla (corregir y `prisma migrate resolve`). Con auto-deploy sobre la base viva, un fallo así hace fallar el build y el deploy no sale (el servicio sigue con la versión anterior): vigilar el log del build tras cada merge con migraciones.
+- **Migrar en el build tiene un costo:** la migración corre después de compilar pero antes de arrancar la versión nueva. Si el deploy falla después (por ejemplo, el arranque), la migración ya quedó aplicada y la versión anterior sigue corriendo contra el esquema nuevo. Por eso cada migración debe ser **compatible con el código anterior** (aditiva; borrar columnas o tablas en un deploy posterior al que dejó de usarlas).
 - La shadow DB no es fiable en este proyecto: las migraciones se escriben a mano y se aplican con `migrate deploy`.
 
 ---
@@ -127,7 +130,7 @@ Cuentas: Neon, Render, Vercel, Upstash (o Redis compatible con TLS), Cloudflare 
 2. Anotar dos cadenas de conexión:
    - **pooled** (host con `-pooler`): `DATABASE_URL`, la usa la app;
    - **direct** (sin `-pooler`): `DATABASE_DIRECT_URL`, la usan las migraciones (`prisma.config.ts`).
-3. Las migraciones se aplican solas en Render (`preDeployCommand`). Para aplicarlas a mano:
+3. En el servicio real ("API Sacdia", Free) las migraciones corren al final del build command (0.1); el `preDeployCommand` del blueprint solo aplica a planes pagos. Para aplicarlas a mano (por ejemplo a `staging` o `production`, con aprobación):
 
    ```bash
    cd sacdia-backend
@@ -160,7 +163,7 @@ El servicio se define en `sacdia-backend/render.yaml`:
 | Nombre | `sacdia-backend` |
 | Región / plan | `oregon` / `starter` |
 | Build | `pnpm install --frozen-lockfile && pnpm prisma generate && pnpm build` |
-| Pre-deploy | `pnpm prisma migrate deploy` (aplica migraciones antes de servir tráfico) |
+| Pre-deploy | `pnpm prisma migrate deploy` (aplica migraciones antes de servir tráfico; requiere plan pago, el Free no lo ejecuta) |
 | Start | `pnpm start:prod` (`node dist/src/main.js`) |
 | Health check | `/api/v1/health` |
 
@@ -318,7 +321,7 @@ Checklist:
 | El arranque falla con error de validación de entorno | Falta una variable obligatoria (por ejemplo `ALLOWED_ORIGINS`, `QR_JWT_SECRET`, un `R2_BUCKET_*` requerido) o `SWAGGER_ENABLED=true` en producción | Revisar el mensaje de Joi y la tabla 4.2 |
 | `REDIS_URL is required ... in production` | Producción sin Redis | Configurar `REDIS_URL` del entorno |
 | `QR_JWT_SECRET must be distinct from BETTER_AUTH_SECRET` | Mismo valor en ambos | Generar otro secreto |
-| Error de Prisma en el pre-deploy | Migración que no aplica sobre la base del entorno | Revisar la migración en local contra una rama de Neon; no usar `db push` |
+| Error de Prisma al final del build (`prisma migrate deploy`) | Migración que no aplica sobre la base del entorno | Revisar la migración en local contra una rama de Neon; si el host de `DATABASE_URL` es `-pooler`, confirmar que `DATABASE_DIRECT_URL` exista; no usar `db push` |
 | `Property X does not exist on type PrismaService` al compilar | No se generó el cliente | El build del blueprint ya ejecuta `pnpm prisma generate`; en local, `pnpm prisma generate` |
 | El registro responde que no existe el rol `user` | Base sin `prisma/seed.ts` | Ejecutar los seeds del §3 |
 | `redirect_uri_mismatch` en OAuth | URL de callback no registrada | Añadir `https://<backend>/api/auth/callback/<provider>` en el proveedor |
