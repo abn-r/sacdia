@@ -1,5 +1,29 @@
 # Carga por certificado: rediseño de la experiencia (app)
 
+> **Estado de implementación (2026-10-13).** Los ocho slices de la app están mergeados en `development` de `sacdia-app`. El texto de abajo es el diseño original; donde el código difiere, manda el código.
+>
+> | Slice | PR (sacdia-app) | Qué entró |
+> |---|---|---|
+> | base | #161 | Galería y loader de tres puntos en la subida |
+> | S1. Errores y copy | #162 | Mapa de errores compartido y copy |
+> | S2. Subida reintentable y espera | #163 | Subida con progreso y espera de lectura con sondeo de `ocr_state` |
+> | S3. Visor de comprobante | #164 | Visor que abre el archivo y la página de la fila |
+> | S4. Revisión | #165 | Revisión con grupos, dock y estados de lectura; parseo de nombres de catálogo, instructor y `ocr_error_code` |
+> | S5. Editor y selectores | #166 | Selectores de especialidad y de clase desde el catálogo, con rango de fechas |
+> | cancelar | #167 | Cancelar o abandonar durante la subida borra el borrador (`DELETE /certificate-bulk-imports/:batchId`) |
+> | S6. Instructor en la carga | #168 | Selector de instructor y campo opcional en la fila de especialidad |
+> | S7. Instructor y fecha en «Mis especialidades» | #169 | `completed_at` e instructor antes de enviar a revisión |
+> | S8. Proponer instructor | #170 | Propuesta de instructor sobre una especialidad aprobada |
+>
+> Dependencias de backend y admin (todas mergeadas): B1 #473, B2 #474, B3 #476, B4 #475, B5 #479, B9 #480, B11 #478; admin B6 #228, B7 #227, B10 #229. Resumen completo y correcciones al diseño en `2026-10-09-certificate-import-instructor-data-model.md`.
+>
+> Diferencias conocidas con este documento:
+>
+> - La sección 6.4 decía que «Mis especialidades» no tendría selector de fecha. S7 sí pide la fecha de finalización (`completed_at`, migración M5 del backend), porque el diseño de datos la incorporó el 2026-10-12.
+> - El backend no exige `completed_at` al enviar a revisión mientras `REQUIRE_HONOR_COMPLETED_AT_ON_SUBMIT` sea `false`. La app lo pide siempre; el backend lo exigirá cuando S7 sea la versión mínima.
+> - Las propuestas de instructor se **retiran** (`WITHDRAWN`); el texto «Cancelar propuesta» de 6.5 es solo copy de la app y llama a `DELETE .../instructor-proposal`.
+> - Migraciones por rama de Neon: `development` tiene M1, M2, M5 y M4; `staging` y `production`, ninguna (dato del responsable, no verificado desde el repositorio). Ver `docs/deployment/DEPLOYMENT-GUIDE.md` §0.5.
+
 **Fecha:** 2026-10-09 (actualizado el 2026-10-10 y el 2026-10-12 con las decisiones del usuario)
 **Estado:** Diseño con las decisiones del usuario incorporadas (D1 a D13). Sin código. No quedan preguntas abiertas (ver "Decisiones tomadas" y la sección 10).
 **Alcance:** `sacdia-app`, flujo del miembro en `lib/features/certificate_import/` (carga, subida, lectura OCR, revisión, edición de filas, visor de comprobante, envío, confirmación y correcciones) y el detalle de una especialidad en `lib/features/honors/` (solo el instructor: captura antes de enviar a revisión, sección 6.4, y propuesta de instructor sobre una especialidad ya aprobada, sección 6.5).
