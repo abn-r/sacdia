@@ -2,7 +2,9 @@
 
 **Estado**: IMPLEMENTADO (en `development`). La variante de OCR con ADC y la validación de PDF con `pdf-lib` entraron con la PR #448 de sacdia-backend (2026-10-07); el proxy keyless (`OCR_MODE=remote`) está aprobado en local y no desplegado.
 
-Superficies en `development`: backend `src/certificate-bulk-imports` (26 rutas), admin `/dashboard/certificate-bulk-imports*` y `/dashboard/institutional-certificate-requests*`, app `lib/features/certificate_import`.
+Superficies en `development`: backend `src/certificate-bulk-imports` (28 rutas) y `src/instructors`, admin `/dashboard/certificate-bulk-imports*`, `/dashboard/institutional-certificate-requests*` y `/dashboard/honor-instructor-proposals`, app `lib/features/certificate_import`.
+
+**Rediseño (2026-10-12, implementado):** catálogos de especialidades y clases con nombres en las filas, instructor opcional, rango de fechas 1960-01-01..hoy, estado de lectura (`ocr_state`), archivo y página de origen de cada fila, borrado de borradores y revisión de Campo Local con instructor y conflicto. Backend #473 a #476 y #478, admin #227 a #229, app #161 a #170. Ver «Rediseño: instructor, catálogos, fechas, lectura y páginas». Plan y estado por slice: `docs/plans/2026-10-09-certificate-import-instructor-data-model.md`.
 
 ## Descripcion de dominio
 
@@ -29,12 +31,17 @@ OCR propone, el miembro confirma y Campo Local valida. La aprobacion aplica a la
 
 | Metodo | Path | Descripcion |
 |---|---|---|
+| GET | `/api/v1/certificate-bulk-imports` | Listar expedientes propios para retomarlos |
 | POST | `/api/v1/certificate-bulk-imports` | Crear borrador con archivos/comprobantes |
 | POST | `/api/v1/certificate-bulk-imports/:batchId/process-ocr` | Encolar la lectura. Sin Redis responde `CERTIFICATE_IMPORT_OCR_UNAVAILABLE` y no marca el lote como leído |
-| GET | `/api/v1/certificate-bulk-imports/:batchId` | Consultar lote propio |
+| GET | `/api/v1/certificate-bulk-imports/catalog/classes?clubTypeId=` | Clases elegibles (incluye retiradas e institucionales con `institutional: true`) |
+| GET | `/api/v1/certificate-bulk-imports/:batchId` | Consultar lote propio (con `ocr_state`, `ocr_error_code`, páginas e instructor) |
+| DELETE | `/api/v1/certificate-bulk-imports/:batchId` | Descartar un borrador propio (solo `DRAFT`) |
 | PATCH | `/api/v1/certificate-bulk-imports/:batchId/items/:itemId` | Corregir fila OCR |
 | POST | `/api/v1/certificate-bulk-imports/:batchId/submit` | Enviar a revision de Campo Local |
 | POST | `/api/v1/certificate-bulk-imports/:batchId/items/:itemId/resubmit` | Corregir y reenviar fila rechazada |
+
+El alta, el `PATCH` y el borrado de filas (`POST`/`DELETE .../items`), y los archivos (`files/presign`, `files/:fileId/confirm`, `files/:fileId/download`, `DELETE files/:fileId`) están en `docs/api/ENDPOINTS-LIVE-REFERENCE.md`. Instructores: `GET /api/v1/instructor-candidates?q=` (módulo `src/instructors`, compartido con «Mis especialidades»).
 
 ### Endpoints admin
 
@@ -47,6 +54,8 @@ OCR propone, el miembro confirma y Campo Local valida. La aprobacion aplica a la
 | POST | `/api/v1/admin/certificate-bulk-imports/:batchId/items/:itemId/approve` | Aprobar una fila |
 | POST | `/api/v1/admin/certificate-bulk-imports/:batchId/items/:itemId/reject` | Rechazar una fila con motivo |
 
+La cola de propuestas de instructor sobre especialidades ya aprobadas (`/api/v1/admin/honor-instructor-proposals`) tiene el mismo revisor y alcance; ver [honores](honores.md).
+
 ## Base de datos
 
 Tablas de workflow/auditoria:
@@ -55,6 +64,12 @@ Tablas de workflow/auditoria:
 - `certificate_bulk_import_items`
 - `certificate_bulk_import_files`
 - `certificate_bulk_import_item_events`
+
+Columnas añadidas por el rediseño (migraciones M1 y M2; detalle en `docs/database/SCHEMA-REFERENCE.md`):
+
+- `certificate_bulk_import_items.instructor_user_id` / `instructor_name` (solo filas HONOR; como máximo uno), `source_file_id` (FK a `certificate_bulk_import_files`, `ON DELETE SET NULL`) y `source_page`.
+- `certificate_bulk_import_files.page_count`.
+- Al aprobar una fila HONOR, el instructor y `completed_at` se copian a `users_honors` (`instructor_*`, `completed_at`).
 
 Tablas finales existentes:
 
@@ -82,11 +97,28 @@ Tablas finales existentes:
 - `REJECTED`
 - `RESUBMITTED`
 
+### Lectura OCR (`ocr_state`, derivado)
+
+No es columna: se deriva de los eventos `OCR_QUEUED`, `OCR_PROCESSED` y `OCR_FAILED` del lote y del job de BullMQ.
+
+| Valor | Significado |
+|---|---|
+| `null` | Nunca se pidió la lectura |
+| `pending` | En cola (incluye la espera entre dos intentos) |
+| `running` | El worker está leyendo |
+| `done` | Terminó y propuso al menos una fila |
+| `empty` | Terminó sin filas: captura manual |
+| `failed` | Falló; `ocr_error_code` trae la causa si el worker la registró (lista blanca) |
+
 ## UX mobile
 
-- Flujo estilo asistente: subir comprobante, leer OCR, revisar sabana de datos, editar fila, enviar a revision y ver estado.
-- La sabana usa cards, no tabla, porque puede haber pocos o muchos registros y el usuario corrige desde telefono.
-- Las filas muestran tipo (`HONOR`/`CLASS`), nombre detectado, match de catalogo, fecha y confianza.
+- Flujo estilo asistente: subir comprobante (con progreso y reintento que conserva el lote y el archivo), esperar la lectura, revisar la sábana de datos, editar fila, enviar a revisión y ver estado.
+- La sábana usa cards, no tabla, porque puede haber pocos o muchos registros y el usuario corrige desde teléfono. La revisión agrupa las filas, muestra qué falta de cada una y tiene un dock con «Completar N» y «Enviar».
+- Las filas muestran tipo (`HONOR`/`CLASS`), el nombre **detectado** por el OCR, el nombre del catálogo **elegido por el miembro** (con categoría o tipo de club), la fecha y una alerta «Revisa la fecha» cuando la confianza de la fecha es menor a 0.8. **El OCR no hace match de catálogo**: `honor_id` y `class_id` los elige el miembro en el editor.
+- Espera de lectura: la app sondea `ocr_state` cada 2 s, avisa que sigue leyendo a los 8 s y deja de esperar a los 60 s; si el estado es `empty` o `failed` abre la revisión con captura manual y reintento.
+- El comprobante se abre en el archivo y la página de la fila (`source_file_id`, `source_page`); si faltan, en el primer archivo, página 1.
+- El editor elige especialidad (`GET /honors?search=`) y clase (`catalog/classes`) de listas, pide la fecha entre 1960-01-01 y hoy y, en filas de especialidad, un instructor opcional (usuario de tu Campo Local o nombre libre). El instructor no cuenta para dejar la fila lista.
+- Cancelar o abandonar durante la subida borra el borrador (`DELETE`), sin bloquear al usuario.
 - Si una fila rechazada vuelve al miembro, puede corregirse y reenviarse.
 
 ## UX admin
@@ -94,6 +126,7 @@ Tablas finales existentes:
 - Bandeja de Campo Local con KPIs, filtros y tabla de lotes.
 - Detalle split view: comprobante sticky + datos/filas/auditoria.
 - Aprobacion por lote o por fila.
+- El detalle muestra el estado de lectura (`ocr_state`), el instructor de cada especialidad (sin correo ni foto), un aviso cuando hay `instructor_conflict` (la especialidad ya estaba aprobada con otro instructor y se conservó) y el archivo y página de cada fila.
 - Rechazo siempre requiere motivo visible para el miembro.
 
 ## Invariantes
@@ -103,6 +136,9 @@ Tablas finales existentes:
 3. Una fila aprobada es idempotente: no duplica `users_honors` ni `enrollments`. Dos aprobaciones simultáneas reclaman la fila con `revision`; la segunda no crea otro hecho. Un rechazo simultáneo tampoco pisa una fila ya reclamada.
 4. El OCR no valida; solo prellena datos.
 5. Las pantallas de registros importados deben mostrar vista simplificada basada en comprobante, no el checklist/progreso normal.
+6. El instructor es opcional, solo de filas HONOR, y nunca bloquea dejar la fila lista ni enviar. Un usuario del sistema debe ser del mismo Campo Local que el dueño del lote, activo, aprobado y mayor de edad; el nombre libre no entra a la auditoría.
+7. `completed_at` (especialidad) y fecha de investidura (clase) van entre 1960-01-01 y hoy. Una fecha del OCR fuera de rango no se guarda como `completed_at`: queda en `detected_date`.
+8. Solo se borra un borrador `DRAFT` propio y sin solicitudes institucionales, y nunca con una lectura OCR en cola o en curso.
 
 ## Reglas confirmadas el 2026-09-21
 
@@ -124,6 +160,19 @@ Tres vías distintas:
 - Acreditación histórica de Campo Local: el comprobante prueba un hecho ya ocurrido. No exige clase en curso, clase anterior, orden ni posición en la escala. Una clase aprobada queda `INVESTIDO` con la fecha del certificado.
 - Guía Mayor (`GM-01`): el comprobante aprobado sustituye la inscripción actual de esa clase. Queda una sola fila, `INVESTIDO`, en el periodo de la fecha del certificado. No se conservan dos inscripciones. Guía Mayor es, por ahora, la última clase del recorrido: el año siguiente la persona sigue como miembro y no recibe otra clase ni otra fila GM.
 - Guía Mayor Avanzado e Instructor: no las acredita Campo Local y no crean `enrollments` al aprobar la solicitud. Van a una bandeja exclusiva del superadministrador.
+
+## Rediseño: instructor, catálogos, fechas, lectura y páginas
+
+Vigente en `development` desde 2026-10-12. Contrato campo por campo y códigos de error: `docs/api/ENDPOINTS-LIVE-REFERENCE.md` §«Estado de lectura, instructor y páginas» y el contrato canónico de `docs/api/API-SPECIFICATION.md`.
+
+- **Catálogos.** `GET /honors?search=` (2 a 60 caracteres) y `GET /certificate-bulk-imports/catalog/classes` (con retiradas e institucionales). Las respuestas de lote traen `honor {name, category}` y `class {name, asset_code, club_type}` con nombres traducidos, para no resolver ids en el cliente. `club_type_id` en el cuerpo de una fila CLASS es solo una verificación de coherencia (`CERTIFICATE_IMPORT_CLASS_CLUB_TYPE_MISMATCH`).
+- **Instructor.** Bloque `instructor` `{ kind: USER | EXTERNAL, user_id?, display_name, photo_url? }`. Buscador `GET /instructor-candidates?q=` (JWT, 30/min, mismo Campo Local, sin correo, máximo 10). Escritura `instructor_user_id` o `instructor_name`, como máximo uno. En una fila CLASS se rechaza (`CERTIFICATE_IMPORT_HONOR_INSTRUCTOR_NOT_ALLOWED`). Al crear el lote, un instructor inválido no rompe el alta: la fila nace `NEEDS_REVIEW` con el código en `rejection_reason`.
+- **Aprobación e instructor (D7).** Sin fila previa de `users_honors`: se copia el instructor del ítem. Fila aún no `APPROVED`: el instructor del ítem, si trae, reemplaza al declarado; si no trae, se conserva el existente (nunca se borra por omisión). Fila ya `APPROVED` (misma fecha): se completa si no tenía; si tenía **otro**, se conserva el existente y se marca `instructor_conflict` en la respuesta, el detalle admin y el evento `ITEM_APPROVED`. La fecha se compara contra `completed_at ?? date` de la especialidad aprobada.
+- **Fechas.** `completed_at` entre 1960-01-01 y hoy (`CERTIFICATE_IMPORT_DATE_TOO_OLD`, `_IN_FUTURE`, `_INVALID`). `PATCH`/`resubmit` responden 400; al crear sin `mark_as_ready` la fila nace `NEEDS_REVIEW`; con `mark_as_ready: true` la creación responde 400.
+- **Lectura.** `ocr_state` y `ocr_error_code` en las respuestas del lote. `OCR_QUEUED` se registra antes de encolar. Una lectura en cola o en curso no se duplica; tras un fallo, `process-ocr` de nuevo reintenta. Un reproceso solo descarta filas que el miembro no tocó (sin catálogo, instructor ni ediciones).
+- **Páginas y archivo.** El OCR trabaja por archivo y por página (tope de 5 páginas por documento). Cada fila guarda `source_file_id` y `source_page`; cada archivo, `page_count`.
+- **Borrar borrador.** `DELETE /certificate-bulk-imports/:batchId`: 404 si no es del usuario, 409 `CERTIFICATE_IMPORT_BATCH_NOT_DELETABLE` (ya no es `DRAFT` o tiene solicitudes institucionales) y 409 `CERTIFICATE_IMPORT_OCR_IN_PROGRESS`. Borra filas, archivos y eventos en cascada y, después del commit, los objetos de R2 (mejor esfuerzo); no queda traza en base, solo en el log.
+- **Migraciones.** M1 `20261010120000_certificate_import_honor_instructor` y M2 `20261010130000_certificate_import_ocr_pages`. Estado por rama de Neon y procedimiento: `docs/deployment/DEPLOYMENT-GUIDE.md` §0.5.
 
 ## Despliegue
 
@@ -151,6 +200,11 @@ Vigentes en `institutional_certificate_requests`. Solo el superadministrador dec
 
 Ya usados por el runtime, como `BadRequestException` con mensaje estable:
 
+- `CERTIFICATE_IMPORT_DATE_TOO_OLD`, `CERTIFICATE_IMPORT_DATE_IN_FUTURE`, `CERTIFICATE_IMPORT_DATE_INVALID`: `completed_at` fuera de 1960-01-01..hoy o no es una fecha real.
+- `CERTIFICATE_IMPORT_HONOR_INSTRUCTOR_NOT_ALLOWED`: instructor en una fila CLASS.
+- `CERTIFICATE_IMPORT_CLASS_CLUB_TYPE_MISMATCH`: `club_type_id` no coincide con el de la clase.
+- `CERTIFICATE_IMPORT_BATCH_NOT_DELETABLE` (409) y `CERTIFICATE_IMPORT_OCR_IN_PROGRESS` (409): borrado de borrador.
+- `HONOR_INSTRUCTOR_AMBIGUOUS`, `HONOR_INSTRUCTOR_INVALID`, `HONOR_INSTRUCTOR_SELF` (400): comparten código con «Mis especialidades».
 - `CERTIFICATE_IMPORT_YEAR_NOT_FOUND`
 - `CERTIFICATE_IMPORT_YEAR_AMBIGUOUS`
 - `CERTIFICATE_IMPORT_ITEM_MISSING_CLASS`

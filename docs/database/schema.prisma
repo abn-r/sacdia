@@ -1,7 +1,7 @@
 // ============================================================================
 // ESPEJO DOCUMENTAL de sacdia-backend/prisma/schema.prisma
-// Copiado de la rama development (commit 66f4ade) el 2026-10-04.
-// 248 modelos y 75 enums. NO editar aquí: la fuente de verdad es el schema del
+// Copiado de la rama development (commit 68123f6) el 2026-10-13.
+// 257 modelos y 79 enums. NO editar aquí: la fuente de verdad es el schema del
 // backend. Para resincronizar, volver a copiar el archivo completo y
 // actualizar esta cabecera.
 // ============================================================================
@@ -515,6 +515,14 @@ model certificate_bulk_import_items {
   reviewed_at         DateTime?                                         @db.Timestamptz(6)
   applied_entity_type certificate_bulk_import_applied_entity_type_enum?
   applied_entity_id   Int?
+  // M1 (20261010120000): instructor opcional, solo filas HONOR. CHECKs de exclusividad y el
+  // índice parcial idx_certificate_bulk_items_instructor_user viven en la migración.
+  instructor_user_id  String?                                           @db.Uuid
+  instructor_name     String?                                           @db.VarChar(150)
+  // M2 (20261010130000): dónde leyó el OCR la fila. Solo las escribe el parser. Sin CHECK entre
+  // ambas (ON DELETE SET NULL); CHECK source_page >= 1 e índice parcial en la migración.
+  source_file_id      String?                                           @db.Uuid
+  source_page         Int?                                              @db.SmallInt
   revision            Int                                               @default(0)
   active              Boolean                                           @default(true)
   created_at          DateTime                                          @default(now()) @db.Timestamptz(6)
@@ -524,6 +532,8 @@ model certificate_bulk_import_items {
   honor       honors?                               @relation(fields: [honor_id], references: [honor_id], onDelete: NoAction, onUpdate: NoAction)
   class       classes?                              @relation(fields: [class_id], references: [class_id], onDelete: NoAction, onUpdate: NoAction)
   reviewed_by users?                                @relation("certificate_import_item_reviewer", fields: [reviewed_by_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
+  instructor  users?                                @relation("certificate_import_item_instructor", fields: [instructor_user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
+  source_file certificate_bulk_import_files?        @relation("certificate_import_item_source_file", fields: [source_file_id], references: [file_id], onDelete: SetNull, onUpdate: NoAction)
   events      certificate_bulk_import_item_events[]
 
   @@index([batch_id], map: "idx_certificate_bulk_items_batch")
@@ -549,9 +559,12 @@ model certificate_bulk_import_files {
   size_bytes     BigInt?
   confirmed_at   DateTime?                               @db.Timestamptz(6)
   jurisdiction   certificate_import_file_jurisdiction_enum @default(CAMPO_LOCAL)
+  // M2 (20261010130000): se escribe al confirmar. NULL en archivos anteriores a M2.
+  page_count     Int?                                    @db.SmallInt
 
   batch       certificate_bulk_import_batches @relation(fields: [batch_id], references: [batch_id], onDelete: Cascade, onUpdate: NoAction)
   uploaded_by users                           @relation("certificate_import_file_uploader", fields: [uploaded_by_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
+  items_sourced certificate_bulk_import_items[] @relation("certificate_import_item_source_file")
   institutional_certificate_requests institutional_certificate_requests[]
 
   @@index([batch_id], map: "idx_certificate_bulk_files_batch")
@@ -1147,6 +1160,7 @@ model districts {
   institutional_name_versions             institutional_name_versions[]             @relation("institutional_name_versions_district")
   institutional_reorganization_participants institutional_reorganization_participants[] @relation("institutional_reorg_participants_district")
   coordination_zone_districts             coordination_zone_districts[]
+  district_investiture_pastors            district_investiture_pastors[]
   translations                            districts_translations[]
 
   @@index([local_field_id, active], map: "idx_districts_local_field_active")
@@ -1198,6 +1212,8 @@ model ecclesiastical_years {
   insurance_cycle_configs     insurance_cycle_configs[]
   activity_series             activity_series[]
   institutional_certificate_requests institutional_certificate_requests[]
+  local_field_class_thresholds local_field_class_thresholds[]
+  local_field_investiture_windows local_field_investiture_windows[]
 
   // Date-range queries: "find the active year for today" uses WHERE start_date <= ? AND end_date >= ?
   @@index([start_date, end_date], map: "idx_ecclesiastical_years_date_range")
@@ -1825,6 +1841,9 @@ model local_fields {
   districts                       districts[]
   folder_templates                folder_templates[]
   investiture_configs             investiture_config[]
+  local_field_class_thresholds    local_field_class_thresholds[]
+  local_field_investiture_windows local_field_investiture_windows[]
+  investiture_reminder_runs       investiture_reminder_runs[]
   local_camporees                 local_camporees[]
   certificate_bulk_import_batches certificate_bulk_import_batches[]
   unions                          unions                            @relation(fields: [union_id], references: [union_id], onDelete: NoAction, onUpdate: NoAction)
@@ -2544,11 +2563,16 @@ model users {
   class_section_progress                 class_section_progress[]
   class_counselor_assignments            class_counselor_assignments[]         @relation("class_counselor_assignee")
   class_counselor_assignments_assigned   class_counselor_assignments[]         @relation("class_counselor_assigned_by")
-  district_investiture_pastor_rows       district_investiture_pastors[]        @relation("district_investiture_pastor_user")
+  district_investiture_pastor_rows      district_investiture_pastors[]        @relation("district_investiture_pastor_user")
   certificate_bulk_import_batches        certificate_bulk_import_batches[]     @relation("certificate_import_batch_user")
   certificate_bulk_import_files          certificate_bulk_import_files[]       @relation("certificate_import_file_uploader")
   certificate_bulk_import_events         certificate_bulk_import_item_events[] @relation("certificate_import_event_performer")
   certificate_bulk_import_reviews        certificate_bulk_import_items[]       @relation("certificate_import_item_reviewer")
+  certificate_import_items_instructed    certificate_bulk_import_items[]       @relation("certificate_import_item_instructor")
+  honors_instructed                      users_honors[]                        @relation("user_honor_instructor")
+  honor_instructor_proposals_proposed    honor_instructor_proposals[]          @relation("honor_instructor_proposal_proposer")
+  honor_instructor_proposals_as_instructor honor_instructor_proposals[]        @relation("honor_instructor_proposal_instructor")
+  honor_instructor_proposals_reviewed    honor_instructor_proposals[]          @relation("honor_instructor_proposal_reviewer")
   institutional_certificate_requests     institutional_certificate_requests[]  @relation("institutional_certificate_request_owner")
   institutional_certificate_reviews      institutional_certificate_requests[]  @relation("institutional_certificate_request_reviewer")
   institutional_certificate_events       institutional_certificate_request_events[] @relation("institutional_certificate_event_performer")
@@ -3358,6 +3382,20 @@ model investiture_message_dispatches {
   @@index([status, kind], map: "idx_investiture_message_dispatches_status_kind")
 }
 
+/// BCR-5. Registro de la corrida diaria de recordatorios por Campo y rol. La fila
+/// existe cuando la corrida del día local ya ocurrió (aunque no hubiera pendientes);
+/// con ella no se generan recordatorios tardíos para destinatarios nuevos. La clave
+/// primaria hace idempotente la reclamación entre instancias concurrentes.
+model investiture_reminder_runs {
+  local_field_id Int
+  role           String       @db.VarChar(40)
+  local_date     String       @db.VarChar(10)
+  ran_at         DateTime     @default(now()) @db.Timestamptz(6)
+  local_fields   local_fields @relation(fields: [local_field_id], references: [local_field_id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([local_field_id, role, local_date], map: "investiture_reminder_runs_pkey")
+}
+
 model diseases {
   disease_id     Int                     @id @default(autoincrement())
   name           String                  @unique
@@ -3555,15 +3593,23 @@ model users_honors {
   validated_by_id                 String?                           @db.Uuid
   validated_at                    DateTime?                         @db.Timestamptz(6)
   rejection_reason                String?
+  // M1 (20261010120000): instructor opcional. CHECKs e índice parcial de conteo en la migración.
+  instructor_user_id              String?                           @db.Uuid
+  instructor_name                 String?                           @db.VarChar(150)
   certificate                     String                            @db.VarChar
   images                          Json                              @default("[]")
   document                        String?                           @db.VarChar
+  // `date` es la fecha de INICIO. Las filas de la carga por certificado anteriores a M5 guardaron ahí la de finalización.
   date                            DateTime                          @db.Date
+  // M5 (20261012130000): fecha de finalización. NULL en borrador; obligatoria al enviar a revisión. CHECK >= 1960-01-01 en la migración.
+  completed_at                    DateTime?                         @db.Date
   created_at                      DateTime?                         @default(now()) @db.Timestamptz(6)
   modified_at                     DateTime?                         @default(now()) @db.Timestamptz(6)
   honors                          honors                            @relation(fields: [honor_id], references: [honor_id], onDelete: NoAction, onUpdate: NoAction, map: "user_honors_honor_id_fkey")
   users                           users                             @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "user_honors_user_id_fkey")
   validator                       users?                            @relation("honor_validator", fields: [validated_by_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
+  instructor                      users?                            @relation("user_honor_instructor", fields: [instructor_user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
+  instructor_proposals              honor_instructor_proposals[]
   evidence_files                    evidence_files[]
   user_honor_requirement_progress   user_honor_requirement_progress[]
   certification_component_responses certification_component_responses[]
@@ -3572,6 +3618,38 @@ model users_honors {
   @@index([user_id], map: "idx_users_honors_user_id")
   @@index([validation_status], map: "idx_users_honors_validation_status")
   @@index([honor_id, active], map: "idx_users_honors_honor_active")
+}
+
+enum honor_instructor_proposal_status_enum {
+  PENDING
+  APPROVED
+  REJECTED
+  WITHDRAWN
+}
+
+// M4 (20261013100000): propuesta de instructor sobre una especialidad APPROVED (D11). users_honors
+// no se toca hasta aprobar. CHECKs (un solo instructor, nombre 3..150, revisor/fecha, motivo) e
+// índices parciales (uq_honor_instructor_proposals_pending, idx_honor_instructor_proposals_queue)
+// viven en la migración; Prisma no expresa los índices parciales.
+model honor_instructor_proposals {
+  proposal_id        String                                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_honor_id      Int
+  proposed_by_id     String                                @db.Uuid
+  instructor_user_id String?                               @db.Uuid
+  instructor_name    String?                               @db.VarChar(150)
+  status             honor_instructor_proposal_status_enum @default(PENDING)
+  rejection_reason   String?
+  reviewed_by_id     String?                               @db.Uuid
+  reviewed_at        DateTime?                             @db.Timestamptz(6)
+  created_at         DateTime                              @default(now()) @db.Timestamptz(6)
+  modified_at        DateTime                              @default(now()) @updatedAt @db.Timestamptz(6)
+
+  user_honor  users_honors @relation(fields: [user_honor_id], references: [user_honor_id], onDelete: NoAction, onUpdate: NoAction)
+  proposed_by users        @relation("honor_instructor_proposal_proposer", fields: [proposed_by_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
+  instructor  users?       @relation("honor_instructor_proposal_instructor", fields: [instructor_user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
+  reviewed_by users?       @relation("honor_instructor_proposal_reviewer", fields: [reviewed_by_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([user_honor_id, created_at(sort: Desc)], map: "idx_honor_instructor_proposals_honor")
 }
 
 model users_permissions {

@@ -207,6 +207,60 @@ El dominio separa **browse de catálogo**, **progresión del participante**, **c
 - **Auto-revisión prohibida:** el participante no puede aprobar/devolver/certificar su propio expediente → `403 CERT_REVIEW_SCOPE_FORBIDDEN`.
 - Fuera de scope → `403 CERT_REVIEW_SCOPE_FORBIDDEN` (sin filtrar existencia del registro).
 
+### Mutabilidad de inscripciones (2026-10-12, backend #477)
+
+- **Abandonar:** `DELETE /certifications/users/:userId/certifications/:certificationId` responde `409 CERT_ENROLLMENT_NOT_ABANDONABLE` en `CERTIFIED`, `APPROVED` y `SUBMITTED_FOR_FINAL_REVIEW`. Antes se podía esconder una certificación otorgada o en revisión final. En los demás estados abandonables la inscripción pasa a `WITHDRAWN` con `active=false` y deja evento `WITHDRAWN`. La escritura va condicionada al estado leído (`409 CERT_CONCURRENT_UPDATE` si un revisor la movió en medio).
+- **Reinscribir:** `enrollUser` rechaza (`409 CERT_ALREADY_ENROLLED`) cualquier fila histórica, aun inactiva, en esos tres estados; no se puede reinscribir sobre una certificación otorgada. `WITHDRAWN`/`EXPIRED` sí permiten reinscripción.
+- **Editar:** crear, editar o enviar requisitos y evidencias exige inscripción en `ENROLLED`, `IN_PROGRESS`, `CHANGES_REQUESTED` o `READY_FOR_CLOSEOUT` (`409 CERT_REQUIREMENT_LOCKED`, `details.entity = 'enrollment'`).
+- **Evidencia:** un componente `FILE_EVIDENCE` solo cuenta con una evidencia `CONFIRMED` y activa; una respuesta vacía creada por `presign` ya no basta.
+- **Revisión:** aprobar o devolver un requisito exige inscripción activa; sobre una abandonada responde `404 RECORD_NOT_FOUND`. Detalle y descarga siguen leyendo filas históricas dentro de scope.
+
+---
+
+## Especialidades de usuario, instructores y borrador de carga por certificado
+
+Desde 2026-10-12 (backend #471 a #480). Complementa el modelo de [honores](../features/honores.md) y de [carga masiva por certificados](../features/carga-masiva-certificados.md).
+
+### Cierre de SEC-1 y SEC-2: una especialidad `APPROVED` o `PENDING_REVIEW` no se reescribe
+
+- **SEC-1 (#471):** `POST /users/:userId/honors` y `POST /users/:userId/honors/bulk` reescribían los campos de una fila existente aunque estuviera `APPROVED` o `PENDING_REVIEW`. Ahora aplican `assertHonorIsMutable` antes de escribir: `400 VALIDATION_HONOR_INVALID_STATUS`. En `bulk`, un solo ítem bloqueado falla todo el lote sin escrituras parciales.
+- **SEC-2 (#472):** `DELETE /users/:userId/honors/:honorId` (abandonar) no tenía el guard, y reiniciar después con `POST .../:honorId` devolvía la especialidad a `IN_PROGRESS` y vaciaba validador, fechas y archivos. Ahora el abandono bloquea `APPROVED` y `PENDING_REVIEW` (mismo 400). `startHonor` sobre una fila inactiva en esos estados **solo restaura `active`**: no reinicia estado, validador, fechas, archivos ni instructor. Otras filas inactivas se reinician y borran `instructor_*` y `completed_at`.
+- La única escritura permitida sobre una especialidad aprobada es `users_honors.instructor_*` + `modified_at` al aprobar una propuesta de instructor (abajo).
+- La subida de archivos y el `PATCH` ya aplicaban el mismo guard.
+
+### Buscador de instructores acotado por Campo Local, sin correo
+
+`GET /instructor-candidates?q=` (`JwtAuthGuard` + `@SkipPermissions`, `@Throttle` 30 por minuto):
+
+- Devuelve solo usuarios `active`, `approval_status = 'approved'`, **mayores de 18 años** y con el **mismo `local_field_id` que quien consulta**, excluyendo a quien consulta. Quien no tiene Campo Local, o una consulta de menos de 3 caracteres (o con una palabra de menos de 2), recibe `[]`.
+- Busca solo por nombre y apellidos; nunca por correo. Máximo 10 resultados con `{ user_id, display_name, photo_url }`: sin correo, teléfono, fecha de nacimiento ni roles. `photo_url` es una URL firmada de 10 minutos.
+- La elegibilidad se evalúa otra vez al **guardar** (`InstructorsService.assertEligible`), contra el **dueño** de la especialidad o del lote, no contra quien llama, con la misma función que usa el buscador. Un solo código público (`HONOR_INSTRUCTOR_INVALID`) para usuario inexistente o fuera de alcance, para no revelar si existe. Una cuenta anonimizada pierde `active`, `birthday` y `local_field_id`, así que deja de ser elegible y se muestra como «Usuario eliminado».
+- El instructor externo es texto libre (3 a 150 caracteres, sin caracteres de control, espacios normalizados). El nombre libre no se copia a la auditoría: `validation_logs` y los eventos del lote guardan solo el tipo y, si es usuario, su id.
+- Los paneles de revisión (carga por certificado, evidencias, cola de propuestas) reciben el bloque `instructor` sin correo ni foto firmada.
+
+### Propuesta de instructor sobre una especialidad aprobada
+
+- Solo el dueño propone o retira (`403 HONOR_INSTRUCTOR_PROPOSAL_FORBIDDEN` para cualquier otro, aunque tenga permiso sobre el usuario): es una declaración personal. `@Throttle` 10 por minuto en el `POST`. Una sola propuesta `PENDING` por especialidad, garantizada por un índice único parcial: dos solicitudes simultáneas dejan una y la otra recibe `409 HONOR_INSTRUCTOR_PROPOSAL_NOT_PENDING`.
+- La decide el revisor del Campo Local (`@GlobalRoles('super-admin','admin','assistant-admin','director-lf','assistant-lf')` + `@SkipPermissions`, helper compartido `src/common/reviewer-scope`). `super-admin` y `admin`/`assistant-admin` sin Campo Local ven todo; quien tiene Campo Local ve solo propuestas cuyo **dueño actual** tiene ese `local_field_id`; fuera de él, `403 HONOR_INSTRUCTOR_PROPOSAL_FORBIDDEN`. La tabla no guarda un `local_field_id` propio para que el alcance siga al Campo vigente del miembro.
+- Al aprobar se revalida que la especialidad siga activa y `APPROVED` (`409 HONOR_INSTRUCTOR_PROPOSAL_NOT_APPROVED`) y que el instructor siga siendo elegible (`400 HONOR_INSTRUCTOR_INVALID`). La escritura sobre `users_honors` es `updateMany` condicionado a `active` y `APPROVED`, y solo toca `instructor_*` y `modified_at`.
+- Auditoría en `validation_logs`: `instructor_proposed`, `instructor_withdrawn`, `instructor_approved`, `instructor_rejected`. Restricciones en base: exactamente un instructor (usuario XOR nombre), revisor y fecha coherentes con el estado, motivo de rechazo no nulo de 3 a 500 caracteres.
+
+### Borrar un borrador de carga por certificado
+
+`DELETE /certificate-bulk-imports/:batchId` (`JwtAuthGuard` + `@SkipPermissions`):
+
+- Solo el dueño y solo un lote en `DRAFT`. Un lote ajeno o inexistente responde `404 CERTIFICATE_IMPORT_BATCH_NOT_FOUND` antes de revelar nada (ni siquiera si tiene un job de OCR vivo).
+- `409 CERTIFICATE_IMPORT_OCR_IN_PROGRESS` si hay lectura en cola o en curso (borrar debajo del worker lo haría fallar y gastaría cuota de Vision); `409 CERTIFICATE_IMPORT_BATCH_NOT_DELETABLE` si ya no es `DRAFT` o tiene solicitudes institucionales (son evidencia del trámite). El borrado es un `deleteMany` condicionado por dueño y `DRAFT`: si `submit` gana la carrera, no se borra nada.
+- Las filas, archivos y eventos del lote se borran en cascada, así que **no queda traza en base** de quién borró y cuándo; solo en el log estructurado. Los objetos de R2 (staging y sellados) se borran después del commit, con mejor esfuerzo.
+
+### Estado de OCR sin filtrar texto del documento
+
+`ocr_state` se deriva de eventos y del job, sin tabla. `ocr_error_code` solo publica códigos de una lista blanca (`OCR_PUBLIC_ERROR_CODES`); cualquier otro se publica como `CERTIFICATE_IMPORT_OCR_FAILED`. El evento `OCR_FAILED` guarda únicamente ese código: ni mensaje, ni texto OCR, ni URLs.
+
+### Endpoints públicos de catálogo
+
+`/honors*`, `/classes*` (catálogo) y `/catalogs/*` son `@Public()` + `OptionalJwtAuthGuard` desde la autenticación global del 2026-08-12. La referencia live los marcaba `JWT`; se corrigió el 2026-10-13. `GET /certificate-bulk-imports/catalog/classes` **no** es público: exige JWT.
+
 ---
 
 ## RBAC de órdenes de pago territoriales (field-payment-orders)

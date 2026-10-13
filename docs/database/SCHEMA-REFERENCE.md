@@ -1,8 +1,8 @@
 # Schema Reference - SACDIA Database
 
 **Estado**: ACTIVE
-**Sincronizado contra**: `sacdia-backend/prisma/schema.prisma` en la rama `development` (commit `66f4ade`)
-**Fecha de resincronizacion**: 2026-10-04 (última migración en `development`: `20260923170000_activity_audience`)
+**Sincronizado contra**: `sacdia-backend/prisma/schema.prisma` en la rama `development` (commit `68123f6`)
+**Fecha de resincronizacion**: 2026-10-13 (última migración en `development`: `20261013110000_remove_retired_investiture_permissions`). Las secciones de abajo se resincronizaron por completo hasta el 2026-10-04; después solo se añadieron las de instructor de especialidad y carga por certificado (2026-10-13). El espejo `schema.prisma` sí es la copia completa.
 
 Referencia humana concisa del schema Prisma vigente.
 
@@ -14,9 +14,9 @@ Referencia humana concisa del schema Prisma vigente.
 
 ## Cifras vigentes
 
-- **Modelos Prisma**: 248 (incluye 27 modelos `*_translations` de i18n)
-- **Enums Prisma**: 75
-- **Migraciones Prisma**: 171 directorios en `prisma/migrations/`
+- **Modelos Prisma**: 257 (incluye 27 modelos `*_translations` de i18n)
+- **Enums Prisma**: 79
+- **Migraciones Prisma**: 187 directorios en `prisma/migrations/`
 - **Tablas Better Auth mapeadas**: `session -> sessions`, `account -> accounts`, `verification -> verifications`
 
 ---
@@ -77,6 +77,55 @@ Referencia humana concisa del schema Prisma vigente.
 - La tabla `investiture_validation_history` se conserva y solo se lee; `investiture_config` también se conserva, sin lecturas ni escrituras por HTTP (sus rutas responden 410).
 - Una app o un panel viejos que listen el historial reciben un valor de `action` que no conocen. La app vieja lo muestra como «Enviado para validación».
 
+## Instructor de especialidad, fecha de finalización y carga por certificado (2026-10-13)
+
+> [!WARNING]
+> Cuatro migraciones aditivas del backend (#474, #475, #479 y #480). Estado por rama de Neon: `development` tiene M1, M2, M5 y M4; `staging` y `production`, ninguna (dato del responsable, no verificado desde el repositorio). Procedimiento y reglas en `docs/deployment/DEPLOYMENT-GUIDE.md` §0.4 y §0.5. Código nuevo sobre una base sin estas migraciones **falla**: migrar primero.
+
+### `users_honors`: instructor y fecha de finalización
+
+- `instructor_user_id uuid` (FK a `users`, `NO ACTION`) e `instructor_name varchar(150)`, ambos nullable (M1). CHECK: `users_honors_instructor_exclusive_ck` (como máximo uno) y `users_honors_instructor_name_ck` (nombre libre de 3 a 150 caracteres sin contar espacios de los extremos). Índice parcial `idx_users_honors_instructor_user_approved` sobre `instructor_user_id` donde `active` y `validation_status = 'APPROVED'` (conteo de «especialidades enseñadas»). El nombre de un instructor usuario no se copia: se lee en vivo de `users`.
+- `completed_at date` nullable (M5): fecha de **finalización**. `users_honors.date` sigue siendo la fecha de **inicio**. CHECK `users_honors_completed_at_min_ck` (`>= 1960-01-01`; sin cota superior, el «no futuro» lo valida el DTO). Backfill determinista en la migración: copia `date` a `completed_at` solo en filas `APPROVED` enlazadas por `applied_entity_id` a un ítem HONOR `APPROVED` cuyo `completed_at` es igual a `users_honors.date`; el resto (incluido el flujo normal) queda en `NULL`. La aprobación por certificado compara contra `completed_at ?? date`.
+- Enviar a revisión exige `completed_at` solo cuando `REQUIRE_HONOR_COMPLETED_AT_ON_SUBMIT` es `true`; hoy es `false` (la base no lo exige nunca).
+
+### `certificate_bulk_import_items` y `certificate_bulk_import_files`
+
+- Items, M1: `instructor_user_id` e `instructor_name` (misma forma y CHECK de exclusividad y de nombre que `users_honors`) más `certificate_bulk_import_items_instructor_honor_ck` (solo filas `HONOR` pueden llevar instructor). Índice parcial `idx_certificate_bulk_items_instructor_user`.
+- Items, M2: `source_file_id uuid` (FK a `certificate_bulk_import_files.file_id`, `ON DELETE SET NULL`: es una pista de navegación) y `source_page smallint` (CHECK `>= 1`). Sin CHECK entre ambas (con `SET NULL` bloquearía borrar el archivo) ni tope de páginas en la base (vive en `CERTIFICATE_IMPORT_MAX_PDF_PAGES`). Índice parcial `idx_certificate_bulk_items_source_file`. Solo las escribe el parser OCR; filas manuales o anteriores: `NULL`.
+- Files, M2: `page_count smallint` (CHECK `>= 1`), escrito al confirmar (imagen: 1). Archivos anteriores: `NULL`.
+- `ocr_state` y `ocr_error_code` **no** son columnas: se derivan de `certificate_bulk_import_item_events` (`OCR_QUEUED`, `OCR_PROCESSED`, `OCR_FAILED`) y del job de BullMQ.
+- El borrado de un borrador (`DELETE /certificate-bulk-imports/:batchId`) depende del `ON DELETE CASCADE` de items, files y events hacia el lote; las solicitudes institucionales no cascadean y bloquean el borrado.
+
+### `honor_instructor_proposals` (M4)
+
+Propuesta de instructor sobre una especialidad ya `APPROVED`. `users_honors` no se toca hasta aprobar.
+
+| Columna | Tipo | Notas |
+|---|---|---|
+| `proposal_id` | `uuid` PK | `gen_random_uuid()` |
+| `user_honor_id` | `int` | FK a `users_honors` (`NO ACTION`) |
+| `proposed_by_id` | `uuid` | FK a `users`; en v1 siempre el dueño |
+| `instructor_user_id` / `instructor_name` | `uuid` / `varchar(150)` | FK a `users`; exactamente uno de los dos |
+| `status` | `honor_instructor_proposal_status_enum` | `PENDING` (default), `APPROVED`, `REJECTED`, `WITHDRAWN` |
+| `rejection_reason` | `text` | obligatorio y no nulo si `REJECTED` |
+| `reviewed_by_id`, `reviewed_at` | `uuid`, `timestamptz` | presentes si y solo si `APPROVED` o `REJECTED` |
+| `created_at`, `modified_at` | `timestamptz` | `now()` |
+
+- CHECK: `honor_instructor_proposals_one_instructor_ck` (`(instructor_user_id IS NULL) <> (instructor_name IS NULL)`), `..._name_ck` (3 a 150), `..._review_ck` (revisor y fecha coherentes con el estado) y `..._reason_ck` (`status <> 'REJECTED' OR (rejection_reason IS NOT NULL AND longitud entre 3 y 500)`; el `IS NOT NULL` es explícito porque un `NULL` en el `BETWEEN` dejaría pasar el CHECK).
+- Índices: único parcial `uq_honor_instructor_proposals_pending` (`user_honor_id` donde `status = 'PENDING'`, una pendiente por especialidad), `idx_honor_instructor_proposals_queue` (`created_at` donde `PENDING`) e `idx_honor_instructor_proposals_honor` (`user_honor_id, created_at DESC`). Sin `CONCURRENTLY`: la tabla nace vacía y la migración corre con `prisma migrate deploy`.
+- Sin `local_field_id` propio: el alcance del revisor sale del Campo Local **actual** del dueño de la especialidad.
+
+### Migraciones de esta sección
+
+| # | Directorio | Contenido |
+|---|---|---|
+| M1 | `20261010120000_certificate_import_honor_instructor` | `instructor_*` en `certificate_bulk_import_items` y `users_honors`, FK, CHECK e índices parciales (con `CONCURRENTLY`) |
+| M2 | `20261010130000_certificate_import_ocr_pages` | `source_file_id`, `source_page`, `page_count`, FK `SET NULL`, CHECK e índice parcial (con `CONCURRENTLY`) |
+| M5 | `20261012130000_honors_completed_at` | `users_honors.completed_at`, CHECK >= 1960-01-01 y backfill |
+| M4 | `20261013100000_honor_instructor_proposals` | Enum y tabla `honor_instructor_proposals` |
+
+(M3, `detected_instructor_name`, era opcional y no se implementó.)
+
 ## Modelos añadidos a esta referencia (resincronización 2026-10-04)
 
 Resumen por grupo de modelos que ya estaban en el schema de `development` y faltaban en esta página.
@@ -110,6 +159,7 @@ Modelos Prisma en PascalCase mapeados a tablas snake_case: `MaterialCategory` (`
 
 - `certificate_bulk_import_batches`, `certificate_bulk_import_items`, `certificate_bulk_import_files` y `certificate_bulk_import_item_events` — lotes de importación masiva, archivos privados (OCR) y bitácora por ítem.
 - `institutional_certificate_requests` e `institutional_certificate_request_events` — bandeja institucional de solicitudes de certificado (migración `20260921190000_institutional_certificate_requests`).
+- Desde 2026-10-13, instructor opcional, archivo y página de origen en los ítems y `page_count` en los archivos: ver «Instructor de especialidad, fecha de finalización y carga por certificado».
 
 ### Reportes, operación y cuentas
 
@@ -261,6 +311,7 @@ Los GIN/parciales no caben en `@@index` de Prisma; el SQL de la migración es la
   - `EXTERNAL` — formato completado en `document` + evidencias generales; no depende del checklist para submit.
 - `users_honors.document` representa el formato completado en modo externo. `users_honors.images` conserva evidencias generales legacy/actuales con limite runtime de 10 imagenes totales.
 - `requirement_evidence` conserva evidencias puntuales por requisito para el modo `IN_APP`.
+- Desde 2026-10-13: `completed_at` (finalización), `instructor_user_id` e `instructor_name`; una fila `PENDING_REVIEW` o `APPROVED` no se reescribe desde la API (ver «Instructor de especialidad, fecha de finalización y carga por certificado»).
 
 ### `honors`, aplicabilidad y clases
 
@@ -665,7 +716,7 @@ Define el presupuesto de puntos por componente dentro de un eje anual:
 
 ### Honores y evidencias
 
-- `honors`, `honors_categories`, `master_honors`, `users_honors`
+- `honors`, `honors_categories`, `master_honors`, `users_honors`, `honor_instructor_proposals`
 - `honor_club_types`, `class_honors`, `class_prerequisites`
 - `honor_requirements`, `user_honor_requirement_progress`, `requirement_evidence`, `evidence_files`
 - `master_honor_divisions`, `master_honor_requirement_groups`, `master_honor_requirement_options`, `master_honor_requirement_option_honors`
@@ -728,6 +779,7 @@ Define el presupuesto de puntos por componente dentro de un eje anual:
 - `master_honor_applicability_scope_enum`
 - `master_honor_requirement_group_type_enum`
 - `honor_completion_mode_enum` (`UNDECIDED`, `IN_APP`, `EXTERNAL`)
+- `honor_instructor_proposal_status_enum` (`PENDING`, `APPROVED`, `REJECTED`, `WITHDRAWN`)
 - `folder_template_status_enum` (`DRAFT`, `PUBLISHED`, `ARCHIVED`)
 - `honor_validation_status_enum`
 - `insurance_type_enum`
@@ -761,6 +813,10 @@ Define el presupuesto de puntos por componente dentro de un eje anual:
 
 ## Migraciones recientes
 
+- `20261013100000_honor_instructor_proposals` (M4) - enum y tabla `honor_instructor_proposals`; índices sin `CONCURRENTLY` desde #485.
+- `20261012130000_honors_completed_at` (M5) - `users_honors.completed_at`, CHECK >= 1960-01-01 y backfill determinista.
+- `20261010130000_certificate_import_ocr_pages` (M2) - `page_count`, `source_page` y `source_file_id`.
+- `20261010120000_certificate_import_honor_instructor` (M1) - instructor opcional en ítems de importación y en `users_honors`.
 - `20260923170000_activity_audience` y `20260923160000_activity_rsvp` - audiencia y RSVP de actividades.
 - `20260921190000_institutional_certificate_requests` - bandeja institucional de solicitudes de certificado.
 - `20260921180000_certificate_import_revision` y `20260921170000_certificate_import_private_files` - revisión y archivos privados de la importación de certificados.

@@ -86,6 +86,34 @@ Neon ramas staging y production: existen y están migradas, sin uso.
 - **Migrar en el build tiene un costo:** la migración corre después de compilar pero antes de arrancar la versión nueva. Si el deploy falla después (por ejemplo, el arranque), la migración ya quedó aplicada y la versión anterior sigue corriendo contra el esquema nuevo. Por eso cada migración debe ser **compatible con el código anterior** (aditiva; borrar columnas o tablas en un deploy posterior al que dejó de usarlas).
 - La shadow DB no es fiable en este proyecto: las migraciones se escriben a mano y se aplican con `migrate deploy`.
 
+### 0.5 Migraciones de instructor de especialidad y carga por certificado (2026-10-13)
+
+Cuatro migraciones aditivas del backend, mergeadas el 2026-10-12 y 2026-10-13. Detalle de columnas y tabla en `docs/database/SCHEMA-REFERENCE.md`.
+
+| # | Directorio (`sacdia-backend/prisma/migrations/`) | Usa `CONCURRENTLY` | `development` | `staging` | `production` |
+|---|---|---|---|---|---|
+| M1 | `20261010120000_certificate_import_honor_instructor` | Sí (2 índices) | Aplicada | No aplicada | No aplicada |
+| M2 | `20261010130000_certificate_import_ocr_pages` | Sí (1 índice) | Aplicada | No aplicada | No aplicada |
+| M5 | `20261012130000_honors_completed_at` | No | Aplicada | No aplicada | No aplicada |
+| M4 | `20261013100000_honor_instructor_proposals` | No (desde #485) | Aplicada | No aplicada | No aplicada |
+
+> [!WARNING]
+> El estado de `staging` y `production` es el que informó el responsable el 2026-10-13; no se verificó contra `_prisma_migrations`. El encabezado de M4 dice además que su checksum se actualizó «en las tres ramas de Neon» tras recuperarla a mano el 2026-10-12, lo que no coincide con «no aplicada». Antes de promover, comprobar en cada rama: `SELECT migration_name, finished_at, rolled_back_at FROM _prisma_migrations WHERE migration_name IN ('20261010120000_certificate_import_honor_instructor','20261010130000_certificate_import_ocr_pages','20261012130000_honors_completed_at','20261013100000_honor_instructor_proposals');`
+>
+> «Existen y están migradas» en §0 y §0.2 vale para las migraciones anteriores a estas cuatro.
+
+**Código nuevo sobre una base sin estas migraciones falla** (columnas y tabla inexistentes). Ningún servicio usa `staging` ni `production` hoy, así que no hay caída; aplicar las cuatro **antes** de apuntar un servicio a esas ramas.
+
+**Procedimiento para `staging` y `production`** (con aprobación; cadena **directa**, sin `-pooler`, tomada de una variable de entorno; no pegar cadenas de conexión en docs, tickets ni chats):
+
+1. Orden: M1, M2, M5 y M4. M1 y M2 son independientes entre sí; M4 necesita M1 porque aprobar una propuesta escribe `users_honors.instructor_*`.
+2. M1 y M2: `psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f prisma/migrations/<directorio>/migration.sql`, **sin** `-1` ni `--single-transaction` y sin envolver el archivo en `BEGIN/COMMIT`: `CREATE INDEX CONCURRENTLY` no corre dentro de una transacción. Con `-f` cada sentencia corre en la suya. **No usar `prisma migrate deploy` para M1 y M2**: ejecuta el archivo como un solo lote y fallaría con P3018 / 25001, como le pasó a M4 antes de #485.
+3. M5 y M4 no usan `CONCURRENTLY`: se pueden aplicar con el mismo `psql -v ON_ERROR_STOP=1 -f` o con `prisma migrate deploy`.
+4. Todas son re-ejecutables (`IF NOT EXISTS`, `DROP CONSTRAINT IF EXISTS`). Si un `CREATE INDEX CONCURRENTLY` falla a medias queda un índice `INVALID`: `DROP INDEX CONCURRENTLY <nombre>;` y volver a correr el archivo.
+5. Registrar cada una en `_prisma_migrations` si se aplicó con `psql`: `corepack pnpm exec prisma migrate resolve --applied <directorio>` con `DATABASE_URL` y `DATABASE_DIRECT_URL` de esa rama. Sin este paso, un `migrate deploy` posterior intentaría correrla de nuevo.
+6. Verificar: `SELECT indexrelid::regclass FROM pg_index WHERE NOT indisvalid;` debe estar vacío para los índices nuevos, y `SELECT conname, convalidated FROM pg_constraint WHERE conname ~ '(instructor|source_|page_count|completed_at)';` debe mostrar todo validado. Para M5: `SELECT count(*) FILTER (WHERE completed_at IS NOT NULL) AS con_fecha, count(*) AS total FROM users_honors WHERE validation_status = 'APPROVED';`
+7. Rollback: solo hacia adelante. Antes de que haya datos reales, `DROP INDEX`, `DROP CONSTRAINT` y `DROP COLUMN` en orden inverso (M4: `DROP TABLE honor_instructor_proposals; DROP TYPE honor_instructor_proposal_status_enum;`).
+
 ---
 
 ## 1. Entornos y ramas
