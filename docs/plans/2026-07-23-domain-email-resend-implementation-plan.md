@@ -1,5 +1,7 @@
 # Domain Email with Resend Implementation Plan
 
+> **Estado (2026-10-13):** implementado. Validación de entorno de Resend (`EMAIL_ENABLED`, `RESEND_API_KEY`, `RESEND_FROM_EMAIL`) en `sacdia-backend/src/config/env.validation.ts`, límite de 90 trabajos por 24 horas en `src/common/email/email.processor.ts` y la guía operativa `docs/guides/domain-email-operations.md` (ACTIVE, verificada el 2026-07-23). Mergeado en sacdia-backend #186. Los pasos manuales (Cloudflare Email Routing, Resend, Gmail SMTP, variables de Render) no son verificables desde el código; la guía operativa los da por hechos a esa fecha. El diseño hermano está en `docs/history/plans/2026-07-23-domain-email-resend-design.md`.
+
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
 **Goal:** Activar el correo automático de SACDIA con

@@ -1,5 +1,7 @@
 # Inscripción de sección a Camporí — Diseño
 
+> **Estado (2026-10-13):** implementado. Backend: `GET` y `POST /camporees/:camporeeId/section-registration`, migración `20260713220000_camporee_section_registration_context` y la FK `camporee_members.camporee_club_id` (sacdia-backend #175, 2026-07-15). App: modelos, panel y hoja de inscripción en `lib/features/camporees/` (sacdia-app #117). Cumple las decisiones aprobadas de este diseño (inscripción contextual del director sin enviar `club_section_id`). Un diseño hermano está en `docs/history/plans/` con el mismo contenido.
+
 **Estado:** APROBADO
 
 **Fecha:** 2026-07-13
