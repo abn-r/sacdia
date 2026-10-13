@@ -125,7 +125,7 @@ Notas:
 
 - `institutional-history` solo contiene el dominio y políticas del PR1 (sin controller); ver `docs/plans/2026-07-23-institutional-history-implementation-plan.md`.
 - El módulo legacy `folders` no tiene controller; los modelos `folders*` siguen en el schema (ver `docs/history/canon/runtime-user-folders.md` y `decisiones-clave.md` §19).
-- La autorización de investidura por umbral, las ventanas/solicitudes de investidura por campo local y el OCR de Vision con ADC/PDF están en la rama de backend `feat/investiture-authorization-ocr` (PR #448), **pendiente de merge**. No forman parte de `development`.
+- La autorización de investidura por umbral, las ventanas/solicitudes de investidura por campo local y el OCR de Vision con ADC/PDF entraron a `development` con el PR #448 de sacdia-backend (rama `feat/investiture-authorization-ocr`, mergeada). La autorización por solicitud quedó completa con #465, #466, #468 y #469 (ver `docs/features/validacion-investiduras.md`).
 
 ---
 
@@ -358,7 +358,7 @@ Detalle operativo de infraestructura (logging, rate limiting, seguridad global) 
 ## 11. Límites de este documento
 
 - No reemplaza a `ENDPOINTS-LIVE-REFERENCE.md` para el contrato por endpoint ni al schema para la estructura de datos.
-- No describe como vigente trabajo que vive fuera de `development` (por ejemplo, el PR #448 de sacdia-backend).
+- No describe como vigente trabajo que vive fuera de `development` (por ejemplo, un PR abierto sin merge).
 - No usa `docs/history/` como fuente.
 
 ---

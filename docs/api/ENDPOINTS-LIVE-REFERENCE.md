@@ -52,7 +52,7 @@ Conteo de filas por sección de la matriz. Las filas marcadas como pendientes de
 | OAuth | 5 |
 | camporee-event-templates | 5 |
 | camporee-events | 16 |
-| camporee-scoring | 19 (+1 pendiente de merge, PR #448) |
+| camporee-scoring | 20 (el `GET .../score` entró con el PR #448) |
 | camporee-staff | 8 |
 | camporee-venues | 9 |
 | camporees | 50 |
@@ -65,10 +65,10 @@ Conteo de filas por sección de la matriz. Las filas marcadas como pendientes de
 | Admin - Certifications | 10 |
 | class-counselor-assignments | 4 |
 | class-progress-scope | 2 |
-| class-thresholds (pendiente de merge, PR #448) | 2 |
-| investiture-windows (pendiente de merge, PR #448) | 2 |
-| investiture-pastors (pendiente de merge, PR #448) | 6 |
-| investiture-requests (pendiente de merge, PR #448) | 8 |
+| class-thresholds | 2 |
+| investiture-windows | 2 |
+| investiture-pastors | 6 |
+| investiture-requests | 8 |
 | classes | 4 |
 | user-classes | 7 |
 | club-enrollments | 7 |
@@ -717,7 +717,7 @@ POST/PATCH de instancia aceptan `honor_ids?: number[]` (máx. 20, únicos, honor
 | PATCH | `/api/v1/camporee-event-judge-assignments/:assignmentId` | JWT | - | Actualizar camporee-event-judge-assignments/{id} | CamporeeScoringService.updateJudgeAssignment() | `src/camporee-scoring/camporee-scoring.controller.ts` |
 | DELETE | `/api/v1/camporee-event-judge-assignments/:assignmentId` | JWT | - | Eliminar/desactivar camporee-event-judge-assignments/{id} | CamporeeScoringService.deactivateJudgeAssignment() | `src/camporee-scoring/camporee-scoring.controller.ts` |
 | GET | `/api/v1/camporee-events/:eventId/scoring-targets` | JWT | - | List enrolled sections that can receive scores; each row includes `active_result_id` (`null` if the section has no official result yet) | CamporeeScoringService.getScoringTargets() | `src/camporee-scoring/camporee-scoring.controller.ts` |
-| GET | `/api/v1/camporee-events/:eventId/sections/:clubSectionId/score` | JWT | - | **Pendiente de merge (PR #448 de sacdia-backend)**: en `development` solo existe el `POST .../scores`. Active official score for one section, or `data: null` when none exists. Includes items, totals and `evaluator_name` | CamporeeScoringService.getOfficialScore() | `src/camporee-scoring/camporee-scoring.controller.ts` |
+| GET | `/api/v1/camporee-events/:eventId/sections/:clubSectionId/score` | JWT | - | Mergeado con el PR #448 de sacdia-backend (antes solo existía el `POST .../scores`). Active official score for one section, or `data: null` when none exists. Includes items, totals and `evaluator_name` | CamporeeScoringService.getOfficialScore() | `src/camporee-scoring/camporee-scoring.controller.ts` |
 | POST | `/api/v1/camporee-events/:eventId/sections/:clubSectionId/scores` | JWT | Header opcional `Idempotency-Key: <UUID>`; juez primary o override autorizado | Submit official camporee score/no-show with serialized target and replay-safe receipt | CamporeeScoringService.submitScore() | `src/camporee-scoring/camporee-scoring.controller.ts` |
 
 #### Contrato de captura oficial de score
@@ -1455,7 +1455,7 @@ Read model de solo lectura. No fusiona folios ni muta `field_payment_orders`, `m
 
 ### investiture
 
-Fase 8 (2026-10-09): la vía club → coordinación → campo está apagada en el código de la rama `feat/investiture-legacy-shutdown`, sin desplegar. Las 17 rutas marcadas «Retirada» responden HTTP 410 con el código estable `INVESTITURE_LEGACY_PIPELINE_RETIRED`, sin exigir permisos ni roles (solo el JWT global): ningún actor recibe un 403 que oculte el 410. Incluye las lecturas `GET /investiture/pending` y `GET /admin/investiture/config*`. Siguen vivos el historial (`GET /investiture/enrollments/:enrollmentId/history` y su alias), `expire-overdue` y el desbloqueo de abajo. Los 17 handlers están en `LegacyInvestitureRetiredController`; no leen cuerpo ni parámetros. El `message` sale del catálogo de errores del idioma de la petición; una app o un panel viejos que no mandan `Accept-Language` lo reciben en español. El inventario histórico y el tratamiento de cada expediente están en `docs/features/validacion-investiduras.md`, sección «Fase 8 — apagado». Los permisos `investiture:submit`, `investiture:validate`, `investiture:mark_invested` e `investiture_config:*` quedan inertes (siguen en seeds y base). `investiture:read` sigue en uso: lo exigen las dos lecturas del historial. Nada está desplegado, las migraciones `20261008120000` y `20261009120000` no están aplicadas en Neon y el desbloqueo no se ejecutó en ningún entorno.
+Fase 8 (ejecutada en código el 2026-10-09; mergeada en `development` con backend #468 y #469): la vía club → coordinación → campo está apagada y desplegada en el backend vivo. Las 17 rutas marcadas «Retirada» responden HTTP 410 con el código estable `INVESTITURE_LEGACY_PIPELINE_RETIRED`, sin exigir permisos ni roles (solo el JWT global): ningún actor recibe un 403 que oculte el 410. Incluye las lecturas `GET /investiture/pending` y `GET /admin/investiture/config*`. Siguen vivos el historial (`GET /investiture/enrollments/:enrollmentId/history` y su alias), `expire-overdue` y el desbloqueo de abajo. Los 17 handlers están en `LegacyInvestitureRetiredController`; no leen cuerpo ni parámetros. El `message` sale del catálogo de errores del idioma de la petición; una app o un panel viejos que no mandan `Accept-Language` lo reciben en español. El inventario histórico y el tratamiento de cada expediente están en `docs/features/validacion-investiduras.md`, sección «Fase 8 — apagado». Los permisos `investiture:submit`, `investiture:validate`, `investiture:mark_invested` e `investiture_config:*` quedaron inertes con la fase 8 y se eliminaron del catálogo y de las concesiones con la migración `20261013110000_remove_retired_investiture_permissions` (backend #488, aplicada el 2026-10-13). `investiture:read` sigue en uso: lo exigen las dos lecturas del historial. Las migraciones `20261008120000` y `20261009120000` están aplicadas en las tres ramas de Neon y el `dry_run` del desbloqueo en `development` dio 0 candidatos; no se corrió `dry_run: false` en ningún entorno.
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |

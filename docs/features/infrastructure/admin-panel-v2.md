@@ -1,6 +1,6 @@
 # Panel Administrativo v2
 
-> **Estado (2026-10-13):** superado. El panel v2 en paralelo (`/v2/dashboard/*`, `(dashboard-v2)`, `studio-shell`, `scaffold:v2`) se retiró cuando el panel adoptó Studio Admin como único shell (sacdia-admin, commit `2458e7b` del 2026-07-24, tras `6bed06e`). En `origin/development` ya no existen esas carpetas ni el script; `/dashboard/v2` solo redirige a `/dashboard`. Este documento queda como historia: no describe el panel vigente (ver `sacdia-admin/CLAUDE.md` y `DESIGN-SYSTEM.md`). Hay otra copia en `docs/history/features/admin-panel-v2.md`.
+> **Estado (2026-10-13):** superado. El panel v2 en paralelo (`/v2/dashboard/*`, `(dashboard-v2)`, `studio-shell`, `scaffold:v2`) se retiró cuando el panel adoptó Studio Admin como único shell (sacdia-admin, commit `2458e7b` del 2026-07-24, tras `6bed06e`). En `origin/development` ya no existen esas carpetas ni el script; `/dashboard/v2` solo redirige a `/dashboard`. Este documento queda como historia: no describe el panel vigente (ver `sacdia-admin/CLAUDE.md` y `DESIGN-SYSTEM.md`). Este es el único ejemplar (la copia de `docs/history/` se eliminó el 2026-10-13).
 
 Panel Studio Admin en paralelo al panel v1, sin reemplazarlo.
 

@@ -21,10 +21,10 @@ Referencia humana concisa del schema Prisma vigente.
 
 ---
 
-## Pendiente de merge (PR #448 de sacdia-backend)
+## Autorización de investidura por solicitud (PR #448 de sacdia-backend, mergeado)
 
 > [!WARNING]
-> Las tablas de esta sección **no existen en `development`**. Están en la rama `feat/investiture-authorization-ocr` (PR #448 de sacdia-backend), junto con sus migraciones (`20260930120000_local_field_class_thresholds`, `20261001130000_local_field_investiture_windows`, `20261001143000_district_investiture_pastors`, `20261001193000_investiture_authorization_requests` y `20261002183000_investiture_authorization_resolution`). Tampoco están en `docs/database/schema.prisma`, que es espejo de `development`. Pasarán a vigentes cuando el PR se integre.
+> Las tablas de esta sección están en `development` desde el PR #448 de sacdia-backend (rama `feat/investiture-authorization-ocr`), junto con sus migraciones (`20260930120000_local_field_class_thresholds`, `20261001130000_local_field_investiture_windows`, `20261001143000_district_investiture_pastors`, `20261001193000_investiture_authorization_requests` y `20261002183000_investiture_authorization_resolution`), y están aplicadas en las tres ramas de Neon (2026-10-13). `docs/database/schema.prisma` las refleja.
 
 ### `local_field_class_thresholds` (2026-09-30)
 
@@ -51,14 +51,14 @@ Referencia humana concisa del schema Prisma vigente.
 - No sustituye el rol global `pastor` ni cierra el pipeline anterior.
 - `user_id` referencia `users.user_id` con `ON DELETE RESTRICT` y `ON UPDATE NO ACTION`. La relación Prisma se llama `district_investiture_pastor_user`. Si el usuario pierde el rol global `pastor`, la fila sigue `active` y sigue contando para el cupo. El listado la devuelve con `can_authorize` false y `role_missing` true. Si la cuenta está eliminada (`users.active = false`), la fila también sigue `active` y ocupando cupo, y el listado la devuelve con `can_authorize` false y `account_inactive` true. En ambos casos no entra en los autorizadores del club, no autoriza y no recibe correos.
 - Cambio de Campo (2026-10-08): dos triggers `AFTER UPDATE OF local_field_id` desactivan (`active = false`, `modified_at = now()`) las asignaciones activas cuyo pastor y distrito dejan de estar en el mismo Campo. `trg_users_drop_district_pastors_on_field_change` en `users` (función `drop_district_pastors_on_user_field_change`) cubre que el pastor cambie de Campo o quede sin Campo, como en la eliminación de cuenta; `trg_districts_drop_district_pastors_on_field_change` en `districts` (función `drop_district_pastors_on_district_field_change`) cubre que el distrito pase a otro Campo. Solo disparan si el valor cambia; no borran filas y liberan el cupo. La migración también desactiva una vez las filas activas que ya cruzaban Campos. Los triggers no están en `schema.prisma`. Reactivar sigue regido por `INVESTITURE_PASTOR_FIELD_MISMATCH`. Por eso una cuenta eliminada que pierde su Campo ya no sigue ocupando cupo.
-- Migraciones: `sacdia-backend/prisma/migrations/20261001143000_district_investiture_pastors/migration.sql`, `sacdia-backend/prisma/migrations/20261007180000_district_investiture_pastor_user_fk/migration.sql` y `sacdia-backend/prisma/migrations/20261008120000_district_pastor_field_change/migration.sql` (sin aplicar en Neon). La llave foránea no está aplicada en Neon. En la base de prueba reconstruida no había huérfanos; la restricción es `district_investiture_pastors_user_id_fkey`.
+- Migraciones: `sacdia-backend/prisma/migrations/20261001143000_district_investiture_pastors/migration.sql`, `sacdia-backend/prisma/migrations/20261007180000_district_investiture_pastor_user_fk/migration.sql` y `sacdia-backend/prisma/migrations/20261008120000_district_pastor_field_change/migration.sql` (aplicada en las tres ramas de Neon). La llave foránea también está aplicada en Neon. En la base de prueba reconstruida no había huérfanos; la restricción es `district_investiture_pastors_user_id_fkey`.
 
 ### `investiture_authorization_requests` e `investiture_authorization_people` (2026-10-01)
 
 - Tablas nuevas, no aplicadas a producción en este cambio.
 - Una solicitud pertenece a una sección y a un año. Las personas guardan clase, enrollment, fecha y estado.
 - Estados: `PENDING`, `INVESTED`, `REJECTED_BY_PERSON`, `REJECTED_BY_SYSTEM`, `REMOVED`, `CLOSED_YEAR`.
-- `authorization_comment`, `rejection_reason` y `system_reason` guardan el comentario opcional, el motivo humano y el texto largo del sistema. `date_changed_by_id` y `date_changed_at` guardan quién corrigió la fecha y el instante del reloj de la aplicación. Esas dos columnas están en `sacdia-backend/prisma/migrations/20261007180100_investiture_date_change_audit/migration.sql` y no están aplicadas en Neon. La lectura de la persona no devuelve el motivo humano ni el texto largo, y colapsa los dos rechazos. Autorizar escribe `INVESTED` y pasa el enrollment a `INVESTIDO` sin `FIELD_APPROVED`. El rechazo humano escribe `REJECTED_BY_PERSON` y no cambia el enrollment. Quien ya no cumple queda `REJECTED_BY_SYSTEM` con `resolution_code` `REQUIREMENTS`.
+- `authorization_comment`, `rejection_reason` y `system_reason` guardan el comentario opcional, el motivo humano y el texto largo del sistema. `date_changed_by_id` y `date_changed_at` guardan quién corrigió la fecha y el instante del reloj de la aplicación. Esas dos columnas están en `sacdia-backend/prisma/migrations/20261007180100_investiture_date_change_audit/migration.sql` y están aplicadas en las tres ramas de Neon (2026-10-13). La lectura de la persona no devuelve el motivo humano ni el texto largo, y colapsa los dos rechazos. Autorizar escribe `INVESTED` y pasa el enrollment a `INVESTIDO` sin `FIELD_APPROVED`. El rechazo humano escribe `REJECTED_BY_PERSON` y no cambia el enrollment. Quien ya no cumple queda `REJECTED_BY_SYSTEM` con `resolution_code` `REQUIREMENTS`.
 - `single_slot` true es Aventureros o Conquistadores regulares: una fila `PENDING` por persona. false es la excepción de Guía Mayor: una `PENDING` por persona y clase.
 - `CLOSED_YEAR` es el pendiente que cerró el año, no un rechazo. No guarda el texto de falta de requisitos. `POST /api/v1/year-end/:yearId/close` y el corte automático lo escriben. Presentar y agregar toman el candado de ese año antes de insertar y vuelven a leer si el año sigue abierto. El corte también alcanza un club cuyo único pendiente es una solicitud de un año terminado. Repetir el cierre no cambia `INVESTED` ni crea otra solicitud en el año siguiente. El recordatorio deja de incluir esa fila porque ya no está `PENDING`.
 - Quitar usa `resolution_code` `REMOVED`. Un pendiente de alguien que ya está `INVESTIDO` en esa clase pasa a `REMOVED` con `resolution_code` `ALREADY_INVESTED`.
@@ -72,7 +72,7 @@ Referencia humana concisa del schema Prisma vigente.
 
 ### `investiture_validation_history` y `LEGACY_LOCK_RELEASED` (fase 8, 2026-10-09)
 
-- Valor nuevo de `investiture_action_enum`: `LEGACY_LOCK_RELEASED`. Migración `sacdia-backend/prisma/migrations/20261009120000_investiture_legacy_lock_release_action/migration.sql` (`ALTER TYPE ... ADD VALUE IF NOT EXISTS`). Implementada en la rama `feat/investiture-legacy-shutdown`, sin aplicar en ningún entorno de Neon.
+- Valor nuevo de `investiture_action_enum`: `LEGACY_LOCK_RELEASED`. Migración `sacdia-backend/prisma/migrations/20261009120000_investiture_legacy_lock_release_action/migration.sql` (`ALTER TYPE ... ADD VALUE IF NOT EXISTS`). Mergeada con backend #469 y aplicada en `development`, `staging` y `production` de Neon (2026-10-13).
 - Solo la escribe `POST /api/v1/admin/investiture/legacy-locks/release` cuando suelta `locked_for_validation`: una fila por enrollment liberado, con `performed_by` el `super-admin` que corrió la operación y un comentario fijo. El `investiture_status` del enrollment no cambia.
 - La tabla `investiture_validation_history` se conserva y solo se lee; `investiture_config` también se conserva, sin lecturas ni escrituras por HTTP (sus rutas responden 410).
 - Una app o un panel viejos que listen el historial reciben un valor de `action` que no conocen. La app vieja lo muestra como «Enviado para validación».
@@ -731,7 +731,7 @@ Define el presupuesto de puntos por componente dentro de un eje anual:
 - `folder_template_status_enum` (`DRAFT`, `PUBLISHED`, `ARCHIVED`)
 - `honor_validation_status_enum`
 - `insurance_type_enum`
-- `investiture_action_enum` (incluye `LEGACY_LOCK_RELEASED`, migración `20261009120000_investiture_legacy_lock_release_action`, sin aplicar en Neon; la escribe solo el desbloqueo de la vía anterior de la fase 8 y no cambia `investiture_status`)
+- `investiture_action_enum` (incluye `LEGACY_LOCK_RELEASED`, migración `20261009120000_investiture_legacy_lock_release_action`, aplicada en las tres ramas de Neon; la escribe solo el desbloqueo de la vía anterior de la fase 8 y no cambia `investiture_status`)
 - `investiture_status_enum`
 - `origin_level_enum`
 - `user_master_honor_status_enum`

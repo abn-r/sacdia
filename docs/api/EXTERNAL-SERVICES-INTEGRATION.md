@@ -113,7 +113,7 @@ RESEND_REPLY_TO=contacto@sacdia.com
 - ✅ Proveedor `src/certificate-bulk-imports/ocr/google-vision-certificate-ocr.provider.ts`, registrado como `CERTIFICATE_OCR_PROVIDER` en `CertificateBulkImportsModule`.
 - ✅ Procesamiento asíncrono en la cola `certificate-import-ocr` cuando BullMQ está configurado.
 - Autenticación por `GOOGLE_VISION_API_KEY` (opcional en `env.validation.ts`). Si falta, la extracción responde `400 CERTIFICATE_IMPORT_OCR_UNAVAILABLE`.
-- La variante con ADC y `pdf-lib` está en la rama `feat/investiture-authorization-ocr` (**pendiente de merge, PR #448 de sacdia-backend**).
+- La variante con ADC y `pdf-lib` entró a `development` con el PR #448 de sacdia-backend (rama `feat/investiture-authorization-ocr`, ya mergeada).
 
 ---
 

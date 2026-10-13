@@ -56,7 +56,7 @@
 | `camporee-supplies` | [camporee-supplies.md](camporee-supplies.md) | Documento presente | `IMPLEMENTADO PARCIAL` |
 | `camporee-venues` | [camporee-venues.md](camporee-venues.md) | Documento presente | `IMPLEMENTADO` |
 | `camporees` | [camporees.md](camporees.md) | Documento presente | `IMPLEMENTADO` |
-| `carga-masiva-certificados` | [carga-masiva-certificados.md](carga-masiva-certificados.md) | Documento presente | `IMPLEMENTADO` (OCR con ADC y `pdf-lib`: pendiente de merge, PR #448) |
+| `carga-masiva-certificados` | [carga-masiva-certificados.md](carga-masiva-certificados.md) | Documento presente | `IMPLEMENTADO` (OCR con ADC y `pdf-lib`, PR #448 mergeado) |
 | `carpetas-evidencias` | [carpetas-evidencias.md](carpetas-evidencias.md) | Documento presente | `DEPRECATED` |
 | `catalogos` | [catalogos.md](catalogos.md) | Documento presente | `IMPLEMENTADO` |
 | `certificaciones-guias-mayores` | [certificaciones-guias-mayores.md](certificaciones-guias-mayores.md) | Documento presente | `IMPLEMENTADO` |
@@ -95,7 +95,7 @@
 | `system-config` | [system-config.md](system-config.md) | Documento presente | `IMPLEMENTADO` |
 | `units` | [units.md](units.md) | Documento presente | `IMPLEMENTADO` |
 | `validacion-evidencias` | [validacion-evidencias.md](validacion-evidencias.md) | Documento presente | `IMPLEMENTADO` |
-| `validacion-investiduras` | [validacion-investiduras.md](validacion-investiduras.md) | Documento presente | `IMPLEMENTADO` (ventanas, cupo de pastores y solicitudes: pendiente de merge, PR #448). Fase 8, apagado de la vía anterior (rutas en 410, pantallas borradas, desbloqueo): implementada en código, sin desplegar |
+| `validacion-investiduras` | [validacion-investiduras.md](validacion-investiduras.md) | Documento presente | `IMPLEMENTADO` (ventanas, cupo de pastores y solicitudes mergeados con el PR #448; panel y app mergeados; fase 8, apagado de la vía anterior con rutas en 410, pantallas borradas y desbloqueo: mergeada, desplegada y migrada en Neon, 2026-10-13) |
 | `weekly-records` | [weekly-records.md](weekly-records.md) | Documento presente | `IMPLEMENTADO` |
 
 ## Documentos complementarios

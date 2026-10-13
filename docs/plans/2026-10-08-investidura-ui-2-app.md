@@ -1,5 +1,7 @@
 # Investidura por autorización — Pantallas de la app (Plan 2)
 
+> **Estado (2026-10-13): ENTREGADO.** Pantallas de la app mergeadas en `development` en sacdia-app #157 (fundación), #158 (tablero), #159 (autorización) y #171 (traducciones); #160 retiró la feature de la vía vieja (fase 8). Migrado en las tres ramas de Neon (`development`, `staging`, `production`: 190 migraciones, `migrate status` al día), con el backend vivo en Render «API Sacdia» (plan Free, rama `development`, contra Neon `development`). Estado vigente y detalle en `docs/features/validacion-investiduras.md` y en el banner de `docs/plans/2026-09-28-investidura-autorizacion.md`. Las ramas, los worktrees y las notas «sin mergear» o «sin desplegar» de abajo describen el momento en que se escribió el plan y son **históricos**.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Que la directiva de la sección presente, agregue, quite y cambie la fecha de quienes cumplen, y que cada persona vea su estado de investidura, desde la app.

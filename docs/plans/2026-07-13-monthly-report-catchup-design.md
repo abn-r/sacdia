@@ -1,6 +1,6 @@
 # Monthly Report Catch-up Design
 
-> **Estado (2026-10-13):** implementado. `runAutoGeneration()` reconcilia períodos vencidos con precarga en lotes de 500, `reports.auto_generate_day` con fallback 5 y kill switch (`src/monthly-reports/monthly-reports.service.ts`), `MONTHLY_REPORT_MANUAL_DATA_REQUIRED` en el contrato de captura manual y el scoring `monthly_reports_timeliness` por primera captura manual (`src/annual-folders/score-calculators/monthly-reports-timeliness-score.ts`). Mergeado en sacdia-backend #181 (2026-07-15). Hay una copia del diseño en `docs/history/plans/`.
+> **Estado (2026-10-13):** implementado. `runAutoGeneration()` reconcilia períodos vencidos con precarga en lotes de 500, `reports.auto_generate_day` con fallback 5 y kill switch (`src/monthly-reports/monthly-reports.service.ts`), `MONTHLY_REPORT_MANUAL_DATA_REQUIRED` en el contrato de captura manual y el scoring `monthly_reports_timeliness` por primera captura manual (`src/annual-folders/score-calculators/monthly-reports-timeliness-score.ts`). Mergeado en sacdia-backend #181 (2026-07-15). Este es el único ejemplar (la copia de `docs/history/plans/` se eliminó el 2026-10-13).
 
 ## Resultado aprobado
 

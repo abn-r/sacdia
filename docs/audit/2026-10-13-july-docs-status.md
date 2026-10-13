@@ -56,7 +56,25 @@
 
 ## Otras observaciones
 
-- **Copias duplicadas.** El commit `b1dec72a` (2026-10-04) movió varios de estos archivos a `docs/history/` y #130 los volvió a poner en su ruta activa. Quedan dos copias idénticas (salvo el banner nuevo, y `admin-panel-v2.md`, que ya difería) de: la auditoría, su SQL, los tres manifiestos `annual-2026-acv.*`, `admin-panel-v2.md`, el diseño de inscripción de sección y el diseño de reportes mensuales. Conviene decidir una sola ubicación.
-- **Documentos de investidura desactualizados.** `docs/features/validacion-investiduras.md` y `docs/plans/2026-09-28-investidura-autorizacion.md` aún dicen que nada está mergeado ni desplegado y que las migraciones no están en Neon, pero la fase 8 y las pantallas de panel y app están en `development` (backend #465, #466, #468, #469; panel #223 a #226; app #157 a #160). Esta rama no los modificó.
-- **Neon.** La nota de la fase 8 del 2026-10-08 dice que la rama `staging` está archivada y que `production` no tenía las migraciones de investidura; el estado informado el 2026-10-13 es que ambas existen y están migradas, sin uso. Ver `docs/deployment/DEPLOYMENT-GUIDE.md` §0.
+- **Copias duplicadas.** Resuelto el 2026-10-13; ver la sección «Duplicados».
+- **Documentos de investidura.** `docs/features/validacion-investiduras.md` y `docs/plans/2026-09-28-investidura-autorizacion.md` se actualizaron el 2026-10-13: todo está mergeado en `development` (backend #465, #466, #468, #469, #485, #488; panel #223 a #226 y #231; app #157 a #160 y #171), desplegado en el backend vivo y migrado en las tres ramas de Neon. Los párrafos con fecha anterior se conservan marcados como históricos.
+- **Neon.** La nota de la fase 8 del 2026-10-08 decía que `staging` estaba archivada y que `production` no tenía las migraciones de investidura. Desde el 2026-10-13 `development`, `staging` y `production` están migradas por completo (190 migraciones). Ver `docs/deployment/DEPLOYMENT-GUIDE.md` §0.
 - **Runbook OCR.** `docs/guides/ocr-proxy-preprod-infra.md` conserva el estado «propuesto» del 2026-10-07 aunque el proxy ya está en Cloud Run según el responsable.
+
+## Duplicados
+
+El commit `b1dec72a` (2026-10-04) movió varios de estos archivos a `docs/history/` y #130 los volvió a poner en su ruta activa, con lo que quedaron dos copias. El 2026-10-13 se conservó **una sola copia, la de la ruta activa** (la que lleva el banner de estado), y se eliminó la de `docs/history/`. Se comparó cada par con `diff` antes de borrar.
+
+| Documento | Copia activa | Copia en `docs/history/` | Diferencia | Resultado |
+|---|---|---|---|---|
+| Auditoría de readiness del 2026-07-17 | `docs/audit/PRODUCTION-ONBOARDING-OPERATIONS-READINESS-2026-07-17.md` | `audit/PRODUCTION-ONBOARDING-OPERATIONS-READINESS-2026-07-17.md` | Solo el banner de estado | Eliminada la de historia |
+| SQL de readiness | `docs/audit/sql/development-database-readiness-2026-07-17.sql` | `audit/sql/development-database-readiness-2026-07-17.sql` | Idénticos | Eliminada la de historia |
+| Manifiesto `annual-2026-acv.json` | `docs/audit/manifests/` | `audit/manifests/` | Idénticos | Eliminada la de historia |
+| Manifiesto `annual-2026-acv.proposal.json` | `docs/audit/manifests/` | `audit/manifests/` | Idénticos | Eliminada la de historia |
+| Esquema `annual-2026-acv.schema.json` | `docs/audit/manifests/` | `audit/manifests/` | Idénticos | Eliminada la de historia |
+| Diseño de inscripción de sección a Camporí | `docs/plans/2026-07-13-camporee-section-enrollment-design.md` | `plans/` (mismo nombre) | Solo el banner de estado | Eliminada la de historia |
+| Diseño de puesta al día de reportes mensuales | `docs/plans/2026-07-13-monthly-report-catchup-design.md` | `plans/` (mismo nombre) | Solo el banner de estado | Eliminada la de historia |
+| Panel admin v2 | `docs/features/infrastructure/admin-panel-v2.md` | `features/admin-panel-v2.md` | La activa tiene el banner «superado» y una línea más (Compose panel) | Eliminada la de historia. El documento sigue marcado como superado; archivarlo es una decisión aparte |
+| Contrato assignment-first de roles de club | `docs/features/auth/CLUB-ROLE-ASSIGNMENT-FIRST-CONTRACT.md` | `01-FEATURES/auth/CLUB-ROLE-ASSIGNMENT-FIRST-CONTRACT.md` | La activa es la versión reescrita sobre `club_sections` (2026-10-04); la de historia usaba rutas por `instance_type`/`instance_id`, ya reemplazadas, y no tenía contenido que faltara en la activa | Eliminada la de historia |
+
+No hubo contenido propio en las copias de historia que hubiera que fusionar. Ningún archivo fuera de `docs/history/` enlazaba a esas copias (búsqueda con `rg` sobre todo el árbol, incluidos `AGENTS.md` y los README). Los enlaces existentes al contrato de roles de club (`docs/api/API-SPECIFICATION.md`, `docs/features/README.md`, `docs/features/auth/AUTHORIZATION-CANONICAL-CONTRACT.md`) ya iban a la ruta activa. Se actualizaron los textos que mencionaban las copias: los banners de `admin-panel-v2.md` y de los dos diseños de julio, y las filas `audit/`, `canon/`, `features/`, `architecture/` y `01-FEATURES/auth/` de `docs/history/README.md`. `docs/history/README.md` se conserva: es el índice de la carpeta y no tiene par en la ruta activa.
