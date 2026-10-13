@@ -22,7 +22,7 @@
 > - La sección 6.4 decía que «Mis especialidades» no tendría selector de fecha. S7 sí pide la fecha de finalización (`completed_at`, migración M5 del backend), porque el diseño de datos la incorporó el 2026-10-12.
 > - El backend no exige `completed_at` al enviar a revisión mientras `REQUIRE_HONOR_COMPLETED_AT_ON_SUBMIT` sea `false`. La app lo pide siempre; el backend lo exigirá cuando S7 sea la versión mínima.
 > - Las propuestas de instructor se **retiran** (`WITHDRAWN`); el texto «Cancelar propuesta» de 6.5 es solo copy de la app y llama a `DELETE .../instructor-proposal`.
-> - Migraciones por rama de Neon: `development` tiene M1, M2, M5 y M4; `staging` y `production`, ninguna (dato del responsable, no verificado desde el repositorio). Ver `docs/deployment/DEPLOYMENT-GUIDE.md` §0.5.
+> - Migraciones por rama de Neon: M1, M2, M5 y M4 aplicadas en `development`, `staging` y `production` (verificado el 2026-10-13). Ver `docs/deployment/DEPLOYMENT-GUIDE.md` §0.5.
 
 **Fecha:** 2026-10-09 (actualizado el 2026-10-10 y el 2026-10-12 con las decisiones del usuario)
 **Estado:** Diseño con las decisiones del usuario incorporadas (D1 a D13). Sin código. No quedan preguntas abiertas (ver "Decisiones tomadas" y la sección 10).

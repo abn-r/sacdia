@@ -92,17 +92,15 @@ Cuatro migraciones aditivas del backend, mergeadas el 2026-10-12 y 2026-10-13. D
 
 | # | Directorio (`sacdia-backend/prisma/migrations/`) | Usa `CONCURRENTLY` | `development` | `staging` | `production` |
 |---|---|---|---|---|---|
-| M1 | `20261010120000_certificate_import_honor_instructor` | Sí (2 índices) | Aplicada | No aplicada | No aplicada |
-| M2 | `20261010130000_certificate_import_ocr_pages` | Sí (1 índice) | Aplicada | No aplicada | No aplicada |
-| M5 | `20261012130000_honors_completed_at` | No | Aplicada | No aplicada | No aplicada |
-| M4 | `20261013100000_honor_instructor_proposals` | No (desde #485) | Aplicada | No aplicada | No aplicada |
+| M1 | `20261010120000_certificate_import_honor_instructor` | Sí (2 índices) | Aplicada | Aplicada | Aplicada |
+| M2 | `20261010130000_certificate_import_ocr_pages` | Sí (1 índice) | Aplicada | Aplicada | Aplicada |
+| M5 | `20261012130000_honors_completed_at` | No | Aplicada | Aplicada | Aplicada |
+| M4 | `20261013100000_honor_instructor_proposals` | No (desde #485) | Aplicada | Aplicada (recuperada) | Aplicada (recuperada) |
 
-> [!WARNING]
-> El estado de `staging` y `production` es el que informó el responsable el 2026-10-13; no se verificó contra `_prisma_migrations`. El encabezado de M4 dice además que su checksum se actualizó «en las tres ramas de Neon» tras recuperarla a mano el 2026-10-12, lo que no coincide con «no aplicada». Antes de promover, comprobar en cada rama: `SELECT migration_name, finished_at, rolled_back_at FROM _prisma_migrations WHERE migration_name IN ('20261010120000_certificate_import_honor_instructor','20261010130000_certificate_import_ocr_pages','20261012130000_honors_completed_at','20261013100000_honor_instructor_proposals');`
->
-> «Existen y están migradas» en §0 y §0.2 vale para las migraciones anteriores a estas cuatro.
+> [!NOTE]
+> Verificado el 2026-10-13 con consultas de solo lectura en las tres ramas: las cuatro migraciones tienen una fila terminada en `_prisma_migrations` con el checksum del archivo actual de `origin/development`, no hay migraciones sin terminar, las 8 columnas y la tabla `honor_instructor_proposals` existen, los 20 constraints están validados y los 6 índices son válidos. En `staging` y `production`, M4 tiene además una fila previa con `rolled_back_at` (el intento con `CONCURRENTLY` que falló con P3018 / 25001) y una segunda fila terminada tras la recuperación manual. Para volver a comprobarlo: `SELECT migration_name, left(checksum, 12), finished_at, rolled_back_at FROM _prisma_migrations WHERE migration_name IN ('20261010120000_certificate_import_honor_instructor','20261010130000_certificate_import_ocr_pages','20261012130000_honors_completed_at','20261013100000_honor_instructor_proposals') ORDER BY migration_name, started_at;`
 
-**Código nuevo sobre una base sin estas migraciones falla** (columnas y tabla inexistentes). Ningún servicio usa `staging` ni `production` hoy, así que no hay caída; aplicar las cuatro **antes** de apuntar un servicio a esas ramas.
+**Código nuevo sobre una base sin estas migraciones falla** (columnas y tabla inexistentes). Las tres ramas ya las tienen; para una rama nueva, aplicar las cuatro **antes** de apuntarle un servicio.
 
 **Procedimiento para `staging` y `production`** (con aprobación; cadena **directa**, sin `-pooler`, tomada de una variable de entorno; no pegar cadenas de conexión en docs, tickets ni chats):
 

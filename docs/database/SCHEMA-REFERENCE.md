@@ -80,7 +80,7 @@ Referencia humana concisa del schema Prisma vigente.
 ## Instructor de especialidad, fecha de finalización y carga por certificado (2026-10-13)
 
 > [!WARNING]
-> Cuatro migraciones aditivas del backend (#474, #475, #479 y #480). Estado por rama de Neon: `development` tiene M1, M2, M5 y M4; `staging` y `production`, ninguna (dato del responsable, no verificado desde el repositorio). Procedimiento y reglas en `docs/deployment/DEPLOYMENT-GUIDE.md` §0.4 y §0.5. Código nuevo sobre una base sin estas migraciones **falla**: migrar primero.
+> Cuatro migraciones aditivas del backend (#474, #475, #479 y #480). Estado por rama de Neon: las cuatro están aplicadas en `development`, `staging` y `production` (verificado el 2026-10-13 contra `_prisma_migrations` y el esquema). Procedimiento y reglas en `docs/deployment/DEPLOYMENT-GUIDE.md` §0.4 y §0.5. Código nuevo sobre una base sin estas migraciones **falla**: migrar primero.
 
 ### `users_honors`: instructor y fecha de finalización
 

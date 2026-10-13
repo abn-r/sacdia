@@ -25,7 +25,7 @@
 >
 > **No implementado:** B8 (sugerencia de instructor por OCR) y M3 (`detected_instructor_name`).
 >
-> **Estado de las migraciones por rama de Neon (2026-10-13).** `development`: M1, M2, M5 y M4 aplicadas. `staging` y `production`: ninguna de las cuatro, según el responsable (no verificado desde el repositorio; ver `docs/deployment/DEPLOYMENT-GUIDE.md` §0.5). M1, M2 y M5 siguen el procedimiento manual de §2.5; M4 corre con `prisma migrate deploy`.
+> **Estado de las migraciones por rama de Neon (2026-10-13).** M1, M2, M5 y M4 aplicadas en `development`, `staging` y `production` (verificado con consultas de solo lectura; en `staging` y `production` M4 se recuperó a mano tras fallar con `CONCURRENTLY`; ver `docs/deployment/DEPLOYMENT-GUIDE.md` §0.5). M1, M2 y M5 siguen el procedimiento manual de §2.5; M4 corre con `prisma migrate deploy`.
 >
 > **Correcciones respecto del diseño** (el código manda):
 >
