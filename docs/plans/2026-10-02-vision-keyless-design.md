@@ -1,6 +1,6 @@
 # OCR keyless desde Render — diseño aceptado
 
-> **Estado real (revisado 2026-10-04 contra `development`)**: Diseño aceptado; sin implementar en ninguna rama (tampoco en el PR #448). Depende de que el PR #448 se integre antes.
+> **Estado real (revisado 2026-10-04 contra `development`)**: **Actualización 2026-10-13:** el PR #448 ya está mergeado en `development` (78f2e54); lo de abajo es el estado del 2026-10-04 (histórico). Diseño aceptado; sin implementar en ninguna rama (tampoco en el PR #448). Depende de que el PR #448 se integre antes.
 
 
 **Estado documental:** ACTIVE

@@ -20,7 +20,7 @@ Fuente: Reality Matrix + Canon verification
 
 ## ¿Sembrar `investiture:mark_invested` a coordinadores? (2026-09-15)
 
-**Estado: RESUELTA — sí.** Seed + migración `20260915210000_grant_investiture_mark_invested_coordinators` para `coordinator` / `zone-coordinator` / `general-coordinator`. El botón sigue exigiendo el permiso; sin grant no aparece.
+**Estado: RESUELTA — sí.** Seed + migración `20260915210000_grant_investiture_mark_invested_coordinators` para `coordinator` / `zone-coordinator` / `general-coordinator`. El botón sigue exigiendo el permiso; sin grant no aparece. *Histórico (2026-10-13): la fase 8 retiró ese botón y el permiso `investiture:mark_invested` se eliminó con la migración `20261013110000_remove_retired_investiture_permissions`.*
 
 ---
 

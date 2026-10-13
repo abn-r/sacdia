@@ -49,7 +49,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 ## Actualizacion 2026-10-09 (Apagado de la vía anterior de investidura, fase 8)
 
-Implementado en las ramas `feat/investiture-legacy-shutdown` (backend), `feat/investiture-legacy-screens-removal` (panel) y `feat/investiture-legacy-app-removal` (app). **Nada está desplegado.** Las migraciones `20261008120000_district_pastor_field_change` y `20261009120000_investiture_legacy_lock_release_action` no están aplicadas en Neon y el desbloqueo no se ejecutó en ningún entorno.
+Mergeado en `development` (backend #468 y #469, panel #226, app #160) y desplegado en el backend vivo. Las migraciones `20261008120000_district_pastor_field_change` y `20261009120000_investiture_legacy_lock_release_action` están aplicadas en las tres ramas de Neon (2026-10-13). El `dry_run` del desbloqueo en `development` dio 0 candidatos; no se corrió `dry_run: false` en ningún entorno.
 
 - **410 estable.** Las 17 rutas de la vía club → coordinación → campo (envío, `club-approve`, `coordinator-approve`, `field-approve`, `invest`, `reject`, `bulk-approve`, `bulk-reject`, los tres alias de `enrollments/:id/...` y la configuración `admin/investiture/config*`) responden HTTP 410 con `code` `INVESTITURE_LEGACY_PIPELINE_RETIRED`. No hay que reintentar: se muestra el `message` y se deja de llamar. El panel y la app nuevos ya no llaman esas rutas.
 - **Las lecturas también.** `GET /investiture/pending` y `GET /admin/investiture/config*` responden 410. No existe reemplazo en esas rutas: la cola de autorización es `GET /api/v1/investiture-requests`.
@@ -81,7 +81,7 @@ No hay endpoints nuevos. Estas respuestas salen de las rutas de carga por certif
 - Alta que quedaría lista, envío, reenvío y aprobación de fila o de solicitud institucional rechazan con esos códigos y no acreditan la clase.
 - `PATCH .../items/:itemId` con `mark_as_ready: true` y edad inválida no guarda la fila.
 - El mismo `PATCH` sobre una fila de clase que ya está `READY`, omitiendo `mark_as_ready` o enviándolo en `false`, guarda la corrección y deja la fila en `NEEDS_REVIEW` si la edad ya no alcanza.
-- El porcentaje de requisitos de clase es el del Campo (`local_field_class_thresholds.minimum_percent`, default 80; **pendiente de merge, PR #448 de sacdia-backend**). Una inscripción cruzada usa el Campo de su sección de origen. El detalle y el listado colectivo usan el mismo número.
+- El porcentaje de requisitos de clase es el del Campo (`local_field_class_thresholds.minimum_percent`, default 80; mergeado con el PR #448 de sacdia-backend). Una inscripción cruzada usa el Campo de su sección de origen. El detalle y el listado colectivo usan el mismo número.
 
 ## Actualizacion 2026-10-07 (Certificado frente a solicitud viva)
 

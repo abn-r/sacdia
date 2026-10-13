@@ -1,5 +1,7 @@
 # Investidura por autorización — Pantallas del panel (Plan 1)
 
+> **Estado (2026-10-13): ENTREGADO.** Pantallas del panel mergeadas en `development` en sacdia-admin #223 (fundación), #224 (autorización), #225 (pantallas de autorización) y #231 (traducciones); #226 retiró las pantallas de la vía vieja (fase 8). Migrado en las tres ramas de Neon (`development`, `staging`, `production`: 190 migraciones, `migrate status` al día), con el backend vivo en Render «API Sacdia» (plan Free, rama `development`, contra Neon `development`). Estado vigente y detalle en `docs/features/validacion-investiduras.md` y en el banner de `docs/plans/2026-09-28-investidura-autorizacion.md`. Las ramas, los worktrees y las notas «sin mergear» o «sin desplegar» de abajo describen el momento en que se escribió el plan y son **históricos**.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Que el pastor del distrito y la dirección del Campo autoricen investiduras desde el panel, y que el Campo configure ventana, porcentaje y pastores por distrito.

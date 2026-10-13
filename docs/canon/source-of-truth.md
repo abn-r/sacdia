@@ -15,7 +15,7 @@
 - La realidad efectiva del sistema es el código de la rama `development` de `sacdia-backend`, `sacdia-admin` y `sacdia-app`.
 - La documentación describe ese código. Si un documento contradice el código, el documento está desactualizado y se corrige en el mismo trabajo.
 - Excepción: si el código contradice la **intención de dominio** fijada en `docs/canon/dominio-sacdia.md`, se trata como bug o decisión pendiente y se escala; no se reescribe el dominio para cuadrar con el código.
-- El trabajo que vive en ramas sin integrar (por ejemplo, el PR #448 de sacdia-backend) no es estado actual. Su documentación puede existir, pero debe marcarse "Pendiente de merge".
+- El trabajo que vive en ramas sin integrar (por ejemplo, un PR abierto sin merge) no es estado actual. Su documentación puede existir, pero debe marcarse "Pendiente de merge".
 
 ---
 
