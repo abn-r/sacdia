@@ -1,5 +1,44 @@
 # Carga por certificado: instructor, catálogo y campos de clase — diseño de datos y API
 
+> **Estado de implementación (2026-10-13).** Implementado y mergeado en `development` de backend, admin y app. El texto de abajo es el diseño original; donde el código difiere, manda el código y la diferencia está anotada en la última columna o en «Correcciones respecto del diseño». Contratos vigentes: `docs/api/ENDPOINTS-LIVE-REFERENCE.md`, `docs/api/API-SPECIFICATION.md` (contrato canónico de instructor) y `docs/features/carga-masiva-certificados.md`.
+>
+> | Slice | Repo | PR | Migración | Notas |
+> |---|---|---|---|---|
+> | SEC-1 | backend | #471 | — | `POST /users/:userId/honors` y `/bulk` ya no reescriben `APPROVED` ni `PENDING_REVIEW` (`assertHonorIsMutable`) |
+> | SEC-2 | backend | #472 | — | `abandonHonor` bloquea `APPROVED`/`PENDING_REVIEW`; `startHonor` sobre una fila inactiva en esos estados solo restaura `active` |
+> | B1 | backend | #473 | — | `GET /instructor-candidates`, `GET /honors?search=`, `GET /certificate-bulk-imports/catalog/classes`, `honor.category` y `class.{asset_code, club_type}` en el lote, rango de fechas 1960-01-01..hoy; además corrige la auth documentada de `/honors`, `/classes` y `/catalogs/club-types` (públicas) |
+> | B2 | backend | #474 | M1 `20261010120000_certificate_import_honor_instructor` | Instructor en ítems y en `users_honors`, bloque `instructor`, `instructor_conflict` (D7) |
+> | B4 | backend | #475 | M2 `20261010130000_certificate_import_ocr_pages` | `files[].page_count`, `items[].source_file_id` (FK `SET NULL`), `items[].source_page` |
+> | B3 | backend | #476 | — | `ocr_state` y `ocr_error_code` derivados (sin tabla nueva); `OCR_QUEUED` se registra antes de encolar; reintento tras fallo. La pregunta abierta 1 de §7.2 quedó resuelta con `ocr_error_code` |
+> | (fuera del plan) | backend | #477 | — | Certificaciones: `deleteCertification` 409 `CERT_ENROLLMENT_NOT_ABANDONABLE`, `enrollUser` rechaza filas otorgadas históricas, `assertEnrollmentEditable`, `FILE_EVIDENCE` exige evidencia `CONFIRMED`, la revisión ignora inscripciones inactivas |
+> | B11 (nuevo) | backend | #478 | — | `DELETE /certificate-bulk-imports/:batchId` (solo dueño y `DRAFT`) |
+> | B5 | backend | #479 | M5 `20261012130000_honors_completed_at` | `users_honors.completed_at` (CHECK >= 1960-01-01, backfill determinista); `completedAt`, `instructorUserId` e `instructorName` en PATCH, POST y bulk. Al enviar a revisión `completed_at` es opcional mientras `REQUIRE_HONOR_COMPLETED_AT_ON_SUBMIT` sea `false` |
+> | B9 | backend | #480 | M4 `20261013100000_honor_instructor_proposals` | Tabla y endpoints de propuestas; estado `WITHDRAWN` (no `CANCELLED`) |
+> | fix M4 | backend | #485 | — | Los índices de M4 se crean sin `CONCURRENTLY` (`migrate deploy` fallaba con P3018) |
+> | B6 | admin | #228 | — | Revisión de la carga por certificado: instructor, conflicto, archivo y página, `ocr_state` |
+> | B7 | admin | #227 | — | Revisión de evidencias de especialidad: instructor y `completed_at` |
+> | B10 | admin | #229 | — | Cola `/dashboard/honor-instructor-proposals` |
+> | (soporte) | admin | #230 | — | Integridad de `xlsx` en el lockfile |
+> | S1 a S5 | app | #162 a #166 | — | Errores y copy, subida y espera, visor, revisión, editor y selectores (más #161, galería y loader, que es la base) |
+> | cancelar | app | #167 | — | Cancelar o abandonar durante la subida llama a `DELETE` del borrador |
+> | S6, S7, S8 | app | #168, #169, #170 | — | Instructor en la carga, instructor y fecha de finalización en «Mis especialidades», propuesta de instructor en una especialidad aprobada |
+>
+> **No implementado:** B8 (sugerencia de instructor por OCR) y M3 (`detected_instructor_name`).
+>
+> **Estado de las migraciones por rama de Neon (2026-10-13).** M1, M2, M5 y M4 aplicadas en `development`, `staging` y `production` (verificado con consultas de solo lectura; en `staging` y `production` M4 se recuperó a mano tras fallar con `CONCURRENTLY`; ver `docs/deployment/DEPLOYMENT-GUIDE.md` §0.5). M1, M2 y M5 siguen el procedimiento manual de §2.5; M4 corre con `prisma migrate deploy`.
+>
+> **Correcciones respecto del diseño** (el código manda):
+>
+> - El estado `CANCELLED` de §2.7 es **`WITHDRAWN`** en el enum `honor_instructor_proposal_status_enum`, en el `DELETE` del miembro y en la auditoría (`instructor_withdrawn`). Donde el texto diga «cancelar» una propuesta, léase «retirar».
+> - La migración M4 se llama **`20261013100000_honor_instructor_proposals`** (el diseño decía `20261012120000_...`).
+> - `honor_instructor_proposals_reason_ck` exige un motivo **no nulo**: `status <> 'REJECTED' OR (rejection_reason IS NOT NULL AND char_length(btrim(rejection_reason)) BETWEEN 3 AND 500)`. El `CHECK` de §2.7 omitía el `IS NOT NULL` y un motivo `NULL` habría pasado, porque `NULL BETWEEN ...` evalúa a `NULL`.
+> - Aprobar una propuesta cuya especialidad ya no está `active` y `APPROVED` responde **409** `HONOR_INSTRUCTOR_PROPOSAL_NOT_APPROVED` (paso 3 de «Aprobar» decía 400). Al **proponer** sigue siendo 400.
+> - M4 no usa `CREATE INDEX CONCURRENTLY` ni se aplica a mano: sus CHECK e índices se crean directamente y la migración corre con `prisma migrate deploy` (build de Render).
+> - D6 («las fechas no llevan CHECK») se mantiene para `completed_at` de la importación y para `users_honors.date`; la columna **nueva** `users_honors.completed_at` (M5, §7.2 punto 2) sí lleva `CHECK (completed_at IS NULL OR completed_at >= DATE '1960-01-01')`, sin cota superior (la base no conoce «hoy»).
+> - El `completed_at` del flujo normal queda detrás de una bandera: `REQUIRE_HONOR_COMPLETED_AT_ON_SUBMIT = false` en `src/honors/honor-validation-workflow.service.ts`. Con `false`, enviar a revisión sin `completed_at` es válido (la app publicada anterior a S7 no lo manda); si llega, se revalida el rango. Pasarla a `true` hace que falte `completed_at` responda 400 `VALIDATION_HONOR_COMPLETED_AT_REQUIRED`; se activa cuando S7 sea la versión mínima de la app.
+> - La aprobación por certificado compara la fecha de finalización contra `completed_at ?? date` y solo contra filas `APPROVED`.
+> - La pregunta abierta 2 de §7.2 quedó resuelta: «Mis especialidades» sí pide la fecha de finalización (M5, S7).
+
 - Fecha: 2026-10-09 (actualizado el 2026-10-10 y el 2026-10-12 con las decisiones del usuario)
 - Estado: propuesta con decisiones del usuario incorporadas, D1 a D13 (sin implementar). No se tocó código ni base de datos. No quedan preguntas abiertas sobre el diseño de datos y la API, salvo las dos de §7.2.
 - Alcance: `sacdia-backend` (Prisma, `src/certificate-bulk-imports/**`, `src/honors/**`, `src/evidence-review/**`, catálogos, el módulo nuevo de candidatos a instructor y la propuesta de instructor sobre especialidades aprobadas), `sacdia-app` (`lib/features/certificate_import` y `lib/features/honors`), `sacdia-admin` (revisión del Campo Local, visor de comprobantes y cola de propuestas de instructor).
@@ -287,7 +326,7 @@ Son **tres migraciones obligatorias e independientes** (M1, M2 y M4) y una opcio
 |---|---|---|---|
 | **M1. Instructor** | `prisma/migrations/20261010120000_certificate_import_honor_instructor/` | `instructor_user_id` e `instructor_name` en `certificate_bulk_import_items` y en `users_honors`, FKs, CHECKs e índices parciales | B2 (carga por certificado); B5 (flujo normal) y B9 (propuestas aprobadas) la usan sin agregar migración |
 | **M2. Páginas y archivo de origen** | `prisma/migrations/20261010130000_certificate_import_ocr_pages/` | `source_page` y `source_file_id` (con su FK `ON DELETE SET NULL` e índice parcial) en `certificate_bulk_import_items`, y `page_count` en `certificate_bulk_import_files`, con sus CHECKs (D4 y D12) | B4 (`page_count`, `source_page` y `source_file_id`) |
-| **M4. Propuestas de instructor** | `prisma/migrations/20261012120000_honor_instructor_proposals/` | Tabla nueva `honor_instructor_proposals`, sus FKs, CHECKs e índices (§2.7) | B9 (backend). B10 (admin) la consume por la API |
+| **M4. Propuestas de instructor** | `prisma/migrations/20261013100000_honor_instructor_proposals/` | Tabla nueva `honor_instructor_proposals`, sus FKs, CHECKs e índices (§2.7) | B9 (backend). B10 (admin) la consume por la API |
 
 M1, M2 y M4 no dependen entre sí **a nivel de esquema**: M4 solo crea una tabla nueva. B9 sí necesita M1 aplicada porque, al aprobar una propuesta, escribe `users_honors.instructor_user_id` e `instructor_name`. Si el slice OCR opcional (§6.2) se implementa, agrega otra migración aditiva con `detected_instructor_name` (M3).
 
@@ -366,7 +405,7 @@ Una especialidad `APPROVED` está congelada (§4.8, SEC-1 y SEC-2). D11 abre **u
 | `proposed_by_id` | `uuid` | no | FK a `users(user_id)`. En v1 siempre es el dueño de la especialidad; se guarda explícito para la auditoría |
 | `instructor_user_id` | `uuid` | sí | FK a `users(user_id)`, `NO ACTION`. Misma regla que §2.1: el nombre no se copia, se lee en vivo |
 | `instructor_name` | `varchar(150)` | sí | Nombre libre normalizado |
-| `status` | enum `honor_instructor_proposal_status_enum` | no | `PENDING` (default), `APPROVED`, `REJECTED`, `CANCELLED` |
+| `status` | enum `honor_instructor_proposal_status_enum` | no | `PENDING` (default), `APPROVED`, `REJECTED`, `WITHDRAWN` |
 | `rejection_reason` | `text` | sí | Obligatorio al rechazar |
 | `reviewed_by_id` | `uuid` | sí | FK a `users(user_id)`. Quien aprobó o rechazó |
 | `reviewed_at` | `timestamptz` | sí | |
@@ -383,9 +422,9 @@ ALTER TABLE honor_instructor_proposals
   ADD CONSTRAINT honor_instructor_proposals_review_ck
     CHECK ((status IN ('APPROVED','REJECTED')) = (reviewed_by_id IS NOT NULL AND reviewed_at IS NOT NULL)),
   ADD CONSTRAINT honor_instructor_proposals_reason_ck
-    CHECK (status <> 'REJECTED' OR char_length(btrim(rejection_reason)) BETWEEN 3 AND 500);
+    CHECK (status <> 'REJECTED' OR (rejection_reason IS NOT NULL AND char_length(btrim(rejection_reason)) BETWEEN 3 AND 500));
 
--- Una sola propuesta pendiente por especialidad (reemplazar = cancelar la anterior en la misma transacción)
+-- Una sola propuesta pendiente por especialidad (reemplazar = retirar la anterior en la misma transacción)
 CREATE UNIQUE INDEX uq_honor_instructor_proposals_pending
   ON honor_instructor_proposals (user_honor_id) WHERE status = 'PENDING';
 -- Cola del Campo Local
@@ -405,7 +444,7 @@ enum honor_instructor_proposal_status_enum {
   PENDING
   APPROVED
   REJECTED
-  CANCELLED
+  WITHDRAWN
 }
 
 model honor_instructor_proposals {
@@ -425,7 +464,7 @@ model honor_instructor_proposals {
   proposed_by  users        @relation("honor_instructor_proposal_proposer", fields: [proposed_by_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
   instructor   users?       @relation("honor_instructor_proposal_instructor", fields: [instructor_user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
   reviewed_by  users?       @relation("honor_instructor_proposal_reviewer", fields: [reviewed_by_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
-  // CHECKs e índices parciales: migración 20261012120000_honor_instructor_proposals (M4).
+  // CHECKs e índices parciales: migración 20261013100000_honor_instructor_proposals (M4).
 }
 ```
 
@@ -598,9 +637,9 @@ Compartidos por los dos flujos (se declaran una vez, en el módulo de instructor
 - Propuesta de instructor sobre una especialidad aprobada (D11, §4.9):
   - `HONOR_INSTRUCTOR_REQUIRED` (400): la propuesta no trae ni `instructorUserId` ni `instructorName`. Con los dos, `HONOR_INSTRUCTOR_AMBIGUOUS`.
   - `HONOR_INSTRUCTOR_UNCHANGED` (400): la persona propuesta ya es el instructor vigente.
-  - `HONOR_INSTRUCTOR_PROPOSAL_NOT_APPROVED` (400): la especialidad no está `APPROVED` y activa. Mientras está en curso o rechazada, el instructor se guarda con el `PATCH` (D10).
+  - `HONOR_INSTRUCTOR_PROPOSAL_NOT_APPROVED` (400 al proponer, 409 al aprobar): la especialidad no está `APPROVED` y activa. Mientras está en curso o rechazada, el instructor se guarda con el `PATCH` (D10).
   - `HONOR_INSTRUCTOR_PROPOSAL_NOT_FOUND` (404): la propuesta no existe.
-  - `HONOR_INSTRUCTOR_PROPOSAL_NOT_PENDING` (409): ya se aprobó, rechazó o canceló.
+  - `HONOR_INSTRUCTOR_PROPOSAL_NOT_PENDING` (409): ya se aprobó, rechazó o retiró.
   - `HONOR_INSTRUCTOR_PROPOSAL_FORBIDDEN` (403): quien llama no es el dueño de la especialidad (endpoints del miembro) o su Campo Local no coincide con el del dueño (endpoints del admin).
 
 Solo de la carga por certificado:
@@ -726,8 +765,8 @@ Van en `UserHonorsController`, con los guards actuales (`JwtAuthGuard` + `Permis
 
 | Endpoint | Cuerpo | Respuesta | Qué hace |
 |---|---|---|---|
-| `POST /users/:userId/honors/:honorId/instructor-proposal` | `{ instructorUserId?: string, instructorName?: string }`, **exactamente uno** | 201, la propuesta (`proposal_id`, `status`, `instructor`) | Crea la propuesta `PENDING`. Si ya había una pendiente, la **reemplaza**: la anterior pasa a `CANCELLED` en la misma transacción |
-| `DELETE /users/:userId/honors/:honorId/instructor-proposal` | — | 200, la propuesta cancelada | Cancela la propuesta `PENDING` (`CANCELLED`) |
+| `POST /users/:userId/honors/:honorId/instructor-proposal` | `{ instructorUserId?: string, instructorName?: string }`, **exactamente uno** | 201, la propuesta (`proposal_id`, `status`, `instructor`) | Crea la propuesta `PENDING`. Si ya había una pendiente, la **reemplaza**: la anterior pasa a `WITHDRAWN` en la misma transacción |
+| `DELETE /users/:userId/honors/:honorId/instructor-proposal` | — | 200, la propuesta retirada | Retira la propuesta `PENDING` (`WITHDRAWN`) |
 
 **Lectura**: no hay endpoint nuevo. Cada fila de `GET /users/:userId/honors` trae el bloque `instructor_proposal` (§4.8, "Respuestas"):
 
@@ -741,7 +780,7 @@ Van en `UserHonorsController`, con los guards actuales (`JwtAuthGuard` + `Permis
 }
 ```
 
-Las propuestas `APPROVED` no salen aquí: ya son el `instructor` vigente de la fila. Las `CANCELLED` tampoco. Una `REJECTED` se muestra hasta que el miembro haga una propuesta nueva.
+Las propuestas `APPROVED` no salen aquí: ya son el `instructor` vigente de la fila. Las `WITHDRAWN` tampoco. Una `REJECTED` se muestra hasta que el miembro haga una propuesta nueva.
 
 Reglas del `POST` (en este orden):
 
@@ -750,7 +789,7 @@ Reglas del `POST` (en este orden):
 3. **Forma**: exactamente uno de los dos campos (`HONOR_INSTRUCTOR_REQUIRED` o `HONOR_INSTRUCTOR_AMBIGUOUS`); el nombre se normaliza como en §4.1.
 4. **Elegibilidad**: `InstructorsService.assertEligible(userId, instructorUserId)`, el mismo servicio de §4.4 (`HONOR_INSTRUCTOR_INVALID`, `HONOR_INSTRUCTOR_SELF`).
 5. **Sin cambio real**: si la persona propuesta ya es el instructor vigente (mismo `instructor_user_id`, o mismo nombre libre sin distinguir mayúsculas), 400 `HONOR_INSTRUCTOR_UNCHANGED`.
-6. **Escritura** en una `$transaction`: `UPDATE … SET status = 'CANCELLED'` sobre la pendiente, si existe, y `INSERT` de la nueva. El índice único parcial (§2.7) hace la operación segura ante dos solicitudes simultáneas: la que pierde recibe 409 `HONOR_INSTRUCTOR_PROPOSAL_NOT_PENDING` y la app invalida y vuelve a leer.
+6. **Escritura** en una `$transaction`: `UPDATE … SET status = 'WITHDRAWN'` sobre la pendiente, si existe, y `INSERT` de la nueva. El índice único parcial (§2.7) hace la operación segura ante dos solicitudes simultáneas: la que pierde recibe 409 `HONOR_INSTRUCTOR_PROPOSAL_NOT_PENDING` y la app invalida y vuelve a leer.
 7. **Tasa**: `@Throttle(namedThrottle({ ttl: 60_000, limit: 10 }))` por usuario.
 
 El `DELETE` exige también ser el dueño, y responde 404 `HONOR_INSTRUCTOR_PROPOSAL_NOT_FOUND` si no hay una pendiente.
@@ -774,7 +813,7 @@ Controlador nuevo `AdminHonorInstructorProposalsController`, `@Controller('admin
 **Aprobar** (`approve`), todo en una sola `$transaction`:
 1. Cargar la propuesta con su especialidad y el dueño; comprobar el alcance del revisor (403).
 2. `updateMany` sobre `proposal_id` con `status = 'PENDING'` a `APPROVED` (`reviewed_by_id`, `reviewed_at`). Si afecta 0 filas: 404 `HONOR_INSTRUCTOR_PROPOSAL_NOT_FOUND` o 409 `HONOR_INSTRUCTOR_PROPOSAL_NOT_PENDING`.
-3. Comprobar que la especialidad sigue `active` y `APPROVED` (si no, 400 `HONOR_INSTRUCTOR_PROPOSAL_NOT_APPROVED` y se revierte todo).
+3. Comprobar que la especialidad sigue `active` y `APPROVED` (si no, **409** `HONOR_INSTRUCTOR_PROPOSAL_NOT_APPROVED` y no se escribe nada; la propuesta sigue `PENDING`). Al proponer, la misma condición sigue siendo 400.
 4. Si la propuesta trae `instructor_user_id`, repetir `assertEligible(dueño, instructor)`. Si ya no es elegible (se desactivó, cambió de campo), 400 `HONOR_INSTRUCTOR_INVALID` y la propuesta sigue `PENDING`; el revisor la rechaza con un motivo. **A diferencia de la aprobación de la carga por certificado (§5, punto 5)**, aquí sí se revalida: pasa tiempo entre proponer y decidir, y el dato entra en un registro que ya estaba cerrado.
 5. Escribir el instructor con **`applyApprovedInstructor`** (abajo).
 6. Registrar `validation_logs`.
@@ -805,7 +844,7 @@ Controlador nuevo `AdminHonorInstructorProposalsController`, `@Controller('admin
 
 #### Interacción con otros flujos
 
-- **Aprobación de la carga por certificado (D7, §5)**: no cancela una propuesta pendiente. Si esa aprobación completa un instructor en una `APPROVED` sin instructor, y después se aprueba la propuesta, esta lo **reemplaza**. El evento y el log guardan `previous_kind`, y la cola muestra `current_instructor` para que el revisor lo vea al decidir.
+- **Aprobación de la carga por certificado (D7, §5)**: no retira una propuesta pendiente. Si esa aprobación completa un instructor en una `APPROVED` sin instructor, y después se aprueba la propuesta, esta lo **reemplaza**. El evento y el log guardan `previous_kind`, y la cola muestra `current_instructor` para que el revisor lo vea al decidir.
 - **Cuenta eliminada**: el instructor propuesto se muestra como "Usuario eliminado" con el mismo mapper de §4.2.
 - **Notificaciones**: ninguna en v1. Ni el instructor (D8) ni el miembro reciben aviso de la decisión; el miembro la ve al abrir la especialidad. El revisor consulta la cola.
 - **Conteo**: el índice parcial de §2.4 cuenta el instructor en cuanto la propuesta se aprueba.
@@ -817,14 +856,14 @@ Controlador nuevo `AdminHonorInstructorProposalsController`, `@Controller('admin
   - propone con usuario del mismo Campo Local y con nombre libre; solo el dueño (otro usuario, 403);
   - `IN_PROGRESS`, `REJECTED`, `PENDING_REVIEW` e inactiva dan `NOT_APPROVED`;
   - `INVALID` (otro campo, inactivo, no aprobado o menor), `SELF`, `UNCHANGED`, `REQUIRED` y `AMBIGUOUS`;
-  - reemplazar deja exactamente una propuesta `PENDING` y la anterior en `CANCELLED`; dos solicitudes simultáneas dejan una sola (la otra, 409);
-  - cancelar; cancelar sin propuesta da `NOT_FOUND`;
+  - reemplazar deja exactamente una propuesta `PENDING` y la anterior en `WITHDRAWN`; dos solicitudes simultáneas dejan una sola (la otra, 409);
+  - retirar; retirar sin propuesta da `NOT_FOUND`;
   - los registros de `validation_logs` no incluyen el nombre libre.
 - Aprobar:
   - `users_honors` cambia **solo** `instructor_user_id`, `instructor_name` y `modified_at`; `date`, `validate`, `certificate`, `images`, `validation_status`, `validated_by_id` y `validated_at` quedan idénticos;
   - al asignar un usuario, el nombre libre queda en `NULL` y al revés;
   - si el instructor dejó de ser elegible: 400 `INVALID`, la propuesta sigue `PENDING` y la fila no cambia;
-  - doble aprobación: 409; aprobar una propuesta ya rechazada o cancelada: 409;
+  - doble aprobación: 409; aprobar una propuesta ya rechazada o retirada: 409;
   - revisor de otro Campo Local: 403; `super-admin`, `admin` sin campo y `director-lf` del mismo campo: permitido;
   - `previous_kind` correcto en `NONE`, `USER` y `EXTERNAL`;
   - prueba de integración del conteo: tras aprobar, el instructor suma 1.
@@ -917,11 +956,11 @@ El conteo de "especialidades enseñadas" se hace sobre `users_honors` (§2.4) y 
 | `done` mal calculado porque el job exitoso se borra (`removeOnComplete`) | `done`/`empty` salen del evento `OCR_PROCESSED`, no del job (§4.6) |
 | Parseo por página cambia la semántica de la fecha global y puede perder fechas | Fecha de la página, con respaldo a la primera fecha del documento y confianza reducida; tests (§4.7) |
 | `source_file_id` nulo o desactualizado (D12): filas manuales, filas anteriores a M2, un archivo que ya no está, o un parser que no pudo ubicar el archivo | Regla única en app y admin (§4.7): archivo de la fila si está en `files[]`; si no, el primero; la página solo se respeta cuando el archivo salió de `source_file_id`. `ON DELETE SET NULL` evita perder la fila. Tests en los dos clientes |
-| Una propuesta de instructor (D11) se usa para abusar: spam de propuestas, o proponer a quien no corresponde | Solo el dueño propone; una sola pendiente por especialidad (índice único parcial, reemplazar cancela la anterior); 10 por minuto; `assertEligible` al proponer y al aprobar; el Campo Local decide y puede rechazar con motivo |
+| Una propuesta de instructor (D11) se usa para abusar: spam de propuestas, o proponer a quien no corresponde | Solo el dueño propone; una sola pendiente por especialidad (índice único parcial, reemplazar retira la anterior); 10 por minuto; `assertEligible` al proponer y al aprobar; el Campo Local decide y puede rechazar con motivo |
 | Escribir `users_honors` de una especialidad aprobada fuera de `assertHonorIsMutable` (D11) | Un único método acotado (`applyApprovedInstructor`) que solo toca `instructor_*` y `modified_at`, con un test que compara la fila antes y después; `assertHonorIsMutable` no cambia (§4.9) |
 | La propuesta se aprueba cuando el instructor ya no es elegible (se desactivó o cambió de campo) | Se revalida al aprobar (§4.9, paso 4); si falla, 400 y el revisor la rechaza con motivo |
 | Nadie mira la cola de propuestas y quedan pendientes (D11, sin notificaciones en v1) | Conteo de pendientes visible en la entrada del menú del admin (B10). Si no basta, una notificación al Campo Local queda como siguiente paso |
-| Una aprobación de la carga por certificado y una propuesta compiten por el instructor de la misma especialidad | La propuesta no se cancela por la aprobación; al aprobarse, reemplaza y deja `previous_kind` en el log. La cola muestra el instructor vigente (§4.9) |
+| Una aprobación de la carga por certificado y una propuesta compiten por el instructor de la misma especialidad | La propuesta no se retira por la aprobación; al aprobarse, reemplaza y deja `previous_kind` en el log. La cola muestra el instructor vigente (§4.9) |
 | Fecha mínima 1960 rechaza certificados legítimos más antiguos | Es la decisión D6. Una excepción manual queda fuera de v1 |
 | La cota de fecha usa "hoy" en UTC (como `assertNotFuture`) | El desfase va por delante de América, así que no genera rechazos falsos; no cubre zonas UTC+ |
 
@@ -936,8 +975,8 @@ Las preguntas de versiones anteriores quedaron resueltas y se retiraron:
 
 Quedan estas dos, que no bloquean ningún slice:
 
-1. **¿`ocr_state` necesita un `ocr_error_code`?** D3 define cinco estados. Para distinguir "lectura no disponible" de "ilegible" en `failed` haría falta un campo opcional. Hoy el único caso diferenciado es el 400 `OCR_UNAVAILABLE` al encolar.
-2. **El flujo normal guarda `date` como fecha de inicio** (§1.6). ¿Debe el formulario pedir la fecha de finalización? D6 se aplica al campo `date` tal como existe; no se agrega un selector de fecha en "Mis especialidades".
+1. **(Resuelta en B3, #476)** **¿`ocr_state` necesita un `ocr_error_code`?** D3 define cinco estados. Para distinguir "lectura no disponible" de "ilegible" en `failed` haría falta un campo opcional. Hoy el único caso diferenciado es el 400 `OCR_UNAVAILABLE` al encolar.
+2. **(Resuelta en B5 y S7, #479 y #169)** **El flujo normal guarda `date` como fecha de inicio** (§1.6). ¿Debe el formulario pedir la fecha de finalización? D6 se aplica al campo `date` tal como existe; no se agrega un selector de fecha en "Mis especialidades".
 
 ### 7.3 Plan de implementación por slices
 
@@ -1113,7 +1152,7 @@ Son dos PRs aparte, previos a B5 y B9, sin migración ni cambio de contrato para
 
 **B9 — Backend: propuesta de instructor sobre una especialidad aprobada** (**migración M4**; requiere M1 aplicada y SEC-1/SEC-2 desplegados)
 
-- Migración `20261012120000_honor_instructor_proposals` (tabla, enum, CHECKs e índices de §2.7) y `schema.prisma`.
+- Migración `20261013100000_honor_instructor_proposals` (tabla, enum, CHECKs e índices de §2.7) y `schema.prisma`.
 - `HonorInstructorProposalsService` y sus endpoints (§4.9):
   - del miembro: `POST` y `DELETE /users/:userId/honors/:honorId/instructor-proposal` (`user_honors:submit`, solo el dueño, 10/min);
   - del admin: `GET`, `approve` y `reject` en `admin/honor-instructor-proposals` (`@GlobalRoles` del Campo Local, `@SkipPermissions()`).

@@ -28,6 +28,8 @@ ENROLLED → IN_PROGRESS → READY_FOR_CLOSEOUT → SUBMITTED_FOR_FINAL_REVIEW
                                               → APPROVED → CERTIFIED
 
 Desde no terminales: WITHDRAWN | EXPIRED
+  (abandonar → WITHDRAWN solo desde ENROLLED, IN_PROGRESS,
+   READY_FOR_CLOSEOUT y CHANGES_REQUESTED)
 Desde revisión final: CHANGES_REQUESTED → IN_PROGRESS (corrección)
 ```
 
@@ -39,6 +41,8 @@ DRAFT → SUBMITTED → APPROVED
 ```
 
 Edición y evidencias bloqueadas en `SUBMITTED` y `APPROVED` (`CERT_REQUIREMENT_LOCKED`).
+
+También se bloquean (mismo `CERT_REQUIREMENT_LOCKED`, `details.entity = 'enrollment'`) el borrador, el envío y las evidencias cuando la **inscripción** no está en `ENROLLED`, `IN_PROGRESS`, `CHANGES_REQUESTED` o `READY_FOR_CLOSEOUT`. Abandonar (`WITHDRAWN`) solo es posible desde esos cuatro estados; en `SUBMITTED_FOR_FINAL_REVIEW`, `APPROVED` y `CERTIFIED` responde 409 `CERT_ENROLLMENT_NOT_ABANDONABLE`. Reglas completas en [certificaciones-guias-mayores.md](certificaciones-guias-mayores.md#mutabilidad-de-la-inscripción-2026-10-12-backend-477).
 
 ---
 

@@ -58,12 +58,22 @@ Modelos nuevos/ampliados (ver `docs/database/SCHEMA-REFERENCE.md`):
 ## Requisitos funcionales (motor versionado)
 
 1. Elegibilidad configurable por versión (`MIN_AGE`, `BAPTIZED`, `INVESTED_CLASS`, `ACTIVE_CLUB_TYPE`, `ACTIVE_ROLE`); evaluada al inscribir y expuesta en endpoint de elegibilidad.
-2. Una inscripción activa por usuario/certificación; fijada a versión publicada vigente.
-3. Requisitos editables solo en `DRAFT` o `CHANGES_REQUESTED`.
+2. Una inscripción activa por usuario/certificación; fijada a versión publicada vigente. No se puede reinscribir sobre una certificación ya otorgada o en revisión final, aunque la fila esté inactiva (ver «Mutabilidad de la inscripción»).
+3. Requisitos editables solo en `DRAFT` o `CHANGES_REQUESTED`, y solo mientras la inscripción esté en `ENROLLED`, `IN_PROGRESS`, `CHANGES_REQUESTED` o `READY_FOR_CLOSEOUT`.
 4. Evidencias privadas en R2 con presign/confirm; MIME allow-list y máximo 10 MiB.
 5. Revisión institucional por requisito con bandeja propia (no `evidence-review`).
 6. Cierre: todos los requisitos obligatorios `APPROVED` + comprobante de junta confirmado → `submit-final` → revisión final → `certify`.
 7. Historial append-only en `certification_review_events`.
+
+## Mutabilidad de la inscripción (2026-10-12, backend #477)
+
+| Operación | Regla |
+|---|---|
+| Abandonar (`DELETE /certifications/users/:userId/certifications/:certificationId`) | 409 `CERT_ENROLLMENT_NOT_ABANDONABLE` en `CERTIFIED`, `APPROVED` y `SUBMITTED_FOR_FINAL_REVIEW`. En `ENROLLED`, `IN_PROGRESS`, `READY_FOR_CLOSEOUT` y `CHANGES_REQUESTED` la inscripción pasa a `WITHDRAWN` con `active=false` y un evento `WITHDRAWN`. `EXPIRED` se conserva y solo se desactiva. Un `WITHDRAWN` activo (fila inconsistente) solo se desactiva. La escritura se condiciona al estado leído: si un revisor movió la inscripción en medio, 409 `CERT_CONCURRENT_UPDATE` |
+| Inscribir (`enrollUser`) | 409 `CERT_ALREADY_ENROLLED` si hay inscripción activa **o** una fila histórica inactiva en `CERTIFIED`, `APPROVED` o `SUBMITTED_FOR_FINAL_REVIEW` (abandonos anteriores al guard). Las filas inactivas `WITHDRAWN` y `EXPIRED` sí permiten reinscribir |
+| Borrador, envío y evidencias de requisitos | `assertEnrollmentEditable`: la inscripción debe estar en `ENROLLED`, `IN_PROGRESS`, `CHANGES_REQUESTED` o `READY_FOR_CLOSEOUT`; si no, 409 `CERT_REQUIREMENT_LOCKED` con `details.entity = 'enrollment'`. `READY_FOR_CLOSEOUT` se permite a propósito para los requisitos opcionales |
+| Componente `FILE_EVIDENCE` | Cuenta como completo solo con al menos una evidencia `CONFIRMED` y activa. Una respuesta vacía creada por `presign` ya no basta |
+| Revisión (`approve`, `request-changes`) | Exige inscripción activa: sobre una abandonada responde 404 `RECORD_NOT_FOUND`. Detalle y descarga de evidencia siguen leyendo filas históricas dentro de scope |
 
 ## Decisiones de diseño
 

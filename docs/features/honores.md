@@ -1,6 +1,6 @@
 # Honores (Especialidades)
 
-**Estado**: IMPLEMENTADO — workflow de validacion backend por modo, paquete de revision admin y maestrías configurables en rollout cross-repo.
+**Estado**: IMPLEMENTADO — workflow de validacion backend por modo, paquete de revision admin y maestrías configurables en rollout cross-repo. Desde 2026-10-12: instructor opcional, fecha de finalización (`completed_at`), propuesta de instructor sobre especialidades aprobadas y cierre de la reescritura de especialidades `APPROVED`/`PENDING_REVIEW` (backend #471, #472, #479 y #480; panel #227 y #229; app #169 y #170).
 
 ## Descripcion de dominio
 
@@ -69,6 +69,37 @@ La fuente de verdad runtime para el camino de trabajo de una especialidad inscri
 Nuevas inscripciones y reactivaciones arrancan en `UNDECIDED`. El modo puede seleccionarse desde `PATCH /api/v1/users/:userId/honors/:honorId` con `completionMode` mientras el honor sea mutable. La app debe pedir confirmacion antes de persistir la seleccion, actualizar todas las vistas del flujo con el modo confirmado y no volver a pedir camino al navegar entre detalle, requisitos o evidencias. Si el miembro cambia de camino despues, debe hacerlo mediante una accion explicita de cambio de modo. El backend es la fuente canonica: la app guia la UX, pero la elegibilidad final se decide en backend.
 
 Los estados `PENDING_REVIEW` y `APPROVED` bloquean cambios libres de modo y de archivos. Un honor rechazado puede corregirse y reenviarse si hay cambios posteriores al rechazo.
+
+### Mutabilidad (SEC-1 y SEC-2, 2026-10-12)
+
+`HONOR_MUTATION_BLOCKED_STATUSES` = `PENDING_REVIEW` y `APPROVED`. Todas estas operaciones responden 400 `VALIDATION_HONOR_INVALID_STATUS` sobre una fila en esos estados y no escriben nada:
+
+- `PATCH /users/:userId/honors/:honorId` y `POST .../:honorId/files`.
+- `POST /users/:userId/honors` y `POST .../bulk` (SEC-1): antes reescribían los campos de la fila existente. En `bulk`, un ítem bloqueado falla todo el lote sin escrituras parciales.
+- `DELETE /users/:userId/honors/:honorId` (SEC-2): abandonar.
+
+`POST /users/:userId/honors/:honorId` (iniciar) sobre una fila **inactiva** `APPROVED` o `PENDING_REVIEW` (abandonada antes de SEC-2) solo restaura `active`: no resetea estado, validador, archivos ni fechas. Sobre otra fila inactiva reinicia en `IN_PROGRESS` y vacía también `instructor_*` y `completed_at`. La única escritura permitida sobre una especialidad aprobada es el instructor, por propuesta (abajo).
+
+## Instructor y fecha de finalización
+
+- **Fecha.** `users_honors.date` es la fecha de **inicio**; `users_honors.completed_at` (migración M5) es la de **finalización**, `yyyy-mm-dd` entre 1960-01-01 y hoy (`HONOR_DATE_TOO_OLD`, `HONOR_DATE_IN_FUTURE`). `PATCH`, `POST` y `bulk` aceptan `completedAt` (`null` la borra). **Al enviar a revisión es opcional por ahora**: `REQUIRE_HONOR_COMPLETED_AT_ON_SUBMIT` (`honor-validation-workflow.service.ts`) vale `false` porque las apps anteriores a S7 no la mandan. Si llega, se revalida el rango. Se activará cuando la app con selector de fecha sea la versión mínima; entonces faltar responderá 400 `VALIDATION_HONOR_COMPLETED_AT_REQUIRED`. La app actual la pide siempre antes de habilitar «Enviar a revisión».
+- **Instructor opcional.** `instructorUserId` (usuario del mismo Campo Local que el dueño, activo, aprobado y mayor de edad) o `instructorName` (3 a 150 caracteres), como máximo uno; `null` lo borra. Se guarda con `PATCH` solo en `IN_PROGRESS` o `REJECTED`. Nunca bloquea el envío. El buscador es `GET /instructor-candidates?q=`. Errores: `HONOR_INSTRUCTOR_AMBIGUOUS`, `HONOR_INSTRUCTOR_INVALID`, `HONOR_INSTRUCTOR_SELF`.
+- **Respuestas.** `GET /users/:userId/honors` trae `completed_at`, `instructor` (sin foto en el listado) e `instructor_proposal`. Las respuestas de una sola especialidad traen `instructor` con `photo_url`.
+- **Carga por certificado.** Aprobar un ítem HONOR copia `completed_at` e instructor a `users_honors`; ver [carga-masiva-certificados.md](carga-masiva-certificados.md). El conteo de «especialidades enseñadas» de un instructor sale del índice parcial sobre `instructor_user_id` con `active` y `APPROVED`, y cubre ambos flujos.
+
+### Propuesta de instructor sobre una especialidad aprobada (D11)
+
+Una especialidad `APPROVED` y activa se congela, salvo el instructor: el miembro lo propone y el Campo Local decide.
+
+| Paso | Endpoint | Regla |
+|---|---|---|
+| Proponer | `POST /users/:userId/honors/:honorId/instructor-proposal` (`user_honors:submit`, 10/min) | Solo el dueño (403 `HONOR_INSTRUCTOR_PROPOSAL_FORBIDDEN` para otro). Exactamente uno de `instructorUserId` o `instructorName`. 400 `HONOR_INSTRUCTOR_PROPOSAL_NOT_APPROVED` si la especialidad no está `APPROVED`/activa; 400 `HONOR_INSTRUCTOR_UNCHANGED` si ya es el instructor vigente. Crea `PENDING` (201); una pendiente anterior pasa a `WITHDRAWN`; dos solicitudes simultáneas: 409 `HONOR_INSTRUCTOR_PROPOSAL_NOT_PENDING` |
+| Retirar | `DELETE .../instructor-proposal` | `PENDING` pasa a `WITHDRAWN`; 404 `HONOR_INSTRUCTOR_PROPOSAL_NOT_FOUND` si no hay |
+| Cola | `GET /admin/honor-instructor-proposals?status=` | `PENDING` (defecto), `APPROVED`, `REJECTED`; la más antigua primero; sin correo ni foto |
+| Aprobar | `POST /admin/honor-instructor-proposals/:proposalId/approve` | Revalida que la especialidad siga `APPROVED`/activa (409 `HONOR_INSTRUCTOR_PROPOSAL_NOT_APPROVED`) y que el instructor siga siendo elegible (400 `HONOR_INSTRUCTOR_INVALID`, la propuesta sigue `PENDING`). Escribe solo `instructor_*` y `modified_at`; `validated_by_id` y `validated_at` siguen diciendo quién aprobó la especialidad |
+| Rechazar | `POST .../:proposalId/reject` con `reason` de 3 a 500 caracteres | No toca `users_honors`; el miembro ve el motivo hasta que haga otra propuesta |
+
+Estados de la propuesta: `PENDING`, `APPROVED`, `REJECTED`, `WITHDRAWN` (tabla `honor_instructor_proposals`, migración M4). `instructor_proposal` en el listado del miembro solo muestra la última propuesta si está `PENDING` o `REJECTED`. Revisor y alcance: los mismos que la carga por certificado (Campo Local del dueño actual). Auditoría en `validation_logs`: `instructor_proposed`, `instructor_withdrawn`, `instructor_approved`, `instructor_rejected`.
 
 Los honores aprobados legacy anteriores a `completion_mode` no deben seguir en `UNDECIDED` si tienen artefactos externos (`document`, `certificate`, `images` o `evidence_files`). Esos registros se backfillean como `EXTERNAL` para no mostrar un estado imposible en el historico.
 
@@ -181,7 +212,7 @@ La maestría {nombre} necesita ajustes para volver a estar vigente.
 
 Controlador: `HonorsController`.
 
-- `GET /honors` — listar honores con paginacion y filtros (`categoryId`, `clubTypeId`, `skillLevel`).
+- `GET /honors` — listar honores con paginacion y filtros (`categoryId`, `clubTypeId`, `skillLevel`, `search`). `search` busca en el nombre y sus traducciones, de 2 a 60 caracteres tras recortar (si no, 400) y no se cachea.
 - `GET /honors/categories` — listar categorias.
 - `GET /honors/grouped-by-category` — agrupar honores por categoria.
 - `GET /honors/:honorId` — detalle.
@@ -199,6 +230,8 @@ Controladores: `UserHonorsController` y `UserHonorRequirementsController`.
 - `POST /users/:userId/honors/:honorId/files`
 - `PATCH /users/:userId/honors/:honorId`
 - `DELETE /users/:userId/honors/:honorId`
+- `POST /users/:userId/honors/:honorId/instructor-proposal`
+- `DELETE /users/:userId/honors/:honorId/instructor-proposal`
 - `GET /users/:userId/honors/:honorId/requirements/progress`
 - `PATCH /users/:userId/honors/:honorId/requirements/:requirementId/progress`
 - `PATCH /users/:userId/honors/:honorId/requirements/progress/batch`
@@ -242,7 +275,8 @@ El backend bloquea el submit si:
 - `completion_mode` esta en `UNDECIDED` o ausente para un honor editable;
 - en modo `IN_APP`, faltan requisitos hoja obligatorios, no se cumple `choice_min` en grupos de opcion, o falta evidencia activa en requisitos marcados `requires_evidence`;
 - en modo `EXTERNAL`, falta el formato completado en `document` o no existe al menos una evidencia general;
-- fue rechazado y no hubo cambios posteriores al rechazo.
+- fue rechazado y no hubo cambios posteriores al rechazo;
+- `completed_at` viene fuera de 1960-01-01..hoy, o falta mientras `REQUIRE_HONOR_COMPLETED_AT_ON_SUBMIT` sea `true` (hoy `false`). El instructor nunca bloquea.
 
 ## Requisitos por especialidad
 
@@ -286,6 +320,7 @@ La app Flutter consume:
 - inscripcion/inicio del honor;
 - progreso por requisitos;
 - carga de evidencia;
+- fecha de finalización e instructor opcional (tarjeta «Instructor o instructora» y selector de fecha en `HonorEvidenceView`, antes de «Enviar a revisión»); en una especialidad aprobada, la propuesta de instructor con sus estados (`PENDING`, `REJECTED`);
 - `POST /validation/submit` para enviar a revision.
 - detalle de evento de camporee en solo lectura: especialidades de preparación con PDF (`material_url`) vía `SacPdfViewer`. Ese vínculo no inscribe ni abre el flujo de cursar.
 
@@ -319,13 +354,15 @@ POST /api/v1/evidence-review/honor/:id/reject
 
 `EvidenceReviewService` delega las acciones de honor al `HonorValidationWorkflowService`, para evitar reglas duplicadas.
 
+El detalle de un honor (`GET /evidence-review/honor/:id`) agrega `instructor` (sin foto ni correo) y `completed_at`, y el panel los muestra. La cola de propuestas de instructor es otra pantalla: `/dashboard/honor-instructor-proposals`, para `super-admin`, `admin`, `assistant-admin`, `director-lf` y `assistant-lf`.
+
 El detalle de un honor pendiente expone `honor_review_packet` y el panel muestra el modo de finalizacion, formato completado si aplica, avance del honor, conteo de requisitos, porcentaje completado, respuestas textuales y evidencias asociadas a requisitos. Esto evita que el revisor apruebe/rechace mirando solo archivos generales.
 
 Para catalogo, la superficie correcta es la que consume endpoints admin (`/admin/honors-catalog`, `/admin/master-honors`, `/admin/honor-categories`). La pantalla historica que muta `/honors` debe considerarse stale si intenta crear/editar contra endpoints publicos no implementados.
 
 ## Carga masiva por certificados OCR
 
-Los honores aprobados desde carga masiva por certificado se aplican en `users_honors` y adjuntan comprobante en `evidence_files.user_honor_id`. El flujo no crea una fuente paralela de especialidades: `certificate_bulk_import_*` conserva staging/auditoria y la verdad final sigue en `users_honors`.
+Los honores aprobados desde carga masiva por certificado se aplican en `users_honors` (con `completed_at` e instructor) y adjuntan comprobante en `evidence_files.user_honor_id`. El flujo no crea una fuente paralela de especialidades: `certificate_bulk_import_*` conserva staging/auditoria y la verdad final sigue en `users_honors`.
 
 ## Gaps y pendientes
 

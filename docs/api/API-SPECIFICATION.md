@@ -731,6 +731,37 @@ En esos casos el campo afectado se retorna `null` sin selección silenciosa ni i
 - Durante FS-01 no se eliminan writes legacy ni se retira `classes`.
 - Nota runtime 2026-05-29: `users_classes` y `users_classes_archive` ya no existen en el schema efectivo; cualquier consumidor nuevo debe leer trayectoria desde `enrollments`.
 
+### Contrato Canónico: Instructor de especialidad, fecha de finalización y carga por certificado
+
+Vigente en `development` desde 2026-10-12 (backend #471 a #480). Los endpoints están en [ENDPOINTS-LIVE-REFERENCE.md](ENDPOINTS-LIVE-REFERENCE.md) (`instructors`, `admin-honor-instructor-proposals`, `user-honors`, `certificate-bulk-imports`); el flujo, en [carga-masiva-certificados.md](../features/carga-masiva-certificados.md) y [honores.md](../features/honores.md).
+
+**Bloque `instructor`** (respuestas de ítems de la carga por certificado, de `users_honors`, de propuestas y del detalle de `evidence-review`):
+
+```json
+{ "kind": "USER", "user_id": "uuid", "display_name": "Ana Pérez Gómez", "photo_url": "https://..." }
+{ "kind": "EXTERNAL", "display_name": "Pr. Juan Soto" }
+```
+
+- `null` cuando no hay instructor. `kind: 'USER'` lee el nombre en vivo (cuenta anonimizada: «Usuario eliminado»); `kind: 'EXTERNAL'` es un nombre libre de 3 a 150 caracteres.
+- Nunca incluye correo. `photo_url` (URL firmada de vida corta o `null`) solo aparece en respuestas del propio miembro (su lote, una sola especialidad, su propuesta); `GET /users/:userId/honors`, los paneles de revisión y la cola del Campo Local no la traen.
+- Escritura: `instructor_user_id` / `instructor_name` (carga por certificado) o `instructorUserId` / `instructorName` (especialidades). **Como máximo uno** (ambos: 400 `HONOR_INSTRUCTOR_AMBIGUOUS`); `null` borra; mandar uno reemplaza al otro. Es opcional y no bloquea enviar. Solo filas HONOR (en CLASS: 400 `CERTIFICATE_IMPORT_HONOR_INSTRUCTOR_NOT_ALLOWED`).
+- Un usuario del sistema debe ser del **mismo Campo Local que el dueño de la especialidad o del lote**, activo, aprobado y mayor de edad (`HONOR_INSTRUCTOR_INVALID`; el propio dueño: `HONOR_INSTRUCTOR_SELF`). El buscador `GET /instructor-candidates?q=` aplica la misma regla y no devuelve a quien consulta.
+
+**Fecha de finalización.** `users_honors.date` sigue siendo la fecha de **inicio**; `users_honors.completed_at` (`date`, nullable) es la de **finalización**. PATCH, POST y bulk de `/users/:userId/honors` aceptan `completedAt` (`yyyy-mm-dd`, de 1960-01-01 a hoy; fuera de rango: 400 `HONOR_DATE_TOO_OLD` / `HONOR_DATE_IN_FUTURE`). Al enviar a revisión (`POST /validation/submit`), `completed_at` es **opcional mientras `REQUIRE_HONOR_COMPLETED_AT_ON_SUBMIT` sea `false`** (constante en `src/honors/honor-validation-workflow.service.ts`): las apps anteriores a S7 no lo mandan. Si llega, se revalida el rango. Con la constante en `true`, faltar responde 400 `VALIDATION_HONOR_COMPLETED_AT_REQUIRED`; se activará cuando la app con selector de fecha sea la versión mínima. En la carga por certificado, `completed_at` del ítem es la fecha de finalización (CLASS: investidura) y la aprobación la compara contra `completed_at ?? date` de la especialidad ya `APPROVED` (distinta: 400 `CERTIFICATE_IMPORT_FINAL_DATE_CONFLICT`).
+
+**Mutabilidad de especialidades de usuario.** `PENDING_REVIEW` y `APPROVED` no se reescriben: PATCH, POST (alta), bulk, subida de archivos y abandono responden 400 `VALIDATION_HONOR_INVALID_STATUS` (con bulk, sin escrituras parciales). Reiniciar una especialidad inactiva `APPROVED`/`PENDING_REVIEW` solo restaura `active`. La **única** excepción es la propuesta de instructor.
+
+**Propuesta de instructor** (solo especialidad `APPROVED` y activa; solo el dueño):
+
+- `POST /users/:userId/honors/:honorId/instructor-proposal` (`user_honors:submit`, 10 por minuto) crea una propuesta `PENDING`; si había otra, queda `WITHDRAWN`. `DELETE` la retira. Estados: `PENDING | APPROVED | REJECTED | WITHDRAWN`.
+- `GET /users/:userId/honors` agrega `instructor_proposal` por fila: `{ proposal_id, status, instructor, rejection_reason, created_at, reviewed_at }` solo si la última propuesta está `PENDING` o `REJECTED`; si no, `null`.
+- El Campo Local resuelve en `/admin/honor-instructor-proposals` (listado, `approve`, `reject` con `reason` de 3 a 500 caracteres). Aprobar escribe únicamente `users_honors.instructor_*` y `modified_at`.
+- Errores: 400 `HONOR_INSTRUCTOR_PROPOSAL_NOT_APPROVED` (al proponer, la especialidad no está `APPROVED`/activa), `HONOR_INSTRUCTOR_REQUIRED`, `HONOR_INSTRUCTOR_AMBIGUOUS`, `HONOR_INSTRUCTOR_INVALID`, `HONOR_INSTRUCTOR_SELF`, `HONOR_INSTRUCTOR_UNCHANGED` (ya es el instructor vigente); 403 `HONOR_INSTRUCTOR_PROPOSAL_FORBIDDEN` (no es el dueño, o el revisor está fuera de su Campo Local); 404 `HONOR_INSTRUCTOR_PROPOSAL_NOT_FOUND`; 409 `HONOR_INSTRUCTOR_PROPOSAL_NOT_PENDING` (resuelta, retirada o solicitud simultánea) y 409 `HONOR_INSTRUCTOR_PROPOSAL_NOT_APPROVED` (al **aprobar**, la especialidad ya no está `APPROVED`).
+
+**Lote de carga por certificado.** Campos añadidos a las respuestas (todos aditivos): `ocr_state` (`null | pending | running | done | empty | failed`, derivado, sin tabla) y `ocr_error_code`; `files[].page_count`; `items[].source_file_id` y `items[].source_page`; `items[].honor.category` y `items[].class.{asset_code, club_type}` con nombres traducidos; `items[].instructor`; `items[].instructor_conflict` (solo admin y respuesta de aprobar). Fechas: `completed_at` entre 1960-01-01 y hoy (`CERTIFICATE_IMPORT_DATE_TOO_OLD` / `_IN_FUTURE` / `_INVALID`). `club_type_id` en una fila CLASS es solo una verificación de coherencia (`CERTIFICATE_IMPORT_CLASS_CLUB_TYPE_MISMATCH`), no se guarda. `DELETE /certificate-bulk-imports/:batchId` descarta un borrador propio. `GET /certificate-bulk-imports/catalog/classes` lista las clases elegibles y `GET /honors?search=` busca especialidades por nombre. Detalle de cada campo y de los códigos: ENDPOINTS-LIVE-REFERENCE, §«Estado de lectura, instructor y páginas».
+
+**Certificaciones (mismo cierre de mutabilidad).** `DELETE /certifications/users/:userId/certifications/:certificationId` responde 409 `CERT_ENROLLMENT_NOT_ABANDONABLE` en `CERTIFIED`, `APPROVED` y `SUBMITTED_FOR_FINAL_REVIEW`; en los demás estados abandonables pasa a `WITHDRAWN` con `active=false`. Inscribir rechaza (409 `CERT_ALREADY_ENROLLED`) también una fila histórica inactiva en esos tres estados. Crear, editar o enviar requisitos y evidencias exige inscripción en `ENROLLED`, `IN_PROGRESS`, `CHANGES_REQUESTED` o `READY_FOR_CLOSEOUT` (si no, 409 `CERT_REQUIREMENT_LOCKED`). Un componente `FILE_EVIDENCE` solo cuenta con una evidencia `CONFIRMED` y activa. La revisión no decide requisitos de una inscripción abandonada.
+
 ---
 
 ## 🚀 Estado de Implementación
@@ -748,6 +779,6 @@ En esos casos el campo afectado se retorna `null` sin selección silenciosa ni i
 ---
 
 **Generado**: 2026-01-29
-**Actualizado**: 2026-10-04
+**Actualizado**: 2026-10-13
 **Versión**: 3.0.0 (contrato runtime unificado)
 **Status**: ACTIVE en `development` (el producto aún no está en producción). Endpoints canónicos en ENDPOINTS-LIVE-REFERENCE.md
