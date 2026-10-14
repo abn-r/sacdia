@@ -55,15 +55,16 @@ App (Flutter)                          Backend (NestJS)
                                         6. ensureSacdiaUserProvisioned (users_pr, roles)
                                         7. Apple: canjea authorizationCode → refresh_token
                                         8. createSession + signJwt
-   ◀──────────────────────────────────── 9. Misma respuesta que POST /auth/oauth/callback:
-                                           { accessToken, sessionToken, user, needsPostRegistration }
+   ◀──────────────────────────────────── 9. Respuesta de POST /auth/oauth/callback + tokens de login:
+                                           { accessToken, sessionToken, refreshToken, expiresAt,
+                                             tokenType, user, needsPostRegistration }
 10. Si needsPostRegistration → post-registro existente
 ```
 
 Reglas:
 
 - **La identidad es `(providerId, accountId)` en `accounts`**, donde `accountId` es el `sub` del proveedor. El correo solo se usa para vincular la primera vez. El `sub` no cambia aunque el usuario cambie de correo u oculte el suyo con Apple. La tabla ya tiene `@@unique([providerId, accountId])`.
-- **La respuesta es idéntica** a la de `OAuthService.handleCallback`, para que la app reutilice el manejo posterior al login.
+- **La respuesta es la de `OAuthService.handleCallback` más los campos de token de `POST /auth/login`** (`refreshToken`, `expiresAt` en segundos y `tokenType: 'bearer'`), para que la app use el mismo parser en ambos logins. `sessionToken` y `refreshToken` llevan el mismo token opaco de sesión.
 - **El nombre de Apple** llega solo en el primer login y solo al cliente. La app lo manda como `fullName`. El backend lo usa al crear el usuario y lo ignora después.
 - **`providerId`** vale `google` o `apple`, los mismos valores que ya leen `GET /auth/oauth/providers` y `DELETE /auth/oauth/:provider`.
 

@@ -782,8 +782,9 @@ export class AppleIdTokenVerifier implements IdTokenVerifier {
       throw new AppUnauthorizedException(ErrorCode.AUTH_INVALID_TOKEN);
     }
 
-    // Apple never includes the name in the token: the app sends it on the
-    // first sign-in as `fullName` (see SocialTokenSignInDto).
+    // The app passes SHA-256(nonce) to the Apple SDK, so the token carries the
+    // hash while we receive the raw nonce. Apple never includes the name in the
+    // token: the app sends it on the first sign-in as `fullName`.
     return {
       provider: this.provider,
       sub: payload.sub,
@@ -1603,7 +1604,11 @@ describe('SocialSignInService', () => {
   const resolver = { resolve: jest.fn() };
   const appleTokens = { exchangeCode: jest.fn() };
   const betterAuth = {
-    createSession: jest.fn().mockResolvedValue({ id: 'sess-1', token: 'opaque-token' }),
+    createSession: jest.fn().mockResolvedValue({
+      id: 'sess-1',
+      token: 'opaque-token',
+      expiresAt: new Date(1_900_000_000_000),
+    }),
     signJwt: jest.fn().mockReturnValue('sacdia-jwt'),
   };
   const prisma = {
@@ -1647,12 +1652,15 @@ describe('SocialSignInService', () => {
     service = module.get(SocialSignInService);
   });
 
-  it('returns the same payload shape as the old OAuth callback', async () => {
+  it('returns the old OAuth callback payload plus the login token fields', async () => {
     await expect(
       service.signIn('google', { idToken: 't', nonce: 'n' }),
     ).resolves.toEqual({
       accessToken: 'sacdia-jwt',
       sessionToken: 'opaque-token',
+      refreshToken: 'opaque-token',
+      expiresAt: 1_900_000_000,
+      tokenType: 'bearer',
       user: {
         id: 'user-1',
         email: 'ana@example.com',
@@ -1762,10 +1770,19 @@ import {
   type VerifiedIdentity,
 } from './social-sign-in.types';
 
-/** Same shape the old `POST /auth/oauth/callback` returned — the app reuses it. */
+/**
+ * Shape of the old `POST /auth/oauth/callback` plus the token fields
+ * `POST /auth/login` returns (`refreshToken`, `expiresAt`, `tokenType`), so the
+ * app parses both responses with the same code. `sessionToken` and
+ * `refreshToken` carry the same opaque session token.
+ */
 export interface SocialSignInResult {
   accessToken: string;
   sessionToken: string;
+  refreshToken: string;
+  /** Unix seconds, like /auth/login. */
+  expiresAt: number;
+  tokenType: 'bearer';
   user: {
     id: string;
     email: string;
@@ -1836,6 +1853,9 @@ export class SocialSignInService {
     return {
       accessToken,
       sessionToken: session.token,
+      refreshToken: session.token,
+      expiresAt: Math.floor(session.expiresAt.getTime() / 1000),
+      tokenType: 'bearer',
       user: {
         id: userId,
         email,
@@ -2006,6 +2026,9 @@ export class SocialSignInController {
       example: {
         accessToken: 'eyJhbGc...',
         sessionToken: 'opaque_session_token',
+        refreshToken: 'opaque_session_token',
+        expiresAt: 1900000000,
+        tokenType: 'bearer',
         user: {
           id: 'uuid-123',
           email: 'user@gmail.com',
@@ -2097,7 +2120,11 @@ describe('Social sign-in E2E', () => {
   const appleVerifier = { provider: 'apple', verify: jest.fn() };
   const appleTokens = { exchangeCode: jest.fn(), revoke: jest.fn() };
   const betterAuth = {
-    createSession: jest.fn().mockResolvedValue({ id: 'sess-1', token: 'opaque-token' }),
+    createSession: jest.fn().mockResolvedValue({
+      id: 'sess-1',
+      token: 'opaque-token',
+      expiresAt: new Date(1_900_000_000_000),
+    }),
     signJwt: jest.fn().mockReturnValue('fake-jwt'),
   };
 
@@ -2166,6 +2193,9 @@ describe('Social sign-in E2E', () => {
     expect(res.body.data).toMatchObject({
       accessToken: 'fake-jwt',
       sessionToken: 'opaque-token',
+      refreshToken: 'opaque-token',
+      expiresAt: 1_900_000_000,
+      tokenType: 'bearer',
       user: { id: 'user-1', email: 'ana@example.com', connectedProviders: ['google'] },
       needsPostRegistration: true,
     });
