@@ -1,5 +1,7 @@
 # Native Social Sign-In — Backend Implementation Plan
 
+> Implementado con cambios; ver el bloque «Estado de implementación» del diseño. Donde el código difiere, manda el código.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** `POST /api/v1/auth/oauth/:provider/token` verifies a Google or Apple `idToken`, creates or links the SACDIA user and returns the same payload the old OAuth callback returned; `DELETE /auth/me` accepts a fresh `idToken` as re-authentication and revokes Apple tokens; the browser-based Better Auth OAuth flow is removed.

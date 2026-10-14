@@ -1,5 +1,32 @@
 # Login con Google y Apple nativo (app móvil)
 
+> **Estado de implementación (2026-10-14).** El texto de abajo es el diseño original; donde el código difiere, manda el código.
+>
+> | Slice | Estado |
+> |---|---|
+> | B1 (verificadores y `AppleTokenClient`) | Mergeado: sacdia-backend #501 |
+> | B2 (resolver, servicio y endpoint) | Mergeado: sacdia-backend #502 |
+> | B3 (`DELETE /auth/me` con `idToken`) y B4 (retirar el flujo viejo) | Pendientes: rama local de sacdia-backend |
+> | A1 y A2 (app) | Pendientes: rama local de sacdia-app |
+> | D1 (documentación) | Pendiente: este PR |
+> | C1 (consolas) | Pendiente: lo hace el usuario. Ver `docs/guides/SOCIAL-SIGN-IN-SETUP.md` |
+>
+> Diferencias con este documento:
+>
+> - **El nonce se hashea para ambos proveedores (D8).** La app entrega `sha256(nonce)` al SDK de Google y de Apple, y el backend compara el claim `nonce` con `sha256hex(nonce)` en los dos.
+> - **Edad máxima del token: 10 minutos** (`maxTokenAge`), con 30 s de tolerancia de reloj. Un token más viejo se rechaza con 401 `AUTH_INVALID_TOKEN`.
+> - **La respuesta agrega `refreshToken`, `expiresAt` (segundos Unix) y `tokenType: 'bearer'`**, para usar el mismo parser que `POST /auth/login`.
+> - **Tomar una cuenta local sin correo verificado** revoca todas sus sesiones, borra sus filas de `accounts` (contraseña incluida) y su secreto TOTP, y manda sus JWT a la lista negra. El diseño solo decía «borra la contraseña».
+> - **409 `AUTH_OAUTH_PROVIDER_ALREADY_LINKED`** cuando la cuenta verificada ya está vinculada a otra identidad del mismo proveedor.
+> - **La foto del proveedor solo llena un avatar vacío.**
+> - **Usuarios con TOTP** reciben un JWT `mfa_pending`, igual que con contraseña.
+> - **El refresh token de Apple solo se guarda si el `sub`** del id token del canje coincide con el del login.
+> - **Si el JWKS no está disponible** responde 503 `AUTH_OAUTH_PROVIDER_UNAVAILABLE` (el diseño decía `SERVICE_UNAVAILABLE`).
+> - **`DELETE /auth/me`** tiene throttle de 3 por hora y un body que mezcla `password` con `{ provider, idToken, nonce }` responde 400.
+> - **iOS necesita `GOOGLE_IOS_CLIENT_ID` en tiempo de ejecución** (`--dart-define`), además de `GOOGLE_SERVER_CLIENT_ID`. `GOOGLE_OAUTH_AUDIENCES` lista ambos client IDs, Web e iOS.
+> - **La app mapea los códigos de error del backend a sus propios mensajes localizados**, en lugar de mostrar el texto del servidor.
+> - **La pantalla de login sigue montada mientras está abierta la hoja nativa**, para no perder el estado si el usuario cancela.
+
 **Fecha:** 2026-10-14
 **Estado:** Diseño aprobado por el usuario sección por sección. Sin código.
 **Alcance:** `sacdia-backend` (verificación de tokens, alta y vinculación de cuentas, borrado de cuenta) y `sacdia-app` (SDK nativos de Google y Apple). El admin web queda fuera.
@@ -29,6 +56,7 @@ Better Auth 1.7 además valida el esquema de Prisma antes de cada operación. #4
 | D5 | Apple solo en iOS; en Android solo Google. |
 | D6 | El `refresh_token` de Apple se guarda en `accounts.refreshToken` en texto plano, igual que las demás columnas de tokens. Cifrarlo queda fuera de esta versión. |
 | D7 | El `client_secret` de Apple se genera en cada llamada (JWT ES256 con la llave `.p8`). No hay rotación manual cada 6 meses. |
+| D8 | Google también recibe `sha256(nonce)`; el backend compara el hash para ambos proveedores y rechaza tokens de más de 10 minutos. |
 
 ### Enfoques descartados
 
@@ -40,11 +68,11 @@ Better Auth 1.7 además valida el esquema de Prisma antes de cada operación. #4
 ```
 App (Flutter)                          Backend (NestJS)
 ─────────────                          ────────────────
-1. Genera nonce aleatorio
-2. SDK nativo (Google / Apple) ──────▶ (Google/Apple)
+1. Genera nonce aleatorio y su SHA-256 hex
+2. SDK nativo (Google / Apple), con el hash ▶ (Google/Apple)
    ◀── idToken (+ authorizationCode en Apple)
 3. POST /auth/oauth/{provider}/token
-   { idToken, nonce, authorizationCode?, fullName? }
+   { idToken, nonce (en claro), authorizationCode?, fullName? }
                                         4. Verifica idToken (jose + JWKS)
                                            iss, aud, exp, nonce, email_verified
                                         5. Resuelve cuenta:
@@ -75,8 +103,8 @@ Reglas:
 | Unidad | Responsabilidad | Depende de |
 |---|---|---|
 | `IdTokenVerifier` (interfaz) | `verify(idToken, nonce): Promise<VerifiedIdentity>`, con `VerifiedIdentity = { sub, email, emailVerified, name?, picture? }`. | — |
-| `GoogleIdTokenVerifier` | JWKS `https://www.googleapis.com/oauth2/v3/certs` vía `createRemoteJWKSet` (caché de `jose`). `iss` ∈ `accounts.google.com`, `https://accounts.google.com`. `aud` ∈ `GOOGLE_OAUTH_AUDIENCES`. `nonce` igual al recibido. | `jose` |
-| `AppleIdTokenVerifier` | JWKS `https://appleid.apple.com/auth/keys`. `iss = https://appleid.apple.com`. `aud = APPLE_BUNDLE_ID`. `nonce` del token igual al SHA-256 hex del nonce recibido. `email_verified` puede llegar como string `"true"`. | `jose` |
+| `GoogleIdTokenVerifier` | JWKS `https://www.googleapis.com/oauth2/v3/certs` vía `createRemoteJWKSet` (caché de `jose`). `iss` ∈ `accounts.google.com`, `https://accounts.google.com`. `aud` ∈ `GOOGLE_OAUTH_AUDIENCES`. `nonce` igual al SHA-256 hex del nonce recibido (D8). Edad máxima del token: 10 minutos. | `jose` |
+| `AppleIdTokenVerifier` | JWKS `https://appleid.apple.com/auth/keys`. `iss = https://appleid.apple.com`. `aud = APPLE_BUNDLE_ID`. `nonce` del token igual al SHA-256 hex del nonce recibido (D8). Edad máxima del token: 10 minutos. `email_verified` puede llegar como string `"true"`. | `jose` |
 | `AppleTokenClient` | `clientSecret()`: JWT ES256 con `iss = APPLE_TEAM_ID`, `sub = APPLE_BUNDLE_ID`, `aud = https://appleid.apple.com`, `kid = APPLE_KEY_ID` y `exp` de 5 minutos. `exchangeCode(code)` → `POST https://appleid.apple.com/auth/token` (`grant_type=authorization_code`) → `refresh_token`. `revoke(refreshToken)` → `POST https://appleid.apple.com/auth/revoke`. | `jose`, `fetch` |
 | `SocialAccountResolver` | Regla D2/D3 en **una transacción**: buscar por `(providerId, sub)`; si no hay, buscar `users.email` y vincular (borrar `password` de la cuenta `credential` si `users.email_verified = false`, y marcar `email_verified = true`); si no hay, crear `users` y `accounts`. Dentro de la misma transacción llama la lógica de `ensureSacdiaUserProvisioned`. | Prisma |
 | `SocialSignInService` | Orquesta: verificador → resolver → (Apple con `authorizationCode`) canje y guardado de `refreshToken` en la fila de `accounts` → `createSession` + `signJwt` → respuesta. | Los anteriores y `BetterAuthService` |
@@ -123,7 +151,7 @@ Se mantiene la arquitectura actual (datasource → repository → usecase → pr
 | Unidad | Cambio |
 |---|---|
 | Dependencias | Nuevas: `google_sign_in`, `sign_in_with_apple`, `crypto` (directa, para el SHA-256 del nonce). |
-| `core/auth/social_auth_client.dart` (nuevo) | Envuelve los SDK. Genera el nonce (32 bytes aleatorios en base64url). Google: `serverClientId` = client ID Web y el nonce. Apple: `nonce` = SHA-256 hex del nonce y scopes `email` y `fullName`. Devuelve `SocialCredential { provider, idToken, nonce, authorizationCode?, fullName? }` o `null` si el usuario canceló. |
+| `core/auth/social_auth_client.dart` (nuevo) | Envuelve los SDK. Genera el nonce (32 bytes aleatorios en base64url). Google: `serverClientId` = client ID Web (más el client ID iOS en iPhone) y `nonce` = SHA-256 hex del nonce. Apple: `nonce` = SHA-256 hex del nonce y scopes `email` y `fullName`. En ambos, `SocialCredential.nonce` lleva el nonce en claro. Devuelve `SocialCredential { provider, idToken, nonce, authorizationCode?, fullName? }` o `null` si el usuario canceló. |
 | `auth_remote_data_source.dart` | `signInWithGoogle()` y `signInWithApple()` llaman al `SocialAuthClient` y hacen `POST /auth/oauth/{provider}/token`. El manejo de la respuesta se reutiliza. |
 | Flujo con navegador | Se eliminan `handleOAuthCallback`, el deep link de regreso y la intercepción del router. `OAuthLaunchResult` se reduce a éxito, cancelado o error. |
 | Botón de Apple | Solo se muestra en iOS (`Platform.isIOS`). |
@@ -147,7 +175,7 @@ Configuración fuera del código:
 | `idToken` inválido: firma, `iss`, `aud`, `exp` o `nonce` | 401 | `AUTH_INVALID_TOKEN` (existe) |
 | Token sin correo o con `email_verified = false` | 401 | `AUTH_OAUTH_EMAIL_UNVERIFIED` (**nuevo**) |
 | Usuario desactivado o borrado | Igual que el login con contraseña | Mismos códigos |
-| JWKS no disponible | 503 | `SERVICE_UNAVAILABLE` |
+| JWKS no disponible | 503 | `AUTH_OAUTH_PROVIDER_UNAVAILABLE` |
 | Falla el canje del `authorizationCode` de Apple | — | No bloquea el login. Warn y no se guarda `refreshToken`. |
 | Falla la revocación en Apple al borrar | — | No bloquea el borrado. Warn. |
 
@@ -163,7 +191,7 @@ Logs: `sub` truncado y motivo del rechazo. Nunca el token, el correo completo ni
 
 | Capa | Casos | Método |
 |---|---|---|
-| `GoogleIdTokenVerifier`, `AppleIdTokenVerifier` | Firma válida e inválida, `iss` y `aud` incorrectos, expirado, `nonce` equivocado (Apple con hash), `email_verified` falso o como string | Unit con un JWKS local: llaves generadas con `jose` y un `JWKSet` local inyectado. Sin red. |
+| `GoogleIdTokenVerifier`, `AppleIdTokenVerifier` | Firma válida e inválida, `iss` y `aud` incorrectos, expirado, `nonce` equivocado (hash en ambos), token de más de 10 minutos, `email_verified` falso o como string | Unit con un JWKS local: llaves generadas con `jose` y un `JWKSet` local inyectado. Sin red. |
 | `SocialAccountResolver` | Las tres ramas, borrado de contraseña con `email_verified = false`, atomicidad | Unit con Prisma mockeado (patrón actual) |
 | `AppleTokenClient` | Claims y header del `client_secret`, canje, revocación, errores HTTP | Unit con `fetch` mockeado |
 | `POST /auth/oauth/:provider/token` | Contrato, misma forma que el `callback` actual, throttle | e2e con verificadores fake por inyección de dependencias |
