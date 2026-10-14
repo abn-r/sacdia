@@ -1,5 +1,7 @@
 # Native Social Sign-In — App (Flutter) Implementation Plan
 
+> Implementado con cambios; ver el bloque «Estado de implementación» del diseño. Donde el código difiere, manda el código.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** The login screen offers "Continuar con Google" (iOS and Android) and "Continuar con Apple" (iOS only); both use the native SDK, post the `idToken` to `POST /auth/oauth/:provider/token` and land the user in the same post-login flow as email/password. Account deletion works for users without a password by re-authenticating with the provider. The browser/deep-link OAuth flow is removed.
