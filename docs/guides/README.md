@@ -19,6 +19,7 @@ Guías prácticas. Están subordinadas al canon y a los contratos (ver `docs/can
 | Guía | Para qué |
 |---|---|
 | [`domain-email-operations.md`](domain-email-operations.md) | Correo `contacto@sacdia.com`: Cloudflare Email Routing, Resend, Render y Gmail |
+| [`SOCIAL-SIGN-IN-SETUP.md`](SOCIAL-SIGN-IN-SETUP.md) | Login con Google y Apple — configuración de consolas y variables |
 | [`google-vision-certificate-ocr.md`](google-vision-certificate-ocr.md) | Runbook de Google Vision con ADC y PDF para certificados (mergeado con el PR #448 de sacdia-backend) |
 | [`../deployment/DEPLOYMENT-GUIDE.md`](../deployment/DEPLOYMENT-GUIDE.md) | Despliegue del backend (Render), admin (Vercel) y app |
 

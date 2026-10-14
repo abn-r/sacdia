@@ -53,7 +53,7 @@ Conteo de filas por sección de la matriz. Las filas marcadas como pendientes de
 | annual-reports | 9 |
 | app.controller.ts | 1 |
 | auth | 20 |
-| OAuth | 5 |
+| OAuth | 3 |
 | camporee-event-templates | 5 |
 | camporee-events | 16 |
 | camporee-scoring | 20 (el `GET .../score` entró con el PR #448) |
@@ -663,7 +663,7 @@ Semántica funcional y límites: [operations-dashboard.md](../features/operation
 | GET | `/api/v1/auth/me` | JWT | - | Perfil + autorización. Pertenencia no inscrita actual con permisos vacíos. No incluye programación de director. Año solapado → 409 `ECCLESIASTICAL_YEAR_AMBIGUOUS` | AuthService.getProfile() | `src/auth/auth.controller.ts` |
 | PATCH | `/api/v1/auth/me/context` | JWT | - | Cambiar contexto activo. `inactive`/`ended`/año no vigente/`designated` → 400 `AUTH_ASSIGNMENT_YEAR_MISMATCH`. Corte del club no completado → 503 `CLUB_CYCLE_NOT_READY`. No invalida JWT | AuthService.setActiveClubContext() | `src/auth/auth.controller.ts` |
 | GET | `/api/v1/auth/profile/completion-status` | JWT | - | Obtener estado del post-registro | AuthService.getCompletionStatus() | `src/auth/auth.controller.ts` |
-| DELETE | `/api/v1/auth/me` | JWT | - | Eliminar cuenta del usuario autenticado | AccountDeletionService.deleteAccount() | `src/auth/auth.controller.ts` |
+| DELETE | `/api/v1/auth/me` | JWT | - | Eliminar cuenta del usuario autenticado (contraseña o `{ provider, idToken, nonce }`; nunca ambos → 400). Throttle 3/hora | AccountDeletionService.deleteAccount() | `src/auth/auth.controller.ts` |
 | POST | `/api/v1/auth/mfa/enroll` | JWT | - | Habilitar 2FA (TOTP) | MfaService.enrollMfa() | `src/auth/mfa.controller.ts` |
 | POST | `/api/v1/auth/mfa/verify` | JWT | - | Verificar código TOTP | MfaService.verifyMfa() | `src/auth/mfa.controller.ts` |
 | DELETE | `/api/v1/auth/mfa/disable` | JWT | - | Deshabilitar 2FA | MfaService.disableMfa() | `src/auth/mfa.controller.ts` |
@@ -676,11 +676,78 @@ Semántica funcional y límites: [operations-dashboard.md](../features/operation
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
-| POST | `/api/v1/auth/oauth/google` | Public | - | Iniciar autenticación con Google | OAuthService.initiateGoogleSignIn() | `src/auth/oauth.controller.ts` |
-| POST | `/api/v1/auth/oauth/apple` | Public | - | Iniciar autenticación con Apple | OAuthService.initiateAppleSignIn() | `src/auth/oauth.controller.ts` |
-| POST | `/api/v1/auth/oauth/callback` | Public | - | Finalizar callback de OAuth | OAuthService.handleCallback() | `src/auth/oauth.controller.ts` |
+| POST | `/api/v1/auth/oauth/:provider/token` | Public | - | Iniciar sesión con un id token nativo de Google o Apple (`provider` = `google` \| `apple`). Throttle 5/min por IP. Contrato abajo | SocialSignInService.signIn() | `src/auth/social-sign-in/social-sign-in.controller.ts` |
 | GET | `/api/v1/auth/oauth/providers` | JWT | - | Obtener providers OAuth conectados | OAuthService.getConnectedProviders() | `src/auth/oauth.controller.ts` |
 | DELETE | `/api/v1/auth/oauth/:provider` | JWT | - | Desconectar un provider OAuth | OAuthService.disconnectProvider() | `src/auth/oauth.controller.ts` |
+
+#### Contrato `POST /api/v1/auth/oauth/:provider/token`
+
+Diseño: `docs/plans/2026-10-14-native-social-sign-in-design.md`. Configuración de consolas y variables: `docs/guides/SOCIAL-SIGN-IN-SETUP.md`. Los endpoints `POST /auth/oauth/google`, `/apple` y `/callback` (flujo con navegador de Better Auth) se retiran en el slice B4 de sacdia-backend, pendiente de merge junto con el cambio de `DELETE /auth/me` (B3).
+
+##### Request
+
+```json
+{
+  "idToken": "<id token del SDK nativo>",
+  "nonce": "<nonce en claro>",
+  "authorizationCode": "<solo Apple>",
+  "fullName": { "givenName": "...", "familyName": "..." }
+}
+```
+
+- `idToken` y `nonce` son obligatorios. `authorizationCode` y `fullName` son opcionales y solo los manda Apple (el nombre llega únicamente en el primer login).
+- La app manda el nonce **en claro**. El claim `nonce` del id token debe ser igual a `sha256hex(nonce)` para **Google y Apple**: la app entrega el hash al SDK.
+- Se rechazan los tokens de más de 10 minutos de antigüedad (tolerancia de reloj de 30 s).
+
+##### Éxito (201)
+
+Envuelto en `{ "status": "success", "data": ... }`:
+
+```json
+{
+  "accessToken": "<JWT HS256>",
+  "sessionToken": "<token opaco de sesión>",
+  "refreshToken": "<token opaco de sesión>",
+  "expiresAt": 1760000000,
+  "tokenType": "bearer",
+  "user": {
+    "id": "...",
+    "email": "...",
+    "name": "...",
+    "paternal_last_name": "...",
+    "maternal_last_name": "...",
+    "avatar": "...",
+    "connectedProviders": ["google"]
+  },
+  "needsPostRegistration": false
+}
+```
+
+`expiresAt` está en segundos Unix. `needsPostRegistration` es `true` cuando el usuario se acaba de crear. Si el usuario tiene TOTP activo, `accessToken` es un JWT `mfa_pending`, igual que en `POST /auth/login`.
+
+##### Errores
+
+| HTTP | Código | Cuándo |
+| --- | --- | --- |
+| 400 | `AUTH_OAUTH_PROVIDER_INVALID` | `provider` distinto de `google` o `apple` |
+| 400 | (validación) | Body inválido, por ejemplo `{}` |
+| 401 | `AUTH_INVALID_TOKEN` | Firma, `iss`, `aud` o `exp` inválidos; token de más de 10 minutos; `nonce` que no coincide; correo de más de 100 caracteres |
+| 401 | `AUTH_OAUTH_EMAIL_UNVERIFIED` | El token no trae correo o `email_verified` es falso |
+| 409 | `AUTH_OAUTH_PROVIDER_ALREADY_LINKED` | La cuenta verificada ya está vinculada a otra identidad del mismo proveedor |
+| 429 | - | Throttle (5/min por IP) |
+| 503 | `AUTH_OAUTH_PROVIDER_UNAVAILABLE` | No se pueden obtener las llaves públicas de Google o Apple |
+
+##### Resolución de cuenta
+
+- La identidad es `(provider, sub)`. Si existe, entra ese usuario.
+- Si no, se busca por correo y se vincula. Si esa cuenta local nunca verificó su correo, se toma: se borran todas sus sesiones, sus filas de `accounts` (contraseña incluida) y su secreto TOTP, y sus JWT entran a la lista negra.
+- Si el correo no existe, se crea el usuario y `needsPostRegistration` es `true`.
+- La foto del proveedor solo llena un avatar vacío.
+- Apple: `authorizationCode` se canjea en el servidor por un refresh token. Se guarda solo si el `sub` del id token de ese canje coincide con el del login. Sirve para revocar el acceso al borrar la cuenta.
+
+##### `DELETE /api/v1/auth/me`
+
+Body: `{ "password": "..." }` **o** `{ "provider", "idToken", "nonce" }`. Mandar ambos es 400. El id token debe pertenecer a un proveedor vinculado al usuario autenticado. Antes de borrar se revoca el refresh token de Apple (si existe), se eliminan las sesiones y el TOTP de la cuenta y sus JWT entran a la lista negra.
 
 ### camporee-event-templates
 
