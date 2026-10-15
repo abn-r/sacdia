@@ -7,13 +7,16 @@
 > La tabla refleja los decoradores HTTP efectivos en controllers NestJS; DTOs, ejemplos y errores finos viven en Swagger/runtime y docs de feature cuando aplique.
 
 **Estado**: ACTIVE
-**Actualizado**: 2026-10-13 (resincronización parcial; ver la nota siguiente)
+**Actualizado**: 2026-10-15 (aceptación legal; ver la nota de resincronización 2026-10-13 para el resto)
 **Total endpoints**: 866 decoradores HTTP en 108 archivos `*.controller.ts` de `development`. La matriz tiene además 20 filas **pendientes de merge (PR #448 de sacdia-backend)**: secciones `class-thresholds`, `investiture-windows`, `investiture-pastors`, `investiture-requests` y el `GET .../sections/:clubSectionId/score` de camporee-scoring.
 **Métodos (development)**: GET 353 · POST 279 · PATCH 125 · DELETE 96 · PUT 13
 **Auth detectada (development)**: Public 13 · JWT u Optional JWT 853
 
 > [!NOTE]
 > **Resincronización parcial 2026-10-13** contra `development` (backend #471 a #480): carga por certificado (incluye `catalog/classes` y el borrado de borradores), instructores de especialidad, propuestas de instructor, mutabilidad de especialidades y certificaciones, y la autenticación de `catalogs`, `honors` y `classes`. Los totales y el conteo de métodos/auth de arriba **no se recalcularon**: el recuento estático actual de decoradores en `*controller.ts` es 900 (GET 371 · POST 287 · PATCH 129 · DELETE 100 · PUT 13) en 115 archivos, distinto del de la cabecera por estos endpoints y por otros cambios posteriores al 2026-10-04.
+
+> [!NOTE]
+> **Aceptación legal 2026-10-15** (sacdia-backend, rama `feat/legal-acceptance`): se añaden 3 endpoints (sección `legal`), los campos `accepted_terms_version` y `accepted_privacy_version` en `POST /auth/register`, el bloque `legal` en `GET /auth/me` y la clave `legal_acceptances` en la exportación de datos. Los totales de la cabecera tampoco incluyen estos 3 endpoints.
 
 ## Cómo leer esta referencia
 
@@ -99,6 +102,7 @@ Conteo de filas por sección de la matriz. Las filas marcadas como pendientes de
 | camporee supplies | 29 |
 | inventory | 8 |
 | investiture | 20 |
+| legal | 3 |
 | legal-representatives | 4 |
 | Materials — Catalog | 4 |
 | Materials — Categories (admin) | 4 |
@@ -652,7 +656,7 @@ Semántica funcional y límites: [operations-dashboard.md](../features/operation
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
-| POST | `/api/v1/auth/register` | Public | - | Registrar nuevo usuario | AuthService.register() | `src/auth/auth.controller.ts` |
+| POST | `/api/v1/auth/register` | Public | - | Registrar nuevo usuario. El body exige `accepted_terms_version` y `accepted_privacy_version` (ver «Aceptación legal en registro» más abajo). Versión distinta de la vigente → 400 `LEGAL_VERSION_MISMATCH` sin crear usuario | AuthService.register() | `src/auth/auth.controller.ts` |
 | POST | `/api/v1/auth/login` | Public | - | Iniciar sesión | AuthService.login() | `src/auth/auth.controller.ts` |
 | POST | `/api/v1/auth/refresh` | Public | - | Refrescar sesión con refresh token | AuthService.refreshSession() | `src/auth/auth.controller.ts` |
 | POST | `/api/v1/auth/logout` | Public | - | Cerrar sesión | AuthService.logout() | `src/auth/auth.controller.ts` |
@@ -661,7 +665,7 @@ Semántica funcional y límites: [operations-dashboard.md](../features/operation
 | POST | `/api/v1/auth/verify-email/send` | JWT | - | Enviar email de verificación al usuario autenticado | AuthService.sendVerificationEmail() | `src/auth/auth.controller.ts` |
 | POST | `/api/v1/auth/verify-email/confirm` | Public | - | Confirmar verificación de email con token | AuthService.confirmEmailVerification() | `src/auth/auth.controller.ts` |
 | POST | `/api/v1/auth/update-password` | JWT | - | Update authenticated user password | AuthService.updateOwnPassword() | `src/auth/auth.controller.ts` |
-| GET | `/api/v1/auth/me` | JWT | - | Perfil + autorización. Pertenencia no inscrita actual con permisos vacíos. No incluye programación de director. Año solapado → 409 `ECCLESIASTICAL_YEAR_AMBIGUOUS` | AuthService.getProfile() | `src/auth/auth.controller.ts` |
+| GET | `/api/v1/auth/me` | JWT | - | Perfil + autorización. Pertenencia no inscrita actual con permisos vacíos. No incluye programación de director. Año solapado → 409 `ECCLESIASTICAL_YEAR_AMBIGUOUS`. Incluye `data.legal` (estado de aceptación legal; ver sección `legal`), siempre leído de la base y fuera del caché de autorización | AuthService.getProfile() | `src/auth/auth.controller.ts` |
 | PATCH | `/api/v1/auth/me/context` | JWT | - | Cambiar contexto activo. `inactive`/`ended`/año no vigente/`designated` → 400 `AUTH_ASSIGNMENT_YEAR_MISMATCH`. Corte del club no completado → 503 `CLUB_CYCLE_NOT_READY`. No invalida JWT | AuthService.setActiveClubContext() | `src/auth/auth.controller.ts` |
 | GET | `/api/v1/auth/profile/completion-status` | JWT | - | Obtener estado del post-registro | AuthService.getCompletionStatus() | `src/auth/auth.controller.ts` |
 | DELETE | `/api/v1/auth/me` | JWT | - | Eliminar cuenta del usuario autenticado (contraseña o `{ provider, idToken, nonce }`; nunca ambos → 400). Throttle 3/hora | AccountDeletionService.deleteAccount() | `src/auth/auth.controller.ts` |
@@ -749,6 +753,23 @@ Envuelto en `{ "status": "success", "data": ... }`:
 ##### `DELETE /api/v1/auth/me`
 
 Body: `{ "password": "..." }` **o** `{ "provider", "idToken", "nonce" }`. Mandar ambos es 400. El id token debe pertenecer a un proveedor vinculado al usuario autenticado. Antes de borrar se revoca el refresh token de Apple (si existe), se eliminan las sesiones y el TOTP de la cuenta y sus JWT entran a la lista negra.
+
+#### Aceptación legal en registro
+
+`POST /api/v1/auth/register` agrega dos campos obligatorios al body, con la versión vigente que devuelve `GET /api/v1/legal/current`:
+
+```json
+{
+  "accepted_terms_version": "1.0.0-store",
+  "accepted_privacy_version": "1.0.0-store"
+}
+```
+
+- Ambos son string, se recortan (`trim`) y tienen máximo 32 caracteres.
+- Falta, vacío, en blanco, no string o más largo de 32 → 400 de validación genérica (`ValidationPipe`), no `LEGAL_VERSION_MISMATCH`.
+- Texto distinto de la versión vigente (comparación exacta, sensible a mayúsculas, tras `trim`) → 400 `{ "status": "error", "statusCode": 400, "code": "LEGAL_VERSION_MISMATCH", "message": "<traducido>", "timestamp": "...", "path": "..." }`.
+- La validación ocurre antes de `createUser`: con 400 no se crea usuario, cuenta ni sesión.
+- Con éxito, las dos filas de `legal_acceptances` (`method = register_checkbox`, con IP y user agent de la petición) se escriben en la misma transacción del registro.
 
 ### camporee-event-templates
 
@@ -1335,6 +1356,8 @@ Una resolución confirmada avisa en la bandeja de la app, no por correo. La inte
 | GET | `/api/v1/users/me/data-exports` | JWT | - | List all data export requests for the current user | DataExportService.listExports() | `src/data-export/data-export.controller.ts` |
 | GET | `/api/v1/users/me/data-exports/:exportId/download` | JWT | - | Get presigned download URL for a ready export | DataExportService.getDownloadUrl() | `src/data-export/data-export.controller.ts` |
 
+El JSON exportado tiene `schema_version` `1.1.0` (antes `1.0.0`; cambio aditivo). Añade la clave `legal_acceptances`, después de `notification_preferences`: lista ordenada por `accepted_at` descendente de `{ document_type, document_version, accepted_at, method, ip_address, user_agent }` del propio usuario.
+
 ### emergency-contacts
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
@@ -1423,6 +1446,60 @@ Una resolución confirmada avisa en la bandeja de la app, no por correo. La inte
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
 | GET | `/api/v1/instructor-candidates?q=` | JWT | `@SkipPermissions`; throttle 30/min | Buscar instructores de especialidad del mismo Campo Local de quien llama: usuarios activos, aprobados y mayores de edad, sin incluir a quien llama. Busca por nombre y apellidos, nunca por correo (mínimo 3 caracteres en total y 2 por palabra; si no se cumple, o el llamante no tiene Campo Local, responde `[]`). Máximo 10 resultados `{ user_id, display_name, photo_url }` (`photo_url` firmada de vida corta o `null`) | InstructorsService.searchCandidates() | `src/instructors/instructor-candidates.controller.ts` |
+
+### legal
+
+| Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
+| --- | --- | --- | --- | --- | --- | --- |
+| GET | `/api/v1/legal/current` | Public | `@SkipPermissions`; throttle 30/min | Versiones vigentes y URLs públicas de los Términos y el Aviso de Privacidad. Siempre en el orden `terms`, `privacy` | LegalService.getCurrent() | `src/legal/legal.controller.ts` |
+| GET | `/api/v1/users/me/legal-acceptance` | JWT | `@SkipPermissions`; throttle 30/min | Estado de aceptación del usuario autenticado para las versiones vigentes | LegalService.getStatus() | `src/legal/legal-acceptance.controller.ts` |
+| POST | `/api/v1/users/me/legal-acceptance` | JWT | `@SkipPermissions`; throttle 10/min | Aceptar las versiones vigentes. Idempotente: responde 200 y no agrega filas si ya estaban aceptadas. Versión distinta de la vigente → 400 `LEGAL_VERSION_MISMATCH` sin escribir | LegalService.accept() | `src/legal/legal-acceptance.controller.ts` |
+
+Sin token, los dos endpoints `users/me/legal-acceptance` responden 401 por el guard JWT global. El módulo `src/legal/` es la fuente de las versiones: `src/legal/legal-documents.constants.ts` (ver `docs/legal/README.md`).
+
+##### `GET /api/v1/legal/current`
+
+```json
+{
+  "status": "success",
+  "data": {
+    "documents": [
+      { "document_type": "terms", "version": "1.0.0-store", "url": "https://sacdia.com/terms" },
+      { "document_type": "privacy", "version": "1.0.0-store", "url": "https://sacdia.com/privacy" }
+    ]
+  }
+}
+```
+
+##### Bloque de estado legal (`LegalStatus`)
+
+Es idéntico en `data` de `GET` y `POST /api/v1/users/me/legal-acceptance`, y en `data.legal` de `GET /api/v1/auth/me`:
+
+```json
+{
+  "requires_acceptance": true,
+  "documents": [
+    { "document_type": "terms", "version": "1.0.0-store", "url": "https://sacdia.com/terms", "accepted": false, "accepted_at": null },
+    { "document_type": "privacy", "version": "1.0.0-store", "url": "https://sacdia.com/privacy", "accepted": true, "accepted_at": "2026-10-15T22:01:00.000Z" }
+  ]
+}
+```
+
+- Un documento está pendiente (`accepted: false`) si NO existe fila para `(usuario, document_type, versión vigente)`. No importa qué otras versiones haya aceptado antes.
+- `requires_acceptance` es `true` si algún documento está pendiente.
+- `accepted_at` es ISO 8601 de la aceptación de la versión vigente, o `null`.
+
+##### `POST /api/v1/users/me/legal-acceptance`
+
+Body (ambos obligatorios, se recortan, máximo 32; campos extra → 400 por `forbidNonWhitelisted`):
+
+```json
+{ "terms_version": "1.0.0-store", "privacy_version": "1.0.0-store" }
+```
+
+Respuesta 200: `{ "status": "success", "data": <LegalStatus> }`. Guarda las filas con `method = acceptance_gate`, IP y user agent de la petición, y `accepted_by_user_id` null. La identidad sale del JWT (`sub`), nunca del body.
+
+Errores: 400 `LEGAL_VERSION_MISMATCH` (`{ "status": "error", "statusCode": 400, "code": "LEGAL_VERSION_MISMATCH", "message": "<traducido>", "timestamp": "...", "path": "..." }`) si alguna versión no es la vigente; 400 de validación genérica si falta, está vacía o no es string; 429 por throttle.
 
 ### insurance
 
