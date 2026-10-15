@@ -1198,7 +1198,7 @@ Una resolución confirmada avisa en la bandeja de la app, no por correo. La inte
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
-| GET | `/api/v1/evidence-review/pending` | JWT | Global: admin, super-admin, coordinator; Permisos: validation:review | Listar evidencias pendientes de revisión | EvidenceReviewService.getPending() | `src/evidence-review/evidence-review.controller.ts` |
+| GET | `/api/v1/evidence-review/pending` | JWT | Global: admin, super-admin, coordinator; Permisos: validation:review | Listar evidencias pendientes de revisión. Cada ítem trae `section_name` (sección del programa de clase o especialidad) y `club_section_id`/`club_name`/`club_section_name` (sección de club del miembro, nullable) | EvidenceReviewService.getPending() | `src/evidence-review/evidence-review.controller.ts` |
 | POST | `/api/v1/evidence-review/bulk-approve` | JWT | Global: admin, super-admin, coordinator; Permisos: validation:review | Aprobar múltiples evidencias en bloque | EvidenceReviewService.bulkApprove() | `src/evidence-review/evidence-review.controller.ts` |
 | POST | `/api/v1/evidence-review/bulk-reject` | JWT | Global: admin, super-admin, coordinator; Permisos: validation:review | Rechazar múltiples evidencias en bloque | EvidenceReviewService.bulkReject() | `src/evidence-review/evidence-review.controller.ts` |
 | GET | `/api/v1/evidence-review/:type/:id` | JWT | Global: admin, super-admin, coordinator; Permisos: validation:review | Obtener detalle de una evidencia con archivos adjuntos | EvidenceReviewService.getDetail() | `src/evidence-review/evidence-review.controller.ts` |
