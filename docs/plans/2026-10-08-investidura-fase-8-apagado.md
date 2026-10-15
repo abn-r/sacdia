@@ -1,5 +1,7 @@
 # Investidura por autorización — Fase 8: apagar la vía vieja (Plan 3)
 
+> **Estado (2026-10-13): ENTREGADO.** Backend mergeado en `development` (#468 `feat/investiture-legacy-retire` y #469 `feat/investiture-legacy-shutdown`; antes de mergear, otros documentos lo citaron como #466, que fue `feat/investiture-ui-backend-support`), panel #226 (`feat/investiture-legacy-screens-removal`) y app #160 (`feat/investiture-legacy-app-removal`). El `dry_run` del desbloqueo en `development` dio 0 candidatos (42 filas bloqueadas, todas `INVESTIDO`); no se corrió `dry_run: false` en ningún entorno. Migrado en las tres ramas de Neon (`development`, `staging`, `production`: 190 migraciones, `migrate status` al día), con el backend vivo en Render «API Sacdia» (plan Free, rama `development`, contra Neon `development`). Estado vigente y detalle en `docs/features/validacion-investiduras.md` y en el banner de `docs/plans/2026-09-28-investidura-autorizacion.md`. Las ramas, los worktrees y las notas «sin mergear» o «sin desplegar» de abajo describen el momento en que se escribió el plan y son **históricos**.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Que ningún enrollment pueda volver a moverse por la vía club → coordinación → campo (ni por `ValidationModule` con `entity_type` `class`), sin perder historia, sin resolver expedientes en silencio y con una operación explícita y auditable para soltar los bloqueos viejos.
@@ -8,7 +10,7 @@
 
 **Tech Stack:** NestJS 11, Prisma 7.9, Jest, PostgreSQL 18 (e2e aislada); Next.js 16 + next-intl + vitest; Flutter + Riverpod + easy_localization + flutter_test.
 
-**Depende de:** Plan 0 (`2026-10-08-investidura-ui-0-backend-soporte.md`), Plan 1 (`…-ui-1-panel.md`) y Plan 2 (`…-ui-2-app.md`). Ramas base, todas sin mergear:
+**Depende de:** Plan 0 (`2026-10-08-investidura-ui-0-backend-soporte.md`), Plan 1 (`…-ui-1-panel.md`) y Plan 2 (`…-ui-2-app.md`). Ramas base (históricas; hoy mergeadas en `development`, ver el banner de estado):
 
 | Repo | Worktree de referencia | Rama base de este plan |
 | --- | --- | --- |

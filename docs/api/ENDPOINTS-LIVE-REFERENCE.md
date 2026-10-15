@@ -7,10 +7,13 @@
 > La tabla refleja los decoradores HTTP efectivos en controllers NestJS; DTOs, ejemplos y errores finos viven en Swagger/runtime y docs de feature cuando aplique.
 
 **Estado**: ACTIVE
-**Actualizado**: 2026-10-04
+**Actualizado**: 2026-10-13 (resincronización parcial; ver la nota siguiente)
 **Total endpoints**: 866 decoradores HTTP en 108 archivos `*.controller.ts` de `development`. La matriz tiene además 20 filas **pendientes de merge (PR #448 de sacdia-backend)**: secciones `class-thresholds`, `investiture-windows`, `investiture-pastors`, `investiture-requests` y el `GET .../sections/:clubSectionId/score` de camporee-scoring.
 **Métodos (development)**: GET 353 · POST 279 · PATCH 125 · DELETE 96 · PUT 13
 **Auth detectada (development)**: Public 13 · JWT u Optional JWT 853
+
+> [!NOTE]
+> **Resincronización parcial 2026-10-13** contra `development` (backend #471 a #480): carga por certificado (incluye `catalog/classes` y el borrado de borradores), instructores de especialidad, propuestas de instructor, mutabilidad de especialidades y certificaciones, y la autenticación de `catalogs`, `honors` y `classes`. Los totales y el conteo de métodos/auth de arriba **no se recalcularon**: el recuento estático actual de decoradores en `*controller.ts` es 900 (GET 371 · POST 287 · PATCH 129 · DELETE 100 · PUT 13) en 115 archivos, distinto del de la cabecera por estos endpoints y por otros cambios posteriores al 2026-10-04.
 
 ## Cómo leer esta referencia
 
@@ -35,6 +38,7 @@ Conteo de filas por sección de la matriz. Las filas marcadas como pendientes de
 | admin | 2 |
 | admin-audit-logs | 2 |
 | admin-geography | 24 |
+| admin-honor-instructor-proposals | 3 |
 | Admin - Honors Requirements | 7 |
 | admin-notifications | 3 |
 | Admin - Phase E Catalogs (i18n) | 36 |
@@ -49,26 +53,26 @@ Conteo de filas por sección de la matriz. Las filas marcadas como pendientes de
 | annual-reports | 9 |
 | app.controller.ts | 1 |
 | auth | 20 |
-| OAuth | 5 |
+| OAuth | 3 |
 | camporee-event-templates | 5 |
 | camporee-events | 16 |
-| camporee-scoring | 19 (+1 pendiente de merge, PR #448) |
+| camporee-scoring | 20 (el `GET .../score` entró con el PR #448) |
 | camporee-staff | 8 |
 | camporee-venues | 9 |
 | camporees | 50 |
 | catalogs | 16 |
 | admin-certificate-bulk-imports | 6 |
-| certificate-bulk-imports | 13 |
+| certificate-bulk-imports | 15 |
 | certificate-import-institutional-requests | 3 |
 | admin-certificate-import-institutional-requests | 4 |
 | certifications | 27 |
 | Admin - Certifications | 10 |
 | class-counselor-assignments | 4 |
 | class-progress-scope | 2 |
-| class-thresholds (pendiente de merge, PR #448) | 2 |
-| investiture-windows (pendiente de merge, PR #448) | 2 |
-| investiture-pastors (pendiente de merge, PR #448) | 6 |
-| investiture-requests (pendiente de merge, PR #448) | 8 |
+| class-thresholds | 2 |
+| investiture-windows | 2 |
+| investiture-pastors | 6 |
+| investiture-requests | 8 |
 | classes | 4 |
 | user-classes | 7 |
 | club-enrollments | 7 |
@@ -83,8 +87,9 @@ Conteo de filas por sección de la matriz. Las filas marcadas como pendientes de
 | finances | 9 |
 | health | 2 |
 | honors | 5 |
-| user-honors | 15 |
+| user-honors | 17 |
 | user-master-honors | 3 |
+| instructors | 1 |
 | insurance | 18 |
 | field-payment-orders | 19 |
 | camporee order products | 6 |
@@ -246,6 +251,18 @@ Conteo de filas por sección de la matriz. Las filas marcadas como pendientes de
 | POST | `/api/v1/admin/churches` | JWT | Global: admin, super-admin; Permisos: churches:create | Create church | AdminGeographyService.createChurch() | `src/admin/admin-geography.controller.ts` |
 | PATCH | `/api/v1/admin/churches/:churchId` | JWT | Global: admin, super-admin; Permisos: churches:update | Update church | AdminGeographyService.updateChurch() | `src/admin/admin-geography.controller.ts` |
 | DELETE | `/api/v1/admin/churches/:churchId` | JWT | Global: admin, super-admin; Permisos: churches:delete | Soft delete church | AdminGeographyService.deleteChurch() | `src/admin/admin-geography.controller.ts` |
+
+### admin-honor-instructor-proposals
+
+Cola del Campo Local para las propuestas de instructor sobre especialidades ya aprobadas. Mismo revisor y alcance que `admin-certificate-bulk-imports` (`@GlobalRoles('super-admin','admin','assistant-admin','director-lf','assistant-lf')` + `@SkipPermissions`, helper `src/common/reviewer-scope`): `super-admin` y `admin`/`assistant-admin` sin Campo Local ven todo; quien tiene Campo Local solo las propuestas cuyo dueño tiene el mismo `users.local_field_id` actual (si no, 403 `HONOR_INSTRUCTOR_PROPOSAL_FORBIDDEN`).
+
+| Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
+| --- | --- | --- | --- | --- | --- | --- |
+| GET | `/api/v1/admin/honor-instructor-proposals` | JWT | Global: super-admin, admin, assistant-admin, director-lf, assistant-lf | Cola, la más antigua primero. `status` = `PENDING` (por defecto), `APPROVED` o `REJECTED`; `page`, `limit` (máx. 100). Responde `{ items, total, page, limit }`; cada ítem trae `proposal_id`, `status`, `created_at`, `honor`, `member { user_id, display_name }`, `current_instructor`, `proposed_instructor` (sin correo ni foto), `rejection_reason` y `reviewed_at` | HonorInstructorProposalsService.list() | `src/honors/admin-honor-instructor-proposals.controller.ts` |
+| POST | `/api/v1/admin/honor-instructor-proposals/:proposalId/approve` | JWT | Global: super-admin, admin, assistant-admin, director-lf, assistant-lf | Aprobar: revalida que la especialidad siga activa y `APPROVED` (si no, 409 `HONOR_INSTRUCTOR_PROPOSAL_NOT_APPROVED`) y que el instructor siga siendo elegible (si no, 400 `HONOR_INSTRUCTOR_INVALID` y la propuesta sigue `PENDING`). Escribe solo `users_honors.instructor_*` y `modified_at` | HonorInstructorProposalsService.approve() | `src/honors/admin-honor-instructor-proposals.controller.ts` |
+| POST | `/api/v1/admin/honor-instructor-proposals/:proposalId/reject` | JWT | Global: super-admin, admin, assistant-admin, director-lf, assistant-lf | Rechazar con `reason` (3 a 500 caracteres, visible para el miembro). No toca `users_honors` | HonorInstructorProposalsService.reject() | `src/honors/admin-honor-instructor-proposals.controller.ts` |
+
+Errores: 404 `HONOR_INSTRUCTOR_PROPOSAL_NOT_FOUND`; 409 `HONOR_INSTRUCTOR_PROPOSAL_NOT_PENDING` (ya resuelta o retirada, o resolución simultánea). Auditoría en `validation_logs` (`instructor_proposed`, `instructor_withdrawn`, `instructor_approved`, `instructor_rejected`) sin el nombre libre del instructor.
 
 ### Admin - Honors Requirements
 
@@ -647,7 +664,7 @@ Semántica funcional y límites: [operations-dashboard.md](../features/operation
 | GET | `/api/v1/auth/me` | JWT | - | Perfil + autorización. Pertenencia no inscrita actual con permisos vacíos. No incluye programación de director. Año solapado → 409 `ECCLESIASTICAL_YEAR_AMBIGUOUS` | AuthService.getProfile() | `src/auth/auth.controller.ts` |
 | PATCH | `/api/v1/auth/me/context` | JWT | - | Cambiar contexto activo. `inactive`/`ended`/año no vigente/`designated` → 400 `AUTH_ASSIGNMENT_YEAR_MISMATCH`. Corte del club no completado → 503 `CLUB_CYCLE_NOT_READY`. No invalida JWT | AuthService.setActiveClubContext() | `src/auth/auth.controller.ts` |
 | GET | `/api/v1/auth/profile/completion-status` | JWT | - | Obtener estado del post-registro | AuthService.getCompletionStatus() | `src/auth/auth.controller.ts` |
-| DELETE | `/api/v1/auth/me` | JWT | - | Eliminar cuenta del usuario autenticado | AccountDeletionService.deleteAccount() | `src/auth/auth.controller.ts` |
+| DELETE | `/api/v1/auth/me` | JWT | - | Eliminar cuenta del usuario autenticado (contraseña o `{ provider, idToken, nonce }`; nunca ambos → 400). Throttle 3/hora | AccountDeletionService.deleteAccount() | `src/auth/auth.controller.ts` |
 | POST | `/api/v1/auth/mfa/enroll` | JWT | - | Habilitar 2FA (TOTP) | MfaService.enrollMfa() | `src/auth/mfa.controller.ts` |
 | POST | `/api/v1/auth/mfa/verify` | JWT | - | Verificar código TOTP | MfaService.verifyMfa() | `src/auth/mfa.controller.ts` |
 | DELETE | `/api/v1/auth/mfa/disable` | JWT | - | Deshabilitar 2FA | MfaService.disableMfa() | `src/auth/mfa.controller.ts` |
@@ -660,11 +677,78 @@ Semántica funcional y límites: [operations-dashboard.md](../features/operation
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
-| POST | `/api/v1/auth/oauth/google` | Public | - | Iniciar autenticación con Google | OAuthService.initiateGoogleSignIn() | `src/auth/oauth.controller.ts` |
-| POST | `/api/v1/auth/oauth/apple` | Public | - | Iniciar autenticación con Apple | OAuthService.initiateAppleSignIn() | `src/auth/oauth.controller.ts` |
-| POST | `/api/v1/auth/oauth/callback` | Public | - | Finalizar callback de OAuth | OAuthService.handleCallback() | `src/auth/oauth.controller.ts` |
+| POST | `/api/v1/auth/oauth/:provider/token` | Public | - | Iniciar sesión con un id token nativo de Google o Apple (`provider` = `google` \| `apple`). Throttle 5/min por IP. Contrato abajo | SocialSignInService.signIn() | `src/auth/social-sign-in/social-sign-in.controller.ts` |
 | GET | `/api/v1/auth/oauth/providers` | JWT | - | Obtener providers OAuth conectados | OAuthService.getConnectedProviders() | `src/auth/oauth.controller.ts` |
 | DELETE | `/api/v1/auth/oauth/:provider` | JWT | - | Desconectar un provider OAuth | OAuthService.disconnectProvider() | `src/auth/oauth.controller.ts` |
+
+#### Contrato `POST /api/v1/auth/oauth/:provider/token`
+
+Diseño: `docs/plans/2026-10-14-native-social-sign-in-design.md`. Configuración de consolas y variables: `docs/guides/SOCIAL-SIGN-IN-SETUP.md`. Los endpoints `POST /auth/oauth/google`, `/apple` y `/callback` (flujo con navegador de Better Auth) se retiran en el slice B4 de sacdia-backend, pendiente de merge junto con el cambio de `DELETE /auth/me` (B3).
+
+##### Request
+
+```json
+{
+  "idToken": "<id token del SDK nativo>",
+  "nonce": "<nonce en claro>",
+  "authorizationCode": "<solo Apple>",
+  "fullName": { "givenName": "...", "familyName": "..." }
+}
+```
+
+- `idToken` y `nonce` son obligatorios. `authorizationCode` y `fullName` son opcionales y solo los manda Apple (el nombre llega únicamente en el primer login).
+- La app manda el nonce **en claro**. El claim `nonce` del id token debe ser igual a `sha256hex(nonce)` para **Google y Apple**: la app entrega el hash al SDK.
+- Se rechazan los tokens de más de 10 minutos de antigüedad (tolerancia de reloj de 30 s).
+
+##### Éxito (201)
+
+Envuelto en `{ "status": "success", "data": ... }`:
+
+```json
+{
+  "accessToken": "<JWT HS256>",
+  "sessionToken": "<token opaco de sesión>",
+  "refreshToken": "<token opaco de sesión>",
+  "expiresAt": 1760000000,
+  "tokenType": "bearer",
+  "user": {
+    "id": "...",
+    "email": "...",
+    "name": "...",
+    "paternal_last_name": "...",
+    "maternal_last_name": "...",
+    "avatar": "...",
+    "connectedProviders": ["google"]
+  },
+  "needsPostRegistration": false
+}
+```
+
+`expiresAt` está en segundos Unix. `needsPostRegistration` es `true` cuando el usuario se acaba de crear. Si el usuario tiene TOTP activo, `accessToken` es un JWT `mfa_pending`, igual que en `POST /auth/login`.
+
+##### Errores
+
+| HTTP | Código | Cuándo |
+| --- | --- | --- |
+| 400 | `AUTH_OAUTH_PROVIDER_INVALID` | `provider` distinto de `google` o `apple` |
+| 400 | (validación) | Body inválido, por ejemplo `{}` |
+| 401 | `AUTH_INVALID_TOKEN` | Firma, `iss`, `aud` o `exp` inválidos; token de más de 10 minutos; `nonce` que no coincide; correo de más de 100 caracteres |
+| 401 | `AUTH_OAUTH_EMAIL_UNVERIFIED` | El token no trae correo o `email_verified` es falso |
+| 409 | `AUTH_OAUTH_PROVIDER_ALREADY_LINKED` | La cuenta verificada ya está vinculada a otra identidad del mismo proveedor |
+| 429 | - | Throttle (5/min por IP) |
+| 503 | `AUTH_OAUTH_PROVIDER_UNAVAILABLE` | No se pueden obtener las llaves públicas de Google o Apple |
+
+##### Resolución de cuenta
+
+- La identidad es `(provider, sub)`. Si existe, entra ese usuario.
+- Si no, se busca por correo y se vincula. Si esa cuenta local nunca verificó su correo, se toma: se borran todas sus sesiones, sus filas de `accounts` (contraseña incluida) y su secreto TOTP, y sus JWT entran a la lista negra.
+- Si el correo no existe, se crea el usuario y `needsPostRegistration` es `true`.
+- La foto del proveedor solo llena un avatar vacío.
+- Apple: `authorizationCode` se canjea en el servidor por un refresh token. Se guarda solo si el `sub` del id token de ese canje coincide con el del login. Sirve para revocar el acceso al borrar la cuenta.
+
+##### `DELETE /api/v1/auth/me`
+
+Body: `{ "password": "..." }` **o** `{ "provider", "idToken", "nonce" }`. Mandar ambos es 400. El id token debe pertenecer a un proveedor vinculado al usuario autenticado. Antes de borrar se revoca el refresh token de Apple (si existe), se eliminan las sesiones y el TOTP de la cuenta y sus JWT entran a la lista negra.
 
 ### camporee-event-templates
 
@@ -718,7 +802,7 @@ POST/PATCH de instancia aceptan `honor_ids?: number[]` (máx. 20, únicos, honor
 | PATCH | `/api/v1/camporee-event-judge-assignments/:assignmentId` | JWT | - | Actualizar camporee-event-judge-assignments/{id} | CamporeeScoringService.updateJudgeAssignment() | `src/camporee-scoring/camporee-scoring.controller.ts` |
 | DELETE | `/api/v1/camporee-event-judge-assignments/:assignmentId` | JWT | - | Eliminar/desactivar camporee-event-judge-assignments/{id} | CamporeeScoringService.deactivateJudgeAssignment() | `src/camporee-scoring/camporee-scoring.controller.ts` |
 | GET | `/api/v1/camporee-events/:eventId/scoring-targets` | JWT | - | List enrolled sections that can receive scores; each row includes `active_result_id` (`null` if the section has no official result yet) | CamporeeScoringService.getScoringTargets() | `src/camporee-scoring/camporee-scoring.controller.ts` |
-| GET | `/api/v1/camporee-events/:eventId/sections/:clubSectionId/score` | JWT | - | **Pendiente de merge (PR #448 de sacdia-backend)**: en `development` solo existe el `POST .../scores`. Active official score for one section, or `data: null` when none exists. Includes items, totals and `evaluator_name` | CamporeeScoringService.getOfficialScore() | `src/camporee-scoring/camporee-scoring.controller.ts` |
+| GET | `/api/v1/camporee-events/:eventId/sections/:clubSectionId/score` | JWT | - | Mergeado con el PR #448 de sacdia-backend (antes solo existía el `POST .../scores`). Active official score for one section, or `data: null` when none exists. Includes items, totals and `evaluator_name` | CamporeeScoringService.getOfficialScore() | `src/camporee-scoring/camporee-scoring.controller.ts` |
 | POST | `/api/v1/camporee-events/:eventId/sections/:clubSectionId/scores` | JWT | Header opcional `Idempotency-Key: <UUID>`; juez primary o override autorizado | Submit official camporee score/no-show with serialized target and replay-safe receipt | CamporeeScoringService.submitScore() | `src/camporee-scoring/camporee-scoring.controller.ts` |
 
 #### Contrato de captura oficial de score
@@ -833,32 +917,32 @@ Los mismos `GET`/`POST` de camporee aceptan `supply_edit_cutoff_local_time` (def
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
-| GET | `/api/v1/catalogs/club-types` | JWT | - | Obtener tipos de club | CatalogsService.getClubTypes() | `src/catalogs/catalogs.controller.ts` |
-| GET | `/api/v1/catalogs/activity-types` | JWT | - | Obtener tipos de actividad | CatalogsService.getActivityTypes() | `src/catalogs/catalogs.controller.ts` |
-| GET | `/api/v1/catalogs/relationship-types` | JWT | - | Obtener tipos de relación | CatalogsService.getRelationshipTypes() | `src/catalogs/catalogs.controller.ts` |
+| GET | `/api/v1/catalogs/club-types` | JWT opcional (`@Public` + OptionalJwt) | - | Obtener tipos de club | CatalogsService.getClubTypes() | `src/catalogs/catalogs.controller.ts` |
+| GET | `/api/v1/catalogs/activity-types` | JWT opcional (`@Public` + OptionalJwt) | - | Obtener tipos de actividad | CatalogsService.getActivityTypes() | `src/catalogs/catalogs.controller.ts` |
+| GET | `/api/v1/catalogs/relationship-types` | JWT opcional (`@Public` + OptionalJwt) | - | Obtener tipos de relación | CatalogsService.getRelationshipTypes() | `src/catalogs/catalogs.controller.ts` |
 | GET | `/api/v1/catalogs/countries` | JWT opcional (`@Public` + OptionalJwt) | - | Países. Sin JWT / sin rol territorial: directorio completo. Con rol territorial: solo el país del actor. | CatalogsService.getCountries() | `src/catalogs/catalogs.controller.ts` |
 | GET | `/api/v1/catalogs/divisions` | JWT opcional (`@Public` + OptionalJwt) | - | Divisiones. Con rol territorial: solo las que tienen uniones en el país del actor. | CatalogsService.getDivisions() | `src/catalogs/catalogs.controller.ts` |
 | GET | `/api/v1/catalogs/unions` | JWT opcional (`@Public` + OptionalJwt) | - | Uniones. Con rol territorial: uniones del país del actor; `countryId`/`divisionId` de otro país → 403 `GUARD_PERMISSION_DENIED`. | CatalogsService.getUnions() | `src/catalogs/catalogs.controller.ts` |
 | GET | `/api/v1/catalogs/local-fields` | JWT opcional (`@Public` + OptionalJwt) | - | Campos locales. Con rol territorial: campos del país del actor; `unionId` de otro país → 403 `GUARD_PERMISSION_DENIED`. | CatalogsService.getLocalFields() | `src/catalogs/catalogs.controller.ts` |
 | GET | `/api/v1/catalogs/districts` | JWT opcional (`@Public` + OptionalJwt) | - | Distritos. Con rol territorial: distritos del país del actor; `localFieldId` de otro país → 403 `GUARD_PERMISSION_DENIED`. | CatalogsService.getDistricts() | `src/catalogs/catalogs.controller.ts` |
 | GET | `/api/v1/catalogs/churches` | JWT opcional (`@Public` + OptionalJwt) | - | Iglesias. Con rol territorial: iglesias del país del actor; `districtId` de otro país → 403 `GUARD_PERMISSION_DENIED`. | CatalogsService.getChurches() | `src/catalogs/catalogs.controller.ts` |
-| GET | `/api/v1/catalogs/roles` | JWT | - | Obtener roles disponibles | CatalogsService.getRoles() | `src/catalogs/catalogs.controller.ts` |
-| GET | `/api/v1/catalogs/ecclesiastical-years` | JWT | - | Obtener años eclesiásticos | CatalogsService.getEcclesiasticalYears() | `src/catalogs/catalogs.controller.ts` |
-| GET | `/api/v1/catalogs/ecclesiastical-years/current` | JWT | - | Obtener año eclesiástico actual | CatalogsService.getCurrentEcclesiasticalYear() | `src/catalogs/catalogs.controller.ts` |
-| GET | `/api/v1/catalogs/club-ideals` | JWT | - | Obtener ideales de club | CatalogsService.getClubIdeals() | `src/catalogs/catalogs.controller.ts` |
-| GET | `/api/v1/catalogs/allergies` | JWT | - | Obtener catálogo de alergias | CatalogsService.getAllergies() | `src/catalogs/catalogs.controller.ts` |
-| GET | `/api/v1/catalogs/diseases` | JWT | - | Obtener catálogo de enfermedades | CatalogsService.getDiseases() | `src/catalogs/catalogs.controller.ts` |
-| GET | `/api/v1/catalogs/medicines` | JWT | - | Obtener catálogo de medicamentos | CatalogsService.getMedicines() | `src/catalogs/catalogs.controller.ts` |
+| GET | `/api/v1/catalogs/roles` | JWT opcional (`@Public` + OptionalJwt) | - | Obtener roles disponibles | CatalogsService.getRoles() | `src/catalogs/catalogs.controller.ts` |
+| GET | `/api/v1/catalogs/ecclesiastical-years` | JWT opcional (`@Public` + OptionalJwt) | - | Obtener años eclesiásticos | CatalogsService.getEcclesiasticalYears() | `src/catalogs/catalogs.controller.ts` |
+| GET | `/api/v1/catalogs/ecclesiastical-years/current` | JWT opcional (`@Public` + OptionalJwt) | - | Obtener año eclesiástico actual | CatalogsService.getCurrentEcclesiasticalYear() | `src/catalogs/catalogs.controller.ts` |
+| GET | `/api/v1/catalogs/club-ideals` | JWT opcional (`@Public` + OptionalJwt) | - | Obtener ideales de club | CatalogsService.getClubIdeals() | `src/catalogs/catalogs.controller.ts` |
+| GET | `/api/v1/catalogs/allergies` | JWT opcional (`@Public` + OptionalJwt) | - | Obtener catálogo de alergias | CatalogsService.getAllergies() | `src/catalogs/catalogs.controller.ts` |
+| GET | `/api/v1/catalogs/diseases` | JWT opcional (`@Public` + OptionalJwt) | - | Obtener catálogo de enfermedades | CatalogsService.getDiseases() | `src/catalogs/catalogs.controller.ts` |
+| GET | `/api/v1/catalogs/medicines` | JWT opcional (`@Public` + OptionalJwt) | - | Obtener catálogo de medicamentos | CatalogsService.getMedicines() | `src/catalogs/catalogs.controller.ts` |
 
 ### admin-certificate-bulk-imports
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
 | GET | `/api/v1/admin/certificate-bulk-imports/pending` | JWT | Global: super-admin, admin, assistant-admin, director-lf, assistant-lf | Listar cargas por certificado pendientes | AdminCertificateBulkImportsService.listPending() | `src/certificate-bulk-imports/admin-certificate-bulk-imports.controller.ts` |
-| GET | `/api/v1/admin/certificate-bulk-imports/:batchId` | JWT | Global: super-admin, admin, assistant-admin, director-lf, assistant-lf | Obtener detalle de carga por certificado | AdminCertificateBulkImportsService.getDetail() | `src/certificate-bulk-imports/admin-certificate-bulk-imports.controller.ts` |
+| GET | `/api/v1/admin/certificate-bulk-imports/:batchId` | JWT | Global: super-admin, admin, assistant-admin, director-lf, assistant-lf | Obtener detalle de carga por certificado. Agrega `ocr_state`/`ocr_error_code` del lote, `files[].page_count` y, por ítem, `instructor` (sin correo ni foto), `instructor_conflict`, `source_file_id` y `source_page` | AdminCertificateBulkImportsService.getDetail() | `src/certificate-bulk-imports/admin-certificate-bulk-imports.controller.ts` |
 | POST | `/api/v1/admin/certificate-bulk-imports/:batchId/approve` | JWT | Global: super-admin, admin, assistant-admin, director-lf, assistant-lf | Rechaza decidir el lote entero. Cada fila se aprueba sola | AdminCertificateBulkImportsService.approveBatch() | `src/certificate-bulk-imports/admin-certificate-bulk-imports.controller.ts` |
 | POST | `/api/v1/admin/certificate-bulk-imports/:batchId/reject` | JWT | Global: super-admin, admin, assistant-admin, director-lf, assistant-lf | Rechaza decidir el lote entero. Cada fila se rechaza sola | AdminCertificateBulkImportsService.rejectBatch() | `src/certificate-bulk-imports/admin-certificate-bulk-imports.controller.ts` |
-| POST | `/api/v1/admin/certificate-bulk-imports/:batchId/items/:itemId/approve` | JWT | Global: super-admin, admin, assistant-admin, director-lf, assistant-lf | Aprobar una fila. Si hay cursado operativo no investido del mismo periodo, exige `reconcile_enrollment_id` y `expected_modified_at` | AdminCertificateBulkImportsService.approveItem() | `src/certificate-bulk-imports/admin-certificate-bulk-imports.controller.ts` |
+| POST | `/api/v1/admin/certificate-bulk-imports/:batchId/items/:itemId/approve` | JWT | Global: super-admin, admin, assistant-admin, director-lf, assistant-lf | Aprobar una fila. Si hay cursado operativo no investido del mismo periodo, exige `reconcile_enrollment_id` y `expected_modified_at`. En una fila HONOR la respuesta incluye `instructor_conflict` (la especialidad ya estaba `APPROVED` con otro instructor: se conserva el existente) | AdminCertificateBulkImportsService.approveItem() | `src/certificate-bulk-imports/admin-certificate-bulk-imports.controller.ts` |
 | POST | `/api/v1/admin/certificate-bulk-imports/:batchId/items/:itemId/reject` | JWT | Global: super-admin, admin, assistant-admin, director-lf, assistant-lf | Rechazar una fila del lote con motivo | AdminCertificateBulkImportsService.rejectItem() | `src/certificate-bulk-imports/admin-certificate-bulk-imports.controller.ts` |
 
 ### certificate-bulk-imports
@@ -870,16 +954,18 @@ Solicitud viva de la misma persona y clase: el año que decide es `investiture_a
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
 | GET | `/api/v1/certificate-bulk-imports` | JWT | Dueño, desde el JWT | Listar expedientes propios | CertificateBulkImportsService.listMine() | `src/certificate-bulk-imports/certificate-bulk-imports.controller.ts` |
-| POST | `/api/v1/certificate-bulk-imports` | JWT | - | Crear un borrador de carga por certificado | CertificateBulkImportsService.createDraft() | `src/certificate-bulk-imports/certificate-bulk-imports.controller.ts` |
-| POST | `/api/v1/certificate-bulk-imports/:batchId/items` | JWT | Dueño, borrador | Alta manual de fila | CertificateBulkImportsService.addItem() | `src/certificate-bulk-imports/certificate-bulk-imports.controller.ts` |
+| POST | `/api/v1/certificate-bulk-imports` | JWT | - | Crear un borrador de carga por certificado. Acepta `files[]` (hasta 10) e `items[]`; una fila con instructor inválido o fecha fuera de rango nace `NEEDS_REVIEW` con el código en `rejection_reason` y no falla el lote (salvo fecha fuera de rango con `mark_as_ready: true`, que responde 400). Responde `ocr_state: null` | CertificateBulkImportsService.createDraft() | `src/certificate-bulk-imports/certificate-bulk-imports.controller.ts` |
+| POST | `/api/v1/certificate-bulk-imports/:batchId/items` | JWT | Dueño, borrador | Alta manual de fila (mismos campos que el `PATCH` de fila) | CertificateBulkImportsService.addItem() | `src/certificate-bulk-imports/certificate-bulk-imports.controller.ts` |
 | DELETE | `/api/v1/certificate-bulk-imports/:batchId/items/:itemId` | JWT | Dueño, borrador | Quitar fila no enviada | CertificateBulkImportsService.removeItem() | `src/certificate-bulk-imports/certificate-bulk-imports.controller.ts` |
-| POST | `/api/v1/certificate-bulk-imports/:batchId/process-ocr` | JWT | - | Encola lectura Google Vision ADC para JPEG/PNG/WebP y PDF completo de 1–5 páginas (≤10 MiB). Sin Redis: `CERTIFICATE_IMPORT_OCR_UNAVAILABLE`. Credenciales, cuota y lectura fallida se resuelven asíncronamente; no hay `OCR_PROCESSED` ante fallo | CertificateBulkImportsService.processOcr() | `src/certificate-bulk-imports/certificate-bulk-imports.controller.ts` |
-| GET | `/api/v1/certificate-bulk-imports/:batchId` | JWT | - | Obtener detalle de una carga por certificado | CertificateBulkImportsService.getBatch() | `src/certificate-bulk-imports/certificate-bulk-imports.controller.ts` |
-| PATCH | `/api/v1/certificate-bulk-imports/:batchId/items/:itemId` | JWT | - | Corregir o completar una fila detectada por OCR | CertificateBulkImportsService.updateItem() | `src/certificate-bulk-imports/certificate-bulk-imports.controller.ts` |
+| POST | `/api/v1/certificate-bulk-imports/:batchId/process-ocr` | JWT | - | Encola lectura Google Vision para JPEG/PNG/WebP y PDF completo de 1–5 páginas (≤10 MiB), vía ADC local (`OCR_MODE=direct`) o proxy keyless (`OCR_MODE=remote`, aprobado en local, no desplegado). Sin Redis: `CERTIFICATE_IMPORT_OCR_UNAVAILABLE`. Credenciales, cuota y lectura fallida se resuelven asíncronamente; no hay `OCR_PROCESSED` ante fallo; el resultado se lee en `ocr_state`/`ocr_error_code` del lote. Registra `OCR_QUEUED` antes de encolar. Una lectura en cola o en curso no se duplica (devuelve el lote); tras un fallo, llamarlo de nuevo reintenta | CertificateBulkImportsService.processOcr() | `src/certificate-bulk-imports/certificate-bulk-imports.controller.ts` |
+| GET | `/api/v1/certificate-bulk-imports/catalog/classes?clubTypeId=` | JWT | `@SkipPermissions` | Clases elegibles al cargar un certificado: `[{ class_id, name, asset_code, club_type_id, institutional }]`. Incluye clases retiradas (que `GET /classes` oculta) e institucionales (`institutional: true`); excluye las inactivas que no son institucionales. `clubTypeId` opcional | CertificateBulkImportsService.listClassCatalog() | `src/certificate-bulk-imports/certificate-bulk-imports.controller.ts` |
+| GET | `/api/v1/certificate-bulk-imports/:batchId` | JWT | - | Obtener detalle de una carga por certificado. Incluye `ocr_state` y `ocr_error_code`, `files[].page_count`, y por ítem `honor {honor_id, name, category}`, `class {class_id, name, asset_code, club_type}`, `instructor`, `source_file_id` y `source_page` | CertificateBulkImportsService.getBatch() | `src/certificate-bulk-imports/certificate-bulk-imports.controller.ts` |
+| DELETE | `/api/v1/certificate-bulk-imports/:batchId` | JWT | Dueño, solo `DRAFT` | Descartar un borrador propio: borra el lote, sus filas y archivos y, tras el commit, los objetos de R2 (mejor esfuerzo). 404 `CERTIFICATE_IMPORT_BATCH_NOT_FOUND` si no existe o no es del usuario; 409 `CERTIFICATE_IMPORT_BATCH_NOT_DELETABLE` (ya no es `DRAFT` o tiene solicitudes institucionales); 409 `CERTIFICATE_IMPORT_OCR_IN_PROGRESS` (lectura en cola o en curso; reintentar). Responde `{ batch_id, deleted: true }` | CertificateImportDraftDeletionService.deleteDraft() | `src/certificate-bulk-imports/certificate-bulk-imports.controller.ts` |
+| PATCH | `/api/v1/certificate-bulk-imports/:batchId/items/:itemId` | JWT | - | Corregir o completar una fila detectada por OCR. Acepta `instructor_user_id` o `instructor_name` (solo filas HONOR; como máximo uno; `null` lo borra), `club_type_id` (solo verificación de la clase) y `completed_at` entre 1960-01-01 y hoy | CertificateBulkImportsService.updateItem() | `src/certificate-bulk-imports/certificate-bulk-imports.controller.ts` |
 | POST | `/api/v1/certificate-bulk-imports/:batchId/submit` | JWT | - | Enviar carga por certificado a validación de Campo Local | CertificateBulkImportsService.submit() | `src/certificate-bulk-imports/certificate-bulk-imports.controller.ts` |
 | POST | `/api/v1/certificate-bulk-imports/:batchId/items/:itemId/resubmit` | JWT | - | Corregir y reenviar una fila rechazada | CertificateBulkImportsService.resubmitItem() | `src/certificate-bulk-imports/certificate-bulk-imports.controller.ts` |
 | POST | `/api/v1/certificate-bulk-imports/:batchId/files/presign` | JWT | Dueño del lote | Preparar subida firmada de un comprobante | CertificateImportFilesService.presign() | `src/certificate-bulk-imports/certificate-bulk-imports.controller.ts` |
-| POST | `/api/v1/certificate-bulk-imports/:batchId/files/:fileId/confirm` | JWT | Dueño del lote | Confirmar bytes reales y sellar; PDF válido 1–5 páginas, no cifrado. PDF_INVALID/PDF_ENCRYPTED/PDF_TOO_MANY_PAGES → 400 | CertificateImportFilesService.confirm() | `src/certificate-bulk-imports/certificate-bulk-imports.controller.ts` |
+| POST | `/api/v1/certificate-bulk-imports/:batchId/files/:fileId/confirm` | JWT | Dueño del lote | Confirmar bytes reales y sellar; PDF válido 1–5 páginas, no cifrado. PDF_INVALID/PDF_ENCRYPTED/PDF_TOO_MANY_PAGES → 400. Cola de validación llena o espera vencida → 429 `CERTIFICATE_IMPORT_PDF_BUSY`; el archivo no queda confirmado | CertificateImportFilesService.confirm() | `src/certificate-bulk-imports/certificate-bulk-imports.controller.ts` |
 | GET | `/api/v1/certificate-bulk-imports/:batchId/files/:fileId/download` | JWT | Dueño; Campo Local en su ámbito; evidencia institucional solo dueño o super-admin | URL efímera del objeto sellado | CertificateImportFilesService.download() | `src/certificate-bulk-imports/certificate-bulk-imports.controller.ts` |
 | DELETE | `/api/v1/certificate-bulk-imports/:batchId/files/:fileId` | JWT | Dueño, solo expediente editable y sin filas enviadas | Retirar comprobante no enviado | CertificateImportFilesService.remove() | `src/certificate-bulk-imports/certificate-bulk-imports.controller.ts` |
 
@@ -893,9 +979,73 @@ Solicitud viva de la misma persona y clase: el año que decide es `investiture_a
 {"status":"error","statusCode":400,"message":"CERTIFICATE_IMPORT_PDF_TOO_MANY_PAGES"}
 ```
 
-- `process-ocr` devuelve el lote tras **encolar**, no el resultado de Vision. Redis ausente falla al encolar (`CERTIFICATE_IMPORT_OCR_UNAVAILABLE`); en el worker ADC/auth falla con el mismo código, cuota con `CERTIFICATE_IMPORT_OCR_QUOTA`, fallo/deadline/resultados incompletos con `CERTIFICATE_IMPORT_OCR_FAILED`. Estos fallos posteriores **no son** respuesta HTTP retroactiva ni un nuevo campo público de estado de job. No escribe `OCR_PROCESSED` salvo lectura completa exitosa. El SDK usa ADC, gRPC/Buffer, deadline 25 s y sin retries internos; BullMQ conserva dos intentos/concurrencia 1.
+- `confirm` sin turno de validación (cola llena o espera de 2 s vencida) responde HTTP **429** `CERTIFICATE_IMPORT_PDF_BUSY`. El archivo no queda confirmado; se puede reintentar el mismo `confirm`. Mismo sobre legacy: el código va en **`message`**. No es `CERTIFICATE_IMPORT_OCR_UNAVAILABLE`. Ejemplo (timestamp/path omitidos):
+
+```json
+{"status":"error","statusCode":429,"message":"CERTIFICATE_IMPORT_PDF_BUSY"}
+```
+
+- `process-ocr` devuelve el lote tras **encolar**, no el resultado de Vision. Redis ausente falla al encolar (`CERTIFICATE_IMPORT_OCR_UNAVAILABLE`); en el worker ADC/auth (o proxy no disponible) falla con el mismo código, cuota con `CERTIFICATE_IMPORT_OCR_QUOTA`, fallo/deadline/resultados incompletos con `CERTIFICATE_IMPORT_OCR_FAILED`. Estos fallos posteriores **no son** respuesta HTTP retroactiva: el cliente los lee en `ocr_state`/`ocr_error_code` del lote (ver «Estado de lectura, instructor y páginas» más abajo). No escribe `OCR_PROCESSED` salvo lectura completa exitosa. El SDK usa ADC, gRPC/Buffer, deadline 25 s y sin retries internos; BullMQ conserva dos intentos/concurrencia 1. Los códigos terminales (`FAILED`, `QUOTA`, `UNSUPPORTED_TYPE`, `FILE_TOO_LARGE`, `PDF_*`) no gastan el segundo intento; `CERTIFICATE_IMPORT_OCR_UNAVAILABLE` sí es reintentable.
 - PDF antiguo confirmado se valida nuevamente antes de Vision; se exige exactamente una respuesta sin error por cada página `1..pageCount`. OCR solo propone; agregar/corregir filas manualmente y aprobación autorizada continúan separados.
-- Implementación revisada e integrada al workspace principal; configuración remota en Render, despliegue y smoke OCR real siguen pendientes. [Runbook ADC/operación](../guides/google-vision-certificate-ocr.md).
+- `CERTIFICATE_IMPORT_PDF_BUSY` es de `confirm` y es el único código de este contrato con HTTP 429 hacia la app. Está **aprobado en local**; sigue sin desplegar. El 429 conserva `message` (en producción el filtro sustituye `message` cuando `status >= 500`, por eso no se usó 503).
+- Implementación revisada e integrada al workspace principal; el proxy OCR keyless está **aprobado en local** (`PASS_LOCAL_SLICE` en Task0, 1, 1b, 2, R, 3 y 4) pero **no desplegado**: no existen Cloud Run, Firestore, Secret Manager ni el modo `remote` en Render. Configuración en Render y humo OCR real siguen pendientes. [Runbook de operación](../guides/google-vision-certificate-ocr.md) · [infraestructura de preproducción](../guides/ocr-proxy-preprod-infra.md).
+
+#### Estado de lectura, instructor y páginas (2026-10-13)
+
+Campos añadidos a las respuestas de lote (`POST /certificate-bulk-imports`, `GET .../:batchId`, `POST .../process-ocr`, `POST .../submit`, y el detalle admin). Todos son aditivos: un cliente anterior los ignora.
+
+| Campo | Dónde | Contrato |
+|---|---|---|
+| `ocr_state` | lote | `null` (nunca se pidió OCR), `pending`, `running`, `done` (leyó filas), `empty` (leyó, sin filas) o `failed`. Se **deriva** de eventos (`OCR_QUEUED`, `OCR_PROCESSED`, `OCR_FAILED`) y del job de BullMQ; no hay tabla ni columna. Si no se pudo determinar (Redis no responde), las dos claves se omiten: es «sin dato», distinto de `null`. Un `OCR_QUEUED` sin job y con más de 5 minutos sin `OCR_PROCESSED` cuenta como `failed` |
+| `ocr_error_code` | lote | Solo con `ocr_state: 'failed'` cuando el worker registró la causa (`OCR_FAILED`); `null` si la causa es desconocida. Lista blanca: `CERTIFICATE_IMPORT_OCR_UNAVAILABLE`, `..._OCR_FAILED`, `..._OCR_QUOTA`, `..._OCR_UNSUPPORTED_TYPE`, `..._OCR_FILE_TOO_LARGE`, `..._PDF_TOO_MANY_PAGES`, `..._PDF_INVALID`, `..._PDF_ENCRYPTED`, `..._STORAGE_UNAVAILABLE`, `..._FILE_NOT_CONFIRMED`, `..._FILE_CONTENT_MISMATCH`, `..._FILE_TOO_LARGE`, `..._FILE_URL_INVALID`, `..._CANNOT_PROCESS_OCR`, `..._BATCH_NOT_FOUND`; cualquier otro se publica como `CERTIFICATE_IMPORT_OCR_FAILED`. Un reintento (`OCR_QUEUED` nuevo) lo limpia |
+| `files[].page_count` | archivo | Páginas del archivo, escrito al confirmar (PDF: el conteo del validador; imagen: 1). `null` en archivos anteriores a la migración M2 |
+| `items[].source_file_id`, `items[].source_page` | fila | Archivo del lote y página (1 a 5, dentro de ese archivo) donde el OCR leyó la fila. `null` en filas manuales o anteriores a M2. Si no hay `source_file_id`, el cliente ignora `source_page` |
+| `items[].honor`, `items[].class` | fila | `honor { honor_id, name, category { honor_category_id, name } }` y `class { class_id, name, asset_code, club_type { club_type_id, name } }`, con nombres traducidos al idioma pedido; `null` si la fila aún no eligió catálogo |
+| `items[].instructor` | fila HONOR | `null`, `{ kind: 'USER', user_id, display_name, photo_url? }` o `{ kind: 'EXTERNAL', display_name }`. El nombre de un usuario se lee en vivo (cuenta anonimizada: «Usuario eliminado»). Nunca trae correo. `photo_url` (URL firmada de vida corta) solo en respuestas del propio miembro (su lote); el admin no la recibe |
+| `items[].instructor_conflict` | detalle admin / respuesta de aprobar | `true` si la especialidad ya estaba `APPROVED` con otro instructor y se conservó el existente (D7) |
+
+Escritura de fila (`POST .../items`, `PATCH .../items/:itemId`, `resubmit`, y `items[]` al crear): `instructor_user_id` (uuid) o `instructor_name` (3 a 150 caracteres, sin caracteres de control), **como máximo uno**; `null` borra; mandar uno reemplaza al otro. El instructor es opcional y no cuenta para dejar la fila lista. Un usuario del sistema debe ser del **mismo Campo Local que el dueño del lote**, activo, aprobado y mayor de edad.
+
+| Código | HTTP | Cuándo |
+|---|---|---|
+| `HONOR_INSTRUCTOR_AMBIGUOUS` | 400 | Vienen `instructor_user_id` e `instructor_name` |
+| `HONOR_INSTRUCTOR_INVALID` | 400 | El usuario no es elegible (otro Campo, inactivo, no aprobado, menor de edad, inexistente). Un solo código para no revelar si existe |
+| `HONOR_INSTRUCTOR_SELF` | 400 | El instructor es el propio dueño |
+| `CERTIFICATE_IMPORT_HONOR_INSTRUCTOR_NOT_ALLOWED` | 400 | Instructor en una fila CLASS |
+| `CERTIFICATE_IMPORT_CLASS_CLUB_TYPE_MISMATCH` | 400 | `club_type_id` no coincide con el de la clase elegida (no se guarda) |
+| `CERTIFICATE_IMPORT_DATE_TOO_OLD` / `_IN_FUTURE` / `_INVALID` | 400 | `completed_at` anterior a 1960-01-01, posterior a hoy o no es una fecha real. En `PATCH`/`resubmit` y con `mark_as_ready: true` es 400; al crear sin `mark_as_ready` la fila nace `NEEDS_REVIEW` con el código en `rejection_reason`. El código llega en `message` (sobre legacy) |
+| `CERTIFICATE_IMPORT_BATCH_NOT_DELETABLE`, `CERTIFICATE_IMPORT_OCR_IN_PROGRESS` | 409 | `DELETE` del borrador (ver la fila del endpoint) |
+
+El OCR **no** hace match de catálogo: entrega `detected_name`, fecha (`completed_at` solo si cae entre 1960-01-01 y hoy; si no, la cruda queda en `detected_date` y `completed_at` en `NULL`) y confianza. `honor_id`/`class_id` los elige el miembro.
+
+#### Contrato interno OCR (backend a proxy)
+
+No agrega endpoints públicos: la app y el admin no lo consumen. Lo llama solo el worker de Render cuando `OCR_MODE=remote` (estado: aprobado en local, no desplegado). Variables del backend: `OCR_MODE` (`direct` | `remote`; obligatoria en producción), `OCR_PROXY_URL` (URL completa `https://<host>/v1/ocr`), `OCR_PROXY_ENV`, `OCR_PROXY_KID`, `OCR_PROXY_SECRET` (base64 de ≥ 32 bytes; el mismo valor que `OCR_SECRET_CURRENT` del proxy para ese `kid`).
+
+| Aspecto | Contrato |
+|---|---|
+| Solicitud | `POST /v1/ocr`, cuerpo binario sin compresión ni redirects, ≤ 10 MiB; JPEG, PNG, WebP o PDF de 1–5 páginas. |
+| Autenticación | HMAC-SHA256 sobre una cuerda canónica v1 con headers `X-Ocr-*` (versión, entorno, `kid`, `operationId`, `issuedAt`, MIME, longitud, `X-Ocr-Page-Count`, timestamp ±120 s, nonce, SHA-256 del cuerpo, firma). Sin Bearer ni credenciales Google. |
+| Identidad | `operationId` = `file_id` persistido; `issuedAt` = `confirmed_at`. Estables entre reintentos. Nunca viaja un identificador de usuario. |
+| Páginas | Render valida y cuenta el PDF y firma `X-Ocr-Page-Count`; el proxy no parsea PDF y exige cobertura exacta y `totalPages == N`. |
+| Cuota | 400 páginas por día UTC y por entorno (`OCR_MAX_PAGES_PER_ENV_PER_DAY`, 1..400), compartidas entre usuarios. |
+| Plazos | Vision 25 s; proxy 35 s; cliente de Render 40 s absolutos. |
+| Respuesta 200 | JSON UTF-8 v1 `{version, operationId, pageCount, pages:[{pageNumber, text}]}`, ≤ 16 MiB. |
+| Error | `{version, code, requestId}` sin texto OCR ni datos humanos. |
+
+Mapeo del código interno al código que ve la app (sin endpoint nuevo):
+
+| Código interno (HTTP) | Código en la app |
+|---|---|
+| `UNAUTHORIZED` (401), `FORBIDDEN` (403), `UNAVAILABLE` (503), `DISCONNECTED` (503) | `CERTIFICATE_IMPORT_OCR_UNAVAILABLE` |
+| `UNSUPPORTED_TYPE` (400) | `CERTIFICATE_IMPORT_OCR_UNSUPPORTED_TYPE` |
+| `PAYLOAD_TOO_LARGE` (413) | `CERTIFICATE_IMPORT_OCR_FILE_TOO_LARGE` |
+| `PDF_TOO_MANY_PAGES`, `PDF_ENCRYPTED`, `PDF_INVALID` (400) | el mismo nombre `CERTIFICATE_IMPORT_PDF_*` |
+| `INVALID_CONTRACT` (400), `ENCODED` (400), `EMPTY_DOCUMENT` (400), `CONFLICT` (409), `RESPONSE_TOO_LARGE` (504), `UNCERTAIN` (504), `PAGE_COUNT_MISMATCH` (502) | `CERTIFICATE_IMPORT_OCR_FAILED` |
+| `QUOTA` (429, sobre v1 válido) | `CERTIFICATE_IMPORT_OCR_QUOTA` |
+| Cualquier 429, 5xx o 504 **sin sobre v1 válido** (por ejemplo Cloud Run sin instancia libre con máximo 1) | `CERTIFICATE_IMPORT_OCR_UNAVAILABLE`, nunca `QUOTA` |
+
+Garantías limitadas: tras `CALLING` confirmado no hay segunda llamada a Vision; la incertidumbre y la respuesta `COMPLETE` perdida van a revisión manual. No hay exactly-once. Si un reintento de BullMQ encuentra el lease del ledger vigente (60 s), el proxy responde `CONFLICT` y la app ve `CERTIFICATE_IMPORT_OCR_FAILED`. Dependencias de despliegue: [infraestructura de preproducción](../guides/ocr-proxy-preprod-infra.md).
 
 ### certificate-import-institutional-requests
 
@@ -931,12 +1081,12 @@ Aprobar no crea `enrollments` ni reactiva la clase. En HTTP, Campo Local, admin 
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
-| POST | `/api/v1/certifications/users/:userId/certifications/enroll` | JWT | Permisos: user_certifications:manage; owner `userId` | Inscribir en la versión `PUBLISHED` vigente (evalúa elegibilidad configurable) | CertificationsService.enrollUser() | `src/certifications/certifications.controller.ts` |
+| POST | `/api/v1/certifications/users/:userId/certifications/enroll` | JWT | Permisos: user_certifications:manage; owner `userId` | Inscribir en la versión `PUBLISHED` vigente (evalúa elegibilidad configurable). 409 `CERT_ALREADY_ENROLLED` si hay inscripción activa o una fila histórica inactiva `CERTIFIED`/`APPROVED`/`SUBMITTED_FOR_FINAL_REVIEW`; las inactivas `WITHDRAWN`/`EXPIRED` sí permiten reinscribir | CertificationsService.enrollUser() | `src/certifications/certifications.controller.ts` |
 | GET | `/api/v1/certifications/users/:userId/certifications` | JWT | Permisos: user_certifications:read; owner `userId` | Listar inscripciones del usuario con resumen de progreso | CertificationsService.getUserCertifications() | `src/certifications/certifications.controller.ts` |
 | GET | `/api/v1/certifications/users/:userId/certifications/:certificationId/eligibility` | JWT | Permisos: user_certifications:read; owner `userId` | Evaluar elegibilidad explicable por regla (versión publicada) | CertificationsService.getEligibility() | `src/certifications/certifications.controller.ts` |
 | GET | `/api/v1/certifications/users/:userId/certifications/:certificationId/progress` | JWT | Permisos: user_certifications:read; owner `userId` | Progreso detallado por módulos/secciones (inscripciones versionadas usan `status` de requisito) | CertificationsService.getCertificationProgress() | `src/certifications/certifications.controller.ts` |
 | PATCH | `/api/v1/certifications/users/:userId/certifications/:certificationId/progress` | JWT | Permisos: user_certifications:manage; owner `userId` | **[LEGACY — deprecado 2026-08-11]** Toggle booleano de sección; inscripciones con `certification_version_id` reciben `410 CERT_LEGACY_ENDPOINT_DEPRECATED` | CertificationsService.updateProgress() | `src/certifications/certifications.controller.ts` |
-| DELETE | `/api/v1/certifications/users/:userId/certifications/:certificationId` | JWT | Permisos: user_certifications:manage; owner `userId` | Abandonar inscripción (soft delete) | CertificationsService.deleteCertification() | `src/certifications/certifications.controller.ts` |
+| DELETE | `/api/v1/certifications/users/:userId/certifications/:certificationId` | JWT | Permisos: user_certifications:manage; owner `userId` | Abandonar inscripción (soft delete). 409 `CERT_ENROLLMENT_NOT_ABANDONABLE` en `CERTIFIED`, `APPROVED` o `SUBMITTED_FOR_FINAL_REVIEW`; en `ENROLLED`/`IN_PROGRESS`/`READY_FOR_CLOSEOUT`/`CHANGES_REQUESTED` pasa a `WITHDRAWN` con `active=false` y evento `WITHDRAWN`; `EXPIRED` queda `EXPIRED` y solo se desactiva | CertificationsService.deleteCertification() | `src/certifications/certifications.controller.ts` |
 
 #### Requisitos y evidencias (participante)
 
@@ -945,7 +1095,7 @@ Path base: `/api/v1/certifications/users/:userId/certification-enrollments/:enro
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
 | GET | `/api/v1/certifications/users/:userId/certification-enrollments/:enrollmentId/requirements/:requirementId` | JWT | user_certifications:read; owner `userId` | Estado del requisito, respuestas y componentes | CertificationRequirementsService.getRequirement() | `src/certifications/controllers/user-certification-requirements.controller.ts` |
-| PATCH | `/api/v1/certifications/users/:userId/certification-enrollments/:enrollmentId/requirements/:requirementId/draft` | JWT | user_certifications:manage; owner `userId` | Guardar borrador (solo `DRAFT` o `CHANGES_REQUESTED`) | CertificationRequirementsService.saveDraft() | `src/certifications/controllers/user-certification-requirements.controller.ts` |
+| PATCH | `/api/v1/certifications/users/:userId/certification-enrollments/:enrollmentId/requirements/:requirementId/draft` | JWT | user_certifications:manage; owner `userId` | Guardar borrador (solo requisito `DRAFT` o `CHANGES_REQUESTED` e inscripción editable) | CertificationRequirementsService.saveDraft() | `src/certifications/controllers/user-certification-requirements.controller.ts` |
 | POST | `/api/v1/certifications/users/:userId/certification-enrollments/:enrollmentId/requirements/:requirementId/submit` | JWT | user_certifications:manage; owner `userId` | Enviar requisito a revisión (`lock_version` obligatorio) | CertificationRequirementsService.submitRequirement() | `src/certifications/controllers/user-certification-requirements.controller.ts` |
 | POST | `/api/v1/certifications/users/:userId/certification-enrollments/:enrollmentId/requirements/:requirementId/evidences/presign` | JWT | user_certifications:manage; owner `userId` | URL firmada de subida R2 (`component_id`, MIME, tamaño) | CertificationEvidenceService.presign() | `src/certifications/controllers/user-certification-requirements.controller.ts` |
 | POST | `/api/v1/certifications/users/:userId/certification-enrollments/:enrollmentId/requirements/:requirementId/evidences/confirm` | JWT | user_certifications:manage; owner `userId` | Confirmar objeto subido (valida HEAD en R2) | CertificationEvidenceService.confirm() | `src/certifications/controllers/user-certification-requirements.controller.ts` |
@@ -966,8 +1116,8 @@ Path base: `/api/v1/certifications/users/:userId/certification-enrollments/:enro
 | GET | `/api/v1/certifications/reviews/requirements` | JWT | Permisos: certifications:review; scope global | Bandeja de requisitos (filtro opcional `?status=`) | CertificationReviewService.getTray() | `src/certifications/controllers/certification-review.controller.ts` |
 | GET | `/api/v1/certifications/reviews/requirements/:progressId` | JWT | Permisos: certifications:review; scope global | Detalle de requisito con respuestas, evidencias e historial | CertificationReviewService.getDetail() | `src/certifications/controllers/certification-review.controller.ts` |
 | GET | `/api/v1/certifications/reviews/requirements/:progressId/evidences/:evidenceId/download` | JWT | Permisos: certifications:review; scope global | URL firmada efímera (TTL 15 min) de evidencia activa `CONFIRMED` del requisito; no acepta object key del cliente | CertificationReviewService.getEvidenceDownloadUrl() | `src/certifications/controllers/certification-review.controller.ts` |
-| POST | `/api/v1/certifications/reviews/requirements/:progressId/approve` | JWT | Permisos: certifications:review; scope global | Aprobar requisito `SUBMITTED` (`lock_version` obligatorio) | CertificationReviewService.approve() | `src/certifications/controllers/certification-review.controller.ts` |
-| POST | `/api/v1/certifications/reviews/requirements/:progressId/request-changes` | JWT | Permisos: certifications:review; scope global | Devolver requisito con comentario obligatorio | CertificationReviewService.requestChanges() | `src/certifications/controllers/certification-review.controller.ts` |
+| POST | `/api/v1/certifications/reviews/requirements/:progressId/approve` | JWT | Permisos: certifications:review; scope global | Aprobar requisito `SUBMITTED` (`lock_version` obligatorio). Si la inscripción fue abandonada (`active=false`) responde 404 `RECORD_NOT_FOUND`; el detalle y la descarga de evidencia siguen viendo filas históricas | CertificationReviewService.approve() | `src/certifications/controllers/certification-review.controller.ts` |
+| POST | `/api/v1/certifications/reviews/requirements/:progressId/request-changes` | JWT | Permisos: certifications:review; scope global | Devolver requisito con comentario obligatorio. Misma regla de inscripción abandonada (404 `RECORD_NOT_FOUND`) | CertificationReviewService.requestChanges() | `src/certifications/controllers/certification-review.controller.ts` |
 
 #### Revisión final y certificación (institucional)
 
@@ -990,8 +1140,8 @@ Path base: `/api/v1/certifications/users/:userId/certification-enrollments/:enro
 | `CERT_SECTION_INVALID` | 400 | Sección/componente fuera de la versión inscrita |
 | `CERT_VERSION_NOT_PUBLISHED` | 400 | No hay versión publicada vigente |
 | `CERT_VERSION_IMMUTABLE` | 409 | Mutación sobre versión `PUBLISHED`/`RETIRED` |
-| `CERT_REQUIREMENT_LOCKED` | 409 | Requisito en `SUBMITTED`/`APPROVED`; evidencia bloqueada |
-| `CERT_REQUIREMENT_INCOMPLETE` | 400 | Faltan entregables obligatorios o objeto R2 ausente |
+| `CERT_REQUIREMENT_LOCKED` | 409 | Requisito en `SUBMITTED`/`APPROVED`; evidencia bloqueada; o inscripción no editable (`details.entity = 'enrollment'`): crear, editar o enviar requisitos y evidencias solo se permite en `ENROLLED`, `IN_PROGRESS`, `CHANGES_REQUESTED` y `READY_FOR_CLOSEOUT` |
+| `CERT_REQUIREMENT_INCOMPLETE` | 400 | Faltan entregables obligatorios, objeto R2 ausente, o un componente `FILE_EVIDENCE` sin al menos una evidencia `CONFIRMED` y activa |
 | `CERT_INVALID_TRANSITION` | 400 | Transición de estado inválida (inscripción o requisito) |
 | `CERT_EVIDENCE_INVALID_TYPE` | 400 | MIME no permitido (`jpeg`, `png`, `webp`, `pdf`) |
 | `CERT_EVIDENCE_TOO_LARGE` | 400 | Archivo > 10 MiB o divergencia vs. declarado |
@@ -999,6 +1149,7 @@ Path base: `/api/v1/certifications/users/:userId/certification-enrollments/:enro
 | `CERT_CLOSEOUT_INCOMPLETE` | 400 | Faltan requisitos aprobados o comprobante de junta listo |
 | `CERT_CONCURRENT_UPDATE` | 409 | `lock_version` obsoleto en envío/revisión |
 | `CERT_LEGACY_ENDPOINT_DEPRECATED` | 410 | `PATCH .../progress` sobre inscripción versionada |
+| `CERT_ENROLLMENT_NOT_ABANDONABLE` | 409 | `DELETE .../certifications/:certificationId` sobre una inscripción `CERTIFIED`, `APPROVED` o `SUBMITTED_FOR_FINAL_REVIEW` |
 
 ### Admin - Certifications
 
@@ -1088,9 +1239,9 @@ Una resolución confirmada avisa en la bandeja de la app, no por correo. La inte
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
-| GET | `/api/v1/classes` | JWT | - | Listar clases | ClassesService.findAll() | `src/classes/classes.controller.ts` |
-| GET | `/api/v1/classes/:classId` | JWT | - | Obtener clase por ID (incluye `prerequisites` activos y `honors[]` por módulo) | ClassesService.findOne() | `src/classes/classes.controller.ts` |
-| GET | `/api/v1/classes/:classId/modules` | JWT | - | Obtener módulos de una clase (embebe `honors[]` por módulo, sin `user_status`) | ClassesService.getModules() | `src/classes/classes.controller.ts` |
+| GET | `/api/v1/classes` | Optional JWT | - | Listar clases | ClassesService.findAll() | `src/classes/classes.controller.ts` |
+| GET | `/api/v1/classes/:classId` | Optional JWT | - | Obtener clase por ID (incluye `prerequisites` activos y `honors[]` por módulo) | ClassesService.findOne() | `src/classes/classes.controller.ts` |
+| GET | `/api/v1/classes/:classId/modules` | Optional JWT | - | Obtener módulos de una clase (embebe `honors[]` por módulo, sin `user_status`) | ClassesService.getModules() | `src/classes/classes.controller.ts` |
 | GET | `/api/v1/classes/:classId/honors` | Optional JWT | - | Especialidades relacionadas (`class_honors`); `module_id`, `module_name`, `material_url`; con JWT opcional incluye `user_status`. Informativo: no bloquea módulo ni investidura | ClassesService.getClassHonors() | `src/classes/classes.controller.ts` |
 
 ### user-classes
@@ -1201,7 +1352,7 @@ Una resolución confirmada avisa en la bandeja de la app, no por correo. La inte
 | GET | `/api/v1/evidence-review/pending` | JWT | Global: admin, super-admin, coordinator; Permisos: validation:review | Listar evidencias pendientes de revisión. Cada ítem trae `section_name` (sección del programa de clase o especialidad) y `club_section_id`/`club_name`/`club_section_name` (sección de club del miembro, nullable) | EvidenceReviewService.getPending() | `src/evidence-review/evidence-review.controller.ts` |
 | POST | `/api/v1/evidence-review/bulk-approve` | JWT | Global: admin, super-admin, coordinator; Permisos: validation:review | Aprobar múltiples evidencias en bloque | EvidenceReviewService.bulkApprove() | `src/evidence-review/evidence-review.controller.ts` |
 | POST | `/api/v1/evidence-review/bulk-reject` | JWT | Global: admin, super-admin, coordinator; Permisos: validation:review | Rechazar múltiples evidencias en bloque | EvidenceReviewService.bulkReject() | `src/evidence-review/evidence-review.controller.ts` |
-| GET | `/api/v1/evidence-review/:type/:id` | JWT | Global: admin, super-admin, coordinator; Permisos: validation:review | Obtener detalle de una evidencia con archivos adjuntos | EvidenceReviewService.getDetail() | `src/evidence-review/evidence-review.controller.ts` |
+| GET | `/api/v1/evidence-review/:type/:id` | JWT | Global: admin, super-admin, coordinator; Permisos: validation:review | Obtener detalle de una evidencia con archivos adjuntos. Para `honor` agrega `instructor` (bloque sin foto ni correo; `null` si no declaró) y `completed_at` (fecha de finalización declarada) | EvidenceReviewService.getDetail() | `src/evidence-review/evidence-review.controller.ts` |
 | POST | `/api/v1/evidence-review/:type/:id/approve` | JWT | Global: admin, super-admin, coordinator; Permisos: validation:review | Aprobar una evidencia | EvidenceReviewService.approve() | `src/evidence-review/evidence-review.controller.ts` |
 | POST | `/api/v1/evidence-review/:type/:id/reject` | JWT | Global: admin, super-admin, coordinator; Permisos: validation:review | Rechazar una evidencia con motivo | EvidenceReviewService.reject() | `src/evidence-review/evidence-review.controller.ts` |
 | GET | `/api/v1/evidence-review/:type/:id/history` | JWT | Global: admin, super-admin, coordinator; Permisos: validation:review | Historial de validación de una evidencia | EvidenceReviewService.getHistory() | `src/evidence-review/evidence-review.controller.ts` |
@@ -1231,11 +1382,11 @@ Una resolución confirmada avisa en la bandeja de la app, no por correo. La inte
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
-| GET | `/api/v1/honors/:honorId/requirements` | JWT | - | Obtener requisitos de un honor | HonorRequirementsService.getRequirements() | `src/honors/honor-requirements.controller.ts` |
-| GET | `/api/v1/honors` | JWT | - | Listar honores | HonorsService.findAll() | `src/honors/honors.controller.ts` |
-| GET | `/api/v1/honors/categories` | JWT | - | Listar categorías de honores (Redis TTL 1h; epoch bump al mutar categorías/honores) | HonorsService.getCategories() | `src/honors/honors.controller.ts` |
-| GET | `/api/v1/honors/grouped-by-category` | JWT | - | Listar honores agrupados por categoría (Redis TTL 1h; epoch bump al mutar honores/categorías/tipos de club) | HonorsService.getGroupedByCategory() | `src/honors/honors.controller.ts` |
-| GET | `/api/v1/honors/:honorId` | JWT | - | Obtener honor por ID | HonorsService.findOne() | `src/honors/honors.controller.ts` |
+| GET | `/api/v1/honors/:honorId/requirements` | Optional JWT | - | Obtener requisitos de un honor | HonorRequirementsService.getRequirements() | `src/honors/honor-requirements.controller.ts` |
+| GET | `/api/v1/honors` | Optional JWT | - | Listar honores. Filtros `categoryId`, `clubTypeId`, `skillLevel`, `page`, `limit` y `search` (nombre y traducciones; de 2 a 60 caracteres tras recortar, si no 400; no se cachea) | HonorsService.findAll() | `src/honors/honors.controller.ts` |
+| GET | `/api/v1/honors/categories` | Optional JWT | - | Listar categorías de honores (Redis TTL 1h; epoch bump al mutar categorías/honores) | HonorsService.getCategories() | `src/honors/honors.controller.ts` |
+| GET | `/api/v1/honors/grouped-by-category` | Optional JWT | - | Listar honores agrupados por categoría (Redis TTL 1h; epoch bump al mutar honores/categorías/tipos de club) | HonorsService.getGroupedByCategory() | `src/honors/honors.controller.ts` |
+| GET | `/api/v1/honors/:honorId` | Optional JWT | - | Obtener honor por ID | HonorsService.findOne() | `src/honors/honors.controller.ts` |
 
 ### user-honors
 
@@ -1248,14 +1399,16 @@ Una resolución confirmada avisa en la bandeja de la app, no por correo. La inte
 | POST | `/api/v1/users/:userId/honors/:honorId/requirements/:requirementId/evidence/link` | JWT | Permisos: user_honors:create | Agregar enlace como evidencia para un requisito | HonorRequirementsService.addEvidenceLink() | `src/honors/honor-requirements.controller.ts` |
 | GET | `/api/v1/users/:userId/honors/:honorId/requirements/:requirementId/evidence` | JWT | Permisos: user_honors:read | Listar evidencias de un requisito | HonorRequirementsService.getEvidences() | `src/honors/honor-requirements.controller.ts` |
 | DELETE | `/api/v1/users/:userId/honors/:honorId/requirements/:requirementId/evidence/:evidenceId` | JWT | Permisos: user_honors:delete | Eliminar una evidencia de un requisito | HonorRequirementsService.deleteEvidence() | `src/honors/honor-requirements.controller.ts` |
-| GET | `/api/v1/users/:userId/honors` | JWT | Permisos: user_honors:read | Obtener honores del usuario | HonorsService.getUserHonors() | `src/honors/honors.controller.ts` |
+| GET | `/api/v1/users/:userId/honors` | JWT | Permisos: user_honors:read | Obtener honores del usuario. Cada fila trae `completed_at`, el bloque `instructor` (sin foto en el listado) e `instructor_proposal` (última propuesta `PENDING` o `REJECTED` de una especialidad `APPROVED`; `null` si no hay) | HonorsService.getUserHonors() | `src/honors/honors.controller.ts` |
 | GET | `/api/v1/users/:userId/honors/stats` | JWT | Permisos: user_honors:read | Obtener estadísticas de honores del usuario | HonorsService.getUserHonorStats() | `src/honors/honors.controller.ts` |
-| POST | `/api/v1/users/:userId/honors` | JWT | Permisos: user_honors:create | Registrar honor con datos iniciales | HonorsService.createUserHonor() | `src/honors/honors.controller.ts` |
-| POST | `/api/v1/users/:userId/honors/bulk` | JWT | Permisos: user_honors:create | Registrar honores de usuario de forma masiva | HonorsService.createUserHonorsBulk() | `src/honors/honors.controller.ts` |
+| POST | `/api/v1/users/:userId/honors` | JWT | Permisos: user_honors:create | Registrar honor con datos iniciales. Acepta `completedAt`, `instructorUserId` o `instructorName`. Sobre una fila existente `APPROVED` o `PENDING_REVIEW` responde 400 `VALIDATION_HONOR_INVALID_STATUS` y no escribe | HonorsService.createUserHonor() | `src/honors/honors.controller.ts` |
+| POST | `/api/v1/users/:userId/honors/bulk` | JWT | Permisos: user_honors:create | Registrar honores de usuario de forma masiva. Mismos campos y mismo bloqueo por ítem; si un ítem es `APPROVED` o `PENDING_REVIEW` falla todo el lote sin escrituras parciales | HonorsService.createUserHonorsBulk() | `src/honors/honors.controller.ts` |
 | POST | `/api/v1/users/:userId/honors/:honorId/files` | JWT | Permisos: user_honors:create | Subir evidencias del honor | HonorsService.uploadUserHonorFiles() | `src/honors/honors.controller.ts` |
-| POST | `/api/v1/users/:userId/honors/:honorId` | JWT | Permisos: user_honors:create | Iniciar un honor | HonorsService.startHonor() | `src/honors/honors.controller.ts` |
-| PATCH | `/api/v1/users/:userId/honors/:honorId` | JWT | Permisos: user_honors:submit | Actualizar progreso de honor | HonorsService.updateUserHonor() | `src/honors/honors.controller.ts` |
-| DELETE | `/api/v1/users/:userId/honors/:honorId` | JWT | Permisos: user_honors:delete | Abandonar honor | HonorsService.abandonHonor() | `src/honors/honors.controller.ts` |
+| POST | `/api/v1/users/:userId/honors/:honorId` | JWT | Permisos: user_honors:create | Iniciar un honor. Sobre una fila inactiva `APPROVED` o `PENDING_REVIEW` solo restaura `active` (no reinicia estado, archivos ni fechas); sobre otra fila inactiva la reinicia y borra `instructor_*` y `completed_at` | HonorsService.startHonor() | `src/honors/honors.controller.ts` |
+| PATCH | `/api/v1/users/:userId/honors/:honorId` | JWT | Permisos: user_honors:submit | Actualizar progreso de honor. Acepta `completedAt` (`yyyy-mm-dd`, de 1960-01-01 a hoy; `null` lo borra), `instructorUserId` o `instructorName` (como máximo uno; `null` lo borra). Solo en `IN_PROGRESS` o `REJECTED`; en `APPROVED` o `PENDING_REVIEW` responde 400 `VALIDATION_HONOR_INVALID_STATUS` | HonorsService.updateUserHonor() | `src/honors/honors.controller.ts` |
+| DELETE | `/api/v1/users/:userId/honors/:honorId` | JWT | Permisos: user_honors:delete | Abandonar honor (desactiva `active`). En `APPROVED` o `PENDING_REVIEW` responde 400 `VALIDATION_HONOR_INVALID_STATUS` | HonorsService.abandonHonor() | `src/honors/honors.controller.ts` |
+| POST | `/api/v1/users/:userId/honors/:honorId/instructor-proposal` | JWT | Permisos: user_honors:submit; solo el dueño (otro actor: 403 `HONOR_INSTRUCTOR_PROPOSAL_FORBIDDEN`); throttle 10/min | Proponer el instructor de una especialidad `APPROVED` activa. Body `{ instructorUserId? , instructorName? }`, exactamente uno. Crea una propuesta `PENDING` (201); si había otra pendiente, la pasa a `WITHDRAWN`. No cambia la especialidad hasta que el Campo Local apruebe | HonorInstructorProposalsService.propose() | `src/honors/honors.controller.ts` |
+| DELETE | `/api/v1/users/:userId/honors/:honorId/instructor-proposal` | JWT | Permisos: user_honors:submit; solo el dueño | Retirar la propuesta `PENDING` (pasa a `WITHDRAWN`). 404 `HONOR_INSTRUCTOR_PROPOSAL_NOT_FOUND` si no hay una pendiente | HonorInstructorProposalsService.withdraw() | `src/honors/honors.controller.ts` |
 
 ### user-master-honors
 
@@ -1264,6 +1417,12 @@ Una resolución confirmada avisa en la bandeja de la app, no por correo. La inte
 | GET | `/api/v1/users/:userId/master-honors` | JWT | Permisos: user_honors:read | Obtener maestrías del usuario | MasterHonorsService.getUserMasterHonors() | `src/honors/master-honors.controller.ts` |
 | GET | `/api/v1/users/:userId/master-honors/roadmap` | JWT | Permisos: user_honors:read | Obtener roadmap de maestrías del usuario | MasterHonorsService.getUserMasterHonorRoadmap() | `src/honors/master-honors.controller.ts` |
 | GET | `/api/v1/users/:userId/master-honors/:masterHonorId` | JWT | Permisos: user_honors:read | Obtener detalle de una maestría del usuario | MasterHonorsService.getUserMasterHonorDetail() | `src/honors/master-honors.controller.ts` |
+
+### instructors
+
+| Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
+| --- | --- | --- | --- | --- | --- | --- |
+| GET | `/api/v1/instructor-candidates?q=` | JWT | `@SkipPermissions`; throttle 30/min | Buscar instructores de especialidad del mismo Campo Local de quien llama: usuarios activos, aprobados y mayores de edad, sin incluir a quien llama. Busca por nombre y apellidos, nunca por correo (mínimo 3 caracteres en total y 2 por palabra; si no se cumple, o el llamante no tiene Campo Local, responde `[]`). Máximo 10 resultados `{ user_id, display_name, photo_url }` (`photo_url` firmada de vida corta o `null`) | InstructorsService.searchCandidates() | `src/instructors/instructor-candidates.controller.ts` |
 
 ### insurance
 
@@ -1420,7 +1579,7 @@ Read model de solo lectura. No fusiona folios ni muta `field_payment_orders`, `m
 
 ### investiture
 
-Fase 8 (2026-10-09): la vía club → coordinación → campo está apagada en el código de la rama `feat/investiture-legacy-shutdown`, sin desplegar. Las 17 rutas marcadas «Retirada» responden HTTP 410 con el código estable `INVESTITURE_LEGACY_PIPELINE_RETIRED`, sin exigir permisos ni roles (solo el JWT global): ningún actor recibe un 403 que oculte el 410. Incluye las lecturas `GET /investiture/pending` y `GET /admin/investiture/config*`. Siguen vivos el historial (`GET /investiture/enrollments/:enrollmentId/history` y su alias), `expire-overdue` y el desbloqueo de abajo. Los 17 handlers están en `LegacyInvestitureRetiredController`; no leen cuerpo ni parámetros. El `message` sale del catálogo de errores del idioma de la petición; una app o un panel viejos que no mandan `Accept-Language` lo reciben en español. El inventario histórico y el tratamiento de cada expediente están en `docs/features/validacion-investiduras.md`, sección «Fase 8 — apagado». Los permisos `investiture:submit`, `investiture:validate`, `investiture:mark_invested` e `investiture_config:*` quedan inertes (siguen en seeds y base). `investiture:read` sigue en uso: lo exigen las dos lecturas del historial. Nada está desplegado, las migraciones `20261008120000` y `20261009120000` no están aplicadas en Neon y el desbloqueo no se ejecutó en ningún entorno.
+Fase 8 (ejecutada en código el 2026-10-09; mergeada en `development` con backend #468 y #469): la vía club → coordinación → campo está apagada y desplegada en el backend vivo. Las 17 rutas marcadas «Retirada» responden HTTP 410 con el código estable `INVESTITURE_LEGACY_PIPELINE_RETIRED`, sin exigir permisos ni roles (solo el JWT global): ningún actor recibe un 403 que oculte el 410. Incluye las lecturas `GET /investiture/pending` y `GET /admin/investiture/config*`. Siguen vivos el historial (`GET /investiture/enrollments/:enrollmentId/history` y su alias), `expire-overdue` y el desbloqueo de abajo. Los 17 handlers están en `LegacyInvestitureRetiredController`; no leen cuerpo ni parámetros. El `message` sale del catálogo de errores del idioma de la petición; una app o un panel viejos que no mandan `Accept-Language` lo reciben en español. El inventario histórico y el tratamiento de cada expediente están en `docs/features/validacion-investiduras.md`, sección «Fase 8 — apagado». Los permisos `investiture:submit`, `investiture:validate`, `investiture:mark_invested` e `investiture_config:*` quedaron inertes con la fase 8 y se eliminaron del catálogo y de las concesiones con la migración `20261013110000_remove_retired_investiture_permissions` (backend #488, aplicada el 2026-10-13). `investiture:read` sigue en uso: lo exigen las dos lecturas del historial. Las migraciones `20261008120000` y `20261009120000` están aplicadas en las tres ramas de Neon y el `dry_run` del desbloqueo en `development` dio 0 candidatos; no se corrió `dry_run: false` en ningún entorno.
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |

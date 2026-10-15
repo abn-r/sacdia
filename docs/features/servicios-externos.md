@@ -41,7 +41,7 @@ Este documento describe cuatro integraciones transversales: Resend (correo), Bul
   - Solo imágenes JPEG, PNG o WebP (`CERTIFICATE_IMPORT_OCR_UNSUPPORTED_TYPE` para el resto, incluido PDF). El archivo debe estar confirmado en el bucket de importaciones de R2 y no superar `CERTIFICATE_IMPORT_MAX_BYTES`.
   - El texto se interpreta con `CertificateOcrParser` y se guarda recortado a 20 000 caracteres.
   - Existe `NoopCertificateOcrProvider`, pero el módulo no lo usa.
-- **Pendiente de merge (PR #448 de sacdia-backend)**: la rama `feat/investiture-authorization-ocr` cambia a `@google-cloud/vision` con credenciales por defecto de Google (ADC, sin clave) y agrega OCR de PDF (`pdf-lib` para contar páginas). Lo describen `docs/plans/2026-09-30-vision-adc-pdf.md` y `docs/plans/2026-10-02-vision-keyless-{design,plan}.md`.
+- **Mergeado en `development` (PR #448 de sacdia-backend)**: la rama `feat/investiture-authorization-ocr` cambió a `@google-cloud/vision` con credenciales por defecto de Google (ADC, sin clave) y agregó OCR de PDF (`pdf-lib` para contar páginas). Lo describen `docs/plans/2026-09-30-vision-adc-pdf.md` y `docs/plans/2026-10-02-vision-keyless-{design,plan}.md`.
 
 ## PostHog (analítica de producto)
 

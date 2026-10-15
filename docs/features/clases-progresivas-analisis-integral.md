@@ -4,12 +4,14 @@
 > **Fecha de corte:** 2026-08-11
 > **Alcance:** backend NestJS, PostgreSQL/Prisma, app Flutter, panel Next.js y documentación vigente
 > **Naturaleza:** documento de diagnóstico; no reemplaza los contratos canónicos
+>
+> **Actualización de investidura (2026-10-13):** las partes que describían el pipeline club → coordinación → campo (envío a validación, `club-approve`, `coordinator-approve`, `field-approve`, `invest`/`markInvestido`) se reescribieron al modelo vigente en `development`: **investidura por autorización**. La directiva de la sección presenta una solicitud por sección y un pastor del distrito, el `director-lf` o el `assistant-lf` autoriza por persona dentro de la ventana del Campo y con el porcentaje mínimo de la clase. Las 17 rutas de la vía anterior responden HTTP 410 `INVESTITURE_LEGACY_PIPELINE_RETIRED`, la ruta de clase de `ValidationModule` también, y la revisión de evidencia por requisito se mantiene. Fuentes: `docs/features/validacion-investiduras.md` y `docs/plans/2026-09-28-investidura-autorizacion.md`. Mergeado en `development` (backend #465, #466, #468, #469; panel #223 a #226; app #157 a #160). El resto del diagnóstico (fecha de corte 2026-08-11) no se reverificó en esta pasada.
 
 ## 1. Resumen ejecutivo
 
-El módulo de clases progresivas administra la trayectoria formativa anual de un miembro: asignación de clase, inscripción, cumplimiento de requisitos, carga y revisión de evidencias, supervisión pedagógica y validación institucional hasta la investidura.
+El módulo de clases progresivas administra la trayectoria formativa anual de un miembro: asignación de clase, inscripción, cumplimiento de requisitos, carga y revisión de evidencias, supervisión pedagógica y reconocimiento institucional por autorización hasta la investidura.
 
-La autoridad operativa e histórica es `enrollments`. Cada inscripción vincula usuario, clase y año eclesiástico; el progreso de módulos y secciones se crea de forma perezosa a medida que se consulta o actualiza. El runtime ya soporta requisitos por tracks `BASIC`, `EXTRA` y `ADVANCED`, asignaciones de consejeros, revisión de evidencias y un pipeline de investidura con historial auditable.
+La autoridad operativa e histórica es `enrollments`. Cada inscripción vincula usuario, clase y año eclesiástico; el progreso de módulos y secciones se crea de forma perezosa a medida que se consulta o actualiza. El runtime ya soporta requisitos por tracks `BASIC`, `EXTRA` y `ADVANCED`, asignaciones de consejeros, revisión de evidencias y una investidura por autorización con historial auditable (la cadena club → coordinación → campo está retirada).
 
 La base funcional existe, pero hay divergencias que impiden tratar el módulo como cerrado:
 
@@ -26,9 +28,9 @@ La base funcional existe, pero hay divergencias que impiden tratar el módulo co
 | Modelo anual | Ámbar | `enrollments` está consolidado, pero la unicidad DB contradice el límite de Guías Mayores |
 | Progreso | Rojo | actualización sin validación relacional ni bloqueo de estado |
 | Evidencias | Rojo | un rechazo puede seguir computando como cumplimiento |
-| Investidura | Ámbar | pipeline robusto; depende de una elegibilidad que hoy puede ser incorrecta |
-| Mobile | Ámbar | consulta y operación principal presentes; corrección de archivo rota |
-| Admin | Ámbar | CRUD y pipeline parciales; faltan controles curriculares y de expiración |
+| Investidura | Verde/Ámbar | modelo por autorización vigente, vía anterior apagada con 410; depende de una elegibilidad que se corrigió (`REJECTED` ya no cuenta); falta ejecutar el desbloqueo de bloqueos legados en cada entorno |
+| Mobile | Ámbar | consulta y operación principal presentes, incluidas las pantallas de presentar y autorizar; corrección de archivo rota |
+| Admin | Ámbar | CRUD de catálogo y pantallas de autorización presentes; faltan controles curriculares y de expiración |
 | Documentación | Ámbar | hay diferencias de autenticación, UI y modelo respecto del runtime |
 
 ## 2. Alcance y criterio de verdad
@@ -42,7 +44,7 @@ La base funcional existe, pero hay divergencias que impiden tratar el módulo co
 - tracks de requisitos y elegibilidad;
 - evidencias y su revisión;
 - asignación y alcance de consejeros;
-- validación e investidura;
+- autorización de investidura (solicitud por sección y autorización por persona);
 - duración y expiración;
 - contratos HTTP y autorización;
 - comportamiento efectivo de mobile y admin;
@@ -82,7 +84,7 @@ El módulo responde cinco preguntas institucionales:
 4. **¿Qué evidencia demuestra el cumplimiento?**
    El miembro carga archivos, envía la sección y un actor autorizado valida o rechaza.
 5. **¿Cuándo se reconoce institucionalmente la clase?**
-   Cuando la inscripción cumple requisitos y atraviesa el pipeline hasta `INVESTIDO`.
+   Cuando la inscripción cumple requisitos, la directiva de la sección la presenta en una solicitud y un pastor del distrito o el Campo la autoriza dentro de la ventana; el enrollment pasa a `INVESTIDO` sin etapas intermedias.
 
 ## 4. Glosario operativo
 
@@ -96,7 +98,10 @@ El módulo responde cinco preguntas institucionales:
 | Progreso de sección | Estado y puntaje individual de un requisito |
 | Evidencia | Archivo vinculado al progreso de una sección |
 | Track | Clasificación curricular: `BASIC`, `EXTRA` o `ADVANCED` |
-| Investidura | Reconocimiento institucional posterior a validaciones escalonadas |
+| Investidura | Reconocimiento institucional que se confirma al autorizar la persona en una solicitud (ya no hay validaciones escalonadas) |
+| Solicitud de investidura | Agrupa personas y clases de **una sola sección** que la directiva presentó en la ventana del Campo; cada persona se resuelve por separado |
+| Ventana del Campo | Rango de días inclusivos, por Campo local y año eclesiástico, en el que se puede presentar y autorizar |
+| Porcentaje del Campo | Umbral mínimo de puntaje por requisito (80 por defecto) que reemplazó el 70 fijo |
 | Año eclesiástico | Periodo operativo usado para inscripción, disponibilidad y alcance |
 | Scope de progreso | Clases y miembros que un actor puede supervisar según su rol/asignación |
 
@@ -105,12 +110,13 @@ El módulo responde cinco preguntas institucionales:
 | Actor | Responsabilidad real | Límites relevantes |
 |---|---|---|
 | Miembro | Consulta clases/progreso, carga, elimina y envía evidencias propias | Requiere permisos y control de ownership; mobile bloquea visualmente expirados |
-| Consejero | Supervisa clases asignadas y puede enviar a validación de investidura | Para scope pedagógico ve solo clases asignadas; requiere rol elegible |
+| Consejero | Supervisa clases asignadas y acompaña el avance del miembro | Para scope pedagógico ve solo clases asignadas; requiere rol elegible. Ya no envía a validación: presentar la solicitud de investidura es de la directiva |
 | Secretario | Puede recibir asignación pedagógica y ver la sección según acceso | La asignación exige rol local permitido |
-| Director / subdirector / secretaría de club | Ve progreso de toda su sección; director aprueba etapa club | El recurso debe corresponder a club/sección |
-| Coordinador | Revisa evidencias, aprueba etapa de coordinación, rechaza y puede investir | Rol global; participa en operaciones masivas |
-| Admin / super-admin | Administra catálogos, revisa evidencias y opera pipeline | Algunas rutas restringen específicamente a `admin`, no a `super-admin` |
-| Campo local | Representado por la etapa `FIELD_APPROVED` y configuración | La aprobación de campo exige rol global `admin` en el runtime |
+| Director / secretario / secretario-tesorero de la sección | Ven el progreso de toda su sección y presentan, quitan personas y corrigen fechas en la solicitud de investidura de **su** sección | No operan solicitudes de otra sección del mismo club. El subdirector (`deputy-director`) no marca ni lee la solicitud |
+| Pastor del distrito | Autoriza o rechaza por persona las solicitudes de su distrito | Rol global `pastor` activo y asignado al distrito del club (cupo global, 2 por defecto); la asignación solo vale dentro de su propio Campo |
+| `director-lf` / `assistant-lf` | Autorizan o rechazan en su Campo (basta uno, igual que un pastor); configuran ventana, porcentaje y asignación de pastores | El alcance es el Campo de la solicitud; el porcentaje solo se edita hasta el 30 de junio, después `super-admin` |
+| Coordinador | Revisa evidencias por requisito | Rol global. Ya no aprueba etapas de investidura |
+| Admin / super-admin | Administran catálogos, revisan evidencias y consultan o configuran ventanas | No autorizan investiduras por esos roles. Solo `super-admin` exacto corre el desbloqueo de bloqueos legados y cambia el cupo de pastores |
 
 ## 6. Arquitectura de extremo a extremo
 
@@ -121,7 +127,8 @@ flowchart LR
     API["API NestJS\n/api/v1"]
     C["ClassesModule"]
     ER["EvidenceReviewModule"]
-    I["InvestitureModule"]
+    I["InvestitureRequestsModule\n(solicitud y autorización)"]
+    IL["InvestitureModule\n(historial, expire-overdue,\n410 de la vía anterior)"]
     PR["PostRegistrationModule"]
     DB[("PostgreSQL\nPrisma")]
     FS["Storage de evidencias"]
@@ -132,11 +139,13 @@ flowchart LR
     API --> C
     API --> ER
     API --> I
+    API --> IL
     API --> PR
     PR --> C
     C --> DB
     ER --> DB
     I --> DB
+    IL --> DB
     C --> FS
     I --> N
     C --> N
@@ -152,10 +161,12 @@ flowchart LR
 | `ClassCounselorAssignmentsService` | asignación anual de responsables pedagógicos |
 | `ClassProgressScopeService` | visibilidad de clases y miembros según rol/contexto |
 | `EvidenceReviewService` | cola, aprobación, rechazo e historial de requisitos |
-| `InvestitureService` | estados, validaciones, duración, expiración e historial institucional |
+| `InvestitureService` | solo lo que sobrevive a la fase 8: lectura del historial, `expire-overdue` (duración y expiración) y el desbloqueo de bloqueos legados (`LegacyLockReleaseService`) |
+| `LegacyInvestitureRetiredController` | las 17 rutas de la vía anterior, todas HTTP 410 `INVESTITURE_LEGACY_PIPELINE_RETIRED` |
+| `InvestitureAuthorizationRequestsController` y servicio (`src/investiture-requests/`) | solicitud por sección, personas, fechas, autorización por persona, historial y anuario; ventana del Campo, porcentaje, cupo y asignación de pastores; correos de presentación y recordatorios; cierre de año sin arrastre |
 | Admin Phase E | CRUD de clases, módulos y secciones |
-| App Flutter | experiencia del miembro y supervisión pedagógica |
-| Admin Next.js | mantenimiento parcial del catálogo y operación del pipeline |
+| App Flutter | experiencia del miembro, supervisión pedagógica, presentar solicitud (directiva) y autorizar (pastor / Campo) |
+| Admin Next.js | mantenimiento parcial del catálogo y pantallas de autorización, ventana/porcentaje y pastores (`/dashboard/investiture-requests`, `investiture-settings`, `investiture-pastors`) |
 
 ## 7. Modelo de datos
 
@@ -172,7 +183,11 @@ erDiagram
     ENROLLMENTS ||--o{ INVESTITURE_VALIDATION_HISTORY : audita
     CLUB_SECTIONS ||--o{ CLASS_COUNSELOR_ASSIGNMENTS : contextualiza
     CLASSES ||--o{ CLASS_COUNSELOR_ASSIGNMENTS : supervisa
-    ECCLESIASTICAL_YEARS ||--o{ INVESTITURE_CONFIG : configura
+    CLUB_SECTIONS ||--o{ INVESTITURE_AUTHORIZATION_REQUESTS : presenta
+    INVESTITURE_AUTHORIZATION_REQUESTS ||--o{ INVESTITURE_AUTHORIZATION_PEOPLE : agrupa
+    ENROLLMENTS ||--o{ INVESTITURE_AUTHORIZATION_PEOPLE : se_resuelve_en
+    ECCLESIASTICAL_YEARS ||--o{ LOCAL_FIELD_INVESTITURE_WINDOWS : delimita
+    ECCLESIASTICAL_YEARS ||--o{ LOCAL_FIELD_CLASS_THRESHOLDS : fija
 ```
 
 ### 7.1 Entidades principales
@@ -182,13 +197,19 @@ erDiagram
 | `classes` | catálogo de niveles | `club_type_id`, `minimum_age`, `display_order`, `requires_previous_gm_investiture`, `advanced_enabled`, `available_from_year_id`, `available_until_year_id`, `min_duration_years`, `max_duration_years`, `active` |
 | `class_modules` | estructura curricular | clase propietaria, orden, activación y traducciones |
 | `class_sections` | requisito evaluable | módulo, track, obligatoriedad, owner de `EXTRA`, disponibilidad anual, orden y estado activo |
-| `enrollments` | autoridad anual/formativa | usuario, clase, año, estado de investidura, flags de envío/bloqueo/actividad, elegibilidad avanzada y fechas |
+| `enrollments` | autoridad anual/formativa | usuario, clase, año, estado de investidura, flags de bloqueo/actividad, elegibilidad avanzada y fechas. Los campos de envío y validación de la vía anterior (`submitted_for_validation`, `submitted_at`, `validated_by`, `validated_at`, `rejection_reason`) ya no se escriben; se conservan como histórico |
 | `class_module_progress` | agregado por módulo | inscripción opcional en Prisma, puntaje y completitud |
 | `class_section_progress` | estado por requisito | inscripción opcional, módulo/sección por ID, puntaje, evidencias JSON y estado de revisión |
 | `evidence_files` | archivo de evidencia | referencia a progreso de sección, metadatos y activación |
 | `class_counselor_assignments` | responsabilidad pedagógica | club, sección, clase, año, usuario, tipo de responsabilidad, excepción y vigencia |
-| `investiture_validation_history` | auditoría de transiciones | inscripción, actor, acción, estado anterior/nuevo y comentarios |
-| `investiture_config` | ventana institucional | campo local, año, fecha límite, fecha de ceremonia y activación |
+| `investiture_validation_history` | auditoría de la vía anterior | inscripción, actor, acción y comentarios. Solo lectura; el desbloqueo agrega `LEGACY_LOCK_RELEASED` |
+| `investiture_config` | configuración de la vía anterior (fecha de ceremonia única por Campo y año) | Se conserva la tabla, su CRUD y sus lecturas responden 410; no se usa como fecha de las personas de una solicitud |
+| `local_field_class_thresholds` | porcentaje mínimo por requisito | Campo local y año; 80 por defecto; reemplaza el 70 fijo en la elegibilidad |
+| `local_field_investiture_windows` | ventana de presentación y autorización | Campo local y año; inicio y fin inclusivos en `local_fields.timezone`; por defecto 1 de octubre al 20 de diciembre recortado al año |
+| `investiture_pastor_quota`, `district_investiture_pastors` | cupo global de pastores (2) y su asignación a distritos | El pastor debe ser del mismo Campo que el distrito; dos triggers apagan la asignación si cambia el Campo |
+| `investiture_authorization_requests` | cabecera de la solicitud | una sección, su club, el año y quién la creó |
+| `investiture_authorization_people` | una fila por persona y clase | enrollment, fecha, estado (`PENDING`, `INVESTED`, `REJECTED_BY_PERSON`, `REJECTED_BY_SYSTEM`, `REMOVED`, `CLOSED_YEAR`), quién resolvió y motivos |
+| `investiture_message_dispatches`, `investiture_reminder_runs` | entrega idempotente de correos y corridas de recordatorio | recordatorios a las 10:00 locales; pastor lunes, miércoles y viernes; Campo solo lunes |
 
 ### 7.2 Invariantes pretendidas y efectivas
 
@@ -223,12 +244,12 @@ flowchart TD
     F --> S["Enviar sección"]
     S --> V{"Revisión"}
     V -->|Rechazo| F
-    V -->|Validación| Q["Evaluar tracks obligatorios"]
-    Q --> I["Enviar enrollment a investidura"]
-    I --> CA["Aprobación de club"]
-    CA --> CO["Aprobación de coordinación"]
-    CO --> FA["Aprobación de campo"]
-    FA --> IN["INVESTIDO"]
+    V -->|Validación| Q["Evaluar tracks obligatorios\ncon el porcentaje del Campo"]
+    Q --> I["Directiva de la sección presenta\nla solicitud (ventana abierta)"]
+    I --> A{"Pastor del distrito,\ndirector-lf o assistant-lf\nautoriza por persona"}
+    A -->|Autoriza| IN["INVESTIDO"]
+    A -->|Rechaza o deja de cumplir| F
+    A -->|Fin de año sin resolver| CY["CLOSED_YEAR\n(sin arrastre al año siguiente)"]
 ```
 
 ### 8.1 Asignación inicial por edad y post-registro
@@ -342,52 +363,48 @@ La respuesta de progreso separa los totales/completados por track y expone:
 - elegibilidad avanzada, si el track está habilitado y completo;
 - razones de bloqueo, por ejemplo ausencia de contexto institucional para un requisito `EXTRA`.
 
-**Defecto actual:** tanto el cálculo general como el servicio de elegibilidad consideran completada una sección cuando `status === VALIDATED` **o** `score >= 70`. Por ello un requisito `REJECTED` con puntaje previo suficiente puede seguir habilitando la investidura.
+**Estado actual:** una sección cuenta como completa si no está `REJECTED` y está `VALIDATED` o su puntaje alcanza el porcentaje del Campo local (80 por defecto, antes un 70 fijo). El detalle individual, el listado colectivo y la elegibilidad usan el mismo criterio. El defecto original (un `REJECTED` con puntaje alto seguía habilitando la investidura) quedó resuelto.
 
-### 8.8 Envío, validación e investidura
+### 8.8 Solicitud y autorización de investidura
 
-Antes de enviar una inscripción, el servicio comprueba:
+La investidura ya no recorre etapas de club, coordinación y campo. Se presenta y se autoriza **por persona**, en una solicitud de una sola sección.
 
-- estado `IN_PROGRESS` o `REJECTED`;
-- inscripción activa;
-- duración mínima y máxima;
-- requisitos obligatorios completos según tracks;
-- configuración de investidura activa para campo local y año.
+**Presentar (directiva de la sección).** El director, el secretario o el secretario-tesorero de la sección eligen a quienes cumplen y los dejan pendientes con una fecha de investidura. La solicitud no mezcla secciones, aunque sean del mismo club. Antes de aceptar a una persona, el backend comprueba:
 
-La fecha límite de envío genera advertencia blanda; no bloquea el envío. Al enviar se activa `locked_for_validation`, se registra historial y se notifica.
+- inscripción operativa válida y clase elegible (`GM-02` y `GM-03` no admiten solicitud: `INVESTITURE_REQUEST_CLASS_NOT_ELIGIBLE`);
+- duración mínima cumplida y requisitos obligatorios completos según tracks, con el porcentaje del Campo;
+- que no esté ya `INVESTIDO` en esa clase ni tenga otra solicitud activa incompatible (Aventureros y Conquistadores regulares: una sola; Guías Mayores: una por persona y clase);
+- que el enrollment no siga bloqueado por la vía anterior (`INVESTITURE_REQUEST_LEGACY_PIPELINE_ACTIVE` si `locked_for_validation` sigue en true);
+- que el día local esté dentro de la ventana del Campo y del año eclesiástico, y que la fecha de investidura caiga en ambos.
+
+Mientras la persona está `PENDING`, el progreso y las evidencias de ese enrollment quedan bloqueados (`INVESTITURE_REQUEST_PROGRESS_LOCKED`); las otras clases de la persona no. Un correo por envío avisa a los pastores del distrito y al `director-lf` y `assistant-lf` del Campo, con el enlace a la solicitud en el panel.
+
+**Autorizar (pastor del distrito, `director-lf` o `assistant-lf`; basta uno).** `POST /investiture-requests/:requestId/resolutions` resuelve cada persona: investir o rechazar con motivo obligatorio. Dentro de la misma transacción se vuelven a comprobar actor, territorio, año, ventana, fecha, progreso y duración. Quien dejó de cumplir queda `REJECTED_BY_SYSTEM`; las demás pueden quedar investidas. El enrollment pasa a `INVESTIDO` sin pasar por `FIELD_APPROVED` y se deja una intención `class.completed` que se entrega una sola vez. Ante decisiones simultáneas gana la primera confirmada.
 
 ```mermaid
 stateDiagram-v2
-    [*] --> IN_PROGRESS
-    IN_PROGRESS --> SUBMITTED: consejero/director envía
-    REJECTED --> SUBMITTED: corrección y reenvío
-    SUBMITTED --> CLUB_APPROVED: director aprueba
-    CLUB_APPROVED --> COORDINATOR_APPROVED: coordinación aprueba
-    COORDINATOR_APPROVED --> FIELD_APPROVED: admin aprueba campo
-    FIELD_APPROVED --> INVESTIDO: admin/coordinación registra ceremonia
-    SUBMITTED --> REJECTED: rechazo
-    CLUB_APPROVED --> REJECTED: rechazo
-    COORDINATOR_APPROVED --> REJECTED: rechazo
-    FIELD_APPROVED --> REJECTED: rechazo
-    IN_PROGRESS --> EXPIRED: duración máxima excedida
-    REJECTED --> EXPIRED: duración máxima excedida
-    INVESTIDO --> [*]
-    EXPIRED --> [*]
+    [*] --> PENDING: la directiva presenta
+    PENDING --> INVESTED: autoriza pastor o Campo
+    PENDING --> REJECTED_BY_PERSON: rechazo humano con motivo
+    PENDING --> REJECTED_BY_SYSTEM: ya no cumple al autorizar
+    PENDING --> REMOVED: la directiva la quita
+    PENDING --> CLOSED_YEAR: termina el año eclesiástico
+    REJECTED_BY_PERSON --> [*]: se puede corregir y volver a presentar
+    REJECTED_BY_SYSTEM --> [*]: se puede corregir y volver a presentar
+    REMOVED --> [*]: se puede volver a presentar
+    INVESTED --> [*]
+    CLOSED_YEAR --> [*]
 ```
 
-Las aprobaciones usan actualización condicional sobre el estado esperado para reducir carreras concurrentes. El acto de investidura utiliza la fecha de ceremonia configurada, escribe historial, notifica y puede emitir achievements.
+El estado de la persona en la solicitud (`investiture_request_person_status`) no reemplaza a `investiture_status_enum`: al autorizar, el enrollment queda `INVESTIDO`. Los demás valores de la cadena anterior (`SUBMITTED_FOR_VALIDATION`, `CLUB_APPROVED`, `COORDINATOR_APPROVED`, `FIELD_APPROVED`, `APPROVED`) se conservan solo en filas ya grabadas.
 
-### 8.9 Rechazo y corrección
+### 8.9 Rechazo, retiro y corrección
 
-Un rechazo institucional:
-
-- exige motivo;
-- cambia la inscripción a `REJECTED`;
-- libera `locked_for_validation`;
-- permite corregir requisitos y reenviar;
-- queda auditado con actor, estado previo/nuevo y comentario.
-
-El backend pretende bloquear modificaciones durante validación mediante `locked_for_validation`, pero los endpoints de actualización, carga y eliminación de evidencia de clase no aplican de forma uniforme ese estado. El bloqueo es, por tanto, incompleto.
+- Un rechazo humano exige motivo; la persona solo ve «Falta de requisitos para investidura». La directiva ve el motivo humano y quien autoriza ve el texto largo del sistema.
+- Rechazar o quitar a la persona libera el bloqueo de progreso de ese enrollment y permite corregir y volver a presentar, siempre que cumpla los requisitos, no esté ya investida en esa clase y la ventana y el año estén abiertos. No libera `EXPIRED`, `INVESTIDO` ni un año cerrado.
+- Al terminar el año eclesiástico (cierre administrativo o corte automático) cada pendiente queda `CLOSED_YEAR`: no se traslada ni se reinicia en el año siguiente y no se muestra el texto de falta de requisitos.
+- El bloqueo de progreso de clase se aplica en `assertClassProgressMutable` y rige solo con `locked_for_validation` en true, con un estado terminal (`INVESTIDO`, `EXPIRED`) o con una persona `PENDING`. Los estados intermedios de la vía anterior ya no bloquean por sí solos. Ese cierre uniforme de PATCH, carga y borrado de evidencia es el que resolvió el defecto crítico de la sección 14.
+- Expedientes con `locked_for_validation` heredado de la vía anterior siguen bloqueados hasta que un `super-admin` corra `POST /admin/investiture/legacy-locks/release` (`dry_run` por defecto) en ese entorno. Ya liberados, se presentan por la solicitud nueva.
 
 ### 8.10 Duración y expiración
 
@@ -395,10 +412,10 @@ La duración se evalúa por años eclesiásticos de forma inclusiva. Si el tiemp
 
 Hay dos puntos de control:
 
-1. al intentar enviar a validación: puede devolver `INVESTITURE_DURATION_MIN_NOT_MET` o expirar y devolver `INVESTITURE_DURATION_EXPIRED`;
-2. operación administrativa `POST /admin/classes/enrollments/expire-overdue`, con `dry_run` opcional.
+1. al presentar la persona en una solicitud y de nuevo al autorizarla: la duración mínima no cumplida o el vencimiento impiden presentarla y, si ya no cumple al autorizar, el sistema la rechaza;
+2. operación administrativa `POST /admin/classes/enrollments/expire-overdue`, con `dry_run` opcional. Omite el enrollment que tenga una persona `PENDING`.
 
-No se localizó un job automático dentro del alcance revisado; la ruta administrativa es la operación explícita disponible.
+No hay un job automático de vencimiento; la ruta administrativa es la operación explícita disponible. Al presentar, la duración mínima no cumplida devuelve `INVESTITURE_DURATION_MIN_NOT_MET` y un enrollment vencido `INVESTITURE_DURATION_EXPIRED`.
 
 ## 9. Contratos HTTP efectivos
 
@@ -453,39 +470,39 @@ Requiere JWT y rol global `admin`, `super-admin` o `coordinator`.
 | `POST /evidence-review/bulk-approve` | aprobación masiva |
 | `POST /evidence-review/bulk-reject` | rechazo masivo |
 
-Para clases, `type` selecciona el adaptador de progreso de sección. La aprobación exige `SUBMITTED`; el rechazo impide estados ya `REJECTED` o `VALIDATED`, pero la operación individual no exige explícitamente `SUBMITTED`, por lo que un ID `PENDING` alcanzable podría ser rechazado.
+Para clases, `type` selecciona el adaptador de progreso de sección. Aprobar y rechazar exigen `SUBMITTED` (`rejectClass`). La revisión de evidencia por requisito se mantiene tal cual en el modelo de autorización: es un circuito distinto de la autorización de investidura.
 
-### 9.5 Pipeline de investidura
+### 9.5 Investidura por autorización
 
-| Método y ruta | Actor/permiso efectivo | Transición |
+Rutas bajo `/api/v1` (`InvestitureAuthorizationRequestsController`, `src/investiture-requests/`). Los permisos se aplican en el servicio por rol y territorio, no solo con el JWT global.
+
+| Método y ruta | Actor efectivo | Uso |
 |---|---|---|
-| `POST /investiture/enrollments/:id/submit` | director/consejero + `investiture:submit` | `IN_PROGRESS/REJECTED → SUBMITTED` |
-| `POST /investiture/enrollments/:id/club-approve` | director + `investiture:validate` | `SUBMITTED → CLUB_APPROVED` |
-| `POST /investiture/enrollments/:id/coordinator-approve` | admin/coordinator + `investiture:validate` | `CLUB_APPROVED → COORDINATOR_APPROVED` |
-| `POST /investiture/enrollments/:id/field-approve` | admin + `investiture:validate` | `COORDINATOR_APPROVED → FIELD_APPROVED` |
-| `POST /investiture/enrollments/:id/invest` | admin/coordinator + `investiture:mark_invested` | `FIELD_APPROVED → INVESTIDO` |
-| `POST /investiture/enrollments/:id/reject` | admin/coordinator + `investiture:validate` | etapa revisable `→ REJECTED` |
-| `POST /investiture/enrollments/bulk-approve` | admin/coordinator | coordinación, campo o investidura; máximo 200 |
-| `POST /investiture/enrollments/bulk-reject` | admin/coordinator | rechazo masivo; máximo 200 |
-| `GET /investiture/pending` | admin/coordinator | cola por estado/filtros |
-| `GET /investiture/enrollments/:id/history` | JWT + autorización en servicio | historial canónico |
+| `GET /club-sections/:sectionId/investiture-requests/presentation-context` | director, secretario o secretario-tesorero de la sección | candidatos, fechas y estado de la ventana para presentar |
+| `POST /club-sections/:sectionId/investiture-requests` | ídem | presentar la solicitud (personas, clase y fecha) |
+| `GET /club-sections/:sectionId/investiture-requests` | ídem | solicitudes de la sección |
+| `POST /investiture-requests/:requestId/people` | ídem | agregar personas (otro correo, solo con las nuevas) |
+| `DELETE /investiture-requests/:requestId/people/:personId` | ídem | quitar a una persona pendiente (sin correo) |
+| `PATCH /investiture-requests/:requestId/dates` | ídem, o `super-admin` para fechas fuera de ventana | cambiar la fecha de las personas pendientes seleccionadas |
+| `GET /investiture-requests` y `GET /investiture-requests/:requestId` | pastor del distrito, `director-lf`, `assistant-lf`; `super-admin` solo lee | bandeja y detalle para autorizar |
+| `POST /investiture-requests/:requestId/resolutions` | pastor del distrito, `director-lf`, `assistant-lf` | investir o rechazar por persona |
+| `GET /investiture-history` | la propia persona | su historial (pendiente, investida o rechazada con el texto genérico) |
+| `GET /club-sections/:sectionId/investiture-history` | directiva de la sección | historial de la sección |
+| `GET /club-sections/:sectionId/investiture-yearbook` | director, secretario o secretario-tesorero | anuario: inscripciones por clase y año |
+| `GET /investiture/enrollments/:enrollmentId/history` y `GET /enrollments/:enrollmentId/investiture-history` | JWT + autorización en servicio | historial grabado de la vía anterior (puede incluir `LEGACY_LOCK_RELEASED`) |
 
-Compatibilidad legacy aún expuesta:
+**Vía anterior retirada.** Estas 17 rutas responden HTTP 410 `INVESTITURE_LEGACY_PIPELINE_RETIRED`, sin leer cuerpo ni parámetros y sin 403 que lo oculte: `POST /investiture/enrollments/:id/{submit,club-approve,coordinator-approve,field-approve,invest,reject}`, `POST /investiture/enrollments/{bulk-approve,bulk-reject}`, `GET /investiture/pending`, los aliases `POST /enrollments/:id/{submit-for-validation,validate,investiture}` y `GET`, `POST`, `PATCH`, `DELETE /admin/investiture/config*`. `ValidationModule` también responde 410 para `entity_type` `class` en `POST /validation/submit` y `POST /validation/:entityType/:entityId/review`; `GET /validation/pending` devuelve `classes: []`. Los honores no cambian.
 
-- `POST /enrollments/:id/submit-for-validation`;
-- `POST /enrollments/:id/validate`;
-- `POST /enrollments/:id/investiture`;
-- `GET /enrollments/:id/investiture-history`.
-
-### 9.6 Configuración y expiración
+### 9.6 Ventana, porcentaje, pastores, desbloqueo y expiración
 
 | Método y ruta | Uso |
 |---|---|
-| `GET /admin/investiture/config` | listar configuraciones |
-| `GET /admin/investiture/config/:configId` | detalle |
-| `POST /admin/investiture/config` | crear por campo/año |
-| `PATCH /admin/investiture/config/:configId` | fechas/actividad |
-| `DELETE /admin/investiture/config/:configId` | eliminar |
+| `GET` / `PATCH /local-fields/:localFieldId/investiture-windows/:ecclesiasticalYearId` | ventana del Campo (inicio y fin inclusivos en `local_fields.timezone`); sin fila y sin intersección con octubre–diciembre, `operational` es false |
+| `GET` / `PATCH /local-fields/:localFieldId/class-thresholds/:ecclesiasticalYearId` | porcentaje mínimo del Campo (80 por defecto); el Campo lo cambia hasta el 30 de junio, después solo `super-admin` |
+| `GET` / `PATCH /investiture-pastor-quota` | cupo global de pastores por distrito (2 por defecto); solo `super-admin` escribe |
+| `GET` / `POST /districts/:districtId/investiture-pastors`, `DELETE .../:userId` | asignación de pastores del distrito (Campo y unión); el pastor debe ser del mismo Campo que el distrito |
+| `GET /investiture-pastor-candidates`, `GET /clubs/:clubId/investiture-authorizers` | candidatos y quiénes autorizan para un club |
+| `POST /admin/investiture/legacy-locks/release` | `super-admin` exacto; `dry_run` por defecto; suelta `locked_for_validation` de expedientes legados sin tocar `investiture_status` |
 | `POST /admin/classes/enrollments/expire-overdue` | admin + `catalogs:update`; `ecclesiastical_year_id?`, `dry_run?` |
 
 ### 9.7 Catálogo administrativo
@@ -512,7 +529,9 @@ El backend administrativo sí acepta `advanced_enabled` y la configuración comp
 - muestra estados de requisito y datos de expiración;
 - bloquea acciones en UI cuando la inscripción está expirada;
 - expone scope de clases y progreso de miembros para consejeros;
-- incluye navegación a pendientes e historial de investidura;
+- la directiva de la sección presenta, quita personas y corrige fechas en la solicitud de investidura (`lib/features/investiture_requests/`), y consulta el historial y el anuario de su sección;
+- el pastor del distrito, el `director-lf` y el `assistant-lf` ven la bandeja de solicitudes y autorizan o rechazan por persona; la persona ve su propia investidura;
+- el detalle de clase ya no tiene tarjeta de envío a validación: una clase investida muestra la insignia «Investido» (se borró la feature de investidura anterior en la fase 8);
 - permite consultar/inscribir trayectoria previa mediante la integración existente.
 
 ### 10.2 Flujo de requisito
@@ -534,18 +553,19 @@ El bloqueo visual de expirados es correcto como UX, pero no es control de seguri
 - CRUD de clases, módulos y secciones mediante catálogos Phase E;
 - mantenimiento de disponibilidad y duración de clases;
 - asignaciones de consejero desde la gestión de roles del club;
-- cola/pipeline de investidura;
-- configuración de fechas de investidura;
-- diálogos de historial y operaciones masivas;
+- bandeja y detalle de solicitudes para autorizar (`/dashboard/investiture-requests`, con la página pública de enlace `investiture-requests/[requestId]` que abre el correo);
+- ventana y porcentaje del Campo (`/dashboard/investiture-settings`) y asignación de pastores por distrito (`/dashboard/investiture-pastors`);
 - cliente API para expiración manual.
+
+Se borraron en la fase 8 las pantallas de la vía anterior: `/dashboard/investiture`, `/pipeline`, `/config`, `/dashboard/enrollments` y la pestaña «Módulos» de `/dashboard/clubs/validations` (que conserva honores).
 
 ### 11.2 Límites efectivos
 
 1. Los tipos y formularios de catálogo no exponen `advanced_enabled`.
 2. Las secciones no exponen `requirement_track`, `required_for_investiture`, owners institucionales ni disponibilidad anual, aunque el backend los soporta.
 3. Existe `expireOverdueClassEnrollments`, pero no se encontró un caller o UI operativa.
-4. Una función de historial del pipeline llama `/investiture/enrollments/:id/investiture-history`; esa ruta no existe. Las rutas válidas son la canónica `/investiture/enrollments/:id/history` y la legacy `/enrollments/:id/investiture-history`.
-5. Los tipos de estado del cliente no representan consistentemente `EXPIRED`.
+4. ~~Una función de historial del pipeline llamaba una ruta inexistente.~~ Obsoleto: el pipeline y su cliente se borraron; un test (`legacy-investiture-endpoints.guard.test.ts`) impide volver a llamar las rutas retiradas.
+5. Los tipos de estado del cliente no representan consistentemente `EXPIRED` (a reverificar, ya que el cliente de investidura fue reescrito).
 
 Consecuencia: admin no puede administrar por completo el currículo avanzado/extra y algunas vistas pueden fallar o representar mal inscripciones vencidas.
 
@@ -557,7 +577,9 @@ Consecuencia: admin no puede administrar por completo el currículo avanzado/ext
 
 ### 12.2 Estados de investidura
 
-`IN_PROGRESS`, `SUBMITTED`, `CLUB_APPROVED`, `COORDINATOR_APPROVED`, `FIELD_APPROVED`, `INVESTIDO`, `REJECTED`, `EXPIRED`.
+Del enrollment (`investiture_status_enum`): `IN_PROGRESS`, `INVESTIDO`, `REJECTED`, `EXPIRED`. Los valores `SUBMITTED_FOR_VALIDATION`, `CLUB_APPROVED`, `COORDINATOR_APPROVED`, `FIELD_APPROVED` y `APPROVED` ya no los escribe ninguna ruta; solo quedan en filas grabadas (y `APPROVED` sigue contando como clase completada).
+
+De la persona en una solicitud (`investiture_request_person_status`): `PENDING`, `INVESTED`, `REJECTED_BY_PERSON`, `REJECTED_BY_SYSTEM`, `REMOVED`, `CLOSED_YEAR`.
 
 ### 12.3 Códigos de error del dominio
 
@@ -568,7 +590,10 @@ Consecuencia: admin no puede administrar por completo el currículo avanzado/ext
 | Evidencia de clase | `CLASS_FILE_REQUIRED`, `CLASS_FILE_INVALID_TYPE`, `CLASS_SECTION_NOT_FOUND`, `CLASS_SECTION_PROGRESS_NOT_FOUND`, `CLASS_SECTION_ALREADY_SUBMITTED`, `CLASS_SECTION_NO_EVIDENCE`, `CLASS_EVIDENCE_FILE_NOT_FOUND` |
 | Consejeros | `CLASS_COUNSELOR_*`, incluyendo asignación inexistente, rol inválido, duplicado, límites, excepción requerida y requisito de Guía Mayor |
 | Revisión | `EVIDENCE_REVIEW_TYPE_INVALID`, `EVIDENCE_REVIEW_CLASS_RECORD_NOT_FOUND`, `EVIDENCE_REVIEW_RECORD_NOT_PENDING`, `EVIDENCE_REVIEW_RECORD_ALREADY_REJECTED`, `EVIDENCE_REVIEW_RECORD_ALREADY_VALIDATED` |
-| Investidura | `INVESTITURE_ENROLLMENT_NOT_FOUND`, `INVESTITURE_ACCESS_DENIED`, `INVESTITURE_DURATION_MIN_NOT_MET`, `INVESTITURE_DURATION_EXPIRED` |
+| Investidura (historial y duración) | `INVESTITURE_ENROLLMENT_NOT_FOUND`, `INVESTITURE_ACCESS_DENIED`, `INVESTITURE_DURATION_MIN_NOT_MET`, `INVESTITURE_DURATION_EXPIRED` |
+| Vía anterior | `INVESTITURE_LEGACY_PIPELINE_RETIRED` (HTTP 410) |
+| Solicitud y autorización | `INVESTITURE_REQUEST_*`: `FORBIDDEN`, `WINDOW_CLOSED`, `DATE_OUTSIDE_WINDOW`, `DATE_OUTSIDE_YEAR`, `YEAR_CLOSED`, `NOT_ELIGIBLE`, `CLASS_NOT_ELIGIBLE`, `ALREADY_INVESTED`, `LEGACY_PIPELINE_ACTIVE`, `ACTIVE_EXISTS`, `NOT_PENDING`, `PROGRESS_LOCKED`, `STALE`, `ALREADY_RESOLVED`, `REASON_REQUIRED`, `CONFLICTING_DECISION` |
+| Ventana, cupo y pastores | `INVESTITURE_WINDOW_*`, `INVESTITURE_PASTOR_*` (por ejemplo `INVESTITURE_PASTOR_QUOTA_FULL`, `INVESTITURE_PASTOR_FIELD_MISMATCH`) |
 | Catálogo | `ADMIN_CLASS_*`, `ADMIN_CLASS_MODULE_*`, `ADMIN_CLASS_SECTION_*`, `ADMIN_CLASS_SECTION_TRACK_CONFIG_INVALID` |
 | Post-registro | `POST_REG_CLASS_NOT_ELIGIBLE` y errores contextuales de clase/membresía |
 
@@ -589,7 +614,7 @@ La suite cubre, entre otros:
 - scope por sección/asignación;
 - aplicación de tracks y elegibilidad;
 - resolver de clase por edad y post-registro;
-- pipeline completo de investidura, concurrencia, historial, operaciones masivas;
+- solicitud y autorización de investidura (`src/investiture-requests/`: ventana, fechas, concurrencia, correos, recordatorios, cierre de año), pruebas PostgreSQL de carreras, apagado de la vía anterior (410) y desbloqueo de bloqueos legados;
 - duración mínima/máxima y expiración.
 
 Archivos principales:
@@ -601,7 +626,9 @@ Archivos principales:
 - `sacdia-backend/src/classes/class-progress-scope.service.spec.ts`;
 - `sacdia-backend/src/classes/class-requirement-eligibility.service.spec.ts`;
 - `sacdia-backend/src/evidence-review/evidence-review.service.spec.ts`;
-- `sacdia-backend/src/investiture/investiture.service.spec.ts`;
+- `sacdia-backend/src/investiture/investiture.service.spec.ts` (historial y `expire-overdue`);
+- `sacdia-backend/src/investiture/legacy-investiture-retired.controller.spec.ts` y `legacy-lock-release.service.spec.ts`;
+- `sacdia-backend/src/investiture-requests/*.spec.ts`;
 - pruebas de post-registro y `ClassAssignmentResolverService`.
 
 ### 13.2 Mobile
@@ -613,15 +640,14 @@ Hay pruebas de:
 - permisos de acciones del requisito;
 - representación de tracks;
 - mapeo de roadmap;
-- estados e historial de investidura.
+- modelos y vistas de `investiture_requests` (presentar, autorizar, historial propio).
 
 No se encontró una prueba que demuestre selección/carga de un archivo corregido desde el CTA específico de rechazo.
 
 ### 13.3 Admin
 
-Hay pruebas de configuración, eliminación, historial del pipeline y componentes de catálogo/display. La cobertura observada no protege de forma integral:
+Hay pruebas de las pantallas de autorización, ventana/porcentaje y pastores, del cliente `investiture-requests.ts`, de la guarda que prohíbe llamar las rutas retiradas (`legacy-investiture-endpoints.guard.test.ts`) y de componentes de catálogo/display. La cobertura observada no protege de forma integral:
 
-- URL canónica del historial del pipeline;
 - operación manual de expiración desde UI;
 - edición de tracks/owners/disponibilidad;
 - representación de `EXPIRED` en todos los consumidores.
@@ -638,12 +664,12 @@ Esta sección describe hechos del estado actual. Las soluciones propuestas está
 | **Alta** | Inscripción directa omite validación de edad/tipo de club que sí usa post-registro | `classes.service.ts`; `class-assignment-resolver.service.ts`; `post-registration.service.ts` | inscripción en clase no elegible por rutas alternativas | Abierto (fuera de alcance del plan 2026-08-11) |
 | **Alta** | Índices de progreso legacy y anuales pueden coexistir; nombre de eliminación de sección no coincide | Prisma; baseline; migración FS-03 | progreso anual repetido puede chocar; deriva Prisma/DB | Abierto |
 | **Alta** | Corrección mobile no abre selector de archivos | `requirement_detail_view.dart`, `_triggerFilePicker` | miembro no puede cargar la corrección desde ese flujo | Abierto |
-| **Media** | Admin mezcla ruta canónica y legacy en historial | `sacdia-admin/src/lib/api/investiture.ts` | 404 en historial del pipeline | Abierto |
+| **Media** | Admin mezcla ruta canónica y legacy en historial | `sacdia-admin/src/lib/api/investiture.ts` | 404 en historial del pipeline | **OBSOLETO** (el pipeline y ese cliente se borraron en la fase 8; panel #226) |
 | **Media** | Admin no expone expiración aunque existe cliente API | `sacdia-admin/src/lib/api/classes.ts`; ausencia de caller | vencimientos dependen de operación externa/manual no visible | Abierto |
 | **Media** | Admin no administra `ADVANCED`/`EXTRA` ni owners/disponibilidad de secciones | tipos/payloads de Phase E frente a DTO backend | currículo configurable solo por API/DB | Abierto |
 | **Media** | Live Reference marca catálogo como JWT; runtime usa Optional JWT | `ENDPOINTS-LIVE-REFERENCE.md`; `classes.controller.ts` | consumidores y seguridad documental inconsistentes | Parcial (honors endpoint documentado como Optional JWT) |
 | **Media** | Rechazo individual de evidencia no exige explícitamente `SUBMITTED` | `evidence-review.service.ts` | posible transición `PENDING → REJECTED` por ID directo | **RESUELTO** (`rejectClass` exige `SUBMITTED`) |
-| **Media** | UI/types admin no cubren consistentemente `EXPIRED` | tipos de investidura admin frente al enum backend | filtros, badges o acciones incorrectas | Abierto |
+| **Media** | UI/types admin no cubren consistentemente `EXPIRED` | tipos de investidura admin frente al enum backend | filtros, badges o acciones incorrectas | Por reverificar (los tipos de investidura del panel se reescribieron) |
 | **Baja** | Consulta de clase por ID no aplica exactamente los filtros del listado | `classes.service.ts` | una clase inactiva/no disponible puede seguir siendo consultable por ID | Abierto |
 | **Baja** | Feature doc afirma capacidades admin que no están conectadas en UI | `docs/features/clases-progresivas.md` frente a admin | falsa percepción de completitud operativa | Parcial (honors/prerequisites UI agregada) |
 
@@ -688,7 +714,8 @@ El módulo podría considerarse estabilizado cuando:
 - [ ] índices de progreso reales fueron auditados y normalizados;
 - [ ] inscripción directa y post-registro aplican una política común de elegibilidad;
 - [ ] mobile permite corrección completa de evidencia;
-- [ ] admin usa la ruta canónica de historial;
+- [x] admin ya no usa la vía anterior de investidura (rutas retiradas con 410 y pantallas borradas);
+- [ ] el desbloqueo de bloqueos legados se corrió en cada entorno que los tenga (con `dry_run` primero y aprobación del usuario);
 - [ ] expiración y configuración de tracks son operables o se documenta quién las ejecuta;
 - [ ] contratos API, docs de feature, DTOs y clientes reflejan el mismo estado;
 - [ ] las pruebas negativas protegen todos los invariantes anteriores.
@@ -718,7 +745,9 @@ El módulo podría considerarse estabilizado cuando:
 - `sacdia-backend/src/classes/class-progress-access.service.ts` — autorización contextual.
 - `sacdia-backend/src/classes/class-progress-scope.controller.ts` y servicio — supervisión.
 - `sacdia-backend/src/evidence-review/evidence-review.controller.ts` y servicio — revisión.
-- `sacdia-backend/src/investiture/investiture.controller.ts` y servicio — pipeline/expiración.
+- `sacdia-backend/src/investiture-requests/` — solicitud, autorización, correos, recordatorios y cierre de año.
+- `sacdia-backend/src/investiture/investiture.controller.ts`, `legacy-investiture-retired.controller.ts` y `legacy-lock-release.service.ts` — historial, `expire-overdue`, 410 y desbloqueo.
+- `sacdia-backend/src/classes/field-investiture-window.controller.ts`, `field-class-threshold.controller.ts` y `district-investiture-pastors.controller.ts` — ventana, porcentaje y pastores.
 - `sacdia-backend/src/admin/admin-phase-e-catalogs.controller.ts` y servicio — CRUD curricular.
 - `sacdia-backend/src/common/errors/error-codes.ts` — códigos de error.
 - `sacdia-backend/prisma/schema.prisma` — modelo Prisma.
@@ -732,14 +761,15 @@ El módulo podría considerarse estabilizado cuando:
 - `sacdia-app/lib/features/classes/domain/entities/class_requirement.dart` — acciones por estado.
 - `sacdia-app/lib/features/classes/presentation/views/requirement_detail_view.dart` — carga, envío y corrección.
 - `sacdia-app/lib/features/classes/presentation/views/teaching_scope_view.dart` — supervisión pedagógica.
+- `sacdia-app/lib/features/investiture_requests/` — presentar, autorizar, historial y anuario.
 
 ### 17.4 Admin
 
 - `sacdia-admin/src/lib/api/classes.ts` — consumo de clases y expiración.
 - `sacdia-admin/src/lib/api/phase-e-catalogs.ts` — tipos/payloads de catálogo.
-- `sacdia-admin/src/lib/api/investiture.ts` — pipeline e historial.
+- `sacdia-admin/src/lib/api/investiture-requests.ts` e `investiture-field-config.ts` — solicitudes, ventana, porcentaje y pastores.
 - `sacdia-admin/src/lib/api/clubs.ts` — asignaciones de responsables.
-- componentes de catálogo, investidura y `roles-tab.tsx` — superficies operativas.
+- componentes de catálogo, `components/investiture-requests/`, `components/investiture-config/` y `roles-tab.tsx` — superficies operativas.
 
 ## 18. Regla de actualización de este documento
 

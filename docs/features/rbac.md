@@ -150,6 +150,21 @@ Las siguientes rutas de `user` permanecen bajo permisos legacy `users:*` y no fo
 - **Guard de policy**: `src/common/guards/sensitive-user-subresource-policy.ts`
 - **Decorator de metadata**: `src/common/decorators/sensitive-user-subresource.decorator.ts`
 
+## Instructores de especialidad y carga por certificado (2026-10-13)
+
+No agregan permisos ni cambian el seed: usan `user_honors:*` ya existentes o JWT + `@GlobalRoles` con `@SkipPermissions`. Matriz de enforcement en `docs/features/auth/RBAC-ENFORCEMENT-MATRIX.md`; contrato en `docs/api/ENDPOINTS-LIVE-REFERENCE.md` (secciones `instructors`, `admin-honor-instructor-proposals`, `user-honors`).
+
+| Superficie | Guardas | Quién |
+|---|---|---|
+| `GET /instructor-candidates?q=` | `JwtAuthGuard` + `@SkipPermissions`; throttle 30/min | Cualquier usuario autenticado; el servicio limita al mismo Campo Local de quien consulta |
+| `POST` / `DELETE /users/:userId/honors/:honorId/instructor-proposal` | `user_honors:submit` + ownership; throttle 10/min en el `POST` | Solo el dueño de la especialidad |
+| `GET /admin/honor-instructor-proposals`, `POST .../:proposalId/approve`, `POST .../:proposalId/reject` | `GlobalRolesGuard` + `@SkipPermissions` | `super-admin`, `admin`, `assistant-admin`, `director-lf`, `assistant-lf`, con el mismo alcance de Campo Local que `admin/certificate-bulk-imports` |
+| `GET /certificate-bulk-imports/catalog/classes`, `DELETE /certificate-bulk-imports/:batchId` | `JwtAuthGuard` + `@SkipPermissions` | Cualquier usuario autenticado; borrar exige ser el dueño y que el lote sea `DRAFT` |
+
+- **Alcance del revisor** (`src/common/reviewer-scope`, compartido por la carga por certificado y las propuestas): `super-admin`, y `admin`/`assistant-admin` sin Campo Local, ven todo; quien tiene Campo Local (incluidos `director-lf` y `assistant-lf`) solo ve el suyo. En las propuestas el Campo Local es el **actual del dueño**.
+- **Panel:** la pantalla `honor-instructor-proposals` (`/dashboard/honor-instructor-proposals`, sección investidura del catálogo de pantallas) usa `viewAny` y las capacidades `approve` y `reject` con los mismos cinco roles (`roleOnlyAccess(CERTIFICATE_BULK_ROLES)`), espejo literal del `@GlobalRoles` del controlador. El sidebar la muestra como «Propuestas de instructor».
+- **`/honors*`, `/classes*` y `/catalogs/*`** son públicos con JWT opcional; la referencia live los marcaba `JWT` y se corrigió. No requieren permiso.
+
 ## Context Switching y permisos por seccion activa
 
 El sistema soporta usuarios con multiples asignaciones de club (ej: Director en Conquistadores + Miembro en Guias Mayores). El contexto activo se controla mediante `PATCH /auth/me/context` y afecta los permisos visibles en toda la app.
@@ -226,7 +241,7 @@ amarillo/acento y escala la tarjeta al 80% respecto del aviso pendiente para
 comunicar revisión sin ocupar tanto espacio del dashboard.
 
 El panel administrativo ya no tiene la ruta `/dashboard/enrollments`: la fase 8
-(implementada en código, sin desplegar) la borró. Esa ruta nunca consumió
+(panel #226, mergeado y desplegado) la borró. Esa ruta nunca consumió
 `GET /club-enrollments/validation/queue` ni `POST /club-enrollments/:enrollmentId/approve|reject`
 (ver `club-enrollments.md`: no hay pantalla para esa bandeja); listaba inscripciones
 de clase pendientes de investidura.
@@ -235,7 +250,7 @@ mostrar la alerta de validación.
 
 ### Permisos de la vía anterior de investidura (fase 8)
 
-`investiture:submit`, `investiture:validate`, `investiture:mark_invested` e `investiture_config:*` quedan **inertes** desde la fase 8 (implementada en código, sin desplegar): las rutas que los exigían responden 410 y ahora usan `@SkipPermissions`, y el panel borró las pantallas que los usaban. `investiture:read` sigue en uso: lo exigen las dos lecturas del historial. Se conservan en los seeds y en la base; no se borran ni se reasignan. `validation:submit` y `validation:review` siguen vigentes (`ValidationModule` los exige antes del 410 de `class`). `docs/features/auth/RBAC-ENFORCEMENT-MATRIX.md` no listaba estas rutas y no cambia.
+`investiture:submit`, `investiture:validate`, `investiture:mark_invested` e `investiture_config:*` quedaron **inertes** con la fase 8: las rutas que los exigían responden 410 y usan `@SkipPermissions`, y el panel borró las pantallas que los usaban. Desde el 2026-10-13 ya no existen: la migración `20261013110000_remove_retired_investiture_permissions` (backend #488) borró las concesiones y las filas del catálogo en `development`, `staging` y `production`. `investiture:read` sigue en uso: lo exigen las dos lecturas del historial. `validation:submit` y `validation:review` siguen vigentes (`ValidationModule` los exige antes del 410 de `class`). `docs/features/auth/RBAC-ENFORCEMENT-MATRIX.md` no listaba estas rutas y no cambia.
 
 ### Seed de permisos
 

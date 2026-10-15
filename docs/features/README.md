@@ -1,7 +1,7 @@
 # Feature Registry - SACDIA
 
 **Estado**: ACTIVE
-**Actualizado**: 2026-10-04 (verificado contra `development`)
+**Actualizado**: 2026-10-13 (filas de carga masiva, honores y certificaciones verificadas contra `development`; el resto, 2026-10-04)
 **Propósito**: registrar qué dominios tienen documento en `docs/features/` y separar cobertura editorial de estado funcional declarado.
 
 > [!IMPORTANT]
@@ -56,10 +56,10 @@
 | `camporee-supplies` | [camporee-supplies.md](camporee-supplies.md) | Documento presente | `IMPLEMENTADO PARCIAL` |
 | `camporee-venues` | [camporee-venues.md](camporee-venues.md) | Documento presente | `IMPLEMENTADO` |
 | `camporees` | [camporees.md](camporees.md) | Documento presente | `IMPLEMENTADO` |
-| `carga-masiva-certificados` | [carga-masiva-certificados.md](carga-masiva-certificados.md) | Documento presente | `IMPLEMENTADO` (OCR con ADC y `pdf-lib`: pendiente de merge, PR #448) |
+| `carga-masiva-certificados` | [carga-masiva-certificados.md](carga-masiva-certificados.md) | Documento presente | `IMPLEMENTADO` (OCR con ADC y `pdf-lib`, PR #448 mergeado; rediseño con instructor, catálogos, `ocr_state`, páginas y borrado de borrador desde 2026-10-12) |
 | `carpetas-evidencias` | [carpetas-evidencias.md](carpetas-evidencias.md) | Documento presente | `DEPRECATED` |
 | `catalogos` | [catalogos.md](catalogos.md) | Documento presente | `IMPLEMENTADO` |
-| `certificaciones-guias-mayores` | [certificaciones-guias-mayores.md](certificaciones-guias-mayores.md) | Documento presente | `IMPLEMENTADO` |
+| `certificaciones-guias-mayores` | [certificaciones-guias-mayores.md](certificaciones-guias-mayores.md) | Documento presente | `IMPLEMENTADO` (reglas de abandono y mutabilidad de la inscripción desde 2026-10-12) |
 | `cierre-anual` | [cierre-anual.md](cierre-anual.md) | Documento presente | `IMPLEMENTADO` |
 | `clases-progresivas` | [clases-progresivas.md](clases-progresivas.md) | Documento presente | `IMPLEMENTADO` |
 | `clasificacion-institucional-ampliada` | [docs/canon/runtime-rankings.md](../canon/runtime-rankings.md) (8.4-C: `composite_score_pct` y `/breakdown`) | Documento presente | `IMPLEMENTADO` |
@@ -72,7 +72,7 @@
 | `finanzas` | [finanzas.md](finanzas.md) | Documento presente | `IMPLEMENTADO` |
 | `gestion-clubs` | [gestion-clubs.md](gestion-clubs.md) | Documento presente | `IMPLEMENTADO` |
 | `gestion-seguros` | [gestion-seguros.md](gestion-seguros.md) | Documento presente | `IMPLEMENTADO` |
-| `honores` | [honores.md](honores.md) | Documento presente | `IMPLEMENTADO` |
+| `honores` | [honores.md](honores.md) | Documento presente | `IMPLEMENTADO` (instructor, `completed_at`, propuestas de instructor y bloqueo de reescritura de especialidades aprobadas desde 2026-10-12) |
 | `i18n` | [i18n.md](i18n.md) | Documento presente | `IMPLEMENTADO PARCIAL` |
 | `informes-trimestrales-anuales` | [informes-trimestrales-anuales.md](informes-trimestrales-anuales.md) | Documento presente | `IMPLEMENTADO PARCIAL` |
 | `infrastructure` | [infrastructure.md](infrastructure.md) | Documento presente | `NO CANON` |
@@ -95,7 +95,7 @@
 | `system-config` | [system-config.md](system-config.md) | Documento presente | `IMPLEMENTADO` |
 | `units` | [units.md](units.md) | Documento presente | `IMPLEMENTADO` |
 | `validacion-evidencias` | [validacion-evidencias.md](validacion-evidencias.md) | Documento presente | `IMPLEMENTADO` |
-| `validacion-investiduras` | [validacion-investiduras.md](validacion-investiduras.md) | Documento presente | `IMPLEMENTADO` (ventanas, cupo de pastores y solicitudes: pendiente de merge, PR #448). Fase 8, apagado de la vía anterior (rutas en 410, pantallas borradas, desbloqueo): implementada en código, sin desplegar |
+| `validacion-investiduras` | [validacion-investiduras.md](validacion-investiduras.md) | Documento presente | `IMPLEMENTADO` (ventanas, cupo de pastores y solicitudes mergeados con el PR #448; panel y app mergeados; fase 8, apagado de la vía anterior con rutas en 410, pantallas borradas y desbloqueo: mergeada, desplegada y migrada en Neon, 2026-10-13) |
 | `weekly-records` | [weekly-records.md](weekly-records.md) | Documento presente | `IMPLEMENTADO` |
 
 ## Documentos complementarios

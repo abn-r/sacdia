@@ -1,5 +1,7 @@
 # Monthly Report Catch-up Implementation Plan
 
+> **Estado (2026-10-13):** implementado. `runAutoGeneration()` reconcilia períodos vencidos con precarga en lotes de 500, `reports.auto_generate_day` con fallback 5 y kill switch (`src/monthly-reports/monthly-reports.service.ts`), `MONTHLY_REPORT_MANUAL_DATA_REQUIRED` en el contrato de captura manual y el scoring `monthly_reports_timeliness` por primera captura manual (`src/annual-folders/score-calculators/monthly-reports-timeliness-score.ts`). Mergeado en sacdia-backend #181 (2026-07-15). No se ejecutaron las pruebas citadas para esta revisión.
+
 **Estado:** decisión aprobada e implementación alineada con el contrato final.
 
 **Objetivo:** reconciliar diariamente todos los períodos mensuales vencidos de una matrícula activa y calcular `monthly_reports_timeliness` desde la primera captura manual a tiempo.

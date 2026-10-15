@@ -1,5 +1,7 @@
 # Investidura por autorización — Soporte de backend para las pantallas (Plan 0)
 
+> **Estado (2026-10-13): ENTREGADO.** Mergeado en `development` como backend #466 (`feat/investiture-ui-backend-support`), sobre #465 (`feat/investiture-authorization-completion`). Los cinco datos de soporte para las pantallas ya están en el backend vivo. Migrado en las tres ramas de Neon (`development`, `staging`, `production`: 190 migraciones, `migrate status` al día), con el backend vivo en Render «API Sacdia» (plan Free, rama `development`, contra Neon `development`). Estado vigente y detalle en `docs/features/validacion-investiduras.md` y en el banner de `docs/plans/2026-09-28-investidura-autorizacion.md`. Las ramas, los worktrees y las notas «sin mergear» o «sin desplegar» de abajo describen el momento en que se escribió el plan y son **históricos**.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Agregar al backend los cinco datos que las pantallas de la app y del panel necesitan y que hoy la API no entrega.

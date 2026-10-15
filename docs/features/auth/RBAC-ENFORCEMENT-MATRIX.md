@@ -88,6 +88,13 @@ Nota de implementacion:
 | `permissions:read` | Ver RBAC | `global` | permiso global | Admin |
 | `permissions:assign` | Cambiar permisos | `global` | permiso + `@GlobalRoles('super-admin')` | Admin |
 | `roles:read` | Ver roles | `global` | permiso global | Admin |
+| `user_honors:create` | Alta de especialidad (`POST /users/:userId/honors`, `/bulk`) | `user` | permiso + ownership (`ownerParam: userId`). Servicio: una fila `APPROVED` o `PENDING_REVIEW` responde 400 `VALIDATION_HONOR_INVALID_STATUS` sin escribir (SEC-1) | App |
+| `user_honors:delete` | Abandonar especialidad (`DELETE /users/:userId/honors/:honorId`) | `user` | permiso + ownership. Servicio: `APPROVED` y `PENDING_REVIEW` bloqueadas (SEC-2) | App |
+| `user_honors:submit` | Proponer o retirar el instructor de una especialidad aprobada (`POST`/`DELETE /users/:userId/honors/:honorId/instructor-proposal`) | `user` | permiso + ownership en el guard. Servicio: solo el dueño (`req.user.sub === :userId`; si no, 403 `HONOR_INSTRUCTOR_PROPOSAL_FORBIDDEN`: el permiso sobre el usuario no basta). `POST` con throttle de 10 por minuto | App |
+| `-` (`@SkipPermissions`, JWT) | Buscar instructores (`GET /instructor-candidates?q=`) | `global` | solo JWT. El alcance lo aplica el servicio: mismo `local_field_id` que quien consulta, activos, aprobados, mayores de edad, sin incluirlo y sin correo. Throttle de 30 por minuto | App |
+| `-` (`@SkipPermissions`, JWT) | Catálogo de clases de la carga por certificado y borrado de borrador (`GET catalog/classes`, `DELETE /certificate-bulk-imports/:batchId`) | `user` | solo JWT. Servicio: el borrado exige dueño y lote `DRAFT` (si no, 404 o 409) | App |
+| `-` (`@GlobalRoles` + `@SkipPermissions`) | Revisar la carga por certificado (`/admin/certificate-bulk-imports/*`) | `global` | `super-admin`, `admin`, `assistant-admin`, `director-lf`, `assistant-lf`. Alcance por Campo Local del lote (`src/common/reviewer-scope`): quien tiene Campo Local solo ve el suyo | Admin |
+| `-` (`@GlobalRoles` + `@SkipPermissions`) | Cola de propuestas de instructor (`/admin/honor-instructor-proposals`: listar, `approve`, `reject`) | `global` | mismos cinco roles que la fila anterior. Alcance por el Campo Local **actual del dueño** de la especialidad; fuera de él, 403 `HONOR_INSTRUCTOR_PROPOSAL_FORBIDDEN` | Admin |
 
 ## Cobertura y Limites de Stage 1
 

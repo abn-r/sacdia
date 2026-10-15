@@ -1,6 +1,6 @@
 # Cierre de carga por certificados — Implementation Plan
 
-> **Estado real (revisado 2026-10-04 contra `development`)**: Implementación parcial. Las tareas T1 a T11 están en `development` (migraciones `20260921*`, `src/certificate-bulk-imports/`, panel `/dashboard/certificate-bulk-imports` y `/dashboard/institutional-certificate-requests`). La lectura con Vision ADC y PDF: Pendiente de merge (PR #448 de sacdia-backend, rama `feat/investiture-authorization-ocr`, commit `113d8ba`). Falta la prueba de humo de extremo a extremo.
+> **Estado real (revisado 2026-10-04 contra `development`)**: **Actualización 2026-10-13:** el PR #448 ya está mergeado en `development` (78f2e54); lo de abajo es el estado del 2026-10-04 (histórico). Implementación parcial. Las tareas T1 a T11 están en `development` (migraciones `20260921*`, `src/certificate-bulk-imports/`, panel `/dashboard/certificate-bulk-imports` y `/dashboard/institutional-certificate-requests`). La lectura con Vision ADC y PDF: Pendiente de merge (PR #448 de sacdia-backend, rama `feat/investiture-authorization-ocr`, commit `113d8ba`). Falta la prueba de humo de extremo a extremo.
 
 
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
