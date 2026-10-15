@@ -38,7 +38,7 @@ Asignados en `club_role_assignments` en el año eclesiástico `year_id = 1`. Sol
 
 | Email | Rol | Sección |
 |---|---|---|
-| `director-club@sacdia.com` | `director` | Primera sección activa del campo local `4` sin director ese año. El seed la busca al ejecutarse; en la rama de desarrollo hoy es `164` (club Estella, Guías Mayores). |
+| `director-club@sacdia.com` | `director` | Primera sección activa del campo local `4` sin director ese año. El seed la busca al ejecutarse; en la rama de desarrollo hoy es `163` (club Estella, Aventureros). Una asignación de director ya terminada no se reutiliza: el seed crea una nueva en la sección vacante. |
 | `secretary-club@sacdia.com` | `secretary` | `club_section_id = 1` (Club 1, Guías Mayores) |
 | `treasurer-club@sacdia.com` | `treasurer` | `club_section_id = 1` |
 | `counselor@sacdia.com` | `counselor` | `club_section_id = 1` |
