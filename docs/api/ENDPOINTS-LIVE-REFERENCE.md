@@ -554,6 +554,7 @@ Semántica funcional y límites: [operations-dashboard.md](../features/operation
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
 | GET | `/api/v1/club-sections/:sectionId/annual-folder` | JWT | Permisos: evidence_folders:read | Get annual evidence folder for a club section (current year) | CatalogsService.getCurrentEcclesiasticalYear(), ClubEnrollmentsService.findCurrentBySectionId(), AnnualFoldersService.getFolderByEnrollment() | `src/annual-folders/annual-folder-by-section.controller.ts` |
+| GET | `/api/v1/club-sections/:sectionId/annual-folder/template-availability` | JWT | Permisos: evidence_folders:read | Check whether an annual evidence folder can be created for a club section | ClubEnrollmentsService.findCurrentBySectionId(), AnnualFoldersService.getTemplateAvailabilityForEnrollment() | `src/annual-folders/annual-folder-by-section.controller.ts` |
 | POST | `/api/v1/club-sections/:sectionId/annual-folder` | JWT | Permisos: evidence_folders:update | Create annual evidence folder for a club section | ClubEnrollmentsService.findCurrentBySectionId(), AnnualFoldersService.createFolderForEnrollment() | `src/annual-folders/annual-folder-by-section.controller.ts` |
 | POST | `/api/v1/annual-folders/enrollments/:enrollmentId` | JWT | Permisos: evidence_folders:update | Create annual evidence folder for a club enrollment | AnnualFoldersService.createFolderForEnrollment() | `src/annual-folders/annual-folders.controller.ts` |
 | GET | `/api/v1/annual-folders/evaluation/queue` | JWT | Permisos: annual_folders:evaluate | List annual evidence folders available for evaluation | AnnualFoldersService.getEvaluationQueue() | `src/annual-folders/annual-folders.controller.ts` |
@@ -1096,7 +1097,7 @@ Una resolución confirmada avisa en la bandeja de la app, no por correo. La inte
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
-| GET | `/api/v1/users/:userId/classes` | JWT | Permisos: classes:read | Obtener inscripciones del usuario | ClassesService.getUserEnrollments() | `src/classes/classes.controller.ts` |
+| GET | `/api/v1/users/:userId/classes` | JWT | Permisos: classes:read | Obtener inscripciones del usuario, por `enrollment_date` desc. Cada fila trae `active`: `false` es una inscripción reemplazada al volver a elegir clase. La app la descarta, salvo `INVESTIDO`, y nunca la toma como clase actual. | ClassesService.getUserEnrollments() | `src/classes/classes.controller.ts` |
 | POST | `/api/v1/users/:userId/classes/enroll` | JWT | Permisos: classes:submit_progress | Inscribir usuario en clase. GM investido puede añadir una clase cruzada de Aventureros/Conquistadores (`cross_type_enrollment`). Errores: `CLASS_MAX_AVENTU_CONQUIS_ACTIVE`, `CLASS_MAX_GM_ACTIVE`, `CLASS_CROSS_TYPE_GM_REQUIRED`, `CLASS_ALREADY_INVESTED`, `CLASS_ALREADY_ENROLLED` | ClassesService.enrollUser() | `src/classes/classes.controller.ts` |
 | GET | `/api/v1/users/:userId/classes/:classId/progress` | JWT | Permisos: classes:read | Obtener progreso del usuario en una clase | ClassesService.getUserProgress() | `src/classes/classes.controller.ts` |
 | PATCH | `/api/v1/users/:userId/classes/:classId/progress` | JWT | Permisos: classes:submit_progress | Actualizar progreso de sección | ClassesService.updateSectionProgress() | `src/classes/classes.controller.ts` |
@@ -1173,7 +1174,7 @@ Una resolución confirmada avisa en la bandeja de la app, no por correo. La inte
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
-| GET | `/api/v1/dashboard/summary` | JWT | - | Resumen del dashboard del usuario autenticado | DashboardService.getSummary() | `src/dashboard/dashboard.controller.ts` |
+| GET | `/api/v1/dashboard/summary` | JWT | - | Resumen del dashboard del usuario autenticado. Clase actual: el enrollment `active` y `OPERATIONAL` más reciente por `enrollment_date`. Trae `current_class_name`, `current_class_id` e `investiture_status` de ese enrollment. El tab Clases de la app aplica la misma regla. | DashboardService.getSummary() | `src/dashboard/dashboard.controller.ts` |
 
 ### data-export
 
