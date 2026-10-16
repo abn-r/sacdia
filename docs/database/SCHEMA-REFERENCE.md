@@ -2,7 +2,7 @@
 
 **Estado**: ACTIVE
 **Sincronizado contra**: `sacdia-backend/prisma/schema.prisma` en la rama `development` (commit `68123f6`)
-**Fecha de resincronizacion**: 2026-10-13 (última migración en `development`: `20261013110000_remove_retired_investiture_permissions`). Las secciones de abajo se resincronizaron por completo hasta el 2026-10-04; después solo se añadieron las de instructor de especialidad y carga por certificado (2026-10-13). El espejo `schema.prisma` sí es la copia completa.
+**Fecha de resincronizacion**: 2026-10-13 (última migración en `development`: `20261013110000_remove_retired_investiture_permissions`). Las secciones de abajo se resincronizaron por completo hasta el 2026-10-04; después solo se añadieron las de instructor de especialidad y carga por certificado (2026-10-13) y la de aceptación legal (`legal_acceptances`, 2026-10-15, migración `20261015120000_legal_acceptances`, pendiente de merge; las cifras de abajo no la incluyen). El espejo `schema.prisma` sí es la copia completa.
 
 Referencia humana concisa del schema Prisma vigente.
 
@@ -125,6 +125,38 @@ Propuesta de instructor sobre una especialidad ya `APPROVED`. `users_honors` no 
 | M4 | `20261013100000_honor_instructor_proposals` | Enum y tabla `honor_instructor_proposals` |
 
 (M3, `detected_instructor_name`, era opcional y no se implementó.)
+
+## Aceptación legal (2026-10-15)
+
+> [!NOTE]
+> Tabla nueva en la rama `feat/legal-acceptance` de sacdia-backend, pendiente de merge. Al mergear, la migración corre con `prisma migrate deploy` al final del build en Render. `docs/database/schema.prisma` (espejo) no se actualiza en este cambio y debe resincronizarse al mergear.
+
+### `legal_acceptances`
+
+Evidencia **append-only** de que un usuario aceptó los Términos y Condiciones o el Aviso de Privacidad en una versión concreta (LFPDPPP, revisión de tiendas). El código solo inserta (con `skipDuplicates`); nunca actualiza ni borra filas.
+
+| Columna | Tipo | Nulo | Default | Notas |
+|---|---|---|---|---|
+| `legal_acceptance_id` | `uuid` | no | `gen_random_uuid()` | PK `legal_acceptances_pkey` |
+| `user_id` | `uuid` | no | - | FK a `users.user_id`: quien acepta |
+| `document_type` | `varchar(16)` | no | - | CHECK: `terms` o `privacy` |
+| `document_version` | `varchar(32)` | no | - | Versión aceptada (por ejemplo `1.0.0-store`) |
+| `accepted_at` | `timestamptz(6)` | no | `now()` | Momento de la aceptación |
+| `method` | `varchar(32)` | no | - | CHECK: `register_checkbox` o `acceptance_gate` |
+| `ip_address` | `varchar(45)` | sí | - | IP de la petición, truncada a 45 |
+| `user_agent` | `varchar(512)` | sí | - | User agent de la petición, truncado a 512 |
+| `accepted_by_user_id` | `uuid` | sí | - | FK a `users.user_id`: reservada para aceptación en nombre de otro; la Fase 1 siempre escribe null |
+| `created_at` | `timestamptz(6)` | no | `now()` | |
+
+- **CHECK**: `legal_acceptances_document_type_ck` (`document_type IN ('terms', 'privacy')`), `legal_acceptances_method_ck` (`method IN ('register_checkbox', 'acceptance_gate')`) y `legal_acceptances_document_version_ck` (`char_length(btrim(document_version)) BETWEEN 1 AND 32`). Prisma no modela CHECK: solo existen en la migración.
+- **Índice único**: `uq_legal_acceptances_user_doc_version` sobre `(user_id, document_type, document_version)`, creado con `CREATE UNIQUE INDEX` y mapeado con `@@unique(map:)`. Sirve las consultas de estado y de exportación, y hace idempotente el `createMany` con `skipDuplicates`. No hay otro índice.
+- **FK**: `legal_acceptances_user_id_fkey` y `legal_acceptances_accepted_by_user_id_fkey`, ambas a `users(user_id)` sin cláusula `ON DELETE`/`ON UPDATE` explícita, es decir, el valor por defecto de Postgres `NO ACTION` (igual que `onDelete: NoAction` en Prisma). Los usuarios se anonimizan o desactivan, no se borran, así que nada cascada.
+- **Relaciones Prisma**: `legal_acceptance_user` (`users.legal_acceptances`) y `legal_acceptance_accepted_by` (`users.legal_acceptances_given`).
+- **Pendiente = ausencia de fila**: un documento está pendiente si no existe fila para `(usuario, tipo, versión vigente)`. Tras revertir una versión, el usuario que ya la había aceptado no vuelve a quedar pendiente.
+- **Migración**: `sacdia-backend/prisma/migrations/20261015120000_legal_acceptances/migration.sql`. Escrita a mano (nunca `migrate dev` ni `migrate diff`): `CREATE TABLE IF NOT EXISTS` más un `CREATE UNIQUE INDEX IF NOT EXISTS`, sin `ALTER`, `DROP` ni `CONCURRENTLY`. Solo aditiva. Reversión manual por rama de Neon: eliminar la tabla a mano; no hay migración down. Antes del merge, `prisma migrate status` contra Neon debe mostrar como única pendiente `20261015120000_legal_acceptances`.
+- **Retención**: IP y user agent se conservan como evidencia del consentimiento. Cuánto tiempo se retienen tras eliminar la cuenta está **pendiente de decisión legal** (LFPDPPP); en la Fase 1 se conservan y el aviso de privacidad debería mencionarlo.
+- **Exportación**: `DataExportService` incluye las filas del propio usuario como `legal_acceptances` (ver `data-export` en `docs/api/ENDPOINTS-LIVE-REFERENCE.md`).
+- **Versiones vigentes**: viven en `sacdia-backend/src/legal/legal-documents.constants.ts`, no en la base de datos (ver `docs/legal/README.md`).
 
 ## Modelos añadidos a esta referencia (resincronización 2026-10-04)
 
