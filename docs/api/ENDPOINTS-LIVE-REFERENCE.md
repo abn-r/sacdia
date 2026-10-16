@@ -7,7 +7,7 @@
 > La tabla refleja los decoradores HTTP efectivos en controllers NestJS; DTOs, ejemplos y errores finos viven en Swagger/runtime y docs de feature cuando aplique.
 
 **Estado**: ACTIVE
-**Actualizado**: 2026-10-15 (aceptación legal; ver la nota de resincronización 2026-10-13 para el resto)
+**Actualizado**: 2026-10-16 (perfiles familiares, sub-fase 2a; ver también aceptación legal 2026-10-15 y la nota de resincronización 2026-10-13)
 **Total endpoints**: 866 decoradores HTTP en 108 archivos `*.controller.ts` de `development`. La matriz tiene además 20 filas **pendientes de merge (PR #448 de sacdia-backend)**: secciones `class-thresholds`, `investiture-windows`, `investiture-pastors`, `investiture-requests` y el `GET .../sections/:clubSectionId/score` de camporee-scoring.
 **Métodos (development)**: GET 353 · POST 279 · PATCH 125 · DELETE 96 · PUT 13
 **Auth detectada (development)**: Public 13 · JWT u Optional JWT 853
@@ -18,6 +18,9 @@
 > [!NOTE]
 > **Aceptación legal 2026-10-15** (sacdia-backend, rama `feat/legal-acceptance`): se añaden 3 endpoints (sección `legal`), los campos `accepted_terms_version` y `accepted_privacy_version` en `POST /auth/register`, el bloque `legal` en `GET /auth/me` y la clave `legal_acceptances` en la exportación de datos. Los totales de la cabecera tampoco incluyen estos 3 endpoints.
 
+> [!NOTE]
+> **Perfiles familiares 2026-10-16** (sacdia-backend, rama `feat/family-profiles`, sub-fase 2a, pendiente de merge): se añade el header `X-Acting-For` (tutor que actúa por un menor sin cuenta; sección siguiente), 8 endpoints (sección `guardianships`), los bloques `acting_for` y `family` en `GET /auth/me`, `acknowledge_dependents` en `DELETE /auth/me` y 15 códigos de error nuevos. Nada de esto existe en `development` hasta el merge, y sin el header el comportamiento de las rutas existentes no cambia. Los totales de la cabecera no incluyen estos 8 endpoints. Siguen pendientes de documentar (sub-fases 2b y 2c): la salida «solo soy tutor de menores» del post-registro, el límite de edad en el registro, la verificación de consentimiento por el director y el bloque de tutorías en admin.
+
 ## Cómo leer esta referencia
 
 - `Auth`: `JWT` cuando el controller/método declara `JwtAuthGuard`, `AuthGuard` o `ApiBearerAuth`; `Public` cuando no se detecta guard bearer en el controller/método.
@@ -26,6 +29,89 @@
 - `Uso`: sale de `@ApiOperation.summary` cuando existe; si no existe, se infiere desde el nombre del handler y el método HTTP.
 - `Uso backend`: primeras llamadas a servicios/repositorios inyectados detectadas en el handler. `-` significa que el handler responde inline o usa lógica privada no capturada por esta extracción estática.
 - `Source`: controller de origen para verificar el contrato antes de tocar clientes.
+
+## Actuar en nombre de un dependiente (`X-Acting-For`)
+
+> [!NOTE]
+> Sub-fase 2a de perfiles familiares, rama `feat/family-profiles` de sacdia-backend, pendiente de merge. Un **dependiente** es un menor sin cuenta propia ni correo (`users.email` null), registrado por un tutor desde `POST /api/v1/guardianships/me/dependents`. Esquema y reglas de datos: `docs/database/SCHEMA-REFERENCE.md`, sección «Perfiles familiares».
+
+### Cómo se pide
+
+- El tutor usa su **propio JWT** y añade `X-Acting-For: <user_id del dependiente>` (UUID). No hay token nuevo ni endpoint de «cambio de perfil».
+- Sin el header, nada cambia. Un header repetido o que no sea UUID responde 400 `ACTING_FOR_HEADER_INVALID` (nunca se interpreta como «yo»).
+- `@Public` ignora el header: la estrategia JWT no corre en esas rutas.
+- La firma, la audiencia y la revocación del JWT se validan siempre sobre el **tutor**. Un JWT de audiencia `sacdia:device` (reservada para la Fase 3) se rechaza con 401 `GUARD_JWT_UNAUTHORIZED`.
+
+### Qué cambia en la petición
+
+`JwtStrategy.validate` **sustituye el principal**: `sub`, `userId` y `user_id` pasan a ser el dependiente, así que todo handler que lee el usuario actual (`/auth/me`, `/users/:userId/...`, QR, notificaciones) ve al menor sin cambios. Además:
+
+| Campo del principal | Valor mientras se actúa |
+| --- | --- |
+| `kind` | `guardian_acting` (sin header: `user`) |
+| `actor_sub` | `user_id` del tutor (sin header: igual a `sub`) |
+| `acting_for` | `true` |
+| `email` | `null` |
+| `scopes` | los del consentimiento (tabla de abajo); `null` = sin restricción en `user` |
+| `guardianship_id`, `consent_status` | de la tutoría usada |
+
+El guard de ownership sigue igual: como `sub` es el dependiente, el bypass de dueño (`/users/:userId/...` con `:userId` = el menor) funciona; los scopes solo **restringen** lo que ese bypass permite. Un tutor no gana ningún permiso de club por actuar.
+
+### Cuándo se concede
+
+`ActingForResolver` concede acceso solo si existe una fila de `guardianships` con **todo** esto:
+
+- `guardian_user_id` = quien llama, `is_custodian = false`, `is_test_data = false` y `consent_status` en `pending` o `verified`.
+- El dependiente está `active`, **no tiene fila `account`** y su `dependent_profiles` no está congelado ni purgado.
+- Tiene fecha de nacimiento y su edad hoy (zona horaria del país) es **menor que la mayoría de edad** del país.
+
+La mayoría de edad, no los 13 años, es el corte para actuar: el límite de 13 solo se aplica al crear el dependiente. Así un niño que cumple 13 antes de la Fase 3 no queda fuera. En cuanto exista una fila `account` para él, actuar deja de funcionar.
+
+Cualquier otro caso responde el **mismo** 403 `ACTING_FOR_FORBIDDEN` (sin tutoría, revocada, de otro tutor, custodia o tutor externo, datos de prueba, dependiente inactivo o con cuenta, congelado, sin fecha de nacimiento, mayor de edad, token `mfa_pending` o header igual al propio `user_id`), para que no se pueda enumerar quién es dependiente de quién. La causa real solo va al log `acting_for_denied`.
+
+### Scopes (denegado por defecto)
+
+Una ruta es accesible actuando solo si declara `@ActingScope(<scope>)` con un scope que el principal tiene. Sin decorador, o con un scope que no tiene: 403 `ACTING_FOR_SCOPE_DENIED`.
+
+| Consentimiento | Scopes concedidos |
+| --- | --- |
+| `pending` | `self:read`, `profile:write`, `registration:write`, `legal:accept` |
+| `verified` | los anteriores más `classes:write`, `honors:write`, `evidence:upload` |
+
+`pending` alcanza para completar el registro del menor (pasos 1 a 3 del post-registro, que crean la solicitud de club) y aceptar los términos. `verified` añade lo que solo importa después de que el club aprueba. Las filas `revoked`, de custodia, de tutor externo o `is_test_data` no dan ningún scope.
+
+Rutas con scope (62 en esta sub-fase; la lista exacta la fija el snapshot `src/auth/acting-for/acting-scope-metadata.spec.ts`, así que ampliar lo que un tutor puede hacer es siempre un cambio explícito en review):
+
+| Scope | Rutas (`/api/v1`) |
+| --- | --- |
+| `self:read` | `GET /auth/me` · `GET /auth/profile/completion-status` · `GET /dashboard/summary` · `GET /users/:userId` · `GET /users/:userId/{allergies,diseases,medicines,age}` · `GET /users/:userId/emergency-contacts[/:contactId]` · `GET /users/:userId/post-registration/{status,photo-status}` · `GET /users/:userId/classes` · `GET /users/:userId/classes/:classId/progress` · `GET /users/:userId/honors` · `GET /users/:userId/honors/stats` · `GET /users/:userId/honors/:honorId/requirements/progress` · `GET /users/:userId/honors/:honorId/requirements/:requirementId/evidence` · `GET /qr/member/token` · `GET /qr/me` · `GET /qr/me/card` · `GET /qr/me/card.pdf` · `GET /notifications/history` · `GET /notifications/unread-count` · `PATCH /notifications/read-all` · `PATCH /notifications/:deliveryId/read` · `GET /users/me/legal-acceptance` |
+| `profile:write` | `PATCH /users/:userId` · `PUT /users/:userId/{allergies,diseases,medicines}` · `DELETE /users/:userId/{allergies/:allergyId,diseases/:diseaseId,medicines/:medicineId}` · `POST` y `DELETE /users/:userId/profile-picture` · `POST /users/:userId/emergency-contacts` · `PATCH` y `DELETE /users/:userId/emergency-contacts/:contactId` · `PATCH /auth/me/context` |
+| `registration:write` | `POST /users/:userId/post-registration/step-{1,2,3}/complete` · `POST /users/:userId/post-registration/membership-request/cancel` · `POST /users/:userId/membership/annual-enroll` |
+| `classes:write` | `POST /users/:userId/classes/enroll` · `PATCH /users/:userId/classes/:classId/progress` · `POST /users/:userId/classes/:classId/sections/:sectionId/submit` |
+| `evidence:upload` | `POST /users/:userId/classes/:classId/sections/:sectionId/files` · `DELETE .../files/:fileId` · `POST /users/:userId/honors/:honorId/files` · `POST /users/:userId/honors/:honorId/requirements/:requirementId/evidence/{upload,link}` · `DELETE .../evidence/:evidenceId` |
+| `honors:write` | `POST /users/:userId/honors` · `POST /users/:userId/honors/bulk` · `POST`, `PATCH` y `DELETE /users/:userId/honors/:honorId` · `PATCH /users/:userId/honors/:honorId/requirements/progress/batch` · `PATCH .../requirements/:requirementId/progress` |
+| `legal:accept` | `POST /users/me/legal-acceptance` (el servicio guarda `accepted_by_user_id` = el tutor) |
+
+**Nunca llevan scope** (el spec lo comprueba): `POST /auth/update-password`, `DELETE /auth/me`, `/auth/sessions*`, `/auth/mfa/*`, `/auth/oauth*`, `/users/me/data-export*`, `/fcm-tokens*`, `/users/me/notification-preferences*`, `/notifications/preferences*`, `/guardianships/*`, `POST /club-sections/:clubSectionId/dependents/:userId/claim-codes`, `/users/:userId/legal-representative*`, `GET /users/:userId/requires-legal-representative`, solicitud de instructor de especialidad, `/users/:userId/master-honors*`, `/certifications*`, `/admin*`, `/clubs*`, `/club-sections*`, `POST /qr/validate|scan`, los envíos de notificaciones y `GET /legal/current`. Por eso los endpoints de `guardianships` se llaman **sin** `X-Acting-For`: el tutor administra su familia desde su propio perfil.
+
+`OptionalJwtAuthGuard` (rutas públicas con sesión opcional, como los catálogos del paso 3): los errores de `X-Acting-For` se propagan y nunca se degradan a anónimo; un principal sustituido en una ruta sin scope se trata como **anónimo** (mínimo privilegio).
+
+### Errores
+
+| Status | `code` | Cuándo |
+| --- | --- | --- |
+| 400 | `ACTING_FOR_HEADER_INVALID` | Header repetido o que no es UUID |
+| 403 | `ACTING_FOR_FORBIDDEN` | Cualquier causa de la lista de arriba (cuerpo uniforme) |
+| 403 | `ACTING_FOR_SCOPE_DENIED` | La ruta no declara un scope que el principal tenga |
+| 503 | `AUTH_REVOCATION_CHECK_UNAVAILABLE` | Falla la base de datos al resolver la tutoría. Nunca se concede por defecto |
+
+Los guards no convierten estos errores en 401: el JWT del tutor sigue siendo válido, así que el cliente no debe cerrar sesión. **Los clientes no deben leer `details`**: `HttpExceptionFilter` quita `details` de las `AppException` cuando `NODE_ENV=production` (en `ACTING_FOR_SCOPE_DENIED`, `details.required_scope` solo aparece fuera de producción). Basta con el `code`.
+
+### Caché, auditoría y límites de tasa
+
+- **Caché**: la decisión se guarda en Redis con clave `acting:v1:{dependentId}:{epoch}:{guardianId}`: 60 s si se concede, 10 s si se deniega. El `epoch` (`acting:epoch:{dependentId}`) sube tras cada cambio de tutorías (crear dependiente, canjear código, revocar, salida de tutor por cierre de cuenta, purga), de modo que un tutor revocado o recién vinculado se refleja en la **siguiente** petición. Si falla Redis se consulta la base; el caché nunca convierte un rechazo en acceso.
+- **Auditoría**: las filas de `audit_logs` escritas mientras se actúa (HTTP o de servicio) llevan `actor_user_id` = tutor, `actor_kind = guardian_acting`, `target_user_id` = dependiente y `request_context.acting_for = { guardian_user_id, dependent_user_id, guardianship_id }`. No hay cambio de schema. Las columnas de dominio (quién subió una evidencia, por ejemplo) siguen registrando al dependiente; el rastro del actor real está en la auditoría. El log de peticiones muestra `tutor>dependiente`. En `legal_acceptances`, `accepted_by_user_id` es el tutor.
+- **Rate limit**: `UserAwareThrottlerGuard` cuenta por `actor_sub`, es decir, todo el tráfico del tutor actuando se suma al tutor, no al menor.
 
 ## Resumen por dominio
 
@@ -88,6 +174,7 @@ Conteo de filas por sección de la matriz. Las filas marcadas como pendientes de
 | emergency-contacts | 5 |
 | evidence-review | 7 |
 | finances | 9 |
+| guardianships | 8 |
 | health | 2 |
 | honors | 5 |
 | user-honors | 17 |
@@ -341,7 +428,7 @@ Errores: 404 `HONOR_INSTRUCTOR_PROPOSAL_NOT_FOUND`; 409 `HONOR_INSTRUCTOR_PROPOS
 | GET | `/api/v1/admin/relationship-types` | JWT | Global: admin, super-admin; Permisos: catalogs:read | List relationship types for admin management | AdminReferenceService.listRelationshipTypes() | `src/admin/admin-reference.controller.ts` |
 | POST | `/api/v1/admin/relationship-types` | JWT | Global: admin, super-admin; Permisos: catalogs:create | Create relationship type | AdminReferenceService.createRelationshipType() | `src/admin/admin-reference.controller.ts` |
 | PATCH | `/api/v1/admin/relationship-types/:relationshipTypeId` | JWT | Global: admin, super-admin; Permisos: catalogs:update | Update relationship type | AdminReferenceService.updateRelationshipType() | `src/admin/admin-reference.controller.ts` |
-| DELETE | `/api/v1/admin/relationship-types/:relationshipTypeId` | JWT | Global: admin, super-admin; Permisos: catalogs:delete | Soft delete relationship type | AdminReferenceService.deleteRelationshipType() | `src/admin/admin-reference.controller.ts` |
+| DELETE | `/api/v1/admin/relationship-types/:relationshipTypeId` | JWT | Global: admin, super-admin; Permisos: catalogs:delete | Soft delete relationship type. Si lo usa un `legal_representatives` o una `guardianships`, 409 `ADMIN_RELATIONSHIP_TYPE_IN_USE` | AdminReferenceService.deleteRelationshipType() | `src/admin/admin-reference.controller.ts` |
 | GET | `/api/v1/admin/allergies` | JWT | Global: admin, super-admin; Permisos: catalogs:read | List allergies for admin management | AdminReferenceService.listAllergies() | `src/admin/admin-reference.controller.ts` |
 | POST | `/api/v1/admin/allergies` | JWT | Global: admin, super-admin; Permisos: catalogs:create | Create allergy | AdminReferenceService.createAllergy() | `src/admin/admin-reference.controller.ts` |
 | PATCH | `/api/v1/admin/allergies/:allergyId` | JWT | Global: admin, super-admin; Permisos: catalogs:update | Update allergy | AdminReferenceService.updateAllergy() | `src/admin/admin-reference.controller.ts` |
@@ -665,10 +752,10 @@ Semántica funcional y límites: [operations-dashboard.md](../features/operation
 | POST | `/api/v1/auth/verify-email/send` | JWT | - | Enviar email de verificación al usuario autenticado | AuthService.sendVerificationEmail() | `src/auth/auth.controller.ts` |
 | POST | `/api/v1/auth/verify-email/confirm` | Public | - | Confirmar verificación de email con token | AuthService.confirmEmailVerification() | `src/auth/auth.controller.ts` |
 | POST | `/api/v1/auth/update-password` | JWT | - | Update authenticated user password | AuthService.updateOwnPassword() | `src/auth/auth.controller.ts` |
-| GET | `/api/v1/auth/me` | JWT | - | Perfil + autorización. Pertenencia no inscrita actual con permisos vacíos. No incluye programación de director. Año solapado → 409 `ECCLESIASTICAL_YEAR_AMBIGUOUS`. Incluye `data.legal` (estado de aceptación legal; ver sección `legal`), siempre leído de la base y fuera del caché de autorización | AuthService.getProfile() | `src/auth/auth.controller.ts` |
+| GET | `/api/v1/auth/me` | JWT | - | Perfil + autorización. Pertenencia no inscrita actual con permisos vacíos. No incluye programación de director. Año solapado → 409 `ECCLESIASTICAL_YEAR_AMBIGUOUS`. Incluye `data.legal` (estado de aceptación legal; ver sección `legal`), siempre leído de la base y fuera del caché de autorización. Perfiles familiares: `data.email` puede ser `null` (dependientes); `data.family` es `{ is_guardian, dependents_count }` con los dependientes activos del usuario (`null` mientras se actúa por un menor); `data.acting_for` es `null`, o con `X-Acting-For` válido `{ actor_user_id, dependent_user_id, guardianship_id, consent_status: "pending"\|"verified", scopes }`. Con el header la respuesta describe al **dependiente** (ver «Actuar en nombre de un dependiente») | AuthService.getProfile() | `src/auth/auth.controller.ts` |
 | PATCH | `/api/v1/auth/me/context` | JWT | - | Cambiar contexto activo. `inactive`/`ended`/año no vigente/`designated` → 400 `AUTH_ASSIGNMENT_YEAR_MISMATCH`. Corte del club no completado → 503 `CLUB_CYCLE_NOT_READY`. No invalida JWT | AuthService.setActiveClubContext() | `src/auth/auth.controller.ts` |
 | GET | `/api/v1/auth/profile/completion-status` | JWT | - | Obtener estado del post-registro | AuthService.getCompletionStatus() | `src/auth/auth.controller.ts` |
-| DELETE | `/api/v1/auth/me` | JWT | - | Eliminar cuenta del usuario autenticado (contraseña o `{ provider, idToken, nonce }`; nunca ambos → 400). Throttle 3/hora | AccountDeletionService.deleteAccount() | `src/auth/auth.controller.ts` |
+| DELETE | `/api/v1/auth/me` | JWT | - | Eliminar cuenta del usuario autenticado (contraseña o `{ provider, idToken, nonce }`; nunca ambos → 400). Throttle 3/hora. Tutores: si tiene dependientes activos, el body debe llevar `"acknowledge_dependents": true` (opcional, boolean); sin él responde 409 `AUTH_DELETE_DEPENDENTS_ACK_REQUIRED` **sin cambiar nada** (la comprobación va después de re-autenticar y antes de revocar Apple). El cliente obtiene la lista y el resultado de cada menor de `GET /api/v1/guardianships/me/deletion-impact`, no del 409. Al confirmar, en la misma transacción cada menor pasa a otro tutor, a custodia del club o se congela 90 días; si algo falla, la cuenta no se elimina. No disponible actuando por un menor | AccountDeletionService.deleteAccount() | `src/auth/auth.controller.ts` |
 | POST | `/api/v1/auth/mfa/enroll` | JWT | - | Habilitar 2FA (TOTP) | MfaService.enrollMfa() | `src/auth/mfa.controller.ts` |
 | POST | `/api/v1/auth/mfa/verify` | JWT | - | Verificar código TOTP | MfaService.verifyMfa() | `src/auth/mfa.controller.ts` |
 | DELETE | `/api/v1/auth/mfa/disable` | JWT | - | Deshabilitar 2FA | MfaService.disableMfa() | `src/auth/mfa.controller.ts` |
@@ -1356,7 +1443,9 @@ Una resolución confirmada avisa en la bandeja de la app, no por correo. La inte
 | GET | `/api/v1/users/me/data-exports` | JWT | - | List all data export requests for the current user | DataExportService.listExports() | `src/data-export/data-export.controller.ts` |
 | GET | `/api/v1/users/me/data-exports/:exportId/download` | JWT | - | Get presigned download URL for a ready export | DataExportService.getDownloadUrl() | `src/data-export/data-export.controller.ts` |
 
-El JSON exportado tiene `schema_version` `1.1.0` (antes `1.0.0`; cambio aditivo). Añade la clave `legal_acceptances`, después de `notification_preferences`: lista ordenada por `accepted_at` descendente de `{ document_type, document_version, accepted_at, method, ip_address, user_agent }` del propio usuario.
+El JSON exportado tiene `schema_version` `1.2.0` (antes `1.1.0` y `1.0.0`; cambios aditivos). La `1.1.0` añadió la clave `legal_acceptances`, después de `notification_preferences`: lista ordenada por `accepted_at` descendente de `{ document_type, document_version, accepted_at, method, ip_address, user_agent }` del propio usuario.
+
+La `1.2.0` (perfiles familiares) añade la clave `family`, después de `legal_acceptances`: `{ dependent_profile, as_dependent, as_guardian }`. `dependent_profile` es `{ created_by_user_id, created_at, frozen_at, purge_after }` o `null`; `as_dependent` y `as_guardian` listan las tutorías donde el usuario es el menor o el tutor, con `{ guardianship_id, dependent_user_id, guardian_user_id, is_custodian, custodian_club_id, is_primary, consent_status, sworn_declaration_at, verification_method, verified_at, revoked_at, revoked_reason, created_at, relationship_type }`. No incluye hashes de códigos, claves de archivos de evidencia ni nombre o teléfono de tutores externos.
 
 ### emergency-contacts
 
@@ -1393,6 +1482,106 @@ El JSON exportado tiene `schema_version` `1.1.0` (antes `1.0.0`; cambio aditivo)
 | POST | `/api/v1/finances/:financeId/evidences` | JWT | Permisos: finances:update | Subir foto de evidencia de un movimiento financiero | FinancesService.uploadEvidence() | `src/finances/finances.controller.ts` |
 | PATCH | `/api/v1/finances/:financeId` | JWT | Permisos: finances:update | Actualizar movimiento | FinancesService.update() | `src/finances/finances.controller.ts` |
 | DELETE | `/api/v1/finances/:financeId` | JWT | Permisos: finances:delete | Desactivar movimiento | FinancesService.remove() | `src/finances/finances.controller.ts` |
+
+### guardianships
+
+> Sub-fase 2a de perfiles familiares, rama `feat/family-profiles`, pendiente de merge. Ninguna ruta de `/guardianships/*` declara `@ActingScope`: mientras se actúa por un menor responden 403 `ACTING_FOR_SCOPE_DENIED`, y la app las llama sin `X-Acting-For`. La propiedad se comprueba en el servicio (`@SkipPermissions`), no con permisos RBAC. Respuestas con el envoltorio `{ "status": "success", "data": ... }`.
+
+| Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
+| --- | --- | --- | --- | --- | --- | --- |
+| GET | `/api/v1/guardianships/me/dependents` | JWT | `@SkipPermissions` | Listar los dependientes activos del tutor autenticado. Excluye congelados y purgados. Respuesta `{ dependents: DependentSummary[], limits: { max_dependents: 10 } }` | GuardianshipsService.listForGuardian() | `src/guardianships/guardianships.controller.ts` |
+| POST | `/api/v1/guardianships/me/dependents` | JWT | `@SkipPermissions`; throttle 10/hora | Registrar un menor sin cuenta (paso 0). En una transacción crea `users` (correo null, rol global `user`), `users_pr` en falso, `dependent_profiles`, la tutoría principal `pending` con `sworn_declaration_at` y las aceptaciones legales en nombre del menor. 201 con `DependentSummary` | GuardianshipsService.createDependent() | `src/guardianships/guardianships.controller.ts` |
+| GET | `/api/v1/guardianships/me/dependents/:dependentId` | JWT | `@SkipPermissions` | Detalle de un dependiente con sus tutores (`DependentDetail`). Un dependiente ajeno, congelado o inexistente responde 404 `GUARDIANSHIP_NOT_FOUND` | GuardianshipsService.getDetailForGuardian() | `src/guardianships/guardianships.controller.ts` |
+| POST | `/api/v1/guardianships/me/dependents/:dependentId/link-codes` | JWT | `@SkipPermissions`; throttle 10/hora | Emitir un código para invitar a un segundo tutor (vigencia 72 h). Un código nuevo revoca los abiertos del mismo dependiente y propósito. Solo un tutor activo de ese dependiente; si no, 404 `GUARDIANSHIP_NOT_FOUND`. Con 4 tutores activos, 409 `GUARDIANSHIP_GUARDIAN_LIMIT_REACHED`. 201 `{ code, expires_at }` | LinkCodesService.issueSecondGuardianCode() | `src/guardianships/guardianships.controller.ts` |
+| POST | `/api/v1/guardianships/link-codes/redeem` | JWT | `@SkipPermissions`; throttle 5 por 15 min y 20 por día | Canjear un código y quedar como tutor del menor. 201 con `DependentSummary` | LinkCodesService.redeem() | `src/guardianships/guardianships.controller.ts` |
+| GET | `/api/v1/guardianships/me/deletion-impact` | JWT | `@SkipPermissions` | Qué pasaría con cada dependiente si el tutor elimina su cuenta. Respuesta `{ dependents: [{ user_id, display_name, outcome }] }` | GuardianshipLifecycleService.deletionImpact() | `src/guardianships/guardianships.controller.ts` |
+| POST | `/api/v1/guardianships/:guardianshipId/revoke` | JWT | `@SkipPermissions` | Dejar una tutoría (`guardian_left`) o que el tutor principal quite a uno secundario (`removed_by_primary`). Responde 200 | GuardianshipLifecycleService.revoke() | `src/guardianships/guardianships.controller.ts` |
+| POST | `/api/v1/club-sections/:clubSectionId/dependents/:userId/claim-codes` | JWT | Permisos: club_members:approve · `@AuthorizationResource` club_section; throttle 10/hora | Un director emite un código de reclamo (vigencia 7 días) para devolver a una familia un menor bajo custodia del club. El menor debe tener una asignación activa o pendiente en esa sección y ningún tutor activo; si ya lo tiene, 409 `GUARDIANSHIP_ALREADY_GUARDIAN`; si no cumple, 404 `GUARDIANSHIP_NOT_FOUND`. 201 `{ code, expires_at }` | LinkCodesService.issueDirectorClaimCode() | `src/guardianships/dependent-claim-codes.controller.ts` |
+
+##### `POST /api/v1/guardianships/me/dependents`
+
+Body (campos extra, como `email` o `access_mode`, → 400 por `forbidNonWhitelisted`; el modo de acceso siempre lo calcula el servidor):
+
+```json
+{
+  "name": "Ana",
+  "paternal_last_name": "Pérez",
+  "maternal_last_name": "López",
+  "birthday": "2017-04-02",
+  "relationship_type_id": "uuid",
+  "sworn_declaration": true,
+  "accepted_terms_version": "1.0.0-store",
+  "accepted_privacy_version": "1.0.0-store"
+}
+```
+
+`maternal_last_name` es opcional; `birthday` es `YYYY-MM-DD`; `sworn_declaration` debe ser `true`. `relationship_type_id` sale de `GET /api/v1/catalogs/relationship-types`.
+
+Reglas, en este orden: versiones legales vigentes, tutor adulto con fecha de nacimiento, parentesco válido y activo, fecha de nacimiento válida, no futura y con edad por debajo de `minor_self_login_min_age` del país del tutor (13 por defecto), y límite de dependientes. El dependiente toma el `country_id` del tutor. Errores: 400 `LEGAL_VERSION_MISMATCH`; 400 `GUARDIANSHIP_RELATIONSHIP_TYPE_INVALID`; 422 `GUARDIANSHIP_GUARDIAN_BIRTHDAY_REQUIRED`; 422 `GUARDIANSHIP_GUARDIAN_NOT_ADULT`; 422 `GUARDIANSHIP_DEPENDENT_AGE_OUT_OF_RANGE` (los de 13 años o más van a una cuenta propia, Fase 3); 409 `GUARDIANSHIP_DEPENDENT_LIMIT_REACHED` (máximo 10 dependientes activos por tutor).
+
+##### `DependentSummary`
+
+```json
+{
+  "user_id": "uuid",
+  "name": "Ana",
+  "paternal_last_name": "Pérez",
+  "maternal_last_name": "López",
+  "birthday": "2017-04-02",
+  "age": 9,
+  "user_image": null,
+  "access_mode": "guardian_managed",
+  "post_register_complete": false,
+  "frozen": false,
+  "guardianship": {
+    "guardianship_id": "uuid",
+    "is_primary": true,
+    "relationship_type": { "relationship_type_id": "uuid", "name": "Madre" },
+    "consent_status": "pending",
+    "verified_at": null,
+    "evidence_uploaded": false
+  },
+  "club_membership": null
+}
+```
+
+- `access_mode` es siempre `guardian_managed` en esta fase.
+- `consent_status` es `pending` o `verified` (nunca `revoked`: esas filas no se listan).
+- `club_membership` es `null` o `{ "assignment_id", "status": "pending|active|rejected|expired|cancelled", "club_section_id", "club_name", "club_type_name" }`.
+- `DependentDetail` es `DependentSummary` más `guardians: [{ guardianship_id, user_id, display_name, relationship_type_name, is_primary, is_custodian, consent_status, is_me }]`. `user_id` es `null` en una custodia de club.
+
+##### Códigos de vinculación
+
+- Formato `XXXX-XXXX`: 8 caracteres Crockford base32. Al canjear se normaliza (mayúsculas, sin guiones ni espacios, `O` a `0`, `I` y `L` a `1`). El servidor guarda solo un hash HMAC-SHA256; el código en claro se devuelve una única vez al emitirlo.
+- Un código sirve una sola vez. Un canje que falla después de consumirlo (ya es tutor, límite de tutores, inviter que ya salió) hace rollback y **no** consume el código.
+- Body del canje: `{ "code": "7KQ4-M9TX", "relationship_type_id": "uuid", "sworn_declaration": true }`. Quien canjea debe ser adulto con fecha de nacimiento (mismos 422 que al crear).
+- `second_guardian`: crea una tutoría no principal con `invited_by_guardianship_id`; queda `verified` (`guardian_invite`) si la del invitador está verificada, y `pending` si no.
+- `director_claim`: el que canjea queda como tutor **principal** `pending`; la custodia del club y cualquier tutor externo heredado se revocan con `claimed`. La verificación anterior no se hereda.
+- Protección contra fuerza bruta: 5 canjes por 15 minutos y 20 por día por usuario (429 de throttle). Además, 10 canjes con código no válido (`GUARDIANSHIP_LINK_CODE_INVALID`, incluidos los mal formados) en 24 h, con la ventana contada desde el primero, bloquean al usuario con 429 `GUARDIANSHIP_LINK_CODE_LOCKED`, sin mirar el código. Si Redis falla, el bloqueo no aplica y solo queda el throttle.
+- Errores del canje: 400 `GUARDIANSHIP_LINK_CODE_INVALID` (cuerpo idéntico para desconocido, vencido, consumido, revocado o ya reclamado); 409 `GUARDIANSHIP_ALREADY_GUARDIAN`; 409 `GUARDIANSHIP_GUARDIAN_LIMIT_REACHED` (máximo 4 tutores activos por dependiente; también al emitir); 400 `GUARDIANSHIP_RELATIONSHIP_TYPE_INVALID`; 429 `GUARDIANSHIP_LINK_CODE_LOCKED`.
+
+##### `POST /api/v1/guardianships/:guardianshipId/revoke`
+
+Body `{ "reason": "guardian_left" | "removed_by_primary" }`. Respuesta:
+
+```json
+{ "status": "success", "data": { "guardianship_id": "uuid", "consent_status": "revoked", "dependent_outcome": "other_guardian" } }
+```
+
+- `guardian_left`: solo el titular de esa fila. `removed_by_primary`: solo el tutor principal, sobre uno secundario. Otra combinación → 403 `GUARDIANSHIP_REVOKE_FORBIDDEN`; tutoría inexistente, ya revocada, de custodia o de un menor ajeno → 404 `GUARDIANSHIP_NOT_FOUND`.
+- `dependent_outcome` indica qué pasa con el menor cuando sale el último tutor activo: `other_guardian` (queda otro tutor; si hacía falta, el más antiguo se vuelve principal), `club_custody` (el menor tiene asignación `active` o `pending`: se crea una fila de custodia del club con el estado y método heredados y se avisa a los directores) o `frozen` (se congela y se purga a los 90 días).
+
+##### `GET /api/v1/guardianships/me/deletion-impact`
+
+```json
+{ "status": "success", "data": { "dependents": [ { "user_id": "uuid", "display_name": "Ana Pérez", "outcome": "other_guardian" } ] } }
+```
+
+`outcome` usa los mismos tres valores. Es una vista previa de solo lectura de lo que hará la eliminación de cuenta.
+
+##### Congelación y purga
+
+Un dependiente `frozen` no se lista, no se puede actuar por él y no recibe pushes. A los 90 días, el cron `dependent-profiles-purge` (`20 4 * * *` UTC) lo anonimiza y borra sus datos personales (detalle en `docs/database/SCHEMA-REFERENCE.md`). La purga borra objetos del bucket privado de R2 `GUARDIANSHIP_EVIDENCE`, que se configura con `R2_BUCKET_GUARDIANSHIP_EVIDENCE` y `R2_PUBLIC_URL_GUARDIANSHIP_EVIDENCE` (opcional `R2_KEY_PREFIX_GUARDIANSHIP_EVIDENCE`, por defecto `guardianships/consent`). Las variables son opcionales al arrancar y solo son obligatorias al usar el bucket.
 
 ### health
 
@@ -1453,7 +1642,7 @@ El JSON exportado tiene `schema_version` `1.1.0` (antes `1.0.0`; cambio aditivo)
 | --- | --- | --- | --- | --- | --- | --- |
 | GET | `/api/v1/legal/current` | Public | `@SkipPermissions`; throttle 30/min | Versiones vigentes y URLs públicas de los Términos y el Aviso de Privacidad. Siempre en el orden `terms`, `privacy` | LegalService.getCurrent() | `src/legal/legal.controller.ts` |
 | GET | `/api/v1/users/me/legal-acceptance` | JWT | `@SkipPermissions`; throttle 30/min | Estado de aceptación del usuario autenticado para las versiones vigentes | LegalService.getStatus() | `src/legal/legal-acceptance.controller.ts` |
-| POST | `/api/v1/users/me/legal-acceptance` | JWT | `@SkipPermissions`; throttle 10/min | Aceptar las versiones vigentes. Idempotente: responde 200 y no agrega filas si ya estaban aceptadas. Versión distinta de la vigente → 400 `LEGAL_VERSION_MISMATCH` sin escribir | LegalService.accept() | `src/legal/legal-acceptance.controller.ts` |
+| POST | `/api/v1/users/me/legal-acceptance` | JWT | `@SkipPermissions`; throttle 10/min | Aceptar las versiones vigentes. Idempotente: responde 200 y no agrega filas si ya estaban aceptadas. Versión distinta de la vigente → 400 `LEGAL_VERSION_MISMATCH` sin escribir. Actuando por un menor (scope `legal:accept`) las filas se guardan para el menor con `accepted_by_user_id` = el tutor | LegalService.accept() | `src/legal/legal-acceptance.controller.ts` |
 
 Sin token, los dos endpoints `users/me/legal-acceptance` responden 401 por el guard JWT global. El módulo `src/legal/` es la fuente de las versiones: `src/legal/legal-documents.constants.ts` (ver `docs/legal/README.md`).
 
@@ -1808,6 +1997,8 @@ Fase 8 (ejecutada en código el 2026-10-09; mergeada en `development` con backen
 | GET | `/api/v1/notifications/preferences` | JWT | - | Get current user notification preferences | NotificationPreferencesService.getUserPreferences() | `src/notifications/notifications.controller.ts` |
 | PUT | `/api/v1/notifications/preferences/:category` | JWT | - | Update notification preference for a category | NotificationPreferencesService.setPreference() | `src/notifications/notifications.controller.ts` |
 
+Perfiles familiares (sub-fase 2a): un dependiente no tiene cuenta ni tokens FCM, así que un push dirigido a él se reenvía a sus tutores activos (máximo 4, sin custodia ni datos de prueba) con título `"{Nombre} · {título}"` y `data.dependent_user_id`. Cada tutor recibe el push solo si su propia preferencia de la categoría lo permite. La entrega en la bandeja sigue en el menor (el tutor la lee actuando por él, scope `self:read`). No aplica a pushes silenciosos ni a fuentes `family:*`. Fuentes nuevas, todas de la categoría `approvals`: `family:custody_transferred`, `family:evidence_uploaded` (evidencia subida por o para el menor por alguien que no es el tutor que actúa; sin efecto cuando el propio tutor sube actuando) y `family:consent_verified` (reservada para la verificación de la sub-fase 2c). No hay chat ni mensajería entre usuarios.
+
 ### FCM Tokens
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
@@ -2076,7 +2267,7 @@ Fase 8 (ejecutada en código el 2026-10-09; mergeada en `development` con backen
 | POST | `/api/v1/users/:userId/profile-picture` | JWT | Permisos: users:update_profile | Subir foto de perfil | UsersService.uploadProfilePicture() | `src/users/users.controller.ts` |
 | DELETE | `/api/v1/users/:userId/profile-picture` | JWT | Permisos: users:update_profile | Eliminar foto de perfil | UsersService.deleteProfilePicture() | `src/users/users.controller.ts` |
 | GET | `/api/v1/users/:userId/age` | JWT | Permisos: users:read_detail | Calcular edad del usuario | UsersService.calculateAge() | `src/users/users.controller.ts` |
-| GET | `/api/v1/users/:userId/requires-legal-representative` | JWT | Permisos: users:read_detail | Verificar si el usuario requiere representante legal | UsersService.calculateAge(), UsersService.requiresLegalRepresentative() | `src/users/users.controller.ts` |
+| GET | `/api/v1/users/:userId/requires-legal-representative` | JWT | Permisos: users:read_detail | **Deprecado**: los representantes legales son de solo lectura y los reemplazan las tutorías. Verificar si el usuario es menor de edad según la mayoría de edad de su país (`countries.age_of_majority`, 18 por defecto); la respuesta ya no dice «18» fijo | UsersService.calculateAge(), UsersService.requiresLegalRepresentative() | `src/users/users.controller.ts` |
 
 ### validation
 

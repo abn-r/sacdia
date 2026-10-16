@@ -2,7 +2,7 @@
 
 **Estado**: ACTIVE
 **Sincronizado contra**: `sacdia-backend/prisma/schema.prisma` en la rama `development` (commit `68123f6`)
-**Fecha de resincronizacion**: 2026-10-13 (última migración en `development`: `20261013110000_remove_retired_investiture_permissions`). Las secciones de abajo se resincronizaron por completo hasta el 2026-10-04; después solo se añadieron las de instructor de especialidad y carga por certificado (2026-10-13) y la de aceptación legal (`legal_acceptances`, 2026-10-15, migración `20261015120000_legal_acceptances`, pendiente de merge; las cifras de abajo no la incluyen). El espejo `schema.prisma` sí es la copia completa.
+**Fecha de resincronizacion**: 2026-10-13 (última migración en `development`: `20261013110000_remove_retired_investiture_permissions`). Las secciones de abajo se resincronizaron por completo hasta el 2026-10-04; después solo se añadieron las de instructor de especialidad y carga por certificado (2026-10-13) y la de aceptación legal (`legal_acceptances`, 2026-10-15, migración `20261015120000_legal_acceptances`, pendiente de merge; las cifras de abajo no la incluyen) y la de perfiles familiares (2026-10-16, migración `20261016120000_family_profiles`, rama `feat/family-profiles`, pendiente de merge). El espejo `schema.prisma` sí es la copia completa e incluye ambas.
 
 Referencia humana concisa del schema Prisma vigente.
 
@@ -18,6 +18,7 @@ Referencia humana concisa del schema Prisma vigente.
 - **Enums Prisma**: 79
 - **Migraciones Prisma**: 187 directorios en `prisma/migrations/`
 - **Tablas Better Auth mapeadas**: `session -> sessions`, `account -> accounts`, `verification -> verifications`
+- **Espejo `schema.prisma`**: 262 modelos y 79 enums, es decir, las cifras de arriba más `legal_acceptances` y las 4 tablas de perfiles familiares. La migración `20261016120000_family_profiles` no cambia el número de enums.
 
 ---
 
@@ -145,7 +146,7 @@ Evidencia **append-only** de que un usuario aceptó los Términos y Condiciones 
 | `method` | `varchar(32)` | no | - | CHECK: `register_checkbox` o `acceptance_gate` |
 | `ip_address` | `varchar(45)` | sí | - | IP de la petición, truncada a 45 |
 | `user_agent` | `varchar(512)` | sí | - | User agent de la petición, truncado a 512 |
-| `accepted_by_user_id` | `uuid` | sí | - | FK a `users.user_id`: reservada para aceptación en nombre de otro; la Fase 1 siempre escribe null |
+| `accepted_by_user_id` | `uuid` | sí | - | FK a `users.user_id`: quien aceptó en nombre de otro. Null en la aceptación propia. Con perfiles familiares, el tutor queda aquí cuando acepta por un menor (ver «Perfiles familiares») |
 | `created_at` | `timestamptz(6)` | no | `now()` | |
 
 - **CHECK**: `legal_acceptances_document_type_ck` (`document_type IN ('terms', 'privacy')`), `legal_acceptances_method_ck` (`method IN ('register_checkbox', 'acceptance_gate')`) y `legal_acceptances_document_version_ck` (`char_length(btrim(document_version)) BETWEEN 1 AND 32`). Prisma no modela CHECK: solo existen en la migración.
@@ -157,6 +158,143 @@ Evidencia **append-only** de que un usuario aceptó los Términos y Condiciones 
 - **Retención**: IP y user agent se conservan como evidencia del consentimiento mientras la cuenta existe. Al eliminar la cuenta, `AccountDeletionService` los pone en `NULL` dentro de la misma transacción; el historial (documento, versión, fecha y método) se queda en el usuario anonimizado. El aviso de privacidad debe mencionarlo.
 - **Exportación**: `DataExportService` incluye las filas del propio usuario como `legal_acceptances` (ver `data-export` en `docs/api/ENDPOINTS-LIVE-REFERENCE.md`).
 - **Versiones vigentes**: viven en `sacdia-backend/src/legal/legal-documents.constants.ts`, no en la base de datos (ver `docs/legal/README.md`).
+
+## Perfiles familiares (2026-10-16)
+
+> [!NOTE]
+> Fase 2 de perfiles familiares (sacdia-backend, rama `feat/family-profiles`), pendiente de merge. La migración `20261016120000_family_profiles` corre con `prisma migrate deploy` al final del build en Render. Antes de abrir el PR, `prisma migrate status` contra Neon `development` debe mostrar como única pendiente esa migración; aplicarla a Neon `development` es un paso manual aparte (psql más fila en `_prisma_migrations`, ver el flujo de migraciones de Neon). `docs/database/schema.prisma` (espejo) ya está resincronizado con esta rama.
+
+Un **dependiente** es un menor de 13 años (el corte depende del país) que tiene un perfil `users` pero ninguna fila `account` ni correo: lo registra un tutor desde la app. El **tutor** actúa por él enviando `X-Acting-For` (ver «Actuar en nombre de un dependiente» en `docs/api/ENDPOINTS-LIVE-REFERENCE.md`). Las tutorías reemplazan a `legal_representatives`, que sigue en el schema y se elimina en la Fase 4.
+
+### `users.email` ahora admite NULL
+
+- `email` pasó de `NOT NULL` a nullable (`String? @unique @db.VarChar(100)` en Prisma). Es la única sentencia de la migración que altera una tabla existente fuera de `countries`.
+- El `UNIQUE` se mantiene: Postgres permite muchas filas con `NULL`. Los dependientes se crean con `email = NULL`.
+- Efectos en código: verificación de correo, envío de correos, tarjeta QR (cae al nombre de la sección o del club), soporte y listados de admin toleran `null`. El token de acceso lleva `email: null` para estos perfiles.
+
+### `countries`: política de edad
+
+Tres columnas nuevas, añadidas con `ADD COLUMN IF NOT EXISTS`:
+
+| Columna | Tipo | Nulo | Default | Notas |
+|---|---|---|---|---|
+| `minor_self_login_min_age` | `smallint` | no | `13` | Edad mínima para tener cuenta propia. Por debajo se crea un dependiente. CHECK `countries_minor_self_login_min_age_ck`: entre 0 y 21 |
+| `age_of_majority` | `smallint` | no | `18` | Edad en que se deja de ser menor. CHECK `countries_age_of_majority_ck`: entre 14 y 21 |
+| `age_reference_timezone` | `varchar(64)` | sí | - | Zona IANA cuyo calendario decide «hoy» al calcular edades. Null usa `America/Mexico_City` |
+
+- Si el usuario no tiene país, o el país no existe, el código usa 13 / 18 / `America/Mexico_City` (`CountryAgePolicyService`). La política se cachea 1 hora (`cache:catalogs:country_age_policy:{id}`) y se invalida al actualizar el país desde admin.
+- Un dependiente nuevo toma el `country_id` del tutor.
+
+### `dependent_profiles`
+
+Identidad explícita de un dependiente: una fila por menor sin cuenta, con su ciclo de congelación y purga.
+
+| Columna | Tipo | Nulo | Default | Notas |
+|---|---|---|---|---|
+| `user_id` | `uuid` | no | - | PK `dependent_profiles_pkey` y FK a `users.user_id` |
+| `created_by_user_id` | `uuid` | no | - | FK a `users.user_id`: el tutor que lo registró |
+| `created_at` | `timestamptz(6)` | no | `now()` | |
+| `frozen_at` | `timestamptz(6)` | sí | - | Se llena cuando el último tutor sale y no hay club que lo custodie |
+| `purge_after` | `timestamptz(6)` | sí | - | `frozen_at` + 90 días |
+| `purged_at` | `timestamptz(6)` | sí | - | Momento en que el cron de purga anonimizó el perfil |
+
+- **CHECK**: `dependent_profiles_frozen_ck` exige `(frozen_at IS NULL) = (purge_after IS NULL)`.
+- **Índice parcial** `idx_dependent_profiles_purge` sobre `(purge_after) WHERE frozen_at IS NOT NULL AND purged_at IS NULL`: lo recorre el cron de purga.
+- Relaciones Prisma: `dependent_profile_user` (1:1 con `users.dependent_profile`) y `dependent_profile_creator`.
+
+### `guardianships`
+
+Quién responde por un dependiente. Una fila por tutor (o por custodia de un club) y dependiente; las filas revocadas se conservan como historial.
+
+| Columna | Tipo | Nulo | Default | Notas |
+|---|---|---|---|---|
+| `guardianship_id` | `uuid` | no | `gen_random_uuid()` | PK `guardianships_pkey` |
+| `dependent_user_id` | `uuid` | no | - | FK a `users.user_id`: el menor |
+| `guardian_user_id` | `uuid` | sí | - | FK a `users.user_id`: el tutor. Null en custodia de club y en tutores externos heredados |
+| `is_custodian` | `boolean` | no | `false` | Custodia del club (el tutor se fue y el menor tiene membresía) |
+| `custodian_club_id` | `integer` | sí | - | FK a `clubs.club_id`: obligatorio si `is_custodian` |
+| `relationship_type_id` | `uuid` | sí | - | FK a `relationship_types` |
+| `is_primary` | `boolean` | no | `false` | Tutor principal: el que puede quitar a un secundario |
+| `consent_status` | `varchar(16)` | no | `'pending'` | `pending`, `verified` o `revoked` |
+| `sworn_declaration_at` | `timestamptz(6)` | sí | - | Cuando el tutor juró serlo |
+| `invited_by_guardianship_id` | `uuid` | sí | - | FK a `guardianships`: la tutoría de quien emitió el código con que entró |
+| `verified_by_user_id` | `uuid` | sí | - | FK a `users.user_id`: quién verificó el consentimiento |
+| `verification_method` | `varchar(32)` | sí | - | `director_paper_form`, `guardian_invite`, `legacy_import` o `test_placeholder` |
+| `verified_at` | `timestamptz(6)` | sí | - | |
+| `revoked_at` | `timestamptz(6)` | sí | - | |
+| `revoked_reason` | `varchar(32)` | sí | - | `guardian_left`, `removed_by_primary`, `guardian_account_closed`, `claimed`, `admin` o `released` |
+| `external_name` | `varchar(150)` | sí | - | Tutor sin cuenta (solo importación desde `legal_representatives`) |
+| `external_phone` | `varchar(20)` | sí | - | |
+| `is_test_data` | `boolean` | no | `false` | Filas de prueba: nunca cuentan como consentimiento ni dan acceso |
+| `created_at` | `timestamptz(6)` | no | `now()` | |
+| `modified_at` | `timestamptz(6)` | no | `now()` | `@updatedAt` en Prisma |
+
+- **CHECK**:
+  - `guardianships_consent_status_ck`, `guardianships_verification_method_ck` y `guardianships_revoked_reason_ck` fijan los valores de arriba (los dos últimos admiten NULL).
+  - `guardianships_holder_ck`: una fila es de custodia (`is_custodian`, sin `guardian_user_id`, con `custodian_club_id`) o de persona (sin club y con `guardian_user_id` o `external_name`).
+  - `guardianships_not_self_ck`: nadie es su propio tutor.
+  - `guardianships_revoked_ck`: `(consent_status = 'revoked') = (revoked_at IS NOT NULL)`.
+  - `guardianships_verified_ck`: `verified` exige `verified_at`.
+- **Índices únicos parciales** (solo existen en la migración):
+  - `uq_guardianships_active_pair` sobre `(dependent_user_id, guardian_user_id)` donde hay tutor y `consent_status <> 'revoked'`: un tutor activo una sola vez por menor.
+  - `uq_guardianships_active_primary` sobre `(dependent_user_id) WHERE is_primary AND consent_status <> 'revoked'`: un solo principal activo.
+  - `uq_guardianships_active_custodian` sobre `(dependent_user_id) WHERE is_custodian AND consent_status <> 'revoked'`: una sola custodia activa.
+- **Índices no únicos**: `idx_guardianships_dependent` (declarado en Prisma con `@@index`), y los parciales `idx_guardianships_guardian_active` (`guardian_user_id` sin revocadas) e `idx_guardianships_custodian_club` (`custodian_club_id` en custodias activas).
+- Relaciones Prisma: `guardianship_dependent`, `guardianship_guardian`, `guardianship_verifier`, `guardianships_custodian` (en `clubs`), `guardianship_invites` (autorreferencia) y la inversa en `relationship_types.guardianships`.
+- **Activa** significa `consent_status IN ('pending','verified')`. Solo las filas activas, no de custodia ni de prueba cuentan para acceso, límites y notificaciones. Límites aplicados en servicio: 10 dependientes activos por tutor y 4 tutores activos por dependiente.
+- **Quién da acceso**: solo `pending` y `verified` de una persona con cuenta. `revoked`, custodia, tutor externo e `is_test_data` no dan acceso.
+
+### `guardianship_consent_evidences`
+
+Historial append-only de la ficha de consentimiento firmada (imagen o PDF) por tutoría. La subida y la verificación del director llegan en la sub-fase 2c; la tabla y el bucket privado ya existen.
+
+| Columna | Tipo | Nulo | Default | Notas |
+|---|---|---|---|---|
+| `evidence_id` | `uuid` | no | `gen_random_uuid()` | PK `guardianship_consent_evidences_pkey` |
+| `guardianship_id` | `uuid` | no | - | FK a `guardianships` |
+| `file_key` | `varchar(512)` | no | - | Clave del objeto en el bucket privado `GUARDIANSHIP_EVIDENCE` |
+| `content_type` | `varchar(64)` | no | - | CHECK: `image/jpeg`, `image/png`, `image/webp` o `application/pdf` |
+| `size_bytes` | `integer` | no | - | CHECK: entre 1 y 10485760 (10 MB) |
+| `uploaded_by_user_id` | `uuid` | no | - | FK a `users.user_id` |
+| `uploaded_at` | `timestamptz(6)` | no | `now()` | |
+| `superseded_at` | `timestamptz(6)` | sí | - | Se llena cuando una subida nueva reemplaza a esta |
+| `purged_at` | `timestamptz(6)` | sí | - | |
+
+- **Índice único parcial** `uq_guardianship_consent_evidences_current` sobre `(guardianship_id) WHERE superseded_at IS NULL AND purged_at IS NULL`: una sola evidencia vigente por tutoría.
+- Relación Prisma: `consent_evidence_uploader` (`users.guardianship_consent_evidences_uploaded`).
+- La purga de un dependiente borra las filas y sus objetos en R2 (decisión A9); la tutoría queda para auditoría.
+
+### `guardianship_link_codes`
+
+Códigos de vinculación de un solo uso. Solo se guarda el hash.
+
+| Columna | Tipo | Nulo | Default | Notas |
+|---|---|---|---|---|
+| `link_code_id` | `uuid` | no | `gen_random_uuid()` | PK `guardianship_link_codes_pkey` |
+| `code_hash` | `char(64)` | no | - | HMAC-SHA256 hex del código normalizado. `UNIQUE` `guardianship_link_codes_code_hash_key` |
+| `dependent_user_id` | `uuid` | no | - | FK a `users.user_id` |
+| `purpose` | `varchar(24)` | no | - | CHECK: `second_guardian` o `director_claim` |
+| `issued_by_user_id` | `uuid` | no | - | FK a `users.user_id`: tutor o director que lo emitió |
+| `issued_for_club_section_id` | `integer` | sí | - | FK a `club_sections`: obligatorio solo en `director_claim` |
+| `expires_at` | `timestamptz(6)` | no | - | CHECK `expires_at > created_at`. 72 h en `second_guardian`, 7 días en `director_claim` |
+| `consumed_at` | `timestamptz(6)` | sí | - | |
+| `consumed_by_user_id` | `uuid` | sí | - | FK a `users.user_id` |
+| `revoked_at` | `timestamptz(6)` | sí | - | Un código nuevo revoca los abiertos del mismo (dependiente, propósito) |
+| `created_at` | `timestamptz(6)` | no | `now()` | |
+
+- **CHECK**: `guardianship_link_codes_purpose_ck`, `guardianship_link_codes_consumed_ck` (`consumed_at` y `consumed_by_user_id` van juntos), `guardianship_link_codes_section_ck` (`director_claim` si y solo si hay sección) y `guardianship_link_codes_expiry_ck`.
+- **Índice parcial** `idx_guardianship_link_codes_dependent_open` sobre `(dependent_user_id, purpose) WHERE consumed_at IS NULL AND revoked_at IS NULL`.
+- El código en claro (8 caracteres Crockford base32, `XXXX-XXXX`) sale del servidor una sola vez, en la respuesta de emisión. El hash usa una clave HKDF derivada de `BETTER_AUTH_SECRET`; no hay variable de entorno nueva.
+- Relaciones Prisma: `link_code_dependent`, `link_code_issuer`, `link_code_consumer` y la inversa en `club_sections.guardianship_link_codes`.
+
+### Reglas de datos
+
+- **Sin copia de datos en la migración.** `legal_representatives` no se migra. El script opcional `sacdia-backend/scripts/family-profiles/seed-dev-guardianships.ts` solo es para ramas de desarrollo: por defecto es simulacro, y con `--apply` más `--placeholders` o `--from-legal-reps` escribe filas `is_test_data` o `legacy_import`. Se ejecuta a mano por rama de Neon y se niega a correr con `NODE_ENV=production`.
+- **Aceptación legal del menor**: al crear un dependiente se insertan sus filas en `legal_acceptances` con `method = 'register_checkbox'`, `user_id` = el menor y `accepted_by_user_id` = el tutor. El CHECK de `method` no cambia.
+- **Estados de un dependiente** cuando el último tutor sale (voluntariamente o por cierre de cuenta): pasa a otro tutor activo (el más antiguo se vuelve principal si hace falta), o a custodia del club si tiene una asignación `active` o `pending` (fila `is_custodian`), o se congela (`frozen_at = now()`, `purge_after = now() + 90 días`).
+- **Purga** (cron `dependent-profiles-purge`, `20 4 * * *` UTC, lotes de 100): primero borra en R2 las evidencias de consentimiento y la foto de perfil (si falla, no cambia nada y reintenta); después, en una transacción, anonimiza la fila `users` (`active = false` y `email`, nombre, apellidos, `birthday`, `blood`, `gender`, `baptism_date`, `user_image`, `country_id`, `union_id` y `local_field_id` en NULL), borra con `DELETE` alergias, enfermedades, medicinas, contactos de emergencia y filas de evidencia, anula IP y user agent en `legal_acceptances` y fija `dependent_profiles.purged_at`. La fila de `guardianships` se conserva para auditoría.
+- **Migración**: `sacdia-backend/prisma/migrations/20261016120000_family_profiles/migration.sql`. Escrita a mano, 17 sentencias en una sola transacción: 4 `ALTER TABLE` (`users.email DROP NOT NULL` y las 3 columnas de `countries`), 4 `CREATE TABLE IF NOT EXISTS` y 9 índices (3 únicos parciales de `guardianships`, 1 único parcial de evidencias, 1 parcial de `dependent_profiles`, 1 de dependiente, 2 parciales más de `guardianships` y 1 parcial de códigos). Todas las FK usan la acción por defecto `NO ACTION`. Sin `DROP`, `DELETE`, `INSERT`, `UPDATE` ni `CONCURRENTLY`; el guard `src/guardianships/family-profiles.migration.spec.ts` lo comprueba y solo admite `ALTER TABLE users ALTER COLUMN email DROP NOT NULL`. Reversión manual por rama de Neon; no hay migración down.
+- **Particularidad de Prisma**: los índices únicos parciales y los parciales no caben en `@@index`/`@@unique`; `schema.prisma` los documenta en un comentario y la migración es la fuente. No ejecutar `prisma format`.
 
 ## Modelos añadidos a esta referencia (resincronización 2026-10-04)
 
@@ -212,6 +350,7 @@ Modelos Prisma en PascalCase mapeados a tablas snake_case: `MaterialCategory` (`
 - Incluye `email_verified`, `approval_status` y `rejection_reason`.
 - Mantiene `access_app`, `access_panel`, `country_id`, `union_id`, `local_field_id`.
 - Ya no usa los flags legacy `apple_connected`, `fb_connected` ni `google_connected`.
+- `email` admite NULL desde `20261016120000_family_profiles` (dependientes sin correo). Sigue `UNIQUE`. Ver «Perfiles familiares».
 
 ### `users_pr`
 
@@ -728,6 +867,7 @@ Define el presupuesto de puntos por componente dentro de un eje anual:
 ### Usuarios y salud
 
 - `users`, `legal_representatives`, `emergency_contacts`, `relationship_types`
+- `dependent_profiles`, `guardianships`, `guardianship_consent_evidences`, `guardianship_link_codes` (perfiles familiares; `legal_representatives` queda de solo lectura hasta la Fase 4)
 - `allergies`, `diseases`, `medicines`, `users_allergies`, `users_diseases`, `users_medicines`
 - `member_insurances`
 
@@ -845,6 +985,7 @@ Define el presupuesto de puntos por componente dentro de un eje anual:
 
 ## Migraciones recientes
 
+- `20261016120000_family_profiles` - rama `feat/family-profiles`, pendiente de merge. `users.email` nullable, 3 columnas de política de edad en `countries` y las tablas `dependent_profiles`, `guardianships`, `guardianship_consent_evidences` y `guardianship_link_codes` con sus índices parciales. Sin DML. No aplicada a Neon.
 - `20261013100000_honor_instructor_proposals` (M4) - enum y tabla `honor_instructor_proposals`; índices sin `CONCURRENTLY` desde #485.
 - `20261012130000_honors_completed_at` (M5) - `users_honors.completed_at`, CHECK >= 1960-01-01 y backfill determinista.
 - `20261010130000_certificate_import_ocr_pages` (M2) - `page_count`, `source_page` y `source_file_id`.
