@@ -213,7 +213,7 @@ Quién responde por un dependiente. Una fila por tutor (o por custodia de un clu
 | `guardian_user_id` | `uuid` | sí | - | FK a `users.user_id`: el tutor. Null en custodia de club y en tutores externos heredados |
 | `is_custodian` | `boolean` | no | `false` | Custodia del club (el tutor se fue y el menor tiene membresía) |
 | `custodian_club_id` | `integer` | sí | - | FK a `clubs.club_id`: obligatorio si `is_custodian` |
-| `relationship_type_id` | `uuid` | sí | - | FK a `relationship_types` |
+| `relationship_type_id` | `uuid` | sí | - | FK a `relationship_types`. Sin restricción en la base: el servicio solo acepta los nombres de `GUARDIAN_RELATIONSHIP_TYPE_NAMES` (ver `docs/features/family-profiles.md`, «Parentesco del tutor») |
 | `is_primary` | `boolean` | no | `false` | Tutor principal: el que puede quitar a un secundario |
 | `consent_status` | `varchar(16)` | no | `'pending'` | `pending`, `verified` o `revoked` |
 | `sworn_declaration_at` | `timestamptz(6)` | sí | - | Cuando el tutor juró serlo |

@@ -53,6 +53,17 @@ Tipos de tutoría:
 
 `legal_representatives` queda de **solo lectura** hasta la Fase 4. Las tutorías la reemplazan.
 
+## Parentesco del tutor
+
+El parentesco que el tutor declara con el menor («yo soy su…») se limita a una lista cerrada: **Padre, Madre, Tutor Legal, Abuelo, Abuela, Tío, Tía, Hermano/a Mayor y Otro** (constante `GUARDIAN_RELATIONSHIP_TYPE_NAMES`, `sacdia-backend/src/guardianships/guardianships.constants.ts:13-23`). El resto del catálogo `relationship_types` existe para los contactos de emergencia y no aplica a una tutoría.
+
+- **Se compara por nombre, no por id.** `relationship_type_id` es un UUID aleatorio por ambiente (`prisma/schema.prisma:3727`), de modo que el mismo parentesco tiene ids distintos en desarrollo, staging y producción; `name` es único (`prisma/schema.prisma:3728`). Una lista de ids fijos en el servidor o en la app se rompería al cambiar de ambiente. El cliente no filtra por UUID: pide la lista al servidor y envía el id que recibe.
+- **Dónde se valida**: al crear un dependiente (`guardianships.service.ts:197`) y al canjear un código de vinculación (`link-codes.service.ts:242`), ambos con `assertRelationshipType` (`guardianships.service.ts:135-153`). En el canje la comprobación va antes de mirar el código: un parentesco no permitido no lo consume.
+- **Errores (400)**: `GUARDIANSHIP_RELATIONSHIP_TYPE_INVALID` si el id no existe o está inactivo (sigue vigente) y `GUARDIANSHIP_RELATIONSHIP_TYPE_NOT_ALLOWED` si es una fila real y activa fuera de la lista.
+- **`GET /api/v1/guardianships/relationship-types`** devuelve las filas activas de la lista en su orden de visualización, con el envoltorio `{ status, data }`. No lleva scope de actuar (`guardianships.controller.ts:76-92`).
+- **Pendiente de datos**: solo aparecen las filas que existan y estén activas en el ambiente. `prisma/seed.ts:15-56` siembra «Abuelo/a» y «Tío/a» como una fila cada uno, no «Abuelo», «Abuela», «Tío» y «Tía»; un ambiente sembrado solo con ese seed ofrece cinco de los nueve parentescos.
+- **App**: «Añadir menor» y «Tengo un código de vinculación» usan `guardianshipRelationshipTypesProvider` (`family_providers.dart:92-95`, que llama `getRelationshipTypes` en `family_remote_data_source.dart:98-121`) en vez del catálogo completo; el selector es el mismo componente con búsqueda de los contactos de emergencia (`relationship_type_picker_field.dart`). El código `GUARDIANSHIP_RELATIONSHIP_TYPE_NOT_ALLOWED` tiene mensaje propio (`family_error_messages.dart:23`, `assets/translations/es.json:450`).
+
 ## Actuar en nombre del menor (seguridad)
 
 Contrato completo en [ENDPOINTS-LIVE-REFERENCE.md](../api/ENDPOINTS-LIVE-REFERENCE.md), sección «Actuar en nombre de un dependiente».
@@ -74,7 +85,7 @@ Documentados con detalle de implementación en `sacdia-app/CLAUDE.md`, sección 
 ### Tutor
 
 1. **Mi familia** (`/family`, entrada en el perfil y aviso único tras el post-registro del propio tutor). Lista a los menores con su estado de consentimiento y de club. Rutas: `/family`, `/family/add`, `/family/link`, `/family/:dependentId`.
-2. **Añadir menor** (paso 0): nombre, apellidos, fecha de nacimiento, parentesco, declaración jurada y aceptación de términos en nombre del menor. Crea el dependiente y **cambia automáticamente a su perfil**.
+2. **Añadir menor** (paso 0): nombre, apellidos, fecha de nacimiento, parentesco (solo los de la lista de «Parentesco del tutor»), declaración jurada y aceptación de términos en nombre del menor. Crea el dependiente y **cambia automáticamente a su perfil**.
 3. **Pasos 1 a 3 del post-registro actuando**: foto, información personal (contacto de emergencia y salud) y solicitud de club, con el header `X-Acting-For`. El paso 2 ya no pide representante legal.
 4. **Cambio de perfil**: selector «Tú · Ana · Luis» y banner fijo «Viendo como Ana · Volver a mi perfil». Cada cambio purga cachés y proveedores por perfil; no se guarda nada del menor en disco (el estado de actuación vive solo en memoria y, tras un cierre brusco, el arranque en frío limpia lo que quedó). Un cambio rápido Ana a Luis descarta las respuestas tardías de Ana.
 5. **Acceso retirado en caliente**: si el servidor responde `ACTING_FOR_FORBIDDEN` a mitad de sesión (otro dispositivo revocó la tutoría), la app sale del modo actuar, vuelve al tutor y avisa con un mensaje. Nunca cierra la sesión del tutor ni restaura al menor desde caché.
@@ -181,6 +192,7 @@ Todo se serializa por menor con un candado de Postgres (`pg_advisory_xact_lock`)
 | La verificación reinicia el plazo (A11) y una solicitud con consentimiento pendiente vive 30 días | Mantener 8 días | La ficha viaja por el tutor y no debe caducar justo al verificarla |
 | Un código no se consume si el canje falla; un canje no puede hacerlo quien lo emitió (403); bloqueo tras 10 fallos en 24 h contados desde el primero con contador atómico | - | Fuerza bruta y autocanje (hallazgos W1, S5 de la verificación 2a) |
 | Un tutor eliminado o desactivado no puede actuar | - | La fila de tutoría no basta (hallazgo S1) |
+| **Parentesco del tutor por lista cerrada de nombres** (`GUARDIAN_RELATIONSHIP_TYPE_NAMES`); `GET /guardianships/relationship-types` entrega las filas y el cliente envía el id recibido | Lista de UUID fijos; filtrar en el cliente; reutilizar todo el catálogo `relationship_types` | Los UUID son aleatorios por ambiente y el catálogo trae parentescos que no describen a un tutor (p. ej. los de contactos de emergencia); el servidor es la única fuente de la lista y valida igual en crear y canjear |
 | Máximo 4 tutores activos por menor y 10 menores por tutor | - | Límites de servicio; `409 GUARDIANSHIP_GUARDIAN_LIMIT_REACHED` y `GUARDIANSHIP_DEPENDENT_LIMIT_REACHED` |
 | El menor toma el país del tutor para su política de edad (A3) | País propio | Un menor nuevo no tiene país |
 | La interfaz de código de reclamo vive en Mi familia («Tengo un código de vinculación») (A15) | Pantalla aparte | Un solo punto de entrada |
