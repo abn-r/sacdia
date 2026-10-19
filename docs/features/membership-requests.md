@@ -1,7 +1,7 @@
 # Membership Requests (solicitudes de membresia)
 
 **Estado**: IMPLEMENTADO (el estado «consentimiento pendiente» de menores sin cuenta pertenece a la Fase 2 de perfiles familiares, pendiente de merge en `feat/family-profiles`; ver [family-profiles.md](family-profiles.md))
-**Verificado contra código**: 2026-10-19 (backend `feat/family-profiles` `603d3d8e`; las secciones sin marca de perfiles familiares conservan su verificación anterior)
+**Verificado contra código**: 2026-10-19 (backend `feat/family-profiles` `422433c0`; admin `4a50314`; las secciones sin marca de perfiles familiares conservan su verificación anterior)
 
 ## Descripcion de dominio
 
@@ -31,7 +31,7 @@ La membresia activa es el gate operativo para funcionalidades de club/seccion. U
 - **Comportamiento operativo**:
   - el listado devuelve solo filas `active=true` y `status='pending'`; cada item trae el bloque `consent` (`null` para adultos y adolescentes con cuenta; para un menor sin cuenta `{ required, dependent, guardianship_id, status: 'pending' | 'verified', evidence_uploaded, guardians[] }`, `consent-gate.service.ts:29-37`), `users.email` puede ser `null` y trae `effective_expires_at`, el vencimiento real (ver «Caducidad distinta»; `membership-requests.service.ts:84-100`)
   - completar el paso 3 crea/reactiva una solicitud `pending`, impide una segunda solicitud pendiente activa del mismo usuario y notifica a `director`, `deputy-director`, `secretary` y `secretary-treasurer`. Un tutor puede completar el paso 3 actuando por el menor; para un menor con consentimiento pendiente la notificacion lleva el titulo «Menor · consentimiento pendiente» (`membership-requests.service.ts:350-362`)
-  - aprobar cambia `status` a `active`, limpia `expires_at` e invalida cache de autorizacion del usuario afectado. Si la solicitud ya no esta `pending` al entrar a la transaccion (otra revision, cancelacion o expiracion) no se activa nada: 409 `MR_ALREADY_PENDING`, o 404 `MR_NOT_FOUND` si es de otra seccion (`membership-requests.service.ts:135-143`, `:175-183`)
+  - aprobar cambia `status` a `active`, limpia `expires_at` e invalida cache de autorizacion del usuario afectado. El 409 de esta ruta tiene dos causas (`MR_CONSENT_NOT_VERIFIED` y `MR_ALREADY_PENDING`); el Swagger del controller ya las distingue (`membership-requests.controller.ts:128-132`). Si la solicitud ya no esta `pending` al entrar a la transaccion (otra revision, cancelacion o expiracion) no se activa nada: 409 `MR_ALREADY_PENDING`, o 404 `MR_NOT_FOUND` si es de otra seccion (`membership-requests.service.ts:135-143`, `:175-183`)
   - aprobar pasa por la compuerta de consentimiento: un menor sin cuenta sin tutoria verificada recibe 409 `MR_CONSENT_NOT_VERIFIED` (`membership-requests.service.ts:145`, `assignment-activation-gate.ts:53-60`). Es la misma compuerta que protege todos los demas caminos que activan un rol de club (asignar rol, `PATCH /club-roles`, sucesion de director, solicitudes de asignacion y transferencia, inscripcion anual, corte de año)
   - rechazar cambia `status` a `rejected`, limpia `expires_at`, persiste `rejection_reason` si llega e invalida cache de autorizacion
   - cancelar por usuario cambia la solicitud a `cancelled`, la desactiva, limpia `expires_at` y reabre `users_pr.club_selection_complete=false` sin borrar perfil ni datos personales
@@ -51,7 +51,7 @@ Detalle completo, rutas y decisiones: [family-profiles.md](family-profiles.md).
 
 ### Admin
 - **1 pagina funcional**: `/dashboard/requests/membership`
-- Permite seleccionar seccion activa, listar pendientes, ver rol/fecha/expiracion y ejecutar aprobar o rechazar
+- Permite seleccionar seccion activa, listar pendientes, ver rol/fecha/expiracion y ejecutar aprobar o rechazar. La columna de vencimiento muestra `effective_expires_at` (con un icono de ayuda mientras el consentimiento de un menor esta pendiente) y la columna de acciones queda fija a la derecha (`pending-members-table.tsx:58-61`, `:267-281`, `:70-78`)
 - Para menores sin cuenta (rama `feat/family-profiles`): insignia de consentimiento, aprobar deshabilitado mientras este pendiente y accion **Verificar** (`membership-consent-verify-dialog.tsx`) para ver o subir la ficha, confirmar y aprobar
 - La pagina obtiene secciones desde `GET /api/v1/clubs` y luego consume la superficie especifica de membership requests
 
