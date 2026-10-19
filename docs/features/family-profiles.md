@@ -1,7 +1,7 @@
 # Perfiles familiares (tutores y menores de 13 años)
 
 **Estado**: IMPLEMENTADO PARCIAL (Fase 2 de 4 implementada en rama y pendiente de merge: `feat/family-profiles` en sacdia-backend, sacdia-app y sacdia-admin; `docs/family-profiles` en este repo). No desplegado. Faltan las Fases 3 y 4 y la Fase 3 bloquea el lanzamiento.
-**Verificado contra código**: 2026-10-19 (backend `554552c1`, app `819f257f`, admin `79a7b29`)
+**Verificado contra código**: 2026-10-19 (backend `554552c1`, app `819f257f`, admin `79a7b29`). La compuerta de activación, las reglas de cuatro ojos y el bloqueo de la ficha verificada se releyeron contra el backend `603d3d8e`
 **Dominios relacionados**: [auth.md](auth.md) (sesión y post-registro), [membership-requests.md](membership-requests.md) (aprobación de ingreso), [contactos-emergencia-representante-legal.md](contactos-emergencia-representante-legal.md) (representante legal, ahora de solo lectura), [rbac.md](rbac.md) (permisos sensibles), [qr-credencial.md](qr-credencial.md) (correo nulo en la tarjeta)
 
 > [!IMPORTANT]
@@ -104,13 +104,39 @@ Documentados con detalle de implementación en `sacdia-app/CLAUDE.md`, sección 
 
 Contrato en [ENDPOINTS-LIVE-REFERENCE.md](../api/ENDPOINTS-LIVE-REFERENCE.md), secciones `membership-requests`, `guardianships` y `admin-users`. Resumen de reglas:
 
-- **Compuerta**: `POST .../membership-requests/:assignmentId/approve` responde 409 `MR_CONSENT_NOT_VERIFIED` para un dependiente sin tutoría verificada; adultos y adolescentes con cuenta no cambian. La comprobación va dentro de la transacción de la aprobación.
-- **Ficha**: la suben el tutor (cualquier tutor activo) o el director en un bucket privado de R2 (JPEG, PNG, WebP o PDF, 10 MB, bytes mágicos; HEIC se rechaza y la app lo convierte). Una subida nueva reemplaza a la anterior sin borrar el objeto. Solo se lee con URL firmada de 900 s; cada lectura y subida se audita.
+- **Compuerta de consentimiento**: ver la sección siguiente. Aprobar una solicitud de un dependiente sin tutoría verificada responde 409 `MR_CONSENT_NOT_VERIFIED`; adultos y adolescentes con cuenta no cambian.
+- **Ficha**: la suben el tutor (cualquier tutor activo) o el director en un bucket privado de R2 (JPEG, PNG, WebP o PDF, 10 MB, bytes mágicos; HEIC se rechaza y la app lo convierte). Una subida nueva reemplaza a la anterior sin borrar el objeto **mientras el consentimiento esté pendiente**. Una vez verificado, la ficha queda **bloqueada**: cualquier subida (del tutor o del director) responde 409 `GUARDIANSHIP_CONSENT_ALREADY_VERIFIED` y reemplazarla exige una tutoría nueva tras revocar (`guardian-evidence.service.ts:403-419`, comprobado antes de guardar y otra vez dentro de la transacción con el candado del menor, `:320` y `:344`). Solo se lee con URL firmada de 900 s; cada lectura y subida se audita.
 - **`verify-consent`**: exige ficha vigente y la casilla de confirmación; marca verificada la tutoría principal activa, promueve a los tutores invitados, escribe el evento `guardianship.consent_verified` en la misma transacción, sube el `epoch` de acting-for (los scopes del tutor se amplían en su siguiente petición) y avisa a los tutores. Con `approve: true` aprueba después del commit; si eso falla devuelve 200 con `approve_error` y repetir la llamada reintenta solo la aprobación. Es idempotente.
-- **Reglas de custodia (cuatro ojos, A14)**: ver «Decisiones».
-- **Caducidad**: una solicitud `pending` de un menor con consentimiento sin verificar vive al menos 30 días (en vez de 8); al verificar, el plazo base de 8 días se cuenta desde la verificación.
+- **Cuatro ojos**: quien verifica no puede ser (a) un tutor vigente del menor, en cualquier tutoría → 403 `GUARDIANSHIP_GUARDIAN_SELF_VERIFY`; ni, si la tutoría principal es una custodia del club, (b) quien subió la ficha vigente, quien creó al menor o el último tutor que lo dejó en custodia → 403 `GUARDIANSHIP_CUSTODIAN_SELF_VERIFY`. Se evalúan al pasar de `pending` a `verified`; repetir la llamada sobre una tutoría ya verificada es una no-operación (`consent-verification.service.ts:231`, `:244`, `:246`, `:312-368`). Ver A14 en «Decisiones».
+- **Caducidad**: una solicitud `pending` de un menor con consentimiento sin verificar vive al menos 30 días (en vez de 8); al verificar, el plazo base (`membership.pending_timeout_days`, 8 por defecto) se cuenta desde la verificación. El cron decide con `created_at` y la fecha de verificación, no con `expires_at` (`membership-requests.service.ts:408-484`).
 - **Aviso al director**: la solicitud nueva de un menor llega con el título «Menor · consentimiento pendiente».
 - **Fail closed**: sin `R2_BUCKET_GUARDIANSHIP_EVIDENCE` todas las operaciones de ficha responden 503 `GUARDIANSHIP_EVIDENCE_UNAVAILABLE` y el resto de la API funciona.
+
+## Compuerta de consentimiento en toda activación de rol de club
+
+Un dependiente solo puede quedar con un rol de club `active` si tiene una tutoría `verified` real (no `is_test_data`). La regla es una función única, `assertAssignmentActivationAllowed` (`src/membership-requests/assignment-activation-gate.ts:53-60`, lanza 409 `MR_CONSENT_NOT_VERIFIED`), y **cada** escritura que puede activar una fila de `club_role_assignments` la llama con el mismo cliente de transacción, justo antes de escribir. Para un dependiente toma el candado por menor (el de verificar, revocar, salir y subir ficha), así una activación y un cambio de consentimiento no compiten. Los adultos, incluidos los adolescentes que se registraron solos, nunca se bloquean (`assignment-activation-gate.ts:26-47`).
+
+Rutas y procesos cubiertos (inventario del guard `assignment-activation-gate.inventory.spec.ts`, líneas 863-897; cada sitio lleva un comentario `// activation-gate: <usuario>`):
+
+| Camino | Sin consentimiento verificado |
+|---|---|
+| `POST /club-sections/:clubSectionId/membership-requests/:assignmentId/approve` | 409 `MR_CONSENT_NOT_VERIFIED` |
+| `PATCH /club-roles/:assignmentId` cuando escribe `status: 'active'` o cambia el rol de una fila activa (`clubs.service.ts:842-869`) | 409 |
+| `POST /clubs/:clubId/sections/:sectionId/roles`, `.../director-assignment`, `.../director-succession` (sucesor, antes de terminar al saliente) | 409 |
+| `POST /requests/assignments/:requestId/review` y `POST /requests/transfers/:requestId/review`, al aprobar (la transferencia mueve una membresía ya activa y también se controla) | 409 |
+| `POST /club-sections/:sectionId/annual-continuations` (reactivar, marcador de la sección base, salto de tipo) | resultado por usuario `blocked` con `error_code: MR_CONSENT_NOT_VERIFIED`; el lote sigue (`annual-membership.service.ts:83`, `:486-495`) |
+| Corte de año: salto de tipo y activación de planes de sucesión de director | se omite el caso, con aviso en logs (y notificación a administradores y a director-lf/assistant-lf para los planes de director); el corte sigue (`year-cut.service.ts:712-722`, `annual-membership.service.ts:400-404`) |
+
+No pasan por la compuerta porque no activan: terminar un rol (`DELETE /club-roles/:assignmentId`), rechazar, cancelar, expirar, el cierre de año, el marcador `inactive` de «no inscrito» y el paso 3 del post-registro (crea la solicitud en `pending`).
+
+Endurecimientos asociados:
+
+- `PATCH /club-roles/:assignmentId`: el `status` del DTO es un enum cerrado con `@IsIn` (`active`, `inactive`, `pending`, `rejected`, `expired`, `cancelled`, `ended`, `designated`; `role-assignment.dto.ts:16-25` y `:117`). Antes era un `@IsString()` libre.
+- `approve`: si la solicitud no está `pending` dentro de la transacción (otra revisión, cancelación o expiración), retorna sin activar nada: 409 `MR_ALREADY_PENDING`, o 404 `MR_NOT_FOUND` si es de otra sección (`membership-requests.service.ts:129-138`, `:169-176`). Nunca cae al `updateMany` sin pasar por la compuerta: el post-registro vuelve a poner en `pending` filas rechazadas o vencidas y una de ellas habría coincidido con el `WHERE` sin compuerta (comentario del código).
+- `PATCH` con `status: 'active'` se controla siempre, aunque la lectura previa (fuera de la transacción) diga que la fila ya estaba activa (`clubs.service.ts:862-869`).
+
+> [!WARNING]
+> **Operaciones fuera del backend**: el SQL manual, los seeds y los scripts escriben directo en la tabla y **se saltan la compuerta** (la base de datos no tiene ningún trigger que la repita). Quien active roles de club por esa vía debe verificar el consentimiento a mano. Procedimiento: [runbook de activación manual](../runbooks/family-profiles-consent-gate-manual-sql.md).
 
 ## Salida del tutor, custodia, congelación y retención
 
@@ -148,8 +174,10 @@ Todo se serializa por menor con un candado de Postgres (`pg_advisory_xact_lock`)
 | **Sin chat ni mensajería entre usuarios** | - | Decisión permanente |
 | Tutor elimina cuenta y el menor no tiene club: **congelar 90 días** | Eliminarlo en el acto | El tutor puede ser sustituido por otro y el menor no pierde datos por error |
 | **A9 (purga)**: anonimizar la fila `users` **y borrar** salud, contactos de emergencia, fichas (filas y objetos de R2), foto, archivos de evidencia, bandeja, datos del tutor externo e IP y user agent de aceptaciones | Solo anonimizar | Es lo que el usuario pidió con "que se borre"; se amplió tras la verificación 2a (ruling S7) |
-| **A14 (cuatro ojos)**: la tutoría de custodia no puede verificarla el custodio. El club no tiene identidad de usuario, así que el conjunto prohibido es: quien subió la ficha vigente, quien creó al menor y el último tutor que lo dejó en custodia (`guardian_left` o `guardian_account_closed`). 403 `GUARDIANSHIP_CUSTODIAN_SELF_VERIFY`. Otra persona autorizada del club (subdirector, secretario, secretario tesorero u otro director con `club_members:approve`) o un administrador sí | Que el director custodio verifique su propia custodia | Evita que una sola persona se auto-autorice un consentimiento |
+| **A14 (cuatro ojos)**: dos reglas. (1) En **toda** tutoría, un tutor vigente del menor no puede verificar su consentimiento, aunque tenga `club_members:approve`: 403 `GUARDIANSHIP_GUARDIAN_SELF_VERIFY` (tutoría `revoked` no cuenta). (2) En la tutoría de **custodia** el club no tiene identidad de usuario, así que el conjunto prohibido es: quien subió la ficha vigente, quien creó al menor y el último tutor que lo dejó en custodia (`guardian_left` o `guardian_account_closed`): 403 `GUARDIANSHIP_CUSTODIAN_SELF_VERIFY`. Otra persona autorizada del club (subdirector, secretario, secretario tesorero u otro director con `club_members:approve`) o un administrador sí | Que el director custodio verifique su propia custodia; que un tutor se auto-verifique por tener permiso en la sección | Evita que una sola persona se auto-autorice un consentimiento |
 | Cualquier tutor activo de un menor visible puede subir y leer la ficha; se guarda en la fila principal | Solo el tutor principal | Un tutor secundario ve el mismo estado y puede ayudar; `uploaded_by_user_id` guarda al autor real |
+| **Una sola compuerta** de activación (`assertAssignmentActivationAllowed`) llamada por cada escritura que activa `club_role_assignments`, con un guard de pruebas por AST que falla si aparece una escritura nueva sin ella | Comprobar el consentimiento solo en `approve` | Varias rutas activan sin pasar por `approve` (asignar rol, sucesión de director, solicitudes de asignación y transferencia, inscripción anual, corte de año, `PATCH` con `status`); hallazgos C1/C2 de la verificación 2c (`assignment-activation-gate.ts:10-11`) |
+| **Ficha bloqueada tras verificar**: subir con el consentimiento verificado es 409 `GUARDIANSHIP_CONSENT_ALREADY_VERIFIED` | Permitir reemplazar la ficha de un consentimiento ya verificado | La ficha verificada es la que revisó el director; el servicio exige revocar y crear una tutoría nueva para cambiarla (`guardian-evidence.service.ts:95-97`) |
 | La verificación reinicia el plazo (A11) y una solicitud con consentimiento pendiente vive 30 días | Mantener 8 días | La ficha viaja por el tutor y no debe caducar justo al verificarla |
 | Un código no se consume si el canje falla; un canje no puede hacerlo quien lo emitió (403); bloqueo tras 10 fallos en 24 h contados desde el primero con contador atómico | - | Fuerza bruta y autocanje (hallazgos W1, S5 de la verificación 2a) |
 | Un tutor eliminado o desactivado no puede actuar | - | La fila de tutoría no basta (hallazgo S1) |
@@ -178,6 +206,8 @@ Todo se serializa por menor con un candado de Postgres (`pg_advisory_xact_lock`)
 - Cualquier tipo de chat.
 
 ## Pruebas automáticas (a 2026-10-19)
+
+> Las cifras son de la corrida previa a los endurecimientos de la compuerta de activación; este pase de documentación no volvió a ejecutar las suites.
 
 | Repo | Resultado |
 |---|---|
@@ -222,4 +252,5 @@ Requiere el bucket de R2 creado y la migración aplicada en Neon `development`.
 - Contrato HTTP: [ENDPOINTS-LIVE-REFERENCE.md](../api/ENDPOINTS-LIVE-REFERENCE.md) (secciones «Actuar en nombre de un dependiente», `guardianships`, `membership-requests`, `legal-representatives`, `post-registration`, `admin-users`, «Edad mínima de la cuenta»).
 - Esquema: [SCHEMA-REFERENCE.md](../database/SCHEMA-REFERENCE.md), «Perfiles familiares»; espejo en `docs/database/schema.prisma`.
 - Registro de decisiones: [DECISIONS-PENDING.md](../audit/DECISIONS-PENDING.md).
-- Código: `sacdia-backend/src/guardianships/`, `src/auth/acting-for/`, `src/membership-requests/consent-*.ts`, `src/common/guards/README.md` (sección de actuar-en-nombre); `sacdia-app/lib/features/family/`, `lib/core/consent/`, `lib/core/auth/acting_for_session.dart`; `sacdia-admin/src/components/membership/membership-consent-verify-dialog.tsx`, `src/components/users/user-guardianships-card.tsx`.
+- Operación: [runbook de SQL manual y seeds frente a la compuerta](../runbooks/family-profiles-consent-gate-manual-sql.md).
+- Código: `sacdia-backend/src/guardianships/`, `src/auth/acting-for/`, `src/membership-requests/consent-*.ts`, `src/membership-requests/assignment-activation-gate.ts`, `src/common/guards/README.md` (sección de actuar-en-nombre); `sacdia-app/lib/features/family/`, `lib/core/consent/`, `lib/core/auth/acting_for_session.dart`; `sacdia-admin/src/components/membership/membership-consent-verify-dialog.tsx`, `src/components/users/user-guardianships-card.tsx`.
