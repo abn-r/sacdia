@@ -2,7 +2,7 @@
 
 **Estado**: ACTIVE
 **Sincronizado contra**: `sacdia-backend/prisma/schema.prisma` en la rama `development` (commit `68123f6`)
-**Fecha de resincronizacion**: 2026-10-13 (última migración en `development`: `20261013110000_remove_retired_investiture_permissions`). Las secciones de abajo se resincronizaron por completo hasta el 2026-10-04; después solo se añadieron las de instructor de especialidad y carga por certificado (2026-10-13) y la de aceptación legal (`legal_acceptances`, 2026-10-15, migración `20261015120000_legal_acceptances`, pendiente de merge; las cifras de abajo no la incluyen) y la de perfiles familiares (2026-10-16, actualizada el 2026-10-19 con la Fase 2 completa; migración `20261016120000_family_profiles`, rama `feat/family-profiles`, pendiente de merge). El espejo `schema.prisma` sí es la copia completa e incluye ambas.
+**Fecha de resincronizacion**: 2026-10-13 (última migración en `development`: `20261013110000_remove_retired_investiture_permissions`). Las secciones de abajo se resincronizaron por completo hasta el 2026-10-04; después solo se añadieron las de instructor de especialidad y carga por certificado (2026-10-13) y la de aceptación legal (`legal_acceptances`, 2026-10-15, migración `20261015120000_legal_acceptances`, pendiente de merge; las cifras de abajo no la incluyen) y la de perfiles familiares (2026-10-16, actualizada el 2026-10-19 con la Fase 2 completa; migración `20261016120000_family_profiles`, rama `feat/family-profiles`, Pendiente de merge (PR #530 de sacdia-backend)). El espejo `schema.prisma` sí es la copia completa e incluye ambas.
 
 Referencia humana concisa del schema Prisma vigente.
 
@@ -162,7 +162,7 @@ Evidencia **append-only** de que un usuario aceptó los Términos y Condiciones 
 ## Perfiles familiares (2026-10-16, actualizado 2026-10-19)
 
 > [!NOTE]
-> Fase 2 de perfiles familiares (sacdia-backend, rama `feat/family-profiles`), pendiente de merge. La Fase 2 **no añadió migraciones ni cambios de schema después de 2a**: la subida de fichas, la verificación del director y el bloque de admin (sub-fase 2c) usan las tablas y columnas de esta misma migración. La migración `20261016120000_family_profiles` corre con `prisma migrate deploy` al final del build en Render. Antes de abrir el PR, `prisma migrate status` contra Neon `development` debe mostrar como única pendiente esa migración; aplicarla a Neon `development` es un paso manual aparte (psql más fila en `_prisma_migrations`, ver el flujo de migraciones de Neon). `docs/database/schema.prisma` (espejo) ya está resincronizado con esta rama.
+> Fase 2 de perfiles familiares (sacdia-backend, rama `feat/family-profiles`), Pendiente de merge (PR #530 de sacdia-backend). La Fase 2 **no añadió migraciones ni cambios de schema después de 2a**: la subida de fichas, la verificación del director y el bloque de admin (sub-fase 2c) usan las tablas y columnas de esta misma migración. La migración `20261016120000_family_profiles` corre con `prisma migrate deploy` al final del build en Render. Antes de abrir el PR, `prisma migrate status` contra Neon `development` debe mostrar como única pendiente esa migración; aplicarla a Neon `development` es un paso manual aparte (psql más fila en `_prisma_migrations`, ver el flujo de migraciones de Neon). `docs/database/schema.prisma` (espejo) ya está resincronizado con esta rama.
 
 Un **dependiente** es un menor de 13 años (el corte depende del país) que tiene un perfil `users` pero ninguna fila `account` ni correo: lo registra un tutor desde la app. El **tutor** actúa por él enviando `X-Acting-For` (ver «Actuar en nombre de un dependiente» en `docs/api/ENDPOINTS-LIVE-REFERENCE.md`). Las tutorías reemplazan a `legal_representatives`, que sigue en el schema y se elimina en la Fase 4.
 
@@ -993,7 +993,7 @@ Define el presupuesto de puntos por componente dentro de un eje anual:
 
 ## Migraciones recientes
 
-- `20261016120000_family_profiles` - rama `feat/family-profiles`, pendiente de merge. `users.email` nullable, 3 columnas de política de edad en `countries` y las tablas `dependent_profiles`, `guardianships`, `guardianship_consent_evidences` y `guardianship_link_codes` con sus índices parciales. Sin DML. No aplicada a Neon.
+- `20261016120000_family_profiles` - rama `feat/family-profiles`, Pendiente de merge (PR #530 de sacdia-backend). `users.email` nullable, 3 columnas de política de edad en `countries` y las tablas `dependent_profiles`, `guardianships`, `guardianship_consent_evidences` y `guardianship_link_codes` con sus índices parciales. Sin DML. No aplicada a Neon.
 - `20261013100000_honor_instructor_proposals` (M4) - enum y tabla `honor_instructor_proposals`; índices sin `CONCURRENTLY` desde #485.
 - `20261012130000_honors_completed_at` (M5) - `users_honors.completed_at`, CHECK >= 1960-01-01 y backfill determinista.
 - `20261010130000_certificate_import_ocr_pages` (M2) - `page_count`, `source_page` y `source_file_id`.

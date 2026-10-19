@@ -1,6 +1,6 @@
 # Membership Requests (solicitudes de membresia)
 
-**Estado**: IMPLEMENTADO (el estado «consentimiento pendiente» de menores sin cuenta pertenece a la Fase 2 de perfiles familiares, pendiente de merge en `feat/family-profiles`; ver [family-profiles.md](family-profiles.md))
+**Estado**: IMPLEMENTADO (el estado «consentimiento pendiente» de menores sin cuenta pertenece a la Fase 2 de perfiles familiares, en `feat/family-profiles`, Pendiente de merge (PR #530 de sacdia-backend, PR #178 de sacdia-app, PR #243 de sacdia-admin); ver [family-profiles.md](family-profiles.md))
 **Verificado contra código**: 2026-10-19 (backend `feat/family-profiles` `422433c0`; admin `4a50314`; las secciones sin marca de perfiles familiares conservan su verificación anterior)
 
 ## Descripcion de dominio

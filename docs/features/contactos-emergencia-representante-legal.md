@@ -1,6 +1,6 @@
 # Contactos de emergencia y representante legal
 
-**Estado**: IMPLEMENTADO. Contactos de emergencia: sin cambios. Representante legal: **de solo lectura** en la rama `feat/family-profiles` (Fase 2 de perfiles familiares, pendiente de merge); en `development` aún existen las rutas de escritura
+**Estado**: IMPLEMENTADO. Contactos de emergencia: sin cambios. Representante legal: **de solo lectura** en la rama `feat/family-profiles` (Fase 2 de perfiles familiares; Pendiente de merge (PR #530 de sacdia-backend, PR #178 de sacdia-app)); en `development` aún existen las rutas de escritura
 **Verificado contra código**: contactos de emergencia, 2026-10-04 (rama `development`); representante legal, 2026-10-19 (backend `feat/family-profiles` `603d3d8e`)
 **Dominios relacionados**: [auth.md](auth.md) (post-registro), [rbac.md](rbac.md) (permisos de subrecursos sensibles), [family-profiles.md](family-profiles.md) (tutorías, que reemplazan al representante legal)
 

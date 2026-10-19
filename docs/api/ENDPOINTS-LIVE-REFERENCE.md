@@ -19,7 +19,7 @@
 > **Aceptación legal 2026-10-15** (sacdia-backend, rama `feat/legal-acceptance`): se añaden 3 endpoints (sección `legal`), los campos `accepted_terms_version` y `accepted_privacy_version` en `POST /auth/register`, el bloque `legal` en `GET /auth/me` y la clave `legal_acceptances` en la exportación de datos. Los totales de la cabecera tampoco incluyen estos 3 endpoints.
 
 > [!NOTE]
-> **Perfiles familiares 2026-10-19** (sacdia-backend, rama `feat/family-profiles`, Fase 2 completa, pendiente de merge): se añade el header `X-Acting-For` (tutor que actúa por un menor sin cuenta; sección siguiente) y **16 endpoints nuevos** y **3 retirados**:
+> **Perfiles familiares 2026-10-19** (sacdia-backend, rama `feat/family-profiles`, Fase 2 completa, Pendiente de merge (PR #530 de sacdia-backend)): se añade el header `X-Acting-For` (tutor que actúa por un menor sin cuenta; sección siguiente) y **16 endpoints nuevos** y **3 retirados**:
 >
 > - Nuevos: 11 de `guardianships` (8 de la sub-fase 2a, subir y leer la ficha de consentimiento del tutor, y `GET /guardianships/relationship-types`), 3 de `membership-requests` (subir y leer la ficha, `verify-consent`), 1 de `admin` (leer la ficha desde el detalle de usuario) y `POST .../post-registration/step-3/guardian-only`.
 > - Retirados: `POST`, `PATCH` y `DELETE /users/:userId/legal-representative` (los representantes legales quedan de solo lectura; ver la sección `legal-representatives`).
@@ -42,7 +42,7 @@
 ## Actuar en nombre de un dependiente (`X-Acting-For`)
 
 > [!NOTE]
-> Perfiles familiares (Fase 2), rama `feat/family-profiles` de sacdia-backend, pendiente de merge. Un **dependiente** es un menor sin cuenta propia ni correo (`users.email` null), registrado por un tutor desde `POST /api/v1/guardianships/me/dependents`. Esquema y reglas de datos: `docs/database/SCHEMA-REFERENCE.md`, sección «Perfiles familiares».
+> Perfiles familiares (Fase 2), rama `feat/family-profiles` de sacdia-backend, Pendiente de merge (PR #530 de sacdia-backend). Un **dependiente** es un menor sin cuenta propia ni correo (`users.email` null), registrado por un tutor desde `POST /api/v1/guardianships/me/dependents`. Esquema y reglas de datos: `docs/database/SCHEMA-REFERENCE.md`, sección «Perfiles familiares».
 
 ### Cómo se pide
 
@@ -486,7 +486,7 @@ Errores: 404 `HONOR_INSTRUCTOR_PROPOSAL_NOT_FOUND`; 409 `HONOR_INSTRUCTOR_PROPOS
 
 #### Tutorías en el detalle de usuario
 
-> Perfiles familiares, rama `feat/family-profiles`, pendiente de merge. Mismo envoltorio `{ status: 'success', data }`; el bloque cuelga de `data.guardianships`.
+> Perfiles familiares, rama `feat/family-profiles`, Pendiente de merge (PR #530 de sacdia-backend). Mismo envoltorio `{ status: 'success', data }`; el bloque cuelga de `data.guardianships`.
 
 `data.guardianships` es `null` si el actor no puede leer la familia sensible `legal_representative` (permiso `legal_representative:read`, o `users:read_detail` mientras dure el respaldo transitorio). Para un adulto sin familia llega con listas vacías y `dependent_profile: null`. No hay bloque de escritura: las tutorías las gestiona el tutor desde la app.
 
@@ -922,7 +922,7 @@ Body: `{ "password": "..." }` **o** `{ "provider", "idToken", "nonce" }`. Mandar
 
 #### Edad mínima de la cuenta
 
-> Perfiles familiares, rama `feat/family-profiles`, pendiente de merge. Quien tiene menos de la edad mínima de cuenta de su país (`countries.minor_self_login_min_age`, 13 por defecto si el país es desconocido) no puede tener cuenta propia: lo registra un tutor desde `POST /api/v1/guardianships/me/dependents`. Dos puntos de control; el segundo es el autoritativo.
+> Perfiles familiares, rama `feat/family-profiles`, Pendiente de merge (PR #530 de sacdia-backend). Quien tiene menos de la edad mínima de cuenta de su país (`countries.minor_self_login_min_age`, 13 por defecto si el país es desconocido) no puede tener cuenta propia: lo registra un tutor desde `POST /api/v1/guardianships/me/dependents`. Dos puntos de control; el segundo es el autoritativo.
 
 | Dónde | Regla | Error |
 | --- | --- | --- |
@@ -1558,11 +1558,11 @@ La `1.2.0` (perfiles familiares) añade la clave `family`, después de `legal_ac
 
 ### guardianships
 
-> Perfiles familiares (Fase 2), rama `feat/family-profiles`, pendiente de merge. Ninguna ruta de `/guardianships/*` declara `@ActingScope`: mientras se actúa por un menor responden 403 `ACTING_FOR_SCOPE_DENIED`, y la app las llama sin `X-Acting-For`. La propiedad se comprueba en el servicio (`@SkipPermissions`), no con permisos RBAC. Respuestas con el envoltorio `{ "status": "success", "data": ... }`.
+> Perfiles familiares (Fase 2), rama `feat/family-profiles`, Pendiente de merge (PR #530 de sacdia-backend). Ninguna ruta de `/guardianships/*` declara `@ActingScope`: mientras se actúa por un menor responden 403 `ACTING_FOR_SCOPE_DENIED`, y la app las llama sin `X-Acting-For`. La propiedad se comprueba en el servicio (`@SkipPermissions`), no con permisos RBAC. Respuestas con el envoltorio `{ "status": "success", "data": ... }`.
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
-| GET | `/api/v1/guardianships/relationship-types` | JWT | `@SkipPermissions` | Parentescos que un tutor puede declarar con el menor («yo soy su…»). Filas activas de `relationship_types` cuyo `name` está en la lista permitida, en el orden fijo de la lista (Padre, Madre, Tutor Legal, Abuelo, Abuela, Tío, Tía, Hermano/a Mayor, Otro). 200 `{ status: "success", data: [{ relationship_type_id, name, description }] }`, la misma forma de ítem que `GET /api/v1/catalogs/relationship-types` (no localiza). Sin `@ActingScope`: se llama sin `X-Acting-For`. Ver «Parentesco del tutor» | GuardianshipsService.listGuardianRelationshipTypes() | `src/guardianships/guardianships.controller.ts` |
+| GET | `/api/v1/guardianships/relationship-types` | JWT | `@SkipPermissions` | Parentescos que un tutor puede declarar con el menor («yo soy su…»). Filas activas de `relationship_types` cuyo `name` está en la lista permitida, en el orden fijo de la lista (Padre, Madre, Tutor Legal, Abuelo, Abuela, Abuelo/a, Tío, Tía, Tío/a, Hermano/a Mayor, Otro; solo las filas que existan en el ambiente). 200 `{ status: "success", data: [{ relationship_type_id, name, description }] }`, la misma forma de ítem que `GET /api/v1/catalogs/relationship-types` (no localiza). Sin `@ActingScope`: se llama sin `X-Acting-For`. Ver «Parentesco del tutor» | GuardianshipsService.listGuardianRelationshipTypes() | `src/guardianships/guardianships.controller.ts` |
 | GET | `/api/v1/guardianships/me/dependents` | JWT | `@SkipPermissions` | Listar los dependientes activos del tutor autenticado. Excluye congelados y purgados. Respuesta `{ dependents: DependentSummary[], limits: { max_dependents: 10 } }` | GuardianshipsService.listForGuardian() | `src/guardianships/guardianships.controller.ts` |
 | POST | `/api/v1/guardianships/me/dependents` | JWT | `@SkipPermissions`; throttle 10/hora | Registrar un menor sin cuenta (paso 0). En una transacción crea `users` (correo null, rol global `user`), `users_pr` en falso, `dependent_profiles`, la tutoría principal `pending` con `sworn_declaration_at` y las aceptaciones legales en nombre del menor. 201 con `DependentSummary` | GuardianshipsService.createDependent() | `src/guardianships/guardianships.controller.ts` |
 | GET | `/api/v1/guardianships/me/dependents/:dependentId` | JWT | `@SkipPermissions` | Detalle de un dependiente con sus tutores (`DependentDetail`). Un dependiente ajeno, congelado o inexistente responde 404 `GUARDIANSHIP_NOT_FOUND` | GuardianshipsService.getDetailForGuardian() | `src/guardianships/guardianships.controller.ts` |
@@ -1979,7 +1979,7 @@ Fase 8 (ejecutada en código el 2026-10-09; mergeada en `development` con backen
 
 ### legal-representatives
 
-> Perfiles familiares, rama `feat/family-profiles`, pendiente de merge. Los representantes legales quedan de **solo lectura**: las tutorías (`guardianships`, sección homónima) los reemplazan y la tabla se elimina en la Fase 4. Sobre `development` aún existen las cuatro rutas.
+> Perfiles familiares, rama `feat/family-profiles`, Pendiente de merge (PR #530 de sacdia-backend). Los representantes legales quedan de **solo lectura**: las tutorías (`guardianships`, sección homónima) los reemplazan y la tabla se elimina en la Fase 4. Sobre `development` aún existen las cuatro rutas.
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -2084,7 +2084,7 @@ Fase 8 (ejecutada en código el 2026-10-09; mergeada en `development` con backen
 
 #### Consentimiento del tutor (menores sin cuenta)
 
-> Perfiles familiares, rama `feat/family-profiles`, pendiente de merge. Solo aplica a **dependientes** (usuarios con `dependent_profiles`). Adolescentes de 13 a 17 años con cuenta propia y cualquier adulto no cambian: `consent` es `null` y aprobar funciona como antes. Las filas `is_test_data` nunca cuentan como consentimiento.
+> Perfiles familiares, rama `feat/family-profiles`, Pendiente de merge (PR #530 de sacdia-backend). Solo aplica a **dependientes** (usuarios con `dependent_profiles`). Adolescentes de 13 a 17 años con cuenta propia y cualquier adulto no cambian: `consent` es `null` y aprobar funciona como antes. Las filas `is_test_data` nunca cuentan como consentimiento.
 
 **Bloque `consent` en `GET .../membership-requests`** (una consulta por lote, sin N+1):
 
@@ -2229,7 +2229,7 @@ Perfiles familiares: un dependiente no tiene cuenta ni tokens FCM, así que un p
 
 ##### `POST /api/v1/users/:userId/post-registration/step-3/guardian-only`
 
-> Perfiles familiares, rama `feat/family-profiles`, pendiente de merge.
+> Perfiles familiares, rama `feat/family-profiles`, Pendiente de merge (PR #530 de sacdia-backend).
 
 Body opcional (todos los campos pueden omitirse): `{ "country_id": 1, "union_id": 2, "local_field_id": 3 }`. Si llegan, se guardan en el usuario. No exige que ya exista un dependiente: el tutor puede cerrar su post-registro antes de añadir menores.
 

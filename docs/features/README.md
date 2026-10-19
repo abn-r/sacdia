@@ -69,7 +69,7 @@
 | `coordinacion` | [coordinacion.md](coordinacion.md) | Documento presente | `IMPLEMENTADO` |
 | `cron-automation` | [cron-automation.md](cron-automation.md) | Documento presente | `IMPLEMENTADO` |
 | `data-export` | [docs/architecture/DATA-EXPORT.md](../architecture/DATA-EXPORT.md) | Documento presente | `IMPLEMENTADO` |
-| `family-profiles` | [family-profiles.md](family-profiles.md) | Documento presente | `IMPLEMENTADO PARCIAL` (Fase 2 de 4 implementada en la rama `feat/family-profiles` de backend, app y panel, pendiente de merge y de despliegue; la Fase 3 bloquea el lanzamiento a producción) |
+| `family-profiles` | [family-profiles.md](family-profiles.md) | Documento presente | `IMPLEMENTADO PARCIAL` (Fase 2 de 4 implementada en la rama `feat/family-profiles` de backend, app y panel; Pendiente de merge (PR #530 de sacdia-backend, PR #178 de sacdia-app, PR #243 de sacdia-admin, PR #141 de sacdia) y de despliegue; la Fase 3 bloquea el lanzamiento a producción) |
 | `finanzas` | [finanzas.md](finanzas.md) | Documento presente | `IMPLEMENTADO` |
 | `gestion-clubs` | [gestion-clubs.md](gestion-clubs.md) | Documento presente | `IMPLEMENTADO` |
 | `gestion-seguros` | [gestion-seguros.md](gestion-seguros.md) | Documento presente | `IMPLEMENTADO` |
