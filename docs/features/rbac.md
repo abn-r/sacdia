@@ -116,7 +116,7 @@ El sistema RBAC implementa permisos finos (fine-grained) para 4 familias de sub-
 | `emergency_contacts` | `emergency_contacts:read` | `users:read_detail` | `GET /users/:userId/emergency-contacts` |
 | `emergency_contacts` | `emergency_contacts:update` | `users:update_profile` | `POST/PATCH/DELETE /users/:userId/emergency-contacts` |
 | `legal_representative` | `legal_representative:read` | `users:read_detail` | `GET /users/:userId/legal-representative` |
-| `legal_representative` | `legal_representative:update` | `users:update_profile` | `POST/PATCH/DELETE /users/:userId/legal-representative` |
+| `legal_representative` | `legal_representative:update` | `users:update_profile` | _(sin rutas: escritura retirada con perfiles familiares; ver [family-profiles](family-profiles.md))_ |
 | `post_registration` | `post_registration:read` | `users:read_detail` | `GET /users/:userId/post-registration/status` |
 | `post_registration` | `registration:complete` | _(sin fallback)_ | `POST /users/:userId/post-registration/step-{1,2,3}/complete` |
 

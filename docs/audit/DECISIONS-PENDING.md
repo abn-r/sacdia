@@ -2,7 +2,72 @@
 
 Generado: 2026-03-14
 Fuente: Reality Matrix + Canon verification
-**Estado: TODAS LAS DECISIONES RESUELTAS**
+**Estado: TODAS LAS DECISIONES RESUELTAS.** Hay una condición de lanzamiento abierta: la Fase 3 de perfiles familiares (ver «Perfiles familiares: restricción de lanzamiento», 2026-10-19).
+
+---
+
+## Perfiles familiares: restricción de lanzamiento (2026-10-19)
+
+**Estado: RESUELTA como decisión — condición de lanzamiento ABIERTA hasta que exista la Fase 3.**
+
+La Fase 2 (tutorías, actuar en nombre del menor, verificación del director) **no debe llegar a producción sin la Fase 3** (inicio de sesión supervisado de 13 a 17 años y dispositivo vinculado). Lo que queda abierto mientras tanto, hoy solo en desarrollo:
+
+- Un adolescente de 13 a 17 años que se registra solo no tiene tutor ni representante legal: las rutas de escritura del representante se retiraron y aún no hay vínculo supervisado.
+- Un dependiente que cumple 13 años sigue gestionado por su tutor hasta la mayoría de edad (actuar se corta por mayoría de edad, no a los 13).
+- Una cuenta social de un menor de 13 años puede existir hasta que guarde su fecha de nacimiento (aceptado en A4/A5; se endurece en la Fase 3).
+- No hay flujo para que el director cree menores; los códigos de reclamo solo reintegran un menor que ya está bajo custodia del club.
+
+Detalle y fases: [family-profiles.md](../features/family-profiles.md), sección «Fases y restricción de lanzamiento».
+
+---
+
+## Perfiles familiares: bucket privado de R2 (prerrequisito de despliegue, 2026-10-16)
+
+**Estado: RESUELTA — el usuario crea el bucket; ACCIÓN PENDIENTE antes del deploy.**
+
+Las fichas de consentimiento firmadas viven en un bucket **privado** de R2 (alias `GUARDIANSHIP_EVIDENCE`). Antes del deploy, el usuario debe crear el bucket y fijar `R2_BUCKET_GUARDIANSHIP_EVIDENCE` en Render. `R2_PUBLIC_URL_GUARDIANSHIP_EVIDENCE` y `R2_KEY_PREFIX_GUARDIANSHIP_EVIDENCE` son opcionales (el bucket no tiene URL pública; el prefijo por defecto es `guardianships/consent`).
+
+En desarrollo y QA la variable puede apuntar a un bucket privado que ya exista: los objetos quedan aislados bajo el prefijo `guardianships/consent`, solo se sirven con URL firmada de 900 s y la purga borra únicamente las claves registradas. El bucket no debe tener dominio personalizado ni `r2.dev` (el código no lo comprueba). Detalle en [family-profiles.md](../features/family-profiles.md), «Prerrequisitos de despliegue».
+
+Mientras la variable falte, la app arranca y el resto de la API funciona, pero **todas** las operaciones de ficha (subir, leer, verificar con ficha) responden 503 `GUARDIANSHIP_EVIDENCE_UNAVAILABLE`: se cierra por defecto, no se degrada. Relacionado: la Fase 2 retira las rutas de escritura del representante legal, por lo que backend y app de la Fase 2 deben desplegarse juntos.
+
+---
+
+## Perfiles familiares: custodia verificada por otra persona (A14, 2026-10-16)
+
+**Estado: RESUELTA — cuatro ojos obligatorios en custodia de club.**
+
+Pregunta: cuando un menor queda bajo custodia del club (el tutor se fue y el menor tiene membresía), ¿quién puede verificar esa custodia?
+
+| Opción | Resolución |
+|--------|------------|
+| El director custodio puede verificar su propia custodia | Rechazada |
+| Otra persona autorizada del club (subdirector, secretario, secretario tesorero, otro director con `club_members:approve`) o un administrador | **Adoptada** |
+
+La custodia pertenece al club (`guardian_user_id` NULL), así que «el custodio» no tiene identidad persistida. El servidor prohíbe verificar a: (a) quien subió la ficha vigente, (b) quien creó al menor (`dependent_profiles.created_by_user_id`) y (c) el último tutor que dejó al menor en custodia (`guardian_left` o `guardian_account_closed`). Respuesta 403 `GUARDIANSHIP_CUSTODIAN_SELF_VERIFY`. La regla solo aplica cuando la fila que se verifica es de custodia. Contrato: [ENDPOINTS-LIVE-REFERENCE.md](../api/ENDPOINTS-LIVE-REFERENCE.md), sección `membership-requests`.
+
+---
+
+## Perfiles familiares: purga de menores, 90 días (A9, 2026-10-16)
+
+**Estado: RESUELTA — «borrar» es anonimizar la fila `users` y borrar los datos personales; aceptada por el usuario.**
+
+Pregunta: cuando un tutor se va y el menor queda congelado sin club, ¿qué significa «se elimina a los 90 días»?
+
+| Opción | Resolución |
+|--------|------------|
+| Solo anonimizar la fila `users` (como la eliminación de cuenta) | Rechazada |
+| Anonimizar la fila `users` **y** borrar físicamente sus datos personales | **Adoptada** |
+
+Alcance de la purga, tras la verificación de la 2a (hallazgo S7) y la regla de IP y user agent:
+
+- Se anonimiza `users` (`active = false`; correo, nombre, apellidos, fecha de nacimiento, sangre, género, bautismo, imagen y geografía en NULL).
+- Se borran alergias, enfermedades, medicinas, contactos de emergencia, las fichas de consentimiento (filas **y** objetos de R2), la foto de perfil, los archivos de evidencia de clases y especialidades (R2 y filas), la bandeja de notificaciones y el nombre y teléfono del tutor externo; se vacían las columnas de archivos de sus especialidades.
+- Se anulan la IP y el user agent de sus `legal_acceptances`. Cuando un **tutor** elimina su cuenta, también los de las aceptaciones que hizo en nombre de sus dependientes (`accepted_by_user_id`).
+- Se conservan la fila `users` anonimizada, las tutorías (quién lo tuvo a cargo) y el progreso de clases y especialidades, sin archivos.
+- Si R2 falla, no se toca la base y se reintenta al día siguiente.
+
+El esquema conserva `guardianship_consent_evidences.purged_at`, pero la purga borra las filas en vez de marcarlas. Detalle: [family-profiles.md](../features/family-profiles.md); tablas: [SCHEMA-REFERENCE.md](../database/SCHEMA-REFERENCE.md).
 
 ---
 

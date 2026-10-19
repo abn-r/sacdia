@@ -1,12 +1,13 @@
 # Membership Requests (solicitudes de membresia)
 
-**Estado**: IMPLEMENTADO
+**Estado**: IMPLEMENTADO (el estado «consentimiento pendiente» de menores sin cuenta pertenece a la Fase 2 de perfiles familiares, en `feat/family-profiles`, Pendiente de merge (PR #530 de sacdia-backend, PR #178 de sacdia-app, PR #243 de sacdia-admin); ver [family-profiles.md](family-profiles.md))
+**Verificado contra código**: 2026-10-19 (backend `feat/family-profiles` `422433c0`; admin `4a50314`; las secciones sin marca de perfiles familiares conservan su verificación anterior)
 
 ## Descripcion de dominio
 
 Este dominio cubre la revision de solicitudes pendientes para ingresar o asumir un rol dentro de una seccion de club. En runtime, la solicitud inicial se crea desde el paso 3 de post-registro (`POST /api/v1/users/:userId/post-registration/step-3/complete`) sobre `club_role_assignments`; no hay una tabla paralela ni un endpoint separado de creacion.
 
-La solicitud vive sobre una asignacion anual de rol y reutiliza los mismos actores de gestion de miembros del club. Cuando una solicitud se aprueba, la asignacion pasa a estado activo; cuando se rechaza, conserva trazabilidad via `rejection_reason`; cuando vence por tiempo, pasa a `expired`.
+La solicitud vive sobre una asignacion anual de rol y reutiliza los mismos actores de gestion de miembros del club. Cuando una solicitud se aprueba, la asignacion pasa a estado activo (para un menor sin cuenta, solo si su consentimiento esta verificado, ver «Menores sin cuenta: consentimiento pendiente»); cuando se rechaza, conserva trazabilidad via `rejection_reason`; cuando vence por tiempo, pasa a `expired`.
 
 La membresia activa es el gate operativo para funcionalidades de club/seccion. Un usuario puede existir, autenticarse y gestionar su perfil sin membresia activa, pero mientras su solicitud este `pending` debe ver el club/seccion como `Pendiente de aprobacion` y no debe acceder a operaciones internas del club.
 
@@ -20,29 +21,44 @@ La membresia activa es el gate operativo para funcionalidades de club/seccion. U
   - `GET /api/v1/club-sections/:clubSectionId/membership-requests` - listar solicitudes pendientes activas de una seccion
   - `POST /api/v1/club-sections/:clubSectionId/membership-requests/:assignmentId/approve` - aprobar solicitud pendiente
   - `POST /api/v1/club-sections/:clubSectionId/membership-requests/:assignmentId/reject` - rechazar solicitud pendiente con motivo opcional
+  - Perfiles familiares (rama `feat/family-profiles`): `POST` y `GET .../:assignmentId/consent-evidence` (subir y leer la ficha firmada del menor) y `POST .../:assignmentId/verify-consent` (el director verifica el consentimiento; con `approve: true` aprueba despues). Contrato en [ENDPOINTS-LIVE-REFERENCE.md](../api/ENDPOINTS-LIVE-REFERENCE.md), seccion `membership-requests` (`membership-requests.controller.ts:55,110,146,178,230,264`)
 - **Endpoint self-service de cancelacion**:
   - `POST /api/v1/users/:userId/post-registration/membership-request/cancel` - cancelar la solicitud pendiente del usuario y reabrir seleccion de club/seccion
 - **Permisos**:
   - toda la superficie usa `JwtAuthGuard` + `PermissionsGuard`
-  - los tres endpoints requieren `club_members:approve`
+  - todos los endpoints de la superficie de revision (listar, aprobar, rechazar, subir y leer la ficha, verificar) requieren `club_members:approve`
   - la autorizacion contextual usa `@AuthorizationResource({ type: 'club', clubIdParam: 'clubSectionId' })`
 - **Comportamiento operativo**:
-  - el listado devuelve solo filas `active=true` y `status='pending'`
-  - completar el paso 3 crea/reactiva una solicitud `pending`, impide una segunda solicitud pendiente activa del mismo usuario y notifica a `director`, `deputy-director`, `secretary` y `secretary-treasurer`
-  - aprobar cambia `status` a `active`, limpia `expires_at` e invalida cache de autorizacion del usuario afectado
+  - el listado devuelve solo filas `active=true` y `status='pending'`; cada item trae el bloque `consent` (`null` para adultos y adolescentes con cuenta; para un menor sin cuenta `{ required, dependent, guardianship_id, status: 'pending' | 'verified', evidence_uploaded, guardians[] }`, `consent-gate.service.ts:29-37`), `users.email` puede ser `null` y trae `effective_expires_at`, el vencimiento real (ver «Caducidad distinta»; `membership-requests.service.ts:84-100`)
+  - completar el paso 3 crea/reactiva una solicitud `pending`, impide una segunda solicitud pendiente activa del mismo usuario y notifica a `director`, `deputy-director`, `secretary` y `secretary-treasurer`. Un tutor puede completar el paso 3 actuando por el menor; para un menor con consentimiento pendiente la notificacion lleva el titulo «Menor · consentimiento pendiente» (`membership-requests.service.ts:350-362`)
+  - aprobar cambia `status` a `active`, limpia `expires_at` e invalida cache de autorizacion del usuario afectado. El 409 de esta ruta tiene dos causas (`MR_CONSENT_NOT_VERIFIED` y `MR_ALREADY_PENDING`); el Swagger del controller ya las distingue (`membership-requests.controller.ts:128-132`). Si la solicitud ya no esta `pending` al entrar a la transaccion (otra revision, cancelacion o expiracion) no se activa nada: 409 `MR_ALREADY_PENDING`, o 404 `MR_NOT_FOUND` si es de otra seccion (`membership-requests.service.ts:135-143`, `:175-183`)
+  - aprobar pasa por la compuerta de consentimiento: un menor sin cuenta sin tutoria verificada recibe 409 `MR_CONSENT_NOT_VERIFIED` (`membership-requests.service.ts:145`, `assignment-activation-gate.ts:53-60`). Es la misma compuerta que protege todos los demas caminos que activan un rol de club (asignar rol, `PATCH /club-roles`, sucesion de director, solicitudes de asignacion y transferencia, inscripcion anual, corte de año)
   - rechazar cambia `status` a `rejected`, limpia `expires_at`, persiste `rejection_reason` si llega e invalida cache de autorizacion
   - cancelar por usuario cambia la solicitud a `cancelled`, la desactiva, limpia `expires_at` y reabre `users_pr.club_selection_complete=false` sin borrar perfil ni datos personales
-  - un cron horario expira solicitudes viejas usando lock distribuido; toma `membership.pending_timeout_days` desde `system_config` y usa `8` dias por defecto
+  - un cron horario expira solicitudes viejas usando lock distribuido; toma `membership.pending_timeout_days` desde `system_config` y usa `8` dias por defecto. Para un menor sin cuenta rige otro plazo, ver abajo
+
+### Menores sin cuenta: consentimiento pendiente (perfiles familiares, Fase 2)
+
+Un menor sin cuenta (usuario con fila en `dependent_profiles`) lo registra su tutor, que actua por el con `X-Acting-For` y completa el paso 3 en su nombre. La solicitud nace `pending` como cualquier otra, pero tiene un segundo estado, el del consentimiento:
+
+- **Consentimiento `pending`**: no se puede aprobar (409 `MR_CONSENT_NOT_VERIFIED`). El tutor sube la ficha firmada en papel (subirla no verifica nada) y el director la revisa y llama a `verify-consent`. Quien verifica no puede ser un tutor del menor (403 `GUARDIANSHIP_GUARDIAN_SELF_VERIFY`) y, en custodia del club, tampoco quien subio la ficha, creo al menor o lo cedio (403 `GUARDIANSHIP_CUSTODIAN_SELF_VERIFY`) (`consent-verification.service.ts:244-252`, `:312-368`).
+- **Consentimiento `verified`**: la solicitud se puede aprobar (en la misma llamada con `approve: true`, o aparte). La ficha verificada queda bloqueada: subir otra responde 409 `GUARDIANSHIP_CONSENT_ALREADY_VERIFIED` (`guardian-evidence.service.ts:403-419`).
+- **Caducidad distinta** (`expireStaleRequests`, `membership-requests.service.ts:414-476`, con la regla en `membership-request-expiry.ts:37-53`): con el consentimiento sin verificar la solicitud vive `max(membership.pending_timeout_days, 30)` dias desde `created_at`; al verificar, el plazo base (`membership.pending_timeout_days`, 8 por defecto) se **reinicia** y se cuenta desde `max(created_at, verified_at)`. El cron decide con esas fechas, no con la columna `expires_at` (que es solo el plazo base guardado al crear, creación + 8 días, `post-registration.service.ts:593-594`). Los adultos no cambian.
+- **`effective_expires_at` en el listado**: cada solicitud pendiente trae el instante en que vence de verdad, calculado con la **misma función** que el cron (`effectiveMembershipExpiry`), así que el panel y la app muestran lo que el cron va a aplicar: adulto `created_at` + plazo base; menor con consentimiento sin verificar `created_at` + `max(plazo base, 30)` días; menor verificado `max(created_at, verified_at)` + plazo base. `expires_at` se devuelve igual, pero ya no es el dato que se muestra. Al extraer la función compartida cambiaron dos detalles: un `membership.pending_timeout_days` inválido cae a 8 (`membership-request-expiry.ts:14-20`) y los días se calculan en UTC (`:22-26`; antes el cron usaba la hora local del servidor).
+- **Adultos y adolescentes con cuenta** nunca se bloquean por esta regla: el flujo de arriba aplica igual que antes.
+
+Detalle completo, rutas y decisiones: [family-profiles.md](family-profiles.md).
 
 ### Admin
 - **1 pagina funcional**: `/dashboard/requests/membership`
-- Permite seleccionar seccion activa, listar pendientes, ver rol/fecha/expiracion y ejecutar aprobar o rechazar
+- Permite seleccionar seccion activa, listar pendientes, ver rol/fecha/expiracion y ejecutar aprobar o rechazar. La columna de vencimiento muestra `effective_expires_at` (con un icono de ayuda mientras el consentimiento de un menor esta pendiente) y la columna de acciones queda fija a la derecha (`pending-members-table.tsx:58-61`, `:267-281`, `:70-78`)
+- Para menores sin cuenta (rama `feat/family-profiles`): insignia de consentimiento, aprobar deshabilitado mientras este pendiente y accion **Verificar** (`membership-consent-verify-dialog.tsx`) para ver o subir la ficha, confirmar y aprobar
 - La pagina obtiene secciones desde `GET /api/v1/clubs` y luego consume la superficie especifica de membership requests
 
 ### App Movil
 - **Feature verificada dentro de Members**: `MembersView` incluye tab de solicitudes de ingreso
 - Carga solicitudes usando el contexto activo de club/seccion y muestra perfil basico del solicitante, filtros y badge de pendientes
-- Directores pueden aprobar o rechazar desde la app; al hacerlo se invalida y recarga el estado del feature
+- Directores pueden aprobar o rechazar desde la app; al hacerlo se invalida y recarga el estado del feature. Para un menor sin cuenta el boton de aprobar pasa a **Verificar consentimiento** mientras este pendiente (rama `feat/family-profiles`)
 - Los actores con permiso `club_members:approve` en su seccion activa pueden abrir el perfil del solicitante mientras la solicitud este `pending`
 - El usuario con solicitud pendiente debe conservar acceso a perfil, gestion de informacion personal y carga masiva/staging de especialidades y clases
 - El usuario con solicitud pendiente no debe ver funcionalidades operativas de club hasta que su asignacion pase a `active`; la app oculta accesos rapidos y tabs operativos cuando detecta membresia `pending`, `rejected` o `expired`
@@ -52,6 +68,7 @@ La membresia activa es el gate operativo para funcionalidades de club/seccion. U
 
 ### Base de datos
 - `club_role_assignments` - almacena la solicitud y su transicion de `pending` a `active`, `rejected` o `expired`
+- `guardianships` y `guardianship_consent_evidences` (perfiles familiares) - consentimiento del tutor y ficha firmada del menor; la compuerta de activacion las consulta (`consent_status = 'verified'` y `is_test_data = false`)
 - `system_config` - soporta el timeout configurable `membership.pending_timeout_days`
 - Relaciones con `users`, `roles`, `club_sections` y `ecclesiastical_years`
 
@@ -59,7 +76,7 @@ La membresia activa es el gate operativo para funcionalidades de club/seccion. U
 
 1. Debe ser posible listar solicitudes pendientes por seccion
 2. Solo actores con `club_members:approve` pueden revisarlas
-3. Aprobar una solicitud debe activar la asignacion anual correspondiente
+3. Aprobar una solicitud debe activar la asignacion anual correspondiente; si el solicitante es un menor sin cuenta, solo con consentimiento verificado (409 `MR_CONSENT_NOT_VERIFIED` si no)
 4. Rechazar una solicitud debe permitir guardar un motivo opcional
 5. Las solicitudes pendientes viejas deben expirar automaticamente por cron
 6. Cambios de estado deben invalidar el cache de autorizacion del usuario afectado
@@ -69,6 +86,8 @@ La membresia activa es el gate operativo para funcionalidades de club/seccion. U
 10. El usuario pendiente puede acceder a perfil, gestion de informacion personal y carga masiva/staging de especialidades y clases
 11. La carga masiva/staging de especialidades y clases no desbloquea permisos operativos de club antes de la membresia activa
 12. El usuario pendiente debe ver la membresia solicitada como `Pendiente de aprobacion`
+13. Una solicitud de un menor sin cuenta con consentimiento sin verificar caduca a los `max(timeout, 30)` dias; al verificar, el plazo base se reinicia desde la verificacion
+14. Aprobar no debe activar nada si la solicitud ya no esta `pending` al entrar a la transaccion
 
 ## Decisiones de diseno
 
@@ -77,12 +96,13 @@ La membresia activa es el gate operativo para funcionalidades de club/seccion. U
 - **Una solicitud pendiente por usuario**: evita estados ambiguos de club/seccion y simplifica el post-registro
 - **Cancelacion como reinicio de seleccion**: cancelar una solicitud pendiente no borra perfil; devuelve al usuario al paso de seleccion de club/seccion
 - **Pendiente como estado limitado**: `pending` permite autogestion personal, pero bloquea operaciones internas de club
-- **Expiracion configurable**: el timeout no esta hardcodeado al negocio; se lee desde `system_config`
+- **Expiracion configurable**: el timeout no esta hardcodeado al negocio; se lee desde `system_config`. Los menores sin cuenta con consentimiento sin verificar tienen un piso de 30 dias porque la ficha firmada viaja por el tutor
+- **Una sola compuerta de activacion**: el consentimiento no se comprueba solo en `approve` sino en toda escritura que active un rol de club (ver family-profiles.md). El SQL manual y los seeds no pasan por ella: [runbook](../runbooks/family-profiles-consent-gate-manual-sql.md)
 - **Lock distribuido en cron**: evita expirar la misma ventana mas de una vez cuando hay multiples instancias del backend
 
 ## Gaps y pendientes
 
-- **Surface verificada acotada a revision**: en este batch no se verifico una ruta canonica dedicada para crear la solicitud inicial
+- **Creacion de la solicitud**: no hay endpoint propio; nace en `POST /api/v1/users/:userId/post-registration/step-3/complete` (`post-registration.controller.ts:150`)
 - **Visibilidad de staging pendiente de arbitrar**: queda por definir si la carga masiva/staging de especialidades y clases del usuario pendiente sera visible para directores antes de aprobar membresia
 - **Sin historial administrativo expuesto**: el endpoint listado devuelve solo pendientes, no una bandeja de aprobadas/rechazadas/expiradas
 - **Sin UI admin para timeout**: el valor de expiracion existe en `system_config`, pero no se verifico una pantalla administrativa para editarlo

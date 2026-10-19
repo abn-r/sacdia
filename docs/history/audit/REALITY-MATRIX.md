@@ -1,5 +1,5 @@
 # Reality Matrix — SACDIA
-Fecha: 2026-03-26 | Última actualización: 2026-08-25
+Fecha: 2026-03-26 | Última actualización: 2026-10-19
 
 ## Addendum 2026-08-25 — camporee-orders (rama, no Neon)
 
@@ -18,6 +18,26 @@ Los conteos del snapshot 2026-03-26 **no** se reescriben aquí. Este addendum re
 Estado de feature: **PARCIAL** (implementado en rama, no desplegado). No FANTASMA: el código existe. No ALINEADO de producción: falta merge + migrate.
 
 Modelos de rama (espejo en `docs/database/schema.prisma`): `camporee_order_products`, `camporee_order_product_options`, `camporee_order_offerings`, `camporee_orders`, `camporee_order_lines`, `camporee_order_proofs`, `camporee_order_folio_counters`.
+
+---
+
+## Addendum 2026-10-19 — perfiles familiares (rama, no Neon)
+
+Los conteos del snapshot 2026-03-26 **no** se reescriben aquí. Este addendum registra la Fase 2 de perfiles familiares (tutorías, actuar en nombre de un menor sin cuenta, verificación del consentimiento por el director) verificada en código de rama, no en `development` ni en Neon.
+
+| Capa | Estado | Evidencia |
+|------|--------|-----------|
+| Backend Nest | Código en `feat/family-profiles` (`554552c1`, 29 commits sobre `development` `79f2cdb0`; releído hasta `422433c0`) | 16 endpoints nuevos (11 `guardianships`, 3 `membership-requests`, 1 `admin-users`, 1 `post-registration`), 3 retirados (`POST/PATCH/DELETE /users/:userId/legal-representative`), 64 rutas con `@ActingScope` (62 al `554552c1`; `3077f724` añade `GET /clubs` y `GET /clubs/:clubId/sections`), 28 códigos de error nuevos en `ErrorCode` frente a la base de la rama (incluye `GUARDIANSHIP_RELATIONSHIP_TYPE_NOT_ALLOWED`; el `GET /guardianships/relationship-types` es el endpoint 16). Jest completo 6882 pruebas pasan; e2e de acting-for 25/25 |
+| Schema | Migración escrita, **no** aplicada a Neon | `20261016120000_family_profiles`: `users.email` nullable, 3 columnas en `countries`, 4 tablas (`dependent_profiles`, `guardianships`, `guardianship_consent_evidences`, `guardianship_link_codes`). Espejo en `docs/database/schema.prisma` (262 modelos, 79 enums) |
+| Doc API | Sí, con salvedad de rama | `ENDPOINTS-LIVE-REFERENCE.md`: «Actuar en nombre de un dependiente», `guardianships`, `membership-requests`, `legal-representatives`, `post-registration`, `admin-users` |
+| Feature | Sí | `docs/features/family-profiles.md` |
+| App | Código en `feat/family-profiles` (`819f257f`) | Mi familia, cambio de perfil, post-registro, verificación del director. `flutter test` 2452 pasan |
+| Admin | Código en `feat/family-profiles` (`79a7b29`) | Insignia y diálogo de verificación, tarjeta de tutorías. Vitest 1471 pasan, 1 fallo ambiental |
+| Neon / `development` | Ausente | Migración pendiente; falta el bucket privado de R2 `R2_BUCKET_GUARDIANSHIP_EVIDENCE` (los endpoints de ficha responden 503 hasta crearlo) |
+
+Estado de feature: **PARCIAL** (Fase 2 de 4 implementada en rama, no desplegada). No FANTASMA: el código existe. No ALINEADO de producción: falta merge, migración, bucket y despliegue conjunto de backend y app. **Restricción de lanzamiento**: la Fase 3 (inicio de sesión supervisado de 13 a 17 años y dispositivo vinculado) debe existir antes de producción (ver `docs/audit/DECISIONS-PENDING.md`).
+
+Modelos de rama (espejo en `docs/database/schema.prisma`): `dependent_profiles`, `guardianships`, `guardianship_consent_evidences`, `guardianship_link_codes`.
 
 ---
 

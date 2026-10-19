@@ -1,7 +1,7 @@
 # Feature Registry - SACDIA
 
 **Estado**: ACTIVE
-**Actualizado**: 2026-10-13 (filas de carga masiva, honores y certificaciones verificadas contra `development`; el resto, 2026-10-04)
+**Actualizado**: 2026-10-19 (fila de perfiles familiares, verificada contra la rama `feat/family-profiles`; filas de carga masiva, honores y certificaciones verificadas contra `development` el 2026-10-13; el resto, 2026-10-04)
 **Propósito**: registrar qué dominios tienen documento en `docs/features/` y separar cobertura editorial de estado funcional declarado.
 
 > [!IMPORTANT]
@@ -30,9 +30,9 @@
 
 | Señal | Cantidad | Evidencia |
 |---|---:|---|
-| Dominios registrados | 54 | filas de la tabla de abajo (50 documentos en `docs/features/` + 2 dominios en `docs/canon/runtime-rankings.md` + `requests` en `docs/canon/runtime-requests.md` + `data-export` en `docs/architecture/DATA-EXPORT.md`) |
+| Dominios registrados | 55 | filas de la tabla de abajo (51 documentos en `docs/features/` + 2 dominios en `docs/canon/runtime-rankings.md` + `requests` en `docs/canon/runtime-requests.md` + `data-export` en `docs/architecture/DATA-EXPORT.md`) |
 | Estado funcional `IMPLEMENTADO` | 42 | declarado en los documentos de dominio |
-| Estado funcional `IMPLEMENTADO PARCIAL` | 7 | `camporee-events`; `camporee-orders`; `camporee-supplies`; `club-enrollments`; `i18n`; `informes-trimestrales-anuales`; `soporte` |
+| Estado funcional `IMPLEMENTADO PARCIAL` | 8 | `camporee-events`; `camporee-orders`; `camporee-supplies`; `club-enrollments`; `family-profiles`; `i18n`; `informes-trimestrales-anuales`; `soporte` |
 | Estado funcional `PARCIAL` | 2 | `audit-log`; `institutional-history` |
 | Estado funcional `NO CANON` | 1 | `infrastructure` (infraestructura operativa) |
 | Estado `ACTIVE` con canon externo | 1 | `achievements` |
@@ -69,6 +69,7 @@
 | `coordinacion` | [coordinacion.md](coordinacion.md) | Documento presente | `IMPLEMENTADO` |
 | `cron-automation` | [cron-automation.md](cron-automation.md) | Documento presente | `IMPLEMENTADO` |
 | `data-export` | [docs/architecture/DATA-EXPORT.md](../architecture/DATA-EXPORT.md) | Documento presente | `IMPLEMENTADO` |
+| `family-profiles` | [family-profiles.md](family-profiles.md) | Documento presente | `IMPLEMENTADO PARCIAL` (Fase 2 de 4 implementada en la rama `feat/family-profiles` de backend, app y panel; Pendiente de merge (PR #530 de sacdia-backend, PR #178 de sacdia-app, PR #243 de sacdia-admin, PR #141 de sacdia) y de despliegue; la Fase 3 bloquea el lanzamiento a producción) |
 | `finanzas` | [finanzas.md](finanzas.md) | Documento presente | `IMPLEMENTADO` |
 | `gestion-clubs` | [gestion-clubs.md](gestion-clubs.md) | Documento presente | `IMPLEMENTADO` |
 | `gestion-seguros` | [gestion-seguros.md](gestion-seguros.md) | Documento presente | `IMPLEMENTADO` |
