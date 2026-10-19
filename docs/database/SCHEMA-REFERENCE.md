@@ -2,7 +2,7 @@
 
 **Estado**: ACTIVE
 **Sincronizado contra**: `sacdia-backend/prisma/schema.prisma` en la rama `development` (commit `68123f6`)
-**Fecha de resincronizacion**: 2026-10-13 (última migración en `development`: `20261013110000_remove_retired_investiture_permissions`). Las secciones de abajo se resincronizaron por completo hasta el 2026-10-04; después solo se añadieron las de instructor de especialidad y carga por certificado (2026-10-13) y la de aceptación legal (`legal_acceptances`, 2026-10-15, migración `20261015120000_legal_acceptances`, pendiente de merge; las cifras de abajo no la incluyen) y la de perfiles familiares (2026-10-16, migración `20261016120000_family_profiles`, rama `feat/family-profiles`, pendiente de merge). El espejo `schema.prisma` sí es la copia completa e incluye ambas.
+**Fecha de resincronizacion**: 2026-10-13 (última migración en `development`: `20261013110000_remove_retired_investiture_permissions`). Las secciones de abajo se resincronizaron por completo hasta el 2026-10-04; después solo se añadieron las de instructor de especialidad y carga por certificado (2026-10-13) y la de aceptación legal (`legal_acceptances`, 2026-10-15, migración `20261015120000_legal_acceptances`, pendiente de merge; las cifras de abajo no la incluyen) y la de perfiles familiares (2026-10-16, actualizada el 2026-10-19 con la Fase 2 completa; migración `20261016120000_family_profiles`, rama `feat/family-profiles`, pendiente de merge). El espejo `schema.prisma` sí es la copia completa e incluye ambas.
 
 Referencia humana concisa del schema Prisma vigente.
 
@@ -159,10 +159,10 @@ Evidencia **append-only** de que un usuario aceptó los Términos y Condiciones 
 - **Exportación**: `DataExportService` incluye las filas del propio usuario como `legal_acceptances` (ver `data-export` en `docs/api/ENDPOINTS-LIVE-REFERENCE.md`).
 - **Versiones vigentes**: viven en `sacdia-backend/src/legal/legal-documents.constants.ts`, no en la base de datos (ver `docs/legal/README.md`).
 
-## Perfiles familiares (2026-10-16)
+## Perfiles familiares (2026-10-16, actualizado 2026-10-19)
 
 > [!NOTE]
-> Fase 2 de perfiles familiares (sacdia-backend, rama `feat/family-profiles`), pendiente de merge. La migración `20261016120000_family_profiles` corre con `prisma migrate deploy` al final del build en Render. Antes de abrir el PR, `prisma migrate status` contra Neon `development` debe mostrar como única pendiente esa migración; aplicarla a Neon `development` es un paso manual aparte (psql más fila en `_prisma_migrations`, ver el flujo de migraciones de Neon). `docs/database/schema.prisma` (espejo) ya está resincronizado con esta rama.
+> Fase 2 de perfiles familiares (sacdia-backend, rama `feat/family-profiles`), pendiente de merge. La Fase 2 **no añadió migraciones ni cambios de schema después de 2a**: la subida de fichas, la verificación del director y el bloque de admin (sub-fase 2c) usan las tablas y columnas de esta misma migración. La migración `20261016120000_family_profiles` corre con `prisma migrate deploy` al final del build en Render. Antes de abrir el PR, `prisma migrate status` contra Neon `development` debe mostrar como única pendiente esa migración; aplicarla a Neon `development` es un paso manual aparte (psql más fila en `_prisma_migrations`, ver el flujo de migraciones de Neon). `docs/database/schema.prisma` (espejo) ya está resincronizado con esta rama.
 
 Un **dependiente** es un menor de 13 años (el corte depende del país) que tiene un perfil `users` pero ninguna fila `account` ni correo: lo registra un tutor desde la app. El **tutor** actúa por él enviando `X-Acting-For` (ver «Actuar en nombre de un dependiente» en `docs/api/ENDPOINTS-LIVE-REFERENCE.md`). Las tutorías reemplazan a `legal_representatives`, que sigue en el schema y se elimina en la Fase 4.
 
@@ -242,11 +242,13 @@ Quién responde por un dependiente. Una fila por tutor (o por custodia de un clu
 - **Índices no únicos**: `idx_guardianships_dependent` (declarado en Prisma con `@@index`), y los parciales `idx_guardianships_guardian_active` (`guardian_user_id` sin revocadas) e `idx_guardianships_custodian_club` (`custodian_club_id` en custodias activas).
 - Relaciones Prisma: `guardianship_dependent`, `guardianship_guardian`, `guardianship_verifier`, `guardianships_custodian` (en `clubs`), `guardianship_invites` (autorreferencia) y la inversa en `relationship_types.guardianships`.
 - **Activa** significa `consent_status IN ('pending','verified')`. Solo las filas activas, no de custodia ni de prueba cuentan para acceso, límites y notificaciones. Límites aplicados en servicio: 10 dependientes activos por tutor y 4 tutores activos por dependiente.
-- **Quién da acceso**: solo `pending` y `verified` de una persona con cuenta. `revoked`, custodia, tutor externo e `is_test_data` no dan acceso.
+- **Quién da acceso**: solo `pending` y `verified` de una persona con cuenta **activa** (`users.active`; un tutor eliminado o desactivado no actúa aunque su fila siga). `revoked`, custodia, tutor externo e `is_test_data` no dan acceso.
+- **Quién escribe `verified`**: `director_paper_form` lo fija `POST .../membership-requests/:assignmentId/verify-consent` sobre la tutoría **principal** activa (de persona o de custodia) y `guardian_invite` lo reciben los tutores invitados por una fila que se verifica (promoción en cadena). `legacy_import` y `test_placeholder` solo los escribe el script de desarrollo. Una custodia de club se verifica con la regla de cuatro ojos (el que subió la ficha, el que creó al menor y el tutor que lo dejó en custodia no pueden verificarla).
+- **Datos del tutor externo**: `external_name` y `external_phone` se anulan al purgar al menor.
 
 ### `guardianship_consent_evidences`
 
-Historial append-only de la ficha de consentimiento firmada (imagen o PDF) por tutoría. La subida y la verificación del director llegan en la sub-fase 2c; la tabla y el bucket privado ya existen.
+Historial append-only de la ficha de consentimiento firmada (imagen o PDF). La ficha cuelga de la **tutoría principal activa** del menor (la fila de consentimiento, de persona o de custodia), la suben el tutor (cualquier tutor activo) o el director y la lee el tutor, el director o un admin con URL firmada de 15 minutos. El bucket es privado: `GUARDIANSHIP_EVIDENCE` (`R2_BUCKET_GUARDIANSHIP_EVIDENCE`; sin él los endpoints de ficha responden 503). Contrato de endpoints en `docs/api/ENDPOINTS-LIVE-REFERENCE.md`, sección `guardianships`.
 
 | Columna | Tipo | Nulo | Default | Notas |
 |---|---|---|---|---|
@@ -255,14 +257,16 @@ Historial append-only de la ficha de consentimiento firmada (imagen o PDF) por t
 | `file_key` | `varchar(512)` | no | - | Clave del objeto en el bucket privado `GUARDIANSHIP_EVIDENCE` |
 | `content_type` | `varchar(64)` | no | - | CHECK: `image/jpeg`, `image/png`, `image/webp` o `application/pdf` |
 | `size_bytes` | `integer` | no | - | CHECK: entre 1 y 10485760 (10 MB) |
-| `uploaded_by_user_id` | `uuid` | no | - | FK a `users.user_id` |
+| `uploaded_by_user_id` | `uuid` | no | - | FK a `users.user_id`: quien subió de verdad (tutor o director). |
 | `uploaded_at` | `timestamptz(6)` | no | `now()` | |
-| `superseded_at` | `timestamptz(6)` | sí | - | Se llena cuando una subida nueva reemplaza a esta |
-| `purged_at` | `timestamptz(6)` | sí | - | |
+| `superseded_at` | `timestamptz(6)` | sí | - | Se llena cuando una subida nueva reemplaza a esta. El objeto en R2 **se conserva** (historial legal) |
+| `purged_at` | `timestamptz(6)` | sí | - | Reservada. La purga de un dependiente borra la fila entera, no la marca |
 
 - **Índice único parcial** `uq_guardianship_consent_evidences_current` sobre `(guardianship_id) WHERE superseded_at IS NULL AND purged_at IS NULL`: una sola evidencia vigente por tutoría.
 - Relación Prisma: `consent_evidence_uploader` (`users.guardianship_consent_evidences_uploaded`).
 - La purga de un dependiente borra las filas y sus objetos en R2 (decisión A9); la tutoría queda para auditoría.
+- **Clave del objeto**: `{prefijo}/{guardianship_id}/{uuid}.{ext}` con prefijo `R2_KEY_PREFIX_GUARDIANSHIP_EVIDENCE` (por defecto `guardianships/consent`); la extensión sale del tipo MIME validado, nunca del nombre original.
+- **Auditoría**: cada subida y cada lectura escriben un evento `guardianship_consent_evidence` (`uploaded` o `read`, `changes.via` = `guardian`, `director` o `admin`) en `audit_logs`; la verificación escribe `guardianship` / `consent_verified` dentro de su transacción.
 
 ### `guardianship_link_codes`
 
@@ -292,7 +296,11 @@ Códigos de vinculación de un solo uso. Solo se guarda el hash.
 - **Sin copia de datos en la migración.** `legal_representatives` no se migra. El script opcional `sacdia-backend/scripts/family-profiles/seed-dev-guardianships.ts` solo es para ramas de desarrollo: por defecto es simulacro, y con `--apply` más `--placeholders` o `--from-legal-reps` escribe filas `is_test_data` o `legacy_import`. Se ejecuta a mano por rama de Neon y se niega a correr con `NODE_ENV=production`.
 - **Aceptación legal del menor**: al crear un dependiente se insertan sus filas en `legal_acceptances` con `method = 'register_checkbox'`, `user_id` = el menor y `accepted_by_user_id` = el tutor. El CHECK de `method` no cambia.
 - **Estados de un dependiente** cuando el último tutor sale (voluntariamente o por cierre de cuenta): pasa a otro tutor activo (el más antiguo se vuelve principal si hace falta), o a custodia del club si tiene una asignación `active` o `pending` (fila `is_custodian`), o se congela (`frozen_at = now()`, `purge_after = now() + 90 días`).
-- **Purga** (cron `dependent-profiles-purge`, `20 4 * * *` UTC, lotes de 100): primero borra en R2 las evidencias de consentimiento y la foto de perfil (si falla, no cambia nada y reintenta); después, en una transacción, anonimiza la fila `users` (`active = false` y `email`, nombre, apellidos, `birthday`, `blood`, `gender`, `baptism_date`, `user_image`, `country_id`, `union_id` y `local_field_id` en NULL), borra con `DELETE` alergias, enfermedades, medicinas, contactos de emergencia y filas de evidencia, anula IP y user agent en `legal_acceptances` y fija `dependent_profiles.purged_at`. La fila de `guardianships` se conserva para auditoría.
+- **Aceptaciones hechas por un tutor**: cuando el tutor elimina su cuenta se anulan `ip_address` y `user_agent` de las filas de `legal_acceptances` donde `user_id` es el tutor **o** `accepted_by_user_id` es el tutor, porque las aceptaciones en nombre del menor llevan la IP y el dispositivo del tutor. Se hace en la misma transacción de la eliminación, después de ceder los menores.
+- **Purga** (cron `dependent-profiles-purge`, `20 4 * * *` UTC, lotes de 100; decisión A9: «borrar» es borrar):
+  1. **Primero R2**, por bucket: fichas de consentimiento (`GUARDIANSHIP_EVIDENCE`), foto de perfil (`USER_PROFILES`), evidencias de clases (`CLASS_EVIDENCE`), evidencias de requisitos de especialidades que no sean enlaces (`EVIDENCE_FILES`), y certificado, documento e imágenes de las especialidades del menor (`USERS_HONORS_CERT` / `USERS_HONORS`, o `CERTIFICATE_IMPORTS` cuando el objeto salió de una carga por certificado). Si R2 falla, no se cambia nada en la base, `purged_at` queda en NULL, la corrida se reporta como fallida y se reintenta en la siguiente.
+  2. **Después, una transacción**: anonimiza la fila `users` (`active = false` y `email`, nombre, apellidos, `birthday`, `blood`, `gender`, `baptism_date`, `user_image`, `country_id`, `union_id` y `local_field_id` en NULL); borra con `DELETE` alergias, enfermedades, medicinas, contactos de emergencia, filas de `guardianship_consent_evidences`, `evidence_files` de clases y especialidades, `requirement_evidence` y `notification_deliveries` (la bandeja del menor); vacía las columnas de archivo de `users_honors` (`certificate = ''`, `document = NULL`, `images = []`); anula `external_name` y `external_phone` de sus `guardianships`; anula IP y user agent en sus `legal_acceptances`; fija `dependent_profiles.purged_at`; y sube el `epoch` de acting-for.
+  3. **Se conserva**: la fila `users` anonimizada, las filas de `guardianships` (quién lo tuvo a cargo, sin datos de contacto del tutor externo), `dependent_profiles` y las filas de progreso de clases y especialidades, sin ningún archivo.
 - **Migración**: `sacdia-backend/prisma/migrations/20261016120000_family_profiles/migration.sql`. Escrita a mano, 17 sentencias en una sola transacción: 4 `ALTER TABLE` (`users.email DROP NOT NULL` y las 3 columnas de `countries`), 4 `CREATE TABLE IF NOT EXISTS` y 9 índices (3 únicos parciales de `guardianships`, 1 único parcial de evidencias, 1 parcial de `dependent_profiles`, 1 de dependiente, 2 parciales más de `guardianships` y 1 parcial de códigos). Todas las FK usan la acción por defecto `NO ACTION`. Sin `DROP`, `DELETE`, `INSERT`, `UPDATE` ni `CONCURRENTLY`; el guard `src/guardianships/family-profiles.migration.spec.ts` lo comprueba y solo admite `ALTER TABLE users ALTER COLUMN email DROP NOT NULL`. Reversión manual por rama de Neon; no hay migración down.
 - **Particularidad de Prisma**: los índices únicos parciales y los parciales no caben en `@@index`/`@@unique`; `schema.prisma` los documenta en un comentario y la migración es la fuente. No ejecutar `prisma format`.
 
