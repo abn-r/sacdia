@@ -27,6 +27,8 @@ Detalle y fases: [family-profiles.md](../features/family-profiles.md), sección 
 
 Las fichas de consentimiento firmadas viven en un bucket **privado** de R2 (alias `GUARDIANSHIP_EVIDENCE`). Antes del deploy, el usuario debe crear el bucket y fijar `R2_BUCKET_GUARDIANSHIP_EVIDENCE` en Render. `R2_PUBLIC_URL_GUARDIANSHIP_EVIDENCE` y `R2_KEY_PREFIX_GUARDIANSHIP_EVIDENCE` son opcionales (el bucket no tiene URL pública; el prefijo por defecto es `guardianships/consent`).
 
+En desarrollo y QA la variable puede apuntar a un bucket privado que ya exista: los objetos quedan aislados bajo el prefijo `guardianships/consent`, solo se sirven con URL firmada de 900 s y la purga borra únicamente las claves registradas. El bucket no debe tener dominio personalizado ni `r2.dev` (el código no lo comprueba). Detalle en [family-profiles.md](../features/family-profiles.md), «Prerrequisitos de despliegue».
+
 Mientras la variable falte, la app arranca y el resto de la API funciona, pero **todas** las operaciones de ficha (subir, leer, verificar con ficha) responden 503 `GUARDIANSHIP_EVIDENCE_UNAVAILABLE`: se cierra por defecto, no se degrada. Relacionado: la Fase 2 retira las rutas de escritura del representante legal, por lo que backend y app de la Fase 2 deben desplegarse juntos.
 
 ---
