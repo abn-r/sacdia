@@ -7,7 +7,7 @@
 > La tabla refleja los decoradores HTTP efectivos en controllers NestJS; DTOs, ejemplos y errores finos viven en Swagger/runtime y docs de feature cuando aplique.
 
 **Estado**: ACTIVE
-**Actualizado**: 2026-10-20 (perfiles familiares, Fase 2 completa: sub-fases 2a, 2b y 2c, y las sub-fases 3a y 3b pendientes de merge; ver también aceptación legal 2026-10-15 y la nota de resincronización 2026-10-13)
+**Actualizado**: 2026-10-20 (perfiles familiares, Fase 2 completa: sub-fases 2a, 2b y 2c, y las sub-fases 3a, 3b y 3c pendientes de merge; ver también aceptación legal 2026-10-15 y la nota de resincronización 2026-10-13)
 **Total endpoints**: 866 decoradores HTTP en 108 archivos `*.controller.ts` de `development`. La matriz tiene además 20 filas **pendientes de merge (PR #448 de sacdia-backend)**: secciones `class-thresholds`, `investiture-windows`, `investiture-pastors`, `investiture-requests` y el `GET .../sections/:clubSectionId/score` de camporee-scoring.
 **Métodos (development)**: GET 353 · POST 279 · PATCH 125 · DELETE 96 · PUT 13
 **Auth detectada (development)**: Public 13 · JWT u Optional JWT 853
@@ -38,12 +38,20 @@
 > - Detalle en «Cuentas supervisadas de 13 a 17 años (Fase 3a)» (antes de «Resumen por dominio»).
 
 > [!NOTE]
-> **Perfiles familiares, Fase 3b** (sacdia-backend, rama `feat/family-profiles-phase3`, dieciséis commits `f31c24cb..1054af7a` sobre `4cf7070f`, Pendiente de merge (PR por abrir: feat/family-profiles-phase3)). <!-- TODO(orquestador): reemplazar por «PR #NNN de sacdia-backend» cuando exista el PR. --> Describe el comportamiento **implementado en el backend** de la sub-fase 3b (dispositivo vinculado de menores de 13 años), verificado contra el código de la rama (con referencias a archivo y, donde no se mueven, a línea). La app (tareas A01 a A11) y el QA ya están hechos en la rama (app `41388c13`); el registro del QA vive en `docs/testing/FAMILY-PROFILES-PHASE3B-QA.md`. Sigue pendiente de merge, y la sub-fase 3c (barridos por cron, ficha de dispositivos para el director) no se ha iniciado. Todo queda detrás de `FAMILY_LINKED_DEVICE_ENABLED` (por defecto `false`). Los totales de la cabecera tampoco incluyen estos endpoints.
+> **Perfiles familiares, Fase 3b** (sacdia-backend, rama `feat/family-profiles-phase3`, dieciséis commits `f31c24cb..1054af7a` sobre `4cf7070f`, Pendiente de merge (PR por abrir: feat/family-profiles-phase3)). <!-- TODO(orquestador): reemplazar por «PR #NNN de sacdia-backend» cuando exista el PR. --> Describe el comportamiento **implementado en el backend** de la sub-fase 3b (dispositivo vinculado de menores de 13 años), verificado contra el código de la rama (con referencias a archivo y, donde no se mueven, a línea). La app (tareas A01 a A11) y el QA ya están hechos en la rama (app `41388c13`); el registro del QA vive en `docs/testing/FAMILY-PROFILES-PHASE3B-QA.md`. Sigue pendiente de merge. La sub-fase 3c (barrido por cron y desvinculación desde el panel) ya está implementada; ver «Registro de menores por un director y acceso familiar en el panel (Fase 3c)». Todo queda detrás de `FAMILY_LINKED_DEVICE_ENABLED` (por defecto `false`). Los totales de la cabecera tampoco incluyen estos endpoints.
 >
 > - Nuevos (4): `POST /auth/device/pair` (público) y, en `guardianships`, `POST .../devices/pairing-tokens`, `GET .../devices` y `POST .../devices/:deviceId/revoke`.
 > - Cambian de contrato: `POST /auth/refresh` y `POST /auth/logout` (sesiones de dispositivo), `GET /auth/me` (`mode: "device"` y `principal.device`), `GET /auth/sessions` y `GET /admin/users/:userId/sessions` (campo `kind`), `GET /guardianships/me/dependents` (`limits.max_devices` y `linked_devices_count` real), `POST /users/me/fcm-tokens` (liga el token al dispositivo), `GET /clubs/:clubId/activities` y `GET /activities/:activityId` (sin listas de asistentes para el dispositivo) y las cuatro rutas de evidencia de especialidades, que pasan de `evidence:upload` a `honors:write`.
 > - 6 códigos de error nuevos (`AUTH_DEVICE_REVOKED`, `AUTH_DEVICE_SESSION_EXPIRED`, `DEVICE_PAIRING_TOKEN_INVALID`, `DEVICE_PAIRING_NOT_ELIGIBLE`, `DEVICE_LIMIT_REACHED`, `DEVICE_NOT_FOUND`) en `ErrorCode` y en los 4 `errors.json`.
 > - Esquema: `docs/database/SCHEMA-REFERENCE.md`, «Dispositivos vinculados (Fase 3b)». Detalle en «Dispositivo vinculado de menores de 13 años (Fase 3b)» (antes de «Resumen por dominio»).
+
+> [!NOTE]
+> **Perfiles familiares, Fase 3c** (sacdia-backend, rama `feat/family-profiles-phase3`, Pendiente de merge (PR por abrir: feat/family-profiles-phase3)). <!-- TODO(orquestador): reemplazar por «PR #NNN de sacdia-backend» cuando exista el PR. --> Describe el comportamiento **implementado en el backend** de la sub-fase 3c (el director registra menores, verificación independiente del consentimiento, tarjeta de acceso familiar en el panel, cron de cambios de edad). Los totales de la cabecera tampoco incluyen estos endpoints.
+>
+> - Nuevos (3): `POST /club-sections/:clubSectionId/dependents` (sección `guardianships`), `POST /admin/users/:userId/supervised-login/disable` y `POST /admin/users/:userId/linked-devices/:deviceId/revoke` (sección `admin-users`).
+> - Cambian de contrato: `POST .../membership-requests/:assignmentId/verify-consent` (permiso `club_members:approve` **o** `consent:verify`; `approve: true` exige `club_members:approve`), `GET .../membership-requests` (`consent.viewer_can_verify` y `consent.viewer_verify_block`), `GET /admin/users/:userId` (`data.family_access`), el cron de vencimiento de solicitudes (congela al menor en custodia) y los avisos de dispositivo por `majority` y `expired`.
+> - Permisos nuevos: `dependents:create` y `consent:verify` (migración de datos `20261022130000_seed_family_permissions`); columna nueva `dependent_profiles.teen_login_nudged_at` (migración `20261022120000_family_director_minors`). 1 código de error nuevo (`MR_APPROVE_PERMISSION_REQUIRED`). Cron nuevo `family-age-transitions`.
+> - **Resumen de la Fase 3 completa**: 17 endpoints nuevos (3a: 10, 3b: 4, 3c: 3). Detalle en «Registro de menores por un director y acceso familiar en el panel (Fase 3c)» (antes de «Resumen por dominio»).
 
 ## Cómo leer esta referencia
 
@@ -315,7 +323,7 @@ Tres variables booleanas en `config/env.validation.ts` (por defecto `false`; `sr
 | --- | --- | --- |
 | `FAMILY_TEEN_LOGIN_ENABLED` | Los endpoints de `supervised-login` (habilitar, deshabilitar, reactivar, restablecer y el `GET`; apagada → 404 `FAMILY_FEATURE_DISABLED`, `SupervisedLoginsService`) y el **inicio de sesión** por nombre de usuario (401 uniforme `AUTH_INVALID_CREDENTIALS`, `src/better-auth/better-auth.service.ts:369`). Las sesiones de nombre de usuario ya abiertas dan 401 `AUTH_SUPERVISED_ACCESS_REVOKED` en su siguiente petición y el refresh se rechaza (ver debajo) | 3a |
 | `FAMILY_LINKED_DEVICE_ENABLED` | Dispositivo vinculado de menores de 13 años: crear el token QR (apagada → 404 `FAMILY_FEATURE_DISABLED`), canjearlo (400 uniforme `DEVICE_PAIRING_TOKEN_INVALID`) y **autenticar** con un token de dispositivo (401 `AUTH_DEVICE_REVOKED` en cada petición y en el refresh, sin cambiar datos). Listar y desvincular dispositivos no dependen de la bandera. Ver «Dispositivo vinculado de menores de 13 años (Fase 3b)» | 3b |
-| `FAMILY_DIRECTOR_CREATE_MINOR_ENABLED` | Registro de menores por un director | 3c |
+| `FAMILY_DIRECTOR_CREATE_MINOR_ENABLED` | Registro de menores por un director: `POST /club-sections/:clubSectionId/dependents` (apagada → 404 `FAMILY_FEATURE_DISABLED`, después de los guards). No afecta a lo ya creado ni a la verificación, el reclamo o el vencimiento. Ver «Registro de menores por un director y acceso familiar en el panel (Fase 3c)» | 3c |
 
 **Apagar `FAMILY_TEEN_LOGIN_ENABLED` corta las sesiones de nombre de usuario ya abiertas** (hallazgo C1 de la verificación 3a, FP3-35; backend `035c633f`):
 
@@ -537,14 +545,14 @@ Un dispositivo **huérfano** es una fila `linked_devices` activa (`revoked_at IS
 | `guardian_account_closed` | El tutor que emparejó elimina su cuenta (los dispositivos de su tutoría) | `deviceReasonOf`, `guardianship-lifecycle.service.ts:553`; `src/auth/account-deletion.service.ts:230` |
 | `teen_login_enabled` | Se habilita el acceso propio del menor, o el menor canjea el código de vínculo de adolescente; también lo registra la compuerta | `supervised-logins.service.ts:384`, `link-codes.service.ts:602`; compuerta |
 | `dependent_frozen` | El último tutor sale y el menor se congela; el cron de 90 días sin tutor; la purga; la compuerta ve al menor inactivo o congelado | `guardianship-lifecycle.service.ts:288`, `pending-teen-cron.service.ts:378`, `dependent-profiles-purge-cron.service.ts`; compuerta |
-| `majority` | El menor llega a la mayoría de edad | **Solo la compuerta, de forma perezosa** (siguiente petición o refresh). El barrido por cron es de la sub-fase 3c |
+| `majority` | El menor llega a la mayoría de edad | La compuerta, de forma perezosa (siguiente petición o refresh), y el barrido diario del cron `family-age-transitions` (3c, `LinkedDevicesService.revokeBySystem`). Avisa a los tutores verificados (ruling W6) |
 | `device_logout` | El teléfono cierra sesión (se revoca antes de borrar la sesión) | `POST /auth/logout` |
 | `session_revoked` | Se borró su sesión por otro camino (usuario o admin), la compuerta no la encuentra, o el chequeo del tope de dispositivos encuentra una fila activa sin sesión (autocuración) | `markMissingSessionsRevoked`; compuerta; `LinkedDeviceRevocation.healOrphansInTx` |
-| `admin` | Reservado: existe `LinkedDevicesService.revokeAsAdmin` pero **ningún endpoint lo expone** en la 3b (entrada para la 3c) | `linked-devices.service.ts:162` |
-| `expired` | Pasó el tope absoluto de 180 días | Solo la compuerta; el barrido por cron de expiración es de la 3c |
+| `admin` | Un administrador lo desvincula desde el panel con un motivo escrito (3c): `POST /admin/users/:userId/linked-devices/:deviceId/revoke` | `LinkedDevicesService.revokeAsAdmin` |
+| `expired` | Pasó el tope absoluto de 180 días | La compuerta y el barrido del cron `family-age-transitions` (3c). Avisa a los tutores verificados (ruling W6) |
 
 - **Los motivos de 3a se revocan dentro de la transacción del llamador** (el dispositivo y el cambio de familia se confirman o se revierten juntos) a través del puerto `LINKED_DEVICE_REVOKER`, que desde la 3b es **obligatorio** y está ligado a `LinkedDevicesService` (ya no hay no-op; `src/guardianships/guardianships.module.ts:80`). El `epoch` lo sube el llamador tras confirmar.
-- **Avisos al tutor por revocación**: solo para `guardian` (a los otros tutores), `guardianship_revoked`, `guardian_account_closed`, `device_logout`, `session_revoked` y `admin` (`NOTIFIED_REASONS`, `linked-devices.service.ts:53`). **No** avisan `teen_login_enabled` (ya tiene su aviso), `dependent_frozen`, `majority` ni `expired`, ni las revocaciones que origina la propia compuerta. Cuando la revocación ocurre dentro de la transacción de otro servicio (3a), el aviso se envía solo cuando la revocación ya es visible desde otra conexión (reintentos a los 50 ms, 250 ms, 1 s, 3 s y 8 s); si la transacción se revirtió no se anuncia nada.
+- **Avisos al tutor por revocación**: solo para `guardian` (a los otros tutores), `guardianship_revoked`, `guardian_account_closed`, `device_logout`, `session_revoked`, `admin`, `majority` y `expired` (`NOTIFIED_REASONS`, `linked-devices.service.ts`). **No** avisan `teen_login_enabled` (ya tiene su aviso) ni `dependent_frozen` (lo causa una acción de un adulto). Desde la 3c (ruling W6) **sí** avisan `majority` y `expired`, y las revocaciones que origina la propia compuerta también anuncian: el aviso sale una sola vez, de quien logre el compare-and-set de la revocación (el barrido o la compuerta). Cuando la revocación ocurre dentro de la transacción de otro servicio (3a), el aviso se envía solo cuando la revocación ya es visible desde otra conexión (reintentos a los 50 ms, 250 ms, 1 s, 3 s y 8 s); si la transacción se revirtió no se anuncia nada.
 - **Purga** (`dependent-profiles-purge`, commit `a8af9091`): revoca los dispositivos que queden (`dependent_frozen`), borra todos los tokens FCM y todos los tokens de emparejamiento del menor y anonimiza sus filas de `linked_devices` (`label` = `Dispositivo`, `app_version` y `fcm_token_id` en `NULL`); las filas se conservan como auditoría. Detalle en `docs/database/SCHEMA-REFERENCE.md`, «Retención y purga».
 - Los dispositivos ya vinculados **no** se revocan por cumplir 13 años (ver la compuerta).
 
@@ -576,6 +584,231 @@ Los seis códigos están en `ErrorCode` (`src/common/errors/error-codes.ts:880-8
 ### Bandera `FAMILY_LINKED_DEVICE_ENABLED`
 
 Por defecto `false` (`src/config/env.validation.ts:240`). Apagada: no se crean tokens (404), no se canjean (400 uniforme), y todo token de dispositivo y todo refresh de dispositivo responde 401 `AUTH_DEVICE_REVOKED` **sin cambiar datos** (las filas siguen activas; al volver a encenderla los dispositivos funcionan otra vez). Listar y desvincular siguen disponibles. **Cambiar la bandera en un servidor desplegado exige reiniciarlo**, igual que `FAMILY_TEEN_LOGIN_ENABLED` (ver «Banderas de configuración»: `ConfigService` lee la foto del entorno del arranque). `GET /auth/me` la expone en `family_features.linked_device`. Para cortar todos los dispositivos en una emergencia: apagarla y reiniciar.
+
+## Registro de menores por un director y acceso familiar en el panel (Fase 3c)
+
+> [!NOTE]
+> Perfiles familiares, Fase 3c, rama `feat/family-profiles-phase3` de sacdia-backend (los diez commits de la 3c son `cf3d6ce2`, `ef6baa39`, `aecd39d1`, `7b51015b`, `44b7b334`, `490dd33a`, `eb574871`, `09e4016d`, `43bbd35d` y `32022392`, en ese orden). Pendiente de merge (PR por abrir: feat/family-profiles-phase3). <!-- TODO(orquestador): reemplazar por «PR #NNN de sacdia-backend» cuando exista el PR, aquí y en las demás notas «Fase 3c» de este archivo. -->
+> Describe el comportamiento **implementado en el backend**, verificado contra el código de la rama. La app (tareas A01 a A06) y el panel (M01 a M05) están hechos en sus ramas `feat/family-profiles-phase3`. El QA en vivo de la 3c sigue **Pendiente**: `docs/testing/FAMILY-PROFILES-PHASE3C-QA.md`. Esquema: `docs/database/SCHEMA-REFERENCE.md`, «Registro por director y acceso familiar (Fase 3c)». Las migraciones `20261022120000_family_director_minors` y `20261022130000_seed_family_permissions` están aplicadas en Neon `development` desde el 2026-10-20 (con aprobación del usuario); no en producción.
+
+Tres piezas: (1) un director registra a un menor de 0 a 17 años en su sección y el club lo custodia hasta que lo reclame una familia, (2) la verificación del consentimiento la hace **otra persona** distinta de quien lo creó, y (3) el panel puede cortar el acceso propio o un dispositivo de un menor, mientras un cron avisa a los tutores cuando el menor cumple la edad de acceso propio o cuando un dispositivo vence.
+
+### Permisos nuevos y quién los tiene
+
+Los crea la migración `20261022130000_seed_family_permissions` (solo DML, `ON CONFLICT`; las mismas filas viven en `prisma/seeds/permissions.seed.sql` y `prisma/seeds/role-permissions.seed.sql`, y una prueba comprueba que coinciden).
+
+| Permiso | Para qué | Roles que lo tienen |
+| --- | --- | --- |
+| `dependents:create` | Registrar un menor en una sección (`POST /club-sections/:clubSectionId/dependents`) | Rol de club `director` y `deputy-director`; globales `admin`, `assistant-admin` y `super-admin` |
+| `consent:verify` | Verificar el consentimiento de un menor **sin** poder aprobar la solicitud (`verify-consent` con `approve: false`) | Rol de club `director`, `deputy-director`, `secretary` y `secretary-treasurer`; globales `admin`, `assistant-admin` y `super-admin` |
+
+La migración da las filas de admin de forma explícita porque una migración no puede apoyarse en los comodines de los seeds. En Neon `development` no existe el rol `assistant-admin`, así que ahí se insertaron **10** asignaciones y no 12 (la migración une solo roles activos que existen).
+
+> [!WARNING]
+> **Limitación B11: los coordinadores NO tienen `consent:verify`.** El diseño suponía que un coordinador global (`coordinator`, `zone-coordinator`, `general-coordinator`) con `consent:verify` resolvería recursos de sección dentro de su territorio. La prueba `src/auth/permissions-consent-verify.spec.ts` (guard real y `AuthorizationContextService` real) lo desmintió: `PermissionsGuard.validateInstanceScope` solo deja pasar si `canManageClub` es verdadero o si el llamante tiene una asignación activa en esa sección, y `canManageClub` usa `resolveActorTerritoryScope`, que solo conoce a `super-admin`, `director-dia`/`assistant-dia`, `director-union`/`assistant-union`, `director-lf`/`assistant-lf` y `admin`/`assistant-admin`. Un coordinador queda en alcance abierto y recibe 403 `GUARD_CLUB_SCOPE_REQUIRED` **incluso dentro de su territorio**. Por eso la migración y los seeds **no** le dan el permiso: sería inútil hasta que `resolveActorTerritoryScope` aprenda el territorio de coordinación (cambio aparte, pendiente de decisión). `assistant-lf` ya verifica por `club_members:approve`.
+>
+> **Consecuencia práctica hoy**: los cuatro roles de club con `consent:verify` ya tienen `club_members:approve`, así que el permiso nuevo **no añade ningún verificador** todavía; existe para el día en que haya un revisor que verifique sin aprobar. Y un revisor que tuviera **solo** `consent:verify` no podría listar las solicitudes ni ver la ficha: `GET .../membership-requests` y `GET`/`POST .../consent-evidence` siguen exigiendo `club_members:approve`. Es un hueco conocido (hoy sin efecto, porque no existe ese revisor).
+
+### `POST /api/v1/club-sections/:clubSectionId/dependents`
+
+Un director registra a un menor en su sección. Controller `DirectorDependentsController` (`src/guardianships/director-dependents.controller.ts`), servicio `DirectorDependentsService`.
+
+- **Autorización**: `@RequirePermissions('dependents:create')` con `@AuthorizationResource({ type: 'club_section', idParam: 'clubSectionId' })`, es decir, el permiso se exige **en esa sección** (un director de otra sección recibe 403). Sin `@ActingScope`: un tutor actuando recibe 403 `ACTING_FOR_SCOPE_DENIED`, y un adolescente supervisado o un dispositivo 403 `PRINCIPAL_SCOPE_DENIED` (denegado por defecto).
+- **Bandera** `FAMILY_DIRECTOR_CREATE_MINOR_ENABLED` (por defecto `false`): apagada → 404 `FAMILY_FEATURE_DISABLED`. La bandera se comprueba **dentro del handler, después de los guards**, de modo que un llamante sin permiso recibe 403 aunque la bandera esté apagada. Apagarla no toca nada de lo ya creado (verificar, reclamar, vencer siguen funcionando). `GET /auth/me` la expone como `family_features.director_create_minor`.
+- **Límite**: 30 por hora por director (429).
+- **Cuerpo** (`CreateDirectorDependentDto`; `forbidNonWhitelisted` está activo, así que cualquier clave extra es 400):
+
+```json
+{
+  "name": "Luis",
+  "paternal_last_name": "Pérez",
+  "maternal_last_name": "López",
+  "birthday": "2016-02-10",
+  "gender": "M",
+  "sworn_declaration": true,
+  "accepted_terms_version": "2.0.0-family",
+  "accepted_privacy_version": "2.0.0-family"
+}
+```
+
+  `name` y `paternal_last_name` obligatorios (hasta 50 caracteres, recortados); `maternal_last_name` opcional; `birthday` `YYYY-MM-DD`; `gender` opcional `M` o `F`; `sworn_declaration` debe ser `true` (el director declara bajo protesta que el tutor firmó la autorización en papel); las dos versiones legales deben ser las vigentes (`GET /legal/current`). **No hay** `email`, `access_mode`, `account`, contraseña ni `relationship_type_id` (el director no es de la familia: quien tiene al menor es el club).
+- **Edad**: `0 <= edad < mayoría de edad del país de la sección` (política de país del club de la sección, no la del director). Es más ancha que la del tutor (un menor de 15 años es válido). Fecha futura, edad negativa o mayor de edad → 422 `GUARDIANSHIP_DEPENDENT_AGE_OUT_OF_RANGE`.
+- **Qué crea** (todo en **una** transacción; si algo falla no queda nada): `users` (UUID nuevo, `email` NULL, `country_id` del club de la sección; no se fijan `union_id` ni `local_field_id`), `users_pr` con todo en `false`, `users_roles` con el rol global `user`, `dependent_profiles` (`created_by_user_id` = el director), una tutoría de **custodia del club** (`is_custodian`, `custodian_club_id` = club principal de la sección, principal, `consent_status = pending`, `sworn_declaration_at`), una asignación `member` **`pending`** en la sección y el año eclesiástico vigente (nunca `active`), las aceptaciones de Términos y Privacidad **del menor registradas por el director** (`accepted_by_user_id` = director) y la fila de auditoría `dependent` / `created_by_director`. No existe fila `account`: el menor no tiene acceso.
+- **Después de confirmar**: sube el `epoch` del menor y avisa a los revisores de la sección (asignación **activa** de `director`, `deputy-director`, `secretary` o `secretary-treasurer`), **sin** avisar a quien lo creó: título «Menor · consentimiento pendiente», fuente `membership_requests:new_request`, de mejor esfuerzo (nunca falla ni retrasa la respuesta).
+- **Respuesta 201**:
+
+```json
+{
+  "status": "success",
+  "data": {
+    "dependent": { "user_id": "uuid", "name": "Luis", "birthday": "2016-02-10", "age": 10 },
+    "guardianship": { "guardianship_id": "uuid", "is_custodian": true, "consent_status": "pending" },
+    "assignment": { "assignment_id": "uuid", "status": "pending", "club_section_id": 163 }
+  }
+}
+```
+
+- **Errores**: 400 de validación (`sworn_declaration` distinto de `true`, clave desconocida, formato) o 400 `LEGAL_VERSION_MISMATCH` (versión no vigente; es lo primero que se comprueba, antes de tocar la base); 403 (sin `dependents:create` en esa sección, o principal no permitido); 404 `FAMILY_FEATURE_DISABLED` (bandera apagada); 404 `CLUB_SECTION_NOT_FOUND` (sección inexistente o sin club principal); 422 `GUARDIANSHIP_DEPENDENT_AGE_OUT_OF_RANGE`; 429 (31.ª en una hora); 500 `POST_REG_NO_ACTIVE_YEAR` (no hay año eclesiástico vigente: no se crea nada).
+- **El menor no es miembro** hasta que **otra persona** verifique la ficha firmada y se apruebe la solicitud (secciones siguientes).
+
+### Verificación independiente del consentimiento (`verify-consent`)
+
+`POST /club-sections/:clubSectionId/membership-requests/:assignmentId/verify-consent` (sección `membership-requests`) cambia así en la 3c:
+
+- **Permisos con «cualquiera de»**: `club_members:approve` **o** `consent:verify` (`@RequirePermissions({ permissions: [...], mode: 'any' })`).
+- **`approve: true` exige además `club_members:approve`**: si el llamante solo tiene `consent:verify`, responde 403 `MR_APPROVE_PERMISSION_REQUIRED` **antes de leer o escribir nada** (la comprobación está en el controller y falla cerrada si el guard no dejó la autorización resuelta). Quien solo tiene `consent:verify` puede llamar con `approve: false` (u omitido); la aprobación la hace después alguien con `club_members:approve`.
+- **Cuatro ojos por id de usuario** (regla A14, sin cambios de contrato, con más escenarios probados): para un menor bajo custodia del club no pueden verificar **quien lo creó** (`dependent_profiles.created_by_user_id`), **quien subió la ficha vigente** ni el último tutor que lo dejó en custodia → 403 `GUARDIANSHIP_CUSTODIAN_SELF_VERIFY`, sin escribir nada; un tutor vigente del menor → 403 `GUARDIANSHIP_GUARDIAN_SELF_VERIFY`. La regla va por **id de usuario**: un creador que además es administrador sigue bloqueado, y sigue bloqueado aunque después pierda el rol. No hay un código de verificador nuevo.
+- Si quien creó al menor llama a `approve` mientras el consentimiento sigue `pending`, la compuerta responde 409 `MR_CONSENT_NOT_VERIFIED`.
+- **Camino completo**: el director crea al menor → (cualquier revisor con `club_members:approve` o el propio director sube la ficha; si la sube el creador, ese creador sigue sin poder verificar) → **otra persona** (subdirector, secretario, secretario-tesorero u otro director, o `admin`) verifica con `verify-consent` → alguien con `club_members:approve` aprueba (`approve: true` en la misma llamada, o `approve` aparte). El evento `guardianship.consent_verified` queda con el verificador como actor.
+
+### `consent.viewer_can_verify` y `consent.viewer_verify_block`
+
+`GET /club-sections/:clubSectionId/membership-requests` añade **dos campos al bloque `consent`** de cada solicitud de un menor (commit `32022392`). Se calculan para **quien consulta** con el mismo predicado que aplica `verify-consent` (un solo módulo, `src/membership-requests/consent-four-eyes.ts`), de modo que la lista y el endpoint no pueden discrepar:
+
+```json
+{
+  "required": true,
+  "dependent": true,
+  "guardian_linked": false,
+  "guardianship_id": "uuid",
+  "status": "pending",
+  "evidence_uploaded": true,
+  "guardians": [{ "display_name": "Club Estella", "relationship_type_name": null, "is_primary": true }],
+  "viewer_can_verify": false,
+  "viewer_verify_block": "self_custodian"
+}
+```
+
+| Campo | Valores | Significado |
+| --- | --- | --- |
+| `viewer_can_verify` | `true` / `false` | `true` **solo si** hay algo que verificar (el menor tiene una tutoría principal activa, no de prueba y no revocada, todavía `pending`, **y** una ficha vigente subida) y quien consulta no está impedido |
+| `viewer_verify_block` | `"self_guardian"`, `"self_custodian"` o `null` | `self_guardian`: quien consulta tiene **cualquier** tutoría no revocada del menor (los datos de prueba cuentan, igual que en `verify-consent`). `self_custodian`: la tutoría principal es de custodia **y** quien consulta subió la ficha vigente, creó al menor o es el tutor de la **última** cesión (las cesiones más antiguas no impiden). Si se cumplen las dos, gana `self_guardian` |
+
+- `viewer_can_verify = false` con `viewer_verify_block = null` significa **nada que verificar todavía** (sin ficha subida, ya verificado, sin tutoría principal, o un adolescente que se registró solo y no tiene `dependent_profiles`). `viewer_verify_block` es `null` incluso para quien creó al menor hasta que exista una ficha.
+- No dice nada de **permisos** (listar ya exige `club_members:approve`) y nunca expone los ids de creador, de quien subió la ficha ni de la cesión. Los adultos siguen con `consent: null`.
+- Es una **pista para la interfaz**: la autoridad sigue siendo `verify-consent` (403). Es una instantánea del momento de la consulta: quien sube la ficha después de cargar la lista pasa a ser el subidor vigente.
+- Costo: constante por página. La consulta de la página también lee quién subió la ficha y quién creó al menor; se añaden una consulta de las tutorías de quien consulta y otra de las cesiones (solo si hay candidatos de custodia), y se omiten si ninguna solicitud tiene tutoría principal pendiente con ficha.
+
+### Código de reclamo para un menor bajo custodia
+
+`POST /club-sections/:clubSectionId/dependents/:userId/claim-codes` (sección `guardianships`, **sin cambios de contrato** en la 3c) sirve ahora también para los menores que registra un director: exige `club_members:approve` en la sección (no `dependents:create` ni `consent:verify`), el menor debe tener perfil de dependiente sin congelar y una asignación `pending` o `active` en esa sección, y ningún tutor activo (si ya lo hay, 409 `GUARDIANSHIP_ALREADY_GUARDIAN`; si no cumple, 404 `GUARDIANSHIP_NOT_FOUND`). Código `XXXX-XXXX`, 7 días, 10 por hora.
+
+Al canjearlo (`POST /guardianships/link-codes/redeem`, propósito `director_claim`) el comportamiento de la Fase 2 **no cambió**, tampoco para un menor de 13 a 17 años:
+
+- El adulto que canjea queda como tutor **principal**, de persona (no custodia), en consentimiento **`pending`**: la verificación **no se hereda**. La fila de custodia del club pasa a `revoked` con `revoked_reason = claimed`.
+- El creador original **sí puede** verificar la ficha **nueva del tutor**: la regla de cuatro ojos de custodia aplica solo a las filas de custodia (decisión P3-A26). Sigue sin poder si es tutor vigente del menor.
+- Un menor de 13 a 17 años reclamado puede después recibir acceso propio (`supervised-login`), pero solo con el tutor ya **verificado**.
+- `director_claim` solo existe para menores **sin cuenta**; si el menor ya tiene una, el canje responde el 400 uniforme.
+
+### Solicitud vencida de un menor en custodia
+
+El cron de membresía (`expireStaleRequests`, `MembershipRequestsService`) sigue venciendo las solicitudes `pending` (para un menor con consentimiento sin verificar, a los 30 días como mínimo; ver «Expiración»). **Nuevo en la 3c** (ruling P3-A18): cuando vence la solicitud de un menor que solo tiene la **custodia del club** (sin ningún tutor de persona, ni siquiera `pending` o con una reclamación en curso, y sin otra membresía `pending` o `active`), el menor se **congela** con el calendario de la Fase 2: `dependent_profiles.frozen_at = now`, `purge_after = now + 90 días`, se revocan sus dispositivos (`dependent_frozen`) y se sube el `epoch`. El cron `dependent-profiles-purge` lo anonimiza después. Un menor con tutor, o con otra membresía, no se toca. Los candados de dependiente se toman **antes** de la escritura masiva (el orden contrario podría bloquearse con `approve`).
+
+### Cron `family-age-transitions`
+
+`FamilyAgeTransitionsCronService` (`src/guardianships/family-age-transitions-cron.service.ts`, registrado en `GuardianshipsModule`). `@Cron('0 14 * * *')` en UTC, nombre de trabajo `family-age-transitions`, candado `cron:family-age-transitions` de 23 horas, lotes de 100 (cursor por id), registrado en `CronRunLogger` (una corrida omitida por el candado también queda anotada). Es idempotente; si hubo fallos en algún envío o revocación la corrida se registra como fallida. Tiene dos fases:
+
+1. **Aviso a los 13 años (nudge)**. Candidatos: usuarios activos **sin cuenta** y con fecha de nacimiento, con `dependent_profiles` sin congelar ni purgar, `teen_login_nudged_at IS NULL` y sin acceso propio habilitado (sin fila `supervised_logins` o desactivado), cuya edad, en la política y la zona horaria de su país, sea `>=` la edad mínima de acceso propio y `<` la mayoría de edad. Se usa `>=`, no «cumple hoy», para que un día de cron perdido se recupere solo.
+   - **Destinatarios**: los que da `GuardianSecurityNotificationsService.recipientsOf` (tutores activos, no de prueba, no custodia, con tutoría **verificada**, máximo 4). Un menor con tutoría `pending`, solo con custodia del club o sin tutor se **omite** y queda en NULL: se le avisará cuando haya un tutor verificado.
+   - **Mensaje**: push y bandeja, nunca correo; fuente `family:age_nudge` (categoría `reminders`); `data.type = dependent_age_milestone` (con `event: age_milestone` y `dependent_user_id`); título «{Nombre} ya puede tener su propio acceso» y cuerpo «Puedes activar el inicio de sesión propio de {Nombre} desde su perfil.». No incluye edad ni fecha de nacimiento.
+   - **Una sola vez**: la corrida **reclama** `teen_login_nudged_at = now` con un compare-and-set (`updateMany` con `teen_login_nudged_at IS NULL`) **antes** de enviar, así que dos instancias o un reintento no pueden avisar dos veces. Si **todos** los envíos fallan, se libera la marca y se cuenta como fallo (se reintenta mañana); con al menos un envío logrado la marca se queda.
+   - **Bandera**: con `FAMILY_TEEN_LOGIN_ENABLED` apagada la fase ni lee candidatos: no envía ni marca nada.
+2. **Barrido de dispositivos vinculados** (**sin** bandera: el mantenimiento debe correr aunque la bandera esté apagada). Recorre los dispositivos activos: si el menor ya tiene la **mayoría de edad** (zona horaria del país) se revoca con motivo `majority`; si pasó `absolute_expires_at` (180 días) con motivo `expired`; `majority` gana a `expired`. Un niño que cumple 13 años **no** se revoca. Un dispositivo cuyo menor no tiene fecha de nacimiento se deja a la compuerta por petición, que lo revoca como `majority` (falla cerrada). Usa `LinkedDevicesService.revokeBySystem`, que revoca en una transacción con el candado del menor y la fecha de nacimiento releída bajo el candado (`majority`), o con el tope releído en el `WHERE` (`expired`).
+   - **Aviso a los tutores (ruling W6)**: los motivos `majority` y `expired` avisan a los tutores verificados restantes con `family:security` «{nombre} · dispositivo desvinculado» y una frase propia («{nombre} ya tiene la edad para usar su propia cuenta.» / «La vinculación venció después de 180 días; puedes vincularlo de nuevo.»). **Una sola vez**, gane el barrido o la compuerta por petición (el aviso sale de quien logra el compare-and-set de la revocación). Para `majority` se salta el corte habitual «los avisos paran a la mayoría de edad», porque es justo el caso. Los motivos `teen_login_enabled` y `dependent_frozen` siguen sin avisar.
+
+### Pushes: `data.type` frente a fuentes `family:*`
+
+El servidor usa dos vocabularios y la app entiende **ambos** (`lib/core/notifications/family_push_route.dart`). La **fuente** (`source`, la categoría de preferencias y la bandeja) es `family:*`; el `data.type` del payload del push es otro nombre:
+
+| Fuente de la notificación | `data.type` realmente enviado | Quién lo recibe |
+| --- | --- | --- |
+| `family:security` | `dependent_security` (con `event`, p. ej. `teen_login_disabled`, `device_paired`, `device_revoked`, y `dependent_user_id`) | Tutores verificados del menor |
+| `family:evidence_uploaded` | `dependent_evidence_uploaded` | Tutores verificados del menor |
+| `family:age_nudge` (3c) | `dependent_age_milestone` | Tutores verificados del menor |
+| `family:teen_reminder` | `teen_guardian_reminder` (con `days_left`) | El adolescente sin tutor |
+| `family:guardian_linked` | `teen_guardian_linked` | El adolescente, cuando un adulto se vincula |
+
+La tabla lista los cinco `data.type` que la app enruta al tocar un push de familia; las demás fuentes `family:*` (`family:consent_verified`, `family:custody_transferred`) y el aviso a revisores (`membership_requests:new_request`) no entran en ese ruteo.
+
+### Acceso familiar en el detalle de usuario y acciones del panel
+
+Solo para el panel (`sacdia-admin`). Todo con el envoltorio `{ status: 'success', data }`.
+
+**`GET /api/v1/admin/users/:userId` → `data.family_access`** (junto a `guardianships`). Es `null` si el actor no puede leer la familia sensible `legal_representative` (permiso `legal_representative:read`, o el respaldo `users:read_detail` hasta 2027-03-31); un usuario sin acceso ni dispositivos recibe el bloque vacío `{ "supervision": null, "supervised_login": null, "linked_devices": [] }`.
+
+```json
+{
+  "supervision": "active",
+  "supervised_login": {
+    "status": "active",
+    "method": "handle",
+    "login_handle": "mateo-k3j9q2xz",
+    "origin": "guardian_enabled",
+    "enabled_at": "2026-10-20T15:00:00.000Z",
+    "enabled_by": { "user_id": "uuid", "display_name": "María Pérez" },
+    "disabled_at": null,
+    "disabled_reason": null,
+    "password_set_by": "guardian",
+    "pending_since": null
+  },
+  "linked_devices": [
+    {
+      "linked_device_id": "uuid",
+      "label": "iPhone de Sofi",
+      "platform": "ios",
+      "app_version": "1.4.0",
+      "status": "active",
+      "paired_by": { "user_id": "uuid", "display_name": "María Pérez" },
+      "paired_at": "2026-10-20T15:00:00.000Z",
+      "last_seen_at": null,
+      "absolute_expires_at": "2027-04-18T15:00:00.000Z",
+      "revoked_at": null,
+      "revoked_reason": null
+    }
+  ]
+}
+```
+
+- `supervision` es `pending_guardian` o `active` (o `null` si no hay acceso propio). Se deriva del acceso guardado y de una tutoría `verified` real (no de prueba, no revocada; la custodia cuenta). **No considera la edad.**
+- `supervised_login.status` es `active`, `pending_guardian` o `disabled`; `disabled_reason` es `guardian`, `admin` o `unlinked_purged`. `login_handle` solo llega con el permiso sensible (nunca el correo); en un acceso por correo es `null`.
+- `linked_devices` incluye los activos y los revocados en los últimos 30 días, del más reciente al más antiguo; `status` es `active` o `revoked`.
+- `GET /admin/users/:userId/sessions` (sección `admin-auth`) ya trae `kind: "user" | "device"` y `linkedDeviceId` (camelCase) desde la 3b; la 3c no lo cambia.
+
+**`POST /api/v1/admin/users/:userId/supervised-login/disable`** — corta el acceso propio de un menor. Controller `AdminUsersController` (clase `@GlobalRoles('admin','super-admin')`), `@RequirePermissions('users:update_admin')` con `@SensitiveUserSubresource('legal_representative','update')` (permiso `legal_representative:update`, con el respaldo `users:update_profile` hasta 2027-03-31), recorte territorial del actor antes de actuar. Responde **200**.
+
+- Cuerpo `{ "reason": "..." }`: el motivo es **obligatorio**, recortado, de **5 a 500** caracteres, y es la **única** clave aceptada (cualquier otra, 400).
+- Efectos iguales a los del tutor: se borran todas las sesiones, la siguiente petición del menor es 401 `AUTH_SUPERVISED_ACCESS_REVOKED`, se sube el `epoch` y se avisa a **todos** los tutores verificados (`family:security`, «acceso desactivado»). El motivo escrito **solo** queda en la fila de auditoría `admin.supervised_login.disabled` (`changes: { reason, sessions_revoked }`, actor = el admin); `disabled_reason` queda en `admin` y `disabled_by_user_id` en el admin. **No** se guarda en el acceso, no se muestra al menor ni a los tutores.
+- No depende de `FAMILY_TEEN_LOGIN_ENABLED` ni de la edad, y es **idempotente**. No crea filas.
+- Respuesta: `{ "supervised_login": { "status": "disabled", "method", "origin", "enabled_at", "disabled_at", "disabled_reason": "admin", "password_set_by" } }` (nunca el nombre de usuario ni el correo).
+- Errores: 400 (motivo ausente, corto, largo o clave extra), 403 (sin permisos), 404 `ADMIN_USER_NOT_FOUND` (también fuera del alcance territorial), 404 `SUPERVISED_LOGIN_NOT_FOUND` (el usuario no tiene acceso propio).
+
+**`POST /api/v1/admin/users/:userId/linked-devices/:deviceId/revoke`** — desvincula un dispositivo. Mismos permisos, alcance y cuerpo que el anterior; `:deviceId` es un UUID. Responde **200**.
+
+- Efectos iguales a los del tutor (sesión borrada, limpieza de FCM, `epoch`, la siguiente petición del teléfono es 401 `AUTH_DEVICE_REVOKED`, aviso `family:security` «dispositivo desvinculado» a **todos** los tutores verificados). Una sola fila de auditoría `admin.linked_device.revoked` con `changes: { reason, revoked_reason: 'admin', label, platform }`; el dispositivo queda con `revoked_reason = admin`.
+- Respuesta: `{ "linked_device_id", "revoked_at", "revoked_reason": "admin" }`. **Idempotente**: repetirlo devuelve los valores originales sin escribir ni avisar de nuevo.
+- Errores: 400 (motivo), 403, 404 `ADMIN_USER_NOT_FOUND` o 404 `DEVICE_NOT_FOUND` (el dispositivo no existe o es de **otra familia**).
+
+**No existe ninguna ruta de admin para habilitar, reactivar, restablecer ni leer una contraseña** del menor (las pruebas comprueban que responden 404 o 405). Corregir un acceso es cosa del tutor.
+
+### Errores de la Fase 3c
+
+Solo hay **un código nuevo** en `ErrorCode` y en los 4 `errors.json` (`es`, `en`, `fr`, `pt-BR`); el resto reutiliza los existentes.
+
+| Status | `code` | Cuándo |
+| --- | --- | --- |
+| 403 | `MR_APPROVE_PERMISSION_REQUIRED` | `verify-consent` con `approve: true` sin `club_members:approve` (solo `consent:verify`) |
+| 403 | `GUARDIANSHIP_CUSTODIAN_SELF_VERIFY` | Verifica quien creó al menor, subió la ficha vigente o cedió al menor (custodia del club) |
+| 403 | `GUARDIANSHIP_GUARDIAN_SELF_VERIFY` | Verifica un tutor vigente del menor |
+| 409 | `MR_CONSENT_NOT_VERIFIED` | Aprobar mientras el consentimiento sigue `pending` |
+| 422 | `GUARDIANSHIP_DEPENDENT_AGE_OUT_OF_RANGE` | Registrar un menor con edad fuera de `0 <= edad < mayoría de edad del país de la sección` |
+| 500 | `POST_REG_NO_ACTIVE_YEAR` | Registrar un menor sin año eclesiástico vigente (no se crea nada) |
+| 404 | `FAMILY_FEATURE_DISABLED` | Registrar un menor con `FAMILY_DIRECTOR_CREATE_MINOR_ENABLED` apagada |
+| 404 | `SUPERVISED_LOGIN_NOT_FOUND` | Desactivar desde el panel un usuario sin acceso propio |
+| 404 | `DEVICE_NOT_FOUND` | Revocar desde el panel un dispositivo inexistente o de otra familia |
+
+### Bandera `FAMILY_DIRECTOR_CREATE_MINOR_ENABLED`
+
+Por defecto `false` (`config/env.validation.ts`; se lee del arranque como las otras dos: cambiarla exige reiniciar). Solo gobierna el `POST /club-sections/:clubSectionId/dependents`. Apagada no se deshace nada. Las valida `env.validation.ts` y las comprueba la prueba de cableado `family-phase3c.wiring.spec.ts`. `.env.example` no pudo leerse ni editarse durante la implementación (regla de denegación del agente): comprobar a mano que liste las tres banderas `FAMILY_*` antes de abrir el PR.
 
 ## Resumen por dominio
 
@@ -930,8 +1163,10 @@ Errores: 404 `HONOR_INSTRUCTOR_PROPOSAL_NOT_FOUND`; 409 `HONOR_INSTRUCTOR_PROPOS
 | --- | --- | --- | --- | --- | --- | --- |
 | GET | `/api/v1/admin/users` | JWT | Global: admin, super-admin, director-lf, assistant-lf, director-union, assistant-union, director-dia, assistant-dia (USER_MANAGEMENT_ROLES, pisa la cerca de clase); Permisos: users:read | Listar usuarios administrativos con alcance por rol (ALL/DIVISION/UNION/LOCAL_FIELD). Ordena el conjunto filtrado **antes** de `skip`/`take`. Query: `search`, `role` (OR global o club), `active`, `unionId`, `localFieldId`, `sortBy` (`name` | `created_at`, default `name`), `sortOrder` (`asc` | `desc`, default `asc`), `page`, `limit`. `sortBy=name`: `name`, `paternal_last_name`, `maternal_last_name` (nulls last) + `user_id` asc. `sortBy=created_at`: `created_at` + `user_id` asc. Enum inválido → 400. Cada ítem incluye `roles` (slugs únicos global+club) y `club_assignments` compactos `{ assignment_id, role_name, section_name, club_name }`. El panel de lista muestra un badge por cargo (sin sección; el mismo cargo en varias secciones se colapsa). | AdminUsersService.listUsers() | `src/admin/admin-users.controller.ts` |
 | GET | `/api/v1/admin/users/bulk-template` | JWT | Global: admin, super-admin; Permisos: users:bulk_create; Global: admin, super-admin, director-lf, assistant-lf, director-union, assistant-union, director-dia, assistant-dia | Descarga plantilla .xlsx para carga masiva de usuarios | AdminUsersService.getBulkTemplateBuffer() | `src/admin/admin-users.controller.ts` |
-| GET | `/api/v1/admin/users/:userId` | JWT | Global: admin, super-admin, director-lf, assistant-lf, director-union, assistant-union, director-dia, assistant-dia (USER_MANAGEMENT_ROLES, pisa la cerca de clase); Permisos: users:read_detail | Obtener detalle de usuario validando alcance por rol del actor. `email` puede ser `null` (dependientes). Añade `guardianships` (quién responde por el usuario y por quién responde; ver «Tutorías en el detalle de usuario» debajo), `null` si el actor no tiene `legal_representative:read` ni el respaldo transitorio `users:read_detail` | AdminUsersService.getUserById() | `src/admin/admin-users.controller.ts` |
+| GET | `/api/v1/admin/users/:userId` | JWT | Global: admin, super-admin, director-lf, assistant-lf, director-union, assistant-union, director-dia, assistant-dia (USER_MANAGEMENT_ROLES, pisa la cerca de clase); Permisos: users:read_detail | Obtener detalle de usuario validando alcance por rol del actor. `email` puede ser `null` (dependientes). Añade `guardianships` (quién responde por el usuario y por quién responde; ver «Tutorías en el detalle de usuario» debajo), `null` si el actor no tiene `legal_representative:read` ni el respaldo transitorio `users:read_detail`. Fase 3c: añade `family_access` (acceso propio y dispositivos vinculados; mismo `null`; ver «Acceso familiar en el detalle de usuario y acciones del panel») | AdminUsersService.getUserById() | `src/admin/admin-users.controller.ts` |
 | GET | `/api/v1/admin/users/:userId/guardianships/:guardianshipId/consent-evidence` | JWT | Global: USER_MANAGEMENT_ROLES; Permisos: `legal_representative:read` (respaldo transitorio `users:read_detail` hasta 2027-03-31); recorte territorial | URL firmada (15 min) de la ficha de consentimiento vigente de esa tutoría. 200 `{ url, expires_in: 900, content_type, uploaded_at }`. La tutoría debe pertenecer a `:userId` como menor; si no, 404 `GUARDIANSHIP_NOT_FOUND`. Sin ficha vigente, 404 `GUARDIANSHIP_EVIDENCE_NOT_FOUND`; sin bucket configurado, 503 `GUARDIANSHIP_EVIDENCE_UNAVAILABLE`. Cada lectura se audita (`guardianship_consent_evidence` / `read`, `via: admin`) antes de devolver la URL | GuardianEvidenceService.getForAdmin() | `src/admin/admin-users.controller.ts` |
+| POST | `/api/v1/admin/users/:userId/supervised-login/disable` | JWT | Global: admin, super-admin; Permisos: users:update_admin + sensible `legal_representative:update` (respaldo `users:update_profile` hasta 2027-03-31); recorte territorial | Fase 3c. Desactiva el acceso propio de un menor desde el panel. Cuerpo `{ reason }` (5 a 500 caracteres, única clave; el motivo solo va a la auditoría `admin.supervised_login.disabled`). 200. Sesiones borradas, siguiente petición del menor 401 `AUTH_SUPERVISED_ACCESS_REVOKED`, todos los tutores verificados reciben aviso. Idempotente; sin bandera ni regla de edad. 404 `ADMIN_USER_NOT_FOUND` o `SUPERVISED_LOGIN_NOT_FOUND`. No existe ruta de admin para activar, reactivar ni cambiar la contraseña | AdminFamilyAccessService.disableSupervisedLogin() | `src/admin/admin-users.controller.ts` |
+| POST | `/api/v1/admin/users/:userId/linked-devices/:deviceId/revoke` | JWT | Global: admin, super-admin; Permisos: users:update_admin + sensible `legal_representative:update` (respaldo `users:update_profile` hasta 2027-03-31); recorte territorial | Fase 3c. Desvincula un dispositivo de un menor desde el panel. Cuerpo `{ reason }` (5 a 500 caracteres; solo auditoría `admin.linked_device.revoked`). 200 `{ linked_device_id, revoked_at, revoked_reason: "admin" }`. Siguiente petición del teléfono 401 `AUTH_DEVICE_REVOKED`; aviso a todos los tutores verificados. Idempotente. 404 `ADMIN_USER_NOT_FOUND` o `DEVICE_NOT_FOUND` (también el dispositivo de otra familia) | AdminFamilyAccessService.revokeLinkedDevice() | `src/admin/admin-users.controller.ts` |
 | PATCH | `/api/v1/admin/users/:userId/approval` | JWT | Global: admin, super-admin; Permisos: users:update_admin | Approve or reject a user | AdminUsersService.updateUserApproval() | `src/admin/admin-users.controller.ts` |
 | PATCH | `/api/v1/admin/users/:userId` | JWT | Global: admin, super-admin; Permisos: users:update_admin | Update user administrative fields | AdminUsersService.updateUser() | `src/admin/admin-users.controller.ts` |
 | POST | `/api/v1/admin/users` | JWT | Global: admin, super-admin; Permisos: users:create; Global: admin, super-admin, director-lf, assistant-lf, director-union, assistant-union, director-dia, assistant-dia | Crear usuario manualmente (admin-iniciado, con invite por email) | AdminUsersService.createAdminUser() | `src/admin/admin-users.controller.ts` |
@@ -2029,6 +2264,7 @@ La `1.2.0` (perfiles familiares) añade la clave `family`, después de `legal_ac
 | GET | `/api/v1/guardianships/me/deletion-impact` | JWT | `@SkipPermissions` | Qué pasaría con cada dependiente si el tutor elimina su cuenta. Respuesta `{ dependents: [{ user_id, display_name, outcome }] }`. Fase 3a: `outcome` puede ser también `pending_guardian` | GuardianshipLifecycleService.deletionImpact() | `src/guardianships/guardianships.controller.ts` |
 | POST | `/api/v1/guardianships/:guardianshipId/revoke` | JWT | `@SkipPermissions` | Dejar una tutoría (`guardian_left`) o que el tutor principal quite a uno secundario (`removed_by_primary`). Responde 200. Fase 3a: el resultado `dependent_outcome` añade `pending_guardian` (adolescente con cuenta) | GuardianshipLifecycleService.revoke() | `src/guardianships/guardianships.controller.ts` |
 | POST | `/api/v1/club-sections/:clubSectionId/dependents/:userId/claim-codes` | JWT | Permisos: club_members:approve · `@AuthorizationResource` club_section; throttle 10/hora | Un director emite un código de reclamo (vigencia 7 días) para devolver a una familia un menor bajo custodia del club. El menor debe tener una asignación activa o pendiente en esa sección y ningún tutor activo; si ya lo tiene, 409 `GUARDIANSHIP_ALREADY_GUARDIAN`; si no cumple, 404 `GUARDIANSHIP_NOT_FOUND`. 201 `{ code, expires_at }` | LinkCodesService.issueDirectorClaimCode() | `src/guardianships/dependent-claim-codes.controller.ts` |
+| POST | `/api/v1/club-sections/:clubSectionId/dependents` | JWT | Permisos: dependents:create · `@AuthorizationResource` club_section; throttle 30/hora; bandera `FAMILY_DIRECTOR_CREATE_MINOR_ENABLED` | Fase 3c. Un director registra a un menor de 0 a 17 años bajo custodia del club: crea en una transacción el usuario sin cuenta ni correo, su perfil de dependiente, la custodia (consentimiento `pending`), una solicitud de membresía `pending` y las aceptaciones legales del menor hechas por el director. Cuerpo estricto (`name`, `paternal_last_name`, `maternal_last_name?`, `birthday`, `gender?`, `sworn_declaration: true`, versiones legales vigentes). 201 `{ dependent, guardianship, assignment }`. 404 `FAMILY_FEATURE_DISABLED` si la bandera está apagada; 422 `GUARDIANSHIP_DEPENDENT_AGE_OUT_OF_RANGE`; 500 `POST_REG_NO_ACTIVE_YEAR`. Detalle en «Registro de menores por un director y acceso familiar en el panel (Fase 3c)» | DirectorDependentsService.create() | `src/guardianships/director-dependents.controller.ts` |
 | GET | `/api/v1/guardianships/me/dependents/:dependentId/supervised-login` | JWT | `@SkipPermissions` | Fase 3a. Elegibilidad para dar acceso propio al menor y, si existe, el acceso (con el nombre de usuario, solo para tutores verificados). Tutor verificado, como él mismo | SupervisedLoginsService.get() | `src/guardianships/guardianships.controller.ts` |
 | POST | `/api/v1/guardianships/me/dependents/:dependentId/supervised-login` | JWT | `@SkipPermissions`; throttle 5/hora; bandera `FAMILY_TEEN_LOGIN_ENABLED` | Fase 3a. Habilitar acceso propio (`method` `handle` o `email`) a un menor de 13 a 17 años sin cuenta. 201 `{ supervised_login, devices_revoked }`. Termina el modo actuar por ese menor | SupervisedLoginsService.enable() | `src/guardianships/guardianships.controller.ts` |
 | POST | `/api/v1/guardianships/me/dependents/:dependentId/supervised-login/disable` | JWT | `@SkipPermissions`; bandera `FAMILY_TEEN_LOGIN_ENABLED` | Fase 3a. Deshabilitar el acceso: sesiones borradas y 401 inmediato. 200 | SupervisedLoginsService.disable() | `src/guardianships/guardianships.controller.ts` |
@@ -2622,12 +2858,12 @@ Fase 8 (ejecutada en código el 2026-10-09; mergeada en `development` con backen
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
-| GET | `/api/v1/club-sections/:clubSectionId/membership-requests` | JWT | Permisos: club_members:approve | Listar solicitudes pendientes de membresía. Cada ítem añade `consent` (`null` para adultos; para menores sin cuenta, ver «Consentimiento del tutor» debajo) y `effective_expires_at` (cuándo vence de verdad; ver «Expiración» debajo), y `users.email` puede ser `null` | MembershipRequestsService.listPending() | `src/membership-requests/membership-requests.controller.ts` |
+| GET | `/api/v1/club-sections/:clubSectionId/membership-requests` | JWT | Permisos: club_members:approve | Listar solicitudes pendientes de membresía. Cada ítem añade `consent` (`null` para adultos; para menores sin cuenta, ver «Consentimiento del tutor» debajo; Fase 3c: el bloque lleva `viewer_can_verify` y `viewer_verify_block`, ver «`consent.viewer_can_verify` y `consent.viewer_verify_block`») y `effective_expires_at` (cuándo vence de verdad; ver «Expiración» debajo), y `users.email` puede ser `null` | MembershipRequestsService.listPending() | `src/membership-requests/membership-requests.controller.ts` |
 | POST | `/api/v1/club-sections/:clubSectionId/membership-requests/:assignmentId/approve` | JWT | Permisos: club_members:approve | Aprobar solicitud de membresía. **Responde 201** (el handler no declara `@HttpCode`, `src/membership-requests/membership-requests.controller.ts:110`; el `@ApiResponse` de Swagger dice 200 y es incorrecto; el QA 3a lo confirmó en vivo). Un menor (sin cuenta, o **con cuenta y de edad menor que la mayoría de edad del país**, Fase 3a; también con fecha de nacimiento `NULL`, que falla cerrada) cuyo consentimiento no está verificado → 409 `MR_CONSENT_NOT_VERIFIED` (la comprobación va dentro de la transacción de la aprobación y es la compuerta común de activación, ver «Compuerta de consentimiento en las activaciones de rol»). Si la solicitud ya no está `pending` al entrar a la transacción (otra revisión la procesó, o se canceló o expiró) no se activa nada: 409 `MR_ALREADY_PENDING`, o 404 `MR_NOT_FOUND` si es de otra sección. El 409 de esta ruta tiene **dos causas distintas**: `MR_CONSENT_NOT_VERIFIED` (el menor no tiene el consentimiento verificado) y `MR_ALREADY_PENDING` (la solicitud ya no estaba pendiente); el Swagger las separaba mal y se corrigió (`membership-requests.controller.ts:128-132`). Aprobar y rechazar registran un evento de auditoría con el revisor como actor | MembershipRequestsService.approve() | `src/membership-requests/membership-requests.controller.ts` |
 | POST | `/api/v1/club-sections/:clubSectionId/membership-requests/:assignmentId/reject` | JWT | Permisos: club_members:approve | Rechazar solicitud de membresía | MembershipRequestsService.reject() | `src/membership-requests/membership-requests.controller.ts` |
 | POST | `/api/v1/club-sections/:clubSectionId/membership-requests/:assignmentId/consent-evidence` | JWT | Permisos: club_members:approve · `@AuthorizationResource` club_assignment; throttle 20/hora | El director sube la ficha firmada del menor (multipart `file`; mismas reglas de archivo que la del tutor). Solo para solicitudes `pending` de esa sección. 201 `{ evidence_id, content_type, size_bytes, uploaded_at }`. No verifica el consentimiento. Con el consentimiento ya verificado → 409 `GUARDIANSHIP_CONSENT_ALREADY_VERIFIED` | GuardianEvidenceService.uploadForDirector() | `src/membership-requests/membership-requests.controller.ts` |
 | GET | `/api/v1/club-sections/:clubSectionId/membership-requests/:assignmentId/consent-evidence` | JWT | Permisos: club_members:approve · `@AuthorizationResource` club_assignment | URL firmada (15 min) de la ficha vigente. Solicitudes `pending` o `active` de esa sección. 200 `{ url, expires_in: 900, content_type, uploaded_at, uploaded_by_display_name }` | GuardianEvidenceService.getForDirector() | `src/membership-requests/membership-requests.controller.ts` |
-| POST | `/api/v1/club-sections/:clubSectionId/membership-requests/:assignmentId/verify-consent` | JWT | Permisos: club_members:approve · `@AuthorizationResource` club_assignment | El director confirma que revisó la ficha firmada y verifica el consentimiento del menor (y, con `approve: true`, aprueba la solicitud). Responde **200** (idempotente), no 201 | ConsentVerificationService.verify() | `src/membership-requests/membership-requests.controller.ts` |
+| POST | `/api/v1/club-sections/:clubSectionId/membership-requests/:assignmentId/verify-consent` | JWT | Permisos: club_members:approve **o** consent:verify (Fase 3c, modo «cualquiera de»; `approve: true` exige además club_members:approve, si no 403 `MR_APPROVE_PERMISSION_REQUIRED`) · `@AuthorizationResource` club_assignment | El director confirma que revisó la ficha firmada y verifica el consentimiento del menor (y, con `approve: true`, aprueba la solicitud). Responde **200** (idempotente), no 201 | ConsentVerificationService.verify() | `src/membership-requests/membership-requests.controller.ts` |
 
 #### Consentimiento del tutor (menores sin cuenta)
 
@@ -2653,6 +2889,7 @@ Fase 8 (ejecutada en código el 2026-10-09; mergeada en `development` con backen
 - `status` es `verified` solo si alguna tutoría real (no de prueba, no revocada) está verificada; si no, `pending`. `guardianship_id` es la tutoría principal activa sobre la que actúa `verify-consent`, o `null` si no queda ninguna.
 - `evidence_uploaded` mira la ficha vigente de la fila principal.
 - `guardians` va con la principal primero y luego por antigüedad. Una custodia del club muestra el nombre del club. No incluye teléfonos ni correos.
+- **Fase 3c**: el bloque agrega `viewer_can_verify` (boolean) y `viewer_verify_block` (`self_guardian`, `self_custodian` o `null`), calculados para quien consulta. Semántica exacta en «`consent.viewer_can_verify` y `consent.viewer_verify_block`» (sección «Registro de menores por un director y acceso familiar en el panel (Fase 3c)»).
 
 **`POST .../:assignmentId/verify-consent`**. Body (campos extra → 400):
 
