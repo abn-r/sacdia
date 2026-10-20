@@ -18,11 +18,11 @@ La versión vigente de cada documento vive en el código, no en esta carpeta: `s
 - Subir una versión obliga a TODOS los usuarios a volver a aceptar: quien no tenga una aceptación registrada para la versión vigente queda bloqueado en la pantalla de aceptación hasta aceptar (ver `legal_acceptances` en `docs/database/SCHEMA-REFERENCE.md` y la sección `legal` en `docs/api/ENDPOINTS-LIVE-REFERENCE.md`).
 - Publica primero el texto nuevo en el sitio web (`https://sacdia.com/terms` y `https://sacdia.com/privacy`) y solo después despliega el cambio de versión. Nunca al revés: los usuarios tendrían que aceptar un texto que todavía no pueden leer.
 
-## Versión 2.0.0-family (BORRADOR, perfiles familiares Fase 3a)
+## Versión 2.0.0-family (BORRADOR, perfiles familiares Fase 3)
 
 > **BORRADOR — requiere revisión del usuario o de un abogado.** Pendiente de merge (PR por abrir: feat/family-profiles-phase3). <!-- TODO(orquestador): reemplazar por «PR #NNN de sacdia-backend» cuando exista el PR. -->
 
-Cambia el texto de menores: cuentas supervisadas de 13 a 17 años, modo pendiente de tutor con plazo de 90 días, facultades del tutor verificado, analítica anónima para menores y, como funciones que **aún no están activas** (Fases 3b y 3c), el dispositivo vinculado de menores de 13 años (3b: implementado en el servidor y desactivado hasta su despliegue; la app falta) y el registro de menores por un director. También corrige la promesa de un segundo opt-in por correo (privacidad §6.2.c.1) que el producto no hace.
+Cambia el texto de menores: cuentas supervisadas de 13 a 17 años, modo pendiente de tutor con plazo de 90 días, facultades del tutor verificado, analítica anónima para menores y, como funciones que **aún no están activas** (Fases 3b y 3c), el dispositivo vinculado de menores de 13 años (3b: implementado en el servidor y en la app, en la rama `feat/family-profiles-phase3`, y desactivado tras `FAMILY_LINKED_DEVICE_ENABLED` hasta su despliegue) y el registro de menores por un director (3c: implementado en servidor, app y panel, en la misma rama, tras `FAMILY_DIRECTOR_CREATE_MINOR_ENABLED`). También corrige la promesa de un segundo opt-in por correo (privacidad §6.2.c.1) que el producto no hace.
 
 | Archivo | Versión | Qué cambió |
 |---|---|---|
@@ -37,7 +37,7 @@ Los borradores completos (`*.full-draft-*`) llevan el sufijo `-draft` porque no 
 **Puerta de publicación (lista de verificación de release):**
 
 1. El usuario o un abogado aprueba el texto y se quita el aviso «BORRADOR» de cada sección.
-2. Se decide si las funciones aún inactivas (dispositivo vinculado y registro por director) se publican ya o se retiran del texto hasta su fase.
+2. Se decide si las funciones aún inactivas (dispositivo vinculado y registro por director, ya implementadas pero apagadas por bandera) se publican ya o se retiran del texto hasta su activación. Antes de publicar, corregir dos frases que el código ya desmiente: en `terminos-y-condiciones.md` §3.2, «La app del dispositivo todavía no existe» (la app de la 3b está implementada en la rama), y en §3.4, que el consentimiento de un menor registrado por un director lo verifica «otro director, un coordinador o un administrador» (los coordinadores **no** pueden verificar hoy: limitación B11, ver `docs/features/family-profiles.md`, «Fase 3»). El mismo cambio de «coordinador» aplica a `terminos-y-condiciones.full-draft-2026-04-17.md`.
 3. Se publica el texto en `https://sacdia.com/terms` y `https://sacdia.com/privacy`.
 4. Solo entonces se despliega el commit de versión del backend (`2.0.0-family`; es el último commit de la sub-fase 3a y se puede revertir solo).
 5. **No promover a `main` mientras exista el aviso «BORRADOR» en estos archivos.**
