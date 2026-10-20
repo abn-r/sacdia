@@ -62,10 +62,10 @@ Pregunta: cuando un tutor se va y el menor queda congelado sin club, ¿qué sign
 Alcance de la purga, tras la verificación de la 2a (hallazgo S7) y la regla de IP y user agent:
 
 - Se anonimiza `users` (`active = false`; correo, nombre, apellidos, fecha de nacimiento, sangre, género, bautismo, imagen y geografía en NULL).
-- Se borran alergias, enfermedades, medicinas, contactos de emergencia, las fichas de consentimiento (filas **y** objetos de R2), la foto de perfil, los archivos de evidencia de clases y especialidades (R2 y filas), la bandeja de notificaciones y el nombre y teléfono del tutor externo; se vacían las columnas de archivos de sus especialidades.
+- Se borran alergias, enfermedades, medicinas, contactos de emergencia, las fichas de consentimiento (filas **y** objetos de R2), la foto de perfil, los archivos de evidencia de clases y especialidades (R2 y filas), la bandeja de notificaciones y el teléfono del tutor externo (su nombre pasa a `'Tutor'`); se vacían las columnas de archivos de sus especialidades.
 - Se anulan la IP y el user agent de sus `legal_acceptances`. Cuando un **tutor** elimina su cuenta, también los de las aceptaciones que hizo en nombre de sus dependientes (`accepted_by_user_id`).
 - Se conservan la fila `users` anonimizada, las tutorías (quién lo tuvo a cargo) y el progreso de clases y especialidades, sin archivos.
-- Si R2 falla, no se toca la base y se reintenta al día siguiente.
+- Los objetos de R2 se borran después de confirmar la transacción, con mejor esfuerzo: si R2 falla, la purga no se revierte ni se reintenta y los huérfanos se limpian a mano desde el registro `dependent_purge_storage_cleanup_failed` (commit `9533895d`; antes se borraba R2 primero y se reintentaba al día siguiente). El nombre del titular externo queda como `'Tutor'` (el CHECK `guardianships_holder_ck` impide anularlo).
 
 El esquema conserva `guardianship_consent_evidences.purged_at`, pero la purga borra las filas en vez de marcarlas. Detalle: [family-profiles.md](../features/family-profiles.md); tablas: [SCHEMA-REFERENCE.md](../database/SCHEMA-REFERENCE.md).
 
