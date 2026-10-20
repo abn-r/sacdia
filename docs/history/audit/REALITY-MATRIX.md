@@ -1,5 +1,5 @@
 # Reality Matrix — SACDIA
-Fecha: 2026-03-26 | Última actualización: 2026-10-19
+Fecha: 2026-03-26 | Última actualización: 2026-10-20
 
 ## Addendum 2026-08-25 — camporee-orders (rama, no Neon)
 
@@ -38,6 +38,24 @@ Los conteos del snapshot 2026-03-26 **no** se reescriben aquí. Este addendum re
 Estado de feature: **PARCIAL** (Fase 2 de 4 implementada en rama, no desplegada). No FANTASMA: el código existe. No ALINEADO de producción: falta merge, migración, bucket y despliegue conjunto de backend y app. **Restricción de lanzamiento**: la Fase 3 (inicio de sesión supervisado de 13 a 17 años y dispositivo vinculado) debe existir antes de producción (ver `docs/audit/DECISIONS-PENDING.md`).
 
 Modelos de rama (espejo en `docs/database/schema.prisma`): `dependent_profiles`, `guardianships`, `guardianship_consent_evidences`, `guardianship_link_codes`.
+
+
+## Addendum 2026-10-20 — perfiles familiares, Fase 3 (rama, no producción)
+
+Los conteos del snapshot 2026-03-26 **no** se reescriben aquí. Este addendum registra la Fase 3 de perfiles familiares (3a cuentas supervisadas de 13 a 17 años, 3b dispositivo vinculado del menor de 13 años, 3c el director registra menores y panel de acceso familiar) verificada en código de rama. Rama `feat/family-profiles-phase3` en backend, app y panel; Pendiente de merge (PR por abrir: feat/family-profiles-phase3). Todo detrás de tres banderas `FAMILY_*` (por defecto `false`); la compuerta de consentimiento por edad, el modo pendiente de tutor y los crones no tienen bandera.
+
+| Capa | Estado | Evidencia |
+|------|--------|-----------|
+| Backend Nest | Código en `feat/family-profiles-phase3` (HEAD `32022392`) | 17 endpoints nuevos (3a: 10, 3b: 4, 3c: 3); permisos nuevos `dependents:create` y `consent:verify`; crones `pending-teen-guardian` (3a) y `family-age-transitions` (3c); `MR_APPROVE_PERMISSION_REQUIRED` es el código nuevo de la 3c. Jest completo 535 suites y 8647 pruebas pasan, `tsc` limpio |
+| Schema | **4 migraciones aplicadas solo a Neon `development`** (2026-10-20, con aprobación), no a `staging` ni `production` | `20261020120000_family_teen_login`, `20261021120000_family_linked_devices`, `20261022120000_family_director_minors` (`dependent_profiles.teen_login_nudged_at`), `20261022130000_seed_family_permissions` (solo DML; 10 asignaciones en `development`, que no tiene el rol `assistant-admin`). El espejo `schema.prisma` no se ha resincronizado |
+| Doc API | Sí, con salvedad de rama | `ENDPOINTS-LIVE-REFERENCE.md`: «Cuentas supervisadas de 13 a 17 años (Fase 3a)», «Dispositivo vinculado de menores de 13 años (Fase 3b)», «Registro de menores por un director y acceso familiar en el panel (Fase 3c)» |
+| Feature | Sí | `docs/features/family-profiles.md`, sección «Fase 3» |
+| App | Código en la rama (HEAD `345dadc0`) | Modo pendiente, acceso propio, dispositivo vinculado con cáscara propia, registro por el director, cuatro ojos, código para la familia, ruteo de push por modo. `flutter test` 3188 pasan |
+| Admin | Código en la rama (HEAD `7a9bfd6`) | Tarjeta «Acceso familiar» (desactivar acceso, revocar dispositivo, sesiones), verificación de consentimiento de adolescentes y menores del director. Vitest 1549 pasan y 1 fallo ambiental en `05ec6de` |
+| QA en vivo | 3a parcial, 3b ejecutado en parte, **3c Pendiente** | `docs/testing/FAMILY-PROFILES-PHASE3{A,B,C}-QA.md` |
+| Producción | Ausente | Falta merge, promoción de las cuatro migraciones, banderas por ambiente, bucket privado de R2, aprobación del texto legal `2.0.0-family` (borrador) y aviso a los directores (`docs/deployment/DEPLOYMENT-GUIDE.md`, §0.6) |
+
+Estado de feature: **PARCIAL** (Fases 2 y 3 implementadas en rama, no desplegadas; Fase 4 sin iniciar). No FANTASMA: el código existe. Limitación conocida: los coordinadores no pueden verificar el consentimiento de un menor (el guard no resuelve su territorio; ver la sección «Fase 3» del feature).
 
 ---
 

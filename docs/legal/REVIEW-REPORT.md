@@ -332,3 +332,31 @@ El `README.md` lista 9 placeholders. Se confirma la lista completa; agrego sever
 ---
 
 **Fin del reporte.**
+
+---
+
+## Adenda 2026-10-19 — Versión 2.0.0-family (perfiles familiares, Fase 3a)
+
+> **BORRADOR — requiere revisión del usuario o de un abogado.** Esta adenda no re-audita el documento completo: solo registra los cambios de la versión 2.0.0-family y las preguntas legales abiertas. Pendiente de merge (PR por abrir: feat/family-profiles-phase3). <!-- TODO(orquestador): reemplazar por «PR #NNN de sacdia-backend» cuando exista el PR. -->
+
+### Hallazgo H-3a-01 — Aviso §6.2.c.1 promete un mecanismo que el producto no tiene (corregido en el borrador)
+
+**Ubicación:** `aviso-de-privacidad.full-draft-2026-04-17.md § 6.2.c.1` (resultado del fix C-02 de arriba).
+**Qué decía:** un correo con enlace único de confirmación al Representante Legal, sin el cual la ficha del Menor no quedaba activa.
+**Realidad verificada:** ese correo nunca existió. El mecanismo real es el formato de consentimiento firmado en papel, subido a un almacenamiento privado y verificado por un director o administrador (cuatro ojos). La Fase 3 tampoco lo implementa (decisión del usuario: no hay correos de código ni OTP).
+**Cambio en el borrador:** §6.2.c.1 describe el mecanismo real y lleva una nota de corrección.
+**Pregunta legal abierta:** ¿el formato firmado verificado por un tercero cumple el estándar de «consentimiento verificable» que C-02 pedía, o hace falta además un segundo opt-in por correo? Si hace falta, debe construirse antes de publicar.
+
+### Otras preguntas legales abiertas (para el usuario o el abogado)
+
+1. **Retención de la copia digital del formato (Aviso §11 y §6.2.c.2).** El texto prometía 5 años; el producto elimina la copia digital cuando se purga al menor (90 días después de congelarse). ¿Basta con el original en papel que guarda el club? Si no, la purga debe conservar la copia.
+2. **Identificación del tutor (§6.2.c.3).** El texto la exigía; el producto no la captura ni valida. Quedó como práctica del club con un `[PENDIENTE]`. ¿La plantilla oficial del formato exige anexarla?
+3. **Autoeliminación de menores (T&C §3.5, §8.1; Aviso §6).** Una cuenta supervisada no puede eliminarse desde la app por el propio menor; lo hace el tutor o un administrador. ¿Es defendible frente a la LFPDPPP y a las reglas de las tiendas (decisión del usuario 2026-10-19, P3-A22)?
+4. **Edad real declarada.** La fecha de nacimiento es autodeclarada y no se verifica; un adolescente puede registrarse como adulto. Se dejó una advertencia en T&C §3.1 y §1.4. ¿Es suficiente?
+5. **Publicar funciones aún inactivas.** El borrador incluye texto del dispositivo vinculado (Fase 3b) y del registro por director (Fase 3c), marcado como «función pendiente». ¿Se publica el texto completo ya, o se retira lo inactivo hasta su fase? («No prometer controles que el sistema no implementa aún», `README.md`.)
+6. **PostHog no estaba en el aviso 1.0.0-store.** La app usa PostHog (`posthog_flutter`) y el aviso operativo no lo nombraba. Se agregó al borrador (Aviso §2.8 y §4; privacidad completa §13). ¿Hay que corregir también la declaración vigente de las tiendas?
+7. **Analítica anónima de 13 a 17 años.** Se decidió «anónima hasta la revisión legal». El abogado debe decidir si queda así, si se elimina o si se permite con consentimiento.
+8. **Aviso de menores en tiendas.** ¿La app queda en categoría «Familias» o «dirigida a menores» ahora que hay cuentas supervisadas desde 13 años y dispositivo vinculado desde 6? Afecta las declaraciones de App Store y Google Play.
+9. **Facultades del tutor.** Cualquier tutor verificado (no solo el principal) puede habilitar, deshabilitar o restablecer el acceso del menor (P3-A2); los demás tutores reciben aviso. ¿Se acepta?
+10. **Consentimiento de la persona menor.** Una persona de 13 a 17 años acepta T&C y Aviso por sí misma en su Cuenta Supervisada (acepta sin tutor en modo pendiente). ¿Qué efecto jurídico tiene esa aceptación sin el Representante Legal?
+11. **Placeholders.** Los 9 placeholders de la auditoría original (`[PENDIENTE: ...]`) siguen sin resolver en los borradores completos.

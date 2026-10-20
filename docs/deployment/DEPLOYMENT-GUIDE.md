@@ -1,7 +1,7 @@
 # SACDIA — Deployment Guide
 
 **Estado**: ACTIVE
-**Actualizado**: 2026-10-13
+**Actualizado**: 2026-10-20
 **Fuentes**: `sacdia-backend/render.yaml`, `sacdia-backend/src/config/env.validation.ts`, `.github/workflows/ci.yml` de cada repo, el dashboard de Render y Neon (topología informada por el responsable de infraestructura el 2026-10-13) y `docs/guides/ocr-proxy-preprod-infra.md`.
 
 > [!IMPORTANT]
@@ -112,6 +112,82 @@ Cuatro migraciones aditivas del backend, mergeadas el 2026-10-12 y 2026-10-13. D
 6. Verificar: `SELECT indexrelid::regclass FROM pg_index WHERE NOT indisvalid;` debe estar vacío para los índices nuevos, y `SELECT conname, convalidated FROM pg_constraint WHERE conname ~ '(instructor|source_|page_count|completed_at)';` debe mostrar todo validado. Para M5: `SELECT count(*) FILTER (WHERE completed_at IS NOT NULL) AS con_fecha, count(*) AS total FROM users_honors WHERE validation_status = 'APPROVED';`
 7. Rollback: solo hacia adelante. Antes de que haya datos reales, `DROP INDEX`, `DROP CONSTRAINT` y `DROP COLUMN` en orden inverso (M4: `DROP TABLE honor_instructor_proposals; DROP TYPE honor_instructor_proposal_status_enum;`).
 
+### 0.6 Checklist de promoción: perfiles familiares (Fase 2 y Fase 3)
+
+> [!WARNING]
+> Estado: **BORRADOR de proceso**, redactado antes de que la Fase 3 se mergee. Las cuatro migraciones de la Fase 3 ya existen con su nombre real y están aplicadas en Neon `development` (2026-10-20); falta promoverlas a `preproduction` y `main`. El texto legal 2.0.0-family es un **borrador pendiente de revisión** (`docs/legal/README.md`). Rama de trabajo del backend: `feat/family-profiles-phase3`, Pendiente de merge (PR por abrir: feat/family-profiles-phase3). <!-- TODO(orquestador): reemplazar por «PR #NNN de sacdia-backend» cuando exista el PR. -->
+
+**Regla de producción.** `production` (Neon) y `main` se alcanzan **solo** por la promoción `development` → `preproduction` → `main`, y **`prisma migrate deploy` es quien aplica las migraciones** en cada deploy. Nada de `psql` a mano sobre producción (esto tiene prioridad, para estas fases, sobre el procedimiento manual del §3, punto 3). El `psql` a mano queda para la rama `development` de Neon con aprobación explícita (QA), siguiendo el flujo de migraciones de Neon. Hoy solo `development` está en línea (§0): un merge a esa rama ya aplica las migraciones a datos reales, así que esta lista también aplica antes de ese merge.
+
+**1. Bloqueantes de la Fase 2 (primero).** Perfiles familiares Fase 2 (PR #530 de sacdia-backend) ya está mergeada en `development`; sus tres migraciones tienen que estar aplicadas en la rama de destino antes de promover la Fase 3, porque la 3a ya las supone (el estado en las ramas `staging` y `production` de Neon no está verificado aquí):
+
+| # | Migración (`sacdia-backend/prisma/migrations/`) | Qué hace |
+|---|---|---|
+| P2-1 | `20261015120000_legal_acceptances` | Tabla `legal_acceptances` (solo aditiva) |
+| P2-2 | `20261016100000_base_user_role_drop_cross_user_grants` | Solo datos: quita permisos cruzados del rol base `user` (corrección de seguridad) |
+| P2-3 | `20261016120000_family_profiles` | `users.email` admite NULL, columnas de edad en `countries` y las 4 tablas de perfiles familiares |
+
+- Bucket **privado** de R2 para las fichas de consentimiento: `R2_BUCKET_GUARDIANSHIP_EVIDENCE` apuntando a un bucket **privado** (el nombre se configura en Render, no se documenta aquí). Sin él, las rutas de ficha responden 503 `GUARDIANSHIP_EVIDENCE_UNAVAILABLE` (el resto de la API sigue). Condición que el código no puede comprobar: el bucket no debe tener dominio personalizado ni acceso `r2.dev` habilitados. Se sirve solo por URL firmada de 15 minutos.
+- Backend y app de la Fase 2 se despliegan juntos (el backend retiró las rutas del representante legal que la app anterior sigue llamando).
+
+**2. Migraciones de la Fase 3, en este orden** (todas escritas a mano, re-ejecutables, sin `CONCURRENTLY`; el guard `family-profiles-phase3.migration.spec.ts` las comprueba):
+
+| # | Migración | Sub-fase | Contenido |
+|---|---|---|---|
+| 1 | `20261020120000_family_teen_login` | 3a | `supervised_logins` y dos reemplazos de CHECK (`guardianship_link_codes` y `guardianships`). Sin DML |
+| 2 | `20261021120000_family_linked_devices` | 3b | `linked_devices`, `device_pairing_tokens` y ampliación de un CHECK de `supervised_logins`. Sin DML |
+| 3 | `20261022120000_family_director_minors` | 3c | `dependent_profiles.teen_login_nudged_at` (una sentencia, aditiva) |
+| 4 | `20261022130000_seed_family_permissions` | 3c | Solo DML: permisos y asignaciones por rol (ver abajo) |
+
+Antes de promover cada rama: `prisma migrate status` contra la base del entorno debe mostrar como únicas pendientes las de la lista que correspondan, y en el log del build debe aparecer `All migrations have been successfully applied`. Las migraciones son compatibles con el código anterior (aditivas; los CHECK solo se amplían), así que un deploy que falla después de migrar no rompe la versión previa. No hay migración *down*: la reversión de esquema es manual y solo antes de que existan datos reales.
+
+**3. Seeds de permisos.** La migración 4 los aplica con `migrate deploy`; los mismos registros viven en `prisma/seeds/permissions.seed.sql` y `prisma/seeds/role-permissions.seed.sql` (pasos del §3.4 para una base nueva). Debe coincidir lo uno con lo otro.
+
+| Permiso | Roles |
+|---|---|
+| `dependents:create` | Director y subdirector de club |
+| `consent:verify` | Director, subdirector, secretario y secretario-tesorero de club |
+
+La migración da además **ambos** permisos a `admin`, `assistant-admin` y `super-admin` de forma explícita (una migración no puede apoyarse en los comodines de los seeds). **Los coordinadores (`coordinator`, `zone-coordinator`, `general-coordinator`) NO reciben `consent:verify`**: la validación de la tarea T3c-B11 falló, porque `PermissionsGuard` no resuelve su territorio sobre recursos de sección y los dejaría con 403 aun dentro de su zona (`docs/api/ENDPOINTS-LIVE-REFERENCE.md`, «Registro de menores por un director y acceso familiar en el panel (Fase 3c)»). `assistant-lf` ya verifica por `club_members:approve`.
+
+Es idempotente (`ON CONFLICT`). Verificar tras aplicarla: un director tiene `dependents:create`; un coordinador y un miembro no. En Neon `development` (2026-10-20) quedaron **10** asignaciones y no 12, porque esa rama no tiene el rol `assistant-admin`; en `preproduction` y `production` el número depende de los roles que existan allí, y la migración une solo roles activos que existan.
+
+**4. Banderas** (variables de Render; por defecto `false`; se habilitan **por entorno**, una a la vez, empezando por `development` y `preproduction`):
+
+| Variable | Gobierna |
+|---|---|
+| `FAMILY_TEEN_LOGIN_ENABLED` | Acceso supervisado de 13 a 17 años con usuario generado y las rutas del tutor para gestionarlo |
+| `FAMILY_LINKED_DEVICE_ENABLED` | Vinculación por QR y autenticación del teléfono de un menor de 13 años |
+| `FAMILY_DIRECTOR_CREATE_MINOR_ENABLED` | `POST /club-sections/:clubSectionId/dependents` (3c; el director registra un menor). Solo gobierna el registro: verificar, reclamar y vencer lo ya creado no dependen de ella |
+
+- Se leen **al arrancar**: cambiar el valor exige reiniciar el servicio (en Render, guardar la variable redeploya).
+- **No tienen bandera**, y por eso llegan con el primer deploy aunque todas estén en `false`: la compuerta de consentimiento para todo menor de edad, el modo "pendiente de tutor", los avisos y el resumen del tutor, los crones (recordatorios y purga de adolescentes sin tutor, barrido de dispositivos, avisos de cumpleaños) y la versión legal. Las banderas **no** deshacen el punto 6.
+- `GET /auth/me` expone el estado en `family_features`; la app oculta lo que esté apagado.
+
+**5. Aprobación legal antes de promover a `main`.** El commit que sube la versión legal del backend a `2.0.0-family` (`86d3717a`, el último de la 3a) es independiente y **revertible por sí solo**. Orden obligatorio: (a) el usuario o un abogado aprueba el texto y se quitan los avisos «BORRADOR»; (b) se publica en `https://sacdia.com/terms` y `https://sacdia.com/privacy`; (c) solo entonces se promueve. Si no se aprueba, se revierte ese commit y la rama puede promoverse sin él (la versión publicada sigue siendo `1.0.0-store`). Subir la versión obliga a **todos** los usuarios a volver a aceptar. Detalle en `docs/legal/README.md` y `docs/legal/store-submission-privacy-checklist.md` (declaraciones de las tiendas, incluida la pregunta abierta sobre la eliminación de cuentas de menores).
+
+**6. Impacto en producción que hay que comunicar a los directores de club** (decisión «opción A»):
+
+- Los miembros de **13 a 17 años que ya tienen una membresía activa** pasan a modo «pendiente de tutor» en cuanto se despliega el backend: pierden su **credencial QR** y su **contexto de club** en la app hasta que haya un tutor vinculado y verificado. La membresía no se borra; es la compuerta de consentimiento, que no depende de ninguna bandera.
+- El director (o una persona con `consent:verify`, ver arriba; hoy los cuatro roles de club con ese permiso ya tienen `club_members:approve`) puede **verificar el consentimiento sobre la asignación ya activa** sin crear una nueva: es una verificación sin aprobación. La ficha firmada la sube el tutor o el director; en los menores que crea un director (3c), la verifica **otra persona** distinta de quien lo creó, de quien subió la ficha y del tutor.
+- Pedir antes del deploy el recuento de miembros de 13 a 17 años con rol activo, para saber a cuántos afecta y avisar con anticipación.
+- Los adolescentes que se registren solos reciben recordatorios a los 7, 30 y 83 días sin tutor; se congelan a los 90 y se purgan 90 días después. En cuentas que ya existen, el plazo empieza en la primera evaluación del cron tras el deploy: nadie se congela ese día.
+- Las apps anteriores a la Fase 3 no entienden el modo restringido: un adolescente con una versión vieja vería errores 403 en las pantallas de club. Publicar la app nueva antes de abrir el backend a los usuarios, o junto con él (deducido del comportamiento del servidor; no probado con una app antigua).
+
+**7. Limpieza de PostHog (P3-A12).** La analítica de los 13 a 17 pasa a ser anónima, pero las **personas ya identificadas** en PostHog con versiones anteriores de la app siguen ahí. Tarea de operaciones, una vez publicada la app nueva: obtener (consulta de solo lectura) los `user_id` de las personas de 13 a 17 años y de las cuentas sin fecha de nacimiento, y **eliminar sus personas y eventos** en PostHog. Dejar constancia de la fecha y el responsable. El procedimiento exacto en el panel de PostHog está pendiente de documentar.
+
+**8. Reversión por bandera** (ninguna borra datos; volver a encender restaura el acceso):
+
+| Bandera | Al apagarla y reiniciar |
+|---|---|
+| `FAMILY_TEEN_LOGIN_ENABLED` | El inicio de sesión con usuario generado responde el 401 uniforme; las sesiones ya abiertas de cuentas con usuario generado se cortan en la siguiente petición; las rutas del tutor para activar, desactivar, reactivar y cambiar la contraseña responden 404 `FAMILY_FEATURE_DISABLED`. Los adolescentes con correo no cambian. |
+| `FAMILY_LINKED_DEVICE_ENABLED` | La vinculación responde 404 (generar token) o 400 uniforme (canjear); todo teléfono ya vinculado recibe 401 `AUTH_DEVICE_REVOKED` en su siguiente petición, **sin** revocar filas ni borrar sesiones. Al volver a encender, los teléfonos que no hayan vencido ni sido revocados vuelven a funcionar |
+| `FAMILY_DIRECTOR_CREATE_MINOR_ENABLED` | La ruta de registro responde 404 `FAMILY_FEATURE_DISABLED` (después de los guards); los menores ya creados, sus solicitudes pendientes y su custodia siguen su curso (verificación, reclamo por el padre o vencimiento a los 30 días) |
+
+Lo que **no** se revierte con banderas: la compuerta de consentimiento, el modo pendiente y los crones. Para quitarlos hace falta revertir el código (el commit legal puede revertirse aparte). Si se revierte el backend a una versión sin 3b, un token de dispositivo (audiencia `sacdia:device`) falla cerrado con 401 y las tablas nuevas quedan sin uso.
+
+**9. Verificación posterior al deploy.** `GET /api/v1/health` en verde; `GET /auth/me` de un adulto con `family_features` en `false`; el log del build con las migraciones aplicadas; un adolescente de prueba en modo pendiente y un director verificando consentimiento sobre una asignación activa; en el panel de PostHog, el adolescente y el teléfono vinculado sin identificar.
+
 ---
 
 ## 1. Entornos y ramas
@@ -217,6 +293,7 @@ Catálogo completo y comentado: `sacdia-backend/.env.example`. Las marcadas como
 | Observabilidad | `PROCESS_MEMORY_LOG_INTERVAL_MINUTES` (entero ≥ 0, por defecto 15; `0` solo desactiva el intervalo), `POSTHOG_PROJECT_TOKEN`, `POSTHOG_HOST` | — |
 | Firebase | `FIREBASE_SERVICE_ACCOUNT_JSON_BASE64` (recomendado) o `FIREBASE_SERVICE_ACCOUNT_JSON` o `FIREBASE_PROJECT_ID` + `FIREBASE_PRIVATE_KEY` + `FIREBASE_CLIENT_EMAIL` | Para push |
 | Correo | `EMAIL_ENABLED`, `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, `RESEND_REPLY_TO` | Si `EMAIL_ENABLED=true`, también `RESEND_API_KEY`, `RESEND_FROM_EMAIL` y `REDIS_URL` |
+| Perfiles familiares (Fase 3) | `FAMILY_TEEN_LOGIN_ENABLED`, `FAMILY_LINKED_DEVICE_ENABLED`, `FAMILY_DIRECTOR_CREATE_MINOR_ENABLED` (booleanos, por defecto `false`; se leen al arrancar). Ver 0.6 | — |
 | Sentry | `SENTRY_DSN`, `SENTRY_RELEASE` (si no se define, se usa `RENDER_GIT_COMMIT`, que inyecta Render) | — |
 
 Buckets, prefijos y acceso de cada alias: `docs/storage/r2-keyprefix-conventions.md`. Operación del correo: `docs/guides/domain-email-operations.md`.

@@ -1,8 +1,9 @@
 ---
 documento: Aviso de Privacidad
-version: 1.0.0-store
-fecha: 2026-06-30
-estado: OPERATIVO PARA PUBLICACIÓN EN TIENDAS
+version: 2.0.0-family
+fecha: 2026-10-19
+estado: BORRADOR — requiere revisión del usuario o de un abogado (no publicar ni promover a main hasta que se apruebe)
+version_publicada_vigente: 1.0.0-store
 aplicable_a: sacdia-app (iOS/Android) + sacdia-admin (web)
 url_publica_sugerida: https://sacdia.com/privacy
 contacto: sacdia.app@gmail.com
@@ -10,8 +11,11 @@ contacto: sacdia.app@gmail.com
 
 # Aviso de Privacidad de SACDIA
 
-Última actualización: **30 de junio de 2026**
+Última actualización: **19 de octubre de 2026** (borrador de la versión 2.0.0-family; la versión publicada hoy sigue siendo la 1.0.0-store del 30 de junio de 2026)
 Contacto de privacidad: **sacdia.app@gmail.com**
+
+> **BORRADOR — requiere revisión del usuario o de un abogado.** Pendiente de merge (PR por abrir: feat/family-profiles-phase3). <!-- TODO(orquestador): reemplazar por «PR #NNN de sacdia-backend» cuando exista el PR. -->
+> Este texto es la versión **2.0.0-family**: cuentas supervisadas para adolescentes de 13 a 17 años (Fase 3 de perfiles familiares). Solo las secciones marcadas con este mismo aviso cambiaron respecto de la 1.0.0-store (§2.1, §2.4, §2.8, §4, §6 y §7). El resto no cambió. La constante de versión del backend (`legal-documents.constants.ts`) pasa a `2.0.0-family` solo después de que este texto se apruebe y se publique en `https://sacdia.com/privacy`.
 
 Este Aviso explica cómo SACDIA recolecta, usa, protege y comparte datos personales al utilizar la aplicación móvil, el panel administrativo web y los servicios relacionados.
 
@@ -36,7 +40,10 @@ SACDIA puede recolectar las siguientes categorías de datos, según las funcione
 - foto de perfil, si se proporciona;
 - identificadores internos de usuario;
 - credenciales protegidas, sesiones y datos de autenticación;
-- datos recibidos de Google o Apple cuando eliges iniciar sesión con esos proveedores.
+- datos recibidos de Google o Apple cuando eliges iniciar sesión con esos proveedores;
+- para cuentas supervisadas habilitadas por un tutor: un nombre de usuario generado por SACDIA (sin correo) y su estado de acceso (habilitado, deshabilitado y quién lo cambió).
+
+> **BORRADOR — requiere revisión del usuario o de un abogado.** Esta sección cambió en la versión 2.0.0-family (antes 1.0.0-store) y no debe publicarse sin aprobación.
 
 ### 2.2 Perfil de miembro y club
 
@@ -60,9 +67,31 @@ Estos datos se usan para fines operativos, de seguridad, acompañamiento institu
 
 ### 2.4 Menores de edad
 
-SACDIA puede tratar información de menores de edad porque la operación de clubes juveniles lo requiere.
+> **BORRADOR — requiere revisión del usuario o de un abogado.** Esta sección cambió en la versión 2.0.0-family (antes 1.0.0-store) y no debe publicarse sin aprobación.
 
-La información de menores debe ser proporcionada, autorizada o supervisada por madre, padre, tutor, representante legal o autoridad adulta del club. Si consideras que se registró información de un menor sin autorización suficiente, puedes solicitar revisión o eliminación escribiendo a **sacdia.app@gmail.com**.
+SACDIA puede tratar información de menores de edad porque la operación de clubes juveniles lo requiere. La información de menores debe ser proporcionada, autorizada o supervisada por madre, padre, tutor, representante legal o autoridad adulta del club. Si consideras que se registró información de un menor sin autorización suficiente, puedes solicitar revisión o eliminación escribiendo a **sacdia.app@gmail.com**.
+
+#### 2.4.1 Qué cambia según la edad
+
+Las edades son las de México (13 y 18 años); en otro país se aplican las configuradas para ese país.
+
+| Edad | Cuenta | Analítica y diagnóstico | Qué ve el tutor |
+|---|---|---|---|
+| Menos de 13 años | Sin cuenta propia: lo registra su tutor (o un director acreditado) y el tutor actúa por él. Puede usar un dispositivo vinculado sin identificación personal (función de la Fase 3b: implementada en el servidor, desactivada hasta su despliegue; hasta 2 dispositivos por menor, con vinculación de 180 días como máximo). | Sin analítica personalizada: el dispositivo vinculado no envía eventos de producto, y mientras el tutor actúa por el menor no se identifica al menor en la analítica. | Todo lo del menor, porque actúa en su nombre. |
+| De 13 a 17 años | Cuenta supervisada, propia pero bajo un tutor. | Solo analítica **anónima**: no se identifica a la persona en la herramienta de analítica ni se asocia un usuario a los reportes de errores, y los eventos no llevan identificador de usuario, correo, nombre de usuario ni nombre. | Un **resumen** de progreso y asistencia y los avisos de seguridad. No ve salud, evidencias, notas ni mensajes. |
+| 18 años o más | Cuenta propia. | Analítica de uso asociada a la cuenta, como se describe en la sección 2.8. | No aplica. |
+
+#### 2.4.2 Cuentas supervisadas y consentimiento del tutor
+
+Una persona de 13 a 17 años que se registra por su cuenta queda en un **modo pendiente de tutor** hasta que un adulto se vincule con un código de un solo uso (vigente 72 horas) y un director del club verifique el formato de consentimiento firmado en papel. Ese formato se sube como imagen o PDF a un almacenamiento privado y solo se lee con enlaces temporales; la verificación la hace una persona del club distinta del tutor (y, cuando el menor está bajo custodia del club, distinta de quien registró al menor o subió el formato). **SACDIA no envía un correo de confirmación adicional al tutor para el consentimiento:** el mecanismo verificable es el formato firmado revisado por un director.
+
+Mientras no haya un tutor verificado, la persona no puede ver datos del club. Si pasan 90 días sin tutor vinculado, la cuenta se congela y 90 días después se elimina y anonimiza; antes se envían recordatorios en la app a los 7, 30 y 83 días.
+
+#### 2.4.3 Qué se comparte con el tutor
+
+- **Resumen:** para una cuenta supervisada con tutor verificado, el tutor ve un resumen de progreso de clases, especialidades y asistencia del año en curso. No incluye datos de salud, contactos de emergencia, evidencias, notas ni ubicación. SACDIA informa a la persona menor, dentro de la app, de qué ve su tutor.
+- **Avisos de seguridad al tutor:** nuevo inicio de sesión, cambio o restablecimiento de contraseña, bloqueos de acceso, cambios de acceso y, en menores de 13 años, vinculación o desvinculación de dispositivos. Además, cuando un dispositivo vinculado sube una evidencia de una clase, el tutor recibe un aviso informativo. Se envían como notificaciones push y en la bandeja de la app, nunca por correo, y no incluyen contraseñas, nombres de usuario ni direcciones IP. El tutor no puede desactivarlos.
+- **Copias de notificaciones del club:** para menores de 13 años, el tutor recibe una copia de las notificaciones del club dirigidas al menor. Las personas de 13 a 17 años con acceso propio **no** generan copias para el tutor.
 
 ### 2.5 Contenido y archivos
 
@@ -97,7 +126,10 @@ Puedes controlar permisos de ubicación desde la configuración de iOS o Android
 - registros de seguridad y auditoría;
 - errores, fallos, rendimiento y diagnósticos;
 - datos de soporte enviados por el usuario;
-- almacenamiento local necesario para sesión, preferencias, caché y funcionamiento offline limitado.
+- almacenamiento local necesario para sesión, preferencias, caché y funcionamiento offline limitado;
+- analítica de uso de la app (pantallas vistas) con PostHog, asociada a la cuenta solo en mayores de 18 años (ver la sección 2.4.1).
+
+> **BORRADOR — requiere revisión del usuario o de un abogado.** Esta sección cambió en la versión 2.0.0-family (antes 1.0.0-store) y no debe publicarse sin aprobación.
 
 ## 3. Para qué usamos los datos
 
@@ -120,6 +152,8 @@ SACDIA no usa datos personales para publicidad comportamental ni para crear perf
 
 ## 4. Cuándo compartimos datos
 
+> **BORRADOR — requiere revisión del usuario o de un abogado.** Esta sección cambió en la versión 2.0.0-family (antes 1.0.0-store) y no debe publicarse sin aprobación.
+
 SACDIA no vende datos personales.
 
 Podemos compartir o procesar datos con proveedores técnicos únicamente cuando sea necesario para operar la plataforma. Estos proveedores actúan como infraestructura, almacenamiento, autenticación, monitoreo, mapas, notificaciones o soporte.
@@ -134,6 +168,7 @@ Entre los proveedores o servicios que pueden participar se encuentran:
 - **Google Cloud Vision**: lectura automática (OCR) de imágenes de certificados que el usuario sube para proponer sus datos;
 - **Apple**: inicio de sesión con Apple y servicios del sistema operativo cuando aplique;
 - **Sentry**: monitoreo de errores y estabilidad;
+- **PostHog**: analítica de uso de la app, sin grabación de sesiones; en menores de 18 años solo analítica anónima (ver la sección 2.4.1);
 - **OpenStreetMap/Nominatim y servicios de geocodificación**: búsqueda o selección de lugares;
 - **Resend**: envío de correo transaccional para verificación, seguridad o soporte;
 - proveedores de correo o mensajería transaccional configurados para verificación, seguridad o soporte.
@@ -159,9 +194,13 @@ Aun así, ningún sistema es 100% seguro. Si detectas una vulnerabilidad, acceso
 
 ## 6. Conservación y eliminación
 
+> **BORRADOR — requiere revisión del usuario o de un abogado.** Esta sección cambió en la versión 2.0.0-family (antes 1.0.0-store) y no debe publicarse sin aprobación.
+
 Conservamos datos mientras la cuenta esté activa o mientras sean necesarios para operar el club, preservar la trayectoria institucional, dar soporte, proteger la seguridad, atender solicitudes o mantener integridad técnica.
 
 Puedes solicitar eliminación de cuenta o datos desde la app, cuando la función esté disponible, o escribiendo a **sacdia.app@gmail.com**.
+
+Una cuenta supervisada de una persona de 13 a 17 años sin tutor vinculado se congela a los 90 días y se elimina y anonimiza 90 días después. Una cuenta supervisada no puede eliminarse desde la app por la propia persona menor: la solicitud la hace el tutor o un administrador.
 
 Al eliminar una cuenta, SACDIA podrá eliminar, anonimizar o conservar ciertos registros cuando sean necesarios para:
 
@@ -176,13 +215,15 @@ Los datos anonimizados o agregados pueden conservarse sin identificar directamen
 
 ## 7. Derechos del usuario
 
+> **BORRADOR — requiere revisión del usuario o de un abogado.** Esta sección cambió en la versión 2.0.0-family (antes 1.0.0-store) y no debe publicarse sin aprobación.
+
 Puedes solicitar:
 
 - acceso a tus datos;
 - corrección de datos incorrectos;
 - eliminación o anonimización cuando proceda;
 - exportación o copia de información disponible;
-- revisión de datos de menores bajo tu responsabilidad;
+- revisión de datos de menores bajo tu responsabilidad (para una cuenta supervisada, la solicitud la hace el tutor);
 - revocación de permisos del dispositivo, como ubicación o notificaciones.
 
 Para ejercer estos derechos, escribe a **sacdia.app@gmail.com** desde el correo asociado a tu cuenta o proporciona información suficiente para verificar tu identidad.
