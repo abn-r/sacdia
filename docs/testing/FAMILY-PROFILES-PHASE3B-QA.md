@@ -237,7 +237,7 @@ Notación: **T** = tutor verificado, **T2** = segundo tutor verificado, **Tp** =
 | L4 | Token con `consumed_at` y sin `consumed_device_id` (y al revés) | Falla por `device_pairing_tokens_consumed_ck` | Pendiente |
 | L5 | Token con `expires_at` a más de 15 minutos de `created_at` | Falla por `device_pairing_tokens_expiry_ck` | Pendiente |
 | L6 | `token_hash` repetido | Falla por la UNIQUE | Pendiente |
-| L7 | `supervised_logins.disabled_reason = 'age_majority'` | Se acepta; un valor fuera de la lista falla | Pendiente |
+| L7 | `supervised_logins.disabled_reason = 'age_majority'` | La base lo acepta (valor reservado, sin uso por la decisión FP3-16 opción A); un valor fuera de la lista falla | Pendiente |
 
 ## Observaciones del autor del plan (verificadas en el código, sin corrida)
 

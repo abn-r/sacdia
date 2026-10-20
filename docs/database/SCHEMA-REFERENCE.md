@@ -330,7 +330,7 @@ Una fila por adolescente con cuenta (o con acceso habilitado por un tutor). Es l
 | `pending_reminder_level` | `smallint` | no | `0` | Recordatorios enviados: 0 ninguno, 1 a los 7 días, 2 a los 30, 3 a los 83 |
 | `disabled_at` | `timestamptz(6)` | sí | - | |
 | `disabled_by_user_id` | `uuid` | sí | - | FK a `users.user_id`: el tutor o el admin que lo deshabilitó. Null si lo hizo el sistema |
-| `disabled_reason` | `varchar(24)` | sí | - | `guardian`, `admin` o `unlinked_purged` (Fase 3b: la base también admite `age_majority`; ningún código lo escribe todavía, tampoco el cron de la 3c, que solo barre dispositivos vinculados) |
+| `disabled_reason` | `varchar(24)` | sí | - | `guardian`, `admin` o `unlinked_purged` (Fase 3b: la base también admite `age_majority`, reservado y sin uso por decisión del 2026-10-20: ver abajo) |
 | `created_at` | `timestamptz(6)` | no | `now()` | |
 | `modified_at` | `timestamptz(6)` | no | `now()` | `@updatedAt` en Prisma |
 
@@ -430,9 +430,9 @@ La migración incluye el reemplazo del CHECK `supervised_logins_disabled_reason_
 
 | Constraint | Antes | Ahora |
 |---|---|---|
-| `supervised_logins_disabled_reason_ck` | `guardian`, `admin`, `unlinked_purged` | `guardian`, `admin`, `unlinked_purged`, `age_majority` (un acceso propio que se deshabilita al llegar a la mayoría de edad) |
+| `supervised_logins_disabled_reason_ck` | `guardian`, `admin`, `unlinked_purged` | `guardian`, `admin`, `unlinked_purged`, `age_majority` (reservado, sin uso) |
 
-Ningún código de la 3b escribe `age_majority` todavía: el valor ya cabe en la base para el barrido por cron de la sub-fase 3c. La prueba de inventario `supervised-logins.disabled-reason.inventory.spec.ts` se actualizó para permitirlo.
+Decisión del 2026-10-20 (FP3-16, opción A): **ningún código escribe `age_majority`**. Al llegar a la mayoría de edad el principal se calcula por la edad en cada petición (deja de ser `supervised_user`, se acaba la supervisión y el tutor pierde facultades y avisos) y la fila de `supervised_logins` no se toca, para que el acceso propio siga funcionando: una fila con `disabled_at` bloquearía el inicio de sesión, y un acceso con nombre de usuario (sin correo) dejaría al adulto sin su cuenta. El valor queda en el CHECK, reservado. La prueba de inventario `supervised-logins.disabled-reason.inventory.spec.ts` lo permite.
 
 ### Migración 20261021120000_family_linked_devices
 
