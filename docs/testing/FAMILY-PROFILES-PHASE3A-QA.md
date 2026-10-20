@@ -87,6 +87,7 @@ El tutor sube la ficha desde el paso 3 actuando por el menor (`POST /users/:user
 | backend `f0755479` | BUG-6: fuga de tiempo en el inicio de sesión al saltarse la consulta de la cuenta |
 | backend `81b3d00a` | Un adolescente supervisado puede reenviar su fecha de nacimiento sin cambios |
 | backend `7e9d5156` | `GET /auth/oauth/providers` lleva `account:manage`, para que una cuenta social de edad desconocida reautentique antes de eliminarse (App Store 5.1.1(v)) |
+| backend `035c633f` | C1 (FP3-35): apagar `FAMILY_TEEN_LOGIN_ENABLED` corta las sesiones por nombre de usuario ya abiertas (antes la bandera solo se leía en el inicio de sesión) |
 | backend `83ffe7cf` | `member:read` incluye `GET .../enrollments/current` y `GET /camporee-judges/me/assignments`: el inicio del adolescente activo daba 403 en ambas |
 | app `e7e06a7d` | «Eliminar cuenta» en la cabecera del post-registro |
 | app `0ba75b48`, `f0b05f0a`, `c9d1a3a8`, `75dea719` | Mensaje del 429, parsers alineados con los contratos confirmados y otros ajustes de la app |
@@ -100,7 +101,7 @@ El tutor sube la ficha desde el paso 3 actuando por el menor (`POST /users/:user
 
 Otros puntos abiertos que no son del simulador:
 
-- **C1 (FP3-35)**: con `FAMILY_TEEN_LOGIN_ENABLED=false` las sesiones por nombre de usuario ya abiertas no se cortan; la corrección está en curso (ver «Banderas de configuración» en `ENDPOINTS-LIVE-REFERENCE`). Ninguna corrida lo cubre todavía.
+- **C1 (FP3-35)**: con `FAMILY_TEEN_LOGIN_ENABLED=false` las sesiones por nombre de usuario ya abiertas se cortan desde el commit `035c633f` del backend (401 en la siguiente petición y refresh rechazado). Lo cubren pruebas unitarias y un caso nuevo en `test/supervised-login.e2e-spec.ts`; **no** se probó en vivo en el simulador.
 - Deshabilitar y restablecer la contraseña, la subida de versión legal y el paso 3 actuando no tienen grabación en el simulador (solo API).
 - Aplicación formal de la migración a Neon `development` (tarea T3a-B05): por confirmar con el usuario.
 - Recorrido offline (arranque en frío sin red): la app trata al adolescente como adulto hasta que `GET /auth/me` responde (la cuenta guardada no incluye el principal). Documentado, no corregido.
