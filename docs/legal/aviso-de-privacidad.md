@@ -77,7 +77,7 @@ Las edades son las de México (13 y 18 años); en otro país se aplican las conf
 
 | Edad | Cuenta | Analítica y diagnóstico | Qué ve el tutor |
 |---|---|---|---|
-| Menos de 13 años | Sin cuenta propia: lo registra su tutor (o un director acreditado) y el tutor actúa por él. Puede usar un dispositivo vinculado sin identificación personal (función de la Fase 3b, aún no activa). | Sin analítica personalizada: el dispositivo vinculado no envía eventos de producto, y mientras el tutor actúa por el menor no se identifica al menor en la analítica. | Todo lo del menor, porque actúa en su nombre. |
+| Menos de 13 años | Sin cuenta propia: lo registra su tutor (o un director acreditado) y el tutor actúa por él. Puede usar un dispositivo vinculado sin identificación personal (función de la Fase 3b: implementada en el servidor, desactivada hasta su despliegue; hasta 2 dispositivos por menor, con vinculación de 180 días como máximo). | Sin analítica personalizada: el dispositivo vinculado no envía eventos de producto, y mientras el tutor actúa por el menor no se identifica al menor en la analítica. | Todo lo del menor, porque actúa en su nombre. |
 | De 13 a 17 años | Cuenta supervisada, propia pero bajo un tutor. | Solo analítica **anónima**: no se identifica a la persona en la herramienta de analítica ni se asocia un usuario a los reportes de errores, y los eventos no llevan identificador de usuario, correo, nombre de usuario ni nombre. | Un **resumen** de progreso y asistencia y los avisos de seguridad. No ve salud, evidencias, notas ni mensajes. |
 | 18 años o más | Cuenta propia. | Analítica de uso asociada a la cuenta, como se describe en la sección 2.8. | No aplica. |
 
@@ -90,7 +90,7 @@ Mientras no haya un tutor verificado, la persona no puede ver datos del club. Si
 #### 2.4.3 Qué se comparte con el tutor
 
 - **Resumen:** para una cuenta supervisada con tutor verificado, el tutor ve un resumen de progreso de clases, especialidades y asistencia del año en curso. No incluye datos de salud, contactos de emergencia, evidencias, notas ni ubicación. SACDIA informa a la persona menor, dentro de la app, de qué ve su tutor.
-- **Avisos de seguridad al tutor:** nuevo inicio de sesión, cambio o restablecimiento de contraseña, bloqueos de acceso, cambios de acceso y, en menores de 13 años, vinculación o desvinculación de dispositivos. Se envían como notificaciones push y en la bandeja de la app, nunca por correo, y no incluyen contraseñas, nombres de usuario ni direcciones IP. El tutor no puede desactivarlos.
+- **Avisos de seguridad al tutor:** nuevo inicio de sesión, cambio o restablecimiento de contraseña, bloqueos de acceso, cambios de acceso y, en menores de 13 años, vinculación o desvinculación de dispositivos. Además, cuando un dispositivo vinculado sube una evidencia de una clase, el tutor recibe un aviso informativo. Se envían como notificaciones push y en la bandeja de la app, nunca por correo, y no incluyen contraseñas, nombres de usuario ni direcciones IP. El tutor no puede desactivarlos.
 - **Copias de notificaciones del club:** para menores de 13 años, el tutor recibe una copia de las notificaciones del club dirigidas al menor. Las personas de 13 a 17 años con acceso propio **no** generan copias para el tutor.
 
 ### 2.5 Contenido y archivos

@@ -70,7 +70,7 @@ Usar esta posición en tiendas y materiales públicos:
 - Crash logs, errores y rendimiento vía Sentry u otros diagnósticos.
 - **Analítica de uso (PostHog)**: declarar que se recolecta solo en mayores de 18 años asociada a la cuenta (borrador: verificar que la declaración vigente de App Store Connect y Google Play ya la incluye; el aviso 1.0.0-store no nombraba a PostHog).
 - **Personas de 13 a 17 años**: analítica **anónima** únicamente (sin identificador de usuario, correo, nombre de usuario ni nombre; sin usuario en Sentry). Debe reflejarse en «Datos vinculados al usuario» frente a «Datos no vinculados».
-- **Modo dispositivo vinculado (menores de 13 años; función de la Fase 3b, aún no activa)**: sin identificadores personales en el dispositivo (ni correo ni contraseña); solo token de notificaciones (FCM) y sesión; **sin analítica de uso** (PostHog desactivado en este modo). No declarar al dispositivo vinculado como recolector de datos de seguimiento.
+- **Modo dispositivo vinculado (menores de 13 años; función de la Fase 3b: servidor implementado y desactivado hasta su despliegue, app pendiente)**: sin identificadores personales en el dispositivo (ni correo ni contraseña); solo token de notificaciones (FCM), sesión y un nombre del teléfono que el tutor ve en su lista de dispositivos; **sin analítica de uso** (PostHog desactivado en este modo; el servidor responde `analytics_anonymous: true`, pero que la app lo cumpla es una tarea de la app aún sin hacer). No declarar al dispositivo vinculado como recolector de datos de seguimiento.
 
 ### Actividad dentro de la app
 
@@ -128,7 +128,7 @@ Declarar que el usuario puede solicitar eliminación de cuenta/datos desde la ap
 - [ ] El manifiesto de privacidad iOS (`sacdia-app/ios/Runner/PrivacyInfo.xcprivacy`) fue revisado contra los datos realmente recolectados.
 - [x] El FAQ de eliminación de cuenta no promete plazos o eliminación total que el backend no cumpla.
 - [ ] (2.0.0-family) La revisión del usuario o de un abogado aprobó el texto de `terminos-y-condiciones.md` y `aviso-de-privacidad.md` versión 2.0.0-family y se publicó en `https://sacdia.com/terms` y `https://sacdia.com/privacy` **antes** de subir la constante de versión del backend.
-- [ ] (2.0.0-family) Las declaraciones de privacidad de App Store Connect y Google Play (Data Safety) reflejan la analítica anónima de 13 a 17 años y, cuando se active la Fase 3b, el modo dispositivo vinculado sin analítica.
+- [ ] (2.0.0-family) Las declaraciones de privacidad de App Store Connect y Google Play (Data Safety) reflejan la analítica anónima de 13 a 17 años y, cuando se active la Fase 3b (servidor listo, app pendiente), el modo dispositivo vinculado sin analítica.
 - [ ] (2.0.0-family) Cuentas de menores: confirmar con las tiendas si el flujo de cuentas supervisadas exige declaraciones adicionales para apps dirigidas a menores (Families / «Designed for Families»). **Pregunta legal abierta.**
 
 ## 7. Advertencia técnica

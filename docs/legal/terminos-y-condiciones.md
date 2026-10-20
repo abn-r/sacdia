@@ -83,7 +83,7 @@ Si tienes entre 13 y 17 años, puedes usar SACDIA con una cuenta supervisada. De
 
 **Cuenta supervisada con tutor verificado.** Usas la app de miembro con las restricciones propias de tu edad: no puedes administrar sesiones, activar verificación en dos pasos, exportar datos, eliminar tu cuenta ni usar las secciones de familia. Tus datos de salud no son visibles para tu tutor.
 
-> **Función pendiente de la Fase 3b (dispositivo vinculado, menores de 13 años).** El tutor vincula un teléfono del menor con un código QR de un solo uso. El dispositivo vinculado no tiene correo ni contraseña, puede subir evidencias de clases y enviarlas a validación, y el tutor puede desvincularlo en cualquier momento. Esta parte del texto solo debe publicarse cuando la función esté activa.
+> **Función de la Fase 3b (dispositivo vinculado, menores de 13 años): implementada en el servidor, desactivada hasta su despliegue.** El tutor verificado vincula un teléfono del menor con un código QR de un solo uso que dura 10 minutos; cada menor puede tener hasta 2 dispositivos vinculados. El dispositivo vinculado no tiene correo ni contraseña, puede ver el progreso y el calendario del menor (sin la lista de quién más asiste), subir evidencias de clases y enviarlas a validación, y el tutor puede desvincularlo en cualquier momento. La vinculación vence a los 180 días como máximo. El tutor recibe un aviso cada vez que se vincula o desvincula un dispositivo y cada vez que el dispositivo sube una evidencia. La app del dispositivo todavía no existe. Esta parte del texto solo debe publicarse cuando la función esté activa.
 
 ### 3.3 Facultades del tutor
 

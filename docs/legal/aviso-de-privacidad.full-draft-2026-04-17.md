@@ -158,7 +158,7 @@ SACDIA aplica los siguientes regímenes diferenciados por rango etario para el t
 
 | Edad | Régimen aplicable | Tratamiento |
 |------|-------------------|-------------|
-| **6–12 años** | LFPDPPP + principios COPPA adoptados voluntariamente | Consentimiento parental verificable obligatorio; sin cuenta propia; el Representante Legal actúa en su nombre; puede usar un **dispositivo vinculado** por el Representante Legal, sin identificación personal en el dispositivo (función de la Fase 3b, aún no activa); prohibición absoluta de tracking/analytics personalizados; sin recolección de datos no esenciales |
+| **6–12 años** | LFPDPPP + principios COPPA adoptados voluntariamente | Consentimiento parental verificable obligatorio; sin cuenta propia; el Representante Legal actúa en su nombre; puede usar un **dispositivo vinculado** por el Representante Legal, sin identificación personal en el dispositivo (función de la Fase 3b: implementada en el servidor, desactivada hasta su despliegue); prohibición absoluta de tracking/analytics personalizados; sin recolección de datos no esenciales |
 | **13–17 años** | LFPDPPP | Consentimiento parental obligatorio (minoría de edad civil <18 en México, Código Civil); **Cuenta Supervisada** con acceso propio bajo un Tutor Verificado; solo analítica **anónima** (no se identifica a la persona en la herramienta de analítica ni se asocia un usuario a los reportes de errores, y los eventos no llevan identificador de usuario, correo, nombre de usuario ni nombre) hasta que la revisión legal decida otra cosa; el Tutor Verificado ve un resumen de progreso y asistencia |
 | **≥18 años** | LFPDPPP estándar | Consentimiento propio del Titular |
 
@@ -193,8 +193,8 @@ El consentimiento del Representante Legal comprende:
 2. El tratamiento de datos personales sensibles del Menor (salud y afiliación religiosa).
 3. La captura y almacenamiento de fotografías e imágenes del Menor en evidencias, certificados y actividades.
 4. El envío de notificaciones push al dispositivo asociado al Menor o al Representante Legal. En Menores de 13 años, el Representante Legal recibe además una **copia** de las notificaciones del club dirigidas al Menor. Las personas de 13 a 17 años con acceso propio **no** generan copias para el tutor.
-5. La **vinculación de un dispositivo** del Menor de 13 años mediante un código QR de un solo uso, que el Representante Legal puede revocar en cualquier momento (función de la Fase 3b, aún no activa).
-6. Los **avisos de seguridad** al Tutor Verificado (nuevo inicio de sesión, cambio o restablecimiento de contraseña, bloqueos de acceso, cambios de acceso y vinculación o desvinculación de dispositivos), por notificación push y bandeja de la app, nunca por correo y sin contraseñas, nombres de usuario ni direcciones IP.
+5. La **vinculación de un dispositivo** del Menor de 13 años mediante un código QR de un solo uso, que el Representante Legal puede revocar en cualquier momento (función de la Fase 3b: implementada en el servidor, desactivada hasta su despliegue).
+6. Los **avisos de seguridad** al Tutor Verificado (nuevo inicio de sesión, cambio o restablecimiento de contraseña, bloqueos de acceso, cambios de acceso y vinculación o desvinculación de dispositivos), por notificación push y bandeja de la app, nunca por correo y sin contraseñas, nombres de usuario ni direcciones IP. Cuando un dispositivo vinculado sube una evidencia de una clase, el Representante Legal recibe además un aviso informativo.
 7. La visibilidad, para el Tutor Verificado, de un **resumen de progreso de clases y especialidades y de asistencia** del Menor con Cuenta Supervisada. No incluye datos de salud, evidencias, notas del consejero, contactos ni ubicación; el Menor es informado de ello en la app.
 8. Las transferencias a encargados descritas en la sección 7.
 
