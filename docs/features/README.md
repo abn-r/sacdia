@@ -1,7 +1,7 @@
 # Feature Registry - SACDIA
 
 **Estado**: ACTIVE
-**Actualizado**: 2026-10-19 (fila de perfiles familiares, verificada contra la rama `feat/family-profiles`; filas de carga masiva, honores y certificaciones verificadas contra `development` el 2026-10-13; el resto, 2026-10-04)
+**Actualizado**: 2026-10-20 (fila de perfiles familiares, actualizada con la Fase 3 (3a, 3b y 3c) verificada contra la rama `feat/family-profiles-phase3` de backend `32022392`, app `345dadc0` y panel `7a9bfd6`; antes, 2026-10-19 contra la rama `feat/family-profiles`; filas de carga masiva, honores y certificaciones verificadas contra `development` el 2026-10-13; el resto, 2026-10-04)
 **Propósito**: registrar qué dominios tienen documento en `docs/features/` y separar cobertura editorial de estado funcional declarado.
 
 > [!IMPORTANT]
@@ -69,7 +69,7 @@
 | `coordinacion` | [coordinacion.md](coordinacion.md) | Documento presente | `IMPLEMENTADO` |
 | `cron-automation` | [cron-automation.md](cron-automation.md) | Documento presente | `IMPLEMENTADO` |
 | `data-export` | [docs/architecture/DATA-EXPORT.md](../architecture/DATA-EXPORT.md) | Documento presente | `IMPLEMENTADO` |
-| `family-profiles` | [family-profiles.md](family-profiles.md) | Documento presente | `IMPLEMENTADO PARCIAL` (Fase 2 de 4 implementada en la rama `feat/family-profiles` de backend, app y panel; Pendiente de merge (PR #530 de sacdia-backend, PR #178 de sacdia-app, PR #243 de sacdia-admin, PR #141 de sacdia) y de despliegue; la Fase 3 bloquea el lanzamiento a producción) |
+| `family-profiles` | [family-profiles.md](family-profiles.md) | Documento presente | `IMPLEMENTADO PARCIAL` (Fase 2 de 4 implementada en la rama `feat/family-profiles` de backend, app y panel; Pendiente de merge (PR #530 de sacdia-backend, PR #178 de sacdia-app, PR #243 de sacdia-admin, PR #141 de sacdia) y de despliegue. Fase 3 (3a cuentas supervisadas de 13 a 17 años, 3b dispositivo vinculado, 3c el director registra menores y panel de acceso familiar) implementada en la rama `feat/family-profiles-phase3` de backend, app y panel, Pendiente de merge (PR por abrir: feat/family-profiles-phase3) <!-- TODO(orquestador): reemplazar por «PR #NNN» cuando existan. -->; QA de la 3c pendiente; la Fase 3 bloquea el lanzamiento a producción y la Fase 4 no se ha iniciado) |
 | `finanzas` | [finanzas.md](finanzas.md) | Documento presente | `IMPLEMENTADO` |
 | `gestion-clubs` | [gestion-clubs.md](gestion-clubs.md) | Documento presente | `IMPLEMENTADO` |
 | `gestion-seguros` | [gestion-seguros.md](gestion-seguros.md) | Documento presente | `IMPLEMENTADO` |
