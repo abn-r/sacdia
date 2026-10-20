@@ -246,7 +246,7 @@ Notación: **T** = tutor verificado, **T2** = segundo tutor verificado, **Tp** =
 3. **Un dispositivo vinculado a los 12 años sigue vivo después de los 13** hasta la mayoría de edad (la compuerta solo revisa la mayoría de edad). Es intencional según el e2e, pero conviene confirmarlo con producto y con el texto legal.
 4. **El cierre de sesión es de mejor esfuerzo**, pero desde `0d40ac40` revoca el dispositivo **antes** de borrar la sesión (una sola transacción). Si la revocación falla, la fila queda activa sin sesión y la comprobación del tope la cura al crear o canjear un token (la marca `session_revoked`), así que ya no ocupa un cupo para siempre.
 5. **La purga de M** (desde `a8af9091`) borra los tokens de emparejamiento y anonimiza `linked_devices` (`label` = `Dispositivo`, `app_version` y `fcm_token_id` nulos); las filas se conservan como auditoría. Ver «Retención y purga» en `SCHEMA-REFERENCE.md`. G11 sigue Pendiente: no se ejecutó la purga en vivo.
-6. **`revokeAsAdmin` existe sin endpoint** (entrada para la 3c); el motivo `admin` solo se produce por ahí. El barrido por cron de mayoría de edad y de expiración también es de la 3c; mientras tanto la compuerta (perezosa) cubre ambos.
+6. **`revokeAsAdmin` existía sin endpoint al escribir este plan**; la 3c lo expone (`POST /admin/users/:userId/linked-devices/:deviceId/revoke`) y añade el barrido por cron de mayoría de edad y de expiración (`family-age-transitions`). Esos escenarios están en `docs/testing/FAMILY-PROFILES-PHASE3C-QA.md`; la compuerta (perezosa) sigue cubriendo ambos casos en el servidor.
 
 ## Datos que quedan en Neon `development`
 
