@@ -55,7 +55,7 @@ Los conteos del snapshot 2026-03-26 **no** se reescriben aquí. Este addendum re
 | QA en vivo | 3a parcial, 3b ejecutado en parte, **3c Pendiente** | `docs/testing/FAMILY-PROFILES-PHASE3{A,B,C}-QA.md` |
 | Producción | Ausente | Falta merge, promoción de las cuatro migraciones, banderas por ambiente, bucket privado de R2, aprobación del texto legal `2.0.0-family` (borrador) y aviso a los directores (`docs/deployment/DEPLOYMENT-GUIDE.md`, §0.6) |
 
-Estado de feature: **PARCIAL** (Fases 2 y 3 implementadas en rama, no desplegadas; Fase 4 sin iniciar). No FANTASMA: el código existe. Limitación conocida: los coordinadores no pueden verificar el consentimiento de un menor (el guard no resuelve su territorio; ver la sección «Fase 3» del feature).
+Estado de feature: **PARCIAL** (Fases 2 y 3 implementadas en rama, no desplegadas; Fase 4 sin iniciar). No FANTASMA: el código existe. Seguimiento `coordinator-consent-verify`: los coordinadores verifican el consentimiento de un menor solo en las secciones que cubren sus asignaciones (migración `20261023120000_grant_consent_verify_to_coordinators`, pendiente de aplicar; ver la sección «Fase 3» del feature).
 
 ---
 

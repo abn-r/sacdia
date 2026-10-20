@@ -37,7 +37,7 @@ Los borradores completos (`*.full-draft-*`) llevan el sufijo `-draft` porque no 
 **Puerta de publicación (lista de verificación de release):**
 
 1. El usuario o un abogado aprueba el texto y se quita el aviso «BORRADOR» de cada sección.
-2. Se decide si las funciones aún inactivas (dispositivo vinculado y registro por director, ya implementadas pero apagadas por bandera) se publican ya o se retiran del texto hasta su activación. Las frases que el código desmentía (la app del dispositivo «todavía no existe», el coordinador como verificador y los avisos de desvinculación sin excepciones) se corrigieron el 2026-10-20 en `terminos-y-condiciones.md` y en `terminos-y-condiciones.full-draft-2026-04-17.md`; siguen como BORRADOR pendiente de revisión.
+2. Se decide si las funciones aún inactivas (dispositivo vinculado y registro por director, ya implementadas pero apagadas por bandera) se publican ya o se retiran del texto hasta su activación. Las frases que el código desmentía (la app del dispositivo «todavía no existe», el coordinador como verificador, que el seguimiento `coordinator-consent-verify` volvió cierto para las secciones que cubren sus asignaciones, y los avisos de desvinculación sin excepciones) se corrigieron el 2026-10-20 en `terminos-y-condiciones.md` y en `terminos-y-condiciones.full-draft-2026-04-17.md`; siguen como BORRADOR pendiente de revisión.
 3. Se publica el texto en `https://sacdia.com/terms` y `https://sacdia.com/privacy`.
 4. Solo entonces se despliega el commit de versión del backend (`2.0.0-family`; es el último commit de la sub-fase 3a y se puede revertir solo).
 5. **No promover a `main` mientras exista el aviso «BORRADOR» en estos archivos.**
