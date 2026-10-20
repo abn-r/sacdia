@@ -2,7 +2,7 @@
 
 **Estado**: ACTIVE
 **Sincronizado contra**: `sacdia-backend/prisma/schema.prisma` en la rama `development` (commit `68123f6`)
-**Fecha de resincronizacion**: 2026-10-13 (última migración en `development`: `20261013110000_remove_retired_investiture_permissions`). Las secciones de abajo se resincronizaron por completo hasta el 2026-10-04; después solo se añadieron las de instructor de especialidad y carga por certificado (2026-10-13) y la de aceptación legal (`legal_acceptances`, 2026-10-15, migración `20261015120000_legal_acceptances`, pendiente de merge; las cifras de abajo no la incluyen) y la de perfiles familiares (2026-10-16, actualizada el 2026-10-19 con la Fase 2 completa; migración `20261016120000_family_profiles`, rama `feat/family-profiles`, Pendiente de merge (PR #530 de sacdia-backend)). El espejo `schema.prisma` sí es la copia completa e incluye ambas. La sub-fase 3a de perfiles familiares (2026-10-19; migración `20261020120000_family_teen_login`, rama `feat/family-profiles-phase3`, Pendiente de merge (PR por abrir: feat/family-profiles-phase3)) <!-- TODO(orquestador): reemplazar por «PR #NNN de sacdia-backend» cuando exista el PR. --> añade `supervised_logins` y dos reemplazos de CHECK; ver «Cuentas supervisadas (Fase 3a)». Las cifras de abajo y el espejo `schema.prisma` **todavía no la incluyen** (se resincronizan cuando el backend se mezcle).
+**Fecha de resincronizacion**: 2026-10-13 (última migración en `development`: `20261013110000_remove_retired_investiture_permissions`). Las secciones de abajo se resincronizaron por completo hasta el 2026-10-04; después solo se añadieron las de instructor de especialidad y carga por certificado (2026-10-13) y la de aceptación legal (`legal_acceptances`, 2026-10-15, migración `20261015120000_legal_acceptances`, pendiente de merge; las cifras de abajo no la incluyen) y la de perfiles familiares (2026-10-16, actualizada el 2026-10-19 con la Fase 2 completa; migración `20261016120000_family_profiles`, rama `feat/family-profiles`, Pendiente de merge (PR #530 de sacdia-backend)). El espejo `schema.prisma` sí es la copia completa e incluye ambas. La sub-fase 3a de perfiles familiares (2026-10-19; migración `20261020120000_family_teen_login`, rama `feat/family-profiles-phase3`, Pendiente de merge (PR por abrir: feat/family-profiles-phase3)) <!-- TODO(orquestador): reemplazar por «PR #NNN de sacdia-backend» cuando exista el PR. --> añade `supervised_logins` y dos reemplazos de CHECK; ver «Cuentas supervisadas (Fase 3a)». La sub-fase 3b (2026-10-20; migración `20261021120000_family_linked_devices`, misma rama, Pendiente de merge (PR por abrir: feat/family-profiles-phase3)) añade `linked_devices` y `device_pairing_tokens` y amplía otro CHECK de `supervised_logins`; ver «Dispositivos vinculados (Fase 3b)». Las cifras de abajo y el espejo `schema.prisma` **todavía no incluyen ni la 3a ni la 3b** (se resincronizan cuando el backend se mezcle).
 
 Referencia humana concisa del schema Prisma vigente.
 
@@ -329,11 +329,11 @@ Una fila por adolescente con cuenta (o con acceso habilitado por un tutor). Es l
 | `pending_reminder_level` | `smallint` | no | `0` | Recordatorios enviados: 0 ninguno, 1 a los 7 días, 2 a los 30, 3 a los 83 |
 | `disabled_at` | `timestamptz(6)` | sí | - | |
 | `disabled_by_user_id` | `uuid` | sí | - | FK a `users.user_id`: el tutor o el admin que lo deshabilitó. Null si lo hizo el sistema |
-| `disabled_reason` | `varchar(24)` | sí | - | `guardian`, `admin` o `unlinked_purged` |
+| `disabled_reason` | `varchar(24)` | sí | - | `guardian`, `admin` o `unlinked_purged` (Fase 3b: la base también admite `age_majority`; ningún código lo escribe todavía, es para el barrido de la 3c) |
 | `created_at` | `timestamptz(6)` | no | `now()` | |
 | `modified_at` | `timestamptz(6)` | no | `now()` | `@updatedAt` en Prisma |
 
-- **CHECK**: `supervised_logins_method_ck`, `supervised_logins_origin_ck` y `supervised_logins_password_set_by_ck` fijan los valores de arriba. `supervised_logins_handle_ck`: `(method = 'handle') = (login_handle IS NOT NULL)`. `supervised_logins_handle_format_ck`: `login_handle ~ '^[a-z0-9][a-z0-9-]{5,39}$'`. `supervised_logins_guardian_enabled_ck`: `origin = 'guardian_enabled'` exige `enabled_by_guardianship_id`, `enabled_by_user_id` y `enabled_at`. `supervised_logins_reminder_ck`: `pending_reminder_level` entre 0 y 3. `supervised_logins_disabled_ck`: `(disabled_at IS NULL) = (disabled_reason IS NULL)`. `supervised_logins_disabled_reason_ck`: solo `guardian`, `admin`, `unlinked_purged`.
+- **CHECK**: `supervised_logins_method_ck`, `supervised_logins_origin_ck` y `supervised_logins_password_set_by_ck` fijan los valores de arriba. `supervised_logins_handle_ck`: `(method = 'handle') = (login_handle IS NOT NULL)`. `supervised_logins_handle_format_ck`: `login_handle ~ '^[a-z0-9][a-z0-9-]{5,39}$'`. `supervised_logins_guardian_enabled_ck`: `origin = 'guardian_enabled'` exige `enabled_by_guardianship_id`, `enabled_by_user_id` y `enabled_at`. `supervised_logins_reminder_ck`: `pending_reminder_level` entre 0 y 3. `supervised_logins_disabled_ck`: `(disabled_at IS NULL) = (disabled_reason IS NULL)`. `supervised_logins_disabled_reason_ck`: `guardian`, `admin`, `unlinked_purged` y, desde la migración de la Fase 3b, `age_majority`.
 - **Índices** (solo en la migración; los parciales y de expresión no caben en `@@index`/`@@unique`): `uq_supervised_logins_handle` único sobre `(lower(login_handle)) WHERE login_handle IS NOT NULL` (el nombre de usuario es único sin distinguir mayúsculas) e `idx_supervised_logins_pending` sobre `(pending_since) WHERE pending_since IS NOT NULL AND disabled_at IS NULL` (lo recorre el cron `pending-teen-guardian`).
 - **FK**: todas con la acción por defecto `NO ACTION` (sin `ON DELETE`). Relaciones Prisma con nombre: `supervised_login_user` (1:1, inversa `users.supervised_login`), `supervised_login_enabler`, `supervised_login_disabler` y `supervised_login_guardianship`.
 - **Semántica de las filas**:
@@ -365,6 +365,84 @@ La migración es aditiva salvo estos dos reemplazos, que **solo amplían** los v
 - **Aplicación**: a mano con psql a la rama `development` de Neon, dos veces para probar la idempotencia, y luego fila en `_prisma_migrations`. Nunca a producción desde este flujo (producción se actualiza al promover). Reversión manual por rama de Neon; no hay migración down. El rollback preferido es apagar la bandera `FAMILY_TEEN_LOGIN_ENABLED` (ver `docs/api/ENDPOINTS-LIVE-REFERENCE.md`, «Banderas de configuración»; apagarla bloquea los inicios de sesión por nombre de usuario y corta en la siguiente petición las sesiones ya abiertas, sin borrarlas; volver a encenderla las restaura); revertir el PR deja la tabla sin uso.
 - **Sin variable de entorno nueva de datos**: las tres banderas (`FAMILY_TEEN_LOGIN_ENABLED`, `FAMILY_LINKED_DEVICE_ENABLED`, `FAMILY_DIRECTOR_CREATE_MINOR_ENABLED`, por defecto `false`) están en `config/env.validation.ts` (`src/config/env.validation.ts:237-`).
 - **Purga de un adolescente con cuenta** (cron `dependent-profiles-purge`, mismo pipeline que un dependiente congelado): además de lo de «Perfiles familiares», borra la credencial y las filas OAuth de `accounts`, las filas `verifications`, las sesiones y los tokens FCM, deja en `NULL` el correo y los datos personales y conserva la fila `users` anonimizada. El correo queda libre para reutilizarse.
+
+## Dispositivos vinculados (Fase 3b)
+
+> [!NOTE]
+> Fase 3b de perfiles familiares (sacdia-backend, rama `feat/family-profiles-phase3`, commits `f31c24cb..bbf26068`), Pendiente de merge (PR por abrir: feat/family-profiles-phase3). <!-- TODO(orquestador): reemplazar por «PR #NNN de sacdia-backend» cuando exista el PR. --> Describe el schema **implementado** en la rama. Migración: `sacdia-backend/prisma/migrations/20261021120000_family_linked_devices/migration.sql`, escrita a mano. **Aplicada a la rama `development` de Neon el 2026-10-20 con aprobación del usuario** (tarea T3b-B04): `psql` con `ON_ERROR_STOP` en una transacción, registro en `_prisma_migrations` y verificación con `prisma migrate status` (al día). Antes de aplicarla ninguna de las dos tablas existía, la última migración era `20261020120000_family_teen_login` y 0 filas de `supervised_logins` violaban el CHECK nuevo; después, `linked_devices` tiene 9 constraints y `device_pairing_tokens` 8. **No está aplicada en producción**: llega al promover `development` → preproducción → `main` (Render corre `prisma migrate deploy` al final del build). La aplicación a Neon la hizo el orquestador del backend; esta referencia la registra tal como se informó y no se volvió a comprobar contra la base al escribirla. `docs/database/schema.prisma` (espejo) se resincroniza al mezclar. Contrato de endpoints: `docs/api/ENDPOINTS-LIVE-REFERENCE.md`, «Dispositivo vinculado de menores de 13 años (Fase 3b)».
+
+Un **dispositivo vinculado** es el teléfono de un menor sin cuenta: tiene una sesión propia (fila normal de `sessions`) y una fila `linked_devices` que la nombra. Una sesión es de dispositivo **solo** si una fila `linked_devices` tiene su `session_id`; `sessions` no cambia.
+
+### `linked_devices`
+
+| Columna | Tipo | Nulo | Default | Notas |
+|---|---|---|---|---|
+| `linked_device_id` | `uuid` | no | `gen_random_uuid()` | PK `linked_devices_pkey` |
+| `dependent_user_id` | `uuid` | no | - | FK a `users.user_id`: el menor |
+| `guardianship_id` | `uuid` | no | - | FK a `guardianships.guardianship_id`: la tutoría con que se emparejó. La compuerta exige que siga `verified`, no custodia, no de prueba y no revocada |
+| `paired_by_user_id` | `uuid` | no | - | FK a `users.user_id`: el tutor que creó el token |
+| `session_id` | `text` | no | - | Id de la sesión del dispositivo en `sessions`. **Sin FK** (ver abajo) |
+| `label` | `varchar(60)` | no | - | Nombre del teléfono que manda el propio dispositivo (el servicio lo limpia a 40 caracteres como máximo, sin caracteres de control ni `<` `>`; por defecto `Dispositivo`) |
+| `platform` | `varchar(16)` | no | - | `ios` o `android` |
+| `app_version` | `varchar(32)` | sí | - | |
+| `fcm_token_id` | `uuid` | sí | - | Id del token FCM que registró el dispositivo (`user_fcm_tokens.fcm_token_id`). **Sin FK**: la fila del token puede desaparecer sin tocar el historial del dispositivo |
+| `paired_at` | `timestamptz(6)` | no | `now()` | |
+| `absolute_expires_at` | `timestamptz(6)` | no | - | Tope absoluto: `paired_at + 180 días`. El refresh nunca lo supera |
+| `last_seen_at` | `timestamptz(6)` | sí | - | Se escribe como máximo cada 5 minutos |
+| `revoked_at` | `timestamptz(6)` | sí | - | |
+| `revoked_by_user_id` | `uuid` | sí | - | FK a `users.user_id`: quien desvinculó. Nulo si lo hizo el sistema (ciclo de vida, compuerta, el propio dispositivo) |
+| `revoked_reason` | `varchar(32)` | sí | - | Ver el CHECK |
+
+- **FK**: las cuatro con la acción por defecto `NO ACTION` (sin `ON DELETE`): `linked_devices_dependent_user_id_fkey`, `linked_devices_guardianship_id_fkey`, `linked_devices_paired_by_user_id_fkey` y `linked_devices_revoked_by_user_id_fkey`.
+- **CHECK**: `linked_devices_platform_ck` (`ios` o `android`); `linked_devices_expiry_ck` (`absolute_expires_at > paired_at`); `linked_devices_revoked_ck` (`(revoked_at IS NULL) = (revoked_reason IS NULL)`: sin motivo no hay revocación y al revés); `linked_devices_revoked_reason_ck`: `guardian`, `guardianship_revoked`, `guardian_account_closed`, `teen_login_enabled`, `majority`, `dependent_frozen`, `device_logout`, `session_revoked`, `admin` o `expired`.
+- **Índices** (solo en la migración; el único y los parciales no caben en `@@index`/`@@unique` de Prisma): `uq_linked_devices_session` único sobre `(session_id)`; `idx_linked_devices_dependent_active` sobre `(dependent_user_id) WHERE revoked_at IS NULL` (cuenta del tope de dos dispositivos); `idx_linked_devices_guardianship_active` sobre `(guardianship_id) WHERE revoked_at IS NULL` (revocar por tutoría).
+- **Por qué `session_id` no tiene FK** (decisión de diseño ADR-4): las filas de `sessions` se borran físicamente al cerrar sesión, al cambiar la contraseña y en todo camino de revocación; una FK con `NO ACTION` rompería esos borrados, y una con `CASCADE` borraría el historial del dispositivo. Por eso la relación Prisma no existe (`session_id String` plano) y la unión se hace a mano (`BetterAuthService.findLinkedDeviceOfSession`, `SessionsService`). Tampoco hay `ALTER` de `sessions`.
+- **Relaciones Prisma con nombre**: en `users`, `linked_device_dependent`, `linked_device_pairer` y `linked_device_revoker` (campos `linked_devices_as_dependent`, `linked_devices_paired`, `linked_devices_revoked`); en `guardianships`, `linked_device_guardianship` (campo `linked_devices`).
+- **Semántica**: máximo **2 dispositivos activos** por menor (`revoked_at IS NULL`; se hace cumplir en el servicio bajo el candado por dependiente, no con una restricción de la base). Una revocación escribe `revoked_at`, `revoked_reason` y `revoked_by_user_id` con compare-and-set sobre `revoked_at IS NULL` (una revocación doble no cambia nada ni duplica la auditoría). Quién escribe cada motivo y qué dispara la revocación: `docs/api/ENDPOINTS-LIVE-REFERENCE.md`, «Cuándo se revoca un dispositivo (motivos)».
+
+### `device_pairing_tokens`
+
+El token de un solo uso que un tutor verificado crea para emparejar el teléfono (lo lleva el QR). Solo se guarda su HMAC.
+
+| Columna | Tipo | Nulo | Default | Notas |
+|---|---|---|---|---|
+| `pairing_token_id` | `uuid` | no | `gen_random_uuid()` | PK `device_pairing_tokens_pkey` |
+| `token_hash` | `char(64)` | no | - | HMAC-SHA256 en hexadecimal del token (clave HKDF derivada de `BETTER_AUTH_SECRET`, `info = sacdia:device-pairing-token`). UNIQUE (`device_pairing_tokens_token_hash_key`). El token en claro no se guarda |
+| `dependent_user_id` | `uuid` | no | - | FK a `users.user_id` |
+| `guardianship_id` | `uuid` | no | - | FK a `guardianships.guardianship_id`: la tutoría del tutor que lo creó |
+| `created_by_user_id` | `uuid` | no | - | FK a `users.user_id`: el tutor |
+| `expires_at` | `timestamptz(6)` | no | - | `created_at + 10 minutos` |
+| `consumed_at` | `timestamptz(6)` | sí | - | |
+| `consumed_device_id` | `uuid` | sí | - | FK a `linked_devices.linked_device_id`: el dispositivo que lo canjeó |
+| `revoked_at` | `timestamptz(6)` | sí | - | Lo marca un token nuevo del mismo menor |
+| `created_at` | `timestamptz(6)` | no | `now()` | |
+
+- **FK**: las cuatro con `NO ACTION`: `device_pairing_tokens_dependent_user_id_fkey`, `..._guardianship_id_fkey`, `..._created_by_user_id_fkey` y `..._consumed_device_id_fkey`.
+- **CHECK**: `device_pairing_tokens_consumed_ck` (`(consumed_at IS NULL) = (consumed_device_id IS NULL)`) y `device_pairing_tokens_expiry_ck` (`expires_at > created_at AND expires_at <= created_at + interval '15 minutes'`; el servicio usa 10 minutos y la base no admite más de 15).
+- **Índice** (solo en la migración): `idx_device_pairing_tokens_open` sobre `(dependent_user_id) WHERE consumed_at IS NULL AND revoked_at IS NULL`.
+- **Orden de escritura al canjear**: primero se crea la fila de `linked_devices` y después se consume el token con compare-and-set; el CHECK `consumed_ck` y la FK `consumed_device_id` obligan a ese orden.
+- Relaciones Prisma con nombre: `pairing_token_dependent`, `pairing_token_creator`, `pairing_token_guardianship` y `pairing_token_device` (en `users`: `pairing_tokens_as_dependent` y `pairing_tokens_created`; en `guardianships`: `pairing_tokens`).
+
+### `supervised_logins.disabled_reason`: `age_majority` (reemplazo del CHECK diferido de la 3a)
+
+La migración incluye el reemplazo del CHECK `supervised_logins_disabled_reason_ck` que la verificación 3a (W5) dejó diferido para la 3b: `DROP CONSTRAINT IF EXISTS` + `ADD CONSTRAINT` que **solo amplía** los valores (nunca los restringe, así que no deja filas huérfanas).
+
+| Constraint | Antes | Ahora |
+|---|---|---|
+| `supervised_logins_disabled_reason_ck` | `guardian`, `admin`, `unlinked_purged` | `guardian`, `admin`, `unlinked_purged`, `age_majority` (un acceso propio que se deshabilita al llegar a la mayoría de edad) |
+
+Ningún código de la 3b escribe `age_majority` todavía: el valor ya cabe en la base para el barrido por cron de la sub-fase 3c. La prueba de inventario `supervised-logins.disabled-reason.inventory.spec.ts` se actualizó para permitirlo.
+
+### Migración 20261021120000_family_linked_devices
+
+- **8 sentencias**: 2 `CREATE TABLE IF NOT EXISTS` (`linked_devices`, `device_pairing_tokens`), 4 `CREATE INDEX IF NOT EXISTS` (uno único y tres parciales) y 1 par `DROP CONSTRAINT IF EXISTS` + `ADD CONSTRAINT` (el CHECK de arriba). Sin DML, sin `DROP` de objetos de datos, sin `CONCURRENTLY` ni `BEGIN`/`COMMIT`. **`sessions` no se toca.** El guard `src/guardianships/family-profiles-phase3.migration.spec.ts` (bloque 3b) comprueba la lista permitida, la lista de prohibiciones, casos negativos, el DMMF de los dos modelos y que el CHECK nuevo sea superconjunto del anterior.
+- **Validación previa**: aplicada dos veces sobre una base PGlite en memoria con cada CHECK y cada restricción única ejercitados (informe del backend); la aplicación real a Neon `development` está arriba.
+- **Reversión**: manual por rama de Neon; no hay migración down. Las dos tablas y sus índices se pueden borrar a mano; el CHECK ampliado puede quedarse. El rollback preferido es apagar `FAMILY_LINKED_DEVICE_ENABLED` (por defecto `false`; ver `docs/api/ENDPOINTS-LIVE-REFERENCE.md`, «Bandera `FAMILY_LINKED_DEVICE_ENABLED`»): corta toda petición de dispositivo con 401 sin tocar la base y, al volver a encenderla, los dispositivos activos funcionan de nuevo. **Cambiar la bandera en un servidor desplegado exige reiniciarlo.**
+- **Sin variable de entorno nueva de datos**: la clave de los tokens se deriva de `BETTER_AUTH_SECRET` con HKDF.
+
+### Retención y purga (pendiente de decidir)
+
+La purga del menor (`dependent-profiles-purge`) revoca los dispositivos que queden y borra todos sus tokens FCM, pero **no** borra ni anula filas de `linked_devices` ni de `device_pairing_tokens` (no hay otra limpieza en el backend). Después de la purga siguen en la base el `label` (texto libre que manda el teléfono, por ejemplo un nombre), `platform`, `app_version`, `paired_by_user_id` y las fechas. Queda abierto si la purga debe anular el `label` o borrar esas filas (decisión A9: «borrar» es borrar); aún no hay una entrada en `docs/audit/DECISIONS-PENDING.md`.
 
 ## Modelos añadidos a esta referencia (resincronización 2026-10-04)
 
@@ -1055,6 +1133,7 @@ Define el presupuesto de puntos por componente dentro de un eje anual:
 
 ## Migraciones recientes
 
+- `20261021120000_family_linked_devices` - rama `feat/family-profiles-phase3`, Pendiente de merge (PR por abrir: feat/family-profiles-phase3). Tablas `linked_devices` y `device_pairing_tokens` con sus índices, y el CHECK `supervised_logins_disabled_reason_ck` ampliado con `age_majority`. Sin DML; `sessions` no cambia. Aplicada a Neon `development` el 2026-10-20 con aprobación del usuario; no aplicada en producción.
 - `20261016120000_family_profiles` - rama `feat/family-profiles`, Pendiente de merge (PR #530 de sacdia-backend). `users.email` nullable, 3 columnas de política de edad en `countries` y las tablas `dependent_profiles`, `guardianships`, `guardianship_consent_evidences` y `guardianship_link_codes` con sus índices parciales. Sin DML. No aplicada a Neon.
 - `20261013100000_honor_instructor_proposals` (M4) - enum y tabla `honor_instructor_proposals`; índices sin `CONCURRENTLY` desde #485.
 - `20261012130000_honors_completed_at` (M5) - `users_honors.completed_at`, CHECK >= 1960-01-01 y backfill determinista.
