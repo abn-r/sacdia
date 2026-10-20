@@ -1,6 +1,6 @@
 # Perfiles familiares (tutores y menores de 13 años)
 
-**Estado**: IMPLEMENTADO PARCIAL (Fase 2 de 4 implementada en rama: `feat/family-profiles` en sacdia-backend, sacdia-app y sacdia-admin; `docs/family-profiles` en este repo. Pendiente de merge (PR #530 de sacdia-backend, PR #178 de sacdia-app, PR #243 de sacdia-admin, PR #141 de sacdia)). No desplegado. Faltan las Fases 3 y 4 y la Fase 3 bloquea el lanzamiento.
+**Estado**: IMPLEMENTADO PARCIAL (Fase 2 de 4 implementada en rama: `feat/family-profiles` en sacdia-backend, sacdia-app y sacdia-admin; `docs/family-profiles` en este repo. Pendiente de merge (PR #530 de sacdia-backend, PR #178 de sacdia-app, PR #243 de sacdia-admin, PR #141 de sacdia)). No desplegado. La Fase 3 tiene las sub-fases 3a (inicio de sesión supervisado) y 3b (dispositivo vinculado) implementadas en la rama `feat/family-profiles-phase3`, Pendiente de merge; falta la 3c y la Fase 4, y la Fase 3 bloquea el lanzamiento. QA de la 3b: `docs/testing/FAMILY-PROFILES-PHASE3B-QA.md`; contrato: `docs/api/ENDPOINTS-LIVE-REFERENCE.md`.
 **Verificado contra código**: 2026-10-19 (backend `554552c1`, app `819f257f`, admin `79a7b29`). La compuerta de activación, las reglas de cuatro ojos y el bloqueo de la ficha verificada se releyeron contra el backend `603d3d8e`. Segundo pase del mismo día contra backend `422433c0`, app `df2e6c6f` y admin `4a50314` (lista de parentescos del tutor, selector de club al actuar, `effective_expires_at` y los ajustes de la app y del panel)
 **Dominios relacionados**: [auth.md](auth.md) (sesión y post-registro), [membership-requests.md](membership-requests.md) (aprobación de ingreso), [contactos-emergencia-representante-legal.md](contactos-emergencia-representante-legal.md) (representante legal, ahora de solo lectura), [rbac.md](rbac.md) (permisos sensibles), [qr-credencial.md](qr-credencial.md) (correo nulo en la tarjeta)
 
@@ -19,7 +19,7 @@ No hay chat ni mensajería entre usuarios, ni ahora ni después. La app y el pan
 |---|---|---|
 | 1 | Aceptación legal de Términos y Aviso de Privacidad | Mergeada (backend #515, #516, #518; app #177; docs #139, #140) |
 | 2 | Tutorías, perfiles dependientes, actuar en nombre del menor, verificación del director (esta página) | Implementada en rama; ver sub-fases abajo |
-| 3 | Inicio de sesión supervisado de 13 a 17 años, dispositivo vinculado del menor de 13 años (QR del tutor), avisos de seguridad al tutor, resúmenes para el tutor | **No iniciada. Bloquea el lanzamiento a producción** |
+| 3 | Inicio de sesión supervisado de 13 a 17 años (**3a**), dispositivo vinculado del menor de 13 años con QR del tutor (**3b**), avisos de seguridad al tutor, resúmenes para el tutor, y el resto marcado como **3c** | **3a y 3b implementadas en la rama `feat/family-profiles-phase3` (backend y app), Pendiente de merge (PR por abrir: feat/family-profiles-phase3); 3c pendiente. Bloquea el lanzamiento a producción** <!-- TODO(orquestador): reemplazar por «PR #NNN» de sacdia-backend y sacdia-app cuando existan. --> |
 | 4 | Liberación a los 18 años (cron), reaceptación de términos, eliminación de `legal_representatives` | No iniciada |
 
 La Fase 2 se entregó en tres sub-fases sobre **una rama y un PR por repo** (excepción de tamaño aprobada; los commits por unidad de trabajo son la mitigación de revisión): **2a** backend base y actuar-en-nombre, **2b** app (Mi familia, cambio de perfil, post-registro), **2c** verificación del director (backend, app y panel).
@@ -222,7 +222,7 @@ Todo se serializa por menor con un candado de Postgres (`pg_advisory_xact_lock`)
 
 ## Lo que no incluye la Fase 2
 
-- Inicio de sesión de adolescentes, dispositivo vinculado, avisos de seguridad y resúmenes para el tutor (Fase 3).
+- Inicio de sesión de adolescentes, dispositivo vinculado, avisos de seguridad y resúmenes para el tutor (Fase 3; la 3a y la 3b ya están implementadas en la rama `feat/family-profiles-phase3`, ver la tabla de fases).
 - Liberación a los 18 años, reaceptación de términos y eliminación de `legal_representatives` (Fase 4).
 - Que el director cree menores. Los códigos de reclamo solo reintegran a una familia un menor que ya está bajo custodia del club.
 - Subir la ficha desde el paso 3 del menor actuando (opcional, no implementado; la ruta del tutor ya es segura para agregarlo).
