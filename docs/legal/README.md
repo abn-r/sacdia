@@ -20,7 +20,7 @@ La versión vigente de cada documento vive en el código, no en esta carpeta: `s
 
 ## Versión 2.0.0-family (BORRADOR, perfiles familiares Fase 3)
 
-> **BORRADOR — requiere revisión del usuario o de un abogado.** Pendiente de merge (PR por abrir: feat/family-profiles-phase3). <!-- TODO(orquestador): reemplazar por «PR #NNN de sacdia-backend» cuando exista el PR. -->
+> **BORRADOR — requiere revisión del usuario o de un abogado.** Pendiente de merge (PR #531 de sacdia-backend).
 
 Cambia el texto de menores: cuentas supervisadas de 13 a 17 años, modo pendiente de tutor con plazo de 90 días, facultades del tutor verificado, analítica anónima para menores y, como funciones que **aún no están activas** (Fases 3b y 3c), el dispositivo vinculado de menores de 13 años (3b: implementado en el servidor y en la app, en la rama `feat/family-profiles-phase3`, y desactivado tras `FAMILY_LINKED_DEVICE_ENABLED` hasta su despliegue) y el registro de menores por un director (3c: implementado en servidor, app y panel, en la misma rama, tras `FAMILY_DIRECTOR_CREATE_MINOR_ENABLED`). También corrige la promesa de un segundo opt-in por correo (privacidad §6.2.c.1) que el producto no hace.
 

@@ -2,7 +2,7 @@
 
 **Estado**: PLAN con corridas del 2026-10-20: API (local + Neon `development`) y visual (app en simulador y panel local; ver «Corrida visual en simulador y panel»). Los escenarios no corridos siguen en «Pendiente»
 **Fecha del plan**: 2026-10-20
-**Ramas**: `feat/family-profiles-phase3` en sacdia-backend (HEAD `32022392`), sacdia-app (HEAD `345dadc0`) y sacdia-admin (HEAD `7a9bfd6`), Pendiente de merge (PR por abrir: feat/family-profiles-phase3) <!-- TODO(orquestador): reemplazar por «PR #NNN» de cada repo cuando existan. -->
+**Ramas**: `feat/family-profiles-phase3` en sacdia-backend (HEAD `32022392`), sacdia-app (HEAD `345dadc0`) y sacdia-admin (HEAD `7a9bfd6`), Pendiente de merge (PRs sacdia-backend #531, sacdia-app #179, sacdia-admin #244 y sacdia #142)
 **Contrato a probar**: `docs/api/ENDPOINTS-LIVE-REFERENCE.md`, «Registro de menores por un director y acceso familiar en el panel (Fase 3c)». Esquema: `docs/database/SCHEMA-REFERENCE.md`, «Registro por director y acceso familiar (Fase 3c)». Feature: `docs/features/family-profiles.md`, «Fase 3».
 
 Este documento es el guion de la 3c, escrito con el mismo estilo que `FAMILY-PROFILES-PHASE3A-QA.md` y `FAMILY-PROFILES-PHASE3B-QA.md`. La columna «Resultado» se llena al ejecutarlo (tarea T3c-Q02); hoy ningún escenario tiene evidencia en vivo. Los usuarios de prueba y cómo crearlos están en `docs/testing/TEST-USERS.md`. Aquí no se anotan contraseñas ni tokens.

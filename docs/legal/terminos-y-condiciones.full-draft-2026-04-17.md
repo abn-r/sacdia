@@ -61,7 +61,7 @@ Al crear una cuenta, acceder o utilizar el Servicio, el Usuario declara haber le
 
 ### 1.2 Edad mínima
 
-> **BORRADOR — requiere revisión del usuario o de un abogado.** Esta sección cambió en la versión 2.0.0-family-draft (antes 1.1.0-draft) y no debe publicarse sin aprobación. Pendiente de merge (PR por abrir: feat/family-profiles-phase3). <!-- TODO(orquestador): reemplazar por «PR #NNN de sacdia-backend» cuando exista el PR. -->
+> **BORRADOR — requiere revisión del usuario o de un abogado.** Esta sección cambió en la versión 2.0.0-family-draft (antes 1.1.0-draft) y no debe publicarse sin aprobación. Pendiente de merge (PR #531 de sacdia-backend).
 
 Las cuentas con acceso propio y sin supervisión están dirigidas a personas mayores de 18 años. Las personas de 13 a 17 años podrán tener una **Cuenta Supervisada**, creada por el propio adolescente o habilitada por su Representante Legal, en los términos de la sección 3.2. Las personas menores de 13 años **no** pueden tener cuenta propia: únicamente podrán ser registradas por su Representante Legal o por un Director de Club debidamente acreditado, y usar un dispositivo vinculado por su Representante Legal. Las edades de este párrafo son las de México; en otro país se aplican las que SACDIA tenga configuradas.
 
@@ -73,7 +73,7 @@ El Servicio se ofrece **exclusivamente a personas con residencia en los Estados 
 
 El Usuario declara contar con capacidad legal plena para obligarse conforme a los presentes Términos. Si el Usuario actúa en representación de una persona moral, declara contar con facultades suficientes para ello.
 
-> **BORRADOR — requiere revisión del usuario o de un abogado.** Esta sección cambió en la versión 2.0.0-family-draft (antes 1.1.0-draft) y no debe publicarse sin aprobación. Pendiente de merge (PR por abrir: feat/family-profiles-phase3). <!-- TODO(orquestador): reemplazar por «PR #NNN de sacdia-backend» cuando exista el PR. -->
+> **BORRADOR — requiere revisión del usuario o de un abogado.** Esta sección cambió en la versión 2.0.0-family-draft (antes 1.1.0-draft) y no debe publicarse sin aprobación. Pendiente de merge (PR #531 de sacdia-backend).
 
 En el caso de una Cuenta Supervisada, la capacidad para obligarse la complementa la aceptación del Representante Legal conforme a la sección 3.2. La fecha de nacimiento la declara quien registra; declarar una fecha falsa para obtener un tipo de cuenta que no corresponde es causa de suspensión o cancelación (sección 8.2).
 
@@ -125,7 +125,7 @@ El registro del Usuario adulto puede quedar sujeto a aprobación administrativa 
 
 ### 3.2 Registro de menores y Cuentas Supervisadas
 
-> **BORRADOR — requiere revisión del usuario o de un abogado.** Esta sección cambió en la versión 2.0.0-family-draft (antes 1.1.0-draft) y no debe publicarse sin aprobación. Pendiente de merge (PR por abrir: feat/family-profiles-phase3). <!-- TODO(orquestador): reemplazar por «PR #NNN de sacdia-backend» cuando exista el PR. -->
+> **BORRADOR — requiere revisión del usuario o de un abogado.** Esta sección cambió en la versión 2.0.0-family-draft (antes 1.1.0-draft) y no debe publicarse sin aprobación. Pendiente de merge (PR #531 de sacdia-backend).
 
 SACDIA reconoce tres situaciones, según la edad (México: 13 y 18 años):
 
@@ -258,7 +258,7 @@ En caso de que el Responsable introduzca funcionalidades de pago, serán aplicab
 
 El Usuario podrá solicitar la cancelación de su cuenta en cualquier momento, mediante la funcionalidad correspondiente en la aplicación o escribiendo a [PENDIENTE: Correo ARCO — ej. arco@sacdia.app].
 
-> **BORRADOR — requiere revisión del usuario o de un abogado.** Esta sección cambió en la versión 2.0.0-family-draft (antes 1.1.0-draft) y no debe publicarse sin aprobación. Pendiente de merge (PR por abrir: feat/family-profiles-phase3). <!-- TODO(orquestador): reemplazar por «PR #NNN de sacdia-backend» cuando exista el PR. -->
+> **BORRADOR — requiere revisión del usuario o de un abogado.** Esta sección cambió en la versión 2.0.0-family-draft (antes 1.1.0-draft) y no debe publicarse sin aprobación. Pendiente de merge (PR #531 de sacdia-backend).
 
 Una Cuenta Supervisada **no** puede cancelarse desde la aplicación por el propio Menor: la cancelación se solicita por el Representante Legal o por un administrador del Responsable, por el correo anterior.
 

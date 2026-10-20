@@ -9,7 +9,7 @@ aplicable_a: App Store Connect + Google Play Console
 
 # Checklist de privacidad para App Store y Google Play
 
-> **BORRADOR — requiere revisión del usuario o de un abogado.** Pendiente de merge (PR por abrir: feat/family-profiles-phase3). <!-- TODO(orquestador): reemplazar por «PR #NNN de sacdia-backend» cuando exista el PR. -->
+> **BORRADOR — requiere revisión del usuario o de un abogado.** Pendiente de merge (PR #531 de sacdia-backend).
 > Versión 2.0.0-family: cuentas supervisadas de 13 a 17 años. Las secciones 2, 3, 4, 5 y 6 marcadas con el aviso de abajo cambiaron; el resto no.
 
 Este checklist traduce el funcionamiento actual de SACDIA a declaraciones prácticas para las tiendas. Debe usarse junto con:

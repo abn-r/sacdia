@@ -2,7 +2,7 @@
 
 **Estado**: PARCIAL (tres comprobaciones pendientes, ver «Pendiente»)
 **Fecha de las corridas**: 2026-10-20
-**Rama**: `feat/family-profiles-phase3` (backend y app), Pendiente de merge (PR por abrir: feat/family-profiles-phase3)
+**Rama**: `feat/family-profiles-phase3` (backend y app), Pendiente de merge (PRs sacdia-backend #531 y sacdia-app #179)
 **Contrato probado**: `docs/api/ENDPOINTS-LIVE-REFERENCE.md`, «Cuentas supervisadas de 13 a 17 años (Fase 3a)»
 
 Resumen de las pruebas manuales de la sub-fase 3a: API contra el backend local (`:3002`, base Neon `development`, `FAMILY_TEEN_LOGIN_ENABLED=true`) y simulador contra esa misma API. Los usuarios de prueba y cómo crearlos están en `docs/testing/TEST-USERS.md`. Aquí no se anotan contraseñas.

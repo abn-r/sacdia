@@ -42,7 +42,7 @@ Modelos de rama (espejo en `docs/database/schema.prisma`): `dependent_profiles`,
 
 ## Addendum 2026-10-20 — perfiles familiares, Fase 3 (rama, no producción)
 
-Los conteos del snapshot 2026-03-26 **no** se reescriben aquí. Este addendum registra la Fase 3 de perfiles familiares (3a cuentas supervisadas de 13 a 17 años, 3b dispositivo vinculado del menor de 13 años, 3c el director registra menores y panel de acceso familiar) verificada en código de rama. Rama `feat/family-profiles-phase3` en backend, app y panel; Pendiente de merge (PR por abrir: feat/family-profiles-phase3). Todo detrás de tres banderas `FAMILY_*` (por defecto `false`); la compuerta de consentimiento por edad, el modo pendiente de tutor y los crones no tienen bandera.
+Los conteos del snapshot 2026-03-26 **no** se reescriben aquí. Este addendum registra la Fase 3 de perfiles familiares (3a cuentas supervisadas de 13 a 17 años, 3b dispositivo vinculado del menor de 13 años, 3c el director registra menores y panel de acceso familiar) verificada en código de rama. Rama `feat/family-profiles-phase3` en backend, app y panel; Pendiente de merge (PRs sacdia-backend #531, sacdia-app #179 y sacdia-admin #244). Todo detrás de tres banderas `FAMILY_*` (por defecto `false`); la compuerta de consentimiento por edad, el modo pendiente de tutor y los crones no tienen bandera.
 
 | Capa | Estado | Evidencia |
 |------|--------|-----------|

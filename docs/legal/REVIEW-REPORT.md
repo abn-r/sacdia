@@ -337,7 +337,7 @@ El `README.md` lista 9 placeholders. Se confirma la lista completa; agrego sever
 
 ## Adenda 2026-10-19 — Versión 2.0.0-family (perfiles familiares, Fase 3a)
 
-> **BORRADOR — requiere revisión del usuario o de un abogado.** Esta adenda no re-audita el documento completo: solo registra los cambios de la versión 2.0.0-family y las preguntas legales abiertas. Pendiente de merge (PR por abrir: feat/family-profiles-phase3). <!-- TODO(orquestador): reemplazar por «PR #NNN de sacdia-backend» cuando exista el PR. -->
+> **BORRADOR — requiere revisión del usuario o de un abogado.** Esta adenda no re-audita el documento completo: solo registra los cambios de la versión 2.0.0-family y las preguntas legales abiertas. Pendiente de merge (PR #531 de sacdia-backend).
 
 ### Hallazgo H-3a-01 — Aviso §6.2.c.1 promete un mecanismo que el producto no tiene (corregido en el borrador)
 

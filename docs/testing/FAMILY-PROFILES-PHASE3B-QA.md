@@ -2,7 +2,7 @@
 
 **Estado**: EJECUTADO PARCIALMENTE el 2026-10-20: QA de API (12 escenarios, sin errores) y QA en simulador (iPhone 17 Pro, iOS 26, todo PASS). Los escenarios sin resultado siguen en «Pendiente» (ver «Resultados de la corrida»)
 **Fecha del plan y de la corrida**: 2026-10-20
-**Rama**: `feat/family-profiles-phase3` (backend), Pendiente de merge (PR por abrir: feat/family-profiles-phase3)
+**Rama**: `feat/family-profiles-phase3` (backend), Pendiente de merge (PR #531 de sacdia-backend)
 **Contrato a probar**: `docs/api/ENDPOINTS-LIVE-REFERENCE.md`, «Dispositivo vinculado de menores de 13 años (Fase 3b)». Esquema: `docs/database/SCHEMA-REFERENCE.md`, «Dispositivos vinculados (Fase 3b)».
 
 Este documento es el guion de la 3b. La columna «Resultado» registra lo que se ejecutó el 2026-10-20 (API local contra Neon `development` y simulador); lo que no se ejecutó sigue en «Pendiente». Los usuarios de prueba y cómo crearlos están en `docs/testing/TEST-USERS.md`. Aquí no se anotan contraseñas ni tokens.

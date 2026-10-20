@@ -14,7 +14,7 @@ contacto: sacdia.app@gmail.com
 Última actualización: **19 de octubre de 2026** (borrador de la versión 2.0.0-family; la versión publicada hoy sigue siendo la 1.0.0-store del 30 de junio de 2026)
 Contacto: **sacdia.app@gmail.com**
 
-> **BORRADOR — requiere revisión del usuario o de un abogado.** Pendiente de merge (PR por abrir: feat/family-profiles-phase3). <!-- TODO(orquestador): reemplazar por «PR #NNN de sacdia-backend» cuando exista el PR. -->
+> **BORRADOR — requiere revisión del usuario o de un abogado.** Pendiente de merge (PR #531 de sacdia-backend).
 > Este texto es la versión **2.0.0-family**: cuentas supervisadas para adolescentes de 13 a 17 años (Fase 3 de perfiles familiares). Solo las secciones marcadas con este mismo aviso cambiaron respecto de la 1.0.0-store (§2 y §3, y el párrafo de menores de §10). El resto del texto no cambió. La constante de versión del backend (`legal-documents.constants.ts`) pasa a `2.0.0-family` solo después de que este texto se apruebe y se publique en `https://sacdia.com/terms`.
 
 Estos Términos regulan el acceso y uso de **SACDIA**, plataforma digital para apoyar la administración, trazabilidad y acompañamiento de clubes juveniles cristianos/adventistas, incluyendo la app móvil y el panel administrativo web.
