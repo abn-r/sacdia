@@ -77,17 +77,17 @@ Si tienes entre 13 y 17 años, puedes usar SACDIA con una cuenta supervisada. De
 - **La creas tú**: te registras con tu correo. Mientras no tengas un tutor vinculado y verificado, tu cuenta está en **modo pendiente de tutor**.
 - **La habilita tu tutor**: tu tutor, desde su propia cuenta, te crea un acceso con un nombre de usuario generado por SACDIA (sin correo) o con tu correo, y define tu contraseña.
 
-**Modo pendiente de tutor.** Puedes completar tu perfil y tu registro, cambiar tu contraseña y generar un código para que un adulto se vincule como tu tutor. No puedes ver datos de otros miembros ni de tu club, ni inscribirte en actividades o clases, y tu ingreso a un club no puede aprobarse. Un tutor se vincula con ese código; el vínculo solo pasa a ser válido cuando un director del club revisa y verifica la ficha de consentimiento firmada en papel. Hasta esa verificación, la persona que canjeó el código **no** tiene facultades sobre tu cuenta ni recibe avisos de seguridad sobre ella.
+**Modo pendiente de tutor.** Puedes completar tu perfil y tu registro, cambiar tu contraseña y generar un código para que un adulto se vincule como tu tutor. No puedes ver datos de otros miembros ni de tu club, ni inscribirte en actividades o clases, y tu ingreso a un club no puede aprobarse. Un tutor se vincula con ese código; el vínculo solo pasa a ser válido cuando una persona autorizada del club o del campo local revisa y verifica la ficha de consentimiento firmada en papel. Hasta esa verificación, la persona que canjeó el código **no** tiene facultades sobre tu cuenta ni recibe avisos de seguridad sobre ella.
 
 **Plazo.** Si pasan 90 días sin un tutor vinculado, tu cuenta se congela y 90 días después se elimina. Antes recibes recordatorios en la app a los 7, 30 y 83 días. Puedes quitar un vínculo pendiente que tú mismo iniciaste si te equivocaste de persona.
 
 **Cuenta supervisada con tutor verificado.** Usas la app de miembro con las restricciones propias de tu edad: no puedes administrar sesiones, activar verificación en dos pasos, exportar datos, eliminar tu cuenta ni usar las secciones de familia. Tus datos de salud no son visibles para tu tutor.
 
-> **Función de la Fase 3b (dispositivo vinculado, menores de 13 años): implementada en el servidor, desactivada hasta su despliegue.** El tutor verificado vincula un teléfono del menor con un código QR de un solo uso que dura 10 minutos; cada menor puede tener hasta 2 dispositivos vinculados. El dispositivo vinculado no tiene correo ni contraseña, puede ver el progreso y el calendario del menor (sin la lista de quién más asiste), subir evidencias de clases y enviarlas a validación, y el tutor puede desvincularlo en cualquier momento. La vinculación vence a los 180 días como máximo. El tutor recibe un aviso cada vez que se vincula o desvincula un dispositivo y cada vez que el dispositivo sube una evidencia. La app del dispositivo todavía no existe. Esta parte del texto solo debe publicarse cuando la función esté activa.
+> **Función de la Fase 3b (dispositivo vinculado, menores de 13 años): implementada, desactivada hasta su despliegue.** El tutor verificado vincula un teléfono del menor con un código QR de un solo uso que dura 10 minutos; cada menor puede tener hasta 2 dispositivos vinculados. El dispositivo vinculado no tiene correo ni contraseña, puede ver el progreso y el calendario del menor (sin la lista de quién más asiste), subir evidencias de clases y enviarlas a validación, y el tutor puede desvincularlo en cualquier momento. La vinculación vence a los 180 días como máximo. El tutor recibe un aviso cada vez que se vincula o desvincula un dispositivo, salvo cuando la desvinculación se debe al congelamiento del perfil o a que se activó el acceso propio del menor (en ese caso recibe el aviso de ese cambio), y cada vez que el dispositivo sube una evidencia. Esta parte del texto solo debe publicarse cuando la función esté activa.
 
 ### 3.3 Facultades del tutor
 
-Un tutor cuyo vínculo ya fue verificado por un director puede, sobre la cuenta supervisada del menor:
+Un tutor cuyo vínculo ya fue verificado por el club puede, sobre la cuenta supervisada del menor:
 
 - habilitar, deshabilitar y volver a habilitar el acceso del menor;
 - restablecer la contraseña del menor (nunca puede ver una contraseña);
@@ -100,7 +100,7 @@ El tutor **no** ve los datos de salud, las evidencias, los mensajes ni las notas
 
 Si eres adulto y registras, administras o subes información de un menor, declaras que cuentas con autorización suficiente para hacerlo y que usarás la información únicamente para fines propios del club.
 
-> **Función pendiente de la Fase 3c (directores).** Un director de club acreditado puede registrar a un menor de 0 a 17 años en su sección, bajo custodia del club, declarando bajo protesta de decir verdad que cuenta con la autorización firmada de su tutor. El consentimiento de ese menor lo verifica **otra persona** (otro director, un coordinador o un administrador), nunca quien lo registró ni quien subió el formato. Esta parte solo debe publicarse cuando la función esté activa.
+> **Función pendiente de la Fase 3c (directores).** Un director de club acreditado puede registrar a un menor de 0 a 17 años en su sección, bajo custodia del club, declarando bajo protesta de decir verdad que cuenta con la autorización firmada de su tutor. El consentimiento de ese menor lo verifica **otra persona** (otra persona autorizada del club o del campo local, o un administrador), nunca quien lo registró ni quien subió el formato. Esta parte solo debe publicarse cuando la función esté activa.
 
 ### 3.5 Eliminación de la cuenta de un menor
 
