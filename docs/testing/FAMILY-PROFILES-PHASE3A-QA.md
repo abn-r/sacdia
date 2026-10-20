@@ -136,7 +136,7 @@ Corrida del 2026-10-20 en la rama Neon aislada `qa-crons-20261020` (copia de `de
 | R5 | Reloj a 90 días | `dependent_profiles` creado con `frozen_at` y `purge_after = frozen_at + 90 días`; `supervised_logins.disabled_reason = unlinked_purged`; sus sesiones borradas (1 → 0); sin aviso | Verificado (copia aislada) |
 | R6 | Segunda corrida inmediata | Resumen `reminders: 0, frozen: 0`; cada adolescente conserva una sola fila de bandeja | Verificado (copia aislada) |
 | R7 | Purga de un menor congelado vencido | Anonimizado, custodia conservada, dispositivos depurados | Verificado en un dependiente sin cuenta (ver 3c, D4). La purga de un adolescente **con** cuenta propia (borrado de credenciales) no se corrió: Pendiente |
-| R8 | Purga de un menor con una tutoría de titular externo (`external_name`) | Anonimizado | **Falla** (bug de producto sin arreglar, ver 3c, «Hallazgo: la purga falla con un titular externo») |
+| R8 | Purga de un menor con una tutoría de titular externo (`external_name`) | Anonimizado | **Falla** al momento de la corrida (bug de producto; corregido después en `9533895d`, ver 3c, «Hallazgo: la purga falla con un titular externo») |
 
 ## Pendiente
 
