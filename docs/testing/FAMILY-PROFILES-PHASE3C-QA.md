@@ -185,3 +185,28 @@ Corrida de las secciones A, B y C (parciales) por API pura, con `director-club@s
 ## Datos que dejó la corrida en Neon `development`
 
 Sin contraseñas ni tokens. Menores (sin cuenta, bajo la sección 163): M1 `4706db0f-ac39-4dd6-a7a2-c2ff8d861106` (aprobado, reclamado por P, consentimiento verificado, req `5eab38dd-2ab9-43b0-b424-ee80e97d2d38`); M2 `cf453727-e252-42f0-9db9-b88bdd53466b` (req `0475c38b-4758-4cbd-9a17-bb1d3e4186bf`, se deja `pending`; no se esperó el vencimiento); M3 `16746220-e270-48bd-b3ac-1e9bd319cbc0` (req `2295bf97-0947-4a1d-9412-606a1e487168`, reclamado por P, consentimiento `pending`). Tutor de prueba P: `qa-fp3c-1792522327414-parent@example.com` (`46431d4d-4564-41a4-8f01-693a26454acd`). También se emparejó y se revocó un teléfono vinculado de un menor de la corrida 3b (`f2c1883f-bce0-476a-827e-bc56d76a7122`). Ediciones manuales de fechas: ninguna. Limpiar con los ids de arriba y con `GET /guardianships/me/dependents` de P.
+
+## Corrida visual en simulador y panel (2026-10-20, app `iPhone 17 Pro` + panel local, backend local `:3002` + Neon `development`)
+
+App (`director-club@sacdia.com`, sección 163):
+
+- PASA. Miembros muestra la acción «Registrar un menor» (permiso + bandera). El formulario pide nombre, apellidos, fecha, género opcional, declaración jurada y aceptación legal a nombre del menor; el botón queda deshabilitado hasta completar. Registro de «Lucas Simulador» (10 años) → aviso «Lucas quedó registrado. Falta que otra persona verifique la ficha firmada.» y la solicitud aparece en Solicitudes.
+- PASA. Verificar consentimiento: para el creador se muestra «Otra persona debe verificar este consentimiento: tú registraste al menor, subiste la ficha o lo dejaste bajo custodia del club.» Tutores: el club («Estella · Principal»).
+- PASA. «Entregar a la familia» genera el código `XXXX-XXXX` con vencimiento a 7 días, «Copiar código» y «Compartir».
+- CORREGIDO durante la corrida (app `6e5a9d9d`): la etiqueta «Menor · consentimiento pendiente» desbordaba 37 px la tarjeta de solicitud junto a las acciones (venía de la Fase 2). `SacBadge` ahora deja que la etiqueta pase a una segunda línea; prueba de widget a ancho de teléfono (roja sin el arreglo: desborde de 183 px).
+
+Panel (cuenta admin del usuario):
+
+- PASA. Tarjeta «Acceso familiar» en el detalle del usuario: supervisión, acceso propio (método, origen, quién lo activó, contraseña definida por), tabla de dispositivos y «Ver sesiones activas» bajo demanda.
+- PASA. Revocar un dispositivo activo: el diálogo exige motivo (con 3 caracteres el botón sigue deshabilitado); tras confirmar, aviso «Dispositivo revocado.», la fila pasa a «Revocado», el token del dispositivo responde 401 `AUTH_DEVICE_REVOKED` y la tutora recibió «Sofi · dispositivo desvinculado».
+- PASA. Desactivar el acceso propio de un adolescente: motivo obligatorio, estado «Desactivada», motivo «Desactivado por administración»; tras recargar, «No hay sesiones activas». Sin controles de activar ni de contraseña.
+
+Observaciones (no bloquean, pendientes de decidir):
+
+1. App: el botón «Generar código para los padr…» se corta a ancho de teléfono.
+2. Panel: para un menor sin acceso propio (niño con dispositivo) la fila «Supervisión del tutor: Sin supervisión» confunde: tiene tutora verificada. Mejor ocultarla o mostrar «No aplica» cuando no hay acceso propio.
+3. Panel: la tabla de dispositivos corta la columna «Estado» a 800 px de ancho (hay desplazamiento horizontal).
+4. Panel: tras desactivar, la lista de sesiones ya abierta no se refresca sola (el backend sí las borró).
+5. Panel: un adolescente con «Origen: Registro propio» muestra «Activado por» su tutora; revisar qué representa `enabled_by` para un registro propio.
+
+Datos extra en Neon `development`: menor «Lucas Simulador» (sección 163, pendiente); dispositivo «QA Admin revoke» de Sofi (revocado por admin); el adolescente QA «Mateo Joven Prueba» (`779ec538-…`) quedó con el acceso propio desactivado por admin.
