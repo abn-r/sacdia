@@ -127,7 +127,7 @@ Cuatro migraciones aditivas del backend, mergeadas el 2026-10-12 y 2026-10-13. D
 | P2-2 | `20261016100000_base_user_role_drop_cross_user_grants` | Solo datos: quita permisos cruzados del rol base `user` (corrección de seguridad) |
 | P2-3 | `20261016120000_family_profiles` | `users.email` admite NULL, columnas de edad en `countries` y las 4 tablas de perfiles familiares |
 
-- Bucket **privado** de R2 para las fichas de consentimiento: `R2_BUCKET_GUARDIANSHIP_EVIDENCE=secure-documents`. Sin él, las rutas de ficha responden 503 `GUARDIANSHIP_EVIDENCE_UNAVAILABLE` (el resto de la API sigue). Condición que el código no puede comprobar: el bucket no debe tener dominio personalizado ni acceso `r2.dev` habilitados. Se sirve solo por URL firmada de 15 minutos.
+- Bucket **privado** de R2 para las fichas de consentimiento: `R2_BUCKET_GUARDIANSHIP_EVIDENCE` apuntando a un bucket **privado** (el nombre se configura en Render, no se documenta aquí). Sin él, las rutas de ficha responden 503 `GUARDIANSHIP_EVIDENCE_UNAVAILABLE` (el resto de la API sigue). Condición que el código no puede comprobar: el bucket no debe tener dominio personalizado ni acceso `r2.dev` habilitados. Se sirve solo por URL firmada de 15 minutos.
 - Backend y app de la Fase 2 se despliegan juntos (el backend retiró las rutas del representante legal que la app anterior sigue llamando).
 
 **2. Migraciones de la Fase 3, en este orden** (todas escritas a mano, re-ejecutables, sin `CONCURRENTLY`; el guard `family-profiles-phase3.migration.spec.ts` las comprueba):
