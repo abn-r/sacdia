@@ -1,7 +1,7 @@
 ---
 documento: Checklist de privacidad para tiendas
 version: 2.0.0-family
-fecha: 2026-10-19
+fecha: 2026-10-20
 estado: BORRADOR — requiere revisión del usuario o de un abogado (la última submission aprobada fue con la 1.0.0-store; no reenviar con este texto hasta que se apruebe)
 version_publicada_vigente: 1.0.0-store
 aplicable_a: App Store Connect + Google Play Console
@@ -68,9 +68,9 @@ Usar esta posición en tiendas y materiales públicos:
 - Sesiones y datos de autenticación.
 - Datos de dispositivo, sistema operativo y versión de app.
 - Crash logs, errores y rendimiento vía Sentry u otros diagnósticos.
-- **Analítica de uso (PostHog)**: declarar que se recolecta solo en mayores de 18 años asociada a la cuenta (borrador: verificar que la declaración vigente de App Store Connect y Google Play ya la incluye; el aviso 1.0.0-store no nombraba a PostHog).
-- **Personas de 13 a 17 años**: analítica **anónima** únicamente (sin identificador de usuario, correo, nombre de usuario ni nombre; sin usuario en Sentry). Debe reflejarse en «Datos vinculados al usuario» frente a «Datos no vinculados».
-- **Modo dispositivo vinculado (menores de 13 años; función de la Fase 3b: servidor implementado y desactivado hasta su despliegue, app pendiente)**: sin identificadores personales en el dispositivo (ni correo ni contraseña); solo token de notificaciones (FCM), sesión y un nombre del teléfono que el tutor ve en su lista de dispositivos; **sin analítica de uso** (PostHog desactivado en este modo; el servidor responde `analytics_anonymous: true`, pero que la app lo cumpla es una tarea de la app aún sin hacer). No declarar al dispositivo vinculado como recolector de datos de seguimiento.
+- **Analítica de uso (PostHog)**: la app identifica a la persona (con su identificador interno, nunca correo ni nombre) solo cuando el servidor lo permite de forma explícita (`GET /auth/me` con `analytics_anonymous: false`), es decir, una persona con la mayoría de edad de su país cumplida. Declararla como dato vinculado al usuario solo para ese grupo (borrador: verificar que la declaración vigente de App Store Connect y Google Play ya la incluye; el aviso 1.0.0-store no nombraba a PostHog).
+- **Personas de 13 a 17 años y cuentas sin fecha de nacimiento (cuenta supervisada, pendiente de tutor o con tutor)**: analítica **anónima** únicamente. La app nunca llama a `identify` para ellas; si el teléfono tenía antes a otra persona identificada, hace `reset` para que los eventos del menor no queden atados a esa identidad. Un campo `analytics_anonymous` ausente o desconocido se trata como anónimo (falla cerrado). Sin usuario en Sentry: la app no asigna usuario a Sentry a nadie (`sendDefaultPii = false`, y una prueba automática falla si alguien añade `setUser`/`SentryUser`). Debe reflejarse en «Datos vinculados al usuario» frente a «Datos no vinculados». Verificado en código y pruebas de la app (`AnalyticsPolicy`, `analytics_policy_test`, `no_sentry_user_test`); **la comprobación en el panel de PostHog y de Sentry sigue pendiente** (QA de las fases 3a y 3b).
+- **Modo dispositivo vinculado (menores de 13 años; función de la Fase 3b: servidor y app implementados en la rama `feat/family-profiles-phase3`, desactivado hasta activar `FAMILY_LINKED_DEVICE_ENABLED`)**: el teléfono no guarda ni pide identificadores personales (ni correo ni contraseña ni nombre de usuario). Lo único que se recolecta es el token de notificaciones (FCM), la sesión del dispositivo (vence a los 180 días como máximo) y un nombre del teléfono que ve el tutor en su lista de dispositivos, además de los diagnósticos técnicos estándar de Sentry sin usuario. **Sin analítica de uso**: PostHog no se inicializa en el arranque en frío cuando la instalación está en modo dispositivo, y al vincular el teléfono se desactiva (`disable` más `reset`); el servidor además responde `analytics_anonymous: true` para el dispositivo. No declarar al dispositivo vinculado como recolector de datos de seguimiento. Pendiente: comprobar en el panel de PostHog que el teléfono vinculado no emite eventos (QA 3b, caso K8).
 
 ### Actividad dentro de la app
 
@@ -114,7 +114,21 @@ Declarar que los datos se transmiten cifrados en producción mediante HTTPS.
 
 Declarar que el usuario puede solicitar eliminación de cuenta/datos desde la app o por contacto de soporte. No prometer eliminación total inmediata: usar lenguaje de eliminación, anonimización o conservación limitada cuando sea necesaria por seguridad, trazabilidad o respaldo.
 
-**Minimización de datos de menores**: una cuenta supervisada de 13 a 17 años sin tutor vinculado se congela a los 90 días y se elimina y anonimiza 90 días después. Una cuenta supervisada no puede eliminarse desde la app por el propio menor (la solicitud la hace el tutor o un administrador): declararlo así en la ficha si la tienda pregunta por el mecanismo de eliminación (puede requerir revisión legal).
+> **BORRADOR — requiere revisión del usuario o de un abogado.** Lo que sigue (eliminación de cuentas de menores) es la **pregunta legal abierta P3-A22** de la Fase 3.
+
+**Minimización de datos de menores**: una cuenta supervisada de 13 a 17 años sin tutor vinculado recibe recordatorios a los 7, 30 y 83 días, se congela a los 90 días (no puede iniciar sesión: `AUTH_ACCOUNT_FROZEN`) y se elimina y anonimiza 90 días después. El plazo cuenta desde el registro (o, en las cuentas que ya existían antes de esta función, desde la primera evaluación tras el despliegue, de modo que nadie se congela en la primera ejecución) y vuelve a empezar si el último tutor se retira o un vínculo pendiente se revoca. Un tutor vinculado que aún no verifica un director cuenta como vinculado y detiene el plazo (no recibe facultades hasta la verificación). La purga borra las credenciales y las cuentas OAuth, las sesiones y los tokens de notificaciones, y anula el correo y los datos personales.
+
+**Eliminación de cuenta desde la app (App Store 5.1.1(v)): quién puede y quién no.** Declarar el mecanismo real, que depende del tipo de cuenta:
+
+| Tipo de cuenta | ¿Puede iniciar la eliminación desde la app? |
+|---|---|
+| Adulto (mayoría de edad del país cumplida) | Sí: Ajustes, reautenticando (contraseña o proveedor Google/Apple). Si tiene menores a su cargo, antes ve el efecto sobre cada uno y debe confirmarlo |
+| Cuenta sin fecha de nacimiento (por ejemplo, alta con Google o Apple antes del paso 2 del post-registro) | Sí: también desde el encabezado del post-registro, para que no quede atrapada |
+| Adolescente de 13 a 17 años (cuenta supervisada, pendiente o con tutor) | **No** desde la app: la entrada está oculta y el servidor la rechaza. Lo solicita el tutor o un administrador por `sacdia.app@gmail.com`; si no hay tutor vinculado, la eliminación ocurre sola a los 90 + 90 días |
+| Menor de 13 años con teléfono vinculado | **No**: el teléfono no tiene cuenta. Lo gestiona el tutor: desvincula el dispositivo, o al retirarse el último tutor el perfil se congela y se purga a los 90 días |
+| Persona que actúa en nombre de un menor | **No**: mientras se actúa por un menor no se puede eliminar la cuenta de nadie |
+
+Este punto **puede chocar con la regla 5.1.1(v)** (una app que permite crear cuentas debe permitir iniciar su eliminación dentro de la app) para el caso de 13 a 17 años, que sí pueden crear una cuenta desde el registro. Es una decisión del usuario del 2026-10-19, marcada para revisión legal (REVIEW-REPORT, punto 3): no afirmar en la ficha de tienda que todo usuario puede eliminar su cuenta desde la app, y confirmar con el abogado y con la tienda si exige una vía dentro de la app para estos casos antes de enviar la 2.0.0-family.
 
 ## 6. Antes de enviar a revisión
 
@@ -128,7 +142,9 @@ Declarar que el usuario puede solicitar eliminación de cuenta/datos desde la ap
 - [ ] El manifiesto de privacidad iOS (`sacdia-app/ios/Runner/PrivacyInfo.xcprivacy`) fue revisado contra los datos realmente recolectados.
 - [x] El FAQ de eliminación de cuenta no promete plazos o eliminación total que el backend no cumpla.
 - [ ] (2.0.0-family) La revisión del usuario o de un abogado aprobó el texto de `terminos-y-condiciones.md` y `aviso-de-privacidad.md` versión 2.0.0-family y se publicó en `https://sacdia.com/terms` y `https://sacdia.com/privacy` **antes** de subir la constante de versión del backend.
-- [ ] (2.0.0-family) Las declaraciones de privacidad de App Store Connect y Google Play (Data Safety) reflejan la analítica anónima de 13 a 17 años y, cuando se active la Fase 3b (servidor listo, app pendiente), el modo dispositivo vinculado sin analítica.
+- [ ] (2.0.0-family) Las declaraciones de privacidad de App Store Connect y Google Play (Data Safety) reflejan la analítica anónima de 13 a 17 años y, cuando se active la Fase 3b, el modo dispositivo vinculado sin analítica ni identificadores personales.
+- [ ] (2.0.0-family) La ficha explica la eliminación de cuenta según la tabla de la sección 5 (los adolescentes de 13 a 17 años no pueden eliminarla desde la app) y el abogado confirmó que es aceptable ante 5.1.1(v) y la LFPDPPP. **Pregunta legal abierta (P3-A22).**
+- [ ] (2.0.0-family) Se comprobó en el panel de PostHog y de Sentry que una cuenta de 13 a 17 años, una cuenta sin fecha de nacimiento y un teléfono vinculado no aparecen identificados (y que el teléfono vinculado no emite eventos).
 - [ ] (2.0.0-family) Cuentas de menores: confirmar con las tiendas si el flujo de cuentas supervisadas exige declaraciones adicionales para apps dirigidas a menores (Families / «Designed for Families»). **Pregunta legal abierta.**
 
 ## 7. Advertencia técnica
