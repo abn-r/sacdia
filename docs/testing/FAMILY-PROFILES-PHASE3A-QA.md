@@ -89,9 +89,37 @@ El tutor sube la ficha desde el paso 3 actuando por el menor (`POST /users/:user
 | backend `7e9d5156` | `GET /auth/oauth/providers` lleva `account:manage`, para que una cuenta social de edad desconocida reautentique antes de eliminarse (App Store 5.1.1(v)) |
 | backend `035c633f` | C1 (FP3-35): apagar `FAMILY_TEEN_LOGIN_ENABLED` corta las sesiones por nombre de usuario ya abiertas (antes la bandera solo se leía en el inicio de sesión) |
 | backend `83ffe7cf` | `member:read` incluye `GET .../enrollments/current` y `GET /camporee-judges/me/assignments`: el inicio del adolescente activo daba 403 en ambas |
+| backend `c8d3590b` | FP3-23: el enlace `SUPERVISED_LOGIN_EVENTS` pasa a ser obligatorio (sin `@Optional()`); si falta, el servidor no arranca. Antes todos los avisos al tutor eran una no-operación silenciosa |
+| backend `58669c63` | FP3-03 y FP3-07: `GET /dashboard/summary` no devuelve datos de club (`club_name`, `club_type`, `user_role` en `null`, `upcoming_activities` vacío) a un adolescente sin tutor verificado ni a una edad desconocida |
+| backend `cce8c687` | Scopes `credential:read` (credencial QR) y `club:context` (`PATCH /auth/me/context`): negados al adolescente pendiente y a la edad desconocida (403 `PRINCIPAL_SCOPE_DENIED`) |
+| backend `be1456f6` | `GET /auth/me` vacía el contexto de club para ese principal (`stripClubContext`) |
+| backend `4ae0b245` | El adolescente solo revoca vínculos pendientes que él inició; un `second_guardian` pendiente responde 404 `GUARDIANSHIP_NOT_FOUND` |
+| backend `63d0b1bf` | Prueba de inventario: las escrituras de `supervised_logins.disabled_reason` se mantienen dentro del CHECK de la base |
+| backend `2ee31a54` | Documentación en `src/common/guards/README.md` de los tipos de principal y los conjuntos de scopes de la Fase 3 |
+| backend `2a59b814` | Formato de las pruebas de datos de club y de revocación (sin cambio de comportamiento) |
 | app `e7e06a7d` | «Eliminar cuenta» en la cabecera del post-registro |
 | app `0ba75b48`, `f0b05f0a`, `c9d1a3a8`, `75dea719` | Mensaje del 429, parsers alineados con los contratos confirmados y otros ajustes de la app |
 | app `3e38f38d`, `bc7d1aaa` | Se quitó «mensajes» del texto de privacidad: SACDIA no tiene mensajería |
+
+### 10. Sin datos de club ni credencial sin tutor verificado — Solo pruebas automáticas
+
+Decisión de producto (opción A): un adolescente sin tutor verificado y una cuenta de edad desconocida no ven datos de club ni tienen credencial QR, tampoco con una asignación de club `active` anterior al despliegue. Contrato: `docs/api/ENDPOINTS-LIVE-REFERENCE.md`, «Sin datos de club ni credencial hasta que haya un tutor verificado».
+
+- Scopes nuevos `credential:read` (`GET /qr/me`, `/qr/me/card`, `/qr/me/card.pdf`, `/qr/member/token`) y `club:context` (`PATCH /auth/me/context`): 403 `PRINCIPAL_SCOPE_DENIED` para un adolescente pendiente y para la edad desconocida. Pruebas: `acting-scope-metadata.spec.ts`, `acting-scope.policy.spec.ts`, `pending-teen-club-data.spec.ts`.
+- `GET /auth/me` sin contexto de club para ese principal: `strip-club-context.spec.ts` y `auth.service.spec.ts`.
+- `GET /dashboard/summary` con `club_name`, `club_type` y `user_role` en `null` y `upcoming_activities` vacío: `dashboard.controller.spec.ts`, `dashboard.service.spec.ts` y un caso nuevo en `test/supervised-login.e2e-spec.ts`.
+- **No** se probó en vivo en el simulador ni contra Neon `development` con un adolescente que ya tuviera una asignación activa.
+- **Impacto de producción a vigilar al desplegar**: los miembros de 13 a 17 años con asignación activa previa pierden la credencial, el cambio de contexto y el nombre del club en su primera petición, hasta que un tutor se vincule y un director verifique el consentimiento sobre la asignación activa.
+- **Residual conocido, sin corregir**: un token QR emitido antes de que el adolescente pasara a pendiente (TTL de 24 h) sigue validándose al escanearlo hasta que caduca.
+
+### 11. Revocar un vínculo pendiente — Solo pruebas automáticas
+
+El adolescente solo quita los vínculos pendientes que él inició (`invited_by_guardianship_id IS NULL`). Un segundo tutor `pending` invitado por un tutor responde 404 `GUARDIANSHIP_NOT_FOUND`. Prueba: `guardianship-lifecycle.service.spec.ts`.
+
+### 12. Banderas y enlace de avisos — Solo pruebas automáticas
+
+- Falta el enlace `SUPERVISED_LOGIN_EVENTS`: el servidor no arranca. Pruebas: `supervised-login-events.binding.spec.ts` y el e2e `supervised-login`, que resuelve cada consumidor desde el `AppModule` real y comprueba que su aviso llega al tutor verificado.
+- Cambiar `FAMILY_TEEN_LOGIN_ENABLED` en un servidor desplegado **exige reiniciar**: `ConfigService` lee la foto del entorno del arranque. Apagarla y no reiniciar deja abiertas las sesiones por nombre de usuario. Al probar C1 en un entorno desplegado hay que reiniciar después de cambiar la variable.
 
 ## Pendiente
 
@@ -103,7 +131,7 @@ Otros puntos abiertos que no son del simulador:
 
 - **C1 (FP3-35)**: con `FAMILY_TEEN_LOGIN_ENABLED=false` las sesiones por nombre de usuario ya abiertas se cortan desde el commit `035c633f` del backend (401 en la siguiente petición y refresh rechazado). Lo cubren pruebas unitarias y un caso nuevo en `test/supervised-login.e2e-spec.ts`; **no** se probó en vivo en el simulador.
 - Deshabilitar y restablecer la contraseña, la subida de versión legal y el paso 3 actuando no tienen grabación en el simulador (solo API).
-- Aplicación formal de la migración a Neon `development` (tarea T3a-B05): por confirmar con el usuario.
+- ~~Aplicación formal de la migración a Neon `development` (tarea T3a-B05)~~ **Hecha**: la migración `20261020120000_family_teen_login` se aplicó a la rama `development` de Neon con aprobación del usuario y se verificó con `prisma migrate status`.
 - Recorrido offline (arranque en frío sin red): la app trata al adolescente como adulto hasta que `GET /auth/me` responde (la cuenta guardada no incluye el principal). Documentado, no corregido.
 
 ## Datos que quedan en Neon `development`
