@@ -13,6 +13,8 @@ Resumen de las pruebas manuales de la sub-fase 3a: API contra el backend local (
 - **Verificado solo por API**: la API se probó en vivo; la pantalla del simulador no.
 - **Solo pruebas automáticas**: cubierto por jest o flutter test, no se corrió en vivo.
 - **Pendiente**: no hay evidencia todavía.
+- **Verificado (copia aislada)**: el cron se ejecutó en vivo sobre una rama Neon aislada (copia de `development`), sin push ni correo.
+- **Falla**: el resultado no coincide con el contrato (el hallazgo se describe en el documento).
 
 ## Evidencia automática (corrida de verificación del 2026-10-20)
 
@@ -120,6 +122,21 @@ El adolescente solo quita los vínculos pendientes que él inició (`invited_by_
 
 - Falta el enlace `SUPERVISED_LOGIN_EVENTS`: el servidor no arranca. Pruebas: `supervised-login-events.binding.spec.ts` y el e2e `supervised-login`, que resuelve cada consumidor desde el `AppModule` real y comprueba que su aviso llega al tutor verificado.
 - Cambiar `FAMILY_TEEN_LOGIN_ENABLED` en un servidor desplegado **exige reiniciar**: `ConfigService` lee la foto del entorno del arranque. Apagarla y no reiniciar deja abiertas las sesiones por nombre de usuario. Al probar C1 en un entorno desplegado hay que reiniciar después de cambiar la variable.
+
+### 13. Cron de adolescentes sin tutor (recordatorios, congelación y purga) — Verificado en copia aislada
+
+Corrida del 2026-10-20 en la rama Neon aislada `qa-crons-20261020` (copia de `development`, borrada al terminar), sin push: backend `origin/development` `6cea416d`, `PendingTeenCronService.run(now)` llamado desde un contexto de aplicación, sin credenciales de Firebase y con `EMAIL_ENABLED=false`. El método, las garantías de aislamiento y el impacto sobre las filas reales de la copia están en `FAMILY-PROFILES-PHASE3C-QA.md`, «QA de crones en vivo sobre una copia aislada». Fixtures por SQL: cinco adolescentes `QACron` de 15 años con cuenta propia, `supervised_logins` `self_registered`, sin tutor, nivel 0 y `pending_since` movido a hace 6, 7, 30, 83 y 90 días.
+
+| ID | Escenario | Esperado | Resultado |
+| --- | --- | --- | --- |
+| R1 | Reloj a 6 días | Sin recordatorio, nivel 0 | Verificado (copia aislada) |
+| R2 | Reloj a 7 días | Nivel 1 y un aviso al adolescente, fuente `family:teen_reminder`, `data.type = teen_guardian_reminder`; una fila en su bandeja; sin correo | Verificado (copia aislada). El push no salió a propósito (sin Firebase); la carga útil se comprobó con un espía de `sendToUser` |
+| R3 | Reloj a 30 días con nivel 0 | Nivel 2 directo (tras una caída solo se envía el último recordatorio vencido) y un solo aviso | Verificado (copia aislada) |
+| R4 | Reloj a 83 días con nivel 0 | Nivel 3 y un solo aviso | Verificado (copia aislada) |
+| R5 | Reloj a 90 días | `dependent_profiles` creado con `frozen_at` y `purge_after = frozen_at + 90 días`; `supervised_logins.disabled_reason = unlinked_purged`; sus sesiones borradas (1 → 0); sin aviso | Verificado (copia aislada) |
+| R6 | Segunda corrida inmediata | Resumen `reminders: 0, frozen: 0`; cada adolescente conserva una sola fila de bandeja | Verificado (copia aislada) |
+| R7 | Purga de un menor congelado vencido | Anonimizado, custodia conservada, dispositivos depurados | Verificado en un dependiente sin cuenta (ver 3c, D4). La purga de un adolescente **con** cuenta propia (borrado de credenciales) no se corrió: Pendiente |
+| R8 | Purga de un menor con una tutoría de titular externo (`external_name`) | Anonimizado | **Falla** (bug de producto sin arreglar, ver 3c, «Hallazgo: la purga falla con un titular externo») |
 
 ## Pendiente
 

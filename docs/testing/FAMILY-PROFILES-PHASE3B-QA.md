@@ -15,6 +15,7 @@ Este documento es el guion de la 3b. La columna «Resultado» registra lo que se
 - **Solo pruebas automáticas**: cubierto por jest o flutter test, no se corrió en vivo.
 - **Pendiente**: no hay evidencia todavía (no se ejecutó, o solo se ejecutó parte del escenario; la nota lo dice).
 - **Falla**: el resultado no coincide con el contrato (anotar el hallazgo y el commit del arreglo).
+- **Parcial**: una parte del escenario se ejecutó en vivo (la nota dice cuál); el resto sigue Pendiente.
 
 ## Precondiciones
 
@@ -174,13 +175,13 @@ Notación: **T** = tutor verificado, **T2** = segundo tutor verificado, **Tp** =
 | G2 | El tutor que emparejó D sale (`POST /guardianships/{g}/revoke`, `guardian_left`), con otro tutor T2 y un dispositivo de T2 | D queda `guardianship_revoked`; el dispositivo emparejado por T2 sigue funcionando; T2 puede vincular de nuevo | Pendiente |
 | G3 | Sale el último tutor de M (con y sin asignación de club) | Todos los dispositivos quedan `guardianship_revoked` (resultado `club_custody`) o `dependent_frozen` (resultado `frozen`) | Pendiente |
 | G4 | El tutor que emparejó elimina su cuenta | Sus dispositivos quedan `guardian_account_closed` | Pendiente |
-| G5 | M cumple la mayoría de edad (mover `birthday` en la base de desarrollo) | La **siguiente** petición de D es 401 y la fila queda `majority` (es perezoso; el barrido por cron es de la 3c) | Pendiente |
-| G6 | M cumple 13 años (mover `birthday`) | D **sigue** funcionando; crear un token nuevo da 422 | Pendiente |
+| G5 | M cumple la mayoría de edad (mover `birthday` en la base de desarrollo) | La **siguiente** petición de D es 401 y la fila queda `majority` (es perezoso; el barrido por cron es de la 3c) | Parcial (2026-10-20, rama Neon aislada `qa-crons-20261020`, copia de `development`, sin push): el barrido `family-age-transitions` deja la fila `majority` y avisa una vez al tutor verificado (ver 3c, G1). El 401 de la compuerta perezosa no se probó: Pendiente |
+| G6 | M cumple 13 años (mover `birthday`) | D **sigue** funcionando; crear un token nuevo da 422 | Parcial (2026-10-20, copia aislada): el barrido no revoca el dispositivo de un menor que cumple 13 hoy (ver 3c, G5). La petición de D y el 422 del token nuevo: Pendiente |
 | G7 | La tutoría de emparejamiento deja de ser `verified` (volver a `pending` en la base) | La siguiente petición de D es 401 y queda `guardianship_revoked` | Pendiente |
-| G8 | M congelado (cron de 90 días o a mano) | D es 401 y la fila queda `dependent_frozen`; los tokens FCM de M se borran en la purga | Pendiente |
+| G8 | M congelado (cron de 90 días o a mano) | D es 401 y la fila queda `dependent_frozen`; los tokens FCM de M se borran en la purga | Parcial (2026-10-20, copia aislada): al congelarse un menor en custodia por vencimiento de su solicitud, su dispositivo quedó `dependent_frozen` (ver 3c, D1). El 401 de D y el borrado de tokens FCM (el fixture no tenía) no se probaron: Pendiente |
 | G9 | Un admin borra la sesión de D (`DELETE /admin/users/{M}/sessions/{sid}`) | D es 401 y la fila queda `session_revoked`; `GET /admin/users/{M}/sessions` mostraba `kind: "device"` antes | Pendiente |
 | G10 | Cada revocación de G2, G4, G9 y la de F1 | Los tutores restantes reciben el aviso de desvinculación; las de G1, G3 (congelado), G5 y G6 no avisan | Pendiente |
-| G11 | Tras la purga de M (90 días después de congelar) | Ver «Observaciones»: las filas de `linked_devices` y `device_pairing_tokens` quedan; documentar qué datos conservan | Pendiente |
+| G11 | Tras la purga de M (90 días después de congelar) | Ver «Observaciones»: las filas de `linked_devices` y `device_pairing_tokens` quedan; documentar qué datos conservan | Verificado (2026-10-20, rama Neon aislada `qa-crons-20261020`, copia de `development`, sin push): la fila de `linked_devices` se conserva con `label = Dispositivo`, `app_version` y `fcm_token_id` nulos y `revoked_reason = dependent_frozen`; el token de emparejamiento se borra (1 → 0). **Falla** si el menor tiene una tutoría de titular externo: la purga entera se revierte (ver 3c, «Hallazgo: la purga falla con un titular externo») |
 
 ### H. Refresh y cierre de sesión
 
@@ -245,7 +246,7 @@ Notación: **T** = tutor verificado, **T2** = segundo tutor verificado, **Tp** =
 2. **`details.reason` de `DEVICE_PAIRING_NOT_ELIGIBLE` se quita en producción** (`HttpExceptionFilter`): la app no puede distinguir «tiene acceso propio» de «ya tiene 13 años» por la respuesta en producción. Si la app necesita el motivo, hay que cambiar el contrato.
 3. **Un dispositivo vinculado a los 12 años sigue vivo después de los 13** hasta la mayoría de edad (la compuerta solo revisa la mayoría de edad). Es intencional según el e2e, pero conviene confirmarlo con producto y con el texto legal.
 4. **El cierre de sesión es de mejor esfuerzo**, pero desde `0d40ac40` revoca el dispositivo **antes** de borrar la sesión (una sola transacción). Si la revocación falla, la fila queda activa sin sesión y la comprobación del tope la cura al crear o canjear un token (la marca `session_revoked`), así que ya no ocupa un cupo para siempre.
-5. **La purga de M** (desde `a8af9091`) borra los tokens de emparejamiento y anonimiza `linked_devices` (`label` = `Dispositivo`, `app_version` y `fcm_token_id` nulos); las filas se conservan como auditoría. Ver «Retención y purga» en `SCHEMA-REFERENCE.md`. G11 sigue Pendiente: no se ejecutó la purga en vivo.
+5. **La purga de M** (desde `a8af9091`) borra los tokens de emparejamiento y anonimiza `linked_devices` (`label` = `Dispositivo`, `app_version` y `fcm_token_id` nulos); las filas se conservan como auditoría. Ver «Retención y purga» en `SCHEMA-REFERENCE.md`. G11 se verificó el 2026-10-20 con la purga en vivo sobre una copia aislada de `development` (ver G11 y `FAMILY-PROFILES-PHASE3C-QA.md`, «QA de crones en vivo sobre una copia aislada»).
 6. **`revokeAsAdmin` existía sin endpoint al escribir este plan**; la 3c lo expone (`POST /admin/users/:userId/linked-devices/:deviceId/revoke`) y añade el barrido por cron de mayoría de edad y de expiración (`family-age-transitions`). Esos escenarios están en `docs/testing/FAMILY-PROFILES-PHASE3C-QA.md`; la compuerta (perezosa) sigue cubriendo ambos casos en el servidor.
 
 ## Datos que quedan en Neon `development`
