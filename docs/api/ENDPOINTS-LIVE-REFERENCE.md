@@ -7,7 +7,7 @@
 > La tabla refleja los decoradores HTTP efectivos en controllers NestJS; DTOs, ejemplos y errores finos viven en Swagger/runtime y docs de feature cuando aplique.
 
 **Estado**: ACTIVE
-**Actualizado**: 2026-10-19 (perfiles familiares, Fase 2 completa: sub-fases 2a, 2b y 2c, y diseño de la Fase 3a pendiente de merge; ver también aceptación legal 2026-10-15 y la nota de resincronización 2026-10-13)
+**Actualizado**: 2026-10-20 (perfiles familiares, Fase 2 completa: sub-fases 2a, 2b y 2c, y las sub-fases 3a y 3b pendientes de merge; ver también aceptación legal 2026-10-15 y la nota de resincronización 2026-10-13)
 **Total endpoints**: 866 decoradores HTTP en 108 archivos `*.controller.ts` de `development`. La matriz tiene además 20 filas **pendientes de merge (PR #448 de sacdia-backend)**: secciones `class-thresholds`, `investiture-windows`, `investiture-pastors`, `investiture-requests` y el `GET .../sections/:clubSectionId/score` de camporee-scoring.
 **Métodos (development)**: GET 353 · POST 279 · PATCH 125 · DELETE 96 · PUT 13
 **Auth detectada (development)**: Public 13 · JWT u Optional JWT 853
@@ -37,6 +37,14 @@
 > - Cambian de contrato: `POST /auth/login` (identificador, bloqueo, `principal`), `GET /auth/me` (`principal`, `family_features`, modo incl. `profile_incomplete`, analítica), `POST /auth/register` (guarda `birthday` y `country_id`; fila de supervisión para 13-17), `POST /auth/update-password` y `POST /auth/verify-email/send` (scope `self:password`), `PATCH /users/:userId` (bloqueo de fecha de nacimiento), `POST /guardianships/me/dependents` (tope de edad = mayoría de edad), `POST /guardianships/link-codes/redeem` (propósito `teen_guardian_link`), `POST /guardianships/:guardianshipId/revoke` y `GET .../deletion-impact` (resultado `pending_guardian`), `GET`/`POST .../membership-requests/...` (compuerta por edad, bloque `consent`, `verify-consent` sobre asignación activa), `GET`/`POST /users/me/legal-acceptance` y `POST /auth/register` (versión legal `2.0.0-family`, solo cuando se apruebe el texto; ver `docs/legal/README.md`) y las rutas existentes que se reetiquetan con scopes de adolescente (la lista exacta la fija el snapshot `acting-scope-metadata.spec.ts`).
 > - Detalle en «Cuentas supervisadas de 13 a 17 años (Fase 3a)» (antes de «Resumen por dominio»).
 
+> [!NOTE]
+> **Perfiles familiares, Fase 3b** (sacdia-backend, rama `feat/family-profiles-phase3`, once commits `f31c24cb..bbf26068` sobre `4cf7070f`, Pendiente de merge (PR por abrir: feat/family-profiles-phase3)). <!-- TODO(orquestador): reemplazar por «PR #NNN de sacdia-backend» cuando exista el PR. --> Describe el comportamiento **implementado en el backend** de la sub-fase 3b (dispositivo vinculado de menores de 13 años), verificado contra el código de la rama (con referencias a archivo y línea donde importa). La app (tareas A01 a A11) y el QA en vivo **no están hechos**: el QA vive en `docs/testing/FAMILY-PROFILES-PHASE3B-QA.md` con los escenarios como pendientes. Todo queda detrás de `FAMILY_LINKED_DEVICE_ENABLED` (por defecto `false`). Los totales de la cabecera tampoco incluyen estos endpoints.
+>
+> - Nuevos (4): `POST /auth/device/pair` (público) y, en `guardianships`, `POST .../devices/pairing-tokens`, `GET .../devices` y `POST .../devices/:deviceId/revoke`.
+> - Cambian de contrato: `POST /auth/refresh` y `POST /auth/logout` (sesiones de dispositivo), `GET /auth/me` (`mode: "device"` y `principal.device`), `GET /auth/sessions` y `GET /admin/users/:userId/sessions` (campo `kind`), `GET /guardianships/me/dependents` (`limits.max_devices` y `linked_devices_count` real), `POST /users/me/fcm-tokens` (liga el token al dispositivo), `GET /clubs/:clubId/activities` y `GET /activities/:activityId` (sin listas de asistentes para el dispositivo) y las cuatro rutas de evidencia de especialidades, que pasan de `evidence:upload` a `honors:write`.
+> - 6 códigos de error nuevos (`AUTH_DEVICE_REVOKED`, `AUTH_DEVICE_SESSION_EXPIRED`, `DEVICE_PAIRING_TOKEN_INVALID`, `DEVICE_PAIRING_NOT_ELIGIBLE`, `DEVICE_LIMIT_REACHED`, `DEVICE_NOT_FOUND`) en `ErrorCode` y en los 4 `errors.json`.
+> - Esquema: `docs/database/SCHEMA-REFERENCE.md`, «Dispositivos vinculados (Fase 3b)». Detalle en «Dispositivo vinculado de menores de 13 años (Fase 3b)» (antes de «Resumen por dominio»).
+
 ## Cómo leer esta referencia
 
 - `Auth`: `JWT` cuando el controller/método declara `JwtAuthGuard`, `AuthGuard` o `ApiBearerAuth`; `Public` cuando no se detecta guard bearer en el controller/método.
@@ -56,7 +64,7 @@
 - El tutor usa su **propio JWT** y añade `X-Acting-For: <user_id del dependiente>` (UUID). No hay token nuevo ni endpoint de «cambio de perfil».
 - Sin el header, nada cambia. Un header repetido o que no sea UUID responde 400 `ACTING_FOR_HEADER_INVALID` (nunca se interpreta como «yo»).
 - `@Public` ignora el header: la estrategia JWT no corre en esas rutas.
-- La firma, la audiencia y la revocación del JWT se validan siempre sobre el **tutor**. Un JWT de audiencia `sacdia:device` (reservada para la Fase 3) se rechaza con 401 `GUARD_JWT_UNAUTHORIZED`.
+- La firma, la audiencia y la revocación del JWT se validan siempre sobre el **tutor**. Un token de dispositivo vinculado (audiencia `sacdia:device`, Fase 3b) **no** puede usar este header: con `X-Acting-For` responde 403 `ACTING_FOR_FORBIDDEN` (ver «Dispositivo vinculado de menores de 13 años (Fase 3b)»). Hasta la Fase 3b esa audiencia se rechazaba con 401 `GUARD_JWT_UNAUTHORIZED`; ahora solo se rechaza si el conjunto de claims no es exactamente el de un dispositivo.
 
 ### Qué cambia en la petición
 
@@ -109,13 +117,13 @@ Rutas con scope (64 en la Fase 2; la Fase 3a reetiqueta algunas y suma las del a
 | `club:context` | `PATCH /auth/me/context` (antes `profile:write`; ver «Scopes de la Fase 3a») |
 | `registration:write` | `POST /users/:userId/post-registration/step-{1,2,3}/complete` · `POST /users/:userId/post-registration/membership-request/cancel` · `POST /users/:userId/membership/annual-enroll` · `GET /clubs` · `GET /clubs/:clubId/sections` |
 | `classes:write` | `POST /users/:userId/classes/enroll` · `PATCH /users/:userId/classes/:classId/progress` · `POST /users/:userId/classes/:classId/sections/:sectionId/submit` |
-| `evidence:upload` | `POST /users/:userId/classes/:classId/sections/:sectionId/files` · `DELETE .../files/:fileId` · `POST /users/:userId/honors/:honorId/files` · `POST /users/:userId/honors/:honorId/requirements/:requirementId/evidence/{upload,link}` · `DELETE .../evidence/:evidenceId` |
-| `honors:write` | `POST /users/:userId/honors` · `POST /users/:userId/honors/bulk` · `POST`, `PATCH` y `DELETE /users/:userId/honors/:honorId` · `PATCH /users/:userId/honors/:honorId/requirements/progress/batch` · `PATCH .../requirements/:requirementId/progress` |
+| `evidence:upload` | `POST /users/:userId/classes/:classId/sections/:sectionId/files` · `DELETE .../files/:fileId` (`src/classes/classes.controller.ts:331` y `:389`). **Fase 3b**: las cuatro rutas de evidencia de especialidades que antes llevaban este scope pasaron a `honors:write` (fila siguiente) para que el dispositivo vinculado, que tiene `evidence:upload`, no pueda tocarlas; tutores y adolescentes tienen ambos scopes, así que su comportamiento no cambia |
+| `honors:write` | `POST /users/:userId/honors` · `POST /users/:userId/honors/bulk` · `POST`, `PATCH` y `DELETE /users/:userId/honors/:honorId` · `PATCH /users/:userId/honors/:honorId/requirements/progress/batch` · `PATCH .../requirements/:requirementId/progress` · (Fase 3b) `POST /users/:userId/honors/:honorId/files` · `POST .../requirements/:requirementId/evidence/{upload,link}` · `DELETE .../evidence/:evidenceId` (`src/honors/honors.controller.ts:247`, `src/honors/honor-requirements.controller.ts:195`, `:238` y `:299`) |
 | `legal:accept` | `POST /users/me/legal-acceptance` (el servicio guarda `accepted_by_user_id` = el tutor) |
 
 **Nunca llevan scope** (el spec lo comprueba): `POST /auth/update-password`, `DELETE /auth/me`, `/auth/sessions*`, `/auth/mfa/*`, `/auth/oauth*`, `/users/me/data-export*`, `/fcm-tokens*`, `/users/me/notification-preferences*`, `/notifications/preferences*`, `/guardianships/*` (incluidas las rutas de la ficha de consentimiento del tutor), `POST /club-sections/:clubSectionId/dependents/:userId/claim-codes`, `POST /users/:userId/post-registration/step-3/guardian-only`, `/users/:userId/legal-representative*`, `GET /users/:userId/requires-legal-representative`, solicitud de instructor de especialidad, `/users/:userId/master-honors*`, `/certifications*`, `/admin*`, `/clubs*` (con **dos excepciones**, las lecturas del selector de club del paso 3: `GET /clubs` y `GET /clubs/:clubId/sections`), `/club-sections*`, `POST /qr/validate|scan`, los envíos de notificaciones y `GET /legal/current`. Por eso los endpoints de `guardianships` se llaman **sin** `X-Acting-For`: el tutor administra su familia desde su propio perfil.
 
-**Selector de club del paso 3 actuando** (`GET /clubs` y `GET /clubs/:clubId/sections`, `src/clubs/clubs.controller.ts:75` y `:192`): el paso 3 del post-registro del menor necesita listar clubes y secciones mientras el tutor actúa, así que estas dos lecturas llevan `@ActingScope('registration:write')`. Es `registration:write` y no `self:read` a propósito: el dispositivo vinculado de la Fase 3 tendrá `self:read` y `evidence:upload`, y no debe poder explorar clubes; solo un tutor que completa el registro del menor (consentimiento `pending` basta) llega a ellas. **Cualquier otra ruta `/clubs/*` sigue denegada** actuando (403 `ACTING_FOR_SCOPE_DENIED`: `GET /clubs/:clubId`, `.../overview`, `.../leadership`, `.../sections/:sectionId` y `.../members` lo comprueba el e2e, `test/acting-for.e2e-spec.ts:403-417`). Por eso la regla «nunca» del spec de metadatos es ahora una expresión regular con excepción: `/^(?!GET \/clubs$|GET \/clubs\/:clubId\/sections$)[A-Z]+ \/clubs(\/|$)/` (`acting-scope-metadata.spec.ts:263-269`); sin la excepción el spec fallaría al ver estas dos rutas con scope. Sin el header ambas rutas no cambian.
+**Selector de club del paso 3 actuando** (`GET /clubs` y `GET /clubs/:clubId/sections`, `src/clubs/clubs.controller.ts:75` y `:192`): el paso 3 del post-registro del menor necesita listar clubes y secciones mientras el tutor actúa, así que estas dos lecturas llevan `@ActingScope('registration:write')`. Es `registration:write` y no `self:read` a propósito: el dispositivo vinculado de la Fase 3b tiene `self:read` y `evidence:upload`, y no debe poder explorar clubes (`DEVICE_SCOPES` no incluye `registration:write`); solo un tutor que completa el registro del menor (consentimiento `pending` basta) llega a ellas. **Cualquier otra ruta `/clubs/*` sigue denegada** actuando (403 `ACTING_FOR_SCOPE_DENIED`: `GET /clubs/:clubId`, `.../overview`, `.../leadership`, `.../sections/:sectionId` y `.../members` lo comprueba el e2e, `test/acting-for.e2e-spec.ts:403-417`). Por eso la regla «nunca» del spec de metadatos es ahora una expresión regular con excepción: `/^(?!GET \/clubs$|GET \/clubs\/:clubId\/sections$)[A-Z]+ \/clubs(\/|$)/` (`acting-scope-metadata.spec.ts:263-269`); sin la excepción el spec fallaría al ver estas dos rutas con scope. Sin el header ambas rutas no cambian.
 
 `OptionalJwtAuthGuard` (rutas públicas con sesión opcional, como los catálogos del paso 3): los errores de `X-Acting-For` se propagan y nunca se degradan a anónimo; un principal sustituido en una ruta sin scope se trata como **anónimo** (mínimo privilegio).
 
@@ -208,6 +216,7 @@ El vocabulario crece y los conjuntos son por tipo de principal. Un conjunto no i
 | `TEEN_SCOPES` (con tutor verificado) | `self:read`, `health:read`, `profile:write`, `registration:write`, `classes:write`, `evidence:submit`, `honors:write`, `evidence:upload`, `legal:accept`, `member:read`, `member:write`, `agenda:read`, `push:register`, `self:password`, `self:preferences`, `credential:read`, `club:context` |
 | Tutor actuando, consentimiento `pending` | `self:read`, `health:read`, `profile:write`, `registration:write`, `legal:accept`, `consent:evidence`, `credential:read`, `club:context` |
 | Tutor actuando, consentimiento `verified` | los anteriores más `classes:write`, `evidence:submit`, `honors:write`, `evidence:upload` |
+| `DEVICE_SCOPES` (dispositivo vinculado, Fase 3b) | `self:read`, `evidence:upload`, `evidence:submit`, `push:register`, `agenda:read`, `credential:read` (ver «Dispositivo vinculado de menores de 13 años (Fase 3b)») |
 
 Cambios sobre la tabla de scopes de la Fase 2 (reetiquetados deliberados; el snapshot `acting-scope-metadata.spec.ts` los fija):
 
@@ -303,7 +312,7 @@ Tres variables booleanas en `config/env.validation.ts` (por defecto `false`; `sr
 | Variable | Qué apaga | Fase |
 | --- | --- | --- |
 | `FAMILY_TEEN_LOGIN_ENABLED` | Los endpoints de `supervised-login` (habilitar, deshabilitar, reactivar, restablecer y el `GET`; apagada → 404 `FAMILY_FEATURE_DISABLED`, `SupervisedLoginsService`) y el **inicio de sesión** por nombre de usuario (401 uniforme `AUTH_INVALID_CREDENTIALS`, `src/better-auth/better-auth.service.ts:369`). Las sesiones de nombre de usuario ya abiertas dan 401 `AUTH_SUPERVISED_ACCESS_REVOKED` en su siguiente petición y el refresh se rechaza (ver debajo) | 3a |
-| `FAMILY_LINKED_DEVICE_ENABLED` | Dispositivo vinculado de menores de 13 años | 3b |
+| `FAMILY_LINKED_DEVICE_ENABLED` | Dispositivo vinculado de menores de 13 años: crear el token QR (apagada → 404 `FAMILY_FEATURE_DISABLED`), canjearlo (400 uniforme `DEVICE_PAIRING_TOKEN_INVALID`) y **autenticar** con un token de dispositivo (401 `AUTH_DEVICE_REVOKED` en cada petición y en el refresh, sin cambiar datos). Listar y desvincular dispositivos no dependen de la bandera. Ver «Dispositivo vinculado de menores de 13 años (Fase 3b)» | 3b |
 | `FAMILY_DIRECTOR_CREATE_MINOR_ENABLED` | Registro de menores por un director | 3c |
 
 **Apagar `FAMILY_TEEN_LOGIN_ENABLED` corta las sesiones de nombre de usuario ya abiertas** (hallazgo C1 de la verificación 3a, FP3-35; backend `035c633f`):
@@ -334,6 +343,228 @@ Un adolescente con cuenta y sin tutoría activa de persona (un vínculo `pending
 Cron `pending-teen-guardian` (`40 4 * * *` UTC, candado `cron:pending-teen-guardian` de 23 h, lotes de 100): recordatorio al adolescente (push y bandeja, nunca correo) a los **7, 30 y 83 días** (solo el último vencido, una vez cada uno); a los **90 días** congela la cuenta en una transacción (`dependent_profiles.frozen_at = now`, `purge_after = now + 90 días`, `supervised_logins.disabled_reason = 'unlinked_purged'`, sesiones borradas, tokens a la lista negra). El cron `dependent-profiles-purge` existente lo elimina y anonimiza 90 días después y ahora también borra credencial y filas `account` (OAuth), `verification`, sesiones y tokens FCM, y deja el correo libre para reutilizarse. Alcanzar la mayoría de edad lo excluye del reloj.
 
 Cuando sale el último tutor de un adolescente **con cuenta**, el resultado `dependent_outcome` es `pending_guardian` (no se congela): vuelve al modo pendiente en su siguiente petición y el reloj reinicia. Con asignación de club activa o pendiente se crea además la custodia del club (`club_custody`) y sigue en modo pendiente. Los dependientes sin cuenta mantienen `frozen`.
+
+## Dispositivo vinculado de menores de 13 años (Fase 3b)
+
+> [!NOTE]
+> Perfiles familiares, Fase 3b, rama `feat/family-profiles-phase3` de sacdia-backend (commits `f31c24cb..bbf26068`). Pendiente de merge (PR por abrir: feat/family-profiles-phase3). <!-- TODO(orquestador): reemplazar por «PR #NNN de sacdia-backend» cuando exista el PR, aquí y en las demás notas «Fase 3b» de este archivo. -->
+> Describe el comportamiento **implementado en el backend**; las rutas `archivo:línea` son de la rama en el commit `bbf26068`. La app de la Fase 3b y el QA en vivo no están hechos (`docs/testing/FAMILY-PROFILES-PHASE3B-QA.md`). Esquema: `docs/database/SCHEMA-REFERENCE.md`, «Dispositivos vinculados (Fase 3b)». Resumen para quien toque los guards: `src/common/guards/README.md`.
+
+Un **dispositivo vinculado** es el teléfono de un menor de 13 años (sin cuenta, sin correo, sin contraseña) que un tutor verificado enlaza con un QR de un solo uso. El teléfono recibe una sesión propia y un JWT de **audiencia distinta** (`sacdia:device`); el servidor lo trata como un tipo de principal más (`linked_device`) con una superficie mínima. Todo depende de la bandera `FAMILY_LINKED_DEVICE_ENABLED` (por defecto `false`; ver «Banderas de configuración»).
+
+### Principal `linked_device` y token de dispositivo
+
+- **JWT**: HS256 con `BETTER_AUTH_SECRET`, `iss = https://api.sacdia.app`, `aud` **exactamente** la cadena `sacdia:device` (`DEVICE_AUDIENCE`, `src/common/constants/jwt-audiences.ts:20`), vigencia **1 hora** (`DEVICE_JWT_TTL`, `src/better-auth/better-auth.service.ts:105`) y claims `sub` (el menor), `sid` (la sesión del dispositivo), `dev` (el `linked_device_id`) y `jti` aleatorio (`signDeviceJwt`, `:1232`; sin él, dos tokens firmados en el mismo segundo serían la misma cadena y el refresh pone en lista negra el token presentado). No lleva correo ni `mfa_pending`. Lo que el dispositivo puede hacer **nunca** va en el token.
+- **Verificación**: la estrategia JWT acepta las audiencias `sacdia:access` y `sacdia:device` (`ACCEPTED_BEARER_AUDIENCES`, `jwt-audiences.ts:23`) y `validate` las distingue por el conjunto de claims (`isDeviceJwtClaims`, `:70`). Un token con **las dos** audiencias o con la audiencia de dispositivo como arreglo (aunque sea `["sacdia:device"]`) responde 401 `GUARD_JWT_UNAUTHORIZED`. Un `dev` falso en un token de acceso se ignora. El principal se arma desde la base, no desde los claims.
+- **Orden de `JwtStrategy.validateDeviceToken`** (`src/auth/strategies/jwt.strategy.ts:283`): conjunto de claims → bandera apagada (401 `AUTH_DEVICE_REVOKED`, `:301`) → `sub`, `sid` y `dev` presentes y `sub`/`dev` UUID (si no, 401 `GUARD_JWT_UNAUTHORIZED`, `:318`) → lista negra de tokens → header `X-Acting-For` → compuerta del dispositivo (`:350`).
+- **`X-Acting-For` con un token de dispositivo** (cualquier valor) → 403 `ACTING_FOR_FORBIDDEN` (uniforme; se registra `cause=device_token`, `jwt.strategy.ts:331`). Un dispositivo nunca actúa por nadie.
+- **Principal resultante**: `{ kind: "linked_device", sub = actor_sub = el menor, acting_for: false, email: null, mfa_pending: false, sid, scopes: DEVICE_SCOPES, guardianship_id, linked_device_id }` (`jwt.strategy.ts:366-379`). `UserAwareThrottlerGuard` también acepta el token y cuenta por `user:{dependentId}`, no por IP (`src/config/user-aware-throttler.guard.ts`).
+- **Registro y auditoría**: el log de peticiones muestra `device:<linked_device_id>` (nunca el id del menor; `src/audit-logs/http-audit.interceptor.ts`); las filas de `audit_logs` llevan `actor_kind = linked_device`, actor = el menor y `request_context.linked_device_id`. `pairing_token` y `qr_payload` se redactan en pino (`src/app.module.ts`), en Sentry (`src/common/interceptors/sentry.interceptor.ts`) y en el filtro de excepciones (`src/common/filters/http-exception.filter.ts`).
+
+### Compuerta por petición (`LinkedDeviceGate`)
+
+Un JWT de dispositivo vive una hora; lo que corta el acceso en la **siguiente** petición es esta compuerta (`src/auth/device/linked-device.gate.ts`, `assertActive` en `:127`). Revisa, en este orden (`loadFromDatabase`, `:220`):
+
+| # | Condición que falla | Respuesta | Motivo que se registra en la fila |
+| --- | --- | --- | --- |
+| 0 | Bandera `FAMILY_LINKED_DEVICE_ENABLED` apagada (se lee cada vez, sin caché) | 401 `AUTH_DEVICE_REVOKED` | ninguno (no cambia datos) |
+| 1 | No hay fila `linked_devices` con ese id, ese menor y esa `sid` | 401 `AUTH_DEVICE_REVOKED` | ninguno |
+| 2 | La fila está revocada | 401 `AUTH_DEVICE_REVOKED` | ninguno (ya lo tiene) |
+| 3 | `absolute_expires_at` pasó (tope de 180 días desde el emparejamiento) | 401 `AUTH_DEVICE_SESSION_EXPIRED` | `expired` |
+| 4 | La sesión no existe, venció o es de otro usuario | 401 `AUTH_DEVICE_REVOKED` | `session_revoked` |
+| 5 | El menor está inactivo | 401 `AUTH_DEVICE_REVOKED` | `dependent_frozen` |
+| 6 | El menor está congelado o purgado | 401 `AUTH_DEVICE_REVOKED` | `dependent_frozen` |
+| 7 | El menor tiene un acceso propio **habilitado** (`supervised_logins` con `disabled_at` nulo) | 401 `AUTH_DEVICE_REVOKED` | `teen_login_enabled` |
+| 8 | Sin fecha de nacimiento, o edad igual o mayor que la mayoría de edad del país (zona horaria del país) | 401 `AUTH_DEVICE_REVOKED` | `majority` |
+| 9 | La tutoría con que se emparejó ya no es `verified`, es de custodia o de prueba, está revocada o no tiene tutor | 401 `AUTH_DEVICE_REVOKED` | `guardianship_revoked` |
+
+- **Cumplir 13 años no desvincula**: la compuerta no mira la edad mínima de acceso propio, solo la mayoría de edad; esa edad se exige únicamente para **vincular** teléfonos nuevos (token y canje). Un dispositivo ya vinculado sigue funcionando después de los 13 hasta la mayoría de edad, hasta que se habilite el acceso propio o hasta que se desvincule (comprobado por el e2e `test/linked-devices.e2e-spec.ts`, caso «the child turning 13 does NOT revoke an existing device»).
+- **Motivo registrado sin esperar**: una causa de ciclo de vida (filas 3 a 9) dispara una revocación sin esperar la respuesta (`autoRevoke`, `:339`), para que la fila diga por qué. Esas revocaciones **no avisan** al tutor. Si la revocación falla, la petición igual responde 401.
+- **Caché**: clave `device:v1:{dependentId}:{epoch}:{deviceId}` sobre el **mismo** `epoch` de acting-for (`acting:epoch:{dependentId}`). Decisión positiva 30 s, negativa 10 s (`DEVICE_GATE_ACTIVE_TTL_MS = 30000`, `:24`), recortada al tope absoluto, a la expiración de la sesión y a la medianoche local del menor. Revocar borra la sesión y sube el `epoch`, así que la entrada deja de leerse y la siguiente petición va a la base. Un `epoch` ausente cuenta como fallo de caché.
+- **Fallas**: Redis falla → se consulta la base; la base falla → 503 `AUTH_REVOCATION_CHECK_UNAVAILABLE`. Nunca se concede por defecto.
+- **`last_seen_at`** se escribe como máximo una vez cada 5 minutos por dispositivo (`DEVICE_LAST_SEEN_INTERVAL_MS`, `:27`); un fallo de esa escritura nunca falla la petición.
+- `JwtAuthGuard` relanza los dos códigos `AUTH_DEVICE_*` sin convertirlos en el 401 genérico (`src/common/guards/jwt-auth.guard.ts`), para que la app distinga «este dispositivo fue desvinculado» de un token vencido.
+
+### `DEVICE_SCOPES` y superficie alcanzable
+
+`DEVICE_SCOPES` (`src/auth/acting-for/auth-principal.ts:142`): `self:read`, `evidence:upload`, `evidence:submit`, `push:register`, `agenda:read`, `credential:read`. **No** tiene `health:read`, `profile:write`, `registration:write`, `classes:write`, `honors:write`, `legal:accept`, `club:context`, `member:read`, `member:write`, `self:password`, `self:preferences`, `guardian_link:issue`, `consent:evidence` ni `account:manage`. El conjunto de la Fase 2 (`LINKED_DEVICE_SCOPES`) quedó reemplazado.
+
+El snapshot `acting-scope-metadata.spec.ts` fija la superficie ruta por ruta (`DEVICE_SURFACE`, 31 rutas) y falla si una ruta nueva con `self:read` aparece sin revisión. Un scope es **necesario, no suficiente**: el RBAC y la propiedad del recurso (`:userId` = el menor) se siguen aplicando como en cualquier petición.
+
+| Grupo | Rutas (`/api/v1`) |
+| --- | --- |
+| Lecturas propias (`self:read`) | `GET /auth/me` · `GET /auth/profile/completion-status` · `GET /dashboard/summary` · `GET /notifications/history` · `GET /notifications/unread-count` · `PATCH /notifications/read-all` · `PATCH /notifications/:deliveryId/read` · `GET /users/:userId` · `GET /users/:userId/age` · `GET /users/:userId/post-registration/{status,photo-status}` · `GET /users/:userId/classes` · `GET /users/:userId/classes/:classId/progress` · `GET /users/:userId/honors` · `GET /users/:userId/honors/stats` · `GET /users/:userId/honors/:honorId/requirements/progress` · `GET /users/:userId/honors/:honorId/requirements/:requirementId/evidence` · `GET /users/me/legal-acceptance` · `GET /users/me/supervision` (para un dispositivo responde `status: null`: la ruta solo devuelve datos a un `supervised_user`) |
+| Evidencia de clases | `POST /users/:userId/classes/:classId/sections/:sectionId/files` (`evidence:upload`) · `DELETE .../files/:fileId` (`evidence:upload`) · `POST .../sections/:sectionId/submit` (`evidence:submit`, enviar a validación) |
+| Agenda **sin asistentes** (`agenda:read`) | `GET /clubs/:clubId/activities` · `GET /activities/:activityId` · `GET /activity-series/:seriesId` |
+| Push propio (`push:register`) | `POST /users/me/fcm-tokens` · `DELETE /users/me/fcm-tokens/:tokenId` |
+| Credencial QR (`credential:read`) | `GET /qr/member/token` · `GET /qr/me` · `GET /qr/me/card` · `GET /qr/me/card.pdf` |
+
+- **Agenda sin asistentes**: para un `linked_device`, las respuestas de `GET /clubs/:clubId/activities` y `GET /activities/:activityId` salen sin `attendees` (ids de usuario), `rsvp` (id de usuario a intención) ni `attendee_profiles` (nombres y avatares); el resto del payload no cambia (`withoutMemberLists`, `src/activities/activities.service.ts:60`, usado en `:222` y `:255`; el controlador lo activa con `req.user.kind === 'linked_device'`, `src/activities/activities.controller.ts:121` y `:286`). `GET /activity-series/:seriesId` no cambia: su payload ya solo lleva conteos.
+- **Evidencia de especialidades**: el dispositivo **no** puede subir, enlazar ni borrar evidencia de especialidades. Esas cuatro rutas pasaron de `evidence:upload` a `honors:write` (ver la tabla de scopes de la Fase 2), que el dispositivo no tiene.
+- **Datos de club**: `principalSeesClubData` devuelve `true` para `linked_device` (`auth-principal.ts:213`), así que `GET /auth/me` y `GET /dashboard/summary` incluyen el club de su menor. No tiene `club:context`: `PATCH /auth/me/context` responde 403 `PRINCIPAL_SCOPE_DENIED` con `kind: "linked_device"`.
+- **Todo lo demás** responde 403 `PRINCIPAL_SCOPE_DENIED` (`kind: "linked_device"`): salud y contactos de emergencia, edición de perfil, registro, legal (aceptar), contraseña, sesiones, eliminar cuenta, `/guardianships*`, preferencias de notificación, `/fcm-tokens*` heredados, exploración de clubes, escrituras de especialidades y clases (salvo la evidencia de arriba) y `/admin*`.
+
+### `POST /api/v1/guardianships/me/dependents/:dependentId/devices/pairing-tokens`
+
+Crea el token que el QR lleva. Se llama **como el tutor, sin `X-Acting-For`** (la ruta no declara `@ActingScope`: actuando responde 403 `ACTING_FOR_SCOPE_DENIED`). Throttle 10 por hora. Sin cuerpo.
+
+```json
+{
+  "status": "success",
+  "data": {
+    "pairing_token": "q3JfB1x0kT9wYzA7u2NcDg",
+    "qr_payload": "sacdia://pair?t=q3JfB1x0kT9wYzA7u2NcDg",
+    "expires_at": "2026-10-20T18:10:00.000Z",
+    "expires_in": 600
+  }
+}
+```
+
+201. El QR codifica `qr_payload` (`sacdia://pair?t=<token>`; es `?t=`, no `?c=`). Código: `DevicePairingService.issue`, `src/guardianships/device-pairing.service.ts:166`; controlador `src/guardianships/guardianships.controller.ts:429`.
+
+- **Token**: 16 bytes aleatorios en base64url (22 caracteres, `^[A-Za-z0-9_-]{22}$`), vigencia 600 s (`DEVICE_PAIRING_TOKEN_TTL_MS`), de un solo uso. En la base solo se guarda su HMAC-SHA256 en hexadecimal (64 caracteres, `token_hash`), con una clave HKDF derivada de `BETTER_AUTH_SECRET` (`info = sacdia:device-pairing-token`; no hay variable de entorno nueva). El token en claro sale una única vez, en esta respuesta; nunca se registra ni se audita. Un token nuevo **revoca** (`revoked_at`) los abiertos del mismo menor.
+- **Reglas, en este orden**:
+  1. Bandera apagada → 404 `FAMILY_FEATURE_DISABLED`.
+  2. Tutor verificado, no custodia, no de prueba (`GuardianPowersPolicy.assertVerifiedGuardian`): extraño, custodia, tutoría revocada o menor ajeno → 404 `GUARDIANSHIP_NOT_FOUND`; vínculo `pending` → 403 `GUARDIANSHIP_CONSENT_NOT_VERIFIED`.
+  3. Con el candado por dependiente: menor inactivo, congelado, purgado o sin perfil → 404 `GUARDIANSHIP_NOT_FOUND`; el menor tiene alguna fila `account` o un `supervised_logins` (cualquiera, habilitado o no) → 422 `DEVICE_PAIRING_NOT_ELIGIBLE` con `reason = has_supervised_login`; sin fecha de nacimiento o con edad igual o mayor que `minSelfLoginAge` del país (13 por defecto) → 422 `DEVICE_PAIRING_NOT_ELIGIBLE` con `reason = age_not_under_min_self_login`.
+  4. Dos dispositivos activos (`revoked_at IS NULL`) → 409 `DEVICE_LIMIT_REACHED`.
+- **Cuerpo de los errores**: `reason` viaja en `details`, que `HttpExceptionFilter` quita cuando `NODE_ENV=production`; **en producción el cliente solo ve `code`**. `max_devices` **no** está en el cuerpo del 409 (el código lo pasa como argumento de la plantilla del mensaje, que no lo usa): el tope se lee de `limits.max_devices` en `GET .../devices` y en `GET /guardianships/me/dependents`. Los clientes no deben depender de `details`.
+
+### `POST /api/v1/auth/device/pair` (público)
+
+Lo llama el teléfono del menor; nada autentica a un usuario, **el token es la credencial**. Código: `src/auth/device/device-auth.controller.ts:39` y `DevicePairingService.pair`, `device-pairing.service.ts:229`. Throttle por IP: 5 por minuto y 20 por hora (`PAIR_THROTTLE`, `device-auth.controller.ts:21`; el 429 del throttler es el genérico de Nest, sin `code` de dominio).
+
+```json
+{
+  "pairing_token": "q3JfB1x0kT9wYzA7u2NcDg",
+  "platform": "ios",
+  "app_version": "2.4.0",
+  "label": "Tablet de Ana"
+}
+```
+
+- `pairing_token`: cadena de hasta 256 caracteres (la validación fina la hace el servicio, para que un token mal formado responda igual que uno desconocido). `platform`: `ios` o `android` (otro valor → 400 de validación del DTO, el 400 genérico, no el uniforme). `app_version` (opcional, hasta 64; se guardan 32 sin caracteres de control ni marcado) y `label` (opcional, hasta 500; se limpia: sin caracteres de control ni `<` `>`, espacios colapsados, 40 caracteres como máximo, por defecto `Dispositivo`).
+- **200**:
+
+```json
+{
+  "status": "success",
+  "data": {
+    "accessToken": "<JWT de dispositivo, 1 h>",
+    "refreshToken": "<token de sesión opaco>",
+    "expiresAt": 1792598400,
+    "tokenType": "bearer",
+    "device": { "linked_device_id": "uuid", "label": "Tablet de Ana" },
+    "user": { "id": "uuid", "name": "Ana", "avatar": null }
+  }
+}
+```
+
+  `expiresAt` son segundos Unix de la **sesión** (30 días desde el emparejamiento), no del JWT. `user.name` es solo el primer nombre y `avatar` el valor de `users.user_image`. No hay datos de tutores, apellidos ni de otros menores, ni se devuelve el token de emparejamiento.
+- **Qué hace**, en una sola transacción y con el candado por dependiente: busca el token por hash; **vuelve a validar todo** lo que `issue` comprobó (tutoría emparejante todavía `verified`, no custodia, no de prueba, `guardian_user_id` igual al creador del token, menor visible, sin cuenta ni acceso propio, menor que `minSelfLoginAge`) y el tope de 2 dispositivos; crea la sesión del dispositivo (30 días), la fila `linked_devices` (tope absoluto a 180 días) y **al final** consume el token con compare-and-set (el perdedor de una carrera hace rollback y recibe el 400 uniforme). La fila del dispositivo se crea antes de consumir el token porque la FK y el CHECK `device_pairing_tokens_consumed_ck` lo exigen. Audita `linked_device.paired` (sin el token) y, tras confirmar, sube el `epoch` y avisa a los tutores (abajo).
+- **400 uniforme `DEVICE_PAIRING_TOKEN_INVALID`** para: token desconocido, mal formado, vencido, ya consumido, revocado, tutoría que ya no es válida, familia cambiada desde que se hizo el QR (cuenta o acceso propio, edad, menor congelado) y **bandera apagada**. Mismo cuerpo en todos los casos.
+- **409 `DEVICE_LIMIT_REACHED`**: token válido pero el menor ya tiene dos dispositivos activos. No consume el token ni cuenta como fallo de IP.
+- **429 `AUTH_LOGIN_LOCKED`**: 30 canjes fallidos (solo los 400 `DEVICE_PAIRING_TOKEN_INVALID` cuentan) desde la misma IP en una ventana de 24 h anclada en el primer fallo bloquean la IP, incluso con un token válido. Cabecera `Retry-After: 3600`; el cuerpo no lleva `details`. Contador atómico en Redis (clave `device-pairing:failures:v1:{ip}`, `src/guardianships/device-pairing-failure-counter.ts`); si Redis falla, el límite diario no aplica y solo queda el throttle por minuto y hora.
+
+### `GET /api/v1/guardianships/me/dependents/:dependentId/devices`
+
+Cualquier tutor **verificado** del menor (no solo quien emparejó el teléfono), como él mismo. Pendiente → 403 `GUARDIANSHIP_CONSENT_NOT_VERIFIED`; extraño → 404 `GUARDIANSHIP_NOT_FOUND`. No depende de la bandera. Código: `LinkedDevicesService.list`, `src/guardianships/linked-devices.service.ts:122`.
+
+```json
+{
+  "status": "success",
+  "data": {
+    "devices": [
+      {
+        "linked_device_id": "uuid",
+        "label": "Tablet de Ana",
+        "platform": "ios",
+        "app_version": "2.4.0",
+        "paired_at": "2026-10-20T18:00:00.000Z",
+        "paired_by_display_name": "Marta Pérez",
+        "last_seen_at": null,
+        "absolute_expires_at": "2027-04-18T18:00:00.000Z",
+        "status": "active",
+        "revoked_at": null,
+        "revoked_reason": null
+      }
+    ],
+    "limits": { "max_devices": 2 }
+  }
+}
+```
+
+Orden: `paired_at` descendente. Lista los activos y los revocados en los últimos 30 días (`REVOKED_DEVICE_HISTORY_MS`). `status` es `active` o `revoked`.
+
+### `POST /api/v1/guardianships/me/dependents/:dependentId/devices/:deviceId/revoke`
+
+Desvincula un dispositivo, de forma inmediata e **idempotente**. Sin cuerpo; throttle 30 por hora; 200. Cualquier tutor verificado. No depende de la bandera. Código: `LinkedDevicesService.revoke`, `linked-devices.service.ts:149`.
+
+```json
+{ "status": "success", "data": { "linked_device_id": "uuid", "revoked_at": "2026-10-20T19:00:00.000Z", "revoked_reason": "guardian" } }
+```
+
+- Errores: 403 `GUARDIANSHIP_CONSENT_NOT_VERIFIED` (vínculo pendiente); 404 `GUARDIANSHIP_NOT_FOUND` (extraño o menor ajeno); 404 `DEVICE_NOT_FOUND` (el dispositivo no existe o es de **otro menor**).
+- **Idempotente**: repetirlo responde 200 con el `revoked_at` y el `revoked_reason` **originales** (aunque el motivo original no fuera `guardian`) y no escribe nada ni avisa de nuevo.
+- **Efectos** (`LinkedDeviceRevocation.revokeInTx`, `src/auth/device/linked-device-revocation.ts:66`, en una transacción con el candado del menor): fija `revoked_at`, `revoked_by_user_id` y `revoked_reason = guardian` con compare-and-set sobre `revoked_at IS NULL`; **borra la sesión** del dispositivo (su refresh token muere); desactiva el token FCM que el dispositivo registró (solo si aún es del menor) y, si no queda otro dispositivo activo, todos los tokens FCM activos del menor; escribe la fila `linked_device.revoked` en `audit_logs`. Tras confirmar sube el `epoch`: la siguiente petición del teléfono es 401 `AUTH_DEVICE_REVOKED` aunque su JWT siga vigente. Los **otros** tutores verificados (no quien revoca) reciben el aviso `family:security` «{nombre} · dispositivo desvinculado».
+
+### Refresh, cierre de sesión y sesiones de dispositivo
+
+- **`POST /auth/refresh`** (cuerpo `{ "refreshToken": "..." }`): se detecta una sesión de dispositivo por su fila `linked_devices` (no por claims). Antes de deslizar la sesión corre la compuerta (`AuthService.refreshSession`, `src/auth/auth.service.ts:616-655`) y responde solo un **JWT de dispositivo** (nunca uno de acceso, aunque el dispositivo esté revocado o vencido: esa ruta no cae al camino de usuario). La sesión desliza `min(ahora + 30 días, tope absoluto)` (`DEVICE_SESSION_DURATION_MS`, `better-auth.service.ts:108`), así que nunca pasa de 180 días desde el emparejamiento. El token de acceso presentado se pone en lista negra como en cualquier refresh. Sin MFA. Errores: tope vencido con la sesión aún viva → 401 `AUTH_DEVICE_SESSION_EXPIRED`; fila revocada o compuerta inactiva con la sesión aún viva (bandera apagada, tutoría inválida, mayoría de edad, acceso propio habilitado, ...) → 401 `AUTH_DEVICE_REVOKED`; si la revocación ya **borró la sesión** (el caso normal tras desvincular) el refresh token no tiene dueño y responde el 401 genérico `AUTH_REFRESH_TOKEN_INVALID`. La app debe tratar los tres como «volver a vincular».
+- **`POST /auth/logout`** con el refresh token de un dispositivo: busca el dispositivo **antes** de borrar la sesión, cierra la sesión y lo revoca con motivo `device_logout` (`AuthService.logout`, `auth.service.ts:760`; mejor esfuerzo: si la revocación falla solo se registra). Los tutores reciben el aviso de desvinculación.
+- **Listas de sesiones**: `GET /auth/sessions` y `GET /admin/users/:userId/sessions` llevan `kind: "user" | "device"` en cada ítem (y `linked_device_id` / `linkedDeviceId`, `null` salvo en un dispositivo). Es una sesión de dispositivo solo si una fila `linked_devices` nombra su id.
+- **Revocar sesiones** (`DELETE /auth/sessions/:sessionId`, `DELETE /auth/sessions` y las rutas de admin): tras borrar las filas, los dispositivos cuya sesión desapareció quedan marcados `session_revoked` (`markMissingSessionsRevoked`). Las rutas de `/auth/sessions*` solo las alcanza la edad desconocida (`account:manage`); el efecto práctico es del lado de admin.
+
+### Cuándo se revoca un dispositivo (motivos)
+
+`linked_devices.revoked_reason` está limitado por un CHECK de la base. Quién escribe cada motivo:
+
+| Motivo | Cuándo | Dónde |
+| --- | --- | --- |
+| `guardian` | Un tutor lo desvincula | `POST .../devices/:deviceId/revoke` |
+| `guardianship_revoked` | Sale o es quitado el tutor que emparejó (`guardian_left`, `removed_by_primary`); sale el último tutor y el menor queda en custodia del club o en modo pendiente; la compuerta ve la tutoría inválida | `GuardianshipLifecycleService` (`guardianship-lifecycle.service.ts:174`, `:222`, `:268`); compuerta |
+| `guardian_account_closed` | El tutor que emparejó elimina su cuenta (los dispositivos de su tutoría) | `deviceReasonOf`, `guardianship-lifecycle.service.ts:553`; `src/auth/account-deletion.service.ts:230` |
+| `teen_login_enabled` | Se habilita el acceso propio del menor, o el menor canjea el código de vínculo de adolescente; también lo registra la compuerta | `supervised-logins.service.ts:384`, `link-codes.service.ts:602`; compuerta |
+| `dependent_frozen` | El último tutor sale y el menor se congela; el cron de 90 días sin tutor; la purga; la compuerta ve al menor inactivo o congelado | `guardianship-lifecycle.service.ts:288`, `pending-teen-cron.service.ts:378`, `dependent-profiles-purge-cron.service.ts:226`; compuerta |
+| `majority` | El menor llega a la mayoría de edad | **Solo la compuerta, de forma perezosa** (siguiente petición o refresh). El barrido por cron es de la sub-fase 3c |
+| `device_logout` | El teléfono cierra sesión | `POST /auth/logout` |
+| `session_revoked` | Se borró su sesión por otro camino (usuario o admin) o la compuerta no la encuentra | `markMissingSessionsRevoked`; compuerta |
+| `admin` | Reservado: existe `LinkedDevicesService.revokeAsAdmin` pero **ningún endpoint lo expone** en la 3b (entrada para la 3c) | `linked-devices.service.ts:162` |
+| `expired` | Pasó el tope absoluto de 180 días | Solo la compuerta; el barrido por cron de expiración es de la 3c |
+
+- **Los motivos de 3a se revocan dentro de la transacción del llamador** (el dispositivo y el cambio de familia se confirman o se revierten juntos) a través del puerto `LINKED_DEVICE_REVOKER`, que desde la 3b es **obligatorio** y está ligado a `LinkedDevicesService` (ya no hay no-op; `src/guardianships/guardianships.module.ts:80`). El `epoch` lo sube el llamador tras confirmar.
+- **Avisos al tutor por revocación**: solo para `guardian` (a los otros tutores), `guardianship_revoked`, `guardian_account_closed`, `device_logout`, `session_revoked` y `admin` (`NOTIFIED_REASONS`, `linked-devices.service.ts:53`). **No** avisan `teen_login_enabled` (ya tiene su aviso), `dependent_frozen`, `majority` ni `expired`, ni las revocaciones que origina la propia compuerta. Cuando la revocación ocurre dentro de la transacción de otro servicio (3a), el aviso se envía solo cuando la revocación ya es visible desde otra conexión (reintentos a los 50 ms, 250 ms, 1 s, 3 s y 8 s); si la transacción se revirtió no se anuncia nada.
+- **Purga** (`dependent-profiles-purge`): además revoca los dispositivos que queden y borra todos los tokens FCM del menor.
+- Los dispositivos ya vinculados **no** se revocan por cumplir 13 años (ver la compuerta).
+
+### Avisos y pushes
+
+- **Vincular**: tras un canje correcto, los tutores verificados no custodia (hasta 4) reciben `family:security` «{nombre} · dispositivo vinculado» con «{etiqueta} ({plataforma})» (`GuardianSecurityNotificationsService.onDevicePaired`, `guardian-security-notifications.service.ts:168`). Push y bandeja, nunca correo; no se puede silenciar.
+- **Subida de evidencia del dispositivo**: cada subida correcta de evidencia de una clase hecha con un token de dispositivo avisa a los tutores del menor con `family:evidence_uploaded`, título «{nombre} subió evidencia» y cuerpo «Se subió evidencia de una clase: {etiqueta}.» (`GuardianNotificationsService.onDependentEvidenceUploaded`, `src/guardianships/guardian-notifications.service.ts:58`, llamado tras confirmar la subida en `src/classes/classes.service.ts:1552`). Destinatarios: tutores de persona, no custodia, no de prueba y con tutoría no revocada (`pending` o `verified`), sin quien subió. Es por **subida**: borrar o enviar a validación no avisa. Mejor esfuerzo: nunca falla la subida. El aviso se suprime solo cuando quien sube es un tutor actuando o un adolescente supervisado; la comprobación es por tipo de principal, no por sujeto, porque el dispositivo también deja el sujeto de auditoría en el menor.
+- **Pushes del club al menor**: el teléfono registra su token con `POST /users/me/fcm-tokens` (`push:register`); el servicio lo liga a la fila del dispositivo (`linked_devices.fcm_token_id`) y, si el token rota, desactiva el anterior (`src/notifications/fcm-tokens.service.ts:91`). Un push del club dirigido al menor llega al **token del dispositivo** y, además, los tutores conservan la copia con la etiqueta «{nombre} · {título}» (`DependentPushRouterService`: tutores activos, hasta 4, con las preferencias de cada uno; las fuentes `family:*` no se vuelven a repartir). La 3b no cambió código aquí: lo verifican las pruebas `notifications.service.spec.ts` y `dependent-push-router.service.spec.ts`. Revocar el dispositivo desactiva su token, así que el menor deja de recibir y los tutores siguen recibiendo la copia.
+- **Analítica**: `GET /auth/me` devuelve `analytics_anonymous: true` siempre para un dispositivo; la app no debe identificar al menor en PostHog ni en Sentry (cumplimiento del lado de la app, no hecho todavía).
+
+### Errores de la Fase 3b
+
+| Status | `code` | Cuándo |
+| --- | --- | --- |
+| 401 | `AUTH_DEVICE_REVOKED` | Token de dispositivo: desvinculado o con la compuerta inactiva (tabla de arriba), o bandera apagada. También en `POST /auth/refresh` con la sesión aún viva |
+| 401 | `AUTH_DEVICE_SESSION_EXPIRED` | Pasó el tope absoluto de 180 días (petición o refresh) |
+| 503 | `AUTH_REVOCATION_CHECK_UNAVAILABLE` | La base falla al evaluar la compuerta. Nunca se concede por defecto |
+| 403 | `ACTING_FOR_FORBIDDEN` | `X-Acting-For` con un token de dispositivo |
+| 403 | `PRINCIPAL_SCOPE_DENIED` | Un dispositivo llama a una ruta sin un scope que tenga (`kind: "linked_device"`) |
+| 400 | `DEVICE_PAIRING_TOKEN_INVALID` | `POST /auth/device/pair`: cualquier problema del token o de la familia, o bandera apagada (cuerpo uniforme) |
+| 422 | `DEVICE_PAIRING_NOT_ELIGIBLE` | Crear el token: el menor tiene cuenta o acceso propio, o ya tiene la edad mínima de acceso propio. `reason` solo fuera de producción |
+| 409 | `DEVICE_LIMIT_REACHED` | Crear el token o canjearlo con dos dispositivos activos. Sin `max_devices` en el cuerpo |
+| 404 | `DEVICE_NOT_FOUND` | Desvincular un dispositivo que no existe o es de otro menor |
+| 404 | `FAMILY_FEATURE_DISABLED` | Crear el token con la bandera apagada |
+| 429 | `AUTH_LOGIN_LOCKED` | Canje: 30 fallos al día por IP (`Retry-After: 3600`) |
+
+Los seis códigos están en `ErrorCode` (`src/common/errors/error-codes.ts:880-885`) y en los 4 `errors.json` del backend (`es`, `en`, `fr`, `pt-BR`).
+
+### Bandera `FAMILY_LINKED_DEVICE_ENABLED`
+
+Por defecto `false` (`src/config/env.validation.ts:240`). Apagada: no se crean tokens (404), no se canjean (400 uniforme), y todo token de dispositivo y todo refresh de dispositivo responde 401 `AUTH_DEVICE_REVOKED` **sin cambiar datos** (las filas siguen activas; al volver a encenderla los dispositivos funcionan otra vez). Listar y desvincular siguen disponibles. **Cambiar la bandera en un servidor desplegado exige reiniciarlo**, igual que `FAMILY_TEEN_LOGIN_ENABLED` (ver «Banderas de configuración»: `ConfigService` lee la foto del entorno del arranque). `GET /auth/me` la expone en `family_features.linked_device`. Para cortar todos los dispositivos en una emergencia: apagarla y reiniciar.
 
 ## Resumen por dominio
 
@@ -1016,14 +1247,15 @@ Semántica funcional y límites: [operations-dashboard.md](../features/operation
 | --- | --- | --- | --- | --- | --- | --- |
 | POST | `/api/v1/auth/register` | Public | - | Registrar nuevo usuario. El body exige `accepted_terms_version` y `accepted_privacy_version` (ver «Aceptación legal en registro» más abajo). Versión distinta de la vigente → 400 `LEGAL_VERSION_MISMATCH` sin crear usuario. Opcionales `birthday` (`YYYY-MM-DD`) y `country_id`: si la edad queda por debajo del mínimo del país (13 por defecto) → 422 `AUTH_REGISTRATION_AGE_BELOW_MINIMUM` sin crear nada (ver «Edad mínima de la cuenta»). Fase 3a: con edad de 13 a 17 años, la misma transacción crea una fila `supervised_logins` (`origin = self_registered`, `method = email`, `password_set_by = self`, `pending_since = now`) y la persona queda en modo pendiente de tutor | AuthService.register() | `src/auth/auth.controller.ts` |
 | POST | `/api/v1/auth/login` | Public | - | Iniciar sesión. Fase 3a: acepta `identifier` (correo o nombre de usuario) o el `email` heredado; respuesta uniforme y tiempo uniforme; bloqueo progresivo 429 `AUTH_LOGIN_LOCKED`; 403 `AUTH_SUPERVISED_LOGIN_DISABLED` / `AUTH_ACCOUNT_FROZEN` solo con la contraseña correcta; `data.user.principal`. Ver «Inicio de sesión por identificador» | AuthService.login() | `src/auth/auth.controller.ts` |
-| POST | `/api/v1/auth/refresh` | Public | - | Refrescar sesión con refresh token | AuthService.refreshSession() | `src/auth/auth.controller.ts` |
-| POST | `/api/v1/auth/logout` | Public | - | Cerrar sesión | AuthService.logout() | `src/auth/auth.controller.ts` |
+| POST | `/api/v1/auth/refresh` | Public | - | Refrescar sesión con refresh token. Fase 3b: si la sesión es la de un dispositivo vinculado (la identifica su fila `linked_devices`), pasa por la compuerta del dispositivo ANTES de deslizar la sesión y devuelve solo un JWT de dispositivo (audiencia `sacdia:device`, 1 h; la sesión desliza 30 días sin pasar de su tope absoluto de 180 días). Ver «Dispositivo vinculado de menores de 13 años (Fase 3b)» | AuthService.refreshSession() | `src/auth/auth.controller.ts` |
+| POST | `/api/v1/auth/device/pair` | Public | `@SkipPermissions` | Fase 3b. El teléfono del menor canjea el token del QR y recibe su sesión de dispositivo (200 con `accessToken`, `refreshToken`, `device`, `user`). Throttle 5/min y 20/h por IP; 30 canjes fallidos al día por IP → 429. Todo fallo del token o de la familia es el mismo 400 `DEVICE_PAIRING_TOKEN_INVALID`. Contrato en «Dispositivo vinculado de menores de 13 años (Fase 3b)» | DevicePairingService.pair() | `src/auth/device/device-auth.controller.ts` |
+| POST | `/api/v1/auth/logout` | Public | - | Cerrar sesión. Fase 3b: cerrar sesión con el refresh token de un dispositivo vinculado lo desvincula (`revoked_reason = device_logout`) | AuthService.logout() | `src/auth/auth.controller.ts` |
 | POST | `/api/v1/auth/password/reset-request` | Public | - | Solicitar recuperación de contraseña | AuthService.requestPasswordReset() | `src/auth/auth.controller.ts` |
 | POST | `/api/v1/auth/password/reset` | Public | - | Confirmar recuperación de contraseña (`ResetPasswordDto`). Throttle 5/min. No emite sesión ni JWT: el cliente debe iniciar sesión de nuevo. Token inválido o expirado → 400 | AuthService.confirmPasswordReset() | `src/auth/auth.controller.ts` |
 | POST | `/api/v1/auth/verify-email/send` | JWT | Scope `self:password` (Fase 3a) | Enviar email de verificación al usuario autenticado | AuthService.sendVerificationEmail() | `src/auth/auth.controller.ts` |
 | POST | `/api/v1/auth/verify-email/confirm` | Public | - | Confirmar verificación de email con token | AuthService.confirmEmailVerification() | `src/auth/auth.controller.ts` |
 | POST | `/api/v1/auth/update-password` | JWT | Scope `self:password` (Fase 3a: lo tiene el adolescente, pendiente o con tutor; ningún otro tipo no `user`) | Update authenticated user password. Fase 3a: un adolescente avisa a sus tutores verificados (`family:security`, nunca la contraseña) tras una contraseña actual correcta; fija `password_set_by = self` | AuthService.updateOwnPassword() | `src/auth/auth.controller.ts` |
-| GET | `/api/v1/auth/me` | JWT | - | Perfil + autorización. Pertenencia no inscrita actual con permisos vacíos. No incluye programación de director. Año solapado → 409 `ECCLESIASTICAL_YEAR_AMBIGUOUS`. Incluye `data.legal` (estado de aceptación legal; ver sección `legal`), siempre leído de la base y fuera del caché de autorización. Perfiles familiares: `data.email` puede ser `null` (dependientes); `data.family` es `{ is_guardian, dependents_count }` con los dependientes activos del usuario (`null` mientras se actúa por un menor); `data.acting_for` es `null`, o con `X-Acting-For` válido `{ actor_user_id, dependent_user_id, guardianship_id, consent_status: "pending"\|"verified", scopes }`. Con el header la respuesta describe al **dependiente** (ver «Actuar en nombre de un dependiente»). **Fase 3a**: añade `data.principal` (`{ kind: "user"|"guardian_acting"|"supervised_user"|"linked_device"|"age_unknown_user", scopes, supervision: null | { status: "pending_guardian"|"active", pending_since, guardians: [{ guardianship_id, consent_status: "pending"|"verified", display_name, relationship_type_name }], summary_visible_to_guardians, days_left } }`, sin datos de contacto), `data.family_features` (`{ teen_login, linked_device, director_create_minor }`), `data.analytics_anonymous` (`true` para cualquier edad menor que la mayoría de edad **y para la edad desconocida**; ausente o desconocido = la app queda anónima) y `data.mode`: `adult\|teen_pending\|teen_supervised\|profile_incomplete` (`profile_incomplete` = `age_unknown_user`, ver «Edad desconocida»). `data.family` es `null` para un adolescente y para la edad desconocida. `acting_for` y `legal` no cambian. **Sin datos de club** para un adolescente pendiente, una edad desconocida y un `supervised_user` sin estado de supervisión (`principalSeesClubData` falso): `authorization.grants.club_assignments` `[]`, `authorization.active_assignment.assignment_id` `null`, `authorization.effective.scope.club` `null`, `authorization.effective.permissions` solo global y directo, `club` `null` y `club_context` vacío, también con una asignación activa anterior al despliegue (ver «Sin datos de club ni credencial hasta que haya un tutor verificado») | AuthService.getProfile() | `src/auth/auth.controller.ts` |
+| GET | `/api/v1/auth/me` | JWT | - | Perfil + autorización. Pertenencia no inscrita actual con permisos vacíos. No incluye programación de director. Año solapado → 409 `ECCLESIASTICAL_YEAR_AMBIGUOUS`. Incluye `data.legal` (estado de aceptación legal; ver sección `legal`), siempre leído de la base y fuera del caché de autorización. Perfiles familiares: `data.email` puede ser `null` (dependientes); `data.family` es `{ is_guardian, dependents_count }` con los dependientes activos del usuario (`null` mientras se actúa por un menor); `data.acting_for` es `null`, o con `X-Acting-For` válido `{ actor_user_id, dependent_user_id, guardianship_id, consent_status: "pending"\|"verified", scopes }`. Con el header la respuesta describe al **dependiente** (ver «Actuar en nombre de un dependiente»). **Fase 3a**: añade `data.principal` (`{ kind: "user"|"guardian_acting"|"supervised_user"|"linked_device"|"age_unknown_user", scopes, supervision: null | { status: "pending_guardian"|"active", pending_since, guardians: [{ guardianship_id, consent_status: "pending"|"verified", display_name, relationship_type_name }], summary_visible_to_guardians, days_left } }`, sin datos de contacto), `data.family_features` (`{ teen_login, linked_device, director_create_minor }`), `data.analytics_anonymous` (`true` para cualquier edad menor que la mayoría de edad **y para la edad desconocida**; ausente o desconocido = la app queda anónima) y `data.mode`: `adult\|teen_pending\|teen_supervised\|profile_incomplete` (`profile_incomplete` = `age_unknown_user`, ver «Edad desconocida»). `data.family` es `null` para un adolescente y para la edad desconocida. `acting_for` y `legal` no cambian. **Sin datos de club** para un adolescente pendiente, una edad desconocida y un `supervised_user` sin estado de supervisión (`principalSeesClubData` falso): `authorization.grants.club_assignments` `[]`, `authorization.active_assignment.assignment_id` `null`, `authorization.effective.scope.club` `null`, `authorization.effective.permissions` solo global y directo, `club` `null` y `club_context` vacío, también con una asignación activa anterior al despliegue (ver «Sin datos de club ni credencial hasta que haya un tutor verificado»). **Fase 3b**: con un token de dispositivo vinculado, `data.mode` es `device`, `data.principal.kind` es `linked_device` y `data.principal.device` es `{ linked_device_id, label, paired_at }` (el bloque solo existe para un dispositivo), `data.family` y `data.principal.supervision` son `null` y `data.analytics_anonymous` es siempre `true`; el dispositivo sí ve el contexto de club de su menor (`principalSeesClubData` devuelve `true` para `linked_device`, `src/auth/acting-for/auth-principal.ts:213`). `data.family_features.linked_device` expone la bandera | AuthService.getProfile() | `src/auth/auth.controller.ts` |
 | PATCH | `/api/v1/auth/me/context` | JWT | - | Cambiar contexto activo. `inactive`/`ended`/año no vigente/`designated` → 400 `AUTH_ASSIGNMENT_YEAR_MISMATCH`. Corte del club no completado → 503 `CLUB_CYCLE_NOT_READY`. No invalida JWT. Scope `club:context` (Fase 3a): lo tienen el tutor actuando y el adolescente activo, **no** el dispositivo vinculado; un adolescente pendiente o una edad desconocida reciben 403 `PRINCIPAL_SCOPE_DENIED` | AuthService.setActiveClubContext() | `src/auth/auth.controller.ts` |
 | GET | `/api/v1/auth/profile/completion-status` | JWT | - | Obtener estado del post-registro | AuthService.getCompletionStatus() | `src/auth/auth.controller.ts` |
 | DELETE | `/api/v1/auth/me` | JWT | - | Eliminar cuenta del usuario autenticado (contraseña o `{ provider, idToken, nonce }`; nunca ambos → 400). Throttle 3/hora. Tutores: si tiene dependientes activos, el body debe llevar `"acknowledge_dependents": true` (opcional, boolean); sin él responde 409 `AUTH_DELETE_DEPENDENTS_ACK_REQUIRED` **sin cambiar nada** (la comprobación va después de re-autenticar y antes de revocar Apple). El cliente obtiene la lista y el resultado de cada menor de `GET /api/v1/guardianships/me/deletion-impact`, no del 409. Al confirmar, en la misma transacción cada menor pasa a otro tutor, a custodia del club o se congela 90 días; si algo falla, la cuenta no se elimina. No disponible actuando por un menor | AccountDeletionService.deleteAccount() | `src/auth/auth.controller.ts` |
@@ -1031,9 +1263,9 @@ Semántica funcional y límites: [operations-dashboard.md](../features/operation
 | POST | `/api/v1/auth/mfa/verify` | JWT | - | Verificar código TOTP | MfaService.verifyMfa() | `src/auth/mfa.controller.ts` |
 | DELETE | `/api/v1/auth/mfa/disable` | JWT | - | Deshabilitar 2FA | MfaService.disableMfa() | `src/auth/mfa.controller.ts` |
 | GET | `/api/v1/auth/mfa/status` | JWT | - | Estado de 2FA | MfaService.getMfaStatus() | `src/auth/mfa.controller.ts` |
-| GET | `/api/v1/auth/sessions` | JWT | - | List active sessions | SessionsService.listSessions() | `src/auth/sessions.controller.ts` |
-| DELETE | `/api/v1/auth/sessions/:sessionId` | JWT | - | Revoke a specific session | SessionsService.revokeSession() | `src/auth/sessions.controller.ts` |
-| DELETE | `/api/v1/auth/sessions` | JWT | - | Revoke all other sessions | SessionsService.revokeAllOtherSessions() | `src/auth/sessions.controller.ts` |
+| GET | `/api/v1/auth/sessions` | JWT | - | List active sessions. Fase 3b: cada ítem lleva `kind` (`user` o `device`) y `linked_device_id` (`null` salvo en una sesión de dispositivo; se sabe por la fila `linked_devices`, `src/auth/sessions.service.ts`) | SessionsService.listSessions() | `src/auth/sessions.controller.ts` |
+| DELETE | `/api/v1/auth/sessions/:sessionId` | JWT | - | Revoke a specific session. Fase 3b: si la sesión era la de un dispositivo vinculado, el dispositivo queda revocado con motivo `session_revoked` | SessionsService.revokeSession() | `src/auth/sessions.controller.ts` |
+| DELETE | `/api/v1/auth/sessions` | JWT | - | Revoke all other sessions. Fase 3b: ídem `session_revoked` para los dispositivos cuya sesión se borra | SessionsService.revokeAllOtherSessions() | `src/auth/sessions.controller.ts` |
 
 ### OAuth
 
@@ -1776,7 +2008,7 @@ La `1.2.0` (perfiles familiares) añade la clave `family`, después de `legal_ac
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
 | GET | `/api/v1/guardianships/relationship-types` | JWT | `@SkipPermissions` | Parentescos que un tutor puede declarar con el menor («yo soy su…»). Filas activas de `relationship_types` cuyo `name` está en la lista permitida, en el orden fijo de la lista (Padre, Madre, Tutor Legal, Abuelo, Abuela, Abuelo/a, Tío, Tía, Tío/a, Hermano/a Mayor, Otro; solo las filas que existan en el ambiente). 200 `{ status: "success", data: [{ relationship_type_id, name, description }] }`, la misma forma de ítem que `GET /api/v1/catalogs/relationship-types` (no localiza). Sin `@ActingScope`: se llama sin `X-Acting-For`. Ver «Parentesco del tutor» | GuardianshipsService.listGuardianRelationshipTypes() | `src/guardianships/guardianships.controller.ts` |
-| GET | `/api/v1/guardianships/me/dependents` | JWT | `@SkipPermissions` | Listar los dependientes activos del tutor autenticado. Excluye congelados y purgados. Respuesta `{ dependents: DependentSummary[], limits: { max_dependents: 10 } }` | GuardianshipsService.listForGuardian() | `src/guardianships/guardianships.controller.ts` |
+| GET | `/api/v1/guardianships/me/dependents` | JWT | `@SkipPermissions` | Listar los dependientes activos del tutor autenticado. Excluye congelados y purgados. Respuesta `{ dependents: DependentSummary[], limits: { max_dependents: 10, max_devices: 2 } }` (`max_devices` desde la Fase 3b) | GuardianshipsService.listForGuardian() | `src/guardianships/guardianships.controller.ts` |
 | POST | `/api/v1/guardianships/me/dependents` | JWT | `@SkipPermissions`; throttle 10/hora | Registrar un menor sin cuenta (paso 0). En una transacción crea `users` (correo null, rol global `user`), `users_pr` en falso, `dependent_profiles`, la tutoría principal `pending` con `sworn_declaration_at` y las aceptaciones legales en nombre del menor. 201 con `DependentSummary` | GuardianshipsService.createDependent() | `src/guardianships/guardianships.controller.ts` |
 | GET | `/api/v1/guardianships/me/dependents/:dependentId` | JWT | `@SkipPermissions` | Detalle de un dependiente con sus tutores (`DependentDetail`). Un dependiente ajeno, congelado o inexistente responde 404 `GUARDIANSHIP_NOT_FOUND` | GuardianshipsService.getDetailForGuardian() | `src/guardianships/guardianships.controller.ts` |
 | POST | `/api/v1/guardianships/me/dependents/:dependentId/consent-evidence` | JWT | `@SkipPermissions`; throttle 20/hora | Subir la ficha de consentimiento firmada (foto o PDF). Multipart, campo `file`. 201 `{ evidence_id, content_type, size_bytes, uploaded_at }`. Solo la deja en espera del director: **nunca** verifica el consentimiento. Con el consentimiento ya verificado → 409 `GUARDIANSHIP_CONSENT_ALREADY_VERIFIED` (ver «Ficha de consentimiento firmada») | GuardianEvidenceService.uploadForGuardian() | `src/guardianships/guardianships.controller.ts` |
@@ -1792,6 +2024,9 @@ La `1.2.0` (perfiles familiares) añade la clave `family`, después de `legal_ac
 | POST | `/api/v1/guardianships/me/dependents/:dependentId/supervised-login/reactivate` | JWT | `@SkipPermissions`; bandera `FAMILY_TEEN_LOGIN_ENABLED` | Fase 3a. Reactivar (con nombre de usuario exige una contraseña nueva). 200 | SupervisedLoginsService.reactivate() | `src/guardianships/guardianships.controller.ts` |
 | POST | `/api/v1/guardianships/me/dependents/:dependentId/supervised-login/password` | JWT | `@SkipPermissions`; throttle 5/hora por dependiente; bandera `FAMILY_TEEN_LOGIN_ENABLED` | Fase 3a. Restablecer la contraseña (nombre de usuario: la fija el tutor; correo: correo estándar de restablecimiento). 200 `{ sessions_revoked }` | SupervisedLoginsService.resetPassword() | `src/guardianships/guardianships.controller.ts` |
 | GET | `/api/v1/guardianships/me/dependents/:dependentId/summary` | JWT | `@SkipPermissions`; throttle 60/hora | Fase 3a. Resumen de progreso de clases, especialidades y asistencia del menor, sin salud. Tutor verificado, como él mismo | GuardianSummaryService.getSummary() | `src/guardianships/guardianships.controller.ts` |
+| POST | `/api/v1/guardianships/me/dependents/:dependentId/devices/pairing-tokens` | JWT | `@SkipPermissions`; throttle 10/hora; bandera `FAMILY_LINKED_DEVICE_ENABLED` | Fase 3b. Crear el token de un solo uso (10 min) que el QR lleva para vincular el teléfono de un menor de 13 años. 201 `{ pairing_token, qr_payload, expires_at, expires_in }`. Solo un tutor verificado, como él mismo. Un token nuevo revoca los abiertos del mismo menor | DevicePairingService.issue() | `src/guardianships/guardianships.controller.ts` |
+| GET | `/api/v1/guardianships/me/dependents/:dependentId/devices` | JWT | `@SkipPermissions`; no depende de la bandera | Fase 3b. Dispositivos del menor: activos y revocados en los últimos 30 días. 200 `{ devices, limits: { max_devices: 2 } }`. Cualquier tutor verificado | LinkedDevicesService.list() | `src/guardianships/guardianships.controller.ts` |
+| POST | `/api/v1/guardianships/me/dependents/:dependentId/devices/:deviceId/revoke` | JWT | `@SkipPermissions`; throttle 30/hora; no depende de la bandera | Fase 3b. Desvincular un dispositivo (inmediato e idempotente). 200 `{ linked_device_id, revoked_at, revoked_reason }`. Cualquier tutor verificado; un dispositivo de otro menor → 404 `DEVICE_NOT_FOUND` | LinkedDevicesService.revoke() | `src/guardianships/guardianships.controller.ts` |
 
 ##### Parentesco del tutor
 
@@ -1945,7 +2180,7 @@ Con la bandera apagada, las cinco rutas de `supervised-login` responden 404 `FAM
 ```
 
 - **Precondiciones**: el menor no tiene cuenta, está activo y no congelado, tiene edad desde `minor_self_login_min_age` y menor que la mayoría de edad (si no → 422 `SUPERVISED_LOGIN_NOT_ELIGIBLE`, `details.reason`), y no tiene ya un acceso habilitado (409 `SUPERVISED_LOGIN_ALREADY_ENABLED`; un acceso deshabilitado se reactiva, no se vuelve a crear).
-- **Una transacción**, con el candado por dependiente: crea la fila `account` de credencial con la contraseña del tutor (misma política y mismo bcrypt de costo 12 que el registro; política no cumplida → 422 `SUPERVISED_LOGIN_PASSWORD_INVALID` y no se crea nada), la fila `supervised_logins` (`origin = guardian_enabled`, `password_set_by = guardian`, `enabled_by_*`, nombre de usuario generado si `method = handle`; con `method = email` fija `users.email`, y si ya existe → 409 `SUPERVISED_LOGIN_EMAIL_UNAVAILABLE`), revoca los dispositivos vinculados del menor mediante el puerto `LINKED_DEVICE_REVOKER` (sin efecto hasta la Fase 3b) y audita `supervised_login.enabled`. La contraseña nunca se devuelve, ni se registra ni se audita.
+- **Una transacción**, con el candado por dependiente: crea la fila `account` de credencial con la contraseña del tutor (misma política y mismo bcrypt de costo 12 que el registro; política no cumplida → 422 `SUPERVISED_LOGIN_PASSWORD_INVALID` y no se crea nada), la fila `supervised_logins` (`origin = guardian_enabled`, `password_set_by = guardian`, `enabled_by_*`, nombre de usuario generado si `method = handle`; con `method = email` fija `users.email`, y si ya existe → 409 `SUPERVISED_LOGIN_EMAIL_UNAVAILABLE`), revoca los dispositivos vinculados del menor mediante el puerto `LINKED_DEVICE_REVOKER` (desde la Fase 3b ligado a `LinkedDevicesService`, motivo `teen_login_enabled`; ver «Dispositivo vinculado de menores de 13 años (Fase 3b)») y audita `supervised_login.enabled`. La contraseña nunca se devuelve, ni se registra ni se audita.
 - **201**: `{ "supervised_login": { ... incluye "login_handle" ... }, "devices_revoked": 0 }`.
 - **Efectos tras confirmar**: sube el `epoch`; el tutor que actuaba por el menor recibe 403 `ACTING_FOR_FORBIDDEN` en su siguiente petición (la app sale del modo actuar); los otros tutores verificados reciben `family:security`. Mientras el acceso esté habilitado, el tutor ya no actúa por el menor y los pushes del club dejan de copiarse al tutor.
 
@@ -1972,7 +2207,7 @@ Con la bandera apagada, las cinco rutas de `supervised-login` responden 404 `FAM
 - Funciona para cualquier modo de acceso del menor. Errores: 409 `GUARDIANSHIP_CONSENT_NOT_VERIFIED` (vínculo pendiente; **no** es 403 como en los poderes de control); 404 `GUARDIANSHIP_NOT_FOUND` (extraño, tutor de otro menor o menor con edad igual o mayor que la mayoría de edad); 403 `ACTING_FOR_SCOPE_DENIED` actuando.
 - Transparencia: `GET /users/me/supervision.summary_visible_to_guardians` es `true` y la app le explica al adolescente qué ve su tutor.
 
-**`DependentSummary` (cambios)**: `access_mode` es `guardian_managed` o `supervised_login` (lo calcula el servidor); se agregan `supervised_login` (`null` o `{ method, login_handle, enabled_at, disabled_at }`), `linked_devices_count` (siempre `0` hasta la Fase 3b) y `age_milestone_reached` (`true` si tiene la edad mínima de cuenta y aún no tiene acceso).
+**`DependentSummary` (cambios)**: `access_mode` es `guardian_managed` o `supervised_login` (lo calcula el servidor); se agregan `supervised_login` (`null` o `{ method, login_handle, enabled_at, disabled_at }`), `linked_devices_count` (dispositivos activos del menor; siempre `0` en la Fase 3a, real desde la Fase 3b: `GuardianshipsService.buildSummaries`, `src/guardianships/guardianships.service.ts`) y `age_milestone_reached` (`true` si tiene la edad mínima de cuenta y aún no tiene acceso).
 
 **Código `teen_guardian_link`** (`POST /api/v1/guardianships/link-codes/redeem`, mismo cuerpo y mismo bloqueo por fuerza bruta): lo emite el **adolescente** (`POST /users/me/guardian-link-codes`). Al canjearlo, en una transacción con el candado del adolescente: solo si el adolescente está activo, tiene cuenta, es menor de edad, no tiene un tutor de persona activo y no está congelado (si no, 400 `GUARDIANSHIP_LINK_CODE_INVALID`); quien canjea debe ser adulto con fecha de nacimiento (422 `GUARDIANSHIP_GUARDIAN_NOT_ADULT` / `GUARDIANSHIP_GUARDIAN_BIRTHDAY_REQUIRED`, **el código no se consume**); no puede canjearlo el propio adolescente (403 `GUARDIANSHIP_LINK_CODE_SELF_REDEEM`). Crea el perfil `dependent_profiles` del adolescente (`created_by_user_id` = el adolescente) y una tutoría **no custodia, principal, `pending`, `invited_by` NULL** que **nunca se verifica sola**; detiene el reloj de 90 días y avisa al adolescente. 201 con `DependentSummary` (`access_mode: "supervised_login"`). Cuenta para el tope de 10 dependientes (409 `GUARDIANSHIP_DEPENDENT_LIMIT_REACHED`). Hasta que un director verifique el consentimiento, quien canjeó solo puede subir la ficha y ver el estado. Los códigos `second_guardian` también se pueden canjear para adolescentes con cuenta; `director_claim` sigue siendo solo de custodia.
 
