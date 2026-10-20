@@ -1,8 +1,9 @@
 ---
 documento: Aviso de Privacidad Integral
-version: 1.1.0-draft
-fecha: 2026-04-17
-estado: BORRADOR - pendiente revisión legal
+version: 2.0.0-family-draft
+fecha: 2026-10-19
+estado: BORRADOR — requiere revisión del usuario o de un abogado (pendiente de revisión legal)
+version_anterior: 1.1.0-draft
 aplicable_a: sacdia-app (iOS/Android) + sacdia-admin (web)
 ---
 
@@ -46,7 +47,9 @@ Para los efectos del presente Aviso, se utilizan las mismas definiciones previst
 - **Encargado:** persona física o moral que, sola o en conjunto con otras, trate datos personales por cuenta del Responsable.
 - **Derechos ARCO:** derechos de Acceso, Rectificación, Cancelación y Oposición previstos en el artículo 22 de la LFPDPPP.
 - **Servicio** o **Plataforma:** el conjunto de funcionalidades ofrecidas a través de la aplicación móvil SACDIA y del panel administrativo SACDIA Admin, destinadas a la administración de clubes juveniles de Aventureros, Conquistadores y Guías Mayores.
-- **Menor:** toda persona física menor de 18 años de edad inscrita en un Club a través de la Plataforma.
+- **Menor:** toda persona física menor de 18 años de edad inscrita en un Club a través de la Plataforma o que tenga una Cuenta Supervisada.
+- **Cuenta Supervisada:** cuenta propia de un Menor de 13 a 17 años que opera bajo la supervisión de un Tutor Verificado (ver Términos y Condiciones §3.2).
+- **Tutor Verificado:** Representante Legal vinculado a un Menor cuyo consentimiento fue revisado y verificado por un director o administrador a partir del formato firmado.
 - **Representante Legal:** padre, madre, tutor o quien ejerza la patria potestad o tutela legal sobre un Menor.
 - **Contenido:** cualquier información, texto, fotografía, imagen, video, documento, evidencia, certificado u otro material que el Usuario suba, publique o comparta a través del Servicio.
 
@@ -147,40 +150,53 @@ El Titular (o Representante Legal, en su caso) otorga su consentimiento **EXPRES
 
 ### 6.1 Principio rector y matriz de edades
 
+> **BORRADOR — requiere revisión del usuario o de un abogado.** Esta sección cambió en la versión 2.0.0-family-draft (antes 1.1.0-draft) y no debe publicarse sin aprobación. Pendiente de merge (PR por abrir: feat/family-profiles-phase3). <!-- TODO(orquestador): reemplazar por «PR #NNN de sacdia-backend» cuando exista el PR. -->
+
 De conformidad con el artículo 4° de la Constitución Política de los Estados Unidos Mexicanos, la Convención sobre los Derechos del Niño y la LFPDPPP, los datos personales de los Menores reciben el **más alto nivel de protección** en atención al principio del interés superior de la niñez.
 
-SACDIA aplica los siguientes regímenes diferenciados por rango etario para el tratamiento de datos del Titular:
+SACDIA aplica los siguientes regímenes diferenciados por rango etario para el tratamiento de datos del Titular (edades de México; en otro país se aplican las configuradas para ese país):
 
 | Edad | Régimen aplicable | Tratamiento |
 |------|-------------------|-------------|
-| **6–12 años** | LFPDPPP + principios COPPA adoptados voluntariamente | Consentimiento parental verificable obligatorio; prohibición absoluta de tracking/analytics personalizados; sin recolección de datos no esenciales |
-| **13–17 años** | LFPDPPP | Consentimiento parental obligatorio (minoría de edad civil <18 en México, Código Civil) |
+| **6–12 años** | LFPDPPP + principios COPPA adoptados voluntariamente | Consentimiento parental verificable obligatorio; sin cuenta propia; el Representante Legal actúa en su nombre; puede usar un **dispositivo vinculado** por el Representante Legal, sin identificación personal en el dispositivo (función de la Fase 3b, aún no activa); prohibición absoluta de tracking/analytics personalizados; sin recolección de datos no esenciales |
+| **13–17 años** | LFPDPPP | Consentimiento parental obligatorio (minoría de edad civil <18 en México, Código Civil); **Cuenta Supervisada** con acceso propio bajo un Tutor Verificado; solo analítica **anónima** (no se identifica a la persona en la herramienta de analítica ni se asocia un usuario a los reportes de errores, y los eventos no llevan identificador de usuario, correo, nombre de usuario ni nombre) hasta que la revisión legal decida otra cosa; el Tutor Verificado ve un resumen de progreso y asistencia |
 | **≥18 años** | LFPDPPP estándar | Consentimiento propio del Titular |
 
-### 6.2 Prohibición de cuentas independientes y verificación del consentimiento parental
+### 6.2 Cuentas de menores y verificación del consentimiento parental
 
-SACDIA **no permite** que menores de 18 años creen cuentas independientes. El registro de un Menor en un club se realiza a través de:
+> **BORRADOR — requiere revisión del usuario o de un abogado.** Esta sección cambió en la versión 2.0.0-family-draft (antes 1.1.0-draft) y no debe publicarse sin aprobación. Pendiente de merge (PR por abrir: feat/family-profiles-phase3). <!-- TODO(orquestador): reemplazar por «PR #NNN de sacdia-backend» cuando exista el PR. -->
 
-**a) La cuenta de su Representante Legal:** padre, madre, tutor legal o quien ejerza la patria potestad o tutela legal, quien deberá otorgar consentimiento expreso y por escrito para el tratamiento de los datos personales del Menor, incluyendo datos sensibles.
+SACDIA **no permite** que menores de 13 años creen cuentas. Las personas de 13 a 17 años pueden tener una **Cuenta Supervisada**, según los Términos y Condiciones §3.2. El registro y el tratamiento de datos de un Menor se realizan a través de:
 
-**b) Un Director de Club acreditado:** persona adulta acreditada por la organización auspiciadora del club, quien deberá recabar previamente el consentimiento expreso y por escrito del Representante Legal a través de los formatos físicos o digitales establecidos por la organización, y declarar bajo protesta de decir verdad haberlo obtenido antes de ingresar datos del Menor a la Plataforma.
+**a) La cuenta de su Representante Legal:** padre, madre, tutor legal o quien ejerza la patria potestad o tutela legal, quien deberá otorgar consentimiento expreso y por escrito para el tratamiento de los datos personales del Menor, incluyendo datos sensibles. En Menores de 13 años actúa en su nombre; en Menores de 13 a 17 años se vincula a la Cuenta Supervisada con un código de un solo uso (vigente 72 horas) o la habilita desde su propia cuenta.
+
+**b) Un Director de Club acreditado** (registro de Menores de 0 a 17 años por un director: función de la Fase 3c, aún no activa): persona adulta acreditada por la organización auspiciadora del club, quien deberá recabar previamente el consentimiento expreso y por escrito del Representante Legal a través de los formatos físicos o digitales establecidos por la organización, y declarar bajo protesta de decir verdad haberlo obtenido antes de ingresar datos del Menor a la Plataforma.
 
 **c) Método de verificación del consentimiento parental.** Para cumplir con el estándar de "consentimiento verificable" exigible a la protección reforzada de menores, el Responsable aplica los siguientes mecanismos:
 
-1. **Segundo opt-in por correo electrónico.** Tras la captura inicial del consentimiento por parte del Representante Legal o del Director de Club, se enviará un correo electrónico al Representante Legal con un **enlace único de confirmación**. La ficha del Menor no quedará activa hasta que dicho enlace sea confirmado.
-2. **Formato firmado (físico o digital).** El consentimiento firmado por el Representante Legal, con identificación oficial anexa, se archiva por el club por un plazo mínimo de **5 (cinco) años** (plazo de prescripción civil conforme al artículo 1159 del Código Civil Federal).
-3. **Identificación oficial del tutor.** Se requerirá un documento de identificación oficial del tutor (copia o escaneo) como evidencia auditable del vínculo y del consentimiento otorgado.
+1. **Formato firmado revisado por una persona distinta (cuatro ojos).** El Representante Legal firma en papel el formato de consentimiento; se sube una imagen o PDF a un almacenamiento privado (solo se lee con enlaces temporales) y un **director del club o un administrador revisa el formato y verifica el consentimiento** en la Plataforma. Quien verifica no puede ser el tutor del Menor ni, cuando el Menor está bajo custodia del club, quien lo registró, quien subió el formato o el último tutor que lo dejó en custodia. Mientras el consentimiento no está verificado, el vínculo del tutor es **pendiente**: no tiene facultades de control ni recibe avisos de seguridad, y el ingreso del Menor a un club no puede aprobarse. La verificación **no** consiste en un correo de confirmación al Representante Legal.
+2. **Archivo del formato.** El original firmado se archiva por el club por un plazo mínimo de **5 (cinco) años** (plazo de prescripción civil conforme al artículo 1159 del Código Civil Federal). La copia digital que SACDIA conserva en almacenamiento privado se elimina junto con el Menor cuando se purga su cuenta, que ocurre 90 días después de congelarse; el original en papel sigue bajo custodia del club.
+3. **Identificación del tutor.** El procedimiento del club puede pedir identificación oficial del tutor como evidencia del vínculo, anexa al formato. SACDIA no valida la identificación de forma automática: la revisa la persona que verifica el consentimiento. [PENDIENTE: confirmar si el formato oficial exige anexar identificación; si no, retirar este punto.]
 4. **Referencias internacionales.** Estos mecanismos adoptan los principios equivalentes a COPPA §312.5 (Children's Online Privacy Protection Act, Estados Unidos) y al artículo 8(2) del GDPR (Unión Europea) como estándar voluntario de protección reforzada, no por aplicabilidad directa sino por mejores prácticas internacionales.
 
+> **Corrección respecto de la versión anterior (1.1.0-draft).** El punto c.1 prometía un *segundo opt-in por correo electrónico* al Representante Legal con un enlace único de confirmación, sin el cual la ficha del Menor no quedaría activa. **Ese mecanismo no existe en el producto y la Fase 3 no lo implementa.** El texto se corrigió para describir el mecanismo real (formato firmado verificado por un director). Si el abogado considera que se requiere un segundo opt-in por correo para cumplir el estándar, debe construirse como funcionalidad nueva antes de publicar. Ver `REVIEW-REPORT.md`, adenda 2026-10-19.
+
+**d) Plazo de 90 días sin tutor.** Una Cuenta Supervisada sin Representante Legal vinculado recibe recordatorios en la app a los 7, 30 y 83 días; a los 90 días se congela y 90 días después se purga (se elimina y anonimiza), aplicando la minimización de datos. Si el último Tutor Verificado se retira, el plazo vuelve a contar desde ese momento.
+
 ### 6.3 Alcance del consentimiento parental
+
+> **BORRADOR — requiere revisión del usuario o de un abogado.** Esta sección cambió en la versión 2.0.0-family-draft (antes 1.1.0-draft) y no debe publicarse sin aprobación. Pendiente de merge (PR por abrir: feat/family-profiles-phase3). <!-- TODO(orquestador): reemplazar por «PR #NNN de sacdia-backend» cuando exista el PR. -->
 
 El consentimiento del Representante Legal comprende:
 
 1. El tratamiento de datos de identificación y contacto del Menor.
 2. El tratamiento de datos personales sensibles del Menor (salud y afiliación religiosa).
 3. La captura y almacenamiento de fotografías e imágenes del Menor en evidencias, certificados y actividades.
-4. El envío de notificaciones push al dispositivo asociado al Menor o al Representante Legal.
-5. Las transferencias a encargados descritas en la sección 7.
+4. El envío de notificaciones push al dispositivo asociado al Menor o al Representante Legal. En Menores de 13 años, el Representante Legal recibe además una **copia** de las notificaciones del club dirigidas al Menor. Las personas de 13 a 17 años con acceso propio **no** generan copias para el tutor.
+5. La **vinculación de un dispositivo** del Menor de 13 años mediante un código QR de un solo uso, que el Representante Legal puede revocar en cualquier momento (función de la Fase 3b, aún no activa).
+6. Los **avisos de seguridad** al Tutor Verificado (nuevo inicio de sesión, cambio o restablecimiento de contraseña, bloqueos de acceso, cambios de acceso y vinculación o desvinculación de dispositivos), por notificación push y bandeja de la app, nunca por correo y sin contraseñas, nombres de usuario ni direcciones IP.
+7. La visibilidad, para el Tutor Verificado, de un **resumen de progreso de clases y especialidades y de asistencia** del Menor con Cuenta Supervisada. No incluye datos de salud, evidencias, notas del consejero, contactos ni ubicación; el Menor es informado de ello en la app.
+8. Las transferencias a encargados descritas en la sección 7.
 
 ### 6.4 Prohibición de publicidad dirigida a Menores
 
@@ -196,9 +212,11 @@ Todo ejercicio de derechos ARCO respecto a datos de Menores será tramitado por 
 
 ### 6.6 Niveles de acceso
 
+> **BORRADOR — requiere revisión del usuario o de un abogado.** Esta sección cambió en la versión 2.0.0-family-draft (antes 1.1.0-draft) y no debe publicarse sin aprobación. Pendiente de merge (PR por abrir: feat/family-profiles-phase3). <!-- TODO(orquestador): reemplazar por «PR #NNN de sacdia-backend» cuando exista el PR. -->
+
 Dentro de la Plataforma, los datos de los Menores son visibles únicamente para:
 
-1. El propio Representante Legal registrante.
+1. El propio Representante Legal registrante (los datos completos de un Menor de 13 años; para una Cuenta Supervisada, un resumen de progreso y asistencia, según §6.3).
 2. El Director del Club y personal autorizado de la sección a la que pertenece el Menor (Secretaria, consejeros de unidad), bajo el sistema de control de acceso basado en roles (RBAC) del Servicio.
 3. Administradores globales del Responsable, para fines de operación y soporte.
 
@@ -378,6 +396,10 @@ Las copias de respaldo técnicas que contengan información cancelada se purgan 
 
 ## 11. Retención y Cancelación
 
+> **BORRADOR — requiere revisión del usuario o de un abogado.** Esta sección cambió en la versión 2.0.0-family-draft (antes 1.1.0-draft) y no debe publicarse sin aprobación. Pendiente de merge (PR por abrir: feat/family-profiles-phase3). <!-- TODO(orquestador): reemplazar por «PR #NNN de sacdia-backend» cuando exista el PR. -->
+
+> Cambio de esta versión: se retiró de la fila de evidencia de consentimiento la mención a «IDs, confirmaciones por correo», que el producto no genera, y se aclaró que la copia digital se elimina al purgar al Menor. Esto choca con el plazo de 5 años de la fila: **requiere decisión legal** (¿se conserva la copia digital 5 años o basta el original en papel del club?). Ver `REVIEW-REPORT.md`, adenda 2026-10-19.
+
 Los datos personales se conservarán durante el tiempo que el Titular mantenga activa su cuenta o su membresía al club. Una vez que la cuenta o membresía sea dada de baja (cancelación), se aplicará la siguiente **política de retención diferenciada por categoría**:
 
 | Categoría | Plazo post-baja | Base legal |
@@ -385,7 +407,7 @@ Los datos personales se conservarán durante el tiempo que el Titular mantenga a
 | Datos de identificación y membresía al club | 2 años | Obligación fiscal/contable (Art. 30 Código Fiscal de la Federación) |
 | Datos sensibles de salud | 6 meses (ampliables a 2 años si hubo siniestro o evento médico reportado) | Principio de minimización, Art. 11 LFPDPPP |
 | Logs técnicos, tokens, sesiones | 90 días | Seguridad operativa |
-| Evidencia de consentimiento parental (formatos firmados, IDs, confirmaciones por correo) | 5 años mínimo | Prescripción civil, Art. 1159 Código Civil Federal |
+| Evidencia de consentimiento parental (formato firmado en papel, archivado por el club; la copia digital se purga con el Menor) | 5 años mínimo para el original en papel | Prescripción civil, Art. 1159 Código Civil Federal |
 | Fotografías y contenido multimedia | Eliminación inmediata al ejercer el derecho de cancelación; backups purgados en 90 días | Derecho de cancelación, Art. 22 y 25 LFPDPPP |
 
 Transcurridos los plazos anteriores, los datos serán cancelados mediante bloqueo previo a supresión, conforme al Art. 25 LFPDPPP.
@@ -412,13 +434,16 @@ Si en el futuro se incorporaran funcionalidades de este tipo (por ejemplo, recom
 
 ## 13. Cookies y Tecnologías de Rastreo
 
+> **BORRADOR — requiere revisión del usuario o de un abogado.** Esta sección cambió en la versión 2.0.0-family-draft (antes 1.1.0-draft) y no debe publicarse sin aprobación. Pendiente de merge (PR por abrir: feat/family-profiles-phase3). <!-- TODO(orquestador): reemplazar por «PR #NNN de sacdia-backend» cuando exista el PR. -->
+
 La Plataforma utiliza las siguientes tecnologías para operar el Servicio. Ninguna se utiliza con fines de publicidad dirigida ni de rastreo en sitios de terceros:
 
 | Tecnología | Proveedor | Finalidad | Datos recopilados |
 |---|---|---|---|
 | **Tokens de sesión / cookies técnicas** | SACDIA (Better Auth) | Mantener sesión del Usuario autenticado | Token, IP, user agent, expiración |
 | **Firebase Cloud Messaging (FCM)** | Google LLC | Envío de notificaciones push al dispositivo | Token FCM, tipo y nombre de dispositivo |
-| **Sentry** | Functional Software, Inc. | Monitoreo de errores en la aplicación | Stack traces con campos sensibles redactados |
+| **Sentry** | Functional Software, Inc. | Monitoreo de errores en la aplicación | Stack traces con campos sensibles redactados. No se asocia un usuario a los reportes de Menores |
+| **PostHog** (agregado en 2.0.0-family-draft) | PostHog, Inc. | Analítica de uso de la aplicación (pantallas vistas), sin grabación de sesiones | Identificador de usuario solo en mayores de 18 años; en Menores de 13 a 17 años solo eventos anónimos; ninguno en dispositivo vinculado (menores de 13) |
 | **Google Maps SDK** | Google LLC | Mostrar mapas y geocodificar direcciones de lugares seleccionados | Coordenadas del lugar (no del Usuario) |
 | **Permiso de ubicación (iOS/Android)** | Sistema operativo | Seleccionar lugar de actividad en el mapa | Coordenadas del punto seleccionado; la ubicación del Titular **no se almacena** |
 | **Almacenamiento local del dispositivo** | Plataforma | Guardar preferencias, idioma, sesión | Clave-valor local |
@@ -480,6 +505,9 @@ La versión en español de este documento es la **vinculante**. Cualquier traduc
 ---
 
 ## Historial de cambios
+
+### v2.0.0-family-draft — 2026-10-19
+BORRADOR. Fase 3 de perfiles familiares: matriz de edades con Cuenta Supervisada de 13 a 17 años y dispositivo vinculado (§6.1), reescritura de §6.2 (sin «cuentas independientes»; plazo de 90 días sin tutor), **corrección de §6.2.c.1** (se retira el segundo opt-in por correo que el producto no hace; el mecanismo real es el formato firmado verificado por un director), alcance del consentimiento ampliado (§6.3: avisos de seguridad, resumen, copias solo para menores de 13), niveles de acceso (§6.6), retención (§11) y PostHog en §13. Requiere revisión del usuario o de un abogado antes de cualquier publicación. Los placeholders `[PENDIENTE: ...]` siguen sin resolver.
 
 ### v1.1.0-draft — 2026-04-17
 Aplicados 26 fixes del reporte de auditoría independiente (REVIEW-REPORT.md v1.0): 5 críticos, 8 altos, 6 medios, 7 bajos. Decisión estratégica: exclusión territorial a México. Pendientes: 9 placeholders a resolver antes de publicación + revisión por abogado.

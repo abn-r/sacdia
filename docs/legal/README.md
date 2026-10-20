@@ -14,9 +14,35 @@ Esta carpeta concentra los textos legales y de privacidad usados para la publica
 
 La versión vigente de cada documento vive en el código, no en esta carpeta: `sacdia-backend/src/legal/legal-documents.constants.ts` (`CURRENT_LEGAL_DOCUMENTS`, con la versión y la URL pública de `terms` y `privacy`). Ese archivo es la fuente de verdad para el registro y para la pantalla de aceptación de la app.
 
-- La versión del código debe coincidir con el `version` del frontmatter de cada documento (hoy `1.0.0-store` en ambos).
+- La versión del código debe coincidir con el `version` del frontmatter de cada documento. **Hoy la constante del backend sigue en `1.0.0-store`** (la versión publicada) y el frontmatter de los documentos operativos ya dice `2.0.0-family` porque es un **borrador pendiente de revisión** (ver «Versión 2.0.0-family» abajo). Mientras el borrador no se apruebe, la constante no se sube.
 - Subir una versión obliga a TODOS los usuarios a volver a aceptar: quien no tenga una aceptación registrada para la versión vigente queda bloqueado en la pantalla de aceptación hasta aceptar (ver `legal_acceptances` en `docs/database/SCHEMA-REFERENCE.md` y la sección `legal` en `docs/api/ENDPOINTS-LIVE-REFERENCE.md`).
 - Publica primero el texto nuevo en el sitio web (`https://sacdia.com/terms` y `https://sacdia.com/privacy`) y solo después despliega el cambio de versión. Nunca al revés: los usuarios tendrían que aceptar un texto que todavía no pueden leer.
+
+## Versión 2.0.0-family (BORRADOR, perfiles familiares Fase 3a)
+
+> **BORRADOR — requiere revisión del usuario o de un abogado.** Pendiente de merge (PR por abrir: feat/family-profiles-phase3). <!-- TODO(orquestador): reemplazar por «PR #NNN de sacdia-backend» cuando exista el PR. -->
+
+Cambia el texto de menores: cuentas supervisadas de 13 a 17 años, modo pendiente de tutor con plazo de 90 días, facultades del tutor verificado, analítica anónima para menores y, como funciones que **aún no están activas** (Fases 3b y 3c), el dispositivo vinculado de menores de 13 años y el registro de menores por un director. También corrige la promesa de un segundo opt-in por correo (privacidad §6.2.c.1) que el producto no hace.
+
+| Archivo | Versión | Qué cambió |
+|---|---|---|
+| `terminos-y-condiciones.md` | `2.0.0-family` | §2, §3 (reescrita) y el párrafo de menores de §10 |
+| `aviso-de-privacidad.md` | `2.0.0-family` | §2.1, §2.4 (reescrita: 2.4.1 a 2.4.3), §2.8, §4 (PostHog), §6 y §7 |
+| `store-submission-privacy-checklist.md` | `2.0.0-family` | Datos de menores, analítica anónima, modo dispositivo, minimización a 90 días |
+| `terminos-y-condiciones.full-draft-2026-04-17.md` | `2.0.0-family-draft` | §0, §1.2, §1.4, §3.2, §8.1 |
+| `aviso-de-privacidad.full-draft-2026-04-17.md` | `2.0.0-family-draft` | §0, §6.1, §6.2 (con la corrección de 6.2.c.1), §6.3, §6.6, §11, §13 |
+
+Los borradores completos (`*.full-draft-*`) llevan el sufijo `-draft` porque no se publican en las tiendas; la constante del backend solo se compara con los documentos operativos.
+
+**Puerta de publicación (lista de verificación de release):**
+
+1. El usuario o un abogado aprueba el texto y se quita el aviso «BORRADOR» de cada sección.
+2. Se decide si las funciones aún inactivas (dispositivo vinculado y registro por director) se publican ya o se retiran del texto hasta su fase.
+3. Se publica el texto en `https://sacdia.com/terms` y `https://sacdia.com/privacy`.
+4. Solo entonces se despliega el commit de versión del backend (`2.0.0-family`; es el último commit de la sub-fase 3a y se puede revertir solo).
+5. **No promover a `main` mientras exista el aviso «BORRADOR» en estos archivos.**
+
+Verificación manual: la versión del frontmatter de `terminos-y-condiciones.md` y de `aviso-de-privacidad.md` es igual a `CURRENT_LEGAL_DOCUMENTS` el día de la publicación, y `rg "BORRADOR — requiere revisión" docs/legal` no devuelve nada.
 
 ## Posición pública de privacidad
 
