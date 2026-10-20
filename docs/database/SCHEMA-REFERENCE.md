@@ -2,7 +2,7 @@
 
 **Estado**: ACTIVE
 **Sincronizado contra**: `sacdia-backend/prisma/schema.prisma` en la rama `development` (commit `68123f6`)
-**Fecha de resincronizacion**: 2026-10-13 (última migración en `development`: `20261013110000_remove_retired_investiture_permissions`). Las secciones de abajo se resincronizaron por completo hasta el 2026-10-04; después solo se añadieron las de instructor de especialidad y carga por certificado (2026-10-13) y la de aceptación legal (`legal_acceptances`, 2026-10-15, migración `20261015120000_legal_acceptances`, pendiente de merge; las cifras de abajo no la incluyen) y la de perfiles familiares (2026-10-16, actualizada el 2026-10-19 con la Fase 2 completa; migración `20261016120000_family_profiles`, rama `feat/family-profiles`, Pendiente de merge (PR #530 de sacdia-backend)). El espejo `schema.prisma` sí es la copia completa e incluye ambas.
+**Fecha de resincronizacion**: 2026-10-13 (última migración en `development`: `20261013110000_remove_retired_investiture_permissions`). Las secciones de abajo se resincronizaron por completo hasta el 2026-10-04; después solo se añadieron las de instructor de especialidad y carga por certificado (2026-10-13) y la de aceptación legal (`legal_acceptances`, 2026-10-15, migración `20261015120000_legal_acceptances`, pendiente de merge; las cifras de abajo no la incluyen) y la de perfiles familiares (2026-10-16, actualizada el 2026-10-19 con la Fase 2 completa; migración `20261016120000_family_profiles`, rama `feat/family-profiles`, Pendiente de merge (PR #530 de sacdia-backend)). El espejo `schema.prisma` sí es la copia completa e incluye ambas. La sub-fase 3a de perfiles familiares (2026-10-19; migración `20261020120000_family_teen_login`, rama `feat/family-profiles-phase3`, Pendiente de merge (PR por abrir: feat/family-profiles-phase3)) <!-- TODO(orquestador): reemplazar por «PR #NNN de sacdia-backend» cuando exista el PR. --> añade `supervised_logins` y dos reemplazos de CHECK; ver «Cuentas supervisadas (Fase 3a)». Las cifras de abajo y el espejo `schema.prisma` **todavía no la incluyen** (se resincronizan cuando el backend se mezcle).
 
 Referencia humana concisa del schema Prisma vigente.
 
@@ -222,7 +222,7 @@ Quién responde por un dependiente. Una fila por tutor (o por custodia de un clu
 | `verification_method` | `varchar(32)` | sí | - | `director_paper_form`, `guardian_invite`, `legacy_import` o `test_placeholder` |
 | `verified_at` | `timestamptz(6)` | sí | - | |
 | `revoked_at` | `timestamptz(6)` | sí | - | |
-| `revoked_reason` | `varchar(32)` | sí | - | `guardian_left`, `removed_by_primary`, `guardian_account_closed`, `claimed`, `admin` o `released` |
+| `revoked_reason` | `varchar(32)` | sí | - | `guardian_left`, `removed_by_primary`, `guardian_account_closed`, `claimed`, `admin` o `released` (Fase 3a: también `removed_by_dependent`) |
 | `external_name` | `varchar(150)` | sí | - | Tutor sin cuenta (solo importación desde `legal_representatives`) |
 | `external_phone` | `varchar(20)` | sí | - | |
 | `is_test_data` | `boolean` | no | `false` | Filas de prueba: nunca cuentan como consentimiento ni dan acceso |
@@ -277,7 +277,7 @@ Códigos de vinculación de un solo uso. Solo se guarda el hash.
 | `link_code_id` | `uuid` | no | `gen_random_uuid()` | PK `guardianship_link_codes_pkey` |
 | `code_hash` | `char(64)` | no | - | HMAC-SHA256 hex del código normalizado. `UNIQUE` `guardianship_link_codes_code_hash_key` |
 | `dependent_user_id` | `uuid` | no | - | FK a `users.user_id` |
-| `purpose` | `varchar(24)` | no | - | CHECK: `second_guardian` o `director_claim` |
+| `purpose` | `varchar(24)` | no | - | CHECK: `second_guardian` o `director_claim` (Fase 3a: también `teen_guardian_link`; ver «Cuentas supervisadas (Fase 3a)») |
 | `issued_by_user_id` | `uuid` | no | - | FK a `users.user_id`: tutor o director que lo emitió |
 | `issued_for_club_section_id` | `integer` | sí | - | FK a `club_sections`: obligatorio solo en `director_claim` |
 | `expires_at` | `timestamptz(6)` | no | - | CHECK `expires_at > created_at`. 72 h en `second_guardian`, 7 días en `director_claim` |
@@ -303,6 +303,68 @@ Códigos de vinculación de un solo uso. Solo se guarda el hash.
   3. **Se conserva**: la fila `users` anonimizada, las filas de `guardianships` (quién lo tuvo a cargo, sin datos de contacto del tutor externo), `dependent_profiles` y las filas de progreso de clases y especialidades, sin ningún archivo.
 - **Migración**: `sacdia-backend/prisma/migrations/20261016120000_family_profiles/migration.sql`. Escrita a mano, 17 sentencias en una sola transacción: 4 `ALTER TABLE` (`users.email DROP NOT NULL` y las 3 columnas de `countries`), 4 `CREATE TABLE IF NOT EXISTS` y 9 índices (3 únicos parciales de `guardianships`, 1 único parcial de evidencias, 1 parcial de `dependent_profiles`, 1 de dependiente, 2 parciales más de `guardianships` y 1 parcial de códigos). Todas las FK usan la acción por defecto `NO ACTION`. Sin `DROP`, `DELETE`, `INSERT`, `UPDATE` ni `CONCURRENTLY`; el guard `src/guardianships/family-profiles.migration.spec.ts` lo comprueba y solo admite `ALTER TABLE users ALTER COLUMN email DROP NOT NULL`. Reversión manual por rama de Neon; no hay migración down.
 - **Particularidad de Prisma**: los índices únicos parciales y los parciales no caben en `@@index`/`@@unique`; `schema.prisma` los documenta en un comentario y la migración es la fuente. No ejecutar `prisma format`.
+
+## Cuentas supervisadas (Fase 3a)
+
+> [!NOTE]
+> Fase 3a de perfiles familiares (sacdia-backend, rama `feat/family-profiles-phase3`), Pendiente de merge (PR por abrir: feat/family-profiles-phase3). <!-- TODO(orquestador): reemplazar por «PR #NNN de sacdia-backend» cuando exista el PR. --> Describe el schema **diseñado**; se verifica contra `prisma/schema.prisma` y la migración al abrir el PR. Migración: `sacdia-backend/prisma/migrations/20261020120000_family_teen_login/migration.sql`, escrita a mano y aplicada a mano a la rama `development` de Neon con psql (flujo de migraciones de Neon; **nunca** `prisma migrate dev`, el shadow DB no sirve). `docs/database/schema.prisma` (espejo) se resincroniza al mezclar. Contrato de endpoints: `docs/api/ENDPOINTS-LIVE-REFERENCE.md`, «Cuentas supervisadas de 13 a 17 años (Fase 3a)».
+
+Un **adolescente con cuenta supervisada** es un usuario con fila `account`, con edad desde la edad mínima de cuenta del país y menor que su mayoría de edad. No hay columna «es adolescente»: la edad se calcula en cada petición con la política del país (`CountryAgePolicyService`, zona horaria del país). El modo pendiente de tutor también se **deriva** (no se guarda): la ausencia de una tutoría `verified`, de persona (no custodia) y real.
+
+### `supervised_logins`
+
+Una fila por adolescente con cuenta (o con acceso habilitado por un tutor). Es la fuente del nombre de usuario, del método de acceso, del reloj de 90 días y de los recordatorios.
+
+| Columna | Tipo | Nulo | Default | Notas |
+|---|---|---|---|---|
+| `user_id` | `uuid` | no | - | PK `supervised_logins_pkey` y FK a `users.user_id` |
+| `method` | `varchar(8)` | no | - | `email` o `handle` |
+| `login_handle` | `varchar(40)` | sí | - | Nombre de usuario generado por el servidor. Obligatorio si `method = 'handle'` y nulo si es `email` |
+| `origin` | `varchar(16)` | no | - | `self_registered` (el adolescente se registró) o `guardian_enabled` (lo habilitó un tutor) |
+| `enabled_by_guardianship_id` | `uuid` | sí | - | FK a `guardianships`: la tutoría con que se habilitó el acceso o con que se vinculó el primer tutor |
+| `enabled_by_user_id` | `uuid` | sí | - | FK a `users.user_id`: el tutor |
+| `enabled_at` | `timestamptz(6)` | sí | - | |
+| `password_set_by` | `varchar(8)` | no | - | `guardian` o `self` |
+| `pending_since` | `timestamptz(6)` | sí | - | Inicio del reloj de 90 días sin tutor. Null cuando hay un tutor de persona activo (aunque esté pendiente de verificación) |
+| `pending_reminder_level` | `smallint` | no | `0` | Recordatorios enviados: 0 ninguno, 1 a los 7 días, 2 a los 30, 3 a los 83 |
+| `disabled_at` | `timestamptz(6)` | sí | - | |
+| `disabled_by_user_id` | `uuid` | sí | - | FK a `users.user_id`: el tutor o el admin que lo deshabilitó. Null si lo hizo el sistema |
+| `disabled_reason` | `varchar(24)` | sí | - | `guardian`, `admin` o `unlinked_purged` |
+| `created_at` | `timestamptz(6)` | no | `now()` | |
+| `modified_at` | `timestamptz(6)` | no | `now()` | `@updatedAt` en Prisma |
+
+- **CHECK**: `supervised_logins_method_ck`, `supervised_logins_origin_ck` y `supervised_logins_password_set_by_ck` fijan los valores de arriba. `supervised_logins_handle_ck`: `(method = 'handle') = (login_handle IS NOT NULL)`. `supervised_logins_handle_format_ck`: `login_handle ~ '^[a-z0-9][a-z0-9-]{5,39}$'`. `supervised_logins_guardian_enabled_ck`: `origin = 'guardian_enabled'` exige `enabled_by_guardianship_id`, `enabled_by_user_id` y `enabled_at`. `supervised_logins_reminder_ck`: `pending_reminder_level` entre 0 y 3. `supervised_logins_disabled_ck`: `(disabled_at IS NULL) = (disabled_reason IS NULL)`. `supervised_logins_disabled_reason_ck`: solo `guardian`, `admin`, `unlinked_purged`.
+- **Índices** (solo en la migración; los parciales y de expresión no caben en `@@index`/`@@unique`): `uq_supervised_logins_handle` único sobre `(lower(login_handle)) WHERE login_handle IS NOT NULL` (el nombre de usuario es único sin distinguir mayúsculas) e `idx_supervised_logins_pending` sobre `(pending_since) WHERE pending_since IS NOT NULL AND disabled_at IS NULL` (lo recorre el cron `pending-teen-guardian`).
+- **FK**: todas con la acción por defecto `NO ACTION` (sin `ON DELETE`). Relaciones Prisma con nombre: `supervised_login_user` (1:1, inversa `users.supervised_login`), `supervised_login_enabler`, `supervised_login_disabler` y `supervised_login_guardianship`.
+- **Semántica de las filas**:
+  - Adolescente que se registra solo: `origin = self_registered`, `method = email`, `password_set_by = self`, `pending_since = now`.
+  - Al canjear el código del adolescente: se llenan `enabled_by_*` y `enabled_at`, `pending_since = NULL`, nivel 0 (el reloj se detiene aunque el vínculo siga pendiente).
+  - Acceso habilitado por un tutor: `origin = guardian_enabled`, `method = email` o `handle`, `password_set_by = guardian`.
+  - Sale el último tutor de un adolescente con cuenta: `pending_since = now`, nivel 0 (no se congela).
+  - A los 90 días sin tutor: `disabled_at = now`, `disabled_reason = unlinked_purged` y el cron congela el perfil.
+  - La mayoría de edad **no** se guarda: la edad se calcula por petición.
+- **Invariante** (prueba de consistencia): un titular de cuenta con fila en `dependent_profiles` tiene siempre una fila `supervised_logins`. Un adolescente con cuenta menor de edad **sin** fila se trata como pendiente (falla cerrada); el script `scripts/family-profiles/backfill-supervised-logins.ts` (solo desarrollo, simulacro por defecto, `--apply` para escribir) crea las filas `self_registered` de los titulares de 13 a 17 años existentes (con tutoría: `pending_since = NULL`; sin ella: `pending_since = now()`, de modo que el reloj de 90 días arranca al desplegar y no al registrarse).
+- **Particularidad de `dependent_profiles`**: para un adolescente con cuenta, la fila se crea **al canjear el código del adolescente** (`created_by_user_id` = el propio adolescente) o al congelarlo por el plazo de 90 días (`frozen_at = now`, `purge_after = now + 90 días`, igual que un dependiente). Un adolescente con cuenta no se congela cuando sale su último tutor: vuelve al modo pendiente.
+
+### `guardianship_link_codes.purpose` y `guardianships.revoked_reason`: dos reemplazos de CHECK
+
+La migración es aditiva salvo estos dos reemplazos, que **solo amplían** los valores (nunca los restringen, así que no dejan filas huérfanas). Cada uno es un par `DROP CONSTRAINT IF EXISTS` + `ADD CONSTRAINT` que el guard de la migración permite de forma explícita, solo para ese nombre.
+
+| Constraint | Antes | Ahora |
+|---|---|---|
+| `guardianship_link_codes_purpose_ck` | `second_guardian`, `director_claim` | `second_guardian`, `director_claim`, `teen_guardian_link` (18 caracteres, cabe en `varchar(24)`) |
+| `guardianships_revoked_reason_ck` | `guardian_left`, `removed_by_primary`, `guardian_account_closed`, `claimed`, `admin`, `released` | los anteriores y `removed_by_dependent` (el adolescente quita un vínculo pendiente que él inició) |
+
+- `guardianship_link_codes_section_ck` (`director_claim` si y solo si hay sección) **no cambia** y sigue siendo válido para el propósito nuevo (sin sección). El código `teen_guardian_link` lo emite el adolescente: `issued_by_user_id` = `dependent_user_id` = el adolescente; vigencia 72 h; un código nuevo revoca los abiertos del mismo (dependiente, propósito).
+- Una tutoría creada al canjear `teen_guardian_link` es no custodia, principal, `pending`, con `invited_by_guardianship_id` NULL y `sworn_declaration_at` lleno; nunca se verifica sola.
+
+### Migración 20261020120000_family_teen_login
+
+- **7 sentencias**: 1 `CREATE TABLE IF NOT EXISTS supervised_logins`, 2 `CREATE INDEX IF NOT EXISTS` (los dos de arriba) y 2 pares `DROP CONSTRAINT IF EXISTS` + `ADD CONSTRAINT` (los dos reemplazos). Sin DML, sin `DROP` de objetos de datos, sin `RENAME`, `TRUNCATE`, `CONCURRENTLY`, `BEGIN`/`COMMIT` ni `ON DELETE`/`ON UPDATE`. La tabla `sessions` **no se toca** (la sesión de un adolescente es una sesión normal).
+- **Guard**: `src/guardianships/family-profiles-phase3.migration.spec.ts` (precedente `family-profiles.migration.spec.ts`): quita comentarios, comprueba la lista permitida (el número de sentencias coincide con el real), aplica la lista de prohibiciones de la Fase 2, verifica que los dos CHECK nuevos sean superconjuntos de los anteriores, incluye casos negativos (`DROP TABLE guardianships`, `UPDATE users`, `INSERT`, `TRUNCATE`, `BEGIN`, un `purpose` sin `director_claim`, `DROP` de `guardianship_link_codes_section_ck`), comprueba el modelo en el DMMF y los nombres de índice, y que aplicarla dos veces sea idempotente (por patrón).
+- **Aplicación**: a mano con psql a la rama `development` de Neon, dos veces para probar la idempotencia, y luego fila en `_prisma_migrations`. Nunca a producción desde este flujo (producción se actualiza al promover). Reversión manual por rama de Neon; no hay migración down. El rollback preferido es apagar la bandera `FAMILY_TEEN_LOGIN_ENABLED` (ver `docs/api/ENDPOINTS-LIVE-REFERENCE.md`); revertir el PR deja la tabla sin uso.
+- **Sin variable de entorno nueva de datos**: las tres banderas (`FAMILY_TEEN_LOGIN_ENABLED`, `FAMILY_LINKED_DEVICE_ENABLED`, `FAMILY_DIRECTOR_CREATE_MINOR_ENABLED`, por defecto `false`) están en `config/env.validation.ts` y `.env.example`.
+- **Purga de un adolescente con cuenta** (cron `dependent-profiles-purge`, mismo pipeline que un dependiente congelado): además de lo de «Perfiles familiares», borra la credencial y las filas OAuth de `accounts`, las filas `verifications`, las sesiones y los tokens FCM, deja en `NULL` el correo y los datos personales y conserva la fila `users` anonimizada. El correo queda libre para reutilizarse.
 
 ## Modelos añadidos a esta referencia (resincronización 2026-10-04)
 
