@@ -115,7 +115,7 @@ Cuatro migraciones aditivas del backend, mergeadas el 2026-10-12 y 2026-10-13. D
 ### 0.6 Checklist de promoción: perfiles familiares (Fase 2 y Fase 3)
 
 > [!WARNING]
-> Estado: **BORRADOR de proceso**, redactado antes de que la Fase 3 se mergee. Se actualiza con los nombres reales cuando existan las migraciones de 3c. El texto legal 2.0.0-family es un **borrador pendiente de revisión** (`docs/legal/README.md`). Rama de trabajo del backend: `feat/family-profiles-phase3`, Pendiente de merge (PR por abrir: feat/family-profiles-phase3). <!-- TODO(orquestador): reemplazar por «PR #NNN de sacdia-backend» cuando exista el PR. -->
+> Estado: **BORRADOR de proceso**, redactado antes de que la Fase 3 se mergee. Las cuatro migraciones de la Fase 3 ya existen con su nombre real y están aplicadas en Neon `development` (2026-10-20); falta promoverlas a `preproduction` y `main`. El texto legal 2.0.0-family es un **borrador pendiente de revisión** (`docs/legal/README.md`). Rama de trabajo del backend: `feat/family-profiles-phase3`, Pendiente de merge (PR por abrir: feat/family-profiles-phase3). <!-- TODO(orquestador): reemplazar por «PR #NNN de sacdia-backend» cuando exista el PR. -->
 
 **Regla de producción.** `production` (Neon) y `main` se alcanzan **solo** por la promoción `development` → `preproduction` → `main`, y **`prisma migrate deploy` es quien aplica las migraciones** en cada deploy. Nada de `psql` a mano sobre producción (esto tiene prioridad, para estas fases, sobre el procedimiento manual del §3, punto 3). El `psql` a mano queda para la rama `development` de Neon con aprobación explícita (QA), siguiendo el flujo de migraciones de Neon. Hoy solo `development` está en línea (§0): un merge a esa rama ya aplica las migraciones a datos reales, así que esta lista también aplica antes de ese merge.
 
@@ -136,8 +136,8 @@ Cuatro migraciones aditivas del backend, mergeadas el 2026-10-12 y 2026-10-13. D
 |---|---|---|---|
 | 1 | `20261020120000_family_teen_login` | 3a | `supervised_logins` y dos reemplazos de CHECK (`guardianship_link_codes` y `guardianships`). Sin DML |
 | 2 | `20261021120000_family_linked_devices` | 3b | `linked_devices`, `device_pairing_tokens` y ampliación de un CHECK de `supervised_logins`. Sin DML |
-| 3 | `20261022120000_family_director_minors` | 3c (pendiente de confirmar nombre) | `dependent_profiles.teen_login_nudged_at` (una sentencia, aditiva) |
-| 4 | `20261022130000_seed_family_permissions` | 3c (pendiente de confirmar nombre) | Solo DML: permisos y asignaciones por rol (ver abajo) |
+| 3 | `20261022120000_family_director_minors` | 3c | `dependent_profiles.teen_login_nudged_at` (una sentencia, aditiva) |
+| 4 | `20261022130000_seed_family_permissions` | 3c | Solo DML: permisos y asignaciones por rol (ver abajo) |
 
 Antes de promover cada rama: `prisma migrate status` contra la base del entorno debe mostrar como únicas pendientes las de la lista que correspondan, y en el log del build debe aparecer `All migrations have been successfully applied`. Las migraciones son compatibles con el código anterior (aditivas; los CHECK solo se amplían), así que un deploy que falla después de migrar no rompe la versión previa. No hay migración *down*: la reversión de esquema es manual y solo antes de que existan datos reales.
 
@@ -146,9 +146,11 @@ Antes de promover cada rama: `prisma migrate status` contra la base del entorno 
 | Permiso | Roles |
 |---|---|
 | `dependents:create` | Director y subdirector de club |
-| `consent:verify` | Director, subdirector, secretario y secretario-tesorero de club; coordinador, coordinador de zona, coordinador general y asistente LF (globales); admin y super-admin por comodín |
+| `consent:verify` | Director, subdirector, secretario y secretario-tesorero de club |
 
-Es idempotente (`ON CONFLICT`). Verificar tras aplicarla: un director tiene `dependents:create`; un coordinador y un miembro no. Pendiente de validar en 3c: que un coordinador global con `consent:verify` solo resuelva recursos dentro de su territorio; si no, se restringe `consent:verify` a secretaría/dirección de club y admin.
+La migración da además **ambos** permisos a `admin`, `assistant-admin` y `super-admin` de forma explícita (una migración no puede apoyarse en los comodines de los seeds). **Los coordinadores (`coordinator`, `zone-coordinator`, `general-coordinator`) NO reciben `consent:verify`**: la validación de la tarea T3c-B11 falló, porque `PermissionsGuard` no resuelve su territorio sobre recursos de sección y los dejaría con 403 aun dentro de su zona (`docs/api/ENDPOINTS-LIVE-REFERENCE.md`, «Registro de menores por un director y acceso familiar en el panel (Fase 3c)»). `assistant-lf` ya verifica por `club_members:approve`.
+
+Es idempotente (`ON CONFLICT`). Verificar tras aplicarla: un director tiene `dependents:create`; un coordinador y un miembro no. En Neon `development` (2026-10-20) quedaron **10** asignaciones y no 12, porque esa rama no tiene el rol `assistant-admin`; en `preproduction` y `production` el número depende de los roles que existan allí, y la migración une solo roles activos que existan.
 
 **4. Banderas** (variables de Render; por defecto `false`; se habilitan **por entorno**, una a la vez, empezando por `development` y `preproduction`):
 
@@ -156,7 +158,7 @@ Es idempotente (`ON CONFLICT`). Verificar tras aplicarla: un director tiene `dep
 |---|---|
 | `FAMILY_TEEN_LOGIN_ENABLED` | Acceso supervisado de 13 a 17 años con usuario generado y las rutas del tutor para gestionarlo |
 | `FAMILY_LINKED_DEVICE_ENABLED` | Vinculación por QR y autenticación del teléfono de un menor de 13 años |
-| `FAMILY_DIRECTOR_CREATE_MINOR_ENABLED` | `POST /club-sections/:clubSectionId/dependents` (3c; el director registra un menor) |
+| `FAMILY_DIRECTOR_CREATE_MINOR_ENABLED` | `POST /club-sections/:clubSectionId/dependents` (3c; el director registra un menor). Solo gobierna el registro: verificar, reclamar y vencer lo ya creado no dependen de ella |
 
 - Se leen **al arrancar**: cambiar el valor exige reiniciar el servicio (en Render, guardar la variable redeploya).
 - **No tienen bandera**, y por eso llegan con el primer deploy aunque todas estén en `false`: la compuerta de consentimiento para todo menor de edad, el modo "pendiente de tutor", los avisos y el resumen del tutor, los crones (recordatorios y purga de adolescentes sin tutor, barrido de dispositivos, avisos de cumpleaños) y la versión legal. Las banderas **no** deshacen el punto 6.
@@ -167,7 +169,7 @@ Es idempotente (`ON CONFLICT`). Verificar tras aplicarla: un director tiene `dep
 **6. Impacto en producción que hay que comunicar a los directores de club** (decisión «opción A»):
 
 - Los miembros de **13 a 17 años que ya tienen una membresía activa** pasan a modo «pendiente de tutor» en cuanto se despliega el backend: pierden su **credencial QR** y su **contexto de club** en la app hasta que haya un tutor vinculado y verificado. La membresía no se borra; es la compuerta de consentimiento, que no depende de ninguna bandera.
-- El director (o una persona con `consent:verify`, ver arriba) puede **verificar el consentimiento sobre la asignación ya activa** sin crear una nueva: es una verificación sin aprobación. La ficha firmada la sube el tutor o el director; en los menores que crea un director (3c), la verifica **otra persona** distinta de quien lo creó, de quien subió la ficha y del tutor.
+- El director (o una persona con `consent:verify`, ver arriba; hoy los cuatro roles de club con ese permiso ya tienen `club_members:approve`) puede **verificar el consentimiento sobre la asignación ya activa** sin crear una nueva: es una verificación sin aprobación. La ficha firmada la sube el tutor o el director; en los menores que crea un director (3c), la verifica **otra persona** distinta de quien lo creó, de quien subió la ficha y del tutor.
 - Pedir antes del deploy el recuento de miembros de 13 a 17 años con rol activo, para saber a cuántos afecta y avisar con anticipación.
 - Los adolescentes que se registren solos reciben recordatorios a los 7, 30 y 83 días sin tutor; se congelan a los 90 y se purgan 90 días después. En cuentas que ya existen, el plazo empieza en la primera evaluación del cron tras el deploy: nadie se congela ese día.
 - Las apps anteriores a la Fase 3 no entienden el modo restringido: un adolescente con una versión vieja vería errores 403 en las pantallas de club. Publicar la app nueva antes de abrir el backend a los usuarios, o junto con él (deducido del comportamiento del servidor; no probado con una app antigua).
@@ -180,7 +182,7 @@ Es idempotente (`ON CONFLICT`). Verificar tras aplicarla: un director tiene `dep
 |---|---|
 | `FAMILY_TEEN_LOGIN_ENABLED` | El inicio de sesión con usuario generado responde el 401 uniforme; las sesiones ya abiertas de cuentas con usuario generado se cortan en la siguiente petición; las rutas del tutor para activar, desactivar, reactivar y cambiar la contraseña responden 404 `FAMILY_FEATURE_DISABLED`. Los adolescentes con correo no cambian. |
 | `FAMILY_LINKED_DEVICE_ENABLED` | La vinculación responde 404 (generar token) o 400 uniforme (canjear); todo teléfono ya vinculado recibe 401 `AUTH_DEVICE_REVOKED` en su siguiente petición, **sin** revocar filas ni borrar sesiones. Al volver a encender, los teléfonos que no hayan vencido ni sido revocados vuelven a funcionar |
-| `FAMILY_DIRECTOR_CREATE_MINOR_ENABLED` | (3c, pendiente de confirmar) La ruta de registro responde 404; los menores ya creados, sus solicitudes pendientes y su custodia siguen su curso (verificación, reclamo por el padre o vencimiento a los 30 días) |
+| `FAMILY_DIRECTOR_CREATE_MINOR_ENABLED` | La ruta de registro responde 404 `FAMILY_FEATURE_DISABLED` (después de los guards); los menores ya creados, sus solicitudes pendientes y su custodia siguen su curso (verificación, reclamo por el padre o vencimiento a los 30 días) |
 
 Lo que **no** se revierte con banderas: la compuerta de consentimiento, el modo pendiente y los crones. Para quitarlos hace falta revertir el código (el commit legal puede revertirse aparte). Si se revierte el backend a una versión sin 3b, un token de dispositivo (audiencia `sacdia:device`) falla cerrado con 401 y las tablas nuevas quedan sin uso.
 
