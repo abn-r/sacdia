@@ -18,41 +18,67 @@ Varios jobs están gobernados por `system_config` o feature flags (ver «Feature
 
 - **Módulo NestJS**: `ScheduleModule.forRoot()` registrado en `sacdia-backend/src/app.module.ts:75`.
 - **Timezone**: UTC explícito (`timeZone: 'UTC'`) en 17 de los 20 jobs. Excepciones: `monthly-reports-reminders` usa `{ timeZone: 'America/Mexico_City' }`; `cron-alert-check` y `fcm-tokens-stale-cleanup` no pasan `timeZone` y corren en la zona del proceso del servidor.
-- **Locks distribuidos**: 11 jobs toman un lock en Redis (`DistributedLockService.tryAcquire`) para evitar ejecución concurrente entre múltiples instancias (ver cada job para clave y TTL). Los demás (`rankings-recalculate`, `finance-period-closing`, `data-export-cleanup`, `member-of-month-auto-evaluate`, `cleanup-expired-records`, `fcm-tokens-cleanup`, `fcm-tokens-stale-cleanup`, `cron-alert-check`, `investiture-achievement-intent`) no tienen lock a nivel del `@Cron` y dependen de la idempotencia del trabajo o de un lock interno (rankings: lock por año dentro del recálculo).
+- **Locks distribuidos**: 11 jobs toman un lock en Redis (`DistributedLockService.tryAcquire`) para evitar ejecución concurrente entre múltiples instancias (ver cada job para clave y TTL). Siete jobs (4, 5, 9, 10, 12, 16 y 17) toman el candado de corrida compartido `cron-run:<job>` (sección «Candado de corrida compartido»). `rankings-recalculate` y `finance-period-closing` no tienen candado a nivel del `@Cron`: el primero usa un lock por año dentro del recálculo y el segundo depende de su idempotencia y de la cola BullMQ.
 - **Logging**: estructurado vía `Logger` de NestJS; fallos por entidad se loguean y continúan con el siguiente elemento del batch.
 - **Los `@Cron` corren dentro del proceso de la API.** `ScheduleModule` vive en el mismo proceso NestJS: si el servicio está dormido, **ningún cron corre**. El servicio `development` ("API Sacdia", plan Free de Render) se suspende tras unos 15 minutos sin tráfico y la primera petición paga un arranque en frío (en la observación del 2026-10-21, unos 24 s); todas las entradas de `cron_run_log` se detuvieron desde el 2026-10-20 20:30 UTC hasta que se despertó el servicio. Afecta a **todos** los jobs (purgas, recordatorios, vencimientos, barridos). Decisión del 2026-10-21: se deja así en desarrollo; **producción necesita un plan de pago siempre encendido** (ver `docs/deployment/DEPLOYMENT-GUIDE.md`, §0.6, punto 10). No confíes en la hora de un cron en `development`: consulta `cron_run_log` y, si necesitas que corra uno, usa «Ejecutar ahora» (ver «Observabilidad admin»). Alternativas descartadas por ahora, si algún día hiciera falta fiabilidad en desarrollo: un ping externo de keep-alive, o mover los crones a Render Cron Jobs o GitHub Actions que llamen a endpoints internos protegidos.
+
+### Candado de corrida compartido
+
+**Estado**: mergeado en `development` el 2026-10-21 (sacdia-backend PR #538).
+
+`CronRunLock.runExclusive(jobName, ttlMs, fn)` (`sacdia-backend/src/common/services/cron-run-lock.service.ts`) ejecuta `fn` solo si toma el candado del job. El candado es atómico y tiene dueño: se toma con `SET NX PX` en Redis y se libera con comparación de dueño (compare-and-delete), así que una corrida no borra el candado de otra. Sin Redis usa un respaldo en memoria, que solo coordina dentro del mismo proceso.
+
+- **Clave**: `cron-run:<job>`. La comparten la ejecución programada y la manual («Ejecutar ahora»).
+- **Jobs con candado propio** (`cron:<job>`, columna «Candado» del inventario) no cambian de clave.
+- **`rankings-recalculate` y `finance-period-closing`** no usan este candado.
+
+**Solape**: si la clave ya está tomada, la corrida termina como `skipped`.
+
+- Ejecución programada: en los jobs 4, 5, 9 y 10 escribe una fila `skipped` con `reason: run_lock_held` en `cron_run_log`. En los jobs 12, 16 y 17, que no registran corridas, solo deja un aviso (`warning`) en el log.
+- Ejecución manual: siempre escribe una fila `skipped`, también en los jobs 12, 16 y 17.
+
+| Job | Clave | TTL |
+|---|---|---|
+| 4 `data-export-cleanup` | `cron-run:data-export-cleanup` | 30 min |
+| 5 `member-of-month-auto-evaluate` | `cron-run:member-of-month-auto-evaluate` | 15 min |
+| 9 `cleanup-expired-records` | `cron-run:cleanup-expired-records` | 10 min |
+| 10 `fcm-tokens-cleanup` | `cron-run:fcm-tokens-cleanup` | 10 min |
+| 12 `investiture-achievement-intent` (y su reconciliación al arrancar) | `cron-run:investiture-achievement-intent` | 4 min |
+| 16 `cron-alert-check` | `cron-run:cron-alert-check` | 10 min |
+| 17 `fcm-tokens-stale-cleanup` | `cron-run:fcm-tokens-stale-cleanup` | 10 min |
 
 ### Inventario de jobs
 
 Los 20 jobs coinciden con la allowlist `CRON_JOB_DEFINITIONS` de `src/admin/cron-jobs/cron-job.registry.ts` (un spec escanea las fuentes y falla si un `@Cron` aparece o desaparece sin entrada). La columna «Job» muestra el nombre de `cron_run_log.job_name` (`jobName` del registro). «Notifica» marca los jobs que envían **avisos reales** (push, bandeja o correo) a personas.
 
-| # | Job (`job_name`) | Cron | Frecuencia efectiva | Módulo | Notifica |
-|---|------------------|------|---------------------|--------|----------|
-| 1 | Monthly reports auto-generate (`monthly-reports-auto-generate`) | `0 23 * * *` | diario 23:00 UTC | `monthly-reports` | No |
-| 2 | Monthly reports reminders (`monthly-reports-reminders`) | `0 9 * * *` | diario 09:00 America/Mexico_City, emite solo dias 27/1/4/5/6 | `monthly-reports` | Sí (push) |
-| 3 | Nightly rankings recalculation (`rankings-recalculate`) | `0 2 * * *` | diario 02:00 UTC | `annual-folders` | No |
-| 4 | Data export cleanup (`data-export-cleanup`) | `0 4 * * *` | diario 04:00 UTC | `data-export` | No |
-| 5 | Member of the month auto-evaluate (`member-of-month-auto-evaluate`) | `5 0 1 * *` | día 1 del mes, 00:05 UTC | `member-of-month` | Sí (push/bandeja a ganadores y directores) |
-| 6 | Finance period closing (`finance-period-closing`) | `0 0 1 * *` | día 1 del mes, 00:00 UTC | `finances` | No |
-| 7 | Activity reminders (`activities-reminder`) | `*/15 * * * *` | cada 15 minutos UTC | `activities` | Sí (push) |
-| 8 | Membership requests expiry (`membership-requests-expiry`) | `3 * * * *` | cada hora en el minuto :03 UTC | `membership-requests` | No |
-| 9 | Cleanup expired sessions/tokens (`cleanup-expired-records`) | `EVERY_6_HOURS` (`0 */6 * * *`) | cada 6 horas UTC | `common` | No |
-| 10 | Cleanup inactive FCM tokens >90d (`fcm-tokens-cleanup`) | `EVERY_DAY_AT_3AM` (`0 3 * * *`) | diario 03:00 UTC | `common` | No |
-| 11 | **Ecclesiastical year cut** (`ecclesiastical-year-cut`) | `5 6 * * *` | diario 06:05 UTC (~00:05 CST / ~23:05 CDT México) | `year-cut` | Sí, condicional (solo si omite un plan de directiva: aviso a `super-admin`, `admin` y la dirección del campo local) |
-| 12 | Investiture achievement intent (`investiture-achievement-intent`) | `*/5 * * * *` | cada 5 minutos UTC, y también al arrancar | `investiture-requests` | No |
-| 13 | Investiture authorization reminders (`investiture-authorization-reminders`) | `*/15 * * * *` | cada 15 minutos UTC; envía a las 10:00 locales de cada Campo | `investiture-requests` | Sí (correo) |
-| 14 | Annual reports auto-generate (`annual-reports-auto-generate`) | `0 2 1 1 *` | 1 de enero, 02:00 UTC | `annual-reports` | No |
-| 15 | Quarterly reports auto-generate (`quarterly-reports-auto-generate`) | `0 1 1 1,4,7,10 *` | día 1 de enero, abril, julio y octubre, 01:00 UTC | `quarterly-reports` | No |
-| 16 | Cron alert check (`cron-alert-check`) | `5,20,35,50 * * * *` | cada 15 minutos (minutos :05, :20, :35, :50), zona del proceso | `common` | Sí (correo + bandeja a super-admin) |
-| 17 | Stale FCM tokens cleanup (`fcm-tokens-stale-cleanup`) | `0 3 * * 0` | domingos 03:00, zona del proceso | `notifications` | No |
-| 18 | Dependent profiles purge (`dependent-profiles-purge`) | `20 4 * * *` | diario 04:20 UTC | `guardianships` | No |
-| 19 | Pending teen guardian (`pending-teen-guardian`) | `40 4 * * *` | diario 04:40 UTC | `guardianships` | Sí (push + bandeja al adolescente) |
-| 20 | Family age transitions (`family-age-transitions`) | `0 14 * * *` | diario 14:00 UTC | `guardianships` | Sí (push + bandeja a tutores) |
+| # | Job (`job_name`) | Cron | Frecuencia efectiva | Módulo | Notifica | Candado (TTL) |
+|---|------------------|------|---------------------|--------|----------|---------------|
+| 1 | Monthly reports auto-generate (`monthly-reports-auto-generate`) | `0 23 * * *` | diario 23:00 UTC | `monthly-reports` | No | `cron:` · 23 h |
+| 2 | Monthly reports reminders (`monthly-reports-reminders`) | `0 9 * * *` | diario 09:00 America/Mexico_City, emite solo dias 27/1/4/5/6 | `monthly-reports` | Sí (push) | `cron:` · 23 h |
+| 3 | Nightly rankings recalculation (`rankings-recalculate`) | `0 2 * * *` | diario 02:00 UTC | `annual-folders` | No | Por año, dentro del recálculo (10 min) |
+| 4 | Data export cleanup (`data-export-cleanup`) | `0 4 * * *` | diario 04:00 UTC | `data-export` | No | `cron-run:` · 30 min |
+| 5 | Member of the month auto-evaluate (`member-of-month-auto-evaluate`) | `5 0 1 * *` | día 1 del mes, 00:05 UTC | `member-of-month` | Sí (push/bandeja a ganadores y directores) | `cron-run:` · 15 min |
+| 6 | Finance period closing (`finance-period-closing`) | `0 0 1 * *` | día 1 del mes, 00:00 UTC | `finances` | No | Ninguno (verifica estado previo) |
+| 7 | Activity reminders (`activities-reminder`) | `*/15 * * * *` | cada 15 minutos UTC | `activities` | Sí (push) | `cron:` · 14 min |
+| 8 | Membership requests expiry (`membership-requests-expiry`) | `3 * * * *` | cada hora en el minuto :03 UTC | `membership-requests` | No | `cron:` · 55 min |
+| 9 | Cleanup expired sessions/tokens (`cleanup-expired-records`) | `EVERY_6_HOURS` (`0 */6 * * *`) | cada 6 horas UTC | `common` | No | `cron-run:` · 10 min |
+| 10 | Cleanup inactive FCM tokens >90d (`fcm-tokens-cleanup`) | `EVERY_DAY_AT_3AM` (`0 3 * * *`) | diario 03:00 UTC | `common` | No | `cron-run:` · 10 min |
+| 11 | **Ecclesiastical year cut** (`ecclesiastical-year-cut`) | `5 6 * * *` | diario 06:05 UTC (~00:05 CST / ~23:05 CDT México) | `year-cut` | Sí, condicional (solo si omite un plan de directiva: aviso a `super-admin`, `admin` y la dirección del campo local) | `cron:` · ~23 h + `pg_advisory_xact_lock` |
+| 12 | Investiture achievement intent (`investiture-achievement-intent`) | `*/5 * * * *` | cada 5 minutos UTC, y también al arrancar | `investiture-requests` | No | `cron-run:` · 4 min (solo aviso) |
+| 13 | Investiture authorization reminders (`investiture-authorization-reminders`) | `*/15 * * * *` | cada 15 minutos UTC; envía a las 10:00 locales de cada Campo | `investiture-requests` | Sí (correo) | `cron:` · 14 min |
+| 14 | Annual reports auto-generate (`annual-reports-auto-generate`) | `0 2 1 1 *` | 1 de enero, 02:00 UTC | `annual-reports` | No | `cron:` · 23 h |
+| 15 | Quarterly reports auto-generate (`quarterly-reports-auto-generate`) | `0 1 1 1,4,7,10 *` | día 1 de enero, abril, julio y octubre, 01:00 UTC | `quarterly-reports` | No | `cron:` · 23 h |
+| 16 | Cron alert check (`cron-alert-check`) | `5,20,35,50 * * * *` | cada 15 minutos (minutos :05, :20, :35, :50), zona del proceso | `common` | Sí (correo + bandeja a super-admin) | `cron-run:` · 10 min (solo aviso) |
+| 17 | Stale FCM tokens cleanup (`fcm-tokens-stale-cleanup`) | `0 3 * * 0` | domingos 03:00, zona del proceso | `notifications` | No | `cron-run:` · 10 min (solo aviso) |
+| 18 | Dependent profiles purge (`dependent-profiles-purge`) | `20 4 * * *` | diario 04:20 UTC | `guardianships` | No | `cron:` · 23 h |
+| 19 | Pending teen guardian (`pending-teen-guardian`) | `40 4 * * *` | diario 04:40 UTC | `guardianships` | Sí (push + bandeja al adolescente) | `cron:` · 23 h |
+| 20 | Family age transitions (`family-age-transitions`) | `0 14 * * *` | diario 14:00 UTC | `guardianships` | Sí (push + bandeja a tutores) | `cron:` · 23 h |
 
 Notas del inventario:
 
 - Los jobs 1, 3 y 6 delegan el trabajo a una cola BullMQ cuando hay Redis (5 intentos, backoff exponencial desde 1 min); sin Redis corren en línea y sin reintento. Los otros 17 corren en el propio `@Cron`.
 - `fcm-tokens-cleanup` era el nombre de `@Cron` de **dos** métodos: el job 10 (`CleanupService.cleanupInactiveFcmTokens`, inactivos >90 d, registra corrida) y el job 17 (`FcmTokensService.cleanupOldTokens`, `last_used` >90 d, no registra corrida). Con el nombre duplicado, solo uno de los dos se programaba. Corregido en la rama `feat/admin-run-cron-now` (sin hash todavía): el `@Cron` del job 17 pasa a llamarse `fcm-tokens-stale-cleanup`, igual que en el registro de crones.
+- La columna «Candado» indica el candado de cada job, con su TTL entre paréntesis: `cron:<job>` es su candado Redis propio y `cron-run:<job>` el candado de corrida compartido (ver «Candado de corrida compartido»).
 - No registran fila en `cron_run_log` tres jobs: `cron-alert-check` (16), `fcm-tokens-stale-cleanup` (17) e `investiture-achievement-intent` (12). Los otros 17 sí.
 
 ## Detalle por job
@@ -114,7 +140,7 @@ Notas del inventario:
 - **Archivo**: `sacdia-backend/src/data-export/data-export.service.ts`
 - **Método**: `cleanupExpiredExports()`
 - **Clase**: `DataExportService`
-- **Cron**: `0 4 * * *` UTC; sin lock a nivel del `@Cron`.
+- **Cron**: `0 4 * * *` UTC. **Candado**: `cron-run:data-export-cleanup` (TTL 30 min).
 - **Propósito**: Marca exportes vencidos como `expired` y hace hard-delete de registros expirados + 6 meses. Limpia archivos correspondientes en Cloudflare R2.
 - **Entidades mutadas**: `data_export_requests` (status, deleted_at); objetos en R2.
 - **Side-effects**: R2 object deletion (fire-and-forget); logs estructurados JSON de métricas.
@@ -125,10 +151,12 @@ Notas del inventario:
 - **Archivo**: `sacdia-backend/src/member-of-month/member-of-month-cron.service.ts`
 - **Método**: `handleAutoEvaluate()`
 - **Clase**: `MemberOfMonthCronService`
+- **Candado**: `cron-run:member-of-month-auto-evaluate` (TTL 15 min).
 - **Propósito**: Evalúa el "miembro del mes" del mes anterior para cada sección activa. Procesa en lotes de 10 con timeout de 5 minutos. El offset `5 0 1 * *` (00:05) evita race conditions contra jobs de midnight.
 - **Entidades mutadas**: `member_of_month` y agregados de scoring (vía `memberOfMonthService.runEvaluation`).
-- **Side-effects**: logs por sección (éxito/fallo); **notifica**: por cada sección evaluada, `MemberOfMonthService` avisa a cada ganador (fuente `units:member_of_month`) y a los directores, subdirectores y `directora` de la sección (fuente `units:member_of_month_director`), solo si son destinatarios de datos de club alcanzables; es no bloqueante (ver `docs/features/member-of-month.md`). Sin lock a nivel del `@Cron`.
+- **Side-effects**: logs por sección (éxito/fallo); **notifica**: por cada sección evaluada, `MemberOfMonthService` avisa a cada ganador (fuente `units:member_of_month`) y a los directores, subdirectores y `directora` de la sección (fuente `units:member_of_month_director`), solo si son destinatarios de datos de club alcanzables; es no bloqueante (ver `docs/features/member-of-month.md`).
 - **Condiciones skip**: no-op si no hay secciones activas; timeout de 5 min por lote (continúa en siguiente ejecución mensual).
+- **Re-ejecución del mes**: los ganadores ya notificados ese mes conservan `notified: true` y no se les notifica de nuevo; tampoco a los directores si ya se notificó a todos. Los eventos de logro se vuelven a emitir (su idempotencia no está verificada).
 
 ### 6. Finance period closing
 
@@ -172,7 +200,7 @@ Notas del inventario:
 - **Archivo**: `sacdia-backend/src/common/services/cleanup.service.ts`
 - **Método**: `cleanupExpiredRecords()`
 - **Clase**: `CleanupService`
-- **Cron**: `CronExpression.EVERY_6_HOURS` UTC; sin lock.
+- **Cron**: `CronExpression.EVERY_6_HOURS` UTC. **Candado**: `cron-run:cleanup-expired-records` (TTL 10 min).
 - **Propósito**: Elimina sesiones y tokens de verificación cuya `expiresAt < now`.
 - **Entidades mutadas**: `session`, `verification` (`deleteMany`).
 - **Side-effects**: logs de conteo eliminado. **Este job NO desactiva tokens FCM** — esa política vive en `notifications.processor.ts:822-843` durante el envío (ver `docs/canon/runtime-communications.md` §8).
@@ -183,7 +211,7 @@ Notas del inventario:
 - **Archivo**: `sacdia-backend/src/common/services/cleanup.service.ts`
 - **Método**: `cleanupInactiveFcmTokens()`
 - **Clase**: `CleanupService` (misma clase que el job 9)
-- **Cron**: `CronExpression.EVERY_DAY_AT_3AM` UTC; sin lock. No confundir con el job 17 (`fcm-tokens-stale-cleanup`), cuyo `@Cron` compartía el nombre `fcm-tokens-cleanup` hasta el renombrado de la rama `feat/admin-run-cron-now` (ver nota del inventario).
+- **Cron**: `CronExpression.EVERY_DAY_AT_3AM` UTC. **Candado**: `cron-run:fcm-tokens-cleanup` (TTL 10 min). No confundir con el job 17 (`fcm-tokens-stale-cleanup`), cuyo `@Cron` compartía el nombre `fcm-tokens-cleanup` hasta el renombrado de la rama `feat/admin-run-cron-now` (ver nota del inventario).
 - **Propósito**: Purga filas de `user_fcm_tokens` con `active = false` y `modified_at < now() - 90 días`. Complementa la desactivación automática por error permanente FCM (`notifications.processor.ts:822-843`) evitando crecimiento indefinido de la tabla.
 - **Entidades mutadas**: `user_fcm_tokens` (`deleteMany`).
 - **Side-effects**: logs de inicio (con `cutoff` ISO) + fin (con `count`); `logger.error` con stack trace en caso de fallo, sin throw.
@@ -219,7 +247,7 @@ Notas del inventario:
 - **Archivo**: `sacdia-backend/src/investiture-requests/investiture-achievement-intent.reconciler.ts`
 - **Método**: `reconcile()` y `onModuleInit()`
 - **Clase**: `InvestitureAchievementIntentReconciler`
-- **Cron**: `*/5 * * * *`, zona `UTC`. Sin lock Redis y **sin fila en `cron_run_log`** (solo loguea; los errores se capturan y no se propagan).
+- **Cron**: `*/5 * * * *`, zona `UTC`. **Candado**: `cron-run:investiture-achievement-intent` (TTL 4 min; la reconciliación al arrancar también va bajo este candado). **Sin fila en `cron_run_log`**: un solape solo deja aviso en el log. Los errores se capturan y no se propagan.
 - **Propósito**: entregar `class.completed` de una investidura ya confirmada si el insert o la cola fallaron. También corre al arrancar. No autoriza de nuevo y no envía correo.
 - **Condiciones**: solo filas `INVESTED` con `achievement_intent_key` cuyo evento no está `processed`. El año, la ventana y la asignación pueden estar cerrados.
 
@@ -263,7 +291,7 @@ Notas del inventario:
 - **Archivo**: `sacdia-backend/src/common/services/cron-alert.service.ts`
 - **Método**: `checkAndAlertFailures()`
 - **Clase**: `CronAlertService`
-- **Cron**: `5,20,35,50 * * * *`, **sin `timeZone`** (zona del proceso). Sin lock Redis y sin fila en `cron_run_log` (no se vigila a sí mismo).
+- **Cron**: `5,20,35,50 * * * *`, **sin `timeZone`** (zona del proceso). **Candado**: `cron-run:cron-alert-check` (TTL 10 min; un solape solo deja aviso en el log). Sin fila en `cron_run_log` (no se vigila a sí mismo).
 - **Propósito**: lee `cron_run_log` de los jobs con corridas en las últimas 24 h y dispara una alerta cuando se cumple alguna condición: `consecutive_failures` (3 o más fallos seguidos), `duration` (una corrida completada de la última hora tardó 5 min o más) o `failure_rate` (más del 50 % de fallos en 24 h). No hay umbrales por job (el mapa de overrides está vacío).
 - **Entidades mutadas**: `cron_alerts_log` (ancla de deduplicación: la misma pareja `(job_name, condition)` no vuelve a alertar durante 6 h mientras `resolved_at` sea `NULL`).
 - **Notifica**: sí, a todos los usuarios activos con rol global `super-admin`: correo (`EmailService.sendCronAlert`, locale `es`) y aviso en la bandeja/push (`NotificationsService.notifySafe`, fuente `system_alert:cron_failure`). Si no hay super-admin activos, solo loguea un warning.
@@ -276,7 +304,7 @@ Notas del inventario:
 - **Clase**: `FcmTokensService`
 - **Cron**: `0 3 * * 0`, **sin `timeZone`** (domingos 03:00, zona del proceso). Su `@Cron` se llamaba `fcm-tokens-cleanup`, igual que el del job 10 (con el nombre duplicado, solo uno de los dos se programaba); se renombra a `fcm-tokens-stale-cleanup` en la rama `feat/admin-run-cron-now` (sin hash todavía).
 - **Propósito**: `deleteMany` de `user_fcm_tokens` con `last_used` anterior a 90 días (activos o no). Complementa al job 10, que borra los inactivos por `modified_at`.
-- **Registro**: no usa `CronRunLogger` (sin fila en `cron_run_log`, sin lock); errores capturados y logueados sin throw. El registro de crones ya lo nombra `fcm-tokens-stale-cleanup`.
+- **Registro**: no usa `CronRunLogger` (sin fila en `cron_run_log`). **Candado**: `cron-run:fcm-tokens-stale-cleanup` (TTL 10 min; un solape solo deja aviso en el log). Errores capturados y logueados sin throw. El registro de crones ya lo nombra `fcm-tokens-stale-cleanup`.
 - **Notifica**: no.
 
 ### 18. Dependent profiles purge
@@ -320,7 +348,7 @@ Notas del inventario:
 ## Política común canonizada
 
 1. **Timezone**: los jobs operan en UTC, con tres excepciones: `monthly-reports-reminders` (`America/Mexico_City`), y `cron-alert-check` y `fcm-tokens-stale-cleanup` (sin `timeZone`, usan la zona del proceso). La conversión a hora local de lo que se muestra es responsabilidad del cliente; el job 13 convierte por Campo con `local_fields.timezone`.
-2. **Idempotencia**: cada job debe ser seguro de re-ejecutar. Los mecanismos son lock distribuido en Redis (jobs 1, 2, 7, 8, 11, 13, 14, 15, 18, 19, 20), lock por año dentro del recálculo (job 3), verificación de estado previo (jobs 4, 5, 6, 12, 16), `deleteMany` con condición temporal (jobs 9, 10, 17) y ledger `club_year_transitions` + lock de transacción por club (job 11).
+2. **Idempotencia**: cada job debe ser seguro de re-ejecutar. Los mecanismos son lock distribuido en Redis (jobs 1, 2, 7, 8, 11, 13, 14, 15, 18, 19, 20), lock por año dentro del recálculo (job 3), candado de corrida compartido `cron-run:<job>` (jobs 4, 5, 9, 10, 12, 16, 17), verificación de estado previo (jobs 4, 5, 6, 12, 16), `deleteMany` con condición temporal (jobs 9, 10, 17) y ledger `club_year_transitions` + lock de transacción por club (job 11).
 3. **Fire-and-forget**: fallos dentro de un job no deben propagarse fuera del job. Los errores se loguean con contexto suficiente para diagnóstico posterior. Los jobs 18, 19 y 20 marcan la corrida como `failed` si algún elemento falla, para que `cron_run_log` y `cron-alert-check` lo reporten, y reintentan en la siguiente corrida.
 4. **Batching**: jobs con alcance masivo (jobs 1, 5, 6, 18, 19, 20) procesan en lotes con timeout propio o tamaño fijo. El batch siguiente se recupera en la próxima ejecución programada.
 5. **Logging estructurado**: los jobs críticos (jobs 1, 2, 3, 4, 8) emiten logs con métricas contables (procesados, omitidos, fallidos). 17 de los 20 jobs persisten además cada corrida en `cron_run_log` (ver «Observabilidad admin»).
@@ -408,7 +436,7 @@ El admin tiene dos superficies complementarias de observabilidad: BullMQ (colas)
   - (sin corrida registrada: `cron-alert-check`, `fcm-tokens-stale-cleanup`, `investiture-achievement-intent`; solo existen como nombre del registro de crones)
 - Status valores: `running | completed | failed | skipped` (CHECK constraint en SQL).
 - Endpoint: `GET /api/v1/admin/analytics/cron-runs` — retorna `{ recent[], stats[] }`. `recent` es última ejecución por job vía `DISTINCT ON (job_name)`. `stats` agrega `avg_duration_ms_30d`, `failure_rate_7d`, `last_success`, `last_failure`, `total_runs_7d` por job.
-- Cada elemento de `recent[]` incluye `trigger` (`'manual' | 'scheduled'`) y `triggered_by` (`user_id` del super-admin de una ejecución manual, o `null`). Pendiente de merge (rama `feat/admin-run-cron-now`, ver «Ejecutar ahora»).
+- Cada elemento de `recent[]` incluye `trigger` (`'manual' | 'scheduled'`) y `triggered_by` (`user_id` del super-admin de una ejecución manual, o `null`). Mergeado en `development` el 2026-10-21 (PR #535 de sacdia-backend; rama `feat/admin-run-cron-now`, ver «Ejecutar ahora»).
 - Sin dependencia de Redis — siempre disponible.
 
 ### Página admin
@@ -421,10 +449,10 @@ El admin tiene dos superficies complementarias de observabilidad: BullMQ (colas)
 
 ### Ejecutar ahora (jobs bajo demanda)
 
-**Estado**: IMPLEMENTADO en las ramas `feat/admin-run-cron-now` de sacdia-backend (commits `2bacda55` y `bb57a925`) y sacdia-admin (commits `34d9e4e`, `ac40318`, `1c21151` y `5026a0a`), **pendiente de merge**. Contrato y errores completos en `docs/api/ENDPOINTS-LIVE-REFERENCE.md`, «Jobs programados bajo demanda».
+**Estado**: IMPLEMENTADO en las ramas `feat/admin-run-cron-now` de sacdia-backend (commits `2bacda55` y `bb57a925`) y sacdia-admin (commits `34d9e4e`, `ac40318`, `1c21151` y `5026a0a`), **mergeadas en `development` el 2026-10-21** (PR #535 de sacdia-backend y PR #247 de sacdia-admin). Contrato y errores completos en `docs/api/ENDPOINTS-LIVE-REFERENCE.md`, «Jobs programados bajo demanda».
 
 - **Para qué.** Con el servicio de `development` dormido los crones no corren (ver «Infraestructura»). Un super-admin puede ejecutar un job a mano; es la forma de correrlos en desarrollo.
-- **API** (solo `super-admin`, 10 por minuto): `GET /api/v1/admin/cron-jobs` (los 20 jobs de la allowlist con su cron de 5 campos, zona horaria y si son ejecutables) y `POST /api/v1/admin/cron-jobs/:jobName/run` (200; espera al job; 404 `CRON_JOB_NOT_FOUND` si no está en la lista). Ejecuta el mismo método que el scheduler, con el **mismo candado** y la **misma fila** de `cron_run_log`, marcada `metadata.trigger = 'manual'` y `metadata.triggered_by`. Añade un candado `cron-manual:<job>`: un job que ya corre responde `skipped`. Los jobs respaldados por BullMQ (`monthly-reports-auto-generate`, `rankings-recalculate`, `finance-period-closing`) devuelven `enqueued: true` cuando hay Redis y terminan en el worker. Audita `admin.cron_job.run`.
+- **API** (solo `super-admin`, 10 por minuto): `GET /api/v1/admin/cron-jobs` (los 20 jobs de la allowlist con su cron de 5 campos, zona horaria y si son ejecutables) y `POST /api/v1/admin/cron-jobs/:jobName/run` (200; espera al job; 404 `CRON_JOB_NOT_FOUND` si no está en la lista). Ejecuta el mismo método que el scheduler, con el **mismo candado** (`cron-run:<job>` en los jobs de «Candado de corrida compartido»; `cron:<job>` en los que tienen candado propio) y la **misma fila** de `cron_run_log`, marcada `metadata.trigger = 'manual'` y `metadata.triggered_by`. Si el job ya corre (por el scheduler u otra ejecución manual), responde `skipped` y deja una fila `skipped`. Los jobs respaldados por BullMQ (`monthly-reports-auto-generate`, `rankings-recalculate`, `finance-period-closing`) devuelven `enqueued: true` cuando hay Redis y terminan en el worker. Audita `admin.cron_job.run`.
 - **Allowlist.** Los 20 `@Cron` del código, uno por uno (`src/admin/cron-jobs/cron-job.registry.ts`); un spec escanea las fuentes y falla si aparece o desaparece un `@Cron` sin entrada, así que añadir un job obliga a decidir si se expone. El inventario de arriba lista los mismos 20 jobs que la allowlist (antes listaba 12). `fcm-tokens-stale-cleanup` es el `cleanupOldTokens` de `FcmTokensService` (job 17), que compartía nombre de scheduler con `cleanup.service.ts` hasta el renombrado de la rama, y no registra corrida.
 - **Panel**: en `/dashboard/system/jobs`, columna «Acciones» con «Ejecutar ahora» y un `AlertDialog` de confirmación, visible solo para un super-admin y en los 20 jobs del catálogo (todos son ejecutables, `runnable: true`). Muestra la insignia «Manual» y, si `enqueued` es `true`, el aviso «En cola». Si la petición se corta (408, 502 o 504) avisa que la ejecución sigue en el servidor y refresca el historial.
 - **Cuidado: no es una simulación.** Corre la lógica real sobre los datos reales de la base. Los jobs que notifican a personas pueden enviar avisos reales; son los 8 marcados «Sí» en la columna «Notifica» del inventario: `monthly-reports-reminders`, `member-of-month-auto-evaluate`, `activities-reminder`, `investiture-authorization-reminders`, `cron-alert-check`, `pending-teen-guardian`, `family-age-transitions` y, solo si omite un plan de directiva, `ecclesiastical-year-cut`. Los más sensibles son `activities-reminder` (push a las secciones con actividades próximas) y `cron-alert-check` (correo y aviso a los super-admin). Antes de ejecutar un job que notifica, confirma que los destinatarios sean de prueba (lista completa en el contrato).

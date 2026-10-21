@@ -91,7 +91,7 @@ Los specs `*.postgres.spec.ts` actuales:
 
 El spec del alcance de coordinadores llegó en la rama
 `test/coordinator-scope-postgres` de sacdia-backend (commits `0a04b54d` y
-`eec8e5aa`), pendiente de merge.
+`eec8e5aa`), mergeada en `development` (PR #536 de sacdia-backend, 2026-10-21).
 
 Para correr uno en local, con un Postgres 18 propio (usuario `postgres`, sin
 tocar ninguna base existente, porque el spec crea y borra su propio esquema):
