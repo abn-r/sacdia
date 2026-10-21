@@ -29,6 +29,10 @@ La unidad final de autoridad es `club_sections`.
 2. Una zona agrupa distritos del mismo campo local.
 3. Un distrito activo no debe pertenecer a más de una zona activa del mismo
    campo local.
+   Solo el territorio activo concede alcance: una asignación `ZONE` cubre un club
+   únicamente si la zona, el vínculo zona-distrito, el **distrito**, el club y la
+   sección están activos. Un distrito desactivado deja de dar cobertura `ZONE`
+   (`GENERAL` no cambia: es todo el campo local). Ver `docs/canon/runtime-coordination.md`.
 4. Un campo local no puede tener más de un coordinador general activo.
 5. Un coordinador de zona se asigna por zona + tipo/sección de club.
 6. El sistema debe soportar asignaciones directas por `club_section`.

@@ -7,7 +7,7 @@
 > La tabla refleja los decoradores HTTP efectivos en controllers NestJS; DTOs, ejemplos y errores finos viven en Swagger/runtime y docs de feature cuando aplique.
 
 **Estado**: ACTIVE
-**Actualizado**: 2026-10-21 (cola de consentimientos del coordinador; ver la nota «Seguimientos 2026-10-21»). Antes, 2026-10-20 (perfiles familiares, Fase 2 completa: sub-fases 2a, 2b y 2c, y las sub-fases 3a, 3b y 3c pendientes de merge; ver también aceptación legal 2026-10-15 y la nota de resincronización 2026-10-13)
+**Actualizado**: 2026-10-21 (cola de consentimientos del coordinador y cobertura de zona; ver la nota «Seguimientos 2026-10-21»). Antes, 2026-10-20 (perfiles familiares, Fase 2 completa: sub-fases 2a, 2b y 2c, y las sub-fases 3a, 3b y 3c pendientes de merge; ver también aceptación legal 2026-10-15 y la nota de resincronización 2026-10-13)
 **Total endpoints**: 866 decoradores HTTP en 108 archivos `*.controller.ts` de `development`. La matriz tiene además 20 filas **pendientes de merge (PR #448 de sacdia-backend)**: secciones `class-thresholds`, `investiture-windows`, `investiture-pastors`, `investiture-requests` y el `GET .../sections/:clubSectionId/score` de camporee-scoring.
 **Métodos (development)**: GET 353 · POST 279 · PATCH 125 · DELETE 96 · PUT 13
 **Auth detectada (development)**: Public 13 · JWT u Optional JWT 853
@@ -54,7 +54,7 @@
 > - **Resumen de la Fase 3 completa**: 17 endpoints nuevos (3a: 10, 3b: 4, 3c: 3). Detalle en «Registro de menores por un director y acceso familiar en el panel (Fase 3c)» (antes de «Resumen por dominio»).
 
 > [!NOTE]
-> **Seguimientos 2026-10-21** (todos **pendientes de merge**, sin cambios de esquema): (1) `GET /coordination/me/consent-pending`, la cola del coordinador (sacdia-backend `feat/coordinator-pending-consents`); ver «`GET /api/v1/coordination/me/consent-pending`» (dentro de «Registro de menores por un director y acceso familiar en el panel (Fase 3c)», tras «Revisor solo-verificación»). Los totales de la cabecera no incluyen la ruta nueva.
+> **Seguimientos 2026-10-21** (todos **pendientes de merge**, sin cambios de esquema): (1) `GET /coordination/me/consent-pending`, la cola del coordinador (sacdia-backend `feat/coordinator-pending-consents`); ver «`GET /api/v1/coordination/me/consent-pending`» (dentro de «Registro de menores por un director y acceso familiar en el panel (Fase 3c)», tras «Revisor solo-verificación»). (3) Cambio de comportamiento sin ruta nueva: la cobertura `ZONE` de un coordinador exige también que el **distrito** esté activo (sacdia-backend `test/coordinator-scope-postgres`, commit `eec8e5aa`); ver `docs/canon/runtime-coordination.md`. Los totales de la cabecera no incluyen la ruta nueva.
 
 ## Cómo leer esta referencia
 
@@ -629,7 +629,7 @@ Un revisor es **solo-verificación** cuando el llamante entró por la vía de co
 | `POST .../verify-consent` | `club_members:approve` **o** `consent:verify` | Fuera de su lista (adulto, solicitud no `pending`, sin tutoría principal, sin ficha vigente, ya verificado, solicitud `active`) responde 404 `MR_NOT_FOUND`, sin distinguir qué hay detrás. Los 403 de cuatro ojos siguen. `approve: true` → 403 `MR_APPROVE_PERMISSION_REQUIRED`. |
 | `POST .../approve` y `.../reject` | solo `club_members:approve` | Sin cambios: 403 para un coordinador. |
 
-Quien aprueba después necesita `club_members:approve`. Cobertura: pruebas unitarias de guard y servicios, y e2e `test/director-created-minor.e2e-spec.ts` (viaje A2: coordinador con asignación `SECTION` cubierta verifica con `approve: false`; coordinador de otra sección, con asignación vencida o miembro de la sección sin asignación reciben 403 `GUARD_CLUB_SCOPE_REQUIRED`; subir ficha 403 `GUARD_PERMISSION_DENIED`; `approve: true` 403 `MR_APPROVE_PERMISSION_REQUIRED`). El e2e no evalúa el filtro relacional de zona contra una base real; esa consulta se prueba por forma del `where`. Pendiente: QA en vivo con una cuenta de coordinador tras aplicar la migración.
+Quien aprueba después necesita `club_members:approve`. Cobertura: pruebas unitarias de guard y servicios, y e2e `test/director-created-minor.e2e-spec.ts` (viaje A2: coordinador con asignación `SECTION` cubierta verifica con `approve: false`; coordinador de otra sección, con asignación vencida o miembro de la sección sin asignación reciben 403 `GUARD_CLUB_SCOPE_REQUIRED`; subir ficha 403 `GUARD_PERMISSION_DENIED`; `approve: true` 403 `MR_APPROVE_PERMISSION_REQUIRED`). El e2e no evalúa el filtro relacional de zona contra una base real; el alcance se verifica con `src/common/authorization/coordinator-section-scope.postgres.spec.ts` (Postgres real, gated; ver `docs/api/TESTING-GUIDE.md`, «Specs contra Postgres real»). Pendiente: QA en vivo con una cuenta de coordinador tras aplicar la migración.
 
 ### `GET /api/v1/coordination/me/consent-pending`
 

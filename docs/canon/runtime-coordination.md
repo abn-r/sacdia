@@ -109,7 +109,7 @@ Reglas por variante:
 | Variante | Campos requeridos | Scope resultante |
 |---|---|---|
 | `GENERAL` | `local_field_id` | Todas las `club_sections` del campo local |
-| `ZONE` | `zone_id`, `club_type_id` | Secciones de ese tipo dentro de distritos de la zona |
+| `ZONE` | `zone_id`, `club_type_id` | Secciones de ese tipo dentro de los distritos **activos** de la zona (ver «Territorio activo») |
 | `SECTION` | `club_section_id` | Solo esa sección concreta |
 
 `local_field_id` se mantiene en la asignación como columna de scope/indexación,
@@ -145,6 +145,35 @@ El scope se calcula como la unión de:
 
 Los consumidores no deben reconstruir este alcance por su cuenta. Los módulos
 deben depender de un resolver común de scope.
+
+### Territorio activo
+
+Solo el territorio **activo** concede alcance. Una asignación vigente (activa y
+dentro de `start_date`/`end_date`, comparando contra el día UTC) cubre una
+sección según su variante:
+
+| Variante | Cubre la sección solo si |
+|---|---|
+| `GENERAL` | la sección está activa y su club está activo y pertenece al campo local de la asignación. **No mira distritos ni zonas**: es todo el campo local, también los clubes de un distrito desactivado |
+| `ZONE` | la zona está **activa**; el **distrito** del club está **activo** (`districts.active`) **y** vinculado de forma activa a la zona (`coordination_zone_districts.active`); el club está activo y es del campo local de la asignación; la sección está activa y es del `club_type_id` de la asignación |
+| `SECTION` | la sección está activa y su club está activo |
+
+Un distrito desactivado deja de dar cobertura `ZONE` aunque su vínculo con la
+zona siga activo (decisión del 2026-10-21: un distrito desactivado no debe
+conceder acceso a nadie, igual que una zona, un club o una sección inactivos).
+Reactivar el distrito restablece la cobertura. `GENERAL` no cambia.
+
+La comprobación puntual de una sección (`PermissionsGuard`) y la expansión de
+`GET /api/v1/coordination/me/scope` construyen el filtro zona-distrito con la
+misma función (`activeZoneDistrictWhere()` en
+`src/common/authorization/coordinator-section-scope.ts`), de modo que no pueden
+discrepar. Se verifican contra PostgreSQL real con
+`coordinator-section-scope.postgres.spec.ts` (ver `docs/api/TESTING-GUIDE.md`).
+
+Los consumidores que derivan de este alcance lo heredan, por ejemplo
+`GET /api/v1/coordination/me/consent-pending` (cola de fichas de consentimiento
+por verificar, ver `docs/api/ENDPOINTS-LIVE-REFERENCE.md`): una sección de un
+distrito inactivo no aparece en ella.
 
 La API pública para clientes autenticados es:
 
@@ -199,6 +228,8 @@ decisión explícita separada.
 - No se debe usar `union_id` como scope de coordinador.
 - No se debe confiar en query params manipulables para ampliar scope.
 - No puede existir más de un coordinador general activo por campo local.
+- Un distrito inactivo no concede cobertura `ZONE`; `GENERAL` cubre todo el campo
+  local sin mirar distritos.
 - Un distrito activo no debe pertenecer a más de una zona activa del mismo campo
   local.
 - La app móvil debe respetar multirol: si el usuario es director y coordinador,
