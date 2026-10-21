@@ -629,7 +629,7 @@ Un revisor es **solo-verificación** cuando el llamante entró por la vía de co
 | `POST .../verify-consent` | `club_members:approve` **o** `consent:verify` | Fuera de su lista (adulto, solicitud no `pending`, sin tutoría principal, sin ficha vigente, ya verificado, solicitud `active`) responde 404 `MR_NOT_FOUND`, sin distinguir qué hay detrás. Los 403 de cuatro ojos siguen. `approve: true` → 403 `MR_APPROVE_PERMISSION_REQUIRED`. |
 | `POST .../approve` y `.../reject` | solo `club_members:approve` | Sin cambios: 403 para un coordinador. |
 
-Quien aprueba después necesita `club_members:approve`. Cobertura: pruebas unitarias de guard y servicios, y e2e `test/director-created-minor.e2e-spec.ts` (viaje A2: coordinador con asignación `SECTION` cubierta verifica con `approve: false`; coordinador de otra sección, con asignación vencida o miembro de la sección sin asignación reciben 403 `GUARD_CLUB_SCOPE_REQUIRED`; subir ficha 403 `GUARD_PERMISSION_DENIED`; `approve: true` 403 `MR_APPROVE_PERMISSION_REQUIRED`). El e2e no evalúa el filtro relacional de zona contra una base real; el alcance se verifica con `src/common/authorization/coordinator-section-scope.postgres.spec.ts` (Postgres real, gated; ver `docs/api/TESTING-GUIDE.md`, «Specs contra Postgres real»). Pendiente: QA en vivo con una cuenta de coordinador tras aplicar la migración.
+Quien aprueba después necesita `club_members:approve`. Cobertura: pruebas unitarias de guard y servicios, y e2e `test/director-created-minor.e2e-spec.ts` (viaje A2: coordinador con asignación `SECTION` cubierta verifica con `approve: false`; coordinador de otra sección, con asignación vencida o miembro de la sección sin asignación reciben 403 `GUARD_CLUB_SCOPE_REQUIRED`; subir ficha 403 `GUARD_PERMISSION_DENIED`; `approve: true` 403 `MR_APPROVE_PERMISSION_REQUIRED`). El e2e no evalúa el filtro relacional de zona contra una base real; el alcance se verifica con `src/common/authorization/coordinator-section-scope.postgres.spec.ts` (Postgres real, gated; ver `docs/api/TESTING-GUIDE.md`, «Specs contra Postgres real»). QA en vivo (2026-10-21, rama temporal de Neon `qa-coord-20261021`): se ejercitó la verificación de un coordinador `ZONE` (`approve: false`: consentimiento `verified`, solicitud `pending`) y el 404 `MR_NOT_FOUND` al repetirla. Sigue sin verificarse en vivo la lista por sección, la lectura de la ficha, los rechazos (otra sección, asignación vencida, miembro sin asignación, subir ficha, aprobar) y los coordinadores `SECTION` y `GENERAL`.
 
 ### `GET /api/v1/coordination/me/consent-pending`
 
@@ -698,7 +698,7 @@ La **cola del coordinador**: una sola llamada devuelve todas las fichas de conse
 | 403 | `ACTING_FOR_SCOPE_DENIED` | Tutor actuando con `X-Acting-For` |
 | 403 | `PRINCIPAL_SCOPE_DENIED` | Adolescente supervisado o dispositivo vinculado |
 
-Costo: el número de consultas no crece con el de secciones (una lectura de candidatas, una de usuarios y tutorías, una de la página y el presentador por sección).
+Costo: el número de consultas no crece con el de secciones. Son una lectura de candidatas (solicitudes pendientes de todas las secciones cubiertas, solo ids), la consulta de trabajo de verificación para esos usuarios (lecturas de tutorías y de la política de edad), una lectura de la página y las cargas por lote del consentimiento de los usuarios de esa página.
 
 **Clientes**: la app («Fichas por verificar») pide páginas de 50 con «Cargar más», muestra el total y el resumen por sección desde `by_section`, y decide los estados de pantalla por `code` (403 `GUARD_CLUB_SCOPE_REQUIRED` → sin secciones; `GUARD_PERMISSION_DENIED`, `ACTING_FOR_SCOPE_DENIED` y `PRINCIPAL_SCOPE_DENIED` → denegado; otros → error con reintento). La insignia del hub sale de `limit=1` y el `total`. El panel muestra la vista «Todas mis secciones» por defecto para coordinadores en `/dashboard/requests/membership`, con páginas de 25; el resumen por sección cambia el selector a la lista de esa sección (no filtra en el cliente, porque la paginación por `offset` ocultaría fichas de otras páginas). Verificar usa `verify-consent` con la `club_section_id` del propio elemento.
 
@@ -1102,7 +1102,7 @@ Conteo de filas por sección de la matriz. Las filas marcadas como pendientes de
 #### Jobs programados bajo demanda («Ejecutar ahora»)
 
 > [!NOTE]
-> Rama `feat/admin-run-cron-now` de sacdia-backend (commits `2bacda55` y `bb57a925`) y de sacdia-admin (commits `34d9e4e` y `ac40318`), **pendientes de merge**. Verificado contra el código de las ramas (`src/admin/cron-jobs/*`, `src/common/services/cron-run-context.ts`, `cron-run-logger.service.ts`, `src/analytics/cron-runs.service.ts`). Sin cambios de esquema. Las filas no cuentan en los totales de la cabecera.
+> Rama `feat/admin-run-cron-now` de sacdia-backend (commits `2bacda55` y `bb57a925`) y de sacdia-admin (commits `34d9e4e`, `ac40318`, `1c21151` y `5026a0a`), **pendientes de merge**. Verificado contra el código de las ramas (`src/admin/cron-jobs/*`, `src/common/services/cron-run-context.ts`, `cron-run-logger.service.ts`, `src/analytics/cron-runs.service.ts`). Sin cambios de esquema. Las filas no cuentan en los totales de la cabecera.
 
 Un **super-admin** puede disparar un `@Cron` sin esperar a su hora. Hace falta porque el servicio `development` está en el plan Free de Render, que se suspende por inactividad y entonces **ningún cron en proceso corre** (ver `docs/deployment/DEPLOYMENT-GUIDE.md`, §0.1 y §0.6); en desarrollo este es el camino para ejecutarlos. Guards: `JwtAuthGuard` + `GlobalRolesGuard` con `@GlobalRoles('super-admin')` y `@SkipPermissions()`. Sin `@ActingScope`: un tutor actuando, un adolescente supervisado o un dispositivo no pasan.
 
@@ -1125,7 +1125,7 @@ Un **super-admin** puede disparar un `@Cron` sin esperar a su hora. Hace falta p
 - **Notificaciones reales.** Ejecutar un job en `development` corre la lógica de producción contra los datos reales de esa base: no hay modo de prueba. Los jobs que envían push, bandeja o correo a personas (por lectura del código; ver la lista abajo) pueden **notificar de verdad**. Los más sensibles: `activities-reminder` (push a la sección por cada actividad en ventana) y `cron-alert-check` (correo y aviso a los super-admin). Antes de ejecutar uno de esta lista, confirma que los destinatarios son de prueba.
 - **Jobs de larga duración y tiempo de espera HTTP.** La petición dura lo que dure el job. El middleware global responde **408** a los 30 s por defecto (`REQUEST_TIMEOUT_MS`), pero **no cancela** el trabajo: sigue en el servidor, conserva el candado hasta terminar, escribe su fila y la auditoría. Detrás de Render también puede cortar la conexión un proxy (502/504). El panel trata 408/502/504 como «la ejecución sigue en el servidor» y refresca el historial pasados unos segundos. Con un cliente propio, no reintentes por un 408: consulta el historial.
 - **Datos que se modifican.** Son los mismos efectos que el cron: `ecclesiastical-year-cut` termina cargos, `dependent-profiles-purge` borra datos de perfiles congelados vencidos, `finance-period-closing` cierra periodos, `data-export-cleanup` borra archivos. Ejecutarlos fuera de hora es válido, pero no es una simulación.
-- **Panel.** `/dashboard/system/jobs` muestra el botón «Ejecutar ahora» (con `AlertDialog` de confirmación) solo a un super-admin y solo en los **9 jobs de la tabla** (los que el panel conoce por nombre); los otros 11 se ejecutan por API. Muestra la insignia «Manual» en las filas manuales y avisa «En cola» cuando `enqueued` es `true`.
+- **Panel.** `/dashboard/system/jobs` muestra el botón «Ejecutar ahora» (con `AlertDialog` de confirmación) solo a un super-admin y en los **20 jobs del catálogo** (`GET /admin/cron-jobs`; el panel muestra y ejecuta todos). Muestra la insignia «Manual» en las filas manuales y avisa «En cola» cuando `enqueued` es `true`.
 
 Jobs de la allowlist y qué envían (lectura estática del código de la rama, siguiendo el job y su servicio directo; no se ejecutó ninguno y un envío más profundo en la cadena, por ejemplo desde un procesador de BullMQ, puede no estar en la lista):
 
@@ -1137,11 +1137,11 @@ Jobs de la allowlist y qué envían (lectura estática del código de la rama, s
 | `member-of-month-auto-evaluate` | Aviso al miembro elegido y a los directores |
 | `pending-teen-guardian` | Push y bandeja al adolescente (días 7, 30 y 83) |
 | `family-age-transitions` | Push y bandeja a los tutores verificados |
-| `investiture-authorization-reminders` | Correo y push de recordatorio de la autorización |
+| `investiture-authorization-reminders` | Correo de recordatorio de la autorización (condicionado por `INVESTITURE_EMAIL_ENABLED`). Además reintenta con `deliverPending()` los avisos de resultado pendientes de investidura, que salen por bandeja y push |
 | `ecclesiastical-year-cut` | Aviso a `super-admin`, `admin` y a la dirección del campo local solo si omite un plan de directiva |
 | Resto (`rankings-recalculate`, `annual-reports-auto-generate`, `cleanup-expired-records`, `fcm-tokens-cleanup`, `fcm-tokens-stale-cleanup`, `data-export-cleanup`, `finance-period-closing`, `dependent-profiles-purge`, `investiture-achievement-intent`, `membership-requests-expiry`, `monthly-reports-auto-generate`, `quarterly-reports-auto-generate`) | No envían avisos a personas |
 
-`fcm-tokens-stale-cleanup` es el `cleanupOldTokens` de `FcmTokensService`: comparte con `cleanup.service.ts` el nombre de scheduler `fcm-tokens-cleanup`, por eso se expone con otro nombre; no escribe fila en `cron_run_log`.
+`fcm-tokens-stale-cleanup` es el `cleanupOldTokens` de `FcmTokensService`; no escribe fila en `cron_run_log`. Su `@Cron` compartía el nombre `fcm-tokens-cleanup` con el de `cleanup.service.ts` y, con nombres duplicados, solo uno de los dos se programaba. Se corrigió renombrando el de `FcmTokensService` a `fcm-tokens-stale-cleanup` en la rama `feat/admin-run-cron-now` (sin hash todavía).
 
 ### admin-audit-logs
 
