@@ -7,7 +7,7 @@
 > La tabla refleja los decoradores HTTP efectivos en controllers NestJS; DTOs, ejemplos y errores finos viven en Swagger/runtime y docs de feature cuando aplique.
 
 **Estado**: ACTIVE
-**Actualizado**: 2026-10-20 (perfiles familiares, Fase 2 completa: sub-fases 2a, 2b y 2c, y las sub-fases 3a, 3b y 3c pendientes de merge; ver también aceptación legal 2026-10-15 y la nota de resincronización 2026-10-13)
+**Actualizado**: 2026-10-21 (cola de consentimientos del coordinador, jobs bajo demanda y cobertura de zona; ver la nota «Seguimientos 2026-10-21»). Antes, 2026-10-20 (perfiles familiares, Fase 2 completa: sub-fases 2a, 2b y 2c, y las sub-fases 3a, 3b y 3c pendientes de merge; ver también aceptación legal 2026-10-15 y la nota de resincronización 2026-10-13)
 **Total endpoints**: 866 decoradores HTTP en 108 archivos `*.controller.ts` de `development`. La matriz tiene además 20 filas **pendientes de merge (PR #448 de sacdia-backend)**: secciones `class-thresholds`, `investiture-windows`, `investiture-pastors`, `investiture-requests` y el `GET .../sections/:clubSectionId/score` de camporee-scoring.
 **Métodos (development)**: GET 353 · POST 279 · PATCH 125 · DELETE 96 · PUT 13
 **Auth detectada (development)**: Public 13 · JWT u Optional JWT 853
@@ -50,8 +50,11 @@
 >
 > - Nuevos (3): `POST /club-sections/:clubSectionId/dependents` (sección `guardianships`), `POST /admin/users/:userId/supervised-login/disable` y `POST /admin/users/:userId/linked-devices/:deviceId/revoke` (sección `admin-users`).
 > - Cambian de contrato: `POST .../membership-requests/:assignmentId/verify-consent` (permiso `club_members:approve` **o** `consent:verify`; `approve: true` exige `club_members:approve`), `GET .../membership-requests` (`consent.viewer_can_verify` y `consent.viewer_verify_block`), `GET /admin/users/:userId` (`data.family_access`), el cron de vencimiento de solicitudes (congela al menor en custodia) y los avisos de dispositivo por `majority` y `expired`.
-> - Permisos nuevos: `dependents:create` y `consent:verify` (migración de datos `20261022130000_seed_family_permissions`; los coordinadores reciben `consent:verify` aparte, con `20261023120000_grant_consent_verify_to_coordinators`, rama `feat/coordinator-consent-verify`, pendiente de aplicar); columna nueva `dependent_profiles.teen_login_nudged_at` (migración `20261022120000_family_director_minors`). 1 código de error nuevo (`MR_APPROVE_PERMISSION_REQUIRED`). Cron nuevo `family-age-transitions`.
+> - Permisos nuevos: `dependents:create` y `consent:verify` (migración de datos `20261022130000_seed_family_permissions`; los coordinadores reciben `consent:verify` aparte, con `20261023120000_grant_consent_verify_to_coordinators`, rama `feat/coordinator-consent-verify`, aplicada en `development`); columna nueva `dependent_profiles.teen_login_nudged_at` (migración `20261022120000_family_director_minors`). 1 código de error nuevo (`MR_APPROVE_PERMISSION_REQUIRED`). Cron nuevo `family-age-transitions`.
 > - **Resumen de la Fase 3 completa**: 17 endpoints nuevos (3a: 10, 3b: 4, 3c: 3). Detalle en «Registro de menores por un director y acceso familiar en el panel (Fase 3c)» (antes de «Resumen por dominio»).
+
+> [!NOTE]
+> **Seguimientos 2026-10-21** (todos **pendientes de merge**, sin cambios de esquema): (1) `GET /coordination/me/consent-pending`, la cola del coordinador (sacdia-backend `feat/coordinator-pending-consents`); ver «`GET /api/v1/coordination/me/consent-pending`» (dentro de «Registro de menores por un director y acceso familiar en el panel (Fase 3c)», tras «Revisor solo-verificación»). (2) `GET /admin/cron-jobs` y `POST /admin/cron-jobs/:jobName/run` («Ejecutar ahora», sacdia-backend `feat/admin-run-cron-now`), y los campos `trigger` y `triggered_by` en `recent[]` de `GET /admin/analytics/cron-runs`; ver «Jobs programados bajo demanda» en la sección `admin`. (3) Cambio de comportamiento sin ruta nueva: la cobertura `ZONE` de un coordinador exige también que el **distrito** esté activo (sacdia-backend `test/coordinator-scope-postgres`, commit `eec8e5aa`); ver `docs/canon/runtime-coordination.md`. Los totales de la cabecera no incluyen las 3 rutas nuevas.
 
 ## Cómo leer esta referencia
 
@@ -600,12 +603,12 @@ Los crea la migración `20261022130000_seed_family_permissions` (solo DML, `ON C
 | Permiso | Para qué | Roles que lo tienen |
 | --- | --- | --- |
 | `dependents:create` | Registrar un menor en una sección (`POST /club-sections/:clubSectionId/dependents`) | Rol de club `director` y `deputy-director`; globales `admin`, `assistant-admin` y `super-admin` |
-| `consent:verify` | Verificar el consentimiento de un menor **sin** poder aprobar la solicitud (`verify-consent` con `approve: false`) | Rol de club `director`, `deputy-director`, `secretary` y `secretary-treasurer`; globales `admin`, `assistant-admin`, `super-admin`, y (migración `20261023120000_grant_consent_verify_to_coordinators`, pendiente de aplicar) `coordinator`, `zone-coordinator` y `general-coordinator` |
+| `consent:verify` | Verificar el consentimiento de un menor **sin** poder aprobar la solicitud (`verify-consent` con `approve: false`) | Rol de club `director`, `deputy-director`, `secretary` y `secretary-treasurer`; globales `admin`, `assistant-admin`, `super-admin`, y (migración `20261023120000_grant_consent_verify_to_coordinators`, aplicada en `development`) `coordinator`, `zone-coordinator` y `general-coordinator` |
 
 La migración da las filas de admin de forma explícita porque una migración no puede apoyarse en los comodines de los seeds. En Neon `development` no existe el rol `assistant-admin`, así que ahí se insertaron **10** asignaciones y no 12 (la migración une solo roles activos que existen).
 
 > [!NOTE]
-> **Coordinadores: `consent:verify` por asignación (antes limitación B11, resuelta).** La migración `20261022130000` dejó fuera a los coordinadores porque `PermissionsGuard` no resolvía su territorio: `canManageClub` y `resolveActorTerritoryScope` no conocen a `coordinator`, `zone-coordinator` ni `general-coordinator` (403 `GUARD_CLUB_SCOPE_REQUIRED` incluso dentro de su zona), y ampliarlos habría dado a un coordinador poder de gestión de club en todas partes. La regla nueva (rama `feat/coordinator-consent-verify`, migración `20261023120000_grant_consent_verify_to_coordinators`, solo DML, **pendiente de aplicar** en todas las ramas de Neon) es **estrecha y por ruta**:
+> **Coordinadores: `consent:verify` por asignación (antes limitación B11, resuelta).** La migración `20261022130000` dejó fuera a los coordinadores porque `PermissionsGuard` no resolvía su territorio: `canManageClub` y `resolveActorTerritoryScope` no conocen a `coordinator`, `zone-coordinator` ni `general-coordinator` (403 `GUARD_CLUB_SCOPE_REQUIRED` incluso dentro de su zona), y ampliarlos habría dado a un coordinador poder de gestión de club en todas partes. La regla nueva (rama `feat/coordinator-consent-verify`, migración `20261023120000_grant_consent_verify_to_coordinators`, solo DML, **aplicada en `development`**, pendiente en `staging` y `production`) es **estrecha y por ruta**:
 >
 > - La migración da `consent:verify` a los roles globales `coordinator`, `zone-coordinator` y `general-coordinator` (`ON CONFLICT DO NOTHING`, solo roles y permiso activos). Los mismos datos viven en el bloque `-- BEGIN/END coordinator consent:verify` de `prisma/seeds/role-permissions.seed.sql`.
 > - Solo tres rutas lo honran, con `@AuthorizationResource({ coordinatorSections: true })`: `GET .../membership-requests`, `GET .../consent-evidence` y `POST .../verify-consent`. El `POST .../consent-evidence` (subir la ficha) es solo de quien aprueba. `approve` y `reject` no cambian.
@@ -626,7 +629,78 @@ Un revisor es **solo-verificación** cuando el llamante entró por la vía de co
 | `POST .../verify-consent` | `club_members:approve` **o** `consent:verify` | Fuera de su lista (adulto, solicitud no `pending`, sin tutoría principal, sin ficha vigente, ya verificado, solicitud `active`) responde 404 `MR_NOT_FOUND`, sin distinguir qué hay detrás. Los 403 de cuatro ojos siguen. `approve: true` → 403 `MR_APPROVE_PERMISSION_REQUIRED`. |
 | `POST .../approve` y `.../reject` | solo `club_members:approve` | Sin cambios: 403 para un coordinador. |
 
-Quien aprueba después necesita `club_members:approve`. Cobertura: pruebas unitarias de guard y servicios, y e2e `test/director-created-minor.e2e-spec.ts` (viaje A2: coordinador con asignación `SECTION` cubierta verifica con `approve: false`; coordinador de otra sección, con asignación vencida o miembro de la sección sin asignación reciben 403 `GUARD_CLUB_SCOPE_REQUIRED`; subir ficha 403 `GUARD_PERMISSION_DENIED`; `approve: true` 403 `MR_APPROVE_PERMISSION_REQUIRED`). El e2e no evalúa el filtro relacional de zona contra una base real; esa consulta se prueba por forma del `where`. Pendiente: QA en vivo con una cuenta de coordinador tras aplicar la migración.
+Quien aprueba después necesita `club_members:approve`. Cobertura: pruebas unitarias de guard y servicios, y e2e `test/director-created-minor.e2e-spec.ts` (viaje A2: coordinador con asignación `SECTION` cubierta verifica con `approve: false`; coordinador de otra sección, con asignación vencida o miembro de la sección sin asignación reciben 403 `GUARD_CLUB_SCOPE_REQUIRED`; subir ficha 403 `GUARD_PERMISSION_DENIED`; `approve: true` 403 `MR_APPROVE_PERMISSION_REQUIRED`). El e2e no evalúa el filtro relacional de zona contra una base real; el alcance se verifica con `src/common/authorization/coordinator-section-scope.postgres.spec.ts` (Postgres real, gated; ver `docs/api/TESTING-GUIDE.md`, «Specs contra Postgres real»). QA en vivo (2026-10-21, rama temporal de Neon `qa-coord-20261021`): se ejercitó la verificación de un coordinador `ZONE` (`approve: false`: consentimiento `verified`, solicitud `pending`) y el 404 `MR_NOT_FOUND` al repetirla. Sigue sin verificarse en vivo la lista por sección, la lectura de la ficha, los rechazos (otra sección, asignación vencida, miembro sin asignación, subir ficha, aprobar) y los coordinadores `SECTION` y `GENERAL`.
+
+### `GET /api/v1/coordination/me/consent-pending`
+
+> [!NOTE]
+> Rama `feat/coordinator-pending-consents` de sacdia-backend (commit `a8688f81`), **pendiente de merge**. Verificado contra el código de la rama (`src/coordination/coordination.controller.ts`, `coordinator-consent-queue.service.ts`, `dto/coordinator-consent-pending-query.dto.ts`, `membership-requests.service.ts` `listVerifyWorkAcrossSections`). La app (sacdia-app, commit `78ff697b`) y el panel (sacdia-admin, commit `07247d1`) ya lo consumen, cada uno en su rama `feat/coordinator-pending-consents`, también pendiente de merge. Las filas de esta ruta no cuentan en los totales de la cabecera.
+
+La **cola del coordinador**: una sola llamada devuelve todas las fichas de consentimiento que esperan verificación en **todas** las secciones que cubren sus `coordinator_assignments` vigentes. Sustituye al recorrido sección por sección que hacían la app y el panel con `GET .../membership-requests` (que sigue siendo la ruta para quien no es coordinador y para una sola sección).
+
+- **Qué lista**: lo mismo que la lista por sección muestra a un revisor solo-verificación (ver «Revisor solo-verificación»): solicitudes `pending` de menores con consentimiento `pending` **y** una ficha vigente subida. Se omiten adultos, consentimientos ya verificados y menores sin ficha. Las filas con `viewer_verify_block` se incluyen con el bloqueo. El predicado es el mismo (`consentHasVerifyWork`), no una copia.
+- **Cobertura**: la expansión de `GET /coordination/me/scope` (solo territorio activo; ver `docs/canon/runtime-coordination.md`). Una asignación vencida o con el territorio inactivo no aporta secciones.
+- **Autorización**: `@RequirePermissions('consent:verify')` con `@AuthorizationResource({ type: 'global' })`, es decir, el permiso se evalúa como **global**: un `consent:verify` que viene de un rol de club **no cuenta**. Además el servicio exige que el permiso provenga de un **rol de coordinador** (`coordinator`, `zone-coordinator` o `general-coordinator`) y que las asignaciones activas cubran al menos una sección. Quien tiene `consent:verify` por otra vía (director, secretario, admin) usa la lista por sección. Sin `@ActingScope`: un tutor actuando, un adolescente supervisado y un dispositivo vinculado quedan denegados por defecto.
+
+**Query** (`CoordinatorConsentPendingQueryDto`; el `ValidationPipe` global tiene `forbidNonWhitelisted`, así que cualquier otro parámetro es 400):
+
+| Parámetro | Requerido | Validación |
+| --- | --- | --- |
+| `limit` | No | Entero de 1 a 100. Por defecto 50 |
+| `offset` | No | Entero `>= 0`. Por defecto 0 |
+
+**Respuesta 200**:
+
+```json
+{
+  "status": "success",
+  "data": {
+    "items": [
+      {
+        "assignment_id": "3f0c8a52-6a58-4b1e-9d2a-0e5b7c1d9a11",
+        "user_id": "8d1f0b34-2c6e-4f0a-bb7e-5a3c9e2d4f10",
+        "club_section_id": 10,
+        "status": "pending",
+        "created_at": "2026-10-01T12:00:00.000Z",
+        "expires_at": "2026-10-09T12:00:00.000Z",
+        "effective_expires_at": "2026-10-31T12:00:00.000Z",
+        "consent_form_uploaded_at": "2026-10-03T09:30:00.000Z",
+        "club_name": "Club Orion",
+        "club_type_name": "Conquistadores",
+        "district_name": "Distrito Norte",
+        "users": { "user_id": "…", "name": "Mateo", "email": null, "paternal_last_name": "Pérez", "maternal_last_name": "López", "user_image": null },
+        "roles": { "role_id": "…", "role_name": "member" },
+        "consent": { "required": true, "dependent": true, "guardian_linked": false, "guardianship_id": "…", "status": "pending", "evidence_uploaded": true, "guardians": [], "viewer_can_verify": true, "viewer_verify_block": null }
+      }
+    ],
+    "total": 1,
+    "limit": 50,
+    "offset": 0,
+    "by_section": [
+      { "club_section_id": 10, "club_name": "Club Orion", "club_type_name": "Conquistadores", "district_name": "Distrito Norte", "pending_consent_count": 1 }
+    ]
+  }
+}
+```
+
+- **`items`**: cada elemento es el elemento de `GET /club-sections/:id/membership-requests` (mismo bloque `consent`, con `viewer_can_verify` y `viewer_verify_block`, y `effective_expires_at`) más `consent_form_uploaded_at`, `club_name`, `club_type_name` y `district_name`. Los tres nombres pueden ser `null` si la sección ya no figura en la expansión (carrera entre la lectura de la cola y la del alcance).
+- **`total`** y **`by_section`** cuentan la cola **completa**, no la página. `by_section` trae solo las secciones con al menos una ficha pendiente (`pending_consent_count >= 1`), ordenadas por `club_section_id`. `limit` y `offset` repiten los valores aplicados.
+- **Orden**: la ficha vigente más antigua primero (`guardianship_consent_evidences.uploaded_at` ascendente, es decir, la que más lleva esperando), luego `created_at` de la solicitud ascendente y, por último, `assignment_id`.
+- **Paginación por `offset`**: el total se calcula en memoria sobre los candidatos, así que no hay cursor. Una fila que otro revisor verifica entre dos páginas puede desplazar las siguientes; los clientes deben tratar la página como instantánea y refrescar tras verificar.
+
+**Errores**:
+
+| Estado | Código | Cuándo |
+| --- | --- | --- |
+| 400 | validación genérica | `limit` fuera de 1..100, `offset` negativo, valores no enteros o parámetros desconocidos |
+| 403 | `GUARD_PERMISSION_DENIED` | `consent:verify` no proviene de un rol de coordinador (un coordinador cuyo permiso sale solo de un rol de club, o un director, secretario o admin sin ese rol) |
+| 403 | `GUARD_CLUB_SCOPE_REQUIRED` | El coordinador no tiene asignaciones vigentes que cubran alguna sección activa (ninguna, vencidas o solo territorio inactivo) |
+| 403 | `ACTING_FOR_SCOPE_DENIED` | Tutor actuando con `X-Acting-For` |
+| 403 | `PRINCIPAL_SCOPE_DENIED` | Adolescente supervisado o dispositivo vinculado |
+
+Costo: el número de consultas no crece con el de secciones. Son una lectura de candidatas (solicitudes pendientes de todas las secciones cubiertas, solo ids), la consulta de trabajo de verificación para esos usuarios (lecturas de tutorías y de la política de edad), una lectura de la página y las cargas por lote del consentimiento de los usuarios de esa página.
+
+**Clientes**: la app («Fichas por verificar») pide páginas de 50 con «Cargar más», muestra el total y el resumen por sección desde `by_section`, y decide los estados de pantalla por `code` (403 `GUARD_CLUB_SCOPE_REQUIRED` → sin secciones; `GUARD_PERMISSION_DENIED`, `ACTING_FOR_SCOPE_DENIED` y `PRINCIPAL_SCOPE_DENIED` → denegado; otros → error con reintento). La insignia del hub sale de `limit=1` y el `total`. El panel muestra la vista «Todas mis secciones» por defecto para coordinadores en `/dashboard/requests/membership`, con páginas de 25; el resumen por sección cambia el selector a la lista de esa sección (no filtra en el cliente, porque la paginación por `offset` ocultaría fichas de otras páginas). Verificar usa `verify-consent` con la `club_section_id` del propio elemento.
 
 ### `POST /api/v1/club-sections/:clubSectionId/dependents`
 
@@ -1022,6 +1096,52 @@ Conteo de filas por sección de la matriz. Las filas marcadas como pendientes de
 | --- | --- | --- | --- | --- | --- | --- |
 | GET | `/api/v1/admin/cron-alerts` | JWT | Global: admin, super-admin | Paginated cron alert history | AdminCronAlertsService.getAlertHistory() | `src/admin/admin-cron-alerts.controller.ts` |
 | POST | `/api/v1/admin/cron-alerts/:id/resolve` | JWT | Global: admin, super-admin; Global: super-admin | Manually resolve a cron alert (super-admin only) | AdminCronAlertsService.resolveAlert() | `src/admin/admin-cron-alerts.controller.ts` |
+| GET | `/api/v1/admin/cron-jobs` | JWT | Global: super-admin | Listar los jobs programados que se pueden ejecutar bajo demanda (pendiente de merge, rama `feat/admin-run-cron-now`) | AdminCronJobsService.list() | `src/admin/cron-jobs/admin-cron-jobs.controller.ts` |
+| POST | `/api/v1/admin/cron-jobs/:jobName/run` | JWT | Global: super-admin (límite 10 por minuto) | Ejecutar ahora un job programado y esperar su resultado (pendiente de merge, rama `feat/admin-run-cron-now`) | AdminCronJobsService.run() | `src/admin/cron-jobs/admin-cron-jobs.controller.ts` |
+
+#### Jobs programados bajo demanda («Ejecutar ahora»)
+
+> [!NOTE]
+> Rama `feat/admin-run-cron-now` de sacdia-backend (commits `2bacda55` y `bb57a925`) y de sacdia-admin (commits `34d9e4e`, `ac40318`, `1c21151` y `5026a0a`), **pendientes de merge**. Verificado contra el código de las ramas (`src/admin/cron-jobs/*`, `src/common/services/cron-run-context.ts`, `cron-run-logger.service.ts`, `src/analytics/cron-runs.service.ts`). Sin cambios de esquema. Las filas no cuentan en los totales de la cabecera.
+
+Un **super-admin** puede disparar un `@Cron` sin esperar a su hora. Hace falta porque el servicio `development` está en el plan Free de Render, que se suspende por inactividad y entonces **ningún cron en proceso corre** (ver `docs/deployment/DEPLOYMENT-GUIDE.md`, §0.1 y §0.6); en desarrollo este es el camino para ejecutarlos. Guards: `JwtAuthGuard` + `GlobalRolesGuard` con `@GlobalRoles('super-admin')` y `@SkipPermissions()`. Sin `@ActingScope`: un tutor actuando, un adolescente supervisado o un dispositivo no pasan.
+
+**`GET /api/v1/admin/cron-jobs`** devuelve `{ status: 'success', data: { jobs: [...] } }`. Cada job: `job_name`, `schedule` (cron de **5 campos**, normalizado: sin segundos ni ceros a la izquierda; sale de los metadatos del propio `@Cron`, no se repite a mano), `time_zone` (`null` si el `@Cron` no declara zona horaria), `runnable` (`false` si el proveedor dueño no está cargado en esta app) y `description` (español).
+
+**`POST /api/v1/admin/cron-jobs/:jobName/run`** (200, sin cuerpo; `@Throttle` de 10 por minuto):
+
+- Ejecuta el **mismo método** que invoca el scheduler, con el **mismo candado distribuido** del job y la **misma fila** en `cron_run_log`, y **espera** a que termine. La fila queda marcada con `metadata.trigger = 'manual'` y `metadata.triggered_by = <user_id del super-admin>`.
+- **Allowlist** de 20 jobs (todos los `@Cron` del código; `cron-job.registry.spec.ts` falla si aparece o desaparece uno sin entrada, así que añadir un job es una decisión revisada). No hay invocación dinámica por nombre. Un nombre desconocido, fuera de la lista o cuyo proveedor no esté cargado responde 404 `CRON_JOB_NOT_FOUND`.
+- **Candado manual** adicional `cron-manual:<job>` (TTL de seguridad de 10 min, liberado siempre en `finally`): una segunda ejecución manual simultánea, o un job cuyo candado normal está tomado, responde `status: "skipped"` (y escribe una fila `skipped`, con `reason`). Evita doble ejecución en los jobs que no tienen candado propio.
+- **Auditoría**: cada llamada que llega al servicio registra `admin.cron_job.run` (`entity_type: cron_job`, `entity_id: <job>`, `result: succeeded | failed`, y en `changes` el `job_name`, `status`, `run_id`, `items_processed`, `duration_ms` y `error_message`). Un 404 no audita.
+- **Respuesta** `{ status: 'success', data }` con `job_name`, `run_id` (`null` si el job no escribe fila o solo encoló), `status` (`completed | failed | skipped`), `items_processed`, `duration_ms`, `error_message` y `enqueued`.
+- **`enqueued: true`**: los tres jobs respaldados por BullMQ (`monthly-reports-auto-generate`, `rankings-recalculate`, `finance-period-closing`) solo **encolan** el trabajo cuando hay Redis; el worker lo termina después y escribe su propia fila (marcada manual por el `manualTriggeredBy` del payload). La respuesta llega antes de que termine: `run_id` es `null` y el resultado se ve en el historial. Sin Redis, el job corre en línea como siempre y se espera.
+- Los handlers tragan sus propios errores, así que el resultado se lee del `CronRunLogger` (mediante `AsyncLocalStorage`). Si un handler lanza, el resultado es `failed` con el mensaje.
+
+**`GET /api/v1/admin/analytics/cron-runs`**: cada elemento de `recent[]` suma `trigger` (`'manual' | 'scheduled'`; las filas anteriores y las programadas son `scheduled`) y `triggered_by` (`user_id` del super-admin o `null`). `stats[]` no cambia y `recent` sigue siendo la **última** fila por job: una ejecución manual reemplaza a la programada en esa vista. El historial (`/cron-runs/history`) ya devolvía `metadata`, donde viaja el marcador.
+
+**Notas operativas**
+
+- **Notificaciones reales.** Ejecutar un job en `development` corre la lógica de producción contra los datos reales de esa base: no hay modo de prueba. Los jobs que envían push, bandeja o correo a personas (por lectura del código; ver la lista abajo) pueden **notificar de verdad**. Los más sensibles: `activities-reminder` (push a la sección por cada actividad en ventana) y `cron-alert-check` (correo y aviso a los super-admin). Antes de ejecutar uno de esta lista, confirma que los destinatarios son de prueba.
+- **Jobs de larga duración y tiempo de espera HTTP.** La petición dura lo que dure el job. El middleware global responde **408** a los 30 s por defecto (`REQUEST_TIMEOUT_MS`), pero **no cancela** el trabajo: sigue en el servidor, conserva el candado hasta terminar, escribe su fila y la auditoría. Detrás de Render también puede cortar la conexión un proxy (502/504). El panel trata 408/502/504 como «la ejecución sigue en el servidor» y refresca el historial pasados unos segundos. Con un cliente propio, no reintentes por un 408: consulta el historial.
+- **Datos que se modifican.** Son los mismos efectos que el cron: `ecclesiastical-year-cut` termina cargos, `dependent-profiles-purge` borra datos de perfiles congelados vencidos, `finance-period-closing` cierra periodos, `data-export-cleanup` borra archivos. Ejecutarlos fuera de hora es válido, pero no es una simulación.
+- **Panel.** `/dashboard/system/jobs` muestra el botón «Ejecutar ahora» (con `AlertDialog` de confirmación) solo a un super-admin y en los **20 jobs del catálogo** (`GET /admin/cron-jobs`; el panel muestra y ejecuta todos). Muestra la insignia «Manual» en las filas manuales y avisa «En cola» cuando `enqueued` es `true`.
+
+Jobs de la allowlist y qué envían (lectura estática del código de la rama, siguiendo el job y su servicio directo; no se ejecutó ninguno y un envío más profundo en la cadena, por ejemplo desde un procesador de BullMQ, puede no estar en la lista):
+
+| Job | Envía a personas |
+| --- | --- |
+| `activities-reminder` | Push a la sección por cada actividad próxima |
+| `cron-alert-check` | Correo y notificación en la app a los super-admin si otro job falla o deja de correr (además registra la alerta) |
+| `monthly-reports-reminders` | Push por rol de sección (solo en los días del ciclo) |
+| `member-of-month-auto-evaluate` | Aviso al miembro elegido y a los directores |
+| `pending-teen-guardian` | Push y bandeja al adolescente (días 7, 30 y 83) |
+| `family-age-transitions` | Push y bandeja a los tutores verificados |
+| `investiture-authorization-reminders` | Correo de recordatorio de la autorización (condicionado por `INVESTITURE_EMAIL_ENABLED`). Además reintenta con `deliverPending()` los avisos de resultado pendientes de investidura, que salen por bandeja y push |
+| `ecclesiastical-year-cut` | Aviso a `super-admin`, `admin` y a la dirección del campo local solo si omite un plan de directiva |
+| Resto (`rankings-recalculate`, `annual-reports-auto-generate`, `cleanup-expired-records`, `fcm-tokens-cleanup`, `fcm-tokens-stale-cleanup`, `data-export-cleanup`, `finance-period-closing`, `dependent-profiles-purge`, `investiture-achievement-intent`, `membership-requests-expiry`, `monthly-reports-auto-generate`, `quarterly-reports-auto-generate`) | No envían avisos a personas |
+
+`fcm-tokens-stale-cleanup` es el `cleanupOldTokens` de `FcmTokensService`; no escribe fila en `cron_run_log`. Su `@Cron` compartía el nombre `fcm-tokens-cleanup` con el de `cleanup.service.ts` y, con nombres duplicados, solo uno de los dos se programaba. Se corrigió renombrando el de `FcmTokensService` a `fcm-tokens-stale-cleanup` en la rama `feat/admin-run-cron-now` (sin hash todavía).
 
 ### admin-audit-logs
 
@@ -1248,7 +1368,7 @@ Errores: 404 `HONOR_INSTRUCTOR_PROPOSAL_NOT_FOUND`; 409 `HONOR_INSTRUCTOR_PROPOS
 | GET | `/api/v1/admin/analytics/jobs-overview` | JWT | Global: admin, super-admin | Overview de jobs y colas BullMQ (admin only) | JobsOverviewService.getOverview() | `src/analytics/analytics.controller.ts` |
 | POST | `/api/v1/admin/analytics/jobs/:queue/:jobId/retry` | JWT | Global: super-admin | Retry failed BullMQ job (super-admin only) | JobsOverviewService.retryFailedJob() | `src/analytics/analytics.controller.ts` |
 | GET | `/api/v1/admin/analytics/queues/:queueName/health` | JWT | Global: admin, super-admin | Queue health snapshot (admin only) | JobsOverviewService.getQueueHealth() | `src/analytics/analytics.controller.ts` |
-| GET | `/api/v1/admin/analytics/cron-runs` | JWT | Global: admin, super-admin | Resumen de ejecuciones de cron jobs (admin only) | CronRunsService.getSummary() | `src/analytics/analytics.controller.ts` |
+| GET | `/api/v1/admin/analytics/cron-runs` | JWT | Global: admin, super-admin | Resumen de ejecuciones de cron jobs (admin only); `recent[]` trae `trigger` y `triggered_by` (pendiente de merge) | CronRunsService.getSummary() | `src/analytics/analytics.controller.ts` |
 | GET | `/api/v1/admin/analytics/cron-runs/history` | JWT | Global: admin, super-admin | Historial paginado de cron runs con filtros | CronRunsService.getHistory() | `src/analytics/analytics.controller.ts` |
 
 #### `GET /api/v1/admin/analytics/operations-dashboard`
@@ -2211,6 +2331,7 @@ Una resolución confirmada avisa en la bandeja de la app, no por correo. La inte
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
 | GET | `/api/v1/coordination/me/scope` | JWT | - | Resolver el alcance efectivo de coordinación del usuario actual | CoordinationService.resolveCoordinatorScope() | `src/coordination/coordination.controller.ts` |
+| GET | `/api/v1/coordination/me/consent-pending` | JWT | Permisos: consent:verify (global; debe venir de un rol de coordinador) | Fichas de consentimiento por verificar en todas las secciones del coordinador (pendiente de merge, rama `feat/coordinator-pending-consents`) | CoordinatorConsentQueueService.listForCoordinator() | `src/coordination/coordination.controller.ts` |
 
 ### dashboard
 
@@ -2228,7 +2349,7 @@ Una resolución confirmada avisa en la bandeja de la app, no por correo. La inte
 
 El JSON exportado tiene `schema_version` `1.2.0` (antes `1.1.0` y `1.0.0`; cambios aditivos). La `1.1.0` añadió la clave `legal_acceptances`, después de `notification_preferences`: lista ordenada por `accepted_at` descendente de `{ document_type, document_version, accepted_at, method, ip_address, user_agent }` del propio usuario.
 
-La `1.2.0` (perfiles familiares) añade la clave `family`, después de `legal_acceptances`: `{ dependent_profile, as_dependent, as_guardian }`. `dependent_profile` es `{ created_by_user_id, created_at, frozen_at, purge_after }` o `null`; `as_dependent` y `as_guardian` listan las tutorías donde el usuario es el menor o el tutor, con `{ guardianship_id, dependent_user_id, guardian_user_id, is_custodian, custodian_club_id, is_primary, consent_status, sworn_declaration_at, verification_method, verified_at, revoked_at, revoked_reason, created_at, relationship_type }`. No incluye hashes de códigos, claves de archivos de evidencia ni nombre o teléfono de tutores externos.
+La `1.2.0` (perfiles familiares) añade la clave `family`, después de `legal_acceptances`: `{ dependent_profile, as_dependent, as_guardian }`. `dependent_profile` es `{ created_by_user_id, created_at, frozen_at, purge_after }` o `null`; `as_dependent` y `as_guardian` listan las tutorías donde el usuario es el menor o el tutor, con `{ guardianship_id, dependent_user_id, guardian_user_id, is_custodian, custodian_club_id, is_primary, consent_status, sworn_declaration_at, verification_method, verified_at, revoked_at, revoked_reason, created_at, relationship_type }` (`verification_method` puede ser `director_paper_form`, `coordinator_paper_form`, `guardian_invite`, `legacy_import` o `test_placeholder`). No incluye hashes de códigos, claves de archivos de evidencia ni nombre o teléfono de tutores externos.
 
 ### emergency-contacts
 
@@ -2907,6 +3028,7 @@ Fase 8 (ejecutada en código el 2026-10-09; mergeada en `development` con backen
 
 - `status` es `verified` solo si alguna tutoría real (no de prueba, no revocada) está verificada; si no, `pending`. `guardianship_id` es la tutoría principal activa sobre la que actúa `verify-consent`, o `null` si no queda ninguna.
 - `evidence_uploaded` mira la ficha vigente de la fila principal.
+- `verification_method` toma `director_paper_form`, `coordinator_paper_form` (verificó un coordinador por su asignación), `guardian_invite`, `legacy_import` o `test_placeholder`, o `null` si la tutoría no está verificada.
 - `guardians` va con la principal primero y luego por antigüedad. Una custodia del club muestra el nombre del club. No incluye teléfonos ni correos.
 - **Fase 3c**: el bloque agrega `viewer_can_verify` (boolean) y `viewer_verify_block` (`self_guardian`, `self_custodian` o `null`), calculados para quien consulta. Semántica exacta en «`consent.viewer_can_verify` y `consent.viewer_verify_block`» (sección «Registro de menores por un director y acceso familiar en el panel (Fase 3c)»).
 
@@ -2917,8 +3039,8 @@ Fase 8 (ejecutada en código el 2026-10-09; mergeada en `development` con backen
 ```
 
 - `confirm_paper_form_reviewed` es obligatorio y debe ser `true`; `approve` es opcional (por defecto `false`).
-- Respuesta 200: `{ guardianship: { guardianship_id, consent_status: "verified", verified_at, verified_by_user_id, verification_method }, assignment: <fila club_role_assignments> | null, approve_error: string | null }`. `verification_method` es `director_paper_form` al verificar.
-- Una transacción, serializada por dependiente: la solicitud debe pertenecer a la sección de la ruta; se actúa sobre la **tutoría principal activa** (de persona o de custodia); debe haber una ficha vigente. Marca la fila `verified` (`verified_by_user_id`, `verified_at`, `director_paper_form`), **promueve** a `verified` (`guardian_invite`) a los tutores invitados por ese tutor mientras estaba `pending` (también en cadena), y escribe el evento de auditoría `guardianship` / `consent_verified` en la misma transacción. Después del commit sube el `epoch` de acting-for (los scopes del tutor se amplían en su siguiente petición) y avisa a los tutores (push `family:consent_verified`, excluye a quien verificó).
+- Respuesta 200: `{ guardianship: { guardianship_id, consent_status: "verified", verified_at, verified_by_user_id, verification_method }, assignment: <fila club_role_assignments> | null, approve_error: string | null }`. `verification_method` es `coordinator_paper_form` si quien verifica llegó a la sección por la vía del coordinador (rol global de coordinador con `consent:verify` y una `coordinator_assignment` vigente que cubre la sección, es decir, el `coordinatorSectionGrant`) y `director_paper_form` en cualquier otro caso (director, o un rol de club con solo `consent:verify`). Rama `feat/coordinator-pending-consents`. Las filas verificadas antes de este cambio quedan como `director_paper_form`.
+- Una transacción, serializada por dependiente: la solicitud debe pertenecer a la sección de la ruta; se actúa sobre la **tutoría principal activa** (de persona o de custodia); debe haber una ficha vigente. Marca la fila `verified` (`verified_by_user_id`, `verified_at`, `director_paper_form` o `coordinator_paper_form` según la vía de quien verifica), **promueve** a `verified` (`guardian_invite`) a los tutores invitados por ese tutor mientras estaba `pending` (también en cadena), y escribe el evento de auditoría `guardianship` / `consent_verified` en la misma transacción (`changes.verification_method` lleva el mismo valor que la fila; con la vía de coordinador el resumen dice «verificado por el coordinador»). Después del commit sube el `epoch` de acting-for (los scopes del tutor se amplían en su siguiente petición) y avisa a los tutores (push `family:consent_verified`, excluye a quien verificó).
 - **Aprobación en dos tiempos**: si `approve: true` y aprobar falla **después** del commit, la respuesta es 200 con `assignment: null` y `approve_error` con el código del fallo; el consentimiento queda verificado y repetir la misma llamada reintenta solo la aprobación.
 - **Idempotencia**: si la solicitud ya está `active` y el consentimiento verificado → 200 sin efectos. Si la tutoría ya estaba verificada y la solicitud sigue `pending`, no se reescribe nada.
 - **Fase 3a — verificar sobre una asignación ya `active`**: `verify-consent` también acepta una asignación `active` con el consentimiento aún `pending` (un adolescente que ya estaba en un club antes de la Fase 3a) y **solo verifica** (`assignment: null`, sin aprobar). Funciona para un adolescente con tutoría (su `dependent_profiles` se crea al canjear el código). Al verificar a un adolescente: se asegura idempotentemente su fila `supervised_logins` (`method = email`), se limpia `pending_since`, se sube su `epoch` (pasa a `TEEN_SCOPES` en su siguiente petición) y se avisa al tutor con `family:consent_verified`. Se mantiene `GUARDIANSHIP_GUARDIAN_SELF_VERIFY`: un tutor vivo nunca verifica.

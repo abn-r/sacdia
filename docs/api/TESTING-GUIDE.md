@@ -51,6 +51,63 @@ dummy para pasar la validación de entorno.
   autorización. Al arreglar cada una, agregarla a la lista bloqueante del
   workflow (`.github/workflows/ci.yml`, job `backend_e2e_tests`).
 
+## 🐘 Specs contra Postgres real (gated)
+
+Los specs unitarios usan dobles en memoria de Prisma: comprueban la **forma** de
+los `where`, no que PostgreSQL seleccione las mismas filas. Para eso hay specs
+que corren contra una base real y que **se omiten** (`describe.skip`) salvo que
+se habiliten con dos variables de entorno (el gate es el mismo en 13 archivos de
+spec de `sacdia-backend/src`):
+
+| Variable | Valor |
+| --- | --- |
+| `ALLOW_AUTHORIZATION_P0_INTEGRATION_DB` | `1` |
+| `AUTHORIZATION_P0_INTEGRATION_DATABASE_URL` | Cadena de conexión a un Postgres **de loopback** (`127.0.0.1`, `localhost` o `::1`); el spec de coordinadores lanza `COORDINATOR_SCOPE_TEST_DATABASE_MUST_BE_LOOPBACK` ante un host remoto |
+
+En CI, el job `Backend Unit Tests` levanta un servicio `postgres:18` y define
+ambas variables, así que corren como parte de `pnpm jest`. **Nunca** apuntes la
+URL a Neon ni a ninguna base compartida.
+
+Los specs `*.postgres.spec.ts` actuales:
+
+- `src/common/authorization/coordinator-section-scope.postgres.spec.ts`: el
+  alcance de un coordinador (`GENERAL`, `ZONE`, `SECTION`, ventana de vigencia
+  por día UTC, unión de asignaciones). Crea un esquema aleatorio, lo arma con
+  las migraciones reales (`0_baseline` y `20260617090000_coordination_zones_assignments`)
+  más tablas padre mínimas, usa un `PrismaClient` real con `@prisma/adapter-pg`
+  (el cableado de producción) con `TimeZone=UTC`, resiembra el mundo antes de
+  cada caso y borra el esquema al final. Cada escenario afirma el conjunto exacto
+  esperado **y** que la comprobación puntual (`coordinatorScopeIncludesSection`,
+  la usa `PermissionsGuard`) y la expansión (`resolveCoordinatorAssignmentSectionIds`,
+  la usa `GET /coordination/me/scope`) coinciden en **todas** las secciones de la
+  base, incluidas las inactivas y una huérfana. Cubre además las reglas de
+  territorio activo: un distrito desactivado no da cobertura `ZONE` y `GENERAL`
+  sigue cubriendo el campo local (ver `docs/canon/runtime-coordination.md`).
+- Otros tres, con la misma idea (por su nombre y su gate; no se detallan aquí):
+  `src/audit-logs/critical-audit-writer.postgres.spec.ts` y
+  `src/auth/device/linked-device-refresh.postgres.spec.ts` (mismo gate de arriba), y
+  `src/rbac/global-user-role-write.postgres.spec.ts`, que usa **otro** gate:
+  `ALLOW_P0_BE13B2_TEST_DB=1` y `P0_BE13B2_TEST_DATABASE_URL`, local.
+
+El spec del alcance de coordinadores llegó en la rama
+`test/coordinator-scope-postgres` de sacdia-backend (commits `0a04b54d` y
+`eec8e5aa`), pendiente de merge.
+
+Para correr uno en local, con un Postgres 18 propio (usuario `postgres`, sin
+tocar ninguna base existente, porque el spec crea y borra su propio esquema):
+
+```bash
+ALLOW_AUTHORIZATION_P0_INTEGRATION_DB=1 \
+AUTHORIZATION_P0_INTEGRATION_DATABASE_URL=postgresql://postgres@127.0.0.1:5432/postgres \
+pnpm jest src/common/authorization/coordinator-section-scope
+```
+
+Sin las variables, `pnpm jest` los reporta como omitidos (sin error). Lo que
+cubre `coordinator-section-scope.postgres.spec.ts` no lo cubren los e2e de
+membresía y consentimiento (`test/director-created-minor.e2e-spec.ts`,
+`test/coordinator-consent-pending.e2e-spec.ts`), que usan un doble en memoria sin
+evaluar filtros relacionales.
+
 ### Pedidos de camporee (unitarios, 2026-08-25)
 
 Verificación focalizada registrada al integrar la feature (sin nest/next/flutter build, sin `prisma migrate`). Las rutas de prueba existen en `development`:
