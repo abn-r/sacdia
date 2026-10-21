@@ -7,7 +7,7 @@
 > La tabla refleja los decoradores HTTP efectivos en controllers NestJS; DTOs, ejemplos y errores finos viven en Swagger/runtime y docs de feature cuando aplique.
 
 **Estado**: ACTIVE
-**Actualizado**: 2026-10-21 (cola de consentimientos del coordinador y cobertura de zona; ver la nota «Seguimientos 2026-10-21»). Antes, 2026-10-20 (perfiles familiares, Fase 2 completa: sub-fases 2a, 2b y 2c, y las sub-fases 3a, 3b y 3c pendientes de merge; ver también aceptación legal 2026-10-15 y la nota de resincronización 2026-10-13)
+**Actualizado**: 2026-10-21 (cola de consentimientos del coordinador, jobs bajo demanda y cobertura de zona; ver la nota «Seguimientos 2026-10-21»). Antes, 2026-10-20 (perfiles familiares, Fase 2 completa: sub-fases 2a, 2b y 2c, y las sub-fases 3a, 3b y 3c pendientes de merge; ver también aceptación legal 2026-10-15 y la nota de resincronización 2026-10-13)
 **Total endpoints**: 866 decoradores HTTP en 108 archivos `*.controller.ts` de `development`. La matriz tiene además 20 filas **pendientes de merge (PR #448 de sacdia-backend)**: secciones `class-thresholds`, `investiture-windows`, `investiture-pastors`, `investiture-requests` y el `GET .../sections/:clubSectionId/score` de camporee-scoring.
 **Métodos (development)**: GET 353 · POST 279 · PATCH 125 · DELETE 96 · PUT 13
 **Auth detectada (development)**: Public 13 · JWT u Optional JWT 853
@@ -54,7 +54,7 @@
 > - **Resumen de la Fase 3 completa**: 17 endpoints nuevos (3a: 10, 3b: 4, 3c: 3). Detalle en «Registro de menores por un director y acceso familiar en el panel (Fase 3c)» (antes de «Resumen por dominio»).
 
 > [!NOTE]
-> **Seguimientos 2026-10-21** (todos **pendientes de merge**, sin cambios de esquema): (1) `GET /coordination/me/consent-pending`, la cola del coordinador (sacdia-backend `feat/coordinator-pending-consents`); ver «`GET /api/v1/coordination/me/consent-pending`» (dentro de «Registro de menores por un director y acceso familiar en el panel (Fase 3c)», tras «Revisor solo-verificación»). (3) Cambio de comportamiento sin ruta nueva: la cobertura `ZONE` de un coordinador exige también que el **distrito** esté activo (sacdia-backend `test/coordinator-scope-postgres`, commit `eec8e5aa`); ver `docs/canon/runtime-coordination.md`. Los totales de la cabecera no incluyen la ruta nueva.
+> **Seguimientos 2026-10-21** (todos **pendientes de merge**, sin cambios de esquema): (1) `GET /coordination/me/consent-pending`, la cola del coordinador (sacdia-backend `feat/coordinator-pending-consents`); ver «`GET /api/v1/coordination/me/consent-pending`» (dentro de «Registro de menores por un director y acceso familiar en el panel (Fase 3c)», tras «Revisor solo-verificación»). (2) `GET /admin/cron-jobs` y `POST /admin/cron-jobs/:jobName/run` («Ejecutar ahora», sacdia-backend `feat/admin-run-cron-now`), y los campos `trigger` y `triggered_by` en `recent[]` de `GET /admin/analytics/cron-runs`; ver «Jobs programados bajo demanda» en la sección `admin`. (3) Cambio de comportamiento sin ruta nueva: la cobertura `ZONE` de un coordinador exige también que el **distrito** esté activo (sacdia-backend `test/coordinator-scope-postgres`, commit `eec8e5aa`); ver `docs/canon/runtime-coordination.md`. Los totales de la cabecera no incluyen las 3 rutas nuevas.
 
 ## Cómo leer esta referencia
 
@@ -1096,6 +1096,52 @@ Conteo de filas por sección de la matriz. Las filas marcadas como pendientes de
 | --- | --- | --- | --- | --- | --- | --- |
 | GET | `/api/v1/admin/cron-alerts` | JWT | Global: admin, super-admin | Paginated cron alert history | AdminCronAlertsService.getAlertHistory() | `src/admin/admin-cron-alerts.controller.ts` |
 | POST | `/api/v1/admin/cron-alerts/:id/resolve` | JWT | Global: admin, super-admin; Global: super-admin | Manually resolve a cron alert (super-admin only) | AdminCronAlertsService.resolveAlert() | `src/admin/admin-cron-alerts.controller.ts` |
+| GET | `/api/v1/admin/cron-jobs` | JWT | Global: super-admin | Listar los jobs programados que se pueden ejecutar bajo demanda (pendiente de merge, rama `feat/admin-run-cron-now`) | AdminCronJobsService.list() | `src/admin/cron-jobs/admin-cron-jobs.controller.ts` |
+| POST | `/api/v1/admin/cron-jobs/:jobName/run` | JWT | Global: super-admin (límite 10 por minuto) | Ejecutar ahora un job programado y esperar su resultado (pendiente de merge, rama `feat/admin-run-cron-now`) | AdminCronJobsService.run() | `src/admin/cron-jobs/admin-cron-jobs.controller.ts` |
+
+#### Jobs programados bajo demanda («Ejecutar ahora»)
+
+> [!NOTE]
+> Rama `feat/admin-run-cron-now` de sacdia-backend (commits `2bacda55` y `bb57a925`) y de sacdia-admin (commits `34d9e4e` y `ac40318`), **pendientes de merge**. Verificado contra el código de las ramas (`src/admin/cron-jobs/*`, `src/common/services/cron-run-context.ts`, `cron-run-logger.service.ts`, `src/analytics/cron-runs.service.ts`). Sin cambios de esquema. Las filas no cuentan en los totales de la cabecera.
+
+Un **super-admin** puede disparar un `@Cron` sin esperar a su hora. Hace falta porque el servicio `development` está en el plan Free de Render, que se suspende por inactividad y entonces **ningún cron en proceso corre** (ver `docs/deployment/DEPLOYMENT-GUIDE.md`, §0.1 y §0.6); en desarrollo este es el camino para ejecutarlos. Guards: `JwtAuthGuard` + `GlobalRolesGuard` con `@GlobalRoles('super-admin')` y `@SkipPermissions()`. Sin `@ActingScope`: un tutor actuando, un adolescente supervisado o un dispositivo no pasan.
+
+**`GET /api/v1/admin/cron-jobs`** devuelve `{ status: 'success', data: { jobs: [...] } }`. Cada job: `job_name`, `schedule` (cron de **5 campos**, normalizado: sin segundos ni ceros a la izquierda; sale de los metadatos del propio `@Cron`, no se repite a mano), `time_zone` (`null` si el `@Cron` no declara zona horaria), `runnable` (`false` si el proveedor dueño no está cargado en esta app) y `description` (español).
+
+**`POST /api/v1/admin/cron-jobs/:jobName/run`** (200, sin cuerpo; `@Throttle` de 10 por minuto):
+
+- Ejecuta el **mismo método** que invoca el scheduler, con el **mismo candado distribuido** del job y la **misma fila** en `cron_run_log`, y **espera** a que termine. La fila queda marcada con `metadata.trigger = 'manual'` y `metadata.triggered_by = <user_id del super-admin>`.
+- **Allowlist** de 20 jobs (todos los `@Cron` del código; `cron-job.registry.spec.ts` falla si aparece o desaparece uno sin entrada, así que añadir un job es una decisión revisada). No hay invocación dinámica por nombre. Un nombre desconocido, fuera de la lista o cuyo proveedor no esté cargado responde 404 `CRON_JOB_NOT_FOUND`.
+- **Candado manual** adicional `cron-manual:<job>` (TTL de seguridad de 10 min, liberado siempre en `finally`): una segunda ejecución manual simultánea, o un job cuyo candado normal está tomado, responde `status: "skipped"` (y escribe una fila `skipped`, con `reason`). Evita doble ejecución en los jobs que no tienen candado propio.
+- **Auditoría**: cada llamada que llega al servicio registra `admin.cron_job.run` (`entity_type: cron_job`, `entity_id: <job>`, `result: succeeded | failed`, y en `changes` el `job_name`, `status`, `run_id`, `items_processed`, `duration_ms` y `error_message`). Un 404 no audita.
+- **Respuesta** `{ status: 'success', data }` con `job_name`, `run_id` (`null` si el job no escribe fila o solo encoló), `status` (`completed | failed | skipped`), `items_processed`, `duration_ms`, `error_message` y `enqueued`.
+- **`enqueued: true`**: los tres jobs respaldados por BullMQ (`monthly-reports-auto-generate`, `rankings-recalculate`, `finance-period-closing`) solo **encolan** el trabajo cuando hay Redis; el worker lo termina después y escribe su propia fila (marcada manual por el `manualTriggeredBy` del payload). La respuesta llega antes de que termine: `run_id` es `null` y el resultado se ve en el historial. Sin Redis, el job corre en línea como siempre y se espera.
+- Los handlers tragan sus propios errores, así que el resultado se lee del `CronRunLogger` (mediante `AsyncLocalStorage`). Si un handler lanza, el resultado es `failed` con el mensaje.
+
+**`GET /api/v1/admin/analytics/cron-runs`**: cada elemento de `recent[]` suma `trigger` (`'manual' | 'scheduled'`; las filas anteriores y las programadas son `scheduled`) y `triggered_by` (`user_id` del super-admin o `null`). `stats[]` no cambia y `recent` sigue siendo la **última** fila por job: una ejecución manual reemplaza a la programada en esa vista. El historial (`/cron-runs/history`) ya devolvía `metadata`, donde viaja el marcador.
+
+**Notas operativas**
+
+- **Notificaciones reales.** Ejecutar un job en `development` corre la lógica de producción contra los datos reales de esa base: no hay modo de prueba. Los jobs que envían push, bandeja o correo a personas (por lectura del código; ver la lista abajo) pueden **notificar de verdad**. Los más sensibles: `activities-reminder` (push a la sección por cada actividad en ventana) y `cron-alert-check` (correo y aviso a los super-admin). Antes de ejecutar uno de esta lista, confirma que los destinatarios son de prueba.
+- **Jobs de larga duración y tiempo de espera HTTP.** La petición dura lo que dure el job. El middleware global responde **408** a los 30 s por defecto (`REQUEST_TIMEOUT_MS`), pero **no cancela** el trabajo: sigue en el servidor, conserva el candado hasta terminar, escribe su fila y la auditoría. Detrás de Render también puede cortar la conexión un proxy (502/504). El panel trata 408/502/504 como «la ejecución sigue en el servidor» y refresca el historial pasados unos segundos. Con un cliente propio, no reintentes por un 408: consulta el historial.
+- **Datos que se modifican.** Son los mismos efectos que el cron: `ecclesiastical-year-cut` termina cargos, `dependent-profiles-purge` borra datos de perfiles congelados vencidos, `finance-period-closing` cierra periodos, `data-export-cleanup` borra archivos. Ejecutarlos fuera de hora es válido, pero no es una simulación.
+- **Panel.** `/dashboard/system/jobs` muestra el botón «Ejecutar ahora» (con `AlertDialog` de confirmación) solo a un super-admin y solo en los **9 jobs de la tabla** (los que el panel conoce por nombre); los otros 11 se ejecutan por API. Muestra la insignia «Manual» en las filas manuales y avisa «En cola» cuando `enqueued` es `true`.
+
+Jobs de la allowlist y qué envían (lectura estática del código de la rama, siguiendo el job y su servicio directo; no se ejecutó ninguno y un envío más profundo en la cadena, por ejemplo desde un procesador de BullMQ, puede no estar en la lista):
+
+| Job | Envía a personas |
+| --- | --- |
+| `activities-reminder` | Push a la sección por cada actividad próxima |
+| `cron-alert-check` | Correo y notificación en la app a los super-admin si otro job falla o deja de correr (además registra la alerta) |
+| `monthly-reports-reminders` | Push por rol de sección (solo en los días del ciclo) |
+| `member-of-month-auto-evaluate` | Aviso al miembro elegido y a los directores |
+| `pending-teen-guardian` | Push y bandeja al adolescente (días 7, 30 y 83) |
+| `family-age-transitions` | Push y bandeja a los tutores verificados |
+| `investiture-authorization-reminders` | Correo y push de recordatorio de la autorización |
+| `ecclesiastical-year-cut` | Aviso a `super-admin`, `admin` y a la dirección del campo local solo si omite un plan de directiva |
+| Resto (`rankings-recalculate`, `annual-reports-auto-generate`, `cleanup-expired-records`, `fcm-tokens-cleanup`, `fcm-tokens-stale-cleanup`, `data-export-cleanup`, `finance-period-closing`, `dependent-profiles-purge`, `investiture-achievement-intent`, `membership-requests-expiry`, `monthly-reports-auto-generate`, `quarterly-reports-auto-generate`) | No envían avisos a personas |
+
+`fcm-tokens-stale-cleanup` es el `cleanupOldTokens` de `FcmTokensService`: comparte con `cleanup.service.ts` el nombre de scheduler `fcm-tokens-cleanup`, por eso se expone con otro nombre; no escribe fila en `cron_run_log`.
 
 ### admin-audit-logs
 
@@ -1322,7 +1368,7 @@ Errores: 404 `HONOR_INSTRUCTOR_PROPOSAL_NOT_FOUND`; 409 `HONOR_INSTRUCTOR_PROPOS
 | GET | `/api/v1/admin/analytics/jobs-overview` | JWT | Global: admin, super-admin | Overview de jobs y colas BullMQ (admin only) | JobsOverviewService.getOverview() | `src/analytics/analytics.controller.ts` |
 | POST | `/api/v1/admin/analytics/jobs/:queue/:jobId/retry` | JWT | Global: super-admin | Retry failed BullMQ job (super-admin only) | JobsOverviewService.retryFailedJob() | `src/analytics/analytics.controller.ts` |
 | GET | `/api/v1/admin/analytics/queues/:queueName/health` | JWT | Global: admin, super-admin | Queue health snapshot (admin only) | JobsOverviewService.getQueueHealth() | `src/analytics/analytics.controller.ts` |
-| GET | `/api/v1/admin/analytics/cron-runs` | JWT | Global: admin, super-admin | Resumen de ejecuciones de cron jobs (admin only) | CronRunsService.getSummary() | `src/analytics/analytics.controller.ts` |
+| GET | `/api/v1/admin/analytics/cron-runs` | JWT | Global: admin, super-admin | Resumen de ejecuciones de cron jobs (admin only); `recent[]` trae `trigger` y `triggered_by` (pendiente de merge) | CronRunsService.getSummary() | `src/analytics/analytics.controller.ts` |
 | GET | `/api/v1/admin/analytics/cron-runs/history` | JWT | Global: admin, super-admin | Historial paginado de cron runs con filtros | CronRunsService.getHistory() | `src/analytics/analytics.controller.ts` |
 
 #### `GET /api/v1/admin/analytics/operations-dashboard`

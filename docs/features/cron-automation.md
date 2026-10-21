@@ -20,6 +20,7 @@ Varios jobs están gobernados por `system_config` o feature flags (ver §6) para
 - **Timezone**: UTC explícito en los jobs operativos; excepción documentada: `monthly-reports-reminders` usa `{ timeZone: 'America/Mexico_City' }`.
 - **Locks distribuidos**: varios jobs usan lock en Redis para evitar ejecución concurrente entre múltiples instancias (ver cada job para TTL).
 - **Logging**: estructurado vía `Logger` de NestJS; fallos por entidad se loguean y continúan con el siguiente elemento del batch.
+- **Los `@Cron` corren dentro del proceso de la API.** `ScheduleModule` vive en el mismo proceso NestJS: si el servicio está dormido, **ningún cron corre**. El servicio `development` ("API Sacdia", plan Free de Render) se suspende tras unos 15 minutos sin tráfico y la primera petición paga un arranque en frío (en la observación del 2026-10-21, unos 24 s); todas las entradas de `cron_run_log` se detuvieron desde el 2026-10-20 20:30 UTC hasta que se despertó el servicio. Afecta a **todos** los jobs (purgas, recordatorios, vencimientos, barridos). Decisión del 2026-10-21: se deja así en desarrollo; **producción necesita un plan de pago siempre encendido** (ver `docs/deployment/DEPLOYMENT-GUIDE.md`, §0.6, punto 10). No confíes en la hora de un cron en `development`: consulta `cron_run_log` y, si necesitas que corra uno, usa «Ejecutar ahora» (ver «Observabilidad admin»). Alternativas descartadas por ahora, si algún día hiciera falta fiabilidad en desarrollo: un ping externo de keep-alive, o mover los crones a Render Cron Jobs o GitHub Actions que llamen a endpoints internos protegidos.
 
 ### Inventario de jobs
 
@@ -261,6 +262,7 @@ El admin tiene dos superficies complementarias de observabilidad: BullMQ (colas)
   - `ecclesiastical-year-cut`
 - Status valores: `running | completed | failed | skipped` (CHECK constraint en SQL).
 - Endpoint: `GET /api/v1/admin/analytics/cron-runs` — retorna `{ recent[], stats[] }`. `recent` es última ejecución por job vía `DISTINCT ON (job_name)`. `stats` agrega `avg_duration_ms_30d`, `failure_rate_7d`, `last_success`, `last_failure`, `total_runs_7d` por job.
+- Cada elemento de `recent[]` incluye `trigger` (`'manual' | 'scheduled'`) y `triggered_by` (`user_id` del super-admin de una ejecución manual, o `null`). Pendiente de merge (rama `feat/admin-run-cron-now`, ver «Ejecutar ahora»).
 - Sin dependencia de Redis — siempre disponible.
 
 ### Página admin
@@ -270,6 +272,17 @@ El admin tiene dos superficies complementarias de observabilidad: BullMQ (colas)
 - Sección "Cron Jobs": tabla con las 11 rows siempre visibles (join con lista hardcoded), columnas Job / Última ejecución / Status / Duración / Items / Último éxito / Último fallo / Tasa fallo 7d / Runs 7d. Status badges coloreados.
 - Degradación grácil: si una de las 2 llamadas falla, la otra renderiza normalmente.
 - Nav: entrada "Jobs & Colas" en sección Sistema, icon `Activity`, permiso `system_config:read`.
+
+### Ejecutar ahora (jobs bajo demanda)
+
+**Estado**: IMPLEMENTADO en las ramas `feat/admin-run-cron-now` de sacdia-backend (commits `2bacda55` y `bb57a925`) y sacdia-admin (commits `34d9e4e` y `ac40318`), **pendiente de merge**. Contrato y errores completos en `docs/api/ENDPOINTS-LIVE-REFERENCE.md`, «Jobs programados bajo demanda».
+
+- **Para qué.** Con el servicio de `development` dormido los crones no corren (ver «Infraestructura»). Un super-admin puede ejecutar un job a mano; es la forma de correrlos en desarrollo.
+- **API** (solo `super-admin`, 10 por minuto): `GET /api/v1/admin/cron-jobs` (los 20 jobs de la allowlist con su cron de 5 campos, zona horaria y si son ejecutables) y `POST /api/v1/admin/cron-jobs/:jobName/run` (200; espera al job; 404 `CRON_JOB_NOT_FOUND` si no está en la lista). Ejecuta el mismo método que el scheduler, con el **mismo candado** y la **misma fila** de `cron_run_log`, marcada `metadata.trigger = 'manual'` y `metadata.triggered_by`. Añade un candado `cron-manual:<job>`: un job que ya corre responde `skipped`. Los jobs respaldados por BullMQ (`monthly-reports-auto-generate`, `rankings-recalculate`, `finance-period-closing`) devuelven `enqueued: true` cuando hay Redis y terminan en el worker. Audita `admin.cron_job.run`.
+- **Allowlist.** Los 20 `@Cron` del código, uno por uno (`src/admin/cron-jobs/cron-job.registry.ts`); un spec escanea las fuentes y falla si aparece o desaparece un `@Cron` sin entrada, así que añadir un job obliga a decidir si se expone. El inventario de arriba lista 12 porque es anterior; la allowlist añade, entre otros, `cron-alert-check`, `pending-teen-guardian`, `family-age-transitions`, `dependent-profiles-purge`, `investiture-authorization-reminders`, los informes anuales y trimestrales y `monthly-reports-reminders`. `fcm-tokens-stale-cleanup` es el `cleanupOldTokens` de `FcmTokensService`, que comparte nombre de scheduler con `cleanup.service.ts` y no registra corrida.
+- **Panel**: en `/dashboard/system/jobs`, columna «Acciones» con «Ejecutar ahora» y un `AlertDialog` de confirmación, visible solo para un super-admin y solo en los 9 jobs de la tabla; los otros 11 se ejecutan por API. Muestra la insignia «Manual» y, si `enqueued` es `true`, el aviso «En cola». Si la petición se corta (408, 502 o 504) avisa que la ejecución sigue en el servidor y refresca el historial.
+- **Cuidado: no es una simulación.** Corre la lógica real sobre los datos reales de la base. Los jobs que notifican a personas pueden enviar avisos reales; los más sensibles son `activities-reminder` (push a las secciones con actividades próximas) y `cron-alert-check` (correo y aviso a los super-admin). Antes de ejecutar un job que notifica, confirma que los destinatarios sean de prueba (lista completa en el contrato).
+- **Jobs largos y tiempo de espera HTTP.** La petición dura lo que dure el job. El backend responde 408 a los 30 s por defecto (`REQUEST_TIMEOUT_MS`) y Render puede cortar antes (502/504), pero el trabajo **no se cancela**: sigue en el servidor, mantiene el candado hasta terminar y escribe su fila de `cron_run_log`. Ante un corte no reintentes: revisa el historial.
 
 ### Alerting Sentry
 
