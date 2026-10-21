@@ -19,7 +19,7 @@
 > **Aceptación legal 2026-10-15** (sacdia-backend, rama `feat/legal-acceptance`): se añaden 3 endpoints (sección `legal`), los campos `accepted_terms_version` y `accepted_privacy_version` en `POST /auth/register`, el bloque `legal` en `GET /auth/me` y la clave `legal_acceptances` en la exportación de datos.
 
 > [!NOTE]
-> **Perfiles familiares 2026-10-19** (sacdia-backend, rama `feat/family-profiles`, Fase 2 completa, Pendiente de merge (PR #530 de sacdia-backend)): se añade el header `X-Acting-For` (tutor que actúa por un menor sin cuenta; sección siguiente) y **16 endpoints nuevos** y **3 retirados**:
+> **Perfiles familiares 2026-10-19** (sacdia-backend, rama `feat/family-profiles`, Fase 2 completa, mergeada en `development` (PR #530 de sacdia-backend)): se añade el header `X-Acting-For` (tutor que actúa por un menor sin cuenta; sección siguiente) y **16 endpoints nuevos** y **3 retirados**:
 >
 > - Nuevos: 11 de `guardianships` (8 de la sub-fase 2a, subir y leer la ficha de consentimiento del tutor, y `GET /guardianships/relationship-types`), 3 de `membership-requests` (subir y leer la ficha, `verify-consent`), 1 de `admin` (leer la ficha desde el detalle de usuario) y `POST .../post-registration/step-3/guardian-only`.
 > - Retirados: `POST`, `PATCH` y `DELETE /users/:userId/legal-representative` (los representantes legales quedan de solo lectura; ver la sección `legal-representatives`).
@@ -28,17 +28,17 @@
 > - **Compuerta de consentimiento en toda activación de rol de club** (409 `MR_CONSENT_NOT_VERIFIED`): además de `approve`, la aplican `PATCH /club-roles/:assignmentId` (cuyo `status` ahora es un enum cerrado), `POST /clubs/:clubId/sections/:sectionId/{roles,director-assignment,director-succession}`, `POST /requests/{assignments,transfers}/:requestId/review` y `POST /club-sections/:sectionId/annual-continuations` (como `blocked` por usuario). Detalle en «Compuerta de consentimiento en las activaciones de rol» (sección `membership-requests`). Subir una ficha con el consentimiento ya verificado responde 409 `GUARDIANSHIP_CONSENT_ALREADY_VERIFIED`, y verificar tiene reglas de cuatro ojos (`GUARDIANSHIP_GUARDIAN_SELF_VERIFY`, `GUARDIANSHIP_CUSTODIAN_SELF_VERIFY`).
 > - **28 códigos de error nuevos** en total (lista por área en cada sección; todos están en `ErrorCode` y en los 4 `errors.json`).
 >
-> Nada de esto existe en `development` hasta el merge, y sin el header el comportamiento de las rutas existentes no cambia. Requiere el bucket privado de R2 `R2_BUCKET_GUARDIANSHIP_EVIDENCE` antes del deploy; mientras no exista, los endpoints de ficha responden 503 `GUARDIANSHIP_EVIDENCE_UNAVAILABLE` y el resto de la API sigue igual (ver la sección `guardianships`). Backend y app de la Fase 2 deben desplegarse juntos: la app anterior sigue llamando a las rutas retiradas del representante legal.
+> Todo esto está en `development` desde el merge del PR #530; sin el header, el comportamiento de las rutas existentes no cambia. Requiere el bucket privado de R2 `R2_BUCKET_GUARDIANSHIP_EVIDENCE` antes del deploy; mientras no exista, los endpoints de ficha responden 503 `GUARDIANSHIP_EVIDENCE_UNAVAILABLE` y el resto de la API sigue igual (ver la sección `guardianships`). Backend y app de la Fase 2 deben desplegarse juntos: la app anterior sigue llamando a las rutas retiradas del representante legal.
 
 > [!NOTE]
-> **Perfiles familiares, Fase 3a** (sacdia-backend, rama `feat/family-profiles-phase3`, Pendiente de merge (PR #531 de sacdia-backend)). Describe el comportamiento **implementado** de la sub-fase 3a (cuentas supervisadas de 13 a 17 años), verificado contra el código de la rama y contra el QA en simulador (`docs/testing/FAMILY-PROFILES-PHASE3A-QA.md`).
+> **Perfiles familiares, Fase 3a** (sacdia-backend, rama `feat/family-profiles-phase3`, mergeada en `development` (PR #531 de sacdia-backend)). Describe el comportamiento **implementado** de la sub-fase 3a (cuentas supervisadas de 13 a 17 años), verificado contra el código de la rama y contra el QA en simulador (`docs/testing/FAMILY-PROFILES-PHASE3A-QA.md`).
 >
 > - Nuevos (10): 6 de `guardianships` (`supervised-login` GET, POST, `disable`, `reactivate`, `password`, y `summary`), 3 de la sección `users/me` de supervisión (`POST /users/me/guardian-link-codes`, `GET /users/me/supervision`, `POST /users/me/guardian-links/:guardianshipId/revoke`), y 1 de `post-registration` (`step-3/consent-evidence`).
 > - Cambian de contrato: `POST /auth/login` (identificador, bloqueo, `principal`), `GET /auth/me` (`principal`, `family_features`, modo incl. `profile_incomplete`, analítica), `POST /auth/register` (guarda `birthday` y `country_id`; fila de supervisión para 13-17), `POST /auth/update-password` y `POST /auth/verify-email/send` (scope `self:password`), `PATCH /users/:userId` (bloqueo de fecha de nacimiento), `POST /guardianships/me/dependents` (tope de edad = mayoría de edad), `POST /guardianships/link-codes/redeem` (propósito `teen_guardian_link`), `POST /guardianships/:guardianshipId/revoke` y `GET .../deletion-impact` (resultado `pending_guardian`), `GET`/`POST .../membership-requests/...` (compuerta por edad, bloque `consent`, `verify-consent` sobre asignación activa), `GET`/`POST /users/me/legal-acceptance` y `POST /auth/register` (versión legal `2.0.0-family`, solo cuando se apruebe el texto; ver `docs/legal/README.md`) y las rutas existentes que se reetiquetan con scopes de adolescente (la lista exacta la fija el snapshot `acting-scope-metadata.spec.ts`).
 > - Detalle en «Cuentas supervisadas de 13 a 17 años (Fase 3a)» (antes de «Resumen por dominio»).
 
 > [!NOTE]
-> **Perfiles familiares, Fase 3b** (sacdia-backend, rama `feat/family-profiles-phase3`, dieciséis commits `f31c24cb..1054af7a` sobre `4cf7070f`, Pendiente de merge (PR #531 de sacdia-backend)). Describe el comportamiento **implementado en el backend** de la sub-fase 3b (dispositivo vinculado de menores de 13 años), verificado contra el código de la rama (con referencias a archivo y, donde no se mueven, a línea). La app (tareas A01 a A11) y el QA ya están hechos en la rama (app `41388c13`); el registro del QA vive en `docs/testing/FAMILY-PROFILES-PHASE3B-QA.md`. Sigue pendiente de merge. La sub-fase 3c (barrido por cron y desvinculación desde el panel) ya está implementada; ver «Registro de menores por un director y acceso familiar en el panel (Fase 3c)». Todo queda detrás de `FAMILY_LINKED_DEVICE_ENABLED` (por defecto `false`).
+> **Perfiles familiares, Fase 3b** (sacdia-backend, rama `feat/family-profiles-phase3`, dieciséis commits `f31c24cb..1054af7a` sobre `4cf7070f`, mergeada en `development` (PR #531 de sacdia-backend)). Describe el comportamiento **implementado en el backend** de la sub-fase 3b (dispositivo vinculado de menores de 13 años), verificado contra el código de la rama (con referencias a archivo y, donde no se mueven, a línea). La app (tareas A01 a A11) y el QA ya están hechos en la rama (app `41388c13`); el registro del QA vive en `docs/testing/FAMILY-PROFILES-PHASE3B-QA.md`. Ya está mergeada en `development` (PR #531 de sacdia-backend). La sub-fase 3c (barrido por cron y desvinculación desde el panel) ya está implementada; ver «Registro de menores por un director y acceso familiar en el panel (Fase 3c)». Todo queda detrás de `FAMILY_LINKED_DEVICE_ENABLED` (por defecto `false`).
 >
 > - Nuevos (4): `POST /auth/device/pair` (público) y, en `guardianships`, `POST .../devices/pairing-tokens`, `GET .../devices` y `POST .../devices/:deviceId/revoke`.
 > - Cambian de contrato: `POST /auth/refresh` y `POST /auth/logout` (sesiones de dispositivo), `GET /auth/me` (`mode: "device"` y `principal.device`), `GET /auth/sessions` y `GET /admin/users/:userId/sessions` (campo `kind`), `GET /guardianships/me/dependents` (`limits.max_devices` y `linked_devices_count` real), `POST /users/me/fcm-tokens` (liga el token al dispositivo), `GET /clubs/:clubId/activities` y `GET /activities/:activityId` (sin listas de asistentes para el dispositivo) y las cuatro rutas de evidencia de especialidades, que pasan de `evidence:upload` a `honors:write`.
@@ -46,7 +46,7 @@
 > - Esquema: `docs/database/SCHEMA-REFERENCE.md`, «Dispositivos vinculados (Fase 3b)». Detalle en «Dispositivo vinculado de menores de 13 años (Fase 3b)» (antes de «Resumen por dominio»).
 
 > [!NOTE]
-> **Perfiles familiares, Fase 3c** (sacdia-backend, rama `feat/family-profiles-phase3`, Pendiente de merge (PR #531 de sacdia-backend)). Describe el comportamiento **implementado en el backend** de la sub-fase 3c (el director registra menores, verificación independiente del consentimiento, tarjeta de acceso familiar en el panel, cron de cambios de edad).
+> **Perfiles familiares, Fase 3c** (sacdia-backend, rama `feat/family-profiles-phase3`, mergeada en `development` (PR #531 de sacdia-backend)). Describe el comportamiento **implementado en el backend** de la sub-fase 3c (el director registra menores, verificación independiente del consentimiento, tarjeta de acceso familiar en el panel, cron de cambios de edad).
 >
 > - Nuevos (3): `POST /club-sections/:clubSectionId/dependents` (sección `guardianships`), `POST /admin/users/:userId/supervised-login/disable` y `POST /admin/users/:userId/linked-devices/:deviceId/revoke` (sección `admin-users`).
 > - Cambian de contrato: `POST .../membership-requests/:assignmentId/verify-consent` (permiso `club_members:approve` **o** `consent:verify`; `approve: true` exige `club_members:approve`), `GET .../membership-requests` (`consent.viewer_can_verify` y `consent.viewer_verify_block`), `GET /admin/users/:userId` (`data.family_access`), el cron de vencimiento de solicitudes (congela al menor en custodia) y los avisos de dispositivo por `majority` y `expired`.
@@ -68,7 +68,7 @@
 ## Actuar en nombre de un dependiente (`X-Acting-For`)
 
 > [!NOTE]
-> Perfiles familiares (Fase 2), rama `feat/family-profiles` de sacdia-backend, Pendiente de merge (PR #530 de sacdia-backend). Un **dependiente** es un menor sin cuenta propia ni correo (`users.email` null), registrado por un tutor desde `POST /api/v1/guardianships/me/dependents`. Esquema y reglas de datos: `docs/database/SCHEMA-REFERENCE.md`, sección «Perfiles familiares».
+> Perfiles familiares (Fase 2), rama `feat/family-profiles` de sacdia-backend, mergeada en `development` (PR #530 de sacdia-backend). Un **dependiente** es un menor sin cuenta propia ni correo (`users.email` null), registrado por un tutor desde `POST /api/v1/guardianships/me/dependents`. Esquema y reglas de datos: `docs/database/SCHEMA-REFERENCE.md`, sección «Perfiles familiares».
 
 ### Cómo se pide
 
@@ -103,7 +103,7 @@ El guard de ownership sigue igual: como `sub` es el dependiente, el bypass de du
 
 La mayoría de edad, no los 13 años, es el corte para actuar: el límite de 13 solo se aplica al crear el dependiente. Así un niño que cumple 13 antes de la Fase 3 no queda fuera. En cuanto exista una fila `account` para él, actuar deja de funcionar.
 
-> **Fase 3a** (Pendiente de merge (PR #531 de sacdia-backend)): «tiene `account`» se precisa con el fragmento `GUARDIAN_MANAGED_DEPENDENT`. El tutor **no** actúa mientras el menor tenga un acceso propio **habilitado** (causa de denegación `supervised_login_active`, mismo 403 uniforme) y **vuelve a poder actuar** si el acceso se deshabilita, pero solo cuando el acceso lo habilitó el tutor (`origin = guardian_enabled`); un adolescente que se registró solo (`self_registered`) nunca es «actuable». Ver «Acceso propio del adolescente y resumen».
+> **Fase 3a** (mergeada en `development` (PR #531 de sacdia-backend)): «tiene `account`» se precisa con el fragmento `GUARDIAN_MANAGED_DEPENDENT`. El tutor **no** actúa mientras el menor tenga un acceso propio **habilitado** (causa de denegación `supervised_login_active`, mismo 403 uniforme) y **vuelve a poder actuar** si el acceso se deshabilita, pero solo cuando el acceso lo habilitó el tutor (`origin = guardian_enabled`); un adolescente que se registró solo (`self_registered`) nunca es «actuable». Ver «Acceso propio del adolescente y resumen».
 
 Cualquier otro caso responde el **mismo** 403 `ACTING_FOR_FORBIDDEN` (sin tutoría, revocada, de otro tutor, custodia o tutor externo, datos de prueba, tutor o dependiente inactivo, dependiente con cuenta, congelado, sin fecha de nacimiento, mayor de edad, token `mfa_pending` o header igual al propio `user_id`), para que no se pueda enumerar quién es dependiente de quién. La causa real solo va al log `acting_for_denied`.
 
@@ -160,7 +160,7 @@ Los guards no convierten estos errores en 401: el JWT del tutor sigue siendo vá
 ## Cuentas supervisadas de 13 a 17 años (Fase 3a)
 
 > [!NOTE]
-> Perfiles familiares, Fase 3a, rama `feat/family-profiles-phase3` de sacdia-backend. Pendiente de merge (PR #531 de sacdia-backend).
+> Perfiles familiares, Fase 3a, rama `feat/family-profiles-phase3` de sacdia-backend. Mergeada en `development` (PR #531 de sacdia-backend).
 > Describe el comportamiento **implementado**: cada afirmación se verificó contra el código de la rama (`src/auth`, `src/guardianships`, `src/better-auth`) y contra el QA en simulador y API (`docs/testing/FAMILY-PROFILES-PHASE3A-QA.md`). Esquema: `docs/database/SCHEMA-REFERENCE.md`, sección «Cuentas supervisadas (Fase 3a)». Feature: `docs/features/family-profiles.md`. Texto legal asociado (borrador): `docs/legal/README.md`, «Versión 2.0.0-family».
 
 Antes de la Fase 3a, un adolescente de 13 a 17 años con cuenta propia se trataba como adulto: podía registrarse solo y entrar a un club sin ningún consentimiento. Ahora es un **usuario supervisado**: el servidor lo reconoce por su edad, le limita lo que puede hacer (denegado por defecto) y le da a un tutor poderes de control **solo cuando un director verificó el consentimiento**.
@@ -360,7 +360,7 @@ Cuando sale el último tutor de un adolescente **con cuenta**, el resultado `dep
 ## Dispositivo vinculado de menores de 13 años (Fase 3b)
 
 > [!NOTE]
-> Perfiles familiares, Fase 3b, rama `feat/family-profiles-phase3` de sacdia-backend (dieciséis commits `f31c24cb..1054af7a`). Pendiente de merge (PR #531 de sacdia-backend).
+> Perfiles familiares, Fase 3b, rama `feat/family-profiles-phase3` de sacdia-backend (dieciséis commits `f31c24cb..1054af7a`). Mergeada en `development` (PR #531 de sacdia-backend).
 > Describe el comportamiento **implementado en el backend**; las referencias `archivo:línea` son de la rama en el commit `1054af7a` y se desvían con cualquier edición: la referencia estable es el archivo y la función. La app de la Fase 3b (commit `41388c13`) y el QA en vivo ya están hechos; resultados en `docs/testing/FAMILY-PROFILES-PHASE3B-QA.md`. Esquema: `docs/database/SCHEMA-REFERENCE.md`, «Dispositivos vinculados (Fase 3b)». Resumen para quien toque los guards: `src/common/guards/README.md`.
 
 Un **dispositivo vinculado** es el teléfono de un menor de 13 años (sin cuenta, sin correo, sin contraseña) que un tutor verificado enlaza con un QR de un solo uso. El teléfono recibe una sesión propia y un JWT de **audiencia distinta** (`sacdia:device`); el servidor lo trata como un tipo de principal más (`linked_device`) con una superficie mínima. Todo depende de la bandera `FAMILY_LINKED_DEVICE_ENABLED` (por defecto `false`; ver «Banderas de configuración»).
@@ -591,7 +591,7 @@ Por defecto `false` (`src/config/env.validation.ts:240`). Apagada: no se crean t
 ## Registro de menores por un director y acceso familiar en el panel (Fase 3c)
 
 > [!NOTE]
-> Perfiles familiares, Fase 3c, rama `feat/family-profiles-phase3` de sacdia-backend (los diez commits de la 3c son `cf3d6ce2`, `ef6baa39`, `aecd39d1`, `7b51015b`, `44b7b334`, `490dd33a`, `eb574871`, `09e4016d`, `43bbd35d` y `32022392`, en ese orden). Pendiente de merge (PR #531 de sacdia-backend).
+> Perfiles familiares, Fase 3c, rama `feat/family-profiles-phase3` de sacdia-backend (los diez commits de la 3c son `cf3d6ce2`, `ef6baa39`, `aecd39d1`, `7b51015b`, `44b7b334`, `490dd33a`, `eb574871`, `09e4016d`, `43bbd35d` y `32022392`, en ese orden). Mergeada en `development` (PR #531 de sacdia-backend).
 > Describe el comportamiento **implementado en el backend**, verificado contra el código de la rama. La app (tareas A01 a A06) y el panel (M01 a M05) están hechos en sus ramas `feat/family-profiles-phase3`. El QA en vivo de la 3c sigue **Pendiente**: `docs/testing/FAMILY-PROFILES-PHASE3C-QA.md`. Esquema: `docs/database/SCHEMA-REFERENCE.md`, «Registro por director y acceso familiar (Fase 3c)». Las migraciones `20261022120000_family_director_minors` y `20261022130000_seed_family_permissions` están aplicadas en Neon `development` desde el 2026-10-20 (con aprobación del usuario); no en producción.
 
 Tres piezas: (1) un director registra a un menor de 0 a 17 años en su sección y el club lo custodia hasta que lo reclame una familia, (2) la verificación del consentimiento la hace **otra persona** distinta de quien lo creó, y (3) el panel puede cortar el acceso propio o un dispositivo de un menor, mientras un cron avisa a los tutores cuando el menor cumple la edad de acceso propio o cuando un dispositivo vence.
@@ -905,7 +905,7 @@ Por defecto `false` (`config/env.validation.ts`; se lee del arranque como las ot
 
 ## Resumen por dominio
 
-Conteo de filas por sección de la matriz. Las filas marcadas como pendientes de merge no cuentan en el total de `development`. Las secciones de perfiles familiares (`guardianships`, `admin-users`, `membership-requests`, `post-registration`) y `legal-representatives` (3 rutas retiradas) ya reflejan la rama `feat/family-profiles`.
+Conteo de decoradores HTTP por tag de Swagger (`@ApiTags` de cada clase controller) contra `development` commit `59122f6d` (2026-10-21). La suma es 935, igual que la cabecera. `app.controller.ts` no tiene `@ApiTags` y se cuenta por archivo. Agrupaciones: `camporees` incluye `camporee-club-registration`; `certifications` incluye `certifications - closeout` y `certifications - review`; `insurance` incluye `insurance purchases`; `field-payment-orders` incluye `insurance reassignments`; `rbac` incluye `rbac-bootstrap`; `guardianships` no incluye `supervision (adolescente)` (las 3 rutas de `teen-link-codes`). Los perfiles familiares (PR #530 y #531 de sacdia-backend) ya están mergeados y cuentan en el total. Las filas al final del bloque no estaban en la tabla anterior.
 
 | Dominio/API tag | Endpoints |
 | --- | ---: |
@@ -914,7 +914,7 @@ Conteo de filas por sección de la matriz. Las filas marcadas como pendientes de
 | activities | 16 |
 | admin-auth | 6 |
 | admin-camporee-event-types | 4 |
-| admin | 2 |
+| admin | 4 |
 | admin-audit-logs | 2 |
 | admin-geography | 24 |
 | admin-honor-instructor-proposals | 3 |
@@ -922,16 +922,16 @@ Conteo de filas por sección de la matriz. Las filas marcadas como pendientes de
 | admin-notifications | 3 |
 | Admin - Phase E Catalogs (i18n) | 36 |
 | admin-reference | 38 |
-| admin-users | 8 |
+| admin-users | 10 |
 | analytics | 8 |
-| Annual Evidence Folders | 13 |
+| Annual Evidence Folders | 14 |
 | Annual Evidence Folders - Templates | 9 |
 | Award Categories | 5 |
 | Annual Evidence Folders - Evaluation | 5 |
 | Annual Evidence Folders - Rankings | 4 |
 | annual-reports | 9 |
 | app.controller.ts | 1 |
-| auth | 20 |
+| auth | 21 |
 | OAuth | 3 |
 | camporee-event-templates | 5 |
 | camporee-events | 16 |
@@ -950,21 +950,21 @@ Conteo de filas por sección de la matriz. Las filas marcadas como pendientes de
 | class-progress-scope | 2 |
 | class-thresholds | 2 |
 | investiture-windows | 2 |
-| investiture-pastors | 6 |
-| investiture-requests | 8 |
+| investiture-pastors | 7 |
+| investiture-requests | 12 |
 | classes | 4 |
 | user-classes | 7 |
 | club-enrollments | 7 |
-| clubs | 20 |
+| clubs | 21 |
 | club-roles | 2 |
 | admin-coordination | 9 |
-| coordination | 1 |
+| coordination | 2 |
 | dashboard | 1 |
 | data-export | 3 |
 | emergency-contacts | 5 |
 | evidence-review | 7 |
 | finances | 9 |
-| guardianships | 17 |
+| guardianships | 21 |
 | health | 2 |
 | honors | 5 |
 | user-honors | 17 |
@@ -978,7 +978,7 @@ Conteo de filas por sección de la matriz. Las filas marcadas como pendientes de
 | payment obligations | 1 |
 | camporee supplies | 29 |
 | inventory | 8 |
-| investiture | 20 |
+| investiture | 21 |
 | legal | 3 |
 | legal-representatives | 1 |
 | Materials — Catalog | 4 |
@@ -998,22 +998,21 @@ Conteo de filas por sección de la matriz. Las filas marcadas como pendientes de
 | post-registration | 8 |
 | qr | 6 |
 | quarterly-reports | 9 |
-| Ranking Weights | 5 |
+| admin-support | 3 |
 | Annual Ranking Configs | 4 |
 | Annual Ranking Progress | 1 |
 | Annual Rankings | 1 |
-| Ranking Tiers | 2 |
 | Member Ranking Weights | 5 |
 | Member Rankings | 4 |
-| Section Rankings | 2 |
-| rbac | 19 |
-| rbac-bootstrap | 1 |
+| rbac | 20 |
+| Ranking Tiers | 2 |
+| Ranking Weights | 5 |
 | requests | 8 |
 | resource-categories | 5 |
-| Resources (App) | 3 |
 | Resources | 8 |
+| Resources (App) | 3 |
 | scoring-categories | 12 |
-| admin-support | 3 |
+| Section Rankings | 2 |
 | support | 1 |
 | system-config | 3 |
 | units | 11 |
@@ -1313,7 +1312,7 @@ Errores: 404 `HONOR_INSTRUCTOR_PROPOSAL_NOT_FOUND`; 409 `HONOR_INSTRUCTOR_PROPOS
 
 #### Tutorías en el detalle de usuario
 
-> Perfiles familiares, rama `feat/family-profiles`, Pendiente de merge (PR #530 de sacdia-backend). Mismo envoltorio `{ status: 'success', data }`; el bloque cuelga de `data.guardianships`.
+> Perfiles familiares, rama `feat/family-profiles`, mergeada en `development` (PR #530 de sacdia-backend). Mismo envoltorio `{ status: 'success', data }`; el bloque cuelga de `data.guardianships`.
 
 `data.guardianships` es `null` si el actor no puede leer la familia sensible `legal_representative` (permiso `legal_representative:read`, o `users:read_detail` mientras dure el respaldo transitorio). Para un adulto sin familia llega con listas vacías y `dependent_profile: null`. No hay bloque de escritura: las tutorías las gestiona el tutor desde la app.
 
@@ -1662,7 +1661,7 @@ Semántica funcional y límites: [operations-dashboard.md](../features/operation
 
 #### Contrato `POST /api/v1/auth/oauth/:provider/token`
 
-Diseño: `docs/plans/2026-10-14-native-social-sign-in-design.md`. Configuración de consolas y variables: `docs/guides/SOCIAL-SIGN-IN-SETUP.md`. Los endpoints `POST /auth/oauth/google`, `/apple` y `/callback` (flujo con navegador de Better Auth) se retiran en el slice B4 de sacdia-backend, pendiente de merge junto con el cambio de `DELETE /auth/me` (B3).
+Diseño: `docs/plans/2026-10-14-native-social-sign-in-design.md`. Configuración de consolas y variables: `docs/guides/SOCIAL-SIGN-IN-SETUP.md`. Los endpoints `POST /auth/oauth/google`, `/apple` y `/callback` (flujo con navegador de Better Auth) se retiraron en el slice B4 de sacdia-backend, mergeado en `development` junto con el cambio de `DELETE /auth/me` (B3) (PR #504 de sacdia-backend).
 
 ##### Request
 
@@ -1750,7 +1749,7 @@ Body: `{ "password": "..." }` **o** `{ "provider", "idToken", "nonce" }`. Mandar
 
 #### Edad mínima de la cuenta
 
-> Perfiles familiares, rama `feat/family-profiles`, Pendiente de merge (PR #530 de sacdia-backend). Quien tiene menos de la edad mínima de cuenta de su país (`countries.minor_self_login_min_age`, 13 por defecto si el país es desconocido) no puede tener cuenta propia: lo registra un tutor desde `POST /api/v1/guardianships/me/dependents`. Dos puntos de control; el segundo es el autoritativo.
+> Perfiles familiares, rama `feat/family-profiles`, mergeada en `development` (PR #530 de sacdia-backend). Quien tiene menos de la edad mínima de cuenta de su país (`countries.minor_self_login_min_age`, 13 por defecto si el país es desconocido) no puede tener cuenta propia: lo registra un tutor desde `POST /api/v1/guardianships/me/dependents`. Dos puntos de control; el segundo es el autoritativo.
 
 | Dónde | Regla | Error |
 | --- | --- | --- |
@@ -1759,7 +1758,7 @@ Body: `{ "password": "..." }` **o** `{ "provider", "idToken", "nonce" }`. Mandar
 
 El registro sin `birthday` sigue siendo posible por API, y el inicio de sesión social crea la cuenta sin pasar por `register`. En ambos casos el PATCH cubre el hueco en cuanto el usuario guarda su fecha de nacimiento (paso 2 del post-registro). Entre tanto la cuenta existe, pero desde la Fase 3a **queda restringida** (`age_unknown_user`, ver «Edad desconocida (`kind: age_unknown_user`)»).
 
-> **Fase 3a** (Pendiente de merge (PR #531 de sacdia-backend)): la regla de la Fase 2 sigue (por debajo del mínimo no hay cuenta), pero **de 13 a 17 años ya se puede registrar solo**: queda en modo pendiente de tutor (`supervised_user`) y no entra a un club hasta que un tutor se vincule y un director verifique el consentimiento (ver «Cuentas supervisadas de 13 a 17 años (Fase 3a)»). Una cuenta sin fecha de nacimiento cuyo post-registro está incompleto es `age_unknown_user` (restringida, solo puede terminar el post-registro y salir de la cuenta); en cualquier otra cuenta sin fecha el principal es `user`, pero la compuerta de activación falla cerrada.
+> **Fase 3a** (mergeada en `development` (PR #531 de sacdia-backend)): la regla de la Fase 2 sigue (por debajo del mínimo no hay cuenta), pero **de 13 a 17 años ya se puede registrar solo**: queda en modo pendiente de tutor (`supervised_user`) y no entra a un club hasta que un tutor se vincule y un director verifique el consentimiento (ver «Cuentas supervisadas de 13 a 17 años (Fase 3a)»). Una cuenta sin fecha de nacimiento cuyo post-registro está incompleto es `age_unknown_user` (restringida, solo puede terminar el post-registro y salir de la cuenta); en cualquier otra cuenta sin fecha el principal es `user`, pero la compuerta de activación falla cerrada.
 
 ### camporee-event-templates
 
@@ -2389,7 +2388,7 @@ La `1.2.0` (perfiles familiares) añade la clave `family`, después de `legal_ac
 
 ### guardianships
 
-> Perfiles familiares (Fase 2), rama `feat/family-profiles`, Pendiente de merge (PR #530 de sacdia-backend). Ninguna ruta de `/guardianships/*` declara `@ActingScope`: mientras se actúa por un menor responden 403 `ACTING_FOR_SCOPE_DENIED`, y la app las llama sin `X-Acting-For`. La propiedad se comprueba en el servicio (`@SkipPermissions`), no con permisos RBAC. Respuestas con el envoltorio `{ "status": "success", "data": ... }`.
+> Perfiles familiares (Fase 2), rama `feat/family-profiles`, mergeada en `development` (PR #530 de sacdia-backend). Ninguna ruta de `/guardianships/*` declara `@ActingScope`: mientras se actúa por un menor responden 403 `ACTING_FOR_SCOPE_DENIED`, y la app las llama sin `X-Acting-For`. La propiedad se comprueba en el servicio (`@SkipPermissions`), no con permisos RBAC. Respuestas con el envoltorio `{ "status": "success", "data": ... }`.
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -2528,11 +2527,11 @@ La verificación por el director y la lectura del director están en la sección
 
 ##### Congelación y purga
 
-Un dependiente `frozen` no se lista, no se puede actuar por él y no recibe pushes. A los 90 días, el cron `dependent-profiles-purge` (`20 4 * * *` UTC, lotes de 100) lo anonimiza y **borra** sus datos personales (decisión A9: «borrar» es borrar, no solo ocultar). Detalle por tabla en `docs/database/SCHEMA-REFERENCE.md`, sección «Perfiles familiares». Anonimiza y borra en una transacción y, **después de confirmarla**, borra los objetos de R2 (fichas de consentimiento, foto de perfil, evidencias de clases y especialidades, certificados y documentos de especialidades) con mejor esfuerzo: si R2 falla, la purga no se revierte ni se reintenta y queda el registro `dependent_purge_storage_cleanup_failed` con el bucket y las claves (commit `9533895d`, pendiente de merge). En una tutoría de titular externo, el nombre queda como `'Tutor'` y no en NULL. La variable `R2_BUCKET_GUARDIANSHIP_EVIDENCE` apunta al bucket privado `GUARDIANSHIP_EVIDENCE` (opcional `R2_KEY_PREFIX_GUARDIANSHIP_EVIDENCE`, por defecto `guardianships/consent`). Las variables son opcionales al arrancar y solo son obligatorias al usar el bucket.
+Un dependiente `frozen` no se lista, no se puede actuar por él y no recibe pushes. A los 90 días, el cron `dependent-profiles-purge` (`20 4 * * *` UTC, lotes de 100) lo anonimiza y **borra** sus datos personales (decisión A9: «borrar» es borrar, no solo ocultar). Detalle por tabla en `docs/database/SCHEMA-REFERENCE.md`, sección «Perfiles familiares». Anonimiza y borra en una transacción y, **después de confirmarla**, borra los objetos de R2 (fichas de consentimiento, foto de perfil, evidencias de clases y especialidades, certificados y documentos de especialidades) con mejor esfuerzo: si R2 falla, la purga no se revierte ni se reintenta y queda el registro `dependent_purge_storage_cleanup_failed` con el bucket y las claves (commit `9533895d`, mergeado en `development` con el PR #533 de sacdia-backend). En una tutoría de titular externo, el nombre queda como `'Tutor'` y no en NULL. La variable `R2_BUCKET_GUARDIANSHIP_EVIDENCE` apunta al bucket privado `GUARDIANSHIP_EVIDENCE` (opcional `R2_KEY_PREFIX_GUARDIANSHIP_EVIDENCE`, por defecto `guardianships/consent`). Las variables son opcionales al arrancar y solo son obligatorias al usar el bucket.
 
 ##### Acceso propio del adolescente y resumen (Fase 3a)
 
-> Perfiles familiares, Fase 3a, rama `feat/family-profiles-phase3`, Pendiente de merge (PR #531 de sacdia-backend). Las seis rutas se llaman **como el tutor, sin `X-Acting-For`** (`skipActingFor`); mientras se actúa responden 403 `ACTING_FOR_SCOPE_DENIED`. Las cinco de `supervised-login` exigen la bandera `FAMILY_TEEN_LOGIN_ENABLED` (apagada → 404 `FAMILY_FEATURE_DISABLED`).
+> Perfiles familiares, Fase 3a, rama `feat/family-profiles-phase3`, mergeada en `development` (PR #531 de sacdia-backend). Las seis rutas se llaman **como el tutor, sin `X-Acting-For`** (`skipActingFor`); mientras se actúa responden 403 `ACTING_FOR_SCOPE_DENIED`. Las cinco de `supervised-login` exigen la bandera `FAMILY_TEEN_LOGIN_ENABLED` (apagada → 404 `FAMILY_FEATURE_DISABLED`).
 
 **Quién puede**: un tutor activo, no custodia, no `is_test_data` y con la tutoría **`verified`** (`GuardianPowersPolicy.assertVerifiedGuardian`). Un vínculo `pending` (por ejemplo, el de un código que el adolescente le dio a un desconocido) no tiene poderes de control. La respuesta depende de la ruta (todo sale de `GuardianPowersPolicy.assertVerifiedGuardian`, `src/guardianships/guardian-powers.policy.ts`):
 
@@ -2600,7 +2599,7 @@ Con la bandera apagada, las cinco rutas de `supervised-login` responden 404 `FAM
 
 ### supervision (adolescente con cuenta supervisada)
 
-> Perfiles familiares, Fase 3a, rama `feat/family-profiles-phase3`, Pendiente de merge (PR #531 de sacdia-backend). Rutas que llama el **propio adolescente** (principal `supervised_user`). Para un adulto: `GET /users/me/supervision` responde **200** con `status: null` (sin datos), y `POST /users/me/guardian-link-codes` responde **403** `PRINCIPAL_SCOPE_DENIED` con `kind: "user"` (`LinkCodesService.issueTeenGuardianLink`, `src/guardianships/link-codes.service.ts:196-204`). Actuando por un menor o con un dispositivo, el scope no está y responden `ACTING_FOR_SCOPE_DENIED` o `PRINCIPAL_SCOPE_DENIED`. Respuestas con `{ "status": "success", "data": ... }`.
+> Perfiles familiares, Fase 3a, rama `feat/family-profiles-phase3`, mergeada en `development` (PR #531 de sacdia-backend). Rutas que llama el **propio adolescente** (principal `supervised_user`). Para un adulto: `GET /users/me/supervision` responde **200** con `status: null` (sin datos), y `POST /users/me/guardian-link-codes` responde **403** `PRINCIPAL_SCOPE_DENIED` con `kind: "user"` (`LinkCodesService.issueTeenGuardianLink`, `src/guardianships/link-codes.service.ts:196-204`). Actuando por un menor o con un dispositivo, el scope no está y responden `ACTING_FOR_SCOPE_DENIED` o `PRINCIPAL_SCOPE_DENIED`. Respuestas con `{ "status": "success", "data": ... }`.
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -2671,7 +2670,7 @@ Contrato del vínculo y del reloj: «Cuentas supervisadas de 13 a 17 años (Fase
 | GET | `/api/v1/users/me/legal-acceptance` | JWT | `@SkipPermissions`; throttle 30/min | Estado de aceptación del usuario autenticado para las versiones vigentes | LegalService.getStatus() | `src/legal/legal-acceptance.controller.ts` |
 | POST | `/api/v1/users/me/legal-acceptance` | JWT | `@SkipPermissions`; throttle 10/min | Aceptar las versiones vigentes. Idempotente: responde 200 y no agrega filas si ya estaban aceptadas. Versión distinta de la vigente → 400 `LEGAL_VERSION_MISMATCH` sin escribir. Actuando por un menor (scope `legal:accept`) las filas se guardan para el menor con `accepted_by_user_id` = el tutor | LegalService.accept() | `src/legal/legal-acceptance.controller.ts` |
 
-> **Fase 3a (borrador, Pendiente de merge (PR #531 de sacdia-backend))**: la constante `CURRENT_LEGAL_DOCUMENTS` (`src/legal/legal-documents.constants.ts`) ya está en `2.0.0-family` para `terms` y `privacy` en la rama, en su propio commit `86d3717a` (revertible solo; el comentario del archivo la marca como BORRADOR). Se despliega **solo después** de que el texto se apruebe y se publique en las URLs; promover a `main` está bloqueado hasta la aprobación legal (ver `docs/legal/README.md`). Con el cambio, todo usuario queda pendiente hasta aceptar la versión nueva (compuerta dura en la app): un adulto por sí mismo, un adolescente por sí mismo (también en modo pendiente; `accepted_by_user_id` null) y un tutor por cada dependiente mientras actúa (`accepted_by_user_id` = el tutor; que el tutor haya aceptado para sí no desbloquea a sus dependientes). Una versión vieja → 400 `LEGAL_VERSION_MISMATCH`. Repetir una aceptación no duplica filas (`skipDuplicates`). Los ejemplos de abajo muestran `1.0.0-store`, la versión vigente hasta entonces.
+> **Fase 3a (borrador, mergeada en `development` (PR #531 de sacdia-backend))**: la constante `CURRENT_LEGAL_DOCUMENTS` (`src/legal/legal-documents.constants.ts`) ya está en `2.0.0-family` para `terms` y `privacy` en `development`, en su propio commit `86d3717a` (revertible solo; el comentario del archivo la marca como BORRADOR). Se despliega **solo después** de que el texto se apruebe y se publique en las URLs; promover a `main` está bloqueado hasta la aprobación legal (ver `docs/legal/README.md`). Con el cambio, todo usuario queda pendiente hasta aceptar la versión nueva (compuerta dura en la app): un adulto por sí mismo, un adolescente por sí mismo (también en modo pendiente; `accepted_by_user_id` null) y un tutor por cada dependiente mientras actúa (`accepted_by_user_id` = el tutor; que el tutor haya aceptado para sí no desbloquea a sus dependientes). Una versión vieja → 400 `LEGAL_VERSION_MISMATCH`. Repetir una aceptación no duplica filas (`skipDuplicates`). Los ejemplos de abajo muestran `1.0.0-store`, la versión vigente hasta entonces.
 
 Sin token, los dos endpoints `users/me/legal-acceptance` responden 401 por el guard JWT global. El módulo `src/legal/` es la fuente de las versiones: `src/legal/legal-documents.constants.ts` (ver `docs/legal/README.md`).
 
@@ -2902,7 +2901,7 @@ Fase 8 (ejecutada en código el 2026-10-09; mergeada en `development` con backen
 
 ### legal-representatives
 
-> Perfiles familiares, rama `feat/family-profiles`, Pendiente de merge (PR #530 de sacdia-backend). Los representantes legales quedan de **solo lectura**: las tutorías (`guardianships`, sección homónima) los reemplazan y la tabla se elimina en la Fase 4. Sobre `development` aún existen las cuatro rutas.
+> Perfiles familiares, rama `feat/family-profiles`, mergeada en `development` (PR #530 de sacdia-backend). Los representantes legales quedan de **solo lectura**: las tutorías (`guardianships`, sección homónima) los reemplazan y la tabla se elimina en la Fase 4. En `development` ya solo queda el `GET`; las otras tres rutas se retiraron.
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -2999,17 +2998,17 @@ Fase 8 (ejecutada en código el 2026-10-09; mergeada en `development` con backen
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
 | GET | `/api/v1/club-sections/:clubSectionId/membership-requests` | JWT | Permisos: club_members:approve **o** consent:verify (modo «cualquiera de»; coordinadores solo en secciones cubiertas por sus `coordinator_assignments` `GENERAL`/`ZONE`/`SECTION`, `@AuthorizationResource` club_section con `coordinatorSections`) | Listar solicitudes pendientes de membresía. Un revisor solo-verificación (opción B) ve solo menores con consentimiento `pending` y ficha vigente, y las filas con `viewer_verify_block` se muestran con el bloqueo. Cada ítem añade `consent` (`null` para adultos; para menores sin cuenta, ver «Consentimiento del tutor» debajo; Fase 3c: el bloque lleva `viewer_can_verify` y `viewer_verify_block`, ver «`consent.viewer_can_verify` y `consent.viewer_verify_block`») y `effective_expires_at` (cuándo vence de verdad; ver «Expiración» debajo), y `users.email` puede ser `null` | MembershipRequestsService.listPending() | `src/membership-requests/membership-requests.controller.ts` |
-| POST | `/api/v1/club-sections/:clubSectionId/membership-requests/:assignmentId/approve` | JWT | Permisos: club_members:approve | Aprobar solicitud de membresía. **Responde 200** (`@HttpCode(HttpStatus.OK)`, commit `1e423a34` de la rama `fix/approve-status-and-device-refresh-pg`, pendiente de merge; antes respondía 201 y el QA 3a lo confirmó en vivo). Un menor (sin cuenta, o **con cuenta y de edad menor que la mayoría de edad del país**, Fase 3a; también con fecha de nacimiento `NULL`, que falla cerrada) cuyo consentimiento no está verificado → 409 `MR_CONSENT_NOT_VERIFIED` (la comprobación va dentro de la transacción de la aprobación y es la compuerta común de activación, ver «Compuerta de consentimiento en las activaciones de rol»). Si la solicitud ya no está `pending` al entrar a la transacción (otra revisión la procesó, o se canceló o expiró) no se activa nada: 409 `MR_ALREADY_PENDING`, o 404 `MR_NOT_FOUND` si es de otra sección. El 409 de esta ruta tiene **dos causas distintas**: `MR_CONSENT_NOT_VERIFIED` (el menor no tiene el consentimiento verificado) y `MR_ALREADY_PENDING` (la solicitud ya no estaba pendiente); el Swagger las separaba mal y se corrigió (`membership-requests.controller.ts:128-132`). Aprobar y rechazar registran un evento de auditoría con el revisor como actor | MembershipRequestsService.approve() | `src/membership-requests/membership-requests.controller.ts` |
-| POST | `/api/v1/club-sections/:clubSectionId/membership-requests/:assignmentId/reject` | JWT | Permisos: club_members:approve | Rechazar solicitud de membresía. Responde **200** (`@HttpCode(HttpStatus.OK)`, commit `1e423a34`, pendiente de merge; antes 201) | MembershipRequestsService.reject() | `src/membership-requests/membership-requests.controller.ts` |
+| POST | `/api/v1/club-sections/:clubSectionId/membership-requests/:assignmentId/approve` | JWT | Permisos: club_members:approve | Aprobar solicitud de membresía. **Responde 200** (`@HttpCode(HttpStatus.OK)`, commit `1e423a34` de la rama `fix/approve-status-and-device-refresh-pg`, mergeado en `development` (PR #533 de sacdia-backend); antes respondía 201 y el QA 3a lo confirmó en vivo). Un menor (sin cuenta, o **con cuenta y de edad menor que la mayoría de edad del país**, Fase 3a; también con fecha de nacimiento `NULL`, que falla cerrada) cuyo consentimiento no está verificado → 409 `MR_CONSENT_NOT_VERIFIED` (la comprobación va dentro de la transacción de la aprobación y es la compuerta común de activación, ver «Compuerta de consentimiento en las activaciones de rol»). Si la solicitud ya no está `pending` al entrar a la transacción (otra revisión la procesó, o se canceló o expiró) no se activa nada: 409 `MR_ALREADY_PENDING`, o 404 `MR_NOT_FOUND` si es de otra sección. El 409 de esta ruta tiene **dos causas distintas**: `MR_CONSENT_NOT_VERIFIED` (el menor no tiene el consentimiento verificado) y `MR_ALREADY_PENDING` (la solicitud ya no estaba pendiente); el Swagger las separaba mal y se corrigió (`membership-requests.controller.ts:128-132`). Aprobar y rechazar registran un evento de auditoría con el revisor como actor | MembershipRequestsService.approve() | `src/membership-requests/membership-requests.controller.ts` |
+| POST | `/api/v1/club-sections/:clubSectionId/membership-requests/:assignmentId/reject` | JWT | Permisos: club_members:approve | Rechazar solicitud de membresía. Responde **200** (`@HttpCode(HttpStatus.OK)`, commit `1e423a34`, mergeado en `development` (PR #533 de sacdia-backend); antes 201) | MembershipRequestsService.reject() | `src/membership-requests/membership-requests.controller.ts` |
 | POST | `/api/v1/club-sections/:clubSectionId/membership-requests/:assignmentId/consent-evidence` | JWT | Permisos: club_members:approve (solo; `consent:verify` no basta: un revisor solo-verificación recibe 403 `GUARD_PERMISSION_DENIED` o `GUARD_CLUB_SCOPE_REQUIRED`) · `@AuthorizationResource` club_assignment; throttle 20/hora | El director sube la ficha firmada del menor (multipart `file`; mismas reglas de archivo que la del tutor). Solo para solicitudes `pending` de esa sección. 201 `{ evidence_id, content_type, size_bytes, uploaded_at }`. No verifica el consentimiento. Con el consentimiento ya verificado → 409 `GUARDIANSHIP_CONSENT_ALREADY_VERIFIED` | GuardianEvidenceService.uploadForDirector() | `src/membership-requests/membership-requests.controller.ts` |
 | GET | `/api/v1/club-sections/:clubSectionId/membership-requests/:assignmentId/consent-evidence` | JWT | Permisos: club_members:approve **o** consent:verify (modo «cualquiera de»; coordinadores solo en secciones cubiertas por sus asignaciones, `coordinatorSections`) · `@AuthorizationResource` club_assignment | URL firmada (15 min) de la ficha vigente. Solicitudes `pending` o `active` de esa sección. Un revisor solo-verificación solo la lee dentro de su lista (solicitud `pending`, menor, consentimiento `pending`, ficha vigente); fuera, 404 `MR_NOT_FOUND`. 200 `{ url, expires_in: 900, content_type, uploaded_at, uploaded_by_display_name }` | GuardianEvidenceService.getForDirector() | `src/membership-requests/membership-requests.controller.ts` |
 | POST | `/api/v1/club-sections/:clubSectionId/membership-requests/:assignmentId/verify-consent` | JWT | Permisos: club_members:approve **o** consent:verify (Fase 3c, modo «cualquiera de»; `approve: true` exige además club_members:approve, si no 403 `MR_APPROVE_PERMISSION_REQUIRED`; coordinadores solo en secciones cubiertas por sus asignaciones, `coordinatorSections`; un solo-verificación fuera de su lista → 404 `MR_NOT_FOUND`) · `@AuthorizationResource` club_assignment | El director confirma que revisó la ficha firmada y verifica el consentimiento del menor (y, con `approve: true`, aprueba la solicitud). Responde **200** (idempotente), no 201 | ConsentVerificationService.verify() | `src/membership-requests/membership-requests.controller.ts` |
 
 #### Consentimiento del tutor (menores sin cuenta)
 
-> Perfiles familiares, rama `feat/family-profiles`, Pendiente de merge (PR #530 de sacdia-backend). Aplica a **dependientes** (usuarios con `dependent_profiles`). Las filas `is_test_data` nunca cuentan como consentimiento.
+> Perfiles familiares, rama `feat/family-profiles`, mergeada en `development` (PR #530 de sacdia-backend). Aplica a **dependientes** (usuarios con `dependent_profiles`). Las filas `is_test_data` nunca cuentan como consentimiento.
 >
-> **Fase 3a** (rama `feat/family-profiles-phase3`, Pendiente de merge (PR #531 de sacdia-backend)): la compuerta y el bloque `consent` pasan de «tiene `dependent_profiles`» a **«es menor de edad»** (edad menor que la mayoría de edad del país, o `dependent_profiles`, o fecha de nacimiento `NULL`). Un adolescente que se registró solo ya **no** queda sin consentimiento: aprobar su solicitud responde 409 `MR_CONSENT_NOT_VERIFIED` hasta que haya un tutor vinculado y verificado. Solo los adultos no cambian (`consent` es `null`). Un menor sin `dependent_profiles` (adolescente que aún no tiene tutor) recibe el bloque `{ "required": true, "dependent": false, "guardian_linked": false, "guardianship_id": null, "status": "pending", "guardians": [] }`; **todos** los bloques agregan `guardian_linked` (`true` si hay una tutoría de persona activa, aunque sea pendiente).
+> **Fase 3a** (rama `feat/family-profiles-phase3`, mergeada en `development` (PR #531 de sacdia-backend)): la compuerta y el bloque `consent` pasan de «tiene `dependent_profiles`» a **«es menor de edad»** (edad menor que la mayoría de edad del país, o `dependent_profiles`, o fecha de nacimiento `NULL`). Un adolescente que se registró solo ya **no** queda sin consentimiento: aprobar su solicitud responde 409 `MR_CONSENT_NOT_VERIFIED` hasta que haya un tutor vinculado y verificado. Solo los adultos no cambian (`consent` es `null`). Un menor sin `dependent_profiles` (adolescente que aún no tiene tutor) recibe el bloque `{ "required": true, "dependent": false, "guardian_linked": false, "guardianship_id": null, "status": "pending", "guardians": [] }`; **todos** los bloques agregan `guardian_linked` (`true` si hay una tutoría de persona activa, aunque sea pendiente).
 
 **Bloque `consent` en `GET .../membership-requests`** (una consulta por lote, sin N+1):
 
@@ -3162,7 +3161,7 @@ Perfiles familiares: un dependiente no tiene cuenta ni tokens FCM, así que un p
 
 ##### `POST /api/v1/users/:userId/post-registration/step-3/consent-evidence`
 
-> Perfiles familiares, Fase 3a, rama `feat/family-profiles-phase3`, Pendiente de merge (PR #531 de sacdia-backend). Cierra el residual aceptado nº 2 de la Fase 2 (el tutor tenía que salir del modo actuar para subir la ficha).
+> Perfiles familiares, Fase 3a, rama `feat/family-profiles-phase3`, mergeada en `development` (PR #531 de sacdia-backend). Cierra el residual aceptado nº 2 de la Fase 2 (el tutor tenía que salir del modo actuar para subir la ficha).
 
 - Solo con `kind = guardian_acting` y `:userId` igual al menor por el que actúa; si no, 403 (un adolescente o un dispositivo vinculado: 403 `PRINCIPAL_SCOPE_DENIED`). El tutor sale de `actor_sub` y la tutoría sale del **principal** (`guardianship_id`), nunca del cuerpo ni de la ruta: un cuerpo que nombre otra tutoría se ignora.
 - Mismas reglas de archivo y de fallo cerrado que la subida del tutor (`POST /guardianships/me/dependents/:dependentId/consent-evidence`): JPEG, PNG, WebP o PDF, 10 MB, bytes mágicos, HEIC rechazado, una ficha vigente por tutoría, 20 por hora compartidas con la ruta del tutor. `uploaded_by_user_id` es el tutor.
@@ -3170,7 +3169,7 @@ Perfiles familiares: un dependiente no tiene cuenta ni tokens FCM, así que un p
 
 ##### `POST /api/v1/users/:userId/post-registration/step-3/guardian-only`
 
-> Perfiles familiares, rama `feat/family-profiles`, Pendiente de merge (PR #530 de sacdia-backend).
+> Perfiles familiares, rama `feat/family-profiles`, mergeada en `development` (PR #530 de sacdia-backend).
 
 Body opcional (todos los campos pueden omitirse): `{ "country_id": 1, "union_id": 2, "local_field_id": 3 }`. Si llegan, se guardan en el usuario. No exige que ya exista un dependiente: el tutor puede cerrar su post-registro antes de añadir menores.
 
