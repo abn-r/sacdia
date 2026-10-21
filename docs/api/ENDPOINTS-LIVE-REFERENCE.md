@@ -7,7 +7,7 @@
 > La tabla refleja los decoradores HTTP efectivos en controllers NestJS; DTOs, ejemplos y errores finos viven en Swagger/runtime y docs de feature cuando aplique.
 
 **Estado**: ACTIVE
-**Actualizado**: 2026-10-20 (perfiles familiares, Fase 2 completa: sub-fases 2a, 2b y 2c, y las sub-fases 3a, 3b y 3c pendientes de merge; ver también aceptación legal 2026-10-15 y la nota de resincronización 2026-10-13)
+**Actualizado**: 2026-10-21 (cola de consentimientos del coordinador; ver la nota «Seguimientos 2026-10-21»). Antes, 2026-10-20 (perfiles familiares, Fase 2 completa: sub-fases 2a, 2b y 2c, y las sub-fases 3a, 3b y 3c pendientes de merge; ver también aceptación legal 2026-10-15 y la nota de resincronización 2026-10-13)
 **Total endpoints**: 866 decoradores HTTP en 108 archivos `*.controller.ts` de `development`. La matriz tiene además 20 filas **pendientes de merge (PR #448 de sacdia-backend)**: secciones `class-thresholds`, `investiture-windows`, `investiture-pastors`, `investiture-requests` y el `GET .../sections/:clubSectionId/score` de camporee-scoring.
 **Métodos (development)**: GET 353 · POST 279 · PATCH 125 · DELETE 96 · PUT 13
 **Auth detectada (development)**: Public 13 · JWT u Optional JWT 853
@@ -52,6 +52,9 @@
 > - Cambian de contrato: `POST .../membership-requests/:assignmentId/verify-consent` (permiso `club_members:approve` **o** `consent:verify`; `approve: true` exige `club_members:approve`), `GET .../membership-requests` (`consent.viewer_can_verify` y `consent.viewer_verify_block`), `GET /admin/users/:userId` (`data.family_access`), el cron de vencimiento de solicitudes (congela al menor en custodia) y los avisos de dispositivo por `majority` y `expired`.
 > - Permisos nuevos: `dependents:create` y `consent:verify` (migración de datos `20261022130000_seed_family_permissions`; los coordinadores reciben `consent:verify` aparte, con `20261023120000_grant_consent_verify_to_coordinators`, rama `feat/coordinator-consent-verify`, pendiente de aplicar); columna nueva `dependent_profiles.teen_login_nudged_at` (migración `20261022120000_family_director_minors`). 1 código de error nuevo (`MR_APPROVE_PERMISSION_REQUIRED`). Cron nuevo `family-age-transitions`.
 > - **Resumen de la Fase 3 completa**: 17 endpoints nuevos (3a: 10, 3b: 4, 3c: 3). Detalle en «Registro de menores por un director y acceso familiar en el panel (Fase 3c)» (antes de «Resumen por dominio»).
+
+> [!NOTE]
+> **Seguimientos 2026-10-21** (todos **pendientes de merge**, sin cambios de esquema): (1) `GET /coordination/me/consent-pending`, la cola del coordinador (sacdia-backend `feat/coordinator-pending-consents`); ver «`GET /api/v1/coordination/me/consent-pending`» (dentro de «Registro de menores por un director y acceso familiar en el panel (Fase 3c)», tras «Revisor solo-verificación»). Los totales de la cabecera no incluyen la ruta nueva.
 
 ## Cómo leer esta referencia
 
@@ -627,6 +630,77 @@ Un revisor es **solo-verificación** cuando el llamante entró por la vía de co
 | `POST .../approve` y `.../reject` | solo `club_members:approve` | Sin cambios: 403 para un coordinador. |
 
 Quien aprueba después necesita `club_members:approve`. Cobertura: pruebas unitarias de guard y servicios, y e2e `test/director-created-minor.e2e-spec.ts` (viaje A2: coordinador con asignación `SECTION` cubierta verifica con `approve: false`; coordinador de otra sección, con asignación vencida o miembro de la sección sin asignación reciben 403 `GUARD_CLUB_SCOPE_REQUIRED`; subir ficha 403 `GUARD_PERMISSION_DENIED`; `approve: true` 403 `MR_APPROVE_PERMISSION_REQUIRED`). El e2e no evalúa el filtro relacional de zona contra una base real; esa consulta se prueba por forma del `where`. Pendiente: QA en vivo con una cuenta de coordinador tras aplicar la migración.
+
+### `GET /api/v1/coordination/me/consent-pending`
+
+> [!NOTE]
+> Rama `feat/coordinator-pending-consents` de sacdia-backend (commit `a8688f81`), **pendiente de merge**. Verificado contra el código de la rama (`src/coordination/coordination.controller.ts`, `coordinator-consent-queue.service.ts`, `dto/coordinator-consent-pending-query.dto.ts`, `membership-requests.service.ts` `listVerifyWorkAcrossSections`). La app (sacdia-app, commit `78ff697b`) y el panel (sacdia-admin, commit `07247d1`) ya lo consumen, cada uno en su rama `feat/coordinator-pending-consents`, también pendiente de merge. Las filas de esta ruta no cuentan en los totales de la cabecera.
+
+La **cola del coordinador**: una sola llamada devuelve todas las fichas de consentimiento que esperan verificación en **todas** las secciones que cubren sus `coordinator_assignments` vigentes. Sustituye al recorrido sección por sección que hacían la app y el panel con `GET .../membership-requests` (que sigue siendo la ruta para quien no es coordinador y para una sola sección).
+
+- **Qué lista**: lo mismo que la lista por sección muestra a un revisor solo-verificación (ver «Revisor solo-verificación»): solicitudes `pending` de menores con consentimiento `pending` **y** una ficha vigente subida. Se omiten adultos, consentimientos ya verificados y menores sin ficha. Las filas con `viewer_verify_block` se incluyen con el bloqueo. El predicado es el mismo (`consentHasVerifyWork`), no una copia.
+- **Cobertura**: la expansión de `GET /coordination/me/scope` (solo territorio activo; ver `docs/canon/runtime-coordination.md`). Una asignación vencida o con el territorio inactivo no aporta secciones.
+- **Autorización**: `@RequirePermissions('consent:verify')` con `@AuthorizationResource({ type: 'global' })`, es decir, el permiso se evalúa como **global**: un `consent:verify` que viene de un rol de club **no cuenta**. Además el servicio exige que el permiso provenga de un **rol de coordinador** (`coordinator`, `zone-coordinator` o `general-coordinator`) y que las asignaciones activas cubran al menos una sección. Quien tiene `consent:verify` por otra vía (director, secretario, admin) usa la lista por sección. Sin `@ActingScope`: un tutor actuando, un adolescente supervisado y un dispositivo vinculado quedan denegados por defecto.
+
+**Query** (`CoordinatorConsentPendingQueryDto`; el `ValidationPipe` global tiene `forbidNonWhitelisted`, así que cualquier otro parámetro es 400):
+
+| Parámetro | Requerido | Validación |
+| --- | --- | --- |
+| `limit` | No | Entero de 1 a 100. Por defecto 50 |
+| `offset` | No | Entero `>= 0`. Por defecto 0 |
+
+**Respuesta 200**:
+
+```json
+{
+  "status": "success",
+  "data": {
+    "items": [
+      {
+        "assignment_id": "3f0c8a52-6a58-4b1e-9d2a-0e5b7c1d9a11",
+        "user_id": "8d1f0b34-2c6e-4f0a-bb7e-5a3c9e2d4f10",
+        "club_section_id": 10,
+        "status": "pending",
+        "created_at": "2026-10-01T12:00:00.000Z",
+        "expires_at": "2026-10-09T12:00:00.000Z",
+        "effective_expires_at": "2026-10-31T12:00:00.000Z",
+        "consent_form_uploaded_at": "2026-10-03T09:30:00.000Z",
+        "club_name": "Club Orion",
+        "club_type_name": "Conquistadores",
+        "district_name": "Distrito Norte",
+        "users": { "user_id": "…", "name": "Mateo", "email": null, "paternal_last_name": "Pérez", "maternal_last_name": "López", "user_image": null },
+        "roles": { "role_id": "…", "role_name": "member" },
+        "consent": { "required": true, "dependent": true, "guardian_linked": false, "guardianship_id": "…", "status": "pending", "evidence_uploaded": true, "guardians": [], "viewer_can_verify": true, "viewer_verify_block": null }
+      }
+    ],
+    "total": 1,
+    "limit": 50,
+    "offset": 0,
+    "by_section": [
+      { "club_section_id": 10, "club_name": "Club Orion", "club_type_name": "Conquistadores", "district_name": "Distrito Norte", "pending_consent_count": 1 }
+    ]
+  }
+}
+```
+
+- **`items`**: cada elemento es el elemento de `GET /club-sections/:id/membership-requests` (mismo bloque `consent`, con `viewer_can_verify` y `viewer_verify_block`, y `effective_expires_at`) más `consent_form_uploaded_at`, `club_name`, `club_type_name` y `district_name`. Los tres nombres pueden ser `null` si la sección ya no figura en la expansión (carrera entre la lectura de la cola y la del alcance).
+- **`total`** y **`by_section`** cuentan la cola **completa**, no la página. `by_section` trae solo las secciones con al menos una ficha pendiente (`pending_consent_count >= 1`), ordenadas por `club_section_id`. `limit` y `offset` repiten los valores aplicados.
+- **Orden**: la ficha vigente más antigua primero (`guardianship_consent_evidences.uploaded_at` ascendente, es decir, la que más lleva esperando), luego `created_at` de la solicitud ascendente y, por último, `assignment_id`.
+- **Paginación por `offset`**: el total se calcula en memoria sobre los candidatos, así que no hay cursor. Una fila que otro revisor verifica entre dos páginas puede desplazar las siguientes; los clientes deben tratar la página como instantánea y refrescar tras verificar.
+
+**Errores**:
+
+| Estado | Código | Cuándo |
+| --- | --- | --- |
+| 400 | validación genérica | `limit` fuera de 1..100, `offset` negativo, valores no enteros o parámetros desconocidos |
+| 403 | `GUARD_PERMISSION_DENIED` | `consent:verify` no proviene de un rol de coordinador (un coordinador cuyo permiso sale solo de un rol de club, o un director, secretario o admin sin ese rol) |
+| 403 | `GUARD_CLUB_SCOPE_REQUIRED` | El coordinador no tiene asignaciones vigentes que cubran alguna sección activa (ninguna, vencidas o solo territorio inactivo) |
+| 403 | `ACTING_FOR_SCOPE_DENIED` | Tutor actuando con `X-Acting-For` |
+| 403 | `PRINCIPAL_SCOPE_DENIED` | Adolescente supervisado o dispositivo vinculado |
+
+Costo: el número de consultas no crece con el de secciones (una lectura de candidatas, una de usuarios y tutorías, una de la página y el presentador por sección).
+
+**Clientes**: la app («Fichas por verificar») pide páginas de 50 con «Cargar más», muestra el total y el resumen por sección desde `by_section`, y decide los estados de pantalla por `code` (403 `GUARD_CLUB_SCOPE_REQUIRED` → sin secciones; `GUARD_PERMISSION_DENIED`, `ACTING_FOR_SCOPE_DENIED` y `PRINCIPAL_SCOPE_DENIED` → denegado; otros → error con reintento). La insignia del hub sale de `limit=1` y el `total`. El panel muestra la vista «Todas mis secciones» por defecto para coordinadores en `/dashboard/requests/membership`, con páginas de 25; el resumen por sección cambia el selector a la lista de esa sección (no filtra en el cliente, porque la paginación por `offset` ocultaría fichas de otras páginas). Verificar usa `verify-consent` con la `club_section_id` del propio elemento.
 
 ### `POST /api/v1/club-sections/:clubSectionId/dependents`
 
@@ -2211,6 +2285,7 @@ Una resolución confirmada avisa en la bandeja de la app, no por correo. La inte
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
 | GET | `/api/v1/coordination/me/scope` | JWT | - | Resolver el alcance efectivo de coordinación del usuario actual | CoordinationService.resolveCoordinatorScope() | `src/coordination/coordination.controller.ts` |
+| GET | `/api/v1/coordination/me/consent-pending` | JWT | Permisos: consent:verify (global; debe venir de un rol de coordinador) | Fichas de consentimiento por verificar en todas las secciones del coordinador (pendiente de merge, rama `feat/coordinator-pending-consents`) | CoordinatorConsentQueueService.listForCoordinator() | `src/coordination/coordination.controller.ts` |
 
 ### dashboard
 

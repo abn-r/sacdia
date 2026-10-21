@@ -47,6 +47,9 @@ La unidad final de autoridad es `club_sections`.
 - Módulo de coordinación para zonas y asignaciones: `CoordinationModule`.
 - Resolver común `coordinator_scope(user_id)` expuesto como
   `GET /api/v1/coordination/me/scope`.
+- Cola de fichas de consentimiento de menores: `GET /api/v1/coordination/me/consent-pending`
+  (todas las secciones cubiertas en una sola llamada, para verificar; ver
+  `docs/features/family-profiles.md` y `docs/api/ENDPOINTS-LIVE-REFERENCE.md`).
 - Backfill admin
   `POST /api/v1/admin/coordination/local-fields/:localFieldId/backfill`
   (`dry_run` default `true`) para migrar rol + `local_field_id` a `GENERAL`.
@@ -79,6 +82,11 @@ La unidad final de autoridad es `club_sections`.
   `coordinator`, `zone-coordinator` o `general-coordinator`.
 - Consume `GET /api/v1/coordination/me/scope` para mostrar secciones asignadas
   y derivar clubes bajo gestión.
+- «Fichas por verificar» (verificación de consentimiento de menores) consume
+  `GET /api/v1/coordination/me/consent-pending`: una llamada por página de 50,
+  con total y resumen por sección (rama `feat/coordinator-pending-consents`,
+  pendiente de merge). El panel tiene la misma cola como vista «Todas mis
+  secciones» de las solicitudes de membresía.
 - SLA, evidencias e investiduras usan el scope filtrado en backend.
 - La superficie de coordinación no muestra aprobaciones de camporee.
 - Multirol: si el usuario también es director, las funcionalidades de director
