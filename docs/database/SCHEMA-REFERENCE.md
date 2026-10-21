@@ -220,7 +220,7 @@ Quién responde por un dependiente. Una fila por tutor (o por custodia de un clu
 | `sworn_declaration_at` | `timestamptz(6)` | sí | - | Cuando el tutor juró serlo |
 | `invited_by_guardianship_id` | `uuid` | sí | - | FK a `guardianships`: la tutoría de quien emitió el código con que entró |
 | `verified_by_user_id` | `uuid` | sí | - | FK a `users.user_id`: quién verificó el consentimiento |
-| `verification_method` | `varchar(32)` | sí | - | `director_paper_form`, `guardian_invite`, `legacy_import` o `test_placeholder` |
+| `verification_method` | `varchar(32)` | sí | - | `director_paper_form`, `coordinator_paper_form`, `guardian_invite`, `legacy_import` o `test_placeholder` |
 | `verified_at` | `timestamptz(6)` | sí | - | |
 | `revoked_at` | `timestamptz(6)` | sí | - | |
 | `revoked_reason` | `varchar(32)` | sí | - | `guardian_left`, `removed_by_primary`, `guardian_account_closed`, `claimed`, `admin` o `released` (Fase 3a: también `removed_by_dependent`) |
@@ -231,7 +231,7 @@ Quién responde por un dependiente. Una fila por tutor (o por custodia de un clu
 | `modified_at` | `timestamptz(6)` | no | `now()` | `@updatedAt` en Prisma |
 
 - **CHECK**:
-  - `guardianships_consent_status_ck`, `guardianships_verification_method_ck` y `guardianships_revoked_reason_ck` fijan los valores de arriba (los dos últimos admiten NULL).
+  - `guardianships_consent_status_ck`, `guardianships_verification_method_ck` y `guardianships_revoked_reason_ck` fijan los valores de arriba (los dos últimos admiten NULL). Ojo: el CHECK de `verification_method` sigue sin listar `coordinator_paper_form` (ver «Quién escribe `verified`»).
   - `guardianships_holder_ck`: una fila es de custodia (`is_custodian`, sin `guardian_user_id`, con `custodian_club_id`) o de persona (sin club y con `guardian_user_id` o `external_name`).
   - `guardianships_not_self_ck`: nadie es su propio tutor.
   - `guardianships_revoked_ck`: `(consent_status = 'revoked') = (revoked_at IS NOT NULL)`.
@@ -244,7 +244,7 @@ Quién responde por un dependiente. Una fila por tutor (o por custodia de un clu
 - Relaciones Prisma: `guardianship_dependent`, `guardianship_guardian`, `guardianship_verifier`, `guardianships_custodian` (en `clubs`), `guardianship_invites` (autorreferencia) y la inversa en `relationship_types.guardianships`.
 - **Activa** significa `consent_status IN ('pending','verified')`. Solo las filas activas, no de custodia ni de prueba cuentan para acceso, límites y notificaciones. Límites aplicados en servicio: 10 dependientes activos por tutor y 4 tutores activos por dependiente.
 - **Quién da acceso**: solo `pending` y `verified` de una persona con cuenta **activa** (`users.active`; un tutor eliminado o desactivado no actúa aunque su fila siga). `revoked`, custodia, tutor externo e `is_test_data` no dan acceso.
-- **Quién escribe `verified`**: `director_paper_form` lo fija `POST .../membership-requests/:assignmentId/verify-consent` sobre la tutoría **principal** activa (de persona o de custodia) y `guardian_invite` lo reciben los tutores invitados por una fila que se verifica (promoción en cadena). `legacy_import` y `test_placeholder` solo los escribe el script de desarrollo. Una custodia de club se verifica con la regla de cuatro ojos (el que subió la ficha, el que creó al menor y el tutor que lo dejó en custodia no pueden verificarla).
+- **Quién escribe `verified`**: `POST .../membership-requests/:assignmentId/verify-consent` lo fija sobre la tutoría **principal** activa (de persona o de custodia): `coordinator_paper_form` si quien verifica llegó por la vía del coordinador (rol global de coordinador con `consent:verify` y una `coordinator_assignment` vigente que cubre la sección) y `director_paper_form` en cualquier otro caso (director, o un rol de club con solo `consent:verify`). La columna es `varchar(32)`, pero el CHECK `guardianships_verification_method_ck` (migración `20261016120000_family_profiles`) solo admite `director_paper_form`, `guardian_invite`, `legacy_import` y `test_placeholder`: **escribir `coordinator_paper_form` exige ampliar ese CHECK con una migración, que aún no existe en la rama**; sin ella el `UPDATE` falla. Las filas verificadas antes de ese cambio (rama `feat/coordinator-pending-consents`) siguen como `director_paper_form`. `guardian_invite` lo reciben los tutores invitados por una fila que se verifica (promoción en cadena). `legacy_import` y `test_placeholder` solo los escribe el script de desarrollo. Una custodia de club se verifica con la regla de cuatro ojos (el que subió la ficha, el que creó al menor y el tutor que lo dejó en custodia no pueden verificarla).
 - **Datos del tutor externo**: al purgar al menor, `external_phone` se anula siempre. `external_name` se anula en las filas de custodia o con `guardian_user_id`, pero en una fila de titular externo (no custodia y sin `guardian_user_id`) se **sobrescribe con el marcador `'Tutor'`** (`PURGED_GUARDIAN_NAME`, `src/guardianships/guardianships.constants.ts`), porque `guardianships_holder_ck` exige un `external_name` en esa fila y anularlo hacía fallar la purga con el error 23514 (corregido en el commit `9533895d`, rama `fix/approve-status-and-device-refresh-pg`, pendiente de merge).
 
 ### `guardianship_consent_evidences`
@@ -267,7 +267,7 @@ Historial append-only de la ficha de consentimiento firmada (imagen o PDF). La f
 - Relación Prisma: `consent_evidence_uploader` (`users.guardianship_consent_evidences_uploaded`).
 - La purga de un dependiente borra las filas y sus objetos en R2 (decisión A9); la tutoría queda para auditoría.
 - **Clave del objeto**: `{prefijo}/{guardianship_id}/{uuid}.{ext}` con prefijo `R2_KEY_PREFIX_GUARDIANSHIP_EVIDENCE` (por defecto `guardianships/consent`); la extensión sale del tipo MIME validado, nunca del nombre original.
-- **Auditoría**: cada subida y cada lectura escriben un evento `guardianship_consent_evidence` (`uploaded` o `read`, `changes.via` = `guardian`, `director` o `admin`) en `audit_logs`; la verificación escribe `guardianship` / `consent_verified` dentro de su transacción.
+- **Auditoría**: cada subida y cada lectura escriben un evento `guardianship_consent_evidence` (`uploaded` o `read`, `changes.via` = `guardian`, `director` o `admin`) en `audit_logs`; la verificación escribe `guardianship` / `consent_verified` dentro de su transacción, con `changes.verification_method` igual al valor de la fila (`director_paper_form` o `coordinator_paper_form`; en este último el resumen dice «verificado por el coordinador»).
 
 ### `guardianship_link_codes`
 

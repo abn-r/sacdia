@@ -6,6 +6,14 @@ Fuente: Reality Matrix + Canon verification
 
 ---
 
+## Perfiles familiares: `verification_method` cuando verifica un coordinador (2026-10-21)
+
+**Estado: RESUELTA — `coordinator_paper_form`; implementada en la rama `feat/coordinator-pending-consents` (backend y panel), pendiente de merge.**
+
+Pregunta: la verificación de un coordinador guardaba `director_paper_form` (la QA en vivo del 2026-10-21 lo mostró), así que el dato no distinguía quién revisó la ficha. Decisión: `guardianships.verification_method` admite el valor `coordinator_paper_form`, que se guarda cuando quien verifica llegó por la vía del coordinador (rol global de coordinador con `consent:verify` y una `coordinator_assignment` vigente que cubre la sección). Director y roles de club con solo `consent:verify` siguen con `director_paper_form`; `guardian_invite` no cambia; las filas ya verificadas no se tocan. El valor va también a la respuesta de `verify-consent` y a `changes.verification_method` del evento `consent_verified`. Condición abierta: el CHECK `guardianships_verification_method_ck` aún no lo admite y requiere una migración. Detalle en [family-profiles.md](../features/family-profiles.md) y [SCHEMA-REFERENCE.md](../database/SCHEMA-REFERENCE.md).
+
+---
+
 ## Perfiles familiares: restricción de lanzamiento (2026-10-19)
 
 **Estado: RESUELTA como decisión — condición de lanzamiento ABIERTA hasta que exista la Fase 3.**
