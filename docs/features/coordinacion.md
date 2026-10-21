@@ -96,6 +96,24 @@ La unidad final de autoridad es `club_sections`.
 - Multirol: si el usuario también es director, las funcionalidades de director
   siguen apareciendo en la app mediante sus permisos/roles existentes.
 
+## Coordinador sin club propio (app)
+
+**Estado**: IMPLEMENTADO en sacdia-app (PR #182, mergeado en `development` el 2026-10-21).
+
+Un usuario con rol global de coordinación (`coordinator`, `zone-coordinator` o `general-coordinator`), sin asignaciones de club visibles (las `designated` no cuentan) y que no actúa en nombre de otra persona, es un **coordinador sin club**. La app lo detecta con `isCoordinatorWithoutClub(user)` (`lib/features/auth/domain/utils/authorization_utils.dart`).
+
+- **Post-registro exento**, como el pastor sin club: no pide foto ni datos personales, y se omiten esos pasos. Es solo de la app: el backend lee `users_pr.complete`, pero no bloquea nada por ese estado. Una cuenta `profile_incomplete` (sin fecha de nacimiento) sí pasa por el post-registro.
+- **Inicio**: `CoordinatorHubView` (hub de coordinación), con campana de notificaciones visible solo para este usuario. La navegación tiene dos pestañas: Coordinación y Perfil.
+- **Rutas permitidas** (`lib/core/config/coordinator_route_access.dart`): dashboard, perfil, información médica, bandeja de notificaciones, el subárbol `/coordinator` (clubes, revisión de evidencias, revisión de consentimientos, SLA, reportes y perfil de coordinador) y `/family`.
+- **Rutas bloqueadas** (redirigen al dashboard): `/coordinator/coord-activities`, honores, clases, club, miembros, actividades e investiduras propias. La misma regla aplica a las notificaciones push y a los deep links.
+
+**Precedencia** cuando el usuario tiene más de un rol:
+
+| Combinación | Inicio | Notas |
+|---|---|---|
+| Coordinador + tutor | Hub de coordinación | «Mi familia» se abre desde el perfil |
+| Coordinador + pastor sin club | Hub de coordinación | Las rutas de autorización siguen accesibles, sin pestaña de navegación |
+
 ## Decisiones de diseño
 
 - **Scope por asignación, no por rol global**: el rol habilita acceso; la
