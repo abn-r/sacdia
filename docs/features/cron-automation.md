@@ -436,7 +436,7 @@ El admin tiene dos superficies complementarias de observabilidad: BullMQ (colas)
   - (sin corrida registrada: `cron-alert-check`, `fcm-tokens-stale-cleanup`, `investiture-achievement-intent`; solo existen como nombre del registro de crones)
 - Status valores: `running | completed | failed | skipped` (CHECK constraint en SQL).
 - Endpoint: `GET /api/v1/admin/analytics/cron-runs` — retorna `{ recent[], stats[] }`. `recent` es última ejecución por job vía `DISTINCT ON (job_name)`. `stats` agrega `avg_duration_ms_30d`, `failure_rate_7d`, `last_success`, `last_failure`, `total_runs_7d` por job.
-- Cada elemento de `recent[]` incluye `trigger` (`'manual' | 'scheduled'`) y `triggered_by` (`user_id` del super-admin de una ejecución manual, o `null`). Pendiente de merge (rama `feat/admin-run-cron-now`, ver «Ejecutar ahora»).
+- Cada elemento de `recent[]` incluye `trigger` (`'manual' | 'scheduled'`) y `triggered_by` (`user_id` del super-admin de una ejecución manual, o `null`). Mergeado en `development` el 2026-10-21 (PR #535 de sacdia-backend; rama `feat/admin-run-cron-now`, ver «Ejecutar ahora»).
 - Sin dependencia de Redis — siempre disponible.
 
 ### Página admin
@@ -449,7 +449,7 @@ El admin tiene dos superficies complementarias de observabilidad: BullMQ (colas)
 
 ### Ejecutar ahora (jobs bajo demanda)
 
-**Estado**: IMPLEMENTADO en las ramas `feat/admin-run-cron-now` de sacdia-backend (commits `2bacda55` y `bb57a925`) y sacdia-admin (commits `34d9e4e`, `ac40318`, `1c21151` y `5026a0a`), **pendiente de merge**. Contrato y errores completos en `docs/api/ENDPOINTS-LIVE-REFERENCE.md`, «Jobs programados bajo demanda».
+**Estado**: IMPLEMENTADO en las ramas `feat/admin-run-cron-now` de sacdia-backend (commits `2bacda55` y `bb57a925`) y sacdia-admin (commits `34d9e4e`, `ac40318`, `1c21151` y `5026a0a`), **mergeadas en `development` el 2026-10-21** (PR #535 de sacdia-backend y PR #247 de sacdia-admin). Contrato y errores completos en `docs/api/ENDPOINTS-LIVE-REFERENCE.md`, «Jobs programados bajo demanda».
 
 - **Para qué.** Con el servicio de `development` dormido los crones no corren (ver «Infraestructura»). Un super-admin puede ejecutar un job a mano; es la forma de correrlos en desarrollo.
 - **API** (solo `super-admin`, 10 por minuto): `GET /api/v1/admin/cron-jobs` (los 20 jobs de la allowlist con su cron de 5 campos, zona horaria y si son ejecutables) y `POST /api/v1/admin/cron-jobs/:jobName/run` (200; espera al job; 404 `CRON_JOB_NOT_FOUND` si no está en la lista). Ejecuta el mismo método que el scheduler, con el **mismo candado** (`cron-run:<job>` en los jobs de «Candado de corrida compartido»; `cron:<job>` en los que tienen candado propio) y la **misma fila** de `cron_run_log`, marcada `metadata.trigger = 'manual'` y `metadata.triggered_by`. Si el job ya corre (por el scheduler u otra ejecución manual), responde `skipped` y deja una fila `skipped`. Los jobs respaldados por BullMQ (`monthly-reports-auto-generate`, `rankings-recalculate`, `finance-period-closing`) devuelven `enqueued: true` cuando hay Redis y terminan en el worker. Audita `admin.cron_job.run`.

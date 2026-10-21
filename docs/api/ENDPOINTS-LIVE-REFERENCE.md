@@ -54,7 +54,7 @@
 > - **Resumen de la Fase 3 completa**: 17 endpoints nuevos (3a: 10, 3b: 4, 3c: 3). Detalle en «Registro de menores por un director y acceso familiar en el panel (Fase 3c)» (antes de «Resumen por dominio»).
 
 > [!NOTE]
-> **Seguimientos 2026-10-21** (todos **pendientes de merge**, sin cambios de esquema): (1) `GET /coordination/me/consent-pending`, la cola del coordinador (sacdia-backend `feat/coordinator-pending-consents`); ver «`GET /api/v1/coordination/me/consent-pending`» (dentro de «Registro de menores por un director y acceso familiar en el panel (Fase 3c)», tras «Revisor solo-verificación»). (2) `GET /admin/cron-jobs` y `POST /admin/cron-jobs/:jobName/run` («Ejecutar ahora», sacdia-backend `feat/admin-run-cron-now`), y los campos `trigger` y `triggered_by` en `recent[]` de `GET /admin/analytics/cron-runs`; ver «Jobs programados bajo demanda» en la sección `admin`. (3) Cambio de comportamiento sin ruta nueva: la cobertura `ZONE` de un coordinador exige también que el **distrito** esté activo (sacdia-backend `test/coordinator-scope-postgres`, commit `eec8e5aa`); ver `docs/canon/runtime-coordination.md`. Los totales de la cabecera no incluyen las 3 rutas nuevas.
+> **Seguimientos 2026-10-21** (todos **mergeados en `development`**, sin cambios de esquema): (1) `GET /coordination/me/consent-pending`, la cola del coordinador (sacdia-backend `feat/coordinator-pending-consents`, PR #534); ver «`GET /api/v1/coordination/me/consent-pending`» (dentro de «Registro de menores por un director y acceso familiar en el panel (Fase 3c)», tras «Revisor solo-verificación»). (2) `GET /admin/cron-jobs` y `POST /admin/cron-jobs/:jobName/run` («Ejecutar ahora», sacdia-backend `feat/admin-run-cron-now`, PR #535), y los campos `trigger` y `triggered_by` en `recent[]` de `GET /admin/analytics/cron-runs`; ver «Jobs programados bajo demanda» en la sección `admin`. (3) Cambio de comportamiento sin ruta nueva: la cobertura `ZONE` de un coordinador exige también que el **distrito** esté activo (sacdia-backend `test/coordinator-scope-postgres`, PR #536, commit `eec8e5aa`); ver `docs/canon/runtime-coordination.md`. Los totales de la cabecera no incluyen las 3 rutas nuevas.
 
 ## Cómo leer esta referencia
 
@@ -634,7 +634,7 @@ Quien aprueba después necesita `club_members:approve`. Cobertura: pruebas unita
 ### `GET /api/v1/coordination/me/consent-pending`
 
 > [!NOTE]
-> Rama `feat/coordinator-pending-consents` de sacdia-backend (commit `a8688f81`), **pendiente de merge**. Verificado contra el código de la rama (`src/coordination/coordination.controller.ts`, `coordinator-consent-queue.service.ts`, `dto/coordinator-consent-pending-query.dto.ts`, `membership-requests.service.ts` `listVerifyWorkAcrossSections`). La app (sacdia-app, commit `78ff697b`) y el panel (sacdia-admin, commit `07247d1`) ya lo consumen, cada uno en su rama `feat/coordinator-pending-consents`, también pendiente de merge. Las filas de esta ruta no cuentan en los totales de la cabecera.
+> Rama `feat/coordinator-pending-consents` de sacdia-backend (commit `a8688f81`), **mergeada en `development` (PR #534 de sacdia-backend, 2026-10-21)**. Verificado contra el código de la rama (`src/coordination/coordination.controller.ts`, `coordinator-consent-queue.service.ts`, `dto/coordinator-consent-pending-query.dto.ts`, `membership-requests.service.ts` `listVerifyWorkAcrossSections`). La app (sacdia-app, commit `78ff697b`) y el panel (sacdia-admin, commit `07247d1`) ya lo consumen desde su rama `feat/coordinator-pending-consents`, mergeada en `development` como PR #181 de sacdia-app y PR #246 de sacdia-admin. Las filas de esta ruta no cuentan en los totales de la cabecera.
 
 La **cola del coordinador**: una sola llamada devuelve todas las fichas de consentimiento que esperan verificación en **todas** las secciones que cubren sus `coordinator_assignments` vigentes. Sustituye al recorrido sección por sección que hacían la app y el panel con `GET .../membership-requests` (que sigue siendo la ruta para quien no es coordinador y para una sola sección).
 
@@ -1096,13 +1096,13 @@ Conteo de filas por sección de la matriz. Las filas marcadas como pendientes de
 | --- | --- | --- | --- | --- | --- | --- |
 | GET | `/api/v1/admin/cron-alerts` | JWT | Global: admin, super-admin | Paginated cron alert history | AdminCronAlertsService.getAlertHistory() | `src/admin/admin-cron-alerts.controller.ts` |
 | POST | `/api/v1/admin/cron-alerts/:id/resolve` | JWT | Global: admin, super-admin; Global: super-admin | Manually resolve a cron alert (super-admin only) | AdminCronAlertsService.resolveAlert() | `src/admin/admin-cron-alerts.controller.ts` |
-| GET | `/api/v1/admin/cron-jobs` | JWT | Global: super-admin | Listar los jobs programados que se pueden ejecutar bajo demanda (pendiente de merge, rama `feat/admin-run-cron-now`) | AdminCronJobsService.list() | `src/admin/cron-jobs/admin-cron-jobs.controller.ts` |
-| POST | `/api/v1/admin/cron-jobs/:jobName/run` | JWT | Global: super-admin (límite 10 por minuto) | Ejecutar ahora un job programado y esperar su resultado (pendiente de merge, rama `feat/admin-run-cron-now`) | AdminCronJobsService.run() | `src/admin/cron-jobs/admin-cron-jobs.controller.ts` |
+| GET | `/api/v1/admin/cron-jobs` | JWT | Global: super-admin | Listar los jobs programados que se pueden ejecutar bajo demanda (mergeada en `development`, PR #535 de sacdia-backend; rama `feat/admin-run-cron-now`) | AdminCronJobsService.list() | `src/admin/cron-jobs/admin-cron-jobs.controller.ts` |
+| POST | `/api/v1/admin/cron-jobs/:jobName/run` | JWT | Global: super-admin (límite 10 por minuto) | Ejecutar ahora un job programado y esperar su resultado (mergeada en `development`, PR #535 de sacdia-backend; rama `feat/admin-run-cron-now`) | AdminCronJobsService.run() | `src/admin/cron-jobs/admin-cron-jobs.controller.ts` |
 
 #### Jobs programados bajo demanda («Ejecutar ahora»)
 
 > [!NOTE]
-> Rama `feat/admin-run-cron-now` de sacdia-backend (commits `2bacda55` y `bb57a925`) y de sacdia-admin (commits `34d9e4e`, `ac40318`, `1c21151` y `5026a0a`), **pendientes de merge**. Verificado contra el código de las ramas (`src/admin/cron-jobs/*`, `src/common/services/cron-run-context.ts`, `cron-run-logger.service.ts`, `src/analytics/cron-runs.service.ts`). Sin cambios de esquema. Las filas no cuentan en los totales de la cabecera.
+> Rama `feat/admin-run-cron-now` de sacdia-backend (commits `2bacda55` y `bb57a925`) y de sacdia-admin (commits `34d9e4e`, `ac40318`, `1c21151` y `5026a0a`), **mergeadas en `development` (PR #535 de sacdia-backend y PR #247 de sacdia-admin, 2026-10-21)**. Verificado contra el código de las ramas (`src/admin/cron-jobs/*`, `src/common/services/cron-run-context.ts`, `cron-run-logger.service.ts`, `src/analytics/cron-runs.service.ts`). Sin cambios de esquema. Las filas no cuentan en los totales de la cabecera.
 
 Un **super-admin** puede disparar un `@Cron` sin esperar a su hora. Hace falta porque el servicio `development` está en el plan Free de Render, que se suspende por inactividad y entonces **ningún cron en proceso corre** (ver `docs/deployment/DEPLOYMENT-GUIDE.md`, §0.1 y §0.6); en desarrollo este es el camino para ejecutarlos. Guards: `JwtAuthGuard` + `GlobalRolesGuard` con `@GlobalRoles('super-admin')` y `@SkipPermissions()`. Sin `@ActingScope`: un tutor actuando, un adolescente supervisado o un dispositivo no pasan.
 
@@ -1368,7 +1368,7 @@ Errores: 404 `HONOR_INSTRUCTOR_PROPOSAL_NOT_FOUND`; 409 `HONOR_INSTRUCTOR_PROPOS
 | GET | `/api/v1/admin/analytics/jobs-overview` | JWT | Global: admin, super-admin | Overview de jobs y colas BullMQ (admin only) | JobsOverviewService.getOverview() | `src/analytics/analytics.controller.ts` |
 | POST | `/api/v1/admin/analytics/jobs/:queue/:jobId/retry` | JWT | Global: super-admin | Retry failed BullMQ job (super-admin only) | JobsOverviewService.retryFailedJob() | `src/analytics/analytics.controller.ts` |
 | GET | `/api/v1/admin/analytics/queues/:queueName/health` | JWT | Global: admin, super-admin | Queue health snapshot (admin only) | JobsOverviewService.getQueueHealth() | `src/analytics/analytics.controller.ts` |
-| GET | `/api/v1/admin/analytics/cron-runs` | JWT | Global: admin, super-admin | Resumen de ejecuciones de cron jobs (admin only); `recent[]` trae `trigger` y `triggered_by` (pendiente de merge) | CronRunsService.getSummary() | `src/analytics/analytics.controller.ts` |
+| GET | `/api/v1/admin/analytics/cron-runs` | JWT | Global: admin, super-admin | Resumen de ejecuciones de cron jobs (admin only); `recent[]` trae `trigger` y `triggered_by` (mergeado en `development`, PR #535 de sacdia-backend) | CronRunsService.getSummary() | `src/analytics/analytics.controller.ts` |
 | GET | `/api/v1/admin/analytics/cron-runs/history` | JWT | Global: admin, super-admin | Historial paginado de cron runs con filtros | CronRunsService.getHistory() | `src/analytics/analytics.controller.ts` |
 
 #### `GET /api/v1/admin/analytics/operations-dashboard`
@@ -2331,7 +2331,7 @@ Una resolución confirmada avisa en la bandeja de la app, no por correo. La inte
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
 | GET | `/api/v1/coordination/me/scope` | JWT | - | Resolver el alcance efectivo de coordinación del usuario actual | CoordinationService.resolveCoordinatorScope() | `src/coordination/coordination.controller.ts` |
-| GET | `/api/v1/coordination/me/consent-pending` | JWT | Permisos: consent:verify (global; debe venir de un rol de coordinador) | Fichas de consentimiento por verificar en todas las secciones del coordinador (pendiente de merge, rama `feat/coordinator-pending-consents`) | CoordinatorConsentQueueService.listForCoordinator() | `src/coordination/coordination.controller.ts` |
+| GET | `/api/v1/coordination/me/consent-pending` | JWT | Permisos: consent:verify (global; debe venir de un rol de coordinador) | Fichas de consentimiento por verificar en todas las secciones del coordinador (mergeada en `development`, PR #534 de sacdia-backend; rama `feat/coordinator-pending-consents`) | CoordinatorConsentQueueService.listForCoordinator() | `src/coordination/coordination.controller.ts` |
 
 ### dashboard
 

@@ -89,7 +89,7 @@ La unidad final de autoridad es `club_sections`.
 - «Fichas por verificar» (verificación de consentimiento de menores) consume
   `GET /api/v1/coordination/me/consent-pending`: una llamada por página de 50,
   con total y resumen por sección (rama `feat/coordinator-pending-consents`,
-  pendiente de merge). El panel tiene la misma cola como vista «Todas mis
+  mergeada en `development` como PR #181 de sacdia-app y PR #534 de sacdia-backend). El panel tiene la misma cola como vista «Todas mis
   secciones» de las solicitudes de membresía.
 - SLA, evidencias e investiduras usan el scope filtrado en backend.
 - La superficie de coordinación no muestra aprobaciones de camporee.
