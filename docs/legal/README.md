@@ -20,7 +20,7 @@ La versión vigente de cada documento vive en el código, no en esta carpeta: `s
 
 ## Versión 2.0.0-family (BORRADOR, perfiles familiares Fase 3)
 
-> **BORRADOR — requiere revisión del usuario o de un abogado.** Pendiente de merge (PR por abrir: feat/family-profiles-phase3). <!-- TODO(orquestador): reemplazar por «PR #NNN de sacdia-backend» cuando exista el PR. -->
+> **BORRADOR — requiere revisión del usuario o de un abogado.** Pendiente de merge (PR #531 de sacdia-backend).
 
 Cambia el texto de menores: cuentas supervisadas de 13 a 17 años, modo pendiente de tutor con plazo de 90 días, facultades del tutor verificado, analítica anónima para menores y, como funciones que **aún no están activas** (Fases 3b y 3c), el dispositivo vinculado de menores de 13 años (3b: implementado en el servidor y en la app, en la rama `feat/family-profiles-phase3`, y desactivado tras `FAMILY_LINKED_DEVICE_ENABLED` hasta su despliegue) y el registro de menores por un director (3c: implementado en servidor, app y panel, en la misma rama, tras `FAMILY_DIRECTOR_CREATE_MINOR_ENABLED`). También corrige la promesa de un segundo opt-in por correo (privacidad §6.2.c.1) que el producto no hace.
 
@@ -37,7 +37,7 @@ Los borradores completos (`*.full-draft-*`) llevan el sufijo `-draft` porque no 
 **Puerta de publicación (lista de verificación de release):**
 
 1. El usuario o un abogado aprueba el texto y se quita el aviso «BORRADOR» de cada sección.
-2. Se decide si las funciones aún inactivas (dispositivo vinculado y registro por director, ya implementadas pero apagadas por bandera) se publican ya o se retiran del texto hasta su activación. Las frases que el código desmentía (la app del dispositivo «todavía no existe», el coordinador como verificador y los avisos de desvinculación sin excepciones) se corrigieron el 2026-10-20 en `terminos-y-condiciones.md` y en `terminos-y-condiciones.full-draft-2026-04-17.md`; siguen como BORRADOR pendiente de revisión.
+2. Se decide si las funciones aún inactivas (dispositivo vinculado y registro por director, ya implementadas pero apagadas por bandera) se publican ya o se retiran del texto hasta su activación. Las frases que el código desmentía (la app del dispositivo «todavía no existe», el coordinador como verificador, que el seguimiento `coordinator-consent-verify` volvió cierto para las secciones que cubren sus asignaciones, y los avisos de desvinculación sin excepciones) se corrigieron el 2026-10-20 en `terminos-y-condiciones.md` y en `terminos-y-condiciones.full-draft-2026-04-17.md`; siguen como BORRADOR pendiente de revisión.
 3. Se publica el texto en `https://sacdia.com/terms` y `https://sacdia.com/privacy`.
 4. Solo entonces se despliega el commit de versión del backend (`2.0.0-family`; es el último commit de la sub-fase 3a y se puede revertir solo).
 5. **No promover a `main` mientras exista el aviso «BORRADOR» en estos archivos.**

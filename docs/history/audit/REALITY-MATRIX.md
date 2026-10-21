@@ -42,7 +42,7 @@ Modelos de rama (espejo en `docs/database/schema.prisma`): `dependent_profiles`,
 
 ## Addendum 2026-10-20 — perfiles familiares, Fase 3 (rama, no producción)
 
-Los conteos del snapshot 2026-03-26 **no** se reescriben aquí. Este addendum registra la Fase 3 de perfiles familiares (3a cuentas supervisadas de 13 a 17 años, 3b dispositivo vinculado del menor de 13 años, 3c el director registra menores y panel de acceso familiar) verificada en código de rama. Rama `feat/family-profiles-phase3` en backend, app y panel; Pendiente de merge (PR por abrir: feat/family-profiles-phase3). Todo detrás de tres banderas `FAMILY_*` (por defecto `false`); la compuerta de consentimiento por edad, el modo pendiente de tutor y los crones no tienen bandera.
+Los conteos del snapshot 2026-03-26 **no** se reescriben aquí. Este addendum registra la Fase 3 de perfiles familiares (3a cuentas supervisadas de 13 a 17 años, 3b dispositivo vinculado del menor de 13 años, 3c el director registra menores y panel de acceso familiar) verificada en código de rama. Rama `feat/family-profiles-phase3` en backend, app y panel; Pendiente de merge (PRs sacdia-backend #531, sacdia-app #179 y sacdia-admin #244). Todo detrás de tres banderas `FAMILY_*` (por defecto `false`); la compuerta de consentimiento por edad, el modo pendiente de tutor y los crones no tienen bandera.
 
 | Capa | Estado | Evidencia |
 |------|--------|-----------|
@@ -55,7 +55,7 @@ Los conteos del snapshot 2026-03-26 **no** se reescriben aquí. Este addendum re
 | QA en vivo | 3a parcial, 3b ejecutado en parte, **3c Pendiente** | `docs/testing/FAMILY-PROFILES-PHASE3{A,B,C}-QA.md` |
 | Producción | Ausente | Falta merge, promoción de las cuatro migraciones, banderas por ambiente, bucket privado de R2, aprobación del texto legal `2.0.0-family` (borrador) y aviso a los directores (`docs/deployment/DEPLOYMENT-GUIDE.md`, §0.6) |
 
-Estado de feature: **PARCIAL** (Fases 2 y 3 implementadas en rama, no desplegadas; Fase 4 sin iniciar). No FANTASMA: el código existe. Limitación conocida: los coordinadores no pueden verificar el consentimiento de un menor (el guard no resuelve su territorio; ver la sección «Fase 3» del feature).
+Estado de feature: **PARCIAL** (Fases 2 y 3 implementadas en rama, no desplegadas; Fase 4 sin iniciar). No FANTASMA: el código existe. Seguimiento `coordinator-consent-verify`: los coordinadores verifican el consentimiento de un menor solo en las secciones que cubren sus asignaciones (migración `20261023120000_grant_consent_verify_to_coordinators`, pendiente de aplicar; ver la sección «Fase 3» del feature).
 
 ---
 

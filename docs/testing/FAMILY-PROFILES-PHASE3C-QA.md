@@ -1,8 +1,8 @@
 # QA de perfiles familiares, Fase 3c (el director registra menores, panel de acceso familiar y cron de cambios de edad)
 
-**Estado**: PLAN con corridas del 2026-10-20: API (local + Neon `development`) y visual (app en simulador y panel local; ver «Corrida visual en simulador y panel»). Los escenarios no corridos siguen en «Pendiente»
+**Estado**: PLAN con corridas del 2026-10-20: API (local + Neon `development`), visual (app en simulador y panel local; ver «Corrida visual en simulador y panel») y crones en vivo sobre una copia aislada de `development` (ver «QA de crones en vivo sobre una copia aislada»). Los escenarios no corridos siguen en «Pendiente»
 **Fecha del plan**: 2026-10-20
-**Ramas**: `feat/family-profiles-phase3` en sacdia-backend (HEAD `32022392`), sacdia-app (HEAD `345dadc0`) y sacdia-admin (HEAD `7a9bfd6`), Pendiente de merge (PR por abrir: feat/family-profiles-phase3) <!-- TODO(orquestador): reemplazar por «PR #NNN» de cada repo cuando existan. -->
+**Ramas**: `feat/family-profiles-phase3` en sacdia-backend (HEAD `32022392`), sacdia-app (HEAD `345dadc0`) y sacdia-admin (HEAD `7a9bfd6`), Pendiente de merge (PRs sacdia-backend #531, sacdia-app #179, sacdia-admin #244 y sacdia #142)
 **Contrato a probar**: `docs/api/ENDPOINTS-LIVE-REFERENCE.md`, «Registro de menores por un director y acceso familiar en el panel (Fase 3c)». Esquema: `docs/database/SCHEMA-REFERENCE.md`, «Registro por director y acceso familiar (Fase 3c)». Feature: `docs/features/family-profiles.md`, «Fase 3».
 
 Este documento es el guion de la 3c, escrito con el mismo estilo que `FAMILY-PROFILES-PHASE3A-QA.md` y `FAMILY-PROFILES-PHASE3B-QA.md`. La columna «Resultado» se llena al ejecutarlo (tarea T3c-Q02); hoy ningún escenario tiene evidencia en vivo. Los usuarios de prueba y cómo crearlos están en `docs/testing/TEST-USERS.md`. Aquí no se anotan contraseñas ni tokens.
@@ -24,7 +24,7 @@ Este documento es el guion de la 3c, escrito con el mismo estilo que `FAMILY-PRO
 4. Personas de prueba, todas en la **misma sección** salvo que se diga otra cosa:
    - **D**: director de club con `dependents:create` (p. ej. `director-club@sacdia.com`, hoy sección 163; ver `TEST-USERS.md`).
    - **S**: una persona con rol de club `secretary`, `secretary-treasurer` o `deputy-director` **activo en la sección de D** (no es un coordinador). `secretary-club@sacdia.com` está en la sección 1: **no sirve** para la sección de D; hay que crear la asignación en la sección de D.
-   - **C**: un coordinador global (`coordinator`, `zone-coordinator` o `general-coordinator`), para documentar la limitación B11.
+   - **C**: un coordinador global (`coordinator`, `zone-coordinator` o `general-coordinator`) con una `coordinator_assignment` activa que cubra la sección de D (escenarios B9 a B9d, seguimiento `coordinator-consent-verify`; requiere aplicar antes la migración `20261023120000_grant_consent_verify_to_coordinators`).
    - **A**: un administrador con `users:update_admin` y `legal_representative:update`; **A0**: un administrador de solo lectura.
    - **P**: un adulto con cuenta (futuro tutor, para el reclamo); **G**: un tutor **verificado** de un menor sin cuenta (sección F y G); un segundo tutor verificado **G2** del mismo menor (F y G).
 5. App: simulador (iPhone 17 Pro, iOS 26) con la sesión de D, otro con la de S, otro con la de P. Panel: sesión de A.
@@ -73,7 +73,11 @@ Notación: **M** = el menor que registra D (sin cuenta), **ficha** = la ficha de
 | B6 | D aprueba req ya verificada por S | req `active`; M es miembro de la sección; D ve el éxito. M sigue sin cuenta | **Verificado solo por API** (2026-10-20, API local + Neon dev). D aprueba la req que verificó assistant-lf: el cuerpo trae `status = active` y la req sale de la lista de pendientes (el POST responde 201, el contrato Swagger dice 200; ver hallazgos). Que M siga sin cuenta no se revisó en la base |
 | B7 | Otra req de M2 (creado por D): **S** sube la ficha vigente y luego S intenta verificarla | 403 `GUARDIANSHIP_CUSTODIAN_SELF_VERIFY` (quien sube la ficha vigente no la verifica en una custodia); la lista da a S `false` / `self_custodian`. Otro tercero sí puede (B8) | Pendiente |
 | B8 | Un tercero con `club_members:approve` en la sección (otro director o subdirector) verifica una req que D creó y S subió | 200 (un tercero distinto del creador y del que subió) | Pendiente |
-| B9 | **C** (coordinador) intenta listar las solicitudes y verificar req | 403 en ambos. Documenta la limitación B11: aunque tuviera `consent:verify`, el guard lo negaría con `GUARD_CLUB_SCOPE_REQUIRED` dentro de su zona. Anotar el `code` real recibido | Pendiente |
+| B9 | **C** (coordinador con asignación que cubre la sección de D) lista las solicitudes, lee la ficha y verifica req con `approve: false` | 200 en los tres. La lista trae solo los menores con consentimiento `pending` y ficha vigente (opción B); la verificación queda con C como actor y la solicitud sigue `pending`. Ya no aplica la limitación B11 (resuelta con la migración `20261023120000_grant_consent_verify_to_coordinators`) | Solo pruebas automáticas: e2e `test/director-created-minor.e2e-spec.ts`, viaje A2 (backend `feat/coordinator-consent-verify`). QA en vivo pendiente (la migración no está aplicada en Neon) |
+| B9a | **C** con asignación de **otra** sección o vencida (`end_date` anterior a hoy) intenta listar, leer la ficha y verificar | 403 `GUARD_CLUB_SCOPE_REQUIRED` en las tres; no se escribe nada | Solo pruebas automáticas (e2e A2: `COORDINATOR_ELSEWHERE`, `COORDINATOR_EXPIRED`). QA en vivo pendiente |
+| B9b | **C** que es miembro del club de D (rol `member`) pero **sin** asignación que cubra la sección intenta listar, leer la ficha y verificar | 403 `GUARD_CLUB_SCOPE_REQUIRED`: la asignación es la autoridad, no ser miembro | Solo pruebas automáticas (e2e A2: `COORDINATOR_MEMBER`). QA en vivo pendiente |
+| B9c | **C** (cubierto) sube una ficha, llama `verify-consent` con `approve: true` o llama `approve` | Subir: 403 `GUARD_PERMISSION_DENIED`; `approve: true`: 403 `MR_APPROVE_PERMISSION_REQUIRED` sin escribir nada; `approve`: 403 | Solo pruebas automáticas (e2e A2). QA en vivo pendiente |
+| B9d | **C** vuelve a verificar un menor que ya verificó (sale de su lista) | 404 `MR_NOT_FOUND` | Solo pruebas automáticas (e2e A2). QA en vivo pendiente |
 | B10 | `approve: true` con un usuario que tiene `consent:verify` pero no `club_members:approve` | 403 `MR_APPROVE_PERMISSION_REQUIRED` antes de tocar nada. **No hay un rol de club así en el seed**: solo se puede probar con un usuario de prueba al que se le quite `club_members:approve` o con las pruebas automáticas. En la app, ese modo muestra «Confirmar verificación» y no aprueba, pero **no se alcanza** desde la lista porque la pestaña de solicitudes exige `club_members:approve` | Pendiente |
 | B11 | Un admin que además creó a M intenta verificar | 403 `GUARDIANSHIP_CUSTODIAN_SELF_VERIFY`: la regla va por id de usuario, no por rol | Pendiente |
 | B12 | Un tutor vigente del menor (p. ej. P tras el reclamo C2) intenta verificar con `club_members:approve` | 403 `GUARDIANSHIP_GUARDIAN_SELF_VERIFY` y `viewer_verify_block = self_guardian` en la lista | Pendiente |
@@ -94,10 +98,10 @@ Notación: **M** = el menor que registra D (sin cuenta), **ficha** = la ficha de
 
 | ID | Escenario | Esperado | Resultado |
 | --- | --- | --- | --- |
-| D1 | M nuevo (consentimiento `pending`, solo custodia). Mover `created_at` de req a hace **más de 30 días** y ejecutar `expireStaleRequests` | req queda `expired`. En `dependent_profiles`: `frozen_at = now`, `purge_after = frozen_at + 90 días`. Sus dispositivos (si hubiera) revocados con `dependent_frozen`. M queda congelado (no se lista ni se puede actuar por él) | Pendiente |
+| D1 | M nuevo (consentimiento `pending`, solo custodia). Mover `created_at` de req a hace **más de 30 días** y ejecutar `expireStaleRequests` | req queda `expired`. En `dependent_profiles`: `frozen_at = now`, `purge_after = frozen_at + 90 días`. Sus dispositivos (si hubiera) revocados con `dependent_frozen`. M queda congelado (no se lista ni se puede actuar por él) | Verificado (2026-10-20, copia aislada `qa-crons-20261020`). Fixture: menor de 9 años con solo custodia del club (fila verificada por `director_paper_form` hace 40 días) y req `pending` creada hace 40 días. req `expired`, `frozen_at` puesto con `purge_after = frozen_at + 90 días`, su dispositivo `dependent_frozen`; segunda corrida: 0 |
 | D2 | Con M del mismo tipo pero con solo **29** días | req **no** vence (el plazo mínimo con el consentimiento sin verificar es 30 días) | Pendiente |
-| D3 | M con un tutor reclamado (C2) o con otra membresía `pending` o `active` y su req vence | req vence pero M **no** se congela | Pendiente |
-| D4 | Adelantar `purge_after` de M congelado y ejecutar el cron `dependent-profiles-purge` | M anonimizado como en la Fase 2 (fila `users` anonimizada, custodia conservada) | Pendiente |
+| D3 | M con un tutor reclamado (C2) o con otra membresía `pending` o `active` y su req vence | req vence pero M **no** se congela | Verificado en la variante «tutor reclamado» (2026-10-20, copia aislada `qa-crons-20261020`): custodia más un tutor usuario verificado; req `expired`, el menor **no** se congela y su dispositivo sigue activo. La variante «otra membresía»: Pendiente |
+| D4 | Adelantar `purge_after` de M congelado y ejecutar el cron `dependent-profiles-purge` | M anonimizado como en la Fase 2 (fila `users` anonimizada, custodia conservada) | Verificado (2026-10-20, copia aislada `qa-crons-20261020`) en un menor con custodia y un tutor usuario: `users` anonimizado (`active = false`; nombre, apellidos, fecha de nacimiento, país y correo nulos), las dos tutorías conservadas, el dispositivo depurado (`label = Dispositivo`, `app_version` nulo), el token de emparejamiento borrado y `purged_at` puesto. **Falla** en un menor con una tutoría de titular externo (ver «Hallazgo: la purga falla con un titular externo») |
 
 ### E. Panel: tarjeta de acceso familiar
 
@@ -120,15 +124,15 @@ Fixture: menor sin cuenta con tutor **verificado** G, `birthday` = hoy hace 13 a
 
 | ID | Escenario | Esperado | Resultado |
 | --- | --- | --- | --- |
-| F1 | Ejecutar el cron | Resumen `nudged: 1`. G recibe push y bandeja: «{Nombre} ya puede tener su propio acceso» («Puedes activar el inicio de sesión propio de {Nombre} desde su perfil.»), fuente `family:age_nudge`, `data.type = dependent_age_milestone`. `dependent_profiles.teen_login_nudged_at` ya no es NULL. Sin correo | Pendiente |
+| F1 | Ejecutar el cron | Resumen `nudged: 1`. G recibe push y bandeja: «{Nombre} ya puede tener su propio acceso» («Puedes activar el inicio de sesión propio de {Nombre} desde su perfil.»), fuente `family:age_nudge`, `data.type = dependent_age_milestone`. `dependent_profiles.teen_login_nudged_at` ya no es NULL. Sin correo | Verificado (2026-10-20, copia aislada `qa-crons-20261020`): `nudged: 1`, una fila de bandeja `family:age_nudge` para G, `data.type = dependent_age_milestone` y `event = age_milestone` (espía de `sendToUser`), marca puesta, sin correo. El push no salió a propósito (sin Firebase) |
 | F2 | Tocar el push en la app de G (en segundo plano y desde arranque en frío) | Abre el detalle del menor en Mi familia sin cambiar de perfil (si G está actuando por otro menor, sale primero). La sección «Acceso» muestra la tarjeta «ya puede tener su propio acceso» | Pendiente |
-| F3 | Ejecutar el cron otra vez, hoy y «mañana» | `nudged: 0`; G no recibe un segundo aviso | Pendiente |
+| F3 | Ejecutar el cron otra vez, hoy y «mañana» | `nudged: 0`; G no recibe un segundo aviso | Verificado el mismo día (2026-10-20, copia aislada `qa-crons-20261020`): `nudged: 0` y G sigue con una sola fila. «Mañana»: Pendiente |
 | F4 | Recuperación: menor con 13 años y 3 días y marca NULL (cron «perdido») | Se avisa una sola vez (la comparación es `>=` la edad mínima, no «cumple hoy») | Pendiente |
 | F5 | Dos tutores verificados G y G2 | Ambos reciben el aviso; la marca se pone una sola vez | Pendiente |
-| F6 | Menor con tutor `pending`, solo con custodia del club o sin tutor | Se omite (`skippedNoGuardian`); la marca **sigue NULL**. Cuando un tutor se verifique, el siguiente cron lo avisa | Pendiente |
-| F7 | Menor con acceso propio ya habilitado, congelado, o de 12 años o de 18 | No se avisa | Pendiente |
-| F8 | `FAMILY_TEEN_LOGIN_ENABLED=false` (con reinicio) y repetir F1 con otro menor | No se envía nada **y** la marca queda NULL | Pendiente |
-| F9 | Fecha límite en una zona distinta de UTC: nacimiento un día antes en Ciudad de México que en UTC | La edad se calcula en la zona del país del menor; el aviso sale según esa fecha | Pendiente |
+| F6 | Menor con tutor `pending`, solo con custodia del club o sin tutor | Se omite (`skippedNoGuardian`); la marca **sigue NULL**. Cuando un tutor se verifique, el siguiente cron lo avisa | Verificado con tutor `pending` (2026-10-20, copia aislada `qa-crons-20261020`): `skippedNoGuardian: 1` en cada corrida y la marca sigue NULL. Custodia sola y sin tutor: Pendiente |
+| F7 | Menor con acceso propio ya habilitado, congelado, o de 12 años o de 18 | No se avisa | Parcial (2026-10-20, copia aislada `qa-crons-20261020`): no se avisa al de 18 años ni al de 10 años. Acceso propio habilitado, congelado y 12 años exactos: Pendiente |
+| F8 | `FAMILY_TEEN_LOGIN_ENABLED=false` (con reinicio) y repetir F1 con otro menor | No se envía nada **y** la marca queda NULL | Verificado (2026-10-20, copia aislada `qa-crons-20261020`) con el mismo menor de F1, corrido **antes** de encender la bandera (`ConfigService.set` en el proceso, no reinicio): `nudged: 0`, ningún envío y la marca NULL |
+| F9 | Fecha límite en una zona distinta de UTC: nacimiento un día antes en Ciudad de México que en UTC | La edad se calcula en la zona del país del menor; el aviso sale según esa fecha | Parcial: la corrida fue a las 15:25 de Ciudad de México (mismo día que en UTC). Se comprobó `ageToday` en el mismo proceso: nacido el 2013-10-21, a las 03:00 UTC del 2026-10-21 tiene 12 en `America/Mexico_City` y 13 en UTC. Un aviso en vivo sobre el borde: Pendiente |
 | F10 | Todos los envíos a los tutores fallan (difícil de reproducir en vivo; hay prueba automática) | El resumen cuenta `failed`, la marca se **libera** a NULL y se reintenta en la siguiente corrida | Pendiente |
 
 ### G. Barrido de dispositivos vinculados
@@ -137,12 +141,12 @@ Fixture: menor con un teléfono vinculado activo (3b, `FAMILY_LINKED_DEVICE_ENAB
 
 | ID | Escenario | Esperado | Resultado |
 | --- | --- | --- | --- |
-| G1 | Poner el `birthday` del menor con la mayoría de edad cumplida y ejecutar `run()` | `majorityRevoked: 1`. El dispositivo queda con `revoked_reason = majority`. G y G2 reciben **un** «{nombre} · dispositivo desvinculado» con «{nombre} ya tiene la edad para usar su propia cuenta.» El teléfono, en su siguiente acción, 401 `AUTH_DEVICE_REVOKED` | Pendiente |
+| G1 | Poner el `birthday` del menor con la mayoría de edad cumplida y ejecutar `run()` | `majorityRevoked: 1`. El dispositivo queda con `revoked_reason = majority`. G y G2 reciben **un** «{nombre} · dispositivo desvinculado» con «{nombre} ya tiene la edad para usar su propia cuenta.» El teléfono, en su siguiente acción, 401 `AUTH_DEVICE_REVOKED` | Verificado con un solo tutor verificado (2026-10-20, copia aislada `qa-crons-20261020`): menor que cumple 18 hoy, `majorityRevoked: 1`, fila `majority`, un aviso `family:security` (`event = device_revoked`) al tutor; la segunda y tercera corrida no avisan de nuevo. El 401 del teléfono: Pendiente |
 | G2 | Misma situación pero el teléfono hace una petición **antes** de que corra el cron (la compuerta revoca primero) | El dispositivo queda con `revoked_reason = majority` y los tutores reciben **un solo** aviso; el cron después no avisa de nuevo | Pendiente |
-| G3 | `absolute_expires_at` en el pasado (mover la fecha) y menor menor de edad | `expiredRevoked: 1`, motivo `expired`. Aviso con «La vinculación venció después de 180 días; puedes vincularlo de nuevo.» | Pendiente |
+| G3 | `absolute_expires_at` en el pasado (mover la fecha) y menor menor de edad | `expiredRevoked: 1`, motivo `expired`. Aviso con «La vinculación venció después de 180 días; puedes vincularlo de nuevo.» | Verificado (2026-10-20, copia aislada `qa-crons-20261020`): menor de 10 años con `absolute_expires_at` hace 20 días, `expiredRevoked: 1`, fila `expired`, un aviso `family:security` al tutor, sin repetición |
 | G4 | Dispositivo con las dos condiciones (mayor de edad y vencido) | Gana `majority` | Pendiente |
-| G5 | Menor que cumple 13 años con un dispositivo activo | **No** se revoca (el dispositivo sigue vivo hasta la mayoría de edad) | Pendiente |
-| G6 | `FAMILY_TEEN_LOGIN_ENABLED=false` | El barrido corre igual y revoca (no depende de esa bandera) | Pendiente |
+| G5 | Menor que cumple 13 años con un dispositivo activo | **No** se revoca (el dispositivo sigue vivo hasta la mayoría de edad) | Verificado (2026-10-20, copia aislada `qa-crons-20261020`): el dispositivo del menor que cumple 13 hoy sigue activo tras tres corridas |
+| G6 | `FAMILY_TEEN_LOGIN_ENABLED=false` | El barrido corre igual y revoca (no depende de esa bandera) | Verificado (2026-10-20, copia aislada `qa-crons-20261020`): la primera corrida, con la bandera apagada, hizo las revocaciones de G1 y G3 |
 | G7 | Menor sin tutores verificados restantes | Se revoca sin aviso y sin error | Pendiente |
 | G8 | Dispositivo de un menor sin fecha de nacimiento | El cron lo deja; la compuerta del siguiente request lo revoca como `majority` (falla cerrada) | Pendiente |
 
@@ -158,15 +162,15 @@ Fixture: menor con un teléfono vinculado activo (3b, `FAMILY_LINKED_DEVICE_ENAB
 
 | ID | Escenario | Esperado | Resultado |
 | --- | --- | --- | --- |
-| I1 | Permisos efectivos por rol | `director` y `deputy-director` de club: `dependents:create` y `consent:verify`; `secretary` y `secretary-treasurer`: `consent:verify` (y **no** `dependents:create`); `coordinator`, `zone-coordinator`, `general-coordinator` y `member`: ninguno de los dos; `admin` y `super-admin`: ambos | Pendiente |
+| I1 | Permisos efectivos por rol | `director` y `deputy-director` de club: `dependents:create` y `consent:verify`; `secretary` y `secretary-treasurer`: `consent:verify` (y **no** `dependents:create`); `coordinator`, `zone-coordinator` y `general-coordinator`: solo `consent:verify` **tras aplicar la migración `20261023120000_grant_consent_verify_to_coordinators`** (antes, ninguno); `member`: ninguno de los dos; `admin` y `super-admin`: ambos | Pendiente |
 | I2 | Conteo en `development` | 10 filas de `role_permissions` para los dos permisos (la rama no tiene `assistant-admin`) | Pendiente |
 | I3 | Columna `dependent_profiles.teen_login_nudged_at` | `timestamptz`, nullable, sin default | Pendiente |
 | I4 | Reaplicar las dos migraciones con psql (en transacción que se revierte) | Sin errores y sin cambios | Pendiente |
 
 ## Observaciones del autor del plan (verificadas en el código, sin corrida)
 
-1. **B11**: los coordinadores no tienen `consent:verify` y el guard los niega en su propio territorio (`src/auth/permissions-consent-verify.spec.ts`). El guion de «secretario o coordinador verifica» del diseño se cambió a «S, otro director o un subdirector de la sección».
-2. **Un revisor con solo `consent:verify` no puede listar ni ver la ficha** (siguen exigiendo `club_members:approve`). Como ningún rol de club tiene `consent:verify` sin `club_members:approve`, B10 no se alcanza con roles reales.
+1. **B11 (resuelta después, 2026-10-20)**: cuando se escribió el plan, los coordinadores no tenían `consent:verify` y el guard los negaba en su propio territorio, así que el guion se cambió a «S, otro director o un subdirector de la sección». El seguimiento `coordinator-consent-verify` (migración `20261023120000_grant_consent_verify_to_coordinators`, rama `feat/coordinator-consent-verify`) los admite en las secciones que cubren sus asignaciones; los escenarios B9 a B9d lo cubren por e2e y falta el QA en vivo.
+2. **Un revisor con solo `consent:verify`** (cuando se escribió el plan) no podía listar ni ver la ficha. Ahora lista y lee la ficha dentro de su lista (opción B), pero no puede subirla ni aprobar. Ningún rol de club tiene `consent:verify` sin `club_members:approve`; el caso real es el coordinador (B9).
 3. **`secretary-club@sacdia.com` pertenece a la sección 1**, no a la del director de prueba; hay que crear la asignación de S en la sección de D (o usar un subdirector).
 4. **No hay endpoint para disparar los crones**: ver la precondición 6. Las ediciones de fechas a mano en `development` hay que revertirlas.
 5. **Orden de la bandera y los guards en el registro**: un llamante sin permiso recibe 403 incluso con la bandera apagada; el 404 `FAMILY_FEATURE_DISABLED` lo ve solo quien sí tiene el permiso.
@@ -178,7 +182,7 @@ Fixture: menor con un teléfono vinculado activo (3b, `FAMILY_LINKED_DEVICE_ENAB
 Corrida de las secciones A, B y C (parciales) por API pura, con `director-club@sacdia.com` (D, sección 163) y `assistant-lf@sacdia.com` (verificador independiente). Las tres banderas `FAMILY_*` estaban encendidas. No se corrieron D, E, F, G, H ni I, ni ningún escenario de app o panel, ni los crones (vencimiento y barrido de edades quedan cubiertos solo por pruebas automáticas).
 
 1. Sin fallos del producto. Los cuatro «FAIL» crudos de la primera pasada fueron del script (una expectativa de 200 donde el POST de aprobar responde 201, una expresión regular que confundió `evidence_uploaded` con un id y dos lecturas de la clave equivocada en la respuesta del canje, repetidas bien en M3).
-2. Discrepancia menor de documentación: `POST .../membership-requests/:assignmentId/approve` responde **201** (no tiene `@HttpCode`), pero su `@ApiResponse` de Swagger declara 200. `verify-consent` sí responde 200.
+2. Discrepancia menor de documentación: `POST .../membership-requests/:assignmentId/approve` respondía **201** (no tenía `@HttpCode`), pero su `@ApiResponse` de Swagger declara 200. `verify-consent` sí responde 200. **Corregido después**: `approve` y `reject` responden 200 (commit `1e423a34`, rama `fix/approve-status-and-device-refresh-pg`, pendiente de merge).
 3. Un llamante sin permiso de club en la sección recibe 403 `GUARD_PERMISSION_DENIED`; un director de otra sección recibe 403 `GUARD_CLUB_SCOPE_REQUIRED`.
 4. Verificar una req ya `active` (M1) funciona en modo «solo verificar» (el servicio acepta asignaciones activas): así se verificó la ficha nueva de P sin que la req esté en la lista de pendientes.
 
@@ -210,3 +214,45 @@ Observaciones (no bloquean, pendientes de decidir):
 5. Panel: un adolescente con «Origen: Registro propio» muestra «Activado por» su tutora; revisar qué representa `enabled_by` para un registro propio.
 
 Datos extra en Neon `development`: menor «Lucas Simulador» (sección 163, pendiente); dispositivo «QA Admin revoke» de Sofi (revocado por admin); el adolescente QA «Mateo Joven Prueba» (`779ec538-…`) quedó con el acceso propio desactivado por admin.
+
+## QA de crones en vivo sobre una copia aislada (2026-10-20)
+
+Rama Neon aislada `qa-crons-20261020` (copia de `development`, creada a las 21:17 UTC y **borrada** al terminar), sin push. `development` no se tocó: es el entorno en vivo con usuarios reales.
+
+- **Código**: backend `origin/development` `6cea416d` (merge del PR #531) en un worktree aparte. Un script con ts-node levanta `NestFactory.createApplicationContext(AppModule)` y llama a los métodos directamente: `PendingTeenCronService.run(now)` dos veces, `FamilyAgeTransitionsCronService.run(now)` con `FAMILY_TEEN_LOGIN_ENABLED` apagada, encendida y otra vez encendida, `MembershipRequestsService.expireStaleRequests()` dos veces y `DependentProfilesPurgeCronService.purgeDue(now)` dos veces (y otra pasada tras agregar un segundo menor a purgar). Los 19 crones programados del proceso se detuvieron al arrancar: solo corrió lo que se llamó.
+- **Sin push ni correo**: sin variables `FIREBASE_*` (`FirebaseAdminModule` deja FCM apagado y `getApps().length = 0`; además `getMessaging` se sustituyó por una función que falla: 0 llamadas), `EMAIL_ENABLED=false`, `fetch` global bloqueado (0 intentos), sin Redis (modo síncrono: solo filas de bandeja en la copia). Los borrados de R2 de la purga se interceptaron (se registran, no se envían).
+- **Fixtures**: SQL directo en la copia, nombres `QACron …` y correos `qa-cron-<ts>-…@example.com`. Solo se imprimieron filas de QA y conteos agregados.
+
+| Cron | Escenario | Esperado | Observado | Resultado |
+| --- | --- | --- | --- | --- |
+| `pending-teen-guardian` | Relojes a 6, 7, 30, 83 y 90 días | 6: nada; 7/30/83: nivel 1/2/3 y un aviso; 90: congelado | `reminders: 3, frozen: 1`; niveles 0/1/2/3; el de 90 congelado con `purge_after` a +90 días, acceso `unlinked_purged`, sesiones borradas | PASA |
+| `pending-teen-guardian` | Segunda corrida | Sin duplicados | `reminders: 0, frozen: 0`; una fila de bandeja por adolescente | PASA |
+| `family-age-transitions` | Bandera apagada (F8, G6) | Sin aviso ni marca; el barrido corre | `nudged: 0`, marca NULL; `majorityRevoked: 1, expiredRevoked: 1` | PASA |
+| `family-age-transitions` | Menor que cumple 13 hoy con tutor verificado (F1) | Un aviso `family:age_nudge`, `data.type = dependent_age_milestone`, marca puesta | `nudged: 1`, un aviso al tutor, marca puesta | PASA |
+| `family-age-transitions` | Menor de 13 con tutor `pending` (F6) | Se omite, marca NULL | `skippedNoGuardian: 1`, marca NULL | PASA |
+| `family-age-transitions` | Repetir (F3) | Nada | `nudged: 0`, sin avisos nuevos | PASA |
+| `family-age-transitions` | Dispositivo de menor que cumple 18 hoy (G1) | `majority` y un aviso | `majority`, un aviso `family:security` | PASA |
+| `family-age-transitions` | Dispositivo pasado del tope (G3) | `expired` y un aviso | `expired`, un aviso | PASA |
+| `family-age-transitions` | Dispositivo de menor que cumple 13 hoy (G5) | No se revoca | Sigue activo | PASA |
+| `membership-requests-expiry` | Menor solo con custodia y req de hace 40 días (D1) | req `expired`, menor congelado (+90 días), dispositivo `dependent_frozen` | Igual; resumen 2 (D1 y D3), segunda corrida 0 | PASA |
+| `membership-requests-expiry` | Menor con custodia y tutor verificado (D3) | req vence, el menor no se congela | req `expired`, menor sin congelar, dispositivo activo | PASA |
+| `dependent-profiles-purge` | Congelado vencido con custodia y tutor usuario (D4) | Anonimizado, tutorías conservadas, dispositivo depurado, tokens borrados | Igual; segunda pasada no lo toca | PASA |
+| `dependent-profiles-purge` | Congelado vencido con una tutoría de titular externo | Anonimizado | Error 23514, transacción revertida, el menor sigue intacto y se reintenta en cada corrida | **FALLA** |
+
+### Hallazgo: la purga falla con un titular externo (bug de producto, corregido en `9533895d`)
+
+> **Corregido** (commit `9533895d`, rama `fix/approve-status-and-device-refresh-pg`, pendiente de merge): la purga ya no pone `external_name` en NULL en las filas de titular externo, sino el marcador `'Tutor'` (`PURGED_GUARDIAN_NAME`), y borra el teléfono. Los objetos de R2 se borran **después** de confirmar la transacción. El texto de abajo describe el fallo tal como se encontró.
+
+`DependentProfilesPurgeCronService.purgeOne` (`src/guardianships/dependent-profiles-purge-cron.service.ts`, el `tx.guardianships.updateMany` que pone `external_name` y `external_phone` en NULL para todas las tutorías del menor) viola `guardianships_holder_ck` cuando una tutoría no custodia no tiene `guardian_user_id` (titular externo: `is_custodian = false`, `guardian_user_id` NULL, `external_name` con valor). El CHECK exige `guardian_user_id IS NOT NULL OR external_name IS NOT NULL` en toda fila no custodia, sea cual sea su estado. Resultado: error 23514 `guardianships_holder_ck`, se revierte la transacción entera, el menor queda congelado sin purgar, la corrida queda `failed` cada día y se reintenta para siempre. Como los objetos de R2 se borran **antes** de la transacción, cada intento borra los archivos pero deja los datos personales en la base. Las tutorías externas las crea `scripts/family-profiles/seed-dev-guardianships.ts --from-legal-reps` (importación de `legal_representatives`); hoy hay 0 en `development`, así que no se dispara todavía. Arreglos posibles (a decidir): dejar un marcador no personal en `external_name` (como `PURGED_DEVICE_LABEL` en los dispositivos) o ajustar el CHECK para las filas de un menor purgado.
+
+### Impacto previsto sobre las filas reales (copia de `development`)
+
+Conteos agregados de filas que no son de QA, antes y después de la corrida:
+
+- **Recordatorios**: 0 relojes nuevos, 0 recordatorios y 0 congelaciones. Hay 50 adolescentes con el reloj pendiente en nivel 0, iniciado el 2026-10-20 entre las 02:30 y las 16:08 UTC; 41 los inició una corrida de `pending-teen-guardian` registrada a las 04:45 UTC del 2026-10-20 en `cron_run_log`, anterior al merge del PR #531 (probablemente un backend local apuntando a `development`). Si nadie vincula tutor, el cron diario mandará unos 50 recordatorios de nivel 1 hacia el 2026-10-27, de nivel 2 hacia el 2026-11-19, de nivel 3 hacia el 2027-01-11 y congelará esas cuentas hacia el 2027-01-18.
+- **Aviso de los 13 y barrido**: 0 (ningún candidato al aviso; de 7 dispositivos vinculados, 0 activos). `family-age-transitions` no tiene ninguna corrida en `cron_run_log` de `development`; la primera será a las 14:00 UTC después del despliegue de `6cea416d`.
+- **Vencimiento de solicitudes**: 0 (3 solicitudes pendientes reales, todas de dependientes y de menos de 8 días).
+- **Purga**: **12 dependientes de la copia se purgaron** y se registraron 6 borrados de R2 (`GUARDIANSHIP_EVIDENCE`: 4 llamadas, 5 objetos; `CLASS_EVIDENCE`: 2 llamadas, 2 objetos). Los 12 se crearon el 2026-10-19 y el 2026-10-20 y se congelaron con `purge_after` igual o muy cercano a `frozen_at` (10 con nombres «Qa…», 2 sin patrón de prueba): parecen datos de QA de otra corrida preparados para la purga. **El cron real de `development` los purgará a las 04:20 UTC del 2026-10-21 y borrará esos objetos de R2.** Si alguno no es de prueba, hay que mover su `purge_after` antes de esa hora.
+- **Avisos a usuarios reales**: 0 (ningún `sendToUser` a ids fuera de QA y ninguna fila nueva de `notification_logs` para ellos).
+
+No quedaron datos en Neon `development`: todo se hizo en la copia, que ya no existe.

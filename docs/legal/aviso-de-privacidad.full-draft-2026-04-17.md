@@ -150,7 +150,7 @@ El Titular (o Representante Legal, en su caso) otorga su consentimiento **EXPRES
 
 ### 6.1 Principio rector y matriz de edades
 
-> **BORRADOR — requiere revisión del usuario o de un abogado.** Esta sección cambió en la versión 2.0.0-family-draft (antes 1.1.0-draft) y no debe publicarse sin aprobación. Pendiente de merge (PR por abrir: feat/family-profiles-phase3). <!-- TODO(orquestador): reemplazar por «PR #NNN de sacdia-backend» cuando exista el PR. -->
+> **BORRADOR — requiere revisión del usuario o de un abogado.** Esta sección cambió en la versión 2.0.0-family-draft (antes 1.1.0-draft) y no debe publicarse sin aprobación. Pendiente de merge (PR #531 de sacdia-backend).
 
 De conformidad con el artículo 4° de la Constitución Política de los Estados Unidos Mexicanos, la Convención sobre los Derechos del Niño y la LFPDPPP, los datos personales de los Menores reciben el **más alto nivel de protección** en atención al principio del interés superior de la niñez.
 
@@ -164,7 +164,7 @@ SACDIA aplica los siguientes regímenes diferenciados por rango etario para el t
 
 ### 6.2 Cuentas de menores y verificación del consentimiento parental
 
-> **BORRADOR — requiere revisión del usuario o de un abogado.** Esta sección cambió en la versión 2.0.0-family-draft (antes 1.1.0-draft) y no debe publicarse sin aprobación. Pendiente de merge (PR por abrir: feat/family-profiles-phase3). <!-- TODO(orquestador): reemplazar por «PR #NNN de sacdia-backend» cuando exista el PR. -->
+> **BORRADOR — requiere revisión del usuario o de un abogado.** Esta sección cambió en la versión 2.0.0-family-draft (antes 1.1.0-draft) y no debe publicarse sin aprobación. Pendiente de merge (PR #531 de sacdia-backend).
 
 SACDIA **no permite** que menores de 13 años creen cuentas. Las personas de 13 a 17 años pueden tener una **Cuenta Supervisada**, según los Términos y Condiciones §3.2. El registro y el tratamiento de datos de un Menor se realizan a través de:
 
@@ -185,7 +185,7 @@ SACDIA **no permite** que menores de 13 años creen cuentas. Las personas de 13 
 
 ### 6.3 Alcance del consentimiento parental
 
-> **BORRADOR — requiere revisión del usuario o de un abogado.** Esta sección cambió en la versión 2.0.0-family-draft (antes 1.1.0-draft) y no debe publicarse sin aprobación. Pendiente de merge (PR por abrir: feat/family-profiles-phase3). <!-- TODO(orquestador): reemplazar por «PR #NNN de sacdia-backend» cuando exista el PR. -->
+> **BORRADOR — requiere revisión del usuario o de un abogado.** Esta sección cambió en la versión 2.0.0-family-draft (antes 1.1.0-draft) y no debe publicarse sin aprobación. Pendiente de merge (PR #531 de sacdia-backend).
 
 El consentimiento del Representante Legal comprende:
 
@@ -212,7 +212,7 @@ Todo ejercicio de derechos ARCO respecto a datos de Menores será tramitado por 
 
 ### 6.6 Niveles de acceso
 
-> **BORRADOR — requiere revisión del usuario o de un abogado.** Esta sección cambió en la versión 2.0.0-family-draft (antes 1.1.0-draft) y no debe publicarse sin aprobación. Pendiente de merge (PR por abrir: feat/family-profiles-phase3). <!-- TODO(orquestador): reemplazar por «PR #NNN de sacdia-backend» cuando exista el PR. -->
+> **BORRADOR — requiere revisión del usuario o de un abogado.** Esta sección cambió en la versión 2.0.0-family-draft (antes 1.1.0-draft) y no debe publicarse sin aprobación. Pendiente de merge (PR #531 de sacdia-backend).
 
 Dentro de la Plataforma, los datos de los Menores son visibles únicamente para:
 
@@ -396,7 +396,7 @@ Las copias de respaldo técnicas que contengan información cancelada se purgan 
 
 ## 11. Retención y Cancelación
 
-> **BORRADOR — requiere revisión del usuario o de un abogado.** Esta sección cambió en la versión 2.0.0-family-draft (antes 1.1.0-draft) y no debe publicarse sin aprobación. Pendiente de merge (PR por abrir: feat/family-profiles-phase3). <!-- TODO(orquestador): reemplazar por «PR #NNN de sacdia-backend» cuando exista el PR. -->
+> **BORRADOR — requiere revisión del usuario o de un abogado.** Esta sección cambió en la versión 2.0.0-family-draft (antes 1.1.0-draft) y no debe publicarse sin aprobación. Pendiente de merge (PR #531 de sacdia-backend).
 
 > Cambio de esta versión: se retiró de la fila de evidencia de consentimiento la mención a «IDs, confirmaciones por correo», que el producto no genera, y se aclaró que la copia digital se elimina al purgar al Menor. Esto choca con el plazo de 5 años de la fila: **requiere decisión legal** (¿se conserva la copia digital 5 años o basta el original en papel del club?). Ver `REVIEW-REPORT.md`, adenda 2026-10-19.
 
@@ -434,7 +434,7 @@ Si en el futuro se incorporaran funcionalidades de este tipo (por ejemplo, recom
 
 ## 13. Cookies y Tecnologías de Rastreo
 
-> **BORRADOR — requiere revisión del usuario o de un abogado.** Esta sección cambió en la versión 2.0.0-family-draft (antes 1.1.0-draft) y no debe publicarse sin aprobación. Pendiente de merge (PR por abrir: feat/family-profiles-phase3). <!-- TODO(orquestador): reemplazar por «PR #NNN de sacdia-backend» cuando exista el PR. -->
+> **BORRADOR — requiere revisión del usuario o de un abogado.** Esta sección cambió en la versión 2.0.0-family-draft (antes 1.1.0-draft) y no debe publicarse sin aprobación. Pendiente de merge (PR #531 de sacdia-backend).
 
 La Plataforma utiliza las siguientes tecnologías para operar el Servicio. Ninguna se utiliza con fines de publicidad dirigida ni de rastreo en sitios de terceros:
 

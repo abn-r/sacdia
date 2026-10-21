@@ -42,7 +42,7 @@ Para los efectos de los presentes Términos, los términos siguientes tendrán e
 - **"Servicio"** o **"Plataforma"**: el conjunto de funcionalidades ofrecidas a través de la aplicación móvil SACDIA y del panel administrativo SACDIA Admin, destinadas a la administración de clubes juveniles de Aventureros, Conquistadores y Guías Mayores.
 - **"Usuario"**: toda persona física que accede o utiliza el Servicio mediante una cuenta registrada: una persona mayor de edad con cuenta propia o un Menor de 13 a 17 años con Cuenta Supervisada.
 - **"Cuenta Supervisada"**: cuenta propia de un Menor de 13 a 17 años que opera bajo la supervisión de un Tutor Verificado, conforme a la sección 3.2.
-- **"Tutor Verificado"**: Representante Legal vinculado a un Menor cuyo consentimiento fue revisado y verificado por una persona autorizada del club o del campo local, o por un administrador a partir del formato firmado. Solo el Tutor Verificado tiene las facultades de la sección 3.2(d).
+- **"Tutor Verificado"**: Representante Legal vinculado a un Menor cuyo consentimiento fue revisado y verificado por una persona autorizada del club, de su coordinación o del campo local, o por un administrador a partir del formato firmado. Solo el Tutor Verificado tiene las facultades de la sección 3.2(d).
 - **"Titular"**: la persona física a quien corresponden los datos personales tratados, en términos de la Ley Federal de Protección de Datos Personales en Posesión de los Particulares.
 - **"Menor"**: toda persona física menor de 18 años de edad inscrita en un Club a través de la Plataforma o que tenga una Cuenta Supervisada.
 - **"Representante Legal"**: padre, madre, tutor o quien ejerza la patria potestad o tutela legal sobre un Menor.
@@ -61,7 +61,7 @@ Al crear una cuenta, acceder o utilizar el Servicio, el Usuario declara haber le
 
 ### 1.2 Edad mínima
 
-> **BORRADOR — requiere revisión del usuario o de un abogado.** Esta sección cambió en la versión 2.0.0-family-draft (antes 1.1.0-draft) y no debe publicarse sin aprobación. Pendiente de merge (PR por abrir: feat/family-profiles-phase3). <!-- TODO(orquestador): reemplazar por «PR #NNN de sacdia-backend» cuando exista el PR. -->
+> **BORRADOR — requiere revisión del usuario o de un abogado.** Esta sección cambió en la versión 2.0.0-family-draft (antes 1.1.0-draft) y no debe publicarse sin aprobación. Pendiente de merge (PR #531 de sacdia-backend).
 
 Las cuentas con acceso propio y sin supervisión están dirigidas a personas mayores de 18 años. Las personas de 13 a 17 años podrán tener una **Cuenta Supervisada**, creada por el propio adolescente o habilitada por su Representante Legal, en los términos de la sección 3.2. Las personas menores de 13 años **no** pueden tener cuenta propia: únicamente podrán ser registradas por su Representante Legal o por un Director de Club debidamente acreditado, y usar un dispositivo vinculado por su Representante Legal. Las edades de este párrafo son las de México; en otro país se aplican las que SACDIA tenga configuradas.
 
@@ -73,7 +73,7 @@ El Servicio se ofrece **exclusivamente a personas con residencia en los Estados 
 
 El Usuario declara contar con capacidad legal plena para obligarse conforme a los presentes Términos. Si el Usuario actúa en representación de una persona moral, declara contar con facultades suficientes para ello.
 
-> **BORRADOR — requiere revisión del usuario o de un abogado.** Esta sección cambió en la versión 2.0.0-family-draft (antes 1.1.0-draft) y no debe publicarse sin aprobación. Pendiente de merge (PR por abrir: feat/family-profiles-phase3). <!-- TODO(orquestador): reemplazar por «PR #NNN de sacdia-backend» cuando exista el PR. -->
+> **BORRADOR — requiere revisión del usuario o de un abogado.** Esta sección cambió en la versión 2.0.0-family-draft (antes 1.1.0-draft) y no debe publicarse sin aprobación. Pendiente de merge (PR #531 de sacdia-backend).
 
 En el caso de una Cuenta Supervisada, la capacidad para obligarse la complementa la aceptación del Representante Legal conforme a la sección 3.2. La fecha de nacimiento la declara quien registra; declarar una fecha falsa para obtener un tipo de cuenta que no corresponde es causa de suspensión o cancelación (sección 8.2).
 
@@ -125,14 +125,14 @@ El registro del Usuario adulto puede quedar sujeto a aprobación administrativa 
 
 ### 3.2 Registro de menores y Cuentas Supervisadas
 
-> **BORRADOR — requiere revisión del usuario o de un abogado.** Esta sección cambió en la versión 2.0.0-family-draft (antes 1.1.0-draft) y no debe publicarse sin aprobación. Pendiente de merge (PR por abrir: feat/family-profiles-phase3). <!-- TODO(orquestador): reemplazar por «PR #NNN de sacdia-backend» cuando exista el PR. -->
+> **BORRADOR — requiere revisión del usuario o de un abogado.** Esta sección cambió en la versión 2.0.0-family-draft (antes 1.1.0-draft) y no debe publicarse sin aprobación. Pendiente de merge (PR #531 de sacdia-backend).
 
 SACDIA reconoce tres situaciones, según la edad (México: 13 y 18 años):
 
 **a) Menor de 13 años (dependiente, sin cuenta propia).** No puede crear cuentas. Se registra por:
 
 1. Su **Representante Legal**: padre, madre, tutor o quien ejerza la patria potestad o tutela legal, quien deberá crear su propia cuenta como Usuario adulto, registrar al Menor desde su cuenta, proporcionar información veraz y otorgar consentimiento expreso y por escrito para el tratamiento de los datos personales del Menor, incluyendo datos personales sensibles (salud y afiliación religiosa), conforme al Aviso de Privacidad Integral. El Representante Legal actúa en nombre del Menor desde su propia sesión.
-2. Un **Director de Club acreditado** (función pendiente de la Fase 3c): persona adulta acreditada por la organización auspiciadora del club, quien podrá registrar Menores de 0 a 17 años en su sección, bajo custodia del club, previa obtención del consentimiento expreso y por escrito del Representante Legal mediante el formato físico o digital establecido por la organización. El Director de Club declara bajo protesta de decir verdad haber recabado dicho consentimiento antes de ingresar datos del Menor. El consentimiento lo verifica **otra persona** distinta de quien registró al Menor, de quien subió el formato y del Representante Legal que lo entregó (otra persona autorizada del club o del campo local, o un administrador). La custodia del club termina cuando el Representante Legal reclama al Menor con un código de reclamo; su consentimiento debe verificarse de nuevo.
+2. Un **Director de Club acreditado** (función pendiente de la Fase 3c): persona adulta acreditada por la organización auspiciadora del club, quien podrá registrar Menores de 0 a 17 años en su sección, bajo custodia del club, previa obtención del consentimiento expreso y por escrito del Representante Legal mediante el formato físico o digital establecido por la organización. El Director de Club declara bajo protesta de decir verdad haber recabado dicho consentimiento antes de ingresar datos del Menor. El consentimiento lo verifica **otra persona** distinta de quien registró al Menor, de quien subió el formato y del Representante Legal que lo entregó (otra persona autorizada del club, de su coordinación o del campo local, o un administrador). La custodia del club termina cuando el Representante Legal reclama al Menor con un código de reclamo; su consentimiento debe verificarse de nuevo.
 
 **b) Menor de 13 a 17 años (Cuenta Supervisada).** Puede tener cuenta propia, creada por él mismo o habilitada por su Representante Legal, bajo las siguientes reglas:
 
@@ -258,7 +258,7 @@ En caso de que el Responsable introduzca funcionalidades de pago, serán aplicab
 
 El Usuario podrá solicitar la cancelación de su cuenta en cualquier momento, mediante la funcionalidad correspondiente en la aplicación o escribiendo a [PENDIENTE: Correo ARCO — ej. arco@sacdia.app].
 
-> **BORRADOR — requiere revisión del usuario o de un abogado.** Esta sección cambió en la versión 2.0.0-family-draft (antes 1.1.0-draft) y no debe publicarse sin aprobación. Pendiente de merge (PR por abrir: feat/family-profiles-phase3). <!-- TODO(orquestador): reemplazar por «PR #NNN de sacdia-backend» cuando exista el PR. -->
+> **BORRADOR — requiere revisión del usuario o de un abogado.** Esta sección cambió en la versión 2.0.0-family-draft (antes 1.1.0-draft) y no debe publicarse sin aprobación. Pendiente de merge (PR #531 de sacdia-backend).
 
 Una Cuenta Supervisada **no** puede cancelarse desde la aplicación por el propio Menor: la cancelación se solicita por el Representante Legal o por un administrador del Responsable, por el correo anterior.
 
