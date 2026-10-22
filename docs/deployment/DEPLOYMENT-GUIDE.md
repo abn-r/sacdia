@@ -32,14 +32,14 @@ GitHub (rama development)
    ├─ push ─► Render "API Sacdia" (auto-deploy) ─► Neon rama development  ◄── base viva
    │              └─ OCR firmado ─► Cloud Run (proxy OCR) ─► Google Vision
    └─ push ─► Vercel (admin.sacdia.com)
-Neon ramas staging y production: existen y están migradas, sin uso.
+Neon ramas staging y production: existen y ningún servicio las usa. `staging` está migrada al nivel de `development` (2026-10-21); `production` sigue en `20261014100000` (ver §0.6).
 ```
 
 | Pieza | Estado real |
 |---|---|
 | Backend | Render web service **"API Sacdia"**, plan **Free**, rama **`development`**, auto-deploy **activado** |
 | Admin | Vercel, `https://admin.sacdia.com`, despliega **`development`** |
-| Base de datos | Neon. `DATABASE_URL` del backend apunta a la rama **`development`** (endpoint `ep-rough-hill-anztwk76`): es la base viva. Las ramas `staging` y `production` existen y tienen las migraciones aplicadas, pero ningún servicio las usa |
+| Base de datos | Neon. `DATABASE_URL` del backend apunta a la rama **`development`** (endpoint `ep-rough-hill-anztwk76`): es la base viva. Las ramas `staging` y `production` existen, pero ningún servicio las usa. `staging` tiene las mismas migraciones que `development` (2026-10-21); `production` sigue en `20261014100000` y le faltan 9 (ver §0.6) |
 | OCR | Proxy keyless en Cloud Run; runbook en `docs/guides/ocr-proxy-preprod-infra.md` |
 | Otros servicios | Redis, R2, Firebase, Resend y Sentry según la tabla 4.2; su cuenta y plan concretos no se documentan aquí |
 
@@ -67,7 +67,7 @@ Neon ramas staging y production: existen y están migradas, sin uso.
 
 - Un proyecto, tres ramas: `development`, `staging`, `production`.
 - **`development` es la base viva**: `DATABASE_URL` de "API Sacdia" apunta a su endpoint (`ep-rough-hill-anztwk76`, cadena pooled). Es lo que el servicio en línea lee y escribe.
-- `staging` y `production` existen y están migradas, pero **ningún servicio las consume**. No tratarlas como respaldo de `development`: no reciben sus datos.
+- `staging` y `production` existen, pero **ningún servicio las consume**. `staging` está al nivel de `development` (2026-10-21); `production` sigue en `20261014100000` (ver §0.6). No tratarlas como respaldo de `development`: no reciben sus datos.
 - Las migraciones se aplican al final del build de Render contra la rama que indique `DATABASE_URL`. Como esa cadena es pooled, el servicio necesita también `DATABASE_DIRECT_URL` (misma rama, host sin `-pooler`) para que `prisma migrate deploy` use una conexión directa. `staging` y `production` no las reciben solas: se aplican a mano, con aprobación, como indica el §3.
 - **Historia (2026-10-13):** hasta esa fecha el build no migraba y el servicio no tenía pre-deploy (el plan Free no lo admite), así que todas las migraciones de octubre se aplicaron a mano. Antes de un deploy con migración, confirmar en el log del build que aparezca `All migrations have been successfully applied` o `No pending migrations to apply`.
 - Nunca incluir cadenas de conexión completas ni contraseñas en docs, tickets o chats; el endpoint (`ep-…`) identifica la rama, el resto es secreto.
