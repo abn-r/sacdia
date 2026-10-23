@@ -1007,6 +1007,7 @@ Conteo de decoradores HTTP por tag de Swagger (`@ApiTags` de cada clase controll
 | rbac | 20 |
 | Ranking Tiers | 2 |
 | Ranking Weights | 5 |
+| reports | 1 |
 | requests | 8 |
 | resource-categories | 5 |
 | Resources | 8 |
@@ -1618,6 +1619,8 @@ Semántica funcional y límites: [operations-dashboard.md](../features/operation
 | GET | `/api/v1/clubs/:clubId/annual-reports` | JWT | Permisos: reports:read | Listar informes anuales de un club (usuario) | AnnualReportsService.listForClub() | `src/annual-reports/annual-reports.controller.ts` |
 | GET | `/api/v1/clubs/:clubId/annual-reports/:id` | JWT | Permisos: reports:read | Obtener informe anual por ID (usuario) | AnnualReportsService.getReport() | `src/annual-reports/annual-reports.controller.ts` |
 | GET | `/api/v1/clubs/:clubId/annual-reports/:id/pdf` | JWT | Permisos: reports:download | Descargar PDF anual. Nombre: `informe-anual-{club}-{tipo}-{año}.pdf` | AnnualReportsPdfService.generatePdf() | `src/annual-reports/annual-reports.controller.ts` |
+
+Alcance (2026-10-22): las rutas `admin/annual-reports/:id*` (detalle, PDF, PATCH, regenerate, finalize) verifican primero la misma visibilidad que el listado admin: territorio para roles territoriales, secciones de `coordinator_assignments` para coordinadores (un club es visible si una de sus secciones está en su alcance), sección activa para roles de club. Fuera de esa visibilidad responden `404` (no `403`). Las rutas `clubs/:clubId/annual-reports*` declaran recurso `club` (`canManageClub` o club activo) y `:id` / `:id/pdf` exigen que el informe pertenezca al `clubId` del path (`404` si no). `reports:update` no existe en el catálogo de permisos: PATCH / regenerate / finalize responden `403` a todos los roles hoy.
 
 ### app.controller.ts
 
@@ -3098,15 +3101,22 @@ El corte de año toma de antemano el candado de todos los dependientes implicado
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
 | GET | `/api/v1/monthly-reports/preview/:enrollmentId` | JWT | Permisos: reports:read | Vista previa del informe mensual | MonthlyReportsService.preview() | `src/monthly-reports/monthly-reports.controller.ts` |
-| POST | `/api/v1/monthly-reports/:enrollmentId` | JWT | Permisos: reports:read | Obtener o crear borrador de informe mensual | MonthlyReportsService.getOrCreateDraft() | `src/monthly-reports/monthly-reports.controller.ts` |
-| PATCH | `/api/v1/monthly-reports/:reportId/manual-data` | JWT | Permisos: reports:read | Actualizar datos manuales del informe | MonthlyReportsService.updateManualData() | `src/monthly-reports/monthly-reports.controller.ts` |
-| POST | `/api/v1/monthly-reports/:reportId/generate` | JWT | Permisos: reports:read | Encola congelar snapshot + PDF (202). Poll GET :reportId hasta generated. | MonthlyReportsService.enqueueGenerate() | `src/monthly-reports/monthly-reports.controller.ts` |
-| POST | `/api/v1/monthly-reports/:reportId/submit` | JWT | Permisos: reports:read | Enviar informe al campo | MonthlyReportsService.submit() | `src/monthly-reports/monthly-reports.controller.ts` |
-| GET | `/api/v1/monthly-reports/enrollment/:enrollmentId` | JWT | Permisos: reports:read | Listar informes de una matrícula | MonthlyReportsService.listReports() | `src/monthly-reports/monthly-reports.controller.ts` |
-| GET | `/api/v1/monthly-reports/:reportId/pdf` | JWT | Permisos: reports:download | Descargar PDF. Nombre: `informe-mensual-{club}-{tipo}-{mes}-{año}.pdf` | MonthlyReportsPdfService.generatePdf() | `src/monthly-reports/monthly-reports.controller.ts` |
+| POST | `/api/v1/monthly-reports/:enrollmentId` | JWT | Permisos: reports:submit | Obtener o crear borrador de informe mensual | MonthlyReportsService.getOrCreateDraft() | `src/monthly-reports/monthly-reports.controller.ts` |
+| PATCH | `/api/v1/monthly-reports/:reportId/manual-data` | JWT | Permisos: reports:submit | Actualizar datos manuales del informe | MonthlyReportsService.updateManualData() | `src/monthly-reports/monthly-reports.controller.ts` |
+| POST | `/api/v1/monthly-reports/:reportId/generate` | JWT | Permisos: reports:submit | Encola congelar snapshot + PDF (202). Poll GET :reportId hasta generated. | MonthlyReportsService.enqueueGenerate() | `src/monthly-reports/monthly-reports.controller.ts` |
+| POST | `/api/v1/monthly-reports/:reportId/submit` | JWT | Permisos: reports:submit | Enviar informe al campo | MonthlyReportsService.submit() | `src/monthly-reports/monthly-reports.controller.ts` |
+| GET | `/api/v1/monthly-reports/enrollment/:enrollmentId` | JWT | Permisos: reports:read (coordinatorSections) | Listar informes de una matrícula | MonthlyReportsService.listReports() | `src/monthly-reports/monthly-reports.controller.ts` |
+| GET | `/api/v1/monthly-reports/:reportId/pdf` | JWT | Permisos: reports:download (coordinatorSections) | Descargar PDF. Nombre: `informe-mensual-{club}-{tipo}-{mes}-{año}.pdf` | MonthlyReportsPdfService.generatePdf() | `src/monthly-reports/monthly-reports.controller.ts` |
 | POST | `/api/v1/monthly-reports/:reportId/regenerate` | JWT | Permisos: reports:write | Encola rerender del PDF almacenado (202) | MonthlyReportsService.enqueueRegenerate() | `src/monthly-reports/monthly-reports.controller.ts` |
 | GET | `/api/v1/monthly-reports/admin/list` | JWT | Permisos: reports:read | Listar reportes multi-club (admin/coordinator) | MonthlyReportsService.listForAdmin() | `src/monthly-reports/monthly-reports.controller.ts` |
-| GET | `/api/v1/monthly-reports/:reportId` | JWT | Permisos: reports:read | Obtener informe mensual | MonthlyReportsService.getReport() | `src/monthly-reports/monthly-reports.controller.ts` |
+| GET | `/api/v1/monthly-reports/:reportId` | JWT | Permisos: reports:read (coordinatorSections) | Obtener informe mensual | MonthlyReportsService.getReport() | `src/monthly-reports/monthly-reports.controller.ts` |
+
+#### Acceso de coordinadores y `reports:submit` (2026-10-22)
+
+- Crear/obtener borrador, editar datos manuales, generar y enviar exigen `reports:submit` (antes `reports:read`). La migración `20261025120000_coordinator_reports_read` lo copió a todo rol o permiso directo que tenía `reports:read` activo, salvo los roles GLOBAL `coordinator`, `zone-coordinator` y `general-coordinator`. `regenerate` sigue en `reports:write`.
+- Los coordinadores tienen `reports:read` + `reports:download` y nunca `reports:submit`: las mutaciones les responden `403 GUARD_PERMISSION_DENIED`.
+- Detalle, PDF y listado por matrícula declaran `coordinatorSections`: un coordinador pasa solo si `coordinator_assignments` (GENERAL / ZONE / SECTION) cubre la sección del informe; fuera de ella `403 GUARD_CLUB_SCOPE_REQUIRED`. `preview` no lo declara.
+- `GET /monthly-reports/admin/list` filtra en el servicio: el coordinador ve solo las secciones de su alcance; los filtros `division_id` / `union_id` / `local_field_id` no lo amplían.
 
 ### Notifications
 
@@ -3206,6 +3216,66 @@ Body opcional (todos los campos pueden omitirse): `{ "country_id": 1, "union_id"
 | GET | `/api/v1/clubs/:clubId/quarterly-reports` | JWT | Permisos: reports:read | Listar informes trimestrales de un club (usuario) | QuarterlyReportsService.listForClub() | `src/quarterly-reports/quarterly-reports.controller.ts` |
 | GET | `/api/v1/clubs/:clubId/quarterly-reports/:id` | JWT | Permisos: reports:read | Obtener informe trimestral por ID (usuario) | QuarterlyReportsService.getReport() | `src/quarterly-reports/quarterly-reports.controller.ts` |
 | GET | `/api/v1/clubs/:clubId/quarterly-reports/:id/pdf` | JWT | Permisos: reports:download | Descargar PDF trimestral. Nombre: `informe-trimestral-{club}-{tipo}-{trimestre}-{año}.pdf` | QuarterlyReportsPdfService.generatePdf() | `src/quarterly-reports/quarterly-reports.controller.ts` |
+
+Alcance (2026-10-22): las rutas `admin/quarterly-reports/:id*` (detalle, PDF, PATCH, regenerate, finalize) verifican primero la misma visibilidad que el listado admin: territorio para roles territoriales, secciones de `coordinator_assignments` para coordinadores (un club es visible si una de sus secciones está en su alcance), sección activa para roles de club. Fuera de esa visibilidad responden `404` (no `403`). Las rutas `clubs/:clubId/quarterly-reports*` declaran recurso `club` (`canManageClub` o club activo) y `:id` / `:id/pdf` exigen que el informe pertenezca al `clubId` del path (`404` si no). `reports:update` no existe en el catálogo de permisos: PATCH / regenerate / finalize responden `403` a todos los roles hoy.
+
+### reports
+
+| Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
+| --- | --- | --- | --- | --- | --- | --- |
+| GET | `/api/v1/reports/compliance` | JWT | Permisos: reports:read | Cumplimiento de informes por club y periodo (solo lectura) | ReportsComplianceService.getCompliance() | `src/reports/reports-compliance.controller.ts` |
+
+#### Contrato de `GET /api/v1/reports/compliance`
+
+Solo lectura. Conteos de informes mensuales (por sección), trimestrales y anuales (por club) de un año eclesiástico.
+
+- **Alcance**: idéntico a los listados admin (`resolveReportVisibilityScopeForActor`). `admin` / `super-admin` / DIA: todo (filtros de territorio opcionales). Unión y campo local: su territorio forzado. Coordinadores (`coordinator`, `zone-coordinator`, `general-coordinator`): secciones de `coordinator_assignments`; los filtros de territorio no amplían ese alcance; sin asignaciones activas => `403 ADMIN_USER_SCOPE_MISSING`. Roles de club: su sección activa. Los conteos mensuales usan solo las secciones del alcance; los trimestrales y anuales son del club, que entra si una de sus secciones está en el alcance.
+- **Query** (todas opcionales): `ecclesiastical_year_id` (default: año activo; inexistente => `404 ANNUAL_REPORT_YEAR_NOT_FOUND`), `club_type_id`, `division_id`, `union_id`, `local_field_id`, `year` + `month` (1-12, acota mensuales; fuera de rango => `400 MONTHLY_REPORT_INVALID_MONTH`), `year` + `quarter` (1-4, acota trimestrales; fuera de rango => `400 QUARTERLY_REPORT_INVALID_QUARTER`), `page` (default 1), `limit` (default 50, máx. 200; pagina `items`, los `totals` cubren todo el alcance).
+- **Periodos**: mensual = cada mes del año eclesiástico; trimestral = cada trimestre calendario completo dentro del año; anual = el año eclesiástico. Fecha límite (`due_at`) = día `reports.auto_generate_day` (system_config, default 5, rango 1-28) del mes siguiente al cierre del periodo, 23:00 UTC (mismo corte que la autogeneración mensual).
+- **Estados**: `submitted` = mensual `submitted`; trimestral/anual `finalized` o `archived`. Si no está enviado: periodo aún abierto => no cuenta; cerrado y antes de `due_at` => `pending`; después => `overdue`. Un informe enviado antes del cierre cuenta como `submitted`. `expected = submitted + pending + overdue`.
+- **Respuesta**:
+
+```json
+{
+  "status": "success",
+  "data": {
+    "as_of": "2026-10-22T15:00:00.000Z",
+    "due_day": 5,
+    "ecclesiastical_year": { "year_id": 1, "start_date": "2026-01-01T00:00:00.000Z", "end_date": "2026-12-31T00:00:00.000Z" },
+    "totals": {
+      "clubs": 2,
+      "monthly": {
+        "expected": 18, "submitted": 12, "pending": 0, "overdue": 6,
+        "by_period": [{ "year": 2026, "month": 1, "due_at": "2026-02-05T23:00:00.000Z", "expected": 2, "submitted": 2, "pending": 0, "overdue": 0 }]
+      },
+      "quarterly": {
+        "expected": 6, "submitted": 2, "pending": 0, "overdue": 4,
+        "by_period": [{ "year": 2026, "quarter": 1, "due_at": "2026-04-05T23:00:00.000Z", "expected": 2, "submitted": 1, "pending": 0, "overdue": 1 }]
+      },
+      "annual": { "expected": 0, "submitted": 0, "pending": 0, "overdue": 0 }
+    },
+    "total": 2,
+    "page": 1,
+    "limit": 50,
+    "items": [
+      {
+        "club_id": 10,
+        "club_name": "Amanecer",
+        "local_field_id": 50,
+        "local_field_name": "Campo Norte",
+        "sections": [{ "club_section_id": 22, "club_type_id": 2, "club_type_name": "Conquistadores" }],
+        "monthly": { "expected": 9, "submitted": 9, "pending": 0, "overdue": 0 },
+        "quarterly": { "expected": 3, "submitted": 1, "pending": 0, "overdue": 2 },
+        "annual": { "expected": 0, "submitted": 0, "pending": 0, "overdue": 0 }
+      }
+    ]
+  }
+}
+```
+
+- Solo secciones y clubes activos. Matrículas mensuales: `club_enrollments.status = 'active'` del año pedido. `items` ordenados por nombre de club.
+
+Lo consume el módulo Reportes de la pestaña Coordinación de la app.
 
 ### Ranking Weights
 

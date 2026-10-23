@@ -27,8 +27,10 @@ La feature esta implementada en backend con IDs UUID y estados `draft -> generat
   - `GET /api/v1/monthly-reports/:reportId/pdf` - descargar PDF solo para `generated|submitted`
   - `GET /api/v1/monthly-reports/:reportId` - obtener detalle completo con `manual_data`, `snapshot_data`, matricula y submitter
 - **Permisos verificados**:
-  - casi toda la superficie requiere `reports:read`
-  - descarga PDF requiere `reports:download`
+  - lectura (`preview`, listado por matrícula, `admin/list`, detalle) requiere `reports:read`
+  - borrador, datos manuales, generar y enviar requieren `reports:submit` (desde 2026-10-22; antes `reports:read`)
+  - descarga PDF requiere `reports:download`; `regenerate` requiere `reports:write`
+  - coordinadores: `reports:read` + `reports:download`, nunca `reports:submit`; detalle, PDF y listado por matrícula declaran `coordinatorSections` (pasa solo si `coordinator_assignments` cubre la sección). Cumplimiento agregado: `GET /api/v1/reports/compliance`
   - el controller usa `JwtAuthGuard`, `PermissionsGuard` y `@AuthorizationResource({ type: 'active_assignment' })`
 - **Estados reales verificados**:
   - `draft`
