@@ -1371,6 +1371,15 @@ Errores: 404 `HONOR_INSTRUCTOR_PROPOSAL_NOT_FOUND`; 409 `HONOR_INSTRUCTOR_PROPOS
 | GET | `/api/v1/admin/analytics/cron-runs` | JWT | Global: admin, super-admin | Resumen de ejecuciones de cron jobs (admin only); `recent[]` trae `trigger` y `triggered_by` (mergeado en `development`, PR #535 de sacdia-backend) | CronRunsService.getSummary() | `src/analytics/analytics.controller.ts` |
 | GET | `/api/v1/admin/analytics/cron-runs/history` | JWT | Global: admin, super-admin | Historial paginado de cron runs con filtros | CronRunsService.getHistory() | `src/analytics/analytics.controller.ts` |
 
+#### `GET /api/v1/admin/analytics/sla-dashboard`: bloque `evidence`
+
+Desde sacdia-backend #543, `evidence` mide la cola de evidencias pendientes con el mismo alcance que `GET /evidence-review/pending`: secciones de clase `SUBMITTED` + especialidades `PENDING_REVIEW`.
+
+- `pending`: evidencias por revisar.
+- `overdue`: pendientes enviadas hace `overdue_threshold_days` días o más.
+- `avg_days`: antigüedad media de las pendientes; `null` si no hay ninguna.
+- `overdue_threshold_days`: umbral de vencimiento, hoy `7` (`EVIDENCE_REVIEW_OVERDUE_DAYS`). Los clientes deben leerlo de aquí en vez de fijarlo.
+
 #### `GET /api/v1/admin/analytics/operations-dashboard`
 
 Endpoint read-only agregado. El controller admite los roles enumerados en la tabla; `assistant-admin` es aceptado por el alias `admin ↔ assistant-admin` de `GlobalRolesGuard`. Solo `super-admin` obtiene scope global. Los demás actores reciben el scope territorial resuelto por `OperationsDashboardScopeService`.
@@ -1620,7 +1629,7 @@ Semántica funcional y límites: [operations-dashboard.md](../features/operation
 | GET | `/api/v1/clubs/:clubId/annual-reports/:id` | JWT | Permisos: reports:read | Obtener informe anual por ID (usuario) | AnnualReportsService.getReport() | `src/annual-reports/annual-reports.controller.ts` |
 | GET | `/api/v1/clubs/:clubId/annual-reports/:id/pdf` | JWT | Permisos: reports:download | Descargar PDF anual. Nombre: `informe-anual-{club}-{tipo}-{año}.pdf` | AnnualReportsPdfService.generatePdf() | `src/annual-reports/annual-reports.controller.ts` |
 
-Alcance (2026-10-22): las rutas `admin/annual-reports/:id*` (detalle, PDF, PATCH, regenerate, finalize) verifican primero la misma visibilidad que el listado admin: territorio para roles territoriales, secciones de `coordinator_assignments` para coordinadores (un club es visible si una de sus secciones está en su alcance), sección activa para roles de club. Fuera de esa visibilidad responden `404` (no `403`). Las rutas `clubs/:clubId/annual-reports*` declaran recurso `club` (`canManageClub` o club activo) y `:id` / `:id/pdf` exigen que el informe pertenezca al `clubId` del path (`404` si no). `reports:update` no existe en el catálogo de permisos: PATCH / regenerate / finalize responden `403` a todos los roles hoy.
+Alcance (2026-10-22): las rutas `admin/annual-reports/:id*` (detalle, PDF, PATCH, regenerate, finalize) verifican primero la misma visibilidad que el listado admin: territorio para roles territoriales, secciones de `coordinator_assignments` para coordinadores (un club es visible si una de sus secciones está en su alcance), sección activa para roles de club. Fuera de esa visibilidad responden `404` (no `403`). Las rutas `clubs/:clubId/annual-reports*` declaran recurso `club` (`canManageClub` o club activo) y `:id` / `:id/pdf` exigen que el informe pertenezca al `clubId` del path (`404` si no). PATCH / regenerate / finalize exigen `reports:update` (migración `20261026120000_reports_update_permission`; antes no existía y respondían `403` a todos los roles). Lo tienen `super-admin`, `admin`, `assistant-admin` y los roles territoriales (`assistant-lf`, `director-lf`, `assistant-union`, `director-union`, `assistant-dia`, `director-dia`), cada uno dentro de su visibilidad. Coordinadores, `pastor` y roles de club no lo tienen: `403 GUARD_PERMISSION_DENIED`.
 
 ### app.controller.ts
 
@@ -3107,13 +3116,13 @@ El corte de año toma de antemano el candado de todos los dependientes implicado
 | POST | `/api/v1/monthly-reports/:reportId/submit` | JWT | Permisos: reports:submit | Enviar informe al campo | MonthlyReportsService.submit() | `src/monthly-reports/monthly-reports.controller.ts` |
 | GET | `/api/v1/monthly-reports/enrollment/:enrollmentId` | JWT | Permisos: reports:read (coordinatorSections) | Listar informes de una matrícula | MonthlyReportsService.listReports() | `src/monthly-reports/monthly-reports.controller.ts` |
 | GET | `/api/v1/monthly-reports/:reportId/pdf` | JWT | Permisos: reports:download (coordinatorSections) | Descargar PDF. Nombre: `informe-mensual-{club}-{tipo}-{mes}-{año}.pdf` | MonthlyReportsPdfService.generatePdf() | `src/monthly-reports/monthly-reports.controller.ts` |
-| POST | `/api/v1/monthly-reports/:reportId/regenerate` | JWT | Permisos: reports:write | Encola rerender del PDF almacenado (202) | MonthlyReportsService.enqueueRegenerate() | `src/monthly-reports/monthly-reports.controller.ts` |
+| POST | `/api/v1/monthly-reports/:reportId/regenerate` | JWT | Permisos: reports:write | Encola rerender del PDF almacenado desde el snapshot congelado (202; solo `generated`/`submitted`) | MonthlyReportsService.enqueueRegenerate() | `src/monthly-reports/monthly-reports.controller.ts` |
 | GET | `/api/v1/monthly-reports/admin/list` | JWT | Permisos: reports:read | Listar reportes multi-club (admin/coordinator) | MonthlyReportsService.listForAdmin() | `src/monthly-reports/monthly-reports.controller.ts` |
 | GET | `/api/v1/monthly-reports/:reportId` | JWT | Permisos: reports:read (coordinatorSections) | Obtener informe mensual | MonthlyReportsService.getReport() | `src/monthly-reports/monthly-reports.controller.ts` |
 
 #### Acceso de coordinadores y `reports:submit` (2026-10-22)
 
-- Crear/obtener borrador, editar datos manuales, generar y enviar exigen `reports:submit` (antes `reports:read`). La migración `20261025120000_coordinator_reports_read` lo copió a todo rol o permiso directo que tenía `reports:read` activo, salvo los roles GLOBAL `coordinator`, `zone-coordinator` y `general-coordinator`. `regenerate` sigue en `reports:write`.
+- Crear/obtener borrador, editar datos manuales, generar y enviar exigen `reports:submit` (antes `reports:read`). La migración `20261025120000_coordinator_reports_read` lo copió a todo rol o permiso directo que tenía `reports:read` activo, salvo los roles GLOBAL `coordinator`, `zone-coordinator` y `general-coordinator`. `regenerate` exige `reports:write` (migración `20261026120000_reports_update_permission`; antes no existía y respondía `403` a todos los roles): se copió a todo rol o permiso directo con `reports:submit` activo, salvo los coordinadores. No cambia datos (vuelve a renderizar el PDF del snapshot) y conserva el recurso `monthly_report`, así que cada rol solo regenera dentro de su sección o territorio.
 - Los coordinadores tienen `reports:read` + `reports:download` y nunca `reports:submit`: las mutaciones les responden `403 GUARD_PERMISSION_DENIED`.
 - Detalle, PDF y listado por matrícula declaran `coordinatorSections`: un coordinador pasa solo si `coordinator_assignments` (GENERAL / ZONE / SECTION) cubre la sección del informe; fuera de ella `403 GUARD_CLUB_SCOPE_REQUIRED`. `preview` no lo declara.
 - `GET /monthly-reports/admin/list` filtra en el servicio: el coordinador ve solo las secciones de su alcance; los filtros `division_id` / `union_id` / `local_field_id` no lo amplían.
@@ -3217,7 +3226,7 @@ Body opcional (todos los campos pueden omitirse): `{ "country_id": 1, "union_id"
 | GET | `/api/v1/clubs/:clubId/quarterly-reports/:id` | JWT | Permisos: reports:read | Obtener informe trimestral por ID (usuario) | QuarterlyReportsService.getReport() | `src/quarterly-reports/quarterly-reports.controller.ts` |
 | GET | `/api/v1/clubs/:clubId/quarterly-reports/:id/pdf` | JWT | Permisos: reports:download | Descargar PDF trimestral. Nombre: `informe-trimestral-{club}-{tipo}-{trimestre}-{año}.pdf` | QuarterlyReportsPdfService.generatePdf() | `src/quarterly-reports/quarterly-reports.controller.ts` |
 
-Alcance (2026-10-22): las rutas `admin/quarterly-reports/:id*` (detalle, PDF, PATCH, regenerate, finalize) verifican primero la misma visibilidad que el listado admin: territorio para roles territoriales, secciones de `coordinator_assignments` para coordinadores (un club es visible si una de sus secciones está en su alcance), sección activa para roles de club. Fuera de esa visibilidad responden `404` (no `403`). Las rutas `clubs/:clubId/quarterly-reports*` declaran recurso `club` (`canManageClub` o club activo) y `:id` / `:id/pdf` exigen que el informe pertenezca al `clubId` del path (`404` si no). `reports:update` no existe en el catálogo de permisos: PATCH / regenerate / finalize responden `403` a todos los roles hoy.
+Alcance (2026-10-22): las rutas `admin/quarterly-reports/:id*` (detalle, PDF, PATCH, regenerate, finalize) verifican primero la misma visibilidad que el listado admin: territorio para roles territoriales, secciones de `coordinator_assignments` para coordinadores (un club es visible si una de sus secciones está en su alcance), sección activa para roles de club. Fuera de esa visibilidad responden `404` (no `403`). Las rutas `clubs/:clubId/quarterly-reports*` declaran recurso `club` (`canManageClub` o club activo) y `:id` / `:id/pdf` exigen que el informe pertenezca al `clubId` del path (`404` si no). PATCH / regenerate / finalize exigen `reports:update` (migración `20261026120000_reports_update_permission`; antes no existía y respondían `403` a todos los roles). Lo tienen `super-admin`, `admin`, `assistant-admin` y los roles territoriales (`assistant-lf`, `director-lf`, `assistant-union`, `director-union`, `assistant-dia`, `director-dia`), cada uno dentro de su visibilidad. Coordinadores, `pastor` y roles de club no lo tienen: `403 GUARD_PERMISSION_DENIED`.
 
 ### reports
 
