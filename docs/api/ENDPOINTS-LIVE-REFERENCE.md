@@ -1371,14 +1371,20 @@ Errores: 404 `HONOR_INSTRUCTOR_PROPOSAL_NOT_FOUND`; 409 `HONOR_INSTRUCTOR_PROPOS
 | GET | `/api/v1/admin/analytics/cron-runs` | JWT | Global: admin, super-admin | Resumen de ejecuciones de cron jobs (admin only); `recent[]` trae `trigger` y `triggered_by` (mergeado en `development`, PR #535 de sacdia-backend) | CronRunsService.getSummary() | `src/analytics/analytics.controller.ts` |
 | GET | `/api/v1/admin/analytics/cron-runs/history` | JWT | Global: admin, super-admin | Historial paginado de cron runs con filtros | CronRunsService.getHistory() | `src/analytics/analytics.controller.ts` |
 
-#### `GET /api/v1/admin/analytics/sla-dashboard`: bloque `evidence`
+#### `GET /api/v1/admin/analytics/sla-dashboard`
 
-Desde sacdia-backend #543, `evidence` mide la cola de evidencias pendientes con el mismo alcance que `GET /evidence-review/pending`: secciones de clase `SUBMITTED` + especialidades `PENDING_REVIEW`.
+Coordinadores reciben las secciones asignadas (`resolveCoordinatorLikeSectionScope`); admin ve global. Caché en memoria del proceso, 60 s por scope.
 
-- `pending`: evidencias por revisar.
-- `overdue`: pendientes enviadas hace `overdue_threshold_days` días o más.
-- `avg_days`: antigüedad media de las pendientes; `null` si no hay ninguna.
-- `overdue_threshold_days`: umbral de vencimiento, hoy `7` (`EVIDENCE_REVIEW_OVERDUE_DAYS`). Los clientes deben leerlo de aquí en vez de fijarlo.
+`data.evidence` (2026-10-23) mide la cola de `GET /evidence-review/pending` con el mismo filtro y scope (clases `SUBMITTED` + especialidades `PENDING_REVIEW`, activas, con `submitted_at`, miembro con asignación activa en una sección del scope):
+
+| Campo | Tipo | Significado |
+| --- | --- | --- |
+| `pending` | int | Evidencias en cola. |
+| `overdue` | int | Pendientes con `submitted_at <= now - overdue_threshold_days`, es decir, de `overdue_threshold_days` días completos o más. |
+| `avg_days` | number \| null | Edad promedio en días (1 decimal) desde `submitted_at`; `null` si no hay pendientes. |
+| `overdue_threshold_days` | int | Umbral de vencimiento (hoy 7). Fuente única: `EVIDENCE_REVIEW_OVERDUE_DAYS` en `src/evidence-review/evidence-review-sla.ts`. Los clientes deben leerlo de aquí en vez de fijarlo. |
+
+`validation.*`, `investiture.*` (vencido a 30 días), `camporee.*`, `timing`, `throughput` y `approval_rate` no cambian.
 
 #### `GET /api/v1/admin/analytics/operations-dashboard`
 
@@ -2383,6 +2389,10 @@ La `1.2.0` (perfiles familiares) añade la clave `family`, después de `legal_ac
 | POST | `/api/v1/evidence-review/:type/:id/approve` | JWT | Global: admin, super-admin, coordinator; Permisos: validation:review | Aprobar una evidencia | EvidenceReviewService.approve() | `src/evidence-review/evidence-review.controller.ts` |
 | POST | `/api/v1/evidence-review/:type/:id/reject` | JWT | Global: admin, super-admin, coordinator; Permisos: validation:review | Rechazar una evidencia con motivo | EvidenceReviewService.reject() | `src/evidence-review/evidence-review.controller.ts` |
 | GET | `/api/v1/evidence-review/:type/:id/history` | JWT | Global: admin, super-admin, coordinator; Permisos: validation:review | Historial de validación de una evidencia | EvidenceReviewService.getHistory() | `src/evidence-review/evidence-review.controller.ts` |
+
+#### `file_count` de evidencias de especialidad
+
+En `GET /evidence-review/pending` el `file_count` de un ítem `honor` es igual al `file_count` (y a `files.length`) de `GET /evidence-review/honor/:id` (2026-10-23). Ambos cuentan el mismo conjunto: formato completado (`document`), `certificate`, imágenes legadas (`images` JSON), filas activas de `evidence_files` y evidencias activas de requisitos activos de la especialidad. Se deduplica por la referencia almacenada (URL sin query), no por la URL firmada: las filas de `evidence_files` copiadas desde `images` (migración `20260327100000`, cargas masivas) ya no aparecen dos veces en el detalle; gana la copia legada, firmada con el bucket `USERS_HONORS`. Para `class` el conteo sigue siendo las filas activas de `evidence_files`.
 
 ### finances
 
