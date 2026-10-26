@@ -2893,6 +2893,31 @@ Read model de solo lectura. No fusiona folios ni muta `field_payment_orders`, `m
 | DELETE | `/api/v1/inventory/inventory/:id` | JWT | Permisos: inventory:delete | Eliminar un item del inventario | InventoryService.delete() | `src/inventory/inventory.controller.ts` |
 | GET | `/api/v1/inventory/catalogs/inventory-categories` | JWT | Permisos: inventory:read | Listar categorías de inventario (Redis TTL 1h) | InventoryService.findAllCategories() | `src/inventory/inventory.controller.ts` |
 
+**Campos extendidos del item (Pendiente de merge; backend `fix/inventory-extended-fields`, migración `20261026130000_inventory_extended_fields`).** `POST /inventory/clubs/:clubId/inventory` y `PATCH /inventory/inventory/:id` aceptan siete campos opcionales, además de `name`, `description`, `inventory_category_id` y `amount`. Validación en `src/inventory/dto/inventory-extended-fields.dto.ts`:
+
+| Campo | Tipo | Validación |
+| --- | --- | --- |
+| `condition` | string | `bueno` (default), `regular` o `malo`; no admite `null` |
+| `serial_number` | string \| null | máx. 100 caracteres |
+| `purchase_date` | string \| null | `YYYY-MM-DD` válida (no se acepta fecha con hora) |
+| `estimated_value` | number \| null | ≥ 0, máx. 2 decimales, máx. 9 999 999 999.99 |
+| `location` | string \| null | máx. 150 caracteres |
+| `assigned_to` | string \| null | texto libre, máx. 150 caracteres (no es FK a usuarios) |
+| `notes` | string \| null | máx. 2000 caracteres |
+
+- Los textos se recortan y una cadena vacía se guarda como `null`. Un valor fuera de rango responde 400 de validación.
+- **PATCH**: campo omitido = sin cambio; `null` limpia el campo (excepto `condition`). **POST**: los campos omitidos quedan en `null` y `condition` en `bueno`.
+- Las respuestas de listado (`GET /clubs/:clubId/inventory`), detalle, alta y edición incluyen los siete campos: `condition` (siempre string), `estimated_value` como número JSON, `purchase_date` como `YYYY-MM-DD` y el resto `string | null`.
+- `PATCH` registra en `inventory_history` un renglón por cada campo extendido que cambia (`field_changed` = nombre del campo; `estimated_value` en texto). `POST` no registra los campos extendidos en el historial.
+- La base lo refuerza con los CHECK `club_inventory_condition_check` y `club_inventory_estimated_value_check`.
+- **Orden de despliegue**: la migración debe estar aplicada en la base antes de desplegar este backend (`staging` y `production` aún no la tienen; ver `docs/deployment/DEPLOYMENT-GUIDE.md` §0.7).
+
+Ejemplo de `PATCH` (limpia la ubicación, cambia la condición y no toca el resto):
+
+```json
+{ "condition": "regular", "location": null, "estimated_value": 1250.5 }
+```
+
 ### investiture
 
 Fase 8 (ejecutada en código el 2026-10-09; mergeada en `development` con backend #468 y #469): la vía club → coordinación → campo está apagada y desplegada en el backend vivo. Las 17 rutas marcadas «Retirada» responden HTTP 410 con el código estable `INVESTITURE_LEGACY_PIPELINE_RETIRED`, sin exigir permisos ni roles (solo el JWT global): ningún actor recibe un 403 que oculte el 410. Incluye las lecturas `GET /investiture/pending` y `GET /admin/investiture/config*`. Siguen vivos el historial (`GET /investiture/enrollments/:enrollmentId/history` y su alias), `expire-overdue` y el desbloqueo de abajo. Los 17 handlers están en `LegacyInvestitureRetiredController`; no leen cuerpo ni parámetros. El `message` sale del catálogo de errores del idioma de la petición; una app o un panel viejos que no mandan `Accept-Language` lo reciben en español. El inventario histórico y el tratamiento de cada expediente están en `docs/features/validacion-investiduras.md`, sección «Fase 8 — apagado». Los permisos `investiture:submit`, `investiture:validate`, `investiture:mark_invested` e `investiture_config:*` quedaron inertes con la fase 8 y se eliminaron del catálogo y de las concesiones con la migración `20261013110000_remove_retired_investiture_permissions` (backend #488, aplicada el 2026-10-13). `investiture:read` sigue en uso: lo exigen las dos lecturas del historial. Las migraciones `20261008120000` y `20261009120000` están aplicadas en las tres ramas de Neon y el `dry_run` del desbloqueo en `development` dio 0 candidatos; no se corrió `dry_run: false` en ningún entorno.

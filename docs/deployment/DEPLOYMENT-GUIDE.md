@@ -195,6 +195,16 @@ Lo que **no** se revierte con banderas: la compuerta de consentimiento, el modo 
 
 **10. Los crones exigen un plan de Render de pago, siempre encendido (decisión del 2026-10-21).** Los `@Cron` corren dentro del proceso de la API; con el plan Free el servicio se suspende por inactividad y **ningún cron corre mientras duerme** (purgas, recordatorios, vencimientos de solicitudes, el reloj de 90 días de los adolescentes sin tutor, el barrido de cambios de edad). En desarrollo se acepta y se resuelve con el botón «Ejecutar ahora» (super-admin; `POST /api/v1/admin/cron-jobs/:jobName/run`). **Producción necesita un plan de pago always-on**: añádelo a esta checklist antes de promover a `main`, junto con la advertencia de que ejecutar a mano un job con avisos (`activities-reminder`, `cron-alert-check` y los de la fase 3) envía notificaciones reales. Si algún día hiciera falta fiabilidad en desarrollo sin pagar: un ping externo de keep-alive, o mover los crones a Render Cron Jobs o GitHub Actions que llamen a endpoints internos protegidos.
 
+### 0.7 Migración de campos extendidos de inventario (2026-10-26)
+
+Una migración aditiva del backend, rama `fix/inventory-extended-fields`, **Pendiente de merge**. Añade a `club_inventory` los campos `condition`, `serial_number`, `purchase_date`, `estimated_value`, `location`, `assigned_to` y `notes`, más dos CHECK. Detalle en `docs/database/SCHEMA-REFERENCE.md`.
+
+| Directorio (`sacdia-backend/prisma/migrations/`) | Usa `CONCURRENTLY` | `development` | `staging` | `production` |
+|---|---|---|---|---|
+| `20261026130000_inventory_extended_fields` | No | Aplicada (2026-10-26) | **Pendiente** | **Pendiente** |
+
+**Aplicarla antes de desplegar el backend de esa rama** en cada entorno: el código nuevo lee y escribe las columnas, así que sobre una base sin ellas falla. Es compatible con el código anterior (solo `ADD COLUMN` y `ADD CONSTRAINT`; las filas existentes quedan con `condition = 'bueno'`). En `development` el merge del backend ya no necesita aplicarla: `prisma migrate deploy` la encontrará registrada. En `staging` y `production` aplican las reglas del §0.4 y del §0.6 (`production` solo por la promoción `development` → `preproduction` → `main`); recuerda que `staging` ya no está al nivel de `development` mientras esta migración siga pendiente.
+
 ---
 
 ## 1. Entornos y ramas
