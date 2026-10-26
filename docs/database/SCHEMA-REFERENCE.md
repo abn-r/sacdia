@@ -584,6 +584,27 @@ Modelos Prisma en PascalCase mapeados a tablas snake_case: `MaterialCategory` (`
 - Incluye datos operativos propios (`phone`, `email`, `website`, `logo_url`, `address`, `lat`, `long`).
 - La unicidad vigente es `@@unique([main_club_id, club_type_id])`.
 
+### `club_inventory`: condición y campos extendidos (Pendiente de merge)
+
+Migración `20261026130000_inventory_extended_fields` (backend, rama `fix/inventory-extended-fields`, Pendiente de merge). Aditiva y compatible con el código anterior: las filas existentes quedan con `condition = 'bueno'` y `NULL` en el resto, sin backfill. Aplicada en Neon `development` (2026-10-26); pendiente en `staging` y `production` (ver `docs/deployment/DEPLOYMENT-GUIDE.md` §0.7).
+
+| Columna | Tipo | Nulabilidad / default |
+|---|---|---|
+| `condition` | `VARCHAR(10)` | `NOT NULL DEFAULT 'bueno'` |
+| `serial_number` | `VARCHAR(100)` | `NULL` |
+| `purchase_date` | `DATE` | `NULL` |
+| `estimated_value` | `DECIMAL(12,2)` | `NULL` |
+| `location` | `VARCHAR(150)` | `NULL` |
+| `assigned_to` | `VARCHAR(150)` | `NULL` (texto libre, no FK) |
+| `notes` | `TEXT` | `NULL` |
+
+CHECK constraints (solo en la base; Prisma no los modela):
+
+- `club_inventory_condition_check`: `condition IN ('bueno', 'regular', 'malo')`.
+- `club_inventory_estimated_value_check`: `estimated_value IS NULL OR estimated_value >= 0`.
+
+Los cambios de estos campos se auditan por campo en `inventory_history`. Contrato y reglas de validación: `docs/features/inventario.md`.
+
 ### `club_role_assignments`
 
 - La relacion operativa es contra `club_section_id`.
