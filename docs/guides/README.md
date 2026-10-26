@@ -10,6 +10,7 @@ Guías prácticas. Están subordinadas al canon y a los contratos (ver `docs/can
 | Guía | Para qué |
 |---|---|
 | [`SETUP-NEW-PC.md`](SETUP-NEW-PC.md) | Preparar un equipo nuevo: repos, toolchain (Node 24, pnpm 10, Flutter), git/gh, flujo de ramas y Claude Code |
+| [`FRESH-ENVIRONMENT-SETUP.md`](FRESH-ENVIRONMENT-SETUP.md) | Levantar un ambiente limpio (env, migraciones, seeds, primer super-admin) y qué datos cargar por capas: primera necesidad, catálogos, configuración territorial, usuario. Incluye huecos del admin |
 | [`developer-workflow.md`](developer-workflow.md) | Flujo de trabajo con código y documentación |
 | [`idea-to-spec.md`](idea-to-spec.md) | Convertir una idea en diseño y plan |
 | [`admin-integration.md`](admin-integration.md) | Integrar pantallas del admin con la API y el screen catalog |
