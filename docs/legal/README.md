@@ -42,7 +42,20 @@ Los borradores completos (`*.full-draft-*`) llevan el sufijo `-draft` porque no 
 4. Solo entonces se despliega el commit de versión del backend (`2.0.0-family`; es el último commit de la sub-fase 3a y se puede revertir solo).
 5. **No promover a `main` mientras exista el aviso «BORRADOR» en estos archivos.**
 
-Verificación manual: la versión del frontmatter de `terminos-y-condiciones.md` y de `aviso-de-privacidad.md` es igual a `CURRENT_LEGAL_DOCUMENTS` el día de la publicación, y `rg "BORRADOR — requiere revisión" docs/legal` no devuelve nada.
+Verificación manual: la versión del frontmatter de `terminos-y-condiciones.md` y de `aviso-de-privacidad.md` es igual a `CURRENT_LEGAL_DOCUMENTS` el día de la publicación, y ni `rg "BORRADOR — requiere revisión" docs/legal` ni `rg "\[PENDIENTE:" docs/legal/aviso-de-privacidad.md docs/legal/terminos-y-condiciones.md` devuelven nada.
+
+### Mejoras P0 del benchmark legal (2026-10-26)
+
+[`BENCHMARK-2026-10-26.md`](./BENCHMARK-2026-10-26.md) comparó los documentos operativos con 7 apps del nicho y con el código real. Las mejoras P0 ya están aplicadas al borrador 2.0.0-family:
+
+| Mejora | Dónde | Pendiente para publicar |
+|---|---|---|
+| Identidad y domicilio del responsable (LFPDPPP art. 16-I) | Aviso §1; Términos intro y §12 | Resolver los marcadores `[PENDIENTE: ...]` |
+| Consentimiento expreso separado para salud y religión (art. 9) | Aviso §2.3.1 | La app hoy tiene un solo checkbox (`sac_legal_consent.dart`); implementar dos controles o retirar §2.3.1 |
+| Lista de encargados completa, con datos y país | Aviso §4.1 a §4.3; checklist §4 | Confirmar razones sociales y DPA; migrar imágenes de AWS S3 a R2; publicar Cloud Run/Firestore solo al desplegar el proxy OCR |
+| Derechos ARCO con procedimiento, plazos y revocación | Aviso §7; Términos §3.5 | Abogado confirma plazos y autoridad con la LFPDPPP 2025 |
+
+Las mejoras P1 y P2 del benchmark (página `/subprocessors` aparte, cookies del panel web, retención por categoría, ley aplicable y jurisdicción en términos, resumen inicial, historial de versiones) **no** están aplicadas.
 
 ## Posición pública de privacidad
 
@@ -59,6 +72,7 @@ Los documentos legales extensos previos se preservaron como referencia para una 
 | [`aviso-de-privacidad.full-draft-2026-04-17.md`](./aviso-de-privacidad.full-draft-2026-04-17.md) | Draft legal amplio con placeholders de entidad/RFC/domicilio y controles futuros. No usar directamente para tiendas. |
 | [`terminos-y-condiciones.full-draft-2026-04-17.md`](./terminos-y-condiciones.full-draft-2026-04-17.md) | Draft legal amplio con placeholders de entidad/RFC/domicilio y controles futuros. No usar directamente para tiendas. |
 | [`REVIEW-REPORT.md`](./REVIEW-REPORT.md) | Reporte de revisión del draft legal anterior. |
+| [`BENCHMARK-2026-10-26.md`](./BENCHMARK-2026-10-26.md) | Benchmark contra 7 apps comparables y contra el código real; 15 mejoras priorizadas (P0 aplicadas al borrador 2.0.0-family). |
 
 ## Reglas antes de publicar
 

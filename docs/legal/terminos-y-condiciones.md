@@ -1,7 +1,7 @@
 ---
 documento: Términos de Uso
 version: 2.0.0-family
-fecha: 2026-10-19
+fecha: 2026-10-26
 estado: BORRADOR — requiere revisión del usuario o de un abogado (no publicar ni promover a main hasta que se apruebe)
 version_publicada_vigente: 1.0.0-store
 aplicable_a: sacdia-app (iOS/Android) + sacdia-admin (web)
@@ -11,13 +11,18 @@ contacto: sacdia.app@gmail.com
 
 # Términos de Uso de SACDIA
 
-Última actualización: **19 de octubre de 2026** (borrador de la versión 2.0.0-family; la versión publicada hoy sigue siendo la 1.0.0-store del 30 de junio de 2026)
+Última actualización: **26 de octubre de 2026** (borrador de la versión 2.0.0-family; la versión publicada hoy sigue siendo la 1.0.0-store del 30 de junio de 2026)
 Contacto: **sacdia.app@gmail.com**
 
 > **BORRADOR — requiere revisión del usuario o de un abogado.** Pendiente de merge (PR #531 de sacdia-backend).
-> Este texto es la versión **2.0.0-family**: cuentas supervisadas para adolescentes de 13 a 17 años (Fase 3 de perfiles familiares). Solo las secciones marcadas con este mismo aviso cambiaron respecto de la 1.0.0-store (§2 y §3, y el párrafo de menores de §10). El resto del texto no cambió. La constante de versión del backend (`legal-documents.constants.ts`) pasa a `2.0.0-family` solo después de que este texto se apruebe y se publique en `https://sacdia.com/terms`.
+> Este texto es la versión **2.0.0-family**: cuentas supervisadas para adolescentes de 13 a 17 años (Fase 3 de perfiles familiares). Las secciones marcadas con este mismo aviso cambiaron respecto de la 1.0.0-store: §2, §3 y el párrafo de menores de §10 (Fase 3, 2026-10-19); el párrafo de identidad del responsable en esta introducción, §3.5 y §12 (P0 del benchmark legal `BENCHMARK-2026-10-26.md`, 2026-10-26). El resto del texto no cambió. La constante de versión del backend (`legal-documents.constants.ts`) pasa a `2.0.0-family` solo después de que este texto se apruebe y se publique en `https://sacdia.com/terms`.
+> Este borrador contiene marcadores `[PENDIENTE: ...]` (identidad y domicilio del responsable). No se publica con marcadores.
 
 Estos Términos regulan el acceso y uso de **SACDIA**, plataforma digital para apoyar la administración, trazabilidad y acompañamiento de clubes juveniles cristianos/adventistas, incluyendo la app móvil y el panel administrativo web.
+
+> **BORRADOR — requiere revisión del usuario o de un abogado.** Párrafo nuevo (2026-10-26, P0-1 del benchmark). No publicar con los marcadores sin resolver.
+
+SACDIA es operada por **[PENDIENTE: razón social de la persona moral o nombre completo de la persona física que opera SACDIA]**, con domicilio en **[PENDIENTE: calle, número, colonia, código postal, ciudad y entidad federativa]** (en adelante, "SACDIA" o "nosotros").
 
 SACDIA se publica en una fase operativa inicial. Actualmente **no ofrece pagos dentro de la app, suscripciones, patrocinios comerciales ni venta de productos digitales**.
 
@@ -102,9 +107,9 @@ Si eres adulto y registras, administras o subes información de un menor, declar
 
 > **Función pendiente de la Fase 3c (directores).** Un director de club acreditado puede registrar a un menor de 0 a 17 años en su sección, bajo custodia del club, declarando bajo protesta de decir verdad que cuenta con la autorización firmada de su tutor. El consentimiento de ese menor lo verifica **otra persona** (otra persona autorizada del club, de su coordinación o del campo local, o un administrador), nunca quien lo registró ni quien subió el formato. Esta parte solo debe publicarse cuando la función esté activa.
 
-### 3.5 Eliminación de la cuenta de un menor
+### 3.5 Eliminación de la cuenta de un menor y derechos ARCO
 
-Una cuenta supervisada **no** puede eliminarse desde la app por el propio menor. La eliminación (o el ejercicio de derechos de acceso, rectificación, cancelación u oposición) se solicita por el tutor o por un administrador, escribiendo a **sacdia.app@gmail.com**.
+Una cuenta supervisada **no** puede eliminarse desde la app por el propio menor. La eliminación, o el ejercicio de los derechos de acceso, rectificación, cancelación u oposición (ARCO) sobre los datos de un menor, la solicita el tutor o representante legal, o un administrador, escribiendo a **sacdia.app@gmail.com** y acreditando la representación. El procedimiento, los requisitos y los plazos de respuesta son los de la sección 7 del [Aviso de Privacidad](https://sacdia.com/privacy).
 
 ### 3.6 Conducta con menores
 
@@ -189,8 +194,12 @@ SACDIA puede actualizar estos Términos para reflejar cambios del producto, segu
 
 ## 12. Contacto
 
-Para soporte, privacidad, eliminación de cuenta o dudas sobre estos Términos:
+> **BORRADOR — requiere revisión del usuario o de un abogado.** Esta sección cambió el 2026-10-26 (P0-1 del benchmark): se agregó el responsable y su domicilio. No publicar con los marcadores sin resolver.
 
+Para soporte, privacidad, eliminación de cuenta, derechos ARCO o dudas sobre estos Términos:
+
+- Responsable: **[PENDIENTE: razón social o nombre completo del responsable]**
+- Domicilio: **[PENDIENTE: domicilio completo para oír y recibir notificaciones]**
 - Correo: **sacdia.app@gmail.com**
 - Soporte: **https://sacdia.com/support**
 - Privacidad: **https://sacdia.com/privacy**

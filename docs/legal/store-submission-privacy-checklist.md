@@ -91,20 +91,27 @@ No declarar publicidad, tracking publicitario ni venta de datos.
 
 ## 4. Compartición con terceros
 
-Declarar compartición/procesamiento con proveedores técnicos necesarios, no con anunciantes:
+> **BORRADOR — requiere revisión del usuario o de un abogado.** Lista completada el 2026-10-26 (P0-4 del benchmark) con los proveedores que el código usa y no estaban declarados. Debe coincidir con la tabla de §4.1 del aviso.
+
+Declarar compartición/procesamiento con proveedores técnicos necesarios (encargados), no con anunciantes:
 
 - Neon/PostgreSQL — base de datos.
 - Render — backend/API.
 - Vercel — panel web.
-- Cloudflare R2 — almacenamiento de archivos.
-- Google/Firebase — autenticación Google, FCM, Android y mapas cuando aplique.
-- Google Cloud Vision — lectura automática (OCR) de imágenes de certificados que sube el usuario.
+- Cloudflare R2 — almacenamiento de archivos (incluye formatos de consentimiento y exportaciones).
+- Upstash (Redis) — caché e infraestructura de colas (copias temporales de respuestas; trabajos de OCR). **Nuevo 2026-10-26.**
+- Google/Firebase — autenticación Google, FCM, App Check, Android.
+- Google Maps Platform — mapas en app y panel (coordenadas de lugares consultados).
+- Google Cloud Vision — lectura automática (OCR) de imágenes de certificados que sube el usuario. Cuando se despliegue el proxy de OCR: también Cloud Run y Firestore (metadatos de uso). **Ampliado 2026-10-26.**
 - Apple — autenticación Apple y servicios iOS cuando aplique.
-- Sentry — errores y estabilidad.
-- OpenStreetMap/Nominatim/geocoding — búsqueda o selección de lugares.
+- Sentry — errores y estabilidad, sin usuario asociado.
+- OpenStreetMap/Nominatim — búsqueda de lugares (texto de búsqueda e IP). El geocoding inverso en móvil usa los geocoders nativos de Apple/Google.
 - PostHog — analítica de uso de la app (menores de 18 años: solo anónima; dispositivo vinculado: ninguna).
 - Resend — correo transaccional para verificación, seguridad o soporte.
-- Proveedor de correo transaccional — verificación, seguridad o soporte.
+- Amazon Web Services (S3, legado) — imágenes del catálogo de especialidades (sin datos personales; IP del dispositivo). **Nuevo 2026-10-26.** Retirar cuando `sacdia-app/lib/features/honors/data/models/*.dart` y `classes/data/models/class_honor_model.dart` dejen de apuntar a `amazonaws.com`.
+- Contenido externo: miniaturas de YouTube (app) y Google Fonts (panel web) cargan directo desde Google con la IP del usuario. No es un SDK ni comparte otros datos; mencionarlo solo en el aviso (§4.2), no como "tercero con el que se comparten datos" en las tiendas.
+
+No declarar como terceros a los directores, consejeros o personal del club: acceden dentro de la plataforma según su rol.
 
 ## 5. Seguridad de datos
 
@@ -145,7 +152,12 @@ Este punto **puede chocar con la regla 5.1.1(v)** (una app que permite crear cue
 - [ ] (2.0.0-family) Las declaraciones de privacidad de App Store Connect y Google Play (Data Safety) reflejan la analítica anónima de 13 a 17 años y, cuando se active la Fase 3b, el modo dispositivo vinculado sin analítica ni identificadores personales.
 - [ ] (2.0.0-family) La ficha explica la eliminación de cuenta según la tabla de la sección 5 (los adolescentes de 13 a 17 años no pueden eliminarla desde la app) y el abogado confirmó que es aceptable ante 5.1.1(v) y la LFPDPPP. **Pregunta legal abierta (P3-A22).**
 - [ ] (2.0.0-family) Se comprobó en el panel de PostHog y de Sentry que una cuenta de 13 a 17 años, una cuenta sin fecha de nacimiento y un teléfono vinculado no aparecen identificados (y que el teléfono vinculado no emite eventos).
-- [ ] (2.0.0-family) Cuentas de menores: confirmar con las tiendas si el flujo de cuentas supervisadas exige declaraciones adicionales para apps dirigidas a menores (Families / «Designed for Families»). **Pregunta legal abierta.**
+- [ ] (2.0.0-family) Cuentas de menores: confirmar con las tiendas si el flujo de cuentas supervisadas exige declaraciones adicionales para apps dirigidas a menores (Families / «Designed for Families»). **Pregunta legal abierta.** No aplicar a la categoría Kids de Apple (prohíbe analítica de terceros; usamos Sentry y PostHog). En Google Play existe la clasificación «mixed audience», que exige pantalla neutral de edad si se declara que la app incluye menores. Ver `BENCHMARK-2026-10-26.md` §3 punto 14.
+- [ ] (2.0.0-family, P0 benchmark) Resueltos los marcadores `[PENDIENTE: ...]` de identidad y domicilio del responsable en aviso §1 y términos (intro y §12).
+- [ ] (2.0.0-family, P0 benchmark) La app muestra consentimiento expreso **separado** para datos de salud y para afiliación religiosa (aviso §2.3.1) y lo registra por separado; si no, se retira §2.3.1 antes de publicar.
+- [ ] (2.0.0-family, P0 benchmark) Confirmados en la consola de cada proveedor de la tabla §4.1 del aviso los términos de encargado o DPA aceptados, y la razón social exacta.
+- [ ] (2.0.0-family, P0 benchmark) Imágenes del catálogo de especialidades migradas de AWS S3 a Cloudflare R2, o AWS declarado en tiendas.
+- [ ] (2.0.0-family, P0 benchmark) El abogado confirmó los plazos ARCO (20 y 15 días hábiles) y el nombre de la autoridad con la LFPDPPP de 2025 (aviso §7).
 
 ## 7. Advertencia técnica
 

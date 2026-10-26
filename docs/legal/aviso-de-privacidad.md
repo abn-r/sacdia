@@ -1,7 +1,7 @@
 ---
 documento: Aviso de Privacidad
 version: 2.0.0-family
-fecha: 2026-10-19
+fecha: 2026-10-26
 estado: BORRADOR — requiere revisión del usuario o de un abogado (no publicar ni promover a main hasta que se apruebe)
 version_publicada_vigente: 1.0.0-store
 aplicable_a: sacdia-app (iOS/Android) + sacdia-admin (web)
@@ -11,23 +11,30 @@ contacto: sacdia.app@gmail.com
 
 # Aviso de Privacidad de SACDIA
 
-Última actualización: **19 de octubre de 2026** (borrador de la versión 2.0.0-family; la versión publicada hoy sigue siendo la 1.0.0-store del 30 de junio de 2026)
+Última actualización: **26 de octubre de 2026** (borrador de la versión 2.0.0-family; la versión publicada hoy sigue siendo la 1.0.0-store del 30 de junio de 2026)
 Contacto de privacidad: **sacdia.app@gmail.com**
 
 > **BORRADOR — requiere revisión del usuario o de un abogado.** Pendiente de merge (PR #531 de sacdia-backend).
-> Este texto es la versión **2.0.0-family**: cuentas supervisadas para adolescentes de 13 a 17 años (Fase 3 de perfiles familiares). Solo las secciones marcadas con este mismo aviso cambiaron respecto de la 1.0.0-store (§2.1, §2.4, §2.8, §4, §6 y §7). El resto no cambió. La constante de versión del backend (`legal-documents.constants.ts`) pasa a `2.0.0-family` solo después de que este texto se apruebe y se publique en `https://sacdia.com/privacy`.
+> Este texto es la versión **2.0.0-family**: cuentas supervisadas para adolescentes de 13 a 17 años (Fase 3 de perfiles familiares). Las secciones marcadas con este mismo aviso cambiaron respecto de la 1.0.0-store: §2.1, §2.4, §2.8, §6 (Fase 3, 2026-10-19) y §1, §2.3, §4, §7 (mejoras P0 del benchmark legal `BENCHMARK-2026-10-26.md`, 2026-10-26). El resto no cambió. La constante de versión del backend (`legal-documents.constants.ts`) pasa a `2.0.0-family` solo después de que este texto se apruebe y se publique en `https://sacdia.com/privacy`.
+> Este borrador contiene marcadores `[PENDIENTE: ...]` en §1 (identidad y domicilio del responsable). No se publica con marcadores: la puerta de publicación del `README.md` debe verificar también `rg "\[PENDIENTE:" docs/legal/aviso-de-privacidad.md docs/legal/terminos-y-condiciones.md`.
 
 Este Aviso explica cómo SACDIA recolecta, usa, protege y comparte datos personales al utilizar la aplicación móvil, el panel administrativo web y los servicios relacionados.
 
 La idea central es simple: **SACDIA no vende datos personales, no los usa para publicidad comportamental y no los comparte con anunciantes**. Los datos se usan para operar la plataforma, proteger a los usuarios, administrar clubes y dar soporte técnico.
 
-## 1. Responsable operativo
+## 1. Identidad y domicilio del responsable
 
-Para esta etapa de publicación, SACDIA opera como plataforma tecnológica para administración y trazabilidad de clubes juveniles cristianos/adventistas. Las consultas de privacidad, soporte, acceso, corrección o eliminación de datos pueden enviarse a:
+> **BORRADOR — requiere revisión del usuario o de un abogado.** Esta sección cambió el 2026-10-26 (P0-1 del benchmark). La LFPDPPP exige identificar al responsable y su domicilio; la 1.0.0-store no lo hacía. No publicar con los marcadores `[PENDIENTE: ...]` sin resolver.
 
-- Correo: **sacdia.app@gmail.com**
+El responsable del tratamiento de tus datos personales es:
+
+- Responsable: **[PENDIENTE: razón social de la persona moral o nombre completo de la persona física que opera SACDIA]**
+- Domicilio para oír y recibir notificaciones: **[PENDIENTE: calle, número, colonia, código postal, ciudad y entidad federativa]**
+- Correo para privacidad y derechos ARCO: **sacdia.app@gmail.com**
 - Soporte: **https://sacdia.com/support**
 - Términos: **https://sacdia.com/terms**
+
+SACDIA es una plataforma tecnológica para administración y trazabilidad de clubes juveniles cristianos/adventistas. Los clubes, coordinaciones y campos locales que usan SACDIA recaban parte de la información (por ejemplo, el formato de consentimiento firmado por el tutor) bajo sus propios procedimientos; SACDIA trata esa información como responsable de la plataforma conforme a este Aviso.
 
 ## 2. Datos que podemos recolectar
 
@@ -64,6 +71,17 @@ SACDIA puede tratar datos sensibles cuando sean necesarios para la operación se
 - información relacionada con la participación en clubes cristianos/adventistas.
 
 Estos datos se usan para fines operativos, de seguridad, acompañamiento institucional y administración del club. No se venden, no se usan para publicidad y no se comparten con anunciantes.
+
+#### 2.3.1 Consentimiento expreso y separado para datos sensibles
+
+> **BORRADOR — requiere revisión del usuario o de un abogado.** Esta sección es nueva (2026-10-26, P0-2 del benchmark; hallazgo C-01 de `REVIEW-REPORT.md`). **La app hoy muestra un solo control de aceptación para Términos y Aviso** (`sac_legal_consent.dart`) y no recaba consentimientos separados. Antes de publicar este texto, la app debe mostrar dos controles independientes y registrar cada aceptación por separado (por ejemplo, con tipos de documento `health` y `religion` en `legal_acceptances`), o este apartado debe retirarse. No prometer un control que el sistema no implementa.
+
+Los datos sensibles requieren tu consentimiento **expreso**, distinto de la aceptación general de este Aviso. SACDIA lo recaba por separado para cada categoría:
+
+- **Datos de salud** (tipo de sangre, alergias, enfermedades, medicamentos, pólizas o comprobantes de seguro): se solicita un consentimiento expreso al capturar la ficha médica. Si no lo otorgas, puedes seguir usando SACDIA, pero el club no contará con tu ficha médica en la plataforma y deberá gestionarla por otros medios.
+- **Afiliación religiosa** (pertenencia a un club cristiano/adventista): se solicita un consentimiento expreso al vincularte a un club. Es necesario para operar la plataforma; sin él no es posible registrar la membresía.
+
+Para menores de edad, ambos consentimientos los otorga el tutor o representante legal (ver §2.4). Puedes revocar cualquiera de los dos conforme a §7.
 
 ### 2.4 Menores de edad
 
@@ -152,30 +170,47 @@ SACDIA no usa datos personales para publicidad comportamental ni para crear perf
 
 ## 4. Cuándo compartimos datos
 
-> **BORRADOR — requiere revisión del usuario o de un abogado.** Esta sección cambió en la versión 2.0.0-family (antes 1.0.0-store) y no debe publicarse sin aprobación.
+> **BORRADOR — requiere revisión del usuario o de un abogado.** Esta sección cambió en la versión 2.0.0-family (PostHog, 2026-10-19) y de nuevo el 2026-10-26 (P0-4 del benchmark): se completó la lista con los proveedores que el código usa y no estaban declarados (Upstash, Google Cloud Run/Firestore, AWS S3 legado, contenido externo) y se agregaron datos y país por proveedor. Pendientes antes de publicar: (a) confirmar la razón social exacta de cada proveedor; (b) confirmar que se aceptaron los términos de encargado o DPA de cada uno en su consola; (c) retirar la fila de AWS S3 cuando las imágenes del catálogo migren a Cloudflare R2; (d) publicar las filas de Cloud Run/Firestore solo cuando el proxy de OCR esté desplegado.
 
 SACDIA no vende datos personales.
 
-Podemos compartir o procesar datos con proveedores técnicos únicamente cuando sea necesario para operar la plataforma. Estos proveedores actúan como infraestructura, almacenamiento, autenticación, monitoreo, mapas, notificaciones o soporte.
+### 4.1 Encargados (proveedores técnicos)
 
-Entre los proveedores o servicios que pueden participar se encuentran:
+Para operar la plataforma, SACDIA remite datos a proveedores técnicos que los tratan **por cuenta de SACDIA y bajo sus instrucciones** (encargados). No deciden sobre tus datos ni los usan para fines propios. Estas remisiones no requieren tu consentimiento conforme a la LFPDPPP, pero te las informamos para que sepas exactamente quién participa:
 
-- **Neon/PostgreSQL**: base de datos;
-- **Render**: hosting de backend/API;
-- **Vercel**: hosting del panel web;
-- **Cloudflare R2**: almacenamiento de archivos, imágenes, evidencias, certificados, comprobantes y exportaciones;
-- **Google**: inicio de sesión con Google, Firebase Cloud Messaging, servicios de Android y mapas cuando aplique;
-- **Google Cloud Vision**: lectura automática (OCR) de imágenes de certificados que el usuario sube para proponer sus datos;
-- **Apple**: inicio de sesión con Apple y servicios del sistema operativo cuando aplique;
-- **Sentry**: monitoreo de errores y estabilidad;
-- **PostHog**: analítica de uso de la app, sin grabación de sesiones; en menores de 18 años solo analítica anónima (ver la sección 2.4.1);
-- **OpenStreetMap/Nominatim y servicios de geocodificación**: búsqueda o selección de lugares;
-- **Resend**: envío de correo transaccional para verificación, seguridad o soporte;
-- proveedores de correo o mensajería transaccional configurados para verificación, seguridad o soporte.
+| Encargado | Servicio | Datos que puede tratar | País de tratamiento |
+|---|---|---|---|
+| **Neon, Inc.** (PostgreSQL) | Base de datos principal | Todos los datos de la plataforma | Estados Unidos |
+| **Render Services, Inc.** | Hosting del backend/API | Todos los datos en tránsito; registros técnicos de peticiones | Estados Unidos |
+| **Vercel, Inc.** | Hosting del panel web | Datos del panel en tránsito; registros técnicos | Estados Unidos |
+| **Cloudflare, Inc.** (R2) | Almacenamiento de archivos | Fotos, evidencias, certificados, comprobantes, formatos de consentimiento, exportaciones de datos | Estados Unidos / red global |
+| **Upstash, Inc.** (Redis) | Caché e infraestructura de colas | Copias temporales de respuestas de la API y trabajos en cola (por ejemplo, OCR de certificados) | Estados Unidos |
+| **Google LLC** (Identidad y Firebase) | Inicio de sesión con Google, notificaciones push (Firebase Cloud Messaging), verificación de integridad de la app (App Check) | Correo, nombre, foto e identificador de Google; token de notificaciones; identificador de instalación | Estados Unidos |
+| **Google LLC** (Maps Platform) | Mapas en la app y en el panel | Coordenadas de los lugares que consultas o seleccionas; dirección IP | Estados Unidos |
+| **Google LLC** (Cloud: Vision; Cloud Run y Firestore cuando se active el proxy de OCR) | Lectura automática (OCR) de certificados que subes para proponer sus datos | Imagen o PDF del certificado; metadatos de uso sin contenido personal | Estados Unidos (us-east4) |
+| **Apple Inc.** | Inicio de sesión con Apple y servicios del sistema operativo | Identificador de Apple, nombre opcional, correo real o de retransmisión | Estados Unidos |
+| **Functional Software, Inc.** (Sentry) | Monitoreo de errores y estabilidad | Registros técnicos con campos sensibles redactados en origen; sin usuario asociado | Estados Unidos |
+| **PostHog, Inc.** | Analítica de uso de la app, sin grabación de sesiones | Pantallas vistas y eventos de producto; identificador interno solo en mayores de edad (ver §2.4.1) | Estados Unidos |
+| **OpenStreetMap Foundation** (Nominatim) | Búsqueda de lugares al registrar actividades | Texto de búsqueda y dirección IP | Reino Unido / Unión Europea |
+| **Resend, Inc.** | Correo transaccional | Correo y contenido del mensaje (verificación, seguridad, soporte) | Estados Unidos |
+| **Amazon Web Services, Inc.** (S3, legado) | Imágenes del catálogo de especialidades | Ningún dato personal; la dirección IP del dispositivo llega al servidor al cargar las imágenes. En migración a Cloudflare R2 | Estados Unidos |
 
-Estos proveedores pueden procesar datos en México, Estados Unidos u otros países, según su infraestructura.
+Estos proveedores están obligados por sus términos de servicio y acuerdos de tratamiento de datos a aplicar medidas de seguridad, confidencialidad y limitación de finalidad equivalentes a las de este Aviso. Varios tratan datos fuera de México. Al aceptar este Aviso, reconoces que tus datos pueden tratarse en los países indicados, lo cual es necesario para prestar el servicio.
 
-También podemos compartir información si es necesario para cumplir una obligación legal, atender una autoridad competente, proteger derechos, prevenir abuso o responder a incidentes de seguridad.
+### 4.2 Contenido externo
+
+Cuando un club enlaza un recurso externo (por ejemplo, un video de YouTube), la app carga su miniatura directamente desde el servidor del tercero (Google), que recibe la dirección IP de tu dispositivo. El panel web carga tipografías desde Google Fonts, con el mismo efecto. SACDIA no comparte con esos servicios ningún otro dato tuyo.
+
+### 4.3 Transferencias
+
+SACDIA **no transfiere** datos personales a terceros que decidan sobre ellos para fines propios, salvo en los casos siguientes, que no requieren tu consentimiento:
+
+- autoridades competentes, cuando lo exija una ley o un requerimiento debidamente fundado;
+- ejercicio o defensa de derechos de SACDIA o de los usuarios;
+- prevención de abuso, fraude o respuesta a incidentes de seguridad;
+- atención médica de emergencia durante una actividad del club, limitada a los datos de la ficha médica y contactos de emergencia.
+
+Los directores, consejeros y personal autorizado de tu club, coordinación o campo local acceden a tus datos **dentro de la plataforma**, según su rol y permisos (ver §5). Eso no es una transferencia a terceros: es el uso para el que registraste la información.
 
 ## 5. Seguridad
 
@@ -213,20 +248,57 @@ Al eliminar una cuenta, SACDIA podrá eliminar, anonimizar o conservar ciertos r
 
 Los datos anonimizados o agregados pueden conservarse sin identificar directamente al usuario.
 
-## 7. Derechos del usuario
+## 7. Derechos ARCO, revocación del consentimiento y limitación de uso
 
-> **BORRADOR — requiere revisión del usuario o de un abogado.** Esta sección cambió en la versión 2.0.0-family (antes 1.0.0-store) y no debe publicarse sin aprobación.
+> **BORRADOR — requiere revisión del usuario o de un abogado.** Esta sección cambió en la versión 2.0.0-family (menores, 2026-10-19) y se reescribió el 2026-10-26 (P0-3 del benchmark) con procedimiento, plazos y revocación. Los plazos de 20 y 15 días hábiles son los de la LFPDPPP de 2010; el abogado debe confirmar si la ley de 2025 los cambió. Confirmar también el nombre vigente de la autoridad.
 
-Puedes solicitar:
+### 7.1 Tus derechos
 
-- acceso a tus datos;
-- corrección de datos incorrectos;
-- eliminación o anonimización cuando proceda;
-- exportación o copia de información disponible;
-- revisión de datos de menores bajo tu responsabilidad (para una cuenta supervisada, la solicitud la hace el tutor);
-- revocación de permisos del dispositivo, como ubicación o notificaciones.
+Puedes ejercer en cualquier momento tus derechos de **Acceso, Rectificación, Cancelación y Oposición (ARCO)**:
 
-Para ejercer estos derechos, escribe a **sacdia.app@gmail.com** desde el correo asociado a tu cuenta o proporciona información suficiente para verificar tu identidad.
+- **Acceso**: conocer qué datos tuyos tratamos y bajo qué condiciones.
+- **Rectificación**: corregir datos inexactos o incompletos. Buena parte de tu perfil puedes corregirla directamente en la app.
+- **Cancelación**: solicitar la eliminación o anonimización de tus datos, con los límites de §6.
+- **Oposición**: oponerte al tratamiento para un fin concreto.
+
+También puedes:
+
+- **exportar** una copia de tu información disponible (en la app, para mayores de edad; o por correo);
+- **revocar** el consentimiento que otorgaste (ver §7.4);
+- **revisar** los datos de menores bajo tu responsabilidad (para una cuenta supervisada, la solicitud la hace el tutor; ver §2.4);
+- **retirar permisos del dispositivo**, como ubicación o notificaciones, desde la configuración de iOS o Android.
+
+### 7.2 Cómo presentar una solicitud
+
+Escribe a **sacdia.app@gmail.com**, de preferencia desde el correo asociado a tu cuenta, e incluye:
+
+1. tu nombre completo y el correo de la cuenta;
+2. el derecho que ejerces y una descripción clara de lo que solicitas;
+3. cualquier dato que ayude a localizar la información (club, periodo, tipo de registro);
+4. si no escribes desde el correo de la cuenta, o la solicitud afecta datos sensibles o de un menor: una identificación oficial vigente y, para menores, el documento que acredite la patria potestad, tutela o representación legal.
+
+### 7.3 Plazos y costo
+
+- Te responderemos en un máximo de **20 días hábiles** a partir de que recibamos la solicitud completa. Si necesitamos más información, te la pediremos dentro de los primeros 5 días hábiles y el plazo se cuenta desde que la entregues.
+- Si la solicitud procede, la haremos efectiva dentro de los **15 días hábiles** siguientes a la respuesta.
+- Estos plazos pueden ampliarse una sola vez por un periodo igual cuando lo justifiquen las circunstancias, y te lo informaremos.
+- El ejercicio de derechos ARCO es **gratuito**. Solo podrían cobrarse costos justificados de envío o reproducción de copias, que te informaríamos antes.
+
+### 7.4 Revocación del consentimiento
+
+Puedes revocar el consentimiento que nos diste, incluido el consentimiento separado para datos de salud o afiliación religiosa (§2.3.1), por el mismo medio de §7.2. Ten en cuenta:
+
+- la revocación no afecta el tratamiento ya realizado ni los registros que debamos conservar por las razones de §6;
+- revocar el consentimiento de datos de salud implica que el club deje de contar con tu ficha médica en la plataforma;
+- revocar el consentimiento de afiliación religiosa o de los datos de cuenta implica dar de baja tu membresía o tu cuenta, porque sin ellos no es posible prestar el servicio.
+
+### 7.5 Limitación de uso o divulgación
+
+SACDIA no usa tus datos para finalidades secundarias (mercadotecnia, publicidad, perfiles comerciales ni venta), así que no existe una lista de exclusión que debas solicitar. Si en el futuro se agregara una finalidad secundaria, se pedirá tu consentimiento por separado y podrás negarlo sin afectar el servicio.
+
+### 7.6 Autoridad
+
+Si consideras que tu derecho a la protección de datos fue vulnerado, puedes acudir a la autoridad competente en México, la **Secretaría Anticorrupción y Buen Gobierno** (antes INAI), conforme a la LFPDPPP.
 
 ## 8. Permisos del dispositivo
 
