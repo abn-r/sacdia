@@ -1,7 +1,7 @@
 # Usuarios de prueba — rama de desarrollo
 
 **Estado**: ACTIVE
-**Actualizado**: 2026-10-04
+**Actualizado**: 2026-10-27
 **Fuente**: `sacdia-backend/prisma/seeds/test-users.seed.ts`
 
 Un usuario por rol administrativo para probar flujos RBAC. Solo para la base de desarrollo de Neon: no ejecutar el seed contra `preproduction` ni producción.
@@ -31,6 +31,15 @@ Asignados en `users_roles`. Todos tienen acceso al panel (`access_panel = true`)
 | `assistant-lf@sacdia.com` | `assistant-lf` | Campo local `4` |
 | `director-union@sacdia.com` | `director-union` | Unión `20` |
 | `assistant-union@sacdia.com` | `assistant-union` | Unión `20` |
+| `admin-test@sacdia.com` | `admin` | Ancla en la unión `20` (solo `super-admin` es global) |
+| `director-dia@sacdia.com` | `director-dia` | División de la unión `20` |
+| `assistant-dia@sacdia.com` | `assistant-dia` | División de la unión `20` |
+| `general-coordinator@sacdia.com` | `general-coordinator` | Campo local `4`; sus secciones se asignan en Coordinación |
+| `zone-coordinator@sacdia.com` | `zone-coordinator` | Campo local `4`; su zona se asigna en Coordinación |
+| `coordinator@sacdia.com` | `coordinator` | Campo local `4`; sus secciones se asignan en Coordinación |
+| `pastor@sacdia.com` | `pastor` | Campo local `4`; su distrito se asigna en Pastores por distrito |
+
+Un coordinador sin secciones asignadas no ve datos (el backend responde `ADMIN_USER_SCOPE_MISSING`). Un `admin` u otro rol territorial sin unión, campo ni división ve una página de bloqueo en el panel.
 
 ## Usuarios con rol de club
 
@@ -50,7 +59,7 @@ Si el cupo de un rol ya está ocupado, el seed no se detiene: avisa con `⚠ …
 ## Notas
 
 - Los IDs (`LOCAL_FIELD_ID = 4`, `UNION_ID = 20`, `CLUB_SECTION_ID = 1`, `YEAR_ID = 1`) son constantes del seed y dependen de los datos de la base de desarrollo. La sección de `director-club` es la única que se calcula al ejecutar el seed.
-- El seed no crea usuarios para `super-admin`, `admin`, `coordinator`, `pastor`, `deputy-director`, `secretary-treasurer`, `instructor` ni `member`. Para esos roles, usa los datos de `prisma/seeds/core.ts` (`pnpm prisma:seed:core`, solo rama de desarrollo) o crea la asignación a mano.
+- El seed no crea usuarios para `super-admin`, `assistant-admin` (el rol no existe en la base de desarrollo), `deputy-director`, `secretary-treasurer`, `instructor` ni `member`. Para esos roles, usa los datos de `prisma/seeds/core.ts` (`pnpm prisma:seed:core`, solo rama de desarrollo) o crea la asignación a mano.
 - Los permisos de cada rol vienen de `prisma/seeds/role-permissions.seed.sql`.
 
 Para comprobarlos en la base:
