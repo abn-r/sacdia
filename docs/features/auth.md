@@ -65,7 +65,7 @@ La gestion de sesiones permite listar sesiones activas y cerrar sesiones individ
 
 ### Base de datos
 - `users` — Tabla principal con `approval_status` (pending/approved/rejected), `rejection_reason`, `access_app`, `access_panel`
-- `users_pr` — Tracking de post-registro (3 pasos + estado completo + `active_club_assignment_id`)
+- `users_pr` — Tracking de post-registro (3 pasos + estado completo + `active_club_assignment_id`). Una fila por usuario (`user_id` único). Register, login social y alta de dependientes la crean; pendiente de merge (PR sacdia-backend#583): para el resto (semillas, cuentas heredadas, creadas por admin) `PostRegistrationRowService.ensure()` (`src/common/services/post-registration-row.service.ts`) la crea de forma perezosa e idempotente (`INSERT ... ON CONFLICT DO NOTHING`, todo en `false`) en `completion-status`, `post-registration/status` y los pasos 1/2/3, `guardian-only` y cancelar solicitud. Un usuario con membresía/rol de club previo no se marca como completo: pasa por el post-registro como cualquier otro
 - `users_roles` — Roles globales asignados
 - `users_permissions` — Permisos directos
 - `roles` — Catalogo de roles
