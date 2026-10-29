@@ -42,7 +42,7 @@ La feature esta implementada en backend con IDs UUID y estados `draft -> generat
   - `submitted_by`: UUID nullable a `users.user_id`
 - **Preview auto-calculado real**:
   - `member_count`
-  - `directiva`
+  - `directiva`: asignaciones activas de la sección con rol `director`, `deputy-director`, `secretary`, `secretary-treasurer` o `treasurer`, en ese orden (`CLUB_DIRECTIVA_ROLES`). Los informes trimestral y anual usan la misma lista.
   - `honors` (`started`, `completed`, `details`)
   - `activities` (`total`, `list`)
   - `finances` (`income`, `expenses`, `balance`, `total_balance`, `transactions`)
@@ -79,13 +79,16 @@ La feature esta implementada en backend con IDs UUID y estados `draft -> generat
 - HTTP JSON serializa `pdf_size_bytes` como `number` (Prisma `BigInt` no es JSON-safe; list/get/generate/submit lo convierten).
 - Solo se habilita si el informe tiene `snapshot_data` y estado `generated` o `submitted`
 - Usa formato carta y arma al menos estas secciones:
-  - `1. ADMINISTRACION`
-  - `2. ENSENANZAS`
+  - `1. ADMINISTRACIÓN`
+  - `2. ENSEÑANZAS`
   - `3. ACTIVIDADES DEL CLUB`
   - `4. FINANZAS` (incluye balance del mes y saldo total acumulado del club)
   - `5. ACTIVIDAD MISIONERA`
   - `6. SERVICIO`
 - Toma metadatos reales de club, distrito, iglesia, tipo de club, mes/anio y submitter
+- Las filas que no caben en una tabla se resumen como «…y N más»; las fechas de actividad se escriben con mes abreviado («2 sep 2026»); un dato con etiqueta sin valor se muestra como «—». Al final quedan las líneas de firma del secretario/a y del director/a.
+- Versión de plantilla: `monthly-report-v3-three-page` (`MONTHLY_REPORT_PDF_TEMPLATE_VERSION`). Al subirla, el GET vuelve a generar los artefactos guardados con una versión anterior.
+- Todos los PDF del backend usan las fuentes estándar de pdfkit (WinAnsi). `loadPdfKit()` limpia el texto antes de medirlo o dibujarlo: quita códigos de control y ANSI y caracteres que esas fuentes no tienen (emoji).
 
 ### Admin Web
 
