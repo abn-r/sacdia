@@ -3350,7 +3350,7 @@ Lo consume el módulo Reportes de la pestaña Coordinación de la app.
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
-| GET | `/api/v1/annual-rankings` | JWT | Permisos: rankings:read | List annual club rankings for administration | AnnualRankingsService.getLeaderboard() | `src/rankings/annual-ranking-progress/annual-rankings.controller.ts` |
+| GET | `/api/v1/annual-rankings` | JWT | Permisos: rankings:read | List annual club rankings for administration. Cada fila trae `club_section_id` para abrir su desglose en `GET /club-sections/:sectionId/annual-ranking-progress`. | AnnualRankingsService.getLeaderboard() | `src/rankings/annual-ranking-progress/annual-rankings.controller.ts` |
 
 ### Ranking Tiers
 
