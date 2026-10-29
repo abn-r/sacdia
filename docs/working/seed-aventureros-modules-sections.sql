@@ -190,7 +190,7 @@ INSERT INTO class_sections (name, description, module_id, active)
 SELECT s.name, s.description, mod_1_id.module_id, true
 FROM mod_1_id,
 (VALUES
-  ('Requisitos básicos generales de la tarjeta de Castores', NULL::TEXT)
+  ('Requisitos básicos generales de la tarjeta de Aves Madrugadoras', NULL::TEXT)
 ) AS s(name, description)
 ON CONFLICT (name, module_id) DO NOTHING;
 
