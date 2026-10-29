@@ -1,7 +1,7 @@
 # Informes trimestrales y anuales de club
 
 **Estado**: IMPLEMENTADO PARCIAL
-**Verificado contra código**: 2026-10-29 (rama `development`; generación bajo demanda y pantallas del admin: Pendiente de merge)
+**Verificado contra código**: 2026-10-29 (rama `development`; generación bajo demanda y correcciones de PDF: Pendiente de merge (sacdia-backend PR #588); pantallas del admin: Pendiente de merge (sacdia-admin PR #276))
 **Dominio relacionado**: [monthly-reports.md](monthly-reports.md)
 
 ## Descripcion de dominio
@@ -19,7 +19,7 @@ Ambos controllers usan `JwtAuthGuard` + `PermissionsGuard`; cada ruta declara `@
 | GET | `/admin/{tipo}` | `reports:read` + `AuthorizationResource({ type: 'active_assignment' })` |
 | GET | `/admin/{tipo}/:id` | `reports:read` |
 | PATCH | `/admin/{tipo}/:id` (datos manuales) | `reports:update` |
-| POST | `/admin/{tipo}/generate` (bajo demanda, Pendiente de merge) | `reports:update` |
+| POST | `/admin/{tipo}/generate` (bajo demanda, Pendiente de merge: sacdia-backend PR #588) | `reports:update` |
 | POST | `/admin/{tipo}/:id/regenerate` | `reports:update` |
 | POST | `/admin/{tipo}/:id/finalize` | `reports:update` |
 | GET | `/admin/{tipo}/:id/pdf` | `reports:download` |
@@ -51,7 +51,7 @@ Reglas verificadas:
 
 ### Admin
 
-Pendiente de merge (rama `feat/admin-quarterly-annual-reports`):
+Pendiente de merge (sacdia-admin PR #276):
 
 - Pantallas `/dashboard/reports/quarterly` y `/dashboard/reports/annual` (sidebar y catálogo de pantallas `reports-quarterly`, `reports-annual`): listado con filtros, diálogo **Generar** (club + año y trimestre, o año eclesiástico) y detalle `[id]`.
 - El detalle muestra los datos calculados, el formulario de datos manuales y los botones Recalcular y Finalizar solo mientras el informe está en `draft`, cada uno según la capacidad de la pantalla (`update`, `finalize`); la descarga del PDF aparece con la capacidad `download` en cualquier estado. La directiva muestra el rol traducido (mismas etiquetas `roles.*` que el resto del panel).
