@@ -929,7 +929,7 @@ Conteo de decoradores HTTP por tag de Swagger (`@ApiTags` de cada clase controll
 | Award Categories | 5 |
 | Annual Evidence Folders - Evaluation | 5 |
 | Annual Evidence Folders - Rankings | 4 |
-| annual-reports | 9 |
+| annual-reports | 10 |
 | app.controller.ts | 1 |
 | auth | 21 |
 | OAuth | 3 |
@@ -997,7 +997,7 @@ Conteo de decoradores HTTP por tag de Swagger (`@ApiTags` de cada clase controll
 | supervision (adolescente) | 3 |
 | post-registration | 8 |
 | qr | 6 |
-| quarterly-reports | 9 |
+| quarterly-reports | 10 |
 | admin-support | 3 |
 | Annual Ranking Configs | 4 |
 | Annual Ranking Progress | 1 |
@@ -1628,6 +1628,7 @@ Semántica funcional y límites: [operations-dashboard.md](../features/operation
 | GET | `/api/v1/admin/annual-reports` | JWT | Permisos: reports:read | Listar informes anuales (admin) | AnnualReportsService.listForAdmin() | `src/annual-reports/annual-reports.controller.ts` |
 | GET | `/api/v1/admin/annual-reports/:id` | JWT | Permisos: reports:read | Obtener informe anual por ID (admin) | AnnualReportsService.getReport() | `src/annual-reports/annual-reports.controller.ts` |
 | PATCH | `/api/v1/admin/annual-reports/:id` | JWT | Permisos: reports:update | Actualizar datos manuales del informe anual (admin) | AnnualReportsService.updateManualData() | `src/annual-reports/annual-reports.controller.ts` |
+| POST | `/api/v1/admin/annual-reports/generate` | JWT | Permisos: reports:update | Generar o recalcular bajo demanda el informe anual de un club (body `{ club_id, ecclesiastical_year_id }`). Pendiente de merge | AnnualReportsService.generateOnDemand() | `src/annual-reports/annual-reports.controller.ts` |
 | POST | `/api/v1/admin/annual-reports/:id/regenerate` | JWT | Permisos: reports:update | Regenerar datos calculados del informe anual (admin) | AnnualReportsService.regenerate() | `src/annual-reports/annual-reports.controller.ts` |
 | POST | `/api/v1/admin/annual-reports/:id/finalize` | JWT | Permisos: reports:update | Finalizar informe anual (admin) | AnnualReportsService.finalize() | `src/annual-reports/annual-reports.controller.ts` |
 | GET | `/api/v1/admin/annual-reports/:id/pdf` | JWT | Permisos: reports:download | Descargar PDF anual. Nombre: `informe-anual-{club}-{tipo}-{año}.pdf` | AnnualReportsPdfService.generatePdf() | `src/annual-reports/annual-reports.controller.ts` |
@@ -1636,6 +1637,8 @@ Semántica funcional y límites: [operations-dashboard.md](../features/operation
 | GET | `/api/v1/clubs/:clubId/annual-reports/:id/pdf` | JWT | Permisos: reports:download | Descargar PDF anual. Nombre: `informe-anual-{club}-{tipo}-{año}.pdf` | AnnualReportsPdfService.generatePdf() | `src/annual-reports/annual-reports.controller.ts` |
 
 Alcance (2026-10-22): las rutas `admin/annual-reports/:id*` (detalle, PDF, PATCH, regenerate, finalize) verifican primero la misma visibilidad que el listado admin: territorio para roles territoriales, secciones de `coordinator_assignments` para coordinadores (un club es visible si una de sus secciones está en su alcance), sección activa para roles de club. Fuera de esa visibilidad responden `404` (no `403`). Las rutas `clubs/:clubId/annual-reports*` declaran recurso `club` (`canManageClub` o club activo) y `:id` / `:id/pdf` exigen que el informe pertenezca al `clubId` del path (`404` si no). PATCH / regenerate / finalize exigen `reports:update` (migración `20261026120000_reports_update_permission`; antes no existía y respondían `403` a todos los roles). Lo tienen `super-admin`, `admin`, `assistant-admin` y los roles territoriales (`assistant-lf`, `director-lf`, `assistant-union`, `director-union`, `assistant-dia`, `director-dia`), cada uno dentro de su visibilidad. Coordinadores, `pastor` y roles de club no lo tienen: `403 GUARD_PERMISSION_DENIED`.
+
+Generación bajo demanda (Pendiente de merge): `POST admin/annual-reports/generate` responde `200` con el mismo cuerpo que el detalle. Crea el borrador si falta, lo recalcula si sigue en `draft` y devuelve sin cambios uno finalizado. Club inexistente o inactivo: `404 ANNUAL_REPORT_CLUB_NOT_FOUND`; club fuera del ámbito del actor: `403 GUARD_PERMISSION_DENIED`; periodo que aún no empieza (día de `America/Mexico_City`): `400 REPORT_PERIOD_IN_FUTURE`. Con el mismo cambio `regenerate` responde `400 ANNUAL_REPORT_NOT_DRAFT` si el informe ya está finalizado.
 
 ### app.controller.ts
 
@@ -3254,6 +3257,7 @@ Body opcional (todos los campos pueden omitirse): `{ "country_id": 1, "union_id"
 | GET | `/api/v1/admin/quarterly-reports` | JWT | Permisos: reports:read | Listar informes trimestrales (admin) | QuarterlyReportsService.listForAdmin() | `src/quarterly-reports/quarterly-reports.controller.ts` |
 | GET | `/api/v1/admin/quarterly-reports/:id` | JWT | Permisos: reports:read | Obtener informe trimestral por ID (admin) | QuarterlyReportsService.getReport() | `src/quarterly-reports/quarterly-reports.controller.ts` |
 | PATCH | `/api/v1/admin/quarterly-reports/:id` | JWT | Permisos: reports:update | Actualizar datos manuales del informe trimestral (admin) | QuarterlyReportsService.updateManualData() | `src/quarterly-reports/quarterly-reports.controller.ts` |
+| POST | `/api/v1/admin/quarterly-reports/generate` | JWT | Permisos: reports:update | Generar o recalcular bajo demanda el informe trimestral de un club (body `{ club_id, year, quarter }`). Pendiente de merge | QuarterlyReportsService.generateOnDemand() | `src/quarterly-reports/quarterly-reports.controller.ts` |
 | POST | `/api/v1/admin/quarterly-reports/:id/regenerate` | JWT | Permisos: reports:update | Regenerar datos calculados del informe trimestral (admin) | QuarterlyReportsService.regenerate() | `src/quarterly-reports/quarterly-reports.controller.ts` |
 | POST | `/api/v1/admin/quarterly-reports/:id/finalize` | JWT | Permisos: reports:update | Finalizar informe trimestral (admin) | QuarterlyReportsService.finalize() | `src/quarterly-reports/quarterly-reports.controller.ts` |
 | GET | `/api/v1/admin/quarterly-reports/:id/pdf` | JWT | Permisos: reports:download | Descargar PDF trimestral. Nombre: `informe-trimestral-{club}-{tipo}-{trimestre}-{año}.pdf` | QuarterlyReportsPdfService.generatePdf() | `src/quarterly-reports/quarterly-reports.controller.ts` |
@@ -3262,6 +3266,8 @@ Body opcional (todos los campos pueden omitirse): `{ "country_id": 1, "union_id"
 | GET | `/api/v1/clubs/:clubId/quarterly-reports/:id/pdf` | JWT | Permisos: reports:download | Descargar PDF trimestral. Nombre: `informe-trimestral-{club}-{tipo}-{trimestre}-{año}.pdf` | QuarterlyReportsPdfService.generatePdf() | `src/quarterly-reports/quarterly-reports.controller.ts` |
 
 Alcance (2026-10-22): las rutas `admin/quarterly-reports/:id*` (detalle, PDF, PATCH, regenerate, finalize) verifican primero la misma visibilidad que el listado admin: territorio para roles territoriales, secciones de `coordinator_assignments` para coordinadores (un club es visible si una de sus secciones está en su alcance), sección activa para roles de club. Fuera de esa visibilidad responden `404` (no `403`). Las rutas `clubs/:clubId/quarterly-reports*` declaran recurso `club` (`canManageClub` o club activo) y `:id` / `:id/pdf` exigen que el informe pertenezca al `clubId` del path (`404` si no). PATCH / regenerate / finalize exigen `reports:update` (migración `20261026120000_reports_update_permission`; antes no existía y respondían `403` a todos los roles). Lo tienen `super-admin`, `admin`, `assistant-admin` y los roles territoriales (`assistant-lf`, `director-lf`, `assistant-union`, `director-union`, `assistant-dia`, `director-dia`), cada uno dentro de su visibilidad. Coordinadores, `pastor` y roles de club no lo tienen: `403 GUARD_PERMISSION_DENIED`.
+
+Generación bajo demanda (Pendiente de merge): `POST admin/quarterly-reports/generate` responde `200` con el mismo cuerpo que el detalle. Crea el borrador si falta, lo recalcula si sigue en `draft` y devuelve sin cambios uno finalizado. Club inexistente o inactivo: `404 QUARTERLY_REPORT_CLUB_NOT_FOUND`; club fuera del ámbito del actor: `403 GUARD_PERMISSION_DENIED`; periodo que aún no empieza (día de `America/Mexico_City`): `400 REPORT_PERIOD_IN_FUTURE`. Con el mismo cambio `regenerate` responde `400 QUARTERLY_REPORT_NOT_DRAFT` si el informe ya está finalizado.
 
 ### reports
 

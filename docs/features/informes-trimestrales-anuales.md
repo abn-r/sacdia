@@ -1,7 +1,7 @@
 # Informes trimestrales y anuales de club
 
 **Estado**: IMPLEMENTADO PARCIAL
-**Verificado contra código**: 2026-10-04 (rama `development`)
+**Verificado contra código**: 2026-10-29 (rama `development`; generación bajo demanda y pantallas del admin: Pendiente de merge)
 **Dominio relacionado**: [monthly-reports.md](monthly-reports.md)
 
 ## Descripcion de dominio
@@ -12,13 +12,14 @@ Además del informe mensual por inscripción, el backend genera dos informes por
 
 ### Backend (`src/quarterly-reports/`, `src/annual-reports/`)
 
-Ambos controllers usan `JwtAuthGuard` + `PermissionsGuard`. Rutas espejo (`{tipo}` = `quarterly-reports` o `annual-reports`):
+Ambos controllers usan `JwtAuthGuard` + `PermissionsGuard`; cada ruta declara `@AuthorizationResource` (`active_assignment` en las `admin/*`, `club` en las `clubs/:clubId/*`). Rutas espejo (`{tipo}` = `quarterly-reports` o `annual-reports`):
 
 | Método | Ruta (`/api/v1`) | Permiso |
 |---|---|---|
 | GET | `/admin/{tipo}` | `reports:read` + `AuthorizationResource({ type: 'active_assignment' })` |
 | GET | `/admin/{tipo}/:id` | `reports:read` |
 | PATCH | `/admin/{tipo}/:id` (datos manuales) | `reports:update` |
+| POST | `/admin/{tipo}/generate` (bajo demanda, Pendiente de merge) | `reports:update` |
 | POST | `/admin/{tipo}/:id/regenerate` | `reports:update` |
 | POST | `/admin/{tipo}/:id/finalize` | `reports:update` |
 | GET | `/admin/{tipo}/:id/pdf` | `reports:download` |
@@ -29,8 +30,12 @@ Ambos controllers usan `JwtAuthGuard` + `PermissionsGuard`. Rutas espejo (`{tipo
 Reglas verificadas:
 
 - **Listado admin**: filtra por división, unión, campo local, club, año y estado (y trimestre en el trimestral), limitado al ámbito jerárquico del actor (`resolveReportVisibilityScopeForActor`).
-- **Estados**: `draft` y `finalized` (texto). Editar datos manuales, `generate` y `finalize` exigen `draft` (`QUARTERLY_REPORT_NOT_DRAFT` / `ANNUAL_REPORT_NOT_DRAFT`). `finalize` guarda `finalized_at` y `finalized_by`.
-- **`regenerate`** recalcula `computed_data` sin mirar el estado: también actualiza informes `finalized`.
+- **Estados**: `draft` y `finalized` (texto). Editar datos manuales, `regenerate` y `finalize` exigen `draft` (`QUARTERLY_REPORT_NOT_DRAFT` / `ANNUAL_REPORT_NOT_DRAFT`). `finalize` guarda `finalized_at` y `finalized_by`. Un informe finalizado queda congelado (Pendiente de merge: hoy en `development` `regenerate` todavía recalcula informes finalizados).
+- **Generación bajo demanda** (Pendiente de merge): `POST /admin/quarterly-reports/generate` recibe `{ club_id, year (2020–2100), quarter (1–4) }` y `POST /admin/annual-reports/generate` recibe `{ club_id, ecclesiastical_year_id }`. Responden `200` con el mismo cuerpo que `GET /admin/{tipo}/:id`.
+  - Crea el borrador si no existe y recalcula sus datos si sigue en `draft`; si ya está finalizado lo devuelve sin tocarlo.
+  - Dos peticiones simultáneas para el mismo periodo no fallan: la segunda lee la fila que creó la primera.
+  - El club debe existir y estar activo (`404 QUARTERLY_REPORT_CLUB_NOT_FOUND` / `ANNUAL_REPORT_CLUB_NOT_FOUND`) y estar dentro del ámbito del actor (`403 GUARD_PERMISSION_DENIED`).
+  - El periodo debe haber empezado según el día de `America/Mexico_City`: el trimestre en curso se permite, uno futuro responde `400 REPORT_PERIOD_IN_FUTURE`. Lo mismo para el año eclesiástico (por `start_date`).
 - **Datos calculados del trimestral**: miembros con asignación activa en las secciones activas del club, directiva, especialidades iniciadas y completadas, actividades, finanzas (ingresos, egresos, balance, movimientos) y bautismos del trimestre. Trimestre válido: 1 a 4 (`QUARTERLY_REPORT_INVALID_QUARTER`).
 - **Datos calculados del anual**: lo mismo por año eclesiástico, más meses reportados, percentil de ranking y miembros con más especialidades.
 - **Unicidad**: `quarterly_reports (club_id, year, quarter)` y `annual_reports (club_id, ecclesiastical_year_id)`.
@@ -38,17 +43,22 @@ Reglas verificadas:
   - Trimestral: `0 1 1 1,4,7,10 *` UTC (`quarterly-reports-auto-generate`). Genera el trimestre recién cerrado para todos los clubes activos si `system_config.reports.quarterly_auto_generate_enabled = 'true'`. No toca informes que ya no estén en `draft`.
   - Anual: `0 2 1 1 *` UTC (`annual-reports-auto-generate`). Genera el año eclesiástico recién terminado si `system_config.reports.annual_auto_generate_enabled = 'true'`.
   - Ambos usan lock Redis y registran en `cron_run_log`.
+  - En la base de desarrollo las dos banderas están en `'false'`, así que los crons no generan nada; los informes salen solo con la generación bajo demanda.
 - **PDF**: lo generan `QuarterlyReportsPdfService` y `AnnualReportsPdfService` al descargar; no se guarda en R2 (los nombres de archivo están en [monthly-reports.md](monthly-reports.md)).
 
 ### Admin
 
-- El detalle de club (`/dashboard/clubs/[id]`) lista los informes anuales con `GET /clubs/:clubId/annual-reports` (si la llamada falla, muestra lista vacía).
-- `src/lib/api/reports.ts` define `listClubQuarterlyReports`, pero ninguna página lo usa.
-- No hay pantallas de detalle, edición, finalización ni descarga de estos informes.
+Pendiente de merge (rama `feat/admin-quarterly-annual-reports`):
+
+- Pantallas `/dashboard/reports/quarterly` y `/dashboard/reports/annual` (sidebar y catálogo de pantallas `reports-quarterly`, `reports-annual`): listado con filtros, diálogo **Generar** (club + año y trimestre, o año eclesiástico) y detalle `[id]`.
+- El detalle muestra los datos calculados, el formulario de datos manuales y los botones Recalcular y Finalizar solo mientras el informe está en `draft`, cada uno según la capacidad de la pantalla (`update`, `finalize`); la descarga del PDF aparece con la capacidad `download` en cualquier estado.
+- La pestaña de informes del detalle de club muestra trimestrales y anuales, enlaza cada fila con su detalle y muestra un error si una de las dos llamadas falla (antes mostraba lista vacía).
+
+En `development` hoy: el detalle de club solo lista los anuales y no hay pantallas de detalle, edición, finalización ni descarga.
 
 ### App móvil
 
-- Sin consumo.
+- El coordinador ve los listados en solo lectura y descarga el PDF (`lib/features/coordinator/data/datasources/coordinator_reports_remote_data_source.dart`, rutas `admin/quarterly-reports` y `admin/annual-reports`). No genera, edita ni finaliza.
 
 ### Base de datos
 
@@ -56,7 +66,7 @@ Reglas verificadas:
 
 ## Gaps y pendientes
 
-- **Rutas sin `@AuthorizationResource`**: en cada controller solo `GET /admin/{tipo}` lo declara. `PermissionsGuard` responde `GUARD_RBAC_MISCONFIGURATION` (500) cuando un handler con `@RequirePermissions` no tiene `@AuthorizationResource`, así que las otras 8 rutas de cada controller fallan tal como están. Afecta también al listado anual del detalle de club en el admin.
-- `regenerate` puede cambiar los datos de un informe ya finalizado (en ambos servicios).
+- Crons apagados por defecto: si se quieren informes automáticos hay que encender las banderas `reports.*_auto_generate_enabled`.
+- `regenerate` puede cambiar los datos de un informe ya finalizado hasta que se mergee el cambio que lo bloquea.
 - El cálculo del trimestral cuenta miembros del año eclesiástico con `active = true`, no del año del periodo del informe.
-- Sin UI de flujo completo en admin ni en app.
+- La app no tiene flujo de generación ni edición (solo lectura para coordinadores).
