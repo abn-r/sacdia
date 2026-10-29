@@ -37,7 +37,7 @@ Reglas verificadas:
   - El club debe existir y estar activo (`404 QUARTERLY_REPORT_CLUB_NOT_FOUND` / `ANNUAL_REPORT_CLUB_NOT_FOUND`) y estar dentro del ámbito del actor (`403 GUARD_PERMISSION_DENIED`).
   - El periodo debe haber empezado según el día de `America/Mexico_City`: el trimestre en curso se permite, uno futuro responde `400 REPORT_PERIOD_IN_FUTURE`. Lo mismo para el año eclesiástico (por `start_date`).
 - **Datos calculados del trimestral**: miembros con asignación activa en las secciones activas del club, directiva, especialidades iniciadas y completadas, actividades, finanzas (ingresos, egresos, balance, movimientos) y bautismos del trimestre. Trimestre válido: 1 a 4 (`QUARTERLY_REPORT_INVALID_QUARTER`).
-- **Datos calculados del anual**: lo mismo por año eclesiástico, más meses reportados, percentil de ranking y miembros con más especialidades.
+- **Datos calculados del anual**: lo mismo por año eclesiástico, más meses reportados, percentil de ranking y miembros con más especialidades. Meses reportados = meses distintos (año + mes) con al menos un informe mensual no borrador de cualquier sección del club, máximo 12 (Pendiente de merge: hoy cuenta filas de informes, así que un club con 3 secciones puede pasar de 12).
 - **Unicidad**: `quarterly_reports (club_id, year, quarter)` y `annual_reports (club_id, ecclesiastical_year_id)`.
 - **Cron**:
   - Trimestral: `0 1 1 1,4,7,10 *` UTC (`quarterly-reports-auto-generate`). Genera el trimestre recién cerrado para todos los clubes activos si `system_config.reports.quarterly_auto_generate_enabled = 'true'`. No toca informes que ya no estén en `draft`.
@@ -45,13 +45,16 @@ Reglas verificadas:
   - Ambos usan lock Redis y registran en `cron_run_log`.
   - En la base de desarrollo las dos banderas están en `'false'`, así que los crons no generan nada; los informes salen solo con la generación bajo demanda.
 - **PDF**: lo generan `QuarterlyReportsPdfService` y `AnnualReportsPdfService` al descargar; no se guarda en R2 (los nombres de archivo están en [monthly-reports.md](monthly-reports.md)).
+  - Contenido (Pendiente de merge): directiva con el nombre del rol en español; todos los datos manuales, con "—" si están vacíos; cada total una sola vez en su sección; bloque final "Director/a del club" con los directores de la directiva (sin correo; "Sin director asignado" si no hay). Hoy en `development` ese bloque muestra a quien finalizó el informe.
+  - Paginación: salta de página solo si la sección no cabe y numera el pie "Página X de Y" en todas las páginas.
+  - El año eclesiástico se muestra como "2026" si empieza y termina el mismo año, o "2025–2026" si cruza años.
 
 ### Admin
 
 Pendiente de merge (rama `feat/admin-quarterly-annual-reports`):
 
 - Pantallas `/dashboard/reports/quarterly` y `/dashboard/reports/annual` (sidebar y catálogo de pantallas `reports-quarterly`, `reports-annual`): listado con filtros, diálogo **Generar** (club + año y trimestre, o año eclesiástico) y detalle `[id]`.
-- El detalle muestra los datos calculados, el formulario de datos manuales y los botones Recalcular y Finalizar solo mientras el informe está en `draft`, cada uno según la capacidad de la pantalla (`update`, `finalize`); la descarga del PDF aparece con la capacidad `download` en cualquier estado.
+- El detalle muestra los datos calculados, el formulario de datos manuales y los botones Recalcular y Finalizar solo mientras el informe está en `draft`, cada uno según la capacidad de la pantalla (`update`, `finalize`); la descarga del PDF aparece con la capacidad `download` en cualquier estado. La directiva muestra el rol traducido (mismas etiquetas `roles.*` que el resto del panel).
 - La pestaña de informes del detalle de club muestra trimestrales y anuales, enlaza cada fila con su detalle y muestra un error si una de las dos llamadas falla (antes mostraba lista vacía).
 
 En `development` hoy: el detalle de club solo lista los anuales y no hay pantallas de detalle, edición, finalización ni descarga.
