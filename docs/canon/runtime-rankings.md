@@ -177,7 +177,7 @@ Rankings (permiso `rankings:read` | `rankings:recalculate`):
 - `PATCH /ranking-tiers/:id` — actualiza un rango global; `band_percentage` debe ser positivo. Permiso `ranking_weights:write`;
 - `GET /annual-folders/rankings?club_type_id&year_id[&category_id][&local_field_id]` — cada fila incluye IDs de navegación (`club_enrollment_id`, `ecclesiastical_year_id`, `local_field_id`) y los 6 campos nuevos: `folder_score_pct`, `finance_score_pct`, `camporee_score_pct`, `evidence_score_pct`, `composite_score_pct`, `composite_calculated_at`. Acepta `rankings:read` desde rol global o desde la asignación activa de club. Si `local_field_id` se omite, el backend usa primero el campo local de la asignación activa y luego el campo local efectivo/perfil del usuario; si se envía explícito, valida acceso jerárquico histórico o coincidencia con la asignación activa antes de consultar;
 - `GET /annual-folders/rankings/club/:enrollmentId?year_id` — ídem;
-- `GET /annual-folders/rankings/:enrollmentId/breakdown?year_id` — drill-down por enrollment: devuelve composite + pesos aplicados + detalle de cada componente. Permiso `rankings:read`;
+- `GET /annual-folders/rankings/:enrollmentId/breakdown?year_id` — drill-down por enrollment: devuelve composite + pesos aplicados + detalle de cada componente. Permiso `rankings:read`. El admin ya no lo usa: el desglose oficial es el del modelo de puntos (§13);
 - `POST /annual-folders/rankings/recalculate?year_id` — encola recálculo de club y responde 202; poll GET rankings;
 
 Award categories (permisos `award_categories:*`):
@@ -189,6 +189,8 @@ Award categories (permisos `award_categories:*`):
 - `DELETE /award-categories/:categoryId` (soft delete).
 
 ### Ranking weights (permisos `ranking_weights:read` | `ranking_weights:write`)
+
+Pesos del composite ponderado (modelo anterior). Desde 2026-10-29 el admin no tiene pantalla para editarlos: el ranking oficial es el modelo de puntos (§13). Los endpoints siguen en el backend y los permisos `ranking_weights:*` siguen protegiendo los rangos globales (`/ranking-tiers`).
 
 - `GET /ranking-weights` — lista configuraciones (default global + overrides por club_type);
 - `GET /ranking-weights/:id` — detalle de una configuración;
@@ -232,6 +234,8 @@ Contrato exacto en `docs/features/annual-folders-scoring.md` y `docs/api/ENDPOIN
 **Vigente desde**: 2026-05-31
 
 La superficie nueva de ranking anual (`/club-sections/:sectionId/annual-ranking-progress`, `/annual-rankings`, `/annual-ranking-configs`) calcula puntos desde `annual_ranking_configs` y `annual_ranking_axis_configs`.
+
+**Modelo oficial** (decisión 2026-10-29): el ranking anual de clubes se muestra con este modelo de puntos. En el admin, la lista (`/dashboard/annual-folders/rankings`) usa `GET /annual-rankings` y cada fila trae `club_section_id`; "Ver desglose" abre `/dashboard/annual-folders/rankings/:sectionId/breakdown?year_id=N`, que lee `GET /club-sections/:sectionId/annual-ranking-progress` (puntos, rango y siguiente rango, ejes con sus componentes y secciones pendientes de la carpeta anual). Ambos endpoints usan la misma configuración y el mismo cálculo, así que lista y desglose coinciden. El admin ya no muestra el desglose del composite ponderado (`/annual-folders/rankings/:enrollmentId/breakdown`); el endpoint sigue en el backend.
 
 ### Ejes canónicos
 
