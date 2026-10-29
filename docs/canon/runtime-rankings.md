@@ -489,6 +489,8 @@ Sin ninguno de estos permisos → acceso denegado (403).
 
 **Kill-switch de visibilidad**: `member_ranking.recalculation_enabled=false` no bloquea lecturas. La visibilidad de `/me` se valida en el servicio contra el perfil RBAC del llamante.
 
+**Respuesta**: cada fila trae `member_name` con el nombre completo (`name` + apellido paterno + materno; `/me` y el top-N siguen anonimizados como `Miembro #N`). En el admin, la tabla de miembros de una sección (`/dashboard/section-rankings/:sectionId/members`) abre el desglose en `/dashboard/member-rankings/:enrollmentId/breakdown?year_id=N`. Un componente sin datos (`null`) se muestra como "no cuenta en el puntaje global" (ver §14.6).
+
 ---
 
 ### 14.8 MEMENTO — Naming híbrido (Audit A11, lock permanente)
