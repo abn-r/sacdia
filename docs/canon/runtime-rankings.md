@@ -190,6 +190,8 @@ Award categories (permisos `award_categories:*`):
 
 ### Ranking weights (permisos `ranking_weights:read` | `ranking_weights:write`)
 
+Pesos del composite ponderado (modelo anterior). Desde 2026-10-29 el admin no tiene pantalla para editarlos: el ranking oficial es el modelo de puntos (§13). Los endpoints siguen en el backend y los permisos `ranking_weights:*` siguen protegiendo los rangos globales (`/ranking-tiers`).
+
 - `GET /ranking-weights` — lista configuraciones (default global + overrides por club_type);
 - `GET /ranking-weights/:id` — detalle de una configuración;
 - `POST /ranking-weights` — crear override por `club_type_id`; body requiere los 4 pesos; valida que sumen 100 (HTTP 400) y que no haya duplicado de `club_type_id` (HTTP 409);
