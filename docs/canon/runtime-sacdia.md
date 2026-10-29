@@ -216,7 +216,7 @@ Notas runtime activas de carpetas anuales:
 
 ### 6.7 Reportes, cierre de año y operación
 
-- informes mensuales (con PDF en R2), trimestrales y anuales, generados por cron;
+- informes mensuales (con PDF en R2), trimestrales y anuales, generados por cron (los crons trimestral y anual dependen de `reports.*_auto_generate_enabled`, apagadas en desarrollo) o bajo demanda desde el admin;
 - cierre y corte de año (`year-end`, `year-cut`);
 - notificaciones push y bandeja (`runtime-communications.md`), invalidación de cache por FCM silencioso (`runtime-resiliencia-red.md`);
 - dashboards de SLA (`runtime-sla-dashboard.md`), operaciones y campo local en `analytics`;
