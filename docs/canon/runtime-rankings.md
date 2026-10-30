@@ -443,13 +443,14 @@ Errores canónicos:
 ### 14.5 Asignación de posición de ranking
 
 **Enrollment rankings** (`enrollment_rankings.rank_position`):
-- `DENSE_RANK() OVER (PARTITION BY (club_id, ecclesiastical_year_id) ORDER BY composite_score_pct DESC NULLS LAST)`.
+- `DENSE_RANK() OVER (PARTITION BY (club_id, club_section_id, ecclesiastical_year_id) ORDER BY composite_score_pct DESC NULLS LAST)`.
+- Cada sección ordena a sus propios miembros desde el puesto 1 (los miembros se listan por sección). Enrollments sin sección (`club_section_id` NULL) se ordenan juntos dentro de su club.
 - Empates comparten rank; el grupo siguiente obtiene `prevRank + 1`.
-- Enrollments sin composite (NULL) reciben `rank_position = NULL`.
+- Enrollments sin composite (NULL) también reciben puesto: quedan al final de su sección (`NULLS LAST`).
 
 **Section rankings** (`section_rankings.rank_position`):
-- `DENSE_RANK() OVER (PARTITION BY (club_id, ecclesiastical_year_id) ORDER BY composite_score_pct DESC NULLS LAST)`.
-- Secciones sin miembros con composite reciben composite NULL y `rank_position = NULL`.
+- `DENSE_RANK() OVER (PARTITION BY (club_id, ecclesiastical_year_id) ORDER BY composite_score_pct DESC NULLS LAST)`: las secciones de un club se ordenan entre sí.
+- Secciones sin miembros con composite reciben composite NULL y quedan al final del club (`NULLS LAST`).
 
 Invariante: `rank_position ∈ ℕ⁺` cuando NOT NULL; NULL es semánticamente "sin posición asignada" (no es cero ni último).
 
