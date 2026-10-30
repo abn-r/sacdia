@@ -216,7 +216,7 @@ Ya usados por el runtime, como `BadRequestException` con mensaje estable:
 - `CERTIFICATE_IMPORT_ENROLLMENT_MISMATCH`: el identificador enviado no es la inscripción de ese usuario, clase y periodo.
 - `CERTIFICATE_IMPORT_ENROLLMENT_VERSION_CONFLICT`: `modified_at` de esa inscripción cambió. Hay que volver a leer el detalle.
 - `CERTIFICATE_IMPORT_INSTITUTIONAL_FORBIDDEN`: la bandeja institucional no es de Campo Local, admin genérico ni Unión. En HTTP el guard responde antes con `GUARD_PERMISSION_DENIED`.
-- `CERTIFICATE_IMPORT_REVIEWER_SCOPE_REQUIRED`: el rol pasó el alias de Campo Local, pero no tiene ámbito sobre el expediente. Unión cae aquí en la bandeja común.
+- `CERTIFICATE_IMPORT_REVIEWER_SCOPE_REQUIRED`: el rol pasó el alias de Campo Local, pero no tiene ámbito sobre el expediente. Unión y división caen aquí en la bandeja común; por eso el admin les oculta la pantalla (gate `exactRoles`, decisión del 2026-10-30).
 - `CERTIFICATE_IMPORT_DECISION_IMMUTABLE`: la solicitud ya tiene la decisión contraria.
 - `CERTIFICATE_IMPORT_CLASS_NOT_INSTITUTIONAL`: la clase no es Guía Mayor Avanzado ni Instructor.
 - `CERTIFICATE_IMPORT_REQUEST_NOT_FOUND`

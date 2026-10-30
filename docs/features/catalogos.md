@@ -77,7 +77,7 @@ Los anos eclesiasticos son un catalogo particularmente critico: definen los peri
 
 ## Requisitos funcionales
 
-1. Los catalogos de lectura siguen disponibles sin JWT para formularios de registro. Un JWT territorial recorta solo la geografía al país del actor; no abre CRUD admin.
+1. Los catalogos de lectura siguen disponibles sin JWT para formularios de registro. Un JWT territorial recorta solo la geografía al país del actor (a su división para `director-dia` / `assistant-dia`); no abre CRUD admin.
 2. La administracion CRUD de catalogos debe estar restringida a super_admin y admin
 3. El panel admin no debe ofrecer entradas de UI (sidebar, paleta, URL que dispara el API) a editores de catalogo si el actor no tiene esos roles globales
 4. La jerarquia geografica debe mantener integridad referencial (no eliminar un pais con uniones activas)
