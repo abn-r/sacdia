@@ -34,8 +34,8 @@ Asignados en `users_roles`. Todos tienen acceso al panel (`access_panel = true`)
 | `admin-test@sacdia.com` | `admin` | Ancla en la unión `20` (solo `super-admin` es global) |
 | `director-dia@sacdia.com` | `director-dia` | División de la unión `20` |
 | `assistant-dia@sacdia.com` | `assistant-dia` | División de la unión `20` |
-| `general-coordinator@sacdia.com` | `general-coordinator` | Campo local `4`; sus secciones se asignan en Coordinación |
-| `zone-coordinator@sacdia.com` | `zone-coordinator` | Campo local `4`; su zona se asigna en Coordinación |
+| `general-coordinator@sacdia.com` | `general-coordinator` | Campo local `4`; el seed le crea una asignación GENERAL sobre el campo local (Pendiente de merge (PR #593 de sacdia-backend)) |
+| `zone-coordinator@sacdia.com` | `zone-coordinator` | Campo local `4`; el seed le crea la zona "Zona Test" con los distritos que tienen clubes activos y una asignación ZONE de Conquistadores (Pendiente de merge (PR #593 de sacdia-backend)) |
 | `coordinator@sacdia.com` | `coordinator` | Campo local `4`; sus secciones se asignan en Coordinación |
 | `pastor@sacdia.com` | `pastor` | Campo local `4`; su distrito se asigna en Pastores por distrito |
 
