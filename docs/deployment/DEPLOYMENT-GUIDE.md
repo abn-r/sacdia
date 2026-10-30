@@ -32,14 +32,14 @@ GitHub (rama development)
    ├─ push ─► Render "API Sacdia" (auto-deploy) ─► Neon rama development  ◄── base viva
    │              └─ OCR firmado ─► Cloud Run (proxy OCR) ─► Google Vision
    └─ push ─► Vercel (admin.sacdia.com)
-Neon ramas staging y production: existen y ningún servicio las usa. `staging` está migrada al nivel de `development` (2026-10-21); `production` sigue en `20261014100000` (ver §0.6).
+Neon ramas staging y production: existen y ningún servicio las usa. `staging` está migrada al nivel de `development` (2026-10-30); `production` sigue en `20261014100000` (ver §0.6 y §0.9).
 ```
 
 | Pieza | Estado real |
 |---|---|
 | Backend | Render web service **"API Sacdia"**, plan **Free**, rama **`development`**, auto-deploy **activado** |
 | Admin | Vercel, `https://admin.sacdia.com`, despliega **`development`** |
-| Base de datos | Neon. `DATABASE_URL` del backend apunta a la rama **`development`** (endpoint `ep-rough-hill-anztwk76`): es la base viva. Las ramas `staging` y `production` existen, pero ningún servicio las usa. `staging` tiene las mismas migraciones que `development` (2026-10-21); `production` sigue en `20261014100000` y le faltan 9 (ver §0.6) |
+| Base de datos | Neon. `DATABASE_URL` del backend apunta a la rama **`development`** (endpoint `ep-rough-hill-anztwk76`): es la base viva. Las ramas `staging` y `production` existen, pero ningún servicio las usa. `staging` tiene las mismas migraciones que `development` (2026-10-30); `production` sigue en `20261014100000` y le faltan 18 (ver §0.6 y §0.9) |
 | OCR | Proxy keyless en Cloud Run; runbook en `docs/guides/ocr-proxy-preprod-infra.md` |
 | Otros servicios | Redis, R2, Firebase, Resend y Sentry según la tabla 4.2; su cuenta y plan concretos no se documentan aquí |
 
@@ -67,7 +67,7 @@ Neon ramas staging y production: existen y ningún servicio las usa. `staging` e
 
 - Un proyecto, tres ramas: `development`, `staging`, `production`.
 - **`development` es la base viva**: `DATABASE_URL` de "API Sacdia" apunta a su endpoint (`ep-rough-hill-anztwk76`, cadena pooled). Es lo que el servicio en línea lee y escribe.
-- `staging` y `production` existen, pero **ningún servicio las consume**. `staging` está al nivel de `development` (2026-10-21); `production` sigue en `20261014100000` (ver §0.6). No tratarlas como respaldo de `development`: no reciben sus datos.
+- `staging` y `production` existen, pero **ningún servicio las consume**. `staging` está al nivel de `development` (2026-10-30); `production` sigue en `20261014100000` (ver §0.6 y §0.9). No tratarlas como respaldo de `development`: no reciben sus datos.
 - Las migraciones se aplican al final del build de Render contra la rama que indique `DATABASE_URL`. Como esa cadena es pooled, el servicio necesita también `DATABASE_DIRECT_URL` (misma rama, host sin `-pooler`) para que `prisma migrate deploy` use una conexión directa. `staging` y `production` no las reciben solas: se aplican a mano, con aprobación, como indica el §3.
 - **Historia (2026-10-13):** hasta esa fecha el build no migraba y el servicio no tenía pre-deploy (el plan Free no lo admite), así que todas las migraciones de octubre se aplicaron a mano. Antes de un deploy con migración, confirmar en el log del build que aparezca `All migrations have been successfully applied` o `No pending migrations to apply`.
 - Nunca incluir cadenas de conexión completas ni contraseñas en docs, tickets o chats; el endpoint (`ep-…`) identifica la rama, el resto es secreto.
@@ -201,9 +201,9 @@ Una migración aditiva del backend, rama `fix/inventory-extended-fields`, **Pend
 
 | Directorio (`sacdia-backend/prisma/migrations/`) | Usa `CONCURRENTLY` | `development` | `staging` | `production` |
 |---|---|---|---|---|
-| `20261026130000_inventory_extended_fields` | No | Aplicada (2026-10-26) | **Pendiente** | **Pendiente** |
+| `20261026130000_inventory_extended_fields` | No | Aplicada (2026-10-26) | Aplicada (2026-10-30) | **Pendiente** |
 
-**Aplicarla antes de desplegar el backend de esa rama** en cada entorno: el código nuevo lee y escribe las columnas, así que sobre una base sin ellas falla. Es compatible con el código anterior (solo `ADD COLUMN` y `ADD CONSTRAINT`; las filas existentes quedan con `condition = 'bueno'`). En `development` el merge del backend ya no necesita aplicarla: `prisma migrate deploy` la encontrará registrada. En `staging` y `production` aplican las reglas del §0.4 y del §0.6 (`production` solo por la promoción `development` → `preproduction` → `main`); recuerda que `staging` ya no está al nivel de `development` mientras esta migración siga pendiente.
+**Aplicarla antes de desplegar el backend de esa rama** en cada entorno: el código nuevo lee y escribe las columnas, así que sobre una base sin ellas falla. Es compatible con el código anterior (solo `ADD COLUMN` y `ADD CONSTRAINT`; las filas existentes quedan con `condition = 'bueno'`). En `development` el merge del backend ya no necesita aplicarla: `prisma migrate deploy` la encontrará registrada. En `staging` y `production` aplican las reglas del §0.4 y del §0.6 (`production` solo por la promoción `development` → `preproduction` → `main`); `staging` la tiene desde el 2026-10-30.
 
 ---
 
@@ -213,9 +213,17 @@ Una migración de datos del backend, mergeada en `development` (PR #591 de sacdi
 
 | Directorio (`sacdia-backend/prisma/migrations/`) | Usa `CONCURRENTLY` | `development` | `staging` | `production` |
 |---|---|---|---|---|
-| `20261030120000_union_division_ranking_reads` | No | Aplicada (2026-10-30) | **Pendiente** | **Pendiente** |
+| `20261030120000_union_division_ranking_reads` | No | Aplicada (2026-10-30) | Aplicada (2026-10-30) | **Pendiente** |
 
 Sin ella el código nuevo funciona, pero unión y división siguen sin ver las clasificaciones.
+
+### 0.9 Estado de migraciones por rama (2026-10-30)
+
+Verificado con `prisma migrate status` contra cada rama (209 migraciones en el repo).
+
+- **`development`**: al día.
+- **`staging`**: al día. El 2026-10-30 se aplicaron con `prisma migrate deploy` las 9 que le faltaban: `20261025120000_coordinator_reports_read`, `20261026120000_reports_update_permission`, `20261026130000_inventory_extended_fields`, `20261028120000_coordinator_roles_resources_read`, `20261028130000_ensure_assistant_admin_role`, `20261028130100_restore_lf_ranking_reads`, `20261028130200_revoke_union_global_ranking_reads`, `20261028130300_strip_soft_hyphen_from_honor_names` y `20261030120000_union_division_ranking_reads`. Ninguna usa `CONCURRENTLY`. Neon tenía la rama archivada y la reactivó al conectar.
+- **`production`**: 18 pendientes. Las 9 de perfiles familiares (`20261015120000` a `20261024120000`, §0.6) y las 9 de la lista anterior. **Se dejan pendientes a propósito** (decisión del 2026-10-30): llegan con la promoción `development` → `preproduction` → `main` y las condiciones del §0.6, no a mano.
 
 ## 1. Entornos y ramas
 
