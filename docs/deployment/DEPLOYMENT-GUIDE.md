@@ -207,6 +207,16 @@ Una migración aditiva del backend, rama `fix/inventory-extended-fields`, **Pend
 
 ---
 
+### 0.8 Permisos de clasificaciones para unión y división (2026-10-30)
+
+Una migración de datos del backend, rama `fix/rankings-territory-and-quarterly-members`, Pendiente de merge (PR #591 de sacdia-backend). Crea `member_rankings` / `section_rankings` `:read_union` y `:read_division` y los asigna a `director-union`, `assistant-union`, `director-dia` y `assistant-dia`. Es idempotente y no cambia el esquema.
+
+| Directorio (`sacdia-backend/prisma/migrations/`) | Usa `CONCURRENTLY` | `development` | `staging` | `production` |
+|---|---|---|---|---|
+| `20261030120000_union_division_ranking_reads` | No | Aplicada (2026-10-30) | **Pendiente** | **Pendiente** |
+
+Sin ella el código nuevo funciona, pero unión y división siguen sin ver las clasificaciones.
+
 ## 1. Entornos y ramas
 
 > **Hoy** solo la rama `development` está conectada a un entorno en línea (ver sección 0). Lo que sigue es el flujo objetivo, para cuando existan los demás entornos.

@@ -36,7 +36,7 @@ Reglas verificadas:
   - Dos peticiones simultáneas para el mismo periodo no fallan: la segunda lee la fila que creó la primera.
   - El club debe existir y estar activo (`404 QUARTERLY_REPORT_CLUB_NOT_FOUND` / `ANNUAL_REPORT_CLUB_NOT_FOUND`) y estar dentro del ámbito del actor (`403 GUARD_PERMISSION_DENIED`).
   - El periodo debe haber empezado según el día de `America/Mexico_City`: el trimestre en curso se permite, uno futuro responde `400 REPORT_PERIOD_IN_FUTURE`. Lo mismo para el año eclesiástico (por `start_date`).
-- **Datos calculados del trimestral**: miembros con asignación activa en las secciones activas del club, directiva, especialidades iniciadas y completadas, actividades, finanzas (ingresos, egresos, balance, movimientos) y bautismos del trimestre. Trimestre válido: 1 a 4 (`QUARTERLY_REPORT_INVALID_QUARTER`).
+- **Datos calculados del trimestral**: miembros del trimestre (personas distintas con una asignación en las secciones activas del club que se cruza con el trimestre: empezó a más tardar su último día y no terminó antes del primero; estado `active`, `ended` o vacío; Pendiente de merge (PR #591 de sacdia-backend)), directiva (asignaciones activas hoy), especialidades iniciadas y completadas, actividades, finanzas (ingresos, egresos, balance, movimientos) y bautismos del trimestre. Trimestre válido: 1 a 4 (`QUARTERLY_REPORT_INVALID_QUARTER`).
 - **Datos calculados del anual**: lo mismo por año eclesiástico, más meses reportados, percentil de ranking y miembros con más especialidades. Meses reportados = meses distintos (año + mes) con al menos un informe mensual no borrador de cualquier sección del club, máximo 12.
 - **Unicidad**: `quarterly_reports (club_id, year, quarter)` y `annual_reports (club_id, ecclesiastical_year_id)`.
 - **Cron**:
@@ -66,5 +66,5 @@ Reglas verificadas:
 ## Gaps y pendientes
 
 - Crons apagados por defecto: si se quieren informes automáticos hay que encender las banderas `reports.*_auto_generate_enabled`.
-- El cálculo del trimestral cuenta miembros del año eclesiástico con `active = true`, no del año del periodo del informe.
+- El cálculo del trimestral cuenta miembros del año eclesiástico con `active = true`, no del año del periodo del informe. Pendiente de merge (PR #591 de sacdia-backend): pasa a contar a los miembros del trimestre.
 - La app no tiene flujo de generación ni edición (solo lectura para coordinadores).
