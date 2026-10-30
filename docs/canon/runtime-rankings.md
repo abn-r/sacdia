@@ -479,8 +479,8 @@ Para el algoritmo exacto, ver `MemberCompositeScoreService` en `sacdia-backend/s
 **Waterfall para member-rankings** (`GET /api/v1/member-rankings` y `GET /:enrollmentId/breakdown`):
 
 1. `member_rankings:read_global` — admin/super-admin: ve todos los enrollments sin filtro de club.
-2. `member_rankings:read_division` — director/asistente de división: clubes cuya unión pertenece a su división. Pendiente de merge (PR #591 de sacdia-backend).
-3. `member_rankings:read_union` — director/asistente de unión: clubes cuyo campo local pertenece a su unión. Pendiente de merge (PR #591 de sacdia-backend).
+2. `member_rankings:read_division` — director/asistente de división: clubes cuya unión pertenece a su división.
+3. `member_rankings:read_union` — director/asistente de unión: clubes cuyo campo local pertenece a su unión.
 4. `member_rankings:read_lf` — coordinador de campo local: ve enrollments de clubes en su campo.
 5. `member_rankings:read_club` — director de club: ve enrollments de su club.
 6. `member_rankings:read_section` — director de sección: ve enrollments de su sección.
@@ -493,12 +493,12 @@ Sin ninguno de estos permisos → acceso denegado (403).
 **Waterfall para section-rankings** (`GET /api/v1/section-rankings` y `GET /:sectionId/members`):
 
 1. `section_rankings:read_global` — admin/super-admin.
-2. `section_rankings:read_division` — director/asistente de división. Pendiente de merge (PR #591 de sacdia-backend).
-3. `section_rankings:read_union` — director/asistente de unión. Pendiente de merge (PR #591 de sacdia-backend).
+2. `section_rankings:read_division` — director/asistente de división.
+3. `section_rankings:read_union` — director/asistente de unión.
 4. `section_rankings:read_lf` — coordinador campo local.
 5. `section_rankings:read_club` — director de club.
 
-En el admin, la pantalla de clasificación de secciones y el desglose de un miembro (`/dashboard/member-rankings/:enrollmentId/breakdown`) aceptan los mismos permisos. Antes el desglose no tenía entrada en el catálogo de pantallas y solo lo abría super-admin. Pendiente de merge (PR #279 de sacdia-admin).
+En el admin, la pantalla de clasificación de secciones y el desglose de un miembro (`/dashboard/member-rankings/:enrollmentId/breakdown`) aceptan los mismos permisos. Antes el desglose no tenía entrada en el catálogo de pantallas y solo lo abría super-admin (corregido en el PR #279 de sacdia-admin).
 
 **Kill-switch de visibilidad**: `member_ranking.recalculation_enabled=false` no bloquea lecturas. La visibilidad de `/me` se valida en el servicio contra el perfil RBAC del llamante.
 
