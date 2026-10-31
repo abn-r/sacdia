@@ -377,10 +377,12 @@ Audit C2 clasificó `camporees` en media prioridad. Sprint D aborda la migració
 
 - creación/eliminación de camporees tiene autoridad independiente de creación de actividades semanales — roles pueden ser otorgados/revocados sin afectar el otro dominio;
 - attendance en camporees comparte UX y permiso con attendance en actividades — coherente para staff que opera ambos contextos;
-- el wildcard de `admin` (`NOT LIKE '%:delete'`) excluye `camporees:delete` — si se requiere acceso admin a delete, debe agregarse explícitamente; hoy solo `super-admin` captura via wildcard full;
+- el wildcard de `admin` (`NOT LIKE '%:delete'`) excluye `camporees:delete` — si se requiere acceso admin a delete, debe agregarse explícitamente (ver actualización 2026-10-30);
 - handlers futuros en camporees deben clasificarse en las dos capas antes de elegir permiso; documentar en el canon cualquier caso borderline.
 
 **Actualización 2026-10-04**: `camporees:register` se reactivó (migración `20260713220000_camporee_section_registration_context`) para `POST /camporees/:camporeeId/clubs`, reservado a `assistant-lf`, `director-lf`, `assistant-union` y `director-union`. Se añadió `camporees:register_active_section` (solo `director` de club) para `POST /camporees/:camporeeId/section-registration`. El controller tiene hoy 46 handlers. Detalle en `docs/canon/runtime-camporees.md`.
+
+**Actualización 2026-10-30** (Pendiente de merge (PR #594 de sacdia-backend)): `admin` recibe cada `:delete` que tenga algún rol territorial, incluido `camporees:delete` (migración `20261030140000_admin_and_union_permission_grants`). `director-union` y `assistant-union` reciben `camporee_events:create|read|update|delete` y `camporee_event_types:read` para configurar eventos, sedes y jueces de sus camporees de unión. `admin` y `super-admin` configuran seguros (`insurance:configure`) indicando el campo local. La migración `20261030150000_platform_admin_seed_cleanups` retira de `admin`, `assistant-admin` y `super-admin` lo que el seed reserva a otros roles: `camporees:register`, `camporees:register_active_section`, `camporee-orders:create|upload-proof|distribute` y `camporee-supplies:plan`; también retira `insurance:configure` de `assistant-admin`.
 
 ### 21. Validation es dominio canónico propio con coexistencia (2026-04-22)
 

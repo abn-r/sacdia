@@ -59,7 +59,8 @@ Permisos cross-cutting preservados:
 
 - `camporees:read` — todos los roles con contexto institucional (secretary + arriba) + JOIN copies + `admin`/`super-admin`.
 - `camporees:create` + `camporees:update` — secretary, treasurer, secretary-treasurer, deputy-director, director (CLUB) + assistant-lf (GLOBAL) + JOIN copies + `admin`/`super-admin`.
-- `camporees:delete` — solo director (CLUB) + assistant-lf (GLOBAL) + JOIN + `super-admin` (el wildcard de `admin` excluye `:delete`; ver §6).
+- `camporees:delete` — director (CLUB) + assistant-lf (GLOBAL) + JOIN + `super-admin` + `admin`. El wildcard de `admin` excluye `:delete`, pero la migración `20261030140000_admin_and_union_permission_grants` le da cada `:delete` que tenga algún rol territorial, y `camporees:delete` es uno (Pendiente de merge (PR #594 de sacdia-backend)).
+- `camporee_events:create|read|update|delete` y `camporee_event_types:read` — también `director-union` y `assistant-union` (GLOBAL), para configurar eventos, sedes y jueces de sus camporees de unión. El catálogo de tipos de evento sigue siendo de `admin` (Pendiente de merge (PR #594 de sacdia-backend)).
 
 ---
 
@@ -111,5 +112,6 @@ El cierre y la reapertura de la inscripción de clubes (`POST camporees/:campore
 - `camporees:*` es el permiso canónico para CRUD de la entidad camporee; reutilizar `activities:*` en nuevos endpoints de camporees rompe la frontera de concerns;
 - `attendance:*` es cross-cutting deliberado entre activities y camporees; fragmentarlo en `camporees:attendance:*` rompe el patrón canonizado;
 - `camporees:register` queda restringido a organizadores territoriales (LF y unión) y `camporees:register_active_section` al director de club; ampliar cualquiera de los dos requiere cambiar el cleanup de `role-permissions.seed.sql` y registrarlo en `decisiones-clave.md`;
-- el wildcard de `admin` (`NOT LIKE '%:delete'`) excluye `camporees:delete` — si la operación de delete debe ser accesible a admin, requiere grant explícito en el bloque de `admin` o escalación vía `super-admin`;
+- el wildcard de `admin` (`NOT LIKE '%:delete'`) excluye `:delete`; `admin` recibe aparte los `:delete` que tenga algún rol territorial, entre ellos `camporees:delete` (Pendiente de merge (PR #594 de sacdia-backend));
+- los permisos de operación de club (`camporee-orders:create|upload-proof|distribute`, `camporee-supplies:plan`) y los de inscripción (`camporees:register`, `camporees:register_active_section`) no son de `admin`, `assistant-admin` ni `super-admin`; los cleanups del seed y la migración `20261030150000_platform_admin_seed_cleanups` los retiran (Pendiente de merge (PR #594 de sacdia-backend));
 - handlers futuros en camporees deben clasificarse: si son CRUD de la entidad → `camporees:*`; si son operaciones de asistencia/inscripción → `attendance:*`. No mezclar.

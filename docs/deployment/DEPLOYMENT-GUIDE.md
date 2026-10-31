@@ -221,6 +221,10 @@ Sin ella el código nuevo funciona, pero unión y división siguen sin ver las c
 
 Verificado con `prisma migrate status` contra cada rama (209 migraciones en el repo).
 
+> Después de esta verificación se agregó `20261030140000_admin_and_union_permission_grants` (solo datos, idempotente; Pendiente de merge (PR #594 de sacdia-backend)): aplicada en `development` el 2026-10-30; **pendiente** en `staging` y en `production`. Vuelve a aplicar las reglas del seed para super-admin, admin y assistant-admin, da a admin los `:delete` que tenga algún rol territorial y da `camporee_events:*` y `camporee_event_types:read` a la unión.
+>
+> `20261030150000_platform_admin_seed_cleanups` (solo datos, idempotente; Pendiente de merge (PR #594 de sacdia-backend)) corrige la anterior: aplicada en `development` el 2026-10-30; **pendiente** en `staging` y en `production`. Retira de super-admin, admin y assistant-admin los permisos que el seed reserva a otros roles (`camporees:register`, `camporees:register_active_section`, `camporee-orders:create|upload-proof|distribute`, `camporee-supplies:plan`) y `insurance:configure` de assistant-admin. Aplicar las dos juntas y en orden.
+
 - **`development`**: al día.
 - **`staging`**: al día. El 2026-10-30 se aplicaron con `prisma migrate deploy` las 9 que le faltaban: `20261025120000_coordinator_reports_read`, `20261026120000_reports_update_permission`, `20261026130000_inventory_extended_fields`, `20261028120000_coordinator_roles_resources_read`, `20261028130000_ensure_assistant_admin_role`, `20261028130100_restore_lf_ranking_reads`, `20261028130200_revoke_union_global_ranking_reads`, `20261028130300_strip_soft_hyphen_from_honor_names` y `20261030120000_union_division_ranking_reads`. Ninguna usa `CONCURRENTLY`. Neon tenía la rama archivada y la reactivó al conectar.
 - **`production`**: 18 pendientes. Las 9 de perfiles familiares (`20261015120000` a `20261024120000`, §0.6) y las 9 de la lista anterior. **Se dejan pendientes a propósito** (decisión del 2026-10-30): llegan con la promoción `development` → `preproduction` → `main` y las condiciones del §0.6, no a mano.

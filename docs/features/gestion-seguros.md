@@ -40,7 +40,7 @@ La vinculacion de seguros con camporees es directa: la tabla `camporee_members` 
 
 Además del flujo legacy `member_insurances`, el backend tiene un **modelo de capacidad** completo sin UI:
 
-- **Config por Campo Local**: `insurance_products` + `insurance_cycle_configs` (costo unitario por producto/año/tipo de club) vía `InsuranceConfigService` con permiso `insurance:configure`. Endpoints: `GET|POST /insurance/products`, `PATCH /insurance/products/:id`, `GET|POST /insurance/cycles`, `PATCH /insurance/cycles/:id`.
+- **Config por Campo Local**: `insurance_products` + `insurance_cycle_configs` (costo unitario por producto/año/tipo de club) vía `InsuranceConfigService` con permiso `insurance:configure`. Endpoints: `GET|POST /insurance/products`, `PATCH /insurance/products/:id`, `GET|POST /insurance/cycles`, `PATCH /insurance/cycles/:id`. Director y asistente de campo local configuran su propio campo (pedir otro → 403). Super-admin y admin configuran el campo que indican con `?local_field_id=` (obligatorio si no tienen campo local propio); en el admin eligen el campo en un selector común a productos y ciclos. Pendiente de merge (PR #594 de sacdia-backend y PR #283 de sacdia-admin).
 - **Compras qty**: `POST|GET /club-sections/:sectionId/insurance/purchases` + detalle/proof/confirm/reject/reverse (`InsurancePurchasesService`). Compra anónima por cantidad → comprobante → `PENDING_CONFIRMATION` → confirm materializa `insurance_coverage_slots` `AVAILABLE`. **No nombra beneficiarios**.
 - **Asignaciones**: `insurance_assignments` existe en schema con domain helpers (`src/insurance/domain/insurance-policy.ts`), pero **sin API HTTP de assign**.
 
