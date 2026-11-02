@@ -32,14 +32,14 @@ GitHub (rama development)
    ├─ push ─► Render "API Sacdia" (auto-deploy) ─► Neon rama development  ◄── base viva
    │              └─ OCR firmado ─► Cloud Run (proxy OCR) ─► Google Vision
    └─ push ─► Vercel (admin.sacdia.com)
-Neon ramas staging y production: existen y ningún servicio las usa. `staging` está migrada al nivel de `development` (2026-10-30); `production` sigue en `20261014100000` (ver §0.6 y §0.9).
+Neon ramas staging y production: existen y ningún servicio las usa. `staging` está migrada al nivel de `development` (2026-11-02); `production` sigue en `20261014100000` (ver §0.6 y §0.9).
 ```
 
 | Pieza | Estado real |
 |---|---|
 | Backend | Render web service **"API Sacdia"**, plan **Free**, rama **`development`**, auto-deploy **activado** |
 | Admin | Vercel, `https://admin.sacdia.com`, despliega **`development`** |
-| Base de datos | Neon. `DATABASE_URL` del backend apunta a la rama **`development`** (endpoint `ep-rough-hill-anztwk76`): es la base viva. Las ramas `staging` y `production` existen, pero ningún servicio las usa. `staging` tiene las mismas migraciones que `development` (2026-10-30); `production` sigue en `20261014100000` y le faltan 18 (ver §0.6 y §0.9) |
+| Base de datos | Neon. `DATABASE_URL` del backend apunta a la rama **`development`** (endpoint `ep-rough-hill-anztwk76`): es la base viva. Las ramas `staging` y `production` existen, pero ningún servicio las usa. `staging` tiene las mismas migraciones que `development` (2026-11-02); `production` sigue en `20261014100000` y le faltan 20 (ver §0.6 y §0.9) |
 | OCR | Proxy keyless en Cloud Run; runbook en `docs/guides/ocr-proxy-preprod-infra.md` |
 | Otros servicios | Redis, R2, Firebase, Resend y Sentry según la tabla 4.2; su cuenta y plan concretos no se documentan aquí |
 
@@ -67,7 +67,7 @@ Neon ramas staging y production: existen y ningún servicio las usa. `staging` e
 
 - Un proyecto, tres ramas: `development`, `staging`, `production`.
 - **`development` es la base viva**: `DATABASE_URL` de "API Sacdia" apunta a su endpoint (`ep-rough-hill-anztwk76`, cadena pooled). Es lo que el servicio en línea lee y escribe.
-- `staging` y `production` existen, pero **ningún servicio las consume**. `staging` está al nivel de `development` (2026-10-30); `production` sigue en `20261014100000` (ver §0.6 y §0.9). No tratarlas como respaldo de `development`: no reciben sus datos.
+- `staging` y `production` existen, pero **ningún servicio las consume**. `staging` está al nivel de `development` (2026-11-02); `production` sigue en `20261014100000` (ver §0.6 y §0.9). No tratarlas como respaldo de `development`: no reciben sus datos.
 - Las migraciones se aplican al final del build de Render contra la rama que indique `DATABASE_URL`. Como esa cadena es pooled, el servicio necesita también `DATABASE_DIRECT_URL` (misma rama, host sin `-pooler`) para que `prisma migrate deploy` use una conexión directa. `staging` y `production` no las reciben solas: se aplican a mano, con aprobación, como indica el §3.
 - **Historia (2026-10-13):** hasta esa fecha el build no migraba y el servicio no tenía pre-deploy (el plan Free no lo admite), así que todas las migraciones de octubre se aplicaron a mano. Antes de un deploy con migración, confirmar en el log del build que aparezca `All migrations have been successfully applied` o `No pending migrations to apply`.
 - Nunca incluir cadenas de conexión completas ni contraseñas en docs, tickets o chats; el endpoint (`ep-…`) identifica la rama, el resto es secreto.
@@ -221,13 +221,13 @@ Sin ella el código nuevo funciona, pero unión y división siguen sin ver las c
 
 Verificado con `prisma migrate status` contra cada rama (209 migraciones en el repo).
 
-> Después de esta verificación se agregó `20261030140000_admin_and_union_permission_grants` (solo datos, idempotente): aplicada en `development` el 2026-10-30; **pendiente** en `staging` y en `production`. Vuelve a aplicar las reglas del seed para super-admin, admin y assistant-admin, da a admin los `:delete` que tenga algún rol territorial y da `camporee_events:*` y `camporee_event_types:read` a la unión.
+> Después de esta verificación se agregó `20261030140000_admin_and_union_permission_grants` (solo datos, idempotente): aplicada en `development` el 2026-10-30 y en `staging` el 2026-11-02; **pendiente** en `production`. Vuelve a aplicar las reglas del seed para super-admin, admin y assistant-admin, da a admin los `:delete` que tenga algún rol territorial y da `camporee_events:*` y `camporee_event_types:read` a la unión.
 >
-> `20261030150000_platform_admin_seed_cleanups` (solo datos, idempotente) corrige la anterior: aplicada en `development` el 2026-10-30; **pendiente** en `staging` y en `production`. Retira de super-admin, admin y assistant-admin los permisos que el seed reserva a otros roles (`camporees:register`, `camporees:register_active_section`, `camporee-orders:create|upload-proof|distribute`, `camporee-supplies:plan`) y `insurance:configure` de assistant-admin. Aplicar las dos juntas y en orden.
+> `20261030150000_platform_admin_seed_cleanups` (solo datos, idempotente) corrige la anterior: aplicada en `development` el 2026-10-30 y en `staging` el 2026-11-02; **pendiente** en `production`. Retira de super-admin, admin y assistant-admin los permisos que el seed reserva a otros roles (`camporees:register`, `camporees:register_active_section`, `camporee-orders:create|upload-proof|distribute`, `camporee-supplies:plan`) y `insurance:configure` de assistant-admin. Aplicar las dos juntas y en orden.
 
 - **`development`**: al día.
-- **`staging`**: al día. El 2026-10-30 se aplicaron con `prisma migrate deploy` las 9 que le faltaban: `20261025120000_coordinator_reports_read`, `20261026120000_reports_update_permission`, `20261026130000_inventory_extended_fields`, `20261028120000_coordinator_roles_resources_read`, `20261028130000_ensure_assistant_admin_role`, `20261028130100_restore_lf_ranking_reads`, `20261028130200_revoke_union_global_ranking_reads`, `20261028130300_strip_soft_hyphen_from_honor_names` y `20261030120000_union_division_ranking_reads`. Ninguna usa `CONCURRENTLY`. Neon tenía la rama archivada y la reactivó al conectar.
-- **`production`**: 18 pendientes. Las 9 de perfiles familiares (`20261015120000` a `20261024120000`, §0.6) y las 9 de la lista anterior. **Se dejan pendientes a propósito** (decisión del 2026-10-30): llegan con la promoción `development` → `preproduction` → `main` y las condiciones del §0.6, no a mano.
+- **`staging`**: al día. El 2026-10-30 se aplicaron con `prisma migrate deploy` las 9 que le faltaban: `20261025120000_coordinator_reports_read`, `20261026120000_reports_update_permission`, `20261026130000_inventory_extended_fields`, `20261028120000_coordinator_roles_resources_read`, `20261028130000_ensure_assistant_admin_role`, `20261028130100_restore_lf_ranking_reads`, `20261028130200_revoke_union_global_ranking_reads`, `20261028130300_strip_soft_hyphen_from_honor_names` y `20261030120000_union_division_ranking_reads`. Ninguna usa `CONCURRENTLY`. Neon tenía la rama archivada y la reactivó al conectar. El 2026-11-02 se aplicaron `20261030140000_admin_and_union_permission_grants` y `20261030150000_platform_admin_seed_cleanups`.
+- **`production`**: 20 pendientes. Las 9 de perfiles familiares (`20261015120000` a `20261024120000`, §0.6), las 9 de la lista anterior y las 2 de permisos de admin y unión. **Se dejan pendientes a propósito** (decisión del 2026-10-30): llegan con la promoción `development` → `preproduction` → `main` y las condiciones del §0.6, no a mano.
 
 ## 1. Entornos y ramas
 
