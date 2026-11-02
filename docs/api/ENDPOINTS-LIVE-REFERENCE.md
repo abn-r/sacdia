@@ -1576,7 +1576,7 @@ Semántica funcional y límites: [operations-dashboard.md](../features/operation
 | GET | `/api/v1/annual-folders/:folderId/sections/:sectionId/status` | JWT | Permisos: evidence_folders:read | Get the current status of a single section within an annual evidence folder | AnnualFoldersService.getSectionStatus() | `src/annual-folders/annual-folders.controller.ts` |
 | POST | `/api/v1/annual-folders/:folderId/sections/:sectionId/submit` | JWT | Permisos: evidence_folders:update | Submit a single section of an annual evidence folder | AnnualFoldersService.submitSection() | `src/annual-folders/annual-folders.controller.ts` |
 | POST | `/api/v1/annual-folders/:folderId/submit` | JWT | Permisos: annual_folders:submit | Submit entire folder for review (director/secretariat only) | AnnualFoldersService.submitFolder() | `src/annual-folders/annual-folders.controller.ts` |
-| POST | `/api/v1/annual-folders/:folderId/close` | JWT | Permisos: evidence_folders:update | Close folder (field-level action) | AnnualFoldersService.closeFolder() | `src/annual-folders/annual-folders.controller.ts` |
+| POST | `/api/v1/annual-folders/:folderId/close` | JWT | Permisos: annual_folders:evaluate + territorio del campo local (Pendiente de merge (PR #598 de sacdia-backend y PR #284 de sacdia-admin)) | Close folder (field-level action) | EvaluationService.assertFolderCloseAccess() + AnnualFoldersService.closeFolder() | `src/annual-folders/evaluation.controller.ts` |
 
 ### Annual Evidence Folders - Templates
 

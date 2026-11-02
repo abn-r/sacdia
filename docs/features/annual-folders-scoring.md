@@ -55,6 +55,8 @@ La Carpeta Anual de Evidencias conserva su propio flujo de carga de archivos e i
 - `member`, `counselor`, `instructor` y `treasurer` no tienen `evidence_folders:read/update`; no cargan ni leen esta carpeta desde el flujo anual.
 - `annual_folders:submit` envía la carpeta completa a revisión. Lo ejecuta `director`, `secretary` o `secretary-treasurer`; los usuarios operativos envían secciones, no la carpeta completa.
 - `assistant-lf` y `director-lf` participan como lectura/supervisión institucional y evaluación mediante `annual_folders:evaluate`; no envían la carpeta completa en nombre del club.
+- Los permisos de club valen para la carpeta de la **sección** donde el usuario tiene el cargo, no para todo el club: un cargo en otra sección del mismo club responde 403 `ANNUAL_FOLDER_FOLDER_ACCESS_DENIED` (Pendiente de merge (PR #598 de sacdia-backend y PR #284 de sacdia-admin)).
+- Cerrar la carpeta (`POST /annual-folders/:folderId/close`, estados `submitted` o `evaluated`) es acción del campo (decisión del 2026-11-02): exige `annual_folders:evaluate` y que el campo local de la carpeta esté en el territorio del actor, la misma regla que evaluar secciones. Los roles de club no cierran su carpeta (Pendiente de merge (PR #598 de sacdia-backend y PR #284 de sacdia-admin)).
 
 ## Requisitos funcionales
 
