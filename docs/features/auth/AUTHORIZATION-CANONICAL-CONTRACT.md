@@ -127,7 +127,7 @@ Cuando una ruta usa `@AuthorizationResource({ type: 'user', ownerParam: 'userId'
 
 - ownership real sobre `userId` habilita self-service estricto para el propio usuario;
 - si no hay ownership, el actor necesita permiso global suficiente (`users:read_detail` para lecturas, `users:update_profile` para escrituras);
-- además, el usuario objetivo debe estar dentro del alcance del actor, la misma regla de `GET /admin/users/:userId`: super-admin a cualquiera; admin, campo local, unión y división a miembros de su territorio; pastor a su campo local; coordinadores a miembros de las secciones que cubren. Fuera de alcance: `403 GUARD_PERMISSION_DENIED`. Los permisos directos por usuario y el camino de miembro de la sección activa no cambian (`common/authorization/target-user-scope.ts`). Pendiente de merge (PR #593 de sacdia-backend);
+- además, el usuario objetivo debe estar dentro del alcance del actor, la misma regla de `GET /admin/users/:userId`: super-admin a cualquiera; admin, campo local, unión y división a miembros de su territorio; pastor a su campo local; coordinadores a miembros de las secciones que cubren. Fuera de alcance: `403 GUARD_PERMISSION_DENIED`. Los permisos directos por usuario y el camino de miembro de la sección activa no cambian (`common/authorization/target-user-scope.ts`).;
 - permisos provenientes solo de `active_assignment` no habilitan acceso transversal a recursos `user` de terceros.
 
 Sub-recursos sensibles hoy cubiertos por familias finas:
