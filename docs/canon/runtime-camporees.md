@@ -60,7 +60,7 @@ Permisos cross-cutting preservados:
 - `camporees:read` — todos los roles con contexto institucional (secretary + arriba) + JOIN copies + `admin`/`super-admin`.
 - `camporees:create` + `camporees:update` — secretary, treasurer, secretary-treasurer, deputy-director, director (CLUB) + assistant-lf (GLOBAL) + JOIN copies + `admin`/`super-admin`.
 - `camporees:delete` — director (CLUB) + assistant-lf (GLOBAL) + JOIN + `super-admin` + `admin`. El wildcard de `admin` excluye `:delete`, pero la migración `20261030140000_admin_and_union_permission_grants` le da cada `:delete` que tenga algún rol territorial, y `camporees:delete` es uno.
-- `camporee_events:create|read|update|delete` y `camporee_event_types:read` — también `director-union` y `assistant-union` (GLOBAL), para configurar eventos, sedes y jueces de sus camporees de unión. El catálogo de tipos de evento sigue siendo de `admin`.
+- `camporee_events:create|read|update|delete` y `camporee_event_types:read` — también `director-union` y `assistant-union` (GLOBAL), para configurar eventos, sedes y jueces de sus camporees de unión. `director-dia` y `assistant-dia` reciben `camporee_events:*` por copiar a `assistant-lf`. Los roles de club solo leen eventos. El catálogo de tipos de evento sigue siendo de `admin`.
 
 ---
 
