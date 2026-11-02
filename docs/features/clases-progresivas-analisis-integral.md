@@ -166,7 +166,7 @@ flowchart LR
 | `InvestitureAuthorizationRequestsController` y servicio (`src/investiture-requests/`) | solicitud por sección, personas, fechas, autorización por persona, historial y anuario; ventana del Campo, porcentaje, cupo y asignación de pastores; correos de presentación y recordatorios; cierre de año sin arrastre |
 | Admin Phase E | CRUD de clases, módulos y secciones |
 | App Flutter | experiencia del miembro, supervisión pedagógica, presentar solicitud (directiva) y autorizar (pastor / Campo) |
-| Admin Next.js | mantenimiento parcial del catálogo y pantallas de autorización, ventana/porcentaje y pastores (`/dashboard/investiture-requests`, `investiture-settings`, `investiture-pastors`) |
+| Admin Next.js | mantenimiento parcial del catálogo y pantallas de autorización, ventana y pastores (`/dashboard/investiture-requests`, `investiture-settings`, `investiture-pastors`) |
 
 ## 7. Modelo de datos
 
@@ -554,7 +554,7 @@ El bloqueo visual de expirados es correcto como UX, pero no es control de seguri
 - mantenimiento de disponibilidad y duración de clases;
 - asignaciones de consejero desde la gestión de roles del club;
 - bandeja y detalle de solicitudes para autorizar (`/dashboard/investiture-requests`, con la página pública de enlace `investiture-requests/[requestId]` que abre el correo);
-- ventana y porcentaje del Campo (`/dashboard/investiture-settings`) y asignación de pastores por distrito (`/dashboard/investiture-pastors`);
+- ventana del Campo (`/dashboard/investiture-settings`; el porcentaje se ocultó el 2026-11-02 porque ya no decide la completitud, Pendiente de merge (PR #284 de sacdia-admin)) y asignación de pastores por distrito (`/dashboard/investiture-pastors`);
 - cliente API para expiración manual.
 
 Se borraron en la fase 8 las pantallas de la vía anterior: `/dashboard/investiture`, `/pipeline`, `/config`, `/dashboard/enrollments` y la pestaña «Módulos» de `/dashboard/clubs/validations` (que conserva honores).
