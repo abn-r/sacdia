@@ -18,7 +18,7 @@ La feature esta implementada en backend con IDs UUID y estados `draft -> generat
 - **Cron**: `src/monthly-reports/monthly-reports-cron.service.ts`
 - **9 endpoints directos**:
   - `GET /api/v1/monthly-reports/preview/:enrollmentId` - preview en vivo para una matricula y periodo
-  - `POST /api/v1/monthly-reports/:enrollmentId` - obtener o crear borrador unico por `(club_enrollment_id, month, year)`
+  - `POST /api/v1/monthly-reports/:enrollmentId` - obtener o crear borrador unico por `(club_enrollment_id, month, year)`; responde 201 si crea el borrador y 200 si ya existia (Pendiente de merge (PR #600 de sacdia-backend); antes siempre 201)
   - `PATCH /api/v1/monthly-reports/:reportId/manual-data` - guardar datos manuales solo si el informe esta en `draft`
   - `POST /api/v1/monthly-reports/:reportId/generate` - encola congelar `snapshot_data` + PDF; responde 202; poll GET hasta `generated`
   - `POST /api/v1/monthly-reports/:reportId/submit` - pasar de `generated` a `submitted`

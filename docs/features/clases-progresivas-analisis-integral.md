@@ -101,7 +101,7 @@ El módulo responde cinco preguntas institucionales:
 | Investidura | Reconocimiento institucional que se confirma al autorizar la persona en una solicitud (ya no hay validaciones escalonadas) |
 | Solicitud de investidura | Agrupa personas y clases de **una sola sección** que la directiva presentó en la ventana del Campo; cada persona se resuelve por separado |
 | Ventana del Campo | Rango de días inclusivos, por Campo local y año eclesiástico, en el que se puede presentar y autorizar |
-| Porcentaje del Campo | Umbral mínimo de puntaje por requisito (80 por defecto) que reemplazó el 70 fijo. Desde el 2026-11-02 no decide la completitud: solo cuenta `VALIDATED` |
+| Porcentaje del Campo | Concepto retirado. Era el umbral mínimo de puntaje por requisito (80 por defecto) que reemplazó el 70 fijo. Desde el 2026-11-02 no decide la completitud (solo cuenta `VALIDATED`) y el PR #600 de sacdia-backend elimina su configuración y sus rutas (pendiente de merge) |
 | Año eclesiástico | Periodo operativo usado para inscripción, disponibilidad y alcance |
 | Scope de progreso | Clases y miembros que un actor puede supervisar según su rol/asignación |
 
@@ -187,7 +187,6 @@ erDiagram
     INVESTITURE_AUTHORIZATION_REQUESTS ||--o{ INVESTITURE_AUTHORIZATION_PEOPLE : agrupa
     ENROLLMENTS ||--o{ INVESTITURE_AUTHORIZATION_PEOPLE : se_resuelve_en
     ECCLESIASTICAL_YEARS ||--o{ LOCAL_FIELD_INVESTITURE_WINDOWS : delimita
-    ECCLESIASTICAL_YEARS ||--o{ LOCAL_FIELD_CLASS_THRESHOLDS : fija
 ```
 
 ### 7.1 Entidades principales
@@ -204,7 +203,7 @@ erDiagram
 | `class_counselor_assignments` | responsabilidad pedagógica | club, sección, clase, año, usuario, tipo de responsabilidad, excepción y vigencia |
 | `investiture_validation_history` | auditoría de la vía anterior | inscripción, actor, acción y comentarios. Solo lectura; el desbloqueo agrega `LEGACY_LOCK_RELEASED` |
 | `investiture_config` | configuración de la vía anterior (fecha de ceremonia única por Campo y año) | Se conserva la tabla, su CRUD y sus lecturas responden 410; no se usa como fecha de las personas de una solicitud |
-| `local_field_class_thresholds` | porcentaje mínimo por requisito | Campo local y año; 80 por defecto; reemplaza el 70 fijo en la elegibilidad |
+| `local_field_class_thresholds` | porcentaje mínimo por requisito (retirado) | Sin uso: ningún código la lee ni la escribe desde el PR #600 de sacdia-backend (pendiente de merge); la tabla sigue en el esquema |
 | `local_field_investiture_windows` | ventana de presentación y autorización | Campo local y año; inicio y fin inclusivos en `local_fields.timezone`; por defecto 1 de octubre al 20 de diciembre recortado al año |
 | `investiture_pastor_quota`, `district_investiture_pastors` | cupo global de pastores (2) y su asignación a distritos | El pastor debe ser del mismo Campo que el distrito; dos triggers apagan la asignación si cambia el Campo |
 | `investiture_authorization_requests` | cabecera de la solicitud | una sección, su club, el año y quién la creó |
@@ -244,7 +243,7 @@ flowchart TD
     F --> S["Enviar sección"]
     S --> V{"Revisión"}
     V -->|Rechazo| F
-    V -->|Validación| Q["Evaluar tracks obligatorios\ncon el porcentaje del Campo"]
+    V -->|Validación| Q["Evaluar tracks obligatorios\n(solo cuentan los VALIDATED)"]
     Q --> I["Directiva de la sección presenta\nla solicitud (ventana abierta)"]
     I --> A{"Pastor del distrito,\ndirector-lf o assistant-lf\nautoriza por persona"}
     A -->|Autoriza| IN["INVESTIDO"]
@@ -363,7 +362,7 @@ La respuesta de progreso separa los totales/completados por track y expone:
 - elegibilidad avanzada, si el track está habilitado y completo;
 - razones de bloqueo, por ejemplo ausencia de contexto institucional para un requisito `EXTRA`.
 
-**Estado actual:** una sección cuenta como completa solo si un revisor la validó (`VALIDATED`). Decisión del 2026-11-02: el puntaje lo escribe el propio miembro con el `PATCH` de progreso, así que un puntaje igual o mayor al porcentaje del Campo ya no completa un requisito por sí solo. El detalle individual, el listado colectivo y la elegibilidad usan el mismo criterio (`sectionCountsAsComplete` en `sacdia-backend/src/classes/field-class-threshold.ts`). El porcentaje del Campo sigue configurable, pero hoy no cambia la completitud.
+**Estado actual:** una sección cuenta como completa solo si un revisor la validó (`VALIDATED`). Decisión del 2026-11-02: el puntaje lo escribe el propio miembro con el `PATCH` de progreso, así que un puntaje igual o mayor al porcentaje del Campo ya no completa un requisito por sí solo. El detalle individual, el listado colectivo y la elegibilidad usan el mismo criterio (`sectionCountsAsComplete` en `sacdia-backend/src/classes/field-class-threshold.ts`). El porcentaje del Campo ya no existe: el PR #600 de sacdia-backend (pendiente de merge) elimina `GET` y `PATCH /local-fields/:localFieldId/class-thresholds/:ecclesiasticalYearId`, `passing_score` en la respuesta de elegibilidad y los códigos `CLASS_THRESHOLD_*`; el panel admin ya no lo muestra (PR #285 de sacdia-admin, mergeado).
 
 ### 8.8 Solicitud y autorización de investidura
 
@@ -372,7 +371,7 @@ La investidura ya no recorre etapas de club, coordinación y campo. Se presenta 
 **Presentar (directiva de la sección).** El director, el secretario o el secretario-tesorero de la sección eligen a quienes cumplen y los dejan pendientes con una fecha de investidura. La solicitud no mezcla secciones, aunque sean del mismo club. Antes de aceptar a una persona, el backend comprueba:
 
 - inscripción operativa válida y clase elegible (`GM-02` y `GM-03` no admiten solicitud: `INVESTITURE_REQUEST_CLASS_NOT_ELIGIBLE`);
-- duración mínima cumplida y requisitos obligatorios completos según tracks, con el porcentaje del Campo;
+- duración mínima cumplida y requisitos obligatorios completos según tracks (solo cuentan los `VALIDATED`);
 - que no esté ya `INVESTIDO` en esa clase ni tenga otra solicitud activa incompatible (Aventureros y Conquistadores regulares: una sola; Guías Mayores: una por persona y clase);
 - que el enrollment no siga bloqueado por la vía anterior (`INVESTITURE_REQUEST_LEGACY_PIPELINE_ACTIVE` si `locked_for_validation` sigue en true);
 - que el día local esté dentro de la ventana del Campo y del año eclesiástico, y que la fecha de investidura caiga en ambos.
@@ -498,7 +497,6 @@ Rutas bajo `/api/v1` (`InvestitureAuthorizationRequestsController`, `src/investi
 | Método y ruta | Uso |
 |---|---|
 | `GET` / `PATCH /local-fields/:localFieldId/investiture-windows/:ecclesiasticalYearId` | ventana del Campo (inicio y fin inclusivos en `local_fields.timezone`); sin fila y sin intersección con octubre–diciembre, `operational` es false |
-| `GET` / `PATCH /local-fields/:localFieldId/class-thresholds/:ecclesiasticalYearId` | porcentaje mínimo del Campo (80 por defecto); el Campo lo cambia hasta el 30 de junio, después solo `super-admin` |
 | `GET` / `PATCH /investiture-pastor-quota` | cupo global de pastores por distrito (2 por defecto); solo `super-admin` escribe |
 | `GET` / `POST /districts/:districtId/investiture-pastors`, `DELETE .../:userId` | asignación de pastores del distrito (Campo y unión); el pastor debe ser del mismo Campo que el distrito |
 | `GET /investiture-pastor-candidates`, `GET /clubs/:clubId/investiture-authorizers` | candidatos y quiénes autorizan para un club |
@@ -747,7 +745,7 @@ El módulo podría considerarse estabilizado cuando:
 - `sacdia-backend/src/evidence-review/evidence-review.controller.ts` y servicio — revisión.
 - `sacdia-backend/src/investiture-requests/` — solicitud, autorización, correos, recordatorios y cierre de año.
 - `sacdia-backend/src/investiture/investiture.controller.ts`, `legacy-investiture-retired.controller.ts` y `legacy-lock-release.service.ts` — historial, `expire-overdue`, 410 y desbloqueo.
-- `sacdia-backend/src/classes/field-investiture-window.controller.ts`, `field-class-threshold.controller.ts` y `district-investiture-pastors.controller.ts` — ventana, porcentaje y pastores.
+- `sacdia-backend/src/classes/field-investiture-window.controller.ts` y `district-investiture-pastors.controller.ts` — ventana y pastores. `field-class-threshold.controller.ts` (porcentaje) se elimina en el PR #600 de sacdia-backend (pendiente de merge).
 - `sacdia-backend/src/admin/admin-phase-e-catalogs.controller.ts` y servicio — CRUD curricular.
 - `sacdia-backend/src/common/errors/error-codes.ts` — códigos de error.
 - `sacdia-backend/prisma/schema.prisma` — modelo Prisma.
