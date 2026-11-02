@@ -359,7 +359,7 @@ La desactivación se ejecuta en una transacción. Los scores históricos permane
 Nuevos permisos:
 
 - `camporee_event_types:read|create|update|delete` (admin/super-admin)
-- `camporee_events:read|create|update|delete` (`director-lf`/`assistant-lf`, `director-union`/`assistant-union`, `director-dia`/`assistant-dia`, admin). Los roles de club solo tienen `camporee_events:read`; los grants de escritura que les dio `20260520225303` se quitan con `20261102130000_align_role_permissions_with_seed` (Pendiente de merge (PR #596 de sacdia-backend)).
+- `camporee_events:read|create|update|delete` (`director-lf`/`assistant-lf`, `director-union`/`assistant-union`, `director-dia`/`assistant-dia`, admin). Los roles de club solo tienen `camporee_events:read`; los grants de escritura que les dio `20260520225303` se quitan con `20261102130000_align_role_permissions_with_seed`.
 
 Mapeos sugeridos:
 
