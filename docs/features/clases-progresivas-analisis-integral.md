@@ -101,7 +101,7 @@ El módulo responde cinco preguntas institucionales:
 | Investidura | Reconocimiento institucional que se confirma al autorizar la persona en una solicitud (ya no hay validaciones escalonadas) |
 | Solicitud de investidura | Agrupa personas y clases de **una sola sección** que la directiva presentó en la ventana del Campo; cada persona se resuelve por separado |
 | Ventana del Campo | Rango de días inclusivos, por Campo local y año eclesiástico, en el que se puede presentar y autorizar |
-| Porcentaje del Campo | Umbral mínimo de puntaje por requisito (80 por defecto) que reemplazó el 70 fijo |
+| Porcentaje del Campo | Umbral mínimo de puntaje por requisito (80 por defecto) que reemplazó el 70 fijo. Desde el 2026-11-02 no decide la completitud: solo cuenta `VALIDATED` |
 | Año eclesiástico | Periodo operativo usado para inscripción, disponibilidad y alcance |
 | Scope de progreso | Clases y miembros que un actor puede supervisar según su rol/asignación |
 
@@ -166,7 +166,7 @@ flowchart LR
 | `InvestitureAuthorizationRequestsController` y servicio (`src/investiture-requests/`) | solicitud por sección, personas, fechas, autorización por persona, historial y anuario; ventana del Campo, porcentaje, cupo y asignación de pastores; correos de presentación y recordatorios; cierre de año sin arrastre |
 | Admin Phase E | CRUD de clases, módulos y secciones |
 | App Flutter | experiencia del miembro, supervisión pedagógica, presentar solicitud (directiva) y autorizar (pastor / Campo) |
-| Admin Next.js | mantenimiento parcial del catálogo y pantallas de autorización, ventana/porcentaje y pastores (`/dashboard/investiture-requests`, `investiture-settings`, `investiture-pastors`) |
+| Admin Next.js | mantenimiento parcial del catálogo y pantallas de autorización, ventana y pastores (`/dashboard/investiture-requests`, `investiture-settings`, `investiture-pastors`) |
 
 ## 7. Modelo de datos
 
@@ -363,7 +363,7 @@ La respuesta de progreso separa los totales/completados por track y expone:
 - elegibilidad avanzada, si el track está habilitado y completo;
 - razones de bloqueo, por ejemplo ausencia de contexto institucional para un requisito `EXTRA`.
 
-**Estado actual:** una sección cuenta como completa si no está `REJECTED` y está `VALIDATED` o su puntaje alcanza el porcentaje del Campo local (80 por defecto, antes un 70 fijo). El detalle individual, el listado colectivo y la elegibilidad usan el mismo criterio. El defecto original (un `REJECTED` con puntaje alto seguía habilitando la investidura) quedó resuelto.
+**Estado actual:** una sección cuenta como completa solo si un revisor la validó (`VALIDATED`). Decisión del 2026-11-02: el puntaje lo escribe el propio miembro con el `PATCH` de progreso, así que un puntaje igual o mayor al porcentaje del Campo ya no completa un requisito por sí solo. El detalle individual, el listado colectivo y la elegibilidad usan el mismo criterio (`sectionCountsAsComplete` en `sacdia-backend/src/classes/field-class-threshold.ts`). El porcentaje del Campo sigue configurable, pero hoy no cambia la completitud.
 
 ### 8.8 Solicitud y autorización de investidura
 
@@ -554,7 +554,7 @@ El bloqueo visual de expirados es correcto como UX, pero no es control de seguri
 - mantenimiento de disponibilidad y duración de clases;
 - asignaciones de consejero desde la gestión de roles del club;
 - bandeja y detalle de solicitudes para autorizar (`/dashboard/investiture-requests`, con la página pública de enlace `investiture-requests/[requestId]` que abre el correo);
-- ventana y porcentaje del Campo (`/dashboard/investiture-settings`) y asignación de pastores por distrito (`/dashboard/investiture-pastors`);
+- ventana del Campo (`/dashboard/investiture-settings`; el porcentaje se ocultó el 2026-11-02 porque ya no decide la completitud) y asignación de pastores por distrito (`/dashboard/investiture-pastors`);
 - cliente API para expiración manual.
 
 Se borraron en la fase 8 las pantallas de la vía anterior: `/dashboard/investiture`, `/pipeline`, `/config`, `/dashboard/enrollments` y la pestaña «Módulos» de `/dashboard/clubs/validations` (que conserva honores).
@@ -681,7 +681,7 @@ Esta sección describe hechos del estado actual. Las soluciones propuestas está
 
 1. **Cerrar mutaciones de progreso por estado.** ~~Rechazar PATCH, upload y delete cuando `locked_for_validation = true` o el enrollment esté `SUBMITTED`, aprobado, `INVESTIDO` o `EXPIRED`; definir explícitamente qué se permite en `REJECTED`.~~ **IMPLEMENTADO** (`CLASS_PROGRESS_LOCKED`; `IN_PROGRESS`/`REJECTED` mutables).
 2. **Validar la jerarquía curricular en el backend.** ~~Resolver sección por ID y comprobar `section.module_id`, `module.class_id`, actividad y disponibilidad anual antes de escribir.~~ **IMPLEMENTADO** (validación en `updateSectionProgress`).
-3. **Unificar la semántica de completitud.** ~~Para requisitos con evidencia, solo `VALIDATED` debe completar; si existen requisitos de puntaje sin revisión, modelarlos explícitamente en lugar de usar `score >= 70` como atajo global.~~ **PARCIAL / IMPLEMENTADO según plan:** `REJECTED` nunca completa; se conserva `VALIDATED || score >= 70` para no-rechazados (sin rediseñar el modelo de puntaje).
+3. **Unificar la semántica de completitud.** ~~Para requisitos con evidencia, solo `VALIDATED` debe completar; si existen requisitos de puntaje sin revisión, modelarlos explícitamente en lugar de usar `score >= 70` como atajo global.~~ **IMPLEMENTADO** (2026-11-02): solo `VALIDATED` completa un requisito; el puntaje no.
 4. **Resolver la invariante anual.** ~~Elegir una única regla: una inscripción activa total o múltiples para Guías Mayores. Alinear servicio, post-registro, migración, errores, pruebas y documentación.~~ **IMPLEMENTADO** (1 activa por usuario/año; servicio GM alineado).
 
 ### P1 — estabilizar datos y flujos de usuario

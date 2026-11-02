@@ -30,6 +30,7 @@ La feature esta implementada en backend con IDs UUID y estados `draft -> generat
   - lectura (`preview`, listado por matrícula, `admin/list`, detalle) requiere `reports:read`
   - borrador, datos manuales, generar y enviar requieren `reports:submit` (desde 2026-10-22; antes `reports:read`)
   - descarga PDF requiere `reports:download`; `regenerate` requiere `reports:write`
+  - tesorero: solo `reports:read` + `reports:download` (ve y descarga). No crea, edita, genera, envía ni regenera el informe; eso es de la directiva (director, subdirector, secretario, secretario-tesorero). Decisión del 2026-11-02, migración `20261102140000_treasurer_monthly_report_read_only`.
   - coordinadores: `reports:read` + `reports:download`, nunca `reports:submit`; detalle, PDF y listado por matrícula declaran `coordinatorSections` (pasa solo si `coordinator_assignments` cubre la sección). Cumplimiento agregado: `GET /api/v1/reports/compliance`
   - el controller usa `JwtAuthGuard`, `PermissionsGuard` y `@AuthorizationResource({ type: 'active_assignment' })`
 - **Estados reales verificados**:
