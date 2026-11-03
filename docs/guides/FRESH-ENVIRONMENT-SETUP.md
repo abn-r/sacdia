@@ -112,7 +112,7 @@ Qué hace y qué no:
 - **PermissionsGuard fail-closed sin bypass de super-admin.** Con `permissions` o `role_permissions` vacías, TODO endpoint protegido devuelve 403, incluso para super-admin. Por eso el orden de seeds es estricto.
 - **Cache de autorización 5 min** (`auth:context:v7:{userId}`). Después de sembrar roles o permisos, o se invalida (`POST /api/v1/admin/catalogs/cache/invalidate` para catálogos; para usuario, re-login o flush de Redis) o se espera.
 - **Año eclesiástico "actual" cacheado 24 h.** Si se consultó cuando no había año, el null queda cacheado. Flush de Redis después de crear el primer año.
-- **`local_fields.timezone` debe ser IANA válido.** Ventanas de investidura y umbrales de clase responden 503 `LOCAL_FIELD_TIMEZONE_UNAVAILABLE` si es null o inválido. El formulario de campo local no lo pide; hay un script `pnpm backfill:local-field-timezones`.
+- **`local_fields.timezone` debe ser IANA válido.** Las ventanas de investidura responden 503 `LOCAL_FIELD_TIMEZONE_UNAVAILABLE` si es null o inválido. El formulario de campo local no lo pide; hay un script `pnpm backfill:local-field-timezones`.
 - **Defaults `active = false`** en `countries`, `unions`, `local_fields`, `districts`, `clubs`, `club_sections`, `club_types`, `ecclesiastical_years`, `honors_categories`, `master_honors`, `finances_categories`, `inventory_categories`, `folder_templates`. Lo que se inserte por SQL sin `active = true` queda invisible.
 - **Columna `districlub_type_id`** es la PK/FK real de distritos (nombre heredado). No es un typo a corregir en seeds.
 - **Las migraciones `INSERT INTO permissions`** (materiales, auditoría, instructor) dependen de que `roles` exista para los grants. En base fresca, `migrate deploy` corre antes que `seed.ts`, así que esos grants son no-op y los cubre `role-permissions.seed.sql` (verificado: incluye `materiales:*` y `audit:read`).
@@ -225,9 +225,9 @@ Cada territorio la hace para sí. Sin ella, las features de ese territorio queda
 |---|---|---|---|---|---|
 | 3.1 | Usuarios administrativos del campo (`director-lf`, `assistant-lf`) con `local_field_id` y `union_id` correctos | `users`, `users_roles` | admin / director-union | `/dashboard/users/new` | El director-lf sin `local_field_id` cae a scope `all` en la UI pero el backend devuelve 403/vacío. **Y no se puede corregir después desde la UI** |
 | 3.2 | Distritos e iglesias del campo | `districts`, `churches` | admin / super-admin (director-lf **no puede**) | Catálogos → Geografía | No se pueden crear clubes |
-| 3.3 | Timezone del campo | `local_fields.timezone` | técnico (script) | **Sin UI** | 503 en ventanas de investidura y umbrales |
+| 3.3 | Timezone del campo | `local_fields.timezone` | técnico (script) | **Sin UI** | 503 en ventanas de investidura |
 | 3.4 | Zonas de coordinación y coordinadores | `coordination_zones`, `coordinator_assignments` | director-lf | `/dashboard/coordination` | Sin supervisión zonal; no bloquea |
-| 3.5 | Ventana de investidura y porcentaje mínimo del año | `local_field_investiture_windows`, `local_field_class_thresholds` | director-lf / assistant-lf (requiere año `active` y hoy dentro del año) | `/dashboard/investiture-settings` | Sin ventana → `investitureWindowAllowsOperation` false → **investidura bloqueada**. Sin umbral → 80 % |
+| 3.5 | Ventana de investidura del año | `local_field_investiture_windows` | director-lf / assistant-lf (requiere año `active` y hoy dentro del año) | `/dashboard/investiture-settings` | Sin ventana → `investitureWindowAllowsOperation` false → **investidura bloqueada**. (El porcentaje mínimo de clase ya no existe: solo `VALIDATED` completa un requisito; Pendiente de merge (PR #600 de sacdia-backend)) |
 | 3.6 | Pastores por distrito | `district_investiture_pastors` | director-lf / assistant-lf | `/dashboard/investiture-pastors` | Nadie autoriza investiduras en ese distrito |
 | 3.7 | Cupo global de pastores | `investiture_pastor_quota` (singleton) | super-admin | misma pantalla | Default 2 |
 | 3.8 | Productos y ciclos de seguro | `insurance_products`, `insurance_cycle_configs` | **solo** director-lf / assistant-lf (super-admin y admin reciben 403) | `/dashboard/insurance/config` | Compra de seguros 404 `INSURANCE_CYCLE_CONFIG_NOT_FOUND` |
@@ -302,7 +302,7 @@ Un menú **Configuración** con tres niveles explícitos, alineado a las capas d
 
 - **Sistema** (super-admin): variables (con alta de llaves), roles, permisos, matriz, auditoría, jobs, cupo de pastores, pesos globales de ranking, rangos (`ranking_tiers`).
 - **Catálogos** (admin): geografía, años, tipos de club, clases/módulos/secciones, especialidades, maestrías, certificaciones, salud, negocio, logros, tipos de evento, categorías de materiales.
-- **Mi territorio** (director-dia / director-union / director-lf, auto-scoped): datos del campo (timezone, pagos, entrega), coordinación, investidura (ventana, umbral, pastores), seguros, plantilla de carpeta anual, ranking anual, scoring, camporees, catálogo de materiales y de pedidos.
+- **Mi territorio** (director-dia / director-union / director-lf, auto-scoped): datos del campo (timezone, pagos, entrega), coordinación, investidura (ventana, pastores), seguros, plantilla de carpeta anual, ranking anual, scoring, camporees, catálogo de materiales y de pedidos.
 
 Más una pantalla **Estado de configuración** que recorra las capas 1 a 3 y marque qué falta para el scope del usuario. La lógica ya existe parcialmente en `lib/prerequisites/*`.
 
@@ -323,7 +323,7 @@ Más una pantalla **Estado de configuración** que recorra las capas 1 a 3 y mar
  8. Catálogos de dominio: classes (+ módulos/secciones), honors, master_honors,
     certifications (publicar versión), achievements, categorías varias
  9. Admin: usuarios director-union / director-lf con union_id y local_field_id
-10. Cada campo: coordinación, investidura (ventana, umbral, pastores), seguros,
+10. Cada campo: coordinación, investidura (ventana, pastores), seguros,
     pago del campo, materiales, plantilla carpeta anual (publicar), ranking config
 11. Clubes (admin o director-lf) → inscripción anual (app) → directiva → miembros
 ```

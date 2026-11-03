@@ -153,7 +153,7 @@ No pasan por la compuerta porque no activan: terminar un rol (`DELETE /club-role
 Endurecimientos asociados:
 
 - `PATCH /club-roles/:assignmentId`: el `status` del DTO es un enum cerrado con `@IsIn` (`active`, `inactive`, `pending`, `rejected`, `expired`, `cancelled`, `ended`, `designated`; `role-assignment.dto.ts:16-25` y `:117`). Antes era un `@IsString()` libre.
-- `approve`: si la solicitud no está `pending` dentro de la transacción (otra revisión, cancelación o expiración), retorna sin activar nada: 409 `MR_ALREADY_PENDING`, o 404 `MR_NOT_FOUND` si es de otra sección (`membership-requests.service.ts:135-143`, `:175-183`). Nunca cae al `updateMany` sin pasar por la compuerta: el post-registro vuelve a poner en `pending` filas rechazadas o vencidas y una de ellas habría coincidido con el `WHERE` sin compuerta (comentario del código).
+- `approve`: si la solicitud no está `pending` dentro de la transacción (otra revisión, cancelación o expiración), retorna sin activar nada: 409 `MR_ALREADY_PROCESSED` (Pendiente de merge (PR #600 de sacdia-backend); antes `MR_ALREADY_PENDING`), o 404 `MR_NOT_FOUND` si es de otra sección (`membership-requests.service.ts:135-143`, `:175-183`). Nunca cae al `updateMany` sin pasar por la compuerta: el post-registro vuelve a poner en `pending` filas rechazadas o vencidas y una de ellas habría coincidido con el `WHERE` sin compuerta (comentario del código).
 - `PATCH` con `status: 'active'` se controla siempre, aunque la lectura previa (fuera de la transacción) diga que la fila ya estaba activa (`clubs.service.ts:862-869`).
 
 > [!WARNING]

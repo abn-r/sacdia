@@ -157,12 +157,12 @@ cola: hay que enviar. Detalle de la cola: [02](02-revision-evidencias.md).
 
 ### Paso 3 — Qué cuenta como “completo” para investidura
 
-`ClassRequirementEligibilityService` marca un requisito completo si no está
-`REJECTED` y (`VALIDATED` **o** su puntaje alcanza el **porcentaje del Campo**:
-80 por defecto, antes un 70 fijo; el Campo lo cambia hasta el 30 de junio y
-después solo `super-admin`)
-(`class-requirement-eligibility.service.ts`, `local_field_class_thresholds`).
-La nota B (70) de `computeGrade` no cambia.
+`ClassRequirementEligibilityService` marca un requisito completo solo si su
+estado es `VALIDATED` (decisión del 2026-11-02; `sectionCountsAsComplete`).
+El puntaje lo escribe el propio miembro, así que ya no completa por sí solo.
+El porcentaje del Campo (antes 80 por defecto) dejó de existir: sus rutas y
+su configuración se retiran en el PR #600 de sacdia-backend (pendiente de
+merge). La nota B (70) de `computeGrade` no cambia.
 
 - `BASIC`: siempre aplica.
 - `EXTRA`: solo si es aplicable al territorio/contexto; bloquea elegibilidad
@@ -175,9 +175,8 @@ EXTRA aplicables) y el avanzado aparte
 (`docs/features/clases-progresivas.md`:57-60).
 
 **Particularidad para no sobrevender:** la tarjeta de la app dice “requisitos
-validados” al 100%, pero el backend puede contar un puntaje que alcance el
-porcentaje del Campo **sin** estado `VALIDATED`. Un `REJECTED` nunca cuenta, aunque el puntaje sea alto.
-En demo, no afirmar que todo requisito pasó por un revisor humano.
+validados” al 100% y, desde el 2026-11-02, es literal: solo cuenta `VALIDATED`.
+Un `REJECTED` nunca cuenta, aunque el puntaje sea alto.
 
 ### Paso 4 — Presentar la solicitud de investidura
 
@@ -253,7 +252,7 @@ simultáneas gana la primera confirmada.
 
 Panel: `/dashboard/investiture-requests` (bandeja y detalle), con la página
 `investiture-requests/[requestId]` que abre el enlace del correo;
-`/dashboard/investiture-settings` (ventana y porcentaje del Campo) y
+`/dashboard/investiture-settings` (ventana del Campo) y
 `/dashboard/investiture-pastors` (asignación de pastores). App: el pastor, el
 `director-lf` y el `assistant-lf` ven la bandeja
 (`authorizer_requests_view.dart`). No se ejecutó E2E con cuentas reales.
@@ -270,8 +269,8 @@ conserve ese bloqueo, la solicitud nueva responde
 `INVESTITURE_REQUEST_LEGACY_PIPELINE_ACTIVE`. Detalle en
 `docs/features/validacion-investiduras.md`.
 
-Configuración que debe existir antes de presentar: ventana y porcentaje del
-Campo (`local_field_investiture_windows`, `local_field_class_thresholds`) y al
+Configuración que debe existir antes de presentar: ventana del
+Campo (`local_field_investiture_windows`) y al
 menos un autorizador para el distrito (pastor asignado o, si no, el Campo).
 Sin ventana operativa, presentar falla por configuración, no por progreso.
 `investiture_config` (fecha única por Campo y año) es de la vía anterior y ya no
@@ -304,7 +303,7 @@ mismo club.
 | Revisar evidencia | Roles/permiso de evidence-review | App coordinador + panel; ficha 02 |
 | Presentar, agregar, quitar y cambiar fecha en la solicitud | Director, secretario o secretario-tesorero de **la** sección | App (pantalla de la sección) |
 | Autorizar o rechazar por persona | Pastor del distrito, `director-lf` o `assistant-lf` (basta uno) | Panel (bandeja y enlace del correo) y app |
-| Configurar ventana y porcentaje del Campo | `director-lf`, `assistant-lf`, `admin`, `super-admin` (porcentaje: `super-admin` después del 30 de junio) | Panel (`investiture-settings`) |
+| Configurar ventana del Campo | `director-lf`, `assistant-lf`, `admin`, `super-admin` | Panel (`investiture-settings`) |
 | Asignar pastores al distrito | `director-lf`, `assistant-lf`, `director-union`, `assistant-union`; cupo: `super-admin` | Panel (`investiture-pastors`) |
 | Soltar bloqueos de la vía anterior | `super-admin` exacto, `dry_run` primero | API (`POST /admin/investiture/legacy-locks/release`) |
 | Vencer enrollments atrasados | admin + `catalogs:update`, `dry_run` luego apply | Panel; **no hay cron** |
@@ -348,11 +347,11 @@ es el checklist cotidiano. No mezclarla en el recorrido principal
 
 | Superficie | Trazado | Límite |
 |---|---|---|
-| Backend | Catálogo, enroll, progreso, submit de requisito, política, solicitud y autorización de investidura, ventana/porcentaje/pastores, correos y recordatorios, cierre de año, 410 de la vía anterior, desbloqueo, vencimiento manual | Mergeado en `development`; sin ensayo con cuentas reales |
+| Backend | Catálogo, enroll, progreso, submit de requisito, política, solicitud y autorización de investidura, ventana/pastores, correos y recordatorios, cierre de año, 410 de la vía anterior, desbloqueo, vencimiento manual | Mergeado en `development`; sin ensayo con cuentas reales |
 | App | Camino, detalle con tracks, carga/envío de requisito, presentar y autorizar investidura, historial propio y de sección, anuario, alcance pedagógico | Sin E2E; la tarjeta de envío vieja ya no existe |
-| Admin | CRUD de catálogo, asignaciones en ficha de sección, bandeja de autorización, ventana/porcentaje, pastores, expire-overdue | El CRUD de catálogo **no** opera progreso de miembros |
+| Admin | CRUD de catálogo, asignaciones en ficha de sección, bandeja de autorización, ventana, pastores, expire-overdue | El CRUD de catálogo **no** opera progreso de miembros |
 | Pruebas | Specs de política, progreso bloqueado, consejero GM, solicitud/autorización, 410 y desbloqueo | Leídas, no ejecutadas |
-| Producción | Permisos reales, ventana y porcentaje por Campo, pastores asignados, cuentas del piloto | Pendiente de ensayo |
+| Producción | Permisos reales, ventana por Campo, pastores asignados, cuentas del piloto | Pendiente de ensayo |
 
 ## Guion de demo ficticio
 
@@ -366,7 +365,7 @@ Demo”, “Director Demo”, “Pastor Demo” (asignado al distrito). Correos
    sigue sin ser clase investida.
 3. Como consejero: lista pedagógica → miembro → mismo detalle. Distinguir
    cargo de director vs clase asignada.
-4. Cuando el miembro llegue al 100% con el porcentaje del Campo: como
+4. Cuando el miembro llegue al 100% de requisitos validados: como
    **director (o secretario) de la sección**, presentar la solicitud con la
    fecha de investidura. Mostrar que la persona queda «En espera de
    autorización.» y que su progreso se bloquea.

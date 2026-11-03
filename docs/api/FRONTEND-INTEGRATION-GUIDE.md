@@ -108,7 +108,7 @@ No hay endpoints nuevos. Estas respuestas salen de las rutas de carga por certif
 - Alta que quedaría lista, envío, reenvío y aprobación de fila o de solicitud institucional rechazan con esos códigos y no acreditan la clase.
 - `PATCH .../items/:itemId` con `mark_as_ready: true` y edad inválida no guarda la fila.
 - El mismo `PATCH` sobre una fila de clase que ya está `READY`, omitiendo `mark_as_ready` o enviándolo en `false`, guarda la corrección y deja la fila en `NEEDS_REVIEW` si la edad ya no alcanza.
-- El porcentaje de requisitos de clase es el del Campo (`local_field_class_thresholds.minimum_percent`, default 80; mergeado con el PR #448 de sacdia-backend). Una inscripción cruzada usa el Campo de su sección de origen. El detalle y el listado colectivo usan el mismo número.
+- Un requisito de clase cuenta como completo solo si un revisor lo validó (`VALIDATED`). El Campo ya no tiene porcentaje configurable: el que se describía aquí (`local_field_class_thresholds.minimum_percent`, PR #448 de sacdia-backend) dejó de aplicarse el 2026-11-02 y sus rutas se retiran. Pendiente de merge (PR #600 de sacdia-backend). El detalle y el listado colectivo usan el mismo criterio.
 
 ## Actualizacion 2026-10-07 (Certificado frente a solicitud viva)
 
@@ -124,16 +124,13 @@ No hay endpoints nuevos. HTTP 400.
 - La persona de la solicitud ahora incluye `resolution_code`.
 - Si el Campo rechaza el certificado y el año cierra, la clase de ese año no queda investida: el cierre solo pasa el `PENDING` a `CLOSED_YEAR` y no escribe el enrollment.
 
-## Actualizacion 2026-10-01 (Porcentaje de clase del Campo)
+## Actualizacion 2026-10-01 (Porcentaje de clase del Campo) — retirada
 
-`GET` y `PATCH /api/v1/local-fields/:localFieldId/class-thresholds/:ecclesiasticalYearId`.
+`GET` y `PATCH /api/v1/local-fields/:localFieldId/class-thresholds/:ecclesiasticalYearId` se retiran. Pendiente de merge (PR #600 de sacdia-backend). No hay reemplazo: desde el 2026-11-02 solo `VALIDATED` completa un requisito, así que el porcentaje del Campo ya no decide nada.
 
-- Lectura y escritura: `director-lf` y `assistant-lf` en su Campo, y `super-admin` en cualquiera. Admin, unión, división y otro Campo responden `GUARD_PERMISSION_DENIED`.
-- Sin fila, `minimum_percent` es 80 y `configured` es false. No se crea la fila al leer.
-- `can_edit` dice si ese usuario puede guardarlo ahora.
-- El cuerpo del PATCH es `{ "minimum_percent": 90 }`, entero de 0 a 100. Si el valor no pasa esa forma (`101`, `-1`, `90.5`, `"90"`, `null`), la ruta responde HTTP 400 del `I18nValidationPipe`: `statusCode`, `message` en arreglo y `error: "Bad Request"`. Esa respuesta no incluye `code`. `CLASS_THRESHOLD_PERCENT_INVALID` queda para llamadas internas al servicio, no para el cliente de esta ruta.
-- El director y el asistente pueden guardarlo hasta el 30 de junio a las 23:59 en la zona del Campo, si ese momento cae dentro del año pedido. Después, `CLASS_THRESHOLD_EDIT_CLOSED`. `super-admin` sigue pudiendo guardarlo dentro de ese año y recibe el mismo 403 fuera del año.
-- Campo o año inexistente: `CLASS_THRESHOLD_FIELD_NOT_FOUND` o `CLASS_THRESHOLD_YEAR_NOT_FOUND`.
+- Las rutas desaparecen y con ellas los códigos `CLASS_THRESHOLD_EDIT_CLOSED`, `CLASS_THRESHOLD_FIELD_NOT_FOUND`, `CLASS_THRESHOLD_YEAR_NOT_FOUND` y `CLASS_THRESHOLD_PERCENT_INVALID`.
+- La respuesta de elegibilidad de clase ya no trae `passing_score`. Los clientes no deben leerlo ni mostrarlo. El panel admin ya no lo muestra (PR #285 de sacdia-admin, mergeado).
+- La tabla `local_field_class_thresholds` sigue en el esquema, sin uso.
 
 ## Actualizacion 2026-10-01 (Ventana de investidura del Campo)
 
@@ -146,7 +143,7 @@ No hay endpoints nuevos. HTTP 400.
 - Consultan sus Campos: director y asistente del Campo, admin, assistant-admin, unión, división y super-admin. No leen un Campo fuera de su alcance.
 - Guardan, mientras el año está activo y el día local cae dentro de ese año: director y asistente solo en su Campo, admin y assistant-admin en su alcance, super-admin en cualquiera. Unión y división reciben `GUARD_PERMISSION_DENIED` al guardar. Fuera de ese año, o con el año inactivo, `INVESTITURE_WINDOW_EDIT_CLOSED`.
 - El cuerpo es `{ "start_date": "2026-10-01", "end_date": "2026-12-20" }`. Los dos días son inclusivos en la zona del Campo. Deben quedar dentro del año y el inicio no puede ser posterior al fin: `INVESTITURE_WINDOW_OUTSIDE_YEAR`, `INVESTITURE_WINDOW_START_AFTER_END`. Un día imposible (`2026-02-31`) es `INVESTITURE_WINDOW_DATE_INVALID`. Si el texto no tiene forma `YYYY-MM-DD`, el `I18nValidationPipe` responde HTTP 400 con `statusCode`, `message` y `error`, sin `code`.
-- `can_edit` no significa permiso para autorizar ni para cambiar el porcentaje de clase. Las rutas del pipeline anterior responden 410 (fase 8) y no consultan esta ventana.
+- `can_edit` no significa permiso para autorizar. Las rutas del pipeline anterior responden 410 (fase 8) y no consultan esta ventana.
 - Presentar y agregar personas usan el mismo predicado: abierto desde el primer día local hasta el último, inclusive. Autorizar todavía no tiene ruta. Esta ventana no inviste.
 
 ## Actualizacion 2026-10-01 (Pastores del distrito)
