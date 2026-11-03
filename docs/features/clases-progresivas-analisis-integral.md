@@ -101,7 +101,7 @@ El módulo responde cinco preguntas institucionales:
 | Investidura | Reconocimiento institucional que se confirma al autorizar la persona en una solicitud (ya no hay validaciones escalonadas) |
 | Solicitud de investidura | Agrupa personas y clases de **una sola sección** que la directiva presentó en la ventana del Campo; cada persona se resuelve por separado |
 | Ventana del Campo | Rango de días inclusivos, por Campo local y año eclesiástico, en el que se puede presentar y autorizar |
-| Porcentaje del Campo | Concepto retirado. Era el umbral mínimo de puntaje por requisito (80 por defecto) que reemplazó el 70 fijo. Desde el 2026-11-02 no decide la completitud (solo cuenta `VALIDATED`) y el PR #600 de sacdia-backend elimina su configuración y sus rutas (pendiente de merge) |
+| Porcentaje del Campo | Concepto retirado. Era el umbral mínimo de puntaje por requisito (80 por defecto) que reemplazó el 70 fijo. Desde el 2026-11-02 no decide la completitud (solo cuenta `VALIDATED`) y el PR #600 de sacdia-backend (mergeado) eliminó su configuración y sus rutas |
 | Año eclesiástico | Periodo operativo usado para inscripción, disponibilidad y alcance |
 | Scope de progreso | Clases y miembros que un actor puede supervisar según su rol/asignación |
 
