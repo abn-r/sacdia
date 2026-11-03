@@ -108,7 +108,7 @@ No hay endpoints nuevos. Estas respuestas salen de las rutas de carga por certif
 - Alta que quedaría lista, envío, reenvío y aprobación de fila o de solicitud institucional rechazan con esos códigos y no acreditan la clase.
 - `PATCH .../items/:itemId` con `mark_as_ready: true` y edad inválida no guarda la fila.
 - El mismo `PATCH` sobre una fila de clase que ya está `READY`, omitiendo `mark_as_ready` o enviándolo en `false`, guarda la corrección y deja la fila en `NEEDS_REVIEW` si la edad ya no alcanza.
-- Un requisito de clase cuenta como completo solo si un revisor lo validó (`VALIDATED`). El Campo ya no tiene porcentaje configurable: el que se describía aquí (`local_field_class_thresholds.minimum_percent`, PR #448 de sacdia-backend) dejó de aplicarse el 2026-11-02 y sus rutas se retiran. Pendiente de merge (PR #600 de sacdia-backend). El detalle y el listado colectivo usan el mismo criterio.
+- Un requisito de clase cuenta como completo solo si un revisor lo validó (`VALIDATED`). El Campo ya no tiene porcentaje configurable: el que se describía aquí (`local_field_class_thresholds.minimum_percent`, PR #448 de sacdia-backend) dejó de aplicarse el 2026-11-02 y sus rutas se retiran. El detalle y el listado colectivo usan el mismo criterio.
 
 ## Actualizacion 2026-10-07 (Certificado frente a solicitud viva)
 
@@ -126,7 +126,7 @@ No hay endpoints nuevos. HTTP 400.
 
 ## Actualizacion 2026-10-01 (Porcentaje de clase del Campo) — retirada
 
-`GET` y `PATCH /api/v1/local-fields/:localFieldId/class-thresholds/:ecclesiasticalYearId` se retiran. Pendiente de merge (PR #600 de sacdia-backend). No hay reemplazo: desde el 2026-11-02 solo `VALIDATED` completa un requisito, así que el porcentaje del Campo ya no decide nada.
+`GET` y `PATCH /api/v1/local-fields/:localFieldId/class-thresholds/:ecclesiasticalYearId` se retiran. No hay reemplazo: desde el 2026-11-02 solo `VALIDATED` completa un requisito, así que el porcentaje del Campo ya no decide nada.
 
 - Las rutas desaparecen y con ellas los códigos `CLASS_THRESHOLD_EDIT_CLOSED`, `CLASS_THRESHOLD_FIELD_NOT_FOUND`, `CLASS_THRESHOLD_YEAR_NOT_FOUND` y `CLASS_THRESHOLD_PERCENT_INVALID`.
 - La respuesta de elegibilidad de clase ya no trae `passing_score`. Los clientes no deben leerlo ni mostrarlo. El panel admin ya no lo muestra (PR #285 de sacdia-admin, mergeado).

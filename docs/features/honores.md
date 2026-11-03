@@ -301,7 +301,7 @@ Hay tres superficies historicas de evidencia:
 
 El limite vigente para evidencia general es de 10 imagenes totales en `users_honors.images`; `document` no consume ese cupo. El backend valida el total existente + nuevo, no solo el tamaño del request.
 
-En `PATCH /users/:userId/honors/:honorId`, `images`, `document` y `certificate` solo aceptan referencias de nuestro almacenamiento R2: la key del bucket, la URL pública del bucket, una URL firmada de nuestra cuenta o un valor que la fila ya guarda. Otro valor responde 400 `HONOR_FILE_REFERENCE_INVALID` (Pendiente de merge (PR #600 de sacdia-backend)).
+En `PATCH /users/:userId/honors/:honorId`, `images`, `document` y `certificate` solo aceptan referencias de nuestro almacenamiento R2: la key del bucket, la URL pública del bucket, una URL firmada de nuestra cuenta o un valor que la fila ya guarda. Otro valor responde 400 `HONOR_FILE_REFERENCE_INVALID`.
 
 El flujo vigente no migra todo a una sola tabla. En su lugar, `GET /evidence-review/honor/:id` agrega un `honor_review_packet` que unifica para revision:
 

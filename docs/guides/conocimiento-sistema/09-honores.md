@@ -122,7 +122,7 @@ Dueño + `validation:submit` + `active_assignment`
 (`validation.controller.ts`:44-71). El workflow rechaza si el `user_id` no
 es el actor: un honor ajeno responde igual que uno inexistente, 404
 `VALIDATION_USER_HONOR_NOT_FOUND`, para no revelar qué ids existen
-(`honor-validation-workflow.service.ts`; Pendiente de merge (PR #600 de sacdia-backend); antes 400
+(`honor-validation-workflow.service.ts`; antes 400
 `VALIDATION_HONOR_NOT_OWNED`). **No** es el envío de
 investidura (ficha 08: consejero/director).
 
@@ -210,7 +210,7 @@ La cola [02](02-revision-evidencias.md) mezcla tipos. Para honor, el `id` es
 | `HONOR_USER_ALREADY_IN_PROGRESS` | Ya está activa | Duplicar la misma especialidad |
 | `VALIDATION_HONOR_COMPLETION_MODE_REQUIRED` | No eligió camino | Enviar desde UNDECIDED |
 | `VALIDATION_HONOR_REQUIREMENTS_INCOMPLETE` / `_MISSING_EVIDENCE` | Falta trabajo del modo | “La UI habilitó el botón, ya está” |
-| `VALIDATION_USER_HONOR_NOT_FOUND` (404) | Otro usuario no envía; un honor ajeno responde como inexistente, sin enumerar ids (Pendiente de merge (PR #600 de sacdia-backend); antes `VALIDATION_HONOR_NOT_OWNED`) | Que el consejero envía como en la clase |
+| `VALIDATION_USER_HONOR_NOT_FOUND` (404) | Otro usuario no envía; un honor ajeno responde como inexistente, sin enumerar ids (antes `VALIDATION_HONOR_NOT_OWNED`) | Que el consejero envía como en la clase |
 | `VALIDATION_HONOR_NO_CHANGES_AFTER_REJECTION` | Reenvío sin corrección | Reenviar el mismo paquete |
 | `VALIDATION_HONOR_ALREADY_PENDING` / `_VALIDATED` | Ya en cola o aprobada | Editar mientras se revisa |
 | Maestría No vigente | Dejó de cumplir reglas | Que “se perdió el parche para siempre” |
