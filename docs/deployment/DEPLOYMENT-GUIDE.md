@@ -1,11 +1,11 @@
 # SACDIA — Deployment Guide
 
 **Estado**: ACTIVE
-**Actualizado**: 2026-10-20
+**Actualizado**: 2026-11-03
 **Fuentes**: `sacdia-backend/render.yaml`, `sacdia-backend/src/config/env.validation.ts`, `.github/workflows/ci.yml` de cada repo, el dashboard de Render y Neon (topología informada por el responsable de infraestructura el 2026-10-13) y `docs/guides/ocr-proxy-preprod-infra.md`.
 
 > [!IMPORTANT]
-> Hoy existe **un solo entorno en línea**, y se despliega desde la rama `development`: el servicio de Render "API Sacdia" y el admin de Vercel construyen `development` y usan la rama `development` de Neon como base viva. Las ramas `staging` y `production` de Neon existen pero **no se usan**. La sección 0 describe esa topología real. Las secciones 1 a 10 son la receta de referencia para levantar entornos separados cuando se creen; donde difieren de la topología actual, manda la sección 0. Si algo contradice `render.yaml` o `env.validation.ts`, mandan esos archivos y esta guía se corrige (ojo: `render.yaml` ya no describe el servicio real, ver 0.2).
+> Hoy existe **un solo entorno en línea**, y se despliega desde la rama `development`: el servicio de Render "API Sacdia" y el admin de Vercel construyen `development` y usan la rama `development` de Neon como base viva. Las ramas `staging` y `production` de Neon existen pero **no se usan**. La sección 0 describe esa topología real. Las secciones 1 a 10 son la receta de referencia para levantar entornos separados cuando se creen; donde difieren de la topología actual, manda la sección 0. Si algo contradice `render.yaml` o `env.validation.ts`, mandan esos archivos y esta guía se corrige. Para crear el entorno de preproducción, ver §0.10.
 
 **Infraestructura:**
 
@@ -57,8 +57,8 @@ Neon ramas staging y production: existen y ningún servicio las usa. `staging` e
 | Health check | endpoint `GET /api/v1/health` (recomendado fijarlo como Health Check Path, ver abajo) |
 
 - **Start con límites de memoria.** El comando de arranque salta `pnpm start:prod` (que es `node dist/src/main.js`) y limita el heap de V8 a 320 MiB y el semi-espacio a 2 MiB para dejar margen bajo los 512 MB del plan Free. Si el proceso supera el límite de memoria de la instancia, Render lo reinicia.
-- **Health Check Path (recomendado).** Configurar en Render → Settings → Health Check Path el valor `/api/v1/health`. Así Render solo pasa el tráfico al deploy nuevo cuando responde `{"status":"ok"}` y reinicia la instancia si deja de responder. El servicio real difiere del blueprint (ver más abajo), así que lo que declara `render.yaml` (`healthCheckPath`) no se aplica solo.
-- **Diferencias con `render.yaml`.** El blueprint del repo define otro servicio (`sacdia-backend`, plan `starter`, start `pnpm start:prod`). El servicio real se llama "API Sacdia", es Free y usa el start de arriba. Los cambios de nombre, plan, start o health se hacen en el dashboard; cambiar `render.yaml` no los toca. Alinear el blueprint con la realidad (o documentar que es solo referencia) es un pendiente.
+- **Health Check Path (recomendado).** Configurar en Render → Settings → Health Check Path el valor `/api/v1/health`. Así Render solo pasa el tráfico al deploy nuevo cuando responde `{"status":"ok"}` y reinicia la instancia si deja de responder. Si el servicio no se gestiona desde el blueprint, lo que declara `render.yaml` (`healthCheckPath`) no se aplica solo.
+- **`render.yaml`.** Desde el commit `2e983f5b` de sacdia-backend (2026-10-28) el blueprint refleja el servicio real: nombre "API Sacdia", plan Free, rama `development`, y el build, el start y el health check de esta tabla. Si el servicio no se gestiona desde el blueprint, los cambios de nombre, plan, start o health se siguen haciendo en el dashboard. Para un segundo servicio (preproducción, §0.10) no reutilizar el blueprint tal cual: declara el mismo nombre y la rama `development`.
 - **Plan Free.** Según la documentación de Render, los web services Free se suspenden tras un periodo sin tráfico y la primera petición posterior paga un arranque en frío. Es esperable en este entorno. Consecuencia para los crones: corren dentro del proceso de la API, así que **mientras el servicio duerme no corre ninguno** (observado el 2026-10-21: no hubo ninguna corrida en `cron_run_log` desde el 2026-10-20 20:30 UTC hasta que se despertó). Para ejecutarlos en desarrollo, un super-admin usa «Ejecutar ahora» (`/dashboard/system/jobs` o `POST /api/v1/admin/cron-jobs/:jobName/run`; ver `docs/features/cron-automation.md`). En producción esto no es aceptable: ver 0.6, punto 10.
 - **Registro de memoria.** El backend escribe una línea estructurada con el mensaje `Process memory` al arrancar (`phase: boot`) y luego cada `PROCESS_MEMORY_LOG_INTERVAL_MINUTES` minutos (`phase: interval`). Por defecto 15; `0` desactiva el intervalo y deja la línea de arranque; valor entero ≥ 0. Campos: `rss_mib`, `heap_used_mib`, `heap_total_mib`, `external_mib`, `array_buffers_mib`, `heap_size_limit_mib`, `uptime_seconds`; sin datos personales. Para ver la presión real de memoria, filtrar los logs de Render por `Process memory` y comparar `rss_mib` con los 512 MB del plan (código: `sacdia-backend/src/common/observability/process-memory-logger.service.ts`).
 - **Variables.** Las secretas se cargan en el dashboard (tabla 4.2). Las de OCR remoto, en 0.3.
@@ -241,6 +241,31 @@ Verificado con `prisma migrate status` contra cada rama (209 migraciones en el r
 - **`staging`**: al día. El 2026-10-30 se aplicaron con `prisma migrate deploy` las 9 que le faltaban: `20261025120000_coordinator_reports_read`, `20261026120000_reports_update_permission`, `20261026130000_inventory_extended_fields`, `20261028120000_coordinator_roles_resources_read`, `20261028130000_ensure_assistant_admin_role`, `20261028130100_restore_lf_ranking_reads`, `20261028130200_revoke_union_global_ranking_reads`, `20261028130300_strip_soft_hyphen_from_honor_names` y `20261030120000_union_division_ranking_reads`. Ninguna usa `CONCURRENTLY`. Neon tenía la rama archivada y la reactivó al conectar. El 2026-11-02 se aplicaron `20261030140000_admin_and_union_permission_grants`, `20261030150000_platform_admin_seed_cleanups` `20261102120000_seed_only_permissions_and_cleanups` y `20261102130000_align_role_permissions_with_seed` y `20261102140000_treasurer_monthly_report_read_only`.
 - **`production`**: 23 pendientes. Las 9 de perfiles familiares (`20261015120000` a `20261024120000`, §0.6), las 9 de la lista anterior y las 5 de permisos (admin, unión, permisos del seed, alineación con el seed y tesorero en informes mensuales). **Se dejan pendientes a propósito** (decisión del 2026-10-30): llegan con la promoción `development` → `preproduction` → `main` y las condiciones del §0.6, no a mano.
 
+> `20261103120000_fcm_token_kind` (PR #602 de sacdia-backend): aplicada en `development` el 2026-11-03 por el deploy. En `staging` no está verificada (sin acceso a `neonctl` al revisar); el primer deploy del entorno de preproducción la aplica con `prisma migrate deploy` (§0.10). En `production` es la pendiente número 24.
+
+### 0.10 Crear el entorno de preproducción (lista del 2026-11-03)
+
+La rama `preproduction` existe en los tres repos, pero **ningún servicio la despliega** (§0). Mergear `development` en ella no publica nada hasta que exista el entorno. Al 2026-11-03, `development` le lleva 1,213 commits en sacdia-backend, 445 en sacdia-admin y 740 en sacdia-app. `preproduction` no tiene cambios propios que falten en `development` (solo commits de merge viejos), y el merge no tiene conflictos en ninguno de los tres repos.
+
+Los pasos 1 a 6 son de dashboard y los hace el responsable de infraestructura. Solo nombres de variables aquí; los valores van en cada servicio.
+
+1. **Base de datos: Neon `staging`** (`ep-noisy-breeze-anxwkc5j`). Ya tiene las migraciones de `development` hasta `20261102140000` y los permisos y grants iguales al seed (§0.9). Para el servicio se necesitan la cadena pooled (`DATABASE_URL`) y la directa (`DATABASE_DIRECT_URL`), las dos de esa rama.
+2. **Render: un web service nuevo** que despliegue `preproduction`. Crearlo a mano o con un blueprint propio, no con `render.yaml` tal cual (§0.1). Copiar el build, el start y el health check de §0.1. Plan:
+   - Con el plan Free el servicio se duerme y **los crones no corren mientras duerme** (§0.1). Para un QA que incluya crones (vencimiento de solicitudes, cambios de edad, recordatorios) hace falta un plan pago, o ejecutarlos a mano con «Ejecutar ahora».
+   - Variables propias de este entorno, sin compartirlas con `development` (§1): `BETTER_AUTH_SECRET`, `QR_JWT_SECRET` (distinto del anterior), `REDIS_URL` (base de Redis propia) y `ALLOWED_ORIGINS` (dominio del admin de preproducción).
+   - `NODE_ENV=production`, `TRUST_PROXY_HOPS=1`, `SWAGGER_ENABLED=false` y `AUTH_REJECT_SNAKE_CASE=true`, como en el blueprint.
+   - R2: las 6 parejas obligatorias de la tabla 4.2 y la del bucket privado de fichas de consentimiento (`R2_BUCKET_GUARDIANSHIP_EVIDENCE`, `R2_PUBLIC_URL_GUARDIANSHIP_EVIDENCE`). Sin ese bucket la API arranca, pero las rutas de fichas responden 503. Decidir si el entorno usa buckets propios o los mismos con otro `R2_KEY_PREFIX_*` (`docs/storage/r2-keyprefix-conventions.md`).
+   - OCR: `OCR_MODE=remote` y las cuatro `OCR_PROXY_*`, con un `OCR_PROXY_ENV` propio del entorno (`docs/guides/ocr-proxy-preprod-infra.md`). Sin ellas el arranque falla.
+   - Firebase (push), Sentry y PostHog, si se quieren en QA.
+   - Banderas en `false` al inicio, para activarlas una a una (§0.6, punto 4): `EMAIL_ENABLED`, `INVESTITURE_EMAIL_ENABLED` y las tres `FAMILY_*`. Con `INVESTITURE_EMAIL_ENABLED=true` también es obligatoria `ADMIN_PANEL_URL`.
+3. **Vercel (admin):** un entorno que construya `preproduction` (rama de preview o proyecto aparte) con su propio `NEXT_PUBLIC_API_URL` apuntando al backend de preproducción, y su `NEXT_PUBLIC_APP_URL`. El resto, como en el §5. Su dominio va en `ALLOWED_ORIGINS` del paso 2.
+4. **OAuth:** en Google, la callback `https://<backend-preprod>/api/auth/callback/google`; en Apple, la Return URL del Services ID. Agregar a `ALLOWED_OAUTH_REDIRECT_URLS` las URLs de retorno de admin y app de este entorno (§6 y §7).
+5. **App:** un build de prueba (TestFlight o prueba interna de Play) con `--dart-define=API_BASE_URL=https://<backend-preprod>/api/v1`. Opcionales: `POSTHOG_PROJECT_TOKEN` y `REALTIME_INVALIDATION_ENABLED` (§8).
+6. **Promover el código:** un PR `development` → `preproduction` en cada repo, primero sacdia-backend. El build de Render corre `prisma migrate deploy` contra `staging`: debe terminar con `No pending migrations to apply` o con `20261103120000_fcm_token_kind` aplicada.
+7. **Verificar** con el §9: health, login en el admin, `/auth/me` desde la app y una subida a R2.
+
+`production` y `main` no cambian con esto: siguen la regla del §0.6.
+
 ## 1. Entornos y ramas
 
 > **Hoy** solo la rama `development` está conectada a un entorno en línea (ver sección 0). Lo que sigue es el flujo objetivo, para cuando existan los demás entornos.
@@ -313,18 +338,16 @@ El servicio se define en `sacdia-backend/render.yaml`:
 | Campo | Valor |
 |---|---|
 | Tipo / runtime | `web` / `node` |
-| Nombre | `sacdia-backend` |
-| Región / plan | `oregon` / `starter` |
-| Build | `pnpm install --frozen-lockfile && pnpm prisma generate && pnpm build` |
-| Pre-deploy | `pnpm prisma migrate deploy` (aplica migraciones antes de servir tráfico; requiere plan pago, el Free no lo ejecuta) |
-| Start | `pnpm start:prod` (`node dist/src/main.js`) |
-| Health check | `/api/v1/health` |
+| Nombre | `API Sacdia` |
+| Región / plan | `oregon` / `free` |
+| Rama | `development`, `autoDeploy: true` |
+| Build | `corepack pnpm install --frozen-lockfile && NODE_OPTIONS=--max-old-space-size=4096 corepack pnpm run build && corepack pnpm exec prisma migrate deploy` (las migraciones van al final del build porque el plan Free no admite pre-deploy) |
+| Start | `node --max-old-space-size=320 --max-semi-space-size=2 dist/src/main.js` |
+| Health check | `/api/v1/health` (`maxShutdownDelaySeconds: 90`, para que el worker de OCR termine su trabajo en curso) |
 
 Variables fijadas en el blueprint: `NODE_ENV=production`, `TRUST_PROXY_HOPS=1`, `SWAGGER_ENABLED=false`, `AUTH_REJECT_SNAKE_CASE=true`. Las secretas (`sync: false`) se cargan en el dashboard de Render: `ALLOWED_ORIGINS`, `DATABASE_URL`, `BETTER_AUTH_SECRET`, `QR_JWT_SECRET`, `REDIS_URL` y el resto de la tabla 4.2.
 
-> **Solo referencia.** El servicio real ("API Sacdia", Free) no sale de este blueprint y difiere en nombre, plan y comando de arranque (ver 0.1). Usar esta tabla para crear un servicio nuevo, no para describir el actual.
-
-Crear el servicio: Render → New → Blueprint → repo `abn-r/sacdia-backend`, y elegir la rama que despliega cada entorno.
+> Desde el 2026-10-28 el blueprint describe el servicio real (§0.1). Para otro entorno, copiar estos valores en un servicio nuevo con otro nombre y su propia rama (§0.10): el blueprint tal cual crearía un segundo "API Sacdia" sobre `development`.
 
 ### 4.2 Variables de entorno
 
@@ -333,12 +356,13 @@ Catálogo completo y comentado: `sacdia-backend/.env.example`. Las marcadas como
 | Grupo | Variables | Obligatoria en producción |
 |---|---|---|
 | App | `NODE_ENV`, `PORT` (3000), `TRUST_PROXY_HOPS`, `FRONTEND_URL`, `REQUEST_TIMEOUT_MS`, `LOG_LEVEL`, `LOG_PRETTY` | — |
+| Correo de investiduras | `INVESTITURE_EMAIL_ENABLED` (por defecto `false`), `ADMIN_PANEL_URL` (enlaces del correo al panel) | `ADMIN_PANEL_URL` sí, si `INVESTITURE_EMAIL_ENABLED=true` |
 | CORS y OAuth | `ALLOWED_ORIGINS` (lista separada por comas de orígenes del admin/app), `ALLOWED_OAUTH_REDIRECT_URLS` | `ALLOWED_ORIGINS` sí |
 | Seguridad | `SWAGGER_ENABLED` (debe ser `false`), `AUTH_REJECT_SNAKE_CASE`, `BOOTSTRAP_SECRET` (opcional, habilita `POST /admin/rbac/bootstrap-admin`) | — |
 | Base de datos | `DATABASE_URL`, `DATABASE_DIRECT_URL`, `DATABASE_APPLICATION_NAME`, `PRISMA_POOL_*` | `DATABASE_URL` sí |
 | Auth | `BETTER_AUTH_SECRET` (≥ 32 caracteres), `QR_JWT_SECRET` (≥ 32, distinto del anterior), `BETTER_AUTH_BASE_URL` | Los dos secretos sí |
 | OAuth | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `APPLE_CLIENT_ID`, `APPLE_TEAM_ID`, `APPLE_KEY_ID`, `APPLE_PRIVATE_KEY` | Si se usa el proveedor |
-| Redis | `REDIS_URL` (`redis://` o `rediss://`), `CACHE_DEFAULT_TTL_MS`, `CACHE_REDIS_CONNECTION_TIMEOUT_MS` | Sí (cache, rate limit y colas fallan al arrancar sin Redis) |
+| Redis | `REDIS_URL` (`redis://` o `rediss://`), `CACHE_DEFAULT_TTL_MS`, `CACHE_REDIS_CONNECTION_TIMEOUT_MS`, `REDIS_BOOT_OPTIONAL` (arrancar aunque Redis no responda) y `THROTTLER_REDIS_FALLBACK` (`closed`, `memory` u `open`: qué hace el límite de tasa si Redis cae) | Sí (cache, rate limit y colas fallan al arrancar sin Redis) |
 | R2 | `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_REGION=auto`, `R2_SIGNED_URL_EXPIRES_SECONDS` y, por alias, `R2_BUCKET_*`, `R2_PUBLIC_URL_*`, `R2_KEY_PREFIX_*` | `HONORS_PDF`, `EVIDENCE_FILES`, `INSURANCE_EVIDENCE`, `DATA_EXPORTS`, `MONTHLY_REPORTS` y `RESOURCES_FILES` sí; el resto, al usarse |
 | Carga de certificados y OCR | `CERTIFICATE_IMPORT_ALLOWED_FILE_HOSTS`, `OCR_MODE` (`direct` o `remote`), y con `remote`: `OCR_PROXY_URL`, `OCR_PROXY_ENV`, `OCR_PROXY_KID`, `OCR_PROXY_SECRET` | `OCR_MODE` sí en producción; las `OCR_PROXY_*` si es `remote` |
 | Observabilidad | `PROCESS_MEMORY_LOG_INTERVAL_MINUTES` (entero ≥ 0, por defecto 15; `0` solo desactiva el intervalo), `POSTHOG_PROJECT_TOKEN`, `POSTHOG_HOST` | — |
@@ -431,6 +455,7 @@ flutter build ipa --release \
   --dart-define=GOOGLE_MAPS_API_KEY=<key>
 ```
 
+- Otros `--dart-define` opcionales: `POSTHOG_PROJECT_TOKEN` (analítica) y `REALTIME_INVALIDATION_ENABLED` (refresco por push silencioso).
 - Identificadores: Android `applicationId = com.sacdia.app`; iOS `com.sacdia.app`. El esquema de deep link para OAuth es `io.sacdia.app` (`Info.plist`).
 - Archivos de Firebase (`android/app/google-services.json`, `ios/Runner/GoogleService-Info.plist`) no están en el repo.
 - CI (`sacdia-app/.github/workflows/ci.yml`): con los secrets `API_BASE_URL`, `GOOGLE_SERVICES_JSON_BASE64`, `GOOGLE_MAPS_API_KEY` y `ANDROID_KEYSTORE_*` genera el AAB firmado y sube símbolos a Sentry (`SENTRY_AUTH_TOKEN`, `dart run sentry_dart_plugin`). Sin keystore solo genera un APK de verificación firmado con la clave debug.
