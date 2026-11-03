@@ -8,7 +8,7 @@
 
 **Estado**: ACTIVE
 **Actualizado**: 2026-10-21 (cola de consentimientos del coordinador, jobs bajo demanda y cobertura de zona; recuento de cabecera recalculado contra `development` 59122f6d; ver la nota «Seguimientos 2026-10-21»). Antes, 2026-10-20 (perfiles familiares, Fase 2 completa: sub-fases 2a, 2b y 2c, y las sub-fases 3a, 3b y 3c pendientes de merge; ver también aceptación legal 2026-10-15 y la nota de resincronización 2026-10-13)
-**Total endpoints**: 933 decoradores HTTP en 124 archivos `*.controller.ts`: el recuento de `development` (935 en 125 archivos) menos las 2 rutas de `class-thresholds` y su controller, que se retiran con el PR #600 de sacdia-backend (pendiente de merge). La matriz incluye las filas del PR #448 de sacdia-backend, mergeado el 2026-10-07 y ya contadas en los totales: secciones `investiture-windows`, `investiture-pastors`, `investiture-requests` y el `GET .../sections/:clubSectionId/score` de camporee-scoring.
+**Total endpoints**: 933 decoradores HTTP en 124 archivos `*.controller.ts`: el recuento de `development` (935 en 125 archivos) menos las 2 rutas de `class-thresholds` y su controller, que se retiraron con el PR #600 de sacdia-backend (mergeado). La matriz incluye las filas del PR #448 de sacdia-backend, mergeado el 2026-10-07 y ya contadas en los totales: secciones `investiture-windows`, `investiture-pastors`, `investiture-requests` y el `GET .../sections/:clubSectionId/score` de camporee-scoring.
 **Métodos (development)**: GET 386 · POST 308 · PATCH 127 · DELETE 99 · PUT 13
 **Auth detectada (development)**: Public 13 · JWT u Optional JWT 920
 
@@ -64,6 +64,13 @@
 - `Uso`: sale de `@ApiOperation.summary` cuando existe; si no existe, se infiere desde el nombre del handler y el método HTTP.
 - `Uso backend`: primeras llamadas a servicios/repositorios inyectados detectadas en el handler. `-` significa que el handler responde inline o usa lógica privada no capturada por esta extracción estática.
 - `Source`: controller de origen para verificar el contrato antes de tocar clientes.
+
+## Errores comunes de validación
+
+Valen para **todas** las rutas (sacdia-backend PR #603 y PR #604, mergeados en `development` el 2026-11-03).
+
+- **Id mal formado**: un parámetro de ruta que debe ser UUID y no lo es (`:userId`, `:clubId`, `:id`…) responde 400 `GUARD_ID_PARAM_INVALID`, con mensaje traducido. Antes respondía el 400 de Nest, en inglés y sin `code`. Es el mismo código que ya daba `PermissionsGuard`. Lo aplica `ParseUuidParamPipe` (`src/common/pipes/parse-uuid-param.pipe.ts`); con `{ optional: true }` deja pasar un valor ausente y valida cualquier otro. Los guards corren antes que los pipes: si quien llama no tiene permiso sobre ese recurso, recibe primero el 403 del guard (por ejemplo, `GET /validation/eligibility/no-es-uuid` pedido por alguien que no es el dueño ni tiene permiso global responde 403 `GUARD_PERMISSION_DENIED`). Las filas de la tabla no repiten este error en cada ruta.
+- **Longitud de texto**: los DTOs usan `@MaxLengthIfString` (`src/common/validation/max-length-if-string.decorator.ts`) en lugar de `@MaxLength`. Si un campo falta o no es texto, el 400 informa solo el error de tipo (`isString`), sin el «no puede superar N caracteres» sobrante. Un texto demasiado largo sigue dando `maxLength`, con el mismo mensaje y el mismo argumento `{max}`.
 
 ## Actuar en nombre de un dependiente (`X-Acting-For`)
 
@@ -905,7 +912,7 @@ Por defecto `false` (`config/env.validation.ts`; se lee del arranque como las ot
 
 ## Resumen por dominio
 
-Conteo de decoradores HTTP por tag de Swagger (`@ApiTags` de cada clase controller) contra `development` commit `59122f6d` (2026-10-21). La suma era 935 en ese commit; sin las 2 rutas de `class-thresholds` que retira el PR #600 de sacdia-backend (pendiente de merge) es 933, igual que la cabecera. `app.controller.ts` no tiene `@ApiTags` y se cuenta por archivo. Agrupaciones: `camporees` incluye `camporee-club-registration`; `certifications` incluye `certifications - closeout` y `certifications - review`; `insurance` incluye `insurance purchases`; `field-payment-orders` incluye `insurance reassignments`; `rbac` incluye `rbac-bootstrap`; `guardianships` no incluye `supervision (adolescente)` (las 3 rutas de `teen-link-codes`). Los perfiles familiares (PR #530 y #531 de sacdia-backend) ya están mergeados y cuentan en el total. Las filas al final del bloque no estaban en la tabla anterior.
+Conteo de decoradores HTTP por tag de Swagger (`@ApiTags` de cada clase controller) contra `development` commit `59122f6d` (2026-10-21). La suma era 935 en ese commit; sin las 2 rutas de `class-thresholds` que retiró el PR #600 de sacdia-backend (mergeado) es 933, igual que la cabecera. `app.controller.ts` no tiene `@ApiTags` y se cuenta por archivo. Agrupaciones: `camporees` incluye `camporee-club-registration`; `certifications` incluye `certifications - closeout` y `certifications - review`; `insurance` incluye `insurance purchases`; `field-payment-orders` incluye `insurance reassignments`; `rbac` incluye `rbac-bootstrap`; `guardianships` no incluye `supervision (adolescente)` (las 3 rutas de `teen-link-codes`). Los perfiles familiares (PR #530 y #531 de sacdia-backend) ya están mergeados y cuentan en el total. Las filas al final del bloque no estaban en la tabla anterior.
 
 | Dominio/API tag | Endpoints |
 | --- | ---: |

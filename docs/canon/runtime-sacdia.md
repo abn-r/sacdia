@@ -125,7 +125,7 @@ Notas:
 
 - `institutional-history` solo contiene el dominio y políticas del PR1 (sin controller); ver `docs/plans/2026-07-23-institutional-history-implementation-plan.md`.
 - El módulo legacy `folders` no tiene controller; los modelos `folders*` siguen en el schema (ver `docs/history/canon/runtime-user-folders.md` y `decisiones-clave.md` §19).
-- La autorización de investidura por umbral, las ventanas/solicitudes de investidura por campo local y el OCR de Vision con ADC/PDF entraron a `development` con el PR #448 de sacdia-backend (rama `feat/investiture-authorization-ocr`, mergeada). La autorización por solicitud quedó completa con #465, #466, #468 y #469 (ver `docs/features/validacion-investiduras.md`). El porcentaje de clase por Campo (`class-thresholds`) ya no existe: desde el 2026-11-02 solo `VALIDATED` completa un requisito y el PR #600 de sacdia-backend retira sus rutas (pendiente de merge).
+- La autorización de investidura por umbral, las ventanas/solicitudes de investidura por campo local y el OCR de Vision con ADC/PDF entraron a `development` con el PR #448 de sacdia-backend (rama `feat/investiture-authorization-ocr`, mergeada). La autorización por solicitud quedó completa con #465, #466, #468 y #469 (ver `docs/features/validacion-investiduras.md`). El porcentaje de clase por Campo (`class-thresholds`) ya no existe: desde el 2026-11-02 solo `VALIDATED` completa un requisito y el PR #600 de sacdia-backend (mergeado) retiró sus rutas.
 
 ---
 
