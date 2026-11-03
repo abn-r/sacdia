@@ -31,7 +31,7 @@ Referencia humana concisa del schema Prisma vigente.
 
 - Tabla nueva, no aplicada a producción en este cambio.
 - Clave `(local_field_id, ecclesiastical_year_id)`, `minimum_percent` 0–100, default 80.
-- Sin uso: desde el 2026-11-02 solo `VALIDATED` completa un requisito, y el PR #600 de sacdia-backend elimina el servicio, las rutas `class-thresholds` y su lectura en el cálculo de requisitos (Pendiente de merge (PR #600 de sacdia-backend)). La tabla queda en el esquema.
+- Sin uso: desde el 2026-11-02 solo `VALIDATED` completa un requisito, y el PR #600 de sacdia-backend elimina el servicio, las rutas `class-thresholds` y su lectura en el cálculo de requisitos. La tabla queda en el esquema.
 - Migración: `sacdia-backend/prisma/migrations/20260930120000_local_field_class_thresholds/migration.sql`.
 
 ### `local_field_investiture_windows` (2026-10-01)
