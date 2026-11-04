@@ -532,7 +532,7 @@ Migraciones `20260527120000_institutional_hierarchy_history`, `20260527193000_cl
 
 ### Autorización
 
-- `authorization_context_versions` — una fila por usuario (`user_id` PK, `version BIGINT`). `AuthorizationContextVersionService` (`src/common/authorization/`) la incrementa dentro de la transacción que cambia asignaciones o geografía, para invalidar el contexto de autorización cacheado. Migración `20260730150000_authorization_temporal_context`.
+- `authorization_context_versions` — una fila por usuario (`user_id` PK, `version BIGINT`). Ya **no** la escribe el runtime: `AuthorizationContextVersionService` y el `bumpMany` del corte de año se eliminaron (backend PR #607); el cache de autorización se invalida por clave (`auth:context:v8`) y su TTL respeta las fronteras temporales. Solo la toca el script `scripts/backfill-local-field-timezones.ts`. Migración `20260730150000_authorization_temporal_context`.
 
 ### Camporees (personal, participantes externos, plantillas y sedes)
 

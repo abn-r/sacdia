@@ -26,6 +26,8 @@ La regla principal es:
 | `club_assignment` | Recurso de asignacion | Permiso efectivo + relacion con `assignment_id` |
 | `user` | Recurso del propio usuario | Permiso global o fallback de ownership |
 
+Autoridad exacta sobre cargos de club (`src/common/authorization/section-role-mutation.policy.ts`), aplicada a asignar, actualizar y revocar cargos, `director-assignment`, `director-succession` y `director-designation`: `super-admin` y `admin` (cualquier sección); `director-lf` y `assistant-lf` del mismo campo local que el club; `director` vigente de la misma sección, salvo sobre sí mismo o sobre el cargo `director`. El rol destino `member` está exento (lo rigen los flujos de membresía). Unión, DIA y `assistant-admin` no mutan cargos. Los nombres de rol se comparan literalmente, sin alias ni herencia. Rechazo: 403 `CLUB_ROLE_MUTATION_FORBIDDEN`.
+
 Nota de implementacion:
 
 - En codigo existen recursos derivados (`activity`, `finance`, `inventory_item`, `inventory_instance`) que resuelven finalmente a validacion de `club_instance`.
@@ -61,11 +63,11 @@ Nota de implementacion:
 | `club_members:approve` | Listar no inscritos del año vigente (`GET /club-sections/:sectionId/annual-continuations`) | `club_section` | permiso + `@AuthorizationResource` club_section (idParam: sectionId) | Admin |
 | `club_members:approve` | Inscribir no inscritos (`POST /club-sections/:sectionId/annual-continuations`) | `club_section` | permiso + `@AuthorizationResource` club_section (idParam: sectionId). Owner del perfil **no** autoriza. | Admin |
 | `registration:complete` | Autoinscripción anual (`POST /users/:userId/membership/annual-enroll`) | `user` | Guard: permiso + owner bypass. Servicio: **403** `ANNUAL_ENROLL_REQUIRES_DIRECTIVE` (D01). Sin efectos. | App |
-| `club_roles:assign` | Crear asignacion (`POST /clubs/:clubId/sections/:sectionId/roles`) | `club` | permiso + `@AuthorizationResource` club (`clubIdParam`) + reglas complementarias en `ClubsService.assignRole`; `club_section_id` del body debe coincidir con `sectionId` | Admin y App |
-| `club_roles:assign` | Preelegir / reemplazar / cancelar director N+1 (`POST`/`PATCH`/`DELETE /clubs/:clubId/sections/:sectionId/director-designation`) | `club` | permiso + `@AuthorizationResource` club + `assertCanDesignateDirector` (super-admin, admin, director-lf, assistant-lf **y** `canManageClub`); sección ∈ club de la URL | Admin |
-| `club_roles:assign` | Leer programación de director (`GET /clubs/:clubId/sections/:sectionId/director-designation`) | `club` | mismos actores que POST (el permiso solo no basta; GET también exige `assertCanDesignateDirector`) | Admin |
-| `club_roles:assign` | Actualizar asignacion (`PATCH /club-roles/:assignmentId`) | `club_assignment` | permiso efectivo + active assignment o bypass global | Admin y App |
-| `club_roles:revoke` | Revocar asignacion (`DELETE /club-roles/:assignmentId`) | `club_assignment` | permiso efectivo + active assignment o bypass global | Admin |
+| `club_roles:assign` | Crear asignacion (`POST /clubs/:clubId/sections/:sectionId/roles`) | `club` | permiso + `@AuthorizationResource` club (`clubIdParam`) + `SectionRoleMutationPolicy` (autoridad exacta, abajo) + reglas complementarias en `ClubsService.assignRole`; `club_section_id` del body debe coincidir con `sectionId`; evento crítico `CLUB_ROLE_ASSIGNED` en la misma transacción | Admin y App |
+| `club_roles:assign` | Preelegir / reemplazar / cancelar director N+1 (`POST`/`PATCH`/`DELETE /clubs/:clubId/sections/:sectionId/director-designation`) | `club` | permiso + `@AuthorizationResource` club + `SectionRoleMutationPolicy` (`super-admin`, `admin`, `director-lf`/`assistant-lf` del mismo campo local; 403 `CLUB_ROLE_MUTATION_FORBIDDEN`) + rol global `super-admin`/`admin`/`director-lf`/`assistant-lf` en el POST; sección ∈ club de la URL; solo año siguiente, ventana 1 oct–31 dic por fecha de negocio del campo | Admin |
+| `club_roles:assign` | Leer programación de director (`GET /clubs/:clubId/sections/:sectionId/director-designation`) | `club` | mismos actores que POST (el permiso solo no basta; GET también pasa por `SectionRoleMutationPolicy` con el cargo `director`, por lo que un director de sección es rechazado) | Admin |
+| `club_roles:assign` | Actualizar asignacion (`PATCH /club-roles/:assignmentId`) | `club_assignment` | permiso efectivo + active assignment o bypass global + `SectionRoleMutationPolicy` sobre el rol actual y el nuevo; evento crítico `CLUB_ROLE_UPDATED` | Admin y App |
+| `club_roles:revoke` | Revocar asignacion (`DELETE /club-roles/:assignmentId`) | `club_assignment` | permiso efectivo + active assignment o bypass global + `SectionRoleMutationPolicy`; evento crítico `CLUB_ROLE_REVOKED` | Admin |
 | `activities:read` | Ver actividades | `club` | permiso global territorial o contexto club | Admin y App |
 | `activities:create` | Crear actividad | `club` | permiso + ClubRoles director/deputy/secretary/secretary-treasurer/counselor o bypass territorial | Admin y App |
 | `activities:update` | Editar actividad | `club_instance` | permiso efectivo + instancia exacta o bypass global | Admin y App |
@@ -87,6 +89,8 @@ Nota de implementacion:
 | `notifications:club` | Enviar notificacion a club | `active_assignment` | permiso efectivo + asignacion activa exacta | Admin |
 | `permissions:read` | Ver RBAC | `global` | permiso global | Admin |
 | `permissions:assign` | Cambiar permisos | `global` | permiso + `@GlobalRoles('super-admin')` | Admin |
+| `permissions:assign` | Asignar / revocar rol global (`POST`/`DELETE /admin/rbac/users/:userId/roles[/:roleId]`) | `global` | permiso + `@GlobalRoles('super-admin')` + `GlobalUserRoleWriteService` (`ExactSuperAdminWritePolicy`: fila activa `users_roles` `super-admin` GLOBAL, si no 403 `SUPER_ADMIN_WRITE_REQUIRED`; locks, `Idempotency-Key`, evento crítico `RBAC_GLOBAL_ROLE_ASSIGNED`/`REVOKED`) | Admin |
+| `roles:read` | Ver roles globales de un usuario (`GET /admin/rbac/users/:userId/roles`) | `global` | permiso + `@GlobalRoles('admin', 'super-admin')` | Admin |
 | `roles:read` | Ver roles | `global` | permiso global | Admin |
 | `user_honors:create` | Alta de especialidad (`POST /users/:userId/honors`, `/bulk`) | `user` | permiso + ownership (`ownerParam: userId`). Servicio: una fila `APPROVED` o `PENDING_REVIEW` responde 400 `VALIDATION_HONOR_INVALID_STATUS` sin escribir (SEC-1) | App |
 | `user_honors:delete` | Abandonar especialidad (`DELETE /users/:userId/honors/:honorId`) | `user` | permiso + ownership. Servicio: `APPROVED` y `PENDING_REVIEW` bloqueadas (SEC-2) | App |

@@ -55,7 +55,7 @@
 
 ## 7. Cache
 
-- Redis con `cache-manager`. Claves por dominio (`cache:catalogs:*`, `auth:context:v7:{userId}`...).
+- Redis con `cache-manager`. Claves por dominio (`cache:catalogs:*`, `auth:context:v8:{userId}`...).
 - Toda mutación que cambie datos cacheados invalida su clave (los catálogos tienen además `POST /api/v1/admin/catalogs/cache/invalidate`).
 - Los dashboards de analytics usan cache en memoria del proceso (TTL 60 s), no Redis.
 

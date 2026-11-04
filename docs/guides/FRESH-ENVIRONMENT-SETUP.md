@@ -110,7 +110,7 @@ Qué hace y qué no:
 ### 1.6 Trampas de arranque conocidas
 
 - **PermissionsGuard fail-closed sin bypass de super-admin.** Con `permissions` o `role_permissions` vacías, TODO endpoint protegido devuelve 403, incluso para super-admin. Por eso el orden de seeds es estricto.
-- **Cache de autorización 5 min** (`auth:context:v7:{userId}`). Después de sembrar roles o permisos, o se invalida (`POST /api/v1/admin/catalogs/cache/invalidate` para catálogos; para usuario, re-login o flush de Redis) o se espera.
+- **Cache de autorización 5 min** (`auth:context:v8:{userId}`). Después de sembrar roles o permisos, o se invalida (`POST /api/v1/admin/catalogs/cache/invalidate` para catálogos; para usuario, re-login o flush de Redis) o se espera.
 - **Año eclesiástico "actual" cacheado 24 h.** Si se consultó cuando no había año, el null queda cacheado. Flush de Redis después de crear el primer año.
 - **`local_fields.timezone` debe ser IANA válido.** Las ventanas de investidura responden 503 `LOCAL_FIELD_TIMEZONE_UNAVAILABLE` si es null o inválido. El formulario de campo local no lo pide; hay un script `pnpm backfill:local-field-timezones`.
 - **Defaults `active = false`** en `countries`, `unions`, `local_fields`, `districts`, `clubs`, `club_sections`, `club_types`, `ecclesiastical_years`, `honors_categories`, `master_honors`, `finances_categories`, `inventory_categories`, `folder_templates`. Lo que se inserte por SQL sin `active = true` queda invisible.

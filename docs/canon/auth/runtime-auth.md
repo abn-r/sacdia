@@ -2,7 +2,7 @@
 
 ## Estado
 ACTIVE
-<!-- VERIFICADO contra código 2026-04-13: runtime auth alineado con Better Auth, verify-email, OAuth callback POST y MFA aal1/aal2. Reverificado 2026-10-04: key de cache `v7`, `POST /auth/password/reset` y `DELETE /auth/me`. -->
+<!-- VERIFICADO contra código 2026-04-13: runtime auth alineado con Better Auth, verify-email, OAuth callback POST y MFA aal1/aal2. Reverificado 2026-10-04: key de cache `v8`, `POST /auth/password/reset` y `DELETE /auth/me`. -->
 
 ## Propósito
 Este documento define el comportamiento técnico vigente del dominio de autenticación y autorización.
@@ -186,7 +186,7 @@ Reglas vigentes:
 - `authorization.effective.permissions` es la fuente operativa para gating de UX;
 - permisos de club salen solo de la asignación activa;
 - `users_permissions` activos entran a `direct_permissions` y a `effective.permissions` (grant global);
-- cache Redis `auth:context:v7:{userId}` (TTL 5 min); mutar roles/permisos invalida la clave. Al invalidar también se borran las claves heredadas (`v2`–`v6` y la clave sin versión) definidas en `authorization-context.service.ts`;
+- cache Redis `auth:context:v8:{userId}` (TTL ≤ 5 min, recortado al fin del año eclesiástico y a la próxima frontera `start_date`/`end_date`/`expires_at` de los cargos); mutar roles/permisos invalida la clave. Al invalidar también se borran las claves heredadas (`v2`–`v7` y la clave sin versión) definidas en `authorization-context.service.ts`;
 - los campos legacy `roles`, `permissions`, `club` y `club_context` siguen expuestos solo por compatibilidad temporal.
 
 ## Contexto activo de club

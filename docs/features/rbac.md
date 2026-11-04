@@ -34,17 +34,16 @@ El sistema incluye un mecanismo de permisos sensibles para sub-recursos de usuar
   - `@SkipPermissions()` — opt-out explicito del `PermissionsGuard` global (`src/common/decorators/skip-permissions.decorator.ts`)
 - **Authorization Context Service**: `src/common/services/authorization-context.service.ts` — resuelve el contexto de autorizacion efectivo del actor
 - **Sensitive Subresource Policy**: `src/common/guards/sensitive-user-subresource-policy.ts`
-- **10 endpoints RBAC admin**:
-  - `GET /api/v1/admin/rbac/permissions` — Listar todos los permisos (roles: super_admin, admin)
-  - `GET /api/v1/admin/rbac/permissions/:id` — Obtener permiso por ID (roles: super_admin, admin)
-  - `POST /api/v1/admin/rbac/permissions` — Crear permiso (roles: super_admin)
-  - `PATCH /api/v1/admin/rbac/permissions/:id` — Actualizar permiso (roles: super_admin)
-  - `DELETE /api/v1/admin/rbac/permissions/:id` — Desactivar permiso (roles: super_admin)
-  - `GET /api/v1/admin/rbac/roles` — Listar roles con sus permisos (roles: super_admin, admin)
-  - `GET /api/v1/admin/rbac/roles/:id` — Obtener rol con permisos (roles: super_admin, admin)
-  - `POST /api/v1/admin/rbac/roles/:id/permissions` — Asignar permisos a rol (roles: super_admin)
-  - `PUT /api/v1/admin/rbac/roles/:id/permissions` — Sincronizar permisos de rol (roles: super_admin)
-  - `DELETE /api/v1/admin/rbac/roles/:id/permissions/:permissionId` — Remover permiso de rol (roles: super_admin)
+- **19 endpoints RBAC admin** (`src/rbac/rbac.controller.ts`, más `POST /admin/rbac/bootstrap-admin`, público y protegido por `x-bootstrap-secret`). Todos exigen JWT; el rol global solo existe donde se indica `@GlobalRoles`, el resto depende del permiso:
+  - `GET /api/v1/admin/rbac/permissions`, `GET .../permissions/:id` — Listar/obtener permisos (`permissions:read`)
+  - `POST /api/v1/admin/rbac/permissions`, `PATCH`/`DELETE .../permissions/:id` — Crear/actualizar/desactivar permiso (`@GlobalRoles('super-admin')` + `permissions:assign`)
+  - `GET /api/v1/admin/rbac/roles`, `GET .../roles/:id` — Listar/obtener roles con sus permisos (`roles:read`)
+  - `POST /api/v1/admin/rbac/roles`, `PATCH`/`DELETE .../roles/:id` — Crear/actualizar/desactivar rol (`super-admin` + `permissions:assign`)
+  - `POST` / `PUT .../roles/:id/permissions`, `DELETE .../roles/:id/permissions/:permissionId` — Asignar, sincronizar o remover permisos de un rol (`super-admin` + `permissions:assign`)
+  - `GET .../users/:userId/permissions` — Permisos directos de un usuario (`permissions:read`)
+  - `POST .../users/:userId/permissions`, `DELETE .../users/:userId/permissions/:permissionId` — Grants directos (`super-admin` + `permissions:assign`)
+  - `GET .../users/:userId/roles` — Roles globales de un usuario (`@GlobalRoles('admin', 'super-admin')` + `roles:read`)
+  - `POST .../users/:userId/roles`, `DELETE .../users/:userId/roles/:roleId` — Asignar/revocar rol global (`@GlobalRoles('super-admin')` + `permissions:assign`; ver «Roles globales de usuario»)
 
 ### Admin
 - **Paginas de RBAC** (bajo Configuracion; ya no existe el hub `/dashboard/rbac`):
@@ -166,6 +165,50 @@ No agregan permisos ni cambian el seed: usan `user_honors:*` ya existentes o JWT
 - **Panel:** la pantalla `honor-instructor-proposals` (`/dashboard/honor-instructor-proposals`, sección investidura del catálogo de pantallas) usa `viewAny` y las capacidades `approve` y `reject` con los mismos cinco roles (`roleOnlyAccess(CERTIFICATE_BULK_ROLES)`), espejo literal del `@GlobalRoles` del controlador. El sidebar la muestra como «Propuestas de instructor».
 - **`/honors*`, `/classes*` y `/catalogs/*`** son públicos con JWT opcional; la referencia live los marcaba `JWT` y se corrigió. No requieren permiso.
 
+## Vigencia temporal, autoridad de cargos y roles globales (2026-11-04)
+
+Backend PR #607, #608, #609 y #610, ya en `development`.
+
+### Vigencia temporal de los cargos de club
+
+- `buildClubGrant.operational` exige, además de `status=active`, año eclesiástico vigente y ciclo del club listo, que `ClubAssignmentEffectivityPolicy.isEffective` sea verdadero. La fecha de negocio es la del **Campo Local del club** (`local_fields.timezone`); si es `null` o no es una zona canónica se usa `America/Mexico_City`. Helper: `src/common/authorization/club-assignment-temporal.ts` (`toTemporalLocalField`, `CLUB_ASSIGNMENT_TEMPORAL_FIELDS`).
+- `ClubRolesGuard` y las consultas directas de `PermissionsGuard` filtran con la misma política y la misma fecha de negocio, de modo que un cargo vencido deja de dar permisos en todos los caminos.
+- `PATCH /auth/me/context` rechaza con 400 `AUTH_ASSIGNMENT_YEAR_MISMATCH` un assignment fuera de ventana (igual que `designated`, año ajeno o `status` distinto de `active`).
+- Preflight de datos antes de desplegar: `prisma/scripts/authorization-effectivity-preflight.sql` (solo lectura; lista cargos `active` del año vigente que están fuera de su ventana y perderán permisos).
+
+### Autoridad exacta sobre cargos (`SectionRoleMutationPolicy`)
+
+`src/common/authorization/section-role-mutation.policy.ts`. Compara nombres de rol de forma literal (sin alias ni herencia) y aplica a `assignRole`, `updateRoleAssignment`, `removeRoleAssignment`, `assignInitialSectionDirector`, `succeedSectionDirector` y a `director-designation` (POST, GET, PATCH, DELETE). Puede mutar:
+
+| Actor | Alcance |
+| --- | --- |
+| `super-admin`, `admin` | cualquier sección |
+| `director-lf`, `assistant-lf` | secciones de clubes de **su mismo Campo Local** |
+| `director` operativo de la sección | solo esa sección; **no** sobre sí mismo y **no** sobre el cargo `director` (ni para nombrar ni para leer la programación `director-designation`) |
+| rol destino `member` | exento (lo rigen los flujos de membresía) |
+
+Unión, DIA y `assistant-admin` no mutan cargos. Cualquier otro actor recibe 403 `CLUB_ROLE_MUTATION_FORBIDDEN`. Un cambio de rol (`updateRoleAssignment`) valida tanto el rol actual como el nuevo.
+
+### Auditoría de cargos
+
+`CriticalAuditWriterService` escribe dentro de la misma transacción del cargo: `CLUB_ROLE_ASSIGNED`, `CLUB_ROLE_UPDATED`, `CLUB_ROLE_REVOKED` (y `DIRECTOR_SUCCEEDED` en la destitución de director). El actor es el usuario autenticado. Si el writer falla, la transacción hace rollback y el cargo no cambia.
+
+### Roles globales de usuario (`GlobalUserRoleWriteService`)
+
+`POST /admin/rbac/users/:userId/roles` y `DELETE /admin/rbac/users/:userId/roles/:roleId` exigen `@GlobalRoles('super-admin')` y `permissions:assign`, y delegan en `src/rbac/global-user-role-write.service.ts`:
+
+- locks advisory por usuario (`rbac-user:{id}`, actor y objetivo ordenados) y por evento;
+- `Idempotency-Key` opcional (si falta se genera uno); misma clave con otro payload → 409 `IDEMPOTENCY_KEY_REUSED`; un reintento con el mismo payload devuelve el resultado original (`replayed: true`);
+- `ExactSuperAdminWritePolicy` (`src/rbac/exact-super-admin-write.policy.ts`): el actor debe tener una fila activa en `users_roles` con el rol `super-admin` de categoría `GLOBAL`; si no, 403 `SUPER_ADMIN_WRITE_REQUIRED`. Un rol que no sea `GLOBAL` → 400 `RBAC_GLOBAL_ROLE_REQUIRED`;
+- evento crítico en la misma transacción: `RBAC_GLOBAL_ROLE_ASSIGNED`, `RBAC_GLOBAL_ROLE_REVOKED` o `RBAC_GLOBAL_ROLE_ASSIGNMENT_NOOP`.
+
+`RbacService.assignRoleToUser` y `removeRoleFromUser` ya no existen; el controlador invalida el cache del usuario afectado después de escribir.
+
+### Specs de red de seguridad
+
+- `src/common/guards/permission-catalog-parity.spec.ts`: todo permiso referenciado en el código (`@RequirePermissions`, `@SensitiveUserSubresource`, constantes de política) debe existir en el catálogo (`permissions.seed.sql` y los `INSERT INTO permissions` de las migraciones); evita permisos fantasma.
+- `src/common/guards/tenant-binding-allowlist.freeze.spec.ts`: ratchet de la allowlist de rutas que aún no tienen `bind` de tenant (`tenant-binding-allowlist.ts`), fijada en 69 (`FROZEN_TOTAL`, más el desglose por marcador). Agregar entradas rompe el build; quitar entradas también, hasta bajar el congelado en el spec.
+
 ## Context Switching y permisos por seccion activa
 
 El sistema soporta usuarios con multiples asignaciones de club (ej: Director en Conquistadores + Miembro en Guias Mayores). El contexto activo se controla mediante `PATCH /auth/me/context` y afecta los permisos visibles en toda la app.
@@ -175,7 +218,7 @@ El sistema soporta usuarios con multiples asignaciones de club (ej: Director en 
 - **Campo canonico**: `users_pr.active_club_assignment_id` en la DB
 - **Seteo**: `PATCH /auth/me/context` con `{ assignment_id }` — escribe en DB, invalida cache Redis, re-resuelve autorizacion
 - **Lectura**: Tanto `GET /auth/me` como `GET /dashboard/summary` leen del mismo campo canonico. El dashboard carga las asignaciones activas en la misma lectura de `users` y elige en memoria por `active_club_assignment_id` (si el ID ya no está activo, cae a la más reciente).
-- **Cache**: Redis `auth:context:v7:{userId}` con revisión de calendario; TTL ≤ 5 min y no cruza el fin del año eclesiástico. Se invalida en cada context switch y en el corte.
+- **Cache**: Redis `auth:context:v8:{userId}` con revisión de calendario en el envelope (`AUTH_CONTEXT_CACHE_KEY`). TTL = el menor entre 5 min, el fin del año eclesiástico y la próxima frontera temporal (`start_date`, `end_date` o `expires_at`) de cualquier assignment cargado (`cacheTtlMs`). Si el TTL resulta ≤ 0 no se cachea. Se invalida en cada context switch y en cada mutación de cargos o roles; al invalidar también se borran las claves `v2`–`v7` y la clave sin versión. El corte de año ya no sube ninguna versión: la vigencia se resuelve por fecha y por TTL.
 
 ### Calculo de effectivePermissions
 
@@ -261,7 +304,7 @@ El archivo `prisma/seeds/role-permissions.seed.sql` es **idempotente**: cada blo
 - `units:create` / `units:delete`
 - `materiales:*` (si no se reafirman aqui, un re-seed borra los grants de la migracion 20260513)
 
-Correr `permissions.seed.sql` y luego `role-permissions.seed.sql`. El snapshot Redis usa `auth:context:v5:{userId}` (TTL ~5 min); mutar `users_permissions` o roles invalida esa clave.
+Correr `permissions.seed.sql` y luego `role-permissions.seed.sql`. El snapshot Redis usa `auth:context:v8:{userId}` (TTL ≤ 5 min); mutar `users_permissions` o roles invalida esa clave.
 
 ## Bugs corregidos (2026-04-10)
 
@@ -276,7 +319,7 @@ Correr `permissions.seed.sql` y luego `role-permissions.seed.sql`. El snapshot R
 
 - **Sin UI en app**: Correcto por diseno — la app no necesita interfaz de administracion de RBAC
 - **Permisos directos a usuarios**: `users_permissions` entra en `effective.permissions` y en el set global del PermissionsGuard. Mutar esos grants es `super-admin`.
-- **Auditoria de matriz**: las mutaciones de `role_permissions`, `users_permissions` y `users_roles` escriben `audit_logs` de dominio (`source: service`) con actor y `changes`. CRUD de catalogo de permisos/roles queda en el interceptor HTTP generico.
+- **Auditoria de matriz**: las mutaciones de `role_permissions` y `users_permissions` escriben `audit_logs` de dominio (`source: service`) con actor y `changes`. Las de `users_roles` (roles globales) y las de cargos de club escriben evento crítico dentro de la transacción (ver secciones siguientes). CRUD de catalogo de permisos/roles queda en el interceptor HTTP generico.
 - **`audit:read`**: solo `super-admin`. El wildcard de `admin` (todo excepto `:delete`) excluye este permiso. Protege `GET /admin/audit-logs` y `GET /admin/audit-logs/:id`. El historial de club (`GET /clubs/:clubId/history`) sigue en `clubs:read`.
 - **OR `users:*`**: sunset documentado `2027-03-31`; el fallback sigue encendido.
 - **PermissionsGuard es APP_GUARD**: un endpoint JWT nuevo sin `@RequirePermissions`, `@SkipPermissions` o `@Public` responde `GUARD_RBAC_MISCONFIGURATION`.

@@ -76,14 +76,14 @@ el aviso correspondiente y no ofrece un CTA de autoinscripción.
 | Inscribir lote (`POST annual-continuations`) | Directiva/actor con `club_members:approve` en la sección destino | 1–100 UUID distintos; owner del perfil no autoriza; resultado por usuario: `enrolled`, `already_enrolled`, `blocked` o `failed`; actor queda auditado. | App móvil; admin aún no consume este contrato. |
 | Autoinscribirse (`POST users/:userId/membership/annual-enroll`) | El guard permite permiso `registration:complete` + owner, pero el servicio lo bloquea deliberadamente. | Siempre `403 ANNUAL_ENROLL_REQUIRES_DIRECTIVE`; sin escritura, ni `pending`, ni éxito simulado. | Data source/notifier Flutter conservados, pero la UI no los llama. |
 | Asignación inicial de director | `super-admin`, `admin`, `director-lf`, `assistant-lf` con permiso/alcance de club | Crea director operativo solo del año vigente; no sustituye la preelección futura. | API disponible; no es el flujo anual de continuidad. |
-| Reemplazo operativo (`POST director-succession`) | Backend: roles globales `super-admin`, `admin`, `director-lf`, `assistant-lf` + `canManageClub`; requiere `club_roles:assign` y `club_roles:revoke`. | `current_assignment_id` debe ser director activo de la sección y del año vigente; transacción termina el actual y crea el nuevo. | Acción administrativa existe, pero no se encontró formulario conectado en la UI actual. |
-| Preelección futura (`POST director-designation`) | `super-admin`, `admin`, `director-lf`, `assistant-lf` + `canManageClub`; permiso `club_roles:assign`. | Sección debe pertenecer al club de la URL; año por fecha debe ser futuro; exige `Idempotency-Key`; un plan abierto por sección/año. | Admin: bloque en detalle de secciones. |
+| Reemplazo operativo (`POST director-succession`) | Backend: `SectionRoleMutationPolicy` (`super-admin`, `admin`, `director-lf`/`assistant-lf` del mismo campo local); requiere `club_roles:assign` y `club_roles:revoke`. | `current_assignment_id` debe ser director activo de la sección y del año vigente; transacción termina el actual y crea el nuevo. | Acción administrativa existe, pero no se encontró formulario conectado en la UI actual. |
+| Preelección futura (`POST director-designation`) | `super-admin`, `admin`, `director-lf`, `assistant-lf` (los dos últimos del mismo campo local, `SectionRoleMutationPolicy`); permiso `club_roles:assign`. | Sección debe pertenecer al club de la URL; solo el año siguiente, del 1 oct al 31 dic por fecha de negocio del campo (`CLUB_DIRECTOR_PLAN_WINDOW_CLOSED`); exige `Idempotency-Key`; un plan abierto por sección/año. | Admin: bloque en detalle de secciones. |
 | Leer/reemplazar/cancelar plan futuro (`GET/PATCH/DELETE director-designation`) | Mismos actores y alcance de la preelección. | `PATCH` usa `succession_id + version`; `DELETE` usa `successionId + version`; no mutan al director operativo. | Admin lee y reemplaza; no se encontró botón/cliente de cancelación. |
 
 **Diferencia de exposición en admin:** la acción server-side de sucesión
 operativa hace un pre-check más estrecho y solo deja pasar explícitamente
 `director-lf`/`assistant-lf`, aunque el backend permite también `admin` y
-`super-admin` con `canManageClub`. Es una diferencia de superficie que debe
+`super-admin` (`SectionRoleMutationPolicy`). Es una diferencia de superficie que debe
 resolverse antes de presentarla como capacidad uniforme.
 
 ## Continuidad de clase y casos borde
