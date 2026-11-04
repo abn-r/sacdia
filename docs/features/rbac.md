@@ -208,11 +208,11 @@ Unión, DIA y `assistant-admin` no mutan cargos. Cualquier otro actor recibe 403
 ### Specs de red de seguridad
 
 - `src/common/guards/permission-catalog-parity.spec.ts`: todo permiso referenciado en el código (`@RequirePermissions`, `@SensitiveUserSubresource`, constantes de política) debe existir en el catálogo (`permissions.seed.sql` y los `INSERT INTO permissions` de las migraciones); evita permisos fantasma.
-- `src/common/guards/tenant-binding-allowlist.freeze.spec.ts`: ratchet de la allowlist de rutas que aún no tienen `bind` de tenant (`tenant-binding-allowlist.ts`), fijada en 69 (`FROZEN_TOTAL`, más el desglose por marcador). Agregar entradas rompe el build; quitar entradas también, hasta bajar el congelado en el spec. Pendiente de merge (PR #615 de sacdia-backend): la allowlist queda vacía y el spec exige que siga vacía (ver «Tenant binding»).
+- `src/common/guards/tenant-binding-allowlist.freeze.spec.ts`: ratchet de la allowlist de rutas que aún no tienen `bind` de tenant (`tenant-binding-allowlist.ts`); nació fijada en 69 (`FROZEN_TOTAL`, más el desglose por marcador) y las fases que retiraban rutas bajaban el congelado. Desde la fase 5 (mergeado el 2026-11-04 (PR #615 de sacdia-backend)) la allowlist está vacía y el spec exige que siga vacía (ver «Tenant binding»).
 
 ## Motor de políticas: catálogo generado, policies por recurso, literales de rol y tenant binding (2026-11-04)
 
-Fases 3, 4 y 6 del plan `docs/history/plans/2026-11-03-rbac-policy-engine-remediation.md`, mergeadas en `development` el 2026-11-04 (backend PR #611, #612, #613 y #614; admin #288 y #289; app #226 y #228). La fase 5 (tenant binding) está abierta como PR #615 de sacdia-backend y se marca Pendiente de merge. El estado por fase vive en ese plan.
+Fases 3, 4 y 6 del plan `docs/history/plans/2026-11-03-rbac-policy-engine-remediation.md`, mergeadas en `development` el 2026-11-04 (backend PR #611, #612, #613 y #614; admin #288 y #289; app #226 y #228). La fase 5 (tenant binding, backend PR #615) se mergeó el mismo día. El estado por fase vive en ese plan.
 
 ### Catálogo de autorización generado (fase 3)
 
@@ -244,9 +244,9 @@ Fases 3, 4 y 6 del plan `docs/history/plans/2026-11-03-rbac-policy-engine-remedi
 - `@ExactGlobalRoles(...)` (`EXACT_GLOBAL_ROLES_KEY`): `GlobalRolesGuard` lo lee primero y no expande alias; `super-admin` sigue pasando; si `@GlobalRoles` y `@ExactGlobalRoles` coinciden en el mismo nivel, gana exact. Aplicado solo a `admin-certificate-bulk-imports.controller.ts` y `admin-honor-instructor-proposals.controller.ts` (`super-admin`, `admin`, `assistant-admin`, `director-lf`, `assistant-lf`), donde `reviewer-scope.ts` ya comparaba de forma exacta: el contrato del guard coincide ahora con la matriz, sin cambio en runtime.
 - Decisiones de producto abiertas (alias amplio en mutaciones; sin cambio): `PATCH local-fields/:id/investiture-windows/:yearId`, las mutaciones de `district-investiture-pastors`, las mutaciones de `admin/coordination`, y toda ruta `@GlobalRoles(admin, super-admin)` admite también `assistant-admin`. Registradas en `docs/audit/DECISIONS-PENDING.md`.
 
-### Tenant binding (fase 5; Pendiente de merge, PR #615 de sacdia-backend)
+### Tenant binding (fase 5)
 
-Nada de esta subsección está en `development` todavía.
+Backend PR #615, mergeado en `development` el 2026-11-04.
 
 - `src/common/guards/tenant-binding-allowlist.ts` queda vacío y `tenant-binding-allowlist.freeze.spec.ts` exige que siga vacío. `tenant-binding-inventory.ts` incluye `fieldId` en `TENANT_PATH_PARAM`.
 - **Kinds de `bind` (11)**: `club`, `club_section`, `local_field`, `union`, `camporee`, `union_camporee` (solo la unión dueña), `club_enrollment_territory`, y los nuevos `union_camporee_participant` (unión dueña, o campo participante con fila activa en `union_camporee_local_fields`, o club con campo activo), `club_section_membership`, `union_membership` y `local_field_membership` (jerarquía o cualquier asignación de club operativa del actor en ese ámbito).
@@ -262,12 +262,12 @@ Nada de esta subsección está en `development` todavía.
 | Spec | Qué congela |
 | --- | --- |
 | `src/common/guards/permission-catalog-parity.spec.ts` | Todo permiso referenciado en código existe en el catálogo (fase 0) |
-| `src/common/guards/tenant-binding-allowlist.freeze.spec.ts` | Allowlist de rutas sin `bind`: 69 en `development`; 0 con el PR #615 (Pendiente de merge) |
+| `src/common/guards/tenant-binding-allowlist.freeze.spec.ts` | Allowlist de rutas sin `bind`: vacía desde la fase 5; una entrada nueva rompe el build |
 | `src/common/authorization/authz-catalog.crossrepo.spec.ts` | Generados de admin y app iguales a los del backend (job «Cross-repo Contract») |
 | `pnpm authz:check` (job «Lint & Type Check») | Generados del backend iguales a seeds y migraciones |
 | `src/common/authorization/access-decision-locality.arch.spec.ts` | 46 archivos que deciden acceso con `club_role_assignments` o `users.local_field_id` fuera de `src/common/authorization/`; un archivo nuevo rompe el build |
 | `local/no-role-literals` (ESLint, `error`) | Ningún literal de nombre de rol fuera de los archivos permitidos |
-| Ratchet de `tenant-body-allowlist.ts` (PR #615, Pendiente de merge) | 55 rutas con tenant en body o query sin `bind` |
+| Ratchet de `tenant-body-allowlist.ts` | 55 rutas con tenant en body o query sin `bind` (fase 5; solo inventario) |
 
 ### Retiro del contrato P0 de consumidores (backend PR #612)
 

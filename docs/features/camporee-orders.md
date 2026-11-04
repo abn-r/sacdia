@@ -265,7 +265,7 @@ Familia sembrada en `prisma/seeds/permissions.seed.sql` + grants en `role-permis
 
 Ninguna mutación carga una orden solo por UUID y permiso: siempre resuelve territorio y relación con la sección.
 
-Pendiente de merge (PR #615 de sacdia-backend), fase 5 de la remediación RBAC: las rutas de pedidos, ofertas y órdenes de pago de camporee declaran `bind` de camporee en el guard (`camporee`, `union_camporee_participant`; `PATCH /union-camporees/:camporeeId/orders-settings` y `PUT /union-camporees/:camporeeId/order-offerings` solo para la unión dueña, `union_camporee`). `GET …/order-offerings` (local y unión) responde 403 `GUARD_CLUB_SCOPE_REQUIRED` fuera del ámbito del camporee (404 `CAMPOREE_NOT_FOUND` / `CAMPOREE_UNION_CAMPOREE_NOT_FOUND` si no existe); el código del guard precede a `CAMPOREE_ORDER_*` en casos cross-tenant.
+Desde 2026-11-04 (fase 5 de la remediación RBAC, backend PR #615): las rutas de pedidos, ofertas y órdenes de pago de camporee declaran `bind` de camporee en el guard (`camporee`, `union_camporee_participant`; `PATCH /union-camporees/:camporeeId/orders-settings` y `PUT /union-camporees/:camporeeId/order-offerings` solo para la unión dueña, `union_camporee`). `GET …/order-offerings` (local y unión) responde 403 `GUARD_CLUB_SCOPE_REQUIRED` fuera del ámbito del camporee (404 `CAMPOREE_NOT_FOUND` / `CAMPOREE_UNION_CAMPOREE_NOT_FOUND` si no existe); el código del guard precede a `CAMPOREE_ORDER_*` en casos cross-tenant.
 
 ---
 

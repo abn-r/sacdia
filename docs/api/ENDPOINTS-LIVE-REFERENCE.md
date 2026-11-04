@@ -7,7 +7,7 @@
 > La tabla refleja los decoradores HTTP efectivos en controllers NestJS; DTOs, ejemplos y errores finos viven en Swagger/runtime y docs de feature cuando aplique.
 
 **Estado**: ACTIVE
-**Actualizado**: 2026-11-04 (remediación RBAC fases 4 y 6 en `development`: policies por recurso y `@ExactGlobalRoles` en dos superficies; fase 5, tenant binding, Pendiente de merge (PR #615 de sacdia-backend): nombres de parámetros y 403/404 de camporees; ver la nota «Remediación RBAC 2026-11-04»). Antes, 2026-10-21 (cola de consentimientos del coordinador, jobs bajo demanda y cobertura de zona; recuento de cabecera recalculado contra `development` 59122f6d; ver la nota «Seguimientos 2026-10-21»). Antes, 2026-10-20 (perfiles familiares, Fase 2 completa: sub-fases 2a, 2b y 2c, y las sub-fases 3a, 3b y 3c pendientes de merge; ver también aceptación legal 2026-10-15 y la nota de resincronización 2026-10-13)
+**Actualizado**: 2026-11-04 (remediación RBAC fases 4 y 6 en `development`: policies por recurso y `@ExactGlobalRoles` en dos superficies; fase 5, tenant binding, también en `development`: nombres de parámetros y 403/404 de camporees; ver la nota «Remediación RBAC 2026-11-04»). Antes, 2026-10-21 (cola de consentimientos del coordinador, jobs bajo demanda y cobertura de zona; recuento de cabecera recalculado contra `development` 59122f6d; ver la nota «Seguimientos 2026-10-21»). Antes, 2026-10-20 (perfiles familiares, Fase 2 completa: sub-fases 2a, 2b y 2c, y las sub-fases 3a, 3b y 3c pendientes de merge; ver también aceptación legal 2026-10-15 y la nota de resincronización 2026-10-13)
 **Total endpoints**: 933 decoradores HTTP en 124 archivos `*.controller.ts`: el recuento de `development` (935 en 125 archivos) menos las 2 rutas de `class-thresholds` y su controller, que se retiraron con el PR #600 de sacdia-backend (mergeado). La matriz incluye las filas del PR #448 de sacdia-backend, mergeado el 2026-10-07 y ya contadas en los totales: secciones `investiture-windows`, `investiture-pastors`, `investiture-requests` y el `GET .../sections/:clubSectionId/score` de camporee-scoring.
 **Métodos (development)**: GET 386 · POST 308 · PATCH 127 · DELETE 99 · PUT 13
 **Auth detectada (development)**: Public 13 · JWT u Optional JWT 920
@@ -59,8 +59,8 @@
 > [!NOTE]
 > **Remediación RBAC 2026-11-04** (plan `docs/history/plans/2026-11-03-rbac-policy-engine-remediation.md`; detalle en `docs/features/rbac.md`). Sin rutas nuevas ni retiradas.
 >
-> - **En `development`** (sacdia-backend #611 a #614, mergeados el 2026-11-04): `@RequirePermissions` tipado con `PermissionKey` del catálogo generado; `PermissionsGuard` despacha el scope de recurso a policies por `type`; `@ExactGlobalRoles` (sin expansión de alias) en `admin-certificate-bulk-imports` y `admin-honor-instructor-proposals`, sin cambio de resultado porque `reviewer-scope.ts` ya comparaba de forma exacta. Ningún contrato HTTP cambia.
-> - **Pendiente de merge (PR #615 de sacdia-backend)**: la allowlist de tenant binding queda vacía. Las URLs no cambian, pero esta referencia ya usa los nombres de parámetro nuevos: `:id` en `PATCH|DELETE /admin/{divisions,unions,local-fields}/:id` (antes `:divisionId`, `:unionId`, `:localFieldId`); `:templateSectionId` en `PATCH|DELETE /annual-folders/templates/sections/:templateSectionId` y en `/annual-folders/:folderId/sections/:templateSectionId/{status,evidences,submit,evaluate,reopen,confirm-union}` (antes `:sectionId`; es el id de la sección de plantilla); `:moduleSectionId` en `/users/:userId/classes/:classId/sections/:moduleSectionId/{submit,files,files/:fileId}` (antes `:sectionId`). Cambios de comportamiento: `GET .../order-offerings`, `GET .../supply-catalog`, `GET .../supply-plans`, `GET .../supply-reports/{kitchen,cash}`, `PATCH .../supply-plan/lines` (local y unión) y `GET /camporees/union/:camporeeId` responden 403 `GUARD_CLUB_SCOPE_REQUIRED` fuera del ámbito del camporee (404 `CAMPOREE_NOT_FOUND` / `CAMPOREE_UNION_CAMPOREE_NOT_FOUND` si no existe); los directores de una unión que no organiza pierden el bypass en planes de insumos; los códigos del guard preceden a `CAMPOREE_ORDER_*` / `CAMPOREE_SUPPLIES_*` en casos cross-tenant. Kinds de `bind` y rutas afectadas en `docs/features/auth/RBAC-ENFORCEMENT-MATRIX.md`, «Tenant binding».
+> - **Fases 3, 4 y 6** (sacdia-backend #611 a #614, mergeados el 2026-11-04): `@RequirePermissions` tipado con `PermissionKey` del catálogo generado; `PermissionsGuard` despacha el scope de recurso a policies por `type`; `@ExactGlobalRoles` (sin expansión de alias) en `admin-certificate-bulk-imports` y `admin-honor-instructor-proposals`, sin cambio de resultado porque `reviewer-scope.ts` ya comparaba de forma exacta. Ningún contrato HTTP cambia.
+> - **Fase 5** (sacdia-backend #615, mergeado el 2026-11-04): la allowlist de tenant binding queda vacía; toda ruta con tenant en el path declara `bind`. Las URLs no cambian, pero esta referencia usa los nombres de parámetro nuevos: `:id` en `PATCH|DELETE /admin/{divisions,unions,local-fields}/:id` (antes `:divisionId`, `:unionId`, `:localFieldId`); `:templateSectionId` en `PATCH|DELETE /annual-folders/templates/sections/:templateSectionId` y en `/annual-folders/:folderId/sections/:templateSectionId/{status,evidences,submit,evaluate,reopen,confirm-union}` (antes `:sectionId`; es el id de la sección de plantilla); `:moduleSectionId` en `/users/:userId/classes/:classId/sections/:moduleSectionId/{submit,files,files/:fileId}` (antes `:sectionId`). Cambios de comportamiento: `GET .../order-offerings`, `GET .../supply-catalog`, `GET .../supply-plans`, `GET .../supply-reports/{kitchen,cash}`, `PATCH .../supply-plan/lines` (local y unión) y `GET /camporees/union/:camporeeId` responden 403 `GUARD_CLUB_SCOPE_REQUIRED` fuera del ámbito del camporee (404 `CAMPOREE_NOT_FOUND` / `CAMPOREE_UNION_CAMPOREE_NOT_FOUND` si no existe); los directores de una unión que no organiza pierden el bypass en planes de insumos; los códigos del guard preceden a `CAMPOREE_ORDER_*` / `CAMPOREE_SUPPLIES_*` en casos cross-tenant. Kinds de `bind` y rutas afectadas en `docs/features/auth/RBAC-ENFORCEMENT-MATRIX.md`, «Tenant binding».
 
 ## Cómo leer esta referencia
 
@@ -1165,7 +1165,7 @@ Jobs de la allowlist y qué envían (lectura estática del código de la rama, s
 
 ### admin-geography
 
-Pendiente de merge (PR #615 de sacdia-backend): los parámetros de `PATCH|DELETE` de divisiones, uniones y campos locales se llaman `:id` (antes `:divisionId`, `:unionId`, `:localFieldId`); las URLs no cambian. Decisión de producto conservada: la geografía admin no se ata a territorio (sin `bind`).
+Desde la fase 5 de la remediación RBAC (backend PR #615, 2026-11-04) los parámetros de `PATCH|DELETE` de divisiones, uniones y campos locales se llaman `:id` (antes `:divisionId`, `:unionId`, `:localFieldId`); las URLs no cambian. Decisión de producto conservada: la geografía admin no se ata a territorio (sin `bind`).
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -1594,7 +1594,7 @@ Semántica funcional y límites: [operations-dashboard.md](../features/operation
 
 ### Annual Evidence Folders - Templates
 
-Pendiente de merge (PR #615 de sacdia-backend): el parámetro de sección de plantilla se llama `:templateSectionId` (antes `:sectionId`), tanto en `templates/sections/:templateSectionId` como en `/annual-folders/:folderId/sections/:templateSectionId/*`; las URLs no cambian.
+Desde la fase 5 de la remediación RBAC (backend PR #615, 2026-11-04) el parámetro de sección de plantilla se llama `:templateSectionId` (antes `:sectionId`), tanto en `templates/sections/:templateSectionId` como en `/annual-folders/:folderId/sections/:templateSectionId/*`; las URLs no cambian.
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -1911,7 +1911,7 @@ Los mismos `GET`/`POST` de camporee aceptan `supply_edit_cutoff_local_time` (def
 | --- | --- | --- | --- | --- | --- | --- |
 | GET | `/api/v1/camporees` | JWT | Permisos: camporees:read. Recorte territorial rol-primero (`director-lf`/unión/división y admin con ancla); coordinador sin asignación de club → denegado. Query opcional `club_type_id` (1=Aventureros, 2=Conquistadores, 3=Guías Mayores) recorta por `includes_*`; sin el query el catálogo territorial queda completo (admin). | Listar camporees | CamporeesService.findAll() | `src/camporees/camporees.controller.ts` |
 | GET | `/api/v1/camporees/union` | JWT | Permisos: camporees:read. Mismo recorte rol-primero que el listado local (campo / unión / división). | Listar camporees de unión | CamporeesService.findAllUnion() | `src/camporees/camporees.controller.ts` |
-| GET | `/api/v1/camporees/union/:camporeeId` | JWT | Permisos: camporees:read. Pendiente de merge (PR #615): 403 `GUARD_CLUB_SCOPE_REQUIRED` fuera del ámbito del camporee; 404 `CAMPOREE_UNION_CAMPOREE_NOT_FOUND` si no existe | Obtener camporee de unión por ID | CamporeesService.findOneUnion() | `src/camporees/camporees.controller.ts` |
+| GET | `/api/v1/camporees/union/:camporeeId` | JWT | Permisos: camporees:read. Desde la fase 5 (backend PR #615, 2026-11-04): 403 `GUARD_CLUB_SCOPE_REQUIRED` fuera del ámbito del camporee; 404 `CAMPOREE_UNION_CAMPOREE_NOT_FOUND` si no existe | Obtener camporee de unión por ID | CamporeesService.findOneUnion() | `src/camporees/camporees.controller.ts` |
 | POST | `/api/v1/camporees/union` | JWT | Permisos: camporees:create | Crear camporee de unión | CamporeesService.createUnion() | `src/camporees/camporees.controller.ts` |
 | PATCH | `/api/v1/camporees/union/:camporeeId` | JWT | Permisos: camporees:update | Actualizar camporee de unión | CamporeesService.updateUnion() | `src/camporees/camporees.controller.ts` |
 | DELETE | `/api/v1/camporees/union/:camporeeId` | JWT | Permisos: camporees:delete | Desactivar camporee de unión | CamporeesService.removeUnion() | `src/camporees/camporees.controller.ts` |
@@ -2820,7 +2820,7 @@ Errores: 400 `LEGAL_VERSION_MISMATCH` (`{ "status": "error", "statusCode": 400, 
 
 No existe `GET .../orders-settings`. Settings en `GET` de camporee y en este GET de ofertas. Escritura: `PATCH .../orders-settings`.
 
-Pendiente de merge (PR #615 de sacdia-backend): `GET .../order-offerings` (local y unión) responde 403 `GUARD_CLUB_SCOPE_REQUIRED` fuera del ámbito del camporee y 404 `CAMPOREE_NOT_FOUND` / `CAMPOREE_UNION_CAMPOREE_NOT_FOUND` si no existe; `PATCH /union-camporees/:camporeeId/orders-settings` y `PUT /union-camporees/:camporeeId/order-offerings` solo para la unión dueña (`bind: union_camporee`).
+Desde la fase 5 de la remediación RBAC (backend PR #615, 2026-11-04): `GET .../order-offerings` (local y unión) responde 403 `GUARD_CLUB_SCOPE_REQUIRED` fuera del ámbito del camporee y 404 `CAMPOREE_NOT_FOUND` / `CAMPOREE_UNION_CAMPOREE_NOT_FOUND` si no existe; `PATCH /union-camporees/:camporeeId/orders-settings` y `PUT /union-camporees/:camporeeId/order-offerings` solo para la unión dueña (`bind: union_camporee`).
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -2864,7 +2864,7 @@ Read model de solo lectura. No fusiona folios ni muta `field_payment_orders`, `m
 
 > Insumos de sección (`src/camporee-supplies`, migración `20260826120000_camporee_supplies`). Distintos de `/camporee-orders` (mercancía PED) y `/payment-orders` (inscripción). Folio `INS{yyyy}{####}`.
 
-Pendiente de merge (PR #615 de sacdia-backend): `GET .../supply-catalog`, `GET .../supply-plans`, `GET .../supply-reports/{kitchen,cash}` y `PATCH .../supply-plan/lines` (local y unión) responden 403 `GUARD_CLUB_SCOPE_REQUIRED` fuera del ámbito del camporee (404 `CAMPOREE_NOT_FOUND` / `CAMPOREE_UNION_CAMPOREE_NOT_FOUND` si no existe); los directores de una unión que no organiza pierden el bypass en planes de insumos. El código del guard precede a `CAMPOREE_SUPPLIES_*` en casos cross-tenant.
+Desde la fase 5 de la remediación RBAC (backend PR #615, 2026-11-04): `GET .../supply-catalog`, `GET .../supply-plans`, `GET .../supply-reports/{kitchen,cash}` y `PATCH .../supply-plan/lines` (local y unión) responden 403 `GUARD_CLUB_SCOPE_REQUIRED` fuera del ámbito del camporee (404 `CAMPOREE_NOT_FOUND` / `CAMPOREE_UNION_CAMPOREE_NOT_FOUND` si no existe); los directores de una unión que no organiza pierden el bypass en planes de insumos. El código del guard precede a `CAMPOREE_SUPPLIES_*` en casos cross-tenant.
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |

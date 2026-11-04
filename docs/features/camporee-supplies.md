@@ -74,7 +74,7 @@ No reutiliza tablas, folios PED ni permisos de mercancía (`camporee-orders`). C
 
 Emisores de club **no** incluyen deputy-director, treasurer ni counselor.
 
-Pendiente de merge (PR #615 de sacdia-backend), fase 5 de la remediación RBAC: las rutas de insumos declaran `bind` de camporee en el guard (`camporee`, `union_camporee_participant`; las que eran `active_assignment` pasan a tipo `camporee` / `union_camporee`). `GET …/supply-catalog`, `GET …/supply-plans`, `GET …/supply-reports/{kitchen,cash}` y `PATCH …/supply-plan/lines` (local y unión) responden 403 `GUARD_CLUB_SCOPE_REQUIRED` fuera del ámbito del camporee (404 `CAMPOREE_NOT_FOUND` / `CAMPOREE_UNION_CAMPOREE_NOT_FOUND` si no existe); los directores de una unión que no organiza pierden el bypass en planes de insumos; el código del guard precede a `CAMPOREE_SUPPLIES_*` en casos cross-tenant.
+Desde 2026-11-04 (fase 5 de la remediación RBAC, backend PR #615): las rutas de insumos declaran `bind` de camporee en el guard (`camporee`, `union_camporee_participant`; las que eran `active_assignment` pasan a tipo `camporee` / `union_camporee`). `GET …/supply-catalog`, `GET …/supply-plans`, `GET …/supply-reports/{kitchen,cash}` y `PATCH …/supply-plan/lines` (local y unión) responden 403 `GUARD_CLUB_SCOPE_REQUIRED` fuera del ámbito del camporee (404 `CAMPOREE_NOT_FOUND` / `CAMPOREE_UNION_CAMPOREE_NOT_FOUND` si no existe); los directores de una unión que no organiza pierden el bypass en planes de insumos; el código del guard precede a `CAMPOREE_SUPPLIES_*` en casos cross-tenant.
 
 ---
 

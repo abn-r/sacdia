@@ -1,7 +1,7 @@
 # Feature Registry - SACDIA
 
 **Estado**: ACTIVE
-**Actualizado**: 2026-11-04 (fila de `rbac`: motor de políticas, fases 3, 4 y 6 mergeadas y fase 5 Pendiente de merge; antes, 2026-10-20: fila de perfiles familiares, actualizada con la Fase 3 (3a, 3b y 3c) verificada contra la rama `feat/family-profiles-phase3` de backend `32022392`, app `345dadc0` y panel `7a9bfd6`; antes, 2026-10-19 contra la rama `feat/family-profiles`; filas de carga masiva, honores y certificaciones verificadas contra `development` el 2026-10-13; el resto, 2026-10-04)
+**Actualizado**: 2026-11-04 (fila de `rbac`: motor de políticas, fases 3, 4, 5 y 6 mergeadas; antes, 2026-10-20: fila de perfiles familiares, actualizada con la Fase 3 (3a, 3b y 3c) verificada contra la rama `feat/family-profiles-phase3` de backend `32022392`, app `345dadc0` y panel `7a9bfd6`; antes, 2026-10-19 contra la rama `feat/family-profiles`; filas de carga masiva, honores y certificaciones verificadas contra `development` el 2026-10-13; el resto, 2026-10-04)
 **Propósito**: registrar qué dominios tienen documento en `docs/features/` y separar cobertura editorial de estado funcional declarado.
 
 > [!IMPORTANT]
@@ -87,7 +87,7 @@
 | `operations-dashboard` | [operations-dashboard.md](operations-dashboard.md) | Documento presente | `IMPLEMENTADO` |
 | `ordenes-de-pago` | [ordenes-de-pago.md](ordenes-de-pago.md) | Documento presente | `IMPLEMENTADO` |
 | `qr-credencial` | [qr-credencial.md](qr-credencial.md) | Documento presente | `IMPLEMENTADO` |
-| `rbac` | [rbac.md](rbac.md) | Documento presente | `IMPLEMENTADO` (remediación del motor de políticas: fases 0, 1, 2, 8, 3, 4 y 6 mergeadas en `development` el 2026-11-04; fase 5, tenant binding, Pendiente de merge (PR #615 de sacdia-backend); fase 7 sin iniciar) |
+| `rbac` | [rbac.md](rbac.md) | Documento presente | `IMPLEMENTADO` (remediación del motor de políticas: fases 0, 1, 2, 8, 3, 4 y 6 mergeadas en `development` el 2026-11-04; fase 5, tenant binding, mergeada el mismo día con el PR #615 de sacdia-backend; fase 7 sin iniciar) |
 | `recursos` | [recursos.md](recursos.md) | Documento presente | `IMPLEMENTADO` |
 | `requests` | [docs/canon/runtime-requests.md](../canon/runtime-requests.md) | Documento presente | `IMPLEMENTADO` |
 | `servicios-externos` | [servicios-externos.md](servicios-externos.md) | Documento presente | `IMPLEMENTADO` |

@@ -12,7 +12,7 @@ La Carpeta Anual de Evidencias conserva su propio flujo de carga de archivos e i
 
 ### Backend (NestJS)
 
-- **EvaluationModule**: evaluar secciones (`POST /:folderId/sections/:templateSectionId/evaluate`; el parámetro se llamaba `:sectionId`, la URL no cambia, Pendiente de merge (PR #615 de sacdia-backend)), confirmar union (`POST .../confirm-union`), reabrir secciones (`POST .../reopen`), listar evaluaciones (`GET /:folderId/evaluations`), nota de revisor por evidencia (`PATCH evidences/:evidenceId/reviewer-note`). Recalculo de totales en transaccion.
+- **EvaluationModule**: evaluar secciones (`POST /:folderId/sections/:templateSectionId/evaluate`; el parámetro se llamaba `:sectionId`, la URL no cambia; backend PR #615, 2026-11-04), confirmar union (`POST .../confirm-union`), reabrir secciones (`POST .../reopen`), listar evaluaciones (`GET /:folderId/evaluations`), nota de revisor por evidencia (`PATCH evidences/:evidenceId/reviewer-note`). Recalculo de totales en transaccion.
 - **AwardCategoriesModule**: CRUD completo en `/award-categories`. Catalogo reutilizable sin FK de ano. Soft-delete.
 - **RankingsModule**: `GET /annual-folders/rankings` (con filtros club_type, year, category), `GET .../club/:enrollmentId`, `POST .../recalculate`. Cron nocturno a las 2 AM. Dense ranking idempotente en transaccion.
 - **Schema**: 3 modelos nuevos (`annual_folder_section_evaluations`, `award_categories`, `club_annual_rankings`) + campos de scoring en `folder_template_sections`, `folder_templates`, `annual_folders` + lifecycle explícito de plantillas (`folder_template_status_enum`).
