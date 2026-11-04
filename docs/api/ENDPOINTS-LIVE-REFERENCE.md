@@ -7,7 +7,7 @@
 > La tabla refleja los decoradores HTTP efectivos en controllers NestJS; DTOs, ejemplos y errores finos viven en Swagger/runtime y docs de feature cuando aplique.
 
 **Estado**: ACTIVE
-**Actualizado**: 2026-10-21 (cola de consentimientos del coordinador, jobs bajo demanda y cobertura de zona; recuento de cabecera recalculado contra `development` 59122f6d; ver la nota «Seguimientos 2026-10-21»). Antes, 2026-10-20 (perfiles familiares, Fase 2 completa: sub-fases 2a, 2b y 2c, y las sub-fases 3a, 3b y 3c pendientes de merge; ver también aceptación legal 2026-10-15 y la nota de resincronización 2026-10-13)
+**Actualizado**: 2026-11-04 (remediación RBAC fases 4 y 6 en `development`: policies por recurso y `@ExactGlobalRoles` en dos superficies; fase 5, tenant binding, Pendiente de merge (PR #615 de sacdia-backend): nombres de parámetros y 403/404 de camporees; ver la nota «Remediación RBAC 2026-11-04»). Antes, 2026-10-21 (cola de consentimientos del coordinador, jobs bajo demanda y cobertura de zona; recuento de cabecera recalculado contra `development` 59122f6d; ver la nota «Seguimientos 2026-10-21»). Antes, 2026-10-20 (perfiles familiares, Fase 2 completa: sub-fases 2a, 2b y 2c, y las sub-fases 3a, 3b y 3c pendientes de merge; ver también aceptación legal 2026-10-15 y la nota de resincronización 2026-10-13)
 **Total endpoints**: 933 decoradores HTTP en 124 archivos `*.controller.ts`: el recuento de `development` (935 en 125 archivos) menos las 2 rutas de `class-thresholds` y su controller, que se retiraron con el PR #600 de sacdia-backend (mergeado). La matriz incluye las filas del PR #448 de sacdia-backend, mergeado el 2026-10-07 y ya contadas en los totales: secciones `investiture-windows`, `investiture-pastors`, `investiture-requests` y el `GET .../sections/:clubSectionId/score` de camporee-scoring.
 **Métodos (development)**: GET 386 · POST 308 · PATCH 127 · DELETE 99 · PUT 13
 **Auth detectada (development)**: Public 13 · JWT u Optional JWT 920
@@ -55,6 +55,12 @@
 
 > [!NOTE]
 > **Seguimientos 2026-10-21** (todos **mergeados en `development`**, sin cambios de esquema): (1) `GET /coordination/me/consent-pending`, la cola del coordinador (sacdia-backend `feat/coordinator-pending-consents`, PR #534); ver «`GET /api/v1/coordination/me/consent-pending`» (dentro de «Registro de menores por un director y acceso familiar en el panel (Fase 3c)», tras «Revisor solo-verificación»). (2) `GET /admin/cron-jobs` y `POST /admin/cron-jobs/:jobName/run` («Ejecutar ahora», sacdia-backend `feat/admin-run-cron-now`, PR #535), y los campos `trigger` y `triggered_by` en `recent[]` de `GET /admin/analytics/cron-runs`; ver «Jobs programados bajo demanda» en la sección `admin`. (3) Cambio de comportamiento sin ruta nueva: la cobertura `ZONE` de un coordinador exige también que el **distrito** esté activo (sacdia-backend `test/coordinator-scope-postgres`, PR #536, commit `eec8e5aa`); ver `docs/canon/runtime-coordination.md`.
+
+> [!NOTE]
+> **Remediación RBAC 2026-11-04** (plan `docs/history/plans/2026-11-03-rbac-policy-engine-remediation.md`; detalle en `docs/features/rbac.md`). Sin rutas nuevas ni retiradas.
+>
+> - **En `development`** (sacdia-backend #611 a #614, mergeados el 2026-11-04): `@RequirePermissions` tipado con `PermissionKey` del catálogo generado; `PermissionsGuard` despacha el scope de recurso a policies por `type`; `@ExactGlobalRoles` (sin expansión de alias) en `admin-certificate-bulk-imports` y `admin-honor-instructor-proposals`, sin cambio de resultado porque `reviewer-scope.ts` ya comparaba de forma exacta. Ningún contrato HTTP cambia.
+> - **Pendiente de merge (PR #615 de sacdia-backend)**: la allowlist de tenant binding queda vacía. Las URLs no cambian, pero esta referencia ya usa los nombres de parámetro nuevos: `:id` en `PATCH|DELETE /admin/{divisions,unions,local-fields}/:id` (antes `:divisionId`, `:unionId`, `:localFieldId`); `:templateSectionId` en `PATCH|DELETE /annual-folders/templates/sections/:templateSectionId` y en `/annual-folders/:folderId/sections/:templateSectionId/{status,evidences,submit,evaluate,reopen,confirm-union}` (antes `:sectionId`; es el id de la sección de plantilla); `:moduleSectionId` en `/users/:userId/classes/:classId/sections/:moduleSectionId/{submit,files,files/:fileId}` (antes `:sectionId`). Cambios de comportamiento: `GET .../order-offerings`, `GET .../supply-catalog`, `GET .../supply-plans`, `GET .../supply-reports/{kitchen,cash}`, `PATCH .../supply-plan/lines` (local y unión) y `GET /camporees/union/:camporeeId` responden 403 `GUARD_CLUB_SCOPE_REQUIRED` fuera del ámbito del camporee (404 `CAMPOREE_NOT_FOUND` / `CAMPOREE_UNION_CAMPOREE_NOT_FOUND` si no existe); los directores de una unión que no organiza pierden el bypass en planes de insumos; los códigos del guard preceden a `CAMPOREE_ORDER_*` / `CAMPOREE_SUPPLIES_*` en casos cross-tenant. Kinds de `bind` y rutas afectadas en `docs/features/auth/RBAC-ENFORCEMENT-MATRIX.md`, «Tenant binding».
 
 ## Cómo leer esta referencia
 
@@ -136,8 +142,8 @@ Rutas con scope (64 en la Fase 2; la Fase 3a reetiqueta algunas y suma las del a
 | `credential:read` | `GET /qr/member/token` · `GET /qr/me` · `GET /qr/me/card` · `GET /qr/me/card.pdf` (antes `self:read`; ver «Scopes de la Fase 3a») |
 | `club:context` | `PATCH /auth/me/context` (antes `profile:write`; ver «Scopes de la Fase 3a») |
 | `registration:write` | `POST /users/:userId/post-registration/step-{1,2,3}/complete` · `POST /users/:userId/post-registration/membership-request/cancel` · `POST /users/:userId/membership/annual-enroll` · `GET /clubs` · `GET /clubs/:clubId/sections` |
-| `classes:write` | `POST /users/:userId/classes/enroll` · `PATCH /users/:userId/classes/:classId/progress` · `POST /users/:userId/classes/:classId/sections/:sectionId/submit` |
-| `evidence:upload` | `POST /users/:userId/classes/:classId/sections/:sectionId/files` · `DELETE .../files/:fileId` (`src/classes/classes.controller.ts:331` y `:389`). **Fase 3b**: las cuatro rutas de evidencia de especialidades que antes llevaban este scope pasaron a `honors:write` (fila siguiente) para que el dispositivo vinculado, que tiene `evidence:upload`, no pueda tocarlas; tutores y adolescentes tienen ambos scopes, así que su comportamiento no cambia |
+| `classes:write` | `POST /users/:userId/classes/enroll` · `PATCH /users/:userId/classes/:classId/progress` · `POST /users/:userId/classes/:classId/sections/:moduleSectionId/submit` |
+| `evidence:upload` | `POST /users/:userId/classes/:classId/sections/:moduleSectionId/files` · `DELETE .../files/:fileId` (`src/classes/classes.controller.ts:331` y `:389`). **Fase 3b**: las cuatro rutas de evidencia de especialidades que antes llevaban este scope pasaron a `honors:write` (fila siguiente) para que el dispositivo vinculado, que tiene `evidence:upload`, no pueda tocarlas; tutores y adolescentes tienen ambos scopes, así que su comportamiento no cambia |
 | `honors:write` | `POST /users/:userId/honors` · `POST /users/:userId/honors/bulk` · `POST`, `PATCH` y `DELETE /users/:userId/honors/:honorId` · `PATCH /users/:userId/honors/:honorId/requirements/progress/batch` · `PATCH .../requirements/:requirementId/progress` · (Fase 3b) `POST /users/:userId/honors/:honorId/files` · `POST .../requirements/:requirementId/evidence/{upload,link}` · `DELETE .../evidence/:evidenceId` (`src/honors/honors.controller.ts:247`, `src/honors/honor-requirements.controller.ts:195`, `:238` y `:299`) |
 | `legal:accept` | `POST /users/me/legal-acceptance` (el servicio guarda `accepted_by_user_id` = el tutor) |
 
@@ -241,7 +247,7 @@ El vocabulario crece y los conjuntos son por tipo de principal. Un conjunto no i
 Cambios sobre la tabla de scopes de la Fase 2 (reetiquetados deliberados; el snapshot `acting-scope-metadata.spec.ts` los fija):
 
 - **`self:read` → `health:read`** en las lecturas de salud y contacto: `GET /users/:userId/{allergies,diseases,medicines}` y `GET /users/:userId/emergency-contacts[/:contactId]`. Un tutor actuando y un adolescente con tutor mantienen acceso porque sus conjuntos incluyen `health:read`.
-- **`classes:write` → `evidence:submit`** en `POST /users/:userId/classes/:classId/sections/:sectionId/submit`. Los dos conjuntos con `classes:write` también tienen `evidence:submit`, así que el comportamiento del tutor no cambia.
+- **`classes:write` → `evidence:submit`** en `POST /users/:userId/classes/:classId/sections/:moduleSectionId/submit`. Los dos conjuntos con `classes:write` también tienen `evidence:submit`, así que el comportamiento del tutor no cambia.
 - **Scopes nuevos** (solo para el tipo que se indica; la lista final la fija el snapshot y `teen-route-walk.spec.ts`, que recorre el registro real de rutas y el seed de permisos del rol `member`):
   - `member:read` (adolescente): lecturas de miembro: `GET /clubs/:clubId`, `.../sections/:sectionId`, `.../leadership`, unidades y registros semanales, mejor miembro del mes, `GET /member-rankings/me`, `GET /activities/:activityId/rsvp` (la intención propia) y `GET /activities/:activityId/attendance`, logros, recursos y categorías de recursos, historial y elegibilidad de validación, solicitudes (lecturas), historial de investidura y categorías de puntuación, más dos lecturas que la pantalla de inicio de miembro pide a todos: `GET /clubs/:clubId/sections/:sectionId/enrollments/current` (inscripción vigente de la propia sección; `src/club-enrollments/club-enrollments.controller.ts:105`, conserva `club_instances:read`) y `GET /camporee-judges/me/assignments` (¿soy juez?: filtra por el usuario del token y a un adolescente le responde `[]`; `src/camporee-scoring/camporee-scoring.controller.ts:348`). Sin ellas el inicio del adolescente activo recibía un 403 por cada una (hallazgo del QA 3a, corregido en `83ffe7cf`). Las rutas de jueces para calificar siguen denegadas.
   - `member:write` (adolescente): `PUT /activities/:activityId/rsvp`, `POST /validation/submit`, `POST` y `DELETE /users/:userId/honors/:honorId/instructor-proposal`.
@@ -414,7 +420,7 @@ El snapshot `acting-scope-metadata.spec.ts` fija la superficie ruta por ruta (`D
 | Grupo | Rutas (`/api/v1`) |
 | --- | --- |
 | Lecturas propias (`self:read`) | `GET /auth/me` · `GET /auth/profile/completion-status` · `GET /dashboard/summary` · `GET /notifications/history` · `GET /notifications/unread-count` · `PATCH /notifications/read-all` · `PATCH /notifications/:deliveryId/read` · `GET /users/:userId` · `GET /users/:userId/age` · `GET /users/:userId/post-registration/{status,photo-status}` · `GET /users/:userId/classes` · `GET /users/:userId/classes/:classId/progress` · `GET /users/:userId/honors` · `GET /users/:userId/honors/stats` · `GET /users/:userId/honors/:honorId/requirements/progress` · `GET /users/:userId/honors/:honorId/requirements/:requirementId/evidence` · `GET /users/me/legal-acceptance` · `GET /users/me/supervision` (para un dispositivo responde `status: null`: la ruta solo devuelve datos a un `supervised_user`) |
-| Evidencia de clases | `POST /users/:userId/classes/:classId/sections/:sectionId/files` (`evidence:upload`) · `DELETE .../files/:fileId` (`evidence:upload`) · `POST .../sections/:sectionId/submit` (`evidence:submit`, enviar a validación) |
+| Evidencia de clases | `POST /users/:userId/classes/:classId/sections/:moduleSectionId/files` (`evidence:upload`) · `DELETE .../files/:fileId` (`evidence:upload`) · `POST .../sections/:moduleSectionId/submit` (`evidence:submit`, enviar a validación) |
 | Agenda **sin asistentes** (`agenda:read`) | `GET /clubs/:clubId/activities` · `GET /activities/:activityId` · `GET /activity-series/:seriesId` |
 | Push propio (`push:register`) | `POST /users/me/fcm-tokens` · `DELETE /users/me/fcm-tokens/:tokenId` |
 | Credencial QR (`credential:read`) | `GET /qr/member/token` · `GET /qr/me` · `GET /qr/me/card` · `GET /qr/me/card.pdf` |
@@ -1159,24 +1165,26 @@ Jobs de la allowlist y qué envían (lectura estática del código de la rama, s
 
 ### admin-geography
 
+Pendiente de merge (PR #615 de sacdia-backend): los parámetros de `PATCH|DELETE` de divisiones, uniones y campos locales se llaman `:id` (antes `:divisionId`, `:unionId`, `:localFieldId`); las URLs no cambian. Decisión de producto conservada: la geografía admin no se ata a territorio (sin `bind`).
+
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
 | GET | `/api/v1/admin/divisions` | JWT | Global: admin, super-admin; Permisos: countries:read | List institutional divisions for admin management | AdminGeographyService.listDivisions() | `src/admin/admin-geography.controller.ts` |
 | POST | `/api/v1/admin/divisions` | JWT | Global: admin, super-admin; Permisos: countries:create | Create institutional division | AdminGeographyService.createDivision() | `src/admin/admin-geography.controller.ts` |
-| PATCH | `/api/v1/admin/divisions/:divisionId` | JWT | Global: admin, super-admin; Permisos: countries:update | Update institutional division | AdminGeographyService.updateDivision() | `src/admin/admin-geography.controller.ts` |
-| DELETE | `/api/v1/admin/divisions/:divisionId` | JWT | Global: admin, super-admin; Permisos: countries:delete | Soft delete institutional division | AdminGeographyService.deleteDivision() | `src/admin/admin-geography.controller.ts` |
+| PATCH | `/api/v1/admin/divisions/:id` | JWT | Global: admin, super-admin; Permisos: countries:update | Update institutional division | AdminGeographyService.updateDivision() | `src/admin/admin-geography.controller.ts` |
+| DELETE | `/api/v1/admin/divisions/:id` | JWT | Global: admin, super-admin; Permisos: countries:delete | Soft delete institutional division | AdminGeographyService.deleteDivision() | `src/admin/admin-geography.controller.ts` |
 | GET | `/api/v1/admin/countries` | JWT | Global: admin, super-admin; Permisos: countries:read | List countries for admin management | AdminGeographyService.listCountries() | `src/admin/admin-geography.controller.ts` |
 | POST | `/api/v1/admin/countries` | JWT | Global: admin, super-admin; Permisos: countries:create | Create country | AdminGeographyService.createCountry() | `src/admin/admin-geography.controller.ts` |
 | PATCH | `/api/v1/admin/countries/:countryId` | JWT | Global: admin, super-admin; Permisos: countries:update | Update country | AdminGeographyService.updateCountry() | `src/admin/admin-geography.controller.ts` |
 | DELETE | `/api/v1/admin/countries/:countryId` | JWT | Global: admin, super-admin; Permisos: countries:delete | Soft delete country | AdminGeographyService.deleteCountry() | `src/admin/admin-geography.controller.ts` |
 | GET | `/api/v1/admin/unions` | JWT | Global: admin, super-admin; Permisos: unions:read | List unions for admin management | AdminGeographyService.listUnions() | `src/admin/admin-geography.controller.ts` |
 | POST | `/api/v1/admin/unions` | JWT | Global: admin, super-admin; Permisos: unions:create | Create union | AdminGeographyService.createUnion() | `src/admin/admin-geography.controller.ts` |
-| PATCH | `/api/v1/admin/unions/:unionId` | JWT | Global: admin, super-admin; Permisos: unions:update | Update union | AdminGeographyService.updateUnion() | `src/admin/admin-geography.controller.ts` |
-| DELETE | `/api/v1/admin/unions/:unionId` | JWT | Global: admin, super-admin; Permisos: unions:delete | Soft delete union | AdminGeographyService.deleteUnion() | `src/admin/admin-geography.controller.ts` |
+| PATCH | `/api/v1/admin/unions/:id` | JWT | Global: admin, super-admin; Permisos: unions:update | Update union | AdminGeographyService.updateUnion() | `src/admin/admin-geography.controller.ts` |
+| DELETE | `/api/v1/admin/unions/:id` | JWT | Global: admin, super-admin; Permisos: unions:delete | Soft delete union | AdminGeographyService.deleteUnion() | `src/admin/admin-geography.controller.ts` |
 | GET | `/api/v1/admin/local-fields` | JWT | Global: admin, super-admin; Permisos: local_fields:read | List local fields for admin management | AdminGeographyService.listLocalFields() | `src/admin/admin-geography.controller.ts` |
 | POST | `/api/v1/admin/local-fields` | JWT | Global: admin, super-admin; Permisos: local_fields:create | Create local field | AdminGeographyService.createLocalField() | `src/admin/admin-geography.controller.ts` |
-| PATCH | `/api/v1/admin/local-fields/:localFieldId` | JWT | Global: admin, super-admin; Permisos: local_fields:update | Update local field | AdminGeographyService.updateLocalField() | `src/admin/admin-geography.controller.ts` |
-| DELETE | `/api/v1/admin/local-fields/:localFieldId` | JWT | Global: admin, super-admin; Permisos: local_fields:delete | Soft delete local field | AdminGeographyService.deleteLocalField() | `src/admin/admin-geography.controller.ts` |
+| PATCH | `/api/v1/admin/local-fields/:id` | JWT | Global: admin, super-admin; Permisos: local_fields:update | Update local field | AdminGeographyService.updateLocalField() | `src/admin/admin-geography.controller.ts` |
+| DELETE | `/api/v1/admin/local-fields/:id` | JWT | Global: admin, super-admin; Permisos: local_fields:delete | Soft delete local field | AdminGeographyService.deleteLocalField() | `src/admin/admin-geography.controller.ts` |
 | GET | `/api/v1/admin/districts` | JWT | Global: admin, super-admin; Permisos: local_fields:read | List districts for admin management | AdminGeographyService.listDistricts() | `src/admin/admin-geography.controller.ts` |
 | POST | `/api/v1/admin/districts` | JWT | Global: admin, super-admin; Permisos: local_fields:update | Create district | AdminGeographyService.createDistrict() | `src/admin/admin-geography.controller.ts` |
 | PATCH | `/api/v1/admin/districts/:districtId` | JWT | Global: admin, super-admin; Permisos: local_fields:update | Update district | AdminGeographyService.updateDistrict() | `src/admin/admin-geography.controller.ts` |
@@ -1188,7 +1196,7 @@ Jobs de la allowlist y qué envían (lectura estática del código de la rama, s
 
 ### admin-honor-instructor-proposals
 
-Cola del Campo Local para las propuestas de instructor sobre especialidades ya aprobadas. Mismo revisor y alcance que `admin-certificate-bulk-imports` (`@GlobalRoles('super-admin','admin','assistant-admin','director-lf','assistant-lf')` + `@SkipPermissions`, helper `src/common/reviewer-scope`): `super-admin` y `admin`/`assistant-admin` sin Campo Local ven todo; quien tiene Campo Local solo las propuestas cuyo dueño tiene el mismo `users.local_field_id` actual (si no, 403 `HONOR_INSTRUCTOR_PROPOSAL_FORBIDDEN`).
+Cola del Campo Local para las propuestas de instructor sobre especialidades ya aprobadas. Mismo revisor y alcance que `admin-certificate-bulk-imports` (`@ExactGlobalRoles('super-admin','admin','assistant-admin','director-lf','assistant-lf')` + `@SkipPermissions`, helper `src/common/reviewer-scope`; desde la fase 6 de la remediación RBAC, backend #614, el decorador no expande alias, lo que ya hacía el helper): `super-admin` y `admin`/`assistant-admin` sin Campo Local ven todo; quien tiene Campo Local solo las propuestas cuyo dueño tiene el mismo `users.local_field_id` actual (si no, 403 `HONOR_INSTRUCTOR_PROPOSAL_FORBIDDEN`).
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -1576,15 +1584,17 @@ Semántica funcional y límites: [operations-dashboard.md](../features/operation
 | GET | `/api/v1/annual-folders/evaluation/queue` | JWT | Permisos: annual_folders:evaluate | List annual evidence folders available for evaluation | AnnualFoldersService.getEvaluationQueue() | `src/annual-folders/annual-folders.controller.ts` |
 | GET | `/api/v1/annual-folders/:folderId` | JWT | Permisos: evidence_folders:read | Get annual evidence folder with sections and evidences | AnnualFoldersService.getFolder() | `src/annual-folders/annual-folders.controller.ts` |
 | GET | `/api/v1/annual-folders/by-enrollment/:enrollmentId` | JWT | Permisos: evidence_folders:read | Get annual evidence folder by enrollment ID | AnnualFoldersService.getFolderByEnrollment() | `src/annual-folders/annual-folders.controller.ts` |
-| POST | `/api/v1/annual-folders/:folderId/sections/:sectionId/evidences` | JWT | Permisos: evidence_folders:update | Upload evidence to a folder section | AnnualFoldersService.uploadEvidence() | `src/annual-folders/annual-folders.controller.ts` |
+| POST | `/api/v1/annual-folders/:folderId/sections/:templateSectionId/evidences` | JWT | Permisos: evidence_folders:update | Upload evidence to a folder section | AnnualFoldersService.uploadEvidence() | `src/annual-folders/annual-folders.controller.ts` |
 | PATCH | `/api/v1/annual-folders/evidences/:evidenceId` | JWT | Permisos: evidence_folders:update | Update evidence metadata | AnnualFoldersService.updateEvidence() | `src/annual-folders/annual-folders.controller.ts` |
 | DELETE | `/api/v1/annual-folders/evidences/:evidenceId` | JWT | Permisos: evidence_folders:update | Delete evidence | AnnualFoldersService.deleteEvidence() | `src/annual-folders/annual-folders.controller.ts` |
-| GET | `/api/v1/annual-folders/:folderId/sections/:sectionId/status` | JWT | Permisos: evidence_folders:read | Get the current status of a single section within an annual evidence folder | AnnualFoldersService.getSectionStatus() | `src/annual-folders/annual-folders.controller.ts` |
-| POST | `/api/v1/annual-folders/:folderId/sections/:sectionId/submit` | JWT | Permisos: evidence_folders:update | Submit a single section of an annual evidence folder | AnnualFoldersService.submitSection() | `src/annual-folders/annual-folders.controller.ts` |
+| GET | `/api/v1/annual-folders/:folderId/sections/:templateSectionId/status` | JWT | Permisos: evidence_folders:read | Get the current status of a single section within an annual evidence folder | AnnualFoldersService.getSectionStatus() | `src/annual-folders/annual-folders.controller.ts` |
+| POST | `/api/v1/annual-folders/:folderId/sections/:templateSectionId/submit` | JWT | Permisos: evidence_folders:update | Submit a single section of an annual evidence folder | AnnualFoldersService.submitSection() | `src/annual-folders/annual-folders.controller.ts` |
 | POST | `/api/v1/annual-folders/:folderId/submit` | JWT | Permisos: annual_folders:submit | Submit entire folder for review (director/secretariat only) | AnnualFoldersService.submitFolder() | `src/annual-folders/annual-folders.controller.ts` |
 | POST | `/api/v1/annual-folders/:folderId/close` | JWT | Permisos: annual_folders:evaluate + territorio del campo local | Close folder (field-level action) | EvaluationService.assertFolderCloseAccess() + AnnualFoldersService.closeFolder() | `src/annual-folders/evaluation.controller.ts` |
 
 ### Annual Evidence Folders - Templates
+
+Pendiente de merge (PR #615 de sacdia-backend): el parámetro de sección de plantilla se llama `:templateSectionId` (antes `:sectionId`), tanto en `templates/sections/:templateSectionId` como en `/annual-folders/:folderId/sections/:templateSectionId/*`; las URLs no cambian.
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -1594,8 +1604,8 @@ Semántica funcional y límites: [operations-dashboard.md](../features/operation
 | PATCH | `/api/v1/annual-folders/templates/:templateId` | JWT | Permisos: annual_folder_templates:update | Update annual folder template metadata | AnnualFoldersService.updateTemplate() | `src/annual-folders/annual-folders.controller.ts` |
 | POST | `/api/v1/annual-folders/templates/:templateId/copy` | JWT | Permisos: annual_folder_templates:create | Copy an annual folder template as a draft | AnnualFoldersService.copyTemplate() | `src/annual-folders/annual-folders.controller.ts` |
 | POST | `/api/v1/annual-folders/templates/:templateId/sections` | JWT | Permisos: annual_folder_templates:update | Add section to template | AnnualFoldersService.addTemplateSection() | `src/annual-folders/annual-folders.controller.ts` |
-| PATCH | `/api/v1/annual-folders/templates/sections/:sectionId` | JWT | Permisos: annual_folder_templates:update | Update template section | AnnualFoldersService.updateTemplateSection() | `src/annual-folders/annual-folders.controller.ts` |
-| DELETE | `/api/v1/annual-folders/templates/sections/:sectionId` | JWT | Permisos: annual_folder_templates:delete | Remove template section | AnnualFoldersService.removeTemplateSection() | `src/annual-folders/annual-folders.controller.ts` |
+| PATCH | `/api/v1/annual-folders/templates/sections/:templateSectionId` | JWT | Permisos: annual_folder_templates:update | Update template section | AnnualFoldersService.updateTemplateSection() | `src/annual-folders/annual-folders.controller.ts` |
+| DELETE | `/api/v1/annual-folders/templates/sections/:templateSectionId` | JWT | Permisos: annual_folder_templates:delete | Remove template section | AnnualFoldersService.removeTemplateSection() | `src/annual-folders/annual-folders.controller.ts` |
 | DELETE | `/api/v1/annual-folders/templates/:templateId` | JWT | Permisos: annual_folder_templates:delete | Delete a draft annual folder template | AnnualFoldersService.removeTemplate() | `src/annual-folders/annual-folders.controller.ts` |
 
 ### Award Categories
@@ -1612,9 +1622,9 @@ Semántica funcional y límites: [operations-dashboard.md](../features/operation
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
-| POST | `/api/v1/annual-folders/:folderId/sections/:sectionId/evaluate` | JWT | Permisos: annual_folders:evaluate | Evaluate a section of an annual evidence folder. La respuesta incluye `status` de la evaluación | EvaluationService.evaluateSection() | `src/annual-folders/evaluation.controller.ts` |
-| POST | `/api/v1/annual-folders/:folderId/sections/:sectionId/reopen` | JWT | Permisos: annual_folders:evaluate | Reopen a section for re-evaluation (removes existing evaluation) | EvaluationService.reopenSection() | `src/annual-folders/evaluation.controller.ts` |
-| POST | `/api/v1/annual-folders/:folderId/sections/:sectionId/confirm-union` | JWT | Permisos: annual_folders:evaluate | Union actor confirms or overrides a pre-approved section | EvaluationService.confirmUnion() | `src/annual-folders/evaluation.controller.ts` |
+| POST | `/api/v1/annual-folders/:folderId/sections/:templateSectionId/evaluate` | JWT | Permisos: annual_folders:evaluate | Evaluate a section of an annual evidence folder. La respuesta incluye `status` de la evaluación | EvaluationService.evaluateSection() | `src/annual-folders/evaluation.controller.ts` |
+| POST | `/api/v1/annual-folders/:folderId/sections/:templateSectionId/reopen` | JWT | Permisos: annual_folders:evaluate | Reopen a section for re-evaluation (removes existing evaluation) | EvaluationService.reopenSection() | `src/annual-folders/evaluation.controller.ts` |
+| POST | `/api/v1/annual-folders/:folderId/sections/:templateSectionId/confirm-union` | JWT | Permisos: annual_folders:evaluate | Union actor confirms or overrides a pre-approved section | EvaluationService.confirmUnion() | `src/annual-folders/evaluation.controller.ts` |
 | GET | `/api/v1/annual-folders/:folderId/evaluations` | JWT | Permisos: annual_folders:evaluate, evidence_folders:read (any) | Get all section evaluations for a folder | AnnualFoldersService.assertFolderReadAccessForUser(), EvaluationService.getFolderEvaluations() | `src/annual-folders/evaluation.controller.ts` |
 | PATCH | `/api/v1/annual-folders/evidences/:evidenceId/reviewer-note` | JWT | Permisos: annual_folders:evaluate | Set or clear a reviewer note on a specific evidence file | AnnualFoldersService.setReviewerNote() | `src/annual-folders/evaluation.controller.ts` |
 
@@ -1901,7 +1911,7 @@ Los mismos `GET`/`POST` de camporee aceptan `supply_edit_cutoff_local_time` (def
 | --- | --- | --- | --- | --- | --- | --- |
 | GET | `/api/v1/camporees` | JWT | Permisos: camporees:read. Recorte territorial rol-primero (`director-lf`/unión/división y admin con ancla); coordinador sin asignación de club → denegado. Query opcional `club_type_id` (1=Aventureros, 2=Conquistadores, 3=Guías Mayores) recorta por `includes_*`; sin el query el catálogo territorial queda completo (admin). | Listar camporees | CamporeesService.findAll() | `src/camporees/camporees.controller.ts` |
 | GET | `/api/v1/camporees/union` | JWT | Permisos: camporees:read. Mismo recorte rol-primero que el listado local (campo / unión / división). | Listar camporees de unión | CamporeesService.findAllUnion() | `src/camporees/camporees.controller.ts` |
-| GET | `/api/v1/camporees/union/:camporeeId` | JWT | Permisos: camporees:read | Obtener camporee de unión por ID | CamporeesService.findOneUnion() | `src/camporees/camporees.controller.ts` |
+| GET | `/api/v1/camporees/union/:camporeeId` | JWT | Permisos: camporees:read. Pendiente de merge (PR #615): 403 `GUARD_CLUB_SCOPE_REQUIRED` fuera del ámbito del camporee; 404 `CAMPOREE_UNION_CAMPOREE_NOT_FOUND` si no existe | Obtener camporee de unión por ID | CamporeesService.findOneUnion() | `src/camporees/camporees.controller.ts` |
 | POST | `/api/v1/camporees/union` | JWT | Permisos: camporees:create | Crear camporee de unión | CamporeesService.createUnion() | `src/camporees/camporees.controller.ts` |
 | PATCH | `/api/v1/camporees/union/:camporeeId` | JWT | Permisos: camporees:update | Actualizar camporee de unión | CamporeesService.updateUnion() | `src/camporees/camporees.controller.ts` |
 | DELETE | `/api/v1/camporees/union/:camporeeId` | JWT | Permisos: camporees:delete | Desactivar camporee de unión | CamporeesService.removeUnion() | `src/camporees/camporees.controller.ts` |
@@ -1972,6 +1982,8 @@ Los mismos `GET`/`POST` de camporee aceptan `supply_edit_cutoff_local_time` (def
 | GET | `/api/v1/catalogs/medicines` | JWT opcional (`@Public` + OptionalJwt) | - | Obtener catálogo de medicamentos | CatalogsService.getMedicines() | `src/catalogs/catalogs.controller.ts` |
 
 ### admin-certificate-bulk-imports
+
+Los cinco roles van en `@ExactGlobalRoles` (fase 6 de la remediación RBAC, backend #614, mergeado el 2026-11-04): sin expansión de alias; `super-admin` sigue pasando. No cambia el resultado: `src/common/reviewer-scope` ya comparaba los roles de forma exacta.
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -2282,9 +2294,9 @@ Una resolución confirmada avisa en la bandeja de la app, no por correo. La inte
 | POST | `/api/v1/users/:userId/classes/enroll` | JWT | Permisos: classes:submit_progress | Inscribir usuario en clase. GM investido puede añadir una clase cruzada de Aventureros/Conquistadores (`cross_type_enrollment`). Errores: `CLASS_MAX_AVENTU_CONQUIS_ACTIVE`, `CLASS_MAX_GM_ACTIVE`, `CLASS_CROSS_TYPE_GM_REQUIRED`, `CLASS_ALREADY_INVESTED`, `CLASS_ALREADY_ENROLLED` | ClassesService.enrollUser() | `src/classes/classes.controller.ts` |
 | GET | `/api/v1/users/:userId/classes/:classId/progress` | JWT | Permisos: classes:read | Obtener progreso del usuario en una clase | ClassesService.getUserProgress() | `src/classes/classes.controller.ts` |
 | PATCH | `/api/v1/users/:userId/classes/:classId/progress` | JWT | Permisos: classes:submit_progress | Actualizar progreso de sección | ClassesService.updateSectionProgress() | `src/classes/classes.controller.ts` |
-| POST | `/api/v1/users/:userId/classes/:classId/sections/:sectionId/submit` | JWT | Permisos: classes:submit_progress | Submit a class section for validation | ClassesService.submitSection() | `src/classes/classes.controller.ts` |
-| POST | `/api/v1/users/:userId/classes/:classId/sections/:sectionId/files` | JWT | Permisos: classes:submit_progress | Upload evidence file for a class section | ClassesService.uploadSectionFile() | `src/classes/classes.controller.ts` |
-| DELETE | `/api/v1/users/:userId/classes/:classId/sections/:sectionId/files/:fileId` | JWT | Permisos: classes:submit_progress | Delete evidence file for a class section | ClassesService.deleteSectionFile() | `src/classes/classes.controller.ts` |
+| POST | `/api/v1/users/:userId/classes/:classId/sections/:moduleSectionId/submit` | JWT | Permisos: classes:submit_progress | Submit a class section for validation | ClassesService.submitSection() | `src/classes/classes.controller.ts` |
+| POST | `/api/v1/users/:userId/classes/:classId/sections/:moduleSectionId/files` | JWT | Permisos: classes:submit_progress | Upload evidence file for a class section | ClassesService.uploadSectionFile() | `src/classes/classes.controller.ts` |
+| DELETE | `/api/v1/users/:userId/classes/:classId/sections/:moduleSectionId/files/:fileId` | JWT | Permisos: classes:submit_progress | Delete evidence file for a class section | ClassesService.deleteSectionFile() | `src/classes/classes.controller.ts` |
 
 ### club-enrollments
 
@@ -2808,6 +2820,8 @@ Errores: 400 `LEGAL_VERSION_MISMATCH` (`{ "status": "error", "statusCode": 400, 
 
 No existe `GET .../orders-settings`. Settings en `GET` de camporee y en este GET de ofertas. Escritura: `PATCH .../orders-settings`.
 
+Pendiente de merge (PR #615 de sacdia-backend): `GET .../order-offerings` (local y unión) responde 403 `GUARD_CLUB_SCOPE_REQUIRED` fuera del ámbito del camporee y 404 `CAMPOREE_NOT_FOUND` / `CAMPOREE_UNION_CAMPOREE_NOT_FOUND` si no existe; `PATCH /union-camporees/:camporeeId/orders-settings` y `PUT /union-camporees/:camporeeId/order-offerings` solo para la unión dueña (`bind: union_camporee`).
+
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
 | PATCH | `/api/v1/camporees/:camporeeId/orders-settings` | JWT | Permisos: camporee-orders:offering-configure | Actualizar ventana de pedidos del camporee local | OfferingsService.updateSettings() | `src/camporee-orders/offerings.controller.ts` |
@@ -2849,6 +2863,8 @@ Read model de solo lectura. No fusiona folios ni muta `field_payment_orders`, `m
 ### camporee supplies
 
 > Insumos de sección (`src/camporee-supplies`, migración `20260826120000_camporee_supplies`). Distintos de `/camporee-orders` (mercancía PED) y `/payment-orders` (inscripción). Folio `INS{yyyy}{####}`.
+
+Pendiente de merge (PR #615 de sacdia-backend): `GET .../supply-catalog`, `GET .../supply-plans`, `GET .../supply-reports/{kitchen,cash}` y `PATCH .../supply-plan/lines` (local y unión) responden 403 `GUARD_CLUB_SCOPE_REQUIRED` fuera del ámbito del camporee (404 `CAMPOREE_NOT_FOUND` / `CAMPOREE_UNION_CAMPOREE_NOT_FOUND` si no existe); los directores de una unión que no organiza pierden el bypass en planes de insumos. El código del guard precede a `CAMPOREE_SUPPLIES_*` en casos cross-tenant.
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
