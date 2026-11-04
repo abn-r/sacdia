@@ -1,7 +1,7 @@
 # Plan de remediación RBAC: de guard monolítico a motor de políticas
 
 **Fecha**: 2026-11-03
-**Estado**: Propuesta (sin implementar)
+**Estado**: En ejecución. Fases 0, 1, 2, 8, 3, 4 y 6 mergeadas en `development` (2026-11-04); fase 5 Pendiente de merge (PR #615 de sacdia-backend); fase 7 sin iniciar. Ver «Estado por fase».
 **Origen**: Auditoría externa de solo lectura del RBAC en backend, admin y app. Hallazgos completos en Engram, topic `architecture/rbac-audit`.
 
 ## Diagnóstico en una línea
@@ -31,6 +31,65 @@ El modelo (roles GLOBAL/CLUB, permisos `resource:action` resueltos en DB, guard 
 | 8 | Sucesión programada del director | backend, admin | Sucesión inmediata que deja la sección sin director de octubre a diciembre |
 
 Las fases 0 a 2 son independientes entre sí tras la 0. La 3 habilita la 6 y la 7. La 4 habilita la 5. La 8 necesita la 1 y la 2.
+
+## Estado por fase (2026-11-04)
+
+Lo que sigue es el estado real de ejecución. Las secciones «Fase N» de abajo conservan el diseño original y valen como intención; cuando difieren de esta tabla, manda la tabla y la documentación vigente (`docs/features/rbac.md`, `docs/features/auth/RBAC-ENFORCEMENT-MATRIX.md`, `docs/api/ENDPOINTS-LIVE-REFERENCE.md`).
+
+| Fase | Estado | PR | Fecha |
+|---|---|---|---|
+| 0 | Hecha | sacdia-backend #607 | 2026-11-04 |
+| 1 | Hecha | sacdia-backend #608 a #610 (fases 1, 2 y 8) | 2026-11-04 |
+| 2 | Hecha | sacdia-backend #608 a #610 (fases 1, 2 y 8) | 2026-11-04 |
+| 8 | Hecha (reducida a cerrar brechas; ver la corrección en su sección) | sacdia-backend #608 a #610 (fases 1, 2 y 8); admin ya tenía el bloque de designación | 2026-11-04 |
+| 3 | Hecha | sacdia-backend #611, sacdia-admin #288, sacdia-app #226; paso 2: sacdia-admin #289, sacdia-app #228 | 2026-11-04 |
+| Retiro del contrato P0 de consumidores | Hecha | sacdia-backend #612 | 2026-11-04 |
+| 4 | Hecha | sacdia-backend #613 | 2026-11-04 |
+| 6 | Hecha | sacdia-backend #614 | 2026-11-04 |
+| 5 | Pendiente de merge (PR #615 de sacdia-backend) | sacdia-backend #615 (abierto) | — |
+| 7 | Pendiente (sin iniciar) | — | — |
+
+Detalle de fases 0, 1, 2 y 8 en `docs/features/rbac.md`, «Vigencia temporal, autoridad de cargos y roles globales». Detalle de 3, 4, 5 y 6 en `docs/features/rbac.md`, «Motor de políticas: catálogo generado, policies por recurso, literales de rol y tenant binding».
+
+### Fase 3, lo que se hizo (difiere del diseño)
+
+- La fuente de verdad del catálogo no es un `prisma/authz/catalog.ts` nuevo: son los seeds que ya existían (`prisma/seeds/permissions.seed.sql`, `prisma/seeds/role-permissions.seed.sql`) y las migraciones, leídos por `scripts/authz/catalog-source.ts`. Los roles sí viven en un archivo nuevo, `prisma/authz/roles.json`, que `prisma/seed.ts` consume.
+- El seed SQL se sigue editando a mano; el generador (`scripts/authz/generate-catalog.ts`, `pnpm authz:generate`) emite los TypeScript y Dart generados, y `pnpm authz:check` falla en CI si no coinciden.
+- Los `UPDATE permissions SET active=false` del seed se honran: esos 9 permisos (`classes:update`, `classes:validate`, `folders:manage`, `folders:read`, `qr:issue_self`, `user_folders:manage`, `user_folders:read`, `user_honors:update`, `users:update`) van a `DEPRECATED_PERMISSION_KEYS` y no entran en `PERMISSION_KEYS` (224 claves activas).
+- Backend: `@RequirePermissions` tipado con `PermissionKey`: un permiso mal escrito no compila. La regla ESLint de literales `x:y` del diseño no se documenta como entregada.
+- Admin: `src/lib/auth/permissions.ts` **no** se borró; conserva sus constantes nombradas con `satisfies PermissionKey`. Sí se borró `seeded-permission-keys.ts`; `screen-catalog/role-aliases.ts` toma `GLOBAL_ROLE_ALIASES` del generado. Hallazgo del paso 2: 34 constantes nombraban permisos que nunca existieron en el backend (`relationship_types|allergies|diseases|medicines|club_types|club_ideals|activity_types:{read,create,update,delete}`, `classes:manage`, `class_modules:manage`, `class_sections:manage`, `finance_categories:manage`, `inventory_categories:manage`, `dashboard:view`); el backend protege esos catálogos con `catalogs:*` y el dashboard con `dashboard:read`. Se eliminaron; no tenían usos.
+- App: `lib/core/authorization/role_aliases.dart` re-exporta el generado; `test/core/authorization/generated_catalog_parity_test.dart` exige que los nombres de rol de club, los alias y todo literal `'recurso:accion'` de `lib/` existan en el catálogo. Se eliminó el literal muerto `post_registration:update` (nunca fue grant; esa ruta usa `users:update_profile`).
+- La deriva entre repos la detecta el job «Cross-repo Contract» del backend (`authz-catalog.crossrepo.spec.ts`) contra los SHAs fijados en las variables de repositorio `SACDIA_ADMIN_CONTRACT_REF` y `SACDIA_APP_CONTRACT_REF`. Cada vez que cambian los generados en admin o app hay que mover la variable correspondiente.
+- Sin evidencia en este corte (no se documentan como hechos): la normalización de `camporee-orders:*`, `camporee-supplies:*`, `field-payment-orders:*` y `materiales:*` (era opcional) y el spec de super-admin con todo permiso activo.
+
+### Retiro del contrato P0 de consumidores (sacdia-backend #612)
+
+`scripts/verify-authorization-director-succession-p0.ts` ya no inventaría consumidores de admin, app ni de este repo, ni verifica frases canónicas en `docs/features/gestion-clubs.md`: ese contrato de julio afirmaba que la sucesión programada no existía, y existe desde septiembre. El CLI `pnpm verify:authorization-p0` conserva readiness de esquema, catálogo IANA/ICU, señales de Postgres y clasificación de fallos; `report_version` pasó a `authorization-director-succession-p0/v2` y desapareció el campo `consumer_inventory`. Se borró `verify-authorization-director-succession-p0-crossrepo.spec.ts`. El job «Cross-repo Contract» ya no clona este repo raíz; la variable `SACDIA_ROOT_CONTRACT_REF` quedó sin uso.
+
+### Fase 4, lo que se hizo y lo diferido
+
+- `permissions.guard.ts` pasó de 2435 a 339 líneas. Conserva lectura de metadata, `@SkipPermissions`, `GUARD_RBAC_MISCONFIGURATION`, comprobación de permisos y bypass de dueño; el scope de recurso lo despacha a un registry de policies (`src/common/authorization/policies/`, 21 policies, cada una con spec). Un tipo de recurso sin policy no compila (`policy-registry.ts` es un tipo mapeado sobre `AuthorizationResourceType`).
+- `ActorScope` (`src/common/authorization/actor-scope.ts`) existe y lo adoptaron los validadores compartidos y `report-visibility-scope`, `camporee-supply-actor`, `camporee-order-actor` y `field-payment-orders/order-actor`.
+- Ratchet `access-decision-locality.arch.spec.ts`: congela 46 archivos que deciden acceso con `club_role_assignments` o `users.local_field_id` fuera de `src/common/authorization/`; un archivo nuevo rompe el build.
+- **Diferido a fases posteriores**: `actor-territory-scope`, `coordinator-section-scope`, `target-user-scope`, `member-territory-scope.service`, `class-progress-scope.service` y `operations-dashboard-scope.service` conservan su API (24 importadores). No se reescribieron como adaptadores sobre `ActorScope`.
+- El constructor del guard no cambió; los 114 casos de sus tres specs siguen idénticos.
+
+### Fase 6, lo que se hizo y decisiones abiertas
+
+- Constantes `GlobalRole` y `ClubRole` en `src/common/authorization/roles.ts` (sobre los tipos generados), conjuntos en `role-sets.ts` y helpers en `role-checks.ts`; `GlobalRoleType` y `ClubRoleType` son alias de `GlobalRoleName`/`ClubRoleName`. Se borró `src/common/constants/roles.constants.ts`.
+- Regla ESLint local `local/no-role-literals` en `error`, sin autofix; 661 literales reemplazados.
+- `@ExactGlobalRoles(...)` existe y `GlobalRolesGuard` lo lee primero, sin expansión de alias (`super-admin` sigue pasando; si `@GlobalRoles` y `@ExactGlobalRoles` coinciden en el mismo nivel, gana exact). Solo se aplicó a `admin-certificate-bulk-imports.controller.ts` y `admin-honor-instructor-proposals.controller.ts`, donde `reviewer-scope.ts` ya era exacto: el contrato del guard ahora coincide con la matriz, sin cambio en runtime.
+- Sin evidencia en este corte (no se documentan como hechos): extraer `isSectionDirector(actor, section)` y similares como policies nombradas, y eliminar las copias privadas de `isSuperAdmin`.
+- **Decisiones de producto abiertas** (alias amplio en mutaciones; sin cambio en runtime; registradas en `docs/audit/DECISIONS-PENDING.md`): `PATCH local-fields/:id/investiture-windows/:yearId`, las mutaciones de `district-investiture-pastors`, las mutaciones de `admin/coordination`, y toda ruta `@GlobalRoles(admin, super-admin)` admite también `assistant-admin`.
+
+### Fase 5, lo que trae el PR #615 (Pendiente de merge)
+
+- `tenant-binding-allowlist.ts` queda vacío y `tenant-binding-allowlist.freeze.spec.ts` exige que siga vacío. `tenant-binding-inventory.ts` incluye `fieldId` en `TENANT_PATH_PARAM`.
+- Kinds de `bind` (11): `club`, `club_section`, `local_field`, `union`, `camporee`, `union_camporee` (solo unión dueña), `club_enrollment_territory`, y nuevos `union_camporee_participant`, `club_section_membership`, `union_membership`, `local_field_membership`.
+- Tenant en body o query: nuevo `tenant-body-allowlist.ts` con 55 rutas `global`/`user`/`active_assignment` que reciben `club_id`, `club_section_id`, `local_field_id`, `union_id`, `division_id`, `camporee_id` o `union_camporee_id` sin `bind`, con ratchet propio. Solo inventario por ahora.
+- Params renombrados (las URLs no cambian): `:id` en `PATCH|DELETE /admin/{divisions,unions,local-fields}/:id`; `:templateSectionId` en secciones de plantilla y de carpeta anual; `:moduleSectionId` en secciones de clase.
+- **Cambios de comportamiento a propósito**: `GET order-offerings`, `GET supply-catalog`, `GET supply-plans`, reportes de cocina y caja, `PATCH supply-plan/lines` (local y unión) y `GET /camporees/union/:id` responden 403 `GUARD_CLUB_SCOPE_REQUIRED` fuera del ámbito del camporee (404 `CAMPOREE_NOT_FOUND` / `CAMPOREE_UNION_CAMPOREE_NOT_FOUND` si no existe); directores de una unión que no organiza pierden el bypass en planes de insumos. Los códigos del guard preceden a `CAMPOREE_ORDER_*` / `CAMPOREE_SUPPLIES_*` en casos cross-tenant.
+- Decisiones de producto conservadas: un consejero de club puede crear categorías de puntuación de su unión; la geografía admin no se ata a territorio.
 
 ---
 
@@ -246,13 +305,13 @@ Un solo desarrollador: 0 → 1 → 2 → 8 → 3 → 4 → 6 → 5 → 7. La 8 v
 
 ## Métricas de seguimiento
 
-| Métrica | Hoy | Meta |
-|---|---|---|
-| Líneas `permissions.guard.ts` | 2.377 | < 500 |
-| Entradas `tenant-binding-allowlist.ts` | 69 | 0 |
-| Literales de rol fuera de guards/policies | 611 | 0 |
-| Literales de permiso fuera de `generated/` | ~690 | 0 |
-| Copias manuales de catálogo/alias en clientes | 3 | 0 |
-| Rutas Flutter con gate de permiso en router | 1 de 113 | todas las del catálogo |
-| Cargos de club auditados con actor real | 3 roles, actor = objetivo | todos, actor = autenticado |
-| Días sin director tras programar sucesión en octubre | ~90 | 0 |
+| Métrica | Al inicio (2026-11-03) | 2026-11-04 | Meta |
+|---|---|---|---|
+| Líneas `permissions.guard.ts` | 2.377 | 339 (fase 4) | < 500 |
+| Entradas `tenant-binding-allowlist.ts` | 69 | 69 en `development`; 0 en el PR #615 (Pendiente de merge) | 0 |
+| Literales de rol fuera de guards/policies | 611 | 0 (661 reemplazados; `local/no-role-literals` en `error`) | 0 |
+| Literales de permiso fuera de `generated/` | ~690 | sin dato; `@RequirePermissions` tipado con `PermissionKey` | 0 |
+| Copias manuales de catálogo/alias en clientes | 3 | 0 (generados en admin y app; `permissions.ts` del admin conserva constantes con `satisfies PermissionKey`) | 0 |
+| Rutas Flutter con gate de permiso en router | 1 de 113 | sin cambio (fase 7) | todas las del catálogo |
+| Cargos de club auditados con actor real | 3 roles, actor = objetivo | todos, actor = autenticado (fase 2) | todos, actor = autenticado |
+| Días sin director tras programar sucesión en octubre | ~90 | 0 (fase 8) | 0 |

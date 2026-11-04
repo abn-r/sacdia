@@ -12,7 +12,7 @@ La Carpeta Anual de Evidencias conserva su propio flujo de carga de archivos e i
 
 ### Backend (NestJS)
 
-- **EvaluationModule**: evaluar secciones (`POST /:folderId/sections/:sectionId/evaluate`), confirmar union (`POST .../confirm-union`), reabrir secciones (`POST .../reopen`), listar evaluaciones (`GET /:folderId/evaluations`), nota de revisor por evidencia (`PATCH evidences/:evidenceId/reviewer-note`). Recalculo de totales en transaccion.
+- **EvaluationModule**: evaluar secciones (`POST /:folderId/sections/:templateSectionId/evaluate`; el parámetro se llamaba `:sectionId`, la URL no cambia, Pendiente de merge (PR #615 de sacdia-backend)), confirmar union (`POST .../confirm-union`), reabrir secciones (`POST .../reopen`), listar evaluaciones (`GET /:folderId/evaluations`), nota de revisor por evidencia (`PATCH evidences/:evidenceId/reviewer-note`). Recalculo de totales en transaccion.
 - **AwardCategoriesModule**: CRUD completo en `/award-categories`. Catalogo reutilizable sin FK de ano. Soft-delete.
 - **RankingsModule**: `GET /annual-folders/rankings` (con filtros club_type, year, category), `GET .../club/:enrollmentId`, `POST .../recalculate`. Cron nocturno a las 2 AM. Dense ranking idempotente en transaccion.
 - **Schema**: 3 modelos nuevos (`annual_folder_section_evaluations`, `award_categories`, `club_annual_rankings`) + campos de scoring en `folder_template_sections`, `folder_templates`, `annual_folders` + lifecycle explícito de plantillas (`folder_template_status_enum`).
@@ -84,8 +84,8 @@ La evaluacion de una seccion puede atravesar hasta dos niveles de aprobacion, co
 
 - **Camino con union (`requires_union_confirmation = true`)**:
   1. El club sube evidencias y ejecuta `submitSection` por cada seccion lista para revision.
-  2. Un actor de campo local (LF) califica con `POST .../sections/:sectionId/evaluate`. La carpeta puede seguir `open`; la precondición real es que la fila de sección esté `SUBMITTED`. La seccion pasa a `PREAPPROVED_LF` y se graba `lf_approved_by` / `lf_approved_at`.
-  3. Un actor de union ejecuta `POST .../sections/:sectionId/confirm-union` con decision `APPROVED` o `REJECTED_OVERRIDE`. La seccion transiciona a `VALIDATED` o `REJECTED` respectivamente. Las columnas LF se preservan intactas para auditoria.
+  2. Un actor de campo local (LF) califica con `POST .../sections/:templateSectionId/evaluate`. La carpeta puede seguir `open`; la precondición real es que la fila de sección esté `SUBMITTED`. La seccion pasa a `PREAPPROVED_LF` y se graba `lf_approved_by` / `lf_approved_at`.
+  3. Un actor de union ejecuta `POST .../sections/:templateSectionId/confirm-union` con decision `APPROVED` o `REJECTED_OVERRIDE`. La seccion transiciona a `VALIDATED` o `REJECTED` respectivamente. Las columnas LF se preservan intactas para auditoria.
   4. Si antes de la confirmación de Unión se requiere corregir la evaluación LF, el backend aún permite re-evaluar una fila `PREAPPROVED_LF`; la UX principal del panel prioriza `confirm-union` para evitar confundir esa corrección con la decisión final de Unión.
 
 - **Atajo sin union (`requires_union_confirmation = false`)**:
@@ -132,7 +132,7 @@ Reopen (LF o union): VALIDATED | REJECTED | PREAPPROVED_LF ──> SUBMITTED
 
 ## Endpoint de confirmacion de union
 
-`POST /annual-folders/:folderId/sections/:sectionId/confirm-union`
+`POST /annual-folders/:folderId/sections/:templateSectionId/confirm-union`
 
 - **DTO**: `{ decision: 'APPROVED' | 'REJECTED_OVERRIDE', notes?: string }`
 - **Permiso**: `annual_folders:evaluate` con `type: 'global'`

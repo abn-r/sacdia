@@ -26,13 +26,13 @@ Las integraciones externas de infraestructura son Sentry (condicional), Redis (c
 - **Guards** (`src/common/guards/`):
   - `global-jwt-auth.guard.ts` — `APP_GUARD`: valida el JWT HS256 de SACDIA en todas las rutas salvo `@Public()`
   - `jwt-auth.guard.ts` — Validacion JWT (Passport) usada explicitamente por controllers
-  - `permissions.guard.ts` — `APP_GUARD` fail-closed: permisos `resource:action` + `@AuthorizationResource`
-  - `global-roles.guard.ts` — Verificacion de roles globales (con alias, `GLOBAL_ROLE_ALIASES`)
+  - `permissions.guard.ts` — `APP_GUARD` fail-closed: permisos `resource:action` + `@AuthorizationResource`; el scope por tipo de recurso lo despacha a las policies de `src/common/authorization/policies/` (fase 4 de la remediación RBAC, 2026-11-04)
+  - `global-roles.guard.ts` — Verificacion de roles globales (con alias, `GLOBAL_ROLE_ALIASES` generado; `@ExactGlobalRoles` sin alias)
   - `club-roles.guard.ts` — Verificacion de roles de club en seccion activa
   - `owner-or-admin.guard.ts` — Self-service o acceso administrativo (`admin` / `assistant-admin` / `super-admin`; el coordinador no es atajo)
   - `optional-jwt-auth.guard.ts` — JWT opcional (endpoints mixtos)
   - `mfa.guard.ts` — Bloquea JWT con `mfa_pending` salvo `@SkipMfaCheck()`
-- **Decorators** (`src/common/decorators/`): `@RequirePermissions` (`permissions.decorator.ts`), `@SkipPermissions`, `@Public`, `@SkipMfaCheck`, `@GlobalRoles`, `@ClubRoles`, `@AuthorizationResource`, `@SensitiveUserSubresource`, `@CurrentUser`, `@GetUser`, `@Audit`
+- **Decorators** (`src/common/decorators/`): `@RequirePermissions` (`permissions.decorator.ts`, tipado con `PermissionKey`), `@SkipPermissions`, `@Public`, `@SkipMfaCheck`, `@GlobalRoles`, `@ExactGlobalRoles`, `@ClubRoles`, `@AuthorizationResource`, `@SensitiveUserSubresource`, `@CurrentUser`, `@GetUser`, `@Audit`
 - **Services** (`src/common/services/`): `authorization-context.service.ts`, `mfa.service.ts`, `session-management.service.ts`, `token-blacklist.service.ts` (Redis), `file-storage.service.ts` + `r2-file-storage.service.ts`, `distributed-lock.service.ts`, `cleanup.service.ts`, `cron-run-logger.service.ts`, `cron-alert.service.ts`, `translation.service.ts`, `institutional-hierarchy.service.ts`, `ecclesiastical-year.service.ts`, `club-cycle-readiness.service.ts`, `class-assignment-resolver.service.ts`
 - **Pipes**: `sanitize.pipe.ts` (XSS), `file-validation.pipe.ts`; ValidationPipe global (class-validator + class-transformer)
 - **Filters**:
