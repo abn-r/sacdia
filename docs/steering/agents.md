@@ -1,7 +1,7 @@
 # Agents Configuration
 
 **Estado**: ACTIVE
-**Actualizado**: 2026-10-04
+**Actualizado**: 2026-11-04 (catálogo de autorización generado, policies y literales de rol en el backend); antes, 2026-10-04
 
 > Reglas extendidas para agentes de IA en SACDIA. El contrato corto está en `AGENTS.md` (raíz); este archivo lo detalla y no lo contradice. Reparto de trabajo entre agentes: `docs/steering/agent-ownership.md`.
 
@@ -58,7 +58,8 @@ No usar como fuente de estado actual: `docs/history/**`, planes ya cerrados, blo
 ### Backend
 
 - Todo handler nuevo declara `@Public()`, `@SkipPermissions()` o `@RequirePermissions(...)` (guard global deny-by-default).
-- Permisos nuevos: `permissions.seed.sql` + reparto en `role-permissions.seed.sql` + screen catalog si afecta a una pantalla.
+- Permisos nuevos: `permissions.seed.sql` + reparto en `role-permissions.seed.sql` + `pnpm authz:generate` (regenera `src/common/authorization/generated/` y los espejos de admin y app; `pnpm authz:check` lo exige en CI) + screen catalog si afecta a una pantalla. Roles nuevos en `prisma/authz/roles.json`. Nunca editar a mano un archivo de `generated/`.
+- Nombres de rol desde `GlobalRole` / `ClubRole` (`src/common/authorization/roles.ts`); la regla ESLint `local/no-role-literals` rechaza literales. Scope de recurso en `src/common/authorization/policies/`, no en servicios.
 - Cambio de schema: migración Prisma + actualización de `docs/database/`.
 - Cambio de endpoint: actualización de `docs/api/ENDPOINTS-LIVE-REFERENCE.md`.
 

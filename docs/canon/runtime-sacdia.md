@@ -237,7 +237,9 @@ Notas runtime activas de carpetas anuales:
 
 Detalle conceptual en `docs/canon/auth/modelo-autorizacion.md`. Guards globales registrados en `AppModule` (`APP_GUARD`), en este orden: `UserAwareThrottlerGuard`, `GlobalJwtAuthGuard`, `PermissionsGuard`.
 
-`PermissionsGuard` es **deny-by-default**: cada handler debe declarar `@Public()`, `@SkipPermissions()` o `@RequirePermissions(...)` con su recurso de autorización; si falta, responde error de configuración RBAC. Además existen `GlobalRolesGuard` (`@GlobalRoles(...)`), `OwnerOrAdminGuard`, `ClubRolesGuard` y `MfaGuard`.
+`PermissionsGuard` es **deny-by-default**: cada handler debe declarar `@Public()`, `@SkipPermissions()` o `@RequirePermissions(...)` con su recurso de autorización; si falta, responde error de configuración RBAC. Además existen `GlobalRolesGuard` (`@GlobalRoles(...)`, con alias; `@ExactGlobalRoles(...)` sin alias), `OwnerOrAdminGuard`, `ClubRolesGuard` y `MfaGuard`.
+
+Desde 2026-11-04 (remediación RBAC, fases 3, 4 y 6): el scope de recurso lo resuelve una policy por `type` en `src/common/authorization/policies/` (registry tipado: un tipo sin policy no compila) sobre el value object `ActorScope`; el catálogo de permisos, roles y alias se genera desde los seeds y `prisma/authz/roles.json` (`pnpm authz:generate`, verificado en CI con `pnpm authz:check` y, entre repos, con el job «Cross-repo Contract») hacia `src/common/authorization/generated/` en el backend y sus espejos en admin y app; `@RequirePermissions` acepta solo `PermissionKey`; los nombres de rol se usan desde `GlobalRole` / `ClubRole` (`src/common/authorization/roles.ts`), con la regla ESLint `local/no-role-literals` en `error`. El `bind` de tenant por ruta (`TenantBindingEnforcer`) todavía deja 69 rutas en `tenant-binding-allowlist.ts`; dejarla en cero está Pendiente de merge (PR #615 de sacdia-backend). Detalle en `docs/features/rbac.md`.
 
 ### 7.2 Estructuras y roles
 

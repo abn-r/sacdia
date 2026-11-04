@@ -58,6 +58,7 @@ Reglas:
   Sin rol territorial, el listado sigue amplio. `GET /catalogs/{countries,divisions,unions,local-fields,districts,churches}` recorta al país del actor territorial; los roles de división, que abarcan varios países, se recortan a su división (`resolveActorCatalogRecorte`). Sin JWT o sin ese rol el directorio geográfico sigue completo. Un filtro fuera del recorte responde `403 GUARD_PERMISSION_DENIED`. El resto de `GET /catalogs/*` no se recorta.
 - `@Public()` también salta el guard de permisos.
 - No promover un lint que prohíba `@SkipPermissions`: es el opt-out documentado.
+- Desde 2026-11-04 el guard no resuelve el scope por sí mismo: despacha cada `type` de `@AuthorizationResource` a una policy de `src/common/authorization/policies/` (registry tipado; un tipo sin policy no compila) y el `bind` de tenant a `TenantBindingEnforcer`. `@RequirePermissions` acepta solo `PermissionKey` del catálogo generado. Detalle en `docs/features/rbac.md`, «Motor de políticas».
 - `PATCH /clubs/:clubId/sections/:sectionId` usa recurso `club_section`: la
   secretaría de la sección A no actualiza la sección B del mismo club.
 
@@ -619,7 +620,13 @@ src/
 ├── common/
 │   ├── guards/
 │   │   ├── global-jwt-auth.guard.ts    # APP_GUARD: JWT por defecto salvo @Public()
-│   │   └── permissions.guard.ts        # APP_GUARD fail-closed
+│   │   ├── permissions.guard.ts        # APP_GUARD fail-closed; despacha scope a policies
+│   │   └── tenant-binding-allowlist.ts # rutas sin bind, congeladas por spec
+│   ├── authorization/
+│   │   ├── generated/                  # catálogo de permisos, roles y alias (pnpm authz:generate)
+│   │   ├── policies/                   # una policy por tipo de recurso
+│   │   ├── roles.ts                    # GlobalRole / ClubRole
+│   │   └── tenant-binding.enforcer.ts  # bind de tenant por ruta
 │   ├── filters/
 │   │   ├── http-exception.filter.ts    # Errores HTTP seguros
 │   │   └── all-exceptions.filter.ts    # Catch-all

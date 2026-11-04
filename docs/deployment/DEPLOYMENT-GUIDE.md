@@ -287,6 +287,7 @@ Reglas:
 - Cada entorno tiene su propia base Neon, su propio Redis y sus propios secretos. No compartir `BETTER_AUTH_SECRET`, `QR_JWT_SECRET` ni la base de Redis entre entornos (`.env.example` lo exige para Upstash).
 - Se promueve código mergeando `development` → `preproduction` → `main`; las migraciones viajan con el código y se aplican en el deploy.
 - La CI de backend y app corre en las tres ramas; la del admin, en sus workflows `build`, `tests` y `typecheck`.
+- CI del backend, job «Lint & Type Check» (2026-11-04): corre `prisma generate` antes de `pnpm run lint` (sin cliente generado, las reglas type-aware veían `any` y el `--fix` borraba aserciones que el build necesitaba) y `pnpm authz:check` (los archivos generados del catálogo de autorización deben coincidir con los seeds). Job «Cross-repo Contract»: clona admin y app en los SHAs de las variables de repositorio `SACDIA_ADMIN_CONTRACT_REF` y `SACDIA_APP_CONTRACT_REF` y compara los catálogos generados; cuando cambian los generados en admin o app hay que mover la variable correspondiente. `SACDIA_ROOT_CONTRACT_REF` ya no se usa (el job no clona este repo).
 
 ---
 
@@ -502,6 +503,8 @@ Checklist:
 | `QR_JWT_SECRET must be distinct from BETTER_AUTH_SECRET` | Mismo valor en ambos | Generar otro secreto |
 | Error de Prisma al final del build (`prisma migrate deploy`) | Migración que no aplica sobre la base del entorno | Revisar la migración en local contra una rama de Neon; si el host de `DATABASE_URL` es `-pooler`, confirmar que `DATABASE_DIRECT_URL` exista; no usar `db push` |
 | `Property X does not exist on type PrismaService` al compilar | No se generó el cliente | El build del blueprint ya ejecuta `pnpm prisma generate`; en local, `pnpm prisma generate` |
+| `pnpm run lint --fix` borra aserciones de tipo que luego rompen el build | ESLint corrió sin el cliente de Prisma generado: las reglas type-aware ven `any` | Ejecutar `prisma generate` antes de `pnpm run lint` (el job «Lint & Type Check» ya lo hace) |
+| `pnpm authz:check` falla en CI | Se editó un seed de permisos o `prisma/authz/roles.json` sin regenerar, o se tocó a mano un archivo de `generated/` | `pnpm authz:generate` y commitear los generados; si cambian en admin o app, mover `SACDIA_ADMIN_CONTRACT_REF` / `SACDIA_APP_CONTRACT_REF` |
 | El registro responde que no existe el rol `user` | Base sin `prisma/seed.ts` | Ejecutar los seeds del §3 |
 | `redirect_uri_mismatch` en OAuth | URL de callback no registrada | Añadir `https://<backend>/api/auth/callback/<provider>` en el proveedor |
 | `prisma migrate deploy` falla con P3018 / 25001 (`CREATE INDEX CONCURRENTLY cannot run inside a transaction block`) | Migración con `CONCURRENTLY` junto a bloques `DO` | Quitar `CONCURRENTLY` (ver 0.4), dejar la migración re-ejecutable y resolver el registro fallido (P3009) antes de redeplegar |

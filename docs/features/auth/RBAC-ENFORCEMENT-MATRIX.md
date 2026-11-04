@@ -1,7 +1,7 @@
 # Matriz de Enforcement RBAC
 
 **Status**: ACTIVE
-**Fecha**: 2026-03-10
+**Fecha**: 2026-03-10 (actualizada 2026-11-04: policies por recurso, `@ExactGlobalRoles`, kinds de `bind`; lo marcado Pendiente de merge (PR #615 de sacdia-backend) no está en `development`)
 **Ambito**: backend enforced permissions
 
 ## Proposito
@@ -31,6 +31,27 @@ Autoridad exacta sobre cargos de club (`src/common/authorization/section-role-mu
 Nota de implementacion:
 
 - En codigo existen recursos derivados (`activity`, `finance`, `inventory_item`, `inventory_instance`) que resuelven finalmente a validacion de `club_instance`.
+- Desde la fase 4 (backend PR #613, 2026-11-04) `PermissionsGuard` no resuelve el scope por sí mismo: despacha cada `type` a una policy de `src/common/authorization/policies/` (`ResourcePolicy.resolve(ctx)`); el registry es un tipo mapeado sobre `AuthorizationResourceType`, así que un tipo sin policy no compila. Policies: `global`, `user`, `active_assignment`; `club`, `club_section`, `activity`, `activity_series`, `finance`, `inventory_instance`, `inventory_item`, `club_assignment`, `class_counselor_assignment`, `investiture_enrollment`, `monthly_report`, `insurance_member`, `insurance_record`; `camporee`, `union_camporee`, `camporee_event`, `camporee_venue`, `camporee_payment`. Detalle en `docs/features/rbac.md`, «Policies por recurso y `ActorScope`».
+
+### Tenant binding (`bind`)
+
+Además del `type`, `@AuthorizationResource` puede declarar `bind` para atar la request a un tenant del path. `TenantBindingEnforcer` (`src/common/authorization/tenant-binding.enforcer.ts`) lo verifica antes del scope. Las rutas que todavía no declaran `bind` viven en `src/common/guards/tenant-binding-allowlist.ts` (69 en `development`, congeladas por spec).
+
+| Kind | Qué exige | Estado |
+|------|-----------|--------|
+| `club` | el club del path está en el alcance del actor | `development` |
+| `club_section` | la sección del path está en el alcance del actor | `development` |
+| `local_field` | el campo local del path está en el territorio del actor | `development` |
+| `union` | la unión del path está en el territorio del actor | `development` |
+| `camporee` | el camporee local del path está en el ámbito del actor | `development` |
+| `union_camporee` | solo la unión dueña del camporee de unión | `development` |
+| `club_enrollment_territory` | la inscripción anual del path pertenece al territorio del actor | `development` |
+| `union_camporee_participant` | unión dueña, o campo participante con fila activa en `union_camporee_local_fields`, o club con campo activo | Pendiente de merge (PR #615) |
+| `club_section_membership` | jerarquía o cualquier asignación de club operativa del actor en esa sección | Pendiente de merge (PR #615) |
+| `union_membership` | jerarquía o cualquier asignación de club operativa del actor en esa unión | Pendiente de merge (PR #615) |
+| `local_field_membership` | jerarquía o cualquier asignación de club operativa del actor en ese campo local | Pendiente de merge (PR #615) |
+
+Con el PR #615 la allowlist queda vacía (el spec exige que siga vacía) y el tenant que llega en body o query sin `bind` queda inventariado en `tenant-body-allowlist.ts` (55 rutas `global` / `user` / `active_assignment`, con ratchet propio; solo inventario).
 
 ## Reglas de Evaluacion
 
@@ -86,7 +107,7 @@ Nota de implementacion:
 | `inventory:delete` | Eliminar item | `club_instance` | permiso efectivo + asignacion activa exacta o bypass global | Admin |
 | `notifications:send` | Enviar notificacion directa | `global` | permiso global explicito | Admin |
 | `notifications:broadcast` | Enviar notificacion masiva | `global` | permiso global explicito | Admin |
-| `notifications:club` | Enviar notificacion a club | `active_assignment` | permiso efectivo + asignacion activa exacta | Admin |
+| `notifications:club` | Enviar notificacion a club (`POST /notifications/club/:instanceType/:instanceId`) | `active_assignment` | permiso efectivo + asignacion activa exacta. Pendiente de merge (PR #615): `bind: club_section` sobre `:instanceId` | Admin |
 | `permissions:read` | Ver RBAC | `global` | permiso global | Admin |
 | `permissions:assign` | Cambiar permisos | `global` | permiso + `@GlobalRoles('super-admin')` | Admin |
 | `permissions:assign` | Asignar / revocar rol global (`POST`/`DELETE /admin/rbac/users/:userId/roles[/:roleId]`) | `global` | permiso + `@GlobalRoles('super-admin')` + `GlobalUserRoleWriteService` (`ExactSuperAdminWritePolicy`: fila activa `users_roles` `super-admin` GLOBAL, si no 403 `SUPER_ADMIN_WRITE_REQUIRED`; locks, `Idempotency-Key`, evento crítico `RBAC_GLOBAL_ROLE_ASSIGNED`/`REVOKED`) | Admin |
@@ -97,8 +118,23 @@ Nota de implementacion:
 | `user_honors:submit` | Proponer o retirar el instructor de una especialidad aprobada (`POST`/`DELETE /users/:userId/honors/:honorId/instructor-proposal`) | `user` | permiso + ownership en el guard. Servicio: solo el dueño (`req.user.sub === :userId`; si no, 403 `HONOR_INSTRUCTOR_PROPOSAL_FORBIDDEN`: el permiso sobre el usuario no basta). `POST` con throttle de 10 por minuto | App |
 | `-` (`@SkipPermissions`, JWT) | Buscar instructores (`GET /instructor-candidates?q=`) | `global` | solo JWT. El alcance lo aplica el servicio: mismo `local_field_id` que quien consulta, activos, aprobados, mayores de edad, sin incluirlo y sin correo. Throttle de 30 por minuto | App |
 | `-` (`@SkipPermissions`, JWT) | Catálogo de clases de la carga por certificado y borrado de borrador (`GET catalog/classes`, `DELETE /certificate-bulk-imports/:batchId`) | `user` | solo JWT. Servicio: el borrado exige dueño y lote `DRAFT` (si no, 404 o 409) | App |
-| `-` (`@GlobalRoles` + `@SkipPermissions`) | Revisar la carga por certificado (`/admin/certificate-bulk-imports/*`) | `global` | `super-admin`, `admin`, `assistant-admin`, `director-lf`, `assistant-lf`. Alcance por Campo Local del lote (`src/common/reviewer-scope`): quien tiene Campo Local solo ve el suyo | Admin |
-| `-` (`@GlobalRoles` + `@SkipPermissions`) | Cola de propuestas de instructor (`/admin/honor-instructor-proposals`: listar, `approve`, `reject`) | `global` | mismos cinco roles que la fila anterior. Alcance por el Campo Local **actual del dueño** de la especialidad; fuera de él, 403 `HONOR_INSTRUCTOR_PROPOSAL_FORBIDDEN` | Admin |
+| `-` (`@ExactGlobalRoles` + `@SkipPermissions`) | Revisar la carga por certificado (`/admin/certificate-bulk-imports/*`) | `global` | `super-admin`, `admin`, `assistant-admin`, `director-lf`, `assistant-lf`, **sin expansión de alias** (desde la fase 6, backend PR #614; antes `@GlobalRoles`, con el mismo resultado porque `reviewer-scope.ts` ya comparaba de forma exacta). Alcance por Campo Local del lote (`src/common/reviewer-scope`): quien tiene Campo Local solo ve el suyo | Admin |
+| `-` (`@ExactGlobalRoles` + `@SkipPermissions`) | Cola de propuestas de instructor (`/admin/honor-instructor-proposals`: listar, `approve`, `reject`) | `global` | mismos cinco roles que la fila anterior, sin expansión de alias. Alcance por el Campo Local **actual del dueño** de la especialidad; fuera de él, 403 `HONOR_INSTRUCTOR_PROPOSAL_FORBIDDEN` | Admin |
+| `camporee-orders:*`, `camporee-supplies:*`, `field-payment-orders:*`, `camporees:read` | 39 rutas de camporee: orders, offerings, payment-orders, configuración y planes de supplies, y `GET /camporees/union/:camporeeId` | `global` o `active_assignment` según la ruta (ver `ENDPOINTS-LIVE-REFERENCE.md`) | Pendiente de merge (PR #615): las rutas `global` conservan tipo y ganan `bind` (`camporee` o `union_camporee_participant`); las `active_assignment` pasan a tipo `camporee` / `union_camporee` con `idParam: 'camporeeId'`. Cambio de comportamiento: `GET .../order-offerings`, `GET .../supply-catalog`, `GET .../supply-plans`, `GET .../supply-reports/{kitchen,cash}`, `PATCH .../supply-plan/lines` (local y unión) y `GET /camporees/union/:camporeeId` responden 403 `GUARD_CLUB_SCOPE_REQUIRED` fuera del ámbito del camporee (404 `CAMPOREE_NOT_FOUND` / `CAMPOREE_UNION_CAMPOREE_NOT_FOUND` si no existe); los directores de una unión que no organiza pierden el bypass en planes de insumos; los códigos del guard preceden a `CAMPOREE_ORDER_*` / `CAMPOREE_SUPPLIES_*` en casos cross-tenant | Admin y App |
+| `camporee-orders:offering-configure` | Ventana y ofertas del camporee de unión (`PATCH /union-camporees/:camporeeId/orders-settings`, `PUT /union-camporees/:camporeeId/order-offerings`) | `global` | permiso global. Pendiente de merge (PR #615): `bind: union_camporee` (solo la unión dueña) | Admin |
+| `coordination:manage` + `@GlobalRoles` | Zonas, asignaciones y backfill de un campo (`GET` y `POST /admin/coordination/local-fields/:localFieldId/{zones,assignments,backfill}`) | sin cambio de `type` | permiso + rol global (admin, campo, unión y división; ver `ENDPOINTS-LIVE-REFERENCE.md`). Pendiente de merge (PR #615): `bind: local_field` sobre `:localFieldId` | Admin |
+| `materiales:configure` | Config de materiales de un campo (`PATCH /materials/config/:localFieldId`) | sin cambio de `type` | permiso. Pendiente de merge (PR #615): `bind: local_field` sobre `:localFieldId` | Admin |
+| `rankings:*` / `section_rankings:*` (any) | Progreso anual de una sección (`GET /club-sections/:sectionId/annual-ranking-progress`) y miembros de un ranking de sección (`GET /section-rankings/:sectionId/members`) | sin cambio de `type` | permiso (any, ver `ENDPOINTS-LIVE-REFERENCE.md`). Pendiente de merge (PR #615): `bind: club_section_membership` sobre `:sectionId` | Admin y App |
+| `scoring_categories:read` / `manage` | Categorías de puntuación de unión (`/unions/:unionId/scoring-categories*`) y de campo (`/local-fields/:fieldId/scoring-categories*`) | sin cambio de `type` | permiso. Pendiente de merge (PR #615): `bind: union_membership` sobre `:unionId` y `local_field_membership` sobre `:fieldId`. Decisión de producto conservada: un consejero de club puede crear categorías de puntuación de su unión | Admin |
+
+## Decisiones de producto abiertas (alias amplio en mutaciones)
+
+Detectadas al cerrar la fase 6 (`@ExactGlobalRoles`). No cambió el runtime; siguen con `@GlobalRoles` y, por tanto, con expansión de alias. Registradas en `docs/audit/DECISIONS-PENDING.md`.
+
+- `PATCH local-fields/:id/investiture-windows/:yearId`.
+- Las mutaciones de `district-investiture-pastors`.
+- Las mutaciones de `admin/coordination`.
+- Toda ruta `@GlobalRoles(admin, super-admin)` admite también `assistant-admin` (alias simétrico `admin ↔ assistant-admin`).
 
 ## Cobertura y Limites de Stage 1
 

@@ -2,7 +2,22 @@
 
 Generado: 2026-03-14
 Fuente: Reality Matrix + Canon verification
-**Estado: TODAS LAS DECISIONES RESUELTAS.** Hay una condición de lanzamiento abierta: la Fase 3 de perfiles familiares (ver «Perfiles familiares: restricción de lanzamiento», 2026-10-19).
+**Estado: UNA DECISIÓN ABIERTA** («RBAC: alias amplio de roles globales en mutaciones», 2026-11-04; sin cambio en runtime hasta decidirla). Hay además una condición de lanzamiento abierta: la Fase 3 de perfiles familiares (ver «Perfiles familiares: restricción de lanzamiento», 2026-10-19).
+
+---
+
+## RBAC: alias amplio de roles globales en mutaciones (2026-11-04)
+
+**Estado: ABIERTA. Sin cambio en runtime.**
+
+Contexto: la fase 6 de la remediación RBAC (backend PR #614, mergeado) introdujo `@ExactGlobalRoles` (sin expansión de alias) y lo aplicó solo donde el servicio ya comparaba roles de forma literal (`admin/certificate-bulk-imports` y `admin/honor-instructor-proposals`). Quedaron mutaciones que siguen con `@GlobalRoles`, es decir, con los alias de `GlobalRolesGuard` (`admin ↔ assistant-admin`; por ejemplo, un rol de unión satisface `@GlobalRoles('director-lf')`), y hay que decidir si ese alcance amplio es el deseado o deben pasar a `@ExactGlobalRoles`:
+
+- `PATCH local-fields/:id/investiture-windows/:yearId`;
+- las mutaciones de `district-investiture-pastors`;
+- las mutaciones de `admin/coordination`;
+- toda ruta `@GlobalRoles(admin, super-admin)`, que admite también `assistant-admin`.
+
+Mientras no se decida, el comportamiento vigente es el de `@GlobalRoles` (alias amplio). Detalle en [rbac.md](../features/rbac.md), «Literales de rol y `@ExactGlobalRoles`», y en [RBAC-ENFORCEMENT-MATRIX.md](../features/auth/RBAC-ENFORCEMENT-MATRIX.md), «Decisiones de producto abiertas».
 
 ---
 
