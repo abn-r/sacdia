@@ -38,13 +38,15 @@ src/
 |   `- dto/                 # DTOs con class-validator
 |- rankings/                # agrupa submódulos (member-rankings, section-rankings, annual-ranking-progress, member-ranking-weights)
 |- common/                  # guards, decorators, filters, interceptors, pipes, errors (AppException + ErrorCode), email, services compartidos
+|   `- authorization/       # generated/ (catálogo de permisos, roles y alias; no editar), policies/ (una por tipo de recurso), roles.ts, role-sets.ts, actor-scope.ts, tenant-binding.enforcer.ts
 |- config/                  # validación de entorno (Joi), cache, BullMQ, throttler, trust proxy
 |- prisma/                  # PrismaService
 `- i18n/{es,en,fr,pt-BR}/   # mensajes de nestjs-i18n
 prisma/
 |- schema.prisma            # autoridad estructural de datos
 |- migrations/              # Prisma Migrate
-`- seeds/                   # seeds SQL (permisos, grants) y TS (usuarios de prueba, logros...)
+|- authz/roles.json         # roles del catálogo (consumido por prisma/seed.ts y por scripts/authz/generate-catalog.ts)
+`- seeds/                   # seeds SQL (permisos, grants; fuente del catálogo generado) y TS (usuarios de prueba, logros...)
 test/                       # e2e (*.e2e-spec.ts)
 scripts/                    # utilidades: auditorías, backfills, importadores, benchmarks
 render.yaml                 # blueprint de Render

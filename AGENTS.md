@@ -63,6 +63,7 @@ propios solo como adaptadores: no deben duplicar ni contradecir este contrato.
 - Runtime base: `docs/canon/runtime-sacdia.md`; auth: `docs/canon/auth/runtime-auth.md`
 - Referencia API runtime (canonica): `docs/api/ENDPOINTS-LIVE-REFERENCE.md`
 - Seguridad: `docs/api/SECURITY-GUIDE.md`
+- RBAC: `docs/features/rbac.md` y `docs/features/auth/RBAC-ENFORCEMENT-MATRIX.md`. Catalogo de permisos, roles y alias generado desde `prisma/seeds/*.sql` y `prisma/authz/roles.json` (`pnpm authz:generate`; `pnpm authz:check` en CI); nunca editar `src/common/authorization/generated/` ni sus espejos en admin (`src/lib/auth/generated/`) y app (`lib/core/authorization/generated/`)
 - Testing: `docs/api/TESTING-GUIDE.md`
 - Despliegue: `docs/deployment/DEPLOYMENT-GUIDE.md` (fuente: `sacdia-backend/render.yaml` y `.env.example`)
 
@@ -133,6 +134,7 @@ Orden recomendado dentro de un dominio:
 Si se modifica codigo que cambie comportamiento, actualizar documentacion en el mismo trabajo:
 
 - Cambio de endpoint/DTO/errores: actualizar `docs/api/`.
+- Cambio de permisos, roles o alias: regenerar el catalogo en backend, admin y app (`pnpm authz:generate`) y, si cambian los generados de admin o app, mover las variables `SACDIA_ADMIN_CONTRACT_REF` / `SACDIA_APP_CONTRACT_REF` del backend.
 - Cambio de schema o relaciones: actualizar `docs/database/`.
 - Cambio de flujo funcional: actualizar `docs/features/` (y el canon `runtime-*` del area si existe).
 - Cambio transversal de arquitectura o stack: actualizar `docs/steering/` y `docs/canon/runtime-sacdia.md`.

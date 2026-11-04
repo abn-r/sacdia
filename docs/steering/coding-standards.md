@@ -36,9 +36,12 @@
 
 ### Autorización
 
-- `PermissionsGuard` es global y deny-by-default: cada handler nuevo declara `@Public()`, `@SkipPermissions()` o `@RequirePermissions('recurso:acción')` con su recurso de autorización. Sin eso el endpoint responde error de configuración.
-- `@GlobalRoles(...)` solo para superficies reservadas a roles de plataforma (`admin`, `super-admin`, `coordinator`).
-- Un permiso nuevo se añade a `prisma/seeds/permissions.seed.sql` y se reparte en `role-permissions.seed.sql`; después se refleja en el screen catalog del admin si afecta a una pantalla.
+- `PermissionsGuard` es global y deny-by-default: cada handler nuevo declara `@Public()`, `@SkipPermissions()` o `@RequirePermissions('recurso:acción')` con su recurso de autorización. Sin eso el endpoint responde error de configuración. `@RequirePermissions` solo acepta claves `PermissionKey` del catálogo generado (`src/common/authorization/generated/`); un permiso mal escrito no compila.
+- El scope de un `type` de recurso vive en su policy (`src/common/authorization/policies/`), no en el guard ni en el servicio; un tipo nuevo exige policy con spec (el registry tipado no compila sin ella). Un servicio nuevo que decida acceso leyendo `club_role_assignments` o `users.local_field_id` fuera de `src/common/authorization/` rompe `access-decision-locality.arch.spec.ts`.
+- `@GlobalRoles(...)` solo para superficies reservadas a roles de plataforma (`admin`, `super-admin`, `coordinator`); expande alias. `@ExactGlobalRoles(...)` cuando la regla del servicio compara roles de forma literal.
+- Nombres de rol desde `GlobalRole` / `ClubRole` (`src/common/authorization/roles.ts`) y los conjuntos de `role-sets.ts`; la regla ESLint `local/no-role-literals` (`error`, sin autofix) rechaza literales de rol fuera de los archivos permitidos.
+- Un permiso nuevo se añade a `prisma/seeds/permissions.seed.sql` y se reparte en `role-permissions.seed.sql`; después `pnpm authz:generate` (backend, admin y app) y, si cambian los generados de admin o app, mover `SACDIA_ADMIN_CONTRACT_REF` / `SACDIA_APP_CONTRACT_REF`; por último el screen catalog del admin si afecta a una pantalla. Un rol nuevo va en `prisma/authz/roles.json`.
+- Toda ruta con tenant en el path declara `bind` en `@AuthorizationResource`; la allowlist `tenant-binding-allowlist.ts` está congelada por spec y no admite entradas nuevas.
 - Reutilizar permisos de otro dominio rompe la frontera de concerns (ver `docs/canon/decisiones-clave.md` §16–§21).
 
 ### Respuestas y errores
@@ -66,9 +69,9 @@
 ### Calidad
 
 - Formato: Prettier (`singleQuote`, `trailingComma: all`); `pnpm run format`.
-- Lint: ESLint (`pnpm run lint`); las reglas `no-unsafe-*` están desactivadas por compatibilidad con Prisma.
+- Lint: ESLint (`pnpm run lint`); las reglas `no-unsafe-*` están desactivadas por compatibilidad con Prisma. Correr `prisma generate` antes de lint: sin cliente generado las reglas type-aware ven `any` y `--fix` borra aserciones que el build necesita (el job «Lint & Type Check» ya lo hace). Regla local `local/no-role-literals` en `eslint/rules/`.
 - Tests: Jest; los unitarios van junto al código (`*.spec.ts`), los e2e en `test/*.e2e-spec.ts`.
-- CI bloqueante: `prisma validate`, lint, build, tests unitarios y `pnpm run audit:security`.
+- CI bloqueante: `prisma validate`, lint, `pnpm authz:check`, build, tests unitarios, `pnpm run audit:security` y el job «Cross-repo Contract» (catálogo generado igual en admin y app).
 
 ---
 

@@ -114,7 +114,8 @@ Detalle canónico: `docs/canon/auth/runtime-auth.md`.
 ## 8. Autorización
 
 - Guards globales: throttler, `GlobalJwtAuthGuard` y `PermissionsGuard` (deny-by-default: cada handler declara `@Public()`, `@SkipPermissions()` o `@RequirePermissions(...)`).
-- Permisos `recurso:acción` en `permissions`, asignados a roles en `role_permissions` (seeds SQL en `prisma/seeds/`).
+- Permisos `recurso:acción` en `permissions`, asignados a roles en `role_permissions` (seeds SQL en `prisma/seeds/`). Desde los seeds y `prisma/authz/roles.json` se genera el catálogo tipado (`pnpm authz:generate`): `src/common/authorization/generated/` en el backend, `src/lib/auth/generated/` en el admin y `lib/core/authorization/generated/` en la app; el CI del backend lo verifica (`pnpm authz:check` y job «Cross-repo Contract»).
+- El scope por tipo de recurso lo resuelven policies en `src/common/authorization/policies/` sobre `ActorScope`; los nombres de rol salen de `GlobalRole` / `ClubRole` (`src/common/authorization/roles.ts`), con la regla ESLint `local/no-role-literals`.
 - Admin y app deciden qué pantallas mostrar con el screen catalog (`sacdia-admin/src/lib/auth/screen-catalog/` y su hermano Dart `sacdia-app/lib/core/authorization/`), que debe reflejar los permisos del backend.
 
 ## 9. Restricciones técnicas vigentes
