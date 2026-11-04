@@ -168,7 +168,7 @@ No hay lista de clubes excluidos. El criterio de inclusión es operativo (tener 
 
 Rankings (permiso `rankings:read` | `rankings:recalculate`):
 
-- `GET /club-sections/:sectionId/annual-ranking-progress?year_id` — scorecard móvil de una sola sección/club. Pendiente de merge (PR #615 de sacdia-backend): `bind: club_section_membership` sobre `:sectionId`. Devuelve progreso anual propio (`current_points`, `max_points`, tier actual/siguiente, componentes y pendientes). No expone lista competitiva de otros clubes; esa visibilidad queda para administración;
+- `GET /club-sections/:sectionId/annual-ranking-progress?year_id` — scorecard móvil de una sola sección/club. Desde 2026-11-04 (backend PR #615) el guard ata `:sectionId` con `bind: club_section_membership`. Devuelve progreso anual propio (`current_points`, `max_points`, tier actual/siguiente, componentes y pendientes). No expone lista competitiva de otros clubes; esa visibilidad queda para administración;
 - `GET /annual-rankings?local_field_id&club_type_id&year_id` — leaderboard administrativo por campo local, tipo de club y año. Calcula puntos con la configuración anual (`annual_ranking_configs`), asigna posición densa por puntos y deriva el tier actual/siguiente con `ranking_tiers`. Requiere `rankings:read`; los roles de campo local leen solo su campo, y unión y división cualquier campo de su territorio (`assertLocalFieldInActorScope`);
 - `GET /annual-ranking-configs?union_id&local_field_id&club_type_id&year_id` — lista configuraciones anuales de puntaje y budgets por componente. La resolución efectiva para un Campo Local prefiere la configuración activa de su Unión y luego la configuración local. Permiso `ranking_weights:read`;
 - `POST /annual-ranking-configs` — crea la configuración anual por Unión o Campo Local/año/tipo de club. El body debe incluir exactamente uno entre `union_id` y `local_field_id`; Unión tiene precedencia. Permiso `ranking_weights:write`; valida suma de ejes/componentes = `max_points` y exige componente `annual_evidence_folder`;
@@ -205,7 +205,7 @@ Evaluations:
 - `POST /annual-folders/:folderId/sections/:templateSectionId/confirm-union`;
 - `GET /annual-folders/:folderId/evaluations`.
 
-El parámetro `:templateSectionId` (id de la sección de plantilla) se llamaba `:sectionId`; el renombre es documental, la URL no cambia (Pendiente de merge (PR #615 de sacdia-backend)).
+El parámetro `:templateSectionId` (id de la sección de plantilla) se llamaba `:sectionId`; el renombre es documental, la URL no cambia (backend PR #615, 2026-11-04).
 
 Contrato exacto en `docs/features/annual-folders-scoring.md` y `docs/api/ENDPOINTS-LIVE-REFERENCE.md`.
 

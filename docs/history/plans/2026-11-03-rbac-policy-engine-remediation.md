@@ -1,7 +1,7 @@
 # Plan de remediación RBAC: de guard monolítico a motor de políticas
 
 **Fecha**: 2026-11-03
-**Estado**: En ejecución. Fases 0, 1, 2, 8, 3, 4 y 6 mergeadas en `development` (2026-11-04); fase 5 Pendiente de merge (PR #615 de sacdia-backend); fase 7 sin iniciar. Ver «Estado por fase».
+**Estado**: En ejecución. Fases 0, 1, 2, 8, 3, 4, 6 y 5 mergeadas en `development` (2026-11-04); fase 7 sin iniciar. Ver «Estado por fase».
 **Origen**: Auditoría externa de solo lectura del RBAC en backend, admin y app. Hallazgos completos en Engram, topic `architecture/rbac-audit`.
 
 ## Diagnóstico en una línea
@@ -46,7 +46,7 @@ Lo que sigue es el estado real de ejecución. Las secciones «Fase N» de abajo 
 | Retiro del contrato P0 de consumidores | Hecha | sacdia-backend #612 | 2026-11-04 |
 | 4 | Hecha | sacdia-backend #613 | 2026-11-04 |
 | 6 | Hecha | sacdia-backend #614 | 2026-11-04 |
-| 5 | Pendiente de merge (PR #615 de sacdia-backend) | sacdia-backend #615 (abierto) | — |
+| 5 | Hecha | sacdia-backend #615 | 2026-11-04 |
 | 7 | Pendiente (sin iniciar) | — | — |
 
 Detalle de fases 0, 1, 2 y 8 en `docs/features/rbac.md`, «Vigencia temporal, autoridad de cargos y roles globales». Detalle de 3, 4, 5 y 6 en `docs/features/rbac.md`, «Motor de políticas: catálogo generado, policies por recurso, literales de rol y tenant binding».
@@ -82,7 +82,7 @@ Detalle de fases 0, 1, 2 y 8 en `docs/features/rbac.md`, «Vigencia temporal, au
 - Sin evidencia en este corte (no se documentan como hechos): extraer `isSectionDirector(actor, section)` y similares como policies nombradas, y eliminar las copias privadas de `isSuperAdmin`.
 - **Decisiones de producto abiertas** (alias amplio en mutaciones; sin cambio en runtime; registradas en `docs/audit/DECISIONS-PENDING.md`): `PATCH local-fields/:id/investiture-windows/:yearId`, las mutaciones de `district-investiture-pastors`, las mutaciones de `admin/coordination`, y toda ruta `@GlobalRoles(admin, super-admin)` admite también `assistant-admin`.
 
-### Fase 5, lo que trae el PR #615 (Pendiente de merge)
+### Fase 5, lo que se hizo (sacdia-backend #615)
 
 - `tenant-binding-allowlist.ts` queda vacío y `tenant-binding-allowlist.freeze.spec.ts` exige que siga vacío. `tenant-binding-inventory.ts` incluye `fieldId` en `TENANT_PATH_PARAM`.
 - Kinds de `bind` (11): `club`, `club_section`, `local_field`, `union`, `camporee`, `union_camporee` (solo unión dueña), `club_enrollment_territory`, y nuevos `union_camporee_participant`, `club_section_membership`, `union_membership`, `local_field_membership`.
@@ -308,7 +308,7 @@ Un solo desarrollador: 0 → 1 → 2 → 8 → 3 → 4 → 6 → 5 → 7. La 8 v
 | Métrica | Al inicio (2026-11-03) | 2026-11-04 | Meta |
 |---|---|---|---|
 | Líneas `permissions.guard.ts` | 2.377 | 339 (fase 4) | < 500 |
-| Entradas `tenant-binding-allowlist.ts` | 69 | 69 en `development`; 0 en el PR #615 (Pendiente de merge) | 0 |
+| Entradas `tenant-binding-allowlist.ts` | 69 | 0 (fase 5) | 0 |
 | Literales de rol fuera de guards/policies | 611 | 0 (661 reemplazados; `local/no-role-literals` en `error`) | 0 |
 | Literales de permiso fuera de `generated/` | ~690 | sin dato; `@RequirePermissions` tipado con `PermissionKey` | 0 |
 | Copias manuales de catálogo/alias en clientes | 3 | 0 (generados en admin y app; `permissions.ts` del admin conserva constantes con `satisfies PermissionKey`) | 0 |
