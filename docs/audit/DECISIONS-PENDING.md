@@ -2,19 +2,20 @@
 
 Generado: 2026-03-14
 Fuente: Reality Matrix + Canon verification
-**Estado: TRES DECISIONES ABIERTAS** («RBAC: alias amplio de roles globales en mutaciones», 2026-11-04, y las dos de «RBAC: alias `assistant-admin` en capabilities de usuarios y consejeros en `scoring_categories.manage`», 2026-11-05; sin cambio en runtime hasta decidirlas). Hay además una condición de lanzamiento abierta: la Fase 3 de perfiles familiares (ver «Perfiles familiares: restricción de lanzamiento», 2026-10-19).
+**Estado: DOS DECISIONES ABIERTAS** («RBAC: alias amplio de roles globales en mutaciones», 2026-11-04, y el punto 2 de «RBAC: alias `assistant-admin` en capabilities de usuarios y consejeros en `scoring_categories.manage`», 2026-11-05; sin cambio en runtime hasta decidirlas). El punto 1 de esa entrada (assistant-admin gestiona usuarios) se decidió el 2026-11-05. Hay además una condición de lanzamiento abierta: la Fase 3 de perfiles familiares (ver «Perfiles familiares: restricción de lanzamiento», 2026-10-19).
 
 ---
 
 ## RBAC: alias `assistant-admin` en capabilities de usuarios y consejeros en `scoring_categories.manage` (2026-11-05)
 
-**Estado: ABIERTA. Sin cambio en runtime.**
+**Estado: punto 1 DECIDIDO (2026-11-05, opción a); punto 2 ABIERTO. Sin cambio en runtime.**
 
 Contexto: la fase 7 de la remediación RBAC (backend #617 y #618, admin #290; mergeados) publica `capabilities` en `GET /auth/me`. Al calcularlas quedaron dos diferencias de alcance que conviene decidir:
 
 1. **`assistant-admin` y la gestión de usuarios.** Las capabilities `users.*` y `rbac.view_user_roles` del backend aplican el alias `assistant-admin` igual que `GlobalRolesGuard`. El screen catalog del admin (`USER_MANAGEMENT_ROLES` en `_helpers.ts`) no incluía ese alias ya antes de la fase 7.
    - Opciones: (a) assistant-admin gestiona usuarios: se mantiene la capability tal como está; (b) no los gestiona: la capability y el guard pasan a `@ExactGlobalRoles` o a una lista sin alias.
    - Impacto: con (a) se acepta que la publicación del backend y el catálogo anterior del admin discrepaban en este rol; con (b) cambia el runtime del backend para un rol existente. Es la misma pregunta de fondo que «alias amplio de roles globales en mutaciones» (2026-11-04).
+   - **Decisión (2026-11-05): (a). `assistant-admin` gestiona usuarios.** Las capabilities `users.*` y `rbac.view_user_roles` y los guards quedan como están; el admin ya sigue a `capabilities`, así que no hay cambio de código. La decisión de 2026-11-04 sobre el alias amplio en el resto de mutaciones sigue abierta.
 2. **`scoring_categories.manage` y los consejeros de club de la unión.** La capability se reporta a consejeros de club de la unión. Es un sobre-reporte aceptado: el servicio sigue siendo la autoridad y responde 403 fuera de su unión. Es coherente con la decisión de producto ya conservada en la fase 5 (un consejero de club puede crear categorías de puntuación de su unión).
    - Opciones: (a) mantener el sobre-reporte; (b) restringir la capability a quien el servicio acepta.
    - Impacto: con (a) el panel puede mostrar la acción a quien recibirá 403 en un objetivo ajeno; con (b) hay que reproducir en `capabilities.ts` la regla de unión del servicio.
