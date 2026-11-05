@@ -1,7 +1,7 @@
 # Matriz de Enforcement RBAC
 
 **Status**: ACTIVE
-**Fecha**: 2026-03-10 (actualizada 2026-11-05: policies por recurso, `@ExactGlobalRoles`, kinds de `bind`, allowlist de tenant a cero y consumo de capabilities por los clientes)
+**Fecha**: 2026-03-10 (actualizada 2026-11-05: decisiones de alias amplio en mutaciones, policies por recurso, `@ExactGlobalRoles`, kinds de `bind`, allowlist de tenant a cero y consumo de capabilities por los clientes)
 **Ambito**: backend enforced permissions
 
 ## Proposito
@@ -122,19 +122,22 @@ El tenant que llega en body o query sin `bind` queda inventariado en `tenant-bod
 | `-` (`@ExactGlobalRoles` + `@SkipPermissions`) | Cola de propuestas de instructor (`/admin/honor-instructor-proposals`: listar, `approve`, `reject`) | `global` | mismos cinco roles que la fila anterior, sin expansión de alias. Alcance por el Campo Local **actual del dueño** de la especialidad; fuera de él, 403 `HONOR_INSTRUCTOR_PROPOSAL_FORBIDDEN` | Admin |
 | `camporee-orders:*`, `camporee-supplies:*`, `field-payment-orders:*`, `camporees:read` | 39 rutas de camporee: orders, offerings, payment-orders, configuración y planes de supplies, y `GET /camporees/union/:camporeeId` | `global` o `active_assignment` según la ruta (ver `ENDPOINTS-LIVE-REFERENCE.md`) | Fase 5 (backend PR #615, 2026-11-04): las rutas `global` conservan tipo y ganan `bind` (`camporee` o `union_camporee_participant`); las `active_assignment` pasan a tipo `camporee` / `union_camporee` con `idParam: 'camporeeId'`. Cambio de comportamiento: `GET .../order-offerings`, `GET .../supply-catalog`, `GET .../supply-plans`, `GET .../supply-reports/{kitchen,cash}`, `PATCH .../supply-plan/lines` (local y unión) y `GET /camporees/union/:camporeeId` responden 403 `GUARD_CLUB_SCOPE_REQUIRED` fuera del ámbito del camporee (404 `CAMPOREE_NOT_FOUND` / `CAMPOREE_UNION_CAMPOREE_NOT_FOUND` si no existe); los directores de una unión que no organiza pierden el bypass en planes de insumos; los códigos del guard preceden a `CAMPOREE_ORDER_*` / `CAMPOREE_SUPPLIES_*` en casos cross-tenant | Admin y App |
 | `camporee-orders:offering-configure` | Ventana y ofertas del camporee de unión (`PATCH /union-camporees/:camporeeId/orders-settings`, `PUT /union-camporees/:camporeeId/order-offerings`) | `global` | permiso global. Desde la fase 5 (2026-11-04) `bind: union_camporee` (solo la unión dueña) | Admin |
-| `coordination:manage` + `@GlobalRoles` | Zonas, asignaciones y backfill de un campo (`GET` y `POST /admin/coordination/local-fields/:localFieldId/{zones,assignments,backfill}`) | sin cambio de `type` | permiso + rol global (admin, campo, unión y división; ver `ENDPOINTS-LIVE-REFERENCE.md`). Desde la fase 5 (2026-11-04) `bind: local_field` sobre `:localFieldId` | Admin |
+| `coordination:manage` + `@GlobalRoles` | Zonas, asignaciones y backfill de un campo (`GET` y `POST /admin/coordination/local-fields/:localFieldId/{zones,assignments,backfill}`) | sin cambio de `type` | permiso + rol global (lecturas: admin, campo, unión y división; escrituras `@ExactGlobalRoles`: admin, assistant-admin, super-admin y campo, pendiente de merge en PR #631 de sacdia-backend; ver `ENDPOINTS-LIVE-REFERENCE.md`). Desde la fase 5 (2026-11-04) `bind: local_field` sobre `:localFieldId` | Admin |
 | `materiales:configure` | Config de materiales de un campo (`PATCH /materials/config/:localFieldId`) | sin cambio de `type` | permiso. Desde la fase 5 (2026-11-04) `bind: local_field` sobre `:localFieldId` | Admin |
 | `rankings:*` / `section_rankings:*` (any) | Progreso anual de una sección (`GET /club-sections/:sectionId/annual-ranking-progress`) y miembros de un ranking de sección (`GET /section-rankings/:sectionId/members`) | sin cambio de `type` | permiso (any, ver `ENDPOINTS-LIVE-REFERENCE.md`). Desde la fase 5 (2026-11-04) `bind: club_section_membership` sobre `:sectionId` | Admin y App |
 | `scoring_categories:read` / `manage` | Categorías de puntuación de unión (`/unions/:unionId/scoring-categories*`) y de campo (`/local-fields/:fieldId/scoring-categories*`) | sin cambio de `type` | permiso. Desde la fase 5 (2026-11-04) `bind: union_membership` sobre `:unionId` y `local_field_membership` sobre `:fieldId`. Decisión de producto conservada: un consejero de club puede crear categorías de puntuación de su unión | Admin |
 
-## Decisiones de producto abiertas (alias amplio en mutaciones)
+## Decisiones de producto (alias amplio en mutaciones)
 
-Detectadas al cerrar la fase 6 (`@ExactGlobalRoles`). No cambió el runtime; siguen con `@GlobalRoles` y, por tanto, con expansión de alias. Registradas en `docs/audit/DECISIONS-PENDING.md`.
+Detectadas al cerrar la fase 6 (`@ExactGlobalRoles`) y decididas el 2026-11-05 (registro en `docs/audit/DECISIONS-PENDING.md`). El alias `admin ↔ assistant-admin` se acepta en todo: toda ruta `@GlobalRoles(admin, super-admin)` admite también `assistant-admin`, y donde se usa `@ExactGlobalRoles` se lista explícitamente. Escribir en la configuración de un campo local es trabajo del campo local: unión y división dejan de escribir y conservan la lectura. **Pendiente de merge (PR #631 de sacdia-backend; PR #291 de sacdia-admin para la pantalla).**
 
-- `PATCH local-fields/:id/investiture-windows/:yearId`.
-- Las mutaciones de `district-investiture-pastors`.
-- Las mutaciones de `admin/coordination`.
-- Toda ruta `@GlobalRoles(admin, super-admin)` admite también `assistant-admin` (alias simétrico `admin ↔ assistant-admin`).
+| Ruta | Lectura | Escritura |
+| --- | --- | --- |
+| `local-fields/:id/investiture-windows/:year` | `GET` exacto: super-admin, admin, assistant-admin, director-lf, assistant-lf, director-union, assistant-union, director-dia, assistant-dia | `PATCH` exacto: super-admin, admin, assistant-admin, director-lf, assistant-lf. Sin cambio de comportamiento: el servicio ya negaba a unión |
+| `district-investiture-pastors` | exacta: super-admin, director-lf, assistant-lf, director-union, assistant-union | `POST`, `DELETE` y `GET investiture-pastor-candidates` exactos: super-admin, director-lf, assistant-lf (el servicio solo asigna por rol de campo). `PATCH investiture-pastor-quota`: solo super-admin. Cambio: unión ya no asigna ni busca candidatos. Capability `investiture.assign_district_pastors` = roles de campo local |
+| `admin/coordination` | sin cambio (alias amplio de clase): `GET zones`, `GET assignments`, `me/scope`, `me/consent-pending` | las 7 escrituras exactas: admin, assistant-admin, super-admin, director-lf, assistant-lf; el servicio exige esos roles antes del chequeo de jerarquía. Cambio: unión y división ya no escriben. Capability `coordination.manage` = admin scope + campo local (por rol, no por nivel territorial; se publica también sin territorio configurado) |
+
+El punto 2 de la decisión de capabilities (`scoring_categories.manage` y consejeros de club de la unión) se decidió el mismo día: se mantiene el sobre-reporte; el servicio sigue siendo la autoridad.
 
 ## Cobertura y Limites de Stage 1
 

@@ -2,31 +2,32 @@
 
 Generado: 2026-03-14
 Fuente: Reality Matrix + Canon verification
-**Estado: DOS DECISIONES ABIERTAS** («RBAC: alias amplio de roles globales en mutaciones», 2026-11-04, y el punto 2 de «RBAC: alias `assistant-admin` en capabilities de usuarios y consejeros en `scoring_categories.manage`», 2026-11-05; sin cambio en runtime hasta decidirlas). El punto 1 de esa entrada (assistant-admin gestiona usuarios) se decidió el 2026-11-05. Hay además una condición de lanzamiento abierta: la Fase 3 de perfiles familiares (ver «Perfiles familiares: restricción de lanzamiento», 2026-10-19).
+**Estado: SIN DECISIONES RBAC ABIERTAS** (las de 2026-11-04 y 2026-11-05 se cerraron el 2026-11-05). Sigue abierta una condición de lanzamiento: la Fase 3 de perfiles familiares (ver «Perfiles familiares: restricción de lanzamiento», 2026-10-19).
 
 ---
 
 ## RBAC: alias `assistant-admin` en capabilities de usuarios y consejeros en `scoring_categories.manage` (2026-11-05)
 
-**Estado: punto 1 DECIDIDO (2026-11-05, opción a); punto 2 ABIERTO. Sin cambio en runtime.**
+**Estado: RESUELTA (2026-11-05) — punto 1 opción (a); punto 2 opción (a). Sin cambio de código.**
 
 Contexto: la fase 7 de la remediación RBAC (backend #617 y #618, admin #290; mergeados) publica `capabilities` en `GET /auth/me`. Al calcularlas quedaron dos diferencias de alcance que conviene decidir:
 
 1. **`assistant-admin` y la gestión de usuarios.** Las capabilities `users.*` y `rbac.view_user_roles` del backend aplican el alias `assistant-admin` igual que `GlobalRolesGuard`. El screen catalog del admin (`USER_MANAGEMENT_ROLES` en `_helpers.ts`) no incluía ese alias ya antes de la fase 7.
    - Opciones: (a) assistant-admin gestiona usuarios: se mantiene la capability tal como está; (b) no los gestiona: la capability y el guard pasan a `@ExactGlobalRoles` o a una lista sin alias.
    - Impacto: con (a) se acepta que la publicación del backend y el catálogo anterior del admin discrepaban en este rol; con (b) cambia el runtime del backend para un rol existente. Es la misma pregunta de fondo que «alias amplio de roles globales en mutaciones» (2026-11-04).
-   - **Decisión (2026-11-05): (a). `assistant-admin` gestiona usuarios.** Las capabilities `users.*` y `rbac.view_user_roles` y los guards quedan como están; el admin ya sigue a `capabilities`, así que no hay cambio de código. La decisión de 2026-11-04 sobre el alias amplio en el resto de mutaciones sigue abierta.
+   - **Decisión (2026-11-05): (a). `assistant-admin` gestiona usuarios.** Las capabilities `users.*` y `rbac.view_user_roles` y los guards quedan como están; el admin ya sigue a `capabilities`, así que no hay cambio de código. La decisión sobre el alias amplio en el resto de mutaciones se cerró el mismo día (ver «RBAC: alias amplio de roles globales en mutaciones», 2026-11-04).
 2. **`scoring_categories.manage` y los consejeros de club de la unión.** La capability se reporta a consejeros de club de la unión. Es un sobre-reporte aceptado: el servicio sigue siendo la autoridad y responde 403 fuera de su unión. Es coherente con la decisión de producto ya conservada en la fase 5 (un consejero de club puede crear categorías de puntuación de su unión).
    - Opciones: (a) mantener el sobre-reporte; (b) restringir la capability a quien el servicio acepta.
    - Impacto: con (a) el panel puede mostrar la acción a quien recibirá 403 en un objetivo ajeno; con (b) hay que reproducir en `capabilities.ts` la regla de unión del servicio.
+   - **Decisión (2026-11-05): (a). Se mantiene el sobre-reporte.** Toda capability significa «puede intentarlo sobre al menos un objetivo»; el servicio sigue siendo la autoridad y responde 403 fuera de su unión. Hacer exacta solo esta capability rompería la uniformidad y reproduciría reglas de servicio en los predicados. Sin cambio de código.
 
-Mientras no se decida, rige el comportamiento descrito. Detalle en [rbac.md](../features/rbac.md), «Capabilities y clientes (fase 7)», y en el plan `docs/history/plans/2026-11-03-rbac-policy-engine-remediation.md`, «Fase 7, lo que se hizo y lo que queda».
+Detalle en [rbac.md](../features/rbac.md), «Capabilities y clientes (fase 7)», y en el plan `docs/history/plans/2026-11-03-rbac-policy-engine-remediation.md`, «Fase 7, lo que se hizo y lo que queda».
 
 ---
 
 ## RBAC: alias amplio de roles globales en mutaciones (2026-11-04)
 
-**Estado: ABIERTA. Sin cambio en runtime.**
+**Estado: RESUELTA (2026-11-05) — alias `admin ↔ assistant-admin` aceptado; escrituras territoriales exactas al campo local. Implementada en sacdia-backend PR #631 y sacdia-admin PR #291 (pendientes de merge).**
 
 Contexto: la fase 6 de la remediación RBAC (backend PR #614, mergeado) introdujo `@ExactGlobalRoles` (sin expansión de alias) y lo aplicó solo donde el servicio ya comparaba roles de forma literal (`admin/certificate-bulk-imports` y `admin/honor-instructor-proposals`). Quedaron mutaciones que siguen con `@GlobalRoles`, es decir, con los alias de `GlobalRolesGuard` (`admin ↔ assistant-admin`; por ejemplo, un rol de unión satisface `@GlobalRoles('director-lf')`), y hay que decidir si ese alcance amplio es el deseado o deben pasar a `@ExactGlobalRoles`:
 
@@ -35,7 +36,15 @@ Contexto: la fase 6 de la remediación RBAC (backend PR #614, mergeado) introduj
 - las mutaciones de `admin/coordination`;
 - toda ruta `@GlobalRoles(admin, super-admin)`, que admite también `assistant-admin`.
 
-Mientras no se decida, el comportamiento vigente es el de `@GlobalRoles` (alias amplio). Detalle en [rbac.md](../features/rbac.md), «Literales de rol y `@ExactGlobalRoles`», y en [RBAC-ENFORCEMENT-MATRIX.md](../features/auth/RBAC-ENFORCEMENT-MATRIX.md), «Decisiones de producto abiertas».
+**Decisión (2026-11-05), en dos partes:**
+
+1. **Alias `admin ↔ assistant-admin`: aceptado en todo («de momento sí»).** Toda ruta `@GlobalRoles(admin, super-admin)` sigue admitiendo `assistant-admin`; donde se usa `@ExactGlobalRoles`, `assistant-admin` se lista explícitamente.
+2. **Escrituras territoriales: «escribir en la configuración de un campo local es trabajo del campo local».** Unión y división dejan de escribir en las tres rutas y conservan la lectura:
+   - `local-fields/:id/investiture-windows/:year`: `PATCH` exacto (super-admin, admin, assistant-admin, director-lf, assistant-lf). Sin cambio de comportamiento: el servicio ya negaba a la unión.
+   - `district-investiture-pastors`: `POST`, `DELETE` y `GET investiture-pastor-candidates` exactos (super-admin, director-lf, assistant-lf); `PATCH investiture-pastor-quota` solo super-admin. Cambio: la unión ya no asigna pastores ni busca candidatos (conserva la lectura).
+   - `admin/coordination`: las 7 escrituras exactas (admin, assistant-admin, super-admin, director-lf, assistant-lf). Cambio: unión y división ya no escriben; las lecturas no cambian.
+
+Implementada en sacdia-backend PR #631 (`feat/authz-exact-local-field-writes`) y sacdia-admin PR #291 (oculta los controles de escritura de coordinación tras la capability `coordination.manage`), ambas **pendientes de merge**. Detalle en [rbac.md](../features/rbac.md), «Literales de rol y `@ExactGlobalRoles`», y en [RBAC-ENFORCEMENT-MATRIX.md](../features/auth/RBAC-ENFORCEMENT-MATRIX.md), «Decisiones de producto (alias amplio en mutaciones)».
 
 ---
 
