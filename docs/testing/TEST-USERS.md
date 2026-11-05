@@ -59,7 +59,7 @@ Si el cupo de un rol ya está ocupado, el seed no se detiene: avisa con `⚠ …
 ## Notas
 
 - Los IDs (`LOCAL_FIELD_ID = 4`, `UNION_ID = 20`, `CLUB_SECTION_ID = 1`, `YEAR_ID = 1`) son constantes del seed y dependen de los datos de la base de desarrollo. La sección de `director-club` es la única que se calcula al ejecutar el seed.
-- El seed no crea usuarios para `super-admin`, `assistant-admin` (el rol no existe en la base de desarrollo), `deputy-director`, `secretary-treasurer`, `instructor` ni `member`. Para esos roles, usa los datos de `prisma/seeds/core.ts` (`pnpm prisma:seed:core`, solo rama de desarrollo) o crea la asignación a mano.
+- El seed no crea usuarios para `super-admin`, `assistant-admin` (el rol existe en la base de desarrollo desde la remediación RBAC de 2026-11, pero el seed aún no crea un usuario), `deputy-director`, `secretary-treasurer`, `instructor` ni `member`. Para esos roles, usa los datos de `prisma/seeds/core.ts` (`pnpm prisma:seed:core`, solo rama de desarrollo) o crea la asignación a mano.
 - Los permisos de cada rol vienen de `prisma/seeds/role-permissions.seed.sql`.
 
 Para comprobarlos en la base:
