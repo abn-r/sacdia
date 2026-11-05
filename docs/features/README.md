@@ -87,7 +87,7 @@
 | `operations-dashboard` | [operations-dashboard.md](operations-dashboard.md) | Documento presente | `IMPLEMENTADO` |
 | `ordenes-de-pago` | [ordenes-de-pago.md](ordenes-de-pago.md) | Documento presente | `IMPLEMENTADO` |
 | `qr-credencial` | [qr-credencial.md](qr-credencial.md) | Documento presente | `IMPLEMENTADO` |
-| `rbac` | [rbac.md](rbac.md) | Documento presente | `IMPLEMENTADO` (remediación del motor de políticas: fases 0, 1, 2, 8, 3, 4 y 6 mergeadas en `development` el 2026-11-04; fase 5, tenant binding, mergeada el mismo día con el PR #615 de sacdia-backend; fase 7, capabilities y clientes, mergeada el 2026-11-04/05 con backend #617 y #618, admin #290 y app #234, #236 y #238, con criterio de salida parcial: quedan gates por nombre de rol en la app y el QA por rol está pendiente) |
+| `rbac` | [rbac.md](rbac.md) | Documento presente | `IMPLEMENTADO` (remediación del motor de políticas: fases 0, 1, 2, 8, 3, 4 y 6 mergeadas en `development` el 2026-11-04; fase 5, tenant binding, mergeada el mismo día con el PR #615 de sacdia-backend; fase 7, capabilities y clientes, mergeada el 2026-11-04/05 con backend #617 y #618, admin #290 y app #234, #236 y #238; criterio de salida cumplido en código con app #240 el 2026-11-05 y 4 de los 6 resolvers diferidos de la fase 4 sobre `ActorScope` con backend #621; el QA por rol está pendiente) |
 | `recursos` | [recursos.md](recursos.md) | Documento presente | `IMPLEMENTADO` |
 | `requests` | [docs/canon/runtime-requests.md](../canon/runtime-requests.md) | Documento presente | `IMPLEMENTADO` |
 | `servicios-externos` | [servicios-externos.md](servicios-externos.md) | Documento presente | `IMPLEMENTADO` |
