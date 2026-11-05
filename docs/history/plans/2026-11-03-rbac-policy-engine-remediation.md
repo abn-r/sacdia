@@ -1,7 +1,7 @@
 # Plan de remediación RBAC: de guard monolítico a motor de políticas
 
 **Fecha**: 2026-11-03
-**Estado**: En ejecución. Fases 0, 1, 2, 8, 3, 4, 6 y 5 mergeadas en `development` (2026-11-04); fase 7 sin iniciar. Ver «Estado por fase».
+**Estado**: Ejecutado; quedan diferidos. Fases 0, 1, 2, 8, 3, 4, 6 y 5 mergeadas en `development` (2026-11-04) y fase 7 mergeada (2026-11-04/05) con criterio de salida parcial: en la app quedan gates por nombre de rol y la paridad admin↔app sobre capabilities es solo transitiva. El QA por rol con capturas sigue pendiente. Ver «Estado por fase» y «Fase 7, lo que se hizo y lo que queda».
 **Origen**: Auditoría externa de solo lectura del RBAC en backend, admin y app. Hallazgos completos en Engram, topic `architecture/rbac-audit`.
 
 ## Diagnóstico en una línea
@@ -32,7 +32,7 @@ El modelo (roles GLOBAL/CLUB, permisos `resource:action` resueltos en DB, guard 
 
 Las fases 0 a 2 son independientes entre sí tras la 0. La 3 habilita la 6 y la 7. La 4 habilita la 5. La 8 necesita la 1 y la 2.
 
-## Estado por fase (2026-11-04)
+## Estado por fase (2026-11-05)
 
 Lo que sigue es el estado real de ejecución. Las secciones «Fase N» de abajo conservan el diseño original y valen como intención; cuando difieren de esta tabla, manda la tabla y la documentación vigente (`docs/features/rbac.md`, `docs/features/auth/RBAC-ENFORCEMENT-MATRIX.md`, `docs/api/ENDPOINTS-LIVE-REFERENCE.md`).
 
@@ -47,7 +47,7 @@ Lo que sigue es el estado real de ejecución. Las secciones «Fase N» de abajo 
 | 4 | Hecha | sacdia-backend #613 | 2026-11-04 |
 | 6 | Hecha | sacdia-backend #614 | 2026-11-04 |
 | 5 | Hecha | sacdia-backend #615 | 2026-11-04 |
-| 7 | Pendiente (sin iniciar) | — | — |
+| 7 | Hecha (criterio de salida parcial; ver su sección) | sacdia-backend #617 y #618, sacdia-admin #290, sacdia-app #234, #236 y #238 | 2026-11-04/05 |
 
 Detalle de fases 0, 1, 2 y 8 en `docs/features/rbac.md`, «Vigencia temporal, autoridad de cargos y roles globales». Detalle de 3, 4, 5 y 6 en `docs/features/rbac.md`, «Motor de políticas: catálogo generado, policies por recurso, literales de rol y tenant binding».
 
@@ -90,6 +90,32 @@ Detalle de fases 0, 1, 2 y 8 en `docs/features/rbac.md`, «Vigencia temporal, au
 - Params renombrados (las URLs no cambian): `:id` en `PATCH|DELETE /admin/{divisions,unions,local-fields}/:id`; `:templateSectionId` en secciones de plantilla y de carpeta anual; `:moduleSectionId` en secciones de clase.
 - **Cambios de comportamiento a propósito**: `GET order-offerings`, `GET supply-catalog`, `GET supply-plans`, reportes de cocina y caja, `PATCH supply-plan/lines` (local y unión) y `GET /camporees/union/:id` responden 403 `GUARD_CLUB_SCOPE_REQUIRED` fuera del ámbito del camporee (404 `CAMPOREE_NOT_FOUND` / `CAMPOREE_UNION_CAMPOREE_NOT_FOUND` si no existe); directores de una unión que no organiza pierden el bypass en planes de insumos. Los códigos del guard preceden a `CAMPOREE_ORDER_*` / `CAMPOREE_SUPPLIES_*` en casos cross-tenant.
 - Decisiones de producto conservadas: un consejero de club puede crear categorías de puntuación de su unión; la geografía admin no se ata a territorio.
+
+### Fase 7, lo que se hizo y lo que queda
+
+Backend #617 y #618, admin #290, app #234, #236 y #238, todos mergeados en `development` (2026-11-04/05). Orden de merge de los PRs: backend, app, admin.
+
+- **Backend (#617, #618)**:
+  - `GET /auth/me` publica `data.authorization.{capabilities, territory, assignable_global_roles}`, calculados por request sobre el perfil ya pasado por `stripClubContext` y nunca cacheados; la clave de caché `auth:context:v8` no cambió. `capabilities` es la lista ordenada de claves del catálogo generado (47 claves en `generated/capability-keys.ts`; el mismo archivo se genera para admin y para app). `territory.level` ∈ `all | open | unconfigured | division | union | local_field` con `division_id`, `union_id` y `local_field_id` nullable. `assignable_global_roles` es el tier inferior al del actor (`user-role-tiers.ts`, movido desde `admin-users.service.ts`) y vacío fuera de los tiers administrativos.
+  - Difiere del diseño: los predicados no salen de las policies de las fases 2 y 4 sino de funciones puras en `capabilities.ts` (`computeCapabilities`, `computeTerritory`, `assignableGlobalRoles`) que reproducen lo que aceptan los guards. #618 alineó los dos casos que no coincidían: `club_roles.assign_section` admite al director operativo de club (como `SectionRoleMutationPolicy`) y `field_payment_orders.review` exige campo local del territorio o del grant activo (como `resolveOrderActor`). Las capabilities son la vista del actor sobre al menos un objetivo; los servicios siguen siendo la autoridad y responden 403 cuando el objetivo concreto no coincide.
+  - La fase 8 había nombrado `clubs.schedule_director_succession`; el catálogo publicado trae `club_roles.designate_director` y `club_roles.succeed_director`.
+  - Invalidación: `invalidateUserAuthorizationCache` publica un push silencioso FCM (`resource: 'authorization'`, `action: 'UPDATED'`) por `NotificationsService`, inyectado `@Optional()` con `forwardRef`. #618 dejó una sola instancia de `AuthorizationContextService`, provista por `CommonModule` (`@Global()`); `AuthModule` ya no la declara, y `auth-module.wiring.spec.ts` compila el `AppModule` y comprueba que `AuthService` y `RbacService` reciben la misma instancia con `NotificationsService` resuelto.
+- **Admin (#290)**:
+  - Los gates usan `capabilityAccess(CapabilityKey)` sobre `capabilities` de `/auth/me`. El slot `@modal` se renderiza en el layout solo si `canAccessDashboardPath` pasa, y cada una de las 15 páginas de `@modal/(.)dashboard/**` llama al mismo gate que su página completa (el diseño decía 16). Las Server Actions usan `requireCapability`. Hay un solo clasificador de 403, `classifyActionError` en `lib/api/action-error.ts`.
+  - Eliminados `NEXT_PUBLIC_RBAC_LEGACY_FALLBACK`, `extractLegacyRoles`, `extractLegacyPermissions` y `canByPermissionOrRole`; `roleOnlyAccess` ya no existe en el screen catalog; `extractRoles` usa solo `global_roles` más el rol del `active_assignment`. Ratchet nuevo: `src/lib/auth/role-literal-ratchet.test.ts`.
+  - `territory` ausente se trata como `level: "open"` (fail-open, decidido); `capabilities` ausente, como lista vacía (deny). `isSuperAdmin` sigue derivado de `roles.has('super-admin')` en `screen-catalog/evaluate.ts`.
+- **App (#234, #236, #238)**:
+  - Guard de ruta en el `redirect` global de GoRouter: el mapa `routeScreenIds` (`lib/core/config/route_screen_policy.dart`) cubre 33 patrones de ruta de 114 `GoRoute`; `canViewScreen` negado manda a `/access-denied`. `ForbiddenView` (`SacErrorState.forbidden`) sirve las 7 vistas del coordinador.
+  - `AuthorizationStaleInterceptor` va en la posición 0 de Dio: el snapshot restaurado desde `secureStorage` sin red se marca stale y las mutaciones reciben un 403 sintético `AUTHORIZATION_STALE` hasta revalidar. Están exentos los `sessionPaths` (`/auth/refresh`, `/auth/logout`, `/auth/me`, `/auth/me/context`) y las peticiones con `kAllowWhileAuthorizationStale` (el borrado del token FCM al cerrar sesión, #238).
+  - `refreshAuthorization` corre en `AppLifecycleState.resumed` (mínimo 30 s), al recuperar conectividad y al recibir el push `authorization`. `RealtimeInvalidationHandler` procesa ese push siempre, sin depender de `RealtimeFeatureFlags.realtimeInvalidationEnabled` (#236); un push que llega durante un refresh en vuelo se repite una vez al terminar. #238 añadió el helper `isAuthorizationStale`, aplicado en 9 datasources y en el registro de camporees, para que un stale no se confunda con un error de seguro.
+  - `test/core/authorization/generated_catalog_parity_test.dart` exige que cada literal de capability y de permiso de `lib/` exista en el catálogo generado.
+- **Criterio de salida: parcial.**
+  - Admin, cumplido: cero gates por lista de roles en `src/components`. Quedan listas que son dato de presentación o filtro (`camporee-scoring/camporee-judges-panel.tsx`, `COORDINATOR_ROLES` en `coordination/coordination-assignments-panel.tsx`, `isProtected` de super-admin en `rbac/roles-table.tsx`).
+  - App, NO cumplido del todo. Siguen vivos: el gate `_sectionBoardRoles` en `lib/features/members/domain/entities/club_member.dart` (L3-11, usado en L84); el gate `role == 'counselor' || 'secretary'` en `lib/features/classes/presentation/views/class_counselor_assignments_view.dart` (L43-46); lógica de formulario por rol en `lib/features/enrollment/presentation/views/enrollment_form_view.dart` (L227-246 y L464); el mapa de alias en `lib/features/members/data/datasources/members_remote_data_source.dart` (L146-150); y el orden de despliegue en `lib/features/members/presentation/views/role_assignment_view.dart` (L50-60). Quedan 10 comprobaciones numéricas `== 403` en datasources de `lib/features` (las de login y `ACTING_FOR_FORBIDDEN` son intencionales). #234 dejó fuera `class_counselor_assignments_view.dart` y `role_assignment_view.dart` a propósito.
+  - Paridad admin↔app sobre capabilities: solo transitiva. `authz-catalog.crossrepo.spec.ts` del backend compara `capability-keys` contra admin y contra app por separado (job «Cross-repo Contract»; las variables `SACDIA_ADMIN_CONTRACT_REF` y `SACDIA_APP_CONTRACT_REF` se movieron a los SHAs de la fase 7). `test/core/authorization/screen_catalog_test.dart` sigue comparando el catálogo de pantallas contra `test/fixtures/screen-catalog.snapshot.json`; no existe un test admin↔app directo sobre capabilities.
+- **Decisiones de producto abiertas nuevas** (en `docs/audit/DECISIONS-PENDING.md`): (1) las capabilities `users.*` y `rbac.view_user_roles` aplican el alias `assistant-admin` como `GlobalRolesGuard`, mientras `USER_MANAGEMENT_ROLES` del screen catalog del admin (`_helpers.ts`) no lo incluía ya antes de la fase 7; (2) `scoring_categories.manage` se reporta a consejeros de club de la unión (sobre-reporte aceptado: el servicio responde 403 fuera de su unión).
+- **Diferidos que siguen abiertos de fases anteriores**: los 6 resolvers de scope sobre API propia (fase 4, ratchet de 46 archivos), las copias privadas de `isSuperAdmin` (fase 6) y el alias `assistant-admin` en mutaciones (fase 6).
+- **QA por rol con capturas**: pendiente (el diseño lo pedía en `qa-capturas-admin/` y `qa-capturas/`). Sin evidencia en este corte de que se haya hecho.
 
 ---
 
@@ -305,13 +331,13 @@ Un solo desarrollador: 0 → 1 → 2 → 8 → 3 → 4 → 6 → 5 → 7. La 8 v
 
 ## Métricas de seguimiento
 
-| Métrica | Al inicio (2026-11-03) | 2026-11-04 | Meta |
+| Métrica | Al inicio (2026-11-03) | 2026-11-04/05 | Meta |
 |---|---|---|---|
 | Líneas `permissions.guard.ts` | 2.377 | 339 (fase 4) | < 500 |
 | Entradas `tenant-binding-allowlist.ts` | 69 | 0 (fase 5) | 0 |
 | Literales de rol fuera de guards/policies | 611 | 0 (661 reemplazados; `local/no-role-literals` en `error`) | 0 |
 | Literales de permiso fuera de `generated/` | ~690 | sin dato; `@RequirePermissions` tipado con `PermissionKey` | 0 |
 | Copias manuales de catálogo/alias en clientes | 3 | 0 (generados en admin y app; `permissions.ts` del admin conserva constantes con `satisfies PermissionKey`) | 0 |
-| Rutas Flutter con gate de permiso en router | 1 de 113 | sin cambio (fase 7) | todas las del catálogo |
+| Rutas Flutter con gate de permiso en router | 1 de 113 | 33 patrones de ruta de 114 `GoRoute` (fase 7, 2026-11-05, vía `routeScreenIds`) | todas las del catálogo |
 | Cargos de club auditados con actor real | 3 roles, actor = objetivo | todos, actor = autenticado (fase 2) | todos, actor = autenticado |
 | Días sin director tras programar sucesión en octubre | ~90 | 0 (fase 8) | 0 |

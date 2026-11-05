@@ -1,7 +1,7 @@
 # Matriz de Enforcement RBAC
 
 **Status**: ACTIVE
-**Fecha**: 2026-03-10 (actualizada 2026-11-04: policies por recurso, `@ExactGlobalRoles`, kinds de `bind` y allowlist de tenant a cero)
+**Fecha**: 2026-03-10 (actualizada 2026-11-05: policies por recurso, `@ExactGlobalRoles`, kinds de `bind`, allowlist de tenant a cero y consumo de capabilities por los clientes)
 **Ambito**: backend enforced permissions
 
 ## Proposito
@@ -202,11 +202,13 @@ JWT-only o ownership guard dedicado sigue siendo valido solo si:
 ### `sacdia-admin`
 
 - Usa `authorization.effective.permissions` para pagina, accion y visibilidad operativa.
+- Desde la fase 7 (admin #290, 2026-11-04/05) las decisiones que dependen de rol o territorio leen `authorization.capabilities` (gates `capabilityAccess`, slot `@modal`, Server Actions con `requireCapability`) y `authorization.territory`; ya no se derivan de listas de roles. `authorization.assignable_global_roles` alimenta los selectores de rol al crear usuarios.
 - Puede usar `authorization.grants` para matrices, explicaciones y detalle.
 
 ### `sacdia-app`
 
 - Usa `authorization.effective.permissions` para habilitar acciones.
+- Desde la fase 7 (app #234, #236 y #238) usa `authorization.capabilities` (`hasCapability`) para lo que el backend ya calcula y el guard de ruta (`routeScreenIds` → `canViewScreen` → `/access-denied`). Un snapshot restaurado sin red queda stale y bloquea mutaciones (403 sintético `AUTHORIZATION_STALE`) hasta releer `/auth/me`. Quedan gates por nombre de rol en la app; ver `docs/features/rbac.md`, «Capabilities y clientes (fase 7)».
 - Usa `authorization.effective.scope.club` para el club/instancia actual.
 - Usa `authorization.grants.club_assignments` para selector de contexto.
 
