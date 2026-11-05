@@ -27,7 +27,7 @@ Detalle en [rbac.md](../features/rbac.md), «Capabilities y clientes (fase 7)»,
 
 ## RBAC: alias amplio de roles globales en mutaciones (2026-11-04)
 
-**Estado: RESUELTA (2026-11-05) — alias `admin ↔ assistant-admin` aceptado; escrituras territoriales exactas al campo local. Implementada en sacdia-backend PR #631 y sacdia-admin PR #291 (pendientes de merge).**
+**Estado: RESUELTA (2026-11-05) — alias `admin ↔ assistant-admin` aceptado; escrituras territoriales exactas al campo local. Implementada en sacdia-backend PR #631 y sacdia-admin PR #291 (mergeados el 2026-11-05).**
 
 Contexto: la fase 6 de la remediación RBAC (backend PR #614, mergeado) introdujo `@ExactGlobalRoles` (sin expansión de alias) y lo aplicó solo donde el servicio ya comparaba roles de forma literal (`admin/certificate-bulk-imports` y `admin/honor-instructor-proposals`). Quedaron mutaciones que siguen con `@GlobalRoles`, es decir, con los alias de `GlobalRolesGuard` (`admin ↔ assistant-admin`; por ejemplo, un rol de unión satisface `@GlobalRoles('director-lf')`), y hay que decidir si ese alcance amplio es el deseado o deben pasar a `@ExactGlobalRoles`:
 
@@ -44,7 +44,7 @@ Contexto: la fase 6 de la remediación RBAC (backend PR #614, mergeado) introduj
    - `district-investiture-pastors`: `POST`, `DELETE` y `GET investiture-pastor-candidates` exactos (super-admin, director-lf, assistant-lf); `PATCH investiture-pastor-quota` solo super-admin. Cambio: la unión ya no asigna pastores ni busca candidatos (conserva la lectura).
    - `admin/coordination`: las 7 escrituras exactas (admin, assistant-admin, super-admin, director-lf, assistant-lf). Cambio: unión y división ya no escriben; las lecturas no cambian.
 
-Implementada en sacdia-backend PR #631 (`feat/authz-exact-local-field-writes`) y sacdia-admin PR #291 (oculta los controles de escritura de coordinación tras la capability `coordination.manage`), ambas **pendientes de merge**. Detalle en [rbac.md](../features/rbac.md), «Literales de rol y `@ExactGlobalRoles`», y en [RBAC-ENFORCEMENT-MATRIX.md](../features/auth/RBAC-ENFORCEMENT-MATRIX.md), «Decisiones de producto (alias amplio en mutaciones)».
+Implementada en sacdia-backend PR #631 (`feat/authz-exact-local-field-writes`) y sacdia-admin PR #291 (oculta los controles de escritura de coordinación tras la capability `coordination.manage`), ambas mergeadas el 2026-11-05. Detalle en [rbac.md](../features/rbac.md), «Literales de rol y `@ExactGlobalRoles`», y en [RBAC-ENFORCEMENT-MATRIX.md](../features/auth/RBAC-ENFORCEMENT-MATRIX.md), «Decisiones de producto (alias amplio en mutaciones)».
 
 ---
 
