@@ -127,7 +127,7 @@ Viven en `scripts/` y corren en CI (`.github/workflows/`):
 | Script | Workflow | Qué comprueba |
 |---|---|---|
 | `scripts/verify-api-docs-consistency.mjs` | `docs-api-consistency.yml` | Consistencia de `api/ENDPOINTS-LIVE-REFERENCE.md` con las rutas del backend |
-| `scripts/verify-permissions-consistency.mjs` | `rbac-permissions-consistency.yml` | Permisos del seed frente a la navegación del admin. **Hoy apunta a `sacdia-admin/src/components/layout/nav-config.ts`, que se borró el 2026-07-14: imprime `SKIP` y no valida nada.** Debe migrarse al screen catalog (`src/lib/auth/screen-catalog/`). |
+| ~~`scripts/verify-permissions-consistency.mjs`~~ | ~~`rbac-permissions-consistency.yml`~~ | Retirado el 2026-11-05. Cruzaba el seed de permisos con `nav-config.ts` del admin, borrado el 2026-07-14, así que hacía `SKIP` siempre. Lo que comprobaba lo cubren hoy, con fallo real en CI: `pnpm authz:check` y `permission-catalog-parity.spec.ts` en sacdia-backend (todo permiso referenciado existe en el seed), el job «Cross-repo Contract» (`authz-catalog.crossrepo.spec.ts`: los generados de admin y app coinciden con el backend) y `satisfies PermissionKey` sobre el catálogo generado en el admin (un permiso inexistente no compila). Ver `docs/features/rbac.md`, «Catálogo de autorización generado (fase 3)» |
 | `scripts/check-sdd-command-parity.mjs` | `sdd-command-parity.yml` | Contratos de comandos SDD (`sdd-*.md`); en CI usa `scripts/__fixtures__`, en local busca `~/.config/opencode/commands` (`--command-dir <ruta>` para otra ubicación, `--json` para salida máquina) |
 
 ---
