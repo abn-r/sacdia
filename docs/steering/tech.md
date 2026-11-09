@@ -101,12 +101,12 @@ Redis es obligatorio en producción (cache, rate limiting y BullMQ fallan al arr
 Better Auth autentica; SACDIA firma su propio JWT (Option C).
 
 - **Access token**: JWT HS256 firmado con `BETTER_AUTH_SECRET`, claims `iss=https://api.sacdia.app`, `aud=sacdia:access`, `sub`, `email` y `sid` (id de sesión de Better Auth, cuando existe); expira en 8 h. Lo emite el backend (`BetterAuthService.signJwt`).
-- **Refresh**: la sesión de Better Auth dura 7 días (`updateAge` de 1 día). `POST /auth/refresh` rota el access token.
+- **Refresh**: la sesión de Better Auth desliza 7 días con cada `POST /auth/refresh` y nunca pasa de 30 días desde el login. Cada refresh emite un access token nuevo y ROTA el refresh token opaco: el anterior vale 30 s más (refrescos simultáneos) y usado después revoca la sesión. Los clientes deben guardar siempre el `refreshToken` de la respuesta.
 - **Sesiones**: máximo 5 concurrentes por usuario; blacklist de JWT en Redis.
 - **MFA**: TOTP; un token con `mfa_pending: true` solo sirve para completar `POST /auth/mfa/verify`.
 - **OAuth**: Google y Apple vía Better Auth (`ALLOWED_OAUTH_REDIRECT_URLS`).
 - **QR de miembro**: JWT aparte firmado con `QR_JWT_SECRET` (distinto obligatoriamente de `BETTER_AUTH_SECRET`), `aud=sacdia:qr-member`. No sirve como token de API.
-- **Admin**: guarda access y refresh en cookies httpOnly (`sacdia_admin_access_token` 8 h, `sacdia_admin_refresh_token` 7 días; `sameSite=strict`, `secure` en producción) mediante las rutas `src/app/api/auth/{token,refresh,me,logout}`. Las rutas `/dashboard/*` se protegen en `src/proxy.ts`.
+- **Admin**: guarda access y refresh en cookies httpOnly (`sacdia_admin_access_token` 8 h, `sacdia_admin_refresh_token` hasta 7 días, recortada a la vigencia de la sesión; `sameSite=strict`, `secure` en producción) mediante las rutas `src/app/api/auth/{token,refresh,me,logout}`. Las rutas `/dashboard/*` se protegen en `src/proxy.ts`.
 - **App**: guarda los tokens en `flutter_secure_storage` (`lib/core/auth/app_auth_service.dart`) y los envía como `Authorization: Bearer` desde el interceptor de Dio.
 
 Detalle canónico: `docs/canon/auth/runtime-auth.md`.

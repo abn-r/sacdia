@@ -136,7 +136,7 @@ Notas:
 Detalle canónico en `docs/canon/auth/runtime-auth.md`. Resumen:
 
 - Better Auth autentica (email/contraseña, OAuth Google y Apple, MFA TOTP); SACDIA firma un JWT de acceso HS256 con `BETTER_AUTH_SECRET`, `iss=https://api.sacdia.app`, `aud=sacdia:access`, expiración 8 h;
-- la sesión de Better Auth dura 7 días (refresh) y cada usuario tiene como máximo 5 sesiones concurrentes;
+- la sesión de Better Auth desliza 7 días con cada refresh, nunca más allá de 30 días desde el login; cada refresh rota el token opaco (detalle en `docs/canon/auth/runtime-auth.md`, «Refresh»), y cada usuario tiene como máximo 5 sesiones concurrentes;
 - los tokens QR de miembro usan otro secreto (`QR_JWT_SECRET`) y `aud=sacdia:qr-member`; el `JwtStrategy` los rechaza como token de API;
 - el admin guarda los tokens en cookies httpOnly (`sacdia_admin_access_token`, `sacdia_admin_refresh_token`; `sameSite=strict`) a través de sus rutas `src/app/api/auth/*`;
 - la app guarda los tokens en `flutter_secure_storage` (`core/auth/app_auth_service.dart`).
