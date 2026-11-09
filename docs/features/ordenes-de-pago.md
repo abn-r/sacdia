@@ -1,7 +1,7 @@
 # Órdenes de pago territoriales y obligaciones de pago
 
 **Estado**: IMPLEMENTADO
-**Verificado contra código**: 2026-10-04 (rama `development`); sección «App móvil» actualizada el 2026-11-09
+**Verificado contra código**: 2026-10-04 (rama `development`); secciones «App móvil», «Admin» y detalle de orden actualizadas el 2026-11-09
 **Dominios relacionados**: [gestion-seguros.md](gestion-seguros.md) (seguros, reasignaciones, runbook de piloto), [camporees.md](camporees.md), [camporee-orders.md](camporee-orders.md), [camporee-supplies.md](camporee-supplies.md), [materials.md](materials.md)
 
 ## Descripcion de dominio
@@ -46,6 +46,7 @@ Reglas verificadas en `field-payment-orders.service.ts`, `state-machine.ts` y `f
 - **Aprobación**: requiere un comprobante `SUBMITTED`; quien lo subió no puede aprobar (`FIELD_PAYMENT_ORDER_MAKER_CHECKER`). Rechazar exige motivo (`FIELD_PAYMENT_ORDER_REJECT_REASON_REQUIRED`).
 - **Materialización de camporee**: en la transacción de aprobación revalida que la sección siga inscrita, la membresía activa y un seguro vigente por beneficiario, y crea un `camporee_members` aprobado y un `camporee_payments` de inscripción aprobado por línea. Un fallo revierte todo. "Ningún camporee es gratis": `registration_cost` nulo o 0 bloquea la orden.
 - **Materialización de seguro**: ver [gestion-seguros.md](gestion-seguros.md) ("Órdenes de pago territoriales").
+- **Detalle**: `GET /payment-orders/:orderId` agrega `club_name`, `section_name`, `camporee_name` (`null` en seguro) y `local_field_name`. Los resuelve el mismo helper que el PDF (`resolveOrderNames`), con los mismos textos de respaldo (`Club N`, `Sección N`).
 - **Eventos**: logs estructurados `field_payment_order.*` (`issued`, `proof_submitted`, `approved`, `rejected`, `cancelled`, `expired`, `fulfill_fail`).
 
 ### Backend: obligaciones de pago (`src/payment-obligations/`)
@@ -66,7 +67,13 @@ Reglas verificadas en `payment-obligations.service.ts`:
 
 ### Admin
 
-- `/dashboard/payment-orders` (`PaymentOrdersClient`): pestañas de pendientes (`PaymentObligationsClient`, consume `/payment-obligations/pending`), bandeja de órdenes y reasignaciones (`ReassignmentsTray`).
+- `/dashboard/payment-orders` (`PaymentOrdersClient`): pestañas de pendientes (`PaymentObligationsClient`, consume `/payment-obligations/pending`), bandeja de órdenes y reasignaciones (`ReassignmentsTray`). En el sidebar va junto a «Finanzas de clubes» (grupo Operación).
+- Desde sacdia-admin PR #300 (2026-11-09):
+  - `?orderId=<id>` abre la pestaña de órdenes y el panel de esa orden, también desde «Revisar inscripción» en pendientes sin recargar.
+  - Una orden con comprobante enviado dice «Comprobante enviado» en las dos pestañas (antes la de pendientes decía «En revisión»).
+  - «Aprobar» pide confirmación con folio y total.
+  - El panel de revisión muestra club, sección, camporee y Campo Local (campos de `GET /payment-orders/:orderId`).
+  - La columna de acciones queda fija a la derecha; a menos de 1280 px se ocultan beneficiarios y fecha de emisión.
 - `/dashboard/insurance/config`: productos, ciclos e instrucciones de pago del Campo Local.
 
 ### App móvil
