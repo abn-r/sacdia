@@ -30,7 +30,7 @@ No reutiliza tablas, folios PED ni permisos de mercancía (`camporee-orders`). C
 |------------|--------|-----------|
 | Backend Nest (catálogo, plan, freeze, folio INS, entrega, reportes, PaymentObligations) | En `development` | `src/camporee-supplies` (29 rutas); Jest `src/camporee-supplies` + `src/payment-obligations` |
 | Schema / migración | En `development` | `prisma/migrations/20260826120000_camporee_supplies/` |
-| Admin (tab Insumos en ficha) | En `development` | `camporee-supplies-tab.tsx`: config, planes, caja, cocina, mark-paid, entrega parcial. **No** impersona submit del club |
+| Admin (tab Insumos en ficha) | En `development` | `camporee-supplies-tab.tsx`: config, planes, caja, cocina, mark-paid, entrega parcial. **No** impersona submit del club. Desde sacdia-admin PR #300: tras «Entregar» la tabla usa el plan que devuelve el POST; tablas vacías con fila de estado; la unidad se reinicia al agregar producto; caben a 1024 px |
 | App (plan en detalle de camporee) | En `development` | `CamporeeSupplyPlanView`: orden de pago; CTA Agregar insumo; insumos por día y horario; alta en sheet |
 
 ---
