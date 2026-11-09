@@ -1,7 +1,7 @@
 # Camporee Events
 
 **Estado**: IMPLEMENTADO PARCIAL
-**Última actualización**: 2026-07-20
+**Última actualización**: 2026-11-09 (adjuntos de evento y desglose de puntaje por rol, PR #633 de sacdia-backend)
 **Owner**: Backend/App/Admin
 **Dominio relacionado**: [camporees.md](./camporees.md)
 
@@ -245,6 +245,25 @@ Especialidades de preparación ligadas a una **instancia** de evento. Consultivo
 
 `@@unique([camporee_event_id, honor_id])`. Máx. 20 por evento. No vive en templates; clonar desde template no copia honores.
 
+### Tabla `camporee_event_attachments`
+
+Imágenes y PDF ligados a una **instancia** de evento (bases, mapas, reglamentos). Migración `20261106120000_camporee_event_attachments`.
+
+| Columna | Tipo | Notas |
+| --- | --- | --- |
+| `camporee_event_attachment_id` | `UUID PK` | `gen_random_uuid()` |
+| `camporee_event_id` | `INT FK camporee_events ON DELETE CASCADE` | |
+| `file_key` | `VARCHAR(500)` | llave del objeto en R2: `<eventId>/<timestamp>-<uuid>.<ext>` |
+| `file_name` | `VARCHAR(255)` | nombre original |
+| `mime_type` | `VARCHAR(100)` | JPG, PNG, WebP o PDF |
+| `size_bytes` | `INT` | máx. 10 MB |
+| `display_order` | `INT DEFAULT 0` | |
+| `active` | `BOOLEAN DEFAULT true` | borrado lógico |
+| `created_by` | `UUID FK users ON DELETE SET NULL` | |
+| `created_at`, `modified_at` | `TIMESTAMPTZ` | |
+
+Índice `(camporee_event_id, active, display_order)`. Máx. 10 activos por evento. Los archivos van al bucket R2 `R2_BUCKET_CAMPOREE_EVENT_ATTACHMENTS`; las lecturas devuelven URL firmada de 900 s. Templates no llevan adjuntos.
+
 ### Scoring por rúbricas
 
 Los templates pueden traer rúbricas reutilizables (`camporee_event_template_rubrics`) cuando `camporee_event_templates.scoring_enabled=true`. Al crear un evento desde template, el backend copia esas rúbricas hacia `camporee_event_rubrics` y conserva `camporee_events.scoring_enabled=true`.
@@ -281,6 +300,12 @@ Autorización:
 - La edición/desactivación de un juez resuelve el camporee padre desde `judgeId` y vuelve a validar `camporee_events:update` + scope `current-write` en el servicio.
 - Envío de puntaje: juez principal activo desde app móvil, o carga manual por `assistant-lf`/`director-lf` con scope institucional. La app consume `GET /camporee-judges/me/assignments`, filtra asignaciones `primary`, agrupa la bandeja por evento (filas = clubes), carga rúbricas del evento y envía exactamente un ítem por rúbrica.
 - Mutaciones de rúbricas, asignación de jueces y envío de puntaje requieren inscripción de clubes cerrada; lecturas permanecen disponibles.
+
+Visibilidad del ranking y del desglose (PR #633):
+
+- `GET .../leaderboard` y `GET .../score-breakdown` filtran por rol global y responden `visibility`: `full` para roles de administración y de campo local o unión (todas las secciones, con posición); `district` para `pastor` (secciones de sus distritos en `district_investiture_pastors` más las propias, con posición recalculada entre ellas); `own` para el resto (solo sus secciones, `rank: null`).
+- `score-breakdown` devuelve los eventos puntuables en orden de agenda y, por sección visible, sus resultados oficiales con ítems de rúbrica y comentarios del juez.
+- `GET /camporee-events/:eventId/sections/:clubSectionId/score` sigue la misma regla, salvo para un juez asignado al evento; fuera de la vista responde 403 `CAMPOREE_SCORING_FORBIDDEN`.
 
 ## Endpoints (backend)
 
@@ -329,6 +354,11 @@ Visibilidad de templates:
 | `PUT`    | `/camporee-events/:id/schedule-blocks`                  | camporee_events:update                      | Reemplazar bloques y asignaciones de agenda |
 | `DELETE` | `/camporee-events/:id`                                  | camporee_events:delete                      | Soft delete                            |
 | `PATCH`  | `/camporee-events/:id/reorder`                          | camporee_events:update                      | Cambiar `display_order`                |
+| `GET`    | `/camporee-events/:id/attachments`                      | camporee_events:read                        | Listar adjuntos con URL firmada (900 s) |
+| `POST`   | `/camporee-events/:id/attachments`                      | camporee_events:update                      | Subir adjunto (`multipart`, campo `file`) |
+| `DELETE` | `/camporee-events/:id/attachments/:attachmentId`        | camporee_events:update                      | Soft delete del adjunto y borrado en R2 |
+
+El detalle y el listado de eventos incluyen `attachments[]`. Errores: `CAMPOREE_EVENT_ATTACHMENT_REQUIRED`, `_TOO_LARGE`, `_MIME_INVALID`, `_LIMIT_REACHED` y `_NOT_FOUND`. El desglose de puntaje (`GET /{local|union}-camporees/:id/score-breakdown`) vive en `camporee-scoring`; ver `ENDPOINTS-LIVE-REFERENCE.md`.
 
 ### Roster operativo del camporee
 
@@ -421,6 +451,9 @@ Tab "Personal" en el detalle del camporee, antes de "Eventos".
 - La capa de datos puede consumir preview local o unión (`local-camporees` /
   `union-camporees`) según `camporeeType`.
 - No CRUD desde móvil en esta iteración.
+- El detalle de cada evento muestra sus adjuntos (grupo «Adjuntos · N»); abre la imagen o el PDF con la URL firmada y la refresca con `GET .../attachments`.
+- La clasificación del camporee consume `score-breakdown` y respeta `visibility` (un rol de club ve solo sus secciones, sin posición).
+- Admin: subir, listar y borrar adjuntos, y la vista del desglose, están en la rama `feat/camporee-event-attachments` de sacdia-admin, todavía sin PR (2026-11-09).
 
 ## Cache
 

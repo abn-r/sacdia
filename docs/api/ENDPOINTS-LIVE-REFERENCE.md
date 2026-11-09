@@ -7,10 +7,17 @@
 > La tabla refleja los decoradores HTTP efectivos en controllers NestJS; DTOs, ejemplos y errores finos viven en Swagger/runtime y docs de feature cuando aplique.
 
 **Estado**: ACTIVE
-**Actualizado**: 2026-11-04 (remediación RBAC fases 4 y 6 en `development`: policies por recurso y `@ExactGlobalRoles` en dos superficies; fase 5, tenant binding, también en `development`: nombres de parámetros y 403/404 de camporees; ver la nota «Remediación RBAC 2026-11-04»). Antes, 2026-10-21 (cola de consentimientos del coordinador, jobs bajo demanda y cobertura de zona; recuento de cabecera recalculado contra `development` 59122f6d; ver la nota «Seguimientos 2026-10-21»). Antes, 2026-10-20 (perfiles familiares, Fase 2 completa: sub-fases 2a, 2b y 2c, y las sub-fases 3a, 3b y 3c pendientes de merge; ver también aceptación legal 2026-10-15 y la nota de resincronización 2026-10-13)
-**Total endpoints**: 933 decoradores HTTP en 124 archivos `*.controller.ts`: el recuento de `development` (935 en 125 archivos) menos las 2 rutas de `class-thresholds` y su controller, que se retiraron con el PR #600 de sacdia-backend (mergeado). La matriz incluye las filas del PR #448 de sacdia-backend, mergeado el 2026-10-07 y ya contadas en los totales: secciones `investiture-windows`, `investiture-pastors`, `investiture-requests` y el `GET .../sections/:clubSectionId/score` de camporee-scoring.
-**Métodos (development)**: GET 386 · POST 308 · PATCH 127 · DELETE 99 · PUT 13
-**Auth detectada (development)**: Public 13 · JWT u Optional JWT 920
+**Actualizado**: 2026-11-09 (adjuntos de eventos de camporee y desglose de puntaje por rol, PR #633 de sacdia-backend; ver la nota «Camporee: adjuntos y desglose de puntaje 2026-11-09»). Antes, 2026-11-04 (remediación RBAC fases 4 y 6 en `development`: policies por recurso y `@ExactGlobalRoles` en dos superficies; fase 5, tenant binding, también en `development`: nombres de parámetros y 403/404 de camporees; ver la nota «Remediación RBAC 2026-11-04»). Antes, 2026-10-21 (cola de consentimientos del coordinador, jobs bajo demanda y cobertura de zona; recuento de cabecera recalculado contra `development` 59122f6d; ver la nota «Seguimientos 2026-10-21»). Antes, 2026-10-20 (perfiles familiares, Fase 2 completa: sub-fases 2a, 2b y 2c, y las sub-fases 3a, 3b y 3c pendientes de merge; ver también aceptación legal 2026-10-15 y la nota de resincronización 2026-10-13)
+**Total endpoints**: 942 decoradores HTTP en 125 archivos `*.controller.ts`, recontados el 2026-11-09 contra `development` (commit 40152173) con el mismo extractor estático. El recuento anterior era 933: 5 de la diferencia son las rutas del PR #633 de sacdia-backend (3 de adjuntos y 2 de desglose de puntaje); las otras 4 entraron antes sin recalcular la cabecera. La matriz incluye las filas del PR #448 de sacdia-backend, mergeado el 2026-10-07: secciones `investiture-windows`, `investiture-pastors`, `investiture-requests` y el `GET .../sections/:clubSectionId/score` de camporee-scoring.
+**Métodos (development)**: GET 391 · POST 311 · PATCH 127 · DELETE 100 · PUT 13
+**Auth detectada (development)**: Public 13 · JWT u Optional JWT 920 (cifras del 2026-11-04; no se recalcularon con el recuento de 2026-11-09)
+
+> [!NOTE]
+> **Camporee: adjuntos y desglose de puntaje 2026-11-09** (PR #633 de sacdia-backend, mergeado en `development`): **5 endpoints nuevos**.
+>
+> - Adjuntos de evento (sección `camporee-events`): `GET`, `POST` y `DELETE /camporee-events/:eventId/attachments[/:attachmentId]`. Detalle en «Adjuntos de evento».
+> - Desglose de puntaje (sección `camporee-scoring`): `GET /local-camporees/:camporeeId/score-breakdown` y `GET /union-camporees/:camporeeId/score-breakdown`.
+> - Cambian de contrato: `GET .../leaderboard` (filtrado por rol y campo `visibility`) y `GET /camporee-events/:eventId/sections/:clubSectionId/score` (fuera de la visibilidad del rol responde 403 `CAMPOREE_SCORING_FORBIDDEN`, salvo juez asignado al evento). Detalle en «Visibilidad del ranking y del desglose».
 
 > [!NOTE]
 > **Resincronización parcial 2026-10-13** contra `development` (backend #471 a #480): carga por certificado (incluye `catalog/classes` y el borrado de borradores), instructores de especialidad, propuestas de instructor, mutabilidad de especialidades y certificaciones, y la autenticación de `catalogs`, `honors` y `classes`. Los totales y el conteo de métodos/auth de la cabecera de entonces **no se recalcularon**: el recuento estático de decoradores en `*controller.ts` era 900 (GET 371 · POST 287 · PATCH 129 · DELETE 100 · PUT 13) en 115 archivos, distinto de esa cabecera. La cabecera se recalculó el 2026-10-21.
@@ -948,8 +955,8 @@ Conteo de decoradores HTTP por tag de Swagger (`@ApiTags` de cada clase controll
 | auth | 21 |
 | OAuth | 3 |
 | camporee-event-templates | 5 |
-| camporee-events | 16 |
-| camporee-scoring | 20 (el `GET .../score` entró con el PR #448) |
+| camporee-events | 19 (3 de adjuntos, PR #633) |
+| camporee-scoring | 22 (el `GET .../score` entró con el PR #448; los 2 `score-breakdown`, con el PR #633) |
 | camporee-staff | 8 |
 | camporee-venues | 9 |
 | camporees | 50 |
@@ -1828,8 +1835,20 @@ El registro sin `birthday` sigue siendo posible por API, y el inicio de sesión 
 | PUT | `/api/v1/camporee-events/:eventId/schedule-blocks` | JWT | Permisos: camporee_events:update | Replace optional schedule blocks and club-section assignments for a camporee event | CamporeeEventsService.replaceScheduleBlocks() | `src/camporee-events/camporee-events.controller.ts` |
 | DELETE | `/api/v1/camporee-events/:eventId` | JWT | Permisos: camporee_events:delete | Soft delete a camporee event instance | CamporeeEventsService.deleteEvent() | `src/camporee-events/camporee-events.controller.ts` |
 | PATCH | `/api/v1/camporee-events/:eventId/reorder` | JWT | Permisos: camporee_events:update | Update display_order of a camporee event instance | CamporeeEventsService.reorderEvent() | `src/camporee-events/camporee-events.controller.ts` |
+| GET | `/api/v1/camporee-events/:eventId/attachments` | JWT | Permisos: camporee_events:read | List active attachments (images/PDFs) of a camporee event, with signed URLs | CamporeeEventsService.listAttachments() | `src/camporee-events/camporee-events.controller.ts` |
+| POST | `/api/v1/camporee-events/:eventId/attachments` | JWT | Permisos: camporee_events:update | Upload an attachment (`multipart/form-data`, campo `file`; JPG, PNG, WebP o PDF, máx. 10 MB) | CamporeeEventsService.uploadAttachment() | `src/camporee-events/camporee-events.controller.ts` |
+| DELETE | `/api/v1/camporee-events/:eventId/attachments/:attachmentId` | JWT | Permisos: camporee_events:update | Soft delete an attachment (`attachmentId` UUID) and remove its R2 object | CamporeeEventsService.deleteAttachment() | `src/camporee-events/camporee-events.controller.ts` |
 
 POST/PATCH de instancia aceptan `honor_ids?: number[]` (máx. 20, únicos, honores activos). Omitir en PATCH no toca la lista; `[]` la vacía. GET, list y preview incluyen `honors[]` (`honor_id`, `name`, `honor_image`, `material_url`, `honors_category_id`, `category_name`, `skill_level`, `active`, `display_order`). Preview no oculta honores aunque la agenda esté cerrada. Errores: `CAMPOREE_EVENT_HONOR_NOT_FOUND`, `CAMPOREE_EVENT_HONOR_DUPLICATE`, `CAMPOREE_EVENT_HONOR_LIMIT`. No hay ruta dedicada. Templates y `from-template` no copian honores.
+
+#### Adjuntos de evento
+
+- Cada adjunto devuelve `attachment_id` (UUID), `file_name`, `mime_type`, `size_bytes`, `url` y `created_at`. `url` es una URL firmada de R2 con TTL de 900 s; no se guarda, se genera en cada lectura.
+- `GET /camporee-events/:eventId` y el listado de eventos del camporee incluyen `attachments[]` con la misma forma, ordenados por `display_order` y fecha de alta.
+- Límite: 10 adjuntos activos por evento. Tipos: JPG, PNG, WebP o PDF; máx. 10 MB.
+- `DELETE` hace borrado lógico (`active=false`) y luego intenta borrar el objeto en R2; si R2 falla solo se registra un aviso y la respuesta sigue siendo `{ deleted: true }`.
+- Errores: `CAMPOREE_EVENT_ATTACHMENT_REQUIRED`, `CAMPOREE_EVENT_ATTACHMENT_TOO_LARGE`, `CAMPOREE_EVENT_ATTACHMENT_MIME_INVALID`, `CAMPOREE_EVENT_ATTACHMENT_LIMIT_REACHED` (`{limit}`), `CAMPOREE_EVENT_ATTACHMENT_NOT_FOUND`, y `CAMPOREE_EVENT_NOT_FOUND` si el evento no está activo.
+- Storage: bucket R2 `R2_BUCKET_CAMPOREE_EVENT_ATTACHMENTS` (+ `R2_PUBLIC_URL_CAMPOREE_EVENT_ATTACHMENTS` y `R2_KEY_PREFIX_CAMPOREE_EVENT_ATTACHMENTS`, todas opcionales en la validación de env). Llave del objeto: `<eventId>/<timestamp>-<uuid>.<ext>`. Tabla: `camporee_event_attachments`.
 
 ### camporee-scoring
 
@@ -1869,9 +1888,21 @@ POST/PATCH de instancia aceptan `honor_ids?: number[]` (máx. 20, únicos, honor
 - Si el índice único produce `P2002` pese al lock, el servicio relee fuera de la transacción: mismo hash y receipt completo devuelve replay; hash distinto devuelve `409 IDEMPOTENCY_KEY_REUSED`; ausencia de fila relanza el error original. Un receipt sin resultado asociado falla con `500 CAMPOREE_SCORING_RECEIPT_INCOMPLETE`.
 - Un override efectivo `manual_lf` o `admin_override` sobre resultado activo debe enviar `expected_active_result_id` igual al ID activo y `notes` no vacío como motivo; si falta el motivo devuelve `400 CAMPOREE_SCORING_OVERRIDE_REASON_REQUIRED`, y si el resultado no coincide devuelve `409 CAMPOREE_SCORING_RESULT_STALE`. El primer score manual, sin activo, puede omitir ambos.
 - El receipt estable incluye `camporee_event_section_result_id`, `camporee_event_score_submission_id`, `score_status`, `raw_awarded_points`, `minimum_adjustment_points`, `total_awarded_points`, `total_max_points`, `percentage`, actor/timestamps de submit/finalización, `notes` e `items`. Su `active=true` es un snapshot del estado al emitirse; no representa el estado actual del resultado después de un override.
-| GET | `/api/v1/local-camporees/:camporeeId/leaderboard` | JWT | Permisos: camporee_events:read | Obtener local-camporees/{id}/leaderboard | CamporeeScoringService.getCamporeeLeaderboard() | `src/camporee-scoring/camporee-scoring.controller.ts` |
-| GET | `/api/v1/union-camporees/:camporeeId/leaderboard` | JWT | Permisos: camporee_events:read | Obtener union-camporees/{id}/leaderboard | CamporeeScoringService.getCamporeeLeaderboard() | `src/camporee-scoring/camporee-scoring.controller.ts` |
+| GET | `/api/v1/local-camporees/:camporeeId/leaderboard` | JWT | Permisos: camporee_events:read | Ranking del camporee, filtrado por rol (`visibility`) | CamporeeScoringService.getCamporeeLeaderboard() | `src/camporee-scoring/camporee-scoring.controller.ts` |
+| GET | `/api/v1/union-camporees/:camporeeId/leaderboard` | JWT | Permisos: camporee_events:read | Ranking del camporee, filtrado por rol (`visibility`) | CamporeeScoringService.getCamporeeLeaderboard() | `src/camporee-scoring/camporee-scoring.controller.ts` |
+| GET | `/api/v1/local-camporees/:camporeeId/score-breakdown` | JWT | Permisos: camporee_events:read | Puntos por sección y por evento, con ítems de rúbrica y comentarios del juez; misma visibilidad que el ranking | CamporeeScoringService.getScoreBreakdown() | `src/camporee-scoring/camporee-scoring.controller.ts` |
+| GET | `/api/v1/union-camporees/:camporeeId/score-breakdown` | JWT | Permisos: camporee_events:read | Puntos por sección y por evento, con ítems de rúbrica y comentarios del juez; misma visibilidad que el ranking | CamporeeScoringService.getScoreBreakdown() | `src/camporee-scoring/camporee-scoring.controller.ts` |
 | GET | `/api/v1/camporee-judges/me/assignments` | JWT | - | List current user camporee judge assignments (`event_title`, `club_name`, `section_name`, `can_submit_score`) | CamporeeScoringService.getMyJudgeAssignments() | `src/camporee-scoring/camporee-scoring.controller.ts` |
+
+#### Visibilidad del ranking y del desglose
+
+- `leaderboard` y `score-breakdown` responden `visibility` según el rol global del usuario:
+  - `full`: roles de administración (`ADMIN_SCOPE_ROLES`) y de campo local o unión (`FIELD_ADMIN_ROLES`). Todas las secciones inscritas, con su posición.
+  - `district`: `pastor`. Las secciones de los distritos que tiene asignados en `district_investiture_pastors`, más las suyas, con la posición recalculada solo entre ellas.
+  - `own`: cualquier otro rol (roles de club). Solo sus propias secciones, con `rank: null`.
+- Cada fila del ranking lleva `rank`, `camporee_club_id`, `club_section_id`, `club_name`, `section_name`, `total_awarded_points`, `total_max_points`, `scored_events_count` y `percentage`.
+- `score-breakdown` responde `{ scope, visibility, events[], sections[] }`. `events` son los eventos activos con puntaje, en orden de agenda (`camporee_event_id`, `title`, `max_points`, `day_number`, `starts_at`). Cada sección es una fila del ranking más `results[]`, con la forma del puntaje oficial (ítems con `notes` del juez) y `camporee_event_id`.
+- `GET /camporee-events/:eventId/sections/:clubSectionId/score` aplica la misma visibilidad: un juez asignado al evento lee cualquier sección; el resto recibe 403 `CAMPOREE_SCORING_FORBIDDEN` si la sección queda fuera de su vista.
 
 ### camporee-staff
 

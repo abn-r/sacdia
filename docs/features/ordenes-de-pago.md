@@ -1,7 +1,7 @@
 # Órdenes de pago territoriales y obligaciones de pago
 
 **Estado**: IMPLEMENTADO
-**Verificado contra código**: 2026-10-04 (rama `development`)
+**Verificado contra código**: 2026-10-04 (rama `development`); sección «App móvil» actualizada el 2026-11-09
 **Dominios relacionados**: [gestion-seguros.md](gestion-seguros.md) (seguros, reasignaciones, runbook de piloto), [camporees.md](camporees.md), [camporee-orders.md](camporee-orders.md), [camporee-supplies.md](camporee-supplies.md), [materials.md](materials.md)
 
 ## Descripcion de dominio
@@ -72,6 +72,11 @@ Reglas verificadas en `payment-obligations.service.ts`:
 ### App móvil
 
 - `lib/features/payment_orders/`: `PaymentOrdersView`, `IssuePaymentOrderView` (emisión con selección de beneficiarios) y `PaymentOrderDetailView` (PDF, comprobante, estado).
+- Emisión de inscripción a camporee (sacdia-app PR #249, 2026-11-08):
+  - Los miembros que ya están en una orden de ese camporee que no esté cancelada ni vencida (incluye aprobadas) no se pueden seleccionar; aparecen en el grupo «Ya en una orden» con el folio. Así se evita el 409 `FIELD_PAYMENT_ORDER_DUPLICATE_BENEFICIARY`. La lista sale de `GET /payment-orders?purpose=CAMPOREE` filtrado por camporee.
+  - Muestra el total (`registration_cost` del camporee × miembros) y pide confirmación antes de emitir. El error de emisión aparece junto al botón.
+  - Tras emitir abre el detalle de la orden; volver regresa al camporee.
+- Comprobante: se elige cámara, fotos o archivo, con vista previa antes de enviar. Las fotos se suben como `comprobante.<ext>`. La fila del comprobante abre la imagen o el PDF con la URL firmada de `GET /payment-orders/:orderId/proof`.
 - `lib/features/camporee_orders/` consume `GET /payment-obligations/pending`.
 
 ### Base de datos
