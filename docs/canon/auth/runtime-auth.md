@@ -161,11 +161,18 @@ Compatibilidad transicional:
 - el backend ya contempla rechazo estricto del payload snake_case;
 - el valor transportado es el session token opaco de Better Auth, no un refresh JWT separado.
 
+Rotación y vigencia (`BetterAuthService.refreshSession`, `src/better-auth/better-auth.service.ts`):
+- cada refresh **rota** el token: `data.refreshToken` trae uno nuevo que el cliente debe guardar, y el presentado pasa a `sessions.previous_token` (con `rotated_at`);
+- el token anterior sigue valiendo 30 s (`REFRESH_REUSE_GRACE_MS`) y devuelve el token vigente sin rotar otra vez; así varios refrescos simultáneos con la misma cookie (pestañas del admin, carreras en la app) reciben el mismo token;
+- usado después de esa ventana se trata como reuso de un token robado: la sesión se borra para ambos portadores, se registra `auth_refresh_token_reuse` (ids de sesión y usuario, nunca el token) y responde 401 `AUTH_REFRESH_TOKEN_INVALID`;
+- una sesión de usuario desliza 7 días con cada refresh pero nunca pasa de `created_at` + 30 días (`SESSION_ABSOLUTE_MAX_MS`); después el refresh responde 401 `AUTH_SESSION_EXPIRED` y hay que volver a iniciar sesión;
+- una sesión de dispositivo vinculado también rota, pero conserva su propio tope (`linked_devices.absolute_expires_at`, 180 días desde el emparejamiento).
+
 ### Logout
 `POST /api/v1/auth/logout` es best effort:
 - acepta bearer opcional;
 - acepta `refreshToken` opcional en body;
-- si recibe `refreshToken`, intenta revocar la sesión opaca en Better Auth;
+- si recibe `refreshToken`, intenta revocar la sesión opaca en Better Auth (también con el token anterior a una rotación);
 - si solo recibe `accessToken`, invalida el JWT en blacklist y deja expirar la sesión opaca por su ciclo natural;
 - no bloquea UX si la revocación falla.
 

@@ -39,7 +39,7 @@ La gestion de sesiones permite listar sesiones activas y cerrar sesiones individ
 
 ### Admin
 - **Login funcional**: `POST /auth/login`, `GET /auth/me`
-- **Persistencia de sesion**: el panel guarda `accessToken` y `refreshToken` en cookies HTTP-only persistentes. El JWT de acceso dura hasta 8h; la sesion real se sostiene con el refresh token opaco de Better Auth por hasta 7 dias con sliding refresh.
+- **Persistencia de sesion**: el panel guarda `accessToken` y `refreshToken` en cookies HTTP-only persistentes. El JWT de acceso dura hasta 8h; la sesion real se sostiene con el refresh token opaco de Better Auth, que desliza 7 dias con cada refresh sin pasar de 30 dias desde el login. Cada refresh rota ese token y el panel guarda el nuevo en la cookie (las rutas `src/app/api/auth/*` lo hacen; el anterior vale 30 s para pestañas que refrescan a la vez).
 - **Refresh automatico**: si el panel navega a `/dashboard` sin access token pero con refresh token, redirige por `/api/auth/refresh` y vuelve al destino original. Las llamadas cliente que reciben 401 refrescan una vez y reintentan antes de mandar al login.
 - **Logout**: `POST /auth/logout`
 - **Proteccion per-page**: via `requireAdminUser()` que verifica `access_panel`
