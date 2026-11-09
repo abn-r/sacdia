@@ -1,7 +1,7 @@
 # Feature: Insumos de camporee
 
 **Estado**: IMPLEMENTADO PARCIAL
-**Fecha**: 2026-08-26 (estado actualizado 2026-10-04)
+**Fecha**: 2026-08-26 (estado actualizado 2026-10-04; app actualizada 2026-11-09)
 **Módulo backend**: `CamporeeSuppliesModule` (`src/camporee-supplies/`) + fuentes en `PaymentObligationsModule`
 **ADR**: [#10 — Bounded context `camporee-supplies`](../api/ARCHITECTURE-DECISIONS.md#10-bounded-context-camporee-supplies-independiente-de-camporee-orders)
 
@@ -14,6 +14,13 @@
 Permite que una **sección inscrita** (`registered|approved`) planifique insumos de cocina (hielo, tortillas, garrafones) por **producto × horario de entrega**, pague un folio **PRINCIPAL** `INS{yyyy}{####}` y ajuste días no congelados con hijos **CHARGE** / **REFUND**. La unidad logística es la sección, no el miembro.
 
 En la app, el plan abre con la **orden de pago** (estimado en borrador; neto y folios INS al enviar). Debajo, **Agregar insumo** (icono +, texto y chevron) abre el sheet de alta; el formulario no vive en la lista. Luego hay un bloque por cada día del camporee y, dentro, los insumos agrupados por horario de entrega.
+
+Desde sacdia-app PR #249 (2026-11-08):
+
+- Cada línea muestra su estado de entrega: «Por entregar», «Entregado: N» (parcial) o «Entregado».
+- Las unidades se muestran legibles y en plural (pieza(s), bolsa(s), kg, L), no el código crudo (`UNIT`, `BAG`, `KG`).
+- Deslizar hacia abajo recarga el plan (estado de pago y entregas).
+- «Enviar plan» pide confirmación. El botón de borrador dice «Guardar».
 
 No reutiliza tablas, folios PED ni permisos de mercancía (`camporee-orders`). Contraste: allá cada línea es un `camporee_member_id`; acá no hay “garrafón de Juan”.
 
