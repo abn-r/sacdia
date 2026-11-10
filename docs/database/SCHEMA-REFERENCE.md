@@ -616,7 +616,7 @@ Los cambios de estos campos se auditan por campo en `inventory_history`. Contrat
 - Índice único parcial `uniq_cra_director_status_section_year` (migración `20260908180000_director_year_slots`; Prisma no lo expresa): `(club_section_id, ecclesiastical_year_id, role_id, status) WHERE active = true AND status IN ('active', 'designated') AND role_id = <uuid del rol CLUB director>`. Garantiza a lo sumo un director operativo y un designado por sección+año (el mismo `role_id` con `status` distinto no choca). No aplica a otros roles de club.
 - Índice único parcial `uniq_cra_annual_member_section_year` (migración `20260909120000_annual_membership_cycle`): `(user_id, club_section_id, ecclesiastical_year_id) WHERE active = true AND status IN ('active', 'inactive') AND role_id = <uuid del rol CLUB member> AND club_section_id IS NOT NULL`. Una membresía anual equivalente por usuario/sección/año. Duplicados existentes bloquean la migración; no se borran automáticamente.
 
-### `role_requirements` y `service_credentials` (constancia de consejería, *pendiente de merge*)
+### `role_requirements` y `service_credentials` (constancia de consejería, *pendiente de merge, PR #649 de sacdia-backend*)
 
 Migración `20261110120000_role_requirements_service_credentials` (SQL escrito a mano; sin `CONCURRENTLY`). Enums nuevos: `role_requirement_type_enum` (`COUNSELOR_TRAINING`), `role_requirement_mode_enum` (`INFO`, `WARN`, `BLOCK`), `service_credential_status_enum` (`PENDING_REVIEW`, `APPROVED`, `REJECTED`), `service_credential_upload_status_enum` (`PENDING_UPLOAD`, `CONFIRMED`).
 
