@@ -54,7 +54,13 @@ La gestion de sesiones permite listar sesiones activas y cerrar sesiones individ
 - No implementa UI de: registro, MFA, OAuth, gestion de sesiones
 
 ### App Movil
-- **5 screens de auth**: SplashView, LoginView, RegisterView, ForgotPasswordView, AuthGate
+- **6 screens de auth**: SplashView, WelcomeCarouselView, LoginView, RegisterView, ForgotPasswordView, AuthGate
+- **Carrusel de bienvenida** (`WelcomeCarouselView`, sacdia-app PR #250, 2026-11-09): aparece solo la primera vez en el dispositivo, antes del login (`welcome_carousel_seen_v7` en `SharedPreferences`; con sesión iniciada las rutas públicas redirigen y no se muestra).
+  - Seis escenas animadas, una por widget en `lib/features/auth/presentation/widgets/welcome/`: logo con destello; las 13 clases y el avance de Viajero validando módulos; panal de especialidades con buscador; mazo de funciones del club; línea de tiempo de servicio; todo converge en el logo.
+  - Sigue el tema del sistema. Con movimiento reducido, cada escena muestra su estado final.
+  - «Omitir» y «Ya tengo cuenta» llevan al login; el logo de la última escena vuela al del login (`Hero` con `AuthTokens.brandMarkHeroTag`). «Crear cuenta» abre el registro encima del login (`go(login)` y luego `push(register)`), así que volver del registro regresa al login.
+  - Textos en es, en, fr y pt-BR bajo `welcome_carousel.*`.
+- **Login, registro y recuperar contraseña**: el cielo superior (`AuthSkyWash`) baja de intensidad en modo oscuro y los enlaces de texto usan `context.sac.link`. Detalle de diseño en `sacdia-app/DESIGN-SYSTEM.md` §12.5.
 - Consume 9+ endpoints incluyendo login, register, logout, password reset, completion-status, context switch
 - **Proteccion biometrica local**: la app implementa biometria como app-lock post-login, no como metodo de inicio de sesion. El switch de settings habilita un opt-in local y `BiometricGate` solo bloquea cuando existe una sesion autenticada vigente; si no hay sesion, login y rutas publicas no quedan cubiertas por el lock. Al cerrar sesion, expirar la sesion o eliminar la cuenta, la preferencia biometrica se limpia junto con la sesion local.
 - **Dashboard birthday celebration**: `DashboardView` lee `UserEntity.birthday` desde `/auth/me`; si coincide con el dia calendario local, muestra un modal celebratorio y un banner festivo arriba de `ClubInfoCard`. El banner reabre el modal hasta que el usuario pulse "no volver a mostrar hoy"; esa decision se persiste en `SharedPreferences` por `user_id + anio + MM-DD`.
