@@ -616,6 +616,22 @@ Los cambios de estos campos se auditan por campo en `inventory_history`. Contrat
 - Índice único parcial `uniq_cra_director_status_section_year` (migración `20260908180000_director_year_slots`; Prisma no lo expresa): `(club_section_id, ecclesiastical_year_id, role_id, status) WHERE active = true AND status IN ('active', 'designated') AND role_id = <uuid del rol CLUB director>`. Garantiza a lo sumo un director operativo y un designado por sección+año (el mismo `role_id` con `status` distinto no choca). No aplica a otros roles de club.
 - Índice único parcial `uniq_cra_annual_member_section_year` (migración `20260909120000_annual_membership_cycle`): `(user_id, club_section_id, ecclesiastical_year_id) WHERE active = true AND status IN ('active', 'inactive') AND role_id = <uuid del rol CLUB member> AND club_section_id IS NOT NULL`. Una membresía anual equivalente por usuario/sección/año. Duplicados existentes bloquean la migración; no se borran automáticamente.
 
+### `role_requirements` y `service_credentials` (constancia de consejería, *pendiente de merge, PR #649 de sacdia-backend*)
+
+Migración `20261110120000_role_requirements_service_credentials` (SQL escrito a mano; sin `CONCURRENTLY`). Enums nuevos: `role_requirement_type_enum` (`COUNSELOR_TRAINING`), `role_requirement_mode_enum` (`INFO`, `WARN`, `BLOCK`), `service_credential_status_enum` (`PENDING_REVIEW`, `APPROVED`, `REJECTED`), `service_credential_upload_status_enum` (`PENDING_UPLOAD`, `CONFIRMED`).
+
+**`role_requirements`**: qué cargo exige qué constancia y desde cuándo. Activarla es un cambio de datos, no de código.
+
+- `requirement_id` (serial, PK), `role_id` (uuid, FK `roles`), `club_type_id` (int, nulo = todo tipo de club, FK `club_types`), `requirement_type`, `mode` (default `INFO`), `effective_from` (date, nulo = sin fecha), `equivalent_certification_id` (int, FK `certifications`: una `users_certifications` `APPROVED` o `CERTIFIED` vigente de esa certificación cuenta como constancia), `active` (default true), `created_at`, `modified_at`.
+- Índice único parcial `uq_role_requirements_active` en `(role_id, requirement_type, COALESCE(club_type_id, 0)) WHERE active` (Prisma no lo expresa). Índice `idx_role_requirements_role_active (role_id, active)`.
+- Semilla idempotente: una fila activa por cargo de servicio (`director`, `deputy-director`, `secretary`, `treasurer`, `secretary-treasurer`, `counselor`; `role_category = 'CLUB'`), `COUNSELOR_TRAINING`, `INFO`, sin tipo de club y sin `effective_from`. `instructor` no entra.
+
+**`service_credentials`**: la constancia que sube quien ocupa el cargo (la revisión es de la fase F6).
+
+- `credential_id` (uuid, PK, `gen_random_uuid()`), `user_id` (FK `users`), `credential_type`, `completed_at` (date, nulo), `object_key` (varchar 512), `original_filename` (varchar 255), `mime_type` (varchar 100), `size_bytes` (bigint), `upload_status`, `status` (default `PENDING_REVIEW`), `reviewed_by_id` (FK `users`, nulo), `reviewer_role` (varchar 50: con qué rol aprobó), `reviewed_at` (timestamptz), `decision_reason` (text), `expires_at` (date), `active` (default true), `created_at`, `modified_at`.
+- Índice `idx_service_credentials_user_type_status (user_id, credential_type, status)`.
+- La API nunca expone `object_key` ni URL de archivo en el detalle del candidato.
+
 ### `director_succession_plans`
 
 - Programación privada del director del periodo siguiente. `outgoing_assignment_id` es nullable para permitir sección vacante.

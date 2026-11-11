@@ -113,6 +113,7 @@ Si la política o el writer fallan, el `member` no queda activado parcialmente.
   destino. Un director activo en otra sección no es `already_enrolled` aquí.
   Una transferencia aprobada tiene prioridad al resolver la base; una base
   ambigua bloquea la continuidad.
+- **Solo membresías y edad máxima:** la lista y la sección base consideran únicamente filas `member`; los cargos de servicio no cuentan. Nadie mayor que el tipo de club de la sección se lista como elegible ni se inscribe por el POST (`ANNUAL_AGE_ABOVE_CLUB_TYPE`; el límite sale del catálogo de clases, edad al inicio del año).
 - **Cambio de edad:** el canon determina clase por edad al inicio del año y no
   cambia durante ese ciclo. Primera inscripción de un tipo: clase por edad.
   Continuidad en el mismo tipo: siguiente `display_order`. El salto formativo
@@ -159,7 +160,7 @@ Si la política o el writer fallan, el `member` no queda activado parcialmente.
 | Superficie | Implementado y comprobado en código | Ausente o no certificado |
 |---|---|---|
 | Backend | Controllers, permisos, política de pertenencia, transacciones, auditoría, corte cron/recovery, plan futuro y errores documentados. | No se ejecutaron tests ni se verificó entorno desplegado en esta revisión. |
-| App móvil | Tarjeta visible con `club_members:approve`; vista GET/POST, selección por lote, refresco de auth y estados parcial/bloqueado/fallido. Banner `member inactive` sin CTA “Inscribirme”. | El widget deshabilita solo `eligibility=blocked`; el backend siempre construye `eligibility=eligible` y expresa el bloqueo de clase en `suggested_class`. Así, una clase bloqueada puede seleccionarse y recién fallar al POST; la UX no muestra la sugerencia de clase. |
+| App móvil | Tarjeta visible con `club_members:approve`; vista GET/POST, selección por lote, refresco de auth y estados parcial/bloqueado/fallido. Banner `member inactive` sin CTA “Inscribirme”. | El widget deshabilita solo `eligibility=blocked`. El backend ahora envía `eligibility=blocked` + `blocked_reason` cuando la persona es elegible a Guía Mayor en una sección AV/CQ, supera la edad del tipo de club o la clase sugerida está bloqueada, así que el desajuste con el POST quedó resuelto. La UX no muestra la sugerencia de clase. |
 | Admin web | Detalle de club: preelección (`director-designation`), sucesión operativa del año vigente (`director-succession`) y bloque de `annual-continuations` (incluye salto de tipo) en el tab de secciones. | Consumo local; no certifica entorno desplegado. |
 | Documentación/deploy | API, RBAC, gestión de clubes y cron describen el contrato; las migraciones recientes constan como aplicadas a Neon **development** el 2026-09-11 en la documentación. | Producción, paridad de artefactos y disponibilidad end-to-end no fueron verificadas. El `CLAUDE.md` del admin aún describe un reset anterior; para el estado actual prevalece el código y la referencia API. |
 
