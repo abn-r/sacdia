@@ -607,6 +607,22 @@ CHECK constraints (solo en la base; Prisma no los modela):
 
 Los cambios de estos campos se auditan por campo en `inventory_history`. Contrato y reglas de validación: `docs/features/inventario.md`.
 
+### `club_enrollments` (revisión de la inscripción anual)
+
+**Pendiente de merge** (rama `feat/club-enrollment-review` de sacdia-backend, sin PR todavía): migración `20261111120000_club_enrollment_review` (SQL escrito a mano, sin `CONCURRENTLY`) y, aparte, `20261111130000_club_enrollments_validate_permission` (solo datos: el permiso `club_enrollments:validate` y sus grants). Aún no están aplicadas en ninguna rama de Neon ni en el espejo `schema.prisma` de esta carpeta.
+
+Columnas nuevas, todas nulas (las inscripciones existentes quedan sin revisión registrada):
+
+- `submitted_at` (`timestamptz(6)`): cuándo se envió (o reenvió) a validación. Migración: se añade al final de `20261111120000_club_enrollment_review` y se rellena con `created_at` en las filas existentes. La API lo pone al crear y al volver a `pending_validation`.
+- `reviewed_by_id` (uuid, FK `users(user_id)`, `ON DELETE NO ACTION`): quien aprobó o rechazó. Relación Prisma `reviewer` (`enrollment_reviewer`).
+- `reviewer_role` (`varchar(50)`): rol del canal de alcance que cubrió la sección (por ejemplo `director-lf`).
+- `reviewed_at` (`timestamptz(6)`): momento de la decisión.
+- `decision_reason` (`text`): motivo del rechazo (5 a 500 caracteres, lo valida la API); `NULL` al aprobar.
+
+La directiva (`director_id`, `deputy_director_ids`, `secretary_id`, `treasurer_id`, `secretary_treasurer_id`) la rellena el servidor con los cargos de club activos de la sección en el año del registro; el cliente no la envía.
+
+Al reenviar una inscripción rechazada o inactiva (`pending_validation` otra vez) los cuatro campos vuelven a `NULL`. Detalle del flujo en [club-enrollments.md](../features/club-enrollments.md).
+
 ### `club_role_assignments`
 
 - La relacion operativa es contra `club_section_id`.
