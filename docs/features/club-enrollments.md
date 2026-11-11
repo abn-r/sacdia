@@ -1,7 +1,7 @@
 # Registro anual del club (club enrollments)
 
-**Estado**: IMPLEMENTADO PARCIAL. La validación por alcance (permiso `club_enrollments:validate`, motivo de rechazo, revisor registrado y avisos) está **Pendiente de merge** (rama `feat/club-enrollment-review`, sin PR todavía); la pantalla del admin y los avisos en la app son trabajo de esa misma rama en sus repos.
-**Verificado contra código**: 2026-11-11 (rama `feat/club-enrollment-review` del backend, creada desde `development`)
+**Estado**: IMPLEMENTADO PARCIAL. La validación por alcance (permiso `club_enrollments:validate`, motivo de rechazo, revisor registrado y avisos) está **Pendiente de merge** (PR #650 de sacdia-backend, #253 de sacdia-app y #302 de sacdia-admin); la pantalla del admin y los avisos en la app son trabajo de esa misma rama en sus repos.
+**Verificado contra código**: 2026-11-11 (PR #650 de sacdia-backend del backend, creada desde `development`)
 **Dominios relacionados**: [gestion-clubs.md](gestion-clubs.md), [carpetas-evidencias.md](carpetas-evidencias.md), [monthly-reports.md](monthly-reports.md), [cierre-anual.md](cierre-anual.md)
 
 ## Descripcion de dominio
@@ -144,7 +144,7 @@ Concedido a `super-admin`, `admin`, `assistant-admin`, `director-lf`, `assistant
 ### Admin
 
 - `src/lib/api/club-enrollments.ts` usa `GET …/enrollments/current` desde la página de informes (`/dashboard/reports`).
-- La pantalla de validación de la bandeja (`/club-enrollments/validation/queue`, `approve`, `reject`) es trabajo de la rama `feat/club-enrollment-review` del admin. `/dashboard/enrollments` era otra cosa (inscripciones de clase pendientes de investidura, borrada en la fase 8).
+- La pantalla de validación de la bandeja (`/club-enrollments/validation/queue`, `approve`, `reject`) es trabajo de la PR #650 de sacdia-backend del admin. `/dashboard/enrollments` era otra cosa (inscripciones de clase pendientes de investidura, borrada en la fase 8).
 
 ### Base de datos
 

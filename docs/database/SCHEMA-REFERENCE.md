@@ -609,7 +609,7 @@ Los cambios de estos campos se auditan por campo en `inventory_history`. Contrat
 
 ### `club_enrollments` (revisión de la inscripción anual)
 
-**Pendiente de merge** (rama `feat/club-enrollment-review` de sacdia-backend, sin PR todavía): migración `20261111120000_club_enrollment_review` (SQL escrito a mano, sin `CONCURRENTLY`) y, aparte, `20261111130000_club_enrollments_validate_permission` (solo datos: el permiso `club_enrollments:validate` y sus grants). Aún no están aplicadas en ninguna rama de Neon ni en el espejo `schema.prisma` de esta carpeta.
+**Pendiente de merge** (PR #650 de sacdia-backend): migración `20261111120000_club_enrollment_review` (SQL escrito a mano, sin `CONCURRENTLY`) y, aparte, `20261111130000_club_enrollments_validate_permission` (solo datos: el permiso `club_enrollments:validate` y sus grants). Aplicadas en la rama `development` de Neon (2026-11-11); faltan `staging` y `production`, y el espejo `schema.prisma` de esta carpeta se resincroniza al hacer merge.
 
 Columnas nuevas, todas nulas (las inscripciones existentes quedan sin revisión registrada):
 
