@@ -66,7 +66,7 @@ monthly-reports/{year}/{month-padded}/{clubEnrollmentId}/{monthlyReportId}.pdf
 | `MONTHLY_REPORTS` | `sacdia-monthly-reports` | `monthly-reports` (defecto igual) | Privado |
 | `MATERIALES_COMPROBANTES` | `sacdia-materiales-comprobantes` | defecto `materiales/comprobantes` | Privado |
 | `CAMPOREE_PAYMENT_VOUCHERS` | `sacdia-camporee-payment-vouchers` | `camporee-payments` (defecto igual) | Privado |
-| `CERTIFICATION_EVIDENCE` | `sacdia-certification-evidence` | `certifications/evidence` (defecto igual) | Privado |
+| `CERTIFICATION_EVIDENCE` | `sacdia-certification-evidence` | `certifications/evidence` (defecto igual). También guarda las constancias de consejería bajo `service-credentials/{userId}/{credentialId}/` (dentro del mismo prefijo) | Privado |
 | `CERTIFICATE_IMPORTS` | sin valor en `.env.example` | defecto `certificate-imports` | Privado |
 
 Notas:
