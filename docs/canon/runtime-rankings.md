@@ -268,7 +268,7 @@ Excepción canónica: `annual_evidence_folder` usa los puntos reales snapshot de
 |---|---|---|
 | `annual_evidence_folder` | `annual_folders` | `total_earned_points / total_max_points` reales de la Carpeta Anual de Evidencias; `progress_percentage` solo normaliza el porcentaje |
 | `monthly_reports_timeliness` | `monthly_reports` + `ecclesiastical_years` | informes `submitted` entregados antes del día `ranking.monthly_report_deadline_day` (default 5) / meses esperados del año eclesiástico |
-| `finance_compliance` | `finance_period_closings` + `finances` + `club_sections` | meses del año calendario con cierre (`closed_at` no nulo) y al menos un movimiento activo del club registrado antes del cierre (`created_at <= closed_at`) / 12. El cierre es automático (día 1, 00:00 UTC), por eso no mide la fecha del cierre sino si el club registró movimientos antes. Ya no usa `ranking.finance_closing_deadline_day`. Pendiente de merge (PR #651 de sacdia-backend) |
+| `finance_compliance` | `finance_period_closings` + `finances` + `club_sections` | meses del año calendario con cierre (`closed_at` no nulo) y al menos un movimiento activo del club registrado antes del cierre (`created_at <= closed_at`) / 12. El cierre es automático (día 1, 00:00 UTC), por eso no mide la fecha del cierre sino si el club registró movimientos antes. Ya no usa `ranking.finance_closing_deadline_day`. |
 | `institutional_data_completeness` | `club_enrollments` + `club_sections` | campos institucionales completos / 10 campos esperados: dirección, horario, director, secretaría, tesorería, nombre, teléfono, email, coordenadas y meta de almas |
 | `activities_registered` | `activity_instances` + `activities` | actividades activas de la sección en el año / `ranking.activities_registered_target` (default 12), con tope 100 |
 | `attendance_participation` | `weekly_records` + `unit_members` | promedio de `weekly_records.attendance` de miembros activos de la sección en los años calendario cubiertos por el año eclesiástico |
@@ -287,7 +287,7 @@ El composite ranking combina cuatro criterios institucionales en un único índi
 | Criterio | Campo | Descripción |
 |----------|-------|-------------|
 | **Carpeta Anual de Evidencias** | `folder_score_pct` | Porcentaje de puntos obtenidos sobre el total de la Carpeta Anual de Evidencias evaluada |
-| **Finanzas** | `finance_score_pct` | Proporción de meses (sobre 12) en los que el club registró al menos un movimiento antes del cierre automático del mes. Los movimientos creados después del cierre no cuentan. Pendiente de merge (PR #651 de sacdia-backend) |
+| **Finanzas** | `finance_score_pct` | Proporción de meses (sobre 12) en los que el club registró al menos un movimiento antes del cierre automático del mes. Los movimientos creados después del cierre no cuentan. |
 | **Camporee** | `camporee_score_pct` | Porcentaje de puntos oficiales obtenidos por la sección en eventos de camporee puntuables activos: `sum(camporee_event_section_results.total_awarded_points) / sum(camporee_events.max_points)` |
 | **Evidencias** | `evidence_score_pct` | Proporción de evidencias de carpeta en estado `VALIDATED` sobre el total de evaluadas (pending excluidos) |
 

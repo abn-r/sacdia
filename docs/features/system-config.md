@@ -35,7 +35,7 @@ Reglas verificadas:
 | `reports.auto_generate_enabled`, `reports.auto_generate_day` | `monthly-reports` | cron de generación del informe mensual |
 | `reports.reminders_enabled` | `monthly-reports` | recordatorios de informe mensual |
 | `reports.quarterly_auto_generate_enabled`, `reports.annual_auto_generate_enabled` | crons de informes trimestral y anual | ver [informes-trimestrales-anuales.md](informes-trimestrales-anuales.md) |
-| `ranking.recalculation_enabled`, `ranking.finance_closing_deadline_day` (sin uso desde la regla de movimientos de finanzas, Pendiente de merge (PR #651 de sacdia-backend)), `ranking.activities_registered_target` | `annual-folders` (rankings y calculadores de puntaje) | clasificación de clubes |
+| `ranking.recalculation_enabled`, `ranking.finance_closing_deadline_day` (sin uso desde la regla de movimientos de finanzas), `ranking.activities_registered_target` | `annual-folders` (rankings y calculadores de puntaje) | clasificación de clubes |
 | `member_ranking.recalculation_enabled`, `member_ranking.member_visibility`, `member_ranking.top_n` | `member-rankings` | ranking de miembros |
 | `scoring.category_max_points_cap` (defecto 20) | `scoring-categories` | tope de puntos por categoría |
 | `field_payment_orders_v1` (JSON con `local_field_id`), `field_payment_orders.expiry_days` (defecto 15) | `field-payment-orders` | ver [ordenes-de-pago.md](ordenes-de-pago.md) |

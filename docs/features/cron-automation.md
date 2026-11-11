@@ -6,7 +6,7 @@
 
 ## Descripción de dominio
 
-El backend SACDIA ejecuta jobs programados que automatizan flujos institucionales recurrentes: generación de reportes mensuales, recordatorios de reportes mensuales, cierre financiero, cálculo de rankings anuales, evaluación de miembro del mes, recordatorios de actividades, expiración de solicitudes, cleanup de tokens/sesiones y limpieza de exportes vencidos, informes trimestrales y anuales, corte del año eclesiástico, alertas por jobs fallidos, recordatorios de autorización de investidura y los ciclos de edad y tutor de los perfiles familiares. En total son **21 jobs** `@Cron` (ver «Inventario de jobs»). El job 21 (recordatorio de fin de mes de finanzas) esta pendiente de merge (PR #651 de sacdia-backend).
+El backend SACDIA ejecuta jobs programados que automatizan flujos institucionales recurrentes: generación de reportes mensuales, recordatorios de reportes mensuales, cierre financiero, cálculo de rankings anuales, evaluación de miembro del mes, recordatorios de actividades, expiración de solicitudes, cleanup de tokens/sesiones y limpieza de exportes vencidos, informes trimestrales y anuales, corte del año eclesiástico, alertas por jobs fallidos, recordatorios de autorización de investidura y los ciclos de edad y tutor de los perfiles familiares. En total son **21 jobs** `@Cron` (ver «Inventario de jobs»).
 
 La mayoría de los jobs operan en **UTC** (ver «Política común canonizada»); los recordatorios de reportes mensuales operan en `America/Mexico_City` porque son mensajes de calendario local para usuarios. Dos jobs (`cron-alert-check` y `fcm-tokens-stale-cleanup`) no declaran zona horaria y usan la del proceso. Son **idempotentes por diseño** (usan locks distribuidos o verificaciones de estado previo; algunos solo dependen de la verificación de estado) y siguen un patrón **fire-and-forget** desde el scheduler — fallos dentro de un job no detienen el resto del pipeline ni propagan excepciones al caller original del endpoint que disparó el flujo.
 
@@ -171,8 +171,6 @@ Notas del inventario:
 - **Rebuild**: `tsx scripts/rebuild-finance-period-closings.ts --apply` regenera meses ya cerrados del año eclesiástico activo con `closed_at` = 00:00 UTC del día 1 del mes siguiente (el instante en que el cron UTC debió correr).
 
 ### 21. Finance month-end reminder
-
-Pendiente de merge (PR #651 de sacdia-backend).
 
 - **Archivo**: `sacdia-backend/src/finances/finance-reminder.service.ts`
 - **Método**: `handleMonthEndReminder()` (lógica en `runMonthEndReminders(year, month)`)
