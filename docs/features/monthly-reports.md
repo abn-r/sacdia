@@ -47,6 +47,7 @@ La feature esta implementada en backend con IDs UUID y estados `draft -> generat
   - `honors` (`started`, `completed`, `details`)
   - `activities` (`total`, `list`)
   - `finances` (`income`, `expenses`, `balance`, `total_balance`, `transactions`)
+    - Los cinco números salen de `FinanceAggregationService` (movimientos activos en vivo): `balance` es el neto del mes y `total_balance` el saldo acumulado de toda la historia de la seccion hasta el fin del mes. Son los mismos que muestra el resumen del club (decisión 2026-11-11, pendiente de merge, PR #651 de sacdia-backend).
   - `meeting_days`
 - **Datos manuales reales**:
   - administracion: `planning_meetings`, `parent_meetings`, `youth_council_attendance`, `church_board_attendance`
