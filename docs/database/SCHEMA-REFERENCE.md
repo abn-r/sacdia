@@ -1,7 +1,7 @@
 # Schema Reference - SACDIA Database
 
 **Estado**: ACTIVE
-**Sincronizado contra**: `sacdia-backend/prisma/schema.prisma` en la rama `development` (commit `68123f6`). Cifras y espejo `schema.prisma` recontados el 2026-11-09 contra el commit `40152173`; ese día se añadieron `camporee_event_attachments` y `user_fcm_tokens.kind` (ver «Migraciones recientes»). El resto de secciones no se revisó de nuevo. El 2026-11-09 las 222 migraciones están aplicadas en las tres ramas de Neon (`development`, `staging` y `production`); `production` se puso al día ese día.
+**Sincronizado contra**: `sacdia-backend/prisma/schema.prisma` en la rama `development` (commit `68123f6`). Cifras y espejo `schema.prisma` recontados el 2026-11-11 contra el commit `1b34d84d` (merge del PR #649 de sacdia-backend, que añade `role_requirements` y `service_credentials`). El resto de secciones no se revisó de nuevo. Las 224 migraciones están aplicadas en las tres ramas de Neon (`development`, `staging` y `production`). Las dos del PR #649 (`20261110120000_role_requirements_service_credentials` y `20261110130000_service_credentials_permissions`) se aplicaron a mano en `staging` y `production` el 2026-11-11, con el mismo checksum que el archivo; `development` las tenía desde el 2026-11-10.
 **Fecha de resincronizacion**: 2026-10-13 (última migración en `development`: `20261013110000_remove_retired_investiture_permissions`). Las secciones de abajo se resincronizaron por completo hasta el 2026-10-04; después solo se añadieron las de instructor de especialidad y carga por certificado (2026-10-13) y la de aceptación legal (`legal_acceptances`, 2026-10-15, migración `20261015120000_legal_acceptances`, ya en `development`; las cifras de abajo la incluyen) y la de perfiles familiares (2026-10-16, actualizada el 2026-10-19 con la Fase 2 completa; migración `20261016120000_family_profiles`, rama `feat/family-profiles`, mergeada (PR #530 de sacdia-backend)). El espejo `schema.prisma` sí es la copia completa e incluye ambas. La sub-fase 3a de perfiles familiares (2026-10-19; migración `20261020120000_family_teen_login`, rama `feat/family-profiles-phase3`, mergeada (PR #531 de sacdia-backend)) añade `supervised_logins` y dos reemplazos de CHECK; ver «Cuentas supervisadas (Fase 3a)». La sub-fase 3b (2026-10-20; migración `20261021120000_family_linked_devices`, misma rama, mergeada (PR #531 de sacdia-backend)) añade `linked_devices` y `device_pairing_tokens` y amplía otro CHECK de `supervised_logins`; ver «Dispositivos vinculados (Fase 3b)». La sub-fase 3c (2026-10-20; migraciones `20261022120000_family_director_minors` y `20261022130000_seed_family_permissions`, misma rama, mergeada (PR #531 de sacdia-backend)) añade `dependent_profiles.teen_login_nudged_at` y los permisos `dependents:create` y `consent:verify`; ver «Registro por director y acceso familiar (Fase 3c)». Las cifras de abajo y el espejo `schema.prisma` ya incluyen la 3a, la 3b y la 3c (recuento del 2026-11-09). El seguimiento de coordinadores (2026-10-20; migración `20261023120000_grant_consent_verify_to_coordinators`, rama `feat/coordinator-consent-verify`, solo DML, **aplicada en `development` y `staging`** (2026-10-21) y en `production` (2026-11-09)) da `consent:verify` a los roles globales de coordinador; ver su sección más abajo. La migración `20261024120000_allow_coordinator_paper_form` (rama `feat/coordinator-pending-consents`, solo DDL, **aplicada en `development` y `staging`** (2026-10-21) y en `production` (2026-11-09)) amplía el CHECK `guardianships_verification_method_ck` con `coordinator_paper_form`; ver su sección más abajo.
 
 Referencia humana concisa del schema Prisma vigente.
@@ -14,13 +14,13 @@ Referencia humana concisa del schema Prisma vigente.
 
 ## Cifras vigentes
 
-Recontadas el 2026-11-09 contra `development` (commit `40152173`):
+Recontadas el 2026-11-11 contra `development` (commit `1b34d84d`):
 
-- **Modelos Prisma**: 266 (incluye 27 modelos `*_translations` de i18n)
-- **Enums Prisma**: 79
-- **Migraciones Prisma**: 222 directorios en `prisma/migrations/` (la última, `20261109120000_drop_global_material_folio_unique`, sin cambios en `schema.prisma`)
+- **Modelos Prisma**: 268 (incluye 27 modelos `*_translations` de i18n)
+- **Enums Prisma**: 83
+- **Migraciones Prisma**: 224 directorios en `prisma/migrations/` (la última, `20261110130000_service_credentials_permissions`, solo datos)
 - **Tablas Better Auth mapeadas**: `session -> sessions`, `account -> accounts`, `verification -> verifications`
-- **Espejo `schema.prisma`**: resincronizado el 2026-11-09 con el mismo commit; es copia exacta del schema del backend (266 modelos y 79 enums). Ya incluye las fases 3a, 3b y 3c de perfiles familiares, `user_fcm_tokens.kind` y `camporee_event_attachments`.
+- **Espejo `schema.prisma`**: resincronizado el 2026-11-11 con el mismo commit; es copia exacta del schema del backend (268 modelos y 83 enums). Ya incluye las fases 3a, 3b y 3c de perfiles familiares, `user_fcm_tokens.kind`, `camporee_event_attachments`, `role_requirements` y `service_credentials`.
 
 ---
 
@@ -616,7 +616,7 @@ Los cambios de estos campos se auditan por campo en `inventory_history`. Contrat
 - Índice único parcial `uniq_cra_director_status_section_year` (migración `20260908180000_director_year_slots`; Prisma no lo expresa): `(club_section_id, ecclesiastical_year_id, role_id, status) WHERE active = true AND status IN ('active', 'designated') AND role_id = <uuid del rol CLUB director>`. Garantiza a lo sumo un director operativo y un designado por sección+año (el mismo `role_id` con `status` distinto no choca). No aplica a otros roles de club.
 - Índice único parcial `uniq_cra_annual_member_section_year` (migración `20260909120000_annual_membership_cycle`): `(user_id, club_section_id, ecclesiastical_year_id) WHERE active = true AND status IN ('active', 'inactive') AND role_id = <uuid del rol CLUB member> AND club_section_id IS NOT NULL`. Una membresía anual equivalente por usuario/sección/año. Duplicados existentes bloquean la migración; no se borran automáticamente.
 
-### `role_requirements` y `service_credentials` (constancia de consejería, *pendiente de merge, PR #649 de sacdia-backend*)
+### `role_requirements` y `service_credentials` (constancia de consejería)
 
 Migración `20261110120000_role_requirements_service_credentials` (SQL escrito a mano; sin `CONCURRENTLY`). Enums nuevos: `role_requirement_type_enum` (`COUNSELOR_TRAINING`), `role_requirement_mode_enum` (`INFO`, `WARN`, `BLOCK`), `service_credential_status_enum` (`PENDING_REVIEW`, `APPROVED`, `REJECTED`), `service_credential_upload_status_enum` (`PENDING_UPLOAD`, `CONFIRMED`).
 
