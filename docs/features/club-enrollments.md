@@ -1,7 +1,7 @@
 # Registro anual del club (club enrollments)
 
-**Estado**: IMPLEMENTADO PARCIAL. La validación por alcance (permiso `club_enrollments:validate`, motivo de rechazo, revisor registrado y avisos) está **Pendiente de merge** (PR #650 de sacdia-backend, #253 de sacdia-app y #302 de sacdia-admin); la pantalla del admin y los avisos en la app son trabajo de esa misma rama en sus repos.
-**Verificado contra código**: 2026-11-11 (PR #650 de sacdia-backend del backend, creada desde `development`)
+**Estado**: IMPLEMENTADO. La validación por alcance (permiso `club_enrollments:validate`, motivo de rechazo, revisor registrado y avisos) entró en `development` con el PR #650 de sacdia-backend, el #253 de sacdia-app y el #302 de sacdia-admin (2026-11-11).
+**Verificado contra código**: 2026-11-11 (`development` tras el merge del PR #650 de sacdia-backend)
 **Dominios relacionados**: [gestion-clubs.md](gestion-clubs.md), [carpetas-evidencias.md](carpetas-evidencias.md), [monthly-reports.md](monthly-reports.md), [cierre-anual.md](cierre-anual.md)
 
 ## Descripcion de dominio
@@ -34,12 +34,12 @@ Verificadas en `club-enrollments.service.ts`:
 
 - **Estados** (texto): `pending_validation`, `active`, `rejected`, `inactive`; el cierre de año los pasa a `closed`.
 - **Alta**: la sección debe existir y pertenecer al club (`CE_SECTION_NOT_FOUND`). Usa el año eclesiástico vigente por fechas (`CatalogsService.getCurrentEcclesiasticalYear`; `CE_NO_ACTIVE_YEAR` si no hay). Una inscripción por sección y año (`UNIQUE (club_section_id, ecclesiastical_year_id)`): si ya existe y no está `rejected` ni `inactive`, responde `CE_ALREADY_ENROLLED`; si está `rejected` o `inactive`, se reescribe y vuelve a `pending_validation`. Comprobación y alta corren en una transacción.
-- **Directiva desde los cargos** (**Pendiente de merge**): `CreateClubEnrollmentDto` (y por herencia el PATCH) ya no tiene `director_id`, `deputy_director_ids`, `secretary_id`, `treasurer_id` ni `secretary_treasurer_id`; un cliente que los envíe recibe 400 (`forbidNonWhitelisted`). El servidor guarda una foto de los cargos de club de la sección en el año eclesiástico del registro (`SectionBoardSnapshotService`, `src/common/authorization/section-board-snapshot.service.ts`), en cada POST (también sobre uno rechazado o inactivo) y en cada PATCH:
+- **Directiva desde los cargos**: `CreateClubEnrollmentDto` (y por herencia el PATCH) ya no tiene `director_id`, `deputy_director_ids`, `secretary_id`, `treasurer_id` ni `secretary_treasurer_id`; un cliente que los envíe recibe 400 (`forbidNonWhitelisted`). El servidor guarda una foto de los cargos de club de la sección en el año eclesiástico del registro (`SectionBoardSnapshotService`, `src/common/authorization/section-board-snapshot.service.ts`), en cada POST (también sobre uno rechazado o inactivo) y en cada PATCH:
   - Cuentan solo asignaciones `active = true`, `status = 'active'` y sin `end_date` vencido, de esa sección y ese año. Otras secciones, otros años y asignaciones terminadas o inactivas se ignoran.
   - `director` → `director_id`; `secretary` → `secretary_id`; `treasurer` → `treasurer_id`; `secretary-treasurer` → `secretary_treasurer_id`; cada uno el titular más antiguo (por `start_date`, luego `user_id`) o `NULL` si no hay.
   - `deputy-director` → `deputy_director_ids`: hasta 2, en orden de `start_date` y luego `user_id`; `[]` si no hay.
   - Ya no se valida la exclusión secretario/tesorero vs secretario-tesorero: la regla la imponen los cupos de cargos. `CE_SECRETARY_TREASURER_EXCLUSIVE` sigue en el enum y las traducciones porque los clientes lo conocen.
-- **Fecha de envío** (`submitted_at`, **Pendiente de merge**): se fija al crear y cada vez que el registro vuelve a `pending_validation` (POST o PATCH sobre uno rechazado o inactivo). Aprobar, rechazar y editar uno aprobado no la tocan.
+- **Fecha de envío** (`submitted_at`): se fija al crear y cada vez que el registro vuelve a `pending_validation` (POST o PATCH sobre uno rechazado o inactivo). Aprobar, rechazar y editar uno aprobado no la tocan.
 - **Edición**: actualiza solo los campos enviados; si la inscripción estaba `rejected` o `inactive`, vuelve a `pending_validation`.
 - **Reenvío (D3)**: al volver a `pending_validation` (POST sobre una rechazada o inactiva, o PATCH sobre una rechazada o inactiva) se ponen en `NULL` `reviewed_by_id`, `reviewer_role`, `reviewed_at` y `decision_reason`.
 - **Editar una aprobada (D4)**: sigue `active`, no se revalida y conserva su revisión.
@@ -149,8 +149,8 @@ Concedido a `super-admin`, `admin`, `assistant-admin`, `director-lf`, `assistant
 ### Base de datos
 
 - `club_enrollments`: `club_section_id`, `ecclesiastical_year_id`, `status` (por defecto `active` en el schema; el servicio crea con `pending_validation`), `address`, `meeting_days`, `latitude`, `longitude`, `meeting_schedule` (JSON), `souls_target`, `fee`, `fee_amount`, `director_id`, `deputy_director_ids` (arreglo), `secretary_id`, `treasurer_id`, `secretary_treasurer_id`, `created_by`, `closed_at`. La directiva (`director_id`, `deputy_director_ids`, `secretary_id`, `treasurer_id`, `secretary_treasurer_id`) es una foto de los cargos de club, no entrada del cliente.
-- Envío (**Pendiente de merge**, misma migración): `submitted_at` (`timestamptz(6)`, nulo; se rellena con `created_at` en las filas existentes).
-- Revisión (**Pendiente de merge**, migración `20261111120000_club_enrollment_review`): `reviewed_by_id` (uuid, FK `users`, sin acción), `reviewer_role` (`varchar(50)`), `reviewed_at` (`timestamptz(6)`), `decision_reason` (`text`); todas nulas. Relación `reviewer` (`enrollment_reviewer`).
+- Envío (misma migración): `submitted_at` (`timestamptz(6)`, nulo; se rellena con `created_at` en las filas existentes).
+- Revisión (migración `20261111120000_club_enrollment_review`): `reviewed_by_id` (uuid, FK `users`, sin acción), `reviewer_role` (`varchar(50)`), `reviewed_at` (`timestamptz(6)`), `decision_reason` (`text`); todas nulas. Relación `reviewer` (`enrollment_reviewer`).
 
 ### Datos de demostración
 
@@ -168,5 +168,4 @@ Concedido a `super-admin`, `admin`, `assistant-admin`, `director-lf`, `assistant
 
 ## Gaps y pendientes
 
-- Falta la pantalla de validación en el admin y mostrar el motivo del rechazo en la app (ramas de esos repos).
 - La clave `club_enrollment_territory` del `AuthorizationResource` sigue existiendo en el decorador y en `TenantBindingEnforcer`, pero ninguna ruta la usa ya.

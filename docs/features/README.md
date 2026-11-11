@@ -31,8 +31,8 @@
 | Señal | Cantidad | Evidencia |
 |---|---:|---|
 | Dominios registrados | 55 | filas de la tabla de abajo (51 documentos en `docs/features/` + 2 dominios en `docs/canon/runtime-rankings.md` + `requests` en `docs/canon/runtime-requests.md` + `data-export` en `docs/architecture/DATA-EXPORT.md`) |
-| Estado funcional `IMPLEMENTADO` | 42 | declarado en los documentos de dominio |
-| Estado funcional `IMPLEMENTADO PARCIAL` | 8 | `camporee-events`; `camporee-orders`; `camporee-supplies`; `club-enrollments`; `family-profiles`; `i18n`; `informes-trimestrales-anuales`; `soporte` |
+| Estado funcional `IMPLEMENTADO` | 43 | declarado en los documentos de dominio |
+| Estado funcional `IMPLEMENTADO PARCIAL` | 7 | `camporee-events`; `camporee-orders`; `camporee-supplies`; `family-profiles`; `i18n`; `informes-trimestrales-anuales`; `soporte` |
 | Estado funcional `PARCIAL` | 2 | `audit-log`; `institutional-history` |
 | Estado funcional `NO CANON` | 1 | `infrastructure` (infraestructura operativa) |
 | Estado `ACTIVE` con canon externo | 1 | `achievements` |
@@ -63,7 +63,7 @@
 | `cierre-anual` | [cierre-anual.md](cierre-anual.md) | Documento presente | `IMPLEMENTADO` |
 | `clases-progresivas` | [clases-progresivas.md](clases-progresivas.md) | Documento presente | `IMPLEMENTADO` |
 | `clasificacion-institucional-ampliada` | [docs/canon/runtime-rankings.md](../canon/runtime-rankings.md) (8.4-C: `composite_score_pct` y `/breakdown`) | Documento presente | `IMPLEMENTADO` |
-| `club-enrollments` | [club-enrollments.md](club-enrollments.md) | Documento presente | `IMPLEMENTADO PARCIAL` |
+| `club-enrollments` | [club-enrollments.md](club-enrollments.md) | Documento presente | `IMPLEMENTADO` |
 | `communications` | [communications.md](communications.md) | Documento presente | `IMPLEMENTADO` |
 | `contactos-emergencia-representante-legal` | [contactos-emergencia-representante-legal.md](contactos-emergencia-representante-legal.md) | Documento presente | `IMPLEMENTADO` |
 | `coordinacion` | [coordinacion.md](coordinacion.md) | Documento presente | `IMPLEMENTADO` |
