@@ -140,7 +140,7 @@ Concedido a `super-admin`, `admin`, `assistant-admin`, `director-lf`, `assistant
 ### App móvil
 
 - `lib/features/enrollment/`: `EnrollmentFormView` crea, consulta (`/current`) y edita la inscripción de la sección. Ahora recibe `decision_reason` y `reviewed_at` para mostrar por qué se rechazó.
-- La tarjeta del registro anual del inicio (`EnrollmentStatusCard`: falta, enviado, rechazado) solo la ve la directiva de la sección activa: capacidad `club.administrative_staff` (director, subdirector, secretario, tesorero y secretario-tesorero). Consejeros, instructores y miembros no la ven. Pendiente de merge (PR #254 de sacdia-app y #651 de sacdia-backend).
+- La tarjeta del registro anual del inicio (`EnrollmentStatusCard`: falta, enviado, rechazado) solo la ve la directiva de la sección activa: capacidad `club.administrative_staff` (director, subdirector, secretario, tesorero y secretario-tesorero). Consejeros, instructores y miembros no la ven.
 
 ### Admin
 

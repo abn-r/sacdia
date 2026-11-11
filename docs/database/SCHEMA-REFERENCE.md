@@ -787,7 +787,7 @@ Los GIN/parciales no caben en `@@index` de Prisma; el SQL de la migración es la
 - Incluye configuracion operativa general.
 - Membership requests usa la key `membership.pending_timeout_days` para expirar solicitudes pendientes.
 - Nuevas keys desde 8.4-C (2026-04-28):
-  - `ranking.finance_closing_deadline_day` (default `5`) — sin uso en `finance_score_pct` (Pendiente de merge (PR #651 de sacdia-backend)); antes era el día límite de cierre financiero.
+  - `ranking.finance_closing_deadline_day` (default `5`) — sin uso en `finance_score_pct`; antes era el día límite de cierre financiero.
   - `ranking.recalculation_enabled` (default `true`) — kill-switch que inhibe el cron y el endpoint manual de recálculo de rankings cuando es `false`.
 
 ### `audit_logs`
@@ -810,7 +810,7 @@ Los GIN/parciales no caben en `@@index` de Prisma; el SQL de la migración es la
 ### `finances`
 
 - Incluye `modified_by_id`, `club_section_id` y `post_closing_note`.
-- `active` tiene default `true` (migración `20261111140000_finances_active_default_true`, pendiente de merge, PR #651 de sacdia-backend); antes era `false` y solo el servicio lo forzaba a `true` al crear.
+- `active` tiene default `true` (migración `20261111140000_finances_active_default_true`); antes era `false` y solo el servicio lo forzaba a `true` al crear.
 - `post_closing_note` es obligatoria (5 a 500 caracteres) al crear, editar o eliminar un movimiento de un mes cerrado; la escribe el servicio, no la base.
 - `finance_period_closings` (modelo `FinancePeriodClosing`) es una foto histórica del mes; los totales ya no se leen de ahí.
 - La relacion principal es con `club_sections`, no con tablas legacy separadas por tipo.

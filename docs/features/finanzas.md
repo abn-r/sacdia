@@ -8,7 +8,7 @@ El modulo de finanzas gestiona los movimientos economicos de cada club de Conqui
 
 Cada club tiene su propia contabilidad independiente, con registro de ingresos y egresos categorizados. El sistema ofrece un resumen financiero por club que permite a la directiva (particularmente al tesorero) tener visibilidad del balance general. Los movimientos financieros son filtrables por ano y mes, lo que facilita el cierre contable por periodo eclesiastico.
 
-El campo `balance` del resumen es el **saldo acumulado de toda la historia** del club (o de la seccion) hasta el fin del periodo pedido: el dinero en caja no se reinicia cada ano eclesiastico. Los ingresos y egresos se informan aparte, por periodo (mes, ano o todo). Todo se calcula en tiempo real con los movimientos activos; las fotos de cierre (`finance_period_closings`) ya no se usan para sumar. Decision 2026-11-11, pendiente de merge (PR #651 de sacdia-backend).
+El campo `balance` del resumen es el **saldo acumulado de toda la historia** del club (o de la seccion) hasta el fin del periodo pedido: el dinero en caja no se reinicia cada ano eclesiastico. Los ingresos y egresos se informan aparte, por periodo (mes, ano o todo). Todo se calcula en tiempo real con los movimientos activos; las fotos de cierre (`finance_period_closings`) ya no se usan para sumar. Decision 2026-11-11.
 
 Las categorias financieras son un catalogo compartido que permite clasificar los movimientos de forma estandar entre clubes. Esto posibilita eventuales reportes consolidados a nivel de campo local o union.
 
@@ -19,14 +19,14 @@ Las categorias financieras son un catalogo compartido que permite clasificar los
 - **Service**: `src/finances/finances.service.ts`
 - **Guards**: JwtAuthGuard, PermissionsGuard, ClubRolesGuard
 - **Servicios**: `FinancesService` (movimientos, categorias, resumen), `FinanceAggregationService` (unica fuente de totales), `FinanceReportsService` (por categoria, Excel, vista consolidada), `FinancePeriodService` (cierre mensual y reglas de mes cerrado), `FinanceReminderService` (recordatorio de fin de mes)
-- **12 endpoints** (los 3 marcados «nuevo» estan pendientes de merge, PRs #651 de sacdia-backend, #303 de sacdia-admin y #254 de sacdia-app):
+- **12 endpoints**:
   - `GET /api/v1/finances/categories` — Listar categorias financieras
   - `GET /api/v1/clubs/:clubId/finances/transactions` — Listado paginado de transacciones con `page`, `limit`, `type`, `search`, `startDate`, `endDate`, `sortBy`, `sortOrder`
-  - `GET /api/v1/clubs/:clubId/finances` — Listar movimientos financieros del club, paginado (`page`, `limit` hasta 100), con filtros `year`, `month`, `clubTypeId`, `categoryId` y `club_section_id` (nuevo, pendiente de merge: seccion exacta; un miembro con alcance de seccion que pide otra recibe 403, una seccion de otro club devuelve lista vacia)
+  - `GET /api/v1/clubs/:clubId/finances` — Listar movimientos financieros del club, paginado (`page`, `limit` hasta 100), con filtros `year`, `month`, `clubTypeId`, `categoryId` y `club_section_id` (seccion exacta; un miembro con alcance de seccion que pide otra recibe 403, una seccion de otro club devuelve lista vacia)
   - `GET /api/v1/clubs/:clubId/finances/summary` — Resumen financiero del club (ver «Contrato del resumen»)
-  - `GET /api/v1/clubs/:clubId/finances/by-category` — nuevo: totales por categoria
-  - `GET /api/v1/clubs/:clubId/finances/export` — nuevo: descarga Excel
-  - `GET /api/v1/finances/overview` — nuevo: vista consolidada por club para campo local, union y division
+  - `GET /api/v1/clubs/:clubId/finances/by-category` — Totales por categoria
+  - `GET /api/v1/clubs/:clubId/finances/export` — Descarga Excel o PDF
+  - `GET /api/v1/finances/overview` — Vista consolidada por club para campo local, union y division
   - `POST /api/v1/clubs/:clubId/finances` — Crear movimiento financiero (roles: director, deputy_director, treasurer)
   - `GET /api/v1/finances/:financeId` — Obtener movimiento por ID
   - `POST /api/v1/finances/:financeId/evidences` — Subir foto de evidencia del ingreso/egreso (maximo 3 fotos activas por movimiento)
@@ -50,7 +50,7 @@ Las categorias financieras son un catalogo compartido que permite clasificar los
 - Permite adjuntar hasta 3 fotos de evidencia por ingreso o egreso desde el formulario y visualizarlas en el detalle con visor interno.
 
 ### Base de datos
-- `finances` — Movimientos financieros (ingresos/egresos por club). `active` ahora es `true` por defecto (migracion `20261111140000_finances_active_default_true`, pendiente de merge); antes era `false` y solo el servicio lo corregia al crear
+- `finances` — Movimientos financieros (ingresos/egresos por club). `active` ahora es `true` por defecto (migracion `20261111140000_finances_active_default_true`); antes era `false` y solo el servicio lo corregia al crear
 - `finance_period_closings` — Foto historica de cada mes cerrado por club (la escribe el cron del dia 1). Ya no se usa para calcular totales; sigue sirviendo para saber si un mes esta cerrado y para el puntaje del ranking
 - `finance_evidence_files` — Fotos de evidencia asociadas a movimientos financieros
 - `finances_categories` — Catalogo de categorias de movimientos financieros
@@ -76,9 +76,9 @@ Las categorias financieras son un catalogo compartido que permite clasificar los
 - **Resumen con saldo acumulado de toda la historia**: reemplaza al saldo arrastrado del ano eclesiastico (ver F1 y F2 abajo)
 - **Doble superficie de lectura**: `GET /clubs/:clubId/finances` resuelve la vista mensual/anual del dashboard y `GET /clubs/:clubId/finances/transactions` cubre busqueda, filtros avanzados y paginacion server-side
 - **Filtrado temporal**: Los filtros por ano/mes se aplican a nivel de query, no como entidades separadas
-- **Ranking anual mide movimientos antes del cierre**: el cierre mensual es automático (cron UTC día 1, 00:00), así que `finance_compliance` ya no puntúa la fecha del cierre. Un mes suma si el club tiene cierre y al menos un movimiento activo, de una sección del club, creado antes de `closed_at`. Puntaje = meses que suman / 12. Los movimientos creados después del cierre (solo admin) no cuentan. El desglose del ranking expone `months_with_movements`, `months_total` y `missed_months` (meses cerrados sin movimiento previo); `deadline_day` desaparece y `ranking.finance_closing_deadline_day` ya no se usa. Pendiente de merge (PR #651 de sacdia-backend).
+- **Ranking anual mide movimientos antes del cierre**: el cierre mensual es automático (cron UTC día 1, 00:00), así que `finance_compliance` ya no puntúa la fecha del cierre. Un mes suma si el club tiene cierre y al menos un movimiento activo, de una sección del club, creado antes de `closed_at`. Puntaje = meses que suman / 12. Los movimientos creados después del cierre (solo admin) no cuentan. El desglose del ranking expone `months_with_movements`, `months_total` y `missed_months` (meses cerrados sin movimiento previo); `deadline_day` desaparece y `ranking.finance_closing_deadline_day` ya no se usa.
 
-## Decisiones 2026-11-11 (pendientes de merge, PRs #651 de sacdia-backend, #303 de sacdia-admin y #254 de sacdia-app)
+## Decisiones 2026-11-11
 
 - **F1 Saldo = acumulado de toda la historia.** El dinero en caja no se reinicia con el ano eclesiastico. `balance` = suma de todos los ingresos menos todos los egresos activos hasta el fin del periodo. Los ingresos y egresos del periodo se informan por separado.
 - **F2 Una sola agregacion.** `FinanceAggregationService` calcula en vivo, desde movimientos activos, `income`, `expenses`, `net`, `movements` y `balance` para un club completo o una seccion. Lo usan el resumen del club, el informe mensual, el trimestral y el anual, asi que siempre coinciden. Las fotos de cierre ya no entran en los totales. Informes: `finances.balance` sigue siendo el neto del periodo y se agrego `finances.total_balance` (saldo acumulado al fin del periodo) en trimestral y anual; el mensual ya lo tenia.
@@ -105,7 +105,7 @@ Query: `year`, `month`, `club_section_id` (opcional; un miembro de seccion solo 
 ## Gaps y pendientes
 
 - **Sin cierre manual**: el cierre mensual es solo automático (decisión 2026-11-11); no hay endpoint para que el club cierre un mes
-- **Sin tendencias ni comparativas entre periodos**, ni exportar a PDF (el Excel y el desglose por categoria ya existen, pendientes de merge)
+- **Sin tendencias ni comparativas entre periodos** (la exportacion a Excel y PDF y el desglose por categoria ya existen)
 - **Vista consolidada sin cache**: `GET /finances/overview` calcula en cada llamada (una consulta agrupada y una consulta por club de la pagina para los meses sin movimientos)
 - **Movimientos sin seccion**: los viejos sin `club_section_id` no entran en ningun total de club; hay que ligarlos a una seccion con un script de datos (hoy solo admin los puede tocar, con nota)
 - **Recordatorio sin interruptor**: el aviso del dia 25 no tiene un parametro de sistema para apagarlo; solo las preferencias de cada usuario
