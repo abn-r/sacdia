@@ -983,7 +983,7 @@ Conteo de decoradores HTTP por tag de Swagger (`@ApiTags` de cada clase controll
 | data-export | 3 |
 | emergency-contacts | 5 |
 | evidence-review | 7 |
-| finances | 9 |
+| finances | 12 (3 pendientes de merge, PR #651 de sacdia-backend) |
 | guardianships | 21 |
 | health | 2 |
 | honors | 5 |
@@ -1135,7 +1135,7 @@ Un **super-admin** puede disparar un `@Cron` sin esperar a su hora. Hace falta p
 - **Solape**: si el candado del job ya está tomado (por el scheduler o por otra ejecución manual), la respuesta es `status: "skipped"` y se escribe una fila `skipped`, con `reason` (`run_lock_held` en los jobs del candado de corrida compartido). No hay un candado manual aparte: la ejecución manual y la programada comparten la misma clave.
 - **Auditoría**: cada llamada que llega al servicio registra `admin.cron_job.run` (`entity_type: cron_job`, `entity_id: <job>`, `result: succeeded | failed`, y en `changes` el `job_name`, `status`, `run_id`, `items_processed`, `duration_ms` y `error_message`). Un 404 no audita.
 - **Respuesta** `{ status: 'success', data }` con `job_name`, `run_id` (`null` si el job no escribe fila o solo encoló), `status` (`completed | failed | skipped`), `items_processed`, `duration_ms`, `error_message` y `enqueued`.
-- **`enqueued: true`**: los tres jobs respaldados por BullMQ (`monthly-reports-auto-generate`, `rankings-recalculate`, `finance-period-closing`) solo **encolan** el trabajo cuando hay Redis; el worker lo termina después y escribe su propia fila (marcada manual por el `manualTriggeredBy` del payload). La respuesta llega antes de que termine: `run_id` es `null` y el resultado se ve en el historial. Sin Redis, el job corre en línea como siempre y se espera.
+- **`enqueued: true`**: los cuatro jobs respaldados por BullMQ (`monthly-reports-auto-generate`, `rankings-recalculate`, `finance-period-closing`, `finance-month-end-reminder`; este último pendiente de merge, PR #651 de sacdia-backend) solo **encolan** el trabajo cuando hay Redis; el worker lo termina después y escribe su propia fila (marcada manual por el `manualTriggeredBy` del payload). La respuesta llega antes de que termine: `run_id` es `null` y el resultado se ve en el historial. Sin Redis, el job corre en línea como siempre y se espera.
 - Los handlers tragan sus propios errores, así que el resultado se lee del `CronRunLogger` (mediante `AsyncLocalStorage`). Si un handler lanza, el resultado es `failed` con el mensaje.
 
 **`GET /api/v1/admin/analytics/cron-runs`**: cada elemento de `recent[]` suma `trigger` (`'manual' | 'scheduled'`; las filas anteriores y las programadas son `scheduled`) y `triggered_by` (`user_id` del super-admin o `null`). `stats[]` no cambia y `recent` sigue siendo la **última** fila por job: una ejecución manual reemplaza a la programada en esa vista. El historial (`/cron-runs/history`) ya devolvía `metadata`, donde viaja el marcador.
@@ -1154,6 +1154,7 @@ Jobs de la allowlist y qué envían (lectura estática del código de la rama, s
 | `activities-reminder` | Push a la sección por cada actividad próxima |
 | `cron-alert-check` | Correo y notificación en la app a los super-admin si otro job falla o deja de correr (además registra la alerta) |
 | `monthly-reports-reminders` | Push por rol de sección (solo en los días del ciclo) |
+| `finance-month-end-reminder` | Push y bandeja al tesorero, secretario-tesorero y director de las secciones sin movimientos del mes (día 25; pendiente de merge, PR #651 de sacdia-backend) |
 | `member-of-month-auto-evaluate` | Aviso al miembro elegido y a los directores |
 | `pending-teen-guardian` | Push y bandeja al adolescente (días 7, 30 y 83) |
 | `family-age-transitions` | Push y bandeja a los tutores verificados |
@@ -2470,14 +2471,17 @@ En `GET /evidence-review/pending` el `file_count` de un ítem `honor` es igual a
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
 | GET | `/api/v1/finances/categories` | JWT | Permisos: finances:read | Listar categorías financieras (Redis TTL 1h; epoch bump al mutar) | FinancesService.getCategories() | `src/finances/finances.controller.ts` |
-| GET | `/api/v1/clubs/:clubId/finances/transactions` | JWT | Permisos: finances:read | Listar todas las transacciones del club (paginadas) | FinancesService.getAllTransactions() | `src/finances/finances.controller.ts` |
-| GET | `/api/v1/clubs/:clubId/finances` | JWT | Permisos: finances:read | Listar movimientos financieros del club | FinancesService.findByClub() | `src/finances/finances.controller.ts` |
-| GET | `/api/v1/clubs/:clubId/finances/summary` | JWT | Permisos: finances:read | Resumen financiero del club | FinancesService.getSummary() | `src/finances/finances.controller.ts` |
-| POST | `/api/v1/clubs/:clubId/finances` | JWT | Permisos: finances:create; Club: director, deputy-director, treasurer, secretary-treasurer | Crear movimiento financiero | FinancesService.create() | `src/finances/finances.controller.ts` |
+| GET | `/api/v1/clubs/:clubId/finances/transactions` | JWT | Permisos: finances:read | Listar todas las transacciones del club (paginadas). Cada una trae `period_closed` (pendiente de merge, PR #651 de sacdia-backend) | FinancesService.getAllTransactions() | `src/finances/finances.controller.ts` |
+| GET | `/api/v1/clubs/:clubId/finances` | JWT | Permisos: finances:read | Listar movimientos financieros del club. Cada movimiento trae `period_closed` (mes cerrado); filtro opcional `club_section_id` (sección exacta) (pendiente de merge, PR #651 de sacdia-backend) | FinancesService.findByClub() | `src/finances/finances.controller.ts` |
+| GET | `/api/v1/clubs/:clubId/finances/summary` | JWT | Permisos: finances:read | Resumen financiero del club. Query `year`, `month`, `club_section_id`. `total_income`/`total_expense`/`net`/`movement_count` son del periodo pedido; `balance` es el saldo acumulado de toda la historia hasta el fin del periodo; `year_income`/`year_expenses` acumulan el año eclesiástico hasta el mes; `period_closed` indica si el mes está cerrado. Cambio de significado pendiente de merge (PR #651 de sacdia-backend) | FinancesService.getSummary() | `src/finances/finances.controller.ts` |
+| GET | `/api/v1/clubs/:clubId/finances/by-category` | JWT | Permisos: finances:read | Ingresos y egresos por categoría (nombres traducidos), de mayor a menor. Query `year` (obligatorio), `month`, `club_section_id`. Pendiente de merge (PR #651 de sacdia-backend) | FinanceReportsService.getByCategory() | `src/finances/finances.controller.ts` |
+| GET | `/api/v1/clubs/:clubId/finances/export` | JWT | Permisos: finances:read | Descarga `.xlsx` (hoja Movimientos y hoja Resumen) o, con `format=pdf`, un PDF carta (`application/pdf`, `Cache-Control: no-store`). Query `year` (obligatorio), `month` (sin mes = año completo), `club_section_id`, `format=xlsx\|pdf` (por defecto `xlsx`; otro valor = 400). Pendiente de merge (PR #651 de sacdia-backend) | FinanceReportsService.buildExport() | `src/finances/finances.controller.ts` |
+| GET | `/api/v1/finances/overview` | JWT | Global: roles globales con finances:read (admin, assistant-admin, campo local, unión, división); Permisos: finances:read; recurso `global`, `local_field_id` ligado al territorio | Vista consolidada por club del territorio del solicitante: ingresos, egresos, neto, saldo acumulado, movimientos, meses sin movimientos y último movimiento. Query `local_field_id`, `year`, `month`, `page`, `limit` (máx. 100). Pendiente de merge (PR #651 de sacdia-backend) | FinanceReportsService.getOverview() | `src/finances/finances.controller.ts` |
+| POST | `/api/v1/clubs/:clubId/finances` | JWT | Permisos: finances:create; Club: director, deputy-director, treasurer, secretary-treasurer | Crear movimiento financiero. En un mes cerrado solo admin/super-admin y `post_closing_note` (5 a 500 caracteres) es obligatoria (pendiente de merge, PR #651 de sacdia-backend) | FinancesService.create() | `src/finances/finances.controller.ts` |
 | GET | `/api/v1/finances/:financeId` | JWT | Permisos: finances:read | Obtener movimiento por ID | FinancesService.findOne() | `src/finances/finances.controller.ts` |
 | POST | `/api/v1/finances/:financeId/evidences` | JWT | Permisos: finances:update | Subir foto de evidencia de un movimiento financiero | FinancesService.uploadEvidence() | `src/finances/finances.controller.ts` |
-| PATCH | `/api/v1/finances/:financeId` | JWT | Permisos: finances:update | Actualizar movimiento | FinancesService.update() | `src/finances/finances.controller.ts` |
-| DELETE | `/api/v1/finances/:financeId` | JWT | Permisos: finances:delete | Desactivar movimiento | FinancesService.remove() | `src/finances/finances.controller.ts` |
+| PATCH | `/api/v1/finances/:financeId` | JWT | Permisos: finances:update | Actualizar movimiento. En un mes cerrado solo admin/super-admin y `post_closing_note` (5 a 500 caracteres) es obligatoria: sin ella `400 FINANCE_CLOSED_PERIOD_NOTE_REQUIRED` (pendiente de merge, PR #651 de sacdia-backend) | FinancesService.update() | `src/finances/finances.controller.ts` |
+| DELETE | `/api/v1/finances/:financeId` | JWT | Permisos: finances:delete | Desactivar movimiento. En un mes cerrado solo admin/super-admin y la nota es obligatoria: body `{ "reason": "..." }` o `?reason=` (el body gana). Sin nota `400 FINANCE_CLOSED_PERIOD_NOTE_REQUIRED` (pendiente de merge, PR #651 de sacdia-backend) | FinancesService.remove() | `src/finances/finances.controller.ts` |
 
 ### guardianships
 

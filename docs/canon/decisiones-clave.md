@@ -454,7 +454,7 @@ Hallazgo paralelo: la ruta admin `/dashboard/validation` usaba `investiture:read
 - semántica current-year-forward: los rankings históricos retienen `0` en los campos nuevos vía `DEFAULT 0` sin recomputación retroactiva;
 - `award_categories.{min,max}_composite_pct` interpretan umbrales en escala 0-100; las filas pre-2026-04-28 están marcadas `is_legacy = true` y excluidas del composite ranking;
 - el kill-switch `system_config[ranking.recalculation_enabled]` (default `true`) inhibe tanto el cron como el recálculo manual; ambas rutas lo consultan antes de ejecutar;
-- el `system_config[ranking.finance_closing_deadline_day]` (default `5`) parametriza qué día del mes se considera como fecha límite de cierre financiero para el cálculo de `finance_score_pct`.
+- el `system_config[ranking.finance_closing_deadline_day]` (default `5`) ya no interviene en `finance_score_pct` (Pendiente de merge (PR #651 de sacdia-backend)): el cierre mensual es automático (decisión 2026-11-11) y el puntaje cuenta los meses con al menos un movimiento activo registrado antes de ese cierre. La fila sigue en `system_config` sin uso.
 
 **Consecuencias**:
 
