@@ -1,16 +1,16 @@
 # Informes trimestrales y anuales de club
 
 **Estado**: IMPLEMENTADO PARCIAL
-**Verificado contra código**: 2026-11-12 (rama `feat/periodic-reports-from-monthly`; el rediseño descrito abajo es **Pendiente de merge (backend PR #653, admin PR #304, app PR #256)**, `development` aún conserva el flujo manual anterior)
+**Verificado contra código**: 2026-11-12 (`development`; rediseño de backend #653, admin #304 y app #256; la migración `20261112120000_periodic_reports_from_monthly` está aplicada en `development`, `staging` y `production` el 2026-11-12)
 **Dominio relacionado**: [monthly-reports.md](monthly-reports.md)
 
 ## Descripcion de dominio
 
-Además del informe mensual por inscripción, el backend genera dos informes por **club** (no por sección): uno trimestral (año calendario + trimestre) y uno anual (año eclesiástico). **Pendiente de merge (backend PR #653, admin PR #304, app PR #256)**: nadie captura datos en ellos. Conservan su estructura, pero las cifras que antes se escribían a mano se calculan a partir de los informes mensuales del club con estado `submitted` dentro del periodo (`monthly_report_manual_data`), junto con el resto de los datos calculados (`computed_data`). El estado es `draft` (en curso) o `finalized` (cerrado y congelado) y el PDF se genera al descargar.
+Además del informe mensual por inscripción, el backend genera dos informes por **club** (no por sección): uno trimestral (año calendario + trimestre) y uno anual (año eclesiástico). Nadie captura datos en ellos. Conservan su estructura, pero las cifras que antes se escribían a mano se calculan a partir de los informes mensuales del club con estado `submitted` dentro del periodo (`monthly_report_manual_data`), junto con el resto de los datos calculados (`computed_data`). El estado es `draft` (en curso) o `finalized` (cerrado y congelado) y el PDF se genera al descargar.
 
 ## Que existe (verificado contra codigo)
 
-> Todo lo de esta sección es **Pendiente de merge (backend PR #653, admin PR #304, app PR #256)**, salvo lo que se indique.
+> Esta sección describe el comportamiento vigente en `development` (backend #653, admin #304, app #256).
 
 ### Origen de los datos
 
@@ -88,11 +88,11 @@ Reglas verificadas:
 - El detalle es solo lectura: muestra los datos calculados y los bloques de datos tomados de los informes mensuales. No hay formulario de datos manuales ni botón Finalizar. El estado se muestra como "En curso" (`draft`) o "Cerrado" (`finalized`).
 - **Recalcular** aparece solo sobre un informe cerrado y solo para `super-admin` y `admin` globales con `reports:update` (capacidad de servidor `reports.regenerate_periodic` en la capacidad `regenerate` de la pantalla), con diálogo de confirmación; la descarga del PDF aparece con la capacidad `download` en cualquier estado. La directiva muestra el rol traducido (mismas etiquetas `roles.*` que el resto del panel).
 - La pestaña de informes del detalle de club muestra trimestrales y anuales solo con la capacidad `reports.view_periodic`, enlaza cada fila con su detalle y muestra un error si una de las dos llamadas falla.
-- Estado del código: admin PR #304 (`feat/periodic-reports-from-monthly`).
+- Procedencia: admin #304.
 
 ### App móvil
 
-- **Pendiente de merge (backend PR #653, admin PR #304, app PR #256)**: la app deja de consumir los informes trimestrales y anuales. La pantalla de informes del coordinador (`lib/features/coordinator/presentation/views/coordinator_reports_view.dart`) queda solo con el cumplimiento de informes mensuales ("Cumplimiento de informes mensuales"): chips de mes, totales del mes y una tarjeta por club con su estado y los PDF mensuales. El data source ya no llama a `admin/quarterly-reports` ni `admin/annual-reports`. Sigue sin generar, editar ni finalizar nada. En `development` el coordinador todavía ve esos listados.
+- La app deja de consumir los informes trimestrales y anuales. La pantalla de informes del coordinador (`lib/features/coordinator/presentation/views/coordinator_reports_view.dart`) queda solo con el cumplimiento de informes mensuales ("Cumplimiento de informes mensuales"): chips de mes, totales del mes y una tarjeta por club con su estado y los PDF mensuales. El data source ya no llama a `admin/quarterly-reports` ni `admin/annual-reports`. Sigue sin generar, editar ni finalizar nada.
 
 ### Base de datos
 

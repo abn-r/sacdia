@@ -282,9 +282,9 @@ Notas del inventario:
 - **Archivo**: `sacdia-backend/src/annual-reports/annual-reports-cron.service.ts`
 - **Método**: `handleAutoGenerate()`
 - **Clase**: `AnnualReportsCronService`
-- **Cron**: `30 3 * * *`, zona `UTC` (diario, 03:30). **Pendiente de merge (backend PR #653, admin PR #304, app PR #256)**; en `development` sigue `0 2 1 1 *`.
+- **Cron**: `30 3 * * *`, zona `UTC` (diario, 03:30).
 - **Lock**: Redis `cron:annual-reports-auto-generate`, TTL 23 h.
-- **Propósito** (**Pendiente de merge (backend PR #653, admin PR #304, app PR #256)**): congela (pasa a `finalized`, `finalized_by` `null`) los informes anuales de todos los años eclesiásticos que terminaron hace más de `reports.periodic_freeze_grace_days` días (15 por defecto), vía `AnnualReportsService.freezeDueReports()`. Es un catch-up diario idempotente: parte del inicio del año eclesiástico anterior al vigente, usa fechas de `America/Mexico_City`, recorre los clubes activos en serie, omite los ya finalizados y los clubes creados después del fin del año, y crea el borrador si falta. Antes generaba solo el último año terminado el 1 de enero.
+- **Propósito** congela (pasa a `finalized`, `finalized_by` `null`) los informes anuales de todos los años eclesiásticos que terminaron hace más de `reports.periodic_freeze_grace_days` días (15 por defecto), vía `AnnualReportsService.freezeDueReports()`. Es un catch-up diario idempotente: parte del inicio del año eclesiástico anterior al vigente, usa fechas de `America/Mexico_City`, recorre los clubes activos en serie, omite los ya finalizados y los clubes creados después del fin del año, y crea el borrador si falta. Antes generaba solo el último año terminado el 1 de enero.
 - **Flag**: `reports.annual_auto_generate_enabled` debe ser `true` (la migración `20261112120000_periodic_reports_from_monthly` la deja en `true`, aplicada solo en dev); sin la fila o con otro valor termina con 0 items. La gracia sale de `reports.periodic_freeze_grace_days` (entero >= 0; si es inválido, 15).
 - **Condiciones skip**: lock no adquirido; flag apagado; no hay año eclesiástico vigente o fuera de gracia. Los errores fatales se capturan y se loguean.
 - **Notifica**: no.
@@ -294,9 +294,9 @@ Notas del inventario:
 - **Archivo**: `sacdia-backend/src/quarterly-reports/quarterly-reports-cron.service.ts`
 - **Método**: `handleAutoGenerate()`
 - **Clase**: `QuarterlyReportsCronService`
-- **Cron**: `0 3 * * *`, zona `UTC` (diario, 03:00). **Pendiente de merge (backend PR #653, admin PR #304, app PR #256)**; en `development` sigue `0 1 1 1,4,7,10 *`.
+- **Cron**: `0 3 * * *`, zona `UTC` (diario, 03:00).
 - **Lock**: Redis `cron:quarterly-reports-auto-generate`, TTL 23 h.
-- **Propósito** (**Pendiente de merge (backend PR #653, admin PR #304, app PR #256)**): congela los informes trimestrales de todos los trimestres que terminaron hace más de `reports.periodic_freeze_grace_days` días (15 por defecto), vía `QuarterlyReportsService.freezeDueReports()`. Catch-up diario idempotente con el mismo alcance que el anual (desde el inicio del año eclesiástico anterior, `America/Mexico_City`, clubes activos en serie, omite finalizados). Antes generaba el trimestre recién terminado el día 1 de enero, abril, julio y octubre.
+- **Propósito** congela los informes trimestrales de todos los trimestres que terminaron hace más de `reports.periodic_freeze_grace_days` días (15 por defecto), vía `QuarterlyReportsService.freezeDueReports()`. Catch-up diario idempotente con el mismo alcance que el anual (desde el inicio del año eclesiástico anterior, `America/Mexico_City`, clubes activos en serie, omite finalizados). Antes generaba el trimestre recién terminado el día 1 de enero, abril, julio y octubre.
 - **Flag**: `reports.quarterly_auto_generate_enabled` debe ser `true` (la migración `20261112120000_periodic_reports_from_monthly` la deja en `true`, aplicada solo en dev).
 - **Condiciones skip**: lock no adquirido; flag apagado. Los errores fatales se capturan y se loguean.
 - **Notifica**: no.
@@ -379,10 +379,10 @@ Notas del inventario:
 | 7. activities-reminder | `activity_reminder_minutes_before` | `60` |
 | 8. membership-requests-expiry | `membership.pending_timeout_days` | `8` |
 | 13. investiture-authorization-reminders | variable de entorno `INVESTITURE_EMAIL_ENABLED` | ver `investitureEmailEnabled()` |
-| 14. annual-reports-auto-generate | `reports.annual_auto_generate_enabled` | `true` tras la migración `20261112120000` (sin fila = apagado); **Pendiente de merge (backend PR #653, admin PR #304, app PR #256)**, en `development` `false` |
-| 14. annual-reports-auto-generate | `reports.periodic_freeze_grace_days` | `15` (**Pendiente de merge (backend PR #653, admin PR #304, app PR #256)**) |
-| 15. quarterly-reports-auto-generate | `reports.quarterly_auto_generate_enabled` | `true` tras la migración `20261112120000` (sin fila = apagado); **Pendiente de merge (backend PR #653, admin PR #304, app PR #256)**, en `development` `false` |
-| 15. quarterly-reports-auto-generate | `reports.periodic_freeze_grace_days` | `15` (la misma clave que el job 14; **Pendiente de merge (backend PR #653, admin PR #304, app PR #256)**) |
+| 14. annual-reports-auto-generate | `reports.annual_auto_generate_enabled` | `true` tras la migración `20261112120000` (aplicada en `development`, `staging` y `production` el 2026-11-12; sin fila = apagado) |
+| 14. annual-reports-auto-generate | `reports.periodic_freeze_grace_days` | `15` |
+| 15. quarterly-reports-auto-generate | `reports.quarterly_auto_generate_enabled` | `true` tras la migración `20261112120000` (aplicada en `development`, `staging` y `production` el 2026-11-12; sin fila = apagado) |
+| 15. quarterly-reports-auto-generate | `reports.periodic_freeze_grace_days` | `15` (la misma clave que el job 14) |
 | 20. family-age-transitions | flag de familia `FAMILY_TEEN_LOGIN_ENABLED` (solo el aviso del cumpleaños 13; el barrido de dispositivos no depende de él) | ver `FamilyFeatureFlagsService` |
 
 El resto de jobs no tiene feature flag; están siempre activos una vez `ScheduleModule` arranca.
@@ -405,7 +405,7 @@ El resto de jobs no tiene feature flag; están siempre activos una vez `Schedule
 ## Gaps y pendientes
 
 - **Alerting sin cobertura de «job que no corrió»**: `cron-alert-check` (job 16) avisa de fallos, lentitud y tasa de error de corridas registradas, pero no detecta un job que dejó de ejecutarse (por ejemplo, con el servicio dormido). Tres jobs no registran corrida y quedan fuera de la vigilancia: `cron-alert-check`, `fcm-tokens-stale-cleanup` e `investiture-achievement-intent`.
-- **`reports.auto_generate_enabled` default false**: la generación automática de reportes mensuales está en dark launch; en producción requiere activación manual por ambiente. `reports.annual_auto_generate_enabled` y `reports.quarterly_auto_generate_enabled` estaban igual en `false` en `development`; **Pendiente de merge (backend PR #653, admin PR #304, app PR #256)**: la migración `20261112120000_periodic_reports_from_monthly` las pone en `true` (aplicada solo en dev; staging y producción pendientes).
+- **`reports.auto_generate_enabled` default false**: la generación automática de reportes mensuales está en dark launch; en producción requiere activación manual por ambiente. `reports.annual_auto_generate_enabled` y `reports.quarterly_auto_generate_enabled` las pone en `true` la migración `20261112120000_periodic_reports_from_monthly` (aplicada en `development`, `staging` y `production` el 2026-11-12).
 - **Dos limpiezas de tokens FCM que se solapan en intención** (jobs 10 y 17: inactivos por `modified_at` frente a sin uso por `last_used`). Pendiente decidir si se unifican. El nombre de `@Cron` duplicado `fcm-tokens-cleanup` (con el que solo uno de los dos se programaba) se corrigió en la rama `feat/admin-run-cron-now`, que renombra el del job 17 a `fcm-tokens-stale-cleanup` (sin hash todavía).
 - **Zona del proceso en dos jobs**: `cron-alert-check` y `fcm-tokens-stale-cleanup` no declaran `timeZone`; si el proceso no corre en UTC, su hora efectiva cambia.
 
