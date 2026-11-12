@@ -443,7 +443,7 @@ Esta guía reúne **49 flujos y familias de flujos funcionales** para explicar e
 
 - **Objetivo e inicio:** existe un informe de periodo mayor que necesita revisión o consulta.
 - **Actores:** administración con permisos de edición y usuarios con lectura/descarga de su alcance.
-- **Recorrido contractual:** listar y abrir informe → actualizar datos manuales cuando corresponda → regenerar calculados → finalizar → consultar o descargar PDF.
+- **Recorrido contractual:** listar y abrir informe → consultar o descargar PDF. **Pendiente de merge (backend PR #653, admin PR #304, app PR #256)**: ya no hay datos manuales ni finalización manual; el informe se calcula de los informes mensuales enviados, queda en curso hasta pasar la gracia y luego lo congela un cron diario. Solo `super-admin` y `admin` pueden recalcular uno cerrado, y los coordinadores no lo ven (`403 PERIODIC_REPORTS_FORBIDDEN`).
 - **Decisiones y resultado:** consultar no permite editar; finalizar no debe interpretarse como el mismo acto que aprobar una carpeta anual. El mecanismo exacto de creación inicial y todas las restricciones por estado no se auditaron en esta síntesis.
 - **Canales/evidencia:** **V/C**, panel → detalle del club → pestaña de informes muestra tablas anuales/trimestrales. Esa pantalla no demuestra edición, regeneración, finalización ni descarga: esas operaciones permanecen verificadas solo por contrato. Una lista vacía tampoco prueba ausencia de informes, porque la carga revisada convierte errores en listas vacías. Ver [recorridos localizados](#pantallas-verificadas).
 - **Para explicar:** “Los cortes trimestrales y anuales tienen documentos propios, no son una carpeta de evidencias”. [Fuente: API, annual-reports/quarterly-reports](../../api/ENDPOINTS-LIVE-REFERENCE.md).

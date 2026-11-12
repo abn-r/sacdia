@@ -34,7 +34,8 @@ Reglas verificadas:
 |---|---|---|
 | `reports.auto_generate_enabled`, `reports.auto_generate_day` | `monthly-reports` | cron de generación del informe mensual |
 | `reports.reminders_enabled` | `monthly-reports` | recordatorios de informe mensual |
-| `reports.quarterly_auto_generate_enabled`, `reports.annual_auto_generate_enabled` | crons de informes trimestral y anual | ver [informes-trimestrales-anuales.md](informes-trimestrales-anuales.md) |
+| `reports.quarterly_auto_generate_enabled`, `reports.annual_auto_generate_enabled` | crons de informes trimestral y anual | ver [informes-trimestrales-anuales.md](informes-trimestrales-anuales.md). **Pendiente de merge (backend PR #653, admin PR #304, app PR #256)**: pasan a `'true'` (migración `20261112120000_periodic_reports_from_monthly`, aplicada solo en dev); en `development` siguen en `'false'` |
+| `reports.periodic_freeze_grace_days` | crons de informes trimestral y anual | Días tras el fin del trimestre o año eclesiástico antes de congelar el informe (`finalized`); entero >= 0, por defecto `15` (valor inválido cae a 15). **Pendiente de merge (backend PR #653, admin PR #304, app PR #256)**; la migración no pisa un valor ya ajustado |
 | `ranking.recalculation_enabled`, `ranking.finance_closing_deadline_day` (sin uso desde la regla de movimientos de finanzas), `ranking.activities_registered_target` | `annual-folders` (rankings y calculadores de puntaje) | clasificación de clubes |
 | `member_ranking.recalculation_enabled`, `member_ranking.member_visibility`, `member_ranking.top_n` | `member-rankings` | ranking de miembros |
 | `scoring.category_max_points_cap` (defecto 20) | `scoring-categories` | tope de puntos por categoría |
@@ -45,7 +46,7 @@ Reglas verificadas:
 | `activity_reminder_minutes_before` | `activities` | recordatorio de actividad |
 | `investiture.min_approval_percentage` | `validation` | umbral de requisitos aprobados |
 
-Origen de las filas: `prisma/seeds/system-config.seed.sql` y migraciones (`20260324021443_add_club_enrollments_and_config`, `20260427120000_quarterly_annual_reports`, `20260428000200_ranking_system_config`, `20260429000002_enrollment_rankings_seeds`, `20260601090000_scoring_category_cap`, `20260812220000_field_payment_orders`).
+Origen de las filas: `prisma/seeds/system-config.seed.sql` y migraciones (`20260324021443_add_club_enrollments_and_config`, `20260427120000_quarterly_annual_reports`, `20260428000200_ranking_system_config`, `20260429000002_enrollment_rankings_seeds`, `20260601090000_scoring_category_cap`, `20260812220000_field_payment_orders`; **Pendiente de merge (backend PR #653, admin PR #304, app PR #256)**: `20261112120000_periodic_reports_from_monthly`).
 
 ### Admin
 
