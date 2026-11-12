@@ -216,7 +216,7 @@ Notas runtime activas de carpetas anuales:
 
 ### 6.7 Reportes, cierre de año y operación
 
-- informes mensuales (con PDF en R2), trimestrales y anuales, generados por cron (los crons trimestral y anual dependen de `reports.*_auto_generate_enabled`, apagadas en desarrollo) o bajo demanda desde el admin;
+- informes mensuales (con PDF en R2), trimestrales y anuales, generados por cron (los crons trimestral y anual dependen de `reports.*_auto_generate_enabled`, apagadas en desarrollo) o bajo demanda desde el admin. **Pendiente de merge (backend PR #653, admin PR #304, app PR #256)**: los trimestrales y anuales no se capturan, se calculan de los informes mensuales enviados, se congelan a diario tras `reports.periodic_freeze_grace_days` (15 por defecto) y los coordinadores no los ven (`403 PERIODIC_REPORTS_FORBIDDEN`; capacidad `reports.view_periodic`; ver `docs/features/informes-trimestrales-anuales.md`);
 - cierre y corte de año (`year-end`, `year-cut`);
 - notificaciones push y bandeja (`runtime-communications.md`), invalidación de cache por FCM silencioso (`runtime-resiliencia-red.md`);
 - dashboards de SLA (`runtime-sla-dashboard.md`), operaciones y campo local en `analytics`;

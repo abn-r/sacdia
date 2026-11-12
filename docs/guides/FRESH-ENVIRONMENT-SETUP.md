@@ -206,8 +206,9 @@ Llaves `system_config` leídas en runtime y su default si faltan (todas opcional
 | `member_ranking.recalculation_enabled` | ON | No |
 | `member_ranking.member_visibility` | `self_only` | No |
 | `member_ranking.top_n` | 5 | No |
-| `reports.annual_auto_generate_enabled` | OFF | No |
-| `reports.quarterly_auto_generate_enabled` | OFF | No |
+| `reports.annual_auto_generate_enabled` | OFF (`ON` desde la migración `20261112120000_periodic_reports_from_monthly`; **Pendiente de merge (backend PR #653, admin PR #304, app PR #256)**) | No |
+| `reports.quarterly_auto_generate_enabled` | OFF (`ON` desde la migración `20261112120000_periodic_reports_from_monthly`; **Pendiente de merge (backend PR #653, admin PR #304, app PR #256)**) | No |
+| `reports.periodic_freeze_grace_days` | 15 (**Pendiente de merge (backend PR #653, admin PR #304, app PR #256)**) | No |
 | `reports.reminders_enabled` | ON | No |
 | `activity_reminder_minutes_before` | 60 | No |
 | `field_payment_orders_v1` | OFF para todos (JSON array de `local_field_id`) | No |
