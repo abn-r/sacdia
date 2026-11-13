@@ -2,7 +2,7 @@
 
 Generado: 2026-03-14
 Fuente: Reality Matrix + Canon verification
-**Estado: SIN DECISIONES RBAC ABIERTAS** (las de 2026-11-04 y 2026-11-05 se cerraron el 2026-11-05). La condición de lanzamiento de perfiles familiares ya se cumple en `development` (la Fase 3 está integrada; ver «Perfiles familiares: restricción de lanzamiento», 2026-10-19). Queda una acción antes del deploy a producción: el bucket privado de R2.
+**Estado: SIN DECISIONES RBAC ABIERTAS** (las de 2026-11-04 y 2026-11-05 se cerraron el 2026-11-05). La condición de lanzamiento de perfiles familiares ya se cumple en `development` (la Fase 3 está integrada; ver «Perfiles familiares: restricción de lanzamiento», 2026-10-19). El bucket privado de R2 ya existe (2026-11-13); falta solo fijar su variable en Render antes del deploy.
 
 ---
 
@@ -73,7 +73,7 @@ Detalle y fases: [family-profiles.md](../features/family-profiles.md), sección 
 
 ## Perfiles familiares: bucket privado de R2 (prerrequisito de despliegue, 2026-10-16)
 
-**Estado: RESUELTA — el usuario crea el bucket; ACCIÓN PENDIENTE antes del deploy.**
+**Estado: RESUELTA — bucket creado por el usuario (confirmado 2026-11-13).** Antes del deploy de cada entorno, `R2_BUCKET_GUARDIANSHIP_EVIDENCE` debe apuntar a ese bucket en el servicio de Render correspondiente.
 
 Las fichas de consentimiento firmadas viven en un bucket **privado** de R2 (alias `GUARDIANSHIP_EVIDENCE`). Antes del deploy, el usuario debe crear el bucket y fijar `R2_BUCKET_GUARDIANSHIP_EVIDENCE` en Render. `R2_PUBLIC_URL_GUARDIANSHIP_EVIDENCE` y `R2_KEY_PREFIX_GUARDIANSHIP_EVIDENCE` son opcionales (el bucket no tiene URL pública; el prefijo por defecto es `guardianships/consent`).
 
