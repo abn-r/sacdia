@@ -199,7 +199,7 @@ Las tres sub-fases se entregaron en orden (cada una con su verificación y su QA
 
 - El servidor decide **en cada petición** si una cuenta es adulta, supervisada (`supervised_user`, con `supervision` `pending_guardian` o `active`) o de edad desconocida (`age_unknown_user`, sin fecha de nacimiento y con el post-registro abierto). Nunca por un claim del JWT. Cada tipo tiene un conjunto de scopes con denegado por defecto (403 `PRINCIPAL_SCOPE_DENIED`).
 - **La compuerta de consentimiento pasa de «es dependiente» a «es menor de edad»**: aprobar la solicitud de un adolescente que se registró solo responde 409 `MR_CONSENT_NOT_VERIFIED` hasta que haya un tutor vinculado y verificado. `verify-consent` también verifica sobre una asignación que ya está `active`.
-- **Modo pendiente de tutor**: un adolescente sin tutor verificado no ve datos de club ni tiene credencial QR. Recordatorios a los 7, 30 y 83 días; a los 90 se congela y 90 días después se purga (cron `pending-teen-guardian`).
+- **Modo pendiente de tutor**: un adolescente sin tutor verificado no ve datos de club ni tiene credencial QR. Recordatorios a los 7, 30 y 83 días; a los 90 la cuenta queda en pausa (cron `pending-teen-guardian`). Pendiente de merge (backend PR #659, app PR #258): la pausa nunca se borra sola (`frozen_reason = pending_guardian`, sin `purge_after`); el adolescente puede seguir entrando para ver su estado, vincular un tutor o borrar su cuenta, y se reactiva cuando el director verifica a un tutor.
 - **Vincular un tutor**: el adolescente emite un código (`POST /users/me/guardian-link-codes`), un adulto lo canjea y queda como tutor `pending` sin poderes hasta que un director verifica.
 - **Acceso propio supervisado**: el tutor **verificado** habilita (por correo o con un nombre de usuario generado por el servidor), desactiva, reactiva y restablece la contraseña. Bloqueo progresivo por intentos fallidos.
 - Avisos de seguridad al tutor (`family:security`, obligatorios), resumen de progreso sin datos de salud, y analítica anónima para 13 a 17 y edad desconocida.
@@ -418,7 +418,7 @@ Decisiones de diseño: el congelamiento se separa del de las fases 2 y 3 por una
 
 - **Textos legales aprobados**: avisos, aceptación y congelamiento están en borrador (ver [docs/legal/README.md](../legal/README.md)); tampoco se actualizaron el aviso de privacidad ni los términos publicados.
 - **Retención indefinida bajo la LFPDPPP**: pendiente de confirmar con un abogado (ruling R6).
-- **Purga de adolescentes sin tutor** (`pending-teen-guardian`, Fase 3): sigue congelando a los 90 días y purgando 90 días después; la Fase 4 no la modifica (el criterio de «nunca borrar solo» podría revisarse después).
+- **Purga de adolescentes sin tutor** (`pending-teen-guardian`, Fase 3): Pendiente de merge (backend PR #659, app PR #258): decidido el 2026-11-13 aplicar el mismo criterio que la Fase 4 (R6): pausa a los 90 días sin borrado automático; se reactiva al verificarse un tutor. Los menores de 13 bajo custodia del club sin cuenta mantienen la decisión A9 (anonimizar 90 días después de congelados).
 - **Aviso en la app del tutor por cada dependiente**: se cubre con el push y la bandeja; no hay un banner propio (no hay campo en el contrato).
 - **Desbloqueo o edición desde el panel**: solo lectura; tampoco hay una acción de administración para emitir el código de reclamo (lo emiten el ex tutor o el director desde la app).
 - **Una opción de dry-run en el registro de crones** del panel: el panel no la ofrece; la prueba en seco se hace con la variable o con el script.
