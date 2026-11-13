@@ -2,7 +2,7 @@
 
 Generado: 2026-03-14
 Fuente: Reality Matrix + Canon verification
-**Estado: SIN DECISIONES RBAC ABIERTAS** (las de 2026-11-04 y 2026-11-05 se cerraron el 2026-11-05). Sigue abierta una condición de lanzamiento: la Fase 3 de perfiles familiares (ver «Perfiles familiares: restricción de lanzamiento», 2026-10-19).
+**Estado: SIN DECISIONES RBAC ABIERTAS** (las de 2026-11-04 y 2026-11-05 se cerraron el 2026-11-05). La condición de lanzamiento de perfiles familiares ya se cumple en `development` (la Fase 3 está integrada; ver «Perfiles familiares: restricción de lanzamiento», 2026-10-19). Queda una acción antes del deploy a producción: el bucket privado de R2.
 
 ---
 
@@ -58,9 +58,9 @@ Pregunta: la verificación de un coordinador guardaba `director_paper_form` (la 
 
 ## Perfiles familiares: restricción de lanzamiento (2026-10-19)
 
-**Estado: RESUELTA como decisión — condición de lanzamiento ABIERTA hasta que exista la Fase 3.**
+**Estado: RESUELTA — condición cumplida 2026-11-13.** La Fase 3 (3a, 3b y 3c) está en `development` (sacdia-backend #531, sacdia-app #179, sacdia-admin #244) y sus migraciones están aplicadas en Neon `development`, `staging` y `production` (verificado el 2026-11-12). Cada hueco de abajo lo cierra la Fase 3. La regla que sigue vigente es de promoción: las Fases 2 y 3 llegan juntas a producción, con el bucket privado de R2 creado antes.
 
-La Fase 2 (tutorías, actuar en nombre del menor, verificación del director) **no debe llegar a producción sin la Fase 3** (inicio de sesión supervisado de 13 a 17 años y dispositivo vinculado). Lo que queda abierto mientras tanto, hoy solo en desarrollo:
+La Fase 2 (tutorías, actuar en nombre del menor, verificación del director) **no debe llegar a producción sin la Fase 3** (inicio de sesión supervisado de 13 a 17 años y dispositivo vinculado). Huecos originales de la Fase 2 (todos cerrados por la Fase 3):
 
 - Un adolescente de 13 a 17 años que se registra solo no tiene tutor ni representante legal: las rutas de escritura del representante se retiraron y aún no hay vínculo supervisado.
 - Un dependiente que cumple 13 años sigue gestionado por su tutor hasta la mayoría de edad (actuar se corta por mayoría de edad, no a los 13).
@@ -204,7 +204,7 @@ La decisión de quién cobra en camporees de unión (campo local) no se reabre; 
 ### Modulos sin canon
 | Modulo | Estado | Detalle | Resolucion |
 |---|---|---|---|
-| gestion-seguros (insurance) | PARCIAL | App tiene 3 screens completas + datasource. Tabla `member_insurances` existe. No hay backend module dedicado ni endpoints. | RESUELTO: seguros ES canon — parte de la trayectoria institucional del miembro. Agregado a dominio-sacdia.md como "seguro institucional". Backend pendiente de implementacion. |
+| gestion-seguros (insurance) | PARCIAL | App tiene 3 screens completas + datasource. Tabla `member_insurances` existe. No hay backend module dedicado ni endpoints. | RESUELTO: seguros ES canon — parte de la trayectoria institucional del miembro. Agregado a dominio-sacdia.md como "seguro institucional". Backend implementado en `sacdia-backend/src/insurance/` (endpoints verificados 2026-05-11; ver tabla de endpoints fantasma). |
 | infrastructure (health, logging) | NO CANON | Backend CommonModule + Sentry configurado. No mencionado en canon como dominio. | RESUELTO: NO es canon de negocio. Es infraestructura operativa. Documentado por referencia en runtime-sacdia.md seccion 9.1. |
 
 ### Endpoints admin de catalogos sin canon (16+ endpoints)

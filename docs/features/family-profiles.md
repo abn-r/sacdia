@@ -193,7 +193,7 @@ Las tres sub-fases se entregaron en orden (cada una con su verificación y su QA
 |---|---|---|---|
 | 3a | Cuentas supervisadas de 13 a 17 años: tipos de principal `supervised_user` y `age_unknown_user`, modo pendiente de tutor (plazo de 90 días), acceso propio que habilita el tutor, avisos de seguridad y resumen para el tutor, ficha subida por el tutor al actuar en el paso 3, analítica anónima, texto legal `2.0.0-family` (borrador) | `FAMILY_TEEN_LOGIN_ENABLED` (solo el acceso propio) | Implementada; QA parcial |
 | 3b | Dispositivo vinculado del menor de 13 años: el tutor verificado vincula el teléfono con un QR de un solo uso; el teléfono tiene su propia sesión y una superficie mínima | `FAMILY_LINKED_DEVICE_ENABLED` | Implementada (servidor y app); QA ejecutado en parte |
-| 3c | El director registra menores bajo custodia del club, verificación del consentimiento por otra persona, tarjeta de acceso familiar en el panel (desactivar acceso, desvincular dispositivo), cron de cambios de edad | `FAMILY_DIRECTOR_CREATE_MINOR_ENABLED` (solo el registro) | Implementada (servidor, app y panel); QA **Pendiente** |
+| 3c | El director registra menores bajo custodia del club, verificación del consentimiento por otra persona, tarjeta de acceso familiar en el panel (desactivar acceso, desvincular dispositivo), cron de cambios de edad | `FAMILY_DIRECTOR_CREATE_MINOR_ENABLED` (solo el registro) | Implementada (servidor, app y panel); QA corrida el 2026-10-20 |
 
 ### 3a: cuentas supervisadas (resumen)
 
