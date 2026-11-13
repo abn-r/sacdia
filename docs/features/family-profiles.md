@@ -1,8 +1,8 @@
 # Perfiles familiares (tutores y menores de 13 años)
 
-**Estado**: IMPLEMENTADO PARCIAL (Fases 2 y 3 de 4 en `development`). La Fase 2 entró con sacdia-backend #530, sacdia-app #178, sacdia-admin #243 y sacdia #141 (2026-10-19); la Fase 3, con sus tres sub-fases 3a (inicio de sesión supervisado), 3b (dispositivo vinculado) y 3c (el director registra menores, tarjeta de acceso familiar en el panel y cron de cambios de edad), con sacdia-backend #531, sacdia-app #179, sacdia-admin #244 y sacdia #142 (2026-10-20). No promovido a `main`; falta la Fase 4. QA: 3a y 3b ejecutados en parte, 3c **Pendiente** (`docs/testing/FAMILY-PROFILES-PHASE3A-QA.md`, `...PHASE3B-QA.md`, `...PHASE3C-QA.md`); contrato: `docs/api/ENDPOINTS-LIVE-REFERENCE.md`.
-**Verificado contra código**: 2026-10-19 (backend `554552c1`, app `819f257f`, admin `79a7b29`). La compuerta de activación, las reglas de cuatro ojos y el bloqueo de la ficha verificada se releyeron contra el backend `603d3d8e`. Segundo pase del mismo día contra backend `422433c0`, app `df2e6c6f` y admin `4a50314` (lista de parentescos del tutor, selector de club al actuar, `effective_expires_at` y los ajustes de la app y del panel). La sección «Fase 3» se verificó el 2026-10-20 contra backend `32022392`, app `345dadc0` y admin `7a9bfd6` (ramas `feat/family-profiles-phase3`)
-**Dominios relacionados**: [auth.md](auth.md) (sesión y post-registro), [membership-requests.md](membership-requests.md) (aprobación de ingreso), [contactos-emergencia-representante-legal.md](contactos-emergencia-representante-legal.md) (representante legal, ahora de solo lectura), [rbac.md](rbac.md) (permisos sensibles), [qr-credencial.md](qr-credencial.md) (correo nulo en la tarjeta)
+**Estado**: IMPLEMENTADO PARCIAL (Fases 2 y 3 de 4 en `development`; **Fase 4 (liberación a la mayoría de edad): Pendiente de merge (backend PR #654, app PR #257, admin PR #305)**, ver «Fase 4»). La Fase 2 entró con sacdia-backend #530, sacdia-app #178, sacdia-admin #243 y sacdia #141 (2026-10-19); la Fase 3, con sus tres sub-fases 3a (inicio de sesión supervisado), 3b (dispositivo vinculado) y 3c (el director registra menores, tarjeta de acceso familiar en el panel y cron de cambios de edad), con sacdia-backend #531, sacdia-app #179, sacdia-admin #244 y sacdia #142 (2026-10-20). No promovido a `main`. QA: 3a y 3b ejecutados en parte, 3c **Pendiente** (`docs/testing/FAMILY-PROFILES-PHASE3A-QA.md`, `...PHASE3B-QA.md`, `...PHASE3C-QA.md`); contrato: `docs/api/ENDPOINTS-LIVE-REFERENCE.md`.
+**Verificado contra código**: la sección «Fase 4» se verificó el 2026-11-12 contra el árbol de código de las ramas `feat/family-profiles-phase4` (backend `2dddd957`, app `d4133071`, admin `46906bd3`; PRs #654, #257 y #305). El resto: 2026-10-19 (backend `554552c1`, app `819f257f`, admin `79a7b29`). La compuerta de activación, las reglas de cuatro ojos y el bloqueo de la ficha verificada se releyeron contra el backend `603d3d8e`. Segundo pase del mismo día contra backend `422433c0`, app `df2e6c6f` y admin `4a50314` (lista de parentescos del tutor, selector de club al actuar, `effective_expires_at` y los ajustes de la app y del panel). La sección «Fase 3» se verificó el 2026-10-20 contra backend `32022392`, app `345dadc0` y admin `7a9bfd6` (ramas `feat/family-profiles-phase3`)
+**Dominios relacionados**: [auth.md](auth.md) (sesión y post-registro), [membership-requests.md](membership-requests.md) (aprobación de ingreso), [contactos-emergencia-representante-legal.md](contactos-emergencia-representante-legal.md) (representante legal, de solo lectura en `development` y eliminado en la Fase 4), [rbac.md](rbac.md) (permisos sensibles), [qr-credencial.md](qr-credencial.md) (correo nulo en la tarjeta)
 
 > [!IMPORTANT]
 > **Restricción de lanzamiento (Fase 3)**: la Fase 2 **no** debe llegar a producción sin la Fase 3. La Fase 3 los cierra (ver «Fase 3») y ya está en `development`; siguen abiertos en cualquier ambiente al que no se haya promovido. Los dos huecos, que hoy solo existen en desarrollo: (1) un adolescente de 13 a 17 años que se registra solo no tiene tutor ni representante legal (las rutas de escritura del representante se retiraron y aún no hay inicio de sesión supervisado), y (2) puede existir brevemente una cuenta social de un menor de 13 años hasta que intente guardar su fecha de nacimiento. Detalle en «Fases y restricción de lanzamiento». La Fase 3 además **no se puede promover a `main` sin la aprobación del texto legal `2.0.0-family`** (`docs/legal/README.md`) ni sin la lista de `docs/deployment/DEPLOYMENT-GUIDE.md`, §0.6.
@@ -20,7 +20,7 @@ No hay chat ni mensajería entre usuarios, ni ahora ni después. La app y el pan
 | 1 | Aceptación legal de Términos y Aviso de Privacidad | Mergeada (backend #515, #516, #518; app #177; docs #139, #140) |
 | 2 | Tutorías, perfiles dependientes, actuar en nombre del menor, verificación del director (esta página) | Implementada en rama; ver sub-fases abajo |
 | 3 | Inicio de sesión supervisado de 13 a 17 años (**3a**), dispositivo vinculado del menor de 13 años con QR del tutor (**3b**), el director registra menores, panel de acceso familiar, cron de cambios de edad y avisos de seguridad y resúmenes para el tutor (**3c** y lo transversal) | **3a, 3b y 3c en `development` (sacdia-backend #531, sacdia-app #179 y sacdia-admin #244); QA de la 3c corrida el 2026-10-20. Bloquea el lanzamiento a producción** |
-| 4 | Liberación a los 18 años (cron), reaceptación de términos, eliminación de `legal_representatives` | No iniciada |
+| 4 | Liberación a la mayoría de edad (cron `family-majority-release`), aceptación propia de los términos, congelamiento sin purga, reclamo de cuenta con código, renombre de permisos a `guardianship:*` y eliminación de `legal_representatives` | **Pendiente de merge (backend PR #654, app PR #257, admin PR #305)**; todo detrás de `FAMILY_MAJORITY_RELEASE_ENABLED` y con los textos legales sin aprobar. Ver «Fase 4» |
 
 La Fase 2 se entregó en tres sub-fases sobre **una rama y un PR por repo** (excepción de tamaño aprobada; los commits por unidad de trabajo son la mitigación de revisión): **2a** backend base y actuar-en-nombre, **2b** app (Mi familia, cambio de perfil, post-registro), **2c** verificación del director (backend, app y panel).
 
@@ -37,7 +37,7 @@ Una migración, `20261016120000_family_profiles` (17 sentencias, sin DML, única
 
 | Concepto | Tabla / columna | Reglas clave |
 |---|---|---|
-| Dependiente | `users` sin fila `account`, `email` NULL, más `dependent_profiles` | Una fila por menor; guarda quién lo creó, `frozen_at`, `purge_after` y `purged_at` |
+| Dependiente | `users` sin fila `account`, `email` NULL, más `dependent_profiles` | Una fila por menor; guarda quién lo creó, `frozen_at`, `purge_after` y `purged_at`. Pendiente de merge (backend PR #654, app PR #257, admin PR #305) (Fase 4): suma `majority_notice_sent_at`, `released_at`, `release_deadline_at`, `release_source`, `release_accepted_at`, `release_completed_at`, `release_reminder_level` y `frozen_reason` |
 | Tutoría | `guardianships` | Una fila por tutor (o por custodia de club) y menor; las revocadas se conservan como historial. Máximo 10 dependientes por tutor y 4 tutores activos por menor |
 | Consentimiento | `guardianships.consent_status` | `pending`, `verified` o `revoked`. `verified` solo lo escribe la verificación de la ficha en papel (`director_paper_form` si verifica un director o un rol de club; `coordinator_paper_form` si verifica un coordinador por su asignación) o la promoción de un tutor invitado (`guardian_invite`) |
 | Ficha firmada | `guardianship_consent_evidences` | Append-only; una sola vigente por tutoría; bucket privado de R2 |
@@ -51,7 +51,7 @@ Tipos de tutoría:
 - **Tutor externo** (`external_name`): solo viene de importar `legal_representatives` con el script de desarrollo; no da acceso.
 - **Datos de prueba** (`is_test_data`): nunca cuentan como consentimiento ni dan acceso.
 
-`legal_representatives` queda de **solo lectura** hasta la Fase 4. Las tutorías la reemplazan.
+`legal_representatives` queda de **solo lectura** en `development`; las tutorías la reemplazan. Pendiente de merge (backend PR #654, app PR #257, admin PR #305): la Fase 4 elimina el módulo, las rutas y la tabla (ver «Fase 4»).
 
 ## Parentesco del tutor
 
@@ -113,7 +113,7 @@ Documentados con detalle de implementación en `sacdia-app/CLAUDE.md`, sección 
 ## Flujos del panel (sacdia-admin)
 
 - **Solicitudes de membresía** (`/dashboard/requests/membership`, y el panel de pendientes del detalle de club): insignia de consentimiento, aprobar deshabilitado con tooltip mientras esté pendiente y acción **Verificar** con un `AlertDialog`: ver la ficha (imagen o PDF por URL firmada), subir una nueva, casilla obligatoria y aprobar al confirmar (casilla activa por defecto). Si la verificación se guardó y la aprobación falló, avisa y refresca la lista (aprobar queda habilitado). Los errores se mapean por `code`.
-- **Detalle de usuario** (`/dashboard/users/[userId]`, pestaña Resumen): tarjeta de **tutorías** con quién responde por el usuario (historial incluido, con quién verificó y cuándo), por quién responde él, y el ciclo de congelación. «Ver ficha» pide la URL firmada al hacer clic y la abre en una pestaña nueva. Se oculta si el actor no tiene `legal_representative:read` (ni el respaldo `users:read_detail`) o si el bloque está vacío. Un correo nulo se muestra como «—».
+- **Detalle de usuario** (`/dashboard/users/[userId]`, pestaña Resumen): tarjeta de **tutorías** con quién responde por el usuario (historial incluido, con quién verificó y cuándo), por quién responde él, y el ciclo de congelación. «Ver ficha» pide la URL firmada al hacer clic y la abre en una pestaña nueva. Se oculta si el actor no tiene `legal_representative:read` (`guardianship:read` en la Fase 4, Pendiente de merge (backend PR #654, app PR #257, admin PR #305); ni el respaldo `users:read_detail`) o si el bloque está vacío. Un correo nulo se muestra como «—».
 - Las tutorías **no se editan desde el panel**: el panel solo lee.
 - **Un dependiente se muestra «Sin acceso propio»** en el detalle de usuario. Los interruptores App, Panel y Estado de «Roles y acceso» guardan banderas de un inicio de sesión que no existe, así que se reemplazan por el aviso «Sin acceso propio · Gestionado por su tutor» (`resumen-tab.tsx:160-174`, `data-testid="dependent-no-access"`); en la barra lateral, «Acceso a la app» muestra «Sin acceso propio» y «Acceso al panel», «No» (`users/[userId]/page.tsx:609-624`). La señal es `guardianships.dependent_profile != null` (`page.tsx:162`), por lo que solo funciona si el actor puede leer ese bloque (`legal_representative:read`); sin ese permiso el bloque llega `null` y se ven las banderas de siempre.
 - **La sección de representante legal vacía se oculta**: el representante legal es de solo lectura y heredado, así que la sección (06) solo se dibuja si existe un registro (`resumen-tab.tsx:210`). Cuando existe, se titula «Representante legal (heredado)» con la nota «Registro heredado, solo lectura. Las relaciones actuales se gestionan en Tutorías.» (`page.tsx:390-391`). Antes mostraba «Sin representante legal registrado.».
@@ -170,6 +170,9 @@ Cuando el último tutor activo sale (por `revoke` o al eliminar su cuenta):
 | Ninguna de las anteriores | `frozen` | `frozen_at = now()`, `purge_after = now() + 90 días`; no se lista, no se puede actuar por él ni recibe pushes |
 
 Todo se serializa por menor con un candado de Postgres (`pg_advisory_xact_lock`), así que dos salidas simultáneas dejan exactamente un destino.
+
+> [!NOTE]
+> **Fase 4 (Pendiente de merge (backend PR #654, app PR #257, admin PR #305))**: el congelamiento de arriba y la purga a los 90 días siguen siendo los de un menor sin tutor. Una persona **liberada por mayoría de edad** y congelada es otra cosa: tiene `frozen_reason = 'majority_release'`, **sin** `purge_after`, y el cron de purga **nunca** la toma. Ver «Fase 4».
 
 **Purga a los 90 días** (decisión A9: «borrar» es borrar, no solo ocultar). El cron `dependent-profiles-purge` (`20 4 * * *` UTC, lotes de 100):
 
@@ -259,6 +262,181 @@ Las tres sub-fases se entregaron en orden (cada una con su verificación y su QA
 - La app y el panel infieren «quién no puede verificar» del `viewer_verify_block` de la **lista**, que es una instantánea: quien sube la ficha después de cargarla pasa a ser el subidor vigente, y la app lo cubre con su conocimiento de la sesión; el servidor (403) sigue mandando.
 - Nada de la 3c se ha ejercitado todavía en vivo (simulador ni Neon con las banderas encendidas): ver `docs/testing/FAMILY-PROFILES-PHASE3C-QA.md`, todo **Pendiente**.
 
+## Fase 4: liberación a la mayoría de edad
+
+> [!NOTE]
+> **Pendiente de merge (backend PR #654, app PR #257, admin PR #305)** en sacdia-backend, sacdia-app y sacdia-admin (los PR aún no están abiertos). Código **sin commitear** en las tres ramas al 2026-11-12; esta sección se verificó contra ese árbol de trabajo. Todo el comportamiento de liberación está detrás de `FAMILY_MAJORITY_RELEASE_ENABLED` (variable de entorno, por defecto `false`, no es `system_config`). Contrato HTTP: [ENDPOINTS-LIVE-REFERENCE.md](../api/ENDPOINTS-LIVE-REFERENCE.md), «Liberación a la mayoría de edad (Fase 4)». Esquema: [SCHEMA-REFERENCE.md](../database/SCHEMA-REFERENCE.md), «Liberación a la mayoría de edad (Fase 4)». Rollout: [DEPLOYMENT-GUIDE.md](../deployment/DEPLOYMENT-GUIDE.md), §0.6, punto 11. **Los textos legales (avisos, aceptación y congelamiento) no están aprobados**: [docs/legal/README.md](../legal/README.md).
+
+### Qué resuelve
+
+Hasta la Fase 3 un dependiente que cumplía la mayoría de edad del país seguía con su fila de tutorías y con una cuenta que el tutor había habilitado. Ahora, al cumplirla, el sistema **libera** a la persona: los tutores dejan de tener cualquier facultad, y la persona pasa a ser un adulto con cuenta propia que debe aceptar de su parte los Términos y el Aviso de Privacidad vigentes (y tener un correo). Si no lo hace en 30 días queda **congelada**, y nunca se borra sola.
+
+### Línea de tiempo
+
+| Cuándo | Qué pasa | Quién lo hace |
+|---|---|---|
+| 30 días antes de la mayoría de edad | Aviso: la persona (si tiene cuenta o acceso por nombre de usuario), los tutores verificados y, si el menor está solo bajo custodia del club, los directores | Cron `family-majority-release` |
+| Día de la mayoría de edad (según el país y su zona horaria) | **Liberación**: se revocan todas las tutorías con motivo `released`; plazo de 30 días para aceptar | Cron (la compuerta perezosa del servidor restringe a la persona desde la medianoche local, antes de que corra) |
+| 23 y 29 días después (7 y 1 día antes del plazo) | Recordatorios a la persona | Cron |
+| 30 días después, sin completar | **Congelamiento** (`frozen_reason = 'majority_release'`, sin fecha de purga) | Cron |
+| En cualquier momento, aun congelada | Aceptar los términos (y añadir correo si falta) **descongela**; reclamar la cuenta con un código, también | La persona |
+
+Las fechas de la mayoría de edad salen de `countries.age_of_majority` y `age_reference_timezone` (18 y `America/Mexico_City` por defecto). Quien nació un 29 de febrero cumple la mayoría de edad el 1 de marzo en un año no bisiesto (`majorityDateOf` en `src/common/age/age.util.ts`, la misma aritmética que `ageAt`).
+
+### Estados de la persona
+
+| Estado | Condición en `dependent_profiles` | Principal que resuelve el servidor |
+|---|---|---|
+| Rastreada | Fila presente, `released_at` nulo | Menor: el de la Fase 3 (`supervised_user`, dispositivo vinculado o actuando) |
+| Avisada | `majority_notice_sent_at` puesto | Igual; solo cambia lo que se muestra |
+| Liberada, pendiente | `released_at` puesto, sin `release_completed_at`, sin `frozen_at` | `released_user`, fase `pending` |
+| Congelada | `frozen_at` puesto con `frozen_reason = 'majority_release'` y sin `purge_after` | `released_user`, fase `frozen` |
+| Completada | `release_completed_at` puesto (aceptó **y** tiene correo) | `user` (adulto común) |
+
+La compuerta es **perezosa**: con la bandera encendida, el resolver trata como liberada a toda persona rastreada, mayor de edad y sin completar, aunque el cron todavía no haya corrido. Así no hay una ventana entre la medianoche del cumpleaños y las 09:30 UTC. Con la bandera apagada el resolver se comporta exactamente como antes. Una persona adulta que se registró sola y **nunca tuvo** una fila de tutoría (autorregistro de un adolescente sin tutor vinculado) no se rastrea: al cumplir la mayoría de edad es un adulto común (ruling R4).
+
+### La liberación
+
+Por cada persona, en **una transacción** bajo el candado de dependiente: se revalida la edad (una fecha de nacimiento corregida gana al escaneo), se reclama `released_at` con compare-and-set y, en la misma transacción:
+
+- se revocan **todas** las tutorías no revocadas (de personas, de custodia del club y las pendientes) con `consent_status = 'revoked'` y `revoked_reason = 'released'`; no se crea custodia ni se promueve a nadie;
+- se revocan los códigos de vinculación abiertos (`second_guardian`, `director_claim`, `teen_guardian_link`), **nunca** los `adult_claim`;
+- se desvinculan los dispositivos (`majority`) y se reinicia el reloj de tutor pendiente;
+- se audita `family.majority.released` (actor `system`; `family.majority.backfill_released` en el relleno).
+
+Después del commit se sube el epoch de acting-for (el token del tutor deja de actuar en la siguiente petición) y se avisa. Un adulto **encontrado tarde** (ya era mayor cuando la bandera se encendió, por ejemplo un dependiente que ya tenía 18 años) sigue el mismo camino con `release_source = 'catchup'` y un plazo de 30 días desde ese momento. La migración de relleno no libera a nadie: solo garantiza que todo dependiente de una tutoría o acceso supervisado tenga su fila.
+
+### Aceptación, correo y finalización
+
+- La persona lee y acepta los Términos y el Aviso vigentes (`POST /users/me/legal-acceptance`). Se guarda una fila **propia** con `method = 'majority_release'` y `accepted_by_user_id` nulo, para la **misma versión** que el tutor pudo haber aceptado en su nombre (no hay subida global de versión; ver la validez en [docs/legal/README.md](../legal/README.md)). El estado legal de un `released_user` solo cuenta esas filas.
+- Si no tiene correo (adolescente con usuario generado), debe añadirlo con `POST /users/me/release/email`; queda **sin verificar** y se envía el correo de verificación. Un correo sin verificar basta para completar (ruling R5). El ex tutor no puede hacerlo por ella.
+- Al cumplirse **ambas** condiciones, `release_completed_at` se pone y la persona vuelve al principal `user`; la caché de acting-for se invalida. Eso puede ocurrir con la aceptación o con el correo, lo que llegue último.
+- El orden es indiferente y ambos pasos son idempotentes; una segunda aceptación responde 200 sin duplicar filas, y dos aceptaciones simultáneas dejan una.
+
+### Congelado: nunca se borra, nunca bloquea el acceso
+
+Una persona que no acepta en 30 días se congela: `frozen_at`, `frozen_reason = 'majority_release'`, **sin** `purge_after`. Sus datos se ocultan de las listas del club y no se procesan, y se conservan hasta que vuelva. Reglas (rulings R1 y R6):
+
+- **Nunca se purga sola.** El cron de purga salta siempre las filas con `frozen_reason = 'majority_release'`, con la bandera encendida o apagada. Solo la persona puede pedir la eliminación (`DELETE /auth/me`), igual que cualquier adulto. Los congelamientos antiguos (`frozen_reason` nulo) conservan los 90 días de purga.
+- **El congelamiento no bloquea el inicio de sesión.** Si tiene credenciales, entra y aterriza en la pantalla de liberación («Eres mayor de edad y aún no has reclamado tu cuenta»): añade correo si falta, acepta los términos y queda descongelada y activa (`frozen_at` y `frozen_reason` a `NULL`, `family.release.thawed`). Los scopes del principal son los **mismos** en `pending` y `frozen`.
+- **Sin plazo para recuperarse.** El `adult_claim` se puede pedir y canjear en cualquier momento, también congelada.
+- Un congelamiento antiguo (menor sin tutor) **nunca** se descongela por esta vía.
+- El congelamiento no cierra sesiones ni revoca códigos `adult_claim`; **no se avisa a los ex tutores** (ruling R3, privacidad): solo a la persona.
+
+### Persona sin cuenta: reclamar con un código (`adult_claim`)
+
+Un dependiente que nunca tuvo cuenta (menor de 13 años, o sin acceso propio) no tiene credenciales al ser liberado: no puede aceptar nada. Un **código de reclamo** le da acceso:
+
+1. Lo emite un **ex tutor** (`POST /guardianships/me/released/:dependentId/adult-claim-code`, desde «Historial» en Mi familia) o, si el menor estaba bajo custodia del club (o su ex tutor no tiene usuario), un **director** con `club_members:approve` en la sección (`POST /club-sections/:clubSectionId/dependents/:userId/adult-claim-codes`, desde el perfil del miembro en la app). Formato `XXXX-XXXX`, vigencia de 14 días; el código en claro sale una sola vez y solo se guarda su HMAC; uno nuevo reemplaza al abierto. El ex tutor y el director son avisados al liberarse la persona (`majority_handover`), porque el código no puede generarse en el cron.
+2. La persona lo canjea en la pantalla pública «Tengo un código de acceso» (login → `/adult-claim`) con `POST /auth/adult-claim/redeem` (código, correo y contraseña). En **una transacción** se consume el código, se guarda el correo (sin verificar) y se crea la credencial. **No** se devuelven tokens y **no** se acepta nada: la persona inicia sesión con su correo y aterriza en `/release`, donde acepta los términos y queda activa.
+3. Seguridad: el mismo 400 uniforme (`GUARDIANSHIP_LINK_CODE_INVALID`) para código desconocido, vencido, usado, revocado, mal formado, de otro propósito o de una persona purgada; el código no se consume si falla una precondición (404 `FAMILY_ADULT_CLAIM_NOT_RELEASED`); 409 `FAMILY_ADULT_CLAIM_EMAIL_UNAVAILABLE` si el correo es de otro; bloqueo por IP (10 fallos en 24 h) y limitación a 10 por hora; el código se comprueba **antes** de calcular el hash de la contraseña. No se crea ninguna tutoría.
+4. El claim no se puede usar si la persona ya tiene cuenta o acceso por nombre de usuario, ya completó o tiene un congelamiento antiguo.
+
+### Historial del ex tutor
+
+`GET /guardianships/me/history` devuelve, para el ex tutor, las personas que liberó: nombre (nulo si se purgó), parentesco, fecha de liberación y `can_issue_claim`. Nada de salud, club, progreso ni contacto. `Mi familia` **no** lista ya a la persona liberada y esta no cuenta para el tope de 10 dependientes (la lista aplica el corte por edad aun entre la medianoche y el cron); el ex tutor deja de recibir sus avisos de seguridad y resúmenes, sus pushes y su `X-Acting-For` (403). Al eliminar la cuenta de un tutor que solo tiene personas liberadas no se pide confirmación de menores (`deletion-impact` solo lista menores).
+
+### Avisos y recordatorios
+
+Todos los avisos de la Fase 4 son **obligatorios** (fuentes `family:majority:*`, prefijo en `MANDATORY_SOURCE_PREFIXES`): el usuario no los puede silenciar. Los envía el propio cron por push y bandeja (`data.type` `majority_notice`, `majority_released`, `majority_reminder`, `majority_frozen` y `majority_handover`) y, **solo a la persona** y cuando tiene correo, por correo (plantilla `majority-release.tsx` en es, en, fr y pt-BR, sin credenciales ni enlaces; con `EMAIL_ENABLED=false` se omite sin fallar). Los textos del servidor van en español.
+
+| Aviso | Cuándo | Recibe |
+|---|---|---|
+| `notice` | 30 días antes | La persona (con cuenta o acceso); los tutores **verificados** (no los pendientes); los directores de la sección solo si el menor está **únicamente** bajo custodia del club |
+| `released` («Ahora eres independiente») | Al liberarla | La persona con cuenta o acceso |
+| `handover` | Al liberarla, si no tiene cuenta | Los ex tutores y, si había custodia, los directores de la sección; también el emisor de un código cuando se canjea |
+| `reminder` | 7 y 1 día antes del plazo | La persona; si no tiene cuenta, ex tutores y directores |
+| `frozen` | Al congelarla | **Solo la persona** (ruling R3) |
+
+Un fallo de envío no impide la liberación; si ningún destinatario recibe el aviso de 30 días, el compare-and-set se devuelve y se reintenta al día siguiente. Los avisos de la persona **nunca** se reenvían a los tutores. Un destinatario inalcanzable (sin token de push) solo recibe la bandeja.
+
+### Compuerta del servidor: el principal `released_user`
+
+Principal de la Fase 4 (se suma a `user`, `guardian_acting`, `supervised_user`, `age_unknown_user` y `linked_device`). Denegado por defecto: una ruta solo es accesible si declara uno de sus scopes (`release:read`, `release:email`, `data:export`, `legal:accept` o `account:manage`; **no** `self:read` ni nada de club). Un `ActingScope` puede ahora ser un arreglo («cualquiera de»). Las 13 rutas accesibles (pending y frozen) son: `GET /auth/me`, `GET` y `POST /users/me/legal-acceptance`, `POST /users/me/release/email`, `POST /auth/verify-email/send`, las tres rutas de exportación de datos, `GET /auth/sessions`, `DELETE /auth/sessions`, `DELETE /auth/sessions/:sessionId`, `DELETE /auth/me` y `GET /auth/oauth/providers`; las fija `release-gate.allowlist.spec.ts` contra el registro real. Todo lo demás responde 403 `PRINCIPAL_SCOPE_DENIED` con `kind = released_user` (muestreado en la auditoría). `X-Acting-For` responde 403. No ve datos de club y queda fuera de los pushes de club. Un token anterior a la liberación queda restringido en la siguiente petición; el principal no entra a la lista negra de JWT.
+
+- `GET /auth/me`: `data.mode = 'released'`, `data.principal.release` (`status`, `released_at`, `deadline_at`, `frozen_at`, `purge_after` siempre `null`, `needs_acceptance`, `needs_email`, `login_method`), `data.family = null` y **`data.analytics_anonymous = true`**: la analítica del cliente sigue anónima hasta completar la liberación. `data.family_features.majority_release` expone la bandera. Para un menor, con la bandera encendida, `principal.supervision` suma `majority_date` y `release_notice_sent`.
+- La caché del principal supervisado pasa a `supv:v4` (y `supv:v4r` con la bandera encendida; TTL de 60 s recortado a la medianoche local).
+
+### Lista del club
+
+La persona liberada y pendiente **sigue en las listas** como un adulto cualquiera (su rol y su progreso se conservan mientras decide) y los roles que ya veían los miembros ven además `release_status: "pending"` y `release_deadline_at` (la app lo muestra como insignia al director; sin datos personales nuevos). Una persona **congelada** por la liberación sale de las listas y de los conteos de la sección, y vuelve al descongelarse. No se tocó ninguna consulta de `club_role_assignments` (el guard `club-assignment-effectivity` sigue en verde). Los pagos y el progreso se conservan siempre; la anonimización solo ocurre si la persona pide eliminar su cuenta.
+
+### App (sacdia-app) y panel (sacdia-admin)
+
+**App**, `lib/features/majority_release/`:
+
+- **Compuerta de rutas**: el redirect del router evalúa la liberación **antes** de la compuerta legal. Pendiente: solo `/release`, `/access-denied` y los visores de documentos legales. Congelada: `/release/frozen`, `/release` (la aceptación descongela) y `/access-denied`. Ninguna es accesible actuando. Al completarse, `refreshAuthorization()` lleva a la persona al inicio de un adulto.
+- **`/release`** (pendiente, y al descongelar): pasos para leer y aceptar los Términos y el Aviso vigentes y, si `needs_email`, añadir el correo (errores 409 en línea, aviso de verificación); cuenta atrás de días hasta el plazo; acciones de exportar y eliminar la cuenta siempre visibles.
+- **`/release/frozen`**: explicación de solo lectura (sin fecha de purga ni promesa de borrado), exportar datos, eliminar cuenta y la acción «aceptar para recuperar el acceso» que reutiliza el flujo de `/release`.
+- **`/adult-claim`** (pública): código, correo y contraseña; error uniforme ante código inválido y mensaje de bloqueo ante 429; tras el éxito, a iniciar sesión con el correo precargado. Entrada: «Tengo un código de acceso» en el inicio/inicio de sesión.
+- **Tutor**: «Historial» en Mi familia, colapsado («Mostrar liberados»), `/family/released` con la entrada mínima (nombre y fecha; «Persona liberada» si se purgó) y la hoja para generar el código (se muestra una vez, copiar y compartir). **Director**: acción en el perfil del miembro, para personas liberadas que venían de custodia (`release_status = pending` y `club_members:approve`).
+- **Aviso** descartable en el perfil del menor de 13 a 17 años y en el inicio de un adolescente pendiente (fecha de mayoría de edad y qué pasa después). El banner específico en la app del tutor no se hizo (no hay campo en el contrato; lo cubren el push y la bandeja).
+- **Push**: `majority_*` lleva a la persona a `/release` o `/release/frozen` según su estado, al tutor a `/family` (aviso) o `/family/released` (entrega) y a los adolescentes a la bandeja; nunca cambia de perfil.
+- **Transversal**: `AuthInterceptor` omite el `X-Acting-For` en `/users/me/release`, `/auth/adult-claim` es pública, `AnalyticsPolicy` trata a la persona liberada como anónima, y las 4 traducciones (es, en, fr, pt-BR) añaden `release.*`, `adult_claim.*`, `family.history.*`, `notifications.majority_*` y los 5 códigos de error.
+
+**Panel**, `src/components/users/user-guardianships-card.tsx` (detalle de usuario, tarjeta de tutorías): bloque «Mayoría de edad» con una insignia (aviso enviado, liberado pendiente, completado o congelado) y las fechas de aviso, liberación, plazo, aceptación y finalización; el congelado por liberación **no** muestra fecha de purga. Es solo de lectura (no hay desbloqueo ni edición desde el panel). El job `family-majority-release` está en `/dashboard/system/jobs` con etiqueta propia y «Ejecutar ahora» (con la confirmación habitual). Los permisos pasan a `guardianship:*` (abajo).
+
+### Bandera, cron y prueba en seco
+
+- `FAMILY_MAJORITY_RELEASE_ENABLED` (por defecto `false`; se lee al arrancar): con ella apagada el cron registra la corrida como omitida (`flag_disabled`), no se avisa ni se libera ni se congela a nadie, la compuerta del resolver no actúa y `family_features.majority_release` es `false`. Apagarla **no** deshace lo ya liberado.
+- `FAMILY_MAJORITY_RELEASE_DRY_RUN`: el cron calcula y deja el resumen en el log (`majority_release_dry_run`), sin escribir ni enviar nada.
+- Cron `family-majority-release`: `30 9 * * *` UTC, candado `cron:family-majority-release` de 23 h, corrida registrada en `cron_run_log`, falla la corrida si algún elemento falla y reintenta al día siguiente. Detalle en [cron-automation.md](cron-automation.md), job 22.
+- `scripts/family-profiles/majority-release-dry-run.ts`: informe de conteos por paso y por país (solo UUID). **Limitación conocida**: con `tsx` 4.23 y Node 24 todo script que arranque Nest e importe `src/app.module` falla con `ERR_INVALID_URL_SCHEME`; la alternativa que funcionó en `development` fue un `.cjs` contra `dist/` (ver DEPLOYMENT-GUIDE §0.6, punto 11.5). **Encender la bandera restringe a la vez a toda persona rastreada mayor de edad**: hacer la prueba en seco y publicar la app con la compuerta antes.
+
+### Permisos renombrados y `legal_representatives` eliminado
+
+- `legal_representative:read|update` pasan a `guardianship:read|update` (migración `20261113130000_family_guardianship_permission_rename`: mismos ids, mismas asignaciones por rol; en Neon `development`, 17 asignaciones por permiso). Se conserva el respaldo `users:*` hasta el **2027-03-31**. La clave de caché de autorización pasa a `auth:context:v9`. Detalle en [rbac.md](rbac.md).
+- Se elimina el módulo `legal-representatives`, `GET /users/:userId/legal-representative` y `GET /users/:userId/requires-legal-representative`, y el bloque `legal_representative` de `GET /admin/users/:userId` y del panel. La tabla `legal_representatives` se borra con `20261114100000_family_drop_legal_representatives` (irreversible, después de `pg_dump` por ambiente y con el código ya desplegado); no se copia ningún dato a las tutorías. Ver [contactos-emergencia-representante-legal.md](contactos-emergencia-representante-legal.md).
+- Orden de integración por el contrato cruzado: primero los commits del panel y de la app, luego las variables `SACDIA_ADMIN_CONTRACT_REF` y `SACDIA_APP_CONTRACT_REF`, luego el backend (ver DEPLOYMENT-GUIDE §0.6, punto 11.2).
+
+### Decisiones de la Fase 4
+
+Decisiones de producto del 2026-11-12 y ajustes posteriores del mismo día (rulings R1 a R6, vinculantes; donde difieren de la especificación y del diseño originales, mandan estas):
+
+| # | Decisión |
+|---|---|
+| D1 | **Plazos**: aviso 30 días antes de la mayoría de edad; 30 días después para aceptar los Términos y el Aviso vigentes; si no, congelamiento. (La decisión original purgaba 90 días después del congelamiento; la sustituye R6.) |
+| D2 | **El tutor, tras la mayoría de edad, no puede nada operativo** (ni actuar, ni resumen, ni avisos); solo queda una entrada «liberado» en su lista, oculta por defecto. La tutoría se revoca con motivo `released` |
+| D3 | **Rol de club y progreso se conservan** mientras decide, visibles al club hasta el congelamiento; pagos y progreso se retienen |
+| D4 | **Aceptación por persona** (`method = 'majority_release'`) sobre la misma versión del texto, sin subida global de versión; compuerta de servidor solo para liberados sin aceptar |
+| D5 | **Sin correo (usuario generado) debe añadir uno** al liberarse o queda congelado; el tutor no puede hacerlo a los 18 |
+| D6 | **Sin cuenta**: código de reclamo `adult_claim` (reutiliza `guardianship_link_codes`) que emite el ex tutor o el director; crea credencial y correo en una transacción |
+| D7 | **Ya mayores con tutoría** se tratan como liberados «el primer día», con aviso acortado (en producción no hay ninguno) |
+| D8 | **Mayoría de edad y zona horaria por país** para el aviso y la liberación |
+| D9 | **Renombrar `legal_representative:read\|update` a `guardianship:read\|update`** ahora, con respaldo `users:*` hasta 2027-03-31, y eliminar la tabla `legal_representatives` |
+| D10 | **Aviso de 30 días**: a la persona (push y bandeja, correo si hay), a los tutores verificados (fuente obligatoria) y al director del club solo si el menor está únicamente bajo custodia |
+| R1 | **Descongelar**: una persona congelada puede aún aceptar los términos y añadir correo; aceptar (con correo) la descongela. Los scopes de `pending` y `frozen` son los mismos |
+| R2 | **Recordatorios 7 y 1 día antes del plazo** (niveles 1 y 2) más un aviso «ya eres independiente» al liberarla (en lugar de los +7/+20/+27 días del diseño) |
+| R3 | **Los ex tutores no reciben el aviso de congelamiento** (privacidad) |
+| R4 | **Un adolescente autorregistrado que nunca tuvo tutor** (sin fila en `dependent_profiles`) no se rastrea: es un adulto común a la mayoría de edad |
+| R5 | **Un correo sin verificar basta para completar** la liberación (la verificación se pide como siempre) |
+| R6 | **Nunca se borra solo a un adulto liberado**: el congelamiento no tiene `purge_after`, el cron de purga lo salta siempre, el congelamiento no bloquea el inicio de sesión y el reclamo con código es posible en cualquier momento. Solo la persona puede pedir su eliminación. **Abierto legal**: confirmar con un abogado que conservar de forma indefinida, sin tratamiento, los datos de un exmenor es aceptable bajo la LFPDPPP |
+
+Decisiones de diseño: el congelamiento se separa del de las fases 2 y 3 por una columna `frozen_reason` (NULL en los antiguos); el CHECK `dependent_profiles_frozen_ck` depende del motivo (un congelamiento por liberación tiene `frozen_at` y **nunca** `purge_after`); la aceptación usa índices únicos parciales (una fila del tutor y otra propia para la misma versión); los códigos `adult_claim` reutilizan `guardianship_link_codes`; la compuerta de servidor es un nuevo principal (`released_user`) y no códigos de error propios (`FAMILY_RELEASE_ACCEPTANCE_REQUIRED` y `FAMILY_RELEASE_FROZEN` de la especificación se **sustituyen** por `PRINCIPAL_SCOPE_DENIED`); el historial del tutor es una ruta propia (`GET /guardianships/me/history`) y no `include_released=true`.
+
+### Lo que no incluye la Fase 4
+
+- **Textos legales aprobados**: avisos, aceptación y congelamiento están en borrador (ver [docs/legal/README.md](../legal/README.md)); tampoco se actualizaron el aviso de privacidad ni los términos publicados.
+- **Retención indefinida bajo la LFPDPPP**: pendiente de confirmar con un abogado (ruling R6).
+- **Purga de adolescentes sin tutor** (`pending-teen-guardian`, Fase 3): sigue congelando a los 90 días y purgando 90 días después; la Fase 4 no la modifica (el criterio de «nunca borrar solo» podría revisarse después).
+- **Aviso en la app del tutor por cada dependiente**: se cubre con el push y la bandeja; no hay un banner propio (no hay campo en el contrato).
+- **Desbloqueo o edición desde el panel**: solo lectura; tampoco hay una acción de administración para emitir el código de reclamo (lo emiten el ex tutor o el director desde la app).
+- **Una opción de dry-run en el registro de crones** del panel: el panel no la ofrece; la prueba en seco se hace con la variable o con el script.
+- **Cron de purga para adultos liberados**: no existe (decisión R6); si la persona quiere borrar sus datos, lo pide ella.
+- **Migraciones aplicadas fuera de `development`**: pendientes; el DROP de `legal_representatives` también en `development`.
+
+### Prerrequisitos de despliegue de la Fase 4
+
+Resumen; el procedimiento completo está en [DEPLOYMENT-GUIDE.md](../deployment/DEPLOYMENT-GUIDE.md), §0.6, punto 11.
+
+1. **Migraciones** en este orden: `20261113100000`, `20261113110000`, `20261113120000`, `20261113140000`, `20261113130000` (renombre de permisos) y, **al final, por ambiente, tras `pg_dump` y con el código ya desplegado**, `20261114100000` (borra `legal_representatives`; irreversible). Aplicadas en Neon `development` las seis (la última el 2026-11-12, tras `pg_dump`); `staging` y `production` pendientes.
+2. **Orden de merge por el contrato cruzado**: commits de renombre del panel y de la app, luego las variables de contrato, luego el backend, luego las variables al SHA integrado.
+3. **Bandera**: desplegar con `FAMILY_MAJORITY_RELEASE_ENABLED=false`; publicar la app con la compuerta **antes** de encenderla; prueba en seco en `development` y `staging`; encender en `development` y `preproduction`; `staging` y `production` solo con aprobación y tras la aprobación legal.
+4. `FAMILY_MAJORITY_RELEASE_DRY_RUN` solo para la prueba en seco.
+5. Un plan de Render siempre encendido para que el cron corra (punto 10 de §0.6).
+
+**Verificación y QA ya hecha**: la API se probó en vivo contra Neon `development` el 2026-11-12 (12 de 13 escenarios pasaron; el que falló destapó que el CHECK `dependent_profiles_frozen_ck` de la Fase 2 impedía congelar sin `purge_after`, corregido y reaplicado). La app y el panel tienen pruebas automáticas; no hay registro de QA manual de las pantallas de liberación en la app ni en el panel. Queda la matriz: adolescente con usuario generado, adolescente con correo, menor solo bajo custodia, persona sin cuenta que reclama con código, y descongelar aceptando.
+
 ## Decisiones
 
 | Decisión | Alternativa rechazada | Motivo |
@@ -269,7 +447,7 @@ Las tres sub-fases se entregaron en orden (cada una con su verificación y su QA
 | `dependent_profiles` como tabla propia | Inferir "sin cuenta"; banderas en `users` | Solo se permite una `ALTER` en `users` (el correo); da identidad explícita y ciclo de congelación y purga |
 | Fichas en tabla append-only | Columnas en `guardianships` | Conserva el historial legal y quién subió cada archivo |
 | Verificar la **tutoría principal**; los invitados heredan | Verificar a cada tutor | La ficha es del ingreso del menor; un tutor verificado responde por quien invita |
-| El bloque de admin reutiliza la familia `legal_representative:read` | Permisos `guardianship:*` nuevos | Evita DML y seeds en la Fase 2; el cambio de nombre llega en la Fase 4 con la tabla |
+| El bloque de admin reutiliza la familia `legal_representative:read` | Permisos `guardianship:*` nuevos | Evita DML y seeds en la Fase 2; el cambio de nombre llega en la Fase 4 con la tabla (Pendiente de merge (backend PR #654, app PR #257, admin PR #305): `guardianship:read\|update`, mismos ids) |
 | Pushes dirigidos al menor van a sus tutores, con el nombre del menor | Solo bandeja | Un menor sin cuenta no tiene tokens FCM (A3). La bandeja sigue en el menor |
 | Aviso al tutor cuando alguien sube evidencia por el menor | - | El gancho existe; es un no-op cuando el propio tutor sube actuando y cobra sentido con el dispositivo vinculado (Fase 3) |
 | **Sin chat ni mensajería entre usuarios** | - | Decisión permanente |
@@ -315,10 +493,12 @@ Las tres sub-fases se entregaron en orden (cada una con su verificación y su QA
 4. Antes de abrir los PR, el backend debe incluir #528 (validación de ámbito y solicitudes) y #529 (UUID inválido en el guard), ambos ya integrados en la rama, y estar al día con `development`.
 5. **Fase 3**: cuatro migraciones más (`20261020120000_family_teen_login`, `20261021120000_family_linked_devices`, `20261022120000_family_director_minors`, `20261022130000_seed_family_permissions`), las banderas `FAMILY_*` por ambiente, la aprobación legal del texto `2.0.0-family` y el aviso a los directores. Todo en `docs/deployment/DEPLOYMENT-GUIDE.md`, §0.6. Las cuatro están aplicadas en Neon `development`, `staging` y `production` (verificado el 2026-11-12).
 
+6. **Fase 4** (Pendiente de merge (backend PR #654, app PR #257, admin PR #305)): seis migraciones más (`20261113100000`, `20261113110000`, `20261113120000`, `20261113140000`, `20261113130000` y, la última y por ambiente, `20261114100000`), las variables `FAMILY_MAJORITY_RELEASE_ENABLED` y `FAMILY_MAJORITY_RELEASE_DRY_RUN`, la app con la compuerta antes de encender la bandera y la aprobación legal. Resumen en «Fase 4», «Prerrequisitos de despliegue de la Fase 4»; procedimiento en `docs/deployment/DEPLOYMENT-GUIDE.md`, §0.6, punto 11.
+
 ## Lo que no incluye la Fase 2
 
 - Inicio de sesión de adolescentes, dispositivo vinculado, avisos de seguridad y resúmenes para el tutor (Fase 3; la 3a, la 3b y la 3c ya están en `development`, ver «Fase 3»).
-- Liberación a los 18 años, reaceptación de términos y eliminación de `legal_representatives` (Fase 4).
+- Liberación a la mayoría de edad, reaceptación de términos y eliminación de `legal_representatives` (Fase 4; Pendiente de merge (backend PR #654, app PR #257, admin PR #305), ver «Fase 4»).
 - Que el director cree menores (Fase 3c, ya implementada en la rama). En la Fase 2 los códigos de reclamo solo reintegran a una familia un menor que ya está bajo custodia del club.
 - Subir la ficha desde el paso 3 del menor actuando (opcional, no implementado; la ruta del tutor ya es segura para agregarlo).
 - Exigencia de la aceptación legal en el servidor para el resto de endpoints.
@@ -343,6 +523,14 @@ No se ejecutó nada contra una base de datos real, R2, Redis ni dispositivo: eso
 | Backend (`32022392`) | Jest completo `--maxWorkers=3`: 535 suites pasan (6 omitidas), 8647 pruebas pasan (34 omitidas), 0 fallan; `tsc --noEmit -p tsconfig.build.json` limpio; e2e de la 3c `test/director-created-minor.e2e-spec.ts` 47 de 47 contra un doble en memoria (no necesita base). En corridas anteriores un worker se cayó con SIGSEGV en `admin-phase-e-catalogs.service.spec.ts` (carga de PGlite); a solas pasa |
 | App (`345dadc0`) | `flutter test`: 3188 pasan, 0 fallan (corrida del lote 3 de la 3c); `flutter analyze lib/features/members test/features/members` sin avisos; el análisis completo conserva 12 avisos anteriores |
 | Admin | En `05ec6de`: Vitest 1549 pasan y 1 falla por el fixture del catálogo de pantallas que busca la app como repo hermano (ambiental); `tsc` y `eslint` de los archivos tocados limpios. El commit `7a9bfd6` (veredicto del servidor) no está recontado aquí |
+
+**Fase 4** (cifras informadas por quien implementó cada repo; este pase de documentación no volvió a ejecutar las suites):
+
+| Repo | Resultado |
+|---|---|
+| Backend | Jest completo: 667 suites y 11 365 pruebas pasan (dos suites de PDF fallan bajo carga y pasan a solas: 120 pruebas); `lint:ci`, `tsc` de compilación y `pnpm authz:check` limpios. El spec de la migración de renombrado se corrió contra un Postgres local (4 pasan). Los specs que simulan la base **no** vieron el CHECK `dependent_profiles_frozen_ck`: lo destapó el QA en vivo |
+| App | `flutter test`: 4 762 pasan; `flutter analyze` sin avisos nuevos (los anteriores siguen) |
+| Admin | `tsc` limpio; Vitest 2 625 pasan; `eslint` de los archivos tocados limpio |
 
 ## QA manual pendiente
 
@@ -371,6 +559,8 @@ Requiere el bucket de R2 creado y la migración aplicada en Neon `development`.
 
 **Fase 3**: los guiones y su estado están en `docs/testing/FAMILY-PROFILES-PHASE3A-QA.md` (parcial), `docs/testing/FAMILY-PROFILES-PHASE3B-QA.md` (ejecutado en parte) y `docs/testing/FAMILY-PROFILES-PHASE3C-QA.md` (**todo Pendiente**: registro por el director, cuatro ojos, reclamo, tarjeta de acceso familiar, aviso de los 13 años, barrido de dispositivos, banderas apagadas).
 
+**Fase 4** (2026-11-12): la API se probó en vivo contra Neon `development` (12 de 13 escenarios; el fallo era el CHECK del congelamiento, ya corregido). Una cuenta de QA («QaMajority Fixture») quedó liberada y completada en esa base. Pendiente: QA manual de las pantallas `/release`, `/release/frozen`, `/adult-claim`, el historial del tutor y la acción del director en la app; la tarjeta «Mayoría de edad» del panel; y la matriz de personas (adolescente con usuario generado, adolescente con correo, menor solo bajo custodia, persona sin cuenta que reclama con código, descongelar aceptando). No hay guion de QA escrito para la Fase 4.
+
 **Backend / datos** (solo con base real)
 
 - Migración aplicada dos veces, restricciones de la base, conteos reales de throttling, Redis real (`EVAL` del contador) y concurrencia real de Postgres: no se pueden probar sin base ni Redis.
@@ -384,4 +574,5 @@ Requiere el bucket de R2 creado y la migración aplicada en Neon `development`.
 - Promoción de la Fase 3: [DEPLOYMENT-GUIDE.md](../deployment/DEPLOYMENT-GUIDE.md), §0.6. Texto legal en borrador: [docs/legal/README.md](../legal/README.md).
 - Registro de decisiones: [DECISIONS-PENDING.md](../audit/DECISIONS-PENDING.md).
 - Operación: [runbook de SQL manual y seeds frente a la compuerta](../runbooks/family-profiles-consent-gate-manual-sql.md).
-- Código: `sacdia-backend/src/guardianships/`, `src/auth/acting-for/`, `src/membership-requests/consent-*.ts`, `src/membership-requests/assignment-activation-gate.ts`, `src/common/guards/README.md` (sección de actuar-en-nombre); `sacdia-app/lib/features/family/`, `lib/core/consent/`, `lib/core/auth/acting_for_session.dart`; `sacdia-admin/src/components/membership/membership-consent-verify-dialog.tsx`, `src/components/users/user-guardianships-card.tsx`.
+- Fase 4: contrato en [ENDPOINTS-LIVE-REFERENCE.md](../api/ENDPOINTS-LIVE-REFERENCE.md), «Liberación a la mayoría de edad (Fase 4)»; esquema en [SCHEMA-REFERENCE.md](../database/SCHEMA-REFERENCE.md); cron en [cron-automation.md](cron-automation.md), job 22; permisos en [rbac.md](rbac.md); rollout en [DEPLOYMENT-GUIDE.md](../deployment/DEPLOYMENT-GUIDE.md), §0.6, punto 11; puntos legales abiertos en [docs/legal/README.md](../legal/README.md).
+- Código: `sacdia-backend/src/guardianships/` (Fase 4: `family-majority-release-cron.service.ts`, `release*.ts`, `adult-claim*.ts`), `src/auth/acting-for/`, `src/auth/supervised/`, `src/legal/`, `src/membership-requests/consent-*.ts`, `src/membership-requests/assignment-activation-gate.ts`, `src/common/guards/README.md` (sección de actuar-en-nombre); `sacdia-app/lib/features/family/`, `lib/features/majority_release/`, `lib/core/consent/`, `lib/core/auth/acting_for_session.dart`; `sacdia-admin/src/components/membership/membership-consent-verify-dialog.tsx`, `src/components/users/user-guardianships-card.tsx`.

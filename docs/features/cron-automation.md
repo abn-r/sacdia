@@ -49,6 +49,9 @@ Varios jobs están gobernados por `system_config` o feature flags (ver «Feature
 
 ### Inventario de jobs
 
+> [!NOTE]
+> **Pendiente de merge (backend PR #654, app PR #257, admin PR #305)**: la Fase 4 de perfiles familiares añade el job 22, `family-majority-release` (ver su detalle). En `development` los jobs son 21; con la rama son 22 en el registro, y 9 los que notifican. Los conteos de este documento («21 jobs», «8 marcados Sí», «18 de los 21») son los de `development`.
+
 Los 21 jobs coinciden con la allowlist `CRON_JOB_DEFINITIONS` de `src/admin/cron-jobs/cron-job.registry.ts` (un spec escanea las fuentes y falla si un `@Cron` aparece o desaparece sin entrada). La columna «Job» muestra el nombre de `cron_run_log.job_name` (`jobName` del registro). «Notifica» marca los jobs que envían **avisos reales** (push, bandeja o correo) a personas.
 
 | # | Job (`job_name`) | Cron | Frecuencia efectiva | Módulo | Notifica | Candado (TTL) |
@@ -74,6 +77,7 @@ Los 21 jobs coinciden con la allowlist `CRON_JOB_DEFINITIONS` de `src/admin/cron
 | 19 | Pending teen guardian (`pending-teen-guardian`) | `40 4 * * *` | diario 04:40 UTC | `guardianships` | Sí (push + bandeja al adolescente) | `cron:` · 23 h |
 | 20 | Family age transitions (`family-age-transitions`) | `0 14 * * *` | diario 14:00 UTC | `guardianships` | Sí (push + bandeja a tutores) | `cron:` · 23 h |
 | 21 | Finance month-end reminder (`finance-month-end-reminder`) | `0 10 25 * *` | día 25 del mes, 10:00 America/Mexico_City | `finances` | Sí (push + bandeja a tesorería y dirección) | `cron:` · 23 h solo sin Redis |
+| 22 | Family majority release (`family-majority-release`) — Pendiente de merge (backend PR #654, app PR #257, admin PR #305) | `30 9 * * *` | diario 09:30 UTC | `guardianships` | Sí (push + bandeja, correo si hay; a la persona, a tutores verificados y a directores de custodia) | `cron:family-majority-release` · 23 h |
 
 Notas del inventario:
 
@@ -331,6 +335,7 @@ Notas del inventario:
 - **Lock**: Redis `cron:dependent-profiles-purge`, TTL 23 h.
 - **Propósito**: purga los perfiles de dependientes **congelados** cuyo `purge_after` ya venció (90 días tras el congelamiento): anonimiza la fila de `users` (sin correo, `active=false`), borra datos de salud, contactos de emergencia, evidencias de consentimiento y de clases/honores, la bandeja de notificaciones y los tokens de emparejamiento, limpia los dispositivos vinculados (se conservan como auditoría) y marca `dependent_profiles.purged_at`. Tras el commit borra los objetos de R2 con mejor esfuerzo. La fila de `users` y las filas de tutela se conservan como historial legal.
 - **Procesamiento**: lotes de 100; cada dependiente va en su propia transacción. Si alguno falla, el job termina en `failed` (para que `cron_run_log` y `cron-alert-check` lo reporten) y los pendientes se reintentan en la siguiente corrida.
+- **Fase 4, Pendiente de merge (backend PR #654, app PR #257, admin PR #305)**: la consulta de purga **nunca** toma una fila con `frozen_reason = 'majority_release'` (ruling R6: un adulto liberado y congelado no se borra solo; solo la propia persona puede pedir su eliminación). Es permanente e independiente de `FAMILY_MAJORITY_RELEASE_ENABLED`; el filtro usa un `OR` explícito (`frozen_reason` nulo o distinto) porque un `not` de Prisma descartaría también las filas con `NULL`. Los congelamientos antiguos (`frozen_reason` nulo) conservan los 90 días.
 - **Notifica**: no.
 
 ### 19. Pending teen guardian
@@ -360,6 +365,28 @@ Notas del inventario:
 - **Procesamiento**: lotes de 100. Si alguno falla, el job termina en `failed`; el aviso fallido devuelve su claim y la revocación se reintenta en el barrido siguiente.
 - **Notifica**: sí (push + bandeja a tutores; avisos de revocación a tutores).
 
+### 22. Family majority release
+
+> [!NOTE]
+> Pendiente de merge (backend PR #654, app PR #257, admin PR #305). Descrito contra el código de la rama; `development` aún no lo tiene.
+
+- **Archivo**: `sacdia-backend/src/guardianships/family-majority-release-cron.service.ts`
+- **Método**: `handleDaily()` (lógica en `run(now, { dryRun, onlyDependentId })`)
+- **Clase**: `FamilyMajorityReleaseCronService`
+- **Cron**: `30 9 * * *`, zona `UTC`.
+- **Lock**: Redis `cron:family-majority-release`, TTL 23 h (`DistributedLockService`); la corrida se registra con `CronRunLogger.track`.
+- **Flags**: `FAMILY_MAJORITY_RELEASE_ENABLED` (apagada: registra la corrida como omitida, `flag_disabled`, y no hace nada) y `FAMILY_MAJORITY_RELEASE_DRY_RUN` (calcula y deja en el log un resumen, sin escribir ni enviar nada). Son variables de entorno, no `system_config`.
+- **Propósito**: cinco pasos idempotentes, cada uno reclamado con compare-and-set:
+  0. **Invariante**: inserta la fila de `dependent_profiles` que falte para todo dependiente de una tutoría o de un acceso supervisado (el mismo SQL de la migración `20261113140000`).
+  1. **Aviso (30 días antes)**: a la persona (si tiene cuenta), a los tutores verificados y, solo si el menor está únicamente bajo custodia del club, a los directores. Marca `majority_notice_sent_at`; si todos los envíos fallan, devuelve el claim.
+  2. **Liberación** (mayoría de edad según el país y su zona horaria; el 29 de febrero llega el 1 de marzo en años no bisiestos): una transacción por persona, bajo el candado del dependiente, revalida la edad, fija `released_at`, `release_deadline_at = ahora + 30 días` y `release_source` (`cron`, o `catchup` si la mayoría de edad fue hace más de un día o es el relleno de un adulto encontrado tarde), revoca **todas** las tutorías (`revoked_reason = 'released'`, incluidas custodia y pendientes; nadie es promovido), revoca los códigos de vinculación abiertos (nunca `adult_claim`), los dispositivos vinculados (`majority`) y reinicia el reloj de tutor pendiente; audita `family.majority.released` (o `family.majority.backfill_released`). Tras el commit sube el epoch de acting-for y avisa a la persona («ya eres independiente»), o, si no tiene cuenta, a sus ex tutores y a los directores de custodia con el aviso de entrega del código.
+  3. **Recordatorios** al faltar 7 y 1 día del plazo (nivel 1 a partir de 23 días desde la liberación, nivel 2 a partir de 29; ruling R2). Una persona sin cuenta lo recibe vía sus ex tutores y directores.
+  4. **Congelamiento** si pasó el plazo sin completar: `frozen_at` y `frozen_reason = 'majority_release'`, **nunca** `purge_after` (ruling R6); no toca las sesiones (la persona entra a aceptar, añadir correo, exportar o eliminar) ni revoca los códigos `adult_claim`; audita `family.majority.frozen`; avisa **solo a la persona** (ruling R3).
+- **Procesamiento**: lotes de 100 por cursor; cuenta `noticed`, `released`, `reminded`, `frozen`, `skippedNoRecipient`, `skippedNoBirthday` y `failed`. Un fallo de envío nunca impide la liberación. Si `failed > 0` la corrida se marca `failed` (alerta de `cron-alert-check`) y mañana se reintenta; cada paso devolvió su claim. Se omiten los usuarios inactivos o sin fecha de nacimiento.
+- **Notifica**: sí. Orígenes `family:majority:*`, obligatorios (no silenciables), y correo cuando hay dirección (`EMAIL_ENABLED=false` lo omite sin fallar).
+- **Dry run**: `scripts/family-profiles/majority-release-dry-run.ts` arranca el contexto de Nest y corre el job con `dryRun` (cuenta por paso y por país, solo UUID; `--only <uuid>`, `--list`; se niega con `NODE_ENV=production` sin `--allow-production`). Ver DEPLOYMENT-GUIDE §0.6 para el flujo de la bandeja y el problema de `tsx` con Node 24.
+- **Panel**: aparece en `/dashboard/system/jobs` con la etiqueta «Liberación por mayoría de edad»; se puede ejecutar ahora (con la confirmación habitual). **No es una simulación**: si la bandera está encendida y no hay dry run, libera y avisa de verdad.
+
 ## Política común canonizada
 
 1. **Timezone**: los jobs operan en UTC, con tres excepciones: `monthly-reports-reminders` (`America/Mexico_City`), y `cron-alert-check` y `fcm-tokens-stale-cleanup` (sin `timeZone`, usan la zona del proceso). La conversión a hora local de lo que se muestra es responsabilidad del cliente; el job 13 convierte por Campo con `local_fields.timezone`.
@@ -384,6 +411,7 @@ Notas del inventario:
 | 15. quarterly-reports-auto-generate | `reports.quarterly_auto_generate_enabled` | `true` tras la migración `20261112120000` (aplicada en `development`, `staging` y `production` el 2026-11-12; sin fila = apagado) |
 | 15. quarterly-reports-auto-generate | `reports.periodic_freeze_grace_days` | `15` (la misma clave que el job 14) |
 | 20. family-age-transitions | flag de familia `FAMILY_TEEN_LOGIN_ENABLED` (solo el aviso del cumpleaños 13; el barrido de dispositivos no depende de él) | ver `FamilyFeatureFlagsService` |
+| 22. family-majority-release (Pendiente de merge (backend PR #654, app PR #257, admin PR #305)) | variables de entorno `FAMILY_MAJORITY_RELEASE_ENABLED` (todo el job) y `FAMILY_MAJORITY_RELEASE_DRY_RUN` (solo calcula y registra); se leen al arrancar, así que cambiarlas exige reiniciar. No viven en `system_config` | ambas `false` |
 
 El resto de jobs no tiene feature flag; están siempre activos una vez `ScheduleModule` arranca.
 
@@ -450,6 +478,7 @@ El admin tiene dos superficies complementarias de observabilidad: BullMQ (colas)
   - `dependent-profiles-purge`
   - `pending-teen-guardian`
   - `family-age-transitions`
+  - `family-majority-release` (Pendiente de merge (backend PR #654, app PR #257, admin PR #305))
   - (sin corrida registrada: `cron-alert-check`, `fcm-tokens-stale-cleanup`, `investiture-achievement-intent`; solo existen como nombre del registro de crones)
 - Status valores: `running | completed | failed | skipped` (CHECK constraint en SQL).
 - Endpoint: `GET /api/v1/admin/analytics/cron-runs` — retorna `{ recent[], stats[] }`. `recent` es última ejecución por job vía `DISTINCT ON (job_name)`. `stats` agrega `avg_duration_ms_30d`, `failure_rate_7d`, `last_success`, `last_failure`, `total_runs_7d` por job.

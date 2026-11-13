@@ -57,6 +57,24 @@ Verificación manual: la versión del frontmatter de `terminos-y-condiciones.md`
 
 Las mejoras P1 y P2 del benchmark (página `/subprocessors` aparte, cookies del panel web, retención por categoría, ley aplicable y jurisdicción en términos, resumen inicial, historial de versiones) **no** están aplicadas.
 
+## Perfiles familiares, Fase 4: liberación a la mayoría de edad (puntos legales abiertos)
+
+> [!WARNING]
+> Pendiente de merge (backend PR #654, app PR #257, admin PR #305). Ninguno de los textos de esta sección está aprobado: **requieren revisión del usuario o de un abogado antes de encender `FAMILY_MAJORITY_RELEASE_ENABLED` en `staging` o `production`** (ver `docs/deployment/DEPLOYMENT-GUIDE.md`, §0.6, punto 11). Los documentos operativos de esta carpeta (`aviso-de-privacidad.md`, `terminos-y-condiciones.md`, checklist de tiendas) **todavía no describen** la liberación ni el congelamiento por mayoría de edad.
+
+Qué hace el producto (detalle en `docs/features/family-profiles.md`, «Fase 4»): 30 días antes de la mayoría de edad se avisa a la persona y a sus tutores verificados; al cumplirla se revocan las tutorías y la persona debe aceptar los Términos y el Aviso vigentes (y tener correo) en 30 días; si no lo hace queda **congelada** (sin procesar su información ni mostrarla en las listas del club), y **nunca se borra sola**.
+
+| # | Punto abierto | Qué falta decidir o redactar |
+|---|---|---|
+| 1 | **Texto del aviso de 30 días antes** (push, bandeja y correo, en es, en, fr y pt-BR; los correos van marcados como pendientes de aprobación legal) | Redacción final: qué le pasa a la persona y a su cuenta al cumplir la mayoría de edad, quién deja de tener facultades y qué debe hacer |
+| 2 | **Texto de la aceptación al ser liberado** (pantalla «release» de la app: leer y aceptar Términos y Aviso, añadir correo) y de los avisos «ya eres independiente» y recordatorios a 7 y 1 día del plazo | Redacción final; si el texto de aceptación debe decir algo más que el de la aceptación ordinaria |
+| 3 | **Texto del congelamiento** (aviso a la persona, pantalla de congelado y la entrega del código de reclamo al ex tutor o al director) | Qué se le dice sobre la información que se conserva sin tratarse y cómo recupera el acceso o pide su eliminación |
+| 4 | **Validez de la aceptación por persona sobre la misma versión del texto**: la liberación **no** sube la versión legal; registra una aceptación propia (`legal_acceptances.method = 'majority_release'`, `accepted_by_user_id` nulo) de la versión vigente, aunque el tutor ya hubiera aceptado esa misma versión en su nombre | Confirmar con un abogado que esa aceptación individual, con el texto sin cambios, basta como consentimiento propio de un adulto antes tutelado, o si hace falta una versión nueva |
+| 5 | **Retención indefinida de los datos de una persona congelada** (ruling R6: ninguna persona liberada que no acepta ni reclama se borra sola; solo ella puede pedir la eliminación) | Confirmar con un abogado que conservar de forma indefinida, sin tratamiento, los datos de un exmenor es aceptable bajo la LFPDPPP, y si el aviso de privacidad debe declararlo y con qué plazo de revisión |
+| 6 | **Coherencia con las eliminaciones de menores**: el aviso y los términos prometen que una cuenta de adolescente sin tutor se congela a los 90 días y se elimina 90 días después; la liberación usa otra regla (congelar sin eliminar) | Decidir si la diferencia se explica en los textos. El cron de adolescentes sin tutor (`pending-teen-guardian`) **no** cambia en esta fase; revisarlo queda para después |
+
+Mientras no se aprueben, la bandera sigue apagada en `staging` y `production`.
+
 ## Posición pública de privacidad
 
 SACDIA debe comunicar esta idea de forma consistente:

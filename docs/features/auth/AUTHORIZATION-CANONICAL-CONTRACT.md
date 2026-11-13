@@ -134,7 +134,7 @@ Sub-recursos sensibles hoy cubiertos por familias finas:
 
 - `health`: `GET/PUT /users/:userId/allergies`, `GET/PUT /users/:userId/diseases`, `GET/PUT /users/:userId/medicines`, `DELETE` item-level de esas tres colecciones;
 - `emergency_contacts`: `GET/POST/PATCH/DELETE /users/:userId/emergency-contacts`;
-- `legal_representative`: `GET/POST/PATCH/DELETE /users/:userId/legal-representative`;
+- `legal_representative`: `GET/POST/PATCH/DELETE /users/:userId/legal-representative` (en `development` solo queda el `GET`; Pendiente de merge (backend PR #654, app PR #257, admin PR #305): la familia pasa a llamarse `guardianship`, esas rutas desaparecen y gobierna `GET /admin/users/:userId/guardianships/:guardianshipId/consent-evidence`, `POST /admin/users/:userId/supervised-login/disable` y `POST /admin/users/:userId/linked-devices/:deviceId/revoke`);
 - `post_registration`: `GET /users/:userId/post-registration/status` y `POST /users/:userId/post-registration/step-{1,2,3}/complete`.
 
 Limite explicito del baseline `health` actual:
@@ -148,7 +148,7 @@ El runtime vigente SI distingue permisos finos por familia sensible para sub-rec
 
 - `health:read` / `health:update`;
 - `emergency_contacts:read` / `emergency_contacts:update`;
-- `legal_representative:read` / `legal_representative:update`;
+- `legal_representative:read` / `legal_representative:update` (Pendiente de merge (backend PR #654, app PR #257, admin PR #305): `guardianship:read` / `guardianship:update`, con el respaldo `users:*` hasta 2027-03-31; la clave de caché del contexto pasa a `auth:context:v9`);
 - `post_registration:read` / `registration:complete`.
 
 Regla de enforcement:

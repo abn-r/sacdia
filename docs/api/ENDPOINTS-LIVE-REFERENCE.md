@@ -13,6 +13,9 @@
 **Auth detectada (development)**: Public 13 · JWT u Optional JWT 920 (cifras del 2026-11-04; no se recalcularon con el recuento de 2026-11-09)
 
 > [!NOTE]
+> **Perfiles familiares, Fase 4: Pendiente de merge (backend PR #654, app PR #257, admin PR #305).** Las cifras de la cabecera son las de `development`. La Fase 4 suma **5 rutas** y retira **2** (954 pasaría a 957, en 129 archivos `*.controller.ts`: sale `legal-representatives.controller.ts`, entran `release.controller.ts` y `adult-claim.controller.ts`; métodos: GET 400 · POST 317 · PATCH 126 · DELETE 101 · PUT 13). No se recontó con el extractor: es la diferencia exacta de las rutas tocadas. Detalle en «Liberación a la mayoría de edad (Fase 4)».
+
+> [!NOTE]
 > **Camporee: adjuntos y desglose de puntaje 2026-11-09** (PR #633 de sacdia-backend, mergeado en `development`): **5 endpoints nuevos**.
 >
 > - Adjuntos de evento (sección `camporee-events`): `GET`, `POST` y `DELETE /camporee-events/:eventId/attachments[/:attachmentId]`. Detalle en «Adjuntos de evento».
@@ -153,6 +156,8 @@ Rutas con scope (64 en la Fase 2; la Fase 3a reetiqueta algunas y suma las del a
 | `evidence:upload` | `POST /users/:userId/classes/:classId/sections/:moduleSectionId/files` · `DELETE .../files/:fileId` (`src/classes/classes.controller.ts:331` y `:389`). **Fase 3b**: las cuatro rutas de evidencia de especialidades que antes llevaban este scope pasaron a `honors:write` (fila siguiente) para que el dispositivo vinculado, que tiene `evidence:upload`, no pueda tocarlas; tutores y adolescentes tienen ambos scopes, así que su comportamiento no cambia |
 | `honors:write` | `POST /users/:userId/honors` · `POST /users/:userId/honors/bulk` · `POST`, `PATCH` y `DELETE /users/:userId/honors/:honorId` · `PATCH /users/:userId/honors/:honorId/requirements/progress/batch` · `PATCH .../requirements/:requirementId/progress` · (Fase 3b) `POST /users/:userId/honors/:honorId/files` · `POST .../requirements/:requirementId/evidence/{upload,link}` · `DELETE .../evidence/:evidenceId` (`src/honors/honors.controller.ts:247`, `src/honors/honor-requirements.controller.ts:195`, `:238` y `:299`) |
 | `legal:accept` | `POST /users/me/legal-acceptance` (el servicio guarda `accepted_by_user_id` = el tutor) |
+
+**Fase 4, Pendiente de merge (backend PR #654, app PR #257, admin PR #305)**: `POST /users/me/data-export`, `GET /users/me/data-exports` y `GET /users/me/data-exports/:exportId/download` pasan a llevar el scope `data:export`, que **solo** tiene el principal `released_user`; para el resto de principales siguen siendo «nunca actuando». Las rutas de legal-representative y `requires-legal-representative` de la lista siguiente se retiran.
 
 **Nunca llevan scope** (el spec lo comprueba): `POST /auth/update-password`, `DELETE /auth/me`, `/auth/sessions*`, `/auth/mfa/*`, `/auth/oauth*`, `/users/me/data-export*`, `/fcm-tokens*`, `/users/me/notification-preferences*`, `/notifications/preferences*`, `/guardianships/*` (incluidas las rutas de la ficha de consentimiento del tutor), `POST /club-sections/:clubSectionId/dependents/:userId/claim-codes`, `POST /users/:userId/post-registration/step-3/guardian-only`, `/users/:userId/legal-representative*`, `GET /users/:userId/requires-legal-representative`, solicitud de instructor de especialidad, `/users/:userId/master-honors*`, `/certifications*`, `/admin*`, `/clubs*` (con **dos excepciones**, las lecturas del selector de club del paso 3: `GET /clubs` y `GET /clubs/:clubId/sections`), `/club-sections*`, `POST /qr/validate|scan`, los envíos de notificaciones y `GET /legal/current`. Por eso los endpoints de `guardianships` se llaman **sin** `X-Acting-For`: el tutor administra su familia desde su propio perfil.
 
@@ -924,6 +929,139 @@ Solo hay **un código nuevo** en `ErrorCode` y en los 4 `errors.json` (`es`, `en
 
 Por defecto `false` (`config/env.validation.ts`; se lee del arranque como las otras dos: cambiarla exige reiniciar). Solo gobierna el `POST /club-sections/:clubSectionId/dependents`. Apagada no se deshace nada. Las valida `env.validation.ts` y las comprueba la prueba de cableado `family-phase3c.wiring.spec.ts`. `.env.example` no pudo leerse ni editarse durante la implementación (regla de denegación del agente): comprobar a mano que liste las tres banderas `FAMILY_*` antes de abrir el PR.
 
+## Liberación a la mayoría de edad (Fase 4)
+
+> [!NOTE]
+> **Pendiente de merge (backend PR #654, app PR #257, admin PR #305)**, sacdia-backend; clientes en las mismas ramas de sacdia-app y sacdia-admin. Describe el comportamiento **implementado**, verificado contra el código de la rama. Todo el comportamiento de liberación está detrás de `FAMILY_MAJORITY_RELEASE_ENABLED` (por defecto `false`); la bandera es una variable de entorno, no un valor de `system_config`. Producto y decisiones: [family-profiles.md](../features/family-profiles.md), «Fase 4». Esquema: [SCHEMA-REFERENCE.md](../database/SCHEMA-REFERENCE.md), «Liberación a la mayoría de edad (Fase 4)».
+
+Cuando una persona con perfil de dependiente cumple la mayoría de edad de su país, el sistema la **libera**: se revocan todas las tutorías (motivo `released`) y pasa a ser un adulto que debe aceptar los Términos y el Aviso vigentes (y tener correo). Hasta entonces el servidor la trata como un principal restringido. Con la bandera apagada nada de esto cambia.
+
+- **5 rutas nuevas** (abajo) y **2 retiradas** (`GET /users/:userId/legal-representative` y `GET /users/:userId/requires-legal-representative`; ver «Rutas retiradas»).
+- Cambian de contrato: `GET /auth/me`, `GET`/`POST /users/me/legal-acceptance`, `POST /auth/verify-email/send`, las tres rutas de exportación de datos, `GET /clubs/:clubId/sections/:sectionId/members` y `GET /admin/users/:userId`.
+- **5 códigos de error nuevos** (`FAMILY_*`; abajo), en `ErrorCode` y en los 4 `errors.json`. El canje reutiliza los códigos de vinculación existentes.
+
+### Principal `released_user` y su lista blanca
+
+El resolver del servidor decide en **cada petición** (nunca por un claim del JWT). Una persona con fila en `dependent_profiles`, mayor de edad y sin `release_completed_at` es `released_user` (fase `pending`, o `frozen` si `frozen_at` está puesto). La compuerta es **perezosa**: cubre las horas entre la medianoche local del cumpleaños y la pasada del cron. Con la bandera apagada el comportamiento es el anterior.
+
+- Scopes (los mismos en `pending` y `frozen`, ruling R1): `release:read`, `legal:accept`, `release:email`, `data:export`, `account:manage`. **Sin** `self:read` ni nada de club. `X-Acting-For` con un principal liberado responde 403.
+- Todo lo demás responde 403 `PRINCIPAL_SCOPE_DENIED` con `details.kind = "released_user"` (los clientes solo leen `code`).
+- **Lista blanca exacta** (la fija `release-gate.allowlist.spec.ts` contra el registro real de controladores; 13 rutas): `GET /auth/me`, `GET`/`POST /users/me/legal-acceptance`, `POST /users/me/release/email`, `POST /auth/verify-email/send`, `POST /users/me/data-export`, `GET /users/me/data-exports`, `GET /users/me/data-exports/:exportId/download`, `GET /auth/sessions`, `DELETE /auth/sessions`, `DELETE /auth/sessions/:sessionId`, `DELETE /auth/me` y `GET /auth/oauth/providers`.
+- **Congelado no bloquea el inicio de sesión ni se purga solo** (ruling R6). Un token emitido antes de la liberación queda restringido en la siguiente petición.
+- Una persona liberada no ve datos de club (`principalSeesClubData` es falso para este principal) y queda fuera de los pushes de club.
+
+### `POST /api/v1/users/me/release/email`
+
+Controller `ReleaseController`, JWT, `@SkipPermissions`, `@ActingScope('release:email')` (solo el principal `released_user`), throttle **5 por hora**. Un adolescente con acceso por nombre de usuario no tiene correo y debe añadir uno para terminar la liberación.
+
+Cuerpo `{ "email": "..." }` (se recorta y pasa a minúsculas, `IsEmail`, máximo 255). **200** `{ "status": "success", "data": { "completed": boolean, "thawed": boolean } }`. El correo queda **sin verificar** y se envía el correo de verificación (ruling R5: un correo sin verificar basta para completar). `completed` es `true` si ya había aceptado los términos; `thawed` es `true` si el congelamiento por liberación se levantó con esta llamada.
+
+| Status | `code` | Cuándo |
+| --- | --- | --- |
+| 409 | `FAMILY_RELEASE_EMAIL_ALREADY_SET` | La cuenta ya tiene correo |
+| 409 | `FAMILY_RELEASE_EMAIL_UNAVAILABLE` | Otro usuario tiene ese correo (genérico: no revela de quién) |
+| 400 | validación | Formato de correo |
+| 403 | `PRINCIPAL_SCOPE_DENIED` | Cualquier principal que no sea `released_user` |
+| 429 | - | Más de 5 por hora |
+
+### `POST /api/v1/auth/adult-claim/redeem` (público)
+
+Controller `AdultClaimController`, `@Public()`, throttle **10 por hora por IP**, más un contador de fallos por IP (10 fallos en 24 h devuelven 429 `GUARDIANSHIP_LINK_CODE_LOCKED` sin evaluar el código). Un adulto liberado **sin cuenta** reclama la suya con un código `adult_claim` que le dio su ex tutor o un director.
+
+Cuerpo `{ "code": "XXXX-XXXX", "email": "...", "password": "..." }`; la contraseña usa la política de `IsNewPassword` (12 caracteres como mínimo, mayúscula, minúscula, dígito y un símbolo de `@$!%*?&`; una débil responde 400 de validación). En **una transacción**: consume el código, guarda el correo (sin verificar) y crea la credencial. **200** `{ "status": "success" }`, **sin tokens**: la persona inicia sesión con su correo y su contraseña y aterriza en la pantalla de liberación, donde acepta los términos. El canje **no** acepta los términos ni crea tutoría. Funciona también mientras la persona está congelada y sin plazo (ruling R6). Después del canje se avisa a quien emitió el código (push `majority_handover`).
+
+| Status | `code` | Cuándo |
+| --- | --- | --- |
+| 400 | `GUARDIANSHIP_LINK_CODE_INVALID` | Uniforme: desconocido, vencido, usado, revocado, mal formado, de otro propósito o de una persona purgada |
+| 404 | `FAMILY_ADULT_CLAIM_NOT_RELEASED` | La persona ya tiene cuenta o acceso, ya completó la liberación, tiene un congelamiento antiguo o no está liberada. **El código no se consume** |
+| 409 | `FAMILY_ADULT_CLAIM_EMAIL_UNAVAILABLE` | Ese correo ya pertenece a otro usuario |
+| 429 | `GUARDIANSHIP_LINK_CODE_LOCKED` o limitación | Demasiados intentos |
+
+Un código `adult_claim` enviado a `POST /guardianships/link-codes/redeem` responde el mismo 400 uniforme y no se consume; un código `second_guardian` enviado aquí también.
+
+### `POST /api/v1/guardianships/me/released/:dependentId/adult-claim-code`
+
+Un **ex tutor** (fila de `guardianships` con `revoked_reason = 'released'`) emite un código para la persona liberada. JWT, `@SkipPermissions`, **sin** `@ActingScope` (actuando, como adolescente o con dispositivo vinculado se rechaza), throttle 10 por hora. **201** `{ "status": "success", "data": { "code": "XXXX-XXXX", "expires_at": "ISO" } }`. El código en claro sale **una sola vez**; vigencia fija de **14 días** (sin tope por el plazo de liberación) y un código nuevo reemplaza al abierto. Se puede emitir en cualquier momento tras la liberación, también con la persona congelada. Se audita `family.adult_claim.issued` (sin el código).
+
+| Status | `code` | Cuándo |
+| --- | --- | --- |
+| 404 | `GUARDIANSHIP_NOT_FOUND` | No es ex tutor de esa persona, o la persona fue purgada |
+| 409 | `FAMILY_ADULT_CLAIM_NOT_RELEASED` | La persona tiene cuenta o credenciales, ya completó la liberación, tiene un congelamiento antiguo o no está liberada |
+| 429 | - | Más de 10 por hora |
+
+### `POST /api/v1/club-sections/:clubSectionId/dependents/:userId/adult-claim-codes`
+
+Para una persona que estaba bajo **custodia del club** (o cuyo ex tutor no tiene usuario). `@RequirePermissions('club_members:approve')` con `@AuthorizationResource({ type: 'club_section', idParam: 'clubSectionId' })`, throttle 10 por hora. **201** `{ status: "success", data: { code, expires_at } }`, mismas reglas de código que la ruta del ex tutor. 404 `GUARDIANSHIP_NOT_FOUND` (la persona no tiene asignación viva en esa sección, o existe un ex tutor con usuario y no hubo custodia), 409 `FAMILY_ADULT_CLAIM_NOT_RELEASED`.
+
+### `GET /api/v1/guardianships/me/history`
+
+Historial mínimo de **personas liberadas** del tutor. JWT, `@SkipPermissions`, sin `X-Acting-For`. **200**:
+
+```json
+{
+  "status": "success",
+  "data": {
+    "released": [
+      {
+        "guardianship_id": "uuid",
+        "dependent_user_id": "uuid",
+        "display_name": "Ana Pérez",
+        "relationship_type_name": "Madre",
+        "released_at": "ISO",
+        "can_issue_claim": true
+      }
+    ]
+  }
+}
+```
+
+Hasta 50 filas, la más reciente primero, desde las tutorías con `revoked_reason = 'released'`. `display_name` es `null` cuando la persona fue purgada. `can_issue_claim` es `true` mientras la persona no tiene cuenta, no completó la liberación y no tiene un congelamiento antiguo (también mientras está congelada por la liberación). No hay datos de salud, club, progreso ni contacto. `GET /guardianships/me/dependents` **nunca** lista a una persona liberada. El `include_released=true` que pedía la especificación original no se implementó: lo cubre esta ruta. Las rutas `/guardianships/:id/*` de una tutoría liberada responden 404.
+
+### Cambios en rutas existentes
+
+- **`GET /api/v1/auth/me`**: `data.principal.kind` admite `released_user` y `data.mode` admite `released`. Con ese principal `data.family` es `null`, `principal.supervision` es `null` y llega `data.principal.release`:
+
+  ```json
+  {
+    "status": "pending",
+    "released_at": "ISO|null",
+    "deadline_at": "ISO|null",
+    "frozen_at": "ISO|null",
+    "purge_after": null,
+    "needs_acceptance": true,
+    "needs_email": false,
+    "login_method": "email"
+  }
+  ```
+
+  `status` es `pending` o `frozen`; `released_at` y `deadline_at` son `null` hasta que el cron persiste la liberación (compuerta perezosa); `purge_after` es siempre `null` en un congelamiento por liberación (R6); `login_method` es `email`, `handle` o `null`. `data.legal` solo cuenta las filas `majority_release` de la propia persona. `data.analytics_anonymous` es `true` mientras es `released_user`. `data.family_features` suma `majority_release` (la bandera, para que la app oculte el flujo si está apagada). Con la bandera encendida, para un menor `data.principal.supervision` suma `majority_date` (fecha ISO `YYYY-MM-DD` de la mayoría de edad) y `release_notice_sent` (si el aviso de 30 días ya salió); con la bandera apagada son `null` y `false`.
+- **`GET /api/v1/users/me/legal-acceptance`** (scopes `self:read` o `release:read`) y **`POST /api/v1/users/me/legal-acceptance`**: para un `released_user` el estado solo cuenta filas con `method = 'majority_release'` (una aceptación hecha por el tutor en su nombre no cuenta) y el `POST` guarda ese método con `accepted_by_user_id` nulo; es idempotente y la misma versión aceptada por el tutor no lo impide. Versión distinta de la vigente: 400 `LEGAL_VERSION_MISMATCH`. Si aún no hay liberación pendiente: 409 `FAMILY_RELEASE_NOT_PENDING`. Aceptar con correo **descongela** (R1). Los adultos comunes no cambian.
+- **`POST /api/v1/auth/verify-email/send`**: scope `self:password` o `release:email`.
+- **`POST /api/v1/users/me/data-export`, `GET /api/v1/users/me/data-exports`, `GET /api/v1/users/me/data-exports/:exportId/download`**: llevan `@ActingScope('data:export')`, que solo tiene el principal `released_user` (siguen siendo «nunca actuando» para los demás).
+- **`GET /api/v1/clubs/:clubId/sections/:sectionId/members`**: cada miembro suma `release_status` (`"pending"` o `null`) y `release_deadline_at` (ISO o `null`), de solo lectura y sin datos personales, para los roles que ya ven la lista. Una persona **congelada** por la liberación no aparece en la lista; una pendiente aparece como un adulto cualquiera.
+- **`GET /api/v1/admin/users/:userId`** → `data.guardianships.dependent_profile` suma `majority_notice_sent_at`, `released_at`, `release_deadline_at`, `release_accepted_at`, `release_completed_at`, `release_source` y `frozen_reason` (`majority_release` o `null`). Solo lectura: el panel no edita ni descongela. El bloque `legal_representative` desaparece de la respuesta (ver «Rutas retiradas»).
+- **Permisos sensibles de la ficha familiar**: `legal_representative:read|update` pasan a `guardianship:read|update` (migración `20261113130000_family_guardianship_permission_rename`, mismos ids de permiso y mismas asignaciones por rol). El respaldo `users:*` se conserva hasta el 2027-03-31. Donde esta página dice `legal_representative:read` o `legal_representative:update` (secciones `admin-users` y las de Fase 3), léase `guardianship:read|update` cuando la Fase 4 se integre. `@SensitiveUserSubresource('legal_representative', ...)` pasa a `'guardianship'`.
+
+### Códigos de error nuevos de la Fase 4
+
+| Status | `code` | Dónde |
+| --- | --- | --- |
+| 409 | `FAMILY_RELEASE_NOT_PENDING` | `POST /users/me/legal-acceptance` sin liberación pendiente |
+| 409 | `FAMILY_RELEASE_EMAIL_UNAVAILABLE` | `POST /users/me/release/email` (correo de otro usuario) |
+| 409 | `FAMILY_RELEASE_EMAIL_ALREADY_SET` | `POST /users/me/release/email` (ya tiene correo) |
+| 409 | `FAMILY_ADULT_CLAIM_EMAIL_UNAVAILABLE` | `POST /auth/adult-claim/redeem` (correo de otro usuario) |
+| 404 | `FAMILY_ADULT_CLAIM_NOT_RELEASED` | Canje y emisión de códigos `adult_claim` |
+
+Los códigos `FAMILY_RELEASE_ACCEPTANCE_REQUIRED` y `FAMILY_RELEASE_FROZEN` de la especificación **no existen**: la compuerta responde `PRINCIPAL_SCOPE_DENIED` con `kind = released_user`. El canje reutiliza `GUARDIANSHIP_LINK_CODE_INVALID` y `GUARDIANSHIP_LINK_CODE_LOCKED`.
+
+### Notificaciones de la liberación
+
+Orígenes `family:majority:notice`, `family:majority:released`, `family:majority:reminder`, `family:majority:frozen` y `family:majority:handover`, **obligatorios** (el prefijo `family:majority` está en `MANDATORY_SOURCE_PREFIXES`: el usuario no los puede silenciar). `data.type` del push y la bandeja: `majority_notice`, `majority_released`, `majority_reminder`, `majority_frozen` y `majority_handover`, más `dependent_user_id` para el tutor, `days_left`, `deadline_at` y `majority_date` según el caso. `majority_handover` también llega a quien emitió el código cuando este se canjea. Quién recibe qué: [family-profiles.md](../features/family-profiles.md), «Avisos y recordatorios».
+
+### Rutas retiradas
+
+**Pendiente de merge (backend PR #654, app PR #257, admin PR #305)**: dejan de existir (404) `GET /api/v1/users/:userId/legal-representative` y `GET /api/v1/users/:userId/requires-legal-representative`. Se elimina el módulo `legal-representatives` y la tabla `legal_representatives`; las tutorías (`guardianships`) la reemplazan. Los códigos `LEGAL_REP_*` siguen en `ErrorCode` y en los `errors.json`, sin ninguna ruta que los emita.
+
 ## Resumen por dominio
 
 Conteo de decoradores HTTP por tag de Swagger (`@ApiTags` de cada clase controller) contra `development` commit `59122f6d` (2026-10-21). La suma era 935 en ese commit; sin las 2 rutas de `class-thresholds` que retiró el PR #600 de sacdia-backend (mergeado) es 933, igual que la cabecera. `app.controller.ts` no tiene `@ApiTags` y se cuenta por archivo. Agrupaciones: `camporees` incluye `camporee-club-registration`; `certifications` incluye `certifications - closeout` y `certifications - review`; `insurance` incluye `insurance purchases`; `field-payment-orders` incluye `insurance reassignments`; `rbac` incluye `rbac-bootstrap`; `guardianships` no incluye `supervision (adolescente)` (las 3 rutas de `teen-link-codes`). Los perfiles familiares (PR #530 y #531 de sacdia-backend) ya están mergeados y cuentan en el total. Las filas al final del bloque no estaban en la tabla anterior.
@@ -984,7 +1122,7 @@ Conteo de decoradores HTTP por tag de Swagger (`@ApiTags` de cada clase controll
 | emergency-contacts | 5 |
 | evidence-review | 7 |
 | finances | 12 |
-| guardianships | 21 |
+| guardianships | 21 (26 con las 5 rutas de la Fase 4, Pendiente de merge (backend PR #654, app PR #257, admin PR #305)) |
 | health | 2 |
 | honors | 5 |
 | user-honors | 17 |
@@ -1000,7 +1138,7 @@ Conteo de decoradores HTTP por tag de Swagger (`@ApiTags` de cada clase controll
 | inventory | 8 |
 | investiture | 21 |
 | legal | 3 |
-| legal-representatives | 1 |
+| legal-representatives | 1 (0 con la Fase 4, Pendiente de merge (backend PR #654, app PR #257, admin PR #305)) |
 | Materials — Catalog | 4 |
 | Materials — Categories (admin) | 4 |
 | Materials — Config | 4 |
@@ -1374,6 +1512,8 @@ Errores: 404 `HONOR_INSTRUCTOR_PROPOSAL_NOT_FOUND`; 409 `HONOR_INSTRUCTOR_PROPOS
   "dependent_profile": { "created_at": "iso", "created_by_user_id": "uuid", "frozen_at": null, "purge_after": null }
 }
 ```
+
+- **Fase 4, Pendiente de merge (backend PR #654, app PR #257, admin PR #305)**: `dependent_profile` suma `majority_notice_sent_at`, `released_at`, `release_deadline_at`, `release_accepted_at`, `release_completed_at`, `release_source` y `frozen_reason` (`"majority_release"` o `null`). Un congelamiento por liberación trae `purge_after: null`. Las filas revocadas por la liberación llevan `revoked_reason: "released"`. El bloque `legal_representative` de esta respuesta se elimina.
 
 - `as_dependent` incluye el **historial**: también las filas revocadas, con `revoked_at` y `revoked_reason`, ordenadas por `created_at` ascendente. Una fila de custodia trae `custodian_club` en vez de `guardian`; un tutor externo trae `external_name` (se anula al purgar al menor).
 - `guardian.email` es `null` si la cuenta del tutor fue eliminada.
@@ -2513,6 +2653,11 @@ En `GET /evidence-review/pending` el `file_count` de un ítem `honor` es igual a
 | POST | `/api/v1/guardianships/me/dependents/:dependentId/devices/pairing-tokens` | JWT | `@SkipPermissions`; throttle 10/hora; bandera `FAMILY_LINKED_DEVICE_ENABLED` | Fase 3b. Crear el token de un solo uso (10 min) que el QR lleva para vincular el teléfono de un menor de 13 años. 201 `{ pairing_token, qr_payload, expires_at, expires_in }`. Solo un tutor verificado, como él mismo. Un token nuevo revoca los abiertos del mismo menor | DevicePairingService.issue() | `src/guardianships/guardianships.controller.ts` |
 | GET | `/api/v1/guardianships/me/dependents/:dependentId/devices` | JWT | `@SkipPermissions`; no depende de la bandera | Fase 3b. Dispositivos del menor: activos y revocados en los últimos 30 días. 200 `{ devices, limits: { max_devices: 2 } }`. Cualquier tutor verificado | LinkedDevicesService.list() | `src/guardianships/guardianships.controller.ts` |
 | POST | `/api/v1/guardianships/me/dependents/:dependentId/devices/:deviceId/revoke` | JWT | `@SkipPermissions`; throttle 30/hora; no depende de la bandera | Fase 3b. Desvincular un dispositivo (inmediato e idempotente). 200 `{ linked_device_id, revoked_at, revoked_reason }`. Cualquier tutor verificado; un dispositivo de otro menor → 404 `DEVICE_NOT_FOUND` | LinkedDevicesService.revoke() | `src/guardianships/guardianships.controller.ts` |
+| GET | `/api/v1/guardianships/me/history` | JWT | `@SkipPermissions` | Pendiente de merge (backend PR #654, app PR #257, admin PR #305). Historial mínimo de personas liberadas al cumplir la mayoría de edad (hasta 50, `can_issue_claim`). Ver «Liberación a la mayoría de edad (Fase 4)» | GuardianshipsService.listReleasedHistory() | `src/guardianships/guardianships.controller.ts` |
+| POST | `/api/v1/guardianships/me/released/:dependentId/adult-claim-code` | JWT | `@SkipPermissions`; sin `@ActingScope`; throttle 10/hora | Pendiente de merge (backend PR #654, app PR #257, admin PR #305). Un ex tutor emite un código `adult_claim` (14 días) para una persona liberada sin cuenta. 201 `{ code, expires_at }`; 404 `GUARDIANSHIP_NOT_FOUND`; 409 `FAMILY_ADULT_CLAIM_NOT_RELEASED` | AdultClaimIssueService.issueForFormerGuardian() | `src/guardianships/guardianships.controller.ts` |
+| POST | `/api/v1/club-sections/:clubSectionId/dependents/:userId/adult-claim-codes` | JWT | Permisos: club_members:approve · `@AuthorizationResource` club_section; throttle 10/hora | Pendiente de merge (backend PR #654, app PR #257, admin PR #305). Un director emite un código `adult_claim` para una persona liberada que estaba bajo custodia del club. 201 `{ code, expires_at }`; 404 `GUARDIANSHIP_NOT_FOUND`; 409 `FAMILY_ADULT_CLAIM_NOT_RELEASED` | AdultClaimIssueService.issueForDirector() | `src/guardianships/dependent-claim-codes.controller.ts` |
+| POST | `/api/v1/users/me/release/email` | JWT | `@SkipPermissions`; `@ActingScope('release:email')` (solo `released_user`); throttle 5/hora | Pendiente de merge (backend PR #654, app PR #257, admin PR #305). La persona liberada añade el correo que le falta. 200 `{ completed, thawed }`; 409 `FAMILY_RELEASE_EMAIL_ALREADY_SET` o `FAMILY_RELEASE_EMAIL_UNAVAILABLE` | ReleaseService.setEmail() | `src/guardianships/release.controller.ts` |
+| POST | `/api/v1/auth/adult-claim/redeem` | Public | Throttle 10/hora por IP; contador de fallos por IP (10 en 24 h, 429 `GUARDIANSHIP_LINK_CODE_LOCKED`) | Pendiente de merge (backend PR #654, app PR #257, admin PR #305). Un adulto liberado sin cuenta canjea un código `adult_claim` y crea su credencial y su correo en una transacción. Cuerpo `{ code, email, password }`; 200 `{ status: "success" }` sin tokens; 400 `GUARDIANSHIP_LINK_CODE_INVALID` uniforme; 404 `FAMILY_ADULT_CLAIM_NOT_RELEASED`; 409 `FAMILY_ADULT_CLAIM_EMAIL_UNAVAILABLE` | AdultClaimService.redeem() | `src/guardianships/adult-claim.controller.ts` |
 
 ##### Parentesco del tutor
 
@@ -3030,17 +3175,18 @@ Fase 8 (ejecutada en código el 2026-10-09; mergeada en `development` con backen
 
 ### legal-representatives
 
-> Perfiles familiares, rama `feat/family-profiles`, mergeada en `development` (PR #530 de sacdia-backend). Los representantes legales quedan de **solo lectura**: las tutorías (`guardianships`, sección homónima) los reemplazan y la tabla se elimina en la Fase 4. En `development` ya solo queda el `GET`; las otras tres rutas se retiraron.
+> **Pendiente de merge (backend PR #654, app PR #257, admin PR #305)**: el módulo `legal-representatives` se elimina por completo. La tabla de abajo queda **vacía** a propósito: `GET /api/v1/users/:userId/legal-representative` y `GET /api/v1/users/:userId/requires-legal-representative` ya no existen en la rama (404) y se retiraron de esta matriz; hasta que se integre, `development` todavía las sirve. Ver «Liberación a la mayoría de edad (Fase 4)», «Rutas retiradas».
+>
+> Antecedente (Fase 2, PR #530 de sacdia-backend, en `development`): los representantes legales quedaron de **solo lectura**, las tutorías (`guardianships`) los reemplazan y las tres rutas de escritura se retiraron.
 
 | Method | Path | Auth | Roles/Permisos | Uso | Uso backend | Source |
 | --- | --- | --- | --- | --- | --- | --- |
-| GET | `/api/v1/users/:userId/legal-representative` | JWT | - | Obtener representante legal del usuario (solo lectura; dato sensible `legal_representative:read`). Sin `@ActingScope`: no se puede leer actuando por un menor | LegalRepresentativesService.findOne() | `src/legal-representatives/legal-representatives.controller.ts` |
 
 **Retiradas** (la ruta ya no existe: el servidor responde 404): `POST`, `PATCH` y `DELETE /api/v1/users/:userId/legal-representative`. Los endpoints de escritura y sus servicios, DTO y specs se eliminaron. El permiso `legal_representative:update` sigue en el catálogo y en los seeds de otros roles, pero ninguna ruta lo usa. Consecuencias:
 
 - El paso 2 del post-registro **ya no exige** representante legal para menores (ver `post-registration`); un menor de 13 años lo registra un tutor y un adolescente de 13 a 17 años se registra sin tutor (pendiente de la Fase 3).
 - Los códigos `LEGAL_REP_*` siguen en `ErrorCode` y en los `errors.json` pero ya no los emite ninguna ruta.
-- `GET /users/:userId/requires-legal-representative` sigue (deprecado) y usa la mayoría de edad del país.
+- `GET /users/:userId/requires-legal-representative` seguía (deprecado) en `development`; Pendiente de merge (backend PR #654, app PR #257, admin PR #305): se retira.
 - **Despliegue conjunto**: la app anterior a la Fase 2 sigue llamando a las rutas de escritura retiradas durante el post-registro; el backend y la app de la Fase 2 se despliegan juntos.
 
 ### Materials — Catalog
@@ -3619,7 +3765,6 @@ Lo consume el módulo Reportes de la pestaña Coordinación de la app.
 | POST | `/api/v1/users/:userId/profile-picture` | JWT | Permisos: users:update_profile | Subir foto de perfil | UsersService.uploadProfilePicture() | `src/users/users.controller.ts` |
 | DELETE | `/api/v1/users/:userId/profile-picture` | JWT | Permisos: users:update_profile | Eliminar foto de perfil | UsersService.deleteProfilePicture() | `src/users/users.controller.ts` |
 | GET | `/api/v1/users/:userId/age` | JWT | Permisos: users:read_detail | Calcular edad del usuario | UsersService.calculateAge() | `src/users/users.controller.ts` |
-| GET | `/api/v1/users/:userId/requires-legal-representative` | JWT | Permisos: users:read_detail | **Deprecado**: los representantes legales son de solo lectura y los reemplazan las tutorías. Verificar si el usuario es menor de edad según la mayoría de edad de su país (`countries.age_of_majority`, 18 por defecto); la respuesta ya no dice «18» fijo | UsersService.calculateAge(), UsersService.requiresLegalRepresentative() | `src/users/users.controller.ts` |
 
 ### validation
 

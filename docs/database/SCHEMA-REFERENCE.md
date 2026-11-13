@@ -2,6 +2,7 @@
 
 **Estado**: ACTIVE
 **Sincronizado contra**: `sacdia-backend/prisma/schema.prisma` en la rama `development` (commit `68123f6`). Cifras y espejo `schema.prisma` recontados el 2026-11-11 contra el commit `6bd6769d` (merge del PR #650 de sacdia-backend, que añade las columnas de revisión y `submitted_at` a `club_enrollments`; antes, el PR #649 añadió `role_requirements` y `service_credentials`). El resto de secciones no se revisó de nuevo. Hay 226 migraciones: las 224 hasta el PR #649 están aplicadas en las tres ramas de Neon (`development`, `staging` y `production`); las dos del PR #650 (`20261111120000_club_enrollment_review` y `20261111130000_club_enrollments_validate_permission`) solo en `development`. Las dos del PR #649 (`20261110120000_role_requirements_service_credentials` y `20261110130000_service_credentials_permissions`) se aplicaron a mano en `staging` y `production` el 2026-11-11, con el mismo checksum que el archivo; `development` las tenía desde el 2026-11-10.
+**Pendiente de merge (backend PR #654, app PR #257, admin PR #305)**: las cifras de arriba son las de `development`. La Fase 4 de perfiles familiares suma 6 migraciones, un modelo menos (`legal_representatives`; el schema pasa de 268 a 267 modelos) y 8 columnas en `dependent_profiles`; el espejo `docs/database/schema.prisma` ya las refleja.
 **Fecha de resincronizacion**: 2026-10-13 (última migración en `development`: `20261013110000_remove_retired_investiture_permissions`). Las secciones de abajo se resincronizaron por completo hasta el 2026-10-04; después solo se añadieron las de instructor de especialidad y carga por certificado (2026-10-13) y la de aceptación legal (`legal_acceptances`, 2026-10-15, migración `20261015120000_legal_acceptances`, ya en `development`; las cifras de abajo la incluyen) y la de perfiles familiares (2026-10-16, actualizada el 2026-10-19 con la Fase 2 completa; migración `20261016120000_family_profiles`, rama `feat/family-profiles`, mergeada (PR #530 de sacdia-backend)). El espejo `schema.prisma` sí es la copia completa e incluye ambas. La sub-fase 3a de perfiles familiares (2026-10-19; migración `20261020120000_family_teen_login`, rama `feat/family-profiles-phase3`, mergeada (PR #531 de sacdia-backend)) añade `supervised_logins` y dos reemplazos de CHECK; ver «Cuentas supervisadas (Fase 3a)». La sub-fase 3b (2026-10-20; migración `20261021120000_family_linked_devices`, misma rama, mergeada (PR #531 de sacdia-backend)) añade `linked_devices` y `device_pairing_tokens` y amplía otro CHECK de `supervised_logins`; ver «Dispositivos vinculados (Fase 3b)». La sub-fase 3c (2026-10-20; migraciones `20261022120000_family_director_minors` y `20261022130000_seed_family_permissions`, misma rama, mergeada (PR #531 de sacdia-backend)) añade `dependent_profiles.teen_login_nudged_at` y los permisos `dependents:create` y `consent:verify`; ver «Registro por director y acceso familiar (Fase 3c)». Las cifras de abajo y el espejo `schema.prisma` ya incluyen la 3a, la 3b y la 3c (recuento del 2026-11-09). El seguimiento de coordinadores (2026-10-20; migración `20261023120000_grant_consent_verify_to_coordinators`, rama `feat/coordinator-consent-verify`, solo DML, **aplicada en `development` y `staging`** (2026-10-21) y en `production` (2026-11-09)) da `consent:verify` a los roles globales de coordinador; ver su sección más abajo. La migración `20261024120000_allow_coordinator_paper_form` (rama `feat/coordinator-pending-consents`, solo DDL, **aplicada en `development` y `staging`** (2026-10-21) y en `production` (2026-11-09)) amplía el CHECK `guardianships_verification_method_ck` con `coordinator_paper_form`; ver su sección más abajo.
 
 Referencia humana concisa del schema Prisma vigente.
@@ -151,8 +152,8 @@ Evidencia **append-only** de que un usuario aceptó los Términos y Condiciones 
 | `accepted_by_user_id` | `uuid` | sí | - | FK a `users.user_id`: quien aceptó en nombre de otro. Null en la aceptación propia. Con perfiles familiares, el tutor queda aquí cuando acepta por un menor (ver «Perfiles familiares») |
 | `created_at` | `timestamptz(6)` | no | `now()` | |
 
-- **CHECK**: `legal_acceptances_document_type_ck` (`document_type IN ('terms', 'privacy')`), `legal_acceptances_method_ck` (`method IN ('register_checkbox', 'acceptance_gate')`) y `legal_acceptances_document_version_ck` (`char_length(btrim(document_version)) BETWEEN 1 AND 32`). Prisma no modela CHECK: solo existen en la migración.
-- **Índice único**: `uq_legal_acceptances_user_doc_version` sobre `(user_id, document_type, document_version)`, creado con `CREATE UNIQUE INDEX` y mapeado con `@@unique(map:)`. Sirve las consultas de estado y de exportación, y hace idempotente el `createMany` con `skipDuplicates`. No hay otro índice.
+- **CHECK**: `legal_acceptances_document_type_ck` (`document_type IN ('terms', 'privacy')`), `legal_acceptances_method_ck` (`method IN ('register_checkbox', 'acceptance_gate')`; Pendiente de merge (backend PR #654, app PR #257, admin PR #305): se añade `'majority_release'`, ver «Liberación a la mayoría de edad (Fase 4)») y `legal_acceptances_document_version_ck` (`char_length(btrim(document_version)) BETWEEN 1 AND 32`). Prisma no modela CHECK: solo existen en la migración.
+- **Índice único**: `uq_legal_acceptances_user_doc_version` sobre `(user_id, document_type, document_version)`, creado con `CREATE UNIQUE INDEX` y mapeado con `@@unique(map:)` (Pendiente de merge (backend PR #654, app PR #257, admin PR #305): pasa a ser un índice **parcial** `WHERE method <> 'majority_release'` y se quita el `@@unique` del schema Prisma; lo acompaña `uq_legal_acceptances_release_user_doc_version`, ver «Liberación a la mayoría de edad (Fase 4)»). Sirve las consultas de estado y de exportación, y hace idempotente el `createMany` con `skipDuplicates`. No hay otro índice.
 - **FK**: `legal_acceptances_user_id_fkey` y `legal_acceptances_accepted_by_user_id_fkey`, ambas a `users(user_id)` sin cláusula `ON DELETE`/`ON UPDATE` explícita, es decir, el valor por defecto de Postgres `NO ACTION` (igual que `onDelete: NoAction` en Prisma). Los usuarios se anonimizan o desactivan, no se borran, así que nada cascada.
 - **Relaciones Prisma**: `legal_acceptance_user` (`users.legal_acceptances`) y `legal_acceptance_accepted_by` (`users.legal_acceptances_given`).
 - **Pendiente = ausencia de fila**: un documento está pendiente si no existe fila para `(usuario, tipo, versión vigente)`. Tras revertir una versión, el usuario que ya la había aceptado no vuelve a quedar pendiente.
@@ -200,8 +201,16 @@ Identidad explícita de un dependiente: una fila por menor sin cuenta, con su ci
 | `purge_after` | `timestamptz(6)` | sí | - | `frozen_at` + 90 días |
 | `purged_at` | `timestamptz(6)` | sí | - | Momento en que el cron de purga anonimizó el perfil |
 | `teen_login_nudged_at` | `timestamptz(6)` | sí | - | Fase 3c. Marca de que ya se avisó a los tutores de que el menor llegó a la edad de acceso propio. `NULL` = nunca avisado. Sin default; ver «Registro por director y acceso familiar (Fase 3c)» |
+| `majority_notice_sent_at` | `timestamptz(6)` | sí | - | Fase 4 (Pendiente de merge (backend PR #654, app PR #257, admin PR #305)). Marca de que el cron envió el aviso de 30 días antes de la mayoría de edad. Se reclama con compare-and-set |
+| `released_at` | `timestamptz(6)` | sí | - | Fase 4. Momento de la liberación al cumplir la mayoría de edad |
+| `release_deadline_at` | `timestamptz(6)` | sí | - | Fase 4. `released_at` + 30 días: plazo para aceptar los términos vigentes (y añadir correo si falta) antes del congelamiento |
+| `release_source` | `varchar(16)` | sí | - | Fase 4. `cron` (liberación el día) o `catchup` (adulto encontrado tarde; plazo de 30 días desde ese momento) |
+| `release_accepted_at` | `timestamptz(6)` | sí | - | Fase 4. La persona aceptó los Términos y el Aviso vigentes (`legal_acceptances.method = 'majority_release'`) |
+| `release_completed_at` | `timestamptz(6)` | sí | - | Fase 4. Aceptó **y** tiene correo: vuelve al principal `user` |
+| `release_reminder_level` | `smallint` | no | `0` | Fase 4. 0 sin recordatorio, 1 a 7 días del plazo (≥ 23 días desde la liberación), 2 a 1 día (≥ 29 días) |
+| `frozen_reason` | `varchar(24)` | sí | - | Fase 4. `majority_release` si el congelamiento lo puso la liberación; `NULL` en los congelamientos de las Fases 2 y 3 |
 
-- **CHECK**: `dependent_profiles_frozen_ck` exige `(frozen_at IS NULL) = (purge_after IS NULL)`.
+- **CHECK**: `dependent_profiles_frozen_ck` exigía `(frozen_at IS NULL) = (purge_after IS NULL)`. Pendiente de merge (backend PR #654, app PR #257, admin PR #305): la migración `20261113100000` lo reemplaza por una regla que depende del motivo: sin congelar, `frozen_at` y `purge_after` nulos; congelamiento antiguo (`frozen_reason IS NULL`), ambos presentes; congelamiento por liberación (`frozen_reason = 'majority_release'`), `frozen_at` presente y `purge_after` **siempre nulo** (ruling R6: nunca se purga solo). Los demás CHECK de la Fase 4 están en «Liberación a la mayoría de edad (Fase 4)».
 - **Índice parcial** `idx_dependent_profiles_purge` sobre `(purge_after) WHERE frozen_at IS NOT NULL AND purged_at IS NULL`: lo recorre el cron de purga.
 - Relaciones Prisma: `dependent_profile_user` (1:1 con `users.dependent_profile`) y `dependent_profile_creator`.
 
@@ -280,7 +289,7 @@ Códigos de vinculación de un solo uso. Solo se guarda el hash.
 | `link_code_id` | `uuid` | no | `gen_random_uuid()` | PK `guardianship_link_codes_pkey` |
 | `code_hash` | `char(64)` | no | - | HMAC-SHA256 hex del código normalizado. `UNIQUE` `guardianship_link_codes_code_hash_key` |
 | `dependent_user_id` | `uuid` | no | - | FK a `users.user_id` |
-| `purpose` | `varchar(24)` | no | - | CHECK: `second_guardian` o `director_claim` (Fase 3a: también `teen_guardian_link`; ver «Cuentas supervisadas (Fase 3a)») |
+| `purpose` | `varchar(24)` | no | - | CHECK: `second_guardian` o `director_claim` (Fase 3a: también `teen_guardian_link`; ver «Cuentas supervisadas (Fase 3a)»; Fase 4, Pendiente de merge (backend PR #654, app PR #257, admin PR #305): también `adult_claim`, 14 días, ver «Liberación a la mayoría de edad (Fase 4)») |
 | `issued_by_user_id` | `uuid` | no | - | FK a `users.user_id`: tutor o director que lo emitió |
 | `issued_for_club_section_id` | `integer` | sí | - | FK a `club_sections`: obligatorio solo en `director_claim` |
 | `expires_at` | `timestamptz(6)` | no | - | CHECK `expires_at > created_at`. 72 h en `second_guardian`, 7 días en `director_claim` |
@@ -516,6 +525,61 @@ Escrita a mano, solo DDL, rama `feat/coordinator-pending-consents` de sacdia-bac
 No añade tablas ni columnas. Por cada menor registrado por un director (`POST /club-sections/:clubSectionId/dependents`) el servicio escribe, en una transacción: `users` (sin `email`; `country_id` del club de la sección), `users_pr`, `users_roles` (rol `user`), `dependent_profiles` (`created_by_user_id` = el director), una fila de `guardianships` de **custodia** (`guardian_user_id` NULL, `is_custodian`, `custodian_club_id` = club principal de la sección, `is_primary`, `consent_status = pending`, `sworn_declaration_at`), una `club_role_assignments` con `status = 'pending'` (nunca `active`), dos filas de `legal_acceptances` con `accepted_by_user_id` = el director y una fila de `audit_logs` (`entity_type = dependent`, `action = created_by_director`). No hay fila en `account`.
 
 Si la solicitud de ese menor vence sin tutor (`expireStaleRequests`), la fila de `dependent_profiles` pasa a `frozen_at = now` y `purge_after = now + 90 días` (el CHECK `dependent_profiles_frozen_ck` se cumple) y el cron `dependent-profiles-purge` hace el resto a los 90 días.
+
+## Liberación a la mayoría de edad (Fase 4)
+
+> [!NOTE]
+> Pendiente de merge (backend PR #654, app PR #257, admin PR #305). Cinco migraciones aditivas o de DML acotado más una sexta que borra una tabla, todas escritas a mano, idempotentes y sin `migrate dev`. Aplicadas en Neon `development` las seis (la sexta, `20261114100000`, el 2026-11-12, después de la copia `pg_dump`); `staging` y `production` quedan **pendientes**. Comportamiento y rollout: [family-profiles.md](../features/family-profiles.md), «Fase 4», y [DEPLOYMENT-GUIDE.md](../deployment/DEPLOYMENT-GUIDE.md), §0.6.
+
+| Orden | Migración | Qué hace |
+|---|---|---|
+| 1 | `20261113100000_family_majority_release_columns` | 8 columnas nuevas en `dependent_profiles`, CHECK de liberación, reemplazo de `dependent_profiles_frozen_ck` por motivo y dos índices parciales |
+| 2 | `20261113110000_family_majority_release_legal` | `legal_acceptances.method` admite `majority_release`; la clave única pasa a dos índices únicos parciales |
+| 3 | `20261113120000_family_majority_release_link_codes` | `guardianship_link_codes.purpose` admite `adult_claim`; CHECK de consumo |
+| 4 | `20261113140000_family_majority_release_backfill_profiles` | Solo DML de preparación: una fila de `dependent_profiles` para todo dependiente de una tutoría o de un acceso supervisado que no la tenga |
+| 5 | `20261113130000_family_guardianship_permission_rename` | Renombra `legal_representative:read\|update` a `guardianship:read\|update` (ver `docs/features/rbac.md`). Sin cambio de esquema |
+| 6 | `20261114100000_family_drop_legal_representatives` | `DROP TABLE IF EXISTS legal_representatives`. Va en un PR aparte (backend PR #655, en borrador), mergeado después de desplegar el código. **Irreversible**: va al final, con el código de la 4c-1 ya desplegado y una copia `pg_dump` de la tabla por ambiente |
+
+El número de orden es el de aplicación, no el del nombre: la migración de renombrado (`...130000`) lleva un sello anterior al relleno (`...140000`) pero es independiente de él; el orden operativo está en el DEPLOYMENT-GUIDE.
+
+### `dependent_profiles`: columnas y restricciones nuevas
+
+Las ocho columnas están en la tabla de `dependent_profiles` de arriba. Restricciones (migración 1):
+
+| Restricción | Regla |
+|---|---|
+| `dependent_profiles_release_pair_ck` | `(released_at IS NULL) = (release_deadline_at IS NULL)` |
+| `dependent_profiles_release_completed_ck` | `release_completed_at IS NULL OR release_accepted_at IS NOT NULL` |
+| `dependent_profiles_release_source_ck` | `release_source IS NULL OR release_source IN ('cron', 'catchup')` |
+| `dependent_profiles_release_reminder_ck` | `release_reminder_level BETWEEN 0 AND 2` |
+| `dependent_profiles_frozen_reason_ck` | `frozen_reason IS NULL OR (frozen_at IS NOT NULL AND frozen_reason IN ('majority_release'))` |
+| `dependent_profiles_frozen_ck` (reemplaza al de la Fase 2) | (`frozen_at IS NULL AND purge_after IS NULL`) **o** (`frozen_at` presente, `frozen_reason IS NULL`, `purge_after` presente) **o** (`frozen_at` presente, `frozen_reason = 'majority_release'`, `purge_after IS NULL`) |
+
+Índices parciales (solo SQL; Prisma no los expresa):
+
+- `idx_dependent_profiles_unreleased` sobre `(user_id) WHERE released_at IS NULL AND frozen_at IS NULL AND purged_at IS NULL`: lo recorre el aviso y la liberación.
+- `idx_dependent_profiles_release_deadline` sobre `(release_deadline_at) WHERE released_at IS NOT NULL AND release_completed_at IS NULL AND frozen_at IS NULL AND purged_at IS NULL`: lo recorren los recordatorios y el congelamiento.
+
+> [!WARNING]
+> **Por qué cambió `dependent_profiles_frozen_ck`.** La regla de la Fase 2 (`(frozen_at IS NULL) = (purge_after IS NULL)`) prohíbe congelar sin fecha de purga, y un congelamiento por liberación nunca la tiene (ruling R6). Las pruebas unitarias simulan la base y no lo vieron: el QA en vivo en `development` falló con Postgres 23514 en el paso de congelar del cron. La migración `20261113100000` se corrigió y se volvió a aplicar en `development` (checksum de `_prisma_migrations` actualizado; solo estaba aplicada ahí). En `staging` y `production` se aplica ya corregida.
+
+El modelo Prisma `dependent_profiles` suma las ocho columnas (`release_reminder_level` es `Int @default(0) @db.SmallInt`). La fila existe para **todo** dependiente de una tutoría o de un acceso supervisado (invariante que mantienen la migración 4 y el paso 0 del cron `family-majority-release`).
+
+### `legal_acceptances`: método `majority_release` e índices parciales
+
+- `legal_acceptances_method_ck` pasa a `method IN ('register_checkbox', 'acceptance_gate', 'majority_release')`.
+- `uq_legal_acceptances_user_doc_version` (`user_id, document_type, document_version`) se recrea como **parcial** `WHERE method <> 'majority_release'`, conservando el nombre y la semántica de los métodos anteriores. El `@@unique` desaparece del modelo Prisma (queda un comentario): Prisma no expresa índices parciales.
+- `uq_legal_acceptances_release_user_doc_version` (mismas columnas) `WHERE method = 'majority_release'`.
+- Resultado: una persona puede tener, para la misma versión, la fila que su tutor aceptó en su nombre **y** su propia fila `majority_release` (con `accepted_by_user_id` nulo). La aceptación por persona es nueva incluso con el mismo texto; no hay subida global de versión. `createMany` con `skipDuplicates` sigue siendo idempotente (`ON CONFLICT DO NOTHING` sin destino).
+
+### `guardianship_link_codes`: `adult_claim`
+
+- `guardianship_link_codes_purpose_ck` suma `adult_claim` (cabe en `varchar(24)`).
+- `guardianship_link_codes_adult_claim_ck`: `purpose <> 'adult_claim' OR consumed_by_user_id IS NULL OR consumed_by_user_id = dependent_user_id`. Fila de un código de reclamo: `dependent_user_id` = el adulto, `issued_by_user_id` = el ex tutor o el director, sin sección (`guardianship_link_codes_section_ck` solo exige sección en `director_claim`), `consumed_by_user_id` = el propio adulto al canjearlo. Vigencia de 14 días. No cambia la nulabilidad de ninguna columna.
+
+### `legal_representatives`: eliminada
+
+Pendiente de merge (backend PR #654, app PR #257, admin PR #305). La migración 6 borra la tabla `legal_representatives` con sus índices (`idx_legal_reps_user`, `idx_legal_reps_representative`) y sus llaves foráneas a `users` y `relationship_types`. El schema Prisma pierde el modelo y las relaciones `users.legal_representative`, `users.as_legal_representative` y `relationship_types.legal_representatives`. **No se copia ningún dato a `guardianships`** (las tutorías de la Fase 2 ya reemplazaban a la tabla). Reversión: restaurar la copia `pg_dump` previa al borrado.
 
 ## Modelos añadidos a esta referencia (resincronización 2026-10-04)
 
@@ -1143,8 +1207,8 @@ Define el presupuesto de puntos por componente dentro de un eje anual:
 
 ### Usuarios y salud
 
-- `users`, `legal_representatives`, `emergency_contacts`, `relationship_types`
-- `dependent_profiles`, `guardianships`, `guardianship_consent_evidences`, `guardianship_link_codes` (perfiles familiares; `legal_representatives` queda de solo lectura hasta la Fase 4)
+- `users`, `emergency_contacts`, `relationship_types` (`legal_representatives` se elimina en la Fase 4; Pendiente de merge (backend PR #654, app PR #257, admin PR #305))
+- `dependent_profiles`, `guardianships`, `guardianship_consent_evidences`, `guardianship_link_codes` (perfiles familiares)
 - `allergies`, `diseases`, `medicines`, `users_allergies`, `users_diseases`, `users_medicines`
 - `member_insurances`
 
@@ -1263,6 +1327,13 @@ Define el presupuesto de puntos por componente dentro de un eje anual:
 
 ## Migraciones recientes
 
+- Fase 4 de perfiles familiares, Pendiente de merge (backend PR #654, app PR #257, admin PR #305), seis migraciones; **aplicadas en `development` las seis** (la última, `20261114100000`, tras la copia `pg_dump` del 2026-11-12), `staging` y `production` pendientes:
+  - `20261114100000_family_drop_legal_representatives` - `DROP TABLE IF EXISTS legal_representatives`. Irreversible; al final y con el código de la 4c-1 desplegado.
+  - `20261113140000_family_majority_release_backfill_profiles` - DML de preparación: filas faltantes de `dependent_profiles` (`ON CONFLICT DO NOTHING`).
+  - `20261113130000_family_guardianship_permission_rename` - DO idempotente: `legal_representative:read|update` pasan a `guardianship:read|update` conservando los ids de permiso.
+  - `20261113120000_family_majority_release_link_codes` - `adult_claim` en `purpose` y CHECK de consumo.
+  - `20261113110000_family_majority_release_legal` - `majority_release` en `method` y dos índices únicos parciales.
+  - `20261113100000_family_majority_release_columns` - 8 columnas, CHECK y dos índices parciales de `dependent_profiles`; reemplaza `dependent_profiles_frozen_ck` por motivo.
 - `20261109120000_drop_global_material_folio_unique` - PR #648 de sacdia-backend, mergeado. Quita `material_orders_folio_key`, el UNIQUE global sobre `material_orders.folio_referencia` de `20260513180000_materiales_init`. `20260514130000_materials_per_local_field` debía quitarlo, pero `staging` y `production` lo conservaron, así que dos Campos Locales no podían emitir el mismo folio (el folio cuenta por Campo Local y año); `development` ya no lo tenía. Idempotente (`DROP CONSTRAINT IF EXISTS` + `DROP INDEX IF EXISTS`). Queda solo `uq_material_orders_lf_folio_ref (local_field_id, folio_referencia) WHERE folio_referencia IS NOT NULL`, en las tres ramas. Aplicada en `development`, `staging` y `production` (2026-11-09).
 - `20261108150000_session_refresh_rotation` - PR #642 de sacdia-backend. Añade `sessions.previous_token TEXT` y `sessions.rotated_at TIMESTAMPTZ(6)` (ambas nullable) y el índice único `sessions_previous_token_key` sobre `previous_token`. Aplicada en las tres ramas de Neon (2026-11-09).
 - `20261106120000_camporee_event_attachments` - PR #633 de sacdia-backend, mergeado en `development`. Tabla `camporee_event_attachments` con su índice y dos FK (evento con `CASCADE`, creador con `SET NULL`). Sin DML. **Aplicada en `development` y `staging`** (2026-11-09) y en `production` (2026-11-09).

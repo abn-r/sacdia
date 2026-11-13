@@ -195,6 +195,52 @@ Lo que **no** se revierte con banderas: la compuerta de consentimiento, el modo 
 
 **10. Los crones exigen un plan de Render de pago, siempre encendido (decisión del 2026-10-21).** Los `@Cron` corren dentro del proceso de la API; con el plan Free el servicio se suspende por inactividad y **ningún cron corre mientras duerme** (purgas, recordatorios, vencimientos de solicitudes, el reloj de 90 días de los adolescentes sin tutor, el barrido de cambios de edad). En desarrollo se acepta y se resuelve con el botón «Ejecutar ahora» (super-admin; `POST /api/v1/admin/cron-jobs/:jobName/run`). **Producción necesita un plan de pago always-on**: añádelo a esta checklist antes de promover a `main`, junto con la advertencia de que ejecutar a mano un job con avisos (`activities-reminder`, `cron-alert-check` y los de la fase 3) envía notificaciones reales. Si algún día hiciera falta fiabilidad en desarrollo sin pagar: un ping externo de keep-alive, o mover los crones a Render Cron Jobs o GitHub Actions que llamen a endpoints internos protegidos.
 
+**11. Fase 4: liberación a la mayoría de edad (Pendiente de merge (backend PR #654, app PR #257, admin PR #305)).**
+
+> [!WARNING]
+> Estado (2026-11-12): las migraciones están **aplicadas en Neon `development`** a mano con psql (cada una en su transacción), **incluida la última** (`20261114100000_family_drop_legal_representatives`, aplicada el 2026-11-12 después de la copia `pg_dump`; en `development` había 1 fila, y en `staging` y `production`, 0). `staging` y `production` están **pendientes**, y `production` solo por la promoción de este §0.6 (regla de producción de arriba). Los PR de los tres repos y del repo raíz aún no están abiertos. Producto y reglas: `docs/features/family-profiles.md`, «Fase 4».
+
+**11.1 Migraciones, en este orden** (`sacdia-backend/prisma/migrations/`; escritas a mano, re-ejecutables, sin `CONCURRENTLY`):
+
+| # | Migración | Contenido | Notas |
+|---|---|---|---|
+| 1 | `20261113100000_family_majority_release_columns` | 8 columnas de liberación en `dependent_profiles`, CHECK, dos índices parciales y reemplazo de `dependent_profiles_frozen_ck` por motivo de congelamiento | Sin DML. Se corrigió tras el QA en `development` (el CHECK de la Fase 2 impedía congelar sin `purge_after`); en `development` se reaplicó y se actualizó el checksum de `_prisma_migrations`. En `staging` y `production` se aplica ya corregida |
+| 2 | `20261113110000_family_majority_release_legal` | `majority_release` en `legal_acceptances.method` y dos índices únicos parciales | Sin DML |
+| 3 | `20261113120000_family_majority_release_link_codes` | `adult_claim` en `guardianship_link_codes.purpose` y CHECK de consumo | Sin DML |
+| 4 | `20261113140000_family_majority_release_backfill_profiles` | Solo DML de preparación: crea la fila de `dependent_profiles` que falte a todo dependiente de una tutoría o de un acceso supervisado | Tras aplicarla, la consulta de verificación del archivo debe devolver 0 filas. **No** libera a nadie: la liberación del «ya mayor de edad» la hace el cron |
+| 5 | `20261113130000_family_guardianship_permission_rename` | Renombra `legal_representative:read\|update` a `guardianship:read\|update` (mismos ids de permiso) | Va aquí en el orden operativo aunque su sello sea anterior a la 4; es independiente. Ver 11.2 |
+| 6 | `20261114100000_family_drop_legal_representatives` | `DROP TABLE IF EXISTS legal_representatives` | **Va en un PR aparte** (backend PR #655, en borrador), que se mergea después de desplegar el código de la Fase 4: Render aplica las migraciones pendientes en el deploy, y así el código viejo nunca consulta la tabla borrada. **Irreversible.** Última, por ambiente, con el código de la 4c-1 ya desplegado y después de la copia `pg_dump` (ver 11.3) |
+
+Compatibilidad: las migraciones 1 a 4 son aditivas o de preparación y el código anterior las ignora. Con la bandera apagada el comportamiento del backend nuevo es el de la Fase 3.
+
+**11.2 Renombre de permisos y contratos cruzados.** El orden de integración es: (1) los commits de renombre del panel y de la app, (2) fijar las variables de repositorio `SACDIA_ADMIN_CONTRACT_REF` y `SACDIA_APP_CONTRACT_REF` en el SHA de 40 caracteres de esos commits (requiere aprobación; mantener la ventana corta, porque el CI de otras ramas del backend compara las claves antiguas contra los SHA nuevos), (3) el PR del backend, (4) tras fusionar los tres PR, mover ambas variables a los SHA integrados. Aplicar la migración 5 junto con el despliegue del backend nuevo (el código nuevo lee `guardianship:*`; el anterior, `legal_representative:*`): la clave de caché de autorización pasa a `auth:context:v9` y el código lee `guardianship:*` con el respaldo `users:*` hasta 2027-03-31. Verificar después: los mismos ids de permiso, las asignaciones de rol intactas (17 por permiso en `development`) y que un rol con `users:read_detail` sigue leyendo la tarjeta familiar. Detalle: `docs/features/rbac.md`.
+
+**11.3 Borrado de `legal_representatives` (4c-2).** Por cada ambiente, en este orden: (a) el código de la 4c-1 (sin el módulo `legal-representatives`, sin `requires-legal-representative`) está desplegado, (b) `pg_dump` de la tabla desde la rama de Neon correspondiente, guardado **fuera del repositorio** (`pg_dump "$DATABASE_URL" -t legal_representatives --data-only --inserts -f legal_representatives_<ambiente>_<fecha>.sql`; sin `--data-only` si hace falta restaurar la definición) y confirmado por el responsable, (c) aplicar la migración 6. Reversión = restaurar esa copia. No se migra ningún dato a `guardianships`. Un backend anterior que corriera contra la base ya sin la tabla fallaría en sus consultas: nunca aplicarla antes del despliegue.
+
+**11.4 Variables de entorno** (Render; booleanos, por defecto `false`; se leen **al arrancar**, así que cambiarlas exige reiniciar). No son valores de `system_config`:
+
+| Variable | Gobierna |
+|---|---|
+| `FAMILY_MAJORITY_RELEASE_ENABLED` | Todo: el cron `family-majority-release` (apagada = corrida omitida `flag_disabled`), la compuerta perezosa del principal `released_user`, `family_features.majority_release` y los avisos. Apagada, el servidor se comporta exactamente como antes |
+| `FAMILY_MAJORITY_RELEASE_DRY_RUN` | El cron calcula quién se avisaría, liberaría, recordaría o congelaría y lo deja en el log (`majority_release_dry_run`); no escribe ni envía nada |
+
+**Importante**: como la compuerta es perezosa, **encender la bandera restringe a la vez a toda persona rastreada de la mayoría de edad en adelante**, no solo a quien cumpla años ese día. Por eso el orden es obligatorio:
+
+1. Desplegar el backend con la bandera apagada (las migraciones y el código nuevos conviven con la app anterior).
+2. **Publicar la app con la compuerta de liberación antes de encender la bandera** (pantallas `/release`, `/release/frozen` y `/adult-claim`). Una app anterior no entiende `released_user`: con la bandera encendida, el adulto liberado recibiría 403 `PRINCIPAL_SCOPE_DENIED` y quedaría sin pantalla (deducido del comportamiento del servidor; no probado con una app antigua). Fijar la versión mínima de la app si hace falta.
+3. **Prueba en seco** en `development`, y luego en `staging`: ver 11.5. Revisar el informe (conteos por paso y por país) antes de encender nada.
+4. Encender `FAMILY_MAJORITY_RELEASE_ENABLED` primero en `development` y `preproduction`, con el panel y la app nuevos. Ejecutar el job desde `/dashboard/system/jobs` («Ejecutar ahora», super-admin) y correr la matriz de QA: adolescente con usuario generado, adolescente con correo, menor solo bajo custodia del club, persona sin cuenta que reclama con código, y descongelar aceptando.
+5. Cambios en `staging` y `production`: solo con aprobación explícita y tras la aprobación legal (`docs/legal/README.md`). En `production`, solo con la promoción de este §0.6.
+
+**11.5 Prueba en seco.** Dos vías:
+
+- **Por entorno**: `FAMILY_MAJORITY_RELEASE_ENABLED=true` y `FAMILY_MAJORITY_RELEASE_DRY_RUN=true` en una instancia de prueba; la corrida diaria (09:30 UTC) o «Ejecutar ahora» deja el resumen en el log y no escribe nada. Cuidado: con la bandera encendida la compuerta perezosa **sí** actúa aunque el cron esté en seco.
+- **Script**: `scripts/family-profiles/majority-release-dry-run.ts` (arranca el contexto de Nest; imprime conteos por paso y por país, solo UUID; `--only <uuid>`, `--list`; se niega con `NODE_ENV=production` sin `--allow-production`). **Problema conocido**: con `tsx` 4.23 y Node 24, todo script que arranque Nest e importe `src/app.module` falla con `ERR_INVALID_URL_SCHEME` en la resolución CJS (también `reports:backfill-pdfs`). Alternativa verificada en `development`: compilar (el servidor de desarrollo ya compila a `dist/`) y ejecutar un `.cjs` propio contra `dist/` que cree el contexto de aplicación y llame a `FamilyMajorityReleaseCronService.run(new Date(), { dryRun: true })`. Ese `.cjs` no está en el repositorio. Resultado en `development` tras el QA: 0 personas afectadas.
+
+**11.6 Qué cambia al desplegar con la bandera apagada, y reversión.** Con la bandera apagada no se libera, no se avisa y no se congela a nadie (el cron queda registrado como omitido). Apagarla de nuevo y reiniciar quita la compuerta del servidor y detiene el cron; **no** deshace lo ya hecho: las tutorías revocadas con motivo `released`, las filas `majority_release` de `legal_acceptances` y los congelamientos siguen en la base (un congelamiento por liberación nunca se purga). El cron de purga salta siempre a quien tenga `frozen_reason = 'majority_release'`, con la bandera que sea.
+
+**11.7 Pendientes de operación.** Textos legales (aviso, aceptación y congelamiento) en revisión (`docs/legal/README.md`); correos con textos marcados como pendientes de aprobación legal; `.env.example` del backend debe listar las dos variables nuevas antes del PR (no se leyó ni editó en este trabajo de documentación).
+
 ### 0.7 Migración de campos extendidos de inventario (2026-10-26)
 
 Una migración aditiva del backend, rama `fix/inventory-extended-fields`, **Pendiente de merge**. Añade a `club_inventory` los campos `condition`, `serial_number`, `purchase_date`, `estimated_value`, `location`, `assigned_to` y `notes`, más dos CHECK. Detalle en `docs/database/SCHEMA-REFERENCE.md`.
@@ -369,7 +415,7 @@ Catálogo completo y comentado: `sacdia-backend/.env.example`. Las marcadas como
 | Observabilidad | `PROCESS_MEMORY_LOG_INTERVAL_MINUTES` (entero ≥ 0, por defecto 15; `0` solo desactiva el intervalo), `POSTHOG_PROJECT_TOKEN`, `POSTHOG_HOST` | — |
 | Firebase | `FIREBASE_SERVICE_ACCOUNT_JSON_BASE64` (recomendado) o `FIREBASE_SERVICE_ACCOUNT_JSON` o `FIREBASE_PROJECT_ID` + `FIREBASE_PRIVATE_KEY` + `FIREBASE_CLIENT_EMAIL` | Para push |
 | Correo | `EMAIL_ENABLED`, `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, `RESEND_REPLY_TO` | Si `EMAIL_ENABLED=true`, también `RESEND_API_KEY`, `RESEND_FROM_EMAIL` y `REDIS_URL` |
-| Perfiles familiares (Fase 3) | `FAMILY_TEEN_LOGIN_ENABLED`, `FAMILY_LINKED_DEVICE_ENABLED`, `FAMILY_DIRECTOR_CREATE_MINOR_ENABLED` (booleanos, por defecto `false`; se leen al arrancar). Ver 0.6 | — |
+| Perfiles familiares (Fase 3) | `FAMILY_TEEN_LOGIN_ENABLED`, `FAMILY_LINKED_DEVICE_ENABLED`, `FAMILY_DIRECTOR_CREATE_MINOR_ENABLED` (booleanos, por defecto `false`; se leen al arrancar). Ver 0.6. Fase 4, Pendiente de merge (backend PR #654, app PR #257, admin PR #305): `FAMILY_MAJORITY_RELEASE_ENABLED` y `FAMILY_MAJORITY_RELEASE_DRY_RUN` (mismos criterios; ver 0.6, punto 11) | — |
 | Sentry | `SENTRY_DSN`, `SENTRY_RELEASE` (si no se define, se usa `RENDER_GIT_COMMIT`, que inyecta Render) | — |
 
 Buckets, prefijos y acceso de cada alias: `docs/storage/r2-keyprefix-conventions.md`. Operación del correo: `docs/guides/domain-email-operations.md`.
