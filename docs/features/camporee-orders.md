@@ -1,7 +1,7 @@
 # Feature: Pedidos de camporee
 
 **Estado**: IMPLEMENTADO PARCIAL
-**Fecha**: 2026-08-25 (estado actualizado 2026-10-04)
+**Fecha**: 2026-08-25 (estado verificado 2026-11-13)
 **Módulo backend**: `CamporeeOrdersModule` (`src/camporee-orders/`) + `PaymentObligationsModule` (`src/payment-obligations/`)
 **ADR**: [#9 — Bounded context `camporee-orders`](../api/ARCHITECTURE-DECISIONS.md#9-bounded-context-camporee-orders-independiente-de-materials-y-fieldpaymentorders)
 
@@ -20,9 +20,9 @@ El dominio es un bounded context independiente. Reutiliza patrones (folio, máqu
 
 | Superficie | Estado | Evidencia |
 |------------|--------|-----------|
-| Backend Nest (catálogo, ofertas, emisión, proof, entrega, PaymentObligations) | En `development` | `src/camporee-orders` (26 rutas) + `src/payment-obligations` (1 ruta); Jest focalizado y `test/camporee-orders.e2e-spec.ts` (no bloqueante en CI) |
+| Backend Nest (catálogo, ofertas, emisión, proof, entrega, PaymentObligations) | En `development` | `src/camporee-orders` (26 rutas) + `src/payment-obligations` (1 ruta); Jest focalizado y `test/camporee-orders.e2e-spec.ts` (bloqueante en CI pendiente de merge, backend PR #657) |
 | Schema / migración | En `development` | `prisma/migrations/20260824190000_camporee_orders/` |
-| Admin (catálogo, settings, ofertas, bandeja, detalle, obligaciones) | En `development` | `/dashboard/campamentos/pedidos/bandeja`, `/dashboard/campamentos/pedidos/catalogo`. Product CRUD sí; POST/PATCH de tallas existen en `src/lib/api/camporee-orders.ts` pero **no** están cableados en UI |
+| Admin (catálogo, settings, ofertas, bandeja, detalle, obligaciones) | En `development` | `/dashboard/campamentos/pedidos/bandeja`, `/dashboard/campamentos/pedidos/catalogo`. Product CRUD sí; POST/PATCH de tallas existen en `src/lib/api/camporee-orders.ts` pero **no** están cableados en UI en `development`. Pendiente de merge (admin PR #306): UI de opciones de talla en el catálogo |
 | App (emisión nominada, proof, pagos pendientes, distribución director) | En `development` | `lib/features/camporee_orders`, `lib/features/payment_orders`; `flutter test test/features/camporee_orders test/features/payment_orders` |
 
 ---
@@ -155,7 +155,7 @@ Cuerpo de emisión (el cliente no envía montos, club, sección ni campo local):
 | POST | `/camporee-order-products/:productId/options` | `camporee-orders:catalog-manage` | Crear opción de talla |
 | PATCH | `/camporee-order-product-options/:optionId` | `camporee-orders:catalog-manage` | Actualizar opción (soft-delete; no hard-delete si hay órdenes) |
 
-Admin: el cliente HTTP expone las seis rutas; la UI de catálogo crea/edita producto, pero **no** llama POST/PATCH de opciones de talla.
+Admin: el cliente HTTP expone las seis rutas; en `development` la UI de catálogo crea/edita producto, pero **no** llama POST/PATCH de opciones de talla (el backend tampoco crea opciones automáticamente: los productos `LETTER`/`NUMERIC` sin opciones no se pueden pedir). Pendiente de merge (admin PR #306): UI de opciones de talla.
 
 ### Settings y ofertas
 
@@ -201,7 +201,7 @@ Admin visualiza el progreso de distribución; **no** impersona al director para 
 
 ## Errores runtime (`ErrorCode`)
 
-Presentes en `src/common/errors/error-codes.ts`. Las claves `CAMPOREE_ORDER_*` **no están** en `src/i18n/*/errors.json` (admin/app tienen copy local).
+Presentes en `src/common/errors/error-codes.ts` y con traducción en `src/i18n/{es,en,fr,pt-BR}/errors.json` (verificado 2026-11-13: todas las claves `CAMPOREE_*`, incluidas `CAMPOREE_ORDER_*` y `CAMPOREE_ORDERS_*`, existen en los cuatro locales).
 
 ```text
 CAMPOREE_ORDERS_DISABLED
@@ -295,7 +295,7 @@ Timezone IANA del camporee; no interpretar fechas con la zona del dispositivo.
 - Entrega parcial de la cantidad de una misma línea.
 - Logística de cocina/compras operativas del evento (sigue siendo gap de [camporees.md](camporees.md)).
 - Impersonación admin de `deliver-to-member`.
-- CRUD de tallas en la UI admin (el API sí existe).
+- CRUD de tallas en la UI admin en `development` (el API sí existe; UI pendiente de merge (admin PR #306)).
 
 ---
 
@@ -310,10 +310,9 @@ Timezone IANA del camporee; no interpretar fechas con la zona del dispositivo.
 
 ---
 
-## Desviaciones honestas (revisadas 2026-10-04)
+## Desviaciones honestas (revisadas 2026-11-13)
 
-- i18n backend `errors.json` no incluye `CAMPOREE_ORDER_*`.
-- `test/camporee-orders.e2e-spec.ts` existe pero no está en el subset bloqueante del CI.
+- `test/camporee-orders.e2e-spec.ts` (verde, 2026-11-13) pasa a formar parte del subset bloqueante del CI (pendiente de merge, backend PR #657); en `development` aún no está en ese subset.
 - La aplicación de la migración y los seeds en cada base Neon se verifica por entorno; este documento no lo asegura.
 - Task 1 del plan quedó históricamente como `feat(payments)...` (`9972925`); no reescribir historia.
 - Admin no emite pedidos de sección ni marca distribución a miembros.

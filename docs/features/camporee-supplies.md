@@ -1,7 +1,7 @@
 # Feature: Insumos de camporee
 
 **Estado**: IMPLEMENTADO PARCIAL
-**Fecha**: 2026-08-26 (estado actualizado 2026-10-04; app actualizada 2026-11-09)
+**Fecha**: 2026-08-26 (estado verificado 2026-11-13; app actualizada 2026-11-09)
 **Módulo backend**: `CamporeeSuppliesModule` (`src/camporee-supplies/`) + fuentes en `PaymentObligationsModule`
 **ADR**: [#10 — Bounded context `camporee-supplies`](../api/ARCHITECTURE-DECISIONS.md#10-bounded-context-camporee-supplies-independiente-de-camporee-orders)
 
@@ -108,3 +108,7 @@ Ver [`ENDPOINTS-LIVE-REFERENCE.md`](../api/ENDPOINTS-LIVE-REFERENCE.md) §campor
 ## Fuera de v1
 
 Paquete físico de notas junto a inscripción, venta de no reclamado, líneas nominadas a miembro, nav global “Insumos” en admin.
+
+## Decisión abierta: cancelación de plan y reembolsos
+
+No existe ruta para cancelar un plan de insumos (verificado 2026-11-13 en `src/camporee-supplies/{config,plans}.controller.ts`: solo `PUT/GET/submit` del plan, `PATCH …/supply-plan/lines`, entregas, reportes y `mark-paid`). Un plan enviado y pagado no se puede revertir por API. Hasta decidir la política de reembolsos, la cancelación y el reembolso quedan fuera de alcance.
