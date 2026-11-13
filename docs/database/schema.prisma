@@ -5,8 +5,8 @@
 // resincronizar, volver a copiar el archivo completo y actualizar esta cabecera.
 // Incluye la Fase 4 de perfiles familiares (backend #654): columnas de liberación
 // en dependent_profiles, los índices únicos parciales de legal_acceptances como
-// comentario y sin el modelo legal_representatives (la tabla se borra con la
-// migración 20261114100000, backend PR #655, pendiente de merge).
+// comentario y sin el modelo legal_representatives (la tabla se borró de la base
+// con la migración 20261114100000, backend #655, aplicada en las tres ramas de Neon).
 // ============================================================================
 
 generator client {

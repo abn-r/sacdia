@@ -260,7 +260,7 @@ El contexto de autorización resuelto (`AuthorizationContextService`) se cachea 
 
 ### 7.3 Autorización sensible
 
-Las superficies sensibles del usuario (`health`, `emergency_contacts`, `legal_representative`, `post_registration`) se resuelven por owner o contexto sobre `userId`, con compatibilidad transicional con permisos `users:*`.
+Las superficies sensibles del usuario (`health`, `emergency_contacts`, `guardianship`, `post_registration`) se resuelven por owner o contexto sobre `userId`, con compatibilidad transicional con permisos `users:*`.
 
 ### 7.4 Política read-wider-than-write en `annual_folders:evaluate`
 
@@ -289,7 +289,7 @@ La autoridad estructural es **`sacdia-backend/prisma/schema.prisma`**. `docs/dat
 
 ### 8.3 Grupos de modelos (no exhaustivo)
 
-- **Identidad y Better Auth**: `users`, `users_pr`, `account`, `session`, `verification`, `legal_representatives`, `emergency_contacts`, `user_fcm_tokens`.
+- **Identidad y Better Auth**: `users`, `users_pr`, `account`, `session`, `verification`, `emergency_contacts`, `user_fcm_tokens`; tutores y menores en `guardianships` y `dependent_profiles`.
 - **Organización**: `countries`, `unions`, `local_fields`, `districts`, `churches`, `ecclesiastical_years`, `coordination_zones`, `coordinator_assignments`.
 - **Clubes**: `clubs`, `club_sections`, `club_role_assignments`, `units`, `weekly_records`.
 - **Formación**: `classes`, `enrollments`, `honors`, `users_honors`, `master_honors`, `certifications` y `certification_versions`, `investiture_validation_history`.
@@ -305,7 +305,7 @@ La autoridad estructural es **`sacdia-backend/prisma/schema.prisma`**. `docs/dat
 
 - `users` conserva identidad operativa del usuario/miembro;
 - `users_pr` conserva tracking granular de post-registro siguiendo `schema.prisma`: PK técnico `user_pr_id` y `user_id` único como vínculo al miembro;
-- `legal_representatives` soporta representante legal;
+- `guardianships` y `dependent_profiles` soportan la relación tutor–menor (la tabla `legal_representatives` se eliminó en la Fase 4 de perfiles familiares, backend #655);
 - `emergency_contacts` soporta contactos de emergencia.
 
 #### Club y sección

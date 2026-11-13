@@ -42,7 +42,6 @@ La base de datos está diseñada con las siguientes características verificadas
 │   ├── users_roles
 │   ├── sessions
 │   ├── authorization_context_versions
-│   ├── legal_representatives
 │   └── emergency_contacts
 │
 ├── 🏛️ Organization
