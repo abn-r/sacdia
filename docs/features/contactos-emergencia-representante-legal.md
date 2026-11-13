@@ -1,7 +1,7 @@
 # Contactos de emergencia y representante legal
 
 **Estado**: IMPLEMENTADO. Contactos de emergencia: sin cambios. Representante legal: **de solo lectura** en la rama `feat/family-profiles` (Fase 2 de perfiles familiares; Pendiente de merge (PR #530 de sacdia-backend, PR #178 de sacdia-app)); en `development` aún existen las rutas de escritura
-**Fase 4 (backend #654, app #257, admin #305)**: el representante legal se **eliminó por completo** de `development` (módulo, rutas, bloque del panel y permisos renombrados). La tabla `legal_representatives` ya no tiene modelo Prisma, pero se borra de la base con la migración `20261114100000` (**Pendiente de merge (backend PR #655, en borrador)**; aplicada solo en Neon `development`). Lo histórico de este documento se conserva como contexto. Ver «Eliminación del representante legal (Fase 4)».
+**Fase 4 (backend #654, app #257, admin #305)**: el representante legal se **eliminó por completo** de `development` (módulo, rutas, bloque del panel y permisos renombrados). La tabla `legal_representatives` ya no tiene modelo Prisma, y la tabla se borró de la base con la migración `20261114100000` (backend #655, aplicada en Neon `development`, `staging` y `production`). Lo histórico de este documento se conserva como contexto. Ver «Eliminación del representante legal (Fase 4)».
 **Verificado contra código**: contactos de emergencia, 2026-10-04 (rama `development`); representante legal, 2026-10-19 (backend `feat/family-profiles` `603d3d8e`)
 **Dominios relacionados**: [auth.md](auth.md) (post-registro), [rbac.md](rbac.md) (permisos de subrecursos sensibles), [family-profiles.md](family-profiles.md) (tutorías, que reemplazan al representante legal)
 
@@ -14,12 +14,12 @@ Cada usuario registra entre uno y cinco contactos de emergencia. Son datos sensi
 >
 > - Se borra el módulo `src/legal-representatives/` y se retiran `GET /users/:userId/legal-representative` y `GET /users/:userId/requires-legal-representative` (ya no existen; responden 404). Ningún cliente las usa: la sección 06 «Representante legal (heredado)» del Resumen del panel y los tipos asociados se quitaron; la app no tiene referencias (una prueba lo vigila).
 > - El bloque `legal_representative` desaparece de `GET /admin/users/:userId`. El permiso `legal_representative:read|update` pasa a `guardianship:read|update` (mismos ids, respaldo `users:*` hasta 2027-03-31; ver [rbac.md](rbac.md)).
-> - El modelo Prisma `legal_representatives` ya no existe en `development`. La tabla se borra con la migración `20261114100000_family_drop_legal_representatives` (**Pendiente de merge (backend PR #655, en borrador)**; ya aplicada en Neon `development`), **irreversible**, después de la copia `pg_dump` por ambiente y con este cambio ya desplegado. **No se migra ningún dato a `guardianships`**: las tutorías no heredan los representantes antiguos (el script de desarrollo `seed-dev-guardianships.ts --from-legal-reps` se quitó). Un representante legal histórico solo se recupera de la copia.
+> - El modelo Prisma `legal_representatives` ya no existe en `development`. La tabla se borró con la migración `20261114100000_family_drop_legal_representatives` (backend #655, aplicada en Neon `development`, `staging` y `production`), **irreversible**, después de la copia `pg_dump` por ambiente y con este cambio ya desplegado. **No se migra ningún dato a `guardianships`**: las tutorías no heredan los representantes antiguos (el script de desarrollo `seed-dev-guardianships.ts --from-legal-reps` se quitó). Un representante legal histórico solo se recupera de la copia.
 > - Se conservan los códigos `LEGAL_REP_*` en `ErrorCode` y en los `errors.json` (sin ruta que los emita), y el eliminar un tipo de parentesco (`DELETE /admin/relationship-types/:id`) ahora solo se bloquea si lo usa una tutoría.
 > - La liberación a los 18 años (Fase 4) reemplaza el tema que antes quedaba como pendiente: ver [family-profiles.md](family-profiles.md), «Fase 4».
 
 > [!NOTE]
-> **Representante legal retirado (perfiles familiares, Fase 2)**: ya no se registra un representante legal. Las **tutorías** (`guardianships`) lo reemplazan: el tutor adulto registra al menor de 13 años y un director verifica la ficha de consentimiento. La tabla `legal_representatives` y su lectura quedan solo como historial hasta la Fase 4, que la elimina. Detalle en [family-profiles.md](family-profiles.md). Mientras la Fase 3 no exista, un adolescente de 13 a 17 años que se registra solo no tiene ni tutor ni representante legal.
+> **Representante legal retirado (perfiles familiares, Fase 2)**: ya no se registra un representante legal. Las **tutorías** (`guardianships`) lo reemplazan: el tutor adulto registra al menor de 13 años y un director verifica la ficha de consentimiento. La tabla `legal_representatives` y su lectura se eliminaron en la Fase 4. Detalle en [family-profiles.md](family-profiles.md). Mientras la Fase 3 no exista, un adolescente de 13 a 17 años que se registra solo no tiene ni tutor ni representante legal.
 
 ## Que existe (verificado contra codigo)
 
@@ -70,10 +70,10 @@ Otros consumidores: la validación de QR devuelve el contacto principal (ver [qr
 ### Base de datos
 
 - `emergency_contacts`: `owner_id`, `contact_user_id` (opcional), `name`, `phone`, `relationship_type_id`, `primary`, `active`.
-- `legal_representatives`: `user_id` (único), `representative_user_id` (opcional), `name`, `paternal_last_name`, `maternal_last_name`, `phone`, `relationship_type_id`. Sin modelo Prisma desde la Fase 4 (backend #654); la tabla se elimina de la base con la migración `20261114100000` (**Pendiente de merge (backend PR #655, en borrador)**). La opción `--from-legal-reps` de `scripts/family-profiles/seed-dev-guardianships.ts` se quitó.
+- `legal_representatives`: `user_id` (único), `representative_user_id` (opcional), `name`, `paternal_last_name`, `maternal_last_name`, `phone`, `relationship_type_id`. Sin modelo Prisma desde la Fase 4 (backend #654); la tabla se eliminó de la base con la migración `20261114100000` (backend #655). La opción `--from-legal-reps` de `scripts/family-profiles/seed-dev-guardianships.ts` se quitó.
 
 ## Gaps y pendientes
 
-- Si un menor cumple 18 años, su representante legal no se elimina ni se marca como inactivo; la tabla se elimina entera en la Fase 4 (backend #654; el borrado de la tabla, backend PR #655, está pendiente de merge), junto con la liberación a la mayoría de edad.
+- Si un menor cumple 18 años, su representante legal no se elimina ni se marca como inactivo; la tabla se eliminó entera en la Fase 4 (backend #654 y #655), junto con la liberación a la mayoría de edad.
 - Ya no hay forma de registrar, corregir, borrar ni leer un representante legal. La cadena de consentimiento nueva es la de tutorías.
 - Los contactos se borran de forma lógica.

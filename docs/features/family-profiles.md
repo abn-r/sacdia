@@ -51,7 +51,7 @@ Tipos de tutoría:
 - **Tutor externo** (`external_name`): solo viene de importar `legal_representatives` con el script de desarrollo; no da acceso.
 - **Datos de prueba** (`is_test_data`): nunca cuentan como consentimiento ni dan acceso.
 
-Las tutorías reemplazan a `legal_representatives`. La Fase 4 (backend #654) eliminó el módulo, las rutas y el modelo Prisma; la tabla se borra de la base con la migración `20261114100000` (**Pendiente de merge (backend PR #655, en borrador)**; ver «Fase 4»).
+Las tutorías reemplazan a `legal_representatives`. La Fase 4 (backend #654) eliminó el módulo, las rutas y el modelo Prisma; la tabla se borró de la base con la migración `20261114100000` (backend #655, aplicada en las tres ramas de Neon; ver «Fase 4»).
 
 ## Parentesco del tutor
 
@@ -199,7 +199,7 @@ Las tres sub-fases se entregaron en orden (cada una con su verificación y su QA
 
 - El servidor decide **en cada petición** si una cuenta es adulta, supervisada (`supervised_user`, con `supervision` `pending_guardian` o `active`) o de edad desconocida (`age_unknown_user`, sin fecha de nacimiento y con el post-registro abierto). Nunca por un claim del JWT. Cada tipo tiene un conjunto de scopes con denegado por defecto (403 `PRINCIPAL_SCOPE_DENIED`).
 - **La compuerta de consentimiento pasa de «es dependiente» a «es menor de edad»**: aprobar la solicitud de un adolescente que se registró solo responde 409 `MR_CONSENT_NOT_VERIFIED` hasta que haya un tutor vinculado y verificado. `verify-consent` también verifica sobre una asignación que ya está `active`.
-- **Modo pendiente de tutor**: un adolescente sin tutor verificado no ve datos de club ni tiene credencial QR. Recordatorios a los 7, 30 y 83 días; a los 90 la cuenta queda en pausa (cron `pending-teen-guardian`). Pendiente de merge (backend PR #659, app PR #258): la pausa nunca se borra sola (`frozen_reason = pending_guardian`, sin `purge_after`); el adolescente puede seguir entrando para ver su estado, vincular un tutor o borrar su cuenta, y se reactiva cuando el director verifica a un tutor.
+- **Modo pendiente de tutor**: un adolescente sin tutor verificado no ve datos de club ni tiene credencial QR. Recordatorios a los 7, 30 y 83 días; a los 90 la cuenta queda en pausa (cron `pending-teen-guardian`). La pausa nunca se borra sola (backend #659, app #258) (`frozen_reason = pending_guardian`, sin `purge_after`); el adolescente puede seguir entrando para ver su estado, vincular un tutor o borrar su cuenta, y se reactiva cuando el director verifica a un tutor.
 - **Vincular un tutor**: el adolescente emite un código (`POST /users/me/guardian-link-codes`), un adulto lo canjea y queda como tutor `pending` sin poderes hasta que un director verifica.
 - **Acceso propio supervisado**: el tutor **verificado** habilita (por correo o con un nombre de usuario generado por el servidor), desactiva, reactiva y restablece la contraseña. Bloqueo progresivo por intentos fallidos.
 - Avisos de seguridad al tutor (`family:security`, obligatorios), resumen de progreso sin datos de salud, y analítica anónima para 13 a 17 y edad desconocida.
@@ -386,7 +386,7 @@ La persona liberada y pendiente **sigue en las listas** como un adulto cualquier
 ### Permisos renombrados y `legal_representatives` eliminado
 
 - `legal_representative:read|update` pasan a `guardianship:read|update` (migración `20261113130000_family_guardianship_permission_rename`: mismos ids, mismas asignaciones por rol; en Neon `development`, 17 asignaciones por permiso). Se conserva el respaldo `users:*` hasta el **2027-03-31**. La clave de caché de autorización pasa a `auth:context:v9`. Detalle en [rbac.md](rbac.md).
-- Se elimina el módulo `legal-representatives`, `GET /users/:userId/legal-representative` y `GET /users/:userId/requires-legal-representative`, y el bloque `legal_representative` de `GET /admin/users/:userId` y del panel. La tabla `legal_representatives` se borra de la base con `20261114100000_family_drop_legal_representatives` (**Pendiente de merge (backend PR #655, en borrador)**; el modelo Prisma ya se quitó; irreversible, después de `pg_dump` por ambiente y con el código ya desplegado); no se copia ningún dato a las tutorías. Ver [contactos-emergencia-representante-legal.md](contactos-emergencia-representante-legal.md).
+- Se elimina el módulo `legal-representatives`, `GET /users/:userId/legal-representative` y `GET /users/:userId/requires-legal-representative`, y el bloque `legal_representative` de `GET /admin/users/:userId` y del panel. La tabla `legal_representatives` se borró de la base con `20261114100000_family_drop_legal_representatives` (backend #655, aplicada en las tres ramas de Neon; el modelo Prisma ya se quitó; irreversible, después de `pg_dump` por ambiente y con el código ya desplegado); no se copia ningún dato a las tutorías. Ver [contactos-emergencia-representante-legal.md](contactos-emergencia-representante-legal.md).
 - Orden de integración por el contrato cruzado: primero los commits del panel y de la app, luego las variables `SACDIA_ADMIN_CONTRACT_REF` y `SACDIA_APP_CONTRACT_REF`, luego el backend (ver DEPLOYMENT-GUIDE §0.6, punto 11.2).
 
 ### Decisiones de la Fase 4
@@ -418,18 +418,18 @@ Decisiones de diseño: el congelamiento se separa del de las fases 2 y 3 por una
 
 - **Textos legales aprobados**: avisos, aceptación y congelamiento están en borrador (ver [docs/legal/README.md](../legal/README.md)); tampoco se actualizaron el aviso de privacidad ni los términos publicados.
 - **Retención indefinida bajo la LFPDPPP**: pendiente de confirmar con un abogado (ruling R6).
-- **Purga de adolescentes sin tutor** (`pending-teen-guardian`, Fase 3): Pendiente de merge (backend PR #659, app PR #258): decidido el 2026-11-13 aplicar el mismo criterio que la Fase 4 (R6): pausa a los 90 días sin borrado automático; se reactiva al verificarse un tutor. Los menores de 13 bajo custodia del club sin cuenta mantienen la decisión A9 (anonimizar 90 días después de congelados).
+- **Purga de adolescentes sin tutor** (`pending-teen-guardian`, Fase 3): Ya no se purga (backend #659, app #258): decidido el 2026-11-13 aplicar el mismo criterio que la Fase 4 (R6): pausa a los 90 días sin borrado automático; se reactiva al verificarse un tutor. Migración `20261114120000_family_pending_guardian_freeze`, aplicada en Neon `development`, `staging` y `production` (2026-11-13; el relleno tocó 0 filas). Los menores de 13 bajo custodia del club sin cuenta mantienen la decisión A9 (anonimizar 90 días después de congelados).
 - **Aviso en la app del tutor por cada dependiente**: se cubre con el push y la bandeja; no hay un banner propio (no hay campo en el contrato).
 - **Desbloqueo o edición desde el panel**: solo lectura; tampoco hay una acción de administración para emitir el código de reclamo (lo emiten el ex tutor o el director desde la app).
 - **Una opción de dry-run en el registro de crones** del panel: el panel no la ofrece; la prueba en seco se hace con la variable o con el script.
 - **Cron de purga para adultos liberados**: no existe (decisión R6); si la persona quiere borrar sus datos, lo pide ella.
-- **Migraciones aplicadas fuera de `development`**: pendientes; el DROP de `legal_representatives` también en `development`.
+- **Migraciones de la Fase 4 y de la pausa de adolescentes**: todas aplicadas en Neon `development`, `staging` y `production`; no queda ninguna pendiente.
 
 ### Prerrequisitos de despliegue de la Fase 4
 
 Resumen; el procedimiento completo está en [DEPLOYMENT-GUIDE.md](../deployment/DEPLOYMENT-GUIDE.md), §0.6, punto 11.
 
-1. **Migraciones** en este orden: `20261113100000`, `20261113110000`, `20261113120000`, `20261113140000`, `20261113130000` (renombre de permisos) y, **al final, por ambiente, tras `pg_dump` y con el código ya desplegado**, `20261114100000` (borra `legal_representatives`; irreversible). Las cinco primeras (la Fase 4 propiamente dicha) están aplicadas en Neon `development`, `staging` y `production` (2026-11-13). La última, `20261114100000`, está aplicada solo en `development` (2026-11-12, tras `pg_dump`) y su PR (backend #655) sigue en borrador.
+1. **Migraciones** en este orden: `20261113100000`, `20261113110000`, `20261113120000`, `20261113140000`, `20261113130000` (renombre de permisos) y, **al final, por ambiente, tras `pg_dump` y con el código ya desplegado**, `20261114100000` (borra `legal_representatives`; irreversible). Las cinco primeras (la Fase 4 propiamente dicha) están aplicadas en Neon `development`, `staging` y `production` (2026-11-13). La última, `20261114100000` (backend #655), está integrada en `development` y aplicada en `development` (2026-11-12), `staging` y `production` (2026-11-13), cada una tras `pg_dump` (`development` tenía 1 fila; `staging` y `production`, 0). Después, la pausa de adolescentes sin tutor (backend #659, app #258) añadió `20261114120000_family_pending_guardian_freeze`, aplicada en las tres ramas el 2026-11-13.
 2. **Orden de merge por el contrato cruzado** (ya integrado en `development`): commits de renombre del panel y de la app, luego las variables de contrato, luego el backend, luego las variables al SHA integrado.
 3. **Bandera**: desplegar con `FAMILY_MAJORITY_RELEASE_ENABLED=false`; publicar la app con la compuerta **antes** de encenderla; prueba en seco en `development` y `staging`; encender en `development` y `preproduction`; `staging` y `production` solo con aprobación y tras la aprobación legal.
 4. `FAMILY_MAJORITY_RELEASE_DRY_RUN` solo para la prueba en seco.
