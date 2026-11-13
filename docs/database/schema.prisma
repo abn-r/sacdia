@@ -1,12 +1,12 @@
 // ============================================================================
 // ESPEJO DOCUMENTAL de sacdia-backend/prisma/schema.prisma
-// Copiado de la rama development (commit 6bd6769d) el 2026-11-11. 268 modelos y
+// Copiado de la rama development (commit f3e7dfa7) el 2026-11-13. 267 modelos y
 // 83 enums. NO editar aquí: la fuente de verdad es el schema del backend. Para
 // resincronizar, volver a copiar el archivo completo y actualizar esta cabecera.
-// Pendiente de merge (backend PR #654, app PR #257, admin PR #305): incluye los cambios de la
-// Fase 4 de perfiles familiares (columnas de liberación en dependent_profiles, los
-// índices únicos parciales de legal_acceptances como comentario y sin el modelo
-// legal_representatives). Al integrar el PR, volver a copiar el archivo completo.
+// Incluye la Fase 4 de perfiles familiares (backend #654): columnas de liberación
+// en dependent_profiles, los índices únicos parciales de legal_acceptances como
+// comentario y sin el modelo legal_representatives (la tabla se borra con la
+// migración 20261114100000, backend PR #655, pendiente de merge).
 // ============================================================================
 
 generator client {
@@ -1308,7 +1308,7 @@ model finances {
   club_type_id        Int
   finance_category_id Int
   finance_date        DateTime                 @db.Date
-  active              Boolean                  @default(false)
+  active              Boolean                  @default(true)
   created_by          String                   @db.Uuid
   modified_by_id      String?                  @db.Uuid
   created_at          DateTime?                @default(now()) @db.Timestamptz(6)

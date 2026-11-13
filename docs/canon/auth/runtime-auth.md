@@ -193,7 +193,7 @@ Reglas vigentes:
 - `authorization.effective.permissions` es la fuente operativa para gating de UX;
 - permisos de club salen solo de la asignación activa;
 - `users_permissions` activos entran a `direct_permissions` y a `effective.permissions` (grant global);
-- cache Redis `auth:context:v8:{userId}` (Pendiente de merge (backend PR #654, app PR #257, admin PR #305): `v9`, que purga `v2`–`v8`) (TTL ≤ 5 min, recortado al fin del año eclesiástico y a la próxima frontera `start_date`/`end_date`/`expires_at` de los cargos); mutar roles/permisos invalida la clave. Al invalidar también se borran las claves heredadas (`v2`–`v7` y la clave sin versión) definidas en `authorization-context.service.ts`;
+- cache Redis `auth:context:v9:{userId}` (la versión 9 vino con la Fase 4 de perfiles familiares y purga `v2`–`v8`) (TTL ≤ 5 min, recortado al fin del año eclesiástico y a la próxima frontera `start_date`/`end_date`/`expires_at` de los cargos); mutar roles/permisos invalida la clave. Al invalidar también se borran las claves heredadas (`v2`–`v7` y la clave sin versión) definidas en `authorization-context.service.ts`;
 - los campos legacy `roles`, `permissions`, `club` y `club_context` siguen expuestos solo por compatibilidad temporal.
 
 ## Contexto activo de club
