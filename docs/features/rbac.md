@@ -116,8 +116,8 @@ El sistema RBAC implementa permisos finos (fine-grained) para 4 familias de sub-
 | `health` | `health:update` | `users:update_profile` | `PUT /users/:userId/allergies`, `PUT /users/:userId/diseases`, `PUT /users/:userId/medicines`, `DELETE` item-level |
 | `emergency_contacts` | `emergency_contacts:read` | `users:read_detail` | `GET /users/:userId/emergency-contacts` |
 | `emergency_contacts` | `emergency_contacts:update` | `users:update_profile` | `POST/PATCH/DELETE /users/:userId/emergency-contacts` |
-| `legal_representative` | `legal_representative:read` | `users:read_detail` | `GET /users/:userId/legal-representative` |
-| `legal_representative` | `legal_representative:update` | `users:update_profile` | _(sin rutas: escritura retirada con perfiles familiares; ver [family-profiles](family-profiles.md))_ |
+| `legal_representative` (pasa a `guardianship`; Pendiente de merge (backend PR #654, app PR #257, admin PR #305)) | `legal_representative:read` (pasa a `guardianship:read`) | `users:read_detail` | `GET /users/:userId/legal-representative` en `development`; en la rama de la Fase 4 esa ruta se retira y el permiso gobierna el bloque `guardianships` de `GET /admin/users/:userId` y la lectura de la ficha de consentimiento (`GET /admin/users/:userId/guardianships/:guardianshipId/consent-evidence`) |
+| `legal_representative` (pasa a `guardianship`; Pendiente de merge (backend PR #654, app PR #257, admin PR #305)) | `legal_representative:update` (pasa a `guardianship:update`) | `users:update_profile` | En `development`, sin rutas. En la rama de la Fase 4: `POST /admin/users/:userId/supervised-login/disable` y `POST /admin/users/:userId/linked-devices/:deviceId/revoke` |
 | `post_registration` | `post_registration:read` | `users:read_detail` | `GET /users/:userId/post-registration/status` |
 | `post_registration` | `registration:complete` | _(sin fallback)_ | `POST /users/:userId/post-registration/step-{1,2,3}/complete` |
 
@@ -127,7 +127,7 @@ El sistema RBAC implementa permisos finos (fine-grained) para 4 familias de sub-
 
 1. **Owner bypass (self-service)**: El propietario del `userId` tiene acceso completo a sus propios sub-recursos sin necesidad de permisos globales explícitos
 2. **Terceros**: Solo se evaluan permisos globales. Se acepta el permiso fino **O** el fallback legacy (OR transicional). Excepcion: `registration:complete` no tiene fallback legacy
-3. **Lectura club-scoped de miembros de la sección**: un permiso fino `family:read` (`health:read`, `emergency_contacts:read`, `legal_representative:read`, `post_registration:read`) en la asignación de club activa habilita **solo lectura** de ese sub-recurso cuando el `userId` es miembro **activo** (no `pending`) de la sección activa del actor. El fallback legacy `users:read_detail` **no** aplica por esta vía, y los modos `update` siguen requiriendo permiso global. Fuera de ese caso, los permisos de `authorization.active_assignment` no habilitan acceso transversal a recursos `user`
+3. **Lectura club-scoped de miembros de la sección**: un permiso fino `family:read` (`health:read`, `emergency_contacts:read`, `legal_representative:read` (`guardianship:read` en la rama de la Fase 4), `post_registration:read`) en la asignación de club activa habilita **solo lectura** de ese sub-recurso cuando el `userId` es miembro **activo** (no `pending`) de la sección activa del actor. El fallback legacy `users:read_detail` **no** aplica por esta vía, y los modos `update` siguen requiriendo permiso global. Fuera de ese caso, los permisos de `authorization.active_assignment` no habilitan acceso transversal a recursos `user`
 
 ### Pruning administrativo
 
@@ -150,6 +150,20 @@ Las siguientes rutas de `user` permanecen bajo permisos legacy `users:*` y no fo
 - **Endpoints live reference**: [`docs/api/ENDPOINTS-LIVE-REFERENCE.md`](../api/ENDPOINTS-LIVE-REFERENCE.md)
 - **Guard de policy**: `src/common/guards/sensitive-user-subresource-policy.ts`
 - **Decorator de metadata**: `src/common/decorators/sensitive-user-subresource.decorator.ts`
+
+
+### Renombre `legal_representative` a `guardianship` (Fase 4)
+
+> [!NOTE]
+> Pendiente de merge (backend PR #654, app PR #257, admin PR #305). Describe el código de la rama; `development` todavía usa los nombres antiguos.
+
+- Los permisos `legal_representative:read` y `legal_representative:update` pasan a llamarse `guardianship:read` y `guardianship:update`. La familia sensible `legal_representative` de `SensitiveUserSubresourceFamily` pasa a `guardianship` (`finePermission` sigue el nombre): gobierna la tarjeta de tutorías y de acceso familiar del panel, la lectura de la ficha de consentimiento y las acciones de desactivar acceso y desvincular dispositivo. El módulo `legal-representatives` ya no existe.
+- **Migración** `20261113130000_family_guardianship_permission_rename` (DO idempotente, solo DML): con solo el nombre antiguo, `UPDATE` de la fila de `permissions` (mismo `permission_id`: `role_permissions` y `users_permissions` siguen válidos, sin reasignar); con ambos nombres (el seed corrió primero), fusiona `role_permissions` y `users_permissions` en la fila nueva (`ON CONFLICT DO NOTHING`) y borra las antiguas; con ninguno, inserta la nueva. Verificada en Neon `development`: mismos ids y 17 asignaciones de rol por permiso, y una segunda corrida no cambia nada. Los seeds (`permissions.seed.sql`, `role-permissions.seed.sql`) usan los nombres nuevos; las migraciones históricas **no** se tocan.
+- **Catálogos generados**: el generador (`pnpm authz:generate`) lee los `INSERT` de las migraciones, así que la migración lleva dos líneas `-- authz:rename <antiguo> -> <nuevo>` que hacen que el nombre antiguo salga del catálogo de los tres repos. Nunca se editan a mano `src/common/authorization/generated/`, `sacdia-admin/src/lib/auth/generated/` ni `sacdia-app/lib/core/authorization/generated/`.
+- **Respaldo `users:*`**: se conserva sin cambios (`users:read_detail` y `users:update_profile`) hasta `USERS_LEGACY_OR_SUNSET_DATE`, **2027-03-31**; quitarlo es un cambio de una línea. Un rol que solo tiene `users:read_detail` lee la tarjeta familiar; `guardianship:read` solo lee; mutar exige `guardianship:update`; quien tenía `legal_representative:update` sigue pudiendo (ids conservados).
+- **Caché de autorización**: la clave pasa de `auth:context:v8` a `auth:context:v9` (FP4-51) para que los conjuntos de permisos en Redis se refresquen; al invalidar también se purgan las claves `v2` a `v8`. `GET /auth/me` devuelve el nombre canónico único.
+- **Clientes**: panel (`GUARDIANSHIP_READ`/`GUARDIANSHIP_UPDATE`, ids de capability `guardianship.read|update` en el catálogo de pantallas, grupo `guardianship:` del selector y etiquetas i18n) y app (`authorization_utils.dart`) renombran sus espejos. Orden de integración por el contrato cruzado: primero los commits del panel y de la app, luego las variables `SACDIA_ADMIN_CONTRACT_REF` y `SACDIA_APP_CONTRACT_REF` (SHA de 40 caracteres), luego el backend; tras el merge de los tres PR, las variables apuntan a los SHA integrados.
+- **Principal `released_user`**: no es un permiso RBAC sino un principal restringido por scopes (`release:read`, `release:email`, `data:export`, `legal:accept`, `account:manage`), sin permisos de club. Ver [family-profiles.md](family-profiles.md), «Fase 4».
 
 ## Instructores de especialidad y carga por certificado (2026-10-13)
 
@@ -317,7 +331,7 @@ El sistema soporta usuarios con multiples asignaciones de club (ej: Director en 
 - **Campo canonico**: `users_pr.active_club_assignment_id` en la DB
 - **Seteo**: `PATCH /auth/me/context` con `{ assignment_id }` — escribe en DB, invalida cache Redis, re-resuelve autorizacion
 - **Lectura**: Tanto `GET /auth/me` como `GET /dashboard/summary` leen del mismo campo canonico. El dashboard carga las asignaciones activas en la misma lectura de `users` y elige en memoria por `active_club_assignment_id` (si el ID ya no está activo, cae a la más reciente).
-- **Cache**: Redis `auth:context:v8:{userId}` con revisión de calendario en el envelope (`AUTH_CONTEXT_CACHE_KEY`). TTL = el menor entre 5 min, el fin del año eclesiástico y la próxima frontera temporal (`start_date`, `end_date` o `expires_at`) de cualquier assignment cargado (`cacheTtlMs`). Si el TTL resulta ≤ 0 no se cachea. Se invalida en cada context switch y en cada mutación de cargos o roles; al invalidar también se borran las claves `v2`–`v7` y la clave sin versión. El corte de año ya no sube ninguna versión: la vigencia se resuelve por fecha y por TTL.
+- **Cache**: Redis `auth:context:v8:{userId}` (Pendiente de merge (backend PR #654, app PR #257, admin PR #305): `auth:context:v9`, que purga también `v8`; ver «Renombre `legal_representative` a `guardianship`») con revisión de calendario en el envelope (`AUTH_CONTEXT_CACHE_KEY`). TTL = el menor entre 5 min, el fin del año eclesiástico y la próxima frontera temporal (`start_date`, `end_date` o `expires_at`) de cualquier assignment cargado (`cacheTtlMs`). Si el TTL resulta ≤ 0 no se cachea. Se invalida en cada context switch y en cada mutación de cargos o roles; al invalidar también se borran las claves `v2`–`v7` y la clave sin versión. El corte de año ya no sube ninguna versión: la vigencia se resuelve por fecha y por TTL.
 
 ### Calculo de effectivePermissions
 
@@ -404,7 +418,7 @@ El archivo `prisma/seeds/role-permissions.seed.sql` es **idempotente**: cada blo
 - `units:create` / `units:delete`
 - `materiales:*` (si no se reafirman aqui, un re-seed borra los grants de la migracion 20260513)
 
-Correr `permissions.seed.sql` y luego `role-permissions.seed.sql`. El snapshot Redis usa `auth:context:v8:{userId}` (TTL ≤ 5 min); mutar `users_permissions` o roles invalida esa clave.
+Correr `permissions.seed.sql` y luego `role-permissions.seed.sql`. El snapshot Redis usa `auth:context:v8:{userId}` (`v9` con la Fase 4, Pendiente de merge) (TTL ≤ 5 min); mutar `users_permissions` o roles invalida esa clave.
 
 ## Bugs corregidos (2026-04-10)
 

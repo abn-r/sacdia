@@ -256,7 +256,7 @@ Roles globales del seed (`prisma/seeds/role-permissions.seed.sql`):
 
 Roles de club del seed: `director`, `deputy-director`, `secretary`, `treasurer`, `secretary-treasurer`, `counselor`, `instructor`, `member`.
 
-El contexto de autorización resuelto (`AuthorizationContextService`) se cachea en Redis con la key `auth:context:v8:{userId}` (TTL = el menor entre 5 min, el fin del año eclesiástico y la próxima frontera temporal `start_date`/`end_date`/`expires_at` de los cargos cargados). Toda mutación de roles o permisos debe invalidar el cache de los usuarios afectados, tanto por `users_roles` como por `club_role_assignments`.
+El contexto de autorización resuelto (`AuthorizationContextService`) se cachea en Redis con la key `auth:context:v8:{userId}` (Pendiente de merge (backend PR #654, app PR #257, admin PR #305): `v9`) (TTL = el menor entre 5 min, el fin del año eclesiástico y la próxima frontera temporal `start_date`/`end_date`/`expires_at` de los cargos cargados). Toda mutación de roles o permisos debe invalidar el cache de los usuarios afectados, tanto por `users_roles` como por `club_role_assignments`.
 
 ### 7.3 Autorización sensible
 
