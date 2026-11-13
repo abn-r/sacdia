@@ -1,7 +1,7 @@
 # Camporee Events
 
 **Estado**: IMPLEMENTADO PARCIAL
-**Última actualización**: 2026-11-09 (adjuntos de evento y desglose de puntaje por rol, PR #633 de sacdia-backend)
+**Última actualización**: 2026-11-13 (verificación contra `development`: fases 6 y 7 del admin implementadas, permisos por rol y pendientes de personal en admin; antes 2026-11-09: adjuntos de evento y desglose de puntaje por rol, PR #633 de sacdia-backend)
 **Owner**: Backend/App/Admin
 **Dominio relacionado**: [camporees.md](./camporees.md)
 
@@ -34,7 +34,12 @@ La separación template ↔ instancia evita que ajustes específicos de un campo
 - **Personal operativo desacoplado del scoring**: las asignaciones de agenda (`camporee_event_staff_assignments`) explican quién se encarga de la actividad; las asignaciones de scoring (`camporee_event_judge_assignments`) siguen definiendo quién evalúa una sección y quién puede subir puntaje.
 - **Agenda segura para app**: `GET /events/preview` aplica `agenda_visible_from`; los usuarios administrativos con permisos de gestión pueden ver agenda completa por el endpoint normal.
 
-## Estado real verificado (2026-07-06)
+## Estado real verificado (2026-11-13)
+
+- Admin en `development`: catálogo de tipos (`/dashboard/catalogs/camporee-event-types`), biblioteca de plantillas (`/dashboard/campamentos/plantillas`, con alta y edición) y pestaña «Eventos» con formularios dedicados para camporee local y de unión están implementados.
+- Lo que el admin **no** tiene en `development`: pestaña «Personal» (roster `camporee_staff_members`), asignación de personal por evento (`staff-assignments`) ni cliente HTTP de `camporee-staff`. El backend exige un responsable activo del roster para publicar un evento (`CAMPOREE_EVENT_RESPONSIBLE_REQUIRED`), así que desde el admin hoy un evento no se puede publicar. Pendiente de merge (admin PR #306): pestaña «Personal», asignaciones de personal por evento, adjuntos y desglose de puntaje.
+
+### Detalle del estado backend (verificado 2026-07-06)
 
 - Backend: `CamporeeEventsController` expone lectura y mutación para eventos locales y de unión:
   - `GET /api/v1/local-camporees/:camporeeId/events`
@@ -384,19 +389,18 @@ El detalle y el listado de eventos incluyen `attachments[]`. Errores: `CAMPOREE_
 
 La desactivación se ejecuta en una transacción. Los scores históricos permanecen auditables y no bloquean la operación; las filas de `camporee_staff_members` no se desactivan automáticamente porque representan un roster operativo independiente.
 
-## Permisos RBAC (a sembrar)
+## Permisos RBAC
 
 Nuevos permisos:
 
 - `camporee_event_types:read|create|update|delete` (admin/super-admin)
 - `camporee_events:read|create|update|delete` (`director-lf`/`assistant-lf`, `director-union`/`assistant-union`, `director-dia`/`assistant-dia`, admin). Los roles de club solo tienen `camporee_events:read`; los grants de escritura que les dio `20260520225303` se quitan con `20261102130000_align_role_permissions_with_seed`.
 
-Mapeos sugeridos:
+Mapeo vigente (seed `role-permissions.seed.sql`, verificado 2026-11-13):
 
-- Director club: read + create + update + delete (sobre camporees de su scope)
-- Subdirector club: read + create + update
-- Admin unión: read + create + update + delete sobre templates de su unión
-- Super-admin: todo
+- Roles de club (`director`, `deputy-director`, `secretary`, `secretary-treasurer`, `treasurer`, `counselor`): solo `camporee_events:read` (lectura; no crean ni editan eventos, templates ni personal).
+- Director y asistente de campo local, de unión y de división (`director-lf`/`assistant-lf`, `director-union`/`assistant-union`, `director-dia`/`assistant-dia`): read + create + update + delete, acotados por territorio (campo local, unión, división) vía el guard.
+- Administradores de plataforma (admin, super-admin): según el catálogo de permisos globales.
 
 ## UI Admin (sacdia-admin)
 
@@ -425,7 +429,7 @@ Tab "Eventos" en `/dashboard/campamentos/[id]` para camporee local y en
 - Lista de instancias con orden drag-handle (display_order).
 - Botones: "Agregar desde template" (picker), "Crear personalizado" (form modal/page).
 - Acciones por fila: editar (form prellenado), eliminar, reordenar.
-- El formulario de evento permite seleccionar tipo de evento, un líder de agenda (usuario o nombre externo), bloques de horario opcionales con asignaciones a secciones inscritas y especialidades de preparación del catálogo. El alta siempre queda `programado`; publicar pide un responsable del roster de personal, distinto del líder de agenda.
+- El formulario de evento permite seleccionar tipo de evento, un líder de agenda (usuario o nombre externo), bloques de horario opcionales con asignaciones a secciones inscritas y especialidades de preparación del catálogo. El alta siempre queda `programado`; publicar pide un responsable del roster de personal, distinto del líder de agenda. En `development` el admin no tiene dónde cargar ese roster ni asignarlo al evento (ver «Personal del camporee»); pendiente de merge (admin PR #306).
 - Las rutas dedicadas de creación/edición existen para ambos scopes:
   `/dashboard/campamentos/[id]/events/new`,
   `/dashboard/campamentos/[id]/events/[eventId]/edit`,
@@ -434,7 +438,9 @@ Tab "Eventos" en `/dashboard/campamentos/[id]` para camporee local y en
 
 ### 4. Personal del camporee
 
-Tab "Personal" en el detalle del camporee, antes de "Eventos".
+> Pendiente de merge (admin PR #306). En `development` el detalle del camporee en admin **no** tiene la pestaña «Personal» ni cliente de `camporee-staff`; el roster solo se opera por API.
+
+Tab "Personal" en el detalle del camporee, antes de "Eventos" (objetivo de la rama).
 
 - Permite cargar personas del camporee con categoría descriptiva.
 - Los candidatos salen de usuarios del scope del camporee.
@@ -453,7 +459,7 @@ Tab "Personal" en el detalle del camporee, antes de "Eventos".
 - No CRUD desde móvil en esta iteración.
 - El detalle de cada evento muestra sus adjuntos (grupo «Adjuntos · N»); abre la imagen o el PDF con la URL firmada y la refresca con `GET .../attachments`.
 - La clasificación del camporee consume `score-breakdown` y respeta `visibility` (un rol de club ve solo sus secciones, sin posición).
-- Admin: subir, listar y borrar adjuntos, y la vista del desglose, están en la rama `feat/camporee-event-attachments` de sacdia-admin, todavía sin PR (2026-11-09).
+- Admin: subir, listar y borrar adjuntos y la vista del desglose de puntaje están pendientes de merge (admin PR #306), junto con las asignaciones de personal por evento.
 
 ## Cache
 
@@ -483,10 +489,11 @@ Sin transformación de datos existentes — feature aditiva.
 | 3    | DTOs + service + controller + tests para `camporee_event_templates`     | Backend | IMPLEMENTADO         |
 | 4    | DTOs + service + controller + tests para `camporee_events` (instancias) | Backend | IMPLEMENTADO         |
 | 5    | Seed permisos + asignación a roles existentes                           | Backend | IMPLEMENTADO         |
-| 6    | Admin: catálogo tipos                                                   | Admin   | PENDIENTE            |
-| 7    | Admin: biblioteca templates (list + form pages)                         | Admin   | PENDIENTE            |
+| 6    | Admin: catálogo tipos                                                   | Admin   | IMPLEMENTADO         |
+| 7    | Admin: biblioteca templates (list + form pages)                         | Admin   | IMPLEMENTADO         |
 | 8    | Admin: tab eventos en detalle de camporee                               | Admin   | IMPLEMENTADO         |
 | 9    | App: pantalla read-only de eventos en camporee                          | App     | IMPLEMENTADO         |
+| 10   | Admin: pestaña Personal, asignaciones por evento, adjuntos y desglose    | Admin   | Pendiente de merge (admin PR #306) |
 
 ## Open questions
 
