@@ -37,7 +37,7 @@ La separación template ↔ instancia evita que ajustes específicos de un campo
 ## Estado real verificado (2026-11-13)
 
 - Admin en `development`: catálogo de tipos (`/dashboard/catalogs/camporee-event-types`), biblioteca de plantillas (`/dashboard/campamentos/plantillas`, con alta y edición) y pestaña «Eventos» con formularios dedicados para camporee local y de unión están implementados.
-- Lo que el admin **no** tiene en `development`: pestaña «Personal» (roster `camporee_staff_members`), asignación de personal por evento (`staff-assignments`) ni cliente HTTP de `camporee-staff`. El backend exige un responsable activo del roster para publicar un evento (`CAMPOREE_EVENT_RESPONSIBLE_REQUIRED`), así que desde el admin hoy un evento no se puede publicar. Pendiente de merge (admin PR #306): pestaña «Personal», asignaciones de personal por evento, adjuntos y desglose de puntaje.
+- El admin también incluye (admin #306) la pestaña «Personal» (roster `camporee_staff_members`), la asignación de personal por evento (`staff-assignments`), el cliente HTTP de `camporee-staff`, adjuntos y desglose de puntaje. El backend exige un responsable activo del roster para publicar un evento (`CAMPOREE_EVENT_RESPONSIBLE_REQUIRED`); desde el admin se carga el roster y se asigna en el formulario del evento, por lo que ya se puede publicar.
 
 ### Detalle del estado backend (verificado 2026-07-06)
 
@@ -429,7 +429,7 @@ Tab "Eventos" en `/dashboard/campamentos/[id]` para camporee local y en
 - Lista de instancias con orden drag-handle (display_order).
 - Botones: "Agregar desde template" (picker), "Crear personalizado" (form modal/page).
 - Acciones por fila: editar (form prellenado), eliminar, reordenar.
-- El formulario de evento permite seleccionar tipo de evento, un líder de agenda (usuario o nombre externo), bloques de horario opcionales con asignaciones a secciones inscritas y especialidades de preparación del catálogo. El alta siempre queda `programado`; publicar pide un responsable del roster de personal, distinto del líder de agenda. En `development` el admin no tiene dónde cargar ese roster ni asignarlo al evento (ver «Personal del camporee»); pendiente de merge (admin PR #306).
+- El formulario de evento permite seleccionar tipo de evento, un líder de agenda (usuario o nombre externo), bloques de horario opcionales con asignaciones a secciones inscritas y especialidades de preparación del catálogo. El alta siempre queda `programado`; publicar pide un responsable del roster de personal, distinto del líder de agenda. El admin carga ese roster en la pestaña «Personal» y lo asigna al evento desde el formulario (ver «Personal del camporee»).
 - Las rutas dedicadas de creación/edición existen para ambos scopes:
   `/dashboard/campamentos/[id]/events/new`,
   `/dashboard/campamentos/[id]/events/[eventId]/edit`,
@@ -438,7 +438,7 @@ Tab "Eventos" en `/dashboard/campamentos/[id]` para camporee local y en
 
 ### 4. Personal del camporee
 
-> Pendiente de merge (admin PR #306). En `development` el detalle del camporee en admin **no** tiene la pestaña «Personal» ni cliente de `camporee-staff`; el roster solo se opera por API.
+> El detalle del camporee en admin incluye la pestaña «Personal» y el cliente de `camporee-staff` (admin #306); el roster también se opera por API.
 
 Tab "Personal" en el detalle del camporee, antes de "Eventos" (objetivo de la rama).
 
@@ -459,7 +459,7 @@ Tab "Personal" en el detalle del camporee, antes de "Eventos" (objetivo de la ra
 - No CRUD desde móvil en esta iteración.
 - El detalle de cada evento muestra sus adjuntos (grupo «Adjuntos · N»); abre la imagen o el PDF con la URL firmada y la refresca con `GET .../attachments`.
 - La clasificación del camporee consume `score-breakdown` y respeta `visibility` (un rol de club ve solo sus secciones, sin posición).
-- Admin: subir, listar y borrar adjuntos y la vista del desglose de puntaje están pendientes de merge (admin PR #306), junto con las asignaciones de personal por evento.
+- Admin: subir, listar y borrar adjuntos, la vista del desglose de puntaje y las asignaciones de personal por evento están disponibles en `development`.
 
 ## Cache
 
@@ -493,7 +493,7 @@ Sin transformación de datos existentes — feature aditiva.
 | 7    | Admin: biblioteca templates (list + form pages)                         | Admin   | IMPLEMENTADO         |
 | 8    | Admin: tab eventos en detalle de camporee                               | Admin   | IMPLEMENTADO         |
 | 9    | App: pantalla read-only de eventos en camporee                          | App     | IMPLEMENTADO         |
-| 10   | Admin: pestaña Personal, asignaciones por evento, adjuntos y desglose    | Admin   | Pendiente de merge (admin PR #306) |
+| 10   | Admin: pestaña Personal, asignaciones por evento, adjuntos y desglose    | Admin   | Implementado (admin #306) |
 
 ## Open questions
 

@@ -46,7 +46,7 @@ La inscripcion de miembros en camporees tiene implicaciones directas con el modu
 
 ### Admin
 
-- **CRUD completo**: Lista con creacion/eliminacion, pagina de detalle con tarjeta de info y tabs de información, miembros, clubes, pagos, órdenes de pago, pedidos, insumos, eventos, jueces, puntajes y ranking (la pestaña «Personal» **no** existe en `development`: pendiente de merge (admin PR #306); el roster de personal solo se opera por API), dialog de creacion/edicion, registro de miembros con validacion de seguro, remocion de miembros
+- **CRUD completo**: Lista con creacion/eliminacion, pagina de detalle con tarjeta de info y tabs de información, miembros, clubes, pagos, órdenes de pago, pedidos, insumos, eventos, jueces, puntajes y ranking (incluida la pestaña «Personal» con el roster de personal, admin #306), dialog de creacion/edicion, registro de miembros con validacion de seguro, remocion de miembros
 - Los formularios de camporee local y de unión capturan dirección textual, fechas limite opcionales y coordenadas opcionales (`lat`, `long`) como par obligatorio: se guardan ambas o ninguna. El admin fija el par con el mismo mapa de Google Maps que clubes (buscar / clic / arrastrar pin); sin `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` muestra el aviso de configuración.
 - El create/edit local no usa `GET /admin/local-fields` (403 para director-lf y bounce a login). Carga `GET /catalogs/local-fields` filtrado por territorio; director-lf ve su campo bloqueado.
 - El admin carga primero el roster operativo del camporee y luego asigna personas específicas a cada actividad/evento; no se fuerza que cada actividad tenga cocina/admin/apoyo/jueces.
