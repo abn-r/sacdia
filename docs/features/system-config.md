@@ -8,7 +8,7 @@
 `system_config` es una tabla clave-valor para parámetros operativos y *feature flags* que se cambian sin desplegar: activar crons, días de vencimiento, topes de puntaje, visibilidad de rankings. Los módulos la leen directamente con Prisma o con `SystemConfigService.get(key)`. Desde el admin solo se editan valores de claves que ya existen.
 
 > [!NOTE]
-> Las banderas de perfiles familiares (`FAMILY_TEEN_LOGIN_ENABLED`, `FAMILY_LINKED_DEVICE_ENABLED`, `FAMILY_DIRECTOR_CREATE_MINOR_ENABLED` y, Pendiente de merge (backend PR #654, app PR #257, admin PR #305), `FAMILY_MAJORITY_RELEASE_ENABLED` y `FAMILY_MAJORITY_RELEASE_DRY_RUN`) **no** viven en `system_config`: son variables de entorno que el servidor lee al arrancar, así que cambiarlas exige reiniciar. Ver `docs/features/family-profiles.md` y `docs/deployment/DEPLOYMENT-GUIDE.md`, §0.6.
+> Las banderas de perfiles familiares (`FAMILY_TEEN_LOGIN_ENABLED`, `FAMILY_LINKED_DEVICE_ENABLED`, `FAMILY_DIRECTOR_CREATE_MINOR_ENABLED` y, desde la Fase 4, `FAMILY_MAJORITY_RELEASE_ENABLED` y `FAMILY_MAJORITY_RELEASE_DRY_RUN`) **no** viven en `system_config`: son variables de entorno que el servidor lee al arrancar, así que cambiarlas exige reiniciar. Ver `docs/features/family-profiles.md` y `docs/deployment/DEPLOYMENT-GUIDE.md`, §0.6.
 
 ## Que existe (verificado contra codigo)
 

@@ -60,7 +60,7 @@ Las mejoras P1 y P2 del benchmark (página `/subprocessors` aparte, cookies del 
 ## Perfiles familiares, Fase 4: liberación a la mayoría de edad (puntos legales abiertos)
 
 > [!WARNING]
-> Pendiente de merge (backend PR #654, app PR #257, admin PR #305). Ninguno de los textos de esta sección está aprobado: **requieren revisión del usuario o de un abogado antes de encender `FAMILY_MAJORITY_RELEASE_ENABLED` en `staging` o `production`** (ver `docs/deployment/DEPLOYMENT-GUIDE.md`, §0.6, punto 11). Los documentos operativos de esta carpeta (`aviso-de-privacidad.md`, `terminos-y-condiciones.md`, checklist de tiendas) **todavía no describen** la liberación ni el congelamiento por mayoría de edad.
+> Fase 4 de perfiles familiares (backend #654, app #257, admin #305). Ninguno de los textos de esta sección está aprobado: **requieren revisión del usuario o de un abogado antes de encender `FAMILY_MAJORITY_RELEASE_ENABLED` en `staging` o `production`** (ver `docs/deployment/DEPLOYMENT-GUIDE.md`, §0.6, punto 11). Los documentos operativos de esta carpeta (`aviso-de-privacidad.md`, `terminos-y-condiciones.md`, checklist de tiendas) **todavía no describen** la liberación ni el congelamiento por mayoría de edad.
 
 Qué hace el producto (detalle en `docs/features/family-profiles.md`, «Fase 4»): 30 días antes de la mayoría de edad se avisa a la persona y a sus tutores verificados; al cumplirla se revocan las tutorías y la persona debe aceptar los Términos y el Aviso vigentes (y tener correo) en 30 días; si no lo hace queda **congelada** (sin procesar su información ni mostrarla en las listas del club), y **nunca se borra sola**.
 

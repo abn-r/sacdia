@@ -87,14 +87,14 @@ Regla:
 | `health:update` | Editar sub-recursos sensibles de salud del usuario |
 | `emergency_contacts:read` | Ver contactos de emergencia del usuario |
 | `emergency_contacts:update` | Editar contactos de emergencia del usuario |
-| `legal_representative:read` | Ver representante legal del usuario. Pendiente de merge (backend PR #654, app PR #257, admin PR #305): pasa a `guardianship:read` (tutorías y acceso familiar; fila `permissions` renombrada, mismo id) |
-| `legal_representative:update` | Editar representante legal del usuario. Pendiente de merge (backend PR #654, app PR #257, admin PR #305): pasa a `guardianship:update` (desactivar acceso propio y desvincular dispositivos desde el panel) |
+| `guardianship:read` | Ver tutorías y acceso familiar del usuario (antes `legal_representative:read`; fila `permissions` renombrada en la Fase 4, mismo id; backend #654) |
+| `guardianship:update` | Desactivar el acceso propio y desvincular dispositivos desde el panel (antes `legal_representative:update`; renombrada en la Fase 4, mismo id) |
 | `post_registration:read` | Ver estado administrativo de post-registro |
 | `registration:complete` | Completar pasos administrativos de post-registro (permiso global dedicado, sin fallback a `users:update`) |
 
 Notas canonicas del modelo vigente:
 
-- las familias sensibles del change son `health`, `emergency_contacts`, `legal_representative` y `post_registration` (Pendiente de merge (backend PR #654, app PR #257, admin PR #305): `legal_representative` pasa a `guardianship`; el respaldo `users:*` sigue hasta 2027-03-31; ver `docs/features/rbac.md`, «Renombre `legal_representative` a `guardianship` (Fase 4)»);
+- las familias sensibles del change son `health`, `emergency_contacts`, `guardianship` y `post_registration` (`guardianship` era `legal_representative` hasta la Fase 4; el respaldo `users:*` sigue hasta 2027-03-31; ver `docs/features/rbac.md`, «Renombre `legal_representative` a `guardianship` (Fase 4)»);
 - OR transicional vigente: para terceros, lectura fina acepta `family:read` o el legado de la familia `users:*` (`users:read_detail`); escritura fina acepta `family:update` o el legado `users:update_profile`. Sunset: `2027-03-31` (`USERS_LEGACY_OR_SUNSET_DATE`). El OR no se apaga en este change;
 - excepcion: los endpoints `POST /step-{1,2,3}/complete` ahora usan `registration:complete` (permiso global dedicado) en lugar de `post_registration:update` con fallback a `users:update`. Roles asignados: super_admin, admin, assistant-lf, director-lf (y equivalentes union/dia por herencia). El owner siempre puede completar su propio registro;
 - `qr:validate` habilita el escaneo/verificacion canonica del QR para roles con alcance operativo. Las rutas `/qr/me*` son self-service con `@SkipPermissions` (el permiso `qr:issue_self` esta retirado de esas rutas);
