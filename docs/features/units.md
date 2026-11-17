@@ -26,6 +26,8 @@ Controller con `JwtAuthGuard` + `PermissionsGuard` y `AuthorizationResource({ ty
 
 Las 4 rutas de `/weekly-records` del mismo controller están en [weekly-records.md](weekly-records.md).
 
+`GET /clubs/:clubId/units/:unitId` agrega `scoring_members [{user_id, name, paternal_last_name, maternal_last_name, user_image, unit_role}]`: los participantes de puntaje de la unidad. Son los miembros activos, el capitán (`unit_role: captain`) y el secretario (`secretary`); nunca el consejero (`advisor_id`) ni el consejero suplente (`substitute_advisor_id`), aunque figuren como miembros. El resto de los miembros llevan `unit_role: member`.
+
 Reglas verificadas en `units.service.ts`:
 
 - **Alta**: el club debe existir (`UNIT_CLUB_NOT_FOUND`) y `club_section_id` es obligatorio. La sección debe estar activa (`UNIT_SECTION_NOT_FOUND`), pertenecer al club (`UNIT_SECTION_WRONG_CLUB`) y ser del `club_type_id` indicado (`UNIT_SECTION_TYPE_MISMATCH`).
@@ -37,7 +39,11 @@ Reglas verificadas en `units.service.ts`:
 
 ### App móvil (`sacdia-app/lib/features/units/`)
 
-- `UnitsListView`, `UnitDetailView`, `UnitFormSheet` (alta y edición), `UnitPointsHistoryView` y `MemberOfMonthHistoryView`.
+- `UnitsListView`, `UnitDetailView`, `UnitFormView` (alta y edición a pantalla completa), `UnitPointsHistoryView` y `MemberOfMonthHistoryView`.
+- Quien gestiona unidades (`units:create` o `units:update`) siempre aterriza en la lista, aunque tenga una sola unidad; la apertura automática de la única unidad aplica solo a quien no gestiona.
+- La lista de puntos (planilla semanal) usa `scoring_members`: incluye al capitán y al secretario con su rol como etiqueta, y no al consejero ni al suplente. Si el servidor no envía `scoring_members`, el cliente deriva la lista de `members` excluyendo a los consejeros.
+- El detalle de unidad ya no muestra «Actividades de esta semana».
+- Al retroceder, Unidades vuelve al dashboard cuando es la primera página (`lib/core/utils/back_or_home.dart`).
 
 ### Admin
 

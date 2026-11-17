@@ -26,15 +26,16 @@ Las secciones ahora se separan en `BASIC`, `ADVANCED` y `EXTRA`: `BASIC` + `EXTR
 - **Inscripciones de usuario** (JwtAuthGuard + PermissionsGuard):
   - `GET /users/:userId/classes` — listar inscripciones del usuario (filtro por yearId)
   - `POST /users/:userId/classes/enroll` — inscribir usuario en clase (class_id + ecclesiastical_year_id); bloquea clases inactivas o fuera de ventana de disponibilidad
-  - `GET /users/:userId/classes/:classId/progress` — progreso anual (acepta ?enrollmentId= como override)
+  - `GET /users/:userId/classes/:classId/progress` — progreso anual (acepta ?enrollmentId= como override); las secciones de requisito exponen `max_files` (10)
+  - `POST /users/:userId/classes/:classId/sections/:moduleSectionId/files` — sube evidencia; con 10 archivos activos en el requisito responde 400 `CLASS_EVIDENCE_MAX_FILES_REACHED`
   - `PATCH /users/:userId/classes/:classId/progress` — actualizar progreso de seccion (module_id, section_id, score, evidences, enrollment_id opcional)
 - **Asignación pedagógica de clases** (JwtAuthGuard + PermissionsGuard):
   - `GET /clubs/:clubId/sections/:sectionId/class-counselor-assignments` — listar responsables de clases de una sección (`yearId`, `classId`, `active` opcionales)
   - `POST /clubs/:clubId/sections/:sectionId/class-counselor-assignments` — asignar consejero/secretario a una clase
   - `PATCH /class-counselor-assignments/:assignmentId` — editar responsabilidad, excepción o fechas
   - `DELETE /class-counselor-assignments/:assignmentId` — revocar asignación (soft delete)
-  - `GET /clubs/:clubId/sections/:sectionId/classes/progress-scope` — listar clases que el actor puede supervisar en la sección (`yearId` opcional)
-  - `GET /clubs/:clubId/sections/:sectionId/classes/:classId/members-progress` — listar avance resumido de miembros activos de esa sección inscritos en la clase (`yearId` opcional)
+  - `GET /clubs/:clubId/sections/:sectionId/classes/progress-scope` — listar clases que el actor puede supervisar en la sección (`yearId` opcional); cada clase trae `members_count`, `avg_progress` (0–100), `status_counts` (`validated`, `submitted`, `rejected`, `pending`) y `counselor` / `assistant` (`{user_id, name}` o `null`)
+  - `GET /clubs/:clubId/sections/:sectionId/classes/:classId/members-progress` — listar avance resumido de miembros activos de esa sección inscritos en la clase (`yearId` opcional); cada miembro trae `status_counts` y el nivel superior `summary {avg_progress, status_counts}`, `counselor` y `assistant`
 - **Servicio**: `ClassesService` con spec de tests
 - **DTOs**: EnrollClassDto, UpdateProgressDto
 - **Decoradores**: lecturas/escrituras de progreso usan `@RequirePermissions('classes:read'/'classes:submit_progress')` + `@AuthorizationResource({ type: 'active_assignment' })`; las escrituras propias declaran además `ownerParam: 'userId'` para permitir self-service antes de exigir permisos de club. La autorización fina de self, directiva de sección y consejero/secretario asignado vive en `ClassProgressAccessService`.
@@ -48,14 +49,21 @@ Las secciones ahora se separan en `BASIC`, `ADVANCED` y `EXTRA`: `BASIC` + `EXTR
 - No gestiona progreso operativo de miembros desde el CRUD de catalogos.
 
 ### App (sacdia-app)
-- 9 screens: ClassesListView, ClassDetailView, ClassDetailWithProgressView, ClassModulesView, SectionDetailView, RequirementDetailView, TeachingScopeView, ClassMembersProgressView, ClassCounselorAssignmentsView.
+- Screens: ClassesListView, ClassDetailView, ClassDetailWithProgressView, ClassModulesView, SectionDetailView, RequirementDetailView, TeachingScopeView, ClassMembersProgressView, MemberProgressView, ClassCounselorAssignmentsView.
+- Widgets compartidos de estado y avance en `lib/core/widgets/status_progress/` (barra, panel, fila, caja resumen, secciones agrupadas y ruta de pasos), extraídos de la carpeta de evidencias.
 - Consume endpoints de listado, detalle, modulos, inscripcion, progreso, subida/borrado de archivos de evidencia, alcance pedagógico por sección y asignación pedagógica de clases.
 - En post-registro, la app preselecciona la sección por edad (Aventureros 4-9, Conquistadores 10-15, Guías Mayores 16+) y la clase progresiva elegible por la mayor `minimum_age` menor o igual a la edad; el backend sigue siendo la autoridad final de la derivación.
-- El acceso rápido `/home/grouped-class` abre `TeachingScopeView`: directores/subdirectores/secretaría ven las clases de toda la sección; consejeros con asignación ven sólo sus clases asignadas.
-- Desde `TeachingScopeView`, los usuarios con `club_roles:assign`/`club_roles:revoke` pueden abrir “Gestionar clases” para crear, editar y revocar asignaciones de consejeros/secretaría a clases de la sección.
-- `ClassMembersProgressView` lista los miembros activos de la sección inscritos en la clase y navega al detalle de progreso con `targetUserId` + `enrollmentId`; las evidencias se guardan sobre el enrollment del miembro objetivo y el actor sigue siendo el usuario autenticado.
+- **Clase agrupada** (pantalla `app-grouped-class`), cinco pantallas en este orden:
+  - **Clases** (`/home/grouped-class`, `TeachingScopeView`): directores/subdirectores/secretaría ven las clases de toda la sección; consejeros con asignación ven sólo sus clases asignadas. Cada clase muestra miembros, avance promedio, estados de requisitos y responsables (`members_count`, `avg_progress`, `status_counts`, `counselor`, `assistant`).
+  - **Miembros** (`/home/grouped-class/class/:classId`, `ClassMembersProgressView`): lista los miembros activos de la sección inscritos en la clase con filtros Todos, Atrasados (avance menor a 40 %) y Por corregir (con requisitos rechazados); navega al avance con `targetUserId` + `enrollmentId`.
+  - **Avance del miembro** (`.../member/:userId`, `MemberProgressView`): requisitos agrupados según lo que debe hacer el consejero con cada uno.
+  - **Detalle del requisito** (`.../member/:userId/requirement/:requirementId`, `RequirementDetailView`): ruta de pasos Archivos → Enviado → Campo local y hasta 10 archivos de evidencia por requisito. Las evidencias se guardan sobre el enrollment del miembro objetivo y el actor sigue siendo el usuario autenticado.
+  - **Consejeros por clase** (`/home/grouped-class/assign`, `ClassCounselorAssignmentsView`): los usuarios con `club_roles:assign`/`club_roles:revoke` crean, editan y revocan el consejero y el subconsejero de cada clase.
+- Si Clase agrupada es la primera página de la pila, volver lleva al dashboard (`lib/core/utils/back_or_home.dart`).
+- Los filtros de `ClassMembersProgressView` se aplican en cliente y la lista va ordenada de menor a mayor avance.
 - `ClassDetailWithProgressView` consume progreso separado por `basic_progress`, `advanced_progress`, `extra_progress`, `investiture_eligibility` y `advanced_eligibility`; la tarjeta de investidura usa `overall_progress` como progreso de requisitos obligatorios, no como avance total de actividades opcionales.
 - En el roadmap "Mi Camino", cada nodo muestra `classes.minimum_age` (p. ej. Amigo = desde 10 años), no el rango del track. El header del track sigue mostrando 6–9 / 10–15 / 16+. Estados del recorrido: completada (`INVESTIDO`), cursando (inscrita no investida), no cursada (sin inscripción y con progreso posterior; escudo gris + candado), por cursar (aún adelante; mismo tratamiento visual) y vencida (`EXPIRED`). La pastilla del nodo distingue no cursada vs por cursar.
+- En `ClassDetailWithProgressView` quien mira su propia clase ve una sola fila de investidura (`OwnInvestitureRow`: estado de la autorización, o «Investido» si la clase se acreditó sin ese flujo) en lugar de la insignia heredada; al tocarla abre Mi investidura (`docs/features/validacion-investiduras.md`).
 - En `ClassDetailWithProgressView`, los requisitos se presentan en secciones visuales separadas: `DESARROLLO DE CLASE` para requisitos básicos, `AVANZADO` para puntos avanzados opcionales y `ACTIVIDADES COMPLEMENTARIAS` para requisitos institucionales aplicables.
 - La tarjeta resumen de avance unifica el porcentaje principal como avance de investidura (`Desarrollo de clase` + `Actividades complementarias` aplicables); debajo sólo muestra `Sección avanzada` como avance independiente cuando la clase la tiene habilitada.
 
@@ -79,7 +87,7 @@ Reglas vigentes:
 - `instructor` no es responsable formal de la trayectoria anual; sólo imparte segmentos o especialidades.
 - El responsable asignable debe estar cursando o haber completado la clase `Guía Mayor`; esta elegibilidad aplica para todas las secciones (Aventureros, Conquistadores y Guías Mayores) y se valida también en backend.
   - Desde la consolidacion de elegibilidad GM, la misma implementacion (`ClubRoleEligibilityService.evaluateGuideMajor`) decide para consejeros y cargos de club; `APPROVED` y `INVESTIDO` cuentan, `REJECTED` y `EXPIRED` no, y el error del consejero sigue siendo `CLASS_COUNSELOR_GUIDE_MAJOR_REQUIRED` (400). Ver reglas 1-3 en `gestion-clubs.md`.
-- Cada clase/sección/año puede tener 1 `primary` y hasta 2 apoyos (`assistant`/`substitute`), máximo 3 activos.
+- Cada clase/sección/año puede tener 1 `primary` (409 `CLASS_COUNSELOR_PRIMARY_EXISTS` si ya hay uno) y hasta 2 apoyos, máximo 3 activos. De los apoyos, a lo sumo un `assistant` activo, el subconsejero (409 `CLASS_COUNSELOR_ASSISTANT_EXISTS`); el otro apoyo es `substitute`.
 - Una persona normalmente tiene 1 clase; la segunda clase requiere `exceptional=true` y `exception_reason`.
 - Director, subdirector, secretario y secretario-tesorero tienen alcance de toda la sección para progreso/evidencias aunque no tengan asignación pedagógica directa.
 - En evidencias delegadas, el owner del progreso sigue siendo el `enrollment` del miembro objetivo; `uploaded_by_id`/`submitted_by_id` representan al actor que subió o envió la evidencia.

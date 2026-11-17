@@ -15,7 +15,7 @@ El modelo vigente es por unidad + usuario + semana **domingo–sábado** (hora `
 - **Service**: `src/units/units.service.ts`
 - **DTOs**: `src/units/dto/units.dto.ts`
 - **4 endpoints directos**:
-  - `GET /api/v1/clubs/:clubId/units/:unitId/weekly-records` - listar registros activos de miembros activos de la unidad
+  - `GET /api/v1/clubs/:clubId/units/:unitId/weekly-records` - listar registros activos de los participantes de puntaje de la unidad (miembros activos, capitán y secretario)
   - `POST /api/v1/clubs/:clubId/units/:unitId/weekly-records` - crear registro semanal individual solo para la semana vigente (domingo–sábado, hora México)
   - `POST /api/v1/clubs/:clubId/units/:unitId/weekly-records/bulk` - crear o actualizar atomica e idempotentemente la planilla semanal de la unidad
   - `PATCH /api/v1/clubs/:clubId/units/:unitId/weekly-records/:recordId` - actualizar estado activo o puntajes por categoria solo si el registro pertenece a la semana vigente
@@ -27,7 +27,7 @@ El modelo vigente es por unidad + usuario + semana **domingo–sábado** (hora `
   - `POST`/`POST bulk` y `PATCH` requieren `units:update`
   - los endpoints resuelven alcance con `@AuthorizationResource({ type: 'club', clubIdParam: 'clubId' })`
 - **Reglas verificadas**:
-  - solo se puede crear para miembros activos de la unidad
+  - solo se puede crear para participantes de puntaje de la unidad: miembros activos, capitán y secretario; el consejero (`advisor_id`) y el consejero suplente (`substitute_advisor_id`) nunca puntúan, aunque estén como miembros. Rige en alta, `bulk`, `PATCH` y listado. Un usuario fuera de ese conjunto: 400 `UNIT_MEMBER_NOT_ACTIVE` al crear o en `bulk`, 403 `UNIT_WEEKLY_RECORD_WRONG_UNIT` en `PATCH`
   - la tupla nueva `(unit_id, user_id, week, year)` es unica; registros legacy con `unit_id = null` se leen como fallback
   - las escrituras de weekly records se limitan a la semana vigente (domingo 00:00 → sábado 23:59 `America/Mexico_City`); semanas anteriores quedan cerradas para edicion retroactiva. No hay cron de reset: el periodo se calcula al leer/escribir.
   - el endpoint bulk ejecuta toda la planilla dentro de una unica transaccion; si un miembro/categoria/periodo falla, no se persiste ningun registro del lote
@@ -45,7 +45,7 @@ El modelo vigente es por unidad + usuario + semana **domingo–sábado** (hora `
 
 ### App Movil
 - **Capture UI verificada**: `UnitDetailView`
-- La app opera como planilla semanal: precarga los registros de la semana vigente (domingo–sábado, hora México) y guarda la unidad completa mediante el endpoint bulk atomico. La pantalla de la unidad lista las actividades de esa semana en la sección de la unidad (informativo; no bloquea la captura).
+- La app opera como planilla semanal: precarga los registros de la semana vigente (domingo–sábado, hora México) y guarda la unidad completa mediante el endpoint bulk atomico.
 - Pueden registrar o ajustar puntajes directores, subdirectores/secretarios del contexto activo, consejeros y capitan de la unidad
 - Autorizacion backend de las escrituras (`POST`, `POST /bulk`, `PATCH`): pasa quien tiene `units:update` en el club (director, subdirector, secretario de club, roles territoriales) **o** quien es capitan, secretario, consejero o consejero suplente de ESA unidad (`units.captain_id`, `secretary_id`, `advisor_id`, `substitute_advisor_id`) y solo tiene `units:read`, p. ej. un miembro de club. La unidad debe estar activa y pertenecer al `:clubId` de la ruta; un miembro que lidera otra unidad recibe `403 GUARD_PERMISSION_DENIED`. Implementado por `UnitWeeklyRecordWriterGuard` (`src/units/guards/unit-weekly-record-writer.guard.ts`). El CRUD de unidades y miembros sigue exigiendo `units:create|update|delete`. `created_by` es siempre el usuario autenticado que guarda.
 - Adolescentes: un menor supervisado con tutor verificado (`supervised_user`, 13-17 anos) que lidera la unidad tambien escribe sus registros: las tres rutas llevan `@ActingScope('member:write')`, que solo tiene `TEEN_SCOPES`. Siguen fuera el adolescente sin tutor verificado, el tutor que actua por un menor y el telefono vinculado. En la app, el atajo y la planilla siguen la misma regla.
@@ -62,7 +62,7 @@ El modelo vigente es por unidad + usuario + semana **domingo–sábado** (hora `
 
 ## Requisitos funcionales
 
-1. Debe ser posible registrar puntaje semanal para miembros activos de una unidad
+1. Debe ser posible registrar puntaje semanal para los participantes de puntaje de una unidad (miembros activos, capitán y secretario; nunca el consejero ni el suplente)
 2. No debe permitirse duplicar un registro para la misma unidad/usuario/semana/anio
 3. Los puntajes por categoria deben validarse contra categorias activas del campo local correspondiente
 4. Ninguna categoria puede exceder su `max_points`; si es `boolean_full`, solo acepta `0` o `max_points`
