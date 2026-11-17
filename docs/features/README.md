@@ -72,7 +72,7 @@
 | `family-profiles` | [family-profiles.md](family-profiles.md) | Documento presente | `IMPLEMENTADO PARCIAL` (Fases 2 a 4 en `development`; no promovidas a `main`. Fases 2 y 3 desde 2026-10-19/20: sacdia-backend #530 y #531, sacdia-app #178 y #179, sacdia-admin #243 y #244; la Fase 3 bloquea el lanzamiento a producción. Fase 4, desde 2026-11-13 (backend #654, app #257, admin #305): liberación a la mayoría de edad, congelamiento sin purga, reclamo de cuenta con código, renombre de permisos a `guardianship:*` y eliminación del módulo `legal-representatives`; detrás de `FAMILY_MAJORITY_RELEASE_ENABLED` y con los textos legales pendientes de aprobación. El borrado de la tabla `legal_representatives` (backend #655) está aplicado en las tres ramas de Neon. Un adolescente que se registra solo y no obtiene tutor verificado queda en pausa a los 90 días y nunca se borra solo (backend #659, app #258)) |
 | `finanzas` | [finanzas.md](finanzas.md) | Documento presente | `IMPLEMENTADO` |
 | `gestion-clubs` | [gestion-clubs.md](gestion-clubs.md) | Documento presente | `IMPLEMENTADO` |
-| `gestion-seguros` | [gestion-seguros.md](gestion-seguros.md) | Documento presente | `IMPLEMENTADO` |
+| `gestion-seguros` | [gestion-seguros.md](gestion-seguros.md) | Documento presente | `IMPLEMENTADO` (modelo anual Pendiente de merge) |
 | `honores` | [honores.md](honores.md) | Documento presente | `IMPLEMENTADO` (instructor, `completed_at`, propuestas de instructor y bloqueo de reescritura de especialidades aprobadas desde 2026-10-12) |
 | `i18n` | [i18n.md](i18n.md) | Documento presente | `IMPLEMENTADO PARCIAL` |
 | `informes-trimestrales-anuales` | [informes-trimestrales-anuales.md](informes-trimestrales-anuales.md) | Documento presente | `IMPLEMENTADO PARCIAL` |

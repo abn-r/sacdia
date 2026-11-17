@@ -1,86 +1,71 @@
 # Gestion de Seguros (Insurance)
 
-**Estado**: IMPLEMENTADO
+**Estado**: IMPLEMENTADO (modelo previo en `development`); modelo anual Pendiente de merge (sacdia-backend PR #664, sacdia-app PR #260, sacdia-admin PR #307)
 
 ## Descripcion de dominio
 
-El seguro institucional es un requisito administrativo para la participacion de miembros en actividades de riesgo dentro de los clubes de Conquistadores, Aventureros y Guias Mayores. Los clubes operan en contextos donde los miembros (muchos de ellos menores de edad) realizan actividades al aire libre que implican riesgo: campamentos, caminatas, escalada, actividades acuaticas, orden cerrado, y especialmente camporees competitivos.
+El seguro institucional cubre a las personas de una sección de club (miembros y directiva) en actividades de riesgo: campamentos, caminatas, orden cerrado y camporees. Desde la decisión de producto del 2026-11-17 el seguro es **anual por año eclesiástico y uno por persona**: lo cobra el Campo Local, el Campo Local fija el precio de cada año (`insurance_cycle_configs`) y la cobertura dura hasta el `ecclesiastical_years.end_date` del ciclo (no 12 meses desde el pago). La cobertura pertenece al club: si el titular se va, la directiva de la sección la reasigna directamente.
 
-El sistema contempla tres tipos de seguro segun el enum `insurance_type_enum`: GENERAL_ACTIVITIES (cobertura general para reuniones y actividades regulares), CAMPOREE (cobertura especifica para participacion en camporees), y HIGH_RISK (cobertura para actividades de alto riesgo como rapel, escalada, etc.). Cada seguro documenta la poliza, aseguradora, vigencia, monto de cobertura y puede incluir evidencia documental adjunta (archivo de poliza escaneado).
+> **Pendiente de merge (sacdia-backend PR #664, sacdia-app PR #260, sacdia-admin PR #307).** Todo lo marcado «modelo anual» describe ramas sin integrar a `development`. La sección «Modelo previo (development)» al final conserva lo que sigue vigente hasta el merge.
 
-La vinculacion de seguros con camporees es directa: la tabla `camporee_members` referencia `member_insurances`, lo que permite validar que un miembro tiene cobertura vigente al momento de inscribirse en un evento. El modulo forma parte de la dimension administrativa de la trayectoria del miembro dentro de la institucion.
+## Modelo anual (Pendiente de merge)
 
-## Que existe (verificado contra codigo)
+### Reglas
+
+- **Pago**: el director emite una orden de pago (`POST /insurance/payment-orders`) que nombra beneficiarios (miembros **y** directiva de la sección), paga al Campo Local (caja, pastor de distrito o transferencia), sube el comprobante y el Campo Local aprueba (maker-checker). Detalle de la orden en [ordenes-de-pago.md](ordenes-de-pago.md).
+- **Vigencia**: `valid_until` = `end_date` del año eclesiástico del ciclo. Emitir sobre un ciclo cuyo año ya terminó responde 400 `FIELD_PAYMENT_ORDER_CYCLE_INVALID` (`cycle_year_ended`).
+- **Una cobertura por persona y año**: nadie puede estar cubierto dos veces en el mismo año eclesiástico (en cualquier sección, club o Campo Local), ni figurar en dos órdenes vivas o pagadas del año (`ISSUED`, `PROOF_SUBMITTED`, `PROOF_REJECTED`, `APPROVED`). Las líneas de orden de seguro guardan `purpose_ref_id` = id del año eclesiástico para sostener la regla. Si se viola: 409 `FIELD_PAYMENT_ORDER_DUPLICATE_BENEFICIARY` con `data.conflicts[]` (`user_id`, `name`, `reason` = `already_covered` | `in_live_order`, `section_name`, `club_name`, `folio`, y `valid_until` u `order_status` según el caso).
+- **Sin flag para seguros**: la emisión de órdenes de seguro ya no depende de `field_payment_orders_v1` (el flag solo rige camporees).
+- **Cobertura** siempre significa una `insurance_assignments` `ACTIVE`; `member_insurances` es solo el puente que usa camporees (se hace upsert al aprobar y se mueve al reasignar).
+
+### Reasignación directa
+
+`POST /insurance/reassignments` (permiso `field-payment-orders:create`) la ejecuta de inmediato la directiva de la sección; no pasa por el Campo Local. La fila de `insurance_reassignment_requests` se guarda `APPROVED` (revisor = actor) solo como auditoría. Condiciones (400 `INSURANCE_REASSIGNMENT_INVALID` con `reason`): cobertura `ACTIVE` de un miembro y vigente (`assignment_not_active_member`, `assignment_expired`, `assignment_not_current_year`), titular distinto del destino (`same_user`), **el titular ya salió del club** (`holder_still_in_club`), destino activo en la misma sección (`destination_not_in_section`) y sin cobertura ni orden viva del año (409 `DUPLICATE_BENEFICIARY`). Mueve el assignment, registra el movimiento `REASSIGNED` y mueve el puente `member_insurances`. `approve` y `reject` quedan solo para filas `PENDING` heredadas. `GET /insurance/reassignments` ahora incluye `from_user_name`, `to_user_name`, `requested_by_name` y `reviewed_by_name`.
+
+### Endpoints nuevos (`insurance-coverage.controller.ts`)
+
+Ambos con `insurance:read` sobre `club_section`.
+
+- `GET /club-sections/:sectionId/insurance/overview` -> `data`: `year` (`ecclesiastical_year_id`, `label`, `start_date`, `end_date`) o `null`; `cycle` (`insurance_cycle_config_id`, `unit_cost`, `purchase_deadline`, `currency`) o `null`; `counts` (`total`, `covered`, `in_process`, `uninsured`); `free_coverages_count`; `people[]` con `user_id`, `name`, `picture`, `role_label`, `is_staff`, `status` (`covered` | `in_order` | `in_review` | `proof_rejected` | `uninsured`), `coverage` (`source` = `paid_here` | `paid_elsewhere` | `reassigned`, sección/club de pago, folio, `approved_at`, `valid_until`, datos de reasignación) y `active_order` (`order_id`, `folio`, `status`, `expires_at`).
+- `GET /club-sections/:sectionId/insurance/free-coverages` -> `data: { count, items[] }`; cada item trae `insurance_assignment_id`, `holder`, `valid_until`, `order_id`, `order_folio` y `left_at`: coberturas vigentes cuyo titular ya no está en el club (reasignables).
+
+### Pendientes del dashboard
+
+`GET /dashboard/pending` agrega, solo para quien tiene `field-payment-orders:create` y si el Campo Local tiene ciclo activo: `uninsured_members` (`count`, `due_date` = `purchase_deadline`, `days_left`; `warning` hasta el plazo inclusive, `urgent` después) y `free_insurance` (`count`, `info`).
+
+### Retirado
+
+- `POST /users/:memberId/insurance`, `PATCH /insurance/:insuranceId` y `POST /club-sections/:sectionId/insurance/purchases` responden siempre 409 `FIELD_PAYMENT_ORDER_LEGACY_DISABLED`. Ya no hay alta manual (póliza, aseguradora y fechas libres) ni compras por cantidad.
+- Admin: la página «Por vencer» y el formulario/diálogo de alta, edición y borrado de seguros.
+- App: el registro manual de seguros.
+- Las lecturas `GET .../members/insurance`, `GET /users/:memberId/insurance` y `GET /insurance/expiring` siguen en backend.
+
+### Superficies
+
+- **Admin**: Seguros > «Por sección» es de solo lectura sobre `overview`; la pestaña de reasignaciones en `/dashboard/payment-orders` es un historial con nombres; el formulario de productos usa los enums correctos (`GENERAL` | `EVENT`, `FIXED_MONTHS` | `EVENT_DATES`).
+- **App**: un solo flujo en `lib/features/insurance/`: resumen en inicio y «Por atender», lista de miembros y directiva, «Asegurar» (emisión de orden), detalle de orden que muestra solo el estado actual con una hoja con todos los estados, lista de órdenes, cobertura por persona y «Reasignar».
+- Idempotency-Key de emisión debe ser UUID (400 `VALIDATION_FAILED`, `idempotency_key_not_uuid`); los ids de beneficiario y destino aceptan cualquier versión de UUID.
+
+## Modelo previo (development, hasta el merge)
 
 ### Backend (InsuranceModule)
-- **Controller**: `src/insurance/insurance.controller.ts`
-- **Service**: `src/insurance/insurance.service.ts`
-- **Module**: `src/insurance/insurance.module.ts`
-- **DTOs**: `src/insurance/dto/`
-- **Guards**: `JwtAuthGuard` + `PermissionsGuard` en toda la superficie; `GET /api/v1/insurance/expiring` agrega `GlobalRolesGuard`
-- **5 endpoints**:
-  - `GET /api/v1/clubs/:clubId/sections/:sectionId/members/insurance` — Requiere `insurance:read` y `AuthorizationResource({ type: 'club' })`
-  - `GET /api/v1/insurance/expiring` — Seguros proximos a vencer; requiere rol global `admin` o `coordinator` y acepta `days_ahead` / `local_field_id`
-  - `GET /api/v1/users/:memberId/insurance` — Requiere `insurance:read` y `AuthorizationResource({ type: 'active_assignment' })`
-  - `POST /api/v1/users/:memberId/insurance` — Requiere `insurance:create`; crea seguro con evidencia opcional (multipart, campo `evidence`)
-  - `PATCH /api/v1/insurance/:insuranceId` — Requiere `insurance:update`; actualiza seguro existente con evidencia opcional (multipart)
+- **Controller**: `src/insurance/insurance.controller.ts`; service `src/insurance/insurance.service.ts`; DTOs en `src/insurance/dto/`.
+- **Guards**: `JwtAuthGuard` + `PermissionsGuard`; `GET /api/v1/insurance/expiring` agrega `GlobalRolesGuard`.
+- Alta y edición legacy: `POST /users/:memberId/insurance` y `PATCH /insurance/:insuranceId` (multipart, campo `evidence`), consumidos por admin y app. Compras por cantidad: `POST|GET /club-sections/:sectionId/insurance/purchases` + detalle/proof/confirm/reject/reverse (no nombran beneficiarios).
+- Config por Campo Local (`insurance:configure`): `GET|POST /insurance/products`, `PATCH /insurance/products/:id`, `GET|POST /insurance/cycles`, `PATCH /insurance/cycles/:id`. Director y asistente de campo local configuran su propio campo (otro -> 403); super-admin y admin usan `?local_field_id=`.
+- En `development` el flag `field_payment_orders_v1` bloquea el alta legacy por Campo Local; el modelo anual lo reemplaza por un bloqueo incondicional.
 
-### Admin
-- **UI funcional**: `/dashboard/insurance` y `/dashboard/insurance/expiring`
-- **Capacidades verificadas**: seleccion de club/seccion, tabla de miembros con estado del seguro, alta/edicion/desactivacion de seguros, alerta de vencimientos y vista dedicada de proximos vencimientos
-- **Consumo verificado**: `GET /clubs/:clubId/sections/:sectionId/members/insurance`, `POST /users/:memberId/insurance`, `PATCH /insurance/:insuranceId`, `GET /insurance/expiring`
+### Órdenes de pago territoriales (en development)
 
-### App Movil
-- **3 screens principales**: InsuranceView, InsuranceDetailView, InsuranceFormSheet
-- Consume listado/detalle/alta/actualizacion; el datasource remoto conserva `GET /insurance/expiring`, pero la alerta actual de vencimientos se deriva localmente desde la lista ya cargada
-- Soporta carga de evidencia documental
-- Espera campos `evidence_file_url` y `evidence_file_name` en las respuestas
+Módulo `src/field-payment-orders/`: emisión con beneficiarios nombrados, PDF con instrucciones de pago, comprobante, revisión LF con maker-checker y materialización (compra `CONFIRMED` + slot + assignment `ACTIVE` + upsert bridge a `member_insurances`), expiración perezosa (`field_payment_orders.expiry_days`, 15 por defecto) y eventos `field_payment_order.*`. Las reasignaciones en `development` son por solicitud con aprobación del Campo Local. Ver [ordenes-de-pago.md](ordenes-de-pago.md).
 
-### Backend — capacity model (dual-path, verificado 2026-08-12)
+### Runbook piloto por Campo Local (operación humana)
 
-Además del flujo legacy `member_insurances`, el backend tiene un **modelo de capacidad** completo sin UI:
-
-- **Config por Campo Local**: `insurance_products` + `insurance_cycle_configs` (costo unitario por producto/año/tipo de club) vía `InsuranceConfigService` con permiso `insurance:configure`. Endpoints: `GET|POST /insurance/products`, `PATCH /insurance/products/:id`, `GET|POST /insurance/cycles`, `PATCH /insurance/cycles/:id`. Director y asistente de campo local configuran su propio campo (pedir otro → 403). Super-admin y admin configuran el campo que indican con `?local_field_id=` (obligatorio si no tienen campo local propio); en el admin eligen el campo en un selector común a productos y ciclos.
-- **Compras qty**: `POST|GET /club-sections/:sectionId/insurance/purchases` + detalle/proof/confirm/reject/reverse (`InsurancePurchasesService`). Compra anónima por cantidad → comprobante → `PENDING_CONFIRMATION` → confirm materializa `insurance_coverage_slots` `AVAILABLE`. **No nombra beneficiarios**.
-- **Asignaciones**: `insurance_assignments` existe en schema con domain helpers (`src/insurance/domain/insurance-policy.ts`), pero **sin API HTTP de assign**.
-
-**Dual-path vigente**:
-
-| Vía | Tablas | Estado |
-|-----|--------|--------|
-| Legacy directa | `member_insurances` | Activa; app/admin la usan; camporees exige su FK |
-| Capacity model | products/cycles/purchases/slots/assignments | Backend-only; purchases qty **legado a reemplazar** por órdenes de pago con beneficiarios nombrados (`field_payment_orders`) |
-
-El plan `docs/history/plans/2026-08-05-insurance-camporee-payment-orders-plan.md` cierra el gap: órdenes grupales con beneficiarios → aprobación LF → slot + assignment ACTIVE + upsert bridge a `member_insurances`.
-
-### Órdenes de pago territoriales (IMPLEMENTADO 2026-08-12)
-
-Módulo `src/field-payment-orders/` (branch `feat/field-payment-orders` en los tres repos):
-
-- **Emisión**: `POST /insurance/payment-orders` (ciclo + beneficiarios nombrados, permiso `field-payment-orders:create`). Valida ciclo activo del LF/club_type, membresía activa en la sección, sin cobertura activa duplicada y sin otra orden activa del mismo beneficiario (unique parcial `active_guard`). Folio secuencial `ORD{year}{####}` por LF con `FOR UPDATE`.
-- **Documento**: `GET /payment-orders/:id/document` genera PDF (PDFKit) con beneficiarios, totales e instrucciones de pago del LF (`field_payment_order_configs`: banco y/o caja del campo; se configura en admin → Seguros → Configuración).
-- **Comprobante**: `POST /payment-orders/:id/proof` (multipart, PDF/JPG/PNG ≤10 MB con magic bytes, R2). Estado `ISSUED → PROOF_SUBMITTED`.
-- **Revisión LF**: bandeja `GET /payment-orders/review-queue`; `approve` exige maker-checker (quien subió el comprobante no puede aprobar) y materializa en la misma transacción: `insurance_purchases` CONFIRMED + `insurance_coverage_slots` + `insurance_assignments` ACTIVE + slot movements + **upsert bridge a `member_insurances`** (camporees sigue funcionando). `reject` requiere motivo y permite re-subir.
-- **Expiración**: lazy expiry al listar/leer; órdenes `ISSUED` vencidas pasan a `EXPIRED` y liberan `active_guard`.
-- **Reasignaciones**: `POST/GET /insurance/reassignments` + approve/reject. Transferencia de cobertura activa entre miembros del mismo club; aprueba LF; mueve el assignment y registra slot movement.
-- **Superficies**: admin (`/dashboard/payment-orders` bandeja + reasignaciones; `/dashboard/insurance/config` productos/ciclos/instrucciones de pago) y app (emitir orden con multi-selección de elegibles, PDF, subir comprobante, timeline de estados; FAB de seguros redirige al flujo nuevo con flag ON).
-- **Observabilidad**: eventos estructurados `field_payment_order.{issued,proof_submitted,approved,rejected,cancelled,expired,fulfill_fail}` con `approve_latency_ms` en logs del backend.
-
-### Feature flags (rollout órdenes de pago)
-
-- `field_payment_orders_v1` (`system_config`): value JSON con lista de `local_field_id` habilitados. Flag ON en un LF: alta directa legacy y submit de purchases qty quedan bloqueados; el flujo nuevo es la única vía de alta.
-- `field_payment_orders.expiry_days` (`system_config`): días para expirar órdenes `ISSUED` sin comprobante. Default **15**.
-
-### Runbook — piloto por Campo Local (operación humana post-merge)
-
-Pasos para habilitar el flujo en un LF piloto (NO ejecutar como parte del deploy automático):
-
-1. **Seed de catálogo**: crear `insurance_products` + `insurance_cycle_configs` del LF (admin → Seguros → Configuración, permiso `insurance:configure`), con `unit_cost` y `purchase_deadline` del año vigente.
-2. **Instrucciones de pago**: capturar `field_payment_order_configs` del LF (banco y/o caja del campo). Sin config activa, el PDF de la orden falla con `FIELD_PAYMENT_ORDER_CONFIG_NOT_FOUND`.
-3. **Permisos**: verificar que el seed de `field-payment-orders:*` está aplicado (`prisma/seeds/permissions.seed.sql` + `role-permissions.seed.sql`).
-4. **Flag ON**: agregar el `local_field_id` a `system_config.field_payment_orders_v1` (JSON array). Desde ese momento el alta directa legacy y el submit de purchases qty quedan bloqueados en ese LF.
-5. **Drain de purchases pendientes**: resolver (confirmar/rechazar) las `insurance_purchases` en `PENDING_CONFIRMATION` del LF antes del flag ON, para no dejar compras huérfanas.
-6. **Rollback**: quitar el `local_field_id` del flag restaura el flujo legacy sin tocar datos; las órdenes ya aprobadas conservan su cobertura materializada.
+1. Crear `insurance_products` + `insurance_cycle_configs` del Campo Local (admin > Seguros > Configuración, `insurance:configure`) con `unit_cost` y `purchase_deadline` del año vigente.
+2. Capturar `field_payment_order_configs` (banco y/o caja). Sin config activa el PDF falla con `FIELD_PAYMENT_ORDER_CONFIG_NOT_FOUND`.
+3. Verificar el seed de `field-payment-orders:*` (`prisma/seeds/permissions.seed.sql` + `role-permissions.seed.sql`).
+4. En `development`: agregar el `local_field_id` a `system_config.field_payment_orders_v1`. Con el modelo anual este paso solo importa para camporees.
+5. Resolver las `insurance_purchases` en `PENDING_CONFIRMATION` antes de migrar para no dejar compras huérfanas.
 
 ### Base de datos
 - `member_insurances` — Seguros por miembro con campos:
@@ -93,31 +78,22 @@ Pasos para habilitar el flujo en un LF piloto (NO ejecutar como parte del deploy
 
 ## Requisitos funcionales
 
-1. Debe ser posible crear un seguro para cualquier miembro activo de una seccion de club
-2. El seguro debe registrar: tipo (GENERAL_ACTIVITIES, CAMPOREE, HIGH_RISK), numero de poliza, aseguradora, fechas de vigencia, monto de cobertura
-3. Debe ser posible adjuntar evidencia documental (PDF, imagen) al seguro via upload multipart
-4. El listado de seguros por seccion debe mostrar cada miembro con su seguro activo mas reciente
-5. Los seguros deben poder actualizarse (renovar vigencia, cambiar aseguradora, actualizar evidencia)
-6. La evidencia se almacena en Cloudflare R2 y se expone como URL firmada
-7. El modulo debe registrar quien creo y quien modifico cada seguro (auditoria)
-8. El panel admin debe permitir gestion de seguros por seccion/club y monitoreo de vencimientos proximos
+1. Un seguro por persona (miembro o directiva) y año eclesiástico, con vigencia hasta el fin de ese año
+2. El precio lo fija el Campo Local por año y tipo de club
+3. Se paga con una orden que nombra beneficiarios y el Campo Local aprueba el comprobante
+4. La cobertura pertenece al club y se reasigna directamente cuando el titular se va
+5. La sección ve su estado anual (cubiertos, en proceso, sin seguro) y recibe avisos de plazo
+6. Camporees sigue validando la cobertura vía `member_insurances` (puente)
 
 ## Decisiones de diseno
 
-- **Multipart para evidencia**: La creacion y actualizacion de seguros aceptan upload multipart con campo `evidence`, no requiere un endpoint separado para archivos
-- **Seguro activo mas reciente**: El listado por seccion resuelve el seguro activo vigente de cada miembro, no el historico completo
-- **Tres tipos de seguro**: El enum `insurance_type_enum` distingue cobertura por contexto de uso, no por nivel de proteccion
-- **Auditoria integrada**: Los campos `created_by_id` y `modified_by_id` registran el actor que gestiona el seguro, que puede ser diferente del miembro asegurado (directores gestionan seguros de sus miembros)
-- **Almacenamiento R2**: La evidencia se guarda en Cloudflare R2 siguiendo el mismo patron que fotos de perfil y evidencias de honores
+- **Modelo anual (2026-11-17)**: reemplaza el alta manual y las compras por cantidad; ver [DECISIONS-PENDING](../audit/DECISIONS-PENDING.md).
+- **Cobertura = assignment `ACTIVE`**; `member_insurances` queda como puente para camporees.
+- **Reasignación directa** sin aprobación del Campo Local; la auditoría queda en `insurance_reassignment_requests`.
+- **Evidencia en R2** (bucket `INSURANCE_EVIDENCE`) solo aplica a los registros legacy existentes.
 
 ## Gaps y pendientes
 
-- **Sin notificaciones de vencimiento**: No hay mecanismo para alertar cuando un seguro esta por vencer
-- **Sin historial**: Solo se muestra el seguro activo mas reciente; no hay endpoint para consultar seguros historicos de un miembro
-- **Validacion de camporee acotada al flujo de registro**: `camporees.service.ts` valida tipo `CAMPOREE`, titularidad, vigencia y estado activo cuando se envia `insurance_id`, pero no existe una superficie general de historial o auditoria de coberturas
-- **REALITY-MATRIX desactualizada**: La Reality Matrix marcaba seguros como "SIN CANON" y sin backend module, pero el modulo `src/insurance/` existe con 5 endpoints funcionales documentados en ENDPOINTS-LIVE-REFERENCE
-
-## Prioridad y siguiente accion
-
-- **Prioridad**: Media — backend, admin y app cubren la operacion base; faltan alertas/notificaciones e historial
-- **Siguiente accion**: Actualizar REALITY-MATRIX.md para reflejar que el InsuranceModule y la UI admin existen. Considerar notificaciones de vencimiento e historial de seguros por miembro.
+- Sin notificaciones push ni correo de vencimiento o de plazo; solo el pendiente del dashboard.
+- El plan [2026-07-23-insurance-capacity-redesign-design.md](../plans/2026-07-23-insurance-capacity-redesign-design.md) queda superado por el modelo anual donde difiera (cupos libres entre secciones, compras por cantidad, componente de ranking `insurance_purchase_timeliness` sin implementar).
+- Falta decidir el destino de las tablas y endpoints de compras por cantidad (hoy solo lectura funcional).

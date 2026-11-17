@@ -6,6 +6,20 @@ Fuente: Reality Matrix + Canon verification
 
 ---
 
+## Seguros: modelo anual y reasignación directa (2026-11-17)
+
+**Estado: RESUELTA (2026-11-17) por el product owner. Implementación Pendiente de merge (sacdia-backend PR #664, sacdia-app PR #260, sacdia-admin PR #307).**
+
+Contexto: el modelo de cupos por compra (plan `2026-07-23-insurance-capacity-redesign-design.md`) no reflejaba la operación real.
+
+- **Decisión 1**: el seguro es anual por año eclesiástico, uno por persona (miembros y directiva); el Campo Local fija el precio por año; la cobertura dura hasta el `end_date` del año eclesiástico; nadie puede estar cubierto dos veces en el año ni en dos órdenes vivas o pagadas.
+- **Decisión 2**: la reasignación es directa. La directiva de la sección mueve la cobertura de un titular que ya salió del club a alguien sin seguro, sin aprobación del Campo Local; queda registro de auditoría.
+- **Consecuencia**: alta manual y compras por cantidad retiradas (409 `FIELD_PAYMENT_ORDER_LEGACY_DISABLED`); la emisión de órdenes de seguro ya no depende de `field_payment_orders_v1`.
+
+Detalle en [gestion-seguros.md](../features/gestion-seguros.md).
+
+---
+
 ## RBAC: alias `assistant-admin` en capabilities de usuarios y consejeros en `scoring_categories.manage` (2026-11-05)
 
 **Estado: RESUELTA (2026-11-05) — punto 1 opción (a); punto 2 opción (a). Sin cambio de código.**
