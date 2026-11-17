@@ -1,6 +1,7 @@
 # Órdenes de pago territoriales y obligaciones de pago
 
 **Estado**: IMPLEMENTADO
+**Modelo anual de seguros**: Pendiente de merge (sacdia-backend PR #664, sacdia-app PR #260, sacdia-admin PR #307); decisión de producto 2026-11-17, ver [gestion-seguros.md](gestion-seguros.md)
 **Verificado contra código**: 2026-10-04 (rama `development`); secciones «App móvil», «Admin» y detalle de orden actualizadas el 2026-11-09
 **Dominios relacionados**: [gestion-seguros.md](gestion-seguros.md) (seguros, reasignaciones, runbook de piloto), [camporees.md](camporees.md), [camporee-orders.md](camporee-orders.md), [camporee-supplies.md](camporee-supplies.md), [materials.md](materials.md)
 
@@ -33,12 +34,14 @@ Controller con `JwtAuthGuard` + `PermissionsGuard`.
 | POST | `/payment-orders/:orderId/approve` | `field-payment-orders:review` | `global` |
 | POST | `/payment-orders/:orderId/reject` | `field-payment-orders:review` | `global` |
 
-Las reasignaciones de cobertura de seguro (`/insurance/reassignments`, 4 rutas) viven en el mismo módulo y están descritas en [gestion-seguros.md](gestion-seguros.md).
+Las reasignaciones de cobertura de seguro (`/insurance/reassignments`, 4 rutas) viven en el mismo módulo. En `development` son solicitudes que aprueba el Campo Local; con el modelo anual (Pendiente de merge) `POST` las ejecuta de inmediato la directiva de la sección y `approve`/`reject` solo atienden filas `PENDING` heredadas. Detalle en [gestion-seguros.md](gestion-seguros.md).
 
 Reglas verificadas en `field-payment-orders.service.ts`, `state-machine.ts` y `fulfillment/`:
 
 - **Propósitos**: `INSURANCE` (referencia `insurance_cycle_config_id`) y `CAMPOREE` (referencia `local_camporee_id` o `union_camporee_id`). En un camporee de unión cobra igualmente el Campo Local; el traspaso a la unión ocurre fuera del sistema.
 - **Estados**: `ISSUED → PROOF_SUBMITTED | CANCELLED | EXPIRED`; `PROOF_SUBMITTED → APPROVED | PROOF_REJECTED`; `PROOF_REJECTED → PROOF_SUBMITTED | CANCELLED`. `APPROVED`, `CANCELLED` y `EXPIRED` son terminales. Transición inválida: 422 `FIELD_PAYMENT_ORDER_INVALID_TRANSITION`.
+- **Seguro anual (Pendiente de merge)**: la emisión de seguro ya no exige `field_payment_orders_v1` (solo camporee). Los beneficiarios pueden ser miembros o directiva de la sección. Cada línea guarda `purpose_ref_id` = id del año eclesiástico y una persona no puede estar cubierta ni en otra orden `ISSUED`/`PROOF_SUBMITTED`/`PROOF_REJECTED`/`APPROVED` del mismo año: 409 `FIELD_PAYMENT_ORDER_DUPLICATE_BENEFICIARY` con `data.conflicts[]` (`user_id`, `name`, `reason` `already_covered` | `in_live_order`, `section_name`, `club_name`, `folio`; el filtro de errores HTTP ahora devuelve el campo opcional `data`). Un ciclo con año terminado da 400 `FIELD_PAYMENT_ORDER_CYCLE_INVALID`. La vigencia llega al `end_date` del año. Las órdenes de lista y detalle traen `beneficiary_name` e `is_staff` por línea.
+- **Idempotency-Key**: debe ser UUID; si no, 400 `VALIDATION_FAILED` (`idempotency_key_not_uuid`). Los ids de beneficiario aceptan cualquier versión de UUID.
 - **Emisión**: exige el flag `field_payment_orders_v1` activo para el Campo Local (`FIELD_PAYMENT_ORDER_FLAG_DISABLED`), al menos un beneficiario y costo unitario mayor que cero (`FIELD_PAYMENT_ORDER_COST_NOT_CONFIGURED`). Total = costo unitario × beneficiarios. Un beneficiario con otra orden activa produce 409 `FIELD_PAYMENT_ORDER_DUPLICATE_BENEFICIARY`.
 - **Idempotencia**: el header `Idempotency-Key` hace que una segunda petición del mismo emisor con la misma clave devuelva la orden existente.
 - **Folio**: `ORD{año}{0001}`, contador por Campo Local y año en `field_payment_folio_counters`.
@@ -74,6 +77,7 @@ Reglas verificadas en `payment-obligations.service.ts`:
   - «Aprobar» pide confirmación con folio y total.
   - El panel de revisión muestra club, sección, camporee y Campo Local (campos de `GET /payment-orders/:orderId`).
   - La columna de acciones queda fija a la derecha; a menos de 1280 px se ocultan beneficiarios y fecha de emisión.
+- Modelo anual (Pendiente de merge): la pestaña de reasignaciones es un historial con nombres (`from_user_name`, `to_user_name`, `requested_by_name`, `reviewed_by_name`).
 - `/dashboard/insurance/config`: productos, ciclos e instrucciones de pago del Campo Local.
 
 ### App móvil
@@ -84,6 +88,7 @@ Reglas verificadas en `payment-obligations.service.ts`:
   - Muestra el total (`registration_cost` del camporee × miembros) y pide confirmación antes de emitir. El error de emisión aparece junto al botón.
   - Tras emitir abre el detalle de la orden; volver regresa al camporee.
 - Comprobante: se elige cámara, fotos o archivo, con vista previa antes de enviar. Las fotos se suben como `comprobante.<ext>`. La fila del comprobante abre la imagen o el PDF con la URL firmada de `GET /payment-orders/:orderId/proof`.
+- Modelo anual (Pendiente de merge): el flujo de seguros vive en `lib/features/insurance/` (resumen, «Por atender», «Asegurar», detalle de orden con solo el estado actual y hoja con todos los estados); `payment_orders` muestra los conflictos de beneficiarios devueltos por el 409.
 - `lib/features/camporee_orders/` consume `GET /payment-obligations/pending`.
 
 ### Base de datos

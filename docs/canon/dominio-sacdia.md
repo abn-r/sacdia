@@ -100,6 +100,8 @@ Dato de referencia que soporta la operación y trazabilidad de la trayectoria de
 
 Registro asociado a la trayectoria del miembro que documenta la cobertura de seguros vinculada a su participación institucional (actividades generales, camporees, actividades de alto riesgo). Forma parte de la dimensión administrativa de la trayectoria.
 
+Modelo anual (decisión de producto 2026-11-17; Pendiente de merge en backend, app y admin): el seguro es anual por año eclesiástico y uno por persona (miembro o directiva). El Campo Local fija el precio de cada año, la cobertura dura hasta el fin de ese año eclesiástico y pertenece al club, que puede reasignarla directamente a otra persona sin seguro cuando el titular se va. Ver `docs/features/gestion-seguros.md`.
+
 ### Cargo
 
 Responsabilidad institucional ejercida por una persona en un contexto y periodo determinados.
