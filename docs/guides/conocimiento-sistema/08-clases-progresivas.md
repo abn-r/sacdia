@@ -284,13 +284,16 @@ Cargo (`club_role_assignments`) y responsabilidad de una clase
 `REJECTED`/`EXPIRED`) o haberla terminado (`APPROVED`/`INVESTIDO`); si no,
 `CLASS_COUNSELOR_GUIDE_MAJOR_REQUIRED`
 (`class-counselor-assignments.service.ts`:31-39, 420-446). Máximo 3 activos
-por clase/sección/año; máximo 2 clases por persona (la segunda exige
+por clase/sección/año, con un solo principal y a lo sumo un `assistant`
+(subconsejero; 409 `CLASS_COUNSELOR_ASSISTANT_EXISTS`); máximo 2 clases por persona (la segunda exige
 `exceptional` + motivo).
 
 Director/subdirector/secretaría ven todas las clases de la sección en
 `progress-scope` (`access_level=section`); el consejero asignado, solo las
 suyas (`assigned`). `members-progress` añade GMs con cursado cruzado del
-mismo club.
+mismo club. Ambas respuestas traen conteos por estado de requisito (`status_counts`),
+avance promedio y los responsables (`counselor`, `assistant`) para la
+pantalla Clase agrupada de la app.
 
 ## Matriz actor × acción
 

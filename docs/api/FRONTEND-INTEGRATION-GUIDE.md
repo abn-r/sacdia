@@ -47,6 +47,18 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 ---
 
+## Actualizacion 2026-11-17 (Clase agrupada, investidura y unidades)
+
+Mergeado en `development` (backend #663, app #259). Todos los cambios de API son aditivos.
+
+- **Progreso por clase.** `GET /clubs/:clubId/sections/:sectionId/classes/progress-scope` agrega a cada clase `members_count`, `avg_progress` (0–100), `status_counts` (`validated`, `submitted`, `rejected`, `pending`) y `counselor` / `assistant` (`{ user_id, name }` o `null`). `GET .../classes/:classId/members-progress` agrega `status_counts` por miembro y, arriba, `summary { avg_progress, status_counts }`, `counselor` y `assistant`.
+- **Evidencia de requisitos.** Las secciones de `GET /users/:userId/classes/:classId/progress` traen `max_files` (10). `POST .../sections/:moduleSectionId/files` con 10 archivos activos responde 400 `CLASS_EVIDENCE_MAX_FILES_REACHED`.
+- **Consejeros por clase.** Por clase, sección y año hay a lo sumo un `primary` (409 `CLASS_COUNSELOR_PRIMARY_EXISTS`) y un `assistant`, el subconsejero (409 `CLASS_COUNSELOR_ASSISTANT_EXISTS`).
+- **Investidura (directiva).** `presentation-context` agrega `authorizers [{ user_id, name }]` (pastores elegibles del distrito de la sección; `[]` si no hay) y, en cada candidato, `missing_requirements_count` (`null` si es elegible). Las vistas de solicitud traen `created_by { user_id, name } | null`; el historial propio y el de sección, `resolved_by_name` («Sistema» en rechazos del sistema) y `resolved_at`.
+- **Investidura (autorizador).** `GET /investiture-requests?include_resolved=true` suma las solicitudes ya resueltas; todos los items traen `invested_count` y `rejected_count`. Resolver solo a parte de las personas pendientes sigue siendo válido: el resto queda `PENDING`.
+- **Unidades.** Son participantes de puntaje los miembros activos, el capitán y el secretario de la unidad; nunca el consejero ni el consejero suplente. Rige en los registros semanales (alta, bulk, edición y listado) y en los candidatos de miembro del mes. `GET /clubs/:clubId/units/:unitId` agrega `scoring_members [{ user_id, name, paternal_last_name, maternal_last_name, user_image, unit_role }]` con `unit_role` `captain`, `secretary` o `member`.
+- **App.** Pantallas nuevas de Clase agrupada (rutas `/home/grouped-class*`) e Investiduras; detalle en `docs/features/clases-progresivas.md`, `docs/features/validacion-investiduras.md` y `docs/features/units.md`.
+
 ## Actualizacion 2026-10-13 (Carga por certificado rediseñada, instructor y fecha de finalización)
 
 Mergeado en `development` (backend #471 a #480, panel #227 a #229, app #161 a #170). Todos los campos nuevos son aditivos. Contratos y códigos: `docs/api/ENDPOINTS-LIVE-REFERENCE.md` (secciones `certificate-bulk-imports`, `instructors`, `admin-honor-instructor-proposals`, `user-honors`) y el contrato canónico de `docs/api/API-SPECIFICATION.md`. Flujo completo en `docs/features/carga-masiva-certificados.md`.

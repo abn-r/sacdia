@@ -50,8 +50,13 @@ Verificado el 2026-10-09 contra las ramas de la fase 8 (backend `feat/investitur
 - La pantalla de autorización nueva está en el plan `docs/plans/2026-10-08-investidura-ui-1-panel.md`.
 
 ### App (sacdia-app)
-- Borrada en la fase 8 la feature de investidura vieja: pendientes, historial, envío, rutas, capa de datos, tarjeta del hub de coordinación y entrada del push en la lista permitida. El detalle de clase ya no muestra la tarjeta de envío a validación: una clase investida muestra la insignia «Investido».
-- Las pantallas de autorización nuevas están en el plan `docs/plans/2026-10-08-investidura-ui-2-app.md`.
+- Borrada en la fase 8 la feature de investidura vieja: pendientes, historial, envío, rutas, capa de datos, tarjeta del hub de coordinación y entrada del push en la lista permitida. El detalle de clase ya no muestra la tarjeta de envío a validación: la clase muestra una sola fila de investidura (`OwnInvestitureRow`).
+- Las pantallas de autorización nuevas están en el plan `docs/plans/2026-10-08-investidura-ui-2-app.md`. El rediseño del 2026-11-17 (app #259, backend #663; ambos en `development`) dejó este comportamiento, en `lib/features/investiture_requests/`:
+  - **Tablero de la sección** (`/home/investiture`, `SectionInvestitureView`, directiva): un solo botón «Enviar a autorización» con las personas listas preseleccionadas; el resumen del tablero usa `authorizers` y `missing_requirements_count` de `presentation-context`. La sección de espera abre la hoja de la persona en espera (`WaitingPersonSheet`). Las filas «Más cerca» y «Aún no cumplen» abren el avance del miembro de Clase agrupada (`/home/grouped-class/class/:classId/member/:userId`).
+  - **Autorizador** (`/investiture/authorize`, `/investiture/authorize/:requestId`): aceptar (✓) o rechazar (✕) en la fila de cada persona, «Investir a todos», confirmación parcial (solo se resuelven las personas con decisión; el resto sigue `PENDING`), pantalla de resultado (`AuthorizerResult`) y solicitudes ya resueltas (`include_resolved=true`, con `invested_count` y `rejected_count`).
+  - **Mi investidura** (`/investiture/mine`, `OwnInvestitureView` con `OwnInvestitureHero`): también se entra desde el perfil (`profile_classes_section.dart`). En el detalle de clase, una sola fila de investidura (`OwnInvestitureRow`) sustituye la insignia heredada «Investido».
+  - El historial de la sección (`/home/investiture/history`) muestra quién resolvió cada persona (`resolved_by_name`, «Sistema» en rechazos del sistema) y cuándo (`resolved_at`); las solicitudes traen `created_by`.
+  - Investiduras vuelve al dashboard al retroceder cuando es la primera página (`lib/core/utils/back_or_home.dart`).
 
 ### Base de datos (schema y runtime alineados)
 
@@ -180,7 +185,7 @@ Todas responden bajo `/api/v1`. Las 17 retiradas están en `sacdia-backend/src/i
 | Panel | `/dashboard/clubs/validations`, pestaña «Módulos» (clases) | Borrada. La pantalla conserva honores. |
 | App | `/investiture/pending` | Borrada. |
 | App | `/investiture/enrollment/:enrollmentId/history` | Borrada. |
-| App | Detalle de clase: tarjeta de envío a validación | Borrada; una clase investida muestra la insignia «Investido». |
+| App | Detalle de clase: tarjeta de envío a validación | Borrada; desde el 2026-11-17 una sola fila de investidura (`OwnInvestitureRow`) reemplaza también la insignia «Investido». |
 | App | `InvestitureSubmitView`, proveedor `markInvestido`, tarjeta del hub de coordinación, entrada del push | Borrados. |
 
 ### Desbloqueo de la vía anterior

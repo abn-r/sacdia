@@ -4,7 +4,7 @@
 
 ## Descripcion de dominio
 
-Miembro del Mes reconoce al integrante con mayor puntaje semanal acumulado dentro de una seccion para un mes y ano determinados. El ranking se calcula sobre `weekly_record_scores` asociados a miembros activos de unidades activas de esa seccion y admite empates. Las semanas de scoring son domingo–sábado (hora México); una semana cuenta para el mes del sábado que la cierra. Cuando existen registros con `weekly_records.unit_id`, la evaluacion usa esa unidad; los registros legacy sin unidad se usan solo como fallback para no perder historico.
+Miembro del Mes reconoce al integrante con mayor puntaje semanal acumulado dentro de una seccion para un mes y ano determinados. El ranking se calcula sobre `weekly_record_scores` asociados a participantes de puntaje de unidades activas de esa seccion (miembros activos, capitán y secretario de la unidad; nunca el consejero ni el consejero suplente) y admite empates. Las semanas de scoring son domingo–sábado (hora México); una semana cuenta para el mes del sábado que la cierra. Cuando existen registros con `weekly_records.unit_id`, la evaluacion usa esa unidad; los registros legacy sin unidad se usan solo como fallback para no perder historico.
 
 La feature combina consulta del ganador vigente, historial paginado, evaluacion manual protegida e evaluacion automatica por cron para el mes anterior. Tambien dispara notificaciones hacia ganadores y directores de la seccion.
 
