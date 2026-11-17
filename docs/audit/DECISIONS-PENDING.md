@@ -8,7 +8,7 @@ Fuente: Reality Matrix + Canon verification
 
 ## Seguros: modelo anual y reasignación directa (2026-11-17)
 
-**Estado: RESUELTA (2026-11-17) por el product owner. Implementación Pendiente de merge (sacdia-backend PR #664, sacdia-app PR #260, sacdia-admin PR #307).**
+**Estado: RESUELTA (2026-11-17) por el product owner. Implementada en `development` (sacdia-backend PR #664, sacdia-app PR #260, sacdia-admin PR #307).**
 
 Contexto: el modelo de cupos por compra (plan `2026-07-23-insurance-capacity-redesign-design.md`) no reflejaba la operación real.
 
