@@ -176,7 +176,8 @@ Notas runtime activas:
 
 - catálogo de clases, progreso por usuario y clase, prerequisitos y honores ligados a clases;
 - honores, especialidades y honores maestros con requisitos;
-- validación de progreso (`runtime-validation.md`) e investidura con pipeline multietapa (`investiture`);
+- validación de progreso (`runtime-validation.md`);
+- investidura por solicitud y autorización (`investiture-requests`): la directiva envía a autorización a quienes cumplen y el pastor del distrito invierte o rechaza a cada persona. El pipeline multietapa anterior se apagó en la Fase 8; ver `../features/validacion-investiduras.md`;
 - certificaciones configurables y su revisión (`runtime-user-certifications.md`);
 - carga masiva de certificados con OCR asistido (`certificate-bulk-imports`; hoy Google Vision por API key, solo imágenes) y solicitudes de certificado institucional;
 - logros (`runtime-achievements.md`) y miembro del mes (`runtime-member-of-month.md`).
