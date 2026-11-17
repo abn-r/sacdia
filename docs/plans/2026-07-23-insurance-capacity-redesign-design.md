@@ -1,6 +1,6 @@
 # Diseño: Rediseño de seguros por compras, cupos y asignaciones
 
-> **Superado parcialmente (2026-11-17)**: el modelo anual (un seguro por persona y año eclesiástico, pago por orden con beneficiarios nombrados, cobertura hasta el fin del año, reasignación directa; Pendiente de merge) reemplaza lo que aquí contradiga: compras por cantidad, cupos libres entre secciones y aprobación de reasignaciones por el Campo Local. Ver `docs/features/gestion-seguros.md`.
+> **Superado parcialmente (2026-11-17)**: el modelo anual (un seguro por persona y año eclesiástico, pago por orden con beneficiarios nombrados, cobertura hasta el fin del año, reasignación directa; en `development` desde 2026-11-17) reemplaza lo que aquí contradiga: compras por cantidad, cupos libres entre secciones y aprobación de reasignaciones por el Campo Local. Ver `docs/features/gestion-seguros.md`.
 
 > **Estado real (revisado 2026-10-04 contra `development`)**: Implementación parcial en `development`. Backend: migración `20260723120000_insurance_capacity_model`, productos, ciclos, compras, cupos y reasignaciones (`src/insurance/`). Admin: consume productos, ciclos y reasignaciones, pero no compras. App: no consume el modelo nuevo. Falta el componente de ranking `insurance_purchase_timeliness`.
 

@@ -1,14 +1,12 @@
 # Gestion de Seguros (Insurance)
 
-**Estado**: IMPLEMENTADO (modelo previo en `development`); modelo anual Pendiente de merge (sacdia-backend PR #664, sacdia-app PR #260, sacdia-admin PR #307)
+**Estado**: IMPLEMENTADO (modelo anual en `development` desde sacdia-backend PR #664, sacdia-app PR #260 y sacdia-admin PR #307)
 
 ## Descripcion de dominio
 
 El seguro institucional cubre a las personas de una sección de club (miembros y directiva) en actividades de riesgo: campamentos, caminatas, orden cerrado y camporees. Desde la decisión de producto del 2026-11-17 el seguro es **anual por año eclesiástico y uno por persona**: lo cobra el Campo Local, el Campo Local fija el precio de cada año (`insurance_cycle_configs`) y la cobertura dura hasta el `ecclesiastical_years.end_date` del ciclo (no 12 meses desde el pago). La cobertura pertenece al club: si el titular se va, la directiva de la sección la reasigna directamente.
 
-> **Pendiente de merge (sacdia-backend PR #664, sacdia-app PR #260, sacdia-admin PR #307).** Todo lo marcado «modelo anual» describe ramas sin integrar a `development`. La sección «Modelo previo (development)» al final conserva lo que sigue vigente hasta el merge.
-
-## Modelo anual (Pendiente de merge)
+## Modelo anual
 
 ### Reglas
 
@@ -46,26 +44,27 @@ Ambos con `insurance:read` sobre `club_section`.
 - **App**: un solo flujo en `lib/features/insurance/`: resumen en inicio y «Por atender», lista de miembros y directiva, «Asegurar» (emisión de orden), detalle de orden que muestra solo el estado actual con una hoja con todos los estados, lista de órdenes, cobertura por persona y «Reasignar».
 - Idempotency-Key de emisión debe ser UUID (400 `VALIDATION_FAILED`, `idempotency_key_not_uuid`); los ids de beneficiario y destino aceptan cualquier versión de UUID.
 
-## Modelo previo (development, hasta el merge)
+## Base del módulo
 
 ### Backend (InsuranceModule)
 - **Controller**: `src/insurance/insurance.controller.ts`; service `src/insurance/insurance.service.ts`; DTOs en `src/insurance/dto/`.
 - **Guards**: `JwtAuthGuard` + `PermissionsGuard`; `GET /api/v1/insurance/expiring` agrega `GlobalRolesGuard`.
-- Alta y edición legacy: `POST /users/:memberId/insurance` y `PATCH /insurance/:insuranceId` (multipart, campo `evidence`), consumidos por admin y app. Compras por cantidad: `POST|GET /club-sections/:sectionId/insurance/purchases` + detalle/proof/confirm/reject/reverse (no nombran beneficiarios).
+- Alta y edición legacy y compras por cantidad: ver «Retirado». Las lecturas de compras (`GET /club-sections/:sectionId/insurance/purchases` y su detalle) siguen disponibles.
 - Config por Campo Local (`insurance:configure`): `GET|POST /insurance/products`, `PATCH /insurance/products/:id`, `GET|POST /insurance/cycles`, `PATCH /insurance/cycles/:id`. Director y asistente de campo local configuran su propio campo (otro -> 403); super-admin y admin usan `?local_field_id=`.
-- En `development` el flag `field_payment_orders_v1` bloquea el alta legacy por Campo Local; el modelo anual lo reemplaza por un bloqueo incondicional.
+- El flag `field_payment_orders_v1` ya solo rige camporees; el alta legacy de seguros está bloqueada siempre.
 
-### Órdenes de pago territoriales (en development)
+### Órdenes de pago territoriales
 
-Módulo `src/field-payment-orders/`: emisión con beneficiarios nombrados, PDF con instrucciones de pago, comprobante, revisión LF con maker-checker y materialización (compra `CONFIRMED` + slot + assignment `ACTIVE` + upsert bridge a `member_insurances`), expiración perezosa (`field_payment_orders.expiry_days`, 15 por defecto) y eventos `field_payment_order.*`. Las reasignaciones en `development` son por solicitud con aprobación del Campo Local. Ver [ordenes-de-pago.md](ordenes-de-pago.md).
+Módulo `src/field-payment-orders/`: emisión con beneficiarios nombrados, PDF con instrucciones de pago, comprobante, revisión LF con maker-checker y materialización (compra `CONFIRMED` + slot + assignment `ACTIVE` + upsert bridge a `member_insurances`), expiración perezosa (`field_payment_orders.expiry_days`, 15 por defecto) y eventos `field_payment_order.*`. Ver [ordenes-de-pago.md](ordenes-de-pago.md).
 
 ### Runbook piloto por Campo Local (operación humana)
 
 1. Crear `insurance_products` + `insurance_cycle_configs` del Campo Local (admin > Seguros > Configuración, `insurance:configure`) con `unit_cost` y `purchase_deadline` del año vigente.
 2. Capturar `field_payment_order_configs` (banco y/o caja). Sin config activa el PDF falla con `FIELD_PAYMENT_ORDER_CONFIG_NOT_FOUND`.
 3. Verificar el seed de `field-payment-orders:*` (`prisma/seeds/permissions.seed.sql` + `role-permissions.seed.sql`).
-4. En `development`: agregar el `local_field_id` a `system_config.field_payment_orders_v1`. Con el modelo anual este paso solo importa para camporees.
-5. Resolver las `insurance_purchases` en `PENDING_CONFIRMATION` antes de migrar para no dejar compras huérfanas.
+4. Solo para camporees: agregar el `local_field_id` a `system_config.field_payment_orders_v1`.
+5. Resolver las `insurance_purchases` en `PENDING_CONFIRMATION` heredadas para no dejar compras huérfanas.
+6. Antes de desplegar el backend en cada entorno: normalizar `field_payment_order_lines.purpose_ref_id` de las líneas de seguro al id del año eclesiástico (SQL en sacdia-backend PR #664). Hecho en development; staging y producción pendientes.
 
 ### Base de datos
 - `member_insurances` — Seguros por miembro con campos:
