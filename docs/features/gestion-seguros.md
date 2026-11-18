@@ -64,7 +64,7 @@ Módulo `src/field-payment-orders/`: emisión con beneficiarios nombrados, PDF c
 3. Verificar el seed de `field-payment-orders:*` (`prisma/seeds/permissions.seed.sql` + `role-permissions.seed.sql`).
 4. Solo para camporees: agregar el `local_field_id` a `system_config.field_payment_orders_v1`.
 5. Resolver las `insurance_purchases` en `PENDING_CONFIRMATION` heredadas para no dejar compras huérfanas.
-6. Antes de desplegar el backend en cada entorno: normalizar `field_payment_order_lines.purpose_ref_id` de las líneas de seguro al id del año eclesiástico (SQL en sacdia-backend PR #664). Hecho en development; staging y producción pendientes.
+6. Antes de desplegar el backend en cada entorno: normalizar `field_payment_order_lines.purpose_ref_id` de las líneas de seguro al id del año eclesiástico (SQL en sacdia-backend PR #664). Aplicado el 2026-11-17 en development (10 filas), staging y producción (0 filas: aún no había órdenes de seguro).
 
 ### Base de datos
 - `member_insurances` — Seguros por miembro con campos:
