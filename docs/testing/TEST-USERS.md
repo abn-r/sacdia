@@ -24,8 +24,6 @@ Todos comparten la misma contraseña, definida en la constante `PASSWORD` del se
 
 ## Rol base `user`
 
-> Pendiente de merge (sacdia-backend PR #665, rama `fix/test-users-base-role`, commit `7960666a`). Ya está aplicado en la rama `development` de Neon; el seed de `development` (sin el PR) todavía no lo crea, así que una base nueva o recreada no lo tendrá hasta que el PR se integre.
-
 Una cuenta real recibe el rol global `user` al registrarse (`auth.service`, inicio de sesión social y tutelas). El seed lo replica: `ensureBaseUserRole` hace un `upsert` en `users_roles` con el rol `user` (GLOBAL) para cada usuario sembrado, de forma idempotente.
 
 Por qué importa: las rutas con `@AuthorizationResource({ type: 'global' })` (por ejemplo `GET /resource-categories` y `GET /resources`) solo cuentan permisos GLOBAL en `PermissionsGuard` (`hasRequiredPermissions`, `src/common/authorization/permission-requirements.ts`). Los permisos que llegan por un rol de club no cuentan ahí. Sin el rol base, un usuario sembrado como `director-club@sacdia.com` recibía 403 en rutas donde un usuario real no.
