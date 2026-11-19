@@ -73,7 +73,7 @@ Cada item del inventario pertenece a una instancia/seccion operativa de club (`c
 
 ### Campos extendidos del item
 
-> Backend: ya en `development` (commit `bddc3557`). La migracion esta aplicada en Neon `development` y `staging`. Para `production`, `docs/deployment/DEPLOYMENT-GUIDE.md` §0.7 la marca pendiente y `docs/database/SCHEMA-REFERENCE.md` la marca aplicada (2026-11-09); los dos documentos no coinciden y no se verifico contra la base.
+> Backend: ya en `development` (commit `bddc3557`). La migracion esta aplicada en Neon `development` y `staging`. En `production` esta aplicada desde el 2026-11-09 (verificado en `_prisma_migrations` y en las columnas de `club_inventory` el 2026-11-19).
 
 `POST /api/v1/inventory/clubs/:clubId/inventory` y `PATCH /api/v1/inventory/inventory/:id` aceptan, ademas de nombre, descripcion, categoria y cantidad, siete campos opcionales:
 

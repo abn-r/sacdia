@@ -1,7 +1,7 @@
 # SACDIA — Deployment Guide
 
 **Estado**: ACTIVE
-**Actualizado**: 2026-11-03
+**Actualizado**: 2026-11-19
 **Fuentes**: `sacdia-backend/render.yaml`, `sacdia-backend/src/config/env.validation.ts`, `.github/workflows/ci.yml` de cada repo, el dashboard de Render y Neon (topología informada por el responsable de infraestructura el 2026-10-13) y `docs/guides/ocr-proxy-preprod-infra.md`.
 
 > [!IMPORTANT]
@@ -243,13 +243,13 @@ Compatibilidad: las migraciones 1 a 4 son aditivas o de preparación y el códig
 
 ### 0.7 Migración de campos extendidos de inventario (2026-10-26)
 
-Una migración aditiva del backend, rama `fix/inventory-extended-fields`, **Pendiente de merge**. Añade a `club_inventory` los campos `condition`, `serial_number`, `purchase_date`, `estimated_value`, `location`, `assigned_to` y `notes`, más dos CHECK. Detalle en `docs/database/SCHEMA-REFERENCE.md`.
+Una migración aditiva del backend (rama `fix/inventory-extended-fields`), ya en `development` (commit `bddc3557`). Añade a `club_inventory` los campos `condition`, `serial_number`, `purchase_date`, `estimated_value`, `location`, `assigned_to` y `notes`, más dos CHECK. Detalle en `docs/database/SCHEMA-REFERENCE.md`.
 
 | Directorio (`sacdia-backend/prisma/migrations/`) | Usa `CONCURRENTLY` | `development` | `staging` | `production` |
 |---|---|---|---|---|
-| `20261026130000_inventory_extended_fields` | No | Aplicada (2026-10-26) | Aplicada (2026-10-30) | **Pendiente** |
+| `20261026130000_inventory_extended_fields` | No | Aplicada (2026-10-26) | Aplicada (2026-10-30) | Aplicada (2026-11-09) |
 
-**Aplicarla antes de desplegar el backend de esa rama** en cada entorno: el código nuevo lee y escribe las columnas, así que sobre una base sin ellas falla. Es compatible con el código anterior (solo `ADD COLUMN` y `ADD CONSTRAINT`; las filas existentes quedan con `condition = 'bueno'`). En `development` el merge del backend ya no necesita aplicarla: `prisma migrate deploy` la encontrará registrada. En `staging` y `production` aplican las reglas del §0.4 y del §0.6 (`production` solo por la promoción `development` → `preproduction` → `main`); `staging` la tiene desde el 2026-10-30.
+**Aplicarla antes de desplegar el backend de esa rama** en cada entorno: el código nuevo lee y escribe las columnas, así que sobre una base sin ellas falla. Es compatible con el código anterior (solo `ADD COLUMN` y `ADD CONSTRAINT`; las filas existentes quedan con `condition = 'bueno'`). En `development` el merge del backend ya no necesita aplicarla: `prisma migrate deploy` la encontrará registrada. En `staging` y `production` aplican las reglas del §0.4 y del §0.6 (`production` solo por la promoción `development` → `preproduction` → `main`); `staging` la tiene desde el 2026-10-30 y `production` desde el 2026-11-09 (verificado en `_prisma_migrations` y en las columnas de `club_inventory` el 2026-11-19).
 
 ---
 
@@ -259,9 +259,9 @@ Una migración de datos del backend, mergeada en `development` (PR #591 de sacdi
 
 | Directorio (`sacdia-backend/prisma/migrations/`) | Usa `CONCURRENTLY` | `development` | `staging` | `production` |
 |---|---|---|---|---|
-| `20261030120000_union_division_ranking_reads` | No | Aplicada (2026-10-30) | Aplicada (2026-10-30) | **Pendiente** |
+| `20261030120000_union_division_ranking_reads` | No | Aplicada (2026-10-30) | Aplicada (2026-10-30) | Aplicada (2026-11-09) |
 
-Sin ella el código nuevo funciona, pero unión y división siguen sin ver las clasificaciones.
+Sin ella el código nuevo funciona, pero unión y división siguen sin ver las clasificaciones. En `production` está aplicada desde el 2026-11-09 (verificado en `_prisma_migrations` el 2026-11-19).
 
 ### 0.9 Estado de migraciones por rama (2026-10-30)
 
