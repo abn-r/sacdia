@@ -36,7 +36,7 @@ La Carpeta Anual de Evidencias conserva su propio flujo de carga de archivos e i
 - Entidades y modelos actualizados con campos de scoring (`earned_points`, evaluation status)
 - Banners de evaluacion y bajo evaluacion
 - Cards de seccion con puntos del evaluador y notas
-- Timeline extendido con pasos de evaluacion
+- Apartado de la carpeta (`EvidenceSectionDetailView`): panel en tarjeta `SacStatePanel` con el estado actual (incluye el paso de unión solo si la carpeta lo requiere) y hoja con todos los estados, en lugar de la ruta de pasos; casilla «Agregar» y un solo botón de envío como en los requisitos de clase (sacdia-app #270). Tras enviar, la pantalla se cierra.
 - Solo lectura — sin UI de evaluacion
 
 #### Progreso anual (pantalla de la app)
