@@ -2,6 +2,7 @@
 
 **Estado**: IMPLEMENTADO
 **Fecha**: 2026-03-26
+**Actualizado**: 2026-11-19 (sección «App móvil» y limitaciones conocidas)
 **Módulo backend**: `ResourcesModule` (`src/resources/`)
 
 ---
@@ -108,7 +109,7 @@ En la app, ese filtro se compara contra el tipo de club de la asignación activa
 - **Bucket**: `RESOURCES_FILES` en Cloudflare R2.
 - **Subida admin**: el admin envía archivos como `multipart/form-data` a `POST /api/v1/resources`; el backend valida permisos/scope y sube el objeto a R2. El navegador no debe hacer PUT directo a R2 para crear recursos.
 - **URLs firmadas**: TTL de 1 hora. Se generan on-demand en `GET /resources/:id` y en el endpoint `/signed-url`.
-- **App móvil**: documentos, audios e imágenes conservan acción de descarga. Además, audio ofrece reproducción embebida desde la URL firmada, los PDF se abren en visor interno y las imágenes se abren en visor fullscreen con zoom.
+- **App móvil**: ver «App móvil» más abajo.
 - **Soft delete**: el archivo en R2 **no se elimina** al desactivar un recurso. Se mantiene para auditoría y posible reactivación.
 - **Limite de archivo**: 50 MB por upload.
 
@@ -144,10 +145,45 @@ Ver definición completa en `docs/database/SCHEMA-REFERENCE.md` — Módulo: Res
 
 ---
 
+## App móvil
+
+**Verificado contra código**: 2026-11-19 (`development`; rediseño en sacdia-app #264, ajustes en #267 y #269). Código en `lib/features/resources/`. Ruta `/home/resources` (`RouteNames.homeResources`); no hay pantalla de detalle propia: el detalle es una hoja.
+
+**Biblioteca (`ResourcesView`)**
+- Consume `GET /resources/me` con páginas de 20 (carga la siguiente al acercarse al final) y los filtros `resource_type`, `resource_category_id` y `search`. La búsqueda se envía con 350 ms de espera.
+- Cuadrícula de 2 columnas. Cada tarjeta muestra el título (nunca el nombre del archivo) y una etiqueta de tipo con icono y texto sobre una píldora translúcida con desenfoque. Las imágenes y los videos de YouTube muestran su vista previa; el resto, un icono del tipo; el texto muestra su inicio.
+- Fila de tipos (`ResourceFilterBar`) y, debajo, una fila de categorías (`ResourceCategoryBar`, `resource_category_bar.dart`) con chips discretos que se combinan con el tipo y la búsqueda; tocar la categoría activa la desmarca.
+- **Las categorías se derivan de los recursos cargados** (`resourceCategoryOptionsProvider`, #267): `resourceFacetProvider` pide una sola página de hasta 100 recursos (el tope del backend) y toma de ahí el `resource_category_id` y el nombre de categoría de cada uno. `GET /resource-categories` solo se usa como enriquecimiento opcional: si responde, sus categorías van primero y en el orden del servidor; si falla, se ignora. Motivo: esa ruta pide `resource_categories:read` y un director recibía 403, con lo que la barra desaparecía.
+- Los conteos por categoría solo se muestran cuando todos los resultados cupieron en esa página de 100 (`ResourceFacet.isComplete`); si hay más, los chips salen sin número. Las categorías se descubren únicamente entre los primeros 100 recursos de la biblioteca sin filtros.
+- Estados: esqueleto con forma de cuadrícula; sin resultados, con el texto de la búsqueda o filtro y la opción «Ver en todos los tipos» cuando hay coincidencias en otros tipos; club sin recursos, con acción de actualizar; error con reintento; *pull-to-refresh*.
+
+**Hoja de detalle (`ResourceDetailSheet`)**: portada y título; una línea «TIPO · tamaño · fecha»; grupo etiqueta-valor con categoría, para qué club (con logo) y quién lo publicó (las filas sin dato se omiten); y un pie fijo con una acción principal y, al lado, «Descargar» y «Compartir».
+
+| Tipo | Acción principal | Secundarias |
+|---|---|---|
+| `audio` | reproductor embebido (el botón grande de reproducir es la acción) | Descargar, Compartir |
+| `image` | «Ver imagen» (visor a pantalla completa con zoom) | Descargar, Compartir |
+| `document` PDF | «Abrir PDF» (visor interno) | Descargar, Compartir |
+| `document` no PDF | «Descargar» | Compartir |
+| `video_link` | «Abrir en YouTube» (o «Abrir enlace» si no es YouTube), con aviso de que sale de la app | ninguna |
+| `text` | muestra el contenido en la hoja | ninguna |
+
+**Reproductor de audio (`ResourceAudioPlayer`)**: control deslizante que se puede arrastrar (con semántica de *slider*), tiempo transcurrido y restante, botones de retroceder y adelantar 15 s (`skip = 15 s`) y reproducir/pausar grande. Buscar posición solo se habilita después de que el audio empezó y se conoce su duración. Al llegar al final, reproducir de nuevo vuelve al inicio. La búsqueda usa `seekTo` del puente nativo (`MethodChannel('sacdia/audio_player')`, `lib/core/media/sac_audio_player_controller.dart`), implementado en `ios/Runner/AppDelegate.swift` y `android/app/src/main/kotlin/com/sacdia/app/MainActivity.kt`. Verificado el 2026-11-19 en el simulador de iOS y en un emulador de Android 16: ±15 s y arrastre.
+
+**Textos**: las cadenas `resources.*` están traducidas en es, en, fr y pt-BR (#269).
+
+## Limitaciones conocidas
+
+- **Imágenes sin miniatura**: las tarjetas de imagen cargan el archivo original completo mediante una URL firmada de R2 (`GET /resources/me/:id/signed-url`); el backend no genera miniaturas y `thumbnail_url` llega `null`. Una imagen de 2.5 MB tarda unos segundos en aparecer la primera vez. Es una limitación, no un fallo.
+- **Imagen que no cargó en Android**: en el emulador de Android la miniatura de una imagen no cargó mientras en iOS sí, con una URL firmada HTTPS válida. No se reprodujo ni se encontró la causa; sin cambio de código.
+- **Nombre de archivo con codificación rota**: se observó el 2026-11-19 un recurso cuyo `file_name` quedó guardado como `niÃ±a-levantate.png` en lugar de `niña-levantate.png`. El backend ya recupera el UTF-8 que multer decodifica como latin1 (`decodeMultipartFileName`, `src/common/utils/multipart-file-name.ts`, aplicado en `resources.service.ts`; commit `78656b95`, 2026-10-15), y ese commit no incluye migración de datos. No se confirmó si el registro observado se subió antes de esa corrección o si algún camino de subida no la aplica. La app muestra el título, no `file_name`, así que el síntoma se ve en el nombre del archivo descargado o compartido y en datos de admin.
+- **Categorías de la biblioteca**: ver arriba; solo salen de los primeros 100 recursos cuando `/resource-categories` no está disponible para el rol.
+- Sin portadas por clase (la entidad `Resource` no trae datos de clase) ni «Avisarme cuando haya» (no hay backend).
+
 ## Implementación por Capa
 
 | Capa | Estado | Detalle |
 |------|--------|---------|
 | Backend (NestJS) | IMPLEMENTADO | `ResourcesModule`, `ResourceCategoriesController`, `ResourcesController`, `ResourcesAppController` |
 | Admin (Next.js) | IMPLEMENTADO | Página CRUD categorías + página gestión de recursos |
-| App (Flutter) | IMPLEMENTADO | Clean Architecture completa (datasource, repository, use cases, bloc, screens) |
+| App (Flutter) | IMPLEMENTADO | `lib/features/resources/` (datos, dominio y presentación con Riverpod); rediseño de 2026-11 descrito en «App móvil» |
