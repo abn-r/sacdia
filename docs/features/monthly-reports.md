@@ -1,12 +1,13 @@
 # Monthly Reports (informes mensuales)
 
 **Estado**: IMPLEMENTADO
+**Actualizado**: 2026-11-19 (sección de la app móvil verificada contra `development`)
 
 ## Descripcion de dominio
 
 `monthly-reports` consolida el informe mensual operativo de una matricula anual de club (`club_enrollments`) para un mes y ano dados. El runtime actual mezcla datos auto-calculados en vivo, captura manual complementaria, congelamiento de snapshot, envio formal y generacion de PDF.
 
-La feature esta implementada en backend con IDs UUID y estados `draft -> generated -> submitted`. Admin y app tienen superficies cliente para esta feature, pero hoy presentan drift respecto del contrato real del backend; en este batch solo se deja documentado ese drift.
+La feature esta implementada en backend con IDs UUID y estados `draft -> generated -> submitted`. El admin tiene una superficie cliente con drift respecto del contrato real del backend, que se deja documentado abajo; la app móvil usa UUID y los campos reales del backend (ver «App Movil»).
 
 ## Que existe (verificado contra codigo)
 
@@ -109,17 +110,36 @@ La feature esta implementada en backend con IDs UUID y estados `draft -> generat
 
 ### App Movil
 
-- **Surface verificada**:
-  - `lib/features/monthly_reports/*`
-  - rutas `monthlyReports`, `monthlyReportDetail` y acceso desde `/home/reports`
-- **Contrato reconciliado parcialmente**:
-  - monthly reports usa `String` para `reportId` y `enrollmentId`, compatible con UUID backend
-  - `EnrollmentModel` conserva `enrollmentUuid` para llamar endpoints UUID sin romper consumers legacy que aun usan `id: int`
-  - `MonthlyReportModel` parsea `snapshot_data`, `manual_data`, `generated_at`, club y tipo de club
-  - la pantalla `/home/reports` permite preparar el informe del mes actual creando/abriendo `draft` y editar datos manuales; la generacion del mes queda reservada al cron/sistema en el cierre del mes siguiente
-  - el detalle movil muestra la misma informacion funcional que el PDF organizada por administracion, ensenanzas/honores, actividades, finanzas, actividad misionera y servicio/materiales
-  - al guardar datos manuales, campos numericos vacios se normalizan a `0`; campos de texto vacios se envian como `null` para limpiar valores previos
-- **Pendiente cliente**: reconciliacion completa de consumidores legacy de enrollment que todavia usan IDs numericos. El `submit` no es flujo primario de director/secretario si el reporte se genera automaticamente el dia de cierre.
+**Actualizado**: 2026-11-19 (`development`; rediseño en sacdia-app #265, ajustes en #267). Código en `lib/features/monthly_reports/`.
+
+**Rutas** (`route_names.dart`)
+
+| Ruta | Pantalla |
+|---|---|
+| `/home/reports` | `MonthlyReportsVisibleListView`: inicio de «Reportes» (acceso desde el inicio) |
+| `/monthly-reports/:enrollmentId` | `MonthlyReportsListView`: historial de una inscripción (se abre desde Finanzas) y reutiliza el mismo historial por año |
+| `/monthly-report/:reportId` | `MonthlyReportDetailView`: detalle (también se abre con `Navigator.push` desde el historial) |
+
+**Inicio de «Reportes»**
+- Con contexto de club (director, secretario, etc.) el historial sale de `GET /monthly-reports/enrollment/:enrollmentId` de la inscripción de la sección activa. Sin contexto de club (coordinador o admin) usa `GET /monthly-reports/admin/list`, que es multi-club; se evita para quien tiene club porque a un director que además coordina le traería informes de otras secciones.
+- «Por atender» muestra solo el informe del mes en curso cuando está en `draft`, o la invitación a empezarlo si todavía no existe (solo con contexto de club). El mes que se prepara es el mes actual (`MonthlyReportPeriod.forPreparation`); el sistema lo genera el día de cierre del mes siguiente. «Empezar» crea o recupera el borrador (`POST /monthly-reports/:enrollmentId`) y abre el detalle. El subtítulo indica cuántas secciones manuales faltan por llenar.
+- Debajo, el historial agrupado por año (etiqueta con conteo y una tarjeta por año), una línea corta por fila («Enviado el 6 nov») y el chip de estado. Estados de esqueleto, vacío y error con reintento; *pull-to-refresh*.
+
+**Detalle**
+- Arriba, `SacStatePanel` con «Paso N de 4» y, al tocarlo, la hoja con los estados: Borrador, Generado, Enviado y Aprobado (con Rechazado en lugar de Enviado cuando aplica). La fecha en que el sistema genera el informe sale del día de generación que el servidor manda en los pendientes del inicio (`GET /dashboard/pending`); sin esa fila, la app usa el día 5 (`kMonthlyReportDefaultDueDay`).
+- Con el informe en `draft`: grupo «Lo llenas tú» con las cuatro secciones manuales (reuniones, actividad misionera, servicio y materiales), cada una con «Listo» o «Falta llenar» (tocarla abre esa sección del formulario), y grupo «Se llena solo» con lo que el sistema calcula, a partir de `GET /monthly-reports/preview/:enrollmentId`. El preview ahora lee `auto_calculated`.
+- Con el informe generado o posterior: caja 2×2 con miembros, actividades, ingresos y balance del mes (una cifra que falta se escribe en gris «Sin dato») y grupos etiqueta-valor por sección. Con `rejected` se cita el comentario del revisor (`review_comment`) y se vuelve a mostrar el índice de secciones manuales.
+- Una sola acción fija abajo según el estado: `draft` → «Llenar lo que falta» (o «Revisar lo que llenaste» si no falta nada); `generated` → «Enviar al campo local» (con confirmación; `POST /monthly-reports/:reportId/submit`, que la app ahora tiene conectado); `submitted` o `approved` → «Ver PDF»; `rejected` → «Corregir y reenviar». Cuando la acción principal no es «Ver PDF» y el PDF se puede descargar, hay un icono de PDF en la barra superior. El PDF se descarga con el JWT en el header (nunca en la URL) y se abre en el visor interno.
+- La app no genera el informe (`canGenerate` es siempre falso): la generación es del cron o del sistema.
+
+**Datos manuales (`MonthlyReportManualDataFormView`)**: una sección por hoja (reuniones: planeación, padres, consejo de jóvenes, junta de iglesia; actividad misionera: meta de almas, no bautizados, estudios bíblicos, instrucción bíblica semanal, estudios dados, literatura, bautizados del mes y total; servicio: participación del club y servicio a la comunidad; materiales: certificados, folletos y requisitos firmados), con contadores, interruptores y campos de texto.
+- **Autoguardado** con 700 ms de espera (`kMonthlyReportAutosaveDelay`) y estados «guardando», «guardado» y «error» (`PATCH /monthly-reports/:reportId/manual-data`). «Listo» y cerrar esperan a que termine el guardado pendiente; si falla, no se cierra sin avisar, y cerrar con cambios sin guardar pide confirmación de descarte. El autoguardado no invalida el detalle ni las listas; eso se hace una sola vez al cerrar.
+- Los contadores muestran en gris el valor del mes anterior como pista con el nombre del mes y el valor («{mes}: {valor}»), tomado de la lista por inscripción (`monthlyReportPreviousManualDataProvider`), sin pedir nada nuevo al servidor; sin esa lista no se muestra.
+- Campos numéricos vacíos se envían como `0`; campos de texto vacíos como `null`.
+
+**Presentación**: un solo chip y estilo de estado para todos los informes (`MonthlyReportStatusChip`). Los nombres de mes van en minúscula a mitad de frase en es, fr y pt-BR (#267). Fechas y «asistentes» se traducen y formatean con la configuración regional.
+
+**Desfase con el backend**: la app modela los estados `approved` y `rejected` (cuatro pasos en el panel), pero el backend solo emite `draft`, `generated` y `submitted`; esos dos estados no ocurren hoy.
 
 ### Base de datos
 
@@ -146,7 +166,7 @@ La feature esta implementada en backend con IDs UUID y estados `draft -> generat
 ## Gaps y pendientes
 
 - **Drift fuerte en admin**: routing, IDs y payload manual/auto no coinciden con el contrato backend actual
-- **App movil parcialmente reconciliada**: reportes mensuales ya usan UUID y snapshot/manual_data; la app captura/edita `draft` y deja la generacion al sistema; queda pendiente limpieza de consumers legacy de enrollment numerico
+- **App movil**: usa UUID y `snapshot_data`/`manual_data`, captura y edita `draft`, envia el informe generado y deja la generacion al sistema; queda pendiente limpieza de consumers legacy de enrollment numerico (`EnrollmentModel` conserva `enrollmentUuid` junto al `id` entero)
 - **Estado no arbitrado mas alla de submitted**: en backend no existen estados `approved` o `rejected` para monthly reports aunque algunos clientes los modelen
 
 ## Prioridad y siguiente accion
