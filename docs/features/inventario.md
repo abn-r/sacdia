@@ -1,6 +1,7 @@
 # Inventario
 
 **Estado**: IMPLEMENTADO
+**Actualizado**: 2026-11-19 (sección de la app móvil verificada contra `development`)
 
 ## Descripcion de dominio
 
@@ -34,15 +35,34 @@ Cada item del inventario pertenece a una instancia/seccion operativa de club (`c
   - dialogos de alta/edicion/eliminacion
   - dialogo de historial por item
 - Consume categorias, listado, alta, edicion, eliminacion logica e historial
-- **Pendiente de merge** (rama `fix/inventory-extended-fields` del admin): dialogo de alta/edicion en 2 pasos con los campos extendidos (al editar, un campo vaciado se envia como `null`), columna de condicion con badge en la tabla, dialogo de detalle de solo lectura y etiquetas de los campos nuevos en el historial (i18n es/en/fr/pt-BR)
+- Campos extendidos (admin, ya en `development`, commit `36b8186b`): dialogo de alta/edicion en 2 pasos con los campos extendidos (al editar, un campo vaciado se envia como `null`), columna de condicion con badge en la tabla, dialogo de detalle de solo lectura y etiquetas de los campos nuevos en el historial (i18n es/en/fr/pt-BR)
 
 ### App Movil
-- **4 screens**: InventoryView, InventoryItemDetailView, AddInventoryItemSheet, InventoryFilterSheet
-- Consume categorias, listado, detalle, alta, edicion y eliminacion
-- CRUD completo desde la app
-- Incluye filtrado por categorias
-- El formulario de alta/edicion captura condicion, numero de serie, fecha de compra, valor estimado, ubicacion, responsable y notas. En alta envia `condition` y los campos que tengan valor; en edicion envia el estado completo, con `null` en los campos que el usuario vacio. `purchase_date` se lee como fecha de calendario (`YYYY-MM-DD`), sin conversion de zona horaria. Antes de esta migracion la API descartaba estos campos sin avisar. Pendiente de merge (cambios locales de la app sin integrar).
-- El detalle movil muestra el tipo de club humano (Conquistadores, Aventureros o Guias Mayores) en lugar del `club_section_id` tecnico, y separa autor y fechas de auditoria en filas independientes
+
+**Actualizado**: 2026-11-19 (`development`; rediseño en sacdia-app #262 y ajustes en #267). Código en `lib/features/inventory/`. Ruta `/home/inventory` (`RouteNames.homeInventory`), sin pantallas hijas en el router: el detalle se abre con `Navigator.push` y el resto son hojas.
+
+**Permisos en la app**: `canManageInventoryProvider` es verdadero con cualquiera de `inventory:create`, `inventory:update` o `inventory:delete`. Sin ellos la app es de solo lectura: no hay botón «Agregar artículo», ni menú ⋯ en las filas, ni menú en el detalle.
+
+**Lista (`InventoryView`)**
+- Barra superior solo con el título; se actualiza con *pull-to-refresh*.
+- Búsqueda por nombre o descripción y botón de filtros con un contador de filtros activos de la hoja (categorías marcadas, más uno si el orden no es el predeterminado). La búsqueda y el estado no cuentan en ese número.
+- Chips de estado (Todos, Bueno, Regular, Malo) con conteo. El conteo de cada chip respeta la búsqueda y las categorías activas, pero no el propio estado. Los chips se ocultan si el club no tiene ningún artículo; un filtro que da cero resultados sí los mantiene.
+- Pastillas removibles para las categorías marcadas y para un orden distinto al predeterminado, más «Limpiar».
+- Artículos agrupados por categoría (grupos de la A a la Z; dentro de cada grupo, el orden elegido). Cada fila muestra foto de 46 px o un recuadro con icono, el nombre completo y «Estado · N piezas · Ubicación».
+- El botón ⋯ de la fila abre una hoja con Ver, Editar, Cambiar estado (subhoja con bueno, regular, malo) y Eliminar (al final, en rojo, con confirmación). No hay acciones por deslizamiento.
+- Pie fijo con efecto esmerilado «Agregar artículo» (solo con permiso y con al menos un artículo). Estados: esqueleto agrupado, vacío (icono de caja; con acción «Agregar el primer artículo» si hay permiso), sin resultados de búsqueda o filtro, y error con reintento.
+
+**Filtros (`InventoryFilterSheet`)**: orden de selección única (nombre A-Z o Z-A, más nuevos, más antiguos, mayor valor) y categorías con casillas de selección múltiple (`InventoryFilters.categoryIds`, un `Set<int>`). Las categorías y sus conteos se derivan de los artículos ya cargados, no del catálogo del servidor, y una categoría marcada sigue visible aunque su conteo llegue a cero. El estado no está en la hoja. El botón «Ver N artículos» es en vivo; no hay «Aplicar». Los filtros se aplican en el cliente sobre la lista completa y se pierden al salir de la pantalla (`autoDispose`).
+
+**Detalle (`InventoryItemDetailView`)**: el título es el nombre del artículo. Con permiso, un menú ⋯ ofrece Editar, Cambiar estado y Eliminar. Carrusel de fotos de 210 px (`PageView`) con contador «1 / N», o un recuadro tintado si no hay fotos. Muestra una sola insignia de condición, «N piezas · valor total $X» y grupos etiqueta-valor; un valor no registrado se lee «Sin registrar». Muestra el tipo de club humano (Conquistadores, Aventureros o Guias Mayores) en lugar del `club_section_id` técnico y separa autor y fechas de auditoría en filas independientes.
+
+**Alta y edición (`showInventoryItemForm`)**: una sola hoja a pantalla completa (no es una ruta; arrastrar para cerrar está desactivado y cerrar pasa por una confirmación de descarte si hay cambios). Orden: fotos, nombre, categoría (hoja de selección), cantidad (paso de 1 a 9 999) y condición (3 opciones), más un grupo plegable «Más detalles» con número de serie, fecha de compra, valor estimado, ubicación y notas. El botón de guardar queda fijo abajo.
+- Al crear, exige al menos una foto; el máximo es 3 fotos activas entre las existentes y las nuevas (`kInventoryMaxPhotos = 3`). Las fotos se suben después de guardar el artículo.
+- Al editar envía el estado completo, con `null` en los campos opcionales que el usuario vació. `description` y `assigned_to` ya no están en el formulario, pero la app los reenvía sin cambios al editar para que el `PATCH` no los borre.
+- `purchase_date` se lee como fecha de calendario (`YYYY-MM-DD`), sin conversión de zona horaria; no admite fechas futuras en el selector.
+- Las categorías del formulario salen de `GET /inventory/catalogs/inventory-categories`. Si falla, la fila de categoría muestra el motivo (permiso, red u otro) y un botón de reintento.
+
+**Lectura defensiva**: `InventoryRemoteDataSource._extractList` acepta la lista suelta o envuelta en `data`/`items`, y los proveedores lanzan el fallo original en vez de uno genérico. Esto endurece el error «No se pudieron cargar las categorías» observado durante el rediseño, cuya causa raíz no se confirmó (no se reprodujo sin una sesión autenticada).
 
 ### Base de datos
 - `club_inventory` — Items del inventario por club/seccion, con `active` para soft delete. Campos extendidos (migracion `20261026130000_inventory_extended_fields`, aditiva): `condition`, `serial_number`, `purchase_date`, `estimated_value`, `location`, `assigned_to`, `notes` (detalle en la seccion siguiente y en `docs/database/SCHEMA-REFERENCE.md`)
@@ -51,9 +71,9 @@ Cada item del inventario pertenece a una instancia/seccion operativa de club (`c
 - `inventory_history` — Historial de cambios por campo/accion (`CREATE`, `UPDATE`, `DELETE`)
 - **Nota**: `inventory_categories` tenia un typo en el PK (`inventory_categoty_id`). Corregido en schema.prisma; migracion `20260320000000_fix_inventory_category_id_typo`.
 
-### Campos extendidos del item (Pendiente de merge)
+### Campos extendidos del item
 
-> Backend: rama `fix/inventory-extended-fields`, Pendiente de merge. La migracion ya esta aplicada en Neon `development`; falta en `staging` y `production` (ver `docs/deployment/DEPLOYMENT-GUIDE.md` §0.7).
+> Backend: ya en `development` (commit `bddc3557`). La migracion esta aplicada en Neon `development` y `staging`. Para `production`, `docs/deployment/DEPLOYMENT-GUIDE.md` §0.7 la marca pendiente y `docs/database/SCHEMA-REFERENCE.md` la marca aplicada (2026-11-09); los dos documentos no coinciden y no se verifico contra la base.
 
 `POST /api/v1/inventory/clubs/:clubId/inventory` y `PATCH /api/v1/inventory/inventory/:id` aceptan, ademas de nombre, descripcion, categoria y cantidad, siete campos opcionales:
 
