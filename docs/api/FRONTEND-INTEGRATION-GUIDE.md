@@ -1122,8 +1122,8 @@ Future<Attendance> registerAttendance(int activityId, String userId) async {
 
 - `GET /activities/:activityId/rsvp` — `{ status: "going" | "not_going" | null, eligible }`.
 - `PUT /activities/:activityId/rsvp` body `{ status }`. Intención del miembro. No escribe `attendees` ni emite `activity.attended`.
-- `GET /activities/:activityId/attendance-roster` — todos los miembros activos de las secciones, con `rsvp` y `confirmed`.
-- La confirmación real sigue en `POST /activities/:activityId/attendance` con `{ user_ids }`. En virtual cada id debe ser miembro de la sección. El QR de una actividad virtual responde `QR_ACTIVITY_VIRTUAL_NO_SCAN`.
+- `GET /activities/:activityId/attendance-roster` — todos los miembros activos de las secciones, con `rsvp` y `confirmed`. Funciona en cualquier modalidad: la app lo usa también para marcar a mano en presencial e híbrido. `rsvp` solo trae valor en virtual.
+- La confirmación real sigue en `POST /activities/:activityId/attendance` con `{ user_ids }` (UUID de cualquier versión). El body reemplaza la lista completa: envía todos los presentes, no solo los nuevos. En virtual cada id debe ser miembro de la sección. El QR de una actividad virtual responde `QR_ACTIVITY_VIRTUAL_NO_SCAN`.
 
 **Series recurrentes** (`activity_series`):
 
