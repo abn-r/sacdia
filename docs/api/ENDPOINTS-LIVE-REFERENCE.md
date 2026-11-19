@@ -3763,8 +3763,8 @@ Lo consume el módulo Reportes de la pestaña Coordinación de la app.
 | DELETE | `/api/v1/users/:userId/allergies/:allergyId` | JWT | - | Eliminar alergia del usuario (borrado lógico) | UsersService.removeAllergy() | `src/users/users.controller.ts` |
 | DELETE | `/api/v1/users/:userId/diseases/:diseaseId` | JWT | - | Eliminar enfermedad del usuario (borrado lógico) | UsersService.removeDisease() | `src/users/users.controller.ts` |
 | DELETE | `/api/v1/users/:userId/medicines/:medicineId` | JWT | - | Eliminar medicamento del usuario (borrado lógico) | UsersService.removeMedicine() | `src/users/users.controller.ts` |
-| POST | `/api/v1/users/:userId/profile-picture` | JWT | Permisos: users:update_profile | Subir foto de perfil | UsersService.uploadProfilePicture() | `src/users/users.controller.ts` |
-| DELETE | `/api/v1/users/:userId/profile-picture` | JWT | Permisos: users:update_profile | Eliminar foto de perfil | UsersService.deleteProfilePicture() | `src/users/users.controller.ts` |
+| POST | `/api/v1/users/:userId/profile-picture` | JWT | Permisos: users:update_profile | Subir foto de perfil. Invalida el caché de autorización del usuario tras escribir (sacdia-backend #667) | UsersService.uploadProfilePicture() | `src/users/users.controller.ts` |
+| DELETE | `/api/v1/users/:userId/profile-picture` | JWT | Permisos: users:update_profile | Eliminar foto de perfil; la app la usa desde la hoja de foto de Editar perfil (sacdia-app #275). Invalida el caché de autorización del usuario tras escribir (sacdia-backend #667) | UsersService.deleteProfilePicture() | `src/users/users.controller.ts` |
 | GET | `/api/v1/users/:userId/age` | JWT | Permisos: users:read_detail | Calcular edad del usuario | UsersService.calculateAge() | `src/users/users.controller.ts` |
 
 ### validation

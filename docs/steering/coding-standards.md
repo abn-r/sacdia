@@ -71,7 +71,7 @@
 - Formato: Prettier (`singleQuote`, `trailingComma: all`); `pnpm run format`.
 - Lint: ESLint (`pnpm run lint`); las reglas `no-unsafe-*` están desactivadas por compatibilidad con Prisma. Correr `prisma generate` antes de lint: sin cliente generado las reglas type-aware ven `any` y `--fix` borra aserciones que el build necesita (el job «Lint & Type Check» ya lo hace). Regla local `local/no-role-literals` en `eslint/rules/`.
 - Tests: Jest; los unitarios van junto al código (`*.spec.ts`), los e2e en `test/*.e2e-spec.ts`.
-- CI bloqueante: `prisma validate`, lint, `pnpm authz:check`, build, tests unitarios, `pnpm run audit:security` y el job «Cross-repo Contract» (catálogo generado igual en admin y app).
+- CI bloqueante: `prisma validate`, lint, `pnpm authz:check`, build, tests unitarios, `pnpm run audit:security` (la lista de excepciones `scripts/audit-security.allowlist.json` está vacía desde 2026-11-19; `effect@3` se fija con el override de pnpm `">=3.22.1 <4"` por GHSA-7589-6fvf-x4pw, dependencia de `prisma > @prisma/config`) y el job «Cross-repo Contract» (catálogo generado igual en admin y app).
 
 ---
 

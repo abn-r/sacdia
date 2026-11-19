@@ -34,7 +34,7 @@ Reglas verificadas en `qr.service.ts`:
 ### App móvil
 
 - `lib/features/virtual_card/`: `VirtualCardView` consume `GET /qr/me/card` y dibuja el QR en el dispositivo (`qr_flutter`; `screen_brightness` sube el brillo en pantalla completa). Se abre desde el perfil, los ajustes y el detalle de actividad.
-- `lib/features/qr/`: `QrScannerView` (`mobile_scanner`) llama a `POST /qr/validate`. Se abre desde ajustes (solo identificación) y desde el detalle de actividad con `activityId` (registra asistencia). El data source también expone `GET /qr/member/token`.
+- `lib/features/qr/`: `QrScannerView` (`mobile_scanner`) llama a `POST /qr/validate`. Se abre desde Ajustes → Directiva → «Escanear credencial» (solo identificación; visible con `attendance:manage` o la capability `club.operational_staff`) y desde el detalle de actividad con `activityId` (registra asistencia). El data source también expone `GET /qr/member/token`.
 
 ### Admin
 
