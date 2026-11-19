@@ -2,6 +2,8 @@
 
 **Estado**: IMPLEMENTADO
 
+**Actualizado**: 2026-11-19 (`development`; rediseño del flujo en la app, sacdia-app #274, y lista de asistencia para todas las modalidades, sacdia-backend #666).
+
 ## Descripcion de dominio
 
 Las actividades son el eje operativo del dia a dia de un club de Conquistadores, Aventureros o Guias Mayores. Representan cualquier evento planificado por la directiva del club: reuniones regulares, campamentos, excursiones, proyectos comunitarios, ensayos de orden cerrado, clases especiales y eventos sociales. Cada actividad esta vinculada a un club especifico y puede tener un tipo categorizado (catalogo `activity_types`).
@@ -34,7 +36,7 @@ Las series recurrentes materializan de inmediato copias independientes (cada N d
   - `GET /api/v1/activities/:activityId/attendance` — Obtener asistencia confirmada
   - `GET /api/v1/activities/:activityId/rsvp` — Intención del usuario en una actividad virtual
   - `PUT /api/v1/activities/:activityId/rsvp` — Marcar `going` o `not_going` (no confirma asistencia)
-  - `GET /api/v1/activities/:activityId/attendance-roster` — Miembros de la sección para confirmar asistencia virtual
+  - `GET /api/v1/activities/:activityId/attendance-roster` — Miembros activos de las secciones de la actividad, con `rsvp` y `confirmed`. Sirve para cualquier modalidad desde sacdia-backend #666: la app lo usa para marcar asistencia a mano también en presencial e híbrido. `rsvp` solo trae valor en virtual
 
 ### Admin
 - **UI completa**: Pagina de lista con selector de club, pagina de detalle con panel de asistencia, dialog de creacion/edicion, confirmacion de eliminacion
@@ -45,7 +47,7 @@ Las series recurrentes materializan de inmediato copias independientes (cada N d
 - Cliente API en `src/lib/api/activities.ts`
 
 ### App Movil
-- **4 screens**: ActivitiesListView, ActivityDetailView, CreateActivityView, LocationPickerView
+- **Pantallas**: `ActivitiesListView` (agenda), `ActivityDetailView`, `CreateActivityView`, `EditActivityView`, `LocationPickerView` y, desde el rediseño de sacdia-app #274, `ActivityAttendanceView`, `ActivityMyQrView` y `ActivityManualAttendanceView`
 - Mismo interruptor de repeticion y preview al crear. El detalle no muestra acciones de serie
 - Incluye selector de ubicacion en mapa (LocationPickerView)
 - `ActivitiesListView` resuelve `clubId` desde `clubContextProvider` (bug de hardcodeo a 1 corregido)
@@ -65,22 +67,45 @@ Las series recurrentes materializan de inmediato copias independientes (cada N d
 - `creatorName`, `creatorImage` — datos del organizador
 - Getters computados: `isPast` (actividad ya ocurrio), `hasVirtualLink` (tiene link de videoconferencia), `hasLocation` (tiene coordenadas validas)
 
-**ActivityDetailView — rediseno completo:**
-- Hero edge-to-edge de tamaño fijo: mapa Google (`google_maps_flutter`) para actividades presenciales, imagen para virtuales/hibridas, con controles superiores superpuestos. No usa `SliverAppBar` colapsable para evitar relayout costoso del mapa nativo durante el scroll
-- Grid 2×3 de metadata con tarjetas tintadas por color (fecha, hora, lugar, tipo, seccion, modalidad)
-- Badge de modalidad (Presencial / Virtual / Hibrido) en la fila del titulo, no sobre el hero
-- La fila de ubicacion muestra la direccion completa y deja la accion de navegacion en una linea inferior
-- Seccion de participantes con avatares apilados en paleta calida
-- Accion interna de asistencia ubicada antes de participantes. En presencial e híbrido, usuarios con `attendance:manage` o rol operacional (`director`, `deputy-director`, `secretary`, `treasurer`, `secretary-treasurer`, `counselor`) escanean QR, y el resto ve "Mostrar mi QR". En virtual no hay QR: el miembro marca Asistiré / No asistiré y quien confirma elige entre todos los miembros de la sección
-- Footer card de organizador con nombre e imagen del creador
-- Estado de carga con shimmer skeleton (`activity_detail_skeleton.dart`)
-- En virtual el miembro marca intención (Asistiré / No asistiré). La asistencia real la confirma un usuario con `attendance:manage` entre todos los miembros de la sección
+**Rediseño del flujo (sacdia-app #274, 2026-11-19):**
 
-**Nuevos widgets extraidos:**
-- `activity_hero_section.dart` — hero condicional: google_maps_flutter (presencial) o imagen (virtual/hibrido)
-- `activity_metadata_grid.dart` — grid 2×3 con acento de color por tarjeta
-- `activity_attendees_section.dart` — avatares apilados con paleta calida
-- `activity_detail_skeleton.dart` — skeleton shimmer de carga
+La agenda (`ActivitiesListView`) y el formulario de crear y editar conservan su diseño. El formulario solo cambió el título a «Nueva actividad» y «Editar actividad», sin subtítulo.
+
+*Detalle (`ActivityDetailView`)*, de arriba abajo:
+- `SacTopBar` con «⋯» (`activity_more_sheet.dart`): Editar y Eliminar, cada uno solo si el usuario puede. Eliminar va al final, en rojo.
+- Encabezado sobrio: cuadro de fecha (`activity_date_tile.dart`, día sobre el mes en tres letras), título y tipo (`activity_type_style.dart`).
+- Mapa integrado arriba (`activity_map_card.dart`), visible antes de bajar. Solo en presencial e híbrido con coordenadas (`activityHasMapCard`). Un toque abre las opciones de mapa (`activity_map_options_sheet.dart`). El mapa no recibe gestos: evita que el scroll se quede atrapado en el mapa nativo.
+- Panel de estado en tarjeta (`activity_state_panel.dart`, sobre `SacStatePanel`), calculado con fecha y hora: próxima (cuenta regresiva, día y hora), en curso o terminada (hace cuánto y, si el backend manda asistentes, cuántos vinieron). Es de solo lectura, sin línea de pasos.
+- DETALLES en filas (`activity_detail_row.dart`): fecha completa, para quién es (`audience_classes` con logo) y modalidad.
+- Descripción completa en varias líneas (`activity_description_block.dart`), sin «ver más».
+- En virtual, la intención Asistiré / No asistiré (`activity_virtual_attendance.dart`). No confirma asistencia.
+- ASISTENCIA (`activity_attendees_section.dart`) y ORGANIZA.
+- Una sola acción en el pie (`activity_detail_actions.dart`):
+  - Presencial e híbrido, con `attendance:manage` o capacidad `club.operational_staff`: «Asistencia» (también después de terminada).
+  - Presencial e híbrido, resto de miembros: «Mostrar mi QR» hasta que termina.
+  - Virtual: «Unirse a la reunión» mientras no termina y hay enlace. Quien confirma lo hace desde una fila del grupo de asistencia.
+- Carga con `activity_detail_skeleton.dart`.
+
+*Asistencia (`ActivityAttendanceView`)*, para la directiva:
+- Resumen «n de total» con número rodante y barra de dos partes. Los registrados usan el color de acento de la app; el resto, el borde.
+- Lista REGISTRADOS, el último registrado primero (orden inverso de `attendees`; no hay hora por asistente).
+- Pie con dos botones apilados del mismo tamaño y con su texto completo: «Escanear QR» (principal) y «Marcar a mano». En virtual solo «Marcar a mano».
+
+*Mi QR (`ActivityMyQrView`)*: el QR del miembro, grande. Mientras está abierta consulta la actividad cada 5 s. Cuando el miembro aparece en `attendees`, el panel pasa a «Asistencia registrada» y el QR se desvanece.
+
+*Resultado del escaneo (`QrScanResultSheet` en `qr_scanner_view.dart`)*: hoja con foto, nombre y palomita dibujada (`SacDrawReveal`), y «Asistencia registrada · n de total».
+
+*Marcar a mano (`ActivityManualAttendanceView`)*:
+- Lista estable en orden alfabético de `GET /activities/:id/attendance-roster`: las filas no cambian de lugar al marcar.
+- Toda la fila es el área de toque (56 px mínimo). La fila marcada lleva un tinte del acento, una palomita sobre el avatar y el interruptor encendido. Vibración ligera en cada cambio.
+- Subtítulo «n de total presentes». Búsqueda y filtros Todos / Faltan / Presentes con contador. Si una fila deja de cumplir el filtro, se desvanece y se cierra en 200 ms.
+- Cada cambio muestra un solo aviso a la vez, «Asistencia marcada: {nombre}» o «Asistencia quitada: {nombre}», con «Deshacer» durante 4 s. El texto es neutro en género.
+- Salir con cambios sin guardar pide confirmación («Seguir marcando» / «Salir»).
+- «Guardar» envía la lista completa a `POST /activities/:id/attendance`, que reemplaza `attendees`.
+
+*Movimiento* (tokens de `SacMotion`): entrada escalonada de la agenda y del detalle (`SacEntrance`), deslizamiento en la dirección del día al cambiar de día en la agenda, palomita dibujada al escanear y número rodante en el resumen. Con movimiento reducido, se muestran sin animación.
+
+*Pendiente conocido*: un toque durante la animación de entrada a veces no se registra.
 
 **CreateActivityView — cambios de formulario:**
 - Agregados date pickers para fecha de inicio y fecha de fin. Con «Repetir esta actividad» se oculta la fecha de fin y no se envía `activity_end_date`; el límite queda en «Repetir hasta»
@@ -109,12 +134,13 @@ Las series recurrentes materializan de inmediato copias independientes (cada N d
 - **Soft delete**: Las actividades se desactivan, no se eliminan fisicamente
 - **Autorizacion por rol de club**: Solo roles operativos (director, subdirector, secretary, counselor) pueden crear actividades; la lectura es abierta a miembros con JWT. La app oculta el boton de creacion si el usuario no tiene el permiso `activities:create` ni alguno de esos roles legacy
 - **Campo `image` opcional en `CreateActivityDto`**: El campo `image` es opcional (`@IsOptional()`) — solo aplica para actividades virtuales. En el DTO de actualizacion (`UpdateActivityDto`) tambien es opcional
-- **Asistencia confirmada no es self-service**: En presencial e híbrido la asistencia la registran usuarios autorizados via QR (`attendance:manage` o roles operacionales de club) o el panel admin (`POST /activities/:id/attendance`). En virtual (`platform = 1`) el QR no registra asistencia. El miembro marca intención en `activities.rsvp` (`going` = hará lo posible, `not_going` = no asistirá, reversible). Esa intención no escribe `attendees` ni emite `activity.attended`. Quien tiene `attendance:manage` confirma la asistencia real entre todos los miembros activos de las secciones de la actividad, aunque hayan dicho que no irían
+- **Asistencia confirmada no es self-service**: En presencial e híbrido la asistencia la registran usuarios autorizados via QR (`attendance:manage` o roles operacionales de club), a mano desde la app con la lista de `attendance-roster`, o desde el panel admin (`POST /activities/:id/attendance`). En virtual (`platform = 1`) el QR no registra asistencia. El miembro marca intención en `activities.rsvp` (`going` = hará lo posible, `not_going` = no asistirá, reversible). Esa intención no escribe `attendees` ni emite `activity.attended`. Quien tiene `attendance:manage` confirma la asistencia real entre todos los miembros activos de las secciones de la actividad, aunque hayan dicho que no irían
 - **BottomSheetPicker en formularios**: El formulario de creacion de actividad adopta `BottomSheetPicker` en lugar de `SacDropdownField` para la seleccion de tipo y seccion, alineandose con el patron de pickers del resto de la app
-- **Geolocalizacion**: La app implementa seleccion de ubicacion en mapa (LocationPickerView) usando `google_maps_flutter` + `geolocator`. El backend almacena coordenadas en campos `lat`/`longitude` del modelo. En el detalle, actividades presenciales muestran un hero edge-to-edge con Google Maps; virtuales muestran una imagen de portada. La migracion de `flutter_map` a `google_maps_flutter` requiere API keys configuradas en `ios/Runner/AppDelegate.swift` y `android/app/src/main/AndroidManifest.xml`
+- **Geolocalizacion**: La app implementa seleccion de ubicacion en mapa (LocationPickerView) usando `google_maps_flutter` + `geolocator`. El backend almacena coordenadas en campos `lat`/`longitude` del modelo. En el detalle, presencial e híbrido con coordenadas muestran una tarjeta de mapa bajo el encabezado, antes de los detalles; virtual no muestra mapa. La migracion de `flutter_map` a `google_maps_flutter` requiere API keys configuradas en `ios/Runner/AppDelegate.swift` y `android/app/src/main/AndroidManifest.xml`
 - **URLs privadas no bloqueantes**: Las imagenes privadas de actividades y perfiles se firman con R2 cuando la configuracion esta disponible. Si R2 no puede firmar una URL en lectura, el backend registra un warning y devuelve el valor almacenado para no romper listados, dashboard ni detalle por un asset no critico.
 - **Tipos de actividad**: Separados en tabla catalogo `activity_types` para permitir administracion independiente
 - **Instancias**: El modelo `activity_instances` se usa para actividades conjuntas (multiples secciones). Ver [actividades-conjuntas](actividades-conjuntas.md)
+- **`user_ids` acepta cualquier versión de UUID** (`@IsUUID('all')` desde sacdia-backend #666). Antes exigía v4 y rechazaba los usuarios de seed, que usan v5
 
 ## Gaps y pendientes
 

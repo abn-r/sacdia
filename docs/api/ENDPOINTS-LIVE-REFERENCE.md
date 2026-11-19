@@ -1219,11 +1219,11 @@ Conteo de decoradores HTTP por tag de Swagger (`@ApiTags` de cada clase controll
 | PATCH | `/api/v1/activities/:activityId` | JWT | Permisos: activities:update | Actualizar actividad | ActivitiesService.update() | `src/activities/activities.controller.ts` |
 | DELETE | `/api/v1/activities/:activityId` | JWT | Permisos: activities:delete | Desactivar actividad | ActivitiesService.remove() | `src/activities/activities.controller.ts` |
 | POST | `/api/v1/activities/:activityId/image` | JWT | Permisos: activities:update | Subir imagen de actividad | ActivitiesService.uploadImage() | `src/activities/activities.controller.ts` |
-| POST | `/api/v1/activities/:activityId/attendance` | JWT | Permisos: attendance:manage | Registrar asistencia confirmada. En virtual solo miembros de la sección | ActivitiesService.recordAttendance() | `src/activities/activities.controller.ts` |
+| POST | `/api/v1/activities/:activityId/attendance` | JWT | Permisos: attendance:manage | Registrar asistencia confirmada. Body `{ user_ids }` (UUID de cualquier versión); reemplaza la lista completa de `attendees`. En virtual solo miembros de la sección | ActivitiesService.recordAttendance() | `src/activities/activities.controller.ts` |
 | GET | `/api/v1/activities/:activityId/attendance` | JWT | Permisos: attendance:read | Obtener asistencia confirmada | ActivitiesService.getAttendance() | `src/activities/activities.controller.ts` |
 | GET | `/api/v1/activities/:activityId/rsvp` | JWT | Permisos: activities:read | Intención de asistencia del usuario (solo virtual) | ActivitiesService.getMyRsvp() | `src/activities/activities.controller.ts` |
 | PUT | `/api/v1/activities/:activityId/rsvp` | JWT | Permisos: activities:read | Marcar going o not_going. No confirma asistencia | ActivitiesService.setRsvp() | `src/activities/activities.controller.ts` |
-| GET | `/api/v1/activities/:activityId/attendance-roster` | JWT | Permisos: attendance:manage | Miembros de la sección con intención y confirmación (solo virtual) | ActivitiesService.getAttendanceRoster() | `src/activities/activities.controller.ts` |
+| GET | `/api/v1/activities/:activityId/attendance-roster` | JWT | Permisos: attendance:manage | Miembros activos de las secciones con intención (`rsvp`, solo en virtual) y confirmación (`confirmed`). Cualquier modalidad desde sacdia-backend #666 | ActivitiesService.getAttendanceRoster() | `src/activities/activities.controller.ts` |
 
 ### admin-auth
 
