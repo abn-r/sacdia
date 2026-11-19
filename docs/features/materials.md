@@ -1,7 +1,7 @@
 # Materiales (tienda del Campo Local)
 
 **Estado**: IMPLEMENTADO
-**Verificado contra código**: 2026-10-04 (rama `development`)
+**Verificado contra código**: 2026-10-04 (rama `development`); sección de la app móvil, 2026-11-19
 
 ## Descripcion de dominio
 
@@ -67,7 +67,47 @@ Submódulos: `catalog`, `categories`, `config`, `inventory`, `orders`, `receipts
 
 ### App móvil (`sacdia-app/lib/features/materials/`)
 
-Vistas: `catalog_view`, `product_detail_view`, `cart_view`, `order_review_view`, `order_summary_view`, `payment_details_view`, `upload_receipt_view` y `order_history_view`.
+**Verificado contra código**: 2026-11-19 (`development`; rediseño en sacdia-app #263, ajustes en #267, #268 y #269, y el panel de estado compartido de #261). La app solo cubre al club que pide: no revisa líneas, no aprueba, no valida comprobantes ni entrega (eso es del admin).
+
+**Rutas** (`lib/core/config/route_names.dart`, `router.dart`)
+
+| Ruta | Pantalla |
+|---|---|
+| `/home/materials` | `OrderHistoryView`: «Pedidos» (entrada del módulo desde el inicio) |
+| `/home/materials/catalog` | `CatalogView`: «Nuevo pedido» (push fuera del shell) |
+| `/home/materials/cart` | `CartView`: «Tu pedido» (carrito y confirmación en una pantalla) |
+| `/home/materials/order/:folio` | `OrderReviewView`: detalle del pedido por folio o UUID |
+| `/home/materials/order/:folio/receipt` | `UploadReceiptView`: subir comprobante |
+| `/home/materials/product/:id` | enlace antiguo: abre el catálogo con la hoja de ese producto |
+| `/home/materials/order/:folio/payment` | enlace antiguo: abre el detalle del pedido con la hoja de pago (solo si el pedido está `aprobada`) |
+| `/home/materials/summary` | redirige a `/home/materials/cart` |
+| `/home/materials/history` | redirige a `/home/materials` |
+
+**Pedidos (`OrderHistoryView`)**: `GET /materials/orders/history`. Los pedidos se agrupan (`groupOrders`, más nuevo primero en cada grupo) en «Por atender», «En curso», «Entregados» y «Cancelados»; un grupo vacío no se dibuja.
+- «Por atender»: pedidos `aprobada` a los que el club debe responder: sin comprobante (pagar) o con el último comprobante `rechazado` (subir otro).
+- «En curso»: `en_revision`, `pagada`, y `aprobada` con comprobante pendiente o aprobado (esperando al campo local).
+- Cada fila muestra miniaturas apiladas, icono y texto de estado, el folio completo en monoespaciada y el monto. Pie fijo «Nuevo pedido» (`SacFrostedFooter`). Estados de esqueleto, vacío y error con reintento; *pull-to-refresh*.
+
+**Catálogo (`CatalogView`)**: búsqueda, filtro por programa (tipo de club), filtro por categoría, paginación con «Cargar más» e icono de carrito. Tocar un producto abre `ProductSizesSheet`:
+- Productos con variante: un paso de cantidad por talla o color. Muestra «Quedan N» (en color de advertencia con 3 o menos, `kLowStockThreshold = 3`) y «Agotada» sin selector cuando el stock es 0. Productos sin variante: un solo selector de piezas.
+- El botón «Agregar N · $total» agrega todas las opciones elegidas de una vez y muestra un aviso «Se agregó … · Ver carrito».
+- El carrito vive en memoria (`cartProvider`); cada línea guarda el precio del momento y la opción de variante.
+
+**Tu pedido (`CartView`)**: productos, dos tarjetas de entrega (recoger en el campo local, o envío al club con su costo), notas opcionales, totales y botón fijo «Confirmar pedido · $total». Las opciones de entrega salen de `GET /materials/config` (`deliveryOptions`); sin configuración muestra recoger y envío. Con envío gratis el texto es «Sin costo» y no «$0.00». Al confirmar (`POST /materials/orders`) vacía el carrito, vuelve a la lista y muestra «Pedido {folio} enviado · Ver pedido». Al abrir esta pantalla se descarta el aviso «Ver carrito» del catálogo (#268).
+
+**Detalle del pedido (`OrderReviewView`)**
+- Arriba, `SacStatePanel` con el estado actual y «Paso N de 4». Al tocarlo se abre `showSacStatesSheet` con los 4 pasos: En revisión, Aprobado: falta pagar, Pagado: lo preparan y Entregado. Un pedido cancelado no tiene número de paso.
+- Si el último comprobante fue rechazado, el panel pasa a «Comprobante rechazado» y se cita el `reject_reason` del revisor bajo el título «Motivo del campo local».
+- Secciones: productos (cantidad × precio), totales (productos, entrega con «Sin costo» si es 0, total) y comprobantes, cuando hay.
+- Una sola acción fija abajo según el estado: «Pagar $total» (pedido `aprobada` sin comprobante) o «Subir otro comprobante» (último comprobante rechazado). En los demás estados no hay acción.
+- El menú ⋯ ofrece copiar el folio y, solo con el pedido `en_revision`, «Cancelar pedido» (último, en rojo), que pide un motivo obligatorio (`POST /materials/orders/:folio/cancel`). La app no ofrece cancelar `aprobada` ni `pagada`, aunque el backend lo permita a quien tiene `materiales:approve`.
+- Los comprobantes ya guardados con un nombre generado (`image_picker_*`, `scaled_*`, un UUID suelto o vacío) se muestran como «Comprobante» o «Comprobante N» (`materials.receipts.default_name`, `receiptDisplayName`). Los nombres reales se muestran tal cual.
+
+**Pago (`PaymentSheet`)**: hoja con el monto en grande, banco, CLABE, beneficiario y concepto (el folio), tomados del snapshot de datos bancarios que el backend copia al aprobar. Las filas de CLABE, beneficiario y concepto tienen botón de copiar de 44 pt; al copiar, el icono cambia a una marca durante 1.5 s dentro de la fila (sin animación con movimiento reducido) y los lectores de pantalla reciben «Copiado: …» como región viva. No se usa un *snackbar* porque quedaba detrás de la hoja (#269). «Ya pagué · subir comprobante» cierra la hoja y abre la pantalla de comprobante.
+
+**Subir comprobante (`UploadReceiptView`)**: el monto llega prellenado con el total del pedido (editable; debe ser mayor a 0), la fecha es hoy (no admite futuras) y el concepto es el folio. El archivo se elige con una hoja Cámara, Galería o Archivo; PDF, JPG o PNG de hasta 10 MB (`_maxFileSizeBytes`). Muestra tarjeta de vista previa con «Cambiar archivo» y los errores junto al campo. Envía `monto_centavos`, `ref_bancaria_declarada` (el folio) y `fecha_pago`. Las fotos de cámara o galería se suben como `comprobante-<folio>.<ext>` (`friendlyReceiptUploadName`, sin caracteres fuera de letras, números, `_` y `-`); un archivo elegido con «Archivo» conserva su nombre.
+
+**Flujo verificado de punta a punta** (iOS contra backend local, 2026-11-18/19): crear pedido; el admin resuelve la disponibilidad de cada línea (`PATCH /materials/orders/:folio/lines/:lineId`; sin eso `approve` responde `422 unresolved_lines`); `POST .../approve`; la app muestra «Pagar» y la hoja de pago; se sube el comprobante; el admin lo rechaza con motivo (la app lo muestra como «Motivo del campo local»); se sube otro; el admin lo aprueba; la app muestra «Pagado: lo preparan».
 
 ### Base de datos
 
@@ -82,3 +122,5 @@ Vistas: `catalog_view`, `product_detail_view`, `cart_view`, `order_review_view`,
 - La descripción Swagger de `POST /materials/orders/:folio/approve` dice que asigna el folio, pero el folio se asigna al crear el pedido.
 - No hay notificaciones push ni correo en los cambios de estado; solo logs.
 - `refund_pending` se marca, pero no existe flujo de reembolso.
+- La app solo permite cancelar pedidos `en_revision`; el backend admite cancelar también `aprobada` y `pagada` con `materiales:approve`.
+- El modelo de estados de la app tiene 4 pasos (en revisión, aprobado, pagado, entregado), sin un paso aparte para el comprobante pendiente de validación: un pedido `aprobada` con comprobante pendiente se muestra como «Revisando tu pago» dentro del paso 2.
