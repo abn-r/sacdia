@@ -10,6 +10,8 @@ Users can request a full JSON export of their personal data stored in SACDIA. Th
 
 ## Flow
 
+En la app móvil la pantalla es Ajustes → Mis datos (`my_data_view.dart`, sacdia-app #275): panel de estado de la exportación e historial, y «Eliminar mi cuenta» al final. Se oculta mientras se actúa por un dependiente y para adolescentes supervisados.
+
 ```
 Mobile App
   └── POST /users/me/data-export

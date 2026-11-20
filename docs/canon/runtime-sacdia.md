@@ -257,7 +257,7 @@ Roles globales del seed (`prisma/seeds/role-permissions.seed.sql`):
 
 Roles de club del seed: `director`, `deputy-director`, `secretary`, `treasurer`, `secretary-treasurer`, `counselor`, `instructor`, `member`.
 
-El contexto de autorización resuelto (`AuthorizationContextService`) se cachea en Redis con la key `auth:context:v9:{userId}` (la versión 9 vino con la Fase 4 de perfiles familiares) (TTL = el menor entre 5 min, el fin del año eclesiástico y la próxima frontera temporal `start_date`/`end_date`/`expires_at` de los cargos cargados). Toda mutación de roles o permisos debe invalidar el cache de los usuarios afectados, tanto por `users_roles` como por `club_role_assignments`.
+El contexto de autorización resuelto (`AuthorizationContextService`) se cachea en Redis con la key `auth:context:v9:{userId}` (la versión 9 vino con la Fase 4 de perfiles familiares) (TTL = el menor entre 5 min, el fin del año eclesiástico y la próxima frontera temporal `start_date`/`end_date`/`expires_at` de los cargos cargados). Toda mutación de roles o permisos debe invalidar el cache de los usuarios afectados, tanto por `users_roles` como por `club_role_assignments`. Desde sacdia-backend #667 (2026-11-19) también lo invalidan `UsersService.update`, `uploadProfilePicture` y `deleteProfilePicture`, porque `GET /auth/me` arma nombre, género, fechas y foto desde ese contexto cacheado y mostraba valores viejos hasta 5 min después de editar el perfil.
 
 ### 7.3 Autorización sensible
 

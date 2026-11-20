@@ -1008,6 +1008,7 @@ Para `/api/v1/users/:userId/...` en superficies sensibles verificadas (`allergie
 
 - frontend no debe interpretar estas rutas como mero "JWT-only";
 - self-service depende de ownership sobre `userId`;
+- `PATCH /users/:userId` y `POST`/`DELETE /users/:userId/profile-picture` invalidan el caché de autorización del usuario (sacdia-backend #667): el siguiente `GET /auth/me` ya devuelve el nombre, las fechas y la foto nuevos. La app llama a `DELETE .../profile-picture` desde la hoja de foto de Editar perfil y, tras guardar, refresca al usuario con `refreshCurrentUser` en vez de invalidarlo;
 - acceso sobre terceros requiere permiso global resuelto (`users:read_detail` o `users:update_profile`, o el permiso fino de familia). Sunset del OR `users:*`: `2027-03-31`;
 - no introducir gating fino por salud/legal/contactos porque el backend todavía no expone permisos separados para esas categorías.
 
