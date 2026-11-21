@@ -52,6 +52,11 @@ La feature existe en backend, admin, app movil y base de datos. Los endpoints es
 - **App movil**: `sacdia-app/lib/features/achievements/data/datasources/achievements_remote_data_source.dart`
   - consume catalogo, `me` y categorias
   - el contrato esperado para catalogo y `me` coincide con el grouping verificado en backend; cada item desenvuelve `achievement` y `user_achievement`
+  - **Pantalla de Logros** (`/home/achievements`, `AchievementsView`), rediseñada en sacdia-app #276 sin cambiar totales ni resumen:
+    - Cuadrícula compartida con Maestrías (`lib/core/widgets/badge_grid/`: `SacBadgeGrid`, `SacBadgeCard`, `SacBadgeTint`). Todas las tarjetas tienen el mismo aspecto y alto fijo por escala de texto; solo el arte y una línea de estado cambian. El arte de Logros es 20 % más grande que el de la cuadrícula base (`kAchievementGridArtHeight`).
+    - Estados de la tarjeta: obtenido (insignia a color y palomita con la fecha), en progreso (insignia gris, barra en el color de acento y «N de M»), sin empezar (insignia gris, sin línea de estado) y secreto no obtenido (dibujo propio y «Logro secreto», nunca «???»).
+  - **Detalle** (`achievement_detail_sheet.dart`): hoja del tamaño de su contenido (hasta 92 % de la pantalla), insignia de 252 pt, chip neutro del tier y chip «N puntos». Muestra un solo panel de estado: obtenido con su fecha; bloqueado («Bloqueado · Primero obtén «X».», con el nombre del prerrequisito); en progreso; o aún no obtenido (los logros de una sola vez ya no muestran «0 de 1»).
+  - **Movimiento**: una insignia obtenida lleva en el detalle un resplandor del color de su tier (`AchievementHeroGlow`) y una pasada de luz cada 5 s; en la cuadrícula, las obtenidas reciben la pasada cada 10 s (`AchievementShine`). Entre pasadas no se anima nada (un `Timer`, no un controlador corriendo). «Reducir movimiento» apaga la luz y deja el resplandor.
 - **Admin web**: `sacdia-admin/src/lib/api/achievements.ts`
   - opera CRUD, estadisticas, upload de badge y evaluacion retroactiva
   - usa `PATCH` para updates, `scope` `GLOBAL|CLUB_TYPE|ECCLESIASTICAL_YEAR` y el campo multipart `file`, alineados con runtime
