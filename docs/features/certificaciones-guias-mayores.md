@@ -17,7 +17,7 @@ Estructura: certificación → versión → módulos → secciones (requisitos) 
 | Controlador | Endpoints | Rol |
 | --- | ---: | --- |
 | `CertificationsController` / `UserCertificationsController` | 8 | Catálogo, inscripción, elegibilidad, progreso, legacy |
-| `UserCertificationRequirementsController` | 6 | Borrador, envío, evidencias por requisito |
+| `UserCertificationRequirementsController` | 7 | Borrador, envío, evidencias y actividades asistidas por requisito (`activity-options` pendiente de merge, PR #668 de sacdia-backend) |
 | `CertificationCloseoutController` | 7 | Cierre participante + bandeja/certificación final |
 | `CertificationReviewController` | 4 | Bandeja y decisión por requisito |
 | `AdminCertificationsController` | 8 | Configuración y publicación de versiones |
@@ -46,6 +46,15 @@ Referencia canónica: `docs/api/ENDPOINTS-LIVE-REFERENCE.md` §certifications y 
 - Flujo por requisito en `lib/features/certifications`: `requirement_detail_view.dart` (borrador, envío, presign/confirm de evidencias) y `certification_closeout_view.dart` (cierre).
 - Entradas de navegación (2026-08-12): chip "Certificaciones" en el tab Clases del bottom nav (`classes_list_view.dart` → `/home/certifications`) y sección "Mis Certificaciones" en el perfil (`profile_certifications_section.dart`, grid 3 columnas espejo de "Mis Clases", tap → `CertificationProgressView`). Antes el módulo solo era alcanzable por deep link de push.
 - Elegibilidad en detalle (2026-08-12): la vista de detalle consume `GET .../eligibility` (`certificationEligibilityProvider`) y muestra la sección "Requisitos de inscripción" con cada regla evaluada (✓/✗ + motivo por `reason_code`); el CTA de inscripción se deshabilita si `eligible=false` o si la versión no tiene reglas configuradas. `CERT_ELIGIBILITY_REQUIRED` y `CERT_ALREADY_ENROLLED` se mapean a mensajes localizados como respaldo.
+
+#### Rediseño con la estructura de Mis clases (2026-11-21)
+
+Pendiente de merge (PR #277 de sacdia-app; depende del PR #668 de sacdia-backend). Cuando se integre reemplaza las entradas de arriba:
+
+- **Acceso:** grupo "Certificaciones" en Mis clases y fila en Explorar, visibles solo para quien es elegible o ya está inscrito (`certificationsAccessProvider`, `keepAlive` registrado en `profile_scope_registry.dart`). El chip, `MyCertificationsView`, `CertificationDetailView` y `CertificationProgressView` se eliminan.
+- **Pantallas:** catálogo (`certifications_list_view.dart`, como "Clases por club"); certificación (`certification_view.dart`, `/certification/:id`: resumen de requisitos requeridos, "Por atender", módulos y Cierre bloqueado hasta tener todo aprobado); módulo (`certification_module_view.dart`, `/certification/:id/module/:moduleId`) con requisitos agrupados por estado. `/certification/:id/progress/:enrollmentId` redirige a la certificación.
+- **Requisito:** panel de estado (`SacStatePanel`) con la nota del campo local una sola vez; las evidencias subidas se listan con su URL firmada; la actividad vinculada se elige de las asistidas (`activity-options`); un solo botón, y tras enviar la pantalla pasa a «Enviado» sin cerrarse. El envío usa el `lock_version` que devuelve el GET del requisito.
+- **Estados:** `completion_status` puede llegar como booleano o como texto (`completionStatusFromJson`). Las fechas de actividad (`activity_date`, columna `date`) se leen como día de calendario para no mostrarse un día antes al oeste de UTC.
 
 ### Base de datos
 
