@@ -174,6 +174,18 @@ Vigente en `development` desde 2026-10-12. Contrato campo por campo y códigos d
 - **Borrar borrador.** `DELETE /certificate-bulk-imports/:batchId`: 404 si no es del usuario, 409 `CERTIFICATE_IMPORT_BATCH_NOT_DELETABLE` (ya no es `DRAFT` o tiene solicitudes institucionales) y 409 `CERTIFICATE_IMPORT_OCR_IN_PROGRESS`. Borra filas, archivos y eventos en cascada y, después del commit, los objetos de R2 (mejor esfuerzo); no queda traza en base, solo en el log.
 - **Migraciones.** M1 `20261010120000_certificate_import_honor_instructor` y M2 `20261010130000_certificate_import_ocr_pages`. Estado por rama de Neon y procedimiento: `docs/deployment/DEPLOYMENT-GUIDE.md` §0.5.
 
+## Rediseño de la app y especialidad sugerida (2026-11-22)
+
+Pendiente de merge (sacdia-app#278 y sacdia-backend#669). Cuando se integre reemplaza lo que dicen «UX mobile» y el punto «El OCR no hace match de catálogo»:
+
+- **Especialidad sugerida (backend).** Al guardar las filas del OCR, una fila HONOR cuyo nombre coincide exacto con una sola especialidad activa recibe `honor_id` y `field_confidence.honor_auto_match = 1`. La comparación ignora mayúsculas, tildes y espacios. Si la fecha se leyó con confianza ≥ 0.8, la fila nace `READY`; si no, sigue `NEEDS_REVIEW` hasta que el miembro confirme la fecha. Las clases no se eligen solas. La respuesta del miembro agrega `honor_suggested` (deja de ser `true` en cuanto el miembro edita la fila), y `honor` trae `honor_image`. Un reproceso descarta las filas sugeridas que nadie tocó.
+- **Inicio.** Explica qué hace y qué admite, lista «Tus envíos» con su estado (primero los que tienen filas por corregir; un envío aún en revisión con alguna fila rechazada ya cuenta como «por corregir», porque el lote sigue `SUBMITTED` hasta decidir todas sus filas) y tiene una sola acción, «Agregar comprobante». El comprobante elegido se ve en miniatura («Foto · 157 KB»), nunca con el nombre técnico del archivo.
+- **Subir y leer.** Un solo panel de estado que pasa de «Subiendo N %» a «Leyendo tu comprobante», con filas esqueleto. Sin barra de pasos.
+- **Revisión.** Caja «Filas listas N de M», el comprobante como fila y dos grupos, «Por completar» y «Listas». Cada fila lleva la insignia o el logo de la clase y un chip «Falta» o «Lista». Una fila cuenta como lista solo si está completa, su fecha no está en duda y, si la eligió el backend, el servidor ya la marcó `READY`. El botón es «Completar N filas» mientras falte alguna y luego «Enviar a revisión». La confirmación de envío es una hoja.
+- **Corregir una fila.** Hoja con lo leído y «Ver pág. N», tipo «Especialidad | Clase», selector de especialidad con insignia y «Sugerida», selector de clase por club con logos, fecha, instructor opcional, «Guardar» y «Quitar de la lista» (con confirmación en hoja).
+- **Estado del envío.** Panel con el estado (En revisión, Hay N filas por corregir, Aprobado en parte, Aprobado) y su hoja de estados. Debajo, todas las filas agrupadas en «Por corregir» (con el motivo), «En revisión» y «Aprobadas». Atrás vuelve a «Carga por certificado», no a la revisión ya enviada. Inicio y estado se recargan deslizando hacia abajo, para ver las decisiones del revisor sin salir de la pantalla.
+- **Error de envío.** `CERTIFICATE_IMPORT_ITEMS_INCOMPLETE` muestra «Faltan filas por revisar» en lugar del aviso genérico de conexión.
+
 ## Despliegue
 
 El orden es schema aditivo, backend con la cola apagada si no hay Redis, y después los clientes. Sin Redis o sin una vía de lectura disponible no hay lectura exitosa y el expediente válido puede completarse a mano. Nunca subir ADC personal a Render ni generar claves de cuenta de servicio o API keys: la organización bloquea las claves y el diseño es keyless.
