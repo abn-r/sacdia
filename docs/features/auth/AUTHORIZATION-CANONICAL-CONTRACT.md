@@ -121,6 +121,13 @@ Describe lo que el backend ya resolvio para la sesion actual.
 
 El recorte operativo es **rol-primero**: el backend lee `grants.global_roles` antes de `effective.scope.global.local_field.id`. Un `director-union` o `assistant-union` con campo de casa sigue en nivel `union`. Los clientes no envían query params para ampliar territorio; un ID fuera de alcance responde `403 GUARD_PERMISSION_DENIED` (no se filtra existencia). `GET /catalogs/{countries,divisions,unions,local-fields,districts,churches}` recorta al **país** del actor cuando el JWT tiene rol territorial (`division` / `union` / `local_field`); ve su país y los campos de ese país, no el directorio mundial. Sin JWT o sin rol territorial (post-registro) el catálogo geográfico sigue completo. Un `countryId` / `unionId` / `localFieldId` / `districtId` de otro país responde `403 GUARD_PERMISSION_DENIED`. Alergias, roles y demás catálogos de referencia no se recortan. `GET /clubs` recorta por territorio operativo (campo / unión / división); el picker de catálogo puede mostrar otros campos del mismo país, pero listar clubs de un campo fuera del territorio sigue 403. `GET /materials/config/all` recorta al territorio del actor.
 
+### `onboarding_mode` y `authorization.local_field_required_roles`
+
+Dos campos aditivos junto al contrato `authorization`; no cambian `grants`, `active_assignment` ni `effective`.
+
+- `data.onboarding_mode` (`"club" | "club_exempt" | "panel_only"`) en `GET /auth/me`, junto a `post_register_complete`. También viaja en `POST /auth/login`, en `POST /auth/oauth/:provider/token` y en `GET /users/:userId/post-registration/status`. Lo deriva el backend en cada lectura a partir de este mismo contrato: con al menos una entrada en `grants.club_assignments` es `club`; si no, `club_exempt` cuando la capability `app.clubless_surface` es verdadera (pastor o coordinación), `panel_only` cuando lo es `admin_panel.access`, y `club` en cualquier otro caso. Los clientes lo leen y no lo infieren de roles ni de clubes; un valor ausente se trata como `club`. Detalle en [auth.md](../auth.md), «Modo de ingreso».
+- `data.authorization.local_field_required_roles` (`string[]`): subconjunto de `assignable_global_roles` que exige `local_field_id` al crear el usuario (hoy `pastor`). El panel lo usa para validar el formulario de alta y la carga masiva sin comparar nombres de rol.
+
 ## Reglas Canonicas para Recursos `user`
 
 Cuando una ruta usa `@AuthorizationResource({ type: 'user', ownerParam: 'userId' })`, el contrato runtime vigente es:
