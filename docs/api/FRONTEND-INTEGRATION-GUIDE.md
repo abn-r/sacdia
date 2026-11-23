@@ -47,6 +47,19 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 ---
 
+## Actualizacion 2026-11-22 (Modo de ingreso, invitación y alta de pastores)
+
+Todos los campos nuevos son aditivos; un cliente que no los conoce se comporta como antes. Contratos y códigos: `docs/api/ENDPOINTS-LIVE-REFERENCE.md` (secciones `auth`, `admin-users`, «Modo de ingreso (`onboarding_mode`)» e «Invitación de cuentas creadas desde el panel»). Reglas de dominio en `docs/features/auth.md`.
+
+- **`onboarding_mode` (app y panel).** `club`, `club_exempt` o `panel_only`, calculado por el backend en cada lectura. Llega en `data.onboarding_mode` de `POST /auth/login`, `POST /auth/oauth/:provider/token`, `GET /auth/me` y `GET /users/:userId/post-registration/status`. El cliente lo lee y **no lo infiere** de roles ni de clubes; ausente o desconocido se trata como `club`.
+  - `club`: tres pasos (foto, datos personales, club).
+  - `club_exempt` (pastor o coordinación sin club): dos pasos. Tras `POST .../step-2/complete` relee `GET /auth/me`; si `post_register_complete` ya es `true` entra al inicio, y si no, avisa y se queda. No hay que llamar a ningún endpoint para «completar» el post-registro.
+  - `panel_only`: sin pasos; `needsPostRegistration` es `false`. La app solo ofrece la pantalla de solo panel (cerrar sesión, comprobar de nuevo y, para un tutor, «Mi familia»).
+  - `post_register_complete` es siempre el valor real de `users_pr.complete`; el modo no lo falsea.
+- **Invitación de cuentas creadas desde el panel (panel).** El correo de invitación abre `/reset-password?token=…&mode=invitation`. Con `mode=invitation` el formulario publica en `POST /auth/invitation/accept` con `{ token, password }` (y no en `POST /auth/password/reset`); no devuelve sesión: el formulario solo muestra la confirmación y la persona inicia sesión después. `AUTH_INVITATION_TOKEN_INVALID` y `AUTH_INVITATION_TOKEN_EXPIRED` se tratan como enlace inválido. Vigencia del token: 7 días.
+- **Reenviar invitación (panel).** `GET /admin/users/:userId` trae `invitation_pending`; con `true` y el permiso `users:create`, la ficha ofrece `POST /admin/users/:userId/invitation`. Respuestas a mostrar: 409 `ADMIN_USER_INVITATION_ALREADY_ACCEPTED`, 429 (`ADMIN_USER_INVITATION_COOLDOWN` o límite por hora), 503 `ADMIN_USER_INVITATION_UNAVAILABLE`; 400 `ADMIN_USER_INVITATION_NOT_APPLICABLE` (cuenta inactiva o sin correo).
+- **Alta de pastores (panel).** `POST /admin/users` y la carga masiva exigen `local_field_id` para los roles de `GET /auth/me` → `authorization.local_field_required_roles` (hoy `pastor`). El formulario valida contra esa lista y **no compara nombres de rol**. Errores: 400 `ADMIN_USER_LOCAL_FIELD_REQUIRED` y, por fila en la carga masiva, `error_code: LOCAL_FIELD_REQUIRED` (la hoja «Roles permitidos» de la plantilla trae `requiere_campo_local`).
+
 ## Actualizacion 2026-11-17 (Clase agrupada, investidura y unidades)
 
 Mergeado en `development` (backend #663, app #259). Todos los cambios de API son aditivos.

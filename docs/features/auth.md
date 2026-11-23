@@ -8,7 +8,7 @@
 
 El modulo de autenticacion es el punto de entrada al sistema SACDIA. Gestiona el ciclo de vida completo de la identidad del usuario: registro, login, refresh de sesion, logout, recuperacion de contrasena, autenticacion con proveedores externos (Google, Apple) y autenticacion multifactor (MFA/2FA). El runtime vigente usa Better Auth self-hosted para resolver identidad primaria y sesiones opacas, mientras el backend de SACDIA emite su JWT HS256 para consumo de API.
 
-El registro de usuarios incluye un flujo de post-registro en tres pasos: (1) foto de perfil, (2) informacion personal completa, y (3) seleccion de club con alta anual en `enrollments`. Este flujo asegura que cada miembro tenga un perfil completo antes de acceder a las funcionalidades del club. El post-registro se trackea en la tabla `users_pr`.
+El registro de usuarios incluye un flujo de post-registro en tres pasos: (1) foto de perfil, (2) informacion personal completa, y (3) seleccion de club con alta anual en `enrollments`. Este flujo asegura que cada miembro tenga un perfil completo antes de acceder a las funcionalidades del club. El post-registro se trackea en la tabla `users_pr`. Los tres pasos aplican al modo `club`; el backend deriva en cada lectura un `onboarding_mode` (`club`, `club_exempt` o `panel_only`) que decide qué pasos corresponden a cada cuenta (ver «Modo de ingreso (`onboarding_mode`)»).
 
 El sistema no debe depender de una aprobacion global manual para que cada usuario exista o acceda a SACDIA. La regla vigente de producto separa identidad, acceso por superficie y membresia operativa: `access_app` controla acceso a app movil, `access_panel` controla acceso al panel admin, y la pertenencia real a club/seccion se resuelve por asignaciones activas. Los campos `approval_status` y `rejection_reason` quedan orientados a **revision administrativa por excepcion**, no a una cola masiva de aprobacion de todos los usuarios.
 
@@ -23,8 +23,8 @@ La gestion de sesiones permite listar sesiones activas y cerrar sesiones individ
   - `src/auth/oauth.controller.ts` — OAuthController (Google, Apple, callback, providers, disconnect)
   - `src/auth/mfa.controller.ts` — MfaController (enroll, verify, disable, status)
 - **Services**: AuthService, OAuthService, MfaService (`src/common/services/mfa.service.ts`), SessionManagementService (`src/common/services/session-management.service.ts`), TokenBlacklistService (`src/common/services/token-blacklist.service.ts`)
-- **23 endpoints**:
-  - Auth core: `POST /auth/register`, `POST /auth/login`, `POST /auth/refresh`, `POST /auth/logout`, `POST /auth/password/reset-request`, `POST /auth/verify-email/send`, `POST /auth/verify-email/confirm`, `POST /auth/update-password`, `GET /auth/me`, `PATCH /auth/me/context`, `GET /auth/profile/completion-status`
+- **24 endpoints**:
+  - Auth core: `POST /auth/register`, `POST /auth/login`, `POST /auth/refresh`, `POST /auth/logout`, `POST /auth/password/reset-request`, `POST /auth/invitation/accept` (pública; ver «Invitación de cuentas creadas desde el panel»), `POST /auth/verify-email/send`, `POST /auth/verify-email/confirm`, `POST /auth/update-password`, `GET /auth/me`, `PATCH /auth/me/context`, `GET /auth/profile/completion-status`
   - Sesiones: `GET /auth/sessions`, `DELETE /auth/sessions/:sessionId`, `DELETE /auth/sessions`
   - OAuth: `POST /auth/oauth/google`, `POST /auth/oauth/apple`, `POST /auth/oauth/callback`, `GET /auth/oauth/providers`, `DELETE /auth/oauth/:provider`
   - MFA: `POST /auth/mfa/enroll`, `POST /auth/mfa/verify`, `DELETE /auth/mfa/disable`, `GET /auth/mfa/status`
@@ -33,7 +33,7 @@ La gestion de sesiones permite listar sesiones activas y cerrar sesiones individ
 - **Controller**: `src/post-registration/post-registration.controller.ts`
 - **4 endpoints**:
   - `GET /api/v1/users/:userId/post-registration/photo-status` — Indica si el usuario ya subió foto de perfil
-  - `GET /api/v1/users/:userId/post-registration/status` — Estado del post-registro
+  - `GET /api/v1/users/:userId/post-registration/status` — Estado del post-registro; incluye `onboarding_mode` (también en la respuesta de un tercero, sin `nextStep`)
   - `POST /api/v1/users/:userId/post-registration/step-1/complete` — Paso 1: foto de perfil
   - `POST /api/v1/users/:userId/post-registration/step-2/complete` — Paso 2: informacion personal
   - `POST /api/v1/users/:userId/post-registration/step-3/complete` — Paso 3: seleccion de club + alta anual en `enrollments`
@@ -53,6 +53,9 @@ La gestion de sesiones permite listar sesiones activas y cerrar sesiones individ
 - **MFA**: el backend conserva enroll/verify/status/disable y admin reset (`GET/DELETE /admin/users/:userId/mfa`); el panel admin **no** muestra ni resetea MFA en ficha de usuario.
 - **Sesiones de ficha**: el backend conserva `GET/DELETE /admin/users/:userId/sessions` (cerca `USER_MANAGEMENT_ROLES` + `users:read_detail` + recorte territorial) y self-service `GET/DELETE /auth/sessions`; el panel admin **no** muestra ni revoca sesiones en ficha de usuario.
 - **Cuentas eliminadas/anónimas**: el panel usa `is_deleted` para mostrar una etiqueta traducida (`Cuenta eliminada`, `Deleted account`, etc.) sin usar el email técnico `deleted-{user_id}@sacdia.deleted` ni guardar textos de UI en campos de identidad.
+- **Invitación y establecer contraseña**: `/reset-password` acepta `mode=invitation`; con él muestra el texto de invitación y publica en `POST /auth/invitation/accept` en vez de `/auth/password/reset`. Los códigos `AUTH_INVITATION_TOKEN_INVALID` y `AUTH_INVITATION_TOKEN_EXPIRED` cuentan como enlace inválido.
+- **Ficha de usuario — post-registro y acceso a la cuenta**: la pestaña de post-registro muestra el modo de ingreso. Con un modo distinto de `club`, el paso 3 aparece como «No aplica» sin acción de forzar; en `panel_only` el estado global también dice «No aplica» y hay un aviso. Una tarjeta «Acceso a la cuenta» con «Reenviar invitación» aparece cuando `invitation_pending` es `true` y el actor tiene el permiso de crear usuarios (`users:create`).
+- **Alta de usuarios**: el formulario y la carga masiva exigen Campo local para los roles que el backend publica en `authorization.local_field_required_roles` (hoy `pastor`); el panel no compara nombres de rol.
 - No implementa UI de: registro, MFA, OAuth, gestion de sesiones
 
 ### App Movil
@@ -67,6 +70,7 @@ La gestion de sesiones permite listar sesiones activas y cerrar sesiones individ
 - **Proteccion biometrica local**: la app implementa biometria como app-lock post-login, no como metodo de inicio de sesion. El switch de «Seguridad» (Ajustes → Seguridad y privacidad) habilita un opt-in local y `BiometricGate` solo bloquea cuando existe una sesion autenticada vigente; si no hay sesion, login y rutas publicas no quedan cubiertas por el lock. Al cerrar sesion, expirar la sesion o eliminar la cuenta, la preferencia biometrica se limpia junto con la sesion local.
 - **Dashboard birthday celebration**: `DashboardView` lee `UserEntity.birthday` desde `/auth/me`; si coincide con el dia calendario local, muestra un modal celebratorio y un banner festivo arriba de `ClubInfoCard`. El banner reabre el modal hasta que el usuario pulse "no volver a mostrar hoy"; esa decision se persiste en `SharedPreferences` por `user_id + anio + MM-DD`.
 - **Post-registro paso 2**: la app precarga `gender`, `birthday`, `baptism`, `baptism_date` y `blood` desde `GET /users/:userId` al volver a datos personales. Las declaraciones explicitas "No tengo alergias/enfermedades/medicamentos" se conservan localmente en `SharedPreferences` por usuario y categoria, porque los endpoints actuales de salud exponen listas y una lista vacia no distingue "sin declarar" de "declarado como ninguno".
+- **Modo de ingreso**: la app lee `onboarding_mode` de `/auth/me` y del login (`OnboardingMode`; un valor ausente o desconocido se lee como `club`) y no lo infiere. `userNeedsPostRegistration` es `true` con la cuenta `profile_incomplete`, o, si el modo no es `panel_only`, mientras `post_register_complete` sea `false`. En `club_exempt` el asistente tiene 2 pasos (foto y datos personales); tras el paso 2 la app relee al usuario y, si el servidor ya marcó el post-registro como completo, entra al inicio. En `panel_only` no hay asistente: la ruta `/account/panel-only` (`PanelOnlyAccountView`) es la única pantalla, con «Cerrar sesión», «Comprobar de nuevo» y, para un tutor, «Mi familia». Una compuerta de rutas (`panel_only_route_policy.dart`) solo deja pasar esa ruta, `/access-denied` y, para un tutor, `/family/**`; no aplica mientras se actúa por un dependiente. El modo se guarda en `SharedPreferences` (`cached_onboarding_mode`) para el arranque sin conexión. Una cuenta solo de panel sí registra el token de notificaciones push. Detalle de cliente en `sacdia-app/CLAUDE.md`, «Modo de ingreso (`onboarding_mode`)».
 - **Profile update payload**: la pantalla de edicion de perfil (cada fila guarda por su cuenta, ver «Rediseño de perfil y ajustes») no envia `phone` ni `address` cuando estan vacios. `PATCH /users/:userId` valida `phone` si la propiedad existe; por eso `phone: ""` debe omitirse para representar "sin telefono".
 - **Eliminar cuenta**: desde Ajustes → Mis datos, al final, la app muestra primero una hoja de consecuencias que lista a los dependientes y después pide confirmación localizada, llama `DELETE /auth/me`, limpia sesión/caché local y describe el efecto real como desactivación + anonimización de datos personales; no promete borrar historial/progreso inmediatamente.
 - **Rediseño de perfil y ajustes** (sacdia-app #275, 2026-11-19, en `development`):
@@ -105,7 +109,7 @@ La gestion de sesiones permite listar sesiones activas y cerrar sesiones individ
 4. Logout con invalidacion de tokens (best effort)
 5. Recuperacion de contrasena via email
 6. Cambio de contrasena para usuarios autenticados
-7. Post-registro en 3 pasos obligatorios antes de acceso completo
+7. Post-registro obligatorio antes de acceso completo: 3 pasos en modo `club`, 2 en `club_exempt` y ninguno en `panel_only`
 8. Paso 3 del post-registro debe crear enrollment anual en `enrollments`
 9. OAuth con Google y Apple como metodos alternativos de login
 10. MFA con enrolamiento TOTP, verificacion, consulta de estado y deshabilitacion
@@ -130,6 +134,34 @@ La gestion de sesiones permite listar sesiones activas y cerrar sesiones individ
 - **Eliminacion de cuenta por autoservicio**: `DELETE /auth/me` revoca sesiones, desactiva FCM, marca `users.active=false`, anonimiza PII en `users`, borra credenciales/vínculos en `accounts` y registra `account_deletion_log`. Los clientes deben derivar el texto visible desde `is_deleted`/`member_is_deleted`; no se guardan etiquetas como `Cuenta eliminada` en columnas de identidad.
 - **Biometria movil como app-lock**: para la release actual, la biometria movil protege una sesion local ya autenticada. No restaura tokens, no reemplaza Better Auth/JWT ni crea un contrato backend nuevo. Un login biometrico real queda fuera de alcance y debe tratarse como feature futura con diseño propio de restauracion segura de sesion.
 
+### Modo de ingreso (`onboarding_mode`)
+
+El backend deriva el modo en cada lectura (`computeOnboardingMode`, `src/common/authorization/onboarding-mode.ts`); nunca se guarda y no hay cambio de esquema. Reglas, en orden (gana la primera):
+
+1. Al menos una asignación de club visible (`authorization.grants.club_assignments`: activa, pendiente, inactiva o vencida; las `designated` no cuentan) → `club`.
+2. Capability `app.clubless_surface` (`admin_panel.pastor_only` o `coordination.hub_view`) → `club_exempt`.
+3. Capability `admin_panel.access` (un rol global distinto de `user`) → `panel_only`.
+4. Cualquier otro caso → `club`. Un miembro que se registra solo, con el rol `user`, sigue eligiendo club.
+
+| Modo | Pasos | `nextStep` | `needsPostRegistration` |
+|---|---|---|---|
+| `club` | foto, datos personales, club | el siguiente pendiente | `!complete` |
+| `club_exempt` | foto, datos personales | `profilePicture` → `personalInfo` → `null` | `!complete` tras reconciliar |
+| `panel_only` | ninguno (la función vive en el panel web) | `null` | `false` |
+
+- **Dónde se publica** (aditivo, snake_case): `data.onboarding_mode` en `GET /users/:userId/post-registration/status` (propietario y vista administrativa), en la respuesta de `POST /auth/login`, en la de `POST /auth/oauth/:provider/token` y en `GET /auth/me`. Una app anterior que lo ignora se comporta como antes.
+- **`complete` honesto**: `post_register_complete` es siempre el valor de `users_pr.complete`. En `club_exempt` pasa a `true` por una reconciliación idempotente (`UPDATE ... WHERE complete = false AND profile_picture_complete AND personal_info_complete`) que corre al leer el estado, en el login y tras los pasos 1 y 2 (también tras una anulación administrativa). Cuando cambia, se invalida el caché de autorización y el de «actuar en nombre de». `complete` nunca se revoca: cancelar la solicitud de membresía de un `club_exempt` solo reinicia `club_selection_complete` y la asignación activa.
+- **`panel_only`**: los pasos 1 y 2 no marcan `complete`. El paso 3 y «solo soy tutor» siguen permitidos: unirse a un club luego mueve la cuenta al modo `club`. Un tutor conserva `/family/**` («Mi familia»).
+- La app no infiere el modo: lo lee del servidor (ver «App Movil»).
+
+### Invitación de cuentas creadas desde el panel
+
+- **Token**: identificador `admin-invitation:{userId}`, vigencia de 7 días (el restablecimiento de contraseña sigue en 1 hora). Reemitir invalida el anterior. Plantilla de correo propia en es, en, fr y pt-BR. Enlace: `{ADMIN_PANEL_URL}/reset-password?token=…&mode=invitation`. Sin `EMAIL_ENABLED=true` o sin `ADMIN_PANEL_URL` no se escribe nada y el alta responde igual con `invite_email_sent: false`.
+- **Aceptar**: `POST /api/v1/auth/invitation/accept`, pública, cuerpo `{ token, password }` (`ResetPasswordDto`), throttle 5/min. En una transacción fija la contraseña, marca `email_verified` y borra el token; revoca las sesiones y no emite sesión ni JWT (el cliente inicia sesión). Token inválido → 400 `AUTH_INVITATION_TOKEN_INVALID`; vencido → 400 `AUTH_INVITATION_TOKEN_EXPIRED`. Una cuenta desactivada recibe `AUTH_INVITATION_TOKEN_INVALID` y no se escribe nada.
+- **Reenviar**: `POST /api/v1/admin/users/:userId/invitation` (`USER_MANAGEMENT_ROLES` + `users:create`, throttle 10/hora por actor). Orden de errores: 404 → 403 → 400 `ADMIN_USER_INVITATION_NOT_APPLICABLE` (cuenta inactiva o sin correo) → 409 `ADMIN_USER_INVITATION_ALREADY_ACCEPTED` → 429 `ADMIN_USER_INVITATION_COOLDOWN` (60 s por usuario) → 503 `ADMIN_USER_INVITATION_UNAVAILABLE` (correo deshabilitado).
+- **Cuenta activada** = `email_verified` o una fila `account` no credencial (social). `GET /admin/users/:userId` devuelve `invitation_pending`: `true` solo para una cuenta activa, con correo, no activada.
+- **Pastor**: el alta exige `local_field_id` (`ROLES_REQUIRING_LOCAL_FIELD = [pastor]`): 400 `ADMIN_USER_LOCAL_FIELD_REQUIRED`; en la carga masiva, `LOCAL_FIELD_REQUIRED` por fila (la plantilla trae la columna `requiere_campo_local`). El backend publica la lista en `GET /auth/me` → `authorization.local_field_required_roles`. La fila `users_pr` se crea dentro de la transacción de alta.
+
 ### Sacdia Admin nativo (contrato aprobado; aún no expuesto en runtime)
 
 - La futura fachada `/api/v1/auth/admin/*` será aditiva; no modificará los contratos ni el comportamiento de `/auth/*` legacy.
@@ -150,6 +182,7 @@ La gestion de sesiones permite listar sesiones activas y cerrar sesiones individ
 - **Admin sin UI MFA/OAuth/sesiones**: El panel admin implementa login/logout y refresh automatico, pero no tiene pantallas propias para MFA, OAuth ni gestion de sesiones.
 - **Semantica legacy de approval**: `PATCH /admin/users/:userId/approval` existe en backend por compatibilidad; el panel admin ya no lo consume ni muestra «Revisión administrativa» en el detalle de usuario.
 - **Admin approval endpoints**: `PATCH /admin/users/:userId/approval` y `PATCH /admin/users/:userId` estan verificados en ENDPOINTS-LIVE-REFERENCE (`src/admin/admin-users.controller.ts`). El panel solo usa el PATCH generico para flags de acceso/activo, y solo lo expone en Accesos a actores `admin` / `super-admin`.
+- **Límites conocidos del modo de ingreso**: (a) una cuenta con los roles `user` y `pastor` y sin club resuelve a `panel_only`, porque la regla del pastor exige que todos sus roles globales sean `pastor`; (b) una cuenta `panel_only` sin dependientes no puede dar de alta a su primer dependiente desde la app (solo un tutor existente conserva «Mi familia»); (c) las cuentas creadas desde el panel antes de este cambio que nunca verificaron el correo aparecen con `invitation_pending: true` y se pueden reinvitar.
 - **Banderas de revision pendientes de formalizar**: menor sin tutor legal, nombre + fecha de nacimiento identicos a otro usuario, y nombres ofensivos.
 
 ## Prioridad y siguiente accion

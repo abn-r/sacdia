@@ -48,6 +48,18 @@ Persona
                          └─ directiva APRUEBA → membresía ACTIVE
 ```
 
+### Variantes por modo de ingreso
+
+El flujo anterior es el del modo `club`. El servidor decide el modo (`onboarding_mode`) en cada lectura y la app lo sigue sin inferirlo:
+
+| Modo | A quién aplica | Qué ve la persona |
+|---|---|---|
+| `club` | Todo miembro con club visible y todo el que se registra solo (rol `user`) | Los tres pasos: foto, datos personales y club |
+| `club_exempt` | Pastor o coordinación sin club | Dos pasos (foto y datos personales). Al terminar el paso 2 el post-registro queda completo, sin solicitud de club |
+| `panel_only` | Cuenta con un rol global sin superficie en la app | Sin pasos: una pantalla explica que su función está en el panel web, con «Cerrar sesión» y «Comprobar de nuevo». Un tutor conserva «Mi familia» |
+
+Una cuenta creada desde el panel (por ejemplo un pastor) no recibe contraseña: recibe una invitación por correo, válida 7 días, que abre la pantalla de establecer contraseña del panel; al aceptarla el correo queda verificado y la persona inicia sesión en la app. Si el enlace venció o se perdió, quien administra usuarios la reenvía desde la ficha. Cancelar una solicitud de membresía no deshace el post-registro de una cuenta `club_exempt`. Detalle en `docs/features/auth.md`, «Modo de ingreso (`onboarding_mode`)».
+
 ## 5. Pasos numerados
 
 ### Paso 1 — Crear o iniciar la cuenta
@@ -64,7 +76,7 @@ Persona
 
 **Actor:** persona autenticada.  
 **Condición:** `users_pr.complete = false`.  
-**Resultado:** la app dirige a post-registro; si está completo, dirige al inicio (`sacdia-app/lib/core/config/router.dart`:244-275). El estado expone tres banderas y `nextStep` para reanudar (`sacdia-backend/src/post-registration/post-registration.service.ts`:61-107).
+**Resultado:** la app dirige a post-registro (según el modo de ingreso, ver arriba); si está completo, dirige al inicio (`sacdia-app/lib/core/config/router.dart`:244-275). El estado expone tres banderas y `nextStep` para reanudar (`sacdia-backend/src/post-registration/post-registration.service.ts`:61-107).
 
 **Disponibilidad:** ruta protegida por JWT y permiso `registration:complete`; el propietario puede operar sobre su recurso (`sacdia-backend/src/post-registration/post-registration.controller.ts`:35-51, 87-176).
 
