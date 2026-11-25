@@ -62,7 +62,7 @@ Modelos nuevos/ampliados (ver `docs/database/SCHEMA-REFERENCE.md`):
 
 - Definición: `certification_versions`, `certification_eligibility_rules`, `certification_requirement_components`
 - Ejecución: `users_certifications` (+ `certification_version_id`, `status`, `lock_version`), `certification_section_progress` (+ `status`, `enrollment_id`), `certification_component_responses`, `certification_evidences`, `certification_review_events`, `certification_closeout_evidences`
-- Proyección legacy retenida: `certification_module_progress`
+- Proyección legacy retenida: `certification_module_progress`. Solo la toca `updateProgress` (legacy, 410 `CERT_LEGACY_ENDPOINT_DEPRECATED` para inscripciones versionadas); el progreso del usuario y el listado de inscritos del admin cuentan secciones requeridas aprobadas de la versión de cada inscripción.
 
 ## Requisitos funcionales (motor versionado)
 
