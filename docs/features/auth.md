@@ -139,7 +139,7 @@ La gestion de sesiones permite listar sesiones activas y cerrar sesiones individ
 El backend deriva el modo en cada lectura (`computeOnboardingMode`, `src/common/authorization/onboarding-mode.ts`); nunca se guarda y no hay cambio de esquema. Reglas, en orden (gana la primera):
 
 1. Al menos una asignación de club visible (`authorization.grants.club_assignments`: activa, pendiente, inactiva o vencida; las `designated` no cuentan) → `club`.
-2. Capability `app.clubless_surface` (`admin_panel.pastor_only` o `coordination.hub_view`) → `club_exempt`.
+2. Capability `app.clubless_surface` (`admin_panel.pastor_only`, `coordination.hub_view` o, pendiente de merge (PR por abrir), `supervision.app_view`: roles de Unión y División) → `club_exempt`. Ver [supervision-territorial.md](supervision-territorial.md).
 3. Capability `admin_panel.access` (un rol global distinto de `user`) → `panel_only`.
 4. Cualquier otro caso → `club`. Un miembro que se registra solo, con el rol `user`, sigue eligiendo club.
 

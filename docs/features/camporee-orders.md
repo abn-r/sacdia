@@ -283,6 +283,10 @@ Timezone IANA del camporee; no interpretar fechas con la zona del dispositivo.
 
 ---
 
+## Supervisión territorial en la app
+
+Pendiente de merge (PR por abrir): Unión configura la oferta y la ventana de pedidos de un camporee de unión desde la app, en `/supervision/union-camporees/:camporeeId/orders`. La biblioteca de productos y tallas sigue en el panel. Ver [supervision-territorial.md](supervision-territorial.md).
+
 ## Fuera de alcance v1
 
 - Pedido directo por el miembro.

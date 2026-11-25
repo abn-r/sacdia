@@ -142,6 +142,8 @@ Concedido a `super-admin`, `admin`, `assistant-admin`, `director-lf`, `assistant
 - `lib/features/enrollment/`: `EnrollmentFormView` crea, consulta (`/current`) y edita la inscripción de la sección. Ahora recibe `decision_reason` y `reviewed_at` para mostrar por qué se rechazó.
 - La tarjeta del registro anual del inicio (`EnrollmentStatusCard`: falta, enviado, rechazado) solo la ve la directiva de la sección activa: capacidad `club.administrative_staff` (director, subdirector, secretario, tesorero y secretario-tesorero). Consejeros, instructores y miembros no la ven.
 
+Pendiente de merge (PR por abrir): Unión y División también aprueban y rechazan desde la supervisión territorial de la app (`/supervision/enrollments`, `club_enrollments.validate`). Ver [supervision-territorial.md](supervision-territorial.md).
+
 ### Admin
 
 - `src/lib/api/club-enrollments.ts` usa `GET …/enrollments/current` desde la página de informes (`/dashboard/reports`).

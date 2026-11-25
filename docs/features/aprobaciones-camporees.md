@@ -29,6 +29,10 @@ El proceso abarca tres tipos de aprobaciones: (1) inscripcion del club al campor
 - Reutiliza tablas existentes: `camporee_clubs`, `camporee_members`
 - Campos de aprobacion en tablas de inscripcion (status, approved_by, approved_at, rejection_reason)
 
+### App móvil
+
+Pendiente de merge (PR por abrir): las aprobaciones de clubes, miembros y pagos de camporees de unión también se hacen desde la supervisión territorial de la app, solo para Unión (`union_camporees.approve_registrations`); División no las ve. Rechazar exige motivo. Ver [supervision-territorial.md](supervision-territorial.md).
+
 ## Requisitos funcionales
 
 1. Admins y organizadores territoriales deben poder ver inscripciones pendientes de aprobacion. El coordinador runtime no aprueba camporee por el rol.
