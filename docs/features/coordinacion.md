@@ -113,6 +113,7 @@ Un usuario con rol global de coordinación (`coordinator`, `zone-coordinator` o 
 |---|---|---|
 | Coordinador + tutor | Hub de coordinación | «Mi familia» se abre desde el perfil |
 | Coordinador + pastor sin club | Hub de coordinación | Las rutas de autorización siguen accesibles, sin pestaña de navegación |
+| Coordinación + supervisión territorial (`supervision.app_view`) sin club | Hub de supervisión | Pendiente de merge (PRs sacdia-backend #683, sacdia-admin #321 y sacdia-app #286). Coordinación queda como pestaña y conserva sus rutas; las de autorizaciones, solo con `investiture.authorize_requests`. Ver [supervision-territorial.md](supervision-territorial.md) |
 
 ## Decisiones de diseño
 

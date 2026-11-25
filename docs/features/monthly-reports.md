@@ -24,7 +24,7 @@ La feature esta implementada en backend con IDs UUID y estados `draft -> generat
   - `POST /api/v1/monthly-reports/:reportId/generate` - encola congelar `snapshot_data` + PDF; responde 202; poll GET hasta `generated`
   - `POST /api/v1/monthly-reports/:reportId/submit` - pasar de `generated` a `submitted`
   - `GET /api/v1/monthly-reports/enrollment/:enrollmentId` - listar informes por matricula, con filtro opcional `status`
-  - `GET /api/v1/monthly-reports/admin/list` - **supervision multi-club jerárquica**. Query params: `division_id`, `union_id`, `local_field_id`, `club_type_id`, `year`, `month`, `status`, `page`, `limit`. Scope: `super-admin`/`admin`/`director-dia`/`assistant-dia` ven todo y pueden filtrar; `director-union`/`assistant-union` quedan forzados a su unión; `director-lf`/`assistant-lf`/`assistant-admin` quedan forzados a su campo; `coordinator`/`zone-coordinator`/`general-coordinator` quedan forzados a `club_section_ids` de `coordinator_assignments`; director/secretario de club queda limitado a su sección activa. Response paginada con club_name, club_type, local_field, submitter_name y member_count por item.
+  - `GET /api/v1/monthly-reports/admin/list` - **supervision multi-club jerárquica**. Query params: `division_id`, `union_id`, `local_field_id`, `club_type_id`, `year`, `month`, `status`, `page`, `limit`. Scope: `super-admin`/`admin` ven todo y pueden filtrar; `director-dia`/`assistant-dia` quedan forzados a su división y los filtros `union_id` y `local_field_id` solo reducen dentro de ella (sin `division_id` derivable: 403 `ADMIN_USER_SCOPE_MISSING`; antes veían todo; Pendiente de merge (PRs sacdia-backend #683, sacdia-admin #321 y sacdia-app #286)); `director-union`/`assistant-union` quedan forzados a su unión; `director-lf`/`assistant-lf`/`assistant-admin` quedan forzados a su campo; `coordinator`/`zone-coordinator`/`general-coordinator` quedan forzados a `club_section_ids` de `coordinator_assignments`; director/secretario de club queda limitado a su sección activa. Response paginada con club_name, club_type, local_field, submitter_name y member_count por item.
   - `GET /api/v1/monthly-reports/:reportId/pdf` - descargar PDF solo para `generated|submitted`
   - `GET /api/v1/monthly-reports/:reportId` - obtener detalle completo con `manual_data`, `snapshot_data`, matricula y submitter
 - **Permisos verificados**:
@@ -138,6 +138,8 @@ La feature esta implementada en backend con IDs UUID y estados `draft -> generat
 - Campos numéricos vacíos se envían como `0`; campos de texto vacíos como `null`.
 
 **Presentación**: un solo chip y estilo de estado para todos los informes (`MonthlyReportStatusChip`). Los nombres de mes van en minúscula a mitad de frase en es, fr y pt-BR (#267). Fechas y «asistentes» se traducen y formatean con la configuración regional.
+
+**Supervisión territorial** (Pendiente de merge (PRs sacdia-backend #683, sacdia-admin #321 y sacdia-app #286)): Unión y División ven el cumplimiento por club y el PDF de los informes de su territorio desde `/supervision/reports`, con `GET /reports/compliance` y `GET /monthly-reports/admin/list`, en una porción de datos propia. Ver [supervision-territorial.md](supervision-territorial.md).
 
 **Desfase con el backend**: la app modela los estados `approved` y `rejected` (cuatro pasos en el panel), pero el backend solo emite `draft`, `generated` y `submitted`; esos dos estados no ocurren hoy.
 

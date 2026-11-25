@@ -105,6 +105,10 @@ Ver [`ENDPOINTS-LIVE-REFERENCE.md`](../api/ENDPOINTS-LIVE-REFERENCE.md) §campor
 
 ---
 
+## Supervisión territorial en la app
+
+Pendiente de merge (PRs sacdia-backend #683, sacdia-admin #321 y sacdia-app #286): Unión configura la hora de corte, los horarios y los productos de insumos de un camporee de unión desde la app (`camporee_supplies.configure`). Los planes y reportes de insumos siguen en el panel. Ver [supervision-territorial.md](supervision-territorial.md).
+
 ## Fuera de v1
 
 Paquete físico de notas junto a inscripción, venta de no reclamado, líneas nominadas a miembro, nav global “Insumos” en admin.
