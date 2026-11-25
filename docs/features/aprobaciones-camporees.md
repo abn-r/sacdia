@@ -31,7 +31,7 @@ El proceso abarca tres tipos de aprobaciones: (1) inscripcion del club al campor
 
 ### App móvil
 
-Pendiente de merge (PRs sacdia-backend #683, sacdia-admin #321 y sacdia-app #286): las aprobaciones de clubes, miembros y pagos de camporees de unión también se hacen desde la supervisión territorial de la app, solo para Unión (`union_camporees.approve_registrations`); División no las ve. Rechazar exige motivo. Ver [supervision-territorial.md](supervision-territorial.md).
+Las aprobaciones de clubes, miembros y pagos de camporees de unión también se hacen desde la supervisión territorial de la app, solo para Unión (`union_camporees.approve_registrations`); División no las ve. Rechazar exige motivo. Ver [supervision-territorial.md](supervision-territorial.md).
 
 ## Requisitos funcionales
 

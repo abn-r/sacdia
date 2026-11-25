@@ -190,7 +190,7 @@ Las rutas de destino no conservan el scope analítico División/Unión. Son nave
 
 ## Supervisión territorial en la app
 
-Pendiente de merge (PRs sacdia-backend #683, sacdia-admin #321 y sacdia-app #286): Unión y División abren este dashboard desde la app en `/supervision/operations`, con baja de nivel por `division_id`, `union_id` y `local_field_id`. Usa el periodo por defecto del servidor. Ver [supervision-territorial.md](supervision-territorial.md).
+Unión y División abren este dashboard desde la app en `/supervision/operations`, con baja de nivel por `division_id`, `union_id` y `local_field_id`. Usa el periodo por defecto del servidor. Ver [supervision-territorial.md](supervision-territorial.md).
 
 ## Límites conocidos
 
