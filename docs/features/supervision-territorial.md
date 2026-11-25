@@ -1,6 +1,6 @@
 # Supervisión territorial (Unión / División) en la app
 
-**Estado**: EN IMPLEMENTACIÓN. Pendiente de merge (PR por abrir). Backend `src/supervision/` y los cambios de alcance en `src/reports/`, `src/analytics/` y `src/annual-folders/` (sacdia-backend), 11 pantallas `supervision-*` del catálogo del panel (sacdia-admin) y la feature `lib/features/supervision/` (sacdia-app). El código vive en ramas de trabajo sin integrar de los tres repos; no es estado de `development`. No se ejecutó contra un backend real ni se vio en un dispositivo; lo único verificado son las pruebas automatizadas listadas en «Pruebas».
+**Estado**: EN IMPLEMENTACIÓN. Pendiente de merge (PRs sacdia-backend #683, sacdia-admin #321 y sacdia-app #286). Backend `src/supervision/` y los cambios de alcance en `src/reports/`, `src/analytics/` y `src/annual-folders/` (sacdia-backend), 11 pantallas `supervision-*` del catálogo del panel (sacdia-admin) y la feature `lib/features/supervision/` (sacdia-app). El código vive en ramas de trabajo sin integrar de los tres repos; no es estado de `development`. No se ejecutó contra un backend real ni se vio en un dispositivo; lo único verificado son las pruebas automatizadas listadas en «Pruebas».
 
 ## Descripción de dominio
 

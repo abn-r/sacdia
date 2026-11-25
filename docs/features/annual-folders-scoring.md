@@ -88,7 +88,7 @@ La Carpeta Anual de Evidencias conserva su propio flujo de carga de archivos e i
 13. El folder transiciona a nivel carpeta completa como `open → submitted → under_evaluation → evaluated → closed`; sin embargo, una sección ya enviada (`annual_folder_section_evaluations.status = SUBMITTED`) puede evaluarse mientras la carpeta sigue `open`, porque otras secciones pueden continuar en carga/envío incremental.
 14. Las plantillas `PUBLISHED` o `ARCHIVED` no se editan ni eliminan para preservar auditoría. Si se necesita reutilizar una estructura, el admin crea una copia `DRAFT`; si sigue siendo borrador y no tiene carpetas generadas, puede eliminarse.
 
-## Alcance de la cola y la lectura (Pendiente de merge (PR por abrir))
+## Alcance de la cola y la lectura (Pendiente de merge (PRs sacdia-backend #683, sacdia-admin #321 y sacdia-app #286))
 
 La cola de evaluación (`GET /annual-folders/evaluation/queue`), la lectura de carpeta y la nota de revisor resuelven al actor por la jerarquía institucional (campo local → unión → división) y no por `users.union_id` ni `users.local_field_id`. Un rol de División ve las carpetas de su división; fuera de ella: 403 `ANNUAL_FOLDER_FOLDER_ACCESS_DENIED` (carpeta) o `ANNUAL_FOLDER_EVIDENCE_TERRITORY_DENIED` (evidencia y nota). Un rol territorial sin id de territorio recibe 403 `ADMIN_USER_SCOPE_MISSING` en la cola. La app móvil lo consume desde la supervisión territorial; ver [supervision-territorial.md](supervision-territorial.md).
 
