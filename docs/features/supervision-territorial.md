@@ -146,6 +146,11 @@ Avance anual de los clubes por territorio: División → unión → campo local 
 
 - Endpoints: `GET /catalogs/unions?divisionId=`, `GET /catalogs/local-fields?unionId=`, `GET /annual-rankings?local_field_id=&club_type_id=&year_id=`. No usa las posiciones de sección ni muestra posiciones.
 - **Con el rediseño** (app #289 y backend #685): los selectores de unión y de campo local leen `GET /annual-rankings/territory-summary`: el de uniones sin parámetros (el servidor responde con las uniones de la división del actor; la ruta no acepta `division_id`) y el de campos locales con `?union_id=`. Muestran en cada fila «N clubes» o «Sin configurar» (campos `clubs_count` y `configured`; contrato en [ENDPOINTS-LIVE-REFERENCE.md](../api/ENDPOINTS-LIVE-REFERENCE.md), «Annual Rankings»). Si ese endpoint responde 404 (un servidor anterior al backend #685), la app vuelve a los catálogos y solo muestra los nombres. En el campo local, cada club lleva su medalla y arriba hay un recuadro con la distribución de medallas; los clubes nunca se ordenan por puesto ni se numeran.
+- **Conteo «con Oro o más»** (backend #686, 2026-11-26): cada fila del resumen territorial trae además `gold_or_better_count` y `progress_calculated_at`. **La app todavía no los muestra** (ver «Gaps y pendientes»).
+  - `gold_or_better_count`: clubes del territorio hijo con al menos una sección en Oro o más. Es `null`, no 0, cuando el año todavía no tiene ninguna fila guardada o el nivel `oro` no está activo.
+  - `progress_calculated_at`: la fecha de cálculo más antigua entre las filas de ese hijo; `null` si no tiene ninguna.
+  - Los datos salen de `annual_ranking_progress_snapshots`, que guarda los puntos de cada inscripción, no su nivel. El conteo compara esos puntos con las bandas vigentes de `ranking_tiers`, así que un cambio de bandas en el panel se refleja sin esperar al siguiente cálculo.
+  - La tabla la refresca el job `rankings.recalculate` después del paso de clubes (cron nocturno 02:00 UTC y disparo manual), por lo que el conteo puede ir hasta un día atrás. La medalla de cada club dentro del campo local se sigue calculando al momento.
 
 ### 9. Camporees de unión: pedidos e insumos
 
@@ -259,13 +264,15 @@ Integrado el 2026-11-26 (app #289; el nombre del territorio y el resumen territo
 | App: rutas y navegación | `sacdia-app/test/core/config/supervision_route_access_test.dart`, `router_supervision_access_test.dart`, `router_coordination_tab_test.dart` |
 | App: feature | `sacdia-app/test/features/supervision/` (datos, providers y vistas) |
 | Resumen territorial y nombre del territorio (backend #685) | `src/rankings/annual-ranking-progress/annual-ranking-territory-summary.service.spec.ts`, `annual-rankings.controller.spec.ts`; `capabilities.spec.ts`, `auth-me-additive.territory-coverage.spec.ts` y `src/auth/auth.service.spec.ts` para `name` |
+| Conteo «con Oro o más» (backend #686) | `src/rankings/annual-ranking-progress/services/annual-ranking-progress-snapshot.service.spec.ts` y `annual-ranking-territory-summary.service.spec.ts` |
 | App: rediseño (app #289) | pruebas de widget de cada pantalla tocada; nuevas para la sección de carpeta, las piezas compartidas, la lectura del nombre del territorio y la vuelta a los catálogos del resumen territorial |
 
 ## Gaps y pendientes
 
 - Lo integrado el 2026-11-25 no se ha ejecutado contra un backend real ni se ha visto en un dispositivo. El rediseño (app #289) sí se vio en el simulador de iOS con una cuenta de Unión contra un backend local con el PR #685 de sacdia-backend; no con una cuenta de División.
 - **Huecos del rediseño frente a los mockups** (datos que la API no devuelve): Operación no muestra la fecha límite de informes; en clubes y carpetas solo el filtro seleccionado muestra su conteo; las secciones del resumen de club muestran la meta de miembros, no el número de miembros; los miembros pendientes de camporee muestran el club sin su tipo; los informes tienen un mosaico de PDF, no una miniatura real.
-- El resumen territorial no cuenta los clubes con Oro o mejor: los niveles no se guardan y calcularlos en vivo cuesta hasta 9 consultas por sección en toda una unión. Puede volver cuando el job nocturno de rankings guarde el nivel por inscripción.
+- El backend ya devuelve el conteo de clubes con Oro o más en el resumen territorial (`gold_or_better_count`, backend #686), pero la app no lo lee ni lo muestra: los selectores de Progreso anual siguen diciendo solo «N clubes» o «Sin configurar».
+- La migración `20261126120000_annual_ranking_progress_snapshots` (backend #686) falta en Neon `staging` y `production`; se aplica al promover a `preproduction` y `main`.
 - La app trata cualquier 404 de `GET /annual-rankings/territory-summary` como «servidor sin el endpoint» y vuelve a los catálogos, también el 404 `RECORD_NOT_FOUND` que el backend devuelve cuando no hay año eclesiástico activo (la app no envía `year_id`, así que el backend usa el año activo).
 - Los informes mensuales de supervisión usan su propia porción de datos y no comparten caché con la pestaña de Reportes de coordinación.
 - Operación muestra el periodo por defecto del servidor y no ofrece otro.
