@@ -62,7 +62,7 @@ Modelos nuevos/ampliados (ver `docs/database/SCHEMA-REFERENCE.md`):
 
 - Definición: `certification_versions`, `certification_eligibility_rules`, `certification_requirement_components`
 - Ejecución: `users_certifications` (+ `certification_version_id`, `status`, `lock_version`), `certification_section_progress` (+ `status`, `enrollment_id`), `certification_component_responses`, `certification_evidences`, `certification_review_events`, `certification_closeout_evidences`
-- Proyección legacy retenida: `certification_module_progress`. Solo la toca `updateProgress` (legacy, 410 `CERT_LEGACY_ENDPOINT_DEPRECATED` para inscripciones versionadas); el progreso del usuario y el listado de inscritos del admin cuentan secciones requeridas aprobadas de la versión de cada inscripción.
+- Proyección legacy: `certification_module_progress`. Nadie la lee ni la escribe desde que se retiró el `PATCH .../progress` legacy (PR #687 de sacdia-backend); la migración que borra la tabla está pendiente de merge (PR #688 de sacdia-backend). El progreso del usuario y el listado de inscritos del admin cuentan secciones requeridas aprobadas de la versión de cada inscripción.
 
 ## Requisitos funcionales (motor versionado)
 
@@ -98,9 +98,9 @@ Detalle paso a paso: [`certificaciones-guias-mayores-revision-workflow.md`](cert
 ## Gaps y pendientes
 
 - Reportes administrativos por club/campo local.
-- Retirar proyección `certification_module_progress` cuando clientes dejen de depender del porcentaje legacy.
+- Borrar la tabla `certification_module_progress`: pendiente de merge (PR #688 de sacdia-backend).
 
 ## Prioridad y siguiente acción
 
 - **Media:** reportes administrativos por club/campo local.
-- **Siguiente acción concreta:** retirar la proyección `certification_module_progress` cuando ningún cliente use el porcentaje legacy.
+- **Siguiente acción concreta:** fusionar el PR #688 de sacdia-backend (borra `certification_module_progress`) y aplicar la migración en `staging` y `production`.
