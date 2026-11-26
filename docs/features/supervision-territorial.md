@@ -2,7 +2,7 @@
 
 **Estado**: IMPLEMENTADO (backend #683, admin #321 y app #286, integrados el 2026-11-25). Backend `src/supervision/` y los cambios de alcance en `src/reports/`, `src/analytics/` y `src/annual-folders/` (sacdia-backend), 11 pantallas `supervision-*` del catálogo del panel (sacdia-admin) y la feature `lib/features/supervision/` (sacdia-app). No se ejecutó contra un backend real ni se vio en un dispositivo; lo único verificado son las pruebas automatizadas listadas en «Pruebas».
 
-**Rediseño de las pantallas**: pendiente de merge (PR #289 de sacdia-app, que necesita el PR #685 de sacdia-backend). Rediseña las 13 pantallas de supervisión con el lenguaje de las pantallas ya rediseñadas (Traslados, Mi familia, Reportes, Progreso anual del club), a partir de los mockups HTML aprobados (`mockups/supervision/` en el workspace). Ver «Rediseño de las pantallas». Ambos PR se probaron en el simulador de iOS con una cuenta de Unión contra un backend local con el PR #685.
+**Rediseño de las pantallas**: IMPLEMENTADO (app #289 y backend #685, integrados el 2026-11-26). Rediseña las 13 pantallas de supervisión con el lenguaje de las pantallas ya rediseñadas (Traslados, Mi familia, Reportes, Progreso anual del club), a partir de los mockups HTML aprobados (`mockups/supervision/` en el workspace). Ver «Rediseño de las pantallas». Ambos PR se probaron en el simulador de iOS con una cuenta de Unión contra un backend local con el PR #685 de sacdia-backend.
 
 ## Descripción de dominio
 
@@ -42,7 +42,7 @@ Es la cuarta persona sin club de la app, junto a pastor, coordinación y solo tu
 
 - **Modo de ingreso**: un rol de Unión o de División sin asignación de club visible (activa, pendiente, inactiva o vencida; las `designated` no cuentan) resuelve a `club_exempt`: post-registro de dos pasos, sin selección de club. Con una asignación visible resuelve a `club`. Un pastor que además tiene rol de Unión o División también resuelve a `club_exempt`. Ver [auth.md](auth.md), «Modo de ingreso».
 - **Sin club** (`isSupervisorWithoutClub`: `supervision.app_view`, sin asignación visible y sin actuar por un dependiente): el inicio (`/home/dashboard`) es el hub de supervisión. Las pestañas son Supervisión y Perfil, más Coordinación si la cuenta también tiene `coordination.hub_view`.
-- **Encabezado de los inicios sin club** (pendiente de merge, PR #289 de sacdia-app): los inicios de supervisión, coordinación y pastor abren con `ClubLessHomeHeader` (`lib/features/dashboard/presentation/widgets/`), que envuelve el `WelcomeHeader` del dashboard: saludo por hora, nombre, foto y campana, más una línea de contexto y el título de la sección. En supervisión la línea de contexto es `data.authorization.territory.name` de `GET /auth/me` (PR #685 de sacdia-backend); si falta, muestra «Unión» o «División».
+- **Encabezado de los inicios sin club** (app #289): los inicios de supervisión, coordinación y pastor abren con `ClubLessHomeHeader` (`lib/features/dashboard/presentation/widgets/`), que envuelve el `WelcomeHeader` del dashboard: saludo por hora, nombre, foto y campana, más una línea de contexto y el título de la sección. En supervisión la línea de contexto es `data.authorization.territory.name` de `GET /auth/me` (backend #685); si falta, muestra «Unión» o «División».
 - **Con club visible**: la persona es la de club y «Supervisión» es una pestaña extra (rama 5 del shell, `/supervision`), visible con `supervision.app_view`.
 - **Precedencia del inicio sin club**: supervisión, luego coordinación, luego pastor. Un tutor conserva «Mi familia» desde el perfil. Mientras se actúa por un dependiente (`X-Acting-For`) la persona de supervisión no aplica.
 - **Rutas permitidas** (`lib/core/config/supervision_route_access.dart`, `isSupervisionAllowedPath`): inicio, perfil, ficha médica, bandeja de avisos, `/access-denied`, todo `/supervision` y todo `/family`. Con `coordination.hub_view` se suman las rutas de coordinación; con `investiture.authorize_requests`, las de autorizaciones. El resto redirige al inicio. Ver [coordinacion.md](coordinacion.md).
@@ -83,7 +83,7 @@ Rutas de la app en `lib/core/config/route_names.dart`; cada ruta lleva una panta
 | # | Función | Ruta | Capability |
 |---|---|---|---|
 | 1 | Inscripciones de club | `/supervision/enrollments` | `club_enrollments.validate` |
-| 2 | Carpetas anuales | `/supervision/folders`, `/supervision/folders/:folderId`, `/supervision/folders/:folderId/sections/:sectionId` (pendiente de merge, PR #289 de sacdia-app) | `folders.evaluate` (+ `folders.confirm_union`) |
+| 2 | Carpetas anuales | `/supervision/folders`, `/supervision/folders/:folderId`, `/supervision/folders/:folderId/sections/:sectionId` (app #289) | `folders.evaluate` (+ `folders.confirm_union`) |
 | 3 | Camporees de unión: aprobaciones | `/supervision/union-camporees`, `/:camporeeId/approvals` | `union_camporees.approve_registrations` |
 | 4 | Traslados y asignaciones | `/supervision/requests` | `requests.review_territory` |
 | 5 | Operación | `/supervision/operations` | `analytics.operations_dashboard` |
@@ -94,7 +94,7 @@ Rutas de la app en `lib/core/config/route_names.dart`; cada ruta lleva una panta
 
 ### 1. Inscripciones de club
 
-Aprobar o rechazar la inscripción anual de las secciones del territorio. Rechazar pide motivo (5 a 500 caracteres, ver [club-enrollments.md](club-enrollments.md)). Con el rediseño (pendiente de merge, PR #289 de sacdia-app), aprobar ya no pide una segunda confirmación (decisión de producto); rechazar sigue pidiendo el motivo.
+Aprobar o rechazar la inscripción anual de las secciones del territorio. Rechazar pide motivo (5 a 500 caracteres, ver [club-enrollments.md](club-enrollments.md)). Con el rediseño (app #289), aprobar ya no pide una segunda confirmación (decisión de producto); rechazar sigue pidiendo el motivo.
 
 - Endpoints: `GET /club-enrollments/validation/queue`, `POST /club-enrollments/:enrollmentId/approve`, `POST /club-enrollments/:enrollmentId/reject`.
 - División y Unión validan solo dentro de su alcance (canales por rol en `ReviewerScopeService`).
@@ -103,14 +103,14 @@ Aprobar o rechazar la inscripción anual de las secciones del territorio. Rechaz
 
 Cola de evaluación, detalle de carpeta con evidencias, evaluar una sección con puntos y notas, reabrir una sección decidida, nota de revisor por evidencia y cerrar la carpeta.
 
-- **Sección como pantalla propia** (pendiente de merge, PR #289 de sacdia-app): `/supervision/folders/:folderId/sections/:sectionId`, con evidencias grandes, notas de revisión y una acción fija abajo (evaluar, confirmar por la Unión o reabrir). La hoja de evaluar muestra los puntos en grande con atajos 0, mitad y máximo. Usa la pantalla `supervision-folders` del catálogo (`route_screen_policy.dart`), igual que el detalle de carpeta.
+- **Sección como pantalla propia** (app #289): `/supervision/folders/:folderId/sections/:sectionId`, con evidencias grandes, notas de revisión y una acción fija abajo (evaluar, confirmar por la Unión o reabrir). La hoja de evaluar muestra los puntos en grande con atajos 0, mitad y máximo. Usa la pantalla `supervision-folders` del catálogo (`route_screen_policy.dart`), igual que el detalle de carpeta.
 
 - Endpoints: `GET /annual-folders/evaluation/queue`, `GET /annual-folders/:folderId`, `POST /annual-folders/:folderId/sections/:sectionId/evaluate`, `.../reopen`, `.../confirm-union`, `POST /annual-folders/:folderId/close`, `PATCH /annual-folders/evidences/:evidenceId/reviewer-note`.
 - **División** evalúa con puntos y no confirma. **Unión** confirma o rechaza (`confirm-union`) las secciones `PREAPPROVED_LF` de carpetas con `requires_union_confirmation`; el resto lo evalúa como cualquier revisor con `folders.evaluate`. Ver [annual-folders-scoring.md](annual-folders-scoring.md).
 
 ### 3. Camporees de unión: aprobaciones
 
-Lista de camporees de unión activos del territorio y, por camporee, las pendientes de clubes, miembros y pagos. Rechazar un elemento exige motivo en la app (`rejection_reason`). Con el rediseño (pendiente de merge, PR #289 de sacdia-app), aprobar el registro de un club, de un miembro o un pago ya no pide una segunda confirmación (decisión de producto).
+Lista de camporees de unión activos del territorio y, por camporee, las pendientes de clubes, miembros y pagos. Rechazar un elemento exige motivo en la app (`rejection_reason`). Con el rediseño (app #289), aprobar el registro de un club, de un miembro o un pago ya no pide una segunda confirmación (decisión de producto).
 
 - Endpoints: `GET /camporees/union`, `GET /camporees/union/:camporeeId`, `GET /camporees/union/:camporeeId/pending`, `GET /camporees/union/:camporeeId/clubs?status=pending_approval`, `PATCH /camporees/union/:camporeeId/clubs/:camporeeClubId/(approve|reject)`, `PATCH /camporees/union/:camporeeId/members/:camporeeMemberId/(approve|reject)`, `PATCH /camporees/payments/:paymentId/(approve|reject)`.
 - **Solo Unión** (y `super-admin`): las rutas de decisión exigen `attendance:approve_late`, que los roles de División no tienen (403 `GUARD_PERMISSION_DENIED`), y el hub no ofrece la entrada sin `union_camporees.approve_registrations`. Ver [aprobaciones-camporees.md](aprobaciones-camporees.md).
@@ -136,7 +136,7 @@ Directorio de clubes del territorio (búsqueda por club, iglesia o distrito; fil
 
 ### 7. Informes mensuales
 
-Cumplimiento por club y mes, y el PDF de cada informe. Usa su propia porción de datos: dos lecturas por mes (cumplimiento y lista de informes), sin compartir caché con la pestaña de Reportes de coordinación. Con el rediseño (pendiente de merge, PR #289 de sacdia-app) el mes se elige desde la barra superior y los clubes se agrupan en vencidos, pendientes, al día y sin informes esperados.
+Cumplimiento por club y mes, y el PDF de cada informe. Usa su propia porción de datos: dos lecturas por mes (cumplimiento y lista de informes), sin compartir caché con la pestaña de Reportes de coordinación. Con el rediseño (app #289) el mes se elige desde la barra superior y los clubes se agrupan en vencidos, pendientes, al día y sin informes esperados.
 
 - Endpoints: `GET /reports/compliance`, `GET /monthly-reports/admin/list`, `GET /monthly-reports/:reportId/pdf` (el id es UUID). Ver [monthly-reports.md](monthly-reports.md).
 
@@ -145,7 +145,7 @@ Cumplimiento por club y mes, y el PDF de cada informe. Usa su propia porción de
 Avance anual de los clubes por territorio: División → unión → campo local → clubes. Un campo local sin configuración del año se muestra como «Aún sin configurar» (el backend responde 404 con el código de configuración inexistente y la app lo trata como estado, no como fallo).
 
 - Endpoints: `GET /catalogs/unions?divisionId=`, `GET /catalogs/local-fields?unionId=`, `GET /annual-rankings?local_field_id=&club_type_id=&year_id=`. No usa las posiciones de sección ni muestra posiciones.
-- **Con el rediseño** (pendiente de merge, PR #289 de sacdia-app y PR #685 de sacdia-backend): los selectores de unión y de campo local leen `GET /annual-rankings/territory-summary`: el de uniones sin parámetros (el servidor responde con las uniones de la división del actor; la ruta no acepta `division_id`) y el de campos locales con `?union_id=`. Muestran en cada fila «N clubes» o «Sin configurar» (campos `clubs_count` y `configured`; contrato en [ENDPOINTS-LIVE-REFERENCE.md](../api/ENDPOINTS-LIVE-REFERENCE.md), «Annual Rankings»). Si ese endpoint responde 404 (un servidor sin el PR #685), la app vuelve a los catálogos y solo muestra los nombres. En el campo local, cada club lleva su medalla y arriba hay un recuadro con la distribución de medallas; los clubes nunca se ordenan por puesto ni se numeran.
+- **Con el rediseño** (app #289 y backend #685): los selectores de unión y de campo local leen `GET /annual-rankings/territory-summary`: el de uniones sin parámetros (el servidor responde con las uniones de la división del actor; la ruta no acepta `division_id`) y el de campos locales con `?union_id=`. Muestran en cada fila «N clubes» o «Sin configurar» (campos `clubs_count` y `configured`; contrato en [ENDPOINTS-LIVE-REFERENCE.md](../api/ENDPOINTS-LIVE-REFERENCE.md), «Annual Rankings»). Si ese endpoint responde 404 (un servidor anterior al backend #685), la app vuelve a los catálogos y solo muestra los nombres. En el campo local, cada club lleva su medalla y arriba hay un recuadro con la distribución de medallas; los clubes nunca se ordenan por puesto ni se numeran.
 
 ### 9. Camporees de unión: pedidos e insumos
 
@@ -196,7 +196,7 @@ Resumen de lo que hace el código por endpoint para un actor de Unión o Divisi�
 | `GET /clubs` | lista recortada; un distrito o campo ajeno: 403 `GUARD_PERMISSION_DENIED` | 403 `ADMIN_USER_SCOPE_MISSING` |
 | `GET /clubs/:clubId`, `/overview` | 403 `GUARD_CLUB_SCOPE_REQUIRED` | |
 | `GET /annual-rankings` | `local_field_id` ajeno o inexistente: 403 `GUARD_PERMISSION_DENIED` | 403 `GUARD_PERMISSION_DENIED` |
-| `GET /annual-rankings/territory-summary` (pendiente de merge, PR #685 de sacdia-backend) | `union_id` ajeno o inexistente: 403 `GUARD_PERMISSION_DENIED` (no hay `division_id`: la división siempre es la del actor) | 403 `ADMIN_USER_SCOPE_MISSING` |
+| `GET /annual-rankings/territory-summary` (backend #685) | `union_id` ajeno o inexistente: 403 `GUARD_PERMISSION_DENIED` (no hay `division_id`: la división siempre es la del actor) | 403 `ADMIN_USER_SCOPE_MISSING` |
 | lecturas de `section-rankings` | lista y detalle recortados; una sección ajena se deniega | lista vacía (no 403) |
 | informes mensuales, trimestrales y anuales | ver «Comportamiento nuevo del backend» | 403 `ADMIN_USER_SCOPE_MISSING` |
 
@@ -234,7 +234,7 @@ Biblioteca de productos y tallas de pedidos, cerrar o reabrir la inscripción de
 
 ## Rediseño de las pantallas
 
-Pendiente de merge (PR #289 de sacdia-app; el nombre del territorio y el resumen territorial vienen del PR #685 de sacdia-backend y, sin él, la app usa la etiqueta del nivel y los nombres de los catálogos). Cubre: inicio de supervisión (más los inicios sin club de coordinación y pastor), inscripciones, carpetas, detalle de carpeta, sección de carpeta (nueva), traslados y asignaciones, operación, clubes, resumen de club, informes mensuales, progreso anual, camporees de unión con sus aprobaciones, y pedidos e insumos.
+Integrado el 2026-11-26 (app #289; el nombre del territorio y el resumen territorial vienen del backend #685 y, con un servidor anterior, la app usa la etiqueta del nivel y los nombres de los catálogos). Cubre: inicio de supervisión (más los inicios sin club de coordinación y pastor), inscripciones, carpetas, detalle de carpeta, sección de carpeta (nueva), traslados y asignaciones, operación, clubes, resumen de club, informes mensuales, progreso anual, camporees de unión con sus aprobaciones, y pedidos e insumos.
 
 - **Inicios sin club**: encabezado del dashboard con el nombre del territorio (ver «Persona y navegación»).
 - **Listas**: una lista agrupada por bloque (`SacGroupedSection`) con algo a la izquierda (`SacListRowIcon` teñido con `SacTone`, logo del tipo de club, avatar o medalla), en lugar de pilas de tarjetas con sombra. Los filtros usan `SupervisionSegmentedControl` y solo muestran conteo cuando la API lo da.
@@ -258,12 +258,12 @@ Pendiente de merge (PR #289 de sacdia-app; el nombre del territorio y el resumen
 | Catálogo del panel | `sacdia-admin/src/lib/auth/screen-catalog/screen-catalog.app.test.ts` |
 | App: rutas y navegación | `sacdia-app/test/core/config/supervision_route_access_test.dart`, `router_supervision_access_test.dart`, `router_coordination_tab_test.dart` |
 | App: feature | `sacdia-app/test/features/supervision/` (datos, providers y vistas) |
-| Resumen territorial y nombre del territorio (pendiente de merge, PR #685 de sacdia-backend) | `src/rankings/annual-ranking-progress/annual-ranking-territory-summary.service.spec.ts`, `annual-rankings.controller.spec.ts`; `capabilities.spec.ts`, `auth-me-additive.territory-coverage.spec.ts` y `src/auth/auth.service.spec.ts` para `name` |
-| App: rediseño (pendiente de merge, PR #289 de sacdia-app) | pruebas de widget de cada pantalla tocada; nuevas para la sección de carpeta, las piezas compartidas, la lectura del nombre del territorio y la vuelta a los catálogos del resumen territorial |
+| Resumen territorial y nombre del territorio (backend #685) | `src/rankings/annual-ranking-progress/annual-ranking-territory-summary.service.spec.ts`, `annual-rankings.controller.spec.ts`; `capabilities.spec.ts`, `auth-me-additive.territory-coverage.spec.ts` y `src/auth/auth.service.spec.ts` para `name` |
+| App: rediseño (app #289) | pruebas de widget de cada pantalla tocada; nuevas para la sección de carpeta, las piezas compartidas, la lectura del nombre del territorio y la vuelta a los catálogos del resumen territorial |
 
 ## Gaps y pendientes
 
-- Lo integrado el 2026-11-25 no se ha ejecutado contra un backend real ni se ha visto en un dispositivo. El rediseño (pendiente de merge, PR #289 de sacdia-app) sí se vio en el simulador de iOS con una cuenta de Unión contra un backend local con el PR #685; no con una cuenta de División.
+- Lo integrado el 2026-11-25 no se ha ejecutado contra un backend real ni se ha visto en un dispositivo. El rediseño (app #289) sí se vio en el simulador de iOS con una cuenta de Unión contra un backend local con el PR #685 de sacdia-backend; no con una cuenta de División.
 - **Huecos del rediseño frente a los mockups** (datos que la API no devuelve): Operación no muestra la fecha límite de informes; en clubes y carpetas solo el filtro seleccionado muestra su conteo; las secciones del resumen de club muestran la meta de miembros, no el número de miembros; los miembros pendientes de camporee muestran el club sin su tipo; los informes tienen un mosaico de PDF, no una miniatura real.
 - El resumen territorial no cuenta los clubes con Oro o mejor: los niveles no se guardan y calcularlos en vivo cuesta hasta 9 consultas por sección en toda una unión. Puede volver cuando el job nocturno de rankings guarde el nivel por inscripción.
 - La app trata cualquier 404 de `GET /annual-rankings/territory-summary` como «servidor sin el endpoint» y vuelve a los catálogos, también el 404 `RECORD_NOT_FOUND` que el backend devuelve cuando no hay año eclesiástico activo (la app no envía `year_id`, así que el backend usa el año activo).
