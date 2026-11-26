@@ -3441,6 +3441,7 @@ El corte de año toma de antemano el candado de todos los dependientes implicado
 - Los coordinadores tienen `reports:read` + `reports:download` y nunca `reports:submit`: las mutaciones les responden `403 GUARD_PERMISSION_DENIED`.
 - Detalle, PDF y listado por matrícula declaran `coordinatorSections`: un coordinador pasa solo si `coordinator_assignments` (GENERAL / ZONE / SECTION) cubre la sección del informe; fuera de ella `403 GUARD_CLUB_SCOPE_REQUIRED`. `preview` no lo declara.
 - `GET /monthly-reports/admin/list` filtra en el servicio: el coordinador ve solo las secciones de su alcance; los filtros `division_id` / `union_id` / `local_field_id` no lo amplían. `director-dia` y `assistant-dia` quedan forzados a su división (desde 2026-11-25, backend #683; antes veían todo): los filtros solo reducen dentro de ella y sin `division_id` derivable responde 403 `ADMIN_USER_SCOPE_MISSING`.
+- Cada item de `GET /monthly-reports/admin/list` trae `monthly_report_id` (UUID), `club_enrollment_id`, `month`, `year`, `status`, `generated_at`, `submitted_at`, `club_id`, `club_name`, `club_type`, `club_type_id`, `local_field`, `local_field_id`, `submitter_name` y `member_count`. `club_id` (desde 2026-11-26, backend #684) es el club de la sección del informe, o `null` si la sección no tiene club; los clientes agrupan por ese id porque `club_name` no es único.
 
 ### Notifications
 
