@@ -1217,7 +1217,7 @@ Define el presupuesto de puntos por componente dentro de un eje anual:
 
 - `classes`, `class_modules`, `class_sections`, `enrollments`, `class_module_progress`, `class_section_progress`
 - `certifications`, `certification_versions`, `certification_eligibility_rules`, `certification_modules`, `certification_sections`, `certification_requirement_components`
-- `users_certifications`, `certification_section_progress`, `certification_component_responses`, `certification_evidences`, `certification_review_events`, `certification_closeout_evidences`, `certification_module_progress` (legacy projection retained)
+- `users_certifications`, `certification_section_progress`, `certification_component_responses`, `certification_evidences`, `certification_review_events`, `certification_closeout_evidences`. `certification_module_progress` (proyección legacy) ya no se lee ni se escribe; la migración `20261127090000_drop_certification_module_progress` la borra. Pendiente de merge (PR #688 de sacdia-backend).
 - `investiture_config`, `investiture_validation_history`, `validation_logs`
 
 **Certificaciones configurables (2026-08-11):**
