@@ -126,6 +126,7 @@ Toda comunicación pública o documental que afirme offline-first debe corregirs
 - **Borradores de certificación**: `Hive.openBox<String>` en `sacdia-app/lib/main.dart` y `certification_draft_local_data_source.dart` guardan borradores en el dispositivo. No se sincronizan solos: el usuario los envía cuando hay red.
 - **Credencial virtual**: `virtual_card_repository_impl.dart` guarda la última credencial en `SharedPreferences`; si la llamada remota falla, `virtual_card_providers.dart` muestra la copia cacheada con `isOffline: true`.
 - **Sesión**: los tokens viven en `flutter_secure_storage` (`core/auth/app_auth_service.dart`), no en Hive.
+- **Autorización** (app #293, #294 y #295, 2026-11-27): la última respuesta de `/auth/me` deja en `flutter_secure_storage` la concesión activa con sus permisos, las capacidades y el territorio. Sin red, la app arranca con esa copia en solo lectura (`authorizationStale`): decide inicio y pestañas, y toda escritura recibe `AUTHORIZATION_STALE` hasta que `/auth/me` responda. Ver [rbac.md](../features/rbac.md), «Arranque sin red».
 
 Nada de esto encola mutaciones ni reconcilia conflictos; por eso no cambia la clasificación de la capacidad.
 
