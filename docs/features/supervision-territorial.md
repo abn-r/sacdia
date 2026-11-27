@@ -47,6 +47,7 @@ Es la cuarta persona sin club de la app, junto a pastor, coordinación y solo tu
 - **Precedencia del inicio sin club**: supervisión, luego coordinación, luego pastor. Un tutor conserva «Mi familia» desde el perfil. Mientras se actúa por un dependiente (`X-Acting-For`) la persona de supervisión no aplica.
 - **Rutas permitidas** (`lib/core/config/supervision_route_access.dart`, `isSupervisionAllowedPath`): inicio, perfil, ficha médica, bandeja de avisos, `/access-denied`, todo `/supervision` y todo `/family`. Con `coordination.hub_view` se suman las rutas de coordinación; con `investiture.authorize_requests`, las de autorizaciones. El resto redirige al inicio. Ver [coordinacion.md](coordinacion.md).
 - **Territorio sin configurar** (`territory.level == 'unconfigured'`): el hub muestra solo «Territorio sin configurar» con «Comprobar de nuevo» (`refreshAuthorization`); no pide conteos ni muestra funciones, y cualquier ruta bajo `/supervision/` vuelve al hub (`unconfiguredSupervisionRedirect`).
+- **Sin conexión** (app #294 y #295): la cuenta entra a su inicio de supervisión con las capacidades y el territorio guardados en la última respuesta de `/auth/me`, así que la línea de contexto sigue mostrando el nombre de su unión o división. Los conteos del hub dicen «No se pudieron cargar los pendientes» con «Reintentar», y las decisiones quedan bloqueadas hasta que el servidor responda (ver [rbac.md](rbac.md), «Stale offline» y «Arranque sin red»).
 
 ## Hub y conteos pendientes
 
